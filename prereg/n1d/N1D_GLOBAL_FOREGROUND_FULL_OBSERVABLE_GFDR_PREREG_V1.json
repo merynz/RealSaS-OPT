@@ -1,0 +1,39 @@
+{
+  "schema": "RealSaS.IRIS.SEES.N1D.GlobalForegroundFullObservableGFDR.Prereg.v1",
+  "date": "2026-08-18",
+  "scope": "open-development full observable-front-door qualification",
+  "families": [14712,15262,13396,14299,15943,11587,14929,15451,12832,9983,13727,10356,11885,13339,12418,12329,10763,11214,12907,14714],
+  "episode": "e00",
+  "prediction_forward": {
+    "P_A": "Problem-A raster-only A visual-hull carrier X",
+    "P_B": "P_A + frozen descriptor-global-foreground multiview 3D response candidate_with_fallback",
+    "N_A_N_B": "frozen N1D normal heads sampled at predicted A/B carrier projections and visibility-weighted consensus",
+    "V_A": "Problem-A A visual-hull visibility",
+    "V_B": "deterministic Pose-B visual-hull visibility evaluated at predicted P_B"
+  },
+  "teacher_use": "strictly evaluator-only after all 20 prediction artifacts exist; Hungarian mapping to exact persistent observation carriers and exact observation reference only",
+  "forbidden_prediction_inputs": ["observation_sidecar", "teacher surface correspondence", "joint", "parent", "skinning weight", "intervention metadata", "exact P/N/V"],
+  "gfdr_schema": "RealSaS.GFDRV2.ObservableMechanics.v4",
+  "gates": {
+    "F_activity_spearman_min": 0.50,
+    "F_kernel_spearman_min": 0.30,
+    "D_tangent_action_error_median_max": 0.75,
+    "R_differential_body_error_max": 1.00,
+    "G_axis_dir_abs_cos_median_min": 0.70,
+    "G_axis_line_error_diag_median_max": 0.10,
+    "minimum_valid_F_episodes": 8,
+    "minimum_supported_G_carriers": 32,
+    "minimum_supported_G_families": 4
+  },
+  "diagnostics_only": ["P_A_error_diag", "P_B_error_diag", "N_A_angle_deg", "N_B_angle_deg", "V_A_accuracy", "V_B_accuracy"],
+  "provenance": {
+    "n1d_best_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "problem_a_source_sha256": "51993e6052bb13a0a0c8f8772083ce1949fc832ffddcd177c752164a787a1b79",
+    "global_foreground_source_sha256": "2110414ed63b06145a34642440dd80b09d47d23cce8ee1cf917aeae43a061825",
+    "gfdr_source_sha256": "ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa",
+    "exact_geometry_causal_result_sha256": "f7a320df3928f830948b2da1e3da6fad070d1b773e6c982f5ad930b9e979000b"
+  },
+  "sealed21": "CLOSED",
+  "external10": "CLOSED",
+  "promotion": "PASS closes the post-N1D open-development observable-front-door GFDR-V2 mechanics chain for this 20-family e00 panel. It does not by itself authorize product/model-2 handoff; sealed/external may only be considered as the next independent qualification stage."
+}

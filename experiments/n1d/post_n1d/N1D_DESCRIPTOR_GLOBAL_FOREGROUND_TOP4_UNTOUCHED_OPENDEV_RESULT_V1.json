@@ -1,0 +1,35 @@
+{
+  "aggregate": {
+    "active_commit_n": 136,
+    "candidate_flow_over_zero": 0.6715516182986869,
+    "candidate_weighted_direction_cosine": 0.7402787612382246,
+    "carrier_nonabstain_fraction": 1.0,
+    "current_flow_over_zero": 0.7439001508301663,
+    "current_weighted_direction_cosine": 0.5475531097997521,
+    "false_activation_candidate": 23,
+    "false_activation_current": 26,
+    "family_direction_nonregress": 3,
+    "mean_nonabstain_fraction": 1.0
+  },
+  "external10": "CLOSED",
+  "families": [10763, 11214, 12907, 14714],
+  "frozen_source_sha256": "2110414ed63b06145a34642440dd80b09d47d23cce8ee1cf917aeae43a061825",
+  "gates": {
+    "PASS": true,
+    "aggregate_flow_over_zero": true,
+    "aggregate_weighted_direction_cosine": true,
+    "false_activation": true,
+    "family_direction_nonregress": true,
+    "nonabstain_fraction": true
+  },
+  "parent_development_prereg_sha256": "640d95233ec47a7640413b62832917897322024a781b517cefb88a46c35d7753",
+  "per_family": {
+    "10763": {"active_commit_n":27,"candidate_flow_over_zero":0.6766312933557043,"candidate_wcos":0.8704661208387277,"current_flow_over_zero":0.4168406801152666,"current_wcos":0.9237069166181386,"direction_nonregress":false,"false_activation_candidate":8,"false_activation_current":9,"mean_geometry_score":0.003688151016831398,"mean_usable_views":3.984375,"nonabstain_fraction":1.0},
+    "11214": {"active_commit_n":33,"candidate_flow_over_zero":0.6552668648649361,"candidate_wcos":0.7069358261308966,"current_flow_over_zero":0.9999256204458442,"current_wcos":0.1011536782044306,"direction_nonregress":true,"false_activation_candidate":1,"false_activation_current":1,"mean_geometry_score":0.005690432153642178,"mean_usable_views":4.0625,"nonabstain_fraction":1.0},
+    "12907": {"active_commit_n":23,"candidate_flow_over_zero":0.8365137300294423,"candidate_wcos":0.6360501145004159,"current_flow_over_zero":0.9429176442656695,"current_wcos":0.3126880361271596,"direction_nonregress":true,"false_activation_candidate":4,"false_activation_current":5,"mean_geometry_score":0.000976098352111876,"mean_usable_views":3.46875,"nonabstain_fraction":1.0},
+    "14714": {"active_commit_n":53,"candidate_flow_over_zero":0.6628054616367998,"candidate_wcos":0.729239279011835,"current_flow_over_zero":0.6858236314206979,"current_wcos":0.671030953650241,"direction_nonregress":true,"false_activation_candidate":10,"false_activation_current":11,"mean_geometry_score":0.008676592260599136,"mean_usable_views":3.671875,"nonabstain_fraction":1.0}
+  },
+  "prereg_sha256": "2cd7c07e3f863b3abbd8b996f7e68e807bb6a8d327c4301e575a7d17c3912606",
+  "schema": "RealSaS.IRIS.SEES.N1D.DescriptorGlobalForegroundTop4Multiview3D.UntouchedOpenDevQualification.Result.v1",
+  "sealed21": "CLOSED"
+}

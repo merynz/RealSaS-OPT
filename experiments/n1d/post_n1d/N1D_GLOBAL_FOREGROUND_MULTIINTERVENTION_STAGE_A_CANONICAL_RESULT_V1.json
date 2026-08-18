@@ -1,0 +1,37 @@
+{
+  "PASS": true,
+  "aggregate_supported_median": {
+    "D_tangent_action_error_median": 0.06735903329943027,
+    "F_activity_spearman": 0.839950980392157,
+    "F_kernel_allpersistent_mae": 0.00040841291774995625,
+    "F_kernel_spearman": 0.7633116883116884,
+    "G_axis_dir_abs_cos_median": 0.7748161554336548,
+    "G_axis_line_error_diag_median": 0.08760786056518555,
+    "G_supported_carriers": 158,
+    "G_supported_families": 4,
+    "R_differential_body_error": 0.05865760147571564,
+    "primary_supported_episodes": 9,
+    "valid_F_episodes": 8
+  },
+  "episode_index_summary": {
+    "e01": {"G_direction_median":0.9572635293006897,"G_line_median":0.043559031561017036,"PASS":true,"primary_families":2},
+    "e03": {"G_direction_median":0.7568253874778748,"G_line_median":0.08154573291540146,"PASS":true,"primary_families":4},
+    "e05": {"G_direction_median":0.8475661277770996,"G_line_median":0.0888945609331131,"PASS":true,"primary_families":2},
+    "e07": {"G_direction_median":0.6566472053527832,"G_line_median":0.13532006740570068,"PASS":false,"primary_families":1}
+  },
+  "episodes": ["e01","e03","e05","e07"],
+  "external10": "CLOSED",
+  "families": [10763,11214,12907,14714],
+  "family_summary": {
+    "10763":{"G_direction_median":0.7552954256534576,"G_line_median":0.0912826918065548,"PASS":true,"primary_episodes":4},
+    "11214":{"G_direction_median":0.7748161554336548,"G_line_median":0.07070734351873398,"PASS":true,"primary_episodes":1},
+    "12907":{"G_direction_median":0.29290491342544556,"G_line_median":0.12119689583778381,"PASS":false,"primary_episodes":1},
+    "14714":{"G_direction_median":0.97104811668396,"G_line_median":0.05405695363879204,"PASS":true,"primary_episodes":3}
+  },
+  "gates": {"D_tangent_action":true,"F_activity":true,"F_kernel":true,"F_valid_coverage":true,"G_axis_direction":true,"G_axis_line":true,"G_carrier_coverage":true,"G_family_coverage":true,"PASS":true,"R_differential":true,"canonical_PASS":true,"robustness_PASS":true},
+  "prereg_sha256": "bf91b445e5c7f9ed7a2510c97f3999b410e9a34592e2c3c951b13961a7237927",
+  "robustness": {"episode_index_G_pass_count":3,"episode_index_G_pass_min":3,"episode_index_PASS":true,"family_G_pass_count":3,"family_G_pass_min":3,"family_PASS":true},
+  "schema": "RealSaS.IRIS.SEES.N1D.GlobalForegroundMultiInterventionOpenDev.StageA.Result.v1",
+  "sealed21": "CLOSED",
+  "stage": "A"
+}

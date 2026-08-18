@@ -1,0 +1,20 @@
+{
+  "date": "2026-08-18",
+  "episode": "e00",
+  "external10": "CLOSED",
+  "families": [10763, 11214, 12907, 14714],
+  "frozen_source_sha256": "2110414ed63b06145a34642440dd80b09d47d23cce8ee1cf917aeae43a061825",
+  "gates": {
+    "aggregate_flow_over_zero_nonregress": true,
+    "aggregate_weighted_direction_nonregress": true,
+    "carrier_nonabstain_fraction_min": 0.95,
+    "false_activation_no_regress": true,
+    "family_direction_nonregress_min": 3
+  },
+  "parent_development_prereg_sha256": "640d95233ec47a7640413b62832917897322024a781b517cefb88a46c35d7753",
+  "promotion": "PASS authorizes this descriptor-global-foreground observation route as the post-N1D open-dev correspondence/3D-response treatment. It does not authorize sealed/external or product handoff.",
+  "rule": "Exact frozen development algorithm: global B-foreground descriptor coarse grid stride4; top8; +-4/step2 refine; final top4/view; calibrated multiview rank3 hypothesis solve; current fallback on abstain; frozen N1D activity gate.",
+  "schema": "RealSaS.IRIS.SEES.N1D.DescriptorGlobalForegroundTop4Multiview3D.UntouchedOpenDevQualification.Prereg.v1",
+  "sealed21": "CLOSED",
+  "teacher_use": "evaluator only after all four predictions are complete"
+}

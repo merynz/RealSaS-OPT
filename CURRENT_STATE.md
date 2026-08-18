@@ -4,64 +4,116 @@
 
 ## Active line
 
-IRIS-SEES post-N1D continuation. The product target is not exact teacher world-vector reconstruction. IRIS-SEES measures observation-native primitives; deterministic geometry/mechanics and the compiler consume them.
+IRIS-SEES post-N1D continuation. Product objective is mechanical sufficiency, not exact teacher latent reconstruction. IRIS-SEES measures observation-native evidence; deterministic geometry/mechanics and the compiler derive downstream structured quantities.
 
-## N1D canonical baseline
+## N1D baseline
 
-N1D itself remains an informative FAIL, not a product/model-2 handoff. Important preserved signal:
+Canonical N1D remains an informative FAIL as originally sealed. Important preserved signal:
 - cross-pose descriptor top1 ≈ 0.8904;
 - Pose-B is genuinely used;
-- motion/activity ranking is learned better than world-vector direction;
+- activity/amplitude ranking is learned more strongly than world-vector direction;
 - near-zero silence and exact same-pose/swap invariants are preserved.
 
-## Post-N1D localization
+The original blocker was not absence of observable persistence evidence. N1D's mechanics path failed to consume the descriptor evidence correctly.
 
-The main failure was progressively localized:
+## Post-N1D causal localization
 
-1. Simple transport/output calibration and longer training do not close the world-vector gap.
-2. Problem-A provides a coherent raster-only geometric front door, but direct Problem-A scene-flow alone is not family-robust enough.
-3. Hard current-vs-Problem-A selector families failed to generalize; early singleton collapse is a recurring dead-end.
-4. The two-candidate set `{N1D current, Problem-A}` has a strong oracle upper bound, showing useful candidates exist, but is too sparse for compiler-grade rank-1 mechanics.
-5. Raw DIS → 3D lifting is geometrically well-conditioned, but ordinary LS, LMedS and forward/backward cycle weighting all fail family robustness. The blocker is 2D persistent correspondence, not camera inversion.
-6. DIS-centered descriptor search loses true endpoints because a minority of DIS errors are large: fixed ±8 px search contains truth only ~85.34% of visible view cases; descriptor top-4 retains truth ~84.79% conditional on being in-window.
-7. Removing DIS as search authority and using **global B-foreground descriptor search + calibrated multiview geometry** produced the first strong post-N1D development PASS.
+Closed dead ends include longer training, simple output calibration/fusion, hard current-vs-Problem-A selectors, raw DIS ordinary LS/LMedS 3D lift, forward/backward cycle weighting, and early singleton collapse of sparse candidate sets.
 
-## Frozen development PASS
+Critical localization:
+- calibrated-camera 3D inversion is well-conditioned;
+- a minority of large raw-DIS correspondence errors caused DIS-centered local search to erase correct candidates;
+- fixed ±8 px DIS-centered search contained the true endpoint only ~85.34% of visible-view cases;
+- conditional on the endpoint being in-window, the frozen N1D descriptor retained it in top-4 ~84.79% of the time.
 
-Treatment:
-- global B-foreground descriptor coarse grid stride 4;
-- top-8 coarse candidates;
-- ±4 px / 2 px-step local refinement;
-- final top-4 candidates per view;
-- calibrated multiview rank-3 3D hypothesis solve;
-- current N1D fallback on abstain;
-- frozen N1D activity gate.
+## Authorized correspondence / world-response route
 
-16-family open-development result:
-- flow/zero: **0.7409 → 0.4411**;
-- weighted direction cosine: **0.5839 → 0.8994**;
-- family direction non-regress: **14/16**;
-- non-abstain coverage: **99.90%**;
-- false activation: **41 → 39**;
-- prereg gates: **5/5 PASS**.
+Frozen treatment:
 
-This is development authority only. It does **not** authorize sealed21, external10, product handoff or retraining.
+```text
+Pose A/B rasters
+ -> Problem-A A visual-hull carriers
+ -> frozen N1D persistent descriptor
+ -> global observable B-foreground search
+ -> top-k candidate set per view
+ -> calibrated multiview rank-3 3D hypothesis solve
+ -> frozen N1D activity/silence contract
+```
+
+16-family development:
+- flow/zero **0.7409 → 0.4411**
+- weighted direction **0.5839 → 0.8994**
+- direction non-regress **14/16**
+- non-abstain **99.90%**
+- false activation **41 → 39**
+- **5/5 gates PASS**
+
+Previously untouched four-family e00 qualification (`10763,11214,12907,14714`):
+- flow/zero **0.7439 → 0.6716**
+- weighted direction **0.5476 → 0.7403**
+- direction non-regress **3/4**
+- coverage **100%**
+- false activation **26 → 23**
+- **5/5 gates PASS**
+
+This route is authorized on open development as the post-N1D correspondence/world-response treatment.
+
+## Causal downstream mechanics closure
+
+### Exact-observation-geometry causal replay
+
+Only response was replaced; exact observation geometry/normals/visibility were frozen for evaluator isolation.
+
+Global-foreground response:
+- D tangent error **0.148326**
+- F activity **0.843860**
+- F kernel **0.793054**
+- R differential **0.104815**
+- G direction **0.880993**
+- G line / diag **0.087942**
+- **9/9 canonical N1D GFDR-V2 gates PASS**
+
+Frozen-current response under the same exact geometry had G line / diag **0.154159**, confirming that the old G-line failure was caused by correspondence/world-response rather than the downstream GFDR-V2 operators.
+
+### Full observable front door
+
+Prediction uses:
+
+```text
+Problem-A X / V_A
++ frozen N1D descriptor and normal heads
++ global B-foreground correspondence search
++ deterministic multiview 3D response
++ deterministic B visual-hull V_B
+-> GFDRV2.ObservableMechanics.v4
+```
+
+20-family e00 open-development result:
+- D tangent error **0.148326**
+- F activity **0.843860**
+- F kernel **0.813066**
+- R differential **0.105003**
+- G direction **0.890067**
+- G line / diag **0.084111**
+- **9/9 canonical N1D GFDR-V2 gates PASS**
+
+Primitive front-door estimates are not exact (median family diagnostics: P_A error/diag ~0.0274, P_B ~0.03935, N_A ~26.8°, N_B ~29.6°), yet downstream mechanics passes. This supports:
+
+```text
+mechanical sufficiency > exact latent reconstruction
+```
+
+The old N1D point-map hard gates are therefore not automatically product blockers for this repaired hybrid route; geometry authority is supplied by the deterministic Problem-A front door rather than the failed N1D point-map head.
 
 ## Active next gate
 
-Frozen untouched-open-dev qualification on four previously untouched DEV families:
+The remaining open-development risk is **intervention generalization**. Current closure evidence is e00-focused.
 
-`10763, 11214, 12907, 14714`, episode `e00`.
-
-The algorithm is frozen exactly as above. Teacher/sidecar may open only after all four predictions are complete. Required gates:
-- aggregate flow/zero non-regress;
-- aggregate weighted direction non-regress;
-- carrier non-abstain ≥ 0.95;
-- false activation no regress;
-- direction non-regress in at least 3/4 families.
+Next required qualification: freeze the exact current route and evaluate previously unopened `e01..e07` interventions without retuning. Only after a multi-intervention open-dev PASS may sealed21/external10 be considered.
 
 **sealed21 = CLOSED**  
-**external10 = CLOSED**
+**external10 = CLOSED**  
+**product/model-2 handoff = NOT YET AUTHORIZED**
 
 ## Data / workspace policy
 
@@ -69,4 +121,4 @@ The algorithm is frozen exactly as above. Teacher/sidecar may open only after al
 - Drive: heavy corpus/cache/checkpoint/proof-pack depot.
 - Library: transient active diagnostics and working artifacts.
 
-Never silently redefine GFDR semantics to fit an implementation. Distinguish canonical structured objects from lower-level learned observation primitives.
+Never silently redefine structural GFDR semantics to fit an implementation. N1D `GFDRV2.ObservableMechanics.v4` diagnostics are downstream mechanics diagnostics, not a replacement definition of the older structural GFDR ontology.

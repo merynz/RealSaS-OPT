@@ -1,0 +1,46 @@
+{
+  "schema": "RealSaS.IRIS.SEES.N1D.GlobalForegroundMultiInterventionOpenDev.Prereg.v1",
+  "date": "2026-08-18",
+  "scope": "two-stage untouched-episode open-development qualification; route frozen before any new episode outcome is opened",
+  "families": [10763,11214,12907,14714],
+  "stage_A": {
+    "episodes": ["e01","e03","e05","e07"],
+    "episode_count": 16,
+    "minimum_valid_F_episodes": 8,
+    "minimum_episode_index_G_pass": 3
+  },
+  "stage_B": {
+    "episodes": ["e02","e04","e06"],
+    "episode_count": 12,
+    "minimum_valid_F_episodes": 6,
+    "minimum_episode_index_G_pass": 2,
+    "open_only_if_stage_A_PASS": true
+  },
+  "route": "exact frozen global B-foreground descriptor top4 + calibrated multiview 3D response + Problem-A X/V_A + frozen N1D normals + deterministic B-hull V_B",
+  "no_retune_between_stages": true,
+  "teacher_use": "evaluator-only after every prediction in the active stage is frozen",
+  "canonical_gfdr_gates": {
+    "F_activity_spearman_min": 0.50,
+    "F_kernel_spearman_min": 0.30,
+    "D_tangent_action_error_median_max": 0.75,
+    "R_differential_body_error_max": 1.00,
+    "G_axis_dir_abs_cos_median_min": 0.70,
+    "G_axis_line_error_diag_median_max": 0.10,
+    "minimum_supported_G_carriers": 32,
+    "minimum_supported_G_families": 4
+  },
+  "robustness_gates": {
+    "minimum_family_G_pass": 3,
+    "family_G_pass_definition": "family median over primary episodes has G direction >=0.70 and G line <=0.10",
+    "episode_index_G_pass_definition": "episode-index median over primary families has G direction >=0.70 and G line <=0.10"
+  },
+  "authority": {
+    "parent_full_observable_prereg_sha256": "1c9fc19d92cd67f83481245d0eded619c5809165d10c420b0b293d27212466ea",
+    "parent_full_observable_result_sha256": "7aaf363080bebaeb987bcd27ab2e2143dcb519ceb8dc4250c4ec4fe7d3ebbdc4",
+    "global_foreground_source_sha256": "2110414ed63b06145a34642440dd80b09d47d23cce8ee1cf917aeae43a061825",
+    "n1d_best_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "sealed21": "CLOSED",
+    "external10": "CLOSED"
+  },
+  "promotion": "Stage A PASS opens Stage B only. Stage A + Stage B PASS authorizes consideration of sealed/external qualification; neither stage alone authorizes product/model-2 handoff."
+}

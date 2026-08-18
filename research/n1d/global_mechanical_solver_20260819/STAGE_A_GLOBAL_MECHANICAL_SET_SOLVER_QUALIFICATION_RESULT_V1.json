@@ -1,0 +1,53 @@
+{
+  "PASS": false,
+  "aggregate_supported_median": {
+    "D_tangent_action_error_median": 0.07520622760408671,
+    "F_activity_spearman": 0.07692307692307693,
+    "F_kernel_allpersistent_mae": 0.0009561249753460288,
+    "F_kernel_spearman": 0.6119321291735085,
+    "G_axis_dir_abs_cos_median": 0.41211068630218506,
+    "G_axis_line_error_diag_median": 0.124537892639637,
+    "G_supported_carriers": 146,
+    "G_supported_families": 4,
+    "R_differential_body_error": 0.0705518126487732,
+    "primary_supported_episodes": 7,
+    "valid_F_episodes": 7
+  },
+  "episode_index_summary": {
+    "e01": {"G_direction_median": 0.9125041365623474,"G_line_median": 0.06082377955317497,"PASS": true,"primary_families": 2},
+    "e03": {"G_direction_median": 0.41211068630218506,"G_line_median": 0.124537892639637,"PASS": false,"primary_families": 3},
+    "e05": {"G_direction_median": 0.3445700407028198,"G_line_median": 0.1503439098596573,"PASS": false,"primary_families": 1},
+    "e07": {"G_direction_median": 0.12950563430786133,"G_line_median": 0.1345881223678589,"PASS": false,"primary_families": 1}
+  },
+  "external10": "CLOSED",
+  "family_summary": {
+    "10763": {"G_direction_median": 0.37834036350250244,"G_line_median": 0.13440999388694763,"PASS": false,"primary_episodes": 4},
+    "11214": {"G_direction_median": 0.2650723159313202,"G_line_median": 0.124537892639637,"PASS": false,"primary_episodes": 1},
+    "12907": {"G_direction_median": 0.5504757165908813,"G_line_median": 0.08769921958446503,"PASS": false,"primary_episodes": 1},
+    "14714": {"G_direction_median": 0.8616479635238647,"G_line_median": 0.07886423170566559,"PASS": true,"primary_episodes": 1}
+  },
+  "freeze_ledger_sha256": "069ed3132d806ac10e809991ac1002bf03ef7e86d8ca0dc271f39f69e9922bd7",
+  "gates": {
+    "D_tangent_action": true,
+    "F_activity": false,
+    "F_kernel": true,
+    "F_valid_coverage": false,
+    "G_axis_direction": false,
+    "G_axis_line": false,
+    "G_carrier_coverage": true,
+    "G_family_coverage": true,
+    "R_differential": true
+  },
+  "robustness": {
+    "episode_index_G_pass_count": 1,
+    "episode_index_PASS": false,
+    "family_G_pass_count": 1,
+    "family_PASS": false
+  },
+  "schema": "RealSaS.IRIS.SEES.N1D.GlobalMechanicalSetSolver.StageAQualification.v1",
+  "sealed21": "CLOSED",
+  "source_sha256": "efa858c59489688f9937a207bf78f03cfe9614b24d12f22369d13142e4e897c1",
+  "stage_B_truth": "CLOSED",
+  "verdict": "FAIL__MOTION_SUPPORT_FRONT_DOOR_AND_FINITE_AXIS_GENERALIZATION",
+  "note": "The exact full per_episode result is preserved in the SHA-bound Library/Drive research bundle 833cfeb104c795323c4ded90b0608cb1c5ed3df2998cd82a44bd7aa28d01b5df. This GitHub compact result preserves all qualification gates and robustness authority while avoiding duplicate bulky diagnostics."
+}

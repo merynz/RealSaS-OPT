@@ -1,0 +1,26 @@
+{
+  "schema": "RealSaS.IRIS.SEES.N1D.GlobalForegroundGFDRCausalReplay.Prereg.v1",
+  "date": "2026-08-18",
+  "scope": "open-development causal isolation only",
+  "families": [14712,15262,13396,14299,15943,11587,14929,15451,12832,9983,13727,10356,11885,13339,12418,12329,10763,11214,12907,14714],
+  "episode": "e00",
+  "treatment": "freeze exact evaluator geometry/normals/visibility on each mapped observation carrier and replace only the world-response displacement field: frozen N1D current versus frozen descriptor-global-foreground candidate",
+  "reason": "causally determine whether repaired observation-to-correspondence/world-response closes downstream canonical GFDR mechanics without confounding P/N/V front-door error",
+  "teacher_use": "evaluator-only mapping and exact observation substrate; never prediction",
+  "gfdr_schema": "RealSaS.GFDRV2.ObservableMechanics.v4",
+  "gates": {
+    "F_activity_spearman_min": 0.50,
+    "F_kernel_spearman_min": 0.30,
+    "D_tangent_action_error_median_max": 0.75,
+    "R_differential_body_error_max": 1.00,
+    "G_axis_dir_abs_cos_median_min": 0.70,
+    "G_axis_line_error_diag_median_max": 0.10,
+    "minimum_valid_F_episodes": 8,
+    "minimum_supported_G_carriers": 32,
+    "minimum_supported_G_families": 4
+  },
+  "comparison": "report frozen-current causal replay alongside candidate; candidate absolute canonical gates determine closure",
+  "sealed21": "CLOSED",
+  "external10": "CLOSED",
+  "promotion": "PASS proves the correspondence/world-response repair is sufficient for the canonical GFDR downstream operators under exact observation geometry. It does not yet prove end-to-end P/N/V or authorize sealed/external."
+}

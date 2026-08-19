@@ -1,131 +1,187 @@
-# RealSaS N1D — New Global Mechanical Hypothesis-Set Solver Status
+# RealSaS N1D — Canonical Research Status
 
 **Date:** 2026-08-19  
-**Current canonical state:** POST-STAGE-B DEVELOPMENT / REPRESENTATION SUFFICIENCY BATTERY ACTIVE / FIXED-TOP4 H RED / SET-VALUED REPRESENTATION SURVIVES  
+**Current canonical state:** `POST_STAGE_B_REPRESENTATION_SUFFICIENCY_BATTERY__CURRENT_TOP4_RED__REVISED_SET_VALUED_TESTC_GREEN_8OF8__TEST_A_B_OPEN`  
 **Frozen Stage-B authority:** `STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE`
 
-## Current canonical frontier — 2026-08-19
+## Immutable qualification state
 
-Hybrid V11 remains the last frozen qualification treatment on this line.
-
-- Stage A: **PASS** on 16/16 frozen episodes with exact standalone-runner parity.
-- Stage B: **FAIL, immutable/no-retune**. Geometry/mechanics retained strong values, but primary F-activity Spearman was `0.433160 < 0.50`.
-- Stage-B truth is now **OPEN DEVELOPMENT EVIDENCE** only. It must not be reused as a fresh blind qualification panel.
+- Stage A: **PASS**, frozen standalone parity 16/16.
+- Stage B: **FAIL**, immutable/no-retune. Primary F-activity `0.433160 < 0.50`; the other principal geometry/mechanics metrics remained passing.
+- Stage-B truth is now **OPEN DEVELOPMENT EVIDENCE ONLY** and cannot be recycled as blind qualification.
 - sealed21 / external10 remain **CLOSED**.
-- **Big/new architecture training is NOT AUTHORIZED** while the representation sufficiency battery is open.
+- Any future blind qualification requires a **new untouched preregistered panel**.
+- **Large/new architecture training is NOT AUTHORIZED** while representation sufficiency Tests A/B remain open.
 
-## Representation sufficiency battery — current result
+## Why the representation sufficiency battery exists
 
-The battery was preregistered before the new population/tail measurements (`b87e222fdf7bf4c66a62314c88ee9e155a576c73`). Its current decision is **not** “representation PASS.” It has isolated one concrete representation-contract failure and one important rescue.
+Historical experiments contained both near-threshold misses and genuinely low family/tail metrics. The battery asks whether the proposed raster-derived representation genuinely lacks information on some tails, or whether the information exists but is lost by premature candidate collapse, feature fusion or calibration.
 
-### Test D — broad family-disjoint learnability
+Parent prereg: `b87e222fdf7bf4c66a62314c88ee9e155a576c73`.
 
-On the canonical open-development N1D population (`232` episodes, `29` families; source `N1D_CANONICAL_DEV_PER_EPISODE.json`, SHA-256 `37d81db0733f6fbf433a944aa0797550f3beee15ff65377ecbcfada1064f4326`):
-
-- strict 29-fold LOFO p_active proxy AUROC: **0.97411**;
-- p_active balanced accuracy at one fixed 0.5 threshold: **0.88937**;
-- multifeature active log-amp LOFO Spearman: **0.84524**;
-- a naive multifeature Ridge collapses held-out family `12832` to **-0.10714** Spearman;
-- however the single frozen raster-derived scalar `predicted_flow_mean` has `12832` Spearman **+0.78571**, aggregate **0.87594**, median family **0.85714**, minimum family **0.50**, with **29/29 evaluable families >=0.50** and no negative family.
-
-Interpretation: broad family-disjoint amplitude-order information exists, but naive feature fusion/calibration can destroy a hard-tail family. This supports explicit ranking and calibrated `p_active`, not uncontrolled fusion.
-
-### Test B — collision proxy
-
-On coarse inference-safe episode summaries, closest 5% cross-family neighbors have active/silent mismatch **7.69%**; closest 10% mismatch **16.67%**. This remains **AMBER**, because this proxy omits the proposed explicit carrier-level `p_active`, wider candidate set and typed uncertainty fields. It is not yet an irreducible representation collision proof.
-
-### Test C — current feasible-set hard tail
-
-The Test-C evaluator mapping/local-scale addendum was preregistered before current H replay (`5dc6989b2026a2db7194130242243b0ab6902b09`). The unchanged current global-foreground route exports its real pairwise rank-3 hypothesis set `H_i` before final selection/refit.
-
-Current fixed-top4 H results:
-
-- `14702`: reliable mapping `63/64`, strict 1x containment **0.93651**, primary 2x containment **1.00000**;
-- historical hard-tail `11032`: reliable mapping `59/64`, strict 1x containment **0.61017**, primary 2x containment **0.84746** (`50/59`);
-- historical hard-tail `15290`: reliable mapping `61/64`, strict 1x containment **0.83607**, primary 2x containment **0.90164**.
-
-The preregistered current-H Test-C decision is therefore **RED**: `11032 <0.90`, and the `14702 -> 11032` gap is **15.25 percentage points**.
-
-Failure localization on `11032` shows the dominant miss occurs **before** downstream H selection. Contained carriers have median `3` visible views with a target-near (`<=4 px`) retained descriptor candidate and median target-to-top4 distance `2.62 px`; missed carriers have median `0` such views and median distance `11.00 px`. Thus the fixed final top-4 candidate truncation frequently prevents target-near geometry from entering `H_i` at all.
-
-### Candidate-breadth causal counterfactual
-
-A separate counterfactual was preregistered before breadth results (`85139f87da7d510d581535d73e066f16a325a1cd`). Frozen model/descriptor/evidence are unchanged.
-
-**Retention-only arm:** same coarse top8 and the exact same refined pixel pool; retain final top16 instead of top4.
-
-- `11032`: primary 2x containment **0.84746 -> 0.94915**, strict 1x **0.61017 -> 0.86441**;
-- `15290`: primary 2x **0.90164 -> 1.00000**, strict 1x **0.83607 -> 0.98361**;
-- `14702`: primary 2x remains **1.00000**, strict 1x **0.93651 -> 1.00000**.
-
-A broader-search arm (`coarse top8 -> top32`, final top16) produces **no additional primary containment gain** on these witnesses. Therefore the required target-near evidence was already in the baseline refined descriptor pool and was being discarded by early top4 collapse.
-
-**Current interpretation:**
-
-- the **current fixed-top4 H representation contract is hard-tail insufficient**;
-- the tested hard-tail does **not** demonstrate that raster-derived descriptor information is absent;
-- the representation class survives if it remains more set-valued through the compiler boundary;
-- the immediate architectural fix is to preserve a wider/uncertainty-aware bounded candidate set, not to add a free XYZ head or jump directly to a larger image model;
-- a revised set-valued contract still requires a complete broad Test-C/A rerun before representation sufficiency can be supported.
-
-## Post-Stage-B activity/amplitude factorization evidence
-
-Prior to the sufficiency battery:
-
-1. frozen V11 baseline was re-evaluated against the exact canonical evaluator with **12/12 episode parity, max diff 0.0**;
-2. a direction-fixed exact-amplitude ceiling closes F activity and preserves all primary downstream quality gates;
-3. a **truth-rank / frozen-magnitude-distribution / frozen-direction** arm preserves the complete V11 displacement-magnitude multiset to `2.78e-17` numerical error while moving F activity from `0.433160` to `1.000000`; F-kernel `0.838823`, D `0.068851`, R `0.043841`, G-direction `0.897785`, G-line `0.076640`, all principal primary quality gates PASS;
-4. candidate-anchored current-amplitude composition on the three primary seed-route Stage-B episodes moves aggregate F activity `0.433160 -> 0.687180`, with F-kernel `0.70775`, D `0.10163`, R `0.04274`, G-direction `0.89947`, G-line `0.08024`: **6/6 principal quality metrics PASS**;
-5. silence must be factored separately: raw-current p95 is approximately `1.384e-3` on primary `11214/e04` versus `3.068e-4` on near-zero `11214/e06` (~`4.51x` separation), while q95-normalized composition erases absolute scale and raises the near-zero predicted moved fraction `0.1719 -> 0.1875`.
-
-This development evidence does **not** rewrite frozen Stage-B as PASS. The historical qualification also has a separate design defect: all three `12907` Stage-B episodes are truth-stratum `near_zero`, so its primary-only four-family G-coverage requirement was structurally unattainable.
-
-## Current architecture target
-
-Keep common-world dual-time geometry and factor motion state explicitly:
+Proposed factorized contract:
 
 ```text
-P_A, P_B_geom / set-valued H_i,
-N_A, N_B,
-V_A, V_B,
-Z,
-p_active, log_amp, dir, U_pred
-+ deterministic typed U_obs
+P_A
+P_B_geom / set-valued candidate-mechanical basin H_i
+N_A, N_B
+V_A, V_B
+Z
+p_active
+log_amp
+dir
+U_pred + typed U_obs
 ```
 
-with authority split:
+Authority split:
 
 ```text
-set-valued candidate/mechanical basin -> physical XYZ authority
-p_active                             -> absolute motion / silence gate
-log_amp                              -> conditional magnitude / ranking evidence
-dir                                  -> direction evidence
-U / match margin / multimodality     -> preserve ambiguity; control pruning/abstention
+set-valued H_i / geometry          -> physical XYZ authority
+p_active                           -> absolute motion / silence
+log_amp                            -> conditional magnitude / ranking
+dir                                -> direction
+U / margin / multimodality/support -> pruning, ambiguity, abstention
 ```
 
-`p_active/log_amp/dir` are evidence, not independent XYZ authority. **Fixed early top4 collapse is forbidden by the current hard-tail evidence.** Final `P_B` remains constrained by multiview feasible geometry.
+`p_active/log_amp/dir` are evidence, not free XYZ authority.
 
-## Next required experiment
+## Test D — broad family-disjoint learnability: PARTIAL PASS / fusion warning
 
-Before any large training:
+Canonical open-development population: `232` episodes, `29` families, source `N1D_CANONICAL_DEV_PER_EPISODE.json`, SHA-256 `37d81db0733f6fbf433a944aa0797550f3beee15ff65377ecbcfada1064f4326`.
 
-1. define a bounded set-valued candidate contract using the proven top16-retention witness as a safe development reference, with uncertainty/margin-aware pruning rather than unconditional early top4 collapse;
-2. rerun current-route Test C across the broader e00 family panel and difficulty strata under that frozen revised contract;
-3. run representation-conditioned feasible-basin oracle Test A and carrier-level collision Test B with the revised set;
-4. only if those are non-RED, train/evaluate the small strict family/episode-held-out `p_active + log_amp` head with ranking + silence supervision.
+Strict 29-fold LOFO episode-summary proxies:
 
-Any later qualification requires a **new untouched preregistered panel**. Stage-B cannot be recycled as blind qualification.
+- p_active AUROC: **0.97411**
+- p_active balanced accuracy at fixed 0.5: **0.88937**
+- multifeature active log-amp Spearman: **0.84524**
+- naive multifeature Ridge collapses held-out family `12832` to **-0.10714** Spearman
+- but the single frozen raster-derived `predicted_flow_mean` score has `12832` Spearman **+0.78571**
+- raw `predicted_flow_mean` amplitude ranking across all evaluable families: aggregate **0.87594**, median family **0.85714**, minimum family **0.50**, **29/29 >= 0.50**, no negative family.
 
-## Canonical post-Stage-B artifacts
+Interpretation: broad family-disjoint amplitude ordering information exists. Naive cross-family feature fusion/calibration can destroy a hard tail. This supports explicit ranking supervision and calibrated factorization rather than unrestricted feature mixing.
 
-- `POST_STAGEB_CURRENT_AMPLITUDE_DIAGNOSTIC.json`
-- `REALSAS_IRIS_POST_STAGEB_TARGET_REPRESENTATION_LOSS_RESEARCH_V1_20260819.md.b64`
-- `post_stageb_factorization_ceiling_v1.py`
-- `POST_STAGEB_FACTORIZATION_CEILING_V1_RESULT_SUMMARY.json`
-- `POST_STAGEB_FACTORIZATION_CEILING_V1.md`
-- `POST_STAGEB_CANDIDATE_ANCHORED_MECHANICAL_BASIN_V1.md`
-- `POST_STAGEB_CANDIDATE_ANCHORED_MECHANICAL_BASIN_V1_RESULT.json`
-- `post_stageb_candidate_anchored_mechanical_basin_v1.py`
+## Test B — collision audit: AMBER / carrier-level test still open
+
+Coarse inference-safe episode-summary nearest-neighbor proxy:
+
+- closest 5% cross-family pairs: active/silent mismatch **7.69%**
+- closest 10%: mismatch **16.67%**
+
+This is not an irreducible representation collision verdict because the proxy omits the proposed explicit carrier-level `p_active`, wider H, feasible-set width, match margin, multimodality and other typed-U fields. Carrier-level revised-contract collision audit remains required.
+
+## Test C — hard-tail feasible-set containment
+
+Mapping/local-scale addendum was preregistered before current H results: `5dc6989b2026a2db7194130242243b0ab6902b09`.
+
+Current global-foreground route uses:
+
+```text
+coarse foreground stride 4
+coarse descriptor top8
+±4 px / step2 refinement
+final retained candidates top4 per visible view
+pairwise rank3 H_i
+mean-reprojection selection
+all-visible nearest-candidate LS refit
+```
+
+### Current fixed-top4 contract — RED
+
+Broad e00 panel: `9908, 11032, 12772, 13203, 14404, 14702, 14758, 15290`.
+
+Across `492/512` reliably mapped carriers:
+
+- pooled primary 2x H-containment: **462/492 = 0.93902**
+- worst family `11032`: **0.84746**
+- `13203`: **0.86885**
+- families >=0.90: **6/8**
+- best–worst gap: **15.25 percentage points**
+- pooled strict 1x containment: **0.82724**
+
+This triggers the preregistered Test-C RED rule. **Fixed early top4 collapse is forbidden by the current hard-tail evidence.**
+
+### Failure localization
+
+On `11032`, the dominant misses occur before downstream H selection:
+
+- contained carriers: median `3` visible views have a target-near retained candidate within 4 px; median target-to-top4 nearest distance `2.62 px`;
+- missed carriers: median `0` such views; median nearest distance `11.00 px`.
+
+Thus target-near descriptor evidence is often discarded before it can enter H.
+
+## Candidate-breadth counterfactual — revised set-valued Test C GREEN on 8/8
+
+Breadth arms were preregistered before results: `85139f87da7d510d581535d73e066f16a325a1cd`.
+
+Retention-only arm changes **only** final retention `top4 -> top16`. Coarse top8, refined pixel pool, model, descriptor and rasters stay frozen.
+
+Per-family primary 2x H-containment:
+
+| family | current top4 | same-pool top16 |
+|---|---:|---:|
+| 9908 | 0.98413 | **1.00000** |
+| 11032 | 0.84746 | **0.94915** |
+| 12772 | 1.00000 | **1.00000** |
+| 13203 | 0.86885 | **0.95082** |
+| 14404 | 0.92063 | **0.96825** |
+| 14702 | 1.00000 | **1.00000** |
+| 14758 | 0.98387 | **0.98387** |
+| 15290 | 0.90164 | **1.00000** |
+
+Broad same-pool top16:
+
+- pooled primary 2x: **483/492 = 0.98171**
+- worst family: **0.94915**
+- families >=0.90: **8/8**
+- best–worst gap: **5.08 pp**
+- pooled strict 1x: **0.94919**
+
+Under the preregistered hard-tail rule, the **revised set-valued top16 Test C is GREEN on this 8-family e00 development panel**.
+
+A broader coarse-search arm (`coarse top8 -> top32`, final top16) raises pooled primary only to **0.98374** and changes primary coverage only on `14758` (`0.98387 -> 1.00000`). Therefore the dominant causal failure is premature final candidate truncation; occasional coarse-beam narrowness is secondary and can be handled with uncertainty-triggered bounded expansion.
+
+## Representation conclusion after Test C
+
+The user's hard-tail concern was correct in a precise form:
+
+- **current compact top4 representation is genuinely insufficient on some families**;
+- the tested failures do **not** show that the paired rasters/frozen descriptor lack the required information;
+- the same frozen evidence recovers both RED hard families simply by preserving more already-present hypotheses;
+- therefore the **representation class survives only as a more set-valued, uncertainty-aware contract**;
+- compiler/global mechanical reasoning should collapse H after consistency/deformation reasoning, not at an early fixed descriptor top-k boundary.
+
+This is not permission to adopt fixed top16 as product architecture blindly. Top16 is a causal development witness/safe reference. The product contract should use bounded uncertainty/margin-aware retention and adaptive expansion.
+
+## Prior Stage-B factorization evidence still stands
+
+- direction-fixed truth-rank/frozen-magnitude ceiling moves F activity `0.433160 -> 1.000000` while preserving all six principal quality metrics;
+- candidate-anchored current-amplitude composition moves primary Stage-B F activity `0.433160 -> 0.687180` with 6/6 principal metrics PASS;
+- absolute silence must remain separate from normalized amplitude (`p_active` distinct from `log_amp`).
+
+These are truth-open development findings and do not rewrite frozen Stage-B qualification.
+
+## Overall battery decision now
+
+```text
+Test A  representation-conditioned revised-basin oracle : OPEN / AMBER
+Test B  carrier-level collision with revised H + factors : OPEN / AMBER
+Test C  current top4 H                              : RED
+Test C' revised same-pool top16 H, broad 8-family  : GREEN
+Test D  broad family-disjoint learnability         : PARTIAL PASS / fusion-calibration warning
+```
+
+**Overall:** `REPRESENTATION_SUFFICIENCY_NOT_YET_SUPPORTED__SET_VALUED_REPRESENTATION_SURVIVES__BIG_TRAINING_NOT_AUTHORIZED`.
+
+## Next authorized work
+
+1. Freeze a bounded set-valued development contract using top16 coverage as the reference and uncertainty/margin-aware pruning rather than unconditional top16 everywhere.
+2. Run Test A: representation-conditioned feasible-basin oracle under the revised set, without free XYZ truth injection.
+3. Run Test B: carrier-level cross-family collision audit including explicit activity/amplitude/direction and typed uncertainty fields.
+4. Only if A/B are non-RED, train the small strict family/episode-held-out `p_active + log_amp` head with ranking + silence supervision.
+5. Any later blind qualification uses a new untouched preregistered panel.
+
+## Canonical battery artifacts
+
 - `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_PREREG.md`
 - `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_INTERIM_RESULT.json`
 - `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_INTERIM.md`
@@ -136,36 +192,9 @@ Any later qualification requires a **new untouched preregistered panel**. Stage-
 - `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_TESTC_BREADTH_COUNTERFACTUAL_PREREG.md`
 - `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_TESTC_BREADTH_COUNTERFACTUAL_RESULT.json`
 - `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_TESTC_BREADTH_REPLICATION.json`
+- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_TESTC_BROAD_8FAMILY_RESULT.json`
+- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_TESTC_BROAD_8FAMILY_REPORT.md`
+- `post_stageb_representation_sufficiency_testc_current_h_probe.py`
+- `post_stageb_representation_sufficiency_testc_breadth_fast.py`
 
-## Historical status preserved below
-
-The following section is retained as provenance for the pre-V11 research frontier. Statements such as “Stage-B truth CLOSED” describe that historical point and are superseded by the current canonical frontier above.
-
----
-
-**Historical date:** 2026-08-19  
-**Historical status:** ACTIVE RESEARCH / NOT SOLVED YET  
-**Historical Stage-B truth:** CLOSED
-
-## Why this line exists
-
-Historical source recovery is no longer the primary path. Code-level architecture audit and repeated local diagnostics converge on the same failure: the descriptor/multiview hypothesis set often contains a good physical endpoint, while per-carrier unary selection collapses the set incorrectly.
-
-The new line therefore preserves set-valued 3D hypotheses and tests observation-only **global mechanical coherence** before committing `P_B`.
-
-## Preserved historical evidence
-
-- Historical descriptor-top4 hypothesis oracle: flow/zero ~0.4254, direction ~0.9283.
-- Historical conclusion: per-carrier unary geometry selection is the wrong abstraction.
-- Local 10763/e01 witness: candidate-set containment is strong and a global rank-1 mechanical selection can recover a strong G solution.
-- Full 16-episode Stage-A V1 frozen qualification failed on F activity / G direction / G line; the later V11 route superseded this frontier.
-
-## Historical persistence
-
-Compact research bundle SHA-256: `833cfeb104c795323c4ded90b0608cb1c5ed3df2998cd82a44bd7aa28d01b5df`.  
-V1 source SHA-256: `efa858c59489688f9937a207bf78f03cfe9614b24d12f22369d13142e4e897c1`.  
-Qualification result SHA-256: `a9fcc2ad4ececae998e17a79f732d133f8a8a08c6220e440d93abb4262d09b33`.  
-Freeze ledger SHA-256: `069ed3132d806ac10e809991ac1002bf03ef7e86d8ca0dc271f39f69e9922bd7`.
-
-Library: `/RealSaS_OPT/N1D_20260819_GLOBAL_MECHANICAL_SOLVER_RESEARCH/`  
-Drive: `RealSaS_IRIS_N1D_GLOBAL_MECHANICAL_SOLVER_RESEARCH_20260819/`
+Historical details remain available in Git history and the preceding canonical reports; this status file intentionally points to the current scientific frontier rather than duplicating the complete historical ledger.

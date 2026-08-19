@@ -2,7 +2,7 @@ name: Recover N1D V2 persisted source
 
 on:
   pull_request:
-    branches: [main]
+    branches: [agent/n1d-global-mechanical-solver-research-20260819]
   workflow_dispatch:
 
 permissions:

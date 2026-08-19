@@ -1,154 +1,185 @@
 # RealSaS N1D — Canonical Research Status
 
 **Date:** 2026-08-19  
-**Current canonical state:** `REPRESENTATION_V2_SUPPORTED__F16_BOUNDED_H_RESEARCH_CONTRACT_FROZEN__SMALL_PACTIVE_LOGAMP_HEAD_AUTHORIZED__BIG_TRAINING_FORBIDDEN`  
+**Current canonical state:** `REPRESENTATION_V2_SUPPORTED__F16_H_FROZEN__PACTV_TYPED_EVIDENCE_SUPPORTED__DIRECT_LOGAMP_FAIL__CANDIDATE_CONDITIONED_AMPLITUDE_NEXT__BIG_TRAINING_FORBIDDEN`  
 **Frozen Stage-B authority:** `STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE`
 
-## Qualification boundary
+## Immutable qualification boundary
 
 - Stage A remains **PASS**.
-- Frozen Stage B remains **FAIL/no-retune**; primary F-activity was `0.433160 < 0.50` while the other principal geometry/mechanics metrics passed.
-- Stage-B/e00 truth is open-development evidence only and cannot be reused as blind qualification.
+- Frozen Stage B remains **FAIL/no-retune**; primary F-activity `0.433160 < 0.50`.
+- Stage-B/e00 truth is open-development evidence only; it cannot be reused as blind qualification.
 - sealed21 / external10 remain **CLOSED**.
-- Any later blind qualification requires a **new untouched preregistered panel**.
+- Future qualification requires a new untouched preregistered panel.
 
-## Representation decision
+## Representation / geometry authority
 
-Canonical representation sufficiency remains:
-
-`REPRESENTATION_SUFFICIENCY_SUPPORTED_FOR_REVISED_SET_VALUED_FACTORIZED_CONTRACT`
-
-Supported interface:
+Representation Sufficiency Battery V1 remains supported for the revised set-valued factorized contract.
 
 ```text
 P_A
-bounded set-valued H_i / P_B_geom
+bounded H_i / P_B_geom
 N_A, N_B
 V_A, V_B
 Z
 p_active
 log_amp
 dir
-U_pred
-+ typed U_obs
+U_pred + typed U_obs
 ```
 
 Authority split:
 
 ```text
-H_i                                -> physical Pose-B XYZ authority
-p_active                           -> absolute motion/non-motion evidence
-log_amp                            -> conditional magnitude/ranking evidence
-dir                                -> direction evidence
-U / margin / multimodality/support -> retention / abstention / confidence
-compiler/global solver             -> final collapse
+H_i       -> physical XYZ authority
+p_active  -> absolute motion/non-motion evidence
+log_amp   -> conditional magnitude/ranking evidence
+dir       -> direction evidence
+compiler  -> final constrained/global collapse
 ```
 
-Free XYZ motion authority and early fixed top4 collapse remain forbidden.
+Fixed early top4 and free XYZ motion heads remain forbidden.
 
-## Bounded H research contract
+## Frozen bounded H research contract
 
-Current research freeze:
+Decision:
 
 `FREEZE_F16_FOR_RESEARCH__PRODUCT_COMPRESSION_DEFERRED`
 
-File: `BOUNDED_H_RESEARCH_CONTRACT_V1.md`  
-Commit: `b3cec959a9d593e0a2693c2bf894b9ea7673a4ac`
+File/commit:
 
-Why:
+- `BOUNDED_H_RESEARCH_CONTRACT_V1.md`
+- `b3cec959a9d593e0a2693c2bf894b9ea7673a4ac`
 
-- fixed top4 hard-tail RED;
-- score top8 / top10 / top12 fail the strict tail gates;
-- Adaptive H V1 does not safely identify rare expansion cases;
-- K8/K10 diversity improves hard-tail coverage but still misses the worst-family gate;
-- D12-C8 matches the F16 worst-family floor but exceeds the compact target;
-- repeatedly tuning K10 on the same truth-open 8-family panel would create overfit risk.
-
-F16 broad e00 reference:
+F16 open-development coverage:
 
 ```text
-pooled primary-2x = .98171
-worst family       = .94915
-families >= .90    = 8/8
-best-worst gap     = 5.08pp
-strict-1x pooled   = .94919
+pooled primary-2x .98171
+worst family       .94915
+8/8 families >=    .90
+best-worst gap     5.08pp
+strict-1x pooled   .94919
 ```
 
-Representation-conditioned oracle constrained to this H passes all 6 principal GFDR gates.
+Vectorized H-only execution diagnostic: ~`21.2 ms / 64-carrier episode`, mean H `2146`, median `1536`, p95 `4608`; this excludes model/search/scoring and is not a product latency claim.
 
-Vectorized pairwise H materialization diagnostic, excluding neural forward/search/scoring:
+Compact-retention attempts are closed for now to avoid overfitting the same truth-open panel:
+
+- Adaptive H V1: FAIL.
+- D8-C4: efficient but worst family `.91525`.
+- D10-C4: pooled `.97967`, worst `.93220`, one 11032 carrier short of the `.94` gate.
+- D12-C8: coverage PASS but outside compact K<=10 budget.
+- score K10/K12: coverage FAIL.
+
+Product compression is deferred to a later dedicated split/problem.
+
+## Factorized Motion Head P0
+
+Prereg:
+
+- `FACTORIZED_MOTION_HEAD_P0_PREREG.md`
+- commit `5ad75bbe5434af901f105f1654e1f8e2b074ff33`
+
+Result:
+
+`FAIL__PACTV_SUPPORTED__DIRECT_LOGAMP_NOT_SUPPORTED`
+
+### p_active
+
+Typed scalar frozen evidence B1:
 
 ```text
-~0.331 ms / carrier
-~21.2 ms / 64-carrier episode
-mean H = 2146
-median H = 1536
-p95 H = 4608
+pooled AUROC             .95854
+worst family AUROC       .89610
+mean family bal-acc      .89176
+worst family bal-acc     .77737
+Brier                    .07252
 ```
 
-Therefore H materialization is not a research-stage blocker. `K=16` is **not** declared a permanent product constant; compression is deferred to a dedicated later optimization split/problem.
+P0 p_active gate: **PASS**.
 
-## Closed compression diagnostics
+Conclusion: the `p_active` factor has a supported typed scalar input contract for a later calibrated small head.
 
-### Adaptive H V1
+### direct log_amp
 
-Verdict:
+Direct global/normalized amplitude regression does **not** pass family-disjoint tail gates.
 
-`FAIL__NO_COMPACT_ADAPTIVE_CONTRACT_PASSES__KEEP_F16_REFERENCE`
+B1 typed scalar:
 
-- F8: pooled `.95528`, worst `.88136` — coverage FAIL.
-- A1 descriptor adaptive: pooled `.96951`, worst `.89831` — coverage FAIL, efficiency PASS.
-- A2 descriptor+geometry: pooled `.97358`, worst `.91525`, mean K `11.93` — coverage + efficiency FAIL.
+```text
+pooled active Spearman   .57431
+median family Spearman   .75250
+worst family Spearman    .12609
+worst pairwise accuracy  .54893
+```
 
-### Expansion-need audit
+Hard tails:
 
-Only `13/492` reliable carriers (`2.64%`) are F8 misses rescued by F16.
+```text
+13203 rho .12609
+15290 rho .18941
+```
 
-- score/reprojection features do not provide a stable family-disjoint rare-event expansion gate;
-- candidate spatial multimodality is more informative (best single LOFO AUROC ~`.808`) but 13 positives are insufficient to freeze a robust expansion classifier.
+Therefore direct `log_amp` head execution is **not authorized**.
 
-### Diversity retention
+### naive descriptor Z fusion
 
-- D8-C4: pooled `.97764`, 8/8 >=.90, worst `.91525`; efficient but tail FAIL.
-- D10-C4: pooled `.97967`, worst `.93220`, gap `6.78pp`, H/F16 `.391`; one `11032` carrier short of the prereg worst-family gate.
-- D12-C8: pooled `.97967`, worst `.94915`; coverage PASS, compact budget FAIL.
+B2 (`typed scalar + Z`) is RED:
 
-### Score rank depth
+```text
+p_active worst AUROC       .83302
+15290 log_amp Spearman    -.40326
+worst pairwise accuracy    .32615
+```
 
-- score K10: pooled `.96545`, worst `.90164` — FAIL.
-- score K12: pooled `.97154`, worst `.91525` — FAIL.
+This recreates the historical held-out multifeature fusion collapse. Naive Z injection into the motion-factor head is forbidden by current evidence.
 
-Conclusion: top16 safety is not explained by rank depth alone; preserving alternate modes matters, but current compact policies are not robust enough to replace F16 on this development panel.
+## Current scientific frontier
 
-## Current authorized next work
+The intended architecture never required `log_amp` to create a free absolute displacement. H is already the XYZ authority.
 
-The bounded-H prerequisite is now satisfied for research.
+Next required diagnostic:
 
-Authorized:
+### Candidate-conditioned amplitude factor
 
-1. preregister and run **small `p_active + log_amp` family/episode-disjoint probes**;
-2. keep `dir` separate;
-3. keep F16 H frozen and prohibit free XYZ;
-4. test each factor causally before combined candidate scoring;
-5. maintain worst-family/tail gates, not aggregate-only promotion.
+For each reliable truth-open carrier:
 
-Still forbidden:
+1. keep frozen F16 `H_i`;
+2. form candidate displacement magnitudes `a_h = ||h - P_A||`;
+3. identify the evaluator-only oracle-near candidate already inside H;
+4. measure its magnitude rank/quantile inside the carrier's feasible H distribution;
+5. test whether frozen current/typed evidence predicts **that candidate-conditioned rank/quantile** family-disjoint;
+6. score candidate magnitudes inside H rather than regress a free truth amplitude.
 
+If `13203/15290` tails recover under candidate-conditioned ranking, redefine `log_amp` as an H-conditioned energy/rank factor and preregister P1.
+
+If they do not, the representation is missing a local differential amplitude evidence channel and must be extended before further training.
+
+## Authorization
+
+Supported:
+
+- F16 bounded H research contract;
+- typed-scalar `p_active` evidence contract;
+- candidate-conditioned amplitude diagnostics.
+
+Paused/forbidden:
+
+- direct/global `log_amp` training;
+- combined p_active+log_amp training;
+- naive Z fusion into motion factors;
 - large/end-to-end training;
-- retuning F16 H from truth;
-- Stage-B requalification;
-- sealed/external opening.
+- Stage-B requalification.
 
 ## Canonical current artifacts
 
 - `REPRESENTATION_CONTRACT_V2.md`
 - `BOUNDED_H_RESEARCH_CONTRACT_V1.md`
+- `FACTORIZED_MOTION_HEAD_P0_PREREG.md`
+- `FACTORIZED_MOTION_HEAD_P0_RESULT.json`
+- `FACTORIZED_MOTION_HEAD_P0_REPORT.md`
+- `factorized_motion_head_p0.py`
 - `F16_H_CONSTRUCTION_BENCHMARK_V1.json`
-- `ADAPTIVE_HYPOTHESIS_RETENTION_V1_REPORT.md`
-- `EXPANSION_NEED_SEPARABILITY_AUDIT_V1_REPORT.md`
-- `DIVERSITY_PRESERVING_RETENTION_V1_RESULT.json`
-- `DIVERSITY_PRESERVING_RETENTION_V1_K10_FOLLOWUP_RESULT.json`
-- `SCORE_RANK_DEPTH_RETENTION_V1_RESULT.json`
-- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_CANONICAL_DECISION.md`
+- compression/audit artifacts preserved beside them.
 
-**Current frontier:** frozen F16 H + small factorized motion-state/magnitude heads; no big training.
+**Current frontier:** keep H and p_active semantics; determine the correct candidate-conditioned formulation for amplitude before any further learning.

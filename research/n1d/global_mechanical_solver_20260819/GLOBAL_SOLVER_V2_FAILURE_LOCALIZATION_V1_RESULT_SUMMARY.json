@@ -1,0 +1,74 @@
+{
+  "schema": "RealSaS.N1D.GlobalSolverV2FailureLocalization.ResultSummary.v1",
+  "date": "2026-08-19",
+  "classification": "FROZEN_LOCAL_OBJECTIVE_CONTEXT_FAIL",
+  "prereg_commit": "ff1b0a76e4095b46c154ccb24782c0a3adbea8d5",
+  "A_relation_transfer": {
+    "gate": true,
+    "n_edges": 1011,
+    "pooled_median_percentile": 0.0573272705078125,
+    "pooled_frac_le_025": 0.8328387734915925,
+    "worst_family_median_percentile": 0.150299072265625,
+    "active_active_median": 0.037532806396484375,
+    "active_inactive_median": 0.1027069091796875,
+    "inactive_inactive_median": 0.09386062622070312
+  },
+  "B_local_oracle_neighbor": {
+    "absolute_gate": false,
+    "n": 261,
+    "contain1": 0.5210727969348659,
+    "contain2": 0.8773946360153256,
+    "worst_family_contain1": 0.24,
+    "worst_family_contain2": 0.52,
+    "best_worst_gap": 0.48,
+    "median_norm_err": 0.9826099061069351,
+    "p90_norm_err": 2.2628001644969893,
+    "per_family_contain2": {
+      "9908": 0.9333333333333333,
+      "11032": 0.52,
+      "12772": 0.8181818181818182,
+      "13203": 0.8055555555555556,
+      "14404": 0.875,
+      "14702": 0.9772727272727273,
+      "14758": 1.0,
+      "15290": 0.92
+    }
+  },
+  "C_oracle_init": {
+    "before": {
+      "absolute_gate": true,
+      "contain1": 0.9118773946360154,
+      "contain2": 1.0,
+      "worst_family_contain1": 0.76,
+      "worst_family_contain2": 1.0,
+      "median_norm_err": 0.3229625335327801
+    },
+    "after": {
+      "absolute_gate": false,
+      "contain1": 0.4789272030651341,
+      "contain2": 0.8275862068965517,
+      "worst_family_contain1": 0.08,
+      "worst_family_contain2": 0.48,
+      "best_worst_gap": 0.52,
+      "median_norm_err": 1.0787278038536479
+    },
+    "unary_init_final": {
+      "contain1": 0.4521072796934866,
+      "contain2": 0.8084291187739464,
+      "worst_family_contain2": 0.44,
+      "median_norm_err": 1.142215140124115
+    }
+  },
+  "D_objective_components": {
+    "unary_initial": {"unary": -409.91492116174754, "pair": -309.2306948530625, "total": -719.14561601481},
+    "unary_final": {"unary": -366.9485013132322, "pair": -480.6304700995393, "total": -847.5789714127716},
+    "oracle_hybrid_initial": {"unary": -167.57537427490232, "pair": -345.2376251168777, "total": -512.8129993917801},
+    "oracle_final": {"unary": -360.5757477587843, "pair": -489.0046692312727, "total": -849.5804169900571},
+    "local_oracle_neighbor": {"unary": -374.5443571885012, "pair": -389.17269155650877, "total": -763.71704874501}
+  },
+  "hypothesis_next": "test common-mode/gauge ambiguity separately before solver changes",
+  "provenance": {
+    "execution_source_sha256": "e8b2fd05339ec0c596439ae4680f63d1ba0dc60d7fe89e451bbbfbab9d0f9932",
+    "full_local_result_sha256": "6eb3242244c1a7c32766405ce09d91f8cb5aff0d59403e1e20f70b094a6bf46e"
+  }
+}

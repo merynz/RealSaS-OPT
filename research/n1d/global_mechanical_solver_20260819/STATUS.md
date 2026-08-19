@@ -1,7 +1,7 @@
 # RealSaS N1D — Canonical Research Status
 
 **Date:** 2026-08-19  
-**Current canonical state:** `REPRESENTATION_V2_SUPPORTED__F16_H_FROZEN__PACTV_SUPPORTED__R_REL_DIS_STRONG_PASS__M256_DOMAIN_PASS__GLOBAL_SOLVER_V2_CAUSAL_BUT_ABSOLUTE_FAIL__LOCAL_OBJECTIVE_CONTEXT_FAIL__RANK_CALIBRATION_INSUFFICIENT__MIXED_MULTI_EDGE_FAILURE__NO_SIMPLE_EDGE_RELIABILITY_SIGNAL__INCIDENT_SUMMARY_LOFO_FAIL__FULL_PAIR_MIN_SUM_CAUSAL_SAFE_BUT_ABSOLUTE_FAIL__BIG_TRAINING_FORBIDDEN`  
+**Current canonical state:** `REPRESENTATION_V2_SUPPORTED__F16_H_FROZEN__PACTV_SUPPORTED__R_REL_DIS_STRONG_PASS__M256_DOMAIN_PASS__GLOBAL_SOLVER_V2_CAUSAL_BUT_ABSOLUTE_FAIL__LOCAL_OBJECTIVE_CONTEXT_FAIL__RANK_CALIBRATION_INSUFFICIENT__MIXED_MULTI_EDGE_FAILURE__NO_SIMPLE_EDGE_RELIABILITY_SIGNAL__INCIDENT_SUMMARY_LOFO_FAIL__FULL_PAIR_MIN_SUM_CAUSAL_SAFE__ROUND2_ADDS_HETEROGENEOUS_CONTEXT_BUT_DEPTH_NOT_MATERIAL__FACTOR_OR_OBJECTIVE_INSUFFICIENCY_REMAINS__BIG_TRAINING_FORBIDDEN`  
 **Frozen Stage-B authority:** `STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE`
 
 ## Immutable qualification boundary
@@ -250,16 +250,88 @@ absolute     FAIL
 
 Verdict: `ONE_PASS_MIN_SUM_MESSAGE_SOLVER_P0_FAIL`.
 
-This is positive structural evidence despite the fail: **hard single-neighbor conditioning is demonstrably lossy, and retaining complete candidate-to-candidate pair structure recovers substantial family-robust signal.** One pass is insufficient for final endpoint authority.
+This is positive structural evidence despite the fail: **hard single-neighbor conditioning is demonstrably lossy, and retaining complete candidate-to-candidate pair structure recovers substantial family-robust signal.**
 
 Artifacts:
 - report `52e6de038ec6469dcce6bd9c3a7dfef938475139`
 - summary `229c044d2773e9ade4110f292bdded92316a3047`
 - exact source `911b841fd9ac96765141d2f6756bd18276d3388a`
 
+## Fixed two-round cavity min-sum P1 — heterogeneous extra context, no depth promotion
+
+Prereg commit `85267a10f0cc53451ee9101b1d21338366aa4260`.
+
+Round 1 is canonical P0 and reproduces **512/512 exact candidate indices**. Round 2 is one synchronous cavity update, excluding the destination echo:
+
+```text
+m_{j->i}^{(2)}(k_i)
+  = min_{k_j} [
+      U_j(k_j)
+      + sum_{q in N(j), q != i} m_{q->j}^{(1)}(k_j)
+      + w_ij R_ij(k_i,k_j)
+    ]
+```
+
+Primary:
+
+```text
+                    U_ONLY      ROUND1       ROUND2
+contain1             .37165       .47126       .45977
+contain2             .67816       .77778       .81609
+worst-family c2      .28000       .40000       .52000
+median norm error   1.31793      1.07155      1.11291
+best-worst c2 gap    .55333       .57727       .48000
+```
+
+Per-family round1 -> round2 contain2:
+
+```text
+09908   .93333 -> .90000
+11032   .40000 -> .52000
+12772   .81818 -> .72727
+13203   .63889 -> .66667
+14404   .56250 -> .75000
+14702   .97727 -> .97727
+14758   .96970 ->1.00000
+15290   .80000 -> .82000
+```
+
+Secondary all-reliable M256-contained:
+
+```text
+contain1   .61042 -> .60417
+contain2   .86667 -> .88750
+worst c2   .67273 -> .72727
+median err .86270 -> .86221
+```
+
+Frozen gates:
+
+```text
+causal vs U_ONLY       PASS
+hard-tail causal       PASS
+secondary safety       PASS
+absolute quality       FAIL
+depth materiality      FAIL
+amplifies-factor-bias  FALSE
+```
+
+Round 2 adds useful context in aggregate and strongly helps `11032`/`14404`, but the preregistered depth-materiality gate fails because `12772` regresses by `.09091` (> allowed `.05`). Pooled contain1 also falls and median primary error worsens relative to round 1.
+
+Canonical verdict:
+
+`SECOND_ROUND_NOT_MATERIAL__FACTOR_OR_OBJECTIVE_INSUFFICIENCY_REMAINS`
+
+Artifacts:
+- report `42f172fd4b8808dcf1b3d0157377b018b1784d14`
+- summary `6a40770b7414592aeff66df974a7654ff559c0e0`
+- exact source `62af8036841820af93a5830a876a2e8b6d3d5902`
+- source SHA256 `37852c2151a14e1bbc62d704263c731cc0ef7ad7688d69e3c47301e255858c64`
+- result SHA256 `7572d5adae05198b013c4c4f4da0cf35e5b4574657691205865e2d0f8227af9f`
+
 ## Current scientific interpretation
 
-Supported path is now more specific:
+Supported path remains:
 
 ```text
 p_active
@@ -279,21 +351,25 @@ Ruled out as sufficient tested fixes:
 - one-edge trimming / median edge ranks;
 - simple scalar edge reliability prediction;
 - symmetric incident-statistic logistic aggregation;
-- one synchronous min-sum pass.
+- one synchronous min-sum pass as final authority;
+- propagation depth alone as a uniformly safe explanation under the exact two-round cavity test.
 
-The frontier is no longer “does relation information exist?” It does. The unresolved question is **how much structured multi-node inference is required to convert full pair compatibility into robust endpoint authority without letting the frozen objective collapse toward a wrong coherent basin**.
+Full pair structure is unquestionably useful: round 1 and round 2 both give large causal gains over U_ONLY. However the second round has **heterogeneous family effects**. It helps the classical hard family `11032` and family `14404` substantially while damaging `12772`, which was already the weakest family in prior full-matrix relation-transfer / pair-aggregation diagnostics.
+
+The frontier is therefore not “run more BP.” The unresolved question is now whether the round-2 heterogeneity is explained by **factor-quality / ambiguity differences, loopy graph motif double-counting, or another context-dependent objective defect**.
 
 ## Authorization / next experiment
 
-Large/end-to-end training remains forbidden. sealed21/external10 remain closed.
+Large/end-to-end training remains forbidden. `sealed21` / `external10` remain closed. Stage-B authority remains immutable FAIL/no-retune.
 
-Any next solver experiment must be separately preregistered. It may build directly on the causal/safe one-pass min-sum result, but may not post-hoc tune iteration count, damping, unary weight, pair weight, graph degree or relation definition on this panel.
+No round-3/4/5 sweep is authorized. No damping, lambda, graph change, R_REL_DIS retune, M256/F16 change or free XYZ is authorized.
 
-A safe next step is a diagnostic that distinguishes:
+The next experiment should be a separately preregistered **round-2 help-vs-harm localization audit**. It may use evaluator truth only to label rescue/regression outcomes, while predictors/diagnostics remain observation-native. It should specifically distinguish at least:
 
-1. whether another bounded round of full-pair message propagation adds genuinely new useful context; versus
-2. whether the remaining hard-tail error is an objective/factor insufficiency that repeated propagation only amplifies.
+1. weak/ambiguous pair factors whose uncertainty is amplified by propagation;
+2. loopy/triangle overlap causing correlated evidence to be counted through multiple paths;
+3. a mixed/other context effect.
 
-If message depth is tested, the depth and update schedule must be fixed before viewing endpoint results; no sweep.
+Only after this localization should one corresponding solver/factor intervention be preregistered.
 
-**Current frontier:** full pair candidate-to-candidate structure is causally useful and must be preserved; one-pass min-sum is insufficient, so the next preregistered question is bounded structured message depth versus factor insufficiency.
+**Current frontier:** full candidate-to-candidate relation structure is causally useful; a second cavity round adds additional but non-uniform context. Localize why propagation helps `11032/14404` and harms `12772` before any further solver modification.

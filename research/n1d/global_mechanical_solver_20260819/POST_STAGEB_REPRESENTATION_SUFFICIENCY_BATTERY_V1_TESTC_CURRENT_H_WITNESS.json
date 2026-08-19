@@ -1,0 +1,48 @@
+{
+  "schema": "RealSaS.N1D.PostStageB.RepresentationSufficiencyBattery.TestC.CurrentH.Witness.v1",
+  "date": "2026-08-19",
+  "status": "TRUTH_OPEN_DEVELOPMENT__TEST_C_RED_WITNESS__NOT_QUALIFICATION",
+  "parent_prereg_commit": "b87e222fdf7bf4c66a62314c88ee9e155a576c73",
+  "mapping_addendum_commit": "5dc6989b2026a2db7194130242243b0ab6902b09",
+  "frozen_stage_b_authority": "STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE",
+  "route": "current descriptor-global-foreground top4 -> pairwise rank3 H_i -> mean reprojection selection -> all-visible nearest-candidate LS refit; H_i export instrumentation does not alter solver selection",
+  "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+  "local_replay_source_sha256": "acc8806397abdf5605fcd3678451abcdfbb3ed8f1567d5ded495569080a56b1f",
+  "families": {
+    "14702": {
+      "historical_old_top8_containment": 0.9637681245803833,
+      "problem_A_carriers": 64,
+      "mapping_reliable_fraction": 0.984375,
+      "mapping_reliable_denominator": 63,
+      "current_H_strict_1x_containment": 0.9365079365079365,
+      "current_H_primary_2x_containment": 1.0,
+      "median_H_normalized_endpoint_error": 0.3970806868614808,
+      "median_committed_normalized_endpoint_error": 0.999835165554324,
+      "global_solution_fraction": 1.0,
+      "local_result_sha256": "c5fa937b0f0e5f3c6d3041aaba3ce1af86c1391dbb4b417c7007e9ab496b4496"
+    },
+    "11032": {
+      "historical_old_top8_containment": 0.7868852615356445,
+      "problem_A_carriers": 64,
+      "mapping_reliable_fraction": 0.921875,
+      "mapping_reliable_denominator": 59,
+      "current_H_strict_1x_containment": 0.6101694915254238,
+      "current_H_primary_2x_containment": 0.847457627118644,
+      "current_H_primary_2x_contained_count": 50,
+      "current_H_primary_2x_missed_count": 9,
+      "median_H_normalized_endpoint_error": 0.6005040015928216,
+      "median_committed_normalized_endpoint_error": 1.9379494190979243,
+      "global_solution_fraction": 1.0,
+      "local_result_sha256": "c61dc72f2761f2eae8d5cb33a72bbfcf98a9839808a3ef38c59c0c1c265a690e"
+    }
+  },
+  "preregistered_test_C_decision": {
+    "rule": "RED if a meaningful hard/worst family has primary 2x containment < 0.90, or >=15 percentage-point loss relative to easy/best",
+    "11032_primary_2x": 0.847457627118644,
+    "14702_primary_2x": 1.0,
+    "gap_percentage_points": 15.2542372881356,
+    "verdict": "RED"
+  },
+  "interpretation": "The current global-foreground hypothesis set is substantially richer than the committed endpoint and is excellent on 14702, but the historical hard-tail family 11032 remains a genuine feasible-set coverage tail: for 9/59 reliably mapped carriers no generated rank-3 hypothesis lies within the preregistered 2x local surface scale of the target endpoint. This cannot be repaired by a downstream selector that is constrained to the current H_i. It does not prove the overall representation class is impossible; it proves the current candidate-generation/basin representation is not yet hard-tail sufficient and must be widened or augmented before big training.",
+  "next": "Replicate on historical hard-tail family 15290 and inspect the missed 11032 carriers for candidate search/view-support/triangulation failure signatures."
+}

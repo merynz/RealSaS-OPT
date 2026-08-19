@@ -1,0 +1,27 @@
+{
+  "schema": "RealSaS.N1D.PostStageB.RepresentationSufficiency.CarrierPActiveLOFO.v1",
+  "date": "2026-08-19",
+  "status": "TRUTH_OPEN_DEVELOPMENT__FAMILY_DISJOINT_PACTIVE_SIGNAL_SUPPORTED",
+  "feature": "log(eps + ||consensus(delta_point_map_srcA)||)",
+  "protocol": "8-fold leave-one-family-out StandardScaler + balanced LogisticRegression(C=1); no family-specific tuning",
+  "panel": [9908,11032,12772,13203,14404,14702,14758,15290],
+  "carriers": 512,
+  "overall_auroc": 0.9294796798029556,
+  "overall_balanced_accuracy_at_0_5": 0.8334975369458129,
+  "per_family": {
+    "9908":  {"moving":30,"nonmoving":34,"auroc":0.9941176470588236,"balanced_accuracy_at_0_5":0.9519607843137254},
+    "11032": {"moving":30,"nonmoving":34,"auroc":0.9303921568627451,"balanced_accuracy_at_0_5":0.8745098039215686},
+    "12772": {"moving":12,"nonmoving":52,"auroc":0.9967948717948718,"balanced_accuracy_at_0_5":0.625},
+    "13203": {"moving":42,"nonmoving":22,"auroc":0.9383116883116882,"balanced_accuracy_at_0_5":0.7608225108225108},
+    "14404": {"moving":33,"nonmoving":31,"auroc":0.8924731182795699,"balanced_accuracy_at_0_5":0.7913000977517106},
+    "14702": {"moving":44,"nonmoving":20,"auroc":0.9659090909090909,"balanced_accuracy_at_0_5":0.865909090909091},
+    "14758": {"moving":35,"nonmoving":29,"auroc":0.9645320197044335,"balanced_accuracy_at_0_5":0.8881773399014778},
+    "15290": {"moving":54,"nonmoving":10,"auroc":0.9777777777777777,"balanced_accuracy_at_0_5":0.7407407407407407}
+  },
+  "minimum_family_auroc": 0.8924731182795699,
+  "repeated_family_ordering_collapse": false,
+  "calibration_warning": "A fixed probability threshold is not family-uniform: e.g. 12772 AUROC is 0.9968 while balanced accuracy at 0.5 is 0.625. p_active therefore needs explicit calibration/confidence/coverage semantics rather than one assumed universal threshold.",
+  "reproducer_sha256": "e67a4719f5f26062e4eb0af3cab25660f43ce70c6052c0cbadd616fd332271e4",
+  "local_result_sha256": "d9c875354a968dca20b335ec66cf833a6e066eb3b24e14ba326dbb1cd682bc5d",
+  "interpretation": "Carrier-level family-disjoint motion-state ordering is strongly learnable from a single frozen current-differential scalar. This supports the proposed explicit p_active factor and explains why Test-B motion-state collisions should not be interpreted as an irreducible raster-information collision."
+}

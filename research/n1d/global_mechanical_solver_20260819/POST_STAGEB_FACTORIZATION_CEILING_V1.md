@@ -143,10 +143,18 @@ Only after that development result should a learned held-out amplitude head be t
 
 ## 8. Reproducible artifacts
 
-- `post_stageb_factorization_ceiling_v1.py`
-- `POST_STAGEB_FACTORIZATION_CEILING_V1_RESULT.json`
+GitHub persists the diagnostic in a text-safe, hash-guarded form:
 
-Artifact SHA-256 at commit preparation:
+- `post_stageb_factorization_ceiling_v1.py` — thin wrapper that concatenates/decodes the exact source payload and refuses execution unless the decoded SHA-256 matches;
+- `source_bundle_b64/post_stageb_factorization_ceiling_v1.py.b64.part00` … `part03` — exact source payload;
+- `POST_STAGEB_FACTORIZATION_CEILING_V1_RESULT_SUMMARY.json` — compact canonical aggregate/provenance result;
+- this report.
 
-- script: `caffa717db433a56109f16eefa5ce68c4e13f24722ac40c46b85b2f6d00473a7`
-- result JSON: `a9520ae969e1c0483fc8b5521ffebd11f658ae8f976663bfdf4d3f56b940fdf4`
+The full per-episode result is deterministically regenerable from the frozen inputs and the decoded source; it is not duplicated in GitHub.
+
+Canonical local artifact hashes at publication preparation:
+
+- decoded diagnostic source SHA-256: `caffa717db433a56109f16eefa5ce68c4e13f24722ac40c46b85b2f6d00473a7`;
+- regenerated full per-episode result JSON SHA-256: `a9520ae969e1c0483fc8b5521ffebd11f658ae8f976663bfdf4d3f56b940fdf4`.
+
+The wrapper independently verifies the decoded source hash before compiling/executing it.

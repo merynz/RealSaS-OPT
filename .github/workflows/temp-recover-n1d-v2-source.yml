@@ -1,0 +1,37 @@
+name: Temporary recover exact N1D V2 source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/temp-recover-n1d-v2-source.yml
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact research authority commit
+        uses: actions/checkout@v4
+        with:
+          ref: 08620737ce526b0c0cc6c551f53910e34a1107fe
+      - name: Decode persisted V2 source and verify frozen SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd research/n1d/global_mechanical_solver_20260819
+          cat \
+            source_bundle_b64/global_relational_candidate_solver_v2_exec.py.b64.part00 \
+            source_bundle_b64/global_relational_candidate_solver_v2_exec.py.b64.part01 \
+            source_bundle_b64/global_relational_candidate_solver_v2_exec.py.b64.part02 \
+            | base64 -d > global_relational_candidate_solver_v2_exec.RECOVERED.py
+          echo '047c264e5a59ff05386cb801e23f0fb8a083828817a329737c50b407093ae8ba  global_relational_candidate_solver_v2_exec.RECOVERED.py' | sha256sum -c -
+      - name: Upload exact recovered bytes
+        uses: actions/upload-artifact@v4
+        with:
+          name: n1d-v2-exact-source
+          path: research/n1d/global_mechanical_solver_20260819/global_relational_candidate_solver_v2_exec.RECOVERED.py
+          if-no-files-found: error
+          retention-days: 1

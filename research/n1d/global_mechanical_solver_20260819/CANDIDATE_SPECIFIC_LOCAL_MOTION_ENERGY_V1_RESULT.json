@@ -1,0 +1,15 @@
+{
+  "schema":"RealSaS.N1D.CandidateSpecificLocalMotionEnergy.v1",
+  "date":"2026-08-19",
+  "prereg_commit":"6af5012a37673b5e1826b3d84304463927ff6e23",
+  "implementation_addendum_commit":"7a4d8ce8f4147f90cb054d079bd2c07be45df5b3",
+  "n_eval":264,
+  "decision":"NO_AMPLITUDE_ARM_PASSES__LOCAL_MOTION_FRONTDOOR_INSUFFICIENT_UNDER_V1",
+  "A_DIS":{"within25":0.4015151515151515,"within50":0.6060606060606061,"worst_family_within25":0.18181818181818182,"worst_family_within50":0.36363636363636365,"mean_family_pairwise_order":0.7035403600743397,"worst_family_pairwise_order":0.5729480122040892,"median_abs_log_ratio":0.3019463709813456,"hardtail_13203_within25":0.35135135135135137,"hardtail_15290_within25":0.49019607843137253,"per_family_within25":{"9908":0.4,"11032":0.3076923076923077,"12772":0.18181818181818182,"13203":0.35135135135135137,"14404":0.34375,"14702":0.4318181818181818,"14758":0.48484848484848486,"15290":0.49019607843137253}},
+  "A_TRANSPORT":{"within25":0.3409090909090909,"within50":0.5643939393939394,"worst_family_within25":0.18181818181818182,"worst_family_within50":0.35135135135135137,"mean_family_pairwise_order":0.6852574585427773,"worst_family_pairwise_order":0.6085690482870945,"median_abs_log_ratio":0.3640881740315751,"hardtail_13203_within25":0.2702702702702703,"hardtail_15290_within25":0.45098039215686275},
+  "A_DELTA3D":{"within25":0.2916666666666667,"within50":0.4734848484848485,"worst_family_within25":0.0,"worst_family_within50":0.09090909090909091,"mean_family_pairwise_order":0.7025725673516954,"worst_family_pairwise_order":0.6044839183481643,"median_abs_log_ratio":0.4290484097135182,"hardtail_13203_within25":0.2702702702702703,"hardtail_15290_within25":0.0784313725490196},
+  "A_ROBUST_FUSION":{"within25":0.3484848484848485,"within50":0.5833333333333334,"worst_family_within25":0.09090909090909091,"worst_family_within50":0.2727272727272727,"mean_family_pairwise_order":0.7134157247695478,"worst_family_pairwise_order":0.6014863626115525,"median_abs_log_ratio":0.34153008180861677,"hardtail_13203_within25":0.24324324324324326,"hardtail_15290_within25":0.27450980392156865},
+  "scientific_conclusion":{"amplitude_only_candidate_energy":"FALSIFIED_UNDER_DIS_TRANSPORT_DELTA3D_V1","observation_signal":"PARTIAL_PAIRWISE_ORDERING_EXISTS_BUT_DOES_NOT_LOCALIZE_CORRECT_MAGNITUDE_REGION_FAMILY_ROBUSTLY","implication":"DO_NOT_TRAIN_STANDALONE_AMPLITUDE; TEST_FULL_VECTOR_CANDIDATE_MOTION_COMPATIBILITY_BEFORE_ADDING_NEW_INPUT_CHANNELS","why":"projected 2D magnitude depends jointly on 3D displacement magnitude and direction; causal amplitude-only separation may itself be the wrong factorization at candidate-scoring stage"},
+  "local_exact_aggregate_sha256":"feedbc11f74b78b39f7d092bf130596a5f430b6934ec79df482e00fdb4163efc",
+  "local_exact_source_sha256":"8a51e3717ff26a1b3c5d8c2ec65b4b75cdd970dfdd35bb6d50cb6f03f33febe2"
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "RealSaS.N1D.V2SourceRecovery.StaticTests.v2",
+  "date": "2026-08-20",
+  "source_sha256": "0747bf3754443053fa5a992f03df4cacddc95f75969572fe4de11253f1e441b4",
+  "gfdr_evidence_source_sha256": "954302fa7962841179521a49e8c989e44535138f0d733f7cd4d76746062593b0",
+  "gfdr_evidence_library_file_id": "file_00000000067c824684daaed9c0e7bd8d",
+  "gfdr_evidence_created_at_utc": "2026-08-17T04:43:10.402819+00:00",
+  "v1_to_v2_diff_sha256": "8fc54ca574dcaf0b103ccac9c0a2073aca9af8781ebbb60be2f83970855e9a0e",
+  "base64_sha256": "e1e3712f273f860102631892fc25445548821ebae9ea8195f78ba5f04dd24ec4",
+  "github_ci_run_id": 32307397649,
+  "github_ci_artifact_id": 9385179953,
+  "tests": {
+    "compile_import_checkpoint": true,
+    "local_scale_exact_gfdr_semantics": true,
+    "local_scale_max_abs": 0.0,
+    "github_bundle_ci_sha_compile_diff_guard": true,
+    "github_artifact_byte_equal_local": true
+  },
+  "historical_outcome_parity_executed": false,
+  "sealed21": "CLOSED",
+  "external10": "CLOSED"
+}

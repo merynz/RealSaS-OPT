@@ -1,0 +1,76 @@
+{
+  "schema": "RealSaS.N1D.GlobalRelationalCandidateSolver.ResultSummary.v3_rank",
+  "date": "2026-08-19",
+  "verdict": "RANK_CALIBRATION_INSUFFICIENT_V3",
+  "prereg": "GLOBAL_RELATIONAL_CANDIDATE_SOLVER_V3_RANK_CALIBRATED_PREREG.md",
+  "qualification_changed": false,
+  "source_validity": {
+    "behavioral_parity_guard": true,
+    "mapping_reliable_denominator": 492,
+    "full_F16_parity_all": true,
+    "M256_parity_all": true,
+    "M256_pooled_primary2x": 0.975609756097561
+  },
+  "primary": {
+    "n": 261,
+    "U_RANK_ONLY": {
+      "contain1": 0.3716475095785441,
+      "contain2": 0.6781609195402298,
+      "worst_family_contain1": 0.0,
+      "worst_family_contain2": 0.28,
+      "best_worst_gap": 0.5533333333333333,
+      "median_norm_error": 1.3179303569635419,
+      "p90_norm_error": 4.1520870275051776
+    },
+    "G_RANK_REL": {
+      "contain1": 0.4559386973180077,
+      "contain2": 0.7586206896551724,
+      "worst_family_contain1": 0.12,
+      "worst_family_contain2": 0.36,
+      "best_worst_gap": 0.64,
+      "median_norm_error": 1.1141697069237158,
+      "p90_norm_error": 3.2071796486662634
+    },
+    "per_family_contain2": {
+      "9908": {"U_RANK_ONLY": 0.8333333333333334, "G_RANK_REL": 0.9333333333333333},
+      "11032": {"U_RANK_ONLY": 0.28, "G_RANK_REL": 0.36},
+      "12772": {"U_RANK_ONLY": 0.8181818181818182, "G_RANK_REL": 0.8181818181818182},
+      "13203": {"U_RANK_ONLY": 0.6111111111111112, "G_RANK_REL": 0.6944444444444444},
+      "14404": {"U_RANK_ONLY": 0.5, "G_RANK_REL": 0.53125},
+      "14702": {"U_RANK_ONLY": 0.8181818181818182, "G_RANK_REL": 0.9318181818181818},
+      "14758": {"U_RANK_ONLY": 0.8181818181818182, "G_RANK_REL": 1.0},
+      "15290": {"U_RANK_ONLY": 0.7, "G_RANK_REL": 0.72}
+    }
+  },
+  "hardtail_contain2_gains": {
+    "11032": 0.08,
+    "13203": 0.08333333333333333,
+    "15290": 0.02
+  },
+  "secondary": {
+    "n": 480,
+    "U_RANK_ONLY_contain2": 0.7958333333333333,
+    "G_RANK_REL_contain2": 0.85625
+  },
+  "gates": {
+    "absolute": false,
+    "causal": true,
+    "safety": true,
+    "causal_exact_boundary_note": "11032 worst-family gain is exactly 2/25 = 0.08; binary-float 0.07999999999999996 must not be treated as failure."
+  },
+  "comparison_to_v2": {
+    "V2_G_REL_DIS_contain2": 0.8084291187739464,
+    "V3_G_RANK_REL_contain2": 0.7586206896551724,
+    "V2_worst_family_contain2": 0.44,
+    "V3_worst_family_contain2": 0.36,
+    "V2_median_norm_error": 1.142215140124115,
+    "V3_median_norm_error": 1.1141697069237158,
+    "interpretation": "Pure order-preserving percentile calibration improves some fine-distance statistics but worsens hard-tail contain2 and family spread; it is insufficient."
+  },
+  "provenance": {
+    "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "local_reconstructed_execution_source_sha256": "2bdbb6f0628a225c667f7687a69af2ad8a47211671f247b93269e324fb33aa09",
+    "local_aggregate_result_sha256": "e98b3be23033248ecf9cb08509e5773bf9507c684e2fbed5c77a10417adb01e9"
+  },
+  "next_frontier": "diagnose incident-edge / multi-edge relational consensus failure before any graph, weight, relation, optimizer or learned-arbitration change"
+}

@@ -1,0 +1,18 @@
+{
+  "schema": "RealSaS.N1D.GlobalRelationalCandidateSolver.SourceManifest.v2",
+  "date": "2026-08-19",
+  "prereg_commit": "d44911b78dcf18f92a599310d17769f240dd296e",
+  "source_parts": [
+    "source_bundle_b64/global_relational_candidate_solver_v2_exec.py.b64.part00",
+    "source_bundle_b64/global_relational_candidate_solver_v2_exec.py.b64.part01",
+    "source_bundle_b64/global_relational_candidate_solver_v2_exec.py.b64.part02"
+  ],
+  "decoded_source_sha256": "047c264e5a59ff05386cb801e23f0fb8a083828817a329737c50b407093ae8ba",
+  "concatenated_base64_sha256": "07c43f50039bd45968fdc3872af09978241b73b6f3f7cecaf4c533aab8a73ce6",
+  "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+  "preflight_json_sha256": "a3a63efc3a6543c8663d13b1a9986bb4965f6cc6237300666c567bcd6e4b4a5b",
+  "full_local_result_json_sha256": "9bccac5988f24c8a2f2fe900f60c10bad796a8367f6c3f37efaa24d37ce6a3df",
+  "reassembly": "cat part00 part01 part02 | base64 -d > global_relational_candidate_solver_v2_exec.py",
+  "verdict": "RELATION_SIGNAL_PRESENT_BUT_SOLVER_FAIL_V2",
+  "solver_executed": true
+}

@@ -17,21 +17,31 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: 08620737ce526b0c0cc6c551f53910e34a1107fe
-      - name: Decode persisted V2 source and verify frozen SHA
+      - name: Diagnose persisted source bundle and decode
         shell: bash
         run: |
           set -euo pipefail
           cd research/n1d/global_mechanical_solver_20260819
-          cat \
-            source_bundle_b64/global_relational_candidate_solver_v2_exec.py.b64.part00 \
-            source_bundle_b64/global_relational_candidate_solver_v2_exec.py.b64.part01 \
-            source_bundle_b64/global_relational_candidate_solver_v2_exec.py.b64.part02 \
-            | base64 -d > global_relational_candidate_solver_v2_exec.RECOVERED.py
-          echo '047c264e5a59ff05386cb801e23f0fb8a083828817a329737c50b407093ae8ba  global_relational_candidate_solver_v2_exec.RECOVERED.py' | sha256sum -c -
-      - name: Upload exact recovered bytes
+          P0=source_bundle_b64/global_relational_candidate_solver_v2_exec.py.b64.part00
+          P1=source_bundle_b64/global_relational_candidate_solver_v2_exec.py.b64.part01
+          P2=source_bundle_b64/global_relational_candidate_solver_v2_exec.py.b64.part02
+          sha256sum "$P0" "$P1" "$P2"
+          cat "$P0" "$P1" "$P2" > global_relational_candidate_solver_v2_exec.CONCAT.b64
+          echo '--- concatenated base64 ---'
+          sha256sum global_relational_candidate_solver_v2_exec.CONCAT.b64
+          wc -c global_relational_candidate_solver_v2_exec.CONCAT.b64
+          base64 -d global_relational_candidate_solver_v2_exec.CONCAT.b64 > global_relational_candidate_solver_v2_exec.RECOVERED.py
+          echo '--- decoded source ---'
+          sha256sum global_relational_candidate_solver_v2_exec.RECOVERED.py
+          wc -c global_relational_candidate_solver_v2_exec.RECOVERED.py
+          python -m py_compile global_relational_candidate_solver_v2_exec.RECOVERED.py
+      - name: Upload diagnostic recovery bytes
         uses: actions/upload-artifact@v4
         with:
-          name: n1d-v2-exact-source
-          path: research/n1d/global_mechanical_solver_20260819/global_relational_candidate_solver_v2_exec.RECOVERED.py
+          name: n1d-v2-source-recovery-diagnostic
+          path: |
+            research/n1d/global_mechanical_solver_20260819/global_relational_candidate_solver_v2_exec.CONCAT.b64
+            research/n1d/global_mechanical_solver_20260819/global_relational_candidate_solver_v2_exec.RECOVERED.py
+            research/n1d/global_mechanical_solver_20260819/GLOBAL_RELATIONAL_CANDIDATE_SOLVER_V2_SOURCE_MANIFEST.json
           if-no-files-found: error
           retention-days: 1

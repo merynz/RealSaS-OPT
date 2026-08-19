@@ -1,0 +1,62 @@
+{
+  "schema": "RealSaS.N1D.Round2HelpHarmLocalization.ResultSummary.v1",
+  "date": "2026-08-19",
+  "prereg_commit": "0bad17f775f8e8e67cce1b1cefaebe1a7a54e2b2",
+  "verdict": "NO_SIMPLE_ROUND2_HELP_HARM_LOCALIZER_V1",
+  "validity": {
+    "all": true,
+    "primary_n": 261,
+    "round1_vs_p0_index_parity": 512,
+    "round1_vs_p1_index_parity": 512,
+    "round2_vs_p1_index_parity": 512,
+    "round1_contain2": 0.7777777777777778,
+    "round2_contain2": 0.8160919540229885,
+    "round1_worst_family_contain2": 0.4,
+    "round2_worst_family_contain2": 0.52,
+    "12772_round2_contain2": 0.7272727272727273,
+    "11032_round2_contain2": 0.52
+  },
+  "labels": {"HELP": 29, "NEUTRAL": 215, "HARM": 17},
+  "contain2_flips": {"bad_to_good": 14, "good_to_bad": 4},
+  "diagnostics": {
+    "D1_MESSAGE_AMBIGUITY": {
+      "spearman_rho": 0.03903061882187583,
+      "auroc_harm_vs_help": 0.6359026369168357,
+      "help_median": 0.08203125,
+      "harm_median": 0.15234375,
+      "family_12772_percentile": 0.4375,
+      "supported": false
+    },
+    "D2_TRIANGLE_OVERLAP": {
+      "spearman_rho": -0.02690167902131733,
+      "auroc_harm_vs_help": 0.5,
+      "help_median": 0.42857142857142855,
+      "harm_median": 0.41379310344827586,
+      "family_12772_percentile": 0.0625,
+      "supported": false
+    },
+    "D3_MESSAGE_VOTE_DISAGREEMENT": {
+      "spearman_rho": -0.060056574056909194,
+      "auroc_harm_vs_help": 0.3732251521298175,
+      "help_median": 0.6820357664095392,
+      "harm_median": 0.5414877595669032,
+      "family_12772_percentile": 0.1875,
+      "supported": false
+    },
+    "D4_TRIANGLE_REL_FLOW_CLOSURE": {
+      "spearman_rho": 0.09091286475144844,
+      "auroc_harm_vs_help": 0.6815415821501014,
+      "help_median": 0.07951523179854185,
+      "harm_median": 0.18322808308525063,
+      "family_12772_percentile": 0.8125,
+      "supported": false
+    }
+  },
+  "passing_diagnostics": [],
+  "provenance": {
+    "diagnostic_semantics_source_sha256": "86e246bf4d04cdbf59060b7b33265bbe1c1ded4e5a3d23a94a2f26e42d9535af",
+    "family_worker_sha256": "c8150fce49fdd9070d21c356b6bcb8c66e586277d8f78344c0b40a9eb44daada",
+    "aggregate_combiner_sha256": "4905c32ba0e93fd71dbe607490d7f31b2afd1001201fc49254d66cc5117c1966",
+    "full_local_result_sha256": "dfa77f0438fba12aaffe4700732b572afb41a33505294a7e76fa45f784da6572"
+  }
+}

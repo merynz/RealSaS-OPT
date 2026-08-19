@@ -1,0 +1,14 @@
+{
+  "date": "2026-08-19",
+  "families": [10763,11214,12907,14714],
+  "forbidden": ["retune thresholds after any Stage-B truth","read Stage-B sidecar before 12 prediction freeze","sealed21","external10"],
+  "freeze_manifest_sha256": "fc8639f9526b1f74ed5ae6d0a19f7d0c4ba8b296da7f4847d87fa9d8fc0a92e4",
+  "no_retune_between_stageA_and_stageB": true,
+  "open_stageA": ["e01","e03","e05","e07"],
+  "prediction_protocol": "download/open B rasters only; generate all 12 predictions; freeze bytes+SHA ledger; reverify; only then open Stage-B observation_sidecar truth",
+  "route": "Hybrid V11: V8 base; switch to V5 Problem-A seed-basin finite-LBS when V8-vs-N1D-current signed agreement <0.30 and absolute agreement >=0.20; no truth in prediction",
+  "schema": "RealSaS.N1D.HybridV11.UntouchedStageB.Prereg.v1",
+  "stageA_result_sha256": "b4ae5cfea7c20b4d98d8d39a2926b99e171136f8824c07377f82b81fc1d8034f",
+  "stageB_gates": {"D_tangent_action_error_median_max":0.75,"F_activity_spearman_min":0.5,"F_kernel_spearman_min":0.3,"G_axis_dir_abs_cos_median_min":0.7,"G_axis_line_error_diag_median_max":0.1,"R_differential_body_error_max":1.0,"minimum_episode_index_G_pass":2,"minimum_family_G_pass":3,"minimum_supported_G_carriers":32,"minimum_supported_G_families":4,"minimum_valid_F_episodes":6},
+  "untouched_stageB": ["e02","e04","e06"]
+}

@@ -1,0 +1,18 @@
+{
+  "schema":"RealSaS.N1D.CandidateSpecificVectorMotionEnergy.v15",
+  "date":"2026-08-19",
+  "prereg_commit":"52da162d25c598ee793a0cabac807baf75198e32",
+  "n_eval":264,
+  "decision":"NO_VECTOR_ARM_PASSES__SINGLE_CARRIER_MOTION_VECTOR_INSUFFICIENT",
+  "V_DIS":{"contain1":0.2840909090909091,"contain2":0.6098484848484849,"worst_family_contain1":0.10810810810810811,"worst_family_contain2":0.23076923076923078,"best_worst_gap":0.557109557109557,"median_norm_err":1.5947904677379505,"p90_norm_err":5.311259968315739,"hardtail_13203_contain2":0.4594594594594595,"hardtail_15290_contain2":0.6862745098039216,"per_family_contain2":{"9908":0.6666666666666666,"11032":0.23076923076923078,"12772":0.7272727272727273,"13203":0.4594594594594595,"14404":0.5625,"14702":0.7045454545454546,"14758":0.7878787878787878,"15290":0.6862745098039216}},
+  "V_TRANSPORT":{"contain1":0.2916666666666667,"contain2":0.5757575757575758,"worst_family_contain2":0.23076923076923078,"median_norm_err":1.6174874576365719,"hardtail_13203_contain2":0.4594594594594595,"hardtail_15290_contain2":0.49019607843137253},
+  "V_DELTA3D":{"contain1":0.21212121212121213,"contain2":0.4962121212121212,"worst_family_contain2":0.1568627450980392,"median_norm_err":2.0172731010889358,"hardtail_13203_contain2":0.43243243243243246,"hardtail_15290_contain2":0.1568627450980392},
+  "V_FUSION":{"contain1":0.2727272727272727,"contain2":0.5643939393939394,"worst_family_contain2":0.34615384615384615,"median_norm_err":1.6536054464526382,"hardtail_13203_contain2":0.3783783783783784,"hardtail_15290_contain2":0.47058823529411764},
+  "P_DIS":{"contain1":0.25,"contain2":0.5833333333333334,"worst_family_contain2":0.23076923076923078,"median_norm_err":1.7476513467121466,"hardtail_13203_contain2":0.5405405405405406,"hardtail_15290_contain2":0.5686274509803921},
+  "P_TRANSPORT":{"contain1":0.2537878787878788,"contain2":0.5454545454545454,"worst_family_contain2":0.2692307692307692,"median_norm_err":1.816473648883859,"hardtail_13203_contain2":0.5675675675675675,"hardtail_15290_contain2":0.35294117647058826},
+  "P_DELTA3D":{"contain1":0.19696969696969696,"contain2":0.4659090909090909,"worst_family_contain2":0.17647058823529413,"median_norm_err":2.2013824987096884,"hardtail_13203_contain2":0.35135135135135137,"hardtail_15290_contain2":0.17647058823529413},
+  "P_FUSION":{"contain1":0.25,"contain2":0.5643939393939394,"worst_family_contain2":0.3076923076923077,"median_norm_err":1.7915966824181089,"hardtail_13203_contain2":0.5405405405405406,"hardtail_15290_contain2":0.47058823529411764},
+  "scientific_conclusion":{"single_carrier_full_vector":"INSUFFICIENT_FOR_FAMILY_ROBUST_H_SELECTION","amplitude_direction_independence":"NOT_THE_ONLY_PROBLEM","next":"test carrier-to-carrier local differential/mechanical relation separability; if present, move amplitude/motion resolution into graph/global solver rather than standalone factor head"},
+  "local_exact_aggregate_sha256":"95c639baacdb4a994626925e370f2f8961507a7a4a95f4030014b7b2eaad852e",
+  "local_exact_source_sha256":"78755b8dbede9ff39f66abb18a9c9061c1b8e2928bd950e93e914ed2717e04e2"
+}

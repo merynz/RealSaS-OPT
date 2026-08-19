@@ -1,0 +1,42 @@
+{
+  "schema": "RealSaS.N1D.ObservableFunctionalAuditV2.ObservableStatePointer.R4",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R4",
+  "status": "OBSERVABLE_PREDICTION_FROZEN__TRUTH_NOT_YET_OPEN_AT_CREATION",
+  "bundle": {
+    "filename": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_OBSERVABLE_STATE_BUNDLE_R4.zip",
+    "size_bytes": 926839,
+    "sha256": "a4f7f9ce1b4f6d7858be4932a055e7509391d3516e8ad396b50b4332147e443f"
+  },
+  "manifest": {
+    "filename": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_OBSERVABLE_STATE_MANIFEST_R4.json",
+    "size_bytes": 7117,
+    "sha256": "ba487f0ec8af931abc76fd5fee5c36c4850dbb0ae2adb4bb07fa1d49087074d1"
+  },
+  "guards": {
+    "families": [9908,11032,12772,13203,14404,14702,14758,15290],
+    "episode": "e00",
+    "states_present": "8_OF_8",
+    "truth_access": "NONE_8_OF_8",
+    "V_B_replay": "BIT_EXACT_8_OF_8",
+    "N_B_replay": "MAX_ABS_LE_1E-7_8_OF_8",
+    "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18"
+  },
+  "mirrors": {
+    "drive": {
+      "bundle_file_id": "1BWVHJzuJkpTJH6kS6onixL07Sqr0SKtP",
+      "manifest_file_id": "1FphhLlG6-MhyJ7LHbKUsrLdbTeF8lmHC",
+      "roundtrip_sha256_verified": true
+    },
+    "library": {
+      "bundle_file_id": "file_00000000b3cc81f48c2f5ca2ae9d6ebf",
+      "bundle_library_file_id": "libfile_1883a3bccbe88191bc9be424c4fe0dbf",
+      "manifest_file_id": "file_0000000078ac81f49fa427cf11687c8b",
+      "manifest_library_file_id": "libfile_d90116415eb08191a3f0289d1cfd1ca4",
+      "roundtrip_sha256_verified": true
+    }
+  },
+  "prereg_sha256": "b692311dd5a27ad22a13fa7b178b535fc41ca67532d07089ce071aaafefad29f",
+  "input_manifest_sha256": "b5c851cdb6db3463b6abf26c215853f899b16e3154f9f1bbd36541dee9fca600",
+  "source_bundle_sha256": "48d66705d210f05953e20c6787722a4e3397c513ff83a19e651a3a5992c9d187"
+}

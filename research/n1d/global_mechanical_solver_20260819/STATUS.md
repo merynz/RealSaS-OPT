@@ -1,29 +1,29 @@
 # RealSaS N1D — Canonical Research Status
 
 **Date:** 2026-08-19  
-**Current canonical state:** `REPRESENTATION_V2_SUPPORTED__F16_H_FROZEN__PACTV_SUPPORTED__R_REL_DIS_STRONG_PASS__M256_DOMAIN_PASS__GLOBAL_SOLVER_V2_CAUSAL_BUT_ABSOLUTE_FAIL__FAILURE_LOCALIZED_TO_LOCAL_OBJECTIVE_CONTEXT__COMMON_MODE_NOT_DOMINANT__NO_SAFE_UNARY_ANCHOR__RANK_CALIBRATION_INSUFFICIENT_V3__NEXT_MULTI_EDGE_CONSENSUS_DIAGNOSTIC__BIG_TRAINING_FORBIDDEN`  
+**Current canonical state:** `REPRESENTATION_V2_SUPPORTED__F16_H_FROZEN__PACTV_SUPPORTED__R_REL_DIS_STRONG_PASS__M256_DOMAIN_PASS__GLOBAL_SOLVER_V2_CAUSAL_BUT_ABSOLUTE_FAIL__LOCAL_OBJECTIVE_CONTEXT_FAIL__RANK_CALIBRATION_INSUFFICIENT__MIXED_MULTI_EDGE_FAILURE__NO_SIMPLE_EDGE_RELIABILITY_SIGNAL__INCIDENT_SUMMARY_LOFO_FAIL__FULL_PAIR_MIN_SUM_CAUSAL_SAFE_BUT_ABSOLUTE_FAIL__BIG_TRAINING_FORBIDDEN`  
 **Frozen Stage-B authority:** `STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE`
 
 ## Immutable qualification boundary
 
 - Stage A remains **PASS**.
 - Frozen Stage B remains **FAIL/no-retune**; primary F-activity `0.433160 < 0.50`.
-- Stage-B/e00 truth is open-development evidence only and cannot be reused as blind qualification.
+- Stage-B/e00 is truth-open development evidence only and may not be reused as blind qualification.
 - `sealed21` / `external10` remain **CLOSED**.
 - Any future blind qualification requires a new untouched preregistered panel.
 
 ## Frozen representation / geometry authority
 
-Representation Sufficiency Battery V1 supports the revised set-valued factorized contract.
+Supported representation:
 
 ```text
 P_A
-F16 bounded set-valued H_i / P_B_geom
+F16 bounded H_i / P_B_geom
 N_A, N_B
 V_A, V_B
 Z
 p_active
-local relational/differential mechanical evidence
+local relational/differential evidence
 U_pred + typed U_obs
 compiler/global solver
 ```
@@ -31,31 +31,33 @@ compiler/global solver
 Authority split:
 
 ```text
-F16 H_i              -> physical Pose-B XYZ authority
-p_active             -> absolute motion / non-motion evidence
-R_REL_DIS            -> local pairwise differential mechanical compatibility
-compiler/global solve-> final feasible configuration
+F16/M256 candidates -> physical Pose-B XYZ authority
+p_active            -> absolute motion/non-motion evidence
+R_REL_DIS           -> pairwise differential compatibility
+compiler/solver     -> final feasible candidate configuration
 ```
 
-Fixed early top4, free XYZ motion heads and truth-conditioned retention remain forbidden.
+No free XYZ final motion head. Fixed early top4 and truth-conditioned candidate retention remain forbidden.
 
-`BOUNDED_H_RESEARCH_CONTRACT_V1.md` remains the frozen research geometry contract.
-
-F16 broad-e00 coverage:
+F16 broad-e00 development coverage:
 
 ```text
 pooled primary-2x .98171
 worst family       .94915
 8/8 families >=    .90
-best-worst gap     5.08 pp
 strict-1x pooled   .94919
 ```
 
-`K=16` remains a research safety contract, not a permanent product constant. Adaptive compression attempts are a separate efficiency problem and are not allowed to weaken geometry authority.
+M256 deterministic solver domain passes preregistered coverage:
+
+```text
+reliable denominator 492/512
+pooled primary-2x     .9756097561
+worst family          .9322033898
+8/8 families >=       .90
+```
 
 ## p_active — supported
-
-Typed scalar motion-state evidence remains supported:
 
 ```text
 pooled AUROC             .95854
@@ -65,21 +67,13 @@ worst family bal-acc     .77737
 Brier                    .07252
 ```
 
-Direct/global `log_amp`, H-relative amplitude, candidate-specific amplitude and candidate-specific full projected motion-vector heads were previously falsified on hard-tail family robustness. The missing endpoint authority is not another independent per-carrier scalar/vector head under those tested contracts.
+Direct/global log_amp, H-relative amplitude, candidate-specific amplitude/vector heads and naive Z fusion have been falsified under tested hard-tail contracts. The endpoint authority problem is not another independent per-carrier scalar/vector head.
 
 ## Frozen local relation — R_REL_DIS STRONG PASS
 
-```text
-candidate relative motion(v) =
-    [project(h_i,v)-project(P_A_i,v)]
-  - [project(h_j,v)-project(P_A_j,v)]
+`R_REL_DIS` compares candidate relative projected motion to observed DIS relative motion across common views.
 
-observed relative motion(v) = DIS_i(v)-DIS_j(v)
-
-R_REL_DIS = median_v ||candidate_relative_motion-observed_relative_motion||
-```
-
-Oracle-pair separability across the eight open-development families:
+Oracle-pair separability on the eight open-development families:
 
 ```text
 edges                            603
@@ -88,46 +82,13 @@ fraction <= .25                  .93035
 fraction <= .10                  .80597
 worst-family median              .05249
 worst-family fraction <= .25     .84615
-11032 median                     .01367
-13203 median                     .03711
-15290 median                     .00195
 ```
 
-Relation definition remains frozen; relation and solver may not be co-tuned.
+Complete M256 transfer also passes (`pooled median oracle percentile .05733`, worst-family `.15030`). Relation definition remains frozen.
 
-## Global Solver V1 — M128 preflight FAIL, solver not run
+## Global Solver V2 — relation causal, absolute FAIL
 
-M128 narrowly failed the exact frozen candidate-domain preflight:
-
-```text
-pooled primary-2x   .9695121951 < .970
-worst family        .9152542373
-families >= .90     8/8
-best-worst gap      8.4746 pp
-```
-
-Canonical V1 verdict remains:
-
-`INCONCLUSIVE_CANDIDATE_COMPRESSION_FAIL`
-
-No rounding into a pass is permitted.
-
-## Global Solver V2 — M256 PASS, relation causal, absolute solver FAIL
-
-Canonical V2 prereg commit: `d44911b78dcf18f92a599310d17769f240dd296e`.
-
-M256 changes only deterministic observation-only candidate capacity. Full F16 parity and reliable denominator `492/512` reproduce exactly.
-
-M256 preflight:
-
-```text
-pooled primary-2x   .9756097561  PASS
-worst family        .9322033898  PASS
-families >= .90     8/8           PASS
-best-worst gap      6.7797 pp      PASS
-```
-
-Primary endpoint result:
+Primary n=261:
 
 ```text
                     U_ONLY      G_REL_DIS
@@ -137,105 +98,29 @@ worst-family c2      .28000       .44000
 median norm error   1.31793      1.14222
 ```
 
-Hard-tail contain2 gains:
+Hard-tail gains: `11032 +.16`, `13203 +.0833`, `15290 +.12`. Secondary contain2 `.79583 -> .87917`. Causal/safety PASS, absolute FAIL.
 
-```text
-11032 +.16000
-13203 +.08333
-15290 +.12000
-```
+Canonical verdict: `RELATION_SIGNAL_PRESENT_BUT_SOLVER_FAIL_V2`.
 
-Secondary all-reliable M256-contained contain2 improves `.79583 -> .87917`.
+## Failure localization
 
-Thus V2 relation is **causal and safe**, but absolute hard-tail quality fails. Canonical verdict:
+The following simple explanations have been ruled out on the open panel:
 
-`RELATION_SIGNAL_PRESENT_BUT_SOLVER_FAIL_V2`
+- M256 candidate capacity failure;
+- R_REL_DIS transfer failure;
+- pure ICM immobility/local initialization only;
+- dominant common family translation;
+- simple median-DIS common anchor;
+- safe fixed unary-anchor subset;
+- percentile/rank calibration alone.
 
-## V2 failure localization — FROZEN_LOCAL_OBJECTIVE_CONTEXT_FAIL
+Even an evaluator-perfect initialization is pulled by the frozen V2 objective toward worse endpoint truth. Correct-neighbor pair-only evidence is strong (`contain2 .85441`, worst `.68`) but incident aggregation is not uniformly reliable.
 
-The complete M256 pair matrices preserve strong oracle-pair separability:
-
-```text
-pooled median oracle percentile   .05733
-fraction <= .25                   .83284
-worst-family median               .15030
-```
-
-So relation transfer is not the primary failure.
-
-With evaluator-correct neighbor context, the unchanged V2 local objective still gives only:
-
-```text
-pooled contain2       .87739
-worst-family contain2 .52000
-11032 contain2        .52000
-```
-
-Even an evaluator-perfect M256 initialization is pulled away by frozen ICM toward a poor basin:
-
-```text
-oracle-hybrid init contain2 1.00000
-oracle-init final contain2   .82759
-worst final contain2         .48000
-```
-
-The objective decreases while endpoint truth quality degrades. Therefore the dominant unresolved layer is objective/context alignment, not merely an optimizer failing to move.
-
-## Common-mode gauge audit — not dominant
-
-R_REL_DIS has an exact common-translation null direction numerically (`max diff ~4.97e-14 px`), but the best evaluator-fitted family common translation explains only about `12.5%` of squared endpoint error and does not rescue hard tails. A simple observation-native median-DIS common anchor materially worsens results.
-
-Canonical decision:
-
-`COMMON_MODE_NOT_DOMINANT__SIMPLE_MEDIAN_DIS_ANCHOR_NOT_SUPPORTED`
-
-## Local objective component rank audit — MULTIEDGE_RELATION_AGGREGATION_FAIL
-
-Under correct neighbor context, oracle candidate ranks are:
-
-```text
-                    median rank   frac rank<=.25
-unary-only             .19336          .58238
-pair-sum-only          .07227          .82375
-total unary+pair       .10742          .77011
-```
-
-Pair-only local endpoint quality is substantially stronger than unary:
-
-```text
-                    contain1   contain2   worst-family c2
-unary-only           .37165     .67816       .280
-pair-only            .48276     .85441       .680
-total                .52107     .87739       .520
-```
-
-However the frozen pair-aggregation support gate misses exactly at worst-family median oracle rank `.201171875 > .20`, and unary interaction is heterogeneous: it damages `11032`/`13203` but helps `15290`. A global lambda interpretation is therefore not supported.
-
-## Unary-anchor confidence audit — no safe fixed anchor set
-
-Simple observation-only confidence signals do not safely identify a fixed subset on which unary may be frozen.
-
-Top-25% examples:
-
-```text
-C_MARGIN contain2 .67826, worst .09091  # actively misleading on 11032
-C_ABS    contain2 .86667, worst .75000
-C_AGREE  contain2 .90984, worst .64286
-```
-
-Canonical decision:
-
-`NO_SAFE_UNARY_ANCHOR_CONFIDENCE_FOUND_V1`
+Local Objective Component Rank Audit classification: `MULTIEDGE_RELATION_AGGREGATION_FAIL`.
 
 ## Global Solver V3 — rank calibration insufficient
 
-V3 preregistered exactly one objective change: replace median/IQR z-score calibration by deterministic empirical mid-rank percentile costs independently for each unary vector and each pair matrix. Raw evidence, factor ordering, M256, graph, degree weights and deterministic ICM remain frozen.
-
-Behavioral source guard reproduces exact full-F16 and M256 parity before endpoint interpretation.
-
-`U_RANK_ONLY` is endpoint-identical to V2 U_ONLY, as required.
-
-Primary result:
+V3 changes only z-score factor calibration to empirical mid-rank percentile costs. It preserves all raw factor orderings.
 
 ```text
                     U_RANK_ONLY   G_RANK_REL
@@ -243,120 +128,172 @@ contain1                .37165       .45594
 contain2                .67816       .75862
 worst-family c2         .28000       .36000
 median norm error      1.31793      1.11417
-best-worst c2 gap       .55333       .64000
 ```
 
-Per-family G_RANK_REL contain2:
+Causal/safety PASS, absolute FAIL. Verdict: `RANK_CALIBRATION_INSUFFICIENT_V3`.
+
+## Multi-edge incident consensus audit — MIXED failure
+
+Prereg commit `39c80ce3a636307ba9414d14a3f9099ed6d10ef8`.
+
+Exact parent behavioral parity reproduced. Among pair-sum baseline-bad nodes:
 
 ```text
-09908  .93333
-11032  .36000
-12772  .81818
-13203  .69444
-14404  .53125
-14702  .93182
-14758 1.00000
-15290  .72000
+bad nodes                              46
+best one-edge deletion rescue <=.25   .4565217391
+rescue <=.10                           .0652173913
+median individually-supporting frac   .25
 ```
 
-Hard-tail gains vs unary:
+Observation-only robust aggregators fail hard-tail promotion:
 
 ```text
-11032 +.08000 exactly (2/25)
-13203 +.08333
-15290 +.02000
+                    baseline   TRIM_MAX1_Z   MEDIAN_EDGE_RANK
+pooled contain2       .85441       .83525          .84291
+worst-family c2       .68000       .64000          .64000
+11032 c2              .68000       .64000          .64000
 ```
 
-Frozen V3 gates:
+Canonical verdict: `MIXED_MULTI_EDGE_FAILURE`.
+
+Artifacts:
+- report commit `0ea98ec54f7c58cb97e19978e87b6e84a8be8f4d`
+- result summary commit `567fed1b05ed1aea718b4bf68d68bfa52b0f16a5`
+- readable reproducer commit `e191f24f6571d8a9c6904eb9d5450d72201aafd9`
+
+## Observation-native edge reliability audit — no simple scalar signal
+
+Prereg commit `f08f788301eef559abf245da1e703bd52b50d2c4`.
+
+Three truth-free damaging-edge predictors were frozen and tested on the 46 parent bad nodes:
 
 ```text
-causal improvement PASS
-secondary safety   PASS
-absolute quality   FAIL
+                         top1     top2    median norm rank   mean norm rank
+rank-vector disagree     .2609    .5000       .4500             .4457
+endpoint-vote outlier    .3043    .5652       .3333             .4504
+relative-flow noise      .1957    .3913       .6667             .5739
 ```
 
-V3 is worse than V2 on pooled contain2 (`.75862 < .80843`), worst-family contain2 (`.36 < .44`) and family spread, despite a small median-error improvement.
+None passes preregistered support gates. Verdict: `NO_SIMPLE_OBS_EDGE_RELIABILITY_SIGNAL_V1`.
 
-Canonical V3 verdict:
+Artifacts:
+- report `65dcb09d18cc37f9f05c2c7640494eb4a271413d`
+- summary `0598eeef1ed422d6987047c94dc6113781c82ddd`
+- exact source `0768ad3fa4c91552aae60d68d57372b0eb564aae`
 
-`RANK_CALIBRATION_INSUFFICIENT_V3`
+## Incident-set learned candidate ranker P0 — family-LOFO FAIL
 
-Canonical V3 artifacts:
+Prereg commit `37a6ba7b975176fa8d549223166578707dfa2329`.
 
-- `GLOBAL_RELATIONAL_CANDIDATE_SOLVER_V3_RANK_CALIBRATED_REPORT.md` — commit `cb8dc9387fa3805ccc5c47717085397cc116c4b2`
-- `GLOBAL_RELATIONAL_CANDIDATE_SOLVER_V3_RANK_CALIBRATED_RESULT_SUMMARY.json` — commit `e760eafc1850f93d46a786083c52ee26c32616f4`
-- `global_relational_candidate_solver_v3_rank_reproducer.py` — commit `28fddd7016fcfb08d88159970026123f2ab7159b`
+A tiny logistic ranker used only U percentile plus symmetric incident-edge percentile statistics and set-valued 2x-positive labels under 8-way family LOFO.
 
-The local V3 execution was a semantic reconstruction, not claimed byte-identical to a previously existing source. It was accepted for development interpretation only after exact F16/M256 behavioral parity and exact V2 unary endpoint parity.
+```text
+pooled contain2       .68966
+worst-family c2       .16000
+11032 c2              .16000
+median norm error    1.39859
+```
 
-## Superseded / non-frontier artifacts from reconnect recovery
+This is only `+.01149` pooled contain2 over U_ONLY and catastrophically under-generalizes on 11032. Verdict: `INCIDENT_SET_CANDIDATE_RANKER_P0_LOFO_FAIL`.
 
-`GLOBAL_RELATIONAL_CANDIDATE_SOLVER_V2_CAPACITY_LADDER_PREREG.md` commit `030c925c85d56a689eae713aebfa4c9d5dea3a92` was written during reconnect recovery before discovering that canonical V2 M256 had already been executed. It is **not** the canonical frontier and must not override canonical V2 evidence.
+Artifacts:
+- report `ca1ed9d40965ece32d83ec20230f9ba21e7360a4`
+- summary `f0e6abe6745f6cac79f655a9222ee3ee74777d0e`
+- exact source `dfe7ad9fc2f52ac20035d47967bd69ce96e2a8bb`
 
-`ADAPTIVE_HYPOTHESIS_RETENTION_V1_DECISIVE_FAIL.md` commit `10a474f581f0aef6bbce8f8c87acce41d318cc89` records a valid open-development adaptive-compression failure but is also not the current scientific frontier.
+## Full pair-structure one-pass min-sum P0 — causal/safe, absolute FAIL
+
+Prereg commit `a1169be16dea0b706a179c59c979770b0ae06347`.
+
+Instead of conditioning every edge on one hard U_ONLY neighbor, preserve the complete M256×M256 relation matrix and send one synchronous min-sum message:
+
+```text
+m_{j->i}(k) = min_l [U_j(l) + w_ij R_ij(k,l)]
+B_i(k)      = U_i(k) + sum_j m_{j->i}(k)
+```
+
+Primary:
+
+```text
+                    U_ONLY   MIN_SUM_P0
+contain1             .37165      .47126
+contain2             .67816      .77778
+worst-family c2      .28000      .40000
+median norm error   1.31793     1.07155
+```
+
+Hard-tail gains:
+
+```text
+11032 +.12
+13203 +.02778
+15290 +.10
+```
+
+Secondary all-reliable M256-contained:
+
+```text
+contain1   .46667 -> .61042
+contain2   .79583 -> .86667
+worst c2   .58182 -> .67273
+median err 1.04946 -> .86270
+```
+
+Frozen gates:
+
+```text
+causal       PASS
+hard-tail    PASS
+safety       PASS
+absolute     FAIL
+```
+
+Verdict: `ONE_PASS_MIN_SUM_MESSAGE_SOLVER_P0_FAIL`.
+
+This is positive structural evidence despite the fail: **hard single-neighbor conditioning is demonstrably lossy, and retaining complete candidate-to-candidate pair structure recovers substantial family-robust signal.** One pass is insufficient for final endpoint authority.
+
+Artifacts:
+- report `52e6de038ec6469dcce6bd9c3a7dfef938475139`
+- summary `229c044d2773e9ade4110f292bdded92316a3047`
+- exact source `911b841fd9ac96765141d2f6756bd18276d3388a`
 
 ## Current scientific interpretation
 
-The evidence now supports:
+Supported path is now more specific:
 
 ```text
 p_active
-+ frozen F16/M256 feasible candidate geometry
-+ frozen R_REL_DIS local relation
++ frozen F16/M256 feasible geometry
++ frozen R_REL_DIS full pair compatibility
++ solver that preserves neighbor candidate uncertainty / pair structure
 ```
 
-but does **not** yet support the tested global objective conversions as final endpoint authority.
+Ruled out as sufficient tested fixes:
 
-Already ruled out as simple explanations/fixes on this panel:
+- independent per-carrier motion heads;
+- M128 compression;
+- V2 hard-state ICM objective;
+- simple gauge anchor;
+- fixed unary confidence anchors;
+- factor rank calibration;
+- one-edge trimming / median edge ranks;
+- simple scalar edge reliability prediction;
+- symmetric incident-statistic logistic aggregation;
+- one synchronous min-sum pass.
 
-- candidate-domain capacity at M256;
-- missing R_REL_DIS signal;
-- pure ICM immobility;
-- dominant family common translation;
-- simple median-DIS absolute anchor;
-- fixed high-confidence unary anchoring;
-- pure order-preserving percentile/rank calibration.
+The frontier is no longer “does relation information exist?” It does. The unresolved question is **how much structured multi-node inference is required to convert full pair compatibility into robust endpoint authority without letting the frozen objective collapse toward a wrong coherent basin**.
 
-The unresolved layer is now specifically **multi-edge relational context composition / incident-edge consensus**: strong local pair orderings do not combine safely and uniformly across nodes/families, and neighbor errors can propagate through the graph.
+## Authorization / next experiment
 
-## Authorized next experiment
+Large/end-to-end training remains forbidden. sealed21/external10 remain closed.
 
-Next experiment must be separately preregistered and diagnostic-only before any objective change.
+Any next solver experiment must be separately preregistered. It may build directly on the causal/safe one-pass min-sum result, but may not post-hoc tune iteration count, damping, unary weight, pair weight, graph degree or relation definition on this panel.
 
-It should test whether hard-tail local failure is explained by a minority of inconsistent incident edges versus a coherent but wrong multi-edge consensus. Observation/evaluator separation must remain strict.
+A safe next step is a diagnostic that distinguishes:
 
-Candidate diagnostics may include, under evaluator-correct neighbor context:
+1. whether another bounded round of full-pair message propagation adds genuinely new useful context; versus
+2. whether the remaining hard-tail error is an objective/factor insufficiency that repeated propagation only amplifies.
 
-```text
-per-incident-edge oracle percentile ranks
-fraction of incident edges supporting oracle candidate in top25/top10
-edge-rank dispersion / disagreement
-leave-one-edge-out pair-sum oracle rank sensitivity
-fixed robust diagnostic aggregators (e.g. median / preregistered trim) only as diagnostic arms
-```
+If message depth is tested, the depth and update schedule must be fixed before viewing endpoint results; no sweep.
 
-No graph edit, edge deletion, relation retuning, lambda sweep, learned arbitration or optimizer change is authorized until that audit localizes the failure.
-
-## Authorization
-
-Supported/frozen:
-- Representation V2 set-valued contract;
-- F16 bounded H research geometry;
-- M256 as a coverage-valid solver-domain reference;
-- typed-scalar `p_active`;
-- raw `R_REL_DIS` local relation;
-- diagnostic-only solver/factor audits under preregistration.
-
-Paused/forbidden:
-- free XYZ;
-- fixed early top4;
-- standalone/direct/H-relative motion heads as final endpoint authority;
-- post-hoc M128 repair;
-- relation retuning on this panel;
-- lambda/temperature/rank-power sweeps;
-- graph/optimizer edits before localization;
-- large/end-to-end training;
-- Stage-B requalification;
-- sealed21/external10 access.
-
-**Current frontier:** preregister and run a multi-edge incident-consensus / outlier localization audit. If it identifies a stable observation-independent structural aggregation failure, only then preregister one corresponding solver-objective change.
+**Current frontier:** full pair candidate-to-candidate structure is causally useful and must be preserved; one-pass min-sum is insufficient, so the next preregistered question is bounded structured message depth versus factor insufficiency.

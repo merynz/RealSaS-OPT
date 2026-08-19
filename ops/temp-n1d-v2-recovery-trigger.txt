@@ -1,2 +1,1 @@
-Temporary marker to trigger the exact persisted N1D V2 source recovery workflow. Do not merge.
-Trigger revision: scan full research history for manifest hashes.
+Temporary N1D V2 recovery trigger retired after provenance diagnosis. Do not merge.

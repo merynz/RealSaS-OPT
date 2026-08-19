@@ -1,0 +1,26 @@
+{
+  "schema":"RealSaS.N1D.FactorizedMotionHeadP0.v1",
+  "date":"2026-08-19",
+  "prereg_commit":"5ad75bbe5434af901f105f1654e1f8e2b074ff33",
+  "decision":"NO_ARM_PASSES__FACTOR_HEAD_NOT_AUTHORIZED",
+  "B0":{
+    "p_active":{"pooled_auroc":0.9311054242561092,"brier":0.10620588442405308,"mean_family_balanced_accuracy":0.8471100302850063,"worst_family_auroc":0.8914807302231238,"worst_family_balanced_accuracy":0.7816091954022988,"gate":true},
+    "log_amp":{"pooled_spearman":0.5852142554031884,"median_family_spearman":0.6955691367456074,"worst_family_spearman":0.23688901502131152,"negative_family_count":0,"mean_family_pairwise_accuracy":0.7580996187376237,"worst_family_pairwise_accuracy":0.6024464831804281,"gate":false,"per_family_spearman":{"9908":0.8700778642936596,"11032":0.8014778325123151,"12772":0.6545454545454547,"13203":0.23688901502131152,"14404":0.2605042016806723,"14702":0.8620155038759689,"14758":0.7365928189457601,"15290":0.6076018099547511}}
+  },
+  "B1_TYPED_SCALAR":{
+    "p_active":{"pooled_auroc":0.9585361366183284,"brier":0.07252086580490977,"mean_family_balanced_accuracy":0.8917649740146842,"worst_family_auroc":0.8961038961038961,"worst_family_balanced_accuracy":0.7773654916512059,"gate":true,"per_family_auroc":{"9908":1.0,"11032":0.9862068965517241,"12772":0.8961038961038961,"13203":0.967857142857143,"14404":0.9716024340770791,"14702":0.9736842105263157,"14758":0.9107142857142857,"15290":1.0}},
+    "log_amp":{"pooled_spearman":0.5743092866076356,"median_family_spearman":0.7524959827191063,"worst_family_spearman":0.12609062819352188,"negative_family_count":0,"mean_family_pairwise_accuracy":0.7712891996785323,"worst_family_pairwise_accuracy":0.5489296636085627,"gate":false,"per_family_spearman":{"9908":0.8794215795328141,"11032":0.7586206896551723,"12772":0.9363636363636365,"13203":0.12609062819352188,"14404":0.5144385026737968,"14702":0.8980972515856236,"14758":0.7463712757830404,"15290":0.18941176470588234}}
+  },
+  "B2_TYPED_PLUS_Z":{
+    "p_active":{"pooled_auroc":0.9222740729590044,"brier":0.10913128327095573,"mean_family_balanced_accuracy":0.8473823581156601,"worst_family_auroc":0.8330241187384044,"worst_family_balanced_accuracy":0.6057513914656771,"gate":false},
+    "log_amp":{"pooled_spearman":0.5727660944794785,"median_family_spearman":0.7580213903743316,"worst_family_spearman":-0.4032579185520362,"negative_family_count":1,"mean_family_pairwise_accuracy":0.7143416753769218,"worst_family_pairwise_accuracy":0.3261480787253983,"gate":false,"per_family_spearman":{"9908":0.7917686318131256,"11032":0.8399014778325121,"12772":0.7363636363636363,"13203":0.18425743584231916,"14404":0.4157372039724981,"14702":0.8590556730091613,"14758":0.7796791443850267,"15290":-0.4032579185520362}}
+  },
+  "scientific_conclusion":{
+    "p_active":"SUPPORTED_BY_TYPED_SCALAR_FROZEN_EVIDENCE",
+    "log_amp":"DIRECT_GLOBAL_AMPLITUDE_REGRESSION_NOT_SUPPORTED_BY_P0",
+    "descriptor_Z_fusion":"RED__RECREATES_HELDOUT_FAMILY_COLLAPSE",
+    "next":"diagnose candidate-conditioned amplitude scoring inside frozen F16 H rather than free/direct truth-amplitude regression"
+  },
+  "local_exact_result_sha256":"b5eaf41ec2f1a0ba248061773a8438106e45585ec683d8d649800d0878e462ca",
+  "local_source_sha256":"a3a952373e5eb4b616c40270d78336e7d6638b2ed5b22f35985ff5b2588df777"
+}

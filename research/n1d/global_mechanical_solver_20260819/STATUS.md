@@ -1,7 +1,7 @@
 # RealSaS N1D — New Global Mechanical Hypothesis-Set Solver Status
 
 **Date:** 2026-08-19  
-**Current canonical state:** POST-STAGE-B DEVELOPMENT / CANDIDATE-BASIN COMPOSITION DEMONSTRATED / V11 FROZEN QUALIFICATION CLOSED  
+**Current canonical state:** POST-STAGE-B DEVELOPMENT / REPRESENTATION SUFFICIENCY BATTERY ACTIVE / FIXED-TOP4 H RED / SET-VALUED REPRESENTATION SURVIVES  
 **Frozen Stage-B authority:** `STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE`
 
 ## Current canonical frontier — 2026-08-19
@@ -12,27 +12,83 @@ Hybrid V11 remains the last frozen qualification treatment on this line.
 - Stage B: **FAIL, immutable/no-retune**. Geometry/mechanics retained strong values, but primary F-activity Spearman was `0.433160 < 0.50`.
 - Stage-B truth is now **OPEN DEVELOPMENT EVIDENCE** only. It must not be reused as a fresh blind qualification panel.
 - sealed21 / external10 remain **CLOSED**.
+- **Big/new architecture training is NOT AUTHORIZED** while the representation sufficiency battery is open.
 
-Post-Stage-B development evidence now isolates and causally tests the remaining activity factor:
+## Representation sufficiency battery — current result
+
+The battery was preregistered before the new population/tail measurements (`b87e222fdf7bf4c66a62314c88ee9e155a576c73`). Its current decision is **not** “representation PASS.” It has isolated one concrete representation-contract failure and one important rescue.
+
+### Test D — broad family-disjoint learnability
+
+On the canonical open-development N1D population (`232` episodes, `29` families; source `N1D_CANONICAL_DEV_PER_EPISODE.json`, SHA-256 `37d81db0733f6fbf433a944aa0797550f3beee15ff65377ecbcfada1064f4326`):
+
+- strict 29-fold LOFO p_active proxy AUROC: **0.97411**;
+- p_active balanced accuracy at one fixed 0.5 threshold: **0.88937**;
+- multifeature active log-amp LOFO Spearman: **0.84524**;
+- a naive multifeature Ridge collapses held-out family `12832` to **-0.10714** Spearman;
+- however the single frozen raster-derived scalar `predicted_flow_mean` has `12832` Spearman **+0.78571**, aggregate **0.87594**, median family **0.85714**, minimum family **0.50**, with **29/29 evaluable families >=0.50** and no negative family.
+
+Interpretation: broad family-disjoint amplitude-order information exists, but naive feature fusion/calibration can destroy a hard-tail family. This supports explicit ranking and calibrated `p_active`, not uncontrolled fusion.
+
+### Test B — collision proxy
+
+On coarse inference-safe episode summaries, closest 5% cross-family neighbors have active/silent mismatch **7.69%**; closest 10% mismatch **16.67%**. This remains **AMBER**, because this proxy omits the proposed explicit carrier-level `p_active`, wider candidate set and typed uncertainty fields. It is not yet an irreducible representation collision proof.
+
+### Test C — current feasible-set hard tail
+
+The Test-C evaluator mapping/local-scale addendum was preregistered before current H replay (`5dc6989b2026a2db7194130242243b0ab6902b09`). The unchanged current global-foreground route exports its real pairwise rank-3 hypothesis set `H_i` before final selection/refit.
+
+Current fixed-top4 H results:
+
+- `14702`: reliable mapping `63/64`, strict 1x containment **0.93651**, primary 2x containment **1.00000**;
+- historical hard-tail `11032`: reliable mapping `59/64`, strict 1x containment **0.61017**, primary 2x containment **0.84746** (`50/59`);
+- historical hard-tail `15290`: reliable mapping `61/64`, strict 1x containment **0.83607**, primary 2x containment **0.90164**.
+
+The preregistered current-H Test-C decision is therefore **RED**: `11032 <0.90`, and the `14702 -> 11032` gap is **15.25 percentage points**.
+
+Failure localization on `11032` shows the dominant miss occurs **before** downstream H selection. Contained carriers have median `3` visible views with a target-near (`<=4 px`) retained descriptor candidate and median target-to-top4 distance `2.62 px`; missed carriers have median `0` such views and median distance `11.00 px`. Thus the fixed final top-4 candidate truncation frequently prevents target-near geometry from entering `H_i` at all.
+
+### Candidate-breadth causal counterfactual
+
+A separate counterfactual was preregistered before breadth results (`85139f87da7d510d581535d73e066f16a325a1cd`). Frozen model/descriptor/evidence are unchanged.
+
+**Retention-only arm:** same coarse top8 and the exact same refined pixel pool; retain final top16 instead of top4.
+
+- `11032`: primary 2x containment **0.84746 -> 0.94915**, strict 1x **0.61017 -> 0.86441**;
+- `15290`: primary 2x **0.90164 -> 1.00000**, strict 1x **0.83607 -> 0.98361**;
+- `14702`: primary 2x remains **1.00000**, strict 1x **0.93651 -> 1.00000**.
+
+A broader-search arm (`coarse top8 -> top32`, final top16) produces **no additional primary containment gain** on these witnesses. Therefore the required target-near evidence was already in the baseline refined descriptor pool and was being discarded by early top4 collapse.
+
+**Current interpretation:**
+
+- the **current fixed-top4 H representation contract is hard-tail insufficient**;
+- the tested hard-tail does **not** demonstrate that raster-derived descriptor information is absent;
+- the representation class survives if it remains more set-valued through the compiler boundary;
+- the immediate architectural fix is to preserve a wider/uncertainty-aware bounded candidate set, not to add a free XYZ head or jump directly to a larger image model;
+- a revised set-valued contract still requires a complete broad Test-C/A rerun before representation sufficiency can be supported.
+
+## Post-Stage-B activity/amplitude factorization evidence
+
+Prior to the sufficiency battery:
 
 1. frozen V11 baseline was re-evaluated against the exact canonical evaluator with **12/12 episode parity, max diff 0.0**;
 2. a direction-fixed exact-amplitude ceiling closes F activity and preserves all primary downstream quality gates;
 3. a **truth-rank / frozen-magnitude-distribution / frozen-direction** arm preserves the complete V11 displacement-magnitude multiset to `2.78e-17` numerical error while moving F activity from `0.433160` to `1.000000`; F-kernel `0.838823`, D `0.068851`, R `0.043841`, G-direction `0.897785`, G-line `0.076640`, all principal primary quality gates PASS;
-4. the previously missing candidate-basin test is now demonstrated on the three **primary seed-route** Stage-B episodes (`10763/e04`, `11214/e04`, `14714/e04`): keep the frozen mechanical basin `q_i`, derive scalar weights only from frozen N1D `delta_point_map_srcA`, and compose `P_B = P_A + w_i q_i` without free XYZ authority;
-5. primary seed-route F activity moves `0.1261 -> 0.6872`, `0.4332 -> 0.68485`, and `0.4000 -> 0.8333`; when combined with unchanged primary `V8_BASE` episodes, aggregate F activity moves `0.433160 -> 0.687180`;
-6. treated primary aggregate principal metrics are F-kernel `0.70775`, D `0.10163`, R `0.04274`, G-direction `0.89947`, G-line `0.08024`: **6/6 principal quality metrics PASS**; family G robustness remains `3/4`, episode-index robustness improves `2/3 -> 3/3`;
-7. the treatment remains candidate-anchored: median distance from current-amplitude basin weight to nearest feasible candidate-projection weight is approximately `0.00706`, `0.00701`, `0.00431` on the three primary seed episodes;
-8. silence must be factored separately: raw-current p95 is approximately `1.384e-3` on primary `11214/e04` versus `3.068e-4` on near-zero `11214/e06` (~`4.51x` separation), while q95-normalized composition erases absolute scale and raises the near-zero predicted moved fraction `0.1719 -> 0.1875`;
-9. therefore the supported architecture is **candidate/mechanical basin as XYZ authority + separate `p_active` silence gate + conditional `log_amp` ranking/magnitude evidence + direction evidence**. A free XYZ motion head is not supported by the current evidence.
+4. candidate-anchored current-amplitude composition on the three primary seed-route Stage-B episodes moves aggregate F activity `0.433160 -> 0.687180`, with F-kernel `0.70775`, D `0.10163`, R `0.04274`, G-direction `0.89947`, G-line `0.08024`: **6/6 principal quality metrics PASS**;
+5. silence must be factored separately: raw-current p95 is approximately `1.384e-3` on primary `11214/e04` versus `3.068e-4` on near-zero `11214/e06` (~`4.51x` separation), while q95-normalized composition erases absolute scale and raises the near-zero predicted moved fraction `0.1719 -> 0.1875`.
 
-This development result does **not** rewrite frozen Stage-B as PASS. The historical qualification also has a separate design defect: all three `12907` Stage-B episodes are truth-stratum `near_zero`, so its primary-only four-family G-coverage requirement was structurally unattainable.
+This development evidence does **not** rewrite frozen Stage-B as PASS. The historical qualification also has a separate design defect: all three `12907` Stage-B episodes are truth-stratum `near_zero`, so its primary-only four-family G-coverage requirement was structurally unattainable.
 
-### Current architecture target
+## Current architecture target
 
 Keep common-world dual-time geometry and factor motion state explicitly:
 
 ```text
-P_A, P_B_geom, N_A, N_B, V_A, V_B, Z,
+P_A, P_B_geom / set-valued H_i,
+N_A, N_B,
+V_A, V_B,
+Z,
 p_active, log_amp, dir, U_pred
 + deterministic typed U_obs
 ```
@@ -40,19 +96,25 @@ p_active, log_amp, dir, U_pred
 with authority split:
 
 ```text
-candidate/mechanical basin -> physical XYZ authority
-p_active                  -> absolute motion / silence gate
-log_amp                   -> conditional magnitude / ranking evidence
-dir                       -> direction evidence
+set-valued candidate/mechanical basin -> physical XYZ authority
+p_active                             -> absolute motion / silence gate
+log_amp                              -> conditional magnitude / ranking evidence
+dir                                  -> direction evidence
+U / match margin / multimodality     -> preserve ambiguity; control pruning/abstention
 ```
 
-`p_active/log_amp/dir` are evidence, not independent XYZ authority. Final `P_B` remains constrained by multiview feasible geometry.
+`p_active/log_amp/dir` are evidence, not independent XYZ authority. **Fixed early top4 collapse is forbidden by the current hard-tail evidence.** Final `P_B` remains constrained by multiview feasible geometry.
 
-### Next required experiment
+## Next required experiment
 
-The candidate-basin causal prerequisite is now satisfied for the primary seed-route development panel. The next step is a small **family/episode-held-out learned `p_active + log_amp` probe**, using explicit conditional ranking loss plus silence/activity supervision, while keeping endpoint selection constrained to the candidate/mechanical basin.
+Before any large training:
 
-Do **not** authorize a new blind qualification from Stage-B. Any later qualification requires a **new untouched preregistered panel**.
+1. define a bounded set-valued candidate contract using the proven top16-retention witness as a safe development reference, with uncertainty/margin-aware pruning rather than unconditional early top4 collapse;
+2. rerun current-route Test C across the broader e00 family panel and difficulty strata under that frozen revised contract;
+3. run representation-conditioned feasible-basin oracle Test A and carrier-level collision Test B with the revised set;
+4. only if those are non-RED, train/evaluate the small strict family/episode-held-out `p_active + log_amp` head with ranking + silence supervision.
+
+Any later qualification requires a **new untouched preregistered panel**. Stage-B cannot be recycled as blind qualification.
 
 ## Canonical post-Stage-B artifacts
 
@@ -63,7 +125,17 @@ Do **not** authorize a new blind qualification from Stage-B. Any later qualifica
 - `POST_STAGEB_FACTORIZATION_CEILING_V1.md`
 - `POST_STAGEB_CANDIDATE_ANCHORED_MECHANICAL_BASIN_V1.md`
 - `POST_STAGEB_CANDIDATE_ANCHORED_MECHANICAL_BASIN_V1_RESULT.json`
-- `post_stageb_candidate_anchored_mechanical_basin_v1.py` — compact canonical treatment specification recovered after the execution-session boundary; full replay depends on the frozen V11 runner/candidate reconstruction and canonical GFDR evaluator already preserved in this research line.
+- `post_stageb_candidate_anchored_mechanical_basin_v1.py`
+- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_PREREG.md`
+- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_INTERIM_RESULT.json`
+- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_INTERIM.md`
+- `post_stageb_representation_sufficiency_battery_v1_interim.py`
+- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_TESTC_MAPPING_ADDENDUM.md`
+- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_TESTC_CURRENT_H_WITNESS.json`
+- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_TESTC_11032_FAILURE_LOCALIZATION.json`
+- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_TESTC_BREADTH_COUNTERFACTUAL_PREREG.md`
+- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_TESTC_BREADTH_COUNTERFACTUAL_RESULT.json`
+- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_TESTC_BREADTH_REPLICATION.json`
 
 ## Historical status preserved below
 
@@ -79,41 +151,14 @@ The following section is retained as provenance for the pre-V11 research frontie
 
 Historical source recovery is no longer the primary path. Code-level architecture audit and repeated local diagnostics converge on the same failure: the descriptor/multiview hypothesis set often contains a good physical endpoint, while per-carrier unary selection collapses the set incorrectly.
 
-The new line therefore preserves set-valued 3D hypotheses and tests observation-only **global mechanical coherence** before committing `P_B`. It is informed by the prior RealSaS code-level audit of DPM/V-DPM, MV-TAP, MVTracker, St4RTrack, and GGPT.
+The new line therefore preserves set-valued 3D hypotheses and tests observation-only **global mechanical coherence** before committing `P_B`.
 
-## Preserved evidence
+## Preserved historical evidence
 
 - Historical descriptor-top4 hypothesis oracle: flow/zero ~0.4254, direction ~0.9283.
 - Historical conclusion: per-carrier unary geometry selection is the wrong abstraction.
 - Local 10763/e01 witness: candidate-set containment is strong and a global rank-1 mechanical selection can recover a strong G solution.
-- Full 16-episode Stage-A frozen V1 qualification **FAILS**; therefore no claim of solution and no Stage-B opening.
-
-## Full Stage-A V1 frozen result
-
-- D tangent: `0.075206` PASS
-- F activity Spearman: `0.076923` FAIL
-- F kernel Spearman: `0.611932` PASS
-- R differential: `0.070552` PASS
-- G direction: `0.412111` FAIL
-- G line: `0.124538` FAIL
-- G carriers: `146` PASS
-- G families: `4` PASS
-- valid F episodes: `7` FAIL
-- family G pass: `1/4` FAIL
-- episode-index G pass: `1/4` FAIL
-
-Verdict: `FAIL__MOTION_SUPPORT_FRONT_DOOR_AND_FINITE_AXIS_GENERALIZATION`.
-
-## Historical scientific interpretation
-
-The single-witness global rank-1 success does not generalize across interventions. The next work must separate at least:
-
-1. candidate containment vs selector failure per intervention;
-2. finite-motion support/activity from near-zero silence;
-3. one-global-transform rank-1 assumptions from multi-part/local mechanical coherence;
-4. typed observation-only scores (descriptor, reprojection, view support, conditioning, local deformation coherence) rather than one unary reprojection score.
-
-At this historical point, Stage-B remained closed.
+- Full 16-episode Stage-A V1 frozen qualification failed on F activity / G direction / G line; the later V11 route superseded this frontier.
 
 ## Historical persistence
 

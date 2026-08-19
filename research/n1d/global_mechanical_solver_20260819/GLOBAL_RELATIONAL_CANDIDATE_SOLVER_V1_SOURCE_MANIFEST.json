@@ -1,0 +1,20 @@
+{
+  "schema": "RealSaS.N1D.GlobalRelationalCandidateSolver.SourceManifest.v1",
+  "date": "2026-08-19",
+  "source_parts": [
+    "source_bundle_b64/global_relational_candidate_solver_v1_exec.py.b64.part00",
+    "source_bundle_b64/global_relational_candidate_solver_v1_exec.py.b64.part01",
+    "source_bundle_b64/global_relational_candidate_solver_v1_exec.py.b64.part02",
+    "source_bundle_b64/global_relational_candidate_solver_v1_exec.py.b64.part03",
+    "source_bundle_b64/global_relational_candidate_solver_v1_exec.py.b64.part04"
+  ],
+  "decoded_source_sha256": "c293568554513e62c3aeedfd81cfb891cfcf52947690bfec1871dc41407ba54e",
+  "concatenated_base64_sha256": "d29055bb1160ffebed5cf11e5d7b37f000a0030d41153cdbc8bb57bcb8bcf1ad",
+  "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+  "preflight_json_sha256": "7414d44d662f82e6ad0c1d43b46f4f4cffcfa387ce77efcc05e15609467f32d8",
+  "result_json_sha256": "9c5415ed12cdad3b77f50fcbb4c7027964e063a37410d87ba7853dddd6bda399",
+  "report_sha256": "b36905e7fe378e1ce8222e9f1861e92e573d7915f196eee48ff361f291736e5a",
+  "reassembly": "cat part00 part01 part02 part03 part04 | base64 -d > global_relational_candidate_solver_v1_exec.py",
+  "verdict": "INCONCLUSIVE_CANDIDATE_COMPRESSION_FAIL",
+  "solver_executed": false
+}

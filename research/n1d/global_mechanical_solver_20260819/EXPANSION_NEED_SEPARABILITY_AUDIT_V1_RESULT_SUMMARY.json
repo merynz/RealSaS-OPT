@@ -1,0 +1,36 @@
+{
+  "schema": "RealSaS.N1D.ExpansionNeedSeparabilityAudit.Summary.v1",
+  "date": "2026-08-19",
+  "status": "TRUTH_OPEN_DEVELOPMENT_DIAGNOSTIC",
+  "label": "NEEDS_EXPANSION := F8 misses primary-2x AND F16 contains primary-2x",
+  "n_reliable": 492,
+  "n_need_expansion": 13,
+  "need_fraction": 0.026422764227642278,
+  "per_family_need": {"9908":1,"11032":4,"12772":0,"13203":4,"14404":2,"14702":0,"14758":0,"15290":2},
+  "base_observation_only_audit": {
+    "best_single_feature": "score_span_q75",
+    "best_single_lofo_auc": 0.7160751565762005,
+    "descriptor_bundle_lofo_auc": 0.6062309298217441,
+    "reprojection_bundle_lofo_auc": 0.6738397302071624,
+    "all_bundle_lofo_auc": 0.647663401316846,
+    "interpretation": "descriptor margin/entropy and raw/nested reprojection diagnostics do not cleanly separate the rare top16-rescuable carriers across families"
+  },
+  "candidate_multimodality_audit": {
+    "best_single_feature": "all16_spread_q25",
+    "best_single_lofo_auc": 0.8079331941544885,
+    "second_single_feature": "tail_near_head_maxpx_q25",
+    "second_single_lofo_auc": 0.7962100529950217,
+    "multi_plus_reprojection_bundle_lofo_auc": 0.7525293078528987,
+    "interpretation": "spatial candidate multimodality carries substantially more expansion-need signal than score entropy alone, but the 13-positive rare-event sample is too small for a stable family-disjoint expansion classifier"
+  },
+  "scientific_conclusion": "Do not freeze a rare-event expand/not-expand classifier from this panel. Prefer a deterministic retention rule that preserves multiple spatial modes inside a small bounded K, then test whether this recovers the top16 hard-tail coverage without requiring prediction of the rare expansion event.",
+  "next": "preregister diversity-preserving candidate retention arms using the same frozen top16 refined candidate pool; truth remains evaluation-only",
+  "local_exact_result_sha256": {
+    "base_audit": "3d85262c6d2065d175ced80e70c66fd3f58e13930e9d9d34e9210e16c8729ed6",
+    "multimodality_audit": "78039a738f3581f3f5f68ba8c0e0f44486f921717d48722cbfba84ea846144b0"
+  },
+  "local_source_sha256": {
+    "base_audit": "4f6ecae0c0e0ec09f7cc94ccd3848e7de8eab8b9426b52a4250aa18c02a73b58",
+    "multimodality_audit": "ad2aa440cdaac09315d66a1459f1ef384620c571f36c32519477471875f93462"
+  }
+}

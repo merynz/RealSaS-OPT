@@ -1,0 +1,30 @@
+{
+  "schema": "RealSaS.Research.InputManifestPointer.v1",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R4",
+  "full_manifest_sha256": "b5c851cdb6db3463b6abf26c215853f899b16e3154f9f1bbd36541dee9fca600",
+  "full_manifest_size_bytes": 39096,
+  "corpus": {
+    "authority": "GOOGLE_DRIVE",
+    "root_folder_id": "1-qseF9kjusXIN9ftYIuaBkqNMXVHLnIx",
+    "lineage": "multiintervention_corpus_v1",
+    "families": [9908, 11032, 12772, 13203, 14404, 14702, 14758, 15290],
+    "episode": "e00",
+    "observable_raster_count": 128,
+    "observable_raster_set_sha256": "efad989dd8a1929e2a9f49e1e94d7e16eda3aea75ca455a1faa052722e349e2c",
+    "evaluator_sidecar_count": 8,
+    "evaluator_sidecar_set_sha256": "8a4107673e65858378c8f0f11cf74704d372b40c4e2f9f1b11a6ae8605c1b033"
+  },
+  "immutable_source_inputs": {
+    "proof_pack": {"drive_file_id": "15iHg-9gIhEz7tuvtv0BpXVfI61AbBR7f", "sha256": "0e28051cdb1b9f603749a907dd84d022daf44bcabd1bd9ec536d242bb95bf24c"},
+    "hybrid_v11_stagea_bundle": {"drive_file_id": "1DfvrHPLynM3ckITv1bikcoYl3_dnLlKs", "sha256": "e39e3f383a7f9be58003aa4763c7cb4e31d30f26088d288771d0deb7db8a9aa5"}
+  },
+  "mirrors": {
+    "drive": {"file_id": "1SinjTrDXj2zeTyHpSZ3-CKfumeL4mjIA", "sha256_verified": true},
+    "library": {"file_id": "file_000000007e4c81f49c8031b0511d85a3", "library_file_id": "libfile_e842369110048191995367bcfb698578", "sha256_verified": true}
+  },
+  "truth_firewall": "SIDECAR_BYTES_HASHED_FOR_INPUT_IDENTITY_ONLY__SEMANTIC_CONTENT_FORBIDDEN_UNTIL_OBSERVABLE_STATE_FREEZE",
+  "sealed21": "CLOSED",
+  "external10": "CLOSED",
+  "training_or_retune": "FORBIDDEN"
+}

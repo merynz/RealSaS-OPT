@@ -1,1 +1,2 @@
 Temporary marker to trigger the exact persisted N1D V2 source recovery workflow. Do not merge.
+Trigger revision: diagnose persisted bundle SHA mismatch.

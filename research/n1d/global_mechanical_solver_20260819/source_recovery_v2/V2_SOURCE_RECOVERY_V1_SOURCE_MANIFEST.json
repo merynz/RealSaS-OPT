@@ -1,0 +1,40 @@
+{
+  "bundle_zip_sha256": "baf02fe6bd0d115f34a81c0909fbf3e11afd32ec5d7338622a192080e3d1f3df",
+  "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+  "date": "2026-08-20",
+  "drive": {
+    "bundle_zip_file_id": "1SLPAKeZWqcAGe_hFvIveVYDFWuTf8Vgx",
+    "folder_id": "134SOxoijC4njtSfD0bjFT8xbSH82l6UP",
+    "path": "RealSaS_IRIS_N1D_GLOBAL_MECHANICAL_SOLVER_RESEARCH_20260819/V2_SOURCE_RECOVERY_20260820",
+    "source_file_id": "1Yg4fpHcnwjDJ_eOd2ZSXBzZoAR2AXY1X"
+  },
+  "external10": "CLOSED",
+  "github": {
+    "branch": "agent/n1d-v2-source-parity-recovery-20260820",
+    "commit": "295a88bc498ed9ae9ddc26c047f70e05522f0335",
+    "path": "research/n1d/global_mechanical_solver_20260819/source_recovery_v2/global_relational_candidate_solver_v2_exec.RECOVERY_V1.py",
+    "repo": "merynz/RealSaS-OPT"
+  },
+  "historical_outcome_parity_executed": false,
+  "library": {
+    "bundle_file_id": "file_00000000b8b4820aabdafd78167bab06",
+    "bundle_library_file_id": "libfile_5e14d4c628a48191bd0e38ddf565e0c0",
+    "path": "/RealSaS_OPT/N1D_20260819_GLOBAL_MECHANICAL_SOLVER_RESEARCH/V2_SOURCE_RECOVERY_20260820",
+    "source_file_id": "file_0000000062c8820a805ec10c91191cca",
+    "source_library_file_id": "libfile_092e721b6e708191ba174819468ecbac"
+  },
+  "p1_execution_source_sha256": "37852c2151a14e1bbc62d704263c731cc0ef7ad7688d69e3c47301e255858c64",
+  "parent_scientific_authority": "08620737ce526b0c0cc6c551f53910e34a1107fe",
+  "schema": "RealSaS.N1D.V2SourceRecovery.SourceManifest.v1",
+  "sealed21": "CLOSED",
+  "source_bundle_filename": "global_relational_candidate_solver_v2_exec.RECOVERY_V1.py",
+  "source_git_blob_sha1": "677242563e243cb4ded3049351f378b520aecda5",
+  "source_persistence_gate": "PASS",
+  "source_sha256": "578fdddcd17d922603fb463ee1f2cae5b88e0e2c96a850900716abef5e7588be",
+  "static_tests_sha256": "8f0e8a44eed04e51b71e3d0b31e62dfd37005ac0bee827e5dc6139b591e8e303",
+  "verified_copies": {
+    "drive_source_sha256": "578fdddcd17d922603fb463ee1f2cae5b88e0e2c96a850900716abef5e7588be",
+    "library_source_sha256": "578fdddcd17d922603fb463ee1f2cae5b88e0e2c96a850900716abef5e7588be",
+    "local_source_sha256": "578fdddcd17d922603fb463ee1f2cae5b88e0e2c96a850900716abef5e7588be"
+  }
+}

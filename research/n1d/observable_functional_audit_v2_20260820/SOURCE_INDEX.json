@@ -1,0 +1,25 @@
+{
+  "bundle": "REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_SOURCE_20260820.zip",
+  "bundle_sha256": "3bd133e805880ccca2e6a177778e3e931064eb0178da5a2ac5b02c07f1595278",
+  "files": {
+    "README.md": "317803f0dc215974b43cbd519f45addee5712433d5a386a94d8d946d2b500c32",
+    "src/evaluation_phase.py": "f4cef6b247b0797377fd07bf2cfe5683b7ed52b8cf2f006dbcca2b13376039d6",
+    "src/frozen_deps/realsas_gfdr_v2.py": "ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa",
+    "src/frozen_deps/realsas_n1d_hybrid_v11_frozen_runner.py": "ddfd3c989138bb256c2c466e80b914bf89fef1796520d41acc734af0ff577407",
+    "src/frozen_deps/v5_seed_geometry_frozen.py": "6185e0fe7b47fedd19c845aecc95d1b8c80a45c17fa683c9f5caedff4bd7d372",
+    "src/frozen_deps/v8_base_frozen.py": "44fe83a56a588d4f0cb771351497090ca302b173a7c70619ff701fb0ed28b1f0",
+    "src/mechanics_metrics.py": "d10e5caaf3888372648ed160fd25361a21b30d6bff0fc4ceccfb4d8068831ab7",
+    "src/observable_phase.py": "6eea236647e04a5566e93733f35c927639cc6407d4f62db80793edfa7e97dadf",
+    "tests/test_decorator_replay.py": "f1f1459bea965bfa453261c72aeb98132fe0de06bc10e7aa767b62064286ae1d",
+    "tests/test_static.py": "7182f104f8043e0b0015ec009989c0a8c4391dd7ac106c421ee39becdec1d4ae"
+  },
+  "required_tests": [
+    "python tests/test_static.py",
+    "python tests/test_decorator_replay.py --root <raster-root> --baseline <frozen-v11-baseline.npz> --family 9908 --episode e00 --route V8_BASE"
+  ],
+  "schema": "RealSaS.N1D.ObservableFunctionalAuditV2.SourceIndex.v1",
+  "test_results": {
+    "decorator_replay_09908": "PASS",
+    "static": "PASS"
+  }
+}

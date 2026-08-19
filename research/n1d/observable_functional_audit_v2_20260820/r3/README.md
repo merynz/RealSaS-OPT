@@ -28,14 +28,14 @@ This bundle implements a fresh functional-geometry audit from the frozen real ra
    - state-vs-state equivalence NRMS is symmetric, while prediction-vs-truth NRMS is truth-normalized;
    - uses response, co-response, differential, transfer, affinity, and support-aware articulation-locus consequences.
 
-## Frozen dependencies copied byte-for-byte
+## Frozen dependency artifacts
 
-- `realsas_n1d_hybrid_v11_frozen_runner.py`
-- `v8_base_frozen.py`
-- `v5_seed_geometry_frozen.py`
-- `realsas_gfdr_v2.py`
+`prepare_runtime.py` hash-verifies and stages these immutable external source-input artifacts before any inference import occurs:
 
-The model implementation ZIP and checkpoint are external immutable inputs and are recorded by the experiment input manifest.
+- Hybrid V11 Stage-A freeze bundle SHA-256 `e39e3f383a7f9be58003aa4763c7cb4e31d30f26088d288771d0deb7db8a9aa5`, containing the exact frozen runner, V8 and V5 source files;
+- GFDR-V2 source SHA-256 `ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa`.
+
+The N1D model implementation ZIP and checkpoint are also external immutable inputs. All dependency artifacts are recorded by the experiment input manifest; no notebook/local source copy is authoritative.
 
 ## Tests
 

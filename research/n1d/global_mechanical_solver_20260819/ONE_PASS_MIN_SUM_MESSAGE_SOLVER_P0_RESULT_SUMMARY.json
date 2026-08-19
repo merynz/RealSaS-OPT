@@ -1,0 +1,40 @@
+{
+  "schema": "RealSaS.N1D.OnePassMinSumMessageSolverP0.ResultSummary.v1",
+  "date": "2026-08-19",
+  "prereg_commit": "a1169be16dea0b706a179c59c979770b0ae06347",
+  "verdict": "ONE_PASS_MIN_SUM_MESSAGE_SOLVER_P0_FAIL",
+  "parity": {
+    "all": true,
+    "m256_reliable_den": 492,
+    "m256_pooled_primary2x": 0.975609756097561,
+    "m256_worst_family_primary2x": 0.9322033898305084,
+    "primary_n": 261,
+    "u_only_contain2": 0.6781609195402298
+  },
+  "primary": {
+    "U_ONLY": {"contain1": 0.3716475095785441, "contain2": 0.6781609195402298, "worst_family_contain2": 0.28, "median_norm_err": 1.3179303569635419},
+    "HARD_U_LOCAL": {"contain1": 0.4559386973180077, "contain2": 0.7969348659003831, "worst_family_contain2": 0.32, "median_norm_err": 1.1167521957217925},
+    "MIN_SUM_P0": {"contain1": 0.47126436781609193, "contain2": 0.7777777777777778, "worst_family_contain1": 0.12, "worst_family_contain2": 0.4, "median_norm_err": 1.0715530716411676, "p90_norm_err": 3.2454769360704203, "best_worst_gap": 0.5772727272727273,
+      "per_family_contain2": {"9908": 0.9333333333333333, "11032": 0.4, "12772": 0.8181818181818182, "13203": 0.6388888888888888, "14404": 0.5625, "14702": 0.9772727272727273, "14758": 0.9696969696969697, "15290": 0.8}}
+  },
+  "secondary": {
+    "U_ONLY_contain2": 0.7958333333333333,
+    "MIN_SUM_P0_contain1": 0.6104166666666667,
+    "MIN_SUM_P0_contain2": 0.8666666666666667,
+    "MIN_SUM_P0_worst_family_contain2": 0.6727272727272727,
+    "MIN_SUM_P0_median_norm_err": 0.8627025949975373
+  },
+  "gains_vs_u_only": {
+    "pooled_primary_contain2": 0.09961685823754796,
+    "worst_family_contain2": 0.12,
+    "11032": 0.12,
+    "13203": 0.02777777777777768,
+    "15290": 0.10000000000000009,
+    "secondary_contain2": 0.07083333333333341
+  },
+  "gates": {"absolute": false, "causal_pool": true, "hardtail_causal": true, "causal": true, "safety": true},
+  "provenance": {
+    "execution_source_sha256": "d7bbb2a7da35a245eaa894454686e71598f5cfceed5c17dedcf765c8012ef0f1",
+    "full_local_result_sha256": "9eb269ba9433fcd4df382f94532edd27d7f8143894089bab40584285439e583c"
+  }
+}

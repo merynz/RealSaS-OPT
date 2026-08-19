@@ -1,0 +1,15 @@
+{
+  "schema":"RealSaS.N1D.LocalDifferentialRelationSeparability.v1",
+  "date":"2026-08-19",
+  "prereg_commit":"2f94f42127e4efde0b0483e90e7887997c3332bf",
+  "decision":"R_REL_DIS",
+  "R_DISP":{"n":633,"median_percentile":0.013671875,"frac_le25":0.9494470774091627,"frac_le10":0.8404423380726699,"worst_family_median":0.06640625,"worst_family_frac_le25":0.9,"hardtail_11032_median":0.0087890625,"hardtail_13203_median":0.02099609375,"hardtail_15290_median":0.001953125,"AA_median":0.0107421875,"AI_median":0.0380859375,"gate":true},
+  "R_RIGID":{"n":633,"median_percentile":0.0537109375,"frac_le25":0.8483412322274881,"frac_le10":0.6793048973143759,"worst_family_median":0.1328125,"worst_family_frac_le25":0.7345132743362832,"hardtail_11032_median":0.05224609375,"hardtail_13203_median":0.0576171875,"hardtail_15290_median":0.009765625,"gate":true},
+  "R_REL_DIS":{"n":603,"median_percentile":0.0146484375,"frac_le25":0.9303482587064676,"frac_le10":0.8059701492537313,"worst_family_median":0.052490234375,"worst_family_frac_le25":0.8461538461538461,"hardtail_11032_median":0.013671875,"hardtail_13203_median":0.037109375,"hardtail_15290_median":0.001953125,"AA":{"n":520,"median_percentile":0.01171875,"frac_le25":0.9423076923076923},"AI":{"n":83,"median_percentile":0.064453125,"frac_le25":0.8554216867469879},"per_family_median":{"9908":0.052490234375,"11032":0.013671875,"12772":0.02880859375,"13203":0.037109375,"14404":0.0263671875,"14702":0.0341796875,"14758":0.03173828125,"15290":0.001953125},"gate":true},
+  "R_REL_TRANSPORT":{"n":603,"median_percentile":0.01953125,"frac_le25":0.9021558872305141,"worst_family_median":0.08056640625,"hardtail_11032_median":0.0205078125,"hardtail_13203_median":0.0234375,"hardtail_15290_median":0.00244140625,"gate":true},
+  "R_REL_DELTA3D":{"n":603,"median_percentile":0.0146484375,"frac_le25":0.9320066334991708,"worst_family_median":0.0546875,"hardtail_11032_median":0.01513671875,"hardtail_13203_median":0.0341796875,"hardtail_15290_median":0.0029296875,"gate":true},
+  "R_REL_FUSION":{"n":603,"median_percentile":0.0126953125,"frac_le25":0.9419568822553898,"frac_le10":0.8258706467661692,"worst_family_median":0.0400390625,"worst_family_frac_le25":0.8703703703703703,"hardtail_11032_median":0.009765625,"hardtail_13203_median":0.0244140625,"hardtail_15290_median":0.001953125,"AA_median":0.009765625,"AI_median":0.05859375,"gate":true},
+  "scientific_conclusion":{"pairwise_local_relation":"STRONGLY_SEPARABLE_ACROSS_ALL_8_FAMILIES","selected_relation":"R_REL_DIS_BY_PREREG_SIMPLICITY_RULE","interpretation":"correct H candidates are ambiguous in isolation but become strongly identifiable through local carrier-to-carrier differential/mechanical relations","architecture":"remove standalone amplitude authority; use p_active + set-valued H + local relational factors + global compiler/solver","next":"separately preregister discrete/global solver with relation frozen; do not tune relation and solver together"},
+  "local_exact_aggregate_sha256":"613c9fec4ac1428fb41e200005f6839a7ab457b4161e0e1feace5e118390aaef",
+  "local_exact_source_sha256":"88a71b50c5f0c1d12240b19fb2895ff7bdc8119fa022970a433e71e0a977f7b6"
+}

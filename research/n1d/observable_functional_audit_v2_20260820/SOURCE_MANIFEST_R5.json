@@ -1,0 +1,65 @@
+{
+  "schema": "RealSaS.Research.SourceManifest.v3",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R5",
+  "status": "SOURCE_THREE_STORE_PASS",
+  "source_bundle": {
+    "filename": "REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_SOURCE_R5_20260820.zip",
+    "sha256": "a14cb7f2ac425689b526415862050f09d7cb66a560bb17c1555fe82092f5cd40",
+    "size_bytes": 14270
+  },
+  "github": {
+    "repository": "merynz/RealSaS-OPT",
+    "branch": "agent/n1d-observable-functional-audit-v2-20260820",
+    "authority_mode": "BASE_COMMIT_PLUS_CONTENT_ADDRESSED_OVERLAYS",
+    "base_source_commit": "a36133e6d97d7f848ce7b8cddcb43b6067e23596",
+    "base_source_root": "research/n1d/observable_functional_audit_v2_20260820/r3",
+    "overlays": {
+      "src/evaluation_phase.py": {
+        "repository_path": "research/n1d/observable_functional_audit_v2_20260820/r5_overlay/evaluation_phase.py",
+        "sha256": "98cb22055763622cd49f6856bd7e53084784535452a29891856138996ecedc8c",
+        "git_blob_sha1": "c0ab36b03383026d431838ef66667aa683e459e8"
+      },
+      "tests/test_imports.py": {
+        "repository_path": "research/n1d/observable_functional_audit_v2_20260820/r5_overlay/test_imports.py",
+        "sha256": "d2c4c891346460568dcc7697872c6e1a3a9231e8e91a2e7d901160d7ba7c3d6d",
+        "git_blob_sha1": "8bff6f0aaa01eddefbf4837ccc6946e621469405"
+      }
+    }
+  },
+  "first_party_files": {
+    "README.md": {"sha256": "c74c8aa8c274d6b50cfa5ceb0441f9b9253e482b0eceaba6f390cb972f06381c", "git_blob_sha1": "6e66ede19bdd2c725f0fddfade60c57258e7ab0f"},
+    "src/observable_phase.py": {"sha256": "6eea236647e04a5566e93733f35c927639cc6407d4f62db80793edfa7e97dadf", "git_blob_sha1": "5654c038f0d00d5a7e519561b1864970b9338494"},
+    "src/mechanics_metrics.py": {"sha256": "0164d0f6519c38ba6b9fd0f271f6794e13973418a00cbb8b4b721f4b1b670511", "git_blob_sha1": "6fe51aa5a6a29eca71e70373cd14691352ecdd68"},
+    "src/evaluation_phase.py": {"sha256": "98cb22055763622cd49f6856bd7e53084784535452a29891856138996ecedc8c", "git_blob_sha1": "c0ab36b03383026d431838ef66667aa683e459e8"},
+    "src/prepare_runtime.py": {"sha256": "a194d60123e314ee5a5281cee37be35b60cfcc318054d135f636ca5326b88783", "git_blob_sha1": "d070f3f80a68623ec1948019efc73f69eab30d98"},
+    "tests/test_static.py": {"sha256": "a82b2e13b3fc51c74fad3ef02da0fc0f41ca79e2791d3d0ba351f55d51415d1e", "git_blob_sha1": "af2388f91fd1942a12291b4129cfd0bc779d87c4"},
+    "tests/test_decorator_replay.py": {"sha256": "f1f1459bea965bfa453261c72aeb98132fe0de06bc10e7aa767b62064286ae1d", "git_blob_sha1": "22412457668c0822bb07c354e639fbfc48d25e17"},
+    "tests/test_imports.py": {"sha256": "d2c4c891346460568dcc7697872c6e1a3a9231e8e91a2e7d901160d7ba7c3d6d", "git_blob_sha1": "8bff6f0aaa01eddefbf4837ccc6946e621469405"}
+  },
+  "immutable_source_inputs": {
+    "n1d_canonical_source_zip_sha256": "230fac37ae52ae234437a017ef7ec88bfa865410d294fd840976a6c4e47ea65b",
+    "hybrid_v11_stagea_source_bundle_sha256": "e39e3f383a7f9be58003aa4763c7cb4e31d30f26088d288771d0deb7db8a9aa5",
+    "gfdr_v2_source_sha256": "ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa"
+  },
+  "tests": {
+    "static": "PASS",
+    "import_smoke": "PASS",
+    "decorator_replay_09908": "PASS",
+    "decorator_replay_V_B": "BIT_EXACT",
+    "decorator_replay_N_B_max_abs": "<=1e-7"
+  },
+  "mirrors": {
+    "drive": {
+      "file_id": "1ACh9GbqnRGJIqXRgPIzsKs2Ve8Jtw6YM",
+      "path": "/Google Drive/RealSaS_IRIS_N1D_GLOBAL_MECHANICAL_SOLVER_RESEARCH_20260819/REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_SOURCE_R5_20260820.zip",
+      "roundtrip_sha256_verified": true
+    },
+    "library": {
+      "file_id": "file_000000004bf281f4b08d759a610f2112",
+      "path": "/RealSaS_OPT/N1D/OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820/REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_SOURCE_R5_20260820.zip",
+      "roundtrip_sha256_verified": true
+    }
+  },
+  "scientific_change_from_R4": "NONE__PYTHON_3_13_DYNAMIC_IMPORT_COMPATIBILITY_ONLY"
+}

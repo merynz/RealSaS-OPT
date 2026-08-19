@@ -1,0 +1,53 @@
+name: Verify N1D V2 recovery bundle
+
+on:
+  pull_request:
+    branches: [agent/n1d-v2-source-parity-recovery-20260820]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/n1d-v2-source-parity-recovery-20260820
+      - name: Reassemble and verify exact Recovery V2 bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=research/n1d/global_mechanical_solver_20260819/source_recovery_v2
+          PARTS="$ROOT/source_bundle_v2_b64/global_relational_candidate_solver_v2_exec.RECOVERY_V2.py.b64.part"
+          cat ${PARTS}00 ${PARTS}01 ${PARTS}02 ${PARTS}03 ${PARTS}04 ${PARTS}05 ${PARTS}06 ${PARTS}07 > /tmp/v2.b64
+          echo 'e1e3712f273f860102631892fc25445548821ebae9ea8195f78ba5f04dd24ec4  /tmp/v2.b64' | sha256sum -c -
+          base64 -d /tmp/v2.b64 > /tmp/global_relational_candidate_solver_v2_exec.RECOVERY_V2.py
+          echo '0747bf3754443053fa5a992f03df4cacddc95f75969572fe4de11253f1e441b4  /tmp/global_relational_candidate_solver_v2_exec.RECOVERY_V2.py' | sha256sum -c -
+          python -m py_compile /tmp/global_relational_candidate_solver_v2_exec.RECOVERY_V2.py
+      - name: Verify V1 to V2 diff is local-scale only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import base64, difflib, hashlib
+          root=Path('research/n1d/global_mechanical_solver_20260819/source_recovery_v2')
+          v1=(root/'global_relational_candidate_solver_v2_exec.RECOVERY_V1.py').read_text()
+          b64=''.join((root/'source_bundle_v2_b64'/f'global_relational_candidate_solver_v2_exec.RECOVERY_V2.py.b64.part{i:02d}').read_text() for i in range(8))
+          v2=base64.b64decode(b64).decode()
+          ud=''.join(difflib.unified_diff(v1.splitlines(True),v2.splitlines(True),fromfile='RECOVERY_V1.py',tofile='RECOVERY_V2.py'))
+          got=hashlib.sha256(ud.encode()).hexdigest()
+          exp='8fc54ca574dcaf0b103ccac9c0a2073aca9af8781ebbb60be2f83970855e9a0e'
+          print(ud)
+          print('DIFF_SHA256',got)
+          if got != exp:
+              raise SystemExit('V1_TO_V2_DIFF_GUARD_FAIL')
+          PY
+      - name: Upload verified decoded source
+        uses: actions/upload-artifact@v4
+        with:
+          name: n1d-v2-recovery-v2-verified-source
+          path: /tmp/global_relational_candidate_solver_v2_exec.RECOVERY_V2.py
+          retention-days: 1
+          if-no-files-found: error

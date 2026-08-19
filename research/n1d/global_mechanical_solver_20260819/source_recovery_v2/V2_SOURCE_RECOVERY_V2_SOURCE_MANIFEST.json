@@ -1,0 +1,65 @@
+{
+  "schema": "RealSaS.N1D.V2SourceRecovery.SourceManifest.v2",
+  "date": "2026-08-20",
+  "parent_scientific_authority": "08620737ce526b0c0cc6c551f53910e34a1107fe",
+  "source_sha256": "0747bf3754443053fa5a992f03df4cacddc95f75969572fe4de11253f1e441b4",
+  "source_bytes": 21972,
+  "source_bundle_filename": "REALSAS_N1D_V2_SOURCE_RECOVERY_V2_BUNDLE_20260820.zip",
+  "source_bundle_zip_sha256": "9666a25a4dbbbaa7bc78612fc0d958da2c9ee892ba6bd8a71724f2686fea4b6b",
+  "static_tests_sha256": "21c9feb07f7388a3c272d793ba68425f5a599ca893abc39a820470086b06d599",
+  "reconstruction_note_sha256": "227ec7615673125527feadd52f9255011db00d98eb5514b9f5c87b2c05e43a46",
+  "v1_to_v2_diff_sha256": "8fc54ca574dcaf0b103ccac9c0a2073aca9af8781ebbb60be2f83970855e9a0e",
+  "independent_evidence": {
+    "name": "realsas_gfdr_v2.py",
+    "sha256": "954302fa7962841179521a49e8c989e44535138f0d733f7cd4d76746062593b0",
+    "original_library_file_id": "file_00000000067c824684daaed9c0e7bd8d",
+    "created_at_utc": "2026-08-17T04:43:10.402819+00:00",
+    "mirrored_drive_file_id": "1jdMDfIdFSjrSfj1FDGCKLF1I8tuDsX9V",
+    "mirrored_library_file_id": "file_000000008798820a8cf7b31eec625e69",
+    "rule": "GFDRV2Config.k_neighbors=12; exclude self; per-point median kNN distance; positive global-median fallback"
+  },
+  "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+  "p1_execution_source_sha256": "37852c2151a14e1bbc62d704263c731cc0ef7ad7688d69e3c47301e255858c64",
+  "github": {
+    "repo": "merynz/RealSaS-OPT",
+    "branch": "agent/n1d-v2-source-parity-recovery-20260820",
+    "commit": "fe4c3c3c2d44d824d929c889bf17b925680b3a0e",
+    "source_bundle_directory": "research/n1d/global_mechanical_solver_20260819/source_recovery_v2/source_bundle_v2_b64",
+    "bundle_manifest_path": "research/n1d/global_mechanical_solver_20260819/source_recovery_v2/RECOVERY_V2_B64_PARTS_MANIFEST.json",
+    "verification_workflow_path": ".github/workflows/verify-n1d-v2-source-recovery-bundle.yml",
+    "ci_run_id": 32307397649,
+    "ci_artifact_id": 9385179953,
+    "ci_conclusion": "success",
+    "base64_sha256": "e1e3712f273f860102631892fc25445548821ebae9ea8195f78ba5f04dd24ec4"
+  },
+  "drive": {
+    "folder_id": "1WWQMDyXSlK6ShAiCJlGO_zuC5Pqn93Ej",
+    "source_file_id": "1u9dZatRBukzwozwnIvyzQg6-lrLjC7IS",
+    "static_tests_file_id": "1c3pCdczNDGBr6Ma2S1wlcctUNwxN_dVv",
+    "reconstruction_note_file_id": "1gFZcem_AkTvHP7toZfMxAyDKNsbcf0A7",
+    "bundle_zip_file_id": "1Z8aR4Zghhkc_hcSB1jPD5ynXNvWcLzV9",
+    "path": "RealSaS_IRIS_N1D_GLOBAL_MECHANICAL_SOLVER_RESEARCH_20260819/V2_SOURCE_RECOVERY_20260820/RECOVERY_V2"
+  },
+  "library": {
+    "path": "/RealSaS_OPT/N1D_20260819_GLOBAL_MECHANICAL_SOLVER_RESEARCH/V2_SOURCE_RECOVERY_20260820/RECOVERY_V2",
+    "source_file_id": "file_00000000c6b08243b668bb6a74381c64",
+    "source_library_file_id": "libfile_70667345b3848191a5e38884ec3fbd2d",
+    "static_tests_file_id": "file_000000008728820a828b12e06312ea38",
+    "reconstruction_note_file_id": "file_0000000047d4820a8c9791012f38bb89",
+    "bundle_file_id": "file_00000000a74c820a8f640a8ba22e17e5",
+    "bundle_library_file_id": "libfile_adb3bbf10c2881919bd23087e064c56b"
+  },
+  "verified_copies": {
+    "local_source_sha256": "0747bf3754443053fa5a992f03df4cacddc95f75969572fe4de11253f1e441b4",
+    "github_ci_decoded_source_sha256": "0747bf3754443053fa5a992f03df4cacddc95f75969572fe4de11253f1e441b4",
+    "drive_source_sha256": "0747bf3754443053fa5a992f03df4cacddc95f75969572fe4de11253f1e441b4",
+    "library_source_sha256": "0747bf3754443053fa5a992f03df4cacddc95f75969572fe4de11253f1e441b4",
+    "github_artifact_byte_equal_local": true,
+    "drive_byte_equal_local": true,
+    "library_byte_equal_local": true
+  },
+  "source_persistence_gate": "PASS",
+  "historical_outcome_parity_executed": false,
+  "sealed21": "CLOSED",
+  "external10": "CLOSED"
+}

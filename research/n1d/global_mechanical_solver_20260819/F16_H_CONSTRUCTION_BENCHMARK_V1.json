@@ -1,0 +1,16 @@
+{
+  "schema":"RealSaS.N1D.F16HConstructionBenchmark.v1",
+  "date":"2026-08-19",
+  "status":"OPEN_DEVELOPMENT_EXECUTION_DIAGNOSTIC",
+  "scope":"pairwise rank-sufficient H construction only from already-precomputed per-view top16 candidates; excludes neural/model forward, descriptor search, evaluator and compiler scoring",
+  "panel_families":[9908,11032,12772,13203,14404,14702,14758,15290],
+  "carriers":512,
+  "total_seconds":0.16967573700094363,
+  "milliseconds_per_carrier":0.331397923829968,
+  "milliseconds_per_64_carrier_episode":21.209467125117953,
+  "mean_H_hypotheses":2146.396484375,
+  "median_H_hypotheses":1536.0,
+  "p95_H_hypotheses":4608.0,
+  "total_H_hypotheses":1098955,
+  "interpretation":"F16 pairwise H materialization is not a research-stage compute blocker in the current vectorized CPU implementation. This does not claim full product inference latency."
+}

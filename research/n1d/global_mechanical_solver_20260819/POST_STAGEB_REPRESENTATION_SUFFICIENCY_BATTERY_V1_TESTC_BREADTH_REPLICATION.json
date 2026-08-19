@@ -1,0 +1,38 @@
+{
+  "schema": "RealSaS.N1D.PostStageB.RepresentationSufficiencyBattery.TestC.CandidateBreadthReplication.v1",
+  "date": "2026-08-19",
+  "status": "TRUTH_OPEN_DEVELOPMENT_RESULT__NOT_QUALIFICATION",
+  "prereg_commit": "85139f87da7d510d581535d73e066f16a325a1cd",
+  "families": {
+    "11032": {
+      "baseline_top4_primary_2x": 0.847457627118644,
+      "retention_top16_primary_2x": 0.9491525423728814,
+      "retention_top16_strict_1x": 0.864406779661017,
+      "broader_coarse32_top16_primary_2x": 0.9491525423728814,
+      "median_top16_H_count": 1536.0
+    },
+    "15290": {
+      "baseline_top4_primary_2x": 0.9016393442622951,
+      "baseline_top4_strict_1x": 0.8360655737704918,
+      "retention_top16_primary_2x": 1.0,
+      "retention_top16_strict_1x": 0.9836065573770492,
+      "broader_coarse32_top16_primary_2x": 1.0,
+      "median_top16_H_count": 3328.0
+    },
+    "14702": {
+      "baseline_top4_primary_2x": 1.0,
+      "baseline_top4_strict_1x": 0.9365079365079365,
+      "retention_top16_primary_2x": 1.0,
+      "retention_top16_strict_1x": 1.0,
+      "broader_coarse32_top16_primary_2x": 1.0,
+      "median_top16_H_count": 1536.0
+    }
+  },
+  "cross_family_observation": {
+    "retention_only_recovers_historical_hard_tails": true,
+    "broader_coarse_search_additional_gain_observed": false,
+    "interpretation": "Across the old worst families tested, target-near descriptor evidence is already in the baseline coarse-top8 refined pool. Current final-top4 truncation discards it. Retaining top16 fixes 11032 above the prereg 0.90 line and drives 15290 to 1.0 without changing model weights or adding an observable channel."
+  },
+  "architectural_implication": "Candidate/mechanical representation must remain more set-valued through the compiler boundary. A fixed top4 collapse is not hard-tail sufficient. The next design task is bounded uncertainty-aware pruning/coverage, not a larger image backbone by default.",
+  "boundary": "These three families localize the failure mechanism but do not yet constitute the complete broad-panel Test-C rerun for a revised top16/bounded-set contract. Current top4 representation remains RED; revised set-valued representation remains to be fully qualified in truth-open development."
+}

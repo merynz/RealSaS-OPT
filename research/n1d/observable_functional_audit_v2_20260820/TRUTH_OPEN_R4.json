@@ -1,0 +1,24 @@
+{
+  "schema": "RealSaS.Research.TruthOpen.v1",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R4",
+  "opened_at_utc": "2026-08-19T23:49:03Z",
+  "observable_state_pointer_commit": "3f08ab79b1b1f1d01d2d3371cefd6c4bbeeb2ae9",
+  "observable_state_bundle_sha256": "a4f7f9ce1b4f6d7858be4932a055e7509391d3516e8ad396b50b4332147e443f",
+  "observable_state_manifest_sha256": "ba487f0ec8af931abc76fd5fee5c36c4850dbb0ae2adb4bb07fa1d49087074d1",
+  "prereg_sha256": "b692311dd5a27ad22a13fa7b178b535fc41ca67532d07089ce071aaafefad29f",
+  "sidecar_byte_identity_preopen": "PASS_8_OF_8",
+  "result_path_preopen": "ABSENT",
+  "allowed_truth_use": [
+    "carrier-to-evaluator-surface mapping",
+    "reliable-active-baseline-hard witness definition",
+    "nearest existing H candidate selection as evaluator counterfactual",
+    "baseline/counterfactual scoring"
+  ],
+  "forbidden_truth_use": [
+    "teacher-created candidate XYZ",
+    "teacher N_B in counterfactual forward mechanics",
+    "teacher V_B in counterfactual forward mechanics",
+    "solver retune or training"
+  ]
+}

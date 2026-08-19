@@ -1,7 +1,7 @@
 # RealSaS N1D — Canonical Research Status
 
 **Date:** 2026-08-19  
-**Current canonical state:** `REPRESENTATION_SUFFICIENCY_SUPPORTED_FOR_REVISED_SET_VALUED_FACTORIZED_CONTRACT__SMALL_HEAD_AUTHORIZED__BIG_TRAINING_NOT_AUTHORIZED`  
+**Current canonical state:** `REPRESENTATION_V2_SUPPORTED__ADAPTIVE_H_V1_FAIL__F16_SAFE_REFERENCE__UNCERTAINTY_TRIGGER_REDESIGN_REQUIRED__FACTOR_HEAD_EXECUTION_PAUSED__BIG_TRAINING_FORBIDDEN`  
 **Frozen Stage-B authority:** `STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE`
 
 ## Qualification boundary
@@ -9,107 +9,28 @@
 - Stage A remains **PASS**.
 - Frozen Stage B remains **FAIL/no-retune**; its primary F-activity was `0.433160 < 0.50` while the other principal geometry/mechanics metrics passed.
 - Stage-B truth is truth-open development evidence only and cannot be reused as blind qualification.
-- sealed21 / external10 remain CLOSED.
+- sealed21 / external10 remain **CLOSED**.
 - Any future blind qualification requires a **new untouched preregistered panel**.
 
-## Representation sufficiency battery V1
+## Representation sufficiency remains supported
 
-Canonical decision: `REPRESENTATION_SUFFICIENCY_SUPPORTED_FOR_REVISED_SET_VALUED_FACTORIZED_CONTRACT`.
+Canonical sufficiency decision:
 
-This is a truth-open scientific sufficiency decision, **not** a product or qualification PASS.
+`REPRESENTATION_SUFFICIENCY_SUPPORTED_FOR_REVISED_SET_VALUED_FACTORIZED_CONTRACT`
 
-### Test C — current compact candidate contract
+The fixed early top4 contract is permanently falsified on the truth-open broad e00 panel. The revised set-valued representation remains supported:
 
-The current fixed-top4 global-foreground `H_i` contract is **RED** on the broad 8-family e00 panel.
+- fixed top4 H: pooled primary-2x `.93902`, worst family `.84746`, only `6/8` families >= `.90` — **RED**;
+- same-pool top16 H: pooled `.98171`, worst `.94915`, `8/8` >= `.90`, gap `5.08pp` — **GREEN development reference**;
+- representation-conditioned oracle constrained to revised H: F activity `.94033`, F kernel `.93813`, D `.15481`, R `.11745`, G direction `.96670`, G line `.04074` — **6/6 principal gates PASS**;
+- carrier collision audit found no both-moving >3x amplitude or direction-cos<.5 collision in the closest tail; remaining collision class is active/non-active and is localized to planned `p_active`;
+- family-disjoint raster-derived activity/amplitude ordering signal remains present.
 
-Across `492/512` reliably mapped carriers:
-
-- pooled primary 2x containment: `0.93902`
-- `11032`: `0.84746`
-- `13203`: `0.86885`
-- families >=0.90: `6/8`
-- best–worst gap: `15.25 pp`
-
-Failure localization shows the dominant miss occurs before downstream H selection: target-near descriptor evidence is discarded by final top4 retention.
-
-**Fixed early top4 collapse is forbidden by this evidence.**
-
-### Test C' — revised set-valued contract
-
-Preregistered retention-only counterfactual changes only final retention `top4 -> top16`; coarse top8, refined pixel pool, model and descriptor remain frozen.
-
-Broad 8-family result:
-
-- pooled primary 2x containment: `483/492 = 0.98171`
-- worst family: `0.94915`
-- families >=0.90: `8/8`
-- best–worst gap: `5.08 pp`
-- pooled strict 1x containment: `0.94919`
-
-Hard tails recover without new model evidence:
-
-- `11032: 0.84746 -> 0.94915`
-- `13203: 0.86885 -> 0.95082`
-- `15290: 0.90164 -> 1.00000`
-
-Broader coarse search (`8 -> 32`, final16) adds little; only `14758` gains primary coverage (`0.98387 -> 1.00000`). Dominant issue is premature truncation, with occasional coarse-beam narrowness secondary.
-
-**Revised set-valued Test C is GREEN on 8/8 e00 families.**
-
-### Test A — representation-conditioned oracle
-
-Oracle may select only an endpoint already present inside revised top16 `H_i`; no free truth XYZ is injected.
-
-Broad 8-family median GFDR:
-
-- F activity `0.94033`
-- F kernel `0.93813`
-- D `0.15481`
-- R `0.11745`
-- G direction `0.96670`
-- G line `0.04074`
-
-**6/6 principal gates PASS.** Tail values remain above gate: minimum family F activity `0.69840`, minimum family G direction `0.74245`, maximum family G line `0.06935`; no H is empty.
-
-**Test A = GREEN on revised 8-family e00 panel.**
-
-### Test B — carrier collision audit
-
-Representation distance uses revised H summaries + descriptor Z + P_A/N_A/V_A + frozen current differential/log-amplitude + descriptor margin/spread/entropy/support. Cross-family nearest-neighbor only.
-
-Closest 5%:
-
-- material collision fraction `0.14815`
-- motion-state mismatch `0.14815`
-- both-moving amplitude ratio >3x: `0`
-- both-moving direction cosine <0.5: `0`
-
-Closest 10% is similar (`0.15385`) and again entirely motion-state mismatch.
-
-Under the prereg rules **Test B = AMBER, not RED**. No new unresolved amplitude/direction equivalence-class collision appears. The remaining class is the already-planned explicit `p_active` factor.
-
-### Test D — family-disjoint learnability
-
-Episode-level canonical open-development population: `232` episodes / `29` families.
-
-- p_active proxy AUROC `0.97411`
-- multifeature active log-amp LOFO Spearman `0.84524`
-- naive multifeature fusion can collapse a held-out family (`12832 = -0.10714`)
-- but frozen raw amplitude evidence has `12832 = +0.78571`, aggregate `0.87594`, median family `0.85714`, minimum family `0.50`, **29/29 >=0.50**, no negative family.
-
-Carrier-level p_active LOFO on the 8-family panel, using only frozen current log-amplitude:
-
-- overall AUROC `0.92948`
-- minimum family AUROC `0.89247`
-- no repeated family ordering collapse.
-
-Fixed probability threshold calibration is nonuniform; `p_active` therefore requires explicit calibration/confidence/coverage semantics.
-
-## Final supported representation
+The supported representation remains:
 
 ```text
 P_A
-P_B_geom / bounded set-valued H_i
+bounded set-valued H_i / P_B_geom
 N_A, N_B
 V_A, V_B
 Z
@@ -117,56 +38,106 @@ p_active
 log_amp
 dir
 U_pred
-+ typed U_obs:
-  reprojection_error
-  view_support
-  triangulation_condition
-  feasible_set_width
-  match_margin
-  candidate_multimodality
-  cycle_error
++ typed U_obs
 ```
 
-Authority:
+Authority split:
 
 ```text
-bounded set-valued H_i              -> physical XYZ authority
-p_active                             -> absolute motion/non-motion authority
-log_amp                              -> conditional magnitude/ranking evidence
-dir                                  -> direction evidence
-U / margin / multimodality / support -> bounded retention, adaptive search, abstention
-compiler/global solver               -> final collapse after global consistency
+bounded H_i                         -> physical XYZ authority
+p_active                            -> absolute motion/non-motion authority
+log_amp                             -> conditional magnitude/ranking evidence
+dir                                 -> direction evidence
+U / margin / multimodality/support -> retention / expansion / abstention
+compiler/global solver              -> final collapse after global consistency
 ```
 
-## What the battery falsified
+## Representation Contract V2
 
-- fixed early top4 collapse;
-- aggregate success as proof of tail sufficiency;
-- unrestricted multifeature fusion as automatically beneficial;
-- one head simultaneously owning activity, amplitude, direction and XYZ;
-- the need to invent a free XYZ motion head to solve the observed tail.
+Frozen open-development interface:
 
-## What the battery supports
+- file: `REPRESENTATION_CONTRACT_V2.md`
+- commit: `9fa5484f162ba863f4522e4e5afb851c8fedabe2`
 
-The paired raster/frozen descriptor evidence tested here contains the required hard-tail geometry and motion-order information **when hypotheses are preserved rather than prematurely collapsed**. The user’s concern about majority-success hiding hard-tail failure was correct; the failure is real but localized.
+Fixed early top4, free XYZ motion authority, truth-conditioned retention and unrestricted factor fusion remain forbidden.
 
-The current evidence supports this statement:
+`K=16` is a demonstrated safety reference, **not** a permanent product constant.
 
-> The representation class is sufficiently informative on the tested truth-open development panels, provided it remains set-valued and factorized. The demonstrated failures come from hypothesis truncation, fusion and calibration, not from a demonstrated absence of raster information.
+## Adaptive Hypothesis Retention V1
 
-This is sufficiency support, not a guarantee of unseen-domain generalization.
+Prereg:
 
-## Next authorized work
+- file: `ADAPTIVE_HYPOTHESIS_RETENTION_V1_PREREG.md`
+- commit: `3953c7c34540e3fc37386fd8c11a39fad0505d52`
 
-1. Freeze a **bounded uncertainty-aware set-valued candidate contract**. Top16 is the demonstrated safe development reference, not necessarily the final fixed K. Use margin/multimodality/view-support to retain/expand only where ambiguity requires it.
-2. Train/evaluate the **small strict family/episode-disjoint `p_active + log_amp` head** with explicit amplitude ranking loss, motion-state supervision and calibration/coverage. No free XYZ authority.
-3. Keep direction and geometry authority separated.
-4. Only after the revised contract + small factor head are frozen should a new untouched preregistered qualification panel be opened.
+Canonical result:
 
-**Large/end-to-end architecture training remains NOT AUTHORIZED at this point.**
+`FAIL__NO_COMPACT_ADAPTIVE_CONTRACT_PASSES__KEEP_F16_REFERENCE`
 
-## Canonical decision artifact
+### Arm summary
 
+| Arm | Pooled 2x | Worst family | 8-family >=.90 | Gap | Mean K | Median K | K16 frac | Coverage | Efficiency |
+|---|---:|---:|---:|---:|---:|---:|---:|---|---|
+| F4 | .93902 | .84746 | 6/8 | 15.25pp | 4.00 | 4 | 0 | FAIL | PASS |
+| F8 | .95528 | .88136 | 6/8 | 11.86pp | 8.00 | 8 | 0 | FAIL | PASS |
+| F16 | **.98171** | **.94915** | **8/8** | **5.08pp** | 16.00 | 16 | 1.00 | **PASS** | FAIL |
+| A1 descriptor adaptive | .96951 | .89831 | 7/8 | 10.17pp | 9.38 | 8 | .331 | FAIL | **PASS** |
+| A2 descriptor + geometry | .97358 | .91525 | **8/8** | 8.47pp | 11.93 | 16 | .566 | FAIL | FAIL |
+
+### Interpretation
+
+- `K=8` is not a safe compact replacement for F16.
+- descriptor margin/entropy alone is too weak on hard-tail family `11032`;
+- raw multiview reprojection/pair-support escalation improves the tail but is not selective enough: it still misses the `.94` worst-family gate while expanding many easy carriers to K16;
+- Adaptive V1 therefore fails **compression**, not representation sufficiency.
+
+Current safety contract is fixed F16 while a better observation-only uncertainty trigger is identified.
+
+## Current required experiment — Expansion-Need Separability Audit
+
+Before factor-head training, define evaluator-only:
+
+```text
+NEEDS_EXPANSION = F8 misses primary-2x AND F16 contains primary-2x
+```
+
+Truth is allowed only to create this truth-open diagnostic label. Candidate trigger features remain observation-only.
+
+Audit strict family-disjoint separability of at least:
+
+```text
+margin4
+margin8
+entropy16
+F4/F8 reprojection residual
+relative reprojection improvement F4 -> F8
+selected endpoint shift F4 -> F8
+normalized pair/support count
+H width / multimodality
+cross-view disagreement
+```
+
+The goal is a self-normalized uncertainty signal that detects top16-rescuable carriers without expanding most easy carriers. Then preregister **Adaptive Hypothesis Retention V2** before testing its coverage.
+
+## Training authorization
+
+The representation sufficiency decision itself is **not revoked**.
+
+However, Adaptive V1 prereg required a bounded H contract to be frozen before the small factor heads are executed. Because no compact adaptive contract passed:
+
+- **small `p_active + log_amp` head execution is PAUSED** pending Adaptive H V2/freeze;
+- `dir` remains separate;
+- **large/end-to-end training remains FORBIDDEN**;
+- no Stage-B requalification is allowed.
+
+## Canonical current artifacts
+
+- `REPRESENTATION_CONTRACT_V2.md`
+- `ADAPTIVE_HYPOTHESIS_RETENTION_V1_PREREG.md`
+- `ADAPTIVE_HYPOTHESIS_RETENTION_V1_RESULT.json`
+- `ADAPTIVE_HYPOTHESIS_RETENTION_V1_REPORT.md`
+- `adaptive_hypothesis_retention_v1.py`
 - `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_CANONICAL_DECISION.md`
+- `POST_STAGEB_REPRESENTATION_SUFFICIENCY_BATTERY_V1_CANONICAL_DECISION.json`
 
-Supporting artifacts include the prereg, broad Test-C result/report, Test-A oracle result, Test-B collision result/addendum, carrier p_active LOFO result, and exact replay/reproducer scripts in this research directory.
+Current frontier: **diagnose expansion need; do not train through an unfrozen candidate-retention contract.**

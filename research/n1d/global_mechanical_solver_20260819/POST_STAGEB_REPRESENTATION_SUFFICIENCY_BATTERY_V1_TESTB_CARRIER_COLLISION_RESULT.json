@@ -1,0 +1,38 @@
+{
+  "schema": "RealSaS.N1D.PostStageB.RepresentationSufficiency.TestB.CarrierCollision.v1",
+  "date": "2026-08-19",
+  "status": "TRUTH_OPEN_DEVELOPMENT__TEST_B_AMBER__NOT_QUALIFICATION",
+  "parent_prereg_commit": "b87e222fdf7bf4c66a62314c88ee9e155a576c73",
+  "metric_addendum_commit": "16acd0208f5ffb3ab8836383bcea011da65f6594",
+  "revised_testC_result_commit": "1acc8ba298e8a5f19ce682aa6fb93c1261ea38dd",
+  "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+  "reproducer_sha256": "a03ac45b75affb9e07a1dc9f839b688416169849276b9488ac05e77862872ee7",
+  "local_result_sha256": "c6da0a4e0a938497647811a9b1269d52e2395b67bc099419675af8b7af4c0da7",
+  "panel": [9908,11032,12772,13203,14404,14702,14758,15290],
+  "carriers": 512,
+  "representation": "Z_A + P_A/N_A/V_A + frozen current differential/log-amplitude + revised top16 H_i summaries + descriptor candidate margin/spread/entropy/support",
+  "cross_family_nearest_neighbor_only": true,
+  "closest_5pct": {
+    "count": 27,
+    "distance_threshold": 0.6109209890380952,
+    "union_material_collision_fraction": 0.14814814814814814,
+    "motion_state_mismatch_fraction": 0.14814814814814814,
+    "both_moving_amplitude_ratio_gt_3_fraction": 0.0,
+    "both_moving_direction_cos_lt_0_5_fraction": 0.0,
+    "distinct_collision_family_pairs": [[12772,14758],[12772,15290]],
+    "distinct_collision_families": [12772,14758,15290]
+  },
+  "closest_10pct": {
+    "count": 52,
+    "distance_threshold": 0.6399417020140439,
+    "union_material_collision_fraction": 0.15384615384615385,
+    "motion_state_mismatch_fraction": 0.15384615384615385,
+    "both_moving_amplitude_ratio_gt_3_fraction": 0.0,
+    "both_moving_direction_cos_lt_0_5_fraction": 0.0,
+    "distinct_collision_family_pairs": [[9908,12772],[12772,14758],[12772,15290]]
+  },
+  "preregistered_decision": "AMBER",
+  "reason": "Closest-5% union collision fraction is between the preregistered GREEN and RED conditions. Every material collision in the closest tails is a motion-state mismatch; no >3x amplitude collision and no >60-degree direction collision appears among pairs where both targets move.",
+  "interpretation": "The revised set-valued geometry plus descriptor/current/uncertainty summaries does not show a new hard-tail amplitude or direction equivalence-class collision on this panel. The remaining collision class is the factor already proposed but not yet instantiated as a learned/calibrated p_active field, so the prereg decision remains AMBER rather than RED.",
+  "next": "Inspect motion-state collision witnesses for proximity to the 0.005 activity boundary and frozen current-amplitude separation, then evaluate the small strict family-disjoint p_active head needed for this factor."
+}

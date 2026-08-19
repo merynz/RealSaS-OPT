@@ -1,0 +1,77 @@
+{
+  "schema": "RealSaS.N1D.MultiEdgeIncidentConsensusAudit.ResultSummary.v1",
+  "date": "2026-08-19",
+  "prereg_commit": "39c80ce3a636307ba9414d14a3f9099ed6d10ef8",
+  "verdict": "MIXED_MULTI_EDGE_FAILURE",
+  "preflight": {
+    "parity": true,
+    "den": 492,
+    "pooled_primary2x": 0.975609756097561,
+    "worst_family_primary2x": 0.9322033898305084,
+    "families_ge_090": 8
+  },
+  "behavioral_consistency": {
+    "all": true,
+    "primary_n": 261,
+    "pair_only_pooled_contain2": 0.8544061302681992,
+    "pair_only_worst_family_contain2": 0.68,
+    "pooled_median_oracle_pair_sum_rank": 0.072265625,
+    "worst_family_median_oracle_rank": 0.201171875
+  },
+  "pair_sum_baseline": {
+    "contain1": 0.4827586206896552,
+    "contain2": 0.8544061302681992,
+    "worst_family_contain1": 0.16,
+    "worst_family_contain2": 0.68,
+    "median_norm_err": 1.0231690472495791,
+    "best_worst_contain2_gap": 0.2533333333333333,
+    "per_family_contain2": {
+      "9908": 0.9333333333333333,
+      "11032": 0.68,
+      "12772": 0.8181818181818182,
+      "13203": 0.8611111111111112,
+      "14404": 0.84375,
+      "14702": 0.9318181818181818,
+      "14758": 0.8484848484848485,
+      "15290": 0.84
+    }
+  },
+  "bad_nodes": {
+    "n": 46,
+    "loeo_rescue_to_025_fraction": 0.45652173913043476,
+    "loeo_rescue_to_010_fraction": 0.06521739130434782,
+    "median_edge_support_fraction_le_025": 0.25
+  },
+  "TRIM_MAX1_Z": {
+    "contain1": 0.45977011494252873,
+    "contain2": 0.8352490421455939,
+    "worst_family_contain2": 0.64,
+    "median_norm_err": 1.0664711176209487,
+    "pooled_preservation": true,
+    "worst_family_gain": -0.040000000000000036,
+    "11032_contain2": 0.64,
+    "11032_gain": -0.040000000000000036,
+    "promotion_rule": false
+  },
+  "MEDIAN_EDGE_RANK": {
+    "contain1": 0.47126436781609193,
+    "contain2": 0.842911877394636,
+    "worst_family_contain2": 0.64,
+    "median_norm_err": 1.039285234717396,
+    "pooled_preservation": true,
+    "worst_family_gain": -0.040000000000000036,
+    "11032_contain2": 0.64,
+    "11032_gain": -0.040000000000000036,
+    "promotion_rule": false
+  },
+  "decision_tree": {
+    "single_edge_outlier_material": false,
+    "coherent_multi_edge_wrong": false,
+    "mixed_multi_edge_failure": true
+  },
+  "provenance": {
+    "full_local_result_sha256": "d151ede430aa587a42f767e0a93968c86e58c32a2e3baf6f81f33774bb88b70a",
+    "local_execution_source_sha256": "54b7b113976f730bbd4524cdcc0d6e71b0c7538f7e0f0f40ab80ac4da426969f",
+    "compact_local_summary_sha256": "71791a147197757328bbd2c4fbf67369b790cb462522da799c33582650e1286e"
+  }
+}

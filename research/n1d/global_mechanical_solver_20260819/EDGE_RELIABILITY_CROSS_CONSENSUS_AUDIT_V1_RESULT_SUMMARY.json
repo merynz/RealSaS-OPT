@@ -1,0 +1,54 @@
+{
+  "schema": "RealSaS.N1D.EdgeReliabilityCrossConsensusAudit.ResultSummary.v1",
+  "date": "2026-08-19",
+  "prereg_commit": "f08f788301eef559abf245da1e703bd52b50d2c4",
+  "verdict": "NO_SIMPLE_OBS_EDGE_RELIABILITY_SIGNAL_V1",
+  "parent_guards": {
+    "all": true,
+    "primary_n": 261,
+    "bad_n": 46,
+    "pair_sum_pooled_contain2": 0.8544061302681992,
+    "pair_sum_worst_family_contain2": 0.68,
+    "pooled_median_oracle_rank": 0.072265625,
+    "worst_family_median_oracle_rank": 0.201171875,
+    "loeo_rescue_to_025": 0.45652173913043476
+  },
+  "predictors": {
+    "S1_RANK_VECTOR_DISAGREE": {
+      "top1": 0.2608695652173913,
+      "top2": 0.5,
+      "median_normalized_rank": 0.45,
+      "mean_normalized_rank": 0.4456521739130434,
+      "families_mean_rank_le_050": 7,
+      "supported": false
+    },
+    "S2_ENDPOINT_VOTE_OUTLIER": {
+      "top1": 0.30434782608695654,
+      "top2": 0.5652173913043478,
+      "median_normalized_rank": 0.3333333333333333,
+      "mean_normalized_rank": 0.45036231884057976,
+      "families_mean_rank_le_050": 6,
+      "supported": false
+    },
+    "S3_REL_FLOW_VIEW_INCONSISTENCY": {
+      "top1": 0.1956521739130435,
+      "top2": 0.391304347826087,
+      "median_normalized_rank": 0.6666666666666666,
+      "mean_normalized_rank": 0.5739130434782609,
+      "families_mean_rank_le_050": 4,
+      "supported": false
+    }
+  },
+  "passing_predictors": [],
+  "support_gate": {
+    "top1_min": 0.35,
+    "top2_min": 0.60,
+    "median_normalized_rank_max": 0.35,
+    "mean_normalized_rank_max": 0.40,
+    "families_mean_rank_le_050_min": 5
+  },
+  "provenance": {
+    "execution_source_sha256": "a3e88e970278a30ef8897729087a337dfbf39552a9bcacea4ea0d386c50e50f4",
+    "full_local_result_sha256": "a07dfe3ea10ed5723a941f95bd632cdfb93594811f01373b8c41b073dfd52b4a"
+  }
+}

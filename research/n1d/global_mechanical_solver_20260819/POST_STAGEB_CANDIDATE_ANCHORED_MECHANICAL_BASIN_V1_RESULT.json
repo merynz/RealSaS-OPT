@@ -1,0 +1,84 @@
+{
+  "schema": "RealSaS.N1D.PostStageB.CandidateAnchoredMechanicalBasin.v1",
+  "date": "2026-08-19",
+  "status": "TRUTH_OPEN_DEVELOPMENT_EVIDENCE__NOT_QUALIFICATION",
+  "frozen_stage_b_authority": "STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE",
+  "sealed21": "CLOSED",
+  "external10": "CLOSED",
+  "treatment": {
+    "geometry_authority": "frozen V11 seed-basin mechanical q_i; no free XYZ authority",
+    "scalar_evidence": "frozen N1D delta_point_map_srcA consensus amplitude",
+    "weight_rule": "w_i = sqrt(clip(||delta_point_map_srcA_i|| / q95(||delta_point_map_srcA||), 0, 1))",
+    "endpoint_rule": "P_B(i) = P_A(i) + w_i * q_i",
+    "truth_used_for_prediction": false,
+    "truth_used_for_evaluation": true
+  },
+  "primary_seed_episodes": {
+    "10763/e04": {
+      "baseline_F_activity": 0.1261,
+      "treated_F_activity": 0.6872,
+      "baseline_F_kernel": 0.4355,
+      "treated_F_kernel": 0.7077,
+      "baseline_R": 0.0762,
+      "treated_R": 0.0617,
+      "baseline_G_line": 0.10165,
+      "treated_G_line": 0.08024,
+      "treated_G_direction": 0.838,
+      "median_nearest_candidate_projection_weight_distance": 0.00706
+    },
+    "11214/e04": {
+      "baseline_F_activity": 0.4332,
+      "treated_F_activity": 0.68485,
+      "baseline_F_kernel": 0.851,
+      "treated_F_kernel": 0.722,
+      "baseline_G_line": 0.0592,
+      "treated_G_line": 0.0375,
+      "median_nearest_candidate_projection_weight_distance": 0.00701,
+      "raw_current_amp_p95": 0.001384
+    },
+    "14714/e04": {
+      "baseline_F_activity": 0.4,
+      "treated_F_activity": 0.8333,
+      "median_nearest_candidate_projection_weight_distance": 0.00431
+    }
+  },
+  "primary_aggregate": {
+    "frozen_F_activity": 0.43316,
+    "treated_F_activity": 0.68718,
+    "treated_F_kernel": 0.70775,
+    "treated_D_tangent_action_error_median": 0.10163,
+    "treated_R_differential_body_error": 0.04274,
+    "treated_G_axis_dir_abs_cos_median": 0.89947,
+    "treated_G_axis_line_error_diag_median": 0.08024,
+    "principal_quality_metrics_pass": "6/6",
+    "family_G_robustness": "3/4",
+    "episode_index_G_robustness": "3/3",
+    "note": "This is a development aggregate. The historical Stage-B qualification remains FAIL; its primary G-family coverage gate was structurally unattainable because family 12907 Stage-B episodes are near_zero."
+  },
+  "silence_evidence": {
+    "primary_witness": "11214/e04",
+    "primary_raw_current_amp_p95": 0.001384,
+    "near_zero_witness": "11214/e06",
+    "near_zero_raw_current_amp_p95": 0.0003068,
+    "primary_to_near_zero_p95_ratio": 4.51,
+    "near_zero_predicted_moved_fraction_before": 0.1719,
+    "near_zero_predicted_moved_fraction_after_q95_normalized_composition": 0.1875,
+    "interpretation": "q95-normalized ranking amplitude discards absolute silence information; p_active/silence authority must remain separate from conditional log_amp/ranking."
+  },
+  "architecture_conclusion": {
+    "geometry_candidate_basin": "physical XYZ authority",
+    "dir": "direction evidence",
+    "log_amp": "conditional magnitude/ranking evidence",
+    "p_active": "absolute motion/silence gate",
+    "free_xyz_motion_head": "FORBIDDEN_BY_CURRENT_EVIDENCE"
+  },
+  "next_authorized_development_step": "family/episode-held-out p_active + log_amp probe with ranking loss + silence BCE; any later qualification requires a new untouched preregistered panel",
+  "recovery_provenance": {
+    "previous_session_reported_ephemeral_hashes": {
+      "report": "cec872d613c4b8dcbd2f62c6c03e7d66095f27917d60d3c2db2f62b9fc126ad0",
+      "result": "3925c55209b77ab5b7ea75b982bf18d0ba497f589724d2cc6aa20f92b3bcfda2",
+      "source": "885de8ac38d3b834e0d446537d620a19f92184b35cfec9e658c15536fea7e215"
+    },
+    "warning": "Those exact ephemeral bytes were not persisted across the tool-session boundary. This canonical recovery commit preserves the experimentally reported values and conclusions without claiming byte identity to the lost ephemeral files."
+  }
+}

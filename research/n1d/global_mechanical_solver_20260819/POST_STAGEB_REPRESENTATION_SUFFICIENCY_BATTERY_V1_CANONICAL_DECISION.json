@@ -1,0 +1,74 @@
+{
+  "schema": "RealSaS.N1D.PostStageB.RepresentationSufficiencyBattery.CanonicalDecision.v1",
+  "date": "2026-08-19",
+  "decision": "REPRESENTATION_SUFFICIENCY_SUPPORTED_FOR_REVISED_SET_VALUED_FACTORIZED_CONTRACT",
+  "qualification_changed": false,
+  "frozen_stage_b_authority": "STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE",
+  "sealed21": "CLOSED",
+  "external10": "CLOSED",
+  "tests": {
+    "A_revised_H_oracle": "GREEN",
+    "B_carrier_collision": "AMBER_LOCALIZED_TO_PLANNED_P_ACTIVE",
+    "C_current_fixed_top4": "RED",
+    "C_revised_same_pool_top16": "GREEN_ON_8_OF_8_E00_FAMILIES",
+    "D_family_disjoint_learnability": "SUPPORTED_WITH_FUSION_AND_CALIBRATION_WARNING"
+  },
+  "test_C_revised": {
+    "pooled_primary_2x": 0.9817073170731707,
+    "worst_family_primary_2x": 0.9491525423728814,
+    "families_ge_0_90": 8,
+    "families_total": 8,
+    "best_worst_gap_pp": 5.0847457627118615
+  },
+  "test_A_aggregate_median": {
+    "F_activity": 0.9403344774050788,
+    "F_kernel": 0.9381271964537439,
+    "D": 0.1548092300832347,
+    "R": 0.11745188012719154,
+    "G_direction": 0.9667040109634399,
+    "G_line": 0.04074304364621639,
+    "principal_gates_pass": "6/6"
+  },
+  "test_B_closest_5pct": {
+    "material_collision_fraction": 0.14814814814814814,
+    "motion_state_mismatch_fraction": 0.14814814814814814,
+    "both_moving_amp_gt3x_fraction": 0.0,
+    "both_moving_direction_cos_lt_0_5_fraction": 0.0
+  },
+  "test_D": {
+    "episode_raw_amp_families_ge_0_50": "29/29",
+    "episode_raw_amp_negative_family_count": 0,
+    "carrier_pactive_overall_auroc": 0.9294796798029556,
+    "carrier_pactive_min_family_auroc": 0.8924731182795699
+  },
+  "supported_contract": {
+    "geometry": "bounded set-valued H_i remains XYZ authority",
+    "p_active": "separate motion/non-motion authority with calibration/coverage",
+    "log_amp": "conditional magnitude/ranking evidence",
+    "dir": "separate direction evidence",
+    "uncertainty": "margin/multimodality/view-support/conditioning controls bounded retention, adaptive expansion and abstention",
+    "compiler": "final collapse after global consistency/deformation reasoning"
+  },
+  "falsified_or_forbidden": [
+    "fixed early top4 candidate collapse",
+    "free XYZ motion head overriding feasible geometry",
+    "unrestricted factor fusion assumed safe",
+    "aggregate-only tail sufficiency claims"
+  ],
+  "authorized_next": [
+    "freeze bounded uncertainty-aware set-valued candidate contract",
+    "train/evaluate small strict family/episode-disjoint p_active + log_amp factorized head",
+    "use explicit ranking + motion-state supervision + calibration/coverage",
+    "after freeze, qualify only on a new untouched preregistered panel"
+  ],
+  "large_end_to_end_training_authorized": false,
+  "canonical_commits": {
+    "battery_prereg": "b87e222fdf7bf4c66a62314c88ee9e155a576c73",
+    "testC_broad": "1acc8ba298e8a5f19ce682aa6fb93c1261ea38dd",
+    "testA": "cf96070fce396bdf6a72bdd73c2a79efc93dd95a",
+    "testB": "49e1d94702abe4f2d7a5f0eadb6dd57e61db8dcd",
+    "carrier_pactive": "c46b5db41690263e7a65610ff555400653651f5b",
+    "canonical_decision_md": "075613d3810b9a8e2b8bd140bdaf4d78d0cc0e00",
+    "status": "08f75f62f49153998368ba23138e46e5e74c66f4"
+  }
+}

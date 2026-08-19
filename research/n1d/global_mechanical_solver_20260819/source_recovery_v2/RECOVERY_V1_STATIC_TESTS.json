@@ -1,0 +1,15 @@
+{
+  "date": "2026-08-20",
+  "external10": "CLOSED",
+  "historical_outcome_parity_executed": false,
+  "schema": "RealSaS.N1D.V2SourceRecovery.StaticTests.v1",
+  "sealed21": "CLOSED",
+  "source_sha256": "578fdddcd17d922603fb463ee1f2cae5b88e0e2c96a850900716abef5e7588be",
+  "tests": {
+    "bilinear_exact": true,
+    "bilinear_max_abs": 0.0,
+    "compile_import_checkpoint": true,
+    "local_scale_structural": true,
+    "make_H_exact_array": true
+  }
+}

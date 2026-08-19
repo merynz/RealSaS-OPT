@@ -1,0 +1,71 @@
+{
+  "baseline_parity": {
+    "PASS": true,
+    "aggregate": {
+      "D_tangent_action_error_median": {"PASS": true,"abs_error": 0.0,"actual": 0.06133054265165463,"expected": 0.06133054265165463},
+      "F_activity_spearman": {"PASS": true,"abs_error": 0.0,"actual": 0.43316048316960803,"expected": 0.43316048316960803},
+      "F_kernel_allpersistent_mae": {"PASS": true,"abs_error": 0.0,"actual": 0.002148872008547187,"expected": 0.002148872008547187},
+      "F_kernel_spearman": {"PASS": true,"abs_error": 0.0,"actual": 0.6343873517786561,"expected": 0.6343873517786561},
+      "G_axis_dir_abs_cos_median": {"PASS": true,"abs_error": 0.0,"actual": 0.8994714617729187,"expected": 0.8994714617729187},
+      "G_axis_line_error_diag_median": {"PASS": true,"abs_error": 0.0,"actual": 0.08841083943843842,"expected": 0.08841083943843842},
+      "G_supported_carriers": {"PASS": true,"abs_error": 0.0,"actual": 215,"expected": 215},
+      "G_supported_families": {"PASS": true,"abs_error": 0.0,"actual": 3,"expected": 3},
+      "R_differential_body_error": {"PASS": true,"abs_error": 0.0,"actual": 0.042739927768707275,"expected": 0.042739927768707275},
+      "primary_supported_episodes": {"PASS": true,"abs_error": 0.0,"actual": 7,"expected": 7},
+      "valid_F_episodes": {"PASS": true,"abs_error": 0.0,"actual": 7,"expected": 7}
+    },
+    "max_per_episode_abs_error": 0.0
+  },
+  "counterfactual_contract": {
+    "candidate_basin_preserved": false,
+    "candidate_set_available_in_frozen_prediction": false,
+    "direction_fixed_for_nonzero_baseline_displacements": true,
+    "interpretation_limit": "These are direction-fixed scalar-motion ceilings. They are not a feasible-candidate/basin composition proof because V11 frozen NPZ files did not persist H_i candidate sets.",
+    "truth_rank_arm_preserves_baseline_displacement_magnitude_multiset": true,
+    "truth_rank_multiset_max_abs_roundoff": 2.7755575615628914e-17
+  },
+  "date": "2026-08-19",
+  "decision": {
+    "current_amplitude_full_panel_composition_demonstrated": false,
+    "factorization_ceiling_demonstrated": true,
+    "full_candidate_basin_composition_demonstrated": false,
+    "next_required_test": "Re-export/reconstruct each V11 feasible candidate set H_i on the now-open Stage-B panel, recompute frozen N1D delta_point_map_srcA amplitude for all routes, and select/re-rank endpoints inside H_i; do not free-scale XYZ."
+  },
+  "frozen_stage_B_authority": "STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE",
+  "full_local_result_sha256": "a9520ae969e1c0483fc8b5521ffebd11f658ae8f976663bfdf4d3f56b940fdf4",
+  "provenance": {
+    "canonical_source_tests": {"PASS": true,"pytest_summary": "39 passed"},
+    "checkpoint_consumed_by_this_diagnostic": false,
+    "checkpoint_sha256_recovered_context_only": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "frozen_stage_B_result_sha256": "33d5f55e9f2f8e8619d0e76638283e8bd2388dd3ae4db9974d85ce8952c1d472",
+    "gfdr_sha256": "ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa",
+    "prediction_freeze_ledger_sha256": "f05ac9d48029a4bd1d62a9ec10967978e524213cb20f2b25a757fad351b48c19",
+    "prediction_sha_guard": {"PASS": true,"expected": 12,"verified": 12},
+    "stage_B_prereg_sha256": "19eca4d653628ed451f5f2ea1d1ad6b4c5ca4ed29c73cead85f5d72f983fc4c5",
+    "targets_sha256": "365cdf52cf1cfc2c7feebbf921a5702b0e8b78338be5692bc107284c4aff534f",
+    "truth_open_ledger_sha256": "80b2b6b371a199b8023718a8ae83fa96084592399c7296255394e5093fa392c2",
+    "truth_sidecar_sha_guard": {"PASS": true,"expected": 12,"verified": 12}
+  },
+  "reproducer_script_sha256": "caffa717db433a56109f16eefa5ce68c4e13f24722ac40c46b85b2f6d00473a7",
+  "route_local_frozen_evidence": {
+    "SEED_weight_finite_episode_count": 3,
+    "SEED_weight_true_active_spearman_median": 0.20520080949489375,
+    "V8_BASE_current_evidence_finite_episode_count": 4,
+    "V8_BASE_current_evidence_true_active_spearman_median": 0.9160104135460645,
+    "arms": {
+      "SEED_baseline": {"aggregate_primary_median": {"D_tangent_action_error_median": 0.06133054265165463,"F_activity_spearman": 0.39999999999999997,"F_kernel_allpersistent_mae": 0.0009059549192897975,"F_kernel_spearman": 0.49137709137709146,"G_axis_dir_abs_cos_median": 0.8538681268692017,"G_axis_line_error_diag_median": 0.10164804756641388,"G_supported_carriers": 83,"G_supported_families": 3,"R_differential_body_error": 0.03580722212791443,"primary_supported_episodes": 3,"valid_F_episodes": 3},"quality_gates_only": {"D_tangent_action": true,"F_activity": false,"F_kernel": true,"G_axis_direction": true,"G_axis_line": false,"R_differential": true}},
+      "SEED_seed_weight_rank_distribution_fixed": {"aggregate_primary_median": {"D_tangent_action_error_median": 0.06230744322210941,"F_activity_spearman": 0.20520080949489375,"F_kernel_allpersistent_mae": 0.000899982696864754,"F_kernel_spearman": 0.5740240269475653,"G_axis_dir_abs_cos_median": 0.8759521245956421,"G_axis_line_error_diag_median": 0.10467138886451721,"G_supported_carriers": 83,"G_supported_families": 3,"R_differential_body_error": 0.038010820746421814,"primary_supported_episodes": 3,"valid_F_episodes": 3},"quality_gates_only": {"D_tangent_action": true,"F_activity": false,"F_kernel": true,"G_axis_direction": true,"G_axis_line": false,"R_differential": true}},
+      "V8_BASE_baseline": {"aggregate_primary_median": {"D_tangent_action_error_median": 0.10618218444953458,"F_activity_spearman": 0.6853959765724471,"F_kernel_allpersistent_mae": 0.003092974773608148,"F_kernel_spearman": 0.7547035838087681,"G_axis_dir_abs_cos_median": 0.911480039358139,"G_axis_line_error_diag_median": 0.08200633153319359,"G_supported_carriers": 132,"G_supported_families": 3,"R_differential_body_error": 0.047558316960930824,"primary_supported_episodes": 4,"valid_F_episodes": 4},"quality_gates_only": {"D_tangent_action": true,"F_activity": true,"F_kernel": true,"G_axis_direction": true,"G_axis_line": true,"R_differential": true}},
+      "V8_BASE_current_rank_distribution_fixed": {"aggregate_primary_median": {"D_tangent_action_error_median": 0.09678717591786304,"F_activity_spearman": 0.8772339324970904,"F_kernel_allpersistent_mae": 0.003467889328021556,"F_kernel_spearman": 0.7789594995746144,"G_axis_dir_abs_cos_median": 0.9100505411624908,"G_axis_line_error_diag_median": 0.1015765555202961,"G_supported_carriers": 132,"G_supported_families": 3,"R_differential_body_error": 0.05372948385775089,"primary_supported_episodes": 4,"valid_F_episodes": 4},"quality_gates_only": {"D_tangent_action": true,"F_activity": true,"F_kernel": true,"G_axis_direction": true,"G_axis_line": false,"R_differential": true}}
+    },
+    "warning": "Route-conditioned diagnostic only. Raw delta_point_map_srcA amplitude is persisted only on V8_BASE outputs; SEED_BASIN_WSEED stores U_obs_seed_weight, which is not the raw current-amplitude signal."
+  },
+  "schema": "RealSaS.N1D.PostStageB.FactorizationCeiling.v1",
+  "status": "TRUTH_OPEN_DEVELOPMENT_DIAGNOSTIC__NOT_QUALIFICATION",
+  "variants": {
+    "baseline": {"aggregate_primary_median": {"D_tangent_action_error_median": 0.06133054265165463,"F_activity_spearman": 0.43316048316960803,"F_kernel_allpersistent_mae": 0.002148872008547187,"F_kernel_spearman": 0.6343873517786561,"G_axis_dir_abs_cos_median": 0.8994714617729187,"G_axis_line_error_diag_median": 0.08841083943843842,"G_supported_carriers": 215,"G_supported_families": 3,"R_differential_body_error": 0.042739927768707275,"primary_supported_episodes": 7,"valid_F_episodes": 7},"all_quality_gates_PASS": false,"quality_gates_only": {"D_tangent_action": true,"F_activity": false,"F_kernel": true,"G_axis_direction": true,"G_axis_line": true,"R_differential": true}},
+    "oracle_truth_amp_direction_fixed": {"aggregate_primary_median": {"D_tangent_action_error_median": 0.02565925204878497,"F_activity_spearman": 0.9999999999999999,"F_kernel_allpersistent_mae": 0.0005657898727804422,"F_kernel_spearman": 0.8544137022397892,"G_axis_dir_abs_cos_median": 0.9561010003089905,"G_axis_line_error_diag_median": 0.057649243623018265,"G_supported_carriers": 215,"G_supported_families": 3,"R_differential_body_error": 0.013111880980432034,"primary_supported_episodes": 7,"valid_F_episodes": 7},"all_quality_gates_PASS": true,"quality_gates_only": {"D_tangent_action": true,"F_activity": true,"F_kernel": true,"G_axis_direction": true,"G_axis_line": true,"R_differential": true}},
+    "oracle_truth_rank_active_distribution_fixed": {"aggregate_primary_median": {"D_tangent_action_error_median": 0.06133054265165463,"F_activity_spearman": 0.9999999999999999,"F_kernel_allpersistent_mae": 0.002114788629114628,"F_kernel_spearman": 0.8586872586872588,"G_axis_dir_abs_cos_median": 0.9330180883407593,"G_axis_line_error_diag_median": 0.07917342334985733,"G_supported_carriers": 215,"G_supported_families": 3,"R_differential_body_error": 0.034158095717430115,"primary_supported_episodes": 7,"valid_F_episodes": 7},"all_quality_gates_PASS": true,"quality_gates_only": {"D_tangent_action": true,"F_activity": true,"F_kernel": true,"G_axis_direction": true,"G_axis_line": true,"R_differential": true}},
+    "oracle_truth_rank_all_distribution_fixed": {"aggregate_primary_median": {"D_tangent_action_error_median": 0.0688513674016425,"F_activity_spearman": 0.9999999999999999,"F_kernel_allpersistent_mae": 0.0020160165149718523,"F_kernel_spearman": 0.8388233235546422,"G_axis_dir_abs_cos_median": 0.8977850675582886,"G_axis_line_error_diag_median": 0.07663998752832413,"G_supported_carriers": 215,"G_supported_families": 3,"R_differential_body_error": 0.04384060576558113,"primary_supported_episodes": 7,"valid_F_episodes": 7},"all_quality_gates_PASS": true,"quality_gates_only": {"D_tangent_action": true,"F_activity": true,"F_kernel": true,"G_axis_direction": true,"G_axis_line": true,"R_differential": true}}
+  }
+}

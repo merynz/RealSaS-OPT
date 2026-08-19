@@ -1,0 +1,97 @@
+{
+  "corrected_observable_geometry_0_of_48": {
+    "authorized": false,
+    "executed": false
+  },
+  "date": "2026-08-20",
+  "execution_note": {
+    "first_process_was_infrastructure_timeout_after_building_7_family_caches": true,
+    "historical_outcome_seen_before_resume": false,
+    "resume_used_same_source_bytes_and_source_native_deterministic_caches": true,
+    "source_or_parameter_change_between_start_and_resume": false
+  },
+  "external10": "CLOSED",
+  "gate_A_full_F16": {
+    "expected": {
+      "11032": 0.9491525424,
+      "12772": 1.0,
+      "13203": 0.9508196721,
+      "14404": 0.9682539683,
+      "14702": 1.0,
+      "14758": 0.9838709677,
+      "15290": 1.0,
+      "9908": 1.0
+    },
+    "observed": {
+      "11032": 0.9672131147540983,
+      "12772": 1.0,
+      "13203": 0.9841269841269841,
+      "14404": 0.984375,
+      "14702": 1.0,
+      "14758": 0.9841269841269841,
+      "15290": 1.0,
+      "9908": 1.0
+    },
+    "pass": false,
+    "per_family_pass": {
+      "11032": false,
+      "12772": true,
+      "13203": false,
+      "14404": false,
+      "14702": true,
+      "14758": false,
+      "15290": true,
+      "9908": true
+    }
+  },
+  "gate_B_M256": {
+    "expected": {
+      "den": 492,
+      "families_ge_090": 8,
+      "pooled_contain2": 0.975609756097561,
+      "worst_family_contain2": 0.9322033898305084
+    },
+    "observed": {
+      "den": 506,
+      "families_ge_090": 8,
+      "per_family_contain1": {
+        "11032": 0.9180327868852459,
+        "12772": 0.96875,
+        "13203": 0.873015873015873,
+        "14404": 0.9375,
+        "14702": 1.0,
+        "14758": 0.9841269841269841,
+        "15290": 0.9682539682539683,
+        "9908": 1.0
+      },
+      "per_family_contain2": {
+        "11032": 0.9672131147540983,
+        "12772": 1.0,
+        "13203": 0.9841269841269841,
+        "14404": 0.984375,
+        "14702": 1.0,
+        "14758": 0.9841269841269841,
+        "15290": 1.0,
+        "9908": 1.0
+      },
+      "pooled_contain2": 0.9901185770750988,
+      "worst_family_contain2": 0.9672131147540983
+    },
+    "pass": false
+  },
+  "gate_C_V2_behavior": {
+    "executed": false,
+    "reason": "Gate A failed; fail-closed source exited before solver."
+  },
+  "gate_D_P1_descendant": {
+    "executed": false,
+    "reason": "Recovery V1 failed before descendant authorization."
+  },
+  "parent_scientific_authority": "08620737ce526b0c0cc6c551f53910e34a1107fe",
+  "prereg_commit": "0a6b8298f06ad402fcf7f81e76f3858aaa796cdc",
+  "recovery_source_sha256": "578fdddcd17d922603fb463ee1f2cae5b88e0e2c96a850900716abef5e7588be",
+  "schema": "RealSaS.N1D.V2SourceRecoveryParityResult.v1",
+  "sealed21": "CLOSED",
+  "source_persistence_manifest_commit": "641b8a60011fa4b98e5c5e88f8e6ff5a2f81ce4c",
+  "verdict": "SOURCE_RECOVERY_V1_FAIL__DO_NOT_TUNE__DO_NOT_RUN_CORRECTED_0_OF_48"
+}

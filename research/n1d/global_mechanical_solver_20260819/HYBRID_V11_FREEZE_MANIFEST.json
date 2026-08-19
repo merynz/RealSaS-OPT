@@ -1,0 +1,35 @@
+{
+  "canonical_n1d_source_zip": {
+    "sha256": "230fac37ae52ae234437a017ef7ec88bfa865410d294fd840976a6c4e47ea65b"
+  },
+  "checkpoint": {
+    "drive_path": "RealSaS_IRIS_SEES_N1D_CORRESPONDENCE_TRANSPORT_MECHANICS_CANONICAL_20260817/checkpoints/BEST.pt",
+    "local_path": "/mnt/data/BEST_copy.pt",
+    "sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18"
+  },
+  "date": "2026-08-19",
+  "gfdr_source": {
+    "sha256": "ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa"
+  },
+  "schema": "RealSaS.N1D.HybridV11.FreezeManifest.v1",
+  "source_files": {
+    "evaluate_frozen_stageA.py": "9e6bb9ea7a78a03d360ea479164bb80e4bec96ac5b375eb826d329fa1a46c8c3",
+    "realsas_n1d_hybrid_v11_frozen_runner.py": "ddfd3c989138bb256c2c466e80b914bf89fef1796520d41acc734af0ff577407",
+    "v5_seed_geometry_frozen.py": "6185e0fe7b47fedd19c845aecc95d1b8c80a45c17fa683c9f5caedff4bd7d372",
+    "v8_base_frozen.py": "44fe83a56a588d4f0cb771351497090ca302b173a7c70619ff701fb0ed28b1f0"
+  },
+  "stageA": {
+    "PASS": true,
+    "episodes_replayed": 16,
+    "frozen_runner_replay_exact_array_diff_max": 0.0,
+    "prediction_ledger_sha256": "989c5b576f9bf761a6c47e93d38b6b0ece8f83e9e5516e8bfcbd9aca36ec440a",
+    "result_sha256": "b4ae5cfea7c20b4d98d8d39a2926b99e171136f8824c07377f82b81fc1d8034f"
+  },
+  "stageB": {
+    "episodes": ["e02","e04","e06"],
+    "no_retune": true,
+    "truth_status": "CLOSED"
+  },
+  "thresholds": {"absolute": 0.2,"signed": 0.3},
+  "treatment": "Hybrid V11: V8 base; switch to V5 Problem-A seed-basin finite-LBS when V8-vs-N1D-current signed agreement <0.30 and absolute agreement >=0.20; no truth in prediction"
+}

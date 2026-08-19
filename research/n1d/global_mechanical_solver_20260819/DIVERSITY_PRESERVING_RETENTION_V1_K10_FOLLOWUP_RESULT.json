@@ -1,0 +1,38 @@
+{
+  "schema": "RealSaS.N1D.DiversityRetention.K10Followup.v1",
+  "date": "2026-08-19",
+  "prereg_commit": "411393d6fd31dd29bf36c8b5522a36422a53d6cc",
+  "decision": "NEITHER_K10_ARM_PASSES__KEEP_F16_REFERENCE",
+  "D10_C8": {
+    "pooled_2x": 0.9735772357723578,
+    "strict_1x": 0.9247967479674797,
+    "worst_family": 0.8983050847457628,
+    "gap_pp": 10.169491525423723,
+    "families_ge_0_90": 7,
+    "mean_K": 10.0,
+    "mean_H_ratio_to_F16": 0.39061472034796696,
+    "coverage_pass": false,
+    "efficiency_pass": true
+  },
+  "D10_C4": {
+    "pooled_2x": 0.9796747967479674,
+    "strict_1x": 0.9288617886178862,
+    "worst_family": 0.9322033898305084,
+    "gap_pp": 6.779661016949157,
+    "families_ge_0_90": 8,
+    "mean_K": 10.0,
+    "mean_H_ratio_to_F16": 0.3905937913745331,
+    "coverage_pass": false,
+    "efficiency_pass": true,
+    "per_family_2x": {"9908":1.0,"11032":0.9322033898305084,"12772":1.0,"13203":0.9508196721311475,"14404":0.9682539682539683,"14702":1.0,"14758":0.9838709677419355,"15290":1.0}
+  },
+  "localization": {
+    "family": 11032,
+    "single_additional_carrier_needed_to_match_D12_worst_family": 36,
+    "D10_C4_normalized_H_error": 2.301718456592004,
+    "D12_C8_normalized_H_error": 1.902147254120031,
+    "critical_truth_near_candidate_ranks": {"view1":9,"view2":9,"view3":8},
+    "interpretation": "D10_C4 drops rank-9 candidates in views 1 and 2 while selecting farther spatial-diversity candidates. D12_C8 retains the score-top8 core and four tail slots, including rank 9, and recovers the carrier. This motivates a preregistered fixed score-rank depth K10/K12 test before adding further uncertainty machinery."
+  },
+  "local_exact_result_sha256": "52a166e44c327dbbb840a59521b631ec950248420dadc77d462414d2b5e1708c"
+}

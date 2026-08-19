@@ -1,0 +1,81 @@
+{
+  "schema": "RealSaS.N1D.PostStageB.RepresentationSufficiencyBattery.TestC.Broad8Family.v1",
+  "date": "2026-08-19",
+  "status": "TRUTH_OPEN_DEVELOPMENT_RESULT__CURRENT_TOP4_RED__REVISED_TOP16_GREEN_ON_8FAMILY_PANEL__NOT_QUALIFICATION",
+  "parent_prereg_commit": "b87e222fdf7bf4c66a62314c88ee9e155a576c73",
+  "mapping_addendum_commit": "5dc6989b2026a2db7194130242243b0ab6902b09",
+  "breadth_prereg_commit": "85139f87da7d510d581535d73e066f16a325a1cd",
+  "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+  "current_H_replay_source_sha256": "acc8806397abdf5605fcd3678451abcdfbb3ed8f1567d5ded495569080a56b1f",
+  "breadth_replay_source_sha256": "762cfc8fb189013ad24c3acaa9b79b21ac3eb697e247b7e1d5129aab8e9cddac",
+  "local_summary_sha256": "695638e0585a4fe1b084ff4615ab571902d7086c0fa5b153e9ad3305a8f80f76",
+  "panel": [9908, 11032, 12772, 13203, 14404, 14702, 14758, 15290],
+  "mapping": {
+    "reliable_carriers": 492,
+    "total_carriers": 512,
+    "pooled_reliable_fraction": 0.9609375,
+    "minimum_family_reliable_fraction": 0.921875
+  },
+  "per_family": {
+    "9908":  {"den":63,"top4_strict_1x":0.9365079365,"top4_primary_2x":0.9841269841,"top16_strict_1x":1.0,"top16_primary_2x":1.0,"coarse32_top16_primary_2x":1.0},
+    "11032": {"den":59,"top4_strict_1x":0.6101694915,"top4_primary_2x":0.8474576271,"top16_strict_1x":0.8644067797,"top16_primary_2x":0.9491525424,"coarse32_top16_primary_2x":0.9491525424},
+    "12772": {"den":60,"top4_strict_1x":0.95,"top4_primary_2x":1.0,"top16_strict_1x":1.0,"top16_primary_2x":1.0,"coarse32_top16_primary_2x":1.0},
+    "13203": {"den":61,"top4_strict_1x":0.6721311475,"top4_primary_2x":0.8688524590,"top16_strict_1x":0.8524590164,"top16_primary_2x":0.9508196721,"coarse32_top16_primary_2x":0.9508196721},
+    "14404": {"den":63,"top4_strict_1x":0.7301587302,"top4_primary_2x":0.9206349206,"top16_strict_1x":0.9206349206,"top16_primary_2x":0.9682539683,"coarse32_top16_primary_2x":0.9682539683},
+    "14702": {"den":63,"top4_strict_1x":0.9365079365,"top4_primary_2x":1.0,"top16_strict_1x":1.0,"top16_primary_2x":1.0,"coarse32_top16_primary_2x":1.0},
+    "14758": {"den":62,"top4_strict_1x":0.9354838710,"top4_primary_2x":0.9838709677,"top16_strict_1x":0.9677419355,"top16_primary_2x":0.9838709677,"coarse32_top16_primary_2x":1.0},
+    "15290": {"den":61,"top4_strict_1x":0.8360655738,"top4_primary_2x":0.9016393443,"top16_strict_1x":0.9836065574,"top16_primary_2x":1.0,"coarse32_top16_primary_2x":1.0}
+  },
+  "current_top4": {
+    "primary_2x_pooled": 0.9390243902439024,
+    "primary_2x_pooled_count": 462,
+    "primary_2x_pooled_den": 492,
+    "primary_2x_mean_family": 0.9383227878626466,
+    "primary_2x_worst_family": 0.847457627118644,
+    "primary_2x_best_family": 1.0,
+    "best_worst_gap_percentage_points": 15.254237288135597,
+    "families_at_or_above_0_90": 6,
+    "families_below_0_90": 2,
+    "strict_1x_pooled": 0.8272357723577236,
+    "preregistered_test_C_verdict": "RED"
+  },
+  "retention_only_top16": {
+    "coarse_k": 8,
+    "final_k": 16,
+    "same_refined_pixel_pool_as_baseline": true,
+    "primary_2x_pooled": 0.9817073170731707,
+    "primary_2x_pooled_count": 483,
+    "primary_2x_pooled_den": 492,
+    "primary_2x_mean_family": 0.9815121438124916,
+    "primary_2x_worst_family": 0.9491525423728814,
+    "primary_2x_best_family": 1.0,
+    "best_worst_gap_percentage_points": 5.0847457627118615,
+    "families_at_or_above_0_90": 8,
+    "families_below_0_90": 0,
+    "strict_1x_pooled": 0.9491869918699187,
+    "revised_contract_test_C_verdict_on_this_panel": "GREEN"
+  },
+  "broader_search_top16": {
+    "coarse_k": 32,
+    "final_k": 16,
+    "primary_2x_pooled": 0.983739837398374,
+    "primary_2x_pooled_count": 484,
+    "primary_2x_pooled_den": 492,
+    "primary_2x_worst_family": 0.9491525423728814,
+    "best_worst_gap_percentage_points": 5.0847457627118615,
+    "families_at_or_above_0_90": 8,
+    "families_below_0_90": 0,
+    "strict_1x_pooled": 0.9491869918699187,
+    "families_with_primary_gain_over_retention_only": [14758],
+    "maximum_primary_gain_over_retention_only": 0.0161290322580645
+  },
+  "causal_conclusion": {
+    "current_fixed_top4_contract": "HARD_TAIL_INSUFFICIENT",
+    "same_frozen_descriptor_with_wider_retention": "HARD_TAIL_COVERAGE_RECOVERED_ON_8_OF_8_PANEL_FAMILIES",
+    "representation_class": "SURVIVES_TEST_C_IF_SET_VALUED_CONTRACT_IS_REVISED",
+    "dominant_failure_mechanism": "PREMATURE_CANDIDATE_COLLAPSE_TRUNCATION",
+    "secondary_mechanism": "OCCASIONAL_COARSE_BEAM_NARROWNESS_AS_IN_14758",
+    "architectural_direction": "PRESERVE_WIDER_UNCERTAINTY_AWARE_HYPOTHESIS_SET; USE_BOUNDED_ADAPTIVE_SEARCH_PRUNING; DO_NOT_ADD_FREE_XYZ_HEAD_BY_DEFAULT"
+  },
+  "boundary": "This is a truth-open development GREEN for revised Test C on the specified 8-family e00 panel only. It is not overall representation sufficiency PASS and not a new qualification. Tests A and carrier-level Test B remain open; any later qualification requires a new untouched preregistered panel."
+}

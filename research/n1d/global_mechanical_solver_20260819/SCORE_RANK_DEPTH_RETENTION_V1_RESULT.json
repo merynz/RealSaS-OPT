@@ -1,0 +1,12 @@
+{
+  "schema":"RealSaS.N1D.ScoreRankDepthRetention.v1",
+  "date":"2026-08-19",
+  "prereg_commit":"9daecff3acd1127f26e64923c59973cd8a87445d",
+  "decision":"KEEP_F16_REFERENCE",
+  "S8":{"pooled_2x":0.9552845528455285,"strict_1x":0.8943089430894309,"worst":0.8813559322033898,"gap_pp":11.864406779661019,"ge90":6,"Hratio":0.2500011374442084,"coverage_pass":false},
+  "S10":{"pooled_2x":0.9654471544715447,"strict_1x":0.9126016260162602,"worst":0.9016393442622951,"gap_pp":9.836065573770492,"ge90":8,"Hratio":0.39063837918750083,"coverage_pass":false,"efficiency_pass":true,"per_family":{"9908":1.0,"11032":0.9152542372881356,"12772":1.0,"13203":0.9016393442622951,"14404":0.9365079365079365,"14702":1.0,"14758":0.9838709677419355,"15290":0.9836065573770492}},
+  "S12":{"pooled_2x":0.9715447154471545,"strict_1x":0.9207317073170732,"worst":0.9152542372881356,"gap_pp":8.47457627118644,"ge90":8,"Hratio":0.5625271280443694,"coverage_pass":false},
+  "F16":{"pooled_2x":0.9817073170731707,"strict_1x":0.9491869918699187,"worst":0.9491525423728814,"gap_pp":5.0847457627118615,"ge90":8,"Hratio":1.0,"coverage_pass":true},
+  "interpretation":"Plain score-rank depth does not explain the D12-C8 recovery. Hard-tail safety requires preserving alternate spatial modes in addition to a high-score core; fixed score K10/K12 do not pass the preregistered tail gates.",
+  "local_exact_result_sha256":"7d8daf1d5284afff2bc229d46b727d0e502ed7733348ebddb892cc35b25df106"
+}

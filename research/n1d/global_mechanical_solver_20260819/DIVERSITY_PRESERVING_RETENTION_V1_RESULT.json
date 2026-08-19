@@ -1,0 +1,17 @@
+{
+  "schema": "RealSaS.N1D.DiversityPreservingRetention.v1",
+  "date": "2026-08-19",
+  "prereg_commit": "ea7b4743838f6a03c4588d1a88b69cdaf321ca71",
+  "decision": "NO_FREEZE_ELIGIBLE_DIVERSITY_ARM_PASSES__KEEP_F16_REFERENCE",
+  "arms": {
+    "S8": {"pooled_2x":0.9552845528455285,"strict_1x":0.8943089430894309,"worst_family":0.8813559322033898,"gap_pp":11.864406779661019,"families_ge_0_90":6,"mean_K":8.0,"mean_H_ratio_to_F16":0.2500011374442084,"coverage_pass":false,"efficiency_pass":true},
+    "D8_C4": {"pooled_2x":0.9776422764227642,"strict_1x":0.9207317073170732,"worst_family":0.9152542372881356,"gap_pp":8.47457627118644,"families_ge_0_90":8,"mean_K":8.0,"mean_H_ratio_to_F16":0.24998293833687457,"coverage_pass":false,"efficiency_pass":true,"per_family":{"9908":1.0,"11032":0.9152542372881356,"12772":1.0,"13203":0.9508196721311475,"14404":0.9682539682539683,"14702":1.0,"14758":0.9838709677419355,"15290":1.0}},
+    "D8_C6": {"pooled_2x":0.9735772357723578,"strict_1x":0.9126016260162602,"worst_family":0.8983050847457628,"gap_pp":10.169491525423723,"families_ge_0_90":7,"mean_K":8.0,"mean_H_ratio_to_F16":0.24999021797980808,"coverage_pass":false,"efficiency_pass":true},
+    "D10_C6": {"pooled_2x":0.9735772357723578,"strict_1x":0.9247967479674797,"worst_family":0.8983050847457628,"gap_pp":10.169491525423723,"families_ge_0_90":7,"mean_K":10.0,"mean_H_ratio_to_F16":0.39059470132989976,"coverage_pass":false,"efficiency_pass":true},
+    "D12_C8": {"pooled_2x":0.9796747967479674,"strict_1x":0.9288617886178862,"worst_family":0.9491525423728814,"gap_pp":5.0847457627118615,"families_ge_0_90":8,"mean_K":12.0,"mean_H_ratio_to_F16":0.562484360142135,"coverage_pass":true,"efficiency_pass":false,"freeze_eligible":false,"per_family":{"9908":1.0,"11032":0.9491525423728814,"12772":1.0,"13203":0.9508196721311475,"14404":0.9682539682539683,"14702":1.0,"14758":0.9838709677419355,"15290":0.9836065573770492}},
+    "F16": {"pooled_2x":0.9817073170731707,"strict_1x":0.9491869918699187,"worst_family":0.9491525423728814,"gap_pp":5.0847457627118615,"families_ge_0_90":8,"mean_K":16.0,"mean_H_ratio_to_F16":1.0,"coverage_pass":true,"efficiency_pass":false}
+  },
+  "interpretation": "Mode diversity is causally important: D8_C4 recovers substantial hard-tail coverage at the same K/H cost as score-top8, while D12_C8 nearly matches F16 primary coverage. No freeze-eligible V1 arm satisfies the worst-family/gap gates, so F16 remains the safety reference pending a targeted K10 core-vs-diversity follow-up.",
+  "next": "preregister K10 core8+2-diversity versus core4+6-diversity causal arms",
+  "local_exact_result_sha256": "483dfe1b1535b9ca122d0e140df5194f3b7f4866a710b157e6750aca4368039d"
+}

@@ -1,0 +1,74 @@
+{
+  "schema": "RealSaS.N1D.PostStageB.RepresentationSufficiencyBattery.InterimV1",
+  "date": "2026-08-19",
+  "status": "TRUTH_OPEN_DEVELOPMENT__INTERIM_AMBER__NOT_QUALIFICATION",
+  "prereg_commit": "b87e222fdf7bf4c66a62314c88ee9e155a576c73",
+  "frozen_stage_b_authority": "STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE",
+  "sealed21": "CLOSED",
+  "external10": "CLOSED",
+  "population_source": {
+    "file": "N1D_CANONICAL_DEV_PER_EPISODE.json",
+    "sha256": "37d81db0733f6fbf433a944aa0797550f3beee15ff65377ecbcfada1064f4326",
+    "episodes": 232,
+    "families": 29,
+    "strata": {"finite": 135, "strong": 64, "near_zero": 33}
+  },
+  "episode_level_inference_safe_features": [
+    "predicted_flow_mean",
+    "moved_fraction_005",
+    "transport_gate_mean",
+    "transport_edge_mass_mean",
+    "transport_entropy_mean",
+    "transport_peak_mean",
+    "persistent_count"
+  ],
+  "test_D_episode_level_proxy": {
+    "protocol": "29-fold leave-one-family-out; no family-specific tuning",
+    "p_active_probe": "StandardScaler + LogisticRegression(C=1,class_weight=balanced,threshold=0.5)",
+    "logamp_probe": "StandardScaler + Ridge(alpha=1), trained on active episodes only",
+    "overall_p_active_balanced_accuracy": 0.8893710979138114,
+    "overall_p_active_auroc": 0.974112989188366,
+    "overall_multifeature_logamp_spearman_active": 0.8452352672453175,
+    "median_family_multifeature_logamp_spearman_active": 0.9285714285714287,
+    "multifeature_tail_warning": {"family": 12832, "active_logamp_spearman": -0.10714285714285716},
+    "raw_scalar_amplitude_baseline": {
+      "score": "predicted_flow_mean",
+      "overall_spearman_active": 0.8759372620679154,
+      "median_family_spearman_active": 0.8571428571428573,
+      "min_family_spearman_active": 0.5,
+      "families_at_or_above_0_50": 29,
+      "families_evaluable": 29,
+      "negative_family_count": 0,
+      "family_12832_spearman": 0.7857142857142859
+    },
+    "p_active_tail": {
+      "13203": {"lofo_auroc": 0.8, "balanced_accuracy_at_0_5": 0.7},
+      "12907": {"lofo_auroc": 0.9333333333333333, "balanced_accuracy_at_0_5": 0.6666666666666666},
+      "12832": {"lofo_auroc": 1.0, "balanced_accuracy_at_0_5": 0.5, "interpretation": "ordering is perfect but fixed probability threshold is miscalibrated"}
+    },
+    "interpretation": "Broad family-disjoint amplitude ordering exists in a single raster-derived scalar. The negative 12832 multifeature result is caused by naive cross-family feature fusion rather than absence of within-family amplitude order. p_active ordering is strong overall, but probability calibration/family tail remains nonuniform."
+  },
+  "test_B_episode_summary_proxy": {
+    "distance": "RobustScaler(IQR) Euclidean distance on inference-safe episode summaries; nearest neighbor restricted to another family",
+    "closest_5pct": {"count": 13, "active_silent_mismatch_fraction": 0.07692307692307693, "median_abs_log_true_amp_diff": 0.20302456736787544, "max_abs_log_true_amp_diff": 0.4438895843836841},
+    "closest_10pct": {"count": 24, "active_silent_mismatch_fraction": 0.16666666666666666, "median_abs_log_true_amp_diff": 0.23197121397141807, "max_abs_log_true_amp_diff": 1.340712956475536},
+    "interpretation": "Some close cross-family episode-summary neighbors differ in active/silent truth. This proxy lacks the proposed explicit carrier-level p_active, candidate-set and typed-U fields; treat as AMBER, not irreducible representation RED."
+  },
+  "historical_test_C_warning": {
+    "route": "old epoch10 descriptor-consensus top8 route; NOT the current descriptor-global-foreground solver",
+    "mean_top8_truth_containment": 0.8994405642151833,
+    "per_family_top8": {"14702": 0.9637681245803833, "12772": 0.973557710647583, "11032": 0.7868852615356445, "14758": 0.9316455721855164, "13203": 0.8902438879013062, "15290": 0.7810651063919067, "14404": 0.909621000289917, "9908": 0.958737850189209},
+    "bottom_two_mean": 0.7839751839637756,
+    "top_two_mean": 0.9686629176139832,
+    "top_bottom_gap_percentage_points": 18.46877336502076,
+    "interpretation": "This historical route would trigger the new hard-tail RED rule. It cannot be used to condemn the current global-foreground representation; current-route tail containment must be measured explicitly."
+  },
+  "current_battery_decision": {
+    "test_A": "AMBER_PENDING_FULL_CANDIDATE_BASIN_ORACLE_TAIL_COVERAGE",
+    "test_B": "AMBER_PROXY_COLLISIONS_EXPLAINABLE_BY_PLANNED_P_ACTIVE_AND_U_BUT_NOT_CLOSED",
+    "test_C": "AMBER_CURRENT_GLOBAL_FOREGROUND_TAIL_CONTAINMENT_NOT_YET_MEASURED",
+    "test_D": "PARTIAL_PASS_BROAD_SIGNAL_PRESENT__NAIVE_MULTIFEATURE_FUSION_HAS_12832_TAIL",
+    "overall": "REPRESENTATION_SUFFICIENCY_NOT_YET_SUPPORTED__BIG_TRAINING_NOT_AUTHORIZED",
+    "next": "Replay the current descriptor-global-foreground candidate generator on a broad family-disjoint panel; persist per-family/top-tail candidate containment and representation-conditioned feasible-basin oracle coverage; then finish carrier-level collision audit."
+  }
+}

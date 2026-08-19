@@ -1,0 +1,12 @@
+{
+  "change_scope": "execution-only: share one neural forward among base/gate/seed computations; no scoring, threshold, geometry, carrier, or output semantics changed",
+  "date": "2026-08-19",
+  "frozen_runner_sha256": "ddfd3c989138bb256c2c466e80b914bf89fef1796520d41acc734af0ff577407",
+  "schema": "RealSaS.N1D.HybridV11.FastExecutionEquivalence.v1",
+  "source_sha256": "5246e9fee8456c5d01ad76c3ec382e880d6ab5d26eac34bd28fe95852d7f8879",
+  "truth_use": "Stage-A open truth not used by harness; equality checked against already-frozen Stage-A predictions",
+  "witnesses": [
+    {"array_max_diff":0.0,"episode":"e01","family":10763,"route":"V8_BASE"},
+    {"array_max_diff":0.0,"episode":"e05","family":10763,"route":"SEED_BASIN_WSEED"}
+  ]
+}

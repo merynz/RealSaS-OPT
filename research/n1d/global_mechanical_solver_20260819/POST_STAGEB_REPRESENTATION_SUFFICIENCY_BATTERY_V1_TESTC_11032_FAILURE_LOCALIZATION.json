@@ -1,0 +1,32 @@
+{
+  "schema": "RealSaS.N1D.PostStageB.RepresentationSufficiencyBattery.TestC.11032FailureLocalization.v1",
+  "date": "2026-08-19",
+  "status": "TRUTH_OPEN_DEVELOPMENT_DIAGNOSTIC",
+  "test_C_witness_commit": "22975891094e7c4f312eb779e2a4d0df09c370cb",
+  "family": 11032,
+  "mapping_reliable_carriers": 59,
+  "primary_2x_contained": 50,
+  "primary_2x_missed": 9,
+  "contained_group": {
+    "median_H_hypothesis_count": 120.0,
+    "median_target_top4_views_within_4px": 3.0,
+    "mean_target_top4_views_within_4px": 3.08,
+    "median_target_top4_views_within_8px": 3.0,
+    "median_target_top4_nearest_pixel_distance": 2.6239591240882874,
+    "median_H_normalized_endpoint_error": 0.48596136854198835,
+    "median_committed_normalized_endpoint_error": 1.608294061742896,
+    "median_solver_mean_reprojection_px": 1.6206544640340974
+  },
+  "missed_group": {
+    "median_H_hypothesis_count": 80.0,
+    "median_target_top4_views_within_4px": 0.0,
+    "mean_target_top4_views_within_4px": 0.4444444444444444,
+    "median_target_top4_views_within_8px": 2.0,
+    "median_target_top4_nearest_pixel_distance": 11.002613544464111,
+    "median_H_normalized_endpoint_error": 4.018823906598463,
+    "median_committed_normalized_endpoint_error": 10.467688299646312,
+    "median_solver_mean_reprojection_px": 6.496651490529378
+  },
+  "interpretation": "The dominant 11032 hard-tail failure occurs before downstream basin selection: the true B endpoint's projections are usually absent from the retained per-view top-4 descriptor candidate sets. Consequently the pairwise rank-3 H_i cannot contain a target-near endpoint. This localizes the current Test-C RED primarily to descriptor candidate retrieval/truncation (with a minority of possible cross-view consistency cases), not to an oracle selector choosing the wrong member of an otherwise sufficient H_i.",
+  "next": "Run a preregistered nested candidate-breadth counterfactual using the same frozen descriptor/model and no new evidence. If wider candidate retention/search recovers the hard tail, representation-class evidence survives while the current H generator is insufficient."
+}

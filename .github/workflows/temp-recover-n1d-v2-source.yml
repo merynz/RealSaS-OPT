@@ -3,8 +3,8 @@ name: Temporary recover exact N1D V2 source
 on:
   push:
     branches: [main]
-    paths:
-      - .github/workflows/temp-recover-n1d-v2-source.yml
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read

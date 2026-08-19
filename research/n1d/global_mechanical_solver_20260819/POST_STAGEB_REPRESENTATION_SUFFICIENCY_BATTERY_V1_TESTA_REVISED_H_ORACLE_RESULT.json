@@ -1,0 +1,54 @@
+{
+  "schema": "RealSaS.N1D.PostStageB.RepresentationSufficiency.TestA.RevisedHOracle.v1",
+  "date": "2026-08-19",
+  "status": "TRUTH_OPEN_DEVELOPMENT__TEST_A_GREEN_ON_REVISED_8FAMILY_E00_PANEL__NOT_QUALIFICATION",
+  "parent_prereg_commit": "b87e222fdf7bf4c66a62314c88ee9e155a576c73",
+  "test_C_broad_result_commit": "1acc8ba298e8a5f19ce682aa6fb93c1261ea38dd",
+  "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+  "reproducer_sha256": "a4776b149ad653a385f5fd27d62a24bc6a565933bf12651ba23876254ee27879",
+  "local_result_sha256": "3f18634ae4125d4e0ef7b2308e59497e2e78d31b9be5dcad09951f39911202dc",
+  "arm": {
+    "coarse_k": 8,
+    "final_k": 16,
+    "oracle": "Truth may choose the nearest endpoint only from the generated revised H_i. It may not inject a free XYZ endpoint outside H_i.",
+    "normal_visibility_route": "frozen N1D normal fields + deterministic B-hull visibility on the oracle-selected representable endpoint"
+  },
+  "panel": [9908,11032,12772,13203,14404,14702,14758,15290],
+  "per_family": {
+    "9908":  {"F_activity":0.9568409344,"F_kernel":0.9576106844,"D":0.1459109257,"R":0.0984423459,"G_direction":0.9836885929,"G_line":0.0116022788,"P_B_error_diag_median":0.0030403389,"stratum":"strong"},
+    "11032": {"F_activity":0.9368186874,"F_kernel":0.8849440984,"D":0.2774686113,"R":0.1261877567,"G_direction":0.7424510717,"G_line":0.0419121385,"P_B_error_diag_median":0.0043879254,"stratum":"strong"},
+    "12772": {"F_activity":0.7902097902,"F_kernel":0.8650245277,"D":0.1632446826,"R":0.1103513017,"G_direction":0.9478350878,"G_line":0.0621053167,"P_B_error_diag_median":0.0051075490,"stratum":"finite"},
+    "13203": {"F_activity":0.6984036950,"F_kernel":0.8002101722,"D":0.2050354496,"R":0.2199474573,"G_direction":0.9667775035,"G_line":0.0693483129,"P_B_error_diag_median":0.0170415156,"stratum":"strong"},
+    "14404": {"F_activity":0.9438502674,"F_kernel":0.9468544776,"D":0.1463737776,"R":0.1560343057,"G_direction":0.9786797762,"G_line":0.0413003229,"P_B_error_diag_median":0.0112448279,"stratum":"strong"},
+    "14702": {"F_activity":0.9813953488,"F_kernel":0.9738788850,"D":0.1111731429,"R":0.0949854478,"G_direction":0.9882069826,"G_line":0.0211708061,"P_B_error_diag_median":0.0053328276,"stratum":"strong"},
+    "14758": {"F_activity":0.9310924370,"F_kernel":0.9293999153,"D":0.1423544934,"R":0.1217907742,"G_direction":0.9501917958,"G_line":0.0183007922,"P_B_error_diag_median":0.0051209023,"stratum":"strong"},
+    "15290": {"F_activity":0.9678292358,"F_kernel":0.9658256587,"D":0.1698699007,"R":0.1131129861,"G_direction":0.9666305184,"G_line":0.0401857644,"P_B_error_diag_median":0.0033673001,"stratum":"strong"}
+  },
+  "aggregate_median": {
+    "F_activity_spearman": 0.9403344774050788,
+    "F_kernel_spearman": 0.9381271964537439,
+    "D_tangent_action_error_median": 0.1548092300832347,
+    "R_differential_body_error": 0.11745188012719154,
+    "G_axis_dir_abs_cos_median": 0.9667040109634399,
+    "G_axis_line_error_diag_median": 0.04074304364621639
+  },
+  "gates": {
+    "F_activity_ge_0_50": true,
+    "F_kernel_ge_0_30": true,
+    "D_le_0_75": true,
+    "R_le_1_00": true,
+    "G_direction_ge_0_70": true,
+    "G_line_le_0_10": true
+  },
+  "gate_pass_count": 6,
+  "all_six_pass": true,
+  "tail_observation": {
+    "minimum_family_F_activity": 0.6984036950004051,
+    "minimum_family_G_direction": 0.7424510717391968,
+    "maximum_family_G_line": 0.06934831291437149,
+    "empty_H_count_across_panel": 0
+  },
+  "decision": "TEST_A_GREEN_ON_REVISED_8FAMILY_E00_PANEL",
+  "interpretation": "Once the candidate representation remains set-valued enough to preserve target-near geometry, an oracle constrained strictly to the revised H_i can recover strong GFDR mechanics across the broad e00 panel. This argues against an intrinsic hard-tail information ceiling in the tested raster/descriptor representation. It does not prove learned selection or collision resolution; Test B remains required.",
+  "boundary": "Truth is used only to select the best state already contained in H_i and for evaluation. This is not a blind qualification and cannot modify frozen Stage-B authority."
+}

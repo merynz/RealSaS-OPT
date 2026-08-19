@@ -1,0 +1,22 @@
+{
+  "schema": "RealSaS.N1D.ObservableFunctionalAuditV2.ObservableStateReuse.v1",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R5",
+  "status": "REUSE_AUTHORIZED_BY_BYTE_IDENTITY",
+  "reused_observable_bundle_sha256": "a4f7f9ce1b4f6d7858be4932a055e7509391d3516e8ad396b50b4332147e443f",
+  "reused_observable_manifest_sha256": "ba487f0ec8af931abc76fd5fee5c36c4850dbb0ae2adb4bb07fa1d49087074d1",
+  "producer_identity_guards": {
+    "observable_phase_sha256_R4": "6eea236647e04a5566e93733f35c927639cc6407d4f62db80793edfa7e97dadf",
+    "observable_phase_sha256_R5": "6eea236647e04a5566e93733f35c927639cc6407d4f62db80793edfa7e97dadf",
+    "prepare_runtime_sha256_R4": "a194d60123e314ee5a5281cee37be35b60cfcc318054d135f636ca5326b88783",
+    "prepare_runtime_sha256_R5": "a194d60123e314ee5a5281cee37be35b60cfcc318054d135f636ca5326b88783",
+    "mechanics_metrics_sha256_R4": "0164d0f6519c38ba6b9fd0f271f6794e13973418a00cbb8b4b721f4b1b670511",
+    "mechanics_metrics_sha256_R5": "0164d0f6519c38ba6b9fd0f271f6794e13973418a00cbb8b4b721f4b1b670511",
+    "observable_raster_set_sha256": "efad989dd8a1929e2a9f49e1e94d7e16eda3aea75ca455a1faa052722e349e2c",
+    "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18"
+  },
+  "R5_only_scientific_executable_change": "evaluation_phase dynamic import registration in sys.modules before exec_module",
+  "reason": "R5 does not alter any producer byte or observable input; recomputing the states would add runtime variability without adding information.",
+  "truth_semantics_observed_before_R5_freeze": false,
+  "R4_result_exists": false
+}

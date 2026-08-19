@@ -1,0 +1,51 @@
+{
+  "schema": "RealSaS.N1D.IncidentSetCandidateRankerP0LOFO.ResultSummary.v1",
+  "date": "2026-08-19",
+  "prereg_commit": "37a6ba7b975176fa8d549223166578707dfa2329",
+  "verdict": "INCIDENT_SET_CANDIDATE_RANKER_P0_LOFO_FAIL",
+  "parity": {
+    "all": true,
+    "m256_reliable_den": 492,
+    "m256_pooled_primary2x": 0.975609756097561,
+    "m256_worst_family_primary2x": 0.9322033898305084,
+    "primary_n": 261,
+    "u_only_contain1": 0.3716475095785441,
+    "u_only_contain2": 0.6781609195402298
+  },
+  "aggregate": {
+    "contain1": 0.31800766283524906,
+    "contain2": 0.6896551724137931,
+    "worst_family_contain1": 0.08,
+    "worst_family_contain2": 0.16,
+    "median_norm_err": 1.3985875170964797,
+    "p90_norm_err": 4.0052816581285,
+    "best_worst_gap": 0.7263636363636363,
+    "per_family_contain2": {
+      "9908": 0.8,
+      "11032": 0.16,
+      "12772": 0.8181818181818182,
+      "13203": 0.6666666666666666,
+      "14404": 0.59375,
+      "14702": 0.8863636363636364,
+      "14758": 0.8787878787878788,
+      "15290": 0.64
+    }
+  },
+  "gains_vs_u_only": {
+    "pooled_contain2": 0.011494252873563315,
+    "worst_family_contain2": -0.12000000000000002,
+    "11032": -0.12000000000000002,
+    "13203": 0.05555555555555547,
+    "15290": -0.05999999999999994
+  },
+  "gates": {
+    "absolute": false,
+    "causal_pool": false,
+    "hardtail_causal": false,
+    "causal": false
+  },
+  "provenance": {
+    "execution_source_sha256": "df23180d93532668cdad5a2f8ac32f552a87b4d7c98c6338c2d910c007f7237f",
+    "full_local_result_sha256": "aa7a2b041a1157a9a5931051869bb1e8be3465cc4f5def261ad18961edb377df"
+  }
+}

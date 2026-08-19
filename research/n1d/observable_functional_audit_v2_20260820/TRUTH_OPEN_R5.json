@@ -1,0 +1,28 @@
+{
+  "schema": "RealSaS.Research.TruthOpen.v1",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R5",
+  "opened_at_utc": "2026-08-20T00:09:38Z",
+  "base_scientific_prereg_sha256": "b692311dd5a27ad22a13fa7b178b535fc41ca67532d07089ce071aaafefad29f",
+  "r5_prereg_sha256": "7591d947e2db4972c3cb1e1bd333249e13630ae125005b36c54c93662236344a",
+  "source_bundle_sha256": "a14cb7f2ac425689b526415862050f09d7cb66a560bb17c1555fe82092f5cd40",
+  "input_manifest_sha256": "3a795e02d8a4379bb976676488604d706fa4fa863c3c0cd27787103781fa34f",
+  "observable_state_bundle_sha256": "a4f7f9ce1b4f6d7858be4932a055e7509391d3516e8ad396b50b4332147e443f",
+  "observable_state_reuse": "BYTE_IDENTITY_PASS",
+  "R4_sidecar_semantic_parse_reached": false,
+  "R4_result_exists": false,
+  "R5_result_preopen": "ABSENT",
+  "allowed_truth_use": [
+    "carrier-to-evaluator-surface mapping",
+    "reliable-active-baseline-hard witness definition",
+    "nearest existing H candidate selection as evaluator counterfactual",
+    "baseline/counterfactual scoring"
+  ],
+  "forbidden_truth_use": [
+    "teacher-created candidate XYZ",
+    "teacher N_B in counterfactual forward mechanics",
+    "teacher V_B in counterfactual forward mechanics",
+    "solver retune or training",
+    "sealed21 or external10"
+  ]
+}

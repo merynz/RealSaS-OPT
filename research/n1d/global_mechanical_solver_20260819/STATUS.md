@@ -1,7 +1,7 @@
 # RealSaS N1D — Canonical Research Status
 
 **Date:** 2026-08-19  
-**Current canonical state:** `REPRESENTATION_V2_SUPPORTED__F16_H_FROZEN__PACTV_SUPPORTED__SINGLE_CARRIER_MOTION_FALSIFIED__LOCAL_RELATION_STRONG_PASS__R_REL_DIS_FROZEN_FOR_GLOBAL_SOLVER__BIG_TRAINING_FORBIDDEN`  
+**Current canonical state:** `REPRESENTATION_V2_SUPPORTED__F16_H_FROZEN__PACTV_SUPPORTED__SINGLE_CARRIER_MOTION_FALSIFIED__R_REL_DIS_STRONG_PASS__GLOBAL_SOLVER_V1_M128_PREFLIGHT_FAIL__SOLVER_NOT_RUN__NEXT_DOMAIN_EXPERIMENT_MUST_BE_PREREGISTERED__BIG_TRAINING_FORBIDDEN`  
 **Frozen Stage-B authority:** `STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE`
 
 ## Immutable qualification boundary
@@ -51,7 +51,7 @@ best-worst gap     5.08pp
 strict-1x pooled   .94919
 ```
 
-`K=16` is a research safety contract, not a permanent product constant. Compression is deferred to a dedicated later split/problem.
+`K=16` is a research safety contract, not a permanent product constant. Compression is a separate problem.
 
 ## p_active — supported
 
@@ -69,59 +69,23 @@ Brier                    .07252
 
 ## Per-carrier conditional motion — falsified under tested contracts
 
-The following increasingly permissive single-carrier formulations failed family-robust hard-tail selection:
+Direct/global `log_amp`, H-relative amplitude, candidate-specific amplitude-only compatibility, and candidate-specific full projected 2D motion-vector compatibility all fail family-robust hard-tail selection. Naive descriptor-Z fusion into the motion factor is also RED.
 
-1. direct/global `log_amp` regression;
-2. H-relative candidate-conditioned amplitude;
-3. candidate-specific amplitude-only local DIS/transport/delta3D compatibility;
-4. candidate-specific full projected 2D motion-vector compatibility.
-
-Representative hard-tail failures:
+Representative failures:
 
 ```text
-P0 direct typed log_amp:
-13203 rho .12609
-15290 rho .18941
-
-P0.5 H-conditioned typed amplitude:
-worst family rho .05475
-
-V1 amplitude-only raw DIS:
-pooled within25 .40152
-13203 .35135
-15290 .49020
-
-V1.5 full-vector raw DIS:
-pooled contain2 .60985
-11032 .23077
-13203 .45946
-15290 .68627
+P0 direct typed log_amp:       13203 rho .12609, 15290 rho .18941
+P0.5 H-conditioned amplitude:  worst family rho .05475
+V1 raw-DIS amplitude:          pooled within25 .40152
+V1.5 full-vector raw DIS:      pooled contain2 .60985
+                               11032 .23077 / 13203 .45946 / 15290 .68627
 ```
 
-Naive descriptor Z fusion into the motion factor remains RED (`15290` direct log-amp rho `-.40326`).
-
-Conclusion: the missing hard-tail information is not another independent per-carrier scalar/vector head.
+Conclusion: the missing hard-tail information is not another independent per-carrier scalar/vector authority.
 
 ## Local Differential Relation Separability V1 — STRONG PASS
 
-Prereg:
-
-- `LOCAL_DIFFERENTIAL_RELATION_SEPARABILITY_V1_PREREG.md`
-- commit `2f94f42127e4efde0b0483e90e7887997c3332bf`
-
-Canonical result:
-
-- `LOCAL_DIFFERENTIAL_RELATION_SEPARABILITY_V1_RESULT.json`
-- commit `14342e87c78b90d5e254607156ff1158d80902a6`
-
-Report:
-
-- `LOCAL_DIFFERENTIAL_RELATION_SEPARABILITY_V1_REPORT.md`
-- commit `3fa61392967ff205ef4607b849a77e450dabaa7b`
-
-### Selected relation — R_REL_DIS
-
-For local graph edge `(i,j)`, candidate pair `(h_i,h_j)`:
+Selected frozen relation: `R_REL_DIS`.
 
 ```text
 candidate relative motion(v) =
@@ -133,73 +97,113 @@ observed relative motion(v) = DIS_i(v) - DIS_j(v)
 R_REL_DIS = median_v ||candidate_relative_motion - observed_relative_motion||
 ```
 
-The relation is observation-native and truth-free. Truth is evaluator-only to identify the oracle H pair.
-
-Oracle pair energy percentile among deterministic sampled alternative candidate pairs:
+Oracle-pair separability across the eight open-development families:
 
 ```text
-edges                              603
-pooled median percentile           .01465
-fraction <= .25                    .93035
-fraction <= .10                    .80597
-worst-family median                .05249
-worst-family fraction <= .25       .84615
-
-11032 median                       .01367
-13203 median                       .03711
-15290 median                       .00195
-
-active-active median               .01172
-active-inactive median             .06445
+edges                            603
+pooled median percentile         .01465
+fraction <= .25                  .93035
+fraction <= .10                  .80597
+worst-family median              .05249
+worst-family fraction <= .25     .84615
+11032 median                     .01367
+13203 median                     .03711
+15290 median                     .00195
 ```
 
-All preregistered separability gates pass by large margins.
+All preregistered relation-separability gates pass by large margins. `R_REL_DIS` remains frozen; relation and solver may not be co-tuned.
 
-Other relations also pass:
+## Global Relational Candidate Solver V1 — PRE-FLIGHT FAIL / SOLVER NOT RUN
+
+Preregistered file: `GLOBAL_RELATIONAL_CANDIDATE_SOLVER_V1_PREREG.md`.
+
+V1 froze an observation-only M128 candidate domain before endpoint results:
 
 ```text
-R_DISP pooled median       .01367
-R_RIGID                     .05371
-R_REL_TRANSPORT             .01953
-R_REL_DELTA3D               .01465
-R_REL_FUSION                .01270
+F16 H -> dedup 1e-5
+best 32 by frozen unary reprojection score
++ deterministic XYZ farthest-point fill to 128
 ```
 
-The preregistered simplicity rule selects **R_REL_DIS** because fusion does not improve the worst-family median by the required `.05`.
+Before interpreting M128, execution replayed the full F16 source and required exact canonical parity. After correcting the evaluator implementation to the preregistered local-scale definition (median of the four nearest other surface samples), parity is exact on all eight families and the mapping-reliable denominator is exactly `492/512`.
 
-## Scientific interpretation
+Full-F16 per-family primary-2x parity:
 
-The repeated hard tail is now localized at the correct abstraction level:
+```text
+09908  1.0000000000
+11032   .9491525424
+12772  1.0000000000
+13203   .9508196721
+14404   .9682539683
+14702  1.0000000000
+14758   .9838709677
+15290  1.0000000000
+```
 
-> A carrier's correct H candidate can remain ambiguous in isolation, yet the correct **candidate pair** becomes extremely easy to distinguish through local differential/mechanical relations.
+M128 preregistered preflight:
 
-Therefore standalone amplitude authority is removed from the current architecture target.
+```text
+pooled primary-2x   .9695121951   FAIL (< .970)
+worst family        .9152542373   PASS (>= .900)
+families >= .90     8/8           PASS
+best-worst gap      8.4746pp       PASS (<=10pp)
+```
 
-Current supported path:
+Per-family M128 primary-2x:
+
+```text
+09908  1.0000000000
+11032   .9152542373
+12772  1.0000000000
+13203   .9344262295
+14404   .9682539683
+14702  1.0000000000
+14758   .9838709677
+15290   .9508196721
+```
+
+Canonical V1 verdict:
+
+`INCONCLUSIVE_CANDIDATE_COMPRESSION_FAIL`
+
+The miss is numerically tiny but the preregistered threshold is exact; it is not rounded into a pass. Consequently **G_REL_DIS ICM was not run or interpreted**. This result does not falsify `R_REL_DIS`; it only rejects M128 as the authorized V1 solver domain.
+
+Canonical V1 artifacts:
+
+- `GLOBAL_RELATIONAL_CANDIDATE_SOLVER_V1_REPORT.md` — commit `7defd9c57e020d823932595e047e27c4f3f5c5ca`
+- `GLOBAL_RELATIONAL_CANDIDATE_SOLVER_V1_RESULT.json` — commit `20afc4e9b51e144c72ad0a556ba5f1f2adaa09e9`
+- `GLOBAL_RELATIONAL_CANDIDATE_SOLVER_V1_SOURCE_MANIFEST.json` — commit `0501f5ccfaef4e2191702238ab3d6578d028bbb8`
+- exact execution source is persisted in 5 base64 parts under `source_bundle_b64/`
+
+## Current scientific interpretation
+
+The current supported path remains:
 
 ```text
 p_active
-+ set-valued frozen H_i
-+ frozen local R_REL_DIS pair factors
-+ global compiler/solver
++ frozen F16 H_i
++ frozen R_REL_DIS local pair factors
++ deterministic/global solver
 -> globally coherent feasible P_B configuration
 ```
 
-Magnitude and direction may remain diagnostic/supervision decompositions, but not independent final candidate authorities.
+V1 did **not** test whether the global relation can solve the endpoint problem because its compressed domain narrowly failed the frozen preflight.
 
-## Current authorized next experiment
+Therefore the next scientific question is candidate-domain capacity, not a new motion head and not a new relation.
 
-**Separately preregister a discrete/global solver V1 with R_REL_DIS frozen.**
+## Authorized next experiment
 
-Non-negotiable:
+A new candidate-domain/global-solver experiment may be run only under a **separate preregistration**. It must keep frozen:
 
-- do not tune relation and solver together;
-- use observation-only candidate compression for tractability and measure its truth-open coverage before interpreting solver failure;
-- preserve an observation-only unary baseline;
-- compare unary-only vs graph relation causally;
-- no post-result lambda/iteration/mode-count tuning;
-- if graph passes endpoint gates, freeze solver behavior before unchanged GFDR evaluation;
-- if graph fails despite strong relation separability, diagnose candidate compression/optimization rather than reopening the per-carrier amplitude head.
+- F16 source H;
+- unary definition and normalization;
+- graph definition;
+- `R_REL_DIS` formula and normalization;
+- edge weights;
+- deterministic ICM mechanics;
+- endpoint gates.
+
+Only the candidate-domain capacity/selection contract may change, and it must be fixed before its preflight is inspected. V1 M128 may not be retroactively modified.
 
 ## Authorization
 
@@ -207,13 +211,15 @@ Supported:
 - F16 bounded H research contract;
 - typed-scalar `p_active`;
 - frozen `R_REL_DIS` local relation;
-- deterministic/global solver diagnostics.
+- separately preregistered deterministic/global solver diagnostics.
 
 Paused/forbidden:
+- modifying V1 M128 post hoc;
 - standalone/direct/H-relative `log_amp` training;
 - single-carrier vector head as final motion authority;
+- new relation tuning on this panel;
 - naive Z fusion into motion factors;
 - large/end-to-end training;
 - Stage-B requalification.
 
-**Current frontier:** frozen H + p_active + frozen local relation -> preregistered global candidate solver.
+**Current frontier:** freeze a new observation-only candidate domain under a separate preregistration; only if its preflight passes may the unchanged frozen global solver be evaluated.

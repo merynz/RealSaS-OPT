@@ -1,7 +1,7 @@
 # RealSaS N1D — Canonical Research Status
 
 **Date:** 2026-08-19  
-**Current canonical state:** `REPRESENTATION_V2_SUPPORTED__F16_H_FROZEN__PACTV_TYPED_EVIDENCE_SUPPORTED__AMPLITUDE_SCALAR_CONTRACT_FALSIFIED__LOCAL_CANDIDATE_MOTION_EVIDENCE_REQUIRED__BIG_TRAINING_FORBIDDEN`  
+**Current canonical state:** `REPRESENTATION_V2_SUPPORTED__F16_H_FROZEN__PACTV_SUPPORTED__SINGLE_CARRIER_MOTION_FALSIFIED__LOCAL_RELATION_STRONG_PASS__R_REL_DIS_FROZEN_FOR_GLOBAL_SOLVER__BIG_TRAINING_FORBIDDEN`  
 **Frozen Stage-B authority:** `STAGE_B_FROZEN_QUALIFICATION_FAIL__NO_RETUNE`
 
 ## Immutable qualification boundary
@@ -10,45 +10,38 @@
 - Frozen Stage B remains **FAIL/no-retune**; primary F-activity `0.433160 < 0.50`.
 - Stage-B/e00 truth is open-development evidence only; it cannot be reused as blind qualification.
 - sealed21 / external10 remain **CLOSED**.
-- Future qualification requires a new untouched preregistered panel.
+- Any later blind qualification requires a new untouched preregistered panel.
 
-## Representation / geometry authority
+## Frozen geometry / representation authority
 
-Representation Sufficiency Battery V1 remains supported for the revised set-valued factorized contract.
+Representation Sufficiency Battery V1 remains supported for the revised set-valued contract.
 
 ```text
 P_A
-bounded H_i / P_B_geom
+bounded set-valued H_i / P_B_geom
 N_A, N_B
 V_A, V_B
 Z
 p_active
-conditional motion compatibility evidence
-dir
+local relational/differential mechanical evidence
 U_pred + typed U_obs
+compiler/global solver
 ```
 
 Authority split:
 
 ```text
-H_i        -> physical XYZ authority
-p_active   -> absolute motion/non-motion evidence
-motion compatibility -> candidate-conditioned magnitude/local differential evidence
-dir        -> direction evidence
-compiler   -> final constrained/global collapse
+F16 H_i              -> physical Pose-B XYZ authority
+p_active             -> absolute motion/non-motion evidence
+local pair relations -> conditional mechanical compatibility between feasible candidates
+compiler/global solve-> final candidate configuration
 ```
 
-Fixed early top4 and free XYZ motion heads remain forbidden.
+Fixed early top4, free XYZ motion heads, and truth-conditioned candidate retention remain forbidden.
 
-## Frozen bounded H research contract
+Bounded research H is frozen by `BOUNDED_H_RESEARCH_CONTRACT_V1.md`, commit `b3cec959a9d593e0a2693c2bf894b9ea7673a4ac`.
 
-Decision: `FREEZE_F16_FOR_RESEARCH__PRODUCT_COMPRESSION_DEFERRED`
-
-File/commit:
-- `BOUNDED_H_RESEARCH_CONTRACT_V1.md`
-- `b3cec959a9d593e0a2693c2bf894b9ea7673a4ac`
-
-F16 open-development coverage:
+F16 broad e00 coverage:
 
 ```text
 pooled primary-2x .98171
@@ -58,13 +51,11 @@ best-worst gap     5.08pp
 strict-1x pooled   .94919
 ```
 
-Vectorized H-only diagnostic: ~`21.2 ms / 64-carrier episode`, mean H `2146`, median `1536`, p95 `4608`; this excludes neural forward/search/scoring and is not a product latency claim.
+`K=16` is a research safety contract, not a permanent product constant. Compression is deferred to a dedicated later split/problem.
 
-Compact-retention optimization is deferred to a dedicated later split/problem to avoid overfitting the current truth-open 8-family panel.
+## p_active — supported
 
-## Motion factor P0 — p_active survives, direct amplitude fails
-
-P0 typed scalar `p_active`:
+Factorized Motion Head P0 typed scalar evidence:
 
 ```text
 pooled AUROC             .95854
@@ -74,140 +65,155 @@ worst family bal-acc     .77737
 Brier                    .07252
 ```
 
-`p_active` input evidence is supported.
+`p_active` remains a supported separate factor.
 
-Direct/global normalized amplitude regression is not family-robust:
+## Per-carrier conditional motion — falsified under tested contracts
+
+The following increasingly permissive single-carrier formulations failed family-robust hard-tail selection:
+
+1. direct/global `log_amp` regression;
+2. H-relative candidate-conditioned amplitude;
+3. candidate-specific amplitude-only local DIS/transport/delta3D compatibility;
+4. candidate-specific full projected 2D motion-vector compatibility.
+
+Representative hard-tail failures:
 
 ```text
-B1 pooled active Spearman .57431
-median family             .75250
-worst family              .12609
-13203                     .12609
-15290                     .18941
+P0 direct typed log_amp:
+13203 rho .12609
+15290 rho .18941
+
+P0.5 H-conditioned typed amplitude:
+worst family rho .05475
+
+V1 amplitude-only raw DIS:
+pooled within25 .40152
+13203 .35135
+15290 .49020
+
+V1.5 full-vector raw DIS:
+pooled contain2 .60985
+11032 .23077
+13203 .45946
+15290 .68627
 ```
 
-Naive descriptor-Z fusion is RED; it recreates held-out family collapse (`15290 rho = -.40326`).
+Naive descriptor Z fusion into the motion factor remains RED (`15290` direct log-amp rho `-.40326`).
 
-## Candidate-Conditioned Amplitude P0.5 — FAIL
+Conclusion: the missing hard-tail information is not another independent per-carrier scalar/vector head.
+
+## Local Differential Relation Separability V1 — STRONG PASS
 
 Prereg:
-- `CANDIDATE_CONDITIONED_AMPLITUDE_P05_PREREG.md`
-- commit `de4ca727956a96db095181f49613db8ff9e7ee24`
 
-Result:
-`NO_ARM_PASSES__AMPLITUDE_EVIDENCE_CHANNEL_INSUFFICIENT`
+- `LOCAL_DIFFERENTIAL_RELATION_SEPARABILITY_V1_PREREG.md`
+- commit `2f94f42127e4efde0b0483e90e7887997c3332bf`
 
-P0.5 restricted amplitude to the frozen F16 feasible distribution. For each active/reliable/F16-contained carrier, the target was the normalized amplitude coordinate of the oracle-near candidate already inside H; no free truth XYZ was introduced.
+Canonical result:
 
-Evaluated carriers: `264`.
+- `LOCAL_DIFFERENTIAL_RELATION_SEPARABILITY_V1_RESULT.json`
+- commit `14342e87c78b90d5e254607156ff1158d80902a6`
 
-### R0 — raw current, H-relative
+Report:
 
-```text
-pooled Spearman             .16383
-median family               .22568
-worst family               -.21811
-negative family count       1
-mean pairwise accuracy      .57927
-worst pairwise              .36876
-pooled within25%            .18939
-```
+- `LOCAL_DIFFERENTIAL_RELATION_SEPARABILITY_V1_REPORT.md`
+- commit `3fa61392967ff205ef4607b849a77e450dabaa7b`
 
-### R1 — calibrated H-relative current
+### Selected relation — R_REL_DIS
+
+For local graph edge `(i,j)`, candidate pair `(h_i,h_j)`:
 
 ```text
-pooled Spearman             .11780
-worst family               -.21811
-pooled within25%            .45076
-worst within25%             .27273
+candidate relative motion(v) =
+    [project(h_i,v)-project(P_A_i,v)]
+  - [project(h_j,v)-project(P_A_j,v)]
+
+observed relative motion(v) = DIS_i(v) - DIS_j(v)
+
+R_REL_DIS = median_v ||candidate_relative_motion - observed_relative_motion||
 ```
 
-Calibration moves estimates toward typical H amplitude regions but does not repair carrier ordering.
+The relation is observation-native and truth-free. Truth is evaluator-only to identify the oracle H pair.
 
-### R2 — typed scalar + H summaries
+Oracle pair energy percentile among deterministic sampled alternative candidate pairs:
 
 ```text
-pooled Spearman             .33528
-median family               .39128
-worst family                .05475
-negative family count       0
-mean pairwise accuracy      .54836
-worst pairwise              .44319
-pooled within25%            .46970
-worst within25%             .39216
+edges                              603
+pooled median percentile           .01465
+fraction <= .25                    .93035
+fraction <= .10                    .80597
+worst-family median                .05249
+worst-family fraction <= .25       .84615
+
+11032 median                       .01367
+13203 median                       .03711
+15290 median                       .00195
+
+active-active median               .01172
+active-inactive median             .06445
 ```
 
-Tail examples:
+All preregistered separability gates pass by large margins.
+
+Other relations also pass:
 
 ```text
-13203 rho .38336
-15290 rho .05475
+R_DISP pooled median       .01367
+R_RIGID                     .05371
+R_REL_TRANSPORT             .01953
+R_REL_DELTA3D               .01465
+R_REL_FUSION                .01270
 ```
 
-### Consequence
+The preregistered simplicity rule selects **R_REL_DIS** because fusion does not improve the worst-family median by the required `.05`.
 
-Candidate-conditioning does **not** rescue amplitude. Therefore the current failure is not just a badly chosen absolute target. The frozen carrier-level scalar/typed evidence lacks a family-robust local magnitude-ordering channel under the tested contracts.
+## Scientific interpretation
 
-This does not revoke:
-- F16 geometry sufficiency;
-- p_active evidence support;
-- separate direction evidence.
+The repeated hard tail is now localized at the correct abstraction level:
 
-It falsifies the current **standalone scalar `log_amp` contract**.
+> A carrier's correct H candidate can remain ambiguous in isolation, yet the correct **candidate pair** becomes extremely easy to distinguish through local differential/mechanical relations.
 
-## Current scientific frontier — candidate-specific local motion evidence
+Therefore standalone amplitude authority is removed from the current architecture target.
 
-Do not continue target reformulation or train through the amplitude failure.
-
-The next required diagnostic keeps F16 H frozen and evaluates observation-native motion **per candidate**:
+Current supported path:
 
 ```text
-predicted_motion_2d(i,h,v) = project(h,v) - project(P_A(i),v)
+p_active
++ set-valued frozen H_i
++ frozen local R_REL_DIS pair factors
++ global compiler/solver
+-> globally coherent feasible P_B configuration
 ```
 
-Compare each candidate's projected displacement to paired-raster local motion evidence at the Pose-A carrier, such as:
+Magnitude and direction may remain diagnostic/supervision decompositions, but not independent final candidate authorities.
 
-```text
-DIS / optical-flow displacement
-transport_offset_srcA
-other frozen paired-view local motion fields
-```
+## Current authorized next experiment
 
-Keep causal terms separate:
+**Separately preregister a discrete/global solver V1 with R_REL_DIS frozen.**
 
-```text
-E_amp(i,h) -> view-wise magnitude compatibility
-E_dir(i,h) -> view-wise direction compatibility
-```
+Non-negotiable:
 
-The immediate question is whether candidate-specific multiview amplitude compatibility ranks the truth-near members of H on hard families (`13203`, `15290`) even though carrier-level scalar amplitude does not.
-
-If yes, replace standalone `log_amp` with candidate-conditioned local differential compatibility/energy.
-If no, current paired-raster motion front door is missing a necessary local differential cue and representation must be extended before any amplitude learning.
+- do not tune relation and solver together;
+- use observation-only candidate compression for tractability and measure its truth-open coverage before interpreting solver failure;
+- preserve an observation-only unary baseline;
+- compare unary-only vs graph relation causally;
+- no post-result lambda/iteration/mode-count tuning;
+- if graph passes endpoint gates, freeze solver behavior before unchanged GFDR evaluation;
+- if graph fails despite strong relation separability, diagnose candidate compression/optimization rather than reopening the per-carrier amplitude head.
 
 ## Authorization
 
 Supported:
 - F16 bounded H research contract;
-- typed-scalar `p_active` evidence;
-- deterministic candidate-specific local motion diagnostics.
+- typed-scalar `p_active`;
+- frozen `R_REL_DIS` local relation;
+- deterministic/global solver diagnostics.
 
 Paused/forbidden:
 - standalone/direct/H-relative `log_amp` training;
-- combined factor-head training;
+- single-carrier vector head as final motion authority;
 - naive Z fusion into motion factors;
 - large/end-to-end training;
 - Stage-B requalification.
 
-## Canonical current artifacts
-
-- `REPRESENTATION_CONTRACT_V2.md`
-- `BOUNDED_H_RESEARCH_CONTRACT_V1.md`
-- `FACTORIZED_MOTION_HEAD_P0_RESULT.json`
-- `FACTORIZED_MOTION_HEAD_P0_REPORT.md`
-- `CANDIDATE_CONDITIONED_AMPLITUDE_P05_PREREG.md`
-- `CANDIDATE_CONDITIONED_AMPLITUDE_P05_RESULT.json`
-- `CANDIDATE_CONDITIONED_AMPLITUDE_P05_REPORT.md`
-- `candidate_conditioned_amplitude_p05.py`
-
-**Current frontier:** preserve H and p_active; test candidate-specific local multiview motion compatibility before any further learning.
+**Current frontier:** frozen H + p_active + frozen local relation -> preregistered global candidate solver.

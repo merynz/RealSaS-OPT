@@ -1,0 +1,52 @@
+{
+  "schema": "RealSaS.N1D.PostStageB.RepresentationSufficiencyBattery.TestC.CandidateBreadthCounterfactual.v1",
+  "date": "2026-08-19",
+  "status": "TRUTH_OPEN_DEVELOPMENT_RESULT__NOT_QUALIFICATION",
+  "prereg_commit": "85139f87da7d510d581535d73e066f16a325a1cd",
+  "test_C_mapping_addendum_commit": "5dc6989b2026a2db7194130242243b0ab6902b09",
+  "failure_localization_commit": "72e0d2719c3672707f382c673dc996b66868bdcd",
+  "family": 11032,
+  "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+  "baseline_current_top4": {
+    "coarse_k": 8,
+    "final_k": 4,
+    "mapping_reliable_denominator": 59,
+    "strict_1x_containment": 0.6101694915254238,
+    "primary_2x_containment": 0.847457627118644,
+    "median_H_normalized_endpoint_error": 0.6005040015928216
+  },
+  "R_retention_only": {
+    "coarse_k": 8,
+    "final_k": 16,
+    "same_refined_pixel_pool_as_baseline": true,
+    "mapping_reliable_denominator": 59,
+    "strict_1x_containment": 0.864406779661017,
+    "primary_2x_containment": 0.9491525423728814,
+    "median_H_normalized_endpoint_error": 0.2425033482565504,
+    "median_H_hypothesis_count": 1536.0,
+    "median_target_candidate_views_within_4px": 3.0,
+    "median_target_candidate_nearest_pixel_distance": 1.1203875541687012
+  },
+  "S_broader_search": {
+    "coarse_k": 32,
+    "final_k": 16,
+    "mapping_reliable_denominator": 59,
+    "strict_1x_containment": 0.864406779661017,
+    "primary_2x_containment": 0.9491525423728814,
+    "median_H_normalized_endpoint_error": 0.2425033482565504,
+    "median_H_hypothesis_count": 1536.0,
+    "median_target_candidate_views_within_4px": 3.0,
+    "median_target_candidate_nearest_pixel_distance": 1.1203875541687012
+  },
+  "local_vectorized_replay_source_sha256": "762cfc8fb189013ad24c3acaa9b79b21ac3eb697e247b7e1d5129aab8e9cddac",
+  "local_result_sha256": "3f22717959b541ffada6cdf6457775a274714d11eeed9a1247d873d6288dc42a",
+  "decision": {
+    "baseline_current_H_test_C": "RED",
+    "retention_only_counterfactual_primary_2x_passes_0_90": true,
+    "broader_coarse_search_adds_gain": false,
+    "localization": "FINAL_TOP4_TRUNCATION_OF_ALREADY_PRESENT_REFINED_DESCRIPTOR_EVIDENCE",
+    "representation_class_implication": "The 11032 hard-tail witness does not demonstrate absence of raster-derived descriptor information. The target-near evidence is already present in the frozen refined candidate pool and is lost by early top-4 collapse. A more set-valued candidate/basin contract can recover hard-tail coverage without new model evidence or training."
+  },
+  "important_boundary": "This does not retroactively make the current top4 H representation sufficient. The current contract remains Test-C RED. It shows the required fix is first to preserve more existing hypotheses / uncertainty rather than immediately invent a new semantic channel or train a larger model.",
+  "next": "Evaluate top16 retention on the second historical hard-tail 15290 and representative easy families, then quantify compute/set-size tradeoff and design uncertainty-aware bounded pruning that preserves hard-tail coverage."
+}

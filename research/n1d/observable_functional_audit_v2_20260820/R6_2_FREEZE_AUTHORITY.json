@@ -1,0 +1,77 @@
+{
+  "schema": "RealSaS.Research.FreezeAuthority.v4",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R6.2",
+  "status": "SOURCE_INPUT_EXECUTION_HARNESS_FREEZE_PASS__TRUTH_SEMANTICALLY_CLOSED",
+  "scientific_contract": "IDENTICAL_TO_R6_1",
+  "scientific_change_from_R6_1": "NONE__PROCESS_ISOLATION_EXECUTION_HARNESS_ONLY",
+  "inherited_r6_1_authority": {
+    "freeze_commit": "7b9ee7a8f4068dbf8f873508fceb1bfc28dd786d",
+    "source_bundle_sha256": "b4ab69fbcc91d8c57ab5f36f151b37495e8d5366554f3189982406d0b60c282f",
+    "source_index_sha256": "dca7f6a6395db21ee69c72c296392b6eb7b019db330e9b5c88831ae3e0d13005",
+    "input_manifest_sha256": "91acc078a9f6c41604b3f6f829c2cb239728d407f75872493a6712dd4ba7ca02",
+    "preflight_sha256": "e418e5ee10365b2c9bdba990710244fcc33db47a2161435effdb01852aa372dc",
+    "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "gfdr_v2_sha256": "ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa"
+  },
+  "execution_harness": {
+    "filename": "R6_2_PROCESS_ISOLATED_OBSERVABLE_HARNESS.py",
+    "sha256": "d1d607c4d8b95da59950dbae6210f8a019bac27de49256848c91be562c7aa3f6",
+    "github_commit": "9acb6ae245f8d2bb8be553db3e5764a38d1cbd4f",
+    "github_blob": "ad03279ea266bcda7b9aa2b43bb351646ec18454",
+    "drive_file_id": "1L-zlpqDywXmTJ2GDegJaMD_wo5pWD-bt",
+    "library_file_id": "libfile_040a4fccb8a88191a2a1f2f12174959a",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "execution_isolation_note": {
+    "filename": "R6_2_EXECUTION_ISOLATION_NOTE.md",
+    "sha256": "6c79e4eabb330b7400c8e9587f486fe894151cb25a4900c39f5ea5aaf8817779",
+    "github_commit": "e8bb4fc612ca1fceb6d4c014da1b6479f3dd9e93",
+    "drive_file_id": "1iZCYXJKJNXt_LJdA72qFAb1FaXilnbZC",
+    "library_file_id": "libfile_f21b97d571cc8191bb82545b3feea46d",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "isolation_parity": {
+    "filename": "R6_2_ISOLATION_PARITY_9908_V2.json",
+    "sha256": "b65bacd0a0ae05053894614812504ba943168b6062c433aa855c76b892d684da",
+    "github_commit": "e124748071210c6ba904db8cec89cbc8016c53e3",
+    "family": "09908",
+    "episode": "e01",
+    "all_12_arrays_bit_exact": true,
+    "state_file_sha_exact": true,
+    "reference_state_sha256": "482181d79ab45c4f12d246a1eaa0a7960d59e2b5c73aeb7e83c86d8b067b7ccd",
+    "drive_file_id": "1dBw0hNb6smfnqNsJVycrmaVfNQJSn5-3",
+    "library_file_id": "libfile_5eebd7d9f914819197311bbf785cd713",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "preflight": {
+    "filename": "PREFLIGHT_R6_2.json",
+    "sha256": "8e2db974ccd104e3e4bf8c81232a8b0339e992e671e0453a1fbeda0509997b25",
+    "github_commit": "5c18e3ec981bef6c5e6bdbb7715cf642d01d2080",
+    "drive_file_id": "1Xd4bEJMEaVrT1mMllUTo0gUB7KONbokI",
+    "library_file_id": "libfile_0bc09e63bfb08191acdf914f5cb03188",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "input_authority": {
+    "panel": "e01",
+    "families": ["09908", "11032", "12772", "13203", "14404", "14702", "14758", "15290"],
+    "producer_hash_gate": "136/136 PASS",
+    "poseA": "64/64 PASS",
+    "poseB_e01": "64/64 PASS",
+    "sidecar_bytes": "8/8 PASS",
+    "sidecar_semantic_access_before_observable_panel_freeze": "NONE"
+  },
+  "execution_policy": {
+    "baseline_and_state_must_be_separate_os_processes": true,
+    "all_8_families_regenerated_under_r6_2": true,
+    "reuse_r6_1_09908_state_as_canonical_r6_2_output": false,
+    "teacher_geometry_as_mechanics_input": "FORBIDDEN",
+    "evaluator_truth_open_before_panel_freeze": false,
+    "training_or_retune": "FORBIDDEN",
+    "metric_threshold_witness_decision_changes": "NONE",
+    "sealed21": "CLOSED",
+    "external10": "CLOSED"
+  },
+  "prereg_required_before_execution": true,
+  "run_authorized_by_this_file_alone": false
+}

@@ -1,0 +1,36 @@
+{
+  "schema": "RealSaS.N1D.ObservableFunctionalAuditV2.ObservableStateAuthority.v1",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "status": "OBSERVABLE_PREDICTION_FROZEN__THREE_STORE_PASS__TRUTH_OPEN_AUTHORIZED",
+  "truth_access_during_prediction": "NONE",
+  "source_bundle_sha256": "3bd133e805880ccca2e6a177778e3e931064eb0178da5a2ac5b02c07f1595278",
+  "input_inventory_sha256": "719d0573b14e218bb081e7e1858df4121f09200436909d3e665e3ac96c47252c",
+  "prereg_sha256": "362e194a16edddc6cf29e3086c63eb380190bf41070c9fda9a9dc0e60ca28018",
+  "observable_state_bundle": {
+    "filename": "REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_OBSERVABLE_STATE_20260820.zip",
+    "sha256": "95dd04d0a23ff925f155457681f66cc21c5345397306e29a97b21bd71ee2d838",
+    "size_bytes": 940622,
+    "drive_file_id": "1w64Mk1_1RFs2DAhJmAG8iOG89QlPmN81",
+    "library_file_id": "file_00000000117481f4b7ccf25090ad54bc"
+  },
+  "detailed_freeze_manifest": {
+    "sha256": "ba14d4fa9b5307e3bbfb8f8ba23b5f93972d1d047886a070fb9f99e5757bf833",
+    "drive_file_id": "1wDxxxf4xS-1g5uNjAmKEvxs-eFIYP0RA",
+    "library_file_id": "file_000000001b548246808f7f8b47c7ac9e"
+  },
+  "panel_manifest_file_sha256": "bf7081b0a077c6d2d345d60b0ffe5980343fc16a0012db2d4c0e07992ba69b58",
+  "guards": {
+    "families": 8,
+    "carriers_per_family": 64,
+    "raster_hashes": "128/128 PASS",
+    "checkpoint_hash": "8/8 PASS",
+    "observable_state_sha": "8/8 PASS",
+    "V_B_decorator_replay": "8/8 BIT_EXACT",
+    "N_B_decorator_replay": "8/8 max_abs=0.0",
+    "candidate_pool_nonempty": "8/8 PASS",
+    "total_observation_derived_candidates": 88191
+  },
+  "sealed21": "CLOSED",
+  "external10": "CLOSED",
+  "training_or_retune": "FORBIDDEN"
+}

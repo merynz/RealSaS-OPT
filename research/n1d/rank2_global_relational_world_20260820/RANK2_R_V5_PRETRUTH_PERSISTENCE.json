@@ -1,0 +1,30 @@
+{
+  "schema": "RealSaS.N1D.Rank2R.V5.PreTruthPersistence.v1",
+  "status": "THREE_STORE_PRETRUTH_FREEZE_PASS",
+  "truth_access": "NONE",
+  "contract_blob_sha": "db98ddf3b885ad28598592f8e30350dab198b1a5",
+  "source_sha256": "ea7ab996f881a08538c3cc049ca799e98783919255ed2c5214c01feada3161d7",
+  "selection_sha256": "277946d94a3685222fb0cef4ad3b34d4c4656657309cccdc65204e01a2386887",
+  "preflight_sha256": "000edfe80d2e351ac71fda8db7bc24a5de6f1037a24858ec73c326bf61e51e5a",
+  "freeze_authority_sha256": "4958392ac7da8ebd987f57339e2ed8526f50d0e6f49a380b7ab02b049e336bb6",
+  "github": {
+    "branch": "agent/n1d-observable-functional-audit-v2-20260820",
+    "source_commit": "f14c9e5c0e3ad6cbcf8a927ecaf14f5644071c6b",
+    "preflight_commit": "97c2872bbb18c83a8eeef31278158bb4afb3ab79",
+    "freeze_authority_commit": "55b0e2612289979b756d17c810ff89e9b721fbcc"
+  },
+  "drive": {
+    "source_id": "1Ds6xpANAjqynGXDJRGFXINIsObfZ4RWd",
+    "selection_id": "1XfsMeEjulCp6GJbyMgHI3hUQnGJzPUq0",
+    "preflight_id": "1x6KU59lCIAgiyzFeAQYmt1j3xO7TUaNu",
+    "freeze_authority_id": "1Y8T_gEfl5EToOqroZ4THJfXvDcFjM-eP"
+  },
+  "library": {
+    "source_file_id": "file_0000000001b481f490365a03b1cfdb22",
+    "selection_file_id": "file_00000000f60881f497f582864b3604bb",
+    "preflight_file_id": "file_000000005ed08246b2183400bf4f68de",
+    "freeze_authority_file_id": "file_000000000e7482438dfb70457a0e0eb1"
+  },
+  "sealed21": "CLOSED",
+  "external10": "CLOSED"
+}

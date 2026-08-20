@@ -1,0 +1,79 @@
+{
+  "authorities": {
+    "decision_contract_commit": "873c7c375226670416d7dedb0c0c3422745472e7",
+    "evaluator_commit": "d178a1b403f4cfb7a4f297c4246d67c138a0a90a",
+    "evaluator_git_blob": "4ae165c5244966ca861673a7d025288457d7e290",
+    "evaluator_sha256": "cbbaf49e296209f4a9e94a8b6c002721d2c1b85ec59f3f63c9727be28519c12d",
+    "preflight_commit": "f4bca2b0aa4e1f4428030b44e858a441cb6bde8f",
+    "set_authority_commit": "3d35bd2742addea66d7eef6bb506ea2ac7d2bf62",
+    "set_authority_sha256": "70a2ed96a81672feee95bb5f4d64e11ed80d6362cdb8bf92c1d8dab17f62aa15",
+    "source_commit": "524c594046d7633a2d17b97ecd2d6dbd35dd869f",
+    "source_sha256": "d1fbc210d7f5a85fcca774ccb483779207a7932e124fc7fe0393568d74d9a1f5"
+  },
+  "family_eval_sha256": {
+    "11032": "031dc48e2ec8851ca4784c4320b3cc5e9a8a7dd5b47c29583bb1d49953cf0141",
+    "12772": "a13f65daa4d7e3e8b6230c2d88e781ffde41aa96b6b44e34808bdd53b702bbc1",
+    "13203": "6800aaaa68a78f654a561d1f51290cd712344c26aae7b040d15be2e713910488",
+    "14404": "d64dcd5fe7920246aeb396bac6bff2c6d75ae9dbfb347c0f7c8f845849dffba0",
+    "14702": "5c9227ae244f13f05e1a15b0c4530219c08f2689444d3aacdce2a442c06162a3",
+    "14758": "875a00ffb1e1ced84f79d8d1f132a86c320f6923332fc9cbbe001b8b1a43c1f3",
+    "15290": "16cf05be47b7c7037bb95a7a22f8820ea36441facc77ea8d6f897c66503ba6b9",
+    "9908": "fe876789f21a84b11ca9240e22b7d100329372f79315c53334ab442517e8ab36"
+  },
+  "hardtail_all": {
+    "any_geometry_improve_n": 18,
+    "any_material_improve_n": 2,
+    "any_mechanical_equivalent_n": 0,
+    "best_composite_below_baseline_n": 15,
+    "best_material_degrade_n": 3,
+    "best_material_improve_n": 2,
+    "frontier_max_n": 7,
+    "frontier_mean_n": 2.9130434782608696,
+    "mean_baseline_composite": 0.5119931884047848,
+    "mean_best_frontier_composite": 0.5148865656296533,
+    "median_baseline_composite": 0.534204636221012,
+    "median_best_frontier_composite": 0.5070994210701362,
+    "n": 23
+  },
+  "hardtail_population_exact_r6_3_parity": true,
+  "hardtail_rank3": {
+    "any_geometry_improve_n": 13,
+    "any_material_improve_n": 1,
+    "any_mechanical_equivalent_n": 0,
+    "best_composite_below_baseline_n": 10,
+    "best_material_degrade_n": 2,
+    "best_material_improve_n": 1,
+    "frontier_max_n": 5,
+    "frontier_mean_n": 3.0,
+    "mean_baseline_composite": 0.49426580472897363,
+    "mean_best_frontier_composite": 0.5083106130506636,
+    "median_baseline_composite": 0.4883371120384433,
+    "median_best_frontier_composite": 0.49164593776872667,
+    "n": 15
+  },
+  "hardtail_rankdef": {
+    "any_geometry_improve_n": 5,
+    "any_material_improve_n": 1,
+    "any_mechanical_equivalent_n": 0,
+    "best_composite_below_baseline_n": 5,
+    "best_material_degrade_n": 1,
+    "best_material_improve_n": 1,
+    "frontier_max_n": 7,
+    "frontier_mean_n": 2.75,
+    "mean_baseline_composite": 0.5452320327969311,
+    "mean_best_frontier_composite": 0.5272164767152587,
+    "median_baseline_composite": 0.5481256708587343,
+    "median_best_frontier_composite": 0.5159353989593811,
+    "n": 8
+  },
+  "interpretation": "G/R as a set-valued evidence representation is supported: global R compresses 77,926 candidates to a ~3-candidate Pareto frontier without a scalar lambda. However G/R-only Pareto pruning is not safe before F/D: only 2/23 hard-tail frontiers contain a material mechanics improvement and none contain a strict mechanics-equivalent alternative. Keep the full feasible set plus separate G/R evidence/global factor for downstream mechanical compilation.",
+  "representation": {
+    "baseline_front_n": 9,
+    "candidate_total": 77926,
+    "mean_front_per_carrier": 2.978515625,
+    "pareto_fraction": 0.01956984831763468,
+    "pareto_front_total": 1525
+  },
+  "schema": "RealSaS.N1D.Rank2R.V4.Result.v1",
+  "status": "SET_REPRESENTATION_SUPPORTED__PARETO_PRUNING_NOT_AUTHORIZED_AS_FINAL"
+}

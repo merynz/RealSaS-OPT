@@ -1,0 +1,31 @@
+{
+  "audit": {
+    "abstain_total": 4,
+    "assigned_real_total": 2352,
+    "full_real_matching_views": 63,
+    "views": 64,
+    "visible_total": 2356
+  },
+  "contract_commit": "fa5b18530cfa72a67b2ecb314337b64f2c2b69c4",
+  "family_selection_logical_sha256": {
+    "11032": "4079267795698961ca667e54a50cedbe6b1110885d18575a9cf1f4e25f9be69a",
+    "12772": "5d5c4d6a28e76c71e4581579e88dca3dd2574731d65da8b2da4d37331b137e7c",
+    "13203": "c2676e086f663a90885eba49e7b98eb42312c77e8122f17634ce290d694c1fa6",
+    "14404": "70ebb61daa3b69436fc14925fc90162ff14e20640961c0258c92013114e641e5",
+    "14702": "76c96d7162d4d38f7f8e84b5656f4258afdd680434c81f62510bdb6e46402205",
+    "14758": "241bdf1d44d58c4429ec2a7781b95ea60cb57f72d9224a17c188cc5eb889e940",
+    "15290": "613bebfe2488ad0eb588f1d1e92457879937a051e6be4ec891547c07b5066e39",
+    "9908": "cf367b64ce970707d344eb4f38cd2722979df8c8a343406fb776f0a29a531249"
+  },
+  "full_selection_library_file_id": "libfile_bec29921b7108191a0b7f0ed105a17a9",
+  "full_selection_library_path": "/RealSaS/N1D/RANK2_R_V3A_20260820/RANK2_R_V3A_OBSERVABLE_SELECTION_COMPACT.json",
+  "full_selection_sha256": "82f7e934179bedb50146e60f85978567a1efcd81197acc1ab302ed68468d9b41",
+  "observable_panel_manifest_sha256": "b5158b4133f1b9b24d84fee30b9c64bcf5ac9a785215279d7733aa86afbeffef",
+  "preflight_commit": "97d223b27d14ba2c81e53946157c40ef47acb79a",
+  "schema": "RealSaS.N1D.Rank2R.V3A.SelectionAuthority.v1",
+  "source_commit": "8d2bd40b955cceb27776d9ea69bbbeb1fec68a29",
+  "source_git_blob": "10cfe814bf5617fdb6df95ed60b42b0036265666",
+  "source_sha256": "911cf2be0e06b502f7591f25168d5114a563324a276a3cf41392f9576e7566c1",
+  "status": "FROZEN_PRE_TRUTH",
+  "truth_access": "NONE"
+}

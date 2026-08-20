@@ -1,0 +1,42 @@
+{
+  "contract_commit": "75a9be91469ec8eb6f3d62a50ff9c2a1cc63d490",
+  "episode": "e01",
+  "external10": "CLOSED",
+  "families": [
+    9908,
+    11032,
+    12772,
+    13203,
+    14404,
+    14702,
+    14758,
+    15290
+  ],
+  "forbidden_forward_tokens": [
+    "sidecar",
+    "surface_points",
+    "surface_normals",
+    "surface_visibility",
+    "teacher",
+    "skeleton",
+    "intervention"
+  ],
+  "note": "The literal metadata key truth_access=NONE is intentionally present and is not a truth input.",
+  "observable_panel_manifest_sha256": "b5158b4133f1b9b24d84fee30b9c64bcf5ac9a785215279d7733aa86afbeffef",
+  "parent_r6_3_closure_sha256": "bd97bed53bd2adbf6eaee64c89e7caaefb9371ad0edf87038f81b31e26e66995",
+  "schema": "RealSaS.N1D.Rank2GlobalRelationalWorld.V0.Preflight.v1",
+  "sealed21": "CLOSED",
+  "source_commit": "28eed22494e0ab7a5c8799c4106d95c53a8c9e82",
+  "source_git_blob": "b98a69e0d7bb5880cd65b1e147e8174e0c233c4e",
+  "source_sha256": "7915cb4a4e1bb3a83645526c61e55d4180d20c37e4541b3771b6e6eb4c11a11c",
+  "status": "PASS",
+  "tests": {
+    "coordinate_delta_max_abs": 4.380176776841438e-17,
+    "coordinate_delta_tolerance": 1e-12,
+    "deterministic_repeat_9908": "PASS",
+    "forbidden_import_or_field_scan": "PASS",
+    "py_compile": "PASS",
+    "truth_access_metadata": "NONE"
+  },
+  "training_or_retune": "FORBIDDEN"
+}

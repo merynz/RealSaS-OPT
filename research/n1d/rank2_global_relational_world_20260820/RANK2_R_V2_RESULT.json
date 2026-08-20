@@ -1,0 +1,78 @@
+{
+  "authorities": {
+    "contract_commit": "668718e9405ffb2509bf2ac2794ba057e88e2ab2",
+    "evaluator_commit": "1e4bb5d4d3f1798cb0dfb66d51bfb4df0d0ec70d",
+    "evaluator_sha256": "56b48b8def13d47ad742b8cc5a28fcd6a6e515743e01c42378a30377780e8a6e",
+    "hardtail_population_exact_r6_3_parity": true,
+    "observable_panel_manifest_sha256": "b5158b4133f1b9b24d84fee30b9c64bcf5ac9a785215279d7733aa86afbeffef",
+    "preflight_commit": "679d585ef19a36cc7541ac44bc41dd90d97765e6",
+    "selection_commit": "168a25adf882c1ec70d06b152602dfefeeff3643",
+    "solver_commit": "785a3e64f159aa66dbf1b7b34988521ffbe3e2d4",
+    "solver_sha256": "1cf8d8fff72cd8596207a605e7a1b687096e15178dcc81f0f28b395c0b1fe5dd"
+  },
+  "episode": "e01",
+  "hardtail_all": {
+    "geometry_improved_n": 4,
+    "material_degrade_fraction": 0.17391304347826086,
+    "material_degrade_n": 4,
+    "material_improve_fraction": 0.0,
+    "material_improve_n": 0,
+    "mean_baseline_composite": 0.5119931884047848,
+    "mean_v2_composite": 0.5671748846515071,
+    "median_baseline_composite": 0.534204636221012,
+    "median_v2_composite": 0.5338012953683072,
+    "n": 23,
+    "strict_mechanical_equivalent_n": 1
+  },
+  "hardtail_overlap": {
+    "hardtail_n": 23,
+    "rank3_fixed_hardtail_n": 15,
+    "rank_variable_fraction": 0.34782608695652173,
+    "rank_variable_hardtail_n": 8
+  },
+  "hardtail_rank3_fixed": {
+    "geometry_improved_n": 0,
+    "material_degrade_fraction": 0.13333333333333333,
+    "material_degrade_n": 2,
+    "material_improve_fraction": 0.0,
+    "material_improve_n": 0,
+    "mean_baseline_composite": 0.49426580472897363,
+    "mean_v2_composite": 0.5374225693712571,
+    "median_baseline_composite": 0.4883371120384433,
+    "median_v2_composite": 0.49908169652466194,
+    "n": 15,
+    "strict_mechanical_equivalent_n": 1
+  },
+  "hardtail_rank_variable": {
+    "geometry_improved_n": 4,
+    "material_degrade_fraction": 0.25,
+    "material_degrade_n": 2,
+    "material_improve_fraction": 0.0,
+    "material_improve_n": 0,
+    "mean_baseline_composite": 0.5452320327969311,
+    "mean_v2_composite": 0.6229604758019758,
+    "median_baseline_composite": 0.5481256708587343,
+    "median_v2_composite": 0.6047792870961053,
+    "n": 8,
+    "strict_mechanical_equivalent_n": 0
+  },
+  "rank_population": {
+    "fixed_n": 486,
+    "variable_n": 26
+  },
+  "reliable_active_all": {
+    "geometry_improved_n": null,
+    "material_degrade_fraction": 0.09900990099009901,
+    "material_degrade_n": 20,
+    "material_improve_fraction": 0.0,
+    "material_improve_n": 0,
+    "mean_baseline_composite": 0.49459144709705516,
+    "mean_v2_composite": 0.5103762745236479,
+    "median_baseline_composite": 0.48213253387471444,
+    "median_v2_composite": 0.48644043766414047,
+    "n": 202,
+    "strict_mechanical_equivalent_n": null
+  },
+  "schema": "RealSaS.N1D.Rank2R.V2.Result.v1",
+  "status": "COMPLETE"
+}

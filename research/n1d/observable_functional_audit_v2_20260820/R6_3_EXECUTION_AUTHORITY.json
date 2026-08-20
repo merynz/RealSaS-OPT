@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.Research.ExecutionAuthority.v2",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R6.3",
+  "panel": "e01",
+  "status": "EXECUTION_AUTHORIZED_AFTER_THREE_STORE_READBACK",
+  "scientific_contract": "IDENTICAL_TO_R6_2_AND_R6_1",
+  "freeze_authority": {
+    "filename": "R6_3_FREEZE_AUTHORITY.json",
+    "sha256": "f1ac1630f696254340bc42864ef3e4ee29073c52ca2121ce89b3b71869e43cf8",
+    "github_commit": "18ff77da34a28fe60fd086d481898ee701630912",
+    "github_blob": "d920abdcfb438af9535e70b64a5f17ed0c385128",
+    "drive_file_id": "1OUrmQB_H0PkXRhsRqEov3IeJMXz5feyQ",
+    "library_file_id": "libfile_ca7025f1a0c881919b850f0fd19e78cd",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "preregistration": {
+    "filename": "PREREG_R6_3.md",
+    "sha256": "e0b06fe665a1e78f7aadf58d40a1fd6f9029f7c52822634c5ae75ee0e16eca33",
+    "github_commit": "b8291543019fe80f502544f83a2d9ce92b522cb8",
+    "github_blob": "9e9a646b39b7aebd5888bb480f7aea2f69f1fdc2",
+    "drive_file_id": "1r0-buiX8JoSQJNUBkLRaXstmMEoO1xiQ",
+    "library_file_id": "libfile_d7981e581fa081918f6bcb64f6eb357c",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "execution_harness": {
+    "sha256": "c5ea7b0d6cd64fc5555b53f5dc9d82b587fbda1c54d452c28b1ea6c40d2da91e",
+    "github_commit": "e55337a9b085cf6860f500657c90b90b0a60a4c6",
+    "github_blob": "e19990dabd5871829babcd22dcf134805c062360",
+    "drive_file_id": "1It-MRlFm8KNRuUERlafBOhoL8C_eTdP6",
+    "library_file_id": "libfile_7e216f075bac81919c17d23d5f4abd3b",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "population": ["09908", "11032", "12772", "13203", "14404", "14702", "14758", "15290"],
+  "input_gate": "136/136 PASS",
+  "phase1_rule": "FOR_EACH_FAMILY_V8_PROCESS_EXIT__GATE_PROCESS_EXIT__BASELINE_FINALIZE_PROCESS_EXIT__STATE_PROCESS_EXIT",
+  "all_8_regenerated_under_r6_3": true,
+  "r6_1_r6_2_states_role": "PARITY_OR_DIAGNOSTIC_ONLY__NOT_CANONICAL_R6_3_OUTPUT",
+  "truth_firewall": {
+    "sidecar_semantic_access_until_full_panel_freeze": "FORBIDDEN",
+    "teacher_geometry_as_mechanics_input": "FORBIDDEN",
+    "generator_only_json": "FORBIDDEN",
+    "training_or_retune": "FORBIDDEN",
+    "sealed21": "CLOSED",
+    "external10": "CLOSED"
+  },
+  "post_phase1_gate": "OBSERVABLE_PANEL_MANIFEST_R6_3_MUST_BE_GITHUB_DRIVE_LIBRARY_BYTE_VERIFIED_BEFORE_PHASE2_TRUTH_OPEN",
+  "rank2_gate": "R6_3_MUST_CLOSE_BEFORE_RANK2_R_EXPERIMENT",
+  "first_canonical_run_must_start_after_execution_authority_three_store_readback": true
+}

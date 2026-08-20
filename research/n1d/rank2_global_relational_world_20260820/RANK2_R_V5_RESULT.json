@@ -1,0 +1,48 @@
+{
+  "authorities": {
+    "contract_blob_sha": "db98ddf3b885ad28598592f8e30350dab198b1a5",
+    "preflight_sha256": "000edfe80d2e351ac71fda8db7bc24a5de6f1037a24858ec73c326bf61e51e5a",
+    "pretruth_freeze_authority_sha256": "4958392ac7da8ebd987f57339e2ed8526f50d0e6f49a380b7ab02b049e336bb6",
+    "pretruth_persistence_sha256": "b3d947f3c8d5262a2ed656c964dca030d719747625422883082635f479412dbf",
+    "pretruth_selection_sha256": "277946d94a3685222fb0cef4ad3b34d4c4656657309cccdc65204e01a2386887",
+    "raw_truth_evaluation_sha256": "6c05bb0e0e92c586bedb3bc6460ef12ec104cfcbefac921c3039667e23504af7",
+    "truth_evaluator_sha256": "250552f11458f024c8ba69401c8c2ca075b053414f2489184fe8bd19409554b8",
+    "v3a_selection_sha256": "82f7e934179bedb50146e60f85978567a1efcd81197acc1ab302ed68468d9b41",
+    "v5_source_sha256": "ea7ab996f881a08538c3cc049ca799e98783919255ed2c5214c01feada3161d7"
+  },
+  "controlled_change": "R only: six-anchor proposal-level address approximation -> all-visible-pair proposal-level address factor. G, V3-A proposal graph/evidence, panel, K legality, truth evaluator semantics, no-F/D policy, and no-XYZ policy remain frozen.",
+  "evaluator_parity": {"pass": true},
+  "external10": "CLOSED",
+  "interpretation": [
+    "Full-pair R contains additional useful global-address information: it improves the targeted rank-3 hard tail over V3-A on oracle-best hit, mean regret, median regret, and 10/15 carrier means.",
+    "The six-anchor approximation is not required for useful R signal, but full-pair equal treatment is not sufficient to close the hard tail.",
+    "Overall oracle-best hit regresses by only 3 rows while assigned mean and median regret improve materially; therefore the outcome is mixed overall rather than a clean population-wide identity PASS.",
+    "No geometry/XYZ collapse, F, D, teacher-forward input, retuning, or post-truth source mutation is authorized by this result."
+  ],
+  "next_hypothesis_boundary": "Before adding F/D, diagnose whether remaining/full-pair regressions arise from treating genuinely articulation-changing carrier pairs as equally invariant R constraints. Any next experiment must preregister one controlled pair-compatibility/gating change while preserving the frozen G/proposal evidence and evaluator.",
+  "overall": {
+    "G": {"abstain_n":0,"assigned_n":2288,"hit_n":490,"hit_rate":0.21416083916083917,"mean_regret_px_assigned":3.640371613838409,"median_regret_px_assigned":1.7272416852096728,"n":2288},
+    "V3A_anchor_R": {"abstain_n":4,"assigned_n":2284,"hit_n":679,"hit_rate":0.29676573426573427,"mean_regret_px_assigned":2.569349403209973,"median_regret_px_assigned":1.4062604064852646,"n":2288},
+    "V5_full_pair_R": {"abstain_n":4,"assigned_n":2284,"hit_n":676,"hit_rate":0.29545454545454547,"mean_regret_px_assigned":2.234475005354412,"median_regret_px_assigned":1.3338537410737232,"n":2288},
+    "V5_minus_V3A_hit_rate_pp": -0.13111888111888015,
+    "V5_vs_V3A_mean_regret_relative_change": -0.130334316320385,
+    "V5_vs_V3A_median_regret_relative_change": -0.051488803266893444,
+    "V5_vs_V3A_rows": {"both_abstain_n":3,"coverage_mismatch_n":2,"improve_n":396,"paired_n":2283,"same_n":1548,"worsen_n":339}
+  },
+  "population": {"applicable_rows":2288,"hardtail_n":23,"rank3_hardtail_carriers":15,"rank3_hardtail_view_rows":79},
+  "pretruth": {"abstain_total":4,"assigned_real_total":2352,"deterministic_repeat":"11032 byte-exact PASS","full_real_matching_views":63,"independent_K_parity":"64/64 PASS","legality":"64/64 PASS","objective_recompute_max_abs":0.0,"raster_byte_parity":"128/128 PASS","v3a_evidence_content_parity":"8/8 PASS","v3a_evidence_file_sha_parity":"8/8 PASS","visible_total":2356},
+  "rank3_hardtail": {
+    "G": {"abstain_n":0,"assigned_n":79,"hit_n":18,"hit_rate":0.22784810126582278,"mean_regret_px_assigned":4.665084409688869,"median_regret_px_assigned":1.5543076080365525,"n":79},
+    "V3A_anchor_R": {"abstain_n":0,"assigned_n":79,"hit_n":21,"hit_rate":0.26582278481012656,"mean_regret_px_assigned":3.2236907342392276,"median_regret_px_assigned":1.5204439867767832,"n":79},
+    "V5_full_pair_R": {"abstain_n":0,"assigned_n":79,"hit_n":26,"hit_rate":0.3291139240506329,"mean_regret_px_assigned":3.109649152226243,"median_regret_px_assigned":1.4065004375246044,"n":79},
+    "V5_minus_V3A_hit_rate_pp":6.329113924050633,
+    "V5_vs_V3A_carriers": {"abstained_n":0,"improved_n":10,"same_n":2,"worsened_n":3},
+    "V5_vs_V3A_mean_regret_relative_change":-0.03537609262629776,
+    "V5_vs_V3A_median_regret_relative_change":-0.07494097134990797,
+    "V5_vs_V3A_rows": {"both_abstain_n":0,"coverage_mismatch_n":0,"improve_n":20,"paired_n":79,"same_n":47,"worsen_n":12}
+  },
+  "schema":"RealSaS.N1D.Rank2R.V5.ResultSummary.v1",
+  "scientific_question":"Does full-pair same-view global relational address improve proposal identity/regret beyond descriptor G and V3-A six-anchor R, without teacher forward input or XYZ collapse?",
+  "sealed21":"CLOSED",
+  "status":"DIRECTIONALLY_SUPPORTED_HARDTAIL__OVERALL_HIT_MIXED__HARDTAIL_OPEN"
+}

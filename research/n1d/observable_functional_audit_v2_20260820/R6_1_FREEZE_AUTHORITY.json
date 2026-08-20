@@ -1,0 +1,58 @@
+{
+  "schema": "RealSaS.Research.FreezeAuthority.v3",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R6.1",
+  "status": "SOURCE_INPUT_FREEZE_PASS__TRUTH_SEMANTICALLY_CLOSED",
+  "scientific_change_from_R4": "NONE__CLEAN_E01_REPLICATION__PYTHON_3_13_IMPORT_COMPATIBILITY_ONLY",
+  "github_source_authority": {
+    "repository": "merynz/RealSaS-OPT",
+    "branch": "agent/n1d-observable-functional-audit-v2-20260820",
+    "base_source_commit": "a36133e6d97d7f848ce7b8cddcb43b6067e23596",
+    "base_source_root": "research/n1d/observable_functional_audit_v2_20260820/r3",
+    "builder_commit": "f61ce22a4f4b080a1a83febb8d954b21303520ab",
+    "builder_path": "research/n1d/observable_functional_audit_v2_20260820/r6_source/BUILD_R6_1_SOURCE.py",
+    "build_recipe_correction_commit": "5b73c26f4265d054e92aa3f5a887aa898c7c6954",
+    "base_evaluator_sha256": "3d39b0afc0213986dad02dc8965df3189d205076219a4016c4e04d9bd753fabc",
+    "r6_1_evaluator_sha256": "a986dba818ab63cbd6beac133c5e713698489ca037d5eeba71329e6b216828e3",
+    "observable_phase_sha256": "6eea236647e04a5566e93733f35c927639cc6407d4f62db80793edfa7e97dadf",
+    "prepare_runtime_sha256": "a194d60123e314ee5a5281cee37be35b60cfcc318054d135f636ca5326b88783",
+    "mechanics_metrics_sha256": "0164d0f6519c38ba6b9fd0f271f6794e13973418a00cbb8b4b721f4b1b670511"
+  },
+  "source_bundle": {
+    "filename": "REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_SOURCE_R6_1_20260820.zip",
+    "bytes": 41942,
+    "sha256": "b4ab69fbcc91d8c57ab5f36f151b37495e8d5366554f3189982406d0b60c282f",
+    "source_index_sha256": "dca7f6a6395db21ee69c72c296392b6eb7b019db330e9b5c88831ae3e0d13005",
+    "drive_file_id": "1Rohh3kFISaFMeNhkyl-nvd1yTxAIwrCl",
+    "library_file_id": "libfile_bb4e9d0fbedc819192ecc2239df1680c",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "input_authority": {
+    "panel": "e01",
+    "families": ["09908", "11032", "12772", "13203", "14404", "14702", "14758", "15290"],
+    "input_manifest_filename": "INPUT_MANIFEST_R6_1.json",
+    "input_manifest_bytes": 34171,
+    "input_manifest_sha256": "91acc078a9f6c41604b3f6f829c2cb239728d407f75872493a6712dd4ba7ca02",
+    "drive_file_id": "1mCRKu_fJYYXfqpCOrg-BZpSUpaINNVYy",
+    "library_file_id": "libfile_fc2443ef919c8191aaf23e5b623eb706",
+    "producer_hash_gate": "136/136 PASS",
+    "poseA": "64/64 PASS",
+    "poseB_e01": "64/64 PASS",
+    "sidecar_bytes": "8/8 PASS",
+    "sidecar_semantic_access": "NONE"
+  },
+  "preflight": {
+    "sha256": "e418e5ee10365b2c9bdba990710244fcc33db47a2161435effdb01852aa372dc",
+    "drive_file_id": "1JTUOWyQQ2K3_OGcf_yfmyBw1ZhTv9l7C",
+    "library_file_id": "libfile_8932435ac81c819191e3312587679acb",
+    "static_truth_firewall": "PASS",
+    "python_3_13_import_smoke": "PASS",
+    "decorator_replay": "PASS"
+  },
+  "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+  "gfdr_v2_sha256": "ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa",
+  "sealed21": "CLOSED",
+  "external10": "CLOSED",
+  "training_or_retune": "FORBIDDEN",
+  "run_authorized_before_prereg": false
+}

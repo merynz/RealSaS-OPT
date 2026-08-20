@@ -1,0 +1,53 @@
+{
+  "detailed_inventory": {
+    "drive_file_id": "1WIy6a-rhjoQGt2pjcfLeuJ4FtQLoXSG6",
+    "library_file_id": "file_0000000009e8824698483c7bb35cb894",
+    "payload_sha256": "a4355d13c592df3f86ec9ec311196c5d3b1b7af118454dfb5997a55fb65e816f",
+    "revision": "R6",
+    "sha256": "719d0573b14e218bb081e7e1858df4121f09200436909d3e665e3ac96c47252c",
+    "verified_files": 136
+  },
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "external10": "CLOSED",
+  "inputs": [
+    {
+      "authority": "DRIVE_AND_LIBRARY_READBACK_IDENTICAL",
+      "id": "INPUT_INVENTORY_R6",
+      "locator": "drive:1WIy6a-rhjoQGt2pjcfLeuJ4FtQLoXSG6 | library:file_0000000009e8824698483c7bb35cb894",
+      "role": "DETAILED_IMMUTABLE_INPUT_INVENTORY",
+      "sha256": "719d0573b14e218bb081e7e1858df4121f09200436909d3e665e3ac96c47252c"
+    },
+    {
+      "authority": "GOOGLE_DRIVE_MULTIINTERVENTION_CORPUS_V1__136_OF_136_BYTE_REPLAY_PASS",
+      "id": "OBSERVABLE_RASTER_SET",
+      "locator": "gdrive-folder:1-qseF9kjusXIN9ftYIuaBkqNMXVHLnIx; paths+file hashes in INPUT_INVENTORY_R6",
+      "role": "OBSERVABLE_PHASE_INPUT_SET_128_FILES",
+      "sha256": "efad989dd8a1929e2a9f49e1e94d7e16eda3aea75ca455a1faa052722e349e2c"
+    },
+    {
+      "authority": "GOOGLE_DRIVE_MULTIINTERVENTION_CORPUS_V1__OPAQUE_BYTE_HASH_VERIFIED_ONLY",
+      "id": "EVALUATOR_SIDECAR_SET",
+      "locator": "gdrive-folder:1-qseF9kjusXIN9ftYIuaBkqNMXVHLnIx; paths+file hashes in INPUT_INVENTORY_R6",
+      "role": "EVALUATOR_ONLY_SET_8_FILES__SEMANTIC_PARSE_LOCKED_UNTIL_TRUTH_OPEN",
+      "sha256": "8a4107673e65858378c8f0f11cf74704d372b40c4e2f9f1b11a6ae8605c1b033"
+    },
+    {
+      "authority": "GOOGLE_DRIVE",
+      "id": "N1D_CANONICAL_PROOF_PACK",
+      "locator": "external-gdrive:file:15iHg-9gIhEz7tuvtv0BpXVfI61AbBR7f",
+      "role": "CHECKPOINT_AND_CANONICAL_MODEL_SOURCE_CONTAINER",
+      "sha256": "0e28051cdb1b9f603749a907dd84d022daf44bcabd1bd9ec536d242bb95bf24c"
+    },
+    {
+      "authority": "GOOGLE_DRIVE",
+      "id": "HYBRID_V11_STAGEA_FREEZE_BUNDLE",
+      "locator": "external-gdrive:file:1DfvrHPLynM3ckITv1bikcoYl3_dnLlKs",
+      "role": "FROZEN_INFERENCE_SOURCE_CONTAINER",
+      "sha256": "e39e3f383a7f9be58003aa4763c7cb4e31d30f26088d288771d0deb7db8a9aa5"
+    }
+  ],
+  "schema": "RealSaS.Research.InputManifestAuthority.v2",
+  "sealed21": "CLOSED",
+  "training_or_retune": "FORBIDDEN",
+  "truth_firewall": "SIDECAR_SEMANTIC_PARSE_FORBIDDEN_UNTIL_OBSERVABLE_STATE_FROZEN_AND_PERSISTED__OPAQUE_BYTE_HASH_COPY_ALLOWED_FOR_PROVENANCE_ONLY"
+}

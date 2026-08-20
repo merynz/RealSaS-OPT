@@ -1,0 +1,73 @@
+{
+  "authorities": {
+    "contract_commit": "7668aff13fb87579bcfdbe113a18c5a46848be34",
+    "evaluator_commit": "0f09a9ddd6a015555e89906b8199eff64d9497ab",
+    "evaluator_sha256": "c49a33f5d83ef6eee4cf25b510c5cc8e17b064a41897d835e38258ce81732091",
+    "recovery_preflight_commit": "a3c33011a460f23b64f9a3e5201435b91cb26ce8",
+    "v3a_decision_commit": "cf5f4b425953750c726c1cc513ba2929d1bbe4fb",
+    "world_authority_correction_commit": "2de5512b2d4cbba6f27edd5abfb922c73c458668",
+    "world_authority_sha256": "d57e61b59c1126a9597759350ef2756218446a43e833018106e5afcdb546d3e0"
+  },
+  "family_result_sha256": {
+    "11032": "b9a6e2db696452eb3069cf8a67096bdfe86f56ab1d384b6c84249939ada16f40",
+    "12772": "4c197bbeafe2798c7988eb97661f60a4ff320fb7f6dd0a116079e358bd284278",
+    "13203": "fdef9322674005c82e7c4304f58b1de0dbedda9472d96f9aadfa6267e813ee57",
+    "14404": "c8a0065dfc1b8b99345b52b22ddaa7d4ff3d9fe91d679656437c64c1a22add14",
+    "14702": "26159eae8c5f1858f6b62824fd4a24e4c2fb8020d3749f5e1c38dc48800af102",
+    "14758": "769a77a0d4d06dbb68e82084ce6d7fd90ced52808021380c245115074d0a3b86",
+    "15290": "3e6eea361001936bea6b84f6be2b245a6bcbeace1b05d4b78142e9a6e827c35d",
+    "9908": "38aa00108c00b1ea7d6ba2a30aed78be247c2c0caccc7483580301ea68015881"
+  },
+  "hardtail_all": {
+    "geometry_improved_n": 14,
+    "material_degrade_n": 16,
+    "material_improve_n": 0,
+    "mean_baseline_composite": 0.5119931884047848,
+    "mean_v3b_composite": 1.2963343424773481,
+    "median_baseline_composite": 0.534204636221012,
+    "median_v3b_composite": 0.8489320665115844,
+    "n": 23,
+    "strict_mechanical_equivalent_n": 0
+  },
+  "hardtail_population_exact_r6_3_parity": true,
+  "hardtail_rank3": {
+    "geometry_improved_n": 9,
+    "material_degrade_n": 11,
+    "material_improve_n": 0,
+    "mean_baseline_composite": 0.4942658047289736,
+    "mean_v3b_composite": 1.3427195776285932,
+    "median_baseline_composite": 0.4883371120384433,
+    "median_v3b_composite": 1.2116654311718653,
+    "n": 15,
+    "strict_mechanical_equivalent_n": 0
+  },
+  "hardtail_rankdef": {
+    "geometry_improved_n": 5,
+    "material_degrade_n": 5,
+    "material_improve_n": 0,
+    "mean_baseline_composite": 0.5452320327969311,
+    "mean_v3b_composite": 1.2093620265687635,
+    "median_baseline_composite": 0.5481256708587343,
+    "median_v3b_composite": 0.8120739719548868,
+    "n": 8,
+    "strict_mechanical_equivalent_n": 0
+  },
+  "interpretation": "Frozen V3-A proposal assignments improve proposal identity directionally, but collapsing each view to one assigned proposal before candidate_pool is mechanically destructive. Negative V3-B does not invalidate the V3-A R signal.",
+  "reliable_active_all": {
+    "geometry_improved_n": 63,
+    "material_degrade_n": 161,
+    "material_improve_n": 0,
+    "mean_baseline_composite": 0.49459144709705516,
+    "mean_v3b_composite": 1.388903617678477,
+    "median_baseline_composite": 0.48213253387471444,
+    "median_v3b_composite": 1.0891743352763432,
+    "n": 202
+  },
+  "schema": "RealSaS.N1D.Rank2R.V3B.Result.v1",
+  "status": "COMPLETE__FAIL_GEOMETRY_LIFT",
+  "world": {
+    "baseline_exact_n": 7,
+    "changed_n_gt_1e_4": 505,
+    "pooled_carriers": 512
+  }
+}

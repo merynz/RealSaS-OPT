@@ -1,0 +1,22 @@
+{
+  "schema": "RealSaS.N1D.Rank2GlobalRelationalWorld.V1.Preflight.v1",
+  "status": "PASS",
+  "contract_commit": "244f6c81c3eb5e7d165eba9f92edb08ffbc23eac",
+  "source_commit": "95b01193129157ecf5b8dc7b9d41766435230efa",
+  "source_git_blob": "d6de97f6fc1f5f93511419fa6ab9dba6540e5b4a",
+  "source_sha256": "47fd12cd0d2370a10c1249573777f6266cc9df71b02540e4634cf33246941c6d",
+  "observable_panel_manifest_sha256": "b5158b4133f1b9b24d84fee30b9c64bcf5ac9a785215279d7733aa86afbeffef",
+  "episode": "e01",
+  "families": [9908,11032,12772,13203,14404,14702,14758,15290],
+  "sealed21": "CLOSED",
+  "external10": "CLOSED",
+  "truth_access": "NONE",
+  "tests": {
+    "py_compile": "PASS",
+    "dynamic_shortest_path_vs_bruteforce_max_abs": 2.220446049250313e-16,
+    "dynamic_shortest_path_tolerance": 1e-10,
+    "deterministic_best_world_repeat_9908": "PASS",
+    "teacher_or_sidecar_forward_access": "NONE"
+  },
+  "note": "Exact dynamic shortest-path update is a computation optimization only; V1 contract/objective is unchanged. GitHub blob is byte-identical to the executable used after removing non-semantic inline comments."
+}

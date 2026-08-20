@@ -1,0 +1,39 @@
+{
+  "candidate_creation_from_teacher": "FORBIDDEN",
+  "contract_commit": "668718e9405ffb2509bf2ac2794ba057e88e2ab2",
+  "deterministic_repeat": "PASS",
+  "deterministic_repeat_exact_json": true,
+  "deterministic_repeat_family": 13203,
+  "dynamic_shortest_path_gate_le_1e_12": "PASS",
+  "dynamic_shortest_path_max_abs_error": 1.1102230246251565e-16,
+  "evaluation_status": "CLOSED",
+  "family_13203_local_counterfactual_min_margin": 0.6069149010418329,
+  "family_13203_restart_agreement": "12/12",
+  "observable_panel_manifest_sha256": "b5158b4133f1b9b24d84fee30b9c64bcf5ac9a785215279d7733aa86afbeffef",
+  "rank_counts": {
+    "11032": [62, 2],
+    "12772": [64, 0],
+    "13203": [56, 8],
+    "14404": [57, 7],
+    "14702": [60, 4],
+    "14758": [61, 3],
+    "15290": [63, 1],
+    "9908": [63, 1],
+    "pooled": [486, 26]
+  },
+  "rank_mask_contract_parity": "PASS",
+  "schema": "RealSaS.N1D.Rank2R.V2.Preflight.v1",
+  "source_commit": "785a3e64f159aa66dbf1b7b34988521ffbe3e2d4",
+  "source_git_blob": "2345c1a5e5f7e5384e8c7dbb4d99ce48daf986cd",
+  "source_sha256": "1cf8d8fff72cd8596207a605e7a1b687096e15178dcc81f0f28b395c0b1fe5dd",
+  "static_forbidden_inputs": [
+    "teacher sidecar semantics",
+    "teacher 3D points/normals/visibility",
+    "joints",
+    "parents",
+    "weights",
+    "intervention metadata"
+  ],
+  "status": "PASS",
+  "truth_access": "NONE"
+}

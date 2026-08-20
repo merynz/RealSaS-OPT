@@ -1,0 +1,15 @@
+{
+  "schema": "RealSaS.Research.FailedExecutionAttempt.v1",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "attempt": "R1_EVALUATION_IMPORT",
+  "status": "INFRASTRUCTURE_FAIL_BEFORE_TRUTH_SEMANTIC_ACCESS__NO_SCIENTIFIC_RESULT",
+  "result_file_created": false,
+  "sidecar_truth_function_reached": false,
+  "failure_stage": "evaluation_phase module import",
+  "exception": "AttributeError in dataclasses because dynamically-loaded frozen GFDR module was not registered in sys.modules before exec_module",
+  "evaluation_log_sha256": "02cd4862dcbd9855fb3698c93866763c3f7836c33f8ed39301e221c2788acff9",
+  "source_bundle_sha256": "3bd133e805880ccca2e6a177778e3e931064eb0178da5a2ac5b02c07f1595278",
+  "observable_state_bundle_sha256": "95dd04d0a23ff925f155457681f66cc21c5345397306e29a97b21bd71ee2d838",
+  "scientific_interpretation_authorized": false,
+  "next_action": "new source revision; no monkey patch; repeat persistence and prereg gates"
+}

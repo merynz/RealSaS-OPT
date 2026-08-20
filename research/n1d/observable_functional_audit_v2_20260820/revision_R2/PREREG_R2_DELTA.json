@@ -1,0 +1,25 @@
+{
+  "schema": "RealSaS.Research.PreregRevisionDelta.v1",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "revision": "R2",
+  "status": "PREREG_R2_FROZEN__TRUTH_SEMANTICALLY_CLOSED",
+  "base_prereg": {
+    "commit": "40cd483f1b5f551a9a57875796dec6356c08324f",
+    "path": "research/n1d/observable_functional_audit_v2_20260820/PREREG.md",
+    "sha256": "362e194a16edddc6cf29e3086c63eb380190bf41070c9fda9a9dc0e60ca28018"
+  },
+  "full_r2_prereg": {
+    "sha256": "a4fdb68058ecf2c6b3b21edaf4ea3e8cd173230564be7f7cb2dbbd8c3e95d75c",
+    "drive_file_id": "1X-hOGY_Ti-SJNb__kxXmjL31SPXm3CMr",
+    "library_file_id": "file_000000003aa08246b05d54271f95751d"
+  },
+  "deterministic_changes": [
+    "status PREREG_FROZEN__TRUTH_SEMANTICALLY_CLOSED -> PREREG_R2_FROZEN__TRUTH_SEMANTICALLY_CLOSED",
+    "source bundle SHA 3bd133e805880ccca2e6a177778e3e931064eb0178da5a2ac5b02c07f1595278 -> a25e288a465722b8a396a5e33392edf1d5795187004efff388632cbcc4c21832",
+    "source manifest authority commit 330cccea2e8fc18c1815bc99dae27b1affba6c6b -> 0784818456edc1a128c6fe878601baac695b5b68",
+    "insert R2 provenance note immediately before Phase separation / truth firewall"
+  ],
+  "inserted_provenance_note": "R1 produced no scientific result: evaluation failed during dynamic GFDR module import before `_truth()` or any semantic sidecar access. R2 changes only evaluator module registration for Python 3.13 (`sys.modules[name]=mod` before `exec_module`, with rollback on failure). `observable_phase.py`, `mechanics_metrics.py`, all thresholds, witness definition, counterfactual selection, GFDR source, checkpoint, candidate construction and decision tree are unchanged. R1 failed-attempt authority: `run/FAILED_ATTEMPT_R1.json`.",
+  "scientific_metrics_thresholds_population_and_decision_tree_changed": false,
+  "semantic_truth_access_before_r2_prereg_freeze": false
+}

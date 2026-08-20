@@ -1,0 +1,33 @@
+{
+  "schema": "RealSaS.N1D.ObservableFunctionalAuditV2.ObservableStateAuthority.R2",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R2",
+  "status": "OBSERVABLE_PREDICTION_R2_FROZEN__THREE_STORE_PASS__TRUTH_OPEN_AUTHORIZED",
+  "truth_access_during_prediction": "NONE",
+  "source_bundle_sha256": "a25e288a465722b8a396a5e33392edf1d5795187004efff388632cbcc4c21832",
+  "input_inventory_sha256": "719d0573b14e218bb081e7e1858df4121f09200436909d3e665e3ac96c47252c",
+  "prereg_r2_sha256": "a4fdb68058ecf2c6b3b21edaf4ea3e8cd173230564be7f7cb2dbbd8c3e95d75c",
+  "observable_state_bundle": {
+    "sha256": "3ec55b69ca1d3c70e3aa2130ee55b6b3519b1da8cd79f2cf9ddc7cfc8205100c",
+    "size_bytes": 940669,
+    "drive_file_id": "1GB5_nZcL4WudivhBi84sK9FICEfaZj5C",
+    "library_file_id": "file_0000000059cc8246924945fcc0ae12c5"
+  },
+  "detailed_freeze_manifest": {
+    "sha256": "025d4579dfe9aa1244afd2d3923dea37075cacc17ee9d18fa131ae75e616aa74",
+    "drive_file_id": "1s4E0bHOaPYx16J9Dvr1aEXxP1YU2t5yl",
+    "library_file_id": "file_000000005b5c824689463f016361a5e7"
+  },
+  "panel_manifest_file_sha256": "bf7081b0a077c6d2d345d60b0ffe5980343fc16a0012db2d4c0e07992ba69b58",
+  "guards": {
+    "families": 8,
+    "r1_r2_observable_state_bit_exact": "8/8",
+    "raster_hashes": "128/128 PASS",
+    "checkpoint_hash": "8/8 PASS",
+    "V_B_decorator_replay": "8/8 BIT_EXACT",
+    "N_B_decorator_replay": "8/8 max_abs=0.0"
+  },
+  "sealed21": "CLOSED",
+  "external10": "CLOSED",
+  "training_or_retune": "FORBIDDEN"
+}

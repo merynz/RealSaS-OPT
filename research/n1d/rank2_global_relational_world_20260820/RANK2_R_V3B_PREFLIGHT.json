@@ -1,0 +1,24 @@
+{
+  "candidate_pool_replay_family": 9908,
+  "candidate_pool_replay": {
+    "carriers": 64,
+    "xyz_exact": true,
+    "quantized_order_exact": true,
+    "max_reproj_abs": 3.814697265625e-06,
+    "max_desc_abs": 4.470348358154297e-08,
+    "reproj_atol": 1e-05,
+    "desc_atol": 1e-06
+  },
+  "contract_commit": "7668aff13fb87579bcfdbe113a18c5a46848be34",
+  "deterministic_repeat": "PASS_BYTE_EXACT",
+  "deterministic_world_sha256": "80dd3a065f2ae0e8ec514a242e78d8a508f9e0d2dbebd57d35272da6dcada632",
+  "deterministic_metadata_sha256": "330084ea6dc5bc96733ffaac05157d591cb2a3e2bf8b9c78ba3d70e6e25a2de9",
+  "observable_panel_manifest_sha256": "b5158b4133f1b9b24d84fee30b9c64bcf5ac9a785215279d7733aa86afbeffef",
+  "schema": "RealSaS.N1D.Rank2R.V3B.Preflight.v1",
+  "source_commit": "07cd92ce9827aeec77a078208430b10f658b2591",
+  "source_git_blob": "cbf33a9a9a387f8bbea3bd42bf0d48fedf4f02bf",
+  "source_sha256": "5a6ca40e834822c5da8c1fef64ea8d71e104902695905eb60ac34642f4b85d24",
+  "status": "PASS",
+  "truth_access": "NONE",
+  "v3a_selection_sha256": "82f7e934179bedb50146e60f85978567a1efcd81197acc1ab302ed68468d9b41"
+}

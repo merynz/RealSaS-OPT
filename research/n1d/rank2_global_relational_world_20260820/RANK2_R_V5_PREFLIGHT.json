@@ -1,0 +1,35 @@
+{
+  "contract_blob_sha": "db98ddf3b885ad28598592f8e30350dab198b1a5",
+  "external10": "CLOSED",
+  "gates": {
+    "all_assignments_frozen": "PASS_64_OF_64",
+    "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "deterministic_repeat": "PASS_BYTE_EXACT_11032",
+    "independent_max_matching_parity": "PASS_64_OF_64",
+    "injectivity_fixed_cardinality": "PASS_64_OF_64",
+    "objective_recompute_parity": "PASS_64_OF_64",
+    "observable_phase_sha256": "6eea236647e04a5566e93733f35c927639cc6407d4f62db80793edfa7e97dadf",
+    "raster_byte_parity": "PASS_128_OF_128",
+    "v3a_evidence_content_digest_parity": "PASS_8_OF_8",
+    "v3a_evidence_file_sha_parity": "PASS_8_OF_8"
+  },
+  "schema": "RealSaS.N1D.Rank2R.V5.PreTruthPreflight.v1",
+  "sealed21": "CLOSED",
+  "selection_audit": {
+    "abstain_total": 4,
+    "assigned_real_total": 2352,
+    "deterministic_repeat_family": 11032,
+    "deterministic_repeat_sha256": "ba2d20bf6e5772d28ffb61fcf8dda3b5437007ab145204566e3ff783a916dde7",
+    "families": 8,
+    "family_views": 64,
+    "full_real_matching_views": 63,
+    "matching_independent_parity_views": 64,
+    "objective_recompute_max_abs": 0.0,
+    "visible_total": 2356
+  },
+  "selection_content_sha256": "2f3408ac1a99c15cd8a4e313abbf3cddfb0f502b8fc91e0c69a937a25ed3f083",
+  "selection_sha256": "277946d94a3685222fb0cef4ad3b34d4c4656657309cccdc65204e01a2386887",
+  "source_sha256": "ea7ab996f881a08538c3cc049ca799e98783919255ed2c5214c01feada3161d7",
+  "status": "PASS__TRUTH_MAY_OPEN_AFTER_FREEZE_PERSISTENCE",
+  "truth_access": "NONE"
+}

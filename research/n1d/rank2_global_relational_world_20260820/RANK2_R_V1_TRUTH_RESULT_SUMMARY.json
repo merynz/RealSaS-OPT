@@ -1,0 +1,9 @@
+{
+  "schema":"RealSaS.N1D.Rank2GlobalRelationalWorld.V1.TruthResult.v1",
+  "population_parity":{"r6_3_hardtail_exact":true,"hardtail_n":23,"families_with_witness":5},
+  "hardtail":{"baseline_composite_median":0.534204636221012,"v1_composite_median":0.7859681387633447,"composite_delta_median_baseline_minus_v1":-0.41637169369504945,"relative_improvement_median":-1.1265575954133837,"material_mechanical_improve_n":0,"material_mechanical_improve_fraction":0.0,"material_mechanical_degrade_n":15,"material_mechanical_degrade_fraction":0.6521739130434783,"geometry_improved_n":15,"geometry_improved_fraction":0.6521739130434783,"teacher_nearest_selected_n":0,"teacher_nearest_selected_fraction":0.0},
+  "reliable_active":{"n":202,"material_improve_n":0,"material_improve_fraction":0.0,"material_degrade_n":148,"material_degrade_fraction":0.7326732673267327},
+  "per_family":{"9908":{"n":0,"material_improve_n":0,"material_degrade_n":0},"11032":{"n":4,"material_improve_n":0,"material_degrade_n":4},"12772":{"n":1,"material_improve_n":0,"material_degrade_n":1},"13203":{"n":0,"material_improve_n":0,"material_degrade_n":0},"14404":{"n":7,"material_improve_n":0,"material_degrade_n":7},"14702":{"n":3,"material_improve_n":0,"material_degrade_n":0,"median_composite_delta":0.07816340986093762},"14758":{"n":8,"material_improve_n":0,"material_degrade_n":3},"15290":{"n":0,"material_improve_n":0,"material_degrade_n":0}},
+  "authorities":{"v1_source_sha256":"47fd12cd0d2370a10c1249573777f6266cc9df71b02540e4634cf33246941c6d","v1_evaluator_sha256":"cec002cffbf7e53212e447c6d0f344b3b33c24c203360ad4da12ae706f6e3687","local_selection_index_sha256":"9135d9dcbbc4651bdc73be185dab9661f1e8a0651965fba61aa57281b2f0be8a"},
+  "decision":"FAIL_BUT_DIRECTIONALLY_BETTER_THAN_V0__MIXED_SINGLETON_SET_FORMULATION_REQUIRED"
+}

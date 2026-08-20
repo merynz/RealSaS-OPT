@@ -1,0 +1,85 @@
+{
+  "schema": "RealSaS.N1D.Rank2G.G1.GeometryGroundedProposal.Prereg.v1",
+  "date": "2026-08-20",
+  "status": "PREREG_FROZEN__CAL16_TRUTH_CLOSED",
+  "scientific_question": "Does adding explicit observation-only multi-view reprojection consistency to proposal-level G improve correspondence selection beyond frozen V5 descriptor-G + full-pair global-address R on family-disjoint cal16, without changing proposal support, R, F/D, or collapsing geometry?",
+  "causal_hypothesis": "The current raster front door contains useful geometry in the top-k proposal graph, but descriptor-only G fails to expose multi-view physical consistency to the proposal-level global solver. A deterministic geometry-grounded G factor should recover additional correct correspondences while R remains unchanged.",
+  "development_evidence_only": {
+    "surface": "already-open dev e01 eight-family Rank2 panel",
+    "use": "post-hoc hypothesis formation only; no threshold/weight fitting",
+    "observations": {
+      "frozen_v5_hardtail_hit": "26/79",
+      "exact_refined_reprojection_selector_hardtail_hit": "33/79",
+      "reprojection_rescues_v5_misses": 19,
+      "v5_rescues_reprojection_misses": 12
+    }
+  },
+  "prospective_surface": {
+    "split": "canonical N1D cal16",
+    "family_rule": "ranked train families positions 16:32 under SHA256('REALSAS_V1_2P_INTERNAL_SPLIT|fid')",
+    "families": [14167,13407,11710,10953,13446,12488,13382,13877,16436,14737,13013,13516,13482,11997,11165,14630],
+    "episode": "e01",
+    "missing_episode_policy": "ABORT; no episode substitution",
+    "truth_policy": "No sidecar semantic read until all 16 raster-only proposal-evidence files and G1/V5 selections are frozen and hashed."
+  },
+  "frozen_inputs": {
+    "n1d_checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "proposal_extractor": "exact V3-A top4 global-B-foreground descriptor extractor semantics",
+    "known_cameras": "canonical orthographic yaw 0,45,...315 degrees",
+    "proposal_support_k": 4,
+    "v5_r_semantics": "full same-view all-visible-pair global relational address",
+    "v5_solver": "maximum-real-matching cardinality K; 16 deterministic restarts; strict-descent move/swap/real-abstain exchange",
+    "sealed21": "CLOSED",
+    "external10": "CLOSED"
+  },
+  "controlled_change": {
+    "name": "proposal-level G only",
+    "v5_G": "stable rank of descriptor score descending within each carrier/view proposal row",
+    "g1_geometry_raw": "For each proposal q in carrier/view row: enumerate q paired with every proposal in every other usable view; frozen orthographic rank>=3 triangulation; reject nonfinite or abs(xyz)>0.75; evaluate mean nearest-proposal reprojection over all usable views; re-triangulate from all nearest proposals and re-evaluate; keep lexicographically best (mean reprojection ASC, support<=4px DESC, support<=2px DESC, mean descriptor support DESC).",
+    "g1_geometry_rank": "stable rank of g1_geometry_raw mean reprojection ascending within carrier/view row",
+    "g1_G_cost": "0.5 * descriptor_rank + 0.5 * geometry_rank",
+    "R": "BYTE/FORMULA UNCHANGED from V5",
+    "objective": "E = mean(G1_G_cost over real assignments) + mean(V5 full-pair R over real-assigned pairs)"
+  },
+  "explicitly_forbidden": [
+    "teacher proximity in forward selection",
+    "sidecar semantic access before selection freeze",
+    "post-truth weight/threshold tuning",
+    "reciprocal descriptor factor in G1",
+    "F or D",
+    "XYZ point collapse or new geometry output",
+    "new proposal creation or pruning",
+    "camera residual fitting",
+    "sealed21 or external10 access"
+  ],
+  "pretruth_gates": [
+    "all cal16 e01 raster inputs exist and are hash inventoried",
+    "checkpoint/source hashes match frozen authority",
+    "proposal evidence contains only raster/model-derived arrays and truth_access=NONE",
+    "V5 R pair-factor parity test passes on fixed synthetic and dev replay",
+    "geometry projection/triangulation parity with frozen v5_seed_geometry_frozen.py <= 1e-4 px / 1e-6 xyz",
+    "independent K parity, injectivity, objective recomputation, deterministic repeat pass",
+    "all cal16 V5 baseline and G1 assignments frozen before truth"
+  ],
+  "evaluation": {
+    "primary_rows": "all reliable truth-visible carrier/view rows for which the frozen proposal row is nonempty",
+    "comparators": ["descriptor G top1", "frozen-formula V5 full-pair R with descriptor G", "G1 geometry-grounded G + unchanged V5 R"],
+    "metrics": ["oracle-best proposal hit rate", "mean proposal regret px", "median proposal regret px", "per-family mean regret direction"],
+    "observable_disagreement_stratum": "pretruth rows where descriptor-rank top proposal differs from geometry-rank top proposal",
+    "pass_rule": {
+      "overall_hit_delta_vs_V5_min": 0.03,
+      "overall_mean_regret_ratio_vs_V5_max": 0.90,
+      "disagreement_hit_delta_vs_V5_min": 0.08,
+      "family_mean_regret_nonworse_count_min": 12
+    },
+    "failure_rule": "If any primary pass-rule item fails, G1 is FAIL as formulated. No same-surface retune."
+  },
+  "next_if_pass": "Preregister G2: add observation-only reciprocal/cycle correspondence to G while preserving G1 geometry and V5 R; then test on a separately frozen surface before sealed qualification.",
+  "next_if_fail": "Do not rescue G1 on cal16. Move to a new learned camera-aware cross-view proposal-fusion treatment (MV-TAP/V-DPM style), with G1 explicit geometry retained as deterministic authority, on a new preregistered split.",
+  "sota_design_lineage": [
+    "MapAnything: explicit calibration/ray/pose inputs instead of rediscovering known cameras",
+    "MV-TAP: camera-ray embedding + time/view/space attention + visibility/confidence iterative tracking",
+    "V-DPM: target-time-conditioned frame/global attention for geometric persistence",
+    "GGPT: explicit match/cycle/epipolar/triangulation/reprojection geometric authority before learned 3D refinement"
+  ]
+}

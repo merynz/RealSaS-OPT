@@ -1,0 +1,81 @@
+{
+  "15290_diagnostic": {
+    "diagnostic_only": true,
+    "fresh_seed_predict_completed": true,
+    "fresh_seed_predict_total_score": 0.7018809482497992,
+    "gate_abs": 0.5685135608380516,
+    "gate_model_seconds": 1.686,
+    "gate_signed": 0.24437616146785138,
+    "switch": true,
+    "v8_seconds": 27.72
+  },
+  "r6_3_harness_sha256": "c5ea7b0d6cd64fc5555b53f5dc9d82b587fbda1c54d452c28b1ea6c40d2da91e",
+  "records": [
+    {
+      "checks": {
+        "baseline_json": {
+          "byte_exact": true,
+          "new_sha256": "87c9fbe9f7335ed82beb4ecff9d4f3c1a21181c85216b1fc7e5771e94464a5d5",
+          "reference_sha256": "87c9fbe9f7335ed82beb4ecff9d4f3c1a21181c85216b1fc7e5771e94464a5d5"
+        },
+        "baseline_npz": {
+          "byte_exact": true,
+          "new_sha256": "c8497ba782f194b0601ef63e82ef19944e83e0f7bf48b7f4a5063c25ee8a7c9e",
+          "reference_sha256": "c8497ba782f194b0601ef63e82ef19944e83e0f7bf48b7f4a5063c25ee8a7c9e"
+        },
+        "state_json": {
+          "byte_exact": true,
+          "new_sha256": "cdd3aa4a5dd8e69798c0c963387df1ddf2a6c836f8b296a03f6ad5f86a0d8ab2",
+          "reference_sha256": "cdd3aa4a5dd8e69798c0c963387df1ddf2a6c836f8b296a03f6ad5f86a0d8ab2"
+        },
+        "state_npz": {
+          "byte_exact": true,
+          "new_sha256": "482181d79ab45c4f12d246a1eaa0a7960d59e2b5c73aeb7e83c86d8b067b7ccd",
+          "reference_sha256": "482181d79ab45c4f12d246a1eaa0a7960d59e2b5c73aeb7e83c86d8b067b7ccd"
+        }
+      },
+      "family": "9908",
+      "pass": true,
+      "route_reference": "V8_BASE"
+    },
+    {
+      "checks": {
+        "baseline_json": {
+          "byte_exact": true,
+          "new_sha256": "56054a9e67acbfa2f5cfd67fd002fe7ba1d65a5485a715b816c643dd1667ca4a",
+          "reference_sha256": "56054a9e67acbfa2f5cfd67fd002fe7ba1d65a5485a715b816c643dd1667ca4a"
+        },
+        "baseline_npz": {
+          "byte_exact": true,
+          "new_sha256": "aa6332a01b679272355f508db452cb3eb060b38ffcc39220909b25c125e60d2a",
+          "reference_sha256": "aa6332a01b679272355f508db452cb3eb060b38ffcc39220909b25c125e60d2a"
+        }
+      },
+      "family": "12772",
+      "pass": true,
+      "route_reference": "SEED_BASIN_WSEED"
+    },
+    {
+      "checks": {
+        "baseline_json": {
+          "byte_exact": true,
+          "new_sha256": "1d5f3442faff94698bbd2617e772f2d67b2fcf0ade94b3c614846608b9d7ac09",
+          "reference_sha256": "1d5f3442faff94698bbd2617e772f2d67b2fcf0ade94b3c614846608b9d7ac09"
+        },
+        "baseline_npz": {
+          "byte_exact": true,
+          "new_sha256": "a4a27d8dec992846def61e53e514b8ace2ea77c42917844575622b146ddea286",
+          "reference_sha256": "a4a27d8dec992846def61e53e514b8ace2ea77c42917844575622b146ddea286"
+        }
+      },
+      "family": "13203",
+      "pass": true,
+      "route_reference": "SEED_BASIN_WSEED"
+    }
+  ],
+  "reference_revision": "R6.2",
+  "schema": "RealSaS.N1D.ObservableFunctionalAuditV2.R6_3ExecutionParity.v1",
+  "status": "PASS",
+  "teacher_outcome_access": "NONE",
+  "truth_semantics": "CLOSED"
+}

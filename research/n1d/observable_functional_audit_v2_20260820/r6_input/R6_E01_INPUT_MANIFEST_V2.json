@@ -1,0 +1,167 @@
+{
+  "corpus_drive_folder_id": "1-qseF9kjusXIN9ftYIuaBkqNMXVHLnIx",
+  "episode_index_declared_content_sha256": "907bca7323c8e7b3832ad276d44af9a5733e606b12c763a492775387f4afb765",
+  "episode_index_drive_file_id": "1XjdMi_-C8Kkuk0TFzeiLZt2IwYot-OpJ",
+  "episode_index_file_sha256": "e1a6a3e00fc3ac38858e3ac649777a4025dba442a4ced5efd916a37200c69362",
+  "external10": "CLOSED",
+  "families": [
+    {
+      "e01_episode_folder_id": "13YDSszaDufhDP54lie7igsqot_TH9y0C",
+      "e01_poseB_folder_id": "1bCmAMdqlgm3rFSMdN33NnlPCHwt3q8pZ",
+      "e01_sidecar_drive_file_id": "17GKkL6bAHFP60EeFrjnGzBN2ci4fracp",
+      "e01_sidecar_sha256": "c0b09ee416540f565251d22cc36bb01872c79faff9149eca80787a14a450855d",
+      "family_id": 9908,
+      "family_manifest_declared_content_sha256": "fa12ce6cfff917158d582352eda2df83c2ffdc0db3419a108b3cc1fe9b6aa463",
+      "family_manifest_drive_file_id": "1cs0t5aNuRsv_9ByVzPkyMjBvA4X4Mk0w",
+      "family_manifest_file_sha256": "0c70eeca068747c9479968bed53fa800dc462b48a19b944d7793e16172bfa832",
+      "family_prereg_hash": "0bd19642a9db0e67d25fb9adbed891d76f48667cef03549acecf2ad9a83917c2",
+      "poseA_folder_id": "1JOfCp9kf0hDqTvJXP00PFttVaz21BXsa",
+      "raster_hash_authority": "verified_family_manifest.poseA_hashes + verified_family_manifest.episodes[e01].poseB_hashes",
+      "split": "dev"
+    },
+    {
+      "e01_episode_folder_id": "1l7HViDLKYEe9_DZA1LekB9McELUnlim3",
+      "e01_poseB_folder_id": "1kItRfl0hNTbKkjlmENFHYaX6fBrzVboF",
+      "e01_sidecar_drive_file_id": "1t9g_p0QnCX5_1yf0YERrtwtMGH1nmsdx",
+      "e01_sidecar_sha256": "42a260c62cc3e622c71a4c739b359afcae7eac17e328858e4e0121bbd5612a7f",
+      "family_id": 11032,
+      "family_manifest_declared_content_sha256": "c2581a1e57cd899160148b32e6b7998c4d95cee4bf378e3d82aa2d4deda5032a",
+      "family_manifest_drive_file_id": "1fhTrnGs4fPWRYXu1lYF_Dt9s5PPh6wr8",
+      "family_manifest_file_sha256": "3f541650e0b9a30469e56279d32313e6f7d12dd7b5c98c084671fe58aa3e9ce9",
+      "family_prereg_hash": "0bd19642a9db0e67d25fb9adbed891d76f48667cef03549acecf2ad9a83917c2",
+      "poseA_folder_id": "1BweAFvR9h3g_vt_TAOBS3oBohMPBBmKq",
+      "raster_hash_authority": "verified_family_manifest.poseA_hashes + verified_family_manifest.episodes[e01].poseB_hashes",
+      "split": "dev"
+    },
+    {
+      "e01_episode_folder_id": "1E1L45AmbRIjP4Iq7QhjTALy6ZKuq_6iU",
+      "e01_poseB_folder_id": "1vSl5lenBZsXuZMDmmEP8-5oqszWg62-Q",
+      "e01_sidecar_drive_file_id": "16o8Q5RLVQ6EUaGUa5Y0ugNunExhzrRxt",
+      "e01_sidecar_sha256": "ea62b7a60fcb2686f241969fde45ae2fd6ee5da2a05d24f7a113dbfa8dad5303",
+      "family_id": 12772,
+      "family_manifest_declared_content_sha256": "1b5812820e4165348e0c9f55207a50421db35a55632290b9f996f2029484b7f7",
+      "family_manifest_drive_file_id": "1IRD1auaLrAnpf_l73o7AY3dN7GeZIEuV",
+      "family_manifest_file_sha256": "4c7f19eacca11642fce628f09891045844618ee6b797081332750a2282cf3c1b",
+      "family_prereg_hash": "0bd19642a9db0e67d25fb9adbed891d76f48667cef03549acecf2ad9a83917c2",
+      "poseA_folder_id": "1KaRg6b-9DuSB5bASDJc9jZBXsk39eju1",
+      "raster_hash_authority": "verified_family_manifest.poseA_hashes + verified_family_manifest.episodes[e01].poseB_hashes",
+      "split": "dev"
+    },
+    {
+      "e01_episode_folder_id": "1X53kI4758tl3nekgd33HT6SzeMd1rZvx",
+      "e01_poseB_folder_id": "11uOutBMsEjff0_hGsZ7Y1VkUh4l0H9lH",
+      "e01_sidecar_drive_file_id": "1ym1RTGQ8TW3Tds5aCNNBJS0VH4A-dlQe",
+      "e01_sidecar_sha256": "df72b4cb51af36cd80c96597f1b50caa29c8bad326c6b5837ef1f7153ce44d7c",
+      "family_id": 13203,
+      "family_manifest_declared_content_sha256": "b5b1fe509525f597e9dfb2226d3d4f0cf316bee8dbe372d8976e330c1197a4d8",
+      "family_manifest_drive_file_id": "1_e4ElL5WAFAvGNBX-gsVUWn7L8WVz4GW",
+      "family_manifest_file_sha256": "8823f11cff93ea9569ceb3dea1e872f1089d6109f6dd7913b5042c036864ace3",
+      "family_prereg_hash": "0bd19642a9db0e67d25fb9adbed891d76f48667cef03549acecf2ad9a83917c2",
+      "poseA_folder_id": "1FQdOEmfbbybP2iGiaeGprM9YNQ5h64bD",
+      "raster_hash_authority": "verified_family_manifest.poseA_hashes + verified_family_manifest.episodes[e01].poseB_hashes",
+      "split": "dev"
+    },
+    {
+      "e01_episode_folder_id": "1E3rm1dkquCDdzOJIZqKWnQqOxw5o3T2q",
+      "e01_poseB_folder_id": "12QEj9YoNGP-f2WMqnkfS596u7B-_C4Hg",
+      "e01_sidecar_drive_file_id": "1yvvOx4-3dU4tzCNL09_Oa_8Mo-sxcyYS",
+      "e01_sidecar_sha256": "8fac138402156d666270361ba1ff9f28654446f5823da6d50a13e963e4934c61",
+      "family_id": 14404,
+      "family_manifest_declared_content_sha256": "aac4f5a471cc72f7c4d1d7be8f92abd70e57a4871c1aec317b435f4273d9648b",
+      "family_manifest_drive_file_id": "1zcvbtavYQpCj8-BxabZuo3w2XoIJKbQk",
+      "family_manifest_file_sha256": "1f9e72f282bf13719e929644cc6d103aeead2d667cdaf7c8b0ff8aeb74b30bba",
+      "family_prereg_hash": "0bd19642a9db0e67d25fb9adbed891d76f48667cef03549acecf2ad9a83917c2",
+      "poseA_folder_id": "1LXY8NyB6DJSjutBrspFtNSIKrKGZChZp",
+      "raster_hash_authority": "verified_family_manifest.poseA_hashes + verified_family_manifest.episodes[e01].poseB_hashes",
+      "split": "dev"
+    },
+    {
+      "e01_episode_folder_id": "1dyz8hGSBO-FvvmisWxlaMsAzPY_y8qus",
+      "e01_poseB_folder_id": "1DOvUuxudUWLIY5dSQynoX3suFs7k9FbU",
+      "e01_sidecar_drive_file_id": "1fCkD2lULXP_0g8i75lrdXIsNFPxA3LBg",
+      "e01_sidecar_sha256": "72e46cac62b5c5345dfaf2cad9f2a144861dad61dfef16cb12eee4b44452bf11",
+      "family_id": 14702,
+      "family_manifest_declared_content_sha256": "31b424b83237fb9b993ab8553fa20ed6d34e6cae875a31a864b7b048ee2cb9c7",
+      "family_manifest_drive_file_id": "1hSWYRafYwgGSZHPVIzdgFSjxFyNzrAq0",
+      "family_manifest_file_sha256": "7673dde6353b0380d53bd6b57e36de652658e8d917450515761920ac27e687b8",
+      "family_prereg_hash": "0bd19642a9db0e67d25fb9adbed891d76f48667cef03549acecf2ad9a83917c2",
+      "poseA_folder_id": "1_cUucIDx7it4O3h5YHzONqCVNKfSV_Dz",
+      "raster_hash_authority": "verified_family_manifest.poseA_hashes + verified_family_manifest.episodes[e01].poseB_hashes",
+      "split": "dev"
+    },
+    {
+      "e01_episode_folder_id": "1tOSqZjY7YHCzshmYqZ1ku4bG1OTl6ivF",
+      "e01_poseB_folder_id": "1QK1o415rqFlBo2m3E42_9kjpJSguKWcU",
+      "e01_sidecar_drive_file_id": "1j-FXgvN0z1ON6rgHoxGTtJSsQ3IO62Qw",
+      "e01_sidecar_sha256": "f5d4baec0b24829690d8f1d78ea9f54dd2d558c97c20c3a95719b718510fd565",
+      "family_id": 14758,
+      "family_manifest_declared_content_sha256": "3bf31500021bc9c40aea0a1af13d52e37408a541a6b5df5eb5339b3facb4783d",
+      "family_manifest_drive_file_id": "1Z6Srxa6y_bxt2Q0s-a42-4vyf0WUgbvI",
+      "family_manifest_file_sha256": "dd8eeb19749a1f67c298b14e8eaa5d04cc026d6afdaaa8d2c8c8cde05825fec6",
+      "family_prereg_hash": "0bd19642a9db0e67d25fb9adbed891d76f48667cef03549acecf2ad9a83917c2",
+      "poseA_folder_id": "1g_zq_5339L8ibBwtQ4-MRyAFwZXs9rzV",
+      "raster_hash_authority": "verified_family_manifest.poseA_hashes + verified_family_manifest.episodes[e01].poseB_hashes",
+      "split": "dev"
+    },
+    {
+      "e01_episode_folder_id": "1Pq_8f0d-nZgHSqVtxXxGG3NSLzFKVNSE",
+      "e01_poseB_folder_id": "1pHKurHIypgtPNdfx_4XOL7hmqoH8gqri",
+      "e01_sidecar_drive_file_id": "1EcnTfW19AoM1W2X8lhzOt2aRoW0Z41DH",
+      "e01_sidecar_sha256": "58a8deac16e9972e0b6dc9677f5ac89ea5e61ce852f2c2e3d413668e81c76928",
+      "family_id": 15290,
+      "family_manifest_declared_content_sha256": "a6eec83b31861eb6106c7bc858924b99779445dec970999b09f4689c30f2d9b3",
+      "family_manifest_drive_file_id": "1g8IQt9bfdQm3o64aLdmmXSrTbkV4XHDZ",
+      "family_manifest_file_sha256": "970dbf0f5b5bc3f93214f4ed4522fdebb7e874f742e86708c5bc3ad27772975e",
+      "family_prereg_hash": "0bd19642a9db0e67d25fb9adbed891d76f48667cef03549acecf2ad9a83917c2",
+      "poseA_folder_id": "17TXL7wvnXmB436Bv_0J-S7gE5hcvCSbu",
+      "raster_hash_authority": "verified_family_manifest.poseA_hashes + verified_family_manifest.episodes[e01].poseB_hashes",
+      "split": "dev"
+    }
+  ],
+  "family_ids": [
+    9908,
+    11032,
+    12772,
+    13203,
+    14404,
+    14702,
+    14758,
+    15290
+  ],
+  "input_role_policy": {
+    "generator_only_json": "FORBIDDEN",
+    "mechanics_input": [
+      "poseA_rasters",
+      "poseB_rasters",
+      "frozen_observable_front_door_outputs_only"
+    ],
+    "pre_truth_open_allowed_sidecar_keys": [
+      "camera_center",
+      "camera_half_extent",
+      "family_id"
+    ],
+    "teacher_eval_only_sidecar_keys": [
+      "surface_points_A",
+      "surface_points_B",
+      "surface_normals_A",
+      "surface_normals_B",
+      "surface_visibility_A",
+      "surface_visibility_B",
+      "surface_xy_A",
+      "surface_xy_B"
+    ],
+    "teacher_geometry_as_mechanics_input": "FORBIDDEN"
+  },
+  "manifest_content_sha256": "eea102387cd052d7580eab13196f2dd352613783f99ef7b6a2c5f647766314d7",
+  "population_policy": "EXACT_PRIMARY_8_NO_TRUTH_SELECTION",
+  "schema": "RealSaS.N1D.ObservableFunctionalAudit.R6E01InputManifest.v2",
+  "sealed21": "CLOSED",
+  "source_scope": {
+    "R5_status": "DIAGNOSTIC_ONLY_INVALID_PROVENANCE",
+    "R6_1_role": "CLEAN_E01_REPLICATION",
+    "rank2_authority_requires_R6_close_first": true,
+    "stale_local_R6_e00_manifest": "FORBIDDEN"
+  },
+  "status": "PREFLIGHT_INPUT_AUTHORITY_FROZEN",
+  "target_episode": "e01"
+}

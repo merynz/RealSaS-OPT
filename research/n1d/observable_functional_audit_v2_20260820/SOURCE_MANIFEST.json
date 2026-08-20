@@ -1,0 +1,62 @@
+{
+  "checkpoint": {
+    "container_locator": "external-gdrive:file:15iHg-9gIhEz7tuvtv0BpXVfI61AbBR7f",
+    "container_sha256": "0e28051cdb1b9f603749a907dd84d022daf44bcabd1bd9ec536d242bb95bf24c",
+    "identity": "N1D_CANONICAL_PROOF_PACK/BEST.pt",
+    "sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18"
+  },
+  "created_at_utc": "2026-08-20T00:40:00Z",
+  "drive": {
+    "file_id": "12EDjC210GnfZgogY7OiE2t9yp7gqCs2u",
+    "folder_id": "1aOY41Pq0suayugJ4jiw6qnRx7lnLkDCG",
+    "path": "RealSaS_IRIS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820/REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_SOURCE_20260820.zip",
+    "readback_sha256": "3bd133e805880ccca2e6a177778e3e931064eb0178da5a2ac5b02c07f1595278"
+  },
+  "evaluator": {
+    "identity": "realsas_gfdr_v2.py (frozen dependency in source bundle)",
+    "sha256": "ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa"
+  },
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "external10": "CLOSED",
+  "frozen_inference_dependencies": {
+    "container_locator": "external-gdrive:file:1DfvrHPLynM3ckITv1bikcoYl3_dnLlKs",
+    "container_sha256": "e39e3f383a7f9be58003aa4763c7cb4e31d30f26088d288771d0deb7db8a9aa5",
+    "realsas_n1d_hybrid_v11_frozen_runner.py": "ddfd3c989138bb256c2c466e80b914bf89fef1796520d41acc734af0ff577407",
+    "v5_seed_geometry_frozen.py": "6185e0fe7b47fedd19c845aecc95d1b8c80a45c17fa683c9f5caedff4bd7d372",
+    "v8_base_frozen.py": "44fe83a56a588d4f0cb771351497090ca302b173a7c70619ff701fb0ed28b1f0"
+  },
+  "github": {
+    "branch": "agent/n1d-observable-functional-audit-v2-20260820",
+    "bundle_representation": "ordered verified base64 chunks; reconstruction manifest final SHA guard",
+    "commit": "cc32fed54a75314dca392b201008e71961a1eaab",
+    "path": "research/n1d/observable_functional_audit_v2_20260820/SOURCE_BUNDLE_RECONSTRUCTION.json",
+    "repository": "merynz/RealSaS-OPT"
+  },
+  "library": {
+    "file_id": "file_00000000673c8246a100dd0691cea9ea",
+    "library_file_id": "libfile_1ae04d36f14881919b67b1ac21af449f",
+    "path": "/RealSaS/N1D/OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820/REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_SOURCE_20260820.zip",
+    "readback_sha256": "3bd133e805880ccca2e6a177778e3e931064eb0178da5a2ac5b02c07f1595278"
+  },
+  "schema": "RealSaS.Research.SourceManifest.v2",
+  "sealed21": "CLOSED",
+  "source_bundle": {
+    "filename": "REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_SOURCE_20260820.zip",
+    "local_verify_path": "/mnt/data/REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_SOURCE_20260820.zip",
+    "sha256": "3bd133e805880ccca2e6a177778e3e931064eb0178da5a2ac5b02c07f1595278",
+    "size_bytes": 38155,
+    "source_index_sha256": "851b5100b5dda3ca653945599ca37ebe5ba637988f64b83874fc69c47914ab9a"
+  },
+  "tests": {
+    "command": "python tests/test_static.py && python tests/test_decorator_replay.py",
+    "guards": [
+      "observable_phase static truth-firewall PASS",
+      "canonical V11 truth-free baseline PASS",
+      "decorate_pb_observable V_B bit-exact replay PASS",
+      "decorate_pb_observable N_B max_abs_diff <= 1e-7 PASS"
+    ],
+    "status": "PASS"
+  },
+  "three_store_source_gate": "PASS",
+  "training_or_retune": "FORBIDDEN"
+}

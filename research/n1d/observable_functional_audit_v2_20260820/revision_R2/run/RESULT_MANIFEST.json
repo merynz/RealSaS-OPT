@@ -1,0 +1,31 @@
+{
+  "schema": "RealSaS.N1D.ObservableFunctionalAuditV2.ResultAuthority.R2",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R2",
+  "status": "RESULT_FROZEN__DRIVE_LIBRARY_READBACK_PASS",
+  "source_bundle_sha256": "a25e288a465722b8a396a5e33392edf1d5795187004efff388632cbcc4c21832",
+  "input_inventory_sha256": "719d0573b14e218bb081e7e1858df4121f09200436909d3e665e3ac96c47252c",
+  "prereg_r2_sha256": "a4fdb68058ecf2c6b3b21edaf4ea3e8cd173230564be7f7cb2dbbd8c3e95d75c",
+  "observable_state_r2_bundle_sha256": "3ec55b69ca1d3c70e3aa2130ee55b6b3519b1da8cd79f2cf9ddc7cfc8205100c",
+  "result": {
+    "sha256": "b9fb9bf84da4a2dc99acaf46f6218129d6128481b3913ad9f65a632ec5c7ad02",
+    "bytes": 374163,
+    "drive_file_id": "1QJgL_voVLyGcvqDBQRWGxf-NPJb_kjTm",
+    "library_file_id": "file_00000000c86881f4af7868c78377029d"
+  },
+  "result_freeze_manifest": {
+    "sha256": "d85a902061e5924be6f49056494fe45b1cf0b89a3a9ec8fccb4c80f8e2a0a732",
+    "drive_file_id": "1Nai1FYyv3U2MHJdDWbZGGMcsFnzWI_PW",
+    "library_file_id": "file_00000000859482469ae626409cab436f"
+  },
+  "execution_log_sha256": "e66bf6a0f6cddc24d98f57406f0ec849f4db38b191487b08fd9251105b67809f",
+  "aggregate": {
+    "n": 90,
+    "enough_population": true,
+    "equivalence_fraction": 0.0,
+    "material_truth_improvement_fraction": 0.022222222222222223,
+    "material_truth_degradation_fraction": 0.03333333333333333,
+    "verdict": "MECHANICS_CHANGE_BUT_TEACHER_NEAR_UTILITY_NOT_DOMINANT__RESEARCH_REQUIRED"
+  },
+  "scientific_interpretation": "authorized after row-level sanity audit; no threshold changes permitted"
+}

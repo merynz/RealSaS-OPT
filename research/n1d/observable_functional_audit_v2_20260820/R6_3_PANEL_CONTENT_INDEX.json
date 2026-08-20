@@ -1,0 +1,25 @@
+{
+  "entries": [
+    {"arcname":"09908/9908_e01_OBSERVABLE_STATE.json","family":"09908","sha256":"cdd3aa4a5dd8e69798c0c963387df1ddf2a6c836f8b296a03f6ad5f86a0d8ab2","size":2657},
+    {"arcname":"09908/9908_e01_OBSERVABLE_STATE.npz","family":"09908","sha256":"482181d79ab45c4f12d246a1eaa0a7960d59e2b5c73aeb7e83c86d8b067b7ccd","size":88697},
+    {"arcname":"11032/11032_e01_OBSERVABLE_STATE.json","family":"11032","sha256":"53e691248970287c9581e1e357ad53a22c4b3a767c8614ef033b1baa89889385","size":2675},
+    {"arcname":"11032/11032_e01_OBSERVABLE_STATE.npz","family":"11032","sha256":"75befc4a4a678d4b59f6a665abbdc7792c40c34b97d821d35cc0ca553bb91770","size":137812},
+    {"arcname":"12772/12772_e01_OBSERVABLE_STATE.json","family":"12772","sha256":"ecea98aa1aa66e9a26da49d06e325ead19a3911677fcd5d4ec0a240dd06db988","size":2683},
+    {"arcname":"12772/12772_e01_OBSERVABLE_STATE.npz","family":"12772","sha256":"4fdbdb81a1b5fa7de05be2cafae54ffed973fd6a6997acbe4b6fc9d77b957cd1","size":74435},
+    {"arcname":"13203/13203_e01_OBSERVABLE_STATE.json","family":"13203","sha256":"6d3c498b1954d9c9956f71a47936566a57cafdd5dd07e6b6186dc20b66892818","size":2682},
+    {"arcname":"13203/13203_e01_OBSERVABLE_STATE.npz","family":"13203","sha256":"6202d457c196165aace21bab25e359346bff6f4417eee15860f327062764a55e","size":69185},
+    {"arcname":"14404/14404_e01_OBSERVABLE_STATE.json","family":"14404","sha256":"dce0423374768c10f6248efb2286de29255eb8373168521bebebcfca2665a085","size":2674},
+    {"arcname":"14404/14404_e01_OBSERVABLE_STATE.npz","family":"14404","sha256":"7d6af6ab6b204f088c9184d226a4a4c7b3f6044e7e391f4b3d43c47fd0aa5425","size":98774},
+    {"arcname":"14702/14702_e01_OBSERVABLE_STATE.json","family":"14702","sha256":"abf1e5484999974035d03f7a252d1f0a6f733b6e426e37c710c44a90c8dc94b1","size":2673},
+    {"arcname":"14702/14702_e01_OBSERVABLE_STATE.npz","family":"14702","sha256":"4a6dabdbf22285d999f974b61821cf46e392609995bd78b88c85ff236740c011","size":96987},
+    {"arcname":"14758/14758_e01_OBSERVABLE_STATE.json","family":"14758","sha256":"2c00a67a669947ea259614439cdcb58adda164aacc860f41424f86f65d94d652","size":2673},
+    {"arcname":"14758/14758_e01_OBSERVABLE_STATE.npz","family":"14758","sha256":"ad9afe562140f29e1708008fe2bd715bdccaaf8ff0c13d1cdeacf0b46128eb45","size":96579},
+    {"arcname":"15290/15290_e01_OBSERVABLE_STATE.json","family":"15290","sha256":"75550548363a41e33ff854c51a5cb768b43420d6ed22fa8e5b8d4cadf7a55bfd","size":2683},
+    {"arcname":"15290/15290_e01_OBSERVABLE_STATE.npz","family":"15290","sha256":"8eb87eb7c5a772023d5f5addb4fee194718cdb7e7b2aefd0a503a2fba1299cbd","size":144725}
+  ],
+  "episode":"e01",
+  "families":["09908","11032","12772","13203","14404","14702","14758","15290"],
+  "schema":"RealSaS.N1D.ObservableFunctionalAuditV2.R6_3PanelContentIndex.v1",
+  "teacher_outcome_access":"NONE",
+  "truth_semantics":"CLOSED"
+}

@@ -1,0 +1,34 @@
+{
+  "authorities": {
+    "selection_sha256": "854a405d3a1a13e3ef9a1007f177a16abbc03f198d1f983292af3ff7603f04fd",
+    "v0_evaluator_sha256": "5a77fd35b30717e05df4f03040262a755e5c7c3efcfdd0b612d3baba3762cecd",
+    "v0_source_sha256": "7915cb4a4e1bb3a83645526c61e55d4180d20c37e4541b3771b6e6eb4c11a11c"
+  },
+  "hardtail": {
+    "baseline_composite_median": 0.534204636221012,
+    "composite_delta_median_baseline_minus_v0": -0.528338382286211,
+    "geometry_improved_fraction": 0.6956521739130435,
+    "geometry_improved_n": 16,
+    "material_mechanical_degrade_fraction": 0.8695652173913043,
+    "material_mechanical_degrade_n": 20,
+    "material_mechanical_improve_fraction": 0.0,
+    "material_mechanical_improve_n": 0,
+    "relative_improvement_median": -1.4295006757805155,
+    "teacher_nearest_selected_fraction": 0.08695652173913043,
+    "teacher_nearest_selected_n": 2,
+    "v0_composite_median": 0.8979348273545062
+  },
+  "per_family": {
+    "11032": {"geometry_improved_n":1,"material_degrade_n":4,"material_improve_n":0,"median_composite_delta":-1.2788171296556814,"n":4,"teacher_nearest_selected_n":0},
+    "12772": {"geometry_improved_n":1,"material_degrade_n":1,"material_improve_n":0,"median_composite_delta":-0.16857064582649262,"n":1,"teacher_nearest_selected_n":0},
+    "13203": {"geometry_improved_n":0,"material_degrade_n":0,"material_improve_n":0,"median_composite_delta":null,"n":0,"teacher_nearest_selected_n":0},
+    "14404": {"geometry_improved_n":5,"material_degrade_n":7,"material_improve_n":0,"median_composite_delta":-1.115250225895145,"n":7,"teacher_nearest_selected_n":1},
+    "14702": {"geometry_improved_n":2,"material_degrade_n":0,"material_improve_n":0,"median_composite_delta":0.03160238898516865,"n":3,"teacher_nearest_selected_n":0},
+    "14758": {"geometry_improved_n":7,"material_degrade_n":8,"material_improve_n":0,"median_composite_delta":-0.22574974416168525,"n":8,"teacher_nearest_selected_n":1},
+    "15290": {"geometry_improved_n":0,"material_degrade_n":0,"material_improve_n":0,"median_composite_delta":null,"n":0,"teacher_nearest_selected_n":0},
+    "9908": {"geometry_improved_n":0,"material_degrade_n":0,"material_improve_n":0,"median_composite_delta":null,"n":0,"teacher_nearest_selected_n":0}
+  },
+  "population_parity": {"families_with_witness":5,"hardtail_n":23,"r6_3_hardtail_exact":true},
+  "reliable_active": {"material_degrade_fraction":0.8415841584158416,"material_degrade_n":170,"material_improve_fraction":0.0,"material_improve_n":0,"n":202},
+  "schema": "RealSaS.N1D.Rank2GlobalRelationalWorld.V0.TruthResult.v1"
+}

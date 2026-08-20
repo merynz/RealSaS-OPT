@@ -1,0 +1,65 @@
+{
+  "authorities": {
+    "contract_commit": "fa5b18530cfa72a67b2ecb314337b64f2c2b69c4",
+    "evaluator_commit": "06ef41768520006dc58c70f19619d55d0843ac46",
+    "evaluator_sha256": "e63b55b6140dd46e1b3e7344d0812b3c879c71383cbd7e36eb26e0b9c0769e84",
+    "preflight_commit": "97d223b27d14ba2c81e53946157c40ef47acb79a",
+    "selection_authority_commit": "f80b9ea1080e3e8782c47066fd0a4667d6196fcc",
+    "selection_sha256": "82f7e934179bedb50146e60f85978567a1efcd81197acc1ab302ed68468d9b41",
+    "solver_sha256": "911cf2be0e06b502f7591f25168d5114a563324a276a3cf41392f9576e7566c1",
+    "source_commit": "8d2bd40b955cceb27776d9ea69bbbeb1fec68a29"
+  },
+  "episode": "e01",
+  "hardtail_rank3": {
+    "abstain_n": 0,
+    "g_hit_n": 18,
+    "g_hit_rate": 0.22784810126582278,
+    "g_mean_regret_px": 4.665084409688869,
+    "g_median_regret_px": 1.5543076080365525,
+    "n": 79,
+    "paired_improve_n": 12,
+    "paired_same_n": 52,
+    "paired_worsen_n": 15,
+    "v3a_hit_n": 21,
+    "v3a_hit_rate": 0.26582278481012656,
+    "v3a_mean_regret_px_assigned": 3.2236907342392276,
+    "v3a_median_regret_px_assigned": 1.5204439867767832
+  },
+  "overall": {
+    "abstain_n": 4,
+    "abstain_rate": 0.0017482517482517483,
+    "delta_hit_rate": 0.0826048951048951,
+    "g_hit_n": 490,
+    "g_hit_rate": 0.21416083916083917,
+    "g_mean_regret_px": 3.640371613838409,
+    "g_median_regret_px": 1.7272416852096728,
+    "n": 2288,
+    "paired_improve_n": 522,
+    "paired_same_n": 1443,
+    "paired_worsen_n": 319,
+    "v3a_hit_n": 679,
+    "v3a_hit_rate": 0.29676573426573427,
+    "v3a_mean_regret_px_assigned": 2.5693494032099724,
+    "v3a_median_regret_px_assigned": 1.4062604064852646
+  },
+  "population": {
+    "applicable_rows": 2288,
+    "hardtail_n": 23,
+    "rank3_hardtail_carriers": 15,
+    "rank3_hardtail_view_rows": 79
+  },
+  "proposal_assignment": {
+    "abstain_total_pre_truth": 4,
+    "assigned_real_total_pre_truth": 2352,
+    "full_real_matching_views": 63,
+    "views": 64,
+    "visible_total_pre_truth": 2356
+  },
+  "rank3_hardtail_carrier_direction": {
+    "improved_n": 6,
+    "same_n": 3,
+    "worsened_n": 6
+  },
+  "schema": "RealSaS.N1D.Rank2R.V3A.ResultSummary.v1",
+  "status": "DIRECTIONALLY_SUPPORTED_DEVELOPMENT_RESULT"
+}

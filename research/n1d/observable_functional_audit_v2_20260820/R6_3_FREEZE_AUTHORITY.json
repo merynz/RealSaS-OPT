@@ -1,0 +1,81 @@
+{
+  "schema": "RealSaS.Research.FreezeAuthority.v5",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R6.3",
+  "status": "SOURCE_INPUT_STAGED_EXECUTION_HARNESS_FREEZE_PASS__TRUTH_SEMANTICALLY_CLOSED",
+  "scientific_contract": "IDENTICAL_TO_R6_2_AND_R6_1",
+  "scientific_change_from_R6_2": "NONE__FURTHER_OS_PROCESS_STAGING_ONLY",
+  "parent_r6_2": {
+    "freeze_authority_sha256": "dff6ca431730d0a56dc3a121bbb473abdd137e22b40a6ac73aa3e275252ad44e",
+    "preregistration_sha256": "eb473e5bdeec1d2c0cf67aa93d6921fa893838060d43a31b4fa773b957c2ee3d",
+    "partial_panel_role_after_r6_3_freeze": "PARITY_AND_DIAGNOSTIC_ONLY__NOT_CANONICAL_R6_3_OUTPUT"
+  },
+  "inherited_r6_1_authority": {
+    "freeze_commit": "7b9ee7a8f4068dbf8f873508fceb1bfc28dd786d",
+    "source_bundle_sha256": "b4ab69fbcc91d8c57ab5f36f151b37495e8d5366554f3189982406d0b60c282f",
+    "source_index_sha256": "dca7f6a6395db21ee69c72c296392b6eb7b019db330e9b5c88831ae3e0d13005",
+    "input_manifest_sha256": "91acc078a9f6c41604b3f6f829c2cb239728d407f75872493a6712dd4ba7ca02",
+    "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "gfdr_v2_sha256": "ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa"
+  },
+  "execution_harness": {
+    "filename": "R6_3_STAGED_PROCESS_ISOLATED_OBSERVABLE_HARNESS.py",
+    "sha256": "c5ea7b0d6cd64fc5555b53f5dc9d82b587fbda1c54d452c28b1ea6c40d2da91e",
+    "github_commit": "e55337a9b085cf6860f500657c90b90b0a60a4c6",
+    "github_blob": "e19990dabd5871829babcd22dcf134805c062360",
+    "drive_file_id": "1It-MRlFm8KNRuUERlafBOhoL8C_eTdP6",
+    "library_file_id": "libfile_7e216f075bac81919c17d23d5f4abd3b",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "execution_isolation_note": {
+    "filename": "R6_3_EXECUTION_ISOLATION_NOTE.md",
+    "sha256": "0e401d12543e83310553b3b4109fbfd89792a33914b5717b2396d2fbb3aa5e01",
+    "github_commit": "fd9f269a210337c5b454c052f61061869fd6817f",
+    "github_blob": "3537b44a083f0a9e021b38ca29abf12f57127db2",
+    "drive_file_id": "1vEJiiOdwnvWRSwmCRSwIKDWUiZmXhraK",
+    "library_file_id": "libfile_0b8c5df5484881918a56af5aa970fbce",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "execution_parity": {
+    "filename": "R6_3_EXECUTION_PARITY.json",
+    "sha256": "313d66ad51276395ac7ad26657de179e5060923a8fe13a50eeae7173d3774a0d",
+    "github_commit": "d52bd77f86466b749f8dd52b809ee64dc26d5955",
+    "github_blob": "c2eed9ac6f6737d5648d3f5b2f21a72fa1c33324",
+    "v8_route_09908_baseline_and_full_state_byte_exact": true,
+    "seed_route_12772_baseline_byte_exact": true,
+    "seed_route_13203_baseline_byte_exact": true,
+    "teacher_outcome_access": "NONE",
+    "truth_semantics": "CLOSED",
+    "drive_file_id": "1kHcX-HWTgLLFpNWGljx7T2a52gc_6-2g",
+    "library_file_id": "libfile_43cad13ced00819199bdaa81448c08ab",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "preflight": {
+    "filename": "PREFLIGHT_R6_3.json",
+    "sha256": "6aefef3966c7b63896ffa4167ab0324fbff86233bd02ada4a69cec85048a8402",
+    "github_commit": "c4a69c2d82ae7395a141dcc50755c3371ef198e7",
+    "github_blob": "e0c72cc63a26b8c7e7bc4b7291adc90153016144",
+    "drive_file_id": "1GQE3CmA71IoN0DWiXUEsflnyKygIvh8s",
+    "library_file_id": "libfile_9c01815f207c8191a4f606e1b06426e5",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "input_authority": {
+    "panel": "e01",
+    "families": ["09908", "11032", "12772", "13203", "14404", "14702", "14758", "15290"],
+    "producer_hash_gate": "136/136 PASS",
+    "sidecar_semantic_access_before_full_R6_3_panel_freeze": "NONE"
+  },
+  "execution_policy": {
+    "per_family_process_sequence": ["V8_PROCESS_EXIT", "GATE_PROCESS_EXIT", "BASELINE_FINALIZE_PROCESS_EXIT", "STATE_PROCESS_EXIT"],
+    "all_8_families_regenerated_under_r6_3": true,
+    "reuse_r6_2_partial_panel_as_canonical_r6_3_output": false,
+    "teacher_geometry_as_mechanics_input": "FORBIDDEN",
+    "evaluator_truth_open_before_panel_freeze": false,
+    "training_or_retune": "FORBIDDEN",
+    "metric_threshold_witness_decision_changes": "NONE",
+    "sealed21": "CLOSED",
+    "external10": "CLOSED"
+  },
+  "prereg_required_before_execution": true,
+  "run_authorized_by_this_file_alone": false
+}

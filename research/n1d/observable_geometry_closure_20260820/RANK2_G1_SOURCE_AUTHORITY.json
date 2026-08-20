@@ -1,0 +1,19 @@
+{
+  "drive": {
+    "file_id": "external-gdrive:file:1b7ucT7EdZgR6Gjgu_6geYdl-nEMJcyd6",
+    "path": "/Google Drive/RealSaS_IRIS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820/rank2_g1_geometry_grounded_proposal.py"
+  },
+  "external10": "CLOSED",
+  "github_representation": "authority manifest; exact executable bytes persisted in Drive and Library before prospective truth",
+  "library": {
+    "file_id": "file_000000002de88246a4aa8375787354b7",
+    "library_file_id": "libfile_050107772db08191a91c8c575f0b8cb0",
+    "path": "/RealSaS/N1D/OBSERVABLE_GEOMETRY_CLOSURE_20260820/rank2_g1_geometry_grounded_proposal.py"
+  },
+  "prereg_canonical_contract_sha256": "e127eac928fc91c03f8bcdf8948744b06ebb9f4362124c79362f0719d376c713",
+  "schema": "RealSaS.N1D.Rank2G.G1.SourceAuthority.v1",
+  "sealed21": "CLOSED",
+  "source_filename": "rank2_g1_geometry_grounded_proposal.py",
+  "source_sha256": "033d8272012eb16f08014a66013177f2bb7bd6badfb249f4cb90d19f2a1a50e2",
+  "truth_access_at_freeze": "CAL16_SEMANTICS_CLOSED"
+}

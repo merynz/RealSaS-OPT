@@ -1,0 +1,49 @@
+{
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "frozen_dependencies": {
+    "checkpoint": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "observable_phase.py": "6eea236647e04a5566e93733f35c927639cc6407d4f62db80793edfa7e97dadf",
+    "realsas_n1d_hybrid_v11_frozen_runner.py": "ddfd3c989138bb256c2c466e80b914bf89fef1796520d41acc734af0ff577407",
+    "v5_seed_geometry_frozen.py": "6185e0fe7b47fedd19c845aecc95d1b8c80a45c17fa683c9f5caedff4bd7d372",
+    "v8_base_frozen.py": "44fe83a56a588d4f0cb771351497090ca302b173a7c70619ff701fb0ed28b1f0"
+  },
+  "guards": {
+    "external10": "CLOSED",
+    "full_8_family_R6_3_regeneration_required": true,
+    "sealed21": "CLOSED",
+    "sidecar_semantic_access": "NONE",
+    "teacher_outcome_access": "NONE",
+    "training_or_retune": "FORBIDDEN"
+  },
+  "harness": {
+    "filename": "R6_3_STAGED_PROCESS_ISOLATED_OBSERVABLE_HARNESS.py",
+    "sha256": "c5ea7b0d6cd64fc5555b53f5dc9d82b587fbda1c54d452c28b1ea6c40d2da91e"
+  },
+  "input_authority": {
+    "R6_1_input_manifest_sha256": "91acc078a9f6c41604b3f6f829c2cb239728d407f75872493a6712dd4ba7ca02",
+    "episode": "e01",
+    "families": [
+      "09908",
+      "11032",
+      "12772",
+      "13203",
+      "14404",
+      "14702",
+      "14758",
+      "15290"
+    ],
+    "producer_hash_gate": "136/136 PASS"
+  },
+  "isolation_note": {
+    "filename": "R6_3_EXECUTION_ISOLATION_NOTE.md",
+    "sha256": "0e401d12543e83310553b3b4109fbfd89792a33914b5717b2396d2fbb3aa5e01"
+  },
+  "parity": {
+    "filename": "R6_3_EXECUTION_PARITY.json",
+    "sha256": "313d66ad51276395ac7ad26657de179e5060923a8fe13a50eeae7173d3774a0d",
+    "status": "PASS"
+  },
+  "schema": "RealSaS.Research.Preflight.v4",
+  "source_revision": "R6.3",
+  "status": "PREFLIGHT_PASS__TRUTH_SEMANTICALLY_CLOSED"
+}

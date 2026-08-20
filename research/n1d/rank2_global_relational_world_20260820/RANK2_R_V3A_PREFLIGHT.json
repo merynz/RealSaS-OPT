@@ -1,0 +1,25 @@
+{
+  "contract_commit": "fa5b18530cfa72a67b2ecb314337b64f2c2b69c4",
+  "determinism_family": 11032,
+  "determinism_proposal_content_sha256": "b384d42f044c4aa0dab5a2891d4000ed8c4c4d7a267d4dec3c565c1c035eb618",
+  "determinism_selection_exact_json": true,
+  "family_11032_abstain_total": 4,
+  "family_11032_full_real_matching_views": 7,
+  "family_11032_visible_total": 358,
+  "forbidden_truth_inputs": [
+    "sidecar semantics",
+    "teacher 3D points/normals/visibility",
+    "joints",
+    "parents",
+    "weights",
+    "intervention metadata",
+    "hard-tail labels"
+  ],
+  "observable_panel_manifest_sha256": "b5158b4133f1b9b24d84fee30b9c64bcf5ac9a785215279d7733aa86afbeffef",
+  "schema": "RealSaS.N1D.Rank2R.V3A.Preflight.v1",
+  "source_commit": "8d2bd40b955cceb27776d9ea69bbbeb1fec68a29",
+  "source_git_blob": "10cfe814bf5617fdb6df95ed60b42b0036265666",
+  "source_sha256": "911cf2be0e06b502f7591f25168d5114a563324a276a3cf41392f9576e7566c1",
+  "status": "PASS",
+  "truth_access": "NONE"
+}

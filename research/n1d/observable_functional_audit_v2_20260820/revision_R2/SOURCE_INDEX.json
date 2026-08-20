@@ -1,0 +1,20 @@
+{
+  "schema": "RealSaS.N1D.ObservableFunctionalAuditV2.SourceIndex.R2",
+  "revision": "R2",
+  "bundle_filename": "REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_SOURCE_R2_20260820.zip",
+  "bundle_sha256": "a25e288a465722b8a396a5e33392edf1d5795187004efff388632cbcc4c21832",
+  "bundle_bytes": 38651,
+  "files": [
+    {"path":"README.md","bytes":2045,"sha256":"317803f0dc215974b43cbd519f45addee5712433d5a386a94d8d946d2b500c32"},
+    {"path":"R2_CHANGELOG.md","bytes":585,"sha256":"f57e4364fc84cae80c1c5065a576fd5f07d260df0cd2eba8a583543a72f410ec"},
+    {"path":"src/observable_phase.py","bytes":8468,"sha256":"6eea236647e04a5566e93733f35c927639cc6407d4f62db80793edfa7e97dadf"},
+    {"path":"src/mechanics_metrics.py","bytes":6221,"sha256":"d10e5caaf3888372648ed160fd25361a21b30d6bff0fc4ceccfb4d8068831ab7"},
+    {"path":"src/evaluation_phase.py","bytes":10160,"sha256":"07008bc3dc879148d0f93c97b68fec6e7a85fcd77a957013a1f83fd8c4b5f978"},
+    {"path":"src/frozen_deps/realsas_n1d_hybrid_v11_frozen_runner.py","bytes":8504,"sha256":"ddfd3c989138bb256c2c466e80b914bf89fef1796520d41acc734af0ff577407"},
+    {"path":"src/frozen_deps/v8_base_frozen.py","bytes":23286,"sha256":"44fe83a56a588d4f0cb771351497090ca302b173a7c70619ff701fb0ed28b1f0"},
+    {"path":"src/frozen_deps/v5_seed_geometry_frozen.py","bytes":19970,"sha256":"6185e0fe7b47fedd19c845aecc95d1b8c80a45c17fa683c9f5caedff4bd7d372"},
+    {"path":"src/frozen_deps/realsas_gfdr_v2.py","bytes":24818,"sha256":"ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa"},
+    {"path":"tests/test_static.py","bytes":1111,"sha256":"7182f104f8043e0b0015ec009989c0a8c4391dd7ac106c421ee39becdec1d4ae"},
+    {"path":"tests/test_decorator_replay.py","bytes":806,"sha256":"f1f1459bea965bfa453261c72aeb98132fe0de06bc10e7aa767b62064286ae1d"}
+  ]
+}

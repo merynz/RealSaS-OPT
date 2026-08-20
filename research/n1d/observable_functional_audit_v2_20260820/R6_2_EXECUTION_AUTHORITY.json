@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.Research.ExecutionAuthority.v1",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R6.2",
+  "panel": "e01",
+  "status": "EXECUTION_AUTHORIZED_AFTER_THREE_STORE_READBACK",
+  "scientific_contract": "IDENTICAL_TO_R6_1",
+  "freeze_authority": {
+    "filename": "R6_2_FREEZE_AUTHORITY.json",
+    "sha256": "dff6ca431730d0a56dc3a121bbb473abdd137e22b40a6ac73aa3e275252ad44e",
+    "github_commit": "a2e363baced4a654f2d95adbad77dbd6a12ba95b",
+    "github_blob": "732823a6d827ca2f1548ee70abec7e76ff9613f3",
+    "drive_file_id": "13H3_r67RSRCXUhwBZHusa_r4emVpWacT",
+    "library_file_id": "libfile_3ad2de37f3e48191861be0b8aafffd14",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "preregistration": {
+    "filename": "PREREG_R6_2.md",
+    "sha256": "eb473e5bdeec1d2c0cf67aa93d6921fa893838060d43a31b4fa773b957c2ee3d",
+    "github_commit": "dd2aea6c735d52a487891460c250b025480b6192",
+    "github_blob": "6f144f8e0166644bc879c78db2e5c77b6e0b3efb",
+    "drive_file_id": "1zN26leJ7kqhmih17Js7SH2W2mFEpiv7C",
+    "library_file_id": "libfile_2de2e8040eb48191bc1110edc77f9eee",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "execution_harness": {
+    "sha256": "d1d607c4d8b95da59950dbae6210f8a019bac27de49256848c91be562c7aa3f6",
+    "github_commit": "9acb6ae245f8d2bb8be553db3e5764a38d1cbd4f",
+    "github_blob": "ad03279ea266bcda7b9aa2b43bb351646ec18454",
+    "drive_file_id": "1L-zlpqDywXmTJ2GDegJaMD_wo5pWD-bt",
+    "library_file_id": "libfile_040a4fccb8a88191a2a1f2f12174959a",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "population": ["09908", "11032", "12772", "13203", "14404", "14702", "14758", "15290"],
+  "input_gate": "136/136 PASS",
+  "phase1_rule": "FOR_EACH_FAMILY_BASELINE_PROCESS_MUST_EXIT_BEFORE_FRESH_STATE_PROCESS_STARTS",
+  "all_8_regenerated_under_r6_2": true,
+  "r6_1_09908_state_role": "PARITY_EVIDENCE_ONLY__NOT_CANONICAL_R6_2_OUTPUT",
+  "truth_firewall": {
+    "sidecar_semantic_access_until_full_panel_freeze": "FORBIDDEN",
+    "teacher_geometry_as_mechanics_input": "FORBIDDEN",
+    "generator_only_json": "FORBIDDEN",
+    "training_or_retune": "FORBIDDEN",
+    "sealed21": "CLOSED",
+    "external10": "CLOSED"
+  },
+  "post_phase1_gate": "OBSERVABLE_PANEL_MANIFEST_R6_2_MUST_BE_GITHUB_DRIVE_LIBRARY_BYTE_VERIFIED_BEFORE_PHASE2_TRUTH_OPEN",
+  "rank2_gate": "R6_2_MUST_CLOSE_BEFORE_RANK2_R_EXPERIMENT",
+  "first_canonical_run_must_start_after_execution_authority_three_store_readback": true
+}

@@ -1,0 +1,32 @@
+{
+  "contract_blob_sha": "db98ddf3b885ad28598592f8e30350dab198b1a5",
+  "evidence_file_sha256": {
+    "11032": "7699d77c78726496320ee5772cb7190bc3a93528490db150ecd527840ae085a0",
+    "12772": "a4040f4af2e6cb5b091e2dec599a800f914237df001d3cebf3464649ab639885",
+    "13203": "416782aaff587fd2da6c9f41f5895a41217cf9bd4a47d0707c8739b0485a4c4a",
+    "14404": "aa485ec1e6859347bdb1b62d15a7accee7589188defa33b1d4f4fb937430c6f6",
+    "14702": "7e2095712e43de947eea312db5e5a8acc06e1788c6a2b72b6841bbcbbaad4bdd",
+    "14758": "961b75eca2d818f1b82da60cdf16fde3a8bbb4a3fdc4b78327c7b38a059d4077",
+    "15290": "a72641057fe218399855b62b7b972b4d585c80fc096465b97a84eaf1dbcd7eae",
+    "9908": "bcde11f5edb0856d67390b5c66d2f867001ba52ea8c93c9f7ea5ad9ca0f5471a"
+  },
+  "external10": "CLOSED",
+  "family_selection_sha256": {
+    "11032": "ba2d20bf6e5772d28ffb61fcf8dda3b5437007ab145204566e3ff783a916dde7",
+    "12772": "c4a6ba88d19c8fd45a952a40b61c28b0d1d87980e70c7745b876c37b357902ae",
+    "13203": "894afe1d32fea1f7e66d54a5756aaa96bfb35d71bd69fae5ec40baec3342199a",
+    "14404": "a3f0adf39799931a130c8a55f119388fc2395ef099c22f67ab32618055a9f648",
+    "14702": "f363c49340783e00a6de3bc50d11d3985cb954047f6baf9ef352b4a0a13b3ed1",
+    "14758": "7fbe0617c3a38f4fe3466f643aee2a027f7eca873ce3f28aa7de950dab2e3c27",
+    "15290": "a3b39ce9c10b17c33df2aed0ded60fb06ca27f9f53c1905e3d93d5c8699997d9",
+    "9908": "015de7b905ac6d4d14d5efd1462a18c2ee1d96a6076398431ab721374cd871bd"
+  },
+  "preflight_sha256": "000edfe80d2e351ac71fda8db7bc24a5de6f1037a24858ec73c326bf61e51e5a",
+  "schema": "RealSaS.N1D.Rank2R.V5.PreTruthFreezeAuthority.v1",
+  "sealed21": "CLOSED",
+  "selection_sha256": "277946d94a3685222fb0cef4ad3b34d4c4656657309cccdc65204e01a2386887",
+  "source_sha256": "ea7ab996f881a08538c3cc049ca799e98783919255ed2c5214c01feada3161d7",
+  "status": "FROZEN_PRE_TRUTH__NO_SOURCE_OR_SELECTION_MUTATION_AUTHORIZED",
+  "truth_access": "NONE",
+  "v3a_selection_sha256": "82f7e934179bedb50146e60f85978567a1efcd81197acc1ab302ed68468d9b41"
+}

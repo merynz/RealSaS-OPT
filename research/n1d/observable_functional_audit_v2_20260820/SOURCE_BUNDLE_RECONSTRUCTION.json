@@ -1,0 +1,24 @@
+{
+  "schema": "RealSaS.N1D.ObservableFunctionalAuditV2.SourceReconstruction.v1",
+  "status": "PASS",
+  "authority_commit": "c217ed6c327418d54ce0ffb5bc5a7e9d83d668ac",
+  "repository": "merynz/RealSaS-OPT",
+  "branch": "agent/n1d-observable-functional-audit-v2-20260820",
+  "bundle_filename": "REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_SOURCE_20260820.zip",
+  "bundle_bytes": 38155,
+  "bundle_sha256": "3bd133e805880ccca2e6a177778e3e931064eb0178da5a2ac5b02c07f1595278",
+  "base64_bytes": 50876,
+  "ordered_parts": [
+    {"path":"source_bundle_b64_exact/p00_00","bytes":4000,"sha256":"7cd82246e6d13aa039b0e728d75c2a822c072bca3910a6b7289f6af02588f9fb","git_blob_sha1":"401a66c2f4105daa1156317c5d2a1b236171393b"},
+    {"path":"source_bundle_b64_exact/p00_01","bytes":4000,"sha256":"06303866a54e6c3eb86d2b0734ae70d5b86ebae6a7bca888a90bd765064bf770","git_blob_sha1":"0c016c410d61bf6b8431bfa230b35c6647f0e254"},
+    {"path":"source_bundle_b64_exact/p00_02","bytes":4000,"sha256":"1f38534f336fd0aa25cfa0b8bed977875dff763a72ca50b51c33387061fc927c","git_blob_sha1":"1d14cedddefd1169131bb4ecbd7e15627f51de69"},
+    {"path":"source_bundle_b64/part01","bytes":12000,"sha256":"200a543ca9c6712f36a292bb8f2e79fff8396ca3fda8fb5f8b7e904b52fac142","git_blob_sha1":"1dcf5589362211111e0ef3a9e3baa4227414cf57"},
+    {"path":"source_bundle_b64_exact/p02_00","bytes":4000,"sha256":"3fadc41619e127073c9339ed2e8f25fcac4f8f6a74dbef53affb468e43af04b3","git_blob_sha1":"b6c5d2f4faa87751eb2dd0e7df793323b2563c8d"},
+    {"path":"source_bundle_b64_exact/p02_01","bytes":4000,"sha256":"c24363dc8dbd9276e32fa7e75c186035ec9fc5c04c0fe40d5e69b23b79e191a6","git_blob_sha1":"26fa034e888039a3b26fcc12f0c08dc52acf5214"},
+    {"path":"source_bundle_b64_exact/p02_02","bytes":4000,"sha256":"9f9c8d5ff56c26e53edd4f379e52fa79bb3bd2e219c5b77516d3567a5433017c","git_blob_sha1":"79d51fbfbaf01f7a87745ad9ac16ddab8f5ac0a2"},
+    {"path":"source_bundle_b64/part03","bytes":12000,"sha256":"81f1c92c8e2c4d5e6511c267fda6e55e3399a030bfe34c5dcff35b93d6267776","git_blob_sha1":"60b8483cfad302f5fc8944d3487bf6b0c4e188c7"},
+    {"path":"source_bundle_b64/part04","bytes":2876,"sha256":"8c3adff3a6e06c70c97752dc510c9d4972be558c37c5577e3cd4d26588b6734b","git_blob_sha1":"c4741cd302da29ed04a87ccca8421c420bc2c6ce"}
+  ],
+  "superseded_do_not_use": ["source_bundle_b64/part00","source_bundle_b64/part02"],
+  "verification": "Concatenate ordered_parts as raw UTF-8/base64 text (no separators), base64-decode, require bundle_sha256."
+}

@@ -1,0 +1,8 @@
+{
+  "schema": "RealSaS.N1D.Rank2R.V3C.EvaluatorByteAuthority.v1",
+  "status": "GITHUB_FROZEN_SOURCE_IS_CANONICAL_EXECUTABLE",
+  "evaluator_commit": "0ea3d14383a075a0763d02fdf4f152460466d462",
+  "github_blob": "4f7d8475f668b0760b61b71a491e98752c8afc2e",
+  "note": "The GitHub-frozen evaluator source is authoritative. Local pre-commit working copy had non-semantic byte drift; execute a local copy reconstructed from this exact GitHub source before truth. No truth has been opened in V3-C yet.",
+  "truth_access": "NONE"
+}

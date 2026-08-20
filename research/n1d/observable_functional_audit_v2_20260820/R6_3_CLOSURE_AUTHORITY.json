@@ -1,0 +1,81 @@
+{
+  "aggregate": {
+    "enough_population": true,
+    "equivalence_fraction": 0.043478260869565216,
+    "family_guard": false,
+    "material_truth_degradation_fraction": 0.0,
+    "material_truth_improvement_fraction": 0.13043478260869565,
+    "witness_n": 23
+  },
+  "canonical_artifacts": {
+    "closure_bundle": {
+      "drive_file_id": "1dkjHEn0CO34XOsFfljU6Kfou8Q3p5TD_",
+      "filename": "REALSAS_N1D_OBSERVABLE_FUNCTIONAL_AUDIT_R6_3_CLOSURE_20260820.zip",
+      "library_file_id": "libfile_ebd8b124c4c88191a9919167a3d05dca",
+      "local_drive_library_readback_parity": "PASS",
+      "sha256": "f72fdcdadb2007855754bb0b54dcce6391f8bc85096182df199185de9075978b"
+    },
+    "decision": {
+      "drive_file_id": "19uq5cUQ9_in3w46BSrSB-04tGK3gMdIu",
+      "filename": "R6_3_CANONICAL_DECISION.json",
+      "library_file_id": "libfile_03715a2bc5a08191b26640a3d9e32c87",
+      "local_drive_library_readback_parity": "PASS",
+      "sha256": "8d79a36c561c3287f2c18ce07314baa54530d787df3867ca02bcac42c7d53384"
+    },
+    "raw_result": {
+      "drive_file_id": "1Q0_9xq6Y0N020D_T1cDN2EghRglu0RWa",
+      "filename": "R6_3_PHASE2_RESULT.json",
+      "library_file_id": "libfile_013837425774819182631473cc0bfe15",
+      "local_drive_library_readback_parity": "PASS",
+      "sha256": "1660eefe353a5ce1bc5ba9bd2eb48003f1da8d9ed69da67b66c5f19418700bb1"
+    },
+    "report": {
+      "drive_file_id": "1yLthLLwkHqjcNIWZ6tMyUyc9U-g2_TsQ",
+      "filename": "R6_3_CANONICAL_REPORT.md",
+      "library_file_id": "libfile_04e525261fe88191a6363de393a5e9ee",
+      "local_drive_library_readback_parity": "PASS",
+      "sha256": "8e2d9e63ad819239f2938056a3d913c2f0209820b62e5f40b67198f4e9f8fb03"
+    },
+    "summary": {
+      "drive_file_id": "1lBZAMe-fgdQ4dhexK1zrnqLb5WNcPE03",
+      "filename": "R6_3_RESULT_SUMMARY.json",
+      "library_file_id": "libfile_6b2f38d769708191bbfa3420558e13a6",
+      "local_drive_library_readback_parity": "PASS",
+      "sha256": "7900219183220323e4706c7187986031788d86e5a0683d2635d4001ee9f05568"
+    }
+  },
+  "episode": "e01",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "external10": "CLOSED",
+  "interpretation_guards": {
+    "low_equivalence_means_only": "TEACHER_NEAREST_FROZEN_H_ALTERNATIVES_USUALLY_CHANGE_PREREGISTERED_MECHANICS_EFFECTS",
+    "proves_impossibility": false,
+    "proves_raster_only_nonidentifiability": false,
+    "teacher_nearest_is_valid_solver_objective": false
+  },
+  "phase1_authority": {
+    "observable_panel_manifest_sha256": "b5158b4133f1b9b24d84fee30b9c64bcf5ac9a785215279d7733aa86afbeffef",
+    "panel_bundle_sha256": "0024b43c8252e6e0a8f83943e1b6c6cb166cbde693b54026174a3058a97da47b"
+  },
+  "phase2_authority": {
+    "raw_result_sha256": "1660eefe353a5ce1bc5ba9bd2eb48003f1da8d9ed69da67b66c5f19418700bb1",
+    "stability_byte_exact_repeat": true,
+    "stability_family": "14758",
+    "stability_sha256": "fb7455a7352dbbe01b1d1dabaa8d22cb8d3ac85f81cb4990e742dd82184b7c25",
+    "truth_open_authority_sha256": "2e928e412c949c6a5d8a519fe15d763c5107446cbcc70e9d99235447da3fa683"
+  },
+  "rank2_next_gate": {
+    "after_parity": "FULL_64_SET_VALUED_GLOBAL_WORLD_SOLVE",
+    "authorized": true,
+    "candidate_creation_from_teacher": "FORBIDDEN",
+    "first_gate": "HISTORICAL_RANK3_BEHAVIOR_PARITY",
+    "optimization_variable_change_only": "SINGLETON_TO_FROZEN_CANDIDATE_SET_SELECTION",
+    "teacher_proximity_as_objective": "FORBIDDEN"
+  },
+  "schema": "RealSaS.Research.ClosureAuthority.v1",
+  "sealed21": "CLOSED",
+  "source_revision": "R6.3",
+  "status": "CANONICAL_CLOSED",
+  "training_or_retune": "FORBIDDEN",
+  "verdict": "MECHANICS_CHANGE_BUT_TEACHER_NEAR_UTILITY_NOT_DOMINANT__RESEARCH_REQUIRED"
+}

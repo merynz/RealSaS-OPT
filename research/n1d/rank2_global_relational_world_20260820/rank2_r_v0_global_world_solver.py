@@ -50,10 +50,13 @@ def relation_features_from_delta(delta: np.ndarray, scale: float) -> np.ndarray:
     d = np.asarray(delta, np.float64)
     r = np.linalg.norm(d, axis=-1, keepdims=True)
     u = d / np.maximum(r, 1e-9)
+    # radial, signed canonical components, unit direction
     return np.concatenate([r / scale, d / scale, u], axis=-1)
 
 
 def relation_loss(feat_a: np.ndarray, feat_b: np.ndarray) -> np.ndarray:
+    # Radial is most invariant under articulation; canonical signed components and
+    # direction retain the historical address semantics but carry lower weight.
     w = np.array([1.0, 0.25, 0.25, 0.25, 0.20, 0.20, 0.20], dtype=np.float64)
     return np.sum(w * huber(feat_b - feat_a), axis=-1) / np.sum(w)
 
@@ -92,7 +95,9 @@ def build_domains(PA, PB, H, reproj, desc, off):
         keep_local = np.argsort(obs, kind="stable")[:k]
         kpts = pts[keep_local]
         kobs = obs[keep_local]
+        # normalized G unary inside retained set; preserve absolute rank information.
         g = kobs.astype(np.float64)
+        # Sharpness of retained G support.
         center = np.median(kpts, axis=0)
         if len(kpts) > 1:
             cov = np.cov((kpts-center).T)
@@ -101,6 +106,8 @@ def build_domains(PA, PB, H, reproj, desc, off):
             linearity = float((eig[-2] + 1e-12) / (eig[-1] + 1e-12))
         else:
             spread, linearity = 0.0, 0.0
+        # Anchor candidate uses observable frozen baseline as a G witness, projected
+        # to the retained feasible domain; no external geometry is read.
         anchor_local = int(np.argmin(np.linalg.norm(kpts - PB[i][None,:], axis=1)))
         domains.append({
             "points": kpts,
@@ -157,6 +164,8 @@ def objective(PA_feat, domains, choice, scale, anchors_set):
 def coordinate_costs(i, PA_feat, domains, choice, scale, anchors_set):
     cand = domains[i]["points"]
     K = len(cand)
+    # Unary mean contribution. Other unary terms are constant, so this is enough
+    # for argmin; scale by 1/64 to match global objective.
     c = domains[i]["g"].astype(np.float64) / 64.0
     for j in range(64):
         if j == i:
@@ -166,15 +175,19 @@ def coordinate_costs(i, PA_feat, domains, choice, scale, anchors_set):
             delta = cand - pj[None,:]
             fa = np.repeat(PA_feat[i,j][None,:], K, axis=0)
         else:
+            # Global energy stores pair (j,i) as point_j-point_i. Preserve sign.
             delta = pj[None,:] - cand
             fa = np.repeat(PA_feat[j,i][None,:], K, axis=0)
         fb = relation_features_from_delta(delta, scale)
         w = pair_weight(i,j,anchors_set)
         c += (LAMBDA_R * w * relation_loss(fa, fb))
+    # Relational denominator is constant across candidate choices; divide by
+    # exact full pair weight sum so coordinate argmin and global energy agree.
     denom = 0.0
     for a in range(64):
         for b in range(a+1,64):
             denom += pair_weight(a,b,anchors_set)
+    # relational contributions above are unnormalized; unary already mean-normalized.
     c = domains[i]["g"].astype(np.float64)/64.0 + (c - domains[i]["g"].astype(np.float64)/64.0)/denom
     return c
 
@@ -189,8 +202,7 @@ def initial_choice(domains, anchors, restart, family):
             g = d["g"]
             prob = np.exp(-4.0 * (g - np.min(g)))
             prob /= prob.sum()
-            c[i] = int(rng.choice(len(g), p=prob)
-            )
+            c[i] = int(rng.choice(len(g), p=prob))
     for i in anchors:
         c[int(i)] = int(domains[int(i)]["anchor_choice"])
     return c
@@ -248,6 +260,9 @@ def solve_family(state_path: Path, family: int):
     local_margin, local_alt = local_counterfactual_margin(PA_feat, domains, best, scale, anchors)
     chosen_points = np.stack([domains[i]["points"][int(best[i])] for i in range(64)])
     anchor_set = set(map(int,anchors.tolist()))
+    baseline_total = None
+    # Descriptive relational energy of the frozen baseline PB. No G unary is assigned
+    # because PB need not be a member of the retained domain.
     baseline_R = relational_energy(PA_feat, PB, scale, anchor_set)
     return {
         "schema": SCHEMA,

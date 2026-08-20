@@ -1,0 +1,34 @@
+{
+  "schema": "RealSaS.N1D.ObservableFunctionalAuditV2.SourcePatch.R2",
+  "revision": "R2",
+  "status": "EXECUTION_COMPATIBILITY_ONLY__SCIENTIFIC_SEMANTICS_UNCHANGED",
+  "base_source_bundle_sha256": "3bd133e805880ccca2e6a177778e3e931064eb0178da5a2ac5b02c07f1595278",
+  "base_source_git_authority": {
+    "commit": "cc32fed54a75314dca392b201008e71961a1eaab",
+    "path": "research/n1d/observable_functional_audit_v2_20260820/SOURCE_BUNDLE_RECONSTRUCTION.json"
+  },
+  "changes": [
+    {
+      "path": "src/evaluation_phase.py",
+      "base_sha256": "f4cef6b247b0797377fd07bf2cfe5683b7ed52b8cf2f006dbcca2b13376039d6",
+      "new_sha256": "07008bc3dc879148d0f93c97b68fec6e7a85fcd77a957013a1f83fd8c4b5f978",
+      "operation": "replace evaluator dynamic-module loader only",
+      "exact_import_change": "import argparse, hashlib, importlib.util, json -> import argparse, hashlib, importlib.util, json, sys",
+      "exact_loader_body": "def _load(name: str, path: Path):\n    spec = importlib.util.spec_from_file_location(name, str(path))\n    mod = importlib.util.module_from_spec(spec)\n    assert spec.loader is not None\n    sys.modules[name] = mod\n    try:\n        spec.loader.exec_module(mod)\n    except Exception:\n        sys.modules.pop(name, None)\n        raise\n    return mod\n"
+    },
+    {
+      "path": "R2_CHANGELOG.md",
+      "new_sha256": "f57e4364fc84cae80c1c5065a576fd5f07d260df0cd2eba8a583543a72f410ec",
+      "operation": "add provenance note",
+      "exact_content": "# Observable Functional Audit V2 — Source Revision R2\n\nR2 changes only the evaluator dynamic-module loader for Python 3.13 compatibility.\n\n- `evaluation_phase.py::_load` now registers the dynamically loaded GFDR module in `sys.modules` before `exec_module`, with rollback on import failure.\n- No metric, threshold, witness definition, counterfactual rule, observable geometry path, GFDR implementation, checkpoint, candidate construction, or decision logic changed.\n- R1 evaluation failed during module import before `_truth()` or any semantic sidecar access and produced no result.\n"
+    }
+  ],
+  "unchanged_scientific_files": {
+    "src/observable_phase.py": "6eea236647e04a5566e93733f35c927639cc6407d4f62db80793edfa7e97dadf",
+    "src/mechanics_metrics.py": "d10e5caaf3888372648ed160fd25361a21b30d6bff0fc4ceccfb4d8068831ab7",
+    "src/frozen_deps/realsas_gfdr_v2.py": "ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa"
+  },
+  "r2_source_bundle_sha256": "a25e288a465722b8a396a5e33392edf1d5795187004efff388632cbcc4c21832",
+  "r2_source_index_sha256": "7cc72ba30e361925094924e72466c53d890b39233b6056b7021ffd6f1e83b182",
+  "tests": ["STATIC_TESTS_PASS", "EVALUATION_IMPORT_PASS_PYTHON_3_13", "DECORATOR_REPLAY_PASS"]
+}

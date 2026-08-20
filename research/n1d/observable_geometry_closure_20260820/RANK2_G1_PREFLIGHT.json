@@ -1,0 +1,56 @@
+{
+  "authorities": {
+    "code_audit_sha256": "35c47bf58cb68b459eddbd77d68aabe5097a0418b4a1ea76c1ef7815dc1bc3fa",
+    "dev_replay_diagnostic_sha256": "e1433bce0d707041068a79a5857fc1d8dea88dd2ad42c3b25d563997845125be",
+    "n1d_checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "prereg_canonical_contract_sha256": "e127eac928fc91c03f8bcdf8948744b06ebb9f4362124c79362f0719d376c713",
+    "prereg_file_sha256": "60e62eeee7b927233523136fb8201b1e0d9705df86e748a2ad7b9f99c9644d5c",
+    "source_sha256": "033d8272012eb16f08014a66013177f2bb7bd6badfb249f4cb90d19f2a1a50e2",
+    "static_test_source_sha256": "4139b2d9949bf2a0b0a4651d31875e106c8be6d48ba2dae4b7ad3a528ffaf4ae",
+    "v5_pretruth_selection_sha256": "277946d94a3685222fb0cef4ad3b34d4c4656657309cccdc65204e01a2386887"
+  },
+  "date": "2026-08-20",
+  "dev_replay_only": {
+    "all_family_outputs_present": true,
+    "family_count": 8,
+    "hardtail_rank3": {
+      "both": 23,
+      "g1_hit": 37,
+      "g1_rescues_v5": 14,
+      "g_hit": 18,
+      "n": 79,
+      "v5_hit": 26,
+      "v5_only": 3
+    },
+    "interpretation": "implementation replay only; no promotion or weight tuning",
+    "overall": {
+      "g1_hit": 894,
+      "g_hit": 490,
+      "n": 2288,
+      "v5_hit": 676
+    }
+  },
+  "external10": "CLOSED",
+  "prospective_gate": {
+    "missing_episode_policy": "ABORT_NO_SUBSTITUTION",
+    "must_freeze_before_truth": [
+      "raster inventory hashes",
+      "proposal evidence hashes",
+      "V5 baseline selections",
+      "G1 selections"
+    ],
+    "sidecar_semantic_access": "CLOSED",
+    "surface": "canonical cal16 x e01"
+  },
+  "schema": "RealSaS.N1D.Rank2G.G1.Preflight.v1",
+  "sealed21": "CLOSED",
+  "static_gates": {
+    "G_formula": "PASS__0.5_DESCRIPTOR_RANK_PLUS_0.5_GEOMETRY_RANK",
+    "R_pair_factor_parity_max_abs": 0.0,
+    "camera_triangulation_roundtrip": "PASS_LT_1E-6_XYZ",
+    "debug_nonfinite_serialization_only_fix": true,
+    "scientific_formula_changed_by_serialization_fix": false
+  },
+  "status": "PASS__CAL16_TRUTH_REMAINS_CLOSED",
+  "truth_access": "DEV_OPEN_DIAGNOSTIC_ONLY__CAL16_CLOSED"
+}

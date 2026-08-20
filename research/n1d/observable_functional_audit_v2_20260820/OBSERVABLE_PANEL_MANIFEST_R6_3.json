@@ -1,0 +1,140 @@
+{
+  "content_index": {
+    "drive_file_id": "1oEULMEJDJLyDgKJj4MmpK7fheNwxMzmt",
+    "github_blob": "bff8c327facc1266a5c7fe72dfb9ce60bf412c20",
+    "github_commit": "1e53c73f4cf275b7857f225e2100a8ef4a2de75b",
+    "library_file_id": "libfile_2b1634b39c90819184f44753ab04bc1e",
+    "local_drive_library_readback_parity": "PASS",
+    "sha256": "ec38f565c8cfd59f2de566a1c14c460fcb627f8ff7b8ef111561be4dae0cb260"
+  },
+  "episode": "e01",
+  "execution_authority_sha256": "35fd4e85633d0c47f866ccd71ac085fd19b645119b19767eec768b4284f41921",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "families": [
+    "09908",
+    "11032",
+    "12772",
+    "13203",
+    "14404",
+    "14702",
+    "14758",
+    "15290"
+  ],
+  "integrity": {
+    "drive_file_id": "1QGUQs8XtXrvieoirZrgRdyloK-b882Yq",
+    "library_file_id": "libfile_3e535fc2f76c81918d668b846394e923",
+    "sha256": "9ca5ed5e3e77272b178c08ada5de0ef1e4ef3a4fc10c7ac5f1b57da346851630",
+    "status": "PASS"
+  },
+  "panel_bundle": {
+    "bytes": 814831,
+    "drive_file_id": "1F8vlZWUbZwwL-_c5qt6t7ICDSpr0kPpt",
+    "filename": "REALSAS_N1D_OBSERVABLE_PANEL_R6_3_E01_20260820.zip",
+    "library_file_id": "libfile_fea09749ba108191bc17007e57e2d414",
+    "local_drive_library_readback_parity": "PASS",
+    "sha256": "0024b43c8252e6e0a8f83943e1b6c6cb166cbde693b54026174a3058a97da47b"
+  },
+  "phase2_gate": "AUTHORIZED_ONLY_AFTER_THIS_MANIFEST_IS_PERSISTED_TO_GITHUB_DRIVE_LIBRARY_AND_BYTE_READBACK_PASSES",
+  "preregistration_sha256": "e0b06fe665a1e78f7aadf58d40a1fd6f9029f7c52822634c5ae75ee0e16eca33",
+  "records": [
+    {
+      "baseline_json_sha256": "87c9fbe9f7335ed82beb4ecff9d4f3c1a21181c85216b1fc7e5771e94464a5d5",
+      "baseline_npz_sha256": "c8497ba782f194b0601ef63e82ef19944e83e0f7bf48b7f4a5063c25ee8a7c9e",
+      "candidate_total": 8307,
+      "family": "09908",
+      "route": "V8_BASE",
+      "state_json": "9908_e01_OBSERVABLE_STATE.json",
+      "state_json_sha256": "cdd3aa4a5dd8e69798c0c963387df1ddf2a6c836f8b296a03f6ad5f86a0d8ab2",
+      "state_npz": "9908_e01_OBSERVABLE_STATE.npz",
+      "state_npz_sha256": "482181d79ab45c4f12d246a1eaa0a7960d59e2b5c73aeb7e83c86d8b067b7ccd"
+    },
+    {
+      "baseline_json_sha256": "3de3706433fa76d7da9010c5d90b7a342a5677ce913267e9d408c31224846610",
+      "baseline_npz_sha256": "87acfd1b15e87b6c04cde9ada77142d62136fbf1b7352ead9fc2332a732360cd",
+      "candidate_total": 13728,
+      "family": "11032",
+      "route": "V8_BASE",
+      "state_json": "11032_e01_OBSERVABLE_STATE.json",
+      "state_json_sha256": "53e691248970287c9581e1e357ad53a22c4b3a767c8614ef033b1baa89889385",
+      "state_npz": "11032_e01_OBSERVABLE_STATE.npz",
+      "state_npz_sha256": "75befc4a4a678d4b59f6a665abbdc7792c40c34b97d821d35cc0ca553bb91770"
+    },
+    {
+      "baseline_json_sha256": "56054a9e67acbfa2f5cfd67fd002fe7ba1d65a5485a715b816c643dd1667ca4a",
+      "baseline_npz_sha256": "aa6332a01b679272355f508db452cb3eb060b38ffcc39220909b25c125e60d2a",
+      "candidate_total": 6957,
+      "family": "12772",
+      "route": "SEED_BASIN_WSEED",
+      "state_json": "12772_e01_OBSERVABLE_STATE.json",
+      "state_json_sha256": "ecea98aa1aa66e9a26da49d06e325ead19a3911677fcd5d4ec0a240dd06db988",
+      "state_npz": "12772_e01_OBSERVABLE_STATE.npz",
+      "state_npz_sha256": "4fdbdb81a1b5fa7de05be2cafae54ffed973fd6a6997acbe4b6fc9d77b957cd1"
+    },
+    {
+      "baseline_json_sha256": "1d5f3442faff94698bbd2617e772f2d67b2fcf0ade94b3c614846608b9d7ac09",
+      "baseline_npz_sha256": "a4a27d8dec992846def61e53e514b8ace2ea77c42917844575622b146ddea286",
+      "candidate_total": 6392,
+      "family": "13203",
+      "route": "SEED_BASIN_WSEED",
+      "state_json": "13203_e01_OBSERVABLE_STATE.json",
+      "state_json_sha256": "6d3c498b1954d9c9956f71a47936566a57cafdd5dd07e6b6186dc20b66892818",
+      "state_npz": "13203_e01_OBSERVABLE_STATE.npz",
+      "state_npz_sha256": "6202d457c196165aace21bab25e359346bff6f4417eee15860f327062764a55e"
+    },
+    {
+      "baseline_json_sha256": "483abac08248af6691e1aa3cc9e8bb77f2bd38db609d12e643f6a161eb513c3f",
+      "baseline_npz_sha256": "576009ec9809de087c109c90ea31384835eb6d7df03584634c5d44620c258230",
+      "candidate_total": 9476,
+      "family": "14404",
+      "route": "V8_BASE",
+      "state_json": "14404_e01_OBSERVABLE_STATE.json",
+      "state_json_sha256": "dce0423374768c10f6248efb2286de29255eb8373168521bebebcfca2665a085",
+      "state_npz": "14404_e01_OBSERVABLE_STATE.npz",
+      "state_npz_sha256": "7d6af6ab6b204f088c9184d226a4a4c7b3f6044e7e391f4b3d43c47fd0aa5425"
+    },
+    {
+      "baseline_json_sha256": "9f188ed97106200f39db56adb3d974b7abf71ef71aa2ce2e8672b71562d97d65",
+      "baseline_npz_sha256": "eaf0c9330f6424046d73a1ac95fcda6d2bff9b9424f7138dfe769f64ebf1b1ab",
+      "candidate_total": 9264,
+      "family": "14702",
+      "route": "V8_BASE",
+      "state_json": "14702_e01_OBSERVABLE_STATE.json",
+      "state_json_sha256": "abf1e5484999974035d03f7a252d1f0a6f733b6e426e37c710c44a90c8dc94b1",
+      "state_npz": "14702_e01_OBSERVABLE_STATE.npz",
+      "state_npz_sha256": "4a6dabdbf22285d999f974b61821cf46e392609995bd78b88c85ff236740c011"
+    },
+    {
+      "baseline_json_sha256": "7ab46b5bfc05df2d6993de488ab911be7afc9a3250f88fe97ea4bc3689b1466f",
+      "baseline_npz_sha256": "8a94f338449abd5ab4f5a90ba6cb586f2c62a0a5bdf1e0360c4674a2a08b4cde",
+      "candidate_total": 9271,
+      "family": "14758",
+      "route": "V8_BASE",
+      "state_json": "14758_e01_OBSERVABLE_STATE.json",
+      "state_json_sha256": "2c00a67a669947ea259614439cdcb58adda164aacc860f41424f86f65d94d652",
+      "state_npz": "14758_e01_OBSERVABLE_STATE.npz",
+      "state_npz_sha256": "ad9afe562140f29e1708008fe2bd715bdccaaf8ff0c13d1cdeacf0b46128eb45"
+    },
+    {
+      "baseline_json_sha256": "988da9437b3aef42e53a7a8d488f16d2e8b3713fc50a867f4dd74035f496910b",
+      "baseline_npz_sha256": "824c46878c7610c714f664987f7e55e73a51d6c5ef7ff8ecb72d211889390f8a",
+      "candidate_total": 14145,
+      "family": "15290",
+      "route": "SEED_BASIN_WSEED",
+      "state_json": "15290_e01_OBSERVABLE_STATE.json",
+      "state_json_sha256": "75550548363a41e33ff854c51a5cb768b43420d6ed22fa8e5b8d4cadf7a55bfd",
+      "state_npz": "15290_e01_OBSERVABLE_STATE.npz",
+      "state_npz_sha256": "8eb87eb7c5a772023d5f5addb4fee194718cdb7e7b2aefd0a503a2fba1299cbd"
+    }
+  ],
+  "schema": "RealSaS.N1D.ObservableFunctionalAuditV2.ObservablePanelManifest.R6_3.v1",
+  "source_revision": "R6.3",
+  "status": "PHASE1_OBSERVABLE_PANEL_FROZEN__TRUTH_SEMANTICALLY_CLOSED",
+  "truth_firewall": {
+    "external10": "CLOSED",
+    "generator_only_json": "FORBIDDEN",
+    "sealed21": "CLOSED",
+    "sidecar_semantic_access_during_phase1": "NONE",
+    "teacher_geometry_as_mechanics_input": "FORBIDDEN",
+    "teacher_outcome_access_during_phase1": "NONE"
+  }
+}

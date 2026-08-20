@@ -1,0 +1,24 @@
+{
+  "all_arrays_bit_exact": true,
+  "array_parity": {
+    "H_desc_score": true,
+    "H_offsets": true,
+    "H_reproj_px": true,
+    "H_xyz": true,
+    "N_A": true,
+    "N_B": true,
+    "P_A": true,
+    "P_B": true,
+    "V_A": true,
+    "V_B": true,
+    "XY_A": true,
+    "XY_B": true
+  },
+  "episode": "e01",
+  "family": 9908,
+  "harness_sha256": "d1d607c4d8b95da59950dbae6210f8a019bac27de49256848c91be562c7aa3f6",
+  "r6_1_state_sha256": "482181d79ab45c4f12d246a1eaa0a7960d59e2b5c73aeb7e83c86d8b067b7ccd",
+  "r6_2_state_sha256": "482181d79ab45c4f12d246a1eaa0a7960d59e2b5c73aeb7e83c86d8b067b7ccd",
+  "schema": "RealSaS.N1D.ObservableFunctionalAudit.R6_2IsolationParity.v2",
+  "state_file_sha_exact": true
+}

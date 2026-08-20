@@ -1,0 +1,43 @@
+{
+  "schema": "RealSaS.Research.TruthOpenAuthority.v1",
+  "experiment_id": "N1D_OBSERVABLE_FUNCTIONAL_AUDIT_V2_20260820",
+  "source_revision": "R6.3",
+  "status": "PHASE2_EVALUATOR_TRUTH_OPEN_AUTHORIZED",
+  "observable_panel_manifest": {
+    "sha256": "b5158b4133f1b9b24d84fee30b9c64bcf5ac9a785215279d7733aa86afbeffef",
+    "github_commit": "25479469d5191545ddfd8d7a2e1565054efecb58",
+    "github_blob": "57da4b01ff950e8d82c587564f4d840ced06a075",
+    "drive_file_id": "1YYU8FkcgBnkrPqY0MW7EXhl0XpXP3pjN",
+    "library_file_id": "libfile_a3c97c3f55008191b181fd18491f8820",
+    "local_drive_library_readback_parity": "PASS"
+  },
+  "frozen_evaluator": {
+    "evaluation_phase_sha256": "a986dba818ab63cbd6beac133c5e713698489ca037d5eeba71329e6b216828e3",
+    "mechanics_metrics_sha256": "0164d0f6519c38ba6b9fd0f271f6794e13973418a00cbb8b4b721f4b1b670511",
+    "observable_decorator_sha256": "6eea236647e04a5566e93733f35c927639cc6407d4f62db80793edfa7e97dadf",
+    "gfdr_v2_sha256": "ca22e3fd42e9c812632eb372544e2319ecf720f6dede1f4a60c8da14ff0cb8fa"
+  },
+  "allowed_teacher_use": [
+    "map_frozen_64_carriers_to_evaluator_surface_truth",
+    "measure_committed_geometry_error",
+    "select_teacher_nearest_candidate_only_within_already_frozen_H_i",
+    "define_frozen_hardtail_witness_population",
+    "compute_truth_relative_evaluation_metrics"
+  ],
+  "forbidden_teacher_use": [
+    "create_candidate",
+    "move_candidate",
+    "alter_candidate_score",
+    "alter_committed_observable_state",
+    "supply_counterfactual_N_B",
+    "supply_counterfactual_V_B",
+    "supply_mechanics_input",
+    "change_threshold_metric_population_or_decision_rule"
+  ],
+  "counterfactual_policy": "N_B_AND_V_B_REGENERATED_FROM_FROZEN_RASTER_MODEL_FRONT_DOOR",
+  "population": ["09908", "11032", "12772", "13203", "14404", "14702", "14758", "15290"],
+  "episode": "e01",
+  "sealed21": "CLOSED",
+  "external10": "CLOSED",
+  "training_or_retune": "FORBIDDEN"
+}

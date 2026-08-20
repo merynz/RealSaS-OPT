@@ -1,0 +1,75 @@
+{
+  "authorities": {
+    "contract_commit": "a5f9f3b8d9d201b0c2175c14c2e24ce0139faeab",
+    "evaluator_commit": "0ea3d14383a075a0763d02fdf4f152460466d462",
+    "evaluator_git_blob": "4f7d8475f668b0760b61b71a491e98752c8afc2e",
+    "evaluator_sha256": "b98c5a30e4396d1fefa7ff8bc40b2218188e8d74029f492eedd7608d7d8441e3",
+    "preflight_commit": "fa96c467434e5eb315db711b4fc426f6b3b9cafe",
+    "source_commit": "36d06d3f09041709fb3c0f5ba6f6040393e1fef9",
+    "source_sha256": "556a99090e90530a4642337d6ad562e356303d4cc6f99480bf6104e2737625ba",
+    "world_authority_sha256": "1161ec646741f03184cacf0c8f57336065f2d3aa5be21852528162416fcfe40f",
+    "world_freeze_commit": "f0cab378aef48415e95698f50fbe285c3309ed33"
+  },
+  "family_result_sha256": {
+    "11032": "b32b79d5c23ff8bdf77f5c77ca2155f7178c1d97bc473fb94380667f13fd67f3",
+    "12772": "04082204101a4f082c25cdb3b9c17174b8e4517c0cb8d066ea24be28487d7ca0",
+    "13203": "04d0610349acab8c6754d12db05089e7a07993abf77a9368e113c6030ecb2a48",
+    "14404": "19153005169c41d21a7bab8192e73fa1c9493440b987e618fc8f85fa2c0778d7",
+    "14702": "b4a4779ece88e5f8e6b1c716efce3fea03ca821e8cc5cc477e43f66a638a9c38",
+    "14758": "12b08e5951777ee3f14c4cca3af7a0cf1ed488c47e0ddb850e34436732c405b8",
+    "15290": "ca4a0bcf67a2e133559c1bd57ee0547b22c9bb2ac318785624d1615a042b097f",
+    "9908": "31911280cac0cf0729ec39a7b80a0dac5987d2c19a3bc4e5528efc039f8a898a"
+  },
+  "hardtail_all": {
+    "geometry_improved_n": 17,
+    "material_degrade_n": 20,
+    "material_improve_n": 0,
+    "mean_baseline_composite": 0.5119931884047848,
+    "mean_v3c_composite": 1.278430056544478,
+    "median_baseline_composite": 0.534204636221012,
+    "median_v3c_composite": 0.8752093516144979,
+    "n": 23,
+    "strict_mechanical_equivalent_n": 0
+  },
+  "hardtail_population_exact_r6_3_parity": true,
+  "hardtail_rank3": {
+    "geometry_improved_n": 13,
+    "material_degrade_n": 14,
+    "material_improve_n": 0,
+    "mean_baseline_composite": 0.49426580472897363,
+    "mean_v3c_composite": 1.3345253307916312,
+    "median_baseline_composite": 0.4883371120384433,
+    "median_v3c_composite": 1.237489849714579,
+    "n": 15,
+    "strict_mechanical_equivalent_n": 0
+  },
+  "hardtail_rankdef": {
+    "geometry_improved_n": 4,
+    "material_degrade_n": 6,
+    "material_improve_n": 0,
+    "mean_baseline_composite": 0.5452320327969311,
+    "mean_v3c_composite": 1.1732514173310657,
+    "median_baseline_composite": 0.5481256708587343,
+    "median_v3c_composite": 0.8738943263513499,
+    "n": 8,
+    "strict_mechanical_equivalent_n": 0
+  },
+  "interpretation": "Global proposal min-marginals are valid relational evidence, but converting G+R ranks immediately to one XYZ realization is mechanically destructive. Preserve G as a weighted/set-valued feasible geometry object; R should annotate global compatibility rather than force a point estimate.",
+  "reliable_active_all": {
+    "geometry_improved_n": 74,
+    "material_degrade_n": 168,
+    "material_improve_n": 0,
+    "mean_baseline_composite": 0.49459144709705516,
+    "mean_v3c_composite": 1.2749397784539247,
+    "median_baseline_composite": 0.48213253387471444,
+    "median_v3c_composite": 0.8951403709126504,
+    "n": 202
+  },
+  "schema": "RealSaS.N1D.Rank2R.V3C.Result.v1",
+  "status": "COMPLETE__FAIL_POINT_COLLAPSE",
+  "world": {
+    "baseline_exact_n": 2,
+    "changed_n_gt_1e_4": 510,
+    "pooled_carriers": 512
+  }
+}

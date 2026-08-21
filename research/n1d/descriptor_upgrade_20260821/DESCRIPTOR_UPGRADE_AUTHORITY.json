@@ -1,0 +1,52 @@
+{
+  "schema": "RealSaS.N1D.DescriptorUpgrade.TransferAuthority.v1",
+  "date": "2026-08-21",
+  "status": "RESEARCH_TRANSFER_COMPLETE__D1_D2_PROTOTYPE_READY__NO_QUALIFICATION_CLAIM",
+  "parent_g2_status": "G2_CLOSED__PASS__UNCHANGED",
+  "sealed21": "CLOSED",
+  "external10": "CLOSED",
+  "old_frozen_descriptor_modified": false,
+  "diagnosis": [
+    "current descriptor head is a 1x1 128-to-64 projection plus uncertainty",
+    "current descriptor field is 32x32 while frozen native inference discriminates 2px-spaced sites",
+    "current descriptor loss pools visible views before carrier-level InfoNCE",
+    "current training truth already exposes per-view XY_A/XY_B and V_A/V_B",
+    "descriptor_log_sigma is not trained/used as matching authority in the frozen path"
+  ],
+  "research_order": [
+    "D1 loss-only on current backbone/head",
+    "D2 coarse/fine spatial descriptor head with true 64x64 fine field",
+    "D3 pair-conditioned local correlation refiner if needed",
+    "D4 foundation-feature ablation only after D1-D3"
+  ],
+  "prototype": {
+    "descriptor_v2_sha256": "7e923db7fd749f19d24c067fba3330a6ede610a9ad915eb75b9cea2ed7c8e651",
+    "descriptor_losses_v2_sha256": "9abcf76508616144b5f46bde040f246ad51436cda67a058633f9dc372df353de",
+    "tests_sha256": "9e60dbabcd4b8c715e79a4c267ffba94b9a79f3ec4640f73bbd800822002f7d7",
+    "local_tests": "PASS",
+    "prototype_head_parameters": 568322
+  },
+  "report": {
+    "sha256": "4505623c956f2b6d02e337db97c6d226aa853dbbf29a203e9484c593791dfd24",
+    "drive_file_id": "1M7C6CS8nNZyv8glZdb5ZbhHpnwf-9VO1",
+    "library_file_id": "libfile_2c6090cb8184819181d45dcd73f146e9"
+  },
+  "bundle": {
+    "sha256": "dc06c580aa49e6118328c4c211036fb5a25312188f07450fe462080932fdd0b0",
+    "drive_file_id": "1MG3Xubn2a32fVQvjUiSYUCAszO_iyWOr",
+    "library_file_id": "libfile_8dd4e55c155081919a64803bd9b7051b"
+  },
+  "github_commits": {
+    "descriptor_v2": "e886f6156c02c1ddcbae79bd777a671a1b5ae991",
+    "descriptor_losses_v2": "c63462f6b4246fb93130d4fc5f76102bf3d2e559",
+    "tests": "8150c3260f236a0ec7f7fe475fd99fe569c62f7c"
+  },
+  "license_boundary": {
+    "direct_noncommercial_code_copied": false,
+    "mast3r_and_dune": "CONCEPTUAL_REFERENCE_ONLY",
+    "dinov2": "APACHE_2_0_CANDIDATE_FOR_LATER_D4",
+    "dinov3": "CUSTOM_LICENSE__LEGAL_REVIEW_BEFORE_PRODUCT_DEPENDENCY",
+    "tapnet": "APACHE_2_0_REFERENCE",
+    "xfeat": "APACHE_2_0_REFERENCE"
+  }
+}

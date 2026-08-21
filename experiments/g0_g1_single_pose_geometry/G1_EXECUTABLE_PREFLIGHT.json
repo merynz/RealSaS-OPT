@@ -27,7 +27,13 @@
     "fusion": 81.90352418227121,
     "geometry": 101.93955843383446
   },
-  "input_shape": [1,8,4,128,128],
+  "input_shape": [
+    1,
+    8,
+    4,
+    128,
+    128
+  ],
   "loss_parts": {
     "N": 0.1467280089855194,
     "P": -0.1972995400428772,
@@ -36,7 +42,35 @@
   },
   "migration": {
     "archived_only_source_keys": [
-      "differential.core.f4.conv1.weight","differential.core.f4.conv2.weight","differential.core.f4.norm1.bias","differential.core.f4.norm1.weight","differential.core.f4.norm2.bias","differential.core.f4.norm2.weight","differential.core.f4.skip.weight","differential.core.f8.conv1.weight","differential.core.f8.conv2.weight","differential.core.f8.norm1.bias","differential.core.f8.norm1.weight","differential.core.f8.norm2.bias","differential.core.f8.norm2.weight","differential.core.f8.skip.weight","differential.core.final.0.conv1.weight","differential.core.final.0.conv2.weight","differential.core.final.0.norm1.bias","differential.core.final.0.norm1.weight","differential.core.final.0.norm2.bias","differential.core.final.0.norm2.weight","differential.core.final.1.bias","differential.core.final.1.weight","differential.core.g16.bias","differential.core.g16.weight","differential.core.p4.bias","differential.core.p4.weight","differential.core.p8.bias","differential.core.p8.weight","differential.point.weight"
+      "differential.core.f4.conv1.weight",
+      "differential.core.f4.conv2.weight",
+      "differential.core.f4.norm1.bias",
+      "differential.core.f4.norm1.weight",
+      "differential.core.f4.norm2.bias",
+      "differential.core.f4.norm2.weight",
+      "differential.core.f4.skip.weight",
+      "differential.core.f8.conv1.weight",
+      "differential.core.f8.conv2.weight",
+      "differential.core.f8.norm1.bias",
+      "differential.core.f8.norm1.weight",
+      "differential.core.f8.norm2.bias",
+      "differential.core.f8.norm2.weight",
+      "differential.core.f8.skip.weight",
+      "differential.core.final.0.conv1.weight",
+      "differential.core.final.0.conv2.weight",
+      "differential.core.final.0.norm1.bias",
+      "differential.core.final.0.norm1.weight",
+      "differential.core.final.0.norm2.bias",
+      "differential.core.final.0.norm2.weight",
+      "differential.core.final.1.bias",
+      "differential.core.final.1.weight",
+      "differential.core.g16.bias",
+      "differential.core.g16.weight",
+      "differential.core.p4.bias",
+      "differential.core.p4.weight",
+      "differential.core.p8.bias",
+      "differential.core.p8.weight",
+      "differential.point.weight"
     ],
     "destination_tensor_count": 141,
     "loaded_fraction": 1.0,
@@ -57,7 +91,13 @@
     "07_V7.png": "35344c48fd737e26cb1116b6dfe73f3b64d3d604d22883769fbeed68c870bddc"
   },
   "schema": "RealSaS.IRIS.G1.ExecutablePreflight.v1",
-  "target_keys_on_device": ["N_A","P_A","V_A","XY_A","direct_obs_A"],
+  "target_keys_on_device": [
+    "N_A",
+    "P_A",
+    "V_A",
+    "XY_A",
+    "direct_obs_A"
+  ],
   "target_npz_sha256": "beccaf76d2ebc876183eeb696037f3c27dd4e7627a3149dae8b84557920c91dc",
   "warmstart_metrics_diagnostic_only": {
     "crossview_normal_spread_median_deg": 17.598188400268555,

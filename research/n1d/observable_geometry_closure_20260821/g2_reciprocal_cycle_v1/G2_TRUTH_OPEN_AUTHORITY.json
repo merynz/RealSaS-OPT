@@ -1,0 +1,22 @@
+{
+  "date": "2026-08-21",
+  "evaluation_scope": "FROZEN rank2_g2_truth_evaluator.py only; reconstruct Problem-A from rasters, then map evaluator truth; no proposal/support/score/solver changes",
+  "external10": "CLOSED",
+  "full_byte_preflight_sha256": "61fb0290efadd783bcdc4d82513fc25807f1f8b0c5c9944abbf3631c6bf928e0",
+  "input_manifest_sha256": "46e669167387c45dfacdfb8558fde72e93d80acad6c50e7abd472d21d71be410",
+  "prereg_sha256": "81496633b19882934302ab9e4d2816ac09fc1316a5529659b36dfa04ecd6b79d",
+  "pretruth_content_index_sha256": "81401d343ce5a807d3ce3d2d9520124491f8f01f45fd73132de3d1d7697b88c5",
+  "pretruth_freeze_sha256": "fac07740e4290bed18a93efabae3f6c6b2f302e4159676ea4f3d89eda5ad98ec",
+  "pretruth_pack_sha256": "03b4b2bef96521a1ae7c3edbfa1a190898065da8f42f59ab34d0383cfa1e70d4",
+  "pretruth_persistence_authority_sha256": "cb49eaa9214ac4538c6b005ee9e263249d13d1bf2ec69b3bfd26bd6810d951a7",
+  "required_next": "PERSIST_AND_READBACK_THIS_AUTHORITY__THEN_RUN_FROZEN_EVALUATOR",
+  "retune_after_truth_open": "FORBIDDEN",
+  "same_surface_rescue": "FORBIDDEN",
+  "schema": "RealSaS.N1D.Rank2G.G2.TruthOpenAuthority.v1",
+  "scientific_inputs_immutable": true,
+  "sealed21": "CLOSED",
+  "semantic_sidecar_access_authorized_after_three_store_readback_of_this_file": true,
+  "source_manifest_sha256": "06ef9c2083c302fcbdde38126414a5ec5f189aaf69e05f8a154cc2b5380e80d1",
+  "status": "TRUTH_OPEN_AUTHORIZED_FOR_FROZEN_EVALUATOR_ONLY",
+  "truth_access_before_this_file": "NONE"
+}

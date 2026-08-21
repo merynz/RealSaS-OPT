@@ -1,32 +1,59 @@
 {
-  "schema": "RealSaS.IRIS.G0.ContractFreeze.v1",
-  "status": "DRAFT_READY_FOR_EXECUTABLE_PREFLIGHT",
-  "inference_input": {"pose_count": 1, "views": 8, "ordered": true, "pose_B_dependency": false},
-  "surface_evidence_semantics": {
-    "P": "REQUIRED common/object-frame geometric position or equivalent surface geometry",
-    "N": "REQUIRED local surface orientation/normal evidence",
-    "V": "REQUIRED per-view visibility/observational support",
-    "U": "REQUIRED calibrated geometric uncertainty/confidence",
-    "correspondence_persistence": "REQUIRED semantic capability: observations across views must associate strongly enough to form coherent surface hypotheses",
-    "provenance": "REQUIRED source-view/support metadata",
-    "Z": "OPTIONAL explicit learned correspondence embedding; not required when common-frame geometry makes persistence implicit"
-  },
-  "forbidden_active_IRIS_authority": [
-    "mechanical_owner_identity", "authored_owner_partition", "skeleton_topology", "parent_prediction",
-    "skinning_weights", "GFDR_as_required_output", "Pose_A_to_Pose_B_deformation_as_required_inference_primitive"
-  ],
-  "g0_dev_metrics": [
-    "point_mean", "point_median", "point_p90", "point_p95",
-    "normal_median_deg", "normal_p90_deg", "normal_p95_deg",
-    "crossview_point_spread_mean", "crossview_point_spread_p95",
-    "crossview_normal_spread_median_deg", "crossview_normal_spread_p95_deg",
-    "visibility_brier", "uncertainty_error_spearman", "uncertainty_risk_coverage_auc",
-    "direct_surface_support_recall_at_0_5"
-  ],
   "deferred_but_required_before_G7": [
-    "silhouette_reprojection_fidelity", "surface_extraction_coverage", "artist_domain_robustness",
+    "silhouette_reprojection_fidelity",
+    "surface_extraction_coverage",
+    "artist_domain_robustness",
     "downstream_Geppetto_Arachne_rig_readiness"
   ],
+  "evaluator_binding": {
+    "checkpoint_key": "realsas_iris_sees/g1_metrics.py::g1_checkpoint_selection_key",
+    "panel_aggregation": "realsas_iris_sees/g1_metrics.py::aggregate_g1_metric_rows",
+    "sample_metrics": "realsas_iris_sees/g1_metrics.py::g1_geometry_metrics"
+  },
+  "forbidden_active_IRIS_authority": [
+    "mechanical_owner_identity",
+    "authored_owner_partition",
+    "skeleton_topology",
+    "parent_prediction",
+    "skinning_weights",
+    "GFDR_as_required_output",
+    "Pose_A_to_Pose_B_deformation_as_required_inference_primitive"
+  ],
+  "g0_dev_metrics": [
+    "point_mean",
+    "point_median",
+    "point_p90",
+    "point_p95",
+    "normal_median_deg",
+    "normal_p90_deg",
+    "normal_p95_deg",
+    "crossview_point_spread_mean",
+    "crossview_point_spread_p95",
+    "crossview_normal_spread_median_deg",
+    "crossview_normal_spread_p95_deg",
+    "visibility_brier",
+    "uncertainty_error_spearman",
+    "uncertainty_risk_coverage_auc",
+    "direct_surface_support_recall_at_0_5"
+  ],
+  "inference_input": {
+    "ordered": true,
+    "pose_B_dependency": false,
+    "pose_count": 1,
+    "views": 8
+  },
   "metric_policy": "No mean-only promotion. Tail metrics are mandatory because D2 improved local/median precision while materially worsening hard-tail p90/mean behavior.",
-  "product_threshold_policy": "G0 freezes definitions, not final product thresholds. G1 establishes the family-disjoint baseline; G7 owns product qualification thresholds."
+  "panel_aggregation_policy": "For each metric report family mean, median, p90 and p95 where finite; checkpoint selection uses explicit family hard-tail statistics, never a mean-only score.",
+  "product_threshold_policy": "G0 freezes definitions, not final product thresholds. G1 establishes the family-disjoint baseline; G7 owns product qualification thresholds.",
+  "schema": "RealSaS.IRIS.G0.ContractFreeze.v1",
+  "status": "FROZEN_BEFORE_G1_OPTIMIZER_STEPS",
+  "surface_evidence_semantics": {
+    "N": "REQUIRED local surface orientation/normal evidence",
+    "P": "REQUIRED common/object-frame geometric position or equivalent surface geometry",
+    "U": "REQUIRED calibrated geometric uncertainty/confidence",
+    "V": "REQUIRED per-view visibility/observational support",
+    "Z": "OPTIONAL explicit learned correspondence embedding; not required when common-frame geometry makes persistence implicit",
+    "correspondence_persistence": "REQUIRED semantic capability: observations across views must associate strongly enough to form coherent surface hypotheses",
+    "provenance": "REQUIRED source-view/support metadata"
+  }
 }

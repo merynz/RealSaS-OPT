@@ -1,0 +1,30 @@
+{
+  "date": "2026-08-21",
+  "external10": "CLOSED",
+  "observable_panel_manifest_sha256": "c4673da974eba9f4ddd4a40948bf4e7361f589edfaf2067b0004a717f3142d68",
+  "pretruth_content_index_sha256": "81401d343ce5a807d3ce3d2d9520124491f8f01f45fd73132de3d1d7697b88c5",
+  "pretruth_freeze_sha256": "fac07740e4290bed18a93efabae3f6c6b2f302e4159676ea4f3d89eda5ad98ec",
+  "pretruth_pack_sha256": "03b4b2bef96521a1ae7c3edbfa1a190898065da8f42f59ab34d0383cfa1e70d4",
+  "referenced_output_policy": "ALL_PANEL_STATE_META_EVIDENCE_G1_G2_AND_FREEZE_BYTES_INCLUDED_IN_PACK_AND_CONTENT_INDEX",
+  "required_next_gate": "FREEZE_AND_PERSIST_G2_TRUTH_OPEN_AUTHORITY_BEFORE_SIDECAR_SEMANTIC_DESERIALIZATION",
+  "schema": "RealSaS.N1D.Rank2G.G2.PretruthPersistenceAuthority.v1",
+  "sealed21": "CLOSED",
+  "status": "PASS_BYTE_EXACT__TRUTH_STILL_CLOSED",
+  "stores": {
+    "drive": {
+      "freeze_file_id": "1-tVRr5IW0CCJbTStEwo7DmigUfAxAixp",
+      "index_file_id": "184ksKiQlF_jXtEqG-_TkYZVwyLC2W0SF",
+      "pack_file_id": "1_gGMV2akwAjjcrrHBDBVrofwrnA774yq",
+      "readback": "PASS_BYTE_EXACT"
+    },
+    "library": {
+      "freeze_file_id": "file_0000000099dc820abd5c11f92180b956",
+      "index_file_id": "file_000000007a78820ab33da36862bf2d97",
+      "pack_file_id": "file_0000000009ac820aaaff2d529757c6ef",
+      "pack_library_file_id": "libfile_2348fd32cbe48191a7068ccb33493040",
+      "readback": "PASS_BYTE_EXACT"
+    }
+  },
+  "truth_access": "NONE",
+  "truth_open_authorized_by_this_file": false
+}

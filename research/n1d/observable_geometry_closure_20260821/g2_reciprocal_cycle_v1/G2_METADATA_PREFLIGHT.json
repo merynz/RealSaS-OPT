@@ -1,0 +1,54 @@
+{
+  "blocked_gate": {
+    "current_environment_blocker": "Connected Drive exposes folders and individual files but no folder raw archive or SHA256 checksum field; current container has no local corpus/checkpoint mirror. Brute-force hundreds of connector transfers is intentionally not treated as canonical preflight.",
+    "name": "FULL_BYTE_PREFLIGHT",
+    "required": [
+      "16 family_manifest canonical digest recomputation from corpus files",
+      "128 Pose-A raster byte SHA checks",
+      "128 e01 Pose-B raster byte SHA checks",
+      "16 e01 sidecar opaque-byte SHA checks",
+      "checkpoint/source byte checks"
+    ],
+    "resolution": "Run frozen preflight_g2.py against a local/mounted canonical corpus + checkpoint. Do not begin observable inference until it returns PASS."
+  },
+  "checks": {
+    "episode_index_canonical_sha_match": true,
+    "episode_index_raw_sha_match": true,
+    "family_audit_raw_sha_match": true,
+    "family_contracts_16_of_16": true,
+    "rank_slice_48_64_exact": true
+  },
+  "cross_source_witness_10287": {
+    "e01_poseB_hash_count": 8,
+    "e01_sidecar_sha256_declared": "5d0edb42df478bd8044981191cb1f7d464bc4f7dc2877ca14d782093bbdf9c95",
+    "manifest_canonical_sha_match": true,
+    "poseA_family_audit_parity": true,
+    "poseA_hash_count": 8,
+    "sidecar_semantics_accessed": false
+  },
+  "date": "2026-08-21",
+  "external10": "CLOSED",
+  "families": [
+    {"e01_declared":true,"family":10287,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":15521,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":16638,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":15284,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":13015,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":14703,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":16414,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":16528,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":16036,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":15226,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":14315,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":12949,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":14405,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":11447,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":13843,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true},
+    {"e01_declared":true,"family":14885,"family_audit_poseA_hash_count":8,"family_audit_present":true,"index_content_sha_match":true,"index_manifest_path_match":true,"pass":true,"split_train":true}
+  ],
+  "schema": "RealSaS.N1D.Rank2G.G2.MetadataPreflight.v1",
+  "sealed21": "CLOSED",
+  "source_freeze_authority_sha256": "14379a001587241cba58dc25afc95c020e9f358150f7c9cd6f036315a4d47270",
+  "status": "METADATA_PASS__FULL_BYTE_PREFLIGHT_REQUIRED_BEFORE_INFERENCE",
+  "truth_access": "NONE"
+}

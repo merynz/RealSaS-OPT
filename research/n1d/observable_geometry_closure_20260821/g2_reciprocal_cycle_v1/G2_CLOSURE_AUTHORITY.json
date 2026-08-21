@@ -1,0 +1,51 @@
+{
+  "canonical_report_sha256": "f28fad789b8c973da565a1e4f7fb3a487d8b4da364be1d58add4759bde752293",
+  "claim": "Promote same-view reciprocal descriptor cycle rank as an additional deterministic observation-native frontend primitive on G2_CONFIRM16.",
+  "closure_pack_index_sha256": "5db371a70b03e86c4bde73cd8ef5ec0f9dcf92586fb33f057b060e2d12b549fa",
+  "closure_pack_sha256": "2ff17f2e5482eb2b9e9e9a51005fb9cc175810054d3db17e85549002543caad4",
+  "date": "2026-08-21",
+  "decision": "PASS",
+  "decision_sha256": "6274a1b9e62846489e422eb444c56719826d93e00adf28d59817e41eeecd011a",
+  "execution_compat_authority_sha256": "0a24e305fcd570911b6cbff5a7a52f93e8323a293d3bff944d653fc2e69192ae",
+  "external10": "CLOSED",
+  "full_byte_preflight_sha256": "61fb0290efadd783bcdc4d82513fc25807f1f8b0c5c9944abbf3631c6bf928e0",
+  "github": {
+    "canonical_report_commit": "a621bffe620a4da96f792b208645fe27c91f21af",
+    "decision_commit": "15b7f76bb1f19c5b297008c9751ba6406f2ec973",
+    "execution_compat_authority_commit": "63b67a964f8e61ec9176e3fe822c0f668dad233f",
+    "full_truth_rows_role": "NOT_STORED_ON_GITHUB__CANONICAL_SHA_AND_DRIVE_LIBRARY_BYTE_AUTHORITIES_ONLY",
+    "pretruth_persistence_authority_commit": "ad4dc647956056020022b7e88b099e8989cfcedb",
+    "small_json_role": "LOGICAL_MIRROR__DRIVE_LIBRARY_LOCAL_BYTES_ARE_SHA_AUTHORITIES",
+    "truth_open_authority_commit": "f422f491eee880e55de414152758c41196616e2c",
+    "truth_summary_commit": "f62113ecbbc50ea7b98e4c310eac892a403ccc6e"
+  },
+  "next_scientific_step": "Return to frontend qualification ladder / mechanical-surface contract; any learned MV-TAP/V-DPM-like refinement requires a new preregistered surface. Revisit old Rank2 role under the new mechanical-surface contract before extending it.",
+  "not_claimed": [
+    "learned generalization of a new network component",
+    "complete 2.5D mechanical surface sufficiency",
+    "sealed21 or external10 performance"
+  ],
+  "prereg_sha256": "81496633b19882934302ab9e4d2816ac09fc1316a5529659b36dfa04ecd6b79d",
+  "preregistered_gates_passed": "4/4",
+  "pretruth_freeze_sha256": "fac07740e4290bed18a93efabae3f6c6b2f302e4159676ea4f3d89eda5ad98ec",
+  "pretruth_persistence_authority_sha256": "cb49eaa9214ac4538c6b005ee9e263249d13d1bf2ec69b3bfd26bd6810d951a7",
+  "primary_result": {
+    "disagreement_hit_delta": 0.08473861720067455,
+    "family_nonworse_count": 16,
+    "mean_regret_G1_px": 1.5357362361584654,
+    "mean_regret_G2_px": 1.3260590730293407,
+    "mean_regret_ratio": 0.8634679848060255,
+    "overall_hit_delta": 0.05093333333333333,
+    "overall_hit_rate_G1": 0.33466666666666667,
+    "overall_hit_rate_G2": 0.3856
+  },
+  "result_three_store_readback": "DRIVE_LIBRARY_PASS_BYTE_EXACT__GITHUB_SMALL_LOGICAL_MIRRORS_AND_SHA_AUTHORITIES",
+  "same_surface_retune_or_rescue": "NONE",
+  "schema": "RealSaS.N1D.Rank2G.G2.ClosureAuthority.v1",
+  "scientific_question_closed": true,
+  "sealed21": "CLOSED",
+  "status": "G2_CLOSED__PASS__RECIPROCAL_CYCLE_PROMOTED_AS_DETERMINISTIC_OBSERVATION_NATIVE_PRIMITIVE",
+  "truth_evaluation_sha256": "81b3ad2f97d7695129fe3d0e6e2eb0e1424a205a2dbd7ce4d204f1b76d55e2a0",
+  "truth_evaluation_summary_sha256": "1aabe6414b389bcb714e1a2f4a43b41f5b16e33f6c649b694e09aa292f82c0f8",
+  "truth_open_authority_sha256": "e8868f2499bf2eebfbea852b3658dbbcef9517e8fd663e33011ed12c942caa61"
+}

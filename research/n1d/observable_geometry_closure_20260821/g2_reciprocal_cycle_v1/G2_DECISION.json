@@ -1,0 +1,59 @@
+{
+  "claim_boundary": {
+    "fail": "reciprocal-cycle as formulated is not promoted; any next frontend treatment requires a new preregistered surface.",
+    "pass": "reciprocal-cycle is promoted as an additional useful deterministic observation-native frontend primitive for the 2.5D mechanical surface; this does not establish learned generalization of a new network module."
+  },
+  "date": "2026-08-21",
+  "disagreement": {
+    "g1_hit_rate": 0.30986509274873525,
+    "g1_mean_regret_px": 1.6405148728108967,
+    "g2_hit_rate": 0.3946037099494098,
+    "g2_mean_regret_px": 1.3270243678811344,
+    "hit_gain_n": 201,
+    "n": 2372
+  },
+  "experiment": "G2_RECIPROCAL_CYCLE_V1",
+  "external10": "CLOSED",
+  "family_guard": {
+    "families": [
+      {"family":10287,"g1_mean_regret_px":2.304816899258386,"g2_mean_regret_px":1.8074297390347334,"n":250,"nonworse":true},
+      {"family":15521,"g1_mean_regret_px":1.0762610882211843,"g2_mean_regret_px":0.9407235192804592,"n":260,"nonworse":true},
+      {"family":16638,"g1_mean_regret_px":2.21956255303877,"g2_mean_regret_px":1.9745963046571433,"n":191,"nonworse":true},
+      {"family":15284,"g1_mean_regret_px":1.071169347239867,"g2_mean_regret_px":1.012421124577235,"n":208,"nonworse":true},
+      {"family":13015,"g1_mean_regret_px":1.9931794346662308,"g2_mean_regret_px":1.873765028320517,"n":235,"nonworse":true},
+      {"family":14703,"g1_mean_regret_px":1.658963148072725,"g2_mean_regret_px":1.481291773620929,"n":264,"nonworse":true},
+      {"family":16414,"g1_mean_regret_px":1.690424447195477,"g2_mean_regret_px":1.2356987772904873,"n":141,"nonworse":true},
+      {"family":16528,"g1_mean_regret_px":1.0832425750779597,"g2_mean_regret_px":0.9557736525151296,"n":200,"nonworse":true},
+      {"family":16036,"g1_mean_regret_px":1.0438221103899192,"g2_mean_regret_px":0.9552210169792044,"n":175,"nonworse":true},
+      {"family":15226,"g1_mean_regret_px":1.5038064826740127,"g2_mean_regret_px":1.1720665842486166,"n":257,"nonworse":true},
+      {"family":14315,"g1_mean_regret_px":1.3378154538903675,"g2_mean_regret_px":1.1101123038924303,"n":221,"nonworse":true},
+      {"family":12949,"g1_mean_regret_px":1.4294262744797672,"g2_mean_regret_px":1.1744928866508713,"n":284,"nonworse":true},
+      {"family":14405,"g1_mean_regret_px":1.5346779505265262,"g2_mean_regret_px":1.3479816686040054,"n":250,"nonworse":true},
+      {"family":11447,"g1_mean_regret_px":1.5026228922323643,"g2_mean_regret_px":1.3280375988331834,"n":319,"nonworse":true},
+      {"family":13843,"g1_mean_regret_px":1.2111937809265265,"g2_mean_regret_px":1.0678180388531473,"n":242,"nonworse":true},
+      {"family":14885,"g1_mean_regret_px":1.8498055644761586,"g2_mean_regret_px":1.681555147513973,"n":253,"nonworse":true}
+    ],
+    "nonworse_count": 16
+  },
+  "gates": {
+    "disagreement_hit_delta_vs_G1": {"margin":0.004738617200674547,"pass":true,"threshold_min":0.08,"value":0.08473861720067455},
+    "family_mean_regret_nonworse_count": {"margin_count":4,"pass":true,"threshold_min":12,"value":16},
+    "overall_hit_delta_vs_G1": {"margin":0.02093333333333333,"pass":true,"threshold_min":0.03,"value":0.05093333333333333},
+    "overall_mean_regret_ratio_vs_G1": {"margin_below_max":0.03653201519397453,"pass":true,"threshold_max":0.9,"value":0.8634679848060255}
+  },
+  "learned_generalization_proven": false,
+  "overall": {
+    "g1_hit_n":1255,"g1_hit_rate":0.33466666666666667,"g1_mean_regret_px":1.5357362361584654,"g1_median_regret_px":1.1270175520162486,
+    "g2_hit_n":1446,"g2_hit_rate":0.3856,"g2_mean_regret_px":1.3260590730293407,"g2_median_regret_px":0.7523182336346494,
+    "hit_gain_n":191,"n":3750,"relative_mean_regret_reduction":0.1365320151939745,"relative_median_regret_reduction":0.33246981620761573
+  },
+  "prereg_sha256":"81496633b19882934302ab9e4d2816ac09fc1316a5529659b36dfa04ecd6b79d",
+  "pretruth_freeze_sha256":"fac07740e4290bed18a93efabae3f6c6b2f302e4159676ea4f3d89eda5ad98ec",
+  "promoted_primitive":"same-view reciprocal descriptor cycle rank",
+  "same_surface_retune_or_rescue":"NONE",
+  "schema":"RealSaS.N1D.Rank2G.G2.ReciprocalCycleDecision.v1",
+  "sealed21":"CLOSED",
+  "status":"PASS",
+  "truth_evaluation_sha256":"81b3ad2f97d7695129fe3d0e6e2eb0e1424a205a2dbd7ce4d204f1b76d55e2a0",
+  "truth_open_authority_sha256":"e8868f2499bf2eebfbea852b3658dbbcef9517e8fd663e33011ed12c942caa61"
+}

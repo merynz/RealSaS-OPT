@@ -73,6 +73,7 @@ def g1_geometry_metrics(outputs: Dict[str, torch.Tensor], target: Dict[str, torc
     }
 
 
+
 def aggregate_g1_metric_rows(rows):
     """Panel aggregation with explicit central + hard-tail family statistics.
 

@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-22  
 **Active branch:** `g0-g1/single-pose-geometry`  
-**Status:** `S0_PROBLEM_FROZEN__S0_A_NEXT__G1_BASELINE_PRESERVED_UNSTARTED`
+**Status:** `S0_A_DATA_PLANE_PASS__S0_B_PROBE_IMPLEMENTATION_NEXT__G1_BASELINE_PRESERVED_UNSTARTED`
 
 ## Read this first
 
@@ -33,7 +33,7 @@ Canonical scientific question:
 
 The target is the functional 8-view observational equivalent of the geometric shape input consumed by 3D auto-riggers. It is **not** exact hidden-mesh reconstruction and it is not hidden mechanical ontology recovery.
 
-The final IRIS head list is now explicitly an **S0 experimental result**. The current `P/N/V/U + persistence/provenance` factorization remains the frozen G1 baseline candidate, not an assumption that every field requires an independent learned head or that no richer geometric state will be needed.
+The final IRIS head list is explicitly an **S0 experimental result**. The current `P/N/V/U + persistence/provenance` factorization remains the frozen G1 baseline candidate, not an assumption that every field requires an independent learned head or that no richer geometric state will be needed.
 
 ### Head-derivation rule
 
@@ -64,46 +64,78 @@ Normals, visibility, adjacency, curvature and other quantities are **not automat
 
 ### Deterministic SurfaceBuilder
 
-A non-learned SurfaceBuilder is now an explicit boundary between raw IRIS evidence and Geppetto/Arachne. Candidate duties: surfel fusion, duplicate merge, provenance/support, reprojection/cycle checks, local neighborhood/adjacency, sheet/component separation and stable derived local geometry. It is not a fourth learned model.
+A non-learned SurfaceBuilder is an explicit boundary between raw IRIS evidence and Geppetto/Arachne. Candidate duties: surfel fusion, duplicate merge, provenance/support, reprojection/cycle checks, local neighborhood/adjacency, sheet/component separation and stable derived local geometry. It is not a fourth learned model.
 
 IRIS does **not** own authored mechanical owner identity, parent/topology prediction, skeleton, weights or mandatory GFDR.
 
 ## S0 — ACTIVE FRONTIER
 
-Authority:
-`experiments/s0_rigging_substrate/S0_PLAN_AND_PREREG_V1.md`
+Authorities:
+- `experiments/s0_rigging_substrate/S0_PLAN_AND_PREREG_V1.md`
+- `experiments/s0_rigging_substrate/S0_A_INFORMATION_DERIVABILITY_MATRIX.json`
+- `experiments/s0_rigging_substrate/S0_A_CORPUS_BINDING_REPORT.md`
 
 Scientific question:
 
 > What is the minimum observation-grounded geometric information that must be delivered from `A×8` so fixed downstream skeleton and skinning probes can recover a clean, editable, functionally valid rig?
 
-### S0-A — NEXT
+### S0-A — DATA PLANE PASS
 
-Build `S0_A_INFORMATION_DERIVABILITY_MATRIX.json` over candidate fields:
-- `P`;
-- `N`;
-- `V`;
-- `U`;
-- provenance;
-- correspondence/persistence / optional `Z`;
-- adjacency/neighborhood graph;
-- connected sheets/components;
-- curvature/local differential geometry;
-- occupancy/thickness;
-- silhouette/boundary support;
-- ambiguity/hypothesis set `H`;
-- appearance/semantic surface latent only as reserve.
+Initial field inventory is frozen. Current provisional conclusions:
+- `P` is the clearest learned primitive candidate;
+- `N` has strong downstream precedent but must beat `N_derived(P)` before becoming a required learned head;
+- exact source mesh faces/topology are rejected as required IRIS product targets; locality is first represented by a canonical derived surface graph;
+- `V/support`, provenance, graph structure, silhouette/boundary and local differential geometry have strong deterministic-derivation candidates;
+- current G1 `log_sigma` is predictive risk, not yet calibrated `U`;
+- correspondence/persistence is required, explicit `Z` is optional;
+- set-valued geometry `H` remains a safety candidate for genuinely multimodal observations.
 
-For every field record: source availability, A×8 observability, current sidecar supervision, deterministic derivability, downstream query, and necessity experiment.
+### S0-A corpus binding — PASS
 
-### S0-B
+The leading S0-B corpus is now directly provenance-bound:
 
-Use fixed-capacity research probes rather than product Geppetto/Arachne:
-- `GeppettoProbe`: substrate -> skeleton/hierarchy;
-- `ArachneProbe`: substrate + GT product skeleton -> skinning;
-- `JointProbe`: predicted skeleton -> skinning -> compiler deformation checks.
+```text
+V19.14 observation rows: 1408
+M5 V18.76 rows:          3456
+exact sample-id join:    1408
+observation-only:           0
+joined split:            1024 train / 384 validation
+```
 
-Initial matched ablation ladder:
+All 1408 joined records have privileged teacher arrays + manifest present in the source-availability audit. All 1408 joined M5 row validations pass and every joined row has `512` surface points.
+
+Joined product-core control counts: min `6`, max `61`, median `21`.  
+Joined detail-control counts: min `6`, max `71`, median `28`.  
+Most rows carry `16` standardized deformation probes (`1395/1408`; the remainder carry 12 or 14).
+
+A real M5 row was downloaded and SHA-verified against its manifest. Its payload co-locates:
+
+```text
+surface_points [512,3]
+surface_normals [512,3]
+view_point_xy01 [8,512,2]
+view_point_visibility [8,512]
+product_core_node_xyz [J,3]
+product_core_parent_index [J]
+product_core_role_index [J]
+product_core_surface_skin_weights [512,J]
+product_core_support_mask [512,J]
+deformation_probes
+```
+
+This is sufficient to implement fixed GeppettoProbe, ArachneProbe and JointProbe without building a new corpus first.
+
+Important open field: M5 manifest reports `component_contract_status = pending_surface_connectivity_owner`. Surface connectivity is therefore **not** imported as a settled hidden authority; S0 must test deterministic SurfaceBuilder graph versus any later learned connectivity treatment.
+
+### S0-B — NEXT EXECUTABLE GATE
+
+Implement fixed-capacity research probes rather than product Geppetto/Arachne:
+- `S0JoinedRow` loader with strict substrate/teacher separation;
+- `GeppettoProbe`: selected substrate arm -> product-core skeleton/hierarchy;
+- `ArachneProbe`: selected substrate arm + **GT product-core skeleton** -> dense skinning;
+- `JointProbe`: predicted skeleton -> predicted skinning -> frozen deformation-probe evaluation.
+
+Initial matched ablation ladder remains:
 
 ```text
 A0  P only
@@ -116,7 +148,7 @@ A6  A5 + occupancy/thickness evidence if available
 A7  A6 + appearance/semantic latent only if geometry-only arms leave a reproducible gap
 ```
 
-A field becomes a required **learned head** only if it is required substrate information and deterministic reconstruction is insufficient.
+First S0-B execution is **tiny open-development parity/smoke only**. Confirmatory field-ablation results are forbidden until the split, optimizer, probe capacity, evaluator and numerical non-inferiority margins are frozen.
 
 ### S0-C
 
@@ -233,10 +265,10 @@ G1 does not define product PASS. It is a baseline/causal gate; G7 owns final IRI
 
 ## Current execution order
 
-1. Execute **S0-A information/derivability inventory** against current RealSaS corpus/sidecar truth and reference rigging inputs.
-2. Freeze `S0_A_INFORMATION_DERIVABILITY_MATRIX.json` and exact S0-B candidate arms.
-3. Implement fixed GeppettoProbe/ArachneProbe interfaces and tiny open-development parity pilot.
-4. Freeze S0-B split/evaluator/non-inferiority margins; run family-disjoint field ablations.
+1. Implement **S0-B fixed probe interfaces/loaders** against the 1408 exact-join corpus.
+2. Run a tiny open-development loader/forward/backward/deformation-evaluator parity smoke only.
+3. Freeze S0-B family split, optimizer, fixed probe capacity, evaluator and numerical non-inferiority margins.
+4. Run family-disjoint field ablations A0→A6; authorize A7 only if geometry-only arms leave a reproducible gap.
 5. Freeze S0-C `RIGGING_SURFACE_CONTRACT_V1.json`.
 6. Run/interpret the already-frozen G1 baseline against this downstream-sufficiency target without changing its prereg.
 7. Route later geometry interventions from observed failure mode only:

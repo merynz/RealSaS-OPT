@@ -1,0 +1,339 @@
+{
+  "schema": "RealSaS.S0A.InformationDerivabilityMatrix.v1",
+  "date": "2026-08-22",
+  "status": "INITIAL_EVIDENCE_MATRIX_FROZEN__BYTE_LEVEL_CORPUS_BINDING_NEXT",
+  "authority": "canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md",
+  "scientific_question": "What is the minimum observation-grounded geometric information required from A×8 for downstream skeleton generation, skinning and compiler verification?",
+  "rules": {
+    "shipping_input": "ONE neutral pose × 8 ordered views",
+    "pose_B_required": false,
+    "hidden_rig_truth_allowed_at_product_inference": false,
+    "final_head_list_is_an_experimental_result": true,
+    "deterministic_derivation_must_be_tested_before_promoting_a_learned_head": true,
+    "ambiguity_must_not_be_forced_to_singleton_without_observational_support": true
+  },
+  "evidence_sources": [
+    {
+      "id": "REALSAS_G1_TARGETS",
+      "kind": "code_verified",
+      "path": "experiments/g0_g1_single_pose_geometry/realsas_iris_sees/g1_targets.py",
+      "branch": "g0-g1/single-pose-geometry",
+      "blob_sha": "91c07b2ef20a3776256ccb3344da817c52223733",
+      "supports": [
+        "surface_points_A -> P_A",
+        "surface_normals_A -> N_A",
+        "surface_xy_A -> XY_A",
+        "surface_visibility_A -> V_A/direct_obs_A",
+        "Pose-B/mechanics exclusion at G1 target-construction boundary"
+      ]
+    },
+    {
+      "id": "REALSAS_G1_MODEL",
+      "kind": "code_verified",
+      "path": "experiments/g0_g1_single_pose_geometry/realsas_iris_sees/g1_model.py",
+      "branch": "g0-g1/single-pose-geometry",
+      "blob_sha": "dacd819bd6a1400e2f29aea6a3b4d88ef2f144bc",
+      "supports": [
+        "current candidate outputs point/normal/log_sigma/visibility_logit",
+        "descriptor_z is preserved but frozen/dormant",
+        "dense_feature exists as an internal latent"
+      ]
+    },
+    {
+      "id": "REALSAS_G1_LOSS",
+      "kind": "code_verified",
+      "path": "experiments/g0_g1_single_pose_geometry/realsas_iris_sees/g1_losses.py",
+      "branch": "g0-g1/single-pose-geometry",
+      "blob_sha": "22fcd7c6215650e19bcf9ea550c691d51ecd0050",
+      "supports": [
+        "P is directly supervised",
+        "N is directly supervised",
+        "V is directly supervised",
+        "U/log_sigma is heteroscedastic predictive risk tied to P error, not direct calibrated uncertainty truth"
+      ]
+    },
+    {
+      "id": "REALSAS_G1_PREFLIGHT",
+      "kind": "artifact_verified",
+      "path": "experiments/g0_g1_single_pose_geometry/G1_EXECUTABLE_PREFLIGHT.json",
+      "supports": [
+        "real A×8 data path is executable",
+        "real direct carrier/support counts exist",
+        "uncertainty-error and risk-coverage diagnostics already exist"
+      ]
+    },
+    {
+      "id": "REALSAS_M5_DENSE_WEIGHT_TRUTH",
+      "kind": "report_verified_not_byte_audited_in_S0A_yet",
+      "source": "REALSAS_M4_M5_DENSE_WEIGHT_REPRESENTATION_AUDIT_20260804.md",
+      "supports": [
+        "M5 V18.76 supplies a dense simplex weight distribution over surface_points × product-core controls",
+        "reported surface point count is 512",
+        "weight truth supports downstream ArachneProbe evaluation"
+      ]
+    },
+    {
+      "id": "REALSAS_1408_JOIN",
+      "kind": "drive_report_verified_not_byte_audited_in_S0A_yet",
+      "source": "V19_27R1_FULL1408_TRAINING_PLAN.md",
+      "supports": [
+        "3456 complete M5 teacher rows",
+        "1408 verified M4 observation rows exact-joining to M5",
+        "1024 train / 384 validation historical split",
+        "228-row subset had regenerated structural role/root/parent/topology evidence"
+      ]
+    },
+    {
+      "id": "RIGANYTHING_PUBLIC_INPUT",
+      "kind": "public_code_verified",
+      "source": "Isabella98Liu/RigAnything config.yaml",
+      "supports": [
+        "pc_tokenizer.in_channels = 6",
+        "n_points = 1024",
+        "reference skeleton generator consumes a 6-channel point representation consistent with position+normal input"
+      ]
+    },
+    {
+      "id": "UNIRIG_PUBLIC_SKELETON_INPUT",
+      "kind": "public_code_verified",
+      "source": "VAST-AI-Research/UniRig src/model/unirig_ar.py",
+      "supports": [
+        "encode_mesh_cond(vertices, normals)",
+        "skeleton generation conditions on point positions and normal features"
+      ]
+    },
+    {
+      "id": "UNIRIG_PUBLIC_SKIN_INPUT",
+      "kind": "public_code_verified",
+      "source": "VAST-AI-Research/UniRig src/model/unirig_skin.py",
+      "supports": [
+        "skinning prediction consumes vertices, normals, joints/tails/parents and deterministic voxel_skin-style geometry prior",
+        "exact mesh faces are not a direct neural forward input in the verified skinning path"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "field": "P_common_frame_position",
+      "provisional_status": "LEARNED_PRIMITIVE_CANDIDATE",
+      "current_realsas_truth": "DIRECT: surface_points_A -> normalized P_A",
+      "A8_observability": "YES_AS_GEOMETRIC_INFERENCE_TARGET",
+      "deterministic_derivability": "NO_FROM_RASTER_WITHOUT_SOLVING_GEOMETRY",
+      "downstream_query": [
+        "global shape organization",
+        "joint/control placement",
+        "bone-to-surface distances",
+        "skinning locality",
+        "surface graph construction"
+      ],
+      "external_precedent": [
+        "RigAnything point representation",
+        "UniRig vertices input"
+      ],
+      "necessity_test": "A0 P-only establishes base downstream ceiling; removing P is not a meaningful rigging substrate arm."
+    },
+    {
+      "field": "N_surface_orientation",
+      "provisional_status": "LEARNED_PRIMITIVE_CANDIDATE",
+      "current_realsas_truth": "DIRECT: surface_normals_A -> N_A",
+      "A8_observability": "YES_BUT_MAY_BE_DERIVABLE_FROM_COHERENT_P",
+      "deterministic_derivability": "PLAUSIBLE_FROM_P_PLUS_LOCAL_NEIGHBORHOOD__UNTESTED",
+      "downstream_query": [
+        "local surface orientation",
+        "shape encoding",
+        "boundary/sheet disambiguation",
+        "skinning local geometry"
+      ],
+      "external_precedent": [
+        "RigAnything 6-channel point representation and published normal ablation evidence",
+        "UniRig explicit normals input for skeleton and skinning"
+      ],
+      "necessity_test": "Compare A1 P+N_derived_from_P versus A2 P+N_direct with identical downstream probes. Promote an N head only if direct/learned N is materially better."
+    },
+    {
+      "field": "V_view_visibility_support",
+      "provisional_status": "DETERMINISTIC_DERIVED_CANDIDATE",
+      "current_realsas_truth": "DIRECT TRAINING TRUTH: surface_visibility_A -> V_A; direct_obs_A derived as any-view support",
+      "A8_observability": "YES_FROM_ALPHA_SILHOUETTE_PLUS_GEOMETRIC_REPROJECTION_WITH_OCCLUSION_AMBIGUITY",
+      "deterministic_derivability": "PARTLY_DIRECTLY_OBSERVED_AND_PARTLY_REPROJECTABLE__LEARNED_FALLBACK_MAY_HELP",
+      "downstream_query": [
+        "support weighting during surfel fusion",
+        "coverage",
+        "occlusion-aware canonicalization",
+        "safety/abstention"
+      ],
+      "necessity_test": "Compare deterministic support/reprojection V against explicit supplied/learned V inside A4."
+    },
+    {
+      "field": "U_geometric_risk_uncertainty",
+      "provisional_status": "LEARNED_PRIMITIVE_CANDIDATE",
+      "current_realsas_truth": "NO_DIRECT_U_TRUTH: G1 log_sigma is trained heteroscedastically against P error; calibration diagnostics are separate",
+      "A8_observability": "UNCERTAINTY_IS_A_PROPERTY_OF_PREDICTIVE_EVIDENCE_NOT_DIRECT_WORLD_TRUTH",
+      "deterministic_derivability": "PARTIAL_RISK_SIGNALS_CAN_BE_DERIVED_FROM_REPROJECTION_SUPPORT_CYCLE_AND_TRIANGULATION_CONDITION",
+      "downstream_query": [
+        "abstention",
+        "hypothesis retention",
+        "fusion weighting",
+        "compiler risk routing"
+      ],
+      "necessity_test": "Compare deterministic U_obs-only, learned predictive risk, and combined risk; calibrate only after representation is frozen."
+    },
+    {
+      "field": "provenance_source_view_pixel",
+      "provisional_status": "DETERMINISTIC_DERIVED_CANDIDATE",
+      "current_realsas_truth": "surface_xy_A + ordered view index + V_A provide teacher-side provenance for current carriers",
+      "A8_observability": "YES_BY_CONSTRUCTION",
+      "deterministic_derivability": "YES_BOOKKEEPING",
+      "downstream_query": [
+        "reprojection",
+        "support counts",
+        "cycle checks",
+        "failure attribution"
+      ],
+      "necessity_test": "No neural-head test unless deterministic provenance cannot survive a future representation change."
+    },
+    {
+      "field": "C_cross_view_correspondence_persistence",
+      "provisional_status": "OPTIONAL_INTERNAL_LATENT",
+      "current_realsas_truth": "CURRENT SIDECAR IMPLICITLY BINDS ONE COMMON P_A CARRIER TO PER-VIEW XY_A/V_A OBSERVATIONS",
+      "A8_observability": "YES_AS_RELATIONAL_EVIDENCE_BUT_NOT_ALWAYS_SINGLETON",
+      "deterministic_derivability": "MAY_BE_IMPLICIT_IF_DIRECT_COMMON_FRAME_P_IS_COHERENT; OTHERWISE_REQUIRES_DESCRIPTOR_CYCLE_OR_MATCHING_EVIDENCE",
+      "downstream_query": [
+        "cross-view surfel fusion",
+        "duplicate resolution",
+        "coherent common-frame shape"
+      ],
+      "necessity_test": "Frozen G1 versus matched reciprocal/cycle/high-recall correspondence intervention. Z is promoted only if explicit representation beats implicit P-based persistence."
+    },
+    {
+      "field": "Z_persistent_descriptor",
+      "provisional_status": "OPTIONAL_INTERNAL_LATENT",
+      "current_realsas_truth": "G1 descriptor_z exists but is frozen and has zero loss authority",
+      "A8_observability": "YES_AS_LEARNED_MATCHING_FEATURE",
+      "deterministic_derivability": "NOT_APPLICABLE_IF_COMMON_FRAME_P_SOLVES_PERSISTENCE",
+      "downstream_query": [
+        "candidate ranking",
+        "reciprocal/cycle matching",
+        "high-recall persistence"
+      ],
+      "necessity_test": "Do not expose Z in product contract unless correspondence diagnostics show a causal gap that P/N/support alone cannot close."
+    },
+    {
+      "field": "G_surface_adjacency_neighborhood",
+      "provisional_status": "DETERMINISTIC_DERIVED_CANDIDATE",
+      "current_realsas_truth": "NOT_AN_EXPLICIT_G1_TARGET",
+      "A8_observability": "YES_APPROXIMATELY_FROM_COMMON_FRAME_P_PER_VIEW_XY_SUPPORT_AND_NORMAL_CONTINUITY",
+      "deterministic_derivability": "PLAUSIBLE_VIA_KNN_IMAGE_PROXIMITY_NORMAL_DISCONTINUITY_AND_CROSS_VIEW_SUPPORT__UNTESTED",
+      "downstream_query": [
+        "local geometry encoding",
+        "sheet separation",
+        "curvature",
+        "skinning locality"
+      ],
+      "necessity_test": "A2 versus A3; if graph helps, then test derived graph versus any learned connectivity prediction before adding a head."
+    },
+    {
+      "field": "connected_surface_sheets_components",
+      "provisional_status": "DETERMINISTIC_DERIVED_CANDIDATE",
+      "current_realsas_truth": "NOT_AN_EXPLICIT_G1_TARGET",
+      "A8_observability": "PARTLY; OCCLUDED_CONTACTS_CAN_BE_AMBIGUOUS",
+      "deterministic_derivability": "DERIVE_FROM_SURFACE_GRAPH_WITH_FAIL_CLOSED_AMBIGUITY",
+      "downstream_query": [
+        "avoid bridging nearby but disconnected layers",
+        "hair/garment/body separation",
+        "skinning locality"
+      ],
+      "necessity_test": "Graph/component ablation on contact-heavy families; learned component head only if deterministic graph repeatedly merges/splits rig-relevant sheets."
+    },
+    {
+      "field": "curvature_local_differential_geometry",
+      "provisional_status": "DETERMINISTIC_DERIVED_CANDIDATE",
+      "current_realsas_truth": "NOT_AN_EXPLICIT_G1_TARGET",
+      "A8_observability": "YES_WHEN_LOCAL_SURFACE_GEOMETRY_IS_WELL_SUPPORTED",
+      "deterministic_derivability": "YES_IN_PRINCIPLE_FROM_P_N_NEIGHBORHOODS_WITH_SUPPORT_THRESHOLDS",
+      "downstream_query": [
+        "joint-locus cues",
+        "surface transition cues",
+        "skinning boundary cues"
+      ],
+      "necessity_test": "Only add to probe features after A3; never add a curvature neural head before derived curvature is tested."
+    },
+    {
+      "field": "occupancy_thickness",
+      "provisional_status": "RESERVE_ONLY",
+      "current_realsas_truth": "NOT_IN_CURRENT_G1_TARGET; TEACHER MESH/VERTEX/FACE SOURCES MAY SUPPORT OFFLINE DERIVATION",
+      "A8_observability": "PARTIAL_AND_POTENTIALLY_NON_IDENTIFIABLE_FOR_HIDDEN_INTERIORS",
+      "deterministic_derivability": "APPROXIMATE_FROM_MULTI_VIEW_SILHOUETTES_AND_SURFACE_HYPOTHESES",
+      "downstream_query": [
+        "inside/outside constraints",
+        "bone placement inside body volume",
+        "separation of near front/back sheets"
+      ],
+      "necessity_test": "Admit A6 only if geometry+graph arms leave a reproducible skeleton/skinning gap correlated with thickness/inside-outside ambiguity."
+    },
+    {
+      "field": "silhouette_boundary_support",
+      "provisional_status": "DETERMINISTIC_DERIVED_CANDIDATE",
+      "current_realsas_truth": "RGBA input and rendered foreground masks directly expose silhouette/boundary evidence",
+      "A8_observability": "YES_DIRECT",
+      "deterministic_derivability": "YES_FROM_INPUT_ALPHA_OR_FOREGROUND_SEGMENTATION",
+      "downstream_query": [
+        "surface coverage",
+        "reprojection validation",
+        "thin-part preservation"
+      ],
+      "necessity_test": "Treat as SurfaceBuilder/validation evidence first, not a separate output head."
+    },
+    {
+      "field": "H_set_valued_geometric_hypotheses",
+      "provisional_status": "NOT_OBSERVABLE_WITHOUT_UNCERTAINTY",
+      "current_realsas_truth": "NO_EXPLICIT_SINGLE_CANONICAL_H_TRUTH IN G1; HISTORICAL RESEARCH SHOWS PREMATURE SINGLETON COLLAPSE CAN BE HARMFUL",
+      "A8_observability": "THE_SUPPORTED_SET_OR_DISTRIBUTION_MAY_BE_OBSERVABLE_EVEN_WHEN_ONE_HIDDEN_STATE_IS_NOT",
+      "deterministic_derivability": "CAN_BE_CONSTRUCTED_FROM_HIGH_RECALL_MATCHING_REPROJECTION_AND_GEOMETRIC_FEASIBILITY IF NEEDED",
+      "downstream_query": [
+        "ambiguity-safe surfel fusion",
+        "compiler reselection",
+        "avoid false certainty in symmetric/occluded regions"
+      ],
+      "necessity_test": "On an ambiguity-enriched open panel, compare singleton P versus retained top-k/set-valued geometry under identical downstream probes and risk coverage."
+    },
+    {
+      "field": "exact_mesh_faces_topology",
+      "provisional_status": "REJECTED_FOR_PRODUCT_INFERENCE",
+      "current_realsas_truth": "TEACHER SOURCES MAY PROVIDE VERTICES/FACES OFFLINE; CURRENT G1 DOES NOT TARGET FACES",
+      "A8_observability": "EXACT HIDDEN TRIANGULATION IS NOT A PRODUCT-IDENTIFIABLE TARGET",
+      "deterministic_derivability": "LOCAL RIGGING SURFACE GRAPH CAN BE CANONICALIZED WITHOUT SOURCE TRIANGULATION",
+      "downstream_query": [
+        "surface locality only"
+      ],
+      "external_precedent": [
+        "RigAnything skeleton path uses point representation rather than exact faces",
+        "verified UniRig skeleton and skinning neural forward paths consume positions/normals rather than exact source faces"
+      ],
+      "necessity_test": "No exact-face head. If locality is insufficient, test canonical derived graph, not source-triangulation recovery."
+    },
+    {
+      "field": "appearance_semantic_surface_latent",
+      "provisional_status": "RESERVE_ONLY",
+      "current_realsas_truth": "G1 exposes dense_feature internally; no semantic surface output is part of the product contract",
+      "A8_observability": "YES",
+      "deterministic_derivability": "NO_BUT_NOT_YET_SHOWN_NECESSARY",
+      "downstream_query": [
+        "possible aid for ambiguous stylized geometry",
+        "possible part/material cues"
+      ],
+      "necessity_test": "A7 is authorized only if geometry-only S0-B arms leave a reproducible downstream gap."
+    }
+  ],
+  "initial_conclusions": [
+    "P is the clearest learned geometric primitive candidate.",
+    "N has strong downstream precedent but must be tested against normals derived from coherent P before being declared a required learned head.",
+    "Exact source mesh faces are not a justified IRIS target; canonical local surface structure should be derived first.",
+    "V/support, provenance, graph structure, silhouette/boundary and local differential geometry have strong deterministic-derivation candidates.",
+    "U must be separated into predictive risk versus deterministic observability diagnostics; current G1 log_sigma is not yet calibrated U.",
+    "Correspondence/persistence is a required capability, but explicit Z is not yet a required external head.",
+    "Set-valued H remains a safety candidate for true ambiguity; scalar U is not assumed to encode multimodality.",
+    "The verified 1408 observation-to-M5 join is the leading S0-B corpus candidate, subject to byte-level binding and skeleton-truth availability audit."
+  ],
+  "next_executable_step": "Perform byte-level/source-manifest corpus binding for the 1408 observation-to-M5 join and audit which rows have canonical skeleton/hierarchy truth required for GeppettoProbe. Do not start S0-B training before that binding is frozen."
+}

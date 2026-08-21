@@ -1,0 +1,21 @@
+{
+  "attempt1_infra_fail_sha256": "5614d73e4ff9a9a9221bae2f78a5673d651a0ea4e2bcc744d8d13a3c43d06b3e",
+  "attempt2_infra_fail_sha256": "03735d0f104f88531282158c5a451388ebfeee5b7315dc032dc27f38f11cdce0",
+  "authorized_next": "RUN_SAME_FROZEN_EVALUATOR_VIA_THIS_SHIM_ON_IMMUTABLE_PRETRUTH_ARTIFACTS",
+  "compat_change": "Python 3.13 sys.modules registration for modules returned by importlib.util.module_from_spec before exec_module; plus science/src on sys.path",
+  "compat_shim_sha256": "f6ab6f26dff12fa341679588e50208442d99f16d0f94f1703119195a2b2b84ff",
+  "date": "2026-08-21",
+  "external10": "CLOSED",
+  "frozen_evaluation_phase_sha256": "f4cef6b247b0797377fd07bf2cfe5683b7ed52b8cf2f006dbcca2b13376039d6",
+  "frozen_evaluator_sha256": "49d0c39710af141ab963939e09b3f7fd3b14347c443ff985e8419233c482b8e6",
+  "proposal_support_change": "NONE",
+  "result_seen_before_freeze": false,
+  "schema": "RealSaS.N1D.Rank2G.G2.TruthEvaluatorExecutionCompatibilityAuthority.v1",
+  "scientific_change": "NONE",
+  "score_change": "NONE",
+  "sealed21": "CLOSED",
+  "solver_change": "NONE",
+  "status": "EXECUTION_COMPATIBILITY_SHIM_FROZEN__SCIENTIFIC_SOURCE_UNCHANGED",
+  "truth_mapping_change": "NONE",
+  "truth_open_authority_sha256": "e8868f2499bf2eebfbea852b3658dbbcef9517e8fd663e33011ed12c942caa61"
+}

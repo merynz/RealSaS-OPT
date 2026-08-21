@@ -48,7 +48,7 @@ def g1_geometry_metrics(outputs: Dict[str, torch.Tensor], target: Dict[str, torc
     nspread = torch.rad2deg(torch.acos((s['normal'] * ncons[:,None]).sum(-1).clamp(-1,1)))[V]
 
     pv = torch.sigmoid(s['visibility_logit'][...,0])
-    brier = float(((pv - target['V_A'].float())**2).mean())
+    brier = float(((pv - target['V_A'].float())**2).mean().detach())
     sigma = torch.exp(s['log_sigma'][...,0])[V]
     e_np = pe.detach().cpu().numpy(); u_np = sigma.detach().cpu().numpy()
     direct = target.get('direct_obs_A', target['V_A'].bool().any(1)).bool()
@@ -71,3 +71,48 @@ def g1_geometry_metrics(outputs: Dict[str, torch.Tensor], target: Dict[str, torc
         'visible_sample_count': int(V.sum().item()),
         'direct_carrier_count': int(direct.sum().item()),
     }
+
+
+def aggregate_g1_metric_rows(rows):
+    """Panel aggregation with explicit central + hard-tail family statistics.
+
+    G1 uses one Pose-A sample per family, so each row is one family. We retain the
+    per-carrier tails computed inside g1_geometry_metrics and then summarize their
+    family distribution without collapsing to a mean-only score.
+    """
+    if not rows:
+        raise ValueError("G1 panel aggregation requires at least one family row")
+    skip = {"visible_sample_count", "direct_carrier_count", "family_id"}
+    keys = sorted(set.intersection(*(set(r.keys()) for r in rows)) - skip)
+    out = {"family_count": len(rows)}
+    for key in keys:
+        vals = np.asarray([float(r[key]) for r in rows], dtype=np.float64)
+        vals = vals[np.isfinite(vals)]
+        if len(vals) == 0:
+            continue
+        out[f"{key}__family_mean"] = float(vals.mean())
+        out[f"{key}__family_median"] = float(np.median(vals))
+        out[f"{key}__family_p90"] = float(np.quantile(vals, 0.90))
+        out[f"{key}__family_p95"] = float(np.quantile(vals, 0.95))
+    out["visible_sample_count"] = int(sum(int(r.get("visible_sample_count", 0)) for r in rows))
+    out["direct_carrier_count"] = int(sum(int(r.get("direct_carrier_count", 0)) for r in rows))
+    return out
+
+
+def g1_checkpoint_selection_key(panel):
+    """Frozen lexicographic G1 checkpoint key; larger tuple is better."""
+    fields = (
+        "point_p95__family_p95",
+        "point_p95__family_median",
+        "crossview_point_spread_p95__family_p95",
+        "point_mean__family_median",
+        "normal_p95_deg__family_p95",
+        "visibility_brier__family_median",
+    )
+    vals = []
+    for key in fields:
+        v = float(panel[key])
+        if not math.isfinite(v):
+            raise ValueError((key, v))
+        vals.append(-v)
+    return tuple(vals)

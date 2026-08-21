@@ -4,18 +4,20 @@ Private canonical research workspace for RealSaS.
 
 > **START HERE — active research branch:** `g0-g1/single-pose-geometry`
 >
-> **Current canonical frontier:** D2 is sealed as diagnostic evidence; the active path is now **G0 → G1 single-pose multiview geometry**.
+> **Current canonical frontier:** G0 is frozen and the **G1 single-pose geometry entry is fully preregistered/preflighted; A100 training has not started**.
 >
-> In a new ChatGPT session, the instruction **“GitHub'a bak ve devam et”** should be interpreted as: open this repository, switch/read the active branch above, read `CURRENT_STATE.md` first, then the canonical contract and the active experiment folder. Do not infer continuation from older N1D reports.
+> In a new ChatGPT session, “GitHub'a bak ve devam et” means: read `CURRENT_STATE.md` first, then the product contract and the G1 freeze files below. Do not continue from older N1D/D2 reports.
 
 ## Canonical continuation order
 
-1. `CURRENT_STATE.md` — single authority for where work stopped and the next executable step.
-2. `canonical/PRODUCT_CONTRACT_V1.md` — current IRIS → Geppetto → Arachne → Compiler responsibility contract.
-3. `experiments/g0_g1_single_pose_geometry/G0_CONTRACT_FREEZE.json` — G0 schema/evaluator contract.
-4. `experiments/g0_g1_single_pose_geometry/G1_PREREG_DRAFT.json` — next experiment prereg; must be split/hash frozen before optimizer steps.
-5. `experiments/g0_g1_single_pose_geometry/PRESERVATION_LEDGER.json` — prior-work retention authority.
-6. `experiments/g0_g1_single_pose_geometry/STARTER_MANIFEST.json` — hashes, migration status and code inventory.
+1. `CURRENT_STATE.md` — single continuation authority.
+2. `canonical/PRODUCT_CONTRACT_V1.md` — IRIS → Geppetto → Arachne → Compiler responsibilities.
+3. `experiments/g0_g1_single_pose_geometry/G0_CONTRACT_FREEZE.json` — frozen G0 semantics/evaluator contract.
+4. `experiments/g0_g1_single_pose_geometry/G1_SPLIT_FREEZE.json` — exact 177/16/16/29 family/sample/truth-access freeze.
+5. `experiments/g0_g1_single_pose_geometry/G1_PREREG_V1.json` — frozen G1 training/evaluation contract.
+6. `experiments/g0_g1_single_pose_geometry/G1_EXECUTABLE_PREFLIGHT.json` — live-corpus no-optimizer preflight witness.
+7. `experiments/g0_g1_single_pose_geometry/G1_FREEZE_MANIFEST.json` — source/hash authority and next executable step.
+8. `experiments/g0_g1_single_pose_geometry/PRESERVATION_LEDGER.json` — prior-work retention authority.
 
 ## Active product path
 
@@ -43,18 +45,10 @@ IRIS owns geometry, not authored mechanical identity. Geometric surface correspo
 
 ## Preservation rule
 
-No research component may silently disappear. Every lineage component must be classified as one of:
-
-- `KEEP_ACTIVE`
-- `RESERVE_CALLABLE`
-- `DEPRECATED_WITH_PROOF`
-
-Removal from the active forward path is not deletion. Source, hashes, result and reason must remain recoverable.
+No research component may silently disappear. Every lineage component is `KEEP_ACTIVE`, `RESERVE_CALLABLE`, or `DEPRECATED_WITH_PROOF`. Removal from the active forward path is not deletion.
 
 ## Storage model
 
-- **GitHub** — canonical code, preregistrations, tests, compact results, reports, `CURRENT_STATE.md`, experiment history and handoff state.
-- **Google Drive** — heavy corpora, caches, checkpoints, proof packs and large artifacts.
-- **ChatGPT Library** — transient diagnostics/working artifacts only when useful.
-
-GitHub is the default continuation surface between chats. Heavy raw data/checkpoints should not be committed here.
+- **GitHub** — canonical source, preregistrations, tests, compact results, hashes and handoff state.
+- **Google Drive** — heavy corpora, caches, checkpoints and proof packs.
+- **ChatGPT Library** — transient diagnostics/working artifacts when useful.

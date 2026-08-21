@@ -1,0 +1,54 @@
+{
+  "corpus_authority": {
+    "drive_root_folder_id": "1-qseF9kjusXIN9ftYIuaBkqNMXVHLnIx",
+    "episode_index_content_sha256": "907bca7323c8e7b3832ad276d44af9a5733e606b12c763a492775387f4afb765",
+    "episode_index_drive_file_id": "1XjdMi_-C8Kkuk0TFzeiLZt2IwYot-OpJ",
+    "episode_index_raw_sha256": "e1a6a3e00fc3ac38858e3ac649777a4025dba442a4ced5efd916a37200c69362",
+    "family_audit_drive_file_id": "1AcajChbSCs9agsnmgiCy5Wjj9pDs0Iei",
+    "family_audit_raw_sha256": "ccb0000262a513635394d4dda057580c8994029b287b7301fc75842d23f2b500"
+  },
+  "date": "2026-08-21",
+  "family_contracts": [
+    {"family": 10287, "family_manifest": "family_10287/family_manifest.json", "family_manifest_content_sha256": "c8839c6b2e42bcb9cd624960c0e79163de8447f10759024b8aca1e6b172da18f", "split": "train"},
+    {"family": 15521, "family_manifest": "family_15521/family_manifest.json", "family_manifest_content_sha256": "ee2cd227e8df9df9241f41db4cd25a240748fd23decba4f6cdbc556deb75aa2b", "split": "train"},
+    {"family": 16638, "family_manifest": "family_16638/family_manifest.json", "family_manifest_content_sha256": "08606f0863555c6169f4c4a2c9517c0ea8214618e33c7f581265ad79e12381dc", "split": "train"},
+    {"family": 15284, "family_manifest": "family_15284/family_manifest.json", "family_manifest_content_sha256": "a989ea6b1ef03025bb9839e560001cb45d69cce14e0803420a95b55c72fd018c", "split": "train"},
+    {"family": 13015, "family_manifest": "family_13015/family_manifest.json", "family_manifest_content_sha256": "83a72e802791672ee8c4c90171e4ecbbae2fae017748b55c5c367f99009dc3e5", "split": "train"},
+    {"family": 14703, "family_manifest": "family_14703/family_manifest.json", "family_manifest_content_sha256": "7ab5c4323597efd0f40272ba0c1f60641fbdd6f76dfeafb16bae929bf1fe0c34", "split": "train"},
+    {"family": 16414, "family_manifest": "family_16414/family_manifest.json", "family_manifest_content_sha256": "21d3a0153cd2ca2ab5f8b73954fe783c3c9549d4678e5dd41d166d68ee2576ef", "split": "train"},
+    {"family": 16528, "family_manifest": "family_16528/family_manifest.json", "family_manifest_content_sha256": "d97fc02dd75c15bb4602b6538e727a3fc0cdebc0b6687bb3cb7c0f764f003139", "split": "train"},
+    {"family": 16036, "family_manifest": "family_16036/family_manifest.json", "family_manifest_content_sha256": "acf12a2c66c23ec67f30af3ff3092e8f7b5d4ab44095c1a48a12c2475fe22021", "split": "train"},
+    {"family": 15226, "family_manifest": "family_15226/family_manifest.json", "family_manifest_content_sha256": "126d1af3c96e74daac4c745493d31ad19b14cdef428158f83c3d45042f45dfde", "split": "train"},
+    {"family": 14315, "family_manifest": "family_14315/family_manifest.json", "family_manifest_content_sha256": "5fe5e8435a126cd1f5c897225f8e8ef0fbfc00b2e2951dff5c86c64ab264d125", "split": "train"},
+    {"family": 12949, "family_manifest": "family_12949/family_manifest.json", "family_manifest_content_sha256": "1ca65b210884a10c33501c1f2a52ca9ebc74c493b8cf23a66107d9512399cf18", "split": "train"},
+    {"family": 14405, "family_manifest": "family_14405/family_manifest.json", "family_manifest_content_sha256": "8623cf581b67051dfdb77d98825182bd3c3ef6b739e153fca841bfe9e8910bfb", "split": "train"},
+    {"family": 11447, "family_manifest": "family_11447/family_manifest.json", "family_manifest_content_sha256": "952ae2c0f1122e24b6185351a7127d91d95a5ea41c9bca641901c6212eada4e9", "split": "train"},
+    {"family": 13843, "family_manifest": "family_13843/family_manifest.json", "family_manifest_content_sha256": "9e3b8627809beca5b4c100ffbd526bb86dabf719245fcfd70ee91ad3ac2751d8", "split": "train"},
+    {"family": 14885, "family_manifest": "family_14885/family_manifest.json", "family_manifest_content_sha256": "609bd3129edc6d3cd89b2a77a7d19e45560b9cd71e887a91c4000433b5f2bdbe", "split": "train"}
+  ],
+  "preflight_required": [
+    "recompute EPISODE_INDEX canonical content digest excluding content_sha256",
+    "verify exact ranked train positions 48:64",
+    "recompute every family_manifest canonical content digest excluding content_sha256",
+    "verify family audit Pose-A hash parity",
+    "hash 8 Pose-A + 8 e01 Pose-B rasters",
+    "hash e01 observation_sidecar bytes without deserializing"
+  ],
+  "schema": "RealSaS.N1D.Rank2G.G2.InputManifest.v1",
+  "status": "INPUT_METADATA_FROZEN__G2_TRUTH_CLOSED",
+  "surface": {
+    "episode": "e01",
+    "families": [10287,15521,16638,15284,13015,14703,16414,16528,16036,15226,14315,12949,14405,11447,13843,14885],
+    "missing_episode_policy": "ABORT_NO_SUBSTITUTION",
+    "name": "G2_CONFIRM16",
+    "rank_slice": [48,64],
+    "selection_rule": "train families positions 48:64 under SHA256('REALSAS_V1_2P_INTERNAL_SPLIT|fid')"
+  },
+  "truth_firewall": {
+    "external10": "CLOSED",
+    "sealed21": "CLOSED",
+    "sidecar_opaque_byte_hashing_for_provenance": "ALLOWED",
+    "sidecar_semantic_deserialization_before_pretruth_selection_freeze": "FORBIDDEN",
+    "teacher_geometry_as_forward_input": "FORBIDDEN"
+  }
+}

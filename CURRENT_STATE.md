@@ -1,124 +1,117 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-08-18
+**Date:** 2026-08-21  
+**Active branch:** `g0-g1/single-pose-geometry`  
+**Status:** `G0/G1_STARTER_COMMITTED__NEXT_SPLIT_AND_HASH_FREEZE`
 
-## Active line
+## Read this first
 
-IRIS-SEES post-N1D continuation. Product objective is mechanical sufficiency, not exact teacher latent reconstruction. IRIS-SEES measures observation-native evidence; deterministic geometry/mechanics and the compiler derive downstream structured quantities.
+This file is the single continuation authority for a new session. Older N1D/GFDR reports remain historical evidence but do **not** define the active product roadmap.
 
-## N1D baseline
-
-Canonical N1D remains an informative FAIL as originally sealed. Important preserved signal:
-- cross-pose descriptor top1 ≈ 0.8904;
-- Pose-B is genuinely used;
-- activity/amplitude ranking is learned more strongly than world-vector direction;
-- near-zero silence and exact same-pose/swap invariants are preserved.
-
-The original blocker was not absence of observable persistence evidence. N1D's mechanics path failed to consume the descriptor evidence correctly.
-
-## Post-N1D causal localization
-
-Closed dead ends include longer training, simple output calibration/fusion, hard current-vs-Problem-A selectors, raw DIS ordinary LS/LMedS 3D lift, forward/backward cycle weighting, and early singleton collapse of sparse candidate sets.
-
-Critical localization:
-- calibrated-camera 3D inversion is well-conditioned;
-- a minority of large raw-DIS correspondence errors caused DIS-centered local search to erase correct candidates;
-- fixed ±8 px DIS-centered search contained the true endpoint only ~85.34% of visible-view cases;
-- conditional on the endpoint being in-window, the frozen N1D descriptor retained it in top-4 ~84.79% of the time.
-
-## Authorized correspondence / world-response route
-
-Frozen treatment:
+## Canonical product architecture
 
 ```text
-Pose A/B rasters
- -> Problem-A A visual-hull carriers
- -> frozen N1D persistent descriptor
- -> global observable B-foreground search
- -> top-k candidate set per view
- -> calibrated multiview rank-3 3D hypothesis solve
- -> frozen N1D activity/silence contract
+ONE neutral pose × 8 ordered views
+ -> IRIS: P/N/V/U + required surface correspondence/persistence semantics
+ -> Geppetto: clean skeleton/hierarchy proposal
+ -> Arachne: skinning/weight proposal
+ -> Compiler: canonicalize/verify/repair/export
+ -> editable puppet + runtime animation
 ```
 
-16-family development:
-- flow/zero **0.7409 → 0.4411**
-- weighted direction **0.5839 → 0.8994**
-- direction non-regress **14/16**
-- non-abstain **99.90%**
-- false activation **41 → 39**
-- **5/5 gates PASS**
+Shipping target is `1 pose × 8 views`. Pose B may remain research/training evidence but is not an inference dependency unless a later controlled end-to-end product ablation proves it indispensable.
 
-Previously untouched four-family e00 qualification (`10763,11214,12907,14714`):
-- flow/zero **0.7439 → 0.6716**
-- weighted direction **0.5476 → 0.7403**
-- direction non-regress **3/4**
-- coverage **100%**
-- false activation **26 → 23**
-- **5/5 gates PASS**
+### IRIS boundary
 
-This route is authorized on open development as the post-N1D correspondence/world-response treatment.
+Required semantic output/capability:
+- `P`: common/object-frame position or equivalent surface geometry;
+- `N`: local surface orientation/normal evidence;
+- `V`: per-view visibility/observational support;
+- `U`: calibrated geometric uncertainty;
+- geometric surface correspondence/persistence strong enough to form coherent multiview surface hypotheses;
+- provenance/source-view support.
 
-## Causal downstream mechanics closure
+`Z` is optional as an explicit learned correspondence embedding. Correspondence itself is **not optional**.
 
-### Exact-observation-geometry causal replay
+IRIS does **not** own authored mechanical owner identity, parent/topology prediction, skeleton, weights or mandatory GFDR.
 
-Only response was replaced; exact observation geometry/normals/visibility were frozen for evaluator isolation.
+## D2 closure — preserved diagnostic
 
-Global-foreground response:
-- D tangent error **0.148326**
-- F activity **0.843860**
-- F kernel **0.793054**
-- R differential **0.104815**
-- G direction **0.880993**
-- G line / diag **0.087942**
-- **9/9 canonical N1D GFDR-V2 gates PASS**
+D2 fine spatial is sealed as `D2_NOT_SUFFICIENT__PROCEED_TO_D3_MATCHER` under its original prereg lineage, but that historical decision does not auto-authorize D3 in the new product roadmap.
 
-Frozen-current response under the same exact geometry had G line / diag **0.154159**, confirming that the old G-line failure was caused by correspondence/world-response rather than the downstream GFDR-V2 operators.
+Matched C2 → D2 highlights:
+- PCK@2: `0.550313 -> 0.692652` (`+0.142338`);
+- oracle hit: `0.308073 -> 0.427844` (`+0.119771`);
+- oracle top-4: `0.644630 -> 0.765229` (`+0.120599`);
+- PCK@4: `0.816959 -> 0.826706` (`+0.009747`);
+- mean top-1 error: `3.265649 -> 4.556463 px` (worse);
+- family mean-distance nonworse: `3/29`;
+- primary gates `1/4`, safety `6/6`.
 
-### Full observable front door
+Interpretation: high-resolution local spatial evidence is real and useful, but using the fine descriptor as global ranking authority creates a hard-tail failure. D1/D2/D3 mechanisms are therefore preserved as `RESERVE_CALLABLE`, especially for later G5 geometry-aware local refinement.
 
-Prediction uses:
+## G0 — contract/evaluator freeze
+
+Starter exists at `experiments/g0_g1_single_pose_geometry/`.
+
+G0 policy:
+- input exactly `A×8`;
+- freeze SurfaceEvidenceSet semantics;
+- no mean-only promotion: median + p90/p95 hard-tail metrics required;
+- product thresholds are not invented at G0; G1 establishes baseline and G7 owns product qualification;
+- sealed/external panels stay closed during architecture selection.
+
+## G1 — current executable line
+
+Scientific question:
+
+> With Pose B and all mechanical/cross-pose objectives removed, can the retained IRIS multiview core produce a usable common-frame surface from `A×8` alone?
+
+Causal intervention is intentionally minimal:
 
 ```text
-Problem-A X / V_A
-+ frozen N1D descriptor and normal heads
-+ global B-foreground correspondence search
-+ deterministic multiview 3D response
-+ deterministic B visual-hull V_B
--> GFDRV2.ObservableMechanics.v4
+A×8
+ -> retained SharedImageEncoder
+ -> retained 8-view GlobalMultiViewFusion
+ -> retained DenseFusionDecoder
+ -> retained geometry head
+ -> P / N / V / U
 ```
 
-20-family e00 open-development result:
-- D tangent error **0.148326**
-- F activity **0.843860**
-- F kernel **0.813066**
-- R differential **0.105003**
-- G direction **0.890067**
-- G line / diag **0.084111**
-- **9/9 canonical N1D GFDR-V2 gates PASS**
+No MV-TAP module, DPM/GGPT route, D3 matcher, bigger backbone or resolution increase is allowed in G1. Those are later causal interventions only if G1 evidence calls for them.
 
-Primitive front-door estimates are not exact (median family diagnostics: P_A error/diag ~0.0274, P_B ~0.03935, N_A ~26.8°, N_B ~29.6°), yet downstream mechanics passes. This supports:
+### Preservation/migration result
 
-```text
-mechanical sufficiency > exact latent reconstruction
-```
+Real canonical N1D `BEST.pt` migration into the G1 active model:
+- destination tensors: `141`;
+- loaded tensors: `141/141 = 100%`;
+- missing: `0`;
+- shape mismatches: `0`;
+- source-only tensors: `29`, all `differential.*`, archived/reserve-callable rather than deleted.
 
-The old N1D point-map hard gates are therefore not automatically product blockers for this repaired hybrid route; geometry authority is supplied by the deterministic Problem-A front door rather than the failed N1D point-map head.
+D1 coarse descriptor remains callable as optional geometric `Z` evidence with zero G1 loss authority. D2 fine descriptor source and D3 matcher concept are preserved for later use if common-frame geometry retains a localization tail.
 
-## Active next gate
+## NEXT EXECUTABLE STEP
 
-The remaining open-development risk is **intervention generalization**. Current closure evidence is e00-focused.
+**Do not start optimizer steps yet.**
 
-Next required qualification: freeze the exact current route and evaluate previously unopened `e01..e07` interventions without retuning. Only after a multi-intervention open-dev PASS may sealed21/external10 be considered.
+1. Build the exact family-disjoint G1 fit/dev split from the existing corpus.
+2. Freeze family IDs, episode/sample selection, source hashes and truth-access policy.
+3. Freeze G1 evaluator implementation against the G0 definitions.
+4. Produce a final `G1_PREREG_V1.json` and preflight manifest with hashes.
+5. Only then build/run the A100 G1 Run-All.
 
-**sealed21 = CLOSED**  
-**external10 = CLOSED**  
-**product/model-2 handoff = NOT YET AUTHORIZED**
+After G1 result:
+- coherent but camera-limited -> G2 camera/ray-aware cross-view fusion;
+- weak common-frame geometry -> G3 direct common-frame pointmap/surface route;
+- learned geometry needing safety -> G4 explicit geometric grounding/refinement;
+- remaining localization hard-tail after world seed -> G5, where D2/D3 reserve components may return.
 
-## Data / workspace policy
+## Non-negotiable process discipline
 
-- GitHub: canonical code, prereg, compact results, reports, experiment history.
-- Drive: heavy corpus/cache/checkpoint/proof-pack depot.
-- Library: transient active diagnostics and working artifacts.
-
-Never silently redefine structural GFDR semantics to fit an implementation. N1D `GFDRV2.ObservableMechanics.v4` diagnostics are downstream mechanics diagnostics, not a replacement definition of the older structural GFDR ontology.
+- GitHub is the canonical continuation surface.
+- `CURRENT_STATE.md` must be updated at every closed gate or material architecture decision.
+- No silent component deletion; update `PRESERVATION_LEDGER.json`.
+- Every prereg is frozen before optimizer steps/truth opening.
+- Keep sealed/external sets closed until explicitly authorized.
+- Heavy corpus/cache/checkpoint data stays in Drive; GitHub stores code, hashes, manifests and compact results.

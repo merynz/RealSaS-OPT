@@ -1,0 +1,18 @@
+{
+  "schema": "RealSaS.IRIS.PreservationLedger.v1",
+  "policy": "No prior component is silently discarded. Every lineage item is KEEP_ACTIVE, RESERVE_CALLABLE, or DEPRECATED_WITH_PROOF.",
+  "items": {
+    "N1D_shared_encoder": {"status": "KEEP_ACTIVE", "destination": "G1 encoder"},
+    "N1D_global_multiview_fusion": {"status": "KEEP_ACTIVE", "destination": "G1 fusion, P=1"},
+    "N1D_camera_embeddings": {"status": "KEEP_ACTIVE", "destination": "G1 camera/view conditioning"},
+    "N1D_dense_decoder": {"status": "KEEP_ACTIVE", "destination": "G1 dense geometry decoder"},
+    "N1D_P_N_V_U_heads": {"status": "KEEP_ACTIVE", "destination": "G1 geometry output"},
+    "D1_coarse_descriptor": {"status": "RESERVE_CALLABLE", "destination": "optional Z / later geometry-localization diagnostic"},
+    "D2_fine_descriptor": {"status": "RESERVE_CALLABLE", "destination": "G5/D3-like local refinement candidate; not global rank authority"},
+    "D3_matcher_idea": {"status": "RESERVE_CALLABLE", "destination": "G5 only if common-frame geometry retains localization hard-tail"},
+    "N1D_A_B_transport": {"status": "RESERVE_CALLABLE", "destination": "historical two-pose research; not G1 active path"},
+    "N1D_differential_decoder": {"status": "RESERVE_CALLABLE", "destination": "historical mechanics/deformation verification"},
+    "F_R_D_GFDR_lineage": {"status": "RESERVE_CALLABLE", "destination": "optional diagnostics/downstream verification, not IRIS critical path"},
+    "Pose_B": {"status": "RESERVE_CALLABLE", "destination": "research/training ablation only; not shipping dependency"}
+  }
+}

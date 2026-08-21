@@ -1,0 +1,30 @@
+{
+  "schema": "RealSaS.IRIS.G0G1.RepositoryManifest.v1",
+  "active_branch": "g0-g1/single-pose-geometry",
+  "base_commit": "c22ab090066f1ca69187f47c8d8e489361ff1ec3",
+  "purpose": "Canonical handoff and executable starter for the 1P×8V IRIS geometry line. GitHub is the cross-chat continuation surface.",
+  "migration": {
+    "source_checkpoint": "N1D_CANONICAL_PROOF_PACK/BEST.pt",
+    "source_tensor_count": 170,
+    "destination_tensor_count": 141,
+    "loaded_tensor_count": 141,
+    "loaded_fraction": 1.0,
+    "missing": 0,
+    "shape_mismatch": 0,
+    "archive_only_count": 29,
+    "archive_only_prefix": "differential.*"
+  },
+  "preserved_source_sha256": {
+    "legacy_reserve/descriptor_d1_objective.py": "b84a3c3bf3cf2d29b43f2b0804b9e62fe92c495f78ed1451bc4cc68366cb2b19",
+    "legacy_reserve/descriptor_d2_spatial.py": "78d033975f132399a28ec41c326de434fcbab71f00a3335f7406b67843e12511",
+    "legacy_reserve/descriptor_d2_proposals.py": "7d69807e63ccbe96a9e49c45ea6d1ba36e5651e71df0542b5935ff0128a14e47",
+    "realsas_iris_sees/model.py": "28122c3415481aba4d47d8f48213137054dd0c9e7381d0072582e0458f038515",
+    "realsas_iris_sees/g1_model.py": "dcaae5edd1f6c44ea99e085c6a5f12ab03e1ae76635e33651b1250babd476b02",
+    "realsas_iris_sees/g1_losses.py": "eadbdedb36a5af6e7f5af186bf49d837e62336b70d1ec6d7a87a8bd0f3d52750",
+    "realsas_iris_sees/g1_metrics.py": "98e88ac9094783eb1251612f7c44085f172af39686f771e8687931518a81f844",
+    "realsas_iris_sees/g1_sampling.py": "75740844bd6eb1e26dadf0c81c775129993c93f0204a3f81ca5b3c7d72c29251",
+    "realsas_iris_sees/g1_targets.py": "32707c1d622b6f81f7ff022d2991c45b7048faf97af0c33f600f17089e0fe957",
+    "tests/test_g1.py": "7ccca7f03eeec397ea0e67993aaa81480f03830b92fc780975d394411d051a8d"
+  },
+  "next_executable_step": "Freeze exact family-disjoint G1 fit/dev split, source hashes, truth-access policy and evaluator; then finalize G1_PREREG_V1 before any optimizer step."
+}

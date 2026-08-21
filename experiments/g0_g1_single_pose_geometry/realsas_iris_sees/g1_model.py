@@ -73,6 +73,13 @@ class IRISG1SinglePose(nn.Module):
         self.descriptor = DescriptorHead(128, scfg.descriptor_dim) if cfg.expose_descriptor_z else None
         self.camera_residual = CameraResidualHead(scfg.token_dim)
 
+        # G1 loss authority is geometry-only. Preserve these tensors for exact N1D
+        # warm-start/provenance, but make the dormant descriptor and camera residual
+        # impossible to update accidentally through a broad optimizer parameter list.
+        if self.descriptor is not None:
+            self.descriptor.requires_grad_(False)
+        self.camera_residual.requires_grad_(False)
+
     def forward(self, images: torch.Tensor) -> Dict[str, torch.Tensor]:
         if images.ndim != 5 or images.shape[1] != 8 or images.shape[2] != self.cfg.input_channels:
             raise ValueError(f"expected [B,8,{self.cfg.input_channels},H,W], got {tuple(images.shape)}")

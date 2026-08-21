@@ -1,0 +1,26 @@
+{
+  "families": [
+    {"family":10287,"mapping_reliable_n":57,"sidecar_sha256":"5d0edb42df478bd8044981191cb1f7d464bc4f7dc2877ca14d782093bbdf9c95"},
+    {"family":15521,"mapping_reliable_n":54,"sidecar_sha256":"b101f4b4ad25b3c57de531ae1c0f7fc4314ef167c5657afbbc80afe2593fd44d"},
+    {"family":16638,"mapping_reliable_n":45,"sidecar_sha256":"78b0b44545c49835ce5642f101d36123f7c5c1f84b4b6d37937eda1ba593250a"},
+    {"family":15284,"mapping_reliable_n":58,"sidecar_sha256":"3246637450cf171ac0ec94d5af3694573b70a729f259995a0dc362429732dfe0"},
+    {"family":13015,"mapping_reliable_n":62,"sidecar_sha256":"f49ab7ba1cc0e354e94938fb1b9be3f7d7ee401f6bdbc77adb913abbd2c8754b"},
+    {"family":14703,"mapping_reliable_n":64,"sidecar_sha256":"3e40802d5d3dd67af00cad1624feba841d35136b089abf0491bf4e42215603d0"},
+    {"family":16414,"mapping_reliable_n":41,"sidecar_sha256":"6ae25dc0221e6d9da2a5ca01d260e117a822a61b41af13a8020ec6db40ed7c97"},
+    {"family":16528,"mapping_reliable_n":53,"sidecar_sha256":"351eb8d85d8fd3f1bd917f30a59fa552ec62d33db5b8bd5bfce176794d568de9"},
+    {"family":16036,"mapping_reliable_n":50,"sidecar_sha256":"7a49e523fb4142d7cfaeac71673b54fe7cc680d8d7ea2d60c8fdc8aa52701cac"},
+    {"family":15226,"mapping_reliable_n":61,"sidecar_sha256":"fdff8effe4044993974f5ac349588038f27c3aa265556b49dbd938270c17b6eb"},
+    {"family":14315,"mapping_reliable_n":58,"sidecar_sha256":"c0d0222db24a8b27e36dda95ce87c144ecd38bee3167db77e625c5fd4f12c310"},
+    {"family":12949,"mapping_reliable_n":61,"sidecar_sha256":"eac01b0b4fe57fcaf069ab164a90f9feed3758b8505abb4b09d638b2ea593487"},
+    {"family":14405,"mapping_reliable_n":62,"sidecar_sha256":"bf874a4ab829cbbea5da5f601bc9f3d6e619b0020b9ed7ed39406bf4b30c31a6"},
+    {"family":11447,"mapping_reliable_n":63,"sidecar_sha256":"e62cc26c280813def9e6541437e6add339515f3947866078177c55d47fbe116e"},
+    {"family":13843,"mapping_reliable_n":63,"sidecar_sha256":"95dbb24e4f517f87456a4e10a22e329a817ca617d9eb1b83255e2402f7fda03d"},
+    {"family":14885,"mapping_reliable_n":64,"sidecar_sha256":"787bd1c4084f32c88e9ac04f70f83b573e40e5e14e1a0ea7adb66b57a7957b13"}
+  ],
+  "family_mean_regret_guard":{"nonworse_count":16},
+  "g1_cycle_disagreement":{"n":2372,"g1":{"n":2372,"hit_n":735,"hit_rate":0.30986509274873525,"assigned_n":2372,"abstain_n":0,"mean_regret_px_assigned":1.6405148728108967,"median_regret_px_assigned":1.2647291307443613},"g2":{"n":2372,"hit_n":936,"hit_rate":0.3946037099494098,"assigned_n":2372,"abstain_n":0,"mean_regret_px_assigned":1.3270243678811344,"median_regret_px_assigned":0.6633276270966604}},
+  "overall":{"g1":{"n":3750,"hit_n":1255,"hit_rate":0.33466666666666667,"assigned_n":3750,"abstain_n":0,"mean_regret_px_assigned":1.5357362361584654,"median_regret_px_assigned":1.1270175520162486},"g2":{"n":3750,"hit_n":1446,"hit_rate":0.3856,"assigned_n":3750,"abstain_n":0,"mean_regret_px_assigned":1.3260590730293407,"median_regret_px_assigned":0.7523182336346494}},
+  "row_n":3750,
+  "schema":"RealSaS.N1D.Rank2G.G2.ReciprocalCycleTruthEvaluation.v1",
+  "truth_evaluation_sha256":"81b3ad2f97d7695129fe3d0e6e2eb0e1424a205a2dbd7ce4d204f1b76d55e2a0"
+}

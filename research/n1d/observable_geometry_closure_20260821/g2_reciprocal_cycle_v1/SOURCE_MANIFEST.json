@@ -1,0 +1,47 @@
+{
+  "bundle": {
+    "build_report_sha256": "630eebd1482d87f214d4d647f0bbb2c61e09e860dcbc5d7dead10fd6c0b12bd0",
+    "deterministic_rebuild_byte_exact": true,
+    "filename": "REALSAS_RANK2_G2_RECIPROCAL_CYCLE_V1_SOURCE_20260821.zip",
+    "sha256": "d9860244aa73bff8a6590200887cbe62b6539efbfdb23528155034fb0652f086",
+    "size_bytes": 33178
+  },
+  "date": "2026-08-21",
+  "external10": "CLOSED",
+  "parent_observable": {
+    "checkpoint_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "evaluation_phase_sha256": "f4cef6b247b0797377fd07bf2cfe5683b7ed52b8cf2f006dbcca2b13376039d6",
+    "observable_phase_sha256": "6eea236647e04a5566e93733f35c927639cc6407d4f62db80793edfa7e97dadf",
+    "r6_3_freeze_authority_sha256": "f1ac1630f696254340bc42864ef3e4ee29073c52ca2121ce89b3b71869e43cf8",
+    "source_index_git_blob": "0b90e7f4de16d53a320468bf40fb2c8b97801f56"
+  },
+  "repo_files_sha256": {
+    "research/n1d/observable_geometry_closure_20260820/rank2_g1_geometry_grounded_proposal.py": "033d8272012eb16f08014a66013177f2bb7bd6badfb249f4cb90d19f2a1a50e2",
+    "research/n1d/observable_geometry_closure_20260821/g2_reciprocal_cycle_v1/build_source_bundle.py": "263a03a646c3c00a8f1986975307fc0e5325dac8fd96ad412c86c3520ef3aa8c",
+    "research/n1d/observable_geometry_closure_20260821/g2_reciprocal_cycle_v1/preflight_g2.py": "1c0cc1a897c30c0df5879312fe16f5c13e464b64797dc3eea33d66c7e94399a2",
+    "research/n1d/observable_geometry_closure_20260821/g2_reciprocal_cycle_v1/run_pretruth_g2.py": "6be49f0e6a4ead8824c770ff820e784de9a8b5d23d0fbc4bb81201ef0720a822",
+    "research/n1d/observable_geometry_closure_20260821/g2_reciprocal_cycle_v1/src/rank2_g2_reciprocal_cycle_evidence.py": "53686fc576e9eede78a87471654b4b0c82d851c6d06d2bfdb76ad52de02aea56",
+    "research/n1d/observable_geometry_closure_20260821/g2_reciprocal_cycle_v1/src/rank2_g2_reciprocal_cycle_proposal.py": "7db428deeefb0671a77e095abde73f105aed0ec45a85c07e9d45b8e9b87aafa0",
+    "research/n1d/observable_geometry_closure_20260821/g2_reciprocal_cycle_v1/src/rank2_g2_truth_evaluator.py": "49d0c39710af141ab963939e09b3f7fd3b14347c443ff985e8419233c482b8e6",
+    "research/n1d/observable_geometry_closure_20260821/g2_reciprocal_cycle_v1/tests/test_g2_evaluator_authority.py": "530c0f6106e367992b80deedff59409c5e2d078b2de3f4c5ed9073f16a75140b",
+    "research/n1d/observable_geometry_closure_20260821/g2_reciprocal_cycle_v1/tests/test_g2_static.py": "2f12cceedec0ecd3a15a3dead3264450fe595f404f87065daae1c58a6fba417c",
+    "research/n1d/rank2_global_relational_world_20260820/rank2_r_v5_full_pairwise_proposal.py": "ea7ab996f881a08538c3cc049ca799e98783919255ed2c5214c01feada3161d7"
+  },
+  "schema": "RealSaS.N1D.Rank2G.G2.SourceManifest.v1",
+  "scientific_authorities": {
+    "g1_prereg_contract_sha256": "e127eac928fc91c03f8bcdf8948744b06ebb9f4362124c79362f0719d376c713",
+    "g1_source_authority_git_blob": "a5e981e559cd7d661b2f757705135b023aa194ee",
+    "g2_readme_git_blob": "91df066499e1f352478d50dc4dcde6d7e367d7de",
+    "product_contract_git_blob": "b1771014b9110a0511ed84ce3259baa57c13e70e",
+    "v5_source_sha256": "ea7ab996f881a08538c3cc049ca799e98783919255ed2c5214c01feada3161d7"
+  },
+  "sealed21": "CLOSED",
+  "static_gates": {
+    "evaluator_raster_PA_authority_regression": "PASS",
+    "g1_geometry_descriptor_parity": "PASS_EXACT_ARRAY",
+    "g2_fusion": "PASS_EQUAL_THIRDS",
+    "v5_support_R_parity": "PASS_EXACT_VALUE"
+  },
+  "status": "SOURCE_FROZEN__G2_TRUTH_CLOSED",
+  "truth_access": "NONE"
+}

@@ -1,0 +1,54 @@
+{
+  "date": "2026-08-21",
+  "drive": {
+    "build": "external-gdrive:file:162rxstGGJ_qX4dMKI_EzJWTgMoTS5Jf2",
+    "bundle": "external-gdrive:file:1ehTq8AGDksi-dQHD6wVTu4enfursI5C0",
+    "input_manifest": "external-gdrive:file:1XEfUAY28_jcAg35MZR_YV9DV9NTPFSY_",
+    "parent_folder_id": "1aOY41Pq0suayugJ4jiw6qnRx7lnLkDCG",
+    "prereg": "external-gdrive:file:1fTxxGScftHksfVQeYaamMLHET96tHzaD",
+    "source_manifest": "external-gdrive:file:1hgFRE4cBgYM9tmv1-enSI4qtJmYigm3I"
+  },
+  "execution_policy": {
+    "external10": "CLOSED",
+    "full_byte_preflight_required_before_observable_inference": true,
+    "pretruth_harness_authorized_after_preflight_PASS": true,
+    "sealed21": "CLOSED",
+    "sidecar_semantic_access_before_that": "FORBIDDEN",
+    "truth_open_authorized_by_this_file": false,
+    "truth_open_requires": "persisted G2_PRETRUTH_FREEZE.json plus all referenced observable/evidence/G1/G2 outputs"
+  },
+  "github": {
+    "branch": "agent/n1d-observable-functional-audit-v2-20260820",
+    "builder_commit": "f8d63a9b2dbab7e629255bf60b0fb3978a37ce91",
+    "input_manifest_commit": "840efd76acc3990680394fb0a5526145b6df06a4",
+    "preflight_commit": "adc9dd8421f387bf4de87ccaffa36c1cb1f3da03",
+    "prereg_commit": "f108921a9a6a95f35e96d80d76121a310f15c306",
+    "pretruth_harness_commit": "7cc132b526beea766d5ed13ee01b794a3570690b",
+    "source_manifest_commit": "d7abc53ebc0567eddbbec89ddb98f841356f9c30",
+    "static_gate_commit": "3cb01686dfc393feb5ab6529e4feb49f5a1f3c14"
+  },
+  "library": {
+    "build": {"file_id": "file_00000000d900820a889424884b6b648c", "library_file_id": "libfile_723f9075de908191931486a3f44f63c9"},
+    "bundle": {"file_id": "file_00000000c460820aabae6a6b11d18d51", "library_file_id": "libfile_ab5182e5ffe8819197785c98e6826fb6"},
+    "input_manifest": {"file_id": "file_000000006dd4820aa18c3b5042c63d20", "library_file_id": "libfile_03b76b4003288191b0b27a6641d5d0c3"},
+    "prereg": {"file_id": "file_000000004268820a8433b04facac0459", "library_file_id": "libfile_8de8e70a23548191bf82e9c6dfef5120"},
+    "source_manifest": {"file_id": "file_000000007680820abbd655c00d1967c0", "library_file_id": "libfile_06646a18d57c8191b9bc07a7e7fbb23b"}
+  },
+  "readback": {
+    "all": "PASS",
+    "build": "PASS_BYTE_EXACT",
+    "bundle": "PASS_BYTE_EXACT",
+    "input_manifest": "PASS_BYTE_EXACT",
+    "prereg": "PASS_BYTE_EXACT",
+    "source_manifest": "PASS_BYTE_EXACT"
+  },
+  "schema": "RealSaS.N1D.Rank2G.G2.FreezeAuthority.v1",
+  "scientific_authorities": {
+    "build_report_sha256": "630eebd1482d87f214d4d647f0bbb2c61e09e860dcbc5d7dead10fd6c0b12bd0",
+    "input_manifest_sha256": "46e669167387c45dfacdfb8558fde72e93d80acad6c50e7abd472d21d71be410",
+    "prereg_sha256": "81496633b19882934302ab9e4d2816ac09fc1316a5529659b36dfa04ecd6b79d",
+    "source_bundle_sha256": "d9860244aa73bff8a6590200887cbe62b6539efbfdb23528155034fb0652f086",
+    "source_manifest_sha256": "06ef9c2083c302fcbdde38126414a5ec5f189aaf69e05f8a154cc2b5380e80d1"
+  },
+  "status": "PRETRUTH_EXECUTION_AUTHORIZED_AFTER_THREE_STORE_BYTE_READBACK__TRUTH_CLOSED"
+}

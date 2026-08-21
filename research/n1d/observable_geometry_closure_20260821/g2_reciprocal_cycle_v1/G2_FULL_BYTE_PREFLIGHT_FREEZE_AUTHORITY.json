@@ -1,0 +1,30 @@
+{
+  "schema": "RealSaS.N1D.Rank2G.G2.FullBytePreflightFreezeAuthority.v1",
+  "date": "2026-08-21",
+  "status": "FULL_BYTE_PREFLIGHT_THREE_STORE_PASS__PRETRUTH_EXECUTION_AUTHORIZED__TRUTH_CLOSED",
+  "preflight": {
+    "sha256": "61fb0290efadd783bcdc4d82513fc25807f1f8b0c5c9944abbf3631c6bf928e0",
+    "github_commit": "1d442b390c2b8b7c90a9929088b17cc4785028fc",
+    "github_blob": "477f56d0655a28ac017a44f3b049968a58f4fb41",
+    "drive_file_id": "external-gdrive:file:1XYB9RzVR1XEPlcg98TWTcuiSA3q1N3bi",
+    "library_file_id": "libfile_a4a03adb4fd08191a90e23c28f817eb3",
+    "readback": "PASS_BYTE_EXACT_ALL_THREE_STORES"
+  },
+  "gate_counts": {
+    "families": "16/16",
+    "poseA_rasters": "128/128",
+    "poseB_rasters": "128/128",
+    "opaque_sidecars": "16/16",
+    "manifest_audit_linkage": "16/16",
+    "byte_mismatches": 0
+  },
+  "truth_firewall": {
+    "truth_access": "NONE",
+    "sidecar_semantic_access": "NONE",
+    "sealed21": "CLOSED",
+    "external10": "CLOSED"
+  },
+  "next_allowed_stage": "OBSERVABLE_PREDICTION_FROZEN",
+  "next_required_artifact": "G2_PRETRUTH_FREEZE.json",
+  "truth_open_authorized_by_this_file": false
+}

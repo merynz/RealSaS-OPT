@@ -1,9 +1,14 @@
-# RealSaS IRIS G0/G1 Starter V1
+# RealSaS IRIS — G0/G1 Single-Pose Geometry
 
-Canonical start of the single-pose geometry line, with explicit preservation of prior work.
+Status: **G0 contract + G1 split/prereg/executable preflight frozen; optimizer steps not started.**
 
-Active path: `A×8 -> encoder -> multiview fusion -> dense decoder -> P/N/V/U -> SurfaceEvidenceSet`.
+Canonical order:
+1. `G0_CONTRACT_FREEZE.json`
+2. `G1_SPLIT_FREEZE.json`
+3. `G1_PREREG_V1.json`
+4. `G1_EXECUTABLE_PREFLIGHT.json`
+5. `G1_FREEZE_MANIFEST.json`
 
-Surface correspondence/persistence is **required as a capability**. An explicit learned `Z` descriptor is optional as a representation. D1/D2 sources are retained under `legacy_reserve/` and may be reactivated for G5/local refinement if geometry evidence requires them.
+G1 is intentionally the smallest causal surgery from N1D: `A×8 -> retained encoder/fusion/decoder/geometry -> P/N/V/U`. Pose B, mechanical objectives, D1/D2/D3 matching authority, larger backbones and higher resolution are forbidden in this baseline.
 
-`migrate_n1d_state_dict()` reports every tensor retained from N1D and every source tensor that remains archive-only, so no lineage component disappears silently.
+Heavy corpus/checkpoints remain in Drive. GitHub stores exact IDs, hashes, source, evaluator, split and prereg authority.

@@ -1,0 +1,68 @@
+{
+  "authorities": {
+    "g1_prereg_contract_sha256": "e127eac928fc91c03f8bcdf8948744b06ebb9f4362124c79362f0719d376c713",
+    "input_manifest_sha256": "46e669167387c45dfacdfb8558fde72e93d80acad6c50e7abd472d21d71be410",
+    "source_bundle_sha256": "d9860244aa73bff8a6590200887cbe62b6539efbfdb23528155034fb0652f086",
+    "source_manifest_sha256": "06ef9c2083c302fcbdde38126414a5ec5f189aaf69e05f8a154cc2b5380e80d1"
+  },
+  "causal_hypothesis": "A forward B proposal can be descriptor-plausible and multi-view geometrically plausible yet map back to the wrong Pose-A carrier neighborhood. Same-view reciprocal descriptor cycle error is an independent observation-native identity discriminator and should reduce proposal regret without changing support or relational structure.",
+  "claim_boundary": {
+    "fail": "reciprocal-cycle as formulated is not promoted; any next frontend treatment requires a new preregistered surface.",
+    "pass": "reciprocal-cycle is promoted as an additional useful deterministic observation-native frontend primitive for the 2.5D mechanical surface; this does not establish learned generalization of a new network module."
+  },
+  "controlled_change": {
+    "G1": "0.5*descriptor_rank + 0.5*geometry_rank",
+    "G2": "(descriptor_rank + geometry_rank + reciprocal_cycle_rank)/3",
+    "cycle_rank": "stable within-carrier/view rank of cycle_px ascending",
+    "cycle_raw": "For frozen B proposal q_B: sample B descriptor at q_B; exact canonical coarse-to-fine descriptor search against same-view Pose-A foreground; q_hat_A is reverse match; cycle_px = ||q_hat_A - XY_A[v,i]||_2.",
+    "name": "G only: add reciprocal cycle rank",
+    "reverse_descriptor_score": "diagnostic provenance only; not a scoring factor",
+    "weight_fit": "NONE"
+  },
+  "date": "2026-08-21",
+  "evaluation": {
+    "failure_rule": "If any primary pass-rule item fails, G2 is FAIL as formulated. No same-surface retune, weight sweep or threshold rescue.",
+    "metrics": ["oracle-best proposal hit rate","mean proposal regret px","median proposal regret px","per-family mean regret direction"],
+    "observable_disagreement_stratum": "pretruth rows where G1 unary G_rank top proposal differs from reciprocal-cycle-rank top proposal",
+    "pass_rule": {
+      "disagreement_hit_delta_vs_G1_min": 0.08,
+      "family_mean_regret_nonworse_count_min": 12,
+      "overall_hit_delta_vs_G1_min": 0.03,
+      "overall_mean_regret_ratio_vs_G1_max": 0.9
+    },
+    "pass_rule_origin": "exact same four-criterion promotion standard used in frozen G1 prereg, with comparator renamed V5->G1; no G2 truth-informed threshold choice",
+    "primary_comparator": "G1 geometry-grounded G + unchanged V5 R",
+    "primary_rows": "all reliable truth-visible carrier/view rows whose already-frozen proposal row is nonempty"
+  },
+  "external10": "CLOSED",
+  "frozen": {
+    "F_D": "FORBIDDEN",
+    "camera_fitting": "FORBIDDEN",
+    "cameras": "canonical orthographic yaw 0,45,...315",
+    "checkpoint": "frozen N1D checkpoint",
+    "g1_geometry": "exact raw reprojection and stable rank",
+    "matching_cardinality_K": "exact maximum-real-matching semantics",
+    "proposal_creation_or_pruning": "FORBIDDEN",
+    "proposal_support": "exact forward top4 sites and scores",
+    "solver": "exact pinned V5 solver semantics; 16 deterministic restarts; strict descent",
+    "teacher_forward_input": "FORBIDDEN",
+    "v5_R": "exact full same-view all-visible-pair factor"
+  },
+  "phase_separation": {
+    "phase0_preflight": "hash source, checkpoint, all 16 family manifests, 8+8 raster bytes, and e01 sidecar opaque bytes. No sidecar deserialization.",
+    "phase1_observable": "produce/freeze raster-only observable states; extract G2 evidence; solve G1 and G2; persist evidence and selections; truth_access=NONE throughout.",
+    "phase2_evaluator_only": "reconstruct Problem-A authority from frozen rasters via _model_context, then use sidecar geometry only for evaluator mapping and oracle-best proposal scoring. Never alter proposal support or scores.",
+    "truth_open_gate": "G2_PRETRUTH_FREEZE.json and every referenced observable/evidence/G1/G2 output must be persisted with SHA readback before evaluator sidecar semantics may open."
+  },
+  "prospective_surface": {
+    "episode": "e01",
+    "families": [10287,15521,16638,15284,13015,14703,16414,16528,16036,15226,14315,12949,14405,11447,13843,14885],
+    "missing_episode_policy": "ABORT_NO_SUBSTITUTION",
+    "name": "G2_CONFIRM16",
+    "selection_rule": "train positions 48:64 under SHA256('REALSAS_V1_2P_INTERNAL_SPLIT|fid')"
+  },
+  "schema": "RealSaS.N1D.Rank2G.G2.ReciprocalCycle.Prereg.v1",
+  "scientific_question": "On a separately frozen confirmation16 surface, does adding observation-only same-view B-to-A reciprocal descriptor cycle rank to frozen G1 descriptor+geometry proposal evidence improve proposal identity selection while preserving exact G1 geometry, exact V5 R/support, matching cardinality and solver semantics?",
+  "sealed21": "CLOSED",
+  "status": "PREREG_FROZEN__G2_TRUTH_CLOSED"
+}

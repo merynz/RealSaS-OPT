@@ -1,0 +1,47 @@
+{
+  "counts": {
+    "cal": 16,
+    "dev": 29,
+    "fit": 177,
+    "total": 238,
+    "tune": 16
+  },
+  "families": {
+    "cal": [14167,13407,11710,10953,13446,12488,13382,13877,16436,14737,13013,13516,13482,11997,11165,14630],
+    "dev": [9908,9983,10178,10356,10763,11032,11214,11587,11885,12329,12418,12772,12832,12907,13203,13339,13396,13727,14299,14404,14702,14712,14714,14758,14929,15262,15290,15451,15943],
+    "fit": [15067,12114,16421,9842,15483,13222,14812,15112,13072,14433,12011,15838,10101,14817,15242,11038,10287,15521,16638,15284,13015,14703,16414,16528,16036,15226,14315,12949,14405,11447,13843,14885,10246,12111,11332,16118,11087,14588,14229,15428,13120,16349,12677,14580,15025,15811,14532,13175,16450,15508,10221,15037,16469,11552,14046,15004,12371,11670,13435,13787,16324,11940,14341,12884,15959,16208,12212,10981,15398,15105,10870,16634,12781,14438,14546,16105,15354,10753,13622,10762,12733,13890,11197,15849,15147,12332,14888,12506,15866,15452,12386,12867,10778,13645,10586,15196,13611,10008,14604,14418,11733,13033,16278,9961,13045,11039,10366,13833,10724,13032,10303,15898,14007,14032,15900,13125,16038,10531,13023,13284,13743,13138,12138,13675,14808,14428,10003,13275,12613,12546,14880,10784,16499,13161,14760,12886,15789,10649,15095,15905,14091,13255,13598,14020,13224,13461,15593,11901,12076,16582,14730,14838,15434,16137,14903,13351,14134,14707,14592,10153,14058,11010,11397,13763,10886,11092,11379,13163,13118,15541,12168,13043,12244,16034,15374,15075,10723],
+    "tune": [10976,10636,10954,16160,15996,11927,16306,11377,16165,9899,14084,12348,15702,12083,16148,15936]
+  },
+  "sample_policy": {
+    "e00_presence_all_238_families": "PASS",
+    "g1_target_builder": "build_g1_target_from_sidecar reads Pose-A fields only and never indexes Pose-B/mechanics fields",
+    "g1_target_keys": ["family_id","P_A","N_A","XY_A","V_A","direct_obs_A"],
+    "input_per_family": "exactly one shared Pose-A raster set: family_<id>/poseA/00_V0.png..07_V7.png",
+    "pose_B_rasters_loaded": false,
+    "reason": "Pose-A raster/camera is shared by construction across interventions. G1 must not duplicate the same A observation across B episodes.",
+    "target_source_episode": "e00"
+  },
+  "schema": "RealSaS.IRIS.G1.FamilySplitFreeze.v1",
+  "source_authority": {
+    "corpus_prereg_hash": "0bd19642a9db0e67d25fb9adbed891d76f48667cef03549acecf2ad9a83917c2",
+    "corpus_root_drive_id": "1-qseF9kjusXIN9ftYIuaBkqNMXVHLnIx",
+    "episode_index_content_sha256": "907bca7323c8e7b3832ad276d44af9a5733e606b12c763a492775387f4afb765",
+    "episode_index_drive_id": "1XjdMi_-C8Kkuk0TFzeiLZt2IwYot-OpJ",
+    "episode_index_raw_sha256": "e1a6a3e00fc3ac38858e3ac649777a4025dba442a4ced5efd916a37200c69362",
+    "n1d_best_payload_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "n1d_canonical_proof_pack_drive_id": "15iHg-9gIhEz7tuvtv0BpXVfI61AbBR7f",
+    "n1d_canonical_proof_pack_sha256": "0e28051cdb1b9f603749a907dd84d022daf44bcabd1bd9ec536d242bb95bf24c",
+    "n1d_internal_split_sha256": "450cc8ce3137f7072a2db8613ce2178fe88328c99b4eb8312516e7e175bbc4f4",
+    "n1d_source_zip_sha256": "230fac37ae52ae234437a017ef7ec88bfa865410d294fd840976a6c4e47ea65b",
+    "split_exactly_matches_n1c": true
+  },
+  "status": "FROZEN_BEFORE_G1_OPTIMIZER_STEPS",
+  "truth_access_policy": {
+    "cal": "CLOSED throughout G1 baseline; reserved for later explicit uncertainty calibration if preregistered separately.",
+    "dev": "CLOSED during training/checkpoint selection; opened exactly once after BEST checkpoint is frozen for G1 baseline evaluation and causal diagnostics.",
+    "external10": "CLOSED",
+    "fit": "G1 target fields may be read for gradient-bearing training only after this split and final prereg are frozen.",
+    "sealed21": "CLOSED",
+    "tune": "G1 target fields may be read for checkpoint selection; no gradient and no hyperparameter sweep."
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realsas.ai/schemas/REALSAS_MASTER_ASSET_RECORD_SCHEMA_V1.json",
+  "title": "RealSaS Master Asset Record V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "canonical_asset_id", "source_records", "legal_state",
+    "geometry", "rig_variants", "render_sets", "split", "integrity"
+  ],
+  "properties": {
+    "schema_version": {"const": "realsas.master_asset_record.v1"},
+    "canonical_asset_id": {"type": "string", "minLength": 1},
+    "source_records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/sourceRecord"}
+    },
+    "legal_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["all_exported_sources_pass", "attribution_entries"],
+      "properties": {
+        "all_exported_sources_pass": {"const": true},
+        "attribution_entries": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "geometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical_vertices", "faces", "canonical_transform", "inverse_canonical_transform", "topology_fingerprint"],
+      "properties": {
+        "source_vertices": {"$ref": "#/$defs/tensorRef"},
+        "canonical_vertices": {"$ref": "#/$defs/tensorRef"},
+        "faces": {"$ref": "#/$defs/tensorRef"},
+        "vertex_normals": {"$ref": "#/$defs/optionalTensor"},
+        "face_normals": {"$ref": "#/$defs/optionalTensor"},
+        "uv": {"$ref": "#/$defs/optionalTensor"},
+        "material_ids": {"$ref": "#/$defs/optionalTensor"},
+        "connected_components": {"$ref": "#/$defs/optionalTensor"},
+        "canonical_transform": {"$ref": "#/$defs/tensorRef"},
+        "inverse_canonical_transform": {"$ref": "#/$defs/tensorRef"},
+        "persistent_surface_samples": {"$ref": "#/$defs/optionalTensor"},
+        "topology_fingerprint": {"type": "string", "minLength": 1},
+        "shape_key_inventory": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "rig_variants": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/rigVariant"}
+    },
+    "render_sets": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/renderSet"}
+    },
+    "source_native_inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_record_id", "field", "preservation"],
+        "properties": {
+          "source_record_id": {"type": "string"},
+          "field": {"type": "string"},
+          "dtype": {"type": ["string", "null"]},
+          "shape": {"type": ["array", "null"], "items": {"type": "integer"}},
+          "sha256": {"$ref": "#/$defs/nullableSha"},
+          "preservation": {"enum": ["CANONICAL_FIELD", "PASSTHROUGH_ARTIFACT", "RAW_SOURCE_BLOB"]}
+        }
+      }
+    },
+    "split": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["master_split"],
+      "properties": {
+        "master_split": {"enum": ["FIT", "TUNE", "CAL", "DEV", "VALIDATION", "SEALED_QUAL", "EXTERNAL_HOLDOUT", "QA_ONLY", "UNASSIGNED"]},
+        "historical_splits": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unknown_field_loss_count", "all_refs_hashed", "passed"],
+      "properties": {
+        "unknown_field_loss_count": {"const": 0},
+        "all_refs_hashed": {"const": true},
+        "passed": {"const": true}
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullableSha": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "artifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "authority"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "size_bytes": {"type": "integer", "minimum": 0},
+        "authority": {"enum": ["SOURCE", "NORMALIZED", "DERIVED", "RENDERED"]}
+      }
+    },
+    "tensorRef": {
+      "allOf": [
+        {"$ref": "#/$defs/artifactRef"},
+        {
+          "type": "object",
+          "properties": {
+            "dtype": {"type": "string"},
+            "shape": {"type": "array", "items": {"type": "integer", "minimum": 0}}
+          },
+          "required": ["dtype", "shape"]
+        }
+      ]
+    },
+    "optionalTensor": {"oneOf": [{"$ref": "#/$defs/tensorRef"}, {"type": "null"}]},
+    "sourceRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_record_id", "source_registry_id", "admission_record"],
+      "properties": {
+        "source_record_id": {"type": "string"},
+        "source_registry_id": {"type": "string"},
+        "admission_record": {"$ref": "#/$defs/artifactRef"},
+        "raw_source": {"oneOf": [{"$ref": "#/$defs/artifactRef"}, {"type": "null"}]},
+        "source_url": {"type": ["string", "null"]}
+      }
+    },
+    "rigVariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rig_variant_id", "authority_source_record_id", "joints", "parents", "skin"],
+      "properties": {
+        "rig_variant_id": {"type": "string"},
+        "authority_source_record_id": {"type": "string"},
+        "joints": {"$ref": "#/$defs/tensorRef"},
+        "parents": {"$ref": "#/$defs/tensorRef"},
+        "bone_edges": {"$ref": "#/$defs/optionalTensor"},
+        "bone_names": {"oneOf": [{"$ref": "#/$defs/artifactRef"}, {"type": "null"}]},
+        "rest_local_matrices": {"$ref": "#/$defs/optionalTensor"},
+        "inverse_bind_matrices": {"$ref": "#/$defs/optionalTensor"},
+        "deform_mask": {"$ref": "#/$defs/optionalTensor"},
+        "skin": {"$ref": "#/$defs/optionalTensor"},
+        "skin_sparse_source": {"oneOf": [{"$ref": "#/$defs/artifactRef"}, {"type": "null"}]},
+        "control_rig_inventory": {"oneOf": [{"$ref": "#/$defs/artifactRef"}, {"type": "null"}]},
+        "animation_inventory": {"oneOf": [{"$ref": "#/$defs/artifactRef"}, {"type": "null"}]}
+      }
+    },
+    "renderSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["render_contract_id", "native_size", "views", "style_family"],
+      "properties": {
+        "render_contract_id": {"type": "string"},
+        "native_size": {"const": 1024},
+        "style_family": {"type": "string"},
+        "semantic_facing": {"enum": ["RESOLVED", "UNKNOWN"]},
+        "views": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["view_index", "yaw_deg", "rgba", "camera", "raster_authority"],
+            "properties": {
+              "view_index": {"type": "integer", "minimum": 0, "maximum": 7},
+              "semantic_label": {"type": ["string", "null"]},
+              "yaw_deg": {"type": "number"},
+              "rgba": {"$ref": "#/$defs/artifactRef"},
+              "camera": {"$ref": "#/$defs/artifactRef"},
+              "raster_authority": {"$ref": "#/$defs/artifactRef"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

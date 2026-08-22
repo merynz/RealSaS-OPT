@@ -5,21 +5,15 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "schema_version",
-    "build_id",
-    "contract",
-    "sources",
-    "counts",
-    "asset_index",
-    "render_contract",
-    "split_policy",
-    "integrity"
+    "schema_version", "build_id", "contract", "source_registry", "sources", "counts",
+    "asset_index", "admission_ledger", "render_contract", "split_policy", "legal_policy", "integrity"
   ],
   "properties": {
     "schema_version": {"const": "realsas.master_corpus_manifest.v1"},
     "build_id": {"type": "string", "minLength": 1},
     "created_utc": {"type": "string", "format": "date-time"},
     "contract": {"$ref": "#/$defs/artifactRef"},
+    "source_registry": {"$ref": "#/$defs/artifactRef"},
     "sources": {
       "type": "array",
       "minItems": 1,
@@ -28,25 +22,33 @@
     "counts": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["source_records_pre_dedup", "canonical_assets", "duplicate_clusters"],
+      "required": ["candidates", "legal_pass", "technical_pass", "admitted_source_records", "canonical_assets", "duplicate_clusters", "rendered_assets"],
       "properties": {
-        "source_records_pre_dedup": {"type": "integer", "minimum": 0},
+        "candidates": {"type": "integer", "minimum": 0},
+        "legal_pass": {"type": "integer", "minimum": 0},
+        "legal_review": {"type": "integer", "minimum": 0},
+        "legal_reject": {"type": "integer", "minimum": 0},
+        "technical_pass": {"type": "integer", "minimum": 0},
+        "technical_reject": {"type": "integer", "minimum": 0},
+        "admitted_source_records": {"type": "integer", "minimum": 0},
         "canonical_assets": {"type": "integer", "minimum": 0},
         "duplicate_clusters": {"type": "integer", "minimum": 0},
         "rendered_assets": {"type": "integer", "minimum": 0}
       }
     },
     "asset_index": {"$ref": "#/$defs/artifactRef"},
+    "admission_ledger": {"$ref": "#/$defs/artifactRef"},
+    "attribution_ledger": {"oneOf": [{"$ref": "#/$defs/artifactRef"}, {"type": "null"}]},
     "render_contract": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["native_width", "native_height", "view_order", "projection_family", "style_families"],
+      "required": ["native_width", "native_height", "view_count", "projection_family", "style_families", "dense_raster_authority"],
       "properties": {
         "native_width": {"const": 1024},
         "native_height": {"const": 1024},
-        "view_order": {
-          "const": ["S", "SE", "E", "NE", "N", "NW", "W", "SW"]
-        },
+        "view_count": {"const": 8},
+        "view_slot_order": {"const": ["V0", "V1", "V2", "V3", "V4", "V5", "V6", "V7"]},
+        "semantic_view_order_when_resolved": {"const": ["S", "SE", "E", "NE", "N", "NW", "W", "SW"]},
         "projection_family": {"type": "string", "minLength": 1},
         "style_families": {
           "type": "array",
@@ -54,17 +56,29 @@
           "items": {"type": "string", "minLength": 1},
           "uniqueItems": true
         },
-        "dense_gbuffer_required": {"type": "boolean"},
+        "dense_raster_authority": {"enum": ["MATERIALIZED", "COMPACT_REPRODUCIBLE", "PERSISTENT_SURFACE_FALLBACK"]},
         "persistent_surface_fallback_min": {"type": "integer", "minimum": 4096}
+      }
+    },
+    "legal_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["legal_nonpass_exportable", "license_evidence_required", "classifier_version"],
+      "properties": {
+        "legal_nonpass_exportable": {"const": false},
+        "license_evidence_required": {"const": true},
+        "classifier_version": {"type": "string", "minLength": 1}
       }
     },
     "split_policy": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["master_possession_does_not_authorize_training", "sealed_fail_closed"],
+      "required": ["canonical_asset_disjoint", "master_possession_does_not_authorize_training", "sealed_fail_closed"],
       "properties": {
+        "canonical_asset_disjoint": {"const": true},
         "master_possession_does_not_authorize_training": {"const": true},
         "sealed_fail_closed": {"const": true},
+        "split_manifest": {"oneOf": [{"$ref": "#/$defs/artifactRef"}, {"type": "null"}]},
         "notes": {"type": "string"}
       }
     },
@@ -75,21 +89,20 @@
     "integrity": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["unknown_field_loss_count", "unresolved_seed_identity_count", "all_artifacts_hashed", "passed"],
+      "required": ["unknown_field_loss_count", "legal_nonpass_export_count", "cross_split_duplicate_count", "all_artifacts_hashed", "passed"],
       "properties": {
         "unknown_field_loss_count": {"const": 0},
-        "unresolved_seed_identity_count": {"const": 0},
+        "legal_nonpass_export_count": {"const": 0},
+        "cross_split_duplicate_count": {"const": 0},
         "all_artifacts_hashed": {"const": true},
         "passed": {"const": true},
-        "manifest_sha256": {"$ref": "#/$defs/sha256"}
+        "manifest_sha256": {"$ref": "#/$defs/nullableSha"}
       }
     }
   },
   "$defs": {
-    "sha256": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{64}$"
-    },
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullableSha": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
     "artifactRef": {
       "type": "object",
       "additionalProperties": false,
@@ -104,23 +117,19 @@
     "sourceSet": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["source_name", "provider", "revision", "admission_manifest", "admitted_source_records", "split_counts"],
+      "required": ["source_registry_id", "source_name", "provider", "revision", "candidate_count", "admitted_source_records", "decision_counts"],
       "properties": {
-        "source_name": {"enum": ["Articulation-XL2.0", "RigXL"]},
+        "source_registry_id": {"type": "string", "minLength": 1},
+        "source_name": {"type": "string", "minLength": 1},
         "provider": {"type": "string", "minLength": 1},
         "repository": {"type": "string"},
         "revision": {"type": "string", "minLength": 1},
-        "source_artifacts": {
-          "type": "array",
-          "items": {"$ref": "#/$defs/artifactRef"}
-        },
-        "admission_manifest": {"$ref": "#/$defs/artifactRef"},
+        "source_artifacts": {"type": "array", "items": {"$ref": "#/$defs/artifactRef"}},
+        "candidate_count": {"type": "integer", "minimum": 0},
         "admitted_source_records": {"type": "integer", "minimum": 0},
-        "split_counts": {
-          "type": "object",
-          "additionalProperties": {"type": "integer", "minimum": 0}
-        },
-        "license": {"type": "string"}
+        "decision_counts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "historical_anchor_count": {"type": "integer", "minimum": 0},
+        "dataset_license": {"type": ["string", "null"]}
       }
     }
   }

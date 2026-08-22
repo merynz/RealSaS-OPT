@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-22  
 **Active branch:** `g0-g1/single-pose-geometry`  
-**Status:** `S0_A_DATA_PLANE_PASS__S0_B_PROBE_IMPLEMENTATION_NEXT__G1_BASELINE_PRESERVED_UNSTARTED`
+**Status:** `S0_B_PILOT_COMPLETE__S0_B2_DERIVED_NORMAL_FALSIFICATION_NEXT__G1_BASELINE_PRESERVED_UNSTARTED`
 
 ## Read this first
 
@@ -20,7 +20,7 @@ ONE neutral pose × 8 ordered views
  -> editable puppet + runtime animation
 ```
 
-Shipping target remains `1 pose × 8 views`. Pose B may remain historical/research evidence but is not a shipping, G1 inference or target-construction dependency.
+Shipping target remains `1 pose × 8 views`. Pose B is not a shipping, G1 inference or target-construction dependency.
 
 ## Canonical problem definition — FROZEN
 
@@ -33,7 +33,7 @@ Canonical scientific question:
 
 The target is the functional 8-view observational equivalent of the geometric shape input consumed by 3D auto-riggers. It is **not** exact hidden-mesh reconstruction and it is not hidden mechanical ontology recovery.
 
-The final IRIS head list is explicitly an **S0 experimental result**. The current `P/N/V/U + persistence/provenance` factorization remains the frozen G1 baseline candidate, not an assumption that every field requires an independent learned head or that no richer geometric state will be needed.
+The final IRIS head list is explicitly an **S0 experimental result**.
 
 ### Head-derivation rule
 
@@ -51,7 +51,7 @@ Therefore:
 
 Current candidate representation is a common/object-frame oriented surfel evidence field:
 - `P`: position evidence;
-- `N`: local orientation/normal evidence;
+- `N`: local orientation/normal information;
 - `V`: view-wise visibility/support;
 - `U`: geometric risk/uncertainty;
 - provenance/source-view support;
@@ -74,25 +74,16 @@ Authorities:
 - `experiments/s0_rigging_substrate/S0_PLAN_AND_PREREG_V1.md`
 - `experiments/s0_rigging_substrate/S0_A_INFORMATION_DERIVABILITY_MATRIX.json`
 - `experiments/s0_rigging_substrate/S0_A_CORPUS_BINDING_REPORT.md`
+- `experiments/s0_rigging_substrate/S0_B_PILOT_REPORT_V1.md`
+- `experiments/s0_rigging_substrate/S0_B_PILOT_RESULT_V1.json`
 
 Scientific question:
 
-> What is the minimum observation-grounded geometric information that must be delivered from `A×8` so fixed downstream skeleton and skinning probes can recover a clean, editable, functionally valid rig?
+> What is the minimum observation-grounded geometric information that must be delivered from `A×8` so downstream skeleton and skinning systems can recover a clean, editable, functionally valid rig?
 
 ### S0-A — DATA PLANE PASS
 
-Initial field inventory is frozen. Current provisional conclusions:
-- `P` is the clearest learned primitive candidate;
-- `N` has strong downstream precedent but must beat `N_derived(P)` before becoming a required learned head;
-- exact source mesh faces/topology are rejected as required IRIS product targets; locality is first represented by a canonical derived surface graph;
-- `V/support`, provenance, graph structure, silhouette/boundary and local differential geometry have strong deterministic-derivation candidates;
-- current G1 `log_sigma` is predictive risk, not yet calibrated `U`;
-- correspondence/persistence is required, explicit `Z` is optional;
-- set-valued geometry `H` remains a safety candidate for genuinely multimodal observations.
-
-### S0-A corpus binding — PASS
-
-The leading S0-B corpus is now directly provenance-bound:
+The corpus binding remains:
 
 ```text
 V19.14 observation rows: 1408
@@ -102,102 +93,154 @@ observation-only:           0
 joined split:            1024 train / 384 validation
 ```
 
-All 1408 joined records have privileged teacher arrays + manifest present in the source-availability audit. All 1408 joined M5 row validations pass and every joined row has `512` surface points.
+All 1408 joined records have privileged teacher arrays + manifest present, all 1408 M5 row validations pass and each row has 512 surface points. Product-core control count across the joined set is 6..61, median 21. Most rows carry 16 standardized deformation probes.
 
-Joined product-core control counts: min `6`, max `61`, median `21`.  
-Joined detail-control counts: min `6`, max `71`, median `28`.  
-Most rows carry `16` standardized deformation probes (`1395/1408`; the remainder carry 12 or 14).
+Important: M5 manifest reports `component_contract_status = pending_surface_connectivity_owner`; surface connectivity is not imported as hidden authority.
 
-A real M5 row was downloaded and SHA-verified against its manifest. Its payload co-locates:
+## S0-B — OPEN-DEVELOPMENT PILOT COMPLETE
 
-```text
-surface_points [512,3]
-surface_normals [512,3]
-view_point_xy01 [8,512,2]
-view_point_visibility [8,512]
-product_core_node_xyz [J,3]
-product_core_parent_index [J]
-product_core_role_index [J]
-product_core_surface_skin_weights [512,J]
-product_core_support_mask [512,J]
-deformation_probes
-```
+Canonical result:
+`experiments/s0_rigging_substrate/S0_B_PILOT_REPORT_V1.md`
 
-This is sufficient to implement fixed GeppettoProbe, ArachneProbe and JointProbe without building a new corpus first.
+### Scope / truth discipline
 
-Important open field: M5 manifest reports `component_contract_status = pending_surface_connectivity_owner`. Surface connectivity is therefore **not** imported as a settled hidden authority; S0 must test deterministic SurfaceBuilder graph versus any later learned connectivity treatment.
+The pilot used only `IRIS_M5_V18_76_PRODUCT_CORE_CORPUS_000.zip`:
+- 790 rows;
+- 790 unique families;
+- 512 surface points per row;
+- deterministic SHA-ordered split: 600 train / 95 selection / 95 qualification;
+- official 384-row M5 validation remained closed.
 
-### S0-B — NEXT EXECUTABLE GATE
+This result is **open-development evidence, not confirmatory authority**, because the exact probe preregistration was not committed to GitHub before the 95-row pilot qualification was opened. Do not relabel it as confirmatory later.
 
-Implement fixed-capacity research probes rather than product Geppetto/Arachne:
-- `S0JoinedRow` loader with strict substrate/teacher separation;
-- `GeppettoProbe`: selected substrate arm -> product-core skeleton/hierarchy;
-- `ArachneProbe`: selected substrate arm + **GT product-core skeleton** -> dense skinning;
-- `JointProbe`: predicted skeleton -> predicted skinning -> frozen deformation-probe evaluation.
-
-Initial matched ablation ladder remains:
+### Tested substrate arms
 
 ```text
 A0  P only
-A1  P + N_derived_from_P
-A2  P + N_direct/exact
-A3  A2 + deterministic surface graph
-A4  A3 + V/support + provenance
-A5  A4 + explicit ambiguity/hypothesis state where needed
-A6  A5 + occupancy/thickness evidence if available
-A7  A6 + appearance/semantic latent only if geometry-only arms leave a reproducible gap
+A1  P + N_derived(P), deterministic kNN/PCA k=12
+A2  P + exact/direct N
+A3  A2 + deterministic local graph descriptors
+A4  A3 + exact view visibility/support + provenance XY
 ```
 
-First S0-B execution is **tiny open-development parity/smoke only**. Confirmatory field-ablation results are forbidden until the split, optimizer, probe capacity, evaluator and numerical non-inferiority margins are frozen.
+A5/A6/A7 were not tested because exact GT substrate does not instantiate genuine prediction uncertainty/multimodality and no geometry-only failure justified semantic appearance features.
 
-### S0-C
+### ArachneProbe result — SUPPORTED
 
-Freeze `RIGGING_SURFACE_CONTRACT_V1.json`: minimal learned primitives, deterministic SurfaceBuilder outputs, ambiguity/uncertainty rules and downstream sufficiency metrics.
+Probe: selected substrate + **GT product skeleton/parents** -> dense skinning -> exact deformation probes.
 
-## Preserved research lessons
+Qualification summary:
 
-These remain active because they concern geometric observation quality rather than mandatory mechanics:
-- high-recall correspondence before irreversible collapse;
-- reciprocal/cycle consistency;
-- explicit view/camera geometry when needed;
-- common/object-frame geometry;
-- geometric grounding/reprojection;
-- visibility/support;
-- uncertainty and provenance;
-- set-valued ambiguity preservation;
-- relational reasoning translated to static geometry.
+| Arm | CE ↓ | top1 ↑ | deform mean ↓ | family-p95 deform ↓ |
+|---|---:|---:|---:|---:|
+| A0 | 1.318255 | 0.614453 | 0.002124 | 0.004661 |
+| A1 | 1.307283 | 0.615049 | 0.002107 | 0.004562 |
+| A2 | 1.269899 | 0.636431 | 0.002050 | 0.004493 |
+| A3 | 1.266380 | 0.640892 | 0.002038 | 0.004510 |
+| A4 | 1.281625 | 0.642681 | 0.002037 | 0.004554 |
 
-Motion-specific outputs remain reserve diagnostics, not core IRIS authority:
-- `p_active`, `log_amp`, motion `dir`, `ΔP`;
-- GFDR/differential mechanics;
-- Pose-B response;
-- deformation Jacobians.
+Key causal evidence:
+- A0 -> A2 exact normals: CE delta about `-0.04836`; deformation mean delta about `-7.44e-5`; both paired bootstrap intervals exclude zero.
+- A2 -> A3 deterministic graph: small additional positive effect.
+- A3 -> A4 support/provenance: no meaningful fixed-skeleton deformation gain and worse CE/hard-tail.
 
-## D2 closure — preserved diagnostic
+Interpretation:
+- `P` alone carries substantial skinning information;
+- **normal information is causally useful**;
+- the tested naive deterministic normal derivation does not recover the full exact-N benefit;
+- graph/neighborhood information remains deterministic-first;
+- no learned faces/adjacency head is justified.
 
-D2 fine spatial remains sealed as `D2_NOT_SUFFICIENT__PROCEED_TO_D3_MATCHER` under its original prereg lineage. D1/D2/D3 mechanisms are `RESERVE_CALLABLE`, not active G1 authority. D2 improved local precision but worsened the hard tail, so G0/G1 explicitly retain median + p90/p95 evaluation.
+### Deterministic normal audit
 
-## G0 — FROZEN
+For `N_derived(P)` using 12-NN PCA on pilot qualification:
+- oriented median angular error `32.08°`;
+- oriented p90 `154.18°`;
+- >90° orientation error on `26.44%` of points;
+- sign-invariant median error `23.13°`.
 
-Canonical file:
-`experiments/g0_g1_single_pose_geometry/G0_CONTRACT_FREEZE.json`
+This falsifies **that specific naive derivation**, not all deterministic derivations from `P + view provenance`.
 
-G0 freezes:
-- input exactly `A×8`;
-- G1 baseline SurfaceEvidence `P/N/V/U` semantics plus required persistence/provenance;
-- sample metrics and family mean/median/p90/p95 aggregation;
-- no mean-only promotion;
-- no final product thresholds at this stage; G7 owns product qualification.
+### Geppetto probe result — PARTIAL / CONTROLLED
 
-G0/G1 are not retroactively rewritten by S0. S0 decides what the eventual product substrate must contain.
+The first unconstrained 48-query set decoder learned joint-locus coverage but its existence/count head destabilized; count MAE remained too large. It is marked:
 
-## G1 — ENTRY FROZEN, TRAINING NOT STARTED
+`INVALID_FOR_HEAD_DECISION`
 
-Scientific question:
+No product-Geppetto conclusion may be drawn from it.
 
-> With Pose B and all mechanical/cross-pose objectives removed, can the retained IRIS multiview core produce a usable common-frame surface from `A×8` alone?
+A second **oracle-count joint-locus probe** used GT joint count only to isolate whether substrate fields carry joint-location information. It is a research information probe, not product inference.
 
-Active frozen path:
+Qualification:
+
+| Arm | joint mean ↓ | family-p95 ↓ | PCK@0.08 ↑ |
+|---|---:|---:|---:|
+| A0 | 0.128674 | 0.210421 | 0.358516 |
+| A1 | 0.128534 | 0.214812 | 0.361194 |
+| A2 | 0.126855 | 0.215006 | 0.362233 |
+| A3 | 0.125293 | 0.206513 | 0.370615 |
+| A4 | 0.118838 | 0.205213 | 0.405811 |
+
+Paired A0 -> A4 joint-mean delta is about `-0.00984` with bootstrap interval excluding zero. A3 -> A4 is also positive.
+
+Interpretation:
+- exact normals carry a small reproducible joint-locus benefit;
+- deterministic local graph helps;
+- **view support/provenance carries additional Geppetto-side information even when exact P/N are present**.
+
+This supports preserving view/support/provenance in the RiggingSurface contract, but does not imply a separate learned V/provenance head; these may remain direct observation bookkeeping or deterministic reconstruction.
+
+### Oracle-matched joint -> skin diagnostic
+
+With oracle count, Hungarian semantic matching and GT parents retained:
+- A0 deformation mean `0.003522`;
+- A4 deformation mean `0.003319`;
+- paired delta about `-0.000203`, bootstrap interval excludes zero.
+
+This is diagnostic only, but shows that richer observation-grounded geometry can improve a joint->skin deformation chain.
+
+## Current S0 decisions
+
+### SUPPORTED
+
+- `P` = **core primitive**.
+- **Normal information is required/useful downstream.**
+- correspondence/persistence remains required capability.
+- view support/provenance should be preserved for downstream Geppetto-side use.
+- local graph/neighborhood structure remains **SurfaceBuilder / deterministic-first**.
+- exact hidden mesh faces/source topology are not required by current evidence.
+
+### NOT YET FROZEN
+
+- `N` as a **separate learned IRIS head**. Current naive `N_derived(P)` fails to close the exact-N downstream gap, but the strongest derivation from `P + exact view provenance/correspondence` has not yet been tested.
+- full Geppetto joint count/topology generation.
+- calibrated `U` and set-valued `H` requirements under predicted/noisy/artist-domain geometry.
+
+## NEXT EXECUTABLE GATE — S0-B2
+
+Before S0-C, run one stronger falsification:
+
+> Can the exact-N downstream benefit be recovered deterministically from `P + view support/provenance/correspondence`, or does `N` need to remain a direct learned IRIS output?
+
+Requirements:
+1. Use a **fresh open-development family panel not used by S0-B pilot qualification**; do not reuse the opened 95 rows as confirmatory evidence.
+2. Freeze strongest deterministic normal/surface derivation before opening its qualification panel.
+3. Compare at minimum:
+   - `P`;
+   - `P + best deterministic N(P, provenance)`;
+   - `P + direct/exact N`;
+   - each with the same deterministic graph policy.
+4. Reuse fixed Arachne information probe and oracle-count joint-locus information probe only after code/method parity is frozen.
+5. If the direct-N gap survives materially, promote `N` as required learned IRIS output in S0-C.
+6. If the gap closes, move normals into SurfaceBuilder and simplify the final IRIS head contract.
+
+After S0-B2, freeze `RIGGING_SURFACE_CONTRACT_V1.json` in S0-C.
+
+## G0 / G1 — PRESERVED, UNCHANGED
+
+G0 remains frozen. G1 remains fully preregistered and **training has not started**.
+
+Frozen G1 path:
 
 ```text
 A×8
@@ -208,77 +251,27 @@ A×8
  -> P / N / V / U
 ```
 
-No MV-TAP/ray-aware fusion, direct pointmap reformulation, DPM/GGPT, D3 matcher, larger backbone or resolution increase is allowed before the frozen G1 baseline result.
+No S0 result retroactively mutates G1. G1 is still the smallest frozen baseline/causal surgery. It will be interpreted later against the S0-C substrate contract.
 
-### Exact split/sample freeze
+Canonical G1 facts remain:
+- split 177 fit / 16 tune / 16 cal / 29 dev = 238;
+- 24 epochs, batch 1, AdamW LR `5e-5`, WD `1e-4`, grad clip `2.0`;
+- N1D BEST migration `141/141` destination tensors loaded;
+- descriptor/camera-residual modules dormant/frozen;
+- executable preflight PASS on family 10178;
+- optimizer steps `0`;
+- cal/sealed/external remain closed under their frozen authorization points.
 
-`G1_SPLIT_FREEZE.json` remains:
-- fit: `177`
-- tune: `16`
-- cal: `16`
-- dev: `29`
-- total: `238`
-- source split SHA-256: `450cc8ce3137f7072a2db8613ce2178fe88328c99b4eb8312516e7e175bbc4f4`
+## After S0-C / G1 routing
 
-G1 uses one unique Pose-A sample per family. `e00` is the target-source episode for all 238 families.
-
-### Truth boundary
-
-Canonical G1 cache construction reads Pose-A fields only:
-`family_id, camera_center, camera_half_extent, surface_points_A, surface_normals_A, surface_xy_A, surface_visibility_A`.
-
-The GPU target contains only:
-`P_A, N_A, XY_A, V_A, direct_obs_A`.
-
-Pose-B fields, scene flow, differential/mechanics targets, authored rig truth and `carrier_id_TRAINING_ONLY` are excluded by the loader boundary.
-
-### Warm-start / passive preservation
-
-Canonical N1D `BEST.pt` migration remains:
-- source tensors: `170`
-- destination tensors: `141`
-- loaded: `141/141 = 100%`
-- missing: `0`
-- shape mismatches: `0`
-- archive-only: `29`, all `differential.*`.
-
-Dormant `descriptor_z` and camera-residual modules remain frozen for provenance/migration. D1/D2 source remains recoverable for later local refinement use.
-
-### Executable preflight
-
-`G1_EXECUTABLE_PREFLIGHT.json` remains `PASS` on live corpus family `10178` with optimizer steps `0`; unit tests are `7/7 PASS`.
-
-Warm-start metrics from this one family remain diagnostic only.
-
-## Frozen G1 training contract
-
-`experiments/g0_g1_single_pose_geometry/G1_PREREG_V1.json` remains unchanged:
-- 24 epochs, batch size 1;
-- AdamW, LR `5e-5`, weight decay `1e-4`, grad clip `2.0`;
-- only `requires_grad=True` parameters enter optimizer;
-- no augmentation and no hyperparameter sweep;
-- tune16 selects BEST with hard-tail statistics;
-- dev opens once after BEST freeze under the existing contract;
-- cal/sealed/external remain closed at their frozen authorization points.
-
-G1 does not define product PASS. It is a baseline/causal gate; G7 owns final IRIS qualification against the S0-C substrate contract.
-
-## Current execution order
-
-1. Implement **S0-B fixed probe interfaces/loaders** against the 1408 exact-join corpus.
-2. Run a tiny open-development loader/forward/backward/deformation-evaluator parity smoke only.
-3. Freeze S0-B family split, optimizer, fixed probe capacity, evaluator and numerical non-inferiority margins.
-4. Run family-disjoint field ablations A0→A6; authorize A7 only if geometry-only arms leave a reproducible gap.
-5. Freeze S0-C `RIGGING_SURFACE_CONTRACT_V1.json`.
-6. Run/interpret the already-frozen G1 baseline against this downstream-sufficiency target without changing its prereg.
-7. Route later geometry interventions from observed failure mode only:
-   - coherence/correspondence gap -> **G1.5** reciprocal/cycle/high-recall persistence + SurfaceBuilder;
-   - camera/view ambiguity -> **G2** camera/ray-aware fusion;
-   - representation inadequacy/multimodality -> **G3** direct/richer common-frame geometry;
-   - grounding/calibration weakness -> **G4**;
-   - residual local hard-tail -> **G5**;
-   - stylized drawing/domain gap -> **G6**;
-   - final IRIS qualification -> **G7**.
+- coherence/correspondence gap -> **G1.5** reciprocal/cycle/high-recall persistence + SurfaceBuilder;
+- camera/view ambiguity -> **G2** camera/ray-aware fusion;
+- representation inadequacy/multimodality -> **G3** direct/richer common-frame geometry;
+- grounding/calibration weakness -> **G4**;
+- residual local hard-tail -> **G5**;
+- stylized drawing/domain gap -> **G6**;
+- final IRIS qualification -> **G7**;
+- then R0/R1 Geppetto, R2 Arachne, R3 joint rig quality, C0 compiler rebind, P0 product gate.
 
 ## Non-negotiable process discipline
 
@@ -286,5 +279,5 @@ G1 does not define product PASS. It is a baseline/causal gate; G7 owns final IRI
 - `CURRENT_STATE.md` must be updated at every closed gate or material architecture decision.
 - No silent component deletion; preserve lineage/provenance.
 - Every confirmatory prereg is frozen before optimizer steps/truth opening.
-- Keep sealed/external panels closed until their frozen authorization point.
+- Keep official validation/sealed/external panels closed until their frozen authorization point.
 - Heavy corpus/cache/checkpoint data stays in Drive; GitHub stores code, hashes, manifests and compact results.

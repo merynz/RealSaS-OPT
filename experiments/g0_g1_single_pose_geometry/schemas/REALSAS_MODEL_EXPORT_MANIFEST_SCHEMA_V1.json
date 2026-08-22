@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realsas.ai/schemas/REALSAS_MODEL_EXPORT_MANIFEST_SCHEMA_V1.json",
+  "title": "RealSaS Model Export Manifest V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "export_id", "consumer", "master_build_id", "records", "firewall", "split_policy", "integrity"],
+  "properties": {
+    "schema_version": {"const": "realsas.model_export_manifest.v1"},
+    "export_id": {"type": "string", "minLength": 1},
+    "consumer": {"enum": ["IRIS", "GEPPETTO", "ARACHNE", "PARSER_QA", "RENDER_QA"]},
+    "master_build_id": {"type": "string", "minLength": 1},
+    "created_utc": {"type": "string", "format": "date-time"},
+    "records": {"$ref": "#/$defs/artifactRef"},
+    "record_count": {"type": "integer", "minimum": 0},
+    "field_allowlist": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "field_denylist": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "firewall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["physical_field_filtering", "forbidden_field_hits", "legal_nonpass_hits", "passed"],
+      "properties": {
+        "physical_field_filtering": {"const": true},
+        "forbidden_field_hits": {"const": 0},
+        "legal_nonpass_hits": {"const": 0},
+        "passed": {"const": true}
+      }
+    },
+    "split_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical_asset_disjoint", "sealed_fail_closed"],
+      "properties": {
+        "canonical_asset_disjoint": {"const": true},
+        "sealed_fail_closed": {"const": true},
+        "included_splits": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["all_records_hashed", "master_refs_resolved", "passed"],
+      "properties": {
+        "all_records_hashed": {"const": true},
+        "master_refs_resolved": {"const": true},
+        "passed": {"const": true},
+        "manifest_sha256": {"$ref": "#/$defs/nullableSha"}
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullableSha": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "artifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "size_bytes": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

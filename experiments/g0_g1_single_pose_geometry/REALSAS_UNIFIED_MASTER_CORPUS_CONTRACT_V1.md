@@ -35,6 +35,13 @@ When available L1 retains source-frame and canonical vertices, faces, normals, U
 
 A transform field is not exposed as a canonical teacher until its coordinate convention is audited. Source-frame rest transforms remain source authority.
 
+## Upstream reproducibility pins
+The V1 builder pins upstream annotation sources rather than silently following mutable `main`:
+- Articulation-XL2.0: Hugging Face revision `11f777d83a1e7ee7c5a22201da4e140cafac1837`.
+- RigXL / UniRig: Hugging Face revision `bfb98220f01fe500398f57f517e67838a7c21b98`.
+
+The automatic Articulation path discovers both the released diverse-pose train/test archives and the main preprocessed train/test archives from the pinned Hugging Face revision. The 31 GB-class main train NPZ is a monolithic pickled object-array archive whose materialization may exceed ordinary Colab host RAM, so it is opened only when an explicit conservative free-RAM gate passes. A low-memory session checkpoints other work and leaves that archive pending; it may not silently omit the main set or declare the corpus complete. Historical RealSaS Articulation3456 remains embedded as a closed-set/split anchor.
+
 ## 1024×8 observation contract
 Each canonical asset is rendered in one neutral/rest state at native 1024×1024 for 8 cyclic yaw slots V0…V7 (0,45,…315 degrees), level orthographic orbit about canonical global Z, screen-up +Z. Semantic S/SE/E/… labels are stored only if facing is actually resolved; otherwise semantics remain UNKNOWN.
 
@@ -55,3 +62,18 @@ Capability-specific admission is allowed: geometry-only may feed IRIS; rig-no-sk
 
 ## Execution
 The canonical Colab builder is resumable. It legal-prefilters before expensive downloads/rendering, preserves L0 before normalization, checkpoints every processed candidate to Drive, physically packs each consumer allow-list, runs forbidden-field firewalls and validates all manifests against bundled JSON Schemas. It does not start any optimizer.
+
+## Automatic gold-source execution addendum
+
+The canonical builder must attempt the clean Tier-B sources automatically before falling back to the explicit `incoming_legal_gold` inbox. Automatic acquisition is still fail-closed:
+
+1. resolve an official/authoritative license source;
+2. acquire the exact source file;
+3. hash and preserve the source bytes;
+4. generate/extract teacher truth;
+5. run technical gates;
+6. render only after legal + geometry admission.
+
+For MakeHuman/MPFB, generator parameters are part of source provenance and multiple rig variants for one generated body share a single `canonical_asset_id`. For Blender Studio and Quaternius, source-page evidence and attribution/license metadata travel with the asset record.
+
+Articulation V1 includes the **main** and **diverse-pose** preprocessed sets whenever the Colab host satisfies the explicit object-array RAM gate. A low-memory session may checkpoint other sources and leave main Articulation pending; it may not declare the corpus complete until every legal-pass candidate has either been processed or explicitly rejected by a canonical gate.

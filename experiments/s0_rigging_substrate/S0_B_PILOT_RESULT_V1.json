@@ -1,0 +1,75 @@
+{
+  "schema": "RealSaS.S0B.RiggingSubstratePilot.v1",
+  "date": "2026-08-22",
+  "status": "S0_B_PILOT_COMPLETE__HEAD_DECISION_PARTIAL",
+  "authority_scope": "open-development pilot only; not product qualification",
+  "source": {
+    "bundle": "IRIS_M5_V18_76_PRODUCT_CORE_CORPUS_000.zip",
+    "bundle_sha256": "43a83db6afb206d0b240eba1acc1e3a474940e6d1b142e0f37cfbf31604977b5",
+    "rows": 790,
+    "families_unique": 790,
+    "surface_points_per_row": 512,
+    "official_validation_opened": false
+  },
+  "split": {
+    "train": 600,
+    "selection": 95,
+    "qualification": 95,
+    "train_ids_sha256": "7e6ad2f93f7666d5a18c28c8c99946301d59932a066c98a99f13c75755dd47c9",
+    "selection_ids_sha256": "78d95eb6a19121557a7a3bb72e45d08d16a1e968372566788f5e8de67e589236",
+    "qualification_ids_sha256": "e4a36e683ba783c56293230089888a81ff7c54b0b66150d26186d788748be5d2"
+  },
+  "arms": {
+    "A0": "P only",
+    "A1": "P + deterministic kNN/PCA N, k=12",
+    "A2": "P + exact/direct N",
+    "A3": "A2 + deterministic local graph descriptors",
+    "A4": "A3 + exact view visibility/support + provenance XY"
+  },
+  "normal_derivation_qualification": {
+    "oriented_median_deg": 32.081936,
+    "oriented_p90_deg": 154.184616,
+    "oriented_p95_deg": 166.424957,
+    "oriented_gt90_fraction": 0.264412,
+    "signless_median_deg": 23.130644,
+    "signless_p90_deg": 70.513954,
+    "signless_p95_deg": 79.872253
+  },
+  "arachne_probe_qualification": {
+    "A0": {"ce": 1.318255, "weight_mae": 0.045887, "top1": 0.614453, "top4_gt_mass": 0.932155, "deform_mean": 0.002124, "deform_family_p95": 0.004661},
+    "A1": {"ce": 1.307283, "weight_mae": 0.045600, "top1": 0.615049, "top4_gt_mass": 0.933326, "deform_mean": 0.002107, "deform_family_p95": 0.004562},
+    "A2": {"ce": 1.269899, "weight_mae": 0.043967, "top1": 0.636431, "top4_gt_mass": 0.935987, "deform_mean": 0.002050, "deform_family_p95": 0.004493},
+    "A3": {"ce": 1.266380, "weight_mae": 0.043743, "top1": 0.640892, "top4_gt_mass": 0.936106, "deform_mean": 0.002038, "deform_family_p95": 0.004510},
+    "A4": {"ce": 1.281625, "weight_mae": 0.043790, "top1": 0.642681, "top4_gt_mass": 0.935084, "deform_mean": 0.002037, "deform_family_p95": 0.004554}
+  },
+  "geppetto_unconstrained_probe": {
+    "status": "INVALID_FOR_HEAD_DECISION",
+    "reason": "joint-locus learned but query existence/count destabilized; count MAE remained too large"
+  },
+  "geppetto_oracle_count_qualification": {
+    "caveat": "GT count used only to isolate joint-locus information; not a product Geppetto result",
+    "A0": {"joint_mean": 0.128674, "family_p95": 0.210421, "joint_p95_mean": 0.253313, "pck05": 0.166913, "pck08": 0.358516},
+    "A1": {"joint_mean": 0.128534, "family_p95": 0.214812, "joint_p95_mean": 0.249572, "pck05": 0.167031, "pck08": 0.361194},
+    "A2": {"joint_mean": 0.126855, "family_p95": 0.215006, "joint_p95_mean": 0.247417, "pck05": 0.172651, "pck08": 0.362233},
+    "A3": {"joint_mean": 0.125293, "family_p95": 0.206513, "joint_p95_mean": 0.245912, "pck05": 0.177754, "pck08": 0.370615},
+    "A4": {"joint_mean": 0.118838, "family_p95": 0.205213, "joint_p95_mean": 0.231957, "pck05": 0.174391, "pck08": 0.405811}
+  },
+  "oracle_matched_joint_pipeline": {
+    "caveat": "oracle count + Hungarian semantic matching + GT parents; diagnostic only",
+    "A0_deform_mean": 0.003522,
+    "A4_deform_mean": 0.003319,
+    "A0_to_A4_delta": -0.000203,
+    "A0_to_A4_bootstrap95": [-0.000342, -0.000067],
+    "paired_wilcoxon_p": 0.0041
+  },
+  "decisions": {
+    "P": "SUPPORTED_CORE_PRIMITIVE",
+    "N_information": "SUPPORTED_DOWNSTREAM_USEFUL",
+    "N_separate_learned_head": "NOT_YET_FROZEN__STRONGER_DETERMINISTIC_DERIVATION_REQUIRED",
+    "surface_graph": "KEEP_DETERMINISTIC_FIRST",
+    "view_support_provenance": "SUPPORTED_GEPPETTO_SIDE_INFORMATION__KEEP_METADATA_CAPABILITY",
+    "exact_mesh_faces": "NOT_REQUIRED_BY_PILOT",
+    "U_H": "UNTESTED_IN_EXACT_SUBSTRATE_PILOT"
+  },
+  "next_gate": "S0-B2 strongest deterministic N/surface reconstruction from P + view provenance/correspondence versus direct N; then S0-C"
+}

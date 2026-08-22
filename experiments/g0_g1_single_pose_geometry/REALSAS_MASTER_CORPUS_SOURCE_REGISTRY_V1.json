@@ -1,0 +1,206 @@
+{
+  "schema_version": "realsas.master_source_registry.v1",
+  "date": "2026-08-22",
+  "legal_policy": {
+    "auto_allow": ["CC0", "PUBLIC_DOMAIN", "CC-BY"],
+    "review": ["CC-BY-SA", "CUSTOM_PERMISSIVE", "DATASET_LICENSE_UNCLEAR", "SOURCE_LICENSE_UNRESOLVED"],
+    "reject": ["NONCOMMERCIAL", "NO_AI_ML", "RESEARCH_ONLY", "ACADEMIC_ONLY", "ALL_RIGHTS_RESERVED", "UNKNOWN_RIGHTS"],
+    "commercial_training_requires_technical_and_legal_pass": true,
+    "unknown_is_pass": false
+  },
+  "sources": [
+    {
+      "id": "objaverse_animated_originals",
+      "name": "Objaverse / Objaverse-XL animated originals",
+      "tier": "A_SCALE",
+      "status": "PASS_PER_ASSET",
+      "truth": ["mesh", "normals", "armature_if_present", "hierarchy_if_present", "skinning_if_present", "bind_rest_transforms_if_present", "animations_if_present", "materials_if_present"],
+      "consumers": ["IRIS", "GEPPETTO", "ARACHNE"],
+      "legal_resolution": "Resolve original object-level license from Objaverse metadata; admit only commercial-permissive records.",
+      "acquisition": "objaverse / objaverse.xl APIs",
+      "auto_build": true
+    },
+    {
+      "id": "articulation_xl2",
+      "name": "Articulation-XL2.0",
+      "tier": "A_SCALE",
+      "status": "PASS_CONDITIONAL_PER_ASSET",
+      "truth": ["vertices", "faces", "normals", "joints", "bones", "root_index", "pc_w_norm", "joint_names", "sparse_skinning"],
+      "consumers": ["IRIS", "GEPPETTO", "ARACHNE"],
+      "legal_resolution": "Retain dataset CC-BY provenance and resolve underlying Objaverse-XL object license by source/fileIdentifier before commercial admission.",
+      "acquisition": "Hugging Face Seed3D/Articulation-XL2.0",
+      "auto_build": true
+    },
+    {
+      "id": "rigxl",
+      "name": "Rig-XL / UniRig",
+      "tier": "A_SCALE",
+      "status": "PASS_CONDITIONAL_PER_ASSET",
+      "truth": ["vertices", "vertex_normals", "faces", "face_normals", "joints", "skin", "parents", "names", "matrix_local"],
+      "consumers": ["IRIS", "GEPPETTO", "ARACHNE"],
+      "legal_resolution": "Objaverse-linked records are object-license resolved. VRoid is quarantined unless explicit model-specific commercial/ML rights are proven.",
+      "acquisition": "Hugging Face VAST-AI/UniRig",
+      "auto_build": true
+    },
+    {
+      "id": "makehuman_mpfb",
+      "name": "MakeHuman / MPFB",
+      "tier": "B_GOLD",
+      "status": "PASS_CC0_CORE",
+      "truth": ["parametric_mesh", "rig", "weights", "generator_parameters"],
+      "consumers": ["IRIS", "GEPPETTO", "ARACHNE"],
+      "legal_resolution": "Core/exported assets are CC0; optional third-party assets require separate resolution.",
+      "acquisition": "MakeHuman/MPFB official repositories",
+      "auto_build": false
+    },
+    {
+      "id": "blender_studio_gold",
+      "name": "Blender Studio open character rigs",
+      "tier": "B_GOLD",
+      "status": "PASS_CC_BY_PER_ASSET",
+      "truth": ["production_mesh", "deform_rig", "weights", "control_rig", "shape_keys", "materials"],
+      "consumers": ["IRIS", "GEPPETTO", "ARACHNE"],
+      "legal_resolution": "Curate only assets whose page explicitly states CC-BY; retain exact attribution.",
+      "acquisition": "Blender Studio character/project downloads",
+      "auto_build": false
+    },
+    {
+      "id": "quaternius_cc0",
+      "name": "Quaternius rigged/animated packs",
+      "tier": "B_GOLD",
+      "status": "PASS_CC0",
+      "truth": ["mesh", "rig", "weights", "animations", "materials"],
+      "consumers": ["IRIS", "GEPPETTO", "ARACHNE"],
+      "legal_resolution": "Use packs explicitly marked CC0 by the author.",
+      "acquisition": "Quaternius official pack downloads",
+      "auto_build": false
+    },
+    {
+      "id": "kaykit_cc0",
+      "name": "KayKit character packs",
+      "tier": "B_GOLD",
+      "status": "PASS_CC0",
+      "truth": ["mesh", "rig", "weights", "animations", "materials"],
+      "consumers": ["IRIS", "GEPPETTO", "ARACHNE"],
+      "legal_resolution": "Use repositories/packs explicitly licensed CC0.",
+      "acquisition": "KayKit GitHub/official downloads",
+      "auto_build": true
+    },
+    {
+      "id": "khronos_gltf_qa",
+      "name": "Khronos glTF Sample Assets",
+      "tier": "C_QA",
+      "status": "PASS_PER_ASSET",
+      "truth": ["skin", "inverse_bind_matrices", "hierarchy", "animation"],
+      "consumers": ["PARSER_QA", "RENDER_QA"],
+      "legal_resolution": "Select only skinned sample assets with explicit compatible per-model license.",
+      "acquisition": "KhronosGroup/glTF-Sample-Assets",
+      "auto_build": true
+    },
+    {
+      "id": "anymate_processed",
+      "name": "Anymate processed dataset",
+      "tier": "QUARANTINE",
+      "status": "LEGAL_REVIEW",
+      "truth": ["point_cloud", "joints", "connectivity", "bones", "point_skinning", "test_mesh_skinning"],
+      "consumers": ["NONE_UNTIL_PROMOTED"],
+      "legal_resolution": "Processed dataset-data license not treated as established by this audit. Prefer direct extraction of original Objaverse-XL assets.",
+      "auto_build": false
+    },
+    {
+      "id": "humanrig",
+      "name": "HumanRig",
+      "tier": "REJECT",
+      "status": "REJECT_COMMERCIAL_TRAINING",
+      "reason": "CC-BY-NC-4.0",
+      "auto_build": false
+    },
+    {
+      "id": "rignet_modelsresource",
+      "name": "ModelsResource-RigNetv1",
+      "tier": "REJECT",
+      "status": "REJECT_COMMERCIAL_TRAINING",
+      "reason": "Underlying Models Resource asset-rights chain does not grant blanket commercial reuse.",
+      "auto_build": false
+    },
+    {
+      "id": "tarig",
+      "name": "TARig",
+      "tier": "REJECT",
+      "status": "REJECT_COMMERCIAL_TRAINING",
+      "reason": "ModelResource/RigNet source-rights chain.",
+      "auto_build": false
+    },
+    {
+      "id": "mixamo",
+      "name": "Adobe Mixamo",
+      "tier": "REJECT",
+      "status": "REJECT_AI_TRAINING_BAN",
+      "reason": "Terms prohibit ML/AI training/testing/improvement use.",
+      "auto_build": false
+    },
+    {
+      "id": "riganything",
+      "name": "RigAnything research assets/checkpoints",
+      "tier": "REJECT",
+      "status": "REJECT_PRODUCT_TRAINING",
+      "reason": "Research/noncommercial license.",
+      "auto_build": false
+    },
+    {
+      "id": "omnirig_armo",
+      "name": "OmniRig / ARMO",
+      "tier": "QUARANTINE",
+      "status": "QUARANTINE_UNRELEASED_OR_UNRESOLVED",
+      "reason": "Large source is relevant but release/license/source-rights chain is not sufficiently clear for commercial automatic admission.",
+      "auto_build": false
+    },
+    {
+      "id": "skintokens_data",
+      "name": "SkinTokens / TokenRig training data",
+      "tier": "REFERENCE",
+      "status": "NOT_A_CLEAN_RELEASED_SOURCE",
+      "reason": "Training composite is not released as an independently resolved corpus and includes VRoid/ModelsResource lineage.",
+      "auto_build": false
+    },
+    {
+      "id": "objaverse_sk",
+      "name": "Objaverse-SK",
+      "tier": "REFERENCE",
+      "status": "DERIVED_REFERENCE_ONLY",
+      "reason": "Autonomous skeleton derivative; originals provide more useful artist-rig/skin truth when available.",
+      "auto_build": false
+    },
+    {
+      "id": "objaverse_tms",
+      "name": "Objaverse-TMS",
+      "tier": "REFERENCE",
+      "status": "DERIVED_REFERENCE_ONLY",
+      "reason": "Skeleton/text derivative; no Arachne advantage over legally resolved originals.",
+      "auto_build": false
+    },
+    {
+      "id": "texturig",
+      "name": "TextuRig",
+      "tier": "REFERENCE",
+      "status": "DERIVED_REFERENCE_ONLY",
+      "reason": "Texture/skeleton derivative of RigXL/Objaverse-XL; originals remain master source authority.",
+      "auto_build": false
+    },
+    {
+      "id": "mblab",
+      "name": "MB-Lab generated 3D assets",
+      "tier": "REJECT",
+      "status": "REJECT_COMMERCIAL_MASTER",
+      "reason": "Default generated 3D output licensing is not compatible with the clean commercial master policy.",
+      "auto_build": false
+    },
+    {
+      "id": "smpl_family",
+      "name": "SMPL/SMPL-X and restricted human-body datasets",
+      "tier": "QUARANTINE",
+      "status": "QUARANTINE_UNLESS_SEPARATE_COMMERCIAL_LICENSE",
+      "auto_build": false
+    }
+  ]
+}

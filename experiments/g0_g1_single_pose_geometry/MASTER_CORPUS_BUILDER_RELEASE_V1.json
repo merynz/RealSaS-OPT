@@ -1,0 +1,45 @@
+{
+  "schema_version": "realsas.master_corpus_builder_release.v1",
+  "date": "2026-08-22",
+  "status": "LOCAL_STATIC_AND_SYNTHETIC_REGRESSION_PASS__COLAB_PRODUCTION_RUN_PENDING",
+  "branch": "g0-g1/single-pose-geometry",
+  "notebook": {
+    "name": "RealSaS_Master_Corpus_1024_RunAll_V1.ipynb",
+    "sha256": "07212230f7dc3bb718da899ed0b703252a77fc7029ed58631b17e9cbd33c0681"
+  },
+  "delivery_bundle": {
+    "name": "RealSaS_Master_Corpus_V1_FINAL_RunAll_Bundle.zip",
+    "sha256": "26d8fe3130ebe85b26f24f0224b871fedfa59c8626c7d2415030aaf47c008cd3"
+  },
+  "canonical_updates": {
+    "contract_commit": "fbe4b424a3d76e8a93fe49470e9266648b3632ed",
+    "source_audit_commit": "0d6d7c075d11ba5a94b37e920d420d09d089be18",
+    "source_registry_commit": "9796b5c0a6ccd802ceaaf496e54cec0721d71639"
+  },
+  "regression": {
+    "code_cells_compile": "15/15",
+    "historical_articulation_anchor": "3456 = 3072 train + 384 validation",
+    "validation_lock": true,
+    "top_left_raster_contract": true,
+    "json_schemas_pass": 4,
+    "physical_iris_firewall": true,
+    "physical_geppetto_firewall": true,
+    "physical_arachne_pack": true,
+    "deterministic_tar_sharding": true,
+    "safe_zip_traversal_guard": true,
+    "articulation_main_and_diverse_discovery": true,
+    "automatic_gold_adapter_static_gates": true
+  },
+  "source_execution": {
+    "articulation_xl2_main_and_diverse": "AUTO__MAIN_REQUIRES_3X_FREE_RAM_GATE",
+    "rigxl": "AUTO__OBJECT_LICENSE_GATE",
+    "linked_objaverse_originals": "AUTO__L0_AUTHORITY",
+    "makehuman_mpfb": "AUTO__CC0_PARAMETRIC_GOLD",
+    "blender_studio": "AUTO_ATTEMPT__CC_BY_FAIL_CLOSED_IF_PUBLIC_DOWNLOAD_UNRESOLVED",
+    "quaternius": "AUTO__ORIGINAL_UPLOADER_CC0_PAGINATED_COLLECTION",
+    "kaykit": "AUTO__CC0",
+    "khronos": "AUTO__QA_ONLY_PER_ASSET_LICENSE"
+  },
+  "model_training_authorized": false,
+  "g1_optimizer_steps": 0
+}

@@ -1,0 +1,60 @@
+{
+  "schema": "RealSaS.S0B2.DerivedNormalFalsification.v1",
+  "date": "2026-08-22",
+  "status": "S0_B2_COMPLETE__DIRECT_N_CURRENT_BEST_ESTIMATE__REVISIONABLE",
+  "authority_scope": "fresh family-disjoint research falsification; not product qualification",
+  "source": {
+    "bundle": "IRIS_M5_V18_76_PRODUCT_CORE_CORPUS_001.zip",
+    "bundle_sha256": "78be9007cd4e0df1deb64e2258dd090a11c54a55de649896c74ed3ed24253897",
+    "rows": 792,
+    "train": 600,
+    "selection": 96,
+    "qualification": 96,
+    "official_validation_opened": false
+  },
+  "split_hashes": {
+    "train": "ab09eccc375abac499e742ab26a22771969015dcaaf7f2eb1a8615ee188d4ac5",
+    "selection": "fbd2db34ed98b6e30ee10f89d2be20198e9c3fa4a80202ce64ff7da49e9aa0f2",
+    "qualification": "bd64de6914a1e00b6342617a6b689a7245a27185e121ee92fbf62f531dd334ce"
+  },
+  "deterministic_normal": {
+    "method": "12NN distance-weighted covariance + minimum-eigenvector + 40NN local-density outward orientation",
+    "qualification": {
+      "row_median_median_deg": 24.087793350219727,
+      "row_p90_median_deg": 111.77532196044922,
+      "row_p95_median_deg": 150.37804412841797,
+      "gt90_fraction": 0.16768391927083334,
+      "row_mean_average_deg": 44.338491102059685
+    }
+  },
+  "arms": {
+    "B0": "P + deterministic graph + ordered-view XY/support; normal slot zero",
+    "B1": "B0 + strongest selected deterministic normal",
+    "B2": "B0 + direct/exact normal"
+  },
+  "arachne_qualification": {
+    "B0": {"ce": 1.1697979557017486, "mae": 0.038840819092001766, "top1": 0.6835734049479166, "top4_mass": 0.9449228669206301, "deform_mean": 0.0018462895801405635, "deform_family_p95": 0.0047240618912970656},
+    "B1": {"ce": 1.157670196145773, "mae": 0.0383769329249238, "top1": 0.6883951822916666, "top4_mass": 0.9455756060779095, "deform_mean": 0.0018186283375750607, "deform_family_p95": 0.004680501837954287},
+    "B2": {"ce": 1.134799536317587, "mae": 0.03756148659158498, "top1": 0.6986897786458334, "top4_mass": 0.9480999540537596, "deform_mean": 0.001783659571175299, "deform_family_p95": 0.004544832953772223}
+  },
+  "paired_B1_to_B2": {
+    "ce": {"mean_delta": -0.022870659828186035, "ci95": [-0.02734879090761145, -0.018751883894825974], "better_fraction": 0.9166666666666666, "wilcoxon_p": 1.016363781219299e-15},
+    "deformation_mean": {"mean_delta": -0.00003496876639976139, "ci95": [-0.00004397448124069297, -0.000026364771455656576], "better_fraction": 0.8645833333333334, "wilcoxon_p": 1.2779724753977457e-12}
+  },
+  "geppetto_oracle_count_qualification": {
+    "B0": {"joint_mean": 0.13312137049312392, "family_p95": 0.21352887526154518, "joint_p95_mean": 0.250392659024025, "pck05": 0.13912713038784993, "pck08": 0.31886404009941555},
+    "B1": {"joint_mean": 0.133051021102195, "family_p95": 0.21261127665638924, "joint_p95_mean": 0.2542016754547755, "pck05": 0.1412140255568389, "pck08": 0.32289824422272007},
+    "B2": {"joint_mean": 0.1331848141271621, "family_p95": 0.21374888718128204, "joint_p95_mean": 0.2516911303003629, "pck05": 0.14618571081999174, "pck08": 0.3234472756806124},
+    "B1_to_B2_joint_mean": {"mean_delta": 0.00013379302496711412, "ci95": [-0.000347235077060759, 0.0006267352398329721], "wilcoxon_p": 0.9127033533806335}
+  },
+  "decision": {
+    "P": "SUPPORTED_CORE",
+    "N_information": "SUPPORTED_DOWNSTREAM",
+    "N_direct_head": "CURRENT_BEST_ESTIMATE_KEEP_DIRECT_FOR_ARACHNE__REVISIONABLE",
+    "N_geppetto_need": "NO_MEANINGFUL_EFFECT_IN_ORACLE_COUNT_LOCUS_PROBE",
+    "graph": "DETERMINISTIC_FIRST",
+    "provenance": "PRESERVE",
+    "U_H": "DEFER_UNTIL_PREDICTED_NOISY_AMBIGUOUS_GEOMETRY",
+    "next_priority": "FRONTEND_DESCRIPTOR_CORRESPONDENCE"
+  }
+}

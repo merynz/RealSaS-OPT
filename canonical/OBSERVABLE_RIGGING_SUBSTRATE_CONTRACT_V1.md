@@ -1,8 +1,10 @@
 # RealSaS — Observable Rigging Substrate Contract V1
 
 **Date:** 2026-08-22  
-**Status:** `CANONICAL_PROBLEM_DEFINITION_FROZEN`  
+**Status:** `CANONICAL_PROBLEM_DEFINITION_FROZEN__FIELDS_EVIDENCE_DERIVED_AND_REVISIONABLE`  
 **Shipping input:** `ONE neutral pose × 8 ordered views`
+
+> **Evidence-authority note.** The problem definition and shipping-input boundary in this document are the current canonical research authority. The specific substrate fields, head assignments and SurfaceBuilder responsibilities are **evidence-derived current best estimates, not immutable truths**. Every field classification must retain its evidence status (`SUPPORTED`, `ESTIMATED/WORKING`, `NOT SUPPORTED`, `INCONCLUSIVE`, `UNTESTED`) and may be revised by stronger controlled experiments. “Canonical” here means *single current source of truth for what we believe and why*, not “guaranteed permanently correct.”
 
 ## 1. Canonical problem
 
@@ -89,6 +91,8 @@ This list is a **candidate factorization**, not a declaration that every item re
 - local adjacency, connected sheets, curvature and surface graph structure should be derived by `SurfaceBuilder` first and become learned outputs only if controlled evidence shows deterministic recovery is insufficient;
 - uncertainty may begin as raw predictive risk and becomes calibrated only at the dedicated calibration gate;
 - multimodal ambiguity may require a set-valued `H_i`; scalar uncertainty alone is not assumed sufficient.
+
+Every item above remains revisionable under stronger evidence.
 
 ## 4. Deterministic SurfaceBuilder boundary
 
@@ -228,10 +232,12 @@ The response to these cases is robust geometric fusion, explicit uncertainty, gr
 
 ## 11. Change control
 
-This document is the canonical problem-definition authority. Revision is required before:
+This document is the canonical problem-definition authority and the current evidence ledger for substrate design. Revision is required before:
 
 - changing shipping input away from one neutral 8-view pose;
 - declaring a fixed final head list without S0 evidence;
 - adding hidden rig/mechanical truth to product inference;
 - forcing singleton geometry where observation supports multiple hypotheses;
 - replacing downstream rigging sufficiency with source-mesh/source-rig exactness.
+
+Field/head classifications may be revised without changing the canonical problem itself when new controlled evidence justifies the change; every such revision must record the superseding experiment and preserve prior provenance.

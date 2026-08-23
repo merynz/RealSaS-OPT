@@ -43,3 +43,6 @@ jobs:
       - name: Observable evaluator preflight
         working-directory: experiments/iris_single_pose_v2
         run: python evaluation_preflight.py
+      - name: Representation authority semantic preflight
+        working-directory: experiments/iris_single_pose_v2
+        run: python representation_preflight.py

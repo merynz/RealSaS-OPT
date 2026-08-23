@@ -46,3 +46,47 @@ jobs:
       - name: Representation authority semantic preflight
         working-directory: experiments/iris_single_pose_v2
         run: python representation_preflight.py
+      - name: Build exact R0-R3 execution bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUNDLE="$RUNNER_TEMP/iris-v2-r0-r3-execution-bundle"
+          mkdir -p "$BUNDLE"
+          SRC="experiments/iris_single_pose_v2"
+          for f in \
+            build_representation_seed_v1.py \
+            stage_source.py \
+            prepare_cache.py \
+            audit_staged_cache_v2.py \
+            representation_authority_study_v1.py \
+            compact_representation_handoff_v1.py \
+            geometry.py \
+            run_representation_authority_v1.py; do
+            cp "$SRC/$f" "$BUNDLE/$f"
+          done
+          (
+            cd "$BUNDLE"
+            sha256sum *.py | sort > SHA256SUMS.txt
+          )
+          GITHUB_SHA="$GITHUB_SHA" python - <<'PY'
+          import json, os
+          from pathlib import Path
+          bundle = Path(os.environ['RUNNER_TEMP']) / 'iris-v2-r0-r3-execution-bundle'
+          info = {
+              'schema': 'RealSaS.IRISSinglePoseV2.ExecutionBundle.v1',
+              'git_commit': os.environ['GITHUB_SHA'],
+              'workflow': 'IRIS V2 Preflight',
+              'optimizer_steps': 0,
+              'training_authorized': False,
+              'entrypoint': 'run_representation_authority_v1.py --mode all',
+              'required_corpus_root': '/content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3',
+          }
+          (bundle / 'BUNDLE_INFO.json').write_text(json.dumps(info, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          PY
+      - name: Upload exact R0-R3 execution bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-r0-r3-execution-bundle
+          path: ${{ runner.temp }}/iris-v2-r0-r3-execution-bundle
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,130 @@
+{
+  "schema_version": "realsas.post_corpus_live_drive_result.v1",
+  "date": "2026-08-23",
+  "build_id": "REALSAS_MASTER_1024_V4_3_LOCAL_FIRST_FULL_PRODUCTION_20260822",
+  "training_authorized": false,
+  "gate0": {
+    "master_variants": 4008,
+    "processed_variants": 4036,
+    "canonical_selected": 3993,
+    "qa_only_excluded": 15,
+    "capabilities": {
+      "iris": 3993,
+      "geppetto": 3890,
+      "arachne": 3414
+    },
+    "splits": {
+      "FIT": 2981,
+      "TUNE": 318,
+      "CAL": 251,
+      "DEV": 274,
+      "EXTERNAL_HOLDOUT": 169
+    },
+    "split_mismatches": 0,
+    "sources": {
+      "objaverse_animated_originals": 3765,
+      "quaternius_cc0": 191,
+      "kaykit_cc0": 37
+    },
+    "source_percent": {
+      "objaverse_animated_originals": 94.29,
+      "quaternius_cc0": 4.78,
+      "kaykit_cc0": 0.93
+    },
+    "master_decisions": {
+      "ADMIT": 3414,
+      "ADMIT_RIG_NO_SKIN": 484,
+      "ADMIT_GEOMETRY_ONLY": 110
+    },
+    "technical_rejects": {
+      "count": 28,
+      "too_many_degenerate_faces": 28,
+      "also_too_many_unweighted_vertices": 2
+    },
+    "latest_unresolved_pending": {
+      "count": 628,
+      "status": {
+        "PENDING_EXTRACTION": 372,
+        "PENDING_MATERIALIZATION": 256
+      },
+      "source": {
+        "objaverse_animated_originals": 586,
+        "kaykit_cc0": 27,
+        "khronos_gltf_qa": 15
+      }
+    },
+    "consumer_export_partial_iris_records": 11
+  },
+  "gate1_samples": [
+    {
+      "asset": "asset_fffcea25a25b094fd8a2b06d",
+      "source": "objaverse_animated_originals",
+      "capability": "ARACHNE",
+      "view": "V0",
+      "native": [1024, 1024],
+      "alpha_authority_exact": true,
+      "triangle_ids_valid": true,
+      "barycentric_outside_fraction_1e5": 0.0,
+      "reprojection_px": {
+        "p50": 7.9e-06,
+        "p95": 2.13e-05,
+        "p99": 2.93e-05,
+        "p999": 0.0337,
+        "max": 3.0968,
+        "gt_0_5": 3,
+        "gt_1_0": 2
+      },
+      "mesh_connected_components": 118
+    },
+    {
+      "asset": "asset_01106041012bec4bd285bb3b",
+      "source": "quaternius_cc0",
+      "capability": "ARACHNE",
+      "view": "V0",
+      "native": [1024, 1024],
+      "alpha_count": 257633,
+      "authority_count": 257633,
+      "alpha_authority_exact": true,
+      "triangle_ids_valid": true,
+      "barycentric_min_weight": -1.043081283569336e-07,
+      "barycentric_outside_fraction_1e5": 0.0,
+      "reprojection_px": {
+        "p50": 1.0386420089060784e-05,
+        "p95": 2.4540683620322973e-05,
+        "p999": 0.014226184444561628,
+        "max": 3.884383861711488
+      },
+      "degenerate_fraction_le_1e12": 0.0,
+      "raw_source_extension": ".blend"
+    },
+    {
+      "asset": "asset_076d5f9cc5befdcdb75323bd",
+      "source": "kaykit_cc0",
+      "capability": "IRIS_ONLY",
+      "view": "V0",
+      "native": [1024, 1024],
+      "alpha_count": 644941,
+      "authority_count": 644941,
+      "alpha_authority_exact": true,
+      "triangle_ids_valid": true,
+      "barycentric_min_weight": -8.940696716308594e-08,
+      "barycentric_outside_fraction_1e5": 0.0,
+      "reprojection_px": {
+        "p50": 1.236191037743099e-05,
+        "p95": 2.487301356200588e-05,
+        "p999": 3.697848198343953e-05,
+        "max": 0.236440968715089
+      },
+      "degenerate_fraction_le_1e12": 0.0,
+      "raw_source_extension": ".fbx"
+    }
+  ],
+  "gate2": {
+    "known_risk": "Blender extractor uses base object data plus deterministic fan triangulation; evaluated depsgraph/modifier equivalence is not yet qualified. Quaternius live full-truth sample is .blend, so this risk is non-vacuous. Quantify affected subset before any selective rerender."
+  },
+  "gate3": {
+    "current_raster_authority": "geometry-isolation control",
+    "appearance_preserving_sibling": "pending coverage audit; do not rerender all by default"
+  },
+  "next": "Run experiments/post_corpus_audit/audit_master_corpus.py on mounted Drive; full 3993 shallow scan + deterministic source/split/capability-stratified deep sample before Gate 4."
+}

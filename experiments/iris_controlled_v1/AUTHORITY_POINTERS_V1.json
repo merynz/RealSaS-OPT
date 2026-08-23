@@ -10,9 +10,21 @@
     "POST_CORPUS_STAGE_B6_FROZEN_REPAIR_STAGING_RESULT_V1.json": "a86178b46dd55636356d27c2f1fe6d042aea1ea7863ecfc2bf33e7a9a0f868f9"
   },
   "drive_only_large_authorities": {
-    "IRIS_CONTROLLED_V1_CORPUS_FREEZE.json": {"sha256":"39884ff3c7df2a8268247623b88c25002f03929dc58c618bca35fc021310895e","size_bytes":160936},
-    "IRIS_CONTROLLED_V1_SPLIT_FREEZE.json": {"sha256":"9e766ac61126c9b4787eef24146e36aac40cbeac166d67ba898f8b79133e9d66","size_bytes":133234},
-    "IRIS_CONTROLLED_V1_EXCLUSIONS.json": {"sha256":"5ba65a4096d1841e33426b29ad81abfaf259c8c0bbeba36ac9cf33cf67185690","size_bytes":34219},
-    "IRIS_CONTROLLED_V1_DEFERRED_REPAIR_SHA_REGISTRY.json": {"sha256":"369babd90f5e4a057fb28a3f44666ada8934b7f8de37566e8acebc33f5ca1022","size_bytes":41220}
+    "IRIS_CONTROLLED_V1_CORPUS_FREEZE.json": {
+      "sha256": "39884ff3c7df2a8268247623b88c25002f03929dc58c618bca35fc021310895e",
+      "size_bytes": 160936
+    },
+    "IRIS_CONTROLLED_V1_SPLIT_FREEZE.json": {
+      "sha256": "9e766ac61126c9b4787eef24146e36aac40cbeac166d67ba898f8b79133e9d66",
+      "size_bytes": 133234
+    },
+    "IRIS_CONTROLLED_V1_EXCLUSIONS.json": {
+      "sha256": "5ba65a4096d1841e33426b29ad81abfaf259c8c0bbeba36ac9cf33cf67185690",
+      "size_bytes": 34219
+    },
+    "IRIS_CONTROLLED_V1_DEFERRED_REPAIR_SHA_REGISTRY.json": {
+      "sha256": "369babd90f5e4a057fb28a3f44666ada8934b7f8de37566e8acebc33f5ca1022",
+      "size_bytes": 41220
+    }
   }
 }

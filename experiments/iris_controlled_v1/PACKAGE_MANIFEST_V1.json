@@ -1,0 +1,33 @@
+{
+  "date":"2026-08-23",
+  "file_count":23,
+  "files":[
+    {"path":"README.md","sha256":"f8ebdbaf37363544673a4d9784fbe2506ad26cc42459a34a66d87308e6a6b7e4","size_bytes":4314},
+    {"path":"ARCHITECTURE_AND_BOUNDARIES_V1.md","sha256":"e4173c851cd45ced346309a5903cefc632e980554705b47ff35ca67daa518aff","size_bytes":3346},
+    {"path":"IRIS_CONTROLLED_V1_PREREG.md","sha256":"bc0f179a424de04800fafbc2d9fcf77d1bd9b7530f8e22fecfa80d3a8a11539d","size_bytes":3542},
+    {"path":"COLAB_RUNBOOK_V1.md","sha256":"c13827ac6d843db832fb33b04b20b47bc00eb1a21cda69bd087293ce28b8bfcf","size_bytes":1501},
+    {"path":"TRAINING_READY_REPORT_V1.md","sha256":"7613208e1daa9cebd7972709eafcf2a0c9d37afe45a766ae4c042e3168530c4b","size_bytes":4580},
+    {"path":"IRIS_CONTROLLED_V1_CORPUS_FREEZE.json","sha256":"39884ff3c7df2a8268247623b88c25002f03929dc58c618bca35fc021310895e","size_bytes":160936},
+    {"path":"IRIS_CONTROLLED_V1_SPLIT_FREEZE.json","sha256":"9e766ac61126c9b4787eef24146e36aac40cbeac166d67ba898f8b79133e9d66","size_bytes":133234},
+    {"path":"IRIS_CONTROLLED_V1_EXCLUSIONS.json","sha256":"5ba65a4096d1841e33426b29ad81abfaf259c8c0bbeba36ac9cf33cf67185690","size_bytes":34219},
+    {"path":"IRIS_CONTROLLED_V1_DEFERRED_REPAIR_SHA_REGISTRY.json","sha256":"369babd90f5e4a057fb28a3f44666ada8934b7f8de37566e8acebc33f5ca1022","size_bytes":41220},
+    {"path":"IRIS_CONTROLLED_V1_REAL_ASSET_PREFLIGHT.json","sha256":"0703039c87fbd28a324f5931c409c35fb3edbba53fda74c0e9d4de92b35abd8d","size_bytes":1098},
+    {"path":"IRIS_CONTROLLED_V1_REPRESENTATION_CEILING_PREFLIGHT.json","sha256":"753c79130e5efdb1d0b5f01933041daccd7f6f0c35ec369356d4ae8ccc95c31e","size_bytes":1825},
+    {"path":"iris_geometry.py","sha256":"ae41f1ef063e4167cc1d82902738b711168dec4b0728d279599c5cb7d496456d","size_bytes":5953},
+    {"path":"iris_dataset.py","sha256":"445776626e88711669fead812c0a1389ba23d567711513a7e18181d2f6c7970b","size_bytes":2467},
+    {"path":"iris_model.py","sha256":"2f93f0c590ed045e74efaff80c4a80c4b41ac645c97a5604c7624d5730644f61","size_bytes":6624},
+    {"path":"iris_losses.py","sha256":"e33ba857a409127850961426f83b11df6541977db4cfe02c2a0ed8f60294b621","size_bytes":3555},
+    {"path":"iris_evidence.py","sha256":"1aec31544acb5ce8eefc9e046a86ae363303730003037187035978ddf249b747","size_bytes":2386},
+    {"path":"prepare_iris_controlled_v1.py","sha256":"d44a126faf2b45350943fbc1501bc6450e8e4edae5d942c5e7e8475d333e5475","size_bytes":9694},
+    {"path":"build_seed_manifest.py","sha256":"32e7285cd3dd72ce23c075071b1df2fafc54097ccd1de8c0b824ff9d1f76e698","size_bytes":2416},
+    {"path":"representation_ceiling_v1.py","sha256":"ea657c5af58cccddd6595505e890b4e402a9877bcb00e91457be0ce47a08ad15","size_bytes":4308},
+    {"path":"train_iris_controlled_v1.py","sha256":"89a06c7f5d55cc5663b6d07fe565d96728a26298bda49def555e38d4cfd7767c","size_bytes":5547},
+    {"path":"evaluate_iris_controlled_v1.py","sha256":"cc886ee343b34cb1b5ecdbf5f9568e1e458dda2e5a108307c409eb4fcd62a65b","size_bytes":1569},
+    {"path":"preflight_iris_controlled_v1.py","sha256":"6273efb072909ffb0162bc780b03243ed0ff6d58affaa82dbdb0f10665d48b42","size_bytes":2968},
+    {"path":"launch_iris_controlled_v1.py","sha256":"88ba6d1dc255b72b03a4beb8bb6c144c9952a497a8e391480bc41aad75103e8a","size_bytes":3013}
+  ],
+  "policy":"Every listed file is immutable for Controlled V1. Changes require V2 or an explicitly versioned amendment before optimizer restart.",
+  "schema":"RealSaS.IRISControlledV1.PackageManifest.v1",
+  "source_authorities":{"b6_result_sha256":"a86178b46dd55636356d27c2f1fe6d042aea1ea7863ecfc2bf33e7a9a0f868f9","canonical_selection_sha256":"af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9"},
+  "status":"TRAINING_READY_OPTIMIZER_NOT_STARTED"
+}

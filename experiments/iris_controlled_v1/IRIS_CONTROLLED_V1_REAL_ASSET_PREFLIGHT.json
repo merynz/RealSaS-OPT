@@ -1,0 +1,12 @@
+{
+  "asset": "asset_00027381105293114a49dc90",
+  "cache_sha256": "1635812732f5e272a1bbce9a404ec9ab23fa4190d99c584f065090a8d49883b3",
+  "grad_abs_sum": 12022.364505450241,
+  "losses": {"N":0.9693120121955872,"P":0.33996450901031494,"P_consistency":0.20470838248729706,"U":0.9515580534934998,"Z_coarse":3.9412150382995605,"Z_fine":6.406808376312256,"n_cos":0.9693120121955872,"p_euclid":0.6793250441551208,"total":1.385274052619934},
+  "output_shapes": {"N":[1,8,3,64,64],"P":[1,8,3,64,64],"Z_coarse":[1,8,64,16,16],"Z_fine":[1,8,32,64,64],"log_sigma":[1,8,1,64,64]},
+  "parameters": 5657863,
+  "pass": true,
+  "schema": "RealSaS.IRISControlledV1.RealAssetPreflight.v1",
+  "track_count": 128,
+  "track_support_hist": {"2":0,"3":0,"4":122,"5":6,"6":0,"7":0,"8":0}
+}

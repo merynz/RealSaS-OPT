@@ -156,7 +156,7 @@ For each representation arm:
 
 The true locus is used only to choose a **legal evaluation third view**, never as a matching score/anchor.
 
-## 9. Required stratification
+## 9. Required stratification and tail diagnostics
 
 Every final result reports:
 
@@ -174,7 +174,25 @@ The bucket boundaries are frozen before results as:
 - connected components: `1`, `2-4`, `5-16`, `17+`;
 - query physical-locus view support from `track_support`: `2-3`, `4-5`, `6-8`.
 
-No bucket boundary may be changed after R0–R3 results are opened. Mean-only promotion remains forbidden.
+Family-tail reporting is frozen to include per-asset top1/top4/top8 and per-asset physical-error median/p90/p95, followed by across-family percentiles. At minimum the across-family output includes median, p90 and p95 for the error summaries; lower-accuracy tail percentiles are also retained for containment rates. No mean-only promotion is allowed.
+
+### Repeated-structure / symmetry integrity rule
+
+The geometry-only authority cannot truthfully provide a semantic `SYMMETRIC` label. Therefore the runner must **not** invent one.
+
+Before results, the automated descriptive proxy is frozen as:
+
+`nearest_non_equivalent_physical_gap = min ||P_candidate - P_query||`
+
+over target-view candidates whose exact physical distance is **strictly greater than** `SAME_LOCUS_TOL`.
+
+Interpretation:
+
+- small gap = another distinct legal physical locus lies nearby in canonical geometry and the query is structurally confusable by proximity/repeated local structure;
+- large gap = the nearest non-equivalent target locus is farther away;
+- this quantity is descriptive only and is **not** a semantic symmetry label, a matching score, a promotion threshold, or an R4 trigger by itself.
+
+Every hard-tail row records this gap when defined. The final canonical interpretation may inspect the complete frozen hard-tail witnesses on legal RGB to determine whether failures visually correspond to symmetry/repeated appearance, but the visual interpretation may not change membership, metrics, thresholds, or the already-opened R0-R3 results.
 
 ## 10. Hard-tail manifest
 
@@ -185,7 +203,7 @@ Record every exact/noise query satisfying at least one:
 - reciprocal failure under exact R0/R1;
 - cycle failure under exact R0/R1.
 
-Each row contains asset, source/target/third view when relevant, provider, capability, component/coverage bucket, arm and legal ambiguity-set size. No RGB or rig-secret data are required in this manifest.
+Each row contains asset, source/target/third view when relevant, provider, capability, component/coverage bucket, arm, legal ambiguity-set size and the descriptive nearest-non-equivalent physical gap. No rig-secret data enter this manifest.
 
 ## 11. R4 integrity lock
 
@@ -209,6 +227,6 @@ The R0–R3 runner is **measurement-only**. It may issue:
 - `DEVELOPMENT_ONLY` for any debug-reduced panel;
 - `APPARATUS_TARGET_REOPEN_REQUIRED` if the frozen apparatus/panel cannot be constructed legally.
 
-The runner may **not** turn the presence/absence of one hard-tail row, a mean score, or any newly invented threshold into `P_GEOMETRY_SUFFICIENT`, `P_PLUS_R_REQUIRED`, `R4_NOT_NEEDED`, `R4_REQUIRED`, or an SOI-2 decision. Hard-tail rows are evidence for the subsequent canonical interpretation, not an automatic decision threshold.
+The runner may **not** turn the presence/absence of one hard-tail row, a mean score, a structural-confusability gap, or any newly invented threshold into `P_GEOMETRY_SUFFICIENT`, `P_PLUS_R_REQUIRED`, `R4_NOT_NEEDED`, `R4_REQUIRED`, or an SOI-2 decision. Hard-tail rows are evidence for the subsequent canonical interpretation, not an automatic decision threshold.
 
 The final parent-prereg decision (`P_GEOMETRY_SUFFICIENT`, `P_PLUS_R_REQUIRED`, `LEGAL_REPRESENTATION_STILL_INSUFFICIENT__PROCEED_TO_SOI2`, or `APPARATUS_TARGET_REOPEN_REQUIRED`) is written only by the canonical interpretation report after verifying the full required evidence. If R4 is scientifically justified by that interpretation, its separate formulation prereg must be frozen before any R4 result is opened.

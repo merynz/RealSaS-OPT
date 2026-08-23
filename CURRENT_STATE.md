@@ -222,6 +222,36 @@ Canonical G1 facts remain:
 
 No S0 result retroactively changes the frozen G1 baseline. The frontend descriptor work is an explicit research continuation; any intervention into the G1 model itself must remain separately preregistered from the frozen baseline.
 
+## Research operating rule — ACTIVE
+
+Do not merely execute the stated next step. At every gate, actively search for adjacent assumptions whose failure could invalidate the conclusion.
+
+For every material PASS/FAIL result, ask before committing the interpretation:
+
+```text
+What assumption does this conclusion depend on?
+  ↓
+Was that assumption actually tested?
+  ↓
+Could a different failure class produce the same observed result?
+  ↓
+What controlled evidence would distinguish those explanations?
+```
+
+Mandatory failure-class separation:
+
+- **apparatus/data failure** — the measurement, corpus, transform, loader, renderer or evaluator is wrong/incomplete;
+- **representation failure** — the required information may exist in the observation but the chosen state/feature language does not preserve it;
+- **target-authority failure** — the supervised “exact” quantity is not the correct observable/product invariant;
+- **learner/solver failure** — the representation is adequate but the current model/optimizer/solver does not recover or use it;
+- **genuine information limit** — only after stronger legal observation representations and target validity have been separated may a non-identifiability/impossibility claim be made.
+
+A negative result is therefore **not an impossibility result by default**. Before declaring an observation fundamentally insufficient, test stronger lawful representations/information ceilings and rule out apparatus, target and learner explanations where feasible.
+
+Likewise, a positive result is not sufficient by itself: actively inspect whether leakage, privileged truth, source bookkeeping, shortcut appearance, split contamination or evaluator coupling could explain the gain.
+
+Research continuation should prefer the next **discriminating experiment** over the next patch. The goal is not “make the metric move”; it is to localize which assumption or subsystem owns the result.
+
 ## Non-negotiable process discipline
 
 - GitHub is the canonical continuation surface.

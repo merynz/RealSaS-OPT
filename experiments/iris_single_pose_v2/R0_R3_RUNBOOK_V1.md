@@ -1,50 +1,91 @@
 # IRIS V2 — R0-R3 Representation Authority Runbook
 
-**Status:** `CI57_PASS__OPTIMIZER_ZERO_ONLY__TRAINING_FORBIDDEN`  
-**Date:** 2026-08-24  
-**Verified code-bearing commit:** `c1f80b5c4061a248da3af2f8080f4ebc4496d4b0`  
-**GitHub Actions:** run `#57`, ID `32671291295`, SUCCESS
+**Status:** `CI69_FINAL_PRE_RESULT_FREEZE__OPTIMIZER_ZERO__TRAINING_FORBIDDEN`  
+**Date:** 2026-08-24
 
-This runbook executes the frozen confirmatory Representation Authority apparatus. It does not train IRIS and may not authorize training.
+Final freeze authority:
+
+`experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_EXECUTION_FREEZE_CI69_20260824.md`
+
+## Exact execution authority
+
+Source head:
+
+`e110014e79f3a9686bfd411e41454a627914fe14`
+
+GitHub Actions:
+
+- `IRIS V2 Preflight #69`
+- run ID `32672422405`
+- SUCCESS
+
+Execution bundle SHA-256:
+
+`31b8bee0ebae9d91b45a58f41134da7d20d479aa3d855d9012f7837c84d4770f`
+
+Drive bundle:
+
+`/content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_single_pose_v2/IRIS_V2_R0_R3_EXECUTION_BUNDLE_CI69.zip`
+
+Prepared Colab launcher:
+
+`RealSaS_IRIS_V2_R0_R3_Representation_Authority_CI69.ipynb`
+
+Notebook SHA-256:
+
+`dd901089c31650cf5a69d79b15a594994717b1d7397e65fa4a91a7f0d41c8a13`
 
 ## Preconditions
 
-Target corpus root:
+Corpus root:
 
 `/content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3`
 
-The runner refuses to start unless these exact frozen authorities are present:
-
-- `reports/iris_controlled_v1/IRIS_CONTROLLED_V1_SPLIT_FREEZE.json`
-- `metadata/CANONICAL_VARIANT_SELECTION.json`
-
-Expected SHA-256:
+Frozen source SHA-256:
 
 - split freeze: `9e766ac61126c9b4787eef24146e36aac40cbeac166d67ba898f8b79133e9d66`
 - canonical selection: `af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9`
 
-The exact 256-asset ordered panel ID-list digest must be:
+Frozen 256-asset ordered panel ID-list SHA-256:
 
 `366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961`
 
-## One command
+No substitution is allowed.
 
-From `experiments/iris_single_pose_v2/` on the active audit branch:
+## Preferred execution
+
+Open the CI69 notebook and **Run all**.
+
+The notebook:
+
+1. mounts Drive;
+2. verifies the exact bundle ZIP SHA;
+3. verifies `BUNDLE_INFO.source_head_sha`;
+4. verifies all eight internal script SHA values;
+5. verifies the orchestrator self-hash lock;
+6. keeps scratch stage/cache under `/content`;
+7. runs the exact frozen optimizer-zero command;
+8. remounts/retries only on recognized transient Drive I/O, without scientific changes;
+9. persists final evidence to:
+   `RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_REPRESENTATION_AUTHORITY_V1_CI69_RESULT`.
+
+Equivalent direct entrypoint from the verified bundle directory:
 
 ```bash
-python run_representation_authority_v1.py --mode all
+python run_representation_authority_v1.py \
+  --root /content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3 \
+  --work-dir /content/IRIS_SINGLE_POSE_V2_REPRESENTATION_AUTHORITY_V1_CI69 \
+  --mode all
 ```
 
-Default staging input is native 1024. Exact correspondence/geometry truth is derived from native-1024 raster authority.
-
-## What the command does
+## What the runner does
 
 ```text
 frozen authority SHA verification
  -> exact locked 256 seed
  -> pre-stage panel digest verification
  -> physical geometry-only staging
- -> V2 exact/dense truth cache
+ -> exact/dense truth cache
  -> read-only stage/cache audit
  -> 38 frozen R0-R3 arms
  -> post-result panel digest verification
@@ -52,13 +93,9 @@ frozen authority SHA verification
  -> RUN_COMPLETE_V1.json
 ```
 
-No substitution is allowed. If one frozen asset fails staging/cache/audit, the confirmatory run stops instead of selecting a replacement.
+`RUN_AUTHORITY_V1.json` hashes all execution dependencies **including the orchestrator itself**. A resumed run cannot silently change the runner.
 
-## Expected output directory
-
-`RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_REPRESENTATION_AUTHORITY_V1/`
-
-Important outputs:
+## Expected evidence
 
 - `RUN_AUTHORITY_V1.json`
 - `REPRESENTATION_SEED_V1.json`
@@ -75,39 +112,25 @@ A completed legal measurement must report:
 
 `R0_R3_MEASURED__CANONICAL_INTERPRETATION_REQUIRED`
 
-and retain:
+and:
 
 - `optimizer_steps = 0`
 - `training_authorized = false`
 - `sealed_splits_opened = false`
 
-The compact handoff is evidence compaction only. It contains the exact R0/R1 panel, R2/R3 noise envelopes, family/source tails and hard-tail witnesses, and is SHA-bound into `RUN_COMPLETE_V1.json`. It cannot issue a scientific promotion decision.
-
-## Resume behavior
-
-Staging and cache builders have source/settings/builder fingerprints and may reuse only exact matching artifacts.
-
-`RUN_AUTHORITY_V1.json` freezes source-authority, settings and script hashes. If any of those semantics change, the runner refuses to mutate the opened run and requires a new work directory.
-
-For explicit continuation after interruption, use the same work directory and one of:
-
-```bash
-python run_representation_authority_v1.py --mode stage
-python run_representation_authority_v1.py --mode cache
-python run_representation_authority_v1.py --mode audit
-python run_representation_authority_v1.py --mode study
-```
-
-Each continuation mode requires its preceding artifact to exist and the frozen run authority to remain byte-compatible.
-
 ## Interpretation boundary
 
-The measurement runner may not decide:
+The runner/notebook may not decide:
 
-- `P_GEOMETRY_SUFFICIENT`;
-- `P_PLUS_R_REQUIRED`;
-- whether R4 is needed;
-- whether SOI-2 is needed;
-- whether training may start.
+- P geometry sufficiency;
+- whether P+N is necessary/sufficient;
+- R4 necessity;
+- SOI-2 necessity;
+- checkpoint selection;
+- training authorization.
 
-Those are subsequent canonical interpretation decisions after the full stratified/tail evidence is inspected. If R4 is scientifically justified, its exact formulation must be separately preregistered before any R4 result is opened.
+Those are subsequent canonical interpretation decisions after the full stratified/tail evidence is inspected.
+
+## Freeze rule
+
+No further execution-code changes are authorized before the first real result unless a genuine apparatus failure is documented. Any apparatus fix requires a new exact-head CI run, bundle digest, Drive mirror and launcher authority; do not patch CI69 in place and call it the same experiment.

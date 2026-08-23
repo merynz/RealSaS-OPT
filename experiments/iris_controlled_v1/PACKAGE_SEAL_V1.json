@@ -1,0 +1,8 @@
+{
+  "listed_files":23,
+  "optimizer_steps":0,
+  "package_manifest":"PACKAGE_MANIFEST_V1.json",
+  "package_manifest_sha256":"e49a67b2ef808fe4f7cc9e414e024d30ab0fddc0ea55099bfa33ef78dbc6f098",
+  "schema":"RealSaS.IRISControlledV1.PackageSeal.v1",
+  "sealed_panels_opened":false
+}

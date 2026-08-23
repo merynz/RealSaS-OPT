@@ -203,10 +203,12 @@ This is deliberately stricter than silently filling the gap.
 
 ## 12. Decision discipline
 
-R0–R3 runner may issue only measurement output plus one of:
+The R0–R3 runner is **measurement-only**. It may issue:
 
-- `R0_R3_COMPLETE__R4_NOT_NEEDED_IF_EXACT_GEOMETRY_CEILING_CLEAR`
-- `R0_R3_HARD_TAIL__FREEZE_R4_FORMULATION_BEFORE_NEXT_RESULT`
-- `APPARATUS_TARGET_REOPEN_REQUIRED`
+- `R0_R3_MEASURED__CANONICAL_INTERPRETATION_REQUIRED` for the frozen confirmatory panel;
+- `DEVELOPMENT_ONLY` for any debug-reduced panel;
+- `APPARATUS_TARGET_REOPEN_REQUIRED` if the frozen apparatus/panel cannot be constructed legally.
 
-The final parent-prereg decision (`P_GEOMETRY_SUFFICIENT`, `P_PLUS_R_REQUIRED`, `...SOI2`) is written only by the canonical interpretation report after verifying the full required evidence. The runner itself must not invent missing promotion thresholds after seeing results.
+The runner may **not** turn the presence/absence of one hard-tail row, a mean score, or any newly invented threshold into `P_GEOMETRY_SUFFICIENT`, `P_PLUS_R_REQUIRED`, `R4_NOT_NEEDED`, `R4_REQUIRED`, or an SOI-2 decision. Hard-tail rows are evidence for the subsequent canonical interpretation, not an automatic decision threshold.
+
+The final parent-prereg decision (`P_GEOMETRY_SUFFICIENT`, `P_PLUS_R_REQUIRED`, `LEGAL_REPRESENTATION_STILL_INSUFFICIENT__PROCEED_TO_SOI2`, or `APPARATUS_TARGET_REOPEN_REQUIRED`) is written only by the canonical interpretation report after verifying the full required evidence. If R4 is scientifically justified by that interpretation, its separate formulation prereg must be frozen before any R4 result is opened.

@@ -21,8 +21,13 @@ jobs:
   preflight:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      SOURCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      WORKFLOW_EVENT_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -50,6 +55,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          ACTUAL_HEAD="$(git rev-parse HEAD)"
+          test "$ACTUAL_HEAD" = "$SOURCE_HEAD_SHA"
           BUNDLE="$RUNNER_TEMP/iris-v2-r0-r3-execution-bundle"
           mkdir -p "$BUNDLE"
           SRC="experiments/iris_single_pose_v2"
@@ -68,13 +75,14 @@ jobs:
             cd "$BUNDLE"
             sha256sum *.py | sort > SHA256SUMS.txt
           )
-          GITHUB_SHA="$GITHUB_SHA" python - <<'PY'
+          python - <<'PY'
           import json, os
           from pathlib import Path
           bundle = Path(os.environ['RUNNER_TEMP']) / 'iris-v2-r0-r3-execution-bundle'
           info = {
               'schema': 'RealSaS.IRISSinglePoseV2.ExecutionBundle.v1',
-              'git_commit': os.environ['GITHUB_SHA'],
+              'source_head_sha': os.environ['SOURCE_HEAD_SHA'],
+              'workflow_event_sha': os.environ['WORKFLOW_EVENT_SHA'],
               'workflow': 'IRIS V2 Preflight',
               'optimizer_steps': 0,
               'training_authorized': False,

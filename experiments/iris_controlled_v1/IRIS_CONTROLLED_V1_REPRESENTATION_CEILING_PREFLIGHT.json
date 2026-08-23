@@ -1,0 +1,15 @@
+{
+  "arms": {
+    "PN_EXACT":{"ambiguous_within_0p003_fraction":0.0,"assets":1,"family_top1_p10":1.0,"mrr":1.0,"pairs":390,"top1":1.0,"top4":1.0,"top8":1.0},
+    "PN_P0p0025_N10":{"ambiguous_within_0p003_fraction":0.0,"assets":1,"family_top1_p10":1.0,"mrr":1.0,"pairs":390,"top1":1.0,"top4":1.0,"top8":1.0},
+    "PN_P0p005_N20":{"ambiguous_within_0p003_fraction":0.0,"assets":1,"family_top1_p10":0.9923076923076923,"mrr":0.9961538461538462,"pairs":390,"top1":0.9923076923076923,"top4":1.0,"top8":1.0},
+    "P_EXACT":{"ambiguous_within_0p003_fraction":0.0,"assets":1,"family_top1_p10":1.0,"mrr":1.0,"pairs":390,"top1":1.0,"top4":1.0,"top8":1.0},
+    "P_NOISE_0p001":{"ambiguous_within_0p003_fraction":0.0,"assets":1,"family_top1_p10":1.0,"mrr":1.0,"pairs":390,"top1":1.0,"top4":1.0,"top8":1.0},
+    "P_NOISE_0p0025":{"ambiguous_within_0p003_fraction":0.0,"assets":1,"family_top1_p10":1.0,"mrr":1.0,"pairs":390,"top1":1.0,"top4":1.0,"top8":1.0}
+  },
+  "assets_requested":1,
+  "interpretation":"PASS means the legal observable P/(P,N) state can address the sampled persistent surface loci under controlled exact-camera observations. It does not prove a learner can recover that state from RGB.",
+  "pass":true,
+  "primary_gate":{"PN_EXACT_top8_min":0.995,"P_EXACT_family_top1_p10_min":0.95,"P_EXACT_top8_min":0.995},
+  "schema":"RealSaS.IRISControlledV1.RepresentationCeiling.v1"
+}

@@ -2,65 +2,53 @@
 
 Private canonical research workspace for RealSaS.
 
-> **START HERE — active branch:** `g0-g1/single-pose-geometry`
+> **START HERE — active audit branch:** `audit/iris-architecture-discipline-20260824`
 >
-> **Current frontier:** IRIS Controlled V1 training package is frozen and ready; optimizer steps are still `0`; CAL/DEV/EXTERNAL are sealed.
+> **Current frontier:** IRIS single-pose architecture reconciliation. **ALL TRAINING IS FORBIDDEN** until the audit closes.
 >
-> In a new ChatGPT session, “GitHub'a bak ve devam et” or simply “devam et” means: read `CURRENT_STATE.md` first and execute its exact next step without asking the user to reconstruct history.
+> In a new session, `GitHub'a bak ve devam et` means: read `CURRENT_STATE.md`, then `audit/IRIS_ARCHITECTURE_AUDIT_20260824.md` when present. Do not execute historical V1 launchers.
 
-## Canonical continuation order
+## Current authority order
 
 1. `CURRENT_STATE.md` — single continuation authority.
-2. `experiments/iris_controlled_v1/CONTINUATION_HANDOFF_V1.md` — exact execution/handoff state.
-3. `experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_PREREG.md` — frozen training/scientific contract.
-4. `experiments/iris_controlled_v1/ARCHITECTURE_AND_BOUNDARIES_V1.md` — IRIS neural/deterministic boundary.
-5. `experiments/iris_controlled_v1/TRAINING_READY_REPORT_V1.md` — corpus/preflight readiness evidence.
-6. `experiments/iris_controlled_v1/AUTHORITY_POINTERS_V1.json` — Drive IDs and SHA authorities.
-7. `experiments/m4_identity_audit/VERY_IMPORTANT_AUDIT_M4_IDENTITY_AMBIGUITY_EQUIVALENT_SUBSTRATE_20260823.md` — required interpretation/downstream-sufficiency audit.
-8. Historical G0/G1/S0/M4 files remain lineage and must not be silently deleted or rewritten.
+2. `canonical/PRODUCT_CONTRACT_V1.md` — product responsibility boundary.
+3. `canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md` — canonical IRIS scientific target.
+4. `experiments/g0_g1_single_pose_geometry/FRONTEND_NATIVE_1024_CORPUS_CONTRACT_V1.md` — native-resolution/data direction.
+5. `experiments/g0_g1_single_pose_geometry/G0_CONTRACT_FREEZE.json` — observable metric/semantic definitions.
+6. `audit/` — current reconciliation findings and lock.
+7. `experiments/iris_single_pose_v2/` — only active implementation path once committed and preflighted.
+8. `experiments/iris_controlled_v1/` — historical/diagnostic lineage; **DO NOT RUN during the audit**.
 
-## Active IRIS path
+## Frozen product boundary
 
 ```text
-8 controlled neutral-pose views
+ONE neutral pose x 8 ordered views
         ↓
-known camera / deterministic frontend
+IRIS observable geometry/persistence evidence
         ↓
-shared multiscale neural perception
+deterministic SurfaceBuilder
         ↓
-P + N + U + coarse/fine persistence
+RiggingSurface
         ↓
-deterministic top-k / reciprocal / cycle / ambiguity / reprojection
+Geppetto → skeleton/hierarchy
         ↓
-qualified persistent observable surface evidence
+Arachne → skinning
+        ↓
+Compiler → verified editable puppet
 ```
 
-The current correction is important: **the observable evidence was not pruned; the problem was pruned.** IRIS no longer has to recover one privileged hidden authored owner identity. It must recover the richest justified observable geometry/persistence evidence and preserve ambiguity when singleton identity is unsupported.
+IRIS does not recover privileged hidden owner IDs or source-rig exactness. It must preserve the richest justified observable geometry and ambiguity needed by downstream rigging.
 
-## Immediate corpus
+## Audit discipline
 
-Controlled V1 uses **3930** clean assets from the 3993 canonical selection.
+No new mini/scale/sealed run is permitted merely because a script exists. A training path becomes executable only after the repository contains one mutually consistent set of:
 
-- FIT 2935
-- TUNE 313
-- CAL 246 — sealed
-- DEV 270 — sealed
-- EXTERNAL_HOLDOUT 166 — sealed
+- architecture contract;
+- resolution/coordinate contract;
+- corpus interface/firewall contract;
+- loss-role contract;
+- evaluator contract;
+- preflight tests;
+- explicit preregistration.
 
-The remaining 63 assets are preserved as 56 repair-pending + 6 shape-key quarantine + 1 blank observation asset.
-
-## Byte authority
-
-Heavy/frozen execution authority lives in Google Drive:
-
-`MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1`
-
-Frozen package manifest SHA-256:
-
-`e49a67b2ef808fe4f7cc9e414e024d30ab0fddc0ea55099bfa33ef78dbc6f098`
-
-GitHub is the continuation and inspection surface; Drive is byte authority for the executable package.
-
-## Preservation rule
-
-No research component may silently disappear. Every historical result remains provenance. Interpretation may be superseded only by an explicit audit/decision document.
+All historical results remain provenance, but superseded code may not remain visually ambiguous as an active authority.

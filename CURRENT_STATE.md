@@ -2,82 +2,46 @@
 
 **Date:** 2026-08-23  
 **Active branch:** `g0-g1/single-pose-geometry`  
-**Status:** `IRIS_CONTROLLED_V1_FAST_PREP_READY__OPTIMIZER_0__SEALED_CLOSED`
+**Status:** `IRIS_CONTROLLED_V1_REPRESENTATION_CEILING_PASS__OPEN_PILOT_NEXT__OPTIMIZER_PRODUCTION_0__SEALED_CLOSED`
 
 ## Read this first
 
 This file is the **single continuation authority**. In a new chat, if the user says only “devam et” or “GitHub'a bak ve devam et”, continue from the exact next action in this file. Do not ask the user to reconstruct history.
 
-Detailed handoff: `experiments/iris_controlled_v1/CONTINUATION_HANDOFF_V1.md`.
-
-## Current scientific correction
+## Scientific target
 
 **Observable evidence was not pruned; the problem was pruned.**
 
-The old M4 pressure was effectively:
-
-`static observations -> privileged exact hidden mechanical-owner identity`
-
-The current IRIS problem is:
+Current IRIS target:
 
 `8 controlled neutral views -> persistent observable surface geometry + uncertainty`
 
-The current evidence contract is richer and explicit:
+Legal evidence contract:
 
 - common-frame P;
 - geometric N;
 - visibility/support;
 - uncertainty/risk;
-- coarse and fine persistence evidence;
+- coarse/fine persistence;
 - reciprocal/cycle consistency;
 - set-valued ambiguity;
 - provenance.
 
-IRIS is not authorized to use joint IDs, owner IDs, parent graph, skin weights, pose-B mechanics or GFDR fields as target authority.
+Forbidden IRIS target authority: joint IDs, owner IDs, parent graph, skin weights, pose-B mechanics, GFDR hidden mechanics.
 
-## Canonical IRIS system boundary
+## Current corpus
 
-```text
-8 ordered RGBA views + known controlled yaw
-        ↓
-DETERMINISTIC FRONTEND
-  order / alpha / resolution / camera geometry
-        ↓
-NEURAL CORE
-  Shared multiscale encoder
-  → within-view axial reasoning
-  → row-constrained multi-view fusion
-  → dense decoder
-  → P / N / U / Z_coarse / Z_fine
-        ↓
-DETERMINISTIC EVIDENCE LAYER
-  geometry-constrained candidate domain
-  → coarse top-k
-  → reciprocal / cycle
-  → local fine rerank
-  → set-valued ambiguity
-  → support + robust P/N fusion
-  → reprojection falsification
-  → provenance
-        ↓
-QUALIFIED OBSERVABLE IRIS EVIDENCE
-```
+Canonical selected: 3993.
 
-Architecture authority: `experiments/iris_controlled_v1/ARCHITECTURE_AND_BOUNDARIES_V1.md`.
+Preserved exclusions:
 
-## Immediate controlled corpus
+- 56 repair-pending assets;
+- 6 active non-Basis shape-key assets;
+- 1 all-8 blank asset.
 
-Canonical selected assets: **3993**.
+Controlled V1 usable: **3930**.
 
-Immediate exclusions, all preserved:
-
-- 56 Stage-B6 repair-pending assets — repaired geometry frozen with SHA, but current A renders still bind old geometry;
-- 6 active non-Basis shape-key assets — rest-state qualification deferred;
-- 1 all-8 blank asset — observation-ineligible.
-
-Therefore Controlled V1 uses **3930 assets**.
-
-Frozen original split membership is preserved; no random resplit:
+Frozen original split membership:
 
 - FIT 2935;
 - TUNE 313;
@@ -85,165 +49,148 @@ Frozen original split membership is preserved; no random resplit:
 - DEV 270 — SEALED;
 - EXTERNAL_HOLDOUT 166 — SEALED.
 
-Open preparation/training count is FIT+TUNE = **3248**.
+Open FIT+TUNE count = **3248**. No resplit authorized.
 
-Source mix remains 3702 Objaverse / 191 Quaternius / 37 KayKit.
+## Frozen package authority
 
-## Frozen byte authority
-
-Canonical base execution package is in Google Drive:
+Drive package:
 
 `MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1`
 
 Drive folder ID: `15Du2plm2vHYe4Mmm-p1-L6emkxYucN8k`.
 
-Frozen base `PACKAGE_MANIFEST_V1.json` SHA-256:
+Base `PACKAGE_MANIFEST_V1.json` SHA-256:
 
 `e49a67b2ef808fe4f7cc9e414e024d30ab0fddc0ea55099bfa33ef78dbc6f098`
 
-Base package seal:
+Base package was sealed before optimizer; CAL/DEV/EXTERNAL remain unopened.
 
-- 23 listed files;
-- optimizer steps `0`;
-- sealed panels opened `false`.
+## Architecture
 
-The fast-prep patch is an additive pre-optimizer engineering amendment. It does not rewrite the base package.
+```text
+8 ordered RGBA views + known controlled yaw
+        ↓
+deterministic input contract
+        ↓
+shared multiscale encoder
+→ within-view axial reasoning
+→ row-constrained multi-view fusion
+→ dense decoder
+→ P / N / U / Z_coarse / Z_fine
+        ↓
+deterministic top-k / reciprocal / cycle / local rerank
+→ set-valued ambiguity
+→ support + P/N fusion
+→ reprojection/provenance
+```
 
-Fast patch authorities:
+Authority: `experiments/iris_controlled_v1/ARCHITECTURE_AND_BOUNDARIES_V1.md`.
 
-- `experiments/iris_controlled_v1/FAST_PREP_ADDENDUM_V1.md`
-- `prepare_iris_controlled_v1_fast.py` SHA-256 `8ce6e0a6cdbd25890d25703aee3a41d4b290d80bdb81c05987dc11630a515ec7`
-- `launch_iris_controlled_v1_fast.py` SHA-256 `1f35904429912b626dab815ed6af871d3e67fd61729963d5e2973017e421c690`
+## REAL REPRESENTATION CEILING — PASS
 
-Both fast scripts are also stored in the Drive package directory. The fast launcher verifies the original frozen base package before work starts.
+Decision authority:
 
-## Training contract — frozen before optimizer
+`experiments/iris_controlled_v1/CEILING_PASS_AND_OPEN_PILOT_DECISION_20260823.md`
 
-Authority: `experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_PREREG.md` plus the pre-optimizer engineering addendum `FAST_PREP_ADDENDUM_V1.md`.
+Executed on 64 deterministic open assets (51 FIT / 13 TUNE), **65,830 cross-view pairs**.
 
-Core settings remain:
+Results:
 
-- 24 epochs;
-- batch 1;
-- AdamW lr 5e-5;
-- weight decay 1e-4;
-- grad clip 2.0;
-- seed 20260823;
-- neural input 256;
-- FIT trains;
-- TUNE selects;
-- CAL/DEV/EXTERNAL remain closed.
+- P_EXACT top1 = `0.9976302598`
+- P_EXACT top4 = `1.0`
+- P_EXACT top8 = `1.0`
+- P_EXACT family top1 p10 = `0.9934295619`
+- PN_EXACT top1 = `0.9942123652`
+- PN_EXACT top8 = `0.9998936655`
+- P noise 0.0025 top8 = `1.0`
+- P noise 0.005 + N noise 20° top1 = `0.9206744645`
+- P noise 0.005 + N noise 20° top8 = `0.9996658059`
+- ambiguous-within-0.003 fraction = `0.0151754519`
 
-Loss after warmup:
+Primary representation gate = **PASS**.
 
-`L = P + .25 N + .05 U + .10 Zc + .05 Zf + .20 P_consistency`.
+Interpretation:
 
-Epochs 0–3 use P/N/U only. Persistence terms enter at epoch 4.
+- legal observable P/(P,N) can address persistent surface loci in the controlled exact-camera setting;
+- this is **not** learner proof;
+- P alone slightly outperformed naive fixed-weight P+N top1, so N must not be forced into matching with an uncalibrated constant coefficient;
+- noisy top8 staying ~99.97% is strong controlled support for high-recall top-k/set-valued ambiguity rather than forced singleton matching.
 
-Fast-prep freezes the 512→256 derived RGBA preprocessing as PIL RGBA bilinear before optimizer step 1. Geometry/persistence target authority is unchanged.
+## Operational cache incident
 
-## Completed no-optimizer preflight
+Original serial prepare was deprecated after `20/3248` took ~16 min (>40 h projection).
 
-A real canonical FIT asset was executed through:
+Fast V2 ceiling cache completed 64 assets in 311 s and passed correspondence parity exactly.
 
-`master geometry + 8 raster authorities -> exact physical tracks -> model -> full loss -> backward`.
+During full 3248 expansion, initial rate burst above 1 asset/s but decayed toward ~0.26 asset/s due Google Drive random-read pressure, implying roughly 3+ h cache preparation.
 
-Result:
+This is an **operational I/O issue, not a scientific failure**.
 
-- 128 cross-view physical tracks;
-- trainable parameters: 5,657,863;
-- finite full loss;
-- nonzero gradient;
-- PASS.
+Partial local fast cache artifacts are preserved in the live Colab `/content/IRIS_CONTROLLED_V1_FAST_CACHE`. Do not delete while the runtime is alive.
 
-Representation apparatus smoke on the same real asset:
+## Training implementation correction before real training
 
-- 390 cross-view pairs;
-- exact P top1/top8 = 1.0 / 1.0;
-- exact P+N top1/top8 = 1.0 / 1.0.
+A checkpoint-selection bug was found before production optimizer launch:
 
-These are apparatus witnesses, not confirmatory generalization results.
+- epochs 0–3 optimize P/N/U only;
+- persistence terms enter at epoch >=4;
+- old trainer compared TUNE `total` across those changing objective definitions.
 
-## Operational incident — serial prepare deprecated
+That could make a warmup checkpoint look artificially best simply because it contained fewer terms.
 
-On the first GPU Colab launch, the original serial preparation path reached only `20/3248` assets after about 16 minutes: roughly **48 seconds per asset**, projecting to >40 hours before the representation ceiling.
+Mandatory corrected trainer:
 
-Root cause is engineering/I/O design, not corpus corruption or an IRIS scientific failure:
+`experiments/iris_controlled_v1/train_iris_controlled_v1_v1_1.py`
 
-- thousands of Drive small-file opens were serialized;
-- raster/image files were re-read for per-source SHA after already being consumed;
-- sixteen 512×512 RGBA images were recompressed per asset;
-- all 3248 open assets were prepared **before** a ceiling that only requires 64.
+It preserves FIT warmup but evaluates TUNE selection with the **same full post-warmup objective at every epoch**.
 
-No optimizer step occurred. No sealed panel was opened.
+SHA-256 of Drive-uploaded v1.1 trainer:
 
-The partial original cache under `cache/IRIS_CONTROLLED_V1` is **DO-NOT-DELETE lineage** but is not the current preparation path.
+`961b6469b54e74222bd3055de68bfa7aa96042a04b59f2f97f1ee586aeb982d3`
 
-The original `launch_iris_controlled_v1.py --mode all` is **operationally deprecated for fresh runs**. Its scientific code remains historical authority.
+The original trainer remains historical lineage and is not the current selection authority.
 
-## FAST preparation policy
+## NEXT SCIENTIFIC GATE — OPEN PILOT LEARNER
 
-The replacement path:
+Do **not** spend hours finishing the full 3248 cache yet.
 
-1. constructs the deterministic 64 open assets needed by the representation ceiling first;
-2. writes derived caches to Colab local SSD `/content/IRIS_CONTROLLED_V1_FAST_CACHE`;
-3. uses bounded parallel Drive reads;
-4. uses a vectorized correspondence implementation;
-5. runs an actual-source parity check against the original correspondence function before preparation and requires zero visibility/row mismatch and <=1e-6 error difference;
-6. uses parent corpus/package SHA authority instead of redundantly hashing every source file again;
-7. SHA-seals every derived cache artifact;
-8. expands to the remaining open assets only after the 64-asset ceiling PASSes.
+Use the already completed 64-asset ceiling manifest:
 
-The 64 cache artifacts are reused during full expansion.
+`/content/IRIS_CONTROLLED_V1_FAST_CACHE/IRIS_CONTROLLED_V1_CACHE_MANIFEST_FAST_V2.json`
 
-## NEXT EXECUTABLE STEP
+Pilot:
 
-**Stop any still-running original serial preparation with Ctrl+C.** Its partial outputs are safe and preserved.
+- 51 FIT train;
+- 13 TUNE evaluate;
+- 8 epochs;
+- CAL/DEV/EXTERNAL untouched;
+- random-init witness recorded first;
+- compare trained state against identical open TUNE evaluation.
 
-Keep the current NVIDIA Colab runtime mounted. From the Drive package directory run:
+Diagnostic PASS requires:
+
+- TUNE P Euclidean error reduced by at least 20%;
+- coarse persistence top8 improves by >5 percentage points over random init;
+- fine persistence top8 improves by >5 percentage points over random init.
+
+Executable:
 
 ```bash
 cd /content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1
-python launch_iris_controlled_v1_fast.py --mode all --workers 8
+python run_iris_controlled_v1_open_pilot.py --epochs 8
 ```
 
-Expected order:
+Before running pilot, interrupt any still-running full cache process with `Ctrl+C`. The existing 64 manifest remains valid; additional local cache assets are harmless and preserved.
 
-```text
-verify frozen base package
-→ build deterministic 64-asset local ceiling cache
-→ real-source old-vs-vectorized correspondence parity PASS
-→ representation ceiling on those 64
-→ only if PASS: expand local cache to all FIT+TUNE = 3248
-→ only if full cache PASS: start optimizer
-```
+After pilot, inspect `PILOT_SUMMARY.json` before authorizing full cache completion or architecture changes.
 
-The fast builder prints `rate=... asset/s` and `ETA_min=...` every 10 completed assets, so throughput is immediately observable.
+## Production training remains NOT STARTED
 
-If only the ceiling is desired first:
+The bounded open pilot may take optimizer steps, but it is **diagnostic**, not the production 3930/3248 Controlled V1 training run.
 
-```bash
-python launch_iris_controlled_v1_fast.py --mode ceiling --workers 8
-```
+Production full-cache/full-training authorization waits for pilot interpretation.
 
-After ceiling PASS, continue:
-
-```bash
-python launch_iris_controlled_v1_fast.py --mode prepare-full --workers 8
-python launch_iris_controlled_v1_fast.py --mode train
-```
-
-Training resume:
-
-```bash
-python launch_iris_controlled_v1_fast.py --mode train --resume
-```
-
-## Sealed policy
-
-Do **not** inspect CAL, DEV or EXTERNAL_HOLDOUT during training/model selection. TUNE performance is not product generalization.
-
-After the open run, first classify the result. A separate explicit recorded authorization is required before sealed evaluation.
+No sealed panel has been opened.
 
 ## VERY IMPORTANT M4 audit
 
@@ -253,60 +200,44 @@ Authority:
 
 Frozen interpretation:
 
-- Graph V1 identity path was genuinely identity-contracting and is falsified;
-- Q representation survived;
+- Graph V1 identity path was identity-contracting and is falsified;
+- Q representation survives;
 - QF V1 did not test the intended joint A∪B quotient;
-- scalar pair threshold/admission formulation was falsified;
+- scalar threshold/admission consumer was falsified;
 - CORR is causally supported;
 - typed signed joint tiny closure passed;
-- V2-C did not establish family-disjoint generalization;
+- V2-C did not prove family-disjoint generalization;
 - UNKNOWN existed historically; the novelty is not UNKNOWN itself;
 - current change is **problem-pruned, evidence-richer**.
 
-Most important unresolved product question:
+Mandatory downstream question remains open:
 
-> Can this richer observable/set-valued evidence actually produce a RigAnything-like 2.5D equivalent substrate sufficient for Geppetto and downstream functional rigging?
+> Can richer observable/set-valued evidence produce a RigAnything-like 2.5D equivalent substrate sufficient for Geppetto and functional rigging?
 
-The audit freezes E0–E5 gates for that question. Prior S0/B2 evidence is supportive but not complete qualification.
+The M4 audit freezes E0–E5 gates for that question. Representation ceiling PASS is only one prerequisite, not downstream product closure.
 
-## Deferred corpus work — preserved, not forgotten
+## Deferred work — preserved, not forgotten
 
-Stage-B7 is **DEFERRED**, not cancelled.
-
-Do not reopen the 56-asset repair/rerender thread unless:
-
-1. a measured Controlled V1 result depends on those assets; or
-2. a final production retrain is being prepared.
-
-Also deferred:
-
+- Stage-B7 publication/rerender of 56 repaired assets;
 - source-appearance B pass;
 - stylized/product C pass;
-- camera jitter / unknown-camera robustness;
+- camera jitter / unknown-camera frontend;
 - artist-specific cross-view residual modeling.
 
-These return after the strongest controlled case is measured.
-
-## Historical baseline preservation
-
-The older 238-family G1 prereg/baseline remains historical and untouched. It is **not** the current training authority. Controlled V1 is a new explicit line with 3930 clean assets and a new preregistration.
-
-No historical M4/S0/G1 evidence should be deleted merely because interpretation changed.
+Do not reopen these by default before the controlled learner result is understood.
 
 ## Research operating rule
 
-For every PASS/FAIL:
-
 ```text
-apparatus/data?
+apparatus/data
   ↓
-representation/target?
+representation/target
   ↓
-learner/optimizer?
+learner/optimizer
   ↓
-evidence consumer?
+evidence consumer
   ↓
 only then genuine information limit
 ```
 
-Do not infer impossibility from learner failure. Do not infer product sufficiency from an exact-oracle PASS. Test the actual downstream consequence.
+Do not infer impossibility from learner failure. Do not infer product sufficiency from exact-oracle/representation PASS. Test downstream consequence.

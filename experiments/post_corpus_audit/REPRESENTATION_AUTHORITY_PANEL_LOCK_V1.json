@@ -1,0 +1,45 @@
+{
+  "schema": "RealSaS.RepresentationAuthority.PanelLock.v1",
+  "date": "2026-08-24",
+  "status": "FROZEN_BEFORE_R0_R3_RESULTS",
+  "optimizer_steps": 0,
+  "asset_count": 256,
+  "split_counts": {
+    "FIT": 230,
+    "TUNE": 26
+  },
+  "source_registry_counts": {
+    "objaverse_animated_originals": 245,
+    "quaternius_cc0": 7,
+    "kaykit_cc0": 4
+  },
+  "capability_counts": {
+    "ARACHNE": 217,
+    "GEPPETTO": 33,
+    "IRIS": 6
+  },
+  "stratum_counts": {
+    "kaykit_cc0|FIT|ARACHNE": 1,
+    "kaykit_cc0|FIT|IRIS": 1,
+    "kaykit_cc0|TUNE|ARACHNE": 1,
+    "kaykit_cc0|TUNE|IRIS": 1,
+    "objaverse_animated_originals|FIT|ARACHNE": 192,
+    "objaverse_animated_originals|FIT|GEPPETTO": 31,
+    "objaverse_animated_originals|TUNE|ARACHNE": 20,
+    "objaverse_animated_originals|TUNE|GEPPETTO": 2,
+    "quaternius_cc0|FIT|ARACHNE": 2,
+    "quaternius_cc0|FIT|IRIS": 3,
+    "quaternius_cc0|TUNE|ARACHNE": 1,
+    "quaternius_cc0|TUNE|IRIS": 1
+  },
+  "asset_id_ordered_list_sha256": "366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961",
+  "asset_id_ordered_list_hash_encoding": "SHA256(UTF8(asset_id_0 + '\\n' + ... + asset_id_255 + '\\n'))",
+  "selection_rule": "one witness per non-empty (source_registry_id, split, strongest capability ARACHNE>GEPPETTO>IRIS) stratum by SHA256('repr-v1:'+asset_id), then fill remaining slots to 256 by the same stable hash",
+  "source_authorities": {
+    "IRIS_CONTROLLED_V1_SPLIT_FREEZE.json": "9e766ac61126c9b4787eef24146e36aac40cbeac166d67ba898f8b79133e9d66",
+    "CANONICAL_VARIANT_SELECTION.json": "af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9"
+  },
+  "sealed_splits_opened": false,
+  "training_authorized": false,
+  "note": "This lock was derived from the two frozen source-authority byte streams before any new R0-R3 result was opened. It fixes panel identity without embedding or exposing sealed membership. Any mismatch invalidates the confirmatory run; no substitution is allowed."
+}

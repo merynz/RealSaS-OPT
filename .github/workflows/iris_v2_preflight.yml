@@ -7,6 +7,14 @@ on:
     paths:
       - 'experiments/iris_single_pose_v2/**'
       - '.github/workflows/iris_v2_preflight.yml'
+  pull_request:
+    branches:
+      - g0-g1/single-pose-geometry
+    paths:
+      - 'experiments/iris_single_pose_v2/**'
+      - 'audit/**'
+      - 'CURRENT_STATE.md'
+      - '.github/workflows/iris_v2_preflight.yml'
   workflow_dispatch:
 
 jobs:

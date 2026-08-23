@@ -244,11 +244,7 @@ def select_assets(cache_rows: list[dict], selection: dict, target: int) -> list[
         provider = str(sel.get("source_registry_id", ""))
         if not provider:
             raise RuntimeError(f"missing source_registry_id for {asset_id}")
-        enriched.append({
-            **row,
-            "source_registry_id": provider,
-            "capability_class": strongest_capability(sel),
-        })
+        enriched.append({**row, "source_registry_id": provider, "capability_class": strongest_capability(sel)})
     if len(enriched) < target:
         raise RuntimeError(f"only {len(enriched)} legal OPEN cached assets; need {target}")
     strata = defaultdict(list)
@@ -276,6 +272,17 @@ def verify_stage_cache_audit(audit_path: str | Path, cache: dict) -> dict:
     return audit
 
 
+def _finite_percentiles(values, ps=(5, 10, 50, 90, 95, 100)) -> dict:
+    a = np.asarray([x for x in values if x is not None and np.isfinite(x)], np.float64)
+    if not len(a):
+        return {"n": 0}
+    out = {"n": int(len(a))}
+    for p in ps:
+        key = "max" if p == 100 else ("median" if p == 50 else f"p{p}")
+        out[key] = float(np.percentile(a, p))
+    return out
+
+
 def summarize_rows(rows: list[dict]) -> dict:
     if not rows:
         return {"queries": 0}
@@ -301,6 +308,9 @@ def summarize_rows(rows: list[dict]) -> dict:
         "cycle_success": float(cycle.mean()) if len(cycle) else None,
         "ambiguous_fraction": float(np.mean(ambiguity > 1)),
         "ambiguity_set_size_p95": float(np.percentile(ambiguity, 95)),
+        "nearest_non_equivalent_physical_gap": _finite_percentiles(
+            [r["nearest_non_equivalent_physical_gap"] for r in rows]
+        ),
     }
 
 
@@ -317,20 +327,26 @@ def family_tail(rows: list[dict]) -> dict:
         groups[row["asset_id"]].append(row)
     values = []
     for asset_id, group in groups.items():
+        errors = np.asarray([x["physical_error"] for x in group], np.float64)
         values.append({
             "asset_id": asset_id,
             "top1": float(np.mean([x["top1"] for x in group])),
+            "top4": float(np.mean([x["top4"] for x in group])),
             "top8": float(np.mean([x["top8"] for x in group])),
-            "physical_error_p95": float(np.percentile([x["physical_error"] for x in group], 95)),
+            "physical_error_median": float(np.median(errors)),
+            "physical_error_p90": float(np.percentile(errors, 90)),
+            "physical_error_p95": float(np.percentile(errors, 95)),
         })
     if not values:
         return {"assets": 0}
     return {
         "assets": len(values),
-        "top1_p10": float(np.percentile([x["top1"] for x in values], 10)),
-        "top1_median": float(np.median([x["top1"] for x in values])),
-        "top8_p10": float(np.percentile([x["top8"] for x in values], 10)),
-        "physical_error_p95_across_asset_p95": float(np.percentile([x["physical_error_p95"] for x in values], 95)),
+        "top1_across_families": _finite_percentiles([x["top1"] for x in values]),
+        "top4_across_families": _finite_percentiles([x["top4"] for x in values]),
+        "top8_across_families": _finite_percentiles([x["top8"] for x in values]),
+        "asset_error_median_distribution": _finite_percentiles([x["physical_error_median"] for x in values]),
+        "asset_error_p90_distribution": _finite_percentiles([x["physical_error_p90"] for x in values]),
+        "asset_error_p95_distribution": _finite_percentiles([x["physical_error_p95"] for x in values]),
     }
 
 
@@ -343,6 +359,12 @@ def load_asset_component_bucket(cache_record: dict) -> tuple[int, str]:
         faces = np.asarray(z["faces"], np.int64)
     count = component_count(vertices, faces)
     return count, component_bucket(count)
+
+
+def _nearest_non_equivalent_gap(p_exact: np.ndarray, target_ids: np.ndarray, track: int) -> float | None:
+    distances = np.linalg.norm(p_exact[target_ids] - p_exact[track][None], axis=-1)
+    outside = distances[distances > SAME_LOCUS_TOL]
+    return float(outside.min()) if len(outside) else None
 
 
 def evaluate_asset(cache_record: dict, per_category: int, arms: list[dict]) -> tuple[dict, list[dict], list[dict]]:
@@ -370,6 +392,19 @@ def evaluate_asset(cache_record: dict, per_category: int, arms: list[dict]) -> t
     components, comp_bucket = load_asset_component_bucket(cache_record)
     all_rows = []
     hard_tail = []
+    query_geometry = {}
+    for query in queries:
+        key = (query["track"], query["target"])
+        if key not in query_geometry:
+            target_ids = np.flatnonzero(visible[:, query["target"]])
+            distances = np.linalg.norm(p_exact[target_ids] - p_exact[query["track"]][None], axis=-1)
+            query_geometry[key] = {
+                "ambiguity_size": int(np.sum(distances <= SAME_LOCUS_TOL)),
+                "nearest_non_equivalent_gap": _nearest_non_equivalent_gap(
+                    p_exact, target_ids, query["track"]
+                ),
+            }
+
     for arm in arms:
         p_obs, n_obs = observed_fields(asset_id, arm, p_exact, n_exact)
         exact_arm = arm["id"] in {"R0_P_EXACT", "R1_PN_EXACT"}
@@ -393,7 +428,7 @@ def evaluate_asset(cache_record: dict, per_category: int, arms: list[dict]) -> t
             top4 = bool(np.any(legal_ranked[:4]))
             top8 = bool(np.any(legal_ranked[:8]))
             physical_error = float(exact_distance_ranked[0])
-            ambiguity_size = int(np.sum(np.linalg.norm(p_exact[target_ids] - p_exact[track][None], axis=-1) <= SAME_LOCUS_TOL))
+            geometry_diag = query_geometry[(track, target)]
 
             source_ids = np.flatnonzero(visible[:, source])
             reverse_order = rank_candidates(
@@ -447,7 +482,8 @@ def evaluate_asset(cache_record: dict, per_category: int, arms: list[dict]) -> t
                 "physical_error": physical_error,
                 "reciprocal_success": reciprocal_success,
                 "cycle_success": cycle_success,
-                "ambiguity_set_size": ambiguity_size,
+                "ambiguity_set_size": geometry_diag["ambiguity_size"],
+                "nearest_non_equivalent_physical_gap": geometry_diag["nearest_non_equivalent_gap"],
             }
             all_rows.append(row)
             if (not top8) or physical_error > HARD_TAIL_ERROR or (exact_arm and (not reciprocal_success or cycle_success is False)):
@@ -571,6 +607,11 @@ def main() -> None:
         "exact_summary": {
             "R0_P_EXACT": by_arm["R0_P_EXACT"],
             "R1_PN_EXACT": by_arm["R1_PN_EXACT"],
+        },
+        "structural_confusability_diagnostic": {
+            "quantity": "nearest target-view exact physical P distance outside the legal SAME_LOCUS_TOL set",
+            "semantic_symmetry_claim": False,
+            "interpretation": "Descriptive geometry-only proximity/repeated-structure proxy. It may contextualize hard-tail failures but is not a semantic symmetry label or promotion gate.",
         },
         "stage_cache_audit": {
             "status": audit.get("status"),

@@ -2,37 +2,43 @@
 
 **Date:** 2026-08-23  
 **Branch:** `g0-g1/single-pose-geometry`  
-**Status:** TRAINING PACKAGE READY / OPTIMIZER STEPS 0 / SEALED CLOSED
+**Status:** FAST PREP PATCH READY / OPTIMIZER STEPS 0 / SEALED CLOSED
 
 ## If the user says only “devam et”
 
-1. Read root `CURRENT_STATE.md`.
-2. Read `experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_PREREG.md`.
-3. Read `experiments/iris_controlled_v1/ARCHITECTURE_AND_BOUNDARIES_V1.md`.
-4. Read `experiments/iris_controlled_v1/TRAINING_READY_REPORT_V1.md`.
-5. Read `experiments/m4_identity_audit/VERY_IMPORTANT_AUDIT_M4_IDENTITY_AMBIGUITY_EQUIVALENT_SUBSTRATE_20260823.md` before making any claim that the observable substrate is product-sufficient.
-6. Do **not** reopen the 56-asset repair thread unless a measured result depends on it.
-7. Do **not** reopen privileged exact-owner M4 as the default target.
+1. Read root `CURRENT_STATE.md` first; it is the single continuation authority.
+2. Read `experiments/iris_controlled_v1/FAST_PREP_ADDENDUM_V1.md` before executing cache preparation.
+3. Read `experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_PREREG.md`.
+4. Read `experiments/iris_controlled_v1/ARCHITECTURE_AND_BOUNDARIES_V1.md`.
+5. Read `experiments/iris_controlled_v1/TRAINING_READY_REPORT_V1.md`.
+6. Read `experiments/m4_identity_audit/VERY_IMPORTANT_AUDIT_M4_IDENTITY_AMBIGUITY_EQUIVALENT_SUBSTRATE_20260823.md` before making any claim that the observable substrate is product-sufficient.
+7. Do **not** reopen the 56-asset repair thread unless a measured result depends on it.
+8. Do **not** reopen privileged exact-owner M4 as the default target.
 
 ## Byte authority
 
-The canonical executable package is the Google Drive package, not the GitHub convenience mirror:
+The canonical base executable package is the Google Drive package:
 
 `MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1`
 
 Drive folder ID: `15Du2plm2vHYe4Mmm-p1-L6emkxYucN8k`
 
-`PACKAGE_MANIFEST_V1.json` SHA-256:
+Base `PACKAGE_MANIFEST_V1.json` SHA-256:
 
 `e49a67b2ef808fe4f7cc9e414e024d30ab0fddc0ea55099bfa33ef78dbc6f098`
 
-Package seal:
+Base package seal:
 
 - listed files: 23;
 - optimizer steps: 0;
 - sealed panels opened: false.
 
-GitHub is the continuation/inspection surface. Drive is the frozen byte authority for execution.
+The fast preparation patch is additive and was frozen before optimizer step 1:
+
+- `prepare_iris_controlled_v1_fast.py` SHA-256 `8ce6e0a6cdbd25890d25703aee3a41d4b290d80bdb81c05987dc11630a515ec7`
+- `launch_iris_controlled_v1_fast.py` SHA-256 `1f35904429912b626dab815ed6af871d3e67fd61729963d5e2973017e421c690`
+
+Both live in the same Drive package folder and in GitHub for inspection.
 
 ## Immediate corpus
 
@@ -54,6 +60,8 @@ Frozen split:
 - DEV 270 — sealed;
 - EXTERNAL_HOLDOUT 166 — sealed.
 
+Open preparation/training count: **3248**.
+
 No resplitting is authorized.
 
 ## Immediate scientific target
@@ -72,16 +80,7 @@ Neural outputs:
 - Z_coarse;
 - Z_fine.
 
-Deterministic IRIS evidence layer owns:
-
-- support;
-- top-k candidate retention;
-- reciprocal/cycle checks;
-- local reranking;
-- set-valued ambiguity;
-- common-frame fusion;
-- reprojection checks;
-- provenance.
+Deterministic IRIS evidence layer owns support, top-k candidate retention, reciprocal/cycle checks, local reranking, set-valued ambiguity, common-frame fusion, reprojection checks and provenance.
 
 No joint IDs, owner IDs, parent graph, skin weights, pose-B mechanics or GFDR mechanical fields are legal IRIS target authority.
 
@@ -106,28 +105,60 @@ Representation apparatus smoke:
 
 This is apparatus validation, not the confirmatory gate.
 
-## Next executable action
+## Operational incident: original serial prepare
 
-Use an NVIDIA Colab runtime and the **Drive package**.
+The first all-in-one run reached only `20/3248` after about 16 minutes, approximately 48 seconds per asset and >40 hours projected before the ceiling.
 
-Safe staged sequence:
+This was diagnosed as an engineering/I/O design failure:
+
+- serial Drive small-file reads;
+- redundant source file SHA re-reads;
+- per-asset recompression of sixteen 512×512 RGBA images;
+- full 3248 preparation before a ceiling that needs only 64.
+
+No optimizer step occurred and no sealed split was opened.
+
+The partial original cache is preserved as lineage. Do not delete it. Do not continue the original serial fresh-run path.
+
+## Current next executable action
+
+If the old serial process is still running, stop it with `Ctrl+C`.
+
+On the already-mounted NVIDIA Colab runtime:
 
 ```bash
 cd /content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1
-python launch_iris_controlled_v1.py --mode prepare
-python launch_iris_controlled_v1.py --mode ceiling
-python launch_iris_controlled_v1.py --mode train
+python launch_iris_controlled_v1_fast.py --mode all --workers 8
 ```
 
-The ceiling is a deterministic 64-open-asset gate. Optimizer is forbidden if it fails.
+The fast launcher does:
 
-Fresh all-in-one execution is also supported:
+```text
+verify frozen base package
+→ build only deterministic 64 ceiling assets to /content local SSD
+→ actual-source original-vs-vectorized correspondence parity check
+→ exact representation ceiling
+→ if PASS, expand to all FIT+TUNE=3248 using the same local cache
+→ if full prep PASS, optimizer starts
+```
+
+The fast builder prints live throughput and ETA every 10 completed assets.
+
+Staged alternative:
 
 ```bash
-python launch_iris_controlled_v1.py --mode all
+python launch_iris_controlled_v1_fast.py --mode ceiling --workers 8
+python launch_iris_controlled_v1_fast.py --mode prepare-full --workers 8
+python launch_iris_controlled_v1_fast.py --mode train
 ```
 
-The launcher verifies the frozen package first and still requires the ceiling PASS before optimizer startup.
+Training resume:
+
+```bash
+python launch_iris_controlled_v1_fast.py --mode train --resume
+```
+
+The derived training cache is intentionally local/ephemeral; parent source authority remains frozen on Drive and every derived cache artifact is SHA-sealed. Full cache manifest/seal/progress are copied into the Drive run provenance directory before training.
 
 ## After training
 

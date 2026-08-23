@@ -40,3 +40,6 @@ jobs:
       - name: Physical firewall / truth-cache preflight
         working-directory: experiments/iris_single_pose_v2
         run: python data_preflight.py
+      - name: Observable evaluator preflight
+        working-directory: experiments/iris_single_pose_v2
+        run: python evaluation_preflight.py

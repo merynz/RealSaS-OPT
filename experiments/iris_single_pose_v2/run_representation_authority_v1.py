@@ -56,6 +56,7 @@ def script_hashes(here: Path) -> dict[str, str]:
         "representation_authority_study_v1.py",
         "compact_representation_handoff_v1.py",
         "geometry.py",
+        "run_representation_authority_v1.py",
     ]
     return {name: sha256_file(here / name) for name in names}
 
@@ -222,7 +223,6 @@ def main() -> None:
     if panel_id_digest != EXPECTED_PANEL_ASSET_ID_LIST_SHA256:
         raise RuntimeError("post-study panel digest differs from the pre-result lock")
 
-    # Always create a small measurement-only handoff after the confirmatory result is frozen.
     run([
         sys.executable, here / "compact_representation_handoff_v1.py",
         "--result", result,

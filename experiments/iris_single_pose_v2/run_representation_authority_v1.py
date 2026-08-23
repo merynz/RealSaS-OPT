@@ -10,6 +10,7 @@ from pathlib import Path
 
 EXPECTED_SPLIT_FREEZE_SHA256 = "9e766ac61126c9b4787eef24146e36aac40cbeac166d67ba898f8b79133e9d66"
 EXPECTED_SELECTION_SHA256 = "af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9"
+EXPECTED_PANEL_ASSET_ID_LIST_SHA256 = "366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961"
 EXPECTED_PANEL = 256
 
 
@@ -19,6 +20,10 @@ def sha256_file(path: str | Path, chunk: int = 8 << 20) -> str:
         for block in iter(lambda: f.read(chunk), b""):
             h.update(block)
     return h.hexdigest()
+
+
+def asset_id_list_sha256(asset_ids: list[str]) -> str:
+    return hashlib.sha256(("\n".join(asset_ids) + "\n").encode("utf-8")).hexdigest()
 
 
 def atomic_json(path: str | Path, obj: dict) -> None:
@@ -100,6 +105,7 @@ def main() -> None:
         "work_dir": str(work),
         "input_resolution": args.input_resolution,
         "truth_authority_resolution": 1024,
+        "expected_panel_asset_id_list_sha256": EXPECTED_PANEL_ASSET_ID_LIST_SHA256,
         "settings": {
             "geom_samples": args.geom_samples,
             "anchors_per_view": args.anchors_per_view,
@@ -119,17 +125,15 @@ def main() -> None:
     }
     if run_authority.exists():
         old = json.load(open(run_authority, encoding="utf-8"))
-        comparable = {k: old.get(k) for k in ("input_resolution", "truth_authority_resolution", "settings", "source_authorities", "script_sha256")}
-        current = {k: authority.get(k) for k in comparable}
+        fields = ("input_resolution", "truth_authority_resolution", "expected_panel_asset_id_list_sha256", "settings", "source_authorities", "script_sha256")
+        comparable = {k: old.get(k) for k in fields}
+        current = {k: authority.get(k) for k in fields}
         if comparable != current:
             raise RuntimeError("existing run authority differs from current source/settings; choose a new --work-dir rather than mutating an opened run")
     else:
         atomic_json(run_authority, authority)
 
-    order = ("seed", "stage", "cache", "audit", "study")
-    stop = order.index(args.mode) if args.mode != "all" else len(order) - 1
-
-    if stop >= 0 and args.mode in ("all", "seed"):
+    if args.mode in ("all", "seed"):
         run([
             sys.executable, here / "build_representation_seed_v1.py",
             "--split-freeze", split_freeze,
@@ -142,6 +146,10 @@ def main() -> None:
     seed_obj = json.load(open(seed, encoding="utf-8"))
     if seed_obj.get("record_count") != EXPECTED_PANEL or seed_obj.get("sealed_splits_opened") is not False:
         raise RuntimeError("frozen 256/open-only seed contract failed")
+    seed_ids = [r["asset_id"] for r in seed_obj["records"]]
+    seed_id_digest = asset_id_list_sha256(seed_ids)
+    if seed_id_digest != EXPECTED_PANEL_ASSET_ID_LIST_SHA256:
+        raise RuntimeError(f"pre-result panel identity drift expected={EXPECTED_PANEL_ASSET_ID_LIST_SHA256} got={seed_id_digest}")
 
     if args.mode in ("all", "stage"):
         run([
@@ -203,14 +211,17 @@ def main() -> None:
     if result_obj.get("optimizer_steps") != 0 or panel_obj.get("asset_target") != EXPECTED_PANEL:
         raise RuntimeError("optimizer/panel contract drift")
 
-    seed_ids = [r["asset_id"] for r in seed_obj["records"]]
     panel_ids = panel_obj["selected_asset_ids"]
     if seed_ids != panel_ids:
         raise RuntimeError("study panel differs from the frozen pre-stage seed; result invalid")
+    panel_id_digest = asset_id_list_sha256(panel_ids)
+    if panel_id_digest != EXPECTED_PANEL_ASSET_ID_LIST_SHA256:
+        raise RuntimeError("post-study panel digest differs from the pre-result lock")
 
     final = {
         **authority,
         "status": "R0_R3_MEASURED__CANONICAL_INTERPRETATION_REQUIRED",
+        "panel_asset_id_list_sha256": panel_id_digest,
         "artifacts": {
             "seed": str(seed), "seed_sha256": sha256_file(seed),
             "stage_manifest": str(stage_manifest), "stage_manifest_sha256": sha256_file(stage_manifest),
@@ -232,6 +243,7 @@ def main() -> None:
         "optimizer_steps": 0,
         "asset_count": final["asset_count"],
         "arm_count": final["arm_count"],
+        "panel_asset_id_list_sha256": panel_id_digest,
         "result": str(result),
         "run_complete": str(work / "RUN_COMPLETE_V1.json"),
         "sealed_splits_opened": False,

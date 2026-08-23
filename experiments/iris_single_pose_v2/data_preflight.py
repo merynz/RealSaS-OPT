@@ -82,7 +82,6 @@ def check_continuous_track_truth(stage: Path, aid: str, truth_path: str):
         if np.any(vis[:, v]):
             err = np.linalg.norm(xy[vis[:, v], v] - exact[vis[:, v]], axis=1)
             max_err = max(max_err, float(err.max(initial=0.0)))
-            # At 1024 authority, exact continuous projection generally is not a pixel center.
             pix = (exact[vis[:, v]] + 1.0) * 512.0 - 0.5
             frac = np.abs(pix - np.round(pix))
             off_pixel_center_witnesses += int(np.any(frac > 1e-4, axis=1).sum())
@@ -93,6 +92,14 @@ def check_continuous_track_truth(stage: Path, aid: str, truth_path: str):
     return {"max_grid_error": max_err, "subpixel_witnesses": off_pixel_center_witnesses}
 
 
+def mutate_source_rgb(master: Path, aid: str):
+    p = master / "master" / "assets" / aid / "renders" / "V0" / "cel_clean.png"
+    with Image.open(p) as im:
+        arr = np.asarray(im.convert("RGBA")).copy()
+    arr[0, 0, 0] = 17
+    Image.fromarray(arr, "RGBA").save(p)
+
+
 def main():
     root = Path(tempfile.mkdtemp(prefix="irisv2_data_preflight_"))
     try:
@@ -100,12 +107,14 @@ def main():
         stage = root / "stage"
         cache = root / "cache"
         aid = make_synthetic_master(master)
-        meta = stage_asset(master, stage, aid, 256)
+        record = {"asset_id": aid, "split": "FIT", "asset_dir": str(stage / "assets" / aid)}
+
+        stage1 = stage_asset(master, stage, aid, 256)
         with np.load(stage / "assets" / aid / "primary_geometry.npz", allow_pickle=False) as z:
             assert set(z.files) == {"vertices", "faces"}, z.files
-        cm = build_asset(
+        cache1 = build_asset(
             stage,
-            {"asset_id": aid, "split": "FIT", "asset_dir": str(stage / "assets" / aid)},
+            record,
             cache,
             geom_samples=64,
             anchors_per_view=64,
@@ -113,19 +122,57 @@ def main():
             radius_px=3,
             max_surface_error=0.004,
         )
-        with np.load(cm["truth_path"], allow_pickle=False) as z:
+        with np.load(cache1["truth_path"], allow_pickle=False) as z:
             assert int(z["geom_mask"].sum()) > 0
             assert len(z["track_p"]) > 0
             assert int(z["track_visible"].sum()) >= 2
-        continuous = check_continuous_track_truth(stage, aid, cm["truth_path"])
+        continuous = check_continuous_track_truth(stage, aid, cache1["truth_path"])
+
+        # Source byte drift must invalidate stage reuse even when shape/camera semantics are unchanged.
+        mutate_source_rgb(master, aid)
+        stage2 = stage_asset(master, stage, aid, 256)
+        if stage1["source_fingerprint"] == stage2["source_fingerprint"]:
+            raise AssertionError("source mutation failed to invalidate stage fingerprint")
+
+        # Any stage dependency drift must invalidate truth-cache reuse as well.
+        cache2 = build_asset(
+            stage,
+            record,
+            cache,
+            geom_samples=64,
+            anchors_per_view=64,
+            max_tracks=128,
+            radius_px=3,
+            max_surface_error=0.004,
+        )
+        if cache1["input_fingerprint"] == cache2["input_fingerprint"]:
+            raise AssertionError("stage mutation failed to invalidate cache input fingerprint")
+
+        # Truth-generation settings are part of cache identity; no silent parameter reuse.
+        cache3 = build_asset(
+            stage,
+            record,
+            cache,
+            geom_samples=64,
+            anchors_per_view=64,
+            max_tracks=128,
+            radius_px=3,
+            max_surface_error=0.0035,
+        )
+        if cache2["input_fingerprint"] == cache3["input_fingerprint"]:
+            raise AssertionError("truth settings change failed to invalidate cache fingerprint")
+
         print(
             json.dumps(
                 {
                     "status": "PASS",
-                    "physical_firewall": meta["physical_firewall"],
-                    "track_count": cm["track_count"],
-                    "geom_valid": cm["geom_valid"],
+                    "physical_firewall": stage2["physical_firewall"],
+                    "track_count": cache3["track_count"],
+                    "geom_valid": cache3["geom_valid"],
                     "continuous_track_truth": continuous,
+                    "stage_source_invalidation": "PASS",
+                    "cache_stage_invalidation": "PASS",
+                    "cache_settings_invalidation": "PASS",
                 },
                 indent=2,
             )

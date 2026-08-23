@@ -54,6 +54,7 @@ def script_hashes(here: Path) -> dict[str, str]:
         "prepare_cache.py",
         "audit_staged_cache_v2.py",
         "representation_authority_study_v1.py",
+        "compact_representation_handoff_v1.py",
         "geometry.py",
     ]
     return {name: sha256_file(here / name) for name in names}
@@ -81,7 +82,6 @@ def main() -> None:
     work = Path(args.work_dir) if args.work_dir else root / "runs" / "IRIS_SINGLE_POSE_V2_REPRESENTATION_AUTHORITY_V1"
     work.mkdir(parents=True, exist_ok=True)
 
-    # Hard authority lock: these are the frozen byte identities carried by the Controlled-3930 package.
     require_sha(split_freeze, EXPECTED_SPLIT_FREEZE_SHA256, "controlled split freeze")
     require_sha(selection, EXPECTED_SELECTION_SHA256, "canonical selection")
 
@@ -94,6 +94,7 @@ def main() -> None:
     result = work / "REPRESENTATION_AUTHORITY_RESULT_R0_R3_V1.json"
     panel = work / "REPRESENTATION_AUTHORITY_PANEL_V1.json"
     hard_tail = work / "REPRESENTATION_AUTHORITY_HARD_TAIL_V1.jsonl"
+    compact = work / "REPRESENTATION_AUTHORITY_COMPACT_HANDOFF_V1.json"
     run_authority = work / "RUN_AUTHORITY_V1.json"
 
     scripts = script_hashes(here)
@@ -125,7 +126,10 @@ def main() -> None:
     }
     if run_authority.exists():
         old = json.load(open(run_authority, encoding="utf-8"))
-        fields = ("input_resolution", "truth_authority_resolution", "expected_panel_asset_id_list_sha256", "settings", "source_authorities", "script_sha256")
+        fields = (
+            "input_resolution", "truth_authority_resolution", "expected_panel_asset_id_list_sha256",
+            "settings", "source_authorities", "script_sha256",
+        )
         comparable = {k: old.get(k) for k in fields}
         current = {k: authority.get(k) for k in fields}
         if comparable != current:
@@ -201,8 +205,8 @@ def main() -> None:
             "--panel-out", panel,
             "--hard-tail-out", hard_tail,
         ])
-    if not result.is_file() or not panel.is_file():
-        raise RuntimeError("representation result/panel absent")
+    if not result.is_file() or not panel.is_file() or not hard_tail.is_file():
+        raise RuntimeError("representation result/panel/hard-tail absent")
 
     result_obj = json.load(open(result, encoding="utf-8"))
     panel_obj = json.load(open(panel, encoding="utf-8"))
@@ -218,6 +222,21 @@ def main() -> None:
     if panel_id_digest != EXPECTED_PANEL_ASSET_ID_LIST_SHA256:
         raise RuntimeError("post-study panel digest differs from the pre-result lock")
 
+    # Always create a small measurement-only handoff after the confirmatory result is frozen.
+    run([
+        sys.executable, here / "compact_representation_handoff_v1.py",
+        "--result", result,
+        "--hard-tail", hard_tail,
+        "--out", compact,
+    ])
+    if not compact.is_file():
+        raise RuntimeError("compact representation handoff absent")
+    compact_obj = json.load(open(compact, encoding="utf-8"))
+    if compact_obj.get("status") != "MEASUREMENT_ONLY__CANONICAL_INTERPRETATION_REQUIRED":
+        raise RuntimeError("compact handoff decision-discipline drift")
+    if compact_obj.get("training_authorized") is not False or compact_obj.get("optimizer_steps") != 0:
+        raise RuntimeError("compact handoff optimizer/training authority drift")
+
     final = {
         **authority,
         "status": "R0_R3_MEASURED__CANONICAL_INTERPRETATION_REQUIRED",
@@ -230,6 +249,7 @@ def main() -> None:
             "panel": str(panel), "panel_sha256": sha256_file(panel),
             "result": str(result), "result_sha256": sha256_file(result),
             "hard_tail": str(hard_tail), "hard_tail_sha256": sha256_file(hard_tail),
+            "compact_handoff": str(compact), "compact_handoff_sha256": sha256_file(compact),
         },
         "asset_count": EXPECTED_PANEL,
         "arm_count": result_obj.get("arm_count"),
@@ -245,6 +265,7 @@ def main() -> None:
         "arm_count": final["arm_count"],
         "panel_asset_id_list_sha256": panel_id_digest,
         "result": str(result),
+        "compact_handoff": str(compact),
         "run_complete": str(work / "RUN_COMPLETE_V1.json"),
         "sealed_splits_opened": False,
         "training_authorized": False,

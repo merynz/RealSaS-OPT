@@ -1,0 +1,52 @@
+{
+  "schema": "RealSaS.IRISControlledV1.HandoffSelfCheck.v1",
+  "date": "2026-08-23",
+  "branch": "g0-g1/single-pose-geometry",
+  "status": "PASS",
+  "canonical_continuation": "CURRENT_STATE.md",
+  "controlled_corpus": {
+    "selected": 3993,
+    "usable": 3930,
+    "excluded_repair_pending": 56,
+    "excluded_shape_key": 6,
+    "excluded_blank": 1,
+    "splits": {
+      "FIT": 2935,
+      "TUNE": 313,
+      "CAL": 246,
+      "DEV": 270,
+      "EXTERNAL_HOLDOUT": 166
+    }
+  },
+  "drive_byte_authority": {
+    "folder_id": "15Du2plm2vHYe4Mmm-p1-L6emkxYucN8k",
+    "path": "MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1",
+    "package_manifest_sha256": "e49a67b2ef808fe4f7cc9e414e024d30ab0fddc0ea55099bfa33ef78dbc6f098",
+    "byte_verified_against_local": true
+  },
+  "optimizer_steps": 0,
+  "sealed_panels_opened": false,
+  "real_asset_preflight": "PASS",
+  "representation_ceiling_smoke": "PASS_APPARATUS_ONLY",
+  "github_executable_entries": {
+    "prepare_iris_controlled_v1.py": "7312fbcd0af4327df024eb431c5f5d7cb31b8ba5",
+    "train_iris_controlled_v1.py": "f6e48dcc13eec1140bd6a476987e6b51acb9bf0b",
+    "preflight_iris_controlled_v1.py": "2401160eb95a070fd2077e9e503fbd4b24060342",
+    "launch_iris_controlled_v1.py": "ac09e9e1d8873b622a93ff83f69bcb5eb9dd0273"
+  },
+  "mandatory_interpretation_audit": "experiments/m4_identity_audit/VERY_IMPORTANT_AUDIT_M4_IDENTITY_AMBIGUITY_EQUIVALENT_SUBSTRATE_20260823.md",
+  "next_action": [
+    "Use NVIDIA GPU Colab runtime",
+    "cd /content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1",
+    "python launch_iris_controlled_v1.py --mode prepare",
+    "python launch_iris_controlled_v1.py --mode ceiling",
+    "python launch_iris_controlled_v1.py --mode train"
+  ],
+  "locks": [
+    "NO_RESPLIT",
+    "CAL_DEV_EXTERNAL_CLOSED",
+    "NO_REOPEN_56_REPAIR_AS_DEFAULT",
+    "NO_PRIVILEGED_EXACT_OWNER_TARGET_AS_DEFAULT",
+    "PROBLEM_PRUNED_EVIDENCE_NOT_PRUNED"
+  ]
+}

@@ -1,80 +1,175 @@
 # IRIS Architecture Discipline Audit — 2026-08-24
 
-Status: `IN_PROGRESS__TRAINING_FORBIDDEN`
-Branch: `audit/iris-architecture-discipline-20260824`
+Status: `V2_EXECUTABLE_APPARATUS_CLOSED__R0_R3_REAL_RESULT_PENDING__TRAINING_FORBIDDEN`  
+Branch: `audit/iris-architecture-discipline-20260824`  
+Draft PR: `#4`
 
 ## Executive finding
 
-The scientific reframing is sound, but the executable Controlled V1/M256 path drifted away from its own research lineage in resolution, fine-descriptor role, evaluator units and checkpoint/evidence-consumer semantics. The completed M256 result therefore localizes useful learner evidence but cannot authorize scale-up.
+The scientific reframing survives audit, but the completed Controlled V1/M256 executable drifted from its own research lineage in resolution, fine-descriptor role, evaluator units and checkpoint/evidence-consumer semantics. M256 remains useful learner evidence but cannot authorize scale-up.
 
-The repair is not a patch to the 128-grid matcher. A clean `experiments/iris_single_pose_v2/` path is being created from the canonical contracts and preserved research evidence.
+The executable repair is now a clean `experiments/iris_single_pose_v2/` path rather than another patch to the old fixed-128 consumer.
 
-## Authorities reviewed
+The remaining immediate blocker is **not architecture coding** and not an optimizer experiment. It is the real frozen 256-asset R0-R3 Representation Authority measurement and its separate canonical interpretation.
 
-Product/problem: `canonical/PRODUCT_CONTRACT_V1.md`, `canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md`, G0 contract, native-1024 contract and Unified Master Corpus contract.
+## Authorities reconciled
 
-Research transfer: the 2026-08-21 correspondence study reviewed RoMa v2, MASt3R, TAPIR/TAPNext, CoTracker, XFeat, DINOv2/DINOv3 and DUNE. Its central finding was alignment of correspondence objective, spatial resolution and inference use. It proposed D1 observation-level matching, D2 coarse/fine role separation, then D3 query-conditioned local refinement only if a hard tail remained.
+- `canonical/PRODUCT_CONTRACT_V1.md`
+- `canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md`
+- native-1024 frontend/corpus contracts
+- 2026-08-21 descriptor/correspondence transfer report
+- D1 / D2 / G2 result lineage
+- M4 identity/ambiguity/equivalent-substrate audit
+- Stage-A through Stage-B6 post-corpus authority chain
+- `IRIS_USABLE_CONTROLLED_CORPUS_FREEZE_V1.md`
+- `REPRESENTATION_AUTHORITY_STUDY_V1_PREREG.md`
+- `REPRESENTATION_AUTHORITY_STUDY_V1_EXECUTION_ADDENDUM_20260824.md`
+- `REPRESENTATION_AUTHORITY_PANEL_LOCK_V1.json`
+- `audit/IRIS_RESEARCH_TO_EXECUTABLE_ROLE_MATRIX_20260824.md`
 
-Post-study experiments: D1 directionally supported; G2 reciprocal/cycle promoted; D2 local precision improved but global ranking/mean/tail behavior failed, so global authority was falsified and local retained-top-k role retained. M4 audit preserved the set-valued observable substrate direction and left E0-E5 downstream sufficiency open.
+## Controlled-corpus chronology
 
-## Mismatch ledger
+The old 80-check matrix originally treated Gates 1-5 as undifferentiated pre-optimizer blockers. Later evidence narrowed that scope.
 
-| ID | Intended/authority | Controlled V1 executable | Audit verdict | V2 action |
-|---|---|---|---|---|
-| R1 | native 1024 primary, 512 matched control, 128 historical | 512 source -> 256 model -> fixed 128 matcher | FAIL | resolution-parametric model/matcher; 1024 primary |
-| R2 | high-res local path + pooled global context | cross-view f16 with learned `max_w=32` | FAIL | fixed pooled global context + full local f16 |
-| R3 | coarse global, fine local retained-top-k | Z_fine included in global RRF fusion | FAIL | global admission Zc/P only; Zf local only |
-| R4 | fine local objective | Z_fine global multi-positive NCE | FAIL | local offset/lattice classification only |
-| R5 | observation-level D1 matching, no early view pooling | partial multi-positive loss | PARTIAL | multi-positive + bidirectional pair matching + hard negative |
-| R6 | explicit native-pixel localization | normalized fixed-grid tolerances | FAIL | exact coarse cells + native-1024 pixel error |
-| R7 | geometry U vs match ambiguity distinguished | one U_geo reused by singleton heuristic | FAIL | U_geo geometry-only; ambiguity from candidate evidence until calibration |
-| R8 | no premature singleton | heuristic singleton pre-calibration | FAIL | top-k hypotheses; singleton disabled |
-| R9 | physical IRIS firewall | master geometry file can include rig fields; prep merely ignores them | PARTIAL | stage physical geometry-only allow-list |
-| R10 | dense native truth | 512 geom samples/view, <=384 tracks | FAIL for primary claim | 4096-class/dense truth target; sparse path control-only |
-| R11 | G0 absolute/tail metrics | relative improvement/mixed means dominate | FAIL | P/N absolute tails, spread, native-pixel tails |
-| R12 | style policy fixed end-to-end | training random style, checkpoint cel-only, final bi-style | FAIL | one frozen bi-style selection/eval policy |
-| R13 | observable checkpoint selection | mixed `val['total']` loss scalar | FAIL | prereg observable metric selection key |
-| R14 | sparse/oracle ceiling wording | exact-P sparse candidate top4 overread as dense search | FAIL wording | preserve as candidate-conditioned ceiling only |
-| R15 | one active executable authority | many V1/v1.1/v1.2/mini launchers | FAIL hygiene | V1 historical; V2 sole active path |
+Current controlled authority:
 
-## Legitimate M256 evidence
+- canonical selected: 3993;
+- repair-pending current-A-render mismatch: 56 excluded;
+- active non-Basis shape-key quarantine: 6 excluded;
+- all-eight-view blank: 1 excluded;
+- immediate controlled corpus: **3930**;
+- FIT 2935 + TUNE 313 = **3248 OPEN**;
+- CAL 246 + DEV 270 + EXTERNAL 166 = **682 SEALED**.
 
-The run is preserved because P/N learned strongly from random initialization, coarse/fine fields learned non-random correspondence structure, both styles behaved similarly, and the observation-derived candidate universe exposed a real consumer/localization gap. It did not prove native-1024 quality, final fine-local matching, calibrated ambiguity, SurfaceBuilder closure or an information limit.
+Gate-3 appearance recovery remains a product/natural-domain requirement. It does not block the preregistered geometry-control Representation Authority study.
 
-## V2 decisions
+## Mismatch ledger and closure
+
+| ID | V1 mismatch | V2 closure | Status |
+|---|---|---|---|
+| R1 | 1024 authority -> 256 model -> fixed 128 matcher | resolution-parametric model/matcher; explicit native authority | CLOSED apparatus |
+| R2 | learned `max_w=32` global bottleneck | fixed-size pooled global context + full local f16 | CLOSED apparatus |
+| R3 | Z_fine entered global RRF | Zc/P global basin admission; Zf local-only | CLOSED apparatus |
+| R4 | fine descriptor trained as global authority | local offset/lattice objective | CLOSED apparatus |
+| R5 | incomplete observation-level objective | balanced observation SupCon + bidirectional multi-positive + hard-negative terms | CLOSED apparatus |
+| R6 | normalized magic localization units | exact coarse-cell + native-1024 pixel metrics | CLOSED apparatus |
+| R7 | U_geo reused as match ambiguity | U_geo geometry-only; match ambiguity remains candidate evidence | CLOSED apparatus |
+| R8 | premature singleton | set-valued top-k; singleton authority disabled | CLOSED apparatus |
+| R9 | rig fields physically present upstream of learner | explicit geometry-only staging allow-list | CLOSED apparatus |
+| R10 | sparse 512/384 truth used for primary claim | 4096-class geometry / 4096 track-cap V2 cache with achieved-when-coverage-permits audit | CLOSED apparatus |
+| R11 | means/relative gains dominated reporting | object-space tails, native-pixel tails, provider/style stratification | CLOSED apparatus |
+| R12 | style policy inconsistent through V1 selection/eval | V2 evaluator is bi-style-capable; final learner style/checkpoint policy intentionally deferred to post-representation prereg | DEFERRED correctly |
+| R13 | checkpoint selected by total loss | V2 evaluator explicitly defines no checkpoint key | DEFERRED correctly |
+| R14 | sparse candidate-conditioned oracle result overread | current R0-R3 wording/candidate universe explicitly scoped | CLOSED interpretation |
+| R15 | many executable V1 authorities | `HISTORICAL_ONLY__DO_NOT_RUN.md`; V2 is sole active candidate path | CLOSED hygiene |
+
+## V2 architecture now bound to research roles
 
 1. resolution-safe shared encoder at R=256/512/1024;
-2. full-resolution local f16 reasoning;
-3. fixed pooled cross-view context with known yaw and continuous x encoding;
-4. P/N/U_geo/Z_fine at R/2, Z_coarse at R/8;
+2. full local f16 reasoning;
+3. fixed pooled multiview context with known yaw;
+4. P/N/U_geo/Z_fine at R/2 and Z_coarse at R/8;
 5. no unproven hard P clip;
-6. Z_coarse global high-recall objective;
-7. Z_fine local-only objective and inference role;
-8. global basin admission Z_coarse + predicted-P rescue;
+6. Z_coarse global high-recall role;
+7. Z_fine local-only role;
+8. global basin admission from Zc + predicted-P rescue;
 9. no global Z_fine ranking;
-10. no singleton until calibration;
-11. explicit coordinate authority in `coords.py`;
-12. evaluator errors in native authority pixels and object-space tails.
+10. no singleton before calibration;
+11. explicit align_corners=False coordinate authority;
+12. reciprocal/cycle support evidence;
+13. continuous projected track truth retained after raster visibility qualification;
+14. physical IRIS firewall;
+15. source/settings/builder-semantic cache invalidation.
 
-## Synthetic code preflight already passed
+## Exact-commit CI result
 
-- V2 sources compile;
-- exact align_corners=False pixel/grid round-trip at 128/256/512/1024;
-- model forward shape checks at 256/512/1024;
-- loss forward/backward finite;
-- adversarial matcher role test proves a globally perfect far-away Z_fine match cannot enter when its coarse basin was not admitted;
-- native-pixel metric unit test reports an exact 4-pixel displacement as 4.0;
-- exact coarse-cell containment test.
+Latest verified PR run: **IRIS V2 Preflight #33 / run ID 32670253449 — SUCCESS**.
 
-## Remaining blockers before mini training
+PASS:
 
-- [ ] verify committed V2 bytes against preflighted local sources;
-- [ ] physically mark V1 executable folder historical/no-run;
-- [ ] add real-corpus geometry-only staging + dense cache prep;
-- [ ] run selected-asset no-optimizer corpus census: P range, N, raster/camera, firewall, split, density, style lineage;
-- [ ] GPU memory/throughput preflight at 256/512/1024 without optimizer updates;
-- [ ] freeze mini membership, metric panel and checkpoint selection key;
-- [ ] create prereg only after all above PASS;
-- [ ] only then create one Colab Run-All notebook.
+- exact committed source compilation;
+- coordinate/model/loss/matcher preflight;
+- physical staging/firewall and stale-cache invalidation;
+- observable evaluator preflight;
+- Representation Authority semantic preflight.
 
-Until every item is closed, training remains forbidden.
+Representation semantic preflight additionally proves the executable can preserve a legal same-locus set containing multiple cached indices, while reciprocal/cycle, Philox determinism and exact-angle N perturbation remain correct.
+
+## Frozen Representation Authority apparatus
+
+### Source byte locks
+
+- controlled split freeze SHA-256: `9e766ac61126c9b4787eef24146e36aac40cbeac166d67ba898f8b79133e9d66`
+- canonical selection SHA-256: `af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9`
+
+### Exact confirmatory panel lock
+
+Before any new R0-R3 result was opened:
+
+- 256 OPEN assets;
+- 230 FIT / 26 TUNE;
+- 245 Objaverse / 7 Quaternius / 4 KayKit;
+- 217 Arachne / 33 Geppetto / 6 IRIS strongest-capability classes;
+- 12 provider×split×capability strata represented;
+- ordered asset-ID list digest: `366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961`.
+
+The Run-All executable checks this digest before staging and again after measurement. Failed apparatus for any locked asset invalidates the run; no replacement asset is authorized.
+
+### R0-R3 semantics
+
+- physical SAME tolerance = 0.003 canonical units;
+- R0 exact P;
+- R1 exact P+N;
+- R2 P-noise sigma `{0,.0005,.001,.0025,.005,.01}`;
+- R3 full 6×5 P/N noise grid with N `{0,5,10,20,40}°`;
+- P+N diagnostic coefficient pre-frozen at legacy `0.05` parity, never swept;
+- both source and target observations perturbed;
+- deterministic Philox namespace independent of evaluation loop order;
+- N noise is exact tangent-plane rotation;
+- top1/4/8 are physical set-containment, not track-index correctness;
+- reciprocal and three-view cycle use legal candidate universes;
+- family/provider/capability/component/support/pair-category tails required;
+- mean-only promotion forbidden.
+
+R4 remains undefined on purpose. If R0-R3 evidence motivates it, a separate R4 formulation prereg must be frozen before any R4 result is opened.
+
+## Active execution line
+
+`experiments/iris_single_pose_v2/run_representation_authority_v1.py --mode all`
+
+This command performs **optimizer=0 only**:
+
+1. verify frozen authority SHA values;
+2. derive the exact locked 256 seed;
+3. verify panel digest;
+4. stage only those 256 through the physical geometry firewall;
+5. build the dense/exact V2 truth cache;
+6. run read-only stage/cache audit;
+7. run 38 R0-R3 measurement arms;
+8. verify the post-result panel is identical;
+9. emit `RUN_COMPLETE_V1.json` with `training_authorized=false`.
+
+## Remaining blockers before any mini training
+
+- [x] reconcile paper/experiment roles with executable architecture;
+- [x] exact committed V2 code path;
+- [x] V1 physically marked historical/no-run;
+- [x] physical geometry-only staging + dense cache prep implementation;
+- [x] selected-panel staging/cache auditor implementation;
+- [x] reciprocal/cycle and set-valued semantic tests;
+- [x] frozen R0-R3 execution semantics;
+- [x] frozen exact 256-asset panel identity;
+- [x] one-command optimizer-zero gate;
+- [ ] **execute real frozen 256-asset R0-R3 gate**;
+- [ ] write canonical R0-R3 interpretation without changing frozen definitions;
+- [ ] only if justified, freeze and execute R4 formulation;
+- [ ] after representation closure: production-width GPU memory/throughput preflight with optimizer=0;
+- [ ] freeze mini membership + observable checkpoint-selection key + style policy;
+- [ ] write new mini prereg;
+- [ ] only then consider one training runner/notebook.
+
+Training remains forbidden until the unchecked items that precede optimizer authorization are explicitly closed in `CURRENT_STATE.md`.
+
+## Research rule
+
+`apparatus/data -> representation/target -> learner/optimizer -> evidence consumer -> downstream sufficiency -> only then information limit`

@@ -96,7 +96,9 @@ It covers the current measurement + compact-handoff/orchestrator bytes, includin
 - family median/p90/p95 tails;
 - geometry-only `nearest_non_equivalent_physical_gap` structural-confusability diagnostic without claiming semantic symmetry;
 - optimizer steps = 0;
-- compact measurement-only handoff generation and final run-authority hashing.
+- compact measurement-only handoff generation and final run-artifact SHA binding.
+
+Commits after `c1f80b5...` are documentation/continuation-only unless this section explicitly advances to a newer code-bearing commit. They do not change the frozen V2 execution bytes validated by run #57.
 
 This is apparatus evidence, not a real-corpus Representation result.
 

@@ -1,0 +1,18 @@
+{
+  "schema": "RealSaS.IRISControlledV1.AuthorityPointers.v1",
+  "date": "2026-08-23",
+  "drive_package_folder_id": "15Du2plm2vHYe4Mmm-p1-L6emkxYucN8k",
+  "drive_package_path": "MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1",
+  "package_manifest_sha256": "e49a67b2ef808fe4f7cc9e414e024d30ab0fddc0ea55099bfa33ef78dbc6f098",
+  "source_authorities": {
+    "CANONICAL_VARIANT_SELECTION.json": "af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9",
+    "IRIS_TRAINING_ELIGIBILITY_V1.json": "b4ee5b87b668ee2a2071e0a26a3d1e6bd0adcf3563bffe88237a0ce7f8dab717",
+    "POST_CORPUS_STAGE_B6_FROZEN_REPAIR_STAGING_RESULT_V1.json": "a86178b46dd55636356d27c2f1fe6d042aea1ea7863ecfc2bf33e7a9a0f868f9"
+  },
+  "drive_only_large_authorities": {
+    "IRIS_CONTROLLED_V1_CORPUS_FREEZE.json": {"sha256":"39884ff3c7df2a8268247623b88c25002f03929dc58c618bca35fc021310895e","size_bytes":160936},
+    "IRIS_CONTROLLED_V1_SPLIT_FREEZE.json": {"sha256":"9e766ac61126c9b4787eef24146e36aac40cbeac166d67ba898f8b79133e9d66","size_bytes":133234},
+    "IRIS_CONTROLLED_V1_EXCLUSIONS.json": {"sha256":"5ba65a4096d1841e33426b29ad81abfaf259c8c0bbeba36ac9cf33cf67185690","size_bytes":34219},
+    "IRIS_CONTROLLED_V1_DEFERRED_REPAIR_SHA_REGISTRY.json": {"sha256":"369babd90f5e4a057fb28a3f44666ada8934b7f8de37566e8acebc33f5ca1022","size_bytes":41220}
+  }
+}

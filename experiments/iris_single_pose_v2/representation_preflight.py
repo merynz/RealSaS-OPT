@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import math
 import subprocess
 import sys
 import tempfile
@@ -73,9 +72,10 @@ def make_asset(root: Path, asset_id: str, split: str):
 
 
 def main():
-    # Deterministic counter namespace: repeated calls must be byte-identical.
+    # Deterministic observation namespace: repeated calls must be byte-identical.
     p = np.asarray([[0.0, 0.0, 0.0], [0.2, 0.1, 0.0]], np.float32)
-    n = np.zeros((2, 8, 3), np.float32); n[..., 2] = 1.0
+    n = np.zeros((2, 8, 3), np.float32)
+    n[..., 2] = 1.0
     arm = {"id": "TEST", "p_sigma": 0.005, "n_deg": 20.0, "use_n": True}
     p1, n1 = observed_fields("asset_repeat", arm, p, n)
     p2, n2 = observed_fields("asset_repeat", arm, p, n)
@@ -83,7 +83,8 @@ def main():
     assert np.array_equal(n1, n2)
 
     # Exact angular perturbation, not xyz-Gaussian approximation.
-    base = np.zeros((32, 3), np.float32); base[:, 2] = 1.0
+    base = np.zeros((32, 3), np.float32)
+    base[:, 2] = 1.0
     out = perturb_normals(base, 20.0, philox_rng("asset_angle", "ANGLE20", 0))
     angle = np.degrees(np.arccos(np.clip((out * base).sum(-1), -1.0, 1.0)))
     assert float(np.max(np.abs(angle - 20.0))) < 1e-3, angle
@@ -132,12 +133,23 @@ def main():
         assert result["status"] == "DEVELOPMENT_ONLY"
         assert result["arm_count"] == 38
         assert result["asset_count"] == 3
-        r0 = result["arms"]["R0_P_EXACT"]["pooled"]
+        assert result["structural_confusability_diagnostic"]["semantic_symmetry_claim"] is False
+
+        r0_full = result["arms"]["R0_P_EXACT"]
+        r0 = r0_full["pooled"]
         r1 = result["arms"]["R1_PN_EXACT"]["pooled"]
         assert r0["top1"] == 1.0 and r0["top8"] == 1.0, r0
         assert r1["top1"] == 1.0 and r1["top8"] == 1.0, r1
         assert r0["reciprocal_success"] == 1.0 and r0["cycle_success"] == 1.0, r0
         assert r0["ambiguous_fraction"] > 0.0, r0
+
+        gap = r0["nearest_non_equivalent_physical_gap"]
+        assert gap["n"] > 0 and gap["median"] > 0.003, gap
+        family = r0_full["family_tail"]
+        assert family["assets"] == 3
+        for key in ("asset_error_median_distribution", "asset_error_p90_distribution", "asset_error_p95_distribution"):
+            assert "median" in family[key] and "p90" in family[key] and "p95" in family[key], family[key]
+
         panel = json.load(open(root / "REPRESENTATION_AUTHORITY_PANEL_V1.json", encoding="utf-8"))
         assert len(panel["selected_asset_ids"]) == 3
         assert panel["mode"] == "DEVELOPMENT_ONLY"
@@ -150,6 +162,8 @@ def main():
         "reciprocal_cycle_exact_R0": "PASS",
         "philox_repeatability": "PASS",
         "exact_angular_noise": "PASS",
+        "family_p90_p95_tail": "PASS",
+        "structural_confusability_not_semantic_symmetry": "PASS",
     }, indent=2))
 
 

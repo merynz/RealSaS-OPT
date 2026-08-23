@@ -93,7 +93,17 @@ The parent prereg says perturbations are independent. Execution meaning is now f
 - every `(asset, view, locus, arm)` observation receives an independent deterministic perturbation;
 - **both source queries and target candidates** are perturbed;
 - exact physical P remains evaluator-only truth;
-- RNG seed is SHA-derived from immutable observation identity + arm, never iteration order.
+- RNG must be independent of query/evaluation loop order.
+
+### Deterministic RNG namespace
+
+For executable vectorization without changing the statistical contract:
+
+1. derive one 128-bit seed from the first 16 bytes of `SHA256("repr-v1-noise|" + asset_id + "|" + arm_id + "|V" + view_index)`;
+2. initialize NumPy `Philox` with that seed;
+3. generate the full observation-noise array in canonical ascending cached `track_index` order.
+
+The cached track index is part of the immutable observation identity for this study. Therefore a track's perturbation is fixed by `(asset_id, arm_id, view_index, track_index)` and cannot change when query order, candidate order or evaluation batching changes. No Python/global RNG state is allowed.
 
 ### P noise
 
@@ -159,7 +169,12 @@ Every final result reports:
 - observation coverage/support bucket;
 - pair category.
 
-Mean-only promotion remains forbidden.
+The bucket boundaries are frozen before results as:
+
+- connected components: `1`, `2-4`, `5-16`, `17+`;
+- query physical-locus view support from `track_support`: `2-3`, `4-5`, `6-8`.
+
+No bucket boundary may be changed after R0–R3 results are opened. Mean-only promotion remains forbidden.
 
 ## 10. Hard-tail manifest
 

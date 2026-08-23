@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-23  
 **Active branch:** `g0-g1/single-pose-geometry`  
-**Status:** `IRIS_REPRESENTATION_PASS__OPEN64_LEARNER_PASS__MATCHER_V1_READY__MINI256_NEXT__SEALED_CLOSED`
+**Status:** `REPRESENTATION_PASS__OPEN64_LEARNER_PASS__DENSE_M256_V1_2_NEXT__SEALED_CLOSED`
 
 ## Read this first
 
@@ -12,13 +12,9 @@ This file is the single continuation authority. If a new chat says only `devam e
 
 **Observable evidence was not pruned; the problem was pruned.**
 
-IRIS target:
+IRIS legal evidence remains: P, geometric N, support/visibility, U/risk, coarse/fine persistence, reciprocal/cycle consistency, set-valued ambiguity and provenance.
 
-`8 controlled neutral views -> persistent observable surface geometry + uncertainty`
-
-Legal evidence: P, geometric N, support/visibility, uncertainty/risk, coarse/fine persistence, reciprocal/cycle consistency, set-valued ambiguity, provenance.
-
-Forbidden target authority: hidden joint/owner IDs, parent graph, skin weights, pose-B mechanics, GFDR hidden mechanics.
+Forbidden IRIS target authority: hidden joint/owner IDs, parent graph, skin weights, pose-B mechanics, GFDR hidden mechanics.
 
 ## Corpus
 
@@ -41,12 +37,11 @@ No resplit.
 - exact P top1 `0.9976302598`
 - exact P top4 `1.0`
 - exact P top8 `1.0`
-- exact P family top1 p10 `0.9934295619`
 - P noise .0025 top4/top8 `1.0 / 1.0`
 - P .005 + N 20° top4 `0.9988151299`, top8 `0.9996658059`
 - ambiguity within 0.003 = `0.0151754519`
 
-Interpretation: observable addressability exists strongly. Top4 exact coverage is already complete in the controlled exact-P setting; top8 is a hard-tail safety envelope.
+Interpretation: observable addressability exists strongly. Exact/modest-noise P already preserves truth completely in top4; top8 is a hard-tail safety envelope.
 
 ## Open64 learner pilot — PASS
 
@@ -56,98 +51,134 @@ Interpretation: observable addressability exists strongly. Top4 exact coverage i
 - TUNE N error `0.9678560908 -> 0.1776760645` = 81.64% reduction
 - raw Z_coarse top8 `0.1243990385 -> 0.9651442308`
 - raw Z_fine top8 `0.1039663462 -> 0.9375`
+- raw coarse top4 `0.8957331731`
+- raw fine top4 `0.8527644231`
 
-Important: these Z metrics are **raw descriptor retrieval**, not the final matcher. They do not include P geometry composition, reciprocal, cycle or ambiguity policy.
+These were raw descriptor retrieval metrics, not final matcher metrics.
 
-## Evidence Matcher V1 — READY, NOT YET RUN ON MINI256
+## Matcher lineage clarification
 
-Authority:
+A sparse `iris_evidence_matcher_v1.py` also exists in repo. It has useful FIT-only calibration, reciprocal and cycle logic, but its candidate nodes are built from cached `track_visible/track_xy` physical-track anchors. GT track IDs are not used in its score, yet the candidate-node universe itself is truth-derived. Therefore it is retained as **diagnostic/ablation lineage**, not the canonical full-inference M256 evaluator.
 
-- `experiments/iris_controlled_v1/iris_evidence_matcher_v1.py`
-- `experiments/iris_controlled_v1/eval_iris_evidence_matcher_v1.py`
-- `experiments/iris_controlled_v1/MINI256_AND_MATCHER_V1_PREREG_20260823.md`
+D3 is still **not implemented** and remains reserve-only.
 
-D3 is **not** included. D3 remains reserve-only if a reproducible hard tail survives Matcher V1.
+## Canonical D3-free dense matcher
 
-Matcher V1 uses only legal inference evidence:
+Canonical current matcher:
 
-1. controlled row-corridor candidate domain;
-2. Z_coarse top8 retention;
-3. FIT-only calibrated rank fusion of Z_coarse + Z_fine + uncertainty-normalized P distance;
-4. reciprocal top4 consistency;
-5. 3+-view cycle consistency in **image coordinates**;
-6. consistency-first rerank;
-7. FIT-calibrated singleton margin targeting >=99% precision;
-8. singleton / adaptive top4 / adaptive top8 ambiguity output.
+`experiments/iris_controlled_v1/iris_dense_matcher_v1.py`
 
-GT physical track IDs are used only by evaluator scoring, never matcher decisions.
+Dense evaluator:
 
-Drive SHA authorities:
+`experiments/iris_controlled_v1/evaluate_iris_dense_matcher_v1.py`
 
-- `iris_evidence_matcher_v1.py` = `4c5b8c80ead2815e1bc9c512f2a5ec8669b5ee48ce22031ae46d083a577edc71`
-- `eval_iris_evidence_matcher_v1.py` = `afb51ef36719512c46093201da94678ed0670b17032cf657482b299f9c788f91`
-- `run_iris_controlled_v1_mini256_v1.py` = `435b393742c7136d0545b5f398f4bcf4d06e2249d7558a47cf87c048dbad8e2f`
-- Mini256 prereg = `816259094cb3c12bd238450d496f925cfe78682a05121407ee81ab54a11f8e6e`
+Candidate domain is **alpha-supported dense 128×128 image-grid pixels**. GT physical tracks are used only to select evaluation queries and score target coordinates; they are never the candidate list or matcher authority.
 
-## NEXT EXECUTABLE STEP — MINI256
+Pipeline:
 
-Do **not** jump to full 3248 training.
+```text
+alpha-supported dense target pixels
+∩ known-camera row corridor
+→ Z_coarse top16
+∪ predicted-P nearest top4
+→ scale-free rank fusion of Z_coarse + Z_fine + predicted-P
+→ final ordered top8
+→ reciprocal top1/top4 in image coordinates
+→ two-third-view cycle support in image coordinates
+→ U-risk qualification
+→ confident singleton / top4 ambiguity / top8 ambiguity
+```
 
-Mini256 is preregistered:
+N is not forced into the correspondence ranking with an uncalibrated coefficient; it remains rich observable/downstream geometry evidence. U cannot create a singleton; it may only widen the output set.
 
-- 224 FIT / 32 TUNE;
-- deterministic hash selection;
-- previous ceiling64 retained as subset;
-- 12 epochs;
-- corrected `train_iris_controlled_v1_v1_1.py`;
-- both cel-clean and ink-cel Matcher V1 evaluation;
+## Fresh M256 dense gate
+
+Canonical prereg:
+
+`experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256_PREREG_V1_1.md`
+
+Membership:
+
+- 208 FIT
+- 48 TUNE
+- total 256
+- all deterministic ceiling/open64 pilot assets excluded (`pilot64_overlap = 0`)
+- 12 epochs from scratch
+- corrected trainer `train_iris_controlled_v1_v1_1.py`
 - CAL/DEV/EXTERNAL closed.
 
-Notebook in Drive package:
+Decision localization:
 
-`RealSaS_IRIS_Controlled_V1_Mini256_MatcherV1.ipynb`
+- `LEARNER_FAIL`
+- `MATCHER_CONSUMER_FAIL_PARTIAL`
+- `M256_PASS`
 
-Direct command:
+Frozen matcher/safety gate includes dense fused top8 >= .97, adaptive output-set truth coverage >= .97, p10 fused top8 >= .90, and confident singleton precision >= .95 at >= .10 coverage.
+
+## Canonical M256 runtime — USE V1.2 ONLY
+
+Authority manifest:
+
+`experiments/iris_controlled_v1/M256_DENSE_AUTHORITY_POINTERS_V1_2.json`
+
+Runner:
+
+`run_iris_controlled_v1_m256_v1_2.py`
+
+SHA-256:
+
+`72aa97e1902e831e5b87f054fceb187c04de55c7948a5ff19465d55b700249ab`
+
+Notebook:
+
+`IRIS_CONTROLLED_V1_M256_V1_2.ipynb`
+
+SHA-256:
+
+`21fcf07de2e25a194c4e84fd7f9a23124a9946c920616d912928c89ba8560cea`
+
+Dense matcher SHA-256:
+
+`6d70c42439e82fc02a4893e49965d206d02a05bd6d505fb42904f2a5b9fd4248`
+
+Dense evaluator SHA-256:
+
+`ba24f0a5b010f29c793c0a9eabbde02892a7c7841937c54babd634ee3d8e1f6b`
+
+All canonical v1.2 runtime files were Google Drive round-trip SHA verified; Python entrypoints compile; dense matcher synthetic self-test PASS.
+
+Earlier M256 runtime entries (`run_iris_controlled_v1_m256.py`, v1.1 runners/notebooks) are **SUPERSEDED BEFORE EXECUTION** and retained only as provenance.
+
+## NEXT EXECUTABLE STEP
+
+Use NVIDIA Colab. From the package directory run:
 
 ```bash
 cd /content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1
-python run_iris_controlled_v1_mini256_v1.py --workers 6 --epochs 12
+python run_iris_controlled_v1_m256_v1_2.py --workers 4 --epochs 12
 ```
 
-It reuses valid existing local cache entries in `/content/IRIS_CONTROLLED_V1_FAST_CACHE` while the Colab runtime lives.
+It will:
 
-## Mini256 decision policy — frozen before run
+1. SHA-verify base package + fast prep + corrected trainer + dense matcher/evaluator;
+2. deterministically select fresh 208 FIT + 48 TUNE excluding pilot64;
+3. prepare only those 256 open assets to local SSD;
+4. run dense matcher at identical random-init witness;
+5. train 12 epochs from scratch;
+6. run dense matcher on best TUNE-selected checkpoint;
+7. write final decision to:
 
-GREEN requires:
-
-- >=50% TUNE P error reduction from random init;
-- >=50% TUNE N error reduction;
-- Matcher V1 final top4 >= .90;
-- final top8 >= .97;
-- adaptive-set coverage >= .98;
-- calibrated confident-singleton precision >= .97 at coverage >= .10.
-
-AMBER: learning exists but Matcher V1 misses GREEN without RED. Do not scale; ablate matcher components.
-
-RED if P or N reduction < .30, final top8 < .90, or adaptive-set coverage < .90.
-
-**GREEN authorizes 1024 intermediate, not immediate full 3248.**
-
-## Trainer lock
-
-Current trainer authority: `train_iris_controlled_v1_v1_1.py`, SHA-256 `961b6469b54e74222bd3055de68bfa7aa96042a04b59f2f97f1ee586aeb982d3`.
-
-Warmup remains P/N/U-only, but TUNE checkpoint selection uses the same full objective every epoch.
+`MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_CONTROLLED_V1_M256_V1_1/M256_DECISION.json`
 
 ## Authorization state
 
-`MATCHER_V1 = READY`
+`DENSE_M256 = AUTHORIZED_AND_NEXT`
 
-`MINI256 = AUTHORIZED`
-
-`1024_INTERMEDIATE = NOT_AUTHORIZED_UNTIL_MINI256_GREEN`
+`1024_INTERMEDIATE = NOT_AUTHORIZED_UNTIL_DENSE_M256_PASS`
 
 `FULL_3248_PRODUCTION = NOT_AUTHORIZED`
+
+`D3 = NOT_IMPLEMENTED__RESERVE_ONLY`
 
 `CAL_DEV_EXTERNAL = CLOSED`
 
@@ -159,7 +190,7 @@ Authority:
 
 `experiments/m4_identity_audit/VERY_IMPORTANT_AUDIT_M4_IDENTITY_AMBIGUITY_EQUIVALENT_SUBSTRATE_20260823.md`
 
-Mandatory downstream question remains open: can richer observable/set-valued evidence produce a RigAnything-like 2.5D equivalent substrate sufficient for Geppetto and functional rigging? E0–E5 remains required before product substrate closure.
+The downstream E0–E5 question remains mandatory: can richer observable/set-valued evidence form a RigAnything-like 2.5D equivalent substrate sufficient for Geppetto and functional rigging?
 
 ## Research rule
 

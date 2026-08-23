@@ -1,6 +1,6 @@
 # IRIS Architecture Discipline Audit — 2026-08-24
 
-Status: `V2_EXECUTABLE_APPARATUS_CLOSED__R0_R3_REAL_RESULT_PENDING__TRAINING_FORBIDDEN`  
+Status: `V2_EXECUTABLE_APPARATUS_CI57_PASS__R0_R3_REAL_RESULT_PENDING__TRAINING_FORBIDDEN`  
 Branch: `audit/iris-architecture-discipline-20260824`  
 Draft PR: `#4`
 
@@ -8,28 +8,11 @@ Draft PR: `#4`
 
 The scientific reframing survives audit. Controlled V1/M256 remains useful historical learner evidence, but its executable drifted from the intended final research lineage in resolution, fine-descriptor role, evaluator units and evidence-consumer/checkpoint semantics and therefore cannot authorize scale-up.
 
-The repair is now one clean active path under `experiments/iris_single_pose_v2/`, not another patch to the old fixed-128 consumer.
+The repair is one clean active path under `experiments/iris_single_pose_v2/`, not another patch to the old fixed-128 consumer.
 
 The remaining immediate blocker is **not architecture coding** and not an optimizer experiment. It is the real frozen 256-asset R0-R3 Representation Authority measurement and its separate canonical interpretation.
 
-## Authorities reconciled
-
-- `canonical/PRODUCT_CONTRACT_V1.md`
-- `canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md`
-- native-1024 frontend/corpus contracts
-- 2026-08-21 descriptor/correspondence transfer report
-- D1 / D2 / G2 result lineage
-- M4 identity/ambiguity/equivalent-substrate audit
-- Stage-A through Stage-B6 post-corpus authority chain
-- `IRIS_USABLE_CONTROLLED_CORPUS_FREEZE_V1.md`
-- `REPRESENTATION_AUTHORITY_STUDY_V1_PREREG.md`
-- `REPRESENTATION_AUTHORITY_STUDY_V1_EXECUTION_ADDENDUM_20260824.md`
-- `REPRESENTATION_AUTHORITY_PANEL_LOCK_V1.json`
-- `audit/IRIS_RESEARCH_TO_EXECUTABLE_ROLE_MATRIX_20260824.md`
-
-## Controlled-corpus chronology
-
-The older 80-check matrix treated Gates 1-5 as undifferentiated pre-optimizer blockers. Later Stage-A/B evidence narrowed that scope.
+## Controlled-corpus authority
 
 Current controlled authority:
 
@@ -83,9 +66,9 @@ Appearance Gate 3 remains a product/natural-domain requirement and does not bloc
 
 ## Exact committed-code CI
 
-**Last verified code-bearing head:** IRIS V2 Preflight **run #51 / ID `32671113352` — SUCCESS**.
+**Current verified code-bearing head:** commit `c1f80b5c4061a248da3af2f8080f4ebc4496d4b0`, IRIS V2 Preflight **run #57 / ID `32671291295` — SUCCESS**.
 
-PASS on the current Representation runner bytes:
+PASS on the current Representation measurement/orchestrator bytes:
 
 - exact committed source compilation;
 - coordinate/model/loss/matcher preflight;
@@ -93,40 +76,40 @@ PASS on the current Representation runner bytes:
 - observable evaluator preflight;
 - Representation Authority semantic preflight.
 
-The Representation preflight proves:
+The Representation apparatus currently proves executable semantics for:
 
-- legal same-locus success is physical-set based even when multiple cached indices are legal;
-- reciprocal/cycle semantics are executable;
-- 38 R0-R3 arms are intact;
-- Philox perturbations are deterministic;
-- normal perturbation is exact-angle tangent rotation;
-- family median/p90/p95 tails are emitted;
-- nearest-non-equivalent physical gap is emitted only as geometry-only structural confusability and is explicitly **not** a semantic symmetry label;
-- optimizer steps remain zero.
+- legal same-locus success as a physical set even when multiple cached indices are legal;
+- reciprocal/cycle support;
+- 38 frozen R0-R3 arms;
+- deterministic Philox perturbations;
+- exact-angle tangent-plane normal perturbation;
+- family median/p90/p95 tails;
+- geometry-only nearest-non-equivalent physical gap without semantic-symmetry claims;
+- compact measurement-only handoff generation;
+- final artifact SHA binding in `RUN_COMPLETE_V1.json`;
+- optimizer steps remaining zero.
 
-Later documentation-only commits do not change those Python bytes unless this section is explicitly advanced.
+This is apparatus evidence only; no real R0-R3 corpus result has yet been opened.
 
 ## Frozen Representation Authority apparatus
 
-### Source byte locks
+Source byte locks:
 
 - controlled split freeze SHA-256: `9e766ac61126c9b4787eef24146e36aac40cbeac166d67ba898f8b79133e9d66`
 - canonical selection SHA-256: `af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9`
 
-### Exact confirmatory panel lock
-
-Frozen before any new R0-R3 result:
+Exact confirmatory panel, frozen pre-result:
 
 - 256 OPEN assets;
 - 230 FIT / 26 TUNE;
 - 245 Objaverse / 7 Quaternius / 4 KayKit;
 - 217 Arachne / 33 Geppetto / 6 IRIS strongest-capability classes;
-- 12 provider×split×capability strata represented;
+- 12 provider×split×capability strata;
 - ordered asset-ID-list SHA-256: `366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961`.
 
-The Run-All executable checks this identity before staging and after measurement. Failed apparatus for any locked asset invalidates the run; no replacement is authorized.
+The Run-All executable checks this identity before staging and after measurement. Failure of any locked asset invalidates the confirmatory run; no replacement is authorized.
 
-### Frozen R0-R3 semantics
+Frozen R0-R3 semantics:
 
 - physical SAME tolerance = 0.003 canonical units;
 - R0 exact P;
@@ -148,11 +131,13 @@ R4 remains deliberately undefined. If R0-R3 evidence motivates it, a separate R4
 
 ## Active execution line
 
-```bash
-python experiments/iris_single_pose_v2/run_representation_authority_v1.py --mode all
-```
-
 Runbook: `experiments/iris_single_pose_v2/R0_R3_RUNBOOK_V1.md`
+
+From `experiments/iris_single_pose_v2/`:
+
+```bash
+python run_representation_authority_v1.py --mode all
+```
 
 The command performs **optimizer=0 only**:
 
@@ -164,7 +149,8 @@ The command performs **optimizer=0 only**:
 6. run read-only stage/cache audit;
 7. run 38 R0-R3 measurement arms;
 8. verify the post-result panel is identical;
-9. emit `RUN_COMPLETE_V1.json` with `training_authorized=false` and sealed splits unopened.
+9. emit `REPRESENTATION_AUTHORITY_COMPACT_HANDOFF_V1.json` as evidence-only compaction;
+10. emit `RUN_COMPLETE_V1.json` with compact/full artifact SHAs, `training_authorized=false`, and sealed splits unopened.
 
 ## Remaining blockers before any mini training
 
@@ -177,6 +163,7 @@ The command performs **optimizer=0 only**:
 - [x] frozen R0-R3 execution semantics;
 - [x] frozen exact 256-asset panel identity;
 - [x] family median/p90/p95 + structural-confusability diagnostic semantics;
+- [x] compact evidence handoff and final SHA binding;
 - [x] one-command optimizer-zero gate;
 - [ ] **execute real frozen 256-asset R0-R3 gate**;
 - [ ] write canonical R0-R3 interpretation without changing frozen definitions;

@@ -1,197 +1,141 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-08-23  
-**Active branch:** `g0-g1/single-pose-geometry`  
-**Status:** `REPRESENTATION_PASS__OPEN64_LEARNER_PASS__DENSE_M256_V1_2_NEXT__SEALED_CLOSED`
+**Date:** 2026-08-24  
+**Active branch:** `audit/iris-architecture-discipline-20260824`  
+**Status:** `IRIS_ARCHITECTURE_AUDIT_IN_PROGRESS__ALL_TRAINING_FORBIDDEN`
 
 ## Read this first
 
-This file is the single continuation authority. If a new chat says only `devam et`, continue from the exact next action below.
+This file is the single continuation authority during the audit. The preserved pre-audit branch is `g0-g1/single-pose-geometry`.
 
-## Scientific target
+## Training authorization
 
-**Observable evidence was not pruned; the problem was pruned.**
+**NO optimizer run is authorized.** This includes mini, scale, CAL/DEV/EXTERNAL, native-1024 qualification and production training.
 
-IRIS legal evidence remains: P, geometric N, support/visibility, U/risk, coarse/fine persistence, reciprocal/cycle consistency, set-valued ambiguity and provenance.
+Training may resume only after:
 
-Forbidden IRIS target authority: hidden joint/owner IDs, parent graph, skin weights, pose-B mechanics, GFDR hidden mechanics.
+1. one canonical single-pose IRIS architecture is frozen;
+2. corpus -> tensor -> output coordinate/resolution semantics are explicit and tested;
+3. the 2026-08-21 multi-paper descriptor/correspondence transfer report is reconciled with the subsequent D1/D2/G2 experiments;
+4. executable code matches that architecture role-by-role;
+5. evaluator measures the intended quantity in explicit native-pixel/object-space units;
+6. syntax, shape, coordinate, role-separation and synthetic preflight all PASS;
+7. `audit/IRIS_ARCHITECTURE_AUDIT_20260824.md` closes with no unresolved mini-gate mismatch.
 
-## Corpus
+## Canonical problem boundary
 
-Canonical selected: 3993. Preserved exclusions: 56 repair-pending + 6 active non-Basis shape-key + 1 blank. Controlled V1 usable: **3930**.
+Shipping input remains `ONE neutral pose x 8 ordered views`.
 
-Frozen split:
+IRIS owns observable geometric evidence sufficient for a deterministic `SurfaceBuilder`; it does not own hidden mechanical owner IDs, source-rig exact partition, skeleton hierarchy, skinning or mandatory GFDR.
 
-- FIT 2935
-- TUNE 313
-- CAL 246 — SEALED
-- DEV 270 — SEALED
-- EXTERNAL_HOLDOUT 166 — SEALED
+The current evidence family remains revisionable under the canonical substrate contract:
 
-No resplit.
+- P: common/object-frame surface position evidence;
+- N: local orientation/normal evidence;
+- U_geo: geometric predictive risk;
+- coarse persistence capability;
+- fine local correspondence evidence;
+- direct visibility/alpha and derived support;
+- provenance;
+- set-valued ambiguity when singleton evidence is insufficient.
 
-## Representation ceiling — PASS
+## Why the previous M256 result cannot authorize the next scale step
 
-64 deterministic open assets / 65,830 pairs:
+The completed audited M256 run is retained as diagnostic evidence only.
 
-- exact P top1 `0.9976302598`
-- exact P top4 `1.0`
-- exact P top8 `1.0`
-- P noise .0025 top4/top8 `1.0 / 1.0`
-- P .005 + N 20° top4 `0.9988151299`, top8 `0.9996658059`
-- ambiguity within 0.003 = `0.0151754519`
+It did show a real learner signal:
 
-Interpretation: observable addressability exists strongly. Exact/modest-noise P already preserves truth completely in top4; top8 is a hard-tail safety envelope.
+- P error reduction: ~85.4%;
+- N error reduction: ~83.5%;
+- coarse persistence top8 gain: ~+0.691;
+- fine persistence top8 gain: ~+0.674.
 
-## Open64 learner pilot — PASS
+But its consumer/evaluator did not match the intended final architecture:
 
-51 FIT / 13 TUNE, 8 epochs:
+- native corpus authority was 1024, while model input was 256 and matcher candidate lattice was fixed 128x128;
+- matcher tolerances were normalized-grid constants rather than explicit native-pixel criteria;
+- `Z_fine` was used in global rank fusion even though the preserved D2 result falsified it as a global ranking authority and supported it only as retained-top-k local evidence;
+- singleton/ambiguity heuristics were not a completed calibrated ambiguity contract;
+- checkpoint selection did not constitute the final frozen observable metric panel.
 
-- TUNE P error `0.6096198788 -> 0.1311205992` = 78.49% reduction
-- TUNE N error `0.9678560908 -> 0.1776760645` = 81.64% reduction
-- raw Z_coarse top8 `0.1243990385 -> 0.9651442308`
-- raw Z_fine top8 `0.1039663462 -> 0.9375`
-- raw coarse top4 `0.8957331731`
-- raw fine top4 `0.8527644231`
+Therefore the run is **not** an information-limit result and does not authorize architecture scale-up.
 
-These were raw descriptor retrieval metrics, not final matcher metrics.
+## Research lineage that must be preserved
 
-## Matcher lineage clarification
+- `canonical/PRODUCT_CONTRACT_V1.md`
+- `canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md`
+- `experiments/g0_g1_single_pose_geometry/FRONTEND_NATIVE_1024_CORPUS_CONTRACT_V1.md`
+- `experiments/g0_g1_single_pose_geometry/G0_CONTRACT_FREEZE.json`
+- `experiments/g0_g1_single_pose_geometry/legacy_reserve/D2_RESULT.md`
+- historical `experiments/iris_controlled_v1/` package and M256 outputs as diagnostic lineage only.
 
-A sparse `iris_evidence_matcher_v1.py` also exists in repo. It has useful FIT-only calibration, reciprocal and cycle logic, but its candidate nodes are built from cached `track_visible/track_xy` physical-track anchors. GT track IDs are not used in its score, yet the candidate-node universe itself is truth-derived. Therefore it is retained as **diagnostic/ablation lineage**, not the canonical full-inference M256 evaluator.
+The 2026-08-21 paper transfer report and 2026-08-23 post-corpus closure matrix are external Drive research authorities and are being mirrored into the audit conclusions.
 
-D3 is still **not implemented** and remains reserve-only.
+## Active implementation path
 
-## Canonical D3-free dense matcher
+New active code is being built under:
 
-Canonical current matcher:
+`experiments/iris_single_pose_v2/`
 
-`experiments/iris_controlled_v1/iris_dense_matcher_v1.py`
+The old `experiments/iris_controlled_v1/` folder is historical/diagnostic during this audit and must not be executed.
 
-Dense evaluator:
-
-`experiments/iris_controlled_v1/evaluate_iris_dense_matcher_v1.py`
-
-Candidate domain is **alpha-supported dense 128×128 image-grid pixels**. GT physical tracks are used only to select evaluation queries and score target coordinates; they are never the candidate list or matcher authority.
-
-Pipeline:
+Target V2 architecture:
 
 ```text
-alpha-supported dense target pixels
-∩ known-camera row corridor
-→ Z_coarse top16
-∪ predicted-P nearest top4
-→ scale-free rank fusion of Z_coarse + Z_fine + predicted-P
-→ final ordered top8
-→ reciprocal top1/top4 in image coordinates
-→ two-third-view cycle support in image coordinates
-→ U-risk qualification
-→ confident singleton / top4 ambiguity / top8 ambiguity
+native/control RGBA x 8
+      |
+shared high-resolution encoder
+      |
++---------------- local/detail path ----------------+
+| f2/f4/f8/f16 at resolution-proportional scales    |
++----------------------------------------------------+
+      |
+within-view axial reasoning @ full f16
+      |
+fixed-size pooled global multiview context
+(known yaw, resolution-independent positional encoding)
+      |
+upsample/fuse context back into local f16
+      |
+coarse Zc @ R/8 -------- global high-recall search
+      |                         |
+P/N/U_geo @ R/2                 | retain top-k basins
+Zf @ R/2 -----------------------+--> LOCAL refinement only
+                                      |
+                              reciprocal/cycle evidence
+                                      |
+                              set-valued hypotheses
+                                      |
+                            deterministic SurfaceBuilder
 ```
 
-N is not forced into the correspondence ranking with an uncalibrated coefficient; it remains rich observable/downstream geometry evidence. U cannot create a singleton; it may only widen the output set.
+No fixed `max_w`; no fixed 128 matcher lattice; no global `Z_fine` authority; no premature singleton.
 
-## Fresh M256 dense gate
+## Current preflight status
 
-Canonical prereg:
+A local synthetic V2 implementation has already passed:
 
-`experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256_PREREG_V1_1.md`
+- Python compile;
+- exact align_corners=False coordinate round-trip;
+- model forward shape checks at input 256 / 512 / 1024;
+- loss forward/backward with finite gradients;
+- explicit matcher role-separation test proving a globally perfect far-away `Z_fine` match cannot enter unless its coarse basin was admitted;
+- native-pixel metric unit test.
 
-Membership:
-
-- 208 FIT
-- 48 TUNE
-- total 256
-- all deterministic ceiling/open64 pilot assets excluded (`pilot64_overlap = 0`)
-- 12 epochs from scratch
-- corrected trainer `train_iris_controlled_v1_v1_1.py`
-- CAL/DEV/EXTERNAL closed.
-
-Decision localization:
-
-- `LEARNER_FAIL`
-- `MATCHER_CONSUMER_FAIL_PARTIAL`
-- `M256_PASS`
-
-Frozen matcher/safety gate includes dense fused top8 >= .97, adaptive output-set truth coverage >= .97, p10 fused top8 >= .90, and confident singleton precision >= .95 at >= .10 coverage.
-
-## Canonical M256 runtime — USE V1.2 ONLY
-
-Authority manifest:
-
-`experiments/iris_controlled_v1/M256_DENSE_AUTHORITY_POINTERS_V1_2.json`
-
-Runner:
-
-`run_iris_controlled_v1_m256_v1_2.py`
-
-SHA-256:
-
-`72aa97e1902e831e5b87f054fceb187c04de55c7948a5ff19465d55b700249ab`
-
-Notebook:
-
-`IRIS_CONTROLLED_V1_M256_V1_2.ipynb`
-
-SHA-256:
-
-`21fcf07de2e25a194c4e84fd7f9a23124a9946c920616d912928c89ba8560cea`
-
-Dense matcher SHA-256:
-
-`6d70c42439e82fc02a4893e49965d206d02a05bd6d505fb42904f2a5b9fd4248`
-
-Dense evaluator SHA-256:
-
-`ba24f0a5b010f29c793c0a9eabbde02892a7c7841937c54babd634ee3d8e1f6b`
-
-All canonical v1.2 runtime files were Google Drive round-trip SHA verified; Python entrypoints compile; dense matcher synthetic self-test PASS.
-
-Earlier M256 runtime entries (`run_iris_controlled_v1_m256.py`, v1.1 runners/notebooks) are **SUPERSEDED BEFORE EXECUTION** and retained only as provenance.
+This is code preflight only, not training evidence.
 
 ## NEXT EXECUTABLE STEP
 
-Use NVIDIA Colab. From the package directory run:
+**Do not train.** Finish the V2 audit package and repo consolidation:
 
-```bash
-cd /content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1
-python run_iris_controlled_v1_m256_v1_2.py --workers 4 --epochs 12
-```
+1. freeze architecture/resolution/corpus/evaluator contracts;
+2. commit the preflighted V2 source;
+3. mark V1 execution paths historical;
+4. run repository-wide syntax/static self-checks;
+5. close `audit/IRIS_ARCHITECTURE_AUDIT_20260824.md` only if every mismatch is resolved.
 
-It will:
-
-1. SHA-verify base package + fast prep + corrected trainer + dense matcher/evaluator;
-2. deterministically select fresh 208 FIT + 48 TUNE excluding pilot64;
-3. prepare only those 256 open assets to local SSD;
-4. run dense matcher at identical random-init witness;
-5. train 12 epochs from scratch;
-6. run dense matcher on best TUNE-selected checkpoint;
-7. write final decision to:
-
-`MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_CONTROLLED_V1_M256_V1_1/M256_DECISION.json`
-
-## Authorization state
-
-`DENSE_M256 = AUTHORIZED_AND_NEXT`
-
-`1024_INTERMEDIATE = NOT_AUTHORIZED_UNTIL_DENSE_M256_PASS`
-
-`FULL_3248_PRODUCTION = NOT_AUTHORIZED`
-
-`D3 = NOT_IMPLEMENTED__RESERVE_ONLY`
-
-`CAL_DEV_EXTERNAL = CLOSED`
-
-`PRODUCT_SUBSTRATE_CLOSURE = NOT_CLAIMED`
-
-## VERY IMPORTANT M4 audit
-
-Authority:
-
-`experiments/m4_identity_audit/VERY_IMPORTANT_AUDIT_M4_IDENTITY_AMBIGUITY_EQUIVALENT_SUBSTRATE_20260823.md`
-
-The downstream E0–E5 question remains mandatory: can richer observable/set-valued evidence form a RigAnything-like 2.5D equivalent substrate sufficient for Geppetto and functional rigging?
+Only after that closure may a new, preregistered mini-training notebook be created.
 
 ## Research rule
 
-`apparatus/data -> representation/target -> learner/optimizer -> evidence consumer -> only then information limit`
+`apparatus/data -> representation/target -> learner/optimizer -> evidence consumer -> downstream sufficiency -> only then information limit`

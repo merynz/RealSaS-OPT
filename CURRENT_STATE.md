@@ -3,7 +3,7 @@
 **Date:** 2026-08-24  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `IRIS_V2_EXECUTABLE_PREFLIGHT_PASS__EXACT_REPRESENTATION_STUDY_NEXT__TRAINING_FORBIDDEN`
+**Status:** `IRIS_V2_PREFLIGHT_PASS__R0_R3_PANEL_FROZEN__REAL_REPRESENTATION_RUN_NEXT__TRAINING_FORBIDDEN`
 
 ## Read this first
 
@@ -11,184 +11,202 @@ This file is the single continuation authority during the audit. The preserved p
 
 ## Current authorization
 
-**NO optimizer run is authorized yet.** CAL/DEV/EXTERNAL remain sealed for learner/model-selection use.
+**NO optimizer run is authorized.** CAL/DEV/EXTERNAL remain sealed for learner/model-selection use.
 
-The immediate blocker is no longer a vague “finish all post-corpus work” requirement. Chronological authority is:
+The post-corpus chronology is already resolved for the controlled research path:
 
-1. Stage-A/B audits localized the corpus problems.
-2. Stage-B3 found a bounded 62-asset `.blend` authority repair set rather than a systemic 3993-asset failure.
-3. Stage-B4 quarantined 6 active non-Basis shape-key assets and authorized read-only repair for the remaining 56.
-4. Stage-B5 dry-run passed 56/56 for IRIS/Geppetto geometry; one Arachne capability drop is bounded.
-5. Stage-B6 froze SHA-verified repaired geometry without mutating canonical assets/renders.
-6. `IRIS_USABLE_CONTROLLED_CORPUS_FREEZE_V1.md` deliberately deferred Stage-B7 publication/rerender and froze the immediate controlled subset at **3930** assets:
-   - 56 repair-pending current-A-render mismatches excluded;
-   - 6 active shape-key assets excluded;
-   - 1 all-eight-view blank asset excluded.
-7. That later freeze explicitly returns the critical path to **exact representation/information ceiling → final controlled frontend → controlled learner**, with appearance/domain robustness after controlled success.
+- 3993 canonical selected assets;
+- 56 repair-pending current-A-render mismatches excluded;
+- 6 active non-Basis shape-key assets excluded;
+- 1 all-eight-view blank asset excluded;
+- immediate controlled corpus = **3930**;
+- FIT = **2935**, TUNE = **313** (OPEN);
+- CAL = 246, DEV = 270, EXTERNAL_HOLDOUT = 166 (SEALED);
+- open FIT+TUNE = **3248**.
 
-Therefore:
+Gate-3 appearance recovery remains mandatory before final/product-domain IRIS qualification but does not block the geometry-control Representation Authority study.
 
-- Gate 1 is closed for the controlled path by quarantine/exclusion.
-- Gate 2 is bounded for the controlled path by excluding the unpublished repair/quarantine set; it remains a production-corpus publication task, not a reason to block the 3930 controlled experiment.
-- Gate 3 appearance recovery remains mandatory before calling IRIS product/natural-domain qualified, but it does **not** block a preregistered geometry-control learner experiment on A.
-- The **immediate no-optimizer scientific gate is the frozen `REPRESENTATION_AUTHORITY_STUDY_V1_PREREG.md`** on legal observable geometry.
-- SOI-2 / product-relevant counterfactual information-limit work is conditional: required if the exact legal representation remains insufficient and always required before an impossibility claim; it is not automatically required before every controlled learner run if the exact representation ceiling passes.
+The immediate scientific gate is the exact/noisy legal Representation Authority study. SOI-2 is conditional on legal representation remaining insufficient and is always required before any impossibility claim.
 
-## Controlled corpus authority
+## Frozen source authorities
 
-Current immediate controlled population: **3930**.
+The executable Representation gate verifies these bytes before doing any work:
 
-Frozen split counts:
+- `IRIS_CONTROLLED_V1_SPLIT_FREEZE.json` SHA-256  
+  `9e766ac61126c9b4787eef24146e36aac40cbeac166d67ba898f8b79133e9d66`
+- `CANONICAL_VARIANT_SELECTION.json` SHA-256  
+  `af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9`
 
-- FIT: 2935 — OPEN
-- TUNE: 313 — OPEN
-- CAL: 246 — SEALED
-- DEV: 270 — SEALED
-- EXTERNAL_HOLDOUT: 166 — SEALED
-
-Open FIT+TUNE population: **3248**. Sealed population: **682**.
-
-Source/provider imbalance remains a required reporting dimension; the selected master corpus is dominated by Objaverse and no mean-only result may hide provider/family tails.
+The split freeze itself binds the training-eligibility and Stage-B6 source-authority hashes. No membership is reconstructed heuristically.
 
 ## Canonical problem boundary
 
 Shipping input remains `ONE neutral pose x 8 ordered views`.
 
-IRIS owns observable geometric evidence sufficient for a deterministic `SurfaceBuilder`; it does not own hidden mechanical owner IDs, source-rig exact partition, skeleton hierarchy, skinning or mandatory GFDR.
+IRIS owns observable geometric/correspondence evidence for a deterministic SurfaceBuilder. It does **not** own authored joint/owner identity, source-rig exact partition, skeleton hierarchy, skinning, or mandatory GFDR.
 
-Current legal evidence family:
+Current evidence family:
 
-- P: common/object-frame surface position evidence;
-- N: local orientation/normal evidence;
-- U_geo: geometric predictive risk only;
-- coarse persistence capability;
+- P common/object-frame surface position;
+- N geometric orientation;
+- U_geo geometric predictive risk only;
+- coarse persistence/high-recall evidence;
 - fine **local** correspondence evidence;
-- direct visibility/alpha and derived support;
-- reciprocal/cycle support evidence;
+- visibility/support;
+- reciprocal/cycle support;
 - provenance;
 - set-valued ambiguity when singleton evidence is insufficient.
 
-Match ambiguity/confidence is not silently aliased to `U_geo`.
-
-## Why the previous M256 result cannot authorize scale-up
-
-The completed M256 run remains useful diagnostic learner evidence. It showed strong P/N learning and non-random correspondence learning, but its consumer/evaluator did not match the intended final architecture:
-
-- native authority was 1024 while the matcher candidate lattice was fixed 128x128;
-- normalized-grid tolerances were used where native-pixel/exact-cell quantities were required;
-- `Z_fine` entered global rank fusion despite the later D2 verdict: global role falsified, local retained-top-k role supported;
-- ambiguity/singleton policy was not calibrated;
-- checkpoint selection was not the final frozen observable panel.
-
-Therefore M256 is **not** an information-limit result and is **not** V2 qualification.
-
-## Research lineage now reconciled
-
-Primary interpretation/contract authorities:
-
-- `canonical/PRODUCT_CONTRACT_V1.md`
-- `canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md`
-- `experiments/g0_g1_single_pose_geometry/FRONTEND_NATIVE_1024_CORPUS_CONTRACT_V1.md`
-- `experiments/post_corpus_audit/POST_CORPUS_80_CHECK_CLOSURE_MATRIX_V1.md`
-- `experiments/post_corpus_audit/POST_CORPUS_STAGE_A_CLOSURE_DECISION_V2.md`
-- `experiments/post_corpus_audit/POST_CORPUS_STAGE_B_INTERPRETATION_V1.md`
-- `experiments/post_corpus_audit/POST_CORPUS_STAGE_B3_INTERPRETATION_V1.md`
-- `experiments/post_corpus_audit/POST_CORPUS_STAGE_B4_INTERPRETATION_V1.md`
-- `experiments/post_corpus_audit/IRIS_USABLE_CONTROLLED_CORPUS_FREEZE_V1.md`
-- `experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_STUDY_V1_PREREG.md`
-- `experiments/m4_identity_audit/VERY_IMPORTANT_AUDIT_M4_IDENTITY_AMBIGUITY_EQUIVALENT_SUBSTRATE_20260823.md`
-- `audit/IRIS_RESEARCH_TO_EXECUTABLE_ROLE_MATRIX_20260824.md`
-
-Historical `experiments/iris_controlled_v1/` remains provenance/diagnostic only on this branch.
-
 ## Active V2 implementation
 
-Active candidate code:
-
-`experiments/iris_single_pose_v2/`
-
-Architecture:
+Active code: `experiments/iris_single_pose_v2/`.
 
 ```text
-native/control RGBA x 8
-      |
-shared high-resolution encoder
-      |
-full local f16 axial reasoning
-      |
-fixed pooled global multiview context + known yaw
-      |
-fuse global context back into local field
-      |
-Z_coarse @ R/8 -------- global high-recall basin admission
-      |                         |
-P/N/U_geo @ R/2 ---- P rescue  | retain top-k basins
-Z_fine @ R/2 ------------------+--> LOCAL refinement only
-                                      |
-                              reciprocal/cycle SUPPORT
-                                      |
-                              set-valued hypotheses
-                                      |
-                            deterministic SurfaceBuilder
+RGBA x 8
+  -> shared high-resolution encoder
+  -> local f16 axial reasoning
+  -> fixed pooled global multiview context + known yaw
+  -> fuse context back into local field
+  -> Z_coarse @ R/8: global high-recall basin admission
+  -> P/N/U_geo @ R/2 + P rescue
+  -> Z_fine @ R/2: LOCAL refinement only
+  -> reciprocal/cycle SUPPORT
+  -> set-valued hypotheses
+  -> deterministic SurfaceBuilder
 ```
 
-No fixed `max_w`; no fixed 128 matcher lattice; no global `Z_fine` admission; no premature singleton.
+No fixed `max_w`; no fixed 128 native authority; no global Z_fine admission; no premature singleton.
 
-## V2 code corrections closed in this audit
+### Audit corrections now executable
 
-The active path now explicitly fixes several silent mismatches discovered during audit:
-
-1. reciprocal training is same-locus/set-valued aware rather than diagonal-ID-only;
-2. accepted correspondence truth retains the exact continuous projected coordinate; raster authority is a visibility/surface-consistency witness and no longer re-quantizes truth to a pixel center;
-3. observation-level SupCon subsampling no longer truncates a view-major prefix and bias early views;
-4. stage reuse is source-byte fingerprinted;
-5. truth-cache reuse is stage/settings/**builder semantic** fingerprinted, including `geometry.py`, so stale truth cannot survive a geometry-semantic change;
-6. deterministic reciprocal/cycle is implemented as support evidence and cannot silently delete candidates or authorize a singleton;
-7. evaluator uses exact coarse cells, object-space geometry tails and native-1024 pixel localization, with provider/style stratification;
-8. evaluator deliberately has **no checkpoint-selection key yet**. Loss-scalar selection is forbidden until the post-representation mini prereg freezes the observable panel.
+1. reciprocal training is legal-positive-set aware, not diagonal cached-ID only;
+2. accepted correspondence XY is exact continuous projection; raster is visibility/surface witness only;
+3. observation SupCon subsampling is view-balanced rather than view-major prefix truncation;
+4. stage/cache reuse is source/settings/builder-semantic fingerprinted;
+5. IRIS staging physically retains only `vertices/faces` geometry plus legal observation authority;
+6. deterministic reciprocal/cycle is support evidence, not a hard candidate-deletion/singleton authority;
+7. evaluator reports object-space tails, exact coarse cells and native-1024-pixel localization;
+8. evaluator has no checkpoint-selection key before preregistration.
 
 ## Exact committed-byte CI
 
 Draft PR #4 triggers `.github/workflows/iris_v2_preflight.yml`.
 
-Latest verified run: GitHub Actions run `32669024486`, conclusion **SUCCESS**.
+Latest verified run: **GitHub Actions run #33 / ID 32670253449 — SUCCESS**.
 
-Passing exact-commit steps:
+PASS steps:
 
-- compile all V2 Python sources;
+- compile all exact committed V2 Python sources;
 - architecture / coordinate / matcher preflight;
 - physical firewall / truth-cache semantic-invalidation preflight;
-- observable evaluator synthetic preflight.
+- observable evaluator synthetic preflight;
+- Representation Authority semantic preflight.
 
-This is executable/apparatus evidence only. It is not learner evidence.
+The Representation preflight verifies:
 
-## Current next scientific executable
+- 38 frozen R0-R3 arms;
+- exact-angle normal perturbation;
+- deterministic Philox observation noise;
+- ambiguity-aware physical same-locus truth rather than cached index truth;
+- exact reciprocal/cycle semantics;
+- optimizer steps = 0.
 
-**Do not train.** Execute the frozen exact Representation Authority Study on the controlled/open legal observation surface.
+This is apparatus evidence, not a corpus result.
 
-Authority:
+## Representation Authority execution is now frozen
+
+Parent prereg:
 
 `experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_STUDY_V1_PREREG.md`
 
-Required arms include:
+Execution addendum:
 
-- R0 exact P;
-- R1 exact P+N;
-- R2 preregistered P-noise ladder;
-- R3 preregistered P+N-noise ladder;
-- R4 uncertainty-aware relational address only as a bounded ablation, with hard uncertain anchors forbidden.
+`experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_STUDY_V1_EXECUTION_ADDENDUM_20260824.md`
 
-Required reporting includes top1/top4/top8 containment, canonical localization, reciprocal/cycle, family p90/p95, provider/source and coverage conditioning, and set-valued ambiguity treatment.
+Exact panel lock:
 
-### Decision after that study
+`experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_PANEL_LOCK_V1.json`
 
-- If exact P/P+N remains near-ceiling: freeze which legal representation V2 must learn, then run production-width no-optimizer GPU preflight, freeze mini membership + observable checkpoint key + prereg, and only then create one training runner/notebook.
-- If exact P/P+N is insufficient but uncertainty-aware relational address materially closes a reproducible hard tail: revise the V2 target/consumer contract **before** training.
-- If legal representation remains insufficient: proceed to SOI-2/target-authority investigation; do not blame a learner that has not run.
+### Confirmatory panel
+
+Frozen before any new R0-R3 result:
+
+- **256 OPEN assets**;
+- **48 queries/asset max**: 16 adjacent, 16 skip-one, 16 opposite;
+- panel split: 230 FIT / 26 TUNE;
+- providers: Objaverse 245 / Quaternius 7 / KayKit 4;
+- strongest capability: Arachne 217 / Geppetto 33 / IRIS 6;
+- 12 non-empty `(provider, split, strongest-capability)` strata represented;
+- ordered asset-ID list digest:  
+  `366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961`.
+
+No post-apparatus substitution is allowed. If one frozen asset cannot stage/cache/audit legally, the confirmatory run fails closed instead of replacing it.
+
+### Frozen R0-R3 semantics
+
+- SAME-locus truth: exact physical P within `0.003` canonical units;
+- R0: exact P;
+- R1: exact P+N;
+- R2 P-noise sigma: `0, .0005, .001, .0025, .005, .01`;
+- R3: full 6x5 cross-product with N angles `0, 5, 10, 20, 40` degrees;
+- P+N diagnostic score fixed pre-result to `dP + 0.05*(1-cos N)`; no coefficient sweep;
+- source and target observations are independently perturbed;
+- noise is deterministic per asset/arm/view/track using Philox;
+- N perturbation is a true exact-angle tangent rotation;
+- top1/top4/top8 are set-valued physical-locus containment, not track-index accuracy;
+- reciprocal and three-view cycle use legal candidate universes;
+- component buckets: `1`, `2-4`, `5-16`, `17+`;
+- support buckets: `2-3`, `4-5`, `6-8`;
+- mean-only promotion forbidden.
+
+R4 is **not** silently invented. If R0-R3 interpretation demonstrates a reproducible residual that motivates relational addressing, a separate R4 formulation prereg must be frozen before R4 results are opened.
+
+## One-command optimizer-zero gate
+
+Executable:
+
+`experiments/iris_single_pose_v2/run_representation_authority_v1.py`
+
+Default target root:
+
+`/content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3`
+
+`--mode all` performs only:
+
+```text
+verify frozen authority SHA
+  -> derive exact frozen 256 seed
+  -> hard-check panel ID digest
+  -> physical geometry-only staging
+  -> dense/exact V2 truth cache
+  -> read-only stage/cache audit
+  -> R0-R3 measurement
+  -> hard-check same panel after result
+  -> RUN_COMPLETE_V1.json
+```
+
+Default staging input is native 1024. Truth authority remains native 1024 raster geometry. The run writes `optimizer_steps: 0`, `training_authorized: false`, and never opens sealed splits.
+
+## NEXT EXECUTABLE STEP
+
+**Run the real frozen 256-asset R0-R3 Representation Authority gate. Do not train.**
+
+The output status must be:
+
+`R0_R3_MEASURED__CANONICAL_INTERPRETATION_REQUIRED`
+
+The measurement runner is deliberately forbidden from deciding `P_GEOMETRY_SUFFICIENT`, `P_PLUS_R_REQUIRED`, R4 necessity, SOI-2, or training authorization. Those decisions belong to the subsequent canonical interpretation report after the full stratified/tail evidence is inspected.
+
+After canonical interpretation only:
+
+- if legal P/P+N evidence is sufficient: freeze the V2 learner target, then run production-width **no-optimizer** GPU capacity preflight;
+- if a reproducible residual warrants R4: freeze `R4_FORMULATION_PREREG` before R4 results;
+- if legal representation remains insufficient: proceed to SOI-2/target-authority work;
+- only after representation closure + GPU preflight + mini membership + observable checkpoint-key prereg may any optimizer run be considered.
 
 ## Downstream closure remains open
 
-A successful controlled IRIS frontend is not product closure. E0–E5 remain mandatory before claiming equivalent-substrate/product success:
+Controlled frontend success is not product closure. E0-E5 remain:
 
 `exact observable substrate -> Geppetto ceiling -> extractability -> predicted-vs-exact consequence -> ambiguity stress -> functionally equivalent 2.5D rigging substrate`.
 

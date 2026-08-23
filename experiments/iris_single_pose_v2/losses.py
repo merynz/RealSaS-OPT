@@ -40,9 +40,13 @@ def geometry_loss(outputs, batch):
     s = sample_field(outputs["U_geo"], grid)[..., 0]
     euclid_detached = torch.linalg.norm(pr_p.detach() - gt_p, dim=-1)
     lu = ((torch.exp(-s) * euclid_detached + s) * mask).sum() / den
-    return {"P": lp, "N": ln, "U_geo": lu,
-            "p_euclid": (euclid_detached * mask).sum().detach() / den,
-            "n_cos": (n_elem * mask).sum().detach() / den}
+    return {
+        "P": lp,
+        "N": ln,
+        "U_geo": lu,
+        "p_euclid": (euclid_detached * mask).sum().detach() / den,
+        "n_cos": (n_elem * mask).sum().detach() / den,
+    }
 
 
 def _masked_multi_positive_ce(logits, pos, valid):
@@ -56,12 +60,7 @@ def _masked_multi_positive_ce(logits, pos, valid):
 
 
 def _positive_set_cycle_loss(pab, pba, source_positive_set, target_positive_set):
-    """Reward return to any legal same-locus positive, never one privileged diagonal ID.
-
-    pab maps source observations to target observations and pba maps target back to source.
-    The two positive-set masks define observation-equivalent loci within each side. This keeps
-    the training objective consistent with IRIS's set-valued ambiguity contract.
-    """
+    """Reward return to any legal same-locus positive, never one privileged diagonal ID."""
     cyc_source = pab @ pba
     cyc_target = pba @ pab
     src_mass = (cyc_source * source_positive_set.to(cyc_source.dtype)).sum(dim=1)
@@ -101,12 +100,20 @@ def pairwise_coarse_objective(zs, zt, p, temperature=0.08, same_radius=0.003, fa
     return dual, hard, reciprocal
 
 
+def _uniform_observation_subsample(idx: torch.Tensor, max_obs: int) -> torch.Tensor:
+    """Deterministically thin a view-major observation list without prefix/view bias."""
+    if idx.shape[0] <= max_obs:
+        return idx
+    take = torch.linspace(0, idx.shape[0] - 1, steps=max_obs, device=idx.device)
+    take = take.round().to(torch.long)
+    return idx[take]
+
+
 def observation_supcon(z, p, vis, temperature=0.08, same_radius=0.003, far_radius=0.025, max_obs=1024):
     idx = vis.T.nonzero(as_tuple=False)
     if idx.shape[0] < 3:
         return z.sum() * 0.0
-    if idx.shape[0] > max_obs:
-        idx = idx[:max_obs]
+    idx = _uniform_observation_subsample(idx, max_obs)
     f = F.normalize(z[idx[:, 0], idx[:, 1]], dim=-1, eps=1e-8)
     pp = p[idx[:, 1]].float()
     sim = (f @ f.T) / temperature
@@ -189,9 +196,7 @@ def fine_local_loss(outputs, batch, radius_cells=4, temperature=0.05, max_tracks
                 if not valid.any():
                     continue
                 lv = logits[valid]
-                labels = torch.full(
-                    (int(valid.sum()),), zero_idx, device=zf.device, dtype=torch.long
-                )
+                labels = torch.full((int(valid.sum()),), zero_idx, device=zf.device, dtype=torch.long)
                 losses.append(F.cross_entropy(lv, labels))
                 pred = lv.argmax(-1)
                 top1s.append((pred == zero_idx).float().mean())

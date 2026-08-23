@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-23  
 **Active branch:** `g0-g1/single-pose-geometry`  
-**Status:** `IRIS_CONTROLLED_V1_TRAINING_PACKAGE_READY__OPTIMIZER_0__SEALED_CLOSED`
+**Status:** `IRIS_CONTROLLED_V1_FAST_PREP_READY__OPTIMIZER_0__SEALED_CLOSED`
 
 ## Read this first
 
@@ -85,35 +85,43 @@ Frozen original split membership is preserved; no random resplit:
 - DEV 270 — SEALED;
 - EXTERNAL_HOLDOUT 166 — SEALED.
 
+Open preparation/training count is FIT+TUNE = **3248**.
+
 Source mix remains 3702 Objaverse / 191 Quaternius / 37 KayKit.
 
 ## Frozen byte authority
 
-Canonical execution package is in Google Drive:
+Canonical base execution package is in Google Drive:
 
 `MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1`
 
 Drive folder ID: `15Du2plm2vHYe4Mmm-p1-L6emkxYucN8k`.
 
-Frozen `PACKAGE_MANIFEST_V1.json` SHA-256:
+Frozen base `PACKAGE_MANIFEST_V1.json` SHA-256:
 
 `e49a67b2ef808fe4f7cc9e414e024d30ab0fddc0ea55099bfa33ef78dbc6f098`
 
-Package seal:
+Base package seal:
 
 - 23 listed files;
 - optimizer steps `0`;
 - sealed panels opened `false`.
 
-GitHub stores readable code/docs/pointers and handoff. **Drive package is byte authority for execution.**
+The fast-prep patch is an additive pre-optimizer engineering amendment. It does not rewrite the base package.
 
-Large authority hashes are recorded in `experiments/iris_controlled_v1/AUTHORITY_POINTERS_V1.json`.
+Fast patch authorities:
+
+- `experiments/iris_controlled_v1/FAST_PREP_ADDENDUM_V1.md`
+- `prepare_iris_controlled_v1_fast.py` SHA-256 `8ce6e0a6cdbd25890d25703aee3a41d4b290d80bdb81c05987dc11630a515ec7`
+- `launch_iris_controlled_v1_fast.py` SHA-256 `1f35904429912b626dab815ed6af871d3e67fd61729963d5e2973017e421c690`
+
+Both fast scripts are also stored in the Drive package directory. The fast launcher verifies the original frozen base package before work starts.
 
 ## Training contract — frozen before optimizer
 
-Authority: `experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_PREREG.md`.
+Authority: `experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_PREREG.md` plus the pre-optimizer engineering addendum `FAST_PREP_ADDENDUM_V1.md`.
 
-Core settings:
+Core settings remain:
 
 - 24 epochs;
 - batch 1;
@@ -121,7 +129,7 @@ Core settings:
 - weight decay 1e-4;
 - grad clip 2.0;
 - seed 20260823;
-- default neural input 256;
+- neural input 256;
 - FIT trains;
 - TUNE selects;
 - CAL/DEV/EXTERNAL remain closed.
@@ -131,6 +139,8 @@ Loss after warmup:
 `L = P + .25 N + .05 U + .10 Zc + .05 Zf + .20 P_consistency`.
 
 Epochs 0–3 use P/N/U only. Persistence terms enter at epoch 4.
+
+Fast-prep freezes the 512→256 derived RGBA preprocessing as PIL RGBA bilinear before optimizer step 1. Geometry/persistence target authority is unchanged.
 
 ## Completed no-optimizer preflight
 
@@ -154,29 +164,79 @@ Representation apparatus smoke on the same real asset:
 
 These are apparatus witnesses, not confirmatory generalization results.
 
+## Operational incident — serial prepare deprecated
+
+On the first GPU Colab launch, the original serial preparation path reached only `20/3248` assets after about 16 minutes: roughly **48 seconds per asset**, projecting to >40 hours before the representation ceiling.
+
+Root cause is engineering/I/O design, not corpus corruption or an IRIS scientific failure:
+
+- thousands of Drive small-file opens were serialized;
+- raster/image files were re-read for per-source SHA after already being consumed;
+- sixteen 512×512 RGBA images were recompressed per asset;
+- all 3248 open assets were prepared **before** a ceiling that only requires 64.
+
+No optimizer step occurred. No sealed panel was opened.
+
+The partial original cache under `cache/IRIS_CONTROLLED_V1` is **DO-NOT-DELETE lineage** but is not the current preparation path.
+
+The original `launch_iris_controlled_v1.py --mode all` is **operationally deprecated for fresh runs**. Its scientific code remains historical authority.
+
+## FAST preparation policy
+
+The replacement path:
+
+1. constructs the deterministic 64 open assets needed by the representation ceiling first;
+2. writes derived caches to Colab local SSD `/content/IRIS_CONTROLLED_V1_FAST_CACHE`;
+3. uses bounded parallel Drive reads;
+4. uses a vectorized correspondence implementation;
+5. runs an actual-source parity check against the original correspondence function before preparation and requires zero visibility/row mismatch and <=1e-6 error difference;
+6. uses parent corpus/package SHA authority instead of redundantly hashing every source file again;
+7. SHA-seals every derived cache artifact;
+8. expands to the remaining open assets only after the 64-asset ceiling PASSes.
+
+The 64 cache artifacts are reused during full expansion.
+
 ## NEXT EXECUTABLE STEP
 
-Use an **NVIDIA GPU Colab runtime** and execute the Drive-frozen package.
+**Stop any still-running original serial preparation with Ctrl+C.** Its partial outputs are safe and preserved.
+
+Keep the current NVIDIA Colab runtime mounted. From the Drive package directory run:
 
 ```bash
 cd /content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1
-python launch_iris_controlled_v1.py --mode prepare
-python launch_iris_controlled_v1.py --mode ceiling
-python launch_iris_controlled_v1.py --mode train
+python launch_iris_controlled_v1_fast.py --mode all --workers 8
 ```
 
-Or fresh:
+Expected order:
 
-```bash
-python launch_iris_controlled_v1.py --mode all
+```text
+verify frozen base package
+→ build deterministic 64-asset local ceiling cache
+→ real-source old-vs-vectorized correspondence parity PASS
+→ representation ceiling on those 64
+→ only if PASS: expand local cache to all FIT+TUNE = 3248
+→ only if full cache PASS: start optimizer
 ```
 
-`prepare` builds only FIT+TUNE cache from canonical master authority. `ceiling` runs a deterministic 64-open-asset exact P/P+N information gate. `train` cannot start unless that gate exists and PASSes.
+The fast builder prints `rate=... asset/s` and `ETA_min=...` every 10 completed assets, so throughput is immediately observable.
 
-If interrupted during training:
+If only the ceiling is desired first:
 
 ```bash
-python launch_iris_controlled_v1.py --mode train --resume
+python launch_iris_controlled_v1_fast.py --mode ceiling --workers 8
+```
+
+After ceiling PASS, continue:
+
+```bash
+python launch_iris_controlled_v1_fast.py --mode prepare-full --workers 8
+python launch_iris_controlled_v1_fast.py --mode train
+```
+
+Training resume:
+
+```bash
+python launch_iris_controlled_v1_fast.py --mode train --resume
 ```
 
 ## Sealed policy

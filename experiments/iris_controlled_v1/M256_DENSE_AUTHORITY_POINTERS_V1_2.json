@@ -1,0 +1,30 @@
+{
+  "schema": "RealSaS.IRISControlledV1.M256DenseAuthorityPointers.v1_2",
+  "date": "2026-08-23",
+  "canonical_runner": "run_iris_controlled_v1_m256_v1_2.py",
+  "canonical_notebook": "IRIS_CONTROLLED_V1_M256_V1_2.ipynb",
+  "canonical_prereg": "IRIS_CONTROLLED_V1_M256_PREREG_V1_1.md",
+  "candidate_domain": "alpha-supported dense 128x128 image grid; GT tracks only define evaluation queries/truth",
+  "D3_used": false,
+  "files_sha256": {
+    "iris_dense_matcher_v1.py": "6d70c42439e82fc02a4893e49965d206d02a05bd6d505fb42904f2a5b9fd4248",
+    "evaluate_iris_dense_matcher_v1.py": "ba24f0a5b010f29c793c0a9eabbde02892a7c7841937c54babd634ee3d8e1f6b",
+    "build_m256_seed.py": "0f6a923ea88b3cba49a30e08cd742b8577f34ec2c3173279db3374e2414aa610",
+    "run_iris_controlled_v1_m256_v1_2.py": "72aa97e1902e831e5b87f054fceb187c04de55c7948a5ff19465d55b700249ab",
+    "IRIS_CONTROLLED_V1_M256_PREREG_V1_1.md": "d361aff33fe30a6519fad6008315562e11fab1124da62f30410a369aa0a5df09",
+    "IRIS_CONTROLLED_V1_M256_V1_2.ipynb": "21fcf07de2e25a194c4e84fd7f9a23124a9946c920616d912928c89ba8560cea",
+    "prepare_iris_controlled_v1_fast.py": "8ce6e0a6cdbd25890d25703aee3a41d4b290d80bdb81c05987dc11630a515ec7",
+    "train_iris_controlled_v1_v1_1.py": "961b6469b54e74222bd3055de68bfa7aa96042a04b59f2f97f1ee586aeb982d3"
+  },
+  "drive_roundtrip_verified": true,
+  "python_compile_pass": true,
+  "dense_matcher_synthetic_self_test": "PASS",
+  "fresh_m256": {"FIT": 208, "TUNE": 48, "pilot64_overlap": 0},
+  "sealed_splits_opened": false,
+  "superseded_runtime_entries": [
+    "run_iris_controlled_v1_m256.py",
+    "run_iris_controlled_v1_m256_v1_1.py",
+    "IRIS_CONTROLLED_V1_M256.ipynb",
+    "IRIS_CONTROLLED_V1_M256_V1_1.ipynb"
+  ]
+}

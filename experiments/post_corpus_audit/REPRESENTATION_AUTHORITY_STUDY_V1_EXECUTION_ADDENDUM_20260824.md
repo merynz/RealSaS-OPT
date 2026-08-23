@@ -51,19 +51,40 @@ A predicted candidate is correct when its **exact canonical physical P** is with
 
 Therefore top-1/top-4/top-8 are ambiguity-aware set-containment metrics. The evaluator never penalizes selecting another candidate inside the legal same-locus set merely because it has a different cached index.
 
-## 5. Query/view-pair panel
+## 5. Confirmatory asset and query panel
 
-Every evaluated asset contributes a deterministic balanced query panel across:
+The parent prereg requires deterministic family-disjoint samples rather than an exhaustive all-open brute force. The final R0–R3 confirmatory panel is therefore frozen at:
 
-- adjacent yaw distance 1;
-- skip-one yaw distance 2;
-- opposite yaw distance 4.
+- **256 OPEN controlled assets**;
+- **48 queries per asset maximum**;
+- 16 query slots for adjacent yaw distance 1;
+- 16 for skip-one yaw distance 2;
+- 16 for opposite yaw distance 4.
 
-Default panel cap: `96 queries / asset` (32 target queries per category where available). If a category has fewer legal queries, unused quota is not silently moved to a different category in aggregate reporting; actual counts are reported.
+### Asset selection
 
-Queries are chosen by stable SHA-256 ordering over `(asset_id, track_index, source_view, target_view)`, not current representation score.
+Build strata from `(source_registry_id, split, strongest capability class)` where strongest capability is `ARACHNE > GEPPETTO > IRIS`.
 
-R0/R1/R2 may run on all open controlled assets if runtime permits. The CLI may set a smaller deterministic pre-result sample for development, but any result with `max_assets > 0` is explicitly `DEVELOPMENT_ONLY` and cannot issue the final study decision. Final confirmatory R0–R3 output requires `max_assets=0` over all records in the supplied OPEN cache manifest.
+1. Within every non-empty stratum, sort assets by `SHA256("repr-v1:" + asset_id)` and take one witness.
+2. Fill remaining slots to 256 from the remaining OPEN controlled assets sorted by the same stable hash.
+3. If fewer than 256 legal cached assets exist, the run is `APPARATUS_TARGET_REOPEN_REQUIRED`; do not silently reduce the confirmatory panel.
+
+This guarantees representation of every available provider/split/capability stratum without changing the corpus' real distribution inside reported pooled metrics. Source-stratified and macro-stratified summaries are reported separately.
+
+### Query selection
+
+For each asset/category, enumerate legal `(track, source_view, target_view)` tuples and select the first 16 under stable `SHA256(asset_id|track|source|target|category)` ordering.
+
+If a category has fewer than 16 legal queries, use all available queries and report the shortfall; unused quota is **not** moved to another category.
+
+The final run is confirmatory only when:
+
+- asset target = 256;
+- query cap = 48;
+- no debug `max_assets` override is used;
+- the exact selected asset IDs are written to the result before any arm metrics are interpreted.
+
+Smaller runs are `DEVELOPMENT_ONLY` and cannot issue the study decision.
 
 ## 6. Observation-noise semantics
 

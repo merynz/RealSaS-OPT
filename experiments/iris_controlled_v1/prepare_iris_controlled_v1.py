@@ -60,6 +60,7 @@ def build_asset(root,record,out_path,geom_samples=512,anchors_per_view=48,max_tr
     if not np.allclose(yaws,np.arange(8,dtype=np.float32)*45.0,atol=1e-4):
         raise RuntimeError(f'{aid}: noncanonical controlled yaw sequence {yaws.tolist()}')
 
+    # Dense geometry supervision samples, deterministic per asset/view.
     geom_xy=np.zeros((VIEWS,geom_samples,2),np.float32)
     geom_p=np.zeros((VIEWS,geom_samples,3),np.float32)
     geom_n=np.zeros((VIEWS,geom_samples,3),np.float32)
@@ -76,7 +77,9 @@ def build_asset(root,record,out_path,geom_samples=512,anchors_per_view=48,max_tr
         ap,an=reconstruct_surface(vertices,faces,gnorm,ra['triangle_id'][ai],ra['barycentric_uv'][ai])
         anchor_ps.append(ap); anchor_ns.append(an)
 
+    # Build exact multi-view surface tracks. A track is kept only when the same physical locus is observed in >=2 views.
     P=np.concatenate(anchor_ps,0); N=np.concatenate(anchor_ns,0)
+    # Quantized dedupe prevents one large visible region from dominating the track pool.
     q=np.round(P/1e-4).astype(np.int64); _,uniq=np.unique(q,axis=0,return_index=True); uniq=np.sort(uniq); P=P[uniq]; N=N[uniq]
     T=len(P); track_xy=np.zeros((T,VIEWS,2),np.float32); track_vis=np.zeros((T,VIEWS),np.uint8); track_err=np.full((T,VIEWS),np.inf,np.float32)
     track_p_view=np.zeros((T,VIEWS,3),np.float32); track_n_view=np.zeros((T,VIEWS,3),np.float32)
@@ -89,6 +92,7 @@ def build_asset(root,record,out_path,geom_samples=512,anchors_per_view=48,max_tr
             track_p_view[ok,v]=pp; track_n_view[ok,v]=nn
     support=track_vis.sum(1); keep=np.flatnonzero(support>=2)
     if len(keep)==0: raise RuntimeError(f'{aid}: no cross-view tracks')
+    # Prefer high-support tracks, deterministic hash tiebreak from physical position.
     if len(keep)>max_tracks:
         h=np.array([int(hashlib.sha256(np.asarray(P[i],np.float32).tobytes()).hexdigest()[:16],16) for i in keep],dtype=np.uint64)
         order=np.lexsort((h,-support[keep])); keep=keep[order[:max_tracks]]
@@ -98,30 +102,57 @@ def build_asset(root,record,out_path,geom_samples=512,anchors_per_view=48,max_tr
     arrays=dict(images=images,yaw_deg=yaws,geom_xy=geom_xy,geom_p=geom_p,geom_n=geom_n,geom_mask=geom_mask,
                 track_p=P.astype(np.float32),track_n=N.astype(np.float32),track_xy=track_xy,track_visible=track_vis,
                 track_p_view=track_p_view,track_n_view=track_n_view,track_support=support.astype(np.uint8),track_surface_error=track_err,
-                asset_id=np.asarray([aid]),split=np.asarray([record['split']))
+                asset_id=np.asarray([aid]),split=np.asarray([record['split']]))
     atomic_npz(out_path,**arrays)
-    return {'asset_id':aid,'split':record['split'],'cache_path':str(out_path),'cache_sha256':sha256_file(out_path),'cache_size_bytes':out_path.stat().st_size,'source_files_sha256':source_sha,'geom_samples_valid':int(geom_mask.sum()),'track_count':int(len(P)),'track_support_hist':{str(k):int((support==k).sum()) for k in range(2,9)}}
+    return {
+        'asset_id':aid,'split':record['split'],'cache_path':str(out_path),'cache_sha256':sha256_file(out_path),
+        'cache_size_bytes':out_path.stat().st_size,'source_files_sha256':source_sha,
+        'geom_samples_valid':int(geom_mask.sum()),'track_count':int(len(P)),
+        'track_support_hist':{str(k):int((support==k).sum()) for k in range(2,9)},
+    }
 
 
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument('--root',default='/content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3'); ap.add_argument('--seed-manifest',required=True); ap.add_argument('--out',default=None); ap.add_argument('--splits',default='FIT,TUNE'); ap.add_argument('--authorize-sealed',default=''); ap.add_argument('--geom-samples',type=int,default=512); ap.add_argument('--anchors-per-view',type=int,default=48); ap.add_argument('--max-tracks',type=int,default=384); ap.add_argument('--limit',type=int,default=0); ap.add_argument('--resume',action='store_true',default=True); a=ap.parse_args()
-    root=Path(a.root); out=Path(a.out) if a.out else root/'cache'/'IRIS_CONTROLLED_V1'; seed=json.load(open(a.seed_manifest)); requested=[s.strip().upper() for s in a.splits.split(',') if s.strip()]
-    sealed={'CAL','DEV','EXTERNAL_HOLDOUT'}; auth={s.strip().upper() for s in a.authorize_sealed.split(',') if s.strip()}; bad=[s for s in requested if s in sealed and s not in auth]
+    ap=argparse.ArgumentParser()
+    ap.add_argument('--root',default='/content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3')
+    ap.add_argument('--seed-manifest',required=True)
+    ap.add_argument('--out',default=None)
+    ap.add_argument('--splits',default='FIT,TUNE')
+    ap.add_argument('--authorize-sealed',default='')
+    ap.add_argument('--geom-samples',type=int,default=512); ap.add_argument('--anchors-per-view',type=int,default=48); ap.add_argument('--max-tracks',type=int,default=384)
+    ap.add_argument('--limit',type=int,default=0); ap.add_argument('--resume',action='store_true',default=True)
+    a=ap.parse_args()
+    root=Path(a.root); out=Path(a.out) if a.out else root/'cache'/'IRIS_CONTROLLED_V1'
+    seed=json.load(open(a.seed_manifest)); requested=[s.strip().upper() for s in a.splits.split(',') if s.strip()]
+    sealed={'CAL','DEV','EXTERNAL_HOLDOUT'}; auth={s.strip().upper() for s in a.authorize_sealed.split(',') if s.strip()}
+    bad=[s for s in requested if s in sealed and s not in auth]
     if bad: raise RuntimeError(f'FAIL CLOSED: sealed split requested without --authorize-sealed: {bad}')
     records=[r for r in seed['records'] if r['split'] in requested]
     if a.limit: records=records[:a.limit]
-    (out/'assets').mkdir(parents=True,exist_ok=True); progress_path=out/'PREPARE_PROGRESS.json'; done={}
+    (out/'assets').mkdir(parents=True,exist_ok=True); progress_path=out/'PREPARE_PROGRESS.json'
+    done={}
     if progress_path.exists():
         try: done={x['asset_id']:x for x in json.load(open(progress_path)).get('records',[])}
         except Exception: done={}
     rows=[]; start=time.time()
     for i,r in enumerate(records,1):
         aid=r['asset_id']; cp=out/'assets'/f'{aid}.npz'
-        if aid in done and cp.exists() and sha256_file(cp)==done[aid].get('cache_sha256'): row=done[aid]
-        else: row=build_asset(root,r,cp,a.geom_samples,a.anchors_per_view,a.max_tracks)
+        if aid in done and cp.exists() and sha256_file(cp)==done[aid].get('cache_sha256'):
+            row=done[aid]
+        else:
+            row=build_asset(root,r,cp,a.geom_samples,a.anchors_per_view,a.max_tracks)
         rows.append(row)
         if i%10==0 or i==len(records):
-            atomic_json(progress_path,{'schema':'RealSaS.IRISControlledV1.PrepareProgress.v1','requested_splits':requested,'records':rows}); print(f'[prepare] {i}/{len(records)} tracks_median={np.median([x["track_count"] for x in rows]):.1f}')
-    manifest={'schema':'RealSaS.IRISControlledV1.CacheManifest.v1','date':'2026-08-23','root':str(root),'requested_splits':requested,'record_count':len(rows),'records':rows,'source_seed_sha256':sha256_file(a.seed_manifest),'settings':{'geom_samples':a.geom_samples,'anchors_per_view':a.anchors_per_view,'max_tracks':a.max_tracks,'styles':list(STYLES),'views':VIEWS,'normal_authority':'area_weighted_geometric_vertex_normals_from_vertices_faces'},'elapsed_sec':time.time()-start}
-    mp=out/'IRIS_CONTROLLED_V1_CACHE_MANIFEST.json'; atomic_json(mp,manifest); seal={'manifest':str(mp),'manifest_sha256':sha256_file(mp),'record_count':len(rows),'splits':dict(Counter(x['split'] for x in rows)),'cache_bytes':sum(x['cache_size_bytes'] for x in rows)}; atomic_json(out/'IRIS_CONTROLLED_V1_CACHE_SEAL.json',seal); print(json.dumps(seal,indent=2))
+            atomic_json(progress_path,{'schema':'RealSaS.IRISControlledV1.PrepareProgress.v1','requested_splits':requested,'records':rows})
+            print(f'[prepare] {i}/{len(records)} tracks_median={np.median([x["track_count"] for x in rows]):.1f}')
+    manifest={'schema':'RealSaS.IRISControlledV1.CacheManifest.v1','date':'2026-08-23','root':str(root),'requested_splits':requested,
+              'record_count':len(rows),'records':rows,'source_seed_sha256':sha256_file(a.seed_manifest),
+              'settings':{'geom_samples':a.geom_samples,'anchors_per_view':a.anchors_per_view,'max_tracks':a.max_tracks,
+                          'styles':list(STYLES),'views':VIEWS,'normal_authority':'area_weighted_geometric_vertex_normals_from_vertices_faces'},
+              'elapsed_sec':time.time()-start}
+    mp=out/'IRIS_CONTROLLED_V1_CACHE_MANIFEST.json'; atomic_json(mp,manifest)
+    seal={'manifest':str(mp),'manifest_sha256':sha256_file(mp),'record_count':len(rows),'splits':dict(Counter(x['split'] for x in rows)),
+          'cache_bytes':sum(x['cache_size_bytes'] for x in rows)}
+    atomic_json(out/'IRIS_CONTROLLED_V1_CACHE_SEAL.json',seal)
+    print(json.dumps(seal,indent=2))
 if __name__=='__main__': main()

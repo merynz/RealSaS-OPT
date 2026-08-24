@@ -57,6 +57,7 @@ def script_hashes(here: Path) -> dict[str, str]:
         "representation_authority_study_v1.py",
         "compact_representation_handoff_v1.py",
         "geometry.py",
+        "coords.py",
         "run_representation_authority_v2.py",
     ]
     return {name: sha256_file(here / name) for name in names}

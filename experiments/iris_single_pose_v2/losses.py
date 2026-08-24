@@ -157,6 +157,14 @@ def _fine_offsets(radius_cells: int, device, dtype):
     return torch.stack([xx.reshape(-1), yy.reshape(-1)], dim=-1)
 
 
+def _uniform_track_subsample(ids: torch.Tensor, max_tracks: int) -> torch.Tensor:
+    """Deterministic position-uniform thinning; never take a track-ID prefix."""
+    if ids.numel() <= max_tracks:
+        return ids
+    take = torch.linspace(0, ids.numel() - 1, steps=max_tracks, device=ids.device)
+    return ids[take.round().to(torch.long)]
+
+
 def fine_local_loss(outputs, batch, radius_cells=4, temperature=0.05, max_tracks_per_pair=64):
     zf = outputs["Z_fine"]
     bsz, views, dim, hf, wf = zf.shape
@@ -177,7 +185,7 @@ def fine_local_loss(outputs, batch, radius_cells=4, temperature=0.05, max_tracks
                 ids = torch.nonzero(vis[b, :, s] & vis[b, :, t], as_tuple=False).flatten()
                 if ids.numel() == 0:
                     continue
-                ids = ids[:max_tracks_per_pair]
+                ids = _uniform_track_subsample(ids, max_tracks_per_pair)
                 src = xy[b, ids, s]
                 truth = xy[b, ids, t]
                 qs = sample_field(zf[b:b+1, s:s+1], src[None, None])[0, 0]

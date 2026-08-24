@@ -86,7 +86,7 @@ Mini artifact:
 - ZIP SHA-256 `9dcb53a5c8447b0c0fcf8f31d618143fe619262204bbd44c5fd9ae7de911612c`
 - independent ZIP SHA replay PASS
 - all internal SHA256SUMS PASS
-- isolated compile/dependency/semantic replay PASS
+- isolated bundle compile/dependency/semantic replay PASS
 - learner partial-visibility regression PASS
 - membership/TUNE/runtime firewall PASS
 - CPU R256/geom1024/tracks128 full-loss forward/backward PASS
@@ -118,6 +118,8 @@ Launcher pre-handoff validation:
 - exact CI202/V4 bundle SHA/content/internal hashes replay PASS
 - exact artifact partial-visibility, mini-contract and AMP-loss regressions replay PASS
 - minimal 186-record runtime seed PASS
+- runtime representation-seed CLI absent PASS
+- FIT-only training TUNE CLI absent PASS
 - capacity PASS additionally requires `diagnostic_stage=complete`, `loss_dtype=torch.float32`, finite gradients and AdamW moment-memory accounting with scientific optimizer steps=0
 - run output streams live; nonzero scientific run writes a failure record with the last 500 lines
 - completion marker remains last-write authority

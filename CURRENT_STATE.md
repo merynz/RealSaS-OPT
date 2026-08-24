@@ -3,129 +3,150 @@
 **Date:** 2026-08-24  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_SUFFICIENT__CI202_RAW_XYZ_DIAGNOSTIC_COMPLETE__P_V3_G0_PASS__CI237_G1_V1_APPARATUS_FALSE_REJECT__CI244_G1_V2_NEXT__OPTIMIZER_ZERO__TRAINING_FORBIDDEN`
-
-> **Execution-source rule:** corrected P Formulation V3 G1 authority is bundle V2 from code-bearing head `985997ba87faa92cc004ad9ab70efeacc400886f`, GitHub Actions run #244 / run ID `32746353085`, artifact ID `9527242584`, ZIP SHA-256 `e04bc7c9638038688304b558cb816f8bccaf5e253bc2195977c0c2328f693667`. Later docs commits do not change that authority.
+**Status:** `P_GEOMETRY_SUFFICIENT__CI202_RAW_XYZ_DIAGNOSTIC_COMPLETE__CI244_V3_FIXED_SCALE_FALSIFIED__P_V4_OBSERVABLE_SCALE_FROZEN__OPTIMIZER_ZERO__TRAINING_FORBIDDEN`
 
 ## Single continuation authority
 
-The active implementation remains `experiments/iris_single_pose_v2/`.
+Active implementation: `experiments/iris_single_pose_v2/`.
 
-Current P-V3 authority:
+Current scientific gate:
 
-- `P_FORMULATION_V3_CLOSURE_PREREG_20260824.md`
-- `P_FORMULATION_V3_PANEL_V1.json`
-- `p_formulation_corpus_audit_v1.py`
-- `p_formulation_master_geometry_firewall_preflight_v1.py`
-- `P_FORMULATION_V3_CI237_APPARATUS_SUPERSESSION_20260824.md`
-- CI244 immutable closure bundle V2.
+- `P_FORMULATION_V4_OBSERVABLE_SCALE_CLOSURE_PREREG_20260824.md`
+- `model_pv4.py`
+- `p_formulation_v4_preflight.py`
+- `p_formulation_v4_corpus_audit.py`
+- same frozen 16-asset FIT panel: `P_FORMULATION_V3_PANEL_V1.json`
 
-Drive mirror:
-
-`RealSaS_MASTER_CORPUS_1024_V3/reports/iris_single_pose_v2/IRIS_V2_P_FORMULATION_V3_CLOSURE_BUNDLE_CI244_V2.zip`
-
-Canonical corrected G1 notebook:
-
-`RealSaS_IRIS_P_Formulation_V3_Closure_CI244_V2.ipynb`
-
-Notebook SHA-256:
-
-`f05b6a420045d9184880915d7454b852250e1ad8c6920bba44025f6f81402b3e`
-
-Persistent corrected result destination:
-
-`RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_FORMULATION_V3_CLOSURE_CI244_V2_RESULT`
+**TRAINING FORBIDDEN.** The latest workflow must release only an optimizer-zero P-V4 closure artifact. Do not reuse the CI202 learner prereg/checkpoint and do not open TUNE/CAL/DEV/EXTERNAL during formulation closure.
 
 ## Representation gate remains CLOSED/PASS
 
-CI104 label remains `P_GEOMETRY_SUFFICIENT`. P ontology is unchanged: canonical/object-frame physical surface position of the observed physical locus.
+CI104 label remains `P_GEOMETRY_SUFFICIENT`: exact legal P is sufficient for same-locus correspondence on the frozen representation panel. The current work changes extractor parameterization, not P ontology.
 
-CI202 is a completed historical learner diagnostic under the old free-XYZ P extractor. It is not checkpoint-compatible with P-V3.
+P remains the canonical/object-frame position of the observed physical surface locus.
 
-## P Formulation V3
+N remains observation-local orientation supervision/diagnostic only and is forbidden from correspondence admission/ranking and checkpoint selection.
 
-Known orthographic camera gives two P coordinates analytically:
+## CI202 — historical raw-XYZ learner diagnostic
 
-```text
-P = 0.54*gx*right(theta)
-  - 0.54*gy*up
-  + depth*forward(theta)
-```
+CI202/V4 completed cleanly under the old free 3-channel XYZ P head. Selected epoch16 / optimizer step512.
 
-Only `depth = P·forward(theta)` is learned.
+Key FIT_SELECT metrics:
 
-The depth head receives explicit `(gx,gy,sin(yaw),cos(yaw))`. P supervision is scalar depth SmoothL1; reconstructed 3D Euclidean P remains evaluation/U_geo authority. N/Zc/Zf authority roles are unchanged.
+- P p95 `0.344555` vs frozen `<=0.005`;
+- Zc@8 `0.789931`;
+- oracle Zf p95 `35.947` native px.
 
-## G0 — CLOSED/PASS
+TUNE P p95 `0.413841` and Zc@8 `0.762019` showed that the primary failure was absolute extraction precision, not a large generalization gap.
 
-Synthetic/executable P-V3 closure passes at 256/512/1024, including native1024 -> 512x512 P field, analytic screen-plane invariants, finite backward, nonzero depth-head gradient, AMP loss boundary, matcher role separation and evaluator/cache regressions.
+The CI202 checkpoint is historical and incompatible with later P formulations.
 
-## CI237 G1 V1 — preserved apparatus false reject
+## P-V3 formulation diagnosis
 
-CI237 result root is preserved:
+Post-CI202 audit showed:
 
-`runs/IRIS_SINGLE_POSE_V2_P_FORMULATION_V3_CLOSURE_CI237_RESULT`
+- R/2=128 P-field discretization at the 256 mini is not an adequate explanation for P p95 ~0.34; a real native1024 oracle-style 128 field gave ~0.0017 p95;
+- triangle+barycentric -> canonical P -> raster projection is correct to near numerical precision on audited real data;
+- canonical geometry is centered/unit-scaled;
+- the free XYZ head was unnecessarily asked to rediscover two coordinates already fixed by orthographic observation geometry.
 
-It persisted `P_V3_CORPUS_GEOMETRY_CLOSURE_FAIL`, but **no scientific geometry metric opened**. All 16 assets were rejected solely because V1 required the master `primary_geometry.npz` field set to equal exactly `{vertices,faces}`.
+P-V3 therefore changed to one learned camera-forward depth scalar plus analytic screen-plane reconstruction.
 
-That condition contradicted the frozen preregistration. The master source is intentionally a superset; the G1 consumer is required to **read only** `vertices` and `faces`, not require the source container to contain only those names.
+## CI237 V1 — preserved apparatus false reject
 
-CI237 V1 aggregate gauge/projection/reconstruction summaries were therefore `n=0`. It does not support a geometry/formulation failure claim.
+CI237 G1 emitted `P_V3_CORPUS_GEOMETRY_CLOSURE_FAIL`, but all 16 assets were rejected before geometry metrics opened because V1 incorrectly required the master NPZ field set to equal exactly `{vertices,faces}`.
 
 Canonical classification:
 
 `APPARATUS_FALSE_REJECT__MASTER_NPZ_SUPERSET_MISTAKEN_FOR_CONSUMPTION_LEAK`
 
-## CI244 correction — CLOSED at apparatus level
+The result root is preserved and must not be overwritten.
 
-V2 semantics:
+## CI244 V2 — valid P-V3 real-corpus result
 
-- master NPZ may be a superset;
-- only `vertices` and `faces` values are loaded;
-- hidden field names may be recorded, hidden values are not consumed;
-- missing `vertices` or `faces` remains fatal;
-- object-dtype hidden-field tripwire proves accidental hidden-value consumption would fail under `allow_pickle=False`.
+CI244 corrected only the source-container firewall: master NPZ may be a superset, while the G1 consumer loads values only from `vertices` and `faces`. Hidden object-dtype tripwire regression passed.
 
-CI244 passed:
+Authority:
 
-- all prior P-V3/model/cache/matcher/evaluator regressions;
-- master geometry superset firewall regression;
-- hidden object-dtype tripwire;
-- panel firewall;
-- isolated uploadable V2 bundle dependency/content replay.
+- code-bearing head `985997ba87faa92cc004ad9ab70efeacc400886f`;
+- Actions run #244 / ID `32746353085`;
+- artifact ID `9527242584`;
+- ZIP SHA-256 `e04bc7c9638038688304b558cb816f8bccaf5e253bc2195977c0c2328f693667`.
 
-The independently downloaded V2 artifact also matched GitHub SHA and passed internal SHA256SUMS + isolated preflights.
+Valid G1 result: `P_V3_CORPUS_GEOMETRY_CLOSURE_FAIL`, **fatal 2/16 only**.
 
-## CURRENT GATE — corrected G1 real-corpus geometry closure
+Across all 16 assets:
 
-Same frozen 16 FIT-only sentinel assets and same preregistered thresholds as CI237:
+- canonical bbox-center infinity norm max `2.98e-08`;
+- largest bbox extent min/median/max `0.99999994 / 1.0 / 1.0`;
+- max absolute canonical coordinate `0.5`;
+- raster-P projection p95 across-asset max `6.72e-08`;
+- projection fraction >1e-3 max `0.00024414`;
+- exact-depth analytic reconstruction p95 across-asset max `4.00e-08`.
 
-- 8 FIT_SELECT sentinels;
-- 8 FIT_TRAIN sentinels;
-- geometry + camera + raster only;
-- no RGB;
-- no TUNE;
-- no CAL/DEV/EXTERNAL;
-- optimizer steps 0.
+Thus canonical gauge, raster/triangle/barycentric P authority, yaw/basis convention and the analytic P decomposition are healthy.
 
-Allowed labels remain exactly:
+### The only falsified V3 assumption
 
-- `P_V3_FORMULATION_GEOMETRY_CLOSED`
-- `P_V3_CORPUS_GEOMETRY_CLOSURE_FAIL`
+14/16 assets use `half_extent=0.54` and pass every V3 gate.
 
-CI237 result must not be overwritten. Corrected V2 uses the distinct CI244 result root above.
+Two assets are internally self-consistent but use a different constant acquisition scale across all eight views:
 
-## Training policy
+- `asset_00aa1b666ba193851a498194`: `0.5570941257476807`;
+- `asset_76313e4bd82b82fcd1659c70`: `0.6172158837318421`.
 
-**TRAINING FORBIDDEN.**
+Their projection and exact-depth reconstruction remain near numerical zero. Therefore **hardcoded 0.54 is falsified; P geometry is not**.
 
-Do not reuse the CI202 mini prereg or checkpoint. If corrected G1 PASSes, next gate is a separately frozen FIT-only depth/P overfit diagnostic. TUNE stays closed during reformulation debugging.
+Canonical interpretation:
 
-## Normal policy
+`P_FORMULATION_V3_CANONICAL_INTERPRETATION_CI244_20260824.md`
 
-`NORMAL_CORRESPONDENCE_AUTHORITY_NOT_ESTABLISHED`.
+## P-V4 — image-derived observable sheet scale
 
-`geom_n` remains observation-local orientation supervision/diagnostic only. N is forbidden from correspondence admission/ranking and checkpoint selection.
+Do not feed `camera.json half_extent` into IRIS. Product IRIS remains image-only.
+
+Canonical largest bbox extent is one. With ordered views:
+
+- V0 horizontal occupancy exposes X extent;
+- V2 horizontal occupancy exposes Y extent;
+- image height exposes Z extent.
+
+For RGBA alpha foreground:
+
+```text
+w0 = V0 bbox width / R
+w2 = V2 bbox width / R
+hz = max bbox height over V0..V7 / R
+m = max(w0,w2,hz)
+h_sheet = 1/(2*m)
+```
+
+P-V4 reconstructs:
+
+```text
+P = h_sheet*gx*right(yaw)
+  - h_sheet*gy*up
+  + depth*forward(yaw)
+```
+
+Only depth is learned. The depth head receives `(gx,gy,sin(yaw),cos(yaw),h_sheet)`. `h_sheet` is deterministic image-derived gauge, not a learned latent and not camera metadata.
+
+Manual alpha checks on the two CI244 fatal assets produced scale errors versus diagnostic camera metadata of about `0.00186` and `0.00114`, motivating but not closing V4.
+
+## CURRENT GATE — P-V4 optimizer-zero closure
+
+Frozen prereg: `P_FORMULATION_V4_OBSERVABLE_SCALE_CLOSURE_PREREG_20260824.md`.
+
+G0 requires synthetic image-only observable-scale closure at 256/512/1024 and representative scales near 0.54/0.557/0.617, finite full loss/backward and nonzero depth-head gradient.
+
+G1 uses the **same frozen 16 FIT-only assets**. No substitution. Camera metadata is teacher-side diagnostic only. For each asset, both styles and resolutions 256/512/1024 must satisfy reconstructed 3D P p95 `<=0.005` when the screen-plane scale comes only from alpha and exact teacher depth is used solely as an optimizer-zero ceiling.
+
+Allowed G1 labels:
+
+- `P_V4_OBSERVABLE_SCALE_GEOMETRY_CLOSED`
+- `P_V4_OBSERVABLE_SCALE_GEOMETRY_FAIL`
+
+Only after G0+G1 PASS may a separate FIT-only P-V4 depth overfit prereg be frozen. No learner optimizer step is currently authorized.
 
 ## Research rule
 

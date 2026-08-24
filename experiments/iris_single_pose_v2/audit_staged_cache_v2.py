@@ -16,8 +16,9 @@ SEALED_SPLITS = {"CAL", "DEV", "EXTERNAL_HOLDOUT"}
 VIEWS = 8
 STYLES = ("cel_clean", "ink_cel")
 CAMERA_CONTRACT = "realsas.level_orthographic_z_orbit.v1"
-ORTHO_HALF_EXTENT = 0.54
 AUTHORITY_RESOLUTION = 1024
+P_TARGET_P95 = 0.005
+ALPHA_THRESHOLD_U8 = 128
 
 
 def atomic_json(path, obj):
@@ -77,6 +78,33 @@ def geometry_gauge(vertices: np.ndarray):
     }
 
 
+def _bbox_span(mask: np.ndarray, coordinate: str) -> int:
+    if mask.ndim != 2:
+        raise ValueError(mask.shape)
+    if coordinate == "x":
+        occupied = mask.any(axis=0)
+    elif coordinate == "y":
+        occupied = mask.any(axis=1)
+    else:
+        raise ValueError(coordinate)
+    ids = np.flatnonzero(occupied)
+    if not len(ids):
+        raise RuntimeError("blank alpha support")
+    return int(ids[-1] - ids[0] + 1)
+
+
+def observable_half_extent(alpha_masks: list[np.ndarray], resolution: int) -> float:
+    if len(alpha_masks) != VIEWS or resolution <= 0:
+        raise RuntimeError("incomplete staged alpha sheet")
+    w0 = _bbox_span(alpha_masks[0], "x") / float(resolution)
+    w2 = _bbox_span(alpha_masks[2], "x") / float(resolution)
+    hz = max(_bbox_span(m, "y") for m in alpha_masks) / float(resolution)
+    occ = max(w0, w2, hz)
+    if not np.isfinite(occ) or occ <= 0:
+        raise RuntimeError(f"invalid staged alpha occupancy: {occ}")
+    return float(0.5 / occ)
+
+
 def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_record: dict | None):
     aid = stage_record["asset_id"]
     split = str(stage_record["split"]).upper()
@@ -124,8 +152,6 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
             fatal.append("nonfinite_vertices")
         if len(vertices):
             gauge = geometry_gauge(vertices)
-            # Canonical corpus is centered/unit-scaled. Tolerances deliberately allow numeric/render repair noise,
-            # but reject source-unit leakage or a materially shifted gauge.
             if gauge["max_abs_coordinate"] > 0.55:
                 fatal.append(f"canonical_coordinate_envelope_exceeded:{gauge['max_abs_coordinate']}")
             if gauge["bbox_center_inf"] > 0.01:
@@ -136,8 +162,10 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
         fatal.append("missing_staged_geometry")
 
     cams = []
+    camera_half_extents = []
     raster_counts = []
     input_resolution = int(marker.get("input_resolution", 0) or 0)
+    alpha_masks = {style: [] for style in STYLES}
     for v in range(VIEWS):
         vd = ar / "renders" / f"V{v}"
         try:
@@ -148,8 +176,11 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
                 fatal.append(f"V{v}:yaw_mismatch")
             if cam.get("contract") != CAMERA_CONTRACT:
                 fatal.append(f"V{v}:camera_contract:{cam.get('contract')}")
-            if abs(float(cam.get("half_extent", np.nan)) - ORTHO_HALF_EXTENT) > 1e-6:
-                fatal.append(f"V{v}:half_extent:{cam.get('half_extent')}")
+            he = float(cam.get("half_extent", np.nan))
+            if not np.isfinite(he) or he <= 0:
+                fatal.append(f"V{v}:invalid_half_extent:{he}")
+            else:
+                camera_half_extents.append(he)
             if cam.get("image_origin") != "TOP_LEFT" or cam.get("image_y_direction") != "DOWN" or cam.get("ndc_y_direction") != "UP":
                 fatal.append(f"V{v}:image_coordinate_contract")
             er, eu, ef = expected_camera_basis(yaw)
@@ -188,6 +219,21 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
                 with Image.open(ip) as im:
                     if im.mode != "RGBA" or im.size != (input_resolution, input_resolution):
                         fatal.append(f"V{v}:{style}:bad_input:{im.mode}:{im.size}")
+                    else:
+                        alpha_masks[style].append(np.asarray(im.getchannel("A"), np.uint8) >= ALPHA_THRESHOLD_U8)
+
+    camera_half_extent = float(np.median(camera_half_extents)) if camera_half_extents else None
+    if len(camera_half_extents) != VIEWS:
+        fatal.append("camera_half_extent_missing")
+    elif float(np.max(np.abs(np.asarray(camera_half_extents) - camera_half_extent))) > 1e-6:
+        fatal.append(f"camera_half_extent_not_constant:{camera_half_extents}")
+
+    observable_half_extents = {}
+    for style in STYLES:
+        try:
+            observable_half_extents[style] = observable_half_extent(alpha_masks[style], input_resolution)
+        except Exception as e:
+            fatal.append(f"observable_scale:{style}:{type(e).__name__}:{e}")
 
     if cache_record.get("schema") != "RealSaS.IRISSinglePoseV2.CacheAsset.v2":
         fatal.append(f"bad_cache_schema:{cache_record.get('schema')}")
@@ -208,6 +254,7 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
     exact_projection_max_grid_error = None
     geom_projection_p95_grid_error = None
     geom_projection_fraction_gt_1e3 = None
+    observable_P_p95 = {}
     max_surface_error = None
     support_min = None
     support_median = None
@@ -234,8 +281,7 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
                         fatal.append("geometry_normal_not_unit")
                     if float(np.max(np.abs(gp_[gm]))) > 0.55:
                         fatal.append("geom_p_outside_canonical_envelope")
-                # Direct teacher invariant: the P reconstructed from triangle+barycentric at a raster
-                # observation must project back to that observation coordinate under the same camera.
+
                 proj_err = []
                 for v, cam in enumerate(cams):
                     mv = gm[v]
@@ -254,6 +300,34 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
                         fatal.append(f"geom_p_projection_outlier_fraction:{geom_projection_fraction_gt_1e3}")
                 else:
                     fatal.append("no_geom_projection_samples")
+
+                # P-V4 learner-side geometry gate: screen-plane scale must be recoverable from
+                # staged RGBA alpha alone. Camera half_extent is diagnostic and is never used here.
+                for style, hobs in observable_half_extents.items():
+                    errs = []
+                    for v, cam in enumerate(cams):
+                        mv = gm[v]
+                        if cam is None or not np.any(mv):
+                            continue
+                        right, up, forward = expected_camera_basis(float(cam["yaw_deg"]))
+                        q = gp_[v, mv]
+                        grid = gxy[v, mv]
+                        depth = q @ forward
+                        recon = (
+                            hobs * grid[:, 0, None] * right[None]
+                            - hobs * grid[:, 1, None] * up[None]
+                            + depth[:, None] * forward[None]
+                        )
+                        errs.append(np.linalg.norm(recon - q, axis=1))
+                    if errs:
+                        e = np.concatenate(errs).astype(np.float64)
+                        p95 = float(np.percentile(e, 95))
+                        observable_P_p95[style] = p95
+                        if p95 > P_TARGET_P95:
+                            fatal.append(f"observable_P_p95_gate:{style}:{p95}")
+                    else:
+                        fatal.append(f"no_observable_P_samples:{style}")
+
                 tp = truth_data["track_p"].astype(np.float32)
                 xy = truth_data["track_xy"].astype(np.float32)
                 vis = truth_data["track_visible"].astype(bool)
@@ -310,6 +384,9 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
         "exact_projection_max_grid_error": exact_projection_max_grid_error,
         "geom_projection_p95_grid_error": geom_projection_p95_grid_error,
         "geom_projection_fraction_gt_1e3": geom_projection_fraction_gt_1e3,
+        "camera_half_extent": camera_half_extent,
+        "observable_half_extent": observable_half_extents,
+        "observable_P_p95": observable_P_p95,
         "canonical_bbox_center_inf": gauge["bbox_center_inf"] if gauge else None,
         "canonical_largest_extent": gauge["largest_extent"] if gauge else None,
         "canonical_max_abs_coordinate": gauge["max_abs_coordinate"] if gauge else None,
@@ -348,8 +425,15 @@ def main():
             print(f"[stage-cache-audit] {i}/{len(srows)} fatal_assets={sum(bool(r['fatal']) for r in rows)}", flush=True)
 
     fatal = [r for r in rows if r["fatal"]]
+    observable_p = [
+        p95 for r in rows for p95 in r["observable_P_p95"].values() if p95 is not None
+    ]
+    camera_h = [r["camera_half_extent"] for r in rows if r["camera_half_extent"] is not None]
+    observable_h = [
+        h for r in rows for h in r["observable_half_extent"].values() if h is not None
+    ]
     report = {
-        "schema": "RealSaS.IRISSinglePoseV2.StageCacheAudit.v2",
+        "schema": "RealSaS.IRISSinglePoseV2.StageCacheAudit.v3",
         "optimizer_steps": 0,
         "stage_manifest": str(Path(a.stage_manifest).resolve()),
         "cache_manifest": str(Path(a.cache_manifest).resolve()),
@@ -365,18 +449,26 @@ def main():
         "continuous_projection_grid_error_max": percentiles([r["exact_projection_max_grid_error"] for r in rows if r["exact_projection_max_grid_error"] is not None]),
         "geom_p_projection_p95_grid_error": percentiles([r["geom_projection_p95_grid_error"] for r in rows if r["geom_projection_p95_grid_error"] is not None]),
         "geom_p_projection_fraction_gt_1e3": percentiles([r["geom_projection_fraction_gt_1e3"] for r in rows if r["geom_projection_fraction_gt_1e3"] is not None]),
+        "camera_half_extent_diagnostic": percentiles(camera_h),
+        "observable_half_extent_from_staged_alpha": percentiles(observable_h),
+        "observable_P_p95": percentiles(observable_p),
+        "observable_P_p95_gate": P_TARGET_P95,
         "canonical_bbox_center_inf": percentiles([r["canonical_bbox_center_inf"] for r in rows if r["canonical_bbox_center_inf"] is not None]),
         "canonical_largest_extent": percentiles([r["canonical_largest_extent"] for r in rows if r["canonical_largest_extent"] is not None]),
         "canonical_max_abs_coordinate": percentiles([r["canonical_max_abs_coordinate"] for r in rows if r["canonical_max_abs_coordinate"] is not None]),
         "fatal_assets": fatal,
         "camera_contract": CAMERA_CONTRACT,
-        "orthographic_half_extent": ORTHO_HALF_EXTENT,
+        "camera_half_extent_policy": "finite positive constant per asset; diagnostic only; never model input",
+        "P_screen_plane_scale_authority": "staged RGBA alpha occupancy + canonical max bbox extent=1",
         "authority_resolution": AUTHORITY_RESOLUTION,
         "density_policy": "4096-class targets are audited as achieved-when-coverage-permits; no asset is failed merely for having fewer persistent physical loci than the cap.",
         "status": "PASS" if not fatal and set(r["split"] for r in rows) <= OPEN_SPLITS else "FAIL",
     }
     atomic_json(a.out, report)
-    print(json.dumps({k: report[k] for k in ("status", "asset_count", "fatal_asset_count", "split_counts", "source_registry_counts", "track_count", "canonical_largest_extent", "geom_p_projection_p95_grid_error")}, indent=2))
+    print(json.dumps({k: report[k] for k in (
+        "status", "asset_count", "fatal_asset_count", "split_counts", "source_registry_counts",
+        "track_count", "canonical_largest_extent", "geom_p_projection_p95_grid_error", "observable_P_p95"
+    )}, indent=2))
 
 
 if __name__ == "__main__":

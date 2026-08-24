@@ -26,18 +26,19 @@ def smooth_l1_vec(pred, target, beta=0.01):
 
 
 def geometry_loss(outputs, batch):
-    grid = batch["geom_xy"]
-    gt_p = batch["geom_p"]
-    gt_n = batch["geom_n"]
+    grid = batch["geom_xy"].float()
+    gt_p = batch["geom_p"].float()
+    gt_n = batch["geom_n"].float()
     mask = batch["geom_mask"].float()
-    pr_p = sample_field(outputs["P"], grid)
-    pr_n = sample_field(outputs["N"], grid)
+    # AMP boundary: model activations may be FP16, but all supervision/loss numerics are FP32.
+    pr_p = sample_field(outputs["P"].float(), grid)
+    pr_n = sample_field(outputs["N"].float(), grid)
     p_elem = smooth_l1_vec(pr_p, gt_p, 0.01)
     n_elem = 1.0 - (pr_n * gt_n).sum(-1).clamp(-1.0, 1.0)
     den = mask.sum().clamp_min(1.0)
     lp = (p_elem * mask).sum() / den
     ln = (n_elem * mask).sum() / den
-    s = sample_field(outputs["U_geo"], grid)[..., 0]
+    s = sample_field(outputs["U_geo"].float(), grid)[..., 0]
     euclid_detached = torch.linalg.norm(pr_p.detach() - gt_p, dim=-1)
     lu = ((torch.exp(-s) * euclid_detached + s) * mask).sum() / den
     return {
@@ -78,8 +79,9 @@ def _positive_set_cycle_loss(pab, pba, source_positive_set, target_positive_set)
 
 
 def pairwise_coarse_objective(zs, zt, p, temperature=0.08, same_radius=0.003, far_radius=0.025, margin=0.10):
-    zs = F.normalize(zs, dim=-1, eps=1e-8)
-    zt = F.normalize(zt, dim=-1, eps=1e-8)
+    # Similarity / softmax / margin numerics stay FP32 under autocast.
+    zs = F.normalize(zs.float(), dim=-1, eps=1e-8)
+    zt = F.normalize(zt.float(), dim=-1, eps=1e-8)
     logits = (zs @ zt.T) / temperature
     dist = torch.cdist(p.float(), p.float())
     pos = dist <= same_radius
@@ -114,7 +116,7 @@ def observation_supcon(z, p, vis, temperature=0.08, same_radius=0.003, far_radiu
     if idx.shape[0] < 3:
         return z.sum() * 0.0
     idx = _uniform_observation_subsample(idx, max_obs)
-    f = F.normalize(z[idx[:, 0], idx[:, 1]], dim=-1, eps=1e-8)
+    f = F.normalize(z[idx[:, 0], idx[:, 1]].float(), dim=-1, eps=1e-8)
     pp = p[idx[:, 1]].float()
     sim = (f @ f.T) / temperature
     dist = torch.cdist(pp, pp)
@@ -128,7 +130,7 @@ def coarse_correspondence_loss(outputs, batch):
     xy = batch["track_xy"].permute(0, 2, 1, 3).contiguous()
     vis = batch["track_visible"].bool()
     p = batch["track_p"]
-    z = sample_field(outputs["Z_coarse"], xy)
+    z = sample_field(outputs["Z_coarse"].float(), xy.float())
     duals, hards, recips, globals_ = [], [], [], []
     for b in range(z.shape[0]):
         globals_.append(observation_supcon(z[b], p[b], vis[b]))
@@ -166,7 +168,8 @@ def _uniform_track_subsample(ids: torch.Tensor, max_tracks: int) -> torch.Tensor
 
 
 def fine_local_loss(outputs, batch, radius_cells=4, temperature=0.05, max_tracks_per_pair=64):
-    zf = outputs["Z_fine"]
+    # Local correlation / CE numerics stay FP32 under autocast.
+    zf = outputs["Z_fine"].float()
     bsz, views, dim, hf, wf = zf.shape
     xy = batch["track_xy"]
     vis = batch["track_visible"].bool()
@@ -220,7 +223,7 @@ def fine_local_loss(outputs, batch, radius_cells=4, temperature=0.05, max_tracks
 def track_p_consistency_loss(outputs, batch):
     xy = batch["track_xy"].permute(0, 2, 1, 3).contiguous()
     vis = batch["track_visible"].bool()
-    p = sample_field(outputs["P"], xy)
+    p = sample_field(outputs["P"].float(), xy.float())
     losses = []
     for b in range(p.shape[0]):
         for t in range(p.shape[2]):

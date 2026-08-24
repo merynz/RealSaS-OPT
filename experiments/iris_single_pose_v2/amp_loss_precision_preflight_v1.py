@@ -67,6 +67,7 @@ def main():
     track_xy = torch.rand(b, tracks, v, 2) * 1.6 - 0.8
     geom_xy = torch.rand(b, v, geom, 2) * 1.6 - 0.8
     batch = {
+        "yaw_deg": torch.arange(v, dtype=torch.float32)[None] * 45.0,
         "geom_xy": geom_xy,
         "geom_p": torch.randn(b, v, geom, 3),
         "geom_n": F.normalize(torch.randn(b, v, geom, 3), dim=-1),
@@ -98,6 +99,7 @@ def main():
         "gpu_preflight_boundary_enforced": True,
         "coarse_half_input_promoted_to_fp32": True,
         "all_loss_fields_half_input": True,
+        "P_depth_supervision_known_yaw_bound": True,
         "full_loss_dtype": str(total.dtype),
         "full_loss_finite": True,
         "backward_finite": True,

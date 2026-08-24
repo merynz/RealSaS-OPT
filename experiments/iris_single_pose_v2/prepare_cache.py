@@ -7,6 +7,7 @@ import os
 import tempfile
 import time
 from pathlib import Path
+
 import numpy as np
 
 from geometry import (
@@ -61,7 +62,12 @@ def _sample_rows(n, take, seed):
 def _builder_sha256() -> dict[str, str]:
     here = Path(__file__).resolve()
     geometry = here.with_name("geometry.py")
-    return {"prepare_cache.py": sha256_file(here), "geometry.py": sha256_file(geometry)}
+    coords = here.with_name("coords.py")
+    return {
+        "prepare_cache.py": sha256_file(here),
+        "geometry.py": sha256_file(geometry),
+        "coords.py": sha256_file(coords),
+    }
 
 
 def _cache_input_fingerprint(ar: Path, aid: str, split: str, settings: dict) -> tuple[str, dict]:
@@ -89,7 +95,7 @@ def build_asset(
     max_surface_error=0.003,
 ):
     aid = record["asset_id"]
-    split = record["split"]
+    split = str(record["split"]).upper()
     ar = stage_root / "assets" / aid
     cp = out / "truth" / f"{aid}.npz"
     mp = out / "meta" / f"{aid}.json"
@@ -100,6 +106,8 @@ def build_asset(
         "radius_px": int(radius_px),
         "max_surface_error": float(max_surface_error),
         "track_xy_authority": "exact_continuous_projection_after_raster_surface_witness",
+        "geom_n_authority": "same raster observation locus as geom_p; local orientation target only",
+        "track_n_view_authority": "nearby visibility-witness diagnostic only; forbidden as correspondence ranking truth",
     }
     input_fingerprint, input_dependencies = _cache_input_fingerprint(ar, aid, split, settings)
     if cp.exists() and mp.exists():
@@ -125,7 +133,7 @@ def build_asset(
             ras.append({k: ra[k] for k in ra.files})
         cams.append(json.load(open(vd / "camera.json", encoding="utf-8")))
         pix = ras[-1]["pixel_linear_index"]
-        if len(pix) == 0 or np.any(pix[1:] < pix[:-1]):
+        if len(pix) == 0 or np.any(pix[1:] <= pix[:-1]):
             raise RuntimeError(f"bad raster {aid} V{v}")
     yaws = np.asarray([float(c["yaw_deg"]) for c in cams], np.float32)
     if not np.allclose(yaws, np.arange(8, dtype=np.float32) * 45.0, atol=1e-4):
@@ -165,27 +173,24 @@ def build_asset(
     track_n_view = np.zeros((T, VIEWS, 3), np.float32)
     for v in range(VIEWS):
         ok, g, err, row = choose_visible_correspondence(
-            P,
-            cams[v],
-            ras[v],
-            vertices,
-            faces,
-            vn,
-            radius_px,
-            max_surface_error,
+            P, cams[v], ras[v], vertices, faces, vn, radius_px, max_surface_error
         )
+        if ok.shape != (T,) or g.shape != (T, 2) or err.shape != (T,) or row.shape != (T,):
+            raise RuntimeError(
+                f"visible-correspondence shape drift {aid} V{v}: "
+                f"ok={ok.shape} g={g.shape} err={err.shape} row={row.shape} T={T}"
+            )
         track_vis[:, v] = ok
         track_xy[ok, v] = g[ok]
-        track_err[:, v] = err[ok]
+        track_err[ok, v] = err[ok]
         if np.any(ok):
             _, nn = reconstruct_surface(
-                vertices,
-                faces,
-                vn,
+                vertices, faces, vn,
                 ras[v]["triangle_id"][row[ok]],
                 ras[v]["barycentric_uv"][row[ok]],
             )
             track_n_view[ok, v] = nn
+
     support = track_vis.sum(1)
     keep = np.flatnonzero(support >= 2)
     if not len(keep):
@@ -203,6 +208,13 @@ def build_asset(
     track_err = track_err[keep]
     track_n_view = track_n_view[keep]
     support = support[keep]
+
+    if track_err.shape != track_vis.shape:
+        raise RuntimeError(f"track error/visibility shape mismatch {aid}: {track_err.shape} vs {track_vis.shape}")
+    if np.any(track_vis.astype(bool) & ~np.isfinite(track_err)):
+        raise RuntimeError(f"visible track without finite witness error {aid}")
+    if np.any(~track_vis.astype(bool) & np.isfinite(track_err)):
+        raise RuntimeError(f"hidden track unexpectedly received finite witness error {aid}")
 
     atomic_npz(
         cp,
@@ -257,23 +269,12 @@ def main():
     result = []
     t = time.time()
     for i, r in enumerate(rows, 1):
-        result.append(
-            build_asset(
-                stage_root,
-                r,
-                out,
-                a.geom_samples,
-                a.anchors_per_view,
-                a.max_tracks,
-                a.radius_px,
-                a.max_surface_error,
-            )
-        )
+        result.append(build_asset(
+            stage_root, r, out, a.geom_samples, a.anchors_per_view,
+            a.max_tracks, a.radius_px, a.max_surface_error,
+        ))
         if i % 5 == 0 or i == len(rows):
-            print(
-                f"[prep-v2] {i}/{len(rows)} tracks_med={np.median([x['track_count'] for x in result]):.0f}",
-                flush=True,
-            )
+            print(f"[prep-v2] {i}/{len(rows)} tracks_med={np.median([x['track_count'] for x in result]):.0f}", flush=True)
     manifest = {
         "schema": CACHE_MANIFEST_SCHEMA,
         "authority_resolution": 1024,
@@ -287,6 +288,8 @@ def main():
             "radius_px": a.radius_px,
             "max_surface_error": a.max_surface_error,
             "track_truth": "geometry-only physical locus with exact continuous projection",
+            "geom_n_truth": "same raster observation locus as geom_p; local orientation target only",
+            "track_n_view_truth": "nearby visibility witness diagnostic only; not correspondence rank authority",
             "images": "staged PNGs; not duplicated into truth NPZ",
         },
         "builder_sha256": _builder_sha256(),

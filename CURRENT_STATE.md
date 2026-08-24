@@ -24,6 +24,18 @@ Drive mirror:
 
 `RealSaS_MASTER_CORPUS_1024_V3/reports/iris_single_pose_v2/IRIS_V2_P_FORMULATION_V3_CLOSURE_BUNDLE_CI244_V2.zip`
 
+Canonical corrected G1 notebook:
+
+`RealSaS_IRIS_P_Formulation_V3_Closure_CI244_V2.ipynb`
+
+Notebook SHA-256:
+
+`f05b6a420045d9184880915d7454b852250e1ad8c6920bba44025f6f81402b3e`
+
+Persistent corrected result destination:
+
+`RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_FORMULATION_V3_CLOSURE_CI244_V2_RESULT`
+
 ## Representation gate remains CLOSED/PASS
 
 CI104 label remains `P_GEOMETRY_SUFFICIENT`. P ontology is unchanged: canonical/object-frame physical surface position of the observed physical locus.
@@ -101,7 +113,7 @@ Allowed labels remain exactly:
 - `P_V3_FORMULATION_GEOMETRY_CLOSED`
 - `P_V3_CORPUS_GEOMETRY_CLOSURE_FAIL`
 
-CI237 result must not be overwritten. Corrected V2 uses a distinct CI244 result root.
+CI237 result must not be overwritten. Corrected V2 uses the distinct CI244 result root above.
 
 ## Training policy
 

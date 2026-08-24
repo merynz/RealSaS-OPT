@@ -87,6 +87,8 @@ Mini artifact:
 - TUNE staging before checkpoint freeze=false
 - sealed splits opened=false
 
+Bundle schema remains V3 because the scientific/runtime data contract is unchanged; CI183 exact head+artifact SHA supersede the known-bad CI174 V3 bytes. Do not use CI174 V3.
+
 Drive immutable mirror:
 
 `RealSaS_MASTER_CORPUS_1024_V3/reports/iris_single_pose_v2/IRIS_V2_MINI_EXTRACTABILITY_BUNDLE_CI183.zip`

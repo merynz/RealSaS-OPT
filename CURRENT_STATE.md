@@ -3,7 +3,7 @@
 **Date:** 2026-08-24  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_SUFFICIENT__P_V5_FORMULATION_CLOSED__FIELD_REPRESENTATION_CLOSED__R256_ONE_CELL_OVERFIT_PREREG_NEXT`
+**Status:** `P_GEOMETRY_SUFFICIENT__P_V5_FORMULATION_CLOSED__FIELD_REPRESENTATION_CLOSED__R256_ONE_CELL_PREREG_FROZEN__CPU_PREFLIGHT_PASS__GPU_RUN_NEXT`
 
 ## Single continuation authority
 
@@ -85,18 +85,6 @@ Canonical persisted result:
 
 `IRIS_SINGLE_POSE_V2_P_V5_FIELD_REPRESENTATION_CLOSURE_V1/P_V5_FIELD_REPRESENTATION_CLOSURE.json`
 
-Frozen gate:
-
-- same 8 pre-result FIT_TRAIN sentinels;
-- both styles = 16 cells;
-- 4096 deterministic visible raster-authority samples/view;
-- no CNN/model weights;
-- neural optimizer steps 0;
-- no TUNE/CAL/DEV/EXTERNAL;
-- no `camera.json` / teacher camera half extent;
-- candidate scalar depth fields 64×64, 128×128, 256×256;
-- full canonical P Euclidean p95 threshold `<=0.005` per cell.
-
 Result:
 
 | field | interpretation | worst-cell P p95 |
@@ -105,17 +93,11 @@ Result:
 | 128×128 (R/2) | NOT_CERTIFIED | `0.01284720621837844` |
 | 256×256 (R) | CERTIFIED 16/16 | `0.0008174655519194024` |
 
-R256 global P p95 by style is `0.0005262544635931412`. The smallest tested certified field is therefore **256×256**.
+R256 global P p95 by style is `0.0005262544635931412`. The smallest tested certified field is **256×256**. Canonical label: `P_V5_FIELD_REPRESENTATION_CLOSED`.
 
-Canonical label:
-
-`P_V5_FIELD_REPRESENTATION_CLOSED`
-
-Important interpretation: failed L2-oracle resolutions are `NOT_CERTIFIED`, not formal mathematical impossibility proofs. Full R is positively certified and is the current legal neural output-field target.
+Failed L2-oracle resolutions are `NOT_CERTIFIED`, not formal mathematical impossibility proofs. Full R is positively certified and is the current legal neural output-field target.
 
 ## R256 learner promotion ladder — CONDITIONAL / FROZEN ORDER
-
-The learner scale-up order is fixed as follows unless controlled evidence requires a preregistered revision:
 
 ```text
 R256 field representation
@@ -129,29 +111,109 @@ R256 field representation
 unseen-family generalization
 ```
 
-Promotion rule: a stage must be completed and interpreted as PASS before the next stage is authorized. A FAIL localizes work at the current stage under the research-order rule; it does not authorize skipping ahead to a broader corpus or generalization experiment.
+Promotion rule: a stage must complete and be interpreted as PASS before the next stage is authorized. A FAIL localizes work at the current stage and does not authorize skipping ahead.
 
-This ladder controls the current P learner work only. It does not freeze later Geppetto/Arachne training organization.
+This ladder controls current P learner work only. It does not freeze later Geppetto/Arachne training organization.
 
-## NEXT GATE — R256 one-asset / one-style learner overfit
+## CURRENT GATE — R256 one-asset / one-style learner overfit
 
-The next authorized research action is to preregister a **single FIT asset × single style R256 learner overfit** before any broader learner run.
+Preregistration is frozen:
+
+- `P_V5_R256_ONE_CELL_PREREG_20260824.md`
+- `P_V5_R256_ONE_CELL_MEMBERSHIP_V1.json`
+- source authority commit: `5fed9ed277f5937fb2eba4db6c4dfeabc2796d4a`
+
+Frozen cell:
+
+- asset `asset_76313e4bd82b82fcd1659c70`
+- style `cel_clean`
+- split `FIT`
+- selected before learner optimization from completed field-closure evidence; no post-result switching.
 
 Purpose:
 
-> With P ontology, V5 analytic reconstruction and R256 output representation already closed/certified, can the current visual learner optimize one fixed observation cell to P p95 <= 0.005?
+> With P ontology, V5 analytic reconstruction and R256 output representation already closed/certified, can the visual learner optimize one fixed observation cell to canonical `P_p95 <= 0.005`?
 
-Required discipline:
+### True full-R intervention
 
-- R256 **input and P/depth output field**;
-- same V5 native-scale-once/yaw formulation;
-- P/depth objective only;
-- no TUNE/CAL/DEV/EXTERNAL;
-- no hidden camera metadata;
-- preflight must verify exact 256×256 output shape and evaluator sampling semantics before optimizer step 1;
-- no broader 2-style/8-asset/generalization experiment until the one-cell result is interpreted.
+A bare `R128 -> bilinear upsample -> depth` is forbidden. The R256 gate adds a direct full-resolution image-conditioned P branch:
 
-Candidate sentinel selection must be frozen in the preregistration before training; selection rationale must be recorded and no post-result switching is permitted.
+```text
+R256 RGBA ─────────────→ full-resolution image stem ─┐
+R256 RGBA → encoder → y2@R128 → upsample to R256 ──┤
+                                                     ↓
+                                            R256 feature fusion
+                                                     ↓
+                                            scalar depth d@R256
+                                                     ↓
+                                             analytic P@R256
+```
+
+N/U/Z diagnostic heads remain frozen and outside the objective.
+
+### Frozen optimizer protocol
+
+- seed `20260824`
+- AdamW `lr=3e-4`, betas `(0.9,0.95)`, weight decay `0`
+- one fixed cell / all 8 views per step
+- 2048 planned optimizer steps
+- checkpoints: `64,128,256,512,1024,2048`
+- FP16 AMP neural forward; FP32 P/depth objective/evaluation
+- SmoothL1 camera-forward depth, beta `0.01`
+- full canonical P Euclidean p95 is decision authority
+- PASS iff selected `P_p95 <= 0.005`
+- no augmentation
+- no TUNE/CAL/DEV/EXTERNAL
+- no `camera.json` / teacher camera half extent.
+
+### Preparation/preflight authority
+
+Local final-source CPU preflight: PASS at scientific optimizer step 0.
+
+Verified before release:
+
+- syntax compile PASS;
+- exact frozen one-cell membership PASS;
+- upstream P-V5 byte identity PASS;
+- native-scale regression PASS;
+- metadata/split firewall PASS;
+- P output equals input resolution rather than R/2 PASS;
+- direct full-resolution image branch present PASS;
+- nonzero finite gradients in both full-resolution image stem and P depth head PASS;
+- N/U/Z frozen heads receive no gradients PASS.
+
+Local machine has no CUDA; production R256 GPU preflight is intentionally **not claimed**. The notebook must execute a zero-optimizer-step CUDA R256 forward/backward preflight before staging/training and fail closed if it does not pass.
+
+Scientific optimizer steps during preparation: `0`.
+
+## NEXT EXECUTABLE STEP
+
+Notebook:
+
+`RealSaS_IRIS_PV5_R256_OneCell_Overfit_V1.ipynb`
+
+Runtime: **CUDA GPU required.**
+
+Run All will:
+
+1. mount Drive and require CUDA;
+2. SHA-verify the embedded exact source bundle;
+3. rerun CPU contract preflight at optimizer 0;
+4. verify persisted field-closure parent authority;
+5. run production R256 CUDA forward/backward preflight at optimizer 0;
+6. stage/cache only the frozen FIT/cel_clean cell;
+7. freeze `PREOPT_AUTHORITY.json`;
+8. train/evaluate the 2048-step R256 one-cell gate;
+9. persist canonical output to:
+
+`MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_V5_R256_ONE_CELL_OVERFIT_V1`
+
+Decision policy:
+
+- PASS → preregister **1 asset × 2 styles R256 overfit only**;
+- FAIL → localize R256 learner/optimizer; do not reopen closed P ontology, V5 analytic geometry or free-R256 representation without contradictory evidence.
+
+No broader learner/generalization training is authorized before this result is interpreted.
 
 ## Research rule
 

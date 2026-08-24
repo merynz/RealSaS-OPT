@@ -1,18 +1,42 @@
 {
-  "schema": "RealSaS.IRISSinglePoseV2.PV5R256OptimizerLocalizationRelease.v1",
-  "status": "PREPARED_NOT_RUN",
-  "parent_run": "MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_V5_R256_ONE_CELL_OVERFIT_V1",
-  "parent_selected_step": 2048,
-  "parent_selected_P_p95": 0.005682396539486942,
-  "parent_checkpoint_sha256": "cad4421ae728848bbf9181c87e0d4912c38ec6f94d61c86cd114ad0a251c79ee",
-  "output_root": "MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_V5_R256_OPTIMIZER_LOCALIZATION_V1",
-  "runtime": "CUDA GPU required",
   "arms": [
-    {"name": "A_LR3E4_CONTROL", "lr": 0.0003, "restart_steps": 512},
-    {"name": "B_LR1E4", "lr": 0.0001, "restart_steps": 512},
-    {"name": "C_LR3E5", "lr": 0.00003, "restart_steps": 512}
+    {
+      "lr": 0.0003,
+      "name": "A_LR3E4_CONTROL",
+      "restart_steps": 512
+    },
+    {
+      "lr": 0.0001,
+      "name": "B_LR1E4",
+      "restart_steps": 512
+    },
+    {
+      "lr": 3e-05,
+      "name": "C_LR3E5",
+      "restart_steps": 512
+    }
   ],
-  "eval_steps": [0, 64, 128, 256, 512],
-  "threshold_P_p95": 0.005,
-  "broader_training_authorized": false
+  "broader_training_authorized": false,
+  "bundle_sha256": "53c34fd494fc9a8dd258f90220c1f2db5511931d43892c07dca79e2243e1d93f",
+  "eval_steps": [
+    0,
+    64,
+    128,
+    256,
+    512
+  ],
+  "next_executable": "RealSaS_IRIS_PV5_R256_Optimizer_Localization_V1.ipynb",
+  "notebook_sha256": "4f482bd9e4a7c4d54386bb62bea3e56fe8ae40f00facb14a94c7f1927a41328b",
+  "output_root": "MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_V5_R256_OPTIMIZER_LOCALIZATION_V1",
+  "parent_checkpoint_sha256": "cad4421ae728848bbf9181c87e0d4912c38ec6f94d61c86cd114ad0a251c79ee",
+  "parent_run": "MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_V5_R256_ONE_CELL_OVERFIT_V1",
+  "parent_selected_P_p95": 0.005682396539486942,
+  "parent_selected_step": 2048,
+  "repo_source_binding_commit": "924664896240effbd83deb737da2ad67b26032cd",
+  "runner_sha256": "f5b984caf7056c0b773e6a36517f69d42ae569526d77f9b58cf9f1b064c9184",
+  "runtime": "CUDA GPU required",
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256OptimizerLocalizationRelease.v1",
+  "scientific_optimizer_steps_during_preparation": 0,
+  "status": "PREREG_FROZEN__SOURCE_BOUND__GPU_RUN_NEXT",
+  "threshold_P_p95": 0.005
 }

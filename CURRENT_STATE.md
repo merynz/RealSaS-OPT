@@ -3,7 +3,7 @@
 **Date:** 2026-08-25  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_SUFFICIENT__P_V5_FORMULATION_CLOSED__FIELD_REPRESENTATION_CLOSED__R256_ONE_CELL_FROZEN_FAIL_0P005682__OPTIMIZER_LOCALIZATION_NEXT`
+**Status:** `P_GEOMETRY_SUFFICIENT__P_V5_FORMULATION_CLOSED__FIELD_REPRESENTATION_CLOSED__R256_ONE_CELL_FROZEN_FAIL_0P005682__OPTIMIZER_LOCALIZATION_PREREG_FROZEN__GPU_RUN_NEXT`
 
 ## Single continuation authority
 
@@ -172,6 +172,30 @@ Three independent 512-step fresh-AdamW restart arms from the exact same checkpoi
 Common betas `(0.9,0.95)`, weight decay `0`, same P/depth objective, same evaluator, no augmentation, no TUNE/CAL/DEV/EXTERNAL, no hidden camera metadata.
 
 Any arm reaching `P_p95 <= 0.005` closes one-cell learner/optimizer sufficiency and authorizes preregistration of **1 asset × 2 styles R256 only**. If all fail, remain at one-cell and inspect residual-tail/objective/feature-capacity evidence.
+
+### Executable handoff
+
+Validated source runner:
+
+`experiments/iris_single_pose_v2/pv5_r256_optimizer_localization_v1.py`
+
+Repo source-binding commit:
+
+`924664896240effbd83deb737da2ad67b26032cd`
+
+Next notebook:
+
+`RealSaS_IRIS_PV5_R256_Optimizer_Localization_V1.ipynb`
+
+Notebook SHA-256:
+
+`4f482bd9e4a7c4d54386bb62bea3e56fe8ae40f00facb14a94c7f1927a41328b`
+
+Bundle SHA-256:
+
+`53c34fd494fc9a8dd258f90220c1f2db5511931d43892c07dca79e2243e1d93f`
+
+Preparation scientific optimizer steps: `0`.
 
 ## Research rule
 

@@ -29,7 +29,7 @@ Source ordered panel-ID digest: `366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745
 
 Mini membership **canonical JSON** SHA-256: `4e223c799cf479a210716a86701ab96459673fe21852142e7cc7bd3a9d30e055`. Canonical JSON means parsed JSON serialized with sorted keys and compact separators; packaging byte SHA is independently bound by bundle `SHA256SUMS.txt`.
 
-Frozen roles: FIT_TRAIN=128; FIT_SELECT=32; TUNE_FINAL=26 (all TUNE assets from the frozen CI104 panel); unused FIT=70. Roles are asset-disjoint. CAL/DEV/EXTERNAL_HOLDOUT remain unopened. Rare FIT source/capability strata count<=3 are forced into FIT_TRAIN before deterministic SHA-based dominant-stratum selection. FIT_SELECT receives no gradients. TUNE_FINAL is never used for checkpoint selection.
+Frozen roles: FIT_TRAIN=128; FIT_SELECT=32; TUNE_FINAL=26 (all TUNE assets from the frozen CI104 panel); unused FIT=70. Roles are asset-disjoint. CAL/DEV/EXTERNAL_HOLDOUT remain unopened. Rare FIT source/capability strata count<=3 are forced into FIT_TRAIN before deterministic SHA-based dominant-stratum selection. FIT_SELECT receives no gradients. TUNE_FINAL is never used for checkpoint selection. **Hard TUNE staging firewall:** before checkpoint selection is frozen, no TUNE_FINAL RGBA, raster authority, camera, derived truth cache, or TUNE cache manifest may be staged, decoded, hashed for learner apparatus, or evaluated. Pre-optimizer knowledge is restricted to the already-frozen TUNE asset-ID membership in the prereg. After `CHECKPOINT_SELECTION_FROZEN.json` exists, the exact 26 TUNE_FINAL assets may be staged/cached once for the single final evaluation.
 
 ## Image/style policy
 
@@ -55,11 +55,11 @@ Frozen lower-is-better selection key:
 
 `P_p95/0.005 + max(0,1-Zc_top8)/0.10 + oracle_Zf_top1_p95_native_px/16 + max(0,0.75-family_Zc_top8_p10)/0.25 + family_P_p95_p90/0.0065 + max(0,0.85-min_style_Zc_top8)/0.15 + max_style_P_p95/0.0065`.
 
-Tie -> earlier epoch. N is absent. Random-init FIT_SELECT is diagnostic. TUNE remains untouched until checkpoint freeze.
+Tie -> earlier epoch. N is absent. Random-init FIT_SELECT is diagnostic. Phase A accepts only FIT_TRAIN/FIT_SELECT cache paths and has no TUNE CLI argument. TUNE images/truth remain untouched until `CHECKPOINT_SELECTION_FROZEN.json` is written.
 
 ## Final TUNE / frozen labels
 
-Evaluate exactly one selected checkpoint on all26 TUNE_FINAL assets, both styles; 24 queries/asset/style, qualification8. No reselection/threshold changes.
+Only after the FIT checkpoint freeze, stage/cache exactly the 26 frozen TUNE_FINAL assets, audit that TUNE-only apparatus, then evaluate exactly one selected checkpoint on all26 TUNE_FINAL assets, both styles; 24 queries/asset/style, qualification8. No reselection/threshold changes. The run authority must record `tune_stage_started_after_checkpoint_freeze=true`.
 
 FIT_SELECT core: P p95<=0.005; Zc Recall@8>=0.90; oracle Zf top1 p95<=16 native px.
 

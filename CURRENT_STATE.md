@@ -3,7 +3,7 @@
 **Date:** 2026-08-24  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `R0_R3_REPRESENTATION_ONLY_CI86_FROZEN__REAL_RUN_NEXT__OPTIMIZER_ZERO__TRAINING_FORBIDDEN`
+**Status:** `R0_R3_REPRESENTATION_ONLY_CI96_FROZEN__REAL_RUN_NEXT__OPTIMIZER_ZERO__TRAINING_FORBIDDEN`
 
 ## Read this first
 
@@ -17,24 +17,26 @@ The preserved pre-audit branch is `g0-g1/single-pose-geometry`. Controlled V1/M2
 
 Current authority:
 
-`experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_EXECUTION_FREEZE_CI86_20260824.md`
+`experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_EXECUTION_FREEZE_CI96_20260824.md`
 
-CI69 is superseded at the apparatus/data-staging layer only. Its real run was interrupted during RGB-heavy staging before cache/audit/study result generation; no R0-R3 scientific result was opened. R0-R3 definitions did not change.
+CI69 and CI86 are superseded at the apparatus layer only. No R0-R3 scientific result was opened under either launcher.
+
+CI86 reached representation-only staging `256/256`, then failed before cache generation because its uploaded execution bundle omitted the local dependency `coords.py` required by `geometry.py`. This was a packaging/CI-coverage failure, not a representation result.
 
 ### Exact code authority
 
-- exact code-bearing head: `e32089498054948aa53b74e728d6ad8d7946693f`
+- exact code-bearing head: `2f1b8ff199f0c147b9641ff2ec2cd22f56c67cb5`
 - workflow: `IRIS V2 Preflight`
-- run: **#86**
-- run ID: `32675574055`
+- run: **#96**
+- run ID: `32677490168`
 - conclusion: **SUCCESS**
-- artifact ID: `9502554757`
-- artifact: `iris-v2-r0-r3-execution-bundle-v2`
-- artifact ZIP SHA-256: `aa6bba667d1b53e5634b5ed9e6274cceca4437130be9d00ef0f72d3f970470df`
+- artifact ID: `9503132948`
+- artifact: `iris-v2-r0-r3-execution-bundle-v3`
+- artifact ZIP SHA-256: `488e053bbdcd84eb846b3cc856984f70c69f026220256c2872fa44eea35fb7ee`
 
 Drive mirror:
 
-`RealSaS_MASTER_CORPUS_1024_V3/reports/iris_single_pose_v2/IRIS_V2_R0_R3_REPRESENTATION_ONLY_BUNDLE_CI86.zip`
+`RealSaS_MASTER_CORPUS_1024_V3/reports/iris_single_pose_v2/IRIS_V2_R0_R3_REPRESENTATION_ONLY_BUNDLE_CI96.zip`
 
 Drive file ID:
 
@@ -42,11 +44,38 @@ Drive file ID:
 
 Prepared launcher:
 
-`RealSaS_IRIS_V2_R0_R3_Representation_Only_CI86.ipynb`
+`RealSaS_IRIS_V2_R0_R3_Representation_Only_CI96.ipynb`
 
 Notebook SHA-256:
 
-`5870a4fc37cfa854c11dd118f492ad1244007f845a34be30a280d1b4338fedf0`
+`d0cb6260bcd021a1286d2ad16e18f9f184f3122626d8cea215b04fcedccaebcd`
+
+## CI96 bundle closure
+
+CI96 changes apparatus/provenance only; frozen R0-R3 scientific definitions are unchanged.
+
+The uploadable bundle now contains the complete local execution dependency set:
+
+- `build_representation_seed_v1.py`
+- `stage_representation_authority_v1.py`
+- `prepare_representation_cache_v1.py`
+- `audit_representation_stage_cache_v1.py`
+- `representation_authority_study_v1.py`
+- `compact_representation_handoff_v1.py`
+- `geometry.py`
+- `coords.py`
+- `run_representation_authority_v2.py`
+
+CI no longer tests only the repository checkout. Before artifact upload it now:
+
+1. scans bundled Python imports against repository-local modules and fails on any missing local dependency;
+2. copies the representation-only synthetic smoke into the bundle directory and runs it from there;
+3. compiles the isolated bundle;
+4. verifies `SHA256SUMS.txt`;
+5. removes all test `__pycache__` artifacts;
+6. asserts the exact final bundle file set before upload.
+
+Run #96 passed the isolated dependency-closure/synthetic-smoke step and the exact bundle-content assertion.
 
 ## Representation-only execution boundary
 
@@ -64,7 +93,7 @@ It does **not** stage, decode, hash, or consume `cel_clean` / `ink_cel` images. 
 
 The physical/fingerprint boundary also excludes hidden rig/mechanics fields from `primary_geometry.npz`.
 
-CI86 dedicated representation-data preflight proves:
+The dedicated representation-data preflight proves:
 
 1. deliberately invalid RGB decoys are never read;
 2. RGB mutation does not change the representation-stage fingerprint;
@@ -106,7 +135,7 @@ CAL/DEV/EXTERNAL remain sealed. No resplitting and no post-apparatus asset subst
 - 12 non-empty `(provider, split, strongest-capability)` strata;
 - ordered asset-ID-list SHA-256: `366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961`.
 
-## Frozen R0-R3 semantics — unchanged by CI86
+## Frozen R0-R3 semantics — unchanged by CI96
 
 - SAME-locus truth = exact physical P within `0.003` canonical units;
 - R0 = exact P;
@@ -129,22 +158,13 @@ R4 remains intentionally undefined. If R0-R3 evidence motivates it, a separate f
 
 Preferred launcher:
 
-`RealSaS_IRIS_V2_R0_R3_Representation_Only_CI86.ipynb` -> **Run all**.
+`RealSaS_IRIS_V2_R0_R3_Representation_Only_CI96.ipynb` -> **Run all**.
 
 CPU runtime is sufficient; GPU is not used.
 
-The notebook:
+If the same Colab runtime that completed CI86 representation staging is still alive, the CI96 notebook may salvage that local stage **only after** verifying the CI86 seed, frozen panel digest, identical stage-builder SHA, all 256 stage markers, exact staged file sets/hashes, physical firewall, and absence of RGB. Otherwise it stages fresh.
 
-1. mounts Drive;
-2. copies the small CI86 bundle locally and verifies ZIP/source-head/internal script SHA values;
-3. verifies `representation_authority_geometry_only`, `rgb_staged=false`, `rgb_consumed=false`;
-4. runs only `run_representation_authority_v2.py --mode all` with optimizer=0;
-5. stages only legal geometry+raster+camera into `/content`;
-6. builds/audits exact truth cache locally;
-7. runs the unchanged 38-arm R0-R3 measurement;
-8. on recognized Drive I/O/stall only, retries the exact frozen run with no panel/seed/threshold/scoring changes;
-9. persists final evidence to:
-   `RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_REPRESENTATION_AUTHORITY_V2_CI86_RESULT`.
+The runner/notebook may not decide P sufficiency, R4, SOI-2 or training authorization.
 
 A successful measurement may emit only:
 
@@ -158,11 +178,9 @@ with:
 - `rgb_staged = false`;
 - `rgb_consumed = false`.
 
-The runner/notebook may not decide P sufficiency, R4, SOI-2 or training authorization.
-
 ## NEXT EXECUTABLE STEP
 
-**Run the CI86 representation-only Colab notebook. Do not train.**
+**Run the CI96 representation-only Colab notebook. Do not train.**
 
 After the persistent result exists, inspect the compact handoff + full result + hard-tail and write one canonical interpretation without changing frozen definitions.
 

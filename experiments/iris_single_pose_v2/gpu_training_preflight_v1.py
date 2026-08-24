@@ -78,6 +78,7 @@ def base_report(resolution, mode):
         "grad_accum_prereg": 4,
         "geom_samples": 1024,
         "track_samples": 128,
+        "mixed_precision_policy": "AMP FP16 model forward only; total_loss outside autocast in explicit FP32 numerics",
         "full_loss_enabled": False,
         "forward_backward_executed": False,
         "adamw_moment_memory_accounted_without_step": False,
@@ -93,6 +94,8 @@ def base_report(resolution, mode):
         "elapsed_sec": None,
         "loss": None,
         "shapes": None,
+        "output_dtypes": None,
+        "loss_dtype": None,
         "finite_gradients": None,
         "error_type": None,
         "error": None,
@@ -107,8 +110,9 @@ def cpu_semantic_smoke(report):
     report["parameters"] = count_parameters(model)
     report["diagnostic_stage"] = "cpu_synthetic_batch"
     batch = synthetic_batch(torch.device("cpu"), report["input_resolution"])
-    report["diagnostic_stage"] = "cpu_forward_full_loss"
+    report["diagnostic_stage"] = "cpu_model_forward"
     out = model(batch["images"], batch["yaw_deg"])
+    report["diagnostic_stage"] = "cpu_fp32_full_loss"
     parts = total_loss(out, batch, epoch=3, warmup_epochs=3)
     loss = parts["total"]
     report["full_loss_enabled"] = True
@@ -120,7 +124,9 @@ def cpu_semantic_smoke(report):
     report["forward_backward_executed"] = True
     report["finite_gradients"] = True
     report["loss"] = float(loss.detach().float().cpu())
+    report["loss_dtype"] = str(loss.dtype)
     report["shapes"] = {k: list(v.shape) for k, v in out.items()}
+    report["output_dtypes"] = {k: str(v.dtype) for k, v in out.items()}
     report["status"] = "CPU_SEMANTIC_PASS"
     report["diagnostic_stage"] = "complete"
 
@@ -151,12 +157,18 @@ def cuda_capacity_probe(report):
     report["diagnostic_stage"] = "cuda_synthetic_batch"
     batch = synthetic_batch(dev, report["input_resolution"])
 
-    report["diagnostic_stage"] = "cuda_autocast_forward_full_loss"
+    report["diagnostic_stage"] = "cuda_autocast_model_forward"
     with torch.autocast(device_type="cuda", dtype=torch.float16):
         out = model(batch["images"], batch["yaw_deg"])
-        parts = total_loss(out, batch, epoch=3, warmup_epochs=3)
-        loss = parts["total"]
+    report["output_dtypes"] = {k: str(v.dtype) for k, v in out.items()}
+
+    report["diagnostic_stage"] = "cuda_fp32_full_loss"
+    parts = total_loss(out, batch, epoch=3, warmup_epochs=3)
+    loss = parts["total"]
     report["full_loss_enabled"] = True
+    report["loss_dtype"] = str(loss.dtype)
+    if loss.dtype != torch.float32:
+        raise RuntimeError(f"full loss must be FP32 outside autocast, got {loss.dtype}")
 
     report["diagnostic_stage"] = "cuda_backward"
     loss.backward()

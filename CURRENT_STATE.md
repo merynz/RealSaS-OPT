@@ -3,7 +3,7 @@
 **Date:** 2026-08-24  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_SUFFICIENT__P_V5_NATIVE_SCALE_ONCE_G1_PASS__FORMULATION_CLOSED__OPTIMIZER_ZERO__NEXT_FIT_ONLY_DEPTH_OVERFIT_PREREG`
+**Status:** `P_GEOMETRY_SUFFICIENT__P_V5_FORMULATION_CLOSED__DEPTH_OVERFIT_PREREG_FROZEN__CPU_PREFLIGHT_PASS__GPU_RUN_NEXT`
 
 ## Single continuation authority
 
@@ -18,8 +18,11 @@ Current P authority:
 - `p_formulation_v5_preflight.py`
 - `p_formulation_v5_corpus_audit.py`
 - frozen 16-asset FIT panel: `P_FORMULATION_V3_PANEL_V1.json`
+- `P_V5_DEPTH_OVERFIT_PREREG_20260824.md`
+- `P_V5_DEPTH_OVERFIT_MEMBERSHIP_V1.json`
+- `P_V5_DEPTH_OVERFIT_RELEASE_V1.json`
 
-No general learner training is authorized yet. The next optimizer-bearing experiment must first receive a separately frozen FIT-only depth/P overfit preregistration.
+No general learner training is authorized. Only the preregistered tiny FIT-only P-V5 depth overfit diagnostic is authorized next.
 
 ## Representation gate remains CLOSED/PASS
 
@@ -90,7 +93,7 @@ Forbidden:
 
 `resize -> re-estimate h from degraded alpha`.
 
-Overall extractor remains image-only. Teacher camera half-extent is not an extractor/model input.
+Overall extractor remains image-only apart from the required canonical ordered yaw convention. Teacher camera half-extent is not an extractor/model input.
 
 Learner model boundary:
 
@@ -98,7 +101,7 @@ Learner model boundary:
 
 The scalar is legal only when produced by `estimate_native_sheet_half_extent(native_images, yaw_deg)` from original ordered 1024 RGBA. The helper rejects non-1024 input.
 
-## P-V5 G0 — CLOSED/PASS, CI283
+## P-V5 G0/G1 — CLOSED/PASS, CI283
 
 Exact execution-source head:
 
@@ -108,42 +111,20 @@ GitHub Actions `IRIS V2 Preflight`:
 
 - run #283;
 - run ID `32755463835`;
-- conclusion `SUCCESS`.
-
-Immutable artifact:
-
-- `iris-v2-p-formulation-v5-native-scale-once-closure-bundle-v1`;
+- conclusion `SUCCESS`;
 - artifact ID `9530710851`;
-- ZIP SHA-256 `8e8cc6c723c5f28fcf93a324435bdc8f90ab722b32e75c01feb4953ec912ac68`.
-
-PASS includes native 1024 scale helper boundary, explicit rejection of 512 input, exact scalar transport through R1024/R512/R256, finite full loss/backward, nonzero depth-head gradient, frozen panel firewall, isolated bundle replay and artifact upload.
-
-Drive mirror:
-
-`RealSaS_MASTER_CORPUS_1024_V3/reports/iris_single_pose_v2/IRIS_V2_P_FORMULATION_V5_NATIVE_SCALE_ONCE_CLOSURE_BUNDLE_CI283.zip`
-
-Drive file ID: `12oBvRrcXOYkMWuiSD79nHNt7A3jV8uU2`.
-
-## P-V5 G1 — CLOSED/PASS
+- bundle SHA-256 `8e8cc6c723c5f28fcf93a324435bdc8f90ab722b32e75c01feb4953ec912ac68`.
 
 Persisted scientific result:
 
 `P_V5_NATIVE_SCALE_ONCE_GEOMETRY_CLOSED`
-
-Result root:
-
-`RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_FORMULATION_V5_NATIVE_SCALE_ONCE_CLOSURE_CI283_RESULT`
-
-Result SHA-256:
-
-`e233e5f9dfc15f7888d637e1c047094836f40152b4ab5a066bf49b8569c671c7`
 
 Frozen panel/result integrity:
 
 - 16 FIT-only sentinels;
 - 2 styles;
 - 3 learner-resolution conditions;
-- 96/96 P-p95 cells passed the unchanged `<=0.005` gate;
+- 96/96 P-p95 cells passed unchanged `<=0.005`;
 - fatal assets: 0;
 - max P p95 `0.0013928374974057078`;
 - median P p95 `7.315552629734155e-05`;
@@ -153,38 +134,82 @@ Frozen panel/result integrity:
 - camera half-extent model input false;
 - scale re-estimated after resize false.
 
-Worst hard-scale asset `asset_00aa...` uses native-derived h `0.5589519650655022`; the exact same scalar is transported at R1024/R512/R256 and P p95 is `0.0013928374974057078` in all three conditions.
+Canonical interpretation: `P-V5 native-scale-once geometry formulation is CLOSED/PASS.`
 
-`asset_76313...` uses native-derived h `0.6183574879227053`; P p95 is `0.0008157795993611216` across all three conditions.
+## CURRENT GATE — P-V5 FIT-only depth overfit
 
-Canonical interpretation:
+Preregistration is frozen before optimizer step 1:
 
-`P-V5 native-scale-once geometry formulation is CLOSED/PASS.`
+`experiments/iris_single_pose_v2/P_V5_DEPTH_OVERFIT_PREREG_20260824.md`
 
-No threshold was loosened and no asset-specific rescue branch was introduced.
+Membership is exactly the pre-result frozen 8 `FIT_TRAIN_SENTINEL` assets from the V3 panel; both styles are used, yielding 16 within-panel cells. No FIT_SELECT/TUNE/CAL/DEV/EXTERNAL asset participates.
 
-### Notebook finalization typo
+Causal intervention:
 
-The first CI283 notebook had a post-result Python typo `allowed = {{...}}`, which raised `TypeError: unhashable type: 'set'` after the scientific result JSON had already been written. The scientific runner/result are valid; only completion metadata/authority-copy finalization was interrupted.
+- train encoder + within/cross-view reasoning + context/decoder + `p_depth_head`;
+- freeze N/U/Z heads;
+- optimize only FP32 SmoothL1 on camera-forward depth;
+- evaluate full reconstructed canonical P;
+- canonical yaw comes from V0..V7 ordering;
+- `camera.json` is not consumed by the new stage/cache/training path;
+- native `h_native` is derived once from original 1024 RGBA and transported unchanged.
 
-Recovery notebook:
+Frozen optimizer protocol:
 
-`RealSaS_IRIS_P_Formulation_V5_Native_Scale_Once_Closure_CI283_RECOVERY.ipynb`
+- R256;
+- AdamW lr `3e-4`, betas `(0.9,0.95)`, weight decay `0`;
+- 64 epochs × 16 asset-style cells = 1024 planned optimizer steps;
+- candidate epochs 16/32/48/64;
+- select minimum worst-cell P p95;
+- PASS iff every 16 cell has P p95 `<=0.005` at selected checkpoint.
 
-It detects the existing scientific result and does **not** rerun G1. It revalidates the frozen contract, writes the completion marker and copies authority files.
+Allowed result labels:
 
-## CURRENT GATE — freeze FIT-only depth/P overfit diagnostic
+- `P_V5_DEPTH_OVERFIT_PASS`;
+- `P_V5_DEPTH_OPTIMIZATION_INSUFFICIENT`.
 
-P formulation is closed at optimizer zero. The next question is learned depth extractability/optimization only.
+### Release/preflight state
 
-Before any optimizer step:
+`P_V5_DEPTH_OVERFIT_RELEASE_V1.json`:
 
-1. freeze a new FIT-only overfit preregistration for P-V5;
-2. keep TUNE/CAL/DEV/EXTERNAL closed;
-3. use native-derived transported scale exactly as closed above;
-4. test whether the one-scalar depth learner can drive reconstructed P to the existing precision target on a tiny FIT subset before reopening broader optimization.
+- exact CI283 upstream source byte identity PASS for `coords.py`, `model.py`, `model_pv4.py`, `model_pv5.py`, `geometry.py`;
+- source compile PASS;
+- frozen membership regression PASS;
+- metadata/TUNE/sealed firewall PASS;
+- native-1024 scale regression PASS;
+- non-1024 native-helper rejection PASS;
+- P-only synthetic forward/backward PASS;
+- nonzero finite depth-head gradient PASS;
+- CI283 scale-transport/R256 field-shape regression PASS;
+- synthetic 8-asset stage -> cache -> dataset pipeline PASS;
+- local scientific optimizer steps `0`.
 
-No general mini retraining is authorized until this new overfit gate is frozen.
+GPU capacity preflight is intentionally not claimed locally. The canonical notebook runs an R256 CUDA AMP-forward + FP32 P-only backward with **zero optimizer steps** and fails closed before real training if it does not PASS.
+
+### NEXT EXECUTABLE STEP
+
+Use the canonical notebook:
+
+`RealSaS_IRIS_PV5_Depth_Overfit_V1.ipynb`
+
+Runtime: **CUDA GPU REQUIRED** because it contains training. CPU is sufficient only for preflight/regression.
+
+Run All performs, in order:
+
+1. mount Drive and verify master corpus;
+2. verify embedded source bundle SHA;
+3. rerun CPU contract + CI283 regression;
+4. verify persisted CI283 parent authority;
+5. run zero-step CUDA R256 GPU preflight;
+6. stage/cache exactly 8 FIT assets to local SSD;
+7. freeze pre-optimizer authority;
+8. train P-only V5 overfit;
+9. evaluate all 16 asset-style cells;
+10. persist decision + best checkpoint + authority to:
+
+`MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_V5_DEPTH_OVERFIT_V1`
+
+No broader learner training is authorized by preparation alone.
 
 ## Research rule
 

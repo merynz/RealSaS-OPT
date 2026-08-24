@@ -13,6 +13,7 @@ CAMERA_CONTRACT = "realsas.level_orthographic_z_orbit.v1"
 ORTHO_HALF_EXTENT = 0.54
 AUTHORITY_RESOLUTION = 1024
 VIEWS = 8
+LEGAL_GEOMETRY_FIELDS = ("vertices", "faces")
 
 
 def atomic_json(path, obj):
@@ -74,17 +75,39 @@ def load_panel(path):
     return obj, rows
 
 
+def load_legal_primary_geometry(path: Path):
+    """Consume only vertices/faces from a master NPZ that may legally contain extra fields.
+
+    The master corpus is a superset authority. This optimizer-zero audit must not interpret,
+    deserialize or depend on rig/mechanics metadata. With allow_pickle=False, an object-dtype
+    hidden field acts as an executable bomb if future code accidentally consumes it.
+    """
+    with np.load(path, allow_pickle=False) as z:
+        available = tuple(z.files)
+        missing = [k for k in LEGAL_GEOMETRY_FIELDS if k not in available]
+        if missing:
+            raise RuntimeError(f"missing_legal_geometry_fields:{missing}")
+        vertices = z["vertices"].astype(np.float32)
+        faces = z["faces"].astype(np.int64)
+    return vertices, faces, {
+        "available_field_names": list(available),
+        "consumed_fields": list(LEGAL_GEOMETRY_FIELDS),
+        "ignored_field_names": sorted(set(available) - set(LEGAL_GEOMETRY_FIELDS)),
+        "hidden_field_values_consumed": False,
+    }
+
+
 def inspect_asset(root: Path, role: str, aid: str, samples_per_view: int):
     asset = root / "master" / "assets" / aid
     fatal = []
     gp = asset / "primary_geometry.npz"
     if not gp.is_file():
         return {"asset_id": aid, "role": role, "fatal": ["missing_primary_geometry"]}
-    with np.load(gp, allow_pickle=False) as z:
-        if set(z.files) != {"vertices", "faces"}:
-            return {"asset_id": aid, "role": role, "fatal": [f"geometry_fields:{sorted(z.files)}"]}
-        vertices = z["vertices"].astype(np.float32)
-        faces = z["faces"].astype(np.int64)
+    try:
+        vertices, faces, geometry_io = load_legal_primary_geometry(gp)
+    except Exception as e:
+        return {"asset_id": aid, "role": role, "fatal": [f"primary_geometry:{type(e).__name__}:{e}"]}
+
     if not len(vertices) or not len(faces):
         fatal.append("empty_geometry")
     if not np.isfinite(vertices).all():
@@ -165,11 +188,9 @@ def inspect_asset(root: Path, role: str, aid: str, samples_per_view: int):
         p, _ = reconstruct_surface(vertices, faces, vn, tri[ids], uv[ids])
         grid = pixel_linear_to_grid(pix[ids], res)
         he = float(cam["half_extent"])
-        # Direct image/teacher alignment residual.
         proj = np.stack([(p @ right) / he, -(p @ up) / he], axis=-1).astype(np.float32)
         perr = np.linalg.norm(proj - grid, axis=1).astype(np.float64)
         projection_errors.extend(perr.tolist())
-        # V3 information-preserving reconstruction using only screen coordinate + exact view depth.
         depth = (p @ forward).astype(np.float32)
         p_v3 = (
             he * grid[:, 0, None] * right[None]
@@ -179,17 +200,15 @@ def inspect_asset(root: Path, role: str, aid: str, samples_per_view: int):
         aerr = np.linalg.norm(p_v3 - p, axis=1).astype(np.float64)
         analytic_reconstruction_errors.extend(aerr.tolist())
         depth_values.extend(depth.astype(np.float64).tolist())
-        view_rows.append(
-            {
-                "view": v,
-                "yaw_deg": yaw,
-                "raster_pixels": int(len(pix)),
-                "sample_count": int(len(ids)),
-                "projection_error": summary(perr),
-                "analytic_reconstruction_error": summary(aerr),
-                "depth": summary(depth),
-            }
-        )
+        view_rows.append({
+            "view": v,
+            "yaw_deg": yaw,
+            "raster_pixels": int(len(pix)),
+            "sample_count": int(len(ids)),
+            "projection_error": summary(perr),
+            "analytic_reconstruction_error": summary(aerr),
+            "depth": summary(depth),
+        })
 
     ps = summary(projection_errors)
     ars = summary(analytic_reconstruction_errors)
@@ -205,6 +224,7 @@ def inspect_asset(root: Path, role: str, aid: str, samples_per_view: int):
         "asset_id": aid,
         "role": role,
         "fatal": fatal,
+        "geometry_io": geometry_io,
         "gauge": gauge,
         "camera_basis_error": summary(basis_errors),
         "projection_error": ps,
@@ -231,13 +251,14 @@ def main():
         print(f"[P-V3-corpus] {i}/{len(rows)} {aid} fatal={len(r['fatal'])}", flush=True)
     fatal = [r for r in result if r["fatal"]]
     report = {
-        "schema": "RealSaS.IRISSinglePoseV2.PFormulationV3CorpusClosure.v1",
+        "schema": "RealSaS.IRISSinglePoseV2.PFormulationV3CorpusClosure.v2",
         "status": "P_V3_FORMULATION_GEOMETRY_CLOSED" if not fatal else "P_V3_CORPUS_GEOMETRY_CLOSURE_FAIL",
         "optimizer_steps": 0,
         "training_authorized": False,
         "rgb_consumed": False,
         "tune_consumed": False,
         "sealed_splits_opened": False,
+        "master_geometry_policy": "primary_geometry may be a superset; consume vertices/faces only; hidden field values are not loaded",
         "camera_contract": CAMERA_CONTRACT,
         "orthographic_half_extent": ORTHO_HALF_EXTENT,
         "authority_resolution": AUTHORITY_RESOLUTION,

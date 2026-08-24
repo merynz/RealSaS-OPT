@@ -1,14 +1,49 @@
 from __future__ import annotations
 
+import ast
+import inspect
 import json
+import textwrap
+
 import torch
 import torch.nn.functional as F
 
+import gpu_training_preflight_v1 as gpu_preflight
 import losses
+import train_mini_v2 as train
+
+
+def calls_inside_autocast(fn):
+    tree = ast.parse(textwrap.dedent(inspect.getsource(fn)))
+    calls = []
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.With, ast.AsyncWith)):
+            continue
+        if not any("autocast" in ast.unparse(item.context_expr) for item in node.items):
+            continue
+        for child in ast.walk(node):
+            if isinstance(child, ast.Call):
+                calls.append(ast.unparse(child.func))
+    return calls
+
+
+def assert_forward_only_autocast(fn, label):
+    source = inspect.getsource(fn)
+    inside = calls_inside_autocast(fn)
+    if "total_loss" not in source:
+        raise RuntimeError(f"{label}: total_loss call missing")
+    if any(name.endswith("total_loss") or name == "total_loss" for name in inside):
+        raise RuntimeError(f"{label}: total_loss is nested inside autocast: {inside}")
+    if not any(name == "model" or name.endswith(".model") for name in inside):
+        raise RuntimeError(f"{label}: model forward not found inside autocast: {inside}")
 
 
 def main():
     torch.manual_seed(20260824)
+
+    # Enforce the actual training/capacity context boundary, not only local dtype casts.
+    assert_forward_only_autocast(train.main, "train_mini_v2.main")
+    assert_forward_only_autocast(gpu_preflight.cuda_capacity_probe, "gpu_training_preflight_v1.cuda_capacity_probe")
 
     # Exact regression for the CI183/T4 failure: FP16 similarity followed by -1e9 masked_fill.
     zs = torch.randn(128, 32, dtype=torch.float16)
@@ -58,6 +93,9 @@ def main():
         "schema": "RealSaS.IRISSinglePoseV2.AMPLossPrecisionPreflight.v1",
         "status": "PASS",
         "prior_failure_regression": "FP16 masked_fill -1e9 overflow",
+        "autocast_boundary": "model forward only; total_loss outside autocast",
+        "trainer_boundary_enforced": True,
+        "gpu_preflight_boundary_enforced": True,
         "coarse_half_input_promoted_to_fp32": True,
         "all_loss_fields_half_input": True,
         "full_loss_dtype": str(total.dtype),

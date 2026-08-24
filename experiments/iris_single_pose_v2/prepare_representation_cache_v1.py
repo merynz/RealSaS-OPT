@@ -65,7 +65,12 @@ def sample_rows(n, take, seed):
 def builder_sha256() -> dict[str, str]:
     here = Path(__file__).resolve()
     geometry = here.with_name("geometry.py")
-    return {"prepare_representation_cache_v1.py": sha256_file(here), "geometry.py": sha256_file(geometry)}
+    coords = here.with_name("coords.py")
+    return {
+        "prepare_representation_cache_v1.py": sha256_file(here),
+        "geometry.py": sha256_file(geometry),
+        "coords.py": sha256_file(coords),
+    }
 
 
 def cache_input_fingerprint(ar: Path, aid: str, split: str, settings: dict) -> tuple[str, dict]:
@@ -179,9 +184,14 @@ def build_asset(
         ok, g, err, row = choose_visible_correspondence(
             P, cams[v], ras[v], vertices, faces, vn, radius_px, max_surface_error
         )
+        if ok.shape != (T,) or g.shape != (T, 2) or err.shape != (T,) or row.shape != (T,):
+            raise RuntimeError(
+                f"visibility correspondence shape drift {aid} V{v}: "
+                f"ok={ok.shape} grid={g.shape} err={err.shape} row={row.shape} expected_T={T}"
+            )
         track_vis[:, v] = ok
         track_xy[ok, v] = g[ok]
-        track_err[:, v] = err[ok]
+        track_err[ok, v] = err[ok]
         if np.any(ok):
             _, nn = reconstruct_surface(
                 vertices, faces, vn,

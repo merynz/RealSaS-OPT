@@ -1,0 +1,26 @@
+{
+  "bundle_name": "IRIS_PV5_FIELD_REPRESENTATION_CLOSURE_V1_BUNDLE.zip",
+  "bundle_sha256": "b11acbce31d96faef37821510796b2045eaf4ef63ed10ac82f0d75a2416247ae",
+  "camera_json_consumed_local": false,
+  "cpu_preflight": "PASS",
+  "date": "2026-08-24",
+  "execution": "CPU_ONLY__NO_NEURAL_TRAINING",
+  "historical_depth_overfit_status": "P_V5_DEPTH_OPTIMIZATION_INSUFFICIENT",
+  "neural_optimizer_steps_local": 0,
+  "notebook_name": "RealSaS_IRIS_PV5_Field_Representation_Closure_V1.ipynb",
+  "notebook_sha256": "2183e1bdd977cc624df81d9eb5046ad87b55fa9f4ffb3827490d94ee602f1262",
+  "parent_status": "P_V5_NATIVE_SCALE_ONCE_GEOMETRY_CLOSED",
+  "real_sentinel_v7_validation": "PASS",
+  "schema": "RealSaS.IRISSinglePoseV2.PV5FieldRepresentationRelease.v1",
+  "sealed_splits_opened_local": false,
+  "source_sha256": {
+    "P_V5_FIELD_REPRESENTATION_CLOSURE_PREREG_20260824.md": "9281ff93f167a31838d165e85e86a0f5c22a5099ab83a941d6bb3297e0dbea38",
+    "P_V5_FIELD_REPRESENTATION_MEMBERSHIP_V1.json": "34673edf86ecce6e6fa1a6291567ea4d2cf67cf56ac619665f2ebd28ae96a701",
+    "VALIDATION_CPU_PREFLIGHT.json": "ec9f42159a3befc6d4d64e96c8e8dbef4aad803558a67680c634277c9abeff41",
+    "VALIDATION_REAL_SENTINEL_V7.json": "c58d67bd63894cbad3467321651fbd9e36c18238ebe0bc4d0f529ba2e602c4cf",
+    "pv5_field_representation_closure.py": "e7c37817b6abd0ce3a83dd5e714cdd70268526fb866a08218669a2fecdda2a06",
+    "pv5_field_representation_preflight.py": "40d38a01989aad0a9b64ee5cb4b0d341c76f3df087c651bef433717a7baaa1da"
+  },
+  "status": "READY_FOR_CPU_RUN_ALL",
+  "tune_consumed_local": false
+}

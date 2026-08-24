@@ -3,102 +3,143 @@
 **Date:** 2026-08-24  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_SUFFICIENT__CI202_MINI_COMPLETE__LEARNER_EXTRACTABILITY_NOT_YET_SUFFICIENT__GENERALIZATION_GAP_NOT_PRIMARY__OPTIMIZATION_DIAGNOSTIC_NEXT`
-
-> **Execution-source rule:** CI202 learner result is bound to the tested code-bearing source head `83a856679a3bc4b4c0c894602f55ac1ffd94aa73` / bundle V4. Later interpretation/docs commits do not change that completed-run authority.
+**Status:** `P_GEOMETRY_SUFFICIENT__CI202_RAW_XYZ_DIAGNOSTIC_COMPLETE__P_FORMULATION_V3_IMPLEMENTED__OPTIMIZER_ZERO_CLOSURE_REQUIRED__TRAINING_FORBIDDEN`
 
 ## Single continuation authority
 
-Canonical learner interpretation:
+The sole active candidate implementation remains `experiments/iris_single_pose_v2/`. Controlled V1/M256 is historical/no-run. CI202 remains a completed historical learner diagnostic under its tested raw free-XYZ P architecture; its checkpoint is **not compatible with and not authoritative for P Formulation V3**.
 
-`experiments/iris_single_pose_v2/MINI_EXTRACTABILITY_CANONICAL_INTERPRETATION_CI202_20260824.md`
+Current executable scientific gate:
 
-The sole active candidate implementation remains `experiments/iris_single_pose_v2/`. Controlled V1/M256 is historical/no-run.
+- `experiments/iris_single_pose_v2/P_FORMULATION_V3_CLOSURE_PREREG_20260824.md`
+- `experiments/iris_single_pose_v2/P_FORMULATION_V3_PANEL_V1.json`
+- `experiments/iris_single_pose_v2/p_formulation_corpus_audit_v1.py`
+
+No optimizer is authorized until P-V3 synthetic CI and real-corpus optimizer-zero closure pass.
 
 ## Representation gate remains CLOSED/PASS
 
-CI104 canonical label remains `P_GEOMETRY_SUFFICIENT`. Exact P on the frozen 256 OPEN panel / 12,288 queries was top1/top4/top8=1/1/1; reciprocal=1; cycle=1; physical-error tails zero. CI202 learner failure does **not** reopen R4/SOI-2 or information existence.
+CI104 canonical label remains `P_GEOMETRY_SUFFICIENT`. Exact P on the frozen representation panel was sufficient for physical same-locus correspondence. The CI202 learner failure does **not** reopen R4/SOI-2 or information existence.
 
-## CI202 completed mini authority
+The current correction is an **extractor parameterization correction**, not a change to P's ontology or to the representation result.
 
-Frozen Mini Extractability / Generalization V1 completed successfully at the apparatus/protocol level:
+## CI202 completed diagnostic — historical raw-XYZ learner
 
-- FIT_TRAIN128 / FIT_SELECT32 / TUNE_FINAL26.
-- selected checkpoint epoch16 / optimizer step512.
-- TUNE not used for checkpoint selection.
-- TUNE staging started only after checkpoint freeze.
-- CI104 representation seed not consumed at learner runtime.
-- CAL/DEV/EXTERNAL_HOLDOUT unopened.
-- N remained local-orientation diagnostic/supervision only; no correspondence or checkpoint authority.
-- completed status: `LEARNER_EXTRACTABILITY_NOT_YET_SUFFICIENT`.
+CI202/V4 completed cleanly with FIT_TRAIN128 / FIT_SELECT32 / TUNE_FINAL26, selected epoch16 / optimizer step512, no TUNE checkpoint-selection leakage and no sealed split opening.
 
-Persistent result root:
+Result: `LEARNER_EXTRACTABILITY_NOT_YET_SUFFICIENT`.
 
-`RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_MINI_EXTRACTABILITY_CI202_RESULT`
+FIT_SELECT selected-epoch metrics included:
 
-## What CI202 actually says
+- P p95 0.344555 vs frozen <=0.005 target;
+- Zc@8 0.789931;
+- P-basin top8 0.649306;
+- oracle Zf p95 35.947 native px;
+- end-to-end top8 <=16px 0.827257.
 
-The model learned substantial signal but missed absolute promotion precision.
+TUNE P p95 0.413841 and Zc@8 0.762019 showed no primary generalization collapse; the dominant failure was absolute extraction precision.
 
-Random-init -> selected epoch16 on FIT_SELECT:
+Canonical historical interpretation remains:
 
-- P p95: 3.868741 -> 0.344555 (91.1% reduction).
-- Zc Recall@8: 0.358507 -> 0.789931 (+0.431424).
-- P-basin top8: 0.345486 -> 0.649306.
-- oracle Zf top1 p95: 51.34 -> 35.95 native px.
-- end-to-end top8 hit <=16px: 0.165799 -> 0.827257.
-- N p95 diagnostic: 147.63 -> 67.85 deg.
+`experiments/iris_single_pose_v2/MINI_EXTRACTABILITY_CANONICAL_INTERPRETATION_CI202_20260824.md`
 
-Frozen core thresholds nevertheless fail:
+## Post-CI202 P audit
 
-- FIT P p95 <=0.005 required; observed 0.344555.
-- FIT Zc@8 >=0.90 required; observed 0.789931.
-- FIT oracle Zf p95 <=16 px required; observed 35.947 px.
+The full P geometry chain was re-audited rather than attributing the failure to optimization budget.
 
-TUNE absolute family/style criteria also fail, but **generalization gap itself is not the primary blocker**:
+Findings:
 
-- P p95 FIT 0.344555 -> TUNE 0.413841; ratio 1.2011 <= frozen max 1.5.
-- Zc@8 FIT 0.789931 -> TUNE 0.762019; drop 0.02791 <= frozen max 0.10.
-- end-to-end top8 <=16px FIT 0.827257 -> TUNE 0.823718.
-- oracle Zf p95 FIT 35.947 -> TUNE 37.754 px.
+1. The 128x128 P field used by the R=256 mini is **not itself an adequate explanation** for P p95 ~0.34. A real native-1024 oracle check showed an exact-style 128 bilinear P field can represent the current <=0.005 p95 target on the sampled asset (p95 ~0.0017).
+2. Real `triangle+barycentric -> canonical P -> camera projection` checks support the existing barycentric convention; p95 raster projection residual was near numerical zero on the inspected asset. Sparse outliers were far too rare to explain CI202.
+3. Native RGB/raster alignment checked on a real view; alpha/raster foreground agreed. Staging uses validated native1024 authority and the intended canonical512->256 derivative for the mini.
+4. Sampled master assets were centered/unit-scaled, but the executable learner cache audit previously did not enforce the canonical P gauge/envelope. This audit omission is now closed in code.
+5. The main formulation defect was the free 3-channel absolute XYZ P head. Under the known orthographic camera, two coordinates are already analytic from observation position; only view-depth must be learned.
 
-Aggregate clean-vs-ink style differences are tiny relative to the absolute error; the hard tail is primarily asset/family driven, not a style-domain collapse.
+## P Formulation V3 — implemented, not yet promoted
 
-## Optimization-state diagnosis
+Controlled camera contract:
 
-Do not infer an architecture ceiling from CI202.
+```text
+right(theta)   = (cos theta, -sin theta, 0)
+forward(theta) = (sin theta,  cos theta, 0)
+up             = (0,0,1)
+half_extent    = 0.54
+```
 
-Epoch16 was the best frozen candidate and learning was still improving:
+For normalized image/grid coordinate `(gx,gy)`:
 
-checkpoint score 223.90 (e4) -> 202.84 (e8) -> 198.66 (e12) -> 189.63 (e16).
+```text
+P = 0.54*gx*right(theta)
+  - 0.54*gy*up
+  + depth*forward(theta)
+```
 
-Between epochs12 and16, training P, Zc and Zf objectives continued improving; Zf local top1 also rose. Thus the 16-epoch mini does not show a clean convergence plateau.
+Implementation changes:
 
-At the same time, do **not** authorize a blind larger/full training run. The next scientific question is whether the gap is optimization-budget limited or a current learner objective/architecture ceiling.
+- free `Conv2d(...,3)` P head removed;
+- one scalar camera-forward depth head at R/2;
+- depth head receives explicit normalized `(gx,gy)` and `(sin yaw,cos yaw)` conditioning;
+- public 3D P reconstructed deterministically from camera geometry + depth;
+- no hard depth clip;
+- P learned loss is scalar depth SmoothL1, not an average across three XYZ coordinates;
+- Euclidean reconstructed P remains evaluation and U_geo authority;
+- N/Zc/Zf roles are unchanged.
+
+## New executable gauge / geometry firewall
+
+`audit_staged_cache_v2.py` now fails closed on:
+
+- wrong authority resolution;
+- non-finite or materially noncanonical geometry;
+- max canonical |coordinate| >0.55;
+- bbox center infinity norm >0.01;
+- largest bbox extent outside [0.98,1.02];
+- camera contract / half-extent / yaw / right-up-forward basis mismatch;
+- raster authority not 1024;
+- `geom_p` or `track_p` outside canonical envelope;
+- `geom_p -> camera projection` p95 mismatch;
+- excessive projection-outlier fraction;
+- track continuous-projection or yaw drift.
+
+## CURRENT GATE — P Formulation V3 optimizer-zero closure
+
+G0 — synthetic executable closure:
+
+- camera basis and coordinate formula;
+- R=256/512/1024 P formulation;
+- R/2 field shapes;
+- arbitrary bilinear screen-plane preservation;
+- full finite loss/backward;
+- finite nonzero depth-head gradient;
+- existing matcher role separation and AMP numerics.
+
+G1 — real-corpus geometry closure:
+
+- frozen **16 FIT-only** sentinel assets;
+- geometry + camera + raster only;
+- no RGB required;
+- no TUNE;
+- no CAL/DEV/EXTERNAL;
+- optimizer steps 0;
+- canonical gauge + camera + raster/P alignment + exact-depth reconstruction gates frozen before result.
+
+PASS label: `P_V3_FORMULATION_GEOMETRY_CLOSED`.
+
+FAIL label: `P_V3_CORPUS_GEOMETRY_CLOSURE_FAIL`.
+
+## Training policy
+
+**TRAINING FORBIDDEN.**
+
+Do not reuse the old CI202 Mini V1 prereg with P-V3, and do not release a new training bundle until G0+G1 close. The current GitHub workflow must release only the optimizer-zero P-V3 closure artifact from the latest architecture; old mini V4 remains historical and immutable.
+
+If G0+G1 PASS, the next prereg must be a FIT-only depth/P overfit/optimization diagnostic. TUNE must not be reopened merely to debug the reformulation.
 
 ## Normal policy remains frozen
 
 `NORMAL_CORRESPONDENCE_AUTHORITY_NOT_ESTABLISHED`.
 
 `geom_n` remains legal observation-local orientation supervision and angular diagnostic only. Production correspondence remains Z_coarse + P global admission and Z_fine local refinement. N stays forbidden from correspondence admission/ranking and checkpoint selection.
-
-## NEXT EXECUTABLE STEP
-
-Preregister and run a **FIT-only Optimization Sufficiency Diagnostic**. Do not reuse TUNE for tuning/selection.
-
-Required diagnostic structure:
-
-1. Tiny same-asset overfit arm: can the current architecture/loss drive legal P and local Zf near target on a deliberately small FIT subset?
-2. Longer FIT-only learning-curve arm: does the same frozen learner continue materially improving beyond the 16-epoch budget, or plateau far above target?
-3. Keep current P/Zc/Zf/N authority roles fixed; no TUNE/CAL/DEV/EXTERNAL opening during diagnostic selection.
-
-The diagnostic should support only causal interpretations such as:
-
-- `OPTIMIZATION_BUDGET_LIMITED`
-- `CURRENT_LEARNER_OBJECTIVE_OR_ARCHITECTURE_LIMITED`
-- `MIXED_P_LIMIT__CORRESPONDENCE_HEALTHY`
-
-Do not proceed to SurfaceBuilder/Geppetto/Arachne sufficiency or final1024/product claims until learner extraction is characterized.
 
 ## Research rule
 

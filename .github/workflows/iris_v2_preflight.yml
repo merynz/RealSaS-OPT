@@ -48,6 +48,9 @@ jobs:
       - name: Representation-only geometry data-path preflight
         working-directory: experiments/iris_single_pose_v2
         run: python representation_data_preflight_v1.py
+      - name: Partial-visibility representation cache regression
+        working-directory: experiments/iris_single_pose_v2
+        run: python representation_cache_visibility_preflight_v1.py
       - name: Observable evaluator preflight
         working-directory: experiments/iris_single_pose_v2
         run: python evaluation_preflight.py
@@ -129,12 +132,14 @@ jobs:
           print('local dependency closure PASS')
           PY
           cp "$SRC/representation_data_preflight_v1.py" "$BUNDLE/_isolated_representation_smoke.py"
+          cp "$SRC/representation_cache_visibility_preflight_v1.py" "$BUNDLE/_isolated_partial_visibility_smoke.py"
           (
             cd "$BUNDLE"
             python -m py_compile *.py
             python _isolated_representation_smoke.py
+            python _isolated_partial_visibility_smoke.py
           )
-          rm "$BUNDLE/_isolated_representation_smoke.py"
+          rm "$BUNDLE/_isolated_representation_smoke.py" "$BUNDLE/_isolated_partial_visibility_smoke.py"
           find "$BUNDLE" -type d -name __pycache__ -prune -exec rm -rf {} +
           (
             cd "$BUNDLE"

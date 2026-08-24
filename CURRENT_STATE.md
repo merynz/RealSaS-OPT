@@ -3,14 +3,15 @@
 **Date:** 2026-08-24  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_SUFFICIENT__CI244_V3_FIXED_SCALE_FALSIFIED__P_V4_G0_CI269_PASS__REAL_CORPUS_G1_READY__OPTIMIZER_ZERO__TRAINING_FORBIDDEN`
+**Status:** `P_GEOMETRY_SUFFICIENT__CI269_V4_FAIL__NATIVE1024_OBSERVABLE_SCALE_CLOSED__RESIZED_ALPHA_REESTIMATION_FALSIFIED__OPTIMIZER_ZERO__TRAINING_FORBIDDEN`
 
 ## Single continuation authority
 
 Active implementation: `experiments/iris_single_pose_v2/`.
 
-Current P formulation authority:
+Current interpretation authority:
 
+- `P_FORMULATION_V4_CI269_RESULT_INTERPRETATION_20260824.md`
 - `P_FORMULATION_V4_OBSERVABLE_SCALE_CLOSURE_PREREG_20260824.md`
 - `model_pv4.py`
 - `p_formulation_v4_preflight.py`
@@ -50,14 +51,7 @@ P = h*gx*right(yaw)
 
 Only camera-forward depth is learned.
 
-CI244/V2 was the valid optimizer-zero 16-FIT real-corpus geometry closure for the fixed-`h=0.54` version.
-
-CI244 authority:
-
-- source head `985997ba87faa92cc004ad9ab70efeacc400886f`;
-- Actions run #244 / ID `32746353085`;
-- artifact ID `9527242584`;
-- ZIP SHA-256 `e04bc7c9638038688304b558cb816f8bccaf5e253bc2195977c0c2328f693667`.
+CI244/V2 was the valid optimizer-zero 16-FIT real-corpus geometry closure for fixed `h=0.54`.
 
 Result: `P_V3_CORPUS_GEOMETRY_CLOSURE_FAIL`, fatal `2/16` only.
 
@@ -69,131 +63,115 @@ Across all 16 assets:
 - raster/P projection p95 max ~`6.72e-08`;
 - exact-depth analytic reconstruction p95 max ~`4.00e-08`.
 
-Two internally healthy assets alone falsified fixed `h=0.54`:
+Two internally healthy assets falsified fixed `h=0.54`:
 
 - `asset_00aa1b666ba193851a498194`: camera half extent `0.5570941257476807`;
 - `asset_76313e4bd82b82fcd1659c70`: camera half extent `0.6172158837318421`.
 
-Therefore the canonical interpretation is:
+Canonical interpretation: `P geometry healthy; hardcoded acquisition scale falsified.`
 
-`P geometry healthy; hardcoded acquisition scale falsified.`
-
-CI237 prior to this is preserved as an apparatus false reject caused by mistakenly requiring the master NPZ field set to equal `{vertices,faces}`. It is not scientific geometry evidence.
-
-## P-V4 — observable image-derived sheet scale
-
-Product IRIS remains image-only. `camera.json half_extent` is **not** a model input.
-
-Canonical geometry has max bbox extent one. For ordered RGBA views:
-
-```text
-w0 = V0 alpha bbox width / R
-w2 = V2 alpha bbox width / R
-hz = max alpha bbox height over V0..V7 / R
-m = max(w0,w2,hz)
-h_sheet = 1/(2*m)
-```
-
-Then:
-
-```text
-P = h_sheet*gx*right(yaw)
-  - h_sheet*gy*up
-  + depth*forward(yaw)
-```
-
-`h_sheet` is deterministic observable gauge from RGBA alpha; it is not a learned latent and does not consume teacher camera scale. The depth head receives `(gx,gy,sin(yaw),cos(yaw),h_sheet)`.
+CI237 is preserved as an apparatus false reject caused by mistakenly requiring the master NPZ field set to equal `{vertices,faces}`. It is not scientific geometry evidence.
 
 ## P-V4 G0 — CLOSED/PASS, CI269
 
-Exact execution-source head:
+P-V4 kept image-only inference and replaced fixed h with deterministic scale estimated from RGBA alpha occupancy. Camera `half_extent` is not a model input.
+
+Exact CI269 execution-source head:
 
 `1c170d6e077dae52e3a6dc171d0d8cabd8eaf528`
 
-GitHub Actions `IRIS V2 Preflight`:
+GitHub Actions:
 
-- run #269;
-- run ID `32752782912`;
-- conclusion `SUCCESS`.
-
-Immutable artifact:
-
-- name `iris-v2-p-formulation-v4-observable-scale-closure-bundle-v1`;
+- run #269 / ID `32752782912`;
+- conclusion `SUCCESS`;
+- artifact `iris-v2-p-formulation-v4-observable-scale-closure-bundle-v1`;
 - artifact ID `9529705348`;
-- size `34301` bytes;
 - ZIP SHA-256 `a206f5d0015c4d9a66e334f21f3eb8beca62dea169f1b35b13763f6b1ad9a0cf`.
 
-CI269 PASS includes:
+G0 included 256/512/1024 model-forward shape checks, image-only forward signature, observable-scale synthetic fixtures, full finite loss/backward, nonzero depth gradient, cache/matcher/AMP/evaluator regressions, and isolated bundle replay.
 
-- exact committed-source compile;
-- all historical architecture/coordinate/matcher/cache/AMP/evaluator regressions;
-- master-geometry superset firewall;
-- P-V4 image-only forward signature (`images,yaw_deg` only);
-- alpha-derived scale fixtures around `0.54`, `0.557`, `0.617`;
-- P-V4 model forward at input resolutions 256/512/1024 with P at R/2 and Zc at R/8;
-- finite full loss/backward and finite nonzero depth-head gradient;
-- P-V4 corpus CLI/panel firewall;
-- isolated bundle dependency/content replay;
-- uploadable bundle verification.
-
-The downloaded artifact was independently replayed outside the repository checkout. Its ZIP SHA matched the GitHub artifact digest; every internal `SHA256SUMS.txt` entry passed; isolated `py_compile`, P-V4 preflight, master-geometry firewall preflight and corpus CLI import all passed.
-
-CI267 is preserved as an apparatus-only failure: the V4 runner imported the old nonexistent symbol `load_primary_geometry`; the legal helper is `load_legal_primary_geometry`. No scientific G1 metric opened in CI267. CI269 closes this symbol drift.
-
-## Drive execution authority
-
-CI269 artifact mirror:
-
-`RealSaS_MASTER_CORPUS_1024_V3/reports/iris_single_pose_v2/IRIS_V2_P_FORMULATION_V4_OBSERVABLE_SCALE_CLOSURE_BUNDLE_CI269.zip`
-
-Drive file ID:
-
-`1I15HBIzVVOitSKZtX2SR9Jh0gbWowEAr`
-
-Canonical Colab notebook:
-
-`RealSaS_IRIS_P_Formulation_V4_Observable_Scale_Closure_CI269.ipynb`
-
-Notebook SHA-256:
-
-`8809874b243e4fc9bef27bf953152a2afedc218433ad186cae4b1da444147d65`
+## P-V4 G1 — SCIENTIFIC FAIL, but native1024 scale CLOSED
 
 Persistent result root:
 
 `RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_FORMULATION_V4_OBSERVABLE_SCALE_CLOSURE_CI269_RESULT`
 
-## CURRENT GATE — P-V4 G1 real-corpus observable-scale closure
+Canonical frozen label:
 
-Run the canonical CI269 notebook only.
+`P_V4_OBSERVABLE_SCALE_GEOMETRY_FAIL`
 
-Frozen population:
+Run hygiene:
 
-- same 16 FIT-only sentinels;
-- 8 FIT_SELECT + 8 FIT_TRAIN;
-- no substitution;
-- no TUNE/CAL/DEV/EXTERNAL.
+- optimizer steps `0`;
+- training authorized `false`;
+- TUNE consumed `false`;
+- sealed splits opened `false`;
+- model camera half-extent input `false`.
 
-For each asset × style (`cel_clean`,`ink_cel`) × resolution (`256`,`512`,`1024`):
+Fatal assets: `3/16`.
 
-- derive `h_sheet` only from RGBA alpha;
-- use exact teacher depth solely as optimizer-zero formulation ceiling;
-- reconstruct full 3D P;
-- require P p95 `<=0.005`.
+### Crucial positive result
 
-Camera half extent is teacher-side diagnostic/reference only and is never passed to the model.
+For **native1024 RGBA**, all 16 assets x both styles pass the existing P p95 <= `0.005` gate.
 
-Allowed G1 labels are exactly:
+Across the 32 native1024 asset x style cells:
 
-- `P_V4_OBSERVABLE_SCALE_GEOMETRY_CLOSED`
-- `P_V4_OBSERVABLE_SCALE_GEOMETRY_FAIL`
+- max P p95 = `0.0013928374974057078`;
+- median P p95 ~`7.32e-05`.
 
-The notebook persists either scientific PASS or scientific FAIL. Apparatus SHA/content/import failures hard-stop separately.
+Therefore image-derived canonical scale is sufficient at native product resolution on the frozen sentinel panel.
 
-## Next gate policy
+### What actually failed
 
-Only if P-V4 G1 returns `P_V4_OBSERVABLE_SCALE_GEOMETRY_CLOSED` may a **separate FIT-only depth/P overfit preregistration** be frozen before any optimizer step.
+V4 re-estimated the scale independently from the resized alpha at 512 and 256. That resolution-dependent re-estimation is falsified.
 
-Do not reuse CI202 training authority. Do not open TUNE during formulation/overfit debugging. No sealed split is authorized.
+Fatal cases:
+
+- `asset_5890cf3d012a4370ad656761`: R512/R1024 PASS; R256 P p95 `0.02480961699038744` FAIL.
+- `asset_00aa1b666ba193851a498194`: R1024 h=`0.5589519650655022`, P p95 `0.0013928374974057078` PASS; R512/R256 h=`0.7231638418079096`, P p95 `0.12448619268834585` FAIL.
+- `asset_76313e4bd82b82fcd1659c70`: R1024 P p95 `0.0008157795993611216` PASS; R512 `0.0018853721325285731` PASS; R256 `0.0051257542567327615` narrowly FAIL.
+
+### `asset_00aa...` resize diagnosis
+
+The 512 derivative is **not** a bad render/corrupt derivative.
+
+Native `cel_clean.png` resized 1024->512 with the corpus LANCZOS operation reproduces `cel_clean_512.png` pixel-for-pixel:
+
+- RGB MAE `0`;
+- alpha MAE `0`;
+- alpha-support IoU `1.0`.
+
+The failure comes from hard support definition `alpha >= 0.5` after antialiased downsampling. The thin spear/appendage remains represented in RGBA, but much of its antialiased alpha falls below `0.5`.
+
+For V0:
+
+- native1024 alpha bbox span at threshold 0.5: `916 x 710`;
+- R512 visible/RGB extent is approximately half-scale (`~463 x 360`);
+- R512 alpha bbox at threshold 0.5 contracts to only `324 x 354`.
+
+Therefore this is a **resolution-dependent support-threshold formulation failure**, not render corruption and not a P geometry failure.
+
+## Current next gate — native-scale-once closure
+
+Do not tune a lower alpha threshold post-result and do not relax P <= `0.005`.
+
+The next optimizer-zero formulation must be:
+
+```text
+native ordered RGBA
+    -> estimate h_sheet ONCE before resize
+    -> carry h_sheet through 512/256 preprocessing
+    -> model/features predict only depth
+    -> analytic full P reconstruction
+```
+
+Do **not** re-estimate `h_sheet` from degraded 512/256 alpha.
+
+Freeze a new optimizer-zero prereg on the same 16 FIT-only sentinel panel and same P p95 <= `0.005` gate. Reuse the exact native-derived scalar at 1024/512/256 reconstruction.
+
+No TUNE/CAL/DEV/EXTERNAL split may be opened.
+
+Only if that closure passes may a separate FIT-only depth/P overfit prereg authorize optimizer steps.
 
 ## Research rule
 

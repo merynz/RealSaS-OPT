@@ -1,0 +1,13 @@
+{
+  "bundle_file": "IRIS_PV5_DEPTH_OVERFIT_V1_BUNDLE.zip",
+  "bundle_sha256": "748d40f3fcab527876048fdd4a38e353003632f231d8fb639484db19e05cac0c",
+  "ci283_regression": "PASS",
+  "cpu_preflight": "PASS",
+  "fake_pipeline_regression": "PASS",
+  "gpu_preflight": "embedded in Run All; zero-step fail-closed before training",
+  "local_scientific_optimizer_steps": 0,
+  "notebook_file": "RealSaS_IRIS_PV5_Depth_Overfit_V1.ipynb",
+  "notebook_sha256": "6086896b29798888276379b6d912402f9322ef4e5e7bd94322074ab949b03c08",
+  "runtime": "CUDA GPU REQUIRED",
+  "schema": "RealSaS.IRISSinglePoseV2.PV5DepthOverfitHandoff.v1"
+}

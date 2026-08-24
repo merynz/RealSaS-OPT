@@ -3,15 +3,15 @@
 **Date:** 2026-08-25  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_SUFFICIENT__P_V5_FORMULATION_CLOSED__FIELD_REPRESENTATION_CLOSED__R256_ONE_CELL_PREREG_FROZEN__ATTEMPT1_APPARATUS_SUPERSEDED_OPT0__V1_1_GPU_RUN_NEXT`
+**Status:** `P_GEOMETRY_SUFFICIENT__P_V5_FORMULATION_CLOSED__FIELD_REPRESENTATION_CLOSED__R256_ONE_CELL_FROZEN_FAIL_0P005682__OPTIMIZER_LOCALIZATION_NEXT`
 
 ## Single continuation authority
 
 Active implementation: `experiments/iris_single_pose_v2/`.
 
-Before continuing in a new session, read this file and the root `README.md`.
+Before continuing in a new session, read this file and root `README.md`.
 
-## Canonical architecture pointer
+## Canonical architecture — evidence controlled
 
 ```text
 8 ordered neutral-pose views
@@ -33,7 +33,7 @@ editable skinning / weight proposal
 verified editable puppet
 ```
 
-IRIS stops at the 2.5D observable substrate. Downstream Geppetto/Arachne training organization is intentionally not frozen during current IRIS work.
+IRIS stops at the observable 2.5D substrate. Downstream Geppetto/Arachne training organization is intentionally not frozen during current IRIS work.
 
 **Architecture change control:** architecture and responsibility boundaries may change only under recorded controlled evidence. Convenience, analogy, intuition, implementation ease or conversational drift are not authority.
 
@@ -41,7 +41,7 @@ IRIS stops at the 2.5D observable substrate. Downstream Geppetto/Arachne trainin
 
 - CI104: `P_GEOMETRY_SUFFICIENT` CLOSED/PASS.
 - P-V5 / CI283: `P_V5_NATIVE_SCALE_ONCE_GEOMETRY_CLOSED` CLOSED/PASS.
-- Legal P factorization remains:
+- Legal P factorization:
 
 ```text
 native1024 ordered RGBA
@@ -53,7 +53,6 @@ native1024 ordered RGBA
 ```
 
 - `camera.json` / teacher camera half extent remain forbidden learner inputs.
-- Historical R/2 8-asset × 2-style learner overfit was insufficient, but is not pure learner-capacity evidence because R/2 output representation was not independently certified.
 
 ## P-V5 field representation closure — CLOSED
 
@@ -72,80 +71,107 @@ Canonical label: `P_V5_FIELD_REPRESENTATION_CLOSED`.
 ```text
 R256 field representation
         ↓
-1 asset × 1 style overfit
+1 asset × 1 style learner/optimizer sufficiency
         ↓ PASS
-1 asset × 2 styles overfit
+1 asset × 2 styles
         ↓ PASS
-8 assets × 2 styles overfit
+8 assets × 2 styles
         ↓ PASS
 unseen-family generalization
 ```
 
-No stage may be skipped without a preregistered evidence-backed revision.
+No rung may be skipped without a preregistered evidence-backed revision.
 
-## Current gate — R256 one asset × one style
+## R256 one asset × one style — COMPLETED / FROZEN FAIL
 
 Frozen cell:
 
-- asset `asset_76313e4bd82b82fcd1659c70`
-- style `cel_clean`
-- split `FIT`
+- asset `asset_76313e4bd82b82fcd1659c70`;
+- style `cel_clean`;
+- split `FIT`.
 
-Scientific preregistration and membership remain unchanged.
-
-True full-R P path:
+True full-R path:
 
 ```text
 R256 RGBA -> full-res image stem ---------┐
 R256 RGBA -> encoder -> y2@128 -> upsample ├-> R256 fusion -> depth@256 -> analytic P@256
 ```
 
-A bare resized R/2 prediction is forbidden.
+Corrected V1.1 GPU preflight PASS:
 
-Frozen protocol:
+- Tesla T4;
+- full-resolution fuse `8×48×256×256`;
+- direct image-stem and P-depth gradients nonzero;
+- optimizer steps at preflight = 0.
 
-- seed `20260824`
-- AdamW `3e-4`, betas `(0.9,0.95)`, weight decay `0`
-- 2048 optimizer steps
-- candidate steps `64/128/256/512/1024/2048`
-- P/depth objective only
-- PASS iff selected canonical `P_p95 <= 0.005`
-- no augmentation
-- no TUNE/CAL/DEV/EXTERNAL
-- no hidden camera metadata.
+Frozen scientific protocol:
 
-## Attempt 1 apparatus supersession — NO SCIENTIFIC RESULT
+- AdamW lr `3e-4`, betas `(0.9,0.95)`, weight decay `0`;
+- 2048 optimizer steps;
+- candidate steps `64/128/256/512/1024/2048`;
+- P/depth objective only;
+- PASS iff canonical `P_p95 <= 0.005`.
 
-The first Colab attempt ended with a non-zero child-process exit before any authorized scientific optimizer step.
+Frozen result:
 
-Root cause was found in `pv5_r256_onecell_gpu_preflight.py`: the diagnostic forward hook used `captured.setdefault(...)` as a lambda return value. PyTorch interprets a non-`None` forward-hook return as a replacement module output, so the hook replaced the R256 feature tensor with a shape tuple and broke the optimizer-zero GPU preflight.
+- selected step `2048`;
+- selected P p95 `0.005682396539486942`;
+- threshold `0.005`;
+- status `P_V5_R256_ONE_CELL_OPTIMIZATION_INSUFFICIENT`;
+- TUNE consumed false;
+- sealed splits opened false;
+- hidden camera metadata consumed false.
 
-Classification:
+Candidate P p95:
 
-`APPARATUS_PREFLIGHT_IMPLEMENTATION_BUG__SCIENTIFIC_OPTIMIZER_STEPS_0`
+```text
+INIT   2.7298591
+64     0.4656130
+128    0.2629219
+256    0.1124968
+512    0.0436651
+1024   0.0288629
+2048   0.0056824
+```
 
-This attempt does **not** count as PASS, FAIL, learner evidence, representation evidence or optimizer evidence. It does not change the preregistration, membership, objective, architecture hypothesis or promotion ladder.
+Interpretation:
 
-Patch commit: `0d1e8f1a3466834ea4272c6b9f1cd6151bb9cd0f`.
+- this is a real scientific FAIL under the frozen gate;
+- it is not evidence to reopen P ontology, V5 geometry or R256 free-field closure;
+- all preregistered candidate evaluations improved monotonically;
+- 1024→2048 p95 improved by ~80.3%; no completed plateau is demonstrated;
+- at 2048 P90=`0.00382736` while P95=`0.00568240`, so the miss is a narrow residual tail;
+- late training remains noisy, consistent with a possible late-stage LR/optimizer floor but not proving it.
 
-Fixed hook semantics: capture shape, explicitly return `None`.
+Canonical interpretation:
 
-Release metadata supersession commit: `3f3493e3dab2d4f1f485cea3be5e955ed96c89df`.
+`experiments/iris_single_pose_v2/P_V5_R256_ONE_CELL_RESULT_INTERPRETATION_20260825.md`
 
-## NEXT EXECUTABLE STEP
+## NEXT GATE — R256 one-cell optimizer localization V1
 
-Use only:
+Preregistered diagnostic:
 
-`RealSaS_IRIS_PV5_R256_OneCell_Overfit_V1_1.ipynb`
+`experiments/iris_single_pose_v2/P_V5_R256_ONE_CELL_OPTIMIZER_LOCALIZATION_PREREG_20260825.md`
 
-The previous `..._V1.ipynb` is superseded and must not be rerun.
+Purpose:
 
-Runtime: **CUDA GPU required.**
+> Starting from the exact selected 2048-step checkpoint, distinguish finite-budget / late-stage learning-rate behavior from a remaining learner/objective/tail problem without broadening corpus scope.
 
-V1.1 additionally persists apparatus diagnostics to Drive on any non-zero runner exit so a closed notebook cannot erase the failure location.
+Frozen parent checkpoint SHA-256:
 
-On PASS: preregister **1 asset × 2 styles R256 overfit only**.  
-On scientific FAIL: localize R256 learner/optimizer; do not reopen closed P ontology, V5 analytic geometry or certified free-R256 representation without contradictory evidence.
+`cad4421ae728848bbf9181c87e0d4912c38ec6f94d61c86cd114ad0a251c79ee`
+
+Zero-step verification must reproduce parent P p95 `0.005682396539486942` within `1e-7` and persist per-view residual-tail metrics.
+
+Three independent 512-step fresh-AdamW restart arms from the exact same checkpoint:
+
+- A: lr `3e-4` control;
+- B: lr `1e-4`;
+- C: lr `3e-5`.
+
+Common betas `(0.9,0.95)`, weight decay `0`, same P/depth objective, same evaluator, no augmentation, no TUNE/CAL/DEV/EXTERNAL, no hidden camera metadata.
+
+Any arm reaching `P_p95 <= 0.005` closes one-cell learner/optimizer sufficiency and authorizes preregistration of **1 asset × 2 styles R256 only**. If all fail, remain at one-cell and inspect residual-tail/objective/feature-capacity evidence.
 
 ## Research rule
 

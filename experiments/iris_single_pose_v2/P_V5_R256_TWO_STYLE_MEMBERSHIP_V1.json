@@ -1,0 +1,22 @@
+{
+  "asset_count": 1,
+  "asset_style_cells": 2,
+  "post_result_selection": false,
+  "records": [
+    {
+      "asset_id": "asset_76313e4bd82b82fcd1659c70",
+      "selection_basis": "same frozen one-cell asset; paired style rung preregistered only after one-cell learner/optimizer sufficiency recovery",
+      "split": "FIT",
+      "style": "cel_clean"
+    },
+    {
+      "asset_id": "asset_76313e4bd82b82fcd1659c70",
+      "selection_basis": "paired rendering style for the same frozen asset; no asset broadening and no post-result style switch",
+      "split": "FIT",
+      "style": "ink_cel"
+    }
+  ],
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256TwoStyleMembership.v1",
+  "sealed_assets": 0,
+  "tune_assets": 0
+}

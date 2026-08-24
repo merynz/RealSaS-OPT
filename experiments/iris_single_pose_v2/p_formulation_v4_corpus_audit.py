@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image
 
 from geometry import geometric_vertex_normals, reconstruct_surface, pixel_linear_to_grid
-from p_formulation_corpus_audit_v1 import load_primary_geometry, load_panel, stable_rows, summary, expected_basis
+from p_formulation_corpus_audit_v1 import load_legal_primary_geometry, load_panel, stable_rows, summary, expected_basis
 
 CAMERA_CONTRACT = "realsas.level_orthographic_z_orbit.v1"
 AUTHORITY_RESOLUTION = 1024
@@ -85,7 +85,7 @@ def inspect_asset(root: Path, role: str, aid: str, samples_per_view: int):
     if not gp.is_file():
         return {"asset_id": aid, "role": role, "fatal": ["missing_primary_geometry"]}
     try:
-        vertices, faces, geometry_io = load_primary_geometry(gp)
+        vertices, faces, geometry_io = load_legal_primary_geometry(gp)
     except Exception as e:
         return {"asset_id": aid, "role": role, "fatal": [f"geometry:{type(e).__name__}:{e}"]}
     if not len(vertices) or not len(faces):
@@ -268,7 +268,6 @@ def main():
     all_recon_p95 = []
     scale_abs_err = []
     for row in result:
-        hcam = row.get("camera_half_extent")
         for style in STYLES:
             for resolution in RESOLUTIONS:
                 p95 = row.get("observable_P_error", {}).get(style, {}).get(str(resolution), {}).get("p95")

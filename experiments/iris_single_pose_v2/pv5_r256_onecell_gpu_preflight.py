@@ -6,6 +6,14 @@ from model_pv5_r256 import IRISSinglePoseV2PV5R256
 from pv5_depth_objective import p_only_objective
 from train_pv5_r256_onecell_v1 import configure_p_only
 
+
+def _capture_shape(store):
+    def hook(_module, _inputs, output):
+        store['shape'] = tuple(output.shape)
+        return None
+    return hook
+
+
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--out',required=True); a=ap.parse_args()
     if not torch.cuda.is_available(): raise RuntimeError('CUDA GPU REQUIRED for production R256 preflight')
@@ -18,7 +26,7 @@ def main():
     S=512; xy=torch.rand(1,8,S,2,device=device)*1.8-.9
     truth=torch.zeros(1,8,S,3,device=device); mask=torch.ones(1,8,S,dtype=torch.bool,device=device)
     captured={}
-    hook=model.p_s1_fuse.register_forward_hook(lambda m,i,o: captured.setdefault('shape',tuple(o.shape)))
+    hook=model.p_s1_fuse.register_forward_hook(_capture_shape(captured))
     with torch.autocast(device_type='cuda',dtype=torch.float16):
         outputs=model(images,yaw,h)
     hook.remove()

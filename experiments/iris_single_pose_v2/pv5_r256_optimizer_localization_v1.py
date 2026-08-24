@@ -323,7 +323,7 @@ def main():
         "parent_run_complete_sha256": sha256_file(parent_run / "RUN_COMPLETE_P_V5_R256_ONE_CELL_V1.json"),
         "parent_checkpoint_sha256": sha256_file(checkpoint_path),
         "zero_step_audit_sha256": sha256_file(work / "ZERO_STEP_RESIDUAL_AUDIT.json"),
-        "arms": [{"name": n, "lr": lr, "restart_steps": STEP_STEPSIF_NEGER} for n, lr in ARMS],
+        "arms": [{"name": n, "lr": lr, "restart_steps": STEPS} for n, lr in ARMS],
         "eval_steps": list(EVAL_STEPS),
         "threshold_P_p95": P_THRESHOLD,
         "tune_consumed": False,

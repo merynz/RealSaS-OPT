@@ -3,7 +3,7 @@
 **Date:** 2026-08-25  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_CLOSED__P_V5_CLOSED__R256_FIELD_CLOSED__ONE_CELL_LEARNER_OPTIMIZER_SUFFICIENT__TWO_STYLE_PREREG_FROZEN__GPU_RUN_NEXT`
+**Status:** `P_GEOMETRY_CLOSED__P_V5_CLOSED__R256_FIELD_CLOSED__ONE_CELL_SUFFICIENT__TWO_STYLE_JOINT_FIT_PASS__EIGHT_BY_TWO_PREREG_NEXT`
 
 ## Single continuation authority
 Active implementation: `experiments/iris_single_pose_v2/`.
@@ -36,6 +36,14 @@ IRIS stops at the observable 2.5D substrate. Geppetto/Arachne training organizat
 
 **Architecture change control:** architecture/responsibility boundaries may change only under recorded controlled evidence. Convenience, analogy, intuition, implementation ease or conversational drift are not authority.
 
+### IMPORTANT external precedent — do not lose
+
+`audit/IMPORTANT_EXTERNAL_PRECEDENT_PATCHMATCH_RL_20260825.md`
+
+PatchMatch-RL (ICCV 2021) is the closest open-code working precedent identified so far for the current IRIS formulation: calibrated multi-view images + known cameras -> pixelwise depth/normal/visibility -> reprojection-consistent oriented surface/point cloud.
+
+This is an **important feasibility precedent and future intervention library**, especially for geometry-in-the-loop cross-view hypothesis verification if a family-disjoint P/N hard tail later survives the direct R256 ladder. It is **not current architecture authority** and does not authorize changing the frozen ladder by analogy alone.
+
 ## Closed P authority
 - `P_GEOMETRY_SUFFICIENT`: CLOSED/PASS.
 - P-V5 native-scale-once analytic reconstruction: CLOSED/PASS.
@@ -53,13 +61,13 @@ Smallest tested certified field = **R256**.
 
 ## Frozen learner promotion ladder
 ```text
-R256 field representation
+R256 field representation                     PASS
         ↓
-1 asset × 1 style learner/optimizer sufficiency
-        ↓ PASS
-1 asset × 2 styles joint fit          ← CURRENT
-        ↓ PASS
-8 assets × 2 styles
+1 asset × 1 style learner/optimizer sufficiency PASS
+        ↓
+1 asset × 2 styles joint fit                    PASS
+        ↓
+8 assets × 2 styles                             ← NEXT
         ↓ PASS
 unseen-family generalization
 ```
@@ -79,79 +87,45 @@ Optimizer localization reproduced the exact checkpoint at step 0 with absolute P
 | B | `1e-4` | 256 | `0.00420133795123547` |
 | C | `3e-5` | 64 | `0.003946938854642211` |
 
-Canonical recovery status: `P_V5_R256_ONE_CELL_RECOVERY_PASS`.
+Canonical recovery status: `P_V5_R256_ONE_CELL_RECOVERY_PASS`.  
 Localization label: `LATE_STAGE_LR_FLOOR_SUPPORTED`.
 
 Interpretation authority:
 `experiments/iris_single_pose_v2/P_V5_R256_OPTIMIZER_LOCALIZATION_RESULT_20260825.md`
 
-The prior miss is localized to late-stage optimizer/LR behavior; P ontology, V5 geometry and R256 representation remain closed.
-
-## CURRENT GATE — R256 one asset × two styles V1
-Preregistration:
-`experiments/iris_single_pose_v2/P_V5_R256_TWO_STYLE_PREREG_20260825.md`
-
-Membership:
-`experiments/iris_single_pose_v2/P_V5_R256_TWO_STYLE_MEMBERSHIP_V1.json`
+## One asset × two styles — CLOSED/PASS
+Canonical result:
+`experiments/iris_single_pose_v2/P_V5_R256_TWO_STYLE_RESULT_20260825.md`
 
 Frozen cells:
 - `asset_76313e4bd82b82fcd1659c70 / cel_clean / FIT`;
 - `asset_76313e4bd82b82fcd1659c70 / ink_cel / FIT`.
 
-Scientific question: can **one shared fresh R256 model** jointly fit both render styles of the same asset to the canonical P threshold?
+One shared fresh R256 model jointly fit both styles. Selected checkpoint `TAIL_0512`, total optimizer steps `2560`:
 
-### Fresh initialization
-The recovered one-style checkpoint is not used as initialization. The two-style gate starts from a fresh deterministic model so this is joint fit, not adaptation from a memorized style.
+| style | selected P p95 | threshold | status |
+|---|---:|---:|---|
+| `cel_clean` | `0.003733412444125855` | `0.005` | PASS |
+| `ink_cel` | `0.0038324856432154623` | `0.005` | PASS |
 
-### Frozen repaired optimizer schedule
-MAIN: fresh AdamW `3e-4`, betas `(0.9,0.95)`, wd `0`, 2048 steps.  
-TAIL: fresh AdamW moments on MAIN-2048 weights, `3e-5`, same betas/wd, 512 steps.
+Selected aggregate P p95: `0.003779542224947363`.  
+Selected worst-cell P p95: `0.0038324856432154623`.
 
-Both style cells are present in every optimizer step (`B=2`, 8 views/cell). No new LR search is authorized.
+MAIN `3e-4` at 2048 steps remained insufficient (`worst-cell P p95 = 0.00982439313083885`). Fresh-moment TAIL `3e-5` crossed the two-cell gate by tail step 128 (`0.0046900292858481395`) and improved through step 512. This independently supports the prior late-stage LR localization under joint two-style fit.
 
-### Representation / objective
-- input/output P field R256;
-- true full-resolution image-conditioned P/depth branch;
-- camera-forward scalar depth learned; canonical P analytic;
-- P/depth objective only; N/U/Z frozen;
-- 4096 shared truth loci/view across styles;
-- no augmentation;
-- no TUNE/CAL/DEV/EXTERNAL;
-- no hidden camera metadata.
+Safety/provenance:
+- best checkpoint SHA-256 `cab207e1455f755b6931b9912fd6404d308216099ee1bab2042cb5dad0952b69`;
+- decision SHA-256 `2250f7c21076c0ae0b04093b5e711d2a2c0d26ababb2f2960ea0759a007cb5eb`;
+- no `camera.json`;
+- no TUNE;
+- sealed splits unopened.
 
-### PASS rule
-Authority candidates: INIT; MAIN `512/1024/2048`; TAIL `64/128/256/512`.
+## CURRENT GATE — preregister 8 assets × 2 styles R256
+Frozen next policy from the two-style result: **preregister `8 assets × 2 styles R256` only**.
 
-PASS iff the **same preregistered checkpoint** has:
-- `cel_clean P_p95 <= 0.005`, and
-- `ink_cel P_p95 <= 0.005`.
+No 8×2 scientific training is authorized until its membership, checkpoint-selection rule, optimizer schedule, per-cell PASS rule and executable preflight are frozen prospectively.
 
-Aggregate p95 alone cannot pass. Checkpoint selection minimizes worst-cell p95, then aggregate p95, then total steps.
-
-PASS -> preregister `8 assets × 2 styles R256` only.  
-FAIL -> remain at same-asset/two-style and localize style interference/joint capacity/optimizer evidence.
-
-## Preparation / executable handoff
-Local validated source checks:
-- syntax PASS;
-- CPU B=2 true-full-R P-only forward/backward PASS;
-- fake-master two-style stage/cache/dataset PASS;
-- shared truth loci across styles PASS;
-- preparation scientific optimizer steps `0`.
-
-Next notebook:
-`RealSaS_IRIS_PV5_R256_TwoStyle_Overfit_V1.ipynb`
-
-Notebook SHA-256:
-`e4e565a88405bdd948d06da65e6e95cd42403ef1798b7414e139f8ea2bab24c7`
-
-Source bundle:
-`IRIS_PV5_R256_TWO_STYLE_OVERFIT_V1_BUNDLE.zip`
-
-Bundle SHA-256:
-`7163f2636bd642c5112877e3d90633182876b825db03986b700d8141c19ab041`
-
-Runtime: **CUDA GPU required**. Notebook runs a production B=2 R256 GPU forward/backward preflight at optimizer step 0 and fails closed before training if the runtime cannot carry the gate.
+The one-asset/two-style result is an overfit/joint-capacity result only. It does not authorize unseen-family or product-domain claims.
 
 ## Research rule
 `apparatus/data -> representation/target -> learner/optimizer -> evidence consumer -> downstream sufficiency -> only then information limit`

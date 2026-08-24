@@ -7,6 +7,8 @@ Private canonical research workspace for RealSaS.
 > **Continuation authority:** read `CURRENT_STATE.md` first.
 >
 > **Canonical architecture authority:** `canonical/PRODUCT_CONTRACT_V1.md` + `canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md`.
+>
+> **IMPORTANT external precedent:** `audit/IMPORTANT_EXTERNAL_PRECEDENT_PATCHMATCH_RL_20260825.md` — feasibility/reference evidence, not architecture authority.
 
 ## Canonical architecture plan — evidence controlled
 
@@ -46,16 +48,25 @@ Until such evidence exists, alternatives remain hypotheses and must not silently
 
 Closed scientific authority:
 
-- `P_GEOMETRY_SUFFICIENT` remains CLOSED/PASS.
-- P-V5 native-scale-once analytic geometry remains CLOSED/PASS.
-- The historical R/2 depth-overfit run completed insufficiently, but its interpretation was reopened at the output-field layer rather than assigned directly to learner capacity.
-- P-V5 field-representation closure is now CLOSED: 256×256 is the smallest tested certified depth field; 128×128 is not certified under the frozen 16-cell gate.
+- `P_GEOMETRY_SUFFICIENT` CLOSED/PASS.
+- P-V5 native-scale-once analytic geometry CLOSED/PASS.
+- P-V5 field representation CLOSED: full `256×256` is the smallest tested certified depth field; `128×128` is not certified under the frozen 16-cell gate.
+- R256 one-asset/one-style learner/optimizer sufficiency CLOSED/PASS after controlled low-LR tail localization.
+- R256 one-asset/two-style joint fit CLOSED/PASS: one shared fresh model passes both `cel_clean` and `ink_cel` separately at the same checkpoint; worst-cell P p95 `0.0038324856432154623` against `0.005`.
 
 Current executable research step:
 
-**preregister and run R256 one-asset / one-style learner overfit.**
+**preregister `8 assets × 2 styles R256` only.**
 
-No broader P learner/generalization claim is authorized before that gate.
+No broader multi-asset or unseen-family/generalization claim is authorized before that gate.
+
+## Important external precedent
+
+PatchMatch-RL (ICCV 2021), *Deep MVS with Pixelwise Depth, Normal, and Visibility*, is the closest open-code working precedent identified so far for the current IRIS geometric formulation: calibrated multi-view raster + known cameras -> depth/normal/visibility -> reprojection-consistent oriented surface.
+
+Its most relevant transferable mechanism is geometry-in-the-loop hypothesis verification through known-camera cross-view warping and support weighting. This is recorded as an **important future intervention candidate** if controlled family-disjoint evidence later exposes a persistent geometry-extraction/coherence hard tail. It does not authorize a current architecture change.
+
+See: `audit/IMPORTANT_EXTERNAL_PRECEDENT_PATCHMATCH_RL_20260825.md`.
 
 ## Authority order
 
@@ -63,7 +74,8 @@ No broader P learner/generalization claim is authorized before that gate.
 2. `canonical/PRODUCT_CONTRACT_V1.md` — visible product architecture and responsibility boundaries.
 3. `canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md` — IRIS scientific problem definition.
 4. active preregistration/result files under `experiments/iris_single_pose_v2/`.
-5. historical experiment branches/files — evidence only, not execution authority unless explicitly re-authorized.
+5. external precedent notes under `audit/` — important reference evidence, not execution authority unless separately promoted by controlled experiments.
+6. historical experiment branches/files — evidence only, not execution authority unless explicitly re-authorized.
 
 ## Research rule
 

@@ -5,6 +5,8 @@
 **Draft PR:** `#4` — audit only, not merged  
 **Status:** `P_GEOMETRY_SUFFICIENT__MINI_EXTRACTABILITY_V1_FROZEN__CI202_V4_RELEASE_PASS__REAL_T4_CAPACITY_GATE_NEXT__OPTIMIZER_ZERO`
 
+> **Execution-source rule:** later handoff/documentation commits do not change the learner execution authority. The exact code-bearing source for the current runnable artifact is CI202 head `83a856679a3bc4b4c0c894602f55ac1ffd94aa73`.
+
 ## Single continuation authority
 
 The sole active candidate implementation is `experiments/iris_single_pose_v2/`. Controlled V1/M256 is historical/no-run.

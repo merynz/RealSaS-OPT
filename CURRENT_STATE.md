@@ -3,19 +3,26 @@
 **Date:** 2026-08-24  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_SUFFICIENT__CI202_RAW_XYZ_DIAGNOSTIC_COMPLETE__P_FORMULATION_V3_IMPLEMENTED__OPTIMIZER_ZERO_CLOSURE_REQUIRED__TRAINING_FORBIDDEN`
+**Status:** `P_GEOMETRY_SUFFICIENT__CI202_RAW_XYZ_DIAGNOSTIC_COMPLETE__P_FORMULATION_V3_G0_CI237_PASS__REAL_G1_NEXT__OPTIMIZER_ZERO__TRAINING_FORBIDDEN`
+
+> **Execution-source rule:** P Formulation V3 closure bundle V1 is bound to code-bearing head `cad879f591be245632e8c29eaa0c8e107fa87fb4`, GitHub Actions run #237 / run ID `32743886600`, artifact ID `9526277144`, ZIP SHA-256 `0b336d4aeae2cea21802439edfaa0ea2d0b0d7f037de4944b1373391fea07371`. Later docs commits do not change that execution authority.
 
 ## Single continuation authority
 
 The sole active candidate implementation remains `experiments/iris_single_pose_v2/`. Controlled V1/M256 is historical/no-run. CI202 remains a completed historical learner diagnostic under its tested raw free-XYZ P architecture; its checkpoint is **not compatible with and not authoritative for P Formulation V3**.
 
-Current executable scientific gate:
+Current scientific authority:
 
 - `experiments/iris_single_pose_v2/P_FORMULATION_V3_CLOSURE_PREREG_20260824.md`
 - `experiments/iris_single_pose_v2/P_FORMULATION_V3_PANEL_V1.json`
 - `experiments/iris_single_pose_v2/p_formulation_corpus_audit_v1.py`
+- CI237 immutable closure bundle V1.
 
-No optimizer is authorized until P-V3 synthetic CI and real-corpus optimizer-zero closure pass.
+Drive mirror:
+
+`RealSaS_MASTER_CORPUS_1024_V3/reports/iris_single_pose_v2/IRIS_V2_P_FORMULATION_V3_CLOSURE_BUNDLE_CI237.zip`
+
+No optimizer is authorized until real-corpus G1 closes.
 
 ## Representation gate remains CLOSED/PASS
 
@@ -55,7 +62,7 @@ Findings:
 4. Sampled master assets were centered/unit-scaled, but the executable learner cache audit previously did not enforce the canonical P gauge/envelope. This audit omission is now closed in code.
 5. The main formulation defect was the free 3-channel absolute XYZ P head. Under the known orthographic camera, two coordinates are already analytic from observation position; only view-depth must be learned.
 
-## P Formulation V3 — implemented, not yet promoted
+## P Formulation V3 — implemented
 
 Controlled camera contract:
 
@@ -101,39 +108,63 @@ Implementation changes:
 - excessive projection-outlier fraction;
 - track continuous-projection or yaw drift.
 
-## CURRENT GATE — P Formulation V3 optimizer-zero closure
+## G0 — CLOSED/PASS under CI237
 
-G0 — synthetic executable closure:
+CI237 passed on exact source head `cad879...`:
 
-- camera basis and coordinate formula;
+- exact committed-source compilation;
+- camera basis and P formula;
 - R=256/512/1024 P formulation;
-- R/2 field shapes;
+- P field at R/2 (native1024 -> 512x512);
 - arbitrary bilinear screen-plane preservation;
-- full finite loss/backward;
-- finite nonzero depth-head gradient;
-- existing matcher role separation and AMP numerics.
+- finite full loss/backward;
+- finite nonzero P depth-head gradient;
+- learner cache and partial-visibility regressions;
+- historical TUNE-order/firewall regression;
+- AMP precision regression;
+- evaluator and representation regressions;
+- P-V3 panel firewall;
+- isolated uploadable closure bundle dependency/content replay.
 
-G1 — real-corpus geometry closure:
+The independently downloaded artifact was replayed outside the repo checkout; its SHA and all internal SHA256SUMS matched and isolated `preflight.py` passed.
 
-- frozen **16 FIT-only** sentinel assets;
+## CURRENT GATE — G1 real-corpus geometry closure
+
+Frozen **16 FIT-only** sentinel assets:
+
+- 8 frozen FIT_SELECT sentinels;
+- 8 frozen FIT_TRAIN sentinels;
 - geometry + camera + raster only;
 - no RGB required;
 - no TUNE;
 - no CAL/DEV/EXTERNAL;
-- optimizer steps 0;
-- canonical gauge + camera + raster/P alignment + exact-depth reconstruction gates frozen before result.
+- optimizer steps 0.
+
+Frozen gates include canonical gauge, camera basis/half extent, raster1024 authority, raster-P projection agreement, and exact-depth V3 reconstruction.
 
 PASS label: `P_V3_FORMULATION_GEOMETRY_CLOSED`.
 
 FAIL label: `P_V3_CORPUS_GEOMETRY_CLOSURE_FAIL`.
 
+Canonical Colab runner:
+
+`RealSaS_IRIS_P_Formulation_V3_Closure_CI237.ipynb`
+
+Notebook SHA-256:
+
+`20865b953b5af82a0db3c6229a89e1b5dde0f0f932876f2180278cbed1498ef0`
+
+Persistent result destination:
+
+`RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_FORMULATION_V3_CLOSURE_CI237_RESULT`
+
 ## Training policy
 
 **TRAINING FORBIDDEN.**
 
-Do not reuse the old CI202 Mini V1 prereg with P-V3, and do not release a new training bundle until G0+G1 close. The current GitHub workflow must release only the optimizer-zero P-V3 closure artifact from the latest architecture; old mini V4 remains historical and immutable.
+Do not reuse the old CI202 Mini V1 prereg with P-V3. The latest workflow no longer builds a training bundle; it releases only the optimizer-zero P-V3 closure artifact.
 
-If G0+G1 PASS, the next prereg must be a FIT-only depth/P overfit/optimization diagnostic. TUNE must not be reopened merely to debug the reformulation.
+If G1 PASS, the next prereg must be a FIT-only depth/P overfit/optimization diagnostic. TUNE must not be reopened merely to debug the reformulation.
 
 ## Normal policy remains frozen
 

@@ -3,130 +3,67 @@
 **Date:** 2026-08-24  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_SUFFICIENT__CI104_INTERPRETED__NORMAL_CORRESPONDENCE_AUTHORITY_NOT_ESTABLISHED__MINI_PREREG_PREP_NEXT__TRAINING_STILL_FORBIDDEN`
+**Status:** `P_GEOMETRY_SUFFICIENT__MINI_EXTRACTABILITY_V1_FROZEN__CI_RELEASE_REQUIRED_BEFORE_NOTEBOOK_OPTIMIZER`
 
 ## Single continuation authority
 
 The sole active candidate implementation is `experiments/iris_single_pose_v2/`. Controlled V1/M256 is historical/no-run.
 
-The frozen 256-asset CI104 optimizer-zero R0-R3 Representation Authority measurement has completed and has been canonically interpreted.
+CI104 Representation Authority is complete and canonically interpreted in `experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_CANONICAL_INTERPRETATION_CI104_20260824.md`.
 
-Canonical interpretation:
+Canonical representation result: `P_GEOMETRY_SUFFICIENT`. R4 and SOI-2 are not opened.
 
-`experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_CANONICAL_INTERPRETATION_CI104_20260824.md`
+## CI104 result that authorizes the learner target
 
-Execution freeze:
+Exact P on the frozen 256 OPEN panel / 12,288 queries: top1/top4/top8=1/1/1; reciprocal=1; cycle=1; pooled physical-error median/p90/p95/max=0/0/0/0; family tails remain perfect across all 256 assets. The R2 P-noise curve remains the descriptive robustness reference.
 
-`experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_EXECUTION_FREEZE_CI104_20260824.md`
+## Normal policy after CI104
 
-## Canonical representation result
+`NORMAL_CORRESPONDENCE_AUTHORITY_NOT_ESTABLISHED` remains the canonical R1/R3 interpretation because `track_n_view` is a nearby view-specific raster witness normal rather than the exact differential normal at the same persistent P locus.
 
-### P authority — CLOSED PASS
+Mini V1 freezes: `geom_n` remains a legal observation-local dense orientation target; N is trained and reported in angular degrees; N is forbidden from correspondence admission/ranking and checkpoint selection; production correspondence remains Z_coarse+P global admission and Z_fine local refinement.
 
-R0 exact P on 12,288 confirmatory queries:
+## Mini Extractability / Generalization V1 — FROZEN BEFORE OPTIMIZER
 
-- top1 = `1.0`
-- top4 = `1.0`
-- top8 = `1.0`
-- reciprocal = `1.0`
-- cycle = `1.0`
-- pooled physical-error median/p90/p95/max = `0 / 0 / 0 / 0`
-- family top1/top4/top8 p5/p10/median/p90/p95/max all `1.0` across 256 assets
+Prereg: `experiments/iris_single_pose_v2/MINI_EXTRACTABILITY_GENERALIZATION_PREREG_V1.md`
 
-Canonical label:
+Membership: `experiments/iris_single_pose_v2/MINI_EXTRACTABILITY_MEMBERSHIP_V1.json`
 
-`P_GEOMETRY_SUFFICIENT`
+Frozen authorities:
 
-Therefore R4 is not opened, SOI-2 is not opened, and no information-limit branch is justified by this gate.
+- CI104 representation seed SHA-256 `f3d43da7766f104cab08f19fd24b515d54fde47545cc3288da023779c6d4c9af`
+- source panel ordered-ID digest `366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961`
+- mini membership SHA-256 `ef19120e2cc98fac50a0c94ba863fd3cc4cec4a8392b9c48684f96ffeba3ba50`
 
-### P robustness — R2 diagnostic
+Frozen roles: FIT_TRAIN128; FIT_SELECT32; TUNE_FINAL26; unused FIT70; CAL/DEV/EXTERNAL_HOLDOUT unopened.
 
-Pooled top8 under controlled isotropic P perturbation:
+Input resolution=256. This mini tests extractability/generalization feasibility, not final 1024 product precision.
 
-- sigma 0.0000 -> `1.0000`
-- sigma 0.0005 -> `1.0000`
-- sigma 0.0010 -> `1.0000`
-- sigma 0.0025 -> `0.9976`
-- sigma 0.0050 -> `0.9390`
-- sigma 0.0100 -> `0.6848`
+Training: 16 epochs, AdamW 3e-4, microbatch1, grad accumulation4, FP16, geometry warmup epochs1-3, correspondence/local refinement from epoch4, candidate checkpoints4/8/12/16.
 
-This is a descriptive robustness curve, not a post-hoc learner promotion threshold.
+Checkpoint selection uses FIT_SELECT only. TUNE_FINAL is evaluated once only after best-checkpoint freeze. Both cel_clean and ink_cel are evaluated separately and equal-macro.
 
-### N correspondence authority — NOT ESTABLISHED
+Allowed final labels: `EXTRACTABILITY_GENERALIZATION_PASS`; `EXTRACTABLE_ON_FIT_SELECT__GENERALIZATION_GAP`; `LEARNER_EXTRACTABILITY_NOT_YET_SUFFICIENT`.
 
-R1/R3 must not be interpreted as an exact-N representation failure/sufficiency result.
+## Training apparatus fixes before release
 
-Implementation inspection shows that `track_n_view` is reconstructed per view from the nearby raster visibility/surface witness `row[ok]`, while `track_p` is the exact persistent common-frame locus. The frozen P+N score `dP + 0.05*(1-cos N)` can therefore let view-specific witness-normal differences perturb a correspondence that exact P alone resolves perfectly.
+The image-bearing learner cache now preserves partial visibility with `track_err[ok,v] = err[ok]`; hidden entries stay +inf. Its semantic fingerprint binds `prepare_cache.py`, `geometry.py`, and `coords.py`.
 
-Observed R1 nominal P+N-exact top1/top4/top8 = `0.96696 / 0.97884 / 0.98543`; reciprocal `0.95980`; cycle `0.94784`.
+The local Z_fine objective no longer takes the first 64 visible track IDs; it uses deterministic position-uniform thinning to remove prefix bias. Both are mandatory CI regressions.
 
-Canonical label for this sub-claim:
+## GPU release gate
 
-`NORMAL_CORRESPONDENCE_AUTHORITY_NOT_ESTABLISHED`
+The already-closed 256/512/1024 architecture executable preflight is not repeated.
 
-This does not block V2 because the active matcher already uses `Z_coarse + P` for global basin admission and `Z_fine` for local refinement; N is geometry/orientation evidence for the downstream substrate, not global correspondence admission authority.
+Before scientific optimizer step1, the exact mini artifact must pass a real CUDA capacity probe at R=256 with current production-width model, full post-warmup loss forward/backward, finite gradients and AdamW two-moment memory accounted, while taking zero scientific optimizer steps.
 
-## Current exact execution authority — CI104
-
-- exact code-bearing head: `7d99eef46d2c071eca1d883e0c916bf4adecda35`
-- GitHub Actions: `IRIS V2 Preflight #104`
-- run ID: `32679394221`
-- result: `SUCCESS`
-- artifact ID: `9503678775`
-- artifact: `iris-v2-r0-r3-execution-bundle-v3`
-- ZIP SHA-256: `bc1e733049fafcd01f933d26c309f7fb5a9cff0d2abd04124219c4ea9ba39473`
-- Drive mirror: `RealSaS_MASTER_CORPUS_1024_V3/reports/iris_single_pose_v2/IRIS_V2_R0_R3_REPRESENTATION_ONLY_BUNDLE_CI104.zip`
-- Drive file ID: `1lW7pmAjjGO-M1OWvkJn9vOphqhv29QNP`
-- persisted real result: `RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_REPRESENTATION_AUTHORITY_V2_CI104_RESULT`
-- frozen panel asset-ID digest: `366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961`
-- optimizer steps: `0`
-- sealed splits opened: `false`
-
-## Apparatus-failure history
-
-- CI69: RGB-heavy staging was broader than this gate required; interrupted before result.
-- CI86: representation-only stage reached `256/256`; execution ZIP omitted `coords.py`; failed before cache.
-- CI96: representation-only stage reached `256/256`; partial visibility exposed `track_err[:,v] = err[ok]` broadcast bug; failed before cache completion/audit/study.
-- CI104: fixed partial-visibility indexing, added a visible+hidden regression, passed all preflights and isolated artifact tests, and produced the first valid frozen R0-R3 measurement.
-
-None of CI69/CI86/CI96 produced a scientific R0-R3 result.
-
-## Representation-only boundary
-
-Stage profile: `representation_authority_geometry_only`.
-
-R0-R3 stages/consumes only sanitized `vertices/faces`, native-1024 `raster_authority.npz`, and `camera.json`. No RGB is staged or consumed. Hidden rig/mechanics fields are excluded from the legal representation fingerprint.
-
-## Controlled corpus / panel
-
-Controlled corpus: 3930 assets.
-
-- FIT 2935 OPEN
-- TUNE 313 OPEN
-- CAL 246 SEALED
-- DEV 270 SEALED
-- EXTERNAL_HOLDOUT 166 SEALED
-
-Frozen confirmatory panel:
-
-- 256 OPEN assets
-- 230 FIT / 26 TUNE
-- ordered asset-ID-list SHA-256 `366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961`
+OOM/non-finite => `APPARATUS_CAPACITY_REOPEN_REQUIRED`; optimizer must not start.
 
 ## NEXT EXECUTABLE STEP
 
-Representation feature search is closed for the current P target. Do **not** open R4 or SOI-2.
+CI must compile/test the exact committed mini apparatus, run learner partial-visibility and mini-contract regressions, build/test `iris-v2-mini-extractability-bundle-v1` outside the repo checkout, and upload that exact artifact. Only a successful artifact may be mirrored to Drive and bound into the Colab GPU notebook. The notebook must pass the zero-step GPU gate before starting the frozen optimizer.
 
-Before any optimizer run:
-
-1. run production-width GPU memory/throughput preflight with optimizer=0;
-2. freeze mini FIT/TUNE membership;
-3. freeze observable checkpoint-selection key + evaluator;
-4. freeze mini style/appearance policy;
-5. write the mini learner prereg;
-6. only then open one learner optimizer runner.
-
-No CAL, DEV, or EXTERNAL_HOLDOUT split may be opened during mini preparation.
+Do not change membership, thresholds, checkpoint key or TUNE policy after optimizer use begins.
 
 ## Research rule
 

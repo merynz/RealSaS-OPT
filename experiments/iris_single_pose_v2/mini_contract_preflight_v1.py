@@ -10,8 +10,11 @@ import sys
 import tempfile
 from pathlib import Path
 
+import torch
+
 import build_mini_seed_v1 as seed_builder
 import dataset
+import evaluate_mini_v2 as mini_eval
 import finalize_mini_v2 as finalize
 import losses
 import matcher
@@ -93,6 +96,34 @@ def gpu_preflight_regression(here: Path):
         "no_cuda_exit_code": 2,
         "no_cuda_structured_report": True,
         "blind_calledprocesserror_regression_closed": True,
+    }
+
+
+def evaluator_precision_regression():
+    class HalfOutputModel(torch.nn.Module):
+        def forward(self, images, yaw_deg):
+            d = images.device
+            return {
+                "P": torch.zeros((1, 8, 3, 2, 2), device=d, dtype=torch.float16),
+                "N": torch.zeros((1, 8, 3, 2, 2), device=d, dtype=torch.float16),
+                "U_geo": torch.zeros((1, 8, 1, 2, 2), device=d, dtype=torch.float16),
+                "Z_coarse": torch.zeros((1, 8, 64, 1, 1), device=d, dtype=torch.float16),
+                "Z_fine": torch.zeros((1, 8, 32, 2, 2), device=d, dtype=torch.float16),
+            }
+
+    batch = {
+        "images": torch.zeros((1, 8, 4, 4, 4), dtype=torch.float32),
+        "yaw_deg": torch.zeros((1, 8), dtype=torch.float32),
+    }
+    out = mini_eval._evaluation_forward(HalfOutputModel(), batch, torch.device("cpu"))
+    assert set(out) == {"P", "N", "U_geo", "Z_coarse", "Z_fine"}
+    assert all(v.dtype == torch.float32 for v in out.values())
+    src = inspect.getsource(mini_eval._evaluation_forward)
+    assert "v.float()" in src
+    return {
+        "amp_export_boundary_explicit": True,
+        "geometry_matcher_input_dtype": "float32",
+        "half_output_regression": True,
     }
 
 
@@ -202,6 +233,7 @@ def main():
     assert "CHECKPOINT_SELECTION_FROZEN.json" in fz and "--tune-cache" in fz and "build_report" in fz
 
     gpu_reg = gpu_preflight_regression(here)
+    eval_reg = evaluator_precision_regression()
     print(
         json.dumps(
             {
@@ -220,6 +252,7 @@ def main():
                 "tune_cli_absent_from_training_phase": True,
                 "tune_stage_after_checkpoint_freeze_enforced": True,
                 "gpu_preflight_regression": gpu_reg,
+                "evaluator_precision_regression": eval_reg,
                 "sealed_splits_opened": False,
                 "optimizer_steps": 0,
             },

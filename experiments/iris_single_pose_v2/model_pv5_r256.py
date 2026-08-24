@@ -35,6 +35,7 @@ class IRISSinglePoseV2PV5R256(IRISSinglePoseV2PV5):
             ConvNormAct(c2 + fw, c2, 3, 1),
             ResidualBlock(c2),
         )
+        # gx, gy, sin(yaw), cos(yaw), native-image-derived h_native.
         self.p_depth_head = nn.Conv2d(c2 + 5, 1, 1)
 
     def forward(self, images, yaw_deg, sheet_half_extent):
@@ -61,6 +62,7 @@ class IRISSinglePoseV2PV5R256(IRISSinglePoseV2PV5):
         y4 = self.d4(y8, f4)
         y2 = self.d2(y4, f2)
 
+        # True full-resolution P branch: direct R-resolution RGBA path + upsampled y2.
         p_img_r = self.p_s1_stem(x)
         y2_r = F.interpolate(y2, size=(h, w), mode="bilinear", align_corners=False)
         p_feat_r = self.p_s1_fuse(torch.cat([y2_r, p_img_r], dim=1))
@@ -72,6 +74,7 @@ class IRISSinglePoseV2PV5R256(IRISSinglePoseV2PV5):
         depth_v = depth.reshape(b, v, 1, h, w)
         p = reconstruct_p_from_observable_scale(depth_v, yaw_deg, observable_h)
 
+        # Frozen diagnostic heads retain their historical R/2 / R/8 resolutions.
         with torch.no_grad():
             n = F.normalize(self.n_head(y2), dim=1, eps=1e-8)
             u_geo = torch.clamp(self.u_geo_head(y2), -6.0, 3.0)

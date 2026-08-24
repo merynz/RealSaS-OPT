@@ -36,138 +36,153 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install numpy pillow
           python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+
       - name: Compile exact committed sources
         working-directory: experiments/iris_single_pose_v2
         run: python -m py_compile *.py
-      - name: Architecture / coordinate / matcher preflight
+
+      - name: Architecture / coordinate / matcher / P-V3 formulation preflight
         working-directory: experiments/iris_single_pose_v2
         run: python preflight.py
-      - name: Learner physical firewall / truth-cache preflight
+
+      - name: Learner physical firewall / truth-cache regression
         working-directory: experiments/iris_single_pose_v2
         run: python data_preflight.py
+
       - name: Learner partial-visibility cache regression
         working-directory: experiments/iris_single_pose_v2
         run: python learner_cache_visibility_preflight_v1.py
-      - name: Frozen mini contract + TUNE staging/runtime-metadata firewall preflight
+
+      - name: Historical mini firewall and TUNE-order regression
         working-directory: experiments/iris_single_pose_v2
         run: python mini_contract_preflight_v1.py
+
       - name: AMP loss precision regression
         working-directory: experiments/iris_single_pose_v2
         run: python amp_loss_precision_preflight_v1.py
-      - name: Representation-only geometry data-path preflight
+
+      - name: Representation-only geometry data-path regression
         working-directory: experiments/iris_single_pose_v2
         run: python representation_data_preflight_v1.py
+
       - name: Partial-visibility representation cache regression
         working-directory: experiments/iris_single_pose_v2
         run: python representation_cache_visibility_preflight_v1.py
-      - name: Observable evaluator preflight
+
+      - name: Observable evaluator regression
         working-directory: experiments/iris_single_pose_v2
         run: python evaluation_preflight.py
-      - name: Representation authority semantic preflight
+
+      - name: Representation authority semantic regression
         working-directory: experiments/iris_single_pose_v2
         run: python representation_preflight.py
 
-      - name: Build exact R0-R3 representation-only execution bundle V3
+      - name: P-V3 corpus closure CLI / panel firewall preflight
+        working-directory: experiments/iris_single_pose_v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          python p_formulation_corpus_audit_v1.py --help >/dev/null
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('P_FORMULATION_V3_PANEL_V1.json')
+          x=json.load(open(p,encoding='utf-8'))
+          assert x['schema']=='RealSaS.IRISSinglePoseV2.PFormulationV3Panel.v1'
+          assert x['asset_count']==16
+          assert x['tune_assets']==0 and x['sealed_assets']==0
+          assert set(x['roles'])=={'FIT_SELECT_SENTINEL','FIT_TRAIN_SENTINEL'}
+          ids=x['roles']['FIT_SELECT_SENTINEL']+x['roles']['FIT_TRAIN_SENTINEL']
+          assert len(ids)==16 and len(set(ids))==16
+          assert x['optimizer_steps']==0 and x['training_authorized'] is False
+          PY
+
+      - name: Build optimizer-zero P Formulation V3 closure bundle V1
         shell: bash
         run: |
           set -euo pipefail
           ACTUAL_HEAD="$(git rev-parse HEAD)"
           test "$ACTUAL_HEAD" = "$SOURCE_HEAD_SHA"
-          BUNDLE="$RUNNER_TEMP/iris-v2-r0-r3-execution-bundle-v3"
-          mkdir -p "$BUNDLE"
+          BUNDLE="$RUNNER_TEMP/iris-v2-p-formulation-v3-closure-bundle-v1"
           SRC="experiments/iris_single_pose_v2"
-          for f in build_representation_seed_v1.py stage_representation_authority_v1.py prepare_representation_cache_v1.py audit_representation_stage_cache_v1.py representation_authority_study_v1.py compact_representation_handoff_v1.py geometry.py coords.py run_representation_authority_v2.py; do cp "$SRC/$f" "$BUNDLE/$f"; done
-          (cd "$BUNDLE" && sha256sum *.py | sort > SHA256SUMS.txt)
-          python - <<'PY'
-          import json,os
-          from pathlib import Path
-          b=Path(os.environ['RUNNER_TEMP'])/'iris-v2-r0-r3-execution-bundle-v3'
-          info={'schema':'RealSaS.IRISSinglePoseV2.ExecutionBundle.v3','source_head_sha':os.environ['SOURCE_HEAD_SHA'],'workflow_event_sha':os.environ['WORKFLOW_EVENT_SHA'],'workflow':'IRIS V2 Preflight','optimizer_steps':0,'training_authorized':False,'stage_profile':'representation_authority_geometry_only','rgb_staged':False,'rgb_consumed':False,'entrypoint':'run_representation_authority_v2.py --mode all','required_corpus_root':'/content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3'}
-          (b/'BUNDLE_INFO.json').write_text(json.dumps(info,indent=2,sort_keys=True)+'\n')
-          PY
-      - name: Verify isolated R0-R3 bundle dependency closure
-        shell: bash
-        run: |
-          set -euo pipefail
-          BUNDLE="$RUNNER_TEMP/iris-v2-r0-r3-execution-bundle-v3"; SRC="experiments/iris_single_pose_v2"
-          python - "$SRC" "$BUNDLE" <<'PY'
-          import ast,sys
-          from pathlib import Path
-          src=Path(sys.argv[1]);b=Path(sys.argv[2]);mods={p.stem for p in src.glob('*.py')};missing=set()
-          for p in b.glob('*.py'):
-            t=ast.parse(p.read_text(),filename=str(p))
-            for n in ast.walk(t):
-              roots=[a.name.split('.')[0] for a in n.names] if isinstance(n,ast.Import) else ([n.module.split('.')[0]] if isinstance(n,ast.ImportFrom) and n.module else [])
-              for r in roots:
-                if r in mods and not (b/f'{r}.py').is_file():missing.add((p.name,r))
-          if missing:raise SystemExit(f'missing local bundle dependencies: {sorted(missing)}')
-          PY
-          cp "$SRC/representation_data_preflight_v1.py" "$BUNDLE/_repr_smoke.py"; cp "$SRC/representation_cache_visibility_preflight_v1.py" "$BUNDLE/_vis_smoke.py"
-          (cd "$BUNDLE" && python -m py_compile *.py && python _repr_smoke.py && python _vis_smoke.py)
-          rm "$BUNDLE/_repr_smoke.py" "$BUNDLE/_vis_smoke.py"; find "$BUNDLE" -type d -name __pycache__ -prune -exec rm -rf {} +; (cd "$BUNDLE" && sha256sum -c SHA256SUMS.txt)
-          python - "$BUNDLE" <<'PY'
-          import sys
-          from pathlib import Path
-          b=Path(sys.argv[1]);expected={'BUNDLE_INFO.json','SHA256SUMS.txt','build_representation_seed_v1.py','stage_representation_authority_v1.py','prepare_representation_cache_v1.py','audit_representation_stage_cache_v1.py','representation_authority_study_v1.py','compact_representation_handoff_v1.py','geometry.py','coords.py','run_representation_authority_v2.py'};actual={p.name for p in b.iterdir()}
-          if actual!=expected:raise SystemExit(f'bundle drift: {sorted(expected-actual)} {sorted(actual-expected)}')
-          PY
-      - name: Upload exact R0-R3 representation-only execution bundle V3
-        uses: actions/upload-artifact@v4
-        with:
-          name: iris-v2-r0-r3-execution-bundle-v3
-          path: ${{ runner.temp }}/iris-v2-r0-r3-execution-bundle-v3
-          if-no-files-found: error
-          retention-days: 14
-
-      - name: Build frozen mini extractability execution bundle V4
-        shell: bash
-        run: |
-          set -euo pipefail
-          ACTUAL_HEAD="$(git rev-parse HEAD)"; test "$ACTUAL_HEAD" = "$SOURCE_HEAD_SHA"
-          BUNDLE="$RUNNER_TEMP/iris-v2-mini-extractability-bundle-v4"; SRC="experiments/iris_single_pose_v2"; mkdir -p "$BUNDLE"
-          for f in MINI_EXTRACTABILITY_MEMBERSHIP_V1.json MINI_MEMBERSHIP_PROVENANCE_V1.json MINI_EXTRACTABILITY_GENERALIZATION_PREREG_V1.md build_mini_seed_v1.py stage_source.py prepare_cache.py audit_staged_cache_v2.py dataset.py losses.py model.py coords.py geometry.py matcher.py metrics.py qualification.py evaluate_v2.py evaluate_mini_v2.py gpu_training_preflight_v1.py train_mini_v2.py finalize_mini_v2.py compact_mini_handoff_v1.py run_mini_extractability_v1.py learner_cache_visibility_preflight_v1.py mini_contract_preflight_v1.py amp_loss_precision_preflight_v1.py; do cp "$SRC/$f" "$BUNDLE/$f"; done
+          mkdir -p "$BUNDLE"
+          for f in \
+            P_FORMULATION_V3_PANEL_V1.json \
+            P_FORMULATION_V3_CLOSURE_PREREG_20260824.md \
+            p_formulation_corpus_audit_v1.py \
+            preflight.py model.py losses.py coords.py geometry.py matcher.py metrics.py; do
+            cp "$SRC/$f" "$BUNDLE/$f"
+          done
           (cd "$BUNDLE" && sha256sum *.py *.json *.md | sort > SHA256SUMS.txt)
           python - <<'PY'
           import json,os
           from pathlib import Path
-          b=Path(os.environ['RUNNER_TEMP'])/'iris-v2-mini-extractability-bundle-v4'
-          info={'schema':'RealSaS.IRISSinglePoseV2.MiniExtractabilityExecutionBundle.v4','source_head_sha':os.environ['SOURCE_HEAD_SHA'],'workflow_event_sha':os.environ['WORKFLOW_EVENT_SHA'],'workflow':'IRIS V2 Preflight','representation_gate':'P_GEOMETRY_SUFFICIENT','source_representation_seed_sha256_provenance_only':'f3d43da7766f104cab08f19fd24b515d54fde47545cc3288da023779c6d4c9af','input_resolution':256,'training_authorized_conditionally_after_gpu_preflight':True,'gpu_preflight_optimizer_steps':0,'runtime_seed_authority':'frozen_membership_only','representation_seed_consumed_at_runtime':False,'runtime_tune_fields':['asset_id','split','mini_role'],'tune_checkpoint_selection':False,'tune_staging_before_checkpoint_freeze':False,'loss_numeric_policy':'AMP model forward; FP32 supervision/matching losses','ci183_half_overflow_regression_closed':True,'sealed_splits_opened':False,'entrypoint':'run_mini_extractability_v1.py','required_corpus_root':'/content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3'}
+          b=Path(os.environ['RUNNER_TEMP'])/'iris-v2-p-formulation-v3-closure-bundle-v1'
+          info={
+            'schema':'RealSaS.IRISSinglePoseV2.PFormulationV3ClosureBundle.v1',
+            'source_head_sha':os.environ['SOURCE_HEAD_SHA'],
+            'workflow_event_sha':os.environ['WORKFLOW_EVENT_SHA'],
+            'workflow':'IRIS V2 Preflight',
+            'representation_gate':'P_GEOMETRY_SUFFICIENT',
+            'P_ontology':'canonical/object-frame physical surface position',
+            'P_parameterization':'analytic orthographic screen-plane coordinates + one learned camera-forward depth scalar',
+            'P_formula':'P=0.54*gx*right(yaw)-0.54*gy*up+depth*forward(yaw)',
+            'camera_contract':'realsas.level_orthographic_z_orbit.v1',
+            'orthographic_half_extent':0.54,
+            'optimizer_steps':0,
+            'training_authorized':False,
+            'rgb_required':False,
+            'tune_consumed':False,
+            'sealed_splits_opened':False,
+            'panel_asset_count':16,
+            'entrypoint':'p_formulation_corpus_audit_v1.py',
+            'required_corpus_root':'/content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3'
+          }
           (b/'BUNDLE_INFO.json').write_text(json.dumps(info,indent=2,sort_keys=True)+'\n')
           PY
-      - name: Verify isolated mini V4 bundle contract and dependency closure
+
+      - name: Verify isolated P Formulation V3 closure bundle
         shell: bash
         run: |
           set -euo pipefail
-          BUNDLE="$RUNNER_TEMP/iris-v2-mini-extractability-bundle-v4"; SRC="experiments/iris_single_pose_v2"
+          BUNDLE="$RUNNER_TEMP/iris-v2-p-formulation-v3-closure-bundle-v1"
+          SRC="experiments/iris_single_pose_v2"
           python - "$SRC" "$BUNDLE" <<'PY'
           import ast,sys
           from pathlib import Path
-          src=Path(sys.argv[1]);b=Path(sys.argv[2]);mods={p.stem for p in src.glob('*.py')};missing=set()
+          src=Path(sys.argv[1]); b=Path(sys.argv[2]); mods={p.stem for p in src.glob('*.py')}; missing=set()
           for p in b.glob('*.py'):
-            t=ast.parse(p.read_text(),filename=str(p))
-            for n in ast.walk(t):
+            tree=ast.parse(p.read_text(),filename=str(p))
+            for n in ast.walk(tree):
               roots=[a.name.split('.')[0] for a in n.names] if isinstance(n,ast.Import) else ([n.module.split('.')[0]] if isinstance(n,ast.ImportFrom) and n.module else [])
               for r in roots:
-                if r in mods and not (b/f'{r}.py').is_file():missing.add((p.name,r))
-          if missing:raise SystemExit(f'missing local mini bundle dependencies: {sorted(missing)}')
+                if r in mods and not (b/f'{r}.py').is_file(): missing.add((p.name,r))
+          if missing: raise SystemExit(f'missing local P-V3 bundle dependencies: {sorted(missing)}')
           PY
-          (cd "$BUNDLE" && python -m py_compile *.py && python learner_cache_visibility_preflight_v1.py && python mini_contract_preflight_v1.py && python amp_loss_precision_preflight_v1.py && python build_mini_seed_v1.py --help >/dev/null && python run_mini_extractability_v1.py --help >/dev/null && python train_mini_v2.py --help >/dev/null && python finalize_mini_v2.py --help >/dev/null)
-          find "$BUNDLE" -type d -name __pycache__ -prune -exec rm -rf {} +; (cd "$BUNDLE" && sha256sum -c SHA256SUMS.txt)
+          (cd "$BUNDLE" && python -m py_compile *.py && python preflight.py && python p_formulation_corpus_audit_v1.py --help >/dev/null)
+          find "$BUNDLE" -type d -name __pycache__ -prune -exec rm -rf {} +
+          (cd "$BUNDLE" && sha256sum -c SHA256SUMS.txt)
           python - "$BUNDLE" <<'PY'
-          import json,subprocess,sys
+          import json,sys
           from pathlib import Path
-          b=Path(sys.argv[1]);expected={'BUNDLE_INFO.json','SHA256SUMS.txt','MINI_EXTRACTABILITY_MEMBERSHIP_V1.json','MINI_MEMBERSHIP_PROVENANCE_V1.json','MINI_EXTRACTABILITY_GENERALIZATION_PREREG_V1.md','build_mini_seed_v1.py','stage_source.py','prepare_cache.py','audit_staged_cache_v2.py','dataset.py','losses.py','model.py','coords.py','geometry.py','matcher.py','metrics.py','qualification.py','evaluate_v2.py','evaluate_mini_v2.py','gpu_training_preflight_v1.py','train_mini_v2.py','finalize_mini_v2.py','compact_mini_handoff_v1.py','run_mini_extractability_v1.py','learner_cache_visibility_preflight_v1.py','mini_contract_preflight_v1.py','amp_loss_precision_preflight_v1.py'};actual={p.name for p in b.iterdir()}
-          if actual!=expected:raise SystemExit(f'mini bundle drift: missing={sorted(expected-actual)} extra={sorted(actual-expected)}')
-          info=json.load(open(b/'BUNDLE_INFO.json'))
-          if info.get('schema')!='RealSaS.IRISSinglePoseV2.MiniExtractabilityExecutionBundle.v4' or info.get('tune_staging_before_checkpoint_freeze') is not False or info.get('representation_seed_consumed_at_runtime') is not False or info.get('runtime_seed_authority')!='frozen_membership_only' or info.get('ci183_half_overflow_regression_closed') is not True:raise SystemExit('bundle V4 runtime/numeric firewall metadata drift')
-          bh=subprocess.check_output([sys.executable,'build_mini_seed_v1.py','--help'],cwd=b,text=True)
-          rh=subprocess.check_output([sys.executable,'run_mini_extractability_v1.py','--help'],cwd=b,text=True)
-          if '--representation-seed' in bh or '--representation-seed' in rh:raise SystemExit('runtime representation seed CLI leaked into V4 bundle')
+          b=Path(sys.argv[1])
+          expected={
+            'BUNDLE_INFO.json','SHA256SUMS.txt',
+            'P_FORMULATION_V3_PANEL_V1.json','P_FORMULATION_V3_CLOSURE_PREREG_20260824.md',
+            'p_formulation_corpus_audit_v1.py','preflight.py','model.py','losses.py','coords.py','geometry.py','matcher.py','metrics.py'
+          }
+          actual={p.name for p in b.iterdir()}
+          if actual!=expected: raise SystemExit(f'P-V3 bundle drift: missing={sorted(expected-actual)} extra={sorted(actual-expected)}')
+          info=json.load(open(b/'BUNDLE_INFO.json',encoding='utf-8'))
+          if info.get('schema')!='RealSaS.IRISSinglePoseV2.PFormulationV3ClosureBundle.v1': raise SystemExit('bad P-V3 bundle schema')
+          if info.get('optimizer_steps')!=0 or info.get('training_authorized') is not False: raise SystemExit('P-V3 optimizer/training authority drift')
+          if info.get('rgb_required') is not False or info.get('tune_consumed') is not False or info.get('sealed_splits_opened') is not False: raise SystemExit('P-V3 data firewall drift')
           PY
-      - name: Upload frozen mini extractability execution bundle V4
+
+      - name: Upload optimizer-zero P Formulation V3 closure bundle V1
         uses: actions/upload-artifact@v4
         with:
-          name: iris-v2-mini-extractability-bundle-v4
-          path: ${{ runner.temp }}/iris-v2-mini-extractability-bundle-v4
+          name: iris-v2-p-formulation-v3-closure-bundle-v1
+          path: ${{ runner.temp }}/iris-v2-p-formulation-v3-closure-bundle-v1
           if-no-files-found: error
           retention-days: 14

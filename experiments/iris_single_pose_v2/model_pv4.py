@@ -5,23 +5,32 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from coords import field_cell_centers
-from model import IRISSinglePoseV2, IRISV2Config, camera_basis_from_yaw, reconstruct_p_from_view_depth
+from model import IRISSinglePoseV2, IRISV2Config, camera_basis_from_yaw
 
 
 ALPHA_THRESHOLD = 0.5
 
 
-def _bbox_span(mask: torch.Tensor, dim: int) -> torch.Tensor:
-    """Inclusive foreground span in pixels for mask [B,H,W]."""
+def _bbox_span(mask: torch.Tensor, coordinate: str) -> torch.Tensor:
+    """Inclusive foreground span in pixels for mask [B,H,W].
+
+    coordinate='x' collapses rows and measures width; coordinate='y' collapses
+    columns and measures height. The explicit name prevents H/W axis ambiguity.
+    """
     if mask.ndim != 3:
         raise ValueError(f"mask must be [B,H,W], got {tuple(mask.shape)}")
-    axis_any = mask.any(dim=2 if dim == 1 else 1)
-    if not axis_any.any(dim=1).all():
+    if coordinate == "x":
+        occupied = mask.any(dim=1)  # [B,W]
+    elif coordinate == "y":
+        occupied = mask.any(dim=2)  # [B,H]
+    else:
+        raise ValueError(f"coordinate must be 'x' or 'y', got {coordinate!r}")
+    if not occupied.any(dim=1).all():
         raise RuntimeError("blank alpha support in canonical sheet-scale estimator")
-    n = axis_any.shape[1]
+    n = occupied.shape[1]
     idx = torch.arange(n, device=mask.device, dtype=torch.long)[None]
-    lo = torch.where(axis_any, idx, torch.full_like(idx, n)).min(dim=1).values
-    hi = torch.where(axis_any, idx, torch.full_like(idx, -1)).max(dim=1).values
+    lo = torch.where(occupied, idx, torch.full_like(idx, n)).min(dim=1).values
+    hi = torch.where(occupied, idx, torch.full_like(idx, -1)).max(dim=1).values
     return (hi - lo + 1).to(torch.float32)
 
 
@@ -57,11 +66,11 @@ def estimate_sheet_half_extent_from_alpha(
     with torch.no_grad():
         alpha = images[:, :, 3].float()
         fg = alpha >= float(alpha_threshold)
-        # Canonical x and y extents are directly visible in yaw 0 and yaw 90.
-        width_v0 = _bbox_span(fg[:, 0], dim=1) / float(w)
-        width_v2 = _bbox_span(fg[:, 2], dim=1) / float(w)
-        # Z is camera-up for every view; use the maximum observed height for robustness.
-        heights = torch.stack([_bbox_span(fg[:, v], dim=0) / float(h) for v in range(8)], dim=1)
+        # Canonical X/Y extents are directly visible as horizontal occupancy in yaw 0/90.
+        width_v0 = _bbox_span(fg[:, 0], "x") / float(w)
+        width_v2 = _bbox_span(fg[:, 2], "x") / float(w)
+        # Z is camera-up for every view; use maximum vertical occupancy for robustness.
+        heights = torch.stack([_bbox_span(fg[:, v], "y") / float(h) for v in range(8)], dim=1)
         z_occ = heights.max(dim=1).values
         max_occ = torch.stack([width_v0, width_v2, z_occ], dim=1).max(dim=1).values
         if not torch.isfinite(max_occ).all() or (max_occ <= 0).any():

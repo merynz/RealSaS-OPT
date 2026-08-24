@@ -4,6 +4,8 @@ from dataclasses import dataclass
 import torch
 import torch.nn.functional as F
 
+from model import camera_basis_from_yaw
+
 
 def sample_field(field: torch.Tensor, grid: torch.Tensor) -> torch.Tensor:
     """field [B,V,C,H,W], grid [B,V,K,2] -> [B,V,K,C], align_corners=False."""
@@ -30,22 +32,42 @@ def geometry_loss(outputs, batch):
     gt_p = batch["geom_p"].float()
     gt_n = batch["geom_n"].float()
     mask = batch["geom_mask"].float()
+    yaw = batch.get("yaw_deg")
+    if yaw is None:
+        raise RuntimeError("P depth supervision requires known yaw_deg")
     # AMP boundary: model activations may be FP16, but all supervision/loss numerics are FP32.
     pr_p = sample_field(outputs["P"].float(), grid)
     pr_n = sample_field(outputs["N"].float(), grid)
-    p_elem = smooth_l1_vec(pr_p, gt_p, 0.01)
+    right, up, forward = camera_basis_from_yaw(
+        yaw.float(), batch=pr_p.shape[0], views=pr_p.shape[1], dtype=pr_p.dtype
+    )
+    right = right[:, :, None, :]
+    up = up[:, :, None, :]
+    forward = forward[:, :, None, :]
+    delta = pr_p - gt_p
+    pr_depth = (pr_p * forward).sum(-1)
+    gt_depth = (gt_p * forward).sum(-1)
+    # P is parameterized by one learned camera-forward depth scalar. The two screen-plane
+    # coordinates are analytic camera geometry and must not dilute the learned depth objective.
+    p_elem = F.smooth_l1_loss(pr_depth, gt_depth, reduction="none", beta=0.01)
     n_elem = 1.0 - (pr_n * gt_n).sum(-1).clamp(-1.0, 1.0)
     den = mask.sum().clamp_min(1.0)
     lp = (p_elem * mask).sum() / den
     ln = (n_elem * mask).sum() / den
     s = sample_field(outputs["U_geo"].float(), grid)[..., 0]
-    euclid_detached = torch.linalg.norm(pr_p.detach() - gt_p, dim=-1)
+    euclid_detached = torch.linalg.norm(delta.detach(), dim=-1)
+    depth_abs_detached = (pr_depth.detach() - gt_depth).abs()
+    screen_right_abs = (delta.detach() * right).sum(-1).abs()
+    screen_up_abs = (delta.detach() * up).sum(-1).abs()
     lu = ((torch.exp(-s) * euclid_detached + s) * mask).sum() / den
     return {
         "P": lp,
         "N": ln,
         "U_geo": lu,
         "p_euclid": (euclid_detached * mask).sum().detach() / den,
+        "p_depth_abs": (depth_abs_detached * mask).sum().detach() / den,
+        "p_screen_right_abs": (screen_right_abs * mask).sum().detach() / den,
+        "p_screen_up_abs": (screen_up_abs * mask).sum().detach() / den,
         "n_cos": (n_elem * mask).sum().detach() / den,
     }
 

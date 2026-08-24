@@ -135,10 +135,33 @@ jobs:
             python _isolated_representation_smoke.py
           )
           rm "$BUNDLE/_isolated_representation_smoke.py"
+          find "$BUNDLE" -type d -name __pycache__ -prune -exec rm -rf {} +
           (
             cd "$BUNDLE"
             sha256sum -c SHA256SUMS.txt
           )
+          python - "$BUNDLE" <<'PY'
+          import sys
+          from pathlib import Path
+          bundle = Path(sys.argv[1])
+          expected = {
+              'BUNDLE_INFO.json',
+              'SHA256SUMS.txt',
+              'build_representation_seed_v1.py',
+              'stage_representation_authority_v1.py',
+              'prepare_representation_cache_v1.py',
+              'audit_representation_stage_cache_v1.py',
+              'representation_authority_study_v1.py',
+              'compact_representation_handoff_v1.py',
+              'geometry.py',
+              'coords.py',
+              'run_representation_authority_v2.py',
+          }
+          actual = {p.name for p in bundle.iterdir()}
+          if actual != expected:
+              raise SystemExit(f'bundle content drift: missing={sorted(expected-actual)} extra={sorted(actual-expected)}')
+          print('exact bundle content PASS')
+          PY
       - name: Upload exact R0-R3 representation-only execution bundle V3
         uses: actions/upload-artifact@v4
         with:

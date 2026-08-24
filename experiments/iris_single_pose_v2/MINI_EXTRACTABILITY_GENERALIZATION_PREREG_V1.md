@@ -45,11 +45,11 @@ Per asset: geometry samples1024/view; anchors512/view; max tracks2048; visibilit
 
 ## Training
 
-Seed20260824; AdamW lr3e-4, wd1e-4, betas(.9,.95); 16 epochs; microbatch1; grad accumulation4; clip1; FP16; train tracks128; eval tracks512. Epochs1-3 P/N/U_geo warmup; from epoch4 add coarse multi-positive, bidirectional pair objective, hard margin, soft reciprocal, P consistency and local Z_fine. Candidate checkpoints4/8/12/16. `Zc_reciprocal_soft=0.02`. Fine track sampling is deterministic position-uniform, never prefix truncation.
+Seed20260824; AdamW lr3e-4, wd1e-4, betas(.9,.95); 16 epochs; microbatch1; grad accumulation4; clip1. Mixed precision policy is **AMP FP16 model forward with explicit FP32 supervision/matching loss numerics**: P/N/U_geo sampling and loss math, Z_coarse normalization/similarity/logsumexp/softmax/margin/cycle, Z_fine local correlation/cross-entropy, and P-consistency are promoted to FP32 before loss computation. This preserves the frozen objective definitions while avoiding Half-range sentinel/softmax/exp failures. Train tracks128; eval tracks512. Epochs1-3 P/N/U_geo warmup; from epoch4 add coarse multi-positive, bidirectional pair objective, hard margin, soft reciprocal, P consistency and local Z_fine. Candidate checkpoints4/8/12/16. `Zc_reciprocal_soft=0.02`. Fine track sampling is deterministic position-uniform, never prefix truncation.
 
 ## GPU release condition
 
-Before scientific optimizer step1, exact bundle must pass CUDA R=256 production-width full post-warmup loss forward+backward, finite gradients, and AdamW two-moment memory accounting with zero scientific optimizer steps. OOM/non-finite => `APPARATUS_CAPACITY_REOPEN_REQUIRED`. The already-closed 256/512/1024 architecture executable preflight is not repeated as a scientific gate.
+Before scientific optimizer step1, exact bundle must pass CUDA R=256 production-width full post-warmup AMP forward + explicit-FP32 loss forward/backward, finite gradients, and AdamW two-moment memory accounting with zero scientific optimizer steps. The release must also pass a CPU Half-input regression that reproduces the prior `masked_fill(..., -1e9)` overflow condition and proves all loss branches promote to finite FP32 numerics. OOM/non-finite/numeric-overflow => `APPARATUS_CAPACITY_REOPEN_REQUIRED`. The already-closed 256/512/1024 architecture executable preflight is not repeated as a scientific gate.
 
 ## FIT_SELECT evaluation / checkpoint key
 

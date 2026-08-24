@@ -3,43 +3,37 @@
 **Date:** 2026-08-24  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_SUFFICIENT__MINI_EXTRACTABILITY_V1_FROZEN__CI183_RELEASE_PASS__GPU_DIAGNOSTIC_GATE_READY__OPTIMIZER_NOT_YET_OPENED`
+**Status:** `P_GEOMETRY_SUFFICIENT__MINI_EXTRACTABILITY_V1_FROZEN__CI202_V4_RELEASE_PASS__REAL_T4_CAPACITY_GATE_NEXT__OPTIMIZER_ZERO`
 
 ## Single continuation authority
 
 The sole active candidate implementation is `experiments/iris_single_pose_v2/`. Controlled V1/M256 is historical/no-run.
 
-CI104 Representation Authority is complete. Canonical representation label: `P_GEOMETRY_SUFFICIENT`; R4/SOI-2 are not opened.
+CI104 Representation Authority is complete. Canonical label: `P_GEOMETRY_SUFFICIENT`; R4/SOI-2 remain closed. Exact P on the frozen 256 OPEN panel / 12,288 queries: top1/top4/top8=1/1/1; reciprocal=1; cycle=1; physical-error tails all zero.
 
-Exact P on the frozen 256 OPEN panel / 12,288 queries: top1/top4/top8=1/1/1; reciprocal=1; cycle=1; physical-error tails all zero.
+## Frozen learner target / normal policy
 
-## Normal policy after CI104
+Primary learner evidence remains P + Z_coarse persistence + local Z_fine refinement. `geom_n` remains legal observation-local orientation supervision and angular diagnostic. `NORMAL_CORRESPONDENCE_AUTHORITY_NOT_ESTABLISHED`: N is forbidden from correspondence admission/ranking and checkpoint selection.
 
-`NORMAL_CORRESPONDENCE_AUTHORITY_NOT_ESTABLISHED`: N remains legal observation-local `geom_n` supervision and an angular diagnostic, but is forbidden from correspondence admission/ranking and checkpoint selection. Production correspondence remains Z_coarse+P global admission and Z_fine local refinement.
-
-## Mini Extractability / Generalization V1 — frozen before optimizer
-
-Prereg: `experiments/iris_single_pose_v2/MINI_EXTRACTABILITY_GENERALIZATION_PREREG_V1.md`
-
-Membership: `experiments/iris_single_pose_v2/MINI_EXTRACTABILITY_MEMBERSHIP_V1.json`
-
+Prereg: `experiments/iris_single_pose_v2/MINI_EXTRACTABILITY_GENERALIZATION_PREREG_V1.md`  
+Membership: `experiments/iris_single_pose_v2/MINI_EXTRACTABILITY_MEMBERSHIP_V1.json`  
 Membership provenance: `experiments/iris_single_pose_v2/MINI_MEMBERSHIP_PROVENANCE_V1.json`
 
-Frozen authorities:
+Frozen membership/authority:
 
-- CI104 representation seed SHA-256 `f3d43da7766f104cab08f19fd24b515d54fde47545cc3288da023779c6d4c9af` — provenance only; never learner runtime input
 - source panel ordered-ID digest `366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961`
-- mini membership canonical-JSON SHA-256 `4e223c799cf479a210716a86701ab96459673fe21852142e7cc7bd3a9d30e055`
-- FIT_TRAIN128 all source FIT; FIT_SELECT32 all source FIT; TUNE_FINAL26 all source TUNE; roles disjoint
+- mini membership canonical JSON SHA-256 `4e223c799cf479a210716a86701ab96459673fe21852142e7cc7bd3a9d30e055`
+- CI104 representation-seed SHA-256 `f3d43da7766f104cab08f19fd24b515d54fde47545cc3288da023779c6d4c9af` is provenance only; never learner runtime input
+- FIT_TRAIN128 / FIT_SELECT32 / TUNE_FINAL26 / unused FIT70
 - CAL/DEV/EXTERNAL_HOLDOUT unopened
 
-Training remains frozen at input256, 16 epochs, AdamW3e-4, microbatch1, grad accumulation4, FP16, geometry warmup epochs1-3, correspondence/local refinement from epoch4, candidate checkpoints4/8/12/16. Checkpoint selection uses FIT_SELECT only.
+Frozen training: input256; 16 epochs; AdamW3e-4; microbatch1; grad accumulation4; clip1; train tracks128; eval tracks512; geometry warmup epochs1-3; correspondence/local refinement from epoch4; candidate checkpoints4/8/12/16; FIT_SELECT-only checkpoint selection; TUNE evaluated once after checkpoint freeze.
 
-Allowed result labels remain only: `EXTRACTABILITY_GENERALIZATION_PASS`; `EXTRACTABLE_ON_FIT_SELECT__GENERALIZATION_GAP`; `LEARNER_EXTRACTABILITY_NOT_YET_SUFFICIENT`.
+Allowed labels remain only: `EXTRACTABILITY_GENERALIZATION_PASS`; `EXTRACTABLE_ON_FIT_SELECT__GENERALIZATION_GAP`; `LEARNER_EXTRACTABILITY_NOT_YET_SUFFICIENT`.
 
 ## Hard TUNE/runtime firewall
 
-Runtime seed contains only `asset_id`, `split`, `mini_role`. CI104 source seed is not consumed at runtime.
+Runtime seed contains only `asset_id`, `split`, `mini_role`; source registry/capability metadata and CI104 source seed are not consumed at runtime.
 
 Enforced execution order:
 
@@ -47,86 +41,96 @@ Enforced execution order:
 
 `train_mini_v2.py` has no TUNE CLI. `finalize_mini_v2.py` is the only post-freeze TUNE consumer.
 
-## Apparatus fixes carried into CI183
+## CI183 T4 failure — apparatus only, scientific result unopened
 
-- learner cache partial visibility: `track_err[ok,v] = err[ok]`; hidden entries remain +inf
-- cache fingerprint binds prepare_cache.py+geometry.py+coords.py
-- Z_fine local loss uses deterministic position-uniform track thinning, never prefix truncation
-- GPU capacity probe always writes structured JSON with environment, diagnostic stage, error type/message and traceback; generic CUDA failures can no longer collapse into blind `CalledProcessError`
-- forced NO_CUDA regression requires exit2 + `status=NO_CUDA` + traceback + optimizer_steps0
-- exact synthetic R=256 / geom_samples1024 / tracks128 full post-warmup loss forward+backward executes in CI CPU semantic replay
-- model parameter count in that replay: 7,394,135
-- evaluator model forward may use CUDA FP16 autocast, but every exported P/N/U/Z evidence field is explicitly cast to FP32 before geometry/grid_sample/matcher arithmetic; half-output regression is mandatory
+The CI183 notebook reached a real Tesla T4 under PyTorch `2.11.0+cu128`. CUDA was available. The zero-step capacity probe failed before optimizer step1 at coarse correspondence loss:
 
-## CI174 failure status
+`sim.masked_fill(~pos, -1e9)`
 
-CI174 is superseded. A user run failed inside the old GPU preflight with returncode1. The user reports T4 had been selected. The exact cause cannot be recovered from CI174 because that script checked CUDA outside its report path and caught only OOM inside the capacity probe; generic CUDA/AMP exceptions produced no structured JSON. Therefore **do not retroactively label the CI174 failure NO_CUDA**.
+with:
 
-CI183 exists specifically to measure the actual attached device/PyTorch CUDA state and exact failure stage before scientific state is opened.
+`RuntimeError: value cannot be converted to type c10::Half without overflow`.
 
-## Current exact learner execution authority — CI183 / bundle V3
+Cause: `total_loss` was still executed inside the CUDA autocast region; similarity became FP16 and `-1e9` is outside Half range. Scientific optimizer steps remained `0`, so no learner result or TUNE evidence was opened.
 
-Code-bearing head: `84954fb56d72a380e4c668983002fb1b8bb5f84e`.
+CI183/V3 is superseded and must not be rerun.
 
-GitHub Actions `IRIS V2 Preflight` run #183, run ID `32687119316`: **SUCCESS**.
+## Mixed-precision numeric policy — fixed before optimizer
+
+The frozen objectives/weights/thresholds are unchanged. Execution numeric policy is now explicit:
+
+`CUDA autocast FP16 -> model forward only`  
+`autocast OFF -> total_loss with explicit FP32 supervision/matching numerics`
+
+FP32 loss domains include P/N/U_geo sampling and loss math; Z_coarse normalization/similarity/logsumexp/softmax/margin/cycle; Z_fine local correlation/cross-entropy; and P-consistency. Evaluator evidence is also converted to FP32 before geometry/grid_sample/matcher arithmetic.
+
+Mandatory regression `amp_loss_precision_preflight_v1.py`:
+
+- reproduces the prior FP16 `masked_fill(...,-1e9)` failure class
+- feeds Half P/N/U/Zc/Zf evidence through all loss branches
+- requires finite FP32 total loss and backward
+- AST-enforces model forward inside autocast and `total_loss` outside autocast in both trainer and GPU capacity probe
+- optimizer steps=0
+
+## Current exact learner execution authority — CI202 / bundle V4
+
+**Code-bearing source head:** `83a856679a3bc4b4c0c894602f55ac1ffd94aa73`.
+
+GitHub Actions `IRIS V2 Preflight` run **#202**, run ID `32688230184`: **SUCCESS**.
 
 Mini artifact:
 
-- artifact ID `9506049384`
-- name `iris-v2-mini-extractability-bundle-v3`
-- ZIP SHA-256 `acb01cca1db063892cd59cf674ae8442f7beee166f6a38324b449af07f7829bb`
+- artifact ID `9506401956`
+- name `iris-v2-mini-extractability-bundle-v4`
+- schema `RealSaS.IRISSinglePoseV2.MiniExtractabilityExecutionBundle.v4`
+- ZIP SHA-256 `9dcb53a5c8447b0c0fcf8f31d618143fe619262204bbd44c5fd9ae7de911612c`
 - independent ZIP SHA replay PASS
-- internal SHA256SUMS PASS
-- isolated bundle compile/dependency/semantic replay PASS
+- all internal SHA256SUMS PASS
+- isolated compile/dependency/semantic replay PASS
 - learner partial-visibility regression PASS
-- membership provenance PASS
-- R256/geom1024/tracks128 CPU full-loss/backward regression PASS
-- forced NO_CUDA structured-report regression PASS
-- evaluator AMP-export->FP32 regression PASS
+- membership/TUNE/runtime firewall PASS
+- CPU R256/geom1024/tracks128 full-loss forward/backward PASS
+- structured NO_CUDA regression PASS
+- evaluator AMP-export -> FP32 evidence regression PASS
+- AMP Half-overflow regression PASS
+- trainer/GPU-preflight autocast-boundary invariant PASS
 - runtime representation seed consumed=false
 - TUNE staging before checkpoint freeze=false
 - sealed splits opened=false
 
-Bundle schema remains V3 because the scientific/runtime data contract is unchanged; CI183 exact head+artifact SHA supersede the known-bad CI174 V3 bytes. Do not use CI174 V3.
-
 Drive immutable mirror:
 
-`RealSaS_MASTER_CORPUS_1024_V3/reports/iris_single_pose_v2/IRIS_V2_MINI_EXTRACTABILITY_BUNDLE_CI183.zip`
+`RealSaS_MASTER_CORPUS_1024_V3/reports/iris_single_pose_v2/IRIS_V2_MINI_EXTRACTABILITY_BUNDLE_CI202.zip`
 
-Drive file ID: `13shqQYNzvQz7XchFZxwPzMGXtSCmQAzt`.
+Drive file ID: `18dm4eCcaexwzJ14Ip-6aUhS9y7vPOt2G`.
 
 ## Colab launcher authority
 
-Launcher: `RealSaS_IRIS_V2_Mini_Extractability_Generalization_CI183.ipynb`
+Launcher: `RealSaS_IRIS_V2_Mini_Extractability_Generalization_CI202.ipynb`
 
-Notebook SHA-256: `eef9cc1c8b2fde684c8309222153d9af9303f1d3d578ffc3763a0df9f9437940`.
+Notebook SHA-256: `eeb3d6aa15961e3ea6a9cab826d1b08e802f8e73eca2798d83c9ef77b3681ebe`.
 
-Launcher checks completed before handoff:
+Launcher pre-handoff validation:
 
 - strict nbformat validation PASS
 - all code cells compile PASS
-- first executable cell contains no Drive or persistent-result access; validates `nvidia-smi` + `torch.cuda.is_available()` first
-- GPU failure occurs before persistent scientific state creation
-- real CI183 bundle SHA/content/internal hashes replay PASS
-- exact artifact semantic regressions replay PASS
+- first executable cell checks real NVIDIA/PyTorch CUDA state before Drive/scientific state
+- exact CI202/V4 bundle SHA/content/internal hashes replay PASS
+- exact artifact partial-visibility, mini-contract and AMP-loss regressions replay PASS
 - minimal 186-record runtime seed PASS
-- runtime representation-seed CLI absent PASS
-- FIT-only training TUNE CLI absent PASS
-- GPU preflight requires structured report even on failure
-- run process streams output and persists a failure record with last 500 lines if the frozen run exits nonzero
+- capacity PASS additionally requires `diagnostic_stage=complete`, `loss_dtype=torch.float32`, finite gradients and AdamW moment-memory accounting with scientific optimizer steps=0
+- run output streams live; nonzero scientific run writes a failure record with the last 500 lines
 - completion marker remains last-write authority
 
 Persistent result root when run:
 
-`RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_MINI_EXTRACTABILITY_CI183_RESULT`
+`RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_MINI_EXTRACTABILITY_CI202_RESULT`
 
 ## NEXT EXECUTABLE STEP
 
-Open `RealSaS_IRIS_V2_Mini_Extractability_Generalization_CI183.ipynb` in Colab with a GPU runtime and Run All.
+Run `RealSaS_IRIS_V2_Mini_Extractability_Generalization_CI202.ipynb` on the T4 runtime from the top.
 
-The notebook first reports the actual NVIDIA device, torch version, torch CUDA build and CUDA visibility. Only an actual environment PASS reaches the zero-scientific-step CUDA capacity probe. Only capacity PASS creates the persistent run authority and opens the frozen optimizer.
-
-If the GPU gate fails, interpret the structured environment/capacity report; do not alter membership, thresholds, checkpoint key, N policy or FIT/TUNE ordering.
+The next scientifically meaningful event is a **real T4 zero-step capacity PASS** under the new boundary. Only that PASS opens optimizer step1. If the capacity gate fails, use its structured stage/error/traceback and keep optimizer at0; do not alter membership, thresholds, checkpoint key, N policy or FIT/TUNE ordering.
 
 After `RUN_COMPLETE_MINI_V1.json` is persisted, interpret only the preregistered outcome labels.
 

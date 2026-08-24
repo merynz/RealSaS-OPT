@@ -15,6 +15,9 @@ OPEN_SPLITS = {"FIT", "TUNE"}
 SEALED_SPLITS = {"CAL", "DEV", "EXTERNAL_HOLDOUT"}
 VIEWS = 8
 STYLES = ("cel_clean", "ink_cel")
+CAMERA_CONTRACT = "realsas.level_orthographic_z_orbit.v1"
+ORTHO_HALF_EXTENT = 0.54
+AUTHORITY_RESOLUTION = 1024
 
 
 def atomic_json(path, obj):
@@ -47,6 +50,33 @@ def load_seed_map(path):
     return {r["asset_id"]: r for r in obj["records"]}
 
 
+def expected_camera_basis(yaw_deg: float):
+    t = np.deg2rad(float(yaw_deg))
+    s, c = np.sin(t), np.cos(t)
+    right = np.asarray([c, -s, 0.0], np.float32)
+    up = np.asarray([0.0, 0.0, 1.0], np.float32)
+    forward = np.asarray([s, c, 0.0], np.float32)
+    return right, up, forward
+
+
+def geometry_gauge(vertices: np.ndarray):
+    if not len(vertices):
+        return None
+    lo = vertices.min(0)
+    hi = vertices.max(0)
+    center = 0.5 * (lo + hi)
+    extent = hi - lo
+    return {
+        "bbox_min": lo.tolist(),
+        "bbox_max": hi.tolist(),
+        "bbox_center": center.tolist(),
+        "bbox_extent": extent.tolist(),
+        "bbox_center_inf": float(np.max(np.abs(center))),
+        "largest_extent": float(np.max(extent)),
+        "max_abs_coordinate": float(np.max(np.abs(vertices))),
+    }
+
+
 def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_record: dict | None):
     aid = stage_record["asset_id"]
     split = str(stage_record["split"]).upper()
@@ -68,6 +98,8 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
             fatal.append("physical_firewall_false")
         if marker.get("geometry_fields") != ["vertices", "faces"]:
             fatal.append(f"bad_geometry_allowlist:{marker.get('geometry_fields')}")
+        if int(marker.get("authority_resolution", 0) or 0) != AUTHORITY_RESOLUTION:
+            fatal.append(f"bad_stage_authority_resolution:{marker.get('authority_resolution')}")
         expected = marker.get("staged_sha256", {})
         if not expected:
             fatal.append("missing_staged_sha256")
@@ -80,6 +112,7 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
     gp = ar / "primary_geometry.npz"
     vertices = np.zeros((0, 3), np.float32)
     faces = np.zeros((0, 3), np.int64)
+    gauge = None
     if gp.is_file():
         with np.load(gp, allow_pickle=False) as z:
             if set(z.files) != {"vertices", "faces"}:
@@ -87,6 +120,18 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
             else:
                 vertices = z["vertices"].astype(np.float32)
                 faces = z["faces"].astype(np.int64)
+        if not np.isfinite(vertices).all():
+            fatal.append("nonfinite_vertices")
+        if len(vertices):
+            gauge = geometry_gauge(vertices)
+            # Canonical corpus is centered/unit-scaled. Tolerances deliberately allow numeric/render repair noise,
+            # but reject source-unit leakage or a materially shifted gauge.
+            if gauge["max_abs_coordinate"] > 0.55:
+                fatal.append(f"canonical_coordinate_envelope_exceeded:{gauge['max_abs_coordinate']}")
+            if gauge["bbox_center_inf"] > 0.01:
+                fatal.append(f"canonical_bbox_not_centered:{gauge['bbox_center_inf']}")
+            if not (0.98 <= gauge["largest_extent"] <= 1.02):
+                fatal.append(f"canonical_largest_extent_not_unit:{gauge['largest_extent']}")
     else:
         fatal.append("missing_staged_geometry")
 
@@ -98,8 +143,24 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
         try:
             cam = json.load(open(vd / "camera.json", encoding="utf-8"))
             cams.append(cam)
-            if abs(float(cam["yaw_deg"]) - 45.0 * v) > 1e-4:
+            yaw = float(cam["yaw_deg"])
+            if abs(yaw - 45.0 * v) > 1e-4:
                 fatal.append(f"V{v}:yaw_mismatch")
+            if cam.get("contract") != CAMERA_CONTRACT:
+                fatal.append(f"V{v}:camera_contract:{cam.get('contract')}")
+            if abs(float(cam.get("half_extent", np.nan)) - ORTHO_HALF_EXTENT) > 1e-6:
+                fatal.append(f"V{v}:half_extent:{cam.get('half_extent')}")
+            if cam.get("image_origin") != "TOP_LEFT" or cam.get("image_y_direction") != "DOWN" or cam.get("ndc_y_direction") != "UP":
+                fatal.append(f"V{v}:image_coordinate_contract")
+            er, eu, ef = expected_camera_basis(yaw)
+            for name, actual, expected_basis in (
+                ("right", cam.get("right"), er),
+                ("up", cam.get("up"), eu),
+                ("forward", cam.get("forward"), ef),
+            ):
+                aa = np.asarray(actual, np.float32) if actual is not None else np.zeros(0, np.float32)
+                if aa.shape != (3,) or not np.allclose(aa, expected_basis, atol=1e-5, rtol=0):
+                    fatal.append(f"V{v}:{name}_basis_mismatch")
         except Exception as e:
             fatal.append(f"V{v}:camera_error:{type(e).__name__}:{e}")
             cams.append(None)
@@ -107,7 +168,10 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
             with np.load(vd / "raster_authority.npz", allow_pickle=False) as ra:
                 pix = np.asarray(ra["pixel_linear_index"], np.int64)
                 tri = np.asarray(ra["triangle_id"], np.int64)
+                rr = int(np.asarray(ra["resolution"]).reshape(-1)[0])
                 raster_counts.append(int(len(pix)))
+                if rr != AUTHORITY_RESOLUTION:
+                    fatal.append(f"V{v}:raster_authority_resolution:{rr}")
                 if len(pix) == 0:
                     fatal.append(f"V{v}:blank_raster")
                 if len(pix) and np.any(pix[1:] <= pix[:-1]):
@@ -142,6 +206,8 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
     track_count = 0
     geom_valid = 0
     exact_projection_max_grid_error = None
+    geom_projection_p95_grid_error = None
+    geom_projection_fraction_gt_1e3 = None
     max_surface_error = None
     support_min = None
     support_median = None
@@ -156,6 +222,7 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
                 fatal.append(f"truth_missing_fields:{sorted(missing)}")
             else:
                 gm = truth_data["geom_mask"].astype(bool)
+                gxy = truth_data["geom_xy"].astype(np.float32)
                 gp_ = truth_data["geom_p"].astype(np.float32)
                 gn = truth_data["geom_n"].astype(np.float32)
                 geom_valid = int(gm.sum())
@@ -165,14 +232,41 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
                     nlen = np.linalg.norm(gn[gm], axis=1)
                     if np.max(np.abs(nlen - 1.0)) > 1e-3:
                         fatal.append("geometry_normal_not_unit")
+                    if float(np.max(np.abs(gp_[gm]))) > 0.55:
+                        fatal.append("geom_p_outside_canonical_envelope")
+                # Direct teacher invariant: the P reconstructed from triangle+barycentric at a raster
+                # observation must project back to that observation coordinate under the same camera.
+                proj_err = []
+                for v, cam in enumerate(cams):
+                    mv = gm[v]
+                    if cam is None or not np.any(mv):
+                        continue
+                    exact = project_grid(gp_[v, mv], cam)
+                    ee = np.linalg.norm(exact - gxy[v, mv], axis=1)
+                    proj_err.append(ee)
+                if proj_err:
+                    pe = np.concatenate(proj_err).astype(np.float64)
+                    geom_projection_p95_grid_error = float(np.percentile(pe, 95))
+                    geom_projection_fraction_gt_1e3 = float(np.mean(pe > 1e-3))
+                    if geom_projection_p95_grid_error > 1e-4:
+                        fatal.append(f"geom_p_projection_p95_mismatch:{geom_projection_p95_grid_error}")
+                    if geom_projection_fraction_gt_1e3 > 0.005:
+                        fatal.append(f"geom_p_projection_outlier_fraction:{geom_projection_fraction_gt_1e3}")
+                else:
+                    fatal.append("no_geom_projection_samples")
                 tp = truth_data["track_p"].astype(np.float32)
                 xy = truth_data["track_xy"].astype(np.float32)
                 vis = truth_data["track_visible"].astype(bool)
                 support = truth_data["track_support"].astype(np.int64)
                 serr = truth_data["track_surface_error"].astype(np.float32)
+                ytruth = truth_data["yaw_deg"].astype(np.float32)
+                if ytruth.shape != (VIEWS,) or not np.allclose(ytruth, np.arange(VIEWS, dtype=np.float32) * 45.0, atol=1e-4):
+                    fatal.append("truth_yaw_contract_mismatch")
                 track_count = int(len(tp))
                 if track_count == 0:
                     fatal.append("zero_tracks")
+                if len(tp) and float(np.max(np.abs(tp))) > 0.55:
+                    fatal.append("track_p_outside_canonical_envelope")
                 if len(support):
                     support_min = int(support.min())
                     support_median = float(np.median(support))
@@ -214,6 +308,11 @@ def inspect_one(stage_root: Path, stage_record: dict, cache_record: dict, seed_r
         "track_support_median": support_median,
         "max_surface_error": max_surface_error,
         "exact_projection_max_grid_error": exact_projection_max_grid_error,
+        "geom_projection_p95_grid_error": geom_projection_p95_grid_error,
+        "geom_projection_fraction_gt_1e3": geom_projection_fraction_gt_1e3,
+        "canonical_bbox_center_inf": gauge["bbox_center_inf"] if gauge else None,
+        "canonical_largest_extent": gauge["largest_extent"] if gauge else None,
+        "canonical_max_abs_coordinate": gauge["max_abs_coordinate"] if gauge else None,
         "raster_pixels_min": min(raster_counts) if raster_counts else 0,
     }
 
@@ -250,7 +349,7 @@ def main():
 
     fatal = [r for r in rows if r["fatal"]]
     report = {
-        "schema": "RealSaS.IRISSinglePoseV2.StageCacheAudit.v1",
+        "schema": "RealSaS.IRISSinglePoseV2.StageCacheAudit.v2",
         "optimizer_steps": 0,
         "stage_manifest": str(Path(a.stage_manifest).resolve()),
         "cache_manifest": str(Path(a.cache_manifest).resolve()),
@@ -264,12 +363,20 @@ def main():
         "raster_pixels_min": percentiles([r["raster_pixels_min"] for r in rows]),
         "surface_error_max": percentiles([r["max_surface_error"] for r in rows if r["max_surface_error"] is not None]),
         "continuous_projection_grid_error_max": percentiles([r["exact_projection_max_grid_error"] for r in rows if r["exact_projection_max_grid_error"] is not None]),
+        "geom_p_projection_p95_grid_error": percentiles([r["geom_projection_p95_grid_error"] for r in rows if r["geom_projection_p95_grid_error"] is not None]),
+        "geom_p_projection_fraction_gt_1e3": percentiles([r["geom_projection_fraction_gt_1e3"] for r in rows if r["geom_projection_fraction_gt_1e3"] is not None]),
+        "canonical_bbox_center_inf": percentiles([r["canonical_bbox_center_inf"] for r in rows if r["canonical_bbox_center_inf"] is not None]),
+        "canonical_largest_extent": percentiles([r["canonical_largest_extent"] for r in rows if r["canonical_largest_extent"] is not None]),
+        "canonical_max_abs_coordinate": percentiles([r["canonical_max_abs_coordinate"] for r in rows if r["canonical_max_abs_coordinate"] is not None]),
         "fatal_assets": fatal,
+        "camera_contract": CAMERA_CONTRACT,
+        "orthographic_half_extent": ORTHO_HALF_EXTENT,
+        "authority_resolution": AUTHORITY_RESOLUTION,
         "density_policy": "4096-class targets are audited as achieved-when-coverage-permits; no asset is failed merely for having fewer persistent physical loci than the cap.",
         "status": "PASS" if not fatal and set(r["split"] for r in rows) <= OPEN_SPLITS else "FAIL",
     }
     atomic_json(a.out, report)
-    print(json.dumps({k: report[k] for k in ("status", "asset_count", "fatal_asset_count", "split_counts", "source_registry_counts", "track_count")}, indent=2))
+    print(json.dumps({k: report[k] for k in ("status", "asset_count", "fatal_asset_count", "split_counts", "source_registry_counts", "track_count", "canonical_largest_extent", "geom_p_projection_p95_grid_error")}, indent=2))
 
 
 if __name__ == "__main__":

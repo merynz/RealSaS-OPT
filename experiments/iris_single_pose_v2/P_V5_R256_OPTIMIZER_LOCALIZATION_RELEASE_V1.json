@@ -1,0 +1,18 @@
+{
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256OptimizerLocalizationRelease.v1",
+  "status": "PREPARED_NOT_RUN",
+  "parent_run": "MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_V5_R256_ONE_CELL_OVERFIT_V1",
+  "parent_selected_step": 2048,
+  "parent_selected_P_p95": 0.005682396539486942,
+  "parent_checkpoint_sha256": "cad4421ae728848bbf9181c87e0d4912c38ec6f94d61c86cd114ad0a251c79ee",
+  "output_root": "MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_V5_R256_OPTIMIZER_LOCALIZATION_V1",
+  "runtime": "CUDA GPU required",
+  "arms": [
+    {"name": "A_LR3E4_CONTROL", "lr": 0.0003, "restart_steps": 512},
+    {"name": "B_LR1E4", "lr": 0.0001, "restart_steps": 512},
+    {"name": "C_LR3E5", "lr": 0.00003, "restart_steps": 512}
+  ],
+  "eval_steps": [0, 64, 128, 256, 512],
+  "threshold_P_p95": 0.005,
+  "broader_training_authorized": false
+}

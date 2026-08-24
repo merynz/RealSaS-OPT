@@ -113,6 +113,26 @@ Canonical label:
 
 Important interpretation: failed L2-oracle resolutions are `NOT_CERTIFIED`, not formal mathematical impossibility proofs. Full R is positively certified and is the current legal neural output-field target.
 
+## R256 learner promotion ladder — CONDITIONAL / FROZEN ORDER
+
+The learner scale-up order is fixed as follows unless controlled evidence requires a preregistered revision:
+
+```text
+R256 field representation
+        ↓
+1 asset × 1 style overfit
+        ↓ PASS
+1 asset × 2 styles overfit
+        ↓ PASS
+8 assets × 2 styles overfit
+        ↓ PASS
+unseen-family generalization
+```
+
+Promotion rule: a stage must be completed and interpreted as PASS before the next stage is authorized. A FAIL localizes work at the current stage under the research-order rule; it does not authorize skipping ahead to a broader corpus or generalization experiment.
+
+This ladder controls the current P learner work only. It does not freeze later Geppetto/Arachne training organization.
+
 ## NEXT GATE — R256 one-asset / one-style learner overfit
 
 The next authorized research action is to preregister a **single FIT asset × single style R256 learner overfit** before any broader learner run.

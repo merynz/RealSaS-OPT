@@ -23,13 +23,17 @@ Global admission=`Z_coarse + predicted P`; Z_fine=local-only refinement; N forbi
 
 ## Membership
 
-CI104 representation-seed byte SHA-256: `f3d43da7766f104cab08f19fd24b515d54fde47545cc3288da023779c6d4c9af`.
+CI104 representation-seed byte SHA-256: `f3d43da7766f104cab08f19fd24b515d54fde47545cc3288da023779c6d4c9af`. It is prior provenance only and is **not a runtime input** to this learner mini.
 
 Source ordered panel-ID digest: `366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961`.
 
 Mini membership **canonical JSON** SHA-256: `4e223c799cf479a210716a86701ab96459673fe21852142e7cc7bd3a9d30e055`. Canonical JSON means parsed JSON serialized with sorted keys and compact separators; packaging byte SHA is independently bound by bundle `SHA256SUMS.txt`.
 
-Frozen roles: FIT_TRAIN=128; FIT_SELECT=32; TUNE_FINAL=26 (all TUNE assets from the frozen CI104 panel); unused FIT=70. Roles are asset-disjoint. CAL/DEV/EXTERNAL_HOLDOUT remain unopened. Rare FIT source/capability strata count<=3 are forced into FIT_TRAIN before deterministic SHA-based dominant-stratum selection. FIT_SELECT receives no gradients. TUNE_FINAL is never used for checkpoint selection. **Hard TUNE staging firewall:** before checkpoint selection is frozen, no TUNE_FINAL RGBA, raster authority, camera, derived truth cache, or TUNE cache manifest may be staged, decoded, hashed for learner apparatus, or evaluated. Pre-optimizer knowledge is restricted to the already-frozen TUNE asset-ID membership in the prereg. After `CHECKPOINT_SELECTION_FROZEN.json` exists, the exact 26 TUNE_FINAL assets may be staged/cached once for the single final evaluation.
+`MINI_MEMBERSHIP_PROVENANCE_V1.json` is a frozen pre-run proof generated against the exact CI104 representation seed. It binds the source-seed SHA, panel digest, membership SHA and role-ID digests and certifies that all 128 FIT_TRAIN + 32 FIT_SELECT IDs were source split FIT and all 26 TUNE_FINAL IDs were source split TUNE. Source registry/capability metadata is not carried into the runtime seed.
+
+Frozen roles: FIT_TRAIN=128; FIT_SELECT=32; TUNE_FINAL=26 (all TUNE assets from the frozen CI104 panel); unused FIT=70. Roles are asset-disjoint. CAL/DEV/EXTERNAL_HOLDOUT remain unopened. Rare FIT source/capability strata count<=3 were forced into FIT_TRAIN before deterministic SHA-based dominant-stratum selection during membership freeze; this stratification metadata is not consumed by the learner runtime. FIT_SELECT receives no gradients. TUNE_FINAL is never used for checkpoint selection.
+
+**Hard TUNE/runtime firewall:** the learner runtime seed is built only from frozen membership and contains exactly `asset_id`, `split`, and `mini_role`; the CI104 representation seed is not opened by the runtime. Before checkpoint selection is frozen, no TUNE_FINAL RGBA, raster authority, camera, derived truth cache, or TUNE cache manifest may be staged, decoded, hashed for learner apparatus, or evaluated. Pre-optimizer TUNE knowledge is therefore restricted to the already-frozen asset-ID membership and its FIT/TUNE role label. After `CHECKPOINT_SELECTION_FROZEN.json` exists, the exact 26 TUNE_FINAL assets may be staged/cached once for the single final evaluation.
 
 ## Image/style policy
 
@@ -59,7 +63,7 @@ Tie -> earlier epoch. N is absent. Random-init FIT_SELECT is diagnostic. Phase A
 
 ## Final TUNE / frozen labels
 
-Only after the FIT checkpoint freeze, stage/cache exactly the 26 frozen TUNE_FINAL assets, audit that TUNE-only apparatus, then evaluate exactly one selected checkpoint on all26 TUNE_FINAL assets, both styles; 24 queries/asset/style, qualification8. No reselection/threshold changes. The run authority must record `tune_stage_started_after_checkpoint_freeze=true`.
+Only after the FIT checkpoint freeze, stage/cache exactly the 26 frozen TUNE_FINAL assets, audit that TUNE-only apparatus, then evaluate exactly one selected checkpoint on all26 TUNE_FINAL assets, both styles; 24 queries/asset/style, qualification8. No reselection/threshold changes. The run authority must record `tune_stage_started_after_checkpoint_freeze=true` and `representation_seed_consumed_at_runtime=false`.
 
 FIT_SELECT core: P p95<=0.005; Zc Recall@8>=0.90; oracle Zf top1 p95<=16 native px.
 

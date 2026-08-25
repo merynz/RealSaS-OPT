@@ -1,0 +1,63 @@
+{
+  "checkpoint_state": [
+    "model",
+    "optimizer",
+    "GradScaler",
+    "Python RNG",
+    "NumPy RNG",
+    "Torch CPU RNG",
+    "Torch CUDA RNG"
+  ],
+  "firewalls": {
+    "architecture_changed": false,
+    "camera_json_consumed": false,
+    "checkpoint_reuse": false,
+    "fresh_model": true,
+    "patchmatch_admitted": false,
+    "unseen_family_opened": false
+  },
+  "parent_authority_sha256": {
+    "36fb_two_style_run_complete": "bbcb57a64b3326007f2b17ae3e4249890d29d3650773ae17f792521f22609c97",
+    "continuation_run_complete": "ab0bba107020c65968b7440d35446413d18278faa68b57a279d42cb4e772f921",
+    "original_8x2_v1_run_complete": "1d31697eec4ee41e2b13384330708c8cd37bcb68c6cfa93eaf125fe9f944d867"
+  },
+  "schedule": {
+    "main_lr": 0.0003,
+    "main_steps": 2048,
+    "tail_lr": 3e-05,
+    "tail_steps": 4096,
+    "total_steps": 6144
+  },
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256EightByTwoV2Release.v1",
+  "scientific_question": "Can unchanged fresh shared R256 certify frozen 8x2 with prospectively adequate continuous low-LR budget?",
+  "source_parent_repo_commit": "fa7ff26090a762e4c5009fbadbf744c91ebbb9d4",
+  "source_sha256": {
+    "P_V5_R256_8X2_MEMBERSHIP_V1.json": "645a36b81da5fd93c2c58ed8c37b32b9c7f831a390c4af574945bfbb3689c0bf",
+    "P_V5_R256_8X2_V2_PARENT_AUTHORITY.json": "4762b0326cacf2f50cd651f7e84e58dad91d54cb8cdd46a00175b1511ea9a0d6",
+    "P_V5_R256_8X2_V2_PREREG_20260825.md": "1e84a48c531a5365444b284432cf4b9bbdb0e4cbd606a5aaef463ae9570ded92",
+    "pv5_r256_8x2_v2_cpu_preflight.py": "f004f25deb7afea5b32954d69c056d4447dfaf082cc11bb7e62932f95210d48f",
+    "pv5_r256_8x2_v2_gpu_preflight.py": "d91aaab111e44be0b4e520aa4652494a3374d2099f3ec4b3b654d22a9682d11a",
+    "run_pv5_r256_8x2_v2.py": "091df55b80588835264a8cc0a892f9dba93f4398585823a0dd1a2ec6ad2e7105",
+    "train_pv5_r256_8x2_v2.py": "701960f8e7c972e75413d9964e33bd1818134e125423cbf94f111597c7fe9d95"
+  },
+  "status": "PREPARED__SCIENTIFIC_OPTIMIZER_STEPS_ZERO",
+  "tail_eval_steps": [
+    256,
+    512,
+    1024,
+    1536,
+    2048,
+    2560,
+    3072,
+    3584,
+    4096
+  ],
+  "validation": {
+    "cpu_accumulation_equivalence": "PASS",
+    "membership_sha_equal_to_v1": true,
+    "python_compile": "PASS",
+    "resumable_checkpoint_roundtrip_after_optimizer_step": "PASS",
+    "resumable_checkpoint_schema": "PASS",
+    "scientific_optimizer_steps": 0
+  }
+}

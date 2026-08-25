@@ -3,7 +3,7 @@
 **Date:** 2026-08-25  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_CLOSED__P_V5_CLOSED__R256_FIELD_CLOSED__ONE_CELL_PASS__TWO_STYLE_PASS__EIGHT_BY_TWO_FAIL__CONTINUATION_FAIL__SCHEDULE_UNDERBUDGET_SUPPORTED__36FB_TWO_STYLE_PREREG_FROZEN__A100_RUN_NEXT`
+**Status:** `P_GEOMETRY_CLOSED__P_V5_CLOSED__R256_FIELD_CLOSED__ONE_CELL_PASS__TWO_STYLE_PASS__EIGHT_BY_TWO_V1_FAIL__CONTINUATION_FAIL__36FB_TWO_STYLE_PASS__FRESH_8X2_V2_PREREG_FROZEN__A100_RUN_NEXT`
 
 ## Single continuation authority
 Active implementation: `experiments/iris_single_pose_v2/`. Read this file and root `README.md` before continuing.
@@ -30,129 +30,119 @@ verified editable puppet
 ```
 IRIS stops at the observable substrate. Architecture/responsibility boundaries may change only under recorded controlled evidence.
 
-`SurfaceBuilder` remains a **deterministic** candidate canonicalization/topology layer in the current contract. The linked alternative architecture note may allow optional learned surface-relation evidence upstream, but SurfaceBuilder itself is not promoted to a neural model.
+`SurfaceBuilder` remains a **deterministic** candidate canonicalization/topology layer in the current contract. The linked alternative architecture note may allow optional learned surface-relation evidence upstream, but SurfaceBuilder itself is not a neural model.
 
 ## Important external precedent
-`audit/IMPORTANT_EXTERNAL_PRECEDENT_PATCHMATCH_RL_20260825.md` remains preserved. PatchMatch-RL geometry-in-the-loop verification is a future intervention candidate only if controlled residual evidence localizes a geometric extraction/coherence blocker. It is not admitted by analogy or convenience.
-
-## Closed P authority
-- `P_GEOMETRY_SUFFICIENT`: CLOSED/PASS.
-- P-V5 observable native-scale analytic reconstruction: CLOSED/PASS.
-- R256 field representation: CLOSED/PASS; smallest tested certified field.
-- one asset × one style learner/optimizer: PASS.
-- one asset × two styles shared joint fit: PASS.
+`audit/IMPORTANT_EXTERNAL_PRECEDENT_PATCHMATCH_RL_20260825.md` remains preserved. PatchMatch-RL is a future geometry-in-the-loop intervention candidate only if residual evidence localizes an extraction/coherence blocker. Current evidence does not justify it.
 
 ## Promotion ladder
 ```text
-R256 field representation                       PASS
+R256 field representation                         PASS
         ↓
-1 asset × 1 style learner/optimizer              PASS
+1 asset × 1 style learner/optimizer                PASS
         ↓
-1 asset × 2 styles joint fit                     PASS
+1 asset × 2 styles joint fit                       PASS
         ↓
-8 assets × 2 styles joint fit V1                 FAIL / IMMUTABLE
+8 assets × 2 styles joint fit V1                   FAIL / IMMUTABLE
         ↓
-residual microscope                              COMPLETE
+residual microscope                                COMPLETE
         ↓
-+2048 low-LR continuation localization           FAIL / IMMUTABLE
++2048 low-LR continuation localization             FAIL / IMMUTABLE
         ↓
-36fb × 2-style solo learner sufficiency          ← FROZEN / RUN NEXT
+36fb × 2-style fresh sufficiency                   PASS
         ↓
-new fresh 8×2 V2 certification PASS required
+fresh 8×2 V2 adequate-budget certification         ← FROZEN / RUN NEXT
         ↓
-unseen-family generalization
+unseen-family generalization                       CLOSED
 ```
-Unseen-family remains closed.
 
-## 8×2 V1 — IMMUTABLE FAIL
-Canonical result: `experiments/iris_single_pose_v2/P_V5_R256_8X2_RESULT_20260825.md`.
+## Immutable 8×2 V1 FAIL
+`experiments/iris_single_pose_v2/P_V5_R256_8X2_RESULT_20260825.md`
 
-Selected `TAIL_0512`, 2560 optimizer steps:
-- worst-cell P95 `0.008320469176396726`;
-- aggregate P95 `0.0051227101590484376`;
+Selected `TAIL_0512`, total step 2560:
 - 8/16 cells PASS;
-- required 16/16 at one preregistered checkpoint.
+- worst P95 `0.008320469176396726`;
+- aggregate P95 `0.0051227101590484376`.
 
-Style interference is strongly disfavored: all four passing assets pass both styles and all four failing assets fail both styles. The prior solo-PASS control `asset_76313...` degrades from ~`0.00373/0.00383` solo to ~`0.00679/0.00675` in the 8-asset shared model.
+Do not rewrite this result.
 
-## Residual localization
-Canonical note: `experiments/iris_single_pose_v2/P_V5_R256_8X2_RESIDUAL_LOCALIZATION_20260825.md`.
+## Immutable +2048 continuation FAIL
+`experiments/iris_single_pose_v2/P_V5_R256_8X2_CONTINUATION_RESULT_20260825.md`
 
-Optimizer-zero microscopy reproduces the frozen failures and finds:
-- `36fb...` error broad across all 8 views, not one broken view;
-- no strong top-error enrichment at silhouette boundary;
-- `76313...` shows the same broad degradation despite prior solo PASS;
-- analytic screen-plane reconstruction remains stable; degradation is concentrated in learned camera-forward depth.
-
-PatchMatch remains important but **not currently justified as the next intervention**.
-
-## +2048 low-LR continuation — IMMUTABLE FAIL
-Canonical result: `experiments/iris_single_pose_v2/P_V5_R256_8X2_CONTINUATION_RESULT_20260825.md`.
-
-Starting from exact failed `TAIL_0512` weights, the frozen continuation used fresh AdamW moments at `3e-5` for +2048 shared optimizer steps.
-
-Final `CONT_2048` / total step 4608:
-- aggregate P95 `0.003706276847515254`;
-- worst-cell P95 `0.005740759451873588`;
+Selected `CONT_2048`, total step 4608:
 - 13/16 cells PASS;
-- scientific status `P_V5_R256_8X2_ADDITIONAL_LOW_LR_OPTIMIZATION_NOT_SUFFICIENT`.
+- worst P95 `0.005740759451873588`;
+- aggregate P95 `0.003706276847515254`.
 
-Remaining failures:
-- `36fb / cel_clean = 0.005740759451873588`;
-- `36fb / ink_cel = 0.005718213529326022`;
-- `76313 / ink_cel = 0.005042715766467144`.
+All 16/16 cells improved relative to the parent checkpoint and the worst-cell curve remained descending. This established that the frozen +2048 budget was insufficient but did not establish a hard shared-capacity wall.
 
-Critical localization: **all 16/16 cells improve from parent `TAIL_0512` to `CONT_2048`**. The worst-cell curve remains descending at the final checkpoint; `36fb` two-style mean improves by ~`4.27e-4` in each of the final two 512-step intervals. Therefore the continuation proves that the frozen +2048 budget was insufficient, but does **not** establish a plateau or true shared-capacity wall.
+## 36fb × two-style sufficiency — PASS
+Canonical result: `experiments/iris_single_pose_v2/P_V5_R256_36FB_TWO_STYLE_RESULT_20260825.md`.
 
-Updated evidence ranking:
-- style interference: strongly disfavored;
-- localized geometry/occlusion hard-tail as primary blocker: disfavored;
-- shared multi-asset fit burden: supported;
-- true shared-capacity wall: not established / weakened;
-- schedule or optimization under-budget: strongly supported;
-- intrinsic two-style extractability of `36fb...`: unresolved.
+Fresh model, MAIN `2048 @ 3e-4`, fresh-moment TAIL `2048 @ 3e-5`:
+- `36fb / cel_clean` P95 `0.002594304538797585`;
+- `36fb / ink_cel` P95 `0.0025984761072322723`;
+- 2/2 PASS;
+- selected worst-cell P95 `0.0025984761072322723`.
 
-Do not add PatchMatch and do not extend this failed checkpoint again by inspection-driven training.
+This falsifies intrinsic non-extractability of the dominant hard asset under current R256 P representation. Combined with the shared continuation trajectory, schedule/shared-optimization burden is now the strongest supported explanation. A demonstrated hard capacity wall is not established.
 
-## CURRENT GATE — 36fb one-asset × two-style fresh sufficiency
-Prereg: `experiments/iris_single_pose_v2/P_V5_R256_36FB_TWO_STYLE_PREREG_20260825.md`.
-Membership: `experiments/iris_single_pose_v2/P_V5_R256_36FB_TWO_STYLE_MEMBERSHIP_V1.json`.
-Release authority: `experiments/iris_single_pose_v2/P_V5_R256_36FB_TWO_STYLE_RELEASE_V1.json`.
+## CURRENT GATE — fresh 8×2 V2 certification
+Prereg: `experiments/iris_single_pose_v2/P_V5_R256_8X2_V2_PREREG_20260825.md`.  
+Release: `experiments/iris_single_pose_v2/P_V5_R256_8X2_V2_RELEASE_V1.json`.
 
+Frozen design:
 ```text
-asset_36fb02305846592b1ecdf3d4
-  × cel_clean
-  × ink_cel
-        ↓
-fresh R256 model
+same 8 FIT assets × 2 styles = 16 cells
+same R256 architecture / P-only objective
+fresh model; NO checkpoint reuse
+
 MAIN 2048 @ 3e-4
-TAIL 2048 @ 3e-5, fresh moments
         ↓
-2/2 cells P_p95 <= 0.005 ?
+fresh AdamW moments once
+TAIL 4096 @ 3e-5, continuous
+        ↓
+PASS iff one prereg checkpoint has
+16/16 cells P_p95 <= 0.005
 ```
 
-The longer tail is frozen prospectively because the 8×2 continuation remained descending through +2048 low-LR steps. This gate does not reuse any failed 8×2 weights.
+Tail eval checkpoints: `256, 512, 1024, 1536, 2048, 2560, 3072, 3584, 4096`. Full schedule runs even if an earlier checkpoint passes.
 
-Prepared release checks:
-- Python syntax/compile: PASS;
-- CPU B=2 full-R P-only forward/backward: PASS;
-- fake 36fb staging: PASS;
-- fake 4096/view cache with exact shared truth loci across styles: PASS;
-- parent continuation + prior two-style authority verifier: PASS;
-- scientific optimizer steps during preparation: 0;
-- prior identical B=2 R256 GPU preflight: PASS on Tesla T4 at `8,115,611,136` peak allocated bytes.
+V2 checkpoint authority is strengthened: every prereg checkpoint contains model + optimizer + GradScaler + Python/NumPy/Torch CPU/Torch CUDA RNG state. Exact phase-local continuation will therefore remain possible if ever scientifically authorized.
 
-Notebook SHA-256: `eff053232806e762c2a1e88c76109a34e05706a691b8d1e5f70586c4f77939d0`.
-Bundle SHA-256: `c002cb7510722565fb48d4a311c25616530256e4edd057fe80d4b828beb5ca2a`.
+Prepared local validation:
+- Python compile: PASS;
+- CPU full-R / accumulation equivalence: PASS (`max abs ~2.086e-7`, `max rel ~4.889e-6`);
+- resumable checkpoint schema: PASS;
+- optimizer-state checkpoint roundtrip after a synthetic optimizer step: PASS;
+- membership SHA exactly equals V1 membership;
+- scientific optimizer steps during preparation: 0.
 
-Interpretation:
-- PASS -> directly supports shared optimization/interference burden; preregister a fresh 8×2 V2 certification with evidence-backed adequate schedule;
-- FAIL -> localize `36fb` itself before any capacity or geometry-intervention claim.
+Firewalls:
+- no architecture change;
+- no PatchMatch;
+- no augmentation;
+- no camera JSON / hidden teacher camera;
+- N/U/Z frozen;
+- unseen-family CLOSED;
+- original FAILs remain immutable.
 
-No architecture change is authorized. Unseen-family remains closed.
+### Next policy
+- V2 PASS → freeze/preregister unseen-family generalization **before opening unseen data**.
+- V2 FAIL → remain at 8×2 and localize true shared capacity/interference before architecture expansion or PatchMatch.
+
+## Current evidence ranking
+- P representation: CLOSED/PASS;
+- style interference: strongly disfavored;
+- intrinsic hard-asset extractability blocker: falsified by 36fb PASS;
+- localized silhouette/occlusion geometry hard-tail: disfavored as primary blocker;
+- shared multi-asset fitting burden: confirmed;
+- schedule/optimization under-budget: strongest current hypothesis;
+- true shared-capacity wall: not established;
+- PatchMatch: preserved but not currently justified.
 
 ## Downstream sequencing after IRIS closure
-Before starting new Geppetto/Arachne/downstream implementation work, audit the most canonical Compiler + Runtime code preserved on Drive and bring the valuable surviving code into GitHub as canonical authority. Do not abandon the existing compiler/runtime codebase.
+Before starting new Geppetto/Arachne/downstream implementation work, audit the most canonical Compiler + Runtime code preserved on Drive and bring valuable surviving code into GitHub as canonical authority. Do not abandon the existing compiler/runtime codebase.
 
 ## Research rule
 `apparatus/data -> representation/target -> learner/optimizer -> evidence consumer -> downstream sufficiency -> only then information limit`

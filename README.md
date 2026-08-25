@@ -5,7 +5,7 @@ Private canonical research workspace for RealSaS.
 > **START HERE — active branch:** `audit/iris-architecture-discipline-20260824`  
 > **Continuation authority:** `CURRENT_STATE.md`  
 > **Canonical architecture:** `canonical/PRODUCT_CONTRACT_V1.md` + `canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md`  
-> **IMPORTANT external precedent:** `audit/IMPORTANT_EXTERNAL_PRECEDENT_PATCHMATCH_RL_20260825.md` — reference/feasibility evidence, not current architecture authority.
+> **IMPORTANT external precedent:** `audit/IMPORTANT_EXTERNAL_PRECEDENT_PATCHMATCH_RL_20260825.md` — preserved precedent, not current intervention authority.
 
 ## Canonical architecture plan — evidence controlled
 ```text
@@ -28,37 +28,44 @@ editable skinning / weight proposal
 verified editable puppet
 ```
 
-IRIS ends at the observable rigging-sufficient substrate. Geppetto owns rigging structure; Arachne owns skinning; Compiler verifies/repairs/exports. Architecture changes require recorded controlled evidence.
-
-`SurfaceBuilder` is currently a **deterministic** candidate geometric canonicalization/topology layer. The linked alternative note may later admit learned surface-relation evidence upstream, but SurfaceBuilder itself has not been promoted to a neural model.
+`SurfaceBuilder` is currently a **deterministic** candidate geometric canonicalization/topology layer. The linked alternative architecture note may later admit learned surface-relation evidence upstream, but SurfaceBuilder itself is not a neural stage.
 
 ## Current IRIS frontier
 Closed/PASS:
 - P geometry sufficiency;
 - P-V5 observable native-scale analytic geometry;
 - R256 field representation;
-- one-asset/one-style learner/optimizer;
-- one-asset/two-style shared fit.
+- one asset × one style;
+- one asset × two styles;
+- dominant hard asset `36fb` × two styles independently (`~0.00260` worst P95).
 
 Immutable FAILs:
-- 8 assets × 2 styles V1: 8/16 PASS, worst P95 `0.008320469176396726`;
-- preregistered +2048 low-LR continuation: 13/16 PASS, worst P95 `0.005740759451873588`.
+- fresh 8×2 V1: 8/16 PASS, worst `0.008320469176396726`;
+- preregistered +2048 low-LR continuation: 13/16 PASS, worst `0.005740759451873588`.
 
-The continuation improves **all 16 cells simultaneously** and the worst-cell curve is still descending at the final authority checkpoint. Therefore it proves the frozen +2048 budget was insufficient, not that a shared-capacity wall has been reached. Schedule/optimization under-budget is currently more strongly supported than capacity failure.
+The continuation improved all 16 cells simultaneously and remained descending. The subsequent fresh `36fb × 2-style` PASS falsifies intrinsic non-extractability of the dominant blocker. Current evidence therefore favors **shared optimization/schedule under-budget** over a demonstrated capacity wall or localized geometry-information failure.
 
-**Current executable gate:** fresh `asset_36fb02305846592b1ecdf3d4 × {cel_clean, ink_cel}` R256 sufficiency test. Frozen schedule: MAIN `2048 @ 3e-4`, then fresh-moment TAIL `2048 @ 3e-5`. PASS requires both cells `P_p95 <= 0.005` at one preregistered checkpoint. No PatchMatch, no checkpoint reuse, no architecture change.
+**Current executable gate:** fresh 8×2 V2 adequate-budget certification.
 
-Prepared apparatus is recorded under:
-- `experiments/iris_single_pose_v2/P_V5_R256_36FB_TWO_STYLE_PREREG_20260825.md`;
-- `experiments/iris_single_pose_v2/P_V5_R256_36FB_TWO_STYLE_RELEASE_V1.json`;
-- inspectable source files `*_hardasset_twostyle*` / `*_36fb_twostyle*` in the same directory.
+```text
+same frozen 16 cells
+fresh unchanged R256 model
+MAIN 2048 @ 3e-4
+TAIL 4096 @ 3e-5 continuous
+PASS = 16/16 P95 <= .005 at one prereg checkpoint
+```
 
-Residual microscopy continues to disfavor a silhouette/occlusion-localized geometry hard-tail, so PatchMatch-RL remains preserved but not admitted as the next intervention.
+Every V2 prereg checkpoint stores model + optimizer + GradScaler + RNG state. No PatchMatch, no architecture change, no unseen-family access.
 
-Unseen-family remains closed until a fresh 8×2 certification passes.
+Authority files:
+- `experiments/iris_single_pose_v2/P_V5_R256_36FB_TWO_STYLE_RESULT_20260825.md`;
+- `experiments/iris_single_pose_v2/P_V5_R256_8X2_V2_PREREG_20260825.md`;
+- `experiments/iris_single_pose_v2/P_V5_R256_8X2_V2_RELEASE_V1.json`.
+
+Unseen-family remains CLOSED until V2 passes and an unseen-family preregistration is frozen.
 
 ## Downstream sequencing
-After IRIS is genuinely closed, and before starting new Geppetto/Arachne/downstream work, audit the most canonical Compiler + Runtime code on Drive and bring the surviving valuable code into GitHub as canonical authority.
+After IRIS is genuinely closed, and before new Geppetto/Arachne/downstream work, audit the most canonical Compiler + Runtime code on Drive and recover the valuable surviving implementation into GitHub as canonical authority.
 
 ## Authority order
 1. `CURRENT_STATE.md`

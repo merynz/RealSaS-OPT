@@ -30,6 +30,8 @@ verified editable puppet
 
 IRIS ends at the observable rigging-sufficient substrate. Geppetto owns rigging structure; Arachne owns skinning; Compiler verifies/repairs/exports. Architecture changes require recorded controlled evidence.
 
+`SurfaceBuilder` is currently a **deterministic** candidate geometric canonicalization/topology layer. The linked alternative note may later admit learned surface-relation evidence upstream, but SurfaceBuilder itself has not been promoted to a neural model.
+
 ## Current IRIS frontier
 Closed/PASS:
 - P geometry sufficiency;
@@ -38,12 +40,22 @@ Closed/PASS:
 - one-asset/one-style learner/optimizer;
 - one-asset/two-style shared fit.
 
-Immutable FAIL:
-- 8 assets × 2 styles V1: selected `TAIL_0512`, 8/16 cells PASS, worst-cell P95 `0.008320469176396726` against required `0.005`.
+Immutable FAILs:
+- 8 assets × 2 styles V1: 8/16 PASS, worst P95 `0.008320469176396726`;
+- preregistered +2048 low-LR continuation: 13/16 PASS, worst P95 `0.005740759451873588`.
 
-**Current executable gate:** 8×2 additional-low-LR localization from the exact failed `TAIL_0512` weights. It tests whether +2048 shared `3e-5` steps with fresh AdamW moments are sufficient. It does not rewrite the original FAIL and cannot directly promote to unseen-family.
+The continuation improves **all 16 cells simultaneously** and the worst-cell curve is still descending at the final authority checkpoint. Therefore it proves the frozen +2048 budget was insufficient, not that a shared-capacity wall has been reached. Schedule/optimization under-budget is currently more strongly supported than capacity failure.
 
-Residual microscopy currently supports a broad shared learned-depth fitting burden over a silhouette/occlusion-localized geometry hard-tail. Therefore PatchMatch-RL is preserved but not admitted into the current localization gate.
+**Current executable gate:** fresh `asset_36fb02305846592b1ecdf3d4 × {cel_clean, ink_cel}` R256 sufficiency test. Frozen schedule: MAIN `2048 @ 3e-4`, then fresh-moment TAIL `2048 @ 3e-5`. PASS requires both cells `P_p95 <= 0.005` at one preregistered checkpoint. No PatchMatch, no checkpoint reuse, no architecture change.
+
+Prepared apparatus is recorded under:
+- `experiments/iris_single_pose_v2/P_V5_R256_36FB_TWO_STYLE_PREREG_20260825.md`;
+- `experiments/iris_single_pose_v2/P_V5_R256_36FB_TWO_STYLE_RELEASE_V1.json`;
+- inspectable source files `*_hardasset_twostyle*` / `*_36fb_twostyle*` in the same directory.
+
+Residual microscopy continues to disfavor a silhouette/occlusion-localized geometry hard-tail, so PatchMatch-RL remains preserved but not admitted as the next intervention.
+
+Unseen-family remains closed until a fresh 8×2 certification passes.
 
 ## Downstream sequencing
 After IRIS is genuinely closed, and before starting new Geppetto/Arachne/downstream work, audit the most canonical Compiler + Runtime code on Drive and bring the surviving valuable code into GitHub as canonical authority.

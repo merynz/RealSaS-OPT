@@ -30,6 +30,14 @@ verified editable puppet
 
 IRIS ends at the observable geometric substrate. Geppetto owns rigging/skeleton structure. Arachne owns skinning. Compiler remains the final verification/export authority after learned proposals.
 
+### Linked alternative hypothesis — could the downstream control flow instead be cross-cutting?
+
+**NOT CANONICAL AUTHORITY.** Preserve the linear plan above as the default contract. A linked research hypothesis asks whether the same responsibility boundaries should eventually execute inside a cross-cutting **Compiler authority plane**, with intermediate Geometry/Rig/Skin qualification gates; whether surface topology should use learned relational evidence plus a constrained deterministic solver; and whether a RigAnything-inspired Geppetto plus SkinTokens-inspired Arachne is the stronger downstream combination.
+
+See: `audit/ALTERNATIVE_DOWNSTREAM_ARCHITECTURE_HYPOTHESES_20260825.md`.
+
+That note is intentionally phrased as **“could this also be the architecture?”** It may not replace this plan without the controlled evidence and explicit contract-revision process defined below.
+
 The future physical training organization of Geppetto and Arachne — including corpus organization, separate versus shared encoders/checkpoints, and joint versus staged training — is intentionally **not frozen** by this contract. Those are later evidence questions after IRIS qualification.
 
 ## Canonical problem-definition authority

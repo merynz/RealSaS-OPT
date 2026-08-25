@@ -1,0 +1,49 @@
+{
+  "additional_steps": 1024,
+  "apparatus_packaging_fix": {
+    "classification": "APPARATUS_PACKAGING_BUG__OPTIMIZER_ZERO",
+    "first_notebook_failure": "gpu preflight import dependency train_pv5_r256_8x2_v2.py omitted from bundle",
+    "fix": "bundle dependency closure completed; package preflight added; notebook child stdout/stderr made visible",
+    "schedule_changed": false,
+    "scientific_optimizer_steps": 0,
+    "scientific_prereg_changed": false
+  },
+  "architecture_changed": false,
+  "eval_steps": [128, 256, 512, 768, 1024],
+  "fresh_optimizer_moments": false,
+  "local_validation": {
+    "exact_parent_checkpoint_cpu_restore": "PASS",
+    "exact_parent_cpu_restore_recheck": "PASS",
+    "gpu_preflight_import_reaches_cuda_guard_without_import_error": "PASS",
+    "optimizer_state_entries": "218/218",
+    "package_compile_all": "PASS",
+    "package_import_all": "PASS",
+    "package_static_dependency_closure": "PASS",
+    "python_syntax": "PASS",
+    "resumed_adamw_synthetic_cpu_step_4096_to_4097": "PASS",
+    "rng_state_present": true,
+    "scaler_state_present": true,
+    "scientific_optimizer_steps": 0
+  },
+  "lr": 3e-05,
+  "parent_checkpoint_sha256": "8c3872412124644885b66aea1b00413a8da5ab91a7471e83fcae001d43544049",
+  "parent_decision_sha256": "77626d41cf87facac5e5d5247a20268bf3654cd94ab24ab16ff8031d8d37678c",
+  "parent_run": "IRIS_SINGLE_POSE_V2_P_V5_R256_8X2_CERTIFICATION_V2",
+  "parent_run_complete_sha256": "339b6a2f929e732e9ac0bb5c540e85b3b473e86acc6508391de9807b20dbb77b",
+  "patchmatch_admitted": false,
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256EightByTwoV2ExactContinuationRelease.v1",
+  "source_sha256": {
+    "P_V5_R256_8X2_MEMBERSHIP_V1.json": "645a36b81da5fd93c2c58ed8c37b32b9c7f831a390c4af574945bfbb3689c0bf",
+    "P_V5_R256_8X2_V2_EXACT_CONTINUATION_PREREG_20260825.md": "9adf7104711f644f0ea5a9d9e8788e0092b5eb545e9793d12cf31e77cfa4e3ad",
+    "P_V5_R256_8X2_V2_EXACT_CONT_PARENT_AUTHORITY.json": "0dc8eb6d5e1b2bd3f0b9c3b1610086cc39ec5cf133d68fa1fd045a37800341bd",
+    "P_V5_R256_8X2_V2_RESULT_20260825.md": "fb61ff40338f585c5d80148b2a6bf1c63fd2e915a8921bdc0860afe4be31bd54",
+    "pv5_r256_8x2_v2_exact_cont_cpu_preflight.py": "bc5ae509cb877136e686c739c9ba1be0f1aedcb6f7e81654bc8e582a1e798436",
+    "pv5_r256_8x2_v2_exact_cont_package_preflight.py": "de5072b6ebbaa29c27cbf4be56ec7c4c24fe396f3ad00517965dc961b2293390",
+    "pv5_r256_8x2_v2_gpu_preflight.py": "d91aaab111e44be0b4e520aa4652494a3374d2099f3ec4b3b654d22a9682d11a",
+    "run_pv5_r256_8x2_v2_exact_cont_v1.py": "b31fee227e0f589fe9fb24333e88b0b12c7bcc6638de6c3623f9bdfe18e4b020",
+    "train_pv5_r256_8x2_v2.py": "701960f8e7c972e75413d9964e33bd1818134e125423cbf94f111597c7fe9d95",
+    "train_pv5_r256_8x2_v2_exact_cont_v1.py": "9f1307bc435c45a9a425f23db888a7b246da49b01dbe343d286662f834e48870"
+  },
+  "status": "READY_FOR_A100_PREOPT_PREFLIGHT__APPARATUS_PACKAGE_FIX_V1_1",
+  "unseen_family_opened": false
+}

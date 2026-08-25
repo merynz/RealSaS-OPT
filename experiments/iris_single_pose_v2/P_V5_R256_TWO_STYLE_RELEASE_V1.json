@@ -1,0 +1,18 @@
+{
+  "broader_training_authorized": false,
+  "bundle_sha256": "7163f2636bd642c5112877e3d90633182876b825db03986b700d8141c19ab041",
+  "conditional_next_on_pass": "8 assets x 2 styles R256 only",
+  "membership": "1 frozen FIT asset x cel_clean+ink_cel",
+  "next_executable": "RealSaS_IRIS_PV5_R256_TwoStyle_Overfit_V1.ipynb",
+  "notebook_sha256": "e4e565a88405bdd948d06da65e6e95cd42403ef1798b7414e139f8ea2bab24c7",
+  "output_root": "MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_V5_R256_TWO_STYLE_OVERFIT_V1",
+  "parent_gate": "P_V5_R256_ONE_CELL_RECOVERY_PASS",
+  "parent_localization_label": "LATE_STAGE_LR_FLOOR_SUPPORTED",
+  "pass_rule": "both style cells individually P_p95 <= 0.005 at one preregistered candidate",
+  "runtime": "CUDA GPU required",
+  "schedule": "fresh model; MAIN AdamW 3e-4 x2048; fresh TAIL AdamW 3e-5 x512",
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256TwoStyleRelease.v1",
+  "scientific_optimizer_steps_during_preparation": 0,
+  "source_bundle": "IRIS_PV5_R256_TWO_STYLE_OVERFIT_V1_BUNDLE.zip",
+  "status": "PREREG_FROZEN__VALIDATED_SOURCE_BUNDLE__GPU_RUN_NEXT"
+}

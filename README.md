@@ -2,65 +2,50 @@
 
 Private canonical research workspace for RealSaS.
 
-> **START HERE — active branch:** `g0-g1/single-pose-geometry`
->
-> **Current frontier:** IRIS Controlled V1 training package is frozen and ready; optimizer steps are still `0`; CAL/DEV/EXTERNAL are sealed.
->
-> In a new ChatGPT session, “GitHub'a bak ve devam et” or simply “devam et” means: read `CURRENT_STATE.md` first and execute its exact next step without asking the user to reconstruct history.
+> **START HERE — active branch:** `audit/iris-architecture-discipline-20260824`  
+> **Continuation authority:** `CURRENT_STATE.md`  
+> **Canonical architecture:** `canonical/PRODUCT_CONTRACT_V1.md` + `canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md`
 
-## Canonical continuation order
+## Current IRIS frontier
+P-V5 R256 multi-asset fit is now **closed on the frozen 8×2 training membership**.
 
-1. `CURRENT_STATE.md` — single continuation authority.
-2. `experiments/iris_controlled_v1/CONTINUATION_HANDOFF_V1.md` — exact execution/handoff state.
-3. `experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_PREREG.md` — frozen training/scientific contract.
-4. `experiments/iris_controlled_v1/ARCHITECTURE_AND_BOUNDARIES_V1.md` — IRIS neural/deterministic boundary.
-5. `experiments/iris_controlled_v1/TRAINING_READY_REPORT_V1.md` — corpus/preflight readiness evidence.
-6. `experiments/iris_controlled_v1/AUTHORITY_POINTERS_V1.json` — Drive IDs and SHA authorities.
-7. `experiments/m4_identity_audit/VERY_IMPORTANT_AUDIT_M4_IDENTITY_AMBIGUITY_EQUIVALENT_SUBSTRATE_20260823.md` — required interpretation/downstream-sufficiency audit.
-8. Historical G0/G1/S0/M4 files remain lineage and must not be silently deleted or rewritten.
+Exact full-state continuation result:
+- first 16/16 crossing at `EXACT_CONT_0512`;
+- selected/final `EXACT_CONT_1024`;
+- total optimizer steps `7168`;
+- worst cell P95 `0.004825880285352466`;
+- checkpoint SHA-256 `672a92030ce1a62acd8228791eb92c7af93c34fa36ac1d5866153f38ef8708de`.
 
-## Active IRIS path
+Earlier V1/V2 FAILs remain immutable. The exact-state PASS proves the final V2 miss was still budget-limited, not a demonstrated hard capacity wall.
+
+## Current executable gate
+**DEV32 fixed-checkpoint zero-shot family generalization probe.**
 
 ```text
-8 controlled neutral-pose views
+fixed EXACT_CONT_1024 checkpoint
         ↓
-known camera / deterministic frontend
+32 deterministic DEV families
+26 Objaverse + 3 Quaternius + 3 KayKit
         ↓
-shared multiscale neural perception
+cel_clean + ink_cel = 64 cells
         ↓
-P + N + U + coarse/fine persistence
+NO optimizer / NO checkpoint selection
         ↓
-deterministic top-k / reciprocal / cycle / ambiguity / reprojection
-        ↓
-qualified persistent observable surface evidence
+strict PASS = 64/64 cell P95 <= .005
 ```
 
-The current correction is important: **the observable evidence was not pruned; the problem was pruned.** IRIS no longer has to recover one privileged hidden authored owner identity. It must recover the richest justified observable geometry/persistence evidence and preserve ambiguity when singleton identity is unsupported.
+Canonical JSON membership SHA-256: `afc20747a6154ac514f3c791ef03496b9e71f99dd7727b7804518e77767b157d`.
 
-## Immediate corpus
+`EXTERNAL_HOLDOUT` has **169** canonical families and remains sealed. It is not consumed by DEV32.
 
-Controlled V1 uses **3930** clean assets from the 3993 canonical selection.
+Authority:
+- `CURRENT_STATE.md`
+- `experiments/iris_single_pose_v2/P_V5_R256_8X2_V2_EXACT_CONTINUATION_RESULT_20260825.md`
+- `experiments/iris_single_pose_v2/P_V5_R256_DEV32_ZERO_SHOT_PREREG_20260825.md`
+- `experiments/iris_single_pose_v2/P_V5_R256_DEV32_ZERO_SHOT_MEMBERSHIP_V1.json`
 
-- FIT 2935
-- TUNE 313
-- CAL 246 — sealed
-- DEV 270 — sealed
-- EXTERNAL_HOLDOUT 166 — sealed
+## Architecture note
+`SurfaceBuilder` remains deterministic in the current contract. Learned surface-relations and cross-cutting Compiler placement remain linked non-canonical hypotheses.
 
-The remaining 63 assets are preserved as 56 repair-pending + 6 shape-key quarantine + 1 blank observation asset.
-
-## Byte authority
-
-Heavy/frozen execution authority lives in Google Drive:
-
-`MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1`
-
-Frozen package manifest SHA-256:
-
-`e49a67b2ef808fe4f7cc9e414e024d30ab0fddc0ea55099bfa33ef78dbc6f098`
-
-GitHub is the continuation and inspection surface; Drive is byte authority for the executable package.
-
-## Preservation rule
-
-No research component may silently disappear. Every historical result remains provenance. Interpretation may be superseded only by an explicit audit/decision document.
+## Downstream sequencing
+After IRIS closes, audit and recover the canonical Compiler + Runtime implementation from Drive before starting new Geppetto/Arachne work.

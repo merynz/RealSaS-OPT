@@ -1,0 +1,12 @@
+{
+  "schema": "RealSaS.IRISSinglePoseV2.PV5FieldRepresentationPreflight.v1",
+  "status": "PASS",
+  "camera_json_consumed": false,
+  "neural_optimizer_steps": 0,
+  "grid_sample_semantics": "bilinear_border_align_corners_false",
+  "rows": [
+    {"hw":64,"linear_depth_abs":{"n":4096,"p50":1.442777491228453e-08,"p90":3.6507721232204027e-07,"p95":8.434591731911606e-07,"max":1.9010377080547203e-05,"mean":2.0324330532123474e-07},"solver":{"istop":7,"iterations":5000,"normr":5.597659127648783e-05,"normar":1.924311772903413e-08,"conda":51.957966599923395,"normx":8.561874465151474}},
+    {"hw":128,"linear_depth_abs":{"n":4096,"p50":4.4132753007630754e-13,"p90":6.7546593318645876e-12,"p95":1.616427824924216e-11,"max":1.7357206574808437e-09,"mean":5.6621568997864816e-12},"solver":{"istop":1,"iterations":757,"normr":2.8529849912313145e-09,"normar":8.521897139299214e-11,"conda":5.20129551141622,"normx":11.733720013230688}},
+    {"hw":256,"linear_depth_abs":{"n":4096,"p50":7.055536710431909e-13,"p90":3.5124403385822234e-12,"p95":8.681041996361216e-12,"max":6.919084194478842e-10,"mean":3.5195566255771876e-12},"solver":{"istop":1,"iterations":215,"normr":1.5492035419879063e-09,"normar":1.757261566820039e-10,"conda":3.0916168153833516,"normx":13.239733997327864}}
+  ]
+}

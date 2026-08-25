@@ -6,6 +6,40 @@
 
 The default user input is one neutral pose rendered/drawn in eight ordered views. Pose B is not a shipping dependency unless a future controlled end-to-end comparison proves a material final-quality advantage that cannot be recovered downstream.
 
+## Canonical architecture plan
+
+```text
+ONE neutral pose × 8 ordered views
+        ↓
+      IRIS
+        ↓
+rigging-sufficient observable 2.5D substrate
+        ↓
+    Geppetto
+        ↓
+editable skeleton / hierarchy proposal
+        ↓
+     Arachne
+        ↓
+editable skinning / weight proposal
+        ↓
+     Compiler
+        ↓
+verified editable puppet
+```
+
+IRIS ends at the observable geometric substrate. Geppetto owns rigging/skeleton structure. Arachne owns skinning. Compiler remains the final verification/export authority after learned proposals.
+
+### Linked alternative hypothesis — could the downstream control flow instead be cross-cutting?
+
+**NOT CANONICAL AUTHORITY.** Preserve the linear plan above as the default contract. A linked research hypothesis asks whether the same responsibility boundaries should eventually execute inside a cross-cutting **Compiler authority plane**, with intermediate Geometry/Rig/Skin qualification gates; whether surface topology should use learned relational evidence plus a constrained deterministic solver; and whether a RigAnything-inspired Geppetto plus SkinTokens-inspired Arachne is the stronger downstream combination.
+
+See: `audit/ALTERNATIVE_DOWNSTREAM_ARCHITECTURE_HYPOTHESES_20260825.md`.
+
+That note is intentionally phrased as **“could this also be the architecture?”** It may not replace this plan without the controlled evidence and explicit contract-revision process defined below.
+
+The future physical training organization of Geppetto and Arachne — including corpus organization, separate versus shared encoders/checkpoints, and joint versus staged training — is intentionally **not frozen** by this contract. Those are later evidence questions after IRIS qualification.
+
 ## Canonical problem-definition authority
 
 The exact IRIS scientific problem is frozen in:
@@ -40,9 +74,9 @@ IRIS is not responsible for authored mechanical owner identity, source-rig exact
 
 ## SurfaceBuilder
 
-A deterministic geometric canonicalization layer sits between raw IRIS evidence and the learned rigging stages. It is **not** a fourth learned model.
+A deterministic geometric canonicalization layer may sit between raw IRIS evidence and the learned rigging stages where controlled evidence shows it is required. It is **not** a fourth learned model and it must not silently absorb Geppetto/Arachne responsibilities.
 
-Candidate responsibilities include surfel fusion, provenance/support bookkeeping, reprojection/cycle checks, local adjacency/neighborhood construction, sheet/component separation and stable derived differential geometry. S0 decides which of these are required.
+Candidate responsibilities include geometric/provenance bookkeeping, reprojection/cycle checks, stable derived differential geometry and other non-mechanical canonicalization. Its exact role remains evidence-derived and revisionable.
 
 ## Geppetto
 
@@ -96,7 +130,23 @@ G1 remains historically and scientifically frozen; S0 does not rewrite its archi
 
 The old D1→D2→D3→D4 descriptor ladder is not automatically the product roadmap. D1/D2/D3 components remain preserved and may be reactivated where the geometry line demonstrates need. High-recall correspondence, reciprocal/cycle consistency, explicit camera geometry, grounding, provenance and ambiguity preservation remain active architecture lessons even though motion-specific GFDR outputs are no longer core IRIS targets.
 
-## Change control
+## Evidence-only architecture change control
+
+The architecture plan above is the default canonical authority. It may be revised only when **recorded controlled evidence** justifies the revision.
+
+A plan change requires at least one explicit evidentiary basis tied to the proposed boundary/representation change, such as:
+- a preregistered experiment or ablation showing the current plan is insufficient;
+- a closure/falsification result that invalidates a current architectural assumption;
+- a frozen downstream sufficiency/non-inferiority test showing a materially better alternative;
+- a safety/observability result demonstrating that the current boundary cannot be maintained responsibly.
+
+Convenience, intuition, architectural fashion, analogy to another system, implementation ease, or conversational drift are **not** sufficient authority. Without controlled evidence, an alternative remains a hypothesis and must not silently replace the canonical plan in `README`, `CURRENT_STATE`, preregistrations or implementation.
+
+Every approved plan revision must record:
+1. the superseding evidence/result;
+2. the exact old assumption being changed;
+3. the new boundary/representation;
+4. what prior evidence remains valid versus superseded.
 
 An explicit contract revision is required before:
 - making Pose B mandatory for shipping;

@@ -1,0 +1,28 @@
+{
+  "artifact_hash_policy": "final bundle/notebook SHA-256 are recorded in external HANDOFF_MANIFEST.json to avoid self-reference",
+  "cpu_preflight_status": "PASS",
+  "ci283_regression_status": "PASS",
+  "date": "2026-08-24",
+  "decision_labels": [
+    "P_V5_DEPTH_OVERFIT_PASS",
+    "P_V5_DEPTH_OPTIMIZATION_INSUFFICIENT"
+  ],
+  "fake_stage_cache_dataset_regression": "PASS",
+  "forbidden_runtime_content": [
+    "camera.json",
+    "TUNE",
+    "CAL",
+    "DEV",
+    "EXTERNAL_HOLDOUT",
+    "hidden mechanical truth"
+  ],
+  "gpu_preflight_status": "NOT_EXECUTED_LOCALLY__NOTEBOOK_RUNS_ZERO_STEP_GPU_PREFLIGHT_BEFORE_TRAINING",
+  "local_scientific_optimizer_steps": 0,
+  "membership": "exact 8 frozen FIT_TRAIN_SENTINEL assets x both styles",
+  "parent_branch": "audit/iris-architecture-discipline-20260824",
+  "parent_ci283_status": "P_V5_NATIVE_SCALE_ONCE_GEOMETRY_CLOSED",
+  "parent_head": "74658d64e2a711dba9ff60ff66dab304631400c6",
+  "runtime_required": "CUDA GPU",
+  "schema": "RealSaS.IRISSinglePoseV2.PV5DepthOverfitRelease.v1",
+  "status": "PREREG_FROZEN__CPU_PREFLIGHT_PASS__CI283_REGRESSION_PASS__FAKE_PIPELINE_PASS__GPU_RUN_NEXT"
+}

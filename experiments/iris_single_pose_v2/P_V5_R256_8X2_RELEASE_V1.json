@@ -1,0 +1,18 @@
+{
+  "apparatus_attempt_1": {
+    "classification": "APPARATUS_IMPLEMENTATION_BUG__OPTIMIZER_ZERO",
+    "root_cause": "semicolon-separated CUDA guard incorrectly captured seed/device/out initialization in conditional suite",
+    "scientific_optimizer_steps": 0
+  },
+  "broader_training_authorized": false,
+  "membership": "8 frozen FIT assets x 2 styles = 16 cells",
+  "next_executable": "RealSaS_IRIS_PV5_R256_8x2_A100_Joint_Fit_V1_1.ipynb",
+  "next_on_pass": "unseen-family generalization preregistration only",
+  "parent_status": "P_V5_R256_TWO_STYLE_OVERFIT_PASS",
+  "pass_rule": "all 16 cells individually P_p95 <= 0.005 at same preregistered checkpoint",
+  "runtime": "A100/high-memory CUDA; >=35 GiB; microbatch 8 x accumulation 2",
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256EightByTwoRelease.v1",
+  "scientific_optimizer_steps_during_preparation": 0,
+  "scientific_protocol_changed": false,
+  "status": "PREPARED_NOT_RUN__APPARATUS_ATTEMPT1_SUPERSEDED_BY_V1_1"
+}

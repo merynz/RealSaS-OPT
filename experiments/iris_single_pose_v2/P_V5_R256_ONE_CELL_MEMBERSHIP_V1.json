@@ -1,0 +1,16 @@
+{
+  "asset_count": 1,
+  "asset_style_cells": 1,
+  "post_result_selection": false,
+  "records": [
+    {
+      "asset_id": "asset_76313e4bd82b82fcd1659c70",
+      "selection_basis": "pre-training frozen P-V5 field-representation closure: hardest full-R certified cell and R/2 non-certified; selected before learner optimization",
+      "split": "FIT",
+      "style": "cel_clean"
+    }
+  ],
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256OneCellMembership.v1",
+  "sealed_assets": 0,
+  "tune_assets": 0
+}

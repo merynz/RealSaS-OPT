@@ -1,0 +1,26 @@
+{
+  "schema": "RealSaS.IRISSinglePoseV2.MiniMembershipProvenance.v1",
+  "verified_against_source_representation_seed": true,
+  "source_representation_seed_sha256": "f3d43da7766f104cab08f19fd24b515d54fde47545cc3288da023779c6d4c9af",
+  "source_panel_asset_id_digest": "366b5fffb1ff93c1c7bbad0ac4746c4f2675a633ec01745c026cecb2b7820961",
+  "membership_canonical_sha256": "4e223c799cf479a210716a86701ab96459673fe21852142e7cc7bd3a9d30e055",
+  "role_counts": {
+    "FIT_TRAIN": 128,
+    "FIT_SELECT": 32,
+    "TUNE_FINAL": 26
+  },
+  "role_asset_id_list_sha256": {
+    "FIT_TRAIN": "3c2df914b33708024eb81cf555d00087c66f45983a55ab96310356df130ba757",
+    "FIT_SELECT": "fe62a1dc625d086e107673a6e3261c76b33064e6f5826e782c0c40d52bd50b14",
+    "TUNE_FINAL": "b820cd30ae6954bd33d64c2950066c780210f11bb42d0becfadcf1c5aaca10ba"
+  },
+  "sorted_used_asset_id_set_sha256": "3f9d3dbe3aa4722a907882eb64ecc2c1e5d1cf5b23e1ddcb9a374c96d8001c5f",
+  "used_asset_count": 186,
+  "roles_disjoint": true,
+  "fit_train_all_source_split_fit": true,
+  "fit_select_all_source_split_fit": true,
+  "tune_final_all_source_split_tune": true,
+  "runtime_carries_source_registry_or_capability_metadata": false,
+  "runtime_representation_seed_consumed": false,
+  "sealed_splits_opened": false
+}

@@ -1,0 +1,23 @@
+{
+  "asset_count": 1,
+  "asset_style_cells": 2,
+  "post_result_selection": true,
+  "records": [
+    {
+      "asset_id": "asset_36fb02305846592b1ecdf3d4",
+      "selection_basis": "hard-asset diagnostic cell frozen after continuation result",
+      "split": "FIT",
+      "style": "cel_clean"
+    },
+    {
+      "asset_id": "asset_36fb02305846592b1ecdf3d4",
+      "selection_basis": "paired style of the same hard asset; same shared geometry/truth loci",
+      "split": "FIT",
+      "style": "ink_cel"
+    }
+  ],
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256HardAssetTwoStyleMembership.v1",
+  "sealed_assets": 0,
+  "selection_basis": "diagnostic hard asset selected because it is the dominant remaining blocker after the preregistered 8x2 continuation FAIL; selection is part of the next-gate localization policy, not a product/generalization sample",
+  "tune_assets": 0
+}

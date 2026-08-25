@@ -1,0 +1,32 @@
+{
+  "schema": "RealSaS.IRISSinglePoseV2.PFormulationV3Panel.v1",
+  "source_membership": "MINI_EXTRACTABILITY_MEMBERSHIP_V1.json",
+  "tune_assets": 0,
+  "sealed_assets": 0,
+  "roles": {
+    "FIT_SELECT_SENTINEL": [
+      "asset_bcad4a6fe35db25a0ff7d887",
+      "asset_5890cf3d012a4370ad656761",
+      "asset_1ce7dace2291ec5ee1224126",
+      "asset_85b7dd15d961fb999bc9b6cc",
+      "asset_ad8624ee6d278477ae2e8674",
+      "asset_23aaffc96b7377ae371babe0",
+      "asset_67df9e27ab1b4c7fd9237247",
+      "asset_00aa1b666ba193851a498194"
+    ],
+    "FIT_TRAIN_SENTINEL": [
+      "asset_551ea351b43a1787d0f55536",
+      "asset_36fb02305846592b1ecdf3d4",
+      "asset_0679fdef64f19a4832a6d521",
+      "asset_76313e4bd82b82fcd1659c70",
+      "asset_6f086a5b1a66378ffe04d7e4",
+      "asset_425122d500ecf5767404f9c0",
+      "asset_5a19f8c5254be7bf30c504f5",
+      "asset_f8a40d6c5d815fe79c8b5e42"
+    ]
+  },
+  "asset_count": 16,
+  "selection_rule": "first 8 frozen FIT_SELECT plus first 8 frozen FIT_TRAIN IDs from MINI_EXTRACTABILITY_MEMBERSHIP_V1.json; frozen before V3 corpus results",
+  "optimizer_steps": 0,
+  "training_authorized": false
+}

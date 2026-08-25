@@ -1,0 +1,11 @@
+{
+  "apparatus_supersession": "Attempt 1 stopped in optimizer-zero GPU preflight because a diagnostic forward hook returned the captured shape tuple and replaced the module output. No scientific result is attributed to that attempt.",
+  "broader_training_authorized": false,
+  "conditional_next_on_pass": "1 asset x 2 styles R256 overfit",
+  "next_executable": "RealSaS_IRIS_PV5_R256_OneCell_Overfit_V1_1.ipynb",
+  "output_root": "MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_SINGLE_POSE_V2_P_V5_R256_ONE_CELL_OVERFIT_V1",
+  "runtime": "CUDA GPU required for scientific training",
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256OneCellRelease.v1",
+  "scientific_optimizer_steps_during_preparation": 0,
+  "status": "PREPARED_NOT_RUN__APPARATUS_V1_SUPERSEDED_BY_V1_1"
+}

@@ -1,0 +1,25 @@
+{
+  "architecture_changed": false,
+  "asset_id": "asset_36fb02305846592b1ecdf3d4",
+  "bundle_sha256": "c002cb7510722565fb48d4a311c25616530256e4edd057fe80d4b828beb5ca2a",
+  "camera_json_admitted": false,
+  "local_checks": {
+    "cpu_contract_preflight": "PASS",
+    "fake_cache_shared_truth_loci": "PASS",
+    "fake_stage_two_cells": "PASS",
+    "parent_authority_verifier": "PASS",
+    "python_ast": "PASS",
+    "python_py_compile": "PASS",
+    "scientific_optimizer_steps_during_preparation": 0
+  },
+  "main_lr": 0.0003,
+  "main_steps": 2048,
+  "notebook_sha256": "eff053232806e762c2a1e88c76109a34e05706a691b8d1e5f70586c4f77939d0",
+  "patchmatch_admitted": false,
+  "prior_identical_B2_R256_gpu_preflight_peak_bytes": 8115611136,
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256HardAssetTwoStyleRelease.v1",
+  "status": "PREPARED_NOT_RUN__A100_RUN_NEXT",
+  "tail_lr": 0.00003,
+  "tail_steps": 2048,
+  "total_planned_optimizer_steps": 4096
+}

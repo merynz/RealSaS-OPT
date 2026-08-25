@@ -1,0 +1,227 @@
+name: IRIS V2 Preflight
+
+on:
+  push:
+    branches:
+      - audit/iris-architecture-discipline-20260824
+    paths:
+      - 'experiments/iris_single_pose_v2/**'
+      - '.github/workflows/iris_v2_preflight.yml'
+  pull_request:
+    branches:
+      - g0-g1/single-pose-geometry
+    paths:
+      - 'experiments/iris_single_pose_v2/**'
+      - 'audit/**'
+      - 'CURRENT_STATE.md'
+      - '.github/workflows/iris_v2_preflight.yml'
+  workflow_dispatch:
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SOURCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      WORKFLOW_EVENT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install runtime
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy pillow
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Compile exact committed sources
+        working-directory: experiments/iris_single_pose_v2
+        run: python -m py_compile *.py
+
+      - name: Architecture / coordinate / matcher / historical P-V3 regression
+        working-directory: experiments/iris_single_pose_v2
+        run: python preflight.py
+
+      - name: Learner physical firewall / truth-cache regression
+        working-directory: experiments/iris_single_pose_v2
+        run: python data_preflight.py
+
+      - name: Learner partial-visibility cache regression
+        working-directory: experiments/iris_single_pose_v2
+        run: python learner_cache_visibility_preflight_v1.py
+
+      - name: Historical mini firewall and TUNE-order regression
+        working-directory: experiments/iris_single_pose_v2
+        run: python mini_contract_preflight_v1.py
+
+      - name: AMP loss precision regression
+        working-directory: experiments/iris_single_pose_v2
+        run: python amp_loss_precision_preflight_v1.py
+
+      - name: Representation-only geometry data-path regression
+        working-directory: experiments/iris_single_pose_v2
+        run: python representation_data_preflight_v1.py
+
+      - name: Partial-visibility representation cache regression
+        working-directory: experiments/iris_single_pose_v2
+        run: python representation_cache_visibility_preflight_v1.py
+
+      - name: Observable evaluator regression
+        working-directory: experiments/iris_single_pose_v2
+        run: python evaluation_preflight.py
+
+      - name: Representation authority semantic regression
+        working-directory: experiments/iris_single_pose_v2
+        run: python representation_preflight.py
+
+      - name: Master geometry superset firewall regression
+        working-directory: experiments/iris_single_pose_v2
+        run: python p_formulation_master_geometry_firewall_preflight_v1.py
+
+      - name: Historical P-V4 formulation regression
+        working-directory: experiments/iris_single_pose_v2
+        run: python p_formulation_v4_preflight.py
+
+      - name: P-V5 native-scale-once formulation preflight
+        working-directory: experiments/iris_single_pose_v2
+        run: python p_formulation_v5_preflight.py
+
+      - name: P-V5 corpus closure CLI / panel firewall preflight
+        working-directory: experiments/iris_single_pose_v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          python p_formulation_v5_corpus_audit.py --help >/dev/null
+          python - <<'PY'
+          import inspect,json
+          import model_pv5
+          x=json.load(open('P_FORMULATION_V3_PANEL_V1.json',encoding='utf-8'))
+          assert x['schema']=='RealSaS.IRISSinglePoseV2.PFormulationV3Panel.v1'
+          assert x['asset_count']==16
+          assert x['tune_assets']==0 and x['sealed_assets']==0
+          assert set(x['roles'])=={'FIT_SELECT_SENTINEL','FIT_TRAIN_SENTINEL'}
+          ids=x['roles']['FIT_SELECT_SENTINEL']+x['roles']['FIT_TRAIN_SENTINEL']
+          assert len(ids)==16 and len(set(ids))==16
+          assert x['optimizer_steps']==0 and x['training_authorized'] is False
+          sig=inspect.signature(model_pv5.IRISSinglePoseV2PV5.forward)
+          assert list(sig.parameters)==['self','images','yaw_deg','sheet_half_extent'], sig
+          src=inspect.getsource(model_pv5.IRISSinglePoseV2PV5.forward).lower()
+          assert 'camera' not in src
+          assert 'estimate_sheet_half_extent_from_alpha' not in src
+          assert 'estimate_native_sheet_half_extent' not in src
+          native_sig=inspect.signature(model_pv5.estimate_native_sheet_half_extent)
+          assert list(native_sig.parameters)==['native_images','yaw_deg']
+          PY
+
+      - name: Build optimizer-zero P Formulation V5 native-scale-once closure bundle V1
+        shell: bash
+        run: |
+          set -euo pipefail
+          ACTUAL_HEAD="$(git rev-parse HEAD)"
+          test "$ACTUAL_HEAD" = "$SOURCE_HEAD_SHA"
+          BUNDLE="$RUNNER_TEMP/iris-v2-p-formulation-v5-native-scale-once-closure-bundle-v1"
+          SRC="experiments/iris_single_pose_v2"
+          mkdir -p "$BUNDLE"
+          for f in \
+            P_FORMULATION_V3_PANEL_V1.json \
+            P_FORMULATION_V5_NATIVE_SCALE_ONCE_CLOSURE_PREREG_20260824.md \
+            P_FORMULATION_V4_CI269_RESULT_INTERPRETATION_20260824.md \
+            p_formulation_v5_corpus_audit.py \
+            p_formulation_v5_preflight.py \
+            model_pv5.py \
+            model_pv4.py \
+            p_formulation_v4_corpus_audit.py \
+            p_formulation_corpus_audit_v1.py \
+            p_formulation_master_geometry_firewall_preflight_v1.py \
+            model.py losses.py coords.py geometry.py matcher.py metrics.py; do
+            cp "$SRC/$f" "$BUNDLE/$f"
+          done
+          (cd "$BUNDLE" && sha256sum *.py *.json *.md | sort > SHA256SUMS.txt)
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          b=Path(os.environ['RUNNER_TEMP'])/'iris-v2-p-formulation-v5-native-scale-once-closure-bundle-v1'
+          info={
+            'schema':'RealSaS.IRISSinglePoseV2.PFormulationV5ClosureBundle.v1',
+            'source_head_sha':os.environ['SOURCE_HEAD_SHA'],
+            'workflow_event_sha':os.environ['WORKFLOW_EVENT_SHA'],
+            'workflow':'IRIS V2 Preflight',
+            'representation_gate':'P_GEOMETRY_SUFFICIENT',
+            'P_ontology':'canonical/object-frame physical surface position',
+            'P_parameterization':'native-image-derived canonical sheet scale transported unchanged + analytic screen-plane coordinates + one learned camera-forward depth scalar',
+            'P_formula':'P=h_native*gx*right(yaw)-h_native*gy*up+depth*forward(yaw)',
+            'observable_scale':'h_native measured once from original ordered 1024 RGBA alpha before learner resize',
+            'overall_extractor_inputs':['native_ordered_rgba','yaw_deg'],
+            'learner_forward_inputs':['resized_images','yaw_deg','sheet_half_extent'],
+            'sheet_half_extent_provenance':'deterministic native1024 RGBA alpha only',
+            'scale_reestimated_after_resize':False,
+            'model_camera_half_extent_input':False,
+            'camera_metadata_role':'teacher-side diagnostic/audit only',
+            'alpha_required':True,
+            'rgb_color_required':False,
+            'master_geometry_policy':'source primary_geometry is a superset; values consumed only from vertices/faces',
+            'optimizer_steps':0,
+            'training_authorized':False,
+            'tune_consumed':False,
+            'sealed_splits_opened':False,
+            'panel_asset_count':16,
+            'entrypoint':'p_formulation_v5_corpus_audit.py',
+            'required_corpus_root':'/content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3'
+          }
+          (b/'BUNDLE_INFO.json').write_text(json.dumps(info,indent=2,sort_keys=True)+'\n')
+          PY
+
+      - name: Verify isolated P Formulation V5 closure bundle V1
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUNDLE="$RUNNER_TEMP/iris-v2-p-formulation-v5-native-scale-once-closure-bundle-v1"
+          SRC="experiments/iris_single_pose_v2"
+          python - "$SRC" "$BUNDLE" <<'PY'
+          import ast,sys
+          from pathlib import Path
+          src=Path(sys.argv[1]); b=Path(sys.argv[2]); mods={p.stem for p in src.glob('*.py')}; missing=set()
+          for p in b.glob('*.py'):
+            tree=ast.parse(p.read_text(),filename=str(p))
+            for n in ast.walk(tree):
+              roots=[a.name.split('.')[0] for a in n.names] if isinstance(n,ast.Import) else ([n.module.split('.')[0]] if isinstance(n,ast.ImportFrom) and n.module else [])
+              for r in roots:
+                if r in mods and not (b/f'{r}.py').is_file(): missing.add((p.name,r))
+          if missing: raise SystemExit(f'missing local P-V5 bundle dependencies: {sorted(missing)}')
+          PY
+          (cd "$BUNDLE" && python -m py_compile *.py && python p_formulation_master_geometry_firewall_preflight_v1.py && python p_formulation_v5_preflight.py && python p_formulation_v5_corpus_audit.py --help >/dev/null)
+          find "$BUNDLE" -type d -name __pycache__ -prune -exec rm -rf {} +
+          (cd "$BUNDLE" && sha256sum -c SHA256SUMS.txt)
+          python - "$BUNDLE" <<'PY'
+          import json,sys
+          from pathlib import Path
+          b=Path(sys.argv[1])
+          expected={
+            'BUNDLE_INFO.json','SHA256SUMS.txt',
+            'P_FORMULATION_V3_PANEL_V1.json','P_FORMULATION_V5_NATIVE_SCALE_ONCE_CLOSURE_PREREG_20260824.md',
+            'P_FORMULATION_V4_CI269_RESULT_INTERPRETATION_20260824.md',
+            'p_formulation_v5_corpus_audit.py','p_formulation_v5_preflight.py','model_pv5.py','model_pv4.py',
+            'p_formulation_v4_corpus_audit.py','p_formulation_corpus_audit_v1.py','p_formulation_master_geometry_firewall_preflight_v1.py',
+            'model.py','losses.py','coords.py','geometry.py','matcher.py','metrics.py'
+          }
+          actual={p.name for p in b.iterdir()}
+          if actual!=expected: raise SystemExit(f'P-V5 bundle drift: missing={sorted(expected-actual)} extra={sorted(actual-expected)}')
+          info=json.load(open(b/'BUNDLE_INFO.json',encoding='utf-8'))
+          if info.get('schema')!='RealSaS.IRISSinglePoseV2.PFormulationV5ClosureBundle.v1': raise SystemExit('bad P-V5 bundle schema')
+          if info.get('optimizer_steps')!=0 or info.get('training_authorized') is not False: raise SystemExit('P-V5 optimizer/training authority drift')
+          if info.get('model_camera_half_extent_input') is not False: raise SystemExit('camera half_extent leaked into model authority')
+          if info.get('scale_reestimated_after_resize') is not False: raise SystemExit('P-V5 scale transport policy drift')
+          if info.get('sheet_half_extent_provenance')!='deterministic native1024 RGBA alpha only': raise SystemExit('P-V5 observable scale provenance drift')
+          if info.get('tune_consumed') is not False or info.get('sealed_splits_opened') is not False: raise SystemExit('P-V5 data firewall drift')
+          PY
+
+      - name: Upload optimizer-zero P Formulation V5 native-scale-once closure bundle V1
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-p-formulation-v5-native-scale-once-closure-bundle-v1
+          path: ${{ runner.temp }}/iris-v2-p-formulation-v5-native-scale-once-closure-bundle-v1
+          if-no-files-found: error
+          retention-days: 14

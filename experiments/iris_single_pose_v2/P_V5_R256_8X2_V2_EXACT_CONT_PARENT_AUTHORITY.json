@@ -1,0 +1,15 @@
+{
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256EightByTwoV2ExactContinuationParentAuthority.v1",
+  "parent_run": "IRIS_SINGLE_POSE_V2_P_V5_R256_8X2_CERTIFICATION_V2",
+  "parent_status": "P_V5_R256_8X2_V2_CERTIFICATION_INSUFFICIENT",
+  "parent_selected_label": "TAIL_4096",
+  "parent_selected_total_optimizer_steps": 6144,
+  "parent_selected_pass_count": 14,
+  "parent_selected_worst_cell_P_p95": 0.005129679851233959,
+  "parent_run_complete_sha256": "339b6a2f929e732e9ac0bb5c540e85b3b473e86acc6508391de9807b20dbb77b",
+  "parent_decision_sha256": "77626d41cf87facac5e5d5247a20268bf3654cd94ab24ab16ff8031d8d37678c",
+  "parent_checkpoint_sha256": "8c3872412124644885b66aea1b00413a8da5ab91a7471e83fcae001d43544049",
+  "continuation_lr": 3e-5,
+  "additional_steps": 1024,
+  "fresh_optimizer_moments": false
+}

@@ -1,0 +1,14 @@
+{
+  "schema": "RealSaS.IRISSinglePoseV2.PV5FieldRepresentationRealSentinelValidation.v1",
+  "status": "PASS",
+  "asset_id": "asset_36fb02305846592b1ecdf3d4",
+  "view": 7,
+  "samples": 4096,
+  "camera_json_consumed": false,
+  "rows": [
+    {"field_hw":64,"depth_abs":{"n":4096,"p50":0.003700343749884403,"p90":0.02699922985380898,"p95":0.03989342867777104,"max":0.17905017271481252,"mean":0.00976772456149275},"solver":{"istop":2,"iterations":2912,"normr":1.208903787188274,"normar":1.2425699545407e-09,"conda":9.080156965857116,"normx":34.54372562611596}},
+    {"field_hw":128,"depth_abs":{"n":4096,"p50":0.0004970354420830003,"p90":0.007311603980119669,"p95":0.013460239341135558,"max":0.10689141507087319,"mean":0.0028708072325912275},"solver":{"istop":7,"iterations":10000,"normr":0.5136541249252233,"normar":9.823726667183617e-07,"conda":125.38013889232327,"normx":100.10020264294783}},
+    {"field_hw":256,"depth_abs":{"n":4096,"p50":1.371298907759666e-14,"p90":1.888888351286866e-13,"p95":4.561941102654288e-13,"max":0.0039734749531841335,"mean":1.9401772412339653e-06},"solver":{"istop":2,"iterations":1300,"normr":0.004955793969916075,"normar":1.6246850321061699e-12,"conda":5.08282576839174,"normx":6.470632776276324}}
+  ],
+  "observation": "R128 remains above 0.005 on this frozen real view under a strong L2 oracle; R256 certifies sub-threshold representability on the same points."
+}

@@ -1,0 +1,28 @@
+{
+  "asset_count": 8,
+  "asset_style_cells": 16,
+  "post_result_selection": false,
+  "records": [
+    {"asset_id": "asset_551ea351b43a1787d0f55536", "split": "FIT", "style": "cel_clean"},
+    {"asset_id": "asset_551ea351b43a1787d0f55536", "split": "FIT", "style": "ink_cel"},
+    {"asset_id": "asset_36fb02305846592b1ecdf3d4", "split": "FIT", "style": "cel_clean"},
+    {"asset_id": "asset_36fb02305846592b1ecdf3d4", "split": "FIT", "style": "ink_cel"},
+    {"asset_id": "asset_0679fdef64f19a4832a6d521", "split": "FIT", "style": "cel_clean"},
+    {"asset_id": "asset_0679fdef64f19a4832a6d521", "split": "FIT", "style": "ink_cel"},
+    {"asset_id": "asset_76313e4bd82b82fcd1659c70", "split": "FIT", "style": "cel_clean"},
+    {"asset_id": "asset_76313e4bd82b82fcd1659c70", "split": "FIT", "style": "ink_cel"},
+    {"asset_id": "asset_6f086a5b1a66378ffe04d7e4", "split": "FIT", "style": "cel_clean"},
+    {"asset_id": "asset_6f086a5b1a66378ffe04d7e4", "split": "FIT", "style": "ink_cel"},
+    {"asset_id": "asset_425122d500ecf5767404f9c0", "split": "FIT", "style": "cel_clean"},
+    {"asset_id": "asset_425122d500ecf5767404f9c0", "split": "FIT", "style": "ink_cel"},
+    {"asset_id": "asset_5a19f8c5254be7bf30c504f5", "split": "FIT", "style": "cel_clean"},
+    {"asset_id": "asset_5a19f8c5254be7bf30c504f5", "split": "FIT", "style": "ink_cel"},
+    {"asset_id": "asset_f8a40d6c5d815fe79c8b5e42", "split": "FIT", "style": "cel_clean"},
+    {"asset_id": "asset_f8a40d6c5d815fe79c8b5e42", "split": "FIT", "style": "ink_cel"}
+  ],
+  "schema": "RealSaS.IRISSinglePoseV2.PV5R256EightByTwoMembership.v1",
+  "source_authority": "same eight FIT sentinels frozen before P-V5 field-representation closure; no post-two-style asset selection",
+  "split": "FIT",
+  "status": "FROZEN_BEFORE_8X2_TRAINING",
+  "styles": ["cel_clean", "ink_cel"]
+}

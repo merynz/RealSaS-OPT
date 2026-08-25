@@ -3,12 +3,10 @@
 **Date:** 2026-08-25  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_CLOSED__P_V5_CLOSED__R256_FIELD_CLOSED__ONE_CELL_SUFFICIENT__TWO_STYLE_JOINT_FIT_PASS__EIGHT_BY_TWO_PREREG_NEXT`
+**Status:** `P_GEOMETRY_CLOSED__P_V5_CLOSED__R256_FIELD_CLOSED__ONE_CELL_PASS__TWO_STYLE_PASS__EIGHT_BY_TWO_PREREG_FROZEN__A100_RUN_NEXT`
 
 ## Single continuation authority
-Active implementation: `experiments/iris_single_pose_v2/`.
-
-Before continuing, read this file and root `README.md`.
+Active implementation: `experiments/iris_single_pose_v2/`. Read this file and root `README.md` before continuing.
 
 ## Canonical architecture — evidence controlled
 
@@ -36,96 +34,78 @@ IRIS stops at the observable 2.5D substrate. Geppetto/Arachne training organizat
 
 **Architecture change control:** architecture/responsibility boundaries may change only under recorded controlled evidence. Convenience, analogy, intuition, implementation ease or conversational drift are not authority.
 
-### IMPORTANT external precedent — do not lose
-
+## IMPORTANT external precedent — preserve, do not silently promote
 `audit/IMPORTANT_EXTERNAL_PRECEDENT_PATCHMATCH_RL_20260825.md`
 
-PatchMatch-RL (ICCV 2021) is the closest open-code working precedent identified so far for the current IRIS formulation: calibrated multi-view images + known cameras -> pixelwise depth/normal/visibility -> reprojection-consistent oriented surface/point cloud.
-
-This is an **important feasibility precedent and future intervention library**, especially for geometry-in-the-loop cross-view hypothesis verification if a family-disjoint P/N hard tail later survives the direct R256 ladder. It is **not current architecture authority** and does not authorize changing the frozen ladder by analogy alone.
+PatchMatch-RL (ICCV 2021) remains the closest open-code working precedent identified for the current IRIS geometric formulation. Its geometry-in-the-loop cross-view hypothesis verification is an important future intervention candidate if controlled multi-asset/family-disjoint evidence localizes a persistent extraction/coherence hard tail. It is **not admitted into the current 8×2 gate** and is not architecture authority by analogy alone.
 
 ## Closed P authority
 - `P_GEOMETRY_SUFFICIENT`: CLOSED/PASS.
 - P-V5 native-scale-once analytic reconstruction: CLOSED/PASS.
-- legal P factorization: native1024 RGBA -> estimate `h_native` once -> canonical yaw -> learn camera-forward scalar depth -> analytic canonical P.
+- legal factorization: native1024 RGBA -> estimate `h_native` once -> known yaw -> learn camera-forward scalar depth -> analytic canonical P.
 - `camera.json` / teacher camera half extent remain forbidden learner inputs.
-
-## R256 field representation — CLOSED
-| field | interpretation | worst-cell P p95 |
-|---|---|---:|
-| 64×64 | NOT_CERTIFIED | `0.03889907157958461` |
-| 128×128 | NOT_CERTIFIED | `0.01284720621837844` |
-| 256×256 | CERTIFIED 16/16 | `0.0008174655519194024` |
-
-Smallest tested certified field = **R256**.
+- R256 field representation: CLOSED/PASS; 256×256 is the smallest tested certified field.
 
 ## Frozen learner promotion ladder
 ```text
-R256 field representation                     PASS
+R256 field representation                       PASS
         ↓
 1 asset × 1 style learner/optimizer sufficiency PASS
         ↓
 1 asset × 2 styles joint fit                    PASS
         ↓
-8 assets × 2 styles                             ← NEXT
+8 assets × 2 styles joint fit                   ← CURRENT / PREREG FROZEN
         ↓ PASS
 unseen-family generalization
 ```
 
 No rung may be skipped without a preregistered evidence-backed revision.
 
-## One asset × one style — learner/optimizer sufficiency CLOSED
-The original frozen fixed-lr gate remains an immutable FAIL:
-- `cel_clean`, 2048 steps, AdamW `3e-4`;
-- P p95 `0.005682396539486942` vs threshold `0.005`.
-
-Optimizer localization reproduced the exact checkpoint at step 0 with absolute P-p95 difference `0.0` and then ran three fresh-AdamW restarts:
-
-| arm | lr | first PASS | min P p95 |
-|---|---:|---:|---:|
-| A control | `3e-4` | — | `0.005420877947472036` |
-| B | `1e-4` | 256 | `0.00420133795123547` |
-| C | `3e-5` | 64 | `0.003946938854642211` |
-
-Canonical recovery status: `P_V5_R256_ONE_CELL_RECOVERY_PASS`.  
-Localization label: `LATE_STAGE_LR_FLOOR_SUPPORTED`.
-
-Interpretation authority:
-`experiments/iris_single_pose_v2/P_V5_R256_OPTIMIZER_LOCALIZATION_RESULT_20260825.md`
-
 ## One asset × two styles — CLOSED/PASS
-Canonical result:
-`experiments/iris_single_pose_v2/P_V5_R256_TWO_STYLE_RESULT_20260825.md`
+Canonical result: `experiments/iris_single_pose_v2/P_V5_R256_TWO_STYLE_RESULT_20260825.md`.
 
-Frozen cells:
-- `asset_76313e4bd82b82fcd1659c70 / cel_clean / FIT`;
-- `asset_76313e4bd82b82fcd1659c70 / ink_cel / FIT`.
+One shared fresh model passed both cells at `TAIL_0512`:
+- `cel_clean P_p95 = 0.003733412444125855`;
+- `ink_cel P_p95 = 0.0038324856432154623`;
+- worst-cell `0.0038324856432154623 <= 0.005`.
 
-One shared fresh R256 model jointly fit both styles. Selected checkpoint `TAIL_0512`, total optimizer steps `2560`:
+The `3e-5` fresh-moment tail crossed the two-style gate by tail step 128, independently supporting the prior late-stage LR localization.
 
-| style | selected P p95 | threshold | status |
-|---|---:|---:|---|
-| `cel_clean` | `0.003733412444125855` | `0.005` | PASS |
-| `ink_cel` | `0.0038324856432154623` | `0.005` | PASS |
+## CURRENT GATE — R256 8 assets × 2 styles V1
+Preregistration: `experiments/iris_single_pose_v2/P_V5_R256_8X2_PREREG_20260825.md`  
+Membership: `experiments/iris_single_pose_v2/P_V5_R256_8X2_MEMBERSHIP_V1.json`
 
-Selected aggregate P p95: `0.003779542224947363`.  
-Selected worst-cell P p95: `0.0038324856432154623`.
+Membership is the same eight frozen FIT sentinels used by the P-V5 field-representation closure, each in `cel_clean` and `ink_cel`: 8 assets / 16 cells. No post-result asset selection.
 
-MAIN `3e-4` at 2048 steps remained insufficient (`worst-cell P p95 = 0.00982439313083885`). Fresh-moment TAIL `3e-5` crossed the two-cell gate by tail step 128 (`0.0046900292858481395`) and improved through step 512. This independently supports the prior late-stage LR localization under joint two-style fit.
+Scientific question: can **one shared fresh R256 model** jointly fit all 16 cells to `P_p95 <= 0.005` at one preregistered checkpoint?
 
-Safety/provenance:
-- best checkpoint SHA-256 `cab207e1455f755b6931b9912fd6404d308216099ee1bab2042cb5dad0952b69`;
-- decision SHA-256 `2250f7c21076c0ae0b04093b5e711d2a2c0d26ababb2f2960ea0759a007cb5eb`;
-- no `camera.json`;
-- no TUNE;
-- sealed splits unopened.
+### Training protocol
+- fresh deterministic model; no prior checkpoint initialization;
+- same proven schedule: MAIN AdamW `3e-4 × 2048`, then fresh-moment TAIL AdamW `3e-5 × 512`;
+- authority checkpoints: INIT; MAIN 512/1024/2048; TAIL 64/128/256/512;
+- no LR search or adaptive schedule from 8×2 results;
+- every optimizer step represents all 16 cells;
+- fixed production decomposition: **8 cells × 2 gradient-accumulation microbatches**;
+- each cell therefore participates in all 2560 optimizer steps;
+- GroupNorm + zero-dropout architecture makes the decomposition batch-stat independent; reduced deterministic gradient-equivalence preflight PASS with max absolute difference `2.086162567138672e-07`.
 
-## CURRENT GATE — preregister 8 assets × 2 styles R256
-Frozen next policy from the two-style result: **preregister `8 assets × 2 styles R256` only**.
+### A100 execution
+Target runtime: A100/high-memory CUDA. GPU preflight requires >=35 GiB device memory and a successful 8-cell / 64-view R256 forward-backward at optimizer step 0. Failure is apparatus-only and blocks scientific training.
 
-No 8×2 scientific training is authorized until its membership, checkpoint-selection rule, optimizer schedule, per-cell PASS rule and executable preflight are frozen prospectively.
+### PASS rule
+PASS iff the **same preregistered checkpoint** has all 16 asset-style cells individually `P_p95 <= 0.005`. Aggregate P95 cannot pass or mask a cell.
 
-The one-asset/two-style result is an overfit/joint-capacity result only. It does not authorize unseen-family or product-domain claims.
+PASS -> preregister unseen-family generalization only.  
+FAIL -> stay at 8×2 and localize the residual pattern before architecture change. PatchMatch-style refinement becomes eligible only if controlled evidence localizes an extraction/coherence blocker.
+
+## Preparation validation
+- syntax PASS;
+- CPU full-R contract PASS;
+- no BatchNorm / nonzero dropout PASS;
+- full-batch vs accumulated-gradient equivalence PASS;
+- fake 8-asset / 16-cell stage-cache-dataset PASS;
+- scientific optimizer steps during preparation: `0`;
+- production A100 GPU preflight: notebook step-0 gate, not yet run.
 
 ## Research rule
 `apparatus/data -> representation/target -> learner/optimizer -> evidence consumer -> downstream sufficiency -> only then information limit`

@@ -3,7 +3,7 @@
 **Date:** 2026-08-25  
 **Active branch:** `audit/iris-architecture-discipline-20260824`  
 **Draft PR:** `#4` — audit only, not merged  
-**Status:** `P_GEOMETRY_CLOSED__P_V5_CLOSED__R256_FIELD_CLOSED__ONE_CELL_PASS__TWO_STYLE_PASS__EIGHT_BY_TWO_PREREG_FROZEN__A100_RUN_NEXT`
+**Status:** `P_GEOMETRY_CLOSED__P_V5_CLOSED__R256_FIELD_CLOSED__ONE_CELL_PASS__TWO_STYLE_PASS__EIGHT_BY_TWO_PREREG_FROZEN__APPARATUS_ATTEMPT1_SUPERSEDED__A100_V1_1_RUN_NEXT`
 
 ## Single continuation authority
 Active implementation: `experiments/iris_single_pose_v2/`. Read this file and root `README.md` before continuing.
@@ -105,7 +105,9 @@ FAIL -> stay at 8×2 and localize the residual pattern before architecture chang
 - full-batch vs accumulated-gradient equivalence PASS;
 - fake 8-asset / 16-cell stage-cache-dataset PASS;
 - scientific optimizer steps during preparation: `0`;
-- production A100 GPU preflight: notebook step-0 gate, not yet run.
+- production A100 GPU preflight attempt 1: PASS on NVIDIA A100-SXM4-40GB; scientific optimizer steps remained 0.
+- apparatus attempt 1 was superseded before training because the trainer CUDA guard accidentally captured seed/device/output initialization in the conditional suite.
+- next executable: `RealSaS_IRIS_PV5_R256_8x2_A100_Joint_Fit_V1_1.ipynb`; scientific protocol unchanged.
 
 ## Research rule
 `apparatus/data -> representation/target -> learner/optimizer -> evidence consumer -> downstream sufficiency -> only then information limit`

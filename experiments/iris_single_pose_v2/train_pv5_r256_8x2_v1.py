@@ -41,7 +41,14 @@ def run_phase(model,cpu_batch,device,out,cm,phase,steps,lr,eval_steps,offset,his
             cand={'label':label,'phase':phase,'phase_step':step,'total_optimizer_steps':total,'lr':lr,'worst_cell_P_p95':ev['worst_cell_P_p95'],'aggregate_P_p95':ev['aggregate']['P_p95'],'all_cells_pass_0p005':ev['all_cells_pass_0p005'],'pass_count':ev['pass_count'],'per_cell':ev['per_cell'],'checkpoint':str(cp)}; cands.append(cand); print(json.dumps({k:v for k,v in cand.items() if k not in ('per_cell','checkpoint')},indent=2),flush=True)
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--cache-manifest',required=True); ap.add_argument('--out-dir',required=True); a=ap.parse_args()
-    if not torch.cuda.is_available(): raise RuntimeError('CUDA required'); seed_all(); device=torch.device('cuda'); out=Path(a.out_dir); out.mkdir(parents=True,exist_ok=True); (out/'eval').mkdir(exist_ok=True); (out/'checkpoints').mkdir(exist_ok=True)
+    if not torch.cuda.is_available():
+        raise RuntimeError('CUDA required')
+    seed_all()
+    device=torch.device('cuda')
+    out=Path(a.out_dir)
+    out.mkdir(parents=True,exist_ok=True)
+    (out/'eval').mkdir(exist_ok=True)
+    (out/'checkpoints').mkdir(exist_ok=True)
     ds=PV5R256EightByTwoDataset(a.cache_manifest); dl=DataLoader(ds,batch_size=16,shuffle=False,num_workers=0,pin_memory=True); cpu=next(iter(dl))
     if len(cpu['asset_id'])!=16: raise RuntimeError('full 16-cell batch missing')
     model=IRISSinglePoseV2PV5R256().to(device); tr=configure_p_only(model)

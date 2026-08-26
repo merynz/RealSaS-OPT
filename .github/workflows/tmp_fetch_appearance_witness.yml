@@ -1,0 +1,35 @@
+name: tmp-fetch-appearance-witness
+on:
+  push:
+    branches:
+      - tmp/appearance-witness-fetch-20260826
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch pinned upstream witness packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p witness/ea593 witness/662ed
+
+          curl -fL 'https://raw.githubusercontent.com/dfmr96/CursoCoderHouse/34e6ee1480971954986736ae056f3ad1a62003a8/CursoCoderHouse/Assets/3D%20Models/Zombies/Naked/NakedZombie%40Zombie%20Walk%20%282%29.fbx' -o 'witness/ea593/object.fbx'
+          curl -fL 'https://raw.githubusercontent.com/dfmr96/CursoCoderHouse/34e6ee1480971954986736ae056f3ad1a62003a8/CursoCoderHouse/Assets/3D%20Models/Zombies/Naked/Nacked%20Zombie%20Texture.bmp' -o 'witness/ea593/Nacked Zombie Texture.bmp'
+          curl -fL 'https://raw.githubusercontent.com/dfmr96/CursoCoderHouse/34e6ee1480971954986736ae056f3ad1a62003a8/CursoCoderHouse/Assets/3D%20Models/Zombies/Naked/Nacked%20Zombie%20Texture%201.bmp' -o 'witness/ea593/Nacked Zombie Texture 1.bmp'
+
+          curl -fL 'https://raw.githubusercontent.com/norvitush/PROJECTS_DEMO/13db541e31c12c88929620d0868a21f6c3d15981/projectSanta2022/Assets/ResourcesData/envir/Santa_sleigh/deer_anim.fbx' -o 'witness/662ed/object.fbx'
+          curl -fL 'https://raw.githubusercontent.com/norvitush/PROJECTS_DEMO/13db541e31c12c88929620d0868a21f6c3d15981/projectSanta2022/Assets/ResourcesData/envir/Santa_sleigh/deer_t.png' -o 'witness/662ed/deer_t.png'
+          curl -fL 'https://raw.githubusercontent.com/norvitush/PROJECTS_DEMO/13db541e31c12c88929620d0868a21f6c3d15981/projectSanta2022/Assets/ResourcesData/envir/Santa_sleigh/deer_mat.mat' -o 'witness/662ed/deer_mat.mat'
+
+          test "$(sha256sum witness/ea593/object.fbx | awk '{print $1}')" = '0e3e5d6179a8a762a451d223f76fcfc097ecd60eea9d46dc20fd005dec823a78'
+          test "$(sha256sum witness/662ed/object.fbx | awk '{print $1}')" = '162d9f41fc9db5bc89a5c0f0d538358f2ad23daef566e31bb71d0fe895b15df1'
+          sha256sum witness/ea593/* witness/662ed/* | tee witness/SHA256SUMS.txt
+
+      - name: Upload witness source package
+        uses: actions/upload-artifact@v4
+        with:
+          name: appearance-witness-source-package
+          path: witness
+          if-no-files-found: error
+          retention-days: 1

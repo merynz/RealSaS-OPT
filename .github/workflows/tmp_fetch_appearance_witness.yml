@@ -29,6 +29,7 @@ jobs:
       - name: Install Blender
         shell: bash
         run: |
+          set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y blender >/dev/null
           blender --version | head -2
@@ -36,10 +37,12 @@ jobs:
       - name: Extract base-mesh UV authority
         shell: bash
         run: |
+          set -euo pipefail
           cat > /tmp/extract_uv.py <<'PY'
-          import bpy, json, os, sys
-          import numpy as np
-          from mathutils import Vector
+          import bpy, json, math, os, traceback
+
+          def v3(x): return [float(x[0]), float(x[1]), float(x[2])]
+          def v2(x): return [float(x[0]), float(x[1])]
 
           def extract(asset_dir):
               fbx = os.path.abspath(os.path.join(asset_dir, 'object.fbx'))
@@ -48,54 +51,68 @@ jobs:
               bpy.ops.wm.read_factory_settings(use_empty=True)
               bpy.ops.import_scene.fbx(filepath=fbx, use_image_search=True)
               meshes = sorted([o for o in bpy.context.scene.objects if o.type == 'MESH'], key=lambda o: o.name)
+              if not meshes:
+                  raise RuntimeError(f'no mesh objects: {asset_dir}')
               meta = {'blender_version': bpy.app.version_string, 'fbx': fbx, 'objects': []}
               for oi, obj in enumerate(meshes):
                   me = obj.data
-                  verts_world = np.asarray([tuple(obj.matrix_world @ v.co) for v in me.vertices], dtype=np.float32)
-                  tris = []
-                  uv_tris = []
-                  mat_idx = []
                   uv_layer = me.uv_layers.active.data if me.uv_layers.active is not None else None
+                  rec = {
+                      'index': oi,
+                      'name': obj.name,
+                      'vertices_world': [v3(obj.matrix_world @ v.co) for v in me.vertices],
+                      'faces': [],
+                      'uv_faces': [],
+                      'material_index': [],
+                      'vertex_count': len(me.vertices),
+                      'polygon_count': len(me.polygons),
+                      'uv_layer': me.uv_layers.active.name if me.uv_layers.active else None,
+                      'materials': []
+                  }
                   for poly in me.polygons:
                       loops = list(poly.loop_indices)
                       vids = list(poly.vertices)
                       for j in range(1, len(vids)-1):
                           idxs = (0, j, j+1)
-                          tris.append([vids[k] for k in idxs])
-                          mat_idx.append(poly.material_index)
+                          rec['faces'].append([int(vids[k]) for k in idxs])
+                          rec['material_index'].append(int(poly.material_index))
                           if uv_layer is not None:
-                              uv_tris.append([tuple(uv_layer[loops[k]].uv) for k in idxs])
+                              rec['uv_faces'].append([v2(uv_layer[loops[k]].uv) for k in idxs])
                           else:
-                              uv_tris.append([(np.nan, np.nan)]*3)
-                  tris = np.asarray(tris, dtype=np.int32)
-                  uv_tris = np.asarray(uv_tris, dtype=np.float32)
-                  mat_idx = np.asarray(mat_idx, dtype=np.int32)
-                  materials = []
+                              rec['uv_faces'].append([[None,None],[None,None],[None,None]])
+                  rec['triangle_count'] = len(rec['faces'])
                   for m in me.materials:
-                      rec = {'name': m.name if m else None, 'base_color': None, 'images': []}
+                      mr = {'name': m.name if m else None, 'base_color': None, 'images': []}
                       if m is not None:
-                          rec['base_color'] = list(m.diffuse_color)
+                          mr['base_color'] = [float(x) for x in m.diffuse_color]
                           if m.use_nodes and m.node_tree:
                               for node in m.node_tree.nodes:
                                   if node.type == 'TEX_IMAGE' and getattr(node, 'image', None) is not None:
-                                      rec['images'].append({'name': node.image.name, 'filepath': bpy.path.abspath(node.image.filepath)})
-                      materials.append(rec)
-                  fn = f'{oi:02d}_{obj.name.replace("/", "_")}.npz'
-                  np.savez_compressed(os.path.join(out_dir, fn), vertices_world=verts_world, faces=tris, uv_faces=uv_tris, material_index=mat_idx)
-                  meta['objects'].append({'index': oi, 'name': obj.name, 'npz': fn, 'vertex_count': int(len(me.vertices)), 'triangle_count': int(len(tris)), 'polygon_count': int(len(me.polygons)), 'uv_layer': me.uv_layers.active.name if me.uv_layers.active else None, 'materials': materials})
+                                      mr['images'].append({'name': node.image.name, 'filepath': bpy.path.abspath(node.image.filepath)})
+                      rec['materials'].append(mr)
+                  fn = f'{oi:02d}_{obj.name.replace("/", "_")}.json'
+                  with open(os.path.join(out_dir, fn), 'w', encoding='utf-8') as f:
+                      json.dump(rec, f, separators=(',', ':'))
+                  meta['objects'].append({k: rec[k] for k in ('index','name','vertex_count','polygon_count','triangle_count','uv_layer','materials') } | {'json': fn})
               with open(os.path.join(out_dir, 'metadata.json'), 'w', encoding='utf-8') as f:
                   json.dump(meta, f, indent=2)
 
-          for asset in ('witness/ea593', 'witness/662ed'):
-              extract(asset)
+          try:
+              for asset in ('witness/ea593', 'witness/662ed'):
+                  extract(asset)
+          except Exception:
+              traceback.print_exc()
+              raise
           PY
-          blender -b --python /tmp/extract_uv.py
+          blender -b --python-exit-code 19 --python /tmp/extract_uv.py
+          test -s witness/ea593/uv_authority/metadata.json
+          test -s witness/662ed/uv_authority/metadata.json
           find witness -path '*/uv_authority/*' -type f -print -exec sha256sum {} \;
 
       - name: Upload witness authority package
         uses: actions/upload-artifact@v4
         with:
-          name: appearance-witness-uv-package
+          name: appearance-witness-uv-package-v2
           path: witness
           if-no-files-found: error
           retention-days: 1

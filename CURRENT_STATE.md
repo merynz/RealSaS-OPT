@@ -2,19 +2,17 @@
 
 **Date:** 2026-08-26  
 **Active branch:** `g0-g1/single-pose-geometry`  
-**Status:** `P_SCALE_SIGNAL_NOT_STRONG__GAUGE_PATHOLOGY_LOCALIZED__F089_TEACHER_FREE_PROPAGATION_POSITIVE__REPRESENTATIVE_ORACLE_NEXT__SEALED_CLOSED`
+**Status:** `P_SCALE_SIGNAL_NOT_STRONG__GAUGE_PATHOLOGY_LOCALIZED__MULTI_ASSET_DISCRIMINABILITY_COMPLETE__LEARNED_FEATURE_REPROJECTION_NEXT__SEALED_CLOSED`
 
 ## Read this first
 
 This file is the single continuation authority.
 
-The active question is no longer the historical M256 matcher gate. Current work has moved to the **single-pose observable common-frame P hard tail**, specifically camera-forward depth under known cameras.
+The active question is the **single-pose observable common-frame P hard tail**, specifically camera-forward depth under known cameras.
 
 ## Current P formulation
 
-P-V5/R256 does not freely regress XYZ. It uses analytic screen-plane coordinates from the raster location and known camera, and learns camera-forward depth.
-
-Approximate decomposition:
+P-V5/R256 uses analytic screen-plane coordinates from raster XY + known camera and learns only camera-forward depth:
 
 ```text
 raster x/y + known camera -> analytic screen-plane P
@@ -23,8 +21,6 @@ image evidence            -> learned forward depth
                                   v
                               full P
 ```
-
-Therefore full-P error must be localized into analytic screen/gauge error versus learned forward-depth/discriminability error.
 
 ## Frozen FIT-scale ladder
 
@@ -40,102 +36,94 @@ Verdict: `SCALE_SIGNAL_BUT_NOT_STRONG`.
 
 512/32 aggregate ratio = `0.68800194`; median ratio = `0.38632081`.
 
-The 512 rung is partly optimization-budget limited, but the stationary worst tail required separate localization.
-
 ## Gauge localization V3 — COMPLETE
 
-Decision:
-
-`TARGET_GAUGE_PATHOLOGY_ESTABLISHED__CORRECT_BEFORE_OPTIMIZATION_OR_PATCHMATCH`
-
-Counts:
+Decision: `TARGET_GAUGE_PATHOLOGY_ESTABLISHED__CORRECT_BEFORE_OPTIMIZATION_OR_PATCHMATCH`
 
 - PROXY32 analytically impossible: `2/64`
 - PROXY32 gauge-safe: `62/64`
 - TRAIN512 analytically impossible: `6/1024`
+- repeated micro-P95 `28.4803` spikes share `asset_90b5f2cc531696040da996a9`
 
-Repeated micro-P95 `28.4803` spikes at steps `2752`, `4768`, `6240` share:
-`asset_90b5f2cc531696040da996a9`.
+Interpretation: severe target/gauge pathologies exist but explain only a small minority of the proxy hard tail.
 
-Interpretation: a small number of severe target/gauge pathologies contaminated the apparent hard tail, but most proxy cells remain genuine gauge-safe residuals.
+## f089 positive-control forensic
 
-No DEV/TUNE/CAL/EXTERNAL split was opened; scientific optimizer steps during the gauge audit = 0.
+`asset_f089abadcd071194617d640b` is gauge-safe but contains a detached giant rectangle (4 vertices / 2 faces / zero source skin weight on those vertices). Its semantic role remains unresolved.
 
-## f089 gauge-safe witness
+Teacher-free image-region discovery + cross-view candidate scoring + robust planar propagation is an exploratory positive on the giant low-texture plane: propagated P90 reaches roughly `0.0011–0.0015` on non-edge-on views. The failed first `best-3` view-selection attempt is preserved in the archive; using all seven target views restored the missing geometric constraints.
 
-`asset_f089abadcd071194617d640b`:
+Interpretation: f089 proves a real `LOW_TEXTURE_PLANAR_PROPAGATION + SUPPORT_OWNERSHIP` mechanism, but must not be treated as the only hard-tail morphology.
 
-- analytic screen P95 ≈ `7.3e-05`
-- full-P P95 at rung512 ≈ `0.408874` cel / `0.448743` ink
+## Multi-asset P discriminability comparison V1 — COMPLETE
 
-Thus its ~0.4 residual is not screen-gauge error.
+Canonical report:
+`experiments/g0_g1_single_pose_geometry/hardtail_forensics_20260826/MULTI_ASSET_P_DISCRIMINABILITY_COMPARISON_V1.md`
 
-### Important asset caveat
+Three gauge-safe hard-tail witnesses were tested with a common CPU candidate-depth sweep (321 depths, 5600 loci/asset, known cameras, image-only RGB/alpha inference evidence; teacher geometry only for scoring):
 
-The asset contains a real detached rectangular component:
+| asset | frozen direct model P95@512 | all-view mean7 P95 | best raw-RGB P95 |
+|---|---:|---:|---:|
+| f089 | 0.448743 | 0.347967 | **0.262374** (`best4`) |
+| ea593 | **0.343100** | 0.551166 | 0.483285 (`perp2_mean`) |
+| 662ed | **0.249118** | 0.310406 | 0.283221 (`best6`) |
 
-- 4 vertices: `591..594`
-- 2 faces: `776,777`
-- disconnected from the rest of the mesh
-- all four vertices have source skin-weight sum `0.0`
-- face area ≈ `0.148846` each
+Key result: raw known-camera photometric hypothesis testing improves f089 but is **worse than the trained direct model at P95 on ea593 and 662ed**.
 
-This explains the giant brown rectangle in several views. Its semantic role is unresolved; do not silently label it junk, but do not treat f089 as the sole representative of normal product hard tail.
+Silhouette/visual-hull oracle:
 
-## f089 CPU discriminability oracle
+- ea593 truth feasible `0.9380`, median feasible depth count `93/321`, feasible width P90 `0.96525`
+- 662ed truth feasible `0.9452`, median feasible depth count `63/321`, feasible width P90 `0.48600`
 
-### Preliminary, teacher-region-assisted
+Thus silhouettes strongly retain truth but usually do not identify a singleton depth.
 
-On the huge low-texture plane, pointwise depth was ambiguous. Image-derived confident seeds plus teacher-provided plane membership and robust planar propagation collapsed catastrophic tails (e.g. V2 ~`0.3606 -> 0.00274`).
+Teacher-visibility-only selection does not close ea593/662ed, so occlusion/view selection is not the sole missing mechanism.
 
-### Teacher-free follow-up
+### Current hard-tail taxonomy
 
-Teacher triangle membership and teacher visibility were removed from inference.
+- `f089`: low-texture planar propagation + region/support ownership; special giant-quad morphology.
+- `ea593`: axial foreshortening + cross-view correspondence / appearance-feature ambiguity.
+- `662ed`: multisurface / view-dependent correspondence hard tail (thin antlers, overlap, repeated colors/cel shading); low texture is not the dominant slice.
 
-Image-only dominant-region discovery reached high IoU on non-edge-on views (V1/V2/V3/V5/V6/V7 ≈ `0.889–0.992`).
+**Conclusion:** hard tail is heterogeneous. `known camera + candidate P + cross-view verification` survives, but `raw RGB/alpha + fixed view aggregation` is falsified as the general treatment.
 
-The first teacher-free `best-3` view-selection attempt **FAILED** because it discarded edge-on V0/V4 constraints.
-
-Using all seven target views restored the informative geometry. Seed correctness was `95–100%`, and propagated P90 became:
-
-- V1 `0.001113`
-- V2 `0.001253` from pointwise `0.359339`
-- V3 `0.001460`
-- V5 `0.001059`
-- V6 `0.001526` from pointwise `0.046122`
-- V7 `0.001345`
-
-This is an exploratory mechanism result, not a formal preregistered PASS.
-
-Remaining f089 error is concentrated in image-region contamination / surface-support ownership, not missing plane-depth information.
+The direct predictor already beats raw RGB geometry verification on the representative ea593/662ed tails, so the next geometry-in-the-loop oracle must consume **frozen learned / appearance-invariant IRIS features**, not replace them with photometric matching.
 
 ## Canonical experiment archive
 
 `experiments/g0_g1_single_pose_geometry/hardtail_forensics_20260826/`
 
-Read in order:
+Important chronology:
 
 1. `P_HARDTAIL_FORENSICS_20260826.md`
 2. `F089_CPU_DISCRIMINABILITY_ORACLE_PRELIMINARY.md`
 3. `F089_TEACHER_FREE_REGION_PROPAGATION_V1.md`
-4. `F089_TEACHER_FREE_REGION_PROPAGATION_V1_METRICS.json`
+4. `MULTI_ASSET_P_DISCRIMINABILITY_COMPARISON_V1.md`
 
-The archive intentionally preserves the apparent catastrophe, the failed first teacher-free view-selection attempt, and the causal correction.
+The archive deliberately preserves failed intermediate hypotheses and causal corrections.
 
 ## NEXT EXECUTABLE STEP
 
-Run the same P discriminability ladder on a **gauge-safe hard-tail asset without the detached giant-quad pathology**.
+`D2 = LEARNED-FEATURE REPROJECTION ORACLE`
 
-Frozen proxy candidate:
-`asset_ea593d044e14f20abe6d2818`
+Primary witnesses:
+- `asset_ea593d044e14f20abe6d2818`
+- `asset_662ed7f1e328bd85959157cf`
 
-Questions:
+Positive-control morphology:
+- `asset_f089abadcd071194617d640b`
 
-1. Does truth depth remain discriminable under cross-view reprojection?
-2. Is the failure low-texture/planar propagation, visibility/view selection, feature evidence, or direct regression?
-3. Does the diagnosis survive on ordinary riggable/object geometry?
+Required ladder:
 
-Only after this representative witness may a minimal geometry-in-the-loop treatment be preregistered.
+```text
+D1 raw RGB/alpha reprojection          [COMPLETE]
+D2 frozen learned-feature reprojection [NEXT]
+D3 + normal/plane patch hypothesis     [conditional]
+D4 visibility-aware source selection   [conditional]
+D5 multi-scale geometric consistency   [reserve]
+```
+
+The D2 experiment must use frozen current IRIS features/checkpoint and known cameras without training or retuning on these witness outcomes. It must report truth rank/top-k and depth P50/P90/P95 against the D1 baselines above.
 
 ## Authorization state
 
@@ -143,7 +131,9 @@ Only after this representative witness may a minimal geometry-in-the-loop treatm
 
 `F089_TEACHER_FREE_ORACLE = EXPLORATORY_POSITIVE`
 
-`REPRESENTATIVE_GAUGE_SAFE_ORACLE = NEXT`
+`MULTI_ASSET_D1_RGB_ORACLE = COMPLETE`
+
+`D2_LEARNED_FEATURE_REPROJECTION = NEXT`
 
 `PATCHMATCH = NOT_AUTHORIZED`
 

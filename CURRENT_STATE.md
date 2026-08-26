@@ -1,197 +1,165 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-08-23  
+**Date:** 2026-08-26  
 **Active branch:** `g0-g1/single-pose-geometry`  
-**Status:** `REPRESENTATION_PASS__OPEN64_LEARNER_PASS__DENSE_M256_V1_2_NEXT__SEALED_CLOSED`
+**Status:** `P_SCALE_SIGNAL_NOT_STRONG__GAUGE_PATHOLOGY_LOCALIZED__F089_TEACHER_FREE_PROPAGATION_POSITIVE__REPRESENTATIVE_ORACLE_NEXT__SEALED_CLOSED`
 
 ## Read this first
 
-This file is the single continuation authority. If a new chat says only `devam et`, continue from the exact next action below.
+This file is the single continuation authority.
 
-## Scientific target
+The active question is no longer the historical M256 matcher gate. Current work has moved to the **single-pose observable common-frame P hard tail**, specifically camera-forward depth under known cameras.
 
-**Observable evidence was not pruned; the problem was pruned.**
+## Current P formulation
 
-IRIS legal evidence remains: P, geometric N, support/visibility, U/risk, coarse/fine persistence, reciprocal/cycle consistency, set-valued ambiguity and provenance.
+P-V5/R256 does not freely regress XYZ. It uses analytic screen-plane coordinates from the raster location and known camera, and learns camera-forward depth.
 
-Forbidden IRIS target authority: hidden joint/owner IDs, parent graph, skin weights, pose-B mechanics, GFDR hidden mechanics.
-
-## Corpus
-
-Canonical selected: 3993. Preserved exclusions: 56 repair-pending + 6 active non-Basis shape-key + 1 blank. Controlled V1 usable: **3930**.
-
-Frozen split:
-
-- FIT 2935
-- TUNE 313
-- CAL 246 — SEALED
-- DEV 270 — SEALED
-- EXTERNAL_HOLDOUT 166 — SEALED
-
-No resplit.
-
-## Representation ceiling — PASS
-
-64 deterministic open assets / 65,830 pairs:
-
-- exact P top1 `0.9976302598`
-- exact P top4 `1.0`
-- exact P top8 `1.0`
-- P noise .0025 top4/top8 `1.0 / 1.0`
-- P .005 + N 20° top4 `0.9988151299`, top8 `0.9996658059`
-- ambiguity within 0.003 = `0.0151754519`
-
-Interpretation: observable addressability exists strongly. Exact/modest-noise P already preserves truth completely in top4; top8 is a hard-tail safety envelope.
-
-## Open64 learner pilot — PASS
-
-51 FIT / 13 TUNE, 8 epochs:
-
-- TUNE P error `0.6096198788 -> 0.1311205992` = 78.49% reduction
-- TUNE N error `0.9678560908 -> 0.1776760645` = 81.64% reduction
-- raw Z_coarse top8 `0.1243990385 -> 0.9651442308`
-- raw Z_fine top8 `0.1039663462 -> 0.9375`
-- raw coarse top4 `0.8957331731`
-- raw fine top4 `0.8527644231`
-
-These were raw descriptor retrieval metrics, not final matcher metrics.
-
-## Matcher lineage clarification
-
-A sparse `iris_evidence_matcher_v1.py` also exists in repo. It has useful FIT-only calibration, reciprocal and cycle logic, but its candidate nodes are built from cached `track_visible/track_xy` physical-track anchors. GT track IDs are not used in its score, yet the candidate-node universe itself is truth-derived. Therefore it is retained as **diagnostic/ablation lineage**, not the canonical full-inference M256 evaluator.
-
-D3 is still **not implemented** and remains reserve-only.
-
-## Canonical D3-free dense matcher
-
-Canonical current matcher:
-
-`experiments/iris_controlled_v1/iris_dense_matcher_v1.py`
-
-Dense evaluator:
-
-`experiments/iris_controlled_v1/evaluate_iris_dense_matcher_v1.py`
-
-Candidate domain is **alpha-supported dense 128×128 image-grid pixels**. GT physical tracks are used only to select evaluation queries and score target coordinates; they are never the candidate list or matcher authority.
-
-Pipeline:
+Approximate decomposition:
 
 ```text
-alpha-supported dense target pixels
-∩ known-camera row corridor
-→ Z_coarse top16
-∪ predicted-P nearest top4
-→ scale-free rank fusion of Z_coarse + Z_fine + predicted-P
-→ final ordered top8
-→ reciprocal top1/top4 in image coordinates
-→ two-third-view cycle support in image coordinates
-→ U-risk qualification
-→ confident singleton / top4 ambiguity / top8 ambiguity
+raster x/y + known camera -> analytic screen-plane P
+image evidence            -> learned forward depth
+                                  |
+                                  v
+                              full P
 ```
 
-N is not forced into the correspondence ranking with an uncalibrated coefficient; it remains rich observable/downstream geometry evidence. U cannot create a singleton; it may only widen the output set.
+Therefore full-P error must be localized into analytic screen/gauge error versus learned forward-depth/discriminability error.
 
-## Fresh M256 dense gate
+## Frozen FIT-scale ladder
 
-Canonical prereg:
+Same architecture, no augmentation change, 7168 successful optimizer updates per rung:
 
-`experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256_PREREG_V1_1.md`
+| FIT families | aggregate P95 | cell median P95 | worst cell P95 |
+|---:|---:|---:|---:|
+| 32 | 0.29040165 | 0.17066082 | 0.51614741 |
+| 128 | 0.21184100 | 0.09814133 | 0.51423088 |
+| 512 | 0.19979690 | 0.06592983 | 0.51396067 |
 
-Membership:
+Verdict: `SCALE_SIGNAL_BUT_NOT_STRONG`.
 
-- 208 FIT
-- 48 TUNE
-- total 256
-- all deterministic ceiling/open64 pilot assets excluded (`pilot64_overlap = 0`)
-- 12 epochs from scratch
-- corrected trainer `train_iris_controlled_v1_v1_1.py`
-- CAL/DEV/EXTERNAL closed.
+512/32 aggregate ratio = `0.68800194`; median ratio = `0.38632081`.
 
-Decision localization:
+The 512 rung is partly optimization-budget limited, but the stationary worst tail required separate localization.
 
-- `LEARNER_FAIL`
-- `MATCHER_CONSUMER_FAIL_PARTIAL`
-- `M256_PASS`
+## Gauge localization V3 — COMPLETE
 
-Frozen matcher/safety gate includes dense fused top8 >= .97, adaptive output-set truth coverage >= .97, p10 fused top8 >= .90, and confident singleton precision >= .95 at >= .10 coverage.
+Decision:
 
-## Canonical M256 runtime — USE V1.2 ONLY
+`TARGET_GAUGE_PATHOLOGY_ESTABLISHED__CORRECT_BEFORE_OPTIMIZATION_OR_PATCHMATCH`
 
-Authority manifest:
+Counts:
 
-`experiments/iris_controlled_v1/M256_DENSE_AUTHORITY_POINTERS_V1_2.json`
+- PROXY32 analytically impossible: `2/64`
+- PROXY32 gauge-safe: `62/64`
+- TRAIN512 analytically impossible: `6/1024`
 
-Runner:
+Repeated micro-P95 `28.4803` spikes at steps `2752`, `4768`, `6240` share:
+`asset_90b5f2cc531696040da996a9`.
 
-`run_iris_controlled_v1_m256_v1_2.py`
+Interpretation: a small number of severe target/gauge pathologies contaminated the apparent hard tail, but most proxy cells remain genuine gauge-safe residuals.
 
-SHA-256:
+No DEV/TUNE/CAL/EXTERNAL split was opened; scientific optimizer steps during the gauge audit = 0.
 
-`72aa97e1902e831e5b87f054fceb187c04de55c7948a5ff19465d55b700249ab`
+## f089 gauge-safe witness
 
-Notebook:
+`asset_f089abadcd071194617d640b`:
 
-`IRIS_CONTROLLED_V1_M256_V1_2.ipynb`
+- analytic screen P95 ≈ `7.3e-05`
+- full-P P95 at rung512 ≈ `0.408874` cel / `0.448743` ink
 
-SHA-256:
+Thus its ~0.4 residual is not screen-gauge error.
 
-`21fcf07de2e25a194c4e84fd7f9a23124a9946c920616d912928c89ba8560cea`
+### Important asset caveat
 
-Dense matcher SHA-256:
+The asset contains a real detached rectangular component:
 
-`6d70c42439e82fc02a4893e49965d206d02a05bd6d505fb42904f2a5b9fd4248`
+- 4 vertices: `591..594`
+- 2 faces: `776,777`
+- disconnected from the rest of the mesh
+- all four vertices have source skin-weight sum `0.0`
+- face area ≈ `0.148846` each
 
-Dense evaluator SHA-256:
+This explains the giant brown rectangle in several views. Its semantic role is unresolved; do not silently label it junk, but do not treat f089 as the sole representative of normal product hard tail.
 
-`ba24f0a5b010f29c793c0a9eabbde02892a7c7841937c54babd634ee3d8e1f6b`
+## f089 CPU discriminability oracle
 
-All canonical v1.2 runtime files were Google Drive round-trip SHA verified; Python entrypoints compile; dense matcher synthetic self-test PASS.
+### Preliminary, teacher-region-assisted
 
-Earlier M256 runtime entries (`run_iris_controlled_v1_m256.py`, v1.1 runners/notebooks) are **SUPERSEDED BEFORE EXECUTION** and retained only as provenance.
+On the huge low-texture plane, pointwise depth was ambiguous. Image-derived confident seeds plus teacher-provided plane membership and robust planar propagation collapsed catastrophic tails (e.g. V2 ~`0.3606 -> 0.00274`).
+
+### Teacher-free follow-up
+
+Teacher triangle membership and teacher visibility were removed from inference.
+
+Image-only dominant-region discovery reached high IoU on non-edge-on views (V1/V2/V3/V5/V6/V7 ≈ `0.889–0.992`).
+
+The first teacher-free `best-3` view-selection attempt **FAILED** because it discarded edge-on V0/V4 constraints.
+
+Using all seven target views restored the informative geometry. Seed correctness was `95–100%`, and propagated P90 became:
+
+- V1 `0.001113`
+- V2 `0.001253` from pointwise `0.359339`
+- V3 `0.001460`
+- V5 `0.001059`
+- V6 `0.001526` from pointwise `0.046122`
+- V7 `0.001345`
+
+This is an exploratory mechanism result, not a formal preregistered PASS.
+
+Remaining f089 error is concentrated in image-region contamination / surface-support ownership, not missing plane-depth information.
+
+## Canonical experiment archive
+
+`experiments/g0_g1_single_pose_geometry/hardtail_forensics_20260826/`
+
+Read in order:
+
+1. `P_HARDTAIL_FORENSICS_20260826.md`
+2. `F089_CPU_DISCRIMINABILITY_ORACLE_PRELIMINARY.md`
+3. `F089_TEACHER_FREE_REGION_PROPAGATION_V1.md`
+4. `F089_TEACHER_FREE_REGION_PROPAGATION_V1_METRICS.json`
+
+The archive intentionally preserves the apparent catastrophe, the failed first teacher-free view-selection attempt, and the causal correction.
 
 ## NEXT EXECUTABLE STEP
 
-Use NVIDIA Colab. From the package directory run:
+Run the same P discriminability ladder on a **gauge-safe hard-tail asset without the detached giant-quad pathology**.
 
-```bash
-cd /content/drive/MyDrive/RealSaS_MASTER_CORPUS_1024_V3/reports/iris_controlled_v1
-python run_iris_controlled_v1_m256_v1_2.py --workers 4 --epochs 12
-```
+Frozen proxy candidate:
+`asset_ea593d044e14f20abe6d2818`
 
-It will:
+Questions:
 
-1. SHA-verify base package + fast prep + corrected trainer + dense matcher/evaluator;
-2. deterministically select fresh 208 FIT + 48 TUNE excluding pilot64;
-3. prepare only those 256 open assets to local SSD;
-4. run dense matcher at identical random-init witness;
-5. train 12 epochs from scratch;
-6. run dense matcher on best TUNE-selected checkpoint;
-7. write final decision to:
+1. Does truth depth remain discriminable under cross-view reprojection?
+2. Is the failure low-texture/planar propagation, visibility/view selection, feature evidence, or direct regression?
+3. Does the diagnosis survive on ordinary riggable/object geometry?
 
-`MyDrive/RealSaS_MASTER_CORPUS_1024_V3/runs/IRIS_CONTROLLED_V1_M256_V1_1/M256_DECISION.json`
+Only after this representative witness may a minimal geometry-in-the-loop treatment be preregistered.
 
 ## Authorization state
 
-`DENSE_M256 = AUTHORIZED_AND_NEXT`
+`GAUGE_LOCALIZATION = COMPLETE`
 
-`1024_INTERMEDIATE = NOT_AUTHORIZED_UNTIL_DENSE_M256_PASS`
+`F089_TEACHER_FREE_ORACLE = EXPLORATORY_POSITIVE`
 
-`FULL_3248_PRODUCTION = NOT_AUTHORIZED`
+`REPRESENTATIVE_GAUGE_SAFE_ORACLE = NEXT`
 
-`D3 = NOT_IMPLEMENTED__RESERVE_ONLY`
+`PATCHMATCH = NOT_AUTHORIZED`
+
+`LONGER_P_TRAINING = NOT_NEXT`
 
 `CAL_DEV_EXTERNAL = CLOSED`
 
 `PRODUCT_SUBSTRATE_CLOSURE = NOT_CLAIMED`
 
-## VERY IMPORTANT M4 audit
-
-Authority:
-
-`experiments/m4_identity_audit/VERY_IMPORTANT_AUDIT_M4_IDENTITY_AMBIGUITY_EQUIVALENT_SUBSTRATE_20260823.md`
-
-The downstream E0–E5 question remains mandatory: can richer observable/set-valued evidence form a RigAnything-like 2.5D equivalent substrate sufficient for Geppetto and functional rigging?
-
 ## Research rule
 
-`apparatus/data -> representation/target -> learner/optimizer -> evidence consumer -> only then information limit`
+```text
+apparatus/target gauge
+ -> observation discriminability
+ -> representation
+ -> learner/optimizer
+ -> evidence consumer / geometric verification
+ -> only then information limit
+```

@@ -5,7 +5,7 @@ on:
       - tmp/appearance-witness-fetch-20260826
 
 jobs:
-  fetch:
+  fetch-and-extract:
     runs-on: ubuntu-latest
     steps:
       - name: Fetch pinned upstream witness packages
@@ -26,10 +26,76 @@ jobs:
           test "$(sha256sum witness/662ed/object.fbx | awk '{print $1}')" = '162d9f41fc9db5bc89a5c0f0d538358f2ad23daef566e31bb71d0fe895b15df1'
           sha256sum witness/ea593/* witness/662ed/* | tee witness/SHA256SUMS.txt
 
-      - name: Upload witness source package
+      - name: Install Blender
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y blender >/dev/null
+          blender --version | head -2
+
+      - name: Extract base-mesh UV authority
+        shell: bash
+        run: |
+          cat > /tmp/extract_uv.py <<'PY'
+          import bpy, json, os, sys
+          import numpy as np
+          from mathutils import Vector
+
+          def extract(asset_dir):
+              fbx = os.path.abspath(os.path.join(asset_dir, 'object.fbx'))
+              out_dir = os.path.abspath(os.path.join(asset_dir, 'uv_authority'))
+              os.makedirs(out_dir, exist_ok=True)
+              bpy.ops.wm.read_factory_settings(use_empty=True)
+              bpy.ops.import_scene.fbx(filepath=fbx, use_image_search=True)
+              meshes = sorted([o for o in bpy.context.scene.objects if o.type == 'MESH'], key=lambda o: o.name)
+              meta = {'blender_version': bpy.app.version_string, 'fbx': fbx, 'objects': []}
+              for oi, obj in enumerate(meshes):
+                  me = obj.data
+                  verts_world = np.asarray([tuple(obj.matrix_world @ v.co) for v in me.vertices], dtype=np.float32)
+                  tris = []
+                  uv_tris = []
+                  mat_idx = []
+                  uv_layer = me.uv_layers.active.data if me.uv_layers.active is not None else None
+                  for poly in me.polygons:
+                      loops = list(poly.loop_indices)
+                      vids = list(poly.vertices)
+                      for j in range(1, len(vids)-1):
+                          idxs = (0, j, j+1)
+                          tris.append([vids[k] for k in idxs])
+                          mat_idx.append(poly.material_index)
+                          if uv_layer is not None:
+                              uv_tris.append([tuple(uv_layer[loops[k]].uv) for k in idxs])
+                          else:
+                              uv_tris.append([(np.nan, np.nan)]*3)
+                  tris = np.asarray(tris, dtype=np.int32)
+                  uv_tris = np.asarray(uv_tris, dtype=np.float32)
+                  mat_idx = np.asarray(mat_idx, dtype=np.int32)
+                  materials = []
+                  for m in me.materials:
+                      rec = {'name': m.name if m else None, 'base_color': None, 'images': []}
+                      if m is not None:
+                          rec['base_color'] = list(m.diffuse_color)
+                          if m.use_nodes and m.node_tree:
+                              for node in m.node_tree.nodes:
+                                  if node.type == 'TEX_IMAGE' and getattr(node, 'image', None) is not None:
+                                      rec['images'].append({'name': node.image.name, 'filepath': bpy.path.abspath(node.image.filepath)})
+                      materials.append(rec)
+                  fn = f'{oi:02d}_{obj.name.replace("/", "_")}.npz'
+                  np.savez_compressed(os.path.join(out_dir, fn), vertices_world=verts_world, faces=tris, uv_faces=uv_tris, material_index=mat_idx)
+                  meta['objects'].append({'index': oi, 'name': obj.name, 'npz': fn, 'vertex_count': int(len(me.vertices)), 'triangle_count': int(len(tris)), 'polygon_count': int(len(me.polygons)), 'uv_layer': me.uv_layers.active.name if me.uv_layers.active else None, 'materials': materials})
+              with open(os.path.join(out_dir, 'metadata.json'), 'w', encoding='utf-8') as f:
+                  json.dump(meta, f, indent=2)
+
+          for asset in ('witness/ea593', 'witness/662ed'):
+              extract(asset)
+          PY
+          blender -b --python /tmp/extract_uv.py
+          find witness -path '*/uv_authority/*' -type f -print -exec sha256sum {} \;
+
+      - name: Upload witness authority package
         uses: actions/upload-artifact@v4
         with:
-          name: appearance-witness-source-package
+          name: appearance-witness-uv-package
           path: witness
           if-no-files-found: error
           retention-days: 1

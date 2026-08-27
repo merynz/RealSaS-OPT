@@ -21,7 +21,7 @@ CALIBRATION_IDS = (
     'asset_f8a40d6c5d815fe79c8b5e42',
 )
 SOURCE_MEMBERSHIP_SHA256='53856330a24f5c04b17db69bf059c6b242f0320c7e3c3c92caf1d24117c6d419'
-SOURCE_BRANCH_HEAD='8c6d339ed7f59d5225ce9a224f281df3e39ff5e0'
+GEOMETRY_AUTHORITY_HEAD='8c6d339ed7f59d5225ce9a224f281df3e39ff5e0'
 
 
 def _sha(path: Path) -> str:
@@ -74,7 +74,7 @@ def main():
       'anchors_per_arm':512,
       'geometry_arms':['E0-0_FULL_MESH_CANONICAL','E0-a_OBSERVABLE_ORACLE','E0-b_OBSERVABLE_DETERMINISTIC'],
       'source_membership_sha256':SOURCE_MEMBERSHIP_SHA256,
-      'source_branch_head':SOURCE_BRANCH_HEAD,
+      'geometry_authority_head':GEOMETRY_AUTHORITY_HEAD,
       'scientific_optimizer_steps':0,
       'qualification_executable_present':False,
       'camera_json_consumed':False,

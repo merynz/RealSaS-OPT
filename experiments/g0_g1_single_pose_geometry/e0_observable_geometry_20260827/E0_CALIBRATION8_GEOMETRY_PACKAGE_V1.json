@@ -1,50 +1,58 @@
 {
-  "schema": "RealSaS.E0.Calibration8GeometryPackage.v1.1",
-  "date": "2026-08-27",
-  "status": "SEALED_READY_FOR_CALIBRATION_EXECUTION__V1_1_PREFLIGHTED_REAL_DATA_SMOKE__PROXY32_CLOSED",
-  "notebook_filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1_1.ipynb",
-  "notebook_sha256": "e40eccd86b07cda90ce3c7ef89e0a14a21a9173c51562e842bdca47602f2f41d",
-  "supersedes_notebook_filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1.ipynb",
-  "supersedes_notebook_sha256": "48d827cde7f41d9e2db31d2ca8ae7f275a262d7d08ba169f258bb01b1f478021",
-  "superseded_failure": "Embedded JSON boolean false was emitted as a Python literal in the setup cell and raised NameError.",
-  "canonical_source_snapshot_commit": "9ce75974e525c282a2ced3547ff5380b320a7bbe",
-  "geometry_authority_head": "8c6d339ed7f59d5225ce9a224f281df3e39ff5e0",
-  "source_membership_sha256": "53856330a24f5c04b17db69bf059c6b242f0320c7e3c3c92caf1d24117c6d419",
-  "calibration_asset_count": 8,
   "anchors_per_arm": 512,
-  "geometry_arms": [
-    "E0-0_FULL_MESH_CANONICAL",
-    "E0-a_OBSERVABLE_ORACLE",
-    "E0-b_OBSERVABLE_DETERMINISTIC"
-  ],
-  "embedded_source_sha256": {
-    "e0_geometry.py": "62a6c1cbeed5c4ace4eb0f1fd6240a02011b267f91142c0a35b432feca7ac659",
-    "surface_builder_e0_v1.py": "42c462619c0ae72b81d08af93336dfbd81ad00a5bf3f750f9241be3b06bfd072",
-    "run_e0_calibration8_geometry_v1.py": "8fb3585d061894ba3eee0516d5109a13e82f9edc00b99e00ce49031e9ceaab4d",
-    "tests/test_e0_surface_builder.py": "f43b53dc8f30269a7ce0c966be91f647361b0a712c215b97f53628cb8bf02b16"
-  },
-  "preflight": {
-    "all_code_cells_compile": true,
-    "exact_setup_and_preflight_cells_execute": true,
-    "pytest": "8 passed",
-    "real_native_asset_smoke": true,
-    "direct_full_density_512_anchor_smoke": true,
-    "scientific_calibration_outcome_opened": false
-  },
+  "calibration_asset_count": 8,
+  "canonical_source_snapshot_commit": "9ce75974e525c282a2ced3547ff5380b320a7bbe",
+  "date": "2026-08-27",
+  "drive_strategy": "STAGE_INPUTS_LOCAL__RUN_LOCAL__RETRY_REMOUNT_EXPORT_TO_DRIVE",
   "firewalls": {
-    "scientific_optimizer_steps": 0,
+    "camera_json_consumed": false,
+    "consumer_native_normalization_in_primary_gate": false,
+    "hard_tail_witness_ids_embedded_in_runner": false,
     "qualification_execution_present": false,
     "qualification_proxy32_membership_embedded": false,
-    "hard_tail_witness_ids_embedded_in_runner": false,
-    "camera_json_consumed": false,
-    "teacher_identity_used_by_e0_b": false,
-    "consumer_native_normalization_in_primary_gate": false
+    "scientific_optimizer_steps": 0,
+    "teacher_identity_used_by_e0_b": false
   },
-  "next_authorized_action": "RUN_CALIBRATION8_GEOMETRY_V1_1_THEN_INSPECT_AND_FREEZE_SCRATCH_DOWNSTREAM_PROBE_PLUS_NONINFERIORITY_MARGINS",
   "forbidden_next_actions": [
     "OPEN_PROXY32_BEFORE_MARGIN_FREEZE",
     "RUN_PRETRAINED_CONSUMER_AS_PRIMARY_SUFFICIENCY_GATE",
     "START_C1_C2_C3_BEFORE_E0_CLOSURE",
     "AUTHORIZE_PATCHMATCH_SEARCH_FUSION_PROPAGATION"
+  ],
+  "geometry_arms": [
+    "E0-0_FULL_MESH_CANONICAL",
+    "E0-a_OBSERVABLE_ORACLE",
+    "E0-b_OBSERVABLE_DETERMINISTIC"
+  ],
+  "geometry_authority_head": "8c6d339ed7f59d5225ce9a224f281df3e39ff5e0",
+  "next_authorized_action": "RUN_CALIBRATION8_GEOMETRY_V1_2_THEN_INSPECT_AND_FREEZE_SCRATCH_DOWNSTREAM_PROBE_PLUS_NONINFERIORITY_MARGINS",
+  "notebook_filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1_2.ipynb",
+  "notebook_sha256": "477b74342e6a890e92f997b990233f723af0da88e870e0ad9c480dd78b5c36dd",
+  "preflight": {
+    "32_anchor_scientific_smoke": true,
+    "all_code_cells_compile": true,
+    "drive_export_hash_selftest": true,
+    "eight_asset_staging_path_executes": true,
+    "errno103_retry_selftest": true,
+    "exact_setup_cell_executes": true,
+    "pytest": "8 passed",
+    "scientific_calibration_outcome_opened": false,
+    "scientific_source_blobs_changed_from_v1_1": false,
+    "v1_1_native_full_density_512_anchor_single_asset_smoke": "PASS"
+  },
+  "schema": "RealSaS.E0.Calibration8GeometryPackage.v1.2",
+  "source_membership_sha256": "53856330a24f5c04b17db69bf059c6b242f0320c7e3c3c92caf1d24117c6d419",
+  "status": "SEALED_READY_FOR_CALIBRATION_EXECUTION__V1_2_DRIVE_FUSE_HARDENED__PROXY32_CLOSED",
+  "supersedes": [
+    {
+      "filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1.ipynb",
+      "reason": "Python cell embedded JSON boolean false literal -> NameError.",
+      "sha256": "48d827cde7f41d9e2db31d2ca8ae7f275a262d7d08ba169f258bb01b1f478021"
+    },
+    {
+      "filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1_1.ipynb",
+      "reason": "Colab Drive FUSE Errno 103 was not handled during raw Path.stat/is_file preflight.",
+      "sha256": "e40eccd86b07cda90ce3c7ef89e0a14a21a9173c51562e842bdca47602f2f41d"
+    }
   ]
 }

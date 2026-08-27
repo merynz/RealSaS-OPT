@@ -37,7 +37,7 @@ def test_e0_b_api_has_no_teacher_identity_fields():
 
 
 def test_derived_match_on_consistent_observable_plane():
-    R=33; he=e0.RENDER_HALF_EXTENT
+    R=33
     cam0=e0.camera_for_view(0); cam1=e0.camera_for_view(1)
     xs=np.linspace(-0.08,0.08,9); zs=np.linspace(-0.08,0.08,9)
     pts=np.array([[x,0.1,z] for z in zs for x in xs],np.float32)
@@ -52,7 +52,7 @@ def test_derived_match_on_consistent_observable_plane():
         views.append(e0.ObservableView(v,R,pix,pp,n,valid))
     src=views[0]; tgt=views[1]
     i=len(src.P)//2; ap=src.P[i]; an=src.N_derived[i]; ag=src.grid[i]
-    row,info=e0.derived_match_row(ap,an,ag,0,tgt,radius_px=5,max_common_frame_error=.03,max_reciprocal_error_px=5)
+    row,info=e0.derived_match_row(ap,an,ag,0,src.half_extent,tgt,radius_px=5,max_common_frame_error=.03,max_reciprocal_error_px=5)
     assert row>=0,info
     assert np.linalg.norm(tgt.P[row]-ap)<.03
 
@@ -93,3 +93,23 @@ def test_full_vs_observable_detects_missing_surface_region():
     m=e0.full_vs_observable_distribution_metrics(geom,'asset_gap',obs,dense_reference_count=512)
     assert m['full_to_observable_nn_p95']>0.05
     assert m['consumer_native_normalization_applied'] is False
+
+
+def test_recover_nondefault_half_extent_from_observable():
+    R=1024; h=0.6172158837; view=0
+    xs=np.linspace(-0.45,0.45,64,dtype=np.float32)
+    zs=np.linspace(-0.35,0.35,64,dtype=np.float32)
+    P=np.array([[x,0.1,z] for z in zs for x in xs],np.float32)
+    g=e0.project_grid(P,e0.camera_for_view(view,h))
+    xy=np.floor((g+1.0)*0.5*R).astype(np.int64)
+    ok=(xy[:,0]>=0)&(xy[:,0]<R)&(xy[:,1]>=0)&(xy[:,1]<R)
+    P=P[ok]; xy=xy[ok]
+    pix=xy[:,1]*R+xy[:,0]
+    order=np.argsort(pix,kind='stable'); pix=pix[order]; P=P[order]
+    _,idx=np.unique(pix,return_index=True); idx=np.sort(idx); pix=pix[idx]; P=P[idx]
+    # Make P exactly consistent with pixel-center authority in x/z so recovery has no raster quantization bias.
+    grid=e0.pixel_center_to_grid(np.stack([pix%R,pix//R],axis=1),R)
+    P[:,0]=grid[:,0]*h; P[:,2]=-grid[:,1]*h
+    got,stats=e0.estimate_half_extent_from_observable(view,pix,P,R)
+    assert abs(got-h)<1e-5
+    assert stats['reprojection_px_p95']<1e-3

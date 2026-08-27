@@ -14,21 +14,23 @@ RealSaS IRIS emits an observation-supported surface, not automatically the same 
 
 No pretrained downstream result is allowed to answer (1) by itself.
 
+**Gauge rule:** the primary E0-0/a/b sufficiency comparison stays in the RealSaS canonical/object frame. Consumer-native bbox normalization is deliberately moved to the secondary OOD diagnostic so normalization mismatch cannot masquerade as missing substrate information.
+
 ## 2. Frozen E0 geometry arms
 
 All arms use the same family membership and downstream evaluator.
 
-### E0-0 — full-mesh consumer-native ceiling
+### E0-0 — full-mesh canonical-frame information ceiling
 
-A closed/full source mesh is sampled through the target consumer's native preprocessing contract. This arm may use source mesh geometry because it is an upper-bound / distribution-reference control, not an IRIS product input.
+A closed/full source mesh is sampled deterministically to the same point budget in the RealSaS canonical/object frame. No RigAnything/TokenRig bbox centering, scaling, or other external-consumer normalization is applied in the primary sufficiency gate. This arm may use source mesh geometry because it is an upper-bound control, not an IRIS product input.
 
-Purpose: establish the downstream consumer's expected geometry distribution and the maximum attainable result under that distribution.
+Purpose: establish the maximum downstream information available from the full surface while keeping coordinate gauge and probe interface matched to the observable arms.
 
 ### E0-a — observable visible-union + oracle persistence
 
 Only geometry actually supported by A×8 is admitted. Cross-view physical persistence is granted with teacher surface identity after the P-only anchor sampler has frozen the anchor rows.
 
-Purpose: isolate the penalty of **coverage + raster-derived sampling + observable-only normalization** from persistence error.
+Purpose: isolate the penalty of **observable coverage + supported-surface sampling** from persistence error while preserving a shared canonical coordinate gauge.
 
 ### E0-b — observable visible-union + deterministic persistence
 
@@ -41,7 +43,7 @@ Purpose: isolate persistence loss:
 Therefore:
 
 ```text
-E0-0 -> E0-a = observable-surface / distribution gap
+E0-0 -> E0-a = observable-surface coverage/support gap in shared canonical frame
 E0-a -> E0-b = persistence / SurfaceBuilder gap
 ```
 
@@ -208,7 +210,7 @@ Adapters are representations for consumers; they do not redefine IRIS truth.
 
 ```text
 A. finish E0 persistence apparatus and calibration
-B. construct E0-0 full-mesh consumer-native ceiling
+B. construct E0-0 full-mesh canonical-frame matched-budget ceiling
 C. run primary scratch matched probes on E0-0 / E0-a / E0-b
 D. freeze E0 information-sufficiency decision
 E. only then run pretrained stock-consumer OOD diagnostics on provenance-eligible assets

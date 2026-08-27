@@ -15,11 +15,11 @@ E0 is not a raster learner experiment and is not a MapAnything experiment. IRIS 
 
 ## Frozen causal comparison
 
-Both observable arms receive the **same exact view-local visible common-frame `P`** reconstructed from native `raster_authority.npz` + `primary_geometry.npz`. The only treatment variable between E0-a and E0-b is cross-view persistence authority.
+Both arms receive the **same exact view-local visible common-frame `P`** reconstructed from native `raster_authority.npz` + `primary_geometry.npz`. The only treatment variable is cross-view persistence authority.
 
 ### E0-a — oracle persistence upper bound
 
-A canonical physical anchor is a teacher surface point identified by source `(triangle_id, barycentric_uv)`. Anchor selection itself is P-only; teacher identity is attached only after the anchor rows are frozen. The exact continuous projection is then tested against target-view raster authority for same-surface visibility support. Teacher provenance is permitted in this arm because E0-a is an upper bound.
+A canonical physical anchor is a teacher surface point identified by source `(triangle_id, barycentric_uv)`. Its exact continuous projection is tested against target-view raster authority for visibility/same-surface support. Teacher provenance is permitted in this arm because E0-a is an upper bound.
 
 Interpretation: perfect physical persistence is granted; never-visible mesh completion is still forbidden.
 
@@ -44,7 +44,9 @@ Teacher surface provenance may be opened only after E0-b has emitted matches, to
 - No Pose B.
 - No joints, parents, skin weights, owner IDs, mechanics/GFDR or compiler IDs enter E0 surface construction.
 - Never-visible mesh vertices/faces are not emitted as RiggingSurface evidence.
-- The same deterministic P-only anchor sampler is used for E0-a and E0-b so differences cannot be caused by different point budgets.
+- The same deterministic P-only anchor sampler is used for both arms so differences cannot be caused by different point budgets.
+- The observable sampler intentionally de-biases naïve raster view-frequency: it takes the same capped candidate budget per view and then performs common-frame farthest-point sampling. Raw raster frequency is therefore not itself the E0-a substrate.
+- Consumer-native bbox centering/scaling is excluded from the primary E0-0/a/b information gate and is evaluated only in the separate pretrained-consumer OOD adapter diagnostic.
 
 ## Frozen population
 
@@ -74,16 +76,16 @@ Hard-tail reporting is family-wise; no mean-only promotion.
 
 ## Downstream sufficiency phase — three geometry arms, two consumer questions
 
-E0 freezes **three geometry arms** so coverage/distribution loss cannot be confused with persistence loss:
+E0 now freezes **three geometry arms** so coverage/distribution loss cannot be confused with persistence loss:
 
-- `E0-0`: full/closed source-mesh surface through a consumer-native sampler/normalizer — downstream distribution ceiling only;
+- `E0-0`: full/closed source-mesh surface sampled deterministically in the same RealSaS canonical/object frame and matched point budget — information ceiling; no external-consumer bbox normalization is applied in the primary gate;
 - `E0-a`: A×8 observable visible union with oracle physical persistence;
 - `E0-b`: the same observable visible union with deterministic SurfaceBuilder persistence.
 
 Thus:
 
 ```text
-E0-0 -> E0-a = observable coverage / sampling / normalization gap
+E0-0 -> E0-a = observable coverage / surface-sampling-support gap in a shared canonical frame
 E0-a -> E0-b = persistence / SurfaceBuilder gap
 ```
 
@@ -107,7 +109,7 @@ E0-0 full-mesh ceiling adequate under the fixed scratch probe?
   YES -> compare E0-a.
 
 E0-a non-inferior to E0-0?
-  NO  -> observable-only coverage/sampling/normalization loses downstream-required information;
+  NO  -> observable-only coverage/surface support loses downstream-required information;
          substrate/SurfaceBuilder contract requires revision before correspondence training.
   YES -> compare E0-b.
 
@@ -124,7 +126,7 @@ Only after this primary decision may stock-vs-observable-adapted pretrained cons
 Three arms, matched except for the stated treatment:
 
 1. `C1 scratch + current objective` — frozen current baseline;
-2. `C2 scratch + tail-aware correspondence objective` — cheap control for loss/curriculum mismatch;
+2. `C2 scratch + tail-aware correspondence objective` — cheap control for objective/curriculum mismatch;
 3. `C3 pretrained prior transplant` — RealSaS-native decoder with pretrained visual/multiview prior (MapAnything-family prior candidate), not the full MapAnything camera/ray/product wrapper.
 
 Only if a representation demonstrates correct correspondence ranking/containment on frozen hard tails may multiview search, fusion, propagation or PatchMatch-style mechanisms be promoted.
@@ -136,5 +138,4 @@ Only if a representation demonstrates correct correspondence ranking/containment
 - `MAPANYTHING_FULL_WRAPPER = NOT_AUTHORIZED`.
 - E0-b must pass an implementation audit proving teacher identity is evaluation-only.
 - Qualification data must not tune thresholds.
-- Pretrained external-consumer results may not redefine the canonical substrate contract without the scratch sufficiency gate.
 - Failed arms remain archived; no silent promotion/deletion.

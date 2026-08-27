@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import hashlib, math
 import numpy as np
-from e0_geometry import (VIEWS,NATIVE_RESOLUTION,RENDER_HALF_EXTENT,geometric_vertex_normals,reconstruct_surface,derive_view_local_normals,pixel_center_to_grid,grid_to_pixel_center,project_grid,camera_for_view,grid_to_nearest_pixel,raster_lookup_near,grid_distance_in_pixels)
+from e0_geometry import (VIEWS,NATIVE_RESOLUTION,RENDER_HALF_EXTENT,geometric_vertex_normals,reconstruct_surface,derive_view_local_normals,pixel_center_to_grid,grid_to_pixel_center,project_grid,camera_for_view,estimate_half_extent_from_observable,grid_to_nearest_pixel,raster_lookup_near,grid_distance_in_pixels)
 
 @dataclass(frozen=True)
 class ObservableView:
@@ -15,6 +15,8 @@ class ObservableView:
     P: np.ndarray
     N_derived: np.ndarray
     N_valid: np.ndarray
+    half_extent: float = RENDER_HALF_EXTENT
+    camera_recovery: dict | None = None
 
     @property
     def grid(self):
@@ -54,8 +56,9 @@ def load_asset_authority(asset_dir: str | Path) -> tuple[dict, list[AuthorityVie
         order = np.argsort(pix, kind="stable")
         pix, tri, uv = pix[order], tri[order], uv[order]
         P, _teacher_N_unused = reconstruct_surface(vertices, faces, vertex_normals, tri, uv)
+        half_extent, camera_recovery = estimate_half_extent_from_observable(v, pix, P, NATIVE_RESOLUTION)
         Nd, Nv = derive_view_local_normals(pix, P, NATIVE_RESOLUTION)
-        obs = ObservableView(v, NATIVE_RESOLUTION, pix, P, Nd, Nv)
+        obs = ObservableView(v, NATIVE_RESOLUTION, pix, P, Nd, Nv, half_extent, camera_recovery)
         views.append(AuthorityView(obs, tri, uv))
     geom = {"vertices": vertices, "faces": faces, "vertex_normals": vertex_normals}
     return geom, views
@@ -79,7 +82,6 @@ def deterministic_anchor_rows(authority_views: list[AuthorityView], asset_id: st
     P=np.concatenate(pts); V=np.concatenate(vv); R=np.concatenate(rr)
     if len(P)<anchor_count:
         raise RuntimeError(f"visible P pool too small: {len(P)} < {anchor_count}")
-    # deterministic first point: farthest from pool centroid; then classic FPS.
     centroid=P.mean(axis=0)
     first=int(np.argmax(np.sum((P-centroid)**2,axis=1)))
     chosen=np.empty(anchor_count,np.int64); chosen[0]=first
@@ -100,19 +102,13 @@ def oracle_match_row(
     max_reprojection_error_px: float = 1.75,
     max_surface_error: float = 0.006,
 ):
-    """E0-a only: teacher physical identity is the source (triangle,bary) carrier.
-
-    The exact carrier generally projects between target pixel centers, so target raster rows are only
-    *visibility witnesses*. A target row can witness the carrier only if the z-buffer winner is the
-    same source triangle near the carrier's exact continuous projection. Barycentric identity remains
-    attached to the anchor and is emitted only in E0-a.
-    """
+    """E0-a only: teacher physical identity is the source (triangle,bary) carrier."""
     obs = target.observable
     anchor_P = np.asarray(anchor_P, np.float32)
-    _anchor_bary = np.asarray(anchor_barycentric_uv, np.float32)  # explicit identity handle; not a score
+    _anchor_bary = np.asarray(anchor_barycentric_uv, np.float32)
     if _anchor_bary.shape != (2,):
         raise ValueError(f"expected barycentric_uv shape (2,), got {_anchor_bary.shape}")
-    grid = project_grid(anchor_P[None], camera_for_view(obs.view))[0]
+    grid = project_grid(anchor_P[None], camera_for_view(obs.view, obs.half_extent))[0]
     if np.any(np.abs(grid) > 1.0):
         return -1, float("inf"), float("inf"), grid
     x, y = grid_to_nearest_pixel(grid[None], obs.resolution)
@@ -120,7 +116,6 @@ def oracle_match_row(
     cand = cand[cand >= 0]
     if not len(cand):
         return -1, float("inf"), float("inf"), grid
-    # Teacher identity gate: a nearby different surface may not stand in for the physical carrier.
     cand = cand[target.triangle_id[cand] == int(anchor_triangle_id)]
     if not len(cand):
         return -1, float("inf"), float("inf"), grid
@@ -140,6 +135,7 @@ def derived_match_row(
     anchor_N,
     anchor_grid,
     source_view: int,
+    source_half_extent: float,
     target: ObservableView,
     *,
     radius_px: int = 4,
@@ -150,7 +146,7 @@ def derived_match_row(
     """E0-b match. This API has no teacher provenance fields by construction."""
     anchor_P=np.asarray(anchor_P,np.float32)
     anchor_N=np.asarray(anchor_N,np.float32)
-    tg=project_grid(anchor_P[None],camera_for_view(target.view))[0]
+    tg=project_grid(anchor_P[None],camera_for_view(target.view,target.half_extent))[0]
     if np.any(np.abs(tg)>1.0): return -1,{"reason":"out_of_frame"}
     x,y=grid_to_nearest_pixel(tg[None],target.resolution)
     cand=raster_lookup_near(target.pixel_linear_index,x,y,target.resolution,radius_px)[0]
@@ -165,7 +161,7 @@ def derived_match_row(
     ndot=np.zeros(len(cand),np.float32)
     if np.any(nvalid): ndot[nvalid]=np.abs(tgtN[nvalid]@anchor_N)/(tgtNnorm[nvalid]*srcNnorm+1e-8)
 
-    back=project_grid(target.P[cand],camera_for_view(source_view))
+    back=project_grid(target.P[cand],camera_for_view(source_view,source_half_extent))
     recip=grid_distance_in_pixels(back,np.broadcast_to(anchor_grid,back.shape),target.resolution)
     valid=(pd<=max_common_frame_error)&nvalid&(ndot>=min_abs_normal_cos)&(recip<=max_reciprocal_error_px)
     if not np.any(valid):
@@ -174,7 +170,6 @@ def derived_match_row(
     score[~valid]=np.inf
     j=int(np.argmin(score)); row=int(cand[j])
     return row,{"reason":"match","P_error":float(pd[j]),"abs_normal_cos":float(ndot[j]),"reciprocal_px":float(recip[j]),"score":float(score[j])}
-
 
 
 def _seed64(label: str) -> int:
@@ -193,11 +188,7 @@ def _face_normals(vertices: np.ndarray, faces: np.ndarray) -> tuple[np.ndarray, 
 
 
 def deterministic_full_mesh_surface(geom: dict, asset_id: str, count: int = 512, *, stream: str = "downstream") -> dict:
-    """Area-uniform full-mesh surface ceiling in the canonical RealSaS object frame.
-
-    This is E0-0 authority only. It deliberately does not apply a pretrained consumer's bbox
-    normalization; consumer-native normalization is a later OOD-adapter treatment.
-    """
+    """Area-uniform full-mesh surface ceiling in the canonical RealSaS object frame."""
     vertices = np.asarray(geom['vertices'], np.float32)
     faces = np.asarray(geom['faces'], np.int64)
     fn, areas = _face_normals(vertices, faces)
@@ -268,6 +259,7 @@ def full_vs_observable_distribution_metrics(geom: dict, asset_id: str, observabl
         'consumer_native_normalization_applied': False,
     }
 
+
 def build_e0_asset(asset_dir: str | Path, *, anchor_count: int = 512) -> tuple[dict, dict, dict]:
     asset_dir=Path(asset_dir); asset_id=asset_dir.name
     geom,auth=load_asset_authority(asset_dir)
@@ -276,8 +268,6 @@ def build_e0_asset(asset_dir: str | Path, *, anchor_count: int = 512) -> tuple[d
     K=len(anchorP)
     source_grid=np.zeros((K,2),np.float32); source_N=np.zeros((K,3),np.float32)
     source_N_valid=np.zeros(K,bool)
-    # Teacher physical identity is attached only after the P-only anchor sampler has frozen the rows.
-    # It is never included in the E0-b common payload or passed to derived_match_row.
     source_triangle=np.zeros(K,np.int64); source_bary=np.zeros((K,2),np.float32)
     for i,(sv,sr) in enumerate(zip(src_views,src_rows)):
         av=auth[int(sv)]
@@ -295,12 +285,10 @@ def build_e0_asset(asset_dir: str | Path, *, anchor_count: int = 512) -> tuple[d
         for tv in range(VIEWS):
             if tv==sv: continue
             ar,ae,arp,_=oracle_match_row(anchorP[i],source_triangle[i],source_bary[i],auth[tv]); a_rows[i,tv]=ar; a_err[i,tv]=ae; a_reproj[i,tv]=arp
-            br,info=derived_match_row(anchorP[i],source_N[i],source_grid[i],sv,obs[tv]); b_rows[i,tv]=br
+            br,info=derived_match_row(anchorP[i],source_N[i],source_grid[i],sv,obs[sv].half_extent,obs[tv]); b_rows[i,tv]=br
             if br>=0:
                 b_p[i,tv]=info['P_error']; b_n[i,tv]=info['abs_normal_cos']; b_recip[i,tv]=info['reciprocal_px']
 
-    # Strict evaluator: a B match is correct only where E0-a says the physical point is visible and
-    # the B-selected visible raster sample is within the same frozen 0.003 surface witness radius.
     a_support=a_rows>=0; b_support=b_rows>=0
     correct=np.zeros_like(b_support)
     for i in range(K):
@@ -308,7 +296,6 @@ def build_e0_asset(asset_dir: str | Path, *, anchor_count: int = 512) -> tuple[d
             br=b_rows[i,tv]
             if br>=0 and a_support[i,tv]:
                 correct[i,tv]=np.linalg.norm(obs[tv].P[br]-anchorP[i])<=0.003
-    # exclude source self-edge from pair metrics
     nonself=np.ones((K,VIEWS),bool); nonself[np.arange(K),src_views.astype(np.int64)]=False
     tp=int(np.sum(correct&nonself)); pred=int(np.sum(b_support&nonself)); truth=int(np.sum(a_support&nonself))
     fp=pred-tp
@@ -325,7 +312,11 @@ def build_e0_asset(asset_dir: str | Path, *, anchor_count: int = 512) -> tuple[d
       'derived_match_P_error_p95':float(np.nanquantile(b_p,0.95)) if np.isfinite(b_p).any() else None,
       'derived_reciprocal_px_p95':float(np.nanquantile(b_recip,0.95)) if np.isfinite(b_recip).any() else None,
       'derived_abs_normal_cos_p05':float(np.nanquantile(b_n,0.05)) if np.isfinite(b_n).any() else None,
-      'oracle_identity_mode':'source_triangle_plus_barycentric_carrier__target_same_triangle_visibility_witness','teacher_identity_used_by_e0_b':False,'camera_json_consumed':False,'scientific_optimizer_steps':0,
+      'oracle_identity_mode':'source_triangle_plus_barycentric_carrier__target_same_triangle_visibility_witness',
+      'camera_authority_mode':'observable_P_plus_raster_pixel_grid__no_camera_json',
+      'recovered_half_extent_per_view':[float(o.half_extent) for o in obs],
+      'camera_recovery_reprojection_px_p95_per_view':[float(o.camera_recovery['reprojection_px_p95']) for o in obs],
+      'teacher_identity_used_by_e0_b':False,'camera_json_consumed':False,'scientific_optimizer_steps':0,
     }
     common={
       'P':anchorP,'N_source_derived':source_N,'N_source_valid':source_N_valid.astype(np.uint8),

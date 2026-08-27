@@ -1,0 +1,20 @@
+{
+  "schema": "RealSaS.IRIS.MapAnythingOrtho.ImplementationStatus.v1",
+  "date": "2026-08-27",
+  "branch": "iris/mapanything-ortho-apache",
+  "fork_point": "ebfa54a73dc19f149e441ad94b4193cd3a25a126",
+  "upstream_code_commit": "3d10cf7a3016fc0f9bb13a071ee66c47b10be0d9",
+  "upstream_model_id": "facebook/map-anything-apache",
+  "upstream_model_revision": "00f9c245bbcb60522d1ed7f9e9d88462c6e3f38a",
+  "implementation": "CODE_COMPLETE_FOR_GPU_PREFLIGHT",
+  "local_static_validation": {
+    "compileall": "PASS",
+    "pytest": "7/7 PASS",
+    "scope": "camera roundtrip/orientation, target firewall/XY conversion, exact synthetic point-depth-consistency loss"
+  },
+  "scientific_optimizer_steps": 0,
+  "gpu_upstream_integration_preflight": "PENDING_A100",
+  "full_encoder_memory_preflight": "PENDING_A100",
+  "training_authorized": false,
+  "authorization_rule": "A PASS from preflight.py --stage full is required by the default trainer before any optimizer step."
+}

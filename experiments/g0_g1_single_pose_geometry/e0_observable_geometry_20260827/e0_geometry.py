@@ -63,48 +63,115 @@ def estimate_half_extent_from_observable(
     P,
     resolution: int,
     *,
-    min_abs_grid: float = 0.05,
-    min_ratio_samples: int = 128,
+    huber_k: float = 1.345,
+    max_irls_steps: int = 3,
 ) -> tuple[float, dict]:
-    """Recover orthographic half-extent from exact visible P and raster pixel provenance.
+    """Recover orthographic half-extent from exact visible P and raster provenance.
 
-    With frozen yaw/right/up and pixel-center grid g:
-      g_x = dot(P,right)/h
-      g_y = -dot(P,up)/h
-    so h is directly observable without camera.json. Both screen axes contribute robust ratios.
+    For each visible row, with pixel-center grid g and camera-frame surface coordinate q:
+      q_x = dot(P,right) = h * g_x
+      q_y = -dot(P,up)   = h * g_y
+
+    Estimate the single slope h through the origin.  This avoids per-coordinate q/g ratios
+    and therefore has no arbitrary |grid| cutoff.  Near-center observations naturally
+    contribute negligible leverage through g^2.  A deterministic Huber IRLS pass provides
+    outlier resistance; native reprojection remains the fail-closed authority.
     """
     pix = np.asarray(pixel_linear_index, np.int64)
     P = np.asarray(P, np.float32)
     if len(pix) != len(P):
         raise ValueError("pixel/P length mismatch")
-    if len(pix) < min_ratio_samples:
+    if len(pix) < 2:
         raise RuntimeError(f"insufficient visible rows for half-extent recovery: {len(pix)}")
+
     y = pix // int(resolution)
     x = pix % int(resolution)
-    grid = pixel_center_to_grid(np.stack([x, y], axis=1), int(resolution))
+    grid32 = pixel_center_to_grid(np.stack([x, y], axis=1), int(resolution))
     unit_cam = camera_for_view(int(view), half_extent=1.0)
-    comp = np.stack([P @ unit_cam["right"], -(P @ unit_cam["up"])], axis=1)
-    mask = np.abs(grid) >= float(min_abs_grid)
-    ratios = comp[mask] / grid[mask]
-    ratios = ratios[np.isfinite(ratios) & (ratios > 0.0)]
-    if len(ratios) < min_ratio_samples:
-        raise RuntimeError(f"insufficient stable half-extent ratios: {len(ratios)}")
-    h = float(np.median(ratios))
+    comp32 = np.stack([P @ unit_cam["right"], -(P @ unit_cam["up"])], axis=1)
+
+    g = np.asarray(grid32, np.float64)
+    q = np.asarray(comp32, np.float64)
+    finite_rows = np.all(np.isfinite(g), axis=1) & np.all(np.isfinite(q), axis=1)
+    g = g[finite_rows]
+    q = q[finite_rows]
+    if len(g) < 2:
+        raise RuntimeError(f"insufficient finite rows for half-extent recovery: {len(g)}")
+
+    row_g2 = np.sum(g * g, axis=1)
+    information_energy = float(np.sum(row_g2))
+    grid_rms = float(np.sqrt(np.mean(row_g2)))
+    numerical_floor = float(np.finfo(np.float64).eps * max(1, len(g)) * 64.0)
+    if not np.isfinite(information_energy) or information_energy <= numerical_floor:
+        raise RuntimeError(
+            f"insufficient camera-scale information energy: {information_energy} <= {numerical_floor}"
+        )
+
+    weights = np.ones(len(g), np.float64)
+    h = float(np.sum(g * q) / information_energy)
+    robust_scale = 0.0
+    for _ in range(int(max_irls_steps)):
+        residual_vec = q - h * g
+        residual = np.linalg.norm(residual_vec, axis=1)
+        med = float(np.median(residual))
+        mad = float(np.median(np.abs(residual - med)))
+        robust_scale = 1.4826 * mad
+        if not np.isfinite(robust_scale) or robust_scale <= 1e-12:
+            weights = np.ones(len(g), np.float64)
+        else:
+            cutoff = float(huber_k) * robust_scale
+            weights = np.ones(len(g), np.float64)
+            high = residual > cutoff
+            weights[high] = cutoff / np.maximum(residual[high], 1e-30)
+        denom = float(np.sum(weights * row_g2))
+        if not np.isfinite(denom) or denom <= numerical_floor:
+            raise RuntimeError(f"robust camera-scale information collapsed: {denom}")
+        h_new = float(np.sum(weights[:, None] * g * q) / denom)
+        if abs(h_new - h) <= 1e-12 * max(1.0, abs(h)):
+            h = h_new
+            break
+        h = h_new
+
     if not (0.05 <= h <= 5.0):
         raise RuntimeError(f"implausible recovered half-extent: {h}")
 
+    axis_energy = np.sum(g * g, axis=0)
+    axis_h = [None, None]
+    for a in range(2):
+        if float(axis_energy[a]) > numerical_floor:
+            axis_h[a] = float(np.sum(g[:, a] * q[:, a]) / axis_energy[a])
+    if axis_h[0] is not None and axis_h[1] is not None:
+        axis_relative_disagreement = abs(axis_h[0] - axis_h[1]) / max(abs(h), 1e-12)
+    else:
+        axis_relative_disagreement = None
+
     predicted = project_grid(P, camera_for_view(int(view), h))
-    residual_px = grid_distance_in_pixels(predicted, grid, int(resolution))
+    residual_px = grid_distance_in_pixels(predicted, grid32, int(resolution))
+    fit_residual = q - h * g
+    weighted_rmse = float(
+        np.sqrt(np.sum(weights[:, None] * fit_residual * fit_residual) / max(2.0 * np.sum(weights), 1.0))
+    )
     stats = {
-        "mode": "observable_P_plus_pixel_grid_robust_median",
-        "ratio_samples": int(len(ratios)),
+        "mode": "observable_P_plus_pixel_grid_robust_origin_slope_v2",
+        "visible_rows": int(len(pix)),
+        "finite_rows": int(len(g)),
+        "information_energy": information_energy,
+        "grid_rms": grid_rms,
+        "effective_weight_sum": float(np.sum(weights)),
+        "robust_scale": float(robust_scale),
+        "weighted_fit_rmse": weighted_rmse,
         "half_extent": h,
+        "half_extent_x": axis_h[0],
+        "half_extent_y": axis_h[1],
+        "axis_relative_disagreement": axis_relative_disagreement,
         "reprojection_px_p50": float(np.quantile(residual_px, 0.50)),
         "reprojection_px_p95": float(np.quantile(residual_px, 0.95)),
         "reprojection_px_p99": float(np.quantile(residual_px, 0.99)),
     }
     if stats["reprojection_px_p95"] > 1.25:
         raise RuntimeError(f"observable camera recovery residual too large: {stats}")
+    if axis_relative_disagreement is not None and axis_relative_disagreement > 0.01:
+        raise RuntimeError(f"observable camera recovery axis disagreement too large: {stats}")
     return h, stats
 
 

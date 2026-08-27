@@ -1,0 +1,6 @@
+# Core upstream is pinned by scripts/bootstrap_upstream.sh at exact code commit.
+# MapAnything itself pins uniception==0.1.7.
+torch
+numpy
+pillow
+pytest

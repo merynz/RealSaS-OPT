@@ -1,0 +1,17 @@
+{
+  "32_anchor_scientific_smoke": true,
+  "all_code_cells_compile": true,
+  "drive_export_hash_selftest": true,
+  "eight_asset_staging_path_executes": true,
+  "errno103_retry_selftest": true,
+  "exact_setup_cell_executes": true,
+  "note": "The scientific 512-anchor native single-asset path was already preflighted in the preceding V1.1 audit. V1.2 changes Drive I/O orchestration only.",
+  "notebook_filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1_2.ipynb",
+  "notebook_sha256": "477b74342e6a890e92f997b990233f723af0da88e870e0ad9c480dd78b5c36dd",
+  "pytest": "8 passed",
+  "qualification_execution_present": false,
+  "schema": "RealSaS.E0.Calibration8NotebookPreflight.v1.2",
+  "scientific_optimizer_steps": 0,
+  "scientific_source_blobs_changed_from_v1_1": false,
+  "status": "PASS"
+}

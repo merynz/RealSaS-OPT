@@ -176,6 +176,98 @@ def derived_match_row(
     return row,{"reason":"match","P_error":float(pd[j]),"abs_normal_cos":float(ndot[j]),"reciprocal_px":float(recip[j]),"score":float(score[j])}
 
 
+
+def _seed64(label: str) -> int:
+    return int(hashlib.sha256(label.encode()).hexdigest()[:16], 16) & 0x7fffffffffffffff
+
+
+def _face_normals(vertices: np.ndarray, faces: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    tri = vertices[faces]
+    cross = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    area2 = np.linalg.norm(cross, axis=1)
+    normals = np.zeros_like(cross, dtype=np.float32)
+    good = area2 > 1e-12
+    normals[good] = (cross[good] / area2[good, None]).astype(np.float32)
+    areas = (0.5 * area2).astype(np.float64)
+    return normals, areas
+
+
+def deterministic_full_mesh_surface(geom: dict, asset_id: str, count: int = 512, *, stream: str = "downstream") -> dict:
+    """Area-uniform full-mesh surface ceiling in the canonical RealSaS object frame.
+
+    This is E0-0 authority only. It deliberately does not apply a pretrained consumer's bbox
+    normalization; consumer-native normalization is a later OOD-adapter treatment.
+    """
+    vertices = np.asarray(geom['vertices'], np.float32)
+    faces = np.asarray(geom['faces'], np.int64)
+    fn, areas = _face_normals(vertices, faces)
+    valid_faces = np.flatnonzero(areas > 1e-12)
+    if not len(valid_faces):
+        raise RuntimeError(f'{asset_id}: no nondegenerate full-mesh faces')
+    probs = areas[valid_faces] / areas[valid_faces].sum()
+    rng = np.random.default_rng(_seed64(f'E0-0|{asset_id}|{stream}|{count}'))
+    chosen = rng.choice(valid_faces, size=count, replace=True, p=probs)
+    r = rng.random((count, 2), dtype=np.float64)
+    su = np.sqrt(r[:, 0])
+    w0 = 1.0 - su
+    w1 = su * (1.0 - r[:, 1])
+    w2 = su * r[:, 1]
+    tri = vertices[faces[chosen]]
+    P = (tri[:, 0] * w0[:, None] + tri[:, 1] * w1[:, None] + tri[:, 2] * w2[:, None]).astype(np.float32)
+    N = fn[chosen].astype(np.float32)
+    return {
+        'P': P,
+        'N_geometric': N,
+        'N_valid': np.ones(count, np.uint8),
+        'sampling': np.array('AREA_UNIFORM_FULL_MESH'),
+        'canonical_frame_preserved': np.array(1, np.uint8),
+    }
+
+
+def _bbox_center_scale(P: np.ndarray) -> tuple[np.ndarray, float]:
+    P = np.asarray(P, np.float32)
+    center = (P.max(axis=0) + P.min(axis=0)) * 0.5
+    scale = float(np.max(np.abs(P - center[None])))
+    return center.astype(np.float32), scale
+
+
+def _nearest_distances(query: np.ndarray, reference: np.ndarray, chunk: int = 1024) -> np.ndarray:
+    query = np.asarray(query, np.float32); reference = np.asarray(reference, np.float32)
+    if not len(query) or not len(reference):
+        raise ValueError('nearest-distance sets must be non-empty')
+    out = np.empty(len(query), np.float32)
+    for s in range(0, len(query), chunk):
+        q = query[s:s+chunk]
+        d2 = np.sum((q[:, None, :] - reference[None, :, :]) ** 2, axis=2)
+        out[s:s+len(q)] = np.sqrt(d2.min(axis=1))
+    return out
+
+
+def full_vs_observable_distribution_metrics(geom: dict, asset_id: str, observable_P: np.ndarray, *, dense_reference_count: int = 8192) -> dict:
+    """Measure the full-surface -> observable-union gap without any pretrained consumer."""
+    full = deterministic_full_mesh_surface(geom, asset_id, dense_reference_count, stream='coverage_reference')['P']
+    observable_P = np.asarray(observable_P, np.float32)
+    f2o = _nearest_distances(full, observable_P)
+    o2f = _nearest_distances(observable_P, full)
+    fc, fs = _bbox_center_scale(full); oc, os = _bbox_center_scale(observable_P)
+    return {
+        'schema': 'RealSaS.E0.FullVsObservableDistribution.v1',
+        'dense_full_reference_count': int(dense_reference_count),
+        'observable_point_count': int(len(observable_P)),
+        'full_to_observable_nn_p50': float(np.quantile(f2o, .50)),
+        'full_to_observable_nn_p90': float(np.quantile(f2o, .90)),
+        'full_to_observable_nn_p95': float(np.quantile(f2o, .95)),
+        'full_to_observable_nn_max': float(f2o.max()),
+        'observable_to_full_nn_p95': float(np.quantile(o2f, .95)),
+        'full_bbox_center': fc.tolist(),
+        'observable_bbox_center': oc.tolist(),
+        'bbox_center_shift_l2': float(np.linalg.norm(fc-oc)),
+        'full_bbox_maxabs_scale': fs,
+        'observable_bbox_maxabs_scale': os,
+        'observable_to_full_scale_ratio': (os/fs) if fs > 0 else None,
+        'consumer_native_normalization_applied': False,
+    }
+
 def build_e0_asset(asset_dir: str | Path, *, anchor_count: int = 512) -> tuple[dict, dict, dict]:
     asset_dir=Path(asset_dir); asset_id=asset_dir.name
     geom,auth=load_asset_authority(asset_dir)

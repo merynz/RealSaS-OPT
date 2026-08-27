@@ -1,0 +1,51 @@
+{
+  "arms": [
+    "D0_FULL_MESH_ORACLE_PROVENANCE",
+    "D1_OBSERVABLE_ORACLE_PERSISTENCE",
+    "D2_OBSERVABLE_MUTUAL_P003"
+  ],
+  "contract_sha256": "cf204ad1ef7d8460e402fb6c3db7361d122b3284116aa6e840af032d0fb39a2a",
+  "date": "2026-08-27",
+  "file_sha256": {
+    "E0_DOWNSTREAM_PROXY_CONTRACT_V1.json": "cf204ad1ef7d8460e402fb6c3db7361d122b3284116aa6e840af032d0fb39a2a",
+    "E0_DOWNSTREAM_PROXY_PREREG_V1.md": "6b533417b1aa12de97ae18277e537f7d44c862c49ab399326027e11aa82d5f31",
+    "E0_DOWNSTREAM_PROXY_SOURCE_HASHES_V1.json": "19a5391c635f0cca9e04663915208de70a2c671b72253e4c4c3c761dcefa882c",
+    "E0_DOWNSTREAM_PROXY_SPLIT_V1.json": "a9ccbe8b7c050ec52e9c7568e2371ed89ec0244a4106c040376645ee2713e615",
+    "RealSaS_E0_DOWNSTREAM_PROXY_BATCH_PARITY_V1.json": "04651c06428f61070d3f2a5b3852b30bcab3ba5158099711a0fdf587d34d710b",
+    "RealSaS_E0_DOWNSTREAM_PROXY_MODEL_SMOKE_V1.json": "ef24a9d64a61ea5da14b38e932a985a9312592a8f4388725338f628a7155bb03",
+    "RealSaS_E0_DOWNSTREAM_PROXY_NOTEBOOK_PREFLIGHT_V1_1.json": "06b5c6b10cea66dd625120e54240ca1de55b3ccd837d1d6ac2a4e4cb6ecd5153",
+    "RealSaS_E0_DOWNSTREAM_PROXY_REAL551_PREFLIGHT_V1_1.json": "8bf7a27bd4e1538da19786df3eb4f38d79a5a5461d29d9edb3a75c328a153f2b",
+    "e0_downstream_proxy_v1.py": "0f599e8f717d4c5070c04e224d90e52d1dc6e76a6e2068e64ed7c9d9d2b950b4",
+    "e0_downstream_proxy_v1_scalar_ref.py": "ce174530f016c8fb31d23192bbd59d9180303b74f691ef0ee8c0c67d3a4bcbae",
+    "run_e0_downstream_proxy_calibration_v1.py": "7fc3021726df64069ba44be42f946db25929372497f39f392898477b374e2ca4",
+    "run_e0_downstream_proxy_prep_v1.py": "f9decfdce8eaf6e5542e6cf285dd193d54c6ce9ce94f70a54dc48ca3489af217",
+    "test_e0_downstream_proxy_v1.py": "a6744d799465f27172308b69440b13241f321d41541469aafe1a676137e3888c"
+  },
+  "firewalls": {
+    "dev32_opened": false,
+    "numerical_noninferiority_margin_frozen": false,
+    "pretrained_consumer_used": false,
+    "proxy32_opened": false,
+    "scientific_training_executed_before_package_seal": false,
+    "teacher_identity_consumed_by_D2_admission": false,
+    "tune_cal_dev_external_used": false
+  },
+  "forbidden": [
+    "open Proxy32 or DEV32 before inspecting calibration4 and freezing numerical margins in a separate record",
+    "interpret proxy results as product Geppetto/Arachne closure",
+    "change population, D2 admission, feature layout, model capacity, optimizer schedule, or selection rule after outcomes open",
+    "consume teacher identity in D2 admission"
+  ],
+  "implementation": "REIMPLEMENTED_FROM_FROZEN_S0_B_CONTRACT__NOT_BYTE_IDENTICAL_S0",
+  "next": "RUN_NOTEBOOK_ON_COLAB_GPU__THEN_INSPECT_CALIBRATION4_BEFORE_ANY_MARGIN_FREEZE_OR_PROXY32_OPEN",
+  "notebook": "RealSaS_E0_DOWNSTREAM_PROXY_V1.ipynb",
+  "notebook_sha256": "26f7bc974fffe7be4467724846a16dd8e4abbab32dc1db56d99e202ae0e08710",
+  "population": {
+    "calibration_truth_capable": 4,
+    "scope": "FIT_ONLY",
+    "selection": 59,
+    "train": 374
+  },
+  "schema": "RealSaS.E0.DownstreamProxyPackage.v1",
+  "status": "SEALED_READY_FOR_FIT_DOWNSTREAM_PROXY_EXECUTION__PROXY32_DEV32_CLOSED"
+}

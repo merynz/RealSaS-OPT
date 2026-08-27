@@ -1,0 +1,30 @@
+{
+  "D0_512_reference_parity": true,
+  "D1_512_reference_parity": true,
+  "D2_P_512_reference_parity": true,
+  "code_cell_count": 9,
+  "contract_sha256": "cf204ad1ef7d8460e402fb6c3db7361d122b3284116aa6e840af032d0fb39a2a",
+  "date": "2026-08-27",
+  "dev32_opened": false,
+  "embedded_source_integrity_count": 12,
+  "exact_notebook_all_code_cells_compile": true,
+  "exact_notebook_preflight_only_run_all": true,
+  "frozen_real551_scalar_batch_32_record_sha256": "04651c06428f61070d3f2a5b3852b30bcab3ba5158099711a0fdf587d34d710b",
+  "frozen_real551_scalar_batch_32_record_verified": true,
+  "notebook": "RealSaS_E0_DOWNSTREAM_PROXY_V1.ipynb",
+  "notebook_sha256": "26f7bc974fffe7be4467724846a16dd8e4abbab32dc1db56d99e202ae0e08710",
+  "notes": [
+    "Runtime preflight verifies the frozen 32-anchor scalar/batch parity record rather than rerunning the expensive scalar matcher every notebook execution.",
+    "The exact notebook bytes were executed with PREFLIGHT_ONLY=1 through all code cells; production prep/training/seal branches were skipped by their explicit firewall.",
+    "Scientific pack construction remains 512 anchors and uses the batch implementation that previously matched the scalar reference bit-exactly on real 551 at 32 anchors and matched V1.3 reference hashes at 512 anchors."
+  ],
+  "numerical_noninferiority_margin_frozen": false,
+  "proxy32_opened": false,
+  "pytest": "4 passed",
+  "real551_batch512_v1_3_reference_parity": true,
+  "real551_model_forward_backward_all_arms": true,
+  "schema": "RealSaS.E0.DownstreamProxyNotebookPreflight.v1.1",
+  "scientific_training_executed_in_preflight": false,
+  "status": "PASS",
+  "teacher_identity_consumed_by_D2_admission": false
+}

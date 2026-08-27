@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-27  
 **Branch:** `g0-g1/single-pose-geometry`  
-**Status:** `PREREG_DRAFT_IMPLEMENTATION_PREFLIGHT__NO_OUTCOME_OPENED`  
+**Status:** `PREREG_AMENDED_APPARATUS_CAMERA_SCALE_RECOVERY__CALIBRATION_V1_2_INVALIDATED__NO_E0_OUTCOME_OPENED`  
 **Scientific optimizer steps at E0 geometry stage:** `0`
 
 ## Why E0 exists
@@ -40,13 +40,19 @@ Teacher surface provenance may be opened only after E0-b has emitted matches, to
 ## Shared observable surface construction
 
 - Native authority: `1024×1024`, views `V0..V7`.
-- No `camera.json` consumption. Camera convention is the frozen P-V5/R256 known-yaw contract: yaw `0,45,...,315`, screen-up `+Z`, fixed render half-extent `0.54`.
+- No `camera.json` consumption. Camera orientation is the frozen P-V5/R256 known-yaw contract: yaw `0,45,...,315`, screen-up `+Z`. Orthographic half-extent is recovered per view from exact observable common-frame `P` + raster pixel-center coordinates by a deterministic robust median relation; `0.54` is not a runtime authority.
 - No Pose B.
 - No joints, parents, skin weights, owner IDs, mechanics/GFDR or compiler IDs enter E0 surface construction.
 - Never-visible mesh vertices/faces are not emitted as RiggingSurface evidence.
 - The same deterministic P-only anchor sampler is used for both arms so differences cannot be caused by different point budgets.
-- The observable sampler intentionally de-biases naïve raster view-frequency: it takes the same capped candidate budget per view and then performs common-frame farthest-point sampling. Raw raster frequency is therefore not itself the E0-a substrate.
-- Consumer-native bbox centering/scaling is excluded from the primary E0-0/a/b information gate and is evaluated only in the separate pretrained-consumer OOD adapter diagnostic.
+
+### Apparatus amendment after invalid calibration V1.2
+
+Calibration V1.2 opened no E0 scientific decision because one calibration family exposed a deterministic apparatus mismatch: the implementation projected every asset with half-extent `0.54`, while the raster authority itself can have a different orthographic scale. The affected frozen member remains in the panel; no threshold or membership is changed.
+
+The corrected apparatus recovers half-extent **only from already-admitted E0 observables**. For each view, with frozen camera orientation and pixel-center grid `g`, exact common-frame point `P` satisfies `g_x = <P,right>/h` and `g_y = -<P,up>/h`. A robust median of valid positive ratios estimates `h`, followed by a fail-closed native-pixel reprojection residual check. `camera.json` remains forbidden in forward construction and may be opened only post-hoc to audit apparatus correctness.
+
+V1.2 outputs are retained as an invalidated apparatus witness and cannot set downstream margins or support E0 PASS/FAIL. The same frozen calibration-8 membership must be rerun under the corrected apparatus before any downstream margin freeze.
 
 ## Frozen population
 

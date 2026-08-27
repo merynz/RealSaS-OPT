@@ -1,0 +1,37 @@
+{
+  "schema": "RealSaS.E0BSafetyCalibrationPackage.v1",
+  "date": "2026-08-27",
+  "status": "READY_FOR_FROZEN_FIT_CALIBRATION8_RUN__NOT_GENERALIZATION",
+  "population": "FROZEN_FIT_CALIBRATION8",
+  "source_e0_run": "E0_CALIBRATION8_GEOMETRY_V1_3",
+  "prereg_path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_B_SAFETY_CALIBRATION_PREREG_V1.md",
+  "prereg_commit": "057be6609326f08d024b173c258cdf42d33ded60",
+  "runner_path": "tools/run_e0_b_safety_calibration_v1_1.py",
+  "runner_commit": "3686df8b09f7ca95120ab8e3f0cec964ad730242",
+  "runner_sha256": "671168fed500f62f648ac2519f713488d25535b5c30f06a1df838acff1146bd9",
+  "notebook_filename": "RealSaS_E0_B_SAFETY_CALIBRATION_V1.ipynb",
+  "notebook_sha256": "0bdaadec817d55a931f545de10ee0dcc41cbb3bac6b98428b1c84419ff9a7249",
+  "local_preflight": {
+    "status": "PASS",
+    "all_code_cells_compile": true,
+    "exact_setup_executes": true,
+    "eight_slot_staging_executes": true,
+    "real_frozen_551_safety_smoke": true,
+    "errno103_retry_selftest": true,
+    "full_eight_scientific_run_executed_locally": false
+  },
+  "variants": [
+    "BASE",
+    "MUTUAL_P006",
+    "MUTUAL_P003",
+    "MUTUAL_P003_SUPPORT2",
+    "MUTUAL_P003_SUPPORT3"
+  ],
+  "teacher_identity_consumed_by_admission": false,
+  "teacher_geometry_evaluator_only": true,
+  "rule_auto_selection": false,
+  "dev32_opened": false,
+  "proxy32_opened": false,
+  "scientific_optimizer_steps": 0,
+  "next": "Run the notebook on the frozen FIT calibration-8 V1.3 artifacts; inspect stdout; freeze one observation-only admission policy before downstream E0-a/E0-b testing."
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "RealSaS.IRIS.MapAnythingOrtho.UpstreamProvenance.v1",
+  "created_utc": "2026-08-27",
+  "upstream_repository": "facebookresearch/map-anything",
+  "upstream_code_commit": "3d10cf7a3016fc0f9bb13a071ee66c47b10be0d9",
+  "upstream_code_license": "Apache-2.0",
+  "upstream_model_id": "facebook/map-anything-apache",
+  "upstream_model_revision": "00f9c245bbcb60522d1ed7f9e9d88462c6e3f38a",
+  "upstream_model_card_license": "Apache-2.0",
+  "upstream_model_size_reported": "~1B parameters / 4.91 GB repository payload",
+  "mapanything_package_version_at_pinned_commit": "1.1.4",
+  "uniception_pin": "0.1.7",
+  "commercial_shipping_status": "HOLD_FOR_FINAL_LICENSE_REVIEW",
+  "experiment_status": "PROCEED_UNDER_PUBLISHED_UPSTREAM_APACHE_METADATA__NOT_LEGAL_CLEARANCE",
+  "license_caveat": "The official repo/model metadata label this variant Apache-2.0 and the MapAnything README recommends it for commercial use. An open Hugging Face community discussion questions a historical license mismatch and had no official resolution visible during this audit; therefore RealSaS experimentation may proceed under the published metadata, but commercial shipping must receive a final provenance/legal review.",
+  "forbidden_upstreams": [
+    "facebook/map-anything (CC-BY-NC 4.0 model)",
+    "DUSt3R source/weights for product integration",
+    "MASt3R source/weights for product integration"
+  ]
+}

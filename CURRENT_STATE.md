@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-28  
 **Active branch:** `g0-g1/single-pose-geometry`  
-**Status:** `E0_DOWNSTREAM_PROXY_V1_1_FUSE_FIX_SEALED_READY__FIT_ONLY__TRAINING_NEXT__PROXY32_DEV32_CLOSED`
+**Status:** `E0_DOWNSTREAM_PROXY_V1_2_CAMERA_RECOVERY_SEALED_READY__FIT_ONLY__TRAINING_NEXT__PROXY32_DEV32_CLOSED`
 
 ## Read this first
 
@@ -10,7 +10,7 @@ This file is the single continuation authority.
 
 The active E0 question is whether the **observable single-pose A×8 common-frame substrate preserves enough rigging-relevant information** relative to a full-mesh ceiling. No E0 product PASS/FAIL has been declared. Product Geppetto and Arachne models do not yet exist; the next experiment uses fixed research information-isolation proxies only.
 
-The original downstream-proxy V1 executable is now **superseded as an execution apparatus**: its first production prep run failed before the first pack/report was committed to Drive. The scientific contract was not changed. V1.1 is the executable authority and changes only Drive/FUSE publication and child-log diagnostics.
+The original downstream-proxy V1 executable is superseded by the V1.1 Drive/FUSE fix. V1.1 then successfully built/published 189/437 frozen assets and false-failed at asset 190 because the camera-scale estimator required 128 ratios after an arbitrary `abs(grid)>=0.05` cutoff; only 84 survived on a small-screen-footprint asset. No downstream scientific training or outcome inspection had begun. V1.2 is now executable authority: it keeps the frozen population, D0/D1/D2, MUTUAL_P003, proxy models and optimizer schedules unchanged, but replaces the ratio heuristic with a robust through-origin slope estimator `q=h*g`.
 
 ## Frozen geometry / persistence chain
 
@@ -179,12 +179,43 @@ Scientific invariants unchanged:
 V1.1 exact-runner smoke on the first real frozen train asset produced a pack bit-identical to direct scientific builder output:
 `d9f1a40ee1db408fcdff7a541af91ebb2c33d1b8949d2236447a3a8dced6d018`
 
+## Camera recovery V1.2 — SEALED
+
+Trigger asset: `asset_de72098ec0bd43ce9fc30c60`. Old estimator failure: `insufficient stable half-extent ratios: 84`. V0 actually contains 2393 visible rows; the failure was caused by the old fixed `|grid|>=0.05` conditioning cutoff, not missing camera information.
+
+New observable-only estimator solves the camera half-extent as a robust regression through the origin:
+
+```text
+q_x = dot(P,right) = h * g_x
+q_y = -dot(P,up)   = h * g_y
+```
+
+Near-center observations naturally contribute low leverage through `g^2`; there is no fixed screen-coordinate cutoff and no ratio-count gate. Deterministic Huber IRLS provides outlier resistance. Fail-close authority remains native reprojection P95 plus x/y slope consistency and numerical information energy. `camera.json` remains forbidden in the forward path.
+
+Real trigger-asset V0 diagnostic:
+- visible rows: `2393`;
+- recovered h: `0.5400000774096994`;
+- post-hoc camera authority: `0.5400000643730164`;
+- absolute error: `1.3036683e-08`;
+- native reprojection P95: `0 px`.
+
+Compatibility check: on the previously passing real frozen train asset `asset_d7d4192f9dac8b146a17bc41`, old and new estimators produce a byte-identical 512-anchor compact pack SHA `d9f1a40ee1db408fcdff7a541af91ebb2c33d1b8949d2236447a3a8dced6d018`.
+
+V1.2 resume records are bound to both the downstream builder SHA and the exact `e0_geometry.py` SHA. V1.1 packs must not be resumed under V1.2.
+
+Canonical V1.2 authorities:
+- `E0_DOWNSTREAM_PROXY_CAMERA_RECOVERY_AMENDMENT_V1_2.md/json`;
+- `E0_DOWNSTREAM_PROXY_NOTEBOOK_PREFLIGHT_V1_3.md/json`;
+- `E0_DOWNSTREAM_PROXY_PACKAGE_V1_2.json`;
+- `run_e0_downstream_proxy_prep_v1_2.py`;
+- executable `RealSaS_E0_DOWNSTREAM_PROXY_V1_2.ipynb` SHA `a46fe75a7ce5a0318d79c6d8b055bc593bd8c57942edc85c1d93353bf742047f`.
+
 ## Next executable action
 
-Run **only** `RealSaS_E0_DOWNSTREAM_PROXY_V1_1.ipynb` on Colab GPU. Do not rerun the superseded V1 notebook.
+Run **only** `RealSaS_E0_DOWNSTREAM_PROXY_V1_2.ipynb` on Colab GPU. Do not rerun V1 or V1.1.
 
 Expected sequence:
-1. use fresh `prep_v1_1` / `checkpoints_v1_1` execution paths;
+1. use fresh `prep_v1_2` / `checkpoints_v1_2` execution paths;
 2. stage only frozen 374 train + 59 selection + 4 truth-capable calibration assets;
 3. build 512-point D0/D1/D2 packs;
 4. train matched from-scratch Arachne proxy arms;
@@ -218,7 +249,9 @@ Do not retroactively alter the frozen E0/calibration populations. After E0 closu
 
 `E0_DOWNSTREAM_PROXY_V1 = SUPERSEDED_EXECUTION_APPARATUS_DRIVE_FUSE_FAILURE`
 
-`E0_DOWNSTREAM_PROXY_V1_1 = SEALED_READY_FOR_FIT_EXECUTION`
+`E0_DOWNSTREAM_PROXY_V1_1 = SUPERSEDED_CAMERA_RECOVERY_RATIO_HEURISTIC_FALSE_FAIL_AT_190_OF_437`
+
+`E0_DOWNSTREAM_PROXY_V1_2 = SEALED_READY_FOR_FIT_EXECUTION`
 
 `E0_DOWNSTREAM_PROXY_SCIENTIFIC_TRAINING = NOT_YET_EXECUTED`
 

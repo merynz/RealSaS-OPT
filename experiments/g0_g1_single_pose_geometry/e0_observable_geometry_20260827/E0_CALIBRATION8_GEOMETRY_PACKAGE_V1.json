@@ -1,9 +1,12 @@
 {
-  "schema": "RealSaS.E0.Calibration8GeometryPackage.v1",
+  "schema": "RealSaS.E0.Calibration8GeometryPackage.v1.1",
   "date": "2026-08-27",
-  "status": "SEALED_READY_FOR_CALIBRATION_EXECUTION__PROXY32_CLOSED",
-  "notebook_filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1.ipynb",
-  "notebook_sha256": "48d827cde7f41d9e2db31d2ca8ae7f275a262d7d08ba169f258bb01b1f478021",
+  "status": "SEALED_READY_FOR_CALIBRATION_EXECUTION__V1_1_PREFLIGHTED_REAL_DATA_SMOKE__PROXY32_CLOSED",
+  "notebook_filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1_1.ipynb",
+  "notebook_sha256": "e40eccd86b07cda90ce3c7ef89e0a14a21a9173c51562e842bdca47602f2f41d",
+  "supersedes_notebook_filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1.ipynb",
+  "supersedes_notebook_sha256": "48d827cde7f41d9e2db31d2ca8ae7f275a262d7d08ba169f258bb01b1f478021",
+  "superseded_failure": "Embedded JSON boolean false was emitted as a Python literal in the setup cell and raised NameError.",
   "canonical_source_snapshot_commit": "9ce75974e525c282a2ced3547ff5380b320a7bbe",
   "geometry_authority_head": "8c6d339ed7f59d5225ce9a224f281df3e39ff5e0",
   "source_membership_sha256": "53856330a24f5c04b17db69bf059c6b242f0320c7e3c3c92caf1d24117c6d419",
@@ -20,6 +23,14 @@
     "run_e0_calibration8_geometry_v1.py": "8fb3585d061894ba3eee0516d5109a13e82f9edc00b99e00ce49031e9ceaab4d",
     "tests/test_e0_surface_builder.py": "f43b53dc8f30269a7ce0c966be91f647361b0a712c215b97f53628cb8bf02b16"
   },
+  "preflight": {
+    "all_code_cells_compile": true,
+    "exact_setup_and_preflight_cells_execute": true,
+    "pytest": "8 passed",
+    "real_native_asset_smoke": true,
+    "direct_full_density_512_anchor_smoke": true,
+    "scientific_calibration_outcome_opened": false
+  },
   "firewalls": {
     "scientific_optimizer_steps": 0,
     "qualification_execution_present": false,
@@ -29,7 +40,7 @@
     "teacher_identity_used_by_e0_b": false,
     "consumer_native_normalization_in_primary_gate": false
   },
-  "next_authorized_action": "RUN_CALIBRATION8_GEOMETRY_THEN_INSPECT_AND_FREEZE_SCRATCH_DOWNSTREAM_PROBE_PLUS_NONINFERIORITY_MARGINS",
+  "next_authorized_action": "RUN_CALIBRATION8_GEOMETRY_V1_1_THEN_INSPECT_AND_FREEZE_SCRATCH_DOWNSTREAM_PROBE_PLUS_NONINFERIORITY_MARGINS",
   "forbidden_next_actions": [
     "OPEN_PROXY32_BEFORE_MARGIN_FREEZE",
     "RUN_PRETRAINED_CONSUMER_AS_PRIMARY_SUFFICIENCY_GATE",

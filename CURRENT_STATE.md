@@ -1,14 +1,16 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-08-27  
+**Date:** 2026-08-28  
 **Active branch:** `g0-g1/single-pose-geometry`  
-**Status:** `E0_DOWNSTREAM_PROXY_V1_SEALED_READY__FIT_ONLY__TRAINING_NEXT__PROXY32_DEV32_CLOSED`
+**Status:** `E0_DOWNSTREAM_PROXY_V1_1_FUSE_FIX_SEALED_READY__FIT_ONLY__TRAINING_NEXT__PROXY32_DEV32_CLOSED`
 
 ## Read this first
 
 This file is the single continuation authority.
 
 The active E0 question is whether the **observable single-pose A×8 common-frame substrate preserves enough rigging-relevant information** relative to a full-mesh ceiling. No E0 product PASS/FAIL has been declared. Product Geppetto and Arachne models do not yet exist; the next experiment uses fixed research information-isolation proxies only.
+
+The original downstream-proxy V1 executable is now **superseded as an execution apparatus**: its first production prep run failed before the first pack/report was committed to Drive. The scientific contract was not changed. V1.1 is the executable authority and changes only Drive/FUSE publication and child-log diagnostics.
 
 ## Frozen geometry / persistence chain
 
@@ -44,26 +46,13 @@ Teacher identity is forbidden from admission. `support>=2/3` is not part of the 
 Canonical safety report:
 `experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_B_SAFETY_CALIBRATION_RESULT_V1.md`
 
-## Downstream proxy package — SEALED READY
+## Downstream proxy scientific contract — unchanged
 
-Canonical package directory:
-`experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/`
-
-Primary files:
-- `E0_DOWNSTREAM_PROXY_PREREG_V1.md`
-- `E0_DOWNSTREAM_PROXY_CONTRACT_V1.json`
-- `E0_DOWNSTREAM_PROXY_PACKAGE_V1.json`
-- `E0_DOWNSTREAM_PROXY_NOTEBOOK_PREFLIGHT_V1_1.md`
-- `E0_DOWNSTREAM_PROXY_NOTEBOOK_PREFLIGHT_V1_1.json`
-
-Exact executable notebook distributed with the experiment:
-`RealSaS_E0_DOWNSTREAM_PROXY_V1.ipynb`
-
-Notebook SHA-256:
-`26f7bc974fffe7be4467724846a16dd8e4abbab32dc1db56d99e202ae0e08710`
-
-Contract SHA-256:
+Scientific contract SHA-256:
 `cf204ad1ef7d8460e402fb6c3db7361d122b3284116aa6e840af032d0fb39a2a`
+
+Scientific builder SHA-256:
+`0f599e8f717d4c5070c04e224d90e52d1dc6e76a6e2068e64ed7c9d9d2b950b4`
 
 Implementation status:
 `REIMPLEMENTED_FROM_FROZEN_S0_B_CONTRACT__NOT_BYTE_IDENTICAL_S0`
@@ -130,42 +119,80 @@ Frozen schedule: seed `1862`, identical initialization across D0/D1/D2, AdamW lr
 
 This is not product skeleton/count/topology generation.
 
-## Apparatus corrections / preflight
+## V1 execution failure — localized
 
-Several issues were caught before scientific execution and corrected:
-1. prep staging must preserve canonical `asset_id` as `asset_dir.name`, because E0 deterministic samplers namespace seeds by asset ID;
-2. Arachne row sampling and Geppetto eval subsampling are arm-independent, so matched arms receive matched stochastic draws;
-3. Geppetto GT-count oracle may not choose an outcome-favorable subset from all 48 queries;
-4. the production batch SurfaceBuilder must preserve scalar matcher semantics.
+The original V1 Colab run exited in production prep before any first-asset pack/report was committed to Drive. The outer notebook showed only `CalledProcessError`.
 
-Frozen real-551 scalar↔batch parity record SHA:
-`04651c06428f61070d3f2a5b3852b30bcab3ba5158099711a0fdf587d34d710b`
+Post-failure localization used the first frozen train asset `asset_d7d4192f9dac8b146a17bc41`:
+- current master `primary_geometry.npz` SHA exactly matches the frozen source-cache authority;
+- all V0..V7 `raster_authority.npz` SHAs exactly match frozen source-cache authority;
+- the exact sealed `build_compact_pack(..., anchor_count=512)` succeeds on those exact bytes;
+- `prep_v1/packs` and `prep_v1/reports` contained no committed first-asset artifact.
 
-Exact notebook V1.1 preflight:
-- all 9 code cells compile;
-- embedded 12-file authority bundle verifies;
-- downstream tests `4 passed`;
-- frozen real-551 32-anchor scalar↔batch bit-exact parity record verifies;
-- real 551 512-anchor D0/D1/D2 reference parity versus corrected E0 V1.3 passes;
-- real-data proxy forward/backward smoke passes for D0/D1/D2;
-- `teacher_identity_consumed_by_D2_admission = false`;
-- scientific training not executed in preflight;
-- numerical non-inferiority margins not frozen;
-- Proxy32 and DEV32 closed.
+Therefore the observed V1 failure is localized to the **Drive/FUSE publication path before first commit**, not the scientific builder, source population, D0/D1/D2 definitions, or MUTUAL_P003.
+
+`E0_DOWNSTREAM_PROXY_V1 = SUPERSEDED_EXECUTION_APPARATUS_DRIVE_FUSE_FAILURE`
+
+## Operational amendment V1.1 — SEALED READY
+
+Canonical amendment files:
+- `E0_DOWNSTREAM_PROXY_OPERATIONAL_AMENDMENT_V1_1.md`
+- `E0_DOWNSTREAM_PROXY_OPERATIONAL_AMENDMENT_V1_1.json`
+- `run_e0_downstream_proxy_prep_v1_1.py`
+- `E0_DOWNSTREAM_PROXY_NOTEBOOK_PREFLIGHT_V1_2.md`
+- `E0_DOWNSTREAM_PROXY_NOTEBOOK_PREFLIGHT_V1_2.json`
+- `E0_DOWNSTREAM_PROXY_PACKAGE_V1_1.json`
+
+Operational amendment SHA-256:
+`e1a7e5c6ed61e08bac48927f38e240ed6e4974fb5402aeeacac363ddbe387662`
+
+Prep runner V1.1 SHA-256:
+`404ad50b8f7a92804530f0b26eb9e8ebd620a196cfa4040bad0ab24f5917d2f6`
+
+Executable notebook:
+`RealSaS_E0_DOWNSTREAM_PROXY_V1_1.ipynb`
+
+Notebook SHA-256:
+`83c49b04b29debbca5c7942b853df0f51d884d8bab1bba0be5d3b668be422151`
+
+Preflight V1.2 SHA-256:
+`e3e18c554c0d5b421c801282acd3dd34877c57c6568d88b102d2f950e4ea52e8`
+
+V1.1 changes only execution apparatus:
+1. build scientific NPZ/JSON bytes locally first;
+2. publish Drive artifacts with direct write + readback SHA verification + bounded retry;
+3. forbid Drive-side `tmp.replace` / rename as publication primitive;
+4. stream child stdout/stderr in the notebook and persist logs;
+5. build scientific checkpoints locally first, then verified-copy them to Drive.
+
+Scientific invariants unchanged:
+- 374 FIT train / 59 FIT selection / 4 truth-capable historical calibration;
+- D0/D1/D2 unchanged;
+- teacher-free `MUTUAL_P003`, cycle threshold `0.003` unchanged;
+- 36D adapter unchanged;
+- Arachne/Geppetto proxy capacities unchanged;
+- seed, optimizer, epochs, checkpoint selection unchanged;
+- no calibration gradient;
+- numerical non-inferiority margins unfrozen;
+- Proxy32/DEV32/TUNE/CAL/EXTERNAL closed.
+
+V1.1 exact-runner smoke on the first real frozen train asset produced a pack bit-identical to direct scientific builder output:
+`d9f1a40ee1db408fcdff7a541af91ebb2c33d1b8949d2236447a3a8dced6d018`
 
 ## Next executable action
 
-Run the **exact sealed notebook** on Colab GPU.
+Run **only** `RealSaS_E0_DOWNSTREAM_PROXY_V1_1.ipynb` on Colab GPU. Do not rerun the superseded V1 notebook.
 
 Expected sequence:
-1. stage only frozen 374 train + 59 selection + 4 truth-capable calibration assets;
-2. build 512-point D0/D1/D2 packs;
-3. train matched from-scratch Arachne proxy arms;
-4. train matched from-scratch Geppetto proxy arms;
-5. inspect calibration4 D0→D1 and D1→D2 paired deltas;
-6. do **not** auto-freeze a numerical margin;
-7. only after inspection write a separate non-inferiority-margin decision record;
-8. Proxy32 may be opened only after that separate freeze.
+1. use fresh `prep_v1_1` / `checkpoints_v1_1` execution paths;
+2. stage only frozen 374 train + 59 selection + 4 truth-capable calibration assets;
+3. build 512-point D0/D1/D2 packs;
+4. train matched from-scratch Arachne proxy arms;
+5. train matched from-scratch Geppetto proxy arms;
+6. inspect calibration4 D0→D1 and D1→D2 paired deltas;
+7. do **not** auto-freeze a numerical margin;
+8. only after inspection write a separate non-inferiority-margin decision record;
+9. Proxy32 may be opened only after that separate freeze.
 
 ## Parked questions
 
@@ -189,7 +216,9 @@ Do not retroactively alter the frozen E0/calibration populations. After E0 closu
 
 `E0_B_ADMISSION = MUTUAL_P003_FROZEN`
 
-`E0_DOWNSTREAM_PROXY_V1 = SEALED_READY_FOR_FIT_EXECUTION`
+`E0_DOWNSTREAM_PROXY_V1 = SUPERSEDED_EXECUTION_APPARATUS_DRIVE_FUSE_FAILURE`
+
+`E0_DOWNSTREAM_PROXY_V1_1 = SEALED_READY_FOR_FIT_EXECUTION`
 
 `E0_DOWNSTREAM_PROXY_SCIENTIFIC_TRAINING = NOT_YET_EXECUTED`
 

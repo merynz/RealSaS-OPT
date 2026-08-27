@@ -1,0 +1,29 @@
+{
+  "date": "2026-08-28",
+  "firewalls": {
+    "D2_admission_changed": false,
+    "dev32_opened": false,
+    "numerical_noninferiority_margin_frozen": false,
+    "population_changed": false,
+    "proxy32_opened": false,
+    "science_changed": false
+  },
+  "next": "RUN_EXACT_V1_1_NOTEBOOK_ON_COLAB_GPU",
+  "notebook": "RealSaS_E0_DOWNSTREAM_PROXY_V1_1.ipynb",
+  "notebook_sha256": "83c49b04b29debbca5c7942b853df0f51d884d8bab1bba0be5d3b668be422151",
+  "operational_amendment_sha256": "e1a7e5c6ed61e08bac48927f38e240ed6e4974fb5402aeeacac363ddbe387662",
+  "population": {
+    "calibration_truth_capable": 4,
+    "scope": "FIT_ONLY",
+    "selection": 59,
+    "train": 374
+  },
+  "preflight_json_sha256": "e3e18c554c0d5b421c801282acd3dd34877c57c6568d88b102d2f950e4ea52e8",
+  "preflight_md_sha256": "48b4458eeb1b8613ad379f2d8c7469414999731db376e23a5cd74129a8df6dd6",
+  "prep_runner": "run_e0_downstream_proxy_prep_v1_1.py",
+  "prep_runner_sha256": "404ad50b8f7a92804530f0b26eb9e8ebd620a196cfa4040bad0ab24f5917d2f6",
+  "schema": "RealSaS.E0.DownstreamProxyPackage.v1_1",
+  "scientific_builder_sha256": "0f599e8f717d4c5070c04e224d90e52d1dc6e76a6e2068e64ed7c9d9d2b950b4",
+  "scientific_contract_sha256": "cf204ad1ef7d8460e402fb6c3db7361d122b3284116aa6e840af032d0fb39a2a",
+  "status": "SEALED_READY_AFTER_OPERATIONAL_FUSE_FIX__SCIENCE_UNCHANGED__PROXY32_DEV32_CLOSED"
+}

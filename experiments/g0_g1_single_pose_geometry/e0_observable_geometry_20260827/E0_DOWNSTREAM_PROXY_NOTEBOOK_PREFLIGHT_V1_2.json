@@ -1,0 +1,40 @@
+{
+  "D2_admission_changed": false,
+  "checks": {
+    "all_9_code_cells_compile": true,
+    "contract_population_firewall": true,
+    "exact_embedded_source_integrity_15_files": true,
+    "exact_v1_1_runner_first_real_train_asset_smoke": true,
+    "mini_prep_index_sha256": "f2a472f6271b5feae9adc5c222e262055eae007c9f8e6b8d891abd9263ca1965",
+    "operational_amendment_firewall": true,
+    "runner_pack_bit_identical_to_direct_builder_pack": true,
+    "runner_pack_sha256": "d9f1a40ee1db408fcdff7a541af91ebb2c33d1b8949d2236447a3a8dced6d018",
+    "unit_tests": "4/4 PASS"
+  },
+  "date": "2026-08-28",
+  "dev32_opened": false,
+  "model_or_optimizer_changed": false,
+  "next": "RUN_EXACT_V1_1_NOTEBOOK_ON_COLAB_GPU__RESUME_SAFE_IN_PREP_V1_1",
+  "notebook": "RealSaS_E0_DOWNSTREAM_PROXY_V1_1.ipynb",
+  "notebook_sha256": "83c49b04b29debbca5c7942b853df0f51d884d8bab1bba0be5d3b668be422151",
+  "numerical_noninferiority_margin_frozen": false,
+  "old_v1_failure_localization": {
+    "all_8_raster_hashes_match_frozen_authority": true,
+    "drive_packs_folder_empty_after_failure": true,
+    "drive_reports_folder_empty_after_failure": true,
+    "exact_build_compact_pack_512_pass": true,
+    "first_asset": "asset_d7d4192f9dac8b146a17bc41",
+    "geometry_hash_matches_frozen_authority": true,
+    "localized_to": "DRIVE_FUSE_PUBLICATION_PATH_BEFORE_FIRST_COMMIT"
+  },
+  "operational_amendment_sha256": "e1a7e5c6ed61e08bac48927f38e240ed6e4974fb5402aeeacac363ddbe387662",
+  "population_changed": false,
+  "prep_runner_v1_1_sha256": "404ad50b8f7a92804530f0b26eb9e8ebd620a196cfa4040bad0ab24f5917d2f6",
+  "proxy32_opened": false,
+  "schema": "RealSaS.E0.DownstreamProxyNotebookPreflight.v1_2",
+  "science_changed": false,
+  "scientific_builder_sha256": "0f599e8f717d4c5070c04e224d90e52d1dc6e76a6e2068e64ed7c9d9d2b950b4",
+  "scientific_contract_sha256": "cf204ad1ef7d8460e402fb6c3db7361d122b3284116aa6e840af032d0fb39a2a",
+  "scientific_training_executed_in_preflight": false,
+  "status": "PASS__OPERATIONAL_FUSE_FIX_ONLY__SCIENCE_UNCHANGED"
+}

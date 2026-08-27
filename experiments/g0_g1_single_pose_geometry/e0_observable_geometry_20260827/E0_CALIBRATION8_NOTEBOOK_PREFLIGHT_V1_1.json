@@ -1,0 +1,36 @@
+{
+  "schema": "RealSaS.E0.Calibration8NotebookPreflight.v1.1",
+  "date": "2026-08-27",
+  "status": "PASS__REAL_DATA_SMOKE__SCIENTIFIC_CALIBRATION_NOT_OPENED",
+  "notebook_filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1_1.ipynb",
+  "notebook_sha256": "e40eccd86b07cda90ce3c7ef89e0a14a21a9173c51562e842bdca47602f2f41d",
+  "fixed_failure": "Python setup cell embedded JSON boolean false as a Python literal, causing NameError before manifest write.",
+  "all_code_cells_compile": true,
+  "exact_notebook_preflight": {
+    "calibration_file_preflight_8_of_8": true,
+    "pytest": "8 passed",
+    "real_calibration_asset_smoke": {
+      "anchors": 32,
+      "precision": 0.9010989010989011,
+      "recall": 0.9879518072289156,
+      "pass": true
+    },
+    "qualification_execution_path_absent": true,
+    "scientific_optimizer_steps": 0
+  },
+  "direct_full_density_real_asset_512_anchor_smoke": {
+    "asset": "asset_f8a40d6c5d815fe79c8b5e42",
+    "anchors": 512,
+    "e0_0_points": 512,
+    "precision": 0.9008498583569405,
+    "recall": 0.9709923664122138,
+    "oracle_supported_pairs": 1310,
+    "derived_predicted_pairs": 1412,
+    "full_to_observable_nn_p95": 0.02462739683687687,
+    "pass": true
+  },
+  "scientific_outcome_opened": false,
+  "proxy32_opened": false,
+  "full_calibration8_scientific_run_executed_locally": false,
+  "note": "Preflight exercised the exact notebook setup/preflight path plus a real native calibration asset. The full eight-asset calibration remains the intended scientific Colab execution."
+}

@@ -1,58 +1,64 @@
 {
-  "anchors_per_arm": 512,
-  "calibration_asset_count": 8,
-  "canonical_source_snapshot_commit": "9ce75974e525c282a2ced3547ff5380b320a7bbe",
+  "schema": "RealSaS.E0.Calibration8GeometryPackage.v1.3",
   "date": "2026-08-27",
+  "status": "SEALED_READY_FOR_CORRECTED_CALIBRATION_EXECUTION__OBSERVABLE_CAMERA_SCALE_RECOVERY__PROXY32_CLOSED",
+  "notebook_filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1_3.ipynb",
+  "notebook_sha256": "06f613e95557263ff4f0f6c7761341d728553ba45da70bbd5df4c44821024b6a",
+  "canonical_source_snapshot_commit": "334737fca6ec78e63675b0788ad3377b3a96c9d8",
+  "geometry_authority_commit": "f5949e05484e2635cb36286312e6019e2293770a",
+  "source_membership_sha256": "53856330a24f5c04b17db69bf059c6b242f0320c7e3c3c92caf1d24117c6d419",
+  "calibration_asset_count": 8,
+  "anchors_per_arm": 512,
+  "geometry_arms": ["E0-0_FULL_MESH_CANONICAL", "E0-a_OBSERVABLE_ORACLE", "E0-b_OBSERVABLE_DETERMINISTIC"],
+  "camera_scale_authority": "observable_P_plus_raster_pixel_grid_robust_median",
   "drive_strategy": "STAGE_INPUTS_LOCAL__RUN_LOCAL__RETRY_REMOUNT_EXPORT_TO_DRIVE",
+  "embedded_source_sha256": {
+    "e0_geometry.py": "8efca3e3a90fea39591cd48c26cf66f48ee9f194161a5c2a90f95ecb7954e46f",
+    "surface_builder_e0_v1.py": "83819fc8869ff26fbfc928fbeda09e59115a0554c94cbddc623b97d1c790c1cb",
+    "run_e0_calibration8_geometry_v1.py": "b900cf8524d49a78584bdf722cccd3e37153674ab6c4027a5df98b6caa9108b1",
+    "tests/test_e0_surface_builder.py": "ef5703f50b9eea6d8cf0aa8ef8ccecd37f05600ee945dbb9579e490379db8b59"
+  },
+  "preflight": {
+    "all_code_cells_compile": true,
+    "fresh_embedded_module_path_assertion": true,
+    "exact_setup_cell_executes": true,
+    "eight_asset_staging_path_executes": true,
+    "errno103_retry_selftest": true,
+    "pytest": "9 passed",
+    "drive_export_hash_selftest": true,
+    "real_763_full_density_512_anchor_smoke": {
+      "recovered_half_extent_all_views": 0.6172158718109131,
+      "camera_reprojection_p95_max_px": 0.000030517578125,
+      "oracle_supported_pairs": 1175,
+      "precision": 0.8950715421303657,
+      "recall": 0.9582978723404255,
+      "f1": 0.9256062474311549
+    }
+  },
   "firewalls": {
-    "camera_json_consumed": false,
-    "consumer_native_normalization_in_primary_gate": false,
-    "hard_tail_witness_ids_embedded_in_runner": false,
+    "scientific_optimizer_steps": 0,
     "qualification_execution_present": false,
     "qualification_proxy32_membership_embedded": false,
-    "scientific_optimizer_steps": 0,
-    "teacher_identity_used_by_e0_b": false
+    "hard_tail_witness_ids_embedded_in_runner": false,
+    "camera_json_consumed": false,
+    "teacher_identity_used_by_e0_b": false,
+    "consumer_native_normalization_in_primary_gate": false
   },
+  "invalidated_run": {
+    "name": "E0_CALIBRATION8_GEOMETRY_V1_2",
+    "reason": "Fixed orthographic half-extent 0.54 corrupted E0-a oracle projection for a frozen calibration member rendered at non-default scale; V1.2 cannot freeze margins or support E0 PASS/FAIL."
+  },
+  "supersedes": [
+    {"filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1.ipynb", "sha256": "48d827cde7f41d9e2db31d2ca8ae7f275a262d7d08ba169f258bb01b1f478021", "reason": "Python cell embedded JSON boolean false literal -> NameError."},
+    {"filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1_1.ipynb", "sha256": "e40eccd86b07cda90ce3c7ef89e0a14a21a9173c51562e842bdca47602f2f41d", "reason": "Colab Drive FUSE Errno 103 was not handled during raw Path.stat/is_file preflight."},
+    {"filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1_2.ipynb", "sha256": "477b74342e6a890e92f997b990233f723af0da88e870e0ad9c480dd78b5c36dd", "reason": "Scientific apparatus hard-coded orthographic half-extent 0.54 instead of recovering per-view observable scale. Run completed but scientific result is invalidated."}
+  ],
+  "next_authorized_action": "RUN_CORRECTED_CALIBRATION8_GEOMETRY_V1_3_THEN_INSPECT_BEFORE_ANY_DOWNSTREAM_MARGIN_FREEZE",
   "forbidden_next_actions": [
-    "OPEN_PROXY32_BEFORE_MARGIN_FREEZE",
+    "USE_V1_2_METRICS_TO_FREEZE_MARGINS",
+    "OPEN_PROXY32_BEFORE_CORRECTED_CALIBRATION_AND_MARGIN_FREEZE",
     "RUN_PRETRAINED_CONSUMER_AS_PRIMARY_SUFFICIENCY_GATE",
     "START_C1_C2_C3_BEFORE_E0_CLOSURE",
     "AUTHORIZE_PATCHMATCH_SEARCH_FUSION_PROPAGATION"
-  ],
-  "geometry_arms": [
-    "E0-0_FULL_MESH_CANONICAL",
-    "E0-a_OBSERVABLE_ORACLE",
-    "E0-b_OBSERVABLE_DETERMINISTIC"
-  ],
-  "geometry_authority_head": "8c6d339ed7f59d5225ce9a224f281df3e39ff5e0",
-  "next_authorized_action": "RUN_CALIBRATION8_GEOMETRY_V1_2_THEN_INSPECT_AND_FREEZE_SCRATCH_DOWNSTREAM_PROBE_PLUS_NONINFERIORITY_MARGINS",
-  "notebook_filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1_2.ipynb",
-  "notebook_sha256": "477b74342e6a890e92f997b990233f723af0da88e870e0ad9c480dd78b5c36dd",
-  "preflight": {
-    "32_anchor_scientific_smoke": true,
-    "all_code_cells_compile": true,
-    "drive_export_hash_selftest": true,
-    "eight_asset_staging_path_executes": true,
-    "errno103_retry_selftest": true,
-    "exact_setup_cell_executes": true,
-    "pytest": "8 passed",
-    "scientific_calibration_outcome_opened": false,
-    "scientific_source_blobs_changed_from_v1_1": false,
-    "v1_1_native_full_density_512_anchor_single_asset_smoke": "PASS"
-  },
-  "schema": "RealSaS.E0.Calibration8GeometryPackage.v1.2",
-  "source_membership_sha256": "53856330a24f5c04b17db69bf059c6b242f0320c7e3c3c92caf1d24117c6d419",
-  "status": "SEALED_READY_FOR_CALIBRATION_EXECUTION__V1_2_DRIVE_FUSE_HARDENED__PROXY32_CLOSED",
-  "supersedes": [
-    {
-      "filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1.ipynb",
-      "reason": "Python cell embedded JSON boolean false literal -> NameError.",
-      "sha256": "48d827cde7f41d9e2db31d2ca8ae7f275a262d7d08ba169f258bb01b1f478021"
-    },
-    {
-      "filename": "RealSaS_E0_CALIBRATION8_GEOMETRY_V1_1.ipynb",
-      "reason": "Colab Drive FUSE Errno 103 was not handled during raw Path.stat/is_file preflight.",
-      "sha256": "e40eccd86b07cda90ce3c7ef89e0a14a21a9173c51562e842bdca47602f2f41d"
-    }
   ]
 }

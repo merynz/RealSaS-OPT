@@ -1,0 +1,37 @@
+{
+  "camera_recovery_amendment_sha256": "4ba13ff2006ab8b888e340c49b79ceec781d90d40fd70f2ea1dcab4451655823",
+  "date": "2026-08-28",
+  "firewalls": {
+    "D0_D1_D2_semantics_changed": false,
+    "D2_admission_changed": false,
+    "camera_json_consumed_forward": false,
+    "dev32_opened": false,
+    "downstream_outcomes_inspected": false,
+    "numerical_noninferiority_margin_frozen": false,
+    "population_changed": false,
+    "proxy32_opened": false,
+    "scientific_training_executed": false
+  },
+  "fresh_paths": {
+    "checkpoints": "checkpoints_v1_2",
+    "prep": "prep_v1_2"
+  },
+  "geometry_source_sha256": "88872577354055e8559e5e343834355068d2cc5bfd2633f7196a6ae45324fa40",
+  "next": "RUN_EXACT_V1_2_NOTEBOOK_ON_COLAB_GPU",
+  "notebook": "RealSaS_E0_DOWNSTREAM_PROXY_V1_2.ipynb",
+  "notebook_sha256": "a46fe75a7ce5a0318d79c6d8b055bc593bd8c57942edc85c1d93353bf742047f",
+  "population": {
+    "calibration_truth_capable": 4,
+    "scope": "FIT_ONLY",
+    "selection": 59,
+    "train": 374
+  },
+  "preflight_json_sha256": "5048824fd5dd4a5aacaf0c1a2f1b4eac1a855fd6518b472b21abafc0cf79a092",
+  "preflight_md_sha256": "b6a960df8d128fae0dbc7d051b1f36c756dc48d8b8162567229286c7683d6d02",
+  "prep_runner": "run_e0_downstream_proxy_prep_v1_2.py",
+  "prep_runner_sha256": "d5d38fe00537922b5bc87f90a59a897ff46af4411b3ddb34c59369954d13d5da",
+  "schema": "RealSaS.E0.DownstreamProxyPackage.v1_2",
+  "scientific_contract_sha256": "cf204ad1ef7d8460e402fb6c3db7361d122b3284116aa6e840af032d0fb39a2a",
+  "status": "SEALED_READY_AFTER_CAMERA_RECOVERY_REGRESSION_FIX__FIT_ONLY__PROXY32_DEV32_CLOSED",
+  "v1_1_operational_amendment_sha256": "e1a7e5c6ed61e08bac48927f38e240ed6e4974fb5402aeeacac363ddbe387662"
+}

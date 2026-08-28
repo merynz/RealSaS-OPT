@@ -1,108 +1,71 @@
-# RealSaS — Canonical IRIS → Geppetto → Arachne Product Contract V1
+# RealSaS — Canonical IRIS → Geppetto → Arachne → Compiler Product Contract V1
+
+**Updated:** 2026-08-28  
+**Status:** `CANONICAL_PRODUCT_RESPONSIBILITY_CONTRACT__COMPILER_IN_SYSTEM_LOOP`
 
 ## North star
 
-`ONE 8-VIEW CHARACTER SHEET -> EDITABLE, RIGGED, ANIMATABLE PUPPET`
+`ONE NEUTRAL 8-VIEW CHARACTER SHEET -> EDITABLE, RIGGED, ANIMATABLE PUPPET`
 
-The default user input is one neutral pose rendered/drawn in eight ordered views. Pose B is not a shipping dependency unless a future controlled end-to-end comparison proves a material final-quality advantage that cannot be recovered downstream.
+Pose B is not a shipping dependency unless future controlled end-to-end evidence proves a material quality gain unavailable downstream.
 
-## Canonical problem-definition authority
+## Canonical system boundary
 
-The exact IRIS scientific problem is frozen in:
+```text
+8 ordered neutral views + known cameras
+  -> IRIS observation-grounded geometry evidence
+  -> deterministic SurfaceBuilder / RiggingSurfaceIR
+  -> Geppetto skeleton/hierarchy proposal G*
+  -> Compiler hierarchy qualification -> QualifiedSkeletonIR G
+  -> Arachne skin proposal W*
+  -> Compiler skin qualification -> QualifiedSkinIR W
+  -> Compiler CanonicalPuppetGraph Y
+  -> motion/deformation proof + bounded repair/re-proof
+  -> engine-neutral runtime package
+```
 
-`canonical/OBSERVABLE_RIGGING_SUBSTRATE_CONTRACT_V1.md`
-
-The key rule is:
-
-> IRIS must recover the **minimal observation-grounded geometric substrate sufficient for downstream rigging**. The final learned head list is an experimental result of S0, not an assumption.
-
-The current `P/N/V/U + persistence/provenance` factorization is the frozen G1 baseline candidate, not yet a proof that every item needs an independent learned head or that no additional geometric field is required.
+IRIS, Geppetto and Arachne are learned responsibility boundaries. Compiler is canonical product authority; runtime is a non-owning projection.
 
 ## IRIS
 
-Single responsibility:
+Single responsibility: recover the **minimal observation-grounded geometric substrate sufficient for downstream rigging**.
 
-`8-view raster observation -> safe, uncertainty-aware, rigging-sufficient observable geometric substrate`
+Closed evidence currently narrows the required exposed learned geometry direction to forward depth `d` under known cameras; common-frame `P` is analytic (`P=O+dF`). N-B3 found no explicit learned normal feature required under its frozen tested regime. This does **not** claim predicted-depth product qualification; the structured ray-aligned tolerance bridge remains the next gate.
 
-Current candidate external semantics:
-- `P`: common/object-frame position or equivalent surface geometry;
-- `N`: local normal/orientation evidence;
-- `V`: per-view visibility and observational support;
-- `U`: geometric uncertainty/risk, calibrated at the dedicated calibration gate;
-- geometric surface correspondence/persistence across views;
-- provenance/support metadata.
-
-An explicit learned `Z` correspondence embedding is optional. The capability to associate observations into coherent surface hypotheses is required, whether represented explicitly or implicitly through common-frame geometry.
-
-S0 determines whether normals, visibility/support or other quantities require independent learned heads, can be deterministically derived, or whether richer geometric state such as ambiguity hypotheses is needed.
-
-IRIS is not responsible for authored mechanical owner identity, source-rig exactness, skeleton topology, parents, skinning weights or mandatory GFDR.
+IRIS does not own authored mechanical owner identity, source-rig exactness, skeleton topology/parents, skin weights or product-canonical IDs.
 
 ## SurfaceBuilder
 
-A deterministic geometric canonicalization layer sits between raw IRIS evidence and the learned rigging stages. It is **not** a fourth learned model.
-
-Candidate responsibilities include surfel fusion, provenance/support bookkeeping, reprojection/cycle checks, local adjacency/neighborhood construction, sheet/component separation and stable derived differential geometry. S0 decides which of these are required.
+Deterministic geometric canonicalization between IRIS and rigging models. Owns analytic point construction, provenance/support bookkeeping, admitted teacher-free persistence and other explicitly qualified deterministic geometric transforms. It is not a fourth learned model and may not silently absorb Geppetto/Arachne mechanics.
 
 ## Geppetto
 
-`RiggingSurface -> clean editable skeleton/hierarchy proposal`
+`RiggingSurfaceIR S -> SkeletonProposalIR G*`.
 
-Owns joint/control locations and skeleton structure/hierarchy. Existing M4-lineage authored skeleton/hierarchy supervision maps here. Exact source-rig recovery is not required when a cleaner functionally equivalent rig exists.
+Owns learned joint/control and hierarchy **proposal** generation. Exact source-rig recovery is not required when a cleaner functionally equivalent rig exists. Proposal IDs/parents are not canonical authority.
+
+## Compiler hierarchy qualification
+
+Consumes `S + G*` through the restored canonical graph optimizer and materializes `QualifiedSkeletonIR G`. Owns root/parent validity, graph invariants, bounded structural policy, canonical ID minting and fail-closed admission.
 
 ## Arachne
 
-`RiggingSurface + Geppetto skeleton -> editable skinning weights`
+`S + QualifiedSkeletonIR G -> SkinProposalIR W*`.
 
-Owns dense/sparse skinning. Existing M5-lineage dense weighting/deformation supervision maps here.
+Owns learned editable skinning proposal generation. Internal dense/sparse/tokenized representation is revisionable; the external contract must remain qualifiable and editable.
 
-Geppetto and Arachne are responsibility boundaries, not a permanent requirement for two physical checkpoints; they may later share an encoder or be jointly trained if evidence supports it while typed interfaces/evaluation remain separable.
+## Compiler skin/product authority
 
-## Compiler
+Owns admissible weights, deterministic/solver-backed projection where justified, residuals, product assembly, single product lineage, motion/deformation proof, attribution, bounded repair/reselection, re-proof and export.
 
-Canonical product authority after learned proposals. Owns IDs/graph normalization, structural validity, hierarchy/weight sanity, cleanup, deterministic postprocess, deformation probes, verification, repair/reselection, fail-closed behavior and editable puppet export.
+Proof, repair, serialization and runtime must bind to the exact same `CanonicalPuppetGraph.product_state_hash`. Model-issued product truth and parallel canonical graphs are forbidden.
 
 ## Quality contract
 
-IRIS is geometry-first. Evaluation must cover position/surface accuracy, normals where required, silhouette reprojection, cross-view consistency, coverage, local geometric fidelity, uncertainty/risk calibration, artist-domain robustness and downstream rig-readiness. Owner partition, parent accuracy, authored-rig exactness and GFDR accuracy are not IRIS promotion gates.
+IRIS promotion requires geometry/downstream evidence, not teacher-rig exactness. Geppetto/Arachne promotion requires editable functional quality plus compiler qualification. Final product promotion requires deformation/motion proof and fail-closed behavior.
 
-A visually plausible surface is insufficient if it destroys geometry needed for downstream rigging. This is tested through geometry-sensitive metrics and controlled `GT observation-equivalent substrate -> downstream` versus `IRIS substrate -> downstream` quality comparisons, not by returning mechanical ontology to IRIS.
-
-## Research roadmap
-
-```text
-D2 diagnostic closure
- -> G0 contract/evaluator freeze
- -> S0 observable rigging-substrate definition + sufficiency ablation
-      S0-A information/derivability inventory
-      S0-B fixed downstream probe ablation
-      S0-C RiggingSurface contract freeze
- -> G1 preserved single-pose multiview geometry baseline
- -> G1.5 geometry coherence interventions IF needed
- -> G2 camera-aware cross-view fusion IF needed
- -> G3 direct/richer common-frame geometry IF needed
- -> G4 explicit geometry grounding + calibration
- -> G5 geometry-aware local refinement IF needed
- -> G6 artist-domain robustness
- -> G7 IRIS product qualification against S0 contract
- -> R1 Geppetto
- -> R2 Arachne
- -> R3 joint rig quality
- -> C0 Compiler restoration/rebind
- -> P0 end-to-end product gate
-```
-
-G1 remains historically and scientifically frozen; S0 does not rewrite its architecture or preregistration. S0 tells us what downstream sufficiency target G1 and later geometry systems must ultimately meet.
-
-The old D1→D2→D3→D4 descriptor ladder is not automatically the product roadmap. D1/D2/D3 components remain preserved and may be reactivated where the geometry line demonstrates need. High-recall correspondence, reciprocal/cycle consistency, explicit camera geometry, grounding, provenance and ambiguity preservation remain active architecture lessons even though motion-specific GFDR outputs are no longer core IRIS targets.
+Current E0 and N-B3 results are scientific information-sufficiency/feature-necessity results, **not** a product pass. The next IRIS gate is the structured ray-aligned predicted-depth tolerance bridge with both frozen proxy instruments and the restored real compiler in loop.
 
 ## Change control
 
-An explicit contract revision is required before:
-- making Pose B mandatory for shipping;
-- returning hidden mechanical-owner identity to IRIS;
-- making GFDR mandatory for IRIS qualification;
-- declaring a fixed final IRIS head list without S0 sufficiency evidence;
-- removing typed responsibility boundaries or editability;
-- replacing final functional-quality gates with teacher-rig/source-mesh exactness;
-- moving canonical final authority entirely into opaque neural output.
+Boundary changes require recorded controlled evidence. Convenience, analogy or implementation fashion are insufficient. Explicit revision is required before returning hidden mechanical ontology to IRIS, making Pose B mandatory, allowing model-owned canonical truth, or replacing functional product gates with source-teacher exactness.

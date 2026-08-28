@@ -1,0 +1,11 @@
+{
+  "schema": "RealSaS.CompilerHistoricalAuthorityPointers.v1",
+  "byte_authority": "Google Drive historical compiler/runtime archives unless a GitHub text authority is named explicitly",
+  "authorities": [
+    {"role":"Aug-v0.5 executable chassis/full source","sha256":"03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130"},
+    {"role":"Aug-6 R5_3 identity/reducer/DAG authority","sha256":"6224661cb4323f78a9b808af10f68dd584431a422e28d26a69e87816a3b0ef80"},
+    {"role":"May v97.39 single-truth rebind patch","sha256":"ac755b4ba9319de963e9f68f962d7a1839e40c640928ac0c035a6af1758673e1","report_sha256":"896d41b83dc36f297ca326fcb49402624437280fb6c2e3d2166add2c8d2fcf2a"},
+    {"role":"late-May v97_43 stronger numerical/rig authority","sha256":"09a94871f938b069ba5c8219f203355e724f2f58afa6e10dc5c6148d98b43efb"},
+    {"role":"Aug-v0.5 C++17 runtime source","sha256":"1af741c9a3d30456a6703809e067a9c3a61220da51a6a1a9cbda2b8a4755e8b0"}
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "heavy_proof_repair_numerical_authority": "DRIVE_SHA_POINTERS",
+  "import_mode": "verify_then_safe_extract",
+  "part_records": [
+    {"chars":10000,"name":"part_000.b64","sha256":"3ad28166c557a73689f967b42d07003418e88bbf42c080f5d71d708ad0238bbc"},
+    {"chars":10000,"name":"part_001.b64","sha256":"74a711ada618898da31a2dea2c223856fabd34fb6206ca9a932195c066313bd4"},
+    {"chars":10000,"name":"part_002.b64","sha256":"204e2b02c0791afea189068fec0ba6d10e824ea819a70fdcb711668de5e52645"},
+    {"chars":2500,"name":"part_003a.b64","sha256":"04885d3b7411aa8ddca9cab734a95c82a8c5c038f707300c88a137afba6d8976"},
+    {"chars":2500,"name":"part_003b.b64","sha256":"bd8123269ce747a404239dee4644e015dca850e7d391562347c661d5078d71ef"},
+    {"chars":2500,"name":"part_003c.b64","sha256":"0f4a40696e43724919b1697066afccfe5017699bc37bdbf23a9be0f0434482cc"},
+    {"chars":2500,"name":"part_003d.b64","sha256":"68b8927a8b69f999544423d1f0b4b522903d12fc1e9b812a60c4b6879b337c61"},
+    {"chars":10000,"name":"part_004.b64","sha256":"a532d681c4cfaf04302b9390a4cad1e47868d9051613b1391e62f58fb20f2742"},
+    {"chars":4664,"name":"part_005.b64","sha256":"baff649c531db2fa2117f642638dbeafb433c7109762ce1571578beffd86caa1"}
+  ],
+  "parts":["part_000.b64","part_001.b64","part_002.b64","part_003a.b64","part_003b.b64","part_003c.b64","part_003d.b64","part_004.b64","part_005.b64"],
+  "raw_sha256":"3a6076b30e0a23807f952365d39d81ddf5d4b1dba734c0bdba47567bced26850",
+  "raw_size_bytes":40998,
+  "records":[
+    {"bytes":14177,"mode":"BYTE_EXACT_V0_5","path":"realsas_artifacts/bundle.py","sha256":"ca63d50ed857412d3b65b98fad4b02c4a9c28057e4a99f67215ae4da4c9a7127"},
+    {"bytes":1954,"mode":"BYTE_EXACT_V0_5","path":"realsas_compiler_graph/cache.py","sha256":"16227183f0bbe8d23e0d32a09d45aa07f608e6ce984478ccb7b1832b0fe6987b"},
+    {"bytes":6013,"mode":"BYTE_EXACT_V0_5","path":"realsas_compiler_graph/events.py","sha256":"83228ac5ed961a421157d44fd3c80922c991a1ad70442392be3fe5c5fcb904a1"},
+    {"bytes":19157,"mode":"BYTE_EXACT_V0_5","path":"realsas_contracts/core.py","sha256":"fdecde5277cffd9d14728af4c008214c596238c0b6f2576df532f16224cc494a"},
+    {"bytes":29499,"mode":"BYTE_EXACT_V0_5","path":"realsas_contracts/execution.py","sha256":"4e62b671ede1a14236266c4171ea2c014dfdfbd83ad1fd4fe4dc4c4618ecd7ad"},
+    {"bytes":16637,"mode":"BYTE_EXACT_V0_5","path":"realsas_contracts/mechanical_identity_constraints_v19_20.py","sha256":"424df3aa974d989a61bc75bf75045364875c4d734eb07b93cbd32984d960c3a5"},
+    {"bytes":8518,"mode":"BYTE_EXACT_V0_5","path":"realsas_contracts/source_evidence.py","sha256":"bb3808ca5e11b085206c1e7178dce82261ee01d8e74219bad657d30a35c9c6cb"},
+    {"bytes":32131,"mode":"BYTE_EXACT_V0_5","path":"realsas_contracts/technical_part_graph.py","sha256":"55425eb0891c552f844d5446832510fbbf7c8d83c32bfe5cf7a4d25e5fd634a6"},
+    {"bytes":53544,"mode":"BYTE_EXACT_V0_5","path":"realsas_synthesis/canonical_graph_optimizer.py","sha256":"b2fddb64753ca783e298be4f1078c70b9667fa9931c67de738f955976e2587c1"},
+    {"bytes":141,"mode":"NAMESPACE_REBIND","path":"realsas_artifacts/__init__.py","sha256":"0cb08737da7501578cd128d44f9c37c4cc56855f35f2aa5a9c0002159c24a586"},
+    {"bytes":50,"mode":"NAMESPACE_REBIND","path":"realsas_compiler_graph/__init__.py","sha256":"83dce04494e6f4ce443b80d018374aaa7f406990dea3dc0256d5331729933260"},
+    {"bytes":75,"mode":"NAMESPACE_REBIND","path":"realsas_contracts/__init__.py","sha256":"602758ac3f0b3a9f62b824e6107b44947f0145162f285190b05da391d61d7888"},
+    {"bytes":75,"mode":"NAMESPACE_REBIND","path":"realsas_synthesis/__init__.py","sha256":"a38d1700712ba9478e216ee8c36f3bebf90d52fae86936161e71648e9e29470e"}
+  ],
+  "schema":"RealSaS.CurrentCompilerHistoricalClosure.v1",
+  "scope":"CURRENT_IRIS_TO_COMPILER_EXECUTION_CLOSURE"
+}

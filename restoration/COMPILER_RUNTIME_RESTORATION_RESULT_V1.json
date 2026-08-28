@@ -1,0 +1,32 @@
+{
+  "schema": "RealSaS.CompilerRuntimeRestorationResult.v1",
+  "date": "2026-08-28",
+  "status": "CURRENT_COMPILER_IN_CANONICAL_LOOP__RUNTIME_BOUND_AND_QUALIFIED",
+  "source_authorities": {
+    "v0_5_full_source_sha256": "03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130",
+    "r5_3_evidence_sha256": "6224661cb4323f78a9b808af10f68dd584431a422e28d26a69e87816a3b0ef80",
+    "v97_43_integrated_source_sha256": "09a94871f938b069ba5c8219f203355e724f2f58afa6e10dc5c6148d98b43efb",
+    "runtime_v0_5_source_sha256": "1af741c9a3d30456a6703809e067a9c3a61220da51a6a1a9cbda2b8a4755e8b0"
+  },
+  "current_execution_closure": {
+    "raw_zip_sha256": "3a6076b30e0a23807f952365d39d81ddf5d4b1dba734c0bdba47567bced26850",
+    "raw_size_bytes": 40998,
+    "byte_exact_v0_5_leaf_count": 9,
+    "namespace_rebind_count": 4,
+    "old_front_brain_import_count": 0,
+    "excluded_old_planner_reason": "imports realsas_truth.mechanical_truth_graph"
+  },
+  "routing": {
+    "geppetto": "RiggingSurfaceIR -> SkeletonProposalIR -> CanonicalGraphOptimizationRequest/Result -> QualifiedSkeletonIR",
+    "arachne": "RiggingSurfaceIR + QualifiedSkeletonIR -> SkinProposalIR -> QualifiedSkinIR",
+    "product": "Qualified S/G/W -> CanonicalPuppetGraph -> proof/repair/re-proof -> runtime projection"
+  },
+  "regression_evidence": {
+    "current_typed_routing": "10/10 PASS",
+    "selected_historical_graph_rig_mesh_weight_arap": "46/46 PASS",
+    "causal_diagnosis_repair": "9/9 PASS",
+    "native_runtime_ctest": "1/1 PASS",
+    "package_to_native_render": "PASS"
+  },
+  "next": "STRUCTURED_RAY_ALIGNED_PREDICTED_DEPTH_TOLERANCE_BRIDGE"
+}

@@ -19,6 +19,8 @@
   "qualification_margins_changed": false,
   "qualification_pack_count_to_build": 27,
   "runner": "run_e0_proxy27_qualification_v1.py",
+  "runner_execution_authority": "EMBEDDED_IN_NOTEBOOK",
+  "runner_repo_mirror_git_blob_sha": "c017b6bdac55c3522b7a98cf06eeacdee528e8cf",
   "runner_sha256": "505420160174ad236355ab62106273dde90a72bbe3d4eac498e4292d9df80d58",
   "schema": "RealSaS.E0.Proxy27QualificationPackage.v1",
   "status": "SEALED_READY_BEFORE_PROXY27_OPEN__DEV32_CLOSED"

@@ -1,0 +1,23 @@
+{
+  "schema": "RealSaS.E0.DownstreamProxyMarginDecision.v1",
+  "date": "2026-08-28",
+  "status": "MARGINS_FROZEN_BEFORE_PROXY32__PROXY32_DEV32_CLOSED",
+  "calibration_result_sha256": "82bbb1b56266742242bee5995209df6d83ecfec177ff6a431d13553491ae36b9",
+  "primary_lower_is_better_metrics": [
+    "arachne.ce",
+    "arachne.influence_disp_mean",
+    "geppetto.joint_mean"
+  ],
+  "primary_max_relative_degradation": 0.05,
+  "primary_required_comparisons": ["D1/D0", "D2/D1", "D2/D0"],
+  "geppetto_tail_metric": "family_p95",
+  "geppetto_tail_max_relative_degradation": 0.10,
+  "pck_catastrophe_veto": {
+    "pck_005_D2_minus_D0_min": -0.10,
+    "pck_008_D2_minus_D0_min": -0.10
+  },
+  "qualification_rule": "ALL_PRIMARY_AND_TAIL_AND_PCK_VETOES_MUST_PASS",
+  "proxy32_opened": false,
+  "dev32_opened": false,
+  "margin_changes_after_proxy32_open": "FORBIDDEN"
+}

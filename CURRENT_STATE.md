@@ -2,144 +2,134 @@
 
 **Date:** 2026-08-28  
 **Active branch:** `g0-g1/single-pose-geometry`  
-**Status:** `E0_DOWNSTREAM_CALIBRATION_COMPLETE__MARGINS_FROZEN__PROXY32_NEXT__DEV32_CLOSED`
+**Status:** `E0_PRE_PROXY32_DIAGNOSTICS_PREREGISTERED__RUN_DIAGNOSTICS_NEXT__PROXY32_DOWNSTREAM_CLOSED__DEV32_CLOSED`
 
 This file is the single continuation authority.
 
-## Active scientific question
+## Frozen E0 downstream gate
 
-Does the exact observable A×8 common-frame substrate preserve enough rigging-relevant information relative to a full-mesh ceiling?
+The current research question is whether the exact observable A×8 common-frame substrate preserves enough rigging-relevant information for matched downstream information-isolation proxies. Product Geppetto/Arachne do not yet exist.
 
 ```text
-D0 = full/closed canonical surface + oracle observation provenance
-D1 = exact observable surface + oracle physical persistence
-D2 = exact observable surface + frozen teacher-free MUTUAL_P003 persistence
+D0 = fixed-budget full-mesh reference + oracle observation provenance
+D1 = exact visible-union substrate + oracle physical persistence
+D2 = exact visible-union substrate + frozen teacher-free MUTUAL_P003 persistence
 ```
 
-Interpretation:
-- D0→D1 = observable coverage/support tax.
-- D1→D2 = deterministic persistence/admission tax.
+Important interpretation correction: D0 is **not** an unconstrained information ceiling. D0 spends 512 area-uniform full-mesh slots; D1/D2 pool visible rows across the eight views and use common-frame FPS for 512 anchors. Therefore D0→D1 mixes information access with fixed-budget sample allocation. This is recorded in `E0_DOWNSTREAM_PROXY_INTERPRETATION_NOTE_V1.md`; frozen qualification margins are unchanged.
 
-These are fixed research information-isolation proxies, not product Geppetto/Arachne.
+## Reusable substrate cache
 
-## Frozen substrate/cache authority
-
-`prep_v1_2` is now an immutable reusable dataset artifact for this gate:
+`prep_v1_2` is immutable reusable authority for the official gate:
 - 437 compact packs complete;
-- pack rebuild is **not** required for downstream model/evaluator changes;
-- geometry source SHA-256: `88872577354055e8559e5e343834355068d2cc5bfd2633f7196a6ae45324fa40`;
-- camera recovery uses robust through-origin observable-only regression; `camera.json` is forbidden forward;
-- D2 admission remains `MUTUAL_P003`, cycle threshold `0.003`, teacher identity forbidden.
+- ordinary downstream/evaluator changes must not rebuild them;
+- geometry source SHA-256 `88872577354055e8559e5e343834355068d2cc5bfd2633f7196a6ae45324fa40`;
+- observable camera scale uses robust through-origin regression; no `camera.json` forward;
+- D2 remains `MUTUAL_P003`, cycle threshold `0.003`, teacher identity forbidden.
 
-Rebuild the 437 packs only if the substrate/pack contract itself changes.
-
-## Downstream execution authority
+## Calibration V1.3 complete
 
 Frozen FIT population:
-- train: 374;
-- selection: 59;
-- calibration truth-capable: 4.
-
-Arachne training uses the symmetric target-support eligibility:
-`COMMON_D0_D1_D2_AT_LEAST_ONE_VALID_SKIN_TARGET`.
-
-This yields:
-- Arachne train: 371;
-- Geppetto train: 374;
-- selection: 59/59 for both;
-- calibration: 4/4 for both.
-
-The three Arachne-zero-common-target assets remain in the frozen E0 and Geppetto populations. This is not retrospective product-domain filtering.
+- train 374;
+- selection 59;
+- calibration truth-capable 4;
+- Arachne common-target train 371;
+- Geppetto train 374.
 
 V1.3 result SHA-256:
 `82bbb1b56266742242bee5995209df6d83ecfec177ff6a431d13553491ae36b9`
 
-V1.3 run seal:
-`E0_DOWNSTREAM_PROXY_SEAL_V1_3.json`
-
-Status in seal:
-`FIT_CALIBRATION_COMPLETE__MARGINS_NOT_FROZEN__PROXY32_DEV32_CLOSED`
-
-The subsequent margin decision below supersedes only the margin-status field; scientific artifacts are unchanged.
-
-## Calibration4 findings
-
-Lower is better.
+Calibration4 aggregates, lower is better:
 
 | Metric | D0 | D1 | D2 | D0→D1 | D1→D2 | D0→D2 |
 |---|---:|---:|---:|---:|---:|---:|
 | Arachne CE | 1.195226 | 1.131971 | 1.146689 | -5.29% | +1.30% | -4.06% |
-| Arachne influence displacement mean | 0.0125986 | 0.0117482 | 0.0119394 | -6.75% | +1.63% | -5.23% |
+| Arachne influence displacement | 0.0125986 | 0.0117482 | 0.0119394 | -6.75% | +1.63% | -5.23% |
 | Geppetto joint mean | 0.137285 | 0.143399 | 0.136530 | +4.45% | -4.79% | -0.55% |
 | Geppetto family-p95 | 0.171975 | 0.179822 | 0.164098 | +4.56% | -8.74% | -4.58% |
 
-Interpretation:
-- Arachne has no observable-coverage penalty in aggregate. D2 pays a small, consistent persistence tax versus D1 (~1–2%), while remaining better than D0 overall.
-- Geppetto shows a small observable-coverage tax at D1; D2 recovers it in both calibration4 and the 59-FIT selection diagnostics. D2 is essentially equal/slightly better than D0 in aggregate joint mean.
-- D2 outperforming D1 on Geppetto must not be interpreted as deterministic persistence being intrinsically superior to oracle persistence; each arm is retrained.
+Defensible conclusion only: deterministic persistence is not currently a downstream bottleneck under these matched proxy consumers. Do not interpret D2>D1 as more physical information.
 
-## Frozen non-inferiority margins
+## Frozen qualification margins
 
-Canonical decision:
-- `E0_DOWNSTREAM_PROXY_MARGIN_DECISION_V1.md`
-- `E0_DOWNSTREAM_PROXY_MARGIN_DECISION_V1.json`
+Authority: `E0_DOWNSTREAM_PROXY_MARGIN_DECISION_V1.md/json`.
 
-Frozen before Proxy32 is opened.
+Primary lower-is-better metrics Arachne CE, Arachne influence displacement, Geppetto joint mean must each satisfy:
 
-Primary lower-is-better metrics:
-- Arachne CE;
-- Arachne influence displacement mean;
-- Geppetto joint mean.
-
-For each:
 ```text
-D1 / D0 <= 1.05
-D2 / D1 <= 1.05
-D2 / D0 <= 1.05
+D1/D0 <= 1.05
+D2/D1 <= 1.05
+D2/D0 <= 1.05
 ```
 
-Geppetto tail guard:
+Geppetto `family_p95` uses the same three ratios at `<=1.10`.
+
+PCK is catastrophe-only:
+
 ```text
-family_p95 D1/D0 <= 1.10
-family_p95 D2/D1 <= 1.10
-family_p95 D2/D0 <= 1.10
+PCK@0.05(D2) >= PCK@0.05(D0)-0.10
+PCK@0.08(D2) >= PCK@0.08(D0)-0.10
 ```
 
-PCK catastrophe veto:
+Margins/metric roles/population/D2 admission cannot change after Proxy32 downstream evaluation opens.
+
+## Pre-Proxy32 interpretation diagnostics — preregistered, outcomes unseen
+
+Before qualification, two cheap interpretation controls were preregistered using **only already-open FIT train/selection**. They cannot change or rescue the frozen qualification gate.
+
+Authority files:
+- `E0_PRE_PROXY32_DIAGNOSTIC_PREREG_V1.md`
+- `E0_PRE_PROXY32_DIAGNOSTIC_SPLIT_V1.json`
+- `E0_PRE_PROXY32_DIAGNOSTIC_SPEC_V1.json`
+- `E0_PRE_PROXY32_DIAGNOSTIC_PREFLIGHT_V1.json`
+- `E0_PRE_PROXY32_DIAGNOSTIC_PACKAGE_V1.json`
+- `N_B3_EPSILON_PREREG_V1.md`
+
+Diagnostic population:
+- train64 = first 64 frozen train assets after existing common Arachne target-support eligibility;
+- evaluation = frozen selection59;
+- all 123 are disjoint from the 32 Proxy families.
+
+Diagnostics:
+1. **Implicit-N decodability**: matched `P3 -> N` versus current `X36 -> N` probes, exact geometric N evaluator-only. This determines how much orientation is already implicit in support/raster/depth features.
+2. **D0 allocation/budget**: diagnostic-only D0@2048 versus official D0@512 and D1@512, with geometric coverage plus matched Arachne/Geppetto consumers. Official 437 packs are reused, not rebuilt.
+
+The N-B3 epsilon ladder is preregistered independently with `epsilon={0,.001,.003,.010}` and arms N0/N3a/N3b/N2, but is **not executed** by the pre-Proxy32 diagnostic notebook.
+
+## Proxy32 metadata-only freeze
+
+Original frozen `FIT_PROXY32` membership is 32 families (26 Objaverse + 3 Quaternius + 3 KayKit), selected before this downstream gate and disjoint from train512.
+
+Metadata-only master-ledger intersection:
+
 ```text
-PCK@0.05(D2) >= PCK@0.05(D0) - 0.10
-PCK@0.08(D2) >= PCK@0.08(D0) - 0.10
+capabilities.iris && capabilities.geppetto && capabilities.arachne
 ```
 
-After Proxy32 is opened, changing these margins, metric roles, population rules, or D2 admission is forbidden.
+produces 27/32 downstream-truth-capable Proxy families. Exact authority:
+`E0_PROXY32_TRUTH_INTERSECTION_V1.json`.
 
-## Firewalls
+Truth-capable ordered-ID SHA-256:
+`b9120bbd3f603cee6bf80110e170309b9fe8b135ae56fbbd6d8d1bda4fc11817`
 
-- `qualification_proxy32 = CLOSED`.
-- `DEV32 = CLOSED`.
-- no pretrained consumer.
-- no product Geppetto/Arachne claim.
-- no product-domain retrospective cleanup.
-- no teacher identity in D2 admission.
-- no non-inferiority rescue by secondary diagnostics.
+This metadata inspection does **not** open Proxy32 downstream metrics. `proxy32_downstream_evaluation_opened=false` remains authoritative.
 
 ## Next executable action
 
-Open the truth-capable intersection of `qualification_proxy32` exactly once and evaluate D0/D1/D2 with the frozen checkpoints and frozen margin decision. Do not retrain, retune, alter margins, alter D2, or rebuild the 437 substrate packs.
+Run `RealSaS_E0_PRE_PROXY32_DIAGNOSTICS_V1.ipynb` on Colab GPU.
 
-If every frozen primary/tail/PCK veto passes:
-`E0_DOWNSTREAM_INFORMATION_SUFFICIENCY_PROXY_PASS`.
+It must:
+- rebuild **0/437** official packs;
+- reuse only 123 existing official packs;
+- create only diagnostic caches for those 123 assets;
+- run implicit-N and D0-budget diagnostics;
+- leave Proxy32 downstream CLOSED;
+- leave DEV32 CLOSED;
+- leave frozen qualification margins unchanged.
 
-Otherwise:
-`E0_DOWNSTREAM_INFORMATION_SUFFICIENCY_PROXY_FAIL` and localize the failed rung without changing the sealed qualification.
+After its result is inspected, open the frozen 27-member truth-capable Proxy32 intersection exactly once with the already-frozen qualification evaluator. No diagnostic outcome may alter that qualification rule.
 
-## Parked
-
-- `N_B3`: strongest structured N(P) falsification; resume after D0/D1/D2 qualification.
-- `PRODUCT_DOMAIN_V1`: prospective product-domain filtering after E0; giant non-deforming props/planes may motivate criteria but cannot retroactively alter this frozen E0 population.
-- C1/C2/C3, full MapAnything wrapper, full PatchMatch remain unauthorized.
-
-## Authorization state
+## Firewalls / authorization
 
 `E0_CALIBRATION8_V1_3 = COMPLETE`
 
@@ -151,10 +141,16 @@ Otherwise:
 
 `DOWNSTREAM_NONINFERIORITY_MARGINS = FROZEN_V1`
 
-`E0_PROXY32_QUALIFICATION = CLOSED__NEXT_GATE`
+`E0_PRE_PROXY32_DIAGNOSTICS = PREREGISTERED__NOT_YET_EXECUTED`
+
+`N_B3_EPSILON = PREREGISTERED__NOT_YET_EXECUTED`
+
+`E0_PROXY32_TRUTH_INTERSECTION = FROZEN_METADATA_ONLY_27_OF_32`
+
+`E0_PROXY32_DOWNSTREAM_EVALUATION = CLOSED`
 
 `DEV32_EXTERNAL = CLOSED`
 
 `E0_PRODUCT_PASS = NOT_CLAIMED`
 
-`N_B3 = PARKED_UNTIL_AFTER_D0_D1_D2_QUALIFICATION`
+`PRODUCT_DOMAIN_V1 = DEFERRED_PROSPECTIVE_AFTER_E0`

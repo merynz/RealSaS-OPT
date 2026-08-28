@@ -1,0 +1,13 @@
+{
+  "files": {
+    "P_HARDTAIL_ORACLE_D2_D5_20260826.md": "3d6917a5ec9a5007703da7f183bcae14a6026eed92c8b7ccdb503cf490ca9987",
+    "P_HARDTAIL_ORACLE_D2_D5_20260826_METRICS.json": "56175b25e0ec870e900da404d5546e9ea93b0189dcba27d20ea41a4a33cf0abc",
+    "P_HARDTAIL_ORACLE_D2_D5_20260826_RAW_METRICS.json": "f17d791858c6363ad3dbd191963490660b5ea429509bdffe9844da2bc77ea201",
+    "d2_learned_feature_oracle_v1.py": "941b4b9d3ed598a3215a0bbbcae63a796bfccbe3aca77b0af6478f7dce8f798d",
+    "d2b_crossview_metric_probe_v1.py": "2732d116fd6ea1245a6aa07b8bb7237db99140143f367f98fa2304248a7890c5",
+    "d3_normal_plane_patch_oracle_v1.py": "fb43827f8c4f12cf6c4377d920b181377ae92836f9b731bdd785d3e983bcb224",
+    "d4_learned_feature_visibility_oracle_v1.py": "e8fede131bf275643e6a18307b81bbe42a9297f886a350351fc9ed06f60ea53b",
+    "d5_multiscale_feature_consistency_oracle_v1.py": "890e66424626c220871290ce70a78cb8aa6dff17a2ef93c0fb996f38fb105ed3"
+  },
+  "schema": "RealSaS.IRIS.PHardTail.D2D5ArtifactSHA256.v2"
+}

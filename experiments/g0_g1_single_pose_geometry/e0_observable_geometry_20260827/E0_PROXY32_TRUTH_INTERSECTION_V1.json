@@ -1,0 +1,308 @@
+{
+  "downstream_metrics_inspected_for_eligibility": false,
+  "eligibility": "capabilities.iris == true AND capabilities.geppetto == true AND capabilities.arachne == true",
+  "excluded_count": 5,
+  "excluded_metadata_only": [
+    {
+      "asset_id": "asset_2cc827f55e415c46a71ffbe1",
+      "capabilities": {
+        "arachne": false,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_8169868db8220e38cdf00611",
+      "capabilities": {
+        "arachne": false,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_0bb166ab2f6ce59c1c314d96",
+      "capabilities": {
+        "arachne": false,
+        "geppetto": false,
+        "iris": true
+      },
+      "source_registry_id": "quaternius_cc0"
+    },
+    {
+      "asset_id": "asset_a74fd0d398cb161cf9246fcc",
+      "capabilities": {
+        "arachne": false,
+        "geppetto": false,
+        "iris": true
+      },
+      "source_registry_id": "kaykit_cc0"
+    },
+    {
+      "asset_id": "asset_076d5f9cc5befdcdb75323bd",
+      "capabilities": {
+        "arachne": false,
+        "geppetto": false,
+        "iris": true
+      },
+      "source_registry_id": "kaykit_cc0"
+    }
+  ],
+  "master_ledger_filename": "MASTER_VARIANTS.jsonl",
+  "master_ledger_sha256": "475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913",
+  "proxy32_downstream_evaluation_opened": false,
+  "proxy32_family_count": 32,
+  "schema": "RealSaS.E0.Proxy32TruthIntersection.v1",
+  "source_membership_canonical_json_sha256": "8531360f1c61dc4cdb699c095790c35ab3af0da5a7a290b420e5777bb4e9169b",
+  "source_membership_filename": "P_V5_R256_FIT_SCALE_LADDER_MEMBERSHIP_V1.json",
+  "source_membership_raw_sha256": "3cfc3dc75be431993a9a863d08f381cd800abe6bb6a56c80c06d124f6cf3c100",
+  "status": "FROZEN_METADATA_ONLY_BEFORE_DOWNSTREAM_PROXY32_EVALUATION",
+  "truth_capable": [
+    {
+      "asset_id": "asset_ea593d044e14f20abe6d2818",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_f089abadcd071194617d640b",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_abd7e358b9e7c7b0e71d969b",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_214c0af580dbfba882412ce3",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_2729b011fa8f11b8a5e46449",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_56267911abfbf3b577dd5c35",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_e383ed2d8a58445c7685d4d0",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_85bd1af37089c1b2680094bb",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_243fc1af9fb7dd6d21a86d00",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_e1b2515bc9403665102d4ca3",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_662ed7f1e328bd85959157cf",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_9ca45c9f0ea6a68ac09680b9",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_a3065f8d9279b9e925c9e3c0",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_7c2bdaa361ce7b9dc59104c2",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_0cd7ab82864a82a904d82cd0",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_78bf64c0e3df08dc4949b60f",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_4eccd8b2ac7eb5cf4209a2f3",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_a971c7f747d59bc75c1e1d74",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_d0b79130c3bf9dda14dedd94",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_c2f271b7b86adfea4512e774",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_530be6a58afec64cf3f7de57",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_b8e712332567fba7d16766c6",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_ca5cb8810bb4f2f8b76096b6",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_12426e8bff6844d027dd65b4",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "objaverse_animated_originals"
+    },
+    {
+      "asset_id": "asset_0c6dddd9c3570b1f193d5726",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "quaternius_cc0"
+    },
+    {
+      "asset_id": "asset_112b9b2b7c831f4127516f4a",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "quaternius_cc0"
+    },
+    {
+      "asset_id": "asset_af357a50a746d82ddccf72c1",
+      "capabilities": {
+        "arachne": true,
+        "geppetto": true,
+        "iris": true
+      },
+      "source_registry_id": "kaykit_cc0"
+    }
+  ],
+  "truth_capable_count": 27,
+  "truth_capable_ids_sha256": "b9120bbd3f603cee6bf80110e170309b9fe8b135ae56fbbd6d8d1bda4fc11817"
+}

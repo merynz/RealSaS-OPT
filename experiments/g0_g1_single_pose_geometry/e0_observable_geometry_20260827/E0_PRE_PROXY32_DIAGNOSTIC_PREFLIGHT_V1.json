@@ -1,0 +1,22 @@
+{
+  "builder_sha256": "bc4c0d4efabc2ab4cf75e55de8d9a16d489dce408ef0f5ded32991ea484fb6d1",
+  "code_cell_count": 8,
+  "code_cells_compile_pass": true,
+  "date": "2026-08-28",
+  "dev32_opened": false,
+  "diagnostic_build_spec_sha256": "deaef5ce4ecfd396227a4d8111ef3835066ce2a6ff983f110d6ba29b244bfc05",
+  "diagnostic_proxy32_disjoint": true,
+  "diagnostic_selection_count": 59,
+  "diagnostic_train_count": 64,
+  "embedded_authority_count": 8,
+  "notebook_sha256": "49871e431c4ad1783f121ebbd240c7aa51dedb664b3816cdc5e0f5950d14ef22",
+  "official_437_pack_rebuild_performed": false,
+  "proxy32_downstream_evaluation_opened": false,
+  "proxy32_family_count": 32,
+  "proxy32_truth_capable_count": 27,
+  "qualification_margins_changed": false,
+  "real_asset_runtime_preflight_performed": false,
+  "schema": "RealSaS.E0.PreProxy32DiagnosticPreflight.v1",
+  "scientific_diagnostics_executed": false,
+  "status": "STATIC_PREFLIGHT_PASS__REAL_ASSET_RUNTIME_NOT_EXECUTED__PROXY32_DOWNSTREAM_CLOSED"
+}

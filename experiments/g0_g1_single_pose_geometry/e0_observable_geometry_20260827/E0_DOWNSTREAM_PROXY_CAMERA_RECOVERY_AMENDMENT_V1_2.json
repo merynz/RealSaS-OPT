@@ -1,0 +1,34 @@
+{
+  "date": "2026-08-28",
+  "evidence": {
+    "absolute_half_extent_error_v0": 1.303668295538074e-08,
+    "grid_rms_v0": 0.0381883928005062,
+    "information_energy_v0": 3.489839553833008,
+    "new_recovered_half_extent_v0": 0.5400000774096994,
+    "new_reprojection_px_p95_v0": 0.0,
+    "posthoc_camera_json_half_extent_v0": 0.5400000643730164,
+    "visible_rows_v0": 2393
+  },
+  "failure_asset": "asset_de72098ec0bd43ce9fc30c60",
+  "firewalls": {
+    "D0_D1_D2_semantics_changed": false,
+    "D2_admission_changed": false,
+    "camera_json_consumed_forward": false,
+    "dev32_opened": false,
+    "downstream_outcomes_inspected": false,
+    "downstream_scientific_training_started": false,
+    "model_or_optimizer_changed": false,
+    "population_changed": false,
+    "proxy32_opened": false
+  },
+  "geometry_source_sha256": "88872577354055e8559e5e343834355068d2cc5bfd2633f7196a6ae45324fa40",
+  "new_estimator": "robust through-origin slope q=h*g using all finite observable rows; deterministic Huber IRLS; no abs(grid) cutoff; reprojection and axis-consistency fail-close",
+  "old_estimator": "median(comp/grid) after abs(grid)>=0.05 with min_ratio_samples=128",
+  "old_failure": "insufficient stable half-extent ratios: 84",
+  "prep_runner_v1_2_sha256": "d5d38fe00537922b5bc87f90a59a897ff46af4411b3ddb34c59369954d13d5da",
+  "resume_policy": "NEW_PREP_V1_2_PATH_AND_GEOMETRY_SHA_BOUND_RECORDS; DO_NOT_REUSE_V1_1_PACKS",
+  "schema": "RealSaS.E0.DownstreamProxyCameraRecoveryAmendment.v1_2",
+  "scientific_contract_sha256": "cf204ad1ef7d8460e402fb6c3db7361d122b3284116aa6e840af032d0fb39a2a",
+  "status": "AUTHORIZED_APPARATUS_CORRECTION_BEFORE_SCIENTIFIC_TRAINING__POPULATION_AND_D0_D1_D2_UNCHANGED",
+  "trigger": "OLD_RATIO_ESTIMATOR_FALSE_FAIL_AT_PREP_190_OF_437"
+}

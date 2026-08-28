@@ -1,0 +1,69 @@
+{
+  "schema": "RealSaS.RiggingSurfaceContract.v1",
+  "date": "2026-08-22",
+  "status": "CURRENT_BEST_ESTIMATE__EVIDENCE_DERIVED__REVISIONABLE",
+  "authority_note": "This file is the current canonical estimate, not an immutable truth. Field/head assignments may change when stronger controlled evidence supersedes them.",
+  "shipping_input": "ONE neutral pose x 8 ordered views",
+  "canonical_problem": "Recover the minimal observation-grounded geometric substrate sufficient for downstream skeleton generation, skinning and compiler verification.",
+  "iris_current_estimated_outputs": {
+    "P": {
+      "assignment": "direct_learned_core",
+      "evidence_status": "SUPPORTED",
+      "reason": "P-only substrate already carries substantial downstream skinning and joint-locus information."
+    },
+    "N": {
+      "assignment": "direct_learned_current_best_estimate",
+      "evidence_status": "SUPPORTED_FOR_ARACHNE__GEPPETTO_NEUTRAL__REVISIONABLE",
+      "reason": "S0-B2 strongest tested deterministic N improved over no-N but exact N retained material fresh-panel CE/deformation advantage."
+    },
+    "V_support": {
+      "assignment": "preserve_observation_support__learned_head_status_not_final",
+      "evidence_status": "SUPPORTED_AS_DOWNSTREAM_METADATA_CAPABILITY",
+      "reason": "S0-B Geppetto information probe benefited from ordered-view support/provenance; fixed-skeleton Arachne did not require an extra support feature."
+    },
+    "U_risk": {
+      "assignment": "predictive_risk_candidate__calibration_deferred",
+      "evidence_status": "UNTESTED_FOR_FINAL_REQUIREMENT",
+      "reason": "Exact-substrate S0 does not instantiate predicted-geometry uncertainty or artist-domain ambiguity."
+    },
+    "persistence": {
+      "assignment": "mandatory_capability",
+      "explicit_Z_required": false,
+      "evidence_status": "SUPPORTED_BY_PRIOR_CORRESPONDENCE_RESEARCH",
+      "reason": "Cross-view persistence is required for coherent common-frame geometry; explicit descriptor Z is an implementation choice."
+    },
+    "provenance": {
+      "assignment": "deterministic_bookkeeping_preserved",
+      "evidence_status": "SUPPORTED",
+      "reason": "Ordered-view provenance materially aided Geppetto-side information isolation in S0-B."
+    }
+  },
+  "surface_builder_current_estimated_responsibilities": {
+    "local_graph_neighborhood": "DETERMINISTIC_FIRST",
+    "curvature_local_differential_geometry": "DETERMINISTIC_FIRST",
+    "sheet_component_logic": "DETERMINISTIC_FIRST__UNTESTED_FULL_PRODUCT",
+    "reprojection_cycle_checks": "DETERMINISTIC_FIRST",
+    "duplicate_surfel_fusion": "DETERMINISTIC_FIRST",
+    "exact_source_faces": "NOT_REQUIRED_BY_CURRENT_EVIDENCE"
+  },
+  "deferred_fields": {
+    "H_set_valued_geometry": "UNTESTED_UNTIL_REAL_MULTIMODALITY_OR_PREDICTED_GEOMETRY_REQUIRES_IT",
+    "occupancy_thickness": "UNTESTED__NO_CURRENT_CAUSAL_JUSTIFICATION",
+    "appearance_semantic_latent": "RESERVE_ONLY__NO_CURRENT_GEOMETRY_ONLY_FAILURE_JUSTIFICATION"
+  },
+  "forbidden_mandatory_iris_authority_without_new_evidence": [
+    "Pose_B_shipping_dependency",
+    "authored_mechanical_owner_identity",
+    "source_rig_exact_partition",
+    "skeleton_parents_topology",
+    "skinning_weights",
+    "mandatory_GFDR",
+    "motion_p_active_log_amp_dir_deltaP"
+  ],
+  "evidence": {
+    "S0_B": "experiments/s0_rigging_substrate/S0_B_PILOT_REPORT_V1.md",
+    "S0_B2": "experiments/s0_rigging_substrate/S0_B2_DERIVED_NORMAL_FALSIFICATION_REPORT_V1.md",
+    "S0_B2_prereg": "experiments/s0_rigging_substrate/S0_B2_PREREG_V1.md"
+  },
+  "next_research_priority": "IRIS frontend descriptor/correspondence path; do not continue output-head expansion unless later evidence exposes a missing substrate quantity."
+}

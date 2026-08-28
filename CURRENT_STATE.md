@@ -1,124 +1,90 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-08-18
+**Date:** 2026-08-28  
+**Canonical continuation branch:** `main`  
+**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__STRUCTURED_PREDICTED_DEPTH_BRIDGE_NEXT__DEV32_CLOSED`
 
-## Active line
+This file on `main` is the single continuation authority.
 
-IRIS-SEES post-N1D continuation. Product objective is mechanical sufficiency, not exact teacher latent reconstruction. IRIS-SEES measures observation-native evidence; deterministic geometry/mechanics and the compiler derive downstream structured quantities.
+All non-main branches are historical/experimental evidence only. Do not continue product/scientific work from a side branch unless `main` explicitly promotes that branch state.
 
-## N1D baseline
+## Closed scientific state
 
-Canonical N1D remains an informative FAIL as originally sealed. Important preserved signal:
-- cross-pose descriptor top1 ≈ 0.8904;
-- Pose-B is genuinely used;
-- activity/amplitude ranking is learned more strongly than world-vector direction;
-- near-zero silence and exact same-pose/swap invariants are preserved.
+- E0 downstream information-sufficiency Proxy27: PASS; product pass not claimed; DEV32 remains closed.
+- N-B3: PASS. No explicit learned normal feature is required under the frozen tested regime; direct-N is removed from the required exposed IRIS output contract.
+- Required learned geometric direction is forward depth `d`; with known orthographic cameras, `P_hat = O + d_hat F` is analytic.
+- B3 isotropic epsilon is NOT a product depth tolerance envelope.
 
-The original blocker was not absence of observable persistence evidence. N1D's mechanics path failed to consume the descriptor evidence correctly.
+## Compiler/runtime restoration — CLOSED FOR CURRENT EXECUTION
 
-## Post-N1D causal localization
-
-Closed dead ends include longer training, simple output calibration/fusion, hard current-vs-Problem-A selectors, raw DIS ordinary LS/LMedS 3D lift, forward/backward cycle weighting, and early singleton collapse of sparse candidate sets.
-
-Critical localization:
-- calibrated-camera 3D inversion is well-conditioned;
-- a minority of large raw-DIS correspondence errors caused DIS-centered local search to erase correct candidates;
-- fixed ±8 px DIS-centered search contained the true endpoint only ~85.34% of visible-view cases;
-- conditional on the endpoint being in-window, the frozen N1D descriptor retained it in top-4 ~84.79% of the time.
-
-## Authorized correspondence / world-response route
-
-Frozen treatment:
+Compiler is now part of the canonical system/evaluation loop.
 
 ```text
-Pose A/B rasters
- -> Problem-A A visual-hull carriers
- -> frozen N1D persistent descriptor
- -> global observable B-foreground search
- -> top-k candidate set per view
- -> calibrated multiview rank-3 3D hypothesis solve
- -> frozen N1D activity/silence contract
+IRIS d
+ -> analytic P_hat
+ -> deterministic SurfaceBuilder / MUTUAL_P003
+ -> RiggingSurfaceIR S
+ -> Geppetto SkeletonProposalIR G*
+ -> CanonicalGraphOptimizationRequest/Result
+ -> Compiler QualifiedSkeletonIR G
+ -> Arachne SkinProposalIR W*
+ -> Compiler QualifiedSkinIR W
+ -> CanonicalPuppetGraph Y
+ -> proof / bounded repair / mandatory re-proof
+ -> runtime projection
 ```
 
-16-family development:
-- flow/zero **0.7409 → 0.4411**
-- weighted direction **0.5839 → 0.8994**
-- direction non-regress **14/16**
-- non-abstain **99.90%**
-- false activation **41 → 39**
-- **5/5 gates PASS**
+Important invariants:
+- proposal IDs never become product-canonical IDs;
+- Compiler owns root/hierarchy qualification and canonical ID minting;
+- stale surface/skeleton bindings fail closed;
+- proof binds exact `product_state_hash`;
+- runtime export requires a passing proof for that exact state;
+- no duplicate hierarchy/topology layer was created.
 
-Previously untouched four-family e00 qualification (`10763,11214,12907,14714`):
-- flow/zero **0.7439 → 0.6716**
-- weighted direction **0.5476 → 0.7403**
-- direction non-regress **3/4**
-- coverage **100%**
-- false activation **26 → 23**
-- **5/5 gates PASS**
+Current GitHub-contained historical execution closure:
+- raw ZIP SHA-256 `3a6076b30e0a23807f952365d39d81ddf5d4b1dba734c0bdba47567bced26850`
+- 9 byte-exact v0.5 leaf modules + 4 namespace rebinds
+- old front-brain/truth imports: 0
 
-This route is authorized on open development as the post-N1D correspondence/world-response treatment.
+Heavy historical authorities remain SHA-bound in Drive:
+- v0.5 full source `03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130`
+- R5_3 `6224661cb4323f78a9b808af10f68dd584431a422e28d26a69e87816a3b0ef80`
+- v97_43 `09a94871f938b069ba5c8219f203355e724f2f58afa6e10dc5c6148d98b43efb`
+- C++17 runtime source `1af741c9a3d30456a6703809e067a9c3a61220da51a6a1a9cbda2b8a4755e8b0`
 
-## Causal downstream mechanics closure
+Restoration regressions: current typed/routing 10/10 PASS; selected historical 46/46 PASS; causal diagnosis/repair 9/9 PASS; native runtime CTest 1/1 PASS; package-to-native render PASS.
 
-### Exact-observation-geometry causal replay
+## NEXT — structured ray-aligned predicted-depth tolerance bridge
 
-Only response was replaced; exact observation geometry/normals/visibility were frozen for evaluator isolation.
+Question:
 
-Global-foreground response:
-- D tangent error **0.148326**
-- F activity **0.843860**
-- F kernel **0.793054**
-- R differential **0.104815**
-- G direction **0.880993**
-- G line / diag **0.087942**
-- **9/9 canonical N1D GFDR-V2 gates PASS**
+> Which forward-depth error regimes can IRIS tolerate before persistence, compiler qualification or functional proof becomes unsafe?
 
-Frozen-current response under the same exact geometry had G line / diag **0.154159**, confirming that the old G-line failure was caused by correspondence/world-response rather than the downstream GFDR-V2 operators.
+Preregister a three-axis corruption envelope:
 
-### Full observable front door
+1. magnitude `epsilon` along each known camera ray before persistence;
+2. spatial correlation length `ell` so coherent regional depth drift is tested, not only independent pixel noise;
+3. view asymmetry `A` so one/few bad views can be stressed against the remaining good views.
 
-Prediction uses:
+For each frozen corruption cell:
+- compute `P_hat = O + d_hat F`;
+- rerun teacher-free `MUTUAL_P003`;
+- evaluate the same frozen proxy-consumer bytes (no retraining per cell);
+- route the same admitted `RiggingSurfaceIR` through the real Compiler path;
+- record persistence error, qualification/abstention, structural validity, and available deformation/proof failures;
+- inherit existing E0 practical margins where the same proxy metric applies;
+- report hard per-family tails separately from aggregates.
 
-```text
-Problem-A X / V_A
-+ frozen N1D descriptor and normal heads
-+ global B-foreground correspondence search
-+ deterministic multiview 3D response
-+ deterministic B visual-hull V_B
--> GFDRV2.ObservableMechanics.v4
-```
+Do not use Proxy27 or DEV32 for tuning. Do not convert the result into one scalar `P95 <= epsilon*`; freeze an admissible region over `(epsilon, ell, A)`.
 
-20-family e00 open-development result:
-- D tangent error **0.148326**
-- F activity **0.843860**
-- F kernel **0.813066**
-- R differential **0.105003**
-- G direction **0.890067**
-- G line / diag **0.084111**
-- **9/9 canonical N1D GFDR-V2 gates PASS**
+## After the bridge
 
-Primitive front-door estimates are not exact (median family diagnostics: P_A error/diag ~0.0274, P_B ~0.03935, N_A ~26.8°, N_B ~29.6°), yet downstream mechanics passes. This supports:
+1. freeze compiler-qualified admissible depth-error region;
+2. MapAnything/external-prior preflight against that region;
+3. backbone + native high-resolution/multiview C-path bake-off;
+4. train depth-only IRIS;
+5. compare actual held-out structured residuals to the frozen region;
+6. run final `d_hat -> P_hat -> persistence -> Compiler -> puppet` qualification.
 
-```text
-mechanical sufficiency > exact latent reconstruction
-```
-
-The old N1D point-map hard gates are therefore not automatically product blockers for this repaired hybrid route; geometry authority is supplied by the deterministic Problem-A front door rather than the failed N1D point-map head.
-
-## Active next gate
-
-The remaining open-development risk is **intervention generalization**. Current closure evidence is e00-focused.
-
-Next required qualification: freeze the exact current route and evaluate previously unopened `e01..e07` interventions without retuning. Only after a multi-intervention open-dev PASS may sealed21/external10 be considered.
-
-**sealed21 = CLOSED**  
-**external10 = CLOSED**  
-**product/model-2 handoff = NOT YET AUTHORIZED**
-
-## Data / workspace policy
-
-- GitHub: canonical code, prereg, compact results, reports, experiment history.
-- Drive: heavy corpus/cache/checkpoint/proof-pack depot.
-- Library: transient active diagnostics and working artifacts.
-
-Never silently redefine structural GFDR semantics to fit an implementation. N1D `GFDRV2.ObservableMechanics.v4` diagnostics are downstream mechanics diagnostics, not a replacement definition of the older structural GFDR ontology.
+Deferred corpus product-hygiene work remains prospective and must not rewrite sealed E0/N-B3 populations.

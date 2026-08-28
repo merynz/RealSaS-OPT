@@ -1,0 +1,83 @@
+{
+  "authorities": {
+    "episode_index_content_sha256": "907bca7323c8e7b3832ad276d44af9a5733e606b12c763a492775387f4afb765",
+    "g1_preflight_sha256": "d0a456413faf804ae5684ea65e85e8f6e5a9c20c9dd3838eed607b6314ac963e",
+    "g1_prereg_sha256": "1aec3b373330ab42d05d143daba953ddd5535f13ede5f2507bbffcf2f61f278b",
+    "g1_split_freeze_sha256": "5a1fadf624948d407628460e465193ca8d6e308f74b9b96d94994c6752ee3ba2",
+    "n1d_best_payload_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "n1d_proof_pack_sha256": "0e28051cdb1b9f603749a907dd84d022daf44bcabd1bd9ec536d242bb95bf24c"
+  },
+  "files": [
+    {
+      "path": "G0_CONTRACT_FREEZE.json",
+      "sha256": "506a272fa0b06a4046075d988dd003a14585c80c698efc53e4881b6b11581b2b",
+      "size": 2640
+    },
+    {
+      "path": "G1_SPLIT_FREEZE.json",
+      "sha256": "5a1fadf624948d407628460e465193ca8d6e308f74b9b96d94994c6752ee3ba2",
+      "size": 5618
+    },
+    {
+      "path": "G1_PREREG_V1.json",
+      "sha256": "1aec3b373330ab42d05d143daba953ddd5535f13ede5f2507bbffcf2f61f278b",
+      "size": 5245
+    },
+    {
+      "path": "G1_EXECUTABLE_PREFLIGHT.json",
+      "sha256": "d0a456413faf804ae5684ea65e85e8f6e5a9c20c9dd3838eed607b6314ac963e",
+      "size": 5009
+    },
+    {
+      "path": "README.md",
+      "sha256": "e013b64a4432b74cdffc86bb62fa38355a09d094f66d80876fd4ea835ea1f440",
+      "size": 682
+    },
+    {
+      "path": "realsas_iris_sees/g1_model.py",
+      "sha256": "e10d68642bad87f1524aacf9a99ced97ad9c54e4152bc474edfdd4b253c6c8ee",
+      "size": 6077
+    },
+    {
+      "path": "realsas_iris_sees/g1_losses.py",
+      "sha256": "eadbdedb36a5af6e7f5af186bf49d837e62336b70d1ec6d7a87a8bd0f3d52750",
+      "size": 1549
+    },
+    {
+      "path": "realsas_iris_sees/g1_metrics.py",
+      "sha256": "2272f9c683b332a06db7c3cb467b4b235aafa94e74d3acd402a09357262bfd4d",
+      "size": 5192
+    },
+    {
+      "path": "realsas_iris_sees/g1_sampling.py",
+      "sha256": "75740844bd6eb1e26dadf0c81c775129993c93f0204a3f81ca5b3c7d72c29251",
+      "size": 1106
+    },
+    {
+      "path": "realsas_iris_sees/g1_targets.py",
+      "sha256": "49983698b6e2dd6a730aa91f855ea9e2b80e47222577b90951a2ed8fa93a7df7",
+      "size": 2808
+    },
+    {
+      "path": "realsas_iris_sees/g1_io.py",
+      "sha256": "8a9548c96aef0115b2676ed620bc43be35f2485f497fcc3eece2944f54f6f1e2",
+      "size": 3795
+    },
+    {
+      "path": "tools/g1_preflight.py",
+      "sha256": "da495322941a338c5fbde51c8fdeca85a117435745e56271e2f357c5df448f0b",
+      "size": 6383
+    },
+    {
+      "path": "tests/test_g1.py",
+      "sha256": "84a2dd67f4b927d3a04f0c7c52575e3135b0d4feb21feeb500e042c3e1469606",
+      "size": 5300
+    }
+  ],
+  "next_executable_step": "Build the hash-pinned A100 G1 Run-All from G1_PREREG_V1.json, then run training; do not change architecture/hyperparameters before the frozen baseline result.",
+  "optimizer_steps": 0,
+  "real_preflight_family": 10178,
+  "schema": "RealSaS.IRIS.G1.FreezeManifest.v1",
+  "status": "G1_ENTRY_FROZEN__A100_RUNALL_AUTHORIZED_NOT_STARTED",
+  "tests": "7/7 PASS"
+}

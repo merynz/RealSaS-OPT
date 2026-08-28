@@ -1,0 +1,37 @@
+{
+  "checks": {
+    "all_code_cells_compile": true,
+    "embedded_source_integrity_files": 18,
+    "normal_real_asset_old_new_pack_bit_identical": true,
+    "normal_real_asset_pack_sha256": "d9f1a40ee1db408fcdff7a541af91ebb2c33d1b8949d2236447a3a8dced6d018",
+    "small_footprint_abs_h_error": 1.303668295538074e-08,
+    "small_footprint_posthoc_camera_h": 0.5400000643730164,
+    "small_footprint_real_v0_recovered_h": 0.5400000774096994,
+    "small_footprint_real_v0_visible_rows": 2393,
+    "small_footprint_reprojection_p95_px": 0.0,
+    "unit_tests_failed": 0,
+    "unit_tests_passed": 6,
+    "v1_2_runner_one_real_asset_pass": true,
+    "v1_2_runner_resume_binds_geometry_sha": true
+  },
+  "date": "2026-08-28",
+  "firewalls": {
+    "D0_D1_D2_semantics_changed": false,
+    "D2_admission_changed": false,
+    "camera_json_consumed_forward": false,
+    "dev32_opened": false,
+    "downstream_outcomes_inspected": false,
+    "numerical_noninferiority_margin_frozen": false,
+    "population_changed": false,
+    "proxy32_opened": false,
+    "scientific_training_executed": false
+  },
+  "camera_recovery_amendment_sha256": "4ba13ff2006ab8b888e340c49b79ceec781d90d40fd70f2ea1dcab4451655823",
+  "geometry_source_sha256": "88872577354055e8559e5e343834355068d2cc5bfd2633f7196a6ae45324fa40",
+  "next": "RUN_EXACT_V1_2_NOTEBOOK_ON_COLAB_GPU_FROM_FRESH_PREP_V1_2_PATH",
+  "notebook": "RealSaS_E0_DOWNSTREAM_PROXY_V1_2.ipynb",
+  "notebook_sha256": "a46fe75a7ce5a0318d79c6d8b055bc593bd8c57942edc85c1d93353bf742047f",
+  "prep_runner_v1_2_sha256": "d5d38fe00537922b5bc87f90a59a897ff46af4411b3ddb34c59369954d13d5da",
+  "schema": "RealSaS.E0.DownstreamProxyNotebookPreflight.v1_3",
+  "status": "PASS__CAMERA_RECOVERY_V2__NO_SCIENTIFIC_TRAINING"
+}

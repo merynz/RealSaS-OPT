@@ -1,0 +1,32 @@
+{
+  "artifact_sha256": {
+    "E0_PRE_PROXY32_DIAGNOSTIC_PREFLIGHT_V1.json": "2c230534a27ca6ff9b084cfb687636d5a18121106de5278f592ba7156633badd",
+    "E0_PRE_PROXY32_DIAGNOSTIC_PREREG_V1.md": "34042d54d6e412dd097fecb43cbba176232d69b0c491557bfa1e851e52487dba",
+    "E0_PRE_PROXY32_DIAGNOSTIC_SPEC_V1.json": "deaef5ce4ecfd396227a4d8111ef3835066ce2a6ff983f110d6ba29b244bfc05",
+    "E0_PRE_PROXY32_DIAGNOSTIC_SPLIT_V1.json": "16984e6eaa783cd95432c79554b2098d05621489958ce4d67694efd44a685cec",
+    "E0_PROXY32_TRUTH_INTERSECTION_V1.json": "fcbdd90d585a3845b8f799fbd1ba6dff526d4714aa581a7f6d301da86d2ecbd9",
+    "N_B3_EPSILON_PREREG_V1.md": "c5836e6f2bbb03aa1963601130e8a835932c84192e889d21300bb6ef560efb90",
+    "RealSaS_E0_PRE_PROXY32_DIAGNOSTICS_V1.ipynb": "49871e431c4ad1783f121ebbd240c7aa51dedb664b3816cdc5e0f5950d14ef22",
+    "build_preproxy_diag_notebook.py": "bc4c0d4efabc2ab4cf75e55de8d9a16d489dce408ef0f5ded32991ea484fb6d1"
+  },
+  "builder_sha256": "bc4c0d4efabc2ab4cf75e55de8d9a16d489dce408ef0f5ded32991ea484fb6d1",
+  "date": "2026-08-28",
+  "dev32_opened": false,
+  "diagnostic_build_spec_sha256": "deaef5ce4ecfd396227a4d8111ef3835066ce2a6ff983f110d6ba29b244bfc05",
+  "diagnostic_selection_count": 59,
+  "diagnostic_train_count": 64,
+  "n_b3_executed": false,
+  "next": "RUN_PRE_PROXY32_DIAGNOSTICS_ON_COLAB_GPU__THEN_INSPECT__THEN_OPEN_FROZEN_PROXY32_QUALIFICATION_ONCE",
+  "notebook_sha256": "49871e431c4ad1783f121ebbd240c7aa51dedb664b3816cdc5e0f5950d14ef22",
+  "official_pack_rebuild_expected": 0,
+  "official_pack_reuse_selected": 123,
+  "preflight_sha256": "2c230534a27ca6ff9b084cfb687636d5a18121106de5278f592ba7156633badd",
+  "proxy32_downstream_evaluation_opened": false,
+  "proxy32_family_count": 32,
+  "proxy32_truth_capable_count": 27,
+  "proxy32_truth_capable_ids_sha256": "b9120bbd3f603cee6bf80110e170309b9fe8b135ae56fbbd6d8d1bda4fc11817",
+  "qualification_margins_changed": false,
+  "real_asset_runtime_preflight_performed": false,
+  "schema": "RealSaS.E0.PreProxy32DiagnosticPackage.v1",
+  "status": "PREREGISTERED_READY_TO_RUN_DIAGNOSTICS__PROXY32_DOWNSTREAM_CLOSED"
+}

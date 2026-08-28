@@ -1,0 +1,121 @@
+{
+  "PASS": true,
+  "active_code_sha256": {
+    "realsas_iris_sees/g1_io.py": "8a9548c96aef0115b2676ed620bc43be35f2485f497fcc3eece2944f54f6f1e2",
+    "realsas_iris_sees/g1_losses.py": "eadbdedb36a5af6e7f5af186bf49d837e62336b70d1ec6d7a87a8bd0f3d52750",
+    "realsas_iris_sees/g1_metrics.py": "2272f9c683b332a06db7c3cb467b4b235aafa94e74d3acd402a09357262bfd4d",
+    "realsas_iris_sees/g1_model.py": "e10d68642bad87f1524aacf9a99ced97ad9c54e4152bc474edfdd4b253c6c8ee",
+    "realsas_iris_sees/g1_sampling.py": "75740844bd6eb1e26dadf0c81c775129993c93f0204a3f81ca5b3c7d72c29251",
+    "realsas_iris_sees/g1_targets.py": "49983698b6e2dd6a730aa91f855ea9e2b80e47222577b90951a2ed8fa93a7df7",
+    "tools/g1_preflight.py": "da495322941a338c5fbde51c8fdeca85a117435745e56271e2f357c5df448f0b"
+  },
+  "checkpoint": {
+    "checkpoint_payload_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "source_container_sha256": "0e28051cdb1b9f603749a907dd84d022daf44bcabd1bd9ec536d242bb95bf24c",
+    "source_epoch": 10,
+    "source_model_tensor_count": 170,
+    "source_schema": "RealSaS.IRIS.SEES.N1D.MechanicsCanonical.Checkpoint.v2"
+  },
+  "family_id": 10178,
+  "family_manifest_content_sha256": "3ae85a94a9b07fe13f4862e63e70d940327059b4105ac65aabb88f43d5af056f",
+  "forbidden_truth_leak": false,
+  "gradient_witness_l1": {
+    "camera_residual": 0.0,
+    "decoder": 733.2744156047702,
+    "descriptor": 0.0,
+    "encoder": 234.87504461593926,
+    "fusion": 81.90352418227121,
+    "geometry": 101.93955843383446
+  },
+  "input_shape": [
+    1,
+    8,
+    4,
+    128,
+    128
+  ],
+  "loss_parts": {
+    "N": 0.1467280089855194,
+    "P": -0.1972995400428772,
+    "V": 0.5048035383224487,
+    "total": -0.09638442099094391
+  },
+  "migration": {
+    "archived_only_source_keys": [
+      "differential.core.f4.conv1.weight",
+      "differential.core.f4.conv2.weight",
+      "differential.core.f4.norm1.bias",
+      "differential.core.f4.norm1.weight",
+      "differential.core.f4.norm2.bias",
+      "differential.core.f4.norm2.weight",
+      "differential.core.f4.skip.weight",
+      "differential.core.f8.conv1.weight",
+      "differential.core.f8.conv2.weight",
+      "differential.core.f8.norm1.bias",
+      "differential.core.f8.norm1.weight",
+      "differential.core.f8.norm2.bias",
+      "differential.core.f8.norm2.weight",
+      "differential.core.f8.skip.weight",
+      "differential.core.final.0.conv1.weight",
+      "differential.core.final.0.conv2.weight",
+      "differential.core.final.0.norm1.bias",
+      "differential.core.final.0.norm1.weight",
+      "differential.core.final.0.norm2.bias",
+      "differential.core.final.0.norm2.weight",
+      "differential.core.final.1.bias",
+      "differential.core.final.1.weight",
+      "differential.core.g16.bias",
+      "differential.core.g16.weight",
+      "differential.core.p4.bias",
+      "differential.core.p4.weight",
+      "differential.core.p8.bias",
+      "differential.core.p8.weight",
+      "differential.point.weight"
+    ],
+    "destination_tensor_count": 141,
+    "loaded_fraction": 1.0,
+    "loaded_tensor_count": 141,
+    "missing_destination_keys": [],
+    "shape_mismatches": [],
+    "unexpected_source_keys": []
+  },
+  "optimizer_steps": 0,
+  "pose_a_png_sha256": {
+    "00_V0.png": "18eeb8b9f1909bb3cc6caa5a8b5f0bba0b39f9157cf4a2be897aa2dcd52bab42",
+    "01_V1.png": "3a536cd01d3485934f1436c6f7a22df265ccc711bd105541e5031733a7f0409a",
+    "02_V2.png": "03f516d215aa73ccf604020f94b2b3ba0aadc4246b674aa964e6010e5672d22f",
+    "03_V3.png": "c7cae4152c2b7b2ac55f8bf4c7c69b9f057595397a7bfd84539e23ca714f3644",
+    "04_V4.png": "afef6fb0da5993a1b92af56f8f119cd3dc9c5b2ef43bc8d16b7f34e84eedc634",
+    "05_V5.png": "a86353c38cf77891619d0c60d010f0909cdb39117d96a7e5cfb98c49bd5ae47a",
+    "06_V6.png": "c18ffa931a8234835e12f3b9ff06525401742f4a205ad8a8753945d783339961",
+    "07_V7.png": "35344c48fd737e26cb1116b6dfe73f3b64d3d604d22883769fbeed68c870bddc"
+  },
+  "schema": "RealSaS.IRIS.G1.ExecutablePreflight.v1",
+  "target_keys_on_device": [
+    "N_A",
+    "P_A",
+    "V_A",
+    "XY_A",
+    "direct_obs_A"
+  ],
+  "target_npz_sha256": "beccaf76d2ebc876183eeb696037f3c27dd4e7627a3149dae8b84557920c91dc",
+  "warmstart_metrics_diagnostic_only": {
+    "crossview_normal_spread_median_deg": 17.598188400268555,
+    "crossview_normal_spread_p95_deg": 42.27141189575195,
+    "crossview_point_spread_mean": 0.01297710184007883,
+    "crossview_point_spread_p95": 0.03427322953939438,
+    "direct_carrier_count": 470,
+    "direct_surface_support_recall_at_0_5": 0.0,
+    "normal_median_deg": 22.752155303955078,
+    "normal_p90_deg": 48.07676696777344,
+    "normal_p95_deg": 57.66999435424805,
+    "point_mean": 0.022470034658908844,
+    "point_median": 0.018249569460749626,
+    "point_p90": 0.037673648446798325,
+    "point_p95": 0.04927032068371773,
+    "uncertainty_error_spearman": 0.5001065130800155,
+    "uncertainty_risk_coverage_auc": 0.016264038954025128,
+    "visibility_brier": 0.16542093455791473,
+    "visible_sample_count": 925
+  }
+}

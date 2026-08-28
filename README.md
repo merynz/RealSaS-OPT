@@ -1,24 +1,17 @@
 # RealSaS-OPT
 
-> **ACTIVE RESEARCH WORKSTREAM — 2026-08-21**
->
-> Branch: **`g0-g1/single-pose-geometry`**
->
-> The active canonical frontier has moved from the older N1D/mechanics continuation to **G0 → G1 single-pose multiview geometry**. For a new ChatGPT session, “GitHub'a bak ve devam et” means: read the active branch's `CURRENT_STATE.md` first, then `canonical/PRODUCT_CONTRACT_V1.md`, then `experiments/g0_g1_single_pose_geometry/`. Do not continue from the stale `main`-branch `CURRENT_STATE.md`.
+Canonical RealSaS research + compiler workspace.
 
-Private canonical research workspace for RealSaS.
+## Start here
 
-## Storage model
+**`main` is the single canonical continuation branch.** Read `CURRENT_STATE.md` on `main` before doing any new work.
 
-- **GitHub** — canonical code, preregistrations, tests, compact results, reports, CURRENT_STATE and experiment history.
-- **Google Drive** — heavy corpora, caches, checkpoints, large proof packs and other data-depot artifacts.
-- **ChatGPT Library** — transient / active working artifacts and diagnostics that benefit from fast retrieval.
+All other branches — including `g0-g1/single-pose-geometry`, `architecture/compiler-ir-solver-canonical-20260825`, `integration/compiler-runtime-canonical-20260828`, and any older experiment branch — are retained as historical/experimental evidence. They are not competing continuation authority and must not be resumed as the active product line unless a future explicit `main` decision promotes something from them.
 
-The three stores may be combined when useful, but authority/provenance must remain explicit. Heavy raw data should not be committed to this repository.
+Canonical system flow:
 
-## Continuation discipline
+`IRIS -> SurfaceBuilder -> Geppetto proposal -> Compiler hierarchy qualification -> Arachne proposal -> Compiler skin/product authority -> proof/repair -> runtime`.
 
-- Active experimental code stays on the named workstream branch until its gate is stabilized.
-- The active branch's `CURRENT_STATE.md` is the single handoff authority.
-- No prior research component may disappear silently; active/reserve/deprecated status must be recorded with provenance.
-- `main` serves as the stable landing page and always points to the current workstream.
+GitHub is continuation/inspection authority. Heavy frozen corpus and historical source archives remain Google Drive byte authority and are bound here by exact SHA-256.
+
+No historical branch is deleted merely to simplify navigation; provenance is preserved while authority is centralized on `main`.

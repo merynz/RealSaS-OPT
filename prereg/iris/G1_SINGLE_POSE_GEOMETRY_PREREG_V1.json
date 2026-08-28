@@ -1,0 +1,122 @@
+{
+  "active_outputs": [
+    "P",
+    "N",
+    "V",
+    "U"
+  ],
+  "causal_intervention": "Single-pose surgery only. No new backbone, no ray-aware transformer, no DPM/GGPT route, no D3 matcher, no resolution increase.",
+  "checkpoint_selection": {
+    "no_cal_selection": true,
+    "no_dev_selection": true,
+    "ordered_minimization": [
+      "point_p95__family_p95",
+      "point_p95__family_median",
+      "crossview_point_spread_p95__family_p95",
+      "point_mean__family_median",
+      "normal_p95_deg__family_p95",
+      "visibility_brier__family_median"
+    ],
+    "panel": "16 tune families, e00 A-only sample, every epoch",
+    "rule": "lexicographic; larger g1_checkpoint_selection_key is better"
+  },
+  "correspondence_contract": "Cross-view persistence/correspondence is required semantically; an explicit learned Z is optional.",
+  "data": {
+    "cal_families": 16,
+    "dev_families": 29,
+    "fit_families": 177,
+    "forbidden_truth_on_gpu": "all Pose-B, scene-flow, differential/mechanics, authored rig and training-only carrier identity fields",
+    "gpu_target_keys": [
+      "P_A",
+      "N_A",
+      "XY_A",
+      "V_A",
+      "direct_obs_A"
+    ],
+    "one_unique_pose_a_sample_per_family": true,
+    "pose_B_raster_reads_forbidden": true,
+    "split_file": "G1_SPLIT_FREEZE.json",
+    "target_source_episode": "e00",
+    "tune_families": 16
+  },
+  "decision_policy": {
+    "G1_product_pass": "NOT_DEFINED; G1 is a baseline/causal gate, not final product qualification",
+    "coherent_but_camera_limited": "route to G2 camera/ray-aware fusion",
+    "geometry_good_but_safety_or_grounding_weak": "route to G4 explicit geometric grounding/refinement",
+    "geometry_good_with_remaining_localization_hard_tail": "route to G5 and consider D2/D3 reserve components",
+    "product_threshold_owner": "G7",
+    "weak_common_frame_geometry": "route to G3 direct common-frame pointmap/surface formulation"
+  },
+  "evaluation": {
+    "causal_diagnostics": [
+      "fixed nontrivial view-image permutation while camera/view-token positions remain fixed",
+      "deterministic wrong-family single-view injection on dev"
+    ],
+    "causal_diagnostics_are": "diagnostic localization evidence, not product thresholds",
+    "dev_open": "exactly once after BEST checkpoint is frozen",
+    "g0_metric_definitions": "G0_CONTRACT_FREEZE.json",
+    "panel_aggregation": "family mean + median + p90 + p95 for every finite metric"
+  },
+  "input": {
+    "channels": "RGB + deterministic raster foreground alpha",
+    "image_size": 128,
+    "ordered": true,
+    "pose": "A only",
+    "views": 8
+  },
+  "objective": {
+    "N": "masked cosine normal loss",
+    "P": "smooth-L1 point error weighted by learned log_sigma; no teacher latent/mechanical term",
+    "V": "binary cross entropy on per-view observability",
+    "Z_loss_weight": 0.0,
+    "cross_pose_loss_weight": 0.0,
+    "mechanics_loss_weight": 0.0,
+    "total": "1.5*P_heteroscedastic + 0.5*N + 0.25*V"
+  },
+  "passive_preservation": {
+    "D1_D2_D3": "preserved RESERVE_CALLABLE; not active in G1",
+    "camera_residual": "diagnostic only; parameters frozen; zero G1 loss authority",
+    "descriptor_z": "exposed for diagnostics/provenance only; head parameters frozen; zero G1 loss authority"
+  },
+  "question": "With Pose B and all mechanical/cross-pose objectives removed, can the retained IRIS multiview core produce a usable common-frame surface from A×8 alone?",
+  "references": {
+    "episode_index_content_sha256": "907bca7323c8e7b3832ad276d44af9a5733e606b12c763a492775387f4afb765",
+    "g0_contract_sha256": "506a272fa0b06a4046075d988dd003a14585c80c698efc53e4881b6b11581b2b",
+    "g1_executable_preflight_sha256": "d0a456413faf804ae5684ea65e85e8f6e5a9c20c9dd3838eed607b6314ac963e",
+    "g1_split_freeze_sha256": "5a1fadf624948d407628460e465193ca8d6e308f74b9b96d94994c6752ee3ba2",
+    "n1d_best_payload_sha256": "0e542d3bb9f01776b4af737dcadc7a02c45c31c440bb1b0dbdb35540638e6b18",
+    "n1d_canonical_proof_pack_sha256": "0e28051cdb1b9f603749a907dd84d022daf44bcabd1bd9ec536d242bb95bf24c",
+    "n1d_source_zip_sha256": "230fac37ae52ae234437a017ef7ec88bfa865410d294fd840976a6c4e47ea65b"
+  },
+  "schema": "RealSaS.IRIS.G1.SinglePoseGeometry.Prereg.v1",
+  "sealed_policy": {
+    "cal": "CLOSED",
+    "external10": "CLOSED",
+    "sealed21": "CLOSED"
+  },
+  "status": "FROZEN_BEFORE_ANY_G1_OPTIMIZER_STEP",
+  "training": {
+    "augmentation": "NONE in G1 baseline",
+    "batch_size": 1,
+    "epochs": 24,
+    "family_order": "deterministic reshuffle each epoch from seed_base + epoch",
+    "gradient_clip_norm": 2.0,
+    "hyperparameter_sweep": false,
+    "learning_rate": 5e-05,
+    "optimizer": "AdamW",
+    "optimizer_parameters": "only parameters with requires_grad=True",
+    "seed_base": 2608220101,
+    "weight_decay": 0.0001
+  },
+  "warmstart": {
+    "archived_only_prefix": "differential.*",
+    "archived_only_source_tensors": 29,
+    "destination_tensors": 141,
+    "loaded_fraction": 1.0,
+    "loaded_tensors": 141,
+    "policy": "Load every shape-compatible retained N1D tensor; fail closed on any missing destination or shape mismatch.",
+    "source_epoch": 10,
+    "source_schema": "RealSaS.IRIS.SEES.N1D.MechanicsCanonical.Checkpoint.v2",
+    "source_tensors": 170
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "RealSaS.E0.Proxy27NonBindingExpectation.v1",
+  "date": "2026-08-28",
+  "status": "FROZEN_BEFORE_PROXY27_DOWNSTREAM_OPEN__NON_BINDING",
+  "binding_to_qualification": false,
+  "may_change_pass_fail": false,
+  "source_calibration_sha256": "82bbb1b56266742242bee5995209df6d83ecfec177ff6a431d13553491ae36b9",
+  "population": "frozen 27-member truth-capable Proxy32 intersection",
+  "expected_direction": {
+    "arachne": "D1 better than D0; D2 slightly worse than D1; D2 still noninferior to or better than D0",
+    "geppetto": "D1 slightly worse than D0; D2 recovers the D1 tax; D2 approximately D0 or modestly better"
+  },
+  "calibration_implied_reference_ratios": {
+    "arachne.ce": {"D1/D0": 0.9470777294527906, "D2/D1": 1.0130012918577844, "D2/D0": 0.9593909634254141},
+    "arachne.influence_disp_mean": {"D1/D0": 0.9325067416757367, "D2/D1": 1.016269529017148, "D2/D0": 0.9476781871681162},
+    "geppetto.joint_mean": {"D1/D0": 1.0445383522721492, "D2/D1": 0.9520958702959774, "D2/D0": 0.9945006515640781},
+    "geppetto.family_p95": {"D1/D0": 1.0456307395672033, "D2/D1": 0.9125607496517215, "D2/D0": 0.954201571558331}
+  },
+  "interpretation": "The record tests whether the FIT diagnostic/calibration pattern generalizes. It is not a margin, prior, rescue rule, or stopping rule. n=27 is adequate for the frozen gate and broad direction but not a precise magnitude estimate."
+}

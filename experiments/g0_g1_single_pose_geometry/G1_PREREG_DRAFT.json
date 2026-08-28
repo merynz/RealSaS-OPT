@@ -1,0 +1,21 @@
+{
+  "schema": "RealSaS.IRIS.G1.SinglePoseGeometry.PreregDraft.v1",
+  "status": "DRAFT_READY_FOR_SPLIT_AND_HASH_FREEZE",
+  "question": "With Pose B and all mechanical/cross-pose objectives removed, can the retained IRIS multiview core produce a usable common-frame surface from A×8 alone?",
+  "causal_intervention": "Single-pose surgery only. No new backbone, no new ray transformer, no DPM/GGPT/D3 module, no resolution increase.",
+  "input": "A×8 only",
+  "active_outputs": ["P", "N", "V", "U"],
+  "passive_optional_output": "descriptor_z retained for preservation/diagnostics; zero G1 loss authority",
+  "active_loss": "1.5*P_heteroscedastic + 0.5*N + 0.25*V",
+  "warmstart_policy": "Load every shape-compatible retained N1D tensor. Archive non-active source tensors in provenance; never silently delete them.",
+  "family_split_policy": "family-disjoint; freeze before optimizer steps",
+  "checkpoint_selection_policy": [
+    "minimize point_p95", "minimize crossview_point_spread_p95", "minimize point_mean",
+    "minimize normal_p95_deg", "improve uncertainty calibration without visibility regression"
+  ],
+  "causal_controls": [
+    "view-shuffle with camera/view tokens held fixed should materially worsen geometry",
+    "wrong-family view injection should worsen geometry and/or raise U"
+  ],
+  "sealed_policy": "Do not open sealed/external panels during G1 architecture selection."
+}

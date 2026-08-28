@@ -1,0 +1,31 @@
+{
+  "D2_admission_changed": false,
+  "changes": [
+    "local-first artifact construction",
+    "Drive direct-write + readback SHA + retry",
+    "no Drive tmp.replace",
+    "stream child logs",
+    "local-first scientific checkpoints then verified Drive publish"
+  ],
+  "date": "2026-08-28",
+  "dev32_opened": false,
+  "diagnosis": {
+    "drive_pack_committed_before_failure": false,
+    "drive_report_committed_before_failure": false,
+    "exact_builder_512_pass": true,
+    "first_asset": "asset_d7d4192f9dac8b146a17bc41",
+    "frozen_source_hashes_match": true,
+    "localized_layer": "DRIVE_FUSE_PUBLICATION_PATH"
+  },
+  "markdown_sha256": "622432b54206718d9d03a829c709e7493195a11425ac5b5ac7fb87dcdbe1138c",
+  "model_or_optimizer_changed": false,
+  "numerical_noninferiority_margin_frozen": false,
+  "population_changed": false,
+  "proxy32_opened": false,
+  "schema": "RealSaS.E0.DownstreamProxyOperationalAmendment.v1_1",
+  "science_changed": false,
+  "scientific_builder_sha256": "0f599e8f717d4c5070c04e224d90e52d1dc6e76a6e2068e64ed7c9d9d2b950b4",
+  "scientific_contract_sha256": "cf204ad1ef7d8460e402fb6c3db7361d122b3284116aa6e840af032d0fb39a2a",
+  "status": "AUTHORIZED_OPERATIONAL_FIX_ONLY__SCIENCE_UNCHANGED",
+  "trigger": "V1_PREP_CHILD_EXIT_BEFORE_FIRST_DRIVE_PACK_OR_REPORT_COMMIT"
+}

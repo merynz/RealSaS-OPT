@@ -1,0 +1,44 @@
+{
+  "D0_D1_D2_changed": false,
+  "D2_admission_changed": false,
+  "arachne_target_support_eligibility": "COMMON_D0_D1_D2_AT_LEAST_ONE_VALID_SKIN_TARGET",
+  "arachne_zero_common_target_exclusion_count": 3,
+  "artifact_sha256": {
+    "ARACHNE_D0_BEST.pt": "e21e9e7f0a65b1c18a4db0327c0bead708cceea6740b9b9bf9946f0a169b80ce",
+    "ARACHNE_D1_BEST.pt": "fedc543d6ac3f1ea067e9ce4fccbaa3c3522a428bc89dc21ee0165f0b9fd088c",
+    "ARACHNE_D2_BEST.pt": "72898a62f23c55aa82047f7bc4b39be787abb97d14f9a3fb973d59b2b5689745",
+    "E0_DOWNSTREAM_PROXY_CALIBRATION_V1.json": "82bbb1b56266742242bee5995209df6d83ecfec177ff6a431d13553491ae36b9",
+    "GEPPETTO_D0_BEST.pt": "ff993aeea8f92d2e0ae70d40605e4089f416c7de14f4e682983ec3e0af6d4cde",
+    "GEPPETTO_D1_BEST.pt": "f1dec9dd8ea623c36c1de1ac31fd9bcba76a510af460088680ab0f38abf75a6d",
+    "GEPPETTO_D2_BEST.pt": "f8c6146fc3ad81146ced01805b9be454ad194b86db3a9ab3d72d7b9eb3747b65"
+  },
+  "checkpoint_source": "checkpoints_v1_3",
+  "consumer_training_population": {
+    "arachne_selection": 59,
+    "arachne_train": 371,
+    "calibration": 4,
+    "geppetto_selection": 59,
+    "geppetto_train": 374
+  },
+  "contract_sha256": "cf204ad1ef7d8460e402fb6c3db7361d122b3284116aa6e840af032d0fb39a2a",
+  "dev32_opened": false,
+  "frozen_population": {
+    "calibration": 4,
+    "fit_selection": 59,
+    "fit_train": 374
+  },
+  "geometry_source_sha256": "88872577354055e8559e5e343834355068d2cc5bfd2633f7196a6ae45324fa40",
+  "next": "INSPECT_CALIBRATION4_D0_D1_D2_AND_FREEZE_NUMERICAL_MARGINS_BEFORE_ANY_PROXY32_OPEN",
+  "numerical_noninferiority_margin_frozen": false,
+  "patched_calibration_runner_sha256": "2f10fc92613f57679ddbf13ee1bef1edc4eb31ed71e89cad478bbbc000a77c85",
+  "prep_index_sha256": "60c8bcff1a1a146cfb81f5ac10c773ba66ac099a69e19b6c768601523b31b05a",
+  "prep_pack_count": 437,
+  "prep_rebuilt_for_v1_3": false,
+  "prep_source": "prep_v1_2",
+  "product_domain_filter_applied": false,
+  "proxy32_opened": false,
+  "result_sha256": "82bbb1b56266742242bee5995209df6d83ecfec177ff6a431d13553491ae36b9",
+  "schema": "RealSaS.E0.DownstreamProxySeal.v1_3",
+  "status": "FIT_CALIBRATION_COMPLETE__MARGINS_NOT_FROZEN__PROXY32_DEV32_CLOSED",
+  "teacher_identity_consumed_by_D2_admission": false
+}

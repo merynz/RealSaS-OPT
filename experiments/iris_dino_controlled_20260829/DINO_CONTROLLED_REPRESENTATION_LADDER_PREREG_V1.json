@@ -1,0 +1,140 @@
+{
+  "schema": "RealSaS.DINOControlledRepresentationLadderPrereg.v1",
+  "date": "2026-08-29",
+  "status": "SEALED_BEFORE_DINO_CANDIDATE_OUTPUTS__APPARATUS_PREFLIGHT_REQUIRED__TRAINING_NOT_YET_AUTHORIZED",
+  "parent_canonical_main": "b25dc36972e156c669e721fdddb5f1466b9eabf4",
+  "question": "Under one fixed RealSaS learner, population, exposure stream and downstream replay, does stronger frozen DINOv2 representation make camera-forward depth more accessible?",
+  "claim_boundary": "FROZEN_REPRESENTATION_ACCESSIBILITY_UNDER_FIXED_32768_UPDATE_BUDGET__NOT_ASYMPTOTIC_CAPACITY__NOT_PRODUCT_READY",
+  "candidates": {
+    "S": {"family": "DINOv2_ViT_S_14", "token_dim": 384, "train_backbone": false},
+    "B": {"family": "DINOv2_ViT_B_14", "token_dim": 768, "train_backbone": false},
+    "L": {"family": "DINOv2_ViT_L_14", "token_dim": 1024, "train_backbone": false},
+    "g": {"family": "DINOv2_ViT_g_14", "token_dim": 1536, "train_backbone": false}
+  },
+  "observation_contract": {
+    "mode": "G",
+    "views": 8,
+    "native_raster": [1024, 1024],
+    "native_channels": "RGBA",
+    "foundation_raster": [518, 518],
+    "patch_size": 14,
+    "patch_grid": [37, 37],
+    "adaptive_crop_zoom": false,
+    "camera_authority": "EXACT_ORTHOGRAPHIC",
+    "native_alpha_authority": true,
+    "native_detail_raster": [1024, 1024]
+  },
+  "training_population": {
+    "family_count": 512,
+    "styles_per_family": ["cel_clean", "ink_cel"],
+    "source_metadata_sha256": "475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913",
+    "selection_seed": "PV5_R256_FIT_SCALE_TRAIN_V1",
+    "source_quota": {"objaverse": 483, "quaternius": 24, "kaykit": 5},
+    "membership_canonical_json_sha256": "8531360f1c61dc4cdb699c095790c35ab3af0da5a7a290b420e5777bb4e9169b",
+    "native_1024_corpus": "RealSaS_MASTER_CORPUS_1024_V3",
+    "missing_member_policy": "FAIL_PREFLIGHT_NO_SUBSTITUTION"
+  },
+  "heldout": {
+    "name": "FIT_PROXY32",
+    "family_count": 32,
+    "styles_per_family": ["cel_clean", "ink_cel"],
+    "gradient_access": false,
+    "checkpoint_selection": false,
+    "must_be_disjoint_from_train512": true
+  },
+  "closed_sets": ["DEV32", "CAL", "EXTERNAL_HOLDOUT", "SEALED_LATER_SETS"],
+  "target": {
+    "learned_geometry_authority": "camera_forward_depth_d_only",
+    "truth_equation": "d_truth=dot(P_truth-O,F)",
+    "reconstruction_equation": "P_hat=O+d_hat*F",
+    "authority_loci_per_view": 4096,
+    "learned_normal": false,
+    "learned_risk": false,
+    "learned_camera": false,
+    "mechanics_truth_allowed": false
+  },
+  "fixed_lift": {
+    "destination_dim": 1536,
+    "operator": "Q_d(x)=concat(x,zeros(1536-d))",
+    "trainable": false,
+    "isometric_before_normalization": true,
+    "post_lift_normalization": "ONE_IDENTICAL_NON_AFFINE_IMPLEMENTATION_SEALED_BY_PREFLIGHT"
+  },
+  "shared_trainable_system": {
+    "must_be_byte_config_identical": [
+      "native_1024_detail_support_encoder",
+      "exact_ortho_camera_adapter",
+      "eight_view_structural_fusion",
+      "depth_decoder",
+      "loss_construction"
+    ],
+    "trainable_parameter_count_must_match_exactly": true,
+    "same_initialization_seed": true,
+    "rung_specific_trainable_projection_before_shared_stack": false
+  },
+  "logical_batch_stream": {
+    "families_per_update": 8,
+    "styles_per_selected_family": 2,
+    "family_style_cells_per_update": 16,
+    "deterministic_balanced_stream": true,
+    "same_manifest_all_rungs": true,
+    "hard_example_mining": false,
+    "outcome_dependent_sampling": false
+  },
+  "optimizer": {
+    "main": {"updates": [1, 2048], "type": "AdamW", "lr": 0.0003, "betas": [0.9, 0.95], "weight_decay": 0.0},
+    "tail": {"updates": [2049, 32768], "type": "AdamW", "fresh_moments_at_2049": true, "lr": 0.00003, "betas": [0.9, 0.95], "weight_decay": 0.0},
+    "candidate_specific_early_stop_or_extension": false
+  },
+  "mandatory_checkpoints": {
+    "MATCHED_7168": {"update": 7168, "nominal_family_exposures": 112, "role": "historical_budget_diagnostic"},
+    "PRIMARY_32768": {"update": 32768, "nominal_family_exposures": 512, "role": "primary_phase1a_comparison"}
+  },
+  "risk_policy": {
+    "candidate_specific_risk_head": false,
+    "constant_common_band": false,
+    "reason": "avoid representation-vs-risk calibration confound; constant prospective band is known potentially degenerate",
+    "future_risk_calibration": "SEPARATE_VERSIONED_EXPERIMENT"
+  },
+  "evaluation": {
+    "primary_checkpoint": "PRIMARY_32768",
+    "actual_residual_field_required": true,
+    "direct_frozen_DTB_ND1_replay_required": true,
+    "scalar_summary_may_override_direct_replay": false,
+    "diagnostic_depth_rms_reference": 0.0025,
+    "diagnostic_ell0_abs_depth_p95_reference": 0.0049,
+    "representation_accessible_label": {
+      "min_heldout_family_style_replay_pass_fraction": 0.95,
+      "hard_route_failures_allowed": 0,
+      "training_fit_must_not_be_globally_underfit": true
+    },
+    "candidate_order_if_pass": [
+      "higher_heldout_direct_replay_coverage",
+      "lower_across_cell_p95_abs_depth_error",
+      "lower_across_cell_p95_projected_P_error",
+      "lower_delivered_Nd_angular_error_where_defined",
+      "smaller_faster_extractor"
+    ]
+  },
+  "structure_scale_diagnostics_native1024_px": {
+    "SUBPATCH_THIN": [0, 28],
+    "ONE_TO_TWO_PATCH": [28, 56],
+    "BROAD": [56, null]
+  },
+  "preflight_required_before_training": [
+    "recover_exact_train512_and_membership_hash",
+    "recover_FIT_PROXY32_and_TRAIN_DIAG32_and_verify_disjointness",
+    "verify_native1024_population_complete_no_substitution",
+    "seal_exact_DINO_source_revision_model_ids_weight_sha256",
+    "verify_518_preprocessing_and_37x37_shapes",
+    "verify_Qd_isometry_and_identical_normalization",
+    "seal_shared_trainable_architecture_code_config_and_equal_parameter_count",
+    "seal_one_deterministic_sample_order_manifest",
+    "cached_vs_online_token_parity",
+    "verify_DTB_ND1_actual_residual_carrier_semantics",
+    "verify_closed_sets_untouched",
+    "verify_optimizer_steps_zero"
+  ],
+  "training_authorized": false,
+  "next": "APPARATUS_DATA_WEIGHT_AUTHORITY_PREFLIGHT_AT_ZERO_OPTIMIZER_STEPS"
+}

@@ -16,7 +16,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import sys
 import numpy as np
+
+_HERE = Path(__file__).resolve().parent
+_E0_DIR = _HERE.parent / "e0_observable_geometry_20260827"
+if not _E0_DIR.is_dir():
+    raise RuntimeError(f"canonical E0 source directory missing: {_E0_DIR}")
+if str(_E0_DIR) not in sys.path:
+    sys.path.insert(0, str(_E0_DIR))
 
 from depth_corruption_v1 import (
     DepthCorruptionSpec,

@@ -1,0 +1,42 @@
+name: consumer-interlock-v0
+on:
+  pull_request:
+    paths:
+      - 'compiler/**'
+      - 'experiments/consumer_interlock_20260829/**'
+      - '.github/workflows/consumer_interlock_v0.yml'
+permissions:
+  contents: read
+jobs:
+  exact-compiler-clean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU dependency
+        run: python -m pip install --disable-pip-version-check numpy
+      - name: Run exact historical Compiler consumer interlock
+        env:
+          PYTHONPATH: ${{ github.workspace }}/compiler
+        run: python experiments/consumer_interlock_20260829/run_exact_compiler_consumer_interlock_v0.py
+      - name: Verify vendor closure raw authority
+        run: |
+          python - <<'PY'
+          import base64,hashlib,json,pathlib
+          d=pathlib.Path('compiler/vendor/realsas_v05_current_execution_closure.b64')
+          m=json.loads((d/'manifest.json').read_text())
+          enc=b''.join((d/r['name']).read_bytes() for r in m['part_records'])
+          raw=base64.b64decode(enc,validate=True)
+          got=hashlib.sha256(raw).hexdigest()
+          print('vendor_raw_sha256',got)
+          assert got==m['raw_sha256']=='3a6076b30e0a23807f952365d39d81ddf5d4b1dba734c0bdba47567bced26850'
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: consumer-interlock-v0-result
+          path: experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_EXACT_COMPILER_CLEAN_RESULT_V1.json
+          if-no-files-found: warn

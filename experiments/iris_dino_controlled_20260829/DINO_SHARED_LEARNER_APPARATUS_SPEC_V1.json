@@ -1,0 +1,70 @@
+{
+  "cache": {
+    "candidate_extraction_microbatch": "may differ only physically for memory; logical training stream fixed",
+    "dtype": "FP32 little-endian",
+    "keys": "candidate/asset/style/view",
+    "representation": "native-width x_norm_patchtokens BEFORE Q_d/L2",
+    "roundtrip_gate": "bitwise exact",
+    "sequential_rung_cache_policy": "allowed after each rung checkpoints/evals are hash-sealed",
+    "shape_per_view": "[1369,native_dim]",
+    "storage": "lossless only; no FP16/BF16/quantization"
+  },
+  "candidate_interface": {
+    "B": {"native_dim": 768, "zero_pad": 768},
+    "L": {"native_dim": 1024, "zero_pad": 512},
+    "S": {"native_dim": 384, "zero_pad": 1152},
+    "g": {"native_dim": 1536, "zero_pad": 0},
+    "post_lift_norm": "FP32 L2/token eps=1e-12 no affine"
+  },
+  "content_sha256": "03ce79be11fb508fb590109b4d903bbf928139b83294b1c053e843521474745a",
+  "date": "2026-08-29",
+  "dtb_nd1_binding": {
+    "binding_arachne_sha256": "72898a62f23c55aa82047f7bc4b39be787abb97d14f9a3fb973d59b2b5689745",
+    "binding_geppetto_sha256": "f8c6146fc3ad81146ced01805b9be454ad194b86db3a9ab3d72d7b9eb3747b65",
+    "boundary": "0.00250 <= epsilon_critical < 0.00275 RMS",
+    "closure_commit": "db4920b94b4b31360e7135295e3fc4cbe7c89aee",
+    "operator_commit": "df6df53dab316660280a1b7780505d412c2d4751",
+    "operator_path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/robust_local_plane_v1.py",
+    "runtime_commit": "1b3f05af80ea900b373f5b2df02db7f469795e77",
+    "runtime_path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/dtb_nd1_runtime_v1.py",
+    "semantic_parity_status": "PENDING_EXECUTION_BEFORE_TOKEN_OUTPUTS_OPEN",
+    "semantics": "predicted d reconstructs view-local P; frozen robust N_d derives only N from P; normal-gated matching/admission builds D2 support/raster/X36; P is never smoothed"
+  },
+  "feature_outputs_opened": false,
+  "schema": "RealSaS.DINO.SharedLearnerApparatusSpec.v1",
+  "scientific_optimizer_steps": 0,
+  "shared_model": {
+    "class": "DINOSharedDepthLearnerV1",
+    "dense_eval": "encode once then deterministic chunked query over every authoritative support row",
+    "file": "dino_shared_depth_learner_v1.py",
+    "input": "Q_d zero-pad + per-token FP32 L2 x_norm_patchtokens [B,8,1369,1536]",
+    "native1024_detail_support": "RGBA stencil: center + 8 directions at radii 1,4,16 native px; shared MLP",
+    "output": "camera-forward depth d only at requested raster loci",
+    "sha256": "af820b2e739253e716b03399fb1add355412027cf5e5da7409a6eec8b8a0a41f",
+    "trainable_parameter_count": 5046739
+  },
+  "status": "FROZEN_BEFORE_CANDIDATE_FEATURE_OUTPUTS",
+  "target": {
+    "analytic_P": "O(grid,h,right,up)+d*F",
+    "learned_camera": false,
+    "learned_normals": false,
+    "learned_risk": false,
+    "truth_d": "dot(P_exact,F_view) at exact authoritative raster row"
+  },
+  "training": {
+    "amp": "CUDA autocast FP16 for shared stack; targets/loss FP32; GradScaler enabled",
+    "augmentation": false,
+    "backbone_frozen": true,
+    "gradient_accumulation_microbatches": 4,
+    "logical_update": "8 families x both styles=16 cells; 8 ordered views/cell",
+    "loss": "FP32 SmoothL1(d_pred,d_truth)",
+    "matched_checkpoint_step": 7168,
+    "optimizer_main": {"betas": [0.9,0.95], "lr": 0.0003, "steps": [1,2048], "type": "AdamW", "weight_decay": 0.0},
+    "optimizer_tail": {"betas": [0.9,0.95], "lr": 0.00003, "steps": [2049,32768], "type": "fresh AdamW moments", "weight_decay": 0.0},
+    "primary_checkpoint_step": 32768,
+    "seed": 20260825,
+    "smooth_l1_beta": 0.01,
+    "trainable_microbatch_cells": 4
+  },
+  "training_authorized": false
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "RealSaS.DINO.MembershipSampleStreamSeal.v1",
+  "date": "2026-08-29",
+  "status": "SEALED_BEFORE_CANDIDATE_FEATURE_OUTPUTS",
+  "scientific_optimizer_steps": 0,
+  "dev32_opened": false,
+  "full_authority_filename": "DINO_MEMBERSHIP_SAMPLE_STREAM_AUTHORITY_V1.json",
+  "full_authority_raw_sha256": "ae1edcaad47cf4867f11d51305eb57db06acb63ef13fc60ca3263c043ef8f71c",
+  "full_authority_content_sha256": "305bcc2efc863c035ad7bce6e0afb29f2354ecc57abd1746e7b15b0485f71d24",
+  "master_ledger_sha256": "475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913",
+  "historical_membership_json_sha256": "8531360f1c61dc4cdb699c095790c35ab3af0da5a7a290b420e5777bb4e9169b",
+  "train512_set_sha256": "1958fa5ed80430ac8ae8f9e66f8d94bc5bfe89c74b5553d13b891c87fdefb2a2",
+  "proxy32_set_sha256": "144e5f21adcab218fa5d8226b76cc949eb3eaa3c065e0cd0a7d30a35f0ed0653",
+  "train_diag32_set_sha256": "ea7e99933739258f1a492326d2631d48a5b2c0018fe8181fb01428f266b3309e",
+  "ordered_asset_id_hashes": {
+    "train512": "5e0d84c8a54d61b6c5bc5dcb814e9e89129db8f82531b972781503ad3052dbf7",
+    "proxy32": "673c35077ee071bd3a5e74029cb8d763ce9bf02acb6d39cc118fa7458a3da548",
+    "train_diag32": "5e2904b384ae923c50e4632e6c9a715e8efc23ebc4f9ee42c04d1b9ceceb4806"
+  },
+  "schedule": {
+    "shape": [32768, 8],
+    "family_exposures": 512,
+    "npy_raw_sha256": "06aae8a811d8affec2c11e5273c3fb6016f72331a117f32392194043aa4de36c",
+    "uint16_data_sha256": "2aca93a8840199785cb4392f52e5ef449b26d31cb52a10473e254aa59a4517bd",
+    "seed": 20260825
+  },
+  "locus_sampler": {
+    "count_per_view": 4096,
+    "seed_formula": "int(SHA256(f'{asset_id}|pv5-depth|{view}')[:16],16)&0x7fffffff",
+    "without_replacement": true,
+    "sorted_after_sample": true
+  },
+  "candidate_features_opened": false,
+  "training_authorized": false
+}

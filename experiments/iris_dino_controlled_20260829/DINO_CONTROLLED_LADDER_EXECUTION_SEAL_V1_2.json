@@ -1,0 +1,18 @@
+{
+  "DEV32": "CLOSED",
+  "candidate_order": [
+    "S",
+    "B",
+    "L",
+    "g"
+  ],
+  "content_sha256": "2000e0df91e5e455830b7d27d6b48fae6149d4e794be5fb0ed74a279de4e70fe",
+  "execution_correction_content_sha256": "ac6149c691cdb7e23e55e8d4e3b47c6e5e2a833e9a1c5bd0b7d2b01bdd732e2b",
+  "execution_correction_raw_sha256": "b487f95abb03ac270bcb4798d180f202cd4ba1a9b8ed4f24c325b178b9f2c8a1",
+  "historical_cache_builder_raw_sha256": "53bbc6874b5e98c22a3b7a7ff866085882ea3fd9f2daa7db8e40d4501a3fc5da",
+  "runner_file": "dino_controlled_ladder_s_b_l_g_v1_2.py",
+  "runner_raw_sha256": "9c0a5e941fc71b1813e539530b0b5fba093df7978fca2ada241a812df94ef790",
+  "schema": "RealSaS.DINO.ControlledLadderExecutionSeal.v1.2",
+  "scientific_optimizer_steps_before_runner_release": 0,
+  "status": "READY_TO_EXECUTE__HISTORICAL_COVERAGE_REPEAT_RESTORED"
+}

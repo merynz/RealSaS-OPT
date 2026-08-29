@@ -1,8 +1,8 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-08-28  
+**Date:** 2026-08-29  
 **Canonical continuation branch:** `main`  
-**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__STRUCTURED_PREDICTED_DEPTH_BRIDGE_NEXT__DEV32_CLOSED`
+**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__DEPTH_BRIDGE_APPARATUS_PASS_M0_M3__SURFACE_GRID_NEXT__DEV32_CLOSED`
 
 This file on `main` is the single continuation authority.
 
@@ -17,7 +17,7 @@ All non-main branches are historical/experimental evidence only. Do not continue
 
 ## Compiler/runtime restoration — CLOSED FOR CURRENT EXECUTION
 
-Compiler is now part of the canonical system/evaluation loop.
+Compiler is part of the canonical system/evaluation loop.
 
 ```text
 IRIS d
@@ -55,36 +55,71 @@ Heavy historical authorities remain SHA-bound in Drive:
 
 Restoration regressions: current typed/routing 10/10 PASS; selected historical 46/46 PASS; causal diagnosis/repair 9/9 PASS; native runtime CTest 1/1 PASS; package-to-native render PASS.
 
-## NEXT — structured ray-aligned predicted-depth tolerance bridge
+## Structured predicted-depth bridge apparatus — M0–M3 CLOSED
+
+Canonical closure: `canonical/STRUCTURED_DEPTH_BRIDGE_APPARATUS_CLOSURE_20260829.md`.
+
+Closed apparatus facts:
+- ray-aligned corruption CPU tests: 5/5 PASS;
+- one real already-open E0 calibration family epsilon=0 replay is identity-equivalent to sealed E0-B persistence;
+- source rows, support, matched rows and source grid are exact at epsilon zero;
+- typed Compiler surface accepts the replay with 512 surface nodes;
+- three sealed non-binding smoke cells traverse independent/coherent and symmetric/asymmetric corruption through MUTUAL_P003 and the typed Compiler surface;
+- Proxy27 was not used for apparatus tuning;
+- DEV32 remains closed.
+
+The M3 smoke values are apparatus evidence only and are forbidden from defining the scientific tolerance grid.
+
+## NEXT — freeze and execute the surface/substrate scientific depth grid
 
 Question:
 
-> Which forward-depth error regimes can IRIS tolerate before persistence, compiler qualification or functional proof becomes unsafe?
+> Which structured forward-depth residual regimes remain safe for observable persistence and the current frozen surface/substrate consumer path?
 
-Preregister a three-axis corruption envelope:
+The corruption family remains:
 
 1. magnitude `epsilon` along each known camera ray before persistence;
 2. spatial correlation length `ell` so coherent regional depth drift is tested, not only independent pixel noise;
 3. view asymmetry `A` so one/few bad views can be stressed against the remaining good views.
 
-For each frozen corruption cell:
+Execution rule:
+- use `calibration_anchor8` to freeze/check the grid and apparatus without consulting Proxy27 bridge outcomes;
+- seal the final cell list, decision/report schema and all byte/checkpoint authorities before qualification outcomes are opened;
 - compute `P_hat = O + d_hat F`;
 - rerun teacher-free `MUTUAL_P003`;
-- evaluate the same frozen proxy-consumer bytes (no retraining per cell);
-- route the same admitted `RiggingSurfaceIR` through the real Compiler path;
-- record persistence error, qualification/abstention, structural validity, and available deformation/proof failures;
+- evaluate the same frozen proxy-consumer bytes where legally applicable, with no retraining per cell;
+- route admitted `RiggingSurfaceIR` through the real Compiler path;
+- record persistence error, qualification/abstention, structural validity and available deformation/proof failures;
 - inherit existing E0 practical margins where the same proxy metric applies;
 - report hard per-family tails separately from aggregates.
 
-Do not use Proxy27 or DEV32 for tuning. Do not convert the result into one scalar `P95 <= epsilon*`; freeze an admissible region over `(epsilon, ell, A)`.
+Do not use Proxy27 or DEV32 for tuning. Do not convert the result into one scalar `P95 <= epsilon*`; preserve the structured `(epsilon, ell, A)` chart.
 
-## After the bridge
+## Product-level interpretation interlock
 
-1. freeze compiler-qualified admissible depth-error region;
+The surface/substrate bridge is not automatically the final product-safe IRIS acceptance region.
+Before using it to select the final foundation/IRIS model, close the sealed consumer-validity interlock with minimal real consumers on the actual RealSaS substrate:
+
+```text
+ClosedRiggingVolume V0
+ -> InteriorRiggingSubstrate V0
+ -> Geppetto G0
+ -> Compiler QualifiedSkeleton
+ -> Arachne A0
+ -> Compiler QualifiedSkin
+ -> deformation / proof replay
+```
+
+Product-level tolerance is consumer-profile specific. Retraining/replacing Geppetto or Arachne creates a new consumer profile and requires replay before old model rankings transfer.
+
+## After the surface bridge + consumer-validity interlock
+
+1. freeze the consumer-qualified admissible depth-error region;
 2. MapAnything/external-prior preflight against that region;
 3. backbone + native high-resolution/multiview C-path bake-off;
 4. train depth-only IRIS;
 5. compare actual held-out structured residuals to the frozen region;
 6. run final `d_hat -> P_hat -> persistence -> Compiler -> puppet` qualification.
 
+Prospective ObservationContract / foundation-prior / external-camera work remains sealed under `prospective/` and is not current scientific authority.
 Deferred corpus product-hygiene work remains prospective and must not rewrite sealed E0/N-B3 populations.

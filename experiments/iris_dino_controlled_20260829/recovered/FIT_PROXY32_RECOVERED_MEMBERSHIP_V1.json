@@ -1,178 +1,47 @@
 {
+  "schema": "RealSaS.RecoveredHistoricalMembership.v1",
+  "membership_name": "FIT_PROXY32",
+  "recovery_method": "EXACT_ASSET_IDS_FROM_PERSISTED_RUNG0512_EVAL_PER_CELL",
+  "source_eval_schema": "RealSaS.IRISSinglePoseV2.PV5R256FitScaleEval.v1",
+  "source_eval_file_sha256": "2552bc8e07299a3fa8615aa10d4f829d5cc20e7c218029ef598e47012e128884",
   "asset_count": 32,
   "cell_count": 64,
-  "expected_styles": [
-    "cel_clean",
-    "ink_cel"
-  ],
-  "membership_name": "FIT_PROXY32",
+  "expected_styles": ["cel_clean", "ink_cel"],
   "records": [
-    {
-      "asset_id": "asset_ea593d044e14f20abe6d2818",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_f089abadcd071194617d640b",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_abd7e358b9e7c7b0e71d969b",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_214c0af580dbfba882412ce3",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_2729b011fa8f11b8a5e46449",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_bdd72a0523be133123ac82e4",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_9a45409eb3bd9e255cf1424d",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_52017b5799e90de9f516e649",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_8e67e53764b0fe1966e05721",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_00f699004601231de81a83fa",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_194e85efe0026697038d393a",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_d384a40155f68dfc5e702c59",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_3c4fca44efa33c9fac66e70e",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_20ff705235c465f361f444e1",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_e73169e16706129e6966ff7e",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_340b6a63a6858190576f5b39",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_1b449637867a6361bb18b25c",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_ec5dc0c237c13b447c3b5528",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_f735037c93e9ba898f928d3c",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_5a39bd62869112230884cd0e",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_ff14d66283194b70e8ab86ac",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_1abc9534546abce622709a4b",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_09c877349023896552cb03c0",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_d48f4d7abdf60d26e7a0454d",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_9dafc93eac6b26d60ae0c1e1",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_a48f972acb462ebac3b69ad6",
-      "source_registry_id": "objaverse_animated_originals",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_cf2288b6019be456c3be97ca",
-      "source_registry_id": "quaternius_cc0",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_f2eda892265e6f20a8e5ba9e",
-      "source_registry_id": "quaternius_cc0",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_76b1a682b24f65d17e5d82d2",
-      "source_registry_id": "quaternius_cc0",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_c91928bc993743552689b4d5",
-      "source_registry_id": "kaykit_cc0",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_81903146784463d0331b1c19",
-      "source_registry_id": "kaykit_cc0",
-      "styles": ["cel_clean", "ink_cel"]
-    },
-    {
-      "asset_id": "asset_0d334b74d1f47cd4ec39ca3f",
-      "source_registry_id": "kaykit_cc0",
-      "styles": ["cel_clean", "ink_cel"]
-    }
+    {"asset_id":"asset_ea593d044e14f20abe6d2818","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_f089abadcd071194617d640b","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_abd7e358b9e7c7b0e71d969b","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_214c0af580dbfba882412ce3","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_2729b011fa8f11b8a5e46449","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_56267911abfbf3b577dd5c35","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_e383ed2d8a58445c7685d4d0","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_85bd1af37089c1b2680094bb","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_243fc1af9fb7dd6d21a86d00","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_e1b2515bc9403665102d4ca3","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_662ed7f1e328bd85959157cf","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_9ca45c9f0ea6a68ac09680b9","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_a3065f8d9279b9e925c9e3c0","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_2cc827f55e415c46a71ffbe1","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_7c2bdaa361ce7b9dc59104c2","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_0cd7ab82864a82a904d82cd0","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_78bf64c0e3df08dc4949b60f","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_4eccd8b2ac7eb5cf4209a2f3","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_a971c7f747d59bc75c1e1d74","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_d0b79130c3bf9dda14dedd94","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_c2f271b7b86adfea4512e774","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_530be6a58afec64cf3f7de57","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_b8e712332567fba7d16766c6","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_ca5cb8810bb4f2f8b76096b6","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_12426e8bff6844d027dd65b4","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_8169868db8220e38cdf00611","source_registry_id":"objaverse_animated_originals","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_0c6dddd9c3570b1f193d5726","source_registry_id":"quaternius_cc0","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_0bb166ab2f6ce59c1c314d96","source_registry_id":"quaternius_cc0","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_112b9b2b7c831f4127516f4a","source_registry_id":"quaternius_cc0","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_a74fd0d398cb161cf9246fcc","source_registry_id":"kaykit_cc0","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_af357a50a746d82ddccf72c1","source_registry_id":"kaykit_cc0","styles":["cel_clean","ink_cel"]},
+    {"asset_id":"asset_076d5f9cc5befdcdb75323bd","source_registry_id":"kaykit_cc0","styles":["cel_clean","ink_cel"]}
   ],
   "recovered_membership_payload_sha256": "38b6636d6b99702b33a7ed7ffd806af2f4fee20c0b116706ed7decb5ea768423",
-  "recovery_method": "EXACT_ASSET_IDS_FROM_PERSISTED_RUNG0512_EVAL_PER_CELL",
-  "schema": "RealSaS.RecoveredHistoricalMembership.v1",
   "scientific_optimizer_steps_during_recovery": 0,
-  "source_eval_file_sha256": "2552bc8e07299a3fa8615aa10d4f829d5cc20e7c218029ef598e47012e128884",
-  "source_eval_schema": "RealSaS.IRISSinglePoseV2.PV5R256FitScaleEval.v1",
   "status": "RECOVERED_EXACT_FROM_PERSISTED_EVAL_AUTHORITY"
 }

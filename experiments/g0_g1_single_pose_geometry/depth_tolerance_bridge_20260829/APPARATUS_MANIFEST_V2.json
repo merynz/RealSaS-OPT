@@ -1,0 +1,64 @@
+{
+  "canonical_next": "STRUCTURED_PREDICTED_DEPTH_BRIDGE",
+  "dev32": "CLOSED",
+  "files": {
+    "APPARATUS_STAGE_A_RESULT_V1.json": {
+      "bytes": 360,
+      "sha256": "317c65d6948b371f29bd5b07d5fef8c4c918b5ba857e187f644649960bf779db"
+    },
+    "APPARATUS_STAGE_B_M2_RESULT_V1.json": {
+      "bytes": 928,
+      "sha256": "f0470cc0b7ae1d303b22a372dfd14e63bbb1ad7d70768affeccde7c475246322"
+    },
+    "APPARATUS_STAGE_C_M3_RESULT_V1.json": {
+      "bytes": 2642,
+      "sha256": "f62b729b22082f8e39a5fc093e3aa5ee529dd45fdae45146a97e2a301f7280ae"
+    },
+    "CONSUMER_VALIDITY_INTERLOCK_V1.md": {
+      "bytes": 2539,
+      "sha256": "1eb8a8b421993546087c38aacc31703820207ddfd8271950cf1b545a78076619"
+    },
+    "DEPTH_TOLERANCE_BRIDGE_PREOPEN_PREREG_V1.md": {
+      "bytes": 4598,
+      "sha256": "26c09f434c4f4af302d6553211ecbf21bb5ff5591392d8a6555039a5ae6a426c"
+    },
+    "M3_SMOKE_CELLS_V1.json": {
+      "bytes": 440,
+      "sha256": "14aa310845b205e7abd4a4d0df10385209949bce5461d5020c499b9ffb1edc0b"
+    },
+    "MINIMUM_FIRST_RESULT_PATH_V1.md": {
+      "bytes": 2933,
+      "sha256": "dbc670b3cf02e005ef7118407eeb40fe501b6dcf8eaf282f72f8ce7a2d1d463c"
+    },
+    "bridge_persistence_v1.py": {
+      "bytes": 5758,
+      "sha256": "2a04102d65167d710f769ff3b7e139e9f1b02716187b17aaace03f443e6f98c4"
+    },
+    "depth_corruption_v1.py": {
+      "bytes": 7264,
+      "sha256": "558b6ebac0857e1ed474d7200623e6c5d6386cc329024837127d279825a1e529"
+    },
+    "run_m2_zero_corruption_parity_v1.py": {
+      "bytes": 4158,
+      "sha256": "dd7ae75eaa3c40905e131fc53f0e560f41e9c0b35c4d6b2154959ba201d57fc2"
+    },
+    "run_m3_smoke_v1.py": {
+      "bytes": 3119,
+      "sha256": "685a4fb2004c28a6ec9e5a5945175ef6977116efbe645f0873d489ffa423d786"
+    },
+    "tests/test_depth_corruption_v1.py": {
+      "bytes": 2428,
+      "sha256": "ea643e00a68912e64596e188e95e64b9052304eaff9bffe74f989807597ee879"
+    }
+  },
+  "gates": {
+    "M1_CPU_TESTS": "PASS_5_OF_5",
+    "M2_ZERO_CORRUPTION_IDENTITY": "PASS",
+    "M3_5_CONSUMER_VALIDITY": "SEALED_PROSPECTIVE_NOT_YET_RUN",
+    "M3_NON_BINDING_SMOKE": "PASS"
+  },
+  "parent_main": "6689393f66f3fd6cefff087a1902e2a7ac3a8061",
+  "proxy27": "CLOSED",
+  "schema": "RealSaS.DepthToleranceBridge.ApparatusManifest.v2",
+  "status": "M0_M3_APPARATUS_PASS__SURFACE_GRID_MAY_BE_SEALED__NO_PRODUCT_TOLERANCE_CLAIM"
+}

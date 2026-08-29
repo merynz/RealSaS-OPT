@@ -1,0 +1,34 @@
+{
+  "canonical_next": "STRUCTURED_PREDICTED_DEPTH_BRIDGE",
+  "dev32": "CLOSED",
+  "files": {
+    "APPARATUS_STAGE_A_RESULT_V1.json": {
+      "bytes": 360,
+      "sha256": "317c65d6948b371f29bd5b07d5fef8c4c918b5ba857e187f644649960bf779db"
+    },
+    "DEPTH_TOLERANCE_BRIDGE_PREOPEN_PREREG_V1.md": {
+      "bytes": 4598,
+      "sha256": "26c09f434c4f4af302d6553211ecbf21bb5ff5591392d8a6555039a5ae6a426c"
+    },
+    "MINIMUM_FIRST_RESULT_PATH_V1.md": {
+      "bytes": 2389,
+      "sha256": "d16c10d8ec8902370552f5fe782ef0e54e32549e359e2915866c8c29bcc4a091"
+    },
+    "bridge_persistence_v1.py": {
+      "bytes": 5476,
+      "sha256": "85adfdbef073d897f668e5759859f02e2d4c1d60c613cd0fe25b8cf7719d5227"
+    },
+    "depth_corruption_v1.py": {
+      "bytes": 7264,
+      "sha256": "558b6ebac0857e1ed474d7200623e6c5d6386cc329024837127d279825a1e529"
+    },
+    "tests/test_depth_corruption_v1.py": {
+      "bytes": 2428,
+      "sha256": "ea643e00a68912e64596e188e95e64b9052304eaff9bffe74f989807597ee879"
+    }
+  },
+  "parent_main": "6689393f66f3fd6cefff087a1902e2a7ac3a8061",
+  "proxy27": "CLOSED",
+  "schema": "RealSaS.DepthToleranceBridge.ApparatusManifest.v1",
+  "status": "APPARATUS_STAGE_A_PASS__NO_SCIENTIFIC_OUTCOMES"
+}

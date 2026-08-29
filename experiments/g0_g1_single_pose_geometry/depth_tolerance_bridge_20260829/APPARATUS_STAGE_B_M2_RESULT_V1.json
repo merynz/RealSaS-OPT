@@ -1,0 +1,26 @@
+{
+  "asset_dir_name": "asset_551ea351b43a1787d0f55536",
+  "asset_id": "asset_551ea351b43a1787d0f55536",
+  "checks": {
+    "P_bit_equal": true,
+    "matched_row_equal": true,
+    "source_grid_bit_equal": true,
+    "source_row_equal": true,
+    "source_view_equal": true,
+    "support_equal": true,
+    "support_pair_count_equal": true,
+    "typed_compiler_schema_ok": true,
+    "typed_compiler_surface_node_count_512": true
+  },
+  "clean_e0b_sha256": "b23a769d60d32064222ea04cb8fe9b4b8d458a5d400d42666332f8ce84a5457a",
+  "dev32": "CLOSED",
+  "matched_row_diff_count": 0,
+  "proxy27": "CLOSED",
+  "schema": "RealSaS.DepthToleranceBridge.M2ZeroCorruptionParity.v1",
+  "scientific_tolerance_cells_opened": false,
+  "status": "PASS",
+  "support_pairs_bridge": 1909,
+  "support_pairs_clean": 1909,
+  "typed_surface_lineage_hash": "5392bbeddf80c02f7099862b913607b8a64b96bfa0621a50385302e980f99d13",
+  "typed_surface_node_count": 512
+}

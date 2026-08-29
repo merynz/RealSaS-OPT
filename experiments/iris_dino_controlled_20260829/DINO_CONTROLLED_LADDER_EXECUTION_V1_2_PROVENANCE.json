@@ -1,0 +1,58 @@
+{
+  "schema": "RealSaS.DINO.ControlledLadderExecutionProvenance.v1.2",
+  "status": "SEALED_DRIVE_EXECUTABLE_AUTHORITY__REPO_HASH_POINTER",
+  "branch": "dino-zero-step-preflight-20260829",
+  "scientific_optimizer_steps_before_v1_2_release": 0,
+  "dev32": "CLOSED",
+  "root_cause": "V1.1 stopped in shared-cache construction on asset_485c9905fc84ad06e6cab6bf V0 with 322 visible raster rows. This is the same pre-optimizer apparatus edge case historically corrected by P-V5/R256 apparatus V1.4.",
+  "execution_correction": {
+    "repo_path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_LADDER_EXECUTION_CORRECTION_V1_2.json",
+    "raw_sha256": "b487f95abb03ac270bcb4798d180f202cd4ba1a9b8ed4f24c325b178b9f2c8a1",
+    "content_sha256": "ac6149c691cdb7e23e55e8d4e3b47c6e5e2a833e9a1c5bd0b7d2b01bdd732e2b"
+  },
+  "execution_seal": {
+    "repo_path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_LADDER_EXECUTION_SEAL_V1_2.json",
+    "raw_sha256": "9af41a7b30430b6ae68b09b8d65e7143fe60f9d3928b6f6adbde2c870571da5a",
+    "content_sha256": "2000e0df91e5e455830b7d27d6b48fae6149d4e794be5fb0ed74a279de4e70fe"
+  },
+  "drive_executable_authority": {
+    "runner": {
+      "path": "/Google Drive/RealSaS_MASTER_CORPUS_1024_V3/reports/dino_controlled_preflight/dino_controlled_ladder_v1/authority/dino_controlled_ladder_s_b_l_g_v1_2.py",
+      "drive_file_id": "1KvHqxjCAizd_v7KIlWZEbsJIX1K6rgvM",
+      "raw_sha256": "9c0a5e941fc71b1813e539530b0b5fba093df7978fca2ada241a812df94ef790"
+    },
+    "notebook": {
+      "path": "/Google Drive/Colab Notebooks/RealSaS_DINO_CONTROLLED_LADDER_S_B_L_g_V1_2.ipynb",
+      "drive_file_id": "1kI2g_QNFvtk3M8Y8yhPoQXO2doD220ah",
+      "raw_sha256": "79dce0f4877fbf4a1ce829d31bf6bd2181e5d0463e2456703e79618498afb778"
+    },
+    "historical_v1_4_cache_builder": {
+      "path": "/Google Drive/RealSaS_MASTER_CORPUS_1024_V3/reports/dino_controlled_preflight/dino_controlled_ladder_v1/authority/HISTORICAL_PV5_V1_4_prepare_fit_scale_cache_v1.py",
+      "drive_file_id": "1o_egAPo_3_ViejaJiuMqrBEsRIBNieYB",
+      "raw_sha256": "53bbc6874b5e98c22a3b7a7ff866085882ea3fd9f2daa7db8e40d4501a3fc5da"
+    }
+  },
+  "restored_sampler": {
+    "n_ge_4096": "same frozen seed; 4096 rows without replacement; sorted",
+    "n_lt_4096": "q,r=divmod(4096,n); tile all rows q times; add deterministic no-replacement remainder r; sort",
+    "zero_visible_rows": "FAIL_CLOSED",
+    "historical_pv5_v1_4_bundle_sha256": "0889f6dca96ff5ac758cab2b63a31cad58a6f1765c11bdc9ee35e408b9386c01"
+  },
+  "drive_byte_verification": {
+    "runner": "PASS",
+    "notebook": "PASS",
+    "execution_correction": "PASS",
+    "execution_seal": "PASS",
+    "historical_cache_builder": "PASS"
+  },
+  "scientific_change": {
+    "architecture_changed": false,
+    "membership_changed": false,
+    "sample_stream_changed": false,
+    "optimizer_changed": false,
+    "loss_changed": false,
+    "evaluation_changed": false,
+    "candidate_specific_tuning": false,
+    "scientific_contract_changed": false
+  }
+}

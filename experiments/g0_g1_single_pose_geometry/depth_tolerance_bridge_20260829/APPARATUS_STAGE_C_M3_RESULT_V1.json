@@ -1,0 +1,77 @@
+{
+  "asset_id": "asset_551ea351b43a1787d0f55536",
+  "binding_scientific_thresholds": false,
+  "cell_count": 3,
+  "cells": [
+    {
+      "affected_view_abs_p95": [
+        0.0019593380391597737,
+        0.001960174727719277,
+        0.0019631438190117474,
+        0.0019608299364335833,
+        0.001961702050175516,
+        0.001960644731298089,
+        0.0019576006685383613,
+        0.001961280149407684
+      ],
+      "affected_view_rms": [
+        0.0010000000474619485,
+        0.0010000000474185977,
+        0.0010000000475579704,
+        0.0010000000475018519,
+        0.0010000000476411302,
+        0.0010000000475259194,
+        0.001000000047581522,
+        0.001000000047584961
+      ],
+      "affected_views": [0,1,2,3,4,5,6,7],
+      "asymmetry": "ALL8",
+      "elapsed_s": 15.751207113265991,
+      "ell_px": 0.0,
+      "epsilon": 0.001,
+      "max_ray_perp_residual": 2.1073424255447017e-08,
+      "support_pairs": 1921,
+      "typed_surface_nodes": 512
+    },
+    {
+      "affected_view_abs_p95": [0.0020174089004285634],
+      "affected_view_rms": [0.0010000000475678505],
+      "affected_views": [5],
+      "asymmetry": "ONE_BAD_HASHED",
+      "elapsed_s": 13.871705293655396,
+      "ell_px": 16.0,
+      "epsilon": 0.001,
+      "max_ray_perp_residual": 2.1073424255447017e-08,
+      "support_pairs": 1910,
+      "typed_surface_nodes": 512
+    },
+    {
+      "affected_view_abs_p95": [0.0058069725055247545,0.005919537506997581],
+      "affected_view_rms": [0.0030000000258898645,0.003000000026261274],
+      "affected_views": [3,7],
+      "asymmetry": "TWO_OPPOSITE_HASHED",
+      "elapsed_s": 13.350661993026733,
+      "ell_px": 8.0,
+      "epsilon": 0.003,
+      "max_ray_perp_residual": 2.1073424255447017e-08,
+      "support_pairs": 1896,
+      "typed_surface_nodes": 512
+    }
+  ],
+  "checks": {
+    "all_affected_view_rms_match_epsilon": true,
+    "all_cells_completed": true,
+    "all_ray_perp_leakage_below_1e-6": true,
+    "all_typed_surface_nodes_512": true,
+    "coherent_one_bad_traversed": true,
+    "coherent_two_opposite_traversed": true,
+    "independent_all8_traversed": true
+  },
+  "dev32": "CLOSED",
+  "execution_mode": "CELLWISE_SAME_SEALED_CELLS__HOST_ORCHESTRATION_LIMIT",
+  "interpretation": "APPARATUS_SMOKE_ONLY__NO_TOLERANCE_OR_PRODUCT_CLAIM",
+  "proxy27": "CLOSED",
+  "schema": "RealSaS.DepthToleranceBridge.M3SmokeResult.v1",
+  "scientific_tolerance_claim_opened": false,
+  "status": "PASS"
+}

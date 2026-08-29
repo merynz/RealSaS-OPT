@@ -1,0 +1,30 @@
+{
+  "asset_id": "asset_551ea351b43a1787d0f55536",
+  "canonical_transport_sha256": "81634b7db6dbae3f7cc30d7f6942ace9be841416dd1db833185884d3e10584c5",
+  "fixture_schema": "RealSaS.ConsumerInterlock.CompilerFixture.v2",
+  "recovery": {
+    "corrupt_monolith_length": 19930,
+    "method": "verified_27000_char_prefix_plus_unique_suffix_search_against_precommitted_sha256",
+    "recovery_run_id": 33240494174,
+    "suffix_match_count": 1,
+    "suffix_match_index_in_corrupt_monolith": 17330,
+    "verified_prefix_length": 27000,
+    "recovered_tail_length": 2600,
+    "recovered_tail_sha256": "fe2d1fbcd847bcab03bc47d87a35c8c4b5799b071559c216b51cc3c1d62f2c94"
+  },
+  "canonical_chunk_names": [
+    "part_00.txt",
+    "part_01.txt",
+    "part_02.txt",
+    "part_03a.txt",
+    "part_03b.txt",
+    "part_04a.txt",
+    "part_04b.txt"
+  ],
+  "canonical_validation_run_id": 33240564583,
+  "canonical_validation_head_sha": "1ac446416f49fc3f827ee814ea5bf9f59092dbfa",
+  "canonical_validation_status": "PASS",
+  "recovery_is_not_a_scientific_pass": true,
+  "schema": "RealSaS.ConsumerInterlock.FixtureTransportProvenance.v1",
+  "status": "SEALED"
+}

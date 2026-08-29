@@ -1,0 +1,42 @@
+{
+  "candidate_features_extracted": false,
+  "content_sha256": "f9da9a0fdc78a5ac6c18456df35173c60793cad93443734686f791137fa69f03",
+  "date": "2026-08-29",
+  "dino_training_started": false,
+  "preprocess_fixture_content_sha256": "fb534f10e46bab0592f0c0e4673f6b8232f831cd132dfb5b0efacdd62e764ae8",
+  "preprocessed_tensor_sha256": "04cb22cc31510331f780e4c9aaba1141776c1fe3b0f8e2570a00badd951aa968",
+  "runtime": {
+    "numpy": "2.1.3",
+    "pillow": "11.3.0",
+    "python": "3.13.15",
+    "torch": "2.11.0+cpu",
+    "torchvision": "0.26.0+cpu"
+  },
+  "schema": "RealSaS.DINO.WeightAuthoritySeal.v1",
+  "scientific_optimizer_steps": 0,
+  "source_revision": "7764ea0f912e53c92e82eb78a2a1631e92725fc8",
+  "status": "PASS__RAW_OFFICIAL_WEIGHT_BYTES_AND_PREPROCESS_SEALED__FEATURE_OUTPUTS_UNOPENED",
+  "weight_result_content_sha256": "62921b9fb7afb03b2fbc772e8e89fda8eeaf0456a786f5b0bce566fba82564d3",
+  "weights": {
+    "B": {
+      "sha256": "0b8b82f85de91b424aded121c7e1dcc2b7bc6d0adeea651bf73a13307fad8c73",
+      "size_bytes": 346378731,
+      "strict_load_pass": true
+    },
+    "L": {
+      "sha256": "d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428",
+      "size_bytes": 1217586395,
+      "strict_load_pass": true
+    },
+    "S": {
+      "sha256": "b938bf1bc15cd2ec0feacfe3a1bb553fe8ea9ca46a7e1d8d00217f29aef60cd9",
+      "size_bytes": 88283115,
+      "strict_load_pass": true
+    },
+    "g": {
+      "sha256": "baf8467e50af277596bbbafa06887c177ee899ab46033649c383577d7e9309d3",
+      "size_bytes": 4546108579,
+      "strict_load_pass": true
+    }
+  }
+}

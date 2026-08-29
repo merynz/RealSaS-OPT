@@ -1,0 +1,102 @@
+{
+  "authorities": {
+    "apparatus_freeze": {
+      "content_sha256": "e285fa051d3609359464dc3bc75fd99f376c612de726d4b7a9fd0910f4e73a2d",
+      "filename": "DINO_APPARATUS_FREEZE_V1_RESULT.json",
+      "raw_sha256": "3c1c94d2888a886a82642e79e1a5cff26b805426f4be02acea7b0231f280226d",
+      "status": "PASS_ARCH_INIT_SAMPLE_CACHE_DATA__DTB_CARRIER_PARITY_PENDING"
+    },
+    "dtb_carrier_parity": {
+      "case_count": 6,
+      "content_sha256": "9703c09e46123f85a1a6c754958deaaa17248f1f96ff42f2c55466981288dacd",
+      "filename": "DTB_ND1_CARRIER_PARITY_V1_RESULT.json",
+      "pass_count": 6,
+      "raw_sha256": "4cda5cf25a5563da26571e91f4ea2efd490997c4cb1e66557e0946b1b564e348",
+      "status": "PASS_FORWARD_DEPTH_RASTER_AUTHORITY_AND_DTB_ND1_TOPOLOGY_PARITY__DINO_FEATURES_UNOPENED"
+    },
+    "token_parity_prereg": {
+      "content_sha256": "9f79397ede85d258fb74d8adcbb80b1b60faae3bb66010b8bdb6fcf931015972",
+      "filename": "DINO_TOKEN_PARITY_PREREG_V1.json",
+      "raw_sha256": "1fd810bb16b904ebe3c7db046c9492e8ad711c0a6ce68a362d950a9e5e37fbf6",
+      "status": "SEALED_BEFORE_FIRST_CANDIDATE_FEATURE_OUTPUT"
+    },
+    "token_parity_result": {
+      "candidate_feature_opening_scope": "TOKEN_PARITY_FIXTURE_ONLY",
+      "content_sha256": "3733754f91b1bb9508eaff5c5abb5d6efa790444fa2fe50ff9e3812a7b17330c",
+      "filename": "DINO_TOKEN_PARITY_V1_RESULT.json",
+      "raw_sha256": "b26ffbbed5af5dc32606e1573f8df3a2828425b72ca2c566ff17a3f5eceb29bf",
+      "status": "PASS_ALL_4_CANDIDATES_ONLINE_REPEAT_CACHE_ROUNDTRIP_QD_L2_PARITY"
+    },
+    "train512_native1024": {
+      "content_sha256": "aa50ea258f8e46e1d282ab2d3b07dd40c29846e86bab47bbc081b34591a9d24e",
+      "filename": "DINO_TRAIN512_NATIVE1024_AUTHORITY_V2.json",
+      "raw_sha256": "780ef80d06b75e1ba65d8ce85df65c09034d5030eae74a755b52bc11a93cd699",
+      "status": "PASS_512_OF_512"
+    },
+    "weight_preprocess": {
+      "content_sha256": "62921b9fb7afb03b2fbc772e8e89fda8eeaf0456a786f5b0bce566fba82564d3",
+      "filename": "DINO_WEIGHT_AUTHORITY_V1.json",
+      "raw_sha256": "d1f85bdcd4bef79c5aa46a41479250ae0332744514e29379e569444b680c879b",
+      "status": "PASS_WEIGHT_BYTES_SOURCE_COMPAT_PREPROCESS_SEALED__FEATURE_OUTPUTS_UNOPENED"
+    }
+  },
+  "build_id": "REALSAS_DINO_ZERO_STEP_PREFLIGHT_COMBINED_SEAL_V1_20260829",
+  "candidate_weights": {
+    "B": {"native_dim": 768, "token_parity_pass": true, "weight_sha256": "0b8b82f85de91b424aded121c7e1dcc2b7bc6d0adeea651bf73a13307fad8c73"},
+    "L": {"native_dim": 1024, "token_parity_pass": true, "weight_sha256": "d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428"},
+    "S": {"native_dim": 384, "token_parity_pass": true, "weight_sha256": "b938bf1bc15cd2ec0feacfe3a1bb553fe8ea9ca46a7e1d8d00217f29aef60cd9"},
+    "g": {"native_dim": 1536, "token_parity_pass": true, "weight_sha256": "baf8467e50af277596bbbafa06887c177ee899ab46033649c383577d7e9309d3"}
+  },
+  "checks": {
+    "apparatus_not_training": true,
+    "apparatus_optimizer_zero": true,
+    "apparatus_status": true,
+    "dtb_cases": true,
+    "dtb_not_training": true,
+    "dtb_optimizer_zero": true,
+    "dtb_status": true,
+    "token_candidates_all_pass": true,
+    "token_dev_closed": true,
+    "token_not_training": true,
+    "token_optimizer_zero": true,
+    "token_prereg_status": true,
+    "token_status": true,
+    "train512_not_training_authority": true,
+    "train512_optimizer_zero": true,
+    "train512_ready": true,
+    "train512_status": true,
+    "weight_not_training": true,
+    "weight_optimizer_zero": true,
+    "weight_status": true
+  },
+  "content_sha256": "73d6bbb8d4656c6f71ed6edbd3fbd4802361041fe78dd1eaa2f8e0b712bf95a9",
+  "decision": {
+    "apparatus_locked": true,
+    "candidate_feature_outputs_opened_only_for_token_parity": true,
+    "next_gate": "EXPLICIT_DINO_CONTROLLED_LADDER_TRAINING_AUTHORIZATION_V1",
+    "training_authorized_by_this_artifact": false,
+    "zero_step_preflight_complete": true
+  },
+  "dev32_opened": false,
+  "dino_training_started_before_authorization": false,
+  "dtb_nd1_boundary": "0.00250 <= epsilon_critical < 0.00275 RMS",
+  "master_ledger_sha256": "475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913",
+  "post_open_firewall": {
+    "cache_semantic_edit_forbidden": true,
+    "membership_edit_forbidden": true,
+    "optimizer_or_loss_edit_forbidden": true,
+    "preprocess_edit_forbidden": true,
+    "sample_stream_edit_forbidden": true,
+    "shared_architecture_edit_forbidden": true
+  },
+  "proxy32_set_sha256": "144e5f21adcab218fa5d8226b76cc949eb3eaa3c065e0cd0a7d30a35f0ed0653",
+  "schema": "RealSaS.DINO.ZeroStepPreflightCombinedSeal.v1",
+  "scientific_optimizer_steps_before_authorization": 0,
+  "sealed_utc": "2026-08-29T17:29:55.244287+00:00",
+  "shared_model_sha256": "af820b2e739253e716b03399fb1add355412027cf5e5da7409a6eec8b8a0a41f",
+  "shared_trainable_parameter_count": 5046739,
+  "source_revision": "7764ea0f912e53c92e82eb78a2a1631e92725fc8",
+  "status": "PASS_ZERO_STEP_PREFLIGHT__CONTROLLED_DINO_LADDER_READY_FOR_EXPLICIT_AUTHORIZATION",
+  "train512_set_sha256": "1958fa5ed80430ac8ae8f9e66f8d94bc5bfe89c74b5553d13b891c87fdefb2a2",
+  "train_diag32_set_sha256": "ea7e99933739258f1a492326d2631d48a5b2c0018fe8181fb01428f266b3309e"
+}

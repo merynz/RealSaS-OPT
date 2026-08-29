@@ -1,0 +1,18 @@
+{
+  "all_edges_hard_required": true,
+  "all_joints_inside_possible_volume": true,
+  "asset_id": "asset_551ea351b43a1787d0f55536",
+  "d2_support_pairs": 1884,
+  "g0_edge_count": 4,
+  "g0_joint_count": 5,
+  "g0_metadata": {
+    "canonical_authority": false,
+    "interior_lineage": "307f98460455425bada74213e8a00bd826d29da206dae95d7881ab9b6b658374",
+    "volume_lineage": "196fb43ecd8004ff05e8882703f96824b405bc6554779db4fc29a531dcb078a5"
+  },
+  "possible_voxels": 33701,
+  "proposal_ids_noncanonical": true,
+  "schema": "RealSaS.ConsumerInterlock.G0PrequalificationSmoke.v1",
+  "strict_voxels": 28137,
+  "surface_nodes": 512
+}

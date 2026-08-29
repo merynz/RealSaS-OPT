@@ -1,0 +1,99 @@
+{
+  "schema": "RealSaS.DINO.SourcePreprocessTokenAuthority.v1",
+  "date": "2026-08-29",
+  "status": "SEALED_BEFORE_WEIGHT_HASHES_OR_CANDIDATE_FEATURE_OUTPUTS__ZERO_OPTIMIZER_STEPS",
+  "scientific_optimizer_steps": 0,
+  "upstream": {
+    "repository": "facebookresearch/dinov2",
+    "revision": "7764ea0f912e53c92e82eb78a2a1631e92725fc8",
+    "revision_role": "exact foundation source authority",
+    "license": "Apache-2.0",
+    "base_weight_url": "https://dl.fbaipublicfiles.com/dinov2"
+  },
+  "candidates": {
+    "S": {
+      "hub_constructor": "dinov2_vits14",
+      "arch_name": "vit_small",
+      "embed_dim": 384,
+      "patch_size": 14,
+      "register_tokens": 0,
+      "official_weight_url": "https://dl.fbaipublicfiles.com/dinov2/dinov2_vits14/dinov2_vits14_pretrain.pth"
+    },
+    "B": {
+      "hub_constructor": "dinov2_vitb14",
+      "arch_name": "vit_base",
+      "embed_dim": 768,
+      "patch_size": 14,
+      "register_tokens": 0,
+      "official_weight_url": "https://dl.fbaipublicfiles.com/dinov2/dinov2_vitb14/dinov2_vitb14_pretrain.pth"
+    },
+    "L": {
+      "hub_constructor": "dinov2_vitl14",
+      "arch_name": "vit_large",
+      "embed_dim": 1024,
+      "patch_size": 14,
+      "register_tokens": 0,
+      "official_weight_url": "https://dl.fbaipublicfiles.com/dinov2/dinov2_vitl14/dinov2_vitl14_pretrain.pth"
+    },
+    "g": {
+      "hub_constructor": "dinov2_vitg14",
+      "arch_name": "vit_giant2",
+      "embed_dim": 1536,
+      "patch_size": 14,
+      "register_tokens": 0,
+      "ffn_layer": "swiglufused",
+      "official_weight_url": "https://dl.fbaipublicfiles.com/dinov2/dinov2_vitg14/dinov2_vitg14_pretrain.pth"
+    }
+  },
+  "preprocess": {
+    "source_observation": "authoritative stored native 1024x1024 RGB channels from the selected RGBA observation; alpha is not composited into RGB and is retained separately as observation/support authority",
+    "adaptive_crop": false,
+    "center_crop": false,
+    "horizontal_flip": false,
+    "augmentation": false,
+    "resize": {
+      "input_hw": [1024, 1024],
+      "output_hw": [518, 518],
+      "operator": "torchvision.transforms.functional.resize",
+      "interpolation": "BICUBIC",
+      "antialias": true,
+      "whole_canvas": true
+    },
+    "tensor_scale": "uint8_RGB / 255.0 in FP32",
+    "normalize_mean": [0.485, 0.456, 0.406],
+    "normalize_std": [0.229, 0.224, 0.225],
+    "library_versions": "must be byte/config sealed by apparatus preflight before first feature extraction"
+  },
+  "foundation_output": {
+    "method": "model.forward_features(preprocessed_rgb)['x_norm_patchtokens']",
+    "cls_token_consumed": false,
+    "register_tokens_consumed": false,
+    "intermediate_blocks_consumed": false,
+    "patch_grid_hw": [37, 37],
+    "tokens_per_view": 1369,
+    "token_order": "native DINO row-major patch-token order reshaped to 37x37 without permutation"
+  },
+  "fixed_interface": {
+    "output_dim": 1536,
+    "S": "append 1152 exact zeros",
+    "B": "append 768 exact zeros",
+    "L": "append 512 exact zeros",
+    "g": "identity",
+    "trainable_projection_before_shared_stack": false,
+    "post_lift_normalization": {
+      "operator": "per-token FP32 L2 normalization",
+      "formula": "z / max(||z||_2, 1e-12)",
+      "epsilon": 1e-12,
+      "affine_parameters": false,
+      "reason": "Q_d is isometric; L2 normalization preserves the zero-pad equivalence without adding a dimension-dependent centering/variance artifact"
+    }
+  },
+  "firewalls": {
+    "backbone_frozen": true,
+    "candidate_specific_preprocess": false,
+    "candidate_specific_layer_selection": false,
+    "candidate_specific_projection": false,
+    "candidate_specific_normalization": false,
+    "open_candidate_features_before_weight_and_preprocess_authority_seal": false
+  }
+}

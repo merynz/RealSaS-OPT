@@ -1,0 +1,60 @@
+{
+  "coordinate_equivalence": {
+    "bundle_sha256": "81d3287755bb321981174f17353c7bfd094ab5bd4c4c643b4d3efe22bf136d5a",
+    "conclusion": "P metric is ray-depth-dominated at the relevant ~0.005 scale. It is not asserted to be mathematically identical for every asset without a full checkpoint re-evaluation in d-space.",
+    "evaluation_metric": "Euclidean ||P_pred-P_truth|| at frozen barycentric/raster loci",
+    "numeric_witness": {
+      "asset_id": "asset_ea593d044e14f20abe6d2818",
+      "dtb_nd1_lower_depth_abs_p95_approx": 0.0049,
+      "samples_per_view": 4096,
+      "screen_p95_fraction_of_lower_dtb_p95": 0.013033858,
+      "screen_plane_error_max_all_samples": 0.00012190263805678114,
+      "screen_plane_error_p95_all_samples": 6.386590393958613e-05,
+      "sheet_half_extent": 0.540084388185654,
+      "source": "objaverse_animated_originals",
+      "structural_identity": "P_pred uses analytic screen coordinates and learned camera-forward depth; evaluator uses ||P_pred-P_truth||. Therefore screen mismatch is the only non-depth term.",
+      "style": "cel_clean",
+      "views": 8
+    },
+    "prediction_geometry": "P = h*g_x*right - h*g_y*up + d*forward",
+    "training_objective": "FP32 SmoothL1 on camera-forward d_pred vs d_truth"
+  },
+  "decision": {
+    "controlled_pretrained_capacity_ladder": "WARRANTED",
+    "immediate_product_selection": "NOT_AUTHORIZED",
+    "reason": "At fixed architecture and total optimizer steps, increasing training-family diversity improves FIT_PROXY32 transfer while training-family precision degrades; the historical family-scale ladder is therefore not a controlled capacity test."
+  },
+  "dtb_nd1_matched_scale": {
+    "ell0_depth_abs_p95_approx": [0.0049, 0.00539],
+    "epsilon_rms_bracket": [0.0025, 0.00275]
+  },
+  "fit_scale_ladder": [
+    {"rung_families":32,"family_exposures_nominal":1792.0,"train_diag8_cell_p95_median":0.007308003888465461,"train_diag32_cell_p95_median":0.008592629409395158,"fit_proxy32_cell_p95_median":0.17066082097589963,"train_diag32_aggregate_p95":0.017656839359551667,"fit_proxy32_aggregate_p95":0.2904016479849814,"fit_proxy32_worst_cell_p95":0.5161474138498305},
+    {"rung_families":128,"family_exposures_nominal":448.0,"train_diag8_cell_p95_median":0.013824648386798793,"train_diag32_cell_p95_median":0.01819417374208568,"fit_proxy32_cell_p95_median":0.09814133346080778,"train_diag32_aggregate_p95":0.0355947080999612,"fit_proxy32_aggregate_p95":0.21184099763631817,"fit_proxy32_worst_cell_p95":0.5142308771610259},
+    {"rung_families":512,"family_exposures_nominal":112.0,"train_diag8_cell_p95_median":0.022464929101988662,"train_diag32_cell_p95_median":0.03137755081988871,"fit_proxy32_cell_p95_median":0.06592982606962318,"train_diag32_aggregate_p95":0.06715385615825648,"fit_proxy32_aggregate_p95":0.19979689791798566,"fit_proxy32_worst_cell_p95":0.5139606714248657}
+  ],
+  "firewalls": {
+    "dev32_opened": false,
+    "no_more_operator_tuning_before_consumer_and_capacity_gates": true,
+    "product_safe_claim_authorized": false,
+    "proxy27_used_for_tuning": false
+  },
+  "historical_small_fit_context": {
+    "interpretation": "Fit-only scratch result sits at/inside the current matched p95 tolerance scale; representational fitting is possible on a small cohort.",
+    "p_v5_r256_8x2_fit_aggregate_P_p95": 0.003706276847515254,
+    "p_v5_r256_8x2_fit_worst_cell_P_p95": 0.005740759451873588
+  },
+  "interpretation": {
+    "not_supported": "FIT_PROXY32 .1998 aggregate = pure 54x family-generalization collapse.",
+    "supported_1": "At fixed architecture/7168 steps, larger train-family scale improves FIT_PROXY32 while worsening train-family diagnostics.",
+    "supported_2": "Rung512 is globally underfit at the precision required by DTB-ND1; unseen Objaverse adds a further family-generalization tail.",
+    "supported_3": "Style is not the dominant axis in rung512; cel/ink medians are nearly identical."
+  },
+  "rung512_counts_vs_dtb_upper_p95": {"threshold":0.00539,"train_diag32_assets_at_or_below":0,"train_diag32_asset_count":32,"fit_proxy32_assets_at_or_below":0,"fit_proxy32_asset_count":32},
+  "rung512_source_medians": {
+    "train_diag32": {"kaykit_cc0":0.13438285738229744,"objaverse_animated_originals":0.030788928270339962,"quaternius_cc0":0.033107900526374565},
+    "fit_proxy32": {"kaykit_cc0":0.12346087414771309,"objaverse_animated_originals":0.07166347634047265,"quaternius_cc0":0.023949862737208585}
+  },
+  "schema": "RealSaS.FITProxy32ResidualAudit.v1",
+  "status": "CLOSED__CONTROLLED_CAPACITY_LADDER_WARRANTED__PRODUCT_SELECTION_NOT_AUTHORIZED"
+}

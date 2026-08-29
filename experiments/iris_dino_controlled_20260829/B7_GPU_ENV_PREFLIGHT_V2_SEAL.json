@@ -1,0 +1,47 @@
+{
+  "schema": "RealSaS.StageB7GpuEnvironmentPreflightSeal.v2",
+  "date": "2026-08-29",
+  "status": "PASS_ENVIRONMENT_AND_AUTHORITY_ONLY",
+  "scientific_optimizer_steps": 0,
+  "master_mutated": false,
+  "repair_assets_rendered": 0,
+  "runtime": {
+    "gpu": "Tesla T4",
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "torch_cuda_build": "12.8",
+    "compute_capability": [7, 5],
+    "cuda_home": "/usr/local/cuda",
+    "nvcc_path": "/usr/local/cuda/bin/nvcc"
+  },
+  "historical_stage_b7": {
+    "sha256": "a9481bc609108b616163a6bc824bd927e93813fafc422cc06c294a58b01b9ca6"
+  },
+  "nvdiffrast": {
+    "tag": "v0.4.0",
+    "commit": "253ac4fcea7de5f396371124af597e6cc957bfae",
+    "fresh_cuda_raster_smoke_pass": true,
+    "fresh_cuda_raster_smoke_covered_pixels": 1152
+  },
+  "data_authority": {
+    "stage_b6_repair_artifact_count": 56,
+    "train512_repair9_authority_pass": true,
+    "sentinel_file_contract_pass": true
+  },
+  "drive_artifacts": {
+    "B7_GPU_ENV_PREFLIGHT_V2_RESULT.json": {
+      "size_bytes": 637,
+      "sha256": "65b527dd7f357ddaf5c8de4c011b81e57e2d1236a0b32aec9dddd3a51fdf081b"
+    },
+    "NVDIFFRAST_BUILD_INSTALL.log": {
+      "size_bytes": 27496,
+      "sha256": "1758ce90dbc04f8da8ea5b57faab5c2b2a161fb242184aa256373f0cafb74971"
+    }
+  },
+  "next_gate": "HISTORICAL_RENDER_SENTINEL_PARITY_THEN_SELECTIVE_9_STAGING",
+  "sealed_selective_runner": {
+    "path": "experiments/iris_dino_controlled_20260829/stage_b7_train512_selective_repair_v2.py",
+    "file_sha256": "f24898678a688be3039c44f6d9a63d7675ac8d3ebe36854e48a88f586292e7db",
+    "initial_commit": "65130c83365f8dbf99c337d0766962de52344140"
+  }
+}

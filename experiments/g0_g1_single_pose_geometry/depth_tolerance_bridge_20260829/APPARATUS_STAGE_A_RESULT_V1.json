@@ -1,0 +1,14 @@
+{
+  "dev32": "CLOSED",
+  "numpy": "2.3.5",
+  "parent_main": "6689393f66f3fd6cefff087a1902e2a7ac3a8061",
+  "proxy27": "CLOSED",
+  "python": "3.13.5",
+  "schema": "RealSaS.DepthToleranceBridge.ApparatusStageAResult.v1",
+  "scientific_outcomes_opened": false,
+  "status": "PASS",
+  "tests": {
+    "depth_corruption_v1": "5/5 PASS",
+    "py_compile": "PASS"
+  }
+}

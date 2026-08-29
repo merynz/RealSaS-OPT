@@ -1,0 +1,43 @@
+{
+  "calibration_result_sha256": "82bbb1b56266742242bee5995209df6d83ecfec177ff6a431d13553491ae36b9",
+  "checkpoint_sha256": {
+    "ARACHNE_D2_BEST.pt": "72898a62f23c55aa82047f7bc4b39be787abb97d14f9a3fb973d59b2b5689745",
+    "GEPPETTO_D2_BEST.pt": "f8c6146fc3ad81146ced01805b9be454ad194b86db3a9ab3d72d7b9eb3747b65"
+  },
+  "checks": {
+    "arachne_max_abs_numeric_diff_vs_historical_calibration": 1.1559688672946322e-07,
+    "arachne_parity_pass": true,
+    "geppetto_max_abs_numeric_diff_vs_historical_calibration": 8.940696716308594e-08,
+    "geppetto_parity_pass": true,
+    "m2_epsilon0_D2_X_bit_exact": true,
+    "m2_epsilon0_d2_support_pair_count": 1884,
+    "m2_historical_d2_support_pair_count": 1884,
+    "numeric_parity_tolerance": 2e-07
+  },
+  "firewalls": {
+    "dev32": "CLOSED",
+    "m3_smoke_used_for_thresholds": false,
+    "proxy27": "CLOSED_FOR_THIS_PARITY",
+    "training_steps": 0
+  },
+  "pack_sha256": {
+    "asset_0679fdef64f19a4832a6d521": "76a84883a1516839d9d5476f7c2d99ad26a29815f490d4d4c50124ecafa3db17",
+    "asset_551ea351b43a1787d0f55536": "a4b3d5544f20a0fecefa877b74f4ad601f072d29afd0df35204c7b182d800c2c",
+    "asset_76313e4bd82b82fcd1659c70": "ddeed0eef39e13ed7831e798b8404de92083df5355bb65002f70087734283633",
+    "asset_f8a40d6c5d815fe79c8b5e42": "41cda2c5623f9698e7c35bd5559b7967871dc7f5c37fff10148b220991d1ebf8"
+  },
+  "schema": "RealSaS.DepthToleranceBridge.ProxyReplayParity.v1",
+  "source_authority": {
+    "embedded_calibration_runner_sha256": "7fc3021726df64069ba44be42f946db25929372497f39f392898477b374e2ca4",
+    "embedded_e0_downstream_proxy_v1_sha256": "0f599e8f717d4c5070c04e224d90e52d1dc6e76a6e2068e64ed7c9d9d2b950b4",
+    "notebook": "RealSaS_E0_DOWNSTREAM_PROXY_V1_2.ipynb",
+    "notebook_sha256": "a46fe75a7ce5a0318d79c6d8b055bc593bd8c57942edc85c1d93353bf742047f"
+  },
+  "status": "PASS",
+  "truth_capable_calibration_ids": [
+    "asset_551ea351b43a1787d0f55536",
+    "asset_0679fdef64f19a4832a6d521",
+    "asset_76313e4bd82b82fcd1659c70",
+    "asset_f8a40d6c5d815fe79c8b5e42"
+  ]
+}

@@ -1,0 +1,30 @@
+name: consumer-coupling-probe-v1
+on:
+  pull_request:
+    paths:
+      - 'compiler/**'
+      - 'experiments/consumer_interlock_20260829/**'
+      - '.github/workflows/consumer_coupling_probe_v1.yml'
+permissions:
+  contents: read
+jobs:
+  coupling-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU dependency
+        run: python -m pip install --disable-pip-version-check numpy
+      - name: Run preregistered G0/A0 coupling probe
+        env:
+          PYTHONPATH: ${{ github.workspace }}/compiler
+        run: python experiments/consumer_interlock_20260829/run_consumer_coupling_probe_v1.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: consumer-coupling-probe-v1-result
+          path: experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_COUPLING_PROBE_RESULT_V1.json
+          if-no-files-found: warn

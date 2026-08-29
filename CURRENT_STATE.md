@@ -2,267 +2,239 @@
 
 **Date:** 2026-08-29  
 **Canonical continuation branch:** `main`  
-**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__DTB_S1_CLOSED__DTB_S1R_CLOSED__DTB_ND1_CLOSED__FIT_PROXY32_RESIDUAL_AUDIT_NEXT__DEV32_CLOSED`
+**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__DTB_ND1_CLOSED__FIT_PROXY32_AUDIT_CLOSED__CONSUMER_INTERLOCK_6_OF_6_PASS__DINO_CONTROLLED_PREREG_NEXT__TRAINING_NOT_AUTHORIZED__DEV32_CLOSED`
 
-This file on `main` is the single continuation authority.
+This file is continuation authority only when present on `main`. On a non-main branch it is a proposed next canonical state and does not override the current `main` authority until that branch is explicitly promoted/merged.
 
-All non-main branches are historical/experimental evidence only. Do not continue product/scientific work from a side branch unless `main` explicitly promotes that branch state.
+Plain-language roadmap:
+`canonical/HUMAN_READABLE_ROADMAP_20260829.md`.
 
-## Experiment naming authority
+## One-line state
 
-To avoid collision with the older IRIS qualification line:
+`depth tolerance measured -> old learner failure decomposed -> real downstream consumer route + coupling validated -> controlled DINOv2 S/B/L/g preregistration next -> only then training`
 
-- `LEGACY-IRIS-M4` = historical IRIS qualification work from the older line.
-- `DTB-S1` = the current structured depth bridge whose sealed files retain `M4_*` names.
-- `DTB-S1R` = the ALL8 boundary refinement whose sealed files retain `M4R_*` names.
-- `DTB-ND1` = the robust local-plane normal intervention.
+## 1. Product/system contract — STABLE
 
-Sealed historical filenames are not renamed.
+North star:
 
-## Closed scientific state
+`ONE NEUTRAL 8-VIEW CHARACTER SHEET -> EDITABLE, RIGGED, ANIMATABLE PUPPET`
 
-- E0 downstream information-sufficiency Proxy27: PASS; product pass not claimed; DEV32 remains closed.
-- N-B3: PASS. No explicit learned normal feature is required under the frozen tested regime; direct-N is removed from the required exposed IRIS output contract.
-- Required learned geometric direction is forward depth `d`; with known orthographic cameras, `P_hat = O + d_hat F` is analytic.
-- B3 isotropic epsilon is NOT a product depth tolerance envelope.
-
-## Compiler/runtime restoration — CLOSED FOR CURRENT EXECUTION
-
-Compiler is part of the canonical system/evaluation loop.
+Current typed route:
 
 ```text
-IRIS d
- -> analytic P_hat
- -> deterministic SurfaceBuilder / D2_MUTUAL_P003
- -> RiggingSurfaceIR S
+8 ordered neutral views + known orthographic cameras
+ -> IRIS learned forward depth d
+ -> analytic P = O + dF
+ -> deterministic SurfaceBuilder / RiggingSurfaceIR S
  -> Geppetto SkeletonProposalIR G*
- -> CanonicalGraphOptimizationRequest/Result
- -> Compiler QualifiedSkeletonIR G
+ -> Compiler graph qualification / QualifiedSkeletonIR G
  -> Arachne SkinProposalIR W*
- -> Compiler QualifiedSkinIR W
+ -> Compiler skin qualification / QualifiedSkinIR W
  -> CanonicalPuppetGraph Y
- -> proof / bounded repair / mandatory re-proof
- -> runtime projection
+ -> deformation/motion proof -> attribution -> bounded repair -> mandatory re-proof
+ -> proven runtime projection
 ```
 
-Important invariants:
-- proposal IDs never become product-canonical IDs;
-- Compiler owns root/hierarchy qualification and canonical ID minting;
-- stale surface/skeleton bindings fail closed;
-- proof binds exact `product_state_hash`;
-- runtime export requires a passing proof for that exact state;
-- no duplicate hierarchy/topology layer was created.
+Authority invariants:
 
-Current GitHub-contained historical execution closure:
-- raw ZIP SHA-256 `3a6076b30e0a23807f952365d39d81ddf5d4b1dba734c0bdba47567bced26850`
-- 9 byte-exact v0.5 leaf modules + 4 namespace rebinds
-- old front-brain/truth imports: 0
+- IRIS/Geppetto/Arachne emit evidence/proposals, not product truth;
+- Compiler owns canonical joint IDs and product state;
+- there is one skeleton/topology authority: `QualifiedSkeletonIR` materialized through the existing canonical graph optimizer;
+- optimizer candidate/work objects are not product graphs;
+- `CanonicalPuppetGraph` references admitted surface/skeleton/skin lineages and is the single product-state authority;
+- proof and runtime bind to exact `product_state_hash`;
+- stale bindings fail closed.
 
-Heavy historical authorities remain SHA-bound in Drive:
-- v0.5 full source `03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130`
-- R5_3 `6224661cb4323f78a9b808af10f68dd584431a422e28d26a69e87816a3b0ef80`
-- v97_43 `09a94871f938b069ba5c8219f203355e724f2f58afa6e10dc5c6148d98b43efb`
-- C++17 runtime source `1af741c9a3d30456a6703809e067a9c3a61220da51a6a1a9cbda2b8a4755e8b0`
+Compiler/runtime restoration remains closed for current execution. Exact historical vendor raw SHA-256:
 
-Restoration regressions: current typed/routing 10/10 PASS; selected historical 46/46 PASS; causal diagnosis/repair 9/9 PASS; native runtime CTest 1/1 PASS; package-to-native render PASS.
+`3a6076b30e0a23807f952365d39d81ddf5d4b1dba734c0bdba47567bced26850`
 
-## Structured predicted-depth bridge apparatus — M0–M3 CLOSED
+## 2. Geometry requirement — CLOSED FOR THE TESTED CONSUMER PROFILE
 
-Canonical closure: `canonical/STRUCTURED_DEPTH_BRIDGE_APPARATUS_CLOSURE_20260829.md`.
+The structured predicted-depth bridge and refinement are closed.
 
-Closed apparatus facts:
-- ray-aligned corruption CPU tests: 5/5 PASS;
-- one real already-open E0 calibration family epsilon=0 replay is identity-equivalent to sealed E0-B BASE persistence;
-- source rows, support, matched rows and source grid are exact at epsilon zero;
-- typed Compiler surface accepts the replay with 512 surface nodes;
-- three sealed non-binding smoke cells traverse independent/coherent and symmetric/asymmetric corruption through the pre-cycle teacher-free BASE matcher and typed Compiler surface;
-- Proxy27 was not used for apparatus tuning;
-- DEV32 remains closed.
+Historical frozen-D2 ALL8 boundary before robust normal derivation:
 
-The M3 smoke values are apparatus evidence only and are forbidden from defining the scientific tolerance grid.
+`0.00225 <= epsilon_critical < 0.00250 RMS`
 
-### Route-semantics correction — CLOSED BEFORE DTB-S1 OUTCOME OPEN
+After the preregistered robust local-plane deterministic normal derivation (`DTB-ND1`):
 
-Canonical correction: `experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_ROUTE_SEMANTICS_CORRECTION_V1.md`.
+`0.00250 <= epsilon_critical < 0.00275 RMS`
 
-The M2/M3 apparatus used `MUTUAL_P003` as an overloaded label for direct `derived_match_row` persistence. Exact downstream authority establishes two distinct stages:
+For the matched ell=0 Gaussian-like bridge this corresponds approximately to depth absolute-P95:
 
-```text
-BASE_DERIVED_MATCHER
- -> reciprocal reverse match
- -> admit iff cycle_P <= 0.003
- -> D2_MUTUAL_P003
-```
+`0.00490–0.00539`
 
-Consequences:
-- sealed M2/M3 result bytes are preserved;
-- their `1909 / 1921 / 1910 / 1896` support-pair values are pre-cycle BASE apparatus evidence;
-- scientific DTB-S1 qualification uses post-cycle `D2_MUTUAL_P003`;
-- BASE is retained only as a separate mechanism diagnostic.
+Clean non-inferiority passed 6/6.
 
-Additive cached/vectorized runtime parity:
-- zero-corruption BASE `1909 == 1909`, bit-exact;
-- zero-corruption D2 `1884 == 1884`, `D2_X` bit-exact;
-- nonzero vectorized forward matcher: 56/56 scalar row comparisons exact;
-- corruption CPU tests remain 5/5 PASS.
+The plane operator does not move/smooth `P`; it only derives `N_d`. Its supported mechanism is changed normal-gated correspondence/admission and therefore changed downstream evidence topology.
 
-## DTB-S1 structured surface/substrate grid — CLOSED (sealed files retain M4 names)
+Canonical closure:
+`canonical/DTB_ND1_ROBUST_LOCAL_PLANE_CLOSURE_20260829.md`.
 
-Canonical closure: `canonical/M4_SURFACE_GRID_CLOSURE_20260829.md`.
+### Stop rule
 
-Canonical full result SHA-256:
-`9de6c8aa150cda3b333753dd58359d93bd688271e0c9e5d7aa2182b2030d90fb`
+Do not open another cheap deterministic geometry intervention before the representation test. In particular do not tune plane window, MAD threshold, minimum neighbors, hull dilation, persistence thresholds, or similar operators from candidate outcomes.
 
-Closed facts:
-- frozen grid: 65/65 cells complete;
-- typed surface route: 65/65 PASS;
-- frozen proxy verdict: 40 PASS / 25 FAIL;
-- zero baseline BASE support pairs: 14,440;
-- zero baseline post-cycle D2 support pairs: 14,094;
-- Proxy27 was not used for grid tuning;
-- DEV32 remains closed;
-- training steps: 0.
+## 3. FIT_PROXY32 coordinate/residual audit — CLOSED
 
-### Primary IRIS-operational interpretation
+Canonical closure:
+`canonical/FIT_PROXY32_COORDINATE_AND_RESIDUAL_AUDIT_20260829.md`.
 
-For IRIS, the primary corruption column is `ALL8` because IRIS predicts all eight views.
+Status:
+`CLOSED__CONTROLLED_CAPACITY_LADDER_WARRANTED__PRODUCT_SELECTION_NOT_AUTHORIZED`
 
-`ONE`, `TWOOPP`, and `FOURALT` are retained as redundancy/external-input stress diagnostics, not as the primary IRIS acceptance columns.
+Key facts:
 
-Under the frozen historical D2 proxy consumer:
-- `epsilon = 0.0015`: ALL8 PASS for `ell = 0,4,16,64`;
-- `epsilon = 0.003`: ALL8 FAIL for `ell = 0,4,16,64`.
+- actual real witness: `asset_ea593d044e14f20abe6d2818`;
+- 8 views x 4096 sample loci;
+- screen-plane mismatch P95: `6.386590393958613e-05`;
+- screen-plane mismatch max: `0.00012190263805678114`;
+- relevant depth-tolerance absolute-P95 lower scale: about `0.00490`;
+- therefore the historical P metric is depth-dominated at the relevant scale and is useful as a residual-scale diagnostic.
 
-Therefore the coarse transition is:
+Historical small-fit evidence:
 
-`0.0015 <= epsilon_critical < 0.003`
+- P-V5 R256 8x2 fit aggregate P-P95: `0.003706276847515254`;
+- worst cell: `0.005740759451873588`.
 
-where epsilon is RMS ray-aligned depth displacement on every affected view.
+Historical family ladder was confounded by exposure:
 
-This is NOT a final product-safe IRIS tolerance. Product interpretation still requires the consumer-validity interlock.
+- 32 families: nominal family exposure 1792; train median `.00859`; FIT_PROXY32 median `.17066`;
+- 128 families: exposure 448; train `.01819`; FIT `.09814`;
+- 512 families: exposure 112; train `.03138`; FIT `.06593`.
 
-### ell interpretation
+At the current upper matched tolerance around `.00539`, rung512 had `0/32` train diagnostic families and `0/32` FIT_PROXY32 families at/below tolerance.
 
-Binary verdict changes across ell in only one tested `(epsilon, asymmetry)` group:
-`epsilon=.006, TWOOPP`.
+Supported interpretation:
 
-However ell is not mechanically dead. A post-hoc diagnostic using the historical E0 differential-normal operator shows strong `theta_Nd` dependence at that slice.
+1. global fitting/precision deficit already exists on training families;
+2. an additional unseen-family gap exists, especially on Objaverse;
+3. family/source tails matter strongly;
+4. increasing family diversity improved transfer while fixed total optimizer steps reduced per-family exposure;
+5. the old 32 -> 128 -> 512 experiment is not a controlled capacity ladder;
+6. failure must not be described as pure unseen-family generalization collapse.
 
-### Proxy failure localization
+Consequence: a controlled pretrained representation-capacity test is warranted.
 
-All 25 proxy-FAIL cells still pass the typed surface route.
+## 4. Consumer-validity interlock — CLOSED 6/6 FOR SACRIFICIAL G0/A0
 
-Frozen check failure counts:
-- Arachne CE +5%: 25/25 FAIL cells;
-- Arachne influence-displacement +5%: 20/25;
-- Geppetto family-P95 +10%: 3/25.
+Original interlock:
+`experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/CONSUMER_VALIDITY_INTERLOCK_V1.md`.
 
-This is evidence about the frozen historical D2 proxy chain, not future production Geppetto/Arachne.
+Canonical closure:
+`canonical/CONSUMER_VALIDITY_INTERLOCK_CLOSURE_20260829.md`.
 
-## DTB-S1R ALL8 boundary refinement — CLOSED (sealed files retain M4R names)
-
-Canonical closure: `canonical/M4R_ALL8_BOUNDARY_REFINEMENT_CLOSURE_20260829.md`.
-
-The preregistered ALL8 refinement closed the historical-normal/frozen-proxy bracket to:
-
-`0.00225 <= epsilon_critical < 0.0025`
-
-Detailed verdict:
-- 0.00175: 4/4 ell PASS
-- 0.00200: 4/4 ell PASS
-- 0.00225: 4/4 ell PASS
-- 0.00250: ell=0/4 FAIL, ell=16/64 PASS -> epsilon-level FAIL
-- 0.00275: 4/4 ell FAIL
-
-At that boundary the firing check was Arachne CE under the frozen D2 proxy. Parent DTB-S1 is immutable. DTB-S1R is not a product-safe tolerance claim.
-
-## DTB-ND1 robust local-plane intervention — CLOSED
-
-Canonical closure: `canonical/DTB_ND1_ROBUST_LOCAL_PLANE_CLOSURE_20260829.md`.
-
-DTB-ND1 changed only the differential normal estimator used by persistence matching. `P` is not fitted, moved, or smoothed; the robust plane emits `N_d` only and changes downstream evidence through normal-gated correspondence/admission.
-
-Clean non-inferiority was preregistered before noisy outcomes and passed all six frozen proxy checks.
-
-Closed ALL8 result:
-- 0.00175: 4/4 ell PASS
-- 0.00200: 4/4 ell PASS
-- 0.00225: 4/4 ell PASS
-- 0.00250: 4/4 ell PASS
-- 0.00275: ell=0 PASS, ell=4/16/64 FAIL -> epsilon-level FAIL
-
-Current frozen historical-D2-proxy bracket:
-
-`0.00250 <= epsilon_critical < 0.00275`
-
-At the new boundary the only firing frozen check is Arachne CE +5%; Geppetto checks and Arachne influence-displacement remain PASS.
-
-Mechanism correction:
-- robust `N_d` materially improves differential-normal stability at the rescued `.0025` high-frequency cells;
-- however `theta_Nd` alone does not determine verdict (`.00275/ell=0` has worse theta than `.00275/ell=16` but passes while ell=16 fails);
-- the supported causal statement is that robust normal estimation changes normal-gated matching/support topology and thereby improves tolerance.
-
-Binding Arachne checkpoint:
-`72898a62f23c55aa82047f7bc4b39be787abb97d14f9a3fb973d59b2b5689745`
-
-DTB-ND1 is not a product-safe tolerance claim.
-
-### Stop rule after DTB-ND1
-
-No further deterministic operator tuning is allowed before the model-side residual/generalization fact is measured.
-
-Forbidden until the residual audit closes:
-- changing plane-fit window;
-- changing MAD threshold;
-- changing minimum neighbors;
-- changing hull dilation;
-- changing persistence thresholds;
-- opening another cheap geometry tolerance intervention.
-
-NEXT is the FIT_PROXY32 coordinate/target equivalence audit and held-out ray-depth residual measurement.
-
-## Residual-scale pilot before expensive foundation selection
-
-A family-disjoint residual audit is required before interpreting the DINO capacity ladder.
-
-Historical context only:
-- old P-V5 R256 scratch 8x2 fit-only learner ended at aggregate `P_p95 ~= 0.003706`;
-- worst cell `P_p95 ~= 0.005741`.
-
-Matched-statistic context for the tested Gaussian-like ell=0 bridge:
-- DTB-ND1 lower bracket endpoint epsilon=.00250 corresponds to depth `abs-p95 ~= .00490`;
-- upper tested failing level epsilon=.00275 corresponds to depth `abs-p95 ~= .00539`.
-
-The historical fit number is therefore below this matched p95 scale, but it is not held-out evidence and coordinate equivalence must still be audited.
-
-The next gate must first audit FIT_PROXY32 coordinate/target equivalence, then measure held-out ray-depth residual distributions and cross-view structure without changing frozen DTB-S1/DTB-S1R/DTB-ND1 consumer criteria.
-
-## Product-level interpretation interlock
-
-The surface/substrate bridge is not automatically the final product-safe IRIS acceptance region.
-
-Before using it to select the final foundation/IRIS model, close the sealed consumer-validity interlock with minimal real consumers on the actual RealSaS substrate:
+The six required steps are now closed for the sacrificial profile:
 
 ```text
 ClosedRiggingVolume V0
  -> InteriorRiggingSubstrate V0
- -> Geppetto G0
- -> Compiler QualifiedSkeleton
- -> Arachne A0
- -> Compiler QualifiedSkin
- -> deformation / proof replay
+ -> G0
+ -> exact Compiler skeleton qualification
+ -> A0
+ -> exact Compiler skin qualification
+ -> deformation/proof
+ -> explicit G0/A0 coupling probe
 ```
 
-Product-level tolerance is consumer-profile specific. Retraining/replacing Geppetto or Arachne creates a new consumer profile and requires replay before old model rankings transfer.
+### Clean exact-Compiler witness
 
-## After FIT_PROXY32 residual audit + consumer-validity interlock
+Asset:
+`asset_551ea351b43a1787d0f55536`
 
-1. freeze the consumer-qualified admissible depth-error region;
-2. MapAnything/external-prior preflight against that region;
-3. backbone + native high-resolution/multiview C-path bake-off;
-4. train depth-only IRIS;
-5. compare actual held-out structured residuals to the frozen region;
-6. run final `d_hat -> P_hat -> persistence -> Compiler -> puppet` qualification.
+Results:
 
-Prospective ObservationContract / foundation-prior / external-camera work remains sealed under `prospective/` and is not current scientific authority.
-Deferred corpus product-hygiene work remains prospective and must not rewrite sealed E0/N-B3 populations.
+- surface nodes: `512`;
+- G0 joints / edges: `5 / 4`;
+- qualified joints: `5 / 5`;
+- graph solver: `chu_liu_edmonds_maximum_spanning_arborescence`;
+- optimizer status: `optimal_arborescence_super_root`;
+- optimality proven: `true`;
+- proposal IDs disjoint from product canonical IDs: `true`;
+- all product IDs minted `J:*`: `true`;
+- qualified skin rows: `512 / 512`;
+- skin max simplex residual before bounded repair: `1.341104507446289e-07`;
+- deformation finite / nontrivial / bounded: PASS;
+- proof bound to exact product state: PASS;
+- runtime bound to exact product state: PASS.
+
+Clean result:
+`experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_EXACT_COMPILER_CLEAN_RESULT_V1.json`.
+
+### Explicit coupling probe
+
+Preregistered before outcome:
+`experiments/consumer_interlock_20260829/CONSUMER_COUPLING_PROBE_PREREG_V1.md`.
+
+Corruption:
+
+`p_bad = root + 0.25 * (p_clean - root)` for every non-root G0 joint.
+
+Measured corruption RMS normalized by surface bbox diagonal:
+
+`0.21196194321606632`
+
+After A0 was allowed to recompute its weights on the corrupted skeleton:
+
+- posed-surface RMSE / bbox diagonal: `0.015168392024714485`;
+- posed-surface P95 point delta / bbox diagonal: `0.02837774072761807`;
+- mean A0 row-L1 weight change: `0.2687926005329492`;
+- diagnostic compensation ratio: `1.3976998717340667`.
+
+Both preregistered response-detectability gates passed. The coupling proof is bound to exact corrupted product state.
+
+Result:
+`experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_COUPLING_PROBE_RESULT_V1.json`.
+
+Interpretation:
+
+The real downstream route can consume the current RealSaS 2.5D substrate, and A0 does not silently erase a severe systematic G0 skeleton error on this sacrificial witness. This validates the route, not product-quality Geppetto/Arachne.
+
+Product-level depth tolerance remains consumer-profile specific. Replacing/retraining Geppetto or Arachne requires replay under the new profile before previous rankings transfer.
+
+## 5. Next scientific gate — CONTROLLED DINOv2 REPRESENTATION LADDER PREREGISTRATION
+
+Do **not** start candidate training yet.
+
+Next executable action is to write and seal the controlled frozen-representation ladder:
+
+- DINOv2 S / 384-d;
+- DINOv2 B / 768-d;
+- DINOv2 L / 1024-d;
+- DINOv2 g / 1536-d.
+
+The experiment must isolate representation accessibility/capacity rather than recreate the historical family-exposure confound.
+
+Required controls:
+
+- exact same scientific training-family population across S/B/L/g;
+- exact same sample/order stream and augmentations;
+- foundation raster `518 x 518`, patch-14 grid `37 x 37`;
+- same native `1024 x 1024` detail path;
+- no adaptive crop/zoom or rung-specific framing;
+- fixed isometric lift `Q_k` into 1536-d;
+- identical non-affine post-lift normalization;
+- identical trainable fusion/head architecture;
+- identical trainable parameter count after the frozen extractor;
+- matched optimizer/exposure policy fixed before scientific candidate outcomes;
+- no candidate-specific stopping/tuning from outcome inspection;
+- candidate interpretation based on actual residual fields replayed through the frozen downstream consumer/proof route, not summary depth metrics alone.
+
+Prospective V-next design remains under:
+`prospective/iris_vnext_20260829/IRIS_VNEXT_EXPERIMENT_PLAN_V4.md`.
+
+Important prospective amendment remains binding for future preregistration: do not blindly use the spatially constant `kappa_common * D_hull` common risk band. Replace it with a candidate-independent observable-conditioned band with non-degeneracy checks, calibrate cross-view inconsistency on consistent and contradictory observation sets, and retain camera perturbation as non-binding sensitivity unless separately promoted.
+
+## 6. Training authorization
+
+**FULL DINO S/B/L/g TRAINING: NOT AUTHORIZED YET.**
+
+Authorization sequence:
+
+1. consumer closure promoted to `main` through normal branch governance;
+2. current-state/roadmap synchronization present on `main`;
+3. controlled DINO ladder preregistration written and sealed;
+4. only then execute candidate training/evaluation.
+
+DEV32 remains closed unless a separately authorized gate explicitly opens it.

@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-29  
 **Canonical continuation branch:** `main`  
-**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__M4_SURFACE_GRID_CLOSED__ALL8_REFINEMENT_NEXT__DEV32_CLOSED`
+**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__M4_SURFACE_GRID_CLOSED__M4R_ALL8_REFINEMENT_CLOSED__RESIDUAL_SCALE_PILOT_NEXT__DEV32_CLOSED`
 
 This file on `main` is the single continuation authority.
 
@@ -156,22 +156,26 @@ Frozen check failure counts:
 
 This is evidence about the frozen historical D2 proxy chain, not future production Geppetto/Arachne.
 
-## NEXT — M4R ALL8 boundary refinement
+## M4R ALL8 boundary refinement — CLOSED
 
-Parent M4 is immutable.
+Canonical closure: `canonical/M4R_ALL8_BOUNDARY_REFINEMENT_CLOSURE_20260829.md`.
 
-Preregistered M4R asks only where inside `[0.0015, 0.003)` the current ALL8 transition lies.
+The 21-cell preregistered ALL8 refinement closed the current frozen surface/proxy bracket to:
 
-Frozen follow-up:
-- asymmetry: ALL8 only;
-- epsilon RMS: `0.00175, 0.002, 0.00225, 0.0025, 0.00275`;
-- ell: `0,4,16,64`;
-- one zero baseline;
-- 21 cells total;
-- same frozen surface route and six proxy checks;
-- an epsilon level passes only if all four ell cells pass.
+`0.00225 <= epsilon_critical < 0.0025`
 
-No M4R outcome may alter M4.
+where epsilon is simultaneous per-view RMS ray-aligned depth residual and an epsilon level passes only if all four tested ell values pass.
+
+Detailed verdict:
+- 0.00175: 4/4 ell PASS
+- 0.00200: 4/4 ell PASS
+- 0.00225: 4/4 ell PASS
+- 0.00250: ell=0/4 FAIL, ell=16/64 PASS -> epsilon-level FAIL
+- 0.00275: 4/4 ell FAIL
+
+At the boundary, failure is again Arachne CE under the frozen D2 proxy. The current E0-derived normal diagnostic shows strong ell dependence, so ell is retained as a mechanism coordinate even though the coarse M4 grid made it look weak.
+
+Parent M4 is immutable. M4R is not a product-safe tolerance claim.
 
 ## Residual-scale pilot before expensive foundation selection
 
@@ -203,7 +207,7 @@ ClosedRiggingVolume V0
 
 Product-level tolerance is consumer-profile specific. Retraining/replacing Geppetto or Arachne creates a new consumer profile and requires replay before old model rankings transfer.
 
-## After M4R + residual-scale pilot + consumer-validity interlock
+## After residual-scale pilot + consumer-validity interlock
 
 1. freeze the consumer-qualified admissible depth-error region;
 2. MapAnything/external-prior preflight against that region;

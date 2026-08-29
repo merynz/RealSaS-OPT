@@ -1,0 +1,9 @@
+{
+  "schema": "RealSaS.DepthToleranceBridge.M4RFullResultAuthority.v1",
+  "result_filename": "M4R_ALL8_BOUNDARY_REFINEMENT_RESULT_V1.json",
+  "sha256": "fb155acdeffaf914071c9aa75c65cbaed5eac7aab43afe135fca633cfd53c116",
+  "cell_count": 21,
+  "parent_m4_sha256": "9de6c8aa150cda3b333753dd58359d93bd688271e0c9e5d7aa2182b2030d90fb",
+  "decision_table_sha256": "c0c209d0f8a876d61c6b07c8626db084a1d404c81808e71112fdedcf025fd0c7",
+  "note": "Full nested result is SHA-bound; canonical repo stores the compact decision table and closure without duplicating the full per-asset diagnostic payload."
+}

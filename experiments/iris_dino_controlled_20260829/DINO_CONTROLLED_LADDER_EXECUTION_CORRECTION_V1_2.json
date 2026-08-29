@@ -1,0 +1,46 @@
+{
+  "content_sha256": "ac6149c691cdb7e23e55e8d4e3b47c6e5e2a833e9a1c5bd0b7d2b01bdd732e2b",
+  "firewall": {
+    "DEV32": "CLOSED",
+    "candidate_depth_metrics_used_to_choose_patch": false,
+    "scientific_optimizer_steps_before_patch": 0
+  },
+  "historical_authority": {
+    "apparatus_audit_revision": "V1.4",
+    "apparatus_audit_status": "PASS",
+    "historical_policy": "deterministic_4096_per_view__unique_without_replacement_when_possible__coverage_repeat_when_support_lt_4096",
+    "prepare_fit_scale_cache_v1_sha256": "53bbc6874b5e98c22a3b7a7ff866085882ea3fd9f2daa7db8e40d4501a3fc5da",
+    "pv5_v1_4_bundle_sha256": "0889f6dca96ff5ac758cab2b63a31cad58a6f1765c11bdc9ee35e408b9386c01"
+  },
+  "issued_utc": "2026-08-29T20:08:04.818949+00:00",
+  "restored_operator": {
+    "n_ge_4096": "same frozen seed; 4096 rows without replacement; sorted",
+    "n_lt_4096": "q,r=divmod(4096,n); tile every row q times; add sorted deterministic no-replacement remainder r using frozen seed; sort final ids",
+    "zero_visible_rows": "FAIL_CLOSED"
+  },
+  "reuse_rule": {
+    "condition": "byte hashes pass AND selected_rows shape=[8,4096] AND 4096 unique selected rows per view AND current raster n>=4096",
+    "prepatch_partial_cache_may_be_reused": true,
+    "reason": "historical V1.4 audit explicitly sealed n>=4096 path unchanged by branch"
+  },
+  "schema": "RealSaS.DINO.ControlledLadderExecutionCorrection.v1.2",
+  "scientific_change": {
+    "architecture_changed": false,
+    "candidate_specific_tuning": false,
+    "evaluation_changed": false,
+    "loss_changed": false,
+    "membership_changed": false,
+    "optimizer_changed": false,
+    "sample_stream_changed": false,
+    "scientific_contract_changed": false
+  },
+  "status": "APPARATUS_FIX_ONLY__HISTORICAL_PV5_V1_4_COVERAGE_REPEAT_RESTORED__BEFORE_OPTIMIZER_STEP_1",
+  "trigger": {
+    "asset_id": "asset_485c9905fc84ad06e6cab6bf",
+    "required_sample_slots": 4096,
+    "scientific_optimizer_steps": 0,
+    "stage": "SHARED_CACHE_ONLY",
+    "view": 0,
+    "visible_rows": 322
+  }
+}

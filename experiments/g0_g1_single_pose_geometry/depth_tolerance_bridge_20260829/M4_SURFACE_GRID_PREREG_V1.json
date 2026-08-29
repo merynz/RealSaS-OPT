@@ -1,0 +1,114 @@
+{
+  "date": "2026-08-29",
+  "decision_operator": {
+    "all_proxy_checks_required": true,
+    "baseline_cell_id": "E0000_L000_ALL8",
+    "cell_labels": [
+      "SURFACE_ROUTE_FAIL",
+      "SURFACE_ROUTE_PASS__PROXY_UNAVAILABLE",
+      "SURFACE_ROUTE_PASS__PROXY_FAIL",
+      "SURFACE_ROUTE_PASS__PROXY_PASS"
+    ],
+    "hard_family_tails": "always report every eligible family separately",
+    "no_scalar_epsilon_collapse": true,
+    "product_safe_claim_authorized": false,
+    "proxy_checks": {
+      "arachne.ce_ratio_to_zero": {"max": 1.05},
+      "arachne.influence_disp_mean_ratio_to_zero": {"max": 1.05},
+      "geppetto.family_p95_ratio_to_zero": {"max": 1.1},
+      "geppetto.joint_mean_ratio_to_zero": {"max": 1.05},
+      "geppetto.pck_005_delta_from_zero": {"min": -0.1},
+      "geppetto.pck_008_delta_from_zero": {"min": -0.1}
+    },
+    "proxy_margin_authority": "E0_DOWNSTREAM_PROXY_MARGIN_DECISION_V1.json; same numerical margins, preregistered here for corrupted-D2 vs zero-D2",
+    "proxy_scope": "only four preregistered truth-capable calibration assets; same frozen D2 checkpoints; no retraining",
+    "support_metrics": "record BASE and D2 support pairs/fractions and per-family changes; diagnostic only, no new support threshold invented",
+    "surface_route_veto": "any nonfinite output, corruption invariant failure, typed RiggingSurfaceIR construction failure, schema mismatch, or node_count != 512 => SURFACE_ROUTE_FAIL"
+  },
+  "firewalls": {
+    "consumer_validity_interlock_still_required_for_product_interpretation": true,
+    "decision_operator_change_after_first_outcome": "FORBIDDEN",
+    "dev32": "CLOSED",
+    "grid_change_after_first_outcome": "FORBIDDEN",
+    "per_cell_retraining_forbidden": true,
+    "proxy27": "CLOSED",
+    "scientific_outcomes_opened_at_prereg": false,
+    "source_or_checkpoint_change_after_first_outcome": "FORBIDDEN_WITHOUT_NEW_VERSIONED_PREREG",
+    "training_steps": 0
+  },
+  "grid": {
+    "asymmetry_cell_tag": {
+      "ALL8": "ALL8",
+      "FOUR_ALTERNATING_HASHED": "FOURALT",
+      "ONE_BAD_HASHED": "ONE",
+      "TWO_OPPOSITE_HASHED": "TWOOPP"
+    },
+    "asymmetry_order": ["ALL8", "ONE_BAD_HASHED", "TWO_OPPOSITE_HASHED", "FOUR_ALTERNATING_HASHED"],
+    "baseline": {"asymmetry": "ALL8", "cell_id": "E0000_L000_ALL8", "ell_px": 0.0, "epsilon": 0.0},
+    "cell_count": 65,
+    "cell_id_rule": "E{round(epsilon*10000):04d}_L{int(ell_px):03d}_{asymmetry_cell_tag[asymmetry]}",
+    "cell_set_definition": "baseline singleton UNION full Cartesian product(nonzero_epsilon_order, ell_px_order, asymmetry_order)",
+    "ell_px_order": [0.0, 4.0, 16.0, 64.0],
+    "nonzero_cell_order": "for epsilon in nonzero_epsilon_order: for ell in ell_px_order: for asymmetry in asymmetry_order",
+    "nonzero_epsilon_order": [0.0015, 0.003, 0.006, 0.012],
+    "zero_cell_deduplicated": true
+  },
+  "grid_rationale": {
+    "base_common_frame_gate_P": 0.006,
+    "cycle_threshold_P": 0.003,
+    "ell_basis": "0=independent; 4=derived_match_row search radius; 16=4x radius; 64=16x radius coherent-region stress",
+    "epsilon_multipliers_of_cycle_threshold": [0.5, 1.0, 2.0, 4.0],
+    "m3_smoke_outcomes_used": false,
+    "outcome_independent": true
+  },
+  "population": {
+    "all_splits": "FIT_ONLY",
+    "dev32_opened": false,
+    "frozen_proxy_eligible_asset_ids": [
+      "asset_551ea351b43a1787d0f55536",
+      "asset_0679fdef64f19a4832a6d521",
+      "asset_76313e4bd82b82fcd1659c70",
+      "asset_f8a40d6c5d815fe79c8b5e42"
+    ],
+    "frozen_proxy_eligible_count": 4,
+    "membership_authority": "E0_MEMBERSHIP_V1.json",
+    "membership_canonical_json_sha256": "3041b55fac643942310627e5de32686014c0d75b90e6b6a2a3e76680bb5fd00b",
+    "proxy27_used_for_grid_selection": false,
+    "surface_compiler_asset_ids": [
+      "asset_551ea351b43a1787d0f55536",
+      "asset_36fb02305846592b1ecdf3d4",
+      "asset_0679fdef64f19a4832a6d521",
+      "asset_76313e4bd82b82fcd1659c70",
+      "asset_6f086a5b1a66378ffe04d7e4",
+      "asset_425122d500ecf5767404f9c0",
+      "asset_5a19f8c5254be7bf30c504f5",
+      "asset_f8a40d6c5d815fe79c8b5e42"
+    ],
+    "surface_compiler_count": 8
+  },
+  "preopen_execution_seal_required": [
+    "raw authoritative geometry/raster SHA-256 for all 8 calibration families",
+    "exact grid-runner bytes",
+    "bridge_grid_runtime_v1.py bytes",
+    "typed Compiler surface-adapter bytes",
+    "D2 proxy checkpoint bytes",
+    "this prereg JSON SHA-256"
+  ],
+  "question": "Which structured forward-depth residual regimes remain safe for observable persistence and the current frozen surface/substrate consumer path?",
+  "report_schema": {
+    "per_asset_required": ["asset_id", "cell_id", "epsilon", "ell_px", "asymmetry", "affected_views", "base_support_pairs", "d2_support_pairs", "base_support_fraction", "d2_support_fraction", "typed_surface_ok", "typed_surface_node_count", "typed_surface_lineage_hash", "corruption_diagnostics"],
+    "per_cell_required": ["cell_id", "surface_route_status", "base_aggregate", "d2_aggregate", "proxy_aggregate", "proxy_checks", "cell_label"],
+    "proxy_per_asset_required": ["geppetto", "arachne"],
+    "top_level_required": ["schema", "prereg_sha256", "source_manifest_sha256", "runner_sha256", "baseline", "cells", "firewalls"]
+  },
+  "route": {
+    "base_is_diagnostic_only": true,
+    "base_stage": "BASE_DERIVED_MATCHER = direct derived_match_row",
+    "compiler_surface_input": "post-cycle D2 P/support/raster_xy",
+    "geometry": "P_hat = P_exact + delta_d * F_v",
+    "qualification_stage": "D2_MUTUAL_P003 = BASE + reciprocal reverse match + cycle_P <= 0.003",
+    "source_rows": "frozen clean P-only deterministic anchor sampler; source P moves with corrupted source view"
+  },
+  "schema": "RealSaS.DepthToleranceBridge.M4SurfaceGridPrereg.v1",
+  "status": "FROZEN_BEFORE_M4_SCIENTIFIC_OUTCOMES__PROXY27_DEV32_CLOSED"
+}

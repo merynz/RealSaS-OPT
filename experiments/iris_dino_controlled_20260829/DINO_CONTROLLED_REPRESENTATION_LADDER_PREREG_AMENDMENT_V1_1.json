@@ -1,0 +1,26 @@
+{
+  "schema": "RealSaS.DINOControlledRepresentationLadderPreregAmendment.v1_1",
+  "date": "2026-08-29",
+  "status": "BINDING_BEFORE_ANY_DINO_CANDIDATE_OUTPUT__SUPERSEDES_ONLY_ENUMERATED_V1_AMBIGUITIES",
+  "parent": "DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_V1",
+  "candidate_outputs_opened_before_amendment": false,
+  "scientific_optimizer_steps_before_amendment": 0,
+  "fixed_cell_counts": {
+    "FIT_PROXY32_family_style_cells": 64,
+    "TRAIN_DIAG32_family_style_cells": 64
+  },
+  "primary_32768_pass_rule": {
+    "FIT_PROXY32_direct_replay_pass_min": 61,
+    "FIT_PROXY32_direct_replay_total": 64,
+    "FIT_PROXY32_hard_route_failure_max": 0,
+    "TRAIN_DIAG32_direct_replay_pass_min": 61,
+    "TRAIN_DIAG32_direct_replay_total": 64,
+    "TRAIN_DIAG32_hard_route_failure_max": 0
+  },
+  "override": {
+    "v1_min_heldout_fraction_0_95": "REPLACED_BY_INTEGER_61_OF_64",
+    "v1_training_fit_must_not_be_globally_underfit": "REPLACED_BY_TRAIN_DIAG32_DIRECT_REPLAY_61_OF_64_AND_ZERO_HARD_ROUTE_FAILURES"
+  },
+  "all_other_v1_rules_unchanged": true,
+  "all_four_training_fit_fail_interpretation": "SHARED_LEARNER_OR_OPTIMIZATION_ADEQUACY_NOT_ESTABLISHED_AT_32768"
+}

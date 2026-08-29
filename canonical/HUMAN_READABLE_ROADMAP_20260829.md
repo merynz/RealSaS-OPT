@@ -27,11 +27,11 @@ Observed decomposition:
 
 Therefore the old 32 -> 128 -> 512 family experiment is not a controlled model-capacity ladder.
 
-Consequence: test pretrained representation accessibility/capacity under matched exposure rather than keep tuning deterministic geometry operators.
+Consequence: test pretrained representation accessibility under one common population/exposure budget rather than keep tuning deterministic geometry operators.
 
 ## 3. Can the real downstream Compiler route consume our 2.5D substrate? — CLOSED
 
-A minimal sacrificial route now passes end to end:
+A minimal sacrificial route passes end to end:
 
 `ClosedRiggingVolume V0 -> InteriorRiggingSubstrate V0 -> G0 -> exact Compiler -> A0 -> exact Compiler -> deformation/proof`
 
@@ -45,56 +45,88 @@ Clean real witness:
 - deformation is finite, nontrivial and bounded;
 - proof/runtime bind to the exact product state.
 
-The final missing coupling probe also passes: a severe 75% inward collapse of non-root G0 geometry remains clearly visible in final posed-surface response even after A0 is allowed to recompute its weights.
+The coupling probe also passes: a severe 75% inward collapse of non-root G0 geometry remains clearly visible in final posed-surface response even after A0 recomputes its weights.
 
-Thus A0 is not silently hiding a systematically bad G0 skeleton in this sacrificial profile.
+Thus the downstream route genuinely consumes skeleton geometry in this sacrificial profile. This proves route validity, not product-quality Geppetto/Arachne.
 
-This proves route validity, not product-quality Geppetto/Arachne.
+## 4. Controlled DINOv2 experiment design — PREREGISTERED
 
-## 4. What comes next? — CONTROLLED DINOv2 REPRESENTATION LADDER
+Plain-language question:
 
-Scientific question:
+> With the learner and downstream route fixed, does a stronger frozen DINOv2 visual representation make the required camera-forward depth easier to learn?
 
-> With everything after the frozen visual representation held constant, does stronger pretrained representation make the required depth field accessible at the accuracy we now know downstream needs?
-
-Frozen candidates:
+Candidates:
 
 - DINOv2 S — 384-d
 - DINOv2 B — 768-d
 - DINOv2 L — 1024-d
 - DINOv2 g — 1536-d
 
-Required controls before training:
+The important controls are now frozen before candidate outputs:
 
-- same training-family population for every rung;
-- same samples/order/augmentations;
-- same 518x518 foundation raster and 37x37 patch grid;
-- same native-1024 detail path;
-- fixed isometric lift to 1536-d;
-- same post-lift normalization;
-- identical trainable fusion/head architecture and identical trainable parameter count;
-- same optimizer policy and exposure budget;
-- no candidate-specific tuning from scientific outcomes;
-- actual predicted residual fields replayed through the frozen downstream consumer/proof chain.
+- exact same historical 512-FIT-family population for all four rungs;
+- both fixed styles for every family;
+- same deterministic sample/order stream;
+- same Mode-G 8-view native-1024 observations and exact cameras;
+- same full-canvas 518x518 DINO raster / 37x37 patch grid;
+- same native-1024 detail/support path;
+- fixed non-trainable zero-pad isometric lift to 1536-d;
+- identical post-lift normalization;
+- identical trainable fusion/head bytes/config/parameter count;
+- depth `d` is the only learned geometry authority;
+- no learned normal, camera or risk head in this representation ladder;
+- no constant common-risk-band ranking path;
+- no candidate-specific stopping/tuning.
 
-The earlier 32/128/512 family ladder confound must not recur.
+Exposure is also frozen:
 
-## 5. Training status
+- update 7168 = historical-budget diagnostic = 112 nominal exposures/family;
+- update 32768 = primary comparison = 512 nominal exposures/family.
 
-**DINOv2 S/B/L/g training has not started and is not authorized merely by the consumer-interlock PASS.**
+The 32768-step point is not called asymptotic convergence. It is simply the same substantially less-starved budget for all candidates.
 
-Next executable action is to write and seal the controlled DINO ladder preregistration, including the matched exposure/optimizer-budget rule and exact selection criteria. Only after that seal should candidate training begin.
+Primary PASS at update 32768 requires both:
 
-## 6. Later branches, only if needed
+- FIT_PROXY32: at least 61/64 direct actual-residual replay PASS, with zero hard route failures;
+- TRAIN_DIAG32: at least 61/64 direct actual-residual replay PASS, with zero hard route failures.
 
-If the frozen DINO ladder does not reach the required region:
+Depth RMS/P95 summaries remain diagnostics. They cannot override direct replay.
 
-1. controlled fine-tuning may be opened as a separately preregistered phase;
-2. MapAnything / DA3 or other full geometry systems may be compared separately;
-3. the final selected model must be judged by its actual residual field through the exact Compiler/consumer chain, not by depth summary metrics alone.
+## 5. What comes next? — ZERO-STEP PREFLIGHT
 
-No further cheap deterministic normal/window/hull/persistence tuning should be opened before the representation test.
+**Training is still closed.**
+
+Before a single DINO optimizer step, the preflight must prove:
+
+1. the exact historical 512-family membership object is recovered/reconstructed and matches its frozen canonical SHA;
+2. all 512 train families and all 32 held-out families exist in native-1024 authority with no substitution;
+3. exact official DINO source/model/weight bytes are SHA-sealed;
+4. the shared trainable architecture/config is sealed and has exactly equal trainable parameter count for S/B/L/g;
+5. one deterministic sample/order manifest is sealed;
+6. cached-vs-online frozen token parity passes;
+7. the frozen DTB-ND1 evaluator can consume actual candidate residual fields without changing semantics;
+8. DEV32 and other closed sets remain unopened.
+
+Current honest blocker: the historical membership hash/selection rule are known, and the old runner identifies the original membership filename, but the exact membership object itself has not yet been recovered from persistent authority. A new 512-set with the same source quota is **not** an acceptable substitute.
+
+## 6. Training status
+
+**DINOv2 S/B/L/g scientific optimizer steps: 0.**
+
+Training becomes eligible only after the zero-step preflight closes cleanly and this preregistered state is promoted to canonical `main`.
+
+## 7. Later branches, only if needed
+
+If all rungs fail because TRAIN_DIAG32 itself is underfit, localize shared learner/optimization adequacy first.
+
+If training fit is adequate but held-out representation access still fails:
+
+1. controlled foundation fine-tuning may be opened as a separately preregistered phase;
+2. MapAnything / DA3 or other full geometry systems may be compared as later system-level interventions;
+3. final models must still be judged by actual residual fields through frozen downstream replay, not by depth summary metrics alone.
+
+No further cheap deterministic normal/window/hull/persistence tuning should be opened from Phase-1A candidate outcomes.
 
 ## One-line state
 
-`depth tolerance measured -> old learner failure decomposed -> real consumer route + coupling validated -> controlled DINOv2 S/B/L/g preregistration next -> then training`
+`depth tolerance measured -> old learner failure decomposed -> real consumer route + coupling validated -> DINO S/B/L/g preregistered -> exact zero-step preflight next -> then, and only then, training`

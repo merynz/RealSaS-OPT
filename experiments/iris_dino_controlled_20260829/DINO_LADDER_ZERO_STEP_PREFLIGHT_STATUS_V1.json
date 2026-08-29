@@ -1,0 +1,45 @@
+{
+  "schema": "RealSaS.DINOLadderZeroStepPreflightStatus.v1",
+  "date": "2026-08-29",
+  "status": "NOT_READY__ZERO_OPTIMIZER_STEPS__BLOCKERS_MUST_CLOSE_BEFORE_TRAINING",
+  "scientific_optimizer_steps": 0,
+  "parent_prereg": "DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_V1",
+  "verified_now": {
+    "canonical_consumer_interlock_on_main": true,
+    "native_1024_master_corpus_exists": true,
+    "historical_train512_selection_rule_known": true,
+    "historical_train512_source_quota_known": true,
+    "historical_complete_membership_sha256_known": true,
+    "fit_proxy32_was_frozen_disjoint_from_historical_train512": true,
+    "observation_contract_518_patch14_37x37_rule_exists": true,
+    "candidate_dims_S_B_L_g_known": true,
+    "risk_head_removed_from_phase1a": true
+  },
+  "historical_membership_authority": {
+    "source_metadata_sha256": "475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913",
+    "selection_seed": "PV5_R256_FIT_SCALE_TRAIN_V1",
+    "train512_source_quota": {"objaverse": 483, "quaternius": 24, "kaykit": 5},
+    "complete_membership_canonical_json_sha256": "8531360f1c61dc4cdb699c095790c35ab3af0da5a7a290b420e5777bb4e9169b"
+  },
+  "blocking_checks": {
+    "exact_membership_object_recovered_and_hash_verified": false,
+    "train512_native1024_availability_512_of_512_verified": false,
+    "fit_proxy32_exact_membership_recovered": false,
+    "train512_fitproxy32_disjointness_recomputed_from_recovered_objects": false,
+    "official_DINO_weight_bytes_sha256_sealed": false,
+    "foundation_extractor_source_revision_sealed": false,
+    "shared_trainable_architecture_code_config_sealed": false,
+    "equal_trainable_parameter_count_verified": false,
+    "deterministic_sample_order_manifest_sealed": false,
+    "cached_vs_online_token_parity_passed": false,
+    "DTB_ND1_actual_residual_carrier_semantic_parity_passed": false
+  },
+  "failure_policy": {
+    "replace_missing_train_family": false,
+    "regenerate_new_train512_with_same_quota": false,
+    "open_DINO_candidate_outputs_before_blockers_close": false,
+    "open_DEV32": false,
+    "perform_optimizer_step": false
+  },
+  "next": "RECOVER_EXACT_HISTORICAL_MEMBERSHIP_OR_RECONSTRUCT_IT_BYTE_EXACT_AND_VERIFY_CANONICAL_SHA256"
+}

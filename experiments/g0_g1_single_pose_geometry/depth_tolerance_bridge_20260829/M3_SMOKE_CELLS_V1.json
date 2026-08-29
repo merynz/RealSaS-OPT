@@ -1,0 +1,11 @@
+{
+  "schema": "RealSaS.DepthToleranceBridge.M3SmokeCells.v1",
+  "binding_scientific_thresholds": false,
+  "asset_id": "asset_551ea351b43a1787d0f55536",
+  "cells": [
+    {"epsilon": 0.001, "ell_px": 0.0, "asymmetry": "ALL8"},
+    {"epsilon": 0.001, "ell_px": 16.0, "asymmetry": "ONE_BAD_HASHED"},
+    {"epsilon": 0.003, "ell_px": 8.0, "asymmetry": "TWO_OPPOSITE_HASHED"}
+  ],
+  "interpretation": "APPARATUS_SMOKE_ONLY__NO_TOLERANCE_CLAIM"
+}

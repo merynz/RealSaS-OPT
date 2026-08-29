@@ -21,6 +21,7 @@ FIXTURE_CHUNK_NAMES=(
     'part_03a.txt',
     'part_03b.txt',
     'part_04a.txt',
+    'part_04b.txt',
 )
 
 def load_fixture():

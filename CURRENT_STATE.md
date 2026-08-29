@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-29  
 **Canonical continuation branch:** `main`  
-**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__DEPTH_BRIDGE_APPARATUS_PASS_M0_M3__SURFACE_GRID_NEXT__DEV32_CLOSED`
+**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__DEPTH_BRIDGE_APPARATUS_PASS_M0_M3__D2_ROUTE_CORRECTED__SURFACE_GRID_NEXT__DEV32_CLOSED`
 
 This file on `main` is the single continuation authority.
 
@@ -22,7 +22,7 @@ Compiler is part of the canonical system/evaluation loop.
 ```text
 IRIS d
  -> analytic P_hat
- -> deterministic SurfaceBuilder / MUTUAL_P003
+ -> deterministic SurfaceBuilder / D2_MUTUAL_P003
  -> RiggingSurfaceIR S
  -> Geppetto SkeletonProposalIR G*
  -> CanonicalGraphOptimizationRequest/Result
@@ -61,14 +61,41 @@ Canonical closure: `canonical/STRUCTURED_DEPTH_BRIDGE_APPARATUS_CLOSURE_20260829
 
 Closed apparatus facts:
 - ray-aligned corruption CPU tests: 5/5 PASS;
-- one real already-open E0 calibration family epsilon=0 replay is identity-equivalent to sealed E0-B persistence;
+- one real already-open E0 calibration family epsilon=0 replay is identity-equivalent to sealed E0-B BASE persistence;
 - source rows, support, matched rows and source grid are exact at epsilon zero;
 - typed Compiler surface accepts the replay with 512 surface nodes;
-- three sealed non-binding smoke cells traverse independent/coherent and symmetric/asymmetric corruption through MUTUAL_P003 and the typed Compiler surface;
+- three sealed non-binding smoke cells traverse independent/coherent and symmetric/asymmetric corruption through the pre-cycle teacher-free BASE matcher and typed Compiler surface;
 - Proxy27 was not used for apparatus tuning;
 - DEV32 remains closed.
 
 The M3 smoke values are apparatus evidence only and are forbidden from defining the scientific tolerance grid.
+
+### Route-semantics correction — CLOSED BEFORE M4 OUTCOME OPEN
+
+Canonical correction: `experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_ROUTE_SEMANTICS_CORRECTION_V1.md`.
+
+The M2/M3 apparatus used `MUTUAL_P003` as an overloaded label for direct `derived_match_row` persistence. Exact downstream authority establishes two distinct stages:
+
+```text
+BASE_DERIVED_MATCHER
+ -> reciprocal reverse match
+ -> admit iff cycle_P <= 0.003
+ -> D2_MUTUAL_P003
+```
+
+Consequences:
+- sealed M2/M3 result bytes are preserved;
+- their `1909 / 1921 / 1910 / 1896` support-pair values are pre-cycle BASE apparatus evidence;
+- scientific M4 qualification must use post-cycle `D2_MUTUAL_P003`;
+- BASE is retained only as a separate mechanism diagnostic.
+
+Additive cached/vectorized M4 runtime parity on the already-open witness:
+- zero-corruption BASE `1909 == 1909`, bit-exact;
+- zero-corruption D2 `1884 == 1884`, `D2_X` bit-exact;
+- nonzero vectorized forward matcher: 56/56 scalar row comparisons exact;
+- corruption CPU tests remain 5/5 PASS.
+
+No scientific tolerance outcome, Proxy27 bridge outcome or DEV32 evidence was opened by this correction.
 
 ## NEXT — freeze and execute the surface/substrate scientific depth grid
 
@@ -86,10 +113,10 @@ Execution rule:
 - use `calibration_anchor8` to freeze/check the grid and apparatus without consulting Proxy27 bridge outcomes;
 - seal the final cell list, decision/report schema and all byte/checkpoint authorities before qualification outcomes are opened;
 - compute `P_hat = O + d_hat F`;
-- rerun teacher-free `MUTUAL_P003`;
+- rerun teacher-free `BASE_DERIVED_MATCHER`, then the frozen reciprocal `cycle_P <= 0.003` admission to obtain `D2_MUTUAL_P003`;
 - evaluate the same frozen proxy-consumer bytes where legally applicable, with no retraining per cell;
-- route admitted `RiggingSurfaceIR` through the real Compiler path;
-- record persistence error, qualification/abstention, structural validity and available deformation/proof failures;
+- route post-cycle `D2_MUTUAL_P003` `RiggingSurfaceIR` through the real Compiler path;
+- record BASE diagnostics separately from D2 persistence error, qualification/abstention, structural validity and available deformation/proof failures;
 - inherit existing E0 practical margins where the same proxy metric applies;
 - report hard per-family tails separately from aggregates.
 

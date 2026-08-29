@@ -1,0 +1,45 @@
+{
+  "asset_id": "asset_551ea351b43a1787d0f55536",
+  "checks": {
+    "nonzero_batch_forward_matches_scalar_contract": true,
+    "zero_base_clean_P_bit_exact": true,
+    "zero_base_clean_matched_row_bit_exact": true,
+    "zero_base_clean_source_row_bit_exact": true,
+    "zero_base_clean_source_view_bit_exact": true,
+    "zero_base_clean_support_bit_exact": true,
+    "zero_base_support_pair_count_equal": true,
+    "zero_d2_X_bit_exact": true,
+    "zero_d2_support_pair_count_equal": true
+  },
+  "firewalls": {
+    "dev32": "CLOSED",
+    "proxy27": "CLOSED",
+    "runtime_diagnostics_binding_to_science": false,
+    "scientific_tolerance_outcomes_opened": false,
+    "training_steps": 0
+  },
+  "nonbinding_runtime_diagnostics_seconds": {
+    "prepare_clean_asset_once": 3.465957860999879,
+    "zero_base_cell_after_prepare": 1.2779846250004994,
+    "zero_d2_cell_after_prepare": 1.3535798290004095
+  },
+  "route_semantics": {
+    "base_stage": "DERIVED_MATCH_ROW_PRE_RECIPROCAL_CYCLE",
+    "historical_d2_stage": "BASE_PLUS_RECIPROCAL_CYCLE_P_LE_0P003",
+    "mutual_cycle_threshold_P": 0.003
+  },
+  "schema": "RealSaS.DepthToleranceBridge.BatchCachedRouteParity.v1",
+  "source_sha256": {
+    "clean_e0b": "b23a769d60d32064222ea04cb8fe9b4b8d458a5d400d42666332f8ce84a5457a",
+    "historical_d2_pack": "a4b3d5544f20a0fecefa877b74f4ad601f072d29afd0df35204c7b182d800c2c"
+  },
+  "status": "PASS",
+  "support_pairs": {
+    "base_bridge": 1909,
+    "base_historical_clean": 1909,
+    "d2_bridge": 1884,
+    "d2_historical_pack": 1884
+  },
+  "tiny_scalar_comparison_anchor_count": 8,
+  "tiny_scalar_comparison_forward_pair_batches_rows": 56
+}

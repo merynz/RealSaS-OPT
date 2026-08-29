@@ -1,59 +1,62 @@
 {
   "schema": "RealSaS.DINOLadderZeroStepPreflightStatus.v1",
   "date": "2026-08-29",
-  "status": "NOT_READY__ZERO_OPTIMIZER_STEPS__TRAIN_AND_HELDOUT_DIAGNOSTIC_MEMBERSHIPS_PARTIALLY_RECOVERED",
+  "status": "NOT_READY__ZERO_OPTIMIZER_STEPS__TRAIN512_SELECTION_RECOVERED__NINE_REPAIR_PUBLICATIONS_REQUIRED",
   "scientific_optimizer_steps": 0,
-  "parent_prereg": "DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_V1",
+  "parent_prereg": "DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_V1 + V1.1 + V1.2",
   "canonical_parent_main": "1e10b3f5fd140feb237f15ee427ef9d713d87a6b",
   "verified_now": {
     "canonical_consumer_interlock_on_main": true,
     "canonical_DINO_prereg_on_main": true,
     "native_1024_master_corpus_exists": true,
-    "historical_train512_selection_rule_known": true,
-    "historical_train512_source_quota_known": true,
-    "historical_complete_membership_sha256_known": true,
-    "historical_membership_ephemeral_filename_known": true,
-    "fit_proxy32_was_frozen_disjoint_from_historical_train512": true,
-    "fit_proxy32_exact_membership_recovered_from_persisted_eval": true,
-    "train_diag32_exact_membership_recovered_from_persisted_eval": true,
-    "fit_proxy32_source_mix_matches_prereg_26_3_3": true,
-    "train_diag32_source_mix_matches_prereg_29_2_1": true,
+    "master_variants_byte_sha_matches_historical_authority": true,
+    "historical_train512_selection_rule_recovered": true,
+    "fit_proxy32_exact_membership_recovered": true,
+    "train_diag32_exact_membership_recovered": true,
+    "train512_exact_selection_equivalence_recovered": true,
+    "train512_fitproxy32_disjointness_recomputed": true,
+    "production_render_contract_1024x1024_8view_exists": true,
+    "production_canonical_render_3993_of_3993_complete": true,
+    "train512_controlled_v1_eligibility_intersection_computed": true,
     "observation_contract_518_patch14_37x37_rule_exists": true,
     "candidate_dims_S_B_L_g_known": true,
     "risk_head_removed_from_phase1a": true
   },
-  "historical_membership_authority": {
+  "membership_authority": {
     "source_metadata_sha256": "475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913",
-    "selection_seed": "PV5_R256_FIT_SCALE_TRAIN_V1",
-    "proxy_selection_seed": "PV5_R256_FIT_SCALE_PROXY32_V1",
-    "train512_source_quota": {"objaverse": 483, "quaternius": 24, "kaykit": 5},
-    "complete_membership_canonical_json_sha256": "8531360f1c61dc4cdb699c095790c35ab3af0da5a7a290b420e5777bb4e9169b",
-    "original_ephemeral_membership_filename": "P_V5_R256_FIT_SCALE_LADDER_MEMBERSHIP_V1.json"
+    "proxy_seed": "PV5_R256_FIT_SCALE_PROXY32_V1",
+    "train_seed": "PV5_R256_FIT_SCALE_TRAIN_V1",
+    "proxy_set_sha256": "144e5f21adcab218fa5d8226b76cc949eb3eaa3c065e0cd0a7d30a35f0ed0653",
+    "train_diag32_set_sha256": "ea7e99933739258f1a492326d2631d48a5b2c0018fe8181fb01428f266b3309e",
+    "train512_set_sha256": "1958fa5ed80430ac8ae8f9e66f8d94bc5bfe89c74b5553d13b891c87fdefb2a2",
+    "historical_combined_membership_json_sha256": "8531360f1c61dc4cdb699c095790c35ab3af0da5a7a290b420e5777bb4e9169b",
+    "recovery_utility": "experiments/iris_dino_controlled_20260829/recover_train512_membership_v1.py",
+    "preflight_report": "experiments/iris_dino_controlled_20260829/TRAIN512_MEMBERSHIP_AND_NATIVE1024_PREFLIGHT_V1.json"
   },
-  "recovered_memberships": {
-    "FIT_PROXY32": {
-      "asset_count": 32,
-      "cell_count": 64,
-      "source_mix": {"objaverse": 26, "quaternius": 3, "kaykit": 3},
-      "source_eval_sha256": "2552bc8e07299a3fa8615aa10d4f829d5cc20e7c218029ef598e47012e128884",
-      "recovered_payload_sha256": "38b6636d6b99702b33a7ed7ffd806af2f4fee20c0b116706ed7decb5ea768423",
-      "repo_path": "experiments/iris_dino_controlled_20260829/recovered/FIT_PROXY32_RECOVERED_MEMBERSHIP_V1.json"
-    },
-    "TRAIN_DIAG32": {
-      "asset_count": 32,
-      "cell_count": 64,
-      "source_mix": {"objaverse": 29, "quaternius": 2, "kaykit": 1},
-      "source_eval_sha256": "bedcf08b6426d1bdf9c1e74e0c491f41e0b93d98d87e749c01f2309e7fc4e75b",
-      "recovered_payload_sha256": "f406b79d6065712b3f01f20bb40fed66832edb3cfa4d645e1ee8173492d06d82",
-      "repo_path": "experiments/iris_dino_controlled_20260829/recovered/TRAIN_DIAG32_RECOVERED_MEMBERSHIP_V1.json"
-    }
+  "train512_native1024_state": {
+    "train512_count": 512,
+    "immediately_training_eligible": 503,
+    "repair_pending": 9,
+    "shape_key_quarantine": 0,
+    "all8_blank": 0,
+    "repair_pending_asset_ids": [
+      "asset_1d6d3b17fe506463b8840c51",
+      "asset_4970fb8cc7c69df071970dc0",
+      "asset_66c8c63c7a97e830b89d0ba8",
+      "asset_674fb6e5571ca86dd0e5c858",
+      "asset_681fb76277c10d2307f7509f",
+      "asset_88fe0971a994597f3866473b",
+      "asset_a873bb17b9a66e6e980845a5",
+      "asset_ce3577373d7cc71b7025cc74",
+      "asset_f56aff9ecf13f7ddf0afcd55"
+    ],
+    "required_before_training": "Stage-B7 selective publication/rerender of the already-frozen Stage-B6 normalized geometry for these exact nine assets, followed by 512/512 lineage/publication PASS"
   },
   "blocking_checks": {
-    "exact_complete_membership_object_recovered_and_canonical_hash_verified": false,
-    "train512_native1024_availability_512_of_512_verified": false,
+    "nine_repair_pending_assets_published_and_rerendered": false,
+    "train512_native1024_authoritative_availability_512_of_512_verified": false,
     "fit_proxy32_native1024_availability_32_of_32_verified": false,
     "train_diag32_native1024_availability_32_of_32_verified": false,
-    "train512_fitproxy32_disjointness_recomputed_from_recovered_objects": false,
     "official_DINO_weight_bytes_sha256_sealed": false,
     "foundation_extractor_source_revision_sealed": false,
     "shared_trainable_architecture_code_config_sealed": false,
@@ -63,11 +66,12 @@
     "DTB_ND1_actual_residual_carrier_semantic_parity_passed": false
   },
   "failure_policy": {
-    "replace_missing_train_family": false,
-    "regenerate_new_train512_with_same_quota_without_hash_match": false,
+    "replace_repair_pending_family": false,
+    "drop_repair_pending_family": false,
+    "use_stale_render_with_repaired_geometry": false,
     "open_DINO_candidate_outputs_before_blockers_close": false,
     "open_DEV32": false,
     "perform_optimizer_step": false
   },
-  "next": "RECOVER_OR_BYTE_EXACT_RECONSTRUCT_COMPLETE_512_MEMBERSHIP_AND_MATCH_SHA256_8531360F..."
+  "next": "BUILD_AND_EXECUTE_SELECTIVE_STAGE_B7_PUBLICATION_FOR_THE_EXACT_NINE_REPAIR_PENDING_TRAIN512_MEMBERS"
 }

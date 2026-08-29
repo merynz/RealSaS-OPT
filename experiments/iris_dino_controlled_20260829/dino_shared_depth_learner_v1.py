@@ -182,19 +182,45 @@ class DINOSharedDepthConfig:
 
 
 class DINOSharedDepthLearnerV1(nn.Module):
+    """Shared trainable system after the frozen DINOv2 representation.
+
+    Candidate identity never enters this module. Every rung arrives as the same
+    [B,8,37*37,1536] Q_d + L2-normalized token tensor.
+
+    Native detail/support comes from exact 1024 RGBA through a fixed geometric
+    sampling stencil plus a shared learned point encoder. Depth is predicted only
+    at requested query loci; dense support fields are produced by chunked querying.
+    """
     def __init__(self, cfg: DINOSharedDepthConfig = DINOSharedDepthConfig()):
         super().__init__()
         self.cfg = cfg
         c = cfg.token_width
-        self.token_stem = nn.Sequential(ConvNormAct(cfg.token_input_dim, c, 1, 1), ResidualBlock(c))
+        self.token_stem = nn.Sequential(
+            ConvNormAct(cfg.token_input_dim, c, 1, 1),
+            ResidualBlock(c),
+        )
         self.within = AxialWithinViewReasoning(c, cfg.within_heads, 1)
         self.cross = ResolutionIndependentRowFusion(c, cfg.views, cfg.context_hw, cfg.cross_layers, cfg.cross_heads)
         self.context_fuse = ContextFuse(c)
+
         self.native_offsets_px = fixed_native_patch_offsets(cfg.native_patch_radii)
         native_in = 4 * len(self.native_offsets_px)
-        self.native_encoder = nn.Sequential(nn.LayerNorm(native_in), nn.Linear(native_in, cfg.native_patch_hidden), nn.GELU(), nn.Linear(cfg.native_patch_hidden, cfg.native_patch_hidden), nn.GELU())
+        self.native_encoder = nn.Sequential(
+            nn.LayerNorm(native_in),
+            nn.Linear(native_in, cfg.native_patch_hidden),
+            nn.GELU(),
+            nn.Linear(cfg.native_patch_hidden, cfg.native_patch_hidden),
+            nn.GELU(),
+        )
         qin = c + cfg.native_patch_hidden + 5
-        self.depth_decoder = nn.Sequential(nn.LayerNorm(qin), nn.Linear(qin, cfg.decoder_hidden1), nn.GELU(), nn.Linear(cfg.decoder_hidden1, cfg.decoder_hidden2), nn.GELU(), nn.Linear(cfg.decoder_hidden2, 1))
+        self.depth_decoder = nn.Sequential(
+            nn.LayerNorm(qin),
+            nn.Linear(qin, cfg.decoder_hidden1),
+            nn.GELU(),
+            nn.Linear(cfg.decoder_hidden1, cfg.decoder_hidden2),
+            nn.GELU(),
+            nn.Linear(cfg.decoder_hidden2, 1),
+        )
 
     def config_dict(self):
         d = asdict(self.cfg)
@@ -210,40 +236,80 @@ class DINOSharedDepthLearnerV1(nn.Module):
         z = lifted_tokens.reshape(b * v, self.cfg.token_hw, self.cfg.token_hw, d).permute(0, 3, 1, 2).contiguous()
         local = self.within(self.token_stem(z)).reshape(b, v, self.cfg.token_width, self.cfg.token_hw, self.cfg.token_hw)
         global_ctx = self.cross(local, yaw_deg)
-        fused = self.context_fuse(local.reshape(b * v, self.cfg.token_width, self.cfg.token_hw, self.cfg.token_hw), global_ctx.reshape(b * v, self.cfg.token_width, self.cfg.token_hw, self.cfg.token_hw))
+        fused = self.context_fuse(
+            local.reshape(b * v, self.cfg.token_width, self.cfg.token_hw, self.cfg.token_hw),
+            global_ctx.reshape(b * v, self.cfg.token_width, self.cfg.token_hw, self.cfg.token_hw),
+        )
         return fused.reshape(b, v, self.cfg.token_width, self.cfg.token_hw, self.cfg.token_hw)
 
-    def query_depth_from_encoded(self, encoded: torch.Tensor, native_rgba: torch.Tensor, query_xy: torch.Tensor, yaw_deg: torch.Tensor, sheet_half_extent: torch.Tensor) -> torch.Tensor:
+    def query_depth_from_encoded(
+        self,
+        encoded: torch.Tensor,
+        native_rgba: torch.Tensor,
+        query_xy: torch.Tensor,
+        yaw_deg: torch.Tensor,
+        sheet_half_extent: torch.Tensor,
+    ) -> torch.Tensor:
         b, v, c, h, w = encoded.shape
         if (v, c, h, w) != (self.cfg.views, self.cfg.token_width, self.cfg.token_hw, self.cfg.token_hw):
             raise ValueError(f"encoded contract drift {tuple(encoded.shape)}")
         if query_xy.ndim != 4 or tuple(query_xy.shape[:2]) != (b, v) or query_xy.shape[-1] != 2:
             raise ValueError(f"query_xy drift {tuple(query_xy.shape)}")
         s = query_xy.shape[2]
+
         grid = query_xy.reshape(b * v, s, 1, 2).to(encoded.dtype)
-        tok = F.grid_sample(encoded.reshape(b * v, c, h, w), grid, mode="bilinear", padding_mode="border", align_corners=False)
-        tok = tok.squeeze(-1).transpose(1, 2).reshape(b, v, s, c)
-        native = self.native_encoder(sample_native_rgba_stencil(native_rgba, query_xy, self.native_offsets_px))
-        if yaw_deg.ndim == 1:
-            yaw_deg = yaw_deg[None].expand(b, -1)
-        yaw = torch.deg2rad(yaw_deg.float())
-        if sheet_half_extent.ndim == 1:
-            sheet_half_extent = sheet_half_extent[None].expand(b, -1)
-        if tuple(sheet_half_extent.shape) != (b, v):
-            raise ValueError(f"half extent drift {tuple(sheet_half_extent.shape)}")
-        cam = torch.stack([torch.sin(yaw), torch.cos(yaw), sheet_half_extent.float()], dim=-1)
-        cam = cam[:, :, None, :].expand(-1, -1, s, -1)
-        q = torch.cat([query_xy.float(), cam], dim=-1).to(tok.dtype)
-        z = torch.cat([tok, native.to(tok.dtype), q], dim=-1)
-        return self.depth_decoder(z).squeeze(-1)
+        dino_q = F.grid_sample(
+            encoded.reshape(b * v, c, h, w), grid,
+            mode="bilinear", padding_mode="border", align_corners=False,
+        ).squeeze(-1).transpose(1, 2).reshape(b, v, s, c)
 
-    def forward(self, lifted_tokens: torch.Tensor, native_rgba: torch.Tensor, query_xy: torch.Tensor, yaw_deg: torch.Tensor, sheet_half_extent: torch.Tensor) -> torch.Tensor:
-        return self.query_depth_from_encoded(self.encode_tokens(lifted_tokens, yaw_deg), native_rgba, query_xy, yaw_deg, sheet_half_extent)
+        native_q = sample_native_rgba_stencil(native_rgba, query_xy, self.native_offsets_px)
+        native_q = self.native_encoder(native_q.float()).to(dino_q.dtype)
+
+        yaw = yaw_deg.float()
+        if yaw.ndim == 1:
+            yaw = yaw[None].expand(b, -1)
+        if tuple(yaw.shape) != (b, v):
+            raise ValueError(f"yaw_deg drift {tuple(yaw.shape)}")
+        tt = torch.deg2rad(yaw)
+        sincos = torch.stack([torch.sin(tt), torch.cos(tt)], dim=-1)[:, :, None, :].expand(b, v, s, 2)
+        sh = sheet_half_extent.float().reshape(b, 1, 1, 1).expand(b, v, s, 1)
+        cam = torch.cat([query_xy.float(), sincos, sh], dim=-1).to(dino_q.dtype)
+
+        feat = torch.cat([dino_q, native_q, cam], dim=-1)
+        depth = self.depth_decoder(feat).squeeze(-1)
+        return depth
+
+    def forward(self, lifted_tokens, native_rgba, query_xy, yaw_deg, sheet_half_extent):
+        enc = self.encode_tokens(lifted_tokens, yaw_deg)
+        return self.query_depth_from_encoded(enc, native_rgba, query_xy, yaw_deg, sheet_half_extent)
 
 
-def depth_truth_from_points(points: torch.Tensor, camera_forward: torch.Tensor) -> torch.Tensor:
-    return torch.sum(points.float() * camera_forward.float(), dim=-1)
+def camera_forward_from_yaw(yaw_deg: torch.Tensor) -> torch.Tensor:
+    yaw = yaw_deg.float()
+    t = torch.deg2rad(yaw)
+    z = torch.zeros_like(t)
+    return torch.stack([torch.sin(t), torch.cos(t), z], dim=-1)
 
 
-def depth_loss(pred_d: torch.Tensor, truth_d: torch.Tensor, beta: float = 0.01) -> torch.Tensor:
-    return F.smooth_l1_loss(pred_d.float(), truth_d.float(), beta=float(beta), reduction="mean")
+def depth_truth_from_points(points: torch.Tensor, yaw_deg: torch.Tensor) -> torch.Tensor:
+    """points [B,V,S,3], yaw [B,V] -> camera-forward depth scalar [B,V,S]."""
+    if points.ndim != 4 or points.shape[-1] != 3:
+        raise ValueError("points must be [B,V,S,3]")
+    b, v, _, _ = points.shape
+    yaw = yaw_deg.float()
+    if yaw.ndim == 1:
+        yaw = yaw[None].expand(b, -1)
+    f = camera_forward_from_yaw(yaw)[:, :, None, :]
+    return (points.float() * f).sum(dim=-1)
+
+
+def depth_smooth_l1_loss(pred_d: torch.Tensor, truth_d: torch.Tensor, mask: torch.Tensor | None = None, beta: float = 0.01):
+    if pred_d.shape != truth_d.shape:
+        raise ValueError(f"pred/truth shape drift {pred_d.shape} {truth_d.shape}")
+    if mask is None:
+        mask = torch.ones_like(pred_d, dtype=torch.bool)
+    mask = mask.bool()
+    if not mask.any():
+        raise RuntimeError("empty depth supervision mask")
+    return F.smooth_l1_loss(pred_d.float()[mask], truth_d.float()[mask], beta=float(beta), reduction="mean")

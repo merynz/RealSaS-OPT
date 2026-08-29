@@ -1,0 +1,9 @@
+{
+  "schema": "RealSaS.DepthToleranceBridge.M4CanonicalFullResultAuthority.v1",
+  "result_filename": "M4_SURFACE_GRID_CANONICAL_FULL_V1.json",
+  "sha256": "9de6c8aa150cda3b333753dd58359d93bd688271e0c9e5d7aa2182b2030d90fb",
+  "runner_exit_code": 0,
+  "cell_count": 65,
+  "resumable_copy_deep_equal_cells": true,
+  "note": "Full nested result is SHA-bound; canonical repo summary/closure carry the decision surface without duplicating the ~1.9 MB per-asset diagnostic payload."
+}

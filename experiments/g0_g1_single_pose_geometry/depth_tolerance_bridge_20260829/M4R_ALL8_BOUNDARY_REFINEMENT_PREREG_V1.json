@@ -1,0 +1,44 @@
+{
+  "asymmetry": "ALL8",
+  "baseline": {
+    "asymmetry": "ALL8",
+    "ell_px": 0,
+    "epsilon": 0.0
+  },
+  "cell_count": 21,
+  "decision_operator": {
+    "boundary_report": "largest tested epsilon with epsilon_level_pass=true; next tested epsilon is the upper failing bracket endpoint",
+    "epsilon_level_pass": "PASS only if all four ell cells PASS",
+    "no_interpolation_claim": true,
+    "per_cell": "unchanged M4 surface-route + six frozen D2 proxy checks"
+  },
+  "diagnostics_only": [
+    "D2 support",
+    "frozen proxy ratios",
+    "current-E0 N_d angular diagnostic may be reported but cannot change PASS"
+  ],
+  "ell_px_order": [0, 4, 16, 64],
+  "epsilon_rms_order": [0.00175, 0.002, 0.00225, 0.0025, 0.00275],
+  "execution_population_asset_ids": [
+    "asset_551ea351b43a1787d0f55536",
+    "asset_36fb02305846592b1ecdf3d4",
+    "asset_0679fdef64f19a4832a6d521",
+    "asset_76313e4bd82b82fcd1659c70",
+    "asset_6f086a5b1a66378ffe04d7e4",
+    "asset_425122d500ecf5767404f9c0",
+    "asset_5a19f8c5254be7bf30c504f5",
+    "asset_f8a40d6c5d815fe79c8b5e42"
+  ],
+  "firewalls": {
+    "consumer_product_safe_claim_authorized": false,
+    "dev32": "CLOSED",
+    "grid_edits_after_first_M4R_outcome": "FORBIDDEN",
+    "parent_M4_immutable": true,
+    "proxy27": "CLOSED_TO_TUNING",
+    "scientific_outcomes_opened_at_prereg": false,
+    "training_steps": 0
+  },
+  "parent_result_sha256": "9de6c8aa150cda3b333753dd58359d93bd688271e0c9e5d7aa2182b2030d90fb",
+  "question": "Where inside [0.0015,0.003) does the current frozen ALL8 surface/proxy transition lie?",
+  "schema": "RealSaS.DepthToleranceBridge.M4RAll8BoundaryRefinementPrereg.v1"
+}

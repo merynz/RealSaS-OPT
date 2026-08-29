@@ -1,0 +1,76 @@
+{
+  "firewalls": {
+    "m4_decision_operator_unchanged": true,
+    "m4_grid_unchanged": true,
+    "product_safe_claim_authorized": false
+  },
+  "interpretation": [
+    "ell reaches differential geometry strongly; it is not swallowed before N_d construction.",
+    "Only ell=0 crosses the frozen Arachne CE +5% margin in this epsilon/asymmetry slice.",
+    "This supports high-frequency depth noise -> derived-normal degradation -> skin-proxy sensitivity as a mechanism hypothesis.",
+    "This is not evidence about the future V-next robust plane-fit normal operator and is not a product-Arachne claim."
+  ],
+  "normal_operator": "SEALED_E0_STRIDE2_LOCAL_TANGENT_CROSS_PRODUCT__SIGN_INVARIANT_COMPARISON",
+  "probe": {
+    "asymmetry": "TWO_OPPOSITE_HASHED",
+    "ell_px": [0, 4, 16, 64],
+    "epsilon": 0.006
+  },
+  "results": [
+    {
+      "affected_asset_view_count": 16,
+      "arachne_ce_ratio_to_zero": 1.0545664163708302,
+      "cell_id": "E0060_L000_TWOOPP",
+      "cell_label": "SURFACE_ROUTE_PASS__PROXY_FAIL",
+      "d2_support_pairs_sum": 11990,
+      "depth_delta_abs_p95_mean": 0.011760883149690926,
+      "ell_px": 0,
+      "theta_Nd_sign_invariant_deg_mean_of_view_p50": 52.51422190666199,
+      "theta_Nd_sign_invariant_deg_mean_of_view_p95": 85.81487083435059,
+      "theta_Nd_sign_invariant_deg_mean_of_view_p99": 89.15043497085571,
+      "valid_overlap_fraction_mean": 0.999828662268123
+    },
+    {
+      "affected_asset_view_count": 16,
+      "arachne_ce_ratio_to_zero": 1.0491040604798956,
+      "cell_id": "E0060_L004_TWOOPP",
+      "cell_label": "SURFACE_ROUTE_PASS__PROXY_PASS",
+      "d2_support_pairs_sum": 11819,
+      "depth_delta_abs_p95_mean": 0.011765542905777693,
+      "ell_px": 4,
+      "theta_Nd_sign_invariant_deg_mean_of_view_p50": 32.54451870918274,
+      "theta_Nd_sign_invariant_deg_mean_of_view_p95": 71.30515384674072,
+      "theta_Nd_sign_invariant_deg_mean_of_view_p99": 84.19410943984985,
+      "valid_overlap_fraction_mean": 0.999828662268123
+    },
+    {
+      "affected_asset_view_count": 16,
+      "arachne_ce_ratio_to_zero": 1.0428075490985238,
+      "cell_id": "E0060_L016_TWOOPP",
+      "cell_label": "SURFACE_ROUTE_PASS__PROXY_PASS",
+      "d2_support_pairs_sum": 11996,
+      "depth_delta_abs_p95_mean": 0.011819418403320014,
+      "ell_px": 16,
+      "theta_Nd_sign_invariant_deg_mean_of_view_p50": 9.749443143606186,
+      "theta_Nd_sign_invariant_deg_mean_of_view_p95": 25.886230945587158,
+      "theta_Nd_sign_invariant_deg_mean_of_view_p99": 33.03771495819092,
+      "valid_overlap_fraction_mean": 0.999828662268123
+    },
+    {
+      "affected_asset_view_count": 16,
+      "arachne_ce_ratio_to_zero": 1.0441575052852174,
+      "cell_id": "E0060_L064_TWOOPP",
+      "cell_label": "SURFACE_ROUTE_PASS__PROXY_PASS",
+      "d2_support_pairs_sum": 11993,
+      "depth_delta_abs_p95_mean": 0.011695239634718746,
+      "ell_px": 64,
+      "theta_Nd_sign_invariant_deg_mean_of_view_p50": 2.790633961558342,
+      "theta_Nd_sign_invariant_deg_mean_of_view_p95": 7.195359826087952,
+      "theta_Nd_sign_invariant_deg_mean_of_view_p99": 8.992359220981598,
+      "valid_overlap_fraction_mean": 0.999828662268123
+    }
+  ],
+  "schema": "RealSaS.DepthToleranceBridge.M4MechanismDiagnostic.v1",
+  "scope": "POSTHOC_DIAGNOSTIC_ONLY__NO_M4_DECISION_OPERATOR_CHANGE",
+  "source_result_sha256": "9de6c8aa150cda3b333753dd58359d93bd688271e0c9e5d7aa2182b2030d90fb"
+}

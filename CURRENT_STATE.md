@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-29  
 **Canonical continuation branch:** `main`  
-**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__DEPTH_BRIDGE_APPARATUS_PASS_M0_M3__D2_ROUTE_CORRECTED__SURFACE_GRID_NEXT__DEV32_CLOSED`
+**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__M4_SURFACE_GRID_CLOSED__ALL8_REFINEMENT_NEXT__DEV32_CLOSED`
 
 This file on `main` is the single continuation authority.
 
@@ -86,45 +86,109 @@ BASE_DERIVED_MATCHER
 Consequences:
 - sealed M2/M3 result bytes are preserved;
 - their `1909 / 1921 / 1910 / 1896` support-pair values are pre-cycle BASE apparatus evidence;
-- scientific M4 qualification must use post-cycle `D2_MUTUAL_P003`;
+- scientific M4 qualification uses post-cycle `D2_MUTUAL_P003`;
 - BASE is retained only as a separate mechanism diagnostic.
 
-Additive cached/vectorized M4 runtime parity on the already-open witness:
+Additive cached/vectorized M4 runtime parity:
 - zero-corruption BASE `1909 == 1909`, bit-exact;
 - zero-corruption D2 `1884 == 1884`, `D2_X` bit-exact;
 - nonzero vectorized forward matcher: 56/56 scalar row comparisons exact;
 - corruption CPU tests remain 5/5 PASS.
 
-No scientific tolerance outcome, Proxy27 bridge outcome or DEV32 evidence was opened by this correction.
+## M4 structured surface/substrate grid — CLOSED
 
-## NEXT — freeze and execute the surface/substrate scientific depth grid
+Canonical closure: `canonical/M4_SURFACE_GRID_CLOSURE_20260829.md`.
 
-Question:
+Canonical full result SHA-256:
+`9de6c8aa150cda3b333753dd58359d93bd688271e0c9e5d7aa2182b2030d90fb`
 
-> Which structured forward-depth residual regimes remain safe for observable persistence and the current frozen surface/substrate consumer path?
+Closed facts:
+- frozen grid: 65/65 cells complete;
+- typed surface route: 65/65 PASS;
+- frozen proxy verdict: 40 PASS / 25 FAIL;
+- zero baseline BASE support pairs: 14,440;
+- zero baseline post-cycle D2 support pairs: 14,094;
+- Proxy27 was not used for grid tuning;
+- DEV32 remains closed;
+- training steps: 0.
 
-The corruption family remains:
+### Primary IRIS-operational interpretation
 
-1. magnitude `epsilon` along each known camera ray before persistence;
-2. spatial correlation length `ell` so coherent regional depth drift is tested, not only independent pixel noise;
-3. view asymmetry `A` so one/few bad views can be stressed against the remaining good views.
+For IRIS, the primary corruption column is `ALL8` because IRIS predicts all eight views.
 
-Execution rule:
-- use `calibration_anchor8` to freeze/check the grid and apparatus without consulting Proxy27 bridge outcomes;
-- seal the final cell list, decision/report schema and all byte/checkpoint authorities before qualification outcomes are opened;
-- compute `P_hat = O + d_hat F`;
-- rerun teacher-free `BASE_DERIVED_MATCHER`, then the frozen reciprocal `cycle_P <= 0.003` admission to obtain `D2_MUTUAL_P003`;
-- evaluate the same frozen proxy-consumer bytes where legally applicable, with no retraining per cell;
-- route post-cycle `D2_MUTUAL_P003` `RiggingSurfaceIR` through the real Compiler path;
-- record BASE diagnostics separately from D2 persistence error, qualification/abstention, structural validity and available deformation/proof failures;
-- inherit existing E0 practical margins where the same proxy metric applies;
-- report hard per-family tails separately from aggregates.
+`ONE`, `TWOOPP`, and `FOURALT` are retained as redundancy/external-input stress diagnostics, not as the primary IRIS acceptance columns.
 
-Do not use Proxy27 or DEV32 for tuning. Do not convert the result into one scalar `P95 <= epsilon*`; preserve the structured `(epsilon, ell, A)` chart.
+Under the current frozen surface/proxy consumer:
+- `epsilon = 0.0015`: ALL8 PASS for `ell = 0,4,16,64`;
+- `epsilon = 0.003`: ALL8 FAIL for `ell = 0,4,16,64`.
+
+Therefore the current coarse transition is:
+
+`0.0015 <= epsilon_critical < 0.003`
+
+where epsilon is RMS ray-aligned depth displacement on every affected view.
+
+This is NOT a final product-safe IRIS tolerance. Product interpretation still requires the consumer-validity interlock.
+
+### ell interpretation
+
+Binary verdict changes across ell in only one tested `(epsilon, asymmetry)` group:
+`epsilon=.006, TWOOPP`.
+
+However ell is not mechanically dead. A post-hoc diagnostic using the current sealed E0 differential-normal operator shows strong `theta_Nd` dependence at that slice:
+- ell=0: affected-view mean Q95 ~85.8 deg;
+- ell=4: ~71.3 deg;
+- ell=16: ~25.9 deg;
+- ell=64: ~7.2 deg.
+
+The ell=0 TWOOPP failure is caused by frozen Arachne CE crossing `1.054566 > 1.05`; ell>=4 passes that margin.
+
+Important limitation: this diagnostic uses the historical E0 stride-2 local tangent/cross-product normal operator, not the prospective V-next robust local-plane operator.
+
+### Proxy failure localization
+
+All 25 proxy-FAIL cells still pass the typed surface route.
+
+Frozen check failure counts:
+- Arachne CE +5%: 25/25 FAIL cells;
+- Arachne influence-displacement +5%: 20/25;
+- Geppetto family-P95 +10%: 3/25.
+
+This is evidence about the frozen historical D2 proxy chain, not future production Geppetto/Arachne.
+
+## NEXT — M4R ALL8 boundary refinement
+
+Parent M4 is immutable.
+
+Preregistered M4R asks only where inside `[0.0015, 0.003)` the current ALL8 transition lies.
+
+Frozen follow-up:
+- asymmetry: ALL8 only;
+- epsilon RMS: `0.00175, 0.002, 0.00225, 0.0025, 0.00275`;
+- ell: `0,4,16,64`;
+- one zero baseline;
+- 21 cells total;
+- same frozen surface route and six proxy checks;
+- an epsilon level passes only if all four ell cells pass.
+
+No M4R outcome may alter M4.
+
+## Residual-scale pilot before expensive foundation selection
+
+A family-disjoint sacrificial IRIS residual pilot is required before interpreting the DINO capacity ladder.
+
+Historical context only:
+- old P-V5 R256 scratch 8x2 fit-only learner ended at aggregate `P_p95 ~= 0.003706`;
+- worst cell `P_p95 ~= 0.005741`.
+
+That historical fit scale lies inside/near the coarse M4 ALL8 bracket after accounting for RMS-vs-p95, but it is not held-out evidence and is not qualification.
+
+The sacrificial pilot must measure actual held-out ray-depth residual distributions and cross-view structure without changing the frozen M4/M4R consumer criteria.
 
 ## Product-level interpretation interlock
 
 The surface/substrate bridge is not automatically the final product-safe IRIS acceptance region.
+
 Before using it to select the final foundation/IRIS model, close the sealed consumer-validity interlock with minimal real consumers on the actual RealSaS substrate:
 
 ```text
@@ -139,7 +203,7 @@ ClosedRiggingVolume V0
 
 Product-level tolerance is consumer-profile specific. Retraining/replacing Geppetto or Arachne creates a new consumer profile and requires replay before old model rankings transfer.
 
-## After the surface bridge + consumer-validity interlock
+## After M4R + residual-scale pilot + consumer-validity interlock
 
 1. freeze the consumer-qualified admissible depth-error region;
 2. MapAnything/external-prior preflight against that region;

@@ -1,0 +1,81 @@
+{
+  "asymmetric_columns_role": {
+    "FOURALT": "multi-view partial-corruption stress",
+    "ONE": "redundancy / external-view outlier stress",
+    "TWOOPP": "paired-view inconsistency / redundancy stress",
+    "not_primary_iris_acceptance": true
+  },
+  "baseline": {
+    "base_support_pairs_sum": 14440,
+    "cell_id": "E0000_L000_ALL8",
+    "cell_label": "SURFACE_ROUTE_PASS__PROXY_PASS",
+    "d2_support_pairs_sum": 14094
+  },
+  "canonical_full_result_sha256": "9de6c8aa150cda3b333753dd58359d93bd688271e0c9e5d7aa2182b2030d90fb",
+  "cell_count": 65,
+  "ell_decision_sensitivity": {
+    "note": "ell changes the current E0-derived differential geometry strongly even though the coarse proxy verdict changes in only one epsilon/asymmetry group.",
+    "verdict_flip_groups": [
+      {
+        "asymmetry": "TWOOPP",
+        "ell0": "FAIL",
+        "ell16": "PASS",
+        "ell4": "PASS",
+        "ell64": "PASS",
+        "epsilon": 0.006
+      }
+    ]
+  },
+  "failure_check_counts": {
+    "arachne.ce_ratio_to_zero": 25,
+    "arachne.influence_disp_mean_ratio_to_zero": 20,
+    "geppetto.family_p95_ratio_to_zero": 3
+  },
+  "firewalls": {
+    "consumer_validity_interlock_still_required": true,
+    "dev32_opened": false,
+    "product_safe_claim_authorized": false,
+    "proxy27_used_for_tuning": false,
+    "training_steps": 0
+  },
+  "mechanism_diagnostic_sha256": "2f6ae6169a4b6f6418b84fe26cce35a3cd60396836bf65460d7a0075011b7ad8",
+  "primary_iris_operational_axis": {
+    "asymmetry": "ALL8",
+    "cells": {
+      "0.0015": [
+        {"d2_support_pairs_sum": 13231, "ell_px": 0, "failed_checks": [], "pass": true},
+        {"d2_support_pairs_sum": 13092, "ell_px": 4, "failed_checks": [], "pass": true},
+        {"d2_support_pairs_sum": 13074, "ell_px": 16, "failed_checks": [], "pass": true},
+        {"d2_support_pairs_sum": 13178, "ell_px": 64, "failed_checks": [], "pass": true}
+      ],
+      "0.003": [
+        {"d2_support_pairs_sum": 10949, "ell_px": 0, "failed_checks": ["arachne.ce_ratio_to_zero"], "pass": false},
+        {"d2_support_pairs_sum": 10874, "ell_px": 4, "failed_checks": ["arachne.ce_ratio_to_zero", "arachne.influence_disp_mean_ratio_to_zero"], "pass": false},
+        {"d2_support_pairs_sum": 11078, "ell_px": 16, "failed_checks": ["arachne.ce_ratio_to_zero"], "pass": false},
+        {"d2_support_pairs_sum": 10940, "ell_px": 64, "failed_checks": ["arachne.ce_ratio_to_zero", "arachne.influence_disp_mean_ratio_to_zero"], "pass": false}
+      ],
+      "0.006": [
+        {"d2_support_pairs_sum": 9288, "ell_px": 0, "failed_checks": ["arachne.ce_ratio_to_zero", "arachne.influence_disp_mean_ratio_to_zero"], "pass": false},
+        {"d2_support_pairs_sum": 7775, "ell_px": 4, "failed_checks": ["arachne.ce_ratio_to_zero", "arachne.influence_disp_mean_ratio_to_zero"], "pass": false},
+        {"d2_support_pairs_sum": 8506, "ell_px": 16, "failed_checks": ["arachne.ce_ratio_to_zero", "arachne.influence_disp_mean_ratio_to_zero"], "pass": false},
+        {"d2_support_pairs_sum": 8534, "ell_px": 64, "failed_checks": ["arachne.ce_ratio_to_zero", "arachne.influence_disp_mean_ratio_to_zero"], "pass": false}
+      ],
+      "0.012": [
+        {"d2_support_pairs_sum": 8332, "ell_px": 0, "failed_checks": ["arachne.ce_ratio_to_zero", "arachne.influence_disp_mean_ratio_to_zero"], "pass": false},
+        {"d2_support_pairs_sum": 6226, "ell_px": 4, "failed_checks": ["arachne.ce_ratio_to_zero", "arachne.influence_disp_mean_ratio_to_zero", "geppetto.family_p95_ratio_to_zero"], "pass": false},
+        {"d2_support_pairs_sum": 6421, "ell_px": 16, "failed_checks": ["arachne.ce_ratio_to_zero", "arachne.influence_disp_mean_ratio_to_zero", "geppetto.family_p95_ratio_to_zero"], "pass": false},
+        {"d2_support_pairs_sum": 6621, "ell_px": 64, "failed_checks": ["arachne.ce_ratio_to_zero", "arachne.influence_disp_mean_ratio_to_zero", "geppetto.family_p95_ratio_to_zero"], "pass": false}
+      ]
+    },
+    "coarse_bracket": {
+      "first_tested_all_ell_fail_epsilon_rms": 0.003,
+      "interpretation": "Current frozen surface/proxy consumer only; not product-safe IRIS acceptance.",
+      "last_tested_all_ell_pass_epsilon_rms": 0.0015
+    },
+    "reason": "IRIS predicts all eight views; asymmetric columns are redundancy/input-stress diagnostics, not the primary IRIS acceptance column."
+  },
+  "proxy_fail_count": 25,
+  "proxy_pass_count": 40,
+  "schema": "RealSaS.DepthToleranceBridge.M4SurfaceGridCanonicalSummary.v1",
+  "surface_route_pass_count": 65
+}

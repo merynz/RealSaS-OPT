@@ -12,15 +12,15 @@ from realsas_compiler_core.skin import qualify_skin
 from realsas_compiler_core.product import assemble_product, bind_proof, project_runtime_package
 
 HERE=Path(__file__).resolve().parent
-EXPECTED_FIXTURE_SHA='e8aa98251c82925a68ee6ffd28a9a7d0a00fac47621129782a2557db34abc722'
+EXPECTED_FIXTURE_TRANSPORT_SHA='81634b7db6dbae3f7cc30d7f6942ace9be841416dd1db833185884d3e10584c5'
 EXPECTED_VENDOR_RAW_SHA='3a6076b30e0a23807f952365d39d81ddf5d4b1dba734c0bdba47567bced26850'
-
-def sha256(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
 def load_fixture():
     p=HERE/'CONSUMER_INTERLOCK_COMPILER_FIXTURE_V2.b64'
-    if sha256(p)!=EXPECTED_FIXTURE_SHA: raise RuntimeError('fixture byte drift')
-    raw=zlib.decompress(base64.b64decode(p.read_text().strip()))
+    transport=p.read_text().strip()
+    if hashlib.sha256(transport.encode('ascii')).hexdigest()!=EXPECTED_FIXTURE_TRANSPORT_SHA:
+        raise RuntimeError('fixture transport drift')
+    raw=zlib.decompress(base64.b64decode(transport,validate=True))
     x=json.loads(raw)
     if x['schema']!='RealSaS.ConsumerInterlock.CompilerFixture.v2': raise RuntimeError('fixture schema drift')
     return x
@@ -55,7 +55,6 @@ def rot_axis_angle(axis,theta):
 def deformation_probe(surface,skeleton,skin):
     SP=np.asarray([n.P for n in surface.surface_nodes],float); sid_to_i={n.surface_id:i for i,n in enumerate(surface.surface_nodes)}
     joints={j.canonical_joint_id:j for j in skeleton.joints}; root=skeleton.root_id
-    # Each non-root joint gets a small deterministic rotation around its parent; root is identity.
     transforms={root:(np.eye(3),np.zeros(3))}
     for jid,j in sorted(joints.items()):
         if jid==root or j.parent_canonical_id is None: continue

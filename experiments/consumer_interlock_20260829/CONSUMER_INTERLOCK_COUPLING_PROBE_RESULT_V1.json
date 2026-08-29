@@ -1,0 +1,57 @@
+{
+  "a0_weight_change_mean_row_l1": 0.2687926005329492,
+  "a0_weight_change_p95_row_l1": 0.5763698374343423,
+  "asset_id": "asset_551ea351b43a1787d0f55536",
+  "bad_product_state_hash": "7412bc4d6fa9bdd7d272396542d63b65067034cab3026986af56b95647c19f92",
+  "bad_recomputed_skin_lineage_hash": "792b087b6f5d88174c7b1fd6789613de10c51fd660ad2f5aa15f88d3e5f203e7",
+  "bad_skeleton_lineage_hash": "124cd253f714cb3740345200fce6401c207480203d031594a6a4413587f61e3a",
+  "clean_skeleton_lineage_hash": "d37ea4f2be192548ea529bc872fb884c5cb1215af0b9eb819a14343181b77d90",
+  "clean_skin_lineage_hash": "9bc9636155e7c0a299d36651b4b97c535421eb683ab33ca7b5ca71555f1b33c0",
+  "compensation_ratio_diagnostic": 1.3976998717340667,
+  "corruption": {
+    "collapse_scale": 0.25,
+    "joint_position_rms": 0.31006343780462375,
+    "joint_position_rms_norm": 0.21196194321606632,
+    "name": "G0_BAD_COLLAPSE75_V1"
+  },
+  "coupling_proof_bound_to_exact_bad_product_state": true,
+  "fixture_transport_sha256": "81634b7db6dbae3f7cc30d7f6942ace9be841416dd1db833185884d3e10584c5",
+  "frozen_clean_weight_response_delta": {
+    "finite": true,
+    "max_point_delta": 0.028158513322379453,
+    "mean_point_delta": 0.014615798548075867,
+    "p95_point_delta": 0.02672266789548553,
+    "p95_point_delta_norm": 0.018267837882303958,
+    "rmse": 0.01587516634497935,
+    "rmse_norm": 0.010852395661949734
+  },
+  "hard_checks": {
+    "all_posed_finite": true,
+    "bad_frozen_skin_512": true,
+    "bad_recomputed_skin_512": true,
+    "bad_skeleton_qualified": true,
+    "clean_skeleton_qualified": true,
+    "clean_skin_512": true,
+    "corruption_rms_norm_ge_0p05": true,
+    "post_comp_p95_norm_ge_0p010": true,
+    "post_comp_rmse_norm_ge_0p005": true
+  },
+  "interpretation": "PASS means severe G0 geometry corruption remains detectably coupled to final posed surface after A0 is allowed to recompute; compensation_ratio is diagnostic only.",
+  "post_compensation_response_delta": {
+    "finite": true,
+    "max_point_delta": 0.04725191887231861,
+    "mean_point_delta": 0.019208901494996912,
+    "p95_point_delta": 0.04151169645658638,
+    "p95_point_delta_norm": 0.02837774072761807,
+    "rmse": 0.02218871796413461,
+    "rmse_norm": 0.015168392024714485
+  },
+  "qualified_joint_count_bad": 5,
+  "qualified_joint_count_clean": 5,
+  "qualified_skin_rows_bad_frozen_clean_weights": 512,
+  "qualified_skin_rows_bad_recomputed": 512,
+  "qualified_skin_rows_clean": 512,
+  "rotation_deg": 15.0,
+  "schema": "RealSaS.ConsumerInterlock.CouplingProbe.v1",
+  "status": "PASS"
+}

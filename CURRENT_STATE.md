@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-29  
 **Canonical continuation branch:** `main`  
-**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__DTB_ND1_CLOSED__FIT_PROXY32_AUDIT_CLOSED__CONSUMER_INTERLOCK_6_OF_6_PASS__DINO_CONTROLLED_PREREG_NEXT__TRAINING_NOT_AUTHORIZED__DEV32_CLOSED`
+**Status:** `E0_PASS__N_B3_PASS_NO_EXPLICIT_N__COMPILER_IN_SYSTEM_LOOP__DTB_ND1_CLOSED__FIT_PROXY32_AUDIT_CLOSED__CONSUMER_INTERLOCK_6_OF_6_PASS__DINO_CONTROLLED_PREREG_SEALED__ZERO_STEP_PREFLIGHT_NEXT__TRAINING_NOT_AUTHORIZED__DEV32_CLOSED`
 
 This file is continuation authority only when present on `main`. On a non-main branch it is a proposed next canonical state and does not override the current `main` authority until that branch is explicitly promoted/merged.
 
@@ -11,7 +11,7 @@ Plain-language roadmap:
 
 ## One-line state
 
-`depth tolerance measured -> old learner failure decomposed -> real downstream consumer route + coupling validated -> controlled DINOv2 S/B/L/g preregistration next -> only then training`
+`depth tolerance measured -> old learner failure decomposed -> real downstream consumer route + coupling validated -> controlled DINOv2 S/B/L/g experiment preregistered -> zero-step apparatus/data/weight preflight next -> only then training`
 
 ## 1. Product/system contract — STABLE
 
@@ -115,7 +115,7 @@ Supported interpretation:
 5. the old 32 -> 128 -> 512 experiment is not a controlled capacity ladder;
 6. failure must not be described as pure unseen-family generalization collapse.
 
-Consequence: a controlled pretrained representation-capacity test is warranted.
+Consequence: a controlled pretrained representation-capacity/accessibility test is warranted.
 
 ## 4. Consumer-validity interlock — CLOSED 6/6 FOR SACRIFICIAL G0/A0
 
@@ -125,7 +125,7 @@ Original interlock:
 Canonical closure:
 `canonical/CONSUMER_VALIDITY_INTERLOCK_CLOSURE_20260829.md`.
 
-The six required steps are now closed for the sacrificial profile:
+The six required steps are closed for the sacrificial profile:
 
 ```text
 ClosedRiggingVolume V0
@@ -138,103 +138,116 @@ ClosedRiggingVolume V0
  -> explicit G0/A0 coupling probe
 ```
 
-### Clean exact-Compiler witness
+Clean witness `asset_551ea351b43a1787d0f55536` passed exact skeleton qualification, 512/512 skin qualification, finite/nontrivial/bounded deformation, exact-state proof/runtime binding, and canonical-ID firewalls.
 
-Asset:
-`asset_551ea351b43a1787d0f55536`
+The explicit preregistered coupling probe collapsed all non-root G0 joints 75% toward root. Corruption RMS / bbox diagonal was `0.21196194321606632`. After A0 recomputed weights, posed-surface difference remained visible: normalized RMSE `0.015168392024714485`, P95 `0.02837774072761807`, diagnostic compensation ratio `1.3976998717340667`. Both frozen detectability gates passed.
 
-Results:
-
-- surface nodes: `512`;
-- G0 joints / edges: `5 / 4`;
-- qualified joints: `5 / 5`;
-- graph solver: `chu_liu_edmonds_maximum_spanning_arborescence`;
-- optimizer status: `optimal_arborescence_super_root`;
-- optimality proven: `true`;
-- proposal IDs disjoint from product canonical IDs: `true`;
-- all product IDs minted `J:*`: `true`;
-- qualified skin rows: `512 / 512`;
-- skin max simplex residual before bounded repair: `1.341104507446289e-07`;
-- deformation finite / nontrivial / bounded: PASS;
-- proof bound to exact product state: PASS;
-- runtime bound to exact product state: PASS.
-
-Clean result:
-`experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_EXACT_COMPILER_CLEAN_RESULT_V1.json`.
-
-### Explicit coupling probe
-
-Preregistered before outcome:
-`experiments/consumer_interlock_20260829/CONSUMER_COUPLING_PROBE_PREREG_V1.md`.
-
-Corruption:
-
-`p_bad = root + 0.25 * (p_clean - root)` for every non-root G0 joint.
-
-Measured corruption RMS normalized by surface bbox diagonal:
-
-`0.21196194321606632`
-
-After A0 was allowed to recompute its weights on the corrupted skeleton:
-
-- posed-surface RMSE / bbox diagonal: `0.015168392024714485`;
-- posed-surface P95 point delta / bbox diagonal: `0.02837774072761807`;
-- mean A0 row-L1 weight change: `0.2687926005329492`;
-- diagnostic compensation ratio: `1.3976998717340667`.
-
-Both preregistered response-detectability gates passed. The coupling proof is bound to exact corrupted product state.
-
-Result:
-`experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_COUPLING_PROBE_RESULT_V1.json`.
-
-Interpretation:
-
-The real downstream route can consume the current RealSaS 2.5D substrate, and A0 does not silently erase a severe systematic G0 skeleton error on this sacrificial witness. This validates the route, not product-quality Geppetto/Arachne.
+Interpretation: the downstream route genuinely consumes skeleton geometry; this does not make sacrificial G0/A0 product-quality models.
 
 Product-level depth tolerance remains consumer-profile specific. Replacing/retraining Geppetto or Arachne requires replay under the new profile before previous rankings transfer.
 
-## 5. Next scientific gate — CONTROLLED DINOv2 REPRESENTATION LADDER PREREGISTRATION
+## 5. Controlled DINOv2 frozen-representation ladder — PREREGISTERED
 
-Do **not** start candidate training yet.
+Scientific preregistration:
+`experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_V1.md`.
 
-Next executable action is to write and seal the controlled frozen-representation ladder:
+Binding ambiguity closure:
+`experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_AMENDMENT_V1_1.md`.
+
+Machine-readable contract:
+`experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_V1.json`.
+
+Plain-language question:
+
+> With everything after the frozen visual representation held constant, does stronger DINOv2 representation make the required camera-forward depth field accessible at the precision RealSaS currently needs?
+
+Candidates:
 
 - DINOv2 S / 384-d;
 - DINOv2 B / 768-d;
 - DINOv2 L / 1024-d;
 - DINOv2 g / 1536-d.
 
-The experiment must isolate representation accessibility/capacity rather than recreate the historical family-exposure confound.
+Key controls now frozen before candidate outputs:
 
-Required controls:
-
-- exact same scientific training-family population across S/B/L/g;
-- exact same sample/order stream and augmentations;
-- foundation raster `518 x 518`, patch-14 grid `37 x 37`;
-- same native `1024 x 1024` detail path;
-- no adaptive crop/zoom or rung-specific framing;
-- fixed isometric lift `Q_k` into 1536-d;
+- one exact historical 512-FIT-family population for all four candidates;
+- both frozen styles for every family;
+- exact same deterministic sample/order stream;
+- Mode-G 8 x native-1024 exact-camera observations;
+- full-canvas deterministic 518 resize -> 37 x 37 patch grid;
+- identical native-1024 detail/support path;
+- fixed isometric zero-pad lift `Q_d : R^d -> R^1536`;
 - identical non-affine post-lift normalization;
-- identical trainable fusion/head architecture;
-- identical trainable parameter count after the frozen extractor;
-- matched optimizer/exposure policy fixed before scientific candidate outcomes;
-- no candidate-specific stopping/tuning from outcome inspection;
-- candidate interpretation based on actual residual fields replayed through the frozen downstream consumer/proof route, not summary depth metrics alone.
+- identical trainable fusion/head bytes/config/parameter count;
+- IRIS learns camera-forward depth `d` only;
+- no learned normal, risk or camera head in Phase 1A;
+- no constant `kappa_common * D_hull` ranking path;
+- same optimizer protocol and no candidate-specific stopping/tuning.
 
-Prospective V-next design remains under:
-`prospective/iris_vnext_20260829/IRIS_VNEXT_EXPERIMENT_PLAN_V4.md`.
+Historical 512 membership authority is frozen by:
 
-Important prospective amendment remains binding for future preregistration: do not blindly use the spatially constant `kappa_common * D_hull` common risk band. Replace it with a candidate-independent observable-conditioned band with non-degeneracy checks, calibrate cross-view inconsistency on consistent and contradictory observation sets, and retain camera perturbation as non-binding sensitivity unless separately promoted.
+- source metadata SHA `475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913`;
+- seed `PV5_R256_FIT_SCALE_TRAIN_V1`;
+- quota `483 / 24 / 5` Objaverse/Quaternius/KayKit;
+- complete canonical membership JSON SHA `8531360f1c61dc4cdb699c095790c35ab3af0da5a7a290b420e5777bb4e9169b`.
 
-## 6. Training authorization
+No missing family may be substituted.
 
-**FULL DINO S/B/L/g TRAINING: NOT AUTHORIZED YET.**
+### Fixed exposure budget
 
-Authorization sequence:
+Mandatory checkpoints:
 
-1. consumer closure promoted to `main` through normal branch governance;
-2. current-state/roadmap synchronization present on `main`;
-3. controlled DINO ladder preregistration written and sealed;
-4. only then execute candidate training/evaluation.
+- `MATCHED_7168`: historical-budget diagnostic, 112 nominal family exposures;
+- `PRIMARY_32768`: primary comparison, 512 nominal family exposures.
 
-DEV32 remains closed unless a separately authorized gate explicitly opens it.
+The 32768-step checkpoint is not claimed asymptotic. It is a fixed, substantially less-starved comparison chosen before candidate outputs; every candidate receives exactly the same budget.
+
+### Frozen PASS operator
+
+At `PRIMARY_32768`, `REPRESENTATION_ACCESSIBLE_V1` requires:
+
+- FIT_PROXY32 actual-residual direct-replay PASS on at least `61/64` family-style cells;
+- FIT_PROXY32 hard route failures `0`;
+- TRAIN_DIAG32 actual-residual direct-replay PASS on at least `61/64` cells;
+- TRAIN_DIAG32 hard route failures `0`.
+
+Scalar depth statistics remain diagnostics and cannot override direct replay.
+
+If all four candidates fail training-fit adequacy, the conclusion is shared learner/optimization adequacy not established at the fixed budget—not capacity falsification.
+
+## 6. Zero-step apparatus/data/weight preflight — NEXT / CURRENT BLOCKER
+
+Status object:
+`experiments/iris_dino_controlled_20260829/DINO_LADDER_ZERO_STEP_PREFLIGHT_STATUS_V1.json`.
+
+Scientific optimizer steps remain exactly `0`.
+
+Already verified at planning level:
+
+- native-1024 master corpus exists;
+- historical 512 selection rule/quota/membership SHA are known;
+- FIT_PROXY32 was frozen disjoint from the historical 512 train set;
+- ObservationContract 518/patch14 framing exists;
+- S/B/L/g token widths are fixed;
+- Phase-1A risk calibration has been removed as a confound.
+
+Hard blockers before training can open:
+
+1. recover/reconstruct the exact historical membership object and verify canonical membership SHA;
+2. verify all exact train512/FIT_PROXY32 members map to native-1024 authoritative assets with no substitution;
+3. seal official DINO source revisions/model IDs and exact weight SHA-256 values;
+4. seal the shared trainable architecture/config/code and prove equal parameter count;
+5. seal one deterministic sample/order manifest;
+6. pass cached-vs-online frozen-token parity;
+7. prove the frozen DTB-ND1 evaluator can consume actual candidate residual fields without semantic reinterpretation;
+8. verify closed sets remain unopened.
+
+The old runner log establishes the historical membership filename was `P_V5_R256_FIT_SCALE_LADDER_MEMBERSHIP_V1.json`, but the exact object itself has not yet been recovered from persistent authority. Re-selecting a fresh 512-set with the same source quota is forbidden.
+
+## 7. Training authorization
+
+**FULL DINO S/B/L/g TRAINING: NOT AUTHORIZED.**
+
+Next executable work is zero-step preflight/recovery only. Candidate training opens only after every preflight blocker above is sealed and the preregistration state is canonical on `main`.
+
+DEV32 remains closed unless a separately preregistered and authorized gate explicitly opens it.

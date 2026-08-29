@@ -24,7 +24,16 @@
         0.001000000047581522,
         0.001000000047584961
       ],
-      "affected_views": [0,1,2,3,4,5,6,7],
+      "affected_views": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "asymmetry": "ALL8",
       "elapsed_s": 15.751207113265991,
       "ell_px": 0.0,
@@ -34,9 +43,15 @@
       "typed_surface_nodes": 512
     },
     {
-      "affected_view_abs_p95": [0.0020174089004285634],
-      "affected_view_rms": [0.0010000000475678505],
-      "affected_views": [5],
+      "affected_view_abs_p95": [
+        0.0020174089004285634
+      ],
+      "affected_view_rms": [
+        0.0010000000475678505
+      ],
+      "affected_views": [
+        5
+      ],
       "asymmetry": "ONE_BAD_HASHED",
       "elapsed_s": 13.871705293655396,
       "ell_px": 16.0,
@@ -46,9 +61,18 @@
       "typed_surface_nodes": 512
     },
     {
-      "affected_view_abs_p95": [0.0058069725055247545,0.005919537506997581],
-      "affected_view_rms": [0.0030000000258898645,0.003000000026261274],
-      "affected_views": [3,7],
+      "affected_view_abs_p95": [
+        0.0058069725055247545,
+        0.005919537506997581
+      ],
+      "affected_view_rms": [
+        0.0030000000258898645,
+        0.003000000026261274
+      ],
+      "affected_views": [
+        3,
+        7
+      ],
       "asymmetry": "TWO_OPPOSITE_HASHED",
       "elapsed_s": 13.350661993026733,
       "ell_px": 8.0,

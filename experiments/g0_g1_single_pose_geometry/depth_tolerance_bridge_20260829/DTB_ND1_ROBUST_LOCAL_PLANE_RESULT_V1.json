@@ -1,0 +1,58 @@
+{
+  "alias": "DTB-ND1",
+  "boundary": {
+    "largest_tested_all_ell_pass_epsilon_rms": 0.0025,
+    "next_tested_epsilon_level_fail_rms": 0.00275,
+    "no_interpolation_claim": true,
+    "reported_bracket": "0.00250 <= epsilon_critical < 0.00275"
+  },
+  "cell_count": 21,
+  "checkpoint_provenance": {
+    "arachne_d2_sha256": "72898a62f23c55aa82047f7bc4b39be787abb97d14f9a3fb973d59b2b5689745",
+    "geppetto_d2_sha256": "f8c6146fc3ad81146ced01805b9be454ad194b86db3a9ab3d72d7b9eb3747b65"
+  },
+  "clean_noninferiority": "PASS__6_OF_6_FROZEN_CHECKS",
+  "firewalls": {
+    "dev32_opened": false,
+    "no_more_deterministic_operator_interventions_before_residual_pilot": true,
+    "product_safe_claim_authorized": false,
+    "proxy27_used_for_tuning": false,
+    "training_steps": 0
+  },
+  "first_firing_check_at_new_boundary": "arachne.ce_ratio_to_zero",
+  "levels": {
+    "0.00175": {"all_four_ell_pass": true},
+    "0.00200": {"all_four_ell_pass": true},
+    "0.00225": {"all_four_ell_pass": true},
+    "0.00250": {"all_four_ell_pass": true},
+    "0.00275": {"all_four_ell_pass": false,
+      "cells": {
+        "0": {"label": "SURFACE_ROUTE_PASS__PROXY_PASS", "d2_support_pairs_sum": 12071, "arachne_ce_ratio": 1.0397937499186913},
+        "4": {"label": "SURFACE_ROUTE_PASS__PROXY_FAIL", "d2_support_pairs_sum": 11303, "arachne_ce_ratio": 1.055113238085692, "failed_checks": ["arachne.ce_ratio_to_zero"]},
+        "16": {"label": "SURFACE_ROUTE_PASS__PROXY_FAIL", "d2_support_pairs_sum": 11501, "arachne_ce_ratio": 1.0541977754903231, "failed_checks": ["arachne.ce_ratio_to_zero"]},
+        "64": {"label": "SURFACE_ROUTE_PASS__PROXY_FAIL", "d2_support_pairs_sum": 11422, "arachne_ce_ratio": 1.0543649833925113, "failed_checks": ["arachne.ce_ratio_to_zero"]}
+      }
+    }
+  },
+  "mechanism": {
+    "causal_interpretation": "Robust N_d improves tolerance, but theta_Nd accuracy alone does not determine verdict. The effect is mediated through normal-gated matching/support topology; new boundary is again Arachne CE.",
+    "normal_operator_changes_P": false,
+    "normal_operator_role": "N_d only; used by normal-gated correspondence/admission; P remains corrupted point field unchanged.",
+    "diagnostic": {
+      "0.00250": {
+        "0": {"mean_view_asset_theta_Nd_q95_deg": 30.312067985534668, "mean_depth_abs_p95": 0.004900179983815177, "d2_support_pairs_sum": 12316, "arachne_ce_ratio": 1.0343412753467107, "label": "SURFACE_ROUTE_PASS__PROXY_PASS"},
+        "4": {"mean_view_asset_theta_Nd_q95_deg": 29.77645170688629, "mean_depth_abs_p95": 0.004899104079595417, "d2_support_pairs_sum": 11683, "arachne_ce_ratio": 1.0495158376264724, "label": "SURFACE_ROUTE_PASS__PROXY_PASS"},
+        "16": {"mean_view_asset_theta_Nd_q95_deg": 10.564930945634842, "mean_depth_abs_p95": 0.004865210934076457, "d2_support_pairs_sum": 11730, "arachne_ce_ratio": 1.0472092031686668, "label": "SURFACE_ROUTE_PASS__PROXY_PASS"},
+        "64": {"mean_view_asset_theta_Nd_q95_deg": 3.0313284937292337, "mean_depth_abs_p95": 0.004868883102608378, "d2_support_pairs_sum": 11731, "arachne_ce_ratio": 1.046454907445081, "label": "SURFACE_ROUTE_PASS__PROXY_PASS"}
+      },
+      "0.00275": {
+        "0": {"mean_view_asset_theta_Nd_q95_deg": 37.59281578660011, "mean_depth_abs_p95": 0.005390804920898516, "d2_support_pairs_sum": 12071, "arachne_ce_ratio": 1.0397937499186913, "label": "SURFACE_ROUTE_PASS__PROXY_PASS"},
+        "4": {"mean_view_asset_theta_Nd_q95_deg": 32.77202582359314, "mean_depth_abs_p95": 0.005395376164233311, "d2_support_pairs_sum": 11303, "arachne_ce_ratio": 1.055113238085692, "label": "SURFACE_ROUTE_PASS__PROXY_FAIL"},
+        "16": {"mean_view_asset_theta_Nd_q95_deg": 11.841799825429916, "mean_depth_abs_p95": 0.005377107941239955, "d2_support_pairs_sum": 11501, "arachne_ce_ratio": 1.0541977754903231, "label": "SURFACE_ROUTE_PASS__PROXY_FAIL"},
+        "64": {"mean_view_asset_theta_Nd_q95_deg": 3.4057654663920403, "mean_depth_abs_p95": 0.005346006818217574, "d2_support_pairs_sum": 11422, "arachne_ce_ratio": 1.0543649833925113, "label": "SURFACE_ROUTE_PASS__PROXY_FAIL"}
+      }
+    }
+  },
+  "parent": "DTB-S1R",
+  "schema": "RealSaS.DTB.ND1.RobustLocalPlaneResult.v1"
+}

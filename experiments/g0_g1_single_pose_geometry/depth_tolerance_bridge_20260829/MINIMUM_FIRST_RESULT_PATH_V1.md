@@ -48,6 +48,16 @@ Run a deliberately tiny fixed smoke set sufficient to prove the apparatus traver
 
 This is apparatus validation, not the product tolerance result.
 
+## Gate M3.5 — consumer-validity interpretation interlock
+
+M2/M3 apparatus PASS is sufficient to open a **surface/substrate robustness** bridge.
+It is not sufficient to call the resulting envelope the final product-safe IRIS tolerance.
+Before using a bridge envelope to select the final foundation/IRIS model, close
+`CONSUMER_VALIDITY_INTERLOCK_V1.md` with minimal real Geppetto/Arachne consumers.
+
+This gate does not block sealing/running the current surface-level corruption grid; it blocks only
+the stronger product-level interpretation.
+
 ## Gate M4 — freeze full scientific grid
 
 Only after M0-M3 PASS:

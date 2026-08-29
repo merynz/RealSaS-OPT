@@ -14,16 +14,35 @@ from realsas_compiler_core.product import assemble_product, bind_proof, project_
 HERE=Path(__file__).resolve().parent
 EXPECTED_FIXTURE_TRANSPORT_SHA='81634b7db6dbae3f7cc30d7f6942ace9be841416dd1db833185884d3e10584c5'
 EXPECTED_VENDOR_RAW_SHA='3a6076b30e0a23807f952365d39d81ddf5d4b1dba734c0bdba47567bced26850'
+FIXTURE_CHUNK_NAMES=(
+    'part_00.txt',
+    'part_01.txt',
+    'part_02.txt',
+    'part_03a.txt',
+    'part_03b.txt',
+    'part_04a.txt',
+)
 
 def load_fixture():
-    p=HERE/'CONSUMER_INTERLOCK_COMPILER_FIXTURE_V2.b64'
-    transport=p.read_text().strip()
-    if hashlib.sha256(transport.encode('ascii')).hexdigest()!=EXPECTED_FIXTURE_TRANSPORT_SHA:
-        raise RuntimeError('fixture transport drift')
+    d=HERE/'fixture_chunks'
+    actual=tuple(sorted(p.name for p in d.iterdir() if p.is_file()))
+    expected=tuple(sorted(FIXTURE_CHUNK_NAMES))
+    if actual!=expected:
+        raise RuntimeError(f'fixture chunk set drift: expected={expected!r} actual={actual!r}')
+    chunks=[]
+    for name in FIXTURE_CHUNK_NAMES:
+        chunk=(d/name).read_text(encoding='ascii').strip()
+        if not chunk or any(c.isspace() for c in chunk):
+            raise RuntimeError(f'fixture chunk whitespace/empty drift: {name}')
+        chunks.append(chunk)
+    transport=''.join(chunks)
+    got=hashlib.sha256(transport.encode('ascii')).hexdigest()
+    if got!=EXPECTED_FIXTURE_TRANSPORT_SHA:
+        raise RuntimeError(f'fixture transport drift: expected={EXPECTED_FIXTURE_TRANSPORT_SHA} got={got}')
     raw=zlib.decompress(base64.b64decode(transport,validate=True))
     x=json.loads(raw)
     if x['schema']!='RealSaS.ConsumerInterlock.CompilerFixture.v2': raise RuntimeError('fixture schema drift')
-    return x
+    return x,got
 
 def reconstruct(x):
     s=x['surface']
@@ -72,7 +91,7 @@ def deformation_probe(surface,skeleton,skin):
     return {'mean_displacement':float(d.mean()),'p95_displacement':float(np.quantile(d,.95)),'max_displacement':float(d.max()),'bbox_diag':diag,'finite':bool(np.all(np.isfinite(out))),'nontrivial':bool(d.mean()>1e-5),'bounded':bool(d.max()<.35*diag)}
 
 def main():
-    x=load_fixture(); surface,g0=reconstruct(x)
+    x,fixture_transport_sha=load_fixture(); surface,g0=reconstruct(x)
     qsk=qualify_skeleton(surface,g0,run_ilp_shadow=False)
     proposal_ids={j.proposal_id for j in g0.joints}; canonical_ids={j.canonical_joint_id for j in qsk.joints}
     if len(qsk.joints)!=len(g0.joints): raise RuntimeError('required G0 joints were not all admitted')
@@ -86,6 +105,8 @@ def main():
     runtime=project_runtime_package(product,proof,manifest={'consumer_interlock':True},runtime_payload_ref='NO_PAYLOAD__INTERLOCK_ONLY')
     out={
       'schema':'RealSaS.ConsumerInterlock.ExactCompilerCleanResult.v1','asset_id':x['asset_id'],
+      'fixture_transport_sha256':fixture_transport_sha,
+      'fixture_transport_chunk_names':list(FIXTURE_CHUNK_NAMES),
       'surface_nodes':len(surface.surface_nodes),'g0_joints':len(g0.joints),'g0_edges':len(g0.edges),
       'qualified_joints':len(qsk.joints),'root_id':qsk.root_id,
       'proposal_ids_disjoint_from_canonical':not bool(proposal_ids & canonical_ids),

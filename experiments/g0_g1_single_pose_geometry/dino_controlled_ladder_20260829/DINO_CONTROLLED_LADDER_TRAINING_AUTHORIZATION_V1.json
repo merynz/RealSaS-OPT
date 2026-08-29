@@ -1,0 +1,65 @@
+{
+  "authorization": {
+    "authorization_applies_per_candidate": true,
+    "authorization_does_not_allow_apparatus_edits": true,
+    "authorization_does_not_open_dev32": true,
+    "dino_training_authorized": true,
+    "scientific_optimizer_steps_authorized": 32768
+  },
+  "authorized_utc": "2026-08-29T17:29:55.244287+00:00",
+  "basis": {
+    "combined_zero_step_seal_content_sha256": "73d6bbb8d4656c6f71ed6edbd3fbd4802361041fe78dd1eaa2f8e0b712bf95a9",
+    "combined_zero_step_seal_filename": "DINO_ZERO_STEP_PREFLIGHT_COMBINED_SEAL_V1.json",
+    "combined_zero_step_seal_raw_sha256": "9aa448a48e4168b1c161962093bf6ee36f527a27f1ded13ac445deca97d3b8fa",
+    "zero_step_preflight_complete": true
+  },
+  "build_id": "REALSAS_DINO_CONTROLLED_LADDER_TRAINING_AUTHORIZATION_V1_20260829",
+  "content_sha256": "87bc72631623caed1f563439054f937db3011a90b4f2b2be79cfbc4034a5f086",
+  "frozen_training_contract": {
+    "amp": "CUDA autocast FP16 for shared trainable stack; targets/loss FP32; GradScaler enabled",
+    "cache": "native-width x_norm_patchtokens, FP32 little-endian, lossless only",
+    "families_per_update": 8,
+    "gradient_accumulation_microbatches": 4,
+    "loss": "FP32 SmoothL1 camera-forward depth",
+    "main_optimizer": {"betas": [0.9, 0.95], "lr": 0.0003, "steps": [1, 2048], "type": "AdamW", "weight_decay": 0.0},
+    "matched_checkpoint_step": 7168,
+    "ordered_views_per_cell": 8,
+    "primary_checkpoint_step": 32768,
+    "sample_stream_data_sha256": "2aca93a8840199785cb4392f52e5ef449b26d31cb52a10473e254aa59a4517bd",
+    "seed": 20260825,
+    "smooth_l1_beta": 0.01,
+    "styles_per_family": 2,
+    "tail_optimizer": {"betas": [0.9, 0.95], "lr": 3e-05, "steps": [2049, 32768], "type": "fresh AdamW moments", "weight_decay": 0.0},
+    "trainable_microbatch_cells": 4,
+    "updates": 32768
+  },
+  "next_action": "EXECUTE_CONTROLLED_LADDER_RUNG_S_THEN_B_THEN_L_THEN_g",
+  "schema": "RealSaS.DINO.ControlledLadderTrainingAuthorization.v1",
+  "scientific_rules": {
+    "accessibility_gate": "proxy/train direct replay >= 61/64 and no hard failures",
+    "architecture_edit_after_token_open": "FORBIDDEN",
+    "cache_semantic_edit": "FORBIDDEN",
+    "candidate_specific_tuning": "FORBIDDEN",
+    "membership_edit": "FORBIDDEN",
+    "optimizer_or_loss_edit": "FORBIDDEN",
+    "posthoc_threshold_tuning": "FORBIDDEN",
+    "preprocess_edit": "FORBIDDEN",
+    "primary_metric": "direct frozen DTB-ND1 replay",
+    "rung_cache_may_be_deleted_only_after_checkpoint_and_eval_hash_seal": true,
+    "sample_stream_edit": "FORBIDDEN",
+    "sealed_checkpoint_and_eval_required_per_rung": true
+  },
+  "scope": {
+    "analytic_reconstruction": "P = O + dF using exact renderer camera authority",
+    "authorized_candidates": ["S", "B", "L", "g"],
+    "backbone": "FROZEN_DINOV2",
+    "candidate_order": ["S", "B", "L", "g"],
+    "dev32_access": "FORBIDDEN",
+    "diagnostic_populations": ["TRAIN_DIAG32", "FIT_PROXY32"],
+    "learned_target": "camera-forward depth d only",
+    "shared_trainable_parameter_count": 5046739,
+    "train512_set_sha256": "1958fa5ed80430ac8ae8f9e66f8d94bc5bfe89c74b5553d13b891c87fdefb2a2",
+    "train_population": "TRAIN512 only"
+  },
+  "status": "AUTHORIZED_CONTROLLED_S_B_L_G_LADDER__SEALED_APPARATUS_ONLY"
+}

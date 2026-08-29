@@ -1,0 +1,57 @@
+{
+  "schema": "RealSaS.DINO.Train512MembershipAndNative1024Preflight.v1",
+  "date": "2026-08-29",
+  "status": "MEMBERSHIP_RECOVERED__503_READY__9_REPAIR_PUBLICATIONS_REQUIRED__ZERO_OPTIMIZER_STEPS",
+  "scientific_optimizer_steps": 0,
+  "source_authority": {
+    "master_variants_sha256_expected": "475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913",
+    "master_variants_sha256_observed": "475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913",
+    "fit_family_count": 2981
+  },
+  "selection_recovery": {
+    "proxy_seed": "PV5_R256_FIT_SCALE_PROXY32_V1",
+    "train_seed": "PV5_R256_FIT_SCALE_TRAIN_V1",
+    "proxy_quota": {"objaverse_animated_originals": 26, "quaternius_cc0": 3, "kaykit_cc0": 3},
+    "train512_quota": {"objaverse_animated_originals": 483, "quaternius_cc0": 24, "kaykit_cc0": 5},
+    "proxy_asset_id_set_sha256": "144e5f21adcab218fa5d8226b76cc949eb3eaa3c065e0cd0a7d30a35f0ed0653",
+    "train32_asset_id_set_sha256": "ea7e99933739258f1a492326d2631d48a5b2c0018fe8181fb01428f266b3309e",
+    "train512_asset_id_set_sha256": "1958fa5ed80430ac8ae8f9e66f8d94bc5bfe89c74b5553d13b891c87fdefb2a2",
+    "historical_combined_membership_json_sha256": "8531360f1c61dc4cdb699c095790c35ab3af0da5a7a290b420e5777bb4e9169b",
+    "historical_cache_asset_count": 544,
+    "historical_cache_manifest_sha256": "5504996e5e2231fcf76192fbc80d46a5d0cb11b8a7c495b8aa8437f0666275c7",
+    "recovery_utility": "recover_train512_membership_v1.py",
+    "interpretation": "Exact scientific family selection is recovered from the byte-pinned source authority and frozen queue rules. Byte-for-byte recreation of the old combined JSON serialization is not required for selection identity."
+  },
+  "native1024_publication_authority": {
+    "master_selected_render_count": 3993,
+    "master_selected_render_complete_count": 3993,
+    "native_render_contract": "1024x1024 x 8 ordered views",
+    "per_view_required_files": ["camera.json", "raster_authority.npz", "cel_clean_512.png", "ink_cel_512.png"],
+    "historical_train512_members_are_fit_selected_assets": true
+  },
+  "controlled_v1_training_eligibility_intersection": {
+    "train512_count": 512,
+    "currently_eligible_count": 503,
+    "repair_pending_count": 9,
+    "shape_key_quarantine_count": 0,
+    "all8_blank_count": 0,
+    "repair_pending_asset_ids": [
+      "asset_1d6d3b17fe506463b8840c51",
+      "asset_4970fb8cc7c69df071970dc0",
+      "asset_66c8c63c7a97e830b89d0ba8",
+      "asset_674fb6e5571ca86dd0e5c858",
+      "asset_681fb76277c10d2307f7509f",
+      "asset_88fe0971a994597f3866473b",
+      "asset_a873bb17b9a66e6e980845a5",
+      "asset_ce3577373d7cc71b7025cc74",
+      "asset_f56aff9ecf13f7ddf0afcd55"
+    ]
+  },
+  "repair_policy": {
+    "replace_missing_family": false,
+    "drop_repair_pending_family": false,
+    "train_on_stale_render_against_repaired_geometry": false,
+    "required_action": "Publish the already-frozen Stage-B6 normalized geometry for these exact nine assets through the authorized Stage-B7 selective rerender path, then re-run the 512/512 publication/authority audit.",
+    "training_authorized_now": false
+  }
+}

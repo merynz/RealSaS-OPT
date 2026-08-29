@@ -1,0 +1,26 @@
+{
+  "content_sha256": "aa50ea258f8e46e1d282ab2d3b07dd40c29846e86bab47bbc081b34591a9d24e",
+  "deep_repaired_count": 9,
+  "dino_training_authorized_by_this_artifact": false,
+  "next_gate": "DINO_WEIGHT_SHA_PREPROCESS_ARCHITECTURE_SAMPLE_STREAM_AND_TOKEN_PARITY",
+  "schema": "RealSaS.DinoTrain512Native1024Authority.v2",
+  "scientific_optimizer_steps": 0,
+  "selection_ledger_sha256": "475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913",
+  "selective_repair_assets": [
+    "asset_1d6d3b17fe506463b8840c51",
+    "asset_4970fb8cc7c69df071970dc0",
+    "asset_66c8c63c7a97e830b89d0ba8",
+    "asset_674fb6e5571ca86dd0e5c858",
+    "asset_681fb76277c10d2307f7509f",
+    "asset_88fe0971a994597f3866473b",
+    "asset_a873bb17b9a66e6e980845a5",
+    "asset_ce3577373d7cc71b7025cc74",
+    "asset_f56aff9ecf13f7ddf0afcd55"
+  ],
+  "selective_repair_count": 9,
+  "staging_content_sha256": "13bee59ea268e232569e041710b52b28ba3900f98e676fc55c36b48ecba85447",
+  "status": "PASS_512_OF_512",
+  "train512_asset_count": 512,
+  "train512_ready_count": 512,
+  "train512_set_sha256": "1958fa5ed80430ac8ae8f9e66f8d94bc5bfe89c74b5553d13b891c87fdefb2a2"
+}

@@ -48,7 +48,7 @@ Current GitHub-contained historical execution closure:
 - old front-brain/truth imports: 0
 
 Heavy historical authorities remain SHA-bound in Drive:
-- v0.5 full source `03a819f01d3cc391e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130`
+- v0.5 full source `03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130`
 - R5_3 `6224661cb4323f78a9b808af10f68dd584431a422e28d26a69e87816a3b0ef80`
 - v97_43 `09a94871f938b069ba5c8219f203355e724f2f58afa6e10dc5c6148d98b43efb`
 - C++17 runtime source `1af741c9a3d30456a6703809e067a9c3a61220da51a6a1a9cbda2b8a4755e8b0`

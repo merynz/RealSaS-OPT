@@ -1,0 +1,19 @@
+{
+  "schema": "RealSaS.DINO.ApparatusFreezeSeal.v1",
+  "date": "2026-08-29",
+  "status": "PASS_ARCH_INIT_SAMPLE_CACHE_DATA__DTB_CARRIER_PARITY_PENDING",
+  "result_raw_sha256": "3c1c94d2888a886a82642e79e1a5cff26b805426f4be02acea7b0231f280226d",
+  "result_content_sha256": "e285fa051d3609359464dc3bc75fd99f376c612de726d4b7a9fd0910f4e73a2d",
+  "trainable_parameter_count": 5046739,
+  "common_init_tensor_sha256": "7f6bbc4c68c512db1353035e351abdc4dfd19b45e8da34fbacb71ce4eb58e4c2",
+  "sample_stream_data_sha256": "2aca93a8840199785cb4392f52e5ef449b26d31cb52a10473e254aa59a4517bd",
+  "family_exposure_min": 512,
+  "family_exposure_max": 512,
+  "fit_proxy32_native1024": "32/32 PASS",
+  "train_diag32_native1024": "32/32 PASS",
+  "candidate_features_extracted": false,
+  "scientific_optimizer_steps": 0,
+  "dino_training_started": false,
+  "training_authorized_by_this_artifact": false,
+  "next_gate": "DTB_ND1_PREDICTED_DEPTH_CARRIER_SEMANTIC_PARITY__NO_DINO_FEATURE_OUTPUTS"
+}

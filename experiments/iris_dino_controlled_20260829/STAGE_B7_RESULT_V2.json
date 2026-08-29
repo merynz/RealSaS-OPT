@@ -1,0 +1,134 @@
+{
+  "assets": [
+    {
+      "asset": "asset_1d6d3b17fe506463b8840c51",
+      "normalized_sha256": "914fc1015c92df8952bacf6a523df277d18f33fe119caf4fb88ea432ab250e84",
+      "pass": true,
+      "render_metrics": {
+        "foreground_authority_rows_total": 1835551,
+        "reprojection_p95_px_max": 1.7265559175619448e-05
+      },
+      "repair_record_sha256": "30a123e9364fbbfd4c6a24886f135b3f48e678d6c09ac92b7f0a609e1f6c9196",
+      "staged_geometry_sha256": "914fc1015c92df8952bacf6a523df277d18f33fe119caf4fb88ea432ab250e84"
+    },
+    {
+      "asset": "asset_4970fb8cc7c69df071970dc0",
+      "normalized_sha256": "2ecbc104cc23ad0e28d3db0c5d7425cbd4a4558f9cdac8c191e03036289f1d04",
+      "pass": true,
+      "render_metrics": {
+        "foreground_authority_rows_total": 2360312,
+        "reprojection_p95_px_max": 2.4138314105147516e-05
+      },
+      "repair_record_sha256": "fc305a14d48f603656df67fbc582157eb9eb2dbb4461a2f4fdbe2291c32d6a85",
+      "staged_geometry_sha256": "2ecbc104cc23ad0e28d3db0c5d7425cbd4a4558f9cdac8c191e03036289f1d04"
+    },
+    {
+      "asset": "asset_66c8c63c7a97e830b89d0ba8",
+      "normalized_sha256": "ab6bc5caa008d446cb953b5390fb1bbbee3db0971ef33dd8a4a271c118e186ff",
+      "pass": true,
+      "render_metrics": {
+        "foreground_authority_rows_total": 1108279,
+        "reprojection_p95_px_max": 3.5654449118321297e-05
+      },
+      "repair_record_sha256": "e38d9c9f111b3e864cb19481fc1c328cf18cba1383d3e72cb400ea98789d4d7e",
+      "staged_geometry_sha256": "ab6bc5caa008d446cb953b5390fb1bbbee3db0971ef33dd8a4a271c118e186ff"
+    },
+    {
+      "asset": "asset_674fb6e5571ca86dd0e5c858",
+      "normalized_sha256": "ab6c38a58b1a331de53d589e055e99c8d490e5ce6aa50e8a26489270cb0c36c7",
+      "pass": true,
+      "render_metrics": {
+        "foreground_authority_rows_total": 2227229,
+        "reprojection_p95_px_max": 2.2841827592302438e-05
+      },
+      "repair_record_sha256": "cce778527efd0832493f277047d3fba9d70c6e143f78aa92274fa7be3378fec6",
+      "staged_geometry_sha256": "ab6c38a58b1a331de53d589e055e99c8d490e5ce6aa50e8a26489270cb0c36c7"
+    },
+    {
+      "asset": "asset_681fb76277c10d2307f7509f",
+      "normalized_sha256": "2d7f14749eca809ca6d33b4202d784e34da9754d084c1c8ce5a0282faa20fe26",
+      "pass": true,
+      "render_metrics": {
+        "foreground_authority_rows_total": 1294206,
+        "reprojection_p95_px_max": 2.157008837616906e-05
+      },
+      "repair_record_sha256": "2f339d7ccfe884d4a59a6f0a4b5a745447fddb88b23115f018efd63bf8c737ec",
+      "staged_geometry_sha256": "2d7f14749eca809ca6d33b4202d784e34da9754d084c1c8ce5a0282faa20fe26"
+    },
+    {
+      "asset": "asset_88fe0971a994597f3866473b",
+      "normalized_sha256": "a573eafd2e01bf9970fbe873e42b9aaed1d60aa150544ef78c8aac8b4bf06b4a",
+      "pass": true,
+      "render_metrics": {
+        "foreground_authority_rows_total": 575715,
+        "reprojection_p95_px_max": 2.4637064654478563e-05
+      },
+      "repair_record_sha256": "6ea8578269a401e184ade2dcd9b5425268ba3bc767eb1d7092d749974ea208f8",
+      "staged_geometry_sha256": "a573eafd2e01bf9970fbe873e42b9aaed1d60aa150544ef78c8aac8b4bf06b4a"
+    },
+    {
+      "asset": "asset_a873bb17b9a66e6e980845a5",
+      "normalized_sha256": "c1615916577d7d3bd12c4e956058b70d6fe1a22c7f17e7cae6849c1b16b8fda8",
+      "pass": true,
+      "render_metrics": {
+        "foreground_authority_rows_total": 2216498,
+        "reprojection_p95_px_max": 5.868649492832768e-05
+      },
+      "repair_record_sha256": "950ba42d1b8f7b180086e8e8ce13793aef1506ae4a9437ed5b47b5b7110d8cbd",
+      "staged_geometry_sha256": "c1615916577d7d3bd12c4e956058b70d6fe1a22c7f17e7cae6849c1b16b8fda8"
+    },
+    {
+      "asset": "asset_ce3577373d7cc71b7025cc74",
+      "normalized_sha256": "8f3137544a85b49b4ff8fe3502af74d780b1d61f69fa67c41ead356ecfd061d6",
+      "pass": true,
+      "render_metrics": {
+        "foreground_authority_rows_total": 884612,
+        "reprojection_p95_px_max": 2.0529799230439472e-05
+      },
+      "repair_record_sha256": "140b7e3404cc86faf13de64f804c2d9ebd69e4e998ec63faa2dd9adefb7c85b2",
+      "staged_geometry_sha256": "8f3137544a85b49b4ff8fe3502af74d780b1d61f69fa67c41ead356ecfd061d6"
+    },
+    {
+      "asset": "asset_f56aff9ecf13f7ddf0afcd55",
+      "normalized_sha256": "08a12b397c8e2eebe41bf07c1490eb0858dad5281ec48f91820d311e8ad9e10f",
+      "pass": true,
+      "render_metrics": {
+        "foreground_authority_rows_total": 1157960,
+        "reprojection_p95_px_max": 2.0517722487183744e-05
+      },
+      "repair_record_sha256": "65edf834d65561ef402c6ae4bf99a6ab445e20e2e480e0ff389ee10935361c75",
+      "staged_geometry_sha256": "08a12b397c8e2eebe41bf07c1490eb0858dad5281ec48f91820d311e8ad9e10f"
+    }
+  ],
+  "build_id": "REALSAS_STAGE_B7_TRAIN512_SELECTIVE_REPAIR_V2_20260829",
+  "content_sha256": "13bee59ea268e232569e041710b52b28ba3900f98e676fc55c36b48ecba85447",
+  "master_mutated": false,
+  "pass_asset_count": 9,
+  "runtime": {
+    "gpu": "Tesla T4",
+    "historical_stage_b7_sha256": "a9481bc609108b616163a6bc824bd927e93813fafc422cc06c294a58b01b9ca6",
+    "nvdiffrast_commit": "253ac4fcea7de5f396371124af597e6cc957bfae",
+    "nvdiffrast_tag": "v0.4.0",
+    "nvdiffrast_version": "0.4.0",
+    "torch": "2.11.0+cu128",
+    "torch_cuda_build": "12.8"
+  },
+  "schema": "RealSaS.StageB7Train512SelectiveRepair.v2",
+  "scientific_optimizer_steps": 0,
+  "sentinel": {
+    "pass": true,
+    "sentinel": "asset_d7d4192f9dac8b146a17bc41",
+    "views": [
+      {"view":0,"pass":true,"support_exact":true,"triangle_id_exact":true,"barycentric_max_abs":0.0,"camera":{"pass":true,"discrete_exact":true,"scalar_max_abs":0.0,"vector_max_abs":0.0},"cel":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"cel512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true}},
+      {"view":1,"pass":true,"support_exact":true,"triangle_id_exact":true,"barycentric_max_abs":0.0,"camera":{"pass":true,"discrete_exact":true,"scalar_max_abs":0.0,"vector_max_abs":0.0},"cel":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"cel512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true}},
+      {"view":2,"pass":true,"support_exact":true,"triangle_id_exact":true,"barycentric_max_abs":0.0,"camera":{"pass":true,"discrete_exact":true,"scalar_max_abs":0.0,"vector_max_abs":0.0},"cel":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"cel512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true}},
+      {"view":3,"pass":true,"support_exact":true,"triangle_id_exact":true,"barycentric_max_abs":0.0,"camera":{"pass":true,"discrete_exact":true,"scalar_max_abs":0.0,"vector_max_abs":0.0},"cel":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"cel512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true}},
+      {"view":4,"pass":true,"support_exact":true,"triangle_id_exact":true,"barycentric_max_abs":0.0,"camera":{"pass":true,"discrete_exact":true,"scalar_max_abs":0.0,"vector_max_abs":0.0},"cel":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"cel512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true}},
+      {"view":5,"pass":true,"support_exact":true,"triangle_id_exact":true,"barycentric_max_abs":0.0,"camera":{"pass":true,"discrete_exact":true,"scalar_max_abs":0.0,"vector_max_abs":0.0},"cel":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"cel512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true}},
+      {"view":6,"pass":true,"support_exact":true,"triangle_id_exact":true,"barycentric_max_abs":0.0,"camera":{"pass":true,"discrete_exact":true,"scalar_max_abs":0.0,"vector_max_abs":0.0},"cel":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"cel512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true}},
+      {"view":7,"pass":true,"support_exact":true,"triangle_id_exact":true,"barycentric_max_abs":0.0,"camera":{"pass":true,"discrete_exact":true,"scalar_max_abs":0.0,"vector_max_abs":0.0},"cel":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"cel512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true},"ink512":{"exact":true,"mae":0.0,"max_abs":0,"shape_equal":true}}
+    ]
+  },
+  "staged_asset_count": 9,
+  "status": "PASS_STAGING_ONLY__MASTER_UNCHANGED"
+}

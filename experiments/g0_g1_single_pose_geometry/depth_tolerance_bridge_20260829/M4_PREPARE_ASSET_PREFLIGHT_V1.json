@@ -1,0 +1,35 @@
+{
+  "anchor_count_per_asset": 512,
+  "asset_count": 8,
+  "asset_ids": [
+    "asset_551ea351b43a1787d0f55536",
+    "asset_36fb02305846592b1ecdf3d4",
+    "asset_0679fdef64f19a4832a6d521",
+    "asset_76313e4bd82b82fcd1659c70",
+    "asset_6f086a5b1a66378ffe04d7e4",
+    "asset_425122d500ecf5767404f9c0",
+    "asset_5a19f8c5254be7bf30c504f5",
+    "asset_f8a40d6c5d815fe79c8b5e42"
+  ],
+  "checks": {
+    "all_anchor_counts_exact": true,
+    "all_assets_loaded": true,
+    "all_source_view_sets_equal_0_through_7": true,
+    "all_views_loaded": true,
+    "typed_surface_adapter_512_node_smoke": true
+  },
+  "compiler_import_mode": "ISOLATED_EXACT_SURFACE_TYPES_HASHING__NO_REALSAS_COMPILER_CORE_PACKAGE_INIT_SIDE_EFFECTS",
+  "dev32": "CLOSED",
+  "execution_note": "Zero-only data compatibility passed on sealed raw bytes. Pre-open transitive audit additionally identified and sealed bridge_persistence_v1.py, depth_corruption_v1.py, the exact isolated Compiler surface/types/hashing modules, and all four frozen proxy target packs. Scientific outcomes remain closed.",
+  "main_helper_byte_exact_local_execution": false,
+  "proxy27": "CLOSED",
+  "proxy_target_pack_byte_audit": "PASS__4_OF_4_MATCH_HISTORICAL_PREP_INDEX",
+  "raw_source_file_count": 72,
+  "raw_source_manifest_sha256": "f044587a12b51a8ae141bb6a3b37c67b7120f9e391e0f0d2afebad939a2da7c8",
+  "schema": "RealSaS.DepthToleranceBridge.M4PrepareAssetPreflight.v1",
+  "scientific_outcome_opened": false,
+  "status": "PASS__DATA_COMPATIBILITY__SCIENTIFIC_OUTCOMES_CLOSED",
+  "training_steps": 0,
+  "transitive_project_dependency_audit": "PASS__ALL_PROJECT_LOCAL_EXECUTION_DEPENDENCIES_PINNED_FOR_M4_ROUTE",
+  "views_per_asset": 8
+}

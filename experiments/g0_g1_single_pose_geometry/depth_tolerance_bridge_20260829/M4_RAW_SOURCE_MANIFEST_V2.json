@@ -1,0 +1,349 @@
+{
+  "asset_count": 8,
+  "asset_ids": [
+    "asset_551ea351b43a1787d0f55536",
+    "asset_36fb02305846592b1ecdf3d4",
+    "asset_0679fdef64f19a4832a6d521",
+    "asset_76313e4bd82b82fcd1659c70",
+    "asset_6f086a5b1a66378ffe04d7e4",
+    "asset_425122d500ecf5767404f9c0",
+    "asset_5a19f8c5254be7bf30c504f5",
+    "asset_f8a40d6c5d815fe79c8b5e42"
+  ],
+  "assets": {
+    "asset_0679fdef64f19a4832a6d521": {
+      "primary_geometry": {
+        "sha256": "7b4b2c691fd565a3f40c4af859ee6c30a91348735263ffd1cc15594df0f3b97d",
+        "size_bytes": 53632
+      },
+      "rasters": {
+        "V0": {
+          "sha256": "74b58e11874aa5dd8cd0af87c13f822d48b0ee685a24bb523e43b7963554f2a0",
+          "size_bytes": 2081513
+        },
+        "V1": {
+          "sha256": "6565a755bc2239f4f5d8985ea6b20163d7a1b871b5d7fc95d441c79abd3cde57",
+          "size_bytes": 1935074
+        },
+        "V2": {
+          "sha256": "812b40ac98716eb0519f0a2e689b25faba67049d74b7ae8bd9876da9084265df",
+          "size_bytes": 1170417
+        },
+        "V3": {
+          "sha256": "00e4fea7128f8f92bcc1d1a9ed5b706e7435072170768aae0e6da487a8d14e94",
+          "size_bytes": 1938804
+        },
+        "V4": {
+          "sha256": "99a573e9ab4b9f91e7da79f274ecfd97b5d47f3a8d90e88d2881a918ef5b743e",
+          "size_bytes": 2091688
+        },
+        "V5": {
+          "sha256": "7c4c6ce48f5458480bd7746c82b1361fb5b63c4eebb5cb4386e06778288b18e5",
+          "size_bytes": 1938640
+        },
+        "V6": {
+          "sha256": "fe37400353649ab63e5b880f07c5587f6be613f93298241794ac3ab1efb02caf",
+          "size_bytes": 1177742
+        },
+        "V7": {
+          "sha256": "6c047310d1e9a31548f3cc5f38761fe36c279693514360ae558796e92dcc6f4f",
+          "size_bytes": 1935896
+        }
+      }
+    },
+    "asset_36fb02305846592b1ecdf3d4": {
+      "primary_geometry": {
+        "sha256": "64b2932074240507d6e93cbef6db6bcef3b876be12edb2dfebdef834e5f10bfe",
+        "size_bytes": 6981
+      },
+      "rasters": {
+        "V0": {
+          "sha256": "53b96625748538464cd34d845e1642d1df15ccf26bbf68d1ad819bcf4492f8d6",
+          "size_bytes": 1415163
+        },
+        "V1": {
+          "sha256": "38b256d83cf8078f7e614b6f3ccb49ab4a6565dae138773f97e080b8c81d8588",
+          "size_bytes": 1417551
+        },
+        "V2": {
+          "sha256": "b33dffd773fb4ae4bbbf9d4e22dd89a0429096733bdc5d3c2eacea081bc23df9",
+          "size_bytes": 1436287
+        },
+        "V3": {
+          "sha256": "c48bf9190d95e505abd980948087d0f5bc0fffb83c996327d2f5f092b0c483d9",
+          "size_bytes": 1435173
+        },
+        "V4": {
+          "sha256": "82dd1ac8769d62e8eec1d73c6e67f7b4d81eca2e9d7e5ffba6437329d1c353b3",
+          "size_bytes": 1417379
+        },
+        "V5": {
+          "sha256": "ae893d71da65d406421fbade1e2e12b8b8f592300ec913cb2e87658bf8d6aaa7",
+          "size_bytes": 1416735
+        },
+        "V6": {
+          "sha256": "ffc04612a99df8445bec0ded0fe2e2746d1314ac8d616eba256f588d7c6f8ca4",
+          "size_bytes": 1436287
+        },
+        "V7": {
+          "sha256": "bfb50e5449391a0c42e5da810468ba7b1031cf8364487cd8417f90ad08192942",
+          "size_bytes": 1435342
+        }
+      }
+    },
+    "asset_425122d500ecf5767404f9c0": {
+      "primary_geometry": {
+        "sha256": "ee9198c184c628d885c4cf2c735e23adfee32fc769a6b4c90c7d2f1181c0900a",
+        "size_bytes": 102189
+      },
+      "rasters": {
+        "V0": {
+          "sha256": "c4740b6e70db3a79674d19c245c6badb63a7019cf7da64cbf4c0248c9a2f5399",
+          "size_bytes": 2121305
+        },
+        "V1": {
+          "sha256": "389185f81ff20a58237703143fa78bd51f2ac85492631f48d77e9b64f00fd1ca",
+          "size_bytes": 2232637
+        },
+        "V2": {
+          "sha256": "c7970e641c55f158c3c230336b23671683e278a284bc7f014a23b4fde18186b7",
+          "size_bytes": 1675971
+        },
+        "V3": {
+          "sha256": "d62327a7112a2d4a140815a7f7fbb3f2c0a7cb111de7db6d9bce0ebc00b544cf",
+          "size_bytes": 2233228
+        },
+        "V4": {
+          "sha256": "66ce302f110f416cefcd2e7596a59f1e36ba43bb85c51e8426097da6b7f072de",
+          "size_bytes": 2127224
+        },
+        "V5": {
+          "sha256": "6c76cc117995bd3bd8719ee2644c52a1a3e701f8099854b44d06e92b77235b19",
+          "size_bytes": 2226126
+        },
+        "V6": {
+          "sha256": "86047c5f3dab042b79daac664b7c4800aa08607a5d6f812432ccdb4460881fdf",
+          "size_bytes": 1675236
+        },
+        "V7": {
+          "sha256": "a86612d3a3d9a7ceb5978ad2d7958903085abd7f8830a0681b50ed620af56cac",
+          "size_bytes": 2236542
+        }
+      }
+    },
+    "asset_551ea351b43a1787d0f55536": {
+      "primary_geometry": {
+        "sha256": "58143b873f228eef8f02fd67391092eb20fcc798e292636715559151de42f077",
+        "size_bytes": 155998
+      },
+      "rasters": {
+        "V0": {
+          "sha256": "3cba771027552ad4902bbb1581d900216e4bcd405bbe8218e142bda9c9c0e52d",
+          "size_bytes": 3215774
+        },
+        "V1": {
+          "sha256": "abb0da812fe8ef6747094b7c3b04d1a0fb844ee523cf8062aed71a0d95c52b0e",
+          "size_bytes": 3183672
+        },
+        "V2": {
+          "sha256": "896077e70bb8e09adc89b02a092a71a332ec52a576c7bb9879a6b3a627e28473",
+          "size_bytes": 2612535
+        },
+        "V3": {
+          "sha256": "2ce9025fa9186033565cd43c0de138abd7227f45e00e7f7c2d962c1bc6fa2c04",
+          "size_bytes": 3197818
+        },
+        "V4": {
+          "sha256": "7fa035f477aac9ac3fb77d29c2f5aa9daa56e2c276c54b6b2ac843fd5169f42c",
+          "size_bytes": 3241329
+        },
+        "V5": {
+          "sha256": "3936f2536d5ffece4863b278edebf51469338e4891860e75c4593f817624b255",
+          "size_bytes": 3175309
+        },
+        "V6": {
+          "sha256": "d66bcb4d08a0c2eb4a540ded3007aed4cc64d4deb880449379843798d051ff28",
+          "size_bytes": 2589082
+        },
+        "V7": {
+          "sha256": "44bcef14a232cb221b9afd19c62094fde0bb4c0d0a19e4a167b236b33f0e9b15",
+          "size_bytes": 3187051
+        }
+      }
+    },
+    "asset_5a19f8c5254be7bf30c504f5": {
+      "primary_geometry": {
+        "sha256": "707b279dd51e99eae8a7497a407da300a24f26aee7102b481c715747eb8398f3",
+        "size_bytes": 172151
+      },
+      "rasters": {
+        "V0": {
+          "sha256": "fb6a05e81bba90b935363931c571c14cd7b51c479cd60cfa2d76d4d3c74bc8b6",
+          "size_bytes": 2271228
+        },
+        "V1": {
+          "sha256": "1a9ce0f27c2b1d43efec14902f396fe2fed09c5cfb8c08e1f52e09ea8c4d06ae",
+          "size_bytes": 2245783
+        },
+        "V2": {
+          "sha256": "8be4f2129521a2cfa208272684157308b6bd36f3f25c283856ae618da7b3f006",
+          "size_bytes": 1603659
+        },
+        "V3": {
+          "sha256": "b012e34b1320a9899dae65bb11dc4c0d0f578745ad2dcc947284d94555dce30f",
+          "size_bytes": 2205472
+        },
+        "V4": {
+          "sha256": "6d7f7420cc2fea5286b3a94c95e08c00fdde56779eca238b74fe56f9fea4472b",
+          "size_bytes": 2274720
+        },
+        "V5": {
+          "sha256": "d3cd7f48bfa68a6c473cd60c5612b19c72bc578a5426ff73b010547a6621351c",
+          "size_bytes": 2247018
+        },
+        "V6": {
+          "sha256": "72ea3cace60e760d10d31e5b4cc0c1e91ffcd55f1485c181a2be8b50a2e149a1",
+          "size_bytes": 1602934
+        },
+        "V7": {
+          "sha256": "bb27bb56694d0a71e220624aab5e424ade80ed26d3941e89bda64451fb2b8aa1",
+          "size_bytes": 2205125
+        }
+      }
+    },
+    "asset_6f086a5b1a66378ffe04d7e4": {
+      "primary_geometry": {
+        "sha256": "550d7971ba2421720c9602c9dbc9c998587ce81b3d0cef4117997ffef842c028",
+        "size_bytes": 49158
+      },
+      "rasters": {
+        "V0": {
+          "sha256": "e92456ac94ebf9437bb276bc5d04cfe0bb1eb008aae9f59b6dadfe01e86bb1df",
+          "size_bytes": 2160883
+        },
+        "V1": {
+          "sha256": "0e8729a9a5102c768bcfdb7923b97667e29951ca38ea1651b8bf01d5f7b03df3",
+          "size_bytes": 1999600
+        },
+        "V2": {
+          "sha256": "3396f90487478b26911d891695db5578f28661a45fca3d766c3c88efd3f8a93d",
+          "size_bytes": 1327636
+        },
+        "V3": {
+          "sha256": "601dd32b040d55495d3fc297922b944967d0feb6a5423df73445390626408932",
+          "size_bytes": 2001542
+        },
+        "V4": {
+          "sha256": "0860f68ce0eac77db5ab87b528109962dad16f326a127d1e63d97abf90b6aa74",
+          "size_bytes": 2158521
+        },
+        "V5": {
+          "sha256": "3f4d228cc3fff26ff11dde8f4e4a627ecf3022b6c80175ec3585235975aa1e5d",
+          "size_bytes": 1997393
+        },
+        "V6": {
+          "sha256": "5c09f963d33f19a93bce82e439598bce98c5e1ae440c516ad947bcd502c1f1ea",
+          "size_bytes": 1328025
+        },
+        "V7": {
+          "sha256": "d9e9c11d219c9abd8c4075cc594fbe3910a2e19d467ea5fbc2566dc7638339d1",
+          "size_bytes": 2004732
+        }
+      }
+    },
+    "asset_76313e4bd82b82fcd1659c70": {
+      "primary_geometry": {
+        "sha256": "6d0ece25182f30a71dc003eb302fb694d16f16714c4f59aaca1b3b0733d20956",
+        "size_bytes": 106678
+      },
+      "rasters": {
+        "V0": {
+          "sha256": "70bc040a879e4bb58a781d70783af210960ef62102edd954ae2a1013255e0703",
+          "size_bytes": 1426403
+        },
+        "V1": {
+          "sha256": "1d0186926a1a298537e0f8194de88222541d186a53b4d8c132e754e6eaf288d8",
+          "size_bytes": 1450134
+        },
+        "V2": {
+          "sha256": "e6ea931107358de197af82702746bfc9ef4362e4cd0086b045c480ab13dec75b",
+          "size_bytes": 1009877
+        },
+        "V3": {
+          "sha256": "7e2224eab69bad87ffcb507207c1d8a1fac77b826f81ca44f275d0fc833a7ed6",
+          "size_bytes": 1441261
+        },
+        "V4": {
+          "sha256": "3d9ca582a3c71110daec2d6a643949074947b7c5cacf8148cba4d6a8376242f2",
+          "size_bytes": 1423275
+        },
+        "V5": {
+          "sha256": "c478c5393430c7c7076b97c029613c2eaf2f073be7cc783ccafb202c2c694899",
+          "size_bytes": 1445985
+        },
+        "V6": {
+          "sha256": "5cfc65eff6db837ae281ec36e2ec3df83a3a8bb5d9d052be281a8db1ceee2a8e",
+          "size_bytes": 1012020
+        },
+        "V7": {
+          "sha256": "7372f6a0b8b81638eae4b110164f734b11e577f8fc0519b129efe1406cccae52",
+          "size_bytes": 1449499
+        }
+      }
+    },
+    "asset_f8a40d6c5d815fe79c8b5e42": {
+      "primary_geometry": {
+        "sha256": "a6e8011f19d7ab2036cf0d292cc062f544af9d0f8f1b61b2775c18bb7f519c28",
+        "size_bytes": 110842
+      },
+      "rasters": {
+        "V0": {
+          "sha256": "ea4abce485e19bb0a91b4ae68c53bc8047496ef3df0c329f10ee4cb3967db51e",
+          "size_bytes": 1568211
+        },
+        "V1": {
+          "sha256": "27483e035f4cd226332cb50d856c77f97c068d0784d9c276b27ba6592110eb37",
+          "size_bytes": 1575064
+        },
+        "V2": {
+          "sha256": "e1146d0fadc997f3a60a2af76e9026efe1e7064656d35aeae9fcc9250defa7a1",
+          "size_bytes": 1255500
+        },
+        "V3": {
+          "sha256": "88d2a9aace85122f20e92db2bf7088d436cead5bb9cc41abc0511f98d15849a1",
+          "size_bytes": 1460114
+        },
+        "V4": {
+          "sha256": "83032fd3e9d58eceedf5a8012ad854925870f5baa0e31199817d8865e0ab4fa7",
+          "size_bytes": 1562346
+        },
+        "V5": {
+          "sha256": "f0ad438b7e3118bb2cb219ae5133b55bfb21e5030992ba43889b4c86dfe61158",
+          "size_bytes": 1571057
+        },
+        "V6": {
+          "sha256": "262f43c8fd49349a1ccab83d5f384879203cbc2aba99278d26c7d0a705dc3176",
+          "size_bytes": 1255328
+        },
+        "V7": {
+          "sha256": "bab7e664e9ee35e5050366ee3c1e3b97aaa36824c784f8b43fba42c4a0ba53ad",
+          "size_bytes": 1462864
+        }
+      }
+    }
+  },
+  "calibration8_source_membership_sha256": "53856330a24f5c04b17db69bf059c6b242f0320c7e3c3c92caf1d24117c6d419",
+  "camera_json_consumed": false,
+  "file_count": 72,
+  "integrity": {
+    "all_expected_files_present": true,
+    "errors": [],
+    "npz_load_pass": true,
+    "zip_test_pass": true
+  },
+  "schema": "RealSaS.M4.RawSourceManifest.v2",
+  "scientific_outcome_opened": false,
+  "source_authority": "RealSaS_MASTER_CORPUS_1024_V3/master/assets",
+  "status": "PREOPEN_RAW_SOURCE_BYTES_SEALED",
+  "views_per_asset": 8
+}

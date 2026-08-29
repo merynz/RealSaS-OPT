@@ -1,0 +1,60 @@
+{
+  "arachne_d2_sha256": "72898a62f23c55aa82047f7bc4b39be787abb97d14f9a3fb973d59b2b5689745",
+  "asset_count": 8,
+  "asset_ids": [
+    "asset_551ea351b43a1787d0f55536",
+    "asset_36fb02305846592b1ecdf3d4",
+    "asset_0679fdef64f19a4832a6d521",
+    "asset_76313e4bd82b82fcd1659c70",
+    "asset_6f086a5b1a66378ffe04d7e4",
+    "asset_425122d500ecf5767404f9c0",
+    "asset_5a19f8c5254be7bf30c504f5",
+    "asset_f8a40d6c5d815fe79c8b5e42"
+  ],
+  "base_commit": "eb18e8a0e12d813419e6e8274c29f784c560daaf",
+  "cell_count": 65,
+  "compiler_import_mode": "ISOLATED_EXACT_SURFACE_TYPES_HASHING__NO_PACKAGE_INIT_SIDE_EFFECTS",
+  "compiler_support_sha256": {
+    "hashing.py": "f47097f3f3d12dfb91594e0494a075dbfbaba36c96f6497665fa86018aa84a98",
+    "types.py": "408db74d9c7db09dd0af1ca9666ae43e0459006375c533b674eab0e3666345a5"
+  },
+  "compiler_surface_sha256": "e81e2eb25145238d7dcc42b493ba94825ac202dd5eed31335537c33372e1b589",
+  "firewalls": {
+    "decision_operator_edits_after_outcome": "FORBIDDEN",
+    "dev32": "CLOSED",
+    "grid_edits_after_outcome": "FORBIDDEN",
+    "product_safe_claim_authorized": false,
+    "proxy27": "CLOSED",
+    "scientific_outcome_opened": false,
+    "training_steps": 0
+  },
+  "geppetto_d2_sha256": "f8c6146fc3ad81146ced01805b9be454ad194b86db3a9ab3d72d7b9eb3747b65",
+  "grid_runtime_sha256": "4ebf3636438aa14b5f832d51da3e9222086b948b7480164dcd3c50d3ad4ca9dd",
+  "prepare_asset_preflight_sha256": "5516a5050e7cb64d1f4a173117549db79415c07c5d549dfc7d0ace626e7d3833",
+  "prereg_sha256": "c23166ff45a9c12fa9978f448a01e0501c5a1972aa5b46fd06bcef3d1305f0e8",
+  "project_dependency_git_blobs": {
+    "bridge_persistence_v1.py": "8a873dcdbce97a6b6030dd31bba20c63ed6351bd",
+    "compiler/hashing.py": "8beb27031a3ed9d073edc07de785a8626d4f1e8d",
+    "compiler/surface.py": "d5f94eb93a80c75874603edb15e8fad570958a80",
+    "compiler/types.py": "928f5a89d415d281018c4e30f8e738d57fa57905",
+    "depth_corruption_v1.py": "6b6a3aeb873ed23e65e8de5356c72b9dbe161ee2",
+    "e0_geometry.py": "2c6bc9b0c1588d1760d20173f7ef4f89f718a11f",
+    "proxy_replay_v1.py": "5ed5fe4cf27d527990e0f21c900e88de1d77b4cd",
+    "surface_builder_e0_v1.py": "496a4981a149f9a6971b56d455d960781cf8e1d5"
+  },
+  "proxy_target_sha256": {
+    "asset_0679fdef64f19a4832a6d521": "76a84883a1516839d9d5476f7c2d99ad26a29815f490d4d4c50124ecafa3db17",
+    "asset_551ea351b43a1787d0f55536": "a4b3d5544f20a0fecefa877b74f4ad601f072d29afd0df35204c7b182d800c2c",
+    "asset_76313e4bd82b82fcd1659c70": "ddeed0eef39e13ed7831e798b8404de92083df5355bb65002f70087734283633",
+    "asset_f8a40d6c5d815fe79c8b5e42": "41cda2c5623f9698e7c35bd5559b7967871dc7f5c37fff10148b220991d1ebf8"
+  },
+  "raw_source_file_count": 72,
+  "raw_source_integrity": "PASS__72_OF_72__ZIP_AND_NPZ_LOAD",
+  "raw_source_manifest_schema": "RealSaS.M4.RawSourceManifest.v2",
+  "runner_sha256": "48462efcf80d6d16ef95dadaa1932f2aaed0f5e5849b0b2ef8961a005e31a667",
+  "schema": "RealSaS.DepthToleranceBridge.M4ExecutionSeal.v1",
+  "scientific_outcome_opened": false,
+  "source_manifest_sha256": "f044587a12b51a8ae141bb6a3b37c67b7120f9e391e0f0d2afebad939a2da7c8",
+  "status": "SEALED_BEFORE_M4_SCIENTIFIC_OUTCOMES",
+  "transitive_audit_status": "PASS__CORRECTED_BEFORE_MAIN_PROMOTION_AND_BEFORE_ANY_M4_OUTCOME"
+}

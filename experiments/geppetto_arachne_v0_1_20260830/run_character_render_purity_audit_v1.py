@@ -58,7 +58,6 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "asset_max_component_count": dist([r["aggregate"]["connected_component_count"]["max"] for r in ok]),
         "asset_min_largest_component_fraction": dist([r["aggregate"]["largest_component_fraction"]["min"] for r in ok]),
         "asset_max_visible_triangle_fraction": dist([r["aggregate"]["max_visible_triangle_pixel_fraction"]["max"] for r in ok]),
-        "asset_min_raster_image_iou": dist([r["aggregate"]["raster_image_mask_iou"]["min"] for r in ok]),
         "asset_max_visible_unskinned_fraction": dist([
             r["aggregate"]["visible_fully_unskinned_pixel_fraction"]["max"]
             for r in ok if r["aggregate"]["visible_fully_unskinned_pixel_fraction"]["count"]
@@ -75,7 +74,6 @@ def extreme_examples(rows: list[dict[str, Any]], n: int = 25) -> dict[str, list[
         "highest_mesh_face_dominance": (lambda r: r["mesh"]["max_face_area_fraction"], True, "max_face_area_fraction"),
         "highest_visible_triangle_dominance": (lambda r: r["aggregate"]["max_visible_triangle_pixel_fraction"]["max"], True, "max_visible_triangle_pixel_fraction"),
         "lowest_frame_margin": (lambda r: r["aggregate"]["min_frame_margin_fraction"]["min"], False, "min_frame_margin_fraction"),
-        "lowest_raster_image_iou": (lambda r: r["aggregate"]["raster_image_mask_iou"]["min"], False, "min_raster_image_mask_iou"),
         "highest_component_count": (lambda r: r["aggregate"]["connected_component_count"]["max"], True, "max_connected_component_count"),
         "lowest_occupancy": (lambda r: r["aggregate"]["occupancy_fraction"]["min"], False, "min_occupancy_fraction"),
         "highest_occupancy": (lambda r: r["aggregate"]["occupancy_fraction"]["max"], True, "max_occupancy_fraction"),
@@ -93,7 +91,7 @@ def extreme_examples(rows: list[dict[str, Any]], n: int = 25) -> dict[str, list[
 
 def report_md(result: dict[str, Any]) -> str:
     a = result["aggregate"]
-    return f"""# Geppetto/Arachne V0.1 — Character/Render Purity Measurement Audit V1\n\nStatus: **`{result['status']}`**  \nScope complete: **{result['scope_complete']}**\n\n## Scope\n\n- structural Geppetto C0 assets measured: **{result['asset_count']}**\n- PASS: **{a['pass_count']}**\n- hard render/geometry authority failures: **{a['fail_count']}**\n- nested structural Arachne C0 assets: **{result['arachne_structural_c0_count']}**\n\n## Measurement-only boundary\n\nThis audit selects **no** character/render thresholds and excludes **no** asset for visual quality. It measures objective tails only. Semantic character-vs-prop classification is a later separately frozen gate. No consumer model outputs are read and training remains unauthorized.\n\n## Objective distributions\n\n- mesh max-face area fraction p50 / p95 / p99 / max: **{a['mesh_max_face_area_fraction']['p50']} / {a['mesh_max_face_area_fraction']['p95']} / {a['mesh_max_face_area_fraction']['p99']} / {a['mesh_max_face_area_fraction']['max']}**\n- per-asset max visible-triangle pixel fraction p50 / p95 / p99 / max: **{a['asset_max_visible_triangle_fraction']['p50']} / {a['asset_max_visible_triangle_fraction']['p95']} / {a['asset_max_visible_triangle_fraction']['p99']} / {a['asset_max_visible_triangle_fraction']['max']}**\n- per-asset minimum raster/image mask IoU p50 / p95 / min: **{a['asset_min_raster_image_iou']['p50']} / {a['asset_min_raster_image_iou']['p95']} / {a['asset_min_raster_image_iou']['min']}**\n- assets touching frame in any view: **{a['assets_touching_frame_any_view']}**\n\n## Next gate\n\nFreeze objective render-usability thresholds and a separate semantic character-purity protocol **from this input-quality result only**, before any Geppetto/Arachne optimizer output is opened.\n"""
+    return f"""# Geppetto/Arachne V0.1 — Character/Render Purity Measurement Audit V1.1\n\nStatus: **`{result['status']}`**  \nScope complete: **{result['scope_complete']}**\n\n## Scope\n\n- structural Geppetto C0 assets measured: **{result['asset_count']}**\n- PASS: **{a['pass_count']}**\n- hard render/geometry authority failures: **{a['fail_count']}**\n- nested structural Arachne C0 assets: **{result['arachne_structural_c0_count']}**\n\n## Measurement-only boundary\n\nThis audit selects **no** character/render thresholds and excludes **no** asset for visual quality. It measures objective tails only. Image-content integrity and semantic character-vs-prop classification are one later separately frozen image gate. No consumer model outputs are read and training remains unauthorized.\n\n## Objective distributions\n\n- mesh max-face area fraction p50 / p95 / p99 / max: **{a['mesh_max_face_area_fraction']['p50']} / {a['mesh_max_face_area_fraction']['p95']} / {a['mesh_max_face_area_fraction']['p99']} / {a['mesh_max_face_area_fraction']['max']}**\n- per-asset max visible-triangle pixel fraction p50 / p95 / p99 / max: **{a['asset_max_visible_triangle_fraction']['p50']} / {a['asset_max_visible_triangle_fraction']['p95']} / {a['asset_max_visible_triangle_fraction']['p99']} / {a['asset_max_visible_triangle_fraction']['max']}**\n- assets touching frame in any view: **{a['assets_touching_frame_any_view']}**\n\n## Next gate\n\nFreeze objective render-usability thresholds and a separate semantic character-purity protocol **from this input-quality result only**, before any Geppetto/Arachne optimizer output is opened.\n"""
 
 
 def main() -> None:
@@ -141,7 +139,7 @@ def main() -> None:
     else:
         status = "SMOKE_ONLY__NOT_FREEZEABLE"
     result = {
-        "schema": "RealSaS.GeppettoArachne.CharacterRenderPurityAudit.v1",
+        "schema": "RealSaS.GeppettoArachne.CharacterRenderPurityAudit.v1.1",
         "status": status,
         "scope_complete": bool(complete and agg["fail_count"] == 0),
         "root": str(args.root),
@@ -158,17 +156,19 @@ def main() -> None:
             "corpus_mutation": False,
             "threshold_based_exclusion_applied": False,
             "semantic_character_classifier_applied": False,
+            "image_content_decoded": False,
+            "cel_clean_512_existence_verified": True,
             "training_authorized": False,
-            "render_authority": "master/assets/<asset>/renders/V0..V7/raster_authority.npz + cel_clean_512.png",
+            "render_authority": "master/assets/<asset>/renders/V0..V7/raster_authority.npz; cel_clean_512.png existence only in V1.1",
             "geometry_authority": "master/assets/<asset>/primary_geometry.npz",
         },
-        "next_gate": "FREEZE_OBJECTIVE_RENDER_USABILITY_AND_SEPARATE_CHARACTER_SEMANTIC_PROTOCOL",
+        "next_gate": "FREEZE_OBJECTIVE_RENDER_USABILITY_AND_IMAGE_SEMANTIC_PROTOCOL",
     }
 
     outdir = args.output_dir or (args.root / "reports" / "geppetto_arachne_v0_1")
     outdir.mkdir(parents=True, exist_ok=True)
-    jp = outdir / "CHARACTER_RENDER_PURITY_AUDIT_RESULT_V1.json"
-    mp = outdir / "CHARACTER_RENDER_PURITY_AUDIT_REPORT_V1.md"
+    jp = outdir / "CHARACTER_RENDER_PURITY_AUDIT_RESULT_V1_1.json"
+    mp = outdir / "CHARACTER_RENDER_PURITY_AUDIT_REPORT_V1_1.md"
     jp.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
     mp.write_text(report_md(result), encoding="utf-8")
     print(json.dumps({"status": status, "result": str(jp), "report": str(mp), "aggregate": agg}, indent=2, sort_keys=True))

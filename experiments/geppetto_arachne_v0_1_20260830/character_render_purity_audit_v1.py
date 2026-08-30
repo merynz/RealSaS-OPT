@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from PIL import Image
 from scipy import ndimage
 
 VIEWS = 8
@@ -33,18 +32,6 @@ def _distribution(x: list[float]) -> dict[str, float | int | None]:
         "p99": float(np.percentile(a, 99)),
         "max": float(np.max(a)),
     }
-
-
-def _image_foreground_mask(path: Path, expected_size: int = RENDER_SIZE) -> tuple[np.ndarray, str]:
-    with Image.open(path) as im:
-        if im.size != (expected_size, expected_size):
-            raise ValueError(f"render size mismatch: {path} -> {im.size}")
-        rgba = np.asarray(im.convert("RGBA"), dtype=np.uint8)
-    alpha = rgba[..., 3]
-    if np.any(alpha < 255):
-        return alpha >= 128, "FILE_ALPHA_GE_128"
-    green = (rgba[..., 0] == 0) & (rgba[..., 1] == 255) & (rgba[..., 2] == 0)
-    return ~green, "EXACT_GREENSCREEN_COMPLEMENT"
 
 
 def _mask_metrics(mask: np.ndarray) -> dict[str, Any]:
@@ -216,20 +203,12 @@ def audit_asset_v1(inp: RenderPurityAssetInputV1) -> dict[str, Any]:
             expected_yaw = float(v * 45)
             if abs(yaw - expected_yaw) > 1e-4:
                 raise ValueError(f"noncanonical yaw V{v}: {yaw} != {expected_yaw}")
-            rm, raster_mask = _raster_metrics(rp, len(faces), tri_skin)
-            image_mask, mask_source = _image_foreground_mask(ip)
-            inter = int(np.count_nonzero(raster_mask & image_mask))
-            union = int(np.count_nonzero(raster_mask | image_mask))
-            raster_n = int(np.count_nonzero(raster_mask))
-            image_n = int(np.count_nonzero(image_mask))
+            rm, _ = _raster_metrics(rp, len(faces), tri_skin)
             rm.update({
                 "view_index": v,
                 "yaw_deg": yaw,
-                "image_mask_source": mask_source,
-                "image_foreground_pixels": image_n,
-                "raster_image_mask_iou": float(inter / union) if union else 1.0,
-                "image_extra_foreground_fraction_of_image": float(np.count_nonzero(image_mask & ~raster_mask) / max(image_n, 1)),
-                "raster_missing_from_image_fraction_of_raster": float(np.count_nonzero(raster_mask & ~image_mask) / max(raster_n, 1)),
+                "cel_clean_512_exists": True,
+                "image_content_decoded": False,
             })
             views.append(rm)
         row["views"] = views
@@ -246,7 +225,6 @@ def audit_asset_v1(inp: RenderPurityAssetInputV1) -> dict[str, Any]:
             "visible_triangle_count": _distribution(vals("visible_triangle_count")),
             "max_visible_triangle_pixel_fraction": _distribution(vals("max_visible_triangle_pixel_fraction")),
             "top2_visible_triangle_pixel_fraction": _distribution(vals("top2_visible_triangle_pixel_fraction")),
-            "raster_image_mask_iou": _distribution(vals("raster_image_mask_iou")),
             "visible_pixel_mean_triangle_skin_fraction": _distribution(vals("visible_pixel_mean_triangle_skin_fraction")),
             "visible_fully_unskinned_pixel_fraction": _distribution(vals("visible_fully_unskinned_pixel_fraction")),
             "border_touch_view_count": int(sum(bool(x["border_touch"]) for x in views)),

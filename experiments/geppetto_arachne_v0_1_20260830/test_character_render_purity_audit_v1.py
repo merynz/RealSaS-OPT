@@ -41,9 +41,10 @@ def test_clean_asset(tmp_path):
     row=audit_asset_v1(RenderPurityAssetInputV1("asset_test","fixture",ad,True))
     assert row["status"]=="PASS", row
     assert len(row["views"])==8
-    assert row["aggregate"]["raster_image_mask_iou"]["min"]==1.0
     assert row["aggregate"]["border_touch_view_count"]==0
     assert row["views"][0]["visible_skinned_triangle_fraction_valid"] is True
+    assert row["views"][0]["cel_clean_512_exists"] is True
+    assert row["views"][0]["image_content_decoded"] is False
 
 
 def test_bad_triangle_fails_closed(tmp_path):

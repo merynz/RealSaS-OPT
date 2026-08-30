@@ -59,7 +59,8 @@ def _mask_metrics(mask: np.ndarray) -> dict[str, Any]:
     y0, y1 = int(ys.min()), int(ys.max())
     bw, bh = x1 - x0 + 1, y1 - y0 + 1
     margins = (x0, W - 1 - x1, y0, H - 1 - y1)
-    labels, cc = ndimage.label(mask, structure=np.ones((3, 3), dtype=np.uint8))
+    crop = mask[y0:y1 + 1, x0:x1 + 1]
+    labels, cc = ndimage.label(crop, structure=np.ones((3, 3), dtype=np.uint8))
     counts = np.bincount(labels.ravel())[1:]
     largest = int(counts.max()) if counts.size else 0
     sig = int(np.count_nonzero(counts >= max(4, int(round(n * 0.001)))))
@@ -152,10 +153,10 @@ def _raster_metrics(
         raise ValueError("raster pixel index out of range")
     if tid.min() < 0 or tid.max() >= face_count:
         raise ValueError("raster triangle index out of range")
-    if len(np.unique(pix)) != len(pix):
-        raise ValueError("raster contains duplicate pixel_linear_index")
     mask = np.zeros(H * W, dtype=bool)
     mask[pix] = True
+    if int(np.count_nonzero(mask)) != len(pix):
+        raise ValueError("raster contains duplicate pixel_linear_index")
     mask = mask.reshape(H, W)
     mm = _mask_metrics(mask)
     counts = np.bincount(tid, minlength=face_count)

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -100,6 +102,7 @@ def main() -> None:
     ap.add_argument("--projection-audit-result", type=Path, required=True)
     ap.add_argument("--output-dir", type=Path, default=None)
     ap.add_argument("--max-assets", type=int, default=0, help="0 = complete structural C0 scope; positive = smoke only")
+    ap.add_argument("--workers", type=int, default=min(4, max(1, os.cpu_count() or 1)))
     args = ap.parse_args()
 
     raw = args.projection_audit_result.read_bytes()
@@ -114,17 +117,21 @@ def main() -> None:
     if args.max_assets > 0:
         assets = assets[:args.max_assets]
 
-    rows = []
-    for i, x in enumerate(assets, 1):
+    workers = max(1, int(args.workers))
+    def one(x):
         aid = x["canonical_asset_id"]
-        rows.append(audit_asset_v1(RenderPurityAssetInputV1(
+        return audit_asset_v1(RenderPurityAssetInputV1(
             canonical_asset_id=aid,
             source_registry_id=x["source_registry_id"],
             asset_dir=args.root / "master" / "assets" / aid,
             arachne_structural_c0=aid in arachne_ids,
-        )))
-        if i % 25 == 0 or i == len(assets):
-            print(f"[character-render-purity] {i}/{len(assets)}")
+        ))
+    rows = []
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for i, row in enumerate(pool.map(one, assets), 1):
+            rows.append(row)
+            if i % 25 == 0 or i == len(assets):
+                print(f"[character-render-purity] {i}/{len(assets)} workers={workers}", flush=True)
 
     agg = summarize(rows)
     if agg["fail_count"]:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 import hashlib
 import json
 import os
@@ -116,20 +116,25 @@ def main() -> None:
         assets = assets[:args.max_assets]
 
     workers = max(1, int(args.workers))
-    def one(x):
-        aid = x["canonical_asset_id"]
-        return audit_asset_v1(RenderPurityAssetInputV1(
-            canonical_asset_id=aid,
-            source_registry_id=x["source_registry_id"],
-            asset_dir=args.root / "master" / "assets" / aid,
-            arachne_structural_c0=aid in arachne_ids,
-        ))
+    inputs = [RenderPurityAssetInputV1(
+        canonical_asset_id=x["canonical_asset_id"],
+        source_registry_id=x["source_registry_id"],
+        asset_dir=args.root / "master" / "assets" / x["canonical_asset_id"],
+        arachne_structural_c0=x["canonical_asset_id"] in arachne_ids,
+    ) for x in assets]
     rows = []
-    with ThreadPoolExecutor(max_workers=workers) as pool:
-        for i, row in enumerate(pool.map(one, assets), 1):
+    if workers == 1:
+        iterator = map(audit_asset_v1, inputs)
+        for i, row in enumerate(iterator, 1):
             rows.append(row)
-            if i % 25 == 0 or i == len(assets):
-                print(f"[character-render-purity] {i}/{len(assets)} workers={workers}", flush=True)
+            if i % 25 == 0 or i == len(inputs):
+                print(f"[character-render-purity] {i}/{len(inputs)} workers=1", flush=True)
+    else:
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            for i, row in enumerate(pool.map(audit_asset_v1, inputs, chunksize=4), 1):
+                rows.append(row)
+                if i % 25 == 0 or i == len(inputs):
+                    print(f"[character-render-purity] {i}/{len(inputs)} workers={workers}", flush=True)
 
     agg = summarize(rows)
     if agg["fail_count"]:

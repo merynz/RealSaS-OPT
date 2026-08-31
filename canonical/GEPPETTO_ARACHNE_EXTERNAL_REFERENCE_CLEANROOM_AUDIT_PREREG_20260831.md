@@ -97,13 +97,11 @@ Code-level extraction of all product-inference inputs and preprocessing:
 Produce a field-by-field `REFERENCE_INPUT -> REALSAS_AVAILABLE_EQUIVALENT` matrix with statuses:
 
 - `EXACT_EQUIVALENT`
-- `STRICTLY_STRONGER_REALSA S`
+- `STRICTLY_STRONGER_REALSAS`
 - `APPROXIMATE_EQUIVALENT`
 - `MISSING`
 - `NOT_REQUIRED_AT_INFERENCE`
 - `UNKNOWN_FROM_PUBLIC_RELEASE`
-
-A typo-free machine-readable version must use `STRICTLY_STRONGER_REALSAS`.
 
 ### R2 — Representation / architecture decomposition
 

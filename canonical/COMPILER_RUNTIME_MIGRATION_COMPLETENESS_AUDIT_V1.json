@@ -1,0 +1,188 @@
+{
+  "schema": "RealSaS.CompilerRuntimeMigrationCompletenessAudit.v1",
+  "date": "2026-09-01",
+  "status": "PASS_INTENDED_MIGRATION_COMPLETE__ARCHITECTURE_INVENTORY_RECONCILED",
+  "scope_semantics": {
+    "historical_maximum_is_not_single_version": true,
+    "historical_maximum_report_is_pre_migration_restoration_authority": true,
+    "post_restoration_github_scope_is_current_execution_closure_not_full_historical_source_mirror": true,
+    "pass_does_not_mean_all_historical_source_bytes_are_in_github": true
+  },
+  "source_authorities": {
+    "historical_maximum_report": {
+      "title": "RealSaS_Compiler_Runtime_Historical_Maximum_Audit_Final_Verdict_2026-08-25.docx",
+      "library_file_id": "file_000000007bf4820aa97807ca9564f3bb",
+      "version_id": "1",
+      "raw_sha256": "82698e86ba0454fd48848c69c10f6de6d8a78132d2c1b52ede5cb03e7e72aece",
+      "direct_drive_url_resolved_by_connector": false,
+      "authority_status": "FINAL_AUDIT_VERDICT__RESTORATION_AUTHORITY"
+    },
+    "v0_5_full_source_sha256": "03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130",
+    "r5_3_authority_sha256": "6224661cb4323f78a9b808af10f68dd584431a422e28d26a69e87816a3b0ef80",
+    "v97_39_single_truth_source_sha256": "ac755b4ba9319de963e9f68f962d7a1839e40c640928ac0c035a6af1758673e1",
+    "v97_43_numerical_rig_sha256": "09a94871f938b069ba5c8219f203355e724f2f58afa6e10dc5c6148d98b43efb",
+    "runtime_v0_5_cpp17_sha256": "1af741c9a3d30456a6703809e067a9c3a61220da51a6a1a9cbda2b8a4755e8b0",
+    "v0_5_inventory_ledger": {
+      "library_file_id": "file_000000004abc81f4bc1064756dac6017",
+      "name": "RealSaS_M4_v0_5_ZIP_TEST.txt"
+    }
+  },
+  "post_restoration_intended_github_payload": {
+    "scope": "CURRENT_IRIS_TO_COMPILER_EXECUTION_CLOSURE",
+    "vendor_path": "compiler/vendor/realsas_v05_current_execution_closure.b64",
+    "decoded_raw_sha256": "3a6076b30e0a23807f952365d39d81ddf5d4b1dba734c0bdba47567bced26850",
+    "decoded_raw_size_bytes": 40998,
+    "transport_part_count": 9,
+    "byte_exact_v0_5_record_count": 9,
+    "namespace_rebind_record_count": 4,
+    "total_declared_record_count": 13,
+    "presence_and_runtime_sha_verification": "PASS",
+    "branch_reconciliation": {
+      "source_branch": "integration/compiler-runtime-canonical-20260828",
+      "source_commit": "e423cd46200220f95452890f74640c0afb57fd28",
+      "main_contains_source_branch": true,
+      "source_branch_unique_commits_vs_main": 0,
+      "source_branch_unique_files_vs_main": 0
+    },
+    "records": [
+      {"path": "realsas_artifacts/bundle.py", "mode": "BYTE_EXACT_V0_5", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"},
+      {"path": "realsas_compiler_graph/cache.py", "mode": "BYTE_EXACT_V0_5", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"},
+      {"path": "realsas_compiler_graph/events.py", "mode": "BYTE_EXACT_V0_5", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"},
+      {"path": "realsas_contracts/core.py", "mode": "BYTE_EXACT_V0_5", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"},
+      {"path": "realsas_contracts/execution.py", "mode": "BYTE_EXACT_V0_5", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"},
+      {"path": "realsas_contracts/mechanical_identity_constraints_v19_20.py", "mode": "BYTE_EXACT_V0_5", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"},
+      {"path": "realsas_contracts/source_evidence.py", "mode": "BYTE_EXACT_V0_5", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"},
+      {"path": "realsas_contracts/technical_part_graph.py", "mode": "BYTE_EXACT_V0_5", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"},
+      {"path": "realsas_synthesis/canonical_graph_optimizer.py", "mode": "BYTE_EXACT_V0_5", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"},
+      {"path": "realsas_artifacts/__init__.py", "mode": "NAMESPACE_REBIND", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"},
+      {"path": "realsas_compiler_graph/__init__.py", "mode": "NAMESPACE_REBIND", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"},
+      {"path": "realsas_contracts/__init__.py", "mode": "NAMESPACE_REBIND", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"},
+      {"path": "realsas_synthesis/__init__.py", "mode": "NAMESPACE_REBIND", "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE"}
+    ]
+  },
+  "component_inventory": [
+    {
+      "component": "current_typed_compiler_surface_rig_skin_mesh_product",
+      "github_paths": ["compiler/realsas_compiler_core"],
+      "classification": "CANONICAL_MAINLINE_EXECUTABLE",
+      "notes": "Geometric substrate, skeleton qualification, skin qualification, MWB-0/MWB-1 typed mesh binding, product/proof/runtime-package binding."
+    },
+    {
+      "component": "historical_graph_contract_leaf_closure",
+      "github_paths": ["compiler/vendor/realsas_v05_current_execution_closure.b64"],
+      "classification": "VENDORED_CURRENT_EXECUTION_CLOSURE",
+      "notes": "Nine byte-exact v0.5 leaves plus four controlled namespace rebinds; import verifies transport and decoded record bytes fail-closed."
+    },
+    {
+      "component": "full_v0_5_python_compiler_chassis",
+      "historical_examples": ["realsas_mesh", "realsas_weight", "realsas_deformation", "realsas_orchestrator", "realsas_proof", "realsas_export", "realsas_reference_runtime", "realsas_rig"],
+      "classification": "HISTORICAL_EXTERNAL_BYTE_AUTHORITY_INTENTIONAL",
+      "notes": "Explicitly not wholesale-mirrored into current GitHub execution closure. Preserve/retype subsystem-by-subsystem only when a current consumer requires it."
+    },
+    {
+      "component": "late_may_mesh_cdt_cotangent_maximum",
+      "classification": "HISTORICAL_EXTERNAL_BYTE_AUTHORITY_INTENTIONAL",
+      "notes": "v95/v97-family numerical authority; MWB-2 promotion requires exact provenance, typed parity, topology/residual and downstream gate."
+    },
+    {
+      "component": "late_may_bbw_qp_kkt_maximum",
+      "classification": "HISTORICAL_EXTERNAL_BYTE_AUTHORITY_INTENTIONAL",
+      "notes": "May not become a hidden second semantic skin owner; only bounded qualification or separately typed deterministic proposal/fallback after demonstrated need."
+    },
+    {
+      "component": "historical_arap_corrective_deformation",
+      "classification": "HISTORICAL_EXTERNAL_BYTE_AUTHORITY_INTENTIONAL",
+      "notes": "Future promotion is against exact CanonicalPuppetGraph.v2 state and residual/deformation parity."
+    },
+    {
+      "component": "historical_xpbd_contact_sdf",
+      "classification": "HISTORICAL_EXTERNAL_BYTE_AUTHORITY_INTENTIONAL",
+      "notes": "Future promotion only after exact-state contact/constraint parity gate."
+    },
+    {
+      "component": "historical_motion_proof_failure_attribution_repair_orchestrator",
+      "classification": "HISTORICAL_EXTERNAL_BYTE_AUTHORITY_INTENTIONAL",
+      "notes": "High-value v0.5 semantics remain architecture obligations; current main has typed proof/hash binding but not the full historical heavy execution tree."
+    },
+    {
+      "component": "current_proof_and_runtime_package_hash_binding",
+      "github_paths": ["compiler/realsas_compiler_core/product.py", "compiler/realsas_compiler_core/types.py"],
+      "classification": "CANONICAL_MAINLINE_EXECUTABLE",
+      "notes": "Current exact-state proof/runtime projection contract; heavy historical probe/repair implementations remain external."
+    },
+    {
+      "component": "native_cpp17_runtime_sdk",
+      "historical_tree": "runtime/realsas_cpp",
+      "classification": "HISTORICAL_EXTERNAL_BYTE_AUTHORITY_INTENTIONAL",
+      "notes": "Historical archive inventory contains full 9-file C++ SDK tree. Current GitHub runtime directory intentionally records boundary/authority rather than mirroring source bytes."
+    },
+    {
+      "component": "current_runtime_boundary_documentation",
+      "github_paths": ["runtime/README.md"],
+      "classification": "RESTORATION_REFERENCE_ONLY",
+      "notes": "Documents C++ source SHA, ABI smoke and package-to-native render evidence."
+    },
+    {
+      "component": "r5_3_authority_discipline",
+      "classification": "RESTORATION_REFERENCE_ONLY",
+      "notes": "Normative semantics are rebound into current Compiler ownership: compiler-minted canonical IDs, single graph owner, no second authority."
+    },
+    {
+      "component": "v97_39_single_truth_rebind",
+      "github_paths": ["restoration/historical/v97_39/SaS_v97_39_FinalPackageSingleTruthRebind_Report.md"],
+      "classification": "RESTORATION_REFERENCE_ONLY",
+      "notes": "Hard invariant is implemented prospectively by exact product-state proof/runtime hash binding."
+    },
+    {
+      "component": "solver_registry",
+      "github_paths": ["compiler/realsas_compiler_core/solver_registry.py"],
+      "classification": "RESTORATION_REFERENCE_ONLY",
+      "audit_finding": "Previously eager-imported absent historical packages while being unreachable from canonical entrypoint.",
+      "repair": "Converted to import-safe authority metadata plus explicit lazy promotion gate; EXECUTABLE_SOLVERS remains empty on current main."
+    },
+    {
+      "component": "old_front_brain_image_decomposition_and_teacher_exact_owner_ontology",
+      "classification": "DEAD_SUPERSEDED_CONFIRMED",
+      "notes": "Historical audit explicitly prohibits restoration because current IRIS/GeometricSubstrateAssembler/Geppetto/Arachne own the new observation/proposal boundaries. Historical evidence remains archival only."
+    }
+  ],
+  "discrepancies": [
+    {
+      "id": "D1_SOLVER_REGISTRY_EAGER_IMPORT",
+      "severity": "REPAIRABLE_REACHABILITY_HYGIENE",
+      "pre_repair_classification": "ORPHANED_OR_UNREACHABLE_REQUIRES_DECISION",
+      "resolution": "FAIL_CLOSED_LAZY_AUTHORITY_REGISTRY",
+      "missing_intended_migration": false
+    },
+    {
+      "id": "D2_FULL_HISTORICAL_BYTES_NOT_IN_GITHUB",
+      "severity": "NONE_BY_CURRENT_EXECUTION_MIGRATION_CONTRACT",
+      "resolution": "INTENTIONAL_EXTERNAL_AUTHORITY",
+      "missing_intended_migration": false,
+      "notes": "The Aug-25 report asks for preservation/reconciliation; the Aug-28 restoration explicitly chose a narrow current-execution GitHub closure and SHA-bound heavy authorities externally."
+    },
+    {
+      "id": "D3_DIRECT_DRIVE_OBJECT_NOT_RESOLVED_IN_CONNECTOR",
+      "severity": "PROVENANCE_ACCESS_NOTE",
+      "resolution": "Library authority report and source inventory ledger remain readable; GitHub SHA pointers and restoration regressions remain recorded.",
+      "missing_intended_migration": false
+    }
+  ],
+  "missing_intended_migration_blockers": [],
+  "repaired_orphans": ["compiler/realsas_compiler_core/solver_registry.py"],
+  "svg_authorization": {
+    "authorized_after_this_closure_merges_and_regressions_pass": true,
+    "required_visual_distinctions": [
+      "canonical mainline executable",
+      "learned proposal layers",
+      "Compiler qualification/solver layers",
+      "canonical product-state IRs",
+      "proof/repair/runtime path",
+      "training-only/evaluator apparatus",
+      "optional/fallback authorities",
+      "historical external byte authorities",
+      "dead/superseded components"
+    ]
+  },
+  "training_authorized": false
+}

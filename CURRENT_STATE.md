@@ -2,13 +2,13 @@
 
 **Date:** 2026-08-31  
 **Canonical continuation branch:** `main`  
-**Status:** `DINO_S1_CLOSED_EARLY__REPROJECTION_V2_SEALED__GATE0_SYNTHETIC_PASS__REAL_CORPUS_GATE0_RUNNER_READY_NOT_EXECUTED__DEV32_CLOSED__NO_V2_OPTIMIZER_AUTHORIZED`
+**Status:** `DINO_S1_CLOSED_EARLY__REPROJECTION_V2_SEALED__GATE0_SYNTHETIC_PASS__REAL_CORPUS_GATE0_READY_NOT_EXECUTED__CLEAN_C0_VISUAL_TRIAGE_SEALED_TESTED_NOT_EXECUTED__DEV32_CLOSED__NO_V2_OPTIMIZER_AUTHORIZED`
 
 This file is continuation authority only on `main`.
 
 ## One-line state
 
-`DTB-ND1 tolerance/consumer replay closed -> DINO S/B nearly flat under SharedLearnerV1 -> S1 early-terminated and frozen-apparatus audit closed BLOCK_AND_FIX -> reprojection-centered partial-canonical IRIS V2 sealed -> deterministic synthetic Gate0 passed -> full TRAIN512 real-corpus Gate0 execution contract + runner are frozen/tested but not yet scientifically executed -> no learned V2 optimizer step is authorized.`
+`DTB-ND1 tolerance/consumer replay closed -> DINO S/B nearly flat under SharedLearnerV1 -> S1 early-terminated and frozen-apparatus audit closed BLOCK_AND_FIX -> reprojection-centered partial-canonical IRIS V2 sealed -> deterministic synthetic Gate0 passed -> full TRAIN512 real-corpus Gate0 execution contract + runner frozen/tested -> native image integrity closed exact -> clean-C0 visual anomaly triage prereg/code/CI frozen before review outputs -> no learned V2 optimizer step authorized.`
 
 ## 1. Product/system contract — STABLE
 
@@ -134,7 +134,7 @@ Real Gate0 measures before learned outputs:
 
 No spacing is selected by the runner. A successful measurement must be followed by a separate spacing/resolution policy freeze.
 
-## 7. Next gates
+## 7. Next IRIS gates
 
 Only after scientific real-corpus Gate0 passes and padding/spacing policy is frozen:
 
@@ -157,13 +157,41 @@ Completed native image/raster measurement:
 - IoU `1.0` for every measured view;
 - hard authority failures `0`.
 
-This proves image/raster support integrity only. Semantic single-riggable-character review remains required and fail-closed before final clean C0. Random/blind visual sanity checking remains mandatory before final clean-C0 trust.
+This proves image/raster support integrity only. Semantic single-riggable-character review remains required and fail-closed before final clean C0.
 
 Corpus H0 work remains separate from V2 apparatus causality and may not reinterpret S1 post hoc.
 
-## 9. Training authority
+## 9. Clean-C0 visual anomaly triage — SEALED / CODE TESTED / NOT EXECUTED
+
+Authority:
+`canonical/CORPUS_VISUAL_ANOMALY_TRIAGE_PREREG_20260831.md`.
+
+Implementation/tests:
+
+- `experiments/geppetto_arachne_v0_1_20260830/semantic_visual_anomaly_triage_v1.py`
+- `experiments/geppetto_arachne_v0_1_20260830/test_semantic_visual_anomaly_triage_v1.py`
+
+GitHub Actions run `33408804606`: `SUCCESS`.
+
+The triage is diagnostic scheduling only and has **no automatic exclusion authority**. It freezes priority sampling for:
+
+- dominant rectangle/quad/plane-like support;
+- multiple disconnected competing subjects;
+- tiny subject / low occupancy;
+- extreme view imbalance;
+- off-center or split-scene support;
+- extremely thin observed support;
+- existing raster triangle-dominance tail;
+- 16 deterministic blind-random controls.
+
+Reviewer-safe contact sheets are ordered V0..V7 and expose no diagnostic reason/metric. Semantic labels remain image-only authority under `IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md`.
+
+A Colab execution notebook has been prepared outside the repo to run both real Gate0 and this triage in one fail-closed session. It is pinned to this authority lineage and leaves `training_authorized=false`.
+
+## 10. Training authority
 
 **V2 learned optimizer steps: NOT AUTHORIZED.**  
 **New S/B/L/g ladder: NOT AUTHORIZED.**  
 **Scientific real-corpus Gate0 deterministic execution: AUTHORIZED under its frozen prereg.**  
+**Clean-C0 visual anomaly triage execution: AUTHORIZED under its frozen prereg.**  
 **DEV32: CLOSED.**

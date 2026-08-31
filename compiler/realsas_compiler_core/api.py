@@ -11,6 +11,8 @@ from .mesh_binding import (
     validate_mesh_candidate,
     validate_qualified_mesh,
     validate_qualified_mesh_skin,
+    qualify_identity_subset_mesh,
+    bind_identity_mesh_skin,
 )
 from .product import assemble_product, assemble_product_v2, bind_proof, require_current_proof, project_runtime_package
 from .bundle_routes import write_typed_artifact, route_for
@@ -33,6 +35,8 @@ class CompilerFacade:
     validate_mesh_candidate=staticmethod(validate_mesh_candidate)
     validate_qualified_mesh=staticmethod(validate_qualified_mesh)
     validate_qualified_mesh_skin=staticmethod(validate_qualified_mesh_skin)
+    qualify_identity_subset_mesh=staticmethod(qualify_identity_subset_mesh)
+    bind_identity_mesh_skin=staticmethod(bind_identity_mesh_skin)
     assemble_product=staticmethod(assemble_product)
     assemble_product_v2=staticmethod(assemble_product_v2)
     bind_proof=staticmethod(bind_proof)

@@ -1,0 +1,39 @@
+{
+  "asset_id": "asset_551ea351b43a1787d0f55536",
+  "camera_binding_hash": "e06a13e5b4538f1d4c2ccdc0e52333b278bb9cf06d362e463c7e240adc92b2c4",
+  "camera_geometry_consumed": false,
+  "candidate_lineage_hash": "60bcb450c58ef3e829c2c4ec48149cba5623bec99d25bcd1a3465c2361ca14c5",
+  "claim_boundary": "typed identity-subset lineage/weight-copy baseline only; no product mesh/deformation claim",
+  "fixture_transport_sha256": "81634b7db6dbae3f7cc30d7f6942ace9be841416dd1db833185884d3e10584c5",
+  "identity_weight_copy_exact": true,
+  "mesh_lineage_hash": "39c5b2d842e600970defbe6cc805e4c377ade0bcbe6bb80372be6a15884ec851",
+  "mesh_skin_lineage_hash": "4f548afea2c7145af3997785baf7cfaac20c57f28a5e2a762bdb913f4305b77e",
+  "product_state_hash": "bd45f7751a4ce2a48f4c549e922b69ae54dd648aba15a6257457c87d53b486e0",
+  "qualified_joint_count": 5,
+  "qualified_skin_row_count": 512,
+  "schema": "RealSaS.MWB1IdentitySubsetBaselineResult.v1",
+  "scientific_optimizer_steps": 0,
+  "selected_surface_ids": [
+    "S:0000:724df3a7b364",
+    "S:0437:767a0fd965e4",
+    "S:0321:fd0447c91433"
+  ],
+  "shared_support_view": 3,
+  "status": "PASS_MWB1_IDENTITY_SUBSET_BASELINE",
+  "surface_bbox_diag": 1.4628259823441812,
+  "surface_node_count": 512,
+  "topology_mutation": {
+    "mesh_hash_changed": true,
+    "original_proof_rejected_as_stale": true,
+    "product_hash_changed": true
+  },
+  "training_authorized": false,
+  "triangle_cross_magnitude": 0.0025998059716087446,
+  "weight_mutation": {
+    "delta": 1e-06,
+    "mesh_skin_hash_changed": true,
+    "mutated_mesh_vertex_id": "MV:0000",
+    "original_proof_rejected_as_stale": true,
+    "product_hash_changed": true
+  }
+}

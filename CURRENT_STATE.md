@@ -2,13 +2,13 @@
 
 **Date:** 2026-08-31  
 **Canonical continuation branch:** `main`  
-**Status:** `DINO_S1_CLOSED_EARLY__FROZEN_APPARATUS_BLOCK_AND_FIX__REPROJECTION_V2_PREREG_SEALED__GATE0_DETERMINISTIC_ONLY__DEV32_CLOSED__NO_V2_OPTIMIZER_AUTHORIZED`
+**Status:** `DINO_S1_CLOSED_EARLY__REPROJECTION_V2_SEALED__GATE0_SYNTHETIC_PASS__REAL_CORPUS_GATE0_RUNNER_READY_NOT_EXECUTED__DEV32_CLOSED__NO_V2_OPTIMIZER_AUTHORIZED`
 
 This file is continuation authority only on `main`.
 
 ## One-line state
 
-`DTB-ND1 tolerance and consumer replay are closed -> DINO S/B were nearly flat under SharedLearnerV1 -> S1 was explicitly early-terminated -> frozen-apparatus audit found a material high-resolution/access confound -> IRIS V2 is now sealed as a reprojection-centered partial-canonical evidence system -> only deterministic Gate 0 coding/testing is authorized; no V2 optimizer step is authorized yet.`
+`DTB-ND1 tolerance/consumer replay closed -> DINO S/B nearly flat under SharedLearnerV1 -> S1 early-terminated and frozen-apparatus audit closed BLOCK_AND_FIX -> reprojection-centered partial-canonical IRIS V2 sealed -> deterministic synthetic Gate0 passed -> full TRAIN512 real-corpus Gate0 execution contract + runner are frozen/tested but not yet scientifically executed -> no learned V2 optimizer step is authorized.`
 
 ## 1. Product/system contract — STABLE
 
@@ -67,17 +67,14 @@ Permitted S1 claim:
 
 Forbidden: extrapolation to L/g, global backbone irrelevance, or S/B flatness under another apparatus.
 
-Authority: `canonical/DINO_LADDER_S1_EARLY_TERMINATION_CLOSURE_20260831.md`.
+Authorities:
 
-## 4. Frozen apparatus audit — CLOSED: BLOCK_AND_FIX
+- `canonical/DINO_LADDER_S1_EARLY_TERMINATION_CLOSURE_20260831.md`
+- `canonical/DINO_FROZEN_APPARATUS_CODE_AUDIT_CLOSURE_20260831.md`
 
-Authority: `canonical/DINO_FROZEN_APPARATUS_CODE_AUDIT_CLOSURE_20260831.md`.
+The frozen-apparatus audit found a material shared-access limitation but did not prove a sole causal mechanism. Evaluator / DTB-ND1 replay passed; loss/sampling/corpus remain separate plausible limitations.
 
-Main finding: the S1 measuring apparatus had a material shared-access limitation: last-layer 37x37 DINO interface, common width bottleneck, 16x16 cross-view context branch, sparse 25-sample native detail path and pointwise final query head. This is a plausible confound, not a proven sole cause.
-
-Evaluator / DTB-ND1 replay passed the audit. Loss/sampling/corpus remain separate plausible limitations.
-
-## 5. IRIS Reprojection-Centered V2 — PREREG SEALED
+## 4. IRIS Reprojection-Centered V2 — PREREG SEALED
 
 Authority: `canonical/IRIS_REPROJECTION_CENTERED_V2_PREREG_20260831.md`.
 
@@ -93,35 +90,53 @@ Internal canonical representation is **partial observed-surface evidence**, neve
 
 V2-A is deliberately single-pass. No recurrent visibility refinement, learned hidden completion, sparse-convolution dependency or new S/B/L/g ladder is authorized.
 
-## 6. Gate 0 — ACTIVE, DETERMINISTIC ONLY
-
-Gate-0 source:
-
-- `experiments/iris_reprojection_v2_20260831/gate0_geometry_v1.py`
-- `experiments/iris_reprojection_v2_20260831/test_gate0_geometry_v1.py`
-- `experiments/iris_reprojection_v2_20260831/run_gate0_synthetic_preflight_v1.py`
-
-CI: `.github/workflows/iris_reprojection_v2_gate0.yml`.
-
-Gate 0 has **zero optimizer steps** and tests:
-
-- exact projection/backprojection;
-- common-world-Z row invariance;
-- visual-hull truth containment x search-reduction frontier;
-- spacing x thin-structure resolvability;
-- robust view-evidence permutation/outlier behavior;
-- streamed candidate memory accounting;
-- explicit UNKNOWN state preservation.
-
-Coarse spacing is not post-hoc tuned. Training-free candidates are `.016`, `.008`, `.004`. Hull padding candidates are `0,1,2,4,8` native pixels. Selection requires both containment and useful search reduction.
-
 Program rule:
 
 `NO_ARCHITECTURAL_MECHANISM_WITHOUT_A_DEMONSTRATED_FAILURE_IT_ADDRESSES`.
 
+## 5. Gate 0 synthetic — CLOSED PASS
+
+Authority: `canonical/IRIS_REPROJECTION_V2_GATE0_SYNTHETIC_CLOSURE_20260831.md`.
+
+Machine result: `experiments/iris_reprojection_v2_20260831/GATE0_SYNTHETIC_PREFLIGHT_RESULT_V1.json`.
+
+GitHub Actions run `33406189796` passed:
+
+- unit regressions: `9/9 PASS`;
+- synthetic preflight: `PASS_SYNTHETIC_GATE0`;
+- scientific optimizer steps: `0`.
+
+Synthetic results validate code algebra only. They select neither real hull padding nor coarse spacing and say nothing about DINO-S learned feasibility.
+
+## 6. Gate 0 real corpus — RUNNER READY / NOT EXECUTED
+
+Execution prereg authority:
+`canonical/IRIS_REPROJECTION_V2_REAL_CORPUS_GATE0_EXECUTION_PREREG_20260831.md`.
+
+Runner/tests:
+
+- `experiments/iris_reprojection_v2_20260831/gate0_real_corpus_v1.py`
+- `experiments/iris_reprojection_v2_20260831/test_gate0_real_corpus_v1.py`
+
+GitHub Actions run `33407283365` passed all three stages: synthetic geometry regressions, real-runner helper regressions, and synthetic preflight.
+
+The scientific real execution is frozen to exact S1 `TRAIN512`, not clean-C0, to preserve H0/architecture causal separation.
+
+Real Gate0 measures before learned outputs:
+
+- exact camera/image/raster authority;
+- hull padding `{0,1,2,4,8}` sampled-truth containment;
+- deterministic 32768-point/asset canonical-volume search reduction;
+- padding decision by smallest zero-sampled-truth-miss candidate;
+- compute-pruning classification with median active fraction threshold `<=0.75`;
+- spacing accounting for `.016/.008/.004`;
+- observed silhouette medial-thickness proxy (`2*EDT` at 3x3 local maxima) and cell strata.
+
+No spacing is selected by the runner. A successful measurement must be followed by a separate spacing/resolution policy freeze.
+
 ## 7. Next gates
 
-Only after Gate 0 closes:
+Only after scientific real-corpus Gate0 passes and padding/spacing policy is frozen:
 
 1. freeze exact DINO-S intermediate taps, native-pyramid implementation, learned evidence representation, loss, runtime and source hashes;
 2. Gate 0.5: one real family, single-pass ceiling;
@@ -150,5 +165,5 @@ Corpus H0 work remains separate from V2 apparatus causality and may not reinterp
 
 **V2 learned optimizer steps: NOT AUTHORIZED.**  
 **New S/B/L/g ladder: NOT AUTHORIZED.**  
-**Gate-0 deterministic implementation/testing: AUTHORIZED.**  
+**Scientific real-corpus Gate0 deterministic execution: AUTHORIZED under its frozen prereg.**  
 **DEV32: CLOSED.**

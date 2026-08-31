@@ -76,6 +76,7 @@ from .types import *
 from .surface import *
 from .rig import *
 from .skin import *
+from .mesh_binding import *
 from .product import *
 from .api import CompilerFacade
 from .bundle_routes import *

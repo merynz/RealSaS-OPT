@@ -1,0 +1,27 @@
+name: mwb0-typed-seam-v1
+on:
+  pull_request:
+    paths:
+      - 'compiler/**'
+      - 'canonical/MESH_WEIGHT_BINDING_CONTRACT_V1.md'
+      - 'canonical/MESH_WEIGHT_BINDING_CONTRACT_V1.json'
+      - '.github/workflows/mwb0_typed_seam_v1.yml'
+permissions:
+  contents: read
+jobs:
+  typed-seam:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install current compiler dependency
+        run: python -m pip install --disable-pip-version-check numpy
+      - name: Compile current compiler source
+        run: python -m compileall -q compiler/realsas_compiler_core compiler/test_mwb0_contract_v1.py
+      - name: Run MWB0 typed seam regressions
+        env:
+          PYTHONPATH: ${{ github.workspace }}/compiler
+        run: python -m unittest -v compiler/test_mwb0_contract_v1.py

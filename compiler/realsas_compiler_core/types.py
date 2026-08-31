@@ -155,8 +155,92 @@ class QualifiedSkinIR:
     schema_version:str="RealSaS.QualifiedSkinIR.v1"
     def to_dict(self): return asdict(self)
 
+# MWB-0: typed editable-mesh / mesh-weight seam. These types intentionally
+# contain no triangulation, BBW, ARAP or XPBD implementation authority.
+@dataclass(frozen=True)
+class SurfaceSupportBinding:
+    mode:str
+    coefficients:tuple[tuple[str,float],...]
+    metadata:Json=field(default_factory=dict)
+    schema_version:str="RealSaS.SurfaceSupportBinding.v1"
+    def to_dict(self): return asdict(self)
+
+@dataclass(frozen=True)
+class MeshVertexCandidate:
+    candidate_vertex_id:str
+    P:Vec3
+    support_binding:SurfaceSupportBinding
+    metadata:Json=field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
+@dataclass(frozen=True)
+class MeshDiscretizationCandidateIR:
+    vertices:tuple[MeshVertexCandidate,...]
+    faces:tuple[tuple[str,...],...]
+    edges:tuple[tuple[str,str],...]
+    surface_binding_hash:str
+    view_index:int
+    camera_binding_hash:str
+    candidate_lineage_hash:str
+    boundary_constraints:tuple[Json,...]=()
+    coverage_classification:str=""
+    solver_provenance:Json=field(default_factory=dict)
+    residual_report:Json=field(default_factory=dict)
+    schema_version:str="RealSaS.MeshDiscretizationCandidateIR.v1"
+    metadata:Json=field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
+@dataclass(frozen=True)
+class QualifiedMeshVertex:
+    canonical_mesh_vertex_id:str
+    P:Vec3
+    support_binding:SurfaceSupportBinding
+    source_candidate_vertex_id:str=""
+    metadata:Json=field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
+@dataclass(frozen=True)
+class QualifiedEditableMeshIR:
+    vertices:tuple[QualifiedMeshVertex,...]
+    faces:tuple[tuple[str,...],...]
+    edges:tuple[tuple[str,str],...]
+    surface_binding_hash:str
+    view_index:int
+    camera_binding_hash:str
+    qualification_report:Json
+    mesh_lineage_hash:str
+    boundary_constraints:tuple[Json,...]=()
+    support_coverage_classification:str=""
+    schema_version:str="RealSaS.QualifiedEditableMeshIR.v1"
+    metadata:Json=field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
+@dataclass(frozen=True)
+class QualifiedMeshSkinRow:
+    canonical_mesh_vertex_id:str
+    influences:tuple[tuple[str,float],...]
+    source_support_coefficients:tuple[tuple[str,float],...]
+    simplex_residual_before:float
+    correction_l1:float
+    def to_dict(self): return asdict(self)
+
+@dataclass(frozen=True)
+class QualifiedMeshSkinIR:
+    rows:tuple[QualifiedMeshSkinRow,...]
+    surface_binding_hash:str
+    skeleton_binding_hash:str
+    skin_binding_hash:str
+    mesh_binding_hash:str
+    transfer_method:str
+    qualification_report:Json
+    mesh_skin_lineage_hash:str
+    schema_version:str="RealSaS.QualifiedMeshSkinIR.v1"
+    metadata:Json=field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
 @dataclass(frozen=True)
 class CanonicalPuppetGraph:
+    """Legacy/current V1 product retained for compatibility during MWB rollout."""
     product_lineage_id:str
     product_state_hash:str
     parent_state_hash:str|None
@@ -170,6 +254,25 @@ class CanonicalPuppetGraph:
     editable_metadata:Json=field(default_factory=dict)
     export_contract_version:str="RealSaS.RuntimePackageIR.v1"
     schema_version:str="RealSaS.CanonicalPuppetGraph.v1"
+    def to_dict(self): return asdict(self)
+
+@dataclass(frozen=True)
+class CanonicalPuppetGraphV2:
+    product_lineage_id:str
+    product_state_hash:str
+    parent_state_hash:str|None
+    admitted_surface_hash:str
+    admitted_skeleton_hash:str
+    admitted_skin_hash:str
+    admitted_mesh_hash:str
+    admitted_mesh_skin_hash:str
+    qualification_ledger:tuple[Json,...]
+    deformation_state:Json=field(default_factory=dict)
+    contact_state:Json=field(default_factory=dict)
+    motion_bindings:Json=field(default_factory=dict)
+    editable_metadata:Json=field(default_factory=dict)
+    export_contract_version:str="RealSaS.RuntimePackageIR.v1"
+    schema_version:str="RealSaS.CanonicalPuppetGraph.v2"
     def to_dict(self): return asdict(self)
 
 @dataclass(frozen=True)

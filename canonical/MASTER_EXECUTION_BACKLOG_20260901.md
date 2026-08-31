@@ -4,8 +4,8 @@
 
 Status vocabulary:
 
-- `[x] CLOSED` — implemented/executed and closure recorded or ready to record;
-- `[~] ACTIVE` — currently executing outside the repository or currently under implementation;
+- `[x] CLOSED` — implemented/executed and closure recorded;
+- `[~] ACTIVE` — currently executing outside the repository or currently under implementation/audit;
 - `[ ] READY` — can proceed without user input once prerequisites are satisfied;
 - `[!] INPUT/REVIEW` — requires user-provided output, semantic review, or explicit scientific authorization;
 - `[-] BLOCKED` — waiting on an earlier gate.
@@ -75,14 +75,14 @@ Status vocabulary:
 47. `[x] CLOSED` Bind mesh + mesh-skin lineage into V2 product state as part of MWB-0.
 48. `[x] CLOSED` Add stale-proof invalidation regressions for mesh/product mutations as part of MWB-0.
 49. `[x] CLOSED` Implement fail-closed MWB lineage/support/topology/simplex checks required by MWB-0.
-50. `[ ] READY` MWB-1 identity/subset deterministic real-witness baseline.
-51. `[-] BLOCKED` MWB-2 local convex interpolation and/or CDT candidate.
+50. `[x] CLOSED` MWB-1 identity/subset deterministic real-witness baseline. Closure: `canonical/MWB1_IDENTITY_SUBSET_BASELINE_CLOSURE_20260901.md`.
+51. `[ ] READY` MWB-2 local convex interpolation and/or CDT candidate; must freeze exact policy and provenance before execution.
 52. `[-] BLOCKED` MWB-3 Arachne field-to-mesh transfer deformation ceiling.
 53. `[-] BLOCKED` MWB-4 historical solver promotion only where demonstrated necessary.
 
 ## Lane D — Compiler / runtime numerical restoration and product proof
 
-54. `[ ] READY` Audit exact historical numerical package inventory against current typed integration needs before promotion.
+54. `[~] ACTIVE` Audit exact historical Compiler/runtime numerical package inventory and Drive-to-GitHub migration completeness against current typed integration needs. Prereg: `canonical/COMPILER_RUNTIME_MIGRATION_COMPLETENESS_AUDIT_PREREG_20260901.md`.
 55. `[-] BLOCKED` Promote exact-predicate CDT only through provenance + typed parity gate if MWB-2 requires it.
 56. `[-] BLOCKED` Restore/promote ARAP against exact `CanonicalPuppetGraph.v2` state if product deformation gate requires it.
 57. `[-] BLOCKED` Restore/promote XPBD/contact against exact product state if motion/contact gate requires it.
@@ -92,22 +92,24 @@ Status vocabulary:
 
 ## Lane R — Repository / architecture hygiene
 
-61. `[ ] READY` Perform atomic `SurfaceBuilder -> GeometricSubstrateAssembler` current-code nomenclature migration without rewriting historical artifacts/hashes.
-62. `[ ] READY` Reconcile obsolete `geppetto-arachne-v0-1-20260830` branch against canonical `main` authority.
-63. `[ ] READY` Audit old Geppetto/Arachne scaffold for still-useful components against current R6 + MWB contracts.
-64. `[-] BLOCKED` Port useful scaffold components into current authority instead of blind merging.
-65. `[ ] READY` Replace obsolete human-readable continuation roadmap with current three-lane roadmap.
+61. `[x] CLOSED` Atomic `SurfaceBuilder -> GeometricSubstrateAssembler` current-code nomenclature migration completed without rewriting explicit historical artifact identities; regression suites passed.
+62. `[x] CLOSED` Reconcile obsolete `geppetto-arachne-v0-1-20260830` branch against canonical `main` authority. Report: `canonical/GEPPETTO_ARACHNE_LEGACY_BRANCH_RECONCILIATION_20260901.md`.
+63. `[x] CLOSED` Audit all 27 legacy-only Geppetto/Arachne files for current R6 + MWB relevance; one active semantic-authority orphan identified/restored.
+64. `[ ] READY` Selectively port only approved legacy components: teacher/evaluator skeleton projection first; requalify substrate helpers separately; do not port G0.1 as architecture authority.
+65. `[ ] READY` Replace obsolete human-readable continuation roadmap with current multi-lane roadmap.
 66. `[ ] READY` Maintain this canonical backlog and mirror major actionable units into GitHub Issues where useful.
-67. `[ ] READY, ORDERED AFTER CORE AUTHORITY AUDITS` Produce a highly detailed end-to-end canonical architecture SVG. **Mandatory prerequisite inside this item:** locate the detailed Drive->GitHub Compiler+Runtime migration/restoration report; derive its complete source inventory; verify every intended migrated Compiler/runtime component against current GitHub bytes, restoration manifests, canonical entrypoints and artifact routes; identify components that were intentionally historical-only, optional fallback, orphaned, dead, or silently sidelined; resolve/report any missing migration before drawing. The final SVG must distinguish canonical mainline, learned proposal layers, Compiler-owned qualification/solver layers, product-state IRs, proof/repair/runtime path, corpus/training-only apparatus, optional/fallback numerical authorities, historical-only authorities, and dead/orphaned components. No architectural component may be omitted merely because it is not on the current happy-path entrypoint.
+67. `[-] BLOCKED ON #54` Produce a highly detailed end-to-end canonical architecture SVG. **Mandatory prerequisite:** locate the detailed Drive->GitHub Compiler+Runtime migration/restoration report; derive its complete source inventory; verify every intended migrated Compiler/runtime component against current GitHub bytes, restoration manifests, canonical entrypoints and artifact routes; identify components that were intentionally historical-only, optional fallback, orphaned, dead, or silently sidelined; resolve/report any missing migration before drawing. The final SVG must distinguish canonical mainline, learned proposal layers, Compiler-owned qualification/solver layers, product-state IRs, proof/repair/runtime path, corpus/training-only apparatus, optional/fallback numerical authorities, historical-only authorities, and dead/orphaned components. No architectural component may be omitted merely because it is not on the current happy-path entrypoint.
 
 ---
 
 ## Current execution order
 
-Immediate autonomous priority while Gate0 runs:
+While real-corpus Gate0 runs externally:
 
-`MWB-0 closure/state -> MWB-1 design/execution -> Clean-C0 triage execution preparation -> Geppetto R6 apparatus preflight -> SkinFieldCodec design -> repository authority/historical inventory audit`
+`migration/inventory audit #54 -> selective teacher-projection port #64 -> Geppetto R6 conditioning preflight -> SkinFieldCodec design -> MWB-2 prereg/provenance only when exact CDT/interpolation authority is clear -> current roadmap refresh`
 
 Gate0-result-dependent work remains frozen until the actual result is supplied.
+
+Clean-C0 diagnostic generation may proceed autonomously when its corpus/runtime authority is locally available, but semantic labels remain human-review input.
 
 No learned optimizer step is authorized by this backlog.

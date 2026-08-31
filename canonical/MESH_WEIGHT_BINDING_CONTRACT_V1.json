@@ -1,0 +1,72 @@
+{
+  "schema": "RealSaS.MeshWeightBindingContract.v1",
+  "date": "2026-08-31",
+  "status": "FROZEN_PREIMPLEMENTATION__MWB0_REQUIRED_BEFORE_FINAL_ARACHNE_PRODUCT_SEAL",
+  "normal_path": [
+    "RiggingSurfaceIR",
+    "MeshDiscretizationCandidateIR",
+    "QualifiedEditableMeshIR",
+    "QualifiedSkeletonIR",
+    "SkinProposalIR",
+    "QualifiedSkinIR",
+    "QualifiedMeshSkinIR",
+    "CanonicalPuppetGraph.v2",
+    "ARAP_XPBD_MOTION_PROOF",
+    "RuntimePackageIR"
+  ],
+  "authority": {
+    "geometry_truth": "RiggingSurfaceIR",
+    "mesh_topology": "Compiler.geometry_qualification",
+    "skeleton_semantics": "Geppetto proposal + Compiler global graph qualification",
+    "skin_semantics": "Arachne proposal",
+    "skin_legality": "Compiler.skin_qualification",
+    "mesh_weight_binding": "deterministic binder + Compiler qualification",
+    "product_truth": "CanonicalPuppetGraph.v2",
+    "deformation_contact": "Compiler numerical solvers on exact product state"
+  },
+  "mesh_vertex_binding": {
+    "coefficients_nonnegative": true,
+    "coefficients_sum_to_one": true,
+    "allowed_modes": [
+      "IDENTITY_SURFACE_NODE",
+      "LOCAL_CONVEX_INTERPOLATION"
+    ],
+    "hidden_completion_forbidden": true,
+    "cross_unknown_support_forbidden": true
+  },
+  "mesh_weight_transfer": {
+    "default_rule": "w(v,j)=sum_s a(v,s)*w(s,j)",
+    "new_joint_support_creation_forbidden": true,
+    "unconstrained_bbw_fill_forbidden": true,
+    "measure_numerical_simplex_residual": true
+  },
+  "bbw": {
+    "full_generator_inside_normal_qualification": "FORBIDDEN",
+    "bounded_projection": "NOT_AUTHORIZED_UNTIL_DEMONSTRATED_FAILURE_AND_PREREGISTERED_BUDGET",
+    "full_alternative_generator": "SEPARATE_TYPED_PROPOSAL_OR_FALLBACK_ARM_REQUIRED"
+  },
+  "canonical_product_v2_required_hashes": [
+    "admitted_surface_hash",
+    "admitted_skeleton_hash",
+    "admitted_skin_hash",
+    "admitted_mesh_hash",
+    "admitted_mesh_skin_hash",
+    "parent_state_hash",
+    "product_state_hash"
+  ],
+  "gates": [
+    "MWB-0_TYPED_SCHEMA_HASHING_ARTIFACT_ROUTE_PREFLIGHT",
+    "MWB-1_IDENTITY_SUBSET_DETERMINISTIC_BASELINE",
+    "MWB-2_CONSTRAINED_INTERPOLATION_OR_CDT",
+    "MWB-3_ARACHNE_FIELD_TO_MESH_TRANSFER_CEILING",
+    "MWB-4_HISTORICAL_SOLVER_PROMOTION_ONLY_IF_NEEDED"
+  ],
+  "training_authorized": false,
+  "blocks": [
+    "FINAL_ARACHNE_PRODUCT_ARCHITECTURE_SEAL"
+  ],
+  "does_not_block": [
+    "IRIS_REAL_GATE0",
+    "GEPPETTO_R6_ORACLE_CAUSAL_WORK"
+  ]
+}

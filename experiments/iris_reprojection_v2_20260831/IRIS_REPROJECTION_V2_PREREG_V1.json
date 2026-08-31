@@ -1,0 +1,84 @@
+{
+  "schema": "RealSaS.IRIS.ReprojectionCenteredV2.Prereg.v1",
+  "date": "2026-08-31",
+  "status": "SEALED_BEFORE_GATE0_OUTPUTS__NO_OPTIMIZER_AUTHORIZED",
+  "backbone_default": {
+    "candidate": "DINOv2-S/14",
+    "frozen": true,
+    "meaning": "compute-efficient V2 apparatus default, not a proof of sufficiency",
+    "larger_backbone_rule": "forbidden until S exhibits a representation ceiling under a qualified V2 apparatus"
+  },
+  "external_contract": {
+    "output": "observation-grounded forward depth d plus validity uncertainty and support evidence",
+    "common_frame": "P = O + dF",
+    "hidden_completion": false,
+    "canonical_internal_state": "partial observed-surface evidence only"
+  },
+  "v2a_reference": {
+    "passes": 1,
+    "exact_camera_authority": "camera.json",
+    "reprojection_is_central": true,
+    "visual_hull_role": "candidate-domain constraint only",
+    "candidate_representation": "dense XY slices with hull mask and streamed candidate evidence",
+    "sparse_convolution": false,
+    "learned_occlusion_authority": false,
+    "recurrent_visibility_refinement": false,
+    "global_soft_argmin": false,
+    "unknown_completion": false
+  },
+  "candidate_states": [
+    "SURFACE_SUPPORTED",
+    "SURFACE_AMBIGUOUS",
+    "UNKNOWN_OCCLUDED",
+    "UNKNOWN_UNOBSERVED",
+    "OUTSIDE_ADMISSIBLE_DOMAIN",
+    "RESOLUTION_UNSUPPORTED"
+  ],
+  "native_pyramid_preflight_widths": {
+    "1024": 32,
+    "512": 48,
+    "256": 64,
+    "128": 96,
+    "64": 128
+  },
+  "gate0": {
+    "optimizer_steps": 0,
+    "authorized": true,
+    "spacing_sweep_world": [0.016, 0.008, 0.004],
+    "hull_padding_sweep_native_px": [0, 1, 2, 4, 8],
+    "mandatory_checks": [
+      "camera_contract",
+      "projection_backprojection_roundtrip",
+      "common_world_z_row_invariance",
+      "hull_truth_containment_x_search_reduction_frontier",
+      "coarse_spacing_x_thin_structure_resolvability",
+      "descriptor_sampling_coordinate_parity",
+      "robust_evidence_view_permutation_and_outlier_resistance",
+      "streaming_memory_accounting",
+      "no_hidden_completion_path",
+      "synthetic_regression_suite"
+    ]
+  },
+  "gate_sequence": [
+    "GATE0_DETERMINISTIC_PREFLIGHT",
+    "GATE0_5_ONE_FAMILY_SINGLE_PASS_CEILING",
+    "GATE1_EIGHT_FAMILY_SINGLE_PASS_CEILING",
+    "GATE2_SMALL_CAUSAL_ABLATIONS",
+    "FULL_TRAINING_ONLY_AFTER_EXPLICIT_AUTHORIZATION"
+  ],
+  "mandatory_ablations_after_ceiling": [
+    "DINO_ON_NATIVE_ON",
+    "DINO_OFF_NATIVE_ON",
+    "DINO_ON_NATIVE_OFF"
+  ],
+  "program_rules": [
+    "NO_ARCHITECTURAL_MECHANISM_WITHOUT_A_DEMONSTRATED_FAILURE_IT_ADDRESSES",
+    "REFINEMENT_MUST_DEMONSTRATE_INFORMATION_GAIN",
+    "ANALYTICALLY_IDENTIFIABLE_STRUCTURE_MUST_NOT_BE_RELEARNED",
+    "UNIDENTIFIABLE_STRUCTURE_REMAINS_PROBABILISTIC_OR_UNKNOWN",
+    "SEALING_PRESERVES_PROVENANCE_BUT_DOES_NOT_CREATE_CAUSAL_ATTRIBUTION"
+  ],
+  "training_authorized": false,
+  "new_backbone_ladder_authorized": false,
+  "dev32_opened": false
+}

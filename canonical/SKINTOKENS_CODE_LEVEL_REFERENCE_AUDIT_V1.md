@@ -1,179 +1,190 @@
 # SkinTokens / TokenRig — Code-Level Reference Audit V1
 
 **Date:** 2026-08-31  
-**Status:** `R0_R4_IN_PROGRESS__REFERENCE_FACTS_ONLY__NO_ARACHNE_ARCHITECTURE_SEAL`
+**Status:** `R0_R4_COMPLETE__SKIN_CODEC_FUNCTION_EXTRACTED__PUBLIC_TRAINING_INTEGRATION_PARTLY_INCOMPLETE__MIT`
 
-## Scope / license
+## Scope and license
 
 Frozen upstream: `VAST-AI-Research/SkinTokens@273b691d35989d71cd17ff2895fdc735097b92d1`.
 
-The public repository is MIT licensed. RealSaS still applies the same scientific clean-room/provenance discipline: reference facts are separated from RealSaS hypotheses, and no reference mechanism is promoted merely because it exists upstream.
+The repository is MIT licensed. RealSaS nevertheless applies the same scientific provenance discipline used for noncommercial references: reference facts, RealSaS contract requirements and new hypotheses remain explicitly separated.
 
-## Sources inspected in this pass
+SkinTokens is audited primarily as the **Arachne representation/codec reference**, not as authority for RealSaS skeleton topology.
+
+## R0 — frozen source inventory
+
+Inspected public snapshot includes:
 
 - `README.md` blob `7b9d14a47adcc29d6bc99367e6d7780980ddd055`
 - `LICENSE` blob `484d9bbef8720dc2797444a18c972a4e6245a07e`
 - `src/model/tokenrig.py` blob `ab35e3fb8dd850737cba7d1782f03c75846971be`
-- `src/model/spec.py` blob `fbb0e932f5dcfdb45351b63fad325018d62f84b0`
 - `src/model/skin_vae_model.py` blob `a2b4e88b6997883ce5861333bb498dc9593ff80d`
 - `src/model/skin_vae/autoencoders/skin_fsq_cvae_model.py` blob `6b66d9e9486d261f0a5d67f795bbe60499fb26e3`
 - `src/data/sampler.py` blob `ef7bc0d8fccd2bd4e0b2bd13887c1c96b2caa6dc`
 - `src/data/transform.py` blob `3601d755766932490a584aa495848402950a0e19`
-- `src/tokenizer/tokenizer_part.py` blob `5e91e3c37be61653dec2be3263bfd2b53f90e5fc`
-- `demo.py` blob `a2cb3a2bc6380428ff16b74592049a2f3fb18402`
+- tokenizer/rig-package/model support files in the same frozen tree
 - paper: `Skin Tokens: A Learned Compact Representation for Unified Autoregressive Rigging`, arXiv:2602.04805.
 
-## R1 — Information contract
+The public snapshot exposes enough inference/representation code to close the functional audit, but important wrapper-level training methods remain `NotImplemented`; exact published-run integration is therefore partly `NOT_PUBLICLY_VERIFIABLE` from code alone.
+
+## R1 — exact information contract
 
 ### Product inference geometry
 
-The released TokenRig path operates on sampled surface geometry represented as vertex/sample positions and normals. `tokenrig.py` forms geometry conditioning from `[vertices, normals]` and also passes the same P+N geometry through a learned mesh encoder.
+The released TokenRig path conditions on sampled surface:
 
-The skin VAE's geometry conditioning uses unordered point-set geometry; the lower-level CVAE separates 3D position from accompanying point features and builds geometry latent tokens by attention over the point set.
+`P_xyz + N_xyz`.
 
-### Existing-skeleton / skin-only mode
+`tokenrig.py` concatenates positions/normals for the skin-VAE geometry condition and independently passes the same P+N geometry through a learned mesh encoder for the autoregressive model.
 
-The released demo supports a mode that uses an existing skeleton and generates skin only. In code, TokenRig can accept pre-existing skeleton tokens; generation begins from that fixed skeleton prefix and continues into skin tokens. This is especially relevant to RealSaS because Arachne consumes `Compiler-qualified QualifiedSkeletonIR` rather than owning skeleton topology.
+For RealSaS the comparison object is:
 
-### Training-only skin-target geometry
+`B_A = ArachneConditioningAdapter(RiggingSurfaceIR, QualifiedSkeletonIR)`.
 
-The released sampler distinguishes:
+This is stronger than comparing SkinTokens against raw IRIS output: deterministic geometry assembly, normalization, qualified local geometry and the Compiler-owned skeleton are all credited if they are functions only of admitted product information.
 
-1. **uniform surface samples** with positions/normals and dense skin matrix values;
-2. **bone-specific dense samples** drawn from faces carrying non-zero influence for a particular bone and nearby regions.
+### Existing-skeleton / skin-only compatibility
 
-The bone-specific sampling depends on ground-truth skin weights and therefore is a **training/codec target-construction device**, not information required from product inference. RealSaS is allowed to construct equivalent training-only target samples from authoritative skin truth without implying that such fields exist at inference.
+TokenRig can start generation from an existing skeleton-token prefix. Therefore the skin problem is not intrinsically dependent on TokenRig owning skeleton generation.
 
-This distinction is binding for the R5 equivalence matrix.
+This maps cleanly to the RealSaS authority split:
 
-## R2 — Functional representation / architecture
+`Compiler-qualified skeleton -> Arachne skin proposal`.
 
-### Stage 1: SkinTokens representation
+### Uniform vs bone-specific training samples
 
-The paper and released code implement a geometry-conditioned discrete representation of each bone's skin influence field.
+The released sampler constructs:
 
-Functional factorization:
+1. uniform surface P/N samples and sampled skin values;
+2. optional per-bone dense samples from faces with nonzero GT influence and nearby geometry.
 
-```text
-per-bone skin field + geometry
- -> skin-field encoder
- -> compact continuous latent tokens
- -> finite scalar quantization (FSQ)
- -> short discrete SkinToken sequence
+The second path explicitly depends on ground-truth skin weights. It is therefore a **training/codec target-construction mechanism**, not product-inference information.
 
-geometry
- -> geometry/condition encoder
- -> condition tokens
+RealSaS may construct an independently specified equivalent active-region training sampler from authoritative dense teacher weights without claiming that those fields exist at inference.
 
-SkinTokens + geometry condition
- -> decoder queried at surface points
- -> continuous per-point influence field for that bone
-```
+## R2 — implementation-independent representation decomposition
 
-The lower-level released `SkinFSQCVAEModel` uses:
+### A. Per-bone skin field
 
-- unordered point-set attention encoders for skin/shape information;
-- a geometry condition encoder;
-- latent projection to a compact channel space;
-- finite scalar quantization / fixed-grid discrete codes;
-- a geometry-conditioned decoder queried at sampled points.
+The important factorization is not direct `N surface points x J joints` regression as one undifferentiated matrix. The reference represents each joint/bone's influence as a sparse spatial field conditioned on geometry.
 
-The public default class signature includes latent width `64`, encoder width `512`, decoder width `1024`, 8 encoder layers, 16 decoder layers and configurable sample-token count. These are reference implementation values, not RealSaS requirements.
+Functional form:
 
-### Sparse-skin objective
+`per-bone influence samples + geometry -> field encoder -> compact latent -> finite scalar quantization -> short discrete state`
 
-The paper explicitly treats dense direct regression as poorly conditioned by the extreme sparsity of the N x J matrix. SkinTokens instead compresses the **per-bone field** and trains reconstruction with a composite objective including BCE, MSE and Dice terms; Dice is used to amplify supervision on sparse positive influence regions.
+and
 
-The paper reports that very short token sequences can reconstruct skin fields at useful fidelity and selects a finite-scalar code configuration balancing compression and reconstruction.
+`discrete/continuous skin state + geometry condition -> query decoder -> continuous influence at requested surface points`.
 
-This strongly supports the existing RealSaS rule:
+### B. Geometry-conditioned FSQ-CVAE
 
-> **Arachne must prove its skin-field representation/codec ceiling before training a predictor of that representation.**
+The released `SkinFSQCVAEModel` has separate skin/field and geometry-condition encoders, latent projections and a geometry-conditioned decoder. Its default class signature contains reference values:
 
-### Stage 2: TokenRig sequence model
+- latent channels `64`;
+- encoder width `512`;
+- decoder width `1024`;
+- encoder layers `8`;
+- decoder layers `16`;
+- point positional embedding from 3D coordinates;
+- finite scalar quantization when an FSQ config is supplied.
 
-Released TokenRig uses:
+These exact widths/layers are reference values, not RealSaS requirements.
 
-- a learned mesh encoder producing global geometry latents;
-- a causal language-model-style transformer;
-- a structured skeleton-token prefix;
-- a vocabulary switch after the skeleton terminator;
-- a fixed number of SkinTokens per skeleton bone;
-- constrained generation grammar so skeleton vocabulary and skin-token vocabulary are used in the correct sequence regions.
+### C. Unified TokenRig sequence
 
-The skin-token block is therefore explicitly aligned to the generated/conditioned skeleton order.
+The released TokenRig combines learned geometry conditioning, a causal transformer, structured skeleton tokens and skin tokens. It can generate both skeleton and skin, but this unified authority topology is **not** adopted by RealSaS.
 
-For RealSaS, unifying skeleton generation and skinning into one authority is **not** adopted: the functional analogue is to condition Arachne on a deterministic serialization/embedding of `QualifiedSkeletonIR` and generate/decode one skin field per compiler-qualified joint.
+The RealSaS functional analogue is:
 
-### Skeleton tokenization in TokenRig
+`QualifiedSkeletonIR deterministic serialization/conditioning + geometry -> Arachne skin-state prediction -> skin-field decode -> SkinProposalIR`.
 
-The released tokenizer quantizes skeleton coordinates and serializes branch/chain structure into discrete tokens. The code can use ordered chain/part information where available. This is a reference sequence representation, not a RealSaS canonical topology authority.
+Compiler remains skeleton and final skin authority.
 
-Arachne only needs a deterministic conditioning representation of the already-qualified skeleton. Geppetto remains independently audited against template-free skeleton references.
+## R3 — training/loss audit
 
-## R3 — Training/loss facts currently verifiable
+### Publicly supported reference facts
 
-### Skin codec from paper
+The paper describes a dedicated skin-codec training stage followed by sequence-model training and later policy/reward refinement. Paper-level objectives include sparse-field-aware reconstruction terms and autoregressive token supervision; these are reference evidence, not automatically RealSaS loss requirements.
 
-The paper describes:
+### Code-level limitation
 
-- FSQ-CVAE training for skin-field reconstruction;
-- BCE + small MSE + Dice composite reconstruction objective;
-- nested dropout / variable token-budget training;
-- importance sampling focused on active deformation regions;
-- finite scalar quantization without a learned VQ codebook;
-- a long dedicated codec-training stage before TokenRig sequence learning.
+In the frozen public source:
 
-### TokenRig from paper/release
+- `SkinVAEModel.training_step` is `NotImplemented`;
+- `SkinVAEModel.get_loss_dict` is `NotImplemented` in the exposed base wrapper;
+- `SkinFSQCVAEModel.forward` is not the released end-to-end training integration;
+- `TokenRig.training_step` is also `NotImplemented` in the exposed base model.
 
-The paper describes supervised next-token training for the unified sequence followed by GRPO post-training. The RL stage uses explicit rig-quality rewards, including joint coverage, bone/mesh containment, skin coverage/sparsity and deformation smoothness.
+Therefore exact released-run loss weighting, optimizer schedule, nested-token curriculum and RL integration must be marked `NOT_PUBLICLY_VERIFIABLE` unless independently verified from paper/checkpoint metadata. We do **not** infer exact executable training behavior from paper prose or uncalled helpers.
 
-The README and paper report separate large training stages for the codec and sequence model and a short RL refinement stage.
+### Consequence for RealSaS
 
-### Public-release limitation
+The audit justifies the **functional obligations**, not an exact upstream training recipe:
 
-In the inspected repository snapshot, `TokenRig.training_step`, `SkinVAEModel.training_step`, and parts of the wrapper-level VAE encode/loss integration are intentionally/not-yet implemented in public source. Therefore exact supervised training code and every hyperparameter cannot be claimed from repository code alone.
+- sparse positive regions must receive nontrivial supervision;
+- a compact skin representation must prove reconstruction capacity before predictor training;
+- geometry conditioning must survive decoding back to the admitted surface;
+- final evaluation must include deformation, not static scalar error alone.
 
-Paper-level equations and checkpoint hyperparameters may be used as reference facts where independently verifiable; absent integration details remain `NOT_PUBLICLY_VERIFIABLE`.
+Exact BCE/MSE/Dice weights, token count, FSQ levels, Qwen choice or GRPO are not frozen RealSaS mechanisms by this audit.
 
-## R4 — Inference and postprocessing responsibility
+## R4 — learned vs deterministic/postprocess responsibility
 
-### Codec decode
+| Function | Responsibility in released reference |
+|---|---|
+| compact per-bone skin representation | learned codec + FSQ discretization |
+| geometry-conditioned field decode | learned |
+| skin-token generation from geometry/skeleton context | learned autoregressive model |
+| grammar/vocabulary switching | deterministic constrained-generation protocol |
+| existing-skeleton prefix construction | deterministic tokenization/serialization |
+| assembly of per-bone fields into N x J matrix | deterministic indexing/assembly around learned fields |
+| sampled-surface -> original mesh transfer in VAE helper | deterministic nearest-neighbor transfer |
+| optional downstream export/postprocess | deterministic and must be audited separately from neural fidelity |
 
-Skin tokens are converted back to FSQ codes and decoded under geometry condition into one continuous influence value per sampled surface point and bone. Per-bone decoded fields are assembled into an N x J skin matrix.
+## RealSaS Compiler ownership correction
 
-### Surface transfer/export
+Arachne is not required to produce a legally final skin matrix. The current Compiler already owns:
 
-The VAE prediction helper can transfer sampled skin predictions to original mesh vertices through nearest sampled-vertex lookup. The demo can additionally apply an optional voxel-based skin postprocess before export. Export also imposes a bounded group-per-vertex representation.
+- exact surface-lineage binding;
+- exact skeleton-lineage binding;
+- legal joint/surface reference checks;
+- nonnegative/finite validation;
+- bounded top-k sparsification when enabled;
+- bounded simplex repair/renormalization;
+- fail-closed rejection when correction exceeds policy.
 
-These deterministic transfer/postprocess steps must be separated from neural representation fidelity when comparing Arachne.
+Therefore Arachne's job is to produce **high-quality influence evidence/fields bound to the qualified skeleton**, not to duplicate legal/simplex authority inside the model.
 
-## First Arachne functional-equivalence obligations
+## Functional obligations carried into Arachne design
 
-Before treating Arachne as a solved problem class under RealSaS inputs, RealSaS must independently implement and test counterparts for the material functions below:
+An independent RealSaS candidate must demonstrate:
 
-1. **geometry conditioning:** `ArachneConditioningAdapter(RiggingSurfaceIR, QualifiedSkeletonIR)` exposes stable P/N/local geometry and skeleton-conditioned descriptors;
-2. **per-joint field factorization:** skin is representable as one sparse spatial influence field per qualified joint, without relying on authored helper identity;
-3. **compact representation ceiling:** the chosen discrete/continuous codec can reconstruct authoritative RealSaS skin truth below frozen static and deformation-sensitive tolerances before any token predictor is trained;
-4. **positive-region supervision:** sparse active influences receive sufficient training signal; trivial near-zero solutions cannot look good by aggregate error alone;
-5. **skeleton conditioning:** skin representation/prediction is explicitly bound to the exact `QualifiedSkeletonIR` lineage and joint ordering/identity adapter;
-6. **surface decoding:** compact skin state can decode back onto all admitted `RiggingSurfaceIR` nodes with no hidden source-mesh dependency;
-7. **simplex/sparsity boundary:** learned outputs remain proposals; Compiler owns legal references, simplex correction, influence-limit policy and fail-closed behavior;
-8. **deformation validation:** static weight error is insufficient; final qualification includes deformation/motion proof.
+1. geometry-conditioned per-joint influence fields;
+2. explicit conditioning on the exact `QualifiedSkeletonIR` lineage;
+3. a codec/representation ceiling on authoritative dense RealSaS skin truth **before** training a predictor of that code/state;
+4. sufficient active-region supervision so sparse trivial solutions cannot win by aggregate error;
+5. decode/evaluation on every admitted `RiggingSurfaceIR` node without hidden source-mesh completion;
+6. `SkinProposalIR` output with no silent helper-weight transport or teacher identity leakage;
+7. Compiler qualification after prediction;
+8. deformation/motion-sensitive proof after qualification.
 
-FSQ itself, Qwen, unified skeleton+skin autoregression, the exact token count or GRPO are **reference-supported mechanisms**, not automatically mandatory. If RealSaS uses a different mechanism, it must satisfy the same functional obligations and match or exceed the oracle-substrate/downstream ceiling.
+FSQ, exact token counts, a Qwen-style LM, unified skeleton+skin autoregression and RL refinement are only `REFERENCE_SUPPORTED` mechanisms until separately justified.
 
-## Important preliminary equivalence finding
+## Why SkinTokens is the primary Arachne reference
 
-SkinTokens is a particularly clean Arachne reference because its **product-inference geometry requirement is much closer to the RealSaS consumer substrate than its training pipeline first appears**:
+SkinTokens is materially cleaner than RigAnything's released skin path for Arachne equivalence because:
 
-- inference conditioning is sampled surface P+N plus skeleton/skin tokens;
-- dense bone-specific samples are constructed using ground-truth influence fields for codec training, so they are not missing product-input information;
-- RealSaS already owns dense authoritative skin truth in the teacher corpus and can construct training-only per-joint active-region samples;
-- Arachne receives a stronger authority boundary than TokenRig's internally generated skeleton because it consumes Compiler-qualified skeleton state.
+- its core representation is explicitly a geometry-conditioned skin field;
+- skin-only conditioning with an existing skeleton is supported;
+- GT-skin-dependent dense samples are training-only target construction rather than inference requirements;
+- RealSaS already has authoritative dense weight truth for eligible corpus assets;
+- RealSaS supplies a Compiler-qualified skeleton rather than asking Arachne to own skeleton truth;
+- its core skin representation does not require mesh-neighbor smoothing to define the learned field itself.
 
-The unresolved material difference is again **coverage/topology of the surface substrate**: TokenRig/SkinTokens are trained against full 3D mesh surfaces, whereas RealSaS product geometry remains partial observation-grounded `RiggingSurfaceIR`.
+The unresolved material difference is **surface coverage/accessibility**: SkinTokens operates on full 3D mesh-surface samples, while shipping RealSaS intentionally exposes partial observation-grounded geometry.
 
-## Status / next audit actions
+## R0-R4 verdict
 
-R0-R4 are started but not closed. Next work is the exact R5 field-by-field matrix, codec-capacity design mapping onto RealSaS dense skin truth, and a clean distinction between paper-only training facts and executable released inference behavior. No Arachne architecture/loss/training seal is authorized by this draft.
+`PASS_PRIMARY_ARACHNE_REFERENCE_FUNCTION_EXTRACTED`
+
+SkinTokens provides strong external evidence that geometry-conditioned compact skin fields are a viable solution family. It does not by itself prove that the partial RealSaS substrate is input-equivalent. That question moves to the shared R5 matrix and R6 oracle-substrate ceiling.

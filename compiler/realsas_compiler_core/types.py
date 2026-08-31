@@ -64,7 +64,7 @@ class RiggingSurfaceIR:
     surface_nodes:tuple[SurfaceNode,...]
     local_relations:tuple[SurfaceRelation,...]=()
     geometry_lineage_hash:str=""
-    builder_id:str="RealSaS.SurfaceBuilder.current"
+    builder_id:str="RealSaS.GeometricSubstrateAssembler.current"
     schema_version:str="RealSaS.RiggingSurfaceIR.v1"
     metadata:Json=field(default_factory=dict)
     def to_dict(self): return asdict(self)
@@ -155,8 +155,6 @@ class QualifiedSkinIR:
     schema_version:str="RealSaS.QualifiedSkinIR.v1"
     def to_dict(self): return asdict(self)
 
-# MWB-0: typed editable-mesh / mesh-weight seam. These types intentionally
-# contain no triangulation, BBW, ARAP or XPBD implementation authority.
 @dataclass(frozen=True)
 class SurfaceSupportBinding:
     mode:str

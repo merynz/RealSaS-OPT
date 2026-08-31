@@ -180,6 +180,7 @@ def qualify_identity_subset_mesh(surface: RiggingSurfaceIR, candidate: MeshDiscr
         "face_count": len(faces),
         "edge_count": len(edges),
         "no_new_geometry_authority": True,
+        "camera_geometry_consumed": bool(candidate.metadata.get("camera_geometry_consumed", False)),
         "numerical_solver_promoted": False,
     }
     mesh = QualifiedEditableMeshIR(vertices, faces, edges, surface.geometry_lineage_hash, candidate.view_index, candidate.camera_binding_hash, report, "", candidate.boundary_constraints, candidate.coverage_classification, metadata={"source_candidate_lineage_hash": candidate.candidate_lineage_hash})

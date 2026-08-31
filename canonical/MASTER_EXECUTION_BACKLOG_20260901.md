@@ -96,9 +96,9 @@ Status vocabulary:
 62. `[x] CLOSED` Reconcile obsolete `geppetto-arachne-v0-1-20260830` branch against canonical `main` authority. Report: `canonical/GEPPETTO_ARACHNE_LEGACY_BRANCH_RECONCILIATION_20260901.md`.
 63. `[x] CLOSED` Audit all 27 legacy-only Geppetto/Arachne files for current R6 + MWB relevance; one active semantic-authority orphan identified/restored.
 64. `[x] CLOSED` Selectively port approved legacy teacher/evaluator skeleton projection into current R6 namespace. Old G0.1 neural scaffold and old interior-volume contract remain reference-only/requalification-required rather than silently promoted. Contract: `canonical/GEPPETTO_R6_TEACHER_PROJECTION_PORT_CONTRACT_20260901.md`.
-65. `[ ] READY` Replace obsolete human-readable continuation roadmap with current multi-lane roadmap.
+65. `[x] CLOSED` Replace obsolete human-readable continuation roadmap with `canonical/HUMAN_READABLE_ROADMAP_20260901.md`, aligned to IRIS V2 + R6 + MWB + reconciled historical authorities.
 66. `[ ] READY` Maintain this canonical backlog and mirror major actionable units into GitHub Issues where useful.
-67. `[ ] READY` Produce the highly detailed end-to-end canonical architecture SVG. Migration prerequisite #54 is CLOSED. The SVG must distinguish canonical mainline, learned proposal layers, Compiler-owned qualification/solver layers, product-state IRs, proof/repair/runtime path, corpus/training-only apparatus, optional/fallback numerical authorities, historical external byte authorities, and dead/superseded components. No architectural component may be omitted merely because it is not on the current happy-path entrypoint, and no historical SHA pointer may be drawn as current executable code.
+67. `[x] CLOSED` Produce and structurally validate the highly detailed end-to-end canonical architecture SVG after migration prerequisite #54. Authorities: `canonical/SYSTEM_ARCHITECTURE_V3_20260901.md`, `canonical/REALSAS_END_TO_END_CANONICAL_ARCHITECTURE_20260901.svg`, validator `tools/validate_architecture_svg_v3.py`. The diagram distinguishes canonical mainline, future learned proposal layers, Compiler qualification, product-state IRs, proof/repair/runtime, training-only apparatus, historical external byte/numerical authorities, promotion/fallback gates and dead/superseded lineage.
 
 ---
 
@@ -106,10 +106,10 @@ Status vocabulary:
 
 While real-corpus Gate0 runs externally:
 
-`final architecture reconstruction/SVG #67 -> current roadmap refresh #65 -> Geppetto R6 conditioning preflight #26/#27 -> SkinFieldCodec design #34 -> MWB-2 prereg/provenance #51`.
+`Geppetto R6 conditioning/candidate preflight #26/#27 -> SkinFieldCodec design #34 -> MWB-2 prereg/provenance #51 -> Clean-C0 diagnostic execution #21 where corpus/runtime authority is locally available`.
 
-Gate0-result-dependent work remains frozen until the actual result is supplied.
+Gate0-result-dependent work remains frozen until the actual result is supplied. When Gate0 output arrives, result ingestion/padding/spacing becomes the highest-priority dependent path.
 
-Clean-C0 diagnostic generation may proceed autonomously when its corpus/runtime authority is locally available, but semantic labels remain human-review input.
+Clean-C0 semantic labels remain human-review input.
 
 No learned optimizer step is authorized by this backlog.

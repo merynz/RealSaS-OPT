@@ -113,9 +113,12 @@ def main() -> int:
 
     v3 = V3.read_text(encoding="utf-8")
     roadmap = ROADMAP.read_text(encoding="utf-8")
+    # These are V3's own normative human-readable architecture classes/terms.
+    # Machine-status tokens from subordinate migration artifacts are validated in
+    # their own closures; V3 intentionally defines its visual vocabulary explicitly.
     for required in (
         "CanonicalPuppetGraph.v2",
-        "HISTORICAL_EXTERNAL_BYTE_AUTHORITY_INTENTIONAL",
+        "HISTORICAL EXTERNAL BYTE / NUMERICAL AUTHORITY",
         "MWB-1",
         "R6",
         "No learned optimizer step is authorized",
@@ -127,7 +130,7 @@ def main() -> int:
         raise SystemExit("roadmap does not point to V3 SVG")
 
     sha = hashlib.sha256(SVG.read_bytes()).hexdigest()
-    print(f"SVG_XML_PARSE=PASS")
+    print("SVG_XML_PARSE=PASS")
     print(f"REQUIRED_NODE_IDS={len(REQUIRED_IDS)}/{len(REQUIRED_IDS)} PASS")
     print(f"AUTHORITY_LABELS={len(REQUIRED_TEXT)}/{len(REQUIRED_TEXT)} PASS")
     print(f"SVG_SHA256={sha}")

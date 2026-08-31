@@ -23,5 +23,7 @@ jobs:
         run: python -m unittest -v test_gate0_geometry_v1.py
       - name: Real-corpus runner helper regressions
         run: python -m unittest -v test_gate0_real_corpus_v1.py
+      - name: Membership hash-authority regressions
+        run: python -m unittest -v test_gate0_real_corpus_v1_1_hashfix.py
       - name: Synthetic Gate0 preflight
         run: python run_gate0_synthetic_preflight_v1.py

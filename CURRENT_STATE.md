@@ -2,13 +2,13 @@
 
 **Date:** 2026-08-31  
 **Canonical continuation branch:** `main`  
-**Status:** `DINO_S1_CLOSED_EARLY__REPROJECTION_V2_SEALED__GATE0_SYNTHETIC_PASS__REAL_CORPUS_GATE0_READY_NOT_EXECUTED__CLEAN_C0_VISUAL_TRIAGE_SEALED_TESTED_NOT_EXECUTED__GEPPETTO_ARACHNE_REFERENCE_AUDIT_OPEN__DEV32_CLOSED__NO_V2_OPTIMIZER_AUTHORIZED`
+**Status:** `DINO_S1_CLOSED_EARLY__REPROJECTION_V2_SEALED__GATE0_SYNTHETIC_PASS__REAL_CORPUS_GATE0_READY_NOT_EXECUTED__CLEAN_C0_VISUAL_TRIAGE_SEALED_TESTED_NOT_EXECUTED__GEPPETTO_ARACHNE_REFERENCE_AUDIT_R0_R5_CLOSED__R6_ORACLE_PROTOCOL_FROZEN__DEV32_CLOSED__NO_NEW_LEARNED_OPTIMIZER_AUTHORIZED`
 
 This file is continuation authority only on `main`.
 
 ## One-line state
 
-`DTB-ND1 tolerance/consumer replay closed -> DINO S/B nearly flat under SharedLearnerV1 -> S1 early-terminated and frozen-apparatus audit closed BLOCK_AND_FIX -> reprojection-centered partial-canonical IRIS V2 sealed -> deterministic synthetic Gate0 passed -> full TRAIN512 real-corpus Gate0 execution contract + runner frozen/tested -> native image integrity closed exact -> clean-C0 visual anomaly triage prereg/code/CI frozen before review outputs -> RigAnything/SkinTokens clean-room code-level reference audit opened at the consumer-facing RiggingSurfaceIR/QualifiedSkeletonIR boundary -> no learned V2 optimizer step authorized.`
+`DTB-ND1 tolerance/consumer replay closed -> DINO S/B nearly flat under SharedLearnerV1 -> S1 early-terminated and frozen-apparatus audit closed BLOCK_AND_FIX -> reprojection-centered partial-canonical IRIS V2 sealed -> deterministic synthetic Gate0 passed -> full TRAIN512 real-corpus Gate0 execution contract + runner frozen/tested -> native image integrity closed exact -> clean-C0 visual anomaly triage prereg/code/CI frozen before review outputs -> RigAnything/SkinTokens code-level clean-room audit R0-R5 closed at B_G/B_A consumer boundaries -> R6 oracle full-surface vs observation-limited causal protocol frozen -> no learned optimizer step authorized.`
 
 ## 1. Product/system contract — STABLE
 
@@ -22,9 +22,9 @@ External route remains:
 8 neutral views + known orthographic cameras
  -> IRIS observation-grounded forward depth/evidence
  -> analytic P = O + dF
- -> SurfaceBuilder / RiggingSurfaceIR
+ -> deterministic geometry substrate / RiggingSurfaceIR
  -> Geppetto SkeletonProposalIR
- -> Compiler skeleton qualification
+ -> Compiler skeleton qualification/global graph authority
  -> Arachne SkinProposalIR
  -> Compiler skin qualification
  -> CanonicalPuppetGraph
@@ -34,7 +34,11 @@ External route remains:
 
 IRIS/Geppetto/Arachne emit evidence/proposals. Compiler owns canonical product state.
 
-Mode G / Mode E topology invariant is binding in `canonical/PRODUCT_CONTRACT_V1.md`: analytic geometry and learned evidence keep the same authority topology; uncertainty changes evidence burden, not geometry ownership.
+**Nomenclature plan:** the historical `SurfaceBuilder` deterministic layer is to be renamed atomically to `GeometricSubstrateAssembler` in a later compatibility migration. Historical artifact/file/hash names are not rewritten. The rename does not expand authority.
+
+`GeometricSubstrateAssembler` may own observation-grounded analytic geometry, admitted persistence, support/provenance and separately qualified local geometric operators. It may not own skeleton root/parent/tree authority, canonical joint IDs, skin simplex authority or hidden completion.
+
+Mode G / Mode E topology invariant remains binding: uncertainty changes learned evidence burden, not geometry ownership.
 
 ## 2. Geometry tolerance — CLOSED FOR CURRENT CONSUMER PROFILE
 
@@ -86,6 +90,8 @@ Central change:
 
 V2-A default backbone is frozen DINOv2-S/14 for compute-efficient apparatus development. This is **not** a proof that S is sufficient. Larger DINO is forbidden until S exhibits a representation ceiling under a qualified V2 apparatus.
 
+Old S1 shared ladder adapter semantics (`S native 384 -> zero-pad 1536 -> shared 256 aperture`) are not inherited. Exact multi-level DINO-S taps/projection widths remain intentionally unsealed until the learned V2 apparatus preflight; no Qd zero-padding/shared-ladder aperture is permitted by default.
+
 Internal canonical representation is **partial observed-surface evidence**, never a completed occupancy/SDF authority. Unknown occluded/unobserved regions remain typed UNKNOWN and are not rendered as invented depth.
 
 V2-A is deliberately single-pass. No recurrent visibility refinement, learned hidden completion, sparse-convolution dependency or new S/B/L/g ladder is authorized.
@@ -118,19 +124,17 @@ Runner/tests:
 - `experiments/iris_reprojection_v2_20260831/gate0_real_corpus_v1.py`
 - `experiments/iris_reprojection_v2_20260831/test_gate0_real_corpus_v1.py`
 
-GitHub Actions run `33407283365` passed all three stages: synthetic geometry regressions, real-runner helper regressions, and synthetic preflight.
-
 The scientific real execution is frozen to exact S1 `TRAIN512`, not clean-C0, to preserve H0/architecture causal separation.
 
 Real Gate0 measures before learned outputs:
 
 - exact camera/image/raster authority;
 - hull padding `{0,1,2,4,8}` sampled-truth containment;
-- deterministic 32768-point/asset canonical-volume search reduction;
+- deterministic canonical-volume search reduction;
 - padding decision by smallest zero-sampled-truth-miss candidate;
-- compute-pruning classification with median active fraction threshold `<=0.75`;
+- compute-pruning classification;
 - spacing accounting for `.016/.008/.004`;
-- observed silhouette medial-thickness proxy (`2*EDT` at 3x3 local maxima) and cell strata.
+- observed silhouette medial-thickness proxy and coarse-cell strata.
 
 No spacing is selected by the runner. A successful measurement must be followed by a separate spacing/resolution policy freeze.
 
@@ -166,59 +170,71 @@ Corpus H0 work remains separate from V2 apparatus causality and may not reinterp
 Authority:
 `canonical/CORPUS_VISUAL_ANOMALY_TRIAGE_PREREG_20260831.md`.
 
-Implementation/tests:
+The triage has **no automatic exclusion authority**. It prioritizes dominant plane/quad-like support, multiple disconnected subjects, tiny/view-imbalanced/off-center/thin cases and deterministic random controls. Reviewer-safe V0..V7 contact sheets expose no diagnostic reason; semantic labels remain image-only authority.
 
-- `experiments/geppetto_arachne_v0_1_20260830/semantic_visual_anomaly_triage_v1.py`
-- `experiments/geppetto_arachne_v0_1_20260830/test_semantic_visual_anomaly_triage_v1.py`
+A FAST audit-driven Colab notebook was prepared outside the repo so the completed 2874x8 audit is not redundantly repeated. It leaves `training_authorized=false`.
 
-GitHub Actions run `33408804606`: `SUCCESS`.
+## 10. Geppetto/Arachne external-reference audit — R0-R5 CLOSED
 
-The triage is diagnostic scheduling only and has **no automatic exclusion authority**. It freezes priority sampling for:
-
-- dominant rectangle/quad/plane-like support;
-- multiple disconnected competing subjects;
-- tiny subject / low occupancy;
-- extreme view imbalance;
-- off-center or split-scene support;
-- extremely thin observed support;
-- existing raster triangle-dominance tail;
-- 16 deterministic blind-random controls.
-
-Reviewer-safe contact sheets are ordered V0..V7 and expose no diagnostic reason/metric. Semantic labels remain image-only authority under `IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md`.
-
-A Colab execution notebook has been prepared outside the repo to run both real Gate0 and this triage in one fail-closed session. It is pinned to this authority lineage and leaves `training_authorized=false`.
-
-## 10. Geppetto/Arachne external-reference audit — OPEN / CLEAN-ROOM
-
-Authority:
+Authorities:
 
 - `canonical/GEPPETTO_ARACHNE_EXTERNAL_REFERENCE_CLEANROOM_AUDIT_PREREG_20260831.md`
 - `canonical/GEPPETTO_ARACHNE_CONSUMER_SUBSTRATE_EQUIVALENCE_BOUNDARY_AMENDMENT_20260831.md`
+- `canonical/RIGANYTHING_CODE_LEVEL_REFERENCE_AUDIT_V1.md`
+- `canonical/SKINTOKENS_CODE_LEVEL_REFERENCE_AUDIT_V1.md`
+- `canonical/GEPPETTO_ARACHNE_REFERENCE_TO_REALSAS_INFORMATION_EQUIVALENCE_V1.md`
+- `canonical/GEPPETTO_ARACHNE_EXTERNAL_REFERENCE_AUDIT_CLOSURE_20260831.md`
 
 Frozen upstream snapshots:
 
 - RigAnything `d03cdb21dd134fa81df6b0947522469db3f78bd2`;
 - SkinTokens `273b691d35989d71cd17ff2895fdc735097b92d1`.
 
-The audit is code-level and function-level, not a paper analogy. RigAnything source remains behind a noncommercial Adobe Research License firewall; no upstream product code may be copied, translated line-for-line, imported or used as a RealSaS product dependency. SkinTokens is MIT but is still audited with the same scientific provenance discipline.
+### Closed conclusions
 
-**Equivalence-boundary correction:** reference inputs are not compared against raw partial IRIS output. Geppetto equivalence is measured against the complete consumer-facing observation stack `IRIS -> ObservationEvidenceIR -> analytic geometry -> deterministic SurfaceBuilder -> RiggingSurfaceIR -> declared deterministic conditioning adapter`. Arachne equivalence is measured against `RiggingSurfaceIR + Compiler-qualified QualifiedSkeletonIR -> declared deterministic conditioning adapter`.
+- RigAnything is the primary external skeleton-function reference under complete 3D P+N surface evidence.
+- SkinTokens is the primary Arachne skin-field/codec reference.
+- RigAnything's released final skin path is secondary evidence only because deterministic mesh-topology smoothing/transfer materially contributes to final weights.
+- At `B_G` / `B_A`, most material **field classes** are present or deterministically derivable.
+- The single material unresolved richness difference is **complete full-mesh surface coverage vs partial observation-grounded admitted surface**.
+- This is an R6 empirical coverage/accessibility gate, not a paper-level argument.
 
-This changes the measurement boundary, not authority ownership. IRIS remains learned evidence; SurfaceBuilder remains deterministic; Compiler remains canonical rig authority. Hidden completion/source-rig leakage remains forbidden.
+### Existing lower-stack authority must be preserved
 
-The audit must separately establish:
+The current Compiler is not a passive validator. Skeleton qualification converts model evidence to a global graph optimization problem, runs `optimize_canonical_graph_v18_98`, selects root/parents and mints canonical IDs. Skin qualification owns lineage/legal-reference checks and bounded simplex/sparsity repair.
 
-1. information/field derivability at the consumer boundary;
-2. coverage/accessibility despite RealSaS being partial observation-grounded geometry;
-3. oracle-substrate consumer ceilings through the same deterministic RealSaS stack;
-4. only then final learned Geppetto/Arachne architecture/loss/training seals.
+Therefore:
+
+- `GeometricSubstrateAssembler` must not duplicate skeleton graph authority;
+- Geppetto proposes joint/root/edge evidence but does not own the final canonical tree;
+- Arachne proposes influence evidence but does not own final simplex/legal-reference authority.
+
+### R6 oracle protocol — FROZEN AT CAUSAL-ARM LEVEL
+
+Common causal arms:
+
+- `U0_REFERENCE_FULL_SURFACE`: rich full-surface diagnostic upper bound; cannot prove product input equivalence;
+- `U1_OBSERVATION_ORACLE_SUBSTRATE`: exact shipping-observable evidence -> same deterministic geometry substrate -> consumer; primary information-sufficiency arm;
+- `U2_PREDICTED_IRIS_SUBSTRATE`: predicted geometry only after U1 passes.
+
+Interpretation:
+
+- U0 fail -> consumer apparatus/representation fail;
+- U0 pass + U1 fail -> observation coverage is insufficient;
+- U1 pass -> hidden complete surface is unnecessary for the admitted small-gate task;
+- U1 pass + U2 fail -> upstream IRIS prediction/accessibility is the bottleneck.
+
+Arachne requires **SkinFieldCodec reconstruction/deformation ceiling before predictor training**.
+
+Exact learned Geppetto/Arachne architecture/loss/optimizer remain intentionally unsealed until prerequisite clean-C0/substrate gates close and are then frozen before optimizer step 1.
 
 ## 11. Training authority
 
-**V2 learned optimizer steps: NOT AUTHORIZED.**  
+**IRIS V2 learned optimizer steps: NOT AUTHORIZED.**  
 **Geppetto/Arachne final learned apparatus training: NOT AUTHORIZED.**  
+**Geppetto/Arachne external-reference R0-R5 audit: CLOSED.**  
+**R6 causal protocol: FROZEN; empirical execution awaits prerequisite substrate/clean-corpus gates and independent candidate seal.**  
 **New S/B/L/g ladder: NOT AUTHORIZED.**  
-**Scientific real-corpus Gate0 deterministic execution: AUTHORIZED under its frozen prereg.**  
+**Scientific real-corpus IRIS Gate0 deterministic execution: AUTHORIZED under its frozen prereg.**  
 **Clean-C0 visual anomaly triage execution: AUTHORIZED under its frozen prereg.**  
-**External-reference clean-room read/audit: AUTHORIZED; code reuse remains license/firewall constrained.**  
 **DEV32: CLOSED.**

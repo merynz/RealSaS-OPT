@@ -1,0 +1,25 @@
+name: geppetto-r6-teacher-projection-v1
+on:
+  pull_request:
+    paths:
+      - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'canonical/GEPPETTO_R6_TEACHER_PROJECTION_PORT_CONTRACT_20260901.md'
+      - '.github/workflows/geppetto_r6_teacher_projection_v1.yml'
+permissions:
+  contents: read
+jobs:
+  teacher-projection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependency
+        run: python -m pip install --disable-pip-version-check numpy
+      - name: Compile selective R6 teacher adapter
+        run: python -m compileall -q experiments/geppetto_arachne_r6_20260901
+      - name: Run teacher projection regressions
+        working-directory: experiments/geppetto_arachne_r6_20260901
+        run: python -m unittest -v test_teacher_projection_v1.py

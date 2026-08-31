@@ -1,0 +1,136 @@
+{
+  "content_sha256": "8b0d6f40383db65688afdcbbd384f7ee4a3dd0f3398867cde264dbb69b047848",
+  "date": "2026-08-31",
+  "final_decision": "BLOCK_AND_FIX",
+  "findings": {
+    "camera_scale_input": {
+      "facts": [
+        "Training/inference decoder receives an image-derived observable_sheet_half_extent from alpha bounding boxes rather than exact camera.json half_extent.",
+        "An audited master witness has exact camera half_extent 0.54 in V0 and V2.",
+        "For that witness V2 alpha support span is 948/1024, giving observable half_extent 0.5400843882, approximately matching 0.54."
+      ],
+      "limitation": "Known camera scale should not be re-derived from style pixels. V2 should feed exact camera authority directly and treat this as an explicit apparatus change.",
+      "verdict": "PASS_WITH_FIX_REQUIRED_FOR_V2"
+    },
+    "corpus_substrate": {
+      "facts": [
+        "S1 membership must remain interpreted exactly as run; later clean-character findings cannot retroactively reinterpret S1.",
+        "The parallel Geppetto/Arachne corpus audit has demonstrated that structural eligibility does not guarantee a semantically clean single-character render.",
+        "Automatic clean-C0 audit is still being completed and will receive blind/random visual sanity checks."
+      ],
+      "next_experiment_rule": "The first decoder-only causal comparison must keep S1 membership fixed. Clean-C0 is a separate H0 intervention, not combined with the decoder intervention.",
+      "verdict": "BLOCK_FOR_CLEAN_CORPUS_CLAIMS__S1_MEMBERSHIP_REMAINS_SEALED"
+    },
+    "evaluator": {
+      "facts": [
+        "Dense evaluation queries every authoritative visible raster row.",
+        "Predicted P is reconstructed with exact camera.json forward/right/up and exact half_extent.",
+        "DTB-ND1 robust local-plane route and frozen Geppetto/Arachne proxies are used.",
+        "FIT eligibility is 27/32 families =54 style cells with pass minimum 52; TRAIN eligibility is 28/32=56 style cells with pass minimum 54.",
+        "Ineligible families are neither PASS nor FAIL; hard route failures among eligible cells are forbidden.",
+        "Scalar depth diagnostics do not substitute for direct consumer replay."
+      ],
+      "verdict": "PASS"
+    },
+    "loss_optimizer_runtime": {
+      "facts": [
+        "Loss is FP32 mean SmoothL1 with beta=0.01 over selected visible loci.",
+        "At |e|<beta, gradient magnitude is |e|/beta; e=0.002 therefore gives 0.2 and e=0.0002 gives 0.02.",
+        "For |e|>=0.01 the SmoothL1 gradient magnitude saturates at 1.",
+        "AdamW uses betas=(0.9,0.95), weight_decay=0; LR 3e-4 steps 1-2048, fresh AdamW moments and LR 3e-5 from 2049-32768.",
+        "AMP FP16 shared stack, FP32 targets/loss, GradScaler; four 4-cell microbatches accumulate one 16-cell logical update.",
+        "Resume saves/restores model, optimizer, scaler and Python/NumPy/Torch CPU/CUDA RNG state."
+      ],
+      "limitations": [
+        "Mean pointwise loss is not aligned to the frozen consumer's tail/derivative sensitivity.",
+        "Global deterministic algorithms are deliberately not forced because CUDA grid_sample backward may be nondeterministic.",
+        "S and B are single executions; tiny count differences such as TRAIN 17->18 must not be interpreted as a reliable ranking without repeatability calibration."
+      ],
+      "verdict": "PASS_IMPLEMENTATION__OBJECTIVE_AND_REPEATABILITY_LIMITATIONS"
+    },
+    "representation_cache": {
+      "facts": [
+        "DINO source revision is sealed to 7764ea0f912e53c92e82eb78a2a1631e92725fc8 and official weight hashes are runtime checked.",
+        "Input is RGBA 1024 contract but DINO preprocess uses RGB only, bicubic+antialias resize to 518, ImageNet normalization.",
+        "Only last-layer x_norm_patchtokens are cached, shape 37x37 x native_dim, FP32 lossless; Q_d zero-pad to 1536 then per-token FP32 L2.",
+        "Cache files are hash checked and lossless roundtrip checked.",
+        "No multi-layer or multiscale DINO access exists."
+      ],
+      "limitations": [
+        "37x37 token grid corresponds to about 27.7 native pixels per token axis after 1024->518->patch14; subpatch detail must come through the native path.",
+        "Last-layer-only access can hide useful earlier-layer local detail; this is an interface hypothesis, not a proven cause."
+      ],
+      "verdict": "PASS_WITH_NAMED_LIMITATIONS"
+    },
+    "sampling_supervision": {
+      "facts": [
+        "Exactly 4096 raster rows per view are selected deterministically.",
+        "When visible rows >=4096, sampling is uniform without replacement; when <4096, deterministic coverage-repeat is used.",
+        "Every view receives exactly 4096 loss slots, so view weighting is equal rather than proportional to visible area.",
+        "No augmentation, hard mining, silhouette/edge/thin/grazing stratification or mechanics-derived weighting is used."
+      ],
+      "limitations": [
+        "Empirical sampling coverage by silhouette distance, thin structure and grazing geometry was not measured before S1.",
+        "Uniform visible-row sampling can underrepresent mechanically sensitive low-area structures."
+      ],
+      "verdict": "PASS_SEMANTICS__KNOWN_COVERAGE_LIMITATION"
+    },
+    "shared_learner_access": {
+      "facts": [
+        "Local DINO field remains 37x37; it is incorrect to claim all DINO information is reduced to 16x16.",
+        "Cross-view context is pooled 37->16, fused across view-row sequences, then bilinearly upsampled 16->37.",
+        "Every rung enters the same trainable 1536->256 stem.",
+        "Total trainable parameters are 5,046,739.",
+        "Native encoder has 29,640 parameters (0.587% of total) and sees only 25 RGBA samples per query at center plus radii 1,4,16.",
+        "Final depth decoder has 133,643 parameters (2.648% of total) and predicts each query pointwise after bilinear feature sampling."
+      ],
+      "interpretation": "This architecture can impose a common high-resolution accessibility ceiling and therefore confound a backbone-scale ladder. It is a plausible mechanism, not yet a causal proof.",
+      "verdict": "BLOCK_FOR_NEW_CAPACITY_LADDER"
+    }
+  },
+  "forbidden_claims": [
+    "The shared decoder/access path has already been causally proven to be the dominant failure source.",
+    "Loss is proven secondary to decoder.",
+    "DINO foundation features are necessary.",
+    "DINO foundation features are unnecessary.",
+    "Clean-C0 contamination explains S1.",
+    "L or g would fail."
+  ],
+  "permitted_claims": [
+    "S1 S->B flatness is conditional on SharedLearnerV1 and its frozen training/evaluation apparatus.",
+    "SharedLearnerV1 contains material high-resolution access limitations that justify stopping the capacity ladder and testing the apparatus first.",
+    "The evaluator route itself passed the code-level authority audit."
+  ],
+  "required_before_next_training": [
+    "Version and freeze a high-resolution spatial decoder/native-access V2 while keeping current loss fixed for the first causal test.",
+    "Use exact camera.json half_extent instead of alpha-derived scale proxy.",
+    "Preregister DINO ON/native ON, DINO OFF/native ON and DINO ON/native OFF as separately trained/evaluated conditions.",
+    "Add a repeatability calibration or deterministic substitute sufficient to bound run-to-run noise before interpreting small deltas.",
+    "Do not change beta or add tail loss in the decoder-only experiment.",
+    "After decoder causality: beta-only ablation, then tail/CVaR-only ablation with beta fixed.",
+    "Do not reopen S/B/L/g until a single rung shows adequate accessibility through the revised apparatus."
+  ],
+  "schema": "RealSaS.DINO.FrozenApparatusCodeAudit.v1",
+  "scope": "S1 frozen representation/cache, sampling/supervision, shared learner/access, loss/optimizer/runtime, evaluator, camera-scale input, corpus substrate",
+  "sources": {
+    "DINO_CONTROLLED_LADDER_TRAINING_AUTHORIZATION_V2.json": {
+      "content_sha256": "0f74c33e8f1d2854c321553166ec4a7a1a16284dffb1311eea2b1b44e87cdc55",
+      "sha256": "0790c9667120cf138d1286511d427faaf8ad0f519d00b3ce0135138dab69ecc0"
+    },
+    "DINO_DIRECT_REPLAY_EVALUATOR_AUTHORITY_CORRECTION_V1.md": {
+      "content_sha256": "32bbed01c52bd6ad65ad1896ea3c1ad7ec8b35138788c673e3d87a581610df1e"
+    },
+    "DINO_SHARED_LEARNER_APPARATUS_SPEC_V1.json": {
+      "content_sha256": "03ce79be11fb508fb590109b4d903bbf928139b83294b1c053e843521474745a",
+      "sha256": "c66560939e41f38e8f191299a610447f2216049dbfb7c64e61737be28f440b47"
+    },
+    "dino_controlled_ladder_s_b_l_g_v1_2.py": {
+      "sha256": "9c0a5e941fc71b1813e539530b0b5fba093df7978fca2ada241a812df94ef790"
+    },
+    "dino_shared_depth_learner_v1.py": {
+      "sha256": "af820b2e739253e716b03399fb1add355412027cf5e5da7409a6eec8b8a0a41f"
+    }
+  },
+  "status": "BLOCK_AND_FIX_BEFORE_NEW_CAPACITY_LADDER",
+  "training_authorized": false
+}

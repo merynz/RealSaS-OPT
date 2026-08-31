@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import hashlib
 import json
 from pathlib import Path
@@ -195,44 +196,55 @@ def _image_mask(path: Path) -> tuple[np.ndarray, str]:
     return np.any(a[:, :, :3] != np.asarray([0, 255, 0], dtype=np.uint8), axis=2), "OPAQUE_EXACT_GREEN"
 
 
-def measure_image_integrity(master_root: Path, objective_manifest: dict) -> dict:
+def _measure_one_image_integrity(master_root: str, aid: str) -> tuple[str, dict]:
+    asset = Path(master_root) / "master" / "assets" / aid
+    views = []
+    try:
+        for v in range(8):
+            vd = asset / "renders" / f"V{v}"
+            cam = json.loads((vd / "camera.json").read_text(encoding="utf-8"))
+            yaw = float(cam["yaw_deg"])
+            if abs(yaw - 45.0 * v) > 1e-4:
+                raise ValueError(f"CAMERA_YAW_DRIFT:{aid}:V{v}:{yaw}")
+            im, mode = _image_mask(vd / "cel_clean.png")
+            ra = _raster_mask(vd / "raster_authority.npz")
+            inter = int(np.count_nonzero(im & ra)); union = int(np.count_nonzero(im | ra))
+            ni = int(np.count_nonzero(im)); nr = int(np.count_nonzero(ra))
+            unsupported = int(np.count_nonzero(im & ~ra)); missing = int(np.count_nonzero(ra & ~im))
+            views.append({
+                "view_index": v,
+                "yaw_deg": yaw,
+                "foreground_mode": mode,
+                "image_foreground_pixels": ni,
+                "raster_foreground_pixels": nr,
+                "intersection_pixels": inter,
+                "union_pixels": union,
+                "iou": float(inter / union) if union else 1.0,
+                "image_unsupported_fraction": float(unsupported / max(1, ni)),
+                "raster_missing_fraction": float(missing / max(1, nr)),
+                "exact_support_equal": bool(np.array_equal(im, ra)),
+            })
+        return "PASS", {"canonical_asset_id": aid, "status": "PASS_MEASURED", "views": views}
+    except Exception as exc:
+        return "FAIL", {"canonical_asset_id": aid, "error": f"{type(exc).__name__}: {exc}"}
+
+
+def measure_image_integrity(master_root: Path, objective_manifest: dict, workers: int = 4) -> dict:
+    pass_ids = [r["canonical_asset_id"] for r in objective_manifest["records"] if r["objective_status"] == "PASS_OBJECTIVE_RENDER_C0"]
     records, failures = [], []
-    for i, rec in enumerate(objective_manifest["records"], 1):
-        if rec["objective_status"] != "PASS_OBJECTIVE_RENDER_C0":
-            continue
-        aid = rec["canonical_asset_id"]
-        asset = master_root / "master" / "assets" / aid
-        views = []
-        try:
-            for v in range(8):
-                vd = asset / "renders" / f"V{v}"
-                cam = json.loads((vd / "camera.json").read_text(encoding="utf-8"))
-                yaw = float(cam["yaw_deg"])
-                if abs(yaw - 45.0 * v) > 1e-4:
-                    raise ValueError(f"CAMERA_YAW_DRIFT:{aid}:V{v}:{yaw}")
-                im, mode = _image_mask(vd / "cel_clean.png")
-                ra = _raster_mask(vd / "raster_authority.npz")
-                inter = int(np.count_nonzero(im & ra)); union = int(np.count_nonzero(im | ra))
-                ni = int(np.count_nonzero(im)); nr = int(np.count_nonzero(ra))
-                unsupported = int(np.count_nonzero(im & ~ra)); missing = int(np.count_nonzero(ra & ~im))
-                views.append({
-                    "view_index": v,
-                    "yaw_deg": yaw,
-                    "foreground_mode": mode,
-                    "image_foreground_pixels": ni,
-                    "raster_foreground_pixels": nr,
-                    "intersection_pixels": inter,
-                    "union_pixels": union,
-                    "iou": float(inter / union) if union else 1.0,
-                    "image_unsupported_fraction": float(unsupported / max(1, ni)),
-                    "raster_missing_fraction": float(missing / max(1, nr)),
-                    "exact_support_equal": bool(np.array_equal(im, ra)),
-                })
-            records.append({"canonical_asset_id": aid, "status": "PASS_MEASURED", "views": views})
-        except Exception as exc:
-            failures.append({"canonical_asset_id": aid, "error": f"{type(exc).__name__}: {exc}"})
-        if i == 1 or i % 25 == 0 or i == len(objective_manifest["records"]):
-            print(f"[image-integrity] scanned structural row {i}/{len(objective_manifest['records'])} measured={len(records)} hard_fail={len(failures)}", flush=True)
+    workers = max(1, int(workers))
+    with ProcessPoolExecutor(max_workers=workers) as ex:
+        futures = {ex.submit(_measure_one_image_integrity, str(master_root), aid): aid for aid in pass_ids}
+        for done, fut in enumerate(as_completed(futures), 1):
+            aid = futures[fut]
+            try:
+                status, payload = fut.result()
+            except Exception as exc:
+                status, payload = "FAIL", {"canonical_asset_id": aid, "error": f"WORKER_{type(exc).__name__}: {exc}"}
+            (records if status == "PASS" else failures).append(payload)
+            if done == 1 or done % 25 == 0 or done == len(pass_ids):
+                print(f"[image-integrity] {done}/{len(pass_ids)} measured={len(records)} hard_fail={len(failures)}", flush=True)
+    records.sort(key=lambda x: x["canonical_asset_id"]); failures.sort(key=lambda x: x["canonical_asset_id"])
     vals_iou = [v["iou"] for r in records for v in r["views"]]
     vals_u = [v["image_unsupported_fraction"] for r in records for v in r["views"]]
     vals_m = [v["raster_missing_fraction"] for r in records for v in r["views"]]
@@ -245,6 +257,7 @@ def measure_image_integrity(master_root: Path, objective_manifest: dict) -> dict
         "objective_pass_expected": EXPECTED_OBJECTIVE_PASS_COUNT,
         "measured_asset_count": len(records),
         "hard_failure_count": len(failures),
+        "workers": workers,
         "measurement_only_no_threshold": True,
         "aggregate": {"iou": dist(vals_iou) if vals_iou else None, "image_unsupported_fraction": dist(vals_u) if vals_u else None, "raster_missing_fraction": dist(vals_m) if vals_m else None, "exact_support_equal_view_count": sum(v["exact_support_equal"] for r in records for v in r["views"])},
         "failures": failures,
@@ -290,6 +303,7 @@ def main() -> None:
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--master-root", type=Path)
     ap.add_argument("--measure-image-integrity", action="store_true")
+    ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--contact-sheets", action="store_true")
     ap.add_argument("--semantic-labels", type=Path)
     args = ap.parse_args()
@@ -302,7 +316,7 @@ def main() -> None:
     pass_ids = [r["canonical_asset_id"] for r in obj["records"] if r["objective_status"] == "PASS_OBJECTIVE_RENDER_C0"]
     if args.measure_image_integrity:
         if args.master_root is None: raise SystemExit("--master-root required")
-        im = measure_image_integrity(args.master_root, obj)
+        im = measure_image_integrity(args.master_root, obj, workers=args.workers)
         atomic_json(args.out_dir / "NATIVE_IMAGE_INTEGRITY_MEASUREMENT_V1.json", im)
         print(f"IMAGE_INTEGRITY={im['status']} measured={im['measured_asset_count']} hard_fail={im['hard_failure_count']}", flush=True)
     if args.contact_sheets:
@@ -312,6 +326,8 @@ def main() -> None:
             if i == 1 or i % 25 == 0 or i == len(pass_ids): print(f"[contact-sheet] {i}/{len(pass_ids)}", flush=True)
         atomic_json(args.out_dir / "SEMANTIC_REVIEW_MANIFEST_V1.json", {"schema":"RealSaS.GeppettoArachne.SemanticReviewManifest.v1","asset_count":len(pass_ids),"asset_set_sha256":set_sha(pass_ids),"labels":list(sorted(SEMANTIC_LABELS)),"training_authorized":False})
     if args.semantic_labels:
+        # This validates the semantic decision file only. Final membership deliberately remains blocked
+        # until a separately frozen image-integrity admission policy/result is provided.
         labels = load_semantic_labels(args.semantic_labels, set(pass_ids))
         c = {k: sum(v == k for v in labels.values()) for k in sorted(SEMANTIC_LABELS)}
         atomic_json(args.out_dir / "SEMANTIC_LABEL_VALIDATION_V1.json", {"schema":"RealSaS.GeppettoArachne.SemanticLabelValidation.v1","status":"PASS_COMPLETE_LABEL_CONTRACT","counts":c,"asset_set_sha256":set_sha(pass_ids),"training_authorized":False})

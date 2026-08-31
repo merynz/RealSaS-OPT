@@ -1,0 +1,35 @@
+{
+  "content_sha256": "ef5765a0a107c4b57aebdadf8d857a613e61bb16493e5f3a396a4f88232c3d76",
+  "hull_frontier": [
+    {"active_lattice_count": 1864, "active_lattice_fraction": 0.233, "pad_px": 0, "total_lattice_count": 8000, "truth_containment": 0.7845},
+    {"active_lattice_count": 2040, "active_lattice_fraction": 0.255, "pad_px": 1, "total_lattice_count": 8000, "truth_containment": 1.0},
+    {"active_lattice_count": 2368, "active_lattice_fraction": 0.296, "pad_px": 2, "total_lattice_count": 8000, "truth_containment": 1.0},
+    {"active_lattice_count": 2728, "active_lattice_fraction": 0.341, "pad_px": 4, "total_lattice_count": 8000, "truth_containment": 1.0},
+    {"active_lattice_count": 4008, "active_lattice_fraction": 0.501, "pad_px": 8, "total_lattice_count": 8000, "truth_containment": 1.0}
+  ],
+  "robust_evidence": {
+    "cosine_median": 0.9999014936226605,
+    "cosine_trimmed_mean": 0.9998992709697475,
+    "dispersion": 0.057302528320715265,
+    "pair_count": 28,
+    "support_views": 8
+  },
+  "schema": "RealSaS.IRIS.ReprojectionV2.Gate0SyntheticPreflight.v1",
+  "scientific_optimizer_steps": 0,
+  "seed": 20260831,
+  "status": "PASS_SYNTHETIC_GATE0",
+  "streaming_plan_example": {
+    "active_candidates": 2000000,
+    "chunk_candidates": 32768,
+    "chunk_count": 62,
+    "max_raw_descriptor_working_bytes": 67108864,
+    "per_candidate_raw_descriptor_bytes": 2048
+  },
+  "synthetic_lattice_shape_zyx": [20, 20, 20],
+  "thin_structure_spacing_sweep": {
+    "0.004": {"bins": {"ge_1_lt_2": 1, "ge_2_lt_4": 2, "ge_4": 2, "lt_1": 1}, "count": 6, "min_cells": 0.5, "p50_cells": 2.5, "spacing": 0.004},
+    "0.008": {"bins": {"ge_1_lt_2": 2, "ge_2_lt_4": 1, "ge_4": 1, "lt_1": 2}, "count": 6, "min_cells": 0.25, "p50_cells": 1.25, "spacing": 0.008},
+    "0.016": {"bins": {"ge_1_lt_2": 1, "ge_2_lt_4": 1, "ge_4": 0, "lt_1": 4}, "count": 6, "min_cells": 0.125, "p50_cells": 0.625, "spacing": 0.016}
+  },
+  "training_authorized": false
+}

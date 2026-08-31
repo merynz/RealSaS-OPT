@@ -1,185 +1,187 @@
 # RigAnything — Code-Level Clean-Room Reference Audit V1
 
 **Date:** 2026-08-31  
-**Status:** `R0_R4_IN_PROGRESS__REFERENCE_FACTS_ONLY__NO_REALSAS_ARCHITECTURE_SEAL`
+**Status:** `R0_R4_COMPLETE__FUNCTIONAL_REFERENCE_EXTRACTED__TRAINING_INTEGRATION_PARTLY_NOT_PUBLICLY_VERIFIABLE__NO_CODE_REUSE`
 
-## Scope / license firewall
+## Scope and license firewall
 
 Frozen upstream: `Isabella98Liu/RigAnything@d03cdb21dd134fa81df6b0947522469db3f78bd2`.
 
-The upstream repository is Adobe Research License / noncommercial research only. This artifact records independently stated behavioral facts, equations, tensor contracts, preprocessing and postprocessing. It is not a source transplant. No upstream product code is admitted into RealSaS product implementation.
+The upstream repository is under the Adobe Research License and is restricted to noncommercial research. This audit records independently stated behavioral facts, tensor contracts, preprocessing, functional factorization and postprocessing. No upstream implementation is admitted as RealSaS product code, no source is translated line-for-line, and no upstream package is a RealSaS product dependency.
 
-## Sources inspected in this pass
+The scientific goal is not architectural imitation. It is to identify the complete function that a RigAnything-class solution performs under its actual input substrate so RealSaS can independently satisfy the same functional obligations.
+
+## R0 — frozen source inventory
+
+Inspected public snapshot:
 
 - `README.md` blob `2879b90dab26dc61c107808f113a70039c69c07e`
-- `LICENSE.md`
+- `LICENSE.md` blob `ca47ac2dd8a2cac08199441e761ce07f7f9fbaa6`
 - `config.yaml` blob `921d5df9d5f4005b81de004103e42e39c23612d5`
-- `scripts/inference.sh` blob `0bb52089be51e854649041d2673a2d0fdf348783`
 - `inference.py` blob `1ec596e0e41df019428c433091f13ced302a4d11`
 - `model/ar_rig_diffusion.py` blob `862c26e6d86470e3a8074c2b2a41d44401895455`
-- `model/utils_ar_transformer.py` blob `2e22ba4417c4f2eba0f0075501801964cb77f16f`
 - `model/diffloss.py` blob `a008237e04d08c79edc470ff5cdcbc3d70273bde`
+- `model/utils_ar_transformer.py` blob `2e22ba4417c4f2eba0f0075501801964cb77f16f`
+- repository tree at the frozen commit
 - paper: `RigAnything: Template-Free Autoregressive Rigging for Diverse 3D Assets`, arXiv:2502.09615 / TOG 2025.
 
-## R1 — Product-inference information contract
+The frozen public repository contains inference/model components but no complete released dataset/training driver matching the published run. Exact non-paper training integration is therefore `NOT_PUBLICLY_VERIFIABLE`.
 
-### External input
+## R1 — exact product-inference information contract
 
-Public inference accepts `.glb` / `.obj`; the wrapper can optionally simplify the mesh before model inference.
+### Skeleton-conditioning geometry
 
-### Geometry actually consumed by the neural path
+The released inference route:
 
-The inference implementation constructs:
+1. loads the input mesh;
+2. samples exactly `1024` points from the complete mesh surface;
+3. attaches the corresponding face normal to each sample;
+4. normalizes normals;
+5. centers geometry by the sampled-point AABB midpoint;
+6. scales by the maximum absolute centered sampled coordinate;
+7. feeds `1024 x 6` `(P_xyz,N_xyz)` to the learned point tokenizer.
 
-1. a **1024-sample surface point set** sampled from the mesh surface;
-2. one corresponding surface normal per sampled point;
-3. a normalized object frame using the sampled-point bounding-box midpoint as center and maximum absolute coordinate as scale;
-4. optionally/full-resolution mesh vertex positions + vertex normals for dense skinning evaluation after skeleton generation.
+Thus polygon connectivity is **not a direct neural input to the skeleton generator**. Its geometric conditioning is a complete-mesh surface sample with normals.
 
-The skeleton-generation neural input is therefore functionally a set/sequence of `1024 x (P_xyz, N_xyz)` rather than raw polygon connectivity.
+Released config:
 
-Mesh faces/topology remain available outside the skeleton network and become relevant in downstream skinning transfer/smoothing/postprocessing.
+- point input channels: `6`;
+- point count: `1024`;
+- point-token hidden: `512`;
+- transformer width: `1024`;
+- transformer layers: `12`;
+- attention head dimension config: `16`;
+- released maximum joint sequence: `64`;
+- diffusion sampling steps: `300`.
 
-### Current preliminary reference-to-RealSaS mapping target
+### Extra geometry in the skin/export route
 
-The correct RealSaS comparison is **not raw IRIS depth**. Per the consumer-substrate boundary amendment, RigAnything's `(surface point, normal)` condition must be compared against a declared deterministic `GeppettoConditioningAdapter(RiggingSurfaceIR)`.
+The inference wrapper also retains full mesh vertices/normals. After skeleton generation the model can evaluate raw skin logits on full mesh points. Mesh connectivity is then used by deterministic smoothing and export transfer. These fields are **not** part of the skeleton neural input and must not be credited to the skeleton learner.
 
-Current RealSaS `RiggingSurfaceIR` already exposes analytic `P`, support/provenance/raster bindings, optional qualified derived normal and local relations. Whether its **partial observation-supported coverage** is sufficient relative to RigAnything's mesh-wide surface sample remains OPEN and must be measured.
+### RealSaS comparison boundary
 
-## R2 — Functional architecture decomposition
+The comparison object is not raw IRIS output. It is:
 
-### Shape encoding
+`B_G = GeppettoConditioningAdapter(RiggingSurfaceIR)`
 
-Reference structure:
+where `RiggingSurfaceIR` is produced from the shipping-observable stack by the deterministic pre-Geppetto geometry layer (planned class name `GeometricSubstrateAssembler`). Deterministic resampling, normalization, local-normal derivation and local geometric descriptors are admissible adapter operations; source-mesh completion is not.
 
-```text
-1024 x 6D surface P+N
- -> point MLP
- -> width-d shape tokens
- -> global self-attention among shape tokens
-```
+## R2 — implementation-independent functional decomposition
 
-Public config:
+### A. Global shape conditioning
 
-- input point channels `6`;
-- point-tokenizer hidden `512`;
-- transformer width `1024`;
-- transformer layers `12`;
-- attention head dimension `16`;
-- maximum joint sequence `64` in the released checkpoint/config.
+`complete-mesh surface P+N -> point tokens -> globally contextualized shape tokens`
 
-### Skeleton generation
+The shape tokens self-attend and remain available to every generated skeleton step.
 
-The skeleton is represented as a variable-length autoregressive sequence of joint positions plus parents. The paper serializes ground-truth trees in BFS order and randomizes sibling order during training to avoid treating arbitrary sibling ordering as unique truth.
+### B. Variable-cardinality skeleton generation
 
-Functional chain:
+`shape context + previous generated skeleton -> next-joint context -> continuous next-joint position -> parent evidence -> update state -> endogenous stop`
 
-```text
-shape tokens + previous skeleton state
- -> hybrid transformer
- -> next-joint context
- -> continuous probabilistic next-joint position
- -> explicit parent-candidate scores
- -> update skeleton state
- -> endogenous stop/count
-```
+The reference is template-free in the relevant sense: the number of generated joints is not supplied as a fixed semantic template at inference.
 
-The public implementation uses:
+### C. Continuous joint position
 
-- shape tokens that self-attend globally;
-- skeleton tokens that attend all shape tokens and causally attend prior skeleton tokens;
-- a diffusion-conditioned continuous 3D position decoder;
-- explicit pairwise parent scoring over generated joint representations;
-- a self-parent event for the newly generated joint as the sequence termination signal; the terminating dummy joint is removed.
+The released model uses a conditional diffusion decoder for each next 3D joint location. Functionally, this supplies a continuous conditional distribution rather than a single direct mean-regression coordinate.
 
-### Continuous joint distribution
+For RealSaS, **continuous/multimodal position evidence is a functional obligation; diffusion itself is only a reference-supported mechanism** until an independent oracle-substrate comparison shows it is necessary.
 
-The reference uses conditional diffusion rather than direct coordinate regression. Public `DiffLoss` implements Gaussian diffusion training loss machinery and a reverse sampler; the paper specifies noise-prediction MSE for ground-truth joint coordinates.
+### D. Relational topology evidence
 
-This is `REFERENCE_SUPPORTED`; it is **not yet** classified as a mandatory RealSaS mechanism. The functional requirement is to represent genuine joint-position ambiguity without forcing mean-seeking collapse. Whether diffusion itself is necessary must be established by oracle-substrate comparison/ablation before the Geppetto seal.
+For a newly generated joint, the reference explicitly scores candidate parents from generated joint representations. The terminating event is encoded by selecting the current/new joint as its own parent; that terminating dummy joint is then removed.
 
-### Parent / topology representation
+RealSaS need not duplicate this authority topology. Geppetto must provide sufficiently expressive joint/root/edge evidence in `SkeletonProposalIR`; the existing Compiler global graph optimizer owns canonical root/parent selection and mints final joint identities.
 
-The reference does not infer topology with a post-hoc MST. Each newly generated joint receives parent probabilities against prior generated joints. The paper supervises connectivity explicitly; inference selects a parent from the predicted distribution.
+### E. Skin influence head present in RigAnything
 
-For RealSaS, the functionally corresponding output is not a reference-style final tree authority. Geppetto must emit sufficiently expressive parent/root/edge evidence into `SkeletonProposalIR`; the Compiler remains the sole topology authority.
+The reference pairs contextualized point tokens with generated joint tokens and predicts point/joint influence logits. This establishes another learned skinning solution family, but it is **not the preferred Arachne clean reference** because the released final skin result materially depends on mesh-topology postprocessing described below.
 
-### Skinning path present in RigAnything
+## R3 — training/loss audit
 
-After skeleton generation, the reference pairs each surface/point token with each generated joint token and maps each pair to an influence logit. Softmax across joints yields a per-surface influence distribution in the paper.
+### Publicly supported facts
 
-The released inference wrapper additionally applies deterministic operations before final GLB export:
+Paper-level functional training facts support:
 
-- retain top-5 joint logits per point;
-- softmax;
-- zero very small weights using the released threshold;
-- renormalize;
-- mesh-neighbor smoothing for multiple iterations;
-- nearest-neighbor transfer to duplicate/original GLB vertices;
-- final renormalization.
+- autoregressive skeleton serialization with explicit structural ordering;
+- continuous joint-position diffusion supervision;
+- explicit connectivity/parent supervision;
+- skin-influence supervision;
+- data drawn from rigged 3D assets with augmentation described by the paper.
 
-These operations must not be credited to the neural skinning head when comparing model capability.
+The released config exposes optimizer/runtime values including LR `1e-4`, betas `.9/.95`, weight decay `.05`, warmup `500`, BF16 AMP and TF32.
 
-## R3 — Training/loss facts currently verifiable
+### Binding public-release limitation
 
-### From paper
+The frozen repository does not expose a complete authoritative training driver/data pipeline for the published model. Therefore:
 
-Verified functional objectives:
+- exact final loss composition/weights beyond independently verified paper statements;
+- exact batching and dataset mixture;
+- all augment probabilities;
+- checkpoint selection semantics;
+- any unpublished curriculum details
 
-- joint position: diffusion noise-prediction MSE;
-- connectivity: explicit supervised connectivity classification loss;
-- skinning: weighted cross-entropy using ground-truth influence weights as target mass;
-- skeleton serialization: BFS; sibling order randomized during training;
-- training data: RigNet plus curated rigged Objaverse; random pose augmentation is reported.
+are `NOT_PUBLICLY_VERIFIABLE` and may not be reconstructed from suggestive config names.
 
-### From public config
+This does **not** weaken the functional reference result because the inference contract and causal factorization are directly code-verifiable.
 
-The released config records Adam-like optimizer hyperparameters (`beta1=.9`, `beta2=.95`), LR `1e-4`, weight decay `.05`, warmup `500`, BF16 AMP/TF32 and the architecture values above.
+## R4 — neural vs deterministic responsibility
 
-### Public-release limitation
-
-The current public repository presents inference code and model components but does **not** expose a complete training forward/integration path for the released model. An open upstream issue also asks for training code release. Therefore exact loss weighting, batching/data implementation and any non-paper training details are `NOT_PUBLICLY_VERIFIABLE` unless recovered from an authoritative paper/source/checkpoint artifact.
-
-Config keys alone must not be treated as proof that a particular loss was active in the released training run.
-
-## R4 — Learned vs deterministic/postprocess responsibility
-
-| Capability | Reference source |
+| Function | Responsibility in released reference |
 |---|---|
-| global surface context | learned transformer |
-| variable joint count | autoregressive learned generation + explicit stop convention |
-| joint-position multimodality | learned diffusion distribution |
-| parent evidence | learned explicit candidate scoring |
-| final skeleton serialization | deterministic sequence convention |
+| surface P+N contextualization | learned |
+| variable joint cardinality | learned autoregressive state + explicit stop convention |
+| continuous joint-position distribution | learned diffusion decoder |
+| parent evidence | learned candidate scoring |
+| final sequential serialization convention | deterministic protocol around learned outputs |
 | raw skin influence logits | learned point/joint pair head |
-| top-k sparsification | deterministic inference postprocess |
-| small-weight cutoff | deterministic inference postprocess |
-| mesh-neighbor smoothing | deterministic mesh-topology postprocess |
-| transfer to original GLB vertices | deterministic nearest-neighbor postprocess |
+| top-5 sparsification | deterministic inference wrapper |
+| low-weight cutoff (`<0.068`) | deterministic inference wrapper |
+| renormalization | deterministic inference wrapper |
+| mesh-neighbor skin smoothing | deterministic, 10 iterations / factor .35 in released inference |
+| duplicate/original GLB transfer | deterministic nearest-neighbor transfer |
 
-## First Geppetto functional-equivalence obligations
+The mesh-neighbor smoothing and transfer mean final RigAnything skin quality cannot be used as evidence that its raw neural skin head alone solves Arachne's problem under a topology-free partial substrate.
 
-Before calling the Geppetto problem externally supported under RealSaS inputs, RealSaS must demonstrate a counterpart for every material function below:
+## Compiler ownership correction
 
-1. **shape conditioning:** a deterministic adapter can expose an adequate global P+N surface sample/descriptor from `RiggingSurfaceIR`;
-2. **coverage:** partial observed surface retains enough global structural evidence for the reference-class task;
-3. **variable cardinality:** no fixed-template joint count assumption;
-4. **structural ambiguity:** sibling/topology ambiguity is not collapsed into a unique arbitrary teacher serialization;
-5. **continuous position distribution:** genuinely multimodal joint positions can remain multimodal/uncertain;
-6. **relational topology evidence:** each proposed control has explicit relational parent/root evidence sufficient for Compiler qualification;
-7. **termination/count:** the model can express when no further supported controls should be proposed;
-8. **oracle ceiling:** the independently implemented candidate can fit/solve exact RealSaS consumer substrate before predicted-IRIS error is introduced.
+RealSaS historically attempted model-free rig synthesis and retains substantial deterministic logic below Geppetto. The current Compiler is not a passive validator:
 
-Exact BFS serialization, diffusion, transformer width 1024 or a 64-joint cap are **reference mechanisms**, not automatically RealSaS requirements. A different independent mechanism is admissible only if it fulfills the same function and passes the same oracle/downstream tests.
+- Geppetto proposal IDs are non-canonical;
+- proposal joints provide positions/root evidence/support;
+- proposal edges provide scored relational evidence;
+- Compiler builds a global graph optimization request;
+- `optimize_canonical_graph_v18_98` selects the admitted root/parents;
+- Compiler mints new canonical product joint IDs and rejects failed graph qualification.
 
-## Key open equivalence question
+Therefore the correct functional comparison is:
 
-The current central uncertainty is no longer field type (`P+N` is plausibly derivable) but **surface coverage/accessibility**:
+`RigAnything skeleton function`
 
-> Can observation-grounded `RiggingSurfaceIR`, after deterministic SurfaceBuilder and conditioning adapter, expose enough of the object-wide surface organization that a RigAnything-class template-free skeleton generator remains solvable without hidden completed mesh geometry?
+versus
 
-This must be answered empirically; it may not be inferred from semantic similarity.
+`independent Geppetto evidence model + existing RealSaS Compiler graph authority`.
 
-## Status / next audit actions
+It would be an architectural regression to duplicate the Compiler's global root/tree solver inside `GeometricSubstrateAssembler` or to require Geppetto to own the final canonical tree merely because RigAnything emits a tree sequentially.
 
-R0-R4 are started but not closed. Remaining work includes paper equation/ablation cross-check, checkpoint/config provenance where accessible, exact preprocessing edge cases, and the R5 field-by-field RealSaS equivalence matrix. No Geppetto architecture/loss/training seal is authorized by this draft.
+## Functional obligations carried into the Geppetto design
+
+A RealSaS candidate must independently satisfy all material reference functions:
+
+1. global shape conditioning from the admitted consumer substrate;
+2. variable control cardinality / explicit unsupported-overflow behavior;
+3. continuous joint-position evidence that does not force unsupported multimodal means;
+4. explicit root/connectivity evidence;
+5. adequate evidence for the Compiler to recover a valid canonical global graph;
+6. no template-specific semantic joint identity assumption;
+7. no silent truncation (`160` current C0 capacity; above it abstains unless causally reopened);
+8. oracle-substrate ceiling before predicted IRIS noise is introduced.
+
+Reference-specific BFS serialization, diffusion, width `1024`, `12` layers and a `64`-joint ceiling are **not** copied requirements.
+
+## R0-R4 verdict
+
+`PASS_REFERENCE_FUNCTION_EXTRACTED_WITH_LICENSE_FIREWALL`
+
+RigAnything is strong evidence that template-free skeleton generation is solvable from a complete 3D surface `P+N` substrate. The only material input-equivalence issue left for RealSaS is not tensor type but **coverage/accessibility**: RigAnything samples the complete mesh surface while shipping RealSaS geometry is deliberately partial and observation-grounded.
+
+That coverage question moves to the shared R5 matrix and R6 oracle-substrate ceiling. Until R6, the claim `RealSaS input is equivalent to RigAnything input` remains forbidden.

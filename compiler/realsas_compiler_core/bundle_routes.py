@@ -21,8 +21,8 @@ class ArtifactRoute:
 # Physical bundle section mirrors semantic authority. Proposal artifacts never land in
 # canonical rig/weight/puppet sections; runtime never becomes a second product truth.
 ARTIFACT_ROUTES: dict[type, ArtifactRoute] = {
-    ObservationEvidenceIR: ArtifactRoute("EVIDENCE", "IRIS+observation bookkeeping", "ir", "observation_evidence_ir.json", ("SurfaceBuilder",)),
-    RiggingSurfaceIR: ArtifactRoute("QUALIFIED_GEOMETRY", "SurfaceBuilder", "ir", "rigging_surface_ir.json", ("Geppetto", "Arachne", "Compiler")),
+    ObservationEvidenceIR: ArtifactRoute("EVIDENCE", "IRIS+observation bookkeeping", "ir", "observation_evidence_ir.json", ("GeometricSubstrateAssembler",)),
+    RiggingSurfaceIR: ArtifactRoute("QUALIFIED_GEOMETRY", "GeometricSubstrateAssembler", "ir", "rigging_surface_ir.json", ("Geppetto", "Arachne", "Compiler")),
     SkeletonProposalIR: ArtifactRoute("PROPOSAL", "Geppetto", "candidates", "skeleton_proposal_ir.json", ("Compiler.rig_qualification",)),
     QualifiedSkeletonIR: ArtifactRoute("QUALIFIED", "Compiler.rig_qualification", "rig", "qualified_skeleton_ir.json", ("Arachne", "Compiler.product_assembly")),
     SkinProposalIR: ArtifactRoute("PROPOSAL", "Arachne", "candidates", "skin_proposal_ir.json", ("Compiler.skin_qualification",)),

@@ -1,0 +1,114 @@
+{
+  "closed_sets": {
+    "DEV32_opened": false
+  },
+  "date": "2026-08-31",
+  "forbidden_claims": [
+    "L would fail under the S1 apparatus.",
+    "g would fail under the S1 apparatus.",
+    "DINO-L or DINO-g representations are insufficient for RealSaS.",
+    "Backbone scale is globally irrelevant.",
+    "The S->B difference would remain small under a different decoder, loss, native-detail path, sampling policy, or representation interface.",
+    "The partial L history is evidence about L primary performance."
+  ],
+  "next": "FROZEN_APPARATUS_CODE_AUDIT_THEN_SINGLE_RUNG_DECODER_CEILING",
+  "permitted_claims": [
+    "Under SharedLearnerV1 and the frozen S1 apparatus, S->B backbone scaling did not materially improve downstream accessibility at PRIMARY_32768.",
+    "S and B both failed the frozen primary accessibility criterion with zero hard-route failures.",
+    "The S1 run does not establish shared learner adequacy."
+  ],
+  "planned_order": [
+    "S",
+    "B",
+    "L",
+    "g"
+  ],
+  "reason": {
+    "class": "POST_HOC_APPARATUS_AUDIT",
+    "observations": [
+      "local DINO field remains 37x37, so it is incorrect to say all DINO information is reduced to 16x16",
+      "cross-view context is pooled to 16x16 then bilinearly upsampled",
+      "all candidate token widths enter one shared 1536->256 stem",
+      "native-1024 detail access is a sparse 25-RGBA-sample stencil encoded by a small MLP, not a dense learned high-resolution spatial field",
+      "the final query head is pointwise after sampling the shared encoded field",
+      "the frozen objective is uniform mean SmoothL1(beta=0.01), with no direct tail/derivative/consumer-aligned term"
+    ],
+    "summary": "A code-level audit after S/B results identified a material shared accessibility ceiling/confound in the fixed learner/loss/access path, reducing the scientific value of spending the remaining compute on L/g under the same apparatus."
+  },
+  "rungs": {
+    "B": {
+      "drive": {
+        "folder_id": "1abqKFtbxKq0_7kebkgRIedMMd-Wz96_4",
+        "primary_eval_id": "1QAvzzkZxnc5IG5arLhXy202T96pAsRUM",
+        "rung_complete_id": "1VH9dNtY4UmE7-Di74ZuBhkl88Fpk2b3d"
+      },
+      "final_optimizer_step": 32768,
+      "hashes": {
+        "matched_checkpoint_sha256": "ef48c14c1ebbd6433b3002275e60a136905d7ca75993f121a6abf53330031e6b",
+        "matched_eval_sha256": "474737318703f67fd6d4ca1c46da476436fe646b5d97800bfd8fd3f530d756d9",
+        "primary_checkpoint_sha256": "05de5d06894fe9a1a3acf5854ce65a66426684a0b30a5eb5511d6897ae621249",
+        "primary_eval_sha256": "c0e637e0d6de4be13a5ac9ce671a7ece4431c5da0cd7e74ac0f5b259459ecf52"
+      },
+      "primary": {
+        "FIT_PROXY32": {
+          "eligible": 54,
+          "hard_route_failures": 0,
+          "pass": 10
+        },
+        "TRAIN_DIAG32": {
+          "eligible": 56,
+          "hard_route_failures": 0,
+          "pass": 18
+        }
+      },
+      "representation_accessible_v1": false,
+      "status": "COMPLETE_PRIMARY_FAIL"
+    },
+    "L": {
+      "drive": {
+        "folder_id": "1euuuR80-uB37II5uSCkuUk-VReUfXf1W",
+        "train_history_id": "1U0J5H_lqI8CR_qKEtudVV4Fo_9FTZpCX"
+      },
+      "highest_persisted_history_step": 192,
+      "primary_eval_opened": false,
+      "scientific_interpretation_forbidden": true,
+      "status": "TERMINATED_PARTIAL_NOT_EVALUATED"
+    },
+    "S": {
+      "drive": {
+        "folder_id": "1KjaqBvo0PHC9E-1Hf_uFCj9N9JzTweGl",
+        "primary_eval_id": "1Eg4MkPsYG479ALfbAkFmXDS7c4vAg2dh",
+        "rung_complete_id": "1rklwX6pqPkv40JlJxCmpVTDAUt6oXUUW"
+      },
+      "final_optimizer_step": 32768,
+      "hashes": {
+        "matched_checkpoint_sha256": "6558e2820a77eaa57e0ef8cfee552a3a02347c0aa2707de228bcaddfc4e1e7d9",
+        "matched_eval_sha256": "d723f5af1d0637369058d055afcc21bd154f382e692600a336084100f9b12cc5",
+        "primary_checkpoint_sha256": "bf915e9a11d84c9ea7fe846ead066215989fcdf2c9c4724d5e3b992769f763e5",
+        "primary_eval_sha256": "f0207ed70b2b78a2f2f261e0fe6e8e9aa665b2bf34cfbd004e345ded65b50177"
+      },
+      "primary": {
+        "FIT_PROXY32": {
+          "eligible": 54,
+          "hard_route_failures": 0,
+          "pass": 10
+        },
+        "TRAIN_DIAG32": {
+          "eligible": 56,
+          "hard_route_failures": 0,
+          "pass": 17
+        }
+      },
+      "representation_accessible_v1": false,
+      "status": "COMPLETE_PRIMARY_FAIL"
+    },
+    "g": {
+      "scientific_interpretation_forbidden": true,
+      "status": "NOT_RUN"
+    }
+  },
+  "schema": "RealSaS.DINO.LadderS1EarlyTermination.v1",
+  "status": "EARLY_TERMINATED_POST_HOC_SHARED_APPARATUS_CONFOUND",
+  "termination_decision_after": "B_PRIMARY_32768",
+  "training_authorized": false
+}

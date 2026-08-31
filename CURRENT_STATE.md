@@ -2,13 +2,13 @@
 
 **Date:** 2026-09-01  
 **Canonical continuation branch:** `main`  
-**Status:** `DINO_S1_CLOSED_EARLY__REPROJECTION_V2_SEALED__GATE0_SYNTHETIC_PASS__REAL_CORPUS_GATE0_EXTERNAL_EXECUTION_ACTIVE_RESULT_NOT_INGESTED__CLEAN_C0_VISUAL_TRIAGE_SEALED_NOT_EXECUTED__GEPPETTO_ARACHNE_R0_R5_CLOSED__R6_FROZEN__R6_TEACHER_PROJECTION_PORTED__MWB0_PASS__MWB1_PASS__MWB2_ELIGIBLE__COMPILER_RUNTIME_INTENDED_MIGRATION_PASS__HISTORICAL_HEAVY_AUTHORITIES_EXTERNAL__ARCHITECTURE_SVG_READY__DEV32_CLOSED__NO_LEARNED_OPTIMIZER_AUTHORIZED`
+**Status:** `DINO_S1_CLOSED_EARLY__REPROJECTION_V2_SEALED__GATE0_SYNTHETIC_PASS__REAL_CORPUS_GATE0_EXTERNAL_EXECUTION_ACTIVE_RESULT_NOT_INGESTED__CLEAN_C0_VISUAL_TRIAGE_SEALED_NOT_EXECUTED__GEPPETTO_ARACHNE_R0_R5_CLOSED__R6_FROZEN__R6_TEACHER_PROJECTION_PORTED__MWB0_PASS__MWB1_PASS__MWB2_ELIGIBLE__COMPILER_RUNTIME_INTENDED_MIGRATION_PASS__HISTORICAL_HEAVY_AUTHORITIES_EXTERNAL__ARCHITECTURE_V3_SVG_CLOSED__DEV32_CLOSED__NO_LEARNED_OPTIMIZER_AUTHORIZED`
 
 This file is continuation authority only on `main`.
 
 ## One-line state
 
-`DTB-ND1 tolerance closed -> SharedLearner S1 closed early -> reprojection-centered partial-observed IRIS V2 sealed -> synthetic Gate0 PASS -> real TRAIN512 Gate0 executing externally/result not ingested -> native image integrity exact PASS -> semantic visual triage sealed/not executed -> RigAnything/SkinTokens R0-R5 closed -> R6 oracle protocol frozen -> legacy Geppetto/Arachne branch reconciled and teacher projection selectively ported -> MWB-0 typed V2 mesh/skin seam PASS -> real MWB-1 identity baseline PASS -> Compiler/runtime intended GitHub migration reconciled PASS with heavy historical numerics/proof/native runtime explicitly external -> final detailed architecture SVG now eligible -> no learned optimizer step authorized.`
+`DTB-ND1 tolerance closed -> SharedLearner S1 closed early -> reprojection-centered partial-observed IRIS V2 sealed -> synthetic Gate0 PASS -> real TRAIN512 Gate0 executing externally/result not ingested -> native image integrity exact PASS -> semantic visual triage sealed/not executed -> RigAnything/SkinTokens R0-R5 closed -> R6 oracle protocol frozen -> legacy Geppetto/Arachne branch reconciled and teacher projection selectively ported -> MWB-0 typed V2 mesh/skin seam PASS -> real MWB-1 identity baseline PASS -> Compiler/runtime intended GitHub migration reconciled PASS with heavy historical numerics/proof/native runtime explicitly external -> architecture V3 + detailed SVG reconstructed and indexed -> next autonomous work: Geppetto R6 candidate/adapter, SkinFieldCodec and MWB-2 preflight -> no learned optimizer step authorized.`
 
 ## 1. Product/system contract — STABLE, V2 PRODUCT LINEAGE EXPLICIT
 
@@ -21,26 +21,37 @@ Current canonical target route:
 ```text
 8 neutral views + known orthographic cameras
  -> IRIS observation-grounded forward depth/evidence
+ -> ObservationEvidenceIR
  -> analytic P = O + dF
  -> GeometricSubstrateAssembler / RiggingSurfaceIR S
+ -> GeppettoConditioningAdapter B_G
  -> Geppetto SkeletonProposalIR G*
  -> Compiler skeleton qualification/global graph authority
  -> QualifiedSkeletonIR G
+ -> ArachneConditioningAdapter B_A
  -> Arachne SkinProposalIR W*
  -> Compiler skin qualification
  -> QualifiedSkinIR W
  -> deterministic mesh candidate / Compiler geometry qualification
  -> QualifiedEditableMeshIR M
- -> qualified skin-to-mesh binding
+ -> deterministic skin-to-mesh binding
  -> QualifiedMeshSkinIR B
  -> CanonicalPuppetGraph.v2 Y
- -> deformation/contact + motion proof
+ -> exact-state deformation/contact + motion proof
  -> owner-routed bounded repair/re-proof if needed
  -> PASS-only RuntimePackageIR projection
  -> native runtime boundary when promoted/materialized
 ```
 
 IRIS, Geppetto and Arachne emit evidence/proposals. Compiler owns canonical product state, canonical IDs, qualification and exact-state proof/export authority.
+
+Current composition authority:
+
+- `canonical/SYSTEM_ARCHITECTURE_V3_20260901.md`;
+- `canonical/REALSAS_END_TO_END_CANONICAL_ARCHITECTURE_20260901.svg`;
+- `canonical/HUMAN_READABLE_ROADMAP_20260901.md`.
+
+Older `SYSTEM_ARCHITECTURE_V2.md`, `IR_TYPE_SYSTEM_V1.md` and `PRODUCT_CONTRACT_V1.md` remain historical contract evidence; their pre-MWB/open-seam current-topology wording is superseded by V3 plus current executable types.
 
 `GeometricSubstrateAssembler` is the current name for the observation-grounded geometry layer. Historical explicit `RealSaS.SurfaceBuilder.current` identities remain preserved in historical artifacts; no historical hash was rewritten.
 
@@ -87,6 +98,8 @@ Authority: `canonical/IRIS_REPROJECTION_CENTERED_V2_PREREG_20260831.md`.
 Central rule:
 
 > Exact cameras create canonical world candidates and exact eight-view reprojections; learned features judge evidence agreement. Analytically identifiable geometry is not relearned.
+
+Current sealed structure uses frozen DINOv2-S multi-level descriptors plus a learned native-resolution path, exact common-world candidate reprojection, robust multi-view aggregation, approximately isotropic world-space regularization, multimodal supported/ambiguous modes and local continuous refinement.
 
 Internal canonical representation is partial observed-surface evidence. Unknown occluded/unobserved regions remain typed UNKNOWN; no hidden/full occupancy completion is current authority.
 
@@ -147,8 +160,10 @@ Closed conclusions:
 - the next question is empirical R6 coverage/accessibility;
 - current Compiler graph and skin qualification authority remains binding.
 
-Frozen R6 arms:
+Frozen consumer boundaries and R6 arms:
 
+- `B_G = GeppettoConditioningAdapter(RiggingSurfaceIR)`;
+- `B_A = ArachneConditioningAdapter(RiggingSurfaceIR, QualifiedSkeletonIR)`;
 - `U0_REFERENCE_FULL_SURFACE`;
 - `U1_OBSERVATION_ORACLE_SUBSTRATE`;
 - `U2_PREDICTED_IRIS_SUBSTRATE` only after U1.
@@ -190,7 +205,7 @@ Real sealed witness:
 - legal weight mutation changed mesh-skin/product hashes and stale proof was rejected;
 - scientific optimizer steps `0`.
 
-MWB-2 is eligible but not opened. Historical CDT is not current executable authority merely because a registry names it.
+MWB-2 is eligible but not opened. Current executable mesh qualification is the identity-subset baseline. `LOCAL_CONVEX_INTERPOLATION` is typed but a production local-convex/CDT producer is not yet promoted.
 
 ## 9. Compiler/runtime migration completeness — CLOSED PASS WITH EXTERNAL HISTORICAL MAXIMUM
 
@@ -255,7 +270,31 @@ This removes a misleading hidden-execution implication without promoting or disc
 
 Old image-decomposition/front-brain and authored-owner/teacher-exact product ontologies are not restored into the canonical path because the historical audit explicitly rejects forcing them onto the current IRIS/GeometricSubstrateAssembler/Geppetto/Arachne boundaries.
 
-## 10. Downstream ownership rules — BINDING
+## 10. Architecture V3 / detailed SVG — CLOSED
+
+Current end-to-end architecture was reconstructed only after migration audit #54 closed.
+
+Authorities:
+
+- `canonical/SYSTEM_ARCHITECTURE_V3_20260901.md` — normative composition and authority semantics;
+- `canonical/REALSAS_END_TO_END_CANONICAL_ARCHITECTURE_20260901.svg` — detailed current visual projection;
+- `tools/validate_architecture_svg_v3.py` — XML/node/authority-label regression;
+- `canonical/HUMAN_READABLE_ROADMAP_20260901.md` — plain-language continuation map.
+
+The SVG explicitly separates:
+
+- current canonical executable mainline;
+- sealed/future learned IRIS/Geppetto/Arachne apparatus;
+- current typed but partial MWB implementation;
+- training/evaluator-only truth apparatus;
+- byte-verified current vendor closure;
+- historical external CDT/BBW-KKT/ARAP/XPBD/proof/native-runtime authorities;
+- per-solver promotion gates;
+- dead/superseded front-brain/teacher-exact/parallel-truth lineage.
+
+A historical SHA pointer is never rendered as a current executable path. An absent current import is never interpreted as historical architectural nonexistence.
+
+## 11. Downstream ownership rules — BINDING
 
 Normal learned skin path:
 
@@ -267,7 +306,7 @@ Mesh discretization may only derive topology/rest positions from admitted observ
 
 ARAP/XPBD consume exact admitted product state and may not silently mutate rest truth. Any accepted rest-state mutation creates a new product state and requires re-proof.
 
-## 11. Current training / execution authority
+## 12. Current training / execution authority
 
 **IRIS V2 learned optimizer steps: NOT AUTHORIZED.**  
 **Geppetto/Arachne learned optimizer steps: NOT AUTHORIZED.**  
@@ -276,13 +315,13 @@ ARAP/XPBD consume exact admitted product state and may not silently mutate rest 
 **MWB-1: CLOSED PASS.**  
 **MWB-2: ELIGIBLE, NOT OPENED.**  
 **Compiler/runtime intended migration audit: CLOSED PASS.**  
+**Architecture V3 + detailed SVG: CLOSED.**  
 **Heavy historical numerical/proof/native runtime source: EXTERNAL AUTHORITY, NOT CURRENT EXECUTION.**  
 **Scientific real-corpus IRIS Gate0: externally active; result not ingested.**  
 **Clean-C0 visual anomaly triage execution: AUTHORIZED under frozen prereg.**  
-**DEV32: CLOSED.**  
-**Final detailed architecture SVG: READY.**
+**DEV32: CLOSED.**
 
-## 12. Canonical operational backlog
+## 13. Canonical operational backlog
 
 Current ordered work authority:
 

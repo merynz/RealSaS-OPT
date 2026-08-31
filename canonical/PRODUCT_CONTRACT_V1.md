@@ -1,6 +1,6 @@
 # RealSaS — Canonical IRIS → Geppetto → Arachne → Compiler Product Contract V1
 
-**Updated:** 2026-08-28  
+**Updated:** 2026-08-31  
 **Status:** `CANONICAL_PRODUCT_RESPONSIBILITY_CONTRACT__COMPILER_IN_SYSTEM_LOOP`
 
 ## North star
@@ -31,6 +31,8 @@ IRIS, Geppetto and Arachne are learned responsibility boundaries. Compiler is ca
 Single responsibility: recover the **minimal observation-grounded geometric substrate sufficient for downstream rigging**.
 
 Closed evidence currently narrows the required exposed learned geometry direction to forward depth `d` under known cameras; common-frame `P` is analytic (`P=O+dF`). N-B3 found no explicit learned normal feature required under its frozen tested regime. This does **not** claim predicted-depth product qualification; the structured ray-aligned tolerance bridge remains the next gate.
+
+**Mode scalability invariant:** across known-camera Mode G and more uncertain Mode E, IRIS preserves the same analytic-geometry / learned-evidence topology; increasing observation or camera uncertainty may increase the relative reliance and calibration burden on learned correspondence/reliability evidence, but may not introduce hidden completion or a second geometry authority without explicit contract revision.
 
 IRIS does not own authored mechanical owner identity, source-rig exactness, skeleton topology/parents, skin weights or product-canonical IDs.
 

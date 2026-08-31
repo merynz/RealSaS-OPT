@@ -2,13 +2,13 @@
 
 **Date:** 2026-08-31  
 **Canonical continuation branch:** `main`  
-**Status:** `DINO_S1_CLOSED_EARLY__REPROJECTION_V2_SEALED__GATE0_SYNTHETIC_PASS__REAL_CORPUS_GATE0_READY_NOT_EXECUTED__CLEAN_C0_VISUAL_TRIAGE_SEALED_TESTED_NOT_EXECUTED__DEV32_CLOSED__NO_V2_OPTIMIZER_AUTHORIZED`
+**Status:** `DINO_S1_CLOSED_EARLY__REPROJECTION_V2_SEALED__GATE0_SYNTHETIC_PASS__REAL_CORPUS_GATE0_READY_NOT_EXECUTED__CLEAN_C0_VISUAL_TRIAGE_SEALED_TESTED_NOT_EXECUTED__GEPPETTO_ARACHNE_REFERENCE_AUDIT_OPEN__DEV32_CLOSED__NO_V2_OPTIMIZER_AUTHORIZED`
 
 This file is continuation authority only on `main`.
 
 ## One-line state
 
-`DTB-ND1 tolerance/consumer replay closed -> DINO S/B nearly flat under SharedLearnerV1 -> S1 early-terminated and frozen-apparatus audit closed BLOCK_AND_FIX -> reprojection-centered partial-canonical IRIS V2 sealed -> deterministic synthetic Gate0 passed -> full TRAIN512 real-corpus Gate0 execution contract + runner frozen/tested -> native image integrity closed exact -> clean-C0 visual anomaly triage prereg/code/CI frozen before review outputs -> no learned V2 optimizer step authorized.`
+`DTB-ND1 tolerance/consumer replay closed -> DINO S/B nearly flat under SharedLearnerV1 -> S1 early-terminated and frozen-apparatus audit closed BLOCK_AND_FIX -> reprojection-centered partial-canonical IRIS V2 sealed -> deterministic synthetic Gate0 passed -> full TRAIN512 real-corpus Gate0 execution contract + runner frozen/tested -> native image integrity closed exact -> clean-C0 visual anomaly triage prereg/code/CI frozen before review outputs -> RigAnything/SkinTokens clean-room code-level reference audit opened at the consumer-facing RiggingSurfaceIR/QualifiedSkeletonIR boundary -> no learned V2 optimizer step authorized.`
 
 ## 1. Product/system contract — STABLE
 
@@ -57,7 +57,7 @@ Authority: `canonical/DTB_ND1_ROBUST_LOCAL_PLANE_CLOSURE_20260829.md`.
 | S @32768 | 10/54 | 17/56 | `COMPLETE_PRIMARY_FAIL` |
 | B @32768 | 10/54 | 18/56 | `COMPLETE_PRIMARY_FAIL` |
 | L | no primary eval | no primary eval | `TERMINATED_PARTIAL_NOT_EVALUATED` |
-| g | not run | not run | `NOT_RUN` |
+| g | not run | no run | `NOT_RUN` |
 
 L history ends at step 192 and has no scientific interpretation. DEV32 remained closed.
 
@@ -188,10 +188,37 @@ Reviewer-safe contact sheets are ordered V0..V7 and expose no diagnostic reason/
 
 A Colab execution notebook has been prepared outside the repo to run both real Gate0 and this triage in one fail-closed session. It is pinned to this authority lineage and leaves `training_authorized=false`.
 
-## 10. Training authority
+## 10. Geppetto/Arachne external-reference audit — OPEN / CLEAN-ROOM
+
+Authority:
+
+- `canonical/GEPPETTO_ARACHNE_EXTERNAL_REFERENCE_CLEANROOM_AUDIT_PREREG_20260831.md`
+- `canonical/GEPPETTO_ARACHNE_CONSUMER_SUBSTRATE_EQUIVALENCE_BOUNDARY_AMENDMENT_20260831.md`
+
+Frozen upstream snapshots:
+
+- RigAnything `d03cdb21dd134fa81df6b0947522469db3f78bd2`;
+- SkinTokens `273b691d35989d71cd17ff2895fdc735097b92d1`.
+
+The audit is code-level and function-level, not a paper analogy. RigAnything source remains behind a noncommercial Adobe Research License firewall; no upstream product code may be copied, translated line-for-line, imported or used as a RealSaS product dependency. SkinTokens is MIT but is still audited with the same scientific provenance discipline.
+
+**Equivalence-boundary correction:** reference inputs are not compared against raw partial IRIS output. Geppetto equivalence is measured against the complete consumer-facing observation stack `IRIS -> ObservationEvidenceIR -> analytic geometry -> deterministic SurfaceBuilder -> RiggingSurfaceIR -> declared deterministic conditioning adapter`. Arachne equivalence is measured against `RiggingSurfaceIR + Compiler-qualified QualifiedSkeletonIR -> declared deterministic conditioning adapter`.
+
+This changes the measurement boundary, not authority ownership. IRIS remains learned evidence; SurfaceBuilder remains deterministic; Compiler remains canonical rig authority. Hidden completion/source-rig leakage remains forbidden.
+
+The audit must separately establish:
+
+1. information/field derivability at the consumer boundary;
+2. coverage/accessibility despite RealSaS being partial observation-grounded geometry;
+3. oracle-substrate consumer ceilings through the same deterministic RealSaS stack;
+4. only then final learned Geppetto/Arachne architecture/loss/training seals.
+
+## 11. Training authority
 
 **V2 learned optimizer steps: NOT AUTHORIZED.**  
+**Geppetto/Arachne final learned apparatus training: NOT AUTHORIZED.**  
 **New S/B/L/g ladder: NOT AUTHORIZED.**  
 **Scientific real-corpus Gate0 deterministic execution: AUTHORIZED under its frozen prereg.**  
 **Clean-C0 visual anomaly triage execution: AUTHORIZED under its frozen prereg.**  
+**External-reference clean-room read/audit: AUTHORIZED; code reuse remains license/firewall constrained.**  
 **DEV32: CLOSED.**

@@ -59,3 +59,40 @@ Current main records native C++17 source as historical external byte authority r
 ## D-010 — Final inference firewall
 
 Final inference runs in a fresh process with only canonical images, fixed camera contract, frozen checkpoints and generic code/config. Teacher/source-rig/source-weight/source-mesh paths are absent from the inference schema.
+
+## D-011 — REDUCED DEMO ARCHITECTURE IS FORBIDDEN
+
+**Supersedes D-008 as an implementation decision and narrows D-009.**
+
+The investor demo must use the same current product architecture and functional obligations as RealSaS V3. The only intentional difference is that learned components are optimized on one specimen rather than a family distribution.
+
+Therefore a smaller/easier architecture justified only by the demo deadline is forbidden. In particular, the earlier small direct-Arachne scaffold, fixed-query Geppetto scaffold and simple IRIS demo U-Net are architecture-smoke artifacts only and cannot be used for the final fitted demo.
+
+Binding contract: `FULL_PRODUCT_SINGLE_SPECIMEN_FIT_CONTRACT_V1.md`.
+
+## D-012 — No fixed joint/control count product cap
+
+Historical 48/64/72-query controls are experiment mechanisms, not product architecture. Geppetto final demo architecture must have endogenous variable cardinality and learned stop/unsupported behavior. Any resource safety bound must be general/input-derived and cannot define output count.
+
+## D-013 — SkinFieldCodec obligation retained
+
+Contrary to D-008, the final demo Arachne path does not bypass the product SkinFieldCodec obligation. A compact per-control skin-field representation and a reconstruction/deformation ceiling remain part of the architecture before learned Arachne proposal generation is accepted.
+
+## D-014 — Historical downstream is reused, not reimplemented
+
+D-009's branch-local deformation/playback-harness allowance is superseded for the final route. Exact historical v0.5 deformation/proof/runtime authority has been recovered and SHA-verified; current typed Compiler products will bind to that authority through an isolated verified adapter/promotion boundary rather than replacing ARAP/XPBD/proof/runtime with a toy implementation.
+
+## D-015 — Current architecture V3 is the demo topology authority
+
+The final fitted demo follows `canonical/SYSTEM_ARCHITECTURE_V3_20260901.md` from architecture PR #19:
+
+- IRIS Reprojection-Centered V2-A;
+- GeometricSubstrateAssembler;
+- Geppetto R6 boundary;
+- Compiler graph qualification;
+- SkinFieldCodec + Arachne R6 boundary;
+- Compiler skin qualification;
+- typed mesh / mesh-skin / CanonicalPuppetGraph.v2;
+- exact-state proof and runtime.
+
+Older M4.5, V05, G0.1/A0.1 and external-paper architectures are evidence/design lineage only where V3 explicitly preserves their lessons; they do not replace V3 current topology.

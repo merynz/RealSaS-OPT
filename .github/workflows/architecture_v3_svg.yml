@@ -1,0 +1,22 @@
+name: architecture-v3-svg
+on:
+  pull_request:
+    paths:
+      - 'canonical/SYSTEM_ARCHITECTURE_V3_20260901.md'
+      - 'canonical/REALSAS_END_TO_END_CANONICAL_ARCHITECTURE_20260901.svg'
+      - 'canonical/HUMAN_READABLE_ROADMAP_20260901.md'
+      - 'tools/validate_architecture_svg_v3.py'
+      - '.github/workflows/architecture_v3_svg.yml'
+permissions:
+  contents: read
+jobs:
+  validate-architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate SVG XML, required nodes and authority labels
+        run: python tools/validate_architecture_svg_v3.py

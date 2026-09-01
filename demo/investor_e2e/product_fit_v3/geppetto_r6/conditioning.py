@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import isfinite
 
 import torch
 
@@ -44,32 +43,46 @@ def _knn(points_norm: torch.Tensor, k: int) -> torch.Tensor:
     return torch.topk(d, k=kk, largest=False, dim=-1).indices
 
 
-def _local_differentials(points_norm: torch.Tensor, knn: torch.Tensor):
-    """Deterministic sign-invariant local plane / scale descriptors.
+def _local_sign_invariant_geometry(points_norm: torch.Tensor, knn: torch.Tensor):
+    """Deterministic local scale/shape descriptors without inventing normal authority.
 
-    The output is not learned geometry authority.  It is a conditioning operator
-    over already-admitted S and deliberately uses |normal| because an unoriented
-    local PCA normal must not silently invent an outside direction.
+    Eigenvalues of the local covariance and neighbor radius are sign/orientation
+    invariant and are legal deterministic functions of already-admitted P.  The
+    PCA eigenvector is deliberately *not* returned: an unoriented PCA normal is
+    not promoted as qualified N_d by this adapter.
     """
     b, n, _ = points_norm.shape
     k = knn.shape[-1]
     batch = torch.arange(b, device=points_norm.device)[:, None, None].expand(b, n, k)
     neigh = points_norm[batch, knn]
-    center = points_norm[:, :, None, :]
-    rel = neigh - center
+    rel = neigh - points_norm[:, :, None, :]
     radius = torch.linalg.norm(rel, dim=-1).mean(dim=-1, keepdim=True)
     cov = torch.einsum("bnki,bnkj->bnij", rel, rel) / float(max(1, k))
-    evals, evecs = torch.linalg.eigh(cov)
-    evals = evals.clamp_min(0.0)
-    normal = evecs[..., 0]
-    denom = evals.sum(dim=-1, keepdim=True).clamp_min(1e-8)
-    spectrum = evals / denom
-    return normal.abs(), spectrum, radius
+    evals = torch.linalg.eigvalsh(cov).clamp_min(0.0)
+    spectrum = evals / evals.sum(dim=-1, keepdim=True).clamp_min(1e-8)
+    return spectrum, radius
 
 
-def _support_features(surface: RiggingSurfaceIR, device: torch.device, dtype: torch.dtype):
+def _qualified_normal_features(surface: RiggingSurfaceIR, device: torch.device, dtype: torch.dtype):
     rows = []
-    rr = 1024.0
+    for node in surface.surface_nodes:
+        n = node.derived_normal
+        if n is None:
+            rows.append([0.0, 0.0, 0.0, 0.0])
+        else:
+            t = torch.tensor(n, dtype=torch.float64)
+            norm = float(torch.linalg.norm(t).item())
+            if not torch.isfinite(t).all() or norm <= 1e-12:
+                raise ValueError(f"GEPPETTO_INVALID_QUALIFIED_NORMAL:{node.surface_id}")
+            rows.append([float(t[0] / norm), float(t[1] / norm), float(t[2] / norm), 1.0])
+    return torch.tensor(rows, dtype=dtype, device=device)[None]
+
+
+def _support_features(surface: RiggingSurfaceIR, device: torch.device, dtype: torch.dtype, rr: float):
+    rows = []
+    rr = float(rr)
+    if rr <= 0:
+        raise ValueError("GEPPETTO_BAD_RASTER_REFERENCE_RESOLUTION")
     for node in surface.surface_nodes:
         support = [0.0] * 8
         for v in node.support_views:
@@ -105,13 +118,15 @@ def build_geppetto_conditioning(
         raise ValueError("GEPPETTO_NONFINITE_SURFACE")
     pn, center, scale = _normalize(p)
     knn = _knn(pn, cfg.local_k)
-    normal_abs, spectrum, radius = _local_differentials(pn, knn)
-    support = _support_features(surface, device, p.dtype)
-    # Feature contract is deterministic and source-rig free:
-    # P_norm(3), |N_local|(3), local covariance spectrum(3), radius(1),
-    # support mask(8), support fraction(1), raster mean/std(4) = 23D.
-    feat = torch.cat([pn, normal_abs, spectrum, radius, support], dim=-1)
-    if feat.shape[-1] != 23:
+    spectrum, radius = _local_sign_invariant_geometry(pn, knn)
+    qualified_normal = _qualified_normal_features(surface, device, p.dtype)
+    support = _support_features(surface, device, p.dtype, cfg.raster_reference_resolution)
+    # Product-legal deterministic feature contract:
+    # P_norm(3), local covariance spectrum(3), radius(1),
+    # qualified derived normal xyz + valid(4), support mask(8),
+    # support fraction(1), raster mean/std(4) = 24D.
+    feat = torch.cat([pn, spectrum, radius, qualified_normal, support], dim=-1)
+    if feat.shape[-1] != 24:
         raise AssertionError(feat.shape)
     if not torch.isfinite(feat).all():
         raise ValueError("GEPPETTO_NONFINITE_CONDITIONING")

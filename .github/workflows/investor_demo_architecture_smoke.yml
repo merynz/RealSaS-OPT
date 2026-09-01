@@ -1,0 +1,33 @@
+name: Investor Demo Architecture Smoke
+
+on:
+  push:
+    branches:
+      - demo/investor-single-specimen-e2e
+  pull_request:
+    paths:
+      - 'demo/investor_e2e/**'
+      - 'compiler/realsas_compiler_core/**'
+
+jobs:
+  zero-specimen-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU scientific runtime
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Compile demo sources
+        run: |
+          python -m compileall -q demo/investor_e2e/realsas_demo_e2e
+      - name: Zero-specimen executable smoke
+        env:
+          PYTHONPATH: compiler:demo/investor_e2e
+        run: |
+          python demo/investor_e2e/realsas_demo_e2e/architecture_smoke_v1.py

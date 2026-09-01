@@ -1,129 +1,184 @@
 # RealSaS — Demo Architecture Readiness V1
 
-**Status:** `OPEN__SPECIMEN_SELECTION_FORBIDDEN`
+**Status:** `OPEN__SPECIMEN_SELECTION_FORBIDDEN__FULL_PRODUCT_V3_REQUIRED`
 
 `DEMO_ARCHITECTURE_READY_V1` must PASS before any real specimen is selected, named in code/config, or used for optimizer execution.
 
-## Base audit — main @ bba22f25313b32aa4f8c2fbe418e3f2590198f38
+Binding architecture contract:
 
-### Existing executable authority to reuse
+- `demo/investor_e2e/FULL_PRODUCT_SINGLE_SPECIMEN_FIT_CONTRACT_V1.md`
+- current product topology `canonical/SYSTEM_ARCHITECTURE_V3_20260901.md` from architecture PR #19
 
-- `compiler/realsas_compiler_core/types.py`
-  - `ObservationEvidenceIR`
-  - `RiggingSurfaceIR`
-  - `SkeletonProposalIR`
-  - `QualifiedSkeletonIR`
-  - `SkinProposalIR`
-  - `QualifiedSkinIR`
-  - typed mesh / mesh-skin IRs
-  - `CanonicalPuppetGraphV2`
-- `compiler/realsas_compiler_core/surface.py`
-  - analytic observation-depth -> common-frame surface path
-- `compiler/realsas_compiler_core/rig.py`
-  - proposal lineage/support checks
-  - global graph optimization
-  - root/parent qualification
-  - Compiler-minted canonical IDs
-- `compiler/realsas_compiler_core/skin.py`
-  - lineage/reference/simplex legality
-  - bounded correction
-- `compiler/realsas_compiler_core/mesh_binding.py`
-  - typed identity support bindings and exact skin copy baseline
-- `compiler/realsas_compiler_core/product.py`
-  - `CanonicalPuppetGraph.v2` assembly and exact-state proof binding
-- `experiments/geppetto_arachne_r6_20260901/teacher_projection_v1.py`
-  - generic anonymous deform-control teacher/evaluator projection only
+The demo does not authorize a reduced model architecture. The only difference from generic RealSaS is that all learned components are fitted on one specimen.
 
-### Material implementation gaps for this demo
+## Existing executable authority to reuse
 
-1. **IRIS demo learned producer — MISSING**
-   - current V2 has deterministic Gate0 apparatus but no complete learned predictor;
-   - older `iris_controlled_v1` is historical scaffold and emits an obsolete direct-P/N style boundary;
-   - demo implementation must emit current depth/support evidence and keep `P` analytic.
+- current Compiler typed IRs and qualification paths;
+- `ObservationEvidenceIR -> GeometricSubstrateAssembler/RiggingSurfaceIR` analytic P boundary;
+- Compiler skeleton graph optimizer and canonical `J:*` minting;
+- Compiler skin legality/simplex/bounded-repair authority;
+- typed mesh / mesh-skin / `CanonicalPuppetGraph.v2` product assembly;
+- exact-state proof binding;
+- R6 anonymous skeleton teacher projection;
+- SHA-verified historical v0.5 deformation/proof/runtime authority through an isolated typed bridge/promotion boundary.
 
-2. **Geppetto learned producer — MISSING**
-   - current R6 has teacher/evaluator projection, no predictor;
-   - required functional obligations: global shape condition, variable/existence control evidence, continuous joint positions, root scores, parent-edge scores.
+## Historical artifacts explicitly NOT sufficient for READY
 
-3. **Arachne learned producer — MISSING**
-   - no current `SkinFieldCodec` or predictor;
-   - for the single-specimen demo, a direct generic geometry+skeleton-conditioned influence-field predictor is allowed, but it must emit `SkinProposalIR` and pass the existing Compiler skin qualifier.
+The following may remain for research history but cannot satisfy the final architecture gate:
 
-4. **Useful generic demo mesh/discretization — MISSING**
-   - MWB-1 identity-subset qualification exists;
-   - no generic product-useful triangulator is current main authority;
-   - branch needs an experimental view-local support-bound triangulation path with zero hidden geometry authority.
+- `IrisDemoV1` simple U-Net/Transformer scaffold;
+- `GeppettoDemoV1` fixed-query scaffold;
+- `ArachneDemoV1` point-joint MLP scaffold;
+- direct demo Arachne path without SkinFieldCodec;
+- fixed 48/64/72 product query/control caps;
+- old G0.1 27D surface+interior `ConsumerTokenV1` path;
+- branch-local toy deformation/playback replacing recovered historical runtime authority.
 
-5. **Generic deformation/probe/playback harness — MISSING**
-   - native C++17 runtime remains historical external byte authority;
-   - branch needs a generic learned-product consumer that applies skinning/preset transforms and exports visual animation evidence without claiming native-runtime promotion.
+## Full-product implementation gaps before READY
 
-6. **Fit/eval/checkpoint/inference firewall harness — MISSING**
-   - must be generic before specimen selection.
+### 1. IRIS Reprojection-Centered V2-A learned apparatus
+
+Must implement the current V3 responsibilities, not a direct dense depth U-Net shortcut:
+
+- native 1024 8-view input contract;
+- frozen DINOv2-S/14 multi-level descriptor path;
+- learned native high-resolution shared spatial pyramid;
+- visual-hull candidate-domain construction;
+- canonical world q-lattice;
+- exact camera reprojection into all views;
+- descriptor + learned-feature sampling;
+- robust view evidence aggregation preserving validity;
+- compact 3D evidence field;
+- world-space regularization;
+- supported/ambiguous mode extraction;
+- local continuous refinement;
+- exact rendering to forward depth/support/uncertainty;
+- no hidden geometry/skeleton/weight authority.
+
+### 2. Geppetto R6 predictor
+
+Must consume only a deterministic adapter over admitted `RiggingSurfaceIR S` and provide:
+
+- template-free variable control count;
+- continuous control loci + uncertainty;
+- root evidence;
+- directed parent/edge evidence;
+- topology/mechanical relation inside contextual/generative state;
+- endogenous stop/unsupported behavior;
+- anonymous `SkeletonProposalIR` output;
+- no fixed product K;
+- no source-rig identity/tails/teacher columns as inference features.
+
+### 3. SkinFieldCodec
+
+Before final Arachne predictor readiness:
+
+- generic dynamic-N/dynamic-J compact per-control skin-field codec;
+- encoder is teacher/training-only;
+- decoder reconstructs dense influence fields over current S;
+- one-family synthetic/reconstruction capacity gate;
+- heterogeneous synthetic structural gate independent of a real demo specimen;
+- deformation-sensitive ceiling under generic probes;
+- no teacher identity as product input.
+
+### 4. Arachne R6 predictor
+
+Must consume only deterministic legal information from `S + QualifiedSkeletonIR G` and provide:
+
+- surface contextual encoding;
+- skeleton/tree contextual encoding;
+- explicit point-control / bone-segment geometry;
+- cross-entity interaction;
+- prediction of the codec's per-control latent field representation;
+- dense decoded influence proposal + uncertainty;
+- weight reconstruction and deformation-sensitive optimization objectives;
+- dynamic current control count;
+- `SkinProposalIR` only; Compiler retains final legal/simplex authority.
+
+### 5. Mesh / exact product / runtime bridge
+
+- current typed mesh path must produce a legal editable support-bound mesh candidate;
+- mesh skin binding must be typed and lineage-checked;
+- `CanonicalPuppetGraph.v2` must assemble;
+- exact-state proof must bind current product hash;
+- recovered historical deformation/runtime authority must consume current typed state through the verified adapter; no replacement toy runtime is accepted.
+
+### 6. Fit/eval/checkpoint/firewall infrastructure
+
+All generic before specimen selection.
 
 ## READY gate checklist
 
 All items below must be `[x]` before changing status to PASS.
 
-### Generic code surface
+### Full-product neural architecture
 
-- [ ] package `demo/investor_e2e/realsas_demo_e2e/` imports without optional specimen data
-- [ ] IRIS demo model class implemented
-- [ ] Geppetto conditioning adapter implemented
-- [ ] Geppetto demo model class implemented
-- [ ] Arachne teacher target adapter implemented
-- [ ] Arachne conditioning adapter implemented
-- [ ] Arachne demo model class implemented
-- [ ] generic mesh candidate/discretization path implemented
-- [ ] generic deformation + playback harness implemented
+- [ ] IRIS V2-A source-complete with all current V3 functional blocks
+- [ ] Geppetto R6 conditioning adapter source-complete
+- [ ] Geppetto R6 variable-cardinality model source-complete
+- [ ] Geppetto has no fixed product control-count cap
+- [ ] SkinFieldCodec source-complete
+- [ ] SkinFieldCodec reconstruction + deformation synthetic gates implemented
+- [ ] Arachne R6 conditioning adapter source-complete
+- [ ] Arachne R6 predictor source-complete
+- [ ] Arachne is dynamic in current surface/joint count
 
-### Contract integration
+### Compiler/product integration
 
-- [ ] IRIS emits current external depth/evidence contract
-- [ ] analytic Compiler surface path consumes IRIS result
+- [ ] IRIS emits current depth/support/uncertainty evidence contract
+- [ ] analytic substrate assembler consumes IRIS result
 - [ ] Geppetto emits existing `SkeletonProposalIR`
 - [ ] existing Compiler skeleton qualification consumes Geppetto result
 - [ ] Arachne emits existing `SkinProposalIR`
 - [ ] existing Compiler skin qualification consumes Arachne result
-- [ ] mesh and mesh-skin types pass existing Compiler validators
-- [ ] `CanonicalPuppetGraph.v2` assembles from the generic path
+- [ ] typed mesh and mesh-skin validation passes
+- [ ] `CanonicalPuppetGraph.v2` assembles
+- [ ] exact-state proof path is bound
+- [ ] historical/current deformation-runtime bridge consumes the exact product state
+
+### Fit-capacity gates without a real specimen
+
+Synthetic fixtures may test representational capacity but cannot contain the later selected demo asset.
+
+- [ ] IRIS synthetic multi-view depth/reprojection fit reaches its hard contract
+- [ ] Geppetto variable-cardinality synthetic forest/tree fit reaches exact count/loci/root/parent evidence contract
+- [ ] Geppetto learned stop is demonstrated without oracle K at inference
+- [ ] SkinFieldCodec reconstructs synthetic dense sparse fields under hard reconstruction/deformation ceiling
+- [ ] Arachne predicts synthetic dynamic-J skin fields and passes deformation-sensitive ceiling
+- [ ] end-to-end synthetic typed product reaches proof/runtime without teacher objects crossing the inference boundary
 
 ### Fit / evaluation infrastructure
 
-- [ ] all V1 acceptance metrics implemented in code
-- [ ] teacher truth loaders are explicitly training/evaluation-only
-- [ ] checkpoint save/load includes model/config/source hashes
-- [ ] run manifest binds exact input/checkpoint/code/output hashes
-- [ ] deterministic seed policy implemented
+- [ ] anonymous R6 teacher projection loader is training/evaluation-only
+- [ ] M5/Master dense skin truth adapter is training/evaluation-only
+- [ ] checkpoint metadata binds architecture/config/source/truth hashes
+- [ ] deterministic seed and resume policy implemented
+- [ ] each fit stage has hard PASS/FAIL metrics; loss decrease alone is insufficient
+- [ ] final checkpoint selection is based only on the one-specimen fit contract after specimen selection
 
 ### Final-inference firewall
 
-- [ ] fresh-process final inference entrypoint implemented
-- [ ] teacher paths are absent from final-inference CLI/schema
-- [ ] source rig/mesh paths are absent from final-inference CLI/schema
-- [ ] no specimen ID is accepted as a model input
-- [ ] static scan rejects forbidden specimen-specific constants/patterns in demo model code
-- [ ] runtime assertion records `teacher_objects_reachable = false`
+- [ ] fresh-process image-only entrypoint implemented
+- [ ] input schema accepts 8 RGBA views + exact cameras + frozen checkpoints + generic config only
+- [ ] teacher paths absent from inference schema
+- [ ] source rig/skin/source mesh truth absent from inference schema
+- [ ] specimen ID absent as prediction key
+- [ ] static scan rejects known joint coordinates/topology/weights/specimen branches
+- [ ] per-specimen threshold overrides forbidden
+- [ ] runtime receipt proves teacher/truth objects unreachable
 
-### Zero-specimen tests
+### Change control
 
-- [ ] synthetic observation fixture exercises IRIS output schema
-- [ ] synthetic surface fixture exercises Geppetto -> Compiler qualification
-- [ ] synthetic qualified skeleton fixture exercises Arachne -> Compiler qualification
-- [ ] synthetic mesh fixture exercises mesh/skin binding
-- [ ] synthetic qualified product exercises deformation/playback
-- [ ] test suite passes with no real specimen files present
-
-### Change-control
-
-- [ ] no optimizer step executed before READY
-- [ ] no real specimen selected or named before READY
-- [ ] code review/audit finds no specimen-specific branches, coordinates, topology, weights, or thresholds
+- [ ] no real demo specimen selected before READY
+- [ ] no optimizer has consumed a real demo specimen before READY
+- [ ] reduced V1/V2 architecture-smoke runners are hard-disabled
+- [ ] source freeze commit/tree recorded at READY
+- [ ] after specimen selection, model/inference source changes invalidate READY and require a new pre-specimen audit
 
 ## PASS semantics
 
 `DEMO_ARCHITECTURE_READY_V1 = PASS` means only:
 
-> The generic branch-local implementation and its firewalls are ready to accept a subsequently selected specimen for an explicitly authorized single-specimen memorization fit.
+> The full current RealSaS product architecture has a specimen-agnostic, executable, capacity-tested implementation and strict truth firewall, ready to be fitted on one subsequently selected full-truth specimen.
 
-It does not mean any model has learned, any specimen has passed, or generalization exists.
+It does not mean generalization exists, and it does not mean the selected specimen has yet been fitted.

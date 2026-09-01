@@ -1,15 +1,12 @@
-"""Generic single-specimen RealSaS demo stack.
+"""Superseded architecture-smoke namespace.
 
-No specimen is bound at import time.  Learned parameters may later memorize one
-selected specimen, but interfaces and execution code are specimen-agnostic.
+The early IrisDemoV1 / GeppettoDemoV1 / ArachneDemoV1 sources are preserved only
+for audit history. They are NOT the final investor-demo architecture and are not
+exported from this package.
+
+Final implementation authority is FULL_PRODUCT_SINGLE_SPECIMEN_FIT_CONTRACT_V1
+and the RealSaS V3 product topology. Use the product-fit V3 namespace once its
+architecture-readiness gate closes.
 """
 
-from .iris_demo_v1 import IrisDemoConfig, IrisDemoV1
-from .geppetto_demo_v1 import GeppettoDemoConfig, GeppettoDemoV1
-from .arachne_demo_v1 import ArachneDemoConfig, ArachneDemoV1
-
-__all__ = [
-    "IrisDemoConfig", "IrisDemoV1",
-    "GeppettoDemoConfig", "GeppettoDemoV1",
-    "ArachneDemoConfig", "ArachneDemoV1",
-]
+__all__ = []

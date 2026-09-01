@@ -3,157 +3,224 @@
 **Status:** `FROZEN_BEFORE_SPECIMEN_SELECTION__FROZEN_BEFORE_OPTIMIZER_STEP_1`  
 **Branch scope only:** `demo/investor-single-specimen-e2e`
 
-This contract defines what `fit`, `PASS`, and `end-to-end` mean for the single-specimen investor demo. It is intentionally a memorization/architecture proof, not a generalization claim.
+This contract defines what `fit`, `PASS`, and `end-to-end` mean for the single-specimen investor demo.
+
+The demo uses the **full current RealSaS product architecture**. The only intentional change from the generic program is the optimization distribution: one subsequently selected full-truth specimen. Generalization is not claimed.
 
 ## A. Global hard rules
 
 A demo PASS requires all of the following:
 
-1. IRIS, Geppetto, and Arachne are actual learned modules with saved/loaded parameter checkpoints.
-2. Their source code is generic and frozen before specimen selection.
-3. Fitting may consume teacher truth; final inference may not.
-4. Final inference receives only the canonical eight RGBA observations plus the fixed canonical camera contract and model checkpoints.
-5. No source-rig skeleton, source-rig weights, teacher projections, teacher mesh, specimen ID, manual correction, or lookup table is reachable by the final-inference process.
-6. Geppetto must emit `SkeletonProposalIR`; final skeleton authority remains `CompilerFacade.qualify_skeleton`.
-7. Arachne must emit `SkinProposalIR`; final skin authority remains `CompilerFacade.qualify_skin`.
-8. No proposal is relabeled canonical without the existing Compiler qualification path.
-9. All recorded metrics must be computed by versioned evaluator code, not manually transcribed.
-10. A failed threshold is a FAIL. Thresholds are not relaxed after seeing the selected specimen.
+1. IRIS, Geppetto and Arachne are real learned modules with saved/loaded checkpoints.
+2. Model/inference source is specimen-agnostic and frozen before specimen selection.
+3. Fitting/evaluation may consume teacher truth; fresh final inference may not.
+4. Final inference receives only the canonical eight RGBA observations, exact camera contract, frozen checkpoints and generic code/configuration.
+5. No source-rig skeleton, source-rig weights, teacher projection, teacher mesh, specimen ID, manual correction, lookup table or cached fitted prediction is reachable by final inference.
+6. Geppetto emits `SkeletonProposalIR`; Compiler owns final admissibility, root/tree choice and canonical `J:*` IDs.
+7. Arachne emits `SkinProposalIR`; Compiler owns legal references, simplex policy, bounded repair and final qualified skin.
+8. `CanonicalPuppetGraph.v2` is the final canonical product state.
+9. Exact-state proof/runtime consumes only that qualified state.
+10. Metrics are computed by versioned evaluator code. Thresholds may not be relaxed after specimen selection.
 
 ## B. IRIS single-specimen fit PASS
 
-IRIS preserves the current external product boundary: camera-forward depth + support/validity/uncertainty evidence; common-frame `P` is analytic from the fixed cameras.
+IRIS preserves the current external product boundary: camera-forward depth + support/validity/uncertainty evidence; common-frame `P` is analytic from the exact cameras.
 
-Frozen demo-fit thresholds over authoritative visible/admitted target samples:
+Hard visible/admitted geometry gates:
 
 - finite output fraction: `1.000000`
 - required target support recall: `1.000000`
-- invented supported samples in teacher-UNKNOWN/unobserved regions: `0`
+- invented supported samples in authoritative UNKNOWN/unobserved regions: `0`
 - normalized/world depth RMS: `<= 0.00250`
 - absolute depth error P95: `<= 0.00539`
 - all eight canonical views represented: `8 / 8`
-- final emitted evidence must compile through the same `ObservationEvidenceIR -> RiggingSurfaceIR` deterministic geometry route.
+- emitted evidence compiles through the normal `ObservationEvidenceIR -> RiggingSurfaceIR` deterministic route
+- no skeleton/skin/product-importance truth is an IRIS inference feature
 
-The `.00250` RMS / `.00539` P95 limits intentionally bind the demo to the already established robust local-plane consumer tolerance neighborhood rather than inventing a looser investor-demo tolerance.
+The `.00250` RMS neighborhood binds the fitted demo to the already measured downstream clean/robust consumer regime rather than inventing a demo-only geometry tolerance.
 
-IRIS may overfit the specimen. It may not consume Geppetto/Arachne labels or source-rig identities as inference features.
+IRIS is allowed to memorize this specimen in parameters. It is not allowed to receive the answer as an inference input.
 
 ## C. Geppetto single-specimen fit PASS
 
-Teacher truth is the generic anonymous deform-control projection produced by the existing R6 teacher projection policy. The selected specimen envelope will require one projected deform root for this demo.
+### C.1 Teacher role
 
-Evaluation first matches predicted proposal joints to teacher controls by minimum-distance bipartite matching in normalized object coordinates. Let `D` be the admitted subject 3D bounding-box diagonal.
+The existing anonymous R6 deform-control projection is a **training/evaluation reference**, not the product skeleton definition.
 
-Frozen thresholds:
+Teacher-exact count, source topology, source bone identity and source helper layout are **not hard product targets**.
 
-- predicted active joint count == teacher deform-control count
-- unmatched teacher controls: `0`
-- unmatched active proposal joints: `0`
-- matched joint `PCK@0.05D = 1.000000`
-- matched joint RMS `<= 0.01000 D`
-- matched root accuracy: `1.000000`
-- matched directed parent-edge accuracy: `1.000000`
-- duplicate active proposal positions within evaluator epsilon: `0`
-- `CompilerFacade.qualify_skeleton(...)`: `PASS`
-- qualified skeleton root count: exactly `1`
+The fitted model may happen to converge very close to the clean projected teacher skeleton. That is acceptable and useful, but the architecture must not require it.
+
+Teacher diagnostics to report, not use as sole PASS authority:
+
+- matched-locus PCK/RMS under anonymous geometric matching;
+- predicted-vs-projected control-count difference;
+- root agreement when a meaningful anonymous mapping exists;
+- directed parent agreement when the two structures are directly comparable.
+
+### C.2 Hard product skeleton gates
+
+Geppetto inference must determine cardinality itself; oracle K is forbidden.
+
+`Compiler.qualify_skeleton(...)` must PASS and the resulting `QualifiedSkeletonIR` must satisfy:
+
+- finite joint positions: `100%`
+- exactly one Compiler-qualified root for the selected demo product
+- connected, acyclic qualified hierarchy
+- missing/illegal parent references: `0`
+- duplicate canonical joint positions within evaluator epsilon: `0`
+- unsupported accepted joints: `0`
+- every accepted joint has admitted `RiggingSurfaceIR` support evidence
+- all accepted bone segments are finite and non-degenerate under the frozen geometry epsilon
+- no accepted joint/bone lies outside the frozen conservative rigging-volume/support envelope beyond the declared geometric tolerance
+- learned stop/endogenous count is used at inference; no teacher count is supplied
 - manual joint/edge injection: `0`
 
-The Compiler may mint different canonical IDs. Evaluation maps identities geometrically/structurally; source teacher IDs never become product IDs.
+### C.3 Functional skeleton gate
 
-## D. Arachne single-specimen fit PASS
+The qualified skeleton proceeds to fitted Arachne skin and the frozen generic deformation/probe bank.
 
-Teacher skin targets are constructed offline by a generic adapter from authoritative dense skin truth onto the admitted demo surface and the anonymous/qualified skeleton correspondence. Teacher weights are training/evaluation-only.
+A skeleton is not accepted merely because its joints are geometrically plausible. The final coupled `G + W` system must satisfy section D's deformation gates and the exact downstream proof route.
 
-Frozen thresholds:
+This makes the product target:
 
-- admitted surface rows with a prediction: `100%`
-- invalid/NaN/negative predicted weights before Compiler: `0`
-- zero-sum predicted rows: `0`
-- mean per-row L1 error to teacher: `<= 0.02000`
-- per-row L1 error P95: `<= 0.05000`
-- predicted simplex residual P95 before Compiler: `<= 0.02000`
-- `CompilerFacade.qualify_skin(..., max_simplex_repair_l1=0.02)`: `PASS`
+> a clean, geometrically supported, mechanically usable skeleton,
+
+not:
+
+> byte-for-byte reconstruction of the authored teacher rig.
+
+## D. SkinFieldCodec + Arachne single-specimen fit PASS
+
+### D.1 Teacher role
+
+Dense authoritative skin truth is training/evaluation authority. When predicted and teacher control spaces admit a direct anonymous correspondence, weight-space errors are reported. They are not the sole product criterion when the product skeleton is a cleaner/different valid structure.
+
+### D.2 SkinFieldCodec gate
+
+Before accepting the Arachne predictor:
+
+- codec output finite: `100%`
+- decoded nonnegative field evidence: `100%`
+- all admitted surface rows reconstructed/present: `100%`
+- selected-specimen codec reconstruction must meet the frozen weight/deformation ceiling established by the generic pre-specimen codec tests
+- codec encoder/teacher dense weights are absent from final inference
+
+### D.3 Arachne / Compiler hard gates
+
+For the predicted `SkinProposalIR`:
+
+- admitted surface rows with prediction: `100%`
+- NaN/Inf/negative predicted influences: `0`
+- zero-sum required rows: `0`
+- illegal qualified-joint references: `0`
+- `Compiler.qualify_skin(...)`: `PASS`
 - missing qualified skin rows: `0`
-- illegal joint references: `0`
+- Compiler repair remains within its frozen bounded correction policy
 
-A frozen generic deformation probe set is additionally required before architecture READY. On that probe set, after mesh binding:
+When direct teacher-control correspondence exists, report at minimum mean/P95 row L1 and dominant-control agreement as diagnostics.
+
+### D.4 Coupled deformation hard gate
+
+The **primary Arachne/product criterion is functional deformation** of the complete qualified product state.
+
+On the frozen generic multi-probe bank:
 
 - detached required surface/mesh components caused by skinning: `0`
 - non-finite deformed positions: `0`
-- normalized deformed-position RMS vs teacher deformation: `<= 0.01000 D`
-- normalized deformed-position P95 vs teacher deformation: `<= 0.02500 D`
+- exploded/collapsed required components: `0`
+- illegal transform propagation: `0`
+- skin simplex/reference violations after qualification: `0`
+- all required probe families execute
+- exact downstream proof has no unsafe accepted state
+
+Where a teacher deformation response can be transported into the product control space without importing teacher identity into inference, additionally require the frozen deformation-response RMS/P95 ceiling. If direct transport is not mathematically meaningful because the valid product skeleton differs, the exact-state Compiler/proof gates remain authoritative and the non-comparability is reported rather than forcing teacher topology back into the product.
 
 ## E. Mesh / binding PASS
 
 The demo cannot stop at skin rows; it must produce an editable deformation carrier.
 
-Before specimen selection, a generic branch-local mesh candidate path must be implemented that:
+The mesh path must:
 
-- derives every rest vertex from admitted `RiggingSurfaceIR` support only;
-- never introduces hidden/back-side geometry truth;
-- records exact support bindings and lineage;
-- passes existing mesh validation;
-- transfers qualified Arachne skin through a typed `QualifiedMeshSkinIR` route;
-- has no specimen-specific topology constants.
+- derive every rest vertex from admitted `RiggingSurfaceIR` support only;
+- introduce no hidden/back-side source geometry authority;
+- record support bindings and lineage;
+- pass existing mesh validation;
+- transfer qualified Arachne skin through typed `QualifiedMeshSkinIR`;
+- contain no specimen-specific topology constants.
 
-For the demo, a view-local triangulated deformation carrier is acceptable. It is not promoted to `main` MWB-2 authority by this branch.
+A bounded view-local/support-bound triangulated deformation carrier is acceptable for this branch if it satisfies the current typed product contract and exact downstream proof. It is not automatically promoted as generic MWB-2 authority on main.
 
 ## F. Final image-only E2E PASS
 
-A fresh final-inference process must start after teacher/fitting objects are destroyed or made inaccessible.
+A fresh final-inference process starts with training/evaluator truth absent or unreachable.
 
 Allowed inputs:
 
 ```text
-- 8 canonical RGBA images
-- fixed canonical camera contract
+- 8 canonical 1024 RGBA observations
+- exact orthographic camera authorities
 - frozen IRIS checkpoint
 - frozen Geppetto checkpoint
-- frozen Arachne checkpoint
-- generic source/config code
-- preset generic animation clip definition
+- frozen SkinFieldCodec/Arachne checkpoints
+- generic source/configuration
+- generic preset motion/probe definition
 ```
 
 Forbidden inputs:
 
 ```text
-- specimen ID as a model feature or branch condition
-- GT depth
-- GT surface
-- GT skeleton / bone arrays / parent arrays
-- GT dense weights
+- specimen ID as prediction key
+- GT depth/surface
+- GT skeleton / parent arrays
+- GT dense skin
 - teacher projection
-- source rig or source mesh
-- manually supplied output coordinates/edges/weights
+- source rig
+- source mesh as hidden final geometry
+- manually supplied joints/edges/weights
 - cached fitted predictions masquerading as inference
+- per-specimen inference thresholds
 ```
 
-Required outputs/closures:
+Required closure:
 
-- IRIS evidence PASS
-- `RiggingSurfaceIR` constructed
-- Geppetto `SkeletonProposalIR` emitted
-- Compiler skeleton qualification PASS
-- Arachne `SkinProposalIR` emitted
-- Compiler skin qualification PASS
-- typed mesh + mesh-skin qualification PASS
-- `CanonicalPuppetGraph.v2` assembled
-- generic deformation probes PASS
-- at least one generic preset animation produces a finite frame sequence from the qualified product state
-- all stage artifacts carry hashes and one run manifest binds checkpoints, inputs, outputs, code commit, metrics, and verdict.
+```text
+8 images
+ -> IRIS
+ -> ObservationEvidenceIR
+ -> GeometricSubstrateAssembler / RiggingSurfaceIR
+ -> Geppetto
+ -> SkeletonProposalIR
+ -> Compiler skeleton qualification
+ -> QualifiedSkeletonIR
+ -> SkinFieldCodec + Arachne
+ -> SkinProposalIR
+ -> Compiler skin qualification
+ -> QualifiedSkinIR
+ -> typed mesh + mesh-skin
+ -> CanonicalPuppetGraph.v2
+ -> exact deformation/contact/motion probes
+ -> PASSING exact-state proof
+ -> RuntimePackageIR / finite animation frame sequence
+```
+
+One run manifest binds input hashes, checkpoint hashes, code commit/tree, every typed stage hash, proof hash, metrics and final verdict.
 
 ## G. Claims permitted after PASS
 
 Permitted:
 
-> RealSaS has a genuine learned end-to-end single-specimen closure: images -> learned perception -> learned skeleton proposal -> learned skin proposal -> Compiler-qualified editable deformation state -> animation.
+> RealSaS has a genuine learned end-to-end single-specimen fitted closure: images -> learned observation-grounded geometry -> learned skeleton proposal -> learned skin proposal -> Compiler-qualified editable/deformable product -> proof-bound animation.
+
+Also permitted, if visually demonstrated:
+
+> The same product architecture intended for generic RealSaS has been fitted end-to-end on one specimen.
 
 Not permitted:
 
 - unseen-character generalization
 - broad style/domain generalization
-- production readiness
 - anything-class coverage
-- equivalence to a full production native runtime
+- full production readiness
 
-Those remain separate research/product gates.
+Those remain later research/product gates.

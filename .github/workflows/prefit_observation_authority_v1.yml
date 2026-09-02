@@ -6,7 +6,9 @@ on:
       - architecture/v4-generic-strength-source-completion-20260902
     paths:
       - 'experiments/family_selection_v1/prefit_observation_authority_v1.py'
+      - 'experiments/fit_observation_v1/**'
       - 'tests/family_selection/test_prefit_observation_authority_v1.py'
+      - 'tests/family_selection/test_master_aligned_source_appearance_v1.py'
       - '.github/workflows/prefit_observation_authority_v1.yml'
   workflow_dispatch:
 
@@ -19,8 +21,8 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install --upgrade pip
-      - run: pip install pytest pillow
-      - name: Reject geometry-control rasters from FIT authority
+      - run: pip install pytest pillow numpy requests
+      - name: Verify FIT observation authority and Master-aligned source appearance
         env:
           PYTHONPATH: .
-        run: pytest -q tests/family_selection/test_prefit_observation_authority_v1.py
+        run: pytest -q tests/family_selection/test_prefit_observation_authority_v1.py tests/family_selection/test_master_aligned_source_appearance_v1.py

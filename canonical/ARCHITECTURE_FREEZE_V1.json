@@ -1,29 +1,41 @@
 {
   "schema": "RealSaS.ArchitectureFreezeSeal.v1",
   "date": "2026-09-02",
-  "status": "INVALIDATED_PENDING_REFREEZE",
+  "status": "PASS_ARCHITECTURE_FROZEN",
   "rule": "ARCHITECTURE_FIRST__FAMILY_SELECTION_ONLY_AFTER_EXPLICIT_FREEZE_SEAL",
-  "family_selection_authorized": false,
+  "family_selection_authorized": true,
   "fit_family_selected_at_freeze": false,
   "fit_family_id_at_freeze": null,
   "scientific_fit_steps_at_freeze": 0,
   "generalization_claim": false,
   "one_family_product_pass": false,
   "full_3d_reconstruction_claim": false,
-  "invalidation": {
-    "reason": "REAL_LEARNED_E2E_PREFLIGHT_FOUND_MISSING_IRIS_SURFACE_LOCAL_RELATIONS_REQUIRED_BY_MWB2",
-    "previous_frozen_generic_source_fingerprint_sha256": "f9c2f346f8f2c2a528bf4b23f777c35e73fdbbbede8313d2650be3d7fa33bc75",
-    "previous_freeze_ci_run_id": 33651535330,
-    "previous_freeze_ci_head_sha": "86069b10f84e8b89c5310ef2f1ef461c5fb75f0",
-    "selection_from_previous_freeze_is_historical_only": true,
-    "optimizer_steps_since_previous_freeze": 0
+  "generic_source_count": 38,
+  "generic_source_fingerprint_sha256": "49d12c76a38935e562cfcb0e32acd2a863b3b10233fc60ea2a33896e67fb07ad",
+  "ci_evidence": {
+    "workflow": "architecture-freeze-source-gate",
+    "run_id": 33676444469,
+    "head_sha": "4dff59c1a4863d61f073020c19643d9bff4e7aaf",
+    "conclusion": "success",
+    "aggregate_generic_strength_tests": "PASS_44_OF_44",
+    "candidate_status": "PASS_SOURCE_ELIGIBLE_FOR_FREEZE",
+    "candidate_artifact_id": 9864546765,
+    "generic_test_log_artifact_id": 9864550738
   },
-  "required_before_refreeze": [
-    "GENERIC_OBSERVED_SURFACE_LOCAL_RELATION_SOURCE_PASS",
-    "MWB2_REAL_CONSUMER_RELATION_GATE_PASS",
-    "AGGREGATE_GENERIC_STRENGTH_CI_PASS",
-    "NEW_GENERIC_SOURCE_FINGERPRINT_SEALED",
-    "FAMILY_SELECTION_RERUN_AFTER_NEW_FREEZE"
-  ],
+  "closure_added_since_previous_freeze": {
+    "integration_gap": "IRIS_PERSISTENCE_SURFACE_LOCAL_RELATIONS_REQUIRED_BY_MWB2",
+    "emitter_anchor_raster_provenance": true,
+    "observed_local_relation_operator": "RealSaS.IRISV2.ObservedAnchorRasterLocalRelations.v1",
+    "source_mesh_used": false,
+    "teacher_truth_used": false,
+    "unknown_or_ambiguous_bridge_forbidden": true,
+    "mwb2_real_consumer_relation_gate": "PASS"
+  },
+  "previous_freeze": {
+    "generic_source_fingerprint_sha256": "f9c2f346f8f2c2a528bf4b23f777c35e73fdbbbede8313d2650be3d7fa33bc75",
+    "ci_run_id": 33651535330,
+    "invalidated_before_refreeze": true,
+    "optimizer_steps_during_invalidation": 0
+  },
   "post_freeze_rule": "ANY_CHANGE_TO_FROZEN_GENERIC_SOURCE_INVALIDATES_FAMILY_SELECTION_AUTHORITY_UNTIL_A_NEW_ARCHITECTURE_FREEZE"
 }

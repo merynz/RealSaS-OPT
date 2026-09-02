@@ -1,0 +1,40 @@
+name: iris-v2-source-contract
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/local_geometry.py'
+      - 'experiments/iris_reprojection_v2_20260831/**'
+      - 'tests/iris/**'
+      - '.github/workflows/iris_v2_source_contract.yml'
+  push:
+    branches:
+      - source/generic-completion-v1-20260902
+    paths:
+      - 'compiler/realsas_compiler_core/local_geometry.py'
+      - 'experiments/iris_reprojection_v2_20260831/**'
+      - 'tests/iris/**'
+      - '.github/workflows/iris_v2_source_contract.yml'
+
+jobs:
+  iris-v2-source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy pillow pytest
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Compile IRIS V2 source
+        run: |
+          python -m py_compile compiler/realsas_compiler_core/local_geometry.py experiments/iris_reprojection_v2_20260831/*.py
+      - name: Run IRIS V2 source gates
+        env:
+          PYTHONPATH: .
+        run: |
+          python -m pytest -q tests/iris/test_iris_v2_source_v1.py

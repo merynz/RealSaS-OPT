@@ -114,7 +114,7 @@ def verify_prefit_observation_authority_v1(
             raise ValueError(f"CAMERA_YAW_DRIFT:V{row.view_index}")
         verified.append(row)
 
-    payload = {
+    hash_payload = {
         "schema": SCHEMA,
         "asset_id": asset_id,
         "raster_authority": raster_authority,
@@ -125,9 +125,15 @@ def verify_prefit_observation_authority_v1(
         "explicit_source_textured_rgba": True,
     }
     return PrefitObservationAuthorityV1(
-        **payload,
+        schema=SCHEMA,
+        asset_id=asset_id,
+        raster_authority=raster_authority,
+        native_resolution=1024,
         views=tuple(verified),
-        observation_authority_sha256=_canonical_hash(payload),
+        exact_eight_views=True,
+        exact_camera_raster_authority=True,
+        explicit_source_textured_rgba=True,
+        observation_authority_sha256=_canonical_hash(hash_payload),
     )
 
 

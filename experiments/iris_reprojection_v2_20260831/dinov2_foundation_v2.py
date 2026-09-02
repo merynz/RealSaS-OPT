@@ -93,36 +93,38 @@ class DINOv2LoadedAuthorityV2:
     feature_contract_hash: str
 
 
-def preprocess_dinov2_rgb_v2(native_rgb: torch.Tensor) -> torch.Tensor:
-    """Exact whole-canvas transform from the sealed 2026-08-29 authority.
+def _scale_native_rgb_flat_v2(native_rgb_flat: torch.Tensor) -> torch.Tensor:
+    if native_rgb_flat.ndim != 4 or native_rgb_flat.shape[1] != 3 or tuple(native_rgb_flat.shape[-2:]) != (1024, 1024):
+        raise ValueError("DINO flat RGB input must be [N,3,1024,1024]")
+    if native_rgb_flat.dtype == torch.uint8:
+        return native_rgb_flat.to(torch.float32).div(255.0)
+    if not native_rgb_flat.is_floating_point():
+        raise ValueError("DINO RGB must be uint8 or floating point")
+    x = native_rgb_flat.to(torch.float32)
+    if not torch.isfinite(x).all() or float(x.min()) < 0.0 or float(x.max()) > 1.0:
+        raise ValueError("floating DINO RGB must be finite and exactly scaled to [0,1]")
+    return x
 
-    Input is [B,8,3,1024,1024], either uint8 or floating point exactly in [0,1].
-    Alpha is deliberately absent: support/alpha remains separate observation authority.
-    The resize operator is exactly torchvision.transforms.functional.resize with
-    InterpolationMode.BICUBIC and antialias=True. Token parity remains the final
-    cross-process/runtime scientific authority.
-    """
+
+def preprocess_dinov2_rgb_flat_v2(native_rgb_flat: torch.Tensor) -> torch.Tensor:
+    """Exact sealed DINO transform for an arbitrary bounded batch of native views."""
     try:
         from torchvision.transforms import functional as TF
         from torchvision.transforms import InterpolationMode
     except ImportError as exc:
         raise RuntimeError("exact DINO preprocessing requires torchvision") from exc
+    x = _scale_native_rgb_flat_v2(native_rgb_flat)
+    x = TF.resize(x, [518, 518], interpolation=InterpolationMode.BICUBIC, antialias=True)
+    mean = torch.tensor(DINO_NORMALIZE_MEAN, device=x.device, dtype=torch.float32).view(1, 3, 1, 1)
+    std = torch.tensor(DINO_NORMALIZE_STD, device=x.device, dtype=torch.float32).view(1, 3, 1, 1)
+    return ((x - mean) / std).contiguous()
+
+
+def preprocess_dinov2_rgb_v2(native_rgb: torch.Tensor) -> torch.Tensor:
+    """Exact whole-canvas transform from the sealed 2026-08-29 authority."""
     if native_rgb.ndim != 5 or native_rgb.shape[1:3] != (8, 3) or tuple(native_rgb.shape[-2:]) != (1024, 1024):
         raise ValueError("DINO RGB input must be [B,8,3,1024,1024]")
-    if native_rgb.dtype == torch.uint8:
-        x = native_rgb.to(torch.float32).div(255.0)
-    elif native_rgb.is_floating_point():
-        x = native_rgb.to(torch.float32)
-        if not torch.isfinite(x).all() or float(x.min()) < 0.0 or float(x.max()) > 1.0:
-            raise ValueError("floating DINO RGB must be finite and exactly scaled to [0,1]")
-    else:
-        raise ValueError("DINO RGB must be uint8 or floating point")
-    B, V = x.shape[:2]
-    flat = x.reshape(B * V, 3, 1024, 1024)
-    flat = TF.resize(flat, [518, 518], interpolation=InterpolationMode.BICUBIC, antialias=True)
-    mean = torch.tensor(DINO_NORMALIZE_MEAN, device=flat.device, dtype=torch.float32).view(1, 3, 1, 1)
-    std = torch.tensor(DINO_NORMALIZE_STD, device=flat.device, dtype=torch.float32).view(1, 3, 1, 1)
-    return ((flat - mean) / std).contiguous()
+    return preprocess_dinov2_rgb_flat_v2(native_rgb.reshape(-1, 3, 1024, 1024))
 
 
 def _git_head(source_dir: Path) -> str:
@@ -198,17 +200,27 @@ def load_exact_dinov2_s_v2(source_dir: str | Path, weight_path: str | Path, *, d
 
 
 @torch.no_grad()
-def extract_dinov2_s_patch_map_v2(model: torch.nn.Module, native_rgb: torch.Tensor) -> torch.Tensor:
-    """Return exact final normalized DINO patch map [B,8,384,37,37]."""
-    x = preprocess_dinov2_rgb_v2(native_rgb)
-    B = native_rgb.shape[0]
+def extract_dinov2_s_patch_map_flat_v2(model: torch.nn.Module, native_rgb_flat: torch.Tensor) -> torch.Tensor:
+    """Return exact final normalized patch map [N,384,37,37] for bounded view chunks."""
+    x = preprocess_dinov2_rgb_flat_v2(native_rgb_flat)
     features = model.forward_features(x)
     if not isinstance(features, Mapping) or "x_norm_patchtokens" not in features:
         raise RuntimeError("DINO forward_features contract drift: x_norm_patchtokens missing")
     tokens = features["x_norm_patchtokens"].float()
-    if tuple(tokens.shape) != (B * 8, 37 * 37, DINO_S_EMBED_DIM):
+    n = native_rgb_flat.shape[0]
+    if tuple(tokens.shape) != (n, 37 * 37, DINO_S_EMBED_DIM):
         raise RuntimeError(f"DINO patch token shape drift: {tuple(tokens.shape)}")
-    return tokens.reshape(B, 8, 37, 37, DINO_S_EMBED_DIM).permute(0, 1, 4, 2, 3).contiguous()
+    return tokens.reshape(n, 37, 37, DINO_S_EMBED_DIM).permute(0, 3, 1, 2).contiguous()
+
+
+@torch.no_grad()
+def extract_dinov2_s_patch_map_v2(model: torch.nn.Module, native_rgb: torch.Tensor) -> torch.Tensor:
+    """Return exact final normalized DINO patch map [B,8,384,37,37]."""
+    if native_rgb.ndim != 5 or native_rgb.shape[1:3] != (8, 3):
+        raise ValueError("DINO RGB input must be [B,8,3,H,W]")
+    B = native_rgb.shape[0]
+    flat = extract_dinov2_s_patch_map_flat_v2(model, native_rgb.reshape(B * 8, 3, 1024, 1024))
+    return flat.reshape(B, 8, DINO_S_EMBED_DIM, 37, 37)
 
 
 def tensor_bytes_sha256_v2(tensor: torch.Tensor) -> str:

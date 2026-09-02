@@ -31,12 +31,6 @@ def _teacher_modes(
     teacher_support: torch.Tensor,
     domain: RayHypothesisDomainV2,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """Normalize legacy single-depth and generic multimodal supervision.
-
-    Returns depth [B,Q,M], mode-valid [B,Q,M], q-supported [B,Q]. NaN/Inf
-    teacher modes are always invalid. A rank-2 support mask broadcasts over modes;
-    a rank-3 support mask can identify individual valid intersections.
-    """
     if teacher_depth.ndim == 2:
         if teacher_depth.shape != domain.anchor_view.shape:
             raise ValueError("teacher depth shape mismatch")
@@ -62,7 +56,7 @@ def _teacher_modes(
 
 def _multitarget_mode_nll(logits: torch.Tensor, depth_values: torch.Tensor, teacher_depth: torch.Tensor, teacher_valid: torch.Tensor) -> torch.Tensor:
     dist = (depth_values[..., None] - teacher_depth[:, :, None, :]).abs()
-    nearest = dist.argmin(dim=2)  # [B,Q,M]
+    nearest = dist.argmin(dim=2)
     logp = torch.log_softmax(logits, dim=-1)
     selected = torch.gather(logp, -1, nearest)
     valid = teacher_valid & torch.isfinite(selected)
@@ -75,10 +69,10 @@ def _mode_matching_errors(
     output: IrisReprojectionOutputV2,
     teacher_depth: torch.Tensor,
     teacher_valid: torch.Tensor,
-) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     pred = output.refined_depth
     pred_valid = output.modes.mode_valid.bool()
-    diff = (pred[..., :, None] - teacher_depth[..., None, :]).abs()  # [B,Q,K,M]
+    diff = (pred[..., :, None] - teacher_depth[..., None, :]).abs()
     inf = torch.full_like(diff, float("inf"))
     diff_for_teacher = torch.where(pred_valid[..., :, None], diff, inf)
     teacher_error, teacher_to_pred = diff_for_teacher.min(dim=-2)
@@ -104,12 +98,7 @@ def iris_v2_loss(
     *,
     weights: IrisV2LossWeights = IrisV2LossWeights(),
 ) -> dict[str, torch.Tensor]:
-    """Multimodal depth/support supervision with metric-aligned hard-tail pressure.
-
-    P/N truth losses remain deliberately absent. Rank-2 teacher depth remains a
-    supported compatibility lane, but the objective no longer assumes that the
-    representation itself has only one admissible ray mode.
-    """
+    """Multimodal depth/support supervision with metric-aligned hard-tail pressure."""
     weights.validate()
     td, tv, q_supported = _teacher_modes(teacher_depth, teacher_support, domain)
     logits = output.field.score_logits
@@ -119,21 +108,15 @@ def iris_v2_loss(
     if not teacher_ok.any():
         raise ValueError("IRIS V2 loss requires at least one supported teacher mode")
     coverage = teacher_error[teacher_ok].mean()
-    # With a complete multimodal teacher, also penalize unsupported extra modes.
-    # The legacy rank-2 lane intentionally does not collapse alternative modes.
     multimodal_teacher = td.shape[-1] > 1
     if multimodal_teacher and pred_ok.any():
         coverage = 0.5 * (coverage + pred_error[pred_ok].mean())
 
-    # Calibrate uncertainty on the predicted mode nearest each supported teacher mode.
     gathered_sigma = torch.gather(output.depth_output.log_sigma, -1, teacher_to_pred.clamp_min(0))
     residual = torch.gather(output.refined_depth, -1, teacher_to_pred.clamp_min(0)) - td
     nll = 0.5 * torch.exp(-2.0 * gathered_sigma) * residual.square() + gathered_sigma
     uncertainty_nll = nll[teacher_ok].mean()
 
-    # Mode-level support: a predicted peak is positive iff it is close to at least
-    # one supported teacher intersection. Unsupported q rays make all modes negative.
-    K = output.refined_depth.shape[-1]
     if domain.depth_values.shape[-1] > 1:
         spacing = (domain.depth_values[..., 1:] - domain.depth_values[..., :-1]).abs().median().clamp_min(1e-6)
     else:
@@ -174,7 +157,25 @@ def iris_v2_loss(
     }
 
 
-def train_step(model, optimizer, batch: dict) -> dict[str, float]:
+def train_step_production_v2(apparatus, optimizer, batch: dict) -> dict[str, float]:
+    """Scientific training entrypoint: foundation maps cannot be injected by caller."""
+    if "foundation_maps" in batch:
+        raise ValueError("production IRIS training forbids caller-supplied foundation_maps")
+    if not hasattr(apparatus, "runtime_seal") or not hasattr(apparatus, "source_contract_hash"):
+        raise TypeError("production IRIS training requires exact foundation-bound apparatus")
+    apparatus.train()
+    optimizer.zero_grad(set_to_none=True)
+    output = apparatus(batch["images"], batch["domain"])
+    losses = iris_v2_loss(output, batch["domain"], batch["teacher_depth"], batch["teacher_support"])
+    losses["total"].backward()
+    optimizer.step()
+    return {k: float(v.detach().cpu()) for k, v in losses.items()}
+
+
+def train_step_injected_foundation_source_test_v2(model, optimizer, batch: dict) -> dict[str, float]:
+    """Synthetic/source-test lane only; never a scientific fit entrypoint."""
+    if "foundation_maps" not in batch:
+        raise ValueError("injected source-test lane requires explicit foundation_maps")
     model.train()
     optimizer.zero_grad(set_to_none=True)
     output = model(batch["images"], batch["foundation_maps"], batch["domain"])

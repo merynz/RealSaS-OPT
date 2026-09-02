@@ -1,0 +1,38 @@
+name: post-freeze-family-selector-v1
+
+on:
+  pull_request:
+    paths:
+      - 'canonical/ARCHITECTURE_FREEZE_V1.json'
+      - 'canonical/architecture_freeze_gate_v1.py'
+      - 'experiments/family_selection_v1/**'
+      - '.github/workflows/post_freeze_family_selector_v1.yml'
+  push:
+    branches:
+      - architecture/v4-generic-strength-source-completion-20260902
+    paths:
+      - 'canonical/ARCHITECTURE_FREEZE_V1.json'
+      - 'canonical/architecture_freeze_gate_v1.py'
+      - 'experiments/family_selection_v1/**'
+      - '.github/workflows/post_freeze_family_selector_v1.yml'
+
+jobs:
+  post-freeze-family-selector-v1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependency
+        run: python -m pip install pytest
+      - name: Compile selection policy
+        run: |
+          python -m py_compile canonical/architecture_freeze_gate_v1.py experiments/family_selection_v1/post_freeze_family_selector_v1.py
+      - name: Revalidate frozen source fingerprint before selector tests
+        run: python canonical/architecture_freeze_gate_v1.py --repo-root . --check-selection-authority
+      - name: Run pre-fit blinded selector gates
+        env:
+          PYTHONPATH: .
+        run: python -m pytest -q experiments/family_selection_v1/test_post_freeze_family_selector_v1.py

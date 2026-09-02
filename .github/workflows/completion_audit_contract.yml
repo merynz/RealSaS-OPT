@@ -1,0 +1,30 @@
+name: completion-audit-contract
+
+on:
+  push:
+    paths:
+      - 'canonical/CANONICAL_REALSaS_COMPLETION_PLAN_20260902.md'
+      - 'canonical/CANONICAL_REALSaS_COMPLETION_MATRIX_20260902.json'
+      - 'canonical/validate_completion_plan_v1.py'
+      - 'CURRENT_STATE.md'
+      - 'canonical/MASTER_EXECUTION_BACKLOG_V4_20260902.md'
+      - '.github/workflows/completion_audit_contract.yml'
+  pull_request:
+    paths:
+      - 'canonical/CANONICAL_REALSaS_COMPLETION_PLAN_20260902.md'
+      - 'canonical/CANONICAL_REALSaS_COMPLETION_MATRIX_20260902.json'
+      - 'canonical/validate_completion_plan_v1.py'
+      - 'CURRENT_STATE.md'
+      - 'canonical/MASTER_EXECUTION_BACKLOG_V4_20260902.md'
+      - '.github/workflows/completion_audit_contract.yml'
+
+jobs:
+  completion-audit-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate canonical completion matrix
+        run: python canonical/validate_completion_plan_v1.py

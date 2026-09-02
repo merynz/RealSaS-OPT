@@ -1,177 +1,74 @@
 # RealSaS-OPT — Current State
 
 **Date:** 2026-09-02  
-**Canonical continuation branch:** `main` after PR #22 merge  
-**Status:** `ARCHITECTURE_V4_FROZEN__CANDIDATE_MODEL_SOURCE_STACK_MERGED__3D_EQUIVALENT_MECHANICS__DIRECTIONAL_2D_2P5D_PRODUCT__SINGLE_FAMILY_E2E_IS_NEXT__GENERALIZATION_BLOCKED__LEARNED_FIT_GATED`
+**Canonical continuation branch:** `main` after final completion-audit merge  
+**Status:** `FORENSIC_COMPLETION_AUDIT_CLOSED__ZERO_ARCHITECTURE_UNKNOWN__GENERIC_SOURCE_COMPLETION_REQUIRED__REAL_FIT_BLOCKED__GENERALIZATION_BLOCKED`
 
 This file is continuation authority only on `main`.
 
 ## One-line state
 
-`Historical compiler/runtime maximum audited -> current migration reconciled -> Architecture V4 freezes 3D-equivalent mechanical evidence versus directional 2D/2.5D product ontology -> CanonicalPuppetGraph.v3 typed -> prospective Geppetto + SkinFieldCodec + Arachne candidate source merged and remote-CI green -> next objective is the preregistered one-real-family scientific ladder and complete animated-puppet PASS -> generalization remains blocked.`
+`Architecture V4 is the binding product/type authority; the unfinished forensic completion audit has now been reconciled into CANONICAL_REALSaS_COMPLETION_PLAN_20260902 + machine matrix; remaining source gaps are typed and ordered; no real-family optimizer is authorized until generic source-completion gates pass.`
 
-## 1. Product/system contract — V4 BINDING
+## Binding authority order
 
-North star:
+1. `canonical/CANONICAL_REALSaS_COMPLETION_PLAN_20260902.md` — completion/execution authority.
+2. `canonical/CANONICAL_REALSaS_COMPLETION_MATRIX_20260902.json` — machine-readable row/gate authority.
+3. `canonical/SYSTEM_ARCHITECTURE_V4_20260902.md` — product ontology/type authority.
+4. current `main` source.
+5. explicitly promoted historical bytes/evidence only.
 
-`ONE NEUTRAL 8-VIEW CHARACTER SHEET -> EDITABLE, RIGGED, DEFORMABLE, ANIMATABLE DIRECTIONAL 2D/2.5D PUPPET`
+`3D_EQUIVALENT_MECHANICS != FULL_3D_RECONSTRUCTION` remains binding. The shipping product is a directional 2D/2.5D puppet. Canonical motion remains puppet-local `translation_xy`, `rotation_deg`, `scale_xy`, `depth_offset`.
 
-Binding ontology:
+## Audit correction
 
-`3D_EQUIVALENT_MECHANICS != FULL_3D_RECONSTRUCTION`.
+Architecture V4 source closure and PR #22 candidate-model source closure were real, but they were not equivalent to closing the entire completion audit. The final audit found blocking source gaps that must be corrected before fitting:
 
-RealSaS may use world/camera-space depth, analytic P, local geometry and multi-view correspondence to provide the mechanical evidence needed for skeleton, skinning and deformation. Those quantities are not authority for a watertight/full hidden 3D character reconstruction.
+- current `GeppettoCandidateV1` hard-bounds count/proposals at 64 although the audited admitted skeleton corpus reaches 328 deform controls;
+- current Geppetto lacks the audited heteroscedastic location-uncertainty head/objective;
+- current Arachne lacks explicit point-control/bone-segment geometry and latent uncertainty;
+- current SkinFieldCodec loss lacks verified-LBS deformation consequence;
+- final IRIS V2 learned q-evidence/mode/refinement/output/train apparatus is not implemented;
+- DTB-ND1 exact source exists historically and must be ported/qualified;
+- MWB2 production mesh, generic appearance producer, motion builder, real proof measurement engine, current runtime consumer, image-only firewall and canonical E2E runner remain open.
 
-Current canonical route:
+## Immediate work — generic source completion, not fitting
 
-```text
-8 source-textured 1024 RGBA views + exact cameras
- -> IRIS observation-grounded evidence
- -> ObservationEvidenceIR
- -> analytic P = O + dF
- -> GeometricSubstrateAssembler / RiggingSurfaceIR S_hat
- -> GeppettoConditioningAdapter
- -> GeppettoCandidateV1 / SkeletonProposalIR
- -> Compiler graph qualification
- -> QualifiedSkeletonIR.v2
- -> R6-A0 SkinFieldCodec representation qualification
- -> ArachneConditioningAdapter
- -> ArachneCandidateV1 latent influence fields
- -> exact shared SkinFieldCodec decoder
- -> SkinProposalIR
- -> Compiler skin qualification
- -> QualifiedSkinIR
- -> direction-local mesh / mesh-skin / appearance for exact 8 views
- -> CanonicalPuppetGraph.v3
- -> exact-state proof bundle
- -> PASS-only RuntimePackageIR
-```
+Execute the dependency order in `CANONICAL_REALSaS_COMPLETION_PLAN_20260902.md`:
 
-Models produce evidence/proposals. Compiler owns canonical IDs, admissibility, final tree, legal skinning, product state, proof and export boundaries. Runtime is a projection only.
+1. exact DTB-ND1 port/qualification + persistence bridge;
+2. generic IRIS V2 source and synthetic/source-gate apparatus;
+3. Geppetto conditioning/cardinality/uncertainty/trainer fixes;
+4. teacher S/G/W target rebind;
+5. SkinFieldCodec verified-LBS R6-A0 apparatus;
+6. Arachne geometry/uncertainty/trainer apparatus;
+7. MWB2 directional mesh/skin producer;
+8. generic observation-derived appearance;
+9. deterministic puppet-local preset motion;
+10. real proof measurement engine;
+11. current runtime reference consumer/export;
+12. fresh-process image-only firewall + COMPLETE_E2E runner;
+13. only then freeze/finalize FIT8 and open the one-family optimizer ladder.
 
-Current authorities:
+## Scientific authorization
 
-- `canonical/SYSTEM_ARCHITECTURE_V4_20260902.md`;
-- `canonical/SINGLE_FAMILY_E2E_FIT_CONTRACT_20260902.md`;
-- `canonical/MASTER_EXECUTION_BACKLOG_V4_20260902.md`;
-- `canonical/ARCHITECTURE_V4_SOURCE_CLOSURE_20260902.md`;
-- `canonical/GEPPETTO_ARACHNE_CANDIDATE_STACK_V1_SOURCE_CLOSURE_20260902.md`.
+**Synthetic/source capacity tests:** AUTHORIZED.  
+**Real one-family optimizer:** BLOCKED until the completion matrix blocking source gates pass.  
+**Arachne optimizer:** additionally BLOCKED until SkinFieldCodec R6-A0 PASS.  
+**FIT8 reproduction/generalization:** BLOCKED until one complete real-family E2E PASS.  
+**Teacher/source mesh at shipping inference:** FORBIDDEN.  
+**Full 3D reconstruction authority:** FORBIDDEN.
 
-V3 architecture documents remain historical audit authority but are superseded for current composition by V4.
+## Recovered historical byte authority
 
-## 2. V4 + learned candidate source contract — TYPED
+Frozen DTB-ND1 robust local-plane source:
+- historical blob `4e612978c3f70a537dcf3189948dc19a38b6e582`;
+- historical carrier runtime blob `329fb839bb94310ab8d28f2789849f893fcea6dd`.
 
-Current V4 source provides:
+They are `PORT_QUALIFY`, not fresh design work.
 
-- `QualifiedSkeletonIR.v2` with explicit deform-root set and separate non-deforming assembly-root binding;
-- support=True-only fusion for `RiggingSurfaceIR` construction;
-- exact 8 `DirectionalRenderableIR` objects with N components per direction;
-- direction-local qualified M/B;
-- per-face-corner appearance authority;
-- qualified visual-completion firewall that cannot mutate S/G/W;
-- capability contract as product state;
-- puppet-local 2D/2.5D joint motion keys (`translation_xy`, `rotation_deg`, `scale_xy`, `depth_offset`);
-- `CanonicalPuppetGraph.v3` product hashing;
-- typed proof plan / measurement / domain report / product proof bundle;
-- stale-proof rejection after product mutation;
-- PASS-only V3 runtime projection;
-- explicit `representation_class=DIRECTIONAL_2D_2P5D_PUPPET`;
-- explicit `mechanical_equivalence_class=THREE_D_EQUIVALENT_MECHANICS`;
-- fail-closed `full_3d_reconstruction_authority=false`.
+## Success criterion before generalization
 
-PR #22 additionally merged the prospective learned source stack:
+One clean real family must enter as eight source-textured 1024 observations and exit, through the actual fresh-process image-only -> Compiler -> proof -> runtime route, as a convincingly jointed, properly skinned, editable, deformable, source-looking eight-direction puppet that visibly performs a preset animation and has all required proof domains PASS.
 
-- deterministic `GeppettoConditioningAdapter` from admitted `RiggingSurfaceIR` only;
-- `GeppettoCandidateV1` global set-proposal Transformer with existence/count/abstain/position/root/parent/support evidence;
-- exact Hungarian supervision with query indices kept proposal-local;
-- `SkinFieldCodecV1` continuous per-qualified-joint latent-field representation and dense simplex decoder;
-- deterministic `ArachneConditioningAdapter` from admitted S + Compiler-qualified G;
-- `ArachneCandidateV1` qualified-skeleton-conditioned surface/joint predictor;
-- Arachne reuses the exact SkinFieldCodec decoder and emits `SkinProposalIR` only;
-- candidate contract tests and dedicated CPU-PyTorch CI.
-
-PR #22 source was squash-merged as `712a8f33021d7a21cdbe347edfe7ab5c46b6e2cb`. The final candidate workflow run `33589590535` / job `100120682241` passed install, compile and real candidate contract tests.
-
-Source implementation is complete enough to execute the preregistered scientific rungs. **Source CI PASS is not a fitted-model or product PASS claim.**
-
-## 3. Immediate scientific objective — SINGLE_FAMILY_E2E_FIT_V1
-
-The project is deliberately **not** opening held-out/generalization work yet.
-
-Immediate target:
-
-```text
-ONE CLEAN REAL FAMILY
- -> IRIS fit -> downstream-consumable S_hat
- -> Geppetto R6 fit -> Compiler-qualified QualifiedSkeletonIR.v2
- -> SkinFieldCodec R6-A0 representation/deformation ceiling PASS
- -> Arachne R6-A1 fit -> Compiler-qualified QualifiedSkinIR
- -> all 8 directional editable meshes + skin bindings + source appearance
- -> effective puppet-local preset animation
- -> required deformation/visual/motion/runtime proof PASS
- -> RuntimePackageIR
-```
-
-PASS must visibly show one real character with:
-
-- sensible skeleton placement/topology for the intended motion;
-- qualified skin weights without catastrophic collapse;
-- editable direction-local meshes;
-- stable deformation;
-- source-attached appearance in all eight directions;
-- at least one preset animation that actually moves the compiled puppet;
-- exact PASS proof/runtime binding.
-
-This proves E2E existence/fit only. It is not a generalization claim and not a full-3D reconstruction claim.
-
-## 4. Ordered next work
-
-1. Freeze the clean 1024 FIT8 membership and choose the initial family without family-specific architecture changes.
-2. Port/qualify the exact robust DTB-ND1 local geometry operator bytes into current source.
-3. Close one-family IRIS fit to downstream mechanical tolerance.
-4. Execute Geppetto R6 U0/U1 using the **already-merged** candidate source; every proposal must pass through the actual Compiler skeleton qualifier.
-5. Execute SkinFieldCodec R6-A0: authoritative dense W -> codec encode/decode -> Compiler qualification -> deformation-sensitive ceiling.
-6. **Only if R6-A0 PASSes**, authorize Arachne R6-A1 fitting using the already-merged predictor and the exact same codec decoder; every output remains `SkinProposalIR` until Compiler qualification.
-7. Freeze MWB-2 local support/topology policy and construct product-quality directional M/B.
-8. Compile source-derived appearance and only necessary qualified visual completion.
-9. Bind effective 2D/2.5D preset animation.
-10. Execute exact-state proof bundle and produce final render/animation evidence.
-11. Only after complete one-family E2E PASS reproduce across the heterogeneous FIT8 set and then open explicit held-out/generalization work.
-
-No source redesign is justified merely because a scientific rung fails. Failure first triggers residual localization / capacity / optimizer / apparatus diagnosis under the frozen contracts; architecture changes require causal evidence.
-
-## 5. Existing closed scientific / migration facts retained
-
-- DTB-ND1 robust local-plane clean non-inferiority closed with `0.00250 <= epsilon_critical < 0.00275 RMS` for the audited consumer profile; exact operator bytes still require promotion into current source.
-- DINO SharedLearner S1 historical ladder closed early; that result is not a global ceiling for future apparatus.
-- IRIS reprojection-centered V2 design/prereg historical evidence remains available; no learned optimizer step is authorized merely by V4.
-- Clean-C0 objective image/raster integrity closed; semantic selection remains human/explicit authority.
-- Clean FIT observation authority remains Master/source-textured 8×1024 RGBA + exact cameras; geometry-isolation/cel renders are auxiliary/debug only.
-- Geppetto/Arachne R0-R5 external-reference audit closed; R6 model source is now implemented and merged, but scientific fit/ceiling gates remain open.
-- Candidate stack remote CPU-PyTorch contract CI PASSed on the reviewed source head.
-- MWB-0 typed seam PASS.
-- MWB-1 real identity/subset baseline PASS.
-- Compiler/runtime intended GitHub migration audit PASS within its explicitly narrow scope.
-- Heavy CDT/BBW/ARAP/XPBD/proof/native-runtime authorities remain historical external byte authority until a typed gate demonstrates current need.
-
-## 6. Training / execution authority
-
-**Generalization program: BLOCKED until single-family E2E PASS.**  
-**Candidate model source: MERGED and available for preregistered one-family rungs.**  
-**Geppetto optimizer: authorized only when its exact one-family R6 U0/U1 rung is opened under the single-family contract.**  
-**SkinFieldCodec R6-A0: next mandatory Arachne-side scientific gate.**  
-**Arachne predictor fitting: FORBIDDEN until R6-A0 codec reconstruction + deformation ceiling PASS.**  
-**Full 3D reconstruction authority: FORBIDDEN in V4 product/runtime.**  
-**Teacher skeleton/weights/source mesh at shipping inference: FORBIDDEN.**  
-**Hidden completion feeding S/G/W: FORBIDDEN.**  
-**Parallel product truth: FORBIDDEN.**
-
-## 7. Success criterion before generalization
-
-Do not call the current program complete because schemas compile or CI passes.
-
-The next meaningful closure is visual/mechanical:
-
-> one clean real family enters as eight source-textured 1024 observations and exits as a convincingly jointed, properly skinned, deformable, source-looking eight-direction puppet that visibly performs a preset animation through the actual canonical compiler/proof/runtime route.
-
-Only that closure authorizes the next phase: FIT8 reproduction and then explicit held-out/generalization work.
+Until then, source/CI progress must not be called product completion.

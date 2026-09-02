@@ -41,7 +41,12 @@ jobs:
           python -m py_compile canonical/architecture_freeze_gate_v1.py experiments/iris_reprojection_v2_20260831/*.py experiments/geppetto_arachne_r6_20260901/*.py
       - name: Verify architecture is family-independent and freeze-eligible
         run: |
-          python canonical/architecture_freeze_gate_v1.py --repo-root .
+          python canonical/architecture_freeze_gate_v1.py --repo-root . | tee architecture-freeze-candidate.json
+      - name: Preserve refreeze candidate fingerprint
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-freeze-candidate
+          path: architecture-freeze-candidate.json
       - name: Run current generic-strength learner gates
         env:
           PYTHONPATH: .
@@ -49,6 +54,7 @@ jobs:
           python -m pytest -q \
             tests/iris/test_iris_v2_source_v1.py \
             tests/iris/test_iris_v2_generic_strength_v1.py \
+            tests/iris/test_iris_v2_surface_relations_v1.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_loss_accumulator_v2.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py \
@@ -57,13 +63,20 @@ jobs:
       - name: Verify family-selection authorization state
         shell: bash
         run: |
-          if [ -f canonical/ARCHITECTURE_FREEZE_V1.json ]; then
+          STATUS=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('canonical/ARCHITECTURE_FREEZE_V1.json')
+          print(json.loads(p.read_text()).get('status','MISSING') if p.is_file() else 'MISSING')
+          PY
+          )
+          if [ "$STATUS" = "PASS_ARCHITECTURE_FROZEN" ]; then
             python canonical/architecture_freeze_gate_v1.py --repo-root . --check-selection-authority
             echo 'PASS: frozen fingerprint authorizes family selection'
           else
             if python canonical/architecture_freeze_gate_v1.py --repo-root . --check-selection-authority; then
-              echo 'ERROR: family selection became authorized before explicit architecture freeze seal'
+              echo 'ERROR: family selection became authorized while freeze is absent/invalidated'
               exit 1
             fi
-            echo 'PASS: family selection remains blocked until explicit freeze seal'
+            echo "PASS: family selection remains blocked while freeze status is $STATUS"
           fi

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import numpy as np
 import torch
 from scipy.optimize import linear_sum_assignment
@@ -65,8 +66,6 @@ def _config() -> GeppettoCandidateConfigV2:
 
 
 def _teacher(surface: RiggingSurfaceIR, conditioning) -> GeppettoTeacherTargetV1:
-    # Three controls are deliberately selected from geometry only. Their count,
-    # locations and topology are unrelated to any real-family witness.
     physical = np.asarray([
         surface.surface_nodes[2].P,
         surface.surface_nodes[6].P,
@@ -92,6 +91,8 @@ def _shipping_metrics(model: GeppettoCandidateV2, conditioning, target: Geppetto
     k = int(counts[0])
     metrics = geppetto_metrics_v2(out.positions_normalized[0, :k], target.positions_normalized)
     metrics["generated_count"] = k
+    metrics["map_mode_indices"] = torch.argmax(out.position_mode_logits[0, :k], dim=-1).cpu().tolist()
+    metrics["stop_probabilities"] = torch.sigmoid(out.stop_logits[0, :min(k + 2, out.stop_logits.shape[1])]).cpu().tolist()
     return metrics
 
 
@@ -128,28 +129,39 @@ def test_small_generic_witness_optimizes_shipping_decode_and_compiler_qualified_
     initial = _shipping_metrics(model, conditioning, target)
     first_loss = None
     last_loss = None
-    for _ in range(192):
+    trace = []
+    checkpoints = {1, 16, 32, 64, 96, 128, 160, 192}
+    for step_index in range(1, 193):
         step = geppetto_train_step_v2(model, optimizer, conditioning, [target])
         if first_loss is None:
             first_loss = float(step["total"])
         last_loss = float(step["total"])
+        if step_index in checkpoints:
+            trace.append({
+                "step": step_index,
+                "loss": {k: round(float(v), 6) for k, v in step.items() if k != "matched_joint_count"},
+                "shipping": _shipping_metrics(model, conditioning, target),
+            })
 
     final = _shipping_metrics(model, conditioning, target)
-
-    # Behavioral-integrity assertions: optimizer progress must be visible in the
-    # exact object shipped by generate(), not only in an auxiliary latent mode.
-    assert last_loss is not None and first_loss is not None and last_loss < first_loss
-    assert final["generated_count"] == len(target.positions_normalized)
-    assert final["matched_p95"] < initial["matched_p95"]
-
     teacher = torch.as_tensor(target.positions_normalized, dtype=torch.float32)
     sep = torch.cdist(teacher, teacher)
     sep = sep.masked_fill(torch.eye(len(teacher), dtype=torch.bool), float("inf"))
     nearest_teacher_separation = float(sep.min())
-    # Below half the nearest teacher separation, each predicted locus lies inside
-    # a unique teacher Voronoi neighborhood; this is geometry-derived, not a
-    # real-family or product-tuned tolerance.
-    assert final["matched_p95"] < 0.5 * nearest_teacher_separation
+    unique_radius = 0.5 * nearest_teacher_separation
+    diagnostic = {
+        "initial": initial,
+        "final": final,
+        "nearest_teacher_separation": nearest_teacher_separation,
+        "unique_radius": unique_radius,
+        "trace": trace,
+    }
+    print("GEPPETTO_BEHAVIORAL_OVERFIT_DIAGNOSTIC=" + json.dumps(diagnostic, sort_keys=True))
+
+    assert last_loss is not None and first_loss is not None and last_loss < first_loss
+    assert final["generated_count"] == len(target.positions_normalized)
+    assert final["matched_p95"] < initial["matched_p95"]
+    assert final["matched_p95"] < unique_radius, diagnostic
 
     proposal = model.propose(conditioning, resource_step_limit=len(surface.surface_nodes))[0]
     assert len(proposal.joints) == len(target.positions_normalized)

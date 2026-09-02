@@ -1,6 +1,6 @@
 # RealSaS — Architecture V4 Source Closure — 2026-09-02
 
-**Status:** `SOURCE_CONTRACT_IMPLEMENTED__ONTOLOGY_CORRECTED__PENDING_SECOND_CI_AND_MERGE`
+**Status:** `SOURCE_CONTRACT_IMPLEMENTED__ONTOLOGY_CORRECTED__REPOSITORY_AUTHORITY_ALIGNED__PENDING_SECOND_CI_AND_MERGE`
 
 This closure records the source-level implementation of the final architecture audit decisions and the explicit correction of the 3D-equivalent/product boundary before merge.
 
@@ -12,6 +12,7 @@ This closure records the source-level implementation of the final architecture a
 - support-admission-corrected `surface.py`
 - V4-aware `bundle_routes.py`
 - V4 facade exposure in `api.py`
+- V4 authority reflected in root `README.md` and `CURRENT_STATE.md`
 
 ## Binding ontology
 

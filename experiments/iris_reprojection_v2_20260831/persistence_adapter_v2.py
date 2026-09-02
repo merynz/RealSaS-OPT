@@ -128,8 +128,11 @@ def attach_observed_local_relations_v2(
     anchors = evidence.metadata.get("hypothesis_anchor_raster", {})
     if not isinstance(anchors, dict) or not anchors:
         raise QualificationError("IRIS_V2_LOCAL_RELATIONS_REQUIRE_ANCHOR_RASTER_METADATA")
-    if surface.metadata.get("raster_coordinate_system") != "PIXEL_CENTER_XY":
+    if evidence.metadata.get("raster_coordinate_system") != "PIXEL_CENTER_XY":
         raise QualificationError("IRIS_V2_LOCAL_RELATIONS_REQUIRE_PIXEL_CENTER_XY")
+    resolution = int(evidence.metadata.get("resolution", 0))
+    if resolution <= 0:
+        raise QualificationError("IRIS_V2_LOCAL_RELATIONS_REQUIRE_RESOLUTION")
 
     entries_by_view: dict[int, list[tuple[object, str, np.ndarray]]] = defaultdict(list)
     for node in sorted(surface.surface_nodes, key=lambda n: n.surface_id):
@@ -244,6 +247,8 @@ def attach_observed_local_relations_v2(
     })
     metadata = dict(surface.metadata)
     metadata.update({
+        "raster_coordinate_system": "PIXEL_CENTER_XY",
+        "resolution": resolution,
         "local_relation_operator": _LOCAL_RELATION_OPERATOR["schema"],
         "local_relation_operator_hash": operator_hash,
         "local_relation_count": len(relations),

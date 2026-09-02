@@ -1,6 +1,6 @@
 # RealSaS — Architecture V4 Source Closure — 2026-09-02
 
-**Status:** `SOURCE_CONTRACT_IMPLEMENTED__ONTOLOGY_CORRECTED__REPOSITORY_AUTHORITY_ALIGNED__PENDING_SECOND_CI_AND_MERGE`
+**Status:** `SOURCE_CONTRACT_IMPLEMENTED__ONTOLOGY_CORRECTED__TERMINOLOGY_AUDITED__REPOSITORY_AUTHORITY_ALIGNED__PENDING_SECOND_CI_AND_MERGE`
 
 This closure records the source-level implementation of the final architecture audit decisions and the explicit correction of the 3D-equivalent/product boundary before merge.
 
@@ -27,6 +27,8 @@ The source contract explicitly carries:
 - `full_3d_reconstruction_authority = false`;
 - puppet-local motion keys: `translation_xy`, `rotation_deg`, `scale_xy`, `depth_offset`;
 - no quaternion/3D rigid-transform requirement in canonical puppet motion.
+
+Terminology audit rule: `reconstruction` may describe a representation/field reconstruction test such as SkinFieldCodec reconstruction, but never a hidden claim that the RealSaS product reconstructs the unique full 3D character.
 
 ## Core invariants
 

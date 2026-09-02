@@ -7,30 +7,52 @@ from pathlib import Path
 
 SCHEMA = "RealSaS.ArchitectureFreezeGate.v1"
 
-# Only source modules that define current generic learner architecture/training semantics.
-# Historical fit scripts, canonical reports and parity fixtures are deliberately outside
-# this source-manifest boundary; they may name witnesses as provenance but cannot define
-# current architecture.
+# Only modules that define the current generic learner architecture, supervision,
+# evaluation, or exact frozen-foundation interface belong here. Historical fit
+# scripts/reports/parity fixtures may name witnesses as provenance but cannot define
+# current architecture and therefore are deliberately outside this manifest.
 CURRENT_GENERIC_SOURCE_FILES = (
-    "experiments/iris_reprojection_v2_20260831/q_domain_v2.py",
+    # IRIS V2 observation/foundation/Q/evidence/training stack.
+    "experiments/iris_reprojection_v2_20260831/observation_contract_v2.py",
     "experiments/iris_reprojection_v2_20260831/foundation_adapter_v2.py",
     "experiments/iris_reprojection_v2_20260831/dinov2_foundation_v2.py",
+    "experiments/iris_reprojection_v2_20260831/q_domain_v2.py",
     "experiments/iris_reprojection_v2_20260831/q_descriptor_sampler_v2.py",
+    "experiments/iris_reprojection_v2_20260831/q_evidence_encoder_v2.py",
+    "experiments/iris_reprojection_v2_20260831/q_spatial_graph_v2.py",
+    "experiments/iris_reprojection_v2_20260831/ray_modes_v2.py",
     "experiments/iris_reprojection_v2_20260831/evidence_field_v2.py",
+    "experiments/iris_reprojection_v2_20260831/world_regularizer_v2.py",
+    "experiments/iris_reprojection_v2_20260831/local_refinement_v2.py",
+    "experiments/iris_reprojection_v2_20260831/depth_output_head_v2.py",
     "experiments/iris_reprojection_v2_20260831/model_v2.py",
-    "experiments/iris_reprojection_v2_20260831/loss_v2.py",
+    "experiments/iris_reprojection_v2_20260831/observation_evidence_emitter_v2.py",
+    "experiments/iris_reprojection_v2_20260831/persistence_adapter_v2.py",
     "experiments/iris_reprojection_v2_20260831/train_v2.py",
     "experiments/iris_reprojection_v2_20260831/eval_v2.py",
+    "experiments/iris_reprojection_v2_20260831/checkpoint_v2.py",
+    # Geppetto V2 generic control proposal stack.
     "experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py",
     "experiments/geppetto_arachne_r6_20260901/geppetto_candidate_v2.py",
     "experiments/geppetto_arachne_r6_20260901/geppetto_loss_v2.py",
     "experiments/geppetto_arachne_r6_20260901/geppetto_train_v2.py",
     "experiments/geppetto_arachne_r6_20260901/geppetto_eval_v2.py",
-    "experiments/geppetto_arachne_r6_20260901/skinfield_codec_v2.py",
-    "experiments/geppetto_arachne_r6_20260901/arachne_v2.py",
-    "experiments/geppetto_arachne_r6_20260901/arachne_loss_v2.py",
-    "experiments/geppetto_arachne_r6_20260901/arachne_train_v2.py",
-    "experiments/geppetto_arachne_r6_20260901/arachne_eval_v2.py",
+    "experiments/geppetto_arachne_r6_20260901/geppetto_checkpoint_v2.py",
+    "experiments/geppetto_arachne_r6_20260901/geppetto_cpu_capacity_v2.py",
+    "experiments/geppetto_arachne_r6_20260901/training_targets_v2.py",
+    # Arachne / skin-field generic deformation stack. The current codec remains V1
+    # by filename; its scientific contract is the current source authority.
+    "experiments/geppetto_arachne_r6_20260901/conditioning_v2.py",
+    "experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py",
+    "experiments/geppetto_arachne_r6_20260901/codec_deformation_loss_v1.py",
+    "experiments/geppetto_arachne_r6_20260901/arachne_geometry_v2.py",
+    "experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py",
+    "experiments/geppetto_arachne_r6_20260901/arachne_tail_objective_v1.py",
+    "experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py",
+    "experiments/geppetto_arachne_r6_20260901/eval_codec_r6_a0_v1.py",
+    "experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py",
+    "experiments/geppetto_arachne_r6_20260901/eval_arachne_r6_a1_v1.py",
+    "experiments/geppetto_arachne_r6_20260901/verified_lbs_v1.py",
 )
 
 # Family/witness literals that have appeared in historical fitting work. They are legal

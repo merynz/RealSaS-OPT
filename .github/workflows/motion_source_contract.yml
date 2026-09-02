@@ -1,0 +1,23 @@
+name: motion-source-contract
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/motion.py'
+      - 'compiler/test_motion_source_v1.py'
+      - '.github/workflows/motion_source_contract.yml'
+  push:
+    branches: [source/generic-completion-v1-20260902]
+    paths:
+      - 'compiler/realsas_compiler_core/motion.py'
+      - 'compiler/test_motion_source_v1.py'
+      - '.github/workflows/motion_source_contract.yml'
+jobs:
+  motion-source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install pytest
+      - run: python -m py_compile compiler/realsas_compiler_core/motion.py
+      - run: PYTHONPATH=. python -m pytest -q compiler/test_motion_source_v1.py

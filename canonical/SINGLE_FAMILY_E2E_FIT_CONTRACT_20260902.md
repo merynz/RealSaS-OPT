@@ -65,7 +65,7 @@ Required proof domains:
 5. Freeze Geppetto adapter/candidate and overfit the same family.
 6. Route every proposal through Compiler qualification into `QualifiedSkeletonIR.v2`.
 7. PASS mechanical-structure checks; teacher graph equality is diagnostic, not the product objective.
-8. Freeze and PASS one-family SkinFieldCodec reconstruction/deformation ceiling.
+8. Freeze and PASS one-family SkinFieldCodec field-reconstruction/deformation ceiling.
 9. Fit Arachne only after codec PASS; route output through `Compiler.qualify_skin`.
 10. Build MWB-2 direction-local editable meshes from admitted support; no hidden/full-3D geometry authority.
 11. Bind qualified skin to each direction-local mesh.

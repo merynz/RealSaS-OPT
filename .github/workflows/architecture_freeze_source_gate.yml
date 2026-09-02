@@ -48,9 +48,12 @@ jobs:
           name: architecture-freeze-candidate
           path: architecture-freeze-candidate.json
       - name: Run current generic-strength learner gates
+        id: generic_tests
         env:
           PYTHONPATH: .
+        shell: bash
         run: |
+          set +e
           python -m pytest -q \
             tests/iris/test_iris_v2_source_v1.py \
             tests/iris/test_iris_v2_generic_strength_v1.py \
@@ -59,7 +62,17 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py \
             experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py \
-            experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py
+            experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py \
+            2>&1 | tee generic-strength-tests.log
+          STATUS=${PIPESTATUS[0]}
+          echo "pytest_exit_code=$STATUS" >> generic-strength-tests.log
+          exit $STATUS
+      - name: Preserve generic learner gate log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generic-strength-tests-log
+          path: generic-strength-tests.log
       - name: Verify family-selection authorization state
         shell: bash
         run: |

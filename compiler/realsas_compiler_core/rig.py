@@ -1,5 +1,7 @@
 from __future__ import annotations
+from dataclasses import replace
 from .types import SkeletonProposalIR, QualifiedSkeletonIR, QualifiedJoint, RiggingSurfaceIR, QualificationError
+from .v4_types import QualifiedSkeletonIRV2
 from .hashing import content_sha256
 from realsas_contracts.technical_part_graph import CanonicalGraphNodeCandidate, CanonicalGraphEdgeCandidate, CanonicalGraphOptimizationRequest
 from realsas_synthesis.canonical_graph_optimizer import optimize_canonical_graph_v18_98
@@ -43,7 +45,6 @@ def qualify_skeleton(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, r
     res=optimize_canonical_graph_v18_98(req)
     if not res.passed:
         raise QualificationError("skeleton qualification failed:"+";".join(res.blockers or (res.status,)))
-    # Canonical product IDs are newly minted by compiler; neither model proposal ids nor optimizer candidate ids survive as product IDs.
     canonical={cid:"J:"+content_sha256({"qualified_graph":res.content_sha256,"candidate":cid})[:20] for cid in res.selected_node_ids}
     q=[]
     for cid in sorted(res.selected_node_ids):
@@ -53,3 +54,26 @@ def qualify_skeleton(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, r
     report={"solver":res.solver,"status":res.status,"objective":res.objective_value,"optimality_proven":res.optimality_proven,"blockers":res.blockers,"warnings":res.warnings,"optimizer_result_sha256":res.content_sha256,"proposal_to_candidate":internal,"candidate_to_canonical":canonical}
     lineage=content_sha256({"surface":surface.geometry_lineage_hash,"proposal":proposal.to_dict(),"report":report,"joints":[j.to_dict() for j in q]})
     return QualifiedSkeletonIR(tuple(q),root,report,lineage)
+
+def qualify_skeleton_v2(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, run_ilp_shadow:bool=False)->QualifiedSkeletonIRV2:
+    """V4 product-facing skeleton qualifier.
+
+    Current restored optimizer still emits one arborescence. The product type no
+    longer conflates that implementation fact with the semantic contract: genuine
+    deform roots are represented as a set, while any future technical assembly root
+    is a separate explicitly non-deforming binding.
+    """
+    legacy=qualify_skeleton(surface,proposal,run_ilp_shadow=run_ilp_shadow)
+    roots=tuple(sorted(j.canonical_joint_id for j in legacy.joints if j.parent_canonical_id is None))
+    if not roots:
+        raise QualificationError("qualified skeleton has no deform root")
+    report=dict(legacy.qualification_report)
+    report.update({
+        "schema_upgrade":"RealSaS.QualifiedSkeletonIR.v2",
+        "deform_root_semantics":"EXPLICIT_SET",
+        "assembly_root_semantics":"SEPARATE_NON_DEFORMING_BINDING",
+        "current_optimizer_shape":"SINGLE_ARBORESCENCE_COMPATIBILITY",
+    })
+    value=QualifiedSkeletonIRV2(tuple(legacy.joints),roots,{},report,"")
+    payload=value.to_dict(); payload.pop("skeleton_lineage_hash",None)
+    return replace(value,skeleton_lineage_hash=content_sha256(payload))

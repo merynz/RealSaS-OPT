@@ -1,0 +1,35 @@
+name: architecture-v4-contract
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/**'
+      - 'compiler/test_architecture_v4_contract_v1.py'
+      - 'compiler/test_surface_support_admission_v1.py'
+      - 'canonical/SYSTEM_ARCHITECTURE_V4_20260902.md'
+      - 'canonical/SINGLE_FAMILY_E2E_FIT_CONTRACT_20260902.md'
+      - 'canonical/MASTER_EXECUTION_BACKLOG_V4_20260902.md'
+      - '.github/workflows/architecture_v4_contract.yml'
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install compiler test dependency
+        run: python -m pip install --disable-pip-version-check numpy
+      - name: Compile V4 source
+        run: python -m compileall -q compiler/realsas_compiler_core compiler/test_architecture_v4_contract_v1.py compiler/test_surface_support_admission_v1.py
+      - name: Run V4 architecture regressions
+        env:
+          PYTHONPATH: ${{ github.workspace }}/compiler
+        run: |
+          python compiler/test_architecture_v4_contract_v1.py
+          python compiler/test_surface_support_admission_v1.py
+          python compiler/test_mwb0_contract_v1.py
+          python compiler/test_solver_registry_external_authority_v1.py
+          python compiler/test_geometric_substrate_naming_v1.py

@@ -175,6 +175,20 @@ class GeppettoCandidateV2(nn.Module):
             raise ValueError("each sample requires admitted surface support")
         return valid_mask.sum(dim=1).long()
 
+    @staticmethod
+    def _map_representative(modes: torch.Tensor, mode_log_sigma: torch.Tensor, mode_logits: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Select a real hypothesis, never the mean between separated modes."""
+        if modes.ndim != 3 or mode_log_sigma.shape != modes.shape or mode_logits.shape != modes.shape[:2]:
+            raise ValueError("multimodal representative contract drift")
+        B, M, C = modes.shape
+        if C != 3 or M < 2:
+            raise ValueError("expected at least two 3D locus modes")
+        idx = torch.argmax(mode_logits, dim=-1)
+        gather3 = idx[:, None, None].expand(B, 1, 3)
+        pos = torch.gather(modes, 1, gather3).squeeze(1)
+        log_sigma = torch.gather(mode_log_sigma, 1, gather3).squeeze(1)
+        return pos, log_sigma, idx
+
     def _parent_logits_chunked(self, h: torch.Tensor, pos: torch.Tensor) -> torch.Tensor:
         B, K, D = h.shape
         rows = []
@@ -218,12 +232,7 @@ class GeppettoCandidateV2(nn.Module):
             modes = torch.tanh(self.position(h).reshape(B, M, 3)) * self.config.position_scale
             mode_ls = self.log_sigma(h).reshape(B, M, 3).clamp(-8.0, 4.0)
             mode_logits = self.position_mode_logits(h)
-            probability = torch.softmax(mode_logits, dim=-1)
-            pos = (probability[..., None] * modes).sum(dim=1)
-            # Moment-style representative uncertainty retained for compatibility;
-            # scientific loss and proposal metadata use the full mixture.
-            sigma = (probability[..., None] * torch.exp(mode_ls)).sum(dim=1).clamp_min(1e-8)
-            rep_ls = torch.log(sigma)
+            pos, rep_ls, _ = self._map_representative(modes, mode_ls, mode_logits)
             previous_states.append(h)
             prev_pos = pos
             out.append((h, pos, rep_ls, modes, mode_ls, mode_logits, self.existence(h).squeeze(-1), self.stop(h).squeeze(-1), self.root(h).squeeze(-1), self.support_presence(h).squeeze(-1)))
@@ -294,6 +303,7 @@ class GeppettoCandidateV2(nn.Module):
                     idx = torch.topk(out.support_logits[b, i, :nvalid], k=top).indices.tolist()
                     support_ids = tuple(conditioning.surface_ids[b][j] for j in idx)
                 mode_prob = torch.softmax(out.position_mode_logits[b, i], dim=-1)
+                map_mode_index = int(torch.argmax(out.position_mode_logits[b, i]).item())
                 hypotheses = []
                 for mi in range(self.config.position_modes):
                     mpn = out.position_modes_normalized[b, i, mi].cpu().numpy()
@@ -302,6 +312,7 @@ class GeppettoCandidateV2(nn.Module):
                         "position": tuple(map(float, mpos)),
                         "probability": float(mode_prob[mi]),
                         "sigma_normalized": tuple(map(float, torch.exp(out.position_mode_log_sigma[b, i, mi]).cpu().tolist())),
+                        "is_representative_map_mode": bool(mi == map_mode_index),
                     })
                 confidence = float((ex[i] * torch.exp(-sigma)).clamp(0.0, 1.0))
                 joints.append(SkeletonProposalJoint(
@@ -313,6 +324,8 @@ class GeppettoCandidateV2(nn.Module):
                     metadata={
                         "generation_index_internal_only": i,
                         "position_sigma": tuple(map(float, torch.exp(out.position_log_sigma[b, i]).cpu().tolist())),
+                        "position_representative": "MAP_MODE",
+                        "position_representative_mode_index": map_mode_index,
                         "position_hypotheses": tuple(hypotheses),
                         "position_hypotheses_schema": "RealSaS.GeppettoPositionHypotheses.v1",
                         "support_presence_probability": float(sp[i]),
@@ -337,6 +350,7 @@ class GeppettoCandidateV2(nn.Module):
                     "dynamic_cardinality": True,
                     "multimodal_loci": True,
                     "position_modes": self.config.position_modes,
+                    "representative_locus_policy": "MAP_MODE",
                     "parent_pair_chunk": self.config.parent_pair_chunk,
                     "resource_policy": self.config.resource_policy,
                     "generated_count": K,

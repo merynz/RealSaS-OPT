@@ -28,13 +28,6 @@ class GeppettoLossWeightsV2:
 
 
 def _independent_zero_accumulators(zero: torch.Tensor, names: tuple[str, ...]) -> dict[str, torch.Tensor]:
-    """Return storage-independent scalar accumulators.
-
-    Using the same zero tensor for every key and then applying ``+=`` aliases the
-    loss channels in PyTorch. Real-family fitting exposed that bug even though
-    source smoke tests had passed. Keep this helper intentionally tiny and
-    directly regression-tested.
-    """
     return {name: zero.clone() for name in names}
 
 
@@ -43,17 +36,30 @@ class GeppettoLossV2:
         self.weights = weights
         self.support_topk = int(support_topk)
 
-    def _match(self, pos, root, target, J):
-        tp = torch.as_tensor(target.positions_normalized, device=pos.device, dtype=pos.dtype)
+    def _match(self, output: GeppettoRawOutputV2, b: int, root: torch.Tensor, target, J: int):
+        tp = torch.as_tensor(target.positions_normalized, device=output.positions_normalized.device, dtype=output.positions_normalized.dtype)
         tr = torch.as_tensor(target.root_mask, device=root.device, dtype=root.dtype)
-        cost = torch.cdist(pos[:J], tp, p=1) + self.weights.match_root_cost * torch.abs(torch.sigmoid(root[:J])[:, None] - tr[None, :])
+        modes = output.position_modes_normalized[b, :J]  # [J,M,3]
+        locus_cost = (modes[:, :, None, :] - tp[None, None, :, :]).abs().sum(dim=-1).min(dim=1).values
+        cost = locus_cost + self.weights.match_root_cost * torch.abs(torch.sigmoid(root[:J])[:, None] - tr[None, :])
         q, t = linear_sum_assignment(cost.detach().cpu().numpy())
         return np.asarray(q, np.int64), np.asarray(t, np.int64)
+
+    @staticmethod
+    def _mixture_position_nll(output: GeppettoRawOutputV2, b: int, q: torch.Tensor, target_positions: torch.Tensor) -> torch.Tensor:
+        means = output.position_modes_normalized[b, q]
+        log_sigma = output.position_mode_log_sigma[b, q]
+        mix_logp = torch.log_softmax(output.position_mode_logits[b, q], dim=-1)
+        residual = means - target_positions[:, None, :]
+        component_logp = mix_logp - 0.5 * (torch.exp(-2.0 * log_sigma) * residual.square()).sum(dim=-1) - log_sigma.sum(dim=-1)
+        return -torch.logsumexp(component_logp, dim=-1).mean()
 
     def __call__(self, output: GeppettoRawOutputV2, targets: Sequence[GeppettoTeacherTargetV1], surface_positions_normalized: torch.Tensor, valid_mask: torch.Tensor):
         B, K = output.existence_logits.shape
         if len(targets) != B or surface_positions_normalized.shape[:2] != valid_mask.shape or surface_positions_normalized.shape[-1] != 3:
             raise ValueError("Geppetto V2 loss batch mismatch")
+        if output.position_modes_normalized.shape[:2] != (B, K) or output.position_modes_normalized.shape[-1] != 3:
+            raise ValueError("Geppetto V2 multimodal locus output missing")
         zero = output.existence_logits.sum() * 0.0
         names = ("position_nll", "existence", "stop", "root", "parent", "support", "support_presence", "abstain")
         total = _independent_zero_accumulators(zero, names)
@@ -75,15 +81,12 @@ class GeppettoLossV2:
             stop_target = torch.zeros(J, device=output.stop_logits.device, dtype=output.stop_logits.dtype)
             stop_target[-1] = 1.0
             total["stop"] += F.binary_cross_entropy_with_logits(output.stop_logits[b, :J], stop_target)
-            q_np, t_np = self._match(output.positions_normalized[b], output.root_logits[b], target, J)
+            q_np, t_np = self._match(output, b, output.root_logits[b], target, J)
             q = torch.as_tensor(q_np, device=output.positions_normalized.device)
             t = torch.as_tensor(t_np, device=output.positions_normalized.device)
             matched += J
             tp = torch.as_tensor(target.positions_normalized, device=output.positions_normalized.device, dtype=output.positions_normalized.dtype)[t]
-            residual = output.positions_normalized[b, q] - tp
-            ls = output.position_log_sigma[b, q]
-            nll = (0.5 * torch.exp(-2.0 * ls) * residual.square() + ls).mean()
-            total["position_nll"] += nll
+            total["position_nll"] += self._mixture_position_nll(output, b, q, tp)
             tr = torch.as_tensor(target.root_mask, device=output.root_logits.device, dtype=output.root_logits.dtype)[t]
             total["root"] += F.binary_cross_entropy_with_logits(output.root_logits[b, q], tr)
             teacher_parent = np.asarray(target.parent_indices, np.int64)

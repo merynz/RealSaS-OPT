@@ -13,13 +13,14 @@ from realsas_compiler_core.v4_types import (
     JointTransformKeyIR,
 )
 from realsas_compiler_core.v4 import (
-    qualified_skeleton_v2_lineage_hash, build_mechanical_state,
+    qualified_skeleton_v2_lineage_hash, mechanical_state_hash, build_mechanical_state,
     build_appearance_binding, build_renderable_component, build_directional_renderable,
     build_directional_renderable_set, build_capability_contract,
     make_single_family_e2e_capability_contract, build_joint_track, build_motion_state,
     assemble_product_v3, bind_proof_plan, bind_measurement_report, bind_domain_proof,
-    bind_product_proof_bundle, require_current_proof_bundle,
+    bind_product_proof_bundle, require_current_proof_bundle, project_runtime_package_v3,
 )
+
 
 class V4ContractTests(unittest.TestCase):
     def setUp(self):
@@ -67,11 +68,11 @@ class V4ContractTests(unittest.TestCase):
             dirs.append(build_directional_renderable(view_index=view,camera_binding_hash=f"CAM:{view}",components=(comp,)))
         return build_directional_renderable_set(tuple(dirs))
 
-    def motion(self, payload="CLIP", moved_quat=(0.0,0.0,1.0,0.0)):
+    def motion(self, payload="CLIP", moved_deg=20.0):
         clip=MotionClipIR("idle","PRESET",payload,("BASE_LBS",),"preset://idle",1.0,True)
         track=build_joint_track("JT0","idle","J0",(
             JointTransformKeyIR(0.0),
-            JointTransformKeyIR(0.5,rotation_xyzw=moved_quat),
+            JointTransformKeyIR(0.5,translation_xy=(0.02,0.0),rotation_deg=moved_deg,scale_xy=(1.0,1.0),depth_offset=0.05),
             JointTransformKeyIR(1.0),
         ))
         return build_motion_state((clip,),(track,))
@@ -83,6 +84,15 @@ class V4ContractTests(unittest.TestCase):
             preset_motion_hash="PRESET",runtime_hash="RUNTIME",policy_hash="POLICY"
         )
         return assemble_product_v3(self.mechanical,visual,caps,self.motion())
+
+    def pass_bundle(self, product):
+        reports=[]
+        required=sorted(set(d for r in product.capability_contract.requirements if r.activation=="REQUIRED" for d in r.required_proof_domains))
+        for domain in required:
+            plan=bind_proof_plan(product,proof_domain=domain,operator_policy_hashes=("OP",),probe_specification={"probe":domain})
+            meas=bind_measurement_report(product,plan,measurements={"ok":True})
+            reports.append(bind_domain_proof(product,plan,meas,status="PASS"))
+        return bind_product_proof_bundle(product,tuple(reports))
 
     def test_exact_eight_directions(self):
         visual=self.build_visual()
@@ -104,15 +114,9 @@ class V4ContractTests(unittest.TestCase):
         self.assertNotEqual(product_a.product_state_hash,product_b.product_state_hash)
 
     def test_proof_is_sibling_and_stale_after_product_change(self):
-        product=self.product(); reports=[]
-        required=sorted(set(d for r in product.capability_contract.requirements if r.activation=="REQUIRED" for d in r.required_proof_domains))
-        for domain in required:
-            plan=bind_proof_plan(product,proof_domain=domain,operator_policy_hashes=("OP",),probe_specification={"probe":domain})
-            meas=bind_measurement_report(product,plan,measurements={"ok":True})
-            reports.append(bind_domain_proof(product,plan,meas,status="PASS"))
-        bundle=bind_product_proof_bundle(product,tuple(reports)); self.assertEqual(bundle.overall_status,"PASS")
+        product=self.product(); bundle=self.pass_bundle(product); self.assertEqual(bundle.overall_status,"PASS")
         old_hash=product.product_state_hash
-        changed=assemble_product_v3(product.mechanical_state,product.directional_renderables,product.capability_contract,self.motion(payload="CLIP2",moved_quat=(0.0,0.0,0.7071067811865475,0.7071067811865476)))
+        changed=assemble_product_v3(product.mechanical_state,product.directional_renderables,product.capability_contract,self.motion(payload="CLIP2",moved_deg=35.0))
         self.assertEqual(product.product_state_hash,old_hash); self.assertNotEqual(changed.product_state_hash,old_hash)
         with self.assertRaisesRegex(QualificationError,"STALE"): require_current_proof_bundle(changed,bundle,require_pass=True)
 
@@ -131,7 +135,11 @@ class V4ContractTests(unittest.TestCase):
     def test_required_preset_motion_must_change_a_canonical_joint(self):
         visual=self.build_visual()
         caps=make_single_family_e2e_capability_contract(base_lbs_hash="LBS",mesh_hash="MESH",skinning_hash="SKINNING",visual_hash=visual.directional_visual_state_hash,preset_motion_hash="PRESET",runtime_hash="RUNTIME",policy_hash="POLICY")
-        static=self.motion(moved_quat=(0.0,0.0,0.0,1.0))
+        static=self.motion(moved_deg=0.0)
+        static_track=replace(static.joint_tracks[0],keys=(JointTransformKeyIR(0.0),JointTransformKeyIR(0.5),JointTransformKeyIR(1.0)),track_hash="")
+        from realsas_compiler_core.v4 import track_hash, motion_state_hash
+        static_track=replace(static_track,track_hash=track_hash(static_track))
+        static=replace(static,joint_tracks=(static_track,),motion_state_hash=""); static=replace(static,motion_state_hash=motion_state_hash(static))
         with self.assertRaisesRegex(QualificationError,"NO_EFFECTIVE_JOINT_MOTION"): assemble_product_v3(self.mechanical,visual,caps,static)
 
     def test_appearance_must_cover_every_face_corner(self):
@@ -141,9 +149,27 @@ class V4ContractTests(unittest.TestCase):
         from realsas_compiler_core.v4 import validate_renderable_component
         with self.assertRaisesRegex(QualificationError,"COVERAGE_INCOMPLETE"): validate_renderable_component(comp,self.mechanical)
 
-    def test_non_unit_motion_quaternion_fails_closed(self):
-        clip=MotionClipIR("idle","PRESET","CLIP",(),"",1.0,False)
-        track=build_joint_track("JT0","idle","J0",(JointTransformKeyIR(0.0),JointTransformKeyIR(0.5,rotation_xyzw=(0.0,0.0,1.0,1.0))))
-        with self.assertRaisesRegex(QualificationError,"QUATERNION_NOT_UNIT"): build_motion_state((clip,),(track,))
+    def test_motion_contract_has_no_3d_rigid_transform_fields(self):
+        key=JointTransformKeyIR(0.25,translation_xy=(1.0,2.0),rotation_deg=15.0,scale_xy=(1.1,0.9),depth_offset=0.2)
+        payload=key.to_dict()
+        self.assertEqual(set(payload),{"time_sec","translation_xy","rotation_deg","scale_xy","depth_offset"})
+        self.assertNotIn("rotation_xyzw",payload)
+        self.assertNotIn("translation",payload)
+
+    def test_full_3d_reconstruction_authority_is_forbidden(self):
+        bad=replace(self.mechanical,full_3d_reconstruction_authority=True,mechanical_state_hash="")
+        bad=replace(bad,mechanical_state_hash=mechanical_state_hash(bad))
+        visual=self.build_visual()
+        caps=make_single_family_e2e_capability_contract(base_lbs_hash="LBS",mesh_hash="MESH",skinning_hash="SKINNING",visual_hash=visual.directional_visual_state_hash,preset_motion_hash="PRESET",runtime_hash="RUNTIME",policy_hash="POLICY")
+        with self.assertRaisesRegex(QualificationError,"FULL_3D_RECONSTRUCTION"):
+            assemble_product_v3(bad,visual,caps,self.motion())
+
+    def test_runtime_declares_directional_puppet_not_3d_reconstruction(self):
+        product=self.product(); bundle=self.pass_bundle(product)
+        runtime=project_runtime_package_v3(product,bundle,manifest={"name":"fixture"},runtime_payload_ref="runtime://fixture")
+        self.assertEqual(runtime.manifest["representation_class"],"DIRECTIONAL_2D_2P5D_PUPPET")
+        self.assertEqual(runtime.manifest["mechanical_equivalence_class"],"THREE_D_EQUIVALENT_MECHANICS")
+        self.assertFalse(runtime.manifest["full_3d_reconstruction_authority"])
+
 
 if __name__=="__main__": unittest.main()

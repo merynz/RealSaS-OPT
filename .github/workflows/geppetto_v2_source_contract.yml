@@ -9,10 +9,12 @@ on:
       - 'experiments/geppetto_arachne_r6_20260901/train_geppetto_r6_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/eval_geppetto_r6_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py'
       - '.github/workflows/geppetto_v2_source_contract.yml'
   push:
     branches:
       - source/generic-completion-v1-20260902
+      - architecture/v4-generic-strength-source-completion-20260902
     paths:
       - 'experiments/geppetto_arachne_r6_20260901/geppetto_*_v2.py'
       - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
@@ -20,6 +22,7 @@ on:
       - 'experiments/geppetto_arachne_r6_20260901/train_geppetto_r6_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/eval_geppetto_r6_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py'
       - '.github/workflows/geppetto_v2_source_contract.yml'
 
 jobs:
@@ -52,4 +55,6 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/training_targets_v2.py
       - name: Run Geppetto V2 source gates
         run: |
-          python -m pytest -q experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py
+          python -m pytest -q \
+            experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py \
+            experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py

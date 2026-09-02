@@ -1,8 +1,8 @@
 # RealSaS — Architecture V4 Source Closure — 2026-09-02
 
-**Status:** `SOURCE_CONTRACT_IMPLEMENTED_PENDING_BRANCH_CI_AND_MERGE`
+**Status:** `SOURCE_CONTRACT_IMPLEMENTED__ONTOLOGY_CORRECTED__PENDING_SECOND_CI_AND_MERGE`
 
-This closure records the source-level implementation of the final architecture audit decisions.
+This closure records the source-level implementation of the final architecture audit decisions and the explicit correction of the 3D-equivalent/product boundary before merge.
 
 ## Implemented source contract
 
@@ -12,6 +12,20 @@ This closure records the source-level implementation of the final architecture a
 - support-admission-corrected `surface.py`
 - V4-aware `bundle_routes.py`
 - V4 facade exposure in `api.py`
+
+## Binding ontology
+
+`3D_EQUIVALENT_MECHANICS != FULL_3D_RECONSTRUCTION`.
+
+World/camera-space depth, P, local geometry and correspondence are mechanical evidence/conditioning carriers. The shipping product is `DIRECTIONAL_2D_2P5D_PUPPET`.
+
+The source contract explicitly carries:
+
+- `mechanical_equivalence_class = THREE_D_EQUIVALENT_MECHANICS`;
+- `representation_class = DIRECTIONAL_2D_2P5D_PUPPET`;
+- `full_3d_reconstruction_authority = false`;
+- puppet-local motion keys: `translation_xy`, `rotation_deg`, `scale_xy`, `depth_offset`;
+- no quaternion/3D rigid-transform requirement in canonical puppet motion.
 
 ## Core invariants
 
@@ -27,7 +41,8 @@ This closure records the source-level implementation of the final architecture a
 - missing required proof => ABSTAIN;
 - required-domain FAIL => FAIL;
 - runtime projection requires exact PASS bundle;
-- support=False cannot influence fused surface nodes.
+- support=False cannot influence fused surface nodes;
+- full 3D reconstruction authority is fail-closed forbidden in V4 product/runtime.
 
 ## Compatibility
 

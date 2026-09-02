@@ -60,8 +60,11 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py
       - name: Run Geppetto V2 source and behavioral gates
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
         run: |
-          python -m pytest -q \
+          python -m pytest -q -s \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py \

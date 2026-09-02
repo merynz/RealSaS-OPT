@@ -73,10 +73,12 @@ if str(_cache_root) not in _sys.path:
     _sys.path.insert(0, str(_cache_root))
 
 from .types import *
+from .v4_types import *
 from .surface import *
 from .rig import *
 from .skin import *
 from .mesh_binding import *
 from .product import *
+from .v4 import *
 from .api import CompilerFacade
 from .bundle_routes import *

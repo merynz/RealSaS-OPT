@@ -14,11 +14,11 @@ def _point(sample):
     return tuple(float(sample.ray_origin[i])+float(sample.depth)*f[i] for i in range(3))
 
 def build_surface_from_persistence(evidence:ObservationEvidenceIR, groups:tuple[PersistenceGroup,...], *, derive_normals:bool=False)->RiggingSurfaceIR:
-    """Compile ray/depth evidence into P and fuse only explicitly admitted persistence groups.
+    """Compile ray/depth evidence into P and fuse only explicitly supported members.
 
-    This function has no teacher/source-rig identity input. Normal is not a required
-    learned field; derive_normals is deliberately unsupported here until a compiler
-    geometry consumer explicitly requests a qualified deterministic construction.
+    support=False observations may be present in evidence or a diagnostic persistence
+    group, but they are forbidden from contributing to fused P, raster bindings,
+    support/provenance, or SurfaceNode source-observation lineage.
     """
     if derive_normals:
         raise QualificationError("normal derivation belongs to a qualified deterministic geometry operator, not the evidence head")
@@ -32,28 +32,44 @@ def build_surface_from_persistence(evidence:ObservationEvidenceIR, groups:tuple[
             if oid in used: raise QualificationError(f"observation appears in multiple persistence groups:{oid}")
             if oid not in by_id: raise QualificationError(f"persistence references missing observation:{oid}")
             used.add(oid); samples.append(by_id[oid])
-        P=[_point(s) for s in samples]
+        admitted=[s for s in samples if bool(s.support)]
+        if not admitted:
+            raise QualificationError(f"persistence group has no supported observations:{g.group_id}")
+        P=[_point(s) for s in admitted]
         mean=tuple(sum(p[i] for p in P)/len(P) for i in range(3))
-        sid="S:"+content_sha256({"group":g.group_id,"obs":sorted(g.observation_ids),"P":mean})[:20]
+        admitted_ids=tuple(sorted(s.observation_id for s in admitted))
+        excluded_ids=tuple(sorted(s.observation_id for s in samples if not s.support))
+        sid="S:"+content_sha256({"group":g.group_id,"obs":admitted_ids,"P":mean})[:20]
         nodes.append(SurfaceNode(
             surface_id=sid,P=mean,
-            support_views=tuple(sorted({int(s.view_index) for s in samples if s.support})),
-            provenance_refs=tuple(sorted({s.provenance_ref for s in samples if s.provenance_ref})),
-            source_observation_ids=tuple(sorted(g.observation_ids)),
-            raster_bindings=tuple(sorted((int(s.view_index),tuple(map(float,s.raster_xy))) for s in samples)),
+            support_views=tuple(sorted({int(s.view_index) for s in admitted})),
+            provenance_refs=tuple(sorted({s.provenance_ref for s in admitted if s.provenance_ref})),
+            source_observation_ids=admitted_ids,
+            raster_bindings=tuple(sorted((int(s.view_index),tuple(map(float,s.raster_xy))) for s in admitted)),
             persistence_group_id=g.group_id,
-            validity_flags=tuple(sorted({flag for s in samples for flag in s.validity_flags})),
-            metadata={"persistence_method":g.method,"persistence_diagnostics":g.diagnostics},
+            validity_flags=tuple(sorted({flag for s in admitted for flag in s.validity_flags})),
+            metadata={
+                "persistence_method":g.method,
+                "persistence_diagnostics":g.diagnostics,
+                "support_false_excluded_observation_ids":excluded_ids,
+                "support_admission_policy":"SUPPORT_TRUE_ONLY_V1",
+            },
         ))
-    lineage=content_sha256({"schema":"RealSaS.RiggingSurfaceIR.v1","evidence":evidence.to_dict(),"groups":[g.to_dict() for g in groups],"nodes":[n.to_dict() for n in nodes]})
-    return RiggingSurfaceIR(tuple(nodes), geometry_lineage_hash=lineage, metadata={"P_authority":"ANALYTIC_FROM_DEPTH_AND_KNOWN_RAY","N_required":False})
+    lineage=content_sha256({
+        "schema":"RealSaS.RiggingSurfaceIR.v1",
+        "support_admission_policy":"SUPPORT_TRUE_ONLY_V1",
+        "evidence":evidence.to_dict(),
+        "groups":[g.to_dict() for g in groups],
+        "nodes":[n.to_dict() for n in nodes],
+    })
+    return RiggingSurfaceIR(tuple(nodes), geometry_lineage_hash=lineage, metadata={
+        "P_authority":"ANALYTIC_FROM_DEPTH_AND_KNOWN_RAY",
+        "N_required":False,
+        "support_admission_policy":"SUPPORT_TRUE_ONLY_V1",
+    })
 
 def rigging_surface_from_d2_arrays(P, support, raster_xy, *, authority_label:str, persistence_label:str="MUTUAL_P003")->RiggingSurfaceIR:
-    """Narrow adapter for sealed E0/D2-style 512-anchor carriers.
-
-    It does not reinterpret sealed experiments. It promotes already-qualified P/support/
-    raster provenance into the current typed compiler boundary for direct compiler tests.
-    """
+    """Narrow adapter for sealed E0/D2-style 512-anchor carriers."""
     import numpy as np
     P=np.asarray(P,float); support=np.asarray(support); raster_xy=np.asarray(raster_xy,float)
     if P.ndim!=2 or P.shape[1]!=3: raise QualificationError("P must be [N,3]")

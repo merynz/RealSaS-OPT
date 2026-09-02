@@ -1,8 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field, asdict
-from .types import Json, Vec2, Vec3, RiggingSurfaceIR, QualifiedJoint, QualifiedSkinIR, QualifiedEditableMeshIR, QualifiedMeshSkinIR
+from .types import Json, Vec2, RiggingSurfaceIR, QualifiedJoint, QualifiedSkinIR, QualifiedEditableMeshIR, QualifiedMeshSkinIR
 
-Quat=tuple[float,float,float,float]
 
 @dataclass(frozen=True)
 class QualifiedSkeletonIRV2:
@@ -14,14 +13,18 @@ class QualifiedSkeletonIRV2:
     schema_version: str = "RealSaS.QualifiedSkeletonIR.v2"
     def to_dict(self): return asdict(self)
 
+
 @dataclass(frozen=True)
 class MechanicalStateIR:
     surface: RiggingSurfaceIR
     skeleton: QualifiedSkeletonIRV2
     skin: QualifiedSkinIR
     mechanical_state_hash: str
-    schema_version: str = "RealSaS.MechanicalStateIR.v1"
+    mechanical_equivalence_class: str = "THREE_D_EQUIVALENT_MECHANICS"
+    full_3d_reconstruction_authority: bool = False
+    schema_version: str = "RealSaS.MechanicalStateIR.v2"
     def to_dict(self): return asdict(self)
+
 
 @dataclass(frozen=True)
 class AppearanceCornerBinding:
@@ -36,6 +39,7 @@ class AppearanceCornerBinding:
     confidence: float = 1.0
     def to_dict(self): return asdict(self)
 
+
 @dataclass(frozen=True)
 class AppearanceBindingIR:
     target_view_index: int
@@ -47,6 +51,7 @@ class AppearanceBindingIR:
     schema_version: str = "RealSaS.AppearanceBindingIR.v1"
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
+
 
 @dataclass(frozen=True)
 class VisualCompletionProposalIR:
@@ -61,6 +66,7 @@ class VisualCompletionProposalIR:
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
 
+
 @dataclass(frozen=True)
 class QualifiedVisualCompletionIR:
     completion_id: str
@@ -74,6 +80,7 @@ class QualifiedVisualCompletionIR:
     schema_version: str = "RealSaS.QualifiedVisualCompletionIR.v1"
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
+
 
 @dataclass(frozen=True)
 class RenderableComponentIR:
@@ -91,6 +98,7 @@ class RenderableComponentIR:
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
 
+
 @dataclass(frozen=True)
 class DirectionalRenderableIR:
     view_index: int
@@ -101,14 +109,17 @@ class DirectionalRenderableIR:
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
 
+
 @dataclass(frozen=True)
 class DirectionalRenderableSetIR:
     directions: tuple[DirectionalRenderableIR, ...]
     directional_visual_state_hash: str
     exact_cardinality: int = 8
-    schema_version: str = "RealSaS.DirectionalRenderableSetIR.v1"
+    representation_class: str = "DIRECTIONAL_2D_2P5D_RENDERABLE_SET"
+    schema_version: str = "RealSaS.DirectionalRenderableSetIR.v2"
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
+
 
 @dataclass(frozen=True)
 class CapabilityRequirement:
@@ -120,6 +131,7 @@ class CapabilityRequirement:
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
 
+
 @dataclass(frozen=True)
 class CapabilityContractIR:
     profile_id: str
@@ -128,6 +140,7 @@ class CapabilityContractIR:
     schema_version: str = "RealSaS.CapabilityContractIR.v1"
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
+
 
 @dataclass(frozen=True)
 class MotionClipIR:
@@ -141,13 +154,22 @@ class MotionClipIR:
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
 
+
 @dataclass(frozen=True)
 class JointTransformKeyIR:
+    """Puppet-local directional 2D/2.5D deformation key.
+
+    depth_offset is an ordering/deformer-context scalar. It is not a world-Z
+    reconstruction coordinate and this type deliberately has no quaternion or 3D
+    rigid transform fields.
+    """
     time_sec: float
-    translation: Vec3 = (0.0, 0.0, 0.0)
-    rotation_xyzw: Quat = (0.0, 0.0, 0.0, 1.0)
-    scale: Vec3 = (1.0, 1.0, 1.0)
+    translation_xy: Vec2 = (0.0, 0.0)
+    rotation_deg: float = 0.0
+    scale_xy: Vec2 = (1.0, 1.0)
+    depth_offset: float = 0.0
     def to_dict(self): return asdict(self)
+
 
 @dataclass(frozen=True)
 class JointTransformTrackIR:
@@ -156,9 +178,11 @@ class JointTransformTrackIR:
     canonical_joint_id: str
     keys: tuple[JointTransformKeyIR, ...]
     track_hash: str
-    schema_version: str = "RealSaS.JointTransformTrackIR.v1"
+    transform_space: str = "PUPPET_LOCAL_2D_2P5D"
+    schema_version: str = "RealSaS.JointTransformTrackIR.v2"
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
+
 
 @dataclass(frozen=True)
 class ComponentOrderTrackIR:
@@ -170,6 +194,7 @@ class ComponentOrderTrackIR:
     schema_version: str = "RealSaS.ComponentOrderTrackIR.v1"
     def to_dict(self): return asdict(self)
 
+
 @dataclass(frozen=True)
 class ComponentVisibilityTrackIR:
     track_id: str
@@ -180,6 +205,7 @@ class ComponentVisibilityTrackIR:
     schema_version: str = "RealSaS.ComponentVisibilityTrackIR.v1"
     def to_dict(self): return asdict(self)
 
+
 @dataclass(frozen=True)
 class MotionStateIR:
     clips: tuple[MotionClipIR, ...]
@@ -187,9 +213,11 @@ class MotionStateIR:
     order_tracks: tuple[ComponentOrderTrackIR, ...]
     visibility_tracks: tuple[ComponentVisibilityTrackIR, ...]
     motion_state_hash: str
-    schema_version: str = "RealSaS.MotionStateIR.v1"
+    representation_class: str = "DIRECTIONAL_2D_2P5D_PUPPET_MOTION"
+    schema_version: str = "RealSaS.MotionStateIR.v2"
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
+
 
 @dataclass(frozen=True)
 class CanonicalPuppetGraphV3:
@@ -207,9 +235,13 @@ class CanonicalPuppetGraphV3:
     qualification_ledger: tuple[Json, ...]
     editable_metadata: Json = field(default_factory=dict)
     runtime_policy: Json = field(default_factory=dict)
+    representation_class: str = "DIRECTIONAL_2D_2P5D_PUPPET"
+    mechanical_equivalence_class: str = "THREE_D_EQUIVALENT_MECHANICS"
+    full_3d_reconstruction_authority: bool = False
     export_contract_version: str = "RealSaS.RuntimePackageIR.v1"
     schema_version: str = "RealSaS.CanonicalPuppetGraph.v3"
     def to_dict(self): return asdict(self)
+
 
 @dataclass(frozen=True)
 class ProofPlanIR:
@@ -221,6 +253,7 @@ class ProofPlanIR:
     schema_version: str = "RealSaS.ProofPlanIR.v1"
     def to_dict(self): return asdict(self)
 
+
 @dataclass(frozen=True)
 class MeasurementReportIR:
     source_product_state_hash: str
@@ -229,6 +262,7 @@ class MeasurementReportIR:
     measurement_report_hash: str
     schema_version: str = "RealSaS.MeasurementReportIR.v1"
     def to_dict(self): return asdict(self)
+
 
 @dataclass(frozen=True)
 class DomainProofReportIR:
@@ -244,6 +278,7 @@ class DomainProofReportIR:
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
 
+
 @dataclass(frozen=True)
 class ProductProofBundleIR:
     source_product_state_hash: str
@@ -254,6 +289,7 @@ class ProductProofBundleIR:
     schema_version: str = "RealSaS.ProductProofBundleIR.v1"
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
+
 
 @dataclass(frozen=True)
 class CapabilityQualificationIR:

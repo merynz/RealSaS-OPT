@@ -1,0 +1,35 @@
+{
+  "schema": "RealSaS.FIT8SourceTexturedAuthorityPrereg.v1",
+  "date": "2026-09-02",
+  "status": "PREREGISTERED__NO_FIT_METRIC_USED__OPTIMIZER_NOT_STARTED",
+  "selection_rule": {
+    "source_pool": "PILOT_ASSET_RESULTS_V1R6.jsonl authority PASS only",
+    "source_pool_pass_count": 22,
+    "ranking": "ascending SHA256('RealSaS.FIT8.v1|' + source_sha256)",
+    "take": 8,
+    "fit_metric_used": false,
+    "family_specific_architecture_change_after_selection": false
+  },
+  "observation_contract": {
+    "primary_render": "TEXTURED_RGBA_WITH_SOURCE_APPEARANCE",
+    "native_resolution": 1024,
+    "exact_views": 8,
+    "forbidden_as_fit_input": ["cel_clean", "ink_cel", "toon_sibling", "geometry_control", "geometry-isolation"]
+  },
+  "truth_policy": {
+    "required_before_optimizer": ["IRIS geometry/camera truth extractable", "Geppetto armature/joint truth extractable", "Arachne dense skin-weight truth extractable"],
+    "master_membership": "VERIFY_BY_EXACT_SOURCE_SHA_OR_CANONICAL_ASSET_BINDING; DO_NOT ASSUME FROM PILOT MEMBERSHIP",
+    "source_truth_evidence": "primary armature + skinned primary objects + weighted vertices + exact source bytes/revision where available"
+  },
+  "selected": [
+    {"rank":1,"pilot_id":"rigxl_03490","source_record_id":"03490","source_sha256":"50bd405757a0ff1f23d2f36cb1a4a8a50109e07246c64f4c2de98ea8cb8a95cb","membership":"rigxl","primary_armature":"Armature","skinned_primary_object_count":7,"weighted_vertex_evidence":17714,"missing_external_image_count":0,"authority_status":"PASS_AUTHORITY_RENDER","view_count":8},
+    {"rank":2,"pilot_id":"rigxl_02128","source_record_id":"02128","source_sha256":"25d4e9932f4745ac4dcdaf1bb4075d823aa6af50da1d53335e43fe77ef6a3294","membership":"rigxl","primary_armature":"Armature","skinned_primary_object_count":9,"weighted_vertex_evidence":7752,"missing_external_image_count":0,"authority_status":"PASS_AUTHORITY_RENDER","view_count":8},
+    {"rank":3,"pilot_id":"kaykit_02_Skeleton_Mage","source_record_id":"KayKit-Character-Pack-Skeletons-1.0/addons/kaykit_character_pack_skeletons/Characters/gltf/Skeleton_Mage.glb","source_sha256":"e05b0f5cfa395271c9f75fd07c0a0613c56f401ece4ab644e080001a79971075","membership":"kaykit","primary_armature":"Rig","skinned_primary_object_count":8,"weighted_vertex_evidence":3716,"missing_external_image_count":0,"authority_status":"PASS_AUTHORITY_RENDER","view_count":8},
+    {"rank":4,"pilot_id":"kaykit_03_Skeleton_Warrior","source_record_id":"KayKit-Character-Pack-Skeletons-1.0/addons/kaykit_character_pack_skeletons/Characters/gltf/Skeleton_Warrior.glb","source_sha256":"178b6fda810b814c250d8a2010c24dfd9b458b9006dd323353e620b7ff118bbe","membership":"kaykit","primary_armature":"Rig","skinned_primary_object_count":9,"weighted_vertex_evidence":5048,"missing_external_image_count":0,"authority_status":"PASS_AUTHORITY_RENDER","view_count":8},
+    {"rank":5,"pilot_id":"rigxl_03625","source_record_id":"03625","source_sha256":"43a82336dca1b25eb2814e8712729ffa9b3ffece73d71fe4488dc2baa0be61a6","membership":"rigxl","primary_armature":"RootNode","skinned_primary_object_count":40,"weighted_vertex_evidence":55002,"missing_external_image_count":0,"authority_status":"PASS_AUTHORITY_RENDER","view_count":8},
+    {"rank":6,"pilot_id":"rigxl_03879","source_record_id":"03879","source_sha256":"a5554383b7b9d9a356142296e8316d2687f624cdc312ced762229241307e805d","membership":"rigxl","primary_armature":"Armature","skinned_primary_object_count":1,"weighted_vertex_evidence":4257,"missing_external_image_count":0,"authority_status":"PASS_AUTHORITY_RENDER","view_count":8},
+    {"rank":7,"pilot_id":"rigxl_04595","source_record_id":"04595","source_sha256":"4fd01c6eede2516c15b4c65ab060470c0a3add5e30b99c583fb8fe0ae0647960","membership":"rigxl","primary_armature":"Armature","skinned_primary_object_count":10,"weighted_vertex_evidence":51594,"missing_external_image_count":0,"authority_status":"PASS_AUTHORITY_RENDER","view_count":8},
+    {"rank":8,"pilot_id":"art_6112a73a-8166-56","source_record_id":"6112a73a-8166-56e4-9f26-faa953d35838","source_sha256":"18548b816c9031b4bcd3e605436eab006f43d68f260e676511812768ffa826dd","membership":"articulation_xl2","primary_armature":"Armature","skinned_primary_object_count":1,"weighted_vertex_evidence":6917,"missing_external_image_count":0,"authority_status":"PASS_AUTHORITY_RENDER","view_count":8}
+  ],
+  "next_gate": "BIND_EACH_SELECTED_SOURCE_TO_THREE_MODEL_TRUTH_AND_EXACT_OBSERVATION_BYTES; THEN AUTHORIZE_FIRST_FAMILY_FIT"
+}

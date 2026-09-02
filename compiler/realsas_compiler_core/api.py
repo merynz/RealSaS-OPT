@@ -15,7 +15,7 @@ from .v4 import (
     build_renderable_component, validate_renderable_component, build_directional_renderable,
     validate_directional_renderable, build_directional_renderable_set,
     validate_directional_renderable_set, build_capability_contract, validate_capability_contract,
-    make_single_family_e2e_capability_contract, build_order_track, build_visibility_track,
+    make_single_family_e2e_capability_contract, build_joint_track, build_order_track, build_visibility_track,
     build_motion_state, validate_motion_state, required_proof_domains, assemble_product_v3,
     bind_proof_plan, bind_measurement_report, bind_domain_proof, bind_product_proof_bundle,
     require_current_proof_bundle, qualify_capability, project_runtime_package_v3,
@@ -64,6 +64,7 @@ class CompilerFacade:
     build_capability_contract=staticmethod(build_capability_contract)
     validate_capability_contract=staticmethod(validate_capability_contract)
     make_single_family_e2e_capability_contract=staticmethod(make_single_family_e2e_capability_contract)
+    build_joint_track=staticmethod(build_joint_track)
     build_order_track=staticmethod(build_order_track)
     build_visibility_track=staticmethod(build_visibility_track)
     build_motion_state=staticmethod(build_motion_state)

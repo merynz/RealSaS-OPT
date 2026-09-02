@@ -14,7 +14,8 @@ from .v4_types import (
     QualifiedSkeletonIRV2, MechanicalStateIR, AppearanceBindingIR,
     VisualCompletionProposalIR, QualifiedVisualCompletionIR,
     RenderableComponentIR, DirectionalRenderableIR, DirectionalRenderableSetIR,
-    CapabilityContractIR, MotionStateIR, CanonicalPuppetGraphV3,
+    CapabilityContractIR, MotionStateIR, JointTransformTrackIR,
+    ComponentOrderTrackIR, ComponentVisibilityTrackIR, CanonicalPuppetGraphV3,
     ProofPlanIR, MeasurementReportIR, DomainProofReportIR, ProductProofBundleIR,
     CapabilityQualificationIR,
 )
@@ -69,6 +70,12 @@ def route_for(value: Any) -> ArtifactRoute:
         return ArtifactRoute("PROPOSAL", "VisualCompletion", "candidates/completion", f"completion_{_slug(value.completion_id)}.json", ("Compiler.visual_completion_qualification",))
     if isinstance(value, QualifiedVisualCompletionIR):
         return ArtifactRoute("QUALIFIED_VISUAL_COMPLETION", "Compiler.visual_completion_qualification", "appearance", f"view_{value.target_view_index:02d}__completion_{_slug(value.completion_id)}.json", ("RenderableComponent", "Proof"))
+    if isinstance(value, JointTransformTrackIR):
+        return ArtifactRoute("CANONICAL_MOTION_TRACK", "MotionCompiler", "motion/tracks", f"joint_{_slug(value.canonical_joint_id)}__{_slug(value.track_id)}.json", ("MotionState", "Runtime", "Proof"))
+    if isinstance(value, ComponentOrderTrackIR):
+        return ArtifactRoute("CANONICAL_VISUAL_MOTION_TRACK", "MotionCompiler", "motion/tracks", f"view_{value.view_index:02d}__order_{_slug(value.track_id)}.json", ("MotionState", "Runtime", "Proof"))
+    if isinstance(value, ComponentVisibilityTrackIR):
+        return ArtifactRoute("CANONICAL_VISUAL_MOTION_TRACK", "MotionCompiler", "motion/tracks", f"view_{value.view_index:02d}__visibility_{_slug(value.track_id)}.json", ("MotionState", "Runtime", "Proof"))
     if isinstance(value, CapabilityQualificationIR):
         return ArtifactRoute("DERIVED_CAPABILITY_QUALIFICATION", "ProductProof", "proof", f"capability_{_slug(value.capability_id)}.json", ("Export",))
     try:

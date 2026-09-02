@@ -8,13 +8,11 @@ V3 remains historical authority for the audit state that led to this amendment. 
 
 ## 1. Program order
 
-The immediate scientific/product objective is deliberately narrow:
+Immediate objective:
 
-> First prove one real 1024 eight-view family can travel end-to-end from shipping observations to a genuinely usable animated puppet: coherent skeleton, qualified skinning, deformable editable mesh, eight directional render states, one preset animation, exact proof and runtime projection.
+> Prove one real clean 1024 eight-view family can travel end-to-end from shipping observations to a genuinely usable animated puppet: coherent skeleton, qualified skinning, deformable editable mesh, eight directional render states, source-attached appearance, at least one effective preset animation, exact proof and runtime projection.
 
-**No generalization claim, held-out claim or large-scale training program is authorized before this one-family E2E closure passes.**
-
-After one-family E2E PASS, the next program becomes heterogeneous FIT8/generalization.
+**No generalization claim, held-out program or scale-up is authorized before this one-family E2E closure passes.**
 
 ## 2. Authority topology
 
@@ -71,8 +69,8 @@ Directional visual state:
     exact 8 x DirectionalRenderableIR
         each -> N RenderableComponentIR
              -> M + B
-             -> AppearanceBindingIR
-             -> optional QualifiedVisualCompletionIR
+             -> per-face-corner AppearanceBindingIR authority
+             -> zero or more QualifiedVisualCompletionIR
 
 CapabilityContractIR + MotionStateIR
         |
@@ -104,7 +102,7 @@ A persistence-group member with `support=False` may exist diagnostically but can
 
 ### Deterministic local geometry
 
-IRIS learned geometric authority ends at forward depth/support/uncertainty. World `P` is analytic. Required normals/differentials are deterministic, qualified and operator-hash-bound derivatives of admitted S. V4 types the boundary; exact robust DTB-ND1 operator bytes remain a separate implementation/promotion item and may not be replaced by a weaker convenience estimator without parity evidence.
+IRIS learned geometric authority ends at forward depth/support/uncertainty. World `P` is analytic. Required normals/differentials are deterministic, qualified and operator-hash-bound derivatives of admitted S. Exact robust DTB-ND1 operator bytes remain a separate implementation/promotion item and may not be replaced by a weaker convenience estimator without parity evidence.
 
 ### Forest-safe skeleton
 
@@ -114,15 +112,29 @@ IRIS learned geometric authority ends at forward depth/support/uncertainty. Worl
 
 `DirectionalRenderableSetIR` has **exact cardinality 8** and ordered views `0..7`.
 
-Each `DirectionalRenderableIR` binds exact view/camera identity and N `RenderableComponentIR` values. Each component owns a direction-local qualified M and B, an `AppearanceBindingIR`, setup order, coverage class and optional qualified completion. Shared S/G/W is never duplicated as eight mechanical truths.
+Each `DirectionalRenderableIR` binds exact view/camera identity and at least one `RenderableComponentIR`. Component IDs and setup orders are unique inside a direction. Each component owns a direction-local qualified M and B, complete appearance coverage for every face corner, coverage class and zero or more qualified completion bindings. Shared S/G/W is never duplicated as eight mechanical truths.
 
-## 5. Appearance authority
+## 5. Appearance authority — per face corner
 
-Shipping appearance is mesh-attached but observation-derived.
+Appearance authority is not component-global because a single renderable mesh may contain regions with different provenance.
 
-`AppearanceBindingIR.authority_class` is one of `OBSERVED_LOCAL`, `OBSERVED_CROSS_VIEW`, `QUALIFIED_COMPLETION`.
+Every mesh face corner must have exactly one `AppearanceCornerBinding` carrying:
 
-Per-corner bindings carry mesh-attached material UV, donor view, donor raster coordinate, source observation hash and confidence. Raster/provenance is authority; runtime material coordinates are the deformation-stable compiled representation. `UNKNOWN` is not admitted as product appearance truth.
+- material UV used by runtime;
+- donor view index;
+- donor raster coordinate;
+- source observation hash;
+- authority class;
+- optional completion ID;
+- confidence.
+
+Allowed authority classes:
+
+- `OBSERVED_LOCAL` — donor is the target view;
+- `OBSERVED_CROSS_VIEW` — donor is another truly observed view;
+- `QUALIFIED_COMPLETION` — corner references an explicitly qualified completion ID.
+
+Raster/provenance is authority; mesh-attached material coordinates are the deformation-stable compiled representation. Missing face-corner appearance is a product blocker.
 
 ## 6. Completion firewall
 
@@ -131,12 +143,12 @@ Unobserved completion cannot mutate or feed back into S/G/W.
 ```text
 UNOBSERVED
  -> VisualCompletionProposalIR
- -> explicit qualification
+ -> explicit qualification against observed S support
  -> QualifiedVisualCompletionIR
- -> renderable component only
+ -> referenced only by renderable appearance corners
 ```
 
-A completion proposal must be anchored to admitted observed surface support. If a required completion cannot be qualified, the required product capability fails or abstains. Completion is never a hidden second geometry, skeleton or skin authority.
+Every completion proposal must be anchored to admitted observed surface IDs. A required completion that is not actually referenced by the renderable fails closed. A corner may not claim `QUALIFIED_COMPLETION` without referencing a qualified completion object.
 
 ## 7. Capability contract
 
@@ -144,13 +156,30 @@ Product identity contains capability policy, not proof results.
 
 `CapabilityContractIR` records each capability as `REQUIRED`, `OPTIONAL` or `DISABLED`, plus implementation binding, policy hash and required proof domains.
 
-The one-family E2E profile requires `BASE_LBS`, `EDITABLE_MESH`, `QUALIFIED_SKINNING`, `VISUAL_8_DIRECTION`, `PRESET_MOTION`, `RUNTIME_BACKEND`.
+The one-family E2E profile requires:
+
+- `BASE_LBS`;
+- `EDITABLE_MESH`;
+- `QUALIFIED_SKINNING`;
+- `VISUAL_8_DIRECTION`;
+- `PRESET_MOTION`;
+- `RUNTIME_BACKEND`.
 
 Heavy ARAP, XPBD, contact and visual completion remain optional unless a product gate explicitly requires them. Historical `solver_registry.py` remains fail-closed provenance authority; a historical solver name is not executable capability proof.
 
-## 8. Motion state
+## 8. Motion state — motion must be real
 
-Static component order is setup state only. `MotionStateIR` contains clips plus optional component order/visibility tracks and a motion-state hash. The first E2E closure requires at least one `PRESET` clip. Learned animation generation is not required.
+Static component order is setup state only.
+
+`MotionStateIR` contains:
+
+- `MotionClipIR[]`;
+- typed `JointTransformTrackIR[]` over canonical joint IDs;
+- optional `ComponentOrderTrackIR[]`;
+- optional `ComponentVisibilityTrackIR[]`;
+- exact motion-state hash.
+
+`JointTransformTrackIR` contains time-ordered local translation / rotation / scale keys. If `PRESET_MOTION` is REQUIRED, the product must contain at least one PRESET clip with at least one canonical-joint track that changes transform state over time. An opaque clip hash or static track cannot satisfy the capability.
 
 ## 9. Canonical product identity
 
@@ -179,7 +208,7 @@ Every report is bound to the exact product hash. Product mutation invalidates pr
 
 ## 11. Repair and runtime
 
-Historical v0.5 proof/failure/owner-attribution/repair semantics remain the restoration authority:
+Historical v0.5 proof/failure/owner-attribution/repair semantics remain restoration authority:
 
 ```text
 Y -> proof -> failure signatures -> owner attribution
@@ -198,12 +227,13 @@ Repair may not silently mutate a product while preserving its old hash.
 - existing S/W/M/B qualification primitives;
 - `QualifiedSkeletonIR.v2` product-facing type;
 - `MechanicalStateIR`;
-- appearance binding and completion firewall types;
+- per-corner appearance authority and completion firewall;
 - exact-eight directional renderables;
-- capability contract and motion state;
+- capability contract;
+- typed canonical-joint preset motion tracks;
 - `CanonicalPuppetGraph.v3`;
 - typed proof bundle and stale-proof rejection;
-- direction/component-safe bundle routing.
+- direction/component/track-safe bundle routing.
 
 ### Typed but implementation-partial
 
@@ -213,7 +243,9 @@ Repair may not silently mutate a product while preserving its old hash.
 - Geppetto candidate model;
 - SkinFieldCodec;
 - Arachne predictor;
+- actual appearance compiler from eight source rasters;
 - heavy historical proof/repair execution;
+- actual LBS/deformation execution over V3 renderables;
 - native runtime materialization.
 
 ### Rejected from core
@@ -223,11 +255,12 @@ Repair may not silently mutate a product while preserving its old hash.
 - one final M/B for all eight directions;
 - hidden completion as mechanical truth;
 - hidden BBW semantic skin generation;
-- proof results inside product identity.
+- proof results inside product identity;
+- opaque/static clip metadata counting as animation capability.
 
 ## 13. Next gate — SINGLE-FAMILY E2E FIT
 
-V4 is considered useful only when one clean real family proves:
+V4 is considered product-valid only when one clean real family proves:
 
 ```text
 8x1024 observations
@@ -235,7 +268,7 @@ V4 is considered useful only when one clean real family proves:
  -> Geppetto -> G
  -> Arachne/codec -> W
  -> directional M/B/appearance
- -> preset animation
+ -> effective preset joint animation
  -> exact deformation/render proof
  -> PASS RuntimePackageIR
 ```

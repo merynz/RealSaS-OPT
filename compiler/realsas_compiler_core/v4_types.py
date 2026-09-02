@@ -1,10 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass, field, asdict
-from typing import Any
-from .types import (
-    Json, Vec2, Vec3, RiggingSurfaceIR, QualifiedJoint, QualifiedSkinIR,
-    QualifiedEditableMeshIR, QualifiedMeshSkinIR,
-)
+from .types import Json, Vec2, Vec3, RiggingSurfaceIR, QualifiedJoint, QualifiedSkinIR, QualifiedEditableMeshIR, QualifiedMeshSkinIR
+
+Quat=tuple[float,float,float,float]
 
 @dataclass(frozen=True)
 class QualifiedSkeletonIRV2:
@@ -33,6 +31,8 @@ class AppearanceCornerBinding:
     donor_view_index: int
     donor_raster_xy: Vec2
     source_observation_hash: str
+    authority_class: str
+    completion_id: str = ""
     confidence: float = 1.0
     def to_dict(self): return asdict(self)
 
@@ -41,7 +41,6 @@ class AppearanceBindingIR:
     target_view_index: int
     mesh_binding_hash: str
     camera_binding_hash: str
-    authority_class: str
     corner_bindings: tuple[AppearanceCornerBinding, ...]
     appearance_lineage_hash: str
     atlas_payload_hash: str = ""
@@ -86,7 +85,7 @@ class RenderableComponentIR:
     setup_order: int
     coverage_classification: str
     component_state_hash: str
-    completion: QualifiedVisualCompletionIR | None = None
+    completions: tuple[QualifiedVisualCompletionIR, ...] = ()
     default_visible: bool = True
     schema_version: str = "RealSaS.RenderableComponentIR.v1"
     metadata: Json = field(default_factory=dict)
@@ -137,6 +136,27 @@ class MotionClipIR:
     clip_payload_hash: str
     required_capabilities: tuple[str, ...] = ()
     source_ref: str = ""
+    duration_sec: float = 1.0
+    loop: bool = False
+    metadata: Json = field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
+@dataclass(frozen=True)
+class JointTransformKeyIR:
+    time_sec: float
+    translation: Vec3 = (0.0, 0.0, 0.0)
+    rotation_xyzw: Quat = (0.0, 0.0, 0.0, 1.0)
+    scale: Vec3 = (1.0, 1.0, 1.0)
+    def to_dict(self): return asdict(self)
+
+@dataclass(frozen=True)
+class JointTransformTrackIR:
+    track_id: str
+    clip_id: str
+    canonical_joint_id: str
+    keys: tuple[JointTransformKeyIR, ...]
+    track_hash: str
+    schema_version: str = "RealSaS.JointTransformTrackIR.v1"
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
 
@@ -163,6 +183,7 @@ class ComponentVisibilityTrackIR:
 @dataclass(frozen=True)
 class MotionStateIR:
     clips: tuple[MotionClipIR, ...]
+    joint_tracks: tuple[JointTransformTrackIR, ...]
     order_tracks: tuple[ComponentOrderTrackIR, ...]
     visibility_tracks: tuple[ComponentVisibilityTrackIR, ...]
     motion_state_hash: str

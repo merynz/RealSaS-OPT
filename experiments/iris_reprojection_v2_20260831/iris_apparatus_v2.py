@@ -11,7 +11,7 @@ from torch import nn
 from .dinov2_foundation_v2 import (
     DINOv2FoundationAuthorityV2,
     DINOv2LoadedAuthorityV2,
-    extract_dinov2_s_patch_map_v2,
+    extract_dinov2_s_patch_map_flat_v2,
     load_exact_dinov2_s_v2,
 )
 from .model_v2 import IrisReprojectionV2, IrisReprojectionOutputV2
@@ -32,6 +32,7 @@ class IrisFoundationRuntimeSealV2:
     output_dim: int
     patch_grid_hw: tuple[int, int]
     preprocessing_id: str
+    foundation_view_chunk: int
     schema: str = "RealSaS.IRIS.FoundationRuntimeSeal.v2"
 
     @property
@@ -40,15 +41,13 @@ class IrisFoundationRuntimeSealV2:
 
 
 class IrisDINOv2SApparatusV2(nn.Module):
-    """Production IRIS V2 apparatus with exact frozen DINOv2-S authority inside it.
+    """Scientific IRIS V2 train/inference path with exact frozen DINOv2-S authority.
 
-    The trainable learner never accepts arbitrary externally supplied foundation maps
-    on this production path. Exact source/weight/preprocess validation happens before
-    construction through ``from_authority_files``. The foundation remains eval-only
-    and gradient-free while the native 1024 RGBA pyramid remains trainable.
-
-    ``IrisReprojectionV2`` remains separately testable with injected maps for synthetic
-    source tests; this apparatus is the scientific train/inference authority.
+    Synthetic source tests may instantiate ``IrisReprojectionV2`` directly with
+    injected frozen maps. Production scientific fitting/inference must use this
+    apparatus so an arbitrary or proxy foundation cannot silently enter the learner.
+    Foundation extraction is view-chunked only as an execution policy; source bytes,
+    preprocessing, model weights and per-view token semantics are unchanged.
     """
 
     def __init__(
@@ -58,17 +57,21 @@ class IrisDINOv2SApparatusV2(nn.Module):
         *,
         authority: DINOv2FoundationAuthorityV2 = DINOv2FoundationAuthorityV2(),
         loaded_authority: DINOv2LoadedAuthorityV2 | None = None,
+        foundation_view_chunk: int = 1,
     ):
         super().__init__()
         authority.validate()
         if learner.sampler.foundation_dims != (authority.embed_dim,):
             raise ValueError("IRIS learner foundation dimensions do not match exact DINO-S authority")
+        if not (1 <= int(foundation_view_chunk) <= 8):
+            raise ValueError("foundation_view_chunk must be 1..8")
         if any(p.requires_grad for p in frozen_dino.parameters()):
             raise ValueError("DINO foundation must be frozen before apparatus construction")
         self.learner = learner
         self.foundation = frozen_dino
         self.foundation.eval()
         self.authority = authority
+        self.foundation_view_chunk = int(foundation_view_chunk)
         contract = authority.feature_contract()
         if loaded_authority is not None and loaded_authority.feature_contract_hash != contract.contract_hash:
             raise ValueError("loaded DINO authority/feature contract mismatch")
@@ -77,10 +80,11 @@ class IrisDINOv2SApparatusV2(nn.Module):
             source_revision=authority.source_revision,
             weight_sha256=authority.weight_sha256,
             constructor=authority.constructor,
-            output_level=authority.output_level,
+            output_level=contract.level_ids[0],
             output_dim=authority.embed_dim,
             patch_grid_hw=authority.patch_grid_hw,
             preprocessing_id=authority.preprocessing_id,
+            foundation_view_chunk=self.foundation_view_chunk,
         )
         self.loaded_authority = loaded_authority
 
@@ -93,11 +97,18 @@ class IrisDINOv2SApparatusV2(nn.Module):
         device: torch.device | str = "cpu",
         hidden_dim: int = 192,
         max_modes: int = 3,
+        foundation_view_chunk: int = 1,
         authority: DINOv2FoundationAuthorityV2 = DINOv2FoundationAuthorityV2(),
     ) -> "IrisDINOv2SApparatusV2":
         foundation, loaded = load_exact_dinov2_s_v2(source_dir, weight_path, device=device, authority=authority)
         learner = IrisReprojectionV2((authority.embed_dim,), hidden_dim=hidden_dim, max_modes=max_modes).to(device)
-        return cls(learner, foundation, authority=authority, loaded_authority=loaded)
+        return cls(
+            learner,
+            foundation,
+            authority=authority,
+            loaded_authority=loaded,
+            foundation_view_chunk=foundation_view_chunk,
+        )
 
     def train(self, mode: bool = True):
         super().train(mode)
@@ -119,14 +130,20 @@ class IrisDINOv2SApparatusV2(nn.Module):
 
     @torch.no_grad()
     def extract_foundation_maps(self, native_rgba: torch.Tensor) -> tuple[torch.Tensor, ...]:
-        # DINO consumes exact native RGB only; alpha remains separate observation/support
-        # evidence and continues through the learned native RGBA pyramid.
-        if native_rgba.ndim != 5 or native_rgba.shape[2] != 4:
+        if native_rgba.ndim != 5 or tuple(native_rgba.shape[1:3]) != (8, 4) or tuple(native_rgba.shape[-2:]) != (1024, 1024):
             raise ValueError("native_rgba shape drift")
-        rgb = native_rgba[:, :, :3]
-        patch_map = extract_dinov2_s_patch_map_v2(self.foundation, rgb)
-        if patch_map.shape[2:] != (self.authority.embed_dim, *self.authority.patch_grid_hw):
-            raise RuntimeError("exact DINO patch-map runtime contract drift")
+        B, V = native_rgba.shape[:2]
+        chunks = []
+        for start in range(0, V, self.foundation_view_chunk):
+            end = min(V, start + self.foundation_view_chunk)
+            rgb = native_rgba[:, start:end, :3].reshape(B * (end - start), 3, 1024, 1024)
+            chunk_map = extract_dinov2_s_patch_map_flat_v2(self.foundation, rgb)
+            chunk_map = chunk_map.reshape(B, end - start, self.authority.embed_dim, *self.authority.patch_grid_hw)
+            chunks.append(chunk_map)
+        patch_map = torch.cat(chunks, dim=1)
+        expected = (B, 8, self.authority.embed_dim, *self.authority.patch_grid_hw)
+        if tuple(patch_map.shape) != expected:
+            raise RuntimeError(f"exact DINO patch-map runtime contract drift:{tuple(patch_map.shape)}")
         return (patch_map.detach(),)
 
     def forward(self, images: torch.Tensor, domain: RayHypothesisDomainV2) -> IrisReprojectionOutputV2:

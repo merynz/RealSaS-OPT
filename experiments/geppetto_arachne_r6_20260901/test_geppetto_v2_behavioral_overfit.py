@@ -117,6 +117,11 @@ def _qualified_topology_is_exact(qualified, conditioning, target: GeppettoTeache
 
 
 def test_small_generic_witness_optimizes_shipping_decode_and_compiler_qualified_g() -> None:
+    # This is a scientific gate, not a stochastic training benchmark. Force the
+    # CPU witness onto deterministic kernels/single-thread reductions so repeated
+    # CI runs of the same commit have the same authority.
+    torch.set_num_threads(1)
+    torch.use_deterministic_algorithms(True)
     torch.manual_seed(20260903)
     np.random.seed(20260903)
 

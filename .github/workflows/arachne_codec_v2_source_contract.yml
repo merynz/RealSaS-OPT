@@ -13,15 +13,17 @@ on:
       - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
       - 'experiments/geppetto_arachne_r6_20260901/arachne_geometry_v2.py'
       - 'experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/arachne_tail_objective_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/eval_arachne_r6_a1_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py'
-      - 'experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
       - '.github/workflows/arachne_codec_v2_source_contract.yml'
   push:
     branches:
       - source/generic-completion-v1-20260902
+      - architecture/v4-generic-strength-source-completion-20260902
     paths:
       - 'experiments/geppetto_arachne_r6_20260901/skin_target_rebind_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
@@ -33,10 +35,11 @@ on:
       - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
       - 'experiments/geppetto_arachne_r6_20260901/arachne_geometry_v2.py'
       - 'experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/arachne_tail_objective_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/eval_arachne_r6_a1_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py'
-      - 'experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
       - '.github/workflows/arachne_codec_v2_source_contract.yml'
 
@@ -67,6 +70,7 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/conditioning_v2.py \
             experiments/geppetto_arachne_r6_20260901/arachne_geometry_v2.py \
             experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py \
+            experiments/geppetto_arachne_r6_20260901/arachne_tail_objective_v1.py \
             experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py \
             experiments/geppetto_arachne_r6_20260901/eval_arachne_r6_a1_v1.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py
@@ -74,4 +78,5 @@ jobs:
         run: |
           python -m pytest -q \
             experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py \
+            experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py

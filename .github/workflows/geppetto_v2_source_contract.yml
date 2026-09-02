@@ -4,7 +4,10 @@ on:
   pull_request:
     paths:
       - 'experiments/geppetto_arachne_r6_20260901/geppetto_*_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
       - 'experiments/geppetto_arachne_r6_20260901/training_targets_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_geppetto_r6_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/eval_geppetto_r6_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
       - '.github/workflows/geppetto_v2_source_contract.yml'
   push:
@@ -12,7 +15,10 @@ on:
       - source/generic-completion-v1-20260902
     paths:
       - 'experiments/geppetto_arachne_r6_20260901/geppetto_*_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
       - 'experiments/geppetto_arachne_r6_20260901/training_targets_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_geppetto_r6_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/eval_geppetto_r6_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
       - '.github/workflows/geppetto_v2_source_contract.yml'
 
@@ -34,10 +40,13 @@ jobs:
         run: |
           python -m py_compile \
             experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py \
+            experiments/geppetto_arachne_r6_20260901/conditioning_v2.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_candidate_v2.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_loss_v2.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_train_v2.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_eval_v2.py \
+            experiments/geppetto_arachne_r6_20260901/train_geppetto_r6_v1.py \
+            experiments/geppetto_arachne_r6_20260901/eval_geppetto_r6_v1.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_checkpoint_v2.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_cpu_capacity_v2.py \
             experiments/geppetto_arachne_r6_20260901/training_targets_v2.py

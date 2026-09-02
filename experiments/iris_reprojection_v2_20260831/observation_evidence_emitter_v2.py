@@ -45,9 +45,11 @@ def emit_observation_evidence_v2(
         groups = {}
         uncertainty = {}
         mode_ambiguity = {}
+        anchor_raster = {}
         for q in range(Q):
             av = int(domain.anchor_view[b, q].item())
             grid = tuple(map(float, domain.anchor_grid[b, q].detach().cpu().tolist()))
+            anchor_pixel = contracts[b].cameras[av].grid_to_pixel_center(grid)
             for m in range(K):
                 if not bool(modes.mode_valid[b, q, m].item()):
                     continue
@@ -61,6 +63,11 @@ def emit_observation_evidence_v2(
                 sigma = float(torch.exp(output.log_sigma[b, q, m]).item())
                 uncertainty[gid] = sigma
                 mode_ambiguity[gid] = bool(modes.ambiguous[b, q].item())
+                anchor_raster[gid] = {
+                    "view_index": av,
+                    "raster_xy": (float(anchor_pixel[0]), float(anchor_pixel[1])),
+                    "anchor_grid_xy": grid,
+                }
                 for v, cam in enumerate(contracts[b].cameras):
                     target_grid = cam.project_grid(point)
                     in_frame = bool((abs(float(target_grid[0])) <= 1.0) and (abs(float(target_grid[1])) <= 1.0))
@@ -69,9 +76,12 @@ def emit_observation_evidence_v2(
                     support = bool(in_frame and p_support >= policy.support_probability_min)
                     oid = f"IRISV2:{b:03d}:{gid}:V{v}"
                     flags = ["Q_HYPOTHESIS", "ANALYTIC_REPROJECTION"]
-                    if modes.ambiguous[b, q]: flags.append("AMBIGUOUS_RAY")
-                    if not in_frame: flags.append("OUT_OF_FRAME")
-                    if not support: flags.append("UNSUPPORTED")
+                    if modes.ambiguous[b, q]:
+                        flags.append("AMBIGUOUS_RAY")
+                    if not in_frame:
+                        flags.append("OUT_OF_FRAME")
+                    if not support:
+                        flags.append("UNSUPPORTED")
                     samples.append(ObservationSample(
                         observation_id=oid,
                         view_index=v,
@@ -95,11 +105,13 @@ def emit_observation_evidence_v2(
                 "observation_contract_hash": contracts[b].contract_hash,
                 "camera_hashes": [c.camera_hash for c in contracts[b].cameras],
                 "hypothesis_groups": groups,
+                "hypothesis_anchor_raster": anchor_raster,
                 "mode_sigma": uncertainty,
                 "ray_ambiguous": mode_ambiguity,
                 "raster_coordinate_system": "PIXEL_CENTER_XY",
                 "resolution": 1024,
                 "mechanical_authority": "FORWARD_DEPTH_SUPPORT_UNCERTAINTY_ONLY",
+                "local_relation_authority": "OBSERVED_ANCHOR_RASTER_LOCALITY_ONLY",
                 "learned_P_head": False,
                 "learned_N_head": False,
                 "full_3d_reconstruction_claim": False,

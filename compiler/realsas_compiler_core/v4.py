@@ -23,6 +23,11 @@ _ALLOWED_CAPABILITY_ACTIVATION = {"REQUIRED", "OPTIONAL", "DISABLED"}
 _ALLOWED_PROOF_STATUS = {"PASS", "FAIL", "ABSTAIN"}
 _ALLOWED_CAPABILITY_STATUS = {"PROVEN", "FAIL", "ABSTAIN", "UNPROVEN"}
 _REQUIRED_VIEWS = tuple(range(8))
+_MECHANICAL_EQUIVALENCE_CLASS = "THREE_D_EQUIVALENT_MECHANICS"
+_RENDERABLE_REPRESENTATION_CLASS = "DIRECTIONAL_2D_2P5D_RENDERABLE_SET"
+_MOTION_REPRESENTATION_CLASS = "DIRECTIONAL_2D_2P5D_PUPPET_MOTION"
+_PRODUCT_REPRESENTATION_CLASS = "DIRECTIONAL_2D_2P5D_PUPPET"
+_JOINT_TRANSFORM_SPACE = "PUPPET_LOCAL_2D_2P5D"
 
 
 def _hash_without(value, field_name: str) -> str:
@@ -78,12 +83,25 @@ def validate_qualified_skeleton_v2(skeleton: QualifiedSkeletonIRV2) -> None:
     if skeleton.skeleton_lineage_hash != qualified_skeleton_v2_lineage_hash(skeleton): raise QualificationError("SKELETON_V2_LINEAGE_HASH_MISMATCH")
 
 
+def validate_mechanical_state(value: MechanicalStateIR) -> None:
+    if value.mechanical_equivalence_class != _MECHANICAL_EQUIVALENCE_CLASS:
+        raise QualificationError("MECHANICAL_STATE_EQUIVALENCE_CLASS_MISMATCH")
+    if bool(value.full_3d_reconstruction_authority):
+        raise QualificationError("FULL_3D_RECONSTRUCTION_AUTHORITY_FORBIDDEN")
+    validate_qualified_skeleton_v2(value.skeleton)
+    if value.skin.surface_binding_hash != value.surface.geometry_lineage_hash:
+        raise QualificationError("MECHANICAL_SKIN_SURFACE_LINEAGE_MISMATCH")
+    if value.skin.skeleton_binding_hash != value.skeleton.skeleton_lineage_hash:
+        raise QualificationError("MECHANICAL_SKIN_SKELETON_LINEAGE_MISMATCH")
+    if value.mechanical_state_hash != mechanical_state_hash(value):
+        raise QualificationError("MECHANICAL_STATE_HASH_MISMATCH")
+
+
 def build_mechanical_state(surface, skeleton: QualifiedSkeletonIRV2, skin) -> MechanicalStateIR:
-    validate_qualified_skeleton_v2(skeleton)
-    if skin.surface_binding_hash != surface.geometry_lineage_hash: raise QualificationError("MECHANICAL_SKIN_SURFACE_LINEAGE_MISMATCH")
-    if skin.skeleton_binding_hash != skeleton.skeleton_lineage_hash: raise QualificationError("MECHANICAL_SKIN_SKELETON_LINEAGE_MISMATCH")
     value = MechanicalStateIR(surface, skeleton, skin, "")
-    return replace(value, mechanical_state_hash=mechanical_state_hash(value))
+    value = replace(value, mechanical_state_hash=mechanical_state_hash(value))
+    validate_mechanical_state(value)
+    return value
 
 
 def build_appearance_binding(*, target_view_index: int, mesh_binding_hash: str, camera_binding_hash: str, corner_bindings: tuple[AppearanceCornerBinding, ...], atlas_payload_hash: str = "", metadata: dict | None = None) -> AppearanceBindingIR:
@@ -178,6 +196,8 @@ def build_directional_renderable_set(directions: tuple[DirectionalRenderableIR, 
 
 
 def validate_directional_renderable_set(value: DirectionalRenderableSetIR, mechanical: MechanicalStateIR) -> None:
+    if value.representation_class != _RENDERABLE_REPRESENTATION_CLASS:
+        raise QualificationError("DIRECTIONAL_RENDERABLE_REPRESENTATION_CLASS_MISMATCH")
     if value.exact_cardinality != 8 or len(value.directions) != 8: raise QualificationError("DIRECTIONAL_RENDERABLE_SET_REQUIRES_EXACTLY_8")
     if tuple(d.view_index for d in value.directions) != _REQUIRED_VIEWS: raise QualificationError("DIRECTIONAL_RENDERABLE_SET_VIEW_ORDER_MUST_BE_0_TO_7")
     for direction in value.directions: validate_directional_renderable(direction, mechanical)
@@ -207,7 +227,7 @@ def make_single_family_e2e_capability_contract(*, base_lbs_hash: str, mesh_hash:
         CapabilityRequirement("PRESET_MOTION", "REQUIRED", preset_motion_hash, policy_hash, ("MOTION",)),
         CapabilityRequirement("RUNTIME_BACKEND", "REQUIRED", runtime_hash, policy_hash, ("RUNTIME_CONSUMPTION",)),
     )
-    return build_capability_contract("SINGLE_FAMILY_E2E_FIT_V1", requirements, metadata={"generalization_claim": False})
+    return build_capability_contract("SINGLE_FAMILY_E2E_FIT_V1", requirements, metadata={"generalization_claim": False, "full_3d_reconstruction_claim": False})
 
 
 def build_joint_track(track_id: str, clip_id: str, canonical_joint_id: str, keys: tuple[JointTransformKeyIR, ...], *, metadata: dict | None = None) -> JointTransformTrackIR:
@@ -229,14 +249,15 @@ def build_motion_state(clips: tuple[MotionClipIR, ...], joint_tracks: tuple[Join
 
 
 def _validate_joint_key(key: JointTransformKeyIR, duration_sec: float) -> None:
-    vals = (key.time_sec, *key.translation, *key.rotation_xyzw, *key.scale)
+    vals = (key.time_sec, *key.translation_xy, key.rotation_deg, *key.scale_xy, key.depth_offset)
     if any(not math.isfinite(float(v)) for v in vals): raise QualificationError("MOTION_JOINT_KEY_NONFINITE")
-    if key.time_sec < 0.0 or key.time_sec > duration_sec or any(float(s) <= 0.0 for s in key.scale): raise QualificationError("MOTION_JOINT_KEY_INVALID")
-    qnorm = math.sqrt(sum(float(q) * float(q) for q in key.rotation_xyzw))
-    if abs(qnorm - 1.0) > 1e-6: raise QualificationError("MOTION_ROTATION_QUATERNION_NOT_UNIT")
+    if key.time_sec < 0.0 or key.time_sec > duration_sec: raise QualificationError("MOTION_JOINT_KEY_INVALID_TIME")
+    if any(float(s) <= 0.0 for s in key.scale_xy): raise QualificationError("MOTION_JOINT_KEY_INVALID_SCALE")
 
 
 def validate_motion_state(value: MotionStateIR) -> None:
+    if value.representation_class != _MOTION_REPRESENTATION_CLASS:
+        raise QualificationError("MOTION_REPRESENTATION_CLASS_MISMATCH")
     clips = {clip.clip_id: clip for clip in value.clips}
     if len(clips) != len(value.clips): raise QualificationError("MOTION_DUPLICATE_CLIP_ID")
     for clip in value.clips:
@@ -248,6 +269,8 @@ def validate_motion_state(value: MotionStateIR) -> None:
         if track.clip_id not in clips: raise QualificationError("MOTION_TRACK_UNKNOWN_CLIP")
         if track.track_hash != track_hash(track): raise QualificationError("MOTION_TRACK_HASH_MISMATCH")
     for track in value.joint_tracks:
+        if track.transform_space != _JOINT_TRANSFORM_SPACE:
+            raise QualificationError("MOTION_JOINT_TRANSFORM_SPACE_MISMATCH")
         if not track.keys: raise QualificationError("MOTION_JOINT_TRACK_EMPTY")
         duration = float(clips[track.clip_id].duration_sec); times=[]
         for key in track.keys: _validate_joint_key(key, duration); times.append(float(key.time_sec))
@@ -259,8 +282,9 @@ def validate_motion_state(value: MotionStateIR) -> None:
 
 def _joint_track_has_effective_motion(track: JointTransformTrackIR) -> bool:
     if len(track.keys) < 2: return False
-    first = track.keys[0]; first_state=(first.translation, first.rotation_xyzw, first.scale)
-    return any((key.translation, key.rotation_xyzw, key.scale) != first_state for key in track.keys[1:])
+    first = track.keys[0]
+    first_state=(first.translation_xy, first.rotation_deg, first.scale_xy, first.depth_offset)
+    return any((key.translation_xy, key.rotation_deg, key.scale_xy, key.depth_offset) != first_state for key in track.keys[1:])
 
 
 def validate_motion_against_mechanical(value: MotionStateIR, mechanical: MechanicalStateIR) -> None:
@@ -271,6 +295,7 @@ def validate_motion_against_mechanical(value: MotionStateIR, mechanical: Mechani
 
 def _required_capability_ids(contract: CapabilityContractIR) -> set[str]: return {r.capability_id for r in contract.requirements if r.activation == "REQUIRED"}
 
+
 def required_proof_domains(contract: CapabilityContractIR) -> tuple[str, ...]:
     domains=set()
     for requirement in contract.requirements:
@@ -278,12 +303,21 @@ def required_proof_domains(contract: CapabilityContractIR) -> tuple[str, ...]:
     return tuple(sorted(domains))
 
 
+def validate_product_ontology(product: CanonicalPuppetGraphV3) -> None:
+    if product.representation_class != _PRODUCT_REPRESENTATION_CLASS:
+        raise QualificationError("PRODUCT_REPRESENTATION_CLASS_MISMATCH")
+    if product.mechanical_equivalence_class != _MECHANICAL_EQUIVALENCE_CLASS:
+        raise QualificationError("PRODUCT_MECHANICAL_EQUIVALENCE_CLASS_MISMATCH")
+    if bool(product.full_3d_reconstruction_authority):
+        raise QualificationError("FULL_3D_RECONSTRUCTION_AUTHORITY_FORBIDDEN")
+
+
 def assemble_product_v3(mechanical: MechanicalStateIR, directional_renderables: DirectionalRenderableSetIR, capability_contract: CapabilityContractIR, motion_state: MotionStateIR, *, parent_state_hash: str | None = None, editable_metadata: dict | None = None, runtime_policy: dict | None = None) -> CanonicalPuppetGraphV3:
-    if mechanical.mechanical_state_hash != mechanical_state_hash(mechanical): raise QualificationError("MECHANICAL_STATE_HASH_MISMATCH")
-    validate_qualified_skeleton_v2(mechanical.skeleton)
-    if mechanical.skin.surface_binding_hash != mechanical.surface.geometry_lineage_hash: raise QualificationError("MECHANICAL_SKIN_SURFACE_LINEAGE_MISMATCH")
-    if mechanical.skin.skeleton_binding_hash != mechanical.skeleton.skeleton_lineage_hash: raise QualificationError("MECHANICAL_SKIN_SKELETON_LINEAGE_MISMATCH")
-    validate_directional_renderable_set(directional_renderables, mechanical); validate_capability_contract(capability_contract); validate_motion_state(motion_state); validate_motion_against_mechanical(motion_state, mechanical)
+    validate_mechanical_state(mechanical)
+    validate_directional_renderable_set(directional_renderables, mechanical)
+    validate_capability_contract(capability_contract)
+    validate_motion_state(motion_state)
+    validate_motion_against_mechanical(motion_state, mechanical)
     required = _required_capability_ids(capability_contract)
     if "VISUAL_8_DIRECTION" in required and len(directional_renderables.directions) != 8: raise QualificationError("REQUIRED_VISUAL_8_DIRECTION_NOT_SATISFIED")
     if "PRESET_MOTION" in required:
@@ -296,21 +330,50 @@ def assemble_product_v3(mechanical: MechanicalStateIR, directional_renderables: 
         {"stage":"CAPABILITY_CONTRACT","hash":capability_contract.capability_contract_hash},
         {"stage":"MOTION_STATE","hash":motion_state.motion_state_hash},
     )
-    payload={"schema":"RealSaS.CanonicalPuppetGraph.v3","parent":parent_state_hash,"mechanical":mechanical.mechanical_state_hash,"directional_visual":directional_renderables.directional_visual_state_hash,"capability_contract":capability_contract.capability_contract_hash,"motion":motion_state.motion_state_hash,"ledger":ledger,"editable":editable_metadata or {},"runtime_policy":runtime_policy or {}}
+    policy = dict(runtime_policy or {})
+    if policy.get("full_3d_reconstruction_authority") is True:
+        raise QualificationError("FULL_3D_RECONSTRUCTION_RUNTIME_POLICY_FORBIDDEN")
+    policy["representation_class"] = _PRODUCT_REPRESENTATION_CLASS
+    policy["mechanical_equivalence_class"] = _MECHANICAL_EQUIVALENCE_CLASS
+    policy["full_3d_reconstruction_authority"] = False
+    payload={
+        "schema":"RealSaS.CanonicalPuppetGraph.v3",
+        "representation_class":_PRODUCT_REPRESENTATION_CLASS,
+        "mechanical_equivalence_class":_MECHANICAL_EQUIVALENCE_CLASS,
+        "full_3d_reconstruction_authority":False,
+        "parent":parent_state_hash,
+        "mechanical":mechanical.mechanical_state_hash,
+        "directional_visual":directional_renderables.directional_visual_state_hash,
+        "capability_contract":capability_contract.capability_contract_hash,
+        "motion":motion_state.motion_state_hash,
+        "ledger":ledger,
+        "editable":editable_metadata or {},
+        "runtime_policy":policy,
+    }
     state=content_sha256(payload); lineage="PUPPETV3:"+content_sha256({"genesis":state,"parent":parent_state_hash})[:24]
-    return CanonicalPuppetGraphV3(lineage,state,parent_state_hash,mechanical,directional_renderables,capability_contract,motion_state,mechanical.mechanical_state_hash,directional_renderables.directional_visual_state_hash,motion_state.motion_state_hash,capability_contract.capability_contract_hash,ledger,editable_metadata or {},runtime_policy or {})
+    product = CanonicalPuppetGraphV3(
+        lineage,state,parent_state_hash,mechanical,directional_renderables,capability_contract,motion_state,
+        mechanical.mechanical_state_hash,directional_renderables.directional_visual_state_hash,
+        motion_state.motion_state_hash,capability_contract.capability_contract_hash,ledger,
+        editable_metadata or {},policy,
+    )
+    validate_product_ontology(product)
+    return product
 
 
 def bind_proof_plan(product: CanonicalPuppetGraphV3, *, proof_domain: str, operator_policy_hashes: tuple[str, ...], probe_specification: dict) -> ProofPlanIR:
+    validate_product_ontology(product)
     value=ProofPlanIR(product.product_state_hash,proof_domain,operator_policy_hashes,probe_specification,""); return replace(value,proof_plan_hash=proof_plan_hash(value))
 
 
 def bind_measurement_report(product: CanonicalPuppetGraphV3, plan: ProofPlanIR, *, measurements: dict) -> MeasurementReportIR:
+    validate_product_ontology(product)
     if plan.source_product_state_hash != product.product_state_hash: raise QualificationError("STALE_PROOF_PLAN")
     value=MeasurementReportIR(product.product_state_hash,plan.proof_plan_hash,measurements,""); return replace(value,measurement_report_hash=measurement_report_hash(value))
 
 
 def bind_domain_proof(product: CanonicalPuppetGraphV3, plan: ProofPlanIR, measurements: MeasurementReportIR, *, status: str, failure_signatures: tuple[dict, ...] = (), owner_attribution: tuple[dict, ...] = (), metadata: dict | None = None) -> DomainProofReportIR:
+    validate_product_ontology(product)
     if status not in _ALLOWED_PROOF_STATUS: raise QualificationError("INVALID_PROOF_STATUS")
     if plan.source_product_state_hash != product.product_state_hash or measurements.source_product_state_hash != product.product_state_hash: raise QualificationError("STALE_PROOF_INPUT")
     if measurements.proof_plan_hash != plan.proof_plan_hash: raise QualificationError("PROOF_MEASUREMENT_PLAN_MISMATCH")
@@ -319,6 +382,7 @@ def bind_domain_proof(product: CanonicalPuppetGraphV3, plan: ProofPlanIR, measur
 
 
 def bind_product_proof_bundle(product: CanonicalPuppetGraphV3, reports: tuple[DomainProofReportIR, ...], *, metadata: dict | None = None) -> ProductProofBundleIR:
+    validate_product_ontology(product)
     required=required_proof_domains(product.capability_contract); by_domain={}
     for report in reports:
         if report.source_product_state_hash != product.product_state_hash: raise QualificationError("STALE_DOMAIN_PROOF")
@@ -335,12 +399,14 @@ def bind_product_proof_bundle(product: CanonicalPuppetGraphV3, reports: tuple[Do
 
 
 def require_current_proof_bundle(product: CanonicalPuppetGraphV3, bundle: ProductProofBundleIR, *, require_pass: bool = False) -> None:
+    validate_product_ontology(product)
     if bundle.source_product_state_hash != product.product_state_hash: raise QualificationError("STALE_PRODUCT_PROOF_BUNDLE")
     if bundle.proof_bundle_hash != proof_bundle_hash(bundle): raise QualificationError("PRODUCT_PROOF_BUNDLE_HASH_MISMATCH")
     if require_pass and bundle.overall_status != "PASS": raise QualificationError("RUNTIME_REQUIRES_PASS_PRODUCT_PROOF_BUNDLE")
 
 
 def qualify_capability(product: CanonicalPuppetGraphV3, capability_id: str, *, status: str, proof_report_hashes: tuple[str, ...], metadata: dict | None = None) -> CapabilityQualificationIR:
+    validate_product_ontology(product)
     if status not in _ALLOWED_CAPABILITY_STATUS: raise QualificationError("INVALID_CAPABILITY_QUALIFICATION_STATUS")
     if capability_id not in {r.capability_id for r in product.capability_contract.requirements}: raise QualificationError("UNKNOWN_CAPABILITY_ID")
     value=CapabilityQualificationIR(product.product_state_hash,capability_id,status,proof_report_hashes,"",metadata=metadata or {})
@@ -348,6 +414,15 @@ def qualify_capability(product: CanonicalPuppetGraphV3, capability_id: str, *, s
 
 
 def project_runtime_package_v3(product: CanonicalPuppetGraphV3, proof_bundle: ProductProofBundleIR, *, manifest: dict, runtime_payload_ref: str) -> RuntimePackageIR:
+    validate_product_ontology(product)
     require_current_proof_bundle(product,proof_bundle,require_pass=True)
-    payload=dict(manifest); payload["source_product_state_hash"]=product.product_state_hash; payload["source_proof_hash"]=proof_bundle.proof_bundle_hash; payload["canonical_product_schema"]=product.schema_version
+    payload=dict(manifest)
+    if payload.get("full_3d_reconstruction_authority") is True:
+        raise QualificationError("FULL_3D_RECONSTRUCTION_RUNTIME_MANIFEST_FORBIDDEN")
+    payload["source_product_state_hash"]=product.product_state_hash
+    payload["source_proof_hash"]=proof_bundle.proof_bundle_hash
+    payload["canonical_product_schema"]=product.schema_version
+    payload["representation_class"]=_PRODUCT_REPRESENTATION_CLASS
+    payload["mechanical_equivalence_class"]=_MECHANICAL_EQUIVALENCE_CLASS
+    payload["full_3d_reconstruction_authority"]=False
     return RuntimePackageIR(product.product_state_hash,proof_bundle.proof_bundle_hash,payload,runtime_payload_ref)

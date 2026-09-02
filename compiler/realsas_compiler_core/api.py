@@ -10,23 +10,27 @@ from .mesh_binding import (
 )
 from .product import assemble_product, assemble_product_v2, bind_proof, require_current_proof, project_runtime_package
 from .v4 import (
-    upgrade_qualified_skeleton_v2, validate_qualified_skeleton_v2, build_mechanical_state,
+    upgrade_qualified_skeleton_v2, validate_qualified_skeleton_v2,
+    validate_mechanical_state, build_mechanical_state,
     build_appearance_binding, validate_appearance_binding, qualify_visual_completion,
     build_renderable_component, validate_renderable_component, build_directional_renderable,
     validate_directional_renderable, build_directional_renderable_set,
     validate_directional_renderable_set, build_capability_contract, validate_capability_contract,
     make_single_family_e2e_capability_contract, build_joint_track, build_order_track, build_visibility_track,
-    build_motion_state, validate_motion_state, required_proof_domains, assemble_product_v3,
+    build_motion_state, validate_motion_state, required_proof_domains,
+    validate_product_ontology, assemble_product_v3,
     bind_proof_plan, bind_measurement_report, bind_domain_proof, bind_product_proof_bundle,
     require_current_proof_bundle, qualify_capability, project_runtime_package_v3,
 )
 from .bundle_routes import write_typed_artifact, route_for
 
+
 class CompilerFacade:
     """Single current programmatic entrypoint for compiler qualification.
 
     V1/V2 compatibility remains available, but V4 composition authority terminates
-    in CanonicalPuppetGraph.v3 + ProductProofBundleIR.
+    in a directional 2D/2.5D CanonicalPuppetGraph.v3 + ProductProofBundleIR.
+    World/camera-space mechanical evidence never implies full-3D reconstruction authority.
     """
     build_surface_from_persistence=staticmethod(build_surface_from_persistence)
     rigging_surface_from_d2_arrays=staticmethod(rigging_surface_from_d2_arrays)
@@ -51,6 +55,7 @@ class CompilerFacade:
 
     upgrade_qualified_skeleton_v2=staticmethod(upgrade_qualified_skeleton_v2)
     validate_qualified_skeleton_v2=staticmethod(validate_qualified_skeleton_v2)
+    validate_mechanical_state=staticmethod(validate_mechanical_state)
     build_mechanical_state=staticmethod(build_mechanical_state)
     build_appearance_binding=staticmethod(build_appearance_binding)
     validate_appearance_binding=staticmethod(validate_appearance_binding)
@@ -70,6 +75,7 @@ class CompilerFacade:
     build_motion_state=staticmethod(build_motion_state)
     validate_motion_state=staticmethod(validate_motion_state)
     required_proof_domains=staticmethod(required_proof_domains)
+    validate_product_ontology=staticmethod(validate_product_ontology)
     assemble_product_v3=staticmethod(assemble_product_v3)
     bind_proof_plan=staticmethod(bind_proof_plan)
     bind_measurement_report=staticmethod(bind_measurement_report)

@@ -1,18 +1,25 @@
 from __future__ import annotations
 
 import math
+import pytest
 import torch
+from torch import nn
 
+from experiments.iris_reprojection_v2_20260831.depth_output_head_v2 import DepthOutputV2
 from experiments.iris_reprojection_v2_20260831.dinov2_foundation_v2 import (
     DINOv2FoundationAuthorityV2,
     DINO_SOURCE_REVISION,
     DINO_S_WEIGHT_SHA256,
 )
-from experiments.iris_reprojection_v2_20260831.evidence_field_v2 import EvidenceFieldV2
+from experiments.iris_reprojection_v2_20260831.evidence_field_v2 import EvidenceFieldV2, EvidenceFieldOutputV2
+from experiments.iris_reprojection_v2_20260831.eval_v2 import iris_v2_scientific_metrics
+from experiments.iris_reprojection_v2_20260831.iris_apparatus_v2 import IrisDINOv2SApparatusV2
+from experiments.iris_reprojection_v2_20260831.model_v2 import IrisReprojectionV2, IrisReprojectionOutputV2
 from experiments.iris_reprojection_v2_20260831.q_descriptor_sampler_v2 import NativeResolutionPyramidV2
-from experiments.iris_reprojection_v2_20260831.q_domain_v2 import pixel_center_grid_v2
+from experiments.iris_reprojection_v2_20260831.q_domain_v2 import RayHypothesisDomainV2, pixel_center_grid_v2
 from experiments.iris_reprojection_v2_20260831.q_spatial_graph_v2 import build_anchor_neighbor_graph_v2
-from experiments.iris_reprojection_v2_20260831.train_v2 import _multitarget_mode_nll
+from experiments.iris_reprojection_v2_20260831.ray_modes_v2 import RayModesV2
+from experiments.iris_reprojection_v2_20260831.train_v2 import _multitarget_mode_nll, train_step_production_v2
 from experiments.iris_reprojection_v2_20260831.world_regularizer_v2 import isotropic_world_regularizer_v2
 
 
@@ -31,6 +38,37 @@ def test_exact_dino_foundation_authority_is_frozen_and_fail_closed_contract():
     assert contract.level_dims == (384,)
     assert "WHOLE1024_TO518" in contract.preprocessing_id
     assert "TORCHVISION_TF_RESIZE_BICUBIC_AA" in contract.preprocessing_id
+
+
+def test_production_apparatus_binds_frozen_foundation_and_bounded_view_chunks():
+    class FrozenFakeDINO(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.marker = nn.Parameter(torch.zeros(()), requires_grad=False)
+
+    learner = IrisReprojectionV2((384,), hidden_dim=24, max_modes=3)
+    apparatus = IrisDINOv2SApparatusV2(learner, FrozenFakeDINO(), foundation_view_chunk=2)
+    assert apparatus.runtime_seal.output_level == "x_norm_patchtokens"
+    assert apparatus.runtime_seal.output_dim == 384
+    assert apparatus.runtime_seal.patch_grid_hw == (37, 37)
+    assert apparatus.runtime_seal.foundation_view_chunk == 2
+    assert all(not p.requires_grad for p in apparatus.foundation.parameters())
+    apparatus.train(True)
+    assert apparatus.foundation.training is False
+    assert tuple(apparatus.learner.sampler.foundation_dims) == (384,)
+
+
+def test_production_train_entrypoint_rejects_arbitrary_foundation_injection_before_step():
+    class DummyApparatus:
+        runtime_seal = object()
+        source_contract_hash = "sealed"
+
+    with pytest.raises(ValueError, match="forbids caller-supplied foundation_maps"):
+        train_step_production_v2(
+            DummyApparatus(),
+            optimizer=None,
+            batch={"foundation_maps": (torch.zeros(1),)},
+        )
 
 
 def test_native_pyramid_preserves_preregistered_five_scale_capacity():
@@ -60,7 +98,6 @@ def _grid(xs, ys):
 
 
 def test_sparse_anchor_graph_is_enumeration_equivariant_and_not_q_index_adjacency():
-    # Four rays on an 8-pixel lattice, deliberately enumerated in non-raster order.
     g = _grid([100, 108, 100, 108], [100, 108, 108, 100])
     valid = torch.ones((1, 4), dtype=torch.bool)
     idx, mask = build_anchor_neighbor_graph_v2(g, valid, max_neighbors=8)
@@ -87,6 +124,63 @@ def test_multitarget_mode_objective_rewards_coverage_of_both_ray_intersections()
     both = torch.full((1, 1, 9), -8.0); both[..., 2] = 5.0; both[..., 6] = 5.0
     one = torch.full((1, 1, 9), -8.0); one[..., 2] = 5.0
     assert _multitarget_mode_nll(both, depth_values, teacher, valid) < _multitarget_mode_nll(one, depth_values, teacher, valid)
+
+
+def test_scientific_eval_reports_multimodal_tail_support_uncertainty_and_world_metrics():
+    B, Q, D, K, H = 1, 2, 5, 2, 6
+    depth_values = torch.tensor([[[0.0, 0.25, 0.5, 0.75, 1.0], [0.0, 0.25, 0.5, 0.75, 1.0]]])
+    q_points = torch.zeros(B, Q, D, 3)
+    q_points[..., 0] = torch.tensor([0.0, 1.0]).view(1, Q, 1)
+    q_points[..., 2] = depth_values
+    candidate_valid = torch.ones(B, Q, D, dtype=torch.bool)
+    domain = RayHypothesisDomainV2(
+        anchor_view=torch.zeros(B, Q, dtype=torch.long),
+        anchor_grid=torch.zeros(B, Q, 2),
+        depth_values=depth_values,
+        q_points=q_points,
+        projected_grid=torch.zeros(B, Q, D, 8, 2),
+        projected_depth=torch.zeros(B, Q, D, 8),
+        in_frame=torch.ones(B, Q, D, 8, dtype=torch.bool),
+        foreground_support=torch.ones(B, Q, D, 8, dtype=torch.bool),
+        candidate_valid=candidate_valid,
+        contract_hashes=("synthetic",),
+    )
+    field = EvidenceFieldOutputV2(
+        score_logits=torch.tensor([[[0.0, 5.0, 0.0, 4.0, 0.0], [0.0, 4.0, 0.0, 5.0, 0.0]]]),
+        hidden=torch.zeros(B, Q, D, H),
+        support_fraction=torch.ones(B, Q, D),
+        neighbor_indices=torch.tensor([[[1], [0]]]),
+        neighbor_mask=torch.ones(B, Q, 1, dtype=torch.bool),
+    )
+    modes = RayModesV2(
+        mode_indices=torch.tensor([[[1, 3], [3, 1]]]),
+        mode_scores=torch.ones(B, Q, K),
+        mode_probabilities=torch.full((B, Q, K), 0.5),
+        mode_valid=torch.ones(B, Q, K, dtype=torch.bool),
+        ambiguous=torch.ones(B, Q, dtype=torch.bool),
+    )
+    refined = torch.tensor([[[0.25, 0.75], [0.75, 0.25]]])
+    depth_output = DepthOutputV2(
+        support_logits=torch.full((B, Q, K), 5.0),
+        log_sigma=torch.full((B, Q, K), -2.0),
+        support_probability=torch.full((B, Q, K), 0.95),
+    )
+    output = IrisReprojectionOutputV2(field, modes, refined, depth_output)
+    teacher_depth = torch.tensor([[[0.25, 0.75], [0.25, 0.75]]])
+    teacher_support = torch.ones_like(teacher_depth, dtype=torch.bool)
+    metrics = iris_v2_scientific_metrics(output, domain, teacher_depth, teacher_support)
+    for key in (
+        "coverage_p95_abs",
+        "coverage_tail_mean",
+        "teacher_mode_recall_at_1p5_spacing",
+        "support_f1",
+        "uncertainty_mean_abs_z",
+        "uncertainty_coverage_1sigma",
+        "world_consistency_regularizer",
+    ):
+        assert key in metrics and math.isfinite(metrics[key])
+    assert metrics["coverage_mae"] == 0.0
+    assert metrics["teacher_mode_recall_at_1p5_spacing"] == 1.0
 
 
 def test_world_regularizer_is_q_permutation_rotation_and_scale_invariant():

@@ -1,56 +1,29 @@
 {
   "schema": "RealSaS.ArchitectureFreezeSeal.v1",
   "date": "2026-09-02",
-  "status": "PASS_ARCHITECTURE_FROZEN",
+  "status": "INVALIDATED_PENDING_REFREEZE",
   "rule": "ARCHITECTURE_FIRST__FAMILY_SELECTION_ONLY_AFTER_EXPLICIT_FREEZE_SEAL",
-  "generic_source_count": 38,
-  "generic_source_fingerprint_sha256": "f9c2f346f8f2c2a528bf4b23f777c35e73fdbbbede8313d2650be3d7fa33bc75",
-  "freeze_eligibility": {
-    "status": "PASS_SOURCE_ELIGIBLE_FOR_FREEZE",
-    "violations": [],
-    "family_literal_scan": "PASS_TOKEN_AWARE",
-    "dino_token_parity_authority": "PASS_RECOVERED_HISTORICAL_TOKEN_PARITY_AUTHORITY"
-  },
-  "ci_evidence": {
-    "workflow": "architecture-freeze-source-gate",
-    "workflow_run_id": 33651535330,
-    "head_sha": "86069b10f84e8b89c5310ef2f1ef461c5fb75f0f",
-    "compile_current_learner_source": "PASS",
-    "freeze_eligibility": "PASS",
-    "aggregate_generic_strength_tests": "PASS_41_OF_41",
-    "pre_freeze_family_selection_lock": "PASS_BLOCKED_AS_REQUIRED"
-  },
-  "frozen_scientific_boundaries": {
-    "iris": {
-      "foundation": "EXACT_FROZEN_DINOV2_S_AUTHORITY",
-      "foundation_source_revision": "7764ea0f912e53c92e82eb78a2a1631e92725fc8",
-      "foundation_weight_sha256": "b938bf1bc15cd2ec0feacfe3a1bb553fe8ea9ca46a7e1d8d00217f29aef60cd9",
-      "foundation_output": "x_norm_patchtokens_37x37x384",
-      "native_path": "LEARNED_5_SCALE_RGBA_1024_512_256_128_64",
-      "evidence": "RAY_REASONING_PLUS_SPARSE_SPATIAL_WORLD_MESSAGE_PASSING",
-      "multimodality": "MULTI_RAY_MODE_PRESERVING",
-      "training": "EXACT_FOUNDATION_BOUND_APPARATUS__CALLER_FOUNDATION_INJECTION_FORBIDDEN",
-      "evaluation": "MULTIMODAL_COVERAGE_TAIL_SUPPORT_UNCERTAINTY_WORLD_CONSISTENCY"
-    },
-    "geppetto": {
-      "cardinality": "DYNAMIC_SURFACE_SUPPORT_BOUNDED__NO_PRODUCT_MAX_K",
-      "locus": "MULTIMODAL_CONTINUOUS_MIXTURE",
-      "representative": "MAP_MODE",
-      "parent_relation": "CHUNKED_ALL_PAIRS_SOFT_EVIDENCE",
-      "compiler_authority": "CANONICAL_IDS_ROOT_TREE_REMAIN_COMPILER_OWNED"
-    },
-    "arachne": {
-      "hard_tail": "BASE_A1_OBJECTIVE_NOT_POST_HOC_REMEDIATION",
-      "deformation": "VERIFIED_LBS_CONSUMER_ALIGNED",
-      "evaluation": "MEAN_P95_TAIL_DEFORMATION_UNCERTAINTY"
-    }
-  },
-  "family_selection_authorized": true,
+  "family_selection_authorized": false,
   "fit_family_selected_at_freeze": false,
   "fit_family_id_at_freeze": null,
   "scientific_fit_steps_at_freeze": 0,
   "generalization_claim": false,
   "one_family_product_pass": false,
   "full_3d_reconstruction_claim": false,
+  "invalidation": {
+    "reason": "REAL_LEARNED_E2E_PREFLIGHT_FOUND_MISSING_IRIS_SURFACE_LOCAL_RELATIONS_REQUIRED_BY_MWB2",
+    "previous_frozen_generic_source_fingerprint_sha256": "f9c2f346f8f2c2a528bf4b23f777c35e73fdbbbede8313d2650be3d7fa33bc75",
+    "previous_freeze_ci_run_id": 33651535330,
+    "previous_freeze_ci_head_sha": "86069b10f84e8b89c5310ef2f1ef461c5fb75f0",
+    "selection_from_previous_freeze_is_historical_only": true,
+    "optimizer_steps_since_previous_freeze": 0
+  },
+  "required_before_refreeze": [
+    "GENERIC_OBSERVED_SURFACE_LOCAL_RELATION_SOURCE_PASS",
+    "MWB2_REAL_CONSUMER_RELATION_GATE_PASS",
+    "AGGREGATE_GENERIC_STRENGTH_CI_PASS",
+    "NEW_GENERIC_SOURCE_FINGERPRINT_SEALED",
+    "FAMILY_SELECTION_RERUN_AFTER_NEW_FREEZE"
+  ],
   "post_freeze_rule": "ANY_CHANGE_TO_FROZEN_GENERIC_SOURCE_INVALIDATES_FAMILY_SELECTION_AUTHORITY_UNTIL_A_NEW_ARCHITECTURE_FREEZE"
 }

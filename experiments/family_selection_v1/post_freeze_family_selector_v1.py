@@ -174,7 +174,7 @@ def select_prefit_families_v1(
     )
     candidate_payload = [asdict(row) for row in sorted(rows, key=lambda r: r.asset_id)]
     candidate_set_sha = _canonical_hash(candidate_payload)
-    selection_payload = {
+    selection_hash_payload = {
         "schema": SCHEMA,
         "policy_id": POLICY_ID,
         "architecture_freeze_fingerprint_sha256": seal["generic_source_fingerprint_sha256"],
@@ -186,10 +186,19 @@ def select_prefit_families_v1(
         "fit_metrics_consumed": False,
         "selection_basis": "SEALED_PREFIT_ELIGIBILITY_PLUS_DOMAIN_SEPARATED_SHA256_ORDER",
     }
-    selection_sha = _canonical_hash(selection_payload)
+    selection_sha = _canonical_hash(selection_hash_payload)
     return FamilySelectionResultV1(
-        **selection_payload,
+        schema=SCHEMA,
+        policy_id=POLICY_ID,
+        architecture_freeze_fingerprint_sha256=seal["generic_source_fingerprint_sha256"],
+        requested_count=count,
+        eligible_count=len(eligible),
+        selected=selected,
+        candidate_set_sha256=candidate_set_sha,
         selection_sha256=selection_sha,
+        scientific_fit_steps_before_selection=0,
+        fit_metrics_consumed=False,
+        selection_basis="SEALED_PREFIT_ELIGIBILITY_PLUS_DOMAIN_SEPARATED_SHA256_ORDER",
     )
 
 

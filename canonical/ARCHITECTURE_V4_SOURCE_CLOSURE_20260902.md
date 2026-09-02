@@ -1,6 +1,6 @@
 # RealSaS — Architecture V4 Source Closure — 2026-09-02
 
-**Status:** `SOURCE_CONTRACT_IMPLEMENTED__ONTOLOGY_CORRECTED__TERMINOLOGY_AUDITED__REPOSITORY_AUTHORITY_ALIGNED__PENDING_SECOND_CI_AND_MERGE`
+**Status:** `SOURCE_CONTRACT_IMPLEMENTED__ONTOLOGY_CORRECTED__TERMINOLOGY_AUDITED__REPOSITORY_AUTHORITY_ALIGNED__SECOND_CI_PASS__READY_TO_MERGE`
 
 This closure records the source-level implementation of the final architecture audit decisions and the explicit correction of the 3D-equivalent/product boundary before merge.
 
@@ -46,6 +46,18 @@ Terminology audit rule: `reconstruction` may describe a representation/field rec
 - runtime projection requires exact PASS bundle;
 - support=False cannot influence fused surface nodes;
 - full 3D reconstruction authority is fail-closed forbidden in V4 product/runtime.
+
+## CI evidence
+
+Corrected ontology head passed:
+
+- `architecture-v4-contract`: PASS;
+- `consumer-interlock-v0`: PASS;
+- `consumer-coupling-probe-v1`: PASS;
+- `mwb0-typed-seam-v1`: PASS;
+- `mwb1-identity-subset-v1`: PASS.
+
+The architecture regression includes explicit checks that canonical puppet motion has no quaternion/3D rigid-transform fields and that full-3D reconstruction authority cannot be promoted into V4 product/runtime.
 
 ## Compatibility
 

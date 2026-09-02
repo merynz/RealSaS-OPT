@@ -112,7 +112,7 @@ This proves E2E existence/fit only. It is not a generalization claim and not a f
 2. Port/qualify exact robust DTB-ND1 local operator bytes into current source.
 3. Close one-family IRIS fit to downstream mechanical tolerance.
 4. Freeze/implement Geppetto adapter + candidate; fit the family; route through Compiler qualification.
-5. Freeze SkinFieldCodec and pass one-family reconstruction/deformation ceiling.
+5. Freeze SkinFieldCodec and pass one-family field-reconstruction/deformation ceiling.
 6. Freeze/implement Arachne only after codec PASS; route through Compiler skin qualification.
 7. Freeze MWB-2 local support/topology policy and construct product-quality directional M/B.
 8. Compile appearance and only necessary qualified completion.

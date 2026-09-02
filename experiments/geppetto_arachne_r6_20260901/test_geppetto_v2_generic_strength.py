@@ -30,16 +30,30 @@ def _forward(model: GeppettoCandidateV2, n: int = 7, k: int = 5):
     return model(f, p, m, decode_steps=k)
 
 
-def test_control_locus_is_multimodal_not_single_gaussian_contract():
+def test_control_locus_is_multimodal_and_primary_is_real_map_hypothesis():
     model = _model()
     out = _forward(model)
     assert model.config.position_modes == 3
     assert out.position_modes_normalized.shape == (1, 5, 3, 3)
     assert out.position_mode_log_sigma.shape == (1, 5, 3, 3)
     assert out.position_mode_logits.shape == (1, 5, 3)
-    probability = torch.softmax(out.position_mode_logits, dim=-1)
-    representative = (probability[..., None] * out.position_modes_normalized).sum(dim=2)
+    idx = torch.argmax(out.position_mode_logits, dim=-1)
+    gather3 = idx[..., None, None].expand(1, 5, 1, 3)
+    representative = torch.gather(out.position_modes_normalized, 2, gather3).squeeze(2)
+    representative_sigma = torch.gather(out.position_mode_log_sigma, 2, gather3).squeeze(2)
     torch.testing.assert_close(out.positions_normalized, representative)
+    torch.testing.assert_close(out.position_log_sigma, representative_sigma)
+
+
+def test_map_representative_does_not_create_nonexistent_midpoint():
+    modes = torch.tensor([[[-1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.2, 0.4, 0.0]]])
+    sigma = torch.zeros_like(modes)
+    logits = torch.tensor([[5.0, 4.0, -3.0]])
+    pos, _, idx = GeppettoCandidateV2._map_representative(modes, sigma, logits)
+    assert int(idx.item()) == 0
+    torch.testing.assert_close(pos, torch.tensor([[-1.0, 0.0, 0.0]]))
+    mixture_mean = (torch.softmax(logits, dim=-1)[..., None] * modes).sum(dim=1)
+    assert not torch.allclose(pos, mixture_mean)
 
 
 def test_mixture_position_nll_can_explain_alternative_valid_locus():

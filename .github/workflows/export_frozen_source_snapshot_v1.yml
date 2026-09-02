@@ -1,0 +1,31 @@
+name: Export Frozen Source Snapshot V1
+on:
+  push:
+    branches:
+      - tooling/export-frozen-source-7f39
+    paths:
+      - '.github/workflows/export_frozen_source_snapshot_v1.yml'
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Export exact frozen source
+        shell: bash
+        run: |
+          set -euo pipefail
+          FROZEN=7f39a846ad05f91560836026e5ef6dfbc74dc731
+          git cat-file -e "${FROZEN}^{commit}"
+          git archive --format=zip --output=RealSaS_OPT_7f39a846ad05_SOURCE.zip "$FROZEN"
+          sha256sum RealSaS_OPT_7f39a846ad05_SOURCE.zip > RealSaS_OPT_7f39a846ad05_SOURCE.zip.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: realsas-frozen-source-7f39a846ad05
+          path: |
+            RealSaS_OPT_7f39a846ad05_SOURCE.zip
+            RealSaS_OPT_7f39a846ad05_SOURCE.zip.sha256
+          if-no-files-found: error

@@ -10,7 +10,7 @@ def geppetto_cpu_capacity_probe_v2(
     *,
     surface_token_count: int = 328,
     decode_steps: int = 328,
-) -> dict[str, float | int | bool | str]:
+) -> dict[str, float | int | bool | str | None]:
     """Synthetic CPU architecture-capacity probe; performs no optimization/training."""
     if surface_token_count < 1 or decode_steps < 1 or decode_steps > surface_token_count:
         raise ValueError("invalid capacity probe cardinality")
@@ -23,6 +23,8 @@ def geppetto_cpu_capacity_probe_v2(
         attention_heads=4,
         feedforward_dim=48,
         support_topk=4,
+        position_modes=3,
+        parent_pair_chunk=32,
     )
     model = GeppettoCandidateV2(cfg).cpu().eval()
     features = torch.zeros((1, surface_token_count, 24), dtype=torch.float32)
@@ -35,6 +37,9 @@ def geppetto_cpu_capacity_probe_v2(
     finite = all(torch.isfinite(x).all().item() for x in (
         output.positions_normalized,
         output.position_log_sigma,
+        output.position_modes_normalized,
+        output.position_mode_log_sigma,
+        output.position_mode_logits,
         output.existence_logits,
         output.stop_logits,
         output.root_logits,
@@ -46,9 +51,11 @@ def geppetto_cpu_capacity_probe_v2(
         "surface_token_count": int(surface_token_count),
         "decode_steps": int(decode_steps),
         "finite": bool(finite),
+        "position_modes": int(output.position_modes_normalized.shape[2]),
         "parent_matrix_rows": int(output.parent_logits.shape[1]),
         "parent_matrix_cols": int(output.parent_logits.shape[2]),
         "support_width": int(output.support_logits.shape[2]),
+        "parent_pair_chunk": int(cfg.parent_pair_chunk),
         "elapsed_seconds": float(elapsed),
         "optimizer_steps": 0,
         "product_max_joint_count": None,

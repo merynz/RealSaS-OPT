@@ -69,3 +69,21 @@ def test_proposal_is_anonymous_soft_evidence_and_compiler_owns_canonical_ids():
 def test_checkpoint_binds_config_and_feature_contract(tmp_path):
     model=GeppettoCandidateV2(_tiny_config()); path=tmp_path/"geppetto-v2.pt"; save_geppetto_checkpoint_v2(path,model,extra_metadata={"optimizer_steps":0}); authority=load_geppetto_checkpoint_v2(path,model); assert authority["dynamic_cardinality"] is True; assert authority["product_max_joint_count"] is None; mismatch=GeppettoCandidateV2(GeppettoCandidateConfigV2(model_dim=48,knn_k=4,local_layers=1,global_layers=1,decoder_layers=1,attention_heads=4,feedforward_dim=96,support_topk=4))
     with pytest.raises(ValueError,match="config_hash"): load_geppetto_checkpoint_v2(path,mismatch)
+
+
+def test_map_mode_crossover_cannot_rewrite_later_latent_control_states():
+    cond=GeppettoConditioningAdapterV2()([_surface("LATENT",12)])
+    model=GeppettoCandidateV2(_tiny_config()).eval()
+    f=torch.tensor(cond.features,dtype=torch.float32)
+    p=torch.tensor(cond.positions_normalized,dtype=torch.float32)
+    m=torch.tensor(cond.valid_mask,dtype=torch.bool)
+    with torch.no_grad():
+        model.position_mode_logits.weight.zero_()
+        model.position_mode_logits.bias.copy_(torch.tensor([100.0,-100.0,-100.0]))
+        a=model(f,p,m,decode_steps=5)
+        model.position_mode_logits.bias.copy_(torch.tensor([-100.0,100.0,-100.0]))
+        b=model(f,p,m,decode_steps=5)
+    assert torch.argmax(a.position_mode_logits,dim=-1).eq(0).all()
+    assert torch.argmax(b.position_mode_logits,dim=-1).eq(1).all()
+    assert not torch.equal(a.positions_normalized,b.positions_normalized)
+    torch.testing.assert_close(a.control_states,b.control_states,atol=0.0,rtol=0.0)

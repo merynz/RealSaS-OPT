@@ -1,8 +1,10 @@
 # RealSaS — Architecture V4 Source Closure — 2026-09-02
 
-**Status:** `SOURCE_CONTRACT_IMPLEMENTED__ONTOLOGY_CORRECTED__TERMINOLOGY_AUDITED__REPOSITORY_AUTHORITY_ALIGNED__FINAL_HEAD_CI_PASS__READY_TO_MERGE`
+**Status:** `SOURCE_CONTRACT_IMPLEMENTED__ONTOLOGY_CORRECTED__TERMINOLOGY_AUDITED__REPOSITORY_AUTHORITY_ALIGNED__FINAL_HEAD_CI_PASS__MERGED_TO_MAIN`
 
-This closure records the source-level implementation of the final architecture audit decisions and the explicit correction of the 3D-equivalent/product boundary before merge.
+**Main merge commit:** `f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee`
+
+This closure records the source-level implementation and mainline promotion of the final architecture audit decisions, including the explicit correction of the 3D-equivalent/product boundary before merge.
 
 ## Implemented source contract
 
@@ -49,7 +51,7 @@ Terminology audit rule: `reconstruction` may describe a representation/field rec
 
 ## CI evidence
 
-Final corrected ontology head passed:
+Final corrected source head passed:
 
 - `architecture-v4-contract`: PASS;
 - `consumer-interlock-v0`: PASS;

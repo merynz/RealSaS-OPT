@@ -10,6 +10,7 @@ on:
       - 'experiments/geppetto_arachne_r6_20260901/eval_geppetto_r6_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py'
       - '.github/workflows/geppetto_v2_source_contract.yml'
   push:
     branches:
@@ -23,6 +24,7 @@ on:
       - 'experiments/geppetto_arachne_r6_20260901/eval_geppetto_r6_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py'
       - '.github/workflows/geppetto_v2_source_contract.yml'
 
 jobs:
@@ -52,9 +54,11 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/eval_geppetto_r6_v1.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_checkpoint_v2.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_cpu_capacity_v2.py \
-            experiments/geppetto_arachne_r6_20260901/training_targets_v2.py
-      - name: Run Geppetto V2 source gates
+            experiments/geppetto_arachne_r6_20260901/training_targets_v2.py \
+            experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py
+      - name: Run Geppetto V2 source and behavioral gates
         run: |
           python -m pytest -q \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py \
-            experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py
+            experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py \
+            experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py

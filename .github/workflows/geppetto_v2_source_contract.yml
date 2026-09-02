@@ -1,0 +1,46 @@
+name: geppetto-v2-source-contract
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/geppetto_arachne_r6_20260901/geppetto_*_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/training_targets_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
+      - '.github/workflows/geppetto_v2_source_contract.yml'
+  push:
+    branches:
+      - source/generic-completion-v1-20260902
+    paths:
+      - 'experiments/geppetto_arachne_r6_20260901/geppetto_*_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/training_targets_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
+      - '.github/workflows/geppetto_v2_source_contract.yml'
+
+jobs:
+  geppetto-v2-source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy pytest
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Compile Geppetto V2 source
+        run: |
+          python -m py_compile \
+            experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py \
+            experiments/geppetto_arachne_r6_20260901/geppetto_candidate_v2.py \
+            experiments/geppetto_arachne_r6_20260901/geppetto_loss_v2.py \
+            experiments/geppetto_arachne_r6_20260901/geppetto_train_v2.py \
+            experiments/geppetto_arachne_r6_20260901/geppetto_eval_v2.py \
+            experiments/geppetto_arachne_r6_20260901/geppetto_checkpoint_v2.py \
+            experiments/geppetto_arachne_r6_20260901/geppetto_cpu_capacity_v2.py \
+            experiments/geppetto_arachne_r6_20260901/training_targets_v2.py
+      - name: Run Geppetto V2 source gates
+        run: |
+          python -m pytest -q experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py

@@ -1,0 +1,25 @@
+{
+  "base_failed_step": 1024,
+  "codec_checkpoint_sha256": "ee6aa0396bea1e9f9acd7d64355909d87edd95b91395e402e9b7aa822f81ddde",
+  "criteria": {"deformation_rms_max": 0.005, "latent_nll_rule": "finite_and_lower_than_original_step0", "negative_weight_count": 0, "row_l1_mean_max": 0.05, "row_l1_p95_max": 0.15, "simplex_max": 1e-05, "uncertainty_rule": "finite"},
+  "field_accepted_remediation_step": 64,
+  "final": {"deformation_rms": 0.0001479240454500541, "latent_nll": -1.7249892950057983, "negative_weight_count": 0, "row_l1_mean": 0.009912646375596523, "row_l1_p95": 0.04755229502916336, "simplex_max_abs_error": 2.384185791015625e-07, "uncertainty_mean": 0.22724217176437378},
+  "input_sha256": "9f02cb60701232a3b4bbaa20ed83fddf18735b7521979372bd1253dce87e15ed",
+  "original_step0_latent_nll": 3.5734949111938477,
+  "remediation_lr": 0.0005,
+  "schema": "RealSaS.CPUFit.ArachneA1.TailRemediation.v1",
+  "status": "PASS_DEVELOPMENT_REMEDIATION__NOT_ORIGINAL_PREREG_PASS",
+  "tail_fraction": 0.1,
+  "tail_weight": 1.0,
+  "pass_checkpoint_sha256": "89c034595410992476714d6e516eeb412c279d6381d677b29b793a030985677d",
+  "trace": {
+    "0": {"deformation_rms": 0.0037133682053536177, "latent_nll": -0.9582170844078064, "negative_weight_count": 0, "row_l1_mean": 0.15484337508678436, "row_l1_p95": 0.7074183225631714, "simplex_max_abs_error": 2.384185791015625e-07, "stage_step": 0, "uncertainty_mean": 0.5274222493171692},
+    "64": {"deformation_rms": 0.0001479240454500541, "latent_nll": -0.8694967031478882, "negative_weight_count": 0, "row_l1_mean": 0.009912646375596523, "row_l1_p95": 0.04755229502916336, "simplex_max_abs_error": 2.384185791015625e-07, "stage_step": 64, "uncertainty_mean": 1.8587692975997925}
+  },
+  "uncertainty_trace": {
+    "0": {"latent_nll": -0.8694967031478882, "uncertainty_mean": 1.8587692975997925},
+    "32": {"latent_nll": -1.4374085664749146, "uncertainty_mean": 0.38564255833625793},
+    "64": {"latent_nll": -1.602128505706787, "uncertainty_mean": 0.2851811647415161},
+    "128": {"latent_nll": -1.7249892950057983, "uncertainty_mean": 0.22724217176437378}
+  }
+}

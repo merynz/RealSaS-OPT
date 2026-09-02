@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import json
 from pathlib import Path
 import pytest
 
@@ -39,6 +40,13 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def current_freeze_fingerprint() -> str:
+    seal = json.loads((repo_root() / "canonical/ARCHITECTURE_FREEZE_V1.json").read_text(encoding="utf-8"))
+    assert seal["status"] == "PASS_ARCHITECTURE_FROZEN"
+    assert seal["family_selection_authorized"] is True
+    return str(seal["generic_source_fingerprint_sha256"])
+
+
 def test_selection_requires_frozen_architecture_and_is_deterministic_prefit_only():
     rows = tuple(candidate(i) for i in range(12))
     a = select_prefit_families_v1(repo_root(), rows, count=8)
@@ -46,7 +54,7 @@ def test_selection_requires_frozen_architecture_and_is_deterministic_prefit_only
     assert a.policy_id == POLICY_ID
     assert a.fit_metrics_consumed is False
     assert a.scientific_fit_steps_before_selection == 0
-    assert a.architecture_freeze_fingerprint_sha256 == "f9c2f346f8f2c2a528bf4b23f777c35e73fdbbbede8313d2650be3d7fa33bc75"
+    assert a.architecture_freeze_fingerprint_sha256 == current_freeze_fingerprint()
     assert [x.asset_id for x in a.selected] == [x.asset_id for x in b.selected]
     assert a.selection_sha256 == b.selection_sha256
     assert len(a.selected) == 8

@@ -10,7 +10,6 @@ import sys
 from typing import Mapping
 
 import torch
-import torch.nn.functional as F
 
 from .foundation_adapter_v2 import FoundationFeatureContractV2
 
@@ -72,7 +71,7 @@ class DINOv2FoundationAuthorityV2:
 
     @property
     def preprocessing_id(self) -> str:
-        return "RGB_UINT8_OR_EXACT_FP01__WHOLE1024_TO518_TORCH_INTERPOLATE_BICUBIC_AA__IMAGENET_NORM__V2"
+        return "RGB_UINT8_OR_EXACT_FP01__WHOLE1024_TO518_TORCHVISION_TF_RESIZE_BICUBIC_AA__IMAGENET_NORM__V2"
 
     def feature_contract(self) -> FoundationFeatureContractV2:
         return FoundationFeatureContractV2(
@@ -95,14 +94,19 @@ class DINOv2LoadedAuthorityV2:
 
 
 def preprocess_dinov2_rgb_v2(native_rgb: torch.Tensor) -> torch.Tensor:
-    """Exact whole-canvas DINOv2 input transform used by sealed RealSaS authority.
+    """Exact whole-canvas transform from the sealed 2026-08-29 authority.
 
     Input is [B,8,3,1024,1024], either uint8 or floating point exactly in [0,1].
     Alpha is deliberately absent: support/alpha remains separate observation authority.
-    Resize uses torch interpolate bicubic+antialias, mathematically matching the sealed
-    torchvision functional operator for tensor inputs; real token parity remains the
-    final executable authority against a frozen reference tensor.
+    The resize operator is exactly torchvision.transforms.functional.resize with
+    InterpolationMode.BICUBIC and antialias=True. Token parity remains the final
+    cross-process/runtime scientific authority.
     """
+    try:
+        from torchvision.transforms import functional as TF
+        from torchvision.transforms import InterpolationMode
+    except ImportError as exc:
+        raise RuntimeError("exact DINO preprocessing requires torchvision") from exc
     if native_rgb.ndim != 5 or native_rgb.shape[1:3] != (8, 3) or tuple(native_rgb.shape[-2:]) != (1024, 1024):
         raise ValueError("DINO RGB input must be [B,8,3,1024,1024]")
     if native_rgb.dtype == torch.uint8:
@@ -115,7 +119,7 @@ def preprocess_dinov2_rgb_v2(native_rgb: torch.Tensor) -> torch.Tensor:
         raise ValueError("DINO RGB must be uint8 or floating point")
     B, V = x.shape[:2]
     flat = x.reshape(B * V, 3, 1024, 1024)
-    flat = F.interpolate(flat, size=DINO_INPUT_HW, mode="bicubic", align_corners=False, antialias=True)
+    flat = TF.resize(flat, [518, 518], interpolation=InterpolationMode.BICUBIC, antialias=True)
     mean = torch.tensor(DINO_NORMALIZE_MEAN, device=flat.device, dtype=torch.float32).view(1, 3, 1, 1)
     std = torch.tensor(DINO_NORMALIZE_STD, device=flat.device, dtype=torch.float32).view(1, 3, 1, 1)
     return ((flat - mean) / std).contiguous()
@@ -160,7 +164,6 @@ def _import_exact_dinov2(source_dir: Path):
     root = str(source_dir)
     if root not in sys.path:
         sys.path.insert(0, root)
-    # Fail closed if a different dinov2 package was already imported from elsewhere.
     loaded = sys.modules.get("dinov2")
     if loaded is not None:
         location = Path(getattr(loaded, "__file__", "")).resolve()

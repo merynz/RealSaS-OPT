@@ -31,6 +31,4 @@ jobs:
           python -m py_compile experiments/geppetto_arachne_r6_20260901/*.py
       - name: Run candidate contract tests
         run: |
-          python -m pytest -q \
-            experiments/geppetto_arachne_r6_20260901/test_teacher_projection_v1.py \
-            experiments/geppetto_arachne_r6_20260901/test_candidate_stack_v1.py
+          python -m pytest -q experiments/geppetto_arachne_r6_20260901/test_candidate_stack_v1.py

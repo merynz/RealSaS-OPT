@@ -256,7 +256,10 @@ def attach_observed_local_relations_v2(
 def compile_surface_v2(evidence: ObservationEvidenceIR, *, max_common_frame_error: float = 0.003) -> RiggingSurfaceIR:
     groups = build_persistence_groups_v2(evidence, max_common_frame_error=max_common_frame_error)
     surface = build_surface_from_persistence(evidence, groups)
-    return attach_observed_local_relations_v2(evidence, surface)
+    anchors = evidence.metadata.get("hypothesis_anchor_raster", {})
+    if isinstance(anchors, dict) and anchors:
+        surface = attach_observed_local_relations_v2(evidence, surface)
+    return surface
 
 
 def _pixel_index(sample, resolution: int) -> int | None:

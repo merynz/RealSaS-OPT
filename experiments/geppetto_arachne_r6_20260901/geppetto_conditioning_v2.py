@@ -19,6 +19,7 @@ def _hash(payload: object) -> str:
         return v
     return sha256(json.dumps(norm(payload), sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
+
 @dataclass(frozen=True)
 class GeometryNormalizationV2:
     center: tuple[float,float,float]
@@ -26,6 +27,7 @@ class GeometryNormalizationV2:
     policy: str="BBOX_CENTER_MAX_EXTENT_V2"
     def normalize(self,xyz)->np.ndarray: return (np.asarray(xyz,np.float32)-np.asarray(self.center,np.float32))/float(self.scale)
     def denormalize(self,xyz)->np.ndarray: return np.asarray(xyz,np.float32)*float(self.scale)+np.asarray(self.center,np.float32)
+
 
 @dataclass(frozen=True)
 class GeppettoConditioningBatchV2:
@@ -35,17 +37,21 @@ class GeppettoConditioningBatchV2:
     valid_mask: np.ndarray
     normalizations: tuple[GeometryNormalizationV2,...]
     source_surface_hashes: tuple[str,...]
+    local_geometry_operator_hashes: tuple[str,...]
     conditioning_hashes: tuple[str,...]
     feature_contract: tuple[str,...]
     schema_version: str="RealSaS.GeppettoConditioningBatch.v2"
 
+
 FEATURE_CONTRACT_V2=("P_norm_x","P_norm_y","P_norm_z","local_cov_eig_0","local_cov_eig_1","local_cov_eig_2","radius","N_x","N_y","N_z","N_valid","support_v0","support_v1","support_v2","support_v3","support_v4","support_v5","support_v6","support_v7","support_fraction","raster_mean_x","raster_mean_y","raster_std_x","raster_std_y")
 assert len(FEATURE_CONTRACT_V2)==24
+
 
 def _normalization(points:np.ndarray)->GeometryNormalizationV2:
     p=np.asarray(points,np.float64)
     if p.ndim!=2 or p.shape[1]!=3 or len(p)==0 or not np.isfinite(p).all(): raise ValueError("surface points must be finite non-empty [N,3]")
     lo,hi=p.min(0),p.max(0); center=(lo+hi)*0.5; scale=float(np.max(hi-lo)); scale=1.0 if scale<=1e-12 else scale; return GeometryNormalizationV2(tuple(map(float,center)),scale)
+
 
 def _covariance_spectrum(points_norm:np.ndarray,k:int=16)->np.ndarray:
     p=np.asarray(points_norm,np.float64); n=len(p); out=np.zeros((n,3),np.float32)
@@ -54,6 +60,7 @@ def _covariance_spectrum(points_norm:np.ndarray,k:int=16)->np.ndarray:
     for i in range(n):
         x=p[nn[i]]-p[i]; C=(x.T@x)/float(max(len(x),1)); ev=np.maximum(np.linalg.eigvalsh(C),0.0)[::-1]; s=float(ev.sum()); ev=ev/s if s>1e-12 else ev; out[i]=ev.astype(np.float32)
     return out
+
 
 def _normalized_raster_bindings(surface,node)->np.ndarray:
     if not node.raster_bindings: return np.zeros((0,2),np.float32)
@@ -66,6 +73,7 @@ def _normalized_raster_bindings(surface,node)->np.ndarray:
     else: raise ValueError("Geppetto V2 requires explicit raster_coordinate_system metadata")
     if not np.isfinite(g).all(): raise ValueError("non-finite raster binding")
     return g.astype(np.float32)
+
 
 def _surface_features(surface,norm:GeometryNormalizationV2):
     nodes=tuple(sorted(surface.surface_nodes,key=lambda n:n.surface_id))
@@ -86,6 +94,7 @@ def _surface_features(surface,norm:GeometryNormalizationV2):
     if not np.isfinite(feat).all(): raise ValueError("non-finite Geppetto V2 feature")
     return ids,feat,pn.astype(np.float32)
 
+
 def _pad(items:list[np.ndarray],width:int):
     m=max(len(x) for x in items); out=np.zeros((len(items),m,width),np.float32); mask=np.zeros((len(items),m),bool)
     for b,x in enumerate(items):
@@ -93,14 +102,17 @@ def _pad(items:list[np.ndarray],width:int):
         out[b,:len(x)]=x; mask[b,:len(x)]=True
     return out,mask
 
+
 class GeppettoConditioningAdapterV2:
     feature_dim=24
     def __call__(self,surfaces:Iterable)->GeppettoConditioningBatchV2:
         surfaces=tuple(surfaces)
         if not surfaces: raise ValueError("at least one surface required")
-        ids_all=[]; feat_all=[]; pos_all=[]; norms=[]; hashes=[]; cond=[]
+        ids_all=[]; feat_all=[]; pos_all=[]; norms=[]; hashes=[]; op_hashes=[]; cond=[]
         for surface in surfaces:
             source_hash=str(surface.geometry_lineage_hash)
             if not source_hash: raise ValueError("surface geometry_lineage_hash required")
-            norm=_normalization(np.asarray([n.P for n in surface.surface_nodes],np.float32)); ids,feat,pos=_surface_features(surface,norm); ids_all.append(ids); feat_all.append(feat); pos_all.append(pos); norms.append(norm); hashes.append(source_hash); cond.append(_hash({"surface":source_hash,"feature_contract":FEATURE_CONTRACT_V2,"ids":ids,"features":feat,"normalization":norm.__dict__}))
-        features,valid=_pad(feat_all,24); positions,_=_pad(pos_all,3); return GeppettoConditioningBatchV2(tuple(ids_all),features,positions,valid,tuple(norms),tuple(hashes),tuple(cond),FEATURE_CONTRACT_V2)
+            op_hash=str(getattr(surface,"metadata",{}).get("Nd_operator_sha256",""))
+            if not op_hash: raise ValueError("Geppetto V2 requires surface.metadata.Nd_operator_sha256")
+            norm=_normalization(np.asarray([n.P for n in surface.surface_nodes],np.float32)); ids,feat,pos=_surface_features(surface,norm); ids_all.append(ids); feat_all.append(feat); pos_all.append(pos); norms.append(norm); hashes.append(source_hash); op_hashes.append(op_hash); cond.append(_hash({"surface":source_hash,"Nd_operator_sha256":op_hash,"feature_contract":FEATURE_CONTRACT_V2,"ids":ids,"features":feat,"normalization":norm.__dict__}))
+        features,valid=_pad(feat_all,24); positions,_=_pad(pos_all,3); return GeppettoConditioningBatchV2(tuple(ids_all),features,positions,valid,tuple(norms),tuple(hashes),tuple(op_hashes),tuple(cond),FEATURE_CONTRACT_V2)

@@ -1,0 +1,77 @@
+name: arachne-codec-v2-source-contract
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/geppetto_arachne_r6_20260901/skin_target_rebind_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_checkpoint_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/verified_lbs_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/codec_deformation_loss_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/eval_codec_r6_a0_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/arachne_geometry_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/eval_arachne_r6_a1_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py'
+      - 'experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
+      - '.github/workflows/arachne_codec_v2_source_contract.yml'
+  push:
+    branches:
+      - source/generic-completion-v1-20260902
+    paths:
+      - 'experiments/geppetto_arachne_r6_20260901/skin_target_rebind_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_checkpoint_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/verified_lbs_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/codec_deformation_loss_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/eval_codec_r6_a0_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/arachne_geometry_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/eval_arachne_r6_a1_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py'
+      - 'experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
+      - '.github/workflows/arachne_codec_v2_source_contract.yml'
+
+jobs:
+  arachne-codec-v2-source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy pillow pytest
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Compile Arachne and codec source
+        run: |
+          python -m py_compile \
+            experiments/geppetto_arachne_r6_20260901/skin_target_rebind_v1.py \
+            experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py \
+            experiments/geppetto_arachne_r6_20260901/skin_field_codec_checkpoint_v1.py \
+            experiments/geppetto_arachne_r6_20260901/verified_lbs_v1.py \
+            experiments/geppetto_arachne_r6_20260901/codec_deformation_loss_v1.py \
+            experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py \
+            experiments/geppetto_arachne_r6_20260901/eval_codec_r6_a0_v1.py \
+            experiments/geppetto_arachne_r6_20260901/conditioning_v2.py \
+            experiments/geppetto_arachne_r6_20260901/arachne_geometry_v2.py \
+            experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py \
+            experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py \
+            experiments/geppetto_arachne_r6_20260901/eval_arachne_r6_a1_v1.py \
+            experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py
+      - name: Run Arachne/codec source gates
+        run: |
+          python -m pytest -q \
+            experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py \
+            experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py

@@ -38,7 +38,7 @@ class GeppettoCandidateConfigV2:
     stop_probability: float = 0.5
     support_presence_probability: float = 0.2
     resource_policy: str = "SURFACE_TOKEN_CARDINALITY_GUARD_V2"
-    architecture_id: str = "RealSaS.GeppettoCandidate.AutoregressiveSetProposal.v2"
+    architecture_id: str = "RealSaS.GeppettoCandidate.LatentAutoregressiveSetProposal.v3"
 
     def validate(self) -> None:
         if self.surface_feature_dim != 24:
@@ -145,6 +145,10 @@ class GeppettoCandidateV2(nn.Module):
     There is no learned/frozen product max-K. Execution is bounded only by admitted
     surface support and explicit chunking. Each control carries multiple continuous
     locus hypotheses; the Compiler still owns canonical IDs, root and legal tree.
+
+    Crucially, the emitted hard-MAP locus is not fed back into the autoregressive
+    state. Recurrence is latent-state-only, so a discrete multimodal hypothesis
+    crossover cannot rewrite every later anonymous control state.
     """
 
     def __init__(self, config: GeppettoCandidateConfigV2 = GeppettoCandidateConfigV2()):
@@ -155,7 +159,6 @@ class GeppettoCandidateV2(nn.Module):
         M = config.position_modes
         self.encoder = SurfaceSetEncoderV2(config)
         self.start = nn.Parameter(torch.zeros(d))
-        self.pos_embed = nn.Sequential(nn.Linear(3, d), nn.GELU(), nn.Linear(d, d))
         self.rel_query = nn.Linear(d * 2, d)
         self.cells = nn.ModuleList([nn.GRUCell(d * 3, d) for _ in range(config.decoder_layers)])
         self.position = nn.Linear(d, M * 3)
@@ -213,10 +216,11 @@ class GeppettoCandidateV2(nn.Module):
             raise ValueError("decode_steps exceeds surface-cardinality resource guard")
         states = [pooled.new_zeros((B, D)) for _ in self.cells]
         previous_states = []
-        prev_pos = pooled.new_zeros((B, 3))
         out = []
         for t in range(int(steps)):
-            prev = self.start[None].expand(B, -1) if t == 0 else self.pos_embed(prev_pos)
+            # Internal generation recurrence must not depend on whichever hard-MAP
+            # locus happened to win a discrete multimodal confidence crossover.
+            prev = self.start[None].expand(B, -1) if t == 0 else previous_states[-1]
             query = self.rel_query(torch.cat([pooled, prev], dim=-1))
             if previous_states:
                 hist = torch.stack(previous_states, dim=1)
@@ -234,7 +238,6 @@ class GeppettoCandidateV2(nn.Module):
             mode_logits = self.position_mode_logits(h)
             pos, rep_ls, _ = self._map_representative(modes, mode_ls, mode_logits)
             previous_states.append(h)
-            prev_pos = pos
             out.append((h, pos, rep_ls, modes, mode_ls, mode_logits, self.existence(h).squeeze(-1), self.stop(h).squeeze(-1), self.root(h).squeeze(-1), self.support_presence(h).squeeze(-1)))
         fields = list(zip(*out))
         h, pos, ls, modes, mode_ls, mode_logits, ex, stop, root, sp = (torch.stack(x, 1) for x in fields)

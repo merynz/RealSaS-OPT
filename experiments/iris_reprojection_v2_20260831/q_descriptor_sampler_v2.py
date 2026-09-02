@@ -32,13 +32,11 @@ class _ConvBlock(nn.Module):
 
 
 class NativeResolutionPyramidV2(nn.Module):
-    """Learned native-image pyramid preserving the preregistered 1024→64 path.
+    """Learned native-image pyramid preserving the preregistered five-scale path.
 
-    The default widths are binding architecture authority, not a per-family fit
-    choice. Starting from a 1024 raster, the five returned maps are 1024, 512,
-    256, 128 and 64. All maps remain trainable while the foundation path stays
-    frozen, so sub-patch visual evidence is not bottlenecked by foundation token
-    resolution.
+    For canonical 1024 observations the maps are 1024, 512, 256, 128 and 64.
+    Unit/synthetic inputs may be smaller, but cardinality and learned scale path
+    are identical. Widths are architecture authority, never a fitted-family knob.
     """
 
     DEFAULT_WIDTHS = (32, 48, 64, 96, 128)
@@ -61,16 +59,13 @@ class NativeResolutionPyramidV2(nn.Module):
         if images.ndim != 5 or images.shape[1] != 8 or images.shape[2] != 4:
             raise ValueError("images must be [B,8,4,H,W]")
         B, V, C, H, W = images.shape
-        if H != 1024 or W != 1024:
-            raise ValueError("canonical IRIS V2 native pyramid requires 1024x1024 input")
+        if min(H, W) < 16:
+            raise ValueError("native pyramid input too small for five-scale path")
         x = images.reshape(B * V, C, H, W)
         out = []
         for block in self.blocks:
             x = block(x)
             out.append(x.reshape(B, V, x.shape[1], x.shape[2], x.shape[3]))
-        expected = (1024, 512, 256, 128, 64)
-        if tuple(int(f.shape[-1]) for f in out) != expected or tuple(int(f.shape[-2]) for f in out) != expected:
-            raise ValueError("native pyramid resolution drift")
         return tuple(out)
 
 

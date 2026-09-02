@@ -5,6 +5,7 @@ on:
     paths:
       - 'canonical/architecture_freeze_gate_v1.py'
       - 'canonical/DINO_TOKEN_PARITY_V1_SEAL_20260902.json'
+      - 'canonical/ARCHITECTURE_FREEZE_V1.json'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
       - 'tests/iris/**'
@@ -15,6 +16,7 @@ on:
     paths:
       - 'canonical/architecture_freeze_gate_v1.py'
       - 'canonical/DINO_TOKEN_PARITY_V1_SEAL_20260902.json'
+      - 'canonical/ARCHITECTURE_FREEZE_V1.json'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
       - 'tests/iris/**'
@@ -32,7 +34,7 @@ jobs:
       - name: Install generic source test dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install numpy pillow pytest
+          python -m pip install numpy pillow pytest scipy
           python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
       - name: Compile current learner source
         run: |
@@ -52,11 +54,16 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py \
             experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py \
             experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py
-      - name: Assert family selection still blocked pre-seal
+      - name: Verify family-selection authorization state
         shell: bash
         run: |
-          if python canonical/architecture_freeze_gate_v1.py --repo-root . --check-selection-authority; then
-            echo 'ERROR: family selection became authorized before explicit architecture freeze seal'
-            exit 1
+          if [ -f canonical/ARCHITECTURE_FREEZE_V1.json ]; then
+            python canonical/architecture_freeze_gate_v1.py --repo-root . --check-selection-authority
+            echo 'PASS: frozen fingerprint authorizes family selection'
+          else
+            if python canonical/architecture_freeze_gate_v1.py --repo-root . --check-selection-authority; then
+              echo 'ERROR: family selection became authorized before explicit architecture freeze seal'
+              exit 1
+            fi
+            echo 'PASS: family selection remains blocked until explicit freeze seal'
           fi
-          echo 'PASS: family selection remains blocked until explicit freeze seal'

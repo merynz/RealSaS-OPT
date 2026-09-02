@@ -37,7 +37,7 @@ Generalization work is blocked until that path passes.
 19. `[ ]` One-family Geppetto fit -> real Compiler -> `QualifiedSkeletonIR.v2`.
 20. `[ ]` Mechanical-structure proof for G.
 21. `[ ]` Freeze SkinFieldCodec.
-22. `[ ]` One-family codec reconstruction + deformation ceiling.
+22. `[ ]` One-family SkinFieldCodec **field-reconstruction** + deformation ceiling; this is not character/3D reconstruction.
 23. `[ ]` Freeze Arachne conditioning/predictor only after codec PASS.
 24. `[ ]` One-family Arachne fit -> real Compiler -> `QualifiedSkinIR`.
 25. `[ ]` Freeze MWB-2 local support/topology policy.

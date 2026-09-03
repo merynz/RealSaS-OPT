@@ -1,0 +1,30 @@
+name: appearance-pixel-center-behavioral-v1
+on:
+  pull_request:
+    paths:
+      - 'canonical/APPEARANCE_PIXEL_CENTER_BEHAVIORAL_PREREG_20260903.md'
+      - 'compiler/realsas_compiler_core/appearance.py'
+      - 'compiler/realsas_compiler_core/mwb2.py'
+      - 'compiler/realsas_compiler_core/v4.py'
+      - 'compiler/test_appearance_pixel_center_behavioral_v1.py'
+      - '.github/workflows/appearance_pixel_center_behavioral_v1.yml'
+permissions:
+  contents: read
+jobs:
+  appearance-pixel-center-behavioral:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest numpy
+      - name: Compile frozen appearance behavioral apparatus
+        run: python -m py_compile compiler/realsas_compiler_core/appearance.py compiler/realsas_compiler_core/mwb2.py compiler/test_appearance_pixel_center_behavioral_v1.py
+      - name: Run frozen appearance pixel-center behavioral gate
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: '0'
+        run: python -m pytest -q -s compiler/test_appearance_pixel_center_behavioral_v1.py

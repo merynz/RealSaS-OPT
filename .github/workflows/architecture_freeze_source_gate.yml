@@ -8,6 +8,8 @@ on:
       - 'canonical/ARCHITECTURE_FREEZE_V1.json'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'compiler/realsas_compiler_core/proof_engine.py'
+      - 'compiler/test_proof_engine_source_v1.py'
       - 'tests/iris/**'
       - '.github/workflows/architecture_freeze_source_gate.yml'
   push:
@@ -19,6 +21,8 @@ on:
       - 'canonical/ARCHITECTURE_FREEZE_V1.json'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'compiler/realsas_compiler_core/proof_engine.py'
+      - 'compiler/test_proof_engine_source_v1.py'
       - 'tests/iris/**'
       - '.github/workflows/architecture_freeze_source_gate.yml'
 
@@ -38,7 +42,7 @@ jobs:
           python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
       - name: Compile current learner source
         run: |
-          python -m py_compile canonical/architecture_freeze_gate_v1.py experiments/iris_reprojection_v2_20260831/*.py experiments/geppetto_arachne_r6_20260901/*.py
+          python -m py_compile canonical/architecture_freeze_gate_v1.py experiments/iris_reprojection_v2_20260831/*.py experiments/geppetto_arachne_r6_20260901/*.py compiler/realsas_compiler_core/proof_engine.py compiler/test_proof_engine_source_v1.py
       - name: Verify architecture is family-independent and freeze-eligible
         run: |
           python canonical/architecture_freeze_gate_v1.py --repo-root . | tee architecture-freeze-candidate.json
@@ -47,20 +51,28 @@ jobs:
         with:
           name: architecture-freeze-candidate
           path: architecture-freeze-candidate.json
-      - name: Run current generic-strength learner gates
+      - name: Run current generic-strength and behavioral learner gates
         id: generic_tests
         env:
           PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
         shell: bash
         run: |
           set +e
-          python -m pytest -q \
+          python -m pytest -q -s \
             tests/iris/test_iris_v2_source_v1.py \
             tests/iris/test_iris_v2_generic_strength_v1.py \
             tests/iris/test_iris_v2_surface_relations_v1.py \
+            compiler/test_proof_engine_source_v1.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_loss_accumulator_v2.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py \
+            experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py \
+            experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py \
+            experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py \
             experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py \
             experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py \
             2>&1 | tee generic-strength-tests.log

@@ -1,10 +1,17 @@
 """Proof-side diagnostic and measurement services behind current Compiler authority."""
 
 from .failure_signatures import derive_failure_signatures, no_owner_attribution
-from .motion_probe import (
-    AuthoredMotionProbePolicyV1,
-    authored_motion_measurement_passes_v1,
-    measure_authored_motion_v1,
+from .motion_bake import (
+    QualificationOwnedMotionFrameIR,
+    QualificationOwnedMotionBakeIR,
+    bind_qualification_owned_motion_bake,
+    assert_motion_bake_binding,
+    deploy_frame_dicts,
+)
+from .motion_frame_metrics import (
+    RESTORED_V05_POLICY_V1,
+    measure_motion_bake_geometry,
+    evaluate_motion_bake_metrics,
 )
 from .causal_attribution import (
     ControlledInterventionEvidenceV1,
@@ -25,9 +32,14 @@ from .repair_loop import (
 __all__ = [
     "derive_failure_signatures",
     "no_owner_attribution",
-    "AuthoredMotionProbePolicyV1",
-    "measure_authored_motion_v1",
-    "authored_motion_measurement_passes_v1",
+    "QualificationOwnedMotionFrameIR",
+    "QualificationOwnedMotionBakeIR",
+    "bind_qualification_owned_motion_bake",
+    "assert_motion_bake_binding",
+    "deploy_frame_dicts",
+    "RESTORED_V05_POLICY_V1",
+    "measure_motion_bake_geometry",
+    "evaluate_motion_bake_metrics",
     "ControlledInterventionEvidenceV1",
     "proof_probe_fingerprint_v1",
     "attribute_signature_owner_v1",

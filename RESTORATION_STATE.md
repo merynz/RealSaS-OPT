@@ -26,18 +26,19 @@ Promote still-valuable historical Compiler/runtime production knowledge **behind
 | IRIS -> Compiler substrate ownership seam | **DONE** | `compiler/realsas_compiler_core/substrate/iris_v2.py` |
 | Compiler substrate physical normalization | **DONE** | `bc443d063d4d8f0bd52981ec2db5b99a795985e1` |
 | Compiler mesh physical normalization | **DONE** | `295b798b1fb40ccb1752afe9da9378dfe8734262` |
-| Authored-motion dynamic probe / proof semantic rebind | **DONE / LOCAL REGRESSION 2/2 PASS** | `fbe80348351c81fa5bba7a56ae1898d5b09ca160` |
+| Direct authored-motion evaluator promotion | **RETRACTED** | `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json` |
+| Qualification-owned motion bake + fail-closed proof seam | **DONE** | `proof/motion_bake.py`, `proof/motion_frame_metrics.py`, current `proof_engine.py` |
+| Directional joint/view binding | **P0 BLOCKER** | `CURRENT_DIRECTIONAL_JOINT_VIEW_BINDING_MISSING` |
 | Controlled causal owner attribution | **DONE / LOCAL REGRESSION 4/4 PASS** | `1dd9a52dda4904c4910f47e66559974b0dc4ad72` |
 | Bounded repair directive + mandatory same-probe re-proof contract | **DONE / LOCAL REGRESSION 5/5 PASS** | `9a60fa341055713c9df8b5d698c58c19a4098025` |
-| Core repair operation registry + real child-state delta audit | **DONE / FAIL-CLOSED** | `12eef470348a4e9822dd927e2ac950e3fcd9dfb7`; `canonical/REPAIR_OPERATION_SOURCE_DIFF_V1_20260903.json` |
-| Historical rig/weight repair executors | **NOT PROMOTED** | rig requires current proposal/requalification seam; weight requires retained-candidate portfolio |
-| Current V4 export -> native runtime interlock | **NEXT MAJOR CLOSURE** | exact proof-state/product-state identity must survive `.rss/.rsr` materialization and native open/render |
-| CDT / BBW-KKT / ARAP / XPBD source diff | **PENDING** | no numerical bulk restore |
+| Core repair operation registry + real child-state delta audit | **DONE / FAIL-CLOSED** | `12eef470348a4e9822dd927e2ac950e3fcd9dfb7` |
+| Historical rig/weight repair executors | **NOT PROMOTED** | current typed seams do not authorize them |
+| Pure native runtime-v2 package writer | **VALID / KEEP** | `compiler/realsas_compiler_services/export/runtime_v2.py` |
+| Current V4 export -> native runtime interlock | **BLOCKED ON P0** | exact proof-owned bake required before projection/materialization |
+| CDT / BBW-KKT / ARAP / XPBD/contact source diff | **PENDING** | no numerical bulk restore |
 | Full behavioral + complete-E2E restoration closure | **PENDING** | required before refreeze decision |
 
 ## Repository organization contract
-
-The repository is treated as four semantic zones:
 
 ```text
 mainline library = models/ + compiler/ + runtime/
@@ -46,52 +47,37 @@ decision/evidence= canonical/
 provenance reserve= historical/
 ```
 
-`models/` contains the semantic homes for the current learned stack: IRIS, Geppetto, SkinFieldCodec and Arachne. Models emit learned evidence/proposals only; current Compiler qualification remains product authority.
+`models/` contains the semantic homes for IRIS, Geppetto, SkinFieldCodec and Arachne. Models emit evidence/proposals only; Compiler qualification remains authoritative. Mainline must not permanently import dated experiment implementations.
 
-Mainline code must converge away from permanent imports of dated experiment packages. Experiments may import mainline; successful experiments are promoted into the relevant semantic home after closure/regression.
+## Motion-proof correction
 
-Compiler physical normalization follows the logical layer map in `compiler/README.md` through dependency-safe moves/re-exports. No mass aesthetic reshuffle is authorized.
+Authored/requested motion still must be dynamically exercised before MOTION PASS. However, the Compiler core and proof binder are **not allowed to manufacture directional frames by treating mechanical `QualifiedJoint.position` and directional editable-mesh `P.xy` as the same coordinate frame**.
 
-## Historical byte authority
+The previously promoted direct evaluator was therefore retracted. Its historical promotion record remains as provenance; `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json` is the current disposition.
 
-Restoration byte authority currently used:
+Current authority is:
 
-- full v0.5 source archive: `RealSaS_M4_v0_5_CANONICAL_MECHANICAL_MEANING_SOURCE.zip`
-- verified SHA-256: `03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130`
+1. a separately qualified directional evaluator produces frames using a typed Compiler-owned joint/view binding;
+2. `motion_bake.py` binds those frames to the exact product state, proof plan, clip and evaluator identity;
+3. `motion_frame_metrics.py` measures deformation consequences;
+4. missing qualified bake => MOTION **ABSTAIN**;
+5. export must consume the same bound frames; solver replay at export is forbidden.
 
-The native `runtime/realsas_cpp/` subtree was restored byte-exactly from that verified archive and is sealed file-by-file in `canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json`.
+The missing prerequisite is `CURRENT_DIRECTIONAL_JOINT_VIEW_BINDING_MISSING`.
 
-## Completed semantic restorations
+## Causal proof and repair firewalls
 
-### Failure localization != causal ownership
+Failure localization is not causal ownership. Controlled attribution requires a same-probe, single-owner bounded counterfactual with material improvement and no protected regression. Repair requires a distinct child state and mandatory same-probe re-proof.
 
-Measured proof failure is diagnostic localization, not owner attribution. `failure_signatures.py` cannot invent an owner or authorize repair.
-
-### Authored motion must be dynamically exercised
-
-`motion_probe.py` + `motion_probe_geometry.py` execute exact current puppet-local authored motion against qualified mesh/mesh-skin state and measure deformation consequences before Compiler-owned MOTION PASS/FAIL.
-
-### Causal ownership requires controlled intervention
-
-`causal_attribution.py` does not restore the old heuristic owner ranker. Owner credit requires same-probe, single-owner, bounded counterfactual evidence with material target improvement and no protected-invariant regression. Ambiguous improvements abstain.
-
-### Repair requires a new child state and mandatory re-proof
-
-`repair_loop.py` emits bounded immutable directives only from attributed evidence and validates effect only after a distinct child product is re-proven under the same probe fingerprint. In-place mutation is forbidden.
-
-### Historical repair source is not executable authority
-
-`repair_registry.py` and `repair_attempt.py` add a stronger current firewall. Historical source presence, or even a populated directive, does not authorize execution. A repair operation must have an explicitly promoted registry record. The Compiler itself recomputes the actual semantic delta between real parent/child products and rejects lineage or scope violations.
-
-Current executable repair-operation count: **0**.
-
-The historical rig parent-edit is blocked because direct final-skeleton mutation would bypass current graph qualification. The historical retained-weight switch is blocked because current qualified skin does not preserve the required retained candidate portfolio.
+Current executable repair-operation count: **0**. Historical source presence is not execution authority.
 
 ## Non-negotiable firewalls
 
 - no historical front-brain/teacher-exact ownership path;
 - no second canonical graph/ID authority;
 - no historical solver or repair executor executes merely because its source exists;
+- no mechanical joint Vec3 / directional mesh `P.xy` shared-frame shortcut;
+- no MOTION PASS without qualification-owned directional frame evidence;
 - no proof can bind a different product state than export/runtime;
 - no failure signature may invent causal ownership;
 - no repair may mutate production state without a distinct child lineage and mandatory same-probe re-proof;
@@ -101,10 +87,11 @@ The historical rig parent-edit is blocked because direct final-skeleton mutation
 
 ## Next execution order
 
-1. bind the current exact-PASS V4 product/proof state to production `.rss/.rsr` materialization without replaying solvers at export time;
-2. prove native C++ open / clip lookup / render consumes that exact proof-gated product identity;
-3. source-diff CDT / BBW-KKT / ARAP / XPBD/contact numerical kernels and promote only bounded kernels with current typed need;
-4. decide whether a current proposal-requalification or retained-candidate seam is scientifically required before any repair executor can be promoted;
-5. continue dependency-safe Compiler physical normalization where it improves authority clarity;
-6. run restoration-wide behavioral/source/E2E/native gates;
-7. only then decide whether to refreeze and reopen FIT selection.
+1. solve and type the Compiler-owned directional joint/view binding;
+2. implement/qualify the directional evaluator on that binding;
+3. bind the exact same qualification-owned frames to proof and export with no replay;
+4. close `.rss/.rsr` -> native C++ open / clip lookup / render interlock;
+5. source-diff CDT / BBW-KKT / ARAP / XPBD/contact and promote only kernels required by current typed architecture;
+6. decide whether any current proposal-requalification / retained-candidate seam is required for repair execution;
+7. run restoration-wide source/regression/E2E/native gates;
+8. only then decide refreeze and FIT authorization.

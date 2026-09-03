@@ -1,0 +1,29 @@
+{
+  "schema": "RealSaS.AuthoredMotionProofRetraction.v1",
+  "date": "2026-09-03",
+  "status": "RETRACT_CURRENT_AUTHORITY",
+  "retracts_record": "canonical/AUTHORED_MOTION_PROOF_PROMOTION_V1_20260903.json",
+  "retracted_sources": [
+    "compiler/realsas_compiler_services/proof/motion_probe.py",
+    "compiler/realsas_compiler_services/proof/motion_probe_geometry.py"
+  ],
+  "reason": {
+    "blocker_id": "CURRENT_DIRECTIONAL_JOINT_VIEW_BINDING_MISSING",
+    "finding": "Mechanical qualified-joint Vec3 coordinates and directional editable-mesh P.xy coordinates were treated as if they shared an authorized transform frame.",
+    "consequence": "The evaluator could manufacture technically valid deformation/runtime frames without a qualified directional joint/view binding, so its PASS cannot be current scientific authority."
+  },
+  "replacement_authority": {
+    "frame_binding": "compiler/realsas_compiler_services/proof/motion_bake.py",
+    "measurement": "compiler/realsas_compiler_services/proof/motion_frame_metrics.py",
+    "proof_owner": "compiler/realsas_compiler_core/proof_engine.py",
+    "missing_frame_behavior": "ABSTAIN",
+    "frames_generated_by_binder": false,
+    "export_solver_replay_forbidden": true
+  },
+  "runtime_writer_disposition": {
+    "path": "compiler/realsas_compiler_services/export/runtime_v2.py",
+    "status": "KEEP_VALID_PURE_WRITER",
+    "full_current_v4_interlock": "BLOCKED_UNTIL_DIRECTIONAL_BINDING"
+  },
+  "fit_authority": "NOT_AUTHORIZED"
+}

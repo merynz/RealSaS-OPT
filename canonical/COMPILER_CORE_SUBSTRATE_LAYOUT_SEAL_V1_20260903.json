@@ -1,0 +1,40 @@
+{
+  "schema": "RealSaS.CompilerCoreSubstrateLayoutSeal.v1",
+  "date": "2026-09-03",
+  "status": "PROMOTED_WITH_COMPATIBILITY_FACADES",
+  "canonical_home": "compiler/realsas_compiler_core/substrate",
+  "byte_preserved_implementations": [
+    {
+      "canonical_path": "compiler/realsas_compiler_core/substrate/surface.py",
+      "former_path": "compiler/realsas_compiler_core/surface.py",
+      "git_blob_sha": "d2339fda460ba9b7a5400180c53cf333273fda3a"
+    },
+    {
+      "canonical_path": "compiler/realsas_compiler_core/substrate/local_geometry.py",
+      "former_path": "compiler/realsas_compiler_core/local_geometry.py",
+      "git_blob_sha": "5dce6152d6e7f2aabf00c9da41fb6019be56896f"
+    },
+    {
+      "canonical_path": "compiler/realsas_compiler_core/substrate/iris_v2.py",
+      "former_path": "experiments/iris_reprojection_v2_20260831/persistence_adapter_v2.py",
+      "git_blob_sha": "3a977f41182c58d33bd6b7f1d1f403115cd772d5"
+    }
+  ],
+  "compatibility_paths": [
+    "compiler/realsas_compiler_core/surface.py",
+    "compiler/realsas_compiler_core/local_geometry.py"
+  ],
+  "authority": {
+    "learned_model_authority": false,
+    "canonical_graph_authority": false,
+    "canonical_skin_authority": false,
+    "product_authority": false,
+    "compiler_substrate_authority": true
+  },
+  "firewalls": [
+    "NO_TEACHER_RIG_OR_SKIN_TRUTH",
+    "NO_SOURCE_MESH_HIDDEN_TOPOLOGY_AUTHORITY",
+    "NO_FAMILY_SPECIFIC_CONSTANTS",
+    "NO_DATED_EXPERIMENT_IMPORTS_FROM_MAINLINE"
+  ]
+}

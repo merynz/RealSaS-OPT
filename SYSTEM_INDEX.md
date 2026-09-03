@@ -17,11 +17,11 @@ Models emit evidence/proposals only. Compiler qualification remains authoritativ
 
 ## Compiler mainline
 
-| Layer | Current home | State |
+| Layer | Canonical home | State |
 |---|---|---|
 | Typed IR / hashing / V4 contracts | `compiler/realsas_compiler_core/{types.py,v4_types.py,hashing.py,v4.py}` | CURRENT |
-| Evidence -> substrate seam | `compiler/realsas_compiler_core/substrate/iris_v2.py` | **CURRENT / PROMOTED BYTE-IDENTICAL** |
-| Generic surface/local geometry | `compiler/realsas_compiler_core/{surface.py,local_geometry.py}` | CURRENT; physical normalization pending import closure |
+| Surface/substrate/local geometry | `compiler/realsas_compiler_core/substrate/{surface.py,local_geometry.py,iris_v2.py}` | **CURRENT / PHYSICALLY NORMALIZED** |
+| Legacy surface/local-geometry imports | `compiler/realsas_compiler_core/{surface.py,local_geometry.py}` | COMPATIBILITY FACADES ONLY |
 | Skeleton qualification | `compiler/realsas_compiler_core/rig.py` | CURRENT |
 | Skin qualification | `compiler/realsas_compiler_core/skin.py` | CURRENT |
 | MWB2 mesh + skin binding | `compiler/realsas_compiler_core/{mwb2.py,mwb2_skin.py,mesh_binding.py}` | CURRENT / BEHAVIORALLY HARDENED |
@@ -38,7 +38,7 @@ Models emit evidence/proposals only. Compiler qualification remains authoritativ
 | Owner attribution + bounded repair/re-proof | historical authority under audit | PENDING |
 | CDT / BBW-KKT / ARAP / XPBD/contact | competing historical authorities | SOURCE-DIFF REQUIRED |
 
-See `compiler/README.md` for the logical layer map.
+See `compiler/README.md` for the physical/logical layer map and `canonical/COMPILER_CORE_SUBSTRATE_LAYOUT_SEAL_V1_20260903.json` for the first core relocation seal.
 
 ## Runtime
 

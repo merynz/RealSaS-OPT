@@ -6,29 +6,34 @@
 
 `realsas_compiler_services/` contains subordinate promoted mechanisms consumed through current typed authority. Services may measure, diagnose, export or execute bounded numerics; they may not create alternate product truth.
 
-## Current logical layer index
+## Current physical + logical layer index
 
-The core package is still physically flatter than the intended library-quality layout. Dependency-safe normalization is now active; new current mechanisms land directly in their semantic package while older compatibility paths are moved only after import closure is proven.
+Physical normalization is active. A compatibility file at an older flat path is not a second implementation: it is a facade whose canonical source is the semantic package named below.
 
-| Logical layer | Current files | Responsibility |
-|---|---|---|
-| Public entry / composition | `api.py`, `v4.py`, `product.py`, `bundle_routes.py` | Compiler entry surfaces, V4 assembly, product composition and bundle routing |
-| Typed contracts / identity | `types.py`, `v4_types.py`, `hashing.py` | IR datatypes, schema contracts and content/lineage identity |
-| Observation -> substrate | `substrate/iris_v2.py`, `surface.py`, `local_geometry.py` | learned-evidence boundary, admitted mechanical substrate construction and deterministic local geometry |
-| Rig qualification | `rig.py` | proposal -> qualified skeleton, canonical joint authority |
-| Skin qualification | `skin.py` | proposal -> qualified skin legality/normalization |
-| Mesh / binding | `mwb2.py`, `mwb2_skin.py`, `mesh_binding.py` | directional editable mesh construction and mesh/skin binding |
-| Appearance | `appearance.py` | observed/cross-view/completion appearance binding |
-| Motion | `motion.py` | current typed preset motion construction/qualification |
-| Deformation measurements | `deformation.py` | mesh/skin measurement adapters using promoted numerical services |
-| Proof binding | `proof_engine.py` | V4 proof-plan/domain/product proof binding; richer historical mechanisms are being promoted behind this boundary |
-| Solver policy | `solver_registry.py` | fail-closed solver capability registry / provenance policy |
+| Logical layer | Canonical implementation | Compatibility / composition | Responsibility |
+|---|---|---|---|
+| Public entry / composition | `api.py`, `v4.py`, `product.py`, `bundle_routes.py` | root package exports | Compiler entry surfaces, V4 assembly, product composition and bundle routing |
+| Typed contracts / identity | `types.py`, `v4_types.py`, `hashing.py` | — | IR datatypes, schema contracts and content/lineage identity |
+| Observation -> substrate | `substrate/{surface.py,local_geometry.py,iris_v2.py}` | `surface.py`, `local_geometry.py` facades | evidence handoff, mechanical substrate construction and deterministic local geometry |
+| Rig qualification | `rig.py` | — | proposal -> qualified skeleton, canonical joint authority |
+| Skin qualification | `skin.py` | — | proposal -> qualified skin legality/normalization |
+| Mesh / binding | `mwb2.py`, `mwb2_skin.py`, `mesh_binding.py` | — | directional editable mesh construction and mesh/skin binding |
+| Appearance | `appearance.py` | — | observed/cross-view/completion appearance binding |
+| Motion | `motion.py` | — | current typed preset motion construction/qualification |
+| Deformation measurements | `deformation.py` | services numerics | mesh/skin measurement adapters |
+| Proof binding | `proof_engine.py` | services proof | V4 proof-plan/domain/product proof binding |
+| Solver policy | `solver_registry.py` | — | fail-closed solver capability registry / provenance policy |
 
-### Substrate boundary
+## Substrate authority
 
-`realsas_compiler_core/substrate/` is now the physical semantic home for evidence-to-mechanical-substrate adapters. `substrate/iris_v2.py` is byte-identical to the audited former experiment source `experiments/iris_reprojection_v2_20260831/persistence_adapter_v2.py`; it constructs persistence groups, observed local relations and DTB-ND1-enriched `RiggingSurfaceIR` through current Compiler authority. It is deterministic Compiler code, not an IRIS learned module.
+`realsas_compiler_core/substrate/` is now the canonical physical home for deterministic surface/substrate code.
 
-Generic `surface.py` and `local_geometry.py` remain at their compatibility paths until their repo-wide import closure is migrated safely.
+- `substrate/surface.py` is byte-identical to the former flat `surface.py` implementation.
+- `substrate/local_geometry.py` is byte-identical to the former flat `local_geometry.py` implementation.
+- `substrate/iris_v2.py` is byte-identical to the audited former experiment `persistence_adapter_v2.py`.
+- the old flat `surface.py` and `local_geometry.py` paths remain compatibility facades so existing imports do not break.
+
+The relocation is sealed by `canonical/COMPILER_CORE_SUBSTRATE_LAYOUT_SEAL_V1_20260903.json`.
 
 ## Promoted service index
 
@@ -42,11 +47,11 @@ Historical motion probes, owner attribution, repair/re-proof and additional nume
 
 ## Intended normalization
 
-After dependency audit, the physical core tree should converge toward obvious semantic packages equivalent to:
+The remaining flat core should converge dependency-safely toward semantic packages equivalent to:
 
 ```text
 contracts/
-substrate/
+substrate/        # started
 rig/
 skin/
 mesh/
@@ -56,7 +61,7 @@ product/
 proof/
 ```
 
-This is a **navigation/ownership normalization**, not an architecture rewrite. Existing public imports will be preserved through controlled re-exports while source files move. No file moves solely for aesthetics.
+This is a **navigation/ownership normalization**, not an architecture rewrite. Existing public imports are preserved through controlled re-exports while canonical source moves. No file moves solely for aesthetics.
 
 ## Research upgrade rule
 

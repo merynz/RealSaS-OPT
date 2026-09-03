@@ -34,6 +34,111 @@ jobs:
       - name: Compile IRIS V2 source
         run: |
           python -m py_compile compiler/realsas_compiler_core/local_geometry.py experiments/iris_reprojection_v2_20260831/*.py
+      - name: Diagnose privileged-input causal reachability
+        env:
+          PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
+        run: |
+          python - <<'PY'
+          import json
+          import math
+          import torch
+          from experiments.iris_reprojection_v2_20260831.observation_contract_v2 import OrthographicCameraV2, ObservationContractV2
+          from experiments.iris_reprojection_v2_20260831.q_descriptor_sampler_v2 import NativeResolutionPyramidV2, SampledQDescriptorsV2
+          from experiments.iris_reprojection_v2_20260831.q_domain_v2 import QCandidatePolicyV2, RayHypothesisDomainV2, build_q_domain_v2, build_canonical_ray_lattice_v2
+          from experiments.iris_reprojection_v2_20260831.q_evidence_encoder_v2 import QEvidenceEncoderV2
+
+          torch.set_num_threads(1)
+          torch.use_deterministic_algorithms(True)
+          torch.manual_seed(20260903)
+
+          def camera(v):
+              a=2*math.pi*v/8
+              return OrthographicCameraV2(v,(0.,0.,0.),(math.cos(a),0.,-math.sin(a)),(0.,1.,0.),(-math.sin(a),0.,-math.cos(a)),1.5,1024)
+          contract=ObservationContractV2('diag',tuple(camera(v) for v in range(8)),tuple(f'r{v}' for v in range(8)))
+
+          # A: same RGB, alpha-only mutation. Any learned native feature delta proves
+          # renderer alpha is causally reachable by trainable parameters.
+          pyramid=NativeResolutionPyramidV2().eval()
+          rgb=torch.randn(1,8,3,32,32)
+          a0=torch.cat([rgb,torch.zeros(1,8,1,32,32)],dim=2)
+          a1=torch.cat([rgb,torch.ones(1,8,1,32,32)],dim=2)
+          with torch.no_grad():
+              f0=pyramid(a0); f1=pyramid(a1)
+          alpha_delta=max(float((x-y).abs().max()) for x,y in zip(f0,f1))
+
+          # B: same candidate coordinates and evidence, only a cyclic re-enumeration
+          # of the eight view axis. A permutation-equivariant view aggregator would
+          # preserve pooled evidence. Absolute vi injection can break that symmetry.
+          B=Q=D=1; V=8; C=7
+          descriptors=torch.randn(B,Q,D,V,C)
+          valid=torch.ones(B,Q,D,V,dtype=torch.bool)
+          projected=torch.randn(B,Q,D,V,2).clamp(-0.8,0.8)
+          depths=torch.linspace(.2,.9,V).view(B,Q,D,V)
+          domain=RayHypothesisDomainV2(
+              anchor_view=torch.zeros(B,Q,dtype=torch.long),
+              anchor_grid=torch.zeros(B,Q,2),
+              depth_values=torch.ones(B,Q,D),
+              q_points=torch.zeros(B,Q,D,3),
+              projected_grid=projected,
+              projected_depth=depths,
+              in_frame=valid,
+              foreground_support=valid,
+              candidate_valid=torch.ones(B,Q,D,dtype=torch.bool),
+              contract_hashes=('diag',),
+          )
+          enc=QEvidenceEncoderV2(C,hidden_dim=24,heads=4,layers=1).eval()
+          with torch.no_grad():
+              base=enc(SampledQDescriptorsV2(descriptors,valid,C),domain)
+              perm=torch.tensor([3,4,5,6,7,0,1,2])
+              dp=RayHypothesisDomainV2(
+                  anchor_view=domain.anchor_view,
+                  anchor_grid=domain.anchor_grid,
+                  depth_values=domain.depth_values,
+                  q_points=domain.q_points,
+                  projected_grid=domain.projected_grid[...,perm,:],
+                  projected_depth=domain.projected_depth[...,perm],
+                  in_frame=domain.in_frame[...,perm],
+                  foreground_support=domain.foreground_support[...,perm],
+                  candidate_valid=domain.candidate_valid,
+                  contract_hashes=domain.contract_hashes,
+              )
+              moved=enc(SampledQDescriptorsV2(descriptors[...,perm,:],valid[...,perm],C),dp)
+          vi_pooled_delta=float((base.pooled-moved.pooled).abs().max())
+
+          # C1: foreground-mask mutation changes candidate validity.
+          av=torch.zeros((1,2),dtype=torch.long)
+          ag=torch.tensor([[[-.2,0.],[.2,0.]]],dtype=torch.float32)
+          dv=torch.linspace(.2,.8,4)
+          all_fg=torch.ones((1,8,32,32),dtype=torch.bool)
+          missing=all_fg.clone(); missing[:,7]=False
+          policy=QCandidatePolicyV2(minimum_foreground_support_views=8)
+          da=build_q_domain_v2((contract,),av,ag,dv,foreground_masks=all_fg,candidate_policy=policy)
+          db=build_q_domain_v2((contract,),av,ag,dv,foreground_masks=missing,candidate_policy=policy)
+          candidate_valid_flip_count=int((da.candidate_valid!=db.candidate_valid).sum())
+
+          # C2: the same kind of mask also changes which anchor rays exist at all.
+          full=torch.ones((1,8,1024,1024),dtype=torch.bool)
+          half=full.clone(); half[:,0,:,:512]=False
+          lattice_policy=QCandidatePolicyV2(minimum_foreground_support_views=1)
+          la=build_canonical_ray_lattice_v2((contract,),full,anchor_view_index=0,anchor_stride_px=128,depth_values=torch.linspace(.2,.8,2),candidate_policy=lattice_policy)
+          lb=build_canonical_ray_lattice_v2((contract,),half,anchor_view_index=0,anchor_stride_px=128,depth_values=torch.linspace(.2,.8,2),candidate_policy=lattice_policy)
+
+          result={
+              'alpha_native_feature_max_delta':alpha_delta,
+              'absolute_vi_cyclic_pooled_max_delta':vi_pooled_delta,
+              'mask_candidate_valid_flip_count':candidate_valid_flip_count,
+              'full_mask_anchor_count':int(la.anchor_view.shape[1]),
+              'mutated_mask_anchor_count':int(lb.anchor_view.shape[1]),
+              'alpha_causally_reachable':bool(alpha_delta>0),
+              'absolute_vi_breaks_view_enumeration_equivariance':bool(vi_pooled_delta>1e-7),
+              'foreground_mask_causally_controls_hypothesis_domain':bool(candidate_valid_flip_count>0 or la.anchor_view.shape[1]!=lb.anchor_view.shape[1]),
+          }
+          print('IRIS_PRIVILEGED_INPUT_CAUSAL_DIAGNOSTIC='+json.dumps(result,sort_keys=True))
+          PY
       - name: Run IRIS V2 source gates
         env:
           PYTHONPATH: .

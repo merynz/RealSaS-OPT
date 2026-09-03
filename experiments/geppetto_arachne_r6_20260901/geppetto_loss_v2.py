@@ -18,6 +18,13 @@ POSITION_LOG_SIGMA_MIN = -8.0
 POSITION_LOG_SIGMA_MAX = 4.0
 POSITION_DIMS = 3
 
+# Shipping loci are float32 in a normalized common frame. Matching is a discrete
+# identity decision, so sub-ULP/BLAS drift must not become a different training
+# correspondence. 2^-16 is exactly representable and equals 128 float32 eps at
+# unit scale; it is a numerical identity grid, not a product geometry tolerance.
+MATCH_GEOMETRY_COST_QUANTIZATION = float(2.0 ** -16)
+_MATCH_TIE_TOTAL_BUDGET = 0.25
+
 
 @dataclass(frozen=True)
 class GeppettoLossWeightsV2:
@@ -36,7 +43,6 @@ class GeppettoLossWeightsV2:
     support: float = 0.5
     support_presence: float = 0.25
     abstain: float = 0.5
-    match_root_cost: float = 0.25
 
 
 def _independent_zero_accumulators(zero: torch.Tensor, names: tuple[str, ...]) -> dict[str, torch.Tensor]:
@@ -67,20 +73,70 @@ def _first_hit_stop_loss(stop_logits: torch.Tensor) -> torch.Tensor:
     return 0.5 * (terminal + worst_early)
 
 
+def _canonical_tie_matrix(n: int) -> np.ndarray:
+    """Deterministic canonical-index tie-break with bounded total authority.
+
+    The primary quantized assignment objective is integer-valued. Every edge
+    receives a deterministic index-derived fractional rank and the *entire*
+    secondary assignment can contribute less than 0.25. Therefore it can select
+    among equal primary optima but can never overturn a one-bin primary advantage.
+    """
+    if n < 1:
+        raise ValueError("assignment cardinality must be positive")
+    i, j = np.indices((n, n), dtype=np.uint64)
+    # Fixed integer mixing only; no RNG or platform floating reduction decides
+    # which anonymous representative wins an exact primary tie.
+    x = ((i + 1) * np.uint64(0x9E3779B1)) ^ ((j + 1) * np.uint64(0x85EBCA77))
+    x ^= ((i + 1) * (j + 1) * np.uint64(0xC2B2AE3D))
+    rank = (x & np.uint64(0xFFFFFFFF)).astype(np.float64) / float(2**32)
+    return rank * (_MATCH_TIE_TOTAL_BUDGET / float(n))
+
+
+def canonical_geometry_assignment_v2(primary_positions, teacher_positions) -> tuple[np.ndarray, np.ndarray]:
+    """Hard anonymous geometry match stable to machine-scale float32 drift.
+
+    Teacher root/tree labels are intentionally absent: canonical root/tree remain
+    Compiler authority and may not condition anonymous teacher<->query identity.
+    """
+    if isinstance(primary_positions, torch.Tensor):
+        primary = primary_positions.detach().cpu().numpy()
+    else:
+        primary = np.asarray(primary_positions)
+    if isinstance(teacher_positions, torch.Tensor):
+        teacher = teacher_positions.detach().cpu().numpy()
+    else:
+        teacher = np.asarray(teacher_positions)
+    primary = np.asarray(primary, dtype=np.float64)
+    teacher = np.asarray(teacher, dtype=np.float64)
+    if primary.ndim != 2 or teacher.ndim != 2 or primary.shape != teacher.shape or primary.shape[1] != POSITION_DIMS:
+        raise ValueError("canonical geometry assignment requires equal [J,3] arrays")
+    if primary.shape[0] < 1 or not np.isfinite(primary).all() or not np.isfinite(teacher).all():
+        raise ValueError("canonical geometry assignment requires finite non-empty loci")
+
+    raw_cost = np.abs(primary[:, None, :] - teacher[None, :, :]).sum(axis=-1)
+    quantized = np.rint(raw_cost / MATCH_GEOMETRY_COST_QUANTIZATION)
+    if not np.isfinite(quantized).all() or float(np.max(np.abs(quantized))) >= float(2**52):
+        raise ValueError("canonical geometry assignment cost outside exact float64 integer range")
+    primary_integer_cost = quantized.astype(np.int64)
+    deterministic_cost = primary_integer_cost.astype(np.float64) + _canonical_tie_matrix(primary.shape[0])
+    q, t = linear_sum_assignment(deterministic_cost)
+    return np.asarray(q, np.int64), np.asarray(t, np.int64)
+
+
 class GeppettoLossV2:
     def __init__(self, weights: GeppettoLossWeightsV2 = GeppettoLossWeightsV2(), support_topk: int = 8):
         self.weights = weights
         self.support_topk = int(support_topk)
 
-    def _match(self, output: GeppettoRawOutputV2, b: int, root: torch.Tensor, target, J: int):
-        """Match teacher controls to the actual shipping MAP representatives."""
-        tp = torch.as_tensor(target.positions_normalized, device=output.positions_normalized.device, dtype=output.positions_normalized.dtype)
-        tr = torch.as_tensor(target.root_mask, device=root.device, dtype=root.dtype)
+    def _match(self, output: GeppettoRawOutputV2, b: int, target, J: int):
+        """Match teacher controls to shipping MAP representatives by geometry only."""
+        tp = torch.as_tensor(
+            target.positions_normalized,
+            device=output.positions_normalized.device,
+            dtype=output.positions_normalized.dtype,
+        )
         primary = output.positions_normalized[b, :J]
-        locus_cost = torch.cdist(primary, tp, p=1)
-        cost = locus_cost + self.weights.match_root_cost * torch.abs(torch.sigmoid(root[:J])[:, None] - tr[None, :])
-        q, t = linear_sum_assignment(cost.detach().cpu().numpy())
-        return np.asarray(q, np.int64), np.asarray(t, np.int64)
+        return canonical_geometry_assignment_v2(primary, tp)
 
     @staticmethod
     def _winner_indices(output: GeppettoRawOutputV2, b: int, q: torch.Tensor, target_positions: torch.Tensor) -> torch.Tensor:
@@ -158,7 +214,7 @@ class GeppettoLossV2:
 
             total["stop"] += _first_hit_stop_loss(output.stop_logits[b, :J])
 
-            q_np, t_np = self._match(output, b, output.root_logits[b], target, J)
+            q_np, t_np = self._match(output, b, target, J)
             q = torch.as_tensor(q_np, device=output.positions_normalized.device)
             t = torch.as_tensor(t_np, device=output.positions_normalized.device)
             matched += J

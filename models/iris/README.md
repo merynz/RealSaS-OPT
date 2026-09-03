@@ -30,9 +30,13 @@ IRIS does **not** own canonical rig IDs, skeleton, skin, product state, proof or
 
 Later internal sub-packaging is allowed only with byte/behavior regression coverage.
 
-## Explicitly outside the model
+## Compiler substrate handoff
 
-`persistence_adapter_v2.py` is **not** promoted here. It consumes `ObservationEvidenceIR` and invokes Compiler surface/local-geometry authority, so it is classified `COMPILER_OWNED_PENDING_PROMOTION`.
+The former experiment file `persistence_adapter_v2.py` is **not** model authority. Its audited exact source is now promoted to:
+
+`compiler/realsas_compiler_core/substrate/iris_v2.py`
+
+That Compiler-owned boundary consumes `ObservationEvidenceIR`, constructs persistence groups and observed local relations, invokes current surface/local-geometry authority, and can attach DTB-ND1 normals before producing `RiggingSurfaceIR` state. The experiment copy remains provenance only.
 
 Gate-0 corpus loaders, preflight runners, tests, preregistration and result JSON remain under `experiments/iris_reprojection_v2_20260831/` as research apparatus/evidence.
 

@@ -20,7 +20,8 @@ Models emit evidence/proposals only. Compiler qualification remains authoritativ
 | Layer | Current home | State |
 |---|---|---|
 | Typed IR / hashing / V4 contracts | `compiler/realsas_compiler_core/{types.py,v4_types.py,hashing.py,v4.py}` | CURRENT |
-| Surface/substrate/local geometry | `compiler/realsas_compiler_core/{surface.py,local_geometry.py}` | CURRENT |
+| Evidence -> substrate seam | `compiler/realsas_compiler_core/substrate/iris_v2.py` | **CURRENT / PROMOTED BYTE-IDENTICAL** |
+| Generic surface/local geometry | `compiler/realsas_compiler_core/{surface.py,local_geometry.py}` | CURRENT; physical normalization pending import closure |
 | Skeleton qualification | `compiler/realsas_compiler_core/rig.py` | CURRENT |
 | Skin qualification | `compiler/realsas_compiler_core/skin.py` | CURRENT |
 | MWB2 mesh + skin binding | `compiler/realsas_compiler_core/{mwb2.py,mwb2_skin.py,mesh_binding.py}` | CURRENT / BEHAVIORALLY HARDENED |
@@ -33,8 +34,7 @@ Models emit evidence/proposals only. Compiler qualification remains authoritativ
 | Causal mutation helpers | `compiler/realsas_compiler_services/proof/causal_mutations.py` | PROMOTED SUPPORT |
 | Export/deploy bake | `compiler/realsas_compiler_services/export/runtime_deploy_bake.py` | PROMOTED |
 | Numerical LBS probe | `compiler/realsas_compiler_services/numerics/lbs.py` | PROMOTED |
-| IRIS persistence/substrate adapter | source classified Compiler-owned | **NEXT SOURCE-OWNERSHIP PROMOTION** |
-| Motion probe / playback measurement | historical authority under audit | PENDING AFTER SUBSTRATE SEAM |
+| Motion probe / playback measurement | historical authority under audit | **NEXT HISTORICAL SEMANTIC PROMOTION** |
 | Owner attribution + bounded repair/re-proof | historical authority under audit | PENDING |
 | CDT / BBW-KKT / ARAP / XPBD/contact | competing historical authorities | SOURCE-DIFF REQUIRED |
 
@@ -61,7 +61,7 @@ See `compiler/README.md` for the logical layer map.
 - Global architecture refreeze: **NOT PERFORMED**
 - Formal Family-1 selection: **BLOCKED**
 - Real-family FIT: **NOT AUTHORIZED**
-- Current work: **Compiler source-ownership normalization + historical proof/runtime promotion**
+- Current work: **Compiler physical source normalization + historical proof/runtime promotion**
 
 ## Promotion rule
 

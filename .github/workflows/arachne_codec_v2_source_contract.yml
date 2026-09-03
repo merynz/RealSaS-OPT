@@ -16,7 +16,7 @@ on:
 jobs:
   arachne-codec-v2-source-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 65
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -55,10 +55,14 @@ jobs:
         env: *det_env
         run: |
           python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_encoder_bypass_bound_diagnostic.py
-      - name: Diagnose clean ID-bound Codec A0 pair geometry
+      - name: Diagnose clean ID-bound Codec A0 point-control pair geometry
         env: *det_env
         run: |
           python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_pair_geometry_bound_diagnostic.py
+      - name: Diagnose complete canonical V2 pair contract
+        env: *det_env
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_full_pair_contract_bound_diagnostic.py
       - name: Verify canonical skin target row binding and frozen behavioral panel
         env: *det_env
         run: |

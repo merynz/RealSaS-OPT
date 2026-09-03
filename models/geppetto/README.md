@@ -1,39 +1,33 @@
 # Geppetto
 
-Geppetto is the learned anonymous skeleton/control proposal subsystem.
+Geppetto is the RealSaS learned anonymous skeleton/control proposal subsystem.
+
+## Current mainline
+
+Current V2 inference source is promoted at:
+
+`models/geppetto/v2/`
+
+The three implementation modules are byte-identical to their audited source counterparts in `experiments/geppetto_arachne_r6_20260901/`:
+
+- `geppetto_candidate_v2.py`
+- `geppetto_conditioning_v2.py`
+- `geppetto_checkpoint_v2.py`
+
+The dated experiment tree remains intact as provenance and contains older V1 architecture, training experiments, capacity diagnostics and behavioral panels.
 
 ## Authority boundary
 
-Geppetto consumes admitted `RiggingSurfaceIR`-derived conditioning and proposes anonymous, multimodal control/joint evidence. Its product-facing boundary is `SkeletonProposalIR`.
+Geppetto consumes admitted `RiggingSurfaceIR`-derived conditioning and emits anonymous, multimodal control evidence as `SkeletonProposalIR`.
 
-Geppetto does **not** own canonical joint IDs, the final root/tree/forest, legal graph synthesis, skeleton qualification, product state or proof. Those remain Compiler-owned.
+Geppetto does **not** own canonical joint IDs, final root/tree/forest selection, graph legality, skeleton qualification, product state or proof. Those remain Compiler-owned.
 
-## Current source candidate
+## Why training is not promoted yet
 
-Current V2 candidates are mixed into:
+Current V2 loss/train code still reaches a shared historical teacher-target contract (`training_targets_v1.py`) that itself depends on the older `conditioning_v1.py` lane. That may still be scientifically valid training apparatus, but it is not automatically part of current V2 inference ownership.
 
-`experiments/geppetto_arachne_r6_20260901/`
+It remains under audit rather than being smuggled into mainline merely to make the folder look complete.
 
-Known current Geppetto files include the V2 candidate architecture, V2 conditioning, checkpoint, loss, train/eval and capacity apparatus. V1 and legacy files in the same folder are not assumed current; audit must classify them individually.
+## Older source
 
-## Target production layout
-
-```text
-models/geppetto/
-  README.md
-  src/
-    model.py
-    conditioning.py
-    checkpoint.py
-  training/
-    losses.py
-    train.py
-  evaluation/
-  tests/
-```
-
-Teacher projection, synthetic oracle and truth adapters are not automatically model-core code. They enter `training/` only if their information firewall is still valid and they are required by the current training contract; otherwise they remain experimental provenance.
-
-## Compiler firewall
-
-The model may construct `SkeletonProposalIR` objects through the public typed proposal contract. Proposal sequence position, learned root logits, parent logits and support logits are evidence only. Compiler qualification is the only path to `QualifiedSkeletonIR`.
+`geppetto_candidate_v1.py`, `geppetto_loss_v1.py`, V1 candidate config and oracle/behavioral harnesses remain experiment/historical evidence unless separately promoted by an explicit decision.

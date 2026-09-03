@@ -9,12 +9,19 @@ on:
       - 'canonical/R6_ORACLE_SUBSTRATE_INFORMATION_SUFFICIENCY_PREREG_20260903.md'
       - 'canonical/R6_ARACHNE_ORACLE_SUBSTRATE_PREREG_20260903.md'
       - 'canonical/R6_ARACHNE_ORACLE_SUBSTRATE_HETEROGENEOUS_PREREG_20260903.md'
+      - 'canonical/MWB2_DIRECTIONAL_BEHAVIORAL_PREREG_20260903.md'
+      - 'canonical/MWB2_DIRECTIONAL_BEHAVIORAL_CLOSURE_20260903.md'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
       - 'compiler/realsas_compiler_core/proof_engine.py'
       - 'compiler/realsas_compiler_core/skin.py'
       - 'compiler/realsas_compiler_core/rig.py'
+      - 'compiler/realsas_compiler_core/mwb2.py'
+      - 'compiler/realsas_compiler_core/mwb2_skin.py'
+      - 'compiler/realsas_compiler_core/mesh_binding.py'
       - 'compiler/test_proof_engine_source_v1.py'
+      - 'compiler/test_mwb2_source_v1.py'
+      - 'compiler/test_mwb2_directional_behavioral_v1.py'
       - 'tests/iris/**'
       - '.github/workflows/architecture_freeze_source_gate.yml'
   push:
@@ -28,12 +35,19 @@ on:
       - 'canonical/R6_ORACLE_SUBSTRATE_INFORMATION_SUFFICIENCY_PREREG_20260903.md'
       - 'canonical/R6_ARACHNE_ORACLE_SUBSTRATE_PREREG_20260903.md'
       - 'canonical/R6_ARACHNE_ORACLE_SUBSTRATE_HETEROGENEOUS_PREREG_20260903.md'
+      - 'canonical/MWB2_DIRECTIONAL_BEHAVIORAL_PREREG_20260903.md'
+      - 'canonical/MWB2_DIRECTIONAL_BEHAVIORAL_CLOSURE_20260903.md'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
       - 'compiler/realsas_compiler_core/proof_engine.py'
       - 'compiler/realsas_compiler_core/skin.py'
       - 'compiler/realsas_compiler_core/rig.py'
+      - 'compiler/realsas_compiler_core/mwb2.py'
+      - 'compiler/realsas_compiler_core/mwb2_skin.py'
+      - 'compiler/realsas_compiler_core/mesh_binding.py'
       - 'compiler/test_proof_engine_source_v1.py'
+      - 'compiler/test_mwb2_source_v1.py'
+      - 'compiler/test_mwb2_directional_behavioral_v1.py'
       - 'tests/iris/**'
       - '.github/workflows/architecture_freeze_source_gate.yml'
 
@@ -51,9 +65,9 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install numpy pillow pytest scipy
           python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-      - name: Compile current learner source
+      - name: Compile current learner and deterministic consumer source
         run: |
-          python -m py_compile canonical/architecture_freeze_gate_v1.py experiments/iris_reprojection_v2_20260831/*.py experiments/geppetto_arachne_r6_20260901/*.py compiler/realsas_compiler_core/proof_engine.py compiler/test_proof_engine_source_v1.py
+          python -m py_compile canonical/architecture_freeze_gate_v1.py experiments/iris_reprojection_v2_20260831/*.py experiments/geppetto_arachne_r6_20260901/*.py compiler/realsas_compiler_core/proof_engine.py compiler/realsas_compiler_core/mwb2.py compiler/realsas_compiler_core/mwb2_skin.py compiler/realsas_compiler_core/mesh_binding.py compiler/test_proof_engine_source_v1.py compiler/test_mwb2_source_v1.py compiler/test_mwb2_directional_behavioral_v1.py
       - name: Verify architecture is family-independent and freeze-eligible
         run: |
           python canonical/architecture_freeze_gate_v1.py --repo-root . | tee architecture-freeze-candidate.json
@@ -62,7 +76,7 @@ jobs:
         with:
           name: architecture-freeze-candidate
           path: architecture-freeze-candidate.json
-      - name: Run current generic-strength and behavioral learner gates
+      - name: Run current generic-strength and behavioral learner/consumer gates
         id: generic_tests
         env:
           PYTHONPATH: .
@@ -79,6 +93,8 @@ jobs:
             tests/iris/test_iris_v2_privileged_input_firewall_v1.py \
             tests/iris/test_iris_v2_surface_relations_v1.py \
             compiler/test_proof_engine_source_v1.py \
+            compiler/test_mwb2_source_v1.py \
+            compiler/test_mwb2_directional_behavioral_v1.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_loss_accumulator_v2.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py \

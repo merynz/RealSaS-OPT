@@ -10,17 +10,16 @@
 
 ## Purpose
 
-Single status entrypoint for post-freeze behavioral hardening. Detailed causal evidence remains in subsystem records. Historical failures are preserved; later causal corrections reclassify claims rather than erasing runs.
+Single status entrypoint for post-freeze behavioral hardening. Detailed causal evidence remains in subsystem records. Historical failures are preserved; causal corrections reclassify claims rather than erasing runs.
 
-## Gate 1 — Geppetto train/decode/Compiler behavior
+## Gate 1 — Geppetto
 
 **Status:** `PASS / CLOSED`
 
-Canonical detail:
-`canonical/GEPPETTO_V2_BEHAVIORAL_CLOSURE_20260903.md`
+Canonical detail: `canonical/GEPPETTO_V2_BEHAVIORAL_CLOSURE_20260903.md`
 
-Verification:
-- generic behavioral panel and independent witness PASS through actual shipping proposal / Compiler mechanical authority;
+- optimize -> shipping proposal -> Compiler mechanical authority PASS;
+- heterogeneous panel + independent witness PASS;
 - cross-region `chilecentral -> westus3` replay PASS;
 - no real-family repair constants.
 
@@ -35,10 +34,9 @@ Records:
 
 Verification:
 - `33751592814` westcentralus: firewall `4/4`, combined IRIS `24/24` PASS;
-- `33751730077` westus3: firewall `4/4`, combined IRIS `24/24` PASS;
-- architecture-freeze prerequisite run `33751730186`: `65/65 PASS` before later Codec changes.
+- `33751730077` westus3: firewall `4/4`, combined IRIS `24/24` PASS.
 
-Historical learned IRIS checkpoints/metrics under the superseded privileged-input contract remain `QUARANTINED`.
+Historical learned IRIS results under the superseded privileged-input contract remain `QUARANTINED`.
 
 ## Architecture candidate state
 
@@ -47,82 +45,74 @@ Old candidate fingerprint from run `33751730186`:
 
 **Status:** `STALE CANDIDATE ONLY / NOT A SEAL`
 
-Ongoing Codec/harness changes make this fingerprint ineligible for promotion. Family selection remains blocked.
+Ongoing Codec/harness changes invalidate promotion. Family selection remains blocked.
 
-## Gate 3 — Arachne / SkinFieldCodec behavioral seam
+## Gate 3 — Arachne / SkinFieldCodec
 
-**Status:** `BOUND_V2 RUNNING — V1 N>=10 IMPLEMENTATION EVIDENCE INVALID`
+**Status:** `FAIL_A0 — CLEAN SHARP WORST-ROW STABILITY SEAM`
 
-Preregistration:
-`canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md`
+Records:
+- preregistration: `canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md`
+- V1 failure/correction: `canonical/ARACHNE_CODEC_BEHAVIORAL_FAILURE_20260903.md`
+- first clean Bound V2 run: `canonical/ARACHNE_CODEC_BOUND_V2_FIRST_RUN_20260903.md`
 
-Failure/correction record:
-`canonical/ARACHNE_CODEC_BEHAVIORAL_FAILURE_20260903.md`
-
-Frozen witnesses and all scientific thresholds/protocols remain unchanged:
-- `chain_blend_3`, seed `20260921`;
-- `branch_blend_4`, seed `20260922`;
-- `sharp_fork_5`, seed `20260923`.
-
-Authority chain remains:
-
+Frozen authority chain:
 `Codec A0 -> frozen Codec -> Arachne A1 -> SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`
 
-### Historical V1 observation
+### Independent source bug closed
 
-Run `33752571671`, job `100639284377`:
-- chain full PASS;
-- branch reported FAIL_A0;
-- sharp reported FAIL_A0.
-
-### Confirmed independent source bug
-
-Historical Codec active-weighted CE changed relative targets inside a simplex row, so exact teacher W was not stationary.
+Historical per-class active-weighted CE made exact teacher W non-stationary.
 
 Repairs:
-- `f0fe52ab625695d46bed7007acba39fe4cdfb248` — active emphasis changed to teacher-only row scalar;
+- `f0fe52ab625695d46bed7007acba39fe4cdfb248` — row-scalar active emphasis;
 - `9692ac12a44769212906616b6bca13861022d42c` — exact-truth stationarity regression.
 
-Post-repair exact teacher gradient is approximately numerical zero (`4.43e-17`). This finding remains valid independently of the panel harness issue.
+Current exact-truth CE logit gradient max: approximately `4.43e-17` PASS.
 
-### Critical V1 harness falsification
+### V1 harness evidence corrected
 
-`ArachneConditioningAdapter` sorts `surface_id` lexicographically. The V1 panel generated teacher W/rest rows in numeric witness creation order and did not rebind them to `conditioning.surface_ids`.
+V1 failed to rebind synthetic teacher W/rest rows from numeric creation order to lexicographically sorted canonical `conditioning.surface_ids` for N>=10.
 
-Consequences:
-- `chain_blend_3`, N=9: identity order, unaffected;
-- `branch_blend_4`, N=12: conditioning order `0,1,10,11,2,...,9`;
-- `sharp_fork_5`, N=15: conditioning order `0,1,10,11,12,13,14,2,...,9`.
+Thus historical branch/sharp representation-capacity conclusions are `INVALID / CONTAMINATED_BY_ROW_BINDING_BUG`.
 
-Therefore branch/sharp V1 targets were attached to wrong canonical surface rows.
+Historical contaminated free-latent and pair-geometry diagnostics remain in repo for provenance but are not active authority.
 
-Causal replay `33756078567`, job `100650698374`, `mexicocentral`, changed only ID-axis binding while preserving seed/model/LR/WD/horizon/threshold/stability:
-- branch: sustained A0 PASS at step `544`, p95 `0.0287868`, deformation ratio `0.0104174`;
-- sharp: final individual PASS p95 `0.0390133`, deformation ratio `0.00743765`, but only `2` consecutive PASS checks by frozen step `1536`.
+### Bound V2 — first clean run
 
-Thus:
+Workflow `33756424156`, job `100651837229`, `westus`:
 
-`V1_BRANCH_SHARP_CAPACITY_CLAIMS = INVALID / CONTAMINATED_BY_ROW_BINDING_BUG`
+`chain_blend_3`:
+- A0 sustained PASS step `480`;
+- A1 shipping/Compiler/LBS sustained PASS step `320`.
 
-Earlier free-latent and pair-geometry representation diagnostics used the same bad binding. Their numeric logs remain provenance, but they cannot justify source architecture changes.
+`branch_blend_4`:
+- canonical row permutation `[0,1,10,11,2,3,4,5,6,7,8,9]`;
+- A0 sustained PASS step `768`, p95 `0.0214583`, deformation ratio `0.00767379`;
+- A1 sustained PASS step `352`, qualified p95 `0.0422459`, deformation ratio `0.0129287`.
 
-### Active successor authority
+`sharp_fork_5`:
+- canonical row permutation `[0,1,10,11,12,13,14,2,3,4,5,6,7,8,9]`;
+- catastrophic V1 plateau disappears;
+- final A0 p95 `0.0448788` and deformation ratio `0.00790533` individually PASS;
+- row p95 oscillates around frozen `0.05` ceiling;
+- only one consecutive PASS remains at step `1536`;
+- authoritative status `FAIL_A0`; A1 not run.
 
-Historical V1 harness is preserved unchanged:
-`test_arachne_v2_behavioral_panel.py`
+Therefore current clean seam is:
 
-Corrected successor:
-`test_arachne_v2_behavioral_panel_bound_v2.py`
+`A0_OBJECTIVE_WORST_ROW_STABILITY != A0_P95_ACCEPTANCE_STABILITY`
 
-V2 changes only canonical target-axis binding. Witness definitions, seeds, architectures, objectives, optimizer settings, horizons, thresholds and three-consecutive-PASS rule are unchanged.
+It is not supported to claim sharp field representational incapacity.
 
-Active CI now requires:
-1. Codec exact-truth stationarity regression;
-2. canonical row-binding cause regression;
-3. full Bound V2 A0 -> A1 -> Compiler -> LBS frozen panel;
-4. Arachne/Codec source gates.
+### Current causal test
 
-No representation repair is authorized until Bound V2 produces clean evidence.
+ID-bound A/B diagnostic now compares, under identical seed/model/LR/WD/horizon and frozen acceptance:
+- current A0 objective;
+- current A0 objective + generic top-10% row-L1 tail with weight `1.0`.
+
+This tail operator already exists in the generic A1 contract. The frozen Bound V2 panel itself is unchanged.
+
+No Codec source repair is authorized until this causal result is observed.
 
 ## Later gates — not yet opened
 

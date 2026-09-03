@@ -1,0 +1,61 @@
+{
+  "schema": "RealSaS.AuthoredMotionProofPromotion.v1",
+  "date": "2026-09-03",
+  "status": "PROMOTE_REBIND_CURRENT_V4",
+  "historical_semantic_source": {
+    "archive_sha256": "03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130",
+    "path": "compiler/realsas_deformation/motion_proof.py",
+    "sha256": "bf71197c7eb26efc196dcf9fa30be4c776efa78863acb0f36e3cabed7dff85a3",
+    "disposition": "PROMOTE_REBIND",
+    "byte_copy": false
+  },
+  "current_sources": [
+    {
+      "path": "compiler/realsas_compiler_services/proof/motion_probe.py",
+      "git_blob_sha": "d8acfba984d030e602ae1df96272a369d4d27daa",
+      "sha256": "9bd9762be87e5b3f41f577ab4cc3bacbadfc238bb38431c871ef0c5aed9b73a2"
+    },
+    {
+      "path": "compiler/realsas_compiler_services/proof/motion_probe_geometry.py",
+      "git_blob_sha": "fe7e7b29ea252108e4c2ef030434e0ef0520811f",
+      "sha256": "e26a2858db83cf7bb4aee0ab4ba0c1688f2b3a10bbc600f34dc99592c4b12e22"
+    },
+    {
+      "path": "compiler/realsas_compiler_core/proof_engine.py",
+      "git_blob_sha": "4dfe53e2f5895d62673e5636b0ef70739cfea466",
+      "sha256": "4d539d3d026a92867ed41a49fc2652417fe305f81fdb72d5e038eb8c1709cd41"
+    }
+  ],
+  "historical_semantics_preserved": [
+    "EXERCISE_AUTHORED_MOTION_ITSELF",
+    "MEASURE_DEFORMATION_OVER_TIME",
+    "FAIL_CLOSED_NONFINITE_OR_DEGENERATE_DEFORMATION",
+    "MEASURE_EDGE_STRETCH_AND_TRIANGLE_AREA_CONSEQUENCES",
+    "MEASURE_LOOP_SEAM_RETURN_CONSEQUENCE",
+    "MEASUREMENT_DOES_NOT_IMPLY_CAUSAL_OWNER"
+  ],
+  "current_authority_rebind": {
+    "product": "RealSaS.CanonicalPuppetGraph.v3",
+    "motion": "RealSaS.MotionStateIR.v2",
+    "transform_space": "PUPPET_LOCAL_2D_2P5D",
+    "proof_plan": "RealSaS.ProofPlanIR.v1",
+    "measurement_report": "RealSaS.MeasurementReportIR.v1",
+    "proof_status_owner": "compiler/realsas_compiler_core/proof_engine.py",
+    "service_is_product_authority": false,
+    "full_3d_reconstruction_authority": false
+  },
+  "generic_policy": {
+    "family_specific_constants": false,
+    "asset_specific_constants": false,
+    "teacher_truth_used": false,
+    "source_mesh_truth_used": false
+  },
+  "local_regression": {
+    "test": "tests/compiler/test_authored_motion_probe_v1.py",
+    "result": "2 passed",
+    "bounded_4deg_loop": "PASS",
+    "collapse_scale_dynamic_deformation": "FAIL",
+    "failure_signature_family": "area_change_exceeded",
+    "causal_owner_attribution": "NOT_PERFORMED"
+  }
+}

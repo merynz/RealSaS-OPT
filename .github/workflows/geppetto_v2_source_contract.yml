@@ -16,24 +16,6 @@ on:
       - 'compiler/realsas_compiler_core/proof_engine.py'
       - 'compiler/test_proof_engine_source_v1.py'
       - '.github/workflows/geppetto_v2_source_contract.yml'
-  push:
-    branches:
-      - source/generic-completion-v1-20260902
-      - architecture/v4-generic-strength-source-completion-20260902
-    paths:
-      - 'experiments/geppetto_arachne_r6_20260901/geppetto_*_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/training_targets_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/train_geppetto_r6_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/eval_geppetto_r6_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py'
-      - 'compiler/realsas_compiler_core/proof_engine.py'
-      - 'compiler/test_proof_engine_source_v1.py'
-      - '.github/workflows/geppetto_v2_source_contract.yml'
 
 jobs:
   geppetto-v2-source-contract:
@@ -52,23 +34,15 @@ jobs:
       - name: Compile Geppetto V2 source
         run: |
           python -m py_compile \
-            experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py \
-            experiments/geppetto_arachne_r6_20260901/conditioning_v2.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_candidate_v2.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_loss_v2.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_train_v2.py \
-            experiments/geppetto_arachne_r6_20260901/geppetto_eval_v2.py \
-            experiments/geppetto_arachne_r6_20260901/train_geppetto_r6_v1.py \
-            experiments/geppetto_arachne_r6_20260901/eval_geppetto_r6_v1.py \
-            experiments/geppetto_arachne_r6_20260901/geppetto_checkpoint_v2.py \
-            experiments/geppetto_arachne_r6_20260901/geppetto_cpu_capacity_v2.py \
-            experiments/geppetto_arachne_r6_20260901/training_targets_v2.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py \
             compiler/realsas_compiler_core/proof_engine.py \
             compiler/test_proof_engine_source_v1.py
-      - name: Diagnose multimodal ownership churn
+      - name: Diagnose uncertainty gradient leakage into shared latent
         env:
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
@@ -80,6 +54,7 @@ jobs:
           import json
           import numpy as np
           import torch
+          from torch import nn
           from experiments.geppetto_arachne_r6_20260901.geppetto_candidate_v2 import GeppettoCandidateV2
           from experiments.geppetto_arachne_r6_20260901.geppetto_conditioning_v2 import GeppettoConditioningAdapterV2
           from experiments.geppetto_arachne_r6_20260901.geppetto_loss_v2 import GeppettoLossV2, GeppettoLossWeightsV2
@@ -93,62 +68,14 @@ jobs:
           torch.use_deterministic_algorithms(True)
           spec = next(x for x in WITNESSES if x.name == 'fork_5')
 
-          class OwnershipLoss(GeppettoLossV2):
-              def __init__(self, variant):
-                  if variant == 'no_mode_rank':
-                      weights = GeppettoLossWeightsV2(mode_rank=0.0)
-                  elif variant == 'winner_owned':
-                      weights = GeppettoLossWeightsV2(position_primary=0.0, position_winner=5.0)
-                  else:
-                      weights = GeppettoLossWeightsV2()
-                  super().__init__(weights=weights, support_topk=4)
-                  self.variant = variant
-                  self.step = 0
-                  self.records = []
-                  self.assignments = []
+          class DetachInput(nn.Module):
+              def __init__(self, inner):
+                  super().__init__()
+                  self.inner = inner
+              def forward(self, x):
+                  return self.inner(x.detach())
 
-              def _match(self, output, b, target, J):
-                  q, t = super()._match(output, b, target, J)
-                  self.assignments.append({'step': self.step, 't': t.tolist()})
-                  return q, t
-
-              def _winner_indices(self, output, b, q, target_positions):
-                  base_wta = GeppettoLossV2._winner_indices(output, b, q, target_positions)
-                  map_idx = torch.argmax(output.position_mode_logits[b, q], dim=-1)
-                  modes = output.position_modes_normalized[b, q]
-                  dist = torch.linalg.norm(modes.detach() - target_positions[:, None, :], dim=-1)
-                  sorted_dist = torch.sort(dist, dim=-1).values
-                  logits = output.position_mode_logits[b, q].detach()
-                  map_logits = torch.gather(logits, 1, map_idx[:, None]).squeeze(1)
-                  wta_logits = torch.gather(logits, 1, base_wta[:, None]).squeeze(1)
-                  self.records.append({
-                      'step': self.step,
-                      'q': q.detach().cpu().tolist(),
-                      'map': map_idx.detach().cpu().tolist(),
-                      'wta': base_wta.detach().cpu().tolist(),
-                      'mismatch': int((map_idx != base_wta).sum().item()),
-                      'map_minus_wta_logit': (map_logits - wta_logits).cpu().tolist(),
-                      'wta_geom_margin': (sorted_dist[:, 1] - sorted_dist[:, 0]).cpu().tolist(),
-                      'mode_errors': dist.cpu().tolist(),
-                  })
-                  if self.variant == 'map_owned':
-                      return map_idx
-                  return base_wta
-
-          def summarize_switches(records, key):
-              query_switches = 0
-              step_switches = 0
-              prev = None
-              for r in records:
-                  cur = tuple(r[key])
-                  if prev is not None:
-                      c = sum(int(a != b) for a, b in zip(prev, cur))
-                      query_switches += c
-                      step_switches += int(c > 0)
-                  prev = cur
-              return {'query_switches': query_switches, 'step_switches': step_switches}
-
-          def run(variant):
+          def setup(variant):
               torch.manual_seed(spec.seed)
               np.random.seed(spec.seed)
               surface = _surface(spec)
@@ -159,13 +86,48 @@ jobs:
               sep = sep.masked_fill(torch.eye(len(teacher), dtype=torch.bool), float('inf'))
               unique_radius = 0.5 * float(sep.min())
               model = GeppettoCandidateV2(_config())
+              if variant == 'sigma_detached_hidden':
+                  model.log_sigma = DetachInput(model.log_sigma)
+              weights = GeppettoLossWeightsV2(position_nll=0.0) if variant == 'nll_zero' else GeppettoLossWeightsV2()
+              loss_fn = GeppettoLossV2(weights=weights, support_topk=4)
               optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
-              loss_fn = OwnershipLoss(variant)
+              return surface, conditioning, target, unique_radius, model, loss_fn, optimizer
+
+          def nll_gradient_probe(variant):
+              surface, conditioning, target, _, model, _, _ = setup(variant)
+              f = torch.as_tensor(conditioning.features, dtype=torch.float32)
+              p = torch.as_tensor(conditioning.positions_normalized, dtype=torch.float32)
+              m = torch.as_tensor(conditioning.valid_mask, dtype=torch.bool)
+              model.train()
+              out = model(f, p, m, decode_steps=len(target.positions_normalized))
+              q = torch.arange(len(target.positions_normalized))
+              tp = torch.as_tensor(target.positions_normalized, dtype=torch.float32)
+              nll = GeppettoLossV2._mixture_position_nll(out, 0, q, tp)
+              model.zero_grad(set_to_none=True)
+              nll.backward()
+              sigma_params = []
+              shared_params = []
+              for name, param in model.named_parameters():
+                  if param.grad is None:
+                      continue
+                  g = float(param.grad.norm().item())
+                  if 'log_sigma' in name:
+                      sigma_params.append(g)
+                  elif any(x in name for x in ('cells.', 'rel_query.', 'encoder.', 'start')):
+                      shared_params.append(g)
+              return {
+                  'nll': float(nll.detach()),
+                  'sigma_grad_norm_sum': float(sum(sigma_params)),
+                  'shared_latent_grad_norm_sum': float(sum(shared_params)),
+                  'shared_latent_grad_parameter_count': len(shared_params),
+              }
+
+          def run(variant):
+              surface, conditioning, target, unique_radius, model, loss_fn, optimizer = setup(variant)
               stable = 0
               pass_step = None
               checks = []
               for step in range(1, MAX_STEPS + 1):
-                  loss_fn.step = step
                   losses = geppetto_train_step_v2(model, optimizer, conditioning, [target], loss_fn=loss_fn)
                   if step != 1 and step % CHECK_EVERY:
                       continue
@@ -180,47 +142,24 @@ jobs:
                       'count': int(shipping['generated_count']),
                       'p95': float(shipping['matched_p95']),
                       'stable': stable,
+                      'position_nll': float(losses['position_nll']),
                       'position_primary': float(losses['position_primary']),
-                      'position_winner': float(losses['position_winner']),
-                      'mode_rank': float(losses['mode_rank']),
                       'stop': float(losses['stop']),
                   })
                   if stable >= REQUIRED_STABLE_PASSES:
                       pass_step = step
                       break
-
-              records = loss_fn.records
-              mismatch_records = [r for r in records if r['mismatch']]
-              near_geom_ties = [
-                  r for r in records
-                  if min(r['wta_geom_margin']) < 1e-4
-              ]
-              assign_switches = 0
-              prev_t = None
-              for r in loss_fn.assignments:
-                  cur = tuple(r['t'])
-                  if prev_t is not None and cur != prev_t:
-                      assign_switches += 1
-                  prev_t = cur
               return {
                   'variant': variant,
+                  'gradient_probe': nll_gradient_probe(variant),
                   'pass_step': pass_step,
                   'stable_passes': stable,
                   'final': _shipping(model, conditioning, target),
-                  'map_switches': summarize_switches(records, 'map'),
-                  'wta_switches': summarize_switches(records, 'wta'),
-                  'assignment_switch_steps': assign_switches,
-                  'mismatch_step_count': len(mismatch_records),
-                  'mismatch_query_events': sum(r['mismatch'] for r in records),
-                  'near_wta_geometry_tie_steps': len(near_geom_ties),
-                  'first_mismatch_records': mismatch_records[:8],
-                  'first_near_geometry_ties': near_geom_ties[:8],
                   'checks': checks,
               }
 
-          variants = ('current', 'no_mode_rank', 'map_owned', 'winner_owned')
-          result = {v: run(v) for v in variants}
-          print('GEPPETTO_MODE_OWNERSHIP_CAUSAL_DIAGNOSTIC=' + json.dumps(result, sort_keys=True))
+          result = {v: run(v) for v in ('current', 'nll_zero', 'sigma_detached_hidden')}
+          print('GEPPETTO_NLL_SHARED_LATENT_CAUSAL_DIAGNOSTIC=' + json.dumps(result, sort_keys=True))
           PY
       - name: Run Geppetto V2 source and behavioral gates
         env:

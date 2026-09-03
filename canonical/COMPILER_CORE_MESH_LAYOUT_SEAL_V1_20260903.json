@@ -1,0 +1,24 @@
+{
+  "schema": "RealSaS.CompilerCoreMeshLayoutSeal.v1",
+  "date": "2026-09-03",
+  "status": "PROMOTED_WITH_COMPATIBILITY_FACADES",
+  "canonical_home": "compiler/realsas_compiler_core/mesh",
+  "byte_preserved_implementations": [
+    {"canonical_path":"compiler/realsas_compiler_core/mesh/mwb2.py","former_path":"compiler/realsas_compiler_core/mwb2.py","git_blob_sha":"ff1376c190988c7f746e22496854a7cbe5bceeef"},
+    {"canonical_path":"compiler/realsas_compiler_core/mesh/mesh_binding.py","former_path":"compiler/realsas_compiler_core/mesh_binding.py","git_blob_sha":"f9795c988084676e5abd1a12aad37ed5012732e2"},
+    {"canonical_path":"compiler/realsas_compiler_core/mesh/mwb2_skin.py","former_path":"compiler/realsas_compiler_core/mwb2_skin.py","git_blob_sha":"43ed592f07888e08aca0f9e7ffd4557e24cd3655"}
+  ],
+  "compatibility_paths": [
+    "compiler/realsas_compiler_core/mwb2.py",
+    "compiler/realsas_compiler_core/mesh_binding.py",
+    "compiler/realsas_compiler_core/mwb2_skin.py"
+  ],
+  "authority": {
+    "editable_mesh_qualification": true,
+    "mesh_skin_transfer": true,
+    "canonical_skeleton_authority": false,
+    "learned_skin_authority": false,
+    "appearance_authority": false,
+    "motion_authority": false
+  }
+}

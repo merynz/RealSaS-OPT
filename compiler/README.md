@@ -17,23 +17,30 @@ Physical normalization is active. A compatibility file at an older flat path is 
 | Observation -> substrate | `substrate/{surface.py,local_geometry.py,iris_v2.py}` | `surface.py`, `local_geometry.py` facades | evidence handoff, mechanical substrate construction and deterministic local geometry |
 | Rig qualification | `rig.py` | — | proposal -> qualified skeleton, canonical joint authority |
 | Skin qualification | `skin.py` | — | proposal -> qualified skin legality/normalization |
-| Mesh / binding | `mwb2.py`, `mwb2_skin.py`, `mesh_binding.py` | — | directional editable mesh construction and mesh/skin binding |
+| Mesh / binding | `mesh/{mwb2.py,mwb2_skin.py,mesh_binding.py}` | `mwb2.py`, `mwb2_skin.py`, `mesh_binding.py` facades | directional editable mesh construction, qualification and mesh/skin binding |
 | Appearance | `appearance.py` | — | observed/cross-view/completion appearance binding |
 | Motion | `motion.py` | — | current typed preset motion construction/qualification |
 | Deformation measurements | `deformation.py` | services numerics | mesh/skin measurement adapters |
 | Proof binding | `proof_engine.py` | services proof | V4 proof-plan/domain/product proof binding |
 | Solver policy | `solver_registry.py` | — | fail-closed solver capability registry / provenance policy |
 
-## Substrate authority
+## Normalized core packages
 
-`realsas_compiler_core/substrate/` is now the canonical physical home for deterministic surface/substrate code.
+### `substrate/`
 
 - `substrate/surface.py` is byte-identical to the former flat `surface.py` implementation.
 - `substrate/local_geometry.py` is byte-identical to the former flat `local_geometry.py` implementation.
 - `substrate/iris_v2.py` is byte-identical to the audited former experiment `persistence_adapter_v2.py`.
-- the old flat `surface.py` and `local_geometry.py` paths remain compatibility facades so existing imports do not break.
+- old flat `surface.py` and `local_geometry.py` remain compatibility facades.
 
-The relocation is sealed by `canonical/COMPILER_CORE_SUBSTRATE_LAYOUT_SEAL_V1_20260903.json`.
+Seal: `canonical/COMPILER_CORE_SUBSTRATE_LAYOUT_SEAL_V1_20260903.json`.
+
+### `mesh/`
+
+- `mesh/mwb2.py`, `mesh/mesh_binding.py` and `mesh/mwb2_skin.py` are byte-identical relocations of the current flat implementations.
+- old flat mesh paths remain compatibility facades, preserving current consumer imports while making the canonical source obvious.
+
+Seal: `canonical/COMPILER_CORE_MESH_LAYOUT_SEAL_V1_20260903.json`.
 
 ## Promoted service index
 
@@ -51,10 +58,10 @@ The remaining flat core should converge dependency-safely toward semantic packag
 
 ```text
 contracts/
-substrate/        # started
+substrate/        # normalized
 rig/
 skin/
-mesh/
+mesh/             # normalized
 appearance/
 motion/
 product/

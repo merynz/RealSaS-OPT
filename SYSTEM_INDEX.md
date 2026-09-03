@@ -24,7 +24,8 @@ Models emit evidence/proposals only. Compiler qualification remains authoritativ
 | Legacy surface/local-geometry imports | `compiler/realsas_compiler_core/{surface.py,local_geometry.py}` | COMPATIBILITY FACADES ONLY |
 | Skeleton qualification | `compiler/realsas_compiler_core/rig.py` | CURRENT |
 | Skin qualification | `compiler/realsas_compiler_core/skin.py` | CURRENT |
-| MWB2 mesh + skin binding | `compiler/realsas_compiler_core/{mwb2.py,mwb2_skin.py,mesh_binding.py}` | CURRENT / BEHAVIORALLY HARDENED |
+| MWB2 mesh + skin binding | `compiler/realsas_compiler_core/mesh/{mwb2.py,mwb2_skin.py,mesh_binding.py}` | **CURRENT / PHYSICALLY NORMALIZED / BEHAVIORALLY HARDENED** |
+| Legacy mesh imports | `compiler/realsas_compiler_core/{mwb2.py,mwb2_skin.py,mesh_binding.py}` | COMPATIBILITY FACADES ONLY |
 | Appearance | `compiler/realsas_compiler_core/appearance.py` | CURRENT / BEHAVIORALLY HARDENED |
 | Motion | `compiler/realsas_compiler_core/motion.py` | CURRENT / BEHAVIORALLY HARDENED |
 | Deformation measurement | `compiler/realsas_compiler_core/deformation.py` + services numerics | CURRENT |
@@ -38,7 +39,7 @@ Models emit evidence/proposals only. Compiler qualification remains authoritativ
 | Owner attribution + bounded repair/re-proof | historical authority under audit | PENDING |
 | CDT / BBW-KKT / ARAP / XPBD/contact | competing historical authorities | SOURCE-DIFF REQUIRED |
 
-See `compiler/README.md` for the physical/logical layer map and `canonical/COMPILER_CORE_SUBSTRATE_LAYOUT_SEAL_V1_20260903.json` for the first core relocation seal.
+See `compiler/README.md` for the physical/logical layer map. Current relocation seals live under `canonical/COMPILER_CORE_*_LAYOUT_SEAL_*`.
 
 ## Runtime
 

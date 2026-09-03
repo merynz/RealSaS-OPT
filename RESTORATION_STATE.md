@@ -24,7 +24,7 @@ Promote still-valuable historical Compiler/runtime production knowledge **behind
 | Diagnostic failure-signature semantic rebind | **DONE / CI PASS** | `5665ecacb77c02e53297340249b0972981a5c4bc` |
 | Current learned-model source ownership promotion | **DONE IN CURRENT TREE** | `models/` + model READMEs + `SYSTEM_INDEX.md` |
 | IRIS -> Compiler substrate ownership seam | **DONE** | `compiler/realsas_compiler_core/substrate/iris_v2.py` |
-| Compiler substrate physical normalization | **DONE** | `bc443d063d4e804f5a19270e8a77c388f107` |
+| Compiler substrate physical normalization | **DONE** | `bc443d063d4d8f0bd52981ec2db5b99a795985e1` |
 | Compiler mesh physical normalization | **DONE** | `295b798b1fb40ccb1752afe9da9378dfe8734262` |
 | Direct authored-motion evaluator promotion | **RETRACTED** | `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json` |
 | Qualification-owned motion bake + fail-closed proof seam | **DONE** | `proof/motion_bake.py`, `proof/motion_frame_metrics.py`, current `proof_engine.py` |

@@ -1,0 +1,62 @@
+{
+  "authority": {
+    "canonical_compiler": "compiler/realsas_compiler_core/",
+    "canonical_product": "RealSaS.CanonicalPuppetGraph.v3",
+    "export_solver_replay": false,
+    "full_3d_reconstruction_authority": false,
+    "global_architecture_refreeze": false,
+    "real_family_fit_authorized": false,
+    "runtime_role": "subordinate_deployment_consumer"
+  },
+  "branch": "restoration/compiler-runtime-promotion-v1-20260903",
+  "decision": "PROMOTE_SOURCE_INTERLOCK__REAL_FAMILY_CLOSURE_STILL_REQUIRED",
+  "evidence_hashes": {
+    "deterministic_rss_sha256": "885aa41f3a4178cba9a7d65128565e481132ffe54d04d0099ee13000883a76ab",
+    "native_render_png_sha256": "4c48faa3bc83afa3a917df4c142de239276041d2b2b5369e36acbc40580f4cb9",
+    "projection_hash": "f29df7dae560de7ecb19cc120db7fa9e8022c94fc426d3a414495bd0e0386542",
+    "runtime_binary_sha256": "934fb4b17accad9bc721a0203b0219de7e8c1edb05e27e4af1ff9e436b676dd9",
+    "source_binding_sha256": "a590d0c58e2cb2e9974b1bd9a7c19850bba103cd39c12daa7acbae0e606990c6"
+  },
+  "fail_closed_limitations": [
+    "Dynamic ComponentOrderTrackIR runtime-bake semantics are not yet typed; any such track causes runtime bake ABSTAIN.",
+    "ComponentVisibilityTrackIR runtime-bake semantics are not yet typed; any such track causes runtime bake ABSTAIN.",
+    "Native runtime v2 projection requires one exact atlas payload per direction.",
+    "Raw texture bytes remain external content-addressed payloads and must match the product appearance lineage at materialization.",
+    "This is a current-like synthetic source-contract/native interlock, not a real-family FIT or generalization result."
+  ],
+  "local_verification": {
+    "clip_count": 1,
+    "current_like_v4_native_roundtrip": "PASS",
+    "deterministic_archive_double_write": "PASS",
+    "github_actions_used_for_this_milestone": false,
+    "native_clip_lookup": "PASS",
+    "native_reference_render": "PASS",
+    "native_runtime_abi_version": 3,
+    "native_runtime_binary_schema": "realSaS.RuntimeBinary.rsr.v2",
+    "proof_owned_bake_pytest": {"failed": 0, "passed": 2},
+    "python_compile": "PASS",
+    "runtime_v2_writer_pytest": {"failed": 0, "passed": 1},
+    "verification_environment": "local/container + restored exact native C++ runtime",
+    "view_count": 8
+  },
+  "projection_contract": {
+    "canonical_mesh_mutated": false,
+    "face_corner_uv_seams": "runtime-only vertex duplication",
+    "material_uv_convention": "NATIVE_PIXEL_CENTER_TO_NORMALIZED_UV_V1",
+    "native_uv_convention": "PNG_TOP_LEFT_NORMALIZED_UV_V1",
+    "native_v2_single_atlas_per_direction_required": true,
+    "proof_owned_frames_only": true,
+    "texture_payload_binding": "external content-addressed image bytes verified at materialization",
+    "uv_transform": "u_runtime=u_material; v_runtime=1-v_material"
+  },
+  "schema": "realsas.current_v4_native_runtime_interlock.v1",
+  "sealed_on": "2026-09-04",
+  "sources": {
+    "current_v4_projection": {"path": "compiler/realsas_compiler_services/export/current_v4_projection.py", "sha256": "b8de38873721d9afbfbae6c1aaa37b71c894ba1d2bc303d825c11e4e97c93ecc"},
+    "native_runtime_source_seal": "canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json",
+    "proof_engine": {"path": "compiler/realsas_compiler_core/proof_engine.py", "sha256": "4907812a42fedb24ab4ff065dd6beb2d8e5d6850c664e8d4259d19cd4de143e9"},
+    "proof_owned_motion_bake": {"path": "compiler/realsas_compiler_services/proof/motion_probe.py", "sha256": "5badc1635af3deb3d1033c9c2c110d468b4064e0c474ca34b63e6e13e9980995"},
+    "runtime_failure_signatures": {"path": "compiler/realsas_compiler_services/proof/failure_signatures.py", "sha256": "22266fa25c239f287bcc501f73dc0f53bade92d204fcc7792d768082b328c93c"},
+    "runtime_v2_writer": {"path": "compiler/realsas_compiler_services/export/runtime_v2.py", "sha256": "f6aa265e1dd0c3059cfd6fd8265fa26b1af5ca3e58e3a4ee963444d39f3f6d78"}
+  }
+}

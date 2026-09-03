@@ -1,0 +1,29 @@
+name: motion-deformation-behavioral-v1
+on:
+  pull_request:
+    paths:
+      - 'canonical/MOTION_DEFORMATION_BEHAVIORAL_PREREG_20260903.md'
+      - 'compiler/realsas_compiler_core/motion.py'
+      - 'compiler/realsas_compiler_core/v4.py'
+      - 'compiler/test_motion_deformation_behavioral_v1.py'
+      - '.github/workflows/motion_deformation_behavioral_v1.yml'
+permissions:
+  contents: read
+jobs:
+  motion-deformation-behavioral:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check numpy pytest
+      - name: Compile frozen motion behavioral apparatus
+        run: python -m py_compile compiler/realsas_compiler_core/motion.py compiler/test_motion_deformation_behavioral_v1.py experiments/geppetto_arachne_r6_20260901/verified_lbs_v1.py
+      - name: Run frozen motion deformation behavioral gate
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: '0'
+        run: python -m pytest -q -s compiler/test_motion_deformation_behavioral_v1.py

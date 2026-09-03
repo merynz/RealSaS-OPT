@@ -1,0 +1,58 @@
+{
+  "schema": "RealSaS.P0DirectionalBindingRuntimeInterlockClosure.v1",
+  "date": "2026-09-04",
+  "source_branch": "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
+  "restoration_base_commit": "fe1fc8f8dec6f43cc483d2987a3f82eed70c5f2f",
+  "source_head_commit": "a5edb2b23fc4dd26c7aab2050954227f81964304",
+  "disposition": {
+    "directional_joint_view_binding": "SOURCE_AND_MATHEMATICAL_CLOSURE_READY",
+    "qualified_directional_motion_evaluator": "SOURCE_AND_MATHEMATICAL_CLOSURE_READY",
+    "typed_motion_provider": "CURRENT_FAIL_CLOSED_AUTHORITY",
+    "proof_owned_motion_bake": "CURRENT",
+    "current_v4_to_native_v2_projection": "SOURCE_CLOSURE_READY",
+    "pure_native_v2_writer": "VALID_KEEP",
+    "sealed_cpp_runtime_execution": "PENDING_RUNNER_EXECUTION",
+    "real_family_fit": "NOT_AUTHORIZED"
+  },
+  "authority_invariants": [
+    "mechanical_joint_vec3_xy_is_not_directional_raster_xy",
+    "joint_pivots_are_projected_only_through_compiler_qualified_surface_to_raster_binding",
+    "rank3_projection_requires_joint_affine_hull_qualification",
+    "proof_engine_rejects_arbitrary_motion_bake_callables",
+    "proof_motion_pass_requires_typed_hash_bound_directional_provider_and_exact_bound_bake",
+    "runtime_static_xy_comes_from_proof_owned_bake_rest_not_mesh_P_xy",
+    "runtime_frames_are_the_same_proof_owned_bake_frames_no_export_solver_replay",
+    "runtime_uv_comes_from_authoritative_local_donor_raster_xy_under_native_cpp_sampler_contract",
+    "cross_view_or_completion_texture_projection_fails_closed_until_atlas_authority_is_qualified",
+    "runtime_consumption_proof_domain_is_pre_export_contract_compatibility_only",
+    "sealed_cpp_open_sample_render_is_a_separate_post_export_interlock"
+  ],
+  "source_blobs": {
+    "compiler/realsas_compiler_core/directional_binding.py": "c71c9924175568d442d010f2ae4943a7596cbb54",
+    "compiler/realsas_compiler_services/proof/directional_motion_evaluator.py": "7b364328016219c864efa355a8c89a46ad1eea13",
+    "compiler/realsas_compiler_services/proof/directional_motion_provider.py": "7e4b8ae00156ceefc4b11e8085199089a2eeee8e",
+    "compiler/realsas_compiler_core/proof_engine.py": "821b4b8be15428e8062d9866eba79664750c51d8",
+    "compiler/realsas_compiler_services/export/current_v4_runtime_v2.py": "2630719294044c97f0fd47971fb79b9dde6fb862",
+    "compiler/realsas_compiler_services/export/runtime_v2.py": "92052182a88ed30e8c1b8232973dcb1a9da414c6",
+    "tests/compiler/test_directional_joint_view_binding_v1.py": "8eac9ebbcd4c627516a9887760ffc858618ee9b6",
+    "tests/compiler/test_current_v4_runtime_v2_projection_v1.py": "4198fc2b841ef45a8f51a372b2ebf3b58990e758",
+    "tests/runtime/current_v4_native_package_probe.cpp": "34b48fce61e465f1f7547a0ae0d119a3e003cee0"
+  },
+  "verification": {
+    "source_dependency_audit": "PASS",
+    "invalid_mechanical_P_xy_evaluator_present": false,
+    "directional_binding_exact_affine_audit": "PASS",
+    "rank3_in_hull_out_of_hull_policy_audit": "PASS",
+    "rotation_only_2d_lbs_math_audit": "PASS",
+    "runtime_png_fixture_format_audit": "PASS",
+    "native_uv_half_pixel_contract_audit": "PASS_CORRECTED",
+    "github_actions_run_id": 33817253942,
+    "github_actions_job_id": 100852021809,
+    "github_actions_runner_id": 0,
+    "github_actions_steps": [],
+    "github_actions_interpretation": "JOB_DID_NOT_START_NOT_A_CODE_FAILURE",
+    "sealed_cpp_package_open_sample_render": "NOT_YET_EXECUTED_ON_CURRENT_SOURCE_HEAD"
+  },
+  "next_required_gate": "Execute one milestone gate that runs Python directional/projection E2E then opens the emitted .rss with sealed runtime/realsas_cpp and verifies exact source-binding/proof hashes plus 8-view sample/render.",
+  "fit_authorization": false
+}

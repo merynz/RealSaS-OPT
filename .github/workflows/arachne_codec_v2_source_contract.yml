@@ -39,7 +39,7 @@ jobs:
           PYTHONHASHSEED: '0'
         run: |
           python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_objective_causal_diagnostic.py
-      - name: Diagnose Codec A0 encoder vs decoder capacity
+      - name: Verify canonical skin target row binding and frozen behavioral panel
         env:
           PYTHONPATH: .
           OMP_NUM_THREADS: '1'
@@ -47,26 +47,8 @@ jobs:
           OPENBLAS_NUM_THREADS: '1'
           PYTHONHASHSEED: '0'
         run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_capacity_diagnostic.py
-      - name: Diagnose Codec explicit point-control geometry
-        env:
-          PYTHONPATH: .
-          OMP_NUM_THREADS: '1'
-          MKL_NUM_THREADS: '1'
-          OPENBLAS_NUM_THREADS: '1'
-          PYTHONHASHSEED: '0'
-        run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_pair_geometry_diagnostic.py
-      - name: Diagnose canonical skin target row binding
-        env:
-          PYTHONPATH: .
-          OMP_NUM_THREADS: '1'
-          MKL_NUM_THREADS: '1'
-          OPENBLAS_NUM_THREADS: '1'
-          PYTHONHASHSEED: '0'
-        run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_arachne_codec_target_row_alignment_diagnostic.py
-      - name: Run Arachne/codec source and behavioral gates
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel_bound_v2.py
+      - name: Run Arachne/codec source gates
         env:
           PYTHONPATH: .
           OMP_NUM_THREADS: '1'
@@ -77,5 +59,4 @@ jobs:
           python -m pytest -q -s \
             experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py \
             experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py \
-            experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py

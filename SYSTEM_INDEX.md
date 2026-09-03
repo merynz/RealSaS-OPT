@@ -32,16 +32,22 @@ Models emit evidence/proposals only. Compiler qualification remains authoritativ
 | Product composition | `compiler/realsas_compiler_core/{api.py,product.py,bundle_routes.py}` | CURRENT |
 | Proof binding | `compiler/realsas_compiler_core/proof_engine.py` | **CURRENT / AUTHORED-MOTION DYNAMIC PROOF PROMOTED** |
 | Dynamic authored-motion measurement | `compiler/realsas_compiler_services/proof/{motion_probe.py,motion_probe_geometry.py}` | **PROMOTED / PRODUCT-NATIVE V4 REBIND** |
-| Failure signatures | `compiler/realsas_compiler_services/proof/failure_signatures.py` | PROMOTED |
-| Causal mutation helpers | `compiler/realsas_compiler_services/proof/causal_mutations.py` | PROMOTED SUPPORT; NOT OWNER AUTHORITY |
+| Failure signatures | `compiler/realsas_compiler_services/proof/failure_signatures.py` | PROMOTED; DIAGNOSTIC ONLY |
+| Controlled causal owner attribution | `compiler/realsas_compiler_services/proof/causal_attribution.py` | **PROMOTED / CONTROLLED-INTERVENTION ONLY** |
+| Bounded repair directive + re-proof contract | `compiler/realsas_compiler_services/proof/repair_loop.py` | **PROMOTED / NO IN-PLACE MUTATION** |
+| Repair operation authority registry | `compiler/realsas_compiler_core/repair_registry.py` | **CURRENT / FAIL-CLOSED / 0 EXECUTABLE OPERATIONS** |
+| Real child-product semantic audit | `compiler/realsas_compiler_core/repair_attempt.py` | **CURRENT / PARENT-LINEAGE + ACTUAL-DELTA GATE** |
 | Export/deploy bake | `compiler/realsas_compiler_services/export/runtime_deploy_bake.py` | PROMOTED |
 | Numerical LBS probe | `compiler/realsas_compiler_services/numerics/lbs.py` | PROMOTED |
-| Causal owner attribution + bounded repair/re-proof | historical semantics under rebind design | **NEXT** |
+| Rig parent repair executor | historical candidate | **BLOCKED — must re-enter current proposal/qualification seam** |
+| Retained weight-candidate repair executor | historical candidate | **BLOCKED — current retained-candidate portfolio absent** |
 | CDT / BBW-KKT / ARAP / XPBD/contact | competing historical authorities | SOURCE-DIFF REQUIRED |
 
-Motion proof now exercises exact current authored `PUPPET_LOCAL_2D_2P5D` clips against qualified directional meshes and mesh-skin, measuring dynamic deformation consequences before Compiler-owned PASS/FAIL binding. It does not infer a causal owner and does not create product truth.
+### Current repair firewall
 
-See `compiler/README.md` for the physical/logical layer map. Current relocation/promotion seals live under `canonical/`.
+The repair control plane exists, but no historical repair implementation is executable merely because its source exists. `REPAIR_OPERATION_AUTHORITY` currently contains zero `CANONICAL_MAINLINE_EXECUTABLE` records. The Compiler computes the actual semantic delta between parent and child products itself; declared changed paths are not trusted.
+
+Seal: `canonical/REPAIR_OPERATION_SOURCE_DIFF_V1_20260903.json`.
 
 ## Runtime
 
@@ -49,7 +55,7 @@ See `compiler/README.md` for the physical/logical layer map. Current relocation/
 |---|---|---|
 | Native C++17 runtime | `runtime/realsas_cpp/` | RESTORED EXACT CONSUMER; source/build gate previously qualified |
 | Python V4 reference consumer | `runtime/reference_v4/` | CURRENT CONFORMANCE REFERENCE |
-| Exact current V4 proof -> `.rss/.rsr` -> native runtime interlock | Compiler services + runtime | PENDING RESTORATION CLOSURE |
+| Exact current V4 proof -> `.rss/.rsr` -> native runtime interlock | Compiler services + runtime | **NEXT MAJOR RESTORATION CLOSURE** |
 
 ## Research / evidence zones
 
@@ -64,7 +70,7 @@ See `compiler/README.md` for the physical/logical layer map. Current relocation/
 - Global architecture refreeze: **NOT PERFORMED**
 - Formal Family-1 selection: **BLOCKED**
 - Real-family FIT: **NOT AUTHORIZED**
-- Current work: **causal owner attribution -> bounded repair -> mandatory re-proof, then exact proof/export/native-runtime interlock**
+- Current work: **exact proof/export/native-runtime interlock + remaining numerical source-diff; repair executors remain fail-closed until current typed seams justify promotion**
 
 ## Promotion rule
 

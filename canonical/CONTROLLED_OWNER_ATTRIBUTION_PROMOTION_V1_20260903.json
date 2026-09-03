@@ -1,0 +1,58 @@
+{
+  "schema": "RealSaS.ControlledOwnerAttributionPromotion.v1",
+  "date": "2026-09-03",
+  "status": "PROMOTE_REBIND_CURRENT_V4",
+  "historical_sources": [
+    {
+      "path": "compiler/realsas_synthesis/causal_attribution.py",
+      "sha256": "e23793d859a9c918790e21cb0e4bb3a3b13ea35373030d85c1990a5aedc15e1d",
+      "disposition": "SEMANTIC_REFERENCE_ONLY",
+      "heuristic_owner_ranking_promoted": false
+    },
+    {
+      "path": "compiler/realsas_synthesis/causal_repair.py",
+      "sha256": "f4c088789dbd85e5ef9361d6f66846b19e9c81cb0e8a0d68b571945f7d53daa4",
+      "disposition": "SEMANTIC_REFERENCE_FOR_COUNTERFACTUAL_AND_REPROOF"
+    },
+    {
+      "path": "compiler/realsas_contracts/causal_repair.py",
+      "sha256": "b4aa4f782be7c189a911abffa65709113c4552c16095db652ec5eb7789fbdbba",
+      "disposition": "CONTRACT_SEMANTICS_REFERENCE"
+    }
+  ],
+  "current_source": {
+    "path": "compiler/realsas_compiler_services/proof/causal_attribution.py",
+    "sha256": "85ec688fdf8bb6e7b5e3423f8d97664bde850879ff496e3081053a000c40dd03"
+  },
+  "preserved_invariants": [
+    "FAILURE_SIGNATURE_IS_NOT_CAUSAL_OWNER",
+    "COUNTERFACTUAL_CHILD_ATTEMPT_REQUIRED",
+    "SAME_PROBE_POLICY_REQUIRED",
+    "SINGLE_OWNER_LOCAL_MUTATION_REQUIRED",
+    "BOUNDED_CHANGE_AUDIT_REQUIRED",
+    "TARGET_MUST_MATERIALLY_IMPROVE_OR_PASS",
+    "PROTECTED_INVARIANTS_MUST_NOT_REGRESS",
+    "AMBIGUOUS_MULTI_OWNER_IMPROVEMENT_MUST_ABSTAIN"
+  ],
+  "explicit_rejections": [
+    "HISTORICAL_HEURISTIC_OWNER_SCORE_AS_TRUTH",
+    "FAILURE_FAMILY_TO_OWNER_LOOKUP_AS_CAUSAL_EVIDENCE",
+    "AUTOMATIC_REPAIR_FROM_SIGNATURE_ONLY",
+    "IN_PLACE_PRODUCT_MUTATION"
+  ],
+  "current_binding_state": {
+    "service_promoted": true,
+    "proof_engine_arbitrary_external_evidence_binding": false,
+    "reason": "core counterfactual child-attempt lineage gate must exist before attribution evidence can enter canonical proof",
+    "product_authority": false
+  },
+  "local_regression": {
+    "test": "tests/compiler/test_controlled_owner_attribution_v1.py",
+    "result": "4 passed",
+    "single_owner_material_improvement": "ATTRIBUTED",
+    "multiple_material_owners": "ABSTAIN",
+    "probe_change": "REJECTED",
+    "cross_owner_mutation": "REJECTED",
+    "protected_invariant_regression": "REJECTED"
+  }
+}

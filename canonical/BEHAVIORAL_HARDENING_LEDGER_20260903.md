@@ -21,7 +21,8 @@ Canonical detail: `canonical/GEPPETTO_V2_BEHAVIORAL_CLOSURE_20260903.md`
 - optimize -> shipping proposal -> Compiler mechanical authority PASS;
 - heterogeneous panel + independent witness PASS;
 - cross-region `chilecentral -> westus3` replay PASS;
-- no real-family repair constants.
+- no real-family repair constants;
+- teacher graph equality remains diagnostic, not product authority.
 
 ## Gate 2 — IRIS privileged-input firewall
 
@@ -45,22 +46,25 @@ Old candidate fingerprint from run `33751730186`:
 
 **Status:** `STALE CANDIDATE ONLY / NOT A SEAL`
 
-Ongoing Codec/harness changes invalidate promotion. Family selection remains blocked.
+Ongoing hardening/audit work invalidates promotion. Family selection remains blocked.
 
 ## Gate 3 — Arachne / SkinFieldCodec
 
-**Status:** `FAIL_A0 — CLEAN SHARP NARROW REPRESENTATION/OBJECTIVE FLOOR`
+**Status:** `AUDIT HOLD — SHIPPING CAPACITY UNPROVEN; TINY-CODEC FAILURE IS NOT PRODUCT FAILURE`
 
-Records:
+Primary cleanroom authority:
+- `canonical/REALSAS_RIGANYTHING_SKINTOKENS_END_TO_END_CLEANROOM_MATRIX_20260903.md`
+
+Historical records preserved:
 - preregistration: `canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md`
 - V1 failure/correction: `canonical/ARACHNE_CODEC_BEHAVIORAL_FAILURE_20260903.md`
 - first clean Bound V2 run: `canonical/ARACHNE_CODEC_BOUND_V2_FIRST_RUN_20260903.md`
 - hard-tail diagnostic: `canonical/SKIN_FIELD_CODEC_A0_TAIL_DIAGNOSTIC_20260903.md`
 - global-temperature diagnostic: `canonical/SKIN_FIELD_CODEC_A0_TEMPERATURE_DIAGNOSTIC_20260903.md`
 - post-PASS force decomposition: `canonical/SKIN_FIELD_CODEC_A0_FORCE_DECOMPOSITION_20260903.md`
-- reconstruction/cooling falsifications: `canonical/SKIN_FIELD_CODEC_A0_RECONSTRUCTION_COOLING_DIAGNOSTICS_20260903.md`
+- reconstruction/cooling diagnostics: `canonical/SKIN_FIELD_CODEC_A0_RECONSTRUCTION_COOLING_DIAGNOSTICS_20260903.md`
 
-Frozen authority chain:
+Frozen intended authority chain:
 `Codec A0 -> frozen Codec -> Arachne A1 -> SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`
 
 ### Independent source bug closed
@@ -71,73 +75,76 @@ Repairs:
 - `f0fe52ab625695d46bed7007acba39fe4cdfb248` — row-scalar active emphasis;
 - `9692ac12a44769212906616b6bca13861022d42c` — exact-truth stationarity regression.
 
-Current exact-truth CE logit gradient max: approximately `4.43e-17` PASS.
+Current exact-truth CE logit gradient max was approximately `4.43e-17` PASS.
 
-### V1 harness evidence corrected
+### Historical V1 harness contamination preserved
 
 V1 failed to rebind synthetic teacher W/rest rows from numeric creation order to lexicographically sorted canonical `conditioning.surface_ids` for N>=10.
 
-Thus historical branch/sharp representation-capacity conclusions are `INVALID / CONTAMINATED_BY_ROW_BINDING_BUG`.
+Therefore historical branch/sharp representation-capacity conclusions from that harness remain:
 
-Historical contaminated free-latent and pair-geometry diagnostics remain in repo for provenance but are not active authority.
+`INVALID / CONTAMINATED_BY_ROW_BINDING_BUG`.
 
-### Bound V2 — first clean run
+The historical runs remain in the repository and are not deleted.
 
-Workflow `33756424156`, job `100651837229`, `westus`:
+### Bound V2 tiny-model evidence
 
-`chain_blend_3`:
-- A0 sustained PASS step `480`;
-- A1 shipping/Compiler/LBS sustained PASS step `320`.
+After correcting row binding:
 
-`branch_blend_4`:
-- canonical row permutation `[0,1,10,11,2,3,4,5,6,7,8,9]`;
-- A0 sustained PASS step `768`, p95 `0.0214583`, deformation ratio `0.00767379`;
-- A1 sustained PASS step `352`, qualified p95 `0.0422459`, deformation ratio `0.0129287`.
+- `chain_blend_3`: A0 sustained PASS and A1/Compiler/LBS PASS;
+- `branch_blend_4`: A0 sustained PASS and A1/Compiler/LBS PASS;
+- `sharp_fork_5`: tiny A0 repeatedly entered the frozen acceptance region but failed to hold three consecutive checks.
 
-`sharp_fork_5`:
-- canonical row permutation `[0,1,10,11,12,13,14,2,3,4,5,6,7,8,9]`;
-- catastrophic V1 plateau disappears;
-- final A0 p95 `0.0448788` and deformation ratio `0.00790533` individually PASS;
-- row p95 repeatedly crosses the frozen `0.05` ceiling;
-- no three-consecutive acceptance;
-- authoritative status `FAIL_A0`; A1 not run.
+Subsequent generic hypotheses were tested and falsified as product repairs, including top-tail weighting, frozen temperature, weight decay, removing deformation loss, cosine cooling as a generic solution, encoder bypass, and injected 4D/10D pair-geometry residual paths.
 
-### Falsified repair hypotheses
+### Critical cleanroom reclassification
 
-- generic top-10% row-L1 tail, weight `1.0`: `FALSIFIED`; sharp remained FAIL and ended worse;
-- frozen initial global softmax temperature: `FALSIFIED`; sharp worsened;
-- weight decay as post-PASS destroyer: `FALSIFIED`; WD=0 continuation was effectively identical;
-- removing A0 deformation MSE as generic solution: `FALSIFIED` by full-panel A/B `33758209799 / 100657705289`; reconstruction-only also failed sharp (`p95 0.0521763`);
-- constant `1e-3` LR overshoot as generic solution: `FALSIFIED` by cosine-to-zero A/B `33758542932 / 100658825104`.
+The behavioral panel's helper Codec is **not shipping-sized**. It instantiates approximately:
 
-### Current clean evidence
+`hidden=32, latent=8, layers=2`
 
-Cosine cooling is diagnostically important even though it does not solve the gate. On `sharp_fork_5`, as LR decays to zero the field settles rather than oscillates:
+while the shipping/default `SkinFieldCodecConfigV1` is:
 
-- step `1376`: p95 `0.0508867`;
-- step `1440`: `0.0508573`;
-- step `1504`: `0.0504006`;
-- step `1536`, LR `0`: p95 `0.0504013`, deformation ratio `0.00662181`.
+`hidden=192, latent=64, encoder_layers=3, decoder_layers=3`.
 
-Codec dropout is `0.0` and deterministic execution is enabled. Therefore the remaining clean seam is no longer best explained as stochastic forward noise or constant-LR overshoot. The evidence supports a very narrow floor somewhere in the current `teacher encoder -> latent -> decoder` representation/objective chain, but does not yet localize which side owns it.
+Therefore:
 
-### Next authorized causal split
+`TINY_SHARP_FAIL != SHIPPING_CODEC_PRODUCT_FAIL`.
 
-Run a corrected-ID-binding comparison under identical downstream objective/evaluation:
+The previous status `FAIL_A0 — CLEAN SHARP NARROW REPRESENTATION/OBJECTIVE FLOOR` is preserved as a historical statement about the tiny Bound-V2 test model, but is no longer authoritative for product architecture capacity.
 
-`teacher encoder -> latent -> same decoder`
+### Cleanroom architectural risk
 
-versus
+Arachne consumes an explicit 10D point/control/parent-segment geometry contract and therefore has strong mechanical conditioning. The final Codec decoder receives surface features + joint features + per-joint latent rather than the full pairwise geometry tensor directly. This split may be sufficient, but its information-preservation capacity is not yet proven.
 
-`free per-joint latent -> same decoder`.
+Compiler skin qualification is a strong fail-closed legality/simplex/lineage boundary, but it cannot repair semantically wrong W into correct W.
 
-If free latent closes sharp, the teacher encoder/summary path is the first demonstrated bottleneck. If it does not, the decoder/conditioning path remains responsible. Historical pre-binding encoder-bypass diagnostics are contaminated and cannot be reused.
+### Next authorized gates
 
-No Codec architecture source repair is authorized before this split is observed.
+1. **P0 shipping-sized Codec capacity smoke** using the actual default `192/64/3` architecture; sustained reconstruction + verified deformation authority.
+2. **P0 full-surface-oracle vs observation-oracle mechanical ceiling** to test whether the references' visibility-independent closed-surface coverage supplies mechanically necessary information.
+3. **P0/P1 Arachne -> Codec information-preservation test** at shipping dimensions.
+4. Only after those pass/fail causally may a Codec/Arachne architecture repair be authorized.
+
+No family-specific tuning, no architecture refreeze and no formal family selection are authorized while these are unresolved.
+
+## End-to-end cleanroom audit
+
+**Status:** `COMPLETE AS CODE MATRIX / TEST OBLIGATIONS OPEN`
+
+Reference pins:
+- RigAnything `d03cdb21dd134fa81df6b0947522469db3f78bd2`;
+- SkinTokens `273b691d35989d71cd17ff2895fdc735097b92d1`.
+
+Main result:
+- RigAnything is code-specialized toward template-free continuous skeleton generation and uses direct point-token × joint-token skinning plus aggressive deterministic mesh smoothing.
+- SkinTokens is code-specialized toward a dedicated high-capacity skin representation: skin-aware dense training samples, FSQ-CVAE, autoregressive skin tokens, geometry-conditioned dense decode and optional topology/voxel prior.
+- No inspected common benchmark authorizes a direct empirical claim that one globally outperforms the other.
+- RealSaS has credible function-level equivalents across observation substrate, skeleton, skin qualification and proof, but two P0 empirical obligations remain: observation-substrate information sufficiency and shipping Arachne/Codec capacity/information preservation.
 
 ## Later gates — not yet opened
 
-After Arachne/Codec closure:
+After the P0 Arachne/Codec and substrate-equivalence obligations close:
 - MWB / mesh-weight binding semantics;
 - appearance/directional raster provenance;
 - motion/runtime state mutation;

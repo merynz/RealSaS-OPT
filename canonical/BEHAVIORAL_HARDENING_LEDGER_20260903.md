@@ -77,10 +77,13 @@ This fingerprint is a candidate only, not a seal.
 
 ## Gate 3 — Arachne / SkinFieldCodec behavioral seam
 
-**Status:** `RUNNING — FIRST PREREGISTERED EXECUTION`
+**Status:** `FAIL — FIRST FAILING LAYER = SKINFIELD CODEC A0`
 
 Preregistration:
 `canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md`
+
+Failure record:
+`canonical/ARACHNE_CODEC_BEHAVIORAL_FAILURE_20260903.md`
 
 Frozen panel:
 - `chain_blend_3`, seed `20260921`;
@@ -91,9 +94,38 @@ Authority chain under test:
 
 `Codec A0 -> frozen Codec -> Arachne A1 -> shipping SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS deformation`
 
-PASS thresholds/protocol were committed before first execution and must not be relaxed after observing results.
+PASS thresholds/protocol were committed before first execution and remain unchanged after observing results.
 
-First behavioral CI workflow launched from commit `e58988740e3274975cbfd4c7c00d66b3f1278175`.
+### First preregistered execution
+
+Workflow run `33752571671`, job `100639284377`, runner region `eastus`, source/behavioral suite result: `2 failed, 20 passed`.
+
+`chain_blend_3`:
+- A0 sustained PASS at step `640`;
+- A0 final row-L1 p95 `0.0473073684`, deformation ratio `0.0124993324`;
+- A1 shipping/Compiler/LBS sustained PASS at step `320`;
+- qualified row-L1 p95 `0.0597252958`, deformation ratio `0.0191426221`;
+- Compiler total correction L1 `2.5319605e-07`.
+
+`branch_blend_4`:
+- `FAIL_A0`; A1 was not run;
+- final step `1536`: row-L1 p95 `0.0938273296` fails frozen `0.05` threshold;
+- deformation ratio `0.0368942656` already passes frozen `0.05` threshold;
+- simplex residual `5.96e-08`, negative weights `0`.
+
+Interpretation: the deformation probes alone under-identify the dense weight field; the frozen row-tail gate correctly exposes residual W error that deformation consequence does not.
+
+`sharp_fork_5`:
+- `FAIL_A0`; A1 was not run;
+- final step `1536`: row-L1 p95 `0.743847549`, deformation ratio `0.240943387`;
+- simplex residual `1.19e-07`, negative weights `0`;
+- the late trace plateaus/oscillates near row-L1 p95 `~0.72–0.76` and deformation ratio `~0.23–0.25` rather than showing simple unfinished convergence.
+
+Interpretation: there is a material generic Codec A0 representation/objective/optimization seam on sharper heterogeneous weight fields. Root cause is not yet assigned.
+
+The full chain PASS on `chain_blend_3` demonstrates that Arachne proposal, Compiler skin qualification and verified LBS plumbing are not universally broken. Repair work remains scoped to Codec A0 until that layer closes.
+
+**Frozen rule:** do not relax witness definitions, seeds, thresholds, optimizer horizons or acceptance protocol. Do not patch A1 while A0 is unresolved.
 
 ## Later gates — not yet opened
 

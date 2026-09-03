@@ -14,15 +14,28 @@ Single status entrypoint for post-freeze behavioral hardening. Detailed causal e
 
 ## Gate 1 — Geppetto
 
-**Status:** `PASS / CLOSED`
+**Status:** `PASS / CLOSED INCLUDING CURRENT R6 U1 ORACLE CONSUMER GATE`
 
-Canonical detail: `canonical/GEPPETTO_V2_BEHAVIORAL_CLOSURE_20260903.md`
+Canonical details:
+- `canonical/GEPPETTO_V2_BEHAVIORAL_CLOSURE_20260903.md`
+- `canonical/R6_GEPPETTO_OBSERVATION_ORACLE_CLOSURE_20260903.md`
 
+Behavioral closure:
 - optimize -> shipping proposal -> Compiler mechanical authority PASS;
 - heterogeneous panel + independent witness PASS;
 - cross-region `chilecentral -> westus3` replay PASS;
 - no real-family repair constants;
 - teacher graph equality remains diagnostic, not product authority.
+
+R6 observation-oracle closure:
+- one-family `branch_blend_4` U0 full-surface PASS and U1 observation-oracle PASS;
+- heterogeneous U1 small panel `3/3 PASS`;
+- `chain_blend_3`: step `96`, p95 `~0.01630`;
+- `branch_blend_4`: step `96`, p95 `~0.01456`;
+- `sharp_fork_5`: step `160`, p95 `~0.01131`;
+- exact count and Compiler mechanical PASS on all three.
+
+Important scope limitation: current capsule-shell U1 coverage remained very high (`159/160`, `159/160`, `160/160`). Therefore this closes the frozen oracle consumer gate but does **not** establish a strong material-self-occlusion claim. A separately preregistered coverage-stress gate may later strengthen evidence without changing this PASS.
 
 ## Gate 2 — IRIS privileged-input firewall
 
@@ -50,12 +63,13 @@ Ongoing hardening/audit work invalidates promotion. Family selection remains blo
 
 ## Gate 3 — Arachne / SkinFieldCodec
 
-**Status:** `PASS / CLOSED`
+**Status:** `SHIPPING CAPACITY PASS / CLOSED; R6 U0-U1 INFORMATION SUFFICIENCY ACTIVE`
 
 Primary authorities:
 - cleanroom matrix: `canonical/REALSAS_RIGANYTHING_SKINTOKENS_END_TO_END_CLEANROOM_MATRIX_20260903.md`
 - shipping Codec causal closure: `canonical/SKIN_FIELD_CODEC_SHIPPING_CAPACITY_AND_COOLING_V1_20260903.md`
 - shipping Arachne behavioral closure: `canonical/ARACHNE_SHIPPING_BEHAVIORAL_CLOSURE_20260903.md`
+- active R6 prereg: `canonical/R6_ARACHNE_ORACLE_SUBSTRATE_PREREG_20260903.md`
 
 Authoritative shipping chain:
 
@@ -91,17 +105,9 @@ Therefore the historical tiny sharp failure is not product-capacity authority:
 
 ### Shipping A0 capacity closure
 
-The actual default shipping Codec was tested on the same preregistered three-witness panel through:
+The actual default shipping Codec was tested on the preregistered three-witness panel through:
 
 `teacher W -> shipping Codec -> raw W -> SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`.
-
-No witness, seed or acceptance threshold was changed.
-
-With constant AdamW LR `1e-3`, `chain_blend_3` and `branch_blend_4` sustained PASS but `sharp_fork_5` repeatedly entered and left the valid region. The sharp lane nevertheless reached raw/qualified p95 below `0.05`, falsifying hard representational impossibility.
-
-Controlled full-panel A/B changed only optimizer schedule:
-
-`constant 1e-3` vs `CosineAnnealingLR(T_max=1536, eta_min=0)`.
 
 Stable cosine A0 PASS:
 
@@ -151,7 +157,7 @@ Workflow run `33770002712`:
 
 `CROSS_REGION_DETERMINISTIC_REPLAY = PASS`.
 
-### Gate 3 final verdict
+### Shipping Gate 3 verdict
 
 `SHIPPING_ARACHNE_TO_FROZEN_SHIPPING_CODEC_TO_COMPILER_TO_LBS = PASS / CLOSED`.
 
@@ -159,9 +165,21 @@ Workflow run `33770002712`:
 
 This is not a real-family fit or generalization claim.
 
+### Active R6 Arachne oracle gate
+
+The next causal question is now specifically:
+
+`U0_REFERENCE_FULL_SURFACE` vs `U1_OBSERVATION_ORACLE_SUBSTRATE` for Arachne.
+
+One-family rung is preregistered on `branch_blend_4` with unchanged shipping thresholds and configs. Each arm must first earn a default shipping Codec A0 capacity token on the arm's admitted row shape; only then may default shipping Arachne A1 run against the frozen decoder.
+
+Qualified G is produced through real `Compiler.qualify_skeleton_v2` from an explicitly labeled oracle mechanical proposal, isolating Arachne from Geppetto prediction error while preserving Compiler canonical-ID ownership.
+
+Current result: `RUNNING / UNKNOWN`.
+
 ## End-to-end cleanroom audit
 
-**Status:** `COMPLETE AS CODE MATRIX / CONSUMER CAPACITY CLOSED / SUBSTRATE INFORMATION SUFFICIENCY OPEN`
+**Status:** `COMPLETE AS CODE MATRIX / GEPPETTO U1 CLOSED / ARACHNE U0-U1 ACTIVE`
 
 Reference pins:
 - RigAnything `d03cdb21dd134fa81df6b0947522469db3f78bd2`;
@@ -173,22 +191,24 @@ Main result:
 - No inspected common benchmark authorizes a direct empirical claim that one globally outperforms the other.
 - RealSaS has credible function-level equivalents across observation substrate, skeleton proposal/qualification, skin proposal/qualification and proof.
 - Geppetto+Compiler generic behavioral capacity is closed.
+- Geppetto current U1 observation-oracle consumer gate is closed `3/3 PASS`.
 - shipping Codec capacity and shipping Arachne->Codec information preservation are closed on the preregistered generic panel.
 
 ### Current P0
 
-The remaining cleanroom architecture question is information sufficiency, not learner capacity:
+Arachne information sufficiency:
 
 `U0_REFERENCE_FULL_SURFACE` vs `U1_OBSERVATION_ORACLE_SUBSTRATE`.
 
 Interpretation remains frozen:
 
-- U0 fail -> consumer apparatus/representation inadequate;
-- U0 pass + U1 fail -> observation-limited substrate information insufficiency demonstrated;
-- U1 pass -> complete hidden/full surface is not necessary for the admitted task on that gate;
-- U1 pass + U2 fail -> IRIS prediction/accessibility becomes the remaining bottleneck.
+- U0 A0 fail -> Codec representation/protocol inadequate on the rich oracle shape;
+- U0 A0 pass + U0 A1 fail -> Arachne apparatus inadequate under rich geometry;
+- U0 pass + U1 A0 fail -> observation-limited admitted shape cannot be represented under the frozen protocol;
+- U0 A1 pass + U1 A0 pass + U1 A1 fail -> observation-limited substrate insufficiency demonstrated for Arachne;
+- U0/U1 A1 pass -> complete hidden/full surface is unnecessary for the admitted Arachne task on this gate, subject to measured coverage-contrast limitations.
 
-No closed-mesh reconstruction objective is implied by a U1 failure. Any failure must first be localized to a missing mechanical information class.
+U2 predicted-IRIS interpretation remains later.
 
 ## Later gates — not yet opened
 

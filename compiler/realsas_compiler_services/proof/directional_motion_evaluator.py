@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Qualified current directional evaluator for the present rotation-only preset lane.
 
-The evaluator consumes a Compiler-qualified DirectionalJointViewBindingSetIR.  Rest
+The evaluator consumes a Compiler-qualified DirectionalJointViewBindingSetIR. Rest
 mesh raster positions come from each mesh vertex's admitted SurfaceSupportBinding;
 joint pivots come from the separately qualified mechanical-P -> raster affine map.
 Mechanical P.xy is never used as a directional coordinate.
@@ -351,9 +351,6 @@ def evaluate_clip_to_qualification_bake(product, plan, clip, binding: Directiona
 
 
 def make_qualified_motion_bake_provider(binding: DirectionalJointViewBindingSetIR, *, policy: DirectionalMotionEvaluatorPolicyV1 = DirectionalMotionEvaluatorPolicyV1()):
-    policy.validate()
-
-    def provider(product, plan, clip):
-        return evaluate_clip_to_qualification_bake(product, plan, clip, binding, policy=policy)
-
-    return provider
+    """Compatibility alias; returns the typed hashed provider authority, not a closure."""
+    from .directional_motion_provider import make_qualified_directional_motion_provider
+    return make_qualified_directional_motion_provider(binding, policy=policy)

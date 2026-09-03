@@ -47,6 +47,10 @@ jobs:
         env: *det_env
         run: |
           python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_reconstruction_ab_diagnostic.py
+      - name: Diagnose full frozen-panel A0 optimizer cooling
+        env: *det_env
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_optimizer_cooling_diagnostic.py
       - name: Verify canonical skin target row binding and frozen behavioral panel
         env: *det_env
         run: |

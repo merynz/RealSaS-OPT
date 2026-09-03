@@ -177,7 +177,7 @@ def _teacher_topology_exact_diagnostic(qualified, conditioning, target: Geppetto
 
 
 def _qualified_mechanical_pass(model, surface, conditioning, target) -> tuple[bool, str, bool]:
-    """Gate final G by canonical MECHANICAL_STRUCTURE, not teacher graph identity."""
+    """Gate final G by canonical anonymous MECHANICAL_STRUCTURE semantics."""
     try:
         proposal = model.propose(conditioning, resource_step_limit=len(surface.surface_nodes))[0]
         if len(proposal.joints) != len(target.positions_normalized):
@@ -191,13 +191,18 @@ def _qualified_mechanical_pass(model, surface, conditioning, target) -> tuple[bo
             for j in qualified.joints
         )
         deform_root_count = len(qualified.deform_root_ids)
+        unsupported_joint_count = sum(not j.support_surface_ids for j in qualified.joints)
         mechanical_pass = (
             len(qualified.joints) > 0
             and deform_root_count > 0
             and illegal_parent_count == 0
+            and unsupported_joint_count == 0
         )
         teacher_exact = _teacher_topology_exact_diagnostic(qualified, conditioning, target)
-        status = f"QUALIFIED_MECHANICAL:roots={deform_root_count}:illegal_parents={int(illegal_parent_count)}"
+        status = (
+            f"QUALIFIED_MECHANICAL:roots={deform_root_count}:"
+            f"illegal_parents={int(illegal_parent_count)}:unsupported={int(unsupported_joint_count)}"
+        )
         return bool(mechanical_pass), status, bool(teacher_exact)
     except Exception as exc:
         return False, f"{type(exc).__name__}:{exc}", False

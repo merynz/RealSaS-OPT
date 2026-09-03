@@ -27,7 +27,7 @@ def _runtime(product):
     return {"representation_class":product.representation_class,"full_3d_reconstruction_authority":bool(product.full_3d_reconstruction_authority),"direction_count":len(product.directional_renderables.directions),"motion_representation":product.motion_state.representation_class}
 
 def _status(domain,m):
-    if domain=="MECHANICAL_STRUCTURE": ok=m['joint_count']>0 and m['deform_root_count']>0 and m['illegal_parent_count']==0
+    if domain=="MECHANICAL_STRUCTURE": ok=m['joint_count']>0 and m['deform_root_count']>0 and m['illegal_parent_count']==0 and m['unsupported_joint_count']==0
     elif domain=="MESH_QUALITY": ok=m['component_count']>=8 and m['face_count']>0 and m['degenerate_faces']==0 and m['min_area']>1e-12
     elif domain=="DIRECTIONAL_VISUAL": ok=m['direction_count']==8 and m['view_order']==list(range(8)) and m['corner_binding_count']>0
     elif domain=="MOTION": ok=m['clip_count']>0 and m['effective_joint_track_count']>0
@@ -65,6 +65,6 @@ def mutation_worsens_measurement(domain:str, baseline:dict, mutated:dict) -> boo
     if domain=="DEFORMATION": return mutated.get('rms',0)>baseline.get('rms',0) or mutated.get('p95',0)>baseline.get('p95',0)
     if domain=="DIRECTIONAL_VISUAL": return mutated.get('direction_count',8)<baseline.get('direction_count',8) or mutated.get('corner_binding_count',0)<baseline.get('corner_binding_count',0)
     if domain=="MOTION": return mutated.get('effective_joint_track_count',0)<baseline.get('effective_joint_track_count',0)
-    if domain=="MECHANICAL_STRUCTURE": return mutated.get('illegal_parent_count',0)>baseline.get('illegal_parent_count',0) or mutated.get('deform_root_count',0)<baseline.get('deform_root_count',0)
+    if domain=="MECHANICAL_STRUCTURE": return mutated.get('illegal_parent_count',0)>baseline.get('illegal_parent_count',0) or mutated.get('deform_root_count',0)<baseline.get('deform_root_count',0) or mutated.get('unsupported_joint_count',0)>baseline.get('unsupported_joint_count',0)
     if domain=="RUNTIME_CONSUMPTION": return mutated.get('representation_class')!=baseline.get('representation_class') or bool(mutated.get('full_3d_reconstruction_authority'))
     raise ValueError(domain)

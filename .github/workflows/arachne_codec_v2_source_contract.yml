@@ -31,7 +31,7 @@ jobs:
         run: |
           python -m py_compile experiments/geppetto_arachne_r6_20260901/*.py
       - name: Verify Codec objective truth stationarity regression
-        env:
+        env: &det_env
           PYTHONPATH: .
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
@@ -39,31 +39,16 @@ jobs:
           PYTHONHASHSEED: '0'
         run: |
           python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_objective_causal_diagnostic.py
-      - name: Diagnose ID-bound Codec A0 global temperature stability
-        env:
-          PYTHONPATH: .
-          OMP_NUM_THREADS: '1'
-          MKL_NUM_THREADS: '1'
-          OPENBLAS_NUM_THREADS: '1'
-          PYTHONHASHSEED: '0'
+      - name: Diagnose post-PASS Codec A0 objective forces
+        env: *det_env
         run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_temperature_causal_diagnostic.py
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_force_decomposition_diagnostic.py
       - name: Verify canonical skin target row binding and frozen behavioral panel
-        env:
-          PYTHONPATH: .
-          OMP_NUM_THREADS: '1'
-          MKL_NUM_THREADS: '1'
-          OPENBLAS_NUM_THREADS: '1'
-          PYTHONHASHSEED: '0'
+        env: *det_env
         run: |
           python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel_bound_v2.py
       - name: Run Arachne/codec source gates
-        env:
-          PYTHONPATH: .
-          OMP_NUM_THREADS: '1'
-          MKL_NUM_THREADS: '1'
-          OPENBLAS_NUM_THREADS: '1'
-          PYTHONHASHSEED: '0'
+        env: *det_env
         run: |
           python -m pytest -q -s \
             experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py \

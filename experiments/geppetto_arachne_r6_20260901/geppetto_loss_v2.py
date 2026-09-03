@@ -92,11 +92,28 @@ def _canonical_tie_matrix(n: int) -> np.ndarray:
     return rank * (_MATCH_TIE_TOTAL_BUDGET / float(n))
 
 
+def _canonical_teacher_geometry_order(teacher: np.ndarray) -> np.ndarray:
+    """Canonicalize teacher columns by geometry, never by supplied row identity."""
+    bins = np.rint(teacher / MATCH_GEOMETRY_COST_QUANTIZATION)
+    if not np.isfinite(bins).all() or float(np.max(np.abs(bins))) >= float(2**52):
+        raise ValueError("teacher geometry outside canonical matching range")
+    # Quantized geometry is primary. Raw geometry only breaks two teacher loci
+    # that land in the same numerical bin; neither source row index nor semantic
+    # labels (root/parent) participate. Thus a teacher-row permutation cannot
+    # change the secondary Hungarian column ranks for geometrically distinct loci.
+    return np.lexsort((
+        teacher[:, 2], teacher[:, 1], teacher[:, 0],
+        bins[:, 2], bins[:, 1], bins[:, 0],
+    )).astype(np.int64)
+
+
 def canonical_geometry_assignment_v2(primary_positions, teacher_positions) -> tuple[np.ndarray, np.ndarray]:
     """Hard anonymous geometry match stable to machine-scale float32 drift.
 
     Teacher root/tree labels are intentionally absent: canonical root/tree remain
     Compiler authority and may not condition anonymous teacher<->query identity.
+    Teacher input row order is also non-authoritative; columns are canonicalized
+    from geometry before the deterministic tie-break is applied.
     """
     if isinstance(primary_positions, torch.Tensor):
         primary = primary_positions.detach().cpu().numpy()
@@ -113,13 +130,16 @@ def canonical_geometry_assignment_v2(primary_positions, teacher_positions) -> tu
     if primary.shape[0] < 1 or not np.isfinite(primary).all() or not np.isfinite(teacher).all():
         raise ValueError("canonical geometry assignment requires finite non-empty loci")
 
-    raw_cost = np.abs(primary[:, None, :] - teacher[None, :, :]).sum(axis=-1)
+    teacher_order = _canonical_teacher_geometry_order(teacher)
+    teacher_canonical = teacher[teacher_order]
+    raw_cost = np.abs(primary[:, None, :] - teacher_canonical[None, :, :]).sum(axis=-1)
     quantized = np.rint(raw_cost / MATCH_GEOMETRY_COST_QUANTIZATION)
     if not np.isfinite(quantized).all() or float(np.max(np.abs(quantized))) >= float(2**52):
         raise ValueError("canonical geometry assignment cost outside exact float64 integer range")
     primary_integer_cost = quantized.astype(np.int64)
     deterministic_cost = primary_integer_cost.astype(np.float64) + _canonical_tie_matrix(primary.shape[0])
-    q, t = linear_sum_assignment(deterministic_cost)
+    q, teacher_canonical_index = linear_sum_assignment(deterministic_cost)
+    t = teacher_order[np.asarray(teacher_canonical_index, np.int64)]
     return np.asarray(q, np.int64), np.asarray(t, np.int64)
 
 
@@ -155,9 +175,9 @@ class GeppettoLossV2:
         """Calibrate multimodal uncertainty without moving locus means or scores.
 
         Geometry is learned by explicit shipping/WTA regression and discrete mode
-        choice by mode_rank. The likelihood term therefore calibrates sigma only.
-        This prevents a tiny-sigma likelihood gradient from moving a previously
-        correct hypothesis until another exchangeable component becomes MAP.
+        choice by mode_rank. Candidate construction disconnects sigma-head inputs
+        from the shared latent state, so this likelihood calibrates only sigma-head
+        parameters and cannot perturb locus/cardinality/topology evidence.
         """
         means = output.position_modes_normalized[b, q].detach()
         log_sigma = output.position_mode_log_sigma[b, q].clamp(POSITION_LOG_SIGMA_MIN, POSITION_LOG_SIGMA_MAX)

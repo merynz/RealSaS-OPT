@@ -16,6 +16,24 @@ on:
       - 'compiler/realsas_compiler_core/proof_engine.py'
       - 'compiler/test_proof_engine_source_v1.py'
       - '.github/workflows/geppetto_v2_source_contract.yml'
+  push:
+    branches:
+      - source/generic-completion-v1-20260902
+      - architecture/v4-generic-strength-source-completion-20260902
+    paths:
+      - 'experiments/geppetto_arachne_r6_20260901/geppetto_*_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/training_targets_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_geppetto_r6_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/eval_geppetto_r6_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py'
+      - 'compiler/realsas_compiler_core/proof_engine.py'
+      - 'compiler/test_proof_engine_source_v1.py'
+      - '.github/workflows/geppetto_v2_source_contract.yml'
 
 jobs:
   geppetto-v2-source-contract:
@@ -34,133 +52,22 @@ jobs:
       - name: Compile Geppetto V2 source
         run: |
           python -m py_compile \
+            experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py \
+            experiments/geppetto_arachne_r6_20260901/conditioning_v2.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_candidate_v2.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_loss_v2.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_train_v2.py \
+            experiments/geppetto_arachne_r6_20260901/geppetto_eval_v2.py \
+            experiments/geppetto_arachne_r6_20260901/train_geppetto_r6_v1.py \
+            experiments/geppetto_arachne_r6_20260901/eval_geppetto_r6_v1.py \
+            experiments/geppetto_arachne_r6_20260901/geppetto_checkpoint_v2.py \
+            experiments/geppetto_arachne_r6_20260901/geppetto_cpu_capacity_v2.py \
+            experiments/geppetto_arachne_r6_20260901/training_targets_v2.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py \
             compiler/realsas_compiler_core/proof_engine.py \
             compiler/test_proof_engine_source_v1.py
-      - name: Diagnose uncertainty gradient leakage into shared latent
-        env:
-          OMP_NUM_THREADS: '1'
-          MKL_NUM_THREADS: '1'
-          OPENBLAS_NUM_THREADS: '1'
-          PYTHONHASHSEED: '0'
-        run: |
-          lscpu | grep -E 'Model name|Vendor ID|Architecture' || true
-          python - <<'PY'
-          import json
-          import numpy as np
-          import torch
-          from torch import nn
-          from experiments.geppetto_arachne_r6_20260901.geppetto_candidate_v2 import GeppettoCandidateV2
-          from experiments.geppetto_arachne_r6_20260901.geppetto_conditioning_v2 import GeppettoConditioningAdapterV2
-          from experiments.geppetto_arachne_r6_20260901.geppetto_loss_v2 import GeppettoLossV2, GeppettoLossWeightsV2
-          from experiments.geppetto_arachne_r6_20260901.geppetto_train_v2 import geppetto_train_step_v2
-          from experiments.geppetto_arachne_r6_20260901.test_geppetto_v2_behavioral_panel import (
-              WITNESSES, _surface, _teacher, _config, _shipping, _qualified_mechanical_pass,
-              LR, WEIGHT_DECAY, MAX_STEPS, CHECK_EVERY, REQUIRED_STABLE_PASSES,
-          )
-
-          torch.set_num_threads(1)
-          torch.use_deterministic_algorithms(True)
-          spec = next(x for x in WITNESSES if x.name == 'fork_5')
-
-          class DetachInput(nn.Module):
-              def __init__(self, inner):
-                  super().__init__()
-                  self.inner = inner
-              def forward(self, x):
-                  return self.inner(x.detach())
-
-          def setup(variant):
-              torch.manual_seed(spec.seed)
-              np.random.seed(spec.seed)
-              surface = _surface(spec)
-              conditioning = GeppettoConditioningAdapterV2()([surface])
-              target = _teacher(spec, surface, conditioning)
-              teacher = torch.as_tensor(target.positions_normalized, dtype=torch.float32)
-              sep = torch.cdist(teacher, teacher)
-              sep = sep.masked_fill(torch.eye(len(teacher), dtype=torch.bool), float('inf'))
-              unique_radius = 0.5 * float(sep.min())
-              model = GeppettoCandidateV2(_config())
-              if variant == 'sigma_detached_hidden':
-                  model.log_sigma = DetachInput(model.log_sigma)
-              weights = GeppettoLossWeightsV2(position_nll=0.0) if variant == 'nll_zero' else GeppettoLossWeightsV2()
-              loss_fn = GeppettoLossV2(weights=weights, support_topk=4)
-              optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
-              return surface, conditioning, target, unique_radius, model, loss_fn, optimizer
-
-          def nll_gradient_probe(variant):
-              surface, conditioning, target, _, model, _, _ = setup(variant)
-              f = torch.as_tensor(conditioning.features, dtype=torch.float32)
-              p = torch.as_tensor(conditioning.positions_normalized, dtype=torch.float32)
-              m = torch.as_tensor(conditioning.valid_mask, dtype=torch.bool)
-              model.train()
-              out = model(f, p, m, decode_steps=len(target.positions_normalized))
-              q = torch.arange(len(target.positions_normalized))
-              tp = torch.as_tensor(target.positions_normalized, dtype=torch.float32)
-              nll = GeppettoLossV2._mixture_position_nll(out, 0, q, tp)
-              model.zero_grad(set_to_none=True)
-              nll.backward()
-              sigma_params = []
-              shared_params = []
-              for name, param in model.named_parameters():
-                  if param.grad is None:
-                      continue
-                  g = float(param.grad.norm().item())
-                  if 'log_sigma' in name:
-                      sigma_params.append(g)
-                  elif any(x in name for x in ('cells.', 'rel_query.', 'encoder.', 'start')):
-                      shared_params.append(g)
-              return {
-                  'nll': float(nll.detach()),
-                  'sigma_grad_norm_sum': float(sum(sigma_params)),
-                  'shared_latent_grad_norm_sum': float(sum(shared_params)),
-                  'shared_latent_grad_parameter_count': len(shared_params),
-              }
-
-          def run(variant):
-              surface, conditioning, target, unique_radius, model, loss_fn, optimizer = setup(variant)
-              stable = 0
-              pass_step = None
-              checks = []
-              for step in range(1, MAX_STEPS + 1):
-                  losses = geppetto_train_step_v2(model, optimizer, conditioning, [target], loss_fn=loss_fn)
-                  if step != 1 and step % CHECK_EVERY:
-                      continue
-                  shipping = _shipping(model, conditioning, target)
-                  geometry_pass = int(shipping['generated_count']) == len(target.positions_normalized) and float(shipping['matched_p95']) < unique_radius
-                  mechanical_pass = False
-                  if geometry_pass:
-                      mechanical_pass, _, _ = _qualified_mechanical_pass(model, surface, conditioning, target)
-                  stable = stable + 1 if (geometry_pass and mechanical_pass) else 0
-                  checks.append({
-                      'step': step,
-                      'count': int(shipping['generated_count']),
-                      'p95': float(shipping['matched_p95']),
-                      'stable': stable,
-                      'position_nll': float(losses['position_nll']),
-                      'position_primary': float(losses['position_primary']),
-                      'stop': float(losses['stop']),
-                  })
-                  if stable >= REQUIRED_STABLE_PASSES:
-                      pass_step = step
-                      break
-              return {
-                  'variant': variant,
-                  'gradient_probe': nll_gradient_probe(variant),
-                  'pass_step': pass_step,
-                  'stable_passes': stable,
-                  'final': _shipping(model, conditioning, target),
-                  'checks': checks,
-              }
-
-          result = {v: run(v) for v in ('current', 'nll_zero', 'sigma_detached_hidden')}
-          print('GEPPETTO_NLL_SHARED_LATENT_CAUSAL_DIAGNOSTIC=' + json.dumps(result, sort_keys=True))
-          PY
       - name: Run Geppetto V2 source and behavioral gates
         env:
           OMP_NUM_THREADS: '1'

@@ -38,10 +38,11 @@ Promote still-valuable historical Compiler/runtime production knowledge **behind
 | Pure native runtime-v2 package writer | **VALID / KEEP** | `compiler/realsas_compiler_services/export/runtime_v2.py` |
 | Current V4 proof/bake -> native-v2 projection | **SOURCE CLOSURE READY** | proof-owned rest/frame XY, exact local raster UV, no solver replay |
 | Current V4 `.rss/.rsr` -> sealed C++ runtime interlock | **HARNESS READY / EXECUTION PENDING RUNNER** | `tests/runtime/current_v4_native_package_probe.cpp`; Actions job never started (`runner_id=0`) |
-| CDT / BBW-KKT / ARAP / XPBD/contact source diff | **PENDING** | no numerical bulk restore |
+| Historical CDT / BBW-KKT / ARAP / XPBD/contact source diff | **DONE / NO CURRENT PROMOTION REQUIRED** | `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json` |
 | Full behavioral + complete-E2E restoration closure | **PENDING** | required before refreeze decision |
 
-P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.
+P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.  
+Historical numerics disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`.
 
 ## Repository organization contract
 
@@ -82,6 +83,19 @@ Post-export native authority is a separate interlock:
 
 The source, projection, archive writer and external C++ probe exist. The current GitHub Actions attempt (`33817253942`) received no runner (`runner_id=0`, `steps=[]`), so native execution on this source head is **not yet claimed PASS**.
 
+## Historical numerical backends
+
+Historical v0.5 CDT, BBW/KKT, ARAP, XPBD and SDF-contact implementations were source-diffed against current V4.
+
+They remain valuable future backends, but none is a current restoration dependency:
+
+- CDT would need typed support lineage for generated/Steiner vertices before it could emit a current `MeshDiscretizationCandidateIR`;
+- BBW/KKT would have to emit `SkinProposalIR` or retained candidate evidence and remain behind current skin qualification;
+- ARAP would require a typed corrective-deformation contract that binds solver identity into proof-owned frames and export;
+- XPBD/contact require a future secondary-dynamics/contact product and runtime contract.
+
+Therefore **no numerical bulk restore is authorized**. Current LBS remains the only promoted numerical runtime/deformation dependency required by present V4.
+
 ## Causal proof and repair firewalls
 
 Failure localization is not causal ownership. Controlled attribution requires a same-probe, single-owner bounded counterfactual with material improvement and no protected regression. Repair requires a distinct child state and mandatory same-probe re-proof.
@@ -99,6 +113,7 @@ Current executable repair-operation count: **0**. Historical source presence is 
 - no proof can bind a different product state than export/runtime;
 - no export-time evaluator/solver replay;
 - no cross-view/completion texture projection into native-v2 until its atlas authority is separately qualified;
+- no historical numerical backend becomes current merely because it once produced strong metrics;
 - no failure signature may invent causal ownership;
 - no repair may mutate production state without a distinct child lineage and mandatory same-probe re-proof;
 - no permanent current dependency on a dated experiment implementation;
@@ -107,8 +122,7 @@ Current executable repair-operation count: **0**. Historical source presence is 
 
 ## Next execution order
 
-1. execute the single milestone P0/native interlock gate when GitHub provides a runner; do not spam reruns;
-2. source-diff CDT / BBW-KKT / ARAP / XPBD/contact and promote only kernels actually required by current typed architecture;
-3. decide whether any current proposal-requalification / retained-candidate seam is required for repair execution;
-4. run restoration-wide source/regression/E2E/native closure gates;
-5. only then decide refreeze and FIT authorization.
+1. decide whether current restoration requires any executable repair seam at all, or whether fail-closed zero-executor repair authority is sufficient for first-fit authorization;
+2. execute the single milestone P0/native interlock gate when GitHub provides a runner; do not spam reruns;
+3. run restoration-wide source/regression/E2E/native closure gates;
+4. only then decide refreeze and FIT authorization.

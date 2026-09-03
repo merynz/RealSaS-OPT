@@ -1,0 +1,75 @@
+{
+  "schema": "RealSaS.HistoricalNumericsSourceDiffDisposition.v1",
+  "date": "2026-09-04",
+  "branch": "restoration/compiler-runtime-promotion-v1-20260903",
+  "historical_archive": {
+    "name": "RealSaS_M4_v0_5_CANONICAL_MECHANICAL_MEANING_SOURCE.zip",
+    "sha256": "03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130"
+  },
+  "current_authority_witnesses": {
+    "compiler/realsas_compiler_core/mesh/mwb2.py": "ff1376c190988c7f746e22496854a7cbe5bceeef",
+    "compiler/realsas_compiler_core/skin.py": "707e9ded55d94b80946cb2bc452e9b583f0a2ac8",
+    "compiler/realsas_compiler_core/deformation.py": "d02657372b4a518e1924902c689dea254c61e9f9",
+    "compiler/realsas_compiler_core/motion.py": "934dfb79a2e77c003f25f12f844569e79439a90f"
+  },
+  "historical_candidates": [
+    {
+      "subsystem": "CDT_CONFORMING_MESH",
+      "historical_path": "compiler/realsas_mesh/cdt_production.py",
+      "sha256": "dd21ae3fc570b2eb5d3c439a5c31fd25fed2ad0743d34a71119d5b391806854d",
+      "historical_role": "Bowyer-Watson / conforming CDT-style domain triangulation with constraints and quality refinement",
+      "current_conflict": "Current MWB2 is an observed-safe-local-relation mesh candidate over admitted surface identities and explicitly records cdt_promoted=false. Historical CDT may introduce independent/Steiner vertices and topology, which requires a new typed SurfaceSupportBinding authority for every generated vertex before it can become a current candidate producer.",
+      "disposition": "KEEP_HISTORICAL_ONLY_FUTURE_TYPED_REBIND_CANDIDATE",
+      "current_promotion_required_for_restoration": false,
+      "allowed_future_entry": "May become an alternate MeshDiscretizationCandidateIR producer only after generated-vertex support lineage and unknown-boundary policy are typed and qualified. It must never bypass current mesh qualification."
+    },
+    {
+      "subsystem": "BBW_KKT_WEIGHTS",
+      "historical_path": "compiler/realsas_weight/production_bbw.py",
+      "sha256": "b609c30b8fd4446abee9d12d3d392477756ab157875df6dc2102ae39f40ca8f4",
+      "historical_role": "bounded biharmonic / KKT-style mesh weight solver with simplex polish and fallback",
+      "current_conflict": "Current skin authority consumes Arachne SkinProposalIR on canonical surface ids and Compiler qualifies simplex/sparsification. Historical BBW directly solves mesh/control weights and would become a second skin generator unless rebound as proposal evidence. Current QualifiedSkinIR contains no retained BBW portfolio.",
+      "disposition": "KEEP_HISTORICAL_ONLY_FUTURE_TYPED_REBIND_CANDIDATE",
+      "current_promotion_required_for_restoration": false,
+      "allowed_future_entry": "May become a bounded geometric fallback that emits SkinProposalIR or retained candidate evidence behind current Compiler qualification; it may not write QualifiedSkinIR directly."
+    },
+    {
+      "subsystem": "ARAP_CORRECTIVE_DEFORMATION",
+      "historical_path": "compiler/realsas_deformation/production_arap.py",
+      "sha256": "9b1d45ddca06bc26fdb830181b3a454e422eab399c04b5e203731fa045734cee",
+      "historical_role": "prepared sparse 2D local/global ARAP corrective deformation",
+      "current_conflict": "Current directional evaluator/proof/runtime authority is LBS-based and exact proof-owned frames are exported without replay. There is no typed corrective-deformer state or ARAP ownership contract in CanonicalPuppetGraph.v3. Promoting ARAP now would silently create a second deformation interpretation and invalidate proof/export identity.",
+      "disposition": "KEEP_HISTORICAL_ONLY_FUTURE_TYPED_REBIND_CANDIDATE",
+      "current_promotion_required_for_restoration": false,
+      "allowed_future_entry": "May be evaluated as a post-LBS corrective candidate only after a typed corrective-deformation contract binds solver version, anchors, parameters, proof frames and runtime bake identity."
+    },
+    {
+      "subsystem": "XPBD_SECONDARY_DYNAMICS",
+      "historical_path": "compiler/realsas_deformation/secondary_xpbd.py",
+      "sha256": "a21982e7a9724e65ca89d375a20f79aae38967c1a663cb068d2dcd26d5ae7539",
+      "historical_role": "deterministic secondary XPBD graph and temporal solver with contact projection",
+      "current_conflict": "Current product/motion schema has no authoritative secondary-particle graph, compliance state, temporal solver state, or secondary-motion runtime contract. Hair/garment/secondary dynamics are outside the current first-fit closure.",
+      "disposition": "KEEP_HISTORICAL_ONLY_FUTURE_PRODUCT_EXTENSION",
+      "current_promotion_required_for_restoration": false,
+      "allowed_future_entry": "Requires a future typed secondary-dynamics product extension and proof/runtime contract; must remain subordinate to canonical product identity."
+    },
+    {
+      "subsystem": "SDF_CONTACT",
+      "historical_path": "compiler/realsas_deformation/contact_sdf.py",
+      "sha256": "4db53c35355cb949e0c4613c9e8575351cd93da5a2b15fde0e0b601fdf6327a4",
+      "historical_role": "exact EDT SDF utilities and deterministic contact projection",
+      "current_conflict": "Current first-fit product has no typed contact/SDF ownership or runtime contact state. The historical module is useful only with a future contact or XPBD lane; promoting it now would be dead mainline code with no current consumer.",
+      "disposition": "KEEP_HISTORICAL_ONLY_FUTURE_PRODUCT_EXTENSION",
+      "current_promotion_required_for_restoration": false,
+      "allowed_future_entry": "May support a future typed contact/secondary-dynamics lane; not a current Compiler dependency."
+    }
+  ],
+  "current_numerical_runtime_dependency": {
+    "LBS": "PROMOTED_CURRENT_SERVICE",
+    "service_path": "compiler/realsas_compiler_services/numerics/lbs.py",
+    "reason": "Current deformation verification and qualified directional motion evaluation require LBS semantics; this dependency is already promoted behind current Compiler authority."
+  },
+  "restoration_decision": "NUMERICAL_SOURCE_DIFF_COMPLETE_NO_ADDITIONAL_BACKEND_PROMOTION_REQUIRED_FOR_CURRENT_V4_CLOSURE",
+  "bulk_restore_forbidden": true,
+  "fit_authorization_changed": false
+}

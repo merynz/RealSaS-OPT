@@ -16,7 +16,7 @@ on:
 jobs:
   arachne-codec-v2-source-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,6 +39,15 @@ jobs:
           PYTHONHASHSEED: '0'
         run: |
           python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_objective_causal_diagnostic.py
+      - name: Diagnose ID-bound Codec A0 tail stability
+        env:
+          PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_tail_causal_diagnostic.py
       - name: Verify canonical skin target row binding and frozen behavioral panel
         env:
           PYTHONPATH: .

@@ -17,7 +17,11 @@ from .directional_motion_evaluator import (
     DirectionalMotionEvaluatorPolicyV1,
     EVALUATOR_SEMANTIC_VERSION,
     evaluate_clip_to_qualification_bake,
-    make_qualified_motion_bake_provider,
+)
+from .directional_motion_provider import (
+    PROVIDER_SCHEMA_VERSION,
+    QualifiedDirectionalMotionBakeProviderV1,
+    make_qualified_directional_motion_provider,
 )
 from .causal_attribution import (
     ControlledInterventionEvidenceV1,
@@ -49,7 +53,9 @@ __all__ = [
     "DirectionalMotionEvaluatorPolicyV1",
     "EVALUATOR_SEMANTIC_VERSION",
     "evaluate_clip_to_qualification_bake",
-    "make_qualified_motion_bake_provider",
+    "PROVIDER_SCHEMA_VERSION",
+    "QualifiedDirectionalMotionBakeProviderV1",
+    "make_qualified_directional_motion_provider",
     "ControlledInterventionEvidenceV1",
     "proof_probe_fingerprint_v1",
     "attribute_signature_owner_v1",

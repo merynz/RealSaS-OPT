@@ -62,35 +62,35 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py
-      - name: Diagnose OpenBLAS conditioning and fork replay
+      - name: Diagnose Python hash seed and fork replay
         env:
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
-          PYTHONHASHSEED: '0'
+          OPENBLAS_NUM_THREADS: '1'
         run: |
           lscpu | grep -E 'Model name|Vendor ID|Architecture' || true
-          OPENBLAS_NUM_THREADS=1 python - <<'PY'
-          import hashlib
+          PYTHONHASHSEED=0 python - <<'PY'
+          import hashlib, os
           from experiments.geppetto_arachne_r6_20260901.geppetto_conditioning_v2 import GeppettoConditioningAdapterV2
           from experiments.geppetto_arachne_r6_20260901.test_geppetto_v2_behavioral_panel import WITNESSES, _surface
           spec = next(x for x in WITNESSES if x.name == 'fork_5')
           c = GeppettoConditioningAdapterV2()([_surface(spec)])
-          print('FORK_CONDITIONING_OPENBLAS1', c.conditioning_hashes[0], hashlib.sha256(c.features.tobytes()).hexdigest())
+          print('FORK_CONDITIONING_HASHSEED0', os.environ.get('PYTHONHASHSEED'), c.conditioning_hashes[0], hashlib.sha256(c.features.tobytes()).hexdigest())
           PY
-          env -u OPENBLAS_NUM_THREADS python - <<'PY'
-          import hashlib
+          env -u PYTHONHASHSEED python - <<'PY'
+          import hashlib, os
           from experiments.geppetto_arachne_r6_20260901.geppetto_conditioning_v2 import GeppettoConditioningAdapterV2
           from experiments.geppetto_arachne_r6_20260901.test_geppetto_v2_behavioral_panel import WITNESSES, _surface
           spec = next(x for x in WITNESSES if x.name == 'fork_5')
           c = GeppettoConditioningAdapterV2()([_surface(spec)])
-          print('FORK_CONDITIONING_OPENBLAS_DEFAULT', c.conditioning_hashes[0], hashlib.sha256(c.features.tobytes()).hexdigest())
+          print('FORK_CONDITIONING_HASHSEED_DEFAULT', os.environ.get('PYTHONHASHSEED'), c.conditioning_hashes[0], hashlib.sha256(c.features.tobytes()).hexdigest())
           PY
           set +e
-          OPENBLAS_NUM_THREADS=1 python -m pytest -q -s 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py::test_preregistered_generic_behavioral_panel[fork_5]'
+          PYTHONHASHSEED=0 python -m pytest -q -s 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py::test_preregistered_generic_behavioral_panel[fork_5]'
           A=$?
-          env -u OPENBLAS_NUM_THREADS python -m pytest -q -s 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py::test_preregistered_generic_behavioral_panel[fork_5]'
+          env -u PYTHONHASHSEED python -m pytest -q -s 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py::test_preregistered_generic_behavioral_panel[fork_5]'
           B=$?
-          echo "FORK_OPENBLAS1_DEFAULT_EXIT_CODES=${A},${B}"
+          echo "FORK_HASHSEED0_DEFAULT_EXIT_CODES=${A},${B}"
           exit 0
       - name: Run Geppetto V2 source and behavioral gates
         env:

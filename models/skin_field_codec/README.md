@@ -1,34 +1,35 @@
 # SkinFieldCodec
 
-SkinFieldCodec is the learned continuous skin-influence representation subsystem used by the current Arachne line.
+SkinFieldCodec is the learned continuous per-joint influence-field representation used by the current Arachne line.
+
+## Current mainline
+
+`models/skin_field_codec/v1/`
+
+Current executable source:
+
+- `skin_field_codec_v1.py` — byte-identical promoted codec implementation;
+- `skin_field_codec_checkpoint_v1.py` — byte-identical checkpoint authority;
+- `config_v1.py` — clean semantic extraction of the current codec config;
+- `candidate_config_v1.py` — compatibility shim required by the byte-preserved codec import path.
+
+The compatibility shim deliberately does **not** carry the historical Geppetto V1 and Arachne V1 configs that shared the original experiment file.
+
+## Learned vs deterministic
+
+The codec is a learned `nn.Module`. For a fixed checkpoint, fixed inputs and deterministic backend execution its forward/decode result can be deterministic, but that does not make it a deterministic geometric solver.
+
+It learns:
+
+- a teacher-lane encoder from dense skin weights to per-joint latent fields;
+- a shared decoder from latent fields + admitted surface/joint conditioning to dense proposal weights.
+
+Teacher dense weights are permitted only on the training/encoding lane. Product inference must use predicted latents and admitted current conditioning.
 
 ## Authority boundary
 
-The codec learns a per-joint latent influence-field representation and a shared decoder from admitted surface + qualified-skeleton conditioning to dense proposal weights.
+SkinFieldCodec does not own canonical joint identity, simplex legality, sparsification, qualified skin, mesh binding, product state or proof. Dense decoded weights remain proposal/evidence consumed by Arachne/Compiler boundaries.
 
-Teacher dense weights are permitted only on the training/encoding lane. Product inference must decode from predicted latents and admitted current conditioning. The codec never owns skin qualification, sparsification, canonical IDs or product state.
+## Training status
 
-## Current source candidate
-
-Current implementation candidate:
-
-`experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py`
-
-Its current semantics explicitly separate teacher-only encoding from inference decoding and preserve a shared decoder used by Arachne. Training targets/losses/checkpoint compatibility remain audit-classified separately.
-
-## Target production layout
-
-```text
-models/skin_field_codec/
-  README.md
-  src/
-    codec.py
-    config.py
-  training/
-    losses.py
-    teacher_encoding.py
-  evaluation/
-  tests/
-```
-
-The current candidate is not copied here until the model-source ownership audit proves which adjacent config/training files are part of the current contract and which are experiment-only.
+Codec training/evaluation files (`train_codec_r6_a0_v1.py`, `eval_codec_r6_a0_v1.py`, deformation/tail objectives and diagnostics) remain in the research tree until their shared teacher-target/LBS dependencies are classified. Current inference ownership does not imply every historical training experiment is current mainline.

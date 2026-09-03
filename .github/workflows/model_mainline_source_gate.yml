@@ -10,7 +10,7 @@ on:
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
       - 'tests/iris/test_iris_mainline_source_v1.py'
-      - 'tests/models/test_geppetto_mainline_source_v1.py'
+      - 'tests/models/**'
       - 'restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md'
       - '.github/workflows/model_mainline_source_gate.yml'
   push:
@@ -22,7 +22,7 @@ on:
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
       - 'tests/iris/test_iris_mainline_source_v1.py'
-      - 'tests/models/test_geppetto_mainline_source_v1.py'
+      - 'tests/models/**'
       - 'restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md'
       - '.github/workflows/model_mainline_source_gate.yml'
 
@@ -38,12 +38,18 @@ jobs:
         run: python tests/iris/test_iris_mainline_source_v1.py
       - name: Geppetto byte-equivalence gate
         run: python tests/models/test_geppetto_mainline_source_v1.py
+      - name: SkinFieldCodec source/config gate
+        run: python tests/models/test_skin_field_codec_mainline_source_v1.py
       - name: Syntax-compile promoted model packages
         run: |
           python - <<'PY'
           import py_compile
           from pathlib import Path
-          for root in (Path('models/iris/v2'), Path('models/geppetto/v2')):
+          for root in (
+              Path('models/iris/v2'),
+              Path('models/geppetto/v2'),
+              Path('models/skin_field_codec/v1'),
+          ):
               for path in sorted(root.glob('*.py')):
                   py_compile.compile(str(path), doraise=True)
           PY

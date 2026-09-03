@@ -1,0 +1,41 @@
+name: proof-service-promotion-gate
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/proof_engine.py'
+      - 'compiler/realsas_compiler_services/**'
+      - 'compiler/test_proof_engine_source_v1.py'
+      - 'compiler/test_promoted_failure_signatures_v1.py'
+      - 'canonical/COMPILER_PROOF_REPAIR_PROMOTION_MANIFEST_V1_20260903.json'
+      - '.github/workflows/proof_service_promotion_gate.yml'
+  push:
+    paths:
+      - 'compiler/realsas_compiler_core/proof_engine.py'
+      - 'compiler/realsas_compiler_services/**'
+      - 'compiler/test_proof_engine_source_v1.py'
+      - 'compiler/test_promoted_failure_signatures_v1.py'
+      - 'canonical/COMPILER_PROOF_REPAIR_PROMOTION_MANIFEST_V1_20260903.json'
+      - '.github/workflows/proof_service_promotion_gate.yml'
+
+jobs:
+  proof-service-promotion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install numpy pytest
+      - name: Compile promoted proof boundary
+        run: |
+          python -m py_compile \
+            compiler/realsas_compiler_core/proof_engine.py \
+            compiler/realsas_compiler_services/__init__.py \
+            compiler/realsas_compiler_services/proof/__init__.py \
+            compiler/realsas_compiler_services/proof/failure_signatures.py
+      - name: Causal diagnostic boundary tests
+        run: |
+          PYTHONPATH=. python -m pytest -q \
+            compiler/test_proof_engine_source_v1.py \
+            compiler/test_promoted_failure_signatures_v1.py

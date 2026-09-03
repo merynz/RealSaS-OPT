@@ -1,0 +1,79 @@
+{
+  "schema": "realsas.compiler_proof_repair_promotion_manifest.v1",
+  "created_on": "2026-09-03",
+  "source_authority": {
+    "archive": "RealSaS_M4_v0_5_CANONICAL_MECHANICAL_MEANING_SOURCE.zip",
+    "archive_sha256": "03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130"
+  },
+  "current_authority": {
+    "canonical_compiler": "compiler/realsas_compiler_core/",
+    "subordinate_services": "compiler/realsas_compiler_services/",
+    "historical_compiler_restored": false,
+    "historical_pipeline_execution_allowed": false,
+    "failure_signature_is_owner_attribution": false,
+    "owner_attribution_requires_controlled_fault_experiment": true
+  },
+  "phase_1": {
+    "status": "PROMOTED_REBOUND",
+    "source": {
+      "path": "compiler/realsas_deformation/failure_signatures.py",
+      "size_bytes": 25075,
+      "sha256": "08ce49b91887a1cc39cdac340802ed924b61240da9b33efb928e8ab5d2bbbc36"
+    },
+    "target": "compiler/realsas_compiler_services/proof/failure_signatures.py",
+    "preserved_semantics": [
+      "typed failure diagnostics",
+      "failure localization is not causal owner attribution",
+      "owner attribution remains not_performed without controlled fault experiment",
+      "repair is not authorized by a diagnostic signature"
+    ],
+    "intentionally_not_restored": [
+      "historical contract imports",
+      "historical compiler authority",
+      "historical orchestrator ownership",
+      "implicit repair authority"
+    ]
+  },
+  "candidate_sources": [
+    {
+      "path": "compiler/realsas_deformation/motion_proof.py",
+      "size_bytes": 109224,
+      "sha256": "bf71197c7eb26efc196dcf9fa30be4c776efa78863acb0f36e3cabed7dff85a3",
+      "classification": "AUDIT_SOURCE_PENDING_TYPED_REBIND",
+      "target_concept": "compiler/realsas_compiler_services/proof/motion_probe.py",
+      "reason": "Valuable probe/measurement semantics, but deeply coupled to historical contracts; semantic extraction only."
+    },
+    {
+      "path": "compiler/realsas_deformation/playback_validator.py",
+      "size_bytes": 27940,
+      "sha256": "e937cf9bbf7a1badf4376b0ea37879b456375f17c036a39537f6ded58006cb40",
+      "classification": "AUDIT_SOURCE_PENDING_TYPED_REBIND",
+      "target_concept": "compiler/realsas_compiler_services/proof/playback_validation.py",
+      "reason": "Useful deformation/playback measurements; must consume current typed product and proof plan."
+    },
+    {
+      "path": "compiler/realsas_orchestrator/motion_qualification.py",
+      "size_bytes": 5099,
+      "sha256": "dbccde412adc4da7f9c3bc30b9c21284807817be44846b86459be1fec704d321",
+      "classification": "PROMOTE_SEMANTICS_PENDING_CURRENT_CAPSULE",
+      "target_concept": "current proof qualification facade",
+      "reason": "Small useful qualification capsule semantics; old orchestrator imports must not survive."
+    },
+    {
+      "path": "compiler/realsas_orchestrator/meaningful_proof_loop.py",
+      "size_bytes": 40505,
+      "sha256": "a50b3429e17cbf8456a6ad8274e053084ce134f25be332acffed28535ec60348",
+      "classification": "PROMOTE_STATE_MACHINE_SEMANTICS_ONLY",
+      "target_concept": "compiler/realsas_compiler_services/repair/proof_repair_loop.py",
+      "reason": "Preserve bounded prove-diagnose-repair-reprove state-machine semantics; do not restore historical prior stack."
+    },
+    {
+      "path": "compiler/realsas_orchestrator/pipeline.py",
+      "size_bytes": 255433,
+      "sha256": "d47f29f5c853a180a3f0de7347e2ab8861b7c29015fd98fd79b38c817c2be614",
+      "classification": "DO_NOT_PROMOTE_MONOLITH",
+      "target_concept": null,
+      "reason": "Historical all-knowing orchestration brain conflicts with current compiler authority and typed boundaries."
+    }
+  ]
+}

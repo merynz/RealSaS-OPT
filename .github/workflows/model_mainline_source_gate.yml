@@ -1,0 +1,42 @@
+name: model-mainline-source-gate
+
+on:
+  pull_request:
+    paths:
+      - 'models/**'
+      - 'compiler/realsas_compiler_core/**'
+      - 'compiler/realsas_compiler_services/**'
+      - 'runtime/reference_v4/**'
+      - 'experiments/iris_reprojection_v2_20260831/**'
+      - 'tests/iris/test_iris_mainline_source_v1.py'
+      - 'restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md'
+      - '.github/workflows/model_mainline_source_gate.yml'
+  push:
+    paths:
+      - 'models/**'
+      - 'compiler/realsas_compiler_core/**'
+      - 'compiler/realsas_compiler_services/**'
+      - 'runtime/reference_v4/**'
+      - 'experiments/iris_reprojection_v2_20260831/**'
+      - 'tests/iris/test_iris_mainline_source_v1.py'
+      - 'restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md'
+      - '.github/workflows/model_mainline_source_gate.yml'
+
+jobs:
+  source-ownership:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Byte-equivalence and import-firewall gate
+        run: python tests/iris/test_iris_mainline_source_v1.py
+      - name: Syntax-compile promoted IRIS package
+        run: |
+          python - <<'PY'
+          import py_compile
+          from pathlib import Path
+          for path in sorted(Path('models/iris/v2').glob('*.py')):
+              py_compile.compile(str(path), doraise=True)
+          PY

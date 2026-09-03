@@ -8,12 +8,14 @@ It is an index, not a substitute for `CURRENT_STATE.md`, `RESTORATION_STATE.md` 
 
 | Subsystem | Current semantic role | Current executable/source location | Mainline status |
 |---|---|---|---|
-| IRIS | 8-view RGB observation evidence; learned geometric authority ends at depth/support/uncertainty | current V2 candidate still under `experiments/iris_reprojection_v2_20260831/`; production owner reserved at `models/iris/` | **SOURCE NORMALIZATION IN PROGRESS** |
+| IRIS | 8-view RGB observation evidence; learned geometric authority ends at depth/support/uncertainty | `models/iris/v2/` | **PROMOTED MAINLINE / BYTE-PRESERVING V2 SOURCE** |
 | Geppetto | anonymous multimodal skeleton/control proposal | current V2 candidate mixed under `experiments/geppetto_arachne_r6_20260901/`; production owner reserved at `models/geppetto/` | **SOURCE NORMALIZATION IN PROGRESS** |
 | SkinFieldCodec | continuous per-joint influence-field latent + shared decoder | current candidate `experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py`; production owner reserved at `models/skin_field_codec/` | **SOURCE NORMALIZATION IN PROGRESS** |
 | Arachne | qualified-skeleton-conditioned dense skin proposal | current V2 candidate mixed under `experiments/geppetto_arachne_r6_20260901/`; production owner reserved at `models/arachne/` | **SOURCE NORMALIZATION IN PROGRESS** |
 
 Models emit evidence/proposals only. Compiler qualification remains authoritative.
+
+IRIS promotion preserves the original experiment files as provenance and excludes Gate-0 harnesses plus Compiler-owned persistence assembly from the model mainline. See `restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md`.
 
 ## Compiler mainline
 
@@ -33,7 +35,8 @@ Models emit evidence/proposals only. Compiler qualification remains authoritativ
 | Causal mutation helpers | `compiler/realsas_compiler_services/proof/causal_mutations.py` | PROMOTED SUPPORT |
 | Export/deploy bake | `compiler/realsas_compiler_services/export/runtime_deploy_bake.py` | PROMOTED |
 | Numerical LBS probe | `compiler/realsas_compiler_services/numerics/lbs.py` | PROMOTED |
-| Motion probe / playback measurement | historical authority under audit | NEXT RESTORATION ITEM |
+| IRIS persistence/substrate adapter | experiment source classified Compiler-owned | PENDING PROMOTION INTO COMPILER SEMANTIC HOME |
+| Motion probe / playback measurement | historical authority under audit | RESTORATION PENDING AFTER MODEL OWNERSHIP CLOSURE |
 | Owner attribution + bounded repair/re-proof | historical authority under audit | PENDING |
 | CDT / BBW-KKT / ARAP / XPBD/contact | competing historical authorities | SOURCE-DIFF REQUIRED |
 
@@ -60,7 +63,7 @@ See `compiler/README.md` for the logical layer map.
 - Global architecture refreeze: **NOT PERFORMED**
 - Formal Family-1 selection: **BLOCKED**
 - Real-family FIT: **NOT AUTHORIZED**
-- Current work: **source ownership normalization + Compiler/runtime historical promotion**
+- Current work: **learned-source mainline promotion + Compiler/runtime historical promotion**
 
 ## Promotion rule
 

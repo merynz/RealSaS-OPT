@@ -103,6 +103,29 @@ def _product(*, translation=(0.0, 0.0)):
     ), clip
 
 
+def _planar_binding_product(*, joint_z=0.0):
+    points = ((-1.0, -1.0, 0.0), (1.0, -1.0, 0.0), (1.0, 1.0, 0.0), (-1.0, 1.0, 0.0))
+    nodes = tuple(
+        SurfaceNode(
+            f"PS:{i}", p, tuple(range(8)), ("SYNTH_PLANAR",), (f"POBS:{i}",),
+            tuple((view, _xy(view, p)) for view in range(8)), f"PG:{i}",
+        )
+        for i, p in enumerate(points)
+    )
+    surface = RiggingSurfaceIR(nodes, geometry_lineage_hash="planar-surface-lineage")
+    joint = SimpleNamespace(canonical_joint_id="J:planar", position=(0.1, -0.2, float(joint_z)), parent_canonical_id=None)
+    skeleton = SimpleNamespace(joints=(joint,), skeleton_lineage_hash="planar-skeleton-lineage")
+    mechanical = SimpleNamespace(surface=surface, skeleton=skeleton)
+    directions = tuple(SimpleNamespace(view_index=v, camera_binding_hash=f"PCAM:{v}", components=()) for v in range(8))
+    directional = SimpleNamespace(directions=directions, directional_visual_state_hash="planar-directional-lineage")
+    return SimpleNamespace(
+        product_state_hash="d" * 64,
+        mechanical_state=mechanical,
+        directional_renderables=directional,
+        motion_state_hash="planar-motion-lineage",
+    )
+
+
 def test_affine_surface_correspondence_qualifies_all_joint_view_pivots():
     product, _ = _product()
     binding = qualify_directional_joint_view_binding(product, policy=DirectionalBindingPolicyV1())
@@ -114,6 +137,22 @@ def test_affine_surface_correspondence_qualifies_all_joint_view_pivots():
         actual = joint_pivot(binding, view, "J:root")
         assert np.allclose(actual, expected, atol=1e-8, rtol=0.0)
         assert binding.projections[view].p95_residual01 < 1e-10
+
+
+def test_rank3_planar_projection_is_qualified_only_for_joint_on_affine_hull():
+    product = _planar_binding_product(joint_z=0.0)
+    policy = DirectionalBindingPolicyV1(min_correspondences=4, required_affine_rank=3)
+    binding = qualify_directional_joint_view_binding(product, policy=policy)
+    assert {row.affine_rank for row in binding.projections} == {3}
+    assert all(math.isfinite(row.qualification_report["effective_condition_number"]) for row in binding.projections)
+    assert max(row.max_joint_affine_hull_residual01 for row in binding.projections) < 1e-12
+
+
+def test_rank3_planar_projection_rejects_joint_outside_identified_affine_hull():
+    product = _planar_binding_product(joint_z=0.25)
+    policy = DirectionalBindingPolicyV1(min_correspondences=4, required_affine_rank=3, max_joint_affine_hull_residual01=0.02)
+    with pytest.raises(QualificationError, match="JOINT_OUTSIDE_AFFINE_HULL"):
+        qualify_directional_joint_view_binding(product, policy=policy)
 
 
 def test_stale_product_binding_is_rejected():

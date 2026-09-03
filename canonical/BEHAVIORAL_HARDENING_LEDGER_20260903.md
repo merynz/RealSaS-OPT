@@ -10,215 +10,137 @@
 
 ## Purpose
 
-Single status entrypoint for post-freeze behavioral hardening. Detailed causal evidence remains in subsystem records. Historical failures are preserved; causal corrections reclassify claims rather than erasing runs.
+Single status entrypoint for post-freeze behavioral hardening. Detailed causal evidence remains in subsystem-specific canonical records; historical failures are preserved there and are not erased by later repairs.
 
 ## Gate 1 — Geppetto
 
 **Status:** `PASS / CLOSED INCLUDING CURRENT R6 U1 ORACLE CONSUMER GATE`
 
-Canonical details:
-- `canonical/GEPPETTO_V2_BEHAVIORAL_CLOSURE_20260903.md`
-- `canonical/R6_GEPPETTO_OBSERVATION_ORACLE_CLOSURE_20260903.md`
+Authorities:
+- `canonical/GEPPETTO_V2_BEHAVIORAL_CLOSURE_20260903.md`;
+- `canonical/R6_GEPPETTO_OBSERVATION_ORACLE_CLOSURE_20260903.md`.
 
-Behavioral closure:
-- optimize -> shipping proposal -> Compiler mechanical authority PASS;
-- heterogeneous panel + independent witness PASS;
-- cross-region `chilecentral -> westus3` replay PASS;
+Closed facts:
+- optimizer -> shipping proposal -> real Compiler mechanical authority PASS;
+- heterogeneous behavioral panel + independent witness PASS;
+- cross-region replay PASS;
+- teacher graph equality diagnostic only, not product authority;
 - no real-family repair constants;
-- teacher graph equality remains diagnostic, not product authority.
+- R6 one-family U0 full-surface PASS;
+- R6 one-family U1 observation-oracle PASS;
+- R6 heterogeneous U1 `3/3 PASS`.
 
-R6 observation-oracle closure:
-- one-family `branch_blend_4` U0 full-surface PASS and U1 observation-oracle PASS;
-- heterogeneous U1 small panel `3/3 PASS`;
-- `chain_blend_3`: step `96`, p95 `~0.01630`;
-- `branch_blend_4`: step `96`, p95 `~0.01456`;
-- `sharp_fork_5`: step `160`, p95 `~0.01131`;
-- exact count and Compiler mechanical PASS on all three.
+Heterogeneous U1 final Geppetto p95:
+- `chain_blend_3`: `~0.01630`, step `96`;
+- `branch_blend_4`: `~0.01456`, step `96`;
+- `sharp_fork_5`: `~0.01131`, step `160`.
 
-Important scope limitation: current capsule-shell U1 coverage remained very high (`159/160`, `159/160`, `160/160`). Therefore this closes the frozen oracle consumer gate but does **not** establish a strong material-self-occlusion claim. A separately preregistered coverage-stress gate may later strengthen evidence without changing this PASS.
+Scope limit: the current capsule shells retain `159/160`, `159/160`, and `160/160` full samples across eight views. Therefore current U1 closes the frozen oracle consumer gate but does **not** establish a strong material-self-occlusion/full-hidden-surface necessity claim.
 
 ## Gate 2 — IRIS privileged-input firewall
 
 **Status:** `PASS SOURCE FIREWALL / CLOSED`
 
-Records:
-- `canonical/IRIS_LEAK_SCOPE_20260903.md`
-- `canonical/IRIS_PRIVILEGED_INPUT_FIREWALL_REPAIR_V1_20260903.md`
-- `canonical/IRIS_REPROJECTION_V2_PRIVILEGED_INPUT_CORRECTION_20260903.md`
+Authorities:
+- `canonical/IRIS_LEAK_SCOPE_20260903.md`;
+- `canonical/IRIS_PRIVILEGED_INPUT_FIREWALL_REPAIR_V1_20260903.md`;
+- `canonical/IRIS_REPROJECTION_V2_PRIVILEGED_INPUT_CORRECTION_20260903.md`.
 
 Verification:
-- `33751592814` westcentralus: firewall `4/4`, combined IRIS `24/24` PASS;
-- `33751730077` westus3: firewall `4/4`, combined IRIS `24/24` PASS.
+- run `33751592814`, westcentralus: firewall `4/4`, combined IRIS `24/24` PASS;
+- run `33751730077`, westus3: firewall `4/4`, combined IRIS `24/24` PASS.
 
 Historical learned IRIS results under the superseded privileged-input contract remain `QUARANTINED`.
 
-## Architecture candidate state
+`U2_PREDICTED_IRIS_SUBSTRATE_SUFFICIENCY = UNKNOWN`; U2 has not yet been opened as an information-sufficiency claim.
+
+## Gate 3 — SkinFieldCodec / Arachne
+
+**Status:** `PASS / CLOSED INCLUDING CURRENT R6 U0-U1 ORACLE CONSUMER GATE`
+
+Authorities:
+- `canonical/SKIN_FIELD_CODEC_SHIPPING_CAPACITY_AND_COOLING_V1_20260903.md`;
+- `canonical/ARACHNE_SHIPPING_BEHAVIORAL_CLOSURE_20260903.md`;
+- `canonical/R6_ARACHNE_ORACLE_SUBSTRATE_ONE_FAMILY_RESULT_20260903.md`;
+- `canonical/R6_ARACHNE_OBSERVATION_ORACLE_CLOSURE_20260903.md`.
+
+Shipping identities:
+- Codec config hash `24c9f2580be9e80a02789e9ba35a57470145114807859057398b07bef9d58715`;
+- Arachne config hash `ee24afce200619c06753e39a617528be0fd84695e6358db24d828693ebcb72d1`.
+
+Shipping behavioral closure:
+- actual default Codec A0 capacity PASS on the preregistered chain/branch/sharp panel;
+- stable generic cosine A0 protocol PASS;
+- default Arachne A1 -> frozen qualified shipping Codec -> raw W -> Compiler -> verified LBS `3/3 PASS`;
+- Compiler correction negligible relative to acceptance and raw W independently passes;
+- exact cross-region replay PASS.
+
+R6 one-family `branch_blend_4`:
+- U0 A0 PASS step `704`, final p95 `~0.03907`, deformation `~0.01586`;
+- U0 A1 PASS step `320`, final p95 `~0.07997`, deformation `~0.02057`;
+- U1 A0 PASS step `608`, final p95 `~0.01898`, deformation `~0.00732`;
+- U1 A1 PASS step `512`, final p95 `~0.05775`, deformation `~0.03149`.
+
+R6 heterogeneous U1:
+- `chain_blend_3`: A0 step `544`, p95 `~0.04466`, deformation `~0.01171`; A1 step `96`, p95 `~0.03887`, deformation `~0.01048`;
+- `branch_blend_4`: A0 step `608`, p95 `~0.01898`, deformation `~0.00732`; A1 step `512`, p95 `~0.05775`, deformation `~0.03149`;
+- `sharp_fork_5`: A0 step `1056`, p95 `~0.02400`, deformation `~0.00481`; A1 step `736`, p95 `~0.08822`, deformation `~0.01489`.
+
+All three achieved exact admitted row coverage, raw + qualified PASS, three consecutive stable checks, and Compiler correction `<1e-5`.
+
+Causal verdict:
+- `SHIPPING_CODEC_CAPACITY_ON_CURRENT_U1_SHAPES = 3/3 PASS`;
+- `SHIPPING_ARACHNE_ON_CURRENT_U1_SHAPES = 3/3 PASS`;
+- `COMPILER_RESCUE_EXPLAINS_PASS = FALSIFIED`;
+- observation-oracle substrate is sufficient for current shipping Arachne+Codec on the admitted small synthetic panel before IRIS prediction error.
+
+Same self-occlusion scope limitation applies: current U1 visibility is near-complete, so material hidden-surface deprivation remains a separate strengthening obligation rather than an already-proven claim.
+
+## Architecture-freeze candidate state
+
+**Status:** `REFREEZE NOT YET AUTHORIZED / SCIENTIFIC PREREQUISITES BEING HARDENED`
 
 Old candidate fingerprint from run `33751730186`:
 `1c6878b2e1e8cbd30a055849a64c8fe68558924e0a874de2e8fffa2e24ad7575`
 
-**Status:** `STALE CANDIDATE ONLY / NOT A SEAL`
+This is stale candidate evidence only, not a seal.
 
-Ongoing hardening/audit work invalidates promotion. Family selection remains blocked.
+Current architecture-freeze workflow now executes as prerequisites:
+- IRIS source/generic/firewall gates;
+- proof source gates;
+- Geppetto generic + behavioral gates;
+- shipping Codec A0 and Arachne A1 gates;
+- R6 Geppetto one-family U0/U1 + heterogeneous U1;
+- R6 Arachne one-family U0/U1 + heterogeneous U1.
 
-## Gate 3 — Arachne / SkinFieldCodec
+Family selection must remain blocked until an explicit new architecture freeze is produced after all authorized behavioral seams close.
 
-**Status:** `SHIPPING CAPACITY PASS / CLOSED; R6 U0-U1 INFORMATION SUFFICIENCY ACTIVE`
+## Current P0 — MWB2 direction-local mesh/skin seam
 
-Primary authorities:
-- cleanroom matrix: `canonical/REALSAS_RIGANYTHING_SKINTOKENS_END_TO_END_CLEANROOM_MATRIX_20260903.md`
-- shipping Codec causal closure: `canonical/SKIN_FIELD_CODEC_SHIPPING_CAPACITY_AND_COOLING_V1_20260903.md`
-- shipping Arachne behavioral closure: `canonical/ARACHNE_SHIPPING_BEHAVIORAL_CLOSURE_20260903.md`
-- active R6 prereg: `canonical/R6_ARACHNE_ORACLE_SUBSTRATE_PREREG_20260903.md`
+**Status:** `OPEN / BEHAVIORAL AUTHORITY NOT YET CLOSED`
 
-Authoritative shipping chain:
+Existing source:
+- `compiler/realsas_compiler_core/mwb2.py`;
+- `compiler/realsas_compiler_core/mwb2_skin.py`.
 
-`Codec A0 -> frozen qualified shipping Codec -> default shipping Arachne A1 -> SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`.
+Existing evidence is insufficient for product closure:
+- MWB0 proves typed seam/nomenclature/solver-authority invariants;
+- MWB1 is explicitly a sacrificial 3-vertex/1-face identity-subset lineage + exact weight-copy baseline and explicitly makes no product mesh/deformation quality claim;
+- the current synthetic complete-E2E runner uses a trivial 4-node square for all eight directions.
 
-### Independent source bug closed
+Important newly exposed seam:
+- all current R6 U1 Geppetto/Arachne substrates had `local_relation_count = 0`;
+- current MWB2 requires an `OBSERVED_SAFE_LOCAL_RELATION_COMPLEX` with enough safe relations to form nondegenerate triangular faces;
+- therefore the observation-substrate -> MWB2 local-relation complex is a real downstream behavioral obligation.
 
-Historical per-class active-weighted CE made exact teacher W non-stationary.
+No source-mesh topology, hidden completion, random connectivity, real-family tuning, or family-specific heuristic may be introduced to hide this seam.
 
-Repairs:
-- `f0fe52ab625695d46bed7007acba39fe4cdfb248` — row-scalar active emphasis;
-- `9692ac12a44769212906616b6bca13861022d42c` — exact-truth stationarity regression.
-
-Current exact-truth CE logit gradient max was approximately `4.43e-17` PASS.
-
-### Historical V1 harness contamination preserved
-
-V1 failed to rebind synthetic teacher W/rest rows from numeric creation order to lexicographically sorted canonical `conditioning.surface_ids` for N>=10.
-
-Therefore historical branch/sharp representation-capacity conclusions from that harness remain:
-
-`INVALID / CONTAMINATED_BY_ROW_BINDING_BUG`.
-
-The historical runs remain in the repository and are not deleted.
-
-### Tiny-model evidence reclassified
-
-The historical behavioral helper Codec used approximately `32 hidden / 8 latent / 2 encoder / 2 decoder layers`; the shipping/default Codec is `192 hidden / 64 latent / 3 encoder / 3 decoder layers`.
-
-Therefore the historical tiny sharp failure is not product-capacity authority:
-
-`TINY_SHARP_FAIL != SHIPPING_CODEC_PRODUCT_FAIL`.
-
-### Shipping A0 capacity closure
-
-The actual default shipping Codec was tested on the preregistered three-witness panel through:
-
-`teacher W -> shipping Codec -> raw W -> SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`.
-
-Stable cosine A0 PASS:
-
-- `chain_blend_3`: step `544`, p95 `~0.01764`, deformation `~0.00631`;
-- `branch_blend_4`: step `672`, p95 `~0.02839`, deformation `~0.00795`;
-- `sharp_fork_5`: step `1056`, p95 `~0.02705`, deformation `~0.00508`.
-
-Compiler correction remained on the order of `1e-7` to `1e-6`; raw and qualified W were effectively equivalent for acceptance.
-
-A0 verdicts:
-
-- `SHIPPING_CODEC_REPRESENTATION_BOTTLENECK = FALSIFIED`;
-- `CONSTANT_LR_1E-3_AS_STABLE_SHIPPING_A0_PROTOCOL = FALSIFIED`;
-- `GENERIC_COSINE_A0_PROTOCOL = PASS`;
-- `COMPILER_RESCUE_EXPLAINS_PASS = FALSIFIED`.
-
-### Shipping A1 closure
-
-Default shipping Arachne:
-
-- architecture: `RealSaS.ArachneCandidate.SegmentAwareJointField.v2`;
-- config hash: `ee24afce200619c06753e39a617528be0fd84695e6358db24d828693ebcb72d1`;
-- model dim `128`;
-- surface encoder layers `2`;
-- attention heads `4`;
-- feedforward dim `384`.
-
-For every witness the shipping Codec was independently A0-qualified with the cosine protocol and frozen before Arachne optimization.
-
-A1 results:
-
-- `chain_blend_3`: step `128`, final p95 `~0.01749`, deformation `~0.00626`;
-- `branch_blend_4`: step `512`, final p95 `~0.09542`, deformation `~0.02462`;
-- `sharp_fork_5`: step `1760`, final p95 `~0.08293`, deformation `~0.01613`.
-
-All three sustained three consecutive A1 PASS checks. Compiler correction again remained negligible (`~1e-7` to `1e-6`).
-
-Teacher latent equality is diagnostic only: branch/sharp latent p95 can remain around `0.16` while final W and deformation satisfy the product behavioral gate.
-
-### Cross-region replay
-
-Workflow run `33770002712`:
-
-- job `100697514568`, `westcentralus`: `3 passed`;
-- exact rerun job `100717194442`, `eastus`: `3 passed`;
-- identical witness pass steps and final metrics.
-
-`CROSS_REGION_DETERMINISTIC_REPLAY = PASS`.
-
-### Shipping Gate 3 verdict
-
-`SHIPPING_ARACHNE_TO_FROZEN_SHIPPING_CODEC_TO_COMPILER_TO_LBS = PASS / CLOSED`.
-
-`HYBRID_ARACHNE_LATENT_CODEC_BOUNDARY_AS_NECESSARY_INFORMATION_BOTTLENECK = FALSIFIED` on the preregistered generic synthetic panel.
-
-This is not a real-family fit or generalization claim.
-
-### Active R6 Arachne oracle gate
-
-The next causal question is now specifically:
-
-`U0_REFERENCE_FULL_SURFACE` vs `U1_OBSERVATION_ORACLE_SUBSTRATE` for Arachne.
-
-One-family rung is preregistered on `branch_blend_4` with unchanged shipping thresholds and configs. Each arm must first earn a default shipping Codec A0 capacity token on the arm's admitted row shape; only then may default shipping Arachne A1 run against the frozen decoder.
-
-Qualified G is produced through real `Compiler.qualify_skeleton_v2` from an explicitly labeled oracle mechanical proposal, isolating Arachne from Geppetto prediction error while preserving Compiler canonical-ID ownership.
-
-Current result: `RUNNING / UNKNOWN`.
-
-## End-to-end cleanroom audit
-
-**Status:** `COMPLETE AS CODE MATRIX / GEPPETTO U1 CLOSED / ARACHNE U0-U1 ACTIVE`
-
-Reference pins:
-- RigAnything `d03cdb21dd134fa81df6b0947522469db3f78bd2`;
-- SkinTokens `273b691d35989d71cd17ff2895fdc735097b92d1`.
-
-Main result:
-- RigAnything is code-specialized toward template-free continuous skeleton generation and uses direct point-token × joint-token skinning plus aggressive deterministic mesh smoothing.
-- SkinTokens is code-specialized toward a dedicated high-capacity skin representation: skin-aware dense training samples, FSQ-CVAE, autoregressive skin tokens, geometry-conditioned dense decode and optional topology/voxel prior.
-- No inspected common benchmark authorizes a direct empirical claim that one globally outperforms the other.
-- RealSaS has credible function-level equivalents across observation substrate, skeleton proposal/qualification, skin proposal/qualification and proof.
-- Geppetto+Compiler generic behavioral capacity is closed.
-- Geppetto current U1 observation-oracle consumer gate is closed `3/3 PASS`.
-- shipping Codec capacity and shipping Arachne->Codec information preservation are closed on the preregistered generic panel.
-
-### Current P0
-
-Arachne information sufficiency:
-
-`U0_REFERENCE_FULL_SURFACE` vs `U1_OBSERVATION_ORACLE_SUBSTRATE`.
-
-Interpretation remains frozen:
-
-- U0 A0 fail -> Codec representation/protocol inadequate on the rich oracle shape;
-- U0 A0 pass + U0 A1 fail -> Arachne apparatus inadequate under rich geometry;
-- U0 pass + U1 A0 fail -> observation-limited admitted shape cannot be represented under the frozen protocol;
-- U0 A1 pass + U1 A0 pass + U1 A1 fail -> observation-limited substrate insufficiency demonstrated for Arachne;
-- U0/U1 A1 pass -> complete hidden/full surface is unnecessary for the admitted Arachne task on this gate, subject to measured coverage-contrast limitations.
-
-U2 predicted-IRIS interpretation remains later.
-
-## Later gates — not yet opened
-
-After substrate-equivalence closes:
-- MWB / mesh-weight binding semantics;
-- appearance/directional raster provenance;
-- motion/runtime state mutation;
-- proof/runtime fail-closed lineage and causal corruption.
-
-No downstream gate may hide an unresolved upstream behavioral failure.
+Next work:
+1. audit the existing observation-derived local-relation producer against MWB2 consumer semantics;
+2. preregister a generic directional MWB behavioral panel before outputs;
+3. drive actual `S/W -> build_mwb2_candidate -> qualify_mwb2_mesh -> bind_mwb2_mesh_skin -> directional deformation/coverage behavior`;
+4. use controlled relation/topology/weight mutations for causal evidence;
+5. only then close MWB and move to appearance/motion/proof-runtime seams.
 
 ## Deferred repository/runtime/source hygiene task
 
@@ -228,14 +150,4 @@ User-approved sequence:
 
 `behavioral architecture closure -> architecture freeze -> semi-freeze source visibility/restoration -> full repo/compiler/runtime source audit -> restore required historical source authorities non-destructively -> re-audit/refreeze if source/authority changes require it`.
 
-Non-destructive goals:
-- inventory branch/PR/top-level path ownership;
-- define canonical branch taxonomy/naming;
-- distinguish active/frozen/audit/archive references;
-- create one repository structure / branch governance map;
-- preserve historical commits/records;
-- expose required historical Compiler/runtime source authority without automatically promoting it to executable/canonical ownership;
-- no deletion;
-- no disruptive branch/path renaming while a scientific gate is active.
-
-This task is intentionally not opened while the U0/U1 substrate gate is active.
+No deletion or disruptive branch/path rename while an active scientific gate is open.

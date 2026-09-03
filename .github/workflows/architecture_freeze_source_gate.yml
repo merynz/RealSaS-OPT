@@ -65,6 +65,7 @@ jobs:
           python -m pytest -q -s \
             tests/iris/test_iris_v2_source_v1.py \
             tests/iris/test_iris_v2_generic_strength_v1.py \
+            tests/iris/test_iris_v2_privileged_input_firewall_v1.py \
             tests/iris/test_iris_v2_surface_relations_v1.py \
             compiler/test_proof_engine_source_v1.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_loss_accumulator_v2.py \

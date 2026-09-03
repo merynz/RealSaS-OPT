@@ -1,31 +1,33 @@
 # RealSaS-OPT
 
-Canonical RealSaS research + compiler workspace.
+Canonical RealSaS research, compiler, proof and runtime workspace.
 
 ## Start here
 
-**`main` is the single canonical continuation branch.** Read `CURRENT_STATE.md` on `main` before doing any new work.
+1. **`CURRENT_STATE.md`** — last canonical-main scientific state.
+2. **`RESTORATION_STATE.md`** — active Compiler/runtime promotion state while the restoration branch is open.
+3. **`REPOSITORY_MAP.md`** — where each class of source/evidence belongs.
+4. **`canonical/README.md`** — current authority index and supersession rules.
 
-All other branches are retained as historical/experimental evidence. They are not competing continuation authority unless a future explicit `main` decision promotes something from them.
+## Product boundary
 
-Current product ontology:
+RealSaS ships an **eight-direction editable 2D/2.5D puppet**. World/camera-space geometry is mechanically useful evidence; it is not full-3D reconstruction authority.
 
-`8 ordered 2D observations -> 3D-equivalent mechanical evidence -> directional 2D/2.5D editable puppet`
+Canonical product flow:
 
-RealSaS is **not** a full-3D reconstruction product. World/camera-space depth, P and local geometry exist to provide mechanically useful evidence for rigging, skinning and deformation. Shipping authority remains an eight-direction 2D/2.5D puppet.
+`IRIS -> GeometricSubstrate -> Geppetto proposal -> Compiler qualification -> Arachne proposal -> Compiler skin/mesh/appearance/motion -> proof/repair -> export -> runtime`
 
-Canonical system flow:
+## Authority rule
 
-`IRIS -> GeometricSubstrateAssembler -> Geppetto proposal -> Compiler hierarchy qualification -> Arachne proposal -> Compiler skin -> directional mesh/appearance -> proof/repair -> runtime`
+`compiler/realsas_compiler_core/` is the single canonical product/identity/qualification authority.
+Historical production knowledge may be promoted only **behind** that authority. Historical code never regains ownership merely because it is older or larger.
 
-Current architecture authority after V4 merge:
+## Repository rule
 
-- `canonical/SYSTEM_ARCHITECTURE_V4_20260902.md`
-- `canonical/SINGLE_FAMILY_E2E_FIT_CONTRACT_20260902.md`
-- `canonical/MASTER_EXECUTION_BACKLOG_V4_20260902.md`
+- production authority is obvious from path;
+- experiments never masquerade as production;
+- historical evidence is preserved, but cannot execute by provenance alone;
+- generated/archival reports do not become semantic owners;
+- every promoted historical source is SHA-bound and regression-gated.
 
-Immediate program objective: prove one clean real family end-to-end as a coherent skeleton, qualified skinning, stable directional deformation and effective preset animation before opening generalization work.
-
-GitHub is continuation/inspection authority. Heavy frozen corpus and historical source archives remain Google Drive byte authority and are bound here by exact SHA-256.
-
-No historical branch is deleted merely to simplify navigation; provenance is preserved while authority is centralized on `main`.
+See `docs/repository/AUTHORITY_MODEL.md` and `docs/repository/STRUCTURE_POLICY.md`.

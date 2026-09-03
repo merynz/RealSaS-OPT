@@ -3,10 +3,15 @@ from __future__ import annotations
 """Compiler-owned directional joint/view binding from admitted surface correspondences.
 
 The current mechanical surface already carries qualified object-frame points P and
-per-view raster observations.  This module fits one affine orthographic map per
-view from those admitted correspondences and binds canonical joint pivots through
-that map.  It never treats mechanical Vec3.xy as raster coordinates and never
-consults teacher/source-mesh geometry.
+per-view raster observations. This module fits one affine orthographic map per view
+from those admitted correspondences and binds canonical joint pivots through that
+map. Mechanical Vec3.xy is never treated as raster coordinates and no teacher or
+source-mesh geometry is consulted.
+
+Rank-3 affine fits are permitted only when every canonical joint lies sufficiently
+close to the admitted surface affine hull. This makes projection of those joints
+identified on that hull instead of silently extrapolating through an unconstrained
+mechanical dimension.
 """
 
 from dataclasses import asdict, dataclass, field, replace
@@ -24,9 +29,10 @@ Json = dict[str, Any]
 @dataclass(frozen=True)
 class DirectionalBindingPolicyV1:
     min_correspondences: int = 8
-    required_affine_rank: int = 4
+    required_affine_rank: int = 3
     max_p95_residual01: float = 0.015
     max_residual01: float = 0.05
+    max_joint_affine_hull_residual01: float = 0.02
     min_raster_span: float = 8.0
     schema_version: str = "RealSaS.DirectionalBindingPolicy.v1"
 
@@ -37,6 +43,8 @@ class DirectionalBindingPolicyV1:
             raise ValueError("unsupported affine-rank policy")
         if not (0.0 < self.max_p95_residual01 <= self.max_residual01 < 1.0):
             raise ValueError("invalid normalized residual policy")
+        if not (0.0 <= self.max_joint_affine_hull_residual01 < 1.0):
+            raise ValueError("invalid joint affine-hull residual policy")
         if self.min_raster_span <= 0.0:
             raise ValueError("invalid raster-span policy")
 
@@ -62,6 +70,7 @@ class DirectionalViewProjectionBindingIR:
     raster_span_px: float
     p95_residual01: float
     max_residual01: float
+    max_joint_affine_hull_residual01: float
     policy_hash: str
     qualification_report: Json
     projection_binding_hash: str
@@ -119,6 +128,53 @@ def _raster_xy(node, view_index: int) -> Vec2 | None:
     return None if not rows else rows[0]
 
 
+def _surface_scale(points: np.ndarray) -> float:
+    if points.ndim != 2 or points.shape[1] != 3 or not len(points):
+        raise QualificationError("DIRECTIONAL_BINDING_INVALID_MECHANICAL_POINTS")
+    span = float(np.linalg.norm(points.max(axis=0) - points.min(axis=0)))
+    if not math.isfinite(span) or span <= 1e-12:
+        raise QualificationError("DIRECTIONAL_BINDING_MECHANICAL_SPAN_DEGENERATE")
+    return span
+
+
+def _joint_affine_hull_residuals(points: np.ndarray, joints) -> tuple[float, ...]:
+    """Distance of joints from the affine hull of admitted mechanical correspondences."""
+    center = points.mean(axis=0)
+    centered = points - center[None, :]
+    _, singular, vt = np.linalg.svd(centered, full_matrices=False)
+    if not len(singular):
+        raise QualificationError("DIRECTIONAL_BINDING_EMPTY_AFFINE_HULL")
+    tol = max(centered.shape) * np.finfo(np.float64).eps * float(singular[0])
+    spatial_rank = int(np.sum(singular > tol))
+    if spatial_rank < 2:
+        raise QualificationError(f"DIRECTIONAL_BINDING_SURFACE_AFFINE_HULL_TOO_LOW:{spatial_rank}")
+    basis = vt[:spatial_rank].T
+    scale = _surface_scale(points)
+    residuals = []
+    for joint in joints:
+        q = np.asarray(tuple(map(float, joint.position)), dtype=np.float64)
+        if q.shape != (3,) or not np.isfinite(q).all():
+            raise QualificationError("DIRECTIONAL_BINDING_INVALID_JOINT_POSITION")
+        delta = q - center
+        projected = basis @ (basis.T @ delta)
+        residuals.append(float(np.linalg.norm(delta - projected)) / scale)
+    return tuple(residuals)
+
+
+def _effective_condition_number(singular: np.ndarray) -> float:
+    finite = np.asarray([float(x) for x in singular if math.isfinite(float(x)) and float(x) > 0.0], dtype=np.float64)
+    if finite.size == 0:
+        raise QualificationError("DIRECTIONAL_BINDING_INVALID_SINGULAR_SPECTRUM")
+    tol = max(1, len(singular)) * np.finfo(np.float64).eps * float(finite.max())
+    active = finite[finite > tol]
+    if active.size == 0:
+        raise QualificationError("DIRECTIONAL_BINDING_EMPTY_EFFECTIVE_SINGULAR_SPECTRUM")
+    value = float(active.max() / active.min())
+    if not math.isfinite(value):
+        raise QualificationError("DIRECTIONAL_BINDING_NONFINITE_CONDITION_NUMBER")
+    return value
+
+
 def _fit_view_projection(product, view_index: int, camera_binding_hash: str, policy: DirectionalBindingPolicyV1) -> DirectionalViewProjectionBindingIR:
     surface = product.mechanical_state.surface
     rows = []
@@ -132,6 +188,14 @@ def _fit_view_projection(product, view_index: int, camera_binding_hash: str, pol
         rows.append((node.surface_id, p, xy))
     if len(rows) < policy.min_correspondences:
         raise QualificationError(f"DIRECTIONAL_BINDING_INSUFFICIENT_CORRESPONDENCE:V{view_index}:{len(rows)}")
+
+    mechanical_points = np.asarray([p for _, p, _ in rows], dtype=np.float64)
+    joint_hull_residuals = _joint_affine_hull_residuals(mechanical_points, product.mechanical_state.skeleton.joints)
+    max_joint_hull_residual = max(joint_hull_residuals, default=0.0)
+    if max_joint_hull_residual > float(policy.max_joint_affine_hull_residual01):
+        raise QualificationError(
+            f"DIRECTIONAL_BINDING_JOINT_OUTSIDE_AFFINE_HULL:V{view_index}:{max_joint_hull_residual}"
+        )
 
     X = np.asarray([[*p, 1.0] for _, p, _ in rows], dtype=np.float64)
     Y = np.asarray([xy for _, _, xy in rows], dtype=np.float64)
@@ -166,14 +230,15 @@ def _fit_view_projection(product, view_index: int, camera_binding_hash: str, pol
         "teacher_truth_used": False,
         "correspondence_count": len(rows),
         "affine_rank": rank,
-        "condition_number": float(singular[0] / singular[-1]) if len(singular) and singular[-1] > 0 else float("inf"),
+        "effective_condition_number": _effective_condition_number(singular),
+        "max_joint_affine_hull_residual01": max_joint_hull_residual,
         "p95_residual01": p95_01,
         "max_residual01": max_01,
     }
     value = DirectionalViewProjectionBindingIR(
         str(product.product_state_hash), int(view_index), str(camera_binding_hash), str(surface.geometry_lineage_hash),
         affine, tuple(sid for sid, _, _ in rows), len(rows), rank, rms, p95, max_residual, span,
-        p95_01, max_01, policy.policy_hash, report, "",
+        p95_01, max_01, max_joint_hull_residual, policy.policy_hash, report, "",
     )
     return replace(value, projection_binding_hash=_projection_hash(value))
 
@@ -217,6 +282,7 @@ def qualify_directional_joint_view_binding(product, *, policy: DirectionalBindin
             "raw_camera_reconstruction_used": False,
             "teacher_truth_used": False,
             "source_mesh_used": False,
+            "rank3_requires_joint_affine_hull_qualification": True,
         },
     )
     value = replace(value, binding_set_hash=_binding_set_hash(value))
@@ -246,6 +312,10 @@ def assert_directional_binding_for_product(product, binding: DirectionalJointVie
             raise QualificationError("STALE_DIRECTIONAL_PROJECTION_PRODUCT")
         if row.camera_binding_hash != directions[view_index].camera_binding_hash:
             raise QualificationError("DIRECTIONAL_PROJECTION_CAMERA_BINDING_MISMATCH")
+        if row.policy_hash != binding.policy_hash:
+            raise QualificationError("DIRECTIONAL_PROJECTION_POLICY_MISMATCH")
+        if row.max_joint_affine_hull_residual01 > float(row.qualification_report.get("max_joint_affine_hull_residual01", -1.0)) + 1e-12:
+            raise QualificationError("DIRECTIONAL_PROJECTION_HULL_DIAGNOSTIC_MISMATCH")
     joint_ids = {j.canonical_joint_id for j in product.mechanical_state.skeleton.joints}
     pivots = {(int(p.view_index), p.canonical_joint_id): p for p in binding.joint_pivots}
     expected = {(view, jid) for view in range(8) for jid in joint_ids}

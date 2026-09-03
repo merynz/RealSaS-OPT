@@ -78,6 +78,7 @@ from .surface import *
 from .rig import *
 from .skin import *
 from .mesh_binding import *
+from .directional_binding import *
 from .product import *
 from .v4 import *
 from .api import CompilerFacade

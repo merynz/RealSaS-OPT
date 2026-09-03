@@ -10,6 +10,9 @@ from compiler.realsas_compiler_services.proof.motion_frame_metrics import (
     evaluate_motion_bake_metrics,
     measure_motion_bake_geometry,
 )
+from compiler.realsas_compiler_services.proof.directional_motion_provider import (
+    QualifiedDirectionalMotionBakeProviderV1,
+)
 
 from .deformation import (
     effective_motion_track_count,
@@ -86,6 +89,16 @@ def _motion(product, plan, *, motion_bake_provider=None, motion_policy=None):
             "clip_measurements": [],
         }, {}
 
+    if not isinstance(motion_bake_provider, QualifiedDirectionalMotionBakeProviderV1):
+        raise QualificationError("MOTION_BAKE_PROVIDER_NOT_QUALIFIED")
+    motion_bake_provider.assert_for_product(product)
+    base.update({
+        "qualified_motion_provider_hash": motion_bake_provider.provider_hash,
+        "directional_binding_set_hash": motion_bake_provider.directional_binding_set_hash,
+        "directional_evaluator_policy_hash": motion_bake_provider.evaluator_policy_hash,
+        "directional_evaluator_semantic_version": motion_bake_provider.evaluator_semantic_version,
+    })
+
     bakes = {}
     rows = []
     for clip in required_clips:
@@ -100,6 +113,13 @@ def _motion(product, plan, *, motion_bake_provider=None, motion_policy=None):
         )
         if bake.clip_id != clip.clip_id:
             raise QualificationError("MOTION_BAKE_CLIP_ID_MISMATCH")
+        if bake.evaluator_semantic_version != motion_bake_provider.evaluator_semantic_version:
+            raise QualificationError("MOTION_BAKE_EVALUATOR_SEMANTIC_MISMATCH")
+        bake_metadata = dict(bake.metadata or {})
+        if bake_metadata.get("directional_binding_set_hash") != motion_bake_provider.directional_binding_set_hash:
+            raise QualificationError("MOTION_BAKE_DIRECTIONAL_BINDING_MISMATCH")
+        if bake_metadata.get("evaluator_policy_hash") != motion_bake_provider.evaluator_policy_hash:
+            raise QualificationError("MOTION_BAKE_EVALUATOR_POLICY_MISMATCH")
         metrics = evaluate_motion_bake_metrics(measure_motion_bake_geometry(bake), policy=motion_policy)
         rows.append(metrics)
         bakes[clip.clip_id] = bake
@@ -125,7 +145,19 @@ def _motion(product, plan, *, motion_bake_provider=None, motion_policy=None):
 
 
 def _runtime(product):
+    runtime_requirements = tuple(
+        requirement for requirement in product.capability_contract.requirements
+        if requirement.activation == "REQUIRED" and "RUNTIME_CONSUMPTION" in set(requirement.required_proof_domains)
+    )
+    implementation_hashes = tuple(sorted({str(row.implementation_binding_hash) for row in runtime_requirements if row.implementation_binding_hash}))
     return {
+        "proof_scope": "PRE_EXPORT_RUNTIME_CONTRACT_COMPATIBILITY_ONLY",
+        "runtime_contract_compatibility_status": "MEASURED_PRE_EXPORT",
+        "native_package_execution_performed": False,
+        "post_export_native_interlock_required": True,
+        "sealed_native_runtime_consumer_required": True,
+        "runtime_requirement_count": len(runtime_requirements),
+        "runtime_implementation_binding_hashes": implementation_hashes,
         "representation_class": product.representation_class,
         "full_3d_reconstruction_authority": bool(product.full_3d_reconstruction_authority),
         "direction_count": len(product.directional_renderables.directions),
@@ -148,7 +180,19 @@ def _status(domain, m):
             and bool(m.get("dynamic_motion_passed", False))
         )
     elif domain == "RUNTIME_CONSUMPTION":
-        ok = m["representation_class"] == "DIRECTIONAL_2D_2P5D_PUPPET" and not m["full_3d_reconstruction_authority"] and m["direction_count"] == 8 and m["motion_representation"] == "DIRECTIONAL_2D_2P5D_PUPPET_MOTION"
+        ok = (
+            m.get("proof_scope") == "PRE_EXPORT_RUNTIME_CONTRACT_COMPATIBILITY_ONLY"
+            and m.get("runtime_contract_compatibility_status") == "MEASURED_PRE_EXPORT"
+            and m.get("native_package_execution_performed") is False
+            and m.get("post_export_native_interlock_required") is True
+            and m.get("sealed_native_runtime_consumer_required") is True
+            and int(m.get("runtime_requirement_count", 0)) > 0
+            and bool(m.get("runtime_implementation_binding_hashes"))
+            and m["representation_class"] == "DIRECTIONAL_2D_2P5D_PUPPET"
+            and not m["full_3d_reconstruction_authority"]
+            and m["direction_count"] == 8
+            and m["motion_representation"] == "DIRECTIONAL_2D_2P5D_PUPPET_MOTION"
+        )
     elif domain == "DEFORMATION":
         ok = m.get("rms", float("inf")) <= float(m.get("rms_threshold", 1e-6)) and m.get("p95", float("inf")) <= float(m.get("p95_threshold", 1e-6))
     else:
@@ -157,11 +201,19 @@ def _status(domain, m):
 
 
 def evaluate_product_proof(product, *, deformation_fixture: dict | None = None, motion_bake_provider=None, motion_policy: dict | None = None, artifacts_out: dict | None = None):
-    """Evaluate current proof domains without manufacturing directional frames.
+    """Evaluate current product proof without manufacturing runtime evidence.
 
-    MOTION can PASS only when a separately qualified evaluator supplies a bake
-    bound to this exact product state and this exact proof plan. Missing frame
-    evidence is ABSTAIN. Direct mechanical-joint/P.xy evaluation is forbidden.
+    MOTION can PASS only when a typed QualifiedDirectionalMotionBakeProviderV1
+    supplies qualification-owned frames bound to this exact product, directional
+    joint/view binding, evaluator policy and proof plan. Missing evidence is
+    ABSTAIN; arbitrary callables are rejected. Direct mechanical-joint/P.xy
+    evaluation is forbidden.
+
+    The historical domain name RUNTIME_CONSUMPTION is retained for contract
+    compatibility, but this pre-export proof measures runtime-contract compatibility
+    only. It explicitly records native_package_execution_performed=False. Actual
+    .rss -> sealed C++ open/sample/render is a separate post-export interlock gate,
+    avoiding circular proof<->export authority.
     """
     validate_product_ontology(product)
     required = set(required_proof_domains(product.capability_contract))
@@ -202,12 +254,29 @@ def evaluate_product_proof(product, *, deformation_fixture: dict | None = None, 
             metadata.update({
                 "qualification_owned_bake_hashes": {clip_id: bake.bake_hash for clip_id, bake in sorted(domain_motion_bakes.items())},
                 "qualification_owned_bake_hash": next(iter(domain_motion_bakes.values())).bake_hash if len(domain_motion_bakes) == 1 else "",
+                "qualified_motion_provider_hash": measurements.get("qualified_motion_provider_hash", ""),
+                "directional_binding_set_hash": measurements.get("directional_binding_set_hash", ""),
+                "directional_evaluator_policy_hash": measurements.get("directional_evaluator_policy_hash", ""),
+                "directional_evaluator_semantic_version": measurements.get("directional_evaluator_semantic_version", ""),
                 "export_solver_replay_forbidden": True,
                 "dynamic_frame_proof_required": True,
                 "directional_joint_view_binding_required": True,
+                "arbitrary_motion_provider_callable_forbidden": True,
+            })
+        elif domain == "RUNTIME_CONSUMPTION":
+            metadata.update({
+                "proof_scope": "PRE_EXPORT_RUNTIME_CONTRACT_COMPATIBILITY_ONLY",
+                "native_package_execution_performed": False,
+                "post_export_native_interlock_required": True,
+                "post_export_native_gate": "RSS_TO_SEALED_CPP_OPEN_SAMPLE_RENDER",
+                "circular_proof_export_dependency_forbidden": True,
             })
         reports.append(bind_domain_proof(product, plan, measurement_report, status=status, failure_signatures=failures, owner_attribution=no_owner_attribution(), metadata=metadata))
-    return bind_product_proof_bundle(product, tuple(reports), metadata={"engine": "RealSaS.ProofEngine.v3.fail_closed_motion_bake", "heavy_solver_promoted": False})
+    return bind_product_proof_bundle(product, tuple(reports), metadata={
+        "engine": "RealSaS.ProofEngine.v5.typed_motion_preexport_runtime_compatibility",
+        "heavy_solver_promoted": False,
+        "post_export_native_interlock_required": "RUNTIME_CONSUMPTION" in required,
+    })
 
 
 def mutation_worsens_measurement(domain: str, baseline: dict, mutated: dict) -> bool:
@@ -216,5 +285,10 @@ def mutation_worsens_measurement(domain: str, baseline: dict, mutated: dict) -> 
     if domain == "DIRECTIONAL_VISUAL": return mutated.get("direction_count", 8) < baseline.get("direction_count", 8) or mutated.get("corner_binding_count", 0) < baseline.get("corner_binding_count", 0)
     if domain == "MOTION": return mutated.get("effective_joint_track_count", 0) < baseline.get("effective_joint_track_count", 0)
     if domain == "MECHANICAL_STRUCTURE": return mutated.get("illegal_parent_count", 0) > baseline.get("illegal_parent_count", 0) or mutated.get("deform_root_count", 0) < baseline.get("deform_root_count", 0) or mutated.get("unsupported_joint_count", 0) > baseline.get("unsupported_joint_count", 0)
-    if domain == "RUNTIME_CONSUMPTION": return mutated.get("representation_class") != baseline.get("representation_class") or bool(mutated.get("full_3d_reconstruction_authority"))
+    if domain == "RUNTIME_CONSUMPTION": return (
+        mutated.get("representation_class") != baseline.get("representation_class")
+        or bool(mutated.get("full_3d_reconstruction_authority"))
+        or mutated.get("runtime_contract_compatibility_status") != baseline.get("runtime_contract_compatibility_status")
+        or mutated.get("runtime_implementation_binding_hashes") != baseline.get("runtime_implementation_binding_hashes")
+    )
     raise ValueError(domain)

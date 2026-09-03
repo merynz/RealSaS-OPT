@@ -14,6 +14,10 @@ from compiler.realsas_compiler_core.directional_binding import (
 from compiler.realsas_compiler_core.types import RiggingSurfaceIR, SurfaceNode, SurfaceSupportBinding, QualificationError
 from compiler.realsas_compiler_services.proof.directional_motion_evaluator import (
     evaluate_clip_to_qualification_bake,
+    make_qualified_motion_bake_provider,
+)
+from compiler.realsas_compiler_services.proof.directional_motion_provider import (
+    QualifiedDirectionalMotionBakeProviderV1,
 )
 from compiler.realsas_compiler_services.proof.motion_frame_metrics import (
     evaluate_motion_bake_metrics,
@@ -161,6 +165,17 @@ def test_stale_product_binding_is_rejected():
     stale = SimpleNamespace(**{**product.__dict__, "product_state_hash": "b" * 64})
     with pytest.raises(QualificationError, match="STALE_DIRECTIONAL_BINDING_PRODUCT"):
         assert_directional_binding_for_product(stale, binding)
+
+
+def test_compatibility_provider_factory_returns_typed_hashed_authority():
+    product, _ = _product()
+    binding = qualify_directional_joint_view_binding(product)
+    provider = make_qualified_motion_bake_provider(binding)
+    assert isinstance(provider, QualifiedDirectionalMotionBakeProviderV1)
+    provider.assert_for_product(product)
+    assert provider.directional_binding_set_hash == binding.binding_set_hash
+    assert provider.provider_hash == provider.expected_provider_hash()
+    assert len(provider.provider_hash) == 64
 
 
 def test_rotation_only_directional_evaluator_produces_measured_rigid_loop():

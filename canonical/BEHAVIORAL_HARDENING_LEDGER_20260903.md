@@ -49,12 +49,14 @@ Ongoing Codec/harness changes invalidate promotion. Family selection remains blo
 
 ## Gate 3 — Arachne / SkinFieldCodec
 
-**Status:** `FAIL_A0 — CLEAN SHARP WORST-ROW STABILITY SEAM`
+**Status:** `FAIL_A0 — CLEAN SHARP POST-PASS STABILITY SEAM`
 
 Records:
 - preregistration: `canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md`
 - V1 failure/correction: `canonical/ARACHNE_CODEC_BEHAVIORAL_FAILURE_20260903.md`
 - first clean Bound V2 run: `canonical/ARACHNE_CODEC_BOUND_V2_FIRST_RUN_20260903.md`
+- hard-tail diagnostic: `canonical/SKIN_FIELD_CODEC_A0_TAIL_DIAGNOSTIC_20260903.md`
+- global-temperature diagnostic: `canonical/SKIN_FIELD_CODEC_A0_TEMPERATURE_DIAGNOSTIC_20260903.md`
 
 Frozen authority chain:
 `Codec A0 -> frozen Codec -> Arachne A1 -> SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`
@@ -98,21 +100,40 @@ Workflow `33756424156`, job `100651837229`, `westus`:
 - only one consecutive PASS remains at step `1536`;
 - authoritative status `FAIL_A0`; A1 not run.
 
-Therefore current clean seam is:
+Therefore the clean seam is not representational incapacity. The Codec repeatedly reaches an acceptable sharp field but does not remain inside the frozen A0 envelope for three consecutive checks.
 
-`A0_OBJECTIVE_WORST_ROW_STABILITY != A0_P95_ACCEPTANCE_STABILITY`
+### Falsified repair hypotheses
 
-It is not supported to claim sharp field representational incapacity.
+#### Generic top-10% row-L1 tail, weight 1.0
+Workflow `33756798991`, job `100653091683`:
+- chain current PASS `480`, +tail PASS `1056`;
+- branch current PASS `768`, +tail PASS `1376`;
+- sharp current remains FAIL, +tail also remains FAIL and ends worse (`p95 0.0899342`).
 
-### Current causal test
+`TOP10_TAIL_WEIGHT_1_CLOSES_SHARP_STABILITY = FALSE`
 
-ID-bound A/B diagnostic now compares, under identical seed/model/LR/WD/horizon and frozen acceptance:
-- current A0 objective;
-- current A0 objective + generic top-10% row-L1 tail with weight `1.0`.
+No A0 tail source repair is authorized from this result; weight/fraction must not be tuned against the observed witness.
 
-This tail operator already exists in the generic A1 contract. The frozen Bound V2 panel itself is unchanged.
+#### Freeze global softmax temperature at generic initialization
+Workflow `33757183471`, job `100654330332`, `northcentralus`:
+- frozen initial temperature accelerates chain (`320`) and branch (`576`);
+- sharp still has no sustained PASS and ends materially worse (`p95 0.118097`, deformation ratio `0.0204097`) than learned-temperature current behavior.
 
-No Codec source repair is authorized until this causal result is observed.
+`LEARNED_GLOBAL_TEMPERATURE_IS_THE_SHARP_STABILITY_ROOT_CAUSE = FALSE`
+
+No fixed-temperature source repair is authorized.
+
+### Current causal diagnostic
+
+The next diagnostic avoids proposing a new hyperparameter. At the first clean ID-bound scalar PASS checkpoint of `sharp_fork_5`, the exact Codec model and AdamW state are cloned and continued for the same 32 steps under isolated existing forces:
+- full current objective;
+- reconstruction only (`CE + mean L1`);
+- cross entropy only;
+- mean pair-L1 only;
+- deformation MSE only;
+- full current objective with weight decay disabled after the branch point.
+
+The frozen Bound V2 panel is unchanged and remains the only behavioral PASS authority. The diagnostic is intended to identify the first training force that destroys or preserves an already-good sharp field before any new source repair is considered.
 
 ## Later gates — not yet opened
 

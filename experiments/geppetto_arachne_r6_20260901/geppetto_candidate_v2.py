@@ -234,7 +234,10 @@ class GeppettoCandidateV2(nn.Module):
                 x = torch.cat([pooled, states[li], rel], dim=-1)
             h = states[-1]
             modes = torch.tanh(self.position(h).reshape(B, M, 3)) * self.config.position_scale
-            mode_ls = self.log_sigma(h).reshape(B, M, 3).clamp(-8.0, 4.0)
+            # Uncertainty calibration owns only the sigma head. The NLL may update
+            # log_sigma parameters, but it must not rewrite the shared latent state
+            # that also drives locus, STOP, root, parent and support evidence.
+            mode_ls = self.log_sigma(h.detach()).reshape(B, M, 3).clamp(-8.0, 4.0)
             mode_logits = self.position_mode_logits(h)
             pos, rep_ls, _ = self._map_representative(modes, mode_ls, mode_logits)
             previous_states.append(h)

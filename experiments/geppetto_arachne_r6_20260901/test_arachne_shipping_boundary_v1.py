@@ -48,6 +48,10 @@ from experiments.geppetto_arachne_r6_20260901.train_codec_r6_a0_v1 import (
 )
 
 
+EXPECTED_SHIPPING_CODEC_HASH = "24c9f2580be9e80a02789e9ba35a57470145114807859057398b07bef9d58715"
+EXPECTED_SHIPPING_ARACHNE_HASH = "ee24afce200619c06753e39a617528be0fd84695e6358db24d828693ebcb72d1"
+
+
 def _criteria_hash() -> str:
     payload = {
         "row_l1_p95_max": A0_ROW_L1_P95_MAX,
@@ -68,6 +72,7 @@ def _qualify_shipping_codec(witness: Witness, conditioning, surface, skeleton, t
     jm = torch.tensor(conditioning.joint_mask, dtype=torch.bool)
 
     codec = SkinFieldCodecV1()
+    assert codec.config.config_hash == EXPECTED_SHIPPING_CODEC_HASH
     optimizer = torch.optim.AdamW(codec.parameters(), lr=1e-3, weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=A0_MAX_STEPS, eta_min=0.0)
 
@@ -175,10 +180,12 @@ def _run_shipping_a1(witness: Witness) -> dict:
         witness, conditioning, surface, skeleton, teacher, rest, transforms
     )
     model = ArachneCandidateV2(codec, ArachneCandidateConfigV2(), freeze_codec=True)
+    assert model.config.config_hash == EXPECTED_SHIPPING_ARACHNE_HASH
     assert model.config.model_dim == 128
     assert model.config.surface_encoder_layers == 2
     assert model.config.attention_heads == 4
     assert model.config.feedforward_dim == 384
+    assert model.codec.config.config_hash == EXPECTED_SHIPPING_CODEC_HASH
     assert model.codec.config.hidden_dim == 192
     assert model.codec.config.latent_dim == 64
     assert all(not p.requires_grad for p in model.codec.parameters())
@@ -237,4 +244,7 @@ def test_shipping_arachne_to_frozen_shipping_codec_through_compiler_and_lbs(witn
     result = _run_shipping_a1(witness)
     print("ARACHNE_SHIPPING_BOUNDARY_V1=" + json.dumps(result, sort_keys=True))
     assert result["status"] == "PASS", result
+    assert result["a1"]["config_hash"] == EXPECTED_SHIPPING_ARACHNE_HASH, result
+    assert result["a1"]["codec_config_hash"] == EXPECTED_SHIPPING_CODEC_HASH, result
     assert result["a1"]["stable_passes"] >= REQUIRED_STABLE, result
+    assert result["a1"]["final"]["compiler_total_correction_l1"] <= MAX_COMPILER_CORRECTION_L1, result

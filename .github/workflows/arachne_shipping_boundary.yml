@@ -1,0 +1,64 @@
+name: arachne-shipping-boundary
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_shipping_boundary_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_capacity_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel_bound_v2.py'
+      - 'compiler/realsas_compiler_core/skin.py'
+      - '.github/workflows/arachne_shipping_boundary.yml'
+  push:
+    branches:
+      - behavioral/geppetto-v2-integrity-v1-20260903
+    paths:
+      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_shipping_boundary_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_capacity_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel_bound_v2.py'
+      - 'compiler/realsas_compiler_core/skin.py'
+      - '.github/workflows/arachne_shipping_boundary.yml'
+
+jobs:
+  shipping-arachne-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy pytest
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Compile shipping A1 closure
+        run: |
+          python -m py_compile \
+            experiments/geppetto_arachne_r6_20260901/test_arachne_shipping_boundary_v1.py \
+            experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py \
+            experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py \
+            experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py \
+            experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py \
+            experiments/geppetto_arachne_r6_20260901/conditioning_v2.py
+      - name: Run shipping Arachne to frozen shipping Codec gate
+        env:
+          PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_arachne_shipping_boundary_v1.py

@@ -3,50 +3,27 @@ name: arachne-codec-v2-source-contract
 on:
   pull_request:
     paths:
-      - 'experiments/geppetto_arachne_r6_20260901/skin_target_rebind_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_checkpoint_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/verified_lbs_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/codec_deformation_loss_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/eval_codec_r6_a0_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/arachne_geometry_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/arachne_tail_objective_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/eval_arachne_r6_a1_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
+      - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'compiler/realsas_compiler_core/skin.py'
       - '.github/workflows/arachne_codec_v2_source_contract.yml'
+      - '.github/workflows/arachne_shipping_boundary.yml'
+      - '.github/workflows/skin_field_codec_shipping_capacity.yml'
   push:
     branches:
       - source/generic-completion-v1-20260902
       - architecture/v4-generic-strength-source-completion-20260902
+      - behavioral/geppetto-v2-integrity-v1-20260903
     paths:
-      - 'experiments/geppetto_arachne_r6_20260901/skin_target_rebind_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_checkpoint_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/verified_lbs_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/codec_deformation_loss_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/eval_codec_r6_a0_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/arachne_geometry_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py'
-      - 'experiments/geppetto_arachne_r6_20260901/arachne_tail_objective_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/eval_arachne_r6_a1_v1.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py'
-      - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
+      - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'compiler/realsas_compiler_core/skin.py'
       - '.github/workflows/arachne_codec_v2_source_contract.yml'
+      - '.github/workflows/arachne_shipping_boundary.yml'
+      - '.github/workflows/skin_field_codec_shipping_capacity.yml'
 
 jobs:
   arachne-codec-v2-source-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -59,24 +36,28 @@ jobs:
           python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
       - name: Compile Arachne and codec source
         run: |
-          python -m py_compile \
-            experiments/geppetto_arachne_r6_20260901/skin_target_rebind_v1.py \
-            experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py \
-            experiments/geppetto_arachne_r6_20260901/skin_field_codec_checkpoint_v1.py \
-            experiments/geppetto_arachne_r6_20260901/verified_lbs_v1.py \
-            experiments/geppetto_arachne_r6_20260901/codec_deformation_loss_v1.py \
-            experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py \
-            experiments/geppetto_arachne_r6_20260901/eval_codec_r6_a0_v1.py \
-            experiments/geppetto_arachne_r6_20260901/conditioning_v2.py \
-            experiments/geppetto_arachne_r6_20260901/arachne_geometry_v2.py \
-            experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py \
-            experiments/geppetto_arachne_r6_20260901/arachne_tail_objective_v1.py \
-            experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py \
-            experiments/geppetto_arachne_r6_20260901/eval_arachne_r6_a1_v1.py \
-            experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py
-      - name: Run Arachne/codec source gates
+          python -m py_compile experiments/geppetto_arachne_r6_20260901/*.py
+      - name: Verify Codec objective truth stationarity regression
+        env: &det_env
+          PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
         run: |
-          python -m pytest -q \
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_objective_causal_diagnostic.py
+      - name: Run Arachne and Codec source invariants
+        env: *det_env
+        run: |
+          python -m pytest -q -s \
             experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py \
             experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py
+      - name: Enforce stable shipping Codec A0 through Compiler and LBS
+        env: *det_env
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_stable_v1.py
+      - name: Enforce shipping Arachne A1 through frozen shipping Codec, Compiler and LBS
+        env: *det_env
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_arachne_shipping_boundary_v1.py

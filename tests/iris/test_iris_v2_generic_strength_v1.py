@@ -56,6 +56,7 @@ def test_production_apparatus_binds_frozen_foundation_and_bounded_view_chunks():
     apparatus.train(True)
     assert apparatus.foundation.training is False
     assert tuple(apparatus.learner.sampler.foundation_dims) == (384,)
+    assert apparatus.learner.native.INPUT_CHANNELS == 3
 
 
 def test_production_train_entrypoint_rejects_arbitrary_foundation_injection_before_step():
@@ -74,8 +75,9 @@ def test_production_train_entrypoint_rejects_arbitrary_foundation_injection_befo
 def test_native_pyramid_preserves_preregistered_five_scale_capacity():
     torch.manual_seed(0)
     pyramid = NativeResolutionPyramidV2()
-    x = torch.randn(1, 8, 4, 32, 32, requires_grad=True)
+    x = torch.randn(1, 8, 3, 32, 32, requires_grad=True)
     levels = pyramid(x)
+    assert pyramid.INPUT_CHANNELS == 3
     assert pyramid.widths == (32, 48, 64, 96, 128)
     assert len(levels) == 5
     assert tuple(int(y.shape[2]) for y in levels) == pyramid.widths

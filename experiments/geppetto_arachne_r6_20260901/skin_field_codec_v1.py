@@ -119,16 +119,32 @@ class SkinFieldCodecV1(nn.Module):
 
 
 def skin_field_codec_loss_v1(decoded_weights: torch.Tensor, teacher_weights: torch.Tensor, surface_mask: torch.Tensor, joint_mask: torch.Tensor, *, active_threshold: float = 1e-3, active_weight: float = 2.0) -> dict[str, torch.Tensor]:
+    """Truth-stationary dense skin reconstruction objective.
+
+    Active influence emphasis is applied as one scalar per simplex row. Applying
+    different class multipliers inside a row changes the cross-entropy optimum
+    away from the teacher simplex distribution. A row scalar preserves the
+    active-emphasis intent while keeping ``decoded_weights == teacher_weights``
+    stationary under the row softmax.
+    """
     if decoded_weights.shape != teacher_weights.shape:
         raise ValueError("codec loss weight shape mismatch")
+    if active_weight < 0.0:
+        raise ValueError("active_weight must be non-negative")
     pair_mask = surface_mask[:, :, None].bool() & joint_mask[:, None, :].bool()
     eps = 1e-8
-    t = teacher_weights.clamp_min(0.0)
+    t = teacher_weights.clamp_min(0.0) * pair_mask.to(teacher_weights.dtype)
     p = decoded_weights.clamp_min(eps)
-    ce = -(t * torch.log(p))
-    active = (t >= active_threshold).to(ce.dtype)
-    weighted = ce * (1.0 + active_weight * active) * pair_mask.to(ce.dtype)
+    ce = -(t * torch.log(p)) * pair_mask.to(p.dtype)
+
+    # Preserve approximately the historical active-emphasis scale without
+    # changing relative class targets inside a simplex row. active_mass is
+    # teacher-only and therefore constant with respect to decoded logits.
+    active_mass = (t * (t >= active_threshold).to(t.dtype)).sum(dim=-1)
+    row_scale = 1.0 + float(active_weight) * active_mass
+    weighted = ce * row_scale[..., None]
     ce_loss = weighted.sum() / pair_mask.sum().clamp_min(1).to(weighted.dtype)
+
     l1 = (torch.abs(decoded_weights - teacher_weights) * pair_mask.to(decoded_weights.dtype)).sum() / pair_mask.sum().clamp_min(1)
     total = ce_loss + l1
     return {"total": total, "cross_entropy": ce_loss, "l1": l1}

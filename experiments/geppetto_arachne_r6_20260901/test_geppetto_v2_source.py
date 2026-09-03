@@ -12,7 +12,7 @@ from experiments.geppetto_arachne_r6_20260901.geppetto_candidate_v2 import Geppe
 from experiments.geppetto_arachne_r6_20260901.geppetto_checkpoint_v2 import load_geppetto_checkpoint_v2, save_geppetto_checkpoint_v2
 from experiments.geppetto_arachne_r6_20260901.geppetto_conditioning_v2 import FEATURE_CONTRACT_V2, GeppettoConditioningAdapterV2
 from experiments.geppetto_arachne_r6_20260901.geppetto_cpu_capacity_v2 import geppetto_cpu_capacity_probe_v2
-from experiments.geppetto_arachne_r6_20260901.geppetto_loss_v2 import GeppettoLossV2
+from experiments.geppetto_arachne_r6_20260901.geppetto_loss_v2 import GeppettoLossV2, canonical_geometry_assignment_v2
 from experiments.geppetto_arachne_r6_20260901.geppetto_train_v2 import geppetto_train_step_v2
 from experiments.geppetto_arachne_r6_20260901.training_targets_v1 import GeppettoTeacherTargetV1
 from experiments.geppetto_arachne_r6_20260901.training_targets_v2 import permute_geppetto_teacher_target_v2
@@ -55,6 +55,27 @@ def test_heteroscedastic_loss_is_teacher_permutation_invariant_and_backpropagate
     assert torch.isfinite(a["total"]) and torch.isfinite(out.position_log_sigma).all(); a["total"].backward(); assert any(param.grad is not None and torch.isfinite(param.grad).all() for param in model.parameters() if param.requires_grad)
 
 
+def test_canonical_hard_assignment_is_teacher_row_permutation_invariant():
+    teacher=np.asarray([[-0.35,-0.10,0.00],[0.00,0.05,0.02],[0.31,0.14,-0.01]],np.float32)
+    primary=np.asarray([[0.02,0.04,0.01],[0.30,0.13,-0.02],[-0.34,-0.11,0.01]],np.float32)
+    perm=np.asarray([2,0,1],np.int64)
+    q0,t0=canonical_geometry_assignment_v2(primary,teacher); qp,tp=canonical_geometry_assignment_v2(primary,teacher[perm])
+    pairs0=sorted((int(q),tuple(map(float,teacher[t]))) for q,t in zip(q0,t0))
+    pairsp=sorted((int(q),tuple(map(float,teacher[perm][t]))) for q,t in zip(qp,tp))
+    assert pairs0==pairsp
+
+
+def test_uncertainty_nll_gradient_is_confined_to_sigma_head():
+    cond=GeppettoConditioningAdapterV2()([_surface("SIGMA",12)]); model=GeppettoCandidateV2(_tiny_config()); f=torch.tensor(cond.features,dtype=torch.float32); p=torch.tensor(cond.positions_normalized,dtype=torch.float32); m=torch.tensor(cond.valid_mask,dtype=torch.bool); target=_target(); out=model(f,p,m,decode_steps=3); q=torch.arange(3); tp=torch.tensor(target.positions_normalized,dtype=torch.float32); nll=GeppettoLossV2._mixture_position_nll(out,0,q,tp); model.zero_grad(set_to_none=True); nll.backward()
+    sigma_grads=[param.grad for name,param in model.named_parameters() if name.startswith("log_sigma.")]
+    assert sigma_grads and all(g is not None and torch.isfinite(g).all() for g in sigma_grads); assert sum(float(g.abs().sum()) for g in sigma_grads)>0.0
+    leaking=[]
+    for name,param in model.named_parameters():
+        if name.startswith("log_sigma.") or param.grad is None: continue
+        if float(param.grad.abs().sum())>0.0: leaking.append(name)
+    assert leaking==[], f"NLL leaked into shared/non-sigma parameters: {leaking}"
+
+
 def test_train_step_is_executable_without_fixed_cardinality():
     cond=GeppettoConditioningAdapterV2()([_surface("C",10)]); model=GeppettoCandidateV2(_tiny_config()); optimizer=torch.optim.AdamW(model.parameters(),lr=1e-4); metrics=geppetto_train_step_v2(model,optimizer,cond,[_target()]); assert np.isfinite(metrics["total"]); assert metrics["matched_joint_count"]==3.0
 
@@ -69,3 +90,21 @@ def test_proposal_is_anonymous_soft_evidence_and_compiler_owns_canonical_ids():
 def test_checkpoint_binds_config_and_feature_contract(tmp_path):
     model=GeppettoCandidateV2(_tiny_config()); path=tmp_path/"geppetto-v2.pt"; save_geppetto_checkpoint_v2(path,model,extra_metadata={"optimizer_steps":0}); authority=load_geppetto_checkpoint_v2(path,model); assert authority["dynamic_cardinality"] is True; assert authority["product_max_joint_count"] is None; mismatch=GeppettoCandidateV2(GeppettoCandidateConfigV2(model_dim=48,knn_k=4,local_layers=1,global_layers=1,decoder_layers=1,attention_heads=4,feedforward_dim=96,support_topk=4))
     with pytest.raises(ValueError,match="config_hash"): load_geppetto_checkpoint_v2(path,mismatch)
+
+
+def test_map_mode_crossover_cannot_rewrite_later_latent_control_states():
+    cond=GeppettoConditioningAdapterV2()([_surface("LATENT",12)])
+    model=GeppettoCandidateV2(_tiny_config()).eval()
+    f=torch.tensor(cond.features,dtype=torch.float32)
+    p=torch.tensor(cond.positions_normalized,dtype=torch.float32)
+    m=torch.tensor(cond.valid_mask,dtype=torch.bool)
+    with torch.no_grad():
+        model.position_mode_logits.weight.zero_()
+        model.position_mode_logits.bias.copy_(torch.tensor([100.0,-100.0,-100.0]))
+        a=model(f,p,m,decode_steps=5)
+        model.position_mode_logits.bias.copy_(torch.tensor([-100.0,100.0,-100.0]))
+        b=model(f,p,m,decode_steps=5)
+    assert torch.argmax(a.position_mode_logits,dim=-1).eq(0).all()
+    assert torch.argmax(b.position_mode_logits,dim=-1).eq(1).all()
+    assert not torch.equal(a.positions_normalized,b.positions_normalized)
+    torch.testing.assert_close(a.control_states,b.control_states,atol=0.0,rtol=0.0)

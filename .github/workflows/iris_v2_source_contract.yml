@@ -34,10 +34,24 @@ jobs:
       - name: Compile IRIS V2 source
         run: |
           python -m py_compile compiler/realsas_compiler_core/local_geometry.py experiments/iris_reprojection_v2_20260831/*.py
+      - name: Verify privileged-input firewall regressions
+        env:
+          PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
+        run: |
+          python -m pytest -q -s tests/iris/test_iris_v2_privileged_input_firewall_v1.py
       - name: Run IRIS V2 source gates
         env:
           PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
         run: |
           python -m pytest -q \
             tests/iris/test_iris_v2_source_v1.py \
-            tests/iris/test_iris_v2_generic_strength_v1.py
+            tests/iris/test_iris_v2_generic_strength_v1.py \
+            tests/iris/test_iris_v2_privileged_input_firewall_v1.py

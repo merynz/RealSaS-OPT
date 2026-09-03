@@ -10,7 +10,7 @@ def test_verified_lbs_weight_mutation_is_causal():
 
 def test_all_domain_mutation_comparators_are_causal():
     cases={
-      'MECHANICAL_STRUCTURE':({'illegal_parent_count':0,'deform_root_count':1},{'illegal_parent_count':1,'deform_root_count':1}),
+      'MECHANICAL_STRUCTURE':({'illegal_parent_count':0,'deform_root_count':1,'unsupported_joint_count':0},{'illegal_parent_count':0,'deform_root_count':1,'unsupported_joint_count':1}),
       'MESH_QUALITY':({'degenerate_faces':0,'min_area':.1},{'degenerate_faces':1,'min_area':0.}),
       'DIRECTIONAL_VISUAL':({'direction_count':8,'corner_binding_count':24},{'direction_count':7,'corner_binding_count':21}),
       'MOTION':({'effective_joint_track_count':1},{'effective_joint_track_count':0}),

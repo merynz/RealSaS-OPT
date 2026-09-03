@@ -103,7 +103,7 @@ def tiny_domain():
 
 
 def test_model_has_no_learned_P_or_N_head_and_backpropagates_depth_only():
-    torch.manual_seed(1); c,domain=tiny_domain(); images=torch.randn(1,8,4,24,24); foundation=(torch.randn(1,8,6,6,6),torch.randn(1,8,10,3,3)); model=IrisReprojectionV2((6,10),hidden_dim=24,max_modes=3); names=tuple(name.lower() for name,_ in model.named_modules()); assert not any(name.endswith("p_head") or name.endswith("n_head") for name in names); out=model(images,foundation,domain); teacher=torch.full((1,4),1.0); support=torch.ones((1,4),dtype=torch.bool); losses=iris_v2_loss(out,domain,teacher,support); losses["total"].backward(); assert torch.isfinite(losses["total"]); assert any(p.grad is not None and torch.isfinite(p.grad).all() for p in model.parameters() if p.requires_grad)
+    torch.manual_seed(1); c,domain=tiny_domain(); images=torch.randn(1,8,3,24,24); foundation=(torch.randn(1,8,6,6,6),torch.randn(1,8,10,3,3)); model=IrisReprojectionV2((6,10),hidden_dim=24,max_modes=3); names=tuple(name.lower() for name,_ in model.named_modules()); assert not any(name.endswith("p_head") or name.endswith("n_head") for name in names); out=model(images,foundation,domain); teacher=torch.full((1,4),1.0); support=torch.ones((1,4),dtype=torch.bool); losses=iris_v2_loss(out,domain,teacher,support); losses["total"].backward(); assert torch.isfinite(losses["total"]); assert any(p.grad is not None and torch.isfinite(p.grad).all() for p in model.parameters() if p.requires_grad)
 
 
 def test_multimodal_ray_modes_preserve_separated_modes_and_unknown():
@@ -115,7 +115,7 @@ def test_world_regularizer_rotation_and_scale_invariant():
 
 
 def test_emitter_persistence_surface_exact_common_frame_roundtrip():
-    torch.manual_seed(3); c,domain=tiny_domain(); images=torch.randn(1,8,4,24,24); foundation=(torch.randn(1,8,6,6,6),torch.randn(1,8,10,3,3)); model=IrisReprojectionV2((6,10),hidden_dim=24,max_modes=1); out=model(images,foundation,domain); out.depth_output.support_probability=torch.ones_like(out.depth_output.support_probability); ev=emit_observation_evidence_v2((c,),domain,out.modes,out.refined_depth,out.depth_output)[0]; surf=compile_surface_v2(ev,max_common_frame_error=1e-5); assert surf.surface_nodes; by_id={s.observation_id:s for s in ev.samples}
+    torch.manual_seed(3); c,domain=tiny_domain(); images=torch.randn(1,8,3,24,24); foundation=(torch.randn(1,8,6,6,6),torch.randn(1,8,10,3,3)); model=IrisReprojectionV2((6,10),hidden_dim=24,max_modes=1); out=model(images,foundation,domain); out.depth_output.support_probability=torch.ones_like(out.depth_output.support_probability); ev=emit_observation_evidence_v2((c,),domain,out.modes,out.refined_depth,out.depth_output)[0]; surf=compile_surface_v2(ev,max_common_frame_error=1e-5); assert surf.surface_nodes; by_id={s.observation_id:s for s in ev.samples}
     for node in surf.surface_nodes:
         pts=[]
         for oid in node.source_observation_ids:

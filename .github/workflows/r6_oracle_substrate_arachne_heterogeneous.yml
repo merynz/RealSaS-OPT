@@ -1,0 +1,69 @@
+name: r6-oracle-substrate-arachne-heterogeneous
+
+on:
+  pull_request:
+    paths:
+      - 'canonical/R6_ARACHNE_ORACLE_SUBSTRATE_HETEROGENEOUS_PREREG_20260903.md'
+      - 'experiments/geppetto_arachne_r6_20260901/oracle_substrate_synthetic_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_one_family_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_heterogeneous_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py'
+      - 'compiler/realsas_compiler_core/rig.py'
+      - 'compiler/realsas_compiler_core/skin.py'
+      - '.github/workflows/r6_oracle_substrate_arachne_heterogeneous.yml'
+  push:
+    branches:
+      - behavioral/geppetto-v2-integrity-v1-20260903
+    paths:
+      - 'canonical/R6_ARACHNE_ORACLE_SUBSTRATE_HETEROGENEOUS_PREREG_20260903.md'
+      - 'experiments/geppetto_arachne_r6_20260901/oracle_substrate_synthetic_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_one_family_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_heterogeneous_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/conditioning_v2.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py'
+      - 'compiler/realsas_compiler_core/rig.py'
+      - 'compiler/realsas_compiler_core/skin.py'
+      - '.github/workflows/r6_oracle_substrate_arachne_heterogeneous.yml'
+
+jobs:
+  r6-a1-heterogeneous-u1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy pytest
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Compile frozen heterogeneous Arachne U1 apparatus
+        run: |
+          python -m py_compile \
+            experiments/geppetto_arachne_r6_20260901/oracle_substrate_synthetic_v1.py \
+            experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_one_family_v1.py \
+            experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_heterogeneous_v1.py \
+            experiments/geppetto_arachne_r6_20260901/arachne_candidate_v2.py \
+            experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py \
+            experiments/geppetto_arachne_r6_20260901/conditioning_v2.py \
+            experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py \
+            experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py
+      - name: Run heterogeneous R6 Arachne U1 gate
+        env:
+          PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
+        run: |
+          lscpu | grep -E 'Model name|Vendor ID|Architecture' || true
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_heterogeneous_v1.py

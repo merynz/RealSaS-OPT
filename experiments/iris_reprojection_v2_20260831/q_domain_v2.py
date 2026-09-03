@@ -1,9 +1,14 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import torch
 
 from .observation_contract_v2 import ObservationContractV2
+
+
+PRODUCTION_Q_DOMAIN_AUTHORITY_V2 = "RGB_CAMERA_FULL_FRAME_LATTICE_V1"
+MASK_DIAGNOSTIC_Q_DOMAIN_AUTHORITY_V2 = "MASK_CONSTRAINED_DIAGNOSTIC_V1"
+UNSEALED_Q_DOMAIN_AUTHORITY_V2 = "CALLER_ANCHORS_UNSEALED_V1"
 
 
 @dataclass(frozen=True)
@@ -32,6 +37,8 @@ class RayHypothesisDomainV2:
     candidate_valid: torch.Tensor
     contract_hashes: tuple[str, ...]
     candidate_policy: QCandidatePolicyV2 | None = None
+    construction_authority: str = "UNSEALED_SOURCE_TEST"
+    anchor_stride_px: int | None = None
 
     @property
     def shape(self) -> tuple[int, int, int]:
@@ -82,6 +89,13 @@ def build_q_domain_v2(
     foreground_masks: torch.Tensor | None = None,
     candidate_policy: QCandidatePolicyV2 | None = None,
 ) -> RayHypothesisDomainV2:
+    """Build an analytic q domain from caller-supplied anchors.
+
+    This generic constructor is suitable for source tests and deterministic Gate-0
+    measurements. It is deliberately *not* production-authorized because caller
+    anchors have no provenance proving that renderer masks/truth did not choose them.
+    Production learner execution must use `build_production_observation_ray_lattice_v2`.
+    """
     if not contracts:
         raise ValueError("contracts required")
     if anchor_view.ndim != 2 or anchor_grid.shape != (*anchor_view.shape, 2):
@@ -121,13 +135,29 @@ def build_q_domain_v2(
         candidate_valid = in_frame.any(dim=-1)
         if candidate_policy is not None:
             raise ValueError("candidate policy requires foreground masks")
+        authority = UNSEALED_Q_DOMAIN_AUTHORITY_V2
     else:
         if candidate_policy is None:
             raise ValueError("foreground-constrained q domain requires explicit candidate policy")
         masks = _pad_masks(foreground_masks.to(device=device).bool(), int(candidate_policy.foreground_padding_px))
         foreground_support = _sample_foreground(masks, projected_grid) & in_frame
         candidate_valid = foreground_support.sum(dim=-1) >= int(candidate_policy.minimum_foreground_support_views)
-    return RayHypothesisDomainV2(anchor_view, anchor_grid, depth_values, q_points, projected_grid, projected_depth, in_frame, foreground_support, candidate_valid, tuple(c.contract_hash for c in contracts), candidate_policy)
+        authority = MASK_DIAGNOSTIC_Q_DOMAIN_AUTHORITY_V2
+    return RayHypothesisDomainV2(
+        anchor_view,
+        anchor_grid,
+        depth_values,
+        q_points,
+        projected_grid,
+        projected_depth,
+        in_frame,
+        foreground_support,
+        candidate_valid,
+        tuple(c.contract_hash for c in contracts),
+        candidate_policy,
+        authority,
+        None,
+    )
 
 
 def pixel_center_grid_v2(x: torch.Tensor, y: torch.Tensor, resolution: int = 1024) -> torch.Tensor:
@@ -136,7 +166,91 @@ def pixel_center_grid_v2(x: torch.Tensor, y: torch.Tensor, resolution: int = 102
     return torch.stack([gx, gy], dim=-1)
 
 
-def build_canonical_ray_lattice_v2(contracts: tuple[ObservationContractV2, ...], foreground_masks: torch.Tensor, *, anchor_view_index: int, anchor_stride_px: int, depth_values: torch.Tensor, candidate_policy: QCandidatePolicyV2) -> RayHypothesisDomainV2:
+def _full_frame_anchor_grid_v2(*, stride_px: int, device, dtype) -> torch.Tensor:
+    if int(stride_px) <= 0:
+        raise ValueError("anchor_stride_px must be positive")
+    resolution = 1024
+    ys = torch.arange(int(stride_px) // 2, resolution, int(stride_px), device=device)
+    xs = torch.arange(int(stride_px) // 2, resolution, int(stride_px), device=device)
+    yy, xx = torch.meshgrid(ys, xs, indexing="ij")
+    if xx.numel() == 0:
+        raise ValueError("anchor stride produced empty full-frame lattice")
+    return pixel_center_grid_v2(xx.reshape(-1), yy.reshape(-1), resolution).to(device=device, dtype=dtype)
+
+
+def build_production_observation_ray_lattice_v2(
+    contracts: tuple[ObservationContractV2, ...],
+    *,
+    anchor_view_index: int,
+    anchor_stride_px: int,
+    depth_values: torch.Tensor,
+) -> RayHypothesisDomainV2:
+    """Build the only Q-domain authorized for learned production execution.
+
+    Anchors cover the full native frame on a deterministic camera-only pixel lattice.
+    No alpha, foreground mask, raster authority, teacher geometry or image-derived
+    segmentation may create/delete rays or candidates. Candidate validity is purely
+    analytic in-frame validity under exact cameras.
+    """
+    if not contracts or anchor_view_index not in range(8):
+        raise ValueError("production q domain requires contracts and anchor view 0..7")
+    B = len(contracts)
+    if depth_values.ndim not in (1, 2, 3) or not torch.isfinite(depth_values).all():
+        raise ValueError("finite depth_values required")
+    grid = _full_frame_anchor_grid_v2(stride_px=int(anchor_stride_px), device=depth_values.device, dtype=depth_values.dtype)
+    anchor_grid = grid[None].expand(B, -1, -1).clone()
+    anchor_view = torch.full((B, grid.shape[0]), int(anchor_view_index), dtype=torch.long, device=depth_values.device)
+    domain = build_q_domain_v2(contracts, anchor_view, anchor_grid, depth_values)
+    domain = replace(
+        domain,
+        construction_authority=PRODUCTION_Q_DOMAIN_AUTHORITY_V2,
+        anchor_stride_px=int(anchor_stride_px),
+    )
+    validate_production_observation_domain_v2(domain)
+    return domain
+
+
+def validate_production_observation_domain_v2(domain: RayHypothesisDomainV2) -> None:
+    """Fail closed if a mask/externally-selected anchor domain reaches the learner."""
+    if domain.construction_authority != PRODUCTION_Q_DOMAIN_AUTHORITY_V2:
+        raise ValueError(f"IRIS production learner forbids unsealed/mask Q domain:{domain.construction_authority}")
+    if domain.candidate_policy is not None:
+        raise ValueError("IRIS production learner forbids foreground candidate policy")
+    if domain.anchor_stride_px is None or int(domain.anchor_stride_px) <= 0:
+        raise ValueError("IRIS production Q domain missing full-frame anchor stride")
+    if not torch.equal(domain.foreground_support.bool(), domain.in_frame.bool()):
+        raise ValueError("IRIS production Q domain foreground support must equal analytic in-frame support")
+    if not torch.equal(domain.candidate_valid.bool(), domain.in_frame.any(dim=-1).bool()):
+        raise ValueError("IRIS production candidate validity must be camera-only in-frame validity")
+    if domain.anchor_view.ndim != 2 or domain.anchor_grid.shape != (*domain.anchor_view.shape, 2):
+        raise ValueError("IRIS production anchor shape drift")
+    if ((domain.anchor_view < 0) | (domain.anchor_view > 7)).any():
+        raise ValueError("IRIS production anchor view drift")
+    first_view = domain.anchor_view[:, :1]
+    if not torch.equal(domain.anchor_view, first_view.expand_as(domain.anchor_view)):
+        raise ValueError("IRIS production lattice requires one fixed analytic anchor view")
+    expected = _full_frame_anchor_grid_v2(
+        stride_px=int(domain.anchor_stride_px),
+        device=domain.anchor_grid.device,
+        dtype=domain.anchor_grid.dtype,
+    )
+    if domain.anchor_grid.shape[1] != expected.shape[0]:
+        raise ValueError("IRIS production anchor count is not full-frame lattice")
+    expected_batched = expected[None].expand(domain.anchor_grid.shape[0], -1, -1)
+    if not torch.equal(domain.anchor_grid, expected_batched):
+        raise ValueError("IRIS production anchors were not generated by full-frame camera lattice")
+
+
+def build_canonical_ray_lattice_v2(
+    contracts: tuple[ObservationContractV2, ...],
+    foreground_masks: torch.Tensor,
+    *,
+    anchor_view_index: int,
+    anchor_stride_px: int,
+    depth_values: torch.Tensor,
+    candidate_policy: QCandidatePolicyV2,
+) -> RayHypothesisDomainV2:
+    """Legacy/Gate-0 mask-constrained lattice. Diagnostic only; never learner input."""
     if anchor_view_index not in range(8) or anchor_stride_px <= 0:
         raise ValueError("invalid canonical ray lattice configuration")
     B, V, H, W = foreground_masks.shape
@@ -157,4 +271,12 @@ def build_canonical_ray_lattice_v2(contracts: tuple[ObservationContractV2, ...],
         raise ValueError("batched canonical ray lattice requires equal anchor count; batch assets separately")
     anchor_grid = torch.stack(all_grids, dim=0).to(depth_values.device)
     anchor_view = torch.full((B, q), int(anchor_view_index), dtype=torch.long, device=depth_values.device)
-    return build_q_domain_v2(contracts, anchor_view, anchor_grid, depth_values, foreground_masks=foreground_masks.to(depth_values.device), candidate_policy=candidate_policy)
+    domain = build_q_domain_v2(
+        contracts,
+        anchor_view,
+        anchor_grid,
+        depth_values,
+        foreground_masks=foreground_masks.to(depth_values.device),
+        candidate_policy=candidate_policy,
+    )
+    return replace(domain, anchor_stride_px=int(anchor_stride_px))

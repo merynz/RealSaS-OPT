@@ -1,0 +1,60 @@
+name: mwb2-directional-behavioral-v1
+
+on:
+  pull_request:
+    paths:
+      - 'canonical/MWB2_DIRECTIONAL_BEHAVIORAL_PREREG_20260903.md'
+      - 'compiler/test_mwb2_directional_behavioral_v1.py'
+      - 'compiler/realsas_compiler_core/mwb2.py'
+      - 'compiler/realsas_compiler_core/mwb2_skin.py'
+      - 'compiler/realsas_compiler_core/mesh_binding.py'
+      - 'compiler/realsas_compiler_core/rig.py'
+      - 'compiler/realsas_compiler_core/skin.py'
+      - 'experiments/iris_reprojection_v2_20260831/persistence_adapter_v2.py'
+      - '.github/workflows/mwb2_directional_behavioral_v1.yml'
+  push:
+    branches:
+      - behavioral/geppetto-v2-integrity-v1-20260903
+    paths:
+      - 'canonical/MWB2_DIRECTIONAL_BEHAVIORAL_PREREG_20260903.md'
+      - 'compiler/test_mwb2_directional_behavioral_v1.py'
+      - 'compiler/realsas_compiler_core/mwb2.py'
+      - 'compiler/realsas_compiler_core/mwb2_skin.py'
+      - 'compiler/realsas_compiler_core/mesh_binding.py'
+      - 'compiler/realsas_compiler_core/rig.py'
+      - 'compiler/realsas_compiler_core/skin.py'
+      - 'experiments/iris_reprojection_v2_20260831/persistence_adapter_v2.py'
+      - '.github/workflows/mwb2_directional_behavioral_v1.yml'
+
+jobs:
+  mwb2-directional-behavioral:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy pytest
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Compile frozen MWB2 behavioral apparatus
+        run: |
+          python -m py_compile \
+            compiler/test_mwb2_directional_behavioral_v1.py \
+            compiler/realsas_compiler_core/mwb2.py \
+            compiler/realsas_compiler_core/mwb2_skin.py \
+            compiler/realsas_compiler_core/mesh_binding.py \
+            experiments/iris_reprojection_v2_20260831/persistence_adapter_v2.py
+      - name: Run frozen MWB2 directional behavioral gate
+        env:
+          PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
+        run: |
+          lscpu | grep -E 'Model name|Vendor ID|Architecture' || true
+          python -m pytest -q -s compiler/test_mwb2_directional_behavioral_v1.py

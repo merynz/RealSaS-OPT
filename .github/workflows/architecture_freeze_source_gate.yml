@@ -6,24 +6,33 @@ on:
       - 'canonical/architecture_freeze_gate_v1.py'
       - 'canonical/DINO_TOKEN_PARITY_V1_SEAL_20260902.json'
       - 'canonical/ARCHITECTURE_FREEZE_V1.json'
+      - 'canonical/R6_ORACLE_SUBSTRATE_INFORMATION_SUFFICIENCY_PREREG_20260903.md'
+      - 'canonical/R6_ARACHNE_ORACLE_SUBSTRATE_PREREG_20260903.md'
+      - 'canonical/R6_ARACHNE_ORACLE_SUBSTRATE_HETEROGENEOUS_PREREG_20260903.md'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
       - 'compiler/realsas_compiler_core/proof_engine.py'
       - 'compiler/realsas_compiler_core/skin.py'
+      - 'compiler/realsas_compiler_core/rig.py'
       - 'compiler/test_proof_engine_source_v1.py'
       - 'tests/iris/**'
       - '.github/workflows/architecture_freeze_source_gate.yml'
   push:
     branches:
       - architecture/v4-generic-strength-source-completion-20260902
+      - behavioral/geppetto-v2-integrity-v1-20260903
     paths:
       - 'canonical/architecture_freeze_gate_v1.py'
       - 'canonical/DINO_TOKEN_PARITY_V1_SEAL_20260902.json'
       - 'canonical/ARCHITECTURE_FREEZE_V1.json'
+      - 'canonical/R6_ORACLE_SUBSTRATE_INFORMATION_SUFFICIENCY_PREREG_20260903.md'
+      - 'canonical/R6_ARACHNE_ORACLE_SUBSTRATE_PREREG_20260903.md'
+      - 'canonical/R6_ARACHNE_ORACLE_SUBSTRATE_HETEROGENEOUS_PREREG_20260903.md'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
       - 'compiler/realsas_compiler_core/proof_engine.py'
       - 'compiler/realsas_compiler_core/skin.py'
+      - 'compiler/realsas_compiler_core/rig.py'
       - 'compiler/test_proof_engine_source_v1.py'
       - 'tests/iris/**'
       - '.github/workflows/architecture_freeze_source_gate.yml'
@@ -81,6 +90,10 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_objective_causal_diagnostic.py \
             experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_stable_v1.py \
             experiments/geppetto_arachne_r6_20260901/test_arachne_shipping_boundary_v1.py \
+            experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_geppetto_one_family_v1.py \
+            experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_geppetto_heterogeneous_v1.py \
+            experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_one_family_v1.py \
+            experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_heterogeneous_v1.py \
             2>&1 | tee generic-strength-tests.log
           STATUS=${PIPESTATUS[0]}
           echo "pytest_exit_code=$STATUS" >> generic-strength-tests.log

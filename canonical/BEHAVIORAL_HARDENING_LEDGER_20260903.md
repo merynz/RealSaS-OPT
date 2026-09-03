@@ -50,14 +50,16 @@ Ongoing hardening/audit work invalidates promotion. Family selection remains blo
 
 ## Gate 3 — Arachne / SkinFieldCodec
 
-**Status:** `A0 SHIPPING CODEC CAPACITY PASS / GENERIC COSINE PROTOCOL PASS / SHIPPING A1 NEXT`
+**Status:** `PASS / CLOSED`
 
 Primary authorities:
 - cleanroom matrix: `canonical/REALSAS_RIGANYTHING_SKINTOKENS_END_TO_END_CLEANROOM_MATRIX_20260903.md`
 - shipping Codec causal closure: `canonical/SKIN_FIELD_CODEC_SHIPPING_CAPACITY_AND_COOLING_V1_20260903.md`
+- shipping Arachne behavioral closure: `canonical/ARACHNE_SHIPPING_BEHAVIORAL_CLOSURE_20260903.md`
 
-Frozen intended authority chain:
-`Codec A0 -> frozen Codec -> Arachne A1 -> SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`
+Authoritative shipping chain:
+
+`Codec A0 -> frozen qualified shipping Codec -> default shipping Arachne A1 -> SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`.
 
 ### Independent source bug closed
 
@@ -95,54 +97,71 @@ The actual default shipping Codec was tested on the same preregistered three-wit
 
 No witness, seed or acceptance threshold was changed.
 
-With constant AdamW LR `1e-3`, `chain_blend_3` and `branch_blend_4` sustained PASS but `sharp_fork_5` repeatedly entered and left the valid region and failed the three-consecutive criterion. The sharp lane nevertheless reached raw/qualified p95 substantially below `0.05`, falsifying hard representational impossibility.
+With constant AdamW LR `1e-3`, `chain_blend_3` and `branch_blend_4` sustained PASS but `sharp_fork_5` repeatedly entered and left the valid region. The sharp lane nevertheless reached raw/qualified p95 below `0.05`, falsifying hard representational impossibility.
 
-A controlled full-panel A/B changed only optimizer schedule:
+Controlled full-panel A/B changed only optimizer schedule:
 
 `constant 1e-3` vs `CosineAnnealingLR(T_max=1536, eta_min=0)`.
 
-Cosine sustained PASS on all three witnesses:
+Stable cosine A0 PASS:
 
-- `chain_blend_3`: pass step `544`, final p95 `~0.01764`, deformation ratio `~0.00631`;
-- `branch_blend_4`: pass step `672`, final p95 `~0.02839`, deformation ratio `~0.00795`;
-- `sharp_fork_5`: pass step `1056`, final p95 `~0.02705`, deformation ratio `~0.00508`.
+- `chain_blend_3`: step `544`, p95 `~0.01764`, deformation `~0.00631`;
+- `branch_blend_4`: step `672`, p95 `~0.02839`, deformation `~0.00795`;
+- `sharp_fork_5`: step `1056`, p95 `~0.02705`, deformation `~0.00508`.
 
-Compiler correction remained only on the order of `1e-7` to `1e-6`; raw and qualified W were effectively equivalent for the acceptance decision.
+Compiler correction remained on the order of `1e-7` to `1e-6`; raw and qualified W were effectively equivalent for acceptance.
 
-Current causal verdicts:
+A0 verdicts:
 
-- `SHIPPING_CODEC_REPRESENTATION_BOTTLENECK = FALSIFIED` on the preregistered generic synthetic panel;
+- `SHIPPING_CODEC_REPRESENTATION_BOTTLENECK = FALSIFIED`;
 - `CONSTANT_LR_1E-3_AS_STABLE_SHIPPING_A0_PROTOCOL = FALSIFIED`;
-- `GENERIC_COSINE_A0_PROTOCOL = PASS` on the current three-witness panel;
+- `GENERIC_COSINE_A0_PROTOCOL = PASS`;
 - `COMPILER_RESCUE_EXPLAINS_PASS = FALSIFIED`.
 
-This is a capacity/training-protocol closure, not a real-family generalization claim.
+### Shipping A1 closure
 
-### Remaining hybrid risk
+Default shipping Arachne:
 
-The cleanroom concern is now narrowed to the actual learned handoff:
+- architecture: `RealSaS.ArachneCandidate.SegmentAwareJointField.v2`;
+- config hash: `ee24afce200619c06753e39a617528be0fd84695e6358db24d828693ebcb72d1`;
+- model dim `128`;
+- surface encoder layers `2`;
+- attention heads `4`;
+- feedforward dim `384`.
 
-`shipping S + Qualified G -> default ArachneCandidateV2 -> per-joint latent -> frozen qualified shipping Codec decoder -> W`.
+For every witness the shipping Codec was independently A0-qualified with the cosine protocol and frozen before Arachne optimization.
 
-A0 proves the shipping Codec can represent the field when teacher W is available to its encoder. It does not yet prove that Arachne can infer an equivalent latent from product conditioning.
+A1 results:
 
-### Next authorized gate
+- `chain_blend_3`: step `128`, final p95 `~0.01749`, deformation `~0.00626`;
+- `branch_blend_4`: step `512`, final p95 `~0.09542`, deformation `~0.02462`;
+- `sharp_fork_5`: step `1760`, final p95 `~0.08293`, deformation `~0.01613`.
 
-**P0 shipping Arachne -> frozen shipping Codec -> Compiler -> verified LBS.**
+All three sustained three consecutive A1 PASS checks. Compiler correction again remained negligible (`~1e-7` to `1e-6`).
 
-Requirements:
-- use the same preregistered three witness families and existing A1 thresholds;
-- use default shipping Arachne (`model_dim=128`, `surface_encoder_layers=2`, `attention_heads=4`, `feedforward_dim=384`), not the historical tiny A1 surrogate;
-- freeze a shipping Codec that has passed the generic cosine A0 protocol;
-- evaluate raw decoded W and actual `propose -> qualify_skin -> QualifiedSkinIR -> verified LBS` separately;
-- do not credit Compiler correction as semantic prediction quality;
-- if A1 fails, localize the Arachne-to-latent seam before any architecture change.
+Teacher latent equality is diagnostic only: branch/sharp latent p95 can remain around `0.16` while final W and deformation satisfy the product behavioral gate.
 
-No family-specific tuning, no architecture refreeze and no formal family selection are authorized while this is unresolved.
+### Cross-region replay
+
+Workflow run `33770002712`:
+
+- job `100697514568`, `westcentralus`: `3 passed`;
+- exact rerun job `100717194442`, `eastus`: `3 passed`;
+- identical witness pass steps and final metrics.
+
+`CROSS_REGION_DETERMINISTIC_REPLAY = PASS`.
+
+### Gate 3 final verdict
+
+`SHIPPING_ARACHNE_TO_FROZEN_SHIPPING_CODEC_TO_COMPILER_TO_LBS = PASS / CLOSED`.
+
+`HYBRID_ARACHNE_LATENT_CODEC_BOUNDARY_AS_NECESSARY_INFORMATION_BOTTLENECK = FALSIFIED` on the preregistered generic synthetic panel.
+
+This is not a real-family fit or generalization claim.
 
 ## End-to-end cleanroom audit
 
-**Status:** `COMPLETE AS CODE MATRIX / TEST OBLIGATIONS OPEN`
+**Status:** `COMPLETE AS CODE MATRIX / CONSUMER CAPACITY CLOSED / SUBSTRATE INFORMATION SUFFICIENCY OPEN`
 
 Reference pins:
 - RigAnything `d03cdb21dd134fa81df6b0947522469db3f78bd2`;
@@ -152,11 +171,28 @@ Main result:
 - RigAnything is code-specialized toward template-free continuous skeleton generation and uses direct point-token × joint-token skinning plus aggressive deterministic mesh smoothing.
 - SkinTokens is code-specialized toward a dedicated high-capacity skin representation: skin-aware dense training samples, FSQ-CVAE, autoregressive skin tokens, geometry-conditioned dense decode and optional topology/voxel prior.
 - No inspected common benchmark authorizes a direct empirical claim that one globally outperforms the other.
-- RealSaS has credible function-level equivalents across observation substrate, skeleton, skin qualification and proof. The shipping Codec representation-capacity question is now closed on the generic synthetic panel; remaining P0 obligations are Arachne-to-Codec information preservation and observation-substrate information sufficiency.
+- RealSaS has credible function-level equivalents across observation substrate, skeleton proposal/qualification, skin proposal/qualification and proof.
+- Geppetto+Compiler generic behavioral capacity is closed.
+- shipping Codec capacity and shipping Arachne->Codec information preservation are closed on the preregistered generic panel.
+
+### Current P0
+
+The remaining cleanroom architecture question is information sufficiency, not learner capacity:
+
+`U0_REFERENCE_FULL_SURFACE` vs `U1_OBSERVATION_ORACLE_SUBSTRATE`.
+
+Interpretation remains frozen:
+
+- U0 fail -> consumer apparatus/representation inadequate;
+- U0 pass + U1 fail -> observation-limited substrate information insufficiency demonstrated;
+- U1 pass -> complete hidden/full surface is not necessary for the admitted task on that gate;
+- U1 pass + U2 fail -> IRIS prediction/accessibility becomes the remaining bottleneck.
+
+No closed-mesh reconstruction objective is implied by a U1 failure. Any failure must first be localized to a missing mechanical information class.
 
 ## Later gates — not yet opened
 
-After the P0 Arachne/Codec and substrate-equivalence obligations close:
+After substrate-equivalence closes:
 - MWB / mesh-weight binding semantics;
 - appearance/directional raster provenance;
 - motion/runtime state mutation;
@@ -164,15 +200,22 @@ After the P0 Arachne/Codec and substrate-equivalence obligations close:
 
 No downstream gate may hide an unresolved upstream behavioral failure.
 
-## Deferred repository hygiene task
+## Deferred repository/runtime/source hygiene task
 
-**Status:** `DEFERRED UNTIL HARDENING SEQUENCE IS STABLE`
+**Status:** `DEFERRED UNTIL AFTER ARCHITECTURE FREEZE`
 
-User-requested non-destructive goal:
+User-approved sequence:
+
+`behavioral architecture closure -> architecture freeze -> semi-freeze source visibility/restoration -> full repo/compiler/runtime source audit -> restore required historical source authorities non-destructively -> re-audit/refreeze if source/authority changes require it`.
+
+Non-destructive goals:
 - inventory branch/PR/top-level path ownership;
 - define canonical branch taxonomy/naming;
 - distinguish active/frozen/audit/archive references;
 - create one repository structure / branch governance map;
 - preserve historical commits/records;
+- expose required historical Compiler/runtime source authority without automatically promoting it to executable/canonical ownership;
 - no deletion;
 - no disruptive branch/path renaming while a scientific gate is active.
+
+This task is intentionally not opened while the U0/U1 substrate gate is active.

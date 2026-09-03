@@ -18,7 +18,7 @@ from compiler.realsas_compiler_core.motion import build_deterministic_preset_mot
 from compiler.realsas_compiler_core.proof_engine import evaluate_product_proof
 from compiler.realsas_compiler_core.deformation import mesh_skin_dense_weights
 from compiler.realsas_compiler_core.directional_binding import DirectionalBindingPolicyV1, qualify_directional_joint_view_binding
-from compiler.realsas_compiler_services.proof.directional_motion_evaluator import make_qualified_motion_bake_provider
+from compiler.realsas_compiler_services.proof.directional_motion_provider import make_qualified_directional_motion_provider
 from experiments.geppetto_arachne_r6_20260901.verified_lbs_v1 import apply_verified_lbs_v1
 from experiments.single_family_e2e_v1.export_bundle_v1 import export_product_bundle_v1
 from runtime.reference_v4.consumer import consume_product_v4_reference
@@ -115,7 +115,7 @@ def run_complete_e2e_v1(output_root=None):
         min_raster_span=8.0,
     )
     directional_binding = qualify_directional_joint_view_binding(product, policy=synthetic_binding_policy)
-    motion_provider = make_qualified_motion_bake_provider(directional_binding)
+    motion_provider = make_qualified_directional_motion_provider(directional_binding)
     proof_artifacts = {}
     proof = evaluate_product_proof(
         product,
@@ -142,6 +142,7 @@ def run_complete_e2e_v1(output_root=None):
         'generalization_claim': False,
         'scientific_fit_steps': 0,
         'directional_binding_hash': directional_binding.binding_set_hash,
+        'qualified_motion_provider_hash': motion_provider.provider_hash,
         'motion_bake_hash': proof_artifacts['motion_bakes'][motion.clips[0].clip_id].bake_hash,
         'synthetic_binding_policy_only': True,
     }

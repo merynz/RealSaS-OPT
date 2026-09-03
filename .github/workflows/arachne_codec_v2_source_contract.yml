@@ -9,6 +9,7 @@ on:
     branches:
       - source/generic-completion-v1-20260902
       - architecture/v4-generic-strength-source-completion-20260902
+      - behavioral/geppetto-v2-integrity-v1-20260903
     paths:
       - 'experiments/geppetto_arachne_r6_20260901/**'
       - '.github/workflows/arachne_codec_v2_source_contract.yml'
@@ -16,7 +17,7 @@ on:
 jobs:
   arachne-codec-v2-source-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 65
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -71,6 +72,10 @@ jobs:
         env: *det_env
         run: |
           python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel_bound_v2.py
+      - name: Verify shipping Codec capacity through Compiler and LBS
+        env: *det_env
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_capacity_v1.py
       - name: Run Arachne/codec source gates
         env: *det_env
         run: |

@@ -42,13 +42,17 @@ No fifth learned subsystem is currently authorized by V4 architecture/current so
 | Runtime deploy bake codec | `compiler/realsas_compiler_services/export/runtime_deploy_bake.py` | PROMOTED |
 | Pure native runtime-v2 writer | `compiler/realsas_compiler_services/export/runtime_v2.py` | **VALID PURE WRITER** |
 | Current V4 proof/bake -> native-v2 projection | `compiler/realsas_compiler_services/export/current_v4_runtime_v2.py` | **SOURCE CLOSURE READY / PROOF-OWNED XY / EXACT LOCAL-RASTER UV / NO REPLAY** |
-| Numerical LBS probe | `compiler/realsas_compiler_services/numerics/lbs.py` | PROMOTED |
+| Numerical LBS probe | `compiler/realsas_compiler_services/numerics/lbs.py` | **PROMOTED / CURRENT NUMERICAL DEPENDENCY** |
+| Historical CDT | v0.5 source-diff reserve | **NOT CURRENT — future typed mesh-candidate producer only** |
+| Historical BBW/KKT | v0.5 source-diff reserve | **NOT CURRENT — future SkinProposal/fallback candidate only** |
+| Historical ARAP | v0.5 source-diff reserve | **NOT CURRENT — future typed corrective-deformer extension only** |
+| Historical XPBD + SDF contact | v0.5 source-diff reserve | **NOT CURRENT — future secondary-dynamics/contact extension only** |
 | Rig parent repair executor | historical candidate | **BLOCKED — must re-enter current proposal/qualification seam** |
 | Retained weight-candidate repair executor | historical candidate | **BLOCKED — current retained-candidate portfolio absent** |
-| CDT / BBW-KKT / ARAP / XPBD/contact | competing historical authorities | SOURCE-DIFF REQUIRED |
 
 Retraction evidence: `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json`.  
-P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.
+P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.  
+Historical numerical disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`.
 
 ## Runtime
 
@@ -75,8 +79,9 @@ P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_IN
 - Formal Family-1 selection: **BLOCKED**
 - Real-family FIT: **NOT AUTHORIZED**
 - Directional P0 source/math closure: **READY**
+- Historical numerical source-diff: **DONE / NO ADDITIONAL CURRENT BACKEND PROMOTION**
 - Native current-source interlock: **PENDING RUNNER EXECUTION**
-- Current work: **numerical source-diff -> native milestone gate when runner available -> restoration-wide closure -> refreeze/FIT decision**
+- Current work: **repair-executor seam decision -> native milestone gate when runner available -> restoration-wide closure -> refreeze/FIT decision**
 
 ## Promotion rule
 

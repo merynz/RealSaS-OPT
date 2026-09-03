@@ -125,7 +125,7 @@ def _probe(mechanical, amplitude_deg):
     selected = track.canonical_joint_id
     selected_joint = next(j for j in joints if j.canonical_joint_id == selected)
     transforms = np.tile(np.eye(4, dtype=np.float64), (1, len(joints), 1, 1))
-    transforms[0, ji[selected]] = _pivoted_rotation_z(selected_joint.P, positive_key.rotation_deg)
+    transforms[0, ji[selected]] = _pivoted_rotation_z(selected_joint.position, positive_key.rotation_deg)
     pred = apply_verified_lbs_v1(p, w, transforms)[0].astype(np.float64)
     displacement = np.linalg.norm(pred - p, axis=1)
     return {

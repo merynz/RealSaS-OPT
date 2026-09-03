@@ -1,6 +1,6 @@
 # RealSaS-OPT — Restoration State
 
-**Date:** 2026-09-03  
+**Date:** 2026-09-04  
 **Branch:** `restoration/compiler-runtime-promotion-v1-20260903`  
 **Verified behavioral base:** `2b5d467186839401ab30f9566015d9e9d49a2a06`  
 **Global architecture refreeze:** `NOT PERFORMED`  
@@ -28,15 +28,20 @@ Promote still-valuable historical Compiler/runtime production knowledge **behind
 | Compiler mesh physical normalization | **DONE** | `295b798b1fb40ccb1752afe9da9378dfe8734262` |
 | Direct authored-motion evaluator promotion | **RETRACTED** | `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json` |
 | Qualification-owned motion bake + fail-closed proof seam | **DONE** | `proof/motion_bake.py`, `proof/motion_frame_metrics.py`, current `proof_engine.py` |
-| Directional joint/view binding | **P0 BLOCKER** | `CURRENT_DIRECTIONAL_JOINT_VIEW_BINDING_MISSING` |
+| Compiler-owned directional joint/view binding | **SOURCE + MATHEMATICAL CLOSURE READY** | `compiler/realsas_compiler_core/directional_binding.py` + P0 closure seal |
+| Qualified directional motion evaluator | **SOURCE + MATHEMATICAL CLOSURE READY / ROTATION-ONLY CURRENT PRESET** | typed binding + typed provider; unsupported semantics fail closed |
+| Typed motion-provider authority | **DONE / FAIL-CLOSED** | arbitrary callbacks rejected; exact product/binding/policy/evaluator identity required |
 | Controlled causal owner attribution | **DONE / LOCAL REGRESSION 4/4 PASS** | `1dd9a52dda4904c4910f47e66559974b0dc4ad72` |
 | Bounded repair directive + mandatory same-probe re-proof contract | **DONE / LOCAL REGRESSION 5/5 PASS** | `9a60fa341055713c9df8b5d698c58c19a4098025` |
 | Core repair operation registry + real child-state delta audit | **DONE / FAIL-CLOSED** | `12eef470348a4e9822dd927e2ac950e3fcd9dfb7` |
 | Historical rig/weight repair executors | **NOT PROMOTED** | current typed seams do not authorize them |
 | Pure native runtime-v2 package writer | **VALID / KEEP** | `compiler/realsas_compiler_services/export/runtime_v2.py` |
-| Current V4 export -> native runtime interlock | **BLOCKED ON P0** | exact proof-owned bake required before projection/materialization |
+| Current V4 proof/bake -> native-v2 projection | **SOURCE CLOSURE READY** | proof-owned rest/frame XY, exact local raster UV, no solver replay |
+| Current V4 `.rss/.rsr` -> sealed C++ runtime interlock | **HARNESS READY / EXECUTION PENDING RUNNER** | `tests/runtime/current_v4_native_package_probe.cpp`; Actions job never started (`runner_id=0`) |
 | CDT / BBW-KKT / ARAP / XPBD/contact source diff | **PENDING** | no numerical bulk restore |
 | Full behavioral + complete-E2E restoration closure | **PENDING** | required before refreeze decision |
+
+P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.
 
 ## Repository organization contract
 
@@ -49,21 +54,33 @@ provenance reserve= historical/
 
 `models/` contains the semantic homes for IRIS, Geppetto, SkinFieldCodec and Arachne. Models emit evidence/proposals only; Compiler qualification remains authoritative. Mainline must not permanently import dated experiment implementations.
 
-## Motion-proof correction
+## Directional motion authority
 
-Authored/requested motion still must be dynamically exercised before MOTION PASS. However, the Compiler core and proof binder are **not allowed to manufacture directional frames by treating mechanical `QualifiedJoint.position` and directional editable-mesh `P.xy` as the same coordinate frame**.
+The previously promoted direct evaluator was retracted because it treated mechanical joint coordinates and directional mesh `P.xy` as one coordinate system. That shortcut remains forbidden.
 
-The previously promoted direct evaluator was therefore retracted. Its historical promotion record remains as provenance; `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json` is the current disposition.
+Current directional authority is now:
 
-Current authority is:
+1. `DirectionalJointViewBindingSetIR` derives view projection only from admitted mechanical-surface `P` <-> raster correspondences;
+2. rank-3 planar projection is allowed only when every canonical joint is qualified on the admitted surface affine hull;
+3. directional joint pivots are produced only through that qualified projection;
+4. directional mesh rest raster coordinates come from each mesh vertex's admitted `SurfaceSupportBinding`, not from `mesh.P.xy`;
+5. a typed `QualifiedDirectionalMotionBakeProviderV1` binds the exact product, directional binding, evaluator policy and evaluator semantic version;
+6. current evaluator scope is the generic rotation-only preset lane; nonzero translation, non-unit scale, depth offset, and unqualified order/visibility animation fail closed;
+7. `motion_bake.py` binds the exact frames to product + proof plan + clip + evaluator identity;
+8. `motion_frame_metrics.py` measures deformation consequences;
+9. export consumes those exact proof-owned frames and never replays the motion evaluator or a solver.
 
-1. a separately qualified directional evaluator produces frames using a typed Compiler-owned joint/view binding;
-2. `motion_bake.py` binds those frames to the exact product state, proof plan, clip and evaluator identity;
-3. `motion_frame_metrics.py` measures deformation consequences;
-4. missing qualified bake => MOTION **ABSTAIN**;
-5. export must consume the same bound frames; solver replay at export is forbidden.
+Missing qualified frame evidence still makes MOTION **ABSTAIN**.
 
-The missing prerequisite is `CURRENT_DIRECTIONAL_JOINT_VIEW_BINDING_MISSING`.
+## Native runtime authority
+
+`RUNTIME_CONSUMPTION` inside `ProductProofBundleIR` is explicitly a **pre-export runtime-contract compatibility** domain. It does not claim that the native package was executed.
+
+Post-export native authority is a separate interlock:
+
+`PASS proof -> exact proof-owned bakes -> current V4/native-v2 projection -> .rss/.rsr -> sealed runtime/realsas_cpp open -> exact source/proof hash check -> 8-view sample -> software render`.
+
+The source, projection, archive writer and external C++ probe exist. The current GitHub Actions attempt (`33817253942`) received no runner (`runner_id=0`, `steps=[]`), so native execution on this source head is **not yet claimed PASS**.
 
 ## Causal proof and repair firewalls
 
@@ -77,8 +94,11 @@ Current executable repair-operation count: **0**. Historical source presence is 
 - no second canonical graph/ID authority;
 - no historical solver or repair executor executes merely because its source exists;
 - no mechanical joint Vec3 / directional mesh `P.xy` shared-frame shortcut;
-- no MOTION PASS without qualification-owned directional frame evidence;
+- no MOTION PASS without a typed qualification-owned directional provider and exact frame evidence;
+- no arbitrary callable may masquerade as motion-bake authority;
 - no proof can bind a different product state than export/runtime;
+- no export-time evaluator/solver replay;
+- no cross-view/completion texture projection into native-v2 until its atlas authority is separately qualified;
 - no failure signature may invent causal ownership;
 - no repair may mutate production state without a distinct child lineage and mandatory same-probe re-proof;
 - no permanent current dependency on a dated experiment implementation;
@@ -87,11 +107,8 @@ Current executable repair-operation count: **0**. Historical source presence is 
 
 ## Next execution order
 
-1. solve and type the Compiler-owned directional joint/view binding;
-2. implement/qualify the directional evaluator on that binding;
-3. bind the exact same qualification-owned frames to proof and export with no replay;
-4. close `.rss/.rsr` -> native C++ open / clip lookup / render interlock;
-5. source-diff CDT / BBW-KKT / ARAP / XPBD/contact and promote only kernels required by current typed architecture;
-6. decide whether any current proposal-requalification / retained-candidate seam is required for repair execution;
-7. run restoration-wide source/regression/E2E/native gates;
-8. only then decide refreeze and FIT authorization.
+1. execute the single milestone P0/native interlock gate when GitHub provides a runner; do not spam reruns;
+2. source-diff CDT / BBW-KKT / ARAP / XPBD/contact and promote only kernels actually required by current typed architecture;
+3. decide whether any current proposal-requalification / retained-candidate seam is required for repair execution;
+4. run restoration-wide source/regression/E2E/native closure gates;
+5. only then decide refreeze and FIT authorization.

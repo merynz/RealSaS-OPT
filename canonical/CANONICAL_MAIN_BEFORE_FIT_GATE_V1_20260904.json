@@ -1,0 +1,37 @@
+{
+  "schema": "RealSaS.CanonicalMainBeforeFitGate.v1",
+  "date": "2026-09-04",
+  "decision": "CANONICAL_MAIN_PROMOTION_REQUIRED_BEFORE_ANY_REAL_FAMILY_FIT",
+  "current_default_main_commit": "de1a44cae1195dd9cbad3b23ef75d58ae80aa9b3",
+  "restoration_branch": "restoration/compiler-runtime-promotion-v1-20260903",
+  "required_order": [
+    "RESTORATION_SOURCE_AND_BEHAVIORAL_CLOSURE",
+    "RESTORATION_WIDE_REGRESSION_E2E_NATIVE_GATE",
+    "EXPLICIT_RESTORATION_VERDICT",
+    "PROMOTE_RESTORATION_TREE_TO_CANONICAL_MAIN",
+    "POST_MERGE_MAIN_REPOSITORY_INTEGRITY_CHECK",
+    "FREEZE_CANONICAL_MAIN_COMMIT_FOR_FIRST_FIT_BASE",
+    "ONLY_THEN_AUTHORIZE_REAL_FAMILY_FIT"
+  ],
+  "fit_branch_may_precede_canonical_main": false,
+  "fit_may_run_on_restoration_branch": false,
+  "fit_may_run_on_safety_or_experiment_branch_before_main_promotion": false,
+  "first_fit_must_record_canonical_main_base_commit": true,
+  "mainline_expected_shape_after_promotion": {
+    "living_system": ["models/", "compiler/", "runtime/"],
+    "research_labs": ["experiments/"],
+    "decision_evidence": ["canonical/"],
+    "provenance_reserve": ["historical/"]
+  },
+  "main_promotion_requirements": [
+    "no_current_mainline_dependency_on_dated_experiment_implementation",
+    "current_learned_models_visible_under_models",
+    "current_compiler_authority_visible_under_compiler",
+    "sealed_native_cpp_runtime_visible_under_runtime",
+    "current_system_index_matches_tree",
+    "restoration_state_matches_tree",
+    "no_unresolved_P0_scientific_authority_blocker",
+    "native_interlock_and_restoration_closure_verdict_recorded"
+  ],
+  "fit_authorized_now": false
+}

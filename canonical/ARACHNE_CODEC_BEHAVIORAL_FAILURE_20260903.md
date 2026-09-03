@@ -1,194 +1,210 @@
-# RealSaS — Arachne / SkinFieldCodec behavioral failure record
+# RealSaS — Arachne / SkinFieldCodec behavioral failure and correction record
 
 **Date:** 2026-09-03  
-**Status:** `FAIL__FIRST_FAILING_LAYER_CODEC_A0__OBJECTIVE_BUG_REPAIRED__REPRESENTATION_CAUSE_UNRESOLVED`  
+**Status:** `V1_PANEL_EVIDENCE_PARTIALLY_INVALID__SURFACE_ROW_BINDING_BUG_CONFIRMED__BOUND_V2_RUNNING`  
 **Preregistration:** `canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md`  
-**First workflow:** `33752571671`  
-**First job:** `100639284377`  
-**First runner region:** `eastus`
+**Original workflow:** `33752571671`  
+**Original job:** `100639284377`  
+**Original runner:** `eastus`
 
 ## 1. Epistemic rule
 
-This is the first execution of the preregistered Arachne/Codec behavioral panel. Its witness definitions, seeds, thresholds, optimizer horizons and stable-PASS protocol were committed before this run and are now immutable for the repair cycle.
+The preregistered witness definitions, seeds, model sizes, optimizer settings, horizons, thresholds and three-consecutive-PASS rule remain frozen.
 
-No threshold or witness may be changed to turn this failure into PASS.
+Historical runs are not deleted or rewritten. When a later causal diagnostic proves an evaluator defect, the old observations remain historical facts but claims that depended on the defective measurement are explicitly reclassified.
 
-Historical FAIL evidence in this record is never overwritten by later repairs. A later PASS answers a new proposition about repaired source.
+## 2. Original V1 panel observation
 
-## 2. Suite result
+Original V1 harness result:
 
-Source compilation: `PASS`.
+`2 failed, 20 passed`
 
-Combined source + behavioral pytest result: `2 failed, 20 passed`.
+- `chain_blend_3`: full A0 -> A1 -> `Arachne.propose -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS` PASS;
+- `branch_blend_4`: reported `FAIL_A0`;
+- `sharp_fork_5`: reported `FAIL_A0`.
 
-Panel result:
+Original V1 final numbers:
 
-`ARACHNE_CODEC_BEHAVIORAL_PANEL = FAIL`
+### `chain_blend_3`
+- A0 sustained PASS at step `640`;
+- A0 row-L1 p95 `0.0473073684`;
+- A0 deformation ratio `0.0124993324`;
+- A1 sustained PASS at step `320`;
+- qualified row-L1 p95 `0.0597252958`;
+- qualified deformation ratio `0.0191426221`.
 
-The first failing layer is `SkinFieldCodec A0` for two witnesses. Arachne A1 is therefore not yet the repair target.
+### `branch_blend_4`
+- final row-L1 p95 `0.0938273296`;
+- final deformation ratio `0.0368942656`;
+- no A1 run.
 
-## 3. `chain_blend_3` — full-chain PASS
+### `sharp_fork_5`
+- final row-L1 p95 `0.743847549`;
+- final deformation ratio `0.240943387`;
+- no A1 run.
 
-Seed: `20260921`.
+These numbers were truly produced by the V1 harness. Their interpretation as evidence about Codec capacity is corrected below.
 
-Codec A0:
-- sustained 3-check PASS at step `640`;
-- row-L1 p95 `0.047307368367910385` <= frozen `0.05`;
-- deformation ratio `0.012499332427978516` <= frozen `0.05`;
-- max simplex residual `1.1920928955078125e-07`;
-- negative weight count `0`.
+## 3. Independent Codec objective bug — VALID finding
 
-Arachne A1 shipping chain:
-- sustained 3-check PASS at step `320`;
-- shipping path is `Arachne.propose -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`;
-- qualified row-L1 p95 `0.05972529575228691` <= frozen `0.10`;
-- qualified deformation ratio `0.019142622128129005` <= frozen `0.10`;
-- Compiler total correction L1 `2.5319604889772324e-07` <= frozen `1e-5`;
-- qualified row count `9`;
-- max simplex residual `0`;
-- negative weights `0`.
+A separate family-independent exact-truth probe showed that historical active-weighted cross entropy multiplied classes inside one simplex row by different constants.
 
-Interpretation: the complete Codec/Arachne/Compiler/LBS authority chain is executable and can satisfy the behavioral contract on at least one generic witness. A broad proposal/Compiler plumbing failure is therefore falsified.
-
-## 4. `branch_blend_4` — FAIL_A0
-
-Seed: `20260922`.
-
-A1 was not run because A0 never produced three consecutive PASS evaluations.
-
-First-run final step `1536`:
-- row-L1 p95 `0.09382732957601547` > frozen `0.05`;
-- deformation ratio `0.036894265562295914` <= frozen `0.05`;
-- max simplex residual `5.960464477539063e-08`;
-- negative weights `0`.
-
-The trace improves strongly from initial row-L1 p95 above `1.4`, but never reaches the frozen row-tail ceiling. Late deformation consequence is already acceptable while the dense row-tail remains wrong.
-
-Interpretation:
-
-> `GOOD_DEFORMATION != SUFFICIENT_W_RECONSTRUCTION`
-
-The behavioral panel correctly detects that the chosen probe bank can be compatible with materially different dense W rows. The row-tail criterion must remain; it may not be removed merely because deformation passes.
-
-## 5. `sharp_fork_5` — FAIL_A0
-
-Seed: `20260923`.
-
-A1 was not run.
-
-First-run final step `1536`:
-- row-L1 p95 `0.7438475489616394` > frozen `0.05`;
-- deformation ratio `0.24094338715076447` > frozen `0.05`;
-- max simplex residual `1.1920928955078125e-07`;
-- negative weights `0`.
-
-The trace starts near row-L1 p95 `1.60`, deformation ratio `0.71`, improves early, then plateaus/oscillates for a long late interval around row-L1 p95 approximately `0.72–0.76` and deformation ratio approximately `0.23–0.25`.
-
-Interpretation: this does not look like a simple near-threshold horizon miss. A generic Codec A0 representation, objective or optimization limitation is exposed on a sharper heterogeneous weight field.
-
-## 6. Initial causal hypotheses
-
-The following hypotheses were opened after the first FAIL:
-
-1. **Encoder information bottleneck.** `encode_teacher_weights()` reduces each joint's entire surface weight field to pooled summaries before the latent MLP; sharp spatial field structure may be compressed.
-2. **Decoder capacity / latent-field bottleneck.** Even oracle/free per-joint latents may be unable to drive the shared decoder to the required W field.
-3. **Shared temperature floor/dynamics.** A global softmax temperature may limit sharp rows or interact with optimization.
-4. **A0 objective geometry.** The weighted cross-entropy construction and deformation MSE may optimize a surrogate that stalls before the frozen dense-row tail ceiling.
-5. **Optimizer dynamics.** Possible but not assumed; `sharp_fork_5` late plateau argues against claiming that more steps alone is the explanation.
-
-## 7. Causal decomposition run
-
-Workflow run `33753462948`, job `100642169460`, runner region `northcentralus` added diagnostics while leaving the frozen behavioral panel unchanged.
-
-### D1 — exact pair-logit feasibility oracle
-
-The exact valid pair logits `log(W_teacher)` followed by the same row softmax and verified LBS pass the frozen A0 behavior by construction and numerically:
-
-- `branch_blend_4`: row-L1 p95 `9.295e-08`, deformation ratio `3.077e-05`;
-- `sharp_fork_5`: row-L1 p95 `1.201e-07`, deformation ratio `2.622e-05`.
-
-Therefore:
-
-`FROZEN_A0_METRICS_AND_THRESHOLDS_FEASIBLE = TRUE`
-
-The panel is not failing because the metric/probe implementation asks for an impossible weight field.
-
-### D2 — free per-joint latent, same decoder
-
-Teacher encoder was bypassed while retaining the same tiny Codec decoder/softmax and the same `latent_dim=8`.
-
-Under the current Codec reconstruction + deformation objective:
-
-- `branch_blend_4` achieved a best frozen-behavior PASS checkpoint: row-L1 p95 `0.0260529`, deformation ratio `0.00715175` at step `1440`;
-- `sharp_fork_5` improved dramatically relative to normal A0 but remained FAIL: best/final row-L1 p95 `~0.10496`, deformation ratio `~0.02495` at step `1536`.
-
-Interpretation:
-
-- the current decoder/softmax has enough capacity for the branch witness when the pooled teacher encoder is removed;
-- teacher-encoder compression is therefore **materially causal** for at least part of the failure;
-- it is **not sufficient root cause** for the sharp witness because encoder bypass alone does not close the frozen row-tail criterion.
-
-### D3 — teacher distribution telemetry
-
-`branch_blend_4` contains no mixed active/inactive row at the `1e-3` active threshold.
-
-`sharp_fork_5` contains `15` mixed active/inactive rows, but the maximum inactive teacher mass per row is only about `8.17e-4`.
-
-This matters for interpreting the objective bug below: that bug is real, but it cannot explain the branch failure and its theoretical target shift is far smaller than the observed sharp plateau.
-
-## 8. Confirmed independent objective contract bug
-
-A family-independent exact-truth probe used teacher row:
+For teacher row:
 
 `[0.6000, 0.3991, 0.0009]`
 
-under historical `active_threshold=1e-3`, `active_weight=2.0`.
-
-The old cross-entropy multiplied active classes by `3` but the inactive class by `1`. At exact teacher probabilities the measured pre-softmax gradient was:
+with `active_threshold=1e-3`, `active_weight=2.0`, exact teacher probabilities produced pre-softmax gradient:
 
 `[-0.00036, -0.00023946, +0.00059946]`
 
-with max absolute gradient `5.9946e-4`.
+max absolute gradient `5.9946e-4`.
 
 Therefore:
 
 `EXACT_TEACHER_W_STATIONARY_UNDER_OLD_CODEC_CE = FALSE`
 
-The old CE optimum is proportional to `class_multiplier * teacher`, not teacher itself. This is a generic loss-contract violation independent of any behavioral witness.
+This causal finding does not depend on the behavioral-panel surface-row ordering and remains valid.
 
-The theoretical teacher-to-old-CE-optimum L1 shift for that adversarial row is about `0.00119964`. That proves the contract bug, but it is too small and too selectively present to be declared the sole explanation of the observed panel failures.
+Repair:
+- `f0fe52ab625695d46bed7007acba39fe4cdfb248`: active emphasis changed to a teacher-only row scalar, preserving relative within-row teacher probabilities;
+- `9692ac12a44769212906616b6bca13861022d42c`: permanent regression requires exact teacher W to be stationary.
 
-### Objective repair
+Post-repair run `33755765286`, job `100649682500`, measured max exact-truth gradient approximately `4.43e-17`: regression PASS.
 
-Commit `f0fe52ab625695d46bed7007acba39fe4cdfb248` changes active emphasis from per-class multipliers to one teacher-only scalar per simplex row. This preserves approximately the historical emphasis scale while preventing within-row target distortion.
+This closes the independent truth-stationarity contract violation only.
 
-Commit `9692ac12a44769212906616b6bca13861022d42c` converts the positive falsification probe into a permanent negative regression:
+## 4. Critical evaluator defect — CONFIRMED
 
-`exact teacher W -> cross-entropy pre-softmax gradient ~= 0`.
+The V1 behavioral harness generated synthetic teacher W in witness creation order:
 
-This repair closes only the truth-stationarity bug. It does **not** authorize declaring the A0 behavioral panel repaired.
+`S:0, S:1, S:2, ...`
 
-## 9. Representation diagnostic now opened
+but `ArachneConditioningAdapter` obtains surface tensors through `_surface_features()`, which sorts `SurfaceNode` objects lexicographically by `surface_id`.
 
-The next causal question is whether the Codec decoder is being forced to rediscover point-to-control relations inefficiently from separate absolute surface/joint embeddings.
+For `N < 10`, the orders coincide. For `N >= 10`, they do not.
 
-A diagnostic lane has been added without changing the frozen panel:
+Observed canonical adapter orders:
 
-- same teacher encoder;
-- same hidden dim `32`;
-- same latent dim `8`;
-- same A0 optimizer/horizon/objective;
-- decoder receives only four additional generic analytic relation channels already represented in the canonical Arachne pair-geometry contract: `dx`, `dy`, `dz`, point-control distance.
+### `branch_blend_4`
+Creation order:
 
-This is a diagnostic, not yet a source repair. Its result will determine whether explicit relational geometry is causally justified.
+`0,1,2,3,4,5,6,7,8,9,10,11`
 
-## 10. Repair boundary
+Conditioning order:
 
-Until Codec A0 closes:
-- do not modify Arachne A1 architecture/loss;
-- do not relax behavioral panel thresholds/seeds/horizons;
-- do not use a real family for repair selection;
-- do not refreeze architecture;
-- do not authorize Family-1 selection.
+`0,1,10,11,2,3,4,5,6,7,8,9`
 
-Any source repair must be accompanied by a cause-level generic regression, then the original preregistered panel must rerun unchanged.
+Permutation:
+
+`[0,1,10,11,2,3,4,5,6,7,8,9]`
+
+### `sharp_fork_5`
+Creation order:
+
+`0,1,2,3,4,5,6,7,8,9,10,11,12,13,14`
+
+Conditioning order:
+
+`0,1,10,11,12,13,14,2,3,4,5,6,7,8,9`
+
+Permutation:
+
+`[0,1,10,11,12,13,14,2,3,4,5,6,7,8,9]`
+
+The V1 harness passed teacher row `i` directly against conditioning tensor row `i`. Thus for the two `N>=10` witnesses, dense skin truth and rest-point rows were attached to the wrong canonical `surface_id` after row 1.
+
+`chain_blend_3` has `N=9`; its identity order was unaffected. This exactly matches the V1 PASS/FAIL split.
+
+## 5. Causal row-binding replay
+
+Workflow `33756078567`, job `100650698374`, runner `mexicocentral` retained the same repaired Codec source, same witness definitions, seeds, optimizer, learning rate, weight decay, 1536-step horizon, thresholds and three-consecutive-PASS rule. The only intervention was exact surface-ID rebinding of teacher W and rest rows into `conditioning.surface_ids` order.
+
+### `branch_blend_4`
+After correct ID binding:
+- sustained A0 PASS at step `544`;
+- three consecutive PASS checks;
+- final checked row-L1 p95 `0.0287867505`;
+- deformation ratio `0.0104174139`;
+- max simplex residual `5.96e-08`;
+- negative weights `0`.
+
+This causally falsifies the original claim that branch V1 failure demonstrated a Codec representation bottleneck.
+
+### `sharp_fork_5`
+After correct ID binding:
+- final checked row-L1 p95 `0.0390132964` — individual threshold PASS;
+- deformation ratio `0.00743764965` — individual threshold PASS;
+- max simplex residual `1.19e-07`;
+- negative weights `0`;
+- only `2` consecutive PASS checks were accumulated by the frozen 1536-step horizon;
+- therefore authoritative preregistered status remains `NOT YET PASS` until the corrected full panel is run.
+
+The intervention improves the original sharp row-L1 p95 from approximately `0.744` to `0.039`, and deformation ratio from approximately `0.241` to `0.0074`, without changing any acceptance threshold or optimizer setting.
+
+Therefore the V1 sharp plateau is overwhelmingly explained by target-row misbinding. Whether a small residual stability/horizon failure remains under the authoritative corrected harness is still an open question.
+
+## 6. Reclassification of intermediate representation diagnostics
+
+Free-latent and explicit point-control-geometry diagnostics executed before the row-binding defect was known consumed the same misbound teacher/rest rows.
+
+Their numerical outputs remain preserved, but representation conclusions drawn from them are reclassified:
+
+`CONTAMINATED_BY_V1_SURFACE_ROW_BINDING_BUG`
+
+They must not justify a Codec architecture change.
+
+In particular:
+- do not claim teacher-encoder compression is a confirmed root cause from those runs;
+- do not add explicit pair geometry to Codec because of those runs;
+- do not increase Codec width/latent capacity because of those runs.
+
+The exact pair-logit oracle remains useful only as a mathematical metric-feasibility sanity check; it did not validate correct canonical row binding.
+
+## 7. Successor behavioral authority
+
+The historical V1 harness is preserved at:
+
+`experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel.py`
+
+It is no longer active behavioral authority because its target axis is known invalid for `N>=10`.
+
+The successor harness is:
+
+`experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel_bound_v2.py`
+
+V2 changes only target binding:
+- synthetic teacher W remains generated by the preregistered formula;
+- witness geometry unchanged;
+- seeds unchanged;
+- architecture unchanged;
+- A0/A1 optimizer settings unchanged;
+- horizons unchanged;
+- thresholds unchanged;
+- three-consecutive-PASS rule unchanged;
+- teacher W and rest rows are bound to the exact canonical `conditioning.surface_ids` order before any optimization or evaluation.
+
+It includes a cause-level regression proving correct row-to-surface-ID binding for both identity-order and `N>=10` non-identity-order witnesses.
+
+Active Arachne CI now runs:
+1. exact-truth Codec objective stationarity regression;
+2. bound V2 frozen behavioral panel;
+3. source/generic-strength gates.
+
+Historical contaminated capacity/pair-geometry diagnostics remain in the repository for provenance but are removed from active PASS authority.
+
+## 8. Current status
+
+`ARACHNE_CODEC_V1_PANEL_IMPLEMENTATION_EVIDENCE = INVALID_FOR_N_GE_10`
+
+`SURFACE_ROW_BINDING_BUG = CONFIRMED`
+
+`INDEPENDENT_CODEC_CE_TRUTH_STATIONARITY_BUG = REPAIRED`
+
+`ARACHNE_CODEC_BOUND_V2_PANEL = RUNNING`
+
+Until Bound V2 closes:
+- no Arachne A1/source architecture repair based on the contaminated V1 evidence;
+- no threshold/seed/horizon changes;
+- no real-family repair selection;
+- no architecture refreeze;
+- no formal Family-1 authorization.

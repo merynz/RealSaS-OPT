@@ -6,19 +6,31 @@ Arachne is the learned skin-proposal subsystem conditioned on admitted surface e
 
 `models/arachne/v2/`
 
-Byte-preserved current source:
+Byte-preserved current inference source:
 
 - `arachne_candidate_v2.py`
 - `conditioning_v2.py`
 - `conditioning_v1.py` — retained compatibility base used by V2 conditioning;
 - `arachne_geometry_v2.py`
 
-Two tiny dependency bridges keep the promoted V2 source byte-identical while making ownership explicit:
+Dependency bridges keep those files byte-identical while ownership remains explicit:
 
-- `skin_field_codec_v1.py` re-exports the canonical current `models.skin_field_codec.v1` decoder;
-- `geppetto_conditioning_v2.py` re-exports the canonical current `models.geppetto.v2` conditioning contract used by Arachne V2.
+- `skin_field_codec_v1.py` -> canonical current SkinFieldCodec implementation/loss;
+- `geppetto_conditioning_v2.py` -> canonical current Geppetto V2 conditioning contract;
+- `codec_deformation_loss_v1.py` -> canonical Codec deformation-training primitive;
+- `train_codec_r6_a0_v1.py` -> canonical Codec A0 qualification token contract.
 
 No duplicate learned Codec or Geppetto implementation is created inside Arachne.
+
+## Current A1 training/evaluation
+
+The current base A1 lane is now visible beside Arachne:
+
+- `arachne_tail_objective_v1.py` — generic family/semantic-ID agnostic hard-tail row objective used by current base A1 training;
+- `train_arachne_r6_a1_v1.py` — byte-preserved current A1 optimization;
+- `eval_arachne_r6_a1_v1.py` — byte-preserved current A1 evaluation.
+
+`arachne_tail_remediation_v1.py` remains in `experiments/`: it explicitly describes a conditional remediation stage after a frozen A1 p95 failure, whereas the current A1 train step already carries generic hard-tail pressure in its base objective. It is preserved as research/remediation provenance, not silently promoted as a second base training authority.
 
 ## Authority boundary
 
@@ -27,7 +39,3 @@ Arachne predicts skin-field latents/dense influence proposals and emits `SkinPro
 ## Compatibility residue
 
 `conditioning_v1.py` contains both the older Geppetto and Arachne deterministic conditioning adapters because current Arachne V2 still calls the Arachne V1 base adapter before adding V2 pair geometry. The entire file is preserved for behavior stability; a later hygiene refactor may extract only the Arachne base after parity tests.
-
-## Training status
-
-Arachne training/evaluation/tail-remediation files remain in the R6 experiment tree while shared teacher-target, codec and diagnostic dependencies are classified. Current V2 inference ownership is now visible without pretending every research remediation script is current production code.

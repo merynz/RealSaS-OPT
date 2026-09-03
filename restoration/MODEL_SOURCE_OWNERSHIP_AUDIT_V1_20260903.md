@@ -1,133 +1,127 @@
 # Model Source Ownership Audit V1 — 2026-09-03
 
-**Status:** `CURRENT_V4_INFERENCE_STACK_PROMOTED__TRAINING_LANES_AND_REPO_WIDE_LEARNED_SCAN_PENDING`  
+**Status:** `CURRENT_V4_MODEL_MAINLINE_PROMOTED__INFERENCE_AND_BASE_TRAINING_VISIBLE__OLD_ALTERNATIVES_REMAIN_RESEARCH`  
 **Branch:** `restoration/compiler-runtime-promotion-v1-20260903`
 
 ## Purpose
 
-Make the current RealSaS learned stack directly inspectable under `models/` without pretending every dated training experiment is current. Model promotion changes source ownership/location only; Compiler authority is unchanged.
+Make the current RealSaS learned system directly inspectable under `models/` while preserving dated research trees as evidence/provenance. Promotion changes source ownership/location, not product authority.
 
-## Current V4 learned stack
+## Current V4 learned inventory
 
-| Subsystem | Mainline home | Promotion state |
+| Subsystem | Mainline home | Current scope |
 |---|---|---|
-| IRIS V2 | `models/iris/v2/` | inference + current train/eval/checkpoint package promoted |
-| Geppetto V2 | `models/geppetto/v2/` | current inference + conditioning + checkpoint promoted |
-| SkinFieldCodec V1 | `models/skin_field_codec/v1/` | current codec + checkpoint promoted; config semantically split from mixed V1 stack file |
-| Arachne V2 | `models/arachne/v2/` | current inference/conditioning/geometry promoted with explicit current-model dependency bridges |
+| IRIS V2 | `models/iris/v2/` | inference, foundation/apparatus contract, checkpoint, current train/eval |
+| Geppetto V2 | `models/geppetto/v2/` | inference/conditioning/checkpoint + V2 target/loss/train/eval |
+| SkinFieldCodec V1 | `models/skin_field_codec/v1/` | codec/checkpoint/config + current A0 deformation-sensitive train/eval |
+| Arachne V2 | `models/arachne/v2/` | inference/conditioning/geometry + current base A1 hard-tail train/eval |
 
-All models remain evidence/proposal producers. Canonical IDs, skeleton/skin legality, product identity, qualification, proof and export remain Compiler-owned.
-
----
+Models emit evidence/proposals only. Compiler owns canonical identity, legality, qualification, product state, proof and export.
 
 ## 1. IRIS V2
 
 Source tree: `experiments/iris_reprojection_v2_20260831/`  
-Source Git tree SHA: `597e5ccb9765e1af60c94b434a91f68de06a11a3`
+Source tree SHA: `597e5ccb9765e1af60c94b434a91f68de06a11a3`
 
-### Byte-preserved mainline modules
+20 current V2 modules were promoted byte-preserving into `models/iris/v2/`: model, q-domain/evidence stack, depth/support/uncertainty heads, DINO authority/adapter/apparatus, observation contract/emitter, checkpoint, current train/eval and world regularizer.
 
-`__init__.py`, `checkpoint_v2.py`, `depth_output_head_v2.py`, `dino_token_parity_v2.py`, `dinov2_foundation_v2.py`, `eval_v2.py`, `evidence_field_v2.py`, `foundation_adapter_v2.py`, `iris_apparatus_v2.py`, `local_refinement_v2.py`, `model_v2.py`, `observation_contract_v2.py`, `observation_evidence_emitter_v2.py`, `q_descriptor_sampler_v2.py`, `q_domain_v2.py`, `q_evidence_encoder_v2.py`, `q_spatial_graph_v2.py`, `ray_modes_v2.py`, `train_v2.py`, `world_regularizer_v2.py`.
+`persistence_adapter_v2.py` (blob `3a977f41182c58d33bd6b7f1d1f403115cd772d5`) is explicitly **Compiler-owned pending promotion** because it consumes observation evidence and invokes Compiler surface/local-geometry authority.
 
-These are linked into `models/iris/v2/` with the same Git blobs as the audited source files.
-
-### Compiler-owned
-
-`persistence_adapter_v2.py` — blob `3a977f41182c58d33bd6b7f1d1f403115cd772d5` — `COMPILER_OWNED_PENDING_PROMOTION` because it consumes `ObservationEvidenceIR` and invokes Compiler surface/local-geometry authority.
-
-### Experiment-only/evidence
-
-Gate-0 geometry/corpus/preflight runners/tests plus preregistration/result JSON stay in the dated experiment tree.
-
----
+Gate-0 corpus/preflight runners/tests/prereg/results remain experiment/evidence.
 
 ## 2. Geppetto V2
 
 Source tree: `experiments/geppetto_arachne_r6_20260901/`  
-Source Git tree SHA: `522ec6fa2470a8236c9e78234908c87b30a1d832`
+Source tree SHA: `522ec6fa2470a8236c9e78234908c87b30a1d832`
 
-### Byte-preserved current inference
+Byte-preserved current core:
 
-| File | Git blob SHA |
-|---|---|
-| `geppetto_candidate_v2.py` | `9c7572aaaa15d28f3738248ad9bbd53a9a056b0b` |
-| `geppetto_conditioning_v2.py` | `9a33ab34ce050842c77dfc64407123303c4bf456` |
-| `geppetto_checkpoint_v2.py` | `4991038092cad88f2b1e11cbd486af3d925e235f` |
+- `geppetto_candidate_v2.py` — `9c7572aaaa15d28f3738248ad9bbd53a9a056b0b`
+- `geppetto_conditioning_v2.py` — `9a33ab34ce050842c77dfc64407123303c4bf456`
+- `geppetto_checkpoint_v2.py` — `4991038092cad88f2b1e11cbd486af3d925e235f`
 
-V1 candidate/config/loss code remains research/history, not current by co-location.
+Byte-preserved current V2 training/evaluation:
 
-### Training lane pending
+- `training_targets_v2.py` — `8caf6bcfc9c2cb10e2c7d0758913e550863df4f8`
+- `geppetto_loss_v2.py` — `036d73690bf17348b2a299887494ebd87d230c0b`
+- `geppetto_train_v2.py` — `4453810f047cc62171ab16ccab3f4c1ead0169c7`
+- `geppetto_eval_v2.py` — `dfdb2f3ab754ec1530a3d489fb9c3d1207c67232`
 
-`geppetto_loss_v2.py` and `geppetto_train_v2.py` still consume `training_targets_v1.py`; that shared target contract reaches the older `conditioning_v1.py` training lane. Scientific validity may survive, but ownership must be untangled before promotion.
+The historical shared `training_targets_v1.py` mixed Geppetto and SkinField target types and imported V1 conditioning. Mainline uses a narrow compatibility module containing only the unchanged `GeppettoTeacherTargetV1` dataclass. This keeps current V2 loss/target source intact without promoting V1 conditioning into Geppetto V2.
 
----
+Geppetto V1 candidate/loss/config, oracle-substrate harnesses, capacity/overfit/panel diagnostics remain research/history.
 
 ## 3. SkinFieldCodec V1
 
-### Byte-preserved implementation
+Byte-preserved core:
 
-| File | Git blob SHA |
-|---|---|
-| `skin_field_codec_v1.py` | `01d064fdbf0df1e1efb09495b788665e582e2f42` |
-| `skin_field_codec_checkpoint_v1.py` | `0365d4e1434443065487c6644a68ab07a60c6cda` |
+- `skin_field_codec_v1.py` — `01d064fdbf0df1e1efb09495b788665e582e2f42`
+- `skin_field_codec_checkpoint_v1.py` — `0365d4e1434443065487c6644a68ab07a60c6cda`
 
-The historical `candidate_config_v1.py` mixed Geppetto V1, Codec V1 and Arachne V1 config ownership. It is **not** copied wholesale into the Codec mainline.
-
-Mainline instead contains:
-
-- `config_v1.py` — semantic extraction of `SkinFieldCodecConfigV1` + `SKIN_FIELD_CODEC_V1` only;
-- `candidate_config_v1.py` — compatibility shim preserving the byte-identical codec module's relative import path.
-
-Default config hash is frozen by source test as:
+The old `candidate_config_v1.py` mixed Geppetto V1, Codec V1 and Arachne V1 configs. Mainline semantically extracts only `SkinFieldCodecConfigV1` + `SKIN_FIELD_CODEC_V1` into `config_v1.py`; a narrow `candidate_config_v1.py` shim preserves the exact codec module's relative import. Default config hash remains:
 
 `24c9f2580be9e80a02789e9ba35a57470145114807859057398b07bef9d58715`
 
-### Training lane pending
+Byte-preserved current A0 training/evaluation:
 
-Codec R6-A0 train/eval, deformation objective, tail/cooling diagnostics and shared teacher targets remain in `experiments/` until their current scientific role is classified.
+- `codec_deformation_loss_v1.py` — `b0462467f8346f3883058c1c47a065f4d5be5adf`
+- `train_codec_r6_a0_v1.py` — `18baa39c8178b0f5f16cece0aa78aa51aac6ca00`
+- `eval_codec_r6_a0_v1.py` — `c29161dca81d70209cf1dbfe1b9d99f3d5b99b3a`
 
----
+Temperature/cooling/tail anatomy/pair-geometry and other diagnostic files remain experiments unless a future closure promotes them into the base codec contract.
 
 ## 4. Arachne V2
 
-### Byte-preserved current implementation
+Byte-preserved current core:
 
-| File | Git blob SHA |
-|---|---|
-| `arachne_candidate_v2.py` | `ba5bf0a2757e8d702176332fcfa91f804e0d545e` |
-| `conditioning_v2.py` | `3383cb7801b22aeb634f05551a847a04e674c7c8` |
-| `conditioning_v1.py` | `b3539ed6c4580ac69338bdb9bd4b93c6e78a262c` |
-| `arachne_geometry_v2.py` | `0a39450b69de48da3b7748cb08972d0b69ff9700` |
+- `arachne_candidate_v2.py` — `ba5bf0a2757e8d702176332fcfa91f804e0d545e`
+- `conditioning_v2.py` — `3383cb7801b22aeb634f05551a847a04e674c7c8`
+- `conditioning_v1.py` — `b3539ed6c4580ac69338bdb9bd4b93c6e78a262c`
+- `arachne_geometry_v2.py` — `0a39450b69de48da3b7748cb08972d0b69ff9700`
 
-Current source retains original relative dependency names. Mainline supplies two explicit bridge modules instead of duplicating learned code:
+Cross-model compatibility bridges point relative historical import names at the canonical current packages:
 
-- `models/arachne/v2/skin_field_codec_v1.py` -> canonical `models.skin_field_codec.v1`;
-- `models/arachne/v2/geppetto_conditioning_v2.py` -> canonical `models.geppetto.v2` conditioning.
+- `skin_field_codec_v1.py` -> `models.skin_field_codec.v1`
+- `geppetto_conditioning_v2.py` -> `models.geppetto.v2`
+- `codec_deformation_loss_v1.py` -> canonical Codec A0 deformation loss
+- `train_codec_r6_a0_v1.py` -> canonical Codec A0 qualification-token contract
 
-`conditioning_v1.py` is preserved because current V2 Arachne conditioning explicitly builds on `ArachneConditioningAdapter` before adding V2 pair geometry. Its unrelated older Geppetto adapter is compatibility residue, not current Geppetto ownership.
+No duplicate learned Codec or Geppetto implementation is created inside Arachne.
 
-Arachne V1 candidate, tail remediation, R6-A1 training/eval and diagnostics remain research evidence pending training-lane audit.
+Byte-preserved current base A1 training/evaluation:
 
----
+- `arachne_tail_objective_v1.py` — `0abfe7c8e85135d0ce613df6463c5d4def220717`
+- `train_arachne_r6_a1_v1.py` — `5db5a7b6c7e8d14e9c33bcf3127c78a445e8ca90`
+- `eval_arachne_r6_a1_v1.py` — `daf233904f31161f4c504179f28d9917932c3514`
 
-## Mainline model firewalls
+`arachne_tail_remediation_v1.py` stays in experiments: it explicitly defines a conditional post-failure remediation stage, while the current base A1 train step already carries generic family/semantic-ID-agnostic hard-tail pressure.
 
-1. Current model Python code must not import dated `experiments.*` packages.
-2. Experiments may import current mainline; the reverse direction is migration debt/bug.
-3. Byte-preserving promotions keep the original experiment source intact for provenance.
-4. Compatibility shims may bridge newly separated semantic homes but may not create alternate learned implementations.
-5. Model outputs remain evidence/proposals; no model promotion expands Compiler authority.
-6. A current inference source promotion does not automatically promote its historical teacher/training/diagnostic apparatus.
+## Repository-wide learned scan
 
-## Remaining closure work
+Code searches over `nn.Module` / `from torch import nn` and current architecture evidence found neural code in these families:
 
-Before declaring **all learned source normalized**:
+- current IRIS V2;
+- older IRIS Controlled V1 and older single-pose/legacy IRIS variants;
+- current Geppetto V2 plus Geppetto V1 alternative;
+- current SkinFieldCodec V1;
+- current Arachne V2 plus Arachne V1 alternative.
 
-1. classify and promote/reject Geppetto V2 training lane;
-2. classify and promote/reject SkinFieldCodec training/evaluation lane;
-3. classify and promote/reject Arachne V2 training/evaluation/tail-remediation lane;
-4. promote the IRIS persistence adapter into its proper Compiler semantic home;
-5. repository-wide scan for any additional RealSaS-owned current `nn.Module` / learned subsystem outside IRIS, Geppetto, SkinFieldCodec and Arachne;
-6. run model-mainline source gate when GitHub runner infrastructure actually launches jobs.
+No fifth learned subsystem is authorized by current V4 architecture or current source composition. This is a **current-mainline inventory closure**, not a claim that future research cannot add another model.
 
-No global architecture refreeze or FIT authorization follows merely from source normalization.
+## Mainline firewalls
+
+1. `models/`, Compiler mainline and runtime reference code may not depend on dated `experiments.*` implementations.
+2. Experiments may import mainline.
+3. Cross-model dependencies resolve through current model homes, not the historical mixed R6 directory.
+4. Teacher truth is training/evaluation-only and cannot become shipping model input or canonical identity.
+5. Current source promotion does not make diagnostic/ablation/remediation experiments current automatically.
+6. Models remain evidence/proposal producers; Compiler authority is unchanged.
+
+## Remaining source-ownership work
+
+- promote IRIS `persistence_adapter_v2.py` into the correct Compiler substrate boundary;
+- run mainline source/byte/import gates when GitHub Actions runners actually launch (recent runs are infrastructure-blocked with `steps=[]`, `runner_id=0`);
+- continue Compiler physical layer normalization only where dependency ownership is unambiguous;
+- resume historical motion proof/playback/repair restoration after the source ownership seam is clean.
+
+No architecture refreeze or FIT authorization follows from this source organization closure.

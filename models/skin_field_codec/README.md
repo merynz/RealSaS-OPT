@@ -26,10 +26,16 @@ It learns:
 
 Teacher dense weights are permitted only on the training/encoding lane. Product inference must use predicted latents and admitted current conditioning.
 
+## Current A0 training/evaluation
+
+The current codec qualification/training lane is now visible beside the model:
+
+- `codec_deformation_loss_v1.py` — differentiable LBS consequence loss;
+- `train_codec_r6_a0_v1.py` — current A0 optimization step and qualification-token contract;
+- `eval_codec_r6_a0_v1.py` — current A0 metrics and PASS/FAIL token production.
+
+These files are byte-preserved from the audited R6 source. Broader diagnostic experiments (temperature, tail anatomy, pair-geometry ablations, cooling and similar probes) remain under `experiments/` because they investigate the codec rather than define the current base training lane.
+
 ## Authority boundary
 
 SkinFieldCodec does not own canonical joint identity, simplex legality, sparsification, qualified skin, mesh binding, product state or proof. Dense decoded weights remain proposal/evidence consumed by Arachne/Compiler boundaries.
-
-## Training status
-
-Codec training/evaluation files (`train_codec_r6_a0_v1.py`, `eval_codec_r6_a0_v1.py`, deformation/tail objectives and diagnostics) remain in the research tree until their shared teacher-target/LBS dependencies are classified. Current inference ownership does not imply every historical training experiment is current mainline.

@@ -63,6 +63,10 @@ jobs:
         env: *det_env
         run: |
           python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_full_pair_contract_bound_diagnostic.py
+      - name: Diagnose cosine-converged Codec A0 row error anatomy
+        env: *det_env
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_row_error_anatomy_diagnostic.py
       - name: Verify canonical skin target row binding and frozen behavioral panel
         env: *det_env
         run: |

@@ -1,6 +1,5 @@
 #include "realsas/realsas_runtime.h"
 
-#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <iostream>
@@ -71,12 +70,6 @@ int main(int argc, char** argv) {
             if (rs_runtime_render_rgba(runtime, 0u, view, sample_time, rgba.data(), rgba.size()) != RS_OK) {
                 result = fail(17, "render rgba"); break;
             }
-            const bool any_alpha = std::any_of(rgba.begin() + 3, rgba.end(), [index = size_t{3}](uint8_t) mutable {
-                // This lambda shape is not useful for stride checking; handled below.
-                ++index;
-                return false;
-            });
-            (void)any_alpha;
             bool visible = false;
             for (size_t i = 3; i < rgba.size(); i += 4) {
                 if (rgba[i] != 0u) { visible = true; break; }

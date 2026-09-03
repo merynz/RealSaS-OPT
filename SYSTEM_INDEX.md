@@ -2,20 +2,18 @@
 
 This is the shortest answer to: **"What do we currently have, where is it, and what is its status?"**
 
-It is an index, not a substitute for `CURRENT_STATE.md`, `RESTORATION_STATE.md` or canonical architecture contracts.
-
 ## Learned stack
 
-| Subsystem | Current semantic role | Current executable/source location | Mainline status |
-|---|---|---|---|
-| IRIS | 8-view RGB observation evidence; learned geometric authority ends at depth/support/uncertainty | `models/iris/v2/` | **PROMOTED MAINLINE / BYTE-PRESERVING V2 SOURCE** |
-| Geppetto | anonymous multimodal skeleton/control proposal | current V2 candidate mixed under `experiments/geppetto_arachne_r6_20260901/`; production owner reserved at `models/geppetto/` | **SOURCE NORMALIZATION IN PROGRESS** |
-| SkinFieldCodec | continuous per-joint influence-field latent + shared decoder | current candidate `experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py`; production owner reserved at `models/skin_field_codec/` | **SOURCE NORMALIZATION IN PROGRESS** |
-| Arachne | qualified-skeleton-conditioned dense skin proposal | current V2 candidate mixed under `experiments/geppetto_arachne_r6_20260901/`; production owner reserved at `models/arachne/` | **SOURCE NORMALIZATION IN PROGRESS** |
+| Subsystem | Current mainline | State |
+|---|---|---|
+| IRIS V2 | `models/iris/v2/` | **CURRENT MAINLINE — inference + current train/eval/checkpoint package promoted** |
+| Geppetto V2 | `models/geppetto/v2/` | **CURRENT MAINLINE INFERENCE — training lane audit pending** |
+| SkinFieldCodec V1 | `models/skin_field_codec/v1/` | **CURRENT MAINLINE INFERENCE/CODEC — training lane audit pending** |
+| Arachne V2 | `models/arachne/v2/` | **CURRENT MAINLINE INFERENCE — training/remediation lane audit pending** |
 
 Models emit evidence/proposals only. Compiler qualification remains authoritative.
 
-IRIS promotion preserves the original experiment files as provenance and excludes Gate-0 harnesses plus Compiler-owned persistence assembly from the model mainline. See `restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md`.
+The original dated experiment trees remain intact as provenance/research labs. Current mainline Python is being guarded against imports from `experiments.*`.
 
 ## Compiler mainline
 
@@ -31,12 +29,12 @@ IRIS promotion preserves the original experiment files as provenance and exclude
 | Deformation measurement | `compiler/realsas_compiler_core/deformation.py` + services numerics | CURRENT |
 | Product composition | `compiler/realsas_compiler_core/{api.py,product.py,bundle_routes.py}` | CURRENT |
 | Proof binding | `compiler/realsas_compiler_core/proof_engine.py` | CURRENT BUT RESTORATION-INCOMPLETE |
-| Failure signatures | `compiler/realsas_compiler_services/proof/failure_signatures.py` | PROMOTED / CI PASS |
+| Failure signatures | `compiler/realsas_compiler_services/proof/failure_signatures.py` | PROMOTED |
 | Causal mutation helpers | `compiler/realsas_compiler_services/proof/causal_mutations.py` | PROMOTED SUPPORT |
 | Export/deploy bake | `compiler/realsas_compiler_services/export/runtime_deploy_bake.py` | PROMOTED |
 | Numerical LBS probe | `compiler/realsas_compiler_services/numerics/lbs.py` | PROMOTED |
-| IRIS persistence/substrate adapter | experiment source classified Compiler-owned | PENDING PROMOTION INTO COMPILER SEMANTIC HOME |
-| Motion probe / playback measurement | historical authority under audit | RESTORATION PENDING AFTER MODEL OWNERSHIP CLOSURE |
+| IRIS persistence/substrate adapter | source classified Compiler-owned | NEXT SOURCE-OWNERSHIP PROMOTION |
+| Motion probe / playback measurement | historical authority under audit | PENDING AFTER SOURCE-OWNERSHIP CLOSURE |
 | Owner attribution + bounded repair/re-proof | historical authority under audit | PENDING |
 | CDT / BBW-KKT / ARAP / XPBD/contact | competing historical authorities | SOURCE-DIFF REQUIRED |
 
@@ -46,7 +44,7 @@ See `compiler/README.md` for the logical layer map.
 
 | Runtime | Current home | State |
 |---|---|---|
-| Native C++17 runtime | `runtime/realsas_cpp/` | RESTORED EXACT CONSUMER / CI PASS |
+| Native C++17 runtime | `runtime/realsas_cpp/` | RESTORED EXACT CONSUMER / source/build gate previously qualified |
 | Python V4 reference consumer | `runtime/reference_v4/` | CURRENT CONFORMANCE REFERENCE |
 | Exact current V4 proof -> `.rss/.rsr` -> native runtime interlock | Compiler services + runtime | PENDING RESTORATION CLOSURE |
 
@@ -54,7 +52,7 @@ See `compiler/README.md` for the logical layer map.
 
 | Area | Purpose |
 |---|---|
-| `experiments/` | active and historical research questions, training/eval apparatus, falsification and upgrade candidates |
+| `experiments/` | active/historical research, training apparatus, falsification and upgrade candidates |
 | `canonical/` | architecture, preregistration, closure, promotion and authority evidence |
 | `historical/` | provenance/source-diff reserve; never an alternate executable mainline |
 
@@ -63,11 +61,9 @@ See `compiler/README.md` for the logical layer map.
 - Global architecture refreeze: **NOT PERFORMED**
 - Formal Family-1 selection: **BLOCKED**
 - Real-family FIT: **NOT AUTHORIZED**
-- Current work: **learned-source mainline promotion + Compiler/runtime historical promotion**
+- Current work: **model training/source normalization + Compiler/runtime historical promotion**
 
 ## Promotion rule
-
-A successful experiment does not remain the de facto current implementation inside `experiments/`.
 
 ```text
 experiment evidence
@@ -77,4 +73,4 @@ experiment evidence
   -> update this index + state ledger
 ```
 
-If this file and the actual tree disagree, treat that disagreement as a repository-integrity bug and repair the index or implementation before making new architecture claims.
+If this file and the actual tree disagree, treat that disagreement as a repository-integrity bug.

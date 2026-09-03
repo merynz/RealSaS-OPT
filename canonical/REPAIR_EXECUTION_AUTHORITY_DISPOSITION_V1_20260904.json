@@ -1,0 +1,47 @@
+{
+  "schema": "RealSaS.RepairExecutionAuthorityDisposition.v1",
+  "date": "2026-09-04",
+  "branch": "restoration/compiler-runtime-promotion-v1-20260903",
+  "current_registry": {
+    "path": "compiler/realsas_compiler_core/repair_registry.py",
+    "blob_sha": "d59c65e00d3202f8f9b52c77d9f8b478a8cd7c8b",
+    "executable_operation_count": 0,
+    "registered_blocked_operations": [
+      "RIG_PARENT_REQUALIFICATION_V1",
+      "WEIGHT_RETAINED_CANDIDATE_V1"
+    ]
+  },
+  "current_repair_contract": {
+    "path": "compiler/realsas_compiler_services/proof/repair_loop.py",
+    "blob_sha": "c5cfb25867d90b23825e5efd92a817f163e4b19c",
+    "distinct_child_state_required": true,
+    "single_owner_scope_required": true,
+    "bounded_change_required": true,
+    "same_probe_reproof_required": true,
+    "protected_invariant_regression_forbidden": true
+  },
+  "product_and_proof_authority": {
+    "automatic_repair_is_required_product_capability": false,
+    "automatic_repair_is_required_proof_domain": false,
+    "runtime_export_requires_overall_pass_product_proof": true,
+    "failed_or_abstained_product_can_be_exported_as_current_runtime": false
+  },
+  "historical_executor_disposition": {
+    "rig_parent_repair": {
+      "status": "BLOCKED_NOT_PROMOTED",
+      "reason": "Historical direct parent mutation would bypass current proposal/optimizer skeleton qualification. A future executor must re-enter current proposal/requalification and produce a distinct child product lineage."
+    },
+    "retained_weight_candidate_repair": {
+      "status": "BLOCKED_NOT_PROMOTED",
+      "reason": "Current QualifiedSkinIR does not retain the historical alternative candidate portfolio. A future executor requires a typed retained-candidate/requalification seam."
+    }
+  },
+  "first_fit_policy": {
+    "zero_executable_repair_operations_block_first_fit_authorization": false,
+    "fit_result_may_progress_only_if_product_proof_overall_status_is_PASS": true,
+    "on_FAIL_or_ABSTAIN": "STOP_FAIL_CLOSED_NO_AUTOMATIC_REPAIR_CREDIT",
+    "repair_contracts_remain_current_for_future_executor_promotion": true
+  },
+  "restoration_decision": "REPAIR_EXECUTION_SEAM_CLOSED_FAIL_CLOSED_ZERO_EXECUTORS_ACCEPTABLE_FOR_FIRST_FIT",
+  "fit_authorization_changed": false
+}

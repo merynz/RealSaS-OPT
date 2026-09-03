@@ -15,7 +15,12 @@ from .dinov2_foundation_v2 import (
     load_exact_dinov2_s_v2,
 )
 from .model_v2 import IrisReprojectionV2, IrisReprojectionOutputV2
-from .q_domain_v2 import RayHypothesisDomainV2
+from .q_descriptor_sampler_v2 import NativeResolutionPyramidV2
+from .q_domain_v2 import (
+    PRODUCTION_Q_DOMAIN_AUTHORITY_V2,
+    RayHypothesisDomainV2,
+    validate_production_observation_domain_v2,
+)
 
 
 def _canonical_hash(payload: object) -> str:
@@ -41,13 +46,13 @@ class IrisFoundationRuntimeSealV2:
 
 
 class IrisDINOv2SApparatusV2(nn.Module):
-    """Scientific IRIS V2 train/inference path with exact frozen DINOv2-S authority.
+    """Scientific IRIS V2 path with frozen DINO and privileged-input firewall.
 
-    Synthetic source tests may instantiate ``IrisReprojectionV2`` directly with
-    injected frozen maps. Production scientific fitting/inference must use this
-    apparatus so an arbitrary or proxy foundation cannot silently enter the learner.
-    Foundation extraction is view-chunked only as an execution policy; source bytes,
-    preprocessing, model weights and per-view token semantics are unchanged.
+    Observation files may remain native RGBA because alpha belongs to renderer /
+    provenance authority. The learned apparatus, however, receives RGB only. Its
+    Q-domain must be the camera-only full-frame lattice sealed by q_domain_v2;
+    foreground masks, raster support and externally selected anchor subsets are
+    rejected before foundation or learner execution.
     """
 
     def __init__(
@@ -63,6 +68,8 @@ class IrisDINOv2SApparatusV2(nn.Module):
         authority.validate()
         if learner.sampler.foundation_dims != (authority.embed_dim,):
             raise ValueError("IRIS learner foundation dimensions do not match exact DINO-S authority")
+        if learner.native.INPUT_CHANNELS != 3:
+            raise ValueError("IRIS production learner must be RGB-only")
         if not (1 <= int(foundation_view_chunk) <= 8):
             raise ValueError("foundation_view_chunk must be 1..8")
         if any(p.requires_grad for p in frozen_dino.parameters()):
@@ -118,7 +125,7 @@ class IrisDINOv2SApparatusV2(nn.Module):
     @staticmethod
     def _validate_and_scale_rgba(images: torch.Tensor) -> torch.Tensor:
         if images.ndim != 5 or tuple(images.shape[1:3]) != (8, 4) or tuple(images.shape[-2:]) != (1024, 1024):
-            raise ValueError("IRIS production images must be [B,8,4,1024,1024]")
+            raise ValueError("IRIS production observation files must be [B,8,4,1024,1024] RGBA")
         if images.dtype == torch.uint8:
             return images.to(torch.float32).div(255.0)
         if not images.is_floating_point():
@@ -127,6 +134,13 @@ class IrisDINOv2SApparatusV2(nn.Module):
         if not torch.isfinite(x).all() or float(x.min()) < 0.0 or float(x.max()) > 1.0:
             raise ValueError("floating IRIS RGBA must be finite and scaled to [0,1]")
         return x
+
+    @staticmethod
+    def learner_rgb_from_rgba(rgba: torch.Tensor) -> torch.Tensor:
+        """One-way privileged-input firewall: renderer alpha never enters learner."""
+        if rgba.ndim != 5 or tuple(rgba.shape[1:3]) != (8, 4):
+            raise ValueError("scaled RGBA expected")
+        return rgba[:, :, :3].contiguous()
 
     @torch.no_grad()
     def extract_foundation_maps(self, native_rgba: torch.Tensor) -> tuple[torch.Tensor, ...]:
@@ -148,8 +162,12 @@ class IrisDINOv2SApparatusV2(nn.Module):
 
     def forward(self, images: torch.Tensor, domain: RayHypothesisDomainV2) -> IrisReprojectionOutputV2:
         rgba = self._validate_and_scale_rgba(images)
+        # Reject privileged Q-domain construction before any expensive or learned
+        # execution. Gate-0 may still build mask domains in its separate diagnostic lane.
+        validate_production_observation_domain_v2(domain)
+        rgb = self.learner_rgb_from_rgba(rgba)
         maps = self.extract_foundation_maps(rgba)
-        return self.learner(rgba, maps, domain)
+        return self.learner(rgb, maps, domain)
 
     def trainable_parameters(self):
         return self.learner.parameters()
@@ -163,6 +181,10 @@ class IrisDINOv2SApparatusV2(nn.Module):
             "runtime_seal_hash": self.runtime_seal.seal_hash,
             "learner_foundation_dims": self.learner.sampler.foundation_dims,
             "native_widths": self.learner.native.widths,
+            "learner_observation_channels": NativeResolutionPyramidV2.INPUT_CHANNELS,
+            "q_domain_authority": PRODUCTION_Q_DOMAIN_AUTHORITY_V2,
+            "view_geometry_features": "PROJECTED_GRID_XY__PROJECTED_CAMERA_FORWARD_DEPTH__VALIDITY",
+            "absolute_view_slot_identity": False,
             "max_modes": self.learner.max_modes,
         }
         return _canonical_hash(payload)

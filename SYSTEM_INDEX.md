@@ -27,19 +27,21 @@ Models emit evidence/proposals only. Compiler qualification remains authoritativ
 | MWB2 mesh + skin binding | `compiler/realsas_compiler_core/mesh/{mwb2.py,mwb2_skin.py,mesh_binding.py}` | **CURRENT / PHYSICALLY NORMALIZED / BEHAVIORALLY HARDENED** |
 | Legacy mesh imports | `compiler/realsas_compiler_core/{mwb2.py,mwb2_skin.py,mesh_binding.py}` | COMPATIBILITY FACADES ONLY |
 | Appearance | `compiler/realsas_compiler_core/appearance.py` | CURRENT / BEHAVIORALLY HARDENED |
-| Motion | `compiler/realsas_compiler_core/motion.py` | CURRENT / BEHAVIORALLY HARDENED |
+| Motion construction | `compiler/realsas_compiler_core/motion.py` | CURRENT / BEHAVIORALLY HARDENED |
 | Deformation measurement | `compiler/realsas_compiler_core/deformation.py` + services numerics | CURRENT |
 | Product composition | `compiler/realsas_compiler_core/{api.py,product.py,bundle_routes.py}` | CURRENT |
-| Proof binding | `compiler/realsas_compiler_core/proof_engine.py` | CURRENT BUT RESTORATION-INCOMPLETE |
+| Proof binding | `compiler/realsas_compiler_core/proof_engine.py` | **CURRENT / AUTHORED-MOTION DYNAMIC PROOF PROMOTED** |
+| Dynamic authored-motion measurement | `compiler/realsas_compiler_services/proof/{motion_probe.py,motion_probe_geometry.py}` | **PROMOTED / PRODUCT-NATIVE V4 REBIND** |
 | Failure signatures | `compiler/realsas_compiler_services/proof/failure_signatures.py` | PROMOTED |
-| Causal mutation helpers | `compiler/realsas_compiler_services/proof/causal_mutations.py` | PROMOTED SUPPORT |
+| Causal mutation helpers | `compiler/realsas_compiler_services/proof/causal_mutations.py` | PROMOTED SUPPORT; NOT OWNER AUTHORITY |
 | Export/deploy bake | `compiler/realsas_compiler_services/export/runtime_deploy_bake.py` | PROMOTED |
 | Numerical LBS probe | `compiler/realsas_compiler_services/numerics/lbs.py` | PROMOTED |
-| Motion probe / playback measurement | historical authority under audit | **NEXT HISTORICAL SEMANTIC PROMOTION** |
-| Owner attribution + bounded repair/re-proof | historical authority under audit | PENDING |
+| Causal owner attribution + bounded repair/re-proof | historical semantics under rebind design | **NEXT** |
 | CDT / BBW-KKT / ARAP / XPBD/contact | competing historical authorities | SOURCE-DIFF REQUIRED |
 
-See `compiler/README.md` for the physical/logical layer map. Current relocation seals live under `canonical/COMPILER_CORE_*_LAYOUT_SEAL_*`.
+Motion proof now exercises exact current authored `PUPPET_LOCAL_2D_2P5D` clips against qualified directional meshes and mesh-skin, measuring dynamic deformation consequences before Compiler-owned PASS/FAIL binding. It does not infer a causal owner and does not create product truth.
+
+See `compiler/README.md` for the physical/logical layer map. Current relocation/promotion seals live under `canonical/`.
 
 ## Runtime
 
@@ -62,14 +64,14 @@ See `compiler/README.md` for the physical/logical layer map. Current relocation 
 - Global architecture refreeze: **NOT PERFORMED**
 - Formal Family-1 selection: **BLOCKED**
 - Real-family FIT: **NOT AUTHORIZED**
-- Current work: **Compiler physical source normalization + historical proof/runtime promotion**
+- Current work: **causal owner attribution -> bounded repair -> mandatory re-proof, then exact proof/export/native-runtime interlock**
 
 ## Promotion rule
 
 ```text
-experiment evidence
+experiment / historical evidence
   -> audit / canonical decision
-  -> promote or replace code in models/compiler/runtime
+  -> promote or rebind code in models/compiler/runtime
   -> mainline regression + E2E
   -> update this index + state ledger
 ```

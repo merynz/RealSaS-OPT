@@ -19,9 +19,9 @@ Physical normalization is active. A compatibility file at an older flat path is 
 | Skin qualification | `skin.py` | — | proposal -> qualified skin legality/normalization |
 | Mesh / binding | `mesh/{mwb2.py,mwb2_skin.py,mesh_binding.py}` | `mwb2.py`, `mwb2_skin.py`, `mesh_binding.py` facades | directional editable mesh construction, qualification and mesh/skin binding |
 | Appearance | `appearance.py` | — | observed/cross-view/completion appearance binding |
-| Motion | `motion.py` | — | current typed preset motion construction/qualification |
+| Motion | `motion.py` | proof services | current typed preset motion construction/qualification plus subordinate dynamic consequence measurement |
 | Deformation measurements | `deformation.py` | services numerics | mesh/skin measurement adapters |
-| Proof binding | `proof_engine.py` | services proof | V4 proof-plan/domain/product proof binding |
+| Proof binding | `proof_engine.py` | `realsas_compiler_services/proof/` | V4 proof-plan/domain/product proof binding; current MOTION domain includes dynamic authored-motion proof |
 | Solver policy | `solver_registry.py` | — | fail-closed solver capability registry / provenance policy |
 
 ## Normalized core packages
@@ -46,11 +46,15 @@ Seal: `canonical/COMPILER_CORE_MESH_LAYOUT_SEAL_V1_20260903.json`.
 
 | Service path | Current role | Product authority? |
 |---|---|---:|
-| `realsas_compiler_services/proof/` | failure signatures and controlled causal mutation/proof helpers | No |
+| `realsas_compiler_services/proof/failure_signatures.py` | deterministic failed-invariant localization without causal-owner invention | No |
+| `realsas_compiler_services/proof/{motion_probe.py,motion_probe_geometry.py}` | exact current authored-motion dynamic deformation measurement | No |
+| `realsas_compiler_services/proof/causal_mutations.py` | controlled mutation helpers for later causal tests | No |
 | `realsas_compiler_services/numerics/` | promoted bounded numerical kernels such as LBS probe | No |
 | `realsas_compiler_services/export/` | proof-gated runtime package/deploy bake mechanisms | No |
 
-Historical motion probes, owner attribution, repair/re-proof and additional numerical mechanisms are promoted only after source audit; they must land in the corresponding service or core semantic owner rather than recreate an old monolith.
+The current motion probe is a semantic rebind of the valuable historical rule that authored/requested motion must be exercised and its consequences measured. It consumes current V4 product state only and reports measurements; `proof_engine.py` remains the sole proof-status owner.
+
+Historical causal owner attribution, bounded repair/re-proof and additional numerical mechanisms are promoted only after source audit; they must land in the corresponding service or core semantic owner rather than recreate an old monolith.
 
 ## Intended normalization
 
@@ -85,4 +89,5 @@ The narrow v0.5 vendor closure remains byte-guarded for existing dependencies. I
 - second canonical graph/ID producer;
 - hidden historical solver execution;
 - permanent mainline imports from dated experiment packages;
+- causal owner inference from a failure label alone;
 - repair without exact-state re-proof.

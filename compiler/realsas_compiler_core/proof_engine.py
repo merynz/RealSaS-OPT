@@ -10,6 +10,9 @@ from compiler.realsas_compiler_services.proof.motion_frame_metrics import (
     evaluate_motion_bake_metrics,
     measure_motion_bake_geometry,
 )
+from compiler.realsas_compiler_services.proof.directional_motion_provider import (
+    QualifiedDirectionalMotionBakeProviderV1,
+)
 
 from .deformation import (
     effective_motion_track_count,
@@ -86,6 +89,16 @@ def _motion(product, plan, *, motion_bake_provider=None, motion_policy=None):
             "clip_measurements": [],
         }, {}
 
+    if not isinstance(motion_bake_provider, QualifiedDirectionalMotionBakeProviderV1):
+        raise QualificationError("MOTION_BAKE_PROVIDER_NOT_QUALIFIED")
+    motion_bake_provider.assert_for_product(product)
+    base.update({
+        "qualified_motion_provider_hash": motion_bake_provider.provider_hash,
+        "directional_binding_set_hash": motion_bake_provider.directional_binding_set_hash,
+        "directional_evaluator_policy_hash": motion_bake_provider.evaluator_policy_hash,
+        "directional_evaluator_semantic_version": motion_bake_provider.evaluator_semantic_version,
+    })
+
     bakes = {}
     rows = []
     for clip in required_clips:
@@ -100,6 +113,13 @@ def _motion(product, plan, *, motion_bake_provider=None, motion_policy=None):
         )
         if bake.clip_id != clip.clip_id:
             raise QualificationError("MOTION_BAKE_CLIP_ID_MISMATCH")
+        if bake.evaluator_semantic_version != motion_bake_provider.evaluator_semantic_version:
+            raise QualificationError("MOTION_BAKE_EVALUATOR_SEMANTIC_MISMATCH")
+        bake_metadata = dict(bake.metadata or {})
+        if bake_metadata.get("directional_binding_set_hash") != motion_bake_provider.directional_binding_set_hash:
+            raise QualificationError("MOTION_BAKE_DIRECTIONAL_BINDING_MISMATCH")
+        if bake_metadata.get("evaluator_policy_hash") != motion_bake_provider.evaluator_policy_hash:
+            raise QualificationError("MOTION_BAKE_EVALUATOR_POLICY_MISMATCH")
         metrics = evaluate_motion_bake_metrics(measure_motion_bake_geometry(bake), policy=motion_policy)
         rows.append(metrics)
         bakes[clip.clip_id] = bake
@@ -159,9 +179,11 @@ def _status(domain, m):
 def evaluate_product_proof(product, *, deformation_fixture: dict | None = None, motion_bake_provider=None, motion_policy: dict | None = None, artifacts_out: dict | None = None):
     """Evaluate current proof domains without manufacturing directional frames.
 
-    MOTION can PASS only when a separately qualified evaluator supplies a bake
-    bound to this exact product state and this exact proof plan. Missing frame
-    evidence is ABSTAIN. Direct mechanical-joint/P.xy evaluation is forbidden.
+    MOTION can PASS only when a typed QualifiedDirectionalMotionBakeProviderV1
+    supplies qualification-owned frames bound to this exact product, directional
+    joint/view binding, evaluator policy and proof plan. Missing evidence is
+    ABSTAIN; arbitrary callables are rejected. Direct mechanical-joint/P.xy
+    evaluation is forbidden.
     """
     validate_product_ontology(product)
     required = set(required_proof_domains(product.capability_contract))
@@ -202,12 +224,17 @@ def evaluate_product_proof(product, *, deformation_fixture: dict | None = None, 
             metadata.update({
                 "qualification_owned_bake_hashes": {clip_id: bake.bake_hash for clip_id, bake in sorted(domain_motion_bakes.items())},
                 "qualification_owned_bake_hash": next(iter(domain_motion_bakes.values())).bake_hash if len(domain_motion_bakes) == 1 else "",
+                "qualified_motion_provider_hash": measurements.get("qualified_motion_provider_hash", ""),
+                "directional_binding_set_hash": measurements.get("directional_binding_set_hash", ""),
+                "directional_evaluator_policy_hash": measurements.get("directional_evaluator_policy_hash", ""),
+                "directional_evaluator_semantic_version": measurements.get("directional_evaluator_semantic_version", ""),
                 "export_solver_replay_forbidden": True,
                 "dynamic_frame_proof_required": True,
                 "directional_joint_view_binding_required": True,
+                "arbitrary_motion_provider_callable_forbidden": True,
             })
         reports.append(bind_domain_proof(product, plan, measurement_report, status=status, failure_signatures=failures, owner_attribution=no_owner_attribution(), metadata=metadata))
-    return bind_product_proof_bundle(product, tuple(reports), metadata={"engine": "RealSaS.ProofEngine.v3.fail_closed_motion_bake", "heavy_solver_promoted": False})
+    return bind_product_proof_bundle(product, tuple(reports), metadata={"engine": "RealSaS.ProofEngine.v4.typed_directional_motion_provider", "heavy_solver_promoted": False})
 
 
 def mutation_worsens_measurement(domain: str, baseline: dict, mutated: dict) -> bool:

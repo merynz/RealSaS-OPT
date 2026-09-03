@@ -33,22 +33,25 @@ class _ConvBlock(nn.Module):
 
 
 class NativeResolutionPyramidV2(nn.Module):
-    """Learned native-image pyramid preserving the preregistered five-scale path.
+    """Learned RGB-only native-image pyramid preserving the five-scale path.
 
-    For canonical 1024 observations the maps are 1024, 512, 256, 128 and 64.
-    Unit/synthetic inputs may be smaller, but cardinality and learned scale path
-    are identical. Widths are architecture authority, never a fitted-family knob.
+    Source observations may be stored as RGBA for raster/provenance authority, but
+    renderer alpha is not learner evidence. Production and source-test learner
+    inputs are therefore exactly three RGB channels.
     """
 
     DEFAULT_WIDTHS = (32, 48, 64, 96, 128)
+    INPUT_CHANNELS = 3
 
-    def __init__(self, in_channels: int = 4, widths: tuple[int, ...] = DEFAULT_WIDTHS):
+    def __init__(self, in_channels: int = INPUT_CHANNELS, widths: tuple[int, ...] = DEFAULT_WIDTHS):
         super().__init__()
+        if int(in_channels) != self.INPUT_CHANNELS:
+            raise ValueError("IRIS V2 learned native path is RGB-only")
         widths = tuple(int(x) for x in widths)
         if len(widths) != 5 or min(widths) <= 0:
             raise ValueError("IRIS V2 native pyramid requires five positive widths")
         blocks = []
-        cin = int(in_channels)
+        cin = self.INPUT_CHANNELS
         for level, cout in enumerate(widths):
             blocks.append(_ConvBlock(cin, cout, stride=1 if level == 0 else 2))
             cin = cout
@@ -57,8 +60,8 @@ class NativeResolutionPyramidV2(nn.Module):
         self.output_dim = int(sum(widths))
 
     def forward_flat(self, images_flat: torch.Tensor, *, checkpoint_blocks: bool = False) -> tuple[torch.Tensor, ...]:
-        if images_flat.ndim != 4 or images_flat.shape[1] != 4:
-            raise ValueError("native flat images must be [N,4,H,W]")
+        if images_flat.ndim != 4 or images_flat.shape[1] != self.INPUT_CHANNELS:
+            raise ValueError("native flat images must be [N,3,H,W] RGB")
         if min(images_flat.shape[-2:]) < 16:
             raise ValueError("native pyramid input too small for five-scale path")
         x = images_flat
@@ -72,8 +75,8 @@ class NativeResolutionPyramidV2(nn.Module):
         return tuple(out)
 
     def forward(self, images: torch.Tensor, *, checkpoint_blocks: bool = False) -> tuple[torch.Tensor, ...]:
-        if images.ndim != 5 or images.shape[1] != 8 or images.shape[2] != 4:
-            raise ValueError("images must be [B,8,4,H,W]")
+        if images.ndim != 5 or images.shape[1] != 8 or images.shape[2] != self.INPUT_CHANNELS:
+            raise ValueError("images must be [B,8,3,H,W] RGB")
         B, V, C, H, W = images.shape
         levels = self.forward_flat(images.reshape(B * V, C, H, W), checkpoint_blocks=checkpoint_blocks)
         return tuple(x.reshape(B, V, x.shape[1], x.shape[2], x.shape[3]) for x in levels)
@@ -133,14 +136,9 @@ class QDescriptorSamplerV2(nn.Module):
         self.descriptor_dim = int(sum(self.foundation_dims) + self.native.output_dim)
 
     def sample_native_streamed(self, images: torch.Tensor, domain: RayHypothesisDomainV2) -> torch.Tensor:
-        """Mathematically full five-scale path with bounded view-wise materialization.
-
-        No resolution/width is removed for a smaller fit. Peak eager feature-map
-        materialization is bounded by native_view_chunk; training optionally uses
-        activation checkpointing while preserving the exact same shared weights.
-        """
-        if images.ndim != 5 or images.shape[1] != 8 or images.shape[2] != 4:
-            raise ValueError("images must be [B,8,4,H,W]")
+        """Mathematically full five-scale RGB path with bounded view materialization."""
+        if images.ndim != 5 or images.shape[1] != 8 or images.shape[2] != NativeResolutionPyramidV2.INPUT_CHANNELS:
+            raise ValueError("images must be [B,8,3,H,W] RGB")
         B, V, C, H, W = images.shape
         chunks = []
         for start in range(0, V, self.native_view_chunk):

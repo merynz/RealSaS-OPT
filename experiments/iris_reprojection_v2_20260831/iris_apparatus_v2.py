@@ -52,7 +52,7 @@ class IrisDINOv2SApparatusV2(nn.Module):
     provenance authority. The learned apparatus, however, receives RGB only. Its
     Q-domain must be the camera-only full-frame lattice sealed by q_domain_v2;
     foreground masks, raster support and externally selected anchor subsets are
-    rejected before foundation or learner execution.
+    rejected before observation preprocessing, foundation or learner execution.
     """
 
     def __init__(
@@ -161,10 +161,10 @@ class IrisDINOv2SApparatusV2(nn.Module):
         return (patch_map.detach(),)
 
     def forward(self, images: torch.Tensor, domain: RayHypothesisDomainV2) -> IrisReprojectionOutputV2:
-        rgba = self._validate_and_scale_rgba(images)
-        # Reject privileged Q-domain construction before any expensive or learned
-        # execution. Gate-0 may still build mask domains in its separate diagnostic lane.
+        # Reject privileged Q-domain construction before image scaling, foundation
+        # extraction, or any learned execution.
         validate_production_observation_domain_v2(domain)
+        rgba = self._validate_and_scale_rgba(images)
         rgb = self.learner_rgb_from_rgba(rgba)
         maps = self.extract_foundation_maps(rgba)
         return self.learner(rgb, maps, domain)

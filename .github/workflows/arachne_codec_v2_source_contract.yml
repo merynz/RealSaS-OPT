@@ -30,7 +30,7 @@ jobs:
       - name: Compile Arachne and codec source
         run: |
           python -m py_compile experiments/geppetto_arachne_r6_20260901/*.py
-      - name: Diagnose pre-repair Codec objective truth stationarity
+      - name: Verify Codec objective truth stationarity regression
         env:
           PYTHONPATH: .
           OMP_NUM_THREADS: '1'
@@ -48,6 +48,15 @@ jobs:
           PYTHONHASHSEED: '0'
         run: |
           python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_capacity_diagnostic.py
+      - name: Diagnose Codec explicit point-control geometry
+        env:
+          PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_pair_geometry_diagnostic.py
       - name: Run Arachne/codec source and behavioral gates
         env:
           PYTHONPATH: .

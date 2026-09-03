@@ -1,0 +1,55 @@
+name: Native runtime source gate
+
+on:
+  push:
+    paths:
+      - 'runtime/realsas_cpp/**'
+      - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
+      - '.github/workflows/native_runtime_source_gate.yml'
+  pull_request:
+    paths:
+      - 'runtime/realsas_cpp/**'
+      - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
+      - '.github/workflows/native_runtime_source_gate.yml'
+
+jobs:
+  verify-native-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ libarchive-dev libpng-dev zlib1g-dev
+
+      - name: Verify sealed source bytes
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          seal_path = Path('canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json')
+          seal = json.loads(seal_path.read_text(encoding='utf-8'))
+          assert seal['authority']['canonical_compiler'] == 'compiler/realsas_compiler_core/'
+          assert seal['authority']['runtime_role'] == 'subordinate_deployment_consumer'
+          assert seal['authority']['historical_compiler_restored'] is False
+          assert seal['verification']['file_count'] == 9
+
+          for entry in seal['files']:
+              path = Path(entry['path'])
+              payload = path.read_bytes()
+              actual = hashlib.sha256(payload).hexdigest()
+              assert len(payload) == entry['size_bytes'], (path, len(payload), entry['size_bytes'])
+              assert actual == entry['sha256'], (path, actual, entry['sha256'])
+          PY
+
+      - name: Configure
+        run: cmake -S runtime/realsas_cpp -B build/native-runtime -DCMAKE_BUILD_TYPE=Release -DREALSAS_BUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build/native-runtime --parallel 2
+
+      - name: ABI smoke
+        run: ctest --test-dir build/native-runtime --output-on-failure

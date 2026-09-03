@@ -1,0 +1,66 @@
+cmake_minimum_required(VERSION 3.20)
+project(RealSaSRuntime VERSION 0.4.0 LANGUAGES CXX)
+
+option(REALSAS_BUILD_SHARED "Build shared runtime library" ON)
+option(REALSAS_BUILD_EXAMPLES "Build runtime examples" ON)
+option(REALSAS_BUILD_TESTS "Build runtime ABI smoke tests" ON)
+
+find_package(ZLIB REQUIRED)
+find_package(PNG REQUIRED)
+find_package(LibArchive REQUIRED)
+
+set(REALSAS_RUNTIME_SOURCES src/realsas_runtime.cpp)
+if(REALSAS_BUILD_SHARED)
+  add_library(realsas_runtime SHARED ${REALSAS_RUNTIME_SOURCES})
+  target_compile_definitions(realsas_runtime PRIVATE REALSAS_RUNTIME_BUILD REALSAS_RUNTIME_SHARED)
+else()
+  add_library(realsas_runtime STATIC ${REALSAS_RUNTIME_SOURCES})
+endif()
+add_library(RealSaS::Runtime ALIAS realsas_runtime)
+target_compile_features(realsas_runtime PUBLIC cxx_std_17)
+target_include_directories(realsas_runtime PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
+target_link_libraries(realsas_runtime PRIVATE LibArchive::LibArchive PNG::PNG ZLIB::ZLIB)
+set_target_properties(realsas_runtime PROPERTIES
+  OUTPUT_NAME realsas_runtime
+  EXPORT_NAME Runtime
+  POSITION_INDEPENDENT_CODE ON)
+
+if(REALSAS_BUILD_EXAMPLES)
+  add_executable(realsas_runtime_demo examples/realsas_runtime_demo.cpp)
+  target_compile_features(realsas_runtime_demo PRIVATE cxx_std_17)
+  target_link_libraries(realsas_runtime_demo PRIVATE RealSaS::Runtime PNG::PNG)
+endif()
+
+if(REALSAS_BUILD_TESTS)
+  enable_testing()
+  add_executable(realsas_runtime_abi_smoke tests/runtime_abi_smoke.cpp)
+  target_compile_features(realsas_runtime_abi_smoke PRIVATE cxx_std_17)
+  target_link_libraries(realsas_runtime_abi_smoke PRIVATE RealSaS::Runtime)
+  add_test(NAME realsas_runtime_abi_smoke COMMAND realsas_runtime_abi_smoke)
+endif()
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+set(REALSAS_RUNTIME_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/RealSaSRuntime")
+configure_package_config_file(
+  cmake/RealSaSRuntimeConfig.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/RealSaSRuntimeConfig.cmake"
+  INSTALL_DESTINATION "${REALSAS_RUNTIME_CMAKE_DIR}")
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/RealSaSRuntimeConfigVersion.cmake"
+  VERSION "${PROJECT_VERSION}"
+  COMPATIBILITY SameMajorVersion)
+
+install(TARGETS realsas_runtime EXPORT RealSaSRuntimeTargets
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(EXPORT RealSaSRuntimeTargets
+  NAMESPACE RealSaS::
+  DESTINATION "${REALSAS_RUNTIME_CMAKE_DIR}")
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/RealSaSRuntimeConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/RealSaSRuntimeConfigVersion.cmake"
+  DESTINATION "${REALSAS_RUNTIME_CMAKE_DIR}")

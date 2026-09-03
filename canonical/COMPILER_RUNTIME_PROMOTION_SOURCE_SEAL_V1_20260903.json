@@ -1,0 +1,87 @@
+{
+  "schema": "realsas.compiler_runtime_promotion_source_seal.v1",
+  "sealed_on": "2026-09-03",
+  "source": {
+    "archive": "RealSaS_M4_v0_5_CANONICAL_MECHANICAL_MEANING_SOURCE.zip",
+    "archive_sha256": "03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130",
+    "archive_root": "RealSaS_M4_V0_5_CANONICAL_MECHANICAL_MEANING/",
+    "subtree": "runtime/realsas_cpp/"
+  },
+  "authority": {
+    "canonical_compiler": "compiler/realsas_compiler_core/",
+    "promoted_path": "runtime/realsas_cpp/",
+    "runtime_role": "subordinate_deployment_consumer",
+    "promotion_mode": "PROMOTE_EXACT_RUNTIME_CONSUMER",
+    "historical_compiler_restored": false,
+    "runtime_may_reinterpret_compiler_truth": false
+  },
+  "verification": {
+    "archive_sha256_verified": true,
+    "file_count": 9,
+    "byte_exact_file_hashes_verified": true,
+    "git_blob_hashes_verified": true,
+    "cmake_configure": "PASS",
+    "cmake_build": "PASS",
+    "ctest": {
+      "test": "realsas_runtime_abi_smoke",
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "files": [
+    {
+      "path": "runtime/realsas_cpp/CMakeLists.txt",
+      "size_bytes": 2807,
+      "sha256": "6f7718108988b8a7c411b1f9a51a6b684c21f3b6736a3c2568105ed68de0cf10",
+      "git_blob_sha1": "513e21f6294ff7e4c5745b0068a242401cf84f1a"
+    },
+    {
+      "path": "runtime/realsas_cpp/FORMAT.md",
+      "size_bytes": 2692,
+      "sha256": "dd1903dfb789a359e975d0d4b1f8993c5cf18fb0c75455897b1352a676932774",
+      "git_blob_sha1": "eede8900a8a7a83eaa992f72cc7c0f22898bc7bb"
+    },
+    {
+      "path": "runtime/realsas_cpp/README.md",
+      "size_bytes": 2533,
+      "sha256": "8e4390b541db2d97e3297437047910ac8dbf232985d13a9c33cb3976f8b1952f",
+      "git_blob_sha1": "fdb4be19875036aa54d194b3635fafcb5493e83a"
+    },
+    {
+      "path": "runtime/realsas_cpp/cmake/RealSaSRuntimeConfig.cmake.in",
+      "size_bytes": 229,
+      "sha256": "c79986ffc01d4492601b3882a4c580f9ec1caef9e9339dedb539e95461972c89",
+      "git_blob_sha1": "aeaa7ee8db654e5bbfb3900312f2369bd6630e66"
+    },
+    {
+      "path": "runtime/realsas_cpp/examples/realsas_runtime_demo.cpp",
+      "size_bytes": 3927,
+      "sha256": "03d260d936489f9a394d176be2b0a5f7ce8bf287375ef9f13fd215227fc71f81",
+      "git_blob_sha1": "374e567480834781c0a65a739d2e828dbed333c4"
+    },
+    {
+      "path": "runtime/realsas_cpp/include/realsas/realsas_runtime.h",
+      "size_bytes": 7481,
+      "sha256": "d416c1d47da3a0e12a830da50d8c4a101bebbda9a7b1d8405747afd5a4a2b794",
+      "git_blob_sha1": "6918b1fabdb1073104cc0cb534ac0ae422907dc7"
+    },
+    {
+      "path": "runtime/realsas_cpp/include/realsas/realsas_runtime.hpp",
+      "size_bytes": 1141,
+      "sha256": "aaca921e08c957c1082d9386eaf8b886b7a039fca9baf790a76bc4ed2ef58434",
+      "git_blob_sha1": "c0fc4fec976e6967f8f48889c3bd53f95d9f7b92"
+    },
+    {
+      "path": "runtime/realsas_cpp/src/realsas_runtime.cpp",
+      "size_bytes": 36366,
+      "sha256": "424170b39cf37645d9657f122f0cbddc6e539e5ffe4c6eed847fb2d5a4562029",
+      "git_blob_sha1": "c8cb5f3261152e76489e6dd38996a95b3ca76fae"
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/runtime_abi_smoke.cpp",
+      "size_bytes": 622,
+      "sha256": "559f1574c5daba09b438414d57ec1b22d52292f9e89347d473f45e6e54f56e54",
+      "git_blob_sha1": "0494e20d0c19a65999c55d5db4f60cbbb445ea8c"
+    }
+  ]
+}

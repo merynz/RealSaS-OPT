@@ -53,7 +53,8 @@ No fifth learned subsystem is currently authorized by V4 architecture/current so
 Retraction evidence: `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json`.  
 P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.  
 Historical numerical disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`.  
-Repair execution disposition: `canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json`.
+Repair execution disposition: `canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json`.  
+Canonical-main-before-fit gate: `canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json`.
 
 ## Runtime
 
@@ -75,6 +76,16 @@ Automatic repair is **not** a required current product capability or proof domai
 - no historical repair executor receives automatic authority;
 - future executor promotion must preserve the current distinct-child + bounded-owner-local + same-probe re-proof contract.
 
+## Canonical main promotion gate
+
+Real-family fit work is forbidden until the closed restoration tree becomes canonical GitHub `main` and that exact `main` passes a post-merge repository-integrity check.
+
+Required sequence:
+
+`restoration closure -> explicit verdict -> promote to main -> post-merge main integrity -> freeze exact main commit -> authorize fit`
+
+The first fit must record the exact canonical `main` commit it descends from.
+
 ## Research / evidence zones
 
 | Area | Purpose |
@@ -92,7 +103,8 @@ Automatic repair is **not** a required current product capability or proof domai
 - Historical numerical source-diff: **DONE / NO ADDITIONAL CURRENT BACKEND PROMOTION**
 - Repair-executor seam decision: **DONE / 0 EXECUTORS ACCEPTABLE FAIL-CLOSED**
 - Native current-source interlock: **PENDING RUNNER EXECUTION**
-- Current work: **native milestone gate when runner available -> restoration-wide closure -> refreeze/FIT decision**
+- Canonical `main` promotion: **MANDATORY BEFORE FIT / NOT YET PERFORMED**
+- Current work: **restoration closure -> canonical main promotion -> post-merge integrity -> first-fit authorization decision**
 
 ## Promotion rule
 

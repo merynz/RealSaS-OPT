@@ -34,7 +34,8 @@ Promote still-valuable historical Compiler/runtime production knowledge **behind
 | Controlled causal owner attribution | **DONE / LOCAL REGRESSION 4/4 PASS** | `1dd9a52dda4904c4910f47e66559974b0dc4ad72` |
 | Bounded repair directive + mandatory same-probe re-proof contract | **DONE / LOCAL REGRESSION 5/5 PASS** | `9a60fa341055713c9df8b5d698c58c19a4098025` |
 | Core repair operation registry + real child-state delta audit | **DONE / FAIL-CLOSED** | `12eef470348a4e9822dd927e2ac950e3fcd9dfb7` |
-| Historical rig/weight repair executors | **NOT PROMOTED** | current typed seams do not authorize them |
+| Repair execution authority for first-fit | **DONE / 0 EXECUTORS ACCEPTED FAIL-CLOSED** | `canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json` |
+| Historical rig/weight repair executors | **NOT PROMOTED** | future typed requalification seams required |
 | Pure native runtime-v2 package writer | **VALID / KEEP** | `compiler/realsas_compiler_services/export/runtime_v2.py` |
 | Current V4 proof/bake -> native-v2 projection | **SOURCE CLOSURE READY** | proof-owned rest/frame XY, exact local raster UV, no solver replay |
 | Current V4 `.rss/.rsr` -> sealed C++ runtime interlock | **HARNESS READY / EXECUTION PENDING RUNNER** | `tests/runtime/current_v4_native_package_probe.cpp`; Actions job never started (`runner_id=0`) |
@@ -42,7 +43,8 @@ Promote still-valuable historical Compiler/runtime production knowledge **behind
 | Full behavioral + complete-E2E restoration closure | **PENDING** | required before refreeze decision |
 
 P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.  
-Historical numerics disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`.
+Historical numerics disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`.  
+Repair execution disposition: `canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json`.
 
 ## Repository organization contract
 
@@ -96,11 +98,17 @@ They remain valuable future backends, but none is a current restoration dependen
 
 Therefore **no numerical bulk restore is authorized**. Current LBS remains the only promoted numerical runtime/deformation dependency required by present V4.
 
-## Causal proof and repair firewalls
+## Repair execution policy
 
-Failure localization is not causal ownership. Controlled attribution requires a same-probe, single-owner bounded counterfactual with material improvement and no protected regression. Repair requires a distinct child state and mandatory same-probe re-proof.
+The current proof/repair architecture is complete as a fail-closed recovery contract, but has **0 executable repair operations**.
 
-Current executable repair-operation count: **0**. Historical source presence is not execution authority.
+This does **not** block first-fit authorization because automatic repair is neither a required product capability nor a required proof domain. The operational rule is:
+
+- PASS product proof -> may proceed to proof-gated runtime export;
+- FAIL/ABSTAIN -> stop; no automatic repair credit and no current runtime export;
+- future repair executors must be separately promoted through current proposal/requalification seams and distinct child-state re-proof.
+
+Thus historical rig-parent and retained-weight repair code is not restored merely to satisfy a checklist.
 
 ## Non-negotiable firewalls
 
@@ -122,7 +130,7 @@ Current executable repair-operation count: **0**. Historical source presence is 
 
 ## Next execution order
 
-1. decide whether current restoration requires any executable repair seam at all, or whether fail-closed zero-executor repair authority is sufficient for first-fit authorization;
-2. execute the single milestone P0/native interlock gate when GitHub provides a runner; do not spam reruns;
-3. run restoration-wide source/regression/E2E/native closure gates;
+1. execute the single milestone P0/native interlock gate when GitHub provides a runner; do not spam reruns;
+2. run restoration-wide source/regression/E2E/native closure gates;
+3. close repository-integrity audit and explicit restoration verdict;
 4. only then decide refreeze and FIT authorization.

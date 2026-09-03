@@ -9,9 +9,11 @@
 
 ## Mission
 
-Promote still-valuable historical Compiler/runtime production knowledge **behind** the current V4 typed Compiler authority, then normalize repository navigation and ownership without destroying provenance.
+Promote still-valuable historical Compiler/runtime production knowledge **behind** the current V4 typed Compiler authority, while converting the repository into a readable research library with one obvious current home for each executable subsystem.
 
 > We are not restoring the old Compiler as owner. We are restoring selected production mechanisms as subordinate services of the current Compiler.
+
+> We are not sterilizing a research repository. We are establishing a visible current mainline that experiments can falsify and upgrade.
 
 ## Current restoration ledger
 
@@ -20,11 +22,37 @@ Promote still-valuable historical Compiler/runtime production knowledge **behind
 | Repository authority + navigation skeleton | **DONE** | `fe8bedfbe0f04519711432942f656aaf4735603e` |
 | Exact native C++ runtime consumer | **DONE / CI PASS** | `25d810e272cc00a7b6fd4d682eabc16fef226223` |
 | Diagnostic failure-signature semantic rebind | **DONE / CI PASS** | `5665ecacb77c02e53297340249b0972981a5c4bc` |
-| Motion probe / playback measurement rebind | **NEXT** | historical source audit in progress |
+| Research-library / source ownership normalization | **IN PROGRESS** | `models/`, `SYSTEM_INDEX.md`, `docs/repository/RESEARCH_LIBRARY_MODEL.md`, Compiler logical layer index |
+| Learned-model file-level promotion audit | **NEXT WITH NORMALIZATION** | IRIS / Geppetto / SkinFieldCodec / Arachne candidates must be classified before physical move |
+| Motion probe / playback measurement rebind | **NEXT AFTER OWNERSHIP AUDIT** | historical source audit already identified as required |
 | Causal owner attribution + bounded repair/re-proof | **PENDING** | must remain separate from failure localization |
 | Current V4 export -> native runtime interlock | **PENDING** | proof-state identity must be exact |
 | CDT / BBW-KKT / ARAP / XPBD source diff | **PENDING** | no numerical bulk restore |
 | Full behavioral + complete-E2E restoration closure | **PENDING** | required before refreeze decision |
+
+## Repository organization contract
+
+The repository is now treated as four semantic zones:
+
+```text
+mainline library = models/ + compiler/ + runtime/
+labs             = experiments/
+decision/evidence= canonical/
+provenance reserve= historical/
+```
+
+`models/` contains the semantic homes for the currently identified learned stack:
+
+- IRIS;
+- Geppetto;
+- SkinFieldCodec;
+- Arachne.
+
+Their executable source is **not bulk-copied yet**. Current candidates remain in dated experiment trees until file-level dependency/truth/supersession audit closes. `SYSTEM_INDEX.md` is the current subsystem/path/status index.
+
+Mainline code must converge away from permanent imports of dated experiment packages. Experiments may import mainline; successful experiments are promoted into the relevant semantic home after closure/regression.
+
+Compiler physical normalization will follow the logical layer map in `compiler/README.md`, but only through dependency-safe moves/re-exports. No mass aesthetic reshuffle is authorized.
 
 ## Historical byte authority
 
@@ -52,6 +80,8 @@ Every historical mechanism receives one of these dispositions before execution:
 - `ARCHIVAL_ONLY` — preserve provenance/evidence, never execute in current product path;
 - `DO_NOT_PROMOTE_MONOLITH` — explicitly forbid resurrection as a current subsystem.
 
+Learned current/experimental source uses the companion dispositions defined in `models/README.md`: model core, training, evaluation, Compiler-owned, experiment-only, archival/superseded.
+
 `compiler/realsas_orchestrator/pipeline.py` is `DO_NOT_PROMOTE_MONOLITH`.
 
 ## Completed semantic correction
@@ -68,15 +98,19 @@ That leak is now removed. `compiler/realsas_compiler_services/proof/failure_sign
 - no proof can bind a different product state than export/runtime;
 - no failure signature may invent causal ownership;
 - no repair may mutate production state without mandatory re-proof;
+- no permanent current dependency on a dated experiment implementation;
 - no family-specific constants during restoration;
 - no FIT8 / Family-1 execution until restoration closure explicitly re-authorizes it.
 
 ## Next execution order
 
-1. rebind historical motion probe and playback measurement semantics to current typed proof inputs;
-2. introduce explicit causal owner-attribution evidence and bounded repair directives;
-3. enforce `prove -> diagnose -> attribute -> repair -> re-prove` as a state machine;
-4. bind current exact-PASS product proof to `.rss/.rsr` export and native runtime consumption;
-5. source-diff numerical kernels rather than restoring whole historical numerical stacks;
-6. run restoration-wide behavioral/source/E2E/native gates;
-7. only then decide whether to refreeze and reopen FIT selection.
+1. close file-level current-model/source ownership inventory and classify IRIS / Geppetto / SkinFieldCodec / Arachne code;
+2. promote only audited current model source into `models/`, preserving experiment evidence and adding compatibility/regression coverage;
+3. normalize Compiler physical layout incrementally where ownership is already unambiguous, preserving public imports;
+4. rebind historical motion probe and playback measurement semantics to current typed proof inputs;
+5. introduce explicit causal owner-attribution evidence and bounded repair directives;
+6. enforce `prove -> diagnose -> attribute -> repair -> re-prove` as a state machine;
+7. bind current exact-PASS product proof to `.rss/.rsr` export and native runtime consumption;
+8. source-diff numerical kernels rather than restoring whole historical numerical stacks;
+9. run restoration-wide behavioral/source/E2E/native gates;
+10. only then decide whether to refreeze and reopen FIT selection.

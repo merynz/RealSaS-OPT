@@ -24,13 +24,15 @@ No fifth learned subsystem is currently authorized by V4 architecture/current so
 | MWB2 mesh + skin binding | `compiler/realsas_compiler_core/mesh/{mwb2.py,mwb2_skin.py,mesh_binding.py}` | **CURRENT / PHYSICALLY NORMALIZED / BEHAVIORALLY HARDENED** |
 | Appearance | `compiler/realsas_compiler_core/appearance.py` | CURRENT / BEHAVIORALLY HARDENED |
 | Motion construction | `compiler/realsas_compiler_core/motion.py` | CURRENT / BEHAVIORALLY HARDENED |
+| Compiler-owned directional joint/view binding | `compiler/realsas_compiler_core/directional_binding.py` | **CURRENT CANDIDATE / SOURCE+MATH CLOSURE READY** |
 | Deformation measurement | `compiler/realsas_compiler_core/deformation.py` + services numerics | CURRENT |
 | Product composition | `compiler/realsas_compiler_core/{api.py,product.py,bundle_routes.py}` | CURRENT |
-| Proof binding | `compiler/realsas_compiler_core/proof_engine.py` | **CURRENT / FAIL-CLOSED QUALIFICATION-OWNED MOTION BAKE** |
-| Qualification-owned motion-frame binding | `compiler/realsas_compiler_services/proof/motion_bake.py` | **CURRENT — DOES NOT GENERATE FRAMES** |
+| Proof binding | `compiler/realsas_compiler_core/proof_engine.py` | **CURRENT / TYPED FAIL-CLOSED DIRECTIONAL PROVIDER** |
+| Qualification-owned motion-frame binding | `compiler/realsas_compiler_services/proof/motion_bake.py` | **CURRENT — BINDS FRAMES; DOES NOT INVENT AUTHORITY** |
+| Qualified directional motion evaluator | `compiler/realsas_compiler_services/proof/directional_motion_evaluator.py` | **CURRENT CANDIDATE — ROTATION-ONLY PRESET; OTHER SEMANTICS FAIL CLOSED** |
+| Typed directional motion provider | `compiler/realsas_compiler_services/proof/directional_motion_provider.py` | **CURRENT CANDIDATE — HASH-BOUND PRODUCT/BINDING/POLICY/EVALUATOR AUTHORITY** |
 | Dynamic motion consequence metrics | `compiler/realsas_compiler_services/proof/motion_frame_metrics.py` | **CURRENT / EVALUATOR-INDEPENDENT** |
 | Direct mechanical-joint -> directional `P.xy` probe | retracted historical restoration attempt | **RETRACTED / NOT CURRENT** |
-| Directional joint/view binding | current typed architecture | **P0 BLOCKER — CURRENT_DIRECTIONAL_JOINT_VIEW_BINDING_MISSING** |
 | Failure signatures | `compiler/realsas_compiler_services/proof/failure_signatures.py` | PROMOTED; DIAGNOSTIC ONLY |
 | Controlled causal owner attribution | `compiler/realsas_compiler_services/proof/causal_attribution.py` | **PROMOTED / CONTROLLED-INTERVENTION ONLY** |
 | Bounded repair directive + re-proof contract | `compiler/realsas_compiler_services/proof/repair_loop.py` | **PROMOTED / NO IN-PLACE MUTATION** |
@@ -39,21 +41,25 @@ No fifth learned subsystem is currently authorized by V4 architecture/current so
 | Proof-to-deploy bake handoff | `compiler/realsas_compiler_services/export/qualification_bake.py` | **CURRENT / SAME-BAKE / NO REPLAY** |
 | Runtime deploy bake codec | `compiler/realsas_compiler_services/export/runtime_deploy_bake.py` | PROMOTED |
 | Pure native runtime-v2 writer | `compiler/realsas_compiler_services/export/runtime_v2.py` | **VALID PURE WRITER** |
-| Full current-V4 runtime projection | blocked | **BLOCKED UNTIL P0 BINDING + QUALIFIED EVALUATOR** |
+| Current V4 proof/bake -> native-v2 projection | `compiler/realsas_compiler_services/export/current_v4_runtime_v2.py` | **SOURCE CLOSURE READY / PROOF-OWNED XY / EXACT LOCAL-RASTER UV / NO REPLAY** |
 | Numerical LBS probe | `compiler/realsas_compiler_services/numerics/lbs.py` | PROMOTED |
 | Rig parent repair executor | historical candidate | **BLOCKED — must re-enter current proposal/qualification seam** |
 | Retained weight-candidate repair executor | historical candidate | **BLOCKED — current retained-candidate portfolio absent** |
 | CDT / BBW-KKT / ARAP / XPBD/contact | competing historical authorities | SOURCE-DIFF REQUIRED |
 
-Retraction evidence: `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json`.
+Retraction evidence: `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json`.  
+P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.
 
 ## Runtime
 
 | Runtime | Current home | State |
 |---|---|---|
-| Native C++17 runtime | `runtime/realsas_cpp/` | RESTORED EXACT CONSUMER; source/build gate previously qualified |
+| Native C++17 runtime | `runtime/realsas_cpp/` | **RESTORED EXACT CONSUMER; SEALED SUBTREE UNCHANGED** |
 | Python V4 reference consumer | `runtime/reference_v4/` | CURRENT CONFORMANCE REFERENCE |
-| Exact current V4 proof -> `.rss/.rsr` -> native runtime interlock | Compiler services + runtime | **BLOCKED ON P0 DIRECTIONAL BINDING** |
+| Current V4 `.rss/.rsr` projection/materialization | Compiler export services | **SOURCE CLOSURE READY** |
+| Exact `.rss/.rsr` -> sealed C++ open/sample/render probe | `tests/runtime/current_v4_native_package_probe.cpp` | **HARNESS READY; CURRENT-SOURCE EXECUTION PENDING RUNNER** |
+
+`RUNTIME_CONSUMPTION` inside the product proof is a **pre-export compatibility** proof domain, not evidence that the C++ package was executed. Post-export native execution is a separate required interlock.
 
 ## Research / evidence zones
 
@@ -68,7 +74,9 @@ Retraction evidence: `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.jso
 - Global architecture refreeze: **NOT PERFORMED**
 - Formal Family-1 selection: **BLOCKED**
 - Real-family FIT: **NOT AUTHORIZED**
-- Current work: **typed directional joint/view binding -> qualified evaluator -> exact proof/export/native interlock -> numerical source-diff -> restoration-wide closure**
+- Directional P0 source/math closure: **READY**
+- Native current-source interlock: **PENDING RUNNER EXECUTION**
+- Current work: **numerical source-diff -> native milestone gate when runner available -> restoration-wide closure -> refreeze/FIT decision**
 
 ## Promotion rule
 

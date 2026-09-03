@@ -13,6 +13,8 @@ on:
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py'
+      - 'compiler/realsas_compiler_core/proof_engine.py'
+      - 'compiler/test_proof_engine_source_v1.py'
       - '.github/workflows/geppetto_v2_source_contract.yml'
   push:
     branches:
@@ -29,6 +31,8 @@ on:
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py'
+      - 'compiler/realsas_compiler_core/proof_engine.py'
+      - 'compiler/test_proof_engine_source_v1.py'
       - '.github/workflows/geppetto_v2_source_contract.yml'
 
 jobs:
@@ -61,8 +65,10 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/training_targets_v2.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py \
-            experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py
-      - name: Diagnose machine-scale trajectory robustness
+            experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py \
+            compiler/realsas_compiler_core/proof_engine.py \
+            compiler/test_proof_engine_source_v1.py
+      - name: Diagnose Hungarian assignment margin and float64 confirmation
         env:
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
@@ -71,11 +77,14 @@ jobs:
         run: |
           lscpu | grep -E 'Model name|Vendor ID|Architecture' || true
           python - <<'PY'
+          import itertools
           import json
           import numpy as np
           import torch
+          from scipy.optimize import linear_sum_assignment
           from experiments.geppetto_arachne_r6_20260901.geppetto_candidate_v2 import GeppettoCandidateV2
           from experiments.geppetto_arachne_r6_20260901.geppetto_conditioning_v2 import GeppettoConditioningAdapterV2
+          from experiments.geppetto_arachne_r6_20260901.geppetto_loss_v2 import GeppettoLossV2
           from experiments.geppetto_arachne_r6_20260901.geppetto_train_v2 import geppetto_train_step_v2
           from experiments.geppetto_arachne_r6_20260901.test_geppetto_v2_behavioral_panel import (
               WITNESSES, _surface, _teacher, _config, _shipping, _qualified_mechanical_pass,
@@ -85,9 +94,48 @@ jobs:
           torch.set_num_threads(1)
           torch.use_deterministic_algorithms(True)
           spec = next(x for x in WITNESSES if x.name == 'fork_5')
-          eps = float(torch.finfo(torch.float32).eps)
 
-          def run(multiplier: int):
+          class TracedLoss(GeppettoLossV2):
+              def __init__(self, *, high_precision: bool):
+                  super().__init__(support_topk=4)
+                  self.high_precision = high_precision
+                  self.step = 0
+                  self.records = []
+
+              def _match(self, output, b, root, target, J):
+                  dtype = torch.float64 if self.high_precision else output.positions_normalized.dtype
+                  tp = torch.as_tensor(target.positions_normalized, device=output.positions_normalized.device, dtype=dtype)
+                  tr = torch.as_tensor(target.root_mask, device=root.device, dtype=dtype)
+                  primary = output.positions_normalized[b, :J].to(dtype)
+                  rootv = root[:J].to(dtype)
+                  locus = torch.cdist(primary, tp, p=1)
+                  root_cost = self.weights.match_root_cost * torch.abs(torch.sigmoid(rootv)[:, None] - tr[None, :])
+                  cost = locus + root_cost
+                  c = cost.detach().cpu().numpy().astype(np.float64, copy=False)
+                  lc = locus.detach().cpu().numpy().astype(np.float64, copy=False)
+                  rc = root_cost.detach().cpu().numpy().astype(np.float64, copy=False)
+                  perms = list(itertools.permutations(range(J)))
+                  ranked = sorted((sum(c[i, p[i]] for i in range(J)), p) for p in perms)
+                  geometry_ranked = sorted((sum(lc[i, p[i]] for i in range(J)), p) for p in perms)
+                  best_total, best = ranked[0]
+                  second_total, second = ranked[1]
+                  geo_total, geo_best = geometry_ranked[0]
+                  self.records.append({
+                      'step': self.step,
+                      'best': list(best),
+                      'second': list(second),
+                      'margin': float(second_total - best_total),
+                      'best_total': float(best_total),
+                      'best_locus': float(sum(lc[i, best[i]] for i in range(J))),
+                      'best_root': float(sum(rc[i, best[i]] for i in range(J))),
+                      'geo_best': list(geo_best),
+                      'geo_best_total': float(geo_total),
+                      'root_flips_geometry_optimum': bool(best != geo_best),
+                  })
+                  q, t = linear_sum_assignment(c)
+                  return np.asarray(q, np.int64), np.asarray(t, np.int64)
+
+          def run(high_precision: bool):
               torch.manual_seed(spec.seed)
               np.random.seed(spec.seed)
               surface = _surface(spec)
@@ -98,48 +146,64 @@ jobs:
               separation = separation.masked_fill(torch.eye(len(teacher), dtype=torch.bool), float('inf'))
               unique_radius = 0.5 * float(separation.min())
               model = GeppettoCandidateV2(_config())
-              if multiplier:
-                  gen = torch.Generator(device='cpu').manual_seed(20260930)
-                  with torch.no_grad():
-                      for p in model.parameters():
-                          if not p.is_floating_point():
-                              continue
-                          noise = torch.empty(p.shape, dtype=p.dtype, device=p.device).uniform_(-1.0, 1.0, generator=gen)
-                          p.add_(float(multiplier) * eps * torch.sign(noise))
-              initial = _shipping(model, conditioning, target)
               optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
+              loss_fn = TracedLoss(high_precision=high_precision)
               stable = 0
               pass_step = None
-              checkpoints = []
-              for step_index in range(1, MAX_STEPS + 1):
-                  geppetto_train_step_v2(model, optimizer, conditioning, [target])
-                  if step_index != 1 and step_index % CHECK_EVERY:
+              for step in range(1, MAX_STEPS + 1):
+                  loss_fn.step = step
+                  geppetto_train_step_v2(model, optimizer, conditioning, [target], loss_fn=loss_fn)
+                  if step != 1 and step % CHECK_EVERY:
                       continue
                   shipping = _shipping(model, conditioning, target)
-                  geometry_pass = (
-                      int(shipping['generated_count']) == len(target.positions_normalized)
-                      and float(shipping['matched_p95']) < unique_radius
-                  )
+                  geometry_pass = int(shipping['generated_count']) == len(target.positions_normalized) and float(shipping['matched_p95']) < unique_radius
                   mechanical_pass = False
                   if geometry_pass:
                       mechanical_pass, _, _ = _qualified_mechanical_pass(model, surface, conditioning, target)
                   stable = stable + 1 if (geometry_pass and mechanical_pass) else 0
-                  if step_index in (1, 32, 64, 320, 640, 1024, 1376, 1408, 1440, 1536, 1792, 2048):
-                      checkpoints.append((step_index, int(shipping['generated_count']), float(shipping['matched_p95']), stable))
                   if stable >= REQUIRED_STABLE_PASSES:
-                      pass_step = step_index
+                      pass_step = step
                       break
+              records = loss_fn.records
+              switches = []
+              prev = None
+              for r in records:
+                  cur = tuple(r['best'])
+                  if prev is not None and cur != prev:
+                      switches.append(r)
+                  prev = cur
+              smallest = sorted(records, key=lambda r: r['margin'])[:12]
               return {
-                  'multiplier': multiplier,
-                  'absolute_parameter_perturbation': multiplier * eps,
-                  'initial': initial,
+                  'precision': 'float64_cost' if high_precision else 'float32_cost',
                   'pass_step': pass_step,
                   'stable_passes': stable,
-                  'checkpoints': checkpoints,
+                  'final': _shipping(model, conditioning, target),
+                  'min_margin': min(r['margin'] for r in records),
+                  'min_margin_step': min(records, key=lambda r: r['margin'])['step'],
+                  'root_flip_count': sum(r['root_flips_geometry_optimum'] for r in records),
+                  'assignment_switch_count': len(switches),
+                  'first_switches': switches[:12],
+                  'smallest_margins': smallest,
+                  'assignments': {r['step']: r for r in records},
               }
 
-          results = [run(m) for m in (0, 1, -1, 8, -8, 64, -64)]
-          print('GEPPETTO_MACHINE_EPS_ROBUSTNESS=' + json.dumps(results, sort_keys=True))
+          r32 = run(False)
+          r64 = run(True)
+          steps = sorted(set(r32['assignments']) & set(r64['assignments']))
+          first_div = None
+          for step in steps:
+              a = r32['assignments'][step]
+              b = r64['assignments'][step]
+              if a['best'] != b['best']:
+                  first_div = {'step': step, 'float32': a, 'float64': b}
+                  break
+          for r in (r32, r64):
+              r.pop('assignments', None)
+          print('GEPPETTO_HUNGARIAN_MARGIN_DIAGNOSTIC=' + json.dumps({
+              'float32': r32,
+              'float64': r64,
+              'first_assignment_divergence': first_div,
+          }, sort_keys=True))
           PY
       - name: Run Geppetto V2 source and behavioral gates
         env:
@@ -149,6 +213,7 @@ jobs:
           PYTHONHASHSEED: '0'
         run: |
           python -m pytest -q -s \
+            compiler/test_proof_engine_source_v1.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_generic_strength.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py \

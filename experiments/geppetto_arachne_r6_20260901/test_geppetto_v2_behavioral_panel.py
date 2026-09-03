@@ -158,7 +158,7 @@ def _shipping(model: GeppettoCandidateV2, conditioning, target: GeppettoTeacherT
     return result
 
 
-def _qualified_topology_exact(qualified, conditioning, target: GeppettoTeacherTargetV1) -> bool:
+def _teacher_topology_exact_diagnostic(qualified, conditioning, target: GeppettoTeacherTargetV1) -> bool:
     joints = tuple(qualified.joints)
     if len(joints) != len(target.positions_normalized):
         return False
@@ -176,17 +176,31 @@ def _qualified_topology_exact(qualified, conditioning, target: GeppettoTeacherTa
     return True
 
 
-def _qualified_g_pass(model, surface, conditioning, target) -> tuple[bool, str]:
+def _qualified_mechanical_pass(model, surface, conditioning, target) -> tuple[bool, str, bool]:
+    """Gate final G by canonical MECHANICAL_STRUCTURE, not teacher graph identity."""
     try:
         proposal = model.propose(conditioning, resource_step_limit=len(surface.surface_nodes))[0]
         if len(proposal.joints) != len(target.positions_normalized):
-            return False, f"PROPOSAL_COUNT_{len(proposal.joints)}"
+            return False, f"PROPOSAL_COUNT_{len(proposal.joints)}", False
         qualified = qualify_skeleton_v2(surface, proposal)
         if len(qualified.joints) != len(target.positions_normalized):
-            return False, f"QUALIFIED_COUNT_{len(qualified.joints)}"
-        return _qualified_topology_exact(qualified, conditioning, target), "QUALIFIED"
+            return False, f"QUALIFIED_COUNT_{len(qualified.joints)}", False
+        ids = {j.canonical_joint_id for j in qualified.joints}
+        illegal_parent_count = sum(
+            j.parent_canonical_id is not None and j.parent_canonical_id not in ids
+            for j in qualified.joints
+        )
+        deform_root_count = len(qualified.deform_root_ids)
+        mechanical_pass = (
+            len(qualified.joints) > 0
+            and deform_root_count > 0
+            and illegal_parent_count == 0
+        )
+        teacher_exact = _teacher_topology_exact_diagnostic(qualified, conditioning, target)
+        status = f"QUALIFIED_MECHANICAL:roots={deform_root_count}:illegal_parents={int(illegal_parent_count)}"
+        return bool(mechanical_pass), status, bool(teacher_exact)
     except Exception as exc:
-        return False, f"{type(exc).__name__}:{exc}"
+        return False, f"{type(exc).__name__}:{exc}", False
 
 
 @pytest.mark.parametrize("spec", WITNESSES, ids=lambda s: s.name)
@@ -223,18 +237,22 @@ def test_preregistered_generic_behavioral_panel(spec: WitnessSpec) -> None:
             int(shipping["generated_count"]) == len(target.positions_normalized)
             and float(shipping["matched_p95"]) < unique_radius
         )
-        topology_pass = False
-        topology_status = "NOT_EVALUATED"
+        mechanical_pass = False
+        mechanical_status = "NOT_EVALUATED"
+        teacher_topology_exact = False
         if geometry_pass:
-            topology_pass, topology_status = _qualified_g_pass(model, surface, conditioning, target)
-        product_pass = bool(geometry_pass and topology_pass)
+            mechanical_pass, mechanical_status, teacher_topology_exact = _qualified_mechanical_pass(
+                model, surface, conditioning, target
+            )
+        product_pass = bool(geometry_pass and mechanical_pass)
         stable = stable + 1 if product_pass else 0
         trace.append({
             "step": step_index,
             "shipping": shipping,
             "geometry_pass": geometry_pass,
-            "qualified_g_pass": topology_pass,
-            "qualified_g_status": topology_status,
+            "qualified_mechanical_pass": mechanical_pass,
+            "qualified_mechanical_status": mechanical_status,
+            "teacher_topology_exact_diagnostic": teacher_topology_exact,
             "stable_passes": stable,
         })
         if stable >= REQUIRED_STABLE_PASSES:

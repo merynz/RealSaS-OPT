@@ -23,12 +23,15 @@ Promote still-valuable historical Compiler/runtime production knowledge **behind
 | Exact native C++ runtime consumer | **DONE / CI PASS** | `25d810e272cc00a7b6fd4d682eabc16fef226223` |
 | Diagnostic failure-signature semantic rebind | **DONE / CI PASS** | `5665ecacb77c02e53297340249b0972981a5c4bc` |
 | Current learned-model source ownership promotion | **DONE IN CURRENT TREE** | `models/` + model READMEs + `SYSTEM_INDEX.md` |
-| IRIS -> Compiler substrate ownership seam | **DONE** | current `compiler/realsas_compiler_core/substrate/iris_v2.py` |
+| IRIS -> Compiler substrate ownership seam | **DONE** | `compiler/realsas_compiler_core/substrate/iris_v2.py` |
 | Compiler substrate physical normalization | **DONE** | `bc443d063d4d8f0bd52981ec2db5b99a795985e1` |
 | Compiler mesh physical normalization | **DONE** | `295b798b1fb40ccb1752afe9da9378dfe8734262` |
-| Authored-motion dynamic probe / proof semantic rebind | **DONE / LOCAL REGRESSION 2/2 PASS** | `fbe80348351c81fa5bba7a56ae1898d5b09ca160`; `canonical/AUTHORED_MOTION_PROOF_PROMOTION_V1_20260903.json` |
-| Causal owner attribution + bounded repair/re-proof | **NEXT** | must remain separate from failure localization and require controlled intervention evidence |
-| Current V4 export -> native runtime interlock | **PENDING** | proof-state identity must be exact |
+| Authored-motion dynamic probe / proof semantic rebind | **DONE / LOCAL REGRESSION 2/2 PASS** | `fbe80348351c81fa5bba7a56ae1898d5b09ca160` |
+| Controlled causal owner attribution | **DONE / LOCAL REGRESSION 4/4 PASS** | `1dd9a52dda4904c4910f47e66559974b0dc4ad72` |
+| Bounded repair directive + mandatory same-probe re-proof contract | **DONE / LOCAL REGRESSION 5/5 PASS** | `9a60fa341055713c9df8b5d698c58c19a4098025` |
+| Core repair operation registry + real child-state delta audit | **DONE / FAIL-CLOSED** | `12eef470348a4e9822dd927e2ac950e3fcd9dfb7`; `canonical/REPAIR_OPERATION_SOURCE_DIFF_V1_20260903.json` |
+| Historical rig/weight repair executors | **NOT PROMOTED** | rig requires current proposal/requalification seam; weight requires retained-candidate portfolio |
+| Current V4 export -> native runtime interlock | **NEXT MAJOR CLOSURE** | exact proof-state/product-state identity must survive `.rss/.rsr` materialization and native open/render |
 | CDT / BBW-KKT / ARAP / XPBD source diff | **PENDING** | no numerical bulk restore |
 | Full behavioral + complete-E2E restoration closure | **PENDING** | required before refreeze decision |
 
@@ -58,58 +61,50 @@ Restoration byte authority currently used:
 
 The native `runtime/realsas_cpp/` subtree was restored byte-exactly from that verified archive and is sealed file-by-file in `canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json`.
 
-Historical records also mention a standalone C++ runtime archive (SHA-256 `1af741c9a3d30456a6703809e067a9c3a61220da51a6a1a9cbda2b8a4755e8b0`). It is provenance/reference only for this restoration; it was not used as promoted subtree byte authority.
-
-Other historical authorities remain candidate evidence until source-diffed and explicitly promoted:
-
-- R5_3 semantic authority SHA-256 `6224661cb4323f78a9b808af10f68dd584431a422e28d26a69e87816a3b0ef80`
-- v97_43 numerical/rig authority SHA-256 `09a94871f938b069ba5c8219f203355e724f2f58afa6e10dc5c6148d98b43efb`
-
 ## Completed semantic restorations
 
 ### Failure localization != causal ownership
 
-Historical v0.5 failure diagnostics preserved an important firewall: a measured geometry/proof failure is diagnostic localization, **not causal owner attribution**. Current `failure_signatures.py` now preserves this separation. `owner_attribution` remains empty until a separate controlled mutation/fault experiment proves ownership. A failure signature cannot authorize repair.
+Measured proof failure is diagnostic localization, not owner attribution. `failure_signatures.py` cannot invent an owner or authorize repair.
 
 ### Authored motion must be dynamically exercised
 
-Historical `realsas_deformation/motion_proof.py` contained another valuable invariant: requested/authored motion must itself be executed and measured; static existence of a clip/track is insufficient proof.
+`motion_probe.py` + `motion_probe_geometry.py` execute exact current puppet-local authored motion against qualified mesh/mesh-skin state and measure deformation consequences before Compiler-owned MOTION PASS/FAIL.
 
-That invariant is now rebound to current V4 state through `compiler/realsas_compiler_services/proof/motion_probe.py` and `motion_probe_geometry.py`. The service consumes exact current `CanonicalPuppetGraph.v3` mechanical state, directional meshes/mesh-skin and puppet-local motion, evaluates actual LBS deformation over sampled clip time, and reports dynamic consequences such as effective motion, edge relative change, triangle area compression/expansion, degeneration, non-finite deformation and loop seam. Compiler `proof_engine.py` owns the final MOTION PASS/FAIL binding.
+### Causal ownership requires controlled intervention
 
-The promoted probe does not create canonical IDs, does not repair state, does not infer causal ownership, and does not claim full-3D reconstruction authority.
+`causal_attribution.py` does not restore the old heuristic owner ranker. Owner credit requires same-probe, single-owner, bounded counterfactual evidence with material target improvement and no protected-invariant regression. Ambiguous improvements abstain.
 
-## Promotion rule
+### Repair requires a new child state and mandatory re-proof
 
-Every historical mechanism receives one of these dispositions before execution:
+`repair_loop.py` emits bounded immutable directives only from attributed evidence and validates effect only after a distinct child product is re-proven under the same probe fingerprint. In-place mutation is forbidden.
 
-- `PROMOTE_EXACT_CONSUMER` — byte-exact non-authoritative runtime/consumer code;
-- `PROMOTE_REBIND` — preserve semantics, rewrite against current typed authority;
-- `SOURCE_DIFF_SELECT` — compare competing historical implementations and promote only the strongest bounded kernel;
-- `ARCHIVAL_ONLY` — preserve provenance/evidence, never execute in current product path;
-- `DO_NOT_PROMOTE_MONOLITH` — explicitly forbid resurrection as a current subsystem.
+### Historical repair source is not executable authority
 
-`compiler/realsas_orchestrator/pipeline.py` remains `DO_NOT_PROMOTE_MONOLITH`.
+`repair_registry.py` and `repair_attempt.py` add a stronger current firewall. Historical source presence, or even a populated directive, does not authorize execution. A repair operation must have an explicitly promoted registry record. The Compiler itself recomputes the actual semantic delta between real parent/child products and rejects lineage or scope violations.
+
+Current executable repair-operation count: **0**.
+
+The historical rig parent-edit is blocked because direct final-skeleton mutation would bypass current graph qualification. The historical retained-weight switch is blocked because current qualified skin does not preserve the required retained candidate portfolio.
 
 ## Non-negotiable firewalls
 
 - no historical front-brain/teacher-exact ownership path;
 - no second canonical graph/ID authority;
-- no historical solver executes merely because its source exists;
+- no historical solver or repair executor executes merely because its source exists;
 - no proof can bind a different product state than export/runtime;
 - no failure signature may invent causal ownership;
-- no repair may mutate production state without mandatory re-proof;
+- no repair may mutate production state without a distinct child lineage and mandatory same-probe re-proof;
 - no permanent current dependency on a dated experiment implementation;
 - no family-specific constants during restoration;
 - no FIT8 / Family-1 execution until restoration closure explicitly re-authorizes it.
 
 ## Next execution order
 
-1. introduce explicit causal owner-attribution evidence based on controlled intervention/counterfactual measurement rather than failure labels;
-2. define bounded repair directives that can target only proven owners and create a new product attempt/state;
-3. enforce `prove -> diagnose -> attribute -> repair -> re-prove` as a state machine;
-4. bind current exact-PASS product proof to `.rss/.rsr` export and native runtime consumption;
-5. source-diff numerical kernels rather than restoring whole historical numerical stacks;
-6. continue dependency-safe Compiler physical normalization where it improves authority clarity;
-7. run restoration-wide behavioral/source/E2E/native gates;
-8. only then decide whether to refreeze and reopen FIT selection.
+1. bind the current exact-PASS V4 product/proof state to production `.rss/.rsr` materialization without replaying solvers at export time;
+2. prove native C++ open / clip lookup / render consumes that exact proof-gated product identity;
+3. source-diff CDT / BBW-KKT / ARAP / XPBD/contact numerical kernels and promote only bounded kernels with current typed need;
+4. decide whether a current proposal-requalification or retained-candidate seam is scientifically required before any repair executor can be promoted;
+5. continue dependency-safe Compiler physical normalization where it improves authority clarity;
+6. run restoration-wide behavioral/source/E2E/native gates;
+7. only then decide whether to refreeze and reopen FIT selection.

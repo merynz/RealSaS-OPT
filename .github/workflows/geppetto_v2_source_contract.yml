@@ -68,6 +68,134 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py \
             compiler/realsas_compiler_core/proof_engine.py \
             compiler/test_proof_engine_source_v1.py
+      - name: Diagnose L1 train vs L2 metric correspondence
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
+        run: |
+          lscpu | grep -E 'Model name|Vendor ID|Architecture' || true
+          python - <<'PY'
+          import json
+          import numpy as np
+          import torch
+          from scipy.optimize import linear_sum_assignment
+          from experiments.geppetto_arachne_r6_20260901.geppetto_candidate_v2 import GeppettoCandidateV2
+          from experiments.geppetto_arachne_r6_20260901.geppetto_conditioning_v2 import GeppettoConditioningAdapterV2
+          from experiments.geppetto_arachne_r6_20260901.geppetto_loss_v2 import (
+              GeppettoLossV2, MATCH_GEOMETRY_COST_QUANTIZATION, _canonical_tie_matrix,
+              canonical_geometry_assignment_v2,
+          )
+          from experiments.geppetto_arachne_r6_20260901.geppetto_train_v2 import geppetto_train_step_v2
+          from experiments.geppetto_arachne_r6_20260901.test_geppetto_v2_behavioral_panel import (
+              WITNESSES, _surface, _teacher, _config, _shipping, _qualified_mechanical_pass,
+              LR, WEIGHT_DECAY, MAX_STEPS, CHECK_EVERY, REQUIRED_STABLE_PASSES,
+          )
+
+          torch.set_num_threads(1)
+          torch.use_deterministic_algorithms(True)
+          spec = next(x for x in WITNESSES if x.name == 'fork_5')
+
+          def canonical_l2(primary, teacher):
+              p = primary.detach().cpu().numpy().astype(np.float64, copy=False)
+              t = np.asarray(teacher, dtype=np.float64)
+              raw = np.linalg.norm(p[:, None, :] - t[None, :, :], axis=-1)
+              qcost = np.rint(raw / MATCH_GEOMETRY_COST_QUANTIZATION).astype(np.int64)
+              q, tt = linear_sum_assignment(qcost.astype(np.float64) + _canonical_tie_matrix(len(p)))
+              return np.asarray(q, np.int64), np.asarray(tt, np.int64)
+
+          class TraceLoss(GeppettoLossV2):
+              def __init__(self, mode):
+                  super().__init__(support_topk=4)
+                  self.mode = mode
+                  self.step = 0
+                  self.records = []
+              def _match(self, output, b, target, J):
+                  primary = output.positions_normalized[b, :J]
+                  l1 = canonical_geometry_assignment_v2(primary, target.positions_normalized)
+                  l2 = canonical_l2(primary, target.positions_normalized)
+                  chosen = l1 if self.mode == 'L1' else l2
+                  q = torch.as_tensor(chosen[0], device=primary.device)
+                  tt = torch.as_tensor(chosen[1], device=primary.device)
+                  tp = torch.as_tensor(target.positions_normalized, device=primary.device, dtype=primary.dtype)[tt]
+                  winner = self._winner_indices(output, b, q, tp)
+                  map_mode = torch.argmax(output.position_mode_logits[b, q], dim=-1)
+                  self.records.append({
+                      'step': self.step,
+                      'l1': l1[1].tolist(),
+                      'l2': l2[1].tolist(),
+                      'chosen': chosen[1].tolist(),
+                      'l1_l2_differ': bool(not np.array_equal(l1[1], l2[1])),
+                      'map_winner_mismatch': int((winner != map_mode).sum().item()),
+                  })
+                  return chosen
+
+          def run(mode):
+              torch.manual_seed(spec.seed)
+              np.random.seed(spec.seed)
+              surface = _surface(spec)
+              conditioning = GeppettoConditioningAdapterV2()([surface])
+              target = _teacher(spec, surface, conditioning)
+              teacher = torch.as_tensor(target.positions_normalized, dtype=torch.float32)
+              sep = torch.cdist(teacher, teacher)
+              sep = sep.masked_fill(torch.eye(len(teacher), dtype=torch.bool), float('inf'))
+              unique_radius = 0.5 * float(sep.min())
+              model = GeppettoCandidateV2(_config())
+              optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
+              loss_fn = TraceLoss(mode)
+              stable = 0
+              pass_step = None
+              checks = []
+              for step in range(1, MAX_STEPS + 1):
+                  loss_fn.step = step
+                  losses = geppetto_train_step_v2(model, optimizer, conditioning, [target], loss_fn=loss_fn)
+                  if step != 1 and step % CHECK_EVERY:
+                      continue
+                  shipping = _shipping(model, conditioning, target)
+                  geometry_pass = int(shipping['generated_count']) == len(target.positions_normalized) and float(shipping['matched_p95']) < unique_radius
+                  mechanical_pass = False
+                  if geometry_pass:
+                      mechanical_pass, _, _ = _qualified_mechanical_pass(model, surface, conditioning, target)
+                  stable = stable + 1 if (geometry_pass and mechanical_pass) else 0
+                  checks.append({
+                      'step': step,
+                      'count': int(shipping['generated_count']),
+                      'p95': float(shipping['matched_p95']),
+                      'stable': stable,
+                      'position_primary': float(losses['position_primary']),
+                      'mode_rank': float(losses['mode_rank']),
+                      'stop': float(losses['stop']),
+                  })
+                  if stable >= REQUIRED_STABLE_PASSES:
+                      pass_step = step
+                      break
+              records = loss_fn.records
+              switches = 0
+              prev = None
+              for r in records:
+                  cur = tuple(r['chosen'])
+                  if prev is not None and cur != prev:
+                      switches += 1
+                  prev = cur
+              disagreements = [r for r in records if r['l1_l2_differ']]
+              winner_mismatch_steps = [r for r in records if r['map_winner_mismatch']]
+              return {
+                  'mode': mode,
+                  'pass_step': pass_step,
+                  'stable_passes': stable,
+                  'final': _shipping(model, conditioning, target),
+                  'assignment_switch_count': switches,
+                  'l1_l2_disagreement_count': len(disagreements),
+                  'first_l1_l2_disagreements': disagreements[:12],
+                  'map_winner_mismatch_step_count': len(winner_mismatch_steps),
+                  'first_map_winner_mismatches': winner_mismatch_steps[:12],
+                  'checks': checks,
+              }
+
+          result = {'current_L1': run('L1'), 'metric_aligned_L2': run('L2')}
+          print('GEPPETTO_L1_L2_CAUSAL_DIAGNOSTIC=' + json.dumps(result, sort_keys=True))
+          PY
       - name: Run Geppetto V2 source and behavioral gates
         env:
           OMP_NUM_THREADS: '1'

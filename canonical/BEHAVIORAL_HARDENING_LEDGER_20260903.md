@@ -50,19 +50,11 @@ Ongoing hardening/audit work invalidates promotion. Family selection remains blo
 
 ## Gate 3 — Arachne / SkinFieldCodec
 
-**Status:** `AUDIT HOLD — SHIPPING CAPACITY UNPROVEN; TINY-CODEC FAILURE IS NOT PRODUCT FAILURE`
+**Status:** `A0 SHIPPING CODEC CAPACITY PASS / GENERIC COSINE PROTOCOL PASS / SHIPPING A1 NEXT`
 
-Primary cleanroom authority:
-- `canonical/REALSAS_RIGANYTHING_SKINTOKENS_END_TO_END_CLEANROOM_MATRIX_20260903.md`
-
-Historical records preserved:
-- preregistration: `canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md`
-- V1 failure/correction: `canonical/ARACHNE_CODEC_BEHAVIORAL_FAILURE_20260903.md`
-- first clean Bound V2 run: `canonical/ARACHNE_CODEC_BOUND_V2_FIRST_RUN_20260903.md`
-- hard-tail diagnostic: `canonical/SKIN_FIELD_CODEC_A0_TAIL_DIAGNOSTIC_20260903.md`
-- global-temperature diagnostic: `canonical/SKIN_FIELD_CODEC_A0_TEMPERATURE_DIAGNOSTIC_20260903.md`
-- post-PASS force decomposition: `canonical/SKIN_FIELD_CODEC_A0_FORCE_DECOMPOSITION_20260903.md`
-- reconstruction/cooling diagnostics: `canonical/SKIN_FIELD_CODEC_A0_RECONSTRUCTION_COOLING_DIAGNOSTICS_20260903.md`
+Primary authorities:
+- cleanroom matrix: `canonical/REALSAS_RIGANYTHING_SKINTOKENS_END_TO_END_CLEANROOM_MATRIX_20260903.md`
+- shipping Codec causal closure: `canonical/SKIN_FIELD_CODEC_SHIPPING_CAPACITY_AND_COOLING_V1_20260903.md`
 
 Frozen intended authority chain:
 `Codec A0 -> frozen Codec -> Arachne A1 -> SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`
@@ -87,46 +79,66 @@ Therefore historical branch/sharp representation-capacity conclusions from that 
 
 The historical runs remain in the repository and are not deleted.
 
-### Bound V2 tiny-model evidence
+### Tiny-model evidence reclassified
 
-After correcting row binding:
+The historical behavioral helper Codec used approximately `32 hidden / 8 latent / 2 encoder / 2 decoder layers`; the shipping/default Codec is `192 hidden / 64 latent / 3 encoder / 3 decoder layers`.
 
-- `chain_blend_3`: A0 sustained PASS and A1/Compiler/LBS PASS;
-- `branch_blend_4`: A0 sustained PASS and A1/Compiler/LBS PASS;
-- `sharp_fork_5`: tiny A0 repeatedly entered the frozen acceptance region but failed to hold three consecutive checks.
-
-Subsequent generic hypotheses were tested and falsified as product repairs, including top-tail weighting, frozen temperature, weight decay, removing deformation loss, cosine cooling as a generic solution, encoder bypass, and injected 4D/10D pair-geometry residual paths.
-
-### Critical cleanroom reclassification
-
-The behavioral panel's helper Codec is **not shipping-sized**. It instantiates approximately:
-
-`hidden=32, latent=8, layers=2`
-
-while the shipping/default `SkinFieldCodecConfigV1` is:
-
-`hidden=192, latent=64, encoder_layers=3, decoder_layers=3`.
-
-Therefore:
+Therefore the historical tiny sharp failure is not product-capacity authority:
 
 `TINY_SHARP_FAIL != SHIPPING_CODEC_PRODUCT_FAIL`.
 
-The previous status `FAIL_A0 — CLEAN SHARP NARROW REPRESENTATION/OBJECTIVE FLOOR` is preserved as a historical statement about the tiny Bound-V2 test model, but is no longer authoritative for product architecture capacity.
+### Shipping A0 capacity closure
 
-### Cleanroom architectural risk
+The actual default shipping Codec was tested on the same preregistered three-witness panel through:
 
-Arachne consumes an explicit 10D point/control/parent-segment geometry contract and therefore has strong mechanical conditioning. The final Codec decoder receives surface features + joint features + per-joint latent rather than the full pairwise geometry tensor directly. This split may be sufficient, but its information-preservation capacity is not yet proven.
+`teacher W -> shipping Codec -> raw W -> SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`.
 
-Compiler skin qualification is a strong fail-closed legality/simplex/lineage boundary, but it cannot repair semantically wrong W into correct W.
+No witness, seed or acceptance threshold was changed.
 
-### Next authorized gates
+With constant AdamW LR `1e-3`, `chain_blend_3` and `branch_blend_4` sustained PASS but `sharp_fork_5` repeatedly entered and left the valid region and failed the three-consecutive criterion. The sharp lane nevertheless reached raw/qualified p95 substantially below `0.05`, falsifying hard representational impossibility.
 
-1. **P0 shipping-sized Codec capacity smoke** using the actual default `192/64/3` architecture; sustained reconstruction + verified deformation authority.
-2. **P0 full-surface-oracle vs observation-oracle mechanical ceiling** to test whether the references' visibility-independent closed-surface coverage supplies mechanically necessary information.
-3. **P0/P1 Arachne -> Codec information-preservation test** at shipping dimensions.
-4. Only after those pass/fail causally may a Codec/Arachne architecture repair be authorized.
+A controlled full-panel A/B changed only optimizer schedule:
 
-No family-specific tuning, no architecture refreeze and no formal family selection are authorized while these are unresolved.
+`constant 1e-3` vs `CosineAnnealingLR(T_max=1536, eta_min=0)`.
+
+Cosine sustained PASS on all three witnesses:
+
+- `chain_blend_3`: pass step `544`, final p95 `~0.01764`, deformation ratio `~0.00631`;
+- `branch_blend_4`: pass step `672`, final p95 `~0.02839`, deformation ratio `~0.00795`;
+- `sharp_fork_5`: pass step `1056`, final p95 `~0.02705`, deformation ratio `~0.00508`.
+
+Compiler correction remained only on the order of `1e-7` to `1e-6`; raw and qualified W were effectively equivalent for the acceptance decision.
+
+Current causal verdicts:
+
+- `SHIPPING_CODEC_REPRESENTATION_BOTTLENECK = FALSIFIED` on the preregistered generic synthetic panel;
+- `CONSTANT_LR_1E-3_AS_STABLE_SHIPPING_A0_PROTOCOL = FALSIFIED`;
+- `GENERIC_COSINE_A0_PROTOCOL = PASS` on the current three-witness panel;
+- `COMPILER_RESCUE_EXPLAINS_PASS = FALSIFIED`.
+
+This is a capacity/training-protocol closure, not a real-family generalization claim.
+
+### Remaining hybrid risk
+
+The cleanroom concern is now narrowed to the actual learned handoff:
+
+`shipping S + Qualified G -> default ArachneCandidateV2 -> per-joint latent -> frozen qualified shipping Codec decoder -> W`.
+
+A0 proves the shipping Codec can represent the field when teacher W is available to its encoder. It does not yet prove that Arachne can infer an equivalent latent from product conditioning.
+
+### Next authorized gate
+
+**P0 shipping Arachne -> frozen shipping Codec -> Compiler -> verified LBS.**
+
+Requirements:
+- use the same preregistered three witness families and existing A1 thresholds;
+- use default shipping Arachne (`model_dim=128`, `surface_encoder_layers=2`, `attention_heads=4`, `feedforward_dim=384`), not the historical tiny A1 surrogate;
+- freeze a shipping Codec that has passed the generic cosine A0 protocol;
+- evaluate raw decoded W and actual `propose -> qualify_skin -> QualifiedSkinIR -> verified LBS` separately;
+- do not credit Compiler correction as semantic prediction quality;
+- if A1 fails, localize the Arachne-to-latent seam before any architecture change.
+
+No family-specific tuning, no architecture refreeze and no formal family selection are authorized while this is unresolved.
 
 ## End-to-end cleanroom audit
 
@@ -140,7 +152,7 @@ Main result:
 - RigAnything is code-specialized toward template-free continuous skeleton generation and uses direct point-token × joint-token skinning plus aggressive deterministic mesh smoothing.
 - SkinTokens is code-specialized toward a dedicated high-capacity skin representation: skin-aware dense training samples, FSQ-CVAE, autoregressive skin tokens, geometry-conditioned dense decode and optional topology/voxel prior.
 - No inspected common benchmark authorizes a direct empirical claim that one globally outperforms the other.
-- RealSaS has credible function-level equivalents across observation substrate, skeleton, skin qualification and proof, but two P0 empirical obligations remain: observation-substrate information sufficiency and shipping Arachne/Codec capacity/information preservation.
+- RealSaS has credible function-level equivalents across observation substrate, skeleton, skin qualification and proof. The shipping Codec representation-capacity question is now closed on the generic synthetic panel; remaining P0 obligations are Arachne-to-Codec information preservation and observation-substrate information sufficiency.
 
 ## Later gates — not yet opened
 

@@ -17,6 +17,8 @@ from compiler.realsas_compiler_core.appearance import build_observed_appearance_
 from compiler.realsas_compiler_core.motion import build_deterministic_preset_motion
 from compiler.realsas_compiler_core.proof_engine import evaluate_product_proof
 from compiler.realsas_compiler_core.deformation import mesh_skin_dense_weights
+from compiler.realsas_compiler_core.directional_binding import DirectionalBindingPolicyV1, qualify_directional_joint_view_binding
+from compiler.realsas_compiler_services.proof.directional_motion_evaluator import make_qualified_motion_bake_provider
 from experiments.geppetto_arachne_r6_20260901.verified_lbs_v1 import apply_verified_lbs_v1
 from experiments.single_family_e2e_v1.export_bundle_v1 import export_product_bundle_v1
 from runtime.reference_v4.consumer import consume_product_v4_reference
@@ -93,13 +95,53 @@ def _deformation_fixture(product):
 
 
 def run_complete_e2e_v1(output_root=None):
-    """Synthetic architecture gate: mock learned proposals through real Compiler/proof/runtime."""
+    """Synthetic architecture gate: mock learned proposals through real Compiler/proof/runtime.
+
+    The 4-point planar binding policy below is explicitly synthetic-only. Production
+    DirectionalBindingPolicyV1 keeps its 8-correspondence default; this gate only
+    proves typed wiring and rank-3 affine-hull semantics without weakening mainline
+    qualification policy.
+    """
     surface = _mock_surface(); skeleton = qualify_skeleton_v2(surface, _mock_skeleton(surface)); skin = qualify_skin(surface, skeleton, _mock_skin(surface, skeleton)); mechanical = build_mechanical_state(surface, skeleton, skin); visuals = _visuals(mechanical); motion = build_deterministic_preset_motion(mechanical)
     capability = make_single_family_e2e_capability_contract(base_lbs_hash=content_sha256({'impl': 'verified_lbs_v1'}), mesh_hash=content_sha256({'mesh': tuple(d.components[0].mesh.mesh_lineage_hash for d in visuals.directions)}), skinning_hash=skin.skin_lineage_hash, visual_hash=visuals.directional_visual_state_hash, preset_motion_hash=motion.motion_state_hash, runtime_hash=content_sha256({'runtime': 'reference_v4'}), policy_hash=content_sha256({'policy': 'single_family_e2e_v1'}))
     product = assemble_product_v3(mechanical, visuals, capability, motion, editable_metadata={'synthetic_source_gate': True}, runtime_policy={'backend': 'REFERENCE_V4'})
-    proof = evaluate_product_proof(product, deformation_fixture=_deformation_fixture(product))
+
+    synthetic_binding_policy = DirectionalBindingPolicyV1(
+        min_correspondences=4,
+        required_affine_rank=3,
+        max_p95_residual01=0.015,
+        max_residual01=0.05,
+        max_joint_affine_hull_residual01=0.02,
+        min_raster_span=8.0,
+    )
+    directional_binding = qualify_directional_joint_view_binding(product, policy=synthetic_binding_policy)
+    motion_provider = make_qualified_motion_bake_provider(directional_binding)
+    proof_artifacts = {}
+    proof = evaluate_product_proof(
+        product,
+        deformation_fixture=_deformation_fixture(product),
+        motion_bake_provider=motion_provider,
+        artifacts_out=proof_artifacts,
+    )
     if proof.overall_status != 'PASS':
         raise RuntimeError(f'SYNTHETIC_E2E_PROOF_NOT_PASS:{proof.overall_status}')
+    if set(proof_artifacts.get('motion_bakes', {})) != {motion.clips[0].clip_id}:
+        raise RuntimeError('SYNTHETIC_E2E_MOTION_BAKE_NOT_CAPTURED')
+
     root = Path(output_root) if output_root is not None else Path(tempfile.mkdtemp(prefix='realsas_e2e_'))
     runtime, manifest = export_product_bundle_v1(root, product=product, proof_bundle=proof); consume = consume_product_v4_reference(product, proof, runtime)
-    return {'status': 'PASS_COMPLETE_SYNTHETIC_E2E_V1', 'product': product, 'proof': proof, 'runtime': runtime, 'runtime_report': consume, 'bundle_manifest': manifest, 'output_root': str(root), 'truth_paths_consumed': False, 'generalization_claim': False, 'scientific_fit_steps': 0}
+    return {
+        'status': 'PASS_COMPLETE_SYNTHETIC_E2E_V1',
+        'product': product,
+        'proof': proof,
+        'runtime': runtime,
+        'runtime_report': consume,
+        'bundle_manifest': manifest,
+        'output_root': str(root),
+        'truth_paths_consumed': False,
+        'generalization_claim': False,
+        'scientific_fit_steps': 0,
+        'directional_binding_hash': directional_binding.binding_set_hash,
+        'motion_bake_hash': proof_artifacts['motion_bakes'][motion.clips[0].clip_id].bake_hash,
+        'synthetic_binding_policy_only': True,
+    }

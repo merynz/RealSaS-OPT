@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_capacity_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_cooling_diagnostic_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/candidate_config_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py'
@@ -18,6 +19,7 @@ on:
       - behavioral/geppetto-v2-integrity-v1-20260903
     paths:
       - 'experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_capacity_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_cooling_diagnostic_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/candidate_config_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py'
@@ -46,13 +48,16 @@ jobs:
         run: |
           python -m py_compile \
             experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_capacity_v1.py \
+            experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_cooling_diagnostic_v1.py \
             experiments/geppetto_arachne_r6_20260901/skin_field_codec_v1.py \
             experiments/geppetto_arachne_r6_20260901/candidate_config_v1.py \
             experiments/geppetto_arachne_r6_20260901/train_codec_r6_a0_v1.py \
             experiments/geppetto_arachne_r6_20260901/codec_deformation_loss_v1.py \
             experiments/geppetto_arachne_r6_20260901/conditioning_v2.py
       - name: Run shipping Codec capacity gate
-        env:
+        id: shipping_gate
+        continue-on-error: true
+        env: &det_env
           PYTHONPATH: .
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
@@ -60,3 +65,12 @@ jobs:
           PYTHONHASHSEED: '0'
         run: |
           python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_capacity_v1.py
+      - name: Diagnose shipping Codec optimizer cooling
+        if: always()
+        env: *det_env
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_cooling_diagnostic_v1.py
+      - name: Enforce shipping capacity gate result
+        if: always()
+        run: |
+          test "${{ steps.shipping_gate.outcome }}" = "success"

@@ -62,36 +62,85 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py
-      - name: Diagnose Python hash seed and fork replay
+      - name: Diagnose machine-scale trajectory robustness
         env:
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
           OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
         run: |
           lscpu | grep -E 'Model name|Vendor ID|Architecture' || true
-          PYTHONHASHSEED=0 python - <<'PY'
-          import hashlib, os
+          python - <<'PY'
+          import json
+          import numpy as np
+          import torch
+          from experiments.geppetto_arachne_r6_20260901.geppetto_candidate_v2 import GeppettoCandidateV2
           from experiments.geppetto_arachne_r6_20260901.geppetto_conditioning_v2 import GeppettoConditioningAdapterV2
-          from experiments.geppetto_arachne_r6_20260901.test_geppetto_v2_behavioral_panel import WITNESSES, _surface
+          from experiments.geppetto_arachne_r6_20260901.geppetto_train_v2 import geppetto_train_step_v2
+          from experiments.geppetto_arachne_r6_20260901.test_geppetto_v2_behavioral_panel import (
+              WITNESSES, _surface, _teacher, _config, _shipping, _qualified_mechanical_pass,
+              LR, WEIGHT_DECAY, MAX_STEPS, CHECK_EVERY, REQUIRED_STABLE_PASSES,
+          )
+
+          torch.set_num_threads(1)
+          torch.use_deterministic_algorithms(True)
           spec = next(x for x in WITNESSES if x.name == 'fork_5')
-          c = GeppettoConditioningAdapterV2()([_surface(spec)])
-          print('FORK_CONDITIONING_HASHSEED0', os.environ.get('PYTHONHASHSEED'), c.conditioning_hashes[0], hashlib.sha256(c.features.tobytes()).hexdigest())
+          eps = float(torch.finfo(torch.float32).eps)
+
+          def run(multiplier: int):
+              torch.manual_seed(spec.seed)
+              np.random.seed(spec.seed)
+              surface = _surface(spec)
+              conditioning = GeppettoConditioningAdapterV2()([surface])
+              target = _teacher(spec, surface, conditioning)
+              teacher = torch.as_tensor(target.positions_normalized, dtype=torch.float32)
+              separation = torch.cdist(teacher, teacher)
+              separation = separation.masked_fill(torch.eye(len(teacher), dtype=torch.bool), float('inf'))
+              unique_radius = 0.5 * float(separation.min())
+              model = GeppettoCandidateV2(_config())
+              if multiplier:
+                  gen = torch.Generator(device='cpu').manual_seed(20260930)
+                  with torch.no_grad():
+                      for p in model.parameters():
+                          if not p.is_floating_point():
+                              continue
+                          noise = torch.empty(p.shape, dtype=p.dtype, device=p.device).uniform_(-1.0, 1.0, generator=gen)
+                          p.add_(float(multiplier) * eps * torch.sign(noise))
+              initial = _shipping(model, conditioning, target)
+              optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
+              stable = 0
+              pass_step = None
+              checkpoints = []
+              for step_index in range(1, MAX_STEPS + 1):
+                  geppetto_train_step_v2(model, optimizer, conditioning, [target])
+                  if step_index != 1 and step_index % CHECK_EVERY:
+                      continue
+                  shipping = _shipping(model, conditioning, target)
+                  geometry_pass = (
+                      int(shipping['generated_count']) == len(target.positions_normalized)
+                      and float(shipping['matched_p95']) < unique_radius
+                  )
+                  mechanical_pass = False
+                  if geometry_pass:
+                      mechanical_pass, _, _ = _qualified_mechanical_pass(model, surface, conditioning, target)
+                  stable = stable + 1 if (geometry_pass and mechanical_pass) else 0
+                  if step_index in (1, 32, 64, 320, 640, 1024, 1376, 1408, 1440, 1536, 1792, 2048):
+                      checkpoints.append((step_index, int(shipping['generated_count']), float(shipping['matched_p95']), stable))
+                  if stable >= REQUIRED_STABLE_PASSES:
+                      pass_step = step_index
+                      break
+              return {
+                  'multiplier': multiplier,
+                  'absolute_parameter_perturbation': multiplier * eps,
+                  'initial': initial,
+                  'pass_step': pass_step,
+                  'stable_passes': stable,
+                  'checkpoints': checkpoints,
+              }
+
+          results = [run(m) for m in (0, 1, -1, 8, -8, 64, -64)]
+          print('GEPPETTO_MACHINE_EPS_ROBUSTNESS=' + json.dumps(results, sort_keys=True))
           PY
-          env -u PYTHONHASHSEED python - <<'PY'
-          import hashlib, os
-          from experiments.geppetto_arachne_r6_20260901.geppetto_conditioning_v2 import GeppettoConditioningAdapterV2
-          from experiments.geppetto_arachne_r6_20260901.test_geppetto_v2_behavioral_panel import WITNESSES, _surface
-          spec = next(x for x in WITNESSES if x.name == 'fork_5')
-          c = GeppettoConditioningAdapterV2()([_surface(spec)])
-          print('FORK_CONDITIONING_HASHSEED_DEFAULT', os.environ.get('PYTHONHASHSEED'), c.conditioning_hashes[0], hashlib.sha256(c.features.tobytes()).hexdigest())
-          PY
-          set +e
-          PYTHONHASHSEED=0 python -m pytest -q -s 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py::test_preregistered_generic_behavioral_panel[fork_5]'
-          A=$?
-          env -u PYTHONHASHSEED python -m pytest -q -s 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py::test_preregistered_generic_behavioral_panel[fork_5]'
-          B=$?
-          echo "FORK_HASHSEED0_DEFAULT_EXIT_CODES=${A},${B}"
-          exit 0
       - name: Run Geppetto V2 source and behavioral gates
         env:
           OMP_NUM_THREADS: '1'

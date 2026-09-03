@@ -166,7 +166,12 @@ def evaluate_product_proof_evidence(
     deformation_fixture: dict | None = None,
     motion_probe_policy: AuthoredMotionProbePolicyV1 = AuthoredMotionProbePolicyV1(),
 ):
-    """Evaluate current proof domains and preserve exact measurement evidence."""
+    """Evaluate current proof domains and bind exact-state diagnostic evidence.
+
+    MOTION is now a dynamic consequence proof over the exact authored current
+    motion, mesh and mesh-skin state. Failure localization remains subordinate;
+    causal owner attribution is still fail-closed until a controlled mutation gate.
+    """
     validate_product_ontology(product)
     motion_probe_policy.validate()
     required = set(required_proof_domains(product.capability_contract))
@@ -180,47 +185,92 @@ def evaluate_product_proof_evidence(
     for domain in sorted(required):
         policy_hashes, probe_spec = _plan_binding(domain, motion_probe_policy)
         plan = bind_proof_plan(product, proof_domain=domain, operator_policy_hashes=policy_hashes, probe_specification=probe_spec)
-        if domain == "MECHANICAL_STRUCTURE": measurements = _mechanical(product)
-        elif domain == "MESH_QUALITY": measurements = _mesh(product)
-        elif domain == "DIRECTIONAL_VISUAL": measurements = _visual(product)
-        elif domain == "MOTION": measurements = _motion(product, motion_probe_policy)
-        elif domain == "RUNTIME_CONSUMPTION": measurements = _runtime(product, measurements_by_domain.get("MOTION", {}))
+        if domain == "MECHANICAL_STRUCTURE":
+            measurements = _mechanical(product)
+        elif domain == "MESH_QUALITY":
+            measurements = _mesh(product)
+        elif domain == "DIRECTIONAL_VISUAL":
+            measurements = _visual(product)
+        elif domain == "MOTION":
+            measurements = _motion(product, motion_probe_policy)
+        elif domain == "RUNTIME_CONSUMPTION":
+            measurements = _runtime(product, measurements_by_domain.get("MOTION", {}))
         elif domain == "DEFORMATION":
-            if deformation_fixture is None: measurements = {"status": "MISSING_FIXTURE"}
+            if deformation_fixture is None:
+                measurements = {"status": "MISSING_FIXTURE"}
             else:
                 component = product.directional_renderables.directions[int(deformation_fixture.get("view_index", 0))].components[int(deformation_fixture.get("component_index", 0))]
                 measurements = verified_mesh_lbs_measurement(component.mesh, component.mesh_skin, product.mechanical_state.skeleton, deformation_fixture["transforms"], deformation_fixture["expected"])
-                measurements.update({"rms_threshold": float(deformation_fixture.get("rms_threshold", 1e-6)), "p95_threshold": float(deformation_fixture.get("p95_threshold", 1e-6))})
+                measurements.update({
+                    "rms_threshold": float(deformation_fixture.get("rms_threshold", 1e-6)),
+                    "p95_threshold": float(deformation_fixture.get("p95_threshold", 1e-6)),
+                })
 
         measurements_by_domain[domain] = measurements
-        if domain == "DEFORMATION" and deformation_fixture is None: status = "ABSTAIN"
-        elif domain == "RUNTIME_CONSUMPTION" and str(measurements.get("proof_owned_runtime_bake_status") or "").startswith("ABSTAIN_"): status = "ABSTAIN"
-        else: status = _status(domain, measurements)
+        if domain == "DEFORMATION" and deformation_fixture is None:
+            status = "ABSTAIN"
+        elif domain == "RUNTIME_CONSUMPTION" and str(measurements.get("proof_owned_runtime_bake_status") or "").startswith("ABSTAIN_"):
+            status = "ABSTAIN"
+        else:
+            status = _status(domain, measurements)
         failures = derive_failure_signatures(domain, measurements, status=status)
         measurement_report = bind_measurement_report(product, plan, measurements=measurements)
         measurement_reports.append(measurement_report)
         reports.append(bind_domain_proof(
             product, plan, measurement_report, status=status,
             failure_signatures=failures, owner_attribution=no_owner_attribution(),
-            metadata={"causal_mutation_gate":"SOURCE_TEST_REQUIRED","diagnostic_service":"RealSaS.CompilerServices.ProofFailureSignatures.v1","causal_owner_attribution":"NOT_PERFORMED","owner_attribution_requires_controlled_fault_experiment":True,"dynamic_authored_motion_probe":domain == "MOTION"},
+            metadata={
+                "causal_mutation_gate": "SOURCE_TEST_REQUIRED",
+                "diagnostic_service": "RealSaS.CompilerServices.ProofFailureSignatures.v1",
+                "causal_owner_attribution": "NOT_PERFORMED",
+                "owner_attribution_requires_controlled_fault_experiment": True,
+                "dynamic_authored_motion_probe": domain == "MOTION",
+            },
         ))
-    bundle = bind_product_proof_bundle(product, tuple(reports), metadata={"engine":"RealSaS.ProofEngine.v3","heavy_solver_promoted":False,"authored_motion_dynamic_probe_promoted":True,"authored_motion_probe_service":AUTHORED_MOTION_PROBE_SERVICE_ID,"measurement_reports_externalized":True})
+    bundle = bind_product_proof_bundle(product, tuple(reports), metadata={
+        "engine": "RealSaS.ProofEngine.v3",
+        "heavy_solver_promoted": False,
+        "authored_motion_dynamic_probe_promoted": True,
+        "authored_motion_probe_service": AUTHORED_MOTION_PROBE_SERVICE_ID,
+        "measurement_reports_externalized": True,
+    })
     return ProductProofEvaluationV1(bundle, tuple(measurement_reports))
 
 
-def evaluate_product_proof(product, *, deformation_fixture: dict | None = None, motion_probe_policy: AuthoredMotionProbePolicyV1 = AuthoredMotionProbePolicyV1()):
+def evaluate_product_proof(
+    product,
+    *,
+    deformation_fixture: dict | None = None,
+    motion_probe_policy: AuthoredMotionProbePolicyV1 = AuthoredMotionProbePolicyV1(),
+):
     """Backward-compatible bundle-only facade over evidence-preserving evaluation."""
-    return evaluate_product_proof_evidence(product, deformation_fixture=deformation_fixture, motion_probe_policy=motion_probe_policy).proof_bundle
+    return evaluate_product_proof_evidence(
+        product, deformation_fixture=deformation_fixture, motion_probe_policy=motion_probe_policy
+    ).proof_bundle
 
 
 def mutation_worsens_measurement(domain: str, baseline: dict, mutated: dict) -> bool:
-    if domain == "MESH_QUALITY": return mutated.get("degenerate_faces", 0) > baseline.get("degenerate_faces", 0) or mutated.get("min_area", 0) < baseline.get("min_area", 0)
-    if domain == "DEFORMATION": return mutated.get("rms", 0) > baseline.get("rms", 0) or mutated.get("p95", 0) > baseline.get("p95", 0)
-    if domain == "DIRECTIONAL_VISUAL": return mutated.get("direction_count", 8) < baseline.get("direction_count", 8) or mutated.get("corner_binding_count", 0) < baseline.get("corner_binding_count", 0)
+    if domain == "MESH_QUALITY":
+        return mutated.get("degenerate_faces", 0) > baseline.get("degenerate_faces", 0) or mutated.get("min_area", 0) < baseline.get("min_area", 0)
+    if domain == "DEFORMATION":
+        return mutated.get("rms", 0) > baseline.get("rms", 0) or mutated.get("p95", 0) > baseline.get("p95", 0)
+    if domain == "DIRECTIONAL_VISUAL":
+        return mutated.get("direction_count", 8) < baseline.get("direction_count", 8) or mutated.get("corner_binding_count", 0) < baseline.get("corner_binding_count", 0)
     if domain == "MOTION":
-        try: base_pass = authored_motion_measurement_passes_v1(baseline); mut_pass = authored_motion_measurement_passes_v1(mutated)
-        except ValueError: return True
-        return ((base_pass and not mut_pass) or mutated.get("max_edge_relative_change",0)>baseline.get("max_edge_relative_change",0) or mutated.get("min_triangle_area_ratio",1)<baseline.get("min_triangle_area_ratio",1) or mutated.get("max_loop_seam_normalized",0)>baseline.get("max_loop_seam_normalized",0) or mutated.get("effective_clip_count",0)<baseline.get("effective_clip_count",0))
-    if domain == "MECHANICAL_STRUCTURE": return mutated.get("illegal_parent_count",0)>baseline.get("illegal_parent_count",0) or mutated.get("deform_root_count",0)<baseline.get("deform_root_count",0) or mutated.get("unsupported_joint_count",0)>baseline.get("unsupported_joint_count",0)
-    if domain == "RUNTIME_CONSUMPTION": return mutated.get("representation_class") != baseline.get("representation_class") or bool(mutated.get("full_3d_reconstruction_authority"))
+        try:
+            base_pass = authored_motion_measurement_passes_v1(baseline)
+            mut_pass = authored_motion_measurement_passes_v1(mutated)
+        except ValueError:
+            return True
+        return (
+            (base_pass and not mut_pass)
+            or mutated.get("max_edge_relative_change", 0) > baseline.get("max_edge_relative_change", 0)
+            or mutated.get("min_triangle_area_ratio", 1) < baseline.get("min_triangle_area_ratio", 1)
+            or mutated.get("max_loop_seam_normalized", 0) > baseline.get("max_loop_seam_normalized", 0)
+            or mutated.get("effective_clip_count", 0) < baseline.get("effective_clip_count", 0)
+        )
+    if domain == "MECHANICAL_STRUCTURE":
+        return (mutated.get("illegal_parent_count", 0) > baseline.get("illegal_parent_count", 0) or mutated.get("deform_root_count", 0) < baseline.get("deform_root_count", 0) or mutated.get("unsupported_joint_count", 0) > baseline.get("unsupported_joint_count", 0))
+    if domain == "RUNTIME_CONSUMPTION":
+        return mutated.get("representation_class") != baseline.get("representation_class") or bool(mutated.get("full_3d_reconstruction_authority"))
     raise ValueError(domain)

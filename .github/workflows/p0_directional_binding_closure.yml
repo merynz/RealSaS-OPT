@@ -6,12 +6,18 @@ on:
     paths:
       - 'compiler/realsas_compiler_core/directional_binding.py'
       - 'compiler/realsas_compiler_core/__init__.py'
+      - 'compiler/realsas_compiler_core/api.py'
       - 'compiler/realsas_compiler_core/proof_engine.py'
       - 'compiler/realsas_compiler_services/proof/directional_motion_evaluator.py'
+      - 'compiler/realsas_compiler_services/proof/directional_motion_provider.py'
       - 'compiler/realsas_compiler_services/proof/motion_bake.py'
       - 'compiler/realsas_compiler_services/proof/motion_frame_metrics.py'
       - 'compiler/realsas_compiler_services/proof/__init__.py'
+      - 'compiler/realsas_compiler_services/export/current_v4_runtime_v2.py'
+      - 'compiler/realsas_compiler_services/export/runtime_v2.py'
+      - 'compiler/realsas_compiler_services/export/__init__.py'
       - 'tests/compiler/test_directional_joint_view_binding_v1.py'
+      - 'tests/compiler/test_current_v4_runtime_v2_projection_v1.py'
       - 'experiments/single_family_e2e_v1/run_complete_e2e_v1.py'
       - 'experiments/single_family_e2e_v1/test_complete_e2e_source_v1.py'
       - '.github/workflows/p0_directional_binding_closure.yml'
@@ -32,9 +38,14 @@ jobs:
         run: |
           python -m py_compile \
             compiler/realsas_compiler_core/directional_binding.py \
+            compiler/realsas_compiler_core/proof_engine.py \
             compiler/realsas_compiler_services/proof/directional_motion_evaluator.py \
+            compiler/realsas_compiler_services/proof/directional_motion_provider.py \
+            compiler/realsas_compiler_services/export/current_v4_runtime_v2.py \
             experiments/single_family_e2e_v1/run_complete_e2e_v1.py
       - name: Run directional binding regression
         run: PYTHONPATH=. python -m pytest -q tests/compiler/test_directional_joint_view_binding_v1.py
-      - name: Run complete synthetic E2E with qualified motion provider
+      - name: Run proof-bake runtime projection regression
+        run: PYTHONPATH=. python -m pytest -q tests/compiler/test_current_v4_runtime_v2_projection_v1.py
+      - name: Run complete synthetic E2E with qualified motion provider and native archive
         run: PYTHONPATH=. python -m pytest -q experiments/single_family_e2e_v1/test_complete_e2e_source_v1.py

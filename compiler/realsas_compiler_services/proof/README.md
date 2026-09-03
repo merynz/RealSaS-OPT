@@ -41,3 +41,21 @@ An owner is attributed only when a counterfactual record:
 If multiple owners materially improve the same failure, attribution **ABSTAINS** rather than pretending the cause is unique. If all interventions are invalid or none materially improve, attribution also abstains.
 
 The service emits JSON-ready controlled evidence for the existing `DomainProofReportIR.owner_attribution` field, but current `proof_engine.py` does not yet accept arbitrary external intervention records. Binding waits for the core child-attempt/repair lineage gate so callers cannot inject fabricated causal evidence.
+
+### `repair_loop.py`
+
+Bounded repair-directive and mandatory re-proof contract. It does **not** mutate `CanonicalPuppetGraph.v3`; it defines what a separately executed repair child attempt must prove before any repair effect can receive credit.
+
+A repair directive is executable only when:
+
+- causal attribution is `attributed`, never merely diagnosed;
+- the selected owner matches the repair operation owner;
+- the operation explicitly targets the attributed signature;
+- the operation carries a non-empty qualification hash and is qualified for automatic execution;
+- allowed change paths and a bounded-change specification are explicit.
+
+Each directive represents **one owner-local counterfactual operation per child attempt**. The application record must produce a distinct child state whose `parent_state_hash` is the baseline product state, change only the attributed owner and only permitted paths, and pass the bounded-change audit.
+
+Repair acceptance then requires a non-empty child proof bundle, the exact same proof-probe fingerprint, material target improvement or target resolution, and zero protected-invariant regressions. Any probe change, cross-owner mutation, lineage mismatch or protected regression rejects repair credit.
+
+Owner-specific executors (rig/weight/mesh/deformation) are intentionally separate and remain unpromoted until their operation families are individually source-diffed and qualified.

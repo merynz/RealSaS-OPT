@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.BoundedRepairLoopPromotion.v1",
+  "date": "2026-09-03",
+  "status": "PROMOTE_REBIND_CURRENT_V4_CONTRACT",
+  "historical_sources": [
+    {
+      "path": "compiler/realsas_synthesis/causal_repair.py",
+      "sha256": "f4c088789dbd85e5ef9361d6f66846b19e9c81cb0e8a0d68b571945f7d53daa4",
+      "disposition": "SEMANTIC_REFERENCE"
+    },
+    {
+      "path": "compiler/realsas_contracts/causal_repair.py",
+      "sha256": "b4aa4f782be7c189a911abffa65709113c4552c16095db652ec5eb7789fbdbba",
+      "disposition": "CONTRACT_SEMANTICS_REFERENCE"
+    }
+  ],
+  "current_source": {
+    "path": "compiler/realsas_compiler_services/proof/repair_loop.py",
+    "sha256": "beae35f96260003b9bec883b9740eae92e74eb6dae2ca5866eda0150978b70c5"
+  },
+  "preserved_invariants": [
+    "REPAIR_REQUIRES_CAUSAL_ATTRIBUTION",
+    "ONE_OWNER_COUNTERFACTUAL_PER_CHILD_ATTEMPT",
+    "IN_PLACE_PRODUCT_MUTATION_FORBIDDEN",
+    "CHILD_PARENT_STATE_MUST_BIND_BASELINE",
+    "OPERATION_QUALIFICATION_REQUIRED",
+    "BOUNDED_CHANGE_SCOPE_REQUIRED",
+    "SAME_PROBE_REPROOF_REQUIRED",
+    "TARGET_MUST_MATERIALLY_IMPROVE_OR_RESOLVE",
+    "PROTECTED_INVARIANTS_MUST_NOT_REGRESS",
+    "REPAIR_EFFECT_CREDIT_REJECTED_ON_IRRELEVANT_OR_CROSS_OWNER_CHANGE"
+  ],
+  "current_scope": {
+    "directive_contract_promoted": true,
+    "application_lineage_validator_promoted": true,
+    "repair_effect_reproof_validator_promoted": true,
+    "owner_specific_production_executor_promoted": false,
+    "automatic_in_place_mutation": false,
+    "product_authority": false
+  },
+  "local_regression": {
+    "test": "tests/compiler/test_bounded_repair_loop_v1.py",
+    "result": "5 passed",
+    "qualified_attributed_directive": "EXECUTABLE",
+    "unattributed_or_unqualified": "BLOCKED",
+    "cross_owner_or_out_of_scope_change": "REJECTED",
+    "same_probe_material_reproof": "ACCEPTED",
+    "probe_change_or_protected_regression": "REJECTED"
+  }
+}

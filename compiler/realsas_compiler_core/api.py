@@ -8,6 +8,13 @@ from .mesh_binding import (
     validate_qualified_mesh, validate_qualified_mesh_skin, qualify_identity_subset_mesh,
     bind_identity_mesh_skin,
 )
+from .directional_binding import (
+    qualify_directional_joint_view_binding,
+    assert_directional_binding_for_product,
+    project_mechanical_point,
+    projection_for_view,
+    joint_pivot,
+)
 from .product import assemble_product, assemble_product_v2, bind_proof, require_current_proof, project_runtime_package
 from .v4 import (
     upgrade_qualified_skeleton_v2, validate_qualified_skeleton_v2,
@@ -47,6 +54,11 @@ class CompilerFacade:
     validate_qualified_mesh_skin=staticmethod(validate_qualified_mesh_skin)
     qualify_identity_subset_mesh=staticmethod(qualify_identity_subset_mesh)
     bind_identity_mesh_skin=staticmethod(bind_identity_mesh_skin)
+    qualify_directional_joint_view_binding=staticmethod(qualify_directional_joint_view_binding)
+    assert_directional_binding_for_product=staticmethod(assert_directional_binding_for_product)
+    project_mechanical_point=staticmethod(project_mechanical_point)
+    projection_for_view=staticmethod(projection_for_view)
+    joint_pivot=staticmethod(joint_pivot)
     assemble_product=staticmethod(assemble_product)
     assemble_product_v2=staticmethod(assemble_product_v2)
     bind_proof=staticmethod(bind_proof)

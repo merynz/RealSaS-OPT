@@ -73,16 +73,16 @@ Architecture-freeze prerequisite run `33751730186`:
 - `family_selection_authorized = false`;
 - only final workflow failure: expected `FAMILY_SELECTION_BLOCKED__SOURCE_CHANGED_AFTER_FREEZE`.
 
-This fingerprint is a candidate only, not a seal.
+This fingerprint is a candidate only, not a seal. It is stale relative to ongoing Codec hardening and must not be promoted.
 
 ## Gate 3 — Arachne / SkinFieldCodec behavioral seam
 
-**Status:** `FAIL — FIRST FAILING LAYER = SKINFIELD CODEC A0`
+**Status:** `FAIL — CODEC A0; ONE OBJECTIVE BUG CLOSED; REPRESENTATION CAUSE UNDER DIAGNOSIS`
 
 Preregistration:
 `canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md`
 
-Failure record:
+Failure / causal record:
 `canonical/ARACHNE_CODEC_BEHAVIORAL_FAILURE_20260903.md`
 
 Frozen panel:
@@ -102,28 +102,48 @@ Workflow run `33752571671`, job `100639284377`, runner region `eastus`, source/b
 
 `chain_blend_3`:
 - A0 sustained PASS at step `640`;
-- A0 final row-L1 p95 `0.0473073684`, deformation ratio `0.0124993324`;
-- A1 shipping/Compiler/LBS sustained PASS at step `320`;
-- qualified row-L1 p95 `0.0597252958`, deformation ratio `0.0191426221`;
-- Compiler total correction L1 `2.5319605e-07`.
+- A1 shipping/Compiler/LBS sustained PASS at step `320`.
 
 `branch_blend_4`:
 - `FAIL_A0`; A1 was not run;
-- final step `1536`: row-L1 p95 `0.0938273296` fails frozen `0.05` threshold;
-- deformation ratio `0.0368942656` already passes frozen `0.05` threshold;
-- simplex residual `5.96e-08`, negative weights `0`.
-
-Interpretation: the deformation probes alone under-identify the dense weight field; the frozen row-tail gate correctly exposes residual W error that deformation consequence does not.
+- first-run final row-L1 p95 `0.0938273296` fails frozen `0.05`;
+- deformation ratio `0.0368942656` already passes.
 
 `sharp_fork_5`:
 - `FAIL_A0`; A1 was not run;
-- final step `1536`: row-L1 p95 `0.743847549`, deformation ratio `0.240943387`;
-- simplex residual `1.19e-07`, negative weights `0`;
-- the late trace plateaus/oscillates near row-L1 p95 `~0.72–0.76` and deformation ratio `~0.23–0.25` rather than showing simple unfinished convergence.
+- first-run final row-L1 p95 `0.743847549`, deformation ratio `0.240943387`;
+- late plateau/oscillation rules out claiming simple unfinished convergence without evidence.
 
-Interpretation: there is a material generic Codec A0 representation/objective/optimization seam on sharper heterogeneous weight fields. Root cause is not yet assigned.
+### Causal decomposition
 
-The full chain PASS on `chain_blend_3` demonstrates that Arachne proposal, Compiler skin qualification and verified LBS plumbing are not universally broken. Repair work remains scoped to Codec A0 until that layer closes.
+Workflow run `33753462948`, job `100642169460`, `northcentralus`:
+
+- exact `log(W_teacher)` pair-logit oracle passes both frozen A0 metrics at approximately numerical precision;
+- therefore frozen metrics/thresholds are feasible;
+- free per-joint latent with the same decoder turns `branch_blend_4` into a transient behavioral PASS (`p95 ~0.0261`, deformation `~0.00715`), causally implicating the teacher encoder compression for that witness;
+- the same bypass improves `sharp_fork_5` from `p95 ~0.744` to `~0.105` and deformation to `~0.025`, but does not fully pass; encoder compression is material but not sufficient root cause.
+
+### Confirmed independent Codec objective bug
+
+Historical active-weighted CE used different class multipliers inside the same simplex row. A generic mixed active/inactive truth row produced max pre-softmax gradient `~5.99e-4` at exact teacher W, proving exact truth was not stationary.
+
+This is a genuine generic contract violation, but telemetry shows it cannot explain the branch failure and is far too small to explain the sharp plateau by itself.
+
+Repair:
+- `f0fe52ab625695d46bed7007acba39fe4cdfb248`: active emphasis changed to a teacher-only row scalar so relative within-row truth is preserved;
+- `9692ac12a44769212906616b6bca13861022d42c`: positive falsification converted to permanent exact-truth stationarity regression.
+
+No A0 behavioral closure is claimed from this repair alone.
+
+### Current open diagnostic
+
+A source-neutral diagnostic now tests whether the Codec decoder is missing explicit relational geometry:
+- same teacher encoder;
+- same hidden `32`, latent `8`;
+- same optimizer/horizon/objective;
+- decoder additionally receives only canonical point-control `dx,dy,dz,distance` relation channels.
+
+If this closes the failing witnesses, explicit pair-relation conditioning becomes a justified generic repair candidate. If not, representation diagnosis continues without touching the frozen panel.
 
 **Frozen rule:** do not relax witness definitions, seeds, thresholds, optimizer horizons or acceptance protocol. Do not patch A1 while A0 is unresolved.
 

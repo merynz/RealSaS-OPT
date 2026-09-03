@@ -62,10 +62,27 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_integrity.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py
+      - name: Diagnose isolated fork replay determinism
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
+        run: |
+          lscpu | grep -E 'Model name|Vendor ID|Architecture' || true
+          set +e
+          python -m pytest -q -s 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py::test_preregistered_generic_behavioral_panel[fork_5]'
+          A=$?
+          python -m pytest -q -s 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_panel.py::test_preregistered_generic_behavioral_panel[fork_5]'
+          B=$?
+          echo "FORK_ISOLATED_REPLAY_EXIT_CODES=${A},${B}"
+          exit 0
       - name: Run Geppetto V2 source and behavioral gates
         env:
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
         run: |
           python -m pytest -q -s \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py \

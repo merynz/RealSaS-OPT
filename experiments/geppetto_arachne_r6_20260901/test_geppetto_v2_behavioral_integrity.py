@@ -6,7 +6,12 @@ import torch
 import torch.nn.functional as F
 
 from experiments.geppetto_arachne_r6_20260901.geppetto_candidate_v2 import GeppettoRawOutputV2
-from experiments.geppetto_arachne_r6_20260901.geppetto_loss_v2 import GeppettoLossV2
+from experiments.geppetto_arachne_r6_20260901.geppetto_loss_v2 import (
+    GeppettoLossV2,
+    GeppettoLossWeightsV2,
+    MATCH_GEOMETRY_COST_QUANTIZATION,
+    canonical_geometry_assignment_v2,
+)
 from experiments.geppetto_arachne_r6_20260901.training_targets_v1 import GeppettoTeacherTargetV1
 
 
@@ -165,3 +170,64 @@ def test_support_objective_matches_topk_ranking_semantics() -> None:
     # propose() consumes support logits by ranking/top-k. A constant sparse class
     # prior must not be a cheap solution; equal positive/negative ranking is ln 2.
     assert losses["support"] >= math.log(2.0) - 1e-5
+
+
+def test_anonymous_correspondence_cannot_use_teacher_root_identity() -> None:
+    j = 5
+    a = _target(j)
+    b = GeppettoTeacherTargetV1(
+        np.asarray(a.positions_normalized, np.float32).copy(),
+        np.asarray(a.parent_indices, np.int64).copy(),
+        np.asarray([False, False, False, False, True]),
+        True,
+    )
+    out, _, _ = _raw_output(a)
+    loss = GeppettoLossV2(support_topk=2)
+    qa, ta = loss._match(out, 0, a, j)
+    qb, tb = loss._match(out, 0, b, j)
+
+    assert np.array_equal(qa, qb)
+    assert np.array_equal(ta, tb)
+    assert not hasattr(GeppettoLossWeightsV2(), "match_root_cost")
+
+
+def test_hard_geometry_assignment_is_stable_to_float32_epsilon_and_exact_ties() -> None:
+    # Two anonymous duplicate pairs intentionally create exact assignment ties.
+    # Machine-scale perturbations are far below the fixed numerical identity grid
+    # and therefore must not rewrite correspondence.
+    g = MATCH_GEOMETRY_COST_QUANTIZATION
+    teacher = np.asarray([
+        [-0.25, 0.0, 0.0],
+        [-0.25, 0.0, 0.0],
+        [0.25, 0.0, 0.0],
+        [0.25, 0.0, 0.0],
+    ], np.float64)
+    primary = teacher.copy()
+    eps = float(np.finfo(np.float32).eps)
+    perturb = np.asarray([
+        [eps, 0.0, 0.0],
+        [-eps, 0.0, 0.0],
+        [0.0, eps, 0.0],
+        [0.0, -eps, 0.0],
+    ], np.float64)
+    assert eps * 4.0 < g
+
+    q0, t0 = canonical_geometry_assignment_v2(primary, teacher)
+    qp, tp = canonical_geometry_assignment_v2(primary + perturb, teacher)
+    qm, tm = canonical_geometry_assignment_v2(primary - perturb, teacher)
+    q32, t32 = canonical_geometry_assignment_v2(primary.astype(np.float32), teacher.astype(np.float32))
+
+    assert np.array_equal(q0, qp) and np.array_equal(t0, tp)
+    assert np.array_equal(q0, qm) and np.array_equal(t0, tm)
+    assert np.array_equal(q0, q32) and np.array_equal(t0, t32)
+
+
+def test_canonical_tie_break_cannot_overturn_one_primary_geometry_bin() -> None:
+    g = MATCH_GEOMETRY_COST_QUANTIZATION
+    teacher = np.asarray([[0.0, 0.0, 0.0], [0.5, 0.0, 0.0]], np.float64)
+    # Identity is better by many numerical bins. Secondary canonical ranking is
+    # bounded globally and may only resolve equal quantized primary optima.
+    primary = np.asarray([[0.49 * g, 0.0, 0.0], [0.5 + 2.0 * g, 0.0, 0.0]], np.float64)
+    q, t = canonical_geometry_assignment_v2(primary, teacher)
+    assert np.array_equal(q, np.asarray([0, 1], np.int64))
+    assert np.array_equal(t, np.asarray([0, 1], np.int64))

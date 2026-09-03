@@ -13,6 +13,12 @@ from .motion_frame_metrics import (
     measure_motion_bake_geometry,
     evaluate_motion_bake_metrics,
 )
+from .directional_motion_evaluator import (
+    DirectionalMotionEvaluatorPolicyV1,
+    EVALUATOR_SEMANTIC_VERSION,
+    evaluate_clip_to_qualification_bake,
+    make_qualified_motion_bake_provider,
+)
 from .causal_attribution import (
     ControlledInterventionEvidenceV1,
     attribute_signature_owner_v1,
@@ -40,6 +46,10 @@ __all__ = [
     "RESTORED_V05_POLICY_V1",
     "measure_motion_bake_geometry",
     "evaluate_motion_bake_metrics",
+    "DirectionalMotionEvaluatorPolicyV1",
+    "EVALUATOR_SEMANTIC_VERSION",
+    "evaluate_clip_to_qualification_bake",
+    "make_qualified_motion_bake_provider",
     "ControlledInterventionEvidenceV1",
     "proof_probe_fingerprint_v1",
     "attribute_signature_owner_v1",

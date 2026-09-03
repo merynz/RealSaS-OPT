@@ -36,7 +36,7 @@ No fifth learned subsystem is currently authorized by V4 architecture/current so
 | Failure signatures | `compiler/realsas_compiler_services/proof/failure_signatures.py` | PROMOTED; DIAGNOSTIC ONLY |
 | Controlled causal owner attribution | `compiler/realsas_compiler_services/proof/causal_attribution.py` | **PROMOTED / CONTROLLED-INTERVENTION ONLY** |
 | Bounded repair directive + re-proof contract | `compiler/realsas_compiler_services/proof/repair_loop.py` | **PROMOTED / NO IN-PLACE MUTATION** |
-| Repair operation authority registry | `compiler/realsas_compiler_core/repair_registry.py` | **CURRENT / FAIL-CLOSED / 0 EXECUTABLE OPERATIONS** |
+| Repair operation authority registry | `compiler/realsas_compiler_core/repair_registry.py` | **CURRENT / FAIL-CLOSED / 0 EXECUTORS / FIRST-FIT ACCEPTABLE** |
 | Real child-product semantic audit | `compiler/realsas_compiler_core/repair_attempt.py` | **CURRENT / PARENT-LINEAGE + ACTUAL-DELTA GATE** |
 | Proof-to-deploy bake handoff | `compiler/realsas_compiler_services/export/qualification_bake.py` | **CURRENT / SAME-BAKE / NO REPLAY** |
 | Runtime deploy bake codec | `compiler/realsas_compiler_services/export/runtime_deploy_bake.py` | PROMOTED |
@@ -47,12 +47,13 @@ No fifth learned subsystem is currently authorized by V4 architecture/current so
 | Historical BBW/KKT | v0.5 source-diff reserve | **NOT CURRENT — future SkinProposal/fallback candidate only** |
 | Historical ARAP | v0.5 source-diff reserve | **NOT CURRENT — future typed corrective-deformer extension only** |
 | Historical XPBD + SDF contact | v0.5 source-diff reserve | **NOT CURRENT — future secondary-dynamics/contact extension only** |
-| Rig parent repair executor | historical candidate | **BLOCKED — must re-enter current proposal/qualification seam** |
-| Retained weight-candidate repair executor | historical candidate | **BLOCKED — current retained-candidate portfolio absent** |
+| Rig parent repair executor | historical candidate | **NOT CURRENT — future proposal/requalification operation only** |
+| Retained weight-candidate repair executor | historical candidate | **NOT CURRENT — future retained-candidate/requalification operation only** |
 
 Retraction evidence: `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json`.  
 P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.  
-Historical numerical disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`.
+Historical numerical disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`.  
+Repair execution disposition: `canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json`.
 
 ## Runtime
 
@@ -64,6 +65,15 @@ Historical numerical disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DIS
 | Exact `.rss/.rsr` -> sealed C++ open/sample/render probe | `tests/runtime/current_v4_native_package_probe.cpp` | **HARNESS READY; CURRENT-SOURCE EXECUTION PENDING RUNNER** |
 
 `RUNTIME_CONSUMPTION` inside the product proof is a **pre-export compatibility** proof domain, not evidence that the C++ package was executed. Post-export native execution is a separate required interlock.
+
+## Repair behavior
+
+Automatic repair is **not** a required current product capability or proof domain. The current first-fit policy is:
+
+- `ProductProofBundleIR.overall_status == PASS` -> runtime export may proceed;
+- `FAIL` or `ABSTAIN` -> stop fail-closed;
+- no historical repair executor receives automatic authority;
+- future executor promotion must preserve the current distinct-child + bounded-owner-local + same-probe re-proof contract.
 
 ## Research / evidence zones
 
@@ -80,8 +90,9 @@ Historical numerical disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DIS
 - Real-family FIT: **NOT AUTHORIZED**
 - Directional P0 source/math closure: **READY**
 - Historical numerical source-diff: **DONE / NO ADDITIONAL CURRENT BACKEND PROMOTION**
+- Repair-executor seam decision: **DONE / 0 EXECUTORS ACCEPTABLE FAIL-CLOSED**
 - Native current-source interlock: **PENDING RUNNER EXECUTION**
-- Current work: **repair-executor seam decision -> native milestone gate when runner available -> restoration-wide closure -> refreeze/FIT decision**
+- Current work: **native milestone gate when runner available -> restoration-wide closure -> refreeze/FIT decision**
 
 ## Promotion rule
 

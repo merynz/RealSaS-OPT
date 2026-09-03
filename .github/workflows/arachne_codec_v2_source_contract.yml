@@ -4,7 +4,10 @@ on:
   pull_request:
     paths:
       - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'compiler/realsas_compiler_core/skin.py'
       - '.github/workflows/arachne_codec_v2_source_contract.yml'
+      - '.github/workflows/arachne_shipping_boundary.yml'
+      - '.github/workflows/skin_field_codec_shipping_capacity.yml'
   push:
     branches:
       - source/generic-completion-v1-20260902
@@ -12,7 +15,10 @@ on:
       - behavioral/geppetto-v2-integrity-v1-20260903
     paths:
       - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'compiler/realsas_compiler_core/skin.py'
       - '.github/workflows/arachne_codec_v2_source_contract.yml'
+      - '.github/workflows/arachne_shipping_boundary.yml'
+      - '.github/workflows/skin_field_codec_shipping_capacity.yml'
 
 jobs:
   arachne-codec-v2-source-contract:
@@ -40,46 +46,18 @@ jobs:
           PYTHONHASHSEED: '0'
         run: |
           python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_objective_causal_diagnostic.py
-      - name: Diagnose post-PASS Codec A0 objective forces
-        env: *det_env
-        run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_force_decomposition_diagnostic.py
-      - name: Diagnose full frozen-panel A0 reconstruction-only objective
-        env: *det_env
-        run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_reconstruction_ab_diagnostic.py
-      - name: Diagnose full frozen-panel A0 optimizer cooling
-        env: *det_env
-        run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_optimizer_cooling_diagnostic.py
-      - name: Diagnose clean ID-bound Codec A0 encoder bypass
-        env: *det_env
-        run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_encoder_bypass_bound_diagnostic.py
-      - name: Diagnose clean ID-bound Codec A0 point-control pair geometry
-        env: *det_env
-        run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_pair_geometry_bound_diagnostic.py
-      - name: Diagnose complete canonical V2 pair contract
-        env: *det_env
-        run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_full_pair_contract_bound_diagnostic.py
-      - name: Diagnose cosine-converged Codec A0 row error anatomy
-        env: *det_env
-        run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_row_error_anatomy_diagnostic.py
-      - name: Verify canonical skin target row binding and frozen behavioral panel
-        env: *det_env
-        run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel_bound_v2.py
-      - name: Verify shipping Codec capacity through Compiler and LBS
-        env: *det_env
-        run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_capacity_v1.py
-      - name: Run Arachne/codec source gates
+      - name: Run Arachne and Codec source invariants
         env: *det_env
         run: |
           python -m pytest -q -s \
             experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py \
             experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py \
             experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py
+      - name: Enforce stable shipping Codec A0 through Compiler and LBS
+        env: *det_env
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_shipping_stable_v1.py
+      - name: Enforce shipping Arachne A1 through frozen shipping Codec, Compiler and LBS
+        env: *det_env
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_arachne_shipping_boundary_v1.py

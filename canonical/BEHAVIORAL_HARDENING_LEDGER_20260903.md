@@ -49,7 +49,7 @@ Ongoing Codec/harness changes invalidate promotion. Family selection remains blo
 
 ## Gate 3 — Arachne / SkinFieldCodec
 
-**Status:** `FAIL_A0 — CLEAN SHARP POST-PASS STABILITY SEAM`
+**Status:** `FAIL_A0 — CLEAN SHARP NARROW REPRESENTATION/OBJECTIVE FLOOR`
 
 Records:
 - preregistration: `canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md`
@@ -57,6 +57,8 @@ Records:
 - first clean Bound V2 run: `canonical/ARACHNE_CODEC_BOUND_V2_FIRST_RUN_20260903.md`
 - hard-tail diagnostic: `canonical/SKIN_FIELD_CODEC_A0_TAIL_DIAGNOSTIC_20260903.md`
 - global-temperature diagnostic: `canonical/SKIN_FIELD_CODEC_A0_TEMPERATURE_DIAGNOSTIC_20260903.md`
+- post-PASS force decomposition: `canonical/SKIN_FIELD_CODEC_A0_FORCE_DECOMPOSITION_20260903.md`
+- reconstruction/cooling falsifications: `canonical/SKIN_FIELD_CODEC_A0_RECONSTRUCTION_COOLING_DIAGNOSTICS_20260903.md`
 
 Frozen authority chain:
 `Codec A0 -> frozen Codec -> Arachne A1 -> SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`
@@ -96,44 +98,42 @@ Workflow `33756424156`, job `100651837229`, `westus`:
 - canonical row permutation `[0,1,10,11,12,13,14,2,3,4,5,6,7,8,9]`;
 - catastrophic V1 plateau disappears;
 - final A0 p95 `0.0448788` and deformation ratio `0.00790533` individually PASS;
-- row p95 oscillates around frozen `0.05` ceiling;
-- only one consecutive PASS remains at step `1536`;
+- row p95 repeatedly crosses the frozen `0.05` ceiling;
+- no three-consecutive acceptance;
 - authoritative status `FAIL_A0`; A1 not run.
-
-Therefore the clean seam is not representational incapacity. The Codec repeatedly reaches an acceptable sharp field but does not remain inside the frozen A0 envelope for three consecutive checks.
 
 ### Falsified repair hypotheses
 
-#### Generic top-10% row-L1 tail, weight 1.0
-Workflow `33756798991`, job `100653091683`:
-- chain current PASS `480`, +tail PASS `1056`;
-- branch current PASS `768`, +tail PASS `1376`;
-- sharp current remains FAIL, +tail also remains FAIL and ends worse (`p95 0.0899342`).
+- generic top-10% row-L1 tail, weight `1.0`: `FALSIFIED`; sharp remained FAIL and ended worse;
+- frozen initial global softmax temperature: `FALSIFIED`; sharp worsened;
+- weight decay as post-PASS destroyer: `FALSIFIED`; WD=0 continuation was effectively identical;
+- removing A0 deformation MSE as generic solution: `FALSIFIED` by full-panel A/B `33758209799 / 100657705289`; reconstruction-only also failed sharp (`p95 0.0521763`);
+- constant `1e-3` LR overshoot as generic solution: `FALSIFIED` by cosine-to-zero A/B `33758542932 / 100658825104`.
 
-`TOP10_TAIL_WEIGHT_1_CLOSES_SHARP_STABILITY = FALSE`
+### Current clean evidence
 
-No A0 tail source repair is authorized from this result; weight/fraction must not be tuned against the observed witness.
+Cosine cooling is diagnostically important even though it does not solve the gate. On `sharp_fork_5`, as LR decays to zero the field settles rather than oscillates:
 
-#### Freeze global softmax temperature at generic initialization
-Workflow `33757183471`, job `100654330332`, `northcentralus`:
-- frozen initial temperature accelerates chain (`320`) and branch (`576`);
-- sharp still has no sustained PASS and ends materially worse (`p95 0.118097`, deformation ratio `0.0204097`) than learned-temperature current behavior.
+- step `1376`: p95 `0.0508867`;
+- step `1440`: `0.0508573`;
+- step `1504`: `0.0504006`;
+- step `1536`, LR `0`: p95 `0.0504013`, deformation ratio `0.00662181`.
 
-`LEARNED_GLOBAL_TEMPERATURE_IS_THE_SHARP_STABILITY_ROOT_CAUSE = FALSE`
+Codec dropout is `0.0` and deterministic execution is enabled. Therefore the remaining clean seam is no longer best explained as stochastic forward noise or constant-LR overshoot. The evidence supports a very narrow floor somewhere in the current `teacher encoder -> latent -> decoder` representation/objective chain, but does not yet localize which side owns it.
 
-No fixed-temperature source repair is authorized.
+### Next authorized causal split
 
-### Current causal diagnostic
+Run a corrected-ID-binding comparison under identical downstream objective/evaluation:
 
-The next diagnostic avoids proposing a new hyperparameter. At the first clean ID-bound scalar PASS checkpoint of `sharp_fork_5`, the exact Codec model and AdamW state are cloned and continued for the same 32 steps under isolated existing forces:
-- full current objective;
-- reconstruction only (`CE + mean L1`);
-- cross entropy only;
-- mean pair-L1 only;
-- deformation MSE only;
-- full current objective with weight decay disabled after the branch point.
+`teacher encoder -> latent -> same decoder`
 
-The frozen Bound V2 panel is unchanged and remains the only behavioral PASS authority. The diagnostic is intended to identify the first training force that destroys or preserves an already-good sharp field before any new source repair is considered.
+versus
+
+`free per-joint latent -> same decoder`.
+
+If free latent closes sharp, the teacher encoder/summary path is the first demonstrated bottleneck. If it does not, the decoder/conditioning path remains responsible. Historical pre-binding encoder-bypass diagnostics are contaminated and cannot be reused.
+
+No Codec architecture source repair is authorized before this split is observed.
 
 ## Later gates — not yet opened
 

@@ -1,0 +1,40 @@
+{
+  "schema": "realsas.compiler_lbs_production_promotion.v1",
+  "created_on": "2026-09-03",
+  "source": {
+    "path": "experiments/geppetto_arachne_r6_20260901/verified_lbs_v1.py",
+    "git_blob_sha1": "de6fcdf2f2251d401abda8f5bd705f8f25bad393",
+    "role_before_promotion": "evaluation_only_experiment_kernel"
+  },
+  "targets": {
+    "numerical_kernel": "compiler/realsas_compiler_services/numerics/lbs.py",
+    "causal_fixture_mutations": "compiler/realsas_compiler_services/proof/causal_mutations.py",
+    "canonical_consumer": "compiler/realsas_compiler_core/deformation.py"
+  },
+  "promotion_mode": "PROMOTE_REBIND_FROM_EXPERIMENT_EVIDENCE",
+  "authority": {
+    "canonical_product_owner": "compiler/realsas_compiler_core/",
+    "numerics_is_subordinate_service": true,
+    "probe_4x4_transforms_are_canonical_motion": false,
+    "canonical_motion_remains": "PUPPET_LOCAL_2D_2P5D",
+    "causal_mutations_may_repair_production_state": false,
+    "experiment_runtime_imports_allowed_in_canonical_core": false
+  },
+  "preserved_semantics": [
+    "finite affine homogeneous probe validation",
+    "nonnegative simplex LBS weights",
+    "deterministic standard LBS evaluation",
+    "RMS/P95/max deformation measurement",
+    "simplex-preserving detached weight-mass counterfactual"
+  ],
+  "verification": {
+    "py_compile": "PASS",
+    "controlled_counterfactual": {
+      "baseline_rms": 0.0,
+      "mutated_rms": 0.3535533905932738,
+      "mutated_p95": 0.475,
+      "status": "PASS"
+    },
+    "canonical_core_experiment_import_firewall_added": true
+  }
+}

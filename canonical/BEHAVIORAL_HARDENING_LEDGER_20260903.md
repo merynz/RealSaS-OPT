@@ -10,9 +10,7 @@
 
 ## Purpose
 
-This file is the single status entrypoint for the post-freeze behavioral hardening sequence. Detailed causal evidence remains in subsystem-specific canonical records; this ledger records only the current epistemic state, authoritative evidence pointers and next gate.
-
-Historical failures are never rewritten after a later repair. `PASS` means only the proposition named by that gate.
+Single status entrypoint for post-freeze behavioral hardening. Detailed causal evidence remains in subsystem records. Historical failures are preserved; later causal corrections reclassify claims rather than erasing runs.
 
 ## Gate 1 — Geppetto train/decode/Compiler behavior
 
@@ -21,154 +19,130 @@ Historical failures are never rewritten after a later repair. `PASS` means only 
 Canonical detail:
 `canonical/GEPPETTO_V2_BEHAVIORAL_CLOSURE_20260903.md`
 
-Key closure:
-- generic train/decode contract mismatches were causally exposed;
-- uncertainty NLL shared-latent gradient leak was confirmed and repaired;
-- actual `optimize -> generate/propose -> Compiler-qualified mechanical structure` behavioral witnesses pass;
-- preregistered heterogeneous panel `wave_chain_4`, `offset_star_4`, `fork_5` passes;
-- independent 3-control witness passes under the current anonymous mechanical acceptance rule;
-- cross-region replay `chilecentral -> westus3` passes.
-
-No real-family constants or family-specific repair branches were introduced.
+Verification:
+- generic behavioral panel and independent witness PASS through actual shipping proposal / Compiler mechanical authority;
+- cross-region `chilecentral -> westus3` replay PASS;
+- no real-family repair constants.
 
 ## Gate 2 — IRIS privileged-input firewall
 
 **Status:** `PASS SOURCE FIREWALL / CLOSED`
 
-Historical scope:
-`canonical/IRIS_LEAK_SCOPE_20260903.md`
-
-Repair closure:
-`canonical/IRIS_PRIVILEGED_INPUT_FIREWALL_REPAIR_V1_20260903.md`
-
-Successor correction:
-`canonical/IRIS_REPROJECTION_V2_PRIVILEGED_INPUT_CORRECTION_20260903.md`
-
-Pre-repair causal result:
-- alpha path reachable;
-- absolute view slot broke joint view re-enumeration equivariance;
-- mask/hull path controlled learned hypothesis-domain candidates/rays.
-
-Repaired source contract:
-- learned native input is RGB-only;
-- no absolute learned view-slot identity;
-- camera/candidate relation enters through analytic projected geometry;
-- production Q-domain is deterministic camera-only full-frame lattice;
-- mask/hull remains deterministic Gate-0 diagnostic only;
-- unsealed/mask/pruned/forged domains fail closed before foundation/learner execution.
+Records:
+- `canonical/IRIS_LEAK_SCOPE_20260903.md`
+- `canonical/IRIS_PRIVILEGED_INPUT_FIREWALL_REPAIR_V1_20260903.md`
+- `canonical/IRIS_REPROJECTION_V2_PRIVILEGED_INPUT_CORRECTION_20260903.md`
 
 Verification:
 - `33751592814` westcentralus: firewall `4/4`, combined IRIS `24/24` PASS;
 - `33751730077` westus3: firewall `4/4`, combined IRIS `24/24` PASS;
-- architecture-freeze prerequisite run `33751730186`: expanded suite `65/65 PASS`.
+- architecture-freeze prerequisite run `33751730186`: `65/65 PASS` before later Codec changes.
 
-Historical learned IRIS checkpoints/metrics produced under the superseded contract remain `QUARANTINED`.
+Historical learned IRIS checkpoints/metrics under the superseded privileged-input contract remain `QUARANTINED`.
 
-## Current architecture candidate
+## Architecture candidate state
 
-Architecture-freeze prerequisite run `33751730186`:
-- source eligibility: `PASS_SOURCE_ELIGIBLE_FOR_FREEZE`;
-- generic source count: `38`;
-- candidate fingerprint: `1c6878b2e1e8cbd30a055849a64c8fe68558924e0a874de2e8fffa2e24ad7575`;
-- `family_selection_authorized = false`;
-- only final workflow failure: expected `FAMILY_SELECTION_BLOCKED__SOURCE_CHANGED_AFTER_FREEZE`.
+Old candidate fingerprint from run `33751730186`:
+`1c6878b2e1e8cbd30a055849a64c8fe68558924e0a874de2e8fffa2e24ad7575`
 
-This fingerprint is a candidate only, not a seal. It is stale relative to ongoing Codec hardening and must not be promoted.
+**Status:** `STALE CANDIDATE ONLY / NOT A SEAL`
+
+Ongoing Codec/harness changes make this fingerprint ineligible for promotion. Family selection remains blocked.
 
 ## Gate 3 — Arachne / SkinFieldCodec behavioral seam
 
-**Status:** `FAIL — CODEC A0; ONE OBJECTIVE BUG CLOSED; REPRESENTATION CAUSE UNDER DIAGNOSIS`
+**Status:** `BOUND_V2 RUNNING — V1 N>=10 IMPLEMENTATION EVIDENCE INVALID`
 
 Preregistration:
 `canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md`
 
-Failure / causal record:
+Failure/correction record:
 `canonical/ARACHNE_CODEC_BEHAVIORAL_FAILURE_20260903.md`
 
-Frozen panel:
+Frozen witnesses and all scientific thresholds/protocols remain unchanged:
 - `chain_blend_3`, seed `20260921`;
 - `branch_blend_4`, seed `20260922`;
 - `sharp_fork_5`, seed `20260923`.
 
-Authority chain under test:
+Authority chain remains:
 
-`Codec A0 -> frozen Codec -> Arachne A1 -> shipping SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS deformation`
+`Codec A0 -> frozen Codec -> Arachne A1 -> SkinProposalIR -> Compiler.qualify_skin -> QualifiedSkinIR -> verified LBS`
 
-PASS thresholds/protocol were committed before first execution and remain unchanged after observing results.
+### Historical V1 observation
 
-### First preregistered execution
+Run `33752571671`, job `100639284377`:
+- chain full PASS;
+- branch reported FAIL_A0;
+- sharp reported FAIL_A0.
 
-Workflow run `33752571671`, job `100639284377`, runner region `eastus`, source/behavioral suite result: `2 failed, 20 passed`.
+### Confirmed independent source bug
 
-`chain_blend_3`:
-- A0 sustained PASS at step `640`;
-- A1 shipping/Compiler/LBS sustained PASS at step `320`.
+Historical Codec active-weighted CE changed relative targets inside a simplex row, so exact teacher W was not stationary.
 
-`branch_blend_4`:
-- `FAIL_A0`; A1 was not run;
-- first-run final row-L1 p95 `0.0938273296` fails frozen `0.05`;
-- deformation ratio `0.0368942656` already passes.
+Repairs:
+- `f0fe52ab625695d46bed7007acba39fe4cdfb248` — active emphasis changed to teacher-only row scalar;
+- `9692ac12a44769212906616b6bca13861022d42c` — exact-truth stationarity regression.
 
-`sharp_fork_5`:
-- `FAIL_A0`; A1 was not run;
-- first-run final row-L1 p95 `0.743847549`, deformation ratio `0.240943387`;
-- late plateau/oscillation rules out claiming simple unfinished convergence without evidence.
+Post-repair exact teacher gradient is approximately numerical zero (`4.43e-17`). This finding remains valid independently of the panel harness issue.
 
-### Causal decomposition
+### Critical V1 harness falsification
 
-Workflow run `33753462948`, job `100642169460`, `northcentralus`:
+`ArachneConditioningAdapter` sorts `surface_id` lexicographically. The V1 panel generated teacher W/rest rows in numeric witness creation order and did not rebind them to `conditioning.surface_ids`.
 
-- exact `log(W_teacher)` pair-logit oracle passes both frozen A0 metrics at approximately numerical precision;
-- therefore frozen metrics/thresholds are feasible;
-- free per-joint latent with the same decoder turns `branch_blend_4` into a transient behavioral PASS (`p95 ~0.0261`, deformation `~0.00715`), causally implicating the teacher encoder compression for that witness;
-- the same bypass improves `sharp_fork_5` from `p95 ~0.744` to `~0.105` and deformation to `~0.025`, but does not fully pass; encoder compression is material but not sufficient root cause.
+Consequences:
+- `chain_blend_3`, N=9: identity order, unaffected;
+- `branch_blend_4`, N=12: conditioning order `0,1,10,11,2,...,9`;
+- `sharp_fork_5`, N=15: conditioning order `0,1,10,11,12,13,14,2,...,9`.
 
-### Confirmed independent Codec objective bug
+Therefore branch/sharp V1 targets were attached to wrong canonical surface rows.
 
-Historical active-weighted CE used different class multipliers inside the same simplex row. A generic mixed active/inactive truth row produced max pre-softmax gradient `~5.99e-4` at exact teacher W, proving exact truth was not stationary.
+Causal replay `33756078567`, job `100650698374`, `mexicocentral`, changed only ID-axis binding while preserving seed/model/LR/WD/horizon/threshold/stability:
+- branch: sustained A0 PASS at step `544`, p95 `0.0287868`, deformation ratio `0.0104174`;
+- sharp: final individual PASS p95 `0.0390133`, deformation ratio `0.00743765`, but only `2` consecutive PASS checks by frozen step `1536`.
 
-This is a genuine generic contract violation, but telemetry shows it cannot explain the branch failure and is far too small to explain the sharp plateau by itself.
+Thus:
 
-Repair:
-- `f0fe52ab625695d46bed7007acba39fe4cdfb248`: active emphasis changed to a teacher-only row scalar so relative within-row truth is preserved;
-- `9692ac12a44769212906616b6bca13861022d42c`: positive falsification converted to permanent exact-truth stationarity regression.
+`V1_BRANCH_SHARP_CAPACITY_CLAIMS = INVALID / CONTAMINATED_BY_ROW_BINDING_BUG`
 
-No A0 behavioral closure is claimed from this repair alone.
+Earlier free-latent and pair-geometry representation diagnostics used the same bad binding. Their numeric logs remain provenance, but they cannot justify source architecture changes.
 
-### Current open diagnostic
+### Active successor authority
 
-A source-neutral diagnostic now tests whether the Codec decoder is missing explicit relational geometry:
-- same teacher encoder;
-- same hidden `32`, latent `8`;
-- same optimizer/horizon/objective;
-- decoder additionally receives only canonical point-control `dx,dy,dz,distance` relation channels.
+Historical V1 harness is preserved unchanged:
+`test_arachne_v2_behavioral_panel.py`
 
-If this closes the failing witnesses, explicit pair-relation conditioning becomes a justified generic repair candidate. If not, representation diagnosis continues without touching the frozen panel.
+Corrected successor:
+`test_arachne_v2_behavioral_panel_bound_v2.py`
 
-**Frozen rule:** do not relax witness definitions, seeds, thresholds, optimizer horizons or acceptance protocol. Do not patch A1 while A0 is unresolved.
+V2 changes only canonical target-axis binding. Witness definitions, seeds, architectures, objectives, optimizer settings, horizons, thresholds and three-consecutive-PASS rule are unchanged.
+
+Active CI now requires:
+1. Codec exact-truth stationarity regression;
+2. canonical row-binding cause regression;
+3. full Bound V2 A0 -> A1 -> Compiler -> LBS frozen panel;
+4. Arachne/Codec source gates.
+
+No representation repair is authorized until Bound V2 produces clean evidence.
 
 ## Later gates — not yet opened
 
-After Arachne/Codec behavioral closure, remaining deterministic/behavioral seams will be opened one at a time rather than globally re-audited:
+After Arachne/Codec closure:
 - MWB / mesh-weight binding semantics;
 - appearance/directional raster provenance;
 - motion/runtime state mutation;
 - proof/runtime fail-closed lineage and causal corruption.
 
-No downstream gate may be used to hide an unresolved upstream behavioral failure.
+No downstream gate may hide an unresolved upstream behavioral failure.
 
 ## Deferred repository hygiene task
 
 **Status:** `DEFERRED UNTIL HARDENING SEQUENCE IS STABLE`
 
-User-requested goal: make the project read as one canonical repository rather than several overlapping work streams, without deleting provenance.
-
-Planned non-destructive scope:
+User-requested non-destructive goal:
 - inventory branch/PR/top-level path ownership;
-- define canonical branch taxonomy and naming rules;
-- distinguish active, frozen, audit and archival references;
-- create a single repository-structure / branch-governance map;
-- preserve all historical commits/records;
-- avoid branch/path renaming while a scientific gate is actively running.
-
-No deletion is authorized by this task.
+- define canonical branch taxonomy/naming;
+- distinguish active/frozen/audit/archive references;
+- create one repository structure / branch governance map;
+- preserve historical commits/records;
+- no deletion;
+- no disruptive branch/path renaming while a scientific gate is active.

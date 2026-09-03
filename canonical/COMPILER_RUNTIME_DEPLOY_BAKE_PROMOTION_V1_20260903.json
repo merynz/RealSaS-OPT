@@ -1,0 +1,39 @@
+{
+  "schema": "realsas.compiler_runtime_deploy_bake_promotion.v1",
+  "created_on": "2026-09-03",
+  "source_authority": {
+    "archive": "RealSaS_M4_v0_5_CANONICAL_MECHANICAL_MEANING_SOURCE.zip",
+    "archive_sha256": "03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130",
+    "path": "compiler/realsas_contracts/runtime_deploy_bake.py",
+    "size_bytes": 9797,
+    "sha256": "63455783459d685637a12a1ef573e3c64945d8b50e6bcb7ce3079ba393a699df"
+  },
+  "target": {
+    "path": "compiler/realsas_compiler_services/export/runtime_deploy_bake.py",
+    "promotion_mode": "PROMOTE_EXACT_SUBORDINATE_CODEC",
+    "byte_exact": true
+  },
+  "authority": {
+    "canonical_product_owner": "compiler/realsas_compiler_core/",
+    "codec_may_decide_proof_status": false,
+    "codec_may_generate_deformation": false,
+    "codec_may_replay_solver_at_export": false,
+    "frames_must_be_qualification_owned_before_encoding": true,
+    "runtime_is_subordinate_consumer": true
+  },
+  "preserved_contract": [
+    "one sample time per qualification-owned frame",
+    "stable mesh identity and vertex cardinality across frames",
+    "per-frame semantic SHA-256",
+    "per-view draw order",
+    "float32 little-endian frame coordinates",
+    "zlib compressed payload with SHA-256 integrity"
+  ],
+  "verification": {
+    "py_compile": "PASS",
+    "roundtrip_test": "PASS",
+    "mesh_identity_drift_rejection": "PASS",
+    "payload_tamper_rejection": "PASS",
+    "local_pytest_count": 3
+  }
+}

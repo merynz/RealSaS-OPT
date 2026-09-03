@@ -1,0 +1,44 @@
+name: runtime-deploy-bake-promotion-gate
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_services/export/**'
+      - 'compiler/test_runtime_deploy_bake_service_v1.py'
+      - 'canonical/COMPILER_RUNTIME_DEPLOY_BAKE_PROMOTION_V1_20260903.json'
+      - '.github/workflows/runtime_deploy_bake_promotion_gate.yml'
+  push:
+    paths:
+      - 'compiler/realsas_compiler_services/export/**'
+      - 'compiler/test_runtime_deploy_bake_service_v1.py'
+      - 'canonical/COMPILER_RUNTIME_DEPLOY_BAKE_PROMOTION_V1_20260903.json'
+      - '.github/workflows/runtime_deploy_bake_promotion_gate.yml'
+
+jobs:
+  runtime-deploy-bake-promotion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pytest
+      - name: Verify exact promoted codec bytes
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          manifest = json.loads(Path('canonical/COMPILER_RUNTIME_DEPLOY_BAKE_PROMOTION_V1_20260903.json').read_text())
+          path = Path(manifest['target']['path'])
+          actual = hashlib.sha256(path.read_bytes()).hexdigest()
+          assert manifest['target']['byte_exact'] is True
+          assert actual == manifest['source_authority']['sha256'], (actual, manifest['source_authority']['sha256'])
+          PY
+      - name: Compile deploy-bake service
+        run: |
+          python -m py_compile \
+            compiler/realsas_compiler_services/export/__init__.py \
+            compiler/realsas_compiler_services/export/runtime_deploy_bake.py \
+            compiler/test_runtime_deploy_bake_service_v1.py
+      - name: Deploy-bake contract tests
+        run: PYTHONPATH=. python -m pytest -q compiler/test_runtime_deploy_bake_service_v1.py

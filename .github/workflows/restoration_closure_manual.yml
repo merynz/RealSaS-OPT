@@ -2,6 +2,7 @@ name: restoration-closure-manual
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   restoration-closure:

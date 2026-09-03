@@ -127,11 +127,7 @@ def _teacher_topology_exact_diagnostic(qualified, conditioning, target: Geppetto
 
 
 def _qualified_mechanical_status(model, surface, conditioning, target) -> tuple[bool, str, bool]:
-    """Apply the canonical MECHANICAL_STRUCTURE acceptance semantics to actual G.
-
-    Teacher graph equality is intentionally retained only as a diagnostic. The
-    frozen first-family contract explicitly says it is not the product objective.
-    """
+    """Apply the canonical anonymous MECHANICAL_STRUCTURE acceptance semantics."""
     try:
         proposal = model.propose(conditioning, resource_step_limit=len(surface.surface_nodes))[0]
         if len(proposal.joints) != len(target.positions_normalized):
@@ -145,14 +141,17 @@ def _qualified_mechanical_status(model, surface, conditioning, target) -> tuple[
             for j in qualified.joints
         )
         deform_root_count = len(qualified.deform_root_ids)
+        unsupported_joint_count = sum(not j.support_surface_ids for j in qualified.joints)
         mechanical_pass = (
             len(qualified.joints) > 0
             and deform_root_count > 0
             and illegal_parent_count == 0
+            and unsupported_joint_count == 0
         )
         teacher_exact = _teacher_topology_exact_diagnostic(qualified, conditioning, target)
         status = (
-            f"QUALIFIED_MECHANICAL:roots={deform_root_count}:illegal_parents={int(illegal_parent_count)}"
+            f"QUALIFIED_MECHANICAL:roots={deform_root_count}:"
+            f"illegal_parents={int(illegal_parent_count)}:unsupported={int(unsupported_joint_count)}"
         )
         return bool(mechanical_pass), status, bool(teacher_exact)
     except Exception as exc:  # failure is evidence; preserve type/message in trace
@@ -246,6 +245,6 @@ def test_small_generic_witness_optimizes_shipping_decode_and_compiler_qualified_
 
     # Loss and teacher-topology equality are diagnostic only. PASS authority is
     # the actual shipping decode plus Compiler-qualified G under the canonical
-    # MECHANICAL_STRUCTURE semantics, sustained for the preregistered checks.
+    # anonymous MECHANICAL_STRUCTURE semantics, sustained for the preregistered checks.
     assert pass_step is not None, diagnostic
     assert stable >= FROZEN_HARNESS_REQUIRED_STABLE_PASSES, diagnostic

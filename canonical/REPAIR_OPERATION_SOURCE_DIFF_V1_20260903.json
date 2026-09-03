@@ -1,0 +1,47 @@
+{
+  "schema": "RealSaS.RepairOperationSourceDiff.v1",
+  "date": "2026-09-03",
+  "status": "FAIL_CLOSED_NO_EXECUTOR_PROMOTED",
+  "historical_candidates": [
+    {
+      "operation_id": "RIG_PARENT_REQUALIFICATION_V1",
+      "historical_path": "compiler/realsas_synthesis/causal_repair.py",
+      "historical_sha256": "f4c088789dbd85e5ef9361d6f66846b19e9c81cb0e8a0d68b571945f7d53daa4",
+      "historical_behavior": "changes the parent endpoint of one existing final-rig edge without creating controls/edges",
+      "current_disposition": "BLOCKED_REQUIRES_CURRENT_PROPOSAL_REQUALIFICATION_SEAM",
+      "reason": "current QualifiedSkeletonIRV2 is optimizer-qualified authority; direct final parent mutation would bypass current graph qualification"
+    },
+    {
+      "operation_id": "WEIGHT_RETAINED_CANDIDATE_V1",
+      "historical_path": "compiler/realsas_weight/causal_repair.py",
+      "historical_sha256": "2aa2b4a52d845c1a926c298f94b155fda54a137aac29044bc2ed6193780480f3",
+      "historical_behavior": "swaps only to a hard-safe retained weight candidate and requires same-spec replay",
+      "current_disposition": "BLOCKED_MISSING_CURRENT_RETAINED_CANDIDATE_PORTFOLIO",
+      "reason": "current qualified skin does not preserve the historical retained-alternative portfolio needed for provenance-safe candidate switching"
+    }
+  ],
+  "current_sources": [
+    {
+      "path": "compiler/realsas_compiler_core/repair_registry.py",
+      "sha256": "5f850bf870615a8e256aa7e2c42866518f834d746ee0487263d3b5a7ce745bf8"
+    },
+    {
+      "path": "compiler/realsas_compiler_core/repair_attempt.py",
+      "sha256": "c74cc5ee86ab0a0ad348b025faa61d342a0b91f16f4dcb51f550f5fe0ef2deb2"
+    }
+  ],
+  "core_firewalls": [
+    "HISTORICAL_SOURCE_PRESENCE_NEVER_IMPLIES_EXECUTABLE_REPAIR_AUTHORITY",
+    "REPAIR_OPERATION_MUST_HAVE_CURRENT_REGISTRY_QUALIFICATION",
+    "CHILD_PARENT_STATE_HASH_MUST_EQUAL_REAL_BASELINE_PRODUCT_STATE",
+    "CHILD_PRODUCT_STATE_MUST_BE_DISTINCT",
+    "CORE_COMPUTES_ACTUAL_SEMANTIC_DELTA_FROM_PARENT_AND_CHILD",
+    "ACTUAL_CHANGE_MUST_FIT_QUALIFIED_OPERATION_SCOPE",
+    "ARBITRARY_DECLARED_CHANGED_PATHS_ARE_NOT_TRUSTED"
+  ],
+  "local_regression": {
+    "test": "tests/compiler/test_repair_child_attempt_gate_v1.py",
+    "result": "5 passed",
+    "historical_registry_records_executable": 0
+  }
+}

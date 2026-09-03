@@ -24,7 +24,7 @@ Promote still-valuable historical Compiler/runtime production knowledge **behind
 | Diagnostic failure-signature semantic rebind | **DONE / CI PASS** | `5665ecacb77c02e53297340249b0972981a5c4bc` |
 | Current learned-model source ownership promotion | **DONE IN CURRENT TREE** | `models/` + model READMEs + `SYSTEM_INDEX.md` |
 | IRIS -> Compiler substrate ownership seam | **DONE** | `compiler/realsas_compiler_core/substrate/iris_v2.py` |
-| Compiler substrate physical normalization | **DONE** | `bc443d063d4d8f0bd52981ec2db5b99a795985e1` |
+| Compiler substrate physical normalization | **DONE** | `bc443d063d4e804f5a19270e8a77c388f107` |
 | Compiler mesh physical normalization | **DONE** | `295b798b1fb40ccb1752afe9da9378dfe8734262` |
 | Direct authored-motion evaluator promotion | **RETRACTED** | `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json` |
 | Qualification-owned motion bake + fail-closed proof seam | **DONE** | `proof/motion_bake.py`, `proof/motion_frame_metrics.py`, current `proof_engine.py` |
@@ -40,11 +40,15 @@ Promote still-valuable historical Compiler/runtime production knowledge **behind
 | Current V4 proof/bake -> native-v2 projection | **SOURCE CLOSURE READY** | proof-owned rest/frame XY, exact local raster UV, no solver replay |
 | Current V4 `.rss/.rsr` -> sealed C++ runtime interlock | **HARNESS READY / EXECUTION PENDING RUNNER** | `tests/runtime/current_v4_native_package_probe.cpp`; Actions job never started (`runner_id=0`) |
 | Historical CDT / BBW-KKT / ARAP / XPBD/contact source diff | **DONE / NO CURRENT PROMOTION REQUIRED** | `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json` |
-| Full behavioral + complete-E2E restoration closure | **PENDING** | required before refreeze decision |
+| Canonical-main-before-fit gate | **SEALED / MANDATORY** | `canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json` |
+| Full behavioral + complete-E2E restoration closure | **PENDING** | required before main promotion |
+| Canonical `main` promotion | **BLOCKED UNTIL RESTORATION CLOSURE** | restoration tree must be promoted before any fit work |
+| Post-merge `main` integrity check | **PENDING AFTER MAIN PROMOTION** | required before fit authorization |
 
 P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.  
 Historical numerics disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`.  
-Repair execution disposition: `canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json`.
+Repair execution disposition: `canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json`.  
+Canonical-main-before-fit gate: `canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json`.
 
 ## Repository organization contract
 
@@ -110,6 +114,21 @@ This does **not** block first-fit authorization because automatic repair is neit
 
 Thus historical rig-parent and retained-weight repair code is not restored merely to satisfy a checklist.
 
+## Canonical-main-before-fit rule
+
+Real-family fit work may not begin directly from the restoration branch, a safety branch, or an experiment branch.
+
+Required order:
+
+1. close restoration source/behavioral/native gates;
+2. record an explicit restoration verdict;
+3. promote the closed restoration tree to canonical GitHub `main`;
+4. run a post-merge repository-integrity check on `main`;
+5. freeze that exact `main` commit as the first-fit base;
+6. only then authorize Family-1/FIT work.
+
+The first fit must record the exact canonical `main` commit it descends from.
+
 ## Non-negotiable firewalls
 
 - no historical front-brain/teacher-exact ownership path;
@@ -126,11 +145,13 @@ Thus historical rig-parent and retained-weight repair code is not restored merel
 - no repair may mutate production state without a distinct child lineage and mandatory same-probe re-proof;
 - no permanent current dependency on a dated experiment implementation;
 - no family-specific constants during restoration;
-- no FIT8 / Family-1 execution until restoration closure explicitly re-authorizes it.
+- no FIT8 / Family-1 execution until canonical `main` promotion and post-merge integrity explicitly re-authorize it.
 
 ## Next execution order
 
 1. execute the single milestone P0/native interlock gate when GitHub provides a runner; do not spam reruns;
 2. run restoration-wide source/regression/E2E/native closure gates;
 3. close repository-integrity audit and explicit restoration verdict;
-4. only then decide refreeze and FIT authorization.
+4. promote the closed tree to canonical `main`;
+5. run post-merge `main` integrity and freeze the first-fit base commit;
+6. only then authorize real-family fit work.

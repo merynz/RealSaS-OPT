@@ -19,6 +19,7 @@ on:
       - 'experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_capacity_diagnostic.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
       - '.github/workflows/arachne_codec_v2_source_contract.yml'
   push:
@@ -42,13 +43,14 @@ on:
       - 'experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_source.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_arachne_v2_generic_strength.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_capacity_diagnostic.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_source.py'
       - '.github/workflows/arachne_codec_v2_source_contract.yml'
 
 jobs:
   arachne-codec-v2-source-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -76,7 +78,17 @@ jobs:
             experiments/geppetto_arachne_r6_20260901/train_arachne_r6_a1_v1.py \
             experiments/geppetto_arachne_r6_20260901/eval_arachne_r6_a1_v1.py \
             experiments/geppetto_arachne_r6_20260901/geppetto_conditioning_v2.py \
-            experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel.py
+            experiments/geppetto_arachne_r6_20260901/test_arachne_v2_behavioral_panel.py \
+            experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_capacity_diagnostic.py
+      - name: Diagnose Codec A0 encoder vs decoder capacity
+        env:
+          PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_arachne_codec_v2_capacity_diagnostic.py
       - name: Run Arachne/codec source and behavioral gates
         env:
           PYTHONPATH: .

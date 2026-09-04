@@ -12,10 +12,6 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageOps, ImageDraw
 
-ASSET_ID = "asset_fbc8d57f848df78bd953fbb5"
-CANDIDATE_ID = "kaykit_cc0:93b401d56e2547316f8841a4"
-SOURCE_SHA256 = "93b401d56e2547316f8841a4ac0086011c64d79185c9cb7623567c2dbf125c7d"
-
 
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -35,8 +31,6 @@ def safe_extract(zip_path: Path, dst: Path) -> None:
 
 
 def validate_authority(root: Path, manifest: dict) -> None:
-    if manifest["asset_id"] != ASSET_ID or manifest["selected_candidate_id"] != CANDIDATE_ID:
-        raise RuntimeError("authority manifest identity mismatch")
     for rel, expected in manifest["files"].items():
         p = root / rel
         if not p.is_file():
@@ -47,13 +41,17 @@ def validate_authority(root: Path, manifest: dict) -> None:
         if got != expected["sha256"]:
             raise RuntimeError(f"authority SHA drift: {rel}: {got} != {expected['sha256']}")
     with np.load(root / "primary_geometry.npz", allow_pickle=False) as z:
-        if np.asarray(z["vertices"]).shape != (2937, 3):
-            raise RuntimeError("Mage vertex shape drift")
-        if np.asarray(z["faces"]).shape != (5683, 3):
-            raise RuntimeError("Mage face shape drift")
-        if np.asarray(z["skin"]).shape != (2937, 41):
-            raise RuntimeError("Mage skin shape drift")
-    for v in range(8):
+        required = ("vertices", "faces", "skin")
+        missing = [k for k in required if k not in z]
+        if missing:
+            raise RuntimeError(f"authority geometry missing keys: {missing}")
+        if np.asarray(z["vertices"]).ndim != 2 or np.asarray(z["vertices"]).shape[1] != 3:
+            raise RuntimeError("authority vertices shape drift")
+        if np.asarray(z["faces"]).ndim != 2 or np.asarray(z["faces"]).shape[1] != 3:
+            raise RuntimeError("authority faces shape drift")
+        if np.asarray(z["skin"]).ndim != 2 or np.asarray(z["skin"]).shape[0] != np.asarray(z["vertices"]).shape[0]:
+            raise RuntimeError("authority skin shape drift")
+    for v in range(int(manifest.get("views", 8))):
         with np.load(root / f"V{v}" / "raster_authority.npz", allow_pickle=False) as z:
             res = np.asarray(z["resolution"]).reshape(-1).tolist()
             if res != [1024, 1024]:
@@ -64,16 +62,14 @@ def validate_authority(root: Path, manifest: dict) -> None:
 
 
 def stage_from_master(master_root: Path, dst: Path, manifest: dict) -> Path:
-    src = master_root / "master" / "assets" / ASSET_ID
+    asset_id = manifest["asset_id"]
+    src = master_root / "master" / "assets" / asset_id
     if not src.is_dir():
-        raise RuntimeError(f"Mage Master asset directory missing: {src}")
-    authority = dst / "mage_authority"
+        raise RuntimeError(f"Master asset directory missing: {src}")
+    authority = dst / "family_authority"
     authority.mkdir(parents=True, exist_ok=True)
     for rel in manifest["files"]:
-        if rel == "primary_geometry.npz":
-            source = src / rel
-        else:
-            source = src / "renders" / rel
+        source = src / rel if rel == "primary_geometry.npz" else src / "renders" / rel
         target = authority / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         if not source.is_file():
@@ -88,27 +84,19 @@ def stage_authority(*, zip_path: Path | None, master_root: Path | None, work: Pa
         raise RuntimeError("exactly one of authority ZIP or Master root must be supplied")
     if master_root is not None:
         authority = stage_from_master(master_root, work, manifest)
-        return authority, {
-            "mode": "DIRECT_MASTER_CORPUS",
-            "master_root": str(master_root),
-            "asset_id": ASSET_ID,
-        }
+        return authority, {"mode": "DIRECT_MASTER_CORPUS", "master_root": str(master_root), "asset_id": manifest["asset_id"]}
     assert zip_path is not None
     zip_sha = sha256_file(zip_path)
     if zip_sha != manifest["zip_sha256"]:
         raise RuntimeError(f"authority ZIP SHA drift: {zip_sha} != {manifest['zip_sha256']}")
     safe_extract(zip_path, work)
-    authority = work / "mage_authority"
+    subdir = manifest.get("zip_root", "family_authority")
+    authority = work / subdir
     validate_authority(authority, manifest)
-    return authority, {
-        "mode": "PREPACKAGED_ZIP_FALLBACK",
-        "authority_zip": str(zip_path),
-        "authority_zip_sha256": zip_sha,
-    }
+    return authority, {"mode": "PREPACKAGED_ZIP_FALLBACK", "authority_zip": str(zip_path), "authority_zip_sha256": zip_sha}
 
 
-def make_contact_sheet(observation_root: Path, out_path: Path) -> None:
-    labels = ["S", "SE", "E", "NE", "N", "NW", "W", "SW"]
+def make_contact_sheet(observation_root: Path, out_path: Path, labels: list[str]) -> None:
     thumbs = []
     for v, label in enumerate(labels):
         with Image.open(observation_root / f"V{v}" / "RGBA.png") as im:
@@ -119,9 +107,11 @@ def make_contact_sheet(observation_root: Path, out_path: Path) -> None:
             draw = ImageDraw.Draw(canvas)
             draw.text((250, 525), label, fill=(255, 255, 255, 255), anchor="mm")
             thumbs.append(canvas.convert("RGB"))
-    sheet = Image.new("RGB", (4 * 520, 2 * 560), (20, 20, 20))
+    cols = 4
+    rows = (len(thumbs) + cols - 1) // cols
+    sheet = Image.new("RGB", (cols * 520, rows * 560), (20, 20, 20))
     for i, im in enumerate(thumbs):
-        sheet.paste(im, ((i % 4) * 520, (i // 4) * 560))
+        sheet.paste(im, ((i % cols) * 520, (i // cols) * 560))
     out_path.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(out_path, quality=95)
 
@@ -131,7 +121,7 @@ def main() -> None:
     source = ap.add_mutually_exclusive_group(required=True)
     source.add_argument("--authority-zip")
     source.add_argument("--master-root")
-    ap.add_argument("--authority-manifest", required=True)
+    ap.add_argument("--family-manifest", required=True)
     ap.add_argument("--source-file", required=True)
     ap.add_argument("--source-package", required=True)
     ap.add_argument("--blender", required=True)
@@ -142,7 +132,7 @@ def main() -> None:
 
     zip_path = Path(args.authority_zip).resolve() if args.authority_zip else None
     master_root = Path(args.master_root).resolve() if args.master_root else None
-    manifest_path = Path(args.authority_manifest).resolve()
+    manifest_path = Path(args.family_manifest).resolve()
     source_file = Path(args.source_file).resolve()
     source_package = Path(args.source_package).resolve()
     blender = Path(args.blender).resolve()
@@ -151,19 +141,20 @@ def main() -> None:
     out = Path(args.out_root).resolve()
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if sha256_file(source_file) != SOURCE_SHA256:
-        raise RuntimeError("Mage source FBX SHA drift")
+    asset_id = manifest["asset_id"]
+    candidate_id = manifest["selected_candidate_id"]
+    source_sha256 = manifest["source_sha256"]
+    labels = manifest.get("view_labels", ["S", "SE", "E", "NE", "N", "NW", "W", "SW"])
+    if len(labels) != int(manifest.get("views", 8)):
+        raise RuntimeError("view label cardinality drift")
+    if sha256_file(source_file) != source_sha256:
+        raise RuntimeError("source file SHA drift")
     if not blender.is_file():
         raise RuntimeError("Blender binary missing")
 
     shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True, exist_ok=True)
-    authority, authority_source = stage_authority(
-        zip_path=zip_path,
-        master_root=master_root,
-        work=work,
-        manifest=manifest,
-    )
+    authority, authority_source = stage_authority(zip_path=zip_path, master_root=master_root, work=work, manifest=manifest)
 
     appearance_npz = work / "appearance" / "source_appearance.npz"
     appearance_json = work / "appearance" / "source_appearance.json"
@@ -173,34 +164,14 @@ def main() -> None:
     if not extractor.is_file() or not binder.is_file():
         raise RuntimeError("appearance apparatus source missing")
 
-    cp = subprocess.run(
-        [str(blender), "-b", "--factory-startup", "--python", str(extractor), "--", str(source_file), str(appearance_npz), str(appearance_json)],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        timeout=600,
-    )
+    cp = subprocess.run([str(blender), "-b", "--factory-startup", "--python", str(extractor), "--", str(source_file), str(appearance_npz), str(appearance_json)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=600)
     (work / "BLENDER_APPEARANCE_EXTRACT.log").write_text(cp.stdout, encoding="utf-8")
     if cp.returncode != 0 or not appearance_npz.is_file() or not appearance_json.is_file():
         raise RuntimeError(f"Blender appearance extraction failed rc={cp.returncode}")
 
     shutil.rmtree(out, ignore_errors=True)
     out.mkdir(parents=True, exist_ok=True)
-    cmd = [
-        sys.executable,
-        str(binder),
-        "--asset-id", ASSET_ID,
-        "--candidate-id", CANDIDATE_ID,
-        "--source-sha256", SOURCE_SHA256,
-        "--source-file", str(source_file),
-        "--source-package", str(source_package),
-        "--canonical-geometry", str(authority / "primary_geometry.npz"),
-        "--appearance-npz", str(appearance_npz),
-        "--appearance-json", str(appearance_json),
-        "--canonical-render-root", str(authority),
-        "--output-root", str(out),
-        "--min-texture-coverage", "0.05",
-    ]
+    cmd = [sys.executable, str(binder), "--asset-id", asset_id, "--candidate-id", candidate_id, "--source-sha256", source_sha256, "--source-file", str(source_file), "--source-package", str(source_package), "--canonical-geometry", str(authority / "primary_geometry.npz"), "--appearance-npz", str(appearance_npz), "--appearance-json", str(appearance_json), "--canonical-render-root", str(authority), "--output-root", str(out), "--min-texture-coverage", str(manifest.get("min_texture_coverage", 0.05))]
     cp2 = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=600)
     (work / "MASTER_ALIGNED_APPEARANCE.log").write_text(cp2.stdout, encoding="utf-8")
     if cp2.returncode != 0:
@@ -208,29 +179,17 @@ def main() -> None:
 
     obs_manifest_path = out / "PREFIT_OBSERVATION_MANIFEST_V1.json"
     obs_manifest = json.loads(obs_manifest_path.read_text(encoding="utf-8"))
-    if not obs_manifest.get("exact_eight_views") or obs_manifest.get("raster_authority") != "MASTER_SOURCE_TEXTURED_RGBA":
+    if obs_manifest.get("asset_id") != asset_id or not obs_manifest.get("exact_eight_views") or obs_manifest.get("raster_authority") != "MASTER_SOURCE_TEXTURED_RGBA":
         raise RuntimeError("observation manifest contract drift")
-    for v in range(8):
+    for v in range(int(manifest.get("views", 8))):
         p = out / f"V{v}" / "RGBA.png"
         with Image.open(p) as im:
             if im.mode != "RGBA" or im.size != (1024, 1024):
                 raise RuntimeError(f"V{v} RGBA contract drift: {im.mode}/{im.size}")
 
-    contact = out / "MAGE_TEXTURED_8VIEW_CONTACT_SHEET.jpg"
-    make_contact_sheet(out, contact)
-    result = {
-        "schema": "RealSaS.FirstFamily.MageObservationRun.v1",
-        "asset_id": ASSET_ID,
-        "candidate_id": CANDIDATE_ID,
-        "authority_source": authority_source,
-        "source_fbx_sha256": SOURCE_SHA256,
-        "observation_manifest_sha256": sha256_file(obs_manifest_path),
-        "contact_sheet_sha256": sha256_file(contact),
-        "textured_foreground_fraction": obs_manifest["textured_foreground_fraction"],
-        "source_reextract_vertex_max_abs_err": obs_manifest["source_reextract_vertex_max_abs_err"],
-        "source_reextract_faces_equal": obs_manifest["source_reextract_faces_equal"],
-        "status": "PASS",
-    }
+    contact = out / "TEXTURED_8VIEW_CONTACT_SHEET.jpg"
+    make_contact_sheet(out, contact, labels)
+    result = {"schema": "RealSaS.FirstFamily.ObservationRun.v1", "asset_id": asset_id, "candidate_id": candidate_id, "authority_source": authority_source, "source_sha256": source_sha256, "family_manifest_sha256": sha256_file(manifest_path), "observation_manifest_sha256": sha256_file(obs_manifest_path), "contact_sheet_sha256": sha256_file(contact), "textured_foreground_fraction": obs_manifest["textured_foreground_fraction"], "source_reextract_vertex_max_abs_err": obs_manifest["source_reextract_vertex_max_abs_err"], "source_reextract_faces_equal": obs_manifest["source_reextract_faces_equal"], "status": "PASS"}
     (out / "FIRST_FAMILY_OBSERVATION_RESULT_V1.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(result, indent=2, sort_keys=True))
 

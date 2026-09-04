@@ -1,13 +1,22 @@
 {
   "schema": "RealSaS.MainPostMergeIntegrityTrigger.v1",
   "date": "2026-09-04",
-  "purpose": "Trigger exact-main post-merge current-mainline and proof-export-native verification before first-fit-base freeze.",
-  "attempt": 2,
-  "reason": "Final exact-main verification after self-hosted legacy CI wiring normalization and successful model/native source gates.",
+  "purpose": "Trigger final exact-main current-mainline and proof-export-native verification after V2 pre-FIT authority reconciliation and before the new first-fit-base freeze.",
+  "attempt": 3,
+  "reason": "Architecture Freeze V2 is sealed, learned-artifact authority is bound to the V2 living fingerprint, stale pre-FIT canonical records are reconciled without erasing historical experiment evidence, and the promoted code baseline already passed both exact-main gates.",
+  "verified_code_baseline_commit": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
+  "verified_code_baseline_current_mainline_run_id": 33863458125,
+  "verified_code_baseline_current_runtime_run_id": 33863458344,
+  "metadata_reconciliation_parent_commit": "30ed0b191a174645f8615ec50723b96a0ad7bdc7",
+  "architecture_freeze_v2": "canonical/ARCHITECTURE_FREEZE_V2.json",
+  "living_source_fingerprint_sha256": "9585aa3af8975fe66af64e161b9289da02b77c012c682bca536c664ef1d271f0",
+  "selection_apparatus_fingerprint_sha256": "9ed25dafe62c62c0cee69dc4878c5587366db5e296a657c9649c86bf334fecd1",
+  "scientific_fit_steps": 0,
   "fit_authorization": false,
   "required_gates": [
     "current-mainline-self-hosted-ci",
     "current-runtime-self-hosted-ci"
   ],
-  "freeze_only_after_both_pass": true
+  "freeze_only_after_both_pass": true,
+  "next_on_pass": "CREATE_NEW_IMMUTABLE_FIRST_FIT_BASE_REF_THEN_ENTER_TEXTURED_MASTER_PREFIT_SELECTION"
 }

@@ -32,7 +32,7 @@ jobs:
       - name: Commit exact visible source if newly materialized
         shell: bash
         run: |
-          if git diff --quiet -- compiler/vendor/realsas_synthesis; then
+          if [ -z "$(git status --porcelain -- compiler/vendor/realsas_synthesis)" ]; then
             echo 'VISIBLE_OPTIMIZER_ALREADY_EXACT'
             exit 0
           fi

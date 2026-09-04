@@ -17,12 +17,21 @@ class IrisV2LossWeights:
     refined_depth: float = 2.0
     uncertainty_nll: float = 0.5
     support: float = 0.5
+    view_support: float = 0.5
     tail_depth: float = 0.5
     world_regularizer: float = 0.02
     tail_fraction: float = 0.10
 
     def validate(self) -> None:
-        numeric = (self.depth_mode, self.refined_depth, self.uncertainty_nll, self.support, self.tail_depth, self.world_regularizer)
+        numeric = (
+            self.depth_mode,
+            self.refined_depth,
+            self.uncertainty_nll,
+            self.support,
+            self.view_support,
+            self.tail_depth,
+            self.world_regularizer,
+        )
         if min(numeric) < 0 or not (0.0 < self.tail_fraction <= 1.0):
             raise ValueError("invalid IRIS V2 loss weights")
 
@@ -53,6 +62,21 @@ def _teacher_modes(
     depth = torch.where(finite, depth, torch.zeros_like(depth))
     q_supported = mode_valid.any(dim=-1)
     return depth.to(domain.depth_values.dtype), mode_valid, q_supported
+
+
+def _teacher_view_support(
+    teacher_view_support: torch.Tensor | None,
+    teacher_depth: torch.Tensor,
+) -> torch.Tensor | None:
+    if teacher_view_support is None:
+        return None
+    if teacher_view_support.ndim == 3 and teacher_depth.shape[-1] == 1:
+        if teacher_view_support.shape != (*teacher_depth.shape[:2], 8):
+            raise ValueError("single-mode teacher_view_support must be [B,Q,8]")
+        return teacher_view_support.bool()[..., None, :]
+    if teacher_view_support.ndim == 4 and teacher_view_support.shape == (*teacher_depth.shape, 8):
+        return teacher_view_support.bool()
+    raise ValueError("teacher_view_support must be [B,Q,8] or [B,Q,M,8]")
 
 
 def _multitarget_mode_nll(logits: torch.Tensor, depth_values: torch.Tensor, teacher_depth: torch.Tensor, teacher_valid: torch.Tensor) -> torch.Tensor:
@@ -91,17 +115,43 @@ def _top_fraction(values: torch.Tensor, fraction: float) -> torch.Tensor:
     return torch.topk(values.reshape(-1), k=k, largest=True).values.mean()
 
 
+def _matched_view_support_loss(
+    output: IrisReprojectionOutputV2,
+    teacher_to_pred: torch.Tensor,
+    teacher_ok: torch.Tensor,
+    teacher_view_support: torch.Tensor | None,
+) -> torch.Tensor:
+    logits = output.depth_output.view_support_logits
+    if teacher_view_support is None:
+        return output.field.score_logits.sum() * 0.0
+    if logits is None:
+        raise ValueError("teacher_view_support supplied but IRIS output has no per-view support logits")
+    if logits.ndim != 4 or logits.shape[-1] != 8:
+        raise ValueError("IRIS per-view support logits must be [B,Q,K,8]")
+    idx = teacher_to_pred.clamp_min(0)[..., None].expand(*teacher_to_pred.shape, 8)
+    matched = torch.gather(logits, 2, idx)
+    mask = teacher_ok[..., None].expand_as(matched)
+    if not mask.any():
+        return matched.sum() * 0.0
+    target = teacher_view_support.to(matched.dtype)
+    return F.binary_cross_entropy_with_logits(matched[mask], target[mask])
+
+
 def iris_v2_loss(
     output: IrisReprojectionOutputV2,
     domain: RayHypothesisDomainV2,
     teacher_depth: torch.Tensor,
     teacher_support: torch.Tensor,
+    teacher_view_support: torch.Tensor | None = None,
     *,
     weights: IrisV2LossWeights = IrisV2LossWeights(),
 ) -> dict[str, torch.Tensor]:
     """Multimodal depth/support supervision with metric-aligned hard-tail pressure."""
     weights.validate()
     td, tv, q_supported = _teacher_modes(teacher_depth, teacher_support, domain)
+    tvs = _teacher_view_support(teacher_view_support, td)
+    if tvs is not None:
+        tvs = tvs & tv[..., None]
     logits = output.field.score_logits
     mode_nll = _multitarget_mode_nll(logits, domain.depth_values, td, tv)
 
@@ -131,6 +181,7 @@ def iris_v2_loss(
     else:
         support = support_logits.sum() * 0.0
 
+    view_support = _matched_view_support_loss(output, teacher_to_pred, teacher_ok, tvs)
     tail = _top_fraction(teacher_error[teacher_ok], weights.tail_fraction)
     regularizer = isotropic_world_regularizer_v2(
         domain.q_points,
@@ -144,6 +195,7 @@ def iris_v2_loss(
         + weights.refined_depth * coverage
         + weights.uncertainty_nll * uncertainty_nll
         + weights.support * support
+        + weights.view_support * view_support
         + weights.tail_depth * tail
         + weights.world_regularizer * regularizer
     )
@@ -153,6 +205,7 @@ def iris_v2_loss(
         "refined_depth": coverage,
         "uncertainty_nll": uncertainty_nll,
         "support": support,
+        "view_support": view_support,
         "tail_depth": tail,
         "world_regularizer": regularizer,
     }
@@ -168,7 +221,13 @@ def train_step_production_v2(apparatus, optimizer, batch: dict) -> dict[str, flo
     apparatus.train()
     optimizer.zero_grad(set_to_none=True)
     output = apparatus(batch["images"], batch["domain"])
-    losses = iris_v2_loss(output, batch["domain"], batch["teacher_depth"], batch["teacher_support"])
+    losses = iris_v2_loss(
+        output,
+        batch["domain"],
+        batch["teacher_depth"],
+        batch["teacher_support"],
+        batch.get("teacher_view_support"),
+    )
     losses["total"].backward()
     optimizer.step()
     result = {k: float(v.detach().cpu()) for k, v in losses.items()}
@@ -183,7 +242,13 @@ def train_step_injected_foundation_source_test_v2(model, optimizer, batch: dict)
     model.train()
     optimizer.zero_grad(set_to_none=True)
     output = model(batch["images"], batch["foundation_maps"], batch["domain"])
-    losses = iris_v2_loss(output, batch["domain"], batch["teacher_depth"], batch["teacher_support"])
+    losses = iris_v2_loss(
+        output,
+        batch["domain"],
+        batch["teacher_depth"],
+        batch["teacher_support"],
+        batch.get("teacher_view_support"),
+    )
     losses["total"].backward()
     optimizer.step()
     return {k: float(v.detach().cpu()) for k, v in losses.items()}

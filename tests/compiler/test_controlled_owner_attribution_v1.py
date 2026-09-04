@@ -1,4 +1,4 @@
-from causal_attribution import (
+from compiler.realsas_compiler_services.proof.causal_attribution import (
     ControlledInterventionEvidenceV1,
     build_controlled_owner_attribution_v1,
     proof_probe_fingerprint_v1,

@@ -20,7 +20,17 @@
     "family_selection_authorized": true,
     "fit_authorized_by_seal": false
   },
+  "fit_branch_may_precede_canonical_main": false,
+  "fit_may_run_on_restoration_branch": false,
+  "fit_may_run_on_safety_or_experiment_branch_before_main_promotion": false,
+  "first_fit_must_record_canonical_main_base_commit": true,
+  "legacy_v1_order_steps_status": "HISTORICALLY_COMPLETED_AND_RETAINED_AS_FAIL_CLOSED_ORDER_INVARIANTS",
   "required_order": [
+    "RESTORATION_SOURCE_AND_BEHAVIORAL_CLOSURE",
+    "RESTORATION_WIDE_REGRESSION_E2E_NATIVE_GATE",
+    "EXPLICIT_RESTORATION_VERDICT",
+    "PROMOTE_RESTORATION_TREE_TO_CANONICAL_MAIN",
+    "POST_MERGE_MAIN_REPOSITORY_INTEGRITY_CHECK",
     "LIVING_ARCHITECTURE_AND_SELECTION_APPARATUS_V2_FROZEN",
     "PREFIT_HARDENING_TREE_PROMOTED_TO_CANONICAL_MAIN",
     "EXACT_MAIN_CURRENT_MAINLINE_GATE_PASS",
@@ -31,7 +41,7 @@
     "BUILD_AND_BLIND_FREEZE_TEXTURED_1024_FIT8_COHORT",
     "BIND_FAMILY_1_EXACT_OBSERVATION_AND_THREE_TRUTH_AUTHORITIES",
     "ZERO_STEP_REAL_FAMILY_E2E_HARNESS_PASS",
-    "ONLY_THEN_AUTHORIZE_FAMILY_1_OPTIMIZER_STEPS"
+    "ONLY_THEN_AUTHORIZE_REAL_FAMILY_FIT"
   ],
   "mainline_expected_shape": {
     "living_system": ["models/", "compiler/", "runtime/"],

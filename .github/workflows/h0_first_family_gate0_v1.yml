@@ -1,0 +1,193 @@
+name: h0-first-family-gate0-v1
+
+on:
+  push:
+    branches:
+      - baseline/h0-first-family-v1-20260904
+    paths:
+      - '.github/workflows/h0_first_family_gate0_v1.yml'
+  workflow_dispatch:
+
+jobs:
+  h0-gate0-fit1:
+    runs-on: [self-hosted, realsas, gpu]
+    timeout-minutes: 180
+    env:
+      REALSAS_LOCAL_ML_VENV: /home/monster/realsas-ml312
+      REALSAS_BLENDER_CACHE: /home/monster/.cache/realsas/blender
+      REALSAS_SOURCE_CACHE: /home/monster/.cache/realsas/family_sources
+      REALSAS_DINO_CACHE: /home/monster/.cache/realsas/dinov2-s-v1
+      FIRST_FAMILY_SPEC: experiments/first_family_fit_v1/FIRST_FAMILY_FIT_SPEC_V1.json
+      FIRST_FAMILY_AUTHORITY_MANIFEST: experiments/first_family_fit_v1/FIRST_FAMILY_AUTHORITY_V1.json
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Activate Linux Python 3.12 toolchain
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Freeze H0 architecture identity
+        shell: bash
+        run: |
+          set -euxo pipefail
+          test -x "$REALSAS_LOCAL_ML_VENV/bin/python"
+          git diff --exit-code 461fd25264f4981af78bf38ddb9a42086f4c9db8 -- models/iris compiler/realsas_compiler_core
+          git rev-parse HEAD | tee H0_HEAD.txt
+          "$REALSAS_LOCAL_ML_VENV/bin/python" -c "import torch,numpy,PIL; assert torch.cuda.is_available(); print(torch.__version__, torch.cuda.get_device_name(0))"
+
+      - name: Resolve exact authority source
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          mkdir -p artifacts/h0_first_family
+          asset_id="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["asset_id"])')"
+          pg_sha="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["authority"]["primary_geometry_sha256"])')"
+          zip_name="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["authority"]["fallback_zip_name"])')"
+          zip_sha="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["authority"]["fallback_zip_sha256"])')"
+          master=''
+          roots=()
+          [ -n "${REALSAS_MASTER_ROOT:-}" ] && roots+=("$REALSAS_MASTER_ROOT")
+          roots+=(
+            /mnt/g/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/g/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/g/Google\ Drive/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/c/Users/*/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/c/Users/*/Google\ Drive/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/c/Users/*/Google\ Drive/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/c/Users/*/Drive/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/d/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/e/RealSaS_MASTER_CORPUS_1024_V3
+          )
+          for root in "${roots[@]}"; do
+            [ -d "$root" ] || continue
+            pg="$root/master/assets/$asset_id/primary_geometry.npz"
+            [ -f "$pg" ] || continue
+            got="$(sha256sum "$pg" | awk '{print $1}')"
+            if [ "$got" = "$pg_sha" ]; then master="$root"; break; fi
+          done
+          if [ -n "$master" ]; then
+            echo "REALSAS_MASTER_ROOT=$master" >> "$GITHUB_ENV"
+            echo "REALSAS_AUTHORITY_MODE=DIRECT_MASTER_CORPUS" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          packs=(/mnt/c/Users/*/Downloads/"$zip_name")
+          test "${#packs[@]}" -gt 0
+          pack="${packs[0]}"
+          test "$(sha256sum "$pack" | awk '{print $1}')" = "$zip_sha"
+          echo "FIRST_FAMILY_AUTHORITY_ZIP=$pack" >> "$GITHUB_ENV"
+          echo "REALSAS_AUTHORITY_MODE=PREPACKAGED_ZIP_FALLBACK" >> "$GITHUB_ENV"
+
+      - name: Materialize exact source and Blender
+        shell: bash
+        run: |
+          set -euxo pipefail
+          source_result="$RUNNER_TEMP/H0_SOURCE_RESULT.json"
+          "$REALSAS_LOCAL_ML_VENV/bin/python" experiments/first_family_fit_v1/materialize_family_source_v1.py \
+            --spec "$FIRST_FAMILY_SPEC" --cache-root "$REALSAS_SOURCE_CACHE" --result-json "$source_result"
+          source_file="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,sys; print(json.load(open(sys.argv[1]))["source_file"])' "$source_result")"
+          source_root="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,sys; print(json.load(open(sys.argv[1]))["source_root"])' "$source_result")"
+          echo "FIRST_FAMILY_SOURCE_FILE=$source_file" >> "$GITHUB_ENV"
+          echo "FIRST_FAMILY_SOURCE_ROOT=$source_root" >> "$GITHUB_ENV"
+          "$REALSAS_LOCAL_ML_VENV/bin/python" experiments/first_family_fit_v1/bootstrap_blender_5_2_v1.py --cache-root "$REALSAS_BLENDER_CACHE" | tee artifacts/h0_first_family/BLENDER_BOOTSTRAP.log
+          blender="$(tail -n 1 artifacts/h0_first_family/BLENDER_BOOTSTRAP.log)"
+          test -x "$blender"
+          echo "REALSAS_BLENDER=$blender" >> "$GITHUB_ENV"
+
+      - name: Build frozen 8-view observation
+        shell: bash
+        run: |
+          set -euxo pipefail
+          out="$GITHUB_WORKSPACE/artifacts/h0_first_family/observation"
+          work="$HOME/.cache/realsas/h0_first_family_observation_work"
+          authority_args=()
+          if [ "$REALSAS_AUTHORITY_MODE" = DIRECT_MASTER_CORPUS ]; then authority_args=(--master-root "$REALSAS_MASTER_ROOT"); else authority_args=(--authority-zip "$FIRST_FAMILY_AUTHORITY_ZIP"); fi
+          PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" experiments/first_family_fit_v1/run_first_family_observation_v1.py \
+            --spec "$FIRST_FAMILY_SPEC" "${authority_args[@]}" --authority-manifest "$FIRST_FAMILY_AUTHORITY_MANIFEST" \
+            --source-file "$FIRST_FAMILY_SOURCE_FILE" --source-package "$FIRST_FAMILY_SOURCE_ROOT" --blender "$REALSAS_BLENDER" \
+            --repo-root "$GITHUB_WORKSPACE" --work-root "$work" --out-root "$out" \
+            | tee artifacts/h0_first_family/OBSERVATION_STDOUT.log
+          grep -q '"status": "PASS"' "$out/FIRST_FAMILY_OBSERVATION_RESULT_V1.json"
+          echo "H0_OBSERVATION_ROOT=$out" >> "$GITHUB_ENV"
+
+      - name: Bootstrap frozen DINOv2-S authority
+        shell: bash
+        run: |
+          set -euxo pipefail
+          "$REALSAS_LOCAL_ML_VENV/bin/python" tools/first_family_fit_v1/bootstrap_dinov2_s_v1.py --cache-root "$REALSAS_DINO_CACHE" | tee artifacts/h0_first_family/DINO_BOOTSTRAP.log
+          grep -q 'status=PASS' artifacts/h0_first_family/DINO_BOOTSTRAP.log
+          echo "H0_DINO_SOURCE=$REALSAS_DINO_CACHE/dinov2" >> "$GITHUB_ENV"
+          echo "H0_DINO_WEIGHT=$REALSAS_DINO_CACHE/dinov2_vits14_pretrain.pth" >> "$GITHUB_ENV"
+
+      - name: Gate-0 exact production resource probe
+        shell: bash
+        run: |
+          set -euxo pipefail
+          out="$GITHUB_WORKSPACE/artifacts/h0_first_family/gate0_exact"
+          work="$HOME/.cache/realsas/h0_gate0_exact_work"
+          authority_args=()
+          if [ "$REALSAS_AUTHORITY_MODE" = DIRECT_MASTER_CORPUS ]; then authority_args=(--master-root "$REALSAS_MASTER_ROOT"); else authority_args=(--authority-zip "$FIRST_FAMILY_AUTHORITY_ZIP"); fi
+          PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" experiments/first_family_fit_v1/run_first_family_iris_fit_v1.py \
+            --spec "$FIRST_FAMILY_SPEC" --observation-root "$H0_OBSERVATION_ROOT" "${authority_args[@]}" \
+            --authority-manifest "$FIRST_FAMILY_AUTHORITY_MANIFEST" --dino-source "$H0_DINO_SOURCE" --dino-weight "$H0_DINO_WEIGHT" \
+            --out-root "$out" --work-root "$work" --resource-probe-only
+          cat "$out/IRIS_RESOURCE_PREFLIGHT_V1.json"
+          cat "$out/IRIS_FIT_RESULT_V1.json"
+
+      - name: Gate-0 reduced H0 rung resource probe
+        shell: bash
+        run: |
+          set -euxo pipefail
+          out="$GITHUB_WORKSPACE/artifacts/h0_first_family/gate0_reduced"
+          work="$HOME/.cache/realsas/h0_gate0_reduced_work"
+          authority_args=()
+          if [ "$REALSAS_AUTHORITY_MODE" = DIRECT_MASTER_CORPUS ]; then authority_args=(--master-root "$REALSAS_MASTER_ROOT"); else authority_args=(--authority-zip "$FIRST_FAMILY_AUTHORITY_ZIP"); fi
+          PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" experiments/first_family_fit_v1/run_first_family_iris_fit_v1.py \
+            --spec "$FIRST_FAMILY_SPEC" --observation-root "$H0_OBSERVATION_ROOT" "${authority_args[@]}" \
+            --authority-manifest "$FIRST_FAMILY_AUTHORITY_MANIFEST" --dino-source "$H0_DINO_SOURCE" --dino-weight "$H0_DINO_WEIGHT" \
+            --out-root "$out" --work-root "$work" --anchor-stride 32 --depth-bins 24 --max-steps 96 --check-every 16 --resource-probe-only
+          cat "$out/IRIS_RESOURCE_PREFLIGHT_V1.json"
+          "$REALSAS_LOCAL_ML_VENV/bin/python" - <<'PY'
+          import json
+          p=json.load(open('artifacts/h0_first_family/gate0_reduced/IRIS_FIT_RESULT_V1.json'))
+          assert p['status']=='PASS_RESOURCE_PROBE_ONLY', p
+          PY
+
+      - name: H0 reduced real FIT-1, 96 optimizer steps max
+        shell: bash
+        run: |
+          set -euxo pipefail
+          out="$GITHUB_WORKSPACE/artifacts/h0_first_family/fit1_reduced"
+          work="$HOME/.cache/realsas/h0_fit1_reduced_work"
+          authority_args=()
+          if [ "$REALSAS_AUTHORITY_MODE" = DIRECT_MASTER_CORPUS ]; then authority_args=(--master-root "$REALSAS_MASTER_ROOT"); else authority_args=(--authority-zip "$FIRST_FAMILY_AUTHORITY_ZIP"); fi
+          set +e
+          PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" experiments/first_family_fit_v1/run_first_family_iris_fit_v1.py \
+            --spec "$FIRST_FAMILY_SPEC" --observation-root "$H0_OBSERVATION_ROOT" "${authority_args[@]}" \
+            --authority-manifest "$FIRST_FAMILY_AUTHORITY_MANIFEST" --dino-source "$H0_DINO_SOURCE" --dino-weight "$H0_DINO_WEIGHT" \
+            --out-root "$out" --work-root "$work" --anchor-stride 32 --depth-bins 24 --max-steps 96 --check-every 16
+          rc=$?
+          set -e
+          test -s "$out/IRIS_FIT_RESULT_V1.json"
+          cat "$out/IRIS_FIT_RESULT_V1.json"
+          echo "$rc" > artifacts/h0_first_family/H0_FIT_PROCESS_EXIT_CODE.txt
+          # Scientific FAIL is a valid H0 measurement. Infrastructure failure is not.
+          "$REALSAS_LOCAL_ML_VENV/bin/python" - <<'PY'
+          import json
+          p=json.load(open('artifacts/h0_first_family/fit1_reduced/IRIS_FIT_RESULT_V1.json'))
+          assert p.get('status') in {'PASS_IRIS_FIT_AND_S','IRIS_FIT_FAIL'}, p
+          print('H0_REAL_FIT_MEASUREMENT_RECORDED=',p['status'])
+          PY
+
+      - name: Upload isolated H0 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: h0-first-family-gate0-v1
+          path: artifacts/h0_first_family/
+          if-no-files-found: error
+          retention-days: 30

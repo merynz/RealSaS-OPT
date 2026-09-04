@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Iterable, Mapping
 
-from canonical.architecture_freeze_gate_v1 import require_family_selection_authority
+from canonical.architecture_freeze_gate_v2 import require_family_selection_authority
 from experiments.family_selection_v1.prefit_family_truth_eligibility_v1 import (
     POLICY_ID as TRUTH_ELIGIBILITY_POLICY_ID,
     PrefitFamilyTruthEligibilityV1,
@@ -135,10 +135,7 @@ def candidate_from_mapping_v1(record: Mapping[str, object]) -> PrefitFamilyCandi
     return candidate
 
 
-def _validate_truth_eligibility_authority(
-    candidate: PrefitFamilyCandidateV1,
-    report: PrefitFamilyTruthEligibilityV1 | None,
-) -> None:
+def _validate_truth_eligibility_authority(candidate: PrefitFamilyCandidateV1, report: PrefitFamilyTruthEligibilityV1 | None) -> None:
     if report is None:
         raise ValueError(f"PREFIT_TRUTH_ELIGIBILITY_REPORT_REQUIRED:{candidate.asset_id}")
     if report.policy_id != TRUTH_ELIGIBILITY_POLICY_ID:
@@ -164,12 +161,7 @@ def select_prefit_families_v1(
     truth_eligibility_reports: Mapping[str, PrefitFamilyTruthEligibilityV1],
     count: int = 8,
 ) -> FamilySelectionResultV1:
-    """Select a deterministic pre-fit panel only after current architecture freeze.
-
-    No model output participates. A candidate cannot become eligible from a hand-set
-    boolean alone: its typed pre-fit truth eligibility report must be supplied and
-    must bind the same asset, policy, PASS state and SHA-256 before blinded ranking.
-    """
+    """Select a deterministic pre-fit panel only after current living-source freeze."""
     if count < 1:
         raise ValueError("selection count must be positive")
     root = Path(repo_root).resolve()
@@ -185,35 +177,32 @@ def select_prefit_families_v1(
             raise ValueError(f"DUPLICATE_ASSET_ID:{row.asset_id}")
         if row.source_family_id in seen_families:
             raise ValueError(f"DUPLICATE_SOURCE_FAMILY_ID:{row.source_family_id}")
-        seen_assets.add(row.asset_id)
-        seen_families.add(row.source_family_id)
+        seen_assets.add(row.asset_id); seen_families.add(row.source_family_id)
         if row.prefit_truth_eligibility_pass:
             _validate_truth_eligibility_authority(row, truth_eligibility_reports.get(row.asset_id))
 
     eligible = tuple(row for row in rows if row.eligible)
     if len(eligible) < count:
         raise RuntimeError(f"INSUFFICIENT_PREFIT_ELIGIBLE_FAMILIES:need={count}:have={len(eligible)}")
-    ranked = sorted(eligible, key=lambda row: (_rank(row.asset_id), row.asset_id))
-    chosen = ranked[:count]
-    selected = tuple(
-        SelectedFamilyV1(
-            ordinal=i,
-            asset_id=row.asset_id,
-            source_family_id=row.source_family_id,
-            blinded_rank_sha256=_rank(row.asset_id),
-            candidate_authority_sha256=row.candidate_authority_sha256,
-            prefit_truth_eligibility_sha256=row.prefit_truth_eligibility_sha256,
-            visual_audit_id=row.visual_audit_id,
-            visual_audit_sha256=row.visual_audit_sha256,
-        )
-        for i, row in enumerate(chosen)
-    )
-    candidate_payload = [asdict(row) for row in sorted(rows, key=lambda r: r.asset_id)]
-    candidate_set_sha = _canonical_hash(candidate_payload)
+    chosen = sorted(eligible, key=lambda row: (_rank(row.asset_id), row.asset_id))[:count]
+    selected = tuple(SelectedFamilyV1(
+        ordinal=i,
+        asset_id=row.asset_id,
+        source_family_id=row.source_family_id,
+        blinded_rank_sha256=_rank(row.asset_id),
+        candidate_authority_sha256=row.candidate_authority_sha256,
+        prefit_truth_eligibility_sha256=row.prefit_truth_eligibility_sha256,
+        visual_audit_id=row.visual_audit_id,
+        visual_audit_sha256=row.visual_audit_sha256,
+    ) for i, row in enumerate(chosen))
+    candidate_set_sha = _canonical_hash([asdict(row) for row in sorted(rows, key=lambda r: r.asset_id)])
+    living_fp = seal["living_source_fingerprint_sha256"]
+    selection_fp = seal["selection_apparatus_fingerprint_sha256"]
     selection_hash_payload = {
         "schema": SCHEMA,
         "policy_id": POLICY_ID,
-        "architecture_freeze_fingerprint_sha256": seal["generic_source_fingerprint_sha256"],
+        "architecture_freeze_fingerprint_sha256": living_fp,
+        "selection_apparatus_fingerprint_sha256": selection_fp,
         "requested_count": count,
         "eligible_count": len(eligible),
         "selected": [asdict(row) for row in selected],
@@ -222,16 +211,15 @@ def select_prefit_families_v1(
         "fit_metrics_consumed": False,
         "selection_basis": "TYPED_PREFIT_TRUTH_ELIGIBILITY_PLUS_SEALED_VISUAL_AUDIT_PLUS_BLINDED_SHA256_ORDER",
     }
-    selection_sha = _canonical_hash(selection_hash_payload)
     return FamilySelectionResultV1(
         schema=SCHEMA,
         policy_id=POLICY_ID,
-        architecture_freeze_fingerprint_sha256=seal["generic_source_fingerprint_sha256"],
+        architecture_freeze_fingerprint_sha256=living_fp,
         requested_count=count,
         eligible_count=len(eligible),
         selected=selected,
         candidate_set_sha256=candidate_set_sha,
-        selection_sha256=selection_sha,
+        selection_sha256=_canonical_hash(selection_hash_payload),
         scientific_fit_steps_before_selection=0,
         fit_metrics_consumed=False,
         selection_basis="TYPED_PREFIT_TRUTH_ELIGIBILITY_PLUS_SEALED_VISUAL_AUDIT_PLUS_BLINDED_SHA256_ORDER",

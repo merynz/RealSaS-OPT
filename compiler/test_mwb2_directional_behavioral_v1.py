@@ -13,6 +13,7 @@ from compiler.realsas_compiler_core.mwb2 import build_mwb2_candidate, qualify_mw
 from compiler.realsas_compiler_core.mwb2_skin import bind_mwb2_mesh_skin
 from compiler.realsas_compiler_core.rig import qualify_skeleton_v2
 from compiler.realsas_compiler_core.skin import qualify_skin
+from compiler.realsas_compiler_core.substrate.iris_v2 import compile_surface_v2
 from compiler.realsas_compiler_core.types import (
     ObservationEvidenceIR,
     ObservationSample,
@@ -22,8 +23,7 @@ from compiler.realsas_compiler_core.types import (
     SkinInfluenceProposal,
     SkinProposalIR,
 )
-from experiments.geppetto_arachne_r6_20260901.codec_deformation_loss_v1 import torch_verified_lbs_v1
-from experiments.iris_reprojection_v2_20260831.persistence_adapter_v2 import compile_surface_v2
+from models.skin_field_codec.v1.codec_deformation_loss_v1 import torch_verified_lbs_v1
 
 
 RESOLUTION = 1024

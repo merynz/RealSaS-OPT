@@ -1,0 +1,189 @@
+name: first-family-prefit-audit-v1
+
+on:
+  push:
+    branches:
+      - first-family-fit/v1-20260904
+    paths:
+      - '.github/workflows/first_family_prefit_audit_v1.yml'
+      - 'experiments/first_family_fit_v1/FAMILY1_MANIFEST_V1.json'
+      - 'experiments/first_family_fit_v1/materialize_family_source_v1.py'
+      - 'experiments/first_family_fit_v1/run_family_observation_v1.py'
+      - 'experiments/first_family_fit_v1/ray_surface_teacher_v2.py'
+      - 'experiments/first_family_fit_v1/prefit_teacher_audit_v1.py'
+      - 'experiments/fit_observation_v1/blender_extract_source_appearance_v1.py'
+      - 'experiments/fit_observation_v1/master_aligned_source_appearance_v1.py'
+  workflow_dispatch:
+
+jobs:
+  family1-prefit-audit:
+    runs-on: [self-hosted, realsas, gpu]
+    timeout-minutes: 90
+    env:
+      REALSAS_LOCAL_ML_VENV: /home/monster/realsas-ml312
+      REALSAS_BLENDER: /home/monster/.cache/realsas/blender/blender-5.2.0-linux-x64/blender
+      REALSAS_SOURCE_CACHE: /home/monster/.cache/realsas/family_sources
+      FAMILY_MANIFEST: experiments/first_family_fit_v1/FAMILY1_MANIFEST_V1.json
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Require local runtime
+        shell: bash
+        run: |
+          set -euxo pipefail
+          test -x "$REALSAS_LOCAL_ML_VENV/bin/python"
+          test -x "$REALSAS_BLENDER"
+          "$REALSAS_LOCAL_ML_VENV/bin/python" -c "import torch,numpy,PIL; assert torch.cuda.is_available(); print(torch.__version__, torch.cuda.get_device_name(0))"
+          "$REALSAS_BLENDER" --version | head -n 2
+
+      - name: Validate canonical family manifest
+        shell: bash
+        run: |
+          set -euxo pipefail
+          PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" - <<'PY'
+          from pathlib import Path
+          from experiments.first_family_fit_v1.run_family_observation_v1 import load_family_manifest
+          m = load_family_manifest(Path('experiments/first_family_fit_v1/FAMILY1_MANIFEST_V1.json'))
+          assert m['master_split'] == 'FIT'
+          assert m['claims']['generalization'] == 'FORBIDDEN'
+          assert m['normalization_policy']['repose_allowed'] is False
+          assert m['normalization_policy']['reflection_repair_allowed'] is False
+          assert all(m['truth_capabilities'][k] for k in ('iris','geppetto','arachne'))
+          print(m['asset_id'], m['selected_candidate_id'])
+          PY
+
+      - name: Resolve exact authority source
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          asset_id="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; m=json.load(open(os.environ["FAMILY_MANIFEST"])); print(m["asset_id"])')"
+          pg_sha="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; m=json.load(open(os.environ["FAMILY_MANIFEST"])); print(m["files"]["primary_geometry.npz"]["sha256"])')"
+          zip_name="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; m=json.load(open(os.environ["FAMILY_MANIFEST"])); print(m["zip_name"])')"
+          zip_sha="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; m=json.load(open(os.environ["FAMILY_MANIFEST"])); print(m["zip_sha256"])')"
+
+          master=''
+          roots=()
+          [ -n "${REALSAS_MASTER_ROOT:-}" ] && roots+=("$REALSAS_MASTER_ROOT")
+          roots+=(
+            /mnt/g/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/g/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/g/Google\ Drive/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/c/Users/*/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/c/Users/*/Google\ Drive/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/c/Users/*/Google\ Drive/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/c/Users/*/Drive/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/d/RealSaS_MASTER_CORPUS_1024_V3
+            /mnt/e/RealSaS_MASTER_CORPUS_1024_V3
+          )
+          for root in "${roots[@]}"; do
+            [ -d "$root" ] || continue
+            pg="$root/master/assets/$asset_id/primary_geometry.npz"
+            [ -f "$pg" ] || continue
+            got="$(sha256sum "$pg" | awk '{print $1}')"
+            if [ "$got" = "$pg_sha" ]; then
+              master="$root"
+              break
+            fi
+          done
+          if [ -n "$master" ]; then
+            echo "REALSAS_MASTER_ROOT=$master" >> "$GITHUB_ENV"
+            echo "REALSAS_AUTHORITY_MODE=DIRECT_MASTER_CORPUS" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          packs=(/mnt/c/Users/*/Downloads/"$zip_name")
+          if [ "${#packs[@]}" -gt 0 ]; then
+            pack="${packs[0]}"
+            got="$(sha256sum "$pack" | awk '{print $1}')"
+            test "$got" = "$zip_sha"
+            echo "FAMILY_AUTHORITY_ZIP=$pack" >> "$GITHUB_ENV"
+            echo "REALSAS_AUTHORITY_MODE=PREPACKAGED_ZIP_FALLBACK" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          echo 'NO_LOCAL_MASTER_MOUNT_AND_NO_VALIDATED_FALLBACK_PACK' >&2
+          exit 17
+
+      - name: Materialize exact source
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p artifacts/first_family_prefit_audit
+          source_result="$RUNNER_TEMP/FAMILY_SOURCE_RESULT.json"
+          "$REALSAS_LOCAL_ML_VENV/bin/python" \
+            experiments/first_family_fit_v1/materialize_family_source_v1.py \
+            --family-manifest "$FAMILY_MANIFEST" \
+            --cache-root "$REALSAS_SOURCE_CACHE" \
+            --result-json "$source_result"
+          source_file="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,sys; print(json.load(open(sys.argv[1]))["source_file"])' "$source_result")"
+          source_root="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,sys; print(json.load(open(sys.argv[1]))["source_root"])' "$source_result")"
+          echo "FAMILY_SOURCE_FILE=$source_file" >> "$GITHUB_ENV"
+          echo "FAMILY_SOURCE_ROOT=$source_root" >> "$GITHUB_ENV"
+          cp "$source_result" artifacts/first_family_prefit_audit/FAMILY_SOURCE_RESULT.json
+
+      - name: Build family-generic canonical textured observation
+        shell: bash
+        run: |
+          set -euxo pipefail
+          work="$HOME/.cache/realsas/family1_prefit_observation_work"
+          out="$GITHUB_WORKSPACE/artifacts/first_family_prefit_audit/observation"
+          authority_args=()
+          if [ "$REALSAS_AUTHORITY_MODE" = 'DIRECT_MASTER_CORPUS' ]; then
+            authority_args=(--master-root "$REALSAS_MASTER_ROOT")
+          else
+            authority_args=(--authority-zip "$FAMILY_AUTHORITY_ZIP")
+          fi
+          PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" \
+            experiments/first_family_fit_v1/run_family_observation_v1.py \
+            --family-manifest "$FAMILY_MANIFEST" \
+            "${authority_args[@]}" \
+            --source-file "$FAMILY_SOURCE_FILE" \
+            --source-package "$FAMILY_SOURCE_ROOT" \
+            --blender "$REALSAS_BLENDER" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --work-root "$work" \
+            --out-root "$out" \
+            | tee artifacts/first_family_prefit_audit/OBSERVATION_STDOUT.log
+          grep -q '"status": "PASS"' "$out/FAMILY_OBSERVATION_RESULT_V1.json"
+
+      - name: Audit exact multi-surface teacher capacity
+        shell: bash
+        run: |
+          set -euxo pipefail
+          authority_args=()
+          if [ "$REALSAS_AUTHORITY_MODE" = 'DIRECT_MASTER_CORPUS' ]; then
+            authority_args=(--master-root "$REALSAS_MASTER_ROOT")
+          else
+            authority_args=(--authority-zip "$FAMILY_AUTHORITY_ZIP")
+          fi
+          PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" \
+            experiments/first_family_fit_v1/prefit_teacher_audit_v1.py \
+            --family-manifest "$FAMILY_MANIFEST" \
+            --observation-root "$GITHUB_WORKSPACE/artifacts/first_family_prefit_audit/observation" \
+            "${authority_args[@]}" \
+            --work-root "$HOME/.cache/realsas/family1_prefit_teacher_audit_work" \
+            --out-json "$GITHUB_WORKSPACE/artifacts/first_family_prefit_audit/PREFIT_TEACHER_AUDIT_V1.json" \
+            | tee artifacts/first_family_prefit_audit/PREFIT_TEACHER_AUDIT_STDOUT.log
+
+      - name: Python compile changed prefit modules
+        shell: bash
+        run: |
+          set -euxo pipefail
+          "$REALSAS_LOCAL_ML_VENV/bin/python" -m py_compile \
+            experiments/first_family_fit_v1/materialize_family_source_v1.py \
+            experiments/first_family_fit_v1/run_family_observation_v1.py \
+            experiments/first_family_fit_v1/ray_surface_teacher_v2.py \
+            experiments/first_family_fit_v1/prefit_teacher_audit_v1.py \
+            experiments/first_family_fit_v1/run_family_iris_fit_v1.py
+
+      - name: Upload prefit audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: first-family-prefit-audit-v1
+          path: artifacts/first_family_prefit_audit/
+          if-no-files-found: error
+          retention-days: 30

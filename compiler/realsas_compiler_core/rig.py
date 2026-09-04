@@ -45,6 +45,8 @@ def qualify_skeleton(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, r
     res=optimize_canonical_graph_v18_98(req)
     if not res.passed:
         raise QualificationError("skeleton qualification failed:"+";".join(res.blockers or (res.status,)))
+    if res.optimality_proven is not True:
+        raise QualificationError("skeleton qualification failed:CANONICAL_GRAPH_OPTIMALITY_NOT_PROVEN")
     canonical={cid:"J:"+content_sha256({"qualified_graph":res.content_sha256,"candidate":cid})[:20] for cid in res.selected_node_ids}
     q=[]
     for cid in sorted(res.selected_node_ids):

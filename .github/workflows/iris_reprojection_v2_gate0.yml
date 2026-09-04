@@ -9,7 +9,7 @@ on:
 
 jobs:
   gate0-cpu:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     defaults:
       run:
         working-directory: experiments/iris_reprojection_v2_20260831

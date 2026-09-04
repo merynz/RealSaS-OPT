@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/first_family_charactergen_geometry_v1.yml'
       - 'experiments/geometry_backends/charactergen_geometry_backend_v1.py'
+      - 'experiments/geometry_backends/render_source_cardinals_v1.py'
       - 'compiler/realsas_compiler_core/substrate/complete_mesh.py'
       - 'tests/geometry/test_charactergen_geometry_backend_source_v1.py'
       - 'tests/compiler/test_complete_mesh_substrate_v1.py'
@@ -23,9 +24,7 @@ jobs:
       REALSAS_CHARACTERGEN_ROOT: /home/monster/.cache/realsas/external/CharacterGen
       REALSAS_CHARACTERGEN_VENV: /home/monster/realsas-charactergen39
       FIRST_FAMILY_SPEC: experiments/first_family_fit_v1/FIRST_FAMILY_FIT_SPEC_V1.json
-      FIRST_FAMILY_AUTHORITY_MANIFEST: experiments/first_family_fit_v1/FIRST_FAMILY_AUTHORITY_V1.json
-      CHARACTERGEN_ENV_FINGERPRINT: realsas-charactergen39-torch2.1.2-cu118-v1
-      NVDIFFRAST_COMMIT: c5caf7bdb8a2448acc491a9faa47753972edd380
+      CHARACTERGEN_ENV_FINGERPRINT: realsas-charactergen39-isosurfaceonly-torch2.1.2-cu118-v2
 
     steps:
       - uses: actions/checkout@v4
@@ -41,68 +40,20 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
+          mkdir -p artifacts/first_family_charactergen_geometry
           test -x "$REALSAS_LOCAL_ML_VENV/bin/python"
           PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" -m unittest \
             tests.compiler.test_complete_mesh_substrate_v1 \
             tests.geometry.test_charactergen_geometry_backend_source_v1
 
-      - name: Record GPU and CUDA toolchain
+      - name: Record GPU and runtime
         shell: bash
         run: |
           set -euxo pipefail
-          mkdir -p artifacts/first_family_charactergen_geometry
           nvidia-smi | tee artifacts/first_family_charactergen_geometry/NVIDIA_SMI.txt
-          if command -v nvcc >/dev/null 2>&1; then
-            nvcc --version | tee artifacts/first_family_charactergen_geometry/NVCC_VERSION.txt
-          else
-            echo 'NVCC_NOT_FOUND' | tee artifacts/first_family_charactergen_geometry/NVCC_VERSION.txt
-          fi
+          git rev-parse HEAD | tee artifacts/first_family_charactergen_geometry/REALSAS_HEAD.txt
 
-      - name: Resolve first-family authority
-        shell: bash
-        run: |
-          set -euo pipefail
-          shopt -s nullglob
-          asset_id="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["asset_id"])')"
-          pg_sha="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["authority"]["primary_geometry_sha256"])')"
-          zip_name="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["authority"]["fallback_zip_name"])')"
-          zip_sha="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["authority"]["fallback_zip_sha256"])')"
-          master=''
-          roots=()
-          [ -n "${REALSAS_MASTER_ROOT:-}" ] && roots+=("$REALSAS_MASTER_ROOT")
-          roots+=(
-            /mnt/g/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
-            /mnt/g/RealSaS_MASTER_CORPUS_1024_V3
-            /mnt/g/Google\ Drive/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
-            /mnt/c/Users/*/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
-            /mnt/c/Users/*/Google\ Drive/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
-            /mnt/c/Users/*/Google\ Drive/RealSaS_MASTER_CORPUS_1024_V3
-            /mnt/c/Users/*/Drive/My\ Drive/RealSaS_MASTER_CORPUS_1024_V3
-            /mnt/d/RealSaS_MASTER_CORPUS_1024_V3
-            /mnt/e/RealSaS_MASTER_CORPUS_1024_V3
-          )
-          for root in "${roots[@]}"; do
-            [ -d "$root" ] || continue
-            pg="$root/master/assets/$asset_id/primary_geometry.npz"
-            [ -f "$pg" ] || continue
-            got="$(sha256sum "$pg" | awk '{print $1}')"
-            if [ "$got" = "$pg_sha" ]; then master="$root"; break; fi
-          done
-          if [ -n "$master" ]; then
-            echo "REALSAS_MASTER_ROOT=$master" >> "$GITHUB_ENV"
-            echo "REALSAS_AUTHORITY_MODE=DIRECT_MASTER_CORPUS" >> "$GITHUB_ENV"
-          else
-            packs=(/mnt/c/Users/*/Downloads/"$zip_name")
-            test "${#packs[@]}" -gt 0
-            pack="${packs[0]}"
-            got="$(sha256sum "$pack" | awk '{print $1}')"
-            test "$got" = "$zip_sha"
-            echo "FIRST_FAMILY_AUTHORITY_ZIP=$pack" >> "$GITHUB_ENV"
-            echo "REALSAS_AUTHORITY_MODE=PREPACKAGED_ZIP_FALLBACK" >> "$GITHUB_ENV"
-          fi
-          echo "FIRST_FAMILY_ASSET_ID=$asset_id" >> "$GITHUB_ENV"
-
-      - name: Materialize exact family source
+      - name: Materialize exact first-family source repository
         shell: bash
         run: |
           set -euxo pipefail
@@ -112,11 +63,15 @@ jobs:
             --spec "$FIRST_FAMILY_SPEC" \
             --cache-root "$REALSAS_SOURCE_CACHE" \
             --result-json "$source_result"
-          source_file="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,sys; print(json.load(open(sys.argv[1]))["source_file"])' "$source_result")"
           source_root="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,sys; print(json.load(open(sys.argv[1]))["source_root"])' "$source_result")"
-          echo "FIRST_FAMILY_SOURCE_FILE=$source_file" >> "$GITHUB_ENV"
+          asset_id="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["asset_id"])')"
+          source_glb="$source_root/addons/kaykit_character_pack_adventures/Characters/gltf/Mage.glb"
+          test -s "$source_glb"
           echo "FIRST_FAMILY_SOURCE_ROOT=$source_root" >> "$GITHUB_ENV"
+          echo "FIRST_FAMILY_SOURCE_GLB=$source_glb" >> "$GITHUB_ENV"
+          echo "FIRST_FAMILY_ASSET_ID=$asset_id" >> "$GITHUB_ENV"
           cp "$source_result" artifacts/first_family_charactergen_geometry/FIRST_FAMILY_SOURCE_RESULT.json
+          sha256sum "$source_glb" | tee artifacts/first_family_charactergen_geometry/MAGE_GLB_SHA256.txt
 
       - name: Provision checksum-verified Blender 5.2.0
         shell: bash
@@ -129,43 +84,18 @@ jobs:
           test -x "$blender"
           echo "REALSAS_BLENDER=$blender" >> "$GITHUB_ENV"
 
-      - name: Build authoritative 1024 observations
+      - name: Render native neutral cardinal RGB inputs
         shell: bash
         run: |
           set -euxo pipefail
-          work="$HOME/.cache/realsas/first_family_charactergen_observation_work"
-          out="$GITHUB_WORKSPACE/artifacts/first_family_charactergen_geometry/observation"
-          authority_args=()
-          if [ "$REALSAS_AUTHORITY_MODE" = 'DIRECT_MASTER_CORPUS' ]; then
-            authority_args=(--master-root "$REALSAS_MASTER_ROOT")
-          else
-            authority_args=(--authority-zip "$FIRST_FAMILY_AUTHORITY_ZIP")
-          fi
-          PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" \
-            experiments/first_family_fit_v1/run_first_family_observation_v1.py \
-            --spec "$FIRST_FAMILY_SPEC" \
-            "${authority_args[@]}" \
-            --authority-manifest "$FIRST_FAMILY_AUTHORITY_MANIFEST" \
-            --source-file "$FIRST_FAMILY_SOURCE_FILE" \
-            --source-package "$FIRST_FAMILY_SOURCE_ROOT" \
-            --blender "$REALSAS_BLENDER" \
-            --repo-root "$GITHUB_WORKSPACE" \
-            --work-root "$work" \
-            --out-root "$out"
-          test -s "$out/FIRST_FAMILY_OBSERVATION_RESULT_V1.json"
-          grep -q '"status": "PASS"' "$out/FIRST_FAMILY_OBSERVATION_RESULT_V1.json"
-
-      - name: Stage CharacterGen cardinal inputs
-        shell: bash
-        run: |
-          set -euxo pipefail
-          obs="$GITHUB_WORKSPACE/artifacts/first_family_charactergen_geometry/observation/observations"
           card="$GITHUB_WORKSPACE/artifacts/first_family_charactergen_geometry/cardinals"
           mkdir -p "$card"
-          cp "$obs/V4/RGBA.png" "$card/N.png"
-          cp "$obs/V0/RGBA.png" "$card/S.png"
-          cp "$obs/V2/RGBA.png" "$card/E.png"
-          cp "$obs/V6/RGBA.png" "$card/W.png"
+          "$REALSAS_BLENDER" -b --factory-startup \
+            --python experiments/geometry_backends/render_source_cardinals_v1.py \
+            -- "$FIRST_FAMILY_SOURCE_GLB" "$card" 1024 \
+            | tee artifacts/first_family_charactergen_geometry/CARDINAL_RENDER.log
+          grep -q 'REALSAS_SOURCE_CARDINAL_RENDER=PASS' artifacts/first_family_charactergen_geometry/CARDINAL_RENDER.log
+          for v in S N E W; do test -s "$card/$v.png"; done
           sha256sum "$card"/*.png | sort | tee artifacts/first_family_charactergen_geometry/CARDINAL_SHA256.txt
 
       - name: Activate Python 3.9 for CharacterGen
@@ -173,7 +103,7 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Build isolated pinned CharacterGen environment
+      - name: Build isolated pinned CharacterGen isosurface environment
         shell: bash
         run: |
           set -euxo pipefail
@@ -185,25 +115,24 @@ jobs:
             "$REALSAS_CHARACTERGEN_VENV/bin/pip" install \
               'torch==2.1.2' 'torchvision==0.16.2' --index-url https://download.pytorch.org/whl/cu118
             "$REALSAS_CHARACTERGEN_VENV/bin/pip" install \
-              'xformers==0.0.23.post1' \
+              'numpy==1.26.4' 'xformers==0.0.23.post1' \
               'huggingface_hub==0.25.2' 'transformers==4.35.2' 'accelerate==0.24.1' 'diffusers==0.24.0' \
-              'pytorch_lightning==2.1.3' 'jaxtyping==0.2.25' 'einops==0.7.0' 'omegaconf==2.3.0' \
-              'wandb==0.16.1' 'lpips==0.1.4' 'imageio==2.33.1' 'ninja==1.11.1.1' \
-              'open3d==0.18.0' 'trimesh==4.0.8' 'pymeshlab==2023.12.post1' 'pygltflib==1.16.1' 'Pillow==10.2.0'
-            "$REALSAS_CHARACTERGEN_VENV/bin/pip" install \
-              "git+https://github.com/NVlabs/nvdiffrast.git@$NVDIFFRAST_COMMIT"
+              'pytorch_lightning==2.1.3' 'torchmetrics==1.2.1' \
+              'jaxtyping==0.2.25' 'einops==0.7.0' 'omegaconf==2.3.0' \
+              'wandb==0.16.1' 'lpips==0.1.4' 'imageio==2.33.1' \
+              'opencv-python-headless==4.9.0.80' 'matplotlib==3.8.2' 'tqdm==4.66.1' 'Pillow==10.2.0'
             printf '%s' "$CHARACTERGEN_ENV_FINGERPRINT" > "$marker"
           fi
           "$REALSAS_CHARACTERGEN_VENV/bin/python" - <<'PY'
           import torch
           print('torch', torch.__version__, 'cuda', torch.version.cuda, 'available', torch.cuda.is_available())
           assert torch.cuda.is_available()
-          import xformers, pytorch_lightning, transformers, diffusers, trimesh, nvdiffrast.torch
-          print('characterGen_runtime_imports=PASS')
+          import xformers, pytorch_lightning, transformers, diffusers, cv2, matplotlib
+          print('charactergen_isosurface_runtime_imports=PASS')
           PY
           "$REALSAS_CHARACTERGEN_VENV/bin/pip" freeze | sort > artifacts/first_family_charactergen_geometry/CHARACTERGEN_ENV_FREEZE.txt
 
-      - name: Run pinned CharacterGen geometry baseline
+      - name: Run pinned CharacterGen isosurface baseline
         shell: bash
         run: |
           set -euxo pipefail
@@ -223,10 +152,10 @@ jobs:
             | tee artifacts/first_family_charactergen_geometry/CHARACTERGEN_STDOUT.log
           test -s "$out/rigging_surface.json"
           test -s "$out/CHARACTERGEN_GEOMETRY_REPORT_V1.json"
-          test ! -e "$out/debug_mesh"
+          test ! -e "$out/transient_charactergen_isosurface_debug.npz"
           cp experiments/EXPERIMENT_LEDGER.jsonl artifacts/first_family_charactergen_geometry/EXPERIMENT_LEDGER_AFTER_RUN.jsonl
 
-      - name: Smoke Geppetto conditioning on real predicted substrate
+      - name: Smoke Geppetto conditioning on predicted sufficient substrate
         shell: bash
         run: |
           set -euxo pipefail
@@ -235,28 +164,16 @@ jobs:
           from pathlib import Path
           from compiler.realsas_compiler_core.types import RiggingSurfaceIR, SurfaceNode, SurfaceRelation
           from models.geppetto.v2.geppetto_conditioning_v2 import GeppettoConditioningAdapterV2
-          p = Path('artifacts/first_family_charactergen_geometry/geometry/rigging_surface.json')
-          d = json.loads(p.read_text())
+          d = json.loads(Path('artifacts/first_family_charactergen_geometry/geometry/rigging_surface.json').read_text())
           nodes = tuple(SurfaceNode(**n) for n in d['surface_nodes'])
           relations = tuple(SurfaceRelation(**r) for r in d.get('local_relations', []))
-          s = RiggingSurfaceIR(
-              surface_nodes=nodes,
-              local_relations=relations,
-              geometry_lineage_hash=d['geometry_lineage_hash'],
-              builder_id=d.get('builder_id',''),
-              schema_version=d.get('schema_version','RealSaS.RiggingSurfaceIR.v1'),
-              metadata=d.get('metadata',{}),
-          )
+          s = RiggingSurfaceIR(surface_nodes=nodes, local_relations=relations,
+              geometry_lineage_hash=d['geometry_lineage_hash'], builder_id=d.get('builder_id',''),
+              schema_version=d.get('schema_version','RealSaS.RiggingSurfaceIR.v1'), metadata=d.get('metadata',{}))
           batch = GeppettoConditioningAdapterV2()((s,))
-          result = {
-              'status':'PASS',
-              'surface_nodes':len(nodes),
-              'feature_shape':list(batch.features.shape),
-              'valid_rows':int(batch.valid_mask.sum()),
-              'source_surface_hash':batch.source_surface_hashes[0],
-              'conditioning_hash':batch.conditioning_hashes[0],
-          }
-          print(json.dumps(result, sort_keys=True))
+          print(json.dumps({'status':'PASS','surface_nodes':len(nodes),'feature_shape':list(batch.features.shape),
+              'valid_rows':int(batch.valid_mask.sum()),'source_surface_hash':batch.source_surface_hashes[0],
+              'conditioning_hash':batch.conditioning_hashes[0]}, sort_keys=True))
           PY
 
       - name: Upload CharacterGen geometry evidence

@@ -79,13 +79,13 @@ Automatic repair is **not** a required current product capability or proof domai
 
 ## Canonical main promotion gate
 
-Real-family fit work is forbidden until the closure-qualified restoration tree becomes canonical GitHub `main` and that exact `main` passes a post-merge repository-integrity check.
+Real-family fit work is forbidden until the closure-qualified tree is the canonical GitHub `main`, that exact `main` SHA passes post-merge repository integrity, and that same SHA is frozen as the first-fit base.
 
 Required sequence:
 
-`restoration closure PASS -> explicit verdict PASS -> promote to main -> post-merge main integrity -> freeze exact main commit -> only then authorize fit`
+`restoration closure PASS -> explicit verdict PASS -> canonical main ref equality -> post-merge main integrity -> freeze exact main SHA -> only then may a later workflow authorize fit`
 
-The first fit must record the exact canonical `main` commit it descends from.
+The first fit must record the exact canonical `main` commit it descends from. Status language below is intentionally invariant across the branch-ref transition: it states conditions that must be true before fit, rather than a time-sensitive “next/pending” snapshot.
 
 ## Research / evidence zones
 
@@ -105,9 +105,10 @@ The first fit must record the exact canonical `main` commit it descends from.
 - Repair-executor seam decision: **DONE / 0 EXECUTORS ACCEPTABLE FAIL-CLOSED**
 - Native current-source interlock: **PASS — run 33827594057**
 - Restoration-wide source/regression/E2E/native closure: **PASS — verdict recorded**
-- Canonical `main` promotion: **AUTHORIZED / NEXT / NOT YET PERFORMED**
-- Post-merge `main` integrity: **PENDING**
-- Current work: **canonical main promotion -> post-merge integrity -> freeze exact first-fit base**
+- Canonical `main` promotion: **EXACT REF EQUALITY REQUIRED BEFORE FIRST-FIT-BASE FREEZE**
+- Post-merge `main` integrity: **EXACT MAIN SHA MUST PASS BEFORE FIRST-FIT-BASE FREEZE**
+- First-fit base: **MUST BE A FROZEN REF TO THAT SAME PASSING MAIN SHA**
+- Family-1/FIT execution: **OUT OF SCOPE UNTIL A LATER EXPLICIT AUTHORIZATION**
 
 ## Promotion rule
 

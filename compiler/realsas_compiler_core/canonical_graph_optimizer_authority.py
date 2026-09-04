@@ -11,6 +11,7 @@ drift from the pre-existing BYTE_EXACT_V0_5 manifest authority.
 import hashlib
 import importlib.util
 from pathlib import Path
+import sys
 
 
 EXPECTED_SHA256 = "b2fddb64753ca783e298be4f1078c70b9667fa9931c67de738f955976e2587c1"
@@ -32,9 +33,18 @@ def _load_visible_optimizer():
     if spec is None or spec.loader is None:
         raise ImportError("cannot construct visible canonical graph optimizer module spec")
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    # Dataclass decoration resolves postponed annotations through sys.modules while
+    # the module body executes. Register the exact visible module before exec, just
+    # like importlib's normal import path, and remove the partial module on failure.
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        sys.modules.pop(name, None)
+        raise
     fn = getattr(module, "optimize_canonical_graph_v18_98", None)
     if not callable(fn):
+        sys.modules.pop(name, None)
         raise ImportError("visible canonical graph optimizer entrypoint missing")
     return module, fn
 

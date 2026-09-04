@@ -45,7 +45,7 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/realsas-mage-geppetto
           PYTHONPATH="$GITHUB_WORKSPACE" "$PY" \
-            experiments/mage_scene_first_e2e_v1/run_mage_geppetto_fit_v1.py \
+            experiments/mage_scene_first_e2e_v1/run_mage_geppetto_fit_v2q.py \
             /tmp/realsas-mage-geppetto/MAGE_GEPPETTO_FIT_RESULT_V1.json
 
       - name: Upload FIT witness

@@ -1,0 +1,7 @@
+{
+  "schema": "RealSaS.RestorationClosureTriggerOnce.v1",
+  "date": "2026-09-04",
+  "branch": "restoration/compiler-runtime-promotion-v1-20260903",
+  "purpose": "Trigger exactly one restoration-wide closure run after source, P0, runtime, numerics, repair, and canonical-main-before-fit decisions are staged.",
+  "fit_authorization": false
+}

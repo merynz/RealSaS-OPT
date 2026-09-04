@@ -1,0 +1,105 @@
+name: current-runtime-self-hosted-ci
+
+on:
+  push:
+    branches:
+      - main
+      - restoration/compiler-runtime-promotion-v1-20260903
+    paths:
+      - 'compiler/realsas_compiler_core/**'
+      - 'compiler/realsas_compiler_services/export/**'
+      - 'compiler/realsas_compiler_services/proof/**'
+      - 'runtime/realsas_cpp/**'
+      - 'runtime/reference_v4/**'
+      - 'tests/runtime/**'
+      - 'tests/compiler/test_current_v4_runtime_v2_projection_v1.py'
+      - 'tests/compiler/test_directional_joint_view_binding_v1.py'
+      - 'tests/compiler/test_motion_bake_firewall_v1.py'
+      - 'experiments/single_family_e2e_v1/**'
+      - '.github/workflows/current_runtime_self_hosted_ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'compiler/**'
+      - 'runtime/**'
+      - 'tests/runtime/**'
+      - 'experiments/single_family_e2e_v1/**'
+  workflow_dispatch:
+
+jobs:
+  proof-export-native:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install CPU runtime-gate dependencies
+        run: python -m pip install --upgrade numpy scipy pytest
+      - name: Directional binding / bake / projection regressions
+        run: |
+          PYTHONPATH=. python -m pytest -q \
+            tests/compiler/test_directional_joint_view_binding_v1.py \
+            tests/compiler/test_motion_bake_firewall_v1.py \
+            tests/compiler/test_current_v4_runtime_v2_projection_v1.py
+      - name: Complete synthetic proof/export gate
+        run: PYTHONPATH=. python -m pytest -q experiments/single_family_e2e_v1/test_complete_e2e_source_v1.py
+      - name: Emit exact current package and probe identities
+        run: |
+          rm -rf .runtime-ci
+          mkdir -p .runtime-ci
+          PYTHONPATH=. python - <<'PY'
+          from pathlib import Path
+          from experiments.single_family_e2e_v1.run_complete_e2e_v1 import run_complete_e2e_v1
+          out = run_complete_e2e_v1(Path('.runtime-ci/e2e'))
+          native = out['native_runtime_result']
+          Path('.runtime-ci/native_probe.env').write_text(
+              f"ARCHIVE_PATH={Path(out['native_runtime_archive']).resolve()}\n"
+              f"SOURCE_BINDING_SHA256={native['source_binding_sha256']}\n"
+              f"PROOF_BUNDLE_SHA256={out['proof'].proof_bundle_hash}\n",
+              encoding='utf-8',
+          )
+          print('product_state_hash=' + out['product'].product_state_hash)
+          print('proof_bundle_hash=' + out['proof'].proof_bundle_hash)
+          print('motion_bake_hash=' + out['motion_bake_hash'])
+          print('projection_hash=' + out['native_projection'].projection_hash)
+          print('archive_sha256=' + native['archive_sha256'])
+          print('runtime_binary_sha256=' + native['runtime_binary_sha256'])
+          PY
+      - name: Verify native toolchain
+        run: |
+          cmake --version
+          c++ --version
+          dpkg -s libarchive-dev libpng-dev zlib1g-dev >/dev/null
+      - name: Build sealed runtime + ABI smoke
+        run: |
+          cmake -S runtime/realsas_cpp -B .runtime-ci/native-build \
+            -DREALSAS_BUILD_SHARED=ON \
+            -DREALSAS_BUILD_EXAMPLES=OFF \
+            -DREALSAS_BUILD_TESTS=ON
+          cmake --build .runtime-ci/native-build --parallel
+          ctest --test-dir .runtime-ci/native-build --output-on-failure
+      - name: Build external package probe
+        run: |
+          c++ -std=c++17 \
+            -Iruntime/realsas_cpp/include \
+            tests/runtime/current_v4_native_package_probe.cpp \
+            -L.runtime-ci/native-build \
+            -Wl,-rpath,"$GITHUB_WORKSPACE/.runtime-ci/native-build" \
+            -lrealsas_runtime \
+            -o .runtime-ci/current_v4_native_package_probe
+      - name: Exact package open/sample/render interlock
+        run: |
+          set -a
+          source .runtime-ci/native_probe.env
+          set +a
+          .runtime-ci/current_v4_native_package_probe \
+            "$ARCHIVE_PATH" \
+            "$SOURCE_BINDING_SHA256" \
+            "$PROOF_BUNDLE_SHA256"
+      - name: Runtime gate summary
+        run: |
+          echo 'CURRENT_RUNTIME_NATIVE_INTERLOCK_PASS'
+          echo "commit=$GITHUB_SHA"

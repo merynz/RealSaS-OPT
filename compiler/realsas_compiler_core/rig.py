@@ -3,8 +3,8 @@ from dataclasses import replace
 from .types import SkeletonProposalIR, QualifiedSkeletonIR, QualifiedJoint, RiggingSurfaceIR, QualificationError
 from .v4_types import QualifiedSkeletonIRV2
 from .hashing import content_sha256
+from .canonical_graph_optimizer_authority import optimize_canonical_graph_v18_98
 from realsas_contracts.technical_part_graph import CanonicalGraphNodeCandidate, CanonicalGraphEdgeCandidate, CanonicalGraphOptimizationRequest
-from realsas_synthesis.canonical_graph_optimizer import optimize_canonical_graph_v18_98
 
 def qualify_skeleton(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, run_ilp_shadow:bool=False)->QualifiedSkeletonIR:
     if proposal.surface_binding_hash != surface.geometry_lineage_hash:

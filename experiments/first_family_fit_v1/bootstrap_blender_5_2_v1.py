@@ -12,11 +12,16 @@ from pathlib import Path
 VERSION = "5.2.0"
 RELEASE_DIR = "Blender5.2"
 ARCHIVE = f"blender-{VERSION}-linux-x64.tar.xz"
+ARCHIVE_BYTES = 384_441_228
 CHECKSUM = f"blender-{VERSION}.sha256"
 BASES = (
-    f"https://mirror.blender.org/release/{RELEASE_DIR}",
     f"https://download.blender.org/release/{RELEASE_DIR}",
+    f"https://mirror.blender.org/release/{RELEASE_DIR}",
+    f"https://mirror.nju.edu.cn/blender/release/{RELEASE_DIR}",
+    f"https://mirrors.aliyun.com/blender/release/{RELEASE_DIR}",
+    f"https://debian.sbor.net/mirrors/blender/{RELEASE_DIR}",
 )
+USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) RealSaS-Blender-Bootstrap/1.1"
 
 
 def sha256_file(path: Path) -> str:
@@ -27,22 +32,67 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def download_first(urls: list[str], dst: Path, min_bytes: int) -> str:
+def _download_curl(url: str, tmp: Path) -> None:
+    curl = shutil.which("curl")
+    if not curl:
+        raise RuntimeError("curl unavailable")
+    subprocess.run(
+        [
+            curl,
+            "--fail",
+            "--location",
+            "--silent",
+            "--show-error",
+            "--retry",
+            "3",
+            "--retry-all-errors",
+            "--connect-timeout",
+            "30",
+            "--max-time",
+            "900",
+            "--user-agent",
+            USER_AGENT,
+            "--output",
+            str(tmp),
+            url,
+        ],
+        check=True,
+        timeout=960,
+    )
+
+
+def _download_urllib(url: str, tmp: Path) -> None:
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": USER_AGENT,
+            "Accept": "*/*",
+            "Connection": "close",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=600) as r, tmp.open("wb") as f:
+        shutil.copyfileobj(r, f, length=8 << 20)
+
+
+def download_first(urls: list[str], dst: Path, min_bytes: int, *, exact_bytes: int | None = None) -> str:
     errors = []
     for url in urls:
-        tmp = dst.with_suffix(dst.suffix + ".part")
-        try:
-            tmp.unlink(missing_ok=True)
-            with urllib.request.urlopen(url, timeout=600) as r, tmp.open("wb") as f:
-                shutil.copyfileobj(r, f, length=8 << 20)
-            if tmp.stat().st_size < min_bytes:
-                raise RuntimeError(f"download too small: {tmp.stat().st_size}")
-            tmp.replace(dst)
-            return url
-        except Exception as exc:
-            errors.append(f"{url}: {type(exc).__name__}: {exc}")
-            tmp.unlink(missing_ok=True)
-    raise RuntimeError("all Blender downloads failed: " + " | ".join(errors[-4:]))
+        for method_name, method in (("curl", _download_curl), ("urllib", _download_urllib)):
+            tmp = dst.with_suffix(dst.suffix + ".part")
+            try:
+                tmp.unlink(missing_ok=True)
+                method(url, tmp)
+                size = tmp.stat().st_size
+                if size < min_bytes:
+                    raise RuntimeError(f"download too small: {size}")
+                if exact_bytes is not None and size != exact_bytes:
+                    raise RuntimeError(f"download size drift: {size} != {exact_bytes}")
+                tmp.replace(dst)
+                return f"{method_name}:{url}"
+            except Exception as exc:
+                errors.append(f"{method_name}:{url}: {type(exc).__name__}: {exc}")
+                tmp.unlink(missing_ok=True)
+    raise RuntimeError("all Blender downloads failed: " + " | ".join(errors[-8:]))
 
 
 def main() -> None:
@@ -62,7 +112,7 @@ def main() -> None:
     cache.mkdir(parents=True, exist_ok=True)
     archive = cache / ARCHIVE
     checksum = cache / CHECKSUM
-    download_first([f"{base}/{CHECKSUM}" for base in BASES], checksum, 64)
+    checksum_source = download_first([f"{base}/{CHECKSUM}" for base in BASES], checksum, 64)
     expected = None
     for line in checksum.read_text(errors="ignore").splitlines():
         parts = line.split()
@@ -71,11 +121,26 @@ def main() -> None:
             break
     if not expected:
         raise RuntimeError("Blender checksum entry not found")
-    if not archive.is_file() or sha256_file(archive) != expected:
-        download_first([f"{base}/{ARCHIVE}" for base in BASES], archive, 100_000_000)
+
+    archive_valid = archive.is_file() and archive.stat().st_size == ARCHIVE_BYTES and sha256_file(archive) == expected
+    archive_source = "cache"
+    if not archive_valid:
+        archive_source = download_first(
+            [f"{base}/{ARCHIVE}" for base in BASES],
+            archive,
+            100_000_000,
+            exact_bytes=ARCHIVE_BYTES,
+        )
     got = sha256_file(archive)
+    if archive.stat().st_size != ARCHIVE_BYTES:
+        raise RuntimeError(f"Blender archive byte-size mismatch: {archive.stat().st_size} != {ARCHIVE_BYTES}")
     if got != expected:
         raise RuntimeError(f"Blender archive SHA mismatch: {got} != {expected}")
+
+    print(f"checksum_source={checksum_source}")
+    print(f"archive_source={archive_source}")
+    print(f"archive_bytes={archive.stat().st_size}")
+    print(f"archive_sha256={got}")
 
     with tarfile.open(archive, "r:xz") as tf:
         tf.extractall(cache)

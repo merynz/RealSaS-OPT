@@ -1,0 +1,41 @@
+{
+  "schema": "RealSaS.IRIS.SceneFirstSignedGeometry.PromotionWitness.v1",
+  "status": "PROVEN_ON_MAGE_FIT",
+  "family": "kaykit_mage",
+  "source_geometry_run_id": "20260904T220929Z",
+  "checkpoint_drive_file_id": "1015IJL4sB8zPGYOO-QGdDZcTcoLRad6v",
+  "checkpoint_sha256": "766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2",
+  "checkpoint_bytes": 54000491,
+  "clipped_zero_surface_drive_file_id": "1ov5QL3H4nVNDAQmVI4j0qcr5iOmC7-cT",
+  "clipped_zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+  "product_inference_inputs": ["8x1024_RGBA", "8xORTHOGRAPHIC_CAMERA"],
+  "teacher_mesh_used_at_inference": false,
+  "character_gen_runtime_used": false,
+  "mechanism": "ALL_VIEW_ALL_PATCH_CAMERA_AWARE_MEMORY__SCENE_CROSS_ATTENTION__SIGNED_QUERY_P__ZERO_LEVEL_SURFACE",
+  "metrics": {
+    "zero_bracket_rate": 0.9091796875,
+    "pred_to_full_truth_p95_norm": 0.019385051340437998,
+    "observable_support_1_2_p95_norm": 0.018609115758040133,
+    "observable_support_3_4_p95_norm": 0.0136317814696471,
+    "full_hidden_truth_to_pred_p95_norm_diagnostic_only": 0.0873807205213689
+  },
+  "normal_authority": {
+    "selected": "ROBUST_LOCAL_PCA_K64_ON_ZERO_SURFACE",
+    "orientation_hint": "MARCHING_CUBES_IMPLICIT_NORMAL_ONLY",
+    "benchmark_schema": "RealSaS.MageNormalAuthorityBenchmark.v1",
+    "seed": 123,
+    "truth_surface_samples": 500000,
+    "predicted_vertex_eval_samples": 30000,
+    "angle_is_orientation_agnostic": true,
+    "mc_implicit_normal_deg": {"median": 18.40784000562587, "p95": 65.51900363469129, "mean": 23.528347053688726},
+    "robust_local_pca_k64_deg": {"median": 15.293376278456606, "p95": 63.39151875108071, "mean": 20.969709818321792}
+  },
+  "promotion_policy": {
+    "hard_gate_predicted_to_truth_precision": true,
+    "hard_gate_observable_truth_completeness": true,
+    "hard_gate_source_view_reprojection": true,
+    "hard_gate_full_hidden_authored_mesh_completeness": false,
+    "checkpoint_is_runtime_dependency": false,
+    "generalization_claim": false
+  }
+}

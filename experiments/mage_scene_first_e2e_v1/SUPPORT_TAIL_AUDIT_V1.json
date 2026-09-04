@@ -1,0 +1,30 @@
+{
+  "schema": "RealSaS.MageSupportTailAudit.v1",
+  "source_geometry_run_id": "20260904T220929Z",
+  "source_observable_union_run_id": "20260904T214354Z",
+  "classification": "RETROSPECTIVE_DIAGNOSTIC__NO_MODEL_UPDATE",
+  "support_definition": "FROZEN_OBSERVABLE_TRUTH_UNION_FIRST_HIT_VIEW_COUNT",
+  "metric": "nearest_predicted_zero_surface_vertex_distance_normalized_by_half_extent",
+  "support_strata": {
+    "1": {"n": 4711, "p95_norm": 0.01933673893042343},
+    "2": {"n": 1975, "p95_norm": 0.01580887347910972},
+    "3": {"n": 330, "p95_norm": 0.012593368565933544},
+    "4": {"n": 13, "p95_norm": 0.0114817284528283}
+  },
+  "back_view_top5_error_support1_fraction": {
+    "NE": {"top5": 0.6666666666666666, "view_baseline": 0.4952},
+    "N": {"top5": 0.7384615384615385, "view_baseline": 0.48496530454895896},
+    "NW": {"top5": 0.6190476190476191, "view_baseline": 0.4790996784565916}
+  },
+  "interpretation": {
+    "low_support_contributes_to_back_hard_tail": true,
+    "mean_support_distribution_alone_explains_view_asymmetry": false,
+    "fixed_anchor_explanation_structurally_expected_in_h1": false,
+    "additional_candidates": ["LOCAL_OCCLUSION_OR_GEOMETRIC_COMPLEXITY", "OPEN_OR_THIN_SURFACE_SIGN_CONFLICT", "DIRECTIONAL_APPEARANCE_EVIDENCE_ASYMMETRY"]
+  },
+  "uncertainty_policy": {
+    "neural_log_sigma_is_calibrated": false,
+    "reason": "SIGNED_V2_OBJECTIVE_DID_NOT_OPTIMIZE_UNCERTAINTY_HEAD",
+    "downstream_current_authority": "OBSERVATIONAL_SUPPORT_COUNT_AND_VIEW_MASK"
+  }
+}

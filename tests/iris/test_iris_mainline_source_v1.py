@@ -28,6 +28,7 @@ PROMOTED = (
     "q_evidence_encoder_v2.py",
     "q_spatial_graph_v2.py",
     "ray_modes_v2.py",
+    "resource_contract_v2.py",
     "train_v2.py",
     "world_regularizer_v2.py",
 )

@@ -1,6 +1,6 @@
 name: pre-fit-hardening-gate-v1
 
-on:
+'on':
   push:
     branches:
       - hardening/pre-fit-closure-v1-20260904
@@ -15,7 +15,7 @@ on:
       - 'tests/repository/**'
       - 'canonical/LEARNED_ARTIFACT_REGISTRY_V1_20260904.json'
       - '.github/workflows/pre_fit_hardening_gate_v1.yml'
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 jobs:
   hardening:

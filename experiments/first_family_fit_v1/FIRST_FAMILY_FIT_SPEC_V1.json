@@ -1,0 +1,36 @@
+{
+  "schema": "RealSaS.FirstFamilyFitSpec.v1",
+  "family_label": "kaykit_mage",
+  "asset_id": "asset_fbc8d57f848df78bd953fbb5",
+  "candidate_id": "kaykit_cc0:93b401d56e2547316f8841a4",
+  "source": {
+    "provider": "GIT",
+    "repository": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0.git",
+    "revision": "672074b73ba276876a19e8816ecdc5241817ab47",
+    "relative_file": "addons/kaykit_character_pack_adventures/Characters/fbx/Mage.fbx",
+    "sha256": "93b401d56e2547316f8841a4ac0086011c64d79185c9cb7623567c2dbf125c7d"
+  },
+  "authority": {
+    "build_id": "REALSAS_MASTER_1024_V4_3_LOCAL_FIRST_FULL_PRODUCTION_20260822",
+    "manifest_file": "experiments/first_family_fit_v1/FIRST_FAMILY_AUTHORITY_V1.json",
+    "fallback_zip_name": "Mage_FIRST_FAMILY_AUTHORITY_PACK_V1.zip",
+    "fallback_zip_sha256": "ddff2f59e724a67aeb1059aaa748e12015d1281246453b601e06426d280364c6",
+    "primary_geometry_sha256": "f1e429a706faffd6ed6fd2b26a756cfca406e4ece440a9717e7e4b09f03db07d"
+  },
+  "observation": {
+    "views": 8,
+    "native_resolution": 1024,
+    "min_texture_coverage": 0.05,
+    "raster_authority": "MASTER_SOURCE_TEXTURED_RGBA"
+  },
+  "iris": {
+    "seed": 240904,
+    "anchor_stride_px": 16,
+    "depth_bins": 48,
+    "hidden_dim": 192,
+    "max_modes": 3,
+    "max_steps": 768,
+    "check_every": 32,
+    "historical_p95_norm_goal": 0.05
+  }
+}

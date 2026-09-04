@@ -1,0 +1,20 @@
+name: CharacterGen Backbone Source V1
+
+on:
+  push:
+    branches:
+      - first-family-fit/charactergen-backbone-v1
+  workflow_dispatch:
+
+jobs:
+  reconstructed-mesh-bridge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install source-test dependency
+        run: python -m pip install --disable-pip-version-check numpy
+      - name: Reconstructed mesh to Geppetto contract
+        run: python -m unittest tests.compiler.test_reconstructed_mesh_substrate_v1 -v

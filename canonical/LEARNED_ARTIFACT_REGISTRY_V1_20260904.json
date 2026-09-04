@@ -1,6 +1,7 @@
 {
   "schema": "RealSaS.LearnedArtifactRegistry.v1",
   "date": "2026-09-04",
+  "architecture_base_commit_hash_kind": "GIT_SHA1_40",
   "architecture_base_commit": "1f1d8b5bd0df9da2c62733c05c54ec4d99c05f2f",
   "architecture_base_ref": "first-fit-base/main-20260904",
   "binary_storage_policy": "EXTERNAL_BINARY__REPOSITORY_HASH_AND_LINEAGE_MANIFEST_REQUIRED",

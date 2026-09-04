@@ -6,89 +6,145 @@
   "binary_storage_policy": "EXTERNAL_BINARY__REPOSITORY_HASH_AND_LINEAGE_MANIFEST_REQUIRED",
   "fit_authorized_now": false,
   "current_product_state": "NO_CURRENT_TRAINED_END_TO_END_MODEL_SET",
-  "dependency_order": [
-    "IRIS_V2",
-    "GEPPETTO_V2",
-    "SKIN_FIELD_CODEC_V1_A0",
-    "ARACHNE_V2_A1"
-  ],
-  "stages": {
+  "dependency_order": ["IRIS_V2", "GEPPETTO_V2", "SKIN_FIELD_CODEC_V1_A0", "ARACHNE_V2_A1"],
+  "current_stages": {
     "IRIS_V2": {
+      "subsystem": "iris",
+      "state": "UNTRAINED",
       "code_root": "models/iris/v2",
       "checkpoint_contract": "models/iris/v2/checkpoint_v2.py",
-      "current_checkpoint_status": "NO_CURRENT_CHECKPOINT",
-      "current_checkpoint_sha256": null,
-      "current_checkpoint_locator": null,
-      "optimizer_steps": 0,
-      "training_data_manifest_sha256": null,
-      "source_contract_hash": null,
-      "foundation_runtime_seal_hash": null,
-      "inference_authorized": false,
-      "reason": "Current privileged-input-corrected IRIS V2 has not yet been fit on the frozen first-fit cohort. Historical learned IRIS states are not current authority."
+      "checkpoint": null,
+      "produced_by": {
+        "rung": "NONE_UNTRAINED",
+        "teacher_access_level": "NONE",
+        "data_manifest_sha256": null,
+        "witness_asset_id": null,
+        "input_sha256": null,
+        "optimizer_steps": 0
+      },
+      "authorized_claims": [],
+      "forbidden_claims": ["SHIPPING_OBSERVATION_ONLY_INFERENCE", "GENERALIZATION", "PRODUCT_MODEL_READY"],
+      "shipping_authority": false,
+      "reason": "Current privileged-input-corrected IRIS V2 has not yet been fit on the frozen first-fit cohort."
     },
     "GEPPETTO_V2": {
+      "subsystem": "geppetto",
+      "state": "UNTRAINED",
       "code_root": "models/geppetto/v2",
       "checkpoint_contract": "models/geppetto/v2/geppetto_checkpoint_v2.py",
-      "current_checkpoint_status": "NO_CURRENT_CHECKPOINT",
-      "current_checkpoint_sha256": null,
-      "current_checkpoint_locator": null,
-      "optimizer_steps": 0,
-      "training_data_manifest_sha256": null,
-      "upstream_surface_checkpoint_sha256": null,
-      "inference_authorized": false,
-      "reason": "Behavioral overfit evidence exists, but no canonical current real-family Geppetto checkpoint is registered."
+      "checkpoint": null,
+      "produced_by": {
+        "rung": "NONE_UNTRAINED",
+        "teacher_access_level": "NONE",
+        "data_manifest_sha256": null,
+        "witness_asset_id": null,
+        "input_sha256": null,
+        "optimizer_steps": 0,
+        "upstream_surface_checkpoint_sha256": null
+      },
+      "authorized_claims": [],
+      "forbidden_claims": ["SHIPPING_OBSERVATION_ONLY_INFERENCE", "GENERALIZATION", "PRODUCT_MODEL_READY"],
+      "shipping_authority": false,
+      "reason": "Behavioral capacity evidence exists, but no canonical current real-family checkpoint is registered."
     },
     "SKIN_FIELD_CODEC_V1_A0": {
+      "subsystem": "skin_field_codec",
+      "state": "UNTRAINED",
       "code_root": "models/skin_field_codec/v1",
       "checkpoint_contract": "models/skin_field_codec/v1/skin_field_codec_checkpoint_v1.py",
-      "current_checkpoint_status": "NO_CURRENT_CHECKPOINT",
-      "current_checkpoint_sha256": null,
-      "current_checkpoint_locator": null,
-      "optimizer_steps": 0,
-      "training_data_manifest_sha256": null,
-      "qualification_token": null,
-      "inference_authorized": false,
-      "reason": "Synthetic behavioral A0 capacity/closure is evidence, not a persisted current product checkpoint."
+      "checkpoint": null,
+      "produced_by": {
+        "rung": "NONE_UNTRAINED",
+        "teacher_access_level": "NONE",
+        "data_manifest_sha256": null,
+        "witness_asset_id": null,
+        "input_sha256": null,
+        "optimizer_steps": 0,
+        "qualification_token_hash": null
+      },
+      "authorized_claims": [],
+      "forbidden_claims": ["ARACHNE_A1_CONDITIONING", "SHIPPING_OBSERVATION_ONLY_INFERENCE", "PRODUCT_MODEL_READY"],
+      "shipping_authority": false,
+      "reason": "Synthetic A0 capacity evidence is not a persisted current product checkpoint or qualification token."
     },
     "ARACHNE_V2_A1": {
+      "subsystem": "arachne",
+      "state": "UNTRAINED",
       "code_root": "models/arachne/v2",
       "checkpoint_contract": "models/arachne/v2/arachne_checkpoint_v2.py",
-      "current_checkpoint_status": "NO_CURRENT_CHECKPOINT",
-      "current_checkpoint_sha256": null,
-      "current_checkpoint_locator": null,
-      "optimizer_steps": 0,
-      "training_data_manifest_sha256": null,
-      "upstream_codec_checkpoint_sha256": null,
-      "upstream_codec_a0_token_hash": null,
-      "upstream_surface_checkpoint_sha256": null,
-      "upstream_skeleton_checkpoint_sha256": null,
-      "inference_authorized": false,
-      "reason": "Synthetic behavioral A1 closure is evidence, not a persisted current product checkpoint. A dedicated checkpoint contract is required before FIT."
+      "checkpoint": null,
+      "produced_by": {
+        "rung": "NONE_UNTRAINED",
+        "teacher_access_level": "NONE",
+        "data_manifest_sha256": null,
+        "witness_asset_id": null,
+        "input_sha256": null,
+        "optimizer_steps": 0,
+        "upstream_codec_checkpoint_sha256": null,
+        "upstream_codec_a0_token_hash": null,
+        "upstream_surface_checkpoint_sha256": null,
+        "upstream_skeleton_checkpoint_sha256": null
+      },
+      "authorized_claims": [],
+      "forbidden_claims": ["SHIPPING_OBSERVATION_ONLY_INFERENCE", "GENERALIZATION", "PRODUCT_MODEL_READY"],
+      "shipping_authority": false,
+      "reason": "Synthetic A1 behavioral closure is evidence, not a persisted current real-family checkpoint."
     }
   },
-  "historical_verified_external_artifacts": [
+  "historical_artifacts": [
     {
-      "stage": "IRIS_HISTORICAL",
-      "name": "V18_93_INDEPENDENT_SUPPORT/best.pt",
-      "status": "HISTORICAL_NOT_CURRENT_AUTHORITY",
-      "source_drive_path": "/content/drive/MyDrive/RealSaS/IRIS_CACHE/V18_93_INDEPENDENT_SUPPORT/best.pt",
-      "source_size_bytes": 200930549,
-      "source_sha256": "5976d8cd0496023b5cad49aa49ee5962e1717175edd06af0bd9aa1132c96557d",
-      "external_archive_folder_id": "19UAAcrpxHHAqXNASKOvKqnCaovwqRmwd",
-      "part_count": 3,
-      "may_be_loaded_as_current": false
+      "subsystem": "iris",
+      "state": "QUARANTINED",
+      "code_identity": {"historical_lineage": "V18_93_INDEPENDENT_SUPPORT", "current_architecture_commit": null},
+      "checkpoint": {
+        "name": "best.pt",
+        "sha256": "5976d8cd0496023b5cad49aa49ee5962e1717175edd06af0bd9aa1132c96557d",
+        "location": "drive:/content/drive/MyDrive/RealSaS/IRIS_CACHE/V18_93_INDEPENDENT_SUPPORT/best.pt",
+        "bytes": 200930549,
+        "archive_folder_id": "19UAAcrpxHHAqXNASKOvKqnCaovwqRmwd",
+        "archive_part_count": 3
+      },
+      "produced_by": {"rung": "HISTORICAL_PRE_CURRENT_FIREWALL", "teacher_access_level": "HISTORICAL_UNKNOWN_OR_SUPERSEDED"},
+      "authorized_claims": ["HISTORICAL_PROVENANCE_ONLY"],
+      "forbidden_claims": ["CURRENT_IRIS_V2", "SHIPPING_OBSERVATION_ONLY_INFERENCE", "PRODUCT_MODEL_READY"],
+      "shipping_authority": false,
+      "quarantine_reason_ref": "canonical/IRIS_LEAK_SCOPE_20260903.md"
     },
     {
-      "stage": "IRIS_HISTORICAL",
-      "name": "V18_82R1/final_best_calibration.pt",
-      "status": "HISTORICAL_NOT_CURRENT_AUTHORITY",
-      "source_drive_path": "/content/drive/MyDrive/RealSaS/IRIS_CACHE/V18_82R1/final_best_calibration.pt",
-      "source_size_bytes": 137079965,
-      "source_sha256": "2d3085c8ef059ba2f8e5b2cea481f0aeb65c21f77ab4d3b062d9f4dcf8afa23b",
-      "external_archive_folder_id": "1_ikrGmQQbCsQ4X--do_yfH6pHhFbB9XS",
-      "part_count": 2,
-      "may_be_loaded_as_current": false
+      "subsystem": "iris",
+      "state": "QUARANTINED",
+      "code_identity": {"historical_lineage": "V18_82R1", "current_architecture_commit": null},
+      "checkpoint": {
+        "name": "final_best_calibration.pt",
+        "sha256": "2d3085c8ef059ba2f8e5b2cea481f0aeb65c21f77ab4d3b062d9f4dcf8afa23b",
+        "location": "drive:/content/drive/MyDrive/RealSaS/IRIS_CACHE/V18_82R1/final_best_calibration.pt",
+        "bytes": 137079965,
+        "archive_folder_id": "1_ikrGmQQbCsQ4X--do_yfH6pHhFbB9XS",
+        "archive_part_count": 2
+      },
+      "produced_by": {"rung": "HISTORICAL_PRE_CURRENT_FIREWALL", "teacher_access_level": "HISTORICAL_UNKNOWN_OR_SUPERSEDED"},
+      "authorized_claims": ["HISTORICAL_PROVENANCE_ONLY"],
+      "forbidden_claims": ["CURRENT_IRIS_V2", "SHIPPING_OBSERVATION_ONLY_INFERENCE", "PRODUCT_MODEL_READY"],
+      "shipping_authority": false,
+      "quarantine_reason_ref": "canonical/IRIS_LEAK_SCOPE_20260903.md"
     }
+  ],
+  "claim_vocabulary": [
+    "HISTORICAL_PROVENANCE_ONLY",
+    "DOWNSTREAM_CONSUMER_CEILING",
+    "SINGLE_FAMILY_FIT",
+    "FIT8_REPRODUCTION",
+    "SHIPPING_OBSERVATION_ONLY_INFERENCE",
+    "GENERALIZATION",
+    "PRODUCT_MODEL_READY"
+  ],
+  "teacher_access_vocabulary": [
+    "NONE",
+    "L0_TARGET_ONLY",
+    "L1_LOSS_ONLY",
+    "L2_ORACLE_UPSTREAM_PRODUCT",
+    "L3_CONDITIONING_INPUT",
+    "HISTORICAL_UNKNOWN_OR_SUPERSEDED"
   ],
   "registration_rule": {
     "binary_may_live_outside_git": true,
@@ -96,9 +152,13 @@
     "every_current_checkpoint_requires_exact_architecture_base": true,
     "every_current_checkpoint_requires_training_data_manifest": true,
     "every_current_checkpoint_requires_optimizer_step": true,
+    "every_trained_checkpoint_requires_rung": true,
+    "every_trained_checkpoint_requires_teacher_access_level": true,
+    "every_trained_checkpoint_requires_authorized_and_forbidden_claims": true,
     "every_downstream_checkpoint_requires_upstream_checkpoint_lineage": true,
     "unregistered_checkpoint_may_be_used_for_product_inference": false,
+    "shipping_claim_requires_shipping_authority_true": true,
     "historical_checkpoint_may_be_promoted_by_name_only": false
   },
-  "first_fit_transition": "Family-1 optimizer step 0 must begin with all current stage entries still NO_CURRENT_CHECKPOINT; successful saved checkpoints update this registry by exact hash/lineage before any inference-authoritative PASS can be claimed."
+  "first_fit_transition": "Family-1 optimizer step 0 starts with all four current stages UNTRAINED. Every saved artifact is first registered with exact rung/teacher-access/hash/lineage and a bounded claim set. No oracle-conditional checkpoint can acquire shipping authority by filename or training success alone."
 }

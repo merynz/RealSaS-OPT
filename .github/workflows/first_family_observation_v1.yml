@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/first_family_observation_v1.yml'
       - 'experiments/first_family_fit_v1/run_mage_observation_v1.py'
+      - 'experiments/first_family_fit_v1/bootstrap_blender_5_2_v1.py'
       - 'experiments/first_family_fit_v1/MAGE_AUTHORITY_PACK_V1.json'
   workflow_dispatch:
 

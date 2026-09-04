@@ -4,22 +4,17 @@ import argparse
 import json
 import os
 import platform
-import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
 
 
-FAMILY_NAME = "kaykit_01_Mage"
-ASSET_ID = "asset_fbc8d57f848df78bd953fbb5"
-EXPECTED_GEOMETRY_SHA256 = "f1e429a706faffd6ed6fd2b26a756cfca406e4ece440a9717e7e4b09f03db07d"
 MASTER_BASENAME = "RealSaS_MASTER_CORPUS_1024_V3"
 
 
 @dataclass
 class ProbeReport:
     schema: str
-    family_name: str
+    family_label: str
     asset_id: str
     python: str
     platform: str
@@ -36,7 +31,6 @@ class ProbeReport:
     primary_geometry_keys: list[str]
     full_truth_fields_present: bool | None
     master_views_present: int | None
-    source_textured_views_present: int | None
     current_model_imports_pass: bool
     notes: list[str]
     status: str
@@ -51,11 +45,11 @@ def _sha256_path(path: Path) -> str:
     return h.hexdigest()
 
 
-def _torch_probe() -> tuple[bool, str | None, bool, str | None, int | None, list[str]]:
+def _torch_probe():
     notes: list[str] = []
     try:
         import torch
-    except Exception as exc:  # pragma: no cover - environment probe
+    except Exception as exc:
         return False, None, False, None, None, [f"TORCH_IMPORT_FAIL:{type(exc).__name__}:{exc}"]
     cuda = bool(torch.cuda.is_available())
     name = None
@@ -65,7 +59,7 @@ def _torch_probe() -> tuple[bool, str | None, bool, str | None, int | None, list
             props = torch.cuda.get_device_properties(0)
             name = str(props.name)
             total = int(props.total_memory)
-        except Exception as exc:  # pragma: no cover
+        except Exception as exc:
             notes.append(f"CUDA_PROPERTY_FAIL:{type(exc).__name__}:{exc}")
     return True, str(torch.__version__), cuda, name, total, notes
 
@@ -81,6 +75,10 @@ def _candidate_master_roots() -> list[Path]:
         home / "data" / MASTER_BASENAME,
         home / "Downloads" / MASTER_BASENAME,
         Path("/content/drive/MyDrive") / MASTER_BASENAME,
+        Path("/mnt/g/My Drive") / MASTER_BASENAME,
+        Path("/mnt/g") / MASTER_BASENAME,
+        Path("/mnt/d") / MASTER_BASENAME,
+        Path("/mnt/e") / MASTER_BASENAME,
     ])
     users = Path("/mnt/c/Users")
     if users.is_dir():
@@ -93,8 +91,9 @@ def _candidate_master_roots() -> list[Path]:
                 u / "Documents" / MASTER_BASENAME,
                 u / "My Drive" / MASTER_BASENAME,
                 u / "Google Drive" / "My Drive" / MASTER_BASENAME,
+                u / "Google Drive" / MASTER_BASENAME,
+                u / "Drive" / "My Drive" / MASTER_BASENAME,
             ])
-    # Stable de-duplication without recursively crawling user disks.
     seen: set[str] = set()
     dedup: list[Path] = []
     for p in out:
@@ -105,35 +104,24 @@ def _candidate_master_roots() -> list[Path]:
     return dedup
 
 
-def _find_master() -> Path | None:
+def _find_master(asset_id: str) -> Path | None:
     for p in _candidate_master_roots():
-        if (p / "master" / "assets" / ASSET_ID / "primary_geometry.npz").is_file():
+        if (p / "master" / "assets" / asset_id / "primary_geometry.npz").is_file():
             return p.resolve()
     return None
 
 
 def _count_master_views(asset_root: Path) -> int:
-    # Historical master layouts use V0..V7 folders. Count only folders carrying both
-    # camera and raster authority; do not guess a visual style.
+    render_root = asset_root / "renders"
     count = 0
     for v in range(8):
-        d = asset_root / f"V{v}"
+        d = render_root / f"V{v}"
         if (d / "camera.json").is_file() and (d / "raster_authority.npz").is_file():
             count += 1
     return count
 
 
-def _count_source_textured_views(asset_root: Path) -> int:
-    names = ("source_textured_rgba.png", "source_textured.png", "textured.png")
-    count = 0
-    for v in range(8):
-        d = asset_root / f"V{v}"
-        if any((d / name).is_file() for name in names):
-            count += 1
-    return count
-
-
-def _probe_geometry(path: Path) -> tuple[list[str], bool, list[str]]:
+def _probe_geometry(path: Path):
     notes: list[str] = []
     try:
         import numpy as np
@@ -141,16 +129,16 @@ def _probe_geometry(path: Path) -> tuple[list[str], bool, list[str]]:
             keys = sorted(map(str, z.files))
     except Exception as exc:
         return [], False, [f"NPZ_OPEN_FAIL:{type(exc).__name__}:{exc}"]
-    geppetto_any = {"bone_heads", "bone_tails"}.issubset(keys) and ("parents" in keys or "bone_parents" in keys)
+    geppetto = {"bone_heads", "bone_tails"}.issubset(keys) and ("parents" in keys or "bone_parents" in keys)
     arachne = "skin" in keys
-    iris = any(k in keys for k in ("vertices", "verts", "positions")) and any(k in keys for k in ("faces", "triangles"))
-    full = bool(iris and geppetto_any and arachne)
+    iris = "vertices" in keys and "faces" in keys
+    full = bool(iris and geppetto and arachne)
     if not full:
         notes.append("FULL_TRUTH_FIELDS_NOT_ALL_PRESENT")
     return keys, full, notes
 
 
-def _probe_current_imports() -> tuple[bool, list[str]]:
+def _probe_current_imports():
     notes: list[str] = []
     try:
         from models.iris.v2.q_domain_v2 import build_production_observation_ray_lattice_v2  # noqa:F401
@@ -158,7 +146,7 @@ def _probe_current_imports() -> tuple[bool, list[str]]:
         from compiler.realsas_compiler_core.substrate.iris_v2 import compile_surface_v2, attach_dtb_nd1_from_evidence  # noqa:F401
         from models.geppetto.v2.geppetto_candidate_v2 import GeppettoCandidateV2  # noqa:F401
         from compiler.realsas_compiler_core.rig import qualify_skeleton_v2  # noqa:F401
-        from models.skin_field_codec.v1.model_v1 import SkinFieldCodecV1  # noqa:F401
+        from models.skin_field_codec.v1.skin_field_codec_v1 import SkinFieldCodecV1  # noqa:F401
         from models.arachne.v2.arachne_candidate_v2 import ArachneCandidateV2  # noqa:F401
         from compiler.realsas_compiler_core.skin import qualify_skin  # noqa:F401
         from compiler.realsas_compiler_core.mwb2 import build_mwb2_candidate, qualify_mwb2_mesh  # noqa:F401
@@ -171,31 +159,37 @@ def _probe_current_imports() -> tuple[bool, list[str]]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--spec", required=True)
     ap.add_argument("--out", default="first_family_local_preflight.json")
     args = ap.parse_args()
+
+    spec = json.loads(Path(args.spec).read_text(encoding="utf-8"))
+    if spec.get("schema") != "RealSaS.FirstFamilyFitSpec.v1":
+        raise RuntimeError("first-family spec schema drift")
+    family_label = spec["family_label"]
+    asset_id = spec["asset_id"]
+    expected_geometry_sha = spec["authority"]["primary_geometry_sha256"]
 
     torch_ok, torch_ver, cuda, cuda_name, cuda_mem, notes = _torch_probe()
     imports_ok, import_notes = _probe_current_imports()
     notes.extend(import_notes)
 
-    master = _find_master()
-    asset_root = master / "master" / "assets" / ASSET_ID if master else None
+    master = _find_master(asset_id)
+    asset_root = master / "master" / "assets" / asset_id if master else None
     geom = asset_root / "primary_geometry.npz" if asset_root else None
     geom_sha = _sha256_path(geom) if geom and geom.is_file() else None
-    geom_match = (geom_sha == EXPECTED_GEOMETRY_SHA256) if geom_sha else None
+    geom_match = (geom_sha == expected_geometry_sha) if geom_sha else None
     keys: list[str] = []
     full_truth: bool | None = None
     master_views: int | None = None
-    textured_views: int | None = None
     if geom and geom.is_file():
         keys, full_truth, geom_notes = _probe_geometry(geom)
         notes.extend(geom_notes)
         master_views = _count_master_views(asset_root)
-        textured_views = _count_source_textured_views(asset_root)
         if geom_match is False:
             notes.append("MASTER_GEOMETRY_SHA_DRIFT")
     else:
-        notes.append("DATA_NOT_LOCAL: exact Master Mage asset not found in bounded known roots")
+        notes.append("DATA_NOT_LOCAL: selected first-family Master asset not found in bounded known roots")
 
     if cuda and cuda_mem is not None and cuda_mem < 8 * (1 << 30):
         notes.append("LOCAL_GPU_IS_PREFLIGHT_ONLY_FOR_NATIVE1024_IRIS; use A100-class GPU for scientific fit")
@@ -211,8 +205,8 @@ def main() -> int:
 
     report = ProbeReport(
         schema="RealSaS.FirstFamilyLocalPreflight.v1",
-        family_name=FAMILY_NAME,
-        asset_id=ASSET_ID,
+        family_label=family_label,
+        asset_id=asset_id,
         python=platform.python_version(),
         platform=platform.platform(),
         torch_importable=torch_ok,
@@ -228,7 +222,6 @@ def main() -> int:
         primary_geometry_keys=keys,
         full_truth_fields_present=full_truth,
         master_views_present=master_views,
-        source_textured_views_present=textured_views,
         current_model_imports_pass=imports_ok,
         notes=notes,
         status=status,

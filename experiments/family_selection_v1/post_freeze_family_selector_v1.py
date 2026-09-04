@@ -7,14 +7,16 @@ from pathlib import Path
 from typing import Iterable, Mapping
 
 from canonical.architecture_freeze_gate_v1 import require_family_selection_authority
+from experiments.family_selection_v1.prefit_family_truth_eligibility_v1 import (
+    POLICY_ID as TRUTH_ELIGIBILITY_POLICY_ID,
+    PrefitFamilyTruthEligibilityV1,
+)
 
 
 SCHEMA = "RealSaS.PostFreezeFamilySelector.v1"
-POLICY_ID = "FIT8_PREFIT_BLINDED_HASH_ORDER_V1"
-RANK_DOMAIN = "RealSaS/FIT8/pre-fit/blinded/hash-order/v1"
+POLICY_ID = "FIT8_PREFIT_BLINDED_HASH_ORDER_V2"
+RANK_DOMAIN = "RealSaS/FIT8/pre-fit/blinded/hash-order/v2"
 
-# These fields encode results that can only exist after model fitting/evaluation. A
-# candidate ledger containing any of them is rejected rather than silently ignored.
 FORBIDDEN_POSTFIT_KEYS = frozenset({
     "fit_loss", "train_loss", "val_loss", "test_loss", "checkpoint", "checkpoint_sha256",
     "iris_score", "iris_metrics", "geppetto_score", "geppetto_metrics",
@@ -35,6 +37,8 @@ class PrefitFamilyCandidateV1:
     single_pose_core_eligible: bool
     exact_camera_raster_authority: bool
     explicit_source_textured_rgba: bool
+    prefit_truth_eligibility_pass: bool
+    prefit_truth_eligibility_sha256: str
     visual_character_only_pass: bool
     visual_no_render_artifact_pass: bool
     visual_no_dominant_geometric_block_pass: bool
@@ -44,11 +48,16 @@ class PrefitFamilyCandidateV1:
     candidate_authority_sha256: str
 
     def validate(self) -> None:
-        for field in ("asset_id", "source_family_id", "visual_audit_id", "visual_audit_sha256", "candidate_authority_sha256"):
+        for field in (
+            "asset_id", "source_family_id", "prefit_truth_eligibility_sha256",
+            "visual_audit_id", "visual_audit_sha256", "candidate_authority_sha256",
+        ):
             if not getattr(self, field):
                 raise ValueError(f"EMPTY_REQUIRED_FIELD:{field}")
-        if len(self.visual_audit_sha256) != 64 or len(self.candidate_authority_sha256) != 64:
-            raise ValueError("AUTHORITY_HASH_MUST_BE_SHA256_HEX")
+        for field in ("prefit_truth_eligibility_sha256", "visual_audit_sha256", "candidate_authority_sha256"):
+            value = str(getattr(self, field))
+            if len(value) != 64 or any(ch not in "0123456789abcdef" for ch in value):
+                raise ValueError(f"AUTHORITY_HASH_MUST_BE_SHA256_HEX:{field}")
 
     @property
     def eligible(self) -> bool:
@@ -62,6 +71,7 @@ class PrefitFamilyCandidateV1:
             self.single_pose_core_eligible,
             self.exact_camera_raster_authority,
             self.explicit_source_textured_rgba,
+            self.prefit_truth_eligibility_pass,
             self.visual_character_only_pass,
             self.visual_no_render_artifact_pass,
             self.visual_no_dominant_geometric_block_pass,
@@ -76,6 +86,7 @@ class SelectedFamilyV1:
     source_family_id: str
     blinded_rank_sha256: str
     candidate_authority_sha256: str
+    prefit_truth_eligibility_sha256: str
     visual_audit_id: str
     visual_audit_sha256: str
 
@@ -124,18 +135,40 @@ def candidate_from_mapping_v1(record: Mapping[str, object]) -> PrefitFamilyCandi
     return candidate
 
 
+def _validate_truth_eligibility_authority(
+    candidate: PrefitFamilyCandidateV1,
+    report: PrefitFamilyTruthEligibilityV1 | None,
+) -> None:
+    if report is None:
+        raise ValueError(f"PREFIT_TRUTH_ELIGIBILITY_REPORT_REQUIRED:{candidate.asset_id}")
+    if report.policy_id != TRUTH_ELIGIBILITY_POLICY_ID:
+        raise ValueError(f"PREFIT_TRUTH_ELIGIBILITY_POLICY_DRIFT:{candidate.asset_id}:{report.policy_id}")
+    if report.asset_id != candidate.asset_id:
+        raise ValueError(f"PREFIT_TRUTH_ELIGIBILITY_ASSET_MISMATCH:{candidate.asset_id}:{report.asset_id}")
+    if report.scientific_fit_steps != 0 or report.postfit_information_consumed is not False:
+        raise ValueError(f"PREFIT_TRUTH_ELIGIBILITY_POSTFIT_CONTAMINATION:{candidate.asset_id}")
+    if report.source_mesh_used_for_model_input or report.teacher_truth_used_for_model_input:
+        raise ValueError(f"PREFIT_TRUTH_ELIGIBILITY_MODEL_INPUT_FIREWALL_VIOLATION:{candidate.asset_id}")
+    if report.pass_prefit_truth_eligibility is not True:
+        raise ValueError(f"PREFIT_TRUTH_ELIGIBILITY_NOT_PASS:{candidate.asset_id}")
+    if candidate.prefit_truth_eligibility_pass is not True:
+        raise ValueError(f"PREFIT_TRUTH_ELIGIBILITY_CANDIDATE_FLAG_NOT_PASS:{candidate.asset_id}")
+    if report.eligibility_sha256 != candidate.prefit_truth_eligibility_sha256:
+        raise ValueError(f"PREFIT_TRUTH_ELIGIBILITY_SHA_MISMATCH:{candidate.asset_id}")
+
+
 def select_prefit_families_v1(
     repo_root: str | Path,
     candidates: Iterable[PrefitFamilyCandidateV1],
     *,
+    truth_eligibility_reports: Mapping[str, PrefitFamilyTruthEligibilityV1],
     count: int = 8,
 ) -> FamilySelectionResultV1:
-    """Select a deterministic pre-fit panel only after architecture freeze.
+    """Select a deterministic pre-fit panel only after current architecture freeze.
 
-    Selection uses no model output. The caller must provide a sealed visual audit made
-    before fitting; among fully eligible candidates, membership is determined only by
-    a fixed domain-separated SHA-256 order. Changing source architecture invalidates
-    the architecture seal and blocks this function before candidate ranking.
+    No model output participates. A candidate cannot become eligible from a hand-set
+    boolean alone: its typed pre-fit truth eligibility report must be supplied and
+    must bind the same asset, policy, PASS state and SHA-256 before blinded ranking.
     """
     if count < 1:
         raise ValueError("selection count must be positive")
@@ -154,6 +187,8 @@ def select_prefit_families_v1(
             raise ValueError(f"DUPLICATE_SOURCE_FAMILY_ID:{row.source_family_id}")
         seen_assets.add(row.asset_id)
         seen_families.add(row.source_family_id)
+        if row.prefit_truth_eligibility_pass:
+            _validate_truth_eligibility_authority(row, truth_eligibility_reports.get(row.asset_id))
 
     eligible = tuple(row for row in rows if row.eligible)
     if len(eligible) < count:
@@ -167,6 +202,7 @@ def select_prefit_families_v1(
             source_family_id=row.source_family_id,
             blinded_rank_sha256=_rank(row.asset_id),
             candidate_authority_sha256=row.candidate_authority_sha256,
+            prefit_truth_eligibility_sha256=row.prefit_truth_eligibility_sha256,
             visual_audit_id=row.visual_audit_id,
             visual_audit_sha256=row.visual_audit_sha256,
         )
@@ -184,7 +220,7 @@ def select_prefit_families_v1(
         "candidate_set_sha256": candidate_set_sha,
         "scientific_fit_steps_before_selection": 0,
         "fit_metrics_consumed": False,
-        "selection_basis": "SEALED_PREFIT_ELIGIBILITY_PLUS_DOMAIN_SEPARATED_SHA256_ORDER",
+        "selection_basis": "TYPED_PREFIT_TRUTH_ELIGIBILITY_PLUS_SEALED_VISUAL_AUDIT_PLUS_BLINDED_SHA256_ORDER",
     }
     selection_sha = _canonical_hash(selection_hash_payload)
     return FamilySelectionResultV1(
@@ -198,7 +234,7 @@ def select_prefit_families_v1(
         selection_sha256=selection_sha,
         scientific_fit_steps_before_selection=0,
         fit_metrics_consumed=False,
-        selection_basis="SEALED_PREFIT_ELIGIBILITY_PLUS_DOMAIN_SEPARATED_SHA256_ORDER",
+        selection_basis="TYPED_PREFIT_TRUTH_ELIGIBILITY_PLUS_SEALED_VISUAL_AUDIT_PLUS_BLINDED_SHA256_ORDER",
     )
 
 

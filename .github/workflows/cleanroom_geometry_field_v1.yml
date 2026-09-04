@@ -21,6 +21,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Activate Linux Python 3.12 toolchain
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Canonical isolation gate
         shell: bash
         run: |

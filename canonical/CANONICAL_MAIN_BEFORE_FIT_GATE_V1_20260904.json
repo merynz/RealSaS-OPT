@@ -1,37 +1,47 @@
 {
   "schema": "RealSaS.CanonicalMainBeforeFitGate.v1",
   "date": "2026-09-04",
-  "decision": "CANONICAL_MAIN_PROMOTION_REQUIRED_BEFORE_ANY_REAL_FAMILY_FIT",
-  "current_default_main_commit": "de1a44cae1195dd9cbad3b23ef75d58ae80aa9b3",
-  "restoration_branch": "restoration/compiler-runtime-promotion-v1-20260903",
+  "decision": "CANONICAL_MAIN_PROMOTED__FINAL_EXACT_MAIN_VERIFICATION_AND_NEW_FIRST_FIT_BASE_REQUIRED_BEFORE_REAL_FIT",
+  "historical_restoration_base_commit": "1f1d8b5bd0df9da2c62733c05c54ec4d99c05f2f",
+  "hardening_promotion_source_branch": "hardening/pre-fit-closure-v1-20260904",
+  "verified_main_code_baseline_before_metadata_reconciliation": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
+  "verified_main_code_baseline_gates": {
+    "current_mainline_self_hosted_ci_run_id": 33863458125,
+    "current_mainline_conclusion": "success",
+    "current_runtime_self_hosted_ci_run_id": 33863458344,
+    "current_runtime_conclusion": "success"
+  },
+  "architecture_source_authority": {
+    "seal": "canonical/ARCHITECTURE_FREEZE_V2.json",
+    "status": "PASS_ARCHITECTURE_FROZEN",
+    "living_source_fingerprint_sha256": "9585aa3af8975fe66af64e161b9289da02b77c012c682bca536c664ef1d271f0",
+    "selection_apparatus_fingerprint_sha256": "9ed25dafe62c62c0cee69dc4878c5587366db5e296a657c9649c86bf334fecd1",
+    "scientific_fit_steps_at_freeze": 0,
+    "family_selection_authorized": true,
+    "fit_authorized_by_seal": false
+  },
   "required_order": [
-    "RESTORATION_SOURCE_AND_BEHAVIORAL_CLOSURE",
-    "RESTORATION_WIDE_REGRESSION_E2E_NATIVE_GATE",
-    "EXPLICIT_RESTORATION_VERDICT",
-    "PROMOTE_RESTORATION_TREE_TO_CANONICAL_MAIN",
-    "POST_MERGE_MAIN_REPOSITORY_INTEGRITY_CHECK",
-    "FREEZE_CANONICAL_MAIN_COMMIT_FOR_FIRST_FIT_BASE",
-    "ONLY_THEN_AUTHORIZE_REAL_FAMILY_FIT"
+    "LIVING_ARCHITECTURE_AND_SELECTION_APPARATUS_V2_FROZEN",
+    "PREFIT_HARDENING_TREE_PROMOTED_TO_CANONICAL_MAIN",
+    "EXACT_MAIN_CURRENT_MAINLINE_GATE_PASS",
+    "EXACT_MAIN_CURRENT_RUNTIME_GATE_PASS",
+    "STALE_PREFIT_CANONICAL_AUTHORITY_RECONCILED_WITHOUT_ERASING_HISTORICAL_EXPERIMENT_EVIDENCE",
+    "FINAL_EXACT_MAIN_METADATA_RECONCILIATION_GATE_PASS",
+    "FREEZE_NEW_EXACT_FIRST_FIT_BASE_REF",
+    "BUILD_AND_BLIND_FREEZE_TEXTURED_1024_FIT8_COHORT",
+    "BIND_FAMILY_1_EXACT_OBSERVATION_AND_THREE_TRUTH_AUTHORITIES",
+    "ZERO_STEP_REAL_FAMILY_E2E_HARNESS_PASS",
+    "ONLY_THEN_AUTHORIZE_FAMILY_1_OPTIMIZER_STEPS"
   ],
-  "fit_branch_may_precede_canonical_main": false,
-  "fit_may_run_on_restoration_branch": false,
-  "fit_may_run_on_safety_or_experiment_branch_before_main_promotion": false,
-  "first_fit_must_record_canonical_main_base_commit": true,
-  "mainline_expected_shape_after_promotion": {
+  "mainline_expected_shape": {
     "living_system": ["models/", "compiler/", "runtime/"],
     "research_labs": ["experiments/"],
     "decision_evidence": ["canonical/"],
     "provenance_reserve": ["historical/"]
   },
-  "main_promotion_requirements": [
-    "no_current_mainline_dependency_on_dated_experiment_implementation",
-    "current_learned_models_visible_under_models",
-    "current_compiler_authority_visible_under_compiler",
-    "sealed_native_cpp_runtime_visible_under_runtime",
-    "current_system_index_matches_tree",
-    "restoration_state_matches_tree",
-    "no_unresolved_P0_scientific_authority_blocker",
-    "native_interlock_and_restoration_closure_verdict_recorded"
-  ],
+  "historical_experiment_policy": "G1_G2_AND_OTHER_SCOPED_EXPERIMENTS_REMAIN_PROVENANCE_WITH_THEIR_ORIGINAL_CLAIM_BOUNDARIES__THEY_ARE_NOT_ERASED_OR_RETROACTIVELY_PROMOTED_TO_CURRENT_PRODUCT_AUTHORITY",
+  "family_selection_completed": false,
+  "family_1_bound": false,
+  "scientific_fit_steps_now": 0,
   "fit_authorized_now": false
 }

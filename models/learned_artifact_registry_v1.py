@@ -7,6 +7,7 @@ from typing import Any
 
 
 SCHEMA = "RealSaS.LearnedArtifactRegistry.v1"
+_GIT_SHA1 = re.compile(r"^[0-9a-f]{40}$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 SHIPPING_CLAIM = "SHIPPING_OBSERVATION_ONLY_INFERENCE"
 
@@ -19,7 +20,9 @@ def load_learned_artifact_registry_v1(path: str | Path) -> dict[str, Any]:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     if payload.get("schema") != SCHEMA:
         raise LearnedArtifactAuthorizationError("LEARNED_ARTIFACT_REGISTRY_SCHEMA_MISMATCH")
-    if not _SHA256.fullmatch(str(payload.get("architecture_base_commit", ""))):
+    if payload.get("architecture_base_commit_hash_kind") != "GIT_SHA1_40":
+        raise LearnedArtifactAuthorizationError("LEARNED_ARTIFACT_REGISTRY_BASE_COMMIT_HASH_KIND_INVALID")
+    if not _GIT_SHA1.fullmatch(str(payload.get("architecture_base_commit", ""))):
         raise LearnedArtifactAuthorizationError("LEARNED_ARTIFACT_REGISTRY_BASE_COMMIT_INVALID")
     if not isinstance(payload.get("current_stages"), dict):
         raise LearnedArtifactAuthorizationError("LEARNED_ARTIFACT_REGISTRY_CURRENT_STAGES_MISSING")
@@ -78,7 +81,7 @@ def reject_historical_checkpoint_for_current_claim_v1(
     checkpoint_sha256: str,
     requested_claim: str,
 ) -> None:
-    for artifact in registry.get("historical_artifacts", ()): 
+    for artifact in registry.get("historical_artifacts", ()):
         checkpoint = artifact.get("checkpoint", {}) if isinstance(artifact, dict) else {}
         if checkpoint.get("sha256") == checkpoint_sha256:
             raise LearnedArtifactAuthorizationError(

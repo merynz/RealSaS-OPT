@@ -63,6 +63,13 @@ jobs:
             tests/repository/test_learned_artifact_registry_v1.py \
             experiments/family_selection_v1/test_prefit_family_truth_eligibility_v1.py \
             experiments/family_selection_v1/test_post_freeze_family_selector_v1.py
+      - name: Verify sealed selection authority when seal exists
+        run: |
+          if [ -f canonical/ARCHITECTURE_FREEZE_V2.json ]; then
+            python canonical/architecture_freeze_gate_v2.py --repo-root . --check-selection-authority
+          else
+            echo 'V2 seal absent: candidate-only run, selection remains blocked'
+          fi
       - name: Emit candidate identities
         run: |
           python - <<'PY'

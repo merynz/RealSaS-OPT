@@ -17,11 +17,27 @@ ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = ROOT / "canonical" / "LEARNED_ARTIFACT_REGISTRY_V1_20260904.json"
 ZERO = "0" * 64
 ONE = "1" * 64
+LIVING = "a" * 64
+SELECTION = "b" * 64
+TRAINING_COMMIT = "c" * 40
 
 
-def test_untrained_current_stage_cannot_be_loaded_for_shipping() -> None:
+def frozen_registry() -> dict:
     registry = load_learned_artifact_registry_v1(REGISTRY_PATH)
-    with pytest.raises(LearnedArtifactAuthorizationError, match="LEARNED_STAGE_NOT_TRAINED"):
+    r = copy.deepcopy(registry)
+    r["architecture_source_authority"].update({
+        "state": "FROZEN_V2",
+        "seal_path": "canonical/ARCHITECTURE_FREEZE_V2.json",
+        "living_source_fingerprint_sha256": LIVING,
+        "selection_apparatus_fingerprint_sha256": SELECTION,
+    })
+    return r
+
+
+def test_pending_architecture_authority_blocks_checkpoint_claims_before_stage_state() -> None:
+    registry = load_learned_artifact_registry_v1(REGISTRY_PATH)
+    assert registry["architecture_source_authority"]["state"] == "PENDING_V2_REFREEZE"
+    with pytest.raises(LearnedArtifactAuthorizationError, match="LEARNED_CHECKPOINT_ARCHITECTURE_AUTHORITY_NOT_FROZEN"):
         authorize_checkpoint_claim_v1(
             registry,
             stage_name="IRIS_V2",
@@ -30,9 +46,20 @@ def test_untrained_current_stage_cannot_be_loaded_for_shipping() -> None:
         )
 
 
+def test_untrained_current_stage_cannot_be_loaded_after_architecture_is_frozen() -> None:
+    registry = frozen_registry()
+    with pytest.raises(LearnedArtifactAuthorizationError, match="LEARNED_STAGE_NOT_TRAINED"):
+        authorize_checkpoint_claim_v1(
+            registry,
+            stage_name="IRIS_V2",
+            checkpoint_sha256=ZERO,
+            requested_claim="SHIPPING_OBSERVATION_ONLY_INFERENCE",
+            require_architecture_fingerprint=LIVING,
+        )
+
+
 def test_oracle_rung_checkpoint_can_be_downstream_bounded_but_not_shipping() -> None:
-    registry = load_learned_artifact_registry_v1(REGISTRY_PATH)
-    r = copy.deepcopy(registry)
+    r = frozen_registry()
     entry = r["current_stages"]["ARACHNE_V2_A1"]
     entry.update({
         "state": "TRAINED_RUNG_BOUNDED",
@@ -46,13 +73,16 @@ def test_oracle_rung_checkpoint_can_be_downstream_bounded_but_not_shipping() -> 
         "teacher_access_level": "L3_CONDITIONING_INPUT",
         "data_manifest_sha256": ONE,
         "optimizer_steps": 17,
+        "training_code_commit_hash_kind": "GIT_SHA1_40",
+        "training_code_commit": TRAINING_COMMIT,
+        "architecture_living_source_fingerprint_sha256": LIVING,
     })
     out = authorize_checkpoint_claim_v1(
         r,
         stage_name="ARACHNE_V2_A1",
         checkpoint_sha256=ZERO,
         requested_claim="DOWNSTREAM_CONSUMER_CEILING",
-        require_architecture_commit=registry["architecture_base_commit"],
+        require_architecture_fingerprint=LIVING,
     )
     assert out["produced_by"]["rung"] == "ORACLE_S__CURRENT_QUALIFIED_G"
     with pytest.raises(LearnedArtifactAuthorizationError, match="CLAIM_NOT_AUTHORIZED"):
@@ -61,6 +91,19 @@ def test_oracle_rung_checkpoint_can_be_downstream_bounded_but_not_shipping() -> 
             stage_name="ARACHNE_V2_A1",
             checkpoint_sha256=ZERO,
             requested_claim="SHIPPING_OBSERVATION_ONLY_INFERENCE",
+            require_architecture_fingerprint=LIVING,
+        )
+
+
+def test_checkpoint_architecture_fingerprint_mismatch_fails_closed() -> None:
+    r = frozen_registry()
+    with pytest.raises(LearnedArtifactAuthorizationError, match="ARCHITECTURE_FINGERPRINT_MISMATCH"):
+        authorize_checkpoint_claim_v1(
+            r,
+            stage_name="IRIS_V2",
+            checkpoint_sha256=ZERO,
+            requested_claim="DOWNSTREAM_CONSUMER_CEILING",
+            require_architecture_fingerprint="d" * 64,
         )
 
 

@@ -22,9 +22,23 @@ SELECTION = "b" * 64
 TRAINING_COMMIT = "c" * 40
 
 
+def base_registry() -> dict:
+    return load_learned_artifact_registry_v1(REGISTRY_PATH)
+
+
+def pending_registry() -> dict:
+    r = copy.deepcopy(base_registry())
+    r["architecture_source_authority"].update({
+        "state": "PENDING_V2_REFREEZE",
+        "seal_path": "canonical/ARCHITECTURE_FREEZE_V2.json",
+        "living_source_fingerprint_sha256": None,
+        "selection_apparatus_fingerprint_sha256": None,
+    })
+    return r
+
+
 def frozen_registry() -> dict:
-    registry = load_learned_artifact_registry_v1(REGISTRY_PATH)
-    r = copy.deepcopy(registry)
+    r = copy.deepcopy(base_registry())
     r["architecture_source_authority"].update({
         "state": "FROZEN_V2",
         "seal_path": "canonical/ARCHITECTURE_FREEZE_V2.json",
@@ -35,8 +49,7 @@ def frozen_registry() -> dict:
 
 
 def test_pending_architecture_authority_blocks_checkpoint_claims_before_stage_state() -> None:
-    registry = load_learned_artifact_registry_v1(REGISTRY_PATH)
-    assert registry["architecture_source_authority"]["state"] == "PENDING_V2_REFREEZE"
+    registry = pending_registry()
     with pytest.raises(LearnedArtifactAuthorizationError, match="LEARNED_CHECKPOINT_ARCHITECTURE_AUTHORITY_NOT_FROZEN"):
         authorize_checkpoint_claim_v1(
             registry,
@@ -108,7 +121,7 @@ def test_checkpoint_architecture_fingerprint_mismatch_fails_closed() -> None:
 
 
 def test_historical_quarantined_checkpoint_is_explicitly_rejected() -> None:
-    registry = load_learned_artifact_registry_v1(REGISTRY_PATH)
+    registry = base_registry()
     sha = registry["historical_artifacts"][0]["checkpoint"]["sha256"]
     with pytest.raises(LearnedArtifactAuthorizationError, match="HISTORICAL_CHECKPOINT_FORBIDDEN"):
         reject_historical_checkpoint_for_current_claim_v1(

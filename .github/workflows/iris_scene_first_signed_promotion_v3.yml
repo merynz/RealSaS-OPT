@@ -66,6 +66,35 @@ jobs:
             models/iris/v3/zero_surface_decoder_v3.py \
             compiler/realsas_compiler_core/substrate/scene_first_signed.py
 
+      - name: Seal Mage 3D depth evidence and future unseen gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('models/iris/v3/PROMOTED_MAGE_FIT_WITNESS_V1.json')
+          w=json.loads(p.read_text())
+          a=w['visible_depth_audit']
+          assert a['classification']=='RETROSPECTIVE_FIT_DIAGNOSTIC_AFTER_XZ_PROJECTION_REVIEW'
+          assert a['teacher_truth_used_for_evaluation_only'] is True
+          assert a['teacher_truth_used_at_inference'] is False
+          assert a['overall_visible_depth']['p95_norm'] <= 0.05
+          assert a['overall_visible_depth']['max_per_view_p95_norm'] <= 0.08
+          assert a['silhouette']['min_view_iou'] >= 0.94
+          assert a['silhouette']['min_view_recall'] >= 0.96
+          y=a['y_extent_normalized']
+          assert y['pred_span']/y['truth_span'] >= 0.90
+          g=w['prospective_unseen_geometry_gate_frozen_after_mage_fit']
+          assert g['frozen_before_any_unseen_family_result'] is True
+          assert g['overall_visible_depth_p95_norm_max']==0.05
+          assert g['max_single_view_visible_depth_p95_norm_max']==0.08
+          assert g['min_view_silhouette_iou_min']==0.94
+          assert g['min_view_silhouette_recall_min']==0.96
+          print('MAGE_EXPLICIT_3D_DEPTH_EVIDENCE=PASS')
+          print('UNSEEN_GEOMETRY_THRESHOLDS=FROZEN')
+          PY
+
       - name: IRIS v3 and GSA bridge tests
         shell: bash
         run: |

@@ -9,8 +9,11 @@ on:
       - 'runtime/reference_v4/**'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
-      - 'tests/iris/test_iris_mainline_source_v1.py'
+      - 'tests/compiler/**'
+      - 'tests/iris/**'
       - 'tests/models/**'
+      - 'tests/repository/test_learned_artifact_registry_v1.py'
+      - 'canonical/LEARNED_ARTIFACT_REGISTRY_V1_20260904.json'
       - 'restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md'
       - '.github/workflows/model_mainline_source_gate.yml'
   push:
@@ -21,8 +24,11 @@ on:
       - 'runtime/reference_v4/**'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
-      - 'tests/iris/test_iris_mainline_source_v1.py'
+      - 'tests/compiler/**'
+      - 'tests/iris/**'
       - 'tests/models/**'
+      - 'tests/repository/test_learned_artifact_registry_v1.py'
+      - 'canonical/LEARNED_ARTIFACT_REGISTRY_V1_20260904.json'
       - 'restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md'
       - '.github/workflows/model_mainline_source_gate.yml'
 
@@ -31,6 +37,10 @@ jobs:
     runs-on: [self-hosted, linux, x64, realsas]
     env:
       PYTHONPATH: .
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -41,7 +51,7 @@ jobs:
           PIP_DISABLE_PIP_VERSION_CHECK: '1'
           PIP_DEFAULT_TIMEOUT: '60'
         run: |
-          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy
+          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pytest
       - name: IRIS byte-equivalence and mainline import firewall
         run: python tests/iris/test_iris_mainline_source_v1.py
       - name: Geppetto inference source gate
@@ -52,6 +62,19 @@ jobs:
         run: python tests/models/test_arachne_mainline_source_v1.py
       - name: Current model training/evaluation source gate
         run: python tests/models/test_model_training_mainline_source_v1.py
+      - name: Pre-fit deterministic/compiler hardening regressions
+        run: |
+          python -m pytest -q \
+            tests/compiler/test_canonical_graph_visible_authority_v1.py \
+            tests/compiler/test_skin_repair_accounting_v1.py \
+            tests/iris/test_iris_v2_mode_determinism_v1.py \
+            tests/iris/test_iris_v2_resource_contract_v1.py \
+            tests/iris/test_iris_v2_support_telemetry_v1.py \
+            tests/models/test_geppetto_determinism_hardening_v1.py \
+            tests/models/test_geppetto_matching_hardening_v1.py \
+            tests/models/test_arachne_checkpoint_v2.py \
+            tests/models/test_learned_artifact_registry_authorization_v1.py \
+            tests/repository/test_learned_artifact_registry_v1.py
       - name: Syntax-compile promoted model packages
         run: |
           python - <<'PY'
@@ -66,3 +89,9 @@ jobs:
               for path in sorted(root.glob('*.py')):
                   py_compile.compile(str(path), doraise=True)
           PY
+      - name: Pre-fit status summary
+        run: |
+          echo 'MODEL_MAINLINE_AND_PREFIT_HARDENING_PASS'
+          echo "commit=$GITHUB_SHA"
+          echo 'scientific_fit_steps=0'
+          echo 'fit_authorized=false'

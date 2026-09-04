@@ -2,6 +2,8 @@
   "schema": "RealSaS.MainPostMergeIntegrityTrigger.v1",
   "date": "2026-09-04",
   "purpose": "Trigger exact-main post-merge current-mainline and proof-export-native verification before first-fit-base freeze.",
+  "attempt": 2,
+  "reason": "Final exact-main verification after self-hosted legacy CI wiring normalization and successful model/native source gates.",
   "fit_authorization": false,
   "required_gates": [
     "current-mainline-self-hosted-ci",

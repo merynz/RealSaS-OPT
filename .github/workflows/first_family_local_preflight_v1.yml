@@ -1,0 +1,60 @@
+name: first-family-local-preflight-v1
+
+on:
+  push:
+    branches:
+      - first-family-fit/v1-20260904
+    paths:
+      - 'experiments/first_family_fit_v1/**'
+      - '.github/workflows/first_family_local_preflight_v1.yml'
+      - 'models/**'
+      - 'compiler/**'
+      - 'runtime/**'
+  workflow_dispatch:
+
+jobs:
+  mage-local-preflight:
+    runs-on: [self-hosted, realsas, gpu]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Environment summary
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "runner=${RUNNER_NAME:-unknown}"
+          uname -a
+          command -v python3 || true
+          python3 --version || true
+          command -v nvidia-smi || true
+          nvidia-smi || true
+
+      - name: First-family local preflight
+        id: preflight
+        shell: bash
+        run: |
+          set +e
+          mkdir -p artifacts/first_family_preflight
+          PYTHONPATH="$GITHUB_WORKSPACE" python3 experiments/first_family_fit_v1/local_preflight_v1.py \
+            --out artifacts/first_family_preflight/FIRST_FAMILY_LOCAL_PREFLIGHT_V1.json \
+            | tee artifacts/first_family_preflight/stdout.log
+          code=${PIPESTATUS[0]}
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload preflight evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: first-family-local-preflight-v1
+          path: artifacts/first_family_preflight/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Enforce preflight verdict
+        shell: bash
+        run: |
+          test "${{ steps.preflight.outputs.code }}" = "0"

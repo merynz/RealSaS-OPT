@@ -74,8 +74,13 @@ scene.render.image_settings.color_mode = "RGBA"
 scene.render.film_transparent = False
 scene.render.use_file_extension = True
 
+# --factory-startup + use_empty=True can leave scene.world unset.
+if scene.world is None:
+    scene.world = bpy.data.worlds.new("RealSaSCardinalWorld")
 scene.world.use_nodes = True
 bg = scene.world.node_tree.nodes.get("Background")
+if bg is None:
+    raise RuntimeError("Blender world Background node missing")
 bg.inputs["Color"].default_value = (0.5, 0.5, 0.5, 1.0)
 bg.inputs["Strength"].default_value = 0.8
 

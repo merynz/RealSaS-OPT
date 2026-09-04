@@ -1,0 +1,107 @@
+name: first-family-observation-v1
+
+on:
+  push:
+    branches:
+      - first-family-fit/v1-20260904
+    paths:
+      - '.github/workflows/first_family_observation_v1.yml'
+  workflow_dispatch:
+
+jobs:
+  mage-observation:
+    runs-on: [self-hosted, realsas, gpu]
+    timeout-minutes: 90
+    env:
+      REALSAS_LOCAL_ML_VENV: /home/monster/realsas-ml312
+      REALSAS_BLENDER_CACHE: /home/monster/.cache/realsas/blender
+      KAYKIT_COMMIT: 672074b73ba276876a19e8816ecdc5241817ab47
+      KAYKIT_REPO: https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0.git
+      MAGE_FBX_REL: addons/kaykit_character_pack_adventures/Characters/fbx/Mage.fbx
+      EXPECTED_AUTHORITY_ZIP_SHA256: ddff2f59e724a67aeb1059aaa748e12015d1281246453b601e06426d280364c6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Require persistent ML environment
+        shell: bash
+        run: |
+          set -euxo pipefail
+          test -x "$REALSAS_LOCAL_ML_VENV/bin/python"
+          "$REALSAS_LOCAL_ML_VENV/bin/python" -c "import torch,numpy,PIL; assert torch.cuda.is_available(); print(torch.__version__)"
+
+      - name: Locate exact Mage authority pack in Windows Downloads
+        shell: bash
+        run: |
+          set -euxo pipefail
+          pack="$(find /mnt/c/Users -maxdepth 3 -type f -name 'Mage_FIRST_FAMILY_AUTHORITY_PACK_V1.zip' -print -quit 2>/dev/null || true)"
+          if [ -z "$pack" ]; then
+            echo 'MAGE_AUTHORITY_PACK_NOT_FOUND_IN_WINDOWS_DOWNLOADS' >&2
+            exit 17
+          fi
+          got="$(sha256sum "$pack" | awk '{print $1}')"
+          test "$got" = "$EXPECTED_AUTHORITY_ZIP_SHA256"
+          echo "MAGE_AUTHORITY_ZIP=$pack" >> "$GITHUB_ENV"
+          echo "authority_zip=$pack"
+          echo "authority_zip_sha256=$got"
+
+      - name: Acquire exact public KayKit Mage source
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cache="$HOME/.cache/realsas/kaykit-adventures-$KAYKIT_COMMIT"
+          if [ ! -d "$cache/.git" ]; then
+            rm -rf "$cache"
+            git clone --filter=blob:none --no-checkout "$KAYKIT_REPO" "$cache"
+          fi
+          git -C "$cache" fetch --depth=1 origin "$KAYKIT_COMMIT"
+          git -C "$cache" checkout --detach "$KAYKIT_COMMIT"
+          fbx="$cache/$MAGE_FBX_REL"
+          test -f "$fbx"
+          got="$(sha256sum "$fbx" | awk '{print $1}')"
+          test "$got" = '93b401d56e2547316f8841a4ac0086011c64d79185c9cb7623567c2dbf125c7d'
+          echo "MAGE_SOURCE_ROOT=$cache" >> "$GITHUB_ENV"
+          echo "MAGE_SOURCE_FBX=$fbx" >> "$GITHUB_ENV"
+
+      - name: Provision checksum-verified Blender 5.2.0
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p artifacts/first_family_observation
+          "$REALSAS_LOCAL_ML_VENV/bin/python" experiments/first_family_fit_v1/bootstrap_blender_5_2_v1.py \
+            --cache-root "$REALSAS_BLENDER_CACHE" \
+            | tee artifacts/first_family_observation/BLENDER_BOOTSTRAP.log
+          blender="$(tail -n 1 artifacts/first_family_observation/BLENDER_BOOTSTRAP.log)"
+          test -x "$blender"
+          "$blender" --version | head -n 2 | tee artifacts/first_family_observation/BLENDER_VERSION.txt
+          echo "REALSAS_BLENDER=$blender" >> "$GITHUB_ENV"
+
+      - name: Build exact Master-aligned source-textured Mage observations
+        shell: bash
+        run: |
+          set -euxo pipefail
+          work="$HOME/.cache/realsas/first_family_mage_observation_work"
+          out="$GITHUB_WORKSPACE/artifacts/first_family_observation/observation"
+          PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" \
+            experiments/first_family_fit_v1/run_mage_observation_v1.py \
+            --authority-zip "$MAGE_AUTHORITY_ZIP" \
+            --authority-manifest experiments/first_family_fit_v1/MAGE_AUTHORITY_PACK_V1.json \
+            --source-file "$MAGE_SOURCE_FBX" \
+            --source-package "$MAGE_SOURCE_ROOT" \
+            --blender "$REALSAS_BLENDER" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --work-root "$work" \
+            --out-root "$out" \
+            | tee artifacts/first_family_observation/FIRST_FAMILY_OBSERVATION_STDOUT.log
+          test -s "$out/FIRST_FAMILY_OBSERVATION_RESULT_V1.json"
+          grep -q '"status": "PASS"' "$out/FIRST_FAMILY_OBSERVATION_RESULT_V1.json"
+
+      - name: Upload Mage observation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: first-family-mage-observation-v1
+          path: artifacts/first_family_observation/
+          if-no-files-found: error
+          retention-days: 30

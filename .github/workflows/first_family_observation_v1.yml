@@ -6,24 +6,26 @@ on:
       - first-family-fit/v1-20260904
     paths:
       - '.github/workflows/first_family_observation_v1.yml'
-      - 'experiments/first_family_fit_v1/run_mage_observation_v1.py'
+      - 'experiments/first_family_fit_v1/run_first_family_observation_v1.py'
+      - 'experiments/first_family_fit_v1/materialize_family_source_v1.py'
       - 'experiments/first_family_fit_v1/bootstrap_blender_5_2_v1.py'
-      - 'experiments/first_family_fit_v1/MAGE_AUTHORITY_PACK_V1.json'
+      - 'experiments/first_family_fit_v1/FIRST_FAMILY_FIT_SPEC_V1.json'
+      - 'experiments/first_family_fit_v1/FIRST_FAMILY_AUTHORITY_V1.json'
+      - 'experiments/fit_observation_v1/blender_extract_source_appearance_v1.py'
+      - 'experiments/fit_observation_v1/master_aligned_source_appearance_v1.py'
   workflow_dispatch:
 
 jobs:
-  mage-observation:
+  first-family-observation:
     runs-on: [self-hosted, realsas, gpu]
     timeout-minutes: 90
     env:
       REALSAS_LOCAL_ML_VENV: /home/monster/realsas-ml312
       REALSAS_BLENDER_CACHE: /home/monster/.cache/realsas/blender
-      KAYKIT_COMMIT: 672074b73ba276876a19e8816ecdc5241817ab47
-      KAYKIT_REPO: https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0.git
-      MAGE_FBX_REL: addons/kaykit_character_pack_adventures/Characters/fbx/Mage.fbx
-      EXPECTED_AUTHORITY_ZIP_SHA256: ddff2f59e724a67aeb1059aaa748e12015d1281246453b601e06426d280364c6
-      MAGE_ASSET_ID: asset_fbc8d57f848df78bd953fbb5
-      MAGE_PRIMARY_GEOMETRY_SHA256: f1e429a706faffd6ed6fd2b26a756cfca406e4ece440a9717e7e4b09f03db07d
+      REALSAS_SOURCE_CACHE: /home/monster/.cache/realsas/family_sources
+      FIRST_FAMILY_SPEC: experiments/first_family_fit_v1/FIRST_FAMILY_FIT_SPEC_V1.json
+      FIRST_FAMILY_AUTHORITY_MANIFEST: experiments/first_family_fit_v1/FIRST_FAMILY_AUTHORITY_V1.json
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,11 +43,16 @@ jobs:
           test -x "$REALSAS_LOCAL_ML_VENV/bin/python"
           "$REALSAS_LOCAL_ML_VENV/bin/python" -c "import torch,numpy,PIL; assert torch.cuda.is_available(); print(torch.__version__)"
 
-      - name: Resolve Master authority source without recursive disk scan
+      - name: Resolve authority source without family-specific code
         shell: bash
         run: |
           set -euo pipefail
           shopt -s nullglob
+          asset_id="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["asset_id"])')"
+          pg_sha="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["authority"]["primary_geometry_sha256"])')"
+          zip_name="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["authority"]["fallback_zip_name"])')"
+          zip_sha="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,os; print(json.load(open(os.environ["FIRST_FAMILY_SPEC"]))["authority"]["fallback_zip_sha256"])')"
+
           master=''
           roots=()
           [ -n "${REALSAS_MASTER_ROOT:-}" ] && roots+=("$REALSAS_MASTER_ROOT")
@@ -62,69 +69,52 @@ jobs:
           )
           for root in "${roots[@]}"; do
             [ -d "$root" ] || continue
-            pg="$root/master/assets/$MAGE_ASSET_ID/primary_geometry.npz"
+            pg="$root/master/assets/$asset_id/primary_geometry.npz"
             [ -f "$pg" ] || continue
             got="$(sha256sum "$pg" | awk '{print $1}')"
-            if [ "$got" = "$MAGE_PRIMARY_GEOMETRY_SHA256" ]; then master="$root"; break; fi
+            if [ "$got" = "$pg_sha" ]; then master="$root"; break; fi
           done
           if [ -n "$master" ]; then
             echo "REALSAS_MASTER_ROOT=$master" >> "$GITHUB_ENV"
             echo "REALSAS_AUTHORITY_MODE=DIRECT_MASTER_CORPUS" >> "$GITHUB_ENV"
             echo "authority_mode=DIRECT_MASTER_CORPUS"
-            echo "master_root=$master"
             exit 0
           fi
-          packs=(/mnt/c/Users/*/Downloads/Mage_FIRST_FAMILY_AUTHORITY_PACK_V1.zip)
+
+          packs=(/mnt/c/Users/*/Downloads/"$zip_name")
           if [ "${#packs[@]}" -gt 0 ]; then
             pack="${packs[0]}"
             got="$(sha256sum "$pack" | awk '{print $1}')"
-            test "$got" = "$EXPECTED_AUTHORITY_ZIP_SHA256"
-            echo "MAGE_AUTHORITY_ZIP=$pack" >> "$GITHUB_ENV"
+            test "$got" = "$zip_sha"
+            echo "FIRST_FAMILY_AUTHORITY_ZIP=$pack" >> "$GITHUB_ENV"
             echo "REALSAS_AUTHORITY_MODE=PREPACKAGED_ZIP_FALLBACK" >> "$GITHUB_ENV"
             echo "authority_mode=PREPACKAGED_ZIP_FALLBACK"
-            echo "future_fit8_data_plane=ONE_PERSISTENT_DRIVE_MOUNT_NOT_PER_FAMILY_ZIPS"
             exit 0
           fi
-          echo 'NO_LOCAL_MASTER_MOUNT. Do not download families one-by-one; configure one persistent Drive mount/sync.' >&2
+          echo 'NO_LOCAL_MASTER_MOUNT_AND_NO_VALIDATED_FALLBACK_PACK' >&2
           exit 17
 
-      - name: Report likely persistent Drive mount roots
-        shell: bash
-        run: |
-          set +e
-          {
-            echo '=== WSL WINDOWS MOUNTS ==='
-            mount | grep -E 'drvfs|/mnt/[a-z]' || true
-            echo '=== LIKELY DRIVE ROOTS ==='
-            for p in /mnt/g /mnt/c/Users/*/My\ Drive /mnt/c/Users/*/Google\ Drive /mnt/c/Users/*/Drive /mnt/d /mnt/e; do
-              [ -d "$p" ] && printf '%s\n' "$p"
-            done
-          } | tee "$RUNNER_TEMP/realsas_drive_mount_probe.txt"
-          exit 0
-
-      - name: Acquire exact public KayKit Mage source
+      - name: Materialize exact source from spec
         shell: bash
         run: |
           set -euxo pipefail
-          cache="$HOME/.cache/realsas/kaykit-adventures-$KAYKIT_COMMIT"
-          if [ ! -d "$cache/.git" ]; then
-            rm -rf "$cache"
-            git clone --filter=blob:none --no-checkout "$KAYKIT_REPO" "$cache"
-          fi
-          git -C "$cache" fetch --depth=1 origin "$KAYKIT_COMMIT"
-          git -C "$cache" checkout --detach "$KAYKIT_COMMIT"
-          fbx="$cache/$MAGE_FBX_REL"
-          test -f "$fbx"
-          got="$(sha256sum "$fbx" | awk '{print $1}')"
-          test "$got" = '93b401d56e2547316f8841a4ac0086011c64d79185c9cb7623567c2dbf125c7d'
-          echo "MAGE_SOURCE_ROOT=$cache" >> "$GITHUB_ENV"
-          echo "MAGE_SOURCE_FBX=$fbx" >> "$GITHUB_ENV"
+          mkdir -p artifacts/first_family_observation
+          source_result="$RUNNER_TEMP/FIRST_FAMILY_SOURCE_RESULT.json"
+          "$REALSAS_LOCAL_ML_VENV/bin/python" \
+            experiments/first_family_fit_v1/materialize_family_source_v1.py \
+            --spec "$FIRST_FAMILY_SPEC" \
+            --cache-root "$REALSAS_SOURCE_CACHE" \
+            --result-json "$source_result"
+          source_file="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,sys; print(json.load(open(sys.argv[1]))["source_file"])' "$source_result")"
+          source_root="$("$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import json,sys; print(json.load(open(sys.argv[1]))["source_root"])' "$source_result")"
+          echo "FIRST_FAMILY_SOURCE_FILE=$source_file" >> "$GITHUB_ENV"
+          echo "FIRST_FAMILY_SOURCE_ROOT=$source_root" >> "$GITHUB_ENV"
+          cp "$source_result" artifacts/first_family_observation/FIRST_FAMILY_SOURCE_RESULT.json
 
       - name: Provision checksum-verified Blender 5.2.0
         shell: bash
         run: |
           set -euxo pipefail
-          mkdir -p artifacts/first_family_observation
           "$REALSAS_LOCAL_ML_VENV/bin/python" experiments/first_family_fit_v1/bootstrap_blender_5_2_v1.py \
             --cache-root "$REALSAS_BLENDER_CACHE" \
             | tee artifacts/first_family_observation/BLENDER_BOOTSTRAP.log
@@ -133,24 +123,25 @@ jobs:
           "$blender" --version | head -n 2 | tee artifacts/first_family_observation/BLENDER_VERSION.txt
           echo "REALSAS_BLENDER=$blender" >> "$GITHUB_ENV"
 
-      - name: Build exact Master-aligned source-textured Mage observations
+      - name: Build exact Master-aligned source-textured observations
         shell: bash
         run: |
           set -euxo pipefail
-          work="$HOME/.cache/realsas/first_family_mage_observation_work"
+          work="$HOME/.cache/realsas/first_family_observation_work"
           out="$GITHUB_WORKSPACE/artifacts/first_family_observation/observation"
           authority_args=()
           if [ "$REALSAS_AUTHORITY_MODE" = 'DIRECT_MASTER_CORPUS' ]; then
             authority_args=(--master-root "$REALSAS_MASTER_ROOT")
           else
-            authority_args=(--authority-zip "$MAGE_AUTHORITY_ZIP")
+            authority_args=(--authority-zip "$FIRST_FAMILY_AUTHORITY_ZIP")
           fi
           PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" \
-            experiments/first_family_fit_v1/run_mage_observation_v1.py \
+            experiments/first_family_fit_v1/run_first_family_observation_v1.py \
+            --spec "$FIRST_FAMILY_SPEC" \
             "${authority_args[@]}" \
-            --authority-manifest experiments/first_family_fit_v1/MAGE_AUTHORITY_PACK_V1.json \
-            --source-file "$MAGE_SOURCE_FBX" \
-            --source-package "$MAGE_SOURCE_ROOT" \
+            --authority-manifest "$FIRST_FAMILY_AUTHORITY_MANIFEST" \
+            --source-file "$FIRST_FAMILY_SOURCE_FILE" \
+            --source-package "$FIRST_FAMILY_SOURCE_ROOT" \
             --blender "$REALSAS_BLENDER" \
             --repo-root "$GITHUB_WORKSPACE" \
             --work-root "$work" \
@@ -159,11 +150,11 @@ jobs:
           test -s "$out/FIRST_FAMILY_OBSERVATION_RESULT_V1.json"
           grep -q '"status": "PASS"' "$out/FIRST_FAMILY_OBSERVATION_RESULT_V1.json"
 
-      - name: Upload Mage observation evidence
+      - name: Upload first-family observation evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: first-family-mage-observation-v1
+          name: first-family-observation-v1
           path: artifacts/first_family_observation/
           if-no-files-found: error
           retention-days: 30

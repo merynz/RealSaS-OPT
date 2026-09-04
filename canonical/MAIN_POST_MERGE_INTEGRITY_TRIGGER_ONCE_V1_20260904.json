@@ -1,0 +1,11 @@
+{
+  "schema": "RealSaS.MainPostMergeIntegrityTrigger.v1",
+  "date": "2026-09-04",
+  "purpose": "Trigger exact-main post-merge current-mainline and proof-export-native verification before first-fit-base freeze.",
+  "fit_authorization": false,
+  "required_gates": [
+    "current-mainline-self-hosted-ci",
+    "current-runtime-self-hosted-ci"
+  ],
+  "freeze_only_after_both_pass": true
+}

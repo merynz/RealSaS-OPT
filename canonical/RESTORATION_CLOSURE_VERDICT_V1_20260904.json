@@ -1,0 +1,57 @@
+{
+  "schema": "RealSaS.RestorationClosureVerdict.v1",
+  "date": "2026-09-04",
+  "source_branch": "restoration/compiler-runtime-promotion-v1-20260903",
+  "closed_source_commit": "7324e6a63df54d999103a59835212cb2d1dc46ee",
+  "verdict": "PASS",
+  "runner": {
+    "name": "realsas-wsl-1660ti",
+    "os": "Linux",
+    "arch": "X64",
+    "execution_environment": "WSL2_SELF_HOSTED"
+  },
+  "verification": {
+    "preclosure_current_mainline": {
+      "commit": "d95af98f32dfeaa4e2f2697f5b704b0691507c58",
+      "run_id": 33827504838,
+      "conclusion": "success"
+    },
+    "preclosure_current_runtime": {
+      "commit": "d95af98f32dfeaa4e2f2697f5b704b0691507c58",
+      "run_id": 33827504909,
+      "conclusion": "success"
+    },
+    "closed_head_current_mainline": {
+      "commit": "7324e6a63df54d999103a59835212cb2d1dc46ee",
+      "run_id": 33827593944,
+      "conclusion": "success"
+    },
+    "restoration_closure": {
+      "run_id": 33827594057,
+      "job_id": 100883454804,
+      "conclusion": "success",
+      "repository_readiness_tests": "7_passed",
+      "learned_source_ownership_tests": "21_passed",
+      "compiler_regressions": "33_passed",
+      "complete_synthetic_e2e": "1_passed",
+      "native_abi_ctest": "1_of_1_passed",
+      "exact_native_package_interlock": "PASS_CURRENT_V4_NATIVE_PACKAGE_OPEN_RENDER",
+      "source_binding_sha256": "6ab523629162c12dd3f34fed826af68c04a1ec9e5bb66ddf406b04223d8cc12e",
+      "proof_bundle_sha256": "7500b2bb96fef7d79ad33dc8e9cdacce945de25d6a872f92a11c5b628ea5166e"
+    }
+  },
+  "authority_verdicts": {
+    "current_mainline_dependency_firewall": "PASS",
+    "learned_model_source_ownership": "PASS",
+    "compiler_regression_closure": "PASS",
+    "complete_e2e_proof_export": "PASS",
+    "sealed_cpp_runtime_build_and_abi": "PASS",
+    "exact_current_v4_package_open_sample_render": "PASS",
+    "restoration_source_behavioral_native_closure": "PASS"
+  },
+  "main_promotion_authorized": true,
+  "post_merge_main_integrity_required": true,
+  "first_fit_base_freeze_required": true,
+  "fit_authorization": false,
+  "next_required_action": "Promote this closed restoration tree to canonical main, run post-merge main integrity, then freeze the exact passing main commit as the first-fit base."
+}

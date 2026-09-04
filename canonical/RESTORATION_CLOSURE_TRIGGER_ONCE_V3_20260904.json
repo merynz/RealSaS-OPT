@@ -1,0 +1,8 @@
+{
+  "schema": "RealSaS.RestorationClosureTriggerOnce.v3",
+  "date": "2026-09-04",
+  "branch": "restoration/compiler-runtime-promotion-v1-20260903",
+  "runner": "self-hosted/linux/x64/realsas",
+  "purpose": "Trigger restoration-wide closure on the latest restoration head after self-hosted CI routing changes.",
+  "fit_authorization": false
+}

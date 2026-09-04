@@ -15,7 +15,12 @@ on:
 jobs:
   mage-local-preflight:
     runs-on: [self-hosted, realsas, gpu]
-    timeout-minutes: 30
+    timeout-minutes: 45
+    env:
+      KAYKIT_COMMIT: 672074b73ba276876a19e8816ecdc5241817ab47
+      KAYKIT_REPO: https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0.git
+      MAGE_FBX_REL: addons/kaykit_character_pack_adventures/Characters/fbx/Mage.fbx
+      MAGE_TEXTURE_REL: addons/kaykit_character_pack_adventures/Characters/fbx/mage_texture.png
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,19 +30,98 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          echo "runner=${RUNNER_NAME:-unknown}"
-          uname -a
-          command -v python3 || true
-          python3 --version || true
-          command -v nvidia-smi || true
-          nvidia-smi || true
+          mkdir -p artifacts/first_family_preflight
+          {
+            echo "runner=${RUNNER_NAME:-unknown}"
+            uname -a
+            echo "PATH=$PATH"
+            command -v nvidia-smi || true
+            nvidia-smi || true
+          } | tee artifacts/first_family_preflight/environment_summary.log
 
-      - name: First-family local preflight
+      - name: Discover supported ML Python environments
+        shell: bash
+        run: |
+          set +e
+          out=artifacts/first_family_preflight/ml_env_probe.log
+          : > "$out"
+          echo '=== executables ===' | tee -a "$out"
+          for cmd in python python3 python3.10 python3.11 python3.12 python3.13 uv conda mamba micromamba pixi; do
+            printf '%-12s ' "$cmd" | tee -a "$out"
+            command -v "$cmd" 2>/dev/null | tee -a "$out" || echo MISSING | tee -a "$out"
+          done
+          echo '=== common venvs ===' | tee -a "$out"
+          for p in \
+            "$HOME/.venv/bin/python" \
+            "$HOME/venv/bin/python" \
+            "$HOME/.cache/realsas/venv/bin/python" \
+            "$HOME/miniconda3/bin/python" \
+            "$HOME/anaconda3/bin/python" \
+            "/opt/conda/bin/python"; do
+            if [ -x "$p" ]; then echo "$p" | tee -a "$out"; fi
+          done
+          echo '=== python torch probes ===' | tee -a "$out"
+          candidates=""
+          for cmd in python3.12 python3.11 python3.10 python3 python; do
+            p=$(command -v "$cmd" 2>/dev/null || true)
+            [ -n "$p" ] && candidates="$candidates $p"
+          done
+          for p in "$HOME/.venv/bin/python" "$HOME/venv/bin/python" "$HOME/.cache/realsas/venv/bin/python" "$HOME/miniconda3/bin/python" "$HOME/anaconda3/bin/python" "/opt/conda/bin/python"; do
+            [ -x "$p" ] && candidates="$candidates $p"
+          done
+          seen=' '
+          for p in $candidates; do
+            case "$seen" in *" $p "*) continue;; esac
+            seen="$seen$p "
+            echo "--- $p ---" | tee -a "$out"
+            "$p" - <<'PY' 2>&1 | tee -a "$out"
+import sys
+print('python', sys.version)
+try:
+    import torch
+    print('torch', torch.__version__)
+    print('cuda_available', torch.cuda.is_available())
+    if torch.cuda.is_available():
+        print('cuda_device', torch.cuda.get_device_name(0))
+        print('cuda_mem', torch.cuda.get_device_properties(0).total_memory)
+except Exception as exc:
+    print('torch_probe_error', type(exc).__name__, str(exc))
+PY
+          done
+          exit 0
+
+      - name: Acquire exact public KayKit Mage source
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cache="$HOME/.cache/realsas/kaykit-adventures-$KAYKIT_COMMIT"
+          if [ ! -d "$cache/.git" ]; then
+            rm -rf "$cache"
+            git clone --filter=blob:none --no-checkout "$KAYKIT_REPO" "$cache"
+          fi
+          git -C "$cache" fetch --depth=1 origin "$KAYKIT_COMMIT"
+          git -C "$cache" checkout --detach "$KAYKIT_COMMIT"
+          fbx="$cache/$MAGE_FBX_REL"
+          tex="$cache/$MAGE_TEXTURE_REL"
+          test -f "$fbx"
+          test -f "$tex"
+          {
+            echo "kaykit_commit=$KAYKIT_COMMIT"
+            echo "fbx=$fbx"
+            stat -c 'fbx_bytes=%s' "$fbx"
+            sha256sum "$fbx" | awk '{print "fbx_sha256=" $1}'
+            echo "texture=$tex"
+            stat -c 'texture_bytes=%s' "$tex"
+            sha256sum "$tex" | awk '{print "texture_sha256=" $1}'
+            git -C "$cache" status --porcelain
+          } | tee artifacts/first_family_preflight/MAGE_PUBLIC_SOURCE_AUTHORITY.txt
+          echo "REALSAS_MAGE_PUBLIC_ROOT=$cache" >> "$GITHUB_ENV"
+
+      - name: First-family current Master preflight
         id: preflight
         shell: bash
         run: |
           set +e
-          mkdir -p artifacts/first_family_preflight
           PYTHONPATH="$GITHUB_WORKSPACE" python3 experiments/first_family_fit_v1/local_preflight_v1.py \
             --out artifacts/first_family_preflight/FIRST_FAMILY_LOCAL_PREFLIGHT_V1.json \
             | tee artifacts/first_family_preflight/stdout.log
@@ -54,7 +138,7 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Enforce preflight verdict
+      - name: Enforce full Master preflight verdict
         shell: bash
         run: |
           test "${{ steps.preflight.outputs.code }}" = "0"

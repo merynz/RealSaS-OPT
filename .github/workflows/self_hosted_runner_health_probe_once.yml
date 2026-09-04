@@ -1,0 +1,76 @@
+name: self-hosted-runner-health-probe-once
+
+on:
+  push:
+    branches:
+      - restoration/compiler-runtime-promotion-v1-20260903
+    paths:
+      - '.github/workflows/self_hosted_runner_health_probe_once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  runner-health:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - name: Runner identity and host health
+        run: |
+          set -euxo pipefail
+          date -Is
+          uname -a
+          id
+          pwd
+          echo "RUNNER_NAME=${RUNNER_NAME:-unknown}"
+          echo "RUNNER_OS=${RUNNER_OS:-unknown}"
+          echo "RUNNER_ARCH=${RUNNER_ARCH:-unknown}"
+          uptime
+          free -h
+          df -h /
+          ulimit -a
+
+      - name: System Python and package baseline
+        run: |
+          set -euxo pipefail
+          command -v python3
+          python3 --version
+          python3 -m pip --version || true
+          python3 - <<'PY'
+          import importlib.util
+          for name in ('numpy', 'scipy', 'pytest'):
+              print(name, bool(importlib.util.find_spec(name)))
+          PY
+
+      - name: HTTPS and DNS probe
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          import socket, urllib.request
+          print('pypi.org ->', socket.gethostbyname_ex('pypi.org'))
+          with urllib.request.urlopen('https://pypi.org/simple/pytest/', timeout=20) as r:
+              print('https_status=', r.status)
+              print('content_type=', r.headers.get('content-type'))
+          PY
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Pip smoke without self-upgrade
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          set -euxo pipefail
+          python --version
+          python -m pip --version
+          python -m pip install --no-input --progress-bar off pytest
+          python -c "import pytest; print('pytest', pytest.__version__)"
+
+      - name: Diagnostic sentinel expected failure
+        run: |
+          echo 'RUNNER_HEALTH_PROBE_REACHED_SENTINEL'
+          echo 'This failure is intentional so the diagnostic run is guaranteed to emit a notification/run id.'
+          exit 86

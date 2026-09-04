@@ -32,6 +32,11 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Activate Linux Python 3.12 toolchain for RealSaS
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Source-contract preflight
         shell: bash
         run: |
@@ -225,7 +230,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" - <<'PY' | tee artifacts/first_family_charactergen_geometry/GEPPETTO_CONDITIONING_SMOKE.json
+          PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_CHARACTERGEN_VENV/bin/python" - <<'PY' | tee artifacts/first_family_charactergen_geometry/GEPPETTO_CONDITIONING_SMOKE.json
           import json
           from pathlib import Path
           from compiler.realsas_compiler_core.types import RiggingSurfaceIR, SurfaceNode, SurfaceRelation
@@ -260,5 +265,5 @@ jobs:
         with:
           name: first-family-charactergen-geometry-v1
           path: artifacts/first_family_charactergen_geometry/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30

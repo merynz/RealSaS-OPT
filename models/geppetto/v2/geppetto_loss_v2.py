@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import itertools
 from typing import Sequence
 import numpy as np
 import torch
@@ -23,7 +24,8 @@ POSITION_DIMS = 3
 # correspondence. 2^-16 is exactly representable and equals 128 float32 eps at
 # unit scale; it is a numerical identity grid, not a product geometry tolerance.
 MATCH_GEOMETRY_COST_QUANTIZATION = float(2.0 ** -16)
-_MATCH_TIE_TOTAL_BUDGET = 0.25
+_MAX_EXACT_SCIPY_INTEGER = 2**52 - 1
+_MAX_COINCIDENT_TOPOLOGY_VARIANTS = 256
 
 
 @dataclass(frozen=True)
@@ -73,23 +75,22 @@ def _first_hit_stop_loss(stop_logits: torch.Tensor) -> torch.Tensor:
     return 0.5 * (terminal + worst_early)
 
 
-def _canonical_tie_matrix(n: int) -> np.ndarray:
-    """Deterministic canonical-index tie-break with bounded total authority.
-
-    The primary quantized assignment objective is integer-valued. Every edge
-    receives a deterministic index-derived fractional rank and the *entire*
-    secondary assignment can contribute less than 0.25. Therefore it can select
-    among equal primary optima but can never overturn a one-bin primary advantage.
-    """
+def _canonical_integer_tie_matrix(n: int) -> np.ndarray:
+    """Unique deterministic secondary edge ranks with no fractional float authority."""
     if n < 1:
         raise ValueError("assignment cardinality must be positive")
     i, j = np.indices((n, n), dtype=np.uint64)
-    # Fixed integer mixing only; no RNG or platform floating reduction decides
-    # which anonymous representative wins an exact primary tie.
     x = ((i + 1) * np.uint64(0x9E3779B1)) ^ ((j + 1) * np.uint64(0x85EBCA77))
     x ^= ((i + 1) * (j + 1) * np.uint64(0xC2B2AE3D))
-    rank = (x & np.uint64(0xFFFFFFFF)).astype(np.float64) / float(2**32)
-    return rank * (_MATCH_TIE_TOTAL_BUDGET / float(n))
+    flat_i = i.reshape(-1).astype(np.int64)
+    flat_j = j.reshape(-1).astype(np.int64)
+    flat_x = (x & np.uint64(0xFFFFFFFF)).reshape(-1)
+    # x is the pseudo-random primary secondary key; i/j only make hash collisions
+    # unique. The resulting ranks are exactly the integers 0..n^2-1.
+    order = np.lexsort((flat_j, flat_i, flat_x))
+    ranks = np.empty(n * n, dtype=np.int64)
+    ranks[order] = np.arange(n * n, dtype=np.int64)
+    return ranks.reshape(n, n)
 
 
 def _canonical_teacher_geometry_order(teacher: np.ndarray) -> np.ndarray:
@@ -98,9 +99,8 @@ def _canonical_teacher_geometry_order(teacher: np.ndarray) -> np.ndarray:
     if not np.isfinite(bins).all() or float(np.max(np.abs(bins))) >= float(2**52):
         raise ValueError("teacher geometry outside canonical matching range")
     # Quantized geometry is primary. Raw geometry only breaks two teacher loci
-    # that land in the same numerical bin; neither source row index nor semantic
-    # labels (root/parent) participate. Thus a teacher-row permutation cannot
-    # change the secondary Hungarian column ranks for geometrically distinct loci.
+    # that land in the same numerical bin. Exact coincident rows remain an
+    # equivalence class and are handled permutation-invariantly by topology loss.
     return np.lexsort((
         teacher[:, 2], teacher[:, 1], teacher[:, 0],
         bins[:, 2], bins[:, 1], bins[:, 0],
@@ -112,8 +112,8 @@ def canonical_geometry_assignment_v2(primary_positions, teacher_positions) -> tu
 
     Teacher root/tree labels are intentionally absent: canonical root/tree remain
     Compiler authority and may not condition anonymous teacher<->query identity.
-    Teacher input row order is also non-authoritative; columns are canonicalized
-    from geometry before the deterministic tie-break is applied.
+    The secondary objective is exact integer lexicographic authority, not a
+    fractional float64 perturbation whose mantissa can disappear at large costs.
     """
     if isinstance(primary_positions, torch.Tensor):
         primary = primary_positions.detach().cpu().numpy()
@@ -134,13 +134,54 @@ def canonical_geometry_assignment_v2(primary_positions, teacher_positions) -> tu
     teacher_canonical = teacher[teacher_order]
     raw_cost = np.abs(primary[:, None, :] - teacher_canonical[None, :, :]).sum(axis=-1)
     quantized = np.rint(raw_cost / MATCH_GEOMETRY_COST_QUANTIZATION)
-    if not np.isfinite(quantized).all() or float(np.max(np.abs(quantized))) >= float(2**52):
-        raise ValueError("canonical geometry assignment cost outside exact float64 integer range")
+    if not np.isfinite(quantized).all() or (quantized < 0).any():
+        raise ValueError("canonical geometry assignment cost invalid")
     primary_integer_cost = quantized.astype(np.int64)
-    deterministic_cost = primary_integer_cost.astype(np.float64) + _canonical_tie_matrix(primary.shape[0])
+    n = int(primary.shape[0])
+    secondary = _canonical_integer_tie_matrix(n)
+    # Any complete assignment has secondary sum < n^3. Multiplying each primary
+    # edge by n^3+1 therefore makes a one-bin primary improvement dominate the
+    # entire secondary assignment, exactly. The final integer is also guarded to
+    # stay <=2^52 so scipy implementations that internally use float64 retain it.
+    scale = int(n**3 + 1)
+    max_primary = int(primary_integer_cost.max(initial=0))
+    max_secondary = int(secondary.max(initial=0))
+    if max_primary > (_MAX_EXACT_SCIPY_INTEGER - max_secondary) // scale:
+        raise ValueError("canonical geometry assignment composite integer exceeds exact scipy range")
+    deterministic_cost = primary_integer_cost * np.int64(scale) + secondary
     q, teacher_canonical_index = linear_sum_assignment(deterministic_cost)
     t = teacher_order[np.asarray(teacher_canonical_index, np.int64)]
     return np.asarray(q, np.int64), np.asarray(t, np.int64)
+
+
+def _coincident_topology_mappings(q_np: np.ndarray, t_np: np.ndarray, teacher_positions: np.ndarray) -> list[dict[int, int]]:
+    """Enumerate only topology-label bijections inside exact coincident loci.
+
+    Geometry has no information that can distinguish two teacher rows at exactly
+    the same locus. Instead of leaking teacher row identity into matching, root and
+    parent supervision is minimized over the finite equivalence-class bijections.
+    """
+    base = {int(tt): int(qq) for qq, tt in zip(q_np.tolist(), t_np.tolist())}
+    by_locus: dict[tuple[float, float, float], list[int]] = {}
+    positions = np.asarray(teacher_positions, np.float64)
+    for tt in sorted(base):
+        key = tuple(0.0 if float(x) == 0.0 else float(x) for x in positions[tt])
+        by_locus.setdefault(key, []).append(tt)
+    groups = [tuple(ids) for ids in by_locus.values() if len(ids) > 1]
+    variants = [base]
+    for group in groups:
+        q_values = tuple(base[t] for t in group)
+        expanded: list[dict[int, int]] = []
+        for mapping in variants:
+            for q_perm in itertools.permutations(q_values):
+                candidate = dict(mapping)
+                for teacher_id, query_id in zip(group, q_perm):
+                    candidate[int(teacher_id)] = int(query_id)
+                expanded.append(candidate)
+                if len(expanded) > _MAX_COINCIDENT_TOPOLOGY_VARIANTS:
+                    raise ValueError("coincident teacher topology symmetry exceeds bounded permutation budget")
+        variants = expanded
+    return variants
 
 
 class GeppettoLossV2:
@@ -162,7 +203,7 @@ class GeppettoLossV2:
     def _winner_indices(output: GeppettoRawOutputV2, b: int, q: torch.Tensor, target_positions: torch.Tensor) -> torch.Tensor:
         modes = output.position_modes_normalized[b, q]
         dist2 = (modes.detach() - target_positions[:, None, :]).square().sum(dim=-1)
-        return torch.argmin(dist2, dim=-1)
+        return torch.argsort(dist2, dim=-1, stable=True)[..., 0]
 
     @staticmethod
     def _winner_positions(output: GeppettoRawOutputV2, b: int, q: torch.Tensor, winner: torch.Tensor) -> torch.Tensor:
@@ -185,12 +226,42 @@ class GeppettoLossV2:
         residual = means - target_positions[:, None, :]
         component_logp = mix_logp - 0.5 * (torch.exp(-2.0 * log_sigma) * residual.square()).sum(dim=-1) - log_sigma.sum(dim=-1)
         raw_nll = -torch.logsumexp(component_logp, dim=-1)
-        # log_sigma >= -8 in each of 3 dimensions => exact lower bound -24.
         return (raw_nll - float(POSITION_DIMS * POSITION_LOG_SIGMA_MIN)).mean()
 
     @staticmethod
     def _mode_rank_loss(output: GeppettoRawOutputV2, b: int, q: torch.Tensor, winner: torch.Tensor) -> torch.Tensor:
         return F.cross_entropy(output.position_mode_logits[b, q], winner)
+
+    @staticmethod
+    def _root_parent_loss_for_mapping(output: GeppettoRawOutputV2, b: int, target: GeppettoTeacherTargetV1, mapping: dict[int, int]) -> tuple[torch.Tensor, torch.Tensor]:
+        teacher_ids = sorted(mapping)
+        q_ids = torch.as_tensor([mapping[t] for t in teacher_ids], device=output.root_logits.device, dtype=torch.long)
+        tr_all = np.asarray(target.root_mask, dtype=bool)
+        tr = torch.as_tensor([bool(tr_all[t]) for t in teacher_ids], device=output.root_logits.device, dtype=torch.bool)
+        matched_root_logits = output.root_logits[b, q_ids]
+        root_pos = matched_root_logits[tr]
+        root_neg = matched_root_logits[~tr]
+        if root_pos.numel() and root_neg.numel():
+            root_loss = _pairwise_rank_loss(root_pos, root_neg)
+        elif root_pos.numel():
+            root_loss = F.softplus(-root_pos).mean()
+        else:
+            root_loss = F.softplus(root_neg).mean()
+
+        teacher_parent = np.asarray(target.parent_indices, np.int64)
+        parent_losses = []
+        for child_t in teacher_ids:
+            parent_t = int(teacher_parent[child_t])
+            if parent_t < 0:
+                continue
+            if parent_t not in mapping:
+                raise ValueError("teacher parent missing from Hungarian match")
+            candidates = [pt for pt in teacher_ids if pt != child_t]
+            logits = torch.stack([output.parent_logits[b, mapping[child_t], mapping[pt]] for pt in candidates])
+            target_index = candidates.index(parent_t)
+            parent_losses.append(F.cross_entropy(logits[None], torch.tensor([target_index], device=logits.device)))
+        parent_loss = torch.stack(parent_losses).mean() if parent_losses else root_loss * 0.0
+        return root_loss, parent_loss
 
     def __call__(self, output: GeppettoRawOutputV2, targets: Sequence[GeppettoTeacherTargetV1], surface_positions_normalized: torch.Tensor, valid_mask: torch.Tensor):
         B, K = output.existence_logits.shape
@@ -222,8 +293,6 @@ class GeppettoLossV2:
             if J > N:
                 raise ValueError(f"teacher joint count {J} exceeds surface resource guard {N}")
 
-            # Existence is confidence evidence for decoded controls; STOP is the
-            # sole generation-cardinality authority.
             ex_target = torch.zeros(K, device=output.existence_logits.device, dtype=output.existence_logits.dtype)
             ex_target[:J] = 1.0
             total["existence"] += F.binary_cross_entropy_with_logits(output.existence_logits[b], ex_target)
@@ -243,44 +312,30 @@ class GeppettoLossV2:
             winner = self._winner_indices(output, b, q, tp)
             winner_positions = self._winner_positions(output, b, q, winner)
 
-            # Both ends of a possible discrete MAP transition are geometrically
-            # prepared. A confidence crossover can therefore not switch shipping
-            # recurrence onto an untrained secondary locus.
             total["position_primary"] += F.smooth_l1_loss(output.positions_normalized[b, q], tp, reduction="mean")
             total["position_winner"] += F.smooth_l1_loss(winner_positions, tp, reduction="mean")
             total["position_nll"] += self._mixture_position_nll(output, b, q, tp)
             total["mode_rank"] += self._mode_rank_loss(output, b, q, winner)
 
-            tr = torch.as_tensor(target.root_mask, device=output.root_logits.device, dtype=torch.bool)[t]
-            matched_root_logits = output.root_logits[b, q]
-            root_pos = matched_root_logits[tr]
-            root_neg = matched_root_logits[~tr]
-            if root_pos.numel() and root_neg.numel():
-                total["root"] += _pairwise_rank_loss(root_pos, root_neg)
-            elif root_pos.numel():
-                total["root"] += F.softplus(-root_pos).mean()
-            else:
-                total["root"] += F.softplus(root_neg).mean()
-
-            teacher_parent = np.asarray(target.parent_indices, np.int64)
-            t_to_q = {int(tt): int(qq) for qq, tt in zip(q_np.tolist(), t_np.tolist())}
-            parent_losses = []
-            matched_teacher_ids = [int(x) for x in t_np.tolist()]
-            for child_t in matched_teacher_ids:
-                parent_t = int(teacher_parent[child_t])
-                if parent_t < 0:
-                    continue
-                if parent_t not in t_to_q:
-                    raise ValueError("teacher parent missing from Hungarian match")
-                candidate_teacher_ids = [pt for pt in matched_teacher_ids if pt != child_t]
-                logits = torch.stack([
-                    output.parent_logits[b, t_to_q[child_t], t_to_q[pt]]
-                    for pt in candidate_teacher_ids
-                ])
-                target_index = candidate_teacher_ids.index(parent_t)
-                parent_losses.append(F.cross_entropy(logits[None], torch.tensor([target_index], device=logits.device)))
-            if parent_losses:
-                total["parent"] += torch.stack(parent_losses).mean()
+            variants = _coincident_topology_mappings(q_np, t_np, np.asarray(target.positions_normalized, np.float64))
+            topology_candidates = []
+            for mapping in variants:
+                root_loss, parent_loss = self._root_parent_loss_for_mapping(output, b, target, mapping)
+                weighted = self.weights.root * root_loss + self.weights.parent * parent_loss
+                topology_candidates.append((weighted, root_loss, parent_loss))
+            # Select by the actual weighted topology objective. Secondary detached
+            # keys make equal weighted optima report the same components regardless
+            # of enumeration order; no teacher row id becomes product identity.
+            best = min(
+                range(len(topology_candidates)),
+                key=lambda i: (
+                    float(topology_candidates[i][0].detach().cpu()),
+                    float(topology_candidates[i][1].detach().cpu()),
+                    float(topology_candidates[i][2].detach().cpu()),
+                ),
+            )
+            total["root"] += topology_candidates[best][1]
+            total["parent"] += topology_candidates[best][2]
 
             surface = surface_positions_normalized[b, :N]
             support_losses = []
@@ -290,7 +345,7 @@ class GeppettoLossV2:
             for qq, tt in zip(q_np.tolist(), t_np.tolist()):
                 d = torch.linalg.norm(surface - raw_teacher[tt][None], dim=-1)
                 top = min(self.support_topk, N)
-                ids = torch.topk(d, k=top, largest=False).indices
+                ids = torch.argsort(d, stable=True)[:top]
                 logits = output.support_logits[b, qq, :N]
                 positive = logits[ids]
                 if top < N:

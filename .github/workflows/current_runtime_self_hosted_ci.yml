@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - restoration/compiler-runtime-promotion-v1-20260903
+      - hardening/pre-fit-closure-v1-20260904
     paths:
       - 'compiler/realsas_compiler_core/**'
       - 'compiler/realsas_compiler_services/export/**'

@@ -19,6 +19,52 @@
     "observable_support_3_4_p95_norm": 0.0136317814696471,
     "full_hidden_truth_to_pred_p95_norm_diagnostic_only": 0.0873807205213689
   },
+  "visible_depth_audit": {
+    "schema": "RealSaS.MageVisibleDepthAudit.v1",
+    "classification": "RETROSPECTIVE_FIT_DIAGNOSTIC_AFTER_XZ_PROJECTION_REVIEW",
+    "teacher_truth_used_for_evaluation_only": true,
+    "teacher_truth_used_at_inference": false,
+    "method": {
+      "surface_sampling": "DETERMINISTIC_AREA_WEIGHTED_BARYCENTRIC",
+      "samples_per_mesh": 2000000,
+      "zbuffer_resolution": 512,
+      "camera_contract": "EXACT_8_ORTHOGRAPHIC_MAGE_CAMERAS",
+      "nearest_hole_fill_pixels": 1.5,
+      "interior_erosion_pixels": 2,
+      "depth_error_normalization": "TEACHER_HALF_EXTENT"
+    },
+    "overall_visible_depth": {
+      "mae_norm": 0.0204467957,
+      "median_norm": 0.0069617747,
+      "p95_norm": 0.0464760137,
+      "p99_norm": 0.4397,
+      "max_per_view_p95_norm": 0.0719296063
+    },
+    "per_view_p95_norm": [
+      0.03009,
+      0.03912,
+      0.04006,
+      0.07193,
+      0.06324,
+      0.06738,
+      0.03994,
+      0.03518
+    ],
+    "silhouette": {
+      "min_view_precision": 0.954729,
+      "min_view_recall": 0.971979,
+      "min_view_iou": 0.946365
+    },
+    "y_extent_normalized": {
+      "truth_min": -0.5137299,
+      "truth_max": 0.5137299,
+      "truth_span": 1.0274598,
+      "pred_min": -0.486491,
+      "pred_max": 0.502933,
+      "pred_span": 0.989424
+    },
+    "interpretation": "NO_Y_DEPTH_COLLAPSE; DEPTH AGREEMENT IS EXPLICITLY VERIFIED ACROSS ALL 8 VIEW DIRECTIONS"
+  },
   "normal_authority": {
     "selected": "RealSaS.GSA.ZeroSurfaceRobustLocalPCA.v1",
     "orientation_hint": "MARCHING_CUBES_IMPLICIT_NORMAL_SIGN_ONLY",
@@ -37,5 +83,13 @@
     "hard_gate_full_hidden_authored_mesh_completeness": false,
     "checkpoint_is_runtime_dependency": false,
     "generalization_claim": false
+  },
+  "prospective_unseen_geometry_gate_frozen_after_mage_fit": {
+    "frozen_before_any_unseen_family_result": true,
+    "overall_visible_depth_p95_norm_max": 0.05,
+    "max_single_view_visible_depth_p95_norm_max": 0.08,
+    "min_view_silhouette_iou_min": 0.94,
+    "min_view_silhouette_recall_min": 0.96,
+    "note": "These thresholds are prospective for unseen evaluation only; they are not retroactively described as Mage preregistration gates."
   }
 }

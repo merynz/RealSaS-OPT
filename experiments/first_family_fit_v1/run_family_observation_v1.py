@@ -14,6 +14,7 @@ from PIL import Image, ImageDraw, ImageOps
 
 
 FAMILY_SCHEMA = "RealSaS.FamilyFitManifest.v1"
+IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tga", ".tif", ".tiff", ".webp", ".dds", ".exr", ".hdr"}
 
 
 def sha256_file(path: Path) -> str:
@@ -22,6 +23,11 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: f.read(8 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def write_json(path: Path, payload: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
 
 
 def load_family_manifest(path: Path) -> dict:
@@ -145,6 +151,88 @@ def stage_authority(*, zip_path: Path | None, master_root: Path | None, work: Pa
     }
 
 
+def _image_candidates(root: Path, image_name: str) -> tuple[list[Path], str]:
+    basename = Path(image_name).name.lower()
+    exact = sorted(p for p in root.rglob("*") if p.is_file() and p.name.lower() == basename)
+    if exact:
+        return exact, "BASENAME"
+    stem = Path(image_name).stem.lower()
+    stem_hits = sorted(
+        p for p in root.rglob("*")
+        if p.is_file() and p.suffix.lower() in IMAGE_EXTS and p.stem.lower() == stem
+    )
+    return stem_hits, "STEM"
+
+
+def prepare_texture_resolution_package(source_package: Path, appearance_json: Path, dst: Path) -> tuple[Path, dict]:
+    """Collapse only byte-identical duplicate image references into one deterministic overlay.
+
+    Source packages commonly repeat the same texture bytes in FBX/GLTF/Textures folders.
+    Treating path multiplicity as material ambiguity is incorrect, but choosing between
+    different bytes with the same image name would be unsafe. This helper therefore
+    canonicalizes duplicates only when every matching candidate has one SHA-256.
+    """
+    structure = json.loads(appearance_json.read_text(encoding="utf-8"))
+    names = sorted({str(m.get("image_name")) for m in structure.get("materials", []) if m.get("image_name")})
+    evidence = {
+        "schema": "RealSaS.TextureResolutionPackage.v1",
+        "source_package": str(source_package),
+        "referenced_image_names": names,
+        "records": [],
+        "mode": "ORIGINAL_PACKAGE",
+    }
+    if not names:
+        evidence["reason"] = "NO_BLENDER_IMAGE_NAMES"
+        return source_package, evidence
+
+    shutil.rmtree(dst, ignore_errors=True)
+    dst.mkdir(parents=True, exist_ok=True)
+    all_resolved = True
+    for name in names:
+        candidates, match_kind = _image_candidates(source_package, name)
+        by_sha: dict[str, list[Path]] = {}
+        for p in candidates:
+            by_sha.setdefault(sha256_file(p), []).append(p)
+        rec = {
+            "image_name": name,
+            "match_kind": match_kind,
+            "candidate_count": len(candidates),
+            "unique_content_count": len(by_sha),
+            "candidates": [str(p.relative_to(source_package)) for p in candidates],
+            "candidate_sha256": sorted(by_sha),
+        }
+        if len(by_sha) != 1:
+            rec["status"] = "UNRESOLVED" if not candidates else "AMBIGUOUS_DIFFERENT_CONTENT"
+            all_resolved = False
+            evidence["records"].append(rec)
+            continue
+        content_sha, paths = next(iter(by_sha.items()))
+        chosen = sorted(paths, key=lambda p: (len(p.relative_to(source_package).parts), str(p.relative_to(source_package))))[0]
+        target_name = Path(name).name or chosen.name
+        target = dst / target_name
+        if target.exists() and sha256_file(target) != content_sha:
+            rec["status"] = "OVERLAY_NAME_COLLISION_DIFFERENT_CONTENT"
+            all_resolved = False
+            evidence["records"].append(rec)
+            continue
+        shutil.copy2(chosen, target)
+        rec.update({
+            "status": "RESOLVED_BYTE_EQUIVALENT",
+            "selected": str(chosen.relative_to(source_package)),
+            "selected_sha256": content_sha,
+            "overlay_name": target.name,
+        })
+        evidence["records"].append(rec)
+
+    if all_resolved:
+        evidence["mode"] = "BYTE_EQUIVALENT_DUPLICATE_COLLAPSE_OVERLAY"
+        evidence["overlay_root"] = str(dst)
+        return dst, evidence
+    evidence["reason"] = "AT_LEAST_ONE_REFERENCED_IMAGE_NOT_UNIQUELY_RESOLVED_BY_CONTENT"
+    shutil.rmtree(dst, ignore_errors=True)
+    return source_package, evidence
+
+
 def make_contact_sheet(observation_root: Path, out_path: Path, labels: list[str]) -> None:
     thumbs = []
     for v, label in enumerate(labels):
@@ -207,6 +295,11 @@ def main() -> None:
         manifest=manifest,
     )
 
+    shutil.rmtree(out, ignore_errors=True)
+    out.mkdir(parents=True, exist_ok=True)
+    diagnostics = out / "_diagnostics"
+    diagnostics.mkdir(parents=True, exist_ok=True)
+
     appearance_npz = work / "appearance" / "source_appearance.npz"
     appearance_json = work / "appearance" / "source_appearance.json"
     appearance_npz.parent.mkdir(parents=True, exist_ok=True)
@@ -222,12 +315,20 @@ def main() -> None:
         text=True,
         timeout=600,
     )
-    (work / "BLENDER_APPEARANCE_EXTRACT.log").write_text(cp.stdout, encoding="utf-8")
+    blender_log = work / "BLENDER_APPEARANCE_EXTRACT.log"
+    blender_log.write_text(cp.stdout, encoding="utf-8")
+    shutil.copy2(blender_log, diagnostics / blender_log.name)
     if cp.returncode != 0 or not appearance_npz.is_file() or not appearance_json.is_file():
         raise RuntimeError(f"Blender appearance extraction failed rc={cp.returncode}")
+    shutil.copy2(appearance_json, diagnostics / "source_appearance.json")
 
-    shutil.rmtree(out, ignore_errors=True)
-    out.mkdir(parents=True, exist_ok=True)
+    effective_source_package, texture_resolution = prepare_texture_resolution_package(
+        source_package,
+        appearance_json,
+        work / "texture_resolution_overlay",
+    )
+    write_json(diagnostics / "TEXTURE_RESOLUTION_EVIDENCE_V1.json", texture_resolution)
+
     cmd = [
         sys.executable,
         str(binder),
@@ -235,7 +336,7 @@ def main() -> None:
         "--candidate-id", candidate_id,
         "--source-sha256", source_sha256,
         "--source-file", str(source_file),
-        "--source-package", str(source_package),
+        "--source-package", str(effective_source_package),
         "--canonical-geometry", str(authority / "primary_geometry.npz"),
         "--appearance-npz", str(appearance_npz),
         "--appearance-json", str(appearance_json),
@@ -244,7 +345,9 @@ def main() -> None:
         "--min-texture-coverage", str(manifest.get("min_texture_coverage", 0.05)),
     ]
     cp2 = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=600)
-    (work / "MASTER_ALIGNED_APPEARANCE.log").write_text(cp2.stdout, encoding="utf-8")
+    binder_log = work / "MASTER_ALIGNED_APPEARANCE.log"
+    binder_log.write_text(cp2.stdout, encoding="utf-8")
+    shutil.copy2(binder_log, diagnostics / binder_log.name)
     if cp2.returncode != 0:
         raise RuntimeError(f"master-aligned appearance failed rc={cp2.returncode}: {cp2.stdout[-5000:]}")
 
@@ -274,11 +377,11 @@ def main() -> None:
         "contact_sheet_sha256": sha256_file(contact),
         "textured_foreground_fraction": obs_manifest.get("textured_foreground_fraction"),
         "source_geometry_alignment": obs_manifest.get("source_geometry_alignment"),
+        "texture_resolution_mode": texture_resolution["mode"],
         "status": "PASS",
     }
     payload = json.dumps(result, indent=2, sort_keys=True) + "\n"
     (out / "FAMILY_OBSERVATION_RESULT_V1.json").write_text(payload, encoding="utf-8")
-    # Compatibility alias for older first-family workflows; payload remains family-generic.
     (out / "FIRST_FAMILY_OBSERVATION_RESULT_V1.json").write_text(payload, encoding="utf-8")
     print(json.dumps(result, indent=2, sort_keys=True))
 

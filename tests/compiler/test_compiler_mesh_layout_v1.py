@@ -17,7 +17,11 @@ class CompilerMeshLayoutTests(unittest.TestCase):
         expected = {
             "mwb2.py": "ff1376c190988c7f746e22496854a7cbe5bceeef",
             "mesh_binding.py": "f9795c988084676e5abd1a12aad37ed5012732e2",
-            "mwb2_skin.py": "43ed592f07888e08aca0f9e7ffd4557e24cd3655",
+            # V2 pre-FIT hardening makes mesh-skin normalization an explicitly
+            # bounded, fail-closed repair with correction telemetry. This blob is
+            # the current sealed implementation; the previous pin predates that
+            # repair-accounting authority.
+            "mwb2_skin.py": "bd3b11d869123b90b0cc9bf7cf3e87dbd1956152",
         }
         for name, sha in expected.items():
             self.assertEqual(git_blob_sha(base / name), sha, name)

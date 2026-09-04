@@ -1,0 +1,75 @@
+{
+  "schema": "RealSaS.FirstFamilyDataAuthority.v1",
+  "status": "FROZEN_BEFORE_FIRST_OPTIMIZER_STEP",
+  "family_role": "FAMILY1_PRIMARY_FIT_WITNESS",
+  "family_name": "kaykit_01_Mage",
+  "canonical_asset_id": "asset_fbc8d57f848df78bd953fbb5",
+  "master_split": "FIT",
+  "master_source_registry_id": "kaykit_cc0",
+  "master_selected_candidate_id": "kaykit_cc0:93b401d56e2547316f8841a4",
+  "truth_capabilities": {
+    "iris": true,
+    "geppetto": true,
+    "arachne": true
+  },
+  "first_fit_base": {
+    "ref": "first-fit-base/main-20260904-v2",
+    "commit": "461fd25264f4981af78bf38ddb9a42086f4c9db8"
+  },
+  "public_source_authority": {
+    "repository": "KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0",
+    "commit": "672074b73ba276876a19e8816ecdc5241817ab47",
+    "fbx_path": "addons/kaykit_character_pack_adventures/Characters/fbx/Mage.fbx",
+    "fbx_bytes": 19502156,
+    "fbx_sha256": "93b401d56e2547316f8841a4ac0086011c64d79185c9cb7623567c2dbf125c7d",
+    "texture_path": "addons/kaykit_character_pack_adventures/Characters/fbx/mage_texture.png",
+    "texture_bytes": 16311,
+    "texture_sha256": "ea49f094b960402635fe51db9f1864960c97271b17f2e3554e5aca1b2bbba144"
+  },
+  "master_geometry_authority": {
+    "drive_file_id": "1WDVx6Um1fOf_6sIra6enEJ-dnS4hN8uL",
+    "bytes": 121877,
+    "sha256": "f1e429a706faffd6ed6fd2b26a756cfca406e4ece440a9717e7e4b09f03db07d",
+    "array_contract": {
+      "vertices_source": {"shape": [2937, 3], "dtype": "float32", "sha256": "25ead858cbab50d4a1bab4470fecba757cdfcea39865c647cf748f58b90c916c"},
+      "vertices": {"shape": [2937, 3], "dtype": "float32", "sha256": "4e01b697bf9fde5f27e2dfff5ba695f92ee8c231fcb7c774d9befe0a7e110833"},
+      "faces": {"shape": [5683, 3], "dtype": "int32", "sha256": "412cd477299f8e214bcd3669d151c9b2be7c689c73f4ae315c345f2ad9736765"},
+      "vertex_normals": {"shape": [2937, 3], "dtype": "float32", "sha256": "21a9c8478ee60eb68e85a67fe219b63bb6b9ec6a3ee9103ee5ecf71c6d0e1e33"},
+      "parents": {"shape": [41], "dtype": "int32", "sha256": "7ddfbc358bc8c51a954e5c82f05b26621b5e47cc070cd9c79206c47ff032821e"},
+      "deform_mask": {"shape": [41], "dtype": "uint8", "sha256": "df23e783a75f67db41e0dc506f6b6c00206f309b5e57a620263816598f0e31bf"},
+      "skin": {"shape": [2937, 41], "dtype": "float32", "sha256": "c5140050f4def096d14c71805958e588e869f1263c4e9d2fcfd0270e02698d1c"},
+      "rest_local_source": {"shape": [41, 4, 4], "dtype": "float32", "sha256": "fd14843af06fde6754de1063b31d4261b47212b1fb62ad18ea7946f89af38337"},
+      "rest_world_source": {"shape": [41, 4, 4], "dtype": "float32", "sha256": "da599ca96dc51fc46949c054b341ad080b1691efda6abed9308407b1fe2b8a7a"},
+      "bone_heads": {"shape": [41, 3], "dtype": "float32", "sha256": "7ab1646dbcc89dc65e2bff0ce7a1d5e828fc98213e3904f25da3a7ea69fe63bc"},
+      "bone_tails": {"shape": [41, 3], "dtype": "float32", "sha256": "53c6b077f6707c349376ed25ad5217d74a89af822e5925492095a5e57ad8e6d2"}
+    },
+    "canonical_transform": [
+      [0.36823258, 0.0, 0.0, -0.03106364],
+      [0.0, 0.36823258, 0.0, 0.04365483],
+      [0.0, 0.0, 0.36823258, -0.49999025],
+      [0.0, 0.0, 0.0, 1.0]
+    ],
+    "canonical_transform_det3": 0.04993057996034622,
+    "vertex_count": 2937,
+    "triangle_count": 5683,
+    "bone_count": 41,
+    "deform_bone_count": 41,
+    "root_count": 1
+  },
+  "normalization_policy": {
+    "pose": "SOURCE_BIND_REST_ADMISSION_V1",
+    "repose_allowed": false,
+    "reflection_repair_allowed": false,
+    "coordinate_change": "RIGID_ORIENTATION_PLUS_UNIFORM_SCALE_PLUS_TRANSLATION_ONLY",
+    "source_textured_render": true,
+    "resolution": [1024, 1024],
+    "view_count": 8,
+    "yaw_step_deg": 45,
+    "background": "TRANSPARENT_RGBA"
+  },
+  "claims": {
+    "generalization": "FORBIDDEN",
+    "shipping_authority": false,
+    "purpose": "ONE_FAMILY_END_TO_END_FIT_AND_ARCHITECTURE_SEAM_DISCOVERY"
+  }
+}

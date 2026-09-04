@@ -22,7 +22,6 @@ from models.iris.v2.train_v2 import iris_v2_loss, train_step_production_v2
 from compiler.realsas_compiler_core.substrate.iris_v2 import compile_surface_v2, attach_dtb_nd1_from_evidence
 from experiments.first_family_fit_v1.run_mage_observation_v1 import stage_authority
 
-ASSET_ID = "asset_fbc8d57f848df78bd953fbb5"
 DEFAULT_SEED = 240904
 DEFAULT_STRIDE = 16
 DEFAULT_DEPTH_BINS = 48
@@ -53,18 +52,20 @@ def domain_to(domain, device):
     return type(domain)(**kw)
 
 
-def load_observation(observation_root: Path) -> tuple[torch.Tensor, ObservationContractV2, dict]:
+def load_observation(observation_root: Path, family: dict) -> tuple[torch.Tensor, ObservationContractV2, dict]:
     manifest_path = observation_root / "PREFIT_OBSERVATION_MANIFEST_V1.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("asset_id") != ASSET_ID or manifest.get("raster_authority") != "MASTER_SOURCE_TEXTURED_RGBA":
-        raise RuntimeError("Mage observation identity/authority drift")
-    if not manifest.get("exact_eight_views") or len(manifest.get("views", [])) != 8:
-        raise RuntimeError("Mage observation must contain exact eight views")
+    asset_id = family["asset_id"]
+    views = int(family.get("views", 8))
+    if manifest.get("asset_id") != asset_id or manifest.get("raster_authority") != "MASTER_SOURCE_TEXTURED_RGBA":
+        raise RuntimeError("observation identity/authority drift")
+    if not manifest.get("exact_eight_views") or len(manifest.get("views", [])) != views:
+        raise RuntimeError("observation view contract drift")
 
     images = []
     cameras = []
     rgba_hashes = []
-    for v in range(8):
+    for v in range(views):
         rgba_path = observation_root / f"V{v}" / "RGBA.png"
         camera_path = observation_root / f"V{v}" / "camera.json"
         expected = manifest["views"][v]
@@ -79,43 +80,25 @@ def load_observation(observation_root: Path) -> tuple[torch.Tensor, ObservationC
         cameras.append(camera_from_renderer_json_v2(camera_path, v))
         rgba_hashes.append(expected["rgba_sha256"])
 
-    contract = ObservationContractV2(
-        ASSET_ID,
-        tuple(cameras),
-        tuple(rgba_hashes),
-        raster_authority="MASTER_SOURCE_TEXTURED_RGBA",
-    )
+    contract = ObservationContractV2(asset_id, tuple(cameras), tuple(rgba_hashes), raster_authority="MASTER_SOURCE_TEXTURED_RGBA")
     rgba = torch.from_numpy(np.stack(images, axis=0)).permute(0, 3, 1, 2).unsqueeze(0).contiguous()
     return rgba, contract, manifest
 
 
-def build_teacher_from_master_raster(
-    *,
-    authority_root: Path,
-    contract: ObservationContractV2,
-    anchor_stride: int,
-    depth_bins: int,
-) -> tuple[object, torch.Tensor, torch.Tensor, dict]:
+def build_teacher_from_master_raster(*, authority_root: Path, contract: ObservationContractV2, anchor_stride: int, depth_bins: int) -> tuple[object, torch.Tensor, torch.Tensor, dict]:
     with np.load(authority_root / "primary_geometry.npz", allow_pickle=False) as z:
         vertices = np.asarray(z["vertices"], dtype=np.float64)
         faces = np.asarray(z["faces"], dtype=np.int64)
-    if vertices.shape != (2937, 3) or faces.shape != (5683, 3):
-        raise RuntimeError("Mage canonical geometry shape drift")
+    if vertices.ndim != 2 or vertices.shape[1] != 3 or faces.ndim != 2 or faces.shape[1] != 3:
+        raise RuntimeError("canonical geometry shape drift")
 
     cam = contract.cameras[0]
     depths = cam.depth_for_point(vertices)
     dmin = float(np.min(depths)); dmax = float(np.max(depths))
     margin = max((dmax - dmin) * 0.08, 1e-3)
     depth_values = torch.linspace(dmin - margin, dmax + margin, int(depth_bins), dtype=torch.float32)
-    domain = build_production_observation_ray_lattice_v2(
-        (contract,),
-        anchor_view_index=0,
-        anchor_stride_px=int(anchor_stride),
-        depth_values=depth_values,
-    )
+    domain = build_production_observation_ray_lattice_v2((contract,), anchor_view_index=0, anchor_stride_px=int(anchor_stride), depth_values=depth_values)
 
-    # Teacher-only use of exact renderer raster authority. It labels the fixed
-    # camera-only full-frame lattice; it never creates/deletes learner Q rays.
     raster_path = authority_root / "V0" / "raster_authority.npz"
     with np.load(raster_path, allow_pickle=False) as z:
         pix = np.asarray(z["pixel_linear_index"], dtype=np.int64).reshape(-1)
@@ -141,6 +124,8 @@ def build_teacher_from_master_raster(
     if len(hit_q):
         rows = order[pos[hit_q]]
         tids = tri[rows]
+        if len(tids) and (tids.min() < 0 or tids.max() >= len(faces)):
+            raise RuntimeError("teacher triangle id out of range")
         uv = buv[rows]
         w = np.stack([uv[:, 0], uv[:, 1], 1.0 - uv[:, 0] - uv[:, 1]], axis=1)
         points = (vertices[faces[tids]] * w[:, :, None]).sum(axis=1)
@@ -152,20 +137,7 @@ def build_teacher_from_master_raster(
     if supported < 64:
         raise RuntimeError(f"too few teacher-supported production rays: {supported}")
     spacing = float((depth_values[1] - depth_values[0]).abs()) if len(depth_values) > 1 else float("nan")
-    telemetry = {
-        "construction_authority": domain.construction_authority,
-        "anchor_stride_px": int(anchor_stride),
-        "q_count": int(domain.anchor_view.shape[1]),
-        "depth_bins": int(depth_bins),
-        "depth_min": float(depth_values.min()),
-        "depth_max": float(depth_values.max()),
-        "depth_spacing": spacing,
-        "teacher_supported_q": supported,
-        "teacher_supported_fraction_full_frame": float(hit.mean()),
-        "teacher_source": "MASTER_V0_VISIBLE_RASTER_AUTHORITY_LABELS_FIXED_CAMERA_ONLY_Q_LATTICE",
-        "learner_q_selection_uses_teacher_or_alpha": False,
-        "raster_authority_sha256": sha256_file(raster_path),
-    }
+    telemetry = {"construction_authority": domain.construction_authority, "anchor_stride_px": int(anchor_stride), "q_count": int(domain.anchor_view.shape[1]), "depth_bins": int(depth_bins), "depth_min": float(depth_values.min()), "depth_max": float(depth_values.max()), "depth_spacing": spacing, "teacher_supported_q": supported, "teacher_supported_fraction_full_frame": float(hit.mean()), "teacher_source": "MASTER_V0_VISIBLE_RASTER_AUTHORITY_LABELS_FIXED_CAMERA_ONLY_Q_LATTICE", "learner_q_selection_uses_teacher_or_alpha": False, "raster_authority_sha256": sha256_file(raster_path)}
     return domain, teacher_depth, teacher_support, telemetry
 
 
@@ -180,11 +152,11 @@ def normalized_metrics(metrics: dict, contract: ObservationContractV2) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--family-manifest", required=True)
     ap.add_argument("--observation-root", required=True)
     authority = ap.add_mutually_exclusive_group(required=True)
     authority.add_argument("--master-root")
     authority.add_argument("--authority-zip")
-    ap.add_argument("--authority-manifest", required=True)
     ap.add_argument("--dino-source", required=True)
     ap.add_argument("--dino-weight", required=True)
     ap.add_argument("--out-root", required=True)
@@ -198,16 +170,13 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=DEFAULT_SEED)
     args = ap.parse_args()
 
+    family_manifest_path = Path(args.family_manifest).resolve()
+    family = json.loads(family_manifest_path.read_text(encoding="utf-8"))
+    asset_id = family["asset_id"]
     out_root = Path(args.out_root).resolve(); out_root.mkdir(parents=True, exist_ok=True)
     work_root = Path(args.work_root).resolve(); shutil.rmtree(work_root, ignore_errors=True); work_root.mkdir(parents=True)
     observation_root = Path(args.observation_root).resolve()
-    manifest = json.loads(Path(args.authority_manifest).read_text(encoding="utf-8"))
-    authority_root, authority_source = stage_authority(
-        zip_path=Path(args.authority_zip).resolve() if args.authority_zip else None,
-        master_root=Path(args.master_root).resolve() if args.master_root else None,
-        work=work_root / "authority_stage",
-        manifest=manifest,
-    )
+    authority_root, authority_source = stage_authority(zip_path=Path(args.authority_zip).resolve() if args.authority_zip else None, master_root=Path(args.master_root).resolve() if args.master_root else None, work=work_root / "authority_stage", manifest=family)
 
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
@@ -215,78 +184,31 @@ def main() -> None:
         raise RuntimeError("CUDA_REQUIRED")
     device = torch.device("cuda")
 
-    rgba_cpu, contract, observation_manifest = load_observation(observation_root)
-    domain_cpu, teacher_depth_cpu, teacher_support_cpu, teacher_telemetry = build_teacher_from_master_raster(
-        authority_root=authority_root,
-        contract=contract,
-        anchor_stride=args.anchor_stride,
-        depth_bins=args.depth_bins,
-    )
-    prereg = {
-        "schema": "RealSaS.FirstFamily.MageIRISFit.v1",
-        "asset_id": ASSET_ID,
-        "observation_contract_hash": contract.contract_hash,
-        "observation_manifest_sha256": sha256_file(observation_root / "PREFIT_OBSERVATION_MANIFEST_V1.json"),
-        "authority_source": authority_source,
-        "teacher": teacher_telemetry,
-        "seed": args.seed,
-        "hidden_dim": 192,
-        "max_modes": 3,
-        "anchor_stride_px": args.anchor_stride,
-        "depth_bins": args.depth_bins,
-        "max_steps": args.max_steps,
-        "check_every": args.check_every,
-        "fit_gate_note": "historical first-family target only; not a generalization claim",
-        "historical_p95_norm_goal": args.historical_p95_norm_goal,
-    }
+    rgba_cpu, contract, observation_manifest = load_observation(observation_root, family)
+    domain_cpu, teacher_depth_cpu, teacher_support_cpu, teacher_telemetry = build_teacher_from_master_raster(authority_root=authority_root, contract=contract, anchor_stride=args.anchor_stride, depth_bins=args.depth_bins)
+    prereg = {"schema": "RealSaS.FirstFamily.IRISFit.v1", "asset_id": asset_id, "family_manifest_sha256": sha256_file(family_manifest_path), "observation_contract_hash": contract.contract_hash, "observation_manifest_sha256": sha256_file(observation_root / "PREFIT_OBSERVATION_MANIFEST_V1.json"), "authority_source": authority_source, "teacher": teacher_telemetry, "seed": args.seed, "hidden_dim": 192, "max_modes": 3, "anchor_stride_px": args.anchor_stride, "depth_bins": args.depth_bins, "max_steps": args.max_steps, "check_every": args.check_every, "fit_gate_note": "first-family fit witness only; not a generalization claim", "historical_p95_norm_goal": args.historical_p95_norm_goal}
     write_json(out_root / "IRIS_FIT_PREREG_V1.json", prereg)
 
-    apparatus = IrisDINOv2SApparatusV2.from_authority_files(
-        Path(args.dino_source), Path(args.dino_weight), device=device,
-        hidden_dim=192, max_modes=3, foundation_view_chunk=1,
-    )
+    apparatus = IrisDINOv2SApparatusV2.from_authority_files(Path(args.dino_source), Path(args.dino_weight), device=device, hidden_dim=192, max_modes=3, foundation_view_chunk=1)
     optimizer = torch.optim.AdamW(apparatus.trainable_parameters(), lr=2e-4, weight_decay=1e-4)
-    init_meta = save_checkpoint_v2(
-        out_root / "IRIS_STEP000000_INIT.pt",
-        model=apparatus, optimizer=optimizer, step=0,
-        config=prereg, source_contract_hash=apparatus.source_contract_hash,
-    )
+    init_meta = save_checkpoint_v2(out_root / "IRIS_STEP000000_INIT.pt", model=apparatus, optimizer=optimizer, step=0, config=prereg, source_contract_hash=apparatus.source_contract_hash)
 
     estimate = estimate_apparatus_materialization_v2(apparatus, domain_cpu)
     free_bytes, total_bytes = torch.cuda.mem_get_info(device)
-    resource = {
-        "device": torch.cuda.get_device_name(0),
-        "free_bytes_after_dino_load": int(free_bytes),
-        "total_bytes": int(total_bytes),
-        "forward_live_lower_bound_bytes": int(estimate.forward_live_lower_bound_bytes),
-        "forward_live_lower_bound_gib": estimate.forward_live_lower_bound_gib,
-        "fits_forward_lower_bound": bool(estimate.forward_live_lower_bound_bytes <= free_bytes),
-        "note": "lower bound excludes backward, native/foundation feature maps, params, allocator overhead",
-    }
+    resource = {"device": torch.cuda.get_device_name(0), "free_bytes_after_dino_load": int(free_bytes), "total_bytes": int(total_bytes), "forward_live_lower_bound_bytes": int(estimate.forward_live_lower_bound_bytes), "forward_live_lower_bound_gib": estimate.forward_live_lower_bound_gib, "fits_forward_lower_bound": bool(estimate.forward_live_lower_bound_bytes <= free_bytes), "note": "lower bound excludes backward, native/foundation feature maps, params, allocator overhead"}
     write_json(out_root / "IRIS_RESOURCE_PREFLIGHT_V1.json", resource)
     if args.resource_probe_only:
-        write_json(out_root / "IRIS_FIT_RESULT_V1.json", {
-            "status": "PASS_RESOURCE_PROBE_ONLY" if resource["fits_forward_lower_bound"] else "RESOURCE_BLOCKED_ON_THIS_GPU_EXPECTED",
-            "optimizer_steps": 0,
-            "resource": resource,
-            "initial_checkpoint": init_meta,
-        })
+        write_json(out_root / "IRIS_FIT_RESULT_V1.json", {"status": "PASS_RESOURCE_PROBE_ONLY" if resource["fits_forward_lower_bound"] else "RESOURCE_BLOCKED_ON_THIS_GPU_EXPECTED", "optimizer_steps": 0, "resource": resource, "initial_checkpoint": init_meta})
         return
     if not resource["fits_forward_lower_bound"]:
-        write_json(out_root / "IRIS_FIT_RESULT_V1.json", {
-            "status": "RESOURCE_BLOCKED_BEFORE_ZERO_STEP",
-            "optimizer_steps": 0,
-            "resource": resource,
-            "initial_checkpoint": init_meta,
-        })
-        raise RuntimeError("IRIS current materialization is provably too large for this GPU; move identical run to A100-class GPU")
+        write_json(out_root / "IRIS_FIT_RESULT_V1.json", {"status": "RESOURCE_BLOCKED_BEFORE_ZERO_STEP", "optimizer_steps": 0, "resource": resource, "initial_checkpoint": init_meta})
+        raise RuntimeError("IRIS current materialization is too large for this GPU; move identical run to A100-class GPU")
 
     domain = domain_to(domain_cpu, device)
     rgba = rgba_cpu.to(device, non_blocking=True)
     teacher_depth = teacher_depth_cpu.to(device)
     teacher_support = teacher_support_cpu.to(device)
 
-    # Optimizer-step-0 scientific smoke: true forward/backward, no step.
     optimizer.zero_grad(set_to_none=True)
     apparatus.train()
     output = apparatus(rgba, domain)
@@ -306,12 +228,7 @@ def main() -> None:
     streak = 0
     final_output = None
     for step in range(1, int(args.max_steps) + 1):
-        train_metrics = train_step_production_v2(apparatus, optimizer, {
-            "images": rgba,
-            "domain": domain,
-            "teacher_depth": teacher_depth,
-            "teacher_support": teacher_support,
-        })
+        train_metrics = train_step_production_v2(apparatus, optimizer, {"images": rgba, "domain": domain, "teacher_depth": teacher_depth, "teacher_support": teacher_support})
         if step == 1 or step % int(args.check_every) == 0 or step == int(args.max_steps):
             apparatus.eval()
             with torch.no_grad():
@@ -320,10 +237,7 @@ def main() -> None:
             record = {"step": step, "train": train_metrics, "eval": scientific}
             history.append(record)
             write_json(out_root / "IRIS_HISTORY_V1.json", history)
-            save_checkpoint_v2(
-                out_root / "IRIS_CHECKPOINT_LATEST.pt", model=apparatus, optimizer=optimizer, step=step,
-                config=prereg, source_contract_hash=apparatus.source_contract_hash,
-            )
+            save_checkpoint_v2(out_root / "IRIS_CHECKPOINT_LATEST.pt", model=apparatus, optimizer=optimizer, step=step, config=prereg, source_contract_hash=apparatus.source_contract_hash)
             streak = streak + 1 if scientific["coverage_p95_norm"] <= float(args.historical_p95_norm_goal) else 0
             print(json.dumps({"IRIS": record, "fit_streak": streak}, sort_keys=True), flush=True)
             if streak >= 3:
@@ -331,32 +245,14 @@ def main() -> None:
 
     if final_output is None:
         raise RuntimeError("IRIS fit produced no evaluation checkpoint")
-    fit_pass = streak >= 3
-    if not fit_pass:
-        write_json(out_root / "IRIS_FIT_RESULT_V1.json", {
-            "status": "IRIS_FIT_FAIL",
-            "optimizer_steps": history[-1]["step"],
-            "last": history[-1],
-            "history": history,
-        })
+    if streak < 3:
+        write_json(out_root / "IRIS_FIT_RESULT_V1.json", {"status": "IRIS_FIT_FAIL", "optimizer_steps": history[-1]["step"], "last": history[-1], "history": history})
         raise RuntimeError(f"IRIS_FIT_FAIL:{history[-1]}")
 
-    evidence = emit_observation_evidence_v2(
-        (contract,), domain, final_output.modes, final_output.refined_depth, final_output.depth_output,
-        policy=EmissionPolicyV2(0.05, True),
-    )[0]
-    surface = compile_surface_v2(evidence)
-    surface = attach_dtb_nd1_from_evidence(evidence, surface)
-    torch.save({"schema": "RealSaS.FirstFamily.IRISSurfacePickle.v1", "surface": surface, "evidence": evidence, "source_contract_hash": apparatus.source_contract_hash}, out_root / "IRIS_SURFACE_AND_EVIDENCE.pt")
-    result = {
-        "status": "PASS_IRIS_FIT_AND_S",
-        "optimizer_steps": history[-1]["step"],
-        "last": history[-1],
-        "surface_nodes": len(surface.surface_nodes),
-        "surface_relations": len(surface.local_relations),
-        "source_contract_hash": apparatus.source_contract_hash,
-        "final_checkpoint_sha256": sha256_file(out_root / "IRIS_CHECKPOINT_LATEST.pt"),
-    }
+    evidence = emit_observation_evidence_v2((contract,), domain, final_output.modes, final_output.refined_depth, final_output.depth_output, policy=EmissionPolicyV2(0.05, True))[0]
+    surface = attach_dtb_nd1_from_evidence(evidence, compile_surface_v2(evidence))
+    torch.save({"schema": "RealSaS.FirstFamily.IRISSurfacePickle.v1", "asset_id": asset_id, "surface": surface, "evidence": evidence, "source_contract_hash": apparatus.source_contract_hash}, out_root / "IRIS_SURFACE_AND_EVIDENCE.pt")
+    result = {"status": "PASS_IRIS_FIT_AND_S", "asset_id": asset_id, "optimizer_steps": history[-1]["step"], "last": history[-1], "surface_nodes": len(surface.surface_nodes), "surface_relations": len(surface.local_relations), "source_contract_hash": apparatus.source_contract_hash, "final_checkpoint_sha256": sha256_file(out_root / "IRIS_CHECKPOINT_LATEST.pt")}
     write_json(out_root / "IRIS_FIT_RESULT_V1.json", result)
     if result["surface_nodes"] < 64 or result["surface_relations"] < 1:
         raise RuntimeError(f"IRIS_SURFACE_FAIL:{result}")

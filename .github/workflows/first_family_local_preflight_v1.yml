@@ -15,13 +15,14 @@ on:
 jobs:
   mage-local-preflight:
     runs-on: [self-hosted, realsas, gpu]
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       KAYKIT_COMMIT: 672074b73ba276876a19e8816ecdc5241817ab47
       KAYKIT_REPO: https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0.git
       MAGE_FBX_REL: addons/kaykit_character_pack_adventures/Characters/fbx/Mage.fbx
       MAGE_TEXTURE_REL: addons/kaykit_character_pack_adventures/Characters/fbx/mage_texture.png
       REALSAS_LOCAL_ML_VENV: /home/monster/realsas-ml312
+      REALSAS_PIP_TMP: /home/monster/.cache/realsas/pip-tmp
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,7 +32,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          mkdir -p artifacts/first_family_preflight
+          mkdir -p artifacts/first_family_preflight "$REALSAS_PIP_TMP"
           {
             echo "runner=${RUNNER_NAME:-unknown}"
             uname -a
@@ -45,6 +46,31 @@ jobs:
             command -v blender || true
             find '/mnt/c/Program Files/Blender Foundation' -maxdepth 3 -iname 'blender.exe' -print 2>/dev/null || true
           } | tee artifacts/first_family_preflight/environment_summary.log
+
+      - name: Set up Linux Python 3.12 bootstrap
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Provision persistent Linux ML environment if needed
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export TMPDIR="$REALSAS_PIP_TMP"
+          mkdir -p "$TMPDIR"
+          if [ ! -x "$REALSAS_LOCAL_ML_VENV/bin/python" ]; then
+            python -m venv "$REALSAS_LOCAL_ML_VENV"
+          fi
+          if ! "$REALSAS_LOCAL_ML_VENV/bin/python" -c 'import torch,numpy,scipy,PIL; assert torch.cuda.is_available()' >/dev/null 2>&1; then
+            "$REALSAS_LOCAL_ML_VENV/bin/python" -m pip install --upgrade 'pip<26'
+            "$REALSAS_LOCAL_ML_VENV/bin/python" -m pip install --no-cache-dir \
+              torch==2.7.0 torchvision==0.22.0 \
+              --index-url https://download.pytorch.org/whl/cu118
+            "$REALSAS_LOCAL_ML_VENV/bin/python" -m pip install --no-cache-dir \
+              'numpy<3' 'scipy<2' 'pillow<13' 'pytest<9'
+          fi
+          "$REALSAS_LOCAL_ML_VENV/bin/python" -m pip freeze | sort | tee artifacts/first_family_preflight/PYTHON_ENV_FREEZE.txt
+          df -h "$TMPDIR" "$REALSAS_LOCAL_ML_VENV" | tee artifacts/first_family_preflight/ML_ENV_DISK_AFTER.txt
 
       - name: Require persistent Linux ML environment
         shell: bash

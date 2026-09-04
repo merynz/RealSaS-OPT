@@ -35,9 +35,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
       - name: Install CPU runtime-gate dependencies
-        run: python -m pip install --upgrade numpy scipy pytest
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pytest
       - name: Directional binding / bake / projection regressions
         run: |
           PYTHONPATH=. python -m pytest -q \

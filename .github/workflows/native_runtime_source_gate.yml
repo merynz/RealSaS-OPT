@@ -18,10 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install native dependencies
+      - name: Verify native dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake g++ libarchive-dev libpng-dev zlib1g-dev
+          cmake --version
+          c++ --version
+          dpkg -s libarchive-dev libpng-dev zlib1g-dev >/dev/null
 
       - name: Verify sealed source bytes
         run: |

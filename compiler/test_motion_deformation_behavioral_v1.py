@@ -10,7 +10,7 @@ from compiler.realsas_compiler_core.motion import build_deterministic_preset_mot
 from compiler.realsas_compiler_core.types import RiggingSurfaceIR, SurfaceNode, QualifiedJoint, QualifiedSkinIR, QualifiedSkinRow
 from compiler.realsas_compiler_core.v4 import build_mechanical_state, qualified_skeleton_v2_lineage_hash
 from compiler.realsas_compiler_core.v4_types import QualifiedSkeletonIRV2
-from experiments.geppetto_arachne_r6_20260901.verified_lbs_v1 import apply_verified_lbs_v1
+from compiler.realsas_compiler_services.numerics.lbs import apply_lbs_probe_v1
 
 
 WITNESSES = (
@@ -126,7 +126,7 @@ def _probe(mechanical, amplitude_deg):
     selected_joint = next(j for j in joints if j.canonical_joint_id == selected)
     transforms = np.tile(np.eye(4, dtype=np.float64), (1, len(joints), 1, 1))
     transforms[0, ji[selected]] = _pivoted_rotation_z(selected_joint.position, positive_key.rotation_deg)
-    pred = apply_verified_lbs_v1(p, w, transforms)[0].astype(np.float64)
+    pred = apply_lbs_probe_v1(p, w, transforms)[0].astype(np.float64)
     displacement = np.linalg.norm(pred - p, axis=1)
     return {
         "motion": motion,

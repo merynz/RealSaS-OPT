@@ -1,0 +1,40 @@
+{
+  "asset_id": "asset_fbc8d57f848df78bd953fbb5",
+  "build_id": "REALSAS_MASTER_1024_V4_3_LOCAL_FIRST_FULL_PRODUCTION_20260822",
+  "files": {
+    "V0/camera.json": {"bytes": 495, "sha256": "9d2af1f4712018239cbb16eaa784de0ae8bb2904bc8bb9be7f34e3b99bd98f01"},
+    "V0/raster_authority.npz": {"bytes": 2432291, "sha256": "ed49f56f0c5d9387ac8b1a47b99060ea5404135498e7012a849ce4147f25bea2"},
+    "V1/camera.json": {"bytes": 557, "sha256": "079bc79ad867fbcf6de050eedc8ab3101d6c5826588ade997cddd9addb0701a7"},
+    "V1/raster_authority.npz": {"bytes": 2335761, "sha256": "600c7308ae8c669e3d23cd927dcee23d501c741fc4f684afd9b10ae3ac38060b"},
+    "V2/camera.json": {"bytes": 535, "sha256": "20a90810a04677a8006361156f9815bc949f078ef5da70ab67facca1d7738bb4"},
+    "V2/raster_authority.npz": {"bytes": 1924890, "sha256": "97e4b8e1656887eb094206f40472866b4b37cc5f49e60f152caac4d9077d078b"},
+    "V3/camera.json": {"bytes": 562, "sha256": "f6bc7d2f5c3f36b44e81a027bc07e0f6c65e960d1564dfd9d706a29a77cf8878"},
+    "V3/raster_authority.npz": {"bytes": 2307877, "sha256": "a6b0b4fd87439950d8c78b43dfa0d30d32daf63eb5c23bd2d0725d4df58cea4d"},
+    "V4/camera.json": {"bytes": 537, "sha256": "d8cbfd42dd8c02b5719365d81ec3b7089e9ab8ec4baee930805181863d3c9356"},
+    "V4/raster_authority.npz": {"bytes": 2443166, "sha256": "9362f0ff1e922d2892c100ed83536853e156af40e648d25a26650eeeac7b6e83"},
+    "V5/camera.json": {"bytes": 560, "sha256": "039e921d2f2ff79d873115aa506eb054fc93d009776bc2c9543cdd0883b3c31d"},
+    "V5/raster_authority.npz": {"bytes": 2387987, "sha256": "9ab03f8f8afb9c1552863d1f560c5f6e930c71e8e4139fb6dc72fb7ae39bd4c7"},
+    "V6/camera.json": {"bytes": 540, "sha256": "ee0bb4682cff38bf418c4457f96aa4a0d2a09f87bad058a835637922072f1da2"},
+    "V6/raster_authority.npz": {"bytes": 1931498, "sha256": "d268cc7b16bf73a479193858a4c9c1ae5765b32a0bf8af19c6a82388ba86c50c"},
+    "V7/camera.json": {"bytes": 560, "sha256": "fd8ffa9743f852d73d59c8fd63173931e6561818ccf81a87e8a4c70b33ab7cec"},
+    "V7/raster_authority.npz": {"bytes": 2301079, "sha256": "ebf78377f5e3e3e015266e31f7afb6dcd0c1eed15f1a620eb2ab3d5f709f5b88"},
+    "primary_geometry.npz": {"bytes": 121877, "sha256": "f1e429a706faffd6ed6fd2b26a756cfca406e4ece440a9717e7e4b09f03db07d"}
+  },
+  "primary_geometry": {"bones": 41, "faces": [5683,3], "skin": [2937,41], "vertices": [2937,3], "vertices_source": [2937,3]},
+  "schema": "RealSaS.FirstFamily.MageAuthorityPack.v1",
+  "selected_candidate_id": "kaykit_cc0:93b401d56e2547316f8841a4",
+  "source_fbx_sha256": "93b401d56e2547316f8841a4ac0086011c64d79185c9cb7623567c2dbf125c7d",
+  "views": [
+    {"view":0,"resolution":[1024,1024],"foreground_pixels":309259,"triangle_id_min":0,"triangle_id_max":5682},
+    {"view":1,"resolution":[1024,1024],"foreground_pixels":293552,"triangle_id_min":0,"triangle_id_max":5682},
+    {"view":2,"resolution":[1024,1024],"foreground_pixels":231507,"triangle_id_min":0,"triangle_id_max":5679},
+    {"view":3,"resolution":[1024,1024],"foreground_pixels":284342,"triangle_id_min":2,"triangle_id_max":5668},
+    {"view":4,"resolution":[1024,1024],"foreground_pixels":309259,"triangle_id_min":2,"triangle_id_max":5640},
+    {"view":5,"resolution":[1024,1024],"foreground_pixels":293473,"triangle_id_min":2,"triangle_id_max":5678},
+    {"view":6,"resolution":[1024,1024],"foreground_pixels":231508,"triangle_id_min":2,"triangle_id_max":5680},
+    {"view":7,"resolution":[1024,1024],"foreground_pixels":284343,"triangle_id_min":0,"triangle_id_max":5682}
+  ],
+  "zip_bytes": 15371628,
+  "zip_name": "Mage_FIRST_FAMILY_AUTHORITY_PACK_V1.zip",
+  "zip_sha256": "ddff2f59e724a67aeb1059aaa748e12015d1281246453b601e06426d280364c6"
+}

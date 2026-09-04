@@ -1,4 +1,4 @@
-from repair_loop import (
+from compiler.realsas_compiler_services.proof.repair_loop import (
     BoundedRepairOperationV1,
     RepairApplicationRecordV1,
     RepairReproofEvidenceV1,

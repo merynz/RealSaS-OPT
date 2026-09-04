@@ -1,0 +1,104 @@
+{
+  "schema": "RealSaS.LearnedArtifactRegistry.v1",
+  "date": "2026-09-04",
+  "architecture_base_commit": "1f1d8b5bd0df9da2c62733c05c54ec4d99c05f2f",
+  "architecture_base_ref": "first-fit-base/main-20260904",
+  "binary_storage_policy": "EXTERNAL_BINARY__REPOSITORY_HASH_AND_LINEAGE_MANIFEST_REQUIRED",
+  "fit_authorized_now": false,
+  "current_product_state": "NO_CURRENT_TRAINED_END_TO_END_MODEL_SET",
+  "dependency_order": [
+    "IRIS_V2",
+    "GEPPETTO_V2",
+    "SKIN_FIELD_CODEC_V1_A0",
+    "ARACHNE_V2_A1"
+  ],
+  "stages": {
+    "IRIS_V2": {
+      "code_root": "models/iris/v2",
+      "checkpoint_contract": "models/iris/v2/checkpoint_v2.py",
+      "current_checkpoint_status": "NO_CURRENT_CHECKPOINT",
+      "current_checkpoint_sha256": null,
+      "current_checkpoint_locator": null,
+      "optimizer_steps": 0,
+      "training_data_manifest_sha256": null,
+      "source_contract_hash": null,
+      "foundation_runtime_seal_hash": null,
+      "inference_authorized": false,
+      "reason": "Current privileged-input-corrected IRIS V2 has not yet been fit on the frozen first-fit cohort. Historical learned IRIS states are not current authority."
+    },
+    "GEPPETTO_V2": {
+      "code_root": "models/geppetto/v2",
+      "checkpoint_contract": "models/geppetto/v2/geppetto_checkpoint_v2.py",
+      "current_checkpoint_status": "NO_CURRENT_CHECKPOINT",
+      "current_checkpoint_sha256": null,
+      "current_checkpoint_locator": null,
+      "optimizer_steps": 0,
+      "training_data_manifest_sha256": null,
+      "upstream_surface_checkpoint_sha256": null,
+      "inference_authorized": false,
+      "reason": "Behavioral overfit evidence exists, but no canonical current real-family Geppetto checkpoint is registered."
+    },
+    "SKIN_FIELD_CODEC_V1_A0": {
+      "code_root": "models/skin_field_codec/v1",
+      "checkpoint_contract": "models/skin_field_codec/v1/skin_field_codec_checkpoint_v1.py",
+      "current_checkpoint_status": "NO_CURRENT_CHECKPOINT",
+      "current_checkpoint_sha256": null,
+      "current_checkpoint_locator": null,
+      "optimizer_steps": 0,
+      "training_data_manifest_sha256": null,
+      "qualification_token": null,
+      "inference_authorized": false,
+      "reason": "Synthetic behavioral A0 capacity/closure is evidence, not a persisted current product checkpoint."
+    },
+    "ARACHNE_V2_A1": {
+      "code_root": "models/arachne/v2",
+      "checkpoint_contract": "models/arachne/v2/arachne_checkpoint_v2.py",
+      "current_checkpoint_status": "NO_CURRENT_CHECKPOINT",
+      "current_checkpoint_sha256": null,
+      "current_checkpoint_locator": null,
+      "optimizer_steps": 0,
+      "training_data_manifest_sha256": null,
+      "upstream_codec_checkpoint_sha256": null,
+      "upstream_codec_a0_token_hash": null,
+      "upstream_surface_checkpoint_sha256": null,
+      "upstream_skeleton_checkpoint_sha256": null,
+      "inference_authorized": false,
+      "reason": "Synthetic behavioral A1 closure is evidence, not a persisted current product checkpoint. A dedicated checkpoint contract is required before FIT."
+    }
+  },
+  "historical_verified_external_artifacts": [
+    {
+      "stage": "IRIS_HISTORICAL",
+      "name": "V18_93_INDEPENDENT_SUPPORT/best.pt",
+      "status": "HISTORICAL_NOT_CURRENT_AUTHORITY",
+      "source_drive_path": "/content/drive/MyDrive/RealSaS/IRIS_CACHE/V18_93_INDEPENDENT_SUPPORT/best.pt",
+      "source_size_bytes": 200930549,
+      "source_sha256": "5976d8cd0496023b5cad49aa49ee5962e1717175edd06af0bd9aa1132c96557d",
+      "external_archive_folder_id": "19UAAcrpxHHAqXNASKOvKqnCaovwqRmwd",
+      "part_count": 3,
+      "may_be_loaded_as_current": false
+    },
+    {
+      "stage": "IRIS_HISTORICAL",
+      "name": "V18_82R1/final_best_calibration.pt",
+      "status": "HISTORICAL_NOT_CURRENT_AUTHORITY",
+      "source_drive_path": "/content/drive/MyDrive/RealSaS/IRIS_CACHE/V18_82R1/final_best_calibration.pt",
+      "source_size_bytes": 137079965,
+      "source_sha256": "2d3085c8ef059ba2f8e5b2cea481f0aeb65c21f77ab4d3b062d9f4dcf8afa23b",
+      "external_archive_folder_id": "1_ikrGmQQbCsQ4X--do_yfH6pHhFbB9XS",
+      "part_count": 2,
+      "may_be_loaded_as_current": false
+    }
+  ],
+  "registration_rule": {
+    "binary_may_live_outside_git": true,
+    "every_current_checkpoint_requires_sha256": true,
+    "every_current_checkpoint_requires_exact_architecture_base": true,
+    "every_current_checkpoint_requires_training_data_manifest": true,
+    "every_current_checkpoint_requires_optimizer_step": true,
+    "every_downstream_checkpoint_requires_upstream_checkpoint_lineage": true,
+    "unregistered_checkpoint_may_be_used_for_product_inference": false,
+    "historical_checkpoint_may_be_promoted_by_name_only": false
+  },
+  "first_fit_transition": "Family-1 optimizer step 0 must begin with all current stage entries still NO_CURRENT_CHECKPOINT; successful saved checkpoints update this registry by exact hash/lineage before any inference-authoritative PASS can be claimed."
+}

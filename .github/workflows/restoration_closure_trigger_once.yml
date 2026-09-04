@@ -1,0 +1,12 @@
+name: restoration-closure-trigger-once
+
+on:
+  push:
+    branches:
+      - restoration/compiler-runtime-promotion-v1-20260903
+    paths:
+      - 'canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V1_20260904.json'
+
+jobs:
+  call-restoration-closure:
+    uses: ./.github/workflows/restoration_closure_manual.yml

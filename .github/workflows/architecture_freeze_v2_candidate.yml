@@ -16,8 +16,11 @@ on:
       - 'experiments/single_family_e2e_v1/data_manifest_v1.py'
       - 'canonical/architecture_freeze_gate_v2.py'
       - 'canonical/LEARNED_ARTIFACT_REGISTRY_V1_20260904.json'
+      - 'canonical/ARCHITECTURE_FREEZE_V2.json'
       - 'canonical/DINO_TOKEN_PARITY_V1_SEAL_20260902.json'
       - 'canonical/MWB2_DIRECTIONAL_BEHAVIORAL_CLOSURE_20260903.md'
+      - 'tests/models/test_learned_artifact_registry_authorization_v1.py'
+      - 'tests/repository/test_learned_artifact_registry_v1.py'
       - '.github/workflows/architecture_freeze_v2_candidate.yml'
   workflow_dispatch:
 

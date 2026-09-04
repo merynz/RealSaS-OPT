@@ -3,6 +3,7 @@
   "date": "2026-09-04",
   "branch": "restoration/compiler-runtime-promotion-v1-20260903",
   "runner": "self-hosted/linux/x64/realsas",
-  "purpose": "Trigger restoration-wide closure on the latest restoration head after self-hosted CI routing changes.",
+  "attempt": 2,
+  "purpose": "Retrigger restoration-wide closure on the latest restoration head after confirming the local self-hosted runner is registered as a persistent systemd service. Previous attempt terminated during dependency installation before any restoration test executed.",
   "fit_authorization": false
 }

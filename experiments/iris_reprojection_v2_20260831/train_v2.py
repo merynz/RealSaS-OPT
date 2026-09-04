@@ -7,6 +7,7 @@ import torch.nn.functional as F
 
 from .model_v2 import IrisReprojectionOutputV2
 from .q_domain_v2 import RayHypothesisDomainV2
+from .resource_contract_v2 import require_cuda_forward_live_set_v2
 from .world_regularizer_v2 import isotropic_world_regularizer_v2
 
 
@@ -163,13 +164,16 @@ def train_step_production_v2(apparatus, optimizer, batch: dict) -> dict[str, flo
         raise ValueError("production IRIS training forbids caller-supplied foundation_maps")
     if not hasattr(apparatus, "runtime_seal") or not hasattr(apparatus, "source_contract_hash"):
         raise TypeError("production IRIS training requires exact foundation-bound apparatus")
+    resource = require_cuda_forward_live_set_v2(apparatus, batch["domain"])
     apparatus.train()
     optimizer.zero_grad(set_to_none=True)
     output = apparatus(batch["images"], batch["domain"])
     losses = iris_v2_loss(output, batch["domain"], batch["teacher_depth"], batch["teacher_support"])
     losses["total"].backward()
     optimizer.step()
-    return {k: float(v.detach().cpu()) for k, v in losses.items()}
+    result = {k: float(v.detach().cpu()) for k, v in losses.items()}
+    result["resource_forward_live_lower_bound_gib"] = resource.forward_live_lower_bound_gib
+    return result
 
 
 def train_step_injected_foundation_source_test_v2(model, optimizer, batch: dict) -> dict[str, float]:

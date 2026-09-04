@@ -1,0 +1,51 @@
+name: current-mainline-self-hosted-ci
+
+on:
+  push:
+    branches:
+      - main
+      - restoration/compiler-runtime-promotion-v1-20260903
+    paths:
+      - 'models/**'
+      - 'compiler/**'
+      - 'runtime/reference_v4/**'
+      - 'tests/compiler/**'
+      - 'tests/models/**'
+      - 'tests/iris/test_iris_mainline_source_v1.py'
+      - 'tests/repository/**'
+      - 'canonical/**'
+      - 'RESTORATION_STATE.md'
+      - 'SYSTEM_INDEX.md'
+      - '.github/workflows/current_mainline_self_hosted_ci.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  fast-current-mainline:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install CPU regression dependencies
+        run: python -m pip install --upgrade numpy scipy pytest
+      - name: Compile current Python ownership roots
+        run: python -m compileall -q models compiler runtime/reference_v4
+      - name: Repository readiness + import firewall
+        run: PYTHONPATH=. python -m pytest -q tests/repository/test_canonical_main_readiness_v1.py
+      - name: Learned source ownership
+        run: |
+          PYTHONPATH=. python -m pytest -q \
+            tests/models \
+            tests/iris/test_iris_mainline_source_v1.py
+      - name: Compiler regressions
+        run: PYTHONPATH=. python -m pytest -q tests/compiler
+      - name: Fast gate summary
+        run: |
+          echo 'CURRENT_MAINLINE_FAST_GATE_PASS'
+          echo "commit=$GITHUB_SHA"
+          echo 'fit_authorization=UNCHANGED_FALSE_UNTIL_CANONICAL_MAIN_POST_MERGE_GATE'

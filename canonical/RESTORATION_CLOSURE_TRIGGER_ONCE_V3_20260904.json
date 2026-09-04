@@ -3,7 +3,7 @@
   "date": "2026-09-04",
   "branch": "restoration/compiler-runtime-promotion-v1-20260903",
   "runner": "self-hosted/linux/x64/realsas",
-  "attempt": 2,
-  "purpose": "Retrigger restoration-wide closure on the latest restoration head after confirming the local self-hosted runner is registered as a persistent systemd service. Previous attempt terminated during dependency installation before any restoration test executed.",
+  "attempt": 3,
+  "purpose": "Run the hardened restoration-wide closure on the latest restoration head. Dependency bootstrap now avoids pip self-upgrade, forces binary wheels, uses bounded network timeouts/retries, and emits host diagnostics before tests.",
   "fit_authorization": false
 }

@@ -1,0 +1,140 @@
+{
+  "schema": "RealSaS.CleanroomGeometryFunctionMatrix.v1",
+  "status": "EXPERIMENTAL_NOT_CANONICAL",
+  "created_utc": "2026-09-04T20:33:00Z",
+  "realsas_base_commit": "f4a08141547952d2dca8a32b9cf8a709d36cdc9e",
+  "reference": {
+    "name": "CharacterGen 3D Stage",
+    "repository": "zjp-shadow/CharacterGen",
+    "commit": "f329a835dbd5003060a5653eafd83d4d8868b043",
+    "policy": "behavioral/function comparison only; no vendor dependency and no source-text copying into RealSaS"
+  },
+  "promotion_rule": {
+    "canonical_files_may_change": false,
+    "required_before_promotion": [
+      "source-contract tests PASS",
+      "teacher-oracle geometry gate PASS",
+      "same-family downstream Geppetto non-inferiority or improvement",
+      "same-family downstream Arachne non-inferiority or improvement",
+      "family-disjoint mini gate PASS"
+    ]
+  },
+  "functional_comparison": [
+    {
+      "reference_function": "LinearCameraEmbedder.forward",
+      "reference_path": "3D_Stage/lrm/models/camera.py",
+      "reference_behavior": "flatten per-view camera condition (c2w_cond) and map it into the image-token feature dimension",
+      "realsas_current": "OrthographicCameraV2 + q_domain_v2 use exact cameras only to analytically construct/project q candidates",
+      "gap": "camera direction/frame is not encoded into learned image tokens",
+      "decision": "BRING_FUNCTION",
+      "cleanroom_form": "exact-camera embedding from origin/right/up/forward/half_extent; no categorical absolute view ID"
+    },
+    {
+      "reference_function": "DINOV2SingleImageTokenizer.configure/forward",
+      "reference_path": "3D_Stage/lrm/models/tokenizers/image.py",
+      "reference_behavior": "extract DINOv2 local tokens and condition the DINO transformer through camera-dependent modulation",
+      "realsas_current": "QDescriptorSamplerV2 samples frozen foundation maps plus an RGB native pyramid at already-projected candidate locations",
+      "gap": "features become multi-view evidence only after candidate projection; no globally camera-aware token bank exists",
+      "decision": "BRING_BEHAVIOR_NOT_IMPLEMENTATION",
+      "cleanroom_form": "first arm keeps foundation encoder frozen and adds exact-camera conditioning after feature extraction; encoder-internal modulation is a challenger only if late conditioning shows a ceiling"
+    },
+    {
+      "reference_function": "TriplaneLearnablePositionalEmbedding.forward/detokenize",
+      "reference_path": "3D_Stage/lrm/models/tokenizers/triplane.py",
+      "reference_behavior": "create persistent learnable scene-query tokens arranged as three orthogonal latent planes",
+      "realsas_current": "no persistent shared scene latent; each q/depth candidate is constructed from an anchor ray",
+      "gap": "the representation is anchor-oriented rather than globally queryable in 3D",
+      "decision": "BRING_FUNCTION",
+      "cleanroom_form": "learnable XY/XZ/YZ scene-query tokens with explicit canonical object-frame coordinates"
+    },
+    {
+      "reference_function": "MultiviewLRM.forward + Transformer1D.forward",
+      "reference_path": "3D_Stage/lrm/systems/multiview_lrm.py; 3D_Stage/lrm/models/transformers/transformer_1d.py",
+      "reference_behavior": "concatenate all view image tokens; let scene tokens repeatedly self-attend and cross-attend to all view tokens; output one shared 3D scene representation",
+      "realsas_current": "QEvidenceEncoderV2 reasons over only eight view samples for one q/depth candidate, pools them, then EvidenceFieldV2 reasons along that anchor ray and neighboring anchor rays",
+      "gap": "no global all-image-to-scene fusion stage exists before geometric querying; non-overlapping views can only interact if the same anchor-generated candidate projects into them",
+      "decision": "BRING_FUNCTION_CRITICAL",
+      "cleanroom_form": "scene-query Transformer decoder: scene tokens query flattened camera-aware multi-view image tokens"
+    },
+    {
+      "reference_function": "TriplaneUpsampleNetwork.forward",
+      "reference_path": "3D_Stage/lrm/models/networks.py",
+      "reference_behavior": "spatially upsample the fused triplane latent before geometry querying",
+      "realsas_current": "native image detail exists, but there is no spatial 3D latent to upsample",
+      "gap": "shared field resolution/detail tradeoff is absent",
+      "decision": "BRING_SMALL_FUNCTION",
+      "cleanroom_form": "single learned 2x triplane upsample; further detail belongs to a later local refinement arm"
+    },
+    {
+      "reference_function": "TriplaneDMTetRenderer.query_triplane",
+      "reference_path": "3D_Stage/lrm/models/renderers/triplane_dmtet.py",
+      "reference_behavior": "project arbitrary 3D points to XY/XZ/YZ planes, bilinearly sample three latent features, concatenate/reduce them and decode a continuous geometry field",
+      "realsas_current": "EvidenceFieldV2 is defined only on the discrete q/depth hypothesis lattice",
+      "gap": "current IRIS cannot ask a continuous shared scene representation 'what geometry exists at P?' independently of anchor construction",
+      "decision": "BRING_FUNCTION_CRITICAL",
+      "cleanroom_form": "continuous query(P) over fused triplanes"
+    },
+    {
+      "reference_function": "MultiHeadMLP.forward (sdf head)",
+      "reference_path": "3D_Stage/lrm/models/networks.py",
+      "reference_behavior": "decode queried latent features into signed-distance geometry plus appearance features",
+      "realsas_current": "DepthSupportUncertaintyHeadV2 emits depth/support/uncertainty for extracted ray modes",
+      "gap": "geometry authority is per-ray depth rather than a scene field",
+      "decision": "BRING_ONLY_GEOMETRY_ROLE",
+      "cleanroom_form": "predict unsigned surface distance plus log uncertainty; do not predict RGB/material features. SDF sign is not required by RiggingSurfaceIR and is not assumed until experimentally justified"
+    },
+    {
+      "reference_function": "TriplaneDMTetRenderer.isosurface / MarchingTetrahedraHelper",
+      "reference_path": "3D_Stage/lrm/models/renderers/triplane_dmtet.py",
+      "reference_behavior": "convert the signed field into a closed triangle mesh",
+      "realsas_current": "RiggingSurfaceIR needs surface nodes P, optional derived normals and relations; it does not require a closed 3D mesh",
+      "gap": "none required for current downstream contract",
+      "decision": "DO_NOT_BRING",
+      "reason": "mesh extraction solves CharacterGen's graphics/export objective, not RealSaS's minimum mechanical substrate objective"
+    },
+    {
+      "reference_function": "renderer.forward_single / material / background / exporter",
+      "reference_path": "3D_Stage/lrm/models/renderers/triplane_dmtet.py and infer.yaml",
+      "reference_behavior": "rasterize mesh, synthesize RGB/normal/depth, unwrap UV and export textured OBJ",
+      "realsas_current": "direction-local artwork and editable 2D mesh are downstream compiler concerns",
+      "gap": "not an IRIS/GSA requirement",
+      "decision": "DO_NOT_BRING"
+    },
+    {
+      "reference_function": "CharacterGen 2D Stage pose canonicalization",
+      "reference_path": "2D_Stage",
+      "reference_behavior": "single arbitrary image to canonical multi-view A-pose images",
+      "realsas_current": "shipping contract already supplies ordered canonical/neutral eight-view turnaround",
+      "gap": "none for the current product contract",
+      "decision": "DO_NOT_BRING"
+    }
+  ],
+  "cleanroom_v1_minimum": {
+    "input": "8 RGB observations + exact ordered orthographic cameras",
+    "reuse_without_modification": [
+      "existing frozen foundation feature extraction",
+      "existing native RGB feature path where memory permits",
+      "ObservationContractV2 exact camera authority",
+      "RiggingSurfaceIR downstream schema"
+    ],
+    "new_experimental_blocks": [
+      "ExactCameraTokenEmbeddingV1",
+      "CameraAwareViewTokenBankV1",
+      "SharedTriplaneSceneFusionV1",
+      "ContinuousSurfaceFieldV1"
+    ],
+    "field_output": [
+      "unsigned_surface_distance",
+      "log_uncertainty"
+    ],
+    "explicitly_absent": [
+      "learned visibility authority",
+      "categorical view ID",
+      "RGB/material head",
+      "UV/texture head",
+      "DMTet or marching-cubes product dependency",
+      "teacher skeleton/weights as learner inputs"
+    ]
+  },
+  "hypothesis": "The missing capability in the incumbent IRIS is not XYZ prediction or mesh extraction; it is a globally queryable, camera-aware multi-view scene field that lets non-overlapping views contribute to one shared 3D representation before surface extraction."
+}

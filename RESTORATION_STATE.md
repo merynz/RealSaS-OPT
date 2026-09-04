@@ -1,7 +1,7 @@
 # RealSaS-OPT — Restoration State
 
 **Date:** 2026-09-04  
-**Branch:** `restoration/compiler-runtime-promotion-v1-20260903`  
+**Source branch:** `restoration/compiler-runtime-promotion-v1-20260903`  
 **Verified behavioral base:** `2b5d467186839401ab30f9566015d9e9d49a2a06`  
 **Global architecture refreeze:** `NOT PERFORMED`  
 **Formal Family-1 selection:** `BLOCKED`  
@@ -42,8 +42,8 @@ Promote still-valuable historical Compiler/runtime production knowledge **behind
 | Historical CDT / BBW-KKT / ARAP / XPBD/contact source diff | **DONE / NO CURRENT PROMOTION REQUIRED** | `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json` |
 | Canonical-main-before-fit gate | **SEALED / MANDATORY** | `canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json` |
 | Full behavioral + complete-E2E restoration closure | **DONE / PASS** | closed source `7324e6a63df54d999103a59835212cb2d1dc46ee`; run `33827594057`; verdict `canonical/RESTORATION_CLOSURE_VERDICT_V1_20260904.json` |
-| Canonical `main` promotion | **AUTHORIZED / NEXT** | restoration closure is complete; promotion not yet performed |
-| Post-merge `main` integrity check | **PENDING AFTER MAIN PROMOTION** | required before first-fit-base freeze |
+| Canonical `main` promotion | **REQUIRED REF EQUALITY BEFORE FREEZE** | the closure-qualified tree must be the canonical `main` ref before post-merge integrity can qualify a first-fit base |
+| Post-merge `main` integrity check | **MANDATORY ON EXACT CANONICAL MAIN** | the exact `main` SHA must pass repository integrity before first-fit-base freeze |
 
 P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.  
 Historical numerics disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`.  
@@ -88,7 +88,7 @@ Post-export native authority is a separate interlock:
 
 `PASS proof -> exact proof-owned bakes -> current V4/native-v2 projection -> .rss/.rsr -> sealed runtime/realsas_cpp open -> exact source/proof hash check -> 8-view sample -> software render`.
 
-That post-export interlock is now **executed and PASS** on closed source commit `7324e6a63df54d999103a59835212cb2d1dc46ee` in self-hosted Actions run `33827594057`. The emitted package bound `SOURCE_BINDING_SHA256=6ab523629162c12dd3f34fed826af68c04a1ec9e5bb66ddf406b04223d8cc12e` and `PROOF_BUNDLE_SHA256=7500b2bb96fef7d79ad33dc8e9cdacce945de25d6a872f92a11c5b628ea5166e`; the external sealed C++ probe returned `PASS_CURRENT_V4_NATIVE_PACKAGE_OPEN_RENDER`.
+That post-export interlock is **executed and PASS** on closed source commit `7324e6a63df54d999103a59835212cb2d1dc46ee` in self-hosted Actions run `33827594057`. The emitted package bound `SOURCE_BINDING_SHA256=6ab523629162c12dd3f34fed826af68c04a1ec9e5bb66ddf406b04223d8cc12e` and `PROOF_BUNDLE_SHA256=7500b2bb96fef7d79ad33dc8e9cdacce945de25d6a872f92a11c5b628ea5166e`; the external sealed C++ probe returned `PASS_CURRENT_V4_NATIVE_PACKAGE_OPEN_RENDER`.
 
 ## Historical numerical backends
 
@@ -123,12 +123,12 @@ Required order:
 
 1. close restoration source/behavioral/native gates — **DONE**;
 2. record an explicit restoration verdict — **DONE**;
-3. promote the closed restoration tree to canonical GitHub `main` — **NEXT**;
-4. run a post-merge repository-integrity check on `main`;
-5. freeze that exact passing `main` commit as the first-fit base;
-6. only then authorize Family-1/FIT work.
+3. make the closure-qualified tree the canonical GitHub `main` ref;
+4. run repository-integrity checks on that exact `main` SHA;
+5. freeze that exact passing `main` SHA as the first-fit base;
+6. only then may a later workflow authorize Family-1/FIT work.
 
-The first fit must record the exact canonical `main` commit it descends from.
+The first fit must record the exact canonical `main` commit it descends from. This document intentionally records the invariant sequence rather than a time-sensitive branch-ref status, so the same qualified tree remains truthful across the fast-forward transition.
 
 ## Non-negotiable firewalls
 
@@ -148,10 +148,10 @@ The first fit must record the exact canonical `main` commit it descends from.
 - no family-specific constants during restoration;
 - no FIT8 / Family-1 execution until canonical `main` promotion and post-merge integrity explicitly re-authorize it.
 
-## Next execution order
+## Promotion / freeze protocol
 
 1. explicit restoration verdict — **DONE**;
-2. promote the closure-qualified restoration tree to canonical `main`;
-3. run post-merge `main` repository integrity on the exact promoted tree;
-4. freeze that exact passing `main` commit as the first-fit base;
+2. canonical `main` ref must equal the closure-qualified tree;
+3. that exact `main` SHA must pass post-merge repository integrity;
+4. that exact passing `main` SHA must be frozen under a dedicated first-fit-base ref;
 5. stop before any Family-1/FIT execution.

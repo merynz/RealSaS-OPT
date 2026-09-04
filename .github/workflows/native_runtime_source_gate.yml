@@ -22,11 +22,12 @@ jobs:
         run: |
           cmake --version
           c++ --version
+          python3 --version
           dpkg -s libarchive-dev libpng-dev zlib1g-dev >/dev/null
 
       - name: Verify sealed source bytes
         run: |
-          python - <<'PY'
+          python3 - <<'PY'
           import hashlib
           import json
           from pathlib import Path

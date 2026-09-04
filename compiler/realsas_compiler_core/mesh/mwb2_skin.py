@@ -8,9 +8,17 @@ from .types import QualifiedMeshSkinIR, QualifiedMeshSkinRow, QualificationError
 _MESH_SKIN_TRANSFER_REPAIR_L1 = 1e-9
 
 
-def bind_mwb2_mesh_skin(surface, skeleton, skin, mesh, *, max_transfer_repair_l1: float = _MESH_SKIN_TRANSFER_REPAIR_L1) -> QualifiedMeshSkinIR:
-    if max_transfer_repair_l1 < 0.0:
-        raise ValueError("mesh-skin transfer repair budget must be nonnegative")
+def bind_mwb2_mesh_skin(
+    surface,
+    skeleton,
+    skin,
+    mesh,
+    *,
+    max_transfer_repair_l1: float = _MESH_SKIN_TRANSFER_REPAIR_L1,
+    max_total_transfer_correction_l1: float = _MESH_SKIN_TRANSFER_REPAIR_L1,
+) -> QualifiedMeshSkinIR:
+    if max_transfer_repair_l1 < 0.0 or max_total_transfer_correction_l1 < 0.0:
+        raise ValueError("mesh-skin transfer repair budgets must be nonnegative")
     validate_qualified_mesh(mesh, surface)
     if skin.surface_binding_hash != surface.geometry_lineage_hash: raise QualificationError("MESH_WEIGHT_SKIN_LINEAGE_MISMATCH: surface")
     if skin.skeleton_binding_hash != skeleton.skeleton_lineage_hash: raise QualificationError("MESH_WEIGHT_SKIN_LINEAGE_MISMATCH: skeleton")
@@ -31,7 +39,10 @@ def bind_mwb2_mesh_skin(surface, skeleton, skin, mesh, *, max_transfer_repair_l1
         correction=sum(abs(final.get(jid,0.0)-accum.get(jid,0.0)) for jid in set(accum)|set(final))
         if correction>max_transfer_repair_l1+1e-15:
             raise QualificationError(f"MESH_WEIGHT_TRANSFER_CORRECTION_BUDGET_EXCEEDED:{correction}")
-        total_correction+=correction; max_residual=max(max_residual,residual)
+        total_correction+=correction
+        if total_correction>max_total_transfer_correction_l1+1e-15:
+            raise QualificationError(f"MESH_WEIGHT_TOTAL_TRANSFER_CORRECTION_BUDGET_EXCEEDED:{total_correction}")
+        max_residual=max(max_residual,residual)
         rows.append(QualifiedMeshSkinRow(vertex.canonical_mesh_vertex_id,normalized,tuple(provenance),residual,correction))
     report={
         "status":"PASS_MWB2_CONVEX_SKIN_TRANSFER",
@@ -41,6 +52,7 @@ def bind_mwb2_mesh_skin(surface, skeleton, skin, mesh, *, max_transfer_repair_l1
         "max_simplex_residual_before":max_residual,
         "total_correction_l1":total_correction,
         "bounded_transfer_repair_l1_per_row":max_transfer_repair_l1,
+        "bounded_transfer_correction_l1_total":max_total_transfer_correction_l1,
         "silent_normalization_forbidden":True,
     }
     value=QualifiedMeshSkinIR(tuple(rows),surface.geometry_lineage_hash,skeleton.skeleton_lineage_hash,skin.skin_lineage_hash,mesh.mesh_lineage_hash,"SURFACE_SUPPORT_CONVEX_TRANSFER_V1",report,"",metadata={"source_mesh_used":False})

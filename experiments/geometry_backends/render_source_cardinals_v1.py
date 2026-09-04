@@ -8,7 +8,6 @@ armatures are put in REST position, the imported geometry is left unchanged, and
 four orthographic RGB views are rendered around the source's own world-space bbox.
 """
 
-import math
 from pathlib import Path
 import sys
 
@@ -65,7 +64,8 @@ radius = span * 3.0
 ortho_scale = span * 1.22
 
 scene = bpy.context.scene
-scene.render.engine = "BLENDER_EEVEE_NEXT"
+# Blender 5.2.0 LTS exposes the Eevee engine as BLENDER_EEVEE.
+scene.render.engine = "BLENDER_EEVEE"
 scene.render.resolution_x = resolution
 scene.render.resolution_y = resolution
 scene.render.resolution_percentage = 100
@@ -112,8 +112,7 @@ cam = bpy.data.objects.new("CanonicalCardinalCamera", cam_data)
 scene.collection.objects.link(cam)
 scene.camera = cam
 
-# RealSaS naming: S=front, N=back, E=right, W=left. The camera points toward
-# the bbox center and uses +Z as image up after Blender's glTF Y-up conversion.
+# RealSaS naming: S=front, N=back, E=right, W=left.
 views = {
     "S": Vector((0.0, -1.0, 0.0)),
     "N": Vector((0.0, 1.0, 0.0)),

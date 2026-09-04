@@ -57,7 +57,8 @@ def test_historical_motion_family_is_rebound_without_old_contract_stack():
 
 def test_current_proof_engine_cannot_infer_owner_from_failed_domain_source():
     source = Path("compiler/realsas_compiler_core/proof_engine.py").read_text(encoding="utf-8")
-    assert 'owners=() if status=="PASS" else ({"owner_domain":domain},)' not in source
-    assert '"owner_domain": domain' not in source
-    assert "owners = no_owner_attribution()" in source
+    normalized_source = "".join(source.split())
+    assert 'owners=()ifstatus=="PASS"else({"owner_domain":domain},)' not in normalized_source
+    assert '"owner_domain":domain' not in normalized_source
+    assert "owner_attribution=no_owner_attribution()" in normalized_source
     assert "owner_attribution_requires_controlled_fault_experiment" in source

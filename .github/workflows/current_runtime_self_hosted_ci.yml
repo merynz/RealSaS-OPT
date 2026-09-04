@@ -39,7 +39,8 @@ jobs:
         env:
           PIP_DISABLE_PIP_VERSION_CHECK: '1'
           PIP_DEFAULT_TIMEOUT: '60'
-        run: python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pytest
+        run: |
+          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pytest
       - name: Directional binding / bake / projection regressions
         run: |
           PYTHONPATH=. python -m pytest -q \

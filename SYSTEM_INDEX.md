@@ -24,24 +24,24 @@ No fifth learned subsystem is currently authorized by V4 architecture/current so
 | MWB2 mesh + skin binding | `compiler/realsas_compiler_core/mesh/{mwb2.py,mwb2_skin.py,mesh_binding.py}` | **CURRENT / PHYSICALLY NORMALIZED / BEHAVIORALLY HARDENED** |
 | Appearance | `compiler/realsas_compiler_core/appearance.py` | CURRENT / BEHAVIORALLY HARDENED |
 | Motion construction | `compiler/realsas_compiler_core/motion.py` | CURRENT / BEHAVIORALLY HARDENED |
-| Compiler-owned directional joint/view binding | `compiler/realsas_compiler_core/directional_binding.py` | **CURRENT CANDIDATE / SOURCE+MATH CLOSURE READY** |
+| Compiler-owned directional joint/view binding | `compiler/realsas_compiler_core/directional_binding.py` | **CURRENT / RESTORATION CLOSURE PASS** |
 | Deformation measurement | `compiler/realsas_compiler_core/deformation.py` + services numerics | CURRENT |
 | Product composition | `compiler/realsas_compiler_core/{api.py,product.py,bundle_routes.py}` | CURRENT |
-| Proof binding | `compiler/realsas_compiler_core/proof_engine.py` | **CURRENT / TYPED FAIL-CLOSED DIRECTIONAL PROVIDER** |
+| Proof binding | `compiler/realsas_compiler_core/proof_engine.py` | **CURRENT / TYPED FAIL-CLOSED DIRECTIONAL PROVIDER / CLOSURE PASS** |
 | Qualification-owned motion-frame binding | `compiler/realsas_compiler_services/proof/motion_bake.py` | **CURRENT — BINDS FRAMES; DOES NOT INVENT AUTHORITY** |
-| Qualified directional motion evaluator | `compiler/realsas_compiler_services/proof/directional_motion_evaluator.py` | **CURRENT CANDIDATE — ROTATION-ONLY PRESET; OTHER SEMANTICS FAIL CLOSED** |
-| Typed directional motion provider | `compiler/realsas_compiler_services/proof/directional_motion_provider.py` | **CURRENT CANDIDATE — HASH-BOUND PRODUCT/BINDING/POLICY/EVALUATOR AUTHORITY** |
+| Qualified directional motion evaluator | `compiler/realsas_compiler_services/proof/directional_motion_evaluator.py` | **CURRENT — ROTATION-ONLY PRESET; OTHER SEMANTICS FAIL CLOSED** |
+| Typed directional motion provider | `compiler/realsas_compiler_services/proof/directional_motion_provider.py` | **CURRENT — HASH-BOUND PRODUCT/BINDING/POLICY/EVALUATOR AUTHORITY** |
 | Dynamic motion consequence metrics | `compiler/realsas_compiler_services/proof/motion_frame_metrics.py` | **CURRENT / EVALUATOR-INDEPENDENT** |
 | Direct mechanical-joint -> directional `P.xy` probe | retracted historical restoration attempt | **RETRACTED / NOT CURRENT** |
 | Failure signatures | `compiler/realsas_compiler_services/proof/failure_signatures.py` | PROMOTED; DIAGNOSTIC ONLY |
-| Controlled causal owner attribution | `compiler/realsas_compiler_services/proof/causal_attribution.py` | **PROMOTED / CONTROLLED-INTERVENTION ONLY** |
-| Bounded repair directive + re-proof contract | `compiler/realsas_compiler_services/proof/repair_loop.py` | **PROMOTED / NO IN-PLACE MUTATION** |
+| Controlled causal owner attribution | `compiler/realsas_compiler_services/proof/causal_attribution.py` | **PROMOTED / CONTROLLED-INTERVENTION ONLY / REGRESSION PASS** |
+| Bounded repair directive + re-proof contract | `compiler/realsas_compiler_services/proof/repair_loop.py` | **PROMOTED / NO IN-PLACE MUTATION / REGRESSION PASS** |
 | Repair operation authority registry | `compiler/realsas_compiler_core/repair_registry.py` | **CURRENT / FAIL-CLOSED / 0 EXECUTORS / FIRST-FIT ACCEPTABLE** |
 | Real child-product semantic audit | `compiler/realsas_compiler_core/repair_attempt.py` | **CURRENT / PARENT-LINEAGE + ACTUAL-DELTA GATE** |
 | Proof-to-deploy bake handoff | `compiler/realsas_compiler_services/export/qualification_bake.py` | **CURRENT / SAME-BAKE / NO REPLAY** |
 | Runtime deploy bake codec | `compiler/realsas_compiler_services/export/runtime_deploy_bake.py` | PROMOTED |
 | Pure native runtime-v2 writer | `compiler/realsas_compiler_services/export/runtime_v2.py` | **VALID PURE WRITER** |
-| Current V4 proof/bake -> native-v2 projection | `compiler/realsas_compiler_services/export/current_v4_runtime_v2.py` | **SOURCE CLOSURE READY / PROOF-OWNED XY / EXACT LOCAL-RASTER UV / NO REPLAY** |
+| Current V4 proof/bake -> native-v2 projection | `compiler/realsas_compiler_services/export/current_v4_runtime_v2.py` | **CURRENT / CLOSURE PASS / PROOF-OWNED XY / EXACT LOCAL-RASTER UV / NO REPLAY** |
 | Numerical LBS probe | `compiler/realsas_compiler_services/numerics/lbs.py` | **PROMOTED / CURRENT NUMERICAL DEPENDENCY** |
 | Historical CDT | v0.5 source-diff reserve | **NOT CURRENT — future typed mesh-candidate producer only** |
 | Historical BBW/KKT | v0.5 source-diff reserve | **NOT CURRENT — future SkinProposal/fallback candidate only** |
@@ -54,18 +54,19 @@ Retraction evidence: `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.jso
 P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.  
 Historical numerical disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`.  
 Repair execution disposition: `canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json`.  
-Canonical-main-before-fit gate: `canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json`.
+Canonical-main-before-fit gate: `canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json`.  
+Restoration-wide closure verdict: `canonical/RESTORATION_CLOSURE_VERDICT_V1_20260904.json`.
 
 ## Runtime
 
 | Runtime | Current home | State |
 |---|---|---|
-| Native C++17 runtime | `runtime/realsas_cpp/` | **RESTORED EXACT CONSUMER; SEALED SUBTREE UNCHANGED** |
+| Native C++17 runtime | `runtime/realsas_cpp/` | **RESTORED EXACT CONSUMER; SEALED SUBTREE; CLOSURE PASS** |
 | Python V4 reference consumer | `runtime/reference_v4/` | CURRENT CONFORMANCE REFERENCE |
-| Current V4 `.rss/.rsr` projection/materialization | Compiler export services | **SOURCE CLOSURE READY** |
-| Exact `.rss/.rsr` -> sealed C++ open/sample/render probe | `tests/runtime/current_v4_native_package_probe.cpp` | **HARNESS READY; CURRENT-SOURCE EXECUTION PENDING RUNNER** |
+| Current V4 `.rss/.rsr` projection/materialization | Compiler export services | **CURRENT / CLOSURE PASS** |
+| Exact `.rss/.rsr` -> sealed C++ open/sample/render probe | `tests/runtime/current_v4_native_package_probe.cpp` | **CI PASS — EXACT CURRENT-V4 PACKAGE OPEN/SAMPLE/RENDER VERIFIED** |
 
-`RUNTIME_CONSUMPTION` inside the product proof is a **pre-export compatibility** proof domain, not evidence that the C++ package was executed. Post-export native execution is a separate required interlock.
+`RUNTIME_CONSUMPTION` inside the product proof is a **pre-export compatibility** proof domain, not evidence that the C++ package was executed. Post-export native execution is a separate interlock, and that interlock passed on closed source commit `7324e6a63df54d999103a59835212cb2d1dc46ee` in Actions run `33827594057`.
 
 ## Repair behavior
 
@@ -78,11 +79,11 @@ Automatic repair is **not** a required current product capability or proof domai
 
 ## Canonical main promotion gate
 
-Real-family fit work is forbidden until the closed restoration tree becomes canonical GitHub `main` and that exact `main` passes a post-merge repository-integrity check.
+Real-family fit work is forbidden until the closure-qualified restoration tree becomes canonical GitHub `main` and that exact `main` passes a post-merge repository-integrity check.
 
 Required sequence:
 
-`restoration closure -> explicit verdict -> promote to main -> post-merge main integrity -> freeze exact main commit -> authorize fit`
+`restoration closure PASS -> explicit verdict PASS -> promote to main -> post-merge main integrity -> freeze exact main commit -> only then authorize fit`
 
 The first fit must record the exact canonical `main` commit it descends from.
 
@@ -99,12 +100,14 @@ The first fit must record the exact canonical `main` commit it descends from.
 - Global architecture refreeze: **NOT PERFORMED**
 - Formal Family-1 selection: **BLOCKED**
 - Real-family FIT: **NOT AUTHORIZED**
-- Directional P0 source/math closure: **READY**
+- Directional P0 source/math closure: **PASS**
 - Historical numerical source-diff: **DONE / NO ADDITIONAL CURRENT BACKEND PROMOTION**
 - Repair-executor seam decision: **DONE / 0 EXECUTORS ACCEPTABLE FAIL-CLOSED**
-- Native current-source interlock: **PENDING RUNNER EXECUTION**
-- Canonical `main` promotion: **MANDATORY BEFORE FIT / NOT YET PERFORMED**
-- Current work: **restoration closure -> canonical main promotion -> post-merge integrity -> first-fit authorization decision**
+- Native current-source interlock: **PASS — run 33827594057**
+- Restoration-wide source/regression/E2E/native closure: **PASS — verdict recorded**
+- Canonical `main` promotion: **AUTHORIZED / NEXT / NOT YET PERFORMED**
+- Post-merge `main` integrity: **PENDING**
+- Current work: **canonical main promotion -> post-merge integrity -> freeze exact first-fit base**
 
 ## Promotion rule
 

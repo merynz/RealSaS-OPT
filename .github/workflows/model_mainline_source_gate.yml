@@ -9,6 +9,8 @@ on:
       - 'runtime/reference_v4/**'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'experiments/family_selection_v1/**'
+      - 'experiments/single_family_e2e_v1/data_manifest_v1.py'
       - 'tests/compiler/**'
       - 'tests/iris/**'
       - 'tests/models/**'
@@ -24,6 +26,8 @@ on:
       - 'runtime/reference_v4/**'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'experiments/family_selection_v1/**'
+      - 'experiments/single_family_e2e_v1/data_manifest_v1.py'
       - 'tests/compiler/**'
       - 'tests/iris/**'
       - 'tests/models/**'
@@ -51,7 +55,7 @@ jobs:
           PIP_DISABLE_PIP_VERSION_CHECK: '1'
           PIP_DEFAULT_TIMEOUT: '60'
         run: |
-          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pytest
+          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pytest pillow
           python -m pip install --no-input --progress-bar off torch --index-url https://download.pytorch.org/whl/cpu
       - name: IRIS byte-equivalence and mainline import firewall
         run: python tests/iris/test_iris_mainline_source_v1.py
@@ -75,7 +79,9 @@ jobs:
             tests/models/test_geppetto_matching_hardening_v1.py \
             tests/models/test_arachne_checkpoint_v2.py \
             tests/models/test_learned_artifact_registry_authorization_v1.py \
-            tests/repository/test_learned_artifact_registry_v1.py
+            tests/repository/test_learned_artifact_registry_v1.py \
+            experiments/family_selection_v1/test_prefit_family_truth_eligibility_v1.py \
+            experiments/family_selection_v1/test_post_freeze_family_selector_v1.py
       - name: Syntax-compile promoted model packages
         run: |
           python - <<'PY'
@@ -86,6 +92,7 @@ jobs:
               Path('models/geppetto/v2'),
               Path('models/skin_field_codec/v1'),
               Path('models/arachne/v2'),
+              Path('experiments/family_selection_v1'),
           ):
               for path in sorted(root.glob('*.py')):
                   py_compile.compile(str(path), doraise=True)

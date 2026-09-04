@@ -7,6 +7,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "canonical" / "LEARNED_ARTIFACT_REGISTRY_V1_20260904.json"
+GIT_SHA1 = re.compile(r"^[0-9a-f]{40}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 CURRENT_STAGES = (
     "IRIS_V2",
@@ -19,7 +20,8 @@ CURRENT_STAGES = (
 def _load() -> dict:
     payload = json.loads(REGISTRY.read_text(encoding="utf-8"))
     assert payload["schema"] == "RealSaS.LearnedArtifactRegistry.v1"
-    assert SHA256.fullmatch(payload["architecture_base_commit"])
+    assert payload["architecture_base_commit_hash_kind"] == "GIT_SHA1_40"
+    assert GIT_SHA1.fullmatch(payload["architecture_base_commit"])
     assert payload["architecture_base_ref"] == "first-fit-base/main-20260904"
     assert payload["binary_storage_policy"] == "EXTERNAL_BINARY__REPOSITORY_HASH_AND_LINEAGE_MANIFEST_REQUIRED"
     return payload

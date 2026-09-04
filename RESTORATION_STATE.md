@@ -27,28 +27,29 @@ Promote still-valuable historical Compiler/runtime production knowledge **behind
 | Compiler substrate physical normalization | **DONE** | `bc443d063d4d8f0bd52981ec2db5b99a795985e1` |
 | Compiler mesh physical normalization | **DONE** | `295b798b1fb40ccb1752afe9da9378dfe8734262` |
 | Direct authored-motion evaluator promotion | **RETRACTED** | `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json` |
-| Qualification-owned motion bake + fail-closed proof seam | **DONE** | `proof/motion_bake.py`, `proof/motion_frame_metrics.py`, current `proof_engine.py` |
-| Compiler-owned directional joint/view binding | **SOURCE + MATHEMATICAL CLOSURE READY** | `compiler/realsas_compiler_core/directional_binding.py` + P0 closure seal |
-| Qualified directional motion evaluator | **SOURCE + MATHEMATICAL CLOSURE READY / ROTATION-ONLY CURRENT PRESET** | typed binding + typed provider; unsupported semantics fail closed |
-| Typed motion-provider authority | **DONE / FAIL-CLOSED** | arbitrary callbacks rejected; exact product/binding/policy/evaluator identity required |
-| Controlled causal owner attribution | **DONE / LOCAL REGRESSION 4/4 PASS** | `1dd9a52dda4904c4910f47e66559974b0dc4ad72` |
-| Bounded repair directive + mandatory same-probe re-proof contract | **DONE / LOCAL REGRESSION 5/5 PASS** | `9a60fa341055713c9df8b5d698c58c19a4098025` |
+| Qualification-owned motion bake + fail-closed proof seam | **DONE / CLOSURE PASS** | `proof/motion_bake.py`, `proof/motion_frame_metrics.py`, current `proof_engine.py` |
+| Compiler-owned directional joint/view binding | **DONE / CLOSURE PASS** | `compiler/realsas_compiler_core/directional_binding.py` + restoration closure verdict |
+| Qualified directional motion evaluator | **DONE / ROTATION-ONLY CURRENT PRESET / CLOSURE PASS** | typed binding + typed provider; unsupported semantics fail closed |
+| Typed motion-provider authority | **DONE / FAIL-CLOSED / CLOSURE PASS** | arbitrary callbacks rejected; exact product/binding/policy/evaluator identity required |
+| Controlled causal owner attribution | **DONE / REGRESSION PASS** | `compiler/realsas_compiler_services/proof/causal_attribution.py` |
+| Bounded repair directive + mandatory same-probe re-proof contract | **DONE / REGRESSION PASS** | `compiler/realsas_compiler_services/proof/repair_loop.py` |
 | Core repair operation registry + real child-state delta audit | **DONE / FAIL-CLOSED** | `12eef470348a4e9822dd927e2ac950e3fcd9dfb7` |
 | Repair execution authority for first-fit | **DONE / 0 EXECUTORS ACCEPTED FAIL-CLOSED** | `canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json` |
 | Historical rig/weight repair executors | **NOT PROMOTED** | future typed requalification seams required |
 | Pure native runtime-v2 package writer | **VALID / KEEP** | `compiler/realsas_compiler_services/export/runtime_v2.py` |
-| Current V4 proof/bake -> native-v2 projection | **SOURCE CLOSURE READY** | proof-owned rest/frame XY, exact local raster UV, no solver replay |
-| Current V4 `.rss/.rsr` -> sealed C++ runtime interlock | **HARNESS READY / EXECUTION PENDING RUNNER** | `tests/runtime/current_v4_native_package_probe.cpp`; Actions job never started (`runner_id=0`) |
+| Current V4 proof/bake -> native-v2 projection | **DONE / CLOSURE PASS** | proof-owned rest/frame XY, exact local raster UV, no solver replay |
+| Current V4 `.rss/.rsr` -> sealed C++ runtime interlock | **DONE / CI PASS** | run `33827594057`; `PASS_CURRENT_V4_NATIVE_PACKAGE_OPEN_RENDER` |
 | Historical CDT / BBW-KKT / ARAP / XPBD/contact source diff | **DONE / NO CURRENT PROMOTION REQUIRED** | `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json` |
 | Canonical-main-before-fit gate | **SEALED / MANDATORY** | `canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json` |
-| Full behavioral + complete-E2E restoration closure | **PENDING** | required before main promotion |
-| Canonical `main` promotion | **BLOCKED UNTIL RESTORATION CLOSURE** | restoration tree must be promoted before any fit work |
-| Post-merge `main` integrity check | **PENDING AFTER MAIN PROMOTION** | required before fit authorization |
+| Full behavioral + complete-E2E restoration closure | **DONE / PASS** | closed source `7324e6a63df54d999103a59835212cb2d1dc46ee`; run `33827594057`; verdict `canonical/RESTORATION_CLOSURE_VERDICT_V1_20260904.json` |
+| Canonical `main` promotion | **AUTHORIZED / NEXT** | restoration closure is complete; promotion not yet performed |
+| Post-merge `main` integrity check | **PENDING AFTER MAIN PROMOTION** | required before first-fit-base freeze |
 
 P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.  
 Historical numerics disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`.  
 Repair execution disposition: `canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json`.  
-Canonical-main-before-fit gate: `canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json`.
+Canonical-main-before-fit gate: `canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json`.  
+Restoration-wide closure verdict: `canonical/RESTORATION_CLOSURE_VERDICT_V1_20260904.json`.
 
 ## Repository organization contract
 
@@ -87,7 +88,7 @@ Post-export native authority is a separate interlock:
 
 `PASS proof -> exact proof-owned bakes -> current V4/native-v2 projection -> .rss/.rsr -> sealed runtime/realsas_cpp open -> exact source/proof hash check -> 8-view sample -> software render`.
 
-The source, projection, archive writer and external C++ probe exist. The current GitHub Actions attempt (`33817253942`) received no runner (`runner_id=0`, `steps=[]`), so native execution on this source head is **not yet claimed PASS**.
+That post-export interlock is now **executed and PASS** on closed source commit `7324e6a63df54d999103a59835212cb2d1dc46ee` in self-hosted Actions run `33827594057`. The emitted package bound `SOURCE_BINDING_SHA256=6ab523629162c12dd3f34fed826af68c04a1ec9e5bb66ddf406b04223d8cc12e` and `PROOF_BUNDLE_SHA256=7500b2bb96fef7d79ad33dc8e9cdacce945de25d6a872f92a11c5b628ea5166e`; the external sealed C++ probe returned `PASS_CURRENT_V4_NATIVE_PACKAGE_OPEN_RENDER`.
 
 ## Historical numerical backends
 
@@ -106,7 +107,7 @@ Therefore **no numerical bulk restore is authorized**. Current LBS remains the o
 
 The current proof/repair architecture is complete as a fail-closed recovery contract, but has **0 executable repair operations**.
 
-This does **not** block first-fit authorization because automatic repair is neither a required product capability nor a required proof domain. The operational rule is:
+This does **not** block first-fit-base freezing because automatic repair is neither a required product capability nor a required proof domain. The operational rule is:
 
 - PASS product proof -> may proceed to proof-gated runtime export;
 - FAIL/ABSTAIN -> stop; no automatic repair credit and no current runtime export;
@@ -120,11 +121,11 @@ Real-family fit work may not begin directly from the restoration branch, a safet
 
 Required order:
 
-1. close restoration source/behavioral/native gates;
-2. record an explicit restoration verdict;
-3. promote the closed restoration tree to canonical GitHub `main`;
+1. close restoration source/behavioral/native gates — **DONE**;
+2. record an explicit restoration verdict — **DONE**;
+3. promote the closed restoration tree to canonical GitHub `main` — **NEXT**;
 4. run a post-merge repository-integrity check on `main`;
-5. freeze that exact `main` commit as the first-fit base;
+5. freeze that exact passing `main` commit as the first-fit base;
 6. only then authorize Family-1/FIT work.
 
 The first fit must record the exact canonical `main` commit it descends from.
@@ -149,9 +150,8 @@ The first fit must record the exact canonical `main` commit it descends from.
 
 ## Next execution order
 
-1. execute the single milestone P0/native interlock gate when GitHub provides a runner; do not spam reruns;
-2. run restoration-wide source/regression/E2E/native closure gates;
-3. close repository-integrity audit and explicit restoration verdict;
-4. promote the closed tree to canonical `main`;
-5. run post-merge `main` integrity and freeze the first-fit base commit;
-6. only then authorize real-family fit work.
+1. explicit restoration verdict — **DONE**;
+2. promote the closure-qualified restoration tree to canonical `main`;
+3. run post-merge `main` repository integrity on the exact promoted tree;
+4. freeze that exact passing `main` commit as the first-fit base;
+5. stop before any Family-1/FIT execution.

@@ -1,0 +1,12 @@
+{
+  "schema": "RealSaS.RestorationClosureTriggerOnce.v4",
+  "date": "2026-09-04",
+  "branch": "restoration/compiler-runtime-promotion-v1-20260903",
+  "runner": "self-hosted/linux/x64/realsas",
+  "attempt": 4,
+  "purpose": "Run restoration-wide closure after current-mainline and current-runtime self-hosted gates passed on the repaired restoration source tree.",
+  "preclosure_fast_gate_commit": "d95af98f32dfeaa4e2f2697f5b704b0691507c58",
+  "preclosure_fast_gate_run_id": 33827504838,
+  "preclosure_runtime_gate_run_id": 33827504909,
+  "fit_authorization": false
+}

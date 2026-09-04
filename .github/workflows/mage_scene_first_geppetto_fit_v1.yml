@@ -1,0 +1,59 @@
+name: mage-scene-first-geppetto-fit-v1
+
+on:
+  push:
+    branches:
+      - e2e/mage-scene-first-v1-20260905
+    paths:
+      - 'experiments/mage_scene_first_e2e_v1/**'
+      - '.github/workflows/mage_scene_first_geppetto_fit_v1.yml'
+  workflow_dispatch:
+
+jobs:
+  mage-geppetto-fit:
+    runs-on: [self-hosted, realsas, gpu]
+    timeout-minutes: 60
+    env:
+      PY: /home/monster/realsas-ml312/bin/python
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bind Linux Python 3.12 runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify runtime and GPU
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          "$PY" - <<'PY'
+          import torch, numpy, scipy
+          print('torch', torch.__version__)
+          print('cuda', torch.cuda.is_available())
+          if not torch.cuda.is_available(): raise SystemExit('CUDA_REQUIRED')
+          print('gpu', torch.cuda.get_device_name(0))
+          print('vram_gib', torch.cuda.get_device_properties(0).total_memory/2**30)
+          PY
+
+      - name: Run real Mage Geppetto FIT
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/realsas-mage-geppetto
+          PYTHONPATH="$GITHUB_WORKSPACE" "$PY" \
+            experiments/mage_scene_first_e2e_v1/run_mage_geppetto_fit_v1.py \
+            /tmp/realsas-mage-geppetto/MAGE_GEPPETTO_FIT_RESULT_V1.json
+
+      - name: Upload FIT witness
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mage-scene-first-geppetto-fit-v1
+          path: |
+            /tmp/realsas-mage-geppetto/MAGE_GEPPETTO_FIT_RESULT_V1.json
+            /tmp/realsas-mage-geppetto/MAGE_GEPPETTO_FIT_RESULT_V1.pt
+          if-no-files-found: warn

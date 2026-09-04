@@ -20,15 +20,15 @@
     "full_hidden_truth_to_pred_p95_norm_diagnostic_only": 0.0873807205213689
   },
   "normal_authority": {
-    "selected": "ROBUST_LOCAL_PCA_K64_ON_ZERO_SURFACE",
-    "orientation_hint": "MARCHING_CUBES_IMPLICIT_NORMAL_ONLY",
+    "selected": "RealSaS.GSA.ZeroSurfaceRobustLocalPCA.v1",
+    "orientation_hint": "MARCHING_CUBES_IMPLICIT_NORMAL_SIGN_ONLY",
     "benchmark_schema": "RealSaS.MageNormalAuthorityBenchmark.v1",
     "seed": 123,
     "truth_surface_samples": 500000,
     "predicted_vertex_eval_samples": 30000,
     "angle_is_orientation_agnostic": true,
     "mc_implicit_normal_deg": {"median": 18.40784000562587, "p95": 65.51900363469129, "mean": 23.528347053688726},
-    "robust_local_pca_k64_deg": {"median": 15.293376278456606, "p95": 63.39151875108071, "mean": 20.969709818321792}
+    "robust_local_pca_k64_deg": {"median": 15.242057190007564, "p95": 64.01449728654123, "mean": 21.010329395171983}
   },
   "promotion_policy": {
     "hard_gate_predicted_to_truth_precision": true,

@@ -12,13 +12,40 @@ jobs:
       - name: Checkout exact requested ref
         uses: actions/checkout@v4
 
+      - name: Runner diagnostics
+        run: |
+          set -euxo pipefail
+          date -Is
+          uname -a
+          id
+          uptime
+          free -h
+          df -h /
+          echo "RUNNER_NAME=${RUNNER_NAME:-unknown}"
+          echo "RUNNER_OS=${RUNNER_OS:-unknown}"
+          echo "RUNNER_ARCH=${RUNNER_ARCH:-unknown}"
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install Python gate dependencies
-        run: python -m pip install --upgrade pip numpy scipy pytest
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+          PIP_RETRIES: '2'
+        run: |
+          set -euxo pipefail
+          python --version
+          python -m pip --version
+          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pytest
+          python - <<'PY'
+          import numpy, scipy, pytest
+          print('numpy', numpy.__version__)
+          print('scipy', scipy.__version__)
+          print('pytest', pytest.__version__)
+          PY
 
       - name: Compile current Python mainline
         run: |
@@ -41,6 +68,7 @@ jobs:
 
       - name: Emit exact current V4 native package fixture
         run: |
+          rm -rf .closure
           mkdir -p .closure
           PYTHONPATH=. python - <<'PY'
           from pathlib import Path

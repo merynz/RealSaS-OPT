@@ -84,7 +84,10 @@ class _LocalGeometryAttention(nn.Module):
         d2 = torch.cdist(xyz.float(), xyz.float(), p=2).square()
         d2 = d2.masked_fill(~mask[:, None, :].bool(), float("inf"))
         k = min(max(1, self.k), N)
-        idx = torch.topk(d2, k=k, dim=-1, largest=False, sorted=True).indices
+        # Conditioning rows are canonicalized by sorted surface_id. Stable sort
+        # therefore gives an explicit backend-independent tie policy for exactly
+        # equidistant neighbors without perturbing the geometric distance itself.
+        idx = torch.argsort(d2, dim=-1, stable=True)[..., :k]
         hn = self._gather(h, idx)
         xn = self._gather(xyz, idx)
         delta = xn - xyz[:, :, None, :]
@@ -186,7 +189,10 @@ class GeppettoCandidateV2(nn.Module):
         B, M, C = modes.shape
         if C != 3 or M < 2:
             raise ValueError("expected at least two 3D locus modes")
-        idx = torch.argmax(mode_logits, dim=-1)
+        # Mode slots are fixed architecture coordinates. Stable descending sort
+        # makes exact-logit ties explicit and backend-independent instead of
+        # delegating tie behavior to a bare argmax implementation.
+        idx = torch.argsort(mode_logits, dim=-1, descending=True, stable=True)[:, 0]
         gather3 = idx[:, None, None].expand(B, 1, 3)
         pos = torch.gather(modes, 1, gather3).squeeze(1)
         log_sigma = torch.gather(mode_log_sigma, 1, gather3).squeeze(1)
@@ -306,10 +312,10 @@ class GeppettoCandidateV2(nn.Module):
                 support_ids = ()
                 if float(sp[i]) >= self.config.support_presence_probability:
                     top = min(self.config.support_topk, nvalid)
-                    idx = torch.topk(out.support_logits[b, i, :nvalid], k=top).indices.tolist()
+                    idx = torch.argsort(out.support_logits[b, i, :nvalid], descending=True, stable=True)[:top].tolist()
                     support_ids = tuple(conditioning.surface_ids[b][j] for j in idx)
                 mode_prob = torch.softmax(out.position_mode_logits[b, i], dim=-1)
-                map_mode_index = int(torch.argmax(out.position_mode_logits[b, i]).item())
+                map_mode_index = int(torch.argsort(out.position_mode_logits[b, i], descending=True, stable=True)[0].item())
                 hypotheses = []
                 for mi in range(self.config.position_modes):
                     mpn = out.position_modes_normalized[b, i, mi].cpu().numpy()
@@ -356,7 +362,7 @@ class GeppettoCandidateV2(nn.Module):
                     "dynamic_cardinality": True,
                     "multimodal_loci": True,
                     "position_modes": self.config.position_modes,
-                    "representative_locus_policy": "MAP_MODE",
+                    "representative_locus_policy": "MAP_MODE_STABLE_SLOT_TIE",
                     "parent_pair_chunk": self.config.parent_pair_chunk,
                     "resource_policy": self.config.resource_policy,
                     "generated_count": K,
@@ -364,6 +370,8 @@ class GeppettoCandidateV2(nn.Module):
                     "generation_index_is_not_identity": True,
                     "compiler_owns_root_tree_ids": True,
                     "full_3d_reconstruction_claim": False,
+                    "knn_equal_distance_tie_policy": "STABLE_CANONICAL_SURFACE_ROW",
+                    "support_equal_logit_tie_policy": "STABLE_CANONICAL_SURFACE_ROW",
                 },
             ))
         return tuple(proposals)

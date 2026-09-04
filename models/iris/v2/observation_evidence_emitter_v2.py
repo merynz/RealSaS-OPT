@@ -46,6 +46,9 @@ def emit_observation_evidence_v2(
         uncertainty = {}
         mode_ambiguity = {}
         anchor_raster = {}
+        joint_support_probability = {}
+        conditional_support_probability = {}
+        mode_probability = {}
         for q in range(Q):
             av = int(domain.anchor_view[b, q].item())
             grid = tuple(map(float, domain.anchor_grid[b, q].detach().cpu().tolist()))
@@ -60,6 +63,11 @@ def emit_observation_evidence_v2(
                 gid = f"Q{q:06d}:M{m:02d}"
                 group_ids = []
                 p_support = float(output.support_probability[b, q, m].item())
+                p_conditional = p_support if output.conditional_support_probability is None else float(output.conditional_support_probability[b, q, m].item())
+                p_mode = float(modes.mode_probabilities[b, q, m].item()) if output.mode_probability is None else float(output.mode_probability[b, q, m].item())
+                joint_support_probability[gid] = p_support
+                conditional_support_probability[gid] = p_conditional
+                mode_probability[gid] = p_mode
                 sigma = float(torch.exp(output.log_sigma[b, q, m]).item())
                 uncertainty[gid] = sigma
                 mode_ambiguity[gid] = bool(modes.ambiguous[b, q].item())
@@ -108,6 +116,10 @@ def emit_observation_evidence_v2(
                 "hypothesis_anchor_raster": anchor_raster,
                 "mode_sigma": uncertainty,
                 "ray_ambiguous": mode_ambiguity,
+                "joint_support_probability": joint_support_probability,
+                "conditional_support_probability": conditional_support_probability,
+                "mode_probability": mode_probability,
+                "support_threshold_quantity": "JOINT_CONDITIONAL_SUPPORT_X_MODE_PROBABILITY",
                 "raster_coordinate_system": "PIXEL_CENTER_XY",
                 "resolution": 1024,
                 "mechanical_authority": "FORWARD_DEPTH_SUPPORT_UNCERTAINTY_ONLY",

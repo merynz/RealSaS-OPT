@@ -6,6 +6,8 @@ on:
       - first-family-fit/v1-20260904
     paths:
       - '.github/workflows/first_family_observation_v1.yml'
+      - 'experiments/first_family_fit_v1/run_mage_observation_v1.py'
+      - 'experiments/first_family_fit_v1/MAGE_AUTHORITY_PACK_V1.json'
   workflow_dispatch:
 
 jobs:
@@ -19,6 +21,8 @@ jobs:
       KAYKIT_REPO: https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0.git
       MAGE_FBX_REL: addons/kaykit_character_pack_adventures/Characters/fbx/Mage.fbx
       EXPECTED_AUTHORITY_ZIP_SHA256: ddff2f59e724a67aeb1059aaa748e12015d1281246453b601e06426d280364c6
+      MAGE_ASSET_ID: asset_fbc8d57f848df78bd953fbb5
+      MAGE_PRIMARY_GEOMETRY_SHA256: f1e429a706faffd6ed6fd2b26a756cfca406e4ece440a9717e7e4b09f03db07d
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,20 +35,51 @@ jobs:
           test -x "$REALSAS_LOCAL_ML_VENV/bin/python"
           "$REALSAS_LOCAL_ML_VENV/bin/python" -c "import torch,numpy,PIL; assert torch.cuda.is_available(); print(torch.__version__)"
 
-      - name: Locate exact Mage authority pack in Windows Downloads
+      - name: Resolve Master authority source
         shell: bash
         run: |
-          set -euxo pipefail
-          pack="$(find /mnt/c/Users -maxdepth 3 -type f -name 'Mage_FIRST_FAMILY_AUTHORITY_PACK_V1.zip' -print -quit 2>/dev/null || true)"
-          if [ -z "$pack" ]; then
-            echo 'MAGE_AUTHORITY_PACK_NOT_FOUND_IN_WINDOWS_DOWNLOADS' >&2
-            exit 17
+          set -euo pipefail
+          master=''
+          while IFS= read -r root; do
+            [ -d "$root" ] || continue
+            pg="$root/master/assets/$MAGE_ASSET_ID/primary_geometry.npz"
+            [ -f "$pg" ] || continue
+            got="$(sha256sum "$pg" | awk '{print $1}')"
+            if [ "$got" = "$MAGE_PRIMARY_GEOMETRY_SHA256" ]; then master="$root"; break; fi
+          done < <(
+            {
+              [ -n "${REALSAS_MASTER_ROOT:-}" ] && printf '%s\n' "$REALSAS_MASTER_ROOT" || true
+              find /mnt/c/Users /mnt/g /mnt/d /mnt/e /home/monster -maxdepth 8 -type d -name 'RealSaS_MASTER_CORPUS_1024_V3' -print 2>/dev/null || true
+            } | awk '!seen[$0]++'
+          )
+          if [ -n "$master" ]; then
+            echo "REALSAS_MASTER_ROOT=$master" >> "$GITHUB_ENV"
+            echo "REALSAS_AUTHORITY_MODE=DIRECT_MASTER_CORPUS" >> "$GITHUB_ENV"
+            echo "authority_mode=DIRECT_MASTER_CORPUS"
+            echo "master_root=$master"
+            exit 0
           fi
-          got="$(sha256sum "$pack" | awk '{print $1}')"
-          test "$got" = "$EXPECTED_AUTHORITY_ZIP_SHA256"
-          echo "MAGE_AUTHORITY_ZIP=$pack" >> "$GITHUB_ENV"
-          echo "authority_zip=$pack"
-          echo "authority_zip_sha256=$got"
+          pack="$(find /mnt/c/Users -maxdepth 4 -type f -name 'Mage_FIRST_FAMILY_AUTHORITY_PACK_V1.zip' -print -quit 2>/dev/null || true)"
+          if [ -n "$pack" ]; then
+            got="$(sha256sum "$pack" | awk '{print $1}')"
+            test "$got" = "$EXPECTED_AUTHORITY_ZIP_SHA256"
+            echo "MAGE_AUTHORITY_ZIP=$pack" >> "$GITHUB_ENV"
+            echo "REALSAS_AUTHORITY_MODE=PREPACKAGED_ZIP_FALLBACK" >> "$GITHUB_ENV"
+            echo "authority_mode=PREPACKAGED_ZIP_FALLBACK"
+            exit 0
+          fi
+          echo 'NO_LOCAL_MASTER_MOUNT. Do not download families one-by-one; configure one persistent Drive mount/sync.' >&2
+          exit 17
+
+      - name: Discover raw source roots already synced locally
+        shell: bash
+        run: |
+          set +e
+          echo '=== RAW SOURCE DISCOVERY ==='
+          find /mnt/c/Users /mnt/g /mnt/d /mnt/e /home/monster -maxdepth 8 -type d \
+            \( -iname '*rigxl*' -o -iname '*articulation*x*' -o -iname '*kaykit*' -o -iname '*artist*intent*' \) \
+            -print 2>/dev/null | head -200 | tee "$RUNNER_TEMP/realsas_raw_source_roots.txt"
+          exit 0
 
       - name: Acquire exact public KayKit Mage source
         shell: bash
@@ -83,9 +118,15 @@ jobs:
           set -euxo pipefail
           work="$HOME/.cache/realsas/first_family_mage_observation_work"
           out="$GITHUB_WORKSPACE/artifacts/first_family_observation/observation"
+          authority_args=()
+          if [ "$REALSAS_AUTHORITY_MODE" = 'DIRECT_MASTER_CORPUS' ]; then
+            authority_args=(--master-root "$REALSAS_MASTER_ROOT")
+          else
+            authority_args=(--authority-zip "$MAGE_AUTHORITY_ZIP")
+          fi
           PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" \
             experiments/first_family_fit_v1/run_mage_observation_v1.py \
-            --authority-zip "$MAGE_AUTHORITY_ZIP" \
+            "${authority_args[@]}" \
             --authority-manifest experiments/first_family_fit_v1/MAGE_AUTHORITY_PACK_V1.json \
             --source-file "$MAGE_SOURCE_FBX" \
             --source-package "$MAGE_SOURCE_ROOT" \

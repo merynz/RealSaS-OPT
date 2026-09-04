@@ -90,6 +90,7 @@ class CanonicalMainReadinessV1(unittest.TestCase):
             "canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json",
             "canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json",
             "canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json",
+            "canonical/RESTORATION_CLOSURE_VERDICT_V1_20260904.json",
         )
         missing = [path for path in required if not (ROOT / path).is_file()]
         self.assertEqual(missing, [], "missing canonical authority records:\n" + "\n".join(missing))
@@ -110,8 +111,12 @@ class CanonicalMainReadinessV1(unittest.TestCase):
         for text in (state, index):
             self.assertNotIn("CURRENT_DIRECTIONAL_JOINT_VIEW_BINDING_MISSING", text)
             self.assertIn("CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json", text)
+            self.assertIn("RESTORATION_CLOSURE_VERDICT_V1_20260904.json", text)
         self.assertIn("Real-family fit:** `NOT AUTHORIZED`", state)
-        self.assertIn("Canonical `main` promotion: **MANDATORY BEFORE FIT / NOT YET PERFORMED**", index)
+        self.assertIn("Full behavioral + complete-E2E restoration closure | **DONE / PASS**", state)
+        self.assertIn("Native current-source interlock: **PASS", index)
+        self.assertIn("Restoration-wide source/regression/E2E/native closure: **PASS", index)
+        self.assertIn("Canonical `main` promotion", index)
 
     def test_closure_workflow_is_manual_only(self) -> None:
         workflow = (ROOT / ".github/workflows/restoration_closure_manual.yml").read_text(encoding="utf-8")

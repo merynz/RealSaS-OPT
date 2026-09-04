@@ -1,0 +1,87 @@
+name: iris-scene-first-signed-promotion-v3
+
+on:
+  push:
+    branches:
+      - promote/iris-scene-first-signed-main-v3-20260905
+    paths:
+      - 'models/iris/v3/**'
+      - 'compiler/realsas_compiler_core/substrate/scene_first_signed.py'
+      - 'compiler/realsas_compiler_core/substrate/__init__.py'
+      - 'tests/iris/test_scene_first_signed_v3.py'
+      - 'tests/compiler/test_scene_first_signed_surface_bridge_v1.py'
+      - '.github/workflows/iris_scene_first_signed_promotion_v3.yml'
+  workflow_dispatch:
+
+jobs:
+  promotion-gate:
+    runs-on: [self-hosted, realsas, gpu]
+    timeout-minutes: 30
+    env:
+      BASE_SHA: 461fd25264f4981af78bf38ddb9a42086f4c9db8
+      PY: /home/monster/realsas-ml312/bin/python
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Promotion ancestry and allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor "$BASE_SHA" HEAD
+          git diff --name-only "$BASE_SHA"...HEAD | tee /tmp/promotion_files.txt
+          while IFS= read -r path; do
+            case "$path" in
+              models/iris/v3/*|compiler/realsas_compiler_core/substrate/scene_first_signed.py|compiler/realsas_compiler_core/substrate/__init__.py|tests/iris/test_scene_first_signed_v3.py|tests/compiler/test_scene_first_signed_surface_bridge_v1.py|.github/workflows/iris_scene_first_signed_promotion_v3.yml) ;;
+              *) echo "PROMOTION_UNEXPECTED_FILE:$path" >&2; exit 1 ;;
+            esac
+          done < /tmp/promotion_files.txt
+          echo PROMOTION_ALLOWLIST=PASS
+
+      - name: Verify local ML environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          "$PY" - <<'PY'
+          import torch, numpy, scipy, pytest
+          print('torch', torch.__version__, 'cuda', torch.cuda.is_available())
+          PY
+          if ! "$PY" -c 'import skimage' >/dev/null 2>&1; then
+            "$PY" -m pip install -q scikit-image
+          fi
+
+      - name: Compile promoted modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PY" -m py_compile \
+            models/iris/v3/scene_first_signed_v3.py \
+            models/iris/v3/zero_surface_decoder_v3.py \
+            compiler/realsas_compiler_core/substrate/scene_first_signed.py
+
+      - name: IRIS v3 and GSA bridge tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH="$GITHUB_WORKSPACE" "$PY" -m pytest -q \
+            tests/iris/test_scene_first_signed_v3.py \
+            tests/compiler/test_scene_first_signed_surface_bridge_v1.py
+
+      - name: Existing compiler runtime E2E regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH="$GITHUB_WORKSPACE" "$PY" -m pytest -q \
+            experiments/single_family_e2e_v1/test_complete_e2e_source_v1.py
+
+      - name: No CharacterGen runtime dependency in promoted canonical files
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RniE '(^|[^A-Za-z])charactergen([^A-Za-z]|$)' models/iris/v3/scene_first_signed_v3.py models/iris/v3/zero_surface_decoder_v3.py compiler/realsas_compiler_core/substrate/scene_first_signed.py; then
+            echo CHARACTERGEN_RUNTIME_REFERENCE_FORBIDDEN >&2
+            exit 1
+          fi
+          echo CHARACTERGEN_RUNTIME_DEPENDENCY=NONE

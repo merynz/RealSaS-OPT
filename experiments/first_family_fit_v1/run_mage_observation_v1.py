@@ -63,6 +63,50 @@ def validate_authority(root: Path, manifest: dict) -> None:
                 raise RuntimeError(f"V{v} origin drift: {origin}")
 
 
+def stage_from_master(master_root: Path, dst: Path, manifest: dict) -> Path:
+    src = master_root / "master" / "assets" / ASSET_ID
+    if not src.is_dir():
+        raise RuntimeError(f"Mage Master asset directory missing: {src}")
+    authority = dst / "mage_authority"
+    authority.mkdir(parents=True, exist_ok=True)
+    for rel in manifest["files"]:
+        if rel == "primary_geometry.npz":
+            source = src / rel
+        else:
+            source = src / "renders" / rel
+        target = authority / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if not source.is_file():
+            raise RuntimeError(f"Master authority source missing: {source}")
+        shutil.copy2(source, target)
+    validate_authority(authority, manifest)
+    return authority
+
+
+def stage_authority(*, zip_path: Path | None, master_root: Path | None, work: Path, manifest: dict) -> tuple[Path, dict]:
+    if (zip_path is None) == (master_root is None):
+        raise RuntimeError("exactly one of authority ZIP or Master root must be supplied")
+    if master_root is not None:
+        authority = stage_from_master(master_root, work, manifest)
+        return authority, {
+            "mode": "DIRECT_MASTER_CORPUS",
+            "master_root": str(master_root),
+            "asset_id": ASSET_ID,
+        }
+    assert zip_path is not None
+    zip_sha = sha256_file(zip_path)
+    if zip_sha != manifest["zip_sha256"]:
+        raise RuntimeError(f"authority ZIP SHA drift: {zip_sha} != {manifest['zip_sha256']}")
+    safe_extract(zip_path, work)
+    authority = work / "mage_authority"
+    validate_authority(authority, manifest)
+    return authority, {
+        "mode": "PREPACKAGED_ZIP_FALLBACK",
+        "authority_zip": str(zip_path),
+        "authority_zip_sha256": zip_sha,
+    }
+
+
 def make_contact_sheet(observation_root: Path, out_path: Path) -> None:
     labels = ["S", "SE", "E", "NE", "N", "NW", "W", "SW"]
     thumbs = []
@@ -84,7 +128,9 @@ def make_contact_sheet(observation_root: Path, out_path: Path) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--authority-zip", required=True)
+    source = ap.add_mutually_exclusive_group(required=True)
+    source.add_argument("--authority-zip")
+    source.add_argument("--master-root")
     ap.add_argument("--authority-manifest", required=True)
     ap.add_argument("--source-file", required=True)
     ap.add_argument("--source-package", required=True)
@@ -94,7 +140,8 @@ def main() -> None:
     ap.add_argument("--out-root", required=True)
     args = ap.parse_args()
 
-    zip_path = Path(args.authority_zip).resolve()
+    zip_path = Path(args.authority_zip).resolve() if args.authority_zip else None
+    master_root = Path(args.master_root).resolve() if args.master_root else None
     manifest_path = Path(args.authority_manifest).resolve()
     source_file = Path(args.source_file).resolve()
     source_package = Path(args.source_package).resolve()
@@ -104,9 +151,6 @@ def main() -> None:
     out = Path(args.out_root).resolve()
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    zip_sha = sha256_file(zip_path)
-    if zip_sha != manifest["zip_sha256"]:
-        raise RuntimeError(f"authority ZIP SHA drift: {zip_sha} != {manifest['zip_sha256']}")
     if sha256_file(source_file) != SOURCE_SHA256:
         raise RuntimeError("Mage source FBX SHA drift")
     if not blender.is_file():
@@ -114,9 +158,12 @@ def main() -> None:
 
     shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True, exist_ok=True)
-    safe_extract(zip_path, work)
-    authority = work / "mage_authority"
-    validate_authority(authority, manifest)
+    authority, authority_source = stage_authority(
+        zip_path=zip_path,
+        master_root=master_root,
+        work=work,
+        manifest=manifest,
+    )
 
     appearance_npz = work / "appearance" / "source_appearance.npz"
     appearance_json = work / "appearance" / "source_appearance.json"
@@ -175,7 +222,7 @@ def main() -> None:
         "schema": "RealSaS.FirstFamily.MageObservationRun.v1",
         "asset_id": ASSET_ID,
         "candidate_id": CANDIDATE_ID,
-        "authority_zip_sha256": zip_sha,
+        "authority_source": authority_source,
         "source_fbx_sha256": SOURCE_SHA256,
         "observation_manifest_sha256": sha256_file(obs_manifest_path),
         "contact_sheet_sha256": sha256_file(contact),

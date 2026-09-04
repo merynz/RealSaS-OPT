@@ -1,0 +1,39 @@
+{
+  "schema": "RealSaS.ArchitectureFreezeSeal.v2",
+  "date": "2026-09-04",
+  "status": "PASS_ARCHITECTURE_FROZEN",
+  "family_selection_authorized": true,
+  "scientific_fit_steps_at_freeze": 0,
+  "fit_family_selected_at_freeze": false,
+  "fit_family_id_at_freeze": null,
+  "generalization_claim": false,
+  "one_family_product_pass": false,
+  "full_3d_reconstruction_claim": false,
+  "living_source_scope_id": "LIVING_MODELS_COMPILER_RUNTIME_AND_EXECUTION_CLOSURE_V2",
+  "living_source_count": 128,
+  "living_source_fingerprint_sha256": "9585aa3af8975fe66af64e161b9289da02b77c012c682bca536c664ef1d271f0",
+  "selection_apparatus_scope_id": "TEXTURED_PREFIT_TRUTH_AND_BLINDED_FIT8_SELECTION_V2",
+  "selection_apparatus_count": 4,
+  "selection_apparatus_fingerprint_sha256": "9ed25dafe62c62c0cee69dc4878c5587366db5e296a657c9649c86bf334fecd1",
+  "vendor_execution_raw_sha256": "3a6076b30e0a23807f952365d39d81ddf5d4b1dba734c0bdba47567bced26850",
+  "visible_optimizer_sha256": "b2fddb64753ca783e298be4f1078c70b9667fa9931c67de738f955976e2587c1",
+  "ci_evidence": {
+    "workflow": "architecture-freeze-v2-candidate",
+    "run_id": 33862732418,
+    "head_sha": "bd399c42a70a4828321c507a1c584defa0a87fc0",
+    "conclusion": "success",
+    "targeted_regression_result": "PASS_42_OF_42",
+    "candidate_status": "PASS_SOURCE_ELIGIBLE_FOR_FREEZE",
+    "candidate_artifact_id": 9932747803,
+    "candidate_artifact_digest_sha256": "f36be67c8d0db24e22181d70b3c020189a661dfa0cc15c7ca18f3853ac3893e7",
+    "candidate_violations": []
+  },
+  "historical_freeze_v1": {
+    "path": "canonical/ARCHITECTURE_FREEZE_V1.json",
+    "status": "SUPERSEDED_FOR_CURRENT_SELECTION_AUTHORITY",
+    "preserved_for_provenance": true
+  },
+  "rule": "ANY_CHANGE_TO_LIVING_SOURCE_OR_PREFIT_SELECTION_APPARATUS_INVALIDATES_FAMILY_SELECTION_AUTHORITY_UNTIL_A_NEW_V2_FREEZE",
+  "fit_authorized_by_this_seal": false,
+  "selection_authorized_by_this_seal": true
+}

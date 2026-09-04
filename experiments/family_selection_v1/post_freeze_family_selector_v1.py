@@ -12,11 +12,9 @@ from experiments.family_selection_v1.prefit_family_truth_eligibility_v1 import (
     PrefitFamilyTruthEligibilityV1,
 )
 
-
 SCHEMA = "RealSaS.PostFreezeFamilySelector.v1"
 POLICY_ID = "FIT8_PREFIT_BLINDED_HASH_ORDER_V2"
 RANK_DOMAIN = "RealSaS/FIT8/pre-fit/blinded/hash-order/v2"
-
 FORBIDDEN_POSTFIT_KEYS = frozenset({
     "fit_loss", "train_loss", "val_loss", "test_loss", "checkpoint", "checkpoint_sha256",
     "iris_score", "iris_metrics", "geppetto_score", "geppetto_metrics",
@@ -48,10 +46,7 @@ class PrefitFamilyCandidateV1:
     candidate_authority_sha256: str
 
     def validate(self) -> None:
-        for field in (
-            "asset_id", "source_family_id", "prefit_truth_eligibility_sha256",
-            "visual_audit_id", "visual_audit_sha256", "candidate_authority_sha256",
-        ):
+        for field in ("asset_id", "source_family_id", "prefit_truth_eligibility_sha256", "visual_audit_id", "visual_audit_sha256", "candidate_authority_sha256"):
             if not getattr(self, field):
                 raise ValueError(f"EMPTY_REQUIRED_FIELD:{field}")
         for field in ("prefit_truth_eligibility_sha256", "visual_audit_sha256", "candidate_authority_sha256"):
@@ -63,18 +58,11 @@ class PrefitFamilyCandidateV1:
     def eligible(self) -> bool:
         self.validate()
         return all((
-            self.master_native_1024,
-            self.master_fit_admit,
-            self.iris_truth_capable,
-            self.geppetto_truth_capable,
-            self.arachne_truth_capable,
-            self.single_pose_core_eligible,
-            self.exact_camera_raster_authority,
-            self.explicit_source_textured_rgba,
-            self.prefit_truth_eligibility_pass,
-            self.visual_character_only_pass,
-            self.visual_no_render_artifact_pass,
-            self.visual_no_dominant_geometric_block_pass,
+            self.master_native_1024, self.master_fit_admit, self.iris_truth_capable,
+            self.geppetto_truth_capable, self.arachne_truth_capable, self.single_pose_core_eligible,
+            self.exact_camera_raster_authority, self.explicit_source_textured_rgba,
+            self.prefit_truth_eligibility_pass, self.visual_character_only_pass,
+            self.visual_no_render_artifact_pass, self.visual_no_dominant_geometric_block_pass,
             self.visual_clear_character_silhouette_pass,
         ))
 
@@ -96,6 +84,7 @@ class FamilySelectionResultV1:
     schema: str
     policy_id: str
     architecture_freeze_fingerprint_sha256: str
+    selection_apparatus_fingerprint_sha256: str
     requested_count: int
     eligible_count: int
     selected: tuple[SelectedFamilyV1, ...]
@@ -161,16 +150,13 @@ def select_prefit_families_v1(
     truth_eligibility_reports: Mapping[str, PrefitFamilyTruthEligibilityV1],
     count: int = 8,
 ) -> FamilySelectionResultV1:
-    """Select a deterministic pre-fit panel only after current living-source freeze."""
     if count < 1:
         raise ValueError("selection count must be positive")
-    root = Path(repo_root).resolve()
-    seal = require_family_selection_authority(root)
+    seal = require_family_selection_authority(Path(repo_root).resolve())
     rows = tuple(candidates)
     if not rows:
         raise ValueError("candidate set is empty")
-    seen_assets: set[str] = set()
-    seen_families: set[str] = set()
+    seen_assets: set[str] = set(); seen_families: set[str] = set()
     for row in rows:
         row.validate()
         if row.asset_id in seen_assets:
@@ -180,49 +166,27 @@ def select_prefit_families_v1(
         seen_assets.add(row.asset_id); seen_families.add(row.source_family_id)
         if row.prefit_truth_eligibility_pass:
             _validate_truth_eligibility_authority(row, truth_eligibility_reports.get(row.asset_id))
-
     eligible = tuple(row for row in rows if row.eligible)
     if len(eligible) < count:
         raise RuntimeError(f"INSUFFICIENT_PREFIT_ELIGIBLE_FAMILIES:need={count}:have={len(eligible)}")
     chosen = sorted(eligible, key=lambda row: (_rank(row.asset_id), row.asset_id))[:count]
-    selected = tuple(SelectedFamilyV1(
-        ordinal=i,
-        asset_id=row.asset_id,
-        source_family_id=row.source_family_id,
-        blinded_rank_sha256=_rank(row.asset_id),
-        candidate_authority_sha256=row.candidate_authority_sha256,
-        prefit_truth_eligibility_sha256=row.prefit_truth_eligibility_sha256,
-        visual_audit_id=row.visual_audit_id,
-        visual_audit_sha256=row.visual_audit_sha256,
-    ) for i, row in enumerate(chosen))
+    selected = tuple(SelectedFamilyV1(i, row.asset_id, row.source_family_id, _rank(row.asset_id), row.candidate_authority_sha256, row.prefit_truth_eligibility_sha256, row.visual_audit_id, row.visual_audit_sha256) for i, row in enumerate(chosen))
     candidate_set_sha = _canonical_hash([asdict(row) for row in sorted(rows, key=lambda r: r.asset_id)])
-    living_fp = seal["living_source_fingerprint_sha256"]
-    selection_fp = seal["selection_apparatus_fingerprint_sha256"]
-    selection_hash_payload = {
-        "schema": SCHEMA,
-        "policy_id": POLICY_ID,
+    living_fp = str(seal["living_source_fingerprint_sha256"])
+    selection_fp = str(seal["selection_apparatus_fingerprint_sha256"])
+    hash_payload = {
+        "schema": SCHEMA, "policy_id": POLICY_ID,
         "architecture_freeze_fingerprint_sha256": living_fp,
         "selection_apparatus_fingerprint_sha256": selection_fp,
-        "requested_count": count,
-        "eligible_count": len(eligible),
-        "selected": [asdict(row) for row in selected],
-        "candidate_set_sha256": candidate_set_sha,
-        "scientific_fit_steps_before_selection": 0,
-        "fit_metrics_consumed": False,
+        "requested_count": count, "eligible_count": len(eligible),
+        "selected": [asdict(row) for row in selected], "candidate_set_sha256": candidate_set_sha,
+        "scientific_fit_steps_before_selection": 0, "fit_metrics_consumed": False,
         "selection_basis": "TYPED_PREFIT_TRUTH_ELIGIBILITY_PLUS_SEALED_VISUAL_AUDIT_PLUS_BLINDED_SHA256_ORDER",
     }
     return FamilySelectionResultV1(
-        schema=SCHEMA,
-        policy_id=POLICY_ID,
-        architecture_freeze_fingerprint_sha256=living_fp,
-        requested_count=count,
-        eligible_count=len(eligible),
-        selected=selected,
-        candidate_set_sha256=candidate_set_sha,
-        selection_sha256=_canonical_hash(selection_hash_payload),
-        scientific_fit_steps_before_selection=0,
-        fit_metrics_consumed=False,
-        selection_basis="TYPED_PREFIT_TRUTH_ELIGIBILITY_PLUS_SEALED_VISUAL_AUDIT_PLUS_BLINDED_SHA256_ORDER",
+        SCHEMA, POLICY_ID, living_fp, selection_fp, count, len(eligible), selected,
+        candidate_set_sha, _canonical_hash(hash_payload), 0, False,
+        "TYPED_PREFIT_TRUTH_ELIGIBILITY_PLUS_SEALED_VISUAL_AUDIT_PLUS_BLINDED_SHA256_ORDER",
     )
 
 

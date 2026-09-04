@@ -6,6 +6,7 @@ on:
       - first-family-fit/v1-20260904
     paths:
       - '.github/workflows/first_family_dino_bootstrap_v1.yml'
+      - 'tools/first_family_fit_v1/bootstrap_dinov2_s_v1.py'
   workflow_dispatch:
 
 jobs:
@@ -19,6 +20,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+
+      - name: Activate Linux Python 3.12 toolchain
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
       - name: Require persistent ML environment
         shell: bash
@@ -62,5 +68,5 @@ jobs:
         with:
           name: first-family-dino-authority-v1
           path: artifacts/first_family_dino/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30

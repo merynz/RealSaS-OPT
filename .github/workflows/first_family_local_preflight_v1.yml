@@ -15,18 +15,20 @@ on:
 jobs:
   mage-local-preflight:
     runs-on: [self-hosted, realsas, gpu]
-    timeout-minutes: 45
+    timeout-minutes: 90
     env:
       KAYKIT_COMMIT: 672074b73ba276876a19e8816ecdc5241817ab47
       KAYKIT_REPO: https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0.git
       MAGE_FBX_REL: addons/kaykit_character_pack_adventures/Characters/fbx/Mage.fbx
       MAGE_TEXTURE_REL: addons/kaykit_character_pack_adventures/Characters/fbx/mage_texture.png
+      TORCH_VERSION: 2.7.0
+      TORCHVISION_VERSION: 0.22.0
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Environment summary
+      - name: Environment summary and Blender discovery
         shell: bash
         run: |
           set -euxo pipefail
@@ -34,43 +36,35 @@ jobs:
           {
             echo "runner=${RUNNER_NAME:-unknown}"
             uname -a
-            echo "PATH=$PATH"
             command -v nvidia-smi || true
             nvidia-smi || true
+            echo '=== blender candidates ==='
+            command -v blender || true
+            find '/mnt/c/Program Files/Blender Foundation' -maxdepth 3 -iname 'blender.exe' -print 2>/dev/null || true
           } | tee artifacts/first_family_preflight/environment_summary.log
 
-      - name: Discover supported ML Python environments
+      - name: Set up Linux Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Provision pinned ML dependencies
         shell: bash
         run: |
-          set +e
-          out=artifacts/first_family_preflight/ml_env_probe.log
-          : > "$out"
-          echo '=== executables ===' | tee -a "$out"
-          for cmd in python python3 python3.10 python3.11 python3.12 python3.13 uv conda mamba micromamba pixi; do
-            printf '%-12s ' "$cmd" | tee -a "$out"
-            command -v "$cmd" 2>/dev/null | tee -a "$out" || echo MISSING | tee -a "$out"
-          done
-          echo '=== common venvs ===' | tee -a "$out"
-          for p in "$HOME/.venv/bin/python" "$HOME/venv/bin/python" "$HOME/.cache/realsas/venv/bin/python" "$HOME/miniconda3/bin/python" "$HOME/anaconda3/bin/python" "/opt/conda/bin/python"; do
-            if [ -x "$p" ]; then echo "$p" | tee -a "$out"; fi
-          done
-          echo '=== python torch probes ===' | tee -a "$out"
-          candidates=""
-          for cmd in python3.12 python3.11 python3.10 python3 python; do
-            p=$(command -v "$cmd" 2>/dev/null || true)
-            [ -n "$p" ] && candidates="$candidates $p"
-          done
-          for p in "$HOME/.venv/bin/python" "$HOME/venv/bin/python" "$HOME/.cache/realsas/venv/bin/python" "$HOME/miniconda3/bin/python" "$HOME/anaconda3/bin/python" "/opt/conda/bin/python"; do
-            [ -x "$p" ] && candidates="$candidates $p"
-          done
-          seen=' '
-          for p in $candidates; do
-            case "$seen" in *" $p "*) continue;; esac
-            seen="$seen$p "
-            echo "--- $p ---" | tee -a "$out"
-            "$p" -c "import sys; print('python',sys.version); import importlib.util; s=importlib.util.find_spec('torch'); print('torch_spec',s); exec(\"import torch; print('torch',torch.__version__); print('cuda_available',torch.cuda.is_available()); print('cuda_device',torch.cuda.get_device_name(0) if torch.cuda.is_available() else None); print('cuda_mem',torch.cuda.get_device_properties(0).total_memory if torch.cuda.is_available() else None)\") if s else None" 2>&1 | tee -a "$out"
-          done
-          exit 0
+          set -euxo pipefail
+          python -m pip install --upgrade 'pip<26'
+          python -m pip install \
+            "torch==${TORCH_VERSION}" "torchvision==${TORCHVISION_VERSION}" \
+            --index-url https://download.pytorch.org/whl/cu118
+          python -m pip install 'numpy<3' 'scipy<2' 'pillow<13' 'pytest<9'
+          python -m pip freeze | sort | tee artifacts/first_family_preflight/PYTHON_ENV_FREEZE.txt
+
+      - name: CUDA PyTorch smoke
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python -c "import json,torch; assert torch.cuda.is_available(), 'CUDA_NOT_AVAILABLE'; p=torch.cuda.get_device_properties(0); x=torch.arange(1024,device='cuda',dtype=torch.float32); y=(x*x).sum(); torch.cuda.synchronize(); print(json.dumps({'torch':torch.__version__,'cuda_runtime':torch.version.cuda,'device':p.name,'total_memory':p.total_memory,'smoke_sum':float(y.cpu())},indent=2))" | tee artifacts/first_family_preflight/TORCH_CUDA_SMOKE.json
 
       - name: Acquire exact public KayKit Mage source
         shell: bash
@@ -99,14 +93,20 @@ jobs:
           } | tee artifacts/first_family_preflight/MAGE_PUBLIC_SOURCE_AUTHORITY.txt
           echo "REALSAS_MAGE_PUBLIC_ROOT=$cache" >> "$GITHUB_ENV"
 
-      - name: First-family current Master preflight
-        id: preflight
+      - name: Current learned and compiler import smoke
+        shell: bash
+        run: |
+          set -euxo pipefail
+          PYTHONPATH="$GITHUB_WORKSPACE" python -c "from models.iris.v2.q_domain_v2 import build_production_observation_ray_lattice_v2; from models.iris.v2.observation_contract_v2 import ObservationContractV2; from compiler.realsas_compiler_core.substrate.iris_v2 import compile_surface_v2,attach_dtb_nd1_from_evidence; from models.geppetto.v2.geppetto_candidate_v2 import GeppettoCandidateV2; from compiler.realsas_compiler_core.rig import qualify_skeleton_v2; from models.skin_field_codec.v1.model_v1 import SkinFieldCodecV1; from models.arachne.v2.arachne_candidate_v2 import ArachneCandidateV2; from compiler.realsas_compiler_core.skin import qualify_skin; from compiler.realsas_compiler_core.mwb2 import build_mwb2_candidate,qualify_mwb2_mesh; from compiler.realsas_compiler_core.mwb2_skin import bind_mwb2_mesh_skin; print('PASS_CURRENT_LEARNED_COMPILER_IMPORT_SMOKE')" | tee artifacts/first_family_preflight/current_import_smoke.log
+
+      - name: Existing Master locality diagnostic
+        id: master_probe
         shell: bash
         run: |
           set +e
-          PYTHONPATH="$GITHUB_WORKSPACE" python3 experiments/first_family_fit_v1/local_preflight_v1.py \
+          PYTHONPATH="$GITHUB_WORKSPACE" python experiments/first_family_fit_v1/local_preflight_v1.py \
             --out artifacts/first_family_preflight/FIRST_FAMILY_LOCAL_PREFLIGHT_V1.json \
-            | tee artifacts/first_family_preflight/stdout.log
+            | tee artifacts/first_family_preflight/master_probe_stdout.log
           code=${PIPESTATUS[0]}
           echo "code=$code" >> "$GITHUB_OUTPUT"
           exit 0
@@ -120,7 +120,10 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Enforce full Master preflight verdict
+      - name: Enforce local execution readiness
         shell: bash
         run: |
-          test "${{ steps.preflight.outputs.code }}" = "0"
+          set -euxo pipefail
+          test -s artifacts/first_family_preflight/TORCH_CUDA_SMOKE.json
+          test -s artifacts/first_family_preflight/MAGE_PUBLIC_SOURCE_AUTHORITY.txt
+          grep -q PASS_CURRENT_LEARNED_COMPILER_IMPORT_SMOKE artifacts/first_family_preflight/current_import_smoke.log

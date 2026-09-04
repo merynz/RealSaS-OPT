@@ -1,0 +1,8 @@
+{
+  "schema": "RealSaS.RestorationClosureTriggerOnce.v2",
+  "date": "2026-09-04",
+  "branch": "restoration/compiler-runtime-promotion-v1-20260903",
+  "runner": "self-hosted/linux/x64/realsas",
+  "purpose": "Trigger exactly one restoration-wide closure run on the registered RealSaS WSL self-hosted runner.",
+  "fit_authorization": false
+}

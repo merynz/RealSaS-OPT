@@ -24,10 +24,8 @@ class IrisReprojectionOutputV2:
 class IrisReprojectionV2(nn.Module):
     """Reprojection-centered RGB observation evidence learner.
 
-    Learned geometric authority is set-valued forward depth plus calibrated mode
-    support/uncertainty and per-view observational support. q_points remain analytic
-    candidate coordinates generated outside the network from exact cameras. P is
-    derived analytically from depth/camera; N remains deterministic/compiler-side.
+    The only learned geometric output is forward depth/support/uncertainty. q_points
+    are analytic candidate coordinates generated outside the network from exact cameras.
     Renderer alpha is not an admitted learner input.
     """
     def __init__(self, foundation_dims: tuple[int, ...], hidden_dim: int = 192, max_modes: int = 3):
@@ -48,10 +46,5 @@ class IrisReprojectionV2(nn.Module):
         field = self.field(encoded, domain)
         modes = extract_ray_modes_v2(field.score_logits, sampled.valid_views.any(dim=-1), max_modes=self.max_modes)
         refined = self.refine(field.hidden, domain.depth_values, modes)
-        out = self.output(
-            field.hidden,
-            modes,
-            view_tokens=encoded.view_tokens,
-            in_frame=domain.in_frame,
-        )
+        out = self.output(field.hidden, modes)
         return IrisReprojectionOutputV2(field, modes, refined, out)

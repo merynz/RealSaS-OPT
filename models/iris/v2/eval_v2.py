@@ -5,7 +5,7 @@ import torch
 
 from .model_v2 import IrisReprojectionOutputV2
 from .q_domain_v2 import RayHypothesisDomainV2
-from .train_v2 import _teacher_modes, _teacher_view_support, _mode_matching_errors
+from .train_v2 import _teacher_modes, _mode_matching_errors
 from .world_regularizer_v2 import isotropic_world_regularizer_v2
 
 
@@ -31,57 +31,11 @@ def _top_fraction_mean(values: torch.Tensor, fraction: float) -> float:
     return float(torch.topk(values, k=k, largest=True).values.mean())
 
 
-def _view_support_metrics(
-    output: IrisReprojectionOutputV2,
-    teacher_to_pred: torch.Tensor,
-    teacher_ok: torch.Tensor,
-    teacher_view_support: torch.Tensor | None,
-    *,
-    threshold: float = 0.5,
-) -> dict[str, float]:
-    if teacher_view_support is None or output.depth_output.view_support_probability is None:
-        return {
-            "view_support_precision": float("nan"),
-            "view_support_recall": float("nan"),
-            "view_support_f1": float("nan"),
-            "view_support_accuracy": float("nan"),
-        }
-    prob = output.depth_output.view_support_probability
-    idx = teacher_to_pred.clamp_min(0)[..., None].expand(*teacher_to_pred.shape, 8)
-    matched = torch.gather(prob, 2, idx)
-    mask = teacher_ok[..., None].expand_as(matched)
-    if not mask.any():
-        return {
-            "view_support_precision": float("nan"),
-            "view_support_recall": float("nan"),
-            "view_support_f1": float("nan"),
-            "view_support_accuracy": float("nan"),
-        }
-    pred = matched >= float(threshold)
-    target = teacher_view_support.bool()
-    p = pred[mask]
-    t = target[mask]
-    tp = (p & t).sum().float()
-    fp = (p & ~t).sum().float()
-    fn = (~p & t).sum().float()
-    precision = tp / (tp + fp).clamp_min(1.0)
-    recall = tp / (tp + fn).clamp_min(1.0)
-    f1 = 2.0 * precision * recall / (precision + recall).clamp_min(1e-12)
-    accuracy = (p == t).float().mean()
-    return {
-        "view_support_precision": float(precision),
-        "view_support_recall": float(recall),
-        "view_support_f1": float(f1),
-        "view_support_accuracy": float(accuracy),
-    }
-
-
 def iris_v2_scientific_metrics(
     output: IrisReprojectionOutputV2,
     domain: RayHypothesisDomainV2,
     teacher_depth: torch.Tensor,
     teacher_support: torch.Tensor,
-    teacher_view_support: torch.Tensor | None = None,
     *,
     support_probability_threshold: float = 0.5,
     tail_fraction: float = 0.10,
@@ -89,8 +43,9 @@ def iris_v2_scientific_metrics(
     """Consumer-aligned evaluation for multimodal IRIS evidence.
 
     Reports teacher-mode coverage, hard-tail error, unsupported predicted modes,
-    support classification, per-view observational support, uncertainty calibration
-    and the same sparse world-space consistency term used by training.
+    support classification, uncertainty calibration and the same sparse world-space
+    consistency term used by training. This evaluator never collapses a multimodal
+    teacher to one scalar target and never requires P/N truth.
     """
     if not (0.0 < support_probability_threshold < 1.0):
         raise ValueError("support_probability_threshold must be in (0,1)")
@@ -98,9 +53,6 @@ def iris_v2_scientific_metrics(
         raise ValueError("tail_fraction must be in (0,1]")
 
     td, tv, q_supported = _teacher_modes(teacher_depth, teacher_support, domain)
-    tvs = _teacher_view_support(teacher_view_support, td)
-    if tvs is not None:
-        tvs = tvs & tv[..., None]
     teacher_error, teacher_to_pred, teacher_ok, pred_error, pred_ok = _mode_matching_errors(output, td, tv)
     if not teacher_ok.any():
         raise ValueError("scientific metrics require at least one supported teacher mode")
@@ -144,7 +96,7 @@ def iris_v2_scientific_metrics(
         neighbor_mask=output.field.neighbor_mask,
     ).detach().float()
 
-    result = {
+    return {
         "teacher_mode_count": int(teacher_ok.sum().item()),
         "predicted_valid_mode_count": int(predicted_mode_valid.sum().item()),
         "coverage_mae": float(err.mean()),
@@ -163,5 +115,3 @@ def iris_v2_scientific_metrics(
         "depth_spacing": float(spacing.detach().cpu()),
         "support_tolerance": float(tolerance.detach().cpu()),
     }
-    result.update(_view_support_metrics(output, teacher_to_pred, teacher_ok, tvs))
-    return result

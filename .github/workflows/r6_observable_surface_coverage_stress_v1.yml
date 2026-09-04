@@ -10,28 +10,38 @@ on:
       - 'experiments/geppetto_arachne_r6_20260901/test_r6_geppetto_observable_coverage_stress_v1.py'
       - 'experiments/geppetto_arachne_r6_20260901/test_r6_arachne_observable_coverage_stress_v1.py'
       - '.github/workflows/r6_observable_surface_coverage_stress_v1.yml'
+  workflow_dispatch:
 
 jobs:
   coverage-stress:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, realsas, gpu]
     timeout-minutes: 180
+    env:
+      REALSAS_LOCAL_ML_VENV: /home/monster/realsas-ml312
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - name: Install frozen test dependencies
+          fetch-depth: 1
+      - name: Bind Linux Python 3.12 runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require validated local ML runtime
+        shell: bash
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install numpy scipy pytest
-          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          set -euxo pipefail
+          test -x "$REALSAS_LOCAL_ML_VENV/bin/python"
+          "$REALSAS_LOCAL_ML_VENV/bin/python" -c "import torch,numpy,scipy,pytest; print(torch.__version__, numpy.__version__)"
       - name: Compile preregistered coverage-stress apparatus
+        shell: bash
         run: |
-          python -m py_compile \
+          set -euxo pipefail
+          "$REALSAS_LOCAL_ML_VENV/bin/python" -m py_compile \
             experiments/geppetto_arachne_r6_20260901/oracle_substrate_coverage_stress_v1.py \
             experiments/geppetto_arachne_r6_20260901/test_r6_geppetto_observable_coverage_stress_v1.py \
             experiments/geppetto_arachne_r6_20260901/test_r6_arachne_observable_coverage_stress_v1.py
       - name: Measure GSA to Geppetto coverage stress
+        shell: bash
         env:
           PYTHONPATH: .
           OMP_NUM_THREADS: '1'
@@ -39,8 +49,10 @@ jobs:
           OPENBLAS_NUM_THREADS: '1'
           PYTHONHASHSEED: '0'
         run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_r6_geppetto_observable_coverage_stress_v1.py 2>&1 | tee R6_G_COVERAGE_STRESS.log
+          set -o pipefail
+          "$REALSAS_LOCAL_ML_VENV/bin/python" -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_r6_geppetto_observable_coverage_stress_v1.py 2>&1 | tee R6_G_COVERAGE_STRESS.log
       - name: Measure GSA to Arachne coverage stress
+        shell: bash
         env:
           PYTHONPATH: .
           OMP_NUM_THREADS: '1'
@@ -48,7 +60,8 @@ jobs:
           OPENBLAS_NUM_THREADS: '1'
           PYTHONHASHSEED: '0'
         run: |
-          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_r6_arachne_observable_coverage_stress_v1.py 2>&1 | tee R6_A_COVERAGE_STRESS.log
+          set -o pipefail
+          "$REALSAS_LOCAL_ML_VENV/bin/python" -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_r6_arachne_observable_coverage_stress_v1.py 2>&1 | tee R6_A_COVERAGE_STRESS.log
       - name: Upload immutable measurement logs
         if: always()
         uses: actions/upload-artifact@v4

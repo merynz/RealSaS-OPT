@@ -20,9 +20,18 @@ CURRENT_STAGES = (
 def _load() -> dict:
     payload = json.loads(REGISTRY.read_text(encoding="utf-8"))
     assert payload["schema"] == "RealSaS.LearnedArtifactRegistry.v1"
-    assert payload["architecture_base_commit_hash_kind"] == "GIT_SHA1_40"
-    assert GIT_SHA1.fullmatch(payload["architecture_base_commit"])
-    assert payload["architecture_base_ref"] == "first-fit-base/main-20260904"
+    assert payload["hardening_branch_base_commit_hash_kind"] == "GIT_SHA1_40"
+    assert GIT_SHA1.fullmatch(payload["hardening_branch_base_commit"])
+    assert payload["hardening_branch_base_ref"] == "first-fit-base/main-20260904"
+    authority = payload["architecture_source_authority"]
+    assert authority["state"] in {"PENDING_V2_REFREEZE", "FROZEN_V2"}
+    if authority["state"] == "PENDING_V2_REFREEZE":
+        assert authority["living_source_fingerprint_sha256"] is None
+        assert authority["selection_apparatus_fingerprint_sha256"] is None
+    else:
+        assert SHA256.fullmatch(authority["living_source_fingerprint_sha256"])
+        assert SHA256.fullmatch(authority["selection_apparatus_fingerprint_sha256"])
+        assert authority["seal_path"] == "canonical/ARCHITECTURE_FREEZE_V2.json"
     assert payload["binary_storage_policy"] == "EXTERNAL_BINARY__REPOSITORY_HASH_AND_LINEAGE_MANIFEST_REQUIRED"
     return payload
 
@@ -35,11 +44,15 @@ def test_current_learned_state_is_explicit_and_fail_closed_before_fit() -> None:
     assert set(payload["current_stages"]) == set(CURRENT_STAGES)
     for stage_name in CURRENT_STAGES:
         stage = payload["current_stages"][stage_name]
+        produced = stage["produced_by"]
         assert stage["state"] == "UNTRAINED", stage_name
         assert stage["checkpoint"] is None, stage_name
-        assert stage["produced_by"]["rung"] == "NONE_UNTRAINED", stage_name
-        assert stage["produced_by"]["teacher_access_level"] == "NONE", stage_name
-        assert stage["produced_by"]["optimizer_steps"] == 0, stage_name
+        assert produced["rung"] == "NONE_UNTRAINED", stage_name
+        assert produced["teacher_access_level"] == "NONE", stage_name
+        assert produced["optimizer_steps"] == 0, stage_name
+        assert produced["training_code_commit_hash_kind"] is None, stage_name
+        assert produced["training_code_commit"] is None, stage_name
+        assert produced["architecture_living_source_fingerprint_sha256"] is None, stage_name
         assert stage["authorized_claims"] == [], stage_name
         assert stage["shipping_authority"] is False, stage_name
         assert "SHIPPING_OBSERVATION_ONLY_INFERENCE" in stage["forbidden_claims"], stage_name
@@ -73,6 +86,8 @@ def test_registry_vocabularies_cover_rung_claim_firewall() -> None:
     assert "DOWNSTREAM_CONSUMER_CEILING" in payload["claim_vocabulary"]
     assert "L3_CONDITIONING_INPUT" in payload["teacher_access_vocabulary"]
     rule = payload["registration_rule"]
+    assert rule["every_current_checkpoint_requires_frozen_v2_living_source_fingerprint"] is True
+    assert rule["every_current_checkpoint_requires_training_code_commit"] is True
     assert rule["every_trained_checkpoint_requires_rung"] is True
     assert rule["every_trained_checkpoint_requires_teacher_access_level"] is True
     assert rule["every_trained_checkpoint_requires_authorized_and_forbidden_claims"] is True

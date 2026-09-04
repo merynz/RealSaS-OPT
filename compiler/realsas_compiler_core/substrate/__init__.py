@@ -17,6 +17,15 @@ from .local_geometry import (
     robust_local_plane_normals,
     robust_local_plane_normals_for_rows,
 )
+from .scene_first_signed import (
+    ZERO_SURFACE_NORMAL_OPERATOR_ID,
+    ZERO_SURFACE_COMPACTOR_ID,
+    ZERO_SURFACE_VISIBILITY_ID,
+    zero_surface_normal_operator_identity_v1,
+    zero_surface_normal_operator_hash_v1,
+    robust_zero_surface_normals_v1,
+    rigging_surface_from_scene_first_zero_mesh_v1,
+)
 
 __all__ = [
     "build_surface_from_persistence",
@@ -29,4 +38,11 @@ __all__ = [
     "orient_normal_against_ray",
     "robust_local_plane_normals",
     "robust_local_plane_normals_for_rows",
+    "ZERO_SURFACE_NORMAL_OPERATOR_ID",
+    "ZERO_SURFACE_COMPACTOR_ID",
+    "ZERO_SURFACE_VISIBILITY_ID",
+    "zero_surface_normal_operator_identity_v1",
+    "zero_surface_normal_operator_hash_v1",
+    "robust_zero_surface_normals_v1",
+    "rigging_surface_from_scene_first_zero_mesh_v1",
 ]

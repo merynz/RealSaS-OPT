@@ -1,0 +1,60 @@
+name: r6-observable-surface-coverage-stress-v1
+
+on:
+  push:
+    branches:
+      - 'first-family-fit/v1-20260904'
+    paths:
+      - 'canonical/R6_OBSERVABLE_SURFACE_COVERAGE_STRESS_PREREG_20260904.md'
+      - 'experiments/geppetto_arachne_r6_20260901/oracle_substrate_coverage_stress_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_r6_geppetto_observable_coverage_stress_v1.py'
+      - 'experiments/geppetto_arachne_r6_20260901/test_r6_arachne_observable_coverage_stress_v1.py'
+      - '.github/workflows/r6_observable_surface_coverage_stress_v1.yml'
+
+jobs:
+  coverage-stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install frozen test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy pytest
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Compile preregistered coverage-stress apparatus
+        run: |
+          python -m py_compile \
+            experiments/geppetto_arachne_r6_20260901/oracle_substrate_coverage_stress_v1.py \
+            experiments/geppetto_arachne_r6_20260901/test_r6_geppetto_observable_coverage_stress_v1.py \
+            experiments/geppetto_arachne_r6_20260901/test_r6_arachne_observable_coverage_stress_v1.py
+      - name: Measure GSA to Geppetto coverage stress
+        env:
+          PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_r6_geppetto_observable_coverage_stress_v1.py 2>&1 | tee R6_G_COVERAGE_STRESS.log
+      - name: Measure GSA to Arachne coverage stress
+        env:
+          PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+          PYTHONHASHSEED: '0'
+        run: |
+          python -m pytest -q -s experiments/geppetto_arachne_r6_20260901/test_r6_arachne_observable_coverage_stress_v1.py 2>&1 | tee R6_A_COVERAGE_STRESS.log
+      - name: Upload immutable measurement logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r6-observable-surface-coverage-stress-v1
+          path: |
+            R6_G_COVERAGE_STRESS.log
+            R6_A_COVERAGE_STRESS.log
+          if-no-files-found: warn

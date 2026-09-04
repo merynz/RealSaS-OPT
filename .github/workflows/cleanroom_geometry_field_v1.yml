@@ -1,0 +1,43 @@
+name: cleanroom-geometry-field-v1
+
+on:
+  push:
+    branches:
+      - cleanroom/iris-geometry-field-v1-20260904
+    paths:
+      - 'experiments/cleanroom_geometry_v1/**'
+      - '.github/workflows/cleanroom_geometry_field_v1.yml'
+  workflow_dispatch:
+
+jobs:
+  cleanroom-source-gate:
+    runs-on: [self-hosted, realsas, gpu]
+    timeout-minutes: 20
+    env:
+      CLEANROOM_BASE: f4a08141547952d2dca8a32b9cf8a709d36cdc9e
+      REALSAS_LOCAL_ML_VENV: /home/monster/realsas-ml312
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Canonical isolation gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only "$CLEANROOM_BASE"...HEAD | tee /tmp/cleanroom_changed.txt
+          while IFS= read -r path; do
+            case "$path" in
+              experiments/cleanroom_geometry_v1/*|.github/workflows/cleanroom_geometry_field_v1.yml) ;;
+              *) echo "CLEANROOM_CANONICAL_CONTAMINATION:$path" >&2; exit 1 ;;
+            esac
+          done < /tmp/cleanroom_changed.txt
+          echo CLEANROOM_CANONICAL_ISOLATION=PASS
+
+      - name: Cleanroom geometry source tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -x "$REALSAS_LOCAL_ML_VENV/bin/python"
+          PYTHONPATH="$GITHUB_WORKSPACE" "$REALSAS_LOCAL_ML_VENV/bin/python" -m unittest \
+            experiments.cleanroom_geometry_v1.test_geometry_field_v1

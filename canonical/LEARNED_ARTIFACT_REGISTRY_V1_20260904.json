@@ -1,9 +1,15 @@
 {
   "schema": "RealSaS.LearnedArtifactRegistry.v1",
   "date": "2026-09-04",
-  "architecture_base_commit_hash_kind": "GIT_SHA1_40",
-  "architecture_base_commit": "1f1d8b5bd0df9da2c62733c05c54ec4d99c05f2f",
-  "architecture_base_ref": "first-fit-base/main-20260904",
+  "hardening_branch_base_commit_hash_kind": "GIT_SHA1_40",
+  "hardening_branch_base_commit": "1f1d8b5bd0df9da2c62733c05c54ec4d99c05f2f",
+  "hardening_branch_base_ref": "first-fit-base/main-20260904",
+  "architecture_source_authority": {
+    "state": "PENDING_V2_REFREEZE",
+    "seal_path": "canonical/ARCHITECTURE_FREEZE_V2.json",
+    "living_source_fingerprint_sha256": null,
+    "selection_apparatus_fingerprint_sha256": null
+  },
   "binary_storage_policy": "EXTERNAL_BINARY__REPOSITORY_HASH_AND_LINEAGE_MANIFEST_REQUIRED",
   "fit_authorized_now": false,
   "current_product_state": "NO_CURRENT_TRAINED_END_TO_END_MODEL_SET",
@@ -21,7 +27,10 @@
         "data_manifest_sha256": null,
         "witness_asset_id": null,
         "input_sha256": null,
-        "optimizer_steps": 0
+        "optimizer_steps": 0,
+        "training_code_commit_hash_kind": null,
+        "training_code_commit": null,
+        "architecture_living_source_fingerprint_sha256": null
       },
       "authorized_claims": [],
       "forbidden_claims": ["SHIPPING_OBSERVATION_ONLY_INFERENCE", "GENERALIZATION", "PRODUCT_MODEL_READY"],
@@ -41,6 +50,9 @@
         "witness_asset_id": null,
         "input_sha256": null,
         "optimizer_steps": 0,
+        "training_code_commit_hash_kind": null,
+        "training_code_commit": null,
+        "architecture_living_source_fingerprint_sha256": null,
         "upstream_surface_checkpoint_sha256": null
       },
       "authorized_claims": [],
@@ -61,6 +73,9 @@
         "witness_asset_id": null,
         "input_sha256": null,
         "optimizer_steps": 0,
+        "training_code_commit_hash_kind": null,
+        "training_code_commit": null,
+        "architecture_living_source_fingerprint_sha256": null,
         "qualification_token_hash": null
       },
       "authorized_claims": [],
@@ -81,6 +96,9 @@
         "witness_asset_id": null,
         "input_sha256": null,
         "optimizer_steps": 0,
+        "training_code_commit_hash_kind": null,
+        "training_code_commit": null,
+        "architecture_living_source_fingerprint_sha256": null,
         "upstream_codec_checkpoint_sha256": null,
         "upstream_codec_a0_token_hash": null,
         "upstream_surface_checkpoint_sha256": null,
@@ -96,7 +114,7 @@
     {
       "subsystem": "iris",
       "state": "QUARANTINED",
-      "code_identity": {"historical_lineage": "V18_93_INDEPENDENT_SUPPORT", "current_architecture_commit": null},
+      "code_identity": {"historical_lineage": "V18_93_INDEPENDENT_SUPPORT", "current_architecture_fingerprint": null},
       "checkpoint": {
         "name": "best.pt",
         "sha256": "5976d8cd0496023b5cad49aa49ee5962e1717175edd06af0bd9aa1132c96557d",
@@ -114,7 +132,7 @@
     {
       "subsystem": "iris",
       "state": "QUARANTINED",
-      "code_identity": {"historical_lineage": "V18_82R1", "current_architecture_commit": null},
+      "code_identity": {"historical_lineage": "V18_82R1", "current_architecture_fingerprint": null},
       "checkpoint": {
         "name": "final_best_calibration.pt",
         "sha256": "2d3085c8ef059ba2f8e5b2cea481f0aeb65c21f77ab4d3b062d9f4dcf8afa23b",
@@ -150,7 +168,8 @@
   "registration_rule": {
     "binary_may_live_outside_git": true,
     "every_current_checkpoint_requires_sha256": true,
-    "every_current_checkpoint_requires_exact_architecture_base": true,
+    "every_current_checkpoint_requires_frozen_v2_living_source_fingerprint": true,
+    "every_current_checkpoint_requires_training_code_commit": true,
     "every_current_checkpoint_requires_training_data_manifest": true,
     "every_current_checkpoint_requires_optimizer_step": true,
     "every_trained_checkpoint_requires_rung": true,
@@ -161,5 +180,5 @@
     "shipping_claim_requires_shipping_authority_true": true,
     "historical_checkpoint_may_be_promoted_by_name_only": false
   },
-  "first_fit_transition": "Family-1 optimizer step 0 starts with all four current stages UNTRAINED. Every saved artifact is first registered with exact rung/teacher-access/hash/lineage and a bounded claim set. No oracle-conditional checkpoint can acquire shipping authority by filename or training success alone."
+  "first_fit_transition": "Family-1 optimizer step 0 starts with all four current stages UNTRAINED. Every saved artifact must bind the frozen V2 living-source fingerprint, the exact training Git commit, rung, teacher-access, data-manifest SHA, optimizer step, checkpoint SHA and bounded claims. No oracle-conditional checkpoint can acquire shipping authority by filename or training success alone."
 }

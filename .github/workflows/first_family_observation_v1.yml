@@ -28,6 +28,11 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Activate Linux Python 3.12 toolchain
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Require persistent ML environment
         shell: bash
         run: |

@@ -51,9 +51,10 @@ def test_qualification_owned_bake_binds_exact_product_and_plan():
 def test_proof_engine_is_fail_closed_without_directional_frame_authority():
     root = Path(__file__).resolve().parents[2]
     source = (root / "compiler/realsas_compiler_core/proof_engine.py").read_text(encoding="utf-8")
+    normalized_source = " ".join(source.split())
     assert "motion_bake_provider" in source
     assert "MISSING_QUALIFICATION_OWNED_BAKE" in source
-    assert "Direct mechanical-joint/P.xy evaluation is forbidden" in source
+    assert "Direct mechanical-joint/P.xy evaluation is forbidden" in normalized_source
     for forbidden in ("motion_probe", "measure_authored_motion_v1", "skinning_transforms"):
         assert forbidden not in source
 

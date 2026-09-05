@@ -49,6 +49,10 @@ These authoring additions are user intent only. They do not claim that arbitrary
 
 The tests assert V4 lineage, raster-derived scene geometry, proof-owned runtime interpolation, sibling user-layer persistence, and canonical-bundle immutability.
 
+### Runner policy
+
+RealSaS product/export CI is expected to run on the canonical local/self-hosted runner with labels `[self-hosted, linux, x64, realsas]`. Do **not** switch these gates back to GitHub-hosted `ubuntu-latest` unless the repository's Actions billing/quota policy is intentionally changed. The workflow files carry the same warning at their entry point so this constraint remains visible to future maintainers.
+
 ## Non-claims
 
 - This promotion does not claim one-family real FIT PASS.

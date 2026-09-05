@@ -26,6 +26,7 @@ from .scene_first_signed import (
     robust_zero_surface_normals_v1,
     rigging_surface_from_scene_first_zero_mesh_v1,
 )
+from .validation import audit_rigging_surface_ir_v1, validate_rigging_surface_ir_v1
 
 __all__ = [
     "build_surface_from_persistence",
@@ -45,4 +46,6 @@ __all__ = [
     "zero_surface_normal_operator_hash_v1",
     "robust_zero_surface_normals_v1",
     "rigging_surface_from_scene_first_zero_mesh_v1",
+    "audit_rigging_surface_ir_v1",
+    "validate_rigging_surface_ir_v1",
 ]

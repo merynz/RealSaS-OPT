@@ -136,9 +136,9 @@ def conditioning_boundary_report_v1(
         raise ValueError("surface position drift between conditioning arms")
 
     delta = full.features - compact.features
-    raster = full.features[0, :, RASTER_COLUMNS]
+    raster = full.features[0][:, RASTER_COLUMNS]
     nonraster_cols = tuple(i for i in range(full.features.shape[-1]) if i not in RASTER_COLUMNS)
-    nonraster_delta = delta[0, :, nonraster_cols]
+    nonraster_delta = delta[0][:, nonraster_cols]
 
     graph_idx, graph_tel = gsa_graph_neighbor_index_v1(production_surface, k=16)
     return {
@@ -150,7 +150,7 @@ def conditioning_boundary_report_v1(
         "raster_channel_std": raster.std(axis=0).astype(float).tolist(),
         "raster_channel_nonzero_fraction": (np.abs(raster) > 1e-12).mean(axis=0).astype(float).tolist(),
         "max_abs_nonraster_feature_delta": float(np.abs(nonraster_delta).max(initial=0.0)),
-        "max_abs_raster_feature_delta": float(np.abs(delta[0, :, RASTER_COLUMNS]).max(initial=0.0)),
+        "max_abs_raster_feature_delta": float(np.abs(delta[0][:, RASTER_COLUMNS]).max(initial=0.0)),
         "gsa_graph_neighbor_telemetry": graph_tel,
         "gsa_graph_neighbor_index_shape": list(graph_idx.shape),
     }

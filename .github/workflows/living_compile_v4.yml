@@ -1,0 +1,47 @@
+# IMPORTANT: RealSaS CI uses the canonical LOCAL/SELF-HOSTED runner.
+# Do not switch this workflow back to GitHub-hosted `ubuntu-latest` unless the
+# Actions billing/quota policy is intentionally changed. Expected labels:
+# [self-hosted, linux, x64, realsas].
+
+name: Living Compile V4
+
+on:
+  pull_request:
+    paths:
+      - 'product/**'
+      - 'tests/product/**'
+      - 'experiments/single_family_e2e_v1/export_bundle_v1.py'
+      - 'REPOSITORY_MAP.md'
+      - 'canonical/LIVING_COMPILE_V4_PRODUCT_SHELL_PROMOTION_20260905.md'
+      - '.github/workflows/living_compile_v4.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'product/**'
+      - 'tests/product/**'
+      - 'experiments/single_family_e2e_v1/export_bundle_v1.py'
+      - '.github/workflows/living_compile_v4.yml'
+
+jobs:
+  product-shell:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Python product-shell tests
+        run: PYTHONPATH=. python -m unittest -v tests.product.test_living_compile_v4
+      - name: Python syntax
+        run: python -m py_compile product/living_compile/*.py experiments/single_family_e2e_v1/export_bundle_v1.py
+      - name: JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in product/living_compile/static/js/*.js; do
+            node --check "$f"
+          done

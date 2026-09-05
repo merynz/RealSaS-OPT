@@ -9,6 +9,7 @@ RealSaS-OPT is a **research library with a continuously upgraded executable main
 | `models/` | Current learned model implementations: IRIS, Geppetto, SkinFieldCodec, Arachne | **Evidence/proposals only** | `models/README.md` |
 | `compiler/realsas_compiler_core/` | Current typed Compiler authority: qualification, canonical IDs, product lineage, proof binding | **Yes — only here** | `compiler/README.md` |
 | `compiler/realsas_compiler_services/` | Promoted proof/repair/export/numerical services consumed through current Compiler contracts | No | `compiler/realsas_compiler_services/README.md` |
+| `product/` | User-facing product surfaces; Living Compile inspector/editor consumes current Compiler/proof/runtime authority | **No — consumer only** | `product/README.md` |
 | `runtime/realsas_cpp/` | Native C++17 runtime consumer of proof-gated export packages | No | `runtime/README.md` |
 | `runtime/reference_v4/` | Python reference/conformance consumer | No | `runtime/README.md` |
 | `experiments/` | Research/training/diagnostic apparatus and upgrade candidates | No | `experiments/README.md` |
@@ -27,14 +28,15 @@ RealSaS-OPT is a **research library with a continuously upgraded executable main
 5. `models/README.md` — current learned stack and its boundaries
 6. `compiler/README.md`
 7. `compiler/realsas_compiler_services/README.md`
-8. `runtime/README.md`
-9. `canonical/README.md`
-10. experiment/workflow indexes only when investigating a specific gate
+8. `product/README.md`
+9. `runtime/README.md`
+10. `canonical/README.md`
+11. experiment/workflow indexes only when investigating a specific gate
 
 ## Research-library lifecycle
 
 ```text
-mainline = models/ + compiler/ + runtime/
+mainline = models/ + compiler/ + product/ + runtime/
 labs     = experiments/
 decision = canonical/
 reserve  = historical/
@@ -51,6 +53,10 @@ See `docs/repository/RESEARCH_LIBRARY_MODEL.md` for the promotion and replacemen
 A current executable concept gets one semantic owner and one obvious mainline directory. If an implementation is experimental, historical, generated evidence, or a runtime consumer, its path must say so. Compatibility aliases may exist temporarily during migration, but they cannot create a second authority.
 
 Production/mainline code should not permanently import dated experiment implementations. Experiments may import mainline code; successful experimental mechanisms are promoted into their semantic home before they become current dependencies.
+
+## Product-surface authority rule
+
+`product/` may visualize, edit, and stage user intent, but it may not mint `CanonicalPuppetGraph`, proof, qualification, or deployable-runtime truth. Living Compile user edits remain sibling authoring layers until Compiler requalification and fresh dynamic proof accept them.
 
 ## No directory-by-date authority
 

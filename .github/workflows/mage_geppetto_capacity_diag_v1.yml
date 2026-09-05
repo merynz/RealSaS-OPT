@@ -1,0 +1,64 @@
+name: mage-geppetto-capacity-diagnostic-v1
+
+on:
+  push:
+    branches:
+      - e2e/mage-scene-first-v1-20260905
+    paths:
+      - 'experiments/mage_geppetto_capacity_diag_v1/**'
+      - '.github/workflows/mage_geppetto_capacity_diag_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: mage-geppetto-capacity-diagnostic-v1
+  cancel-in-progress: true
+
+jobs:
+  capacity-diagnostic:
+    runs-on: [self-hosted, realsas, gpu]
+    timeout-minutes: 60
+    env:
+      PY: /home/monster/realsas-ml312/bin/python
+      CUBLAS_WORKSPACE_CONFIG: ':4096:8'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bind Linux Python 3.12 runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify runtime and GPU
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          "$PY" - <<'PY'
+          import os, torch
+          print('torch', torch.__version__)
+          print('cuda', torch.cuda.is_available())
+          print('cublas_workspace_config', os.environ.get('CUBLAS_WORKSPACE_CONFIG'))
+          if not torch.cuda.is_available(): raise SystemExit('CUDA_REQUIRED')
+          if os.environ.get('CUBLAS_WORKSPACE_CONFIG') != ':4096:8': raise SystemExit('DETERMINISTIC_CUBLAS_BINDING_REQUIRED')
+          print('gpu', torch.cuda.get_device_name(0))
+          print('vram_gib', torch.cuda.get_device_properties(0).total_memory/2**30)
+          PY
+
+      - name: Run Mage Geppetto capacity diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/realsas-mage-geppetto-capacity
+          PYTHONPATH="$GITHUB_WORKSPACE" "$PY" \
+            experiments/mage_geppetto_capacity_diag_v1/run.py \
+            /tmp/realsas-mage-geppetto-capacity/MAGE_GEPPETTO_CAPACITY_DIAGNOSTIC_V1.json
+
+      - name: Upload diagnostic witness
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mage-geppetto-capacity-diagnostic-v1
+          path: /tmp/realsas-mage-geppetto-capacity/MAGE_GEPPETTO_CAPACITY_DIAGNOSTIC_V1.json
+          if-no-files-found: warn

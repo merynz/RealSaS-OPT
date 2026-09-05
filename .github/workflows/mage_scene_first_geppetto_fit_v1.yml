@@ -19,6 +19,7 @@ jobs:
     timeout-minutes: 60
     env:
       PY: /home/monster/realsas-ml312/bin/python
+      CUBLAS_WORKSPACE_CONFIG: ':4096:8'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,10 +36,12 @@ jobs:
           set -euo pipefail
           test -x "$PY"
           "$PY" - <<'PY'
-          import torch, numpy, scipy
+          import os, torch, numpy, scipy
           print('torch', torch.__version__)
           print('cuda', torch.cuda.is_available())
+          print('cublas_workspace_config', os.environ.get('CUBLAS_WORKSPACE_CONFIG'))
           if not torch.cuda.is_available(): raise SystemExit('CUDA_REQUIRED')
+          if os.environ.get('CUBLAS_WORKSPACE_CONFIG') != ':4096:8': raise SystemExit('DETERMINISTIC_CUBLAS_BINDING_REQUIRED')
           print('gpu', torch.cuda.get_device_name(0))
           print('vram_gib', torch.cuda.get_device_properties(0).total_memory/2**30)
           PY

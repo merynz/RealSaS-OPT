@@ -1,3 +1,8 @@
+# IMPORTANT: RealSaS CI uses the canonical LOCAL/SELF-HOSTED runner.
+# Do not switch this workflow back to GitHub-hosted `ubuntu-latest` unless the
+# Actions billing/quota policy is intentionally changed. Expected labels:
+# [self-hosted, linux, x64, realsas].
+
 name: export-runtime-source-contract
 on:
   pull_request:
@@ -17,7 +22,8 @@ on:
       - '.github/workflows/export_runtime_source_contract.yml'
 jobs:
   export-runtime-source-contract:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

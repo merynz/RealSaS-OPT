@@ -1,0 +1,33 @@
+name: package-mage-e2e-snapshot-v1
+
+on:
+  push:
+    branches:
+      - e2e/mage-scene-first-v1-20260905
+    paths:
+      - '.github/workflows/package_mage_e2e_snapshot_v1.yml'
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build exact E2E source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/realsas-e2e-snapshot
+          tar -czf /tmp/realsas-e2e-snapshot/RealSaS_MAGE_E2E_SOURCE_SNAPSHOT_V1.tar.gz \
+            models/geppetto \
+            models/arachne \
+            compiler \
+            experiments/mage_scene_first_e2e_v1
+          sha256sum /tmp/realsas-e2e-snapshot/RealSaS_MAGE_E2E_SOURCE_SNAPSHOT_V1.tar.gz \
+            | tee /tmp/realsas-e2e-snapshot/SHA256.txt
+          git rev-parse HEAD | tee /tmp/realsas-e2e-snapshot/COMMIT.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: realsas-mage-e2e-source-snapshot-v1
+          path: /tmp/realsas-e2e-snapshot/
+          compression-level: 0

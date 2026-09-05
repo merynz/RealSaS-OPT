@@ -107,6 +107,8 @@ Examples not globally enforced by the type itself include:
 
 This is a contract-hardening gap. It is not yet evidence that the Mage fixture is malformed; the measured Mage fixture is internally coherent on the fields audited above.
 
+A read-only central validator was added after this audit finding as `substrate.validation.validate_rigging_surface_ir_v1`. It is intentionally **not** wired into product construction yet; promotion to a mandatory fail-closed interlock requires its own E2E compatibility pass. The validator now centralizes node/raster/support/normal/relation/lineage invariants and has a stricter scene-first profile.
+
 ## 6. Correction to legacy-path findings
 
 The following concerns are real in legacy/alternate substrate paths but do not currently explain the Mage scene-first witness unless those paths are reintroduced:
@@ -128,6 +130,8 @@ Before any new Geppetto architecture change after the optimizer fork, perform tw
 
 1. **Raster restoration diagnostic** — same scene-first nodes/normals/support, but feed the production raster bindings instead of four zero raster channels.
 2. **Topology-consumption diagnostic** — compare current Euclidean KNN locality against a controlled encoder that consumes GSA `local_relations`, without changing target serialization or downstream authority.
+
+The boundary interventions are now frozen in `GSA_GEPPETTO_CONDITIONING_ABLATION_DESIGN_FREEZE_V1.md`. The topology arm uses a cardinality-matched `GSA_GRAPH_16` policy: self + 15 neighbors ranked by graph hop, then Euclidean distance, then sorted `surface_id`, so neighbor cardinality is not a hidden confound.
 
 Separately harden `RiggingSurfaceIR` with an explicit validator and producer/consumer invariant tests before the full Mage E2E chain is declared deterministic-boundary clean.
 

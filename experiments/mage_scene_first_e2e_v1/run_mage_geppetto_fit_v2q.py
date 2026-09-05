@@ -1,19 +1,24 @@
 from __future__ import annotations
 
 import base64
+from collections import Counter
 from hashlib import sha256
 from io import BytesIO
 from pathlib import Path
+import math
 import sys
 
 import numpy as np
 
 from experiments.mage_scene_first_e2e_v1 import run_mage_geppetto_fit_v1 as fit
+from experiments.mage_scene_first_e2e_v1.geppetto_coincident_loss_v3 import GeppettoLossV3CoincidentVectorized
+from models.geppetto.v2.geppetto_train_v2 import geppetto_train_step_v2 as _canonical_train_step
 
 
 PARTS_DIR = Path(__file__).with_name("fixture_parts")
 FIXTURE_SHA256 = "60b0b2788b7d37971dcd81886c165cd56eab3da767f9b555b08cc3f267ed1aa8"
 EXPECTED_PARTS = tuple(f"v2q_{i:02d}.txt" for i in range(9))
+LOSS = GeppettoLossV3CoincidentVectorized()
 
 
 def _load_fixture_v2q() -> dict[str, np.ndarray]:
@@ -56,13 +61,30 @@ def _load_fixture_v2q() -> dict[str, np.ndarray]:
         }
     if out["points"].shape != (950, 3) or out["bone_heads_world"].shape != (41, 3):
         raise RuntimeError("dequantized Mage fixture shape drift")
+    groups = Counter(map(tuple, out["bone_heads_world"].tolist()))
+    multiplicities = sorted((n for n in groups.values() if n > 1), reverse=True)
+    variants = math.prod(math.factorial(n) for n in multiplicities)
+    print("MAGE_COINCIDENT_HEAD_MULTIPLICITIES", multiplicities, "TOPOLOGY_VARIANTS", variants, flush=True)
+    if variants != 2304:
+        raise RuntimeError(f"Mage coincident topology contract drift:{variants}")
     return out
 
 
-# Transport-only substitution. Training architecture, optimizer, targets, compiler
-# qualification, and PASS criteria remain the frozen V1 FIT experiment.
+def _train_step_v3(model, optimizer, conditioning, targets, *, loss_fn=None):
+    if loss_fn is not None:
+        raise ValueError("E2E wrapper owns the preregistered coincident-symmetry loss")
+    return _canonical_train_step(model, optimizer, conditioning, targets, loss_fn=LOSS)
+
+
+# The compact fixture is transport-only. The only scientific challenger here is
+# a generic loss-equivalence hardening: exact coincident teacher loci remain
+# anonymous, but their finite topology symmetries are evaluated in one vectorized
+# tensor instead of V2's <=256 Python-loop enumeration. Model architecture,
+# optimizer, targets, shipping inference, compiler qualification and PASS gates
+# remain the frozen Mage V1 FIT experiment.
 fit._load_fixture = _load_fixture_v2q
 fit.FIXTURE_SHA256 = FIXTURE_SHA256
+fit.geppetto_train_step_v2 = _train_step_v3
 
 
 if __name__ == "__main__":

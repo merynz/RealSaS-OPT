@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RealSaS — Living Compile</title>
+  <link rel="stylesheet" href="/static/css/living_compile.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="mark">RS</span><div><strong>RealSaS</strong><small>Living Compile · V4</small></div></div>
+    <div class="bundle-open"><input id="bundlePath" placeholder="C:\\...\\e2e_output"><button id="openBundle">OPEN BUNDLE</button></div>
+    <div class="authority"><span id="proofBadge" class="badge">NO BUNDLE</span><span id="stateHash" class="mono"></span></div>
+  </header>
+
+  <nav class="modebar">
+    <button class="mode active" data-mode="rig">RIG</button>
+    <button class="mode" data-mode="mesh">MESH</button>
+    <button class="mode" data-mode="weights">WEIGHTS</button>
+    <button class="mode" data-mode="bindings">BINDINGS</button>
+    <button class="mode" data-mode="topology">TOPOLOGY</button>
+    <button class="mode" data-mode="ik">IK</button>
+    <button class="mode" data-mode="animation">ANIMATION</button>
+    <span class="separator"></span>
+    <button id="saveLayer">SAVE USER LAYER</button>
+    <button id="exportRuntime">EXPORT</button>
+  </nav>
+
+  <main class="workspace">
+    <aside class="left panel">
+      <div class="panel-title">CHARACTER / VIEW</div>
+      <div id="views" class="view-grid"></div>
+      <div class="panel-title">SCENE</div>
+      <div id="sceneTree" class="tree"></div>
+      <div class="panel-title">AUTHORITY</div>
+      <div id="authorityText" class="authority-copy">Open a proof-gated V4 bundle.</div>
+    </aside>
+
+    <section class="center panel viewport-panel">
+      <div class="viewport-toolbar">
+        <span id="viewLabel">VIEW —</span>
+        <label><input id="showImage" type="checkbox" checked> IMAGE</label>
+        <label><input id="showMesh" type="checkbox" checked> MESH</label>
+        <label><input id="showRig" type="checkbox" checked> RIG</label>
+        <label><input id="showWeights" type="checkbox"> WEIGHTS</label>
+        <button id="fitView">FIT</button>
+      </div>
+      <canvas id="viewport" width="1100" height="820"></canvas>
+      <div id="hint" class="hint">Open a bundle.</div>
+    </section>
+
+    <aside class="right panel inspector">
+      <div class="panel-title">INSPECTOR</div>
+      <div id="inspectorBody"></div>
+    </aside>
+  </main>
+
+  <section class="timeline panel">
+    <div class="timeline-head">
+      <div class="transport"><button id="play">▶</button><button id="stop">■</button></div>
+      <select id="clipSelect"></select>
+      <span id="timeReadout" class="mono">0.000 / 0.000</span>
+      <label>FPS <input id="fps" type="number" min="1" max="120" value="30"></label>
+      <button id="newClip">NEW CLIP</button><button id="addKey">ADD KEY</button><button id="deleteKey">DELETE KEY</button>
+      <select id="curveSelect"><option value="linear">LINEAR</option><option value="step">STEP</option><option value="cubic">CUBIC</option></select>
+    </div>
+    <div class="timeline-body">
+      <div id="trackList" class="track-list"></div>
+      <div class="dope-wrap"><canvas id="dope" width="1500" height="220"></canvas></div>
+    </div>
+  </section>
+
+  <div id="toast" class="toast"></div>
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

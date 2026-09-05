@@ -1,5 +1,7 @@
 from dataclasses import replace
+import math
 
+import numpy as np
 import pytest
 
 from compiler.realsas_compiler_core.substrate.scene_first_signed import (
@@ -10,7 +12,35 @@ from compiler.realsas_compiler_core.substrate.validation import (
     validate_rigging_surface_ir_v1,
 )
 from compiler.realsas_compiler_core.types import QualificationError, SurfaceRelation
-from tests.compiler.test_scene_first_signed_surface_bridge_v1 import _cameras, _sphere_mesh
+from models.iris.v3.zero_surface_decoder_v3 import extract_zero_surface_mesh_v3
+
+
+def _sphere_mesh():
+    pytest.importorskip("skimage")
+    r = 30
+    a = np.linspace(-1.0, 1.0, r, dtype=np.float32)
+    z, y, x = np.meshgrid(a, a, a, indexing="ij")
+    field = np.sqrt(x * x + y * y + z * z) - 0.62
+    return extract_zero_surface_mesh_v3(field)
+
+
+def _cameras(resolution=128):
+    rows = []
+    for view in range(8):
+        yaw = math.radians(45.0 * view)
+        forward = np.asarray([-math.sin(yaw), -math.cos(yaw), 0.0], np.float64)
+        origin = -4.0 * forward
+        right = np.asarray([-math.cos(yaw), math.sin(yaw), 0.0], np.float64)
+        rows.append({
+            "view_index": view,
+            "origin": origin.tolist(),
+            "right": right.tolist(),
+            "screen_up": [0.0, 0.0, 1.0],
+            "forward": forward.tolist(),
+            "half_extent": 1.05,
+            "resolution": resolution,
+        })
+    return rows
 
 
 def _surface():

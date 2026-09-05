@@ -9,6 +9,10 @@ on:
       - '.github/workflows/mage_scene_first_geppetto_fit_v1.yml'
   workflow_dispatch:
 
+concurrency:
+  group: mage-scene-first-geppetto-fit-v1
+  cancel-in-progress: true
+
 jobs:
   mage-geppetto-fit:
     runs-on: [self-hosted, realsas, gpu]

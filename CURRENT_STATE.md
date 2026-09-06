@@ -8,7 +8,7 @@ This file is continuation authority only on `main`.
 
 ## One-line state
 
-`Architecture V4, the deterministic compiler/runtime ownership split, and the FIT1 product target remain binding; however Geppetto architecture promotion/refreeze is temporarily blocked because the current V2 decoder is latent-state recurrent rather than skeleton-causal autoregressive. AR-01 must isolate and test generated/teacher joint + parent geometry feedback before Geppetto is refrozen. FIT1-specific optimizer containment remains scientifically allowed inside FIT1 and is not generic architecture authority.`
+`Architecture V4, the deterministic compiler/runtime ownership split, and the FIT1 product target remain binding; however Geppetto architecture promotion/refreeze is temporarily blocked because the current V2 decoder is latent-state recurrent rather than skeleton-causal autoregressive. AR-01 must isolate and test generated/teacher joint + parent geometry feedback before Geppetto is refrozen. FIT1 mechanism authority remains in its own preregistered experiment/result ledger.`
 
 ## Binding authority order
 
@@ -70,11 +70,9 @@ The exact hard-MAP recurrence previously removed must **not** be restored as the
 
 ## FIT1 authority during the hold
 
-FIT1 remains the immediate product-science target. FIT1-specific interventions are scientifically legitimate when preregistered and reported as FIT1 mechanisms, including the previously studied strong trunk actual-update containment such as the `0.005` arm.
+FIT1 remains the immediate product-science target. FIT1-specific mechanisms continue under their own preregistered experiment/result authority and are not re-adjudicated by this state file.
 
-Such a FIT1-specific policy may establish or preserve FIT1 closure. It must not be promoted as evidence that a generic architecture will generalize unless a later family-disjoint transfer gate independently supports that claim.
-
-AR-01 is therefore not a rejection of FIT1. It is a short architecture-responsibility closure required before Geppetto is refrozen for the continuing FIT1 program.
+AR-01 is therefore not a rejection or redesign of FIT1. It is a narrow architecture-responsibility closure required before Geppetto is refrozen for the continuing FIT1 program.
 
 ## Separate unresolved neural responsibility — not part of AR-01
 

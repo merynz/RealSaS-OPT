@@ -63,6 +63,8 @@ jobs:
         run: python tests/models/test_geppetto_mainline_source_v1.py
       - name: Geppetto lossless product-conditioning regression
         run: python -m pytest -q tests/models/test_geppetto_lossless_conditioning_v3.py
+      - name: Geppetto AR-01 causal isolation regression
+        run: python -m pytest -q tests/models/test_geppetto_ar01_skeleton_causal_v1.py
       - name: SkinFieldCodec source/config gate
         run: python tests/models/test_skin_field_codec_mainline_source_v1.py
       - name: Arachne inference source/dependency bridge gate
@@ -84,7 +86,7 @@ jobs:
             tests/repository/test_learned_artifact_registry_v1.py \
             experiments/family_selection_v1/test_prefit_family_truth_eligibility_v1.py \
             experiments/family_selection_v1/test_post_freeze_family_selector_v1.py
-      - name: Syntax-compile promoted model packages
+      - name: Syntax-compile promoted and experimental model packages
         run: |
           python - <<'PY'
           import py_compile
@@ -93,6 +95,7 @@ jobs:
               Path('models/iris/v2'),
               Path('models/geppetto/v2'),
               Path('models/geppetto/v3'),
+              Path('models/geppetto/challengers'),
               Path('models/skin_field_codec/v1'),
               Path('models/arachne/v2'),
               Path('experiments/family_selection_v1'),

@@ -1,65 +1,126 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-09-02  
-**Canonical continuation branch:** `main` after generic-source PR merge  
-**Status:** `FORENSIC_AUDIT_CLOSED__GENERIC_SOURCE_GATE_PASS__FIT8_FREEZE_NEXT__REAL_FIT_NOT_STARTED__GENERALIZATION_BLOCKED`
+**Date:** 2026-09-07  
+**Canonical continuation branch:** `main`  
+**Status:** `GEPPETTO_AR01_AUDIT_HOLD__SKELETON_CAUSAL_AR_UNRESOLVED__FIT1_REMAINS_SCIENTIFIC_TARGET`
 
 This file is continuation authority only on `main`.
 
 ## One-line state
 
-`Architecture V4 + the forensic completion matrix are binding; every blocking generic source row required before fitting now has executable source and green source/E2E gates; next is FIT-01 (deterministic clean full-truth FIT8 freeze + one-family prereg), not architectural redesign.`
+`Architecture V4, the deterministic compiler/runtime ownership split, and the FIT1 product target remain binding; however Geppetto architecture promotion/refreeze is temporarily blocked because the current V2 decoder is latent-state recurrent rather than skeleton-causal autoregressive. AR-01 must isolate and test generated/teacher joint + parent geometry feedback before Geppetto is refrozen. FIT1-specific optimizer containment remains scientifically allowed inside FIT1 and is not generic architecture authority.`
 
 ## Binding authority order
 
-1. `canonical/CANONICAL_REALSaS_COMPLETION_PLAN_20260902.md` — completion/execution authority.
-2. `canonical/CANONICAL_REALSaS_COMPLETION_MATRIX_20260902.json` — machine row/dependency authority.
-3. `canonical/GENERIC_SOURCE_COMPLETION_CLOSURE_20260902.md` — source-gate closure and next-gate authority.
-4. `canonical/SYSTEM_ARCHITECTURE_V4_20260902.md` — product ontology/type authority.
-5. current `main` source.
-6. explicitly promoted historical bytes/evidence only.
+1. this `CURRENT_STATE.md` — continuation / stop-go authority;
+2. `canonical/BRANCH_AUTHORITY_V1.md` — branch/promotion authority;
+3. `canonical/CANONICAL_REALSaS_COMPLETION_PLAN_20260902.md` — completion/execution lineage except where superseded by this audit hold;
+4. `canonical/CANONICAL_REALSaS_COMPLETION_MATRIX_20260902.json` — machine row/dependency lineage except where superseded by this audit hold;
+5. `canonical/SYSTEM_ARCHITECTURE_V4_20260902.md` — product ontology/type authority;
+6. current `main` source;
+7. explicitly promoted historical bytes/evidence only.
 
-`3D_EQUIVALENT_MECHANICS != FULL_3D_RECONSTRUCTION` remains binding. Shipping representation is an eight-direction 2D/2.5D puppet. Canonical motion is puppet-local `translation_xy`, `rotation_deg`, `scale_xy`, `depth_offset`; quaternion/Vec3 canonical motion is forbidden.
+No side branch becomes current truth merely because it contains newer experiments. Experimental evidence may block continuation without being promoted as product source.
 
-## Closed generic source stack
+## What remains closed / binding
 
-- exact DTB-ND1 port/qualification + persistence bridge;
-- generic IRIS V2 q-evidence/mode/refinement/d/support/uncertainty/train/eval/checkpoint apparatus;
-- Geppetto V2 audited 24D conditioning, resource-bounded dynamic cardinality through the 328-control envelope, uncertainty, STOP, relation evidence and train/eval;
-- one-family exact data/truth rebind authority;
-- SkinFieldCodec verified-LBS/deformation apparatus;
-- segment-aware, tree-aware Arachne V2 with shared codec decoder and uncertainty;
-- MWB2 observed-safe directional mesh + exact S/G/W/M mesh-skin lineage;
-- observation-derived appearance with no camera refit and typed UNKNOWN failure;
-- deterministic joint-ID-only puppet-local preset motion;
-- causal six-domain proof/deformation engine;
-- fresh-PASS-proof-gated bundle export + Python V4 reference runtime;
-- inference truth firewall + complete synthetic/mock-learned E2E through real Compiler/proof/runtime.
+- Shipping target remains an eight-direction 2D/2.5D editable puppet; full 3D reconstruction is not product authority.
+- IRIS owns learned image-to-signed-geometry evidence.
+- GSA / RiggingSurfaceIR assembly, validation, provenance, normalization/packing contracts, exact legality, canonicalization and fail-close remain deterministic responsibilities.
+- Compiler owns canonical IDs only after exact solve and owns final legal root/parent/tree selection.
+- Geometry-only deduplication is forbidden.
+- Hidden deform-node synthesis/completion remains forbidden with budget 0 in the product route.
+- Teacher/source mesh at shipping inference remains forbidden.
+- Lossless evidence must be preserved at the learned-consumer boundary; summary-only 24D evidence is not sufficient product authority.
 
-## Scientific authorization
+## Geppetto audit finding — why continuation is on hold
 
-**Synthetic/source capacity & complete source E2E:** PASS/AUTHORIZED.  
-**FIT8 deterministic membership + visual freeze:** NEXT.  
-**Real one-family optimizer:** NOT YET STARTED; open only after FIT8 and exact one-family prereg/data-byte freeze.  
-**One-family product PASS:** NOT CLAIMED.  
-**FIT8 generalization:** BLOCKED until one complete real-family E2E PASS.  
-**Teacher/source mesh at shipping inference:** FORBIDDEN.  
-**Full 3D reconstruction authority:** FORBIDDEN.
+Current canonical Geppetto V2 is `RealSaS.GeppettoCandidate.LatentAutoregressiveSetProposal.v3`.
 
-## FIT-01 authority already recovered
+Its decoder is recurrent in latent state, but the emitted joint locus is not fed into the next generation step, and parent logits are evaluated after the generated latent/locus sequence exists. Therefore it is **not** a generated-skeleton-conditioned structural autoregressive decoder in the RigAnything sense.
 
-The audited Master lane remains:
+Historical hard-MAP locus feedback was deliberately removed because discrete multimodal crossover could rewrite all later anonymous control states. That repair proved the old hard-MAP feedback path brittle; it did **not** prove that safe continuous/mechanical skeleton feedback is unnecessary.
 
-`Master clean family -> 8-view RGBA/cameras to IRIS; skeleton truth training/eval-only to Geppetto; skin truth training/eval-only to Arachne.`
+The repository already contains a research-only RigAnything-mechanism challenger with teacher-forced/sampled joint + parent-geometry feedback. That source is evidence/design lineage only and is not product authority until a controlled AR-01 experiment closes.
 
-Use the frozen full-truth FIT population and source-textured/clean visual review. Do not replace Master RGBA+cameras with a newly invented appearance authority. Mage `asset_fbc8d57f848df78bd953fbb5` remains a proven strong initial witness candidate, but no source architecture may be customized around it.
+## AR-01 — next scientific gate
+
+**Gate ID:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
+
+Question:
+
+> With all other mechanism, evidence, target, serialization, optimizer and evaluation variables matched, does previous joint + parent mechanical geometry causally fed into the next generation step improve FIT1 reachability/retention and structural prediction relative to the same decoder with that feedback disabled?
+
+Required isolation:
+
+- same lossless evidence seam;
+- same full-surface access policy;
+- same locus-generation mechanism in both arms;
+- same model parameterization except for the preregistered feedback gate;
+- same structural serialization;
+- same forced FIT1 control count for this architecture test;
+- same optimizer schedule/policy;
+- same seed/backend contract;
+- same late-stability evaluation;
+- no sibling-order augmentation in AR-01;
+- no simultaneous optimizer redesign;
+- no compiler/cardinality repair.
+
+The exact hard-MAP recurrence previously removed must **not** be restored as the AR-01 treatment. The treatment is safe skeleton-causal feedback using joint geometry plus parent geometry/state.
+
+## FIT1 authority during the hold
+
+FIT1 remains the immediate product-science target. FIT1-specific interventions are scientifically legitimate when preregistered and reported as FIT1 mechanisms, including the previously studied strong trunk actual-update containment such as the `0.005` arm.
+
+Such a FIT1-specific policy may establish or preserve FIT1 closure. It must not be promoted as evidence that a generic architecture will generalize unless a later family-disjoint transfer gate independently supports that claim.
+
+AR-01 is therefore not a rejection of FIT1. It is a short architecture-responsibility closure required before Geppetto is refrozen for the continuing FIT1 program.
+
+## Separate unresolved neural responsibility — not part of AR-01
+
+`MECHANICAL_SALIENCE_FUNCTIONAL_SIMPLIFICATION` remains open.
+
+Questions such as:
+
+- whether a deform control is mechanically necessary;
+- whether an artist two-joint chain can be simplified while preserving function;
+- whether accessory/facial/deformation controls belong in the product skeleton;
+
+cannot be invented by an exact graph optimizer from legality alone. They require neural mechanical evidence and belong on the Geppetto side of the boundary.
+
+This responsibility is intentionally **out of scope for AR-01** so that AR-01 changes one causal variable only. It must remain on the post-AR-01 research ledger and must not silently migrate into compiler heuristics.
+
+## Experimental branch authority
+
+The lossless-rigging-evidence branch and its draft PR remain experimental/quarantined. A green source gate proves source/contract integrity only; it does not authorize architecture promotion.
+
+The historical/experimental Mage branches remain evidence lineage. Red GitHub Actions must be classified as apparatus/config, source-contract, science, or cancelled/superseded before they can affect scientific authority.
+
+## Promotion / refreeze rule
+
+No Geppetto architecture refreeze is authorized before AR-01 closes.
+
+If AR-01 supports skeleton-causal autoregression, promotion must atomically reconcile:
+
+1. promoted model source;
+2. source/unit/behavioral tests;
+3. exact AR-01 result + prereg/provenance hashes;
+4. lossless product-conditioning consumer compatibility;
+5. compiler contract compatibility;
+6. this `CURRENT_STATE.md` continuation decision;
+7. explicit revocation/supersession of the prior Geppetto architecture authority where applicable.
+
+Only then create an immutable milestone tag/commit for the refrozen architecture.
 
 ## Next execution order
 
-1. freeze the deterministic 8-family full-truth clean panel and exact byte manifest;
-2. visually review all 64 source-textured 1024 observations;
-3. preregister one-family optimizer/capacity ladder and proof thresholds without using outcomes;
-4. run one-family IRIS -> Geppetto -> codec/Arachne -> MWB2/appearance/motion -> proof/runtime;
-5. only after a real-family full E2E PASS open heterogeneous FIT8/generalization.
+1. freeze AR-01 preregistration before any new optimizer step;
+2. construct the causal-isolated AR0/AR1 challenger with one feedback gate;
+3. run source/unit/causal preflights proving the two arms differ only through skeleton feedback;
+4. run the disciplined FIT1 AR-01 notebook and record full late-stability traces;
+5. decide PASS/FAIL without changing gates post-result;
+6. if PASS, promote/refreeze through the explicit main promotion rule;
+7. continue FIT1 product closure;
+8. retain `MECHANICAL_SALIENCE_FUNCTIONAL_SIMPLIFICATION` as the next separate neural-responsibility gate rather than hiding it in compiler heuristics.
 
-Source/CI closure is not product completion; the next claimable scientific milestone is one real-family E2E product PASS.
+Until step 5 closes, **do not treat current latent-only recurrence or the research C3 challenger as frozen generic Geppetto architecture authority.**

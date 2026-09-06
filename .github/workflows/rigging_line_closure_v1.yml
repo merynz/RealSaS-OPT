@@ -15,22 +15,37 @@ on:
       - '.github/workflows/rigging_line_closure_v1.yml'
   workflow_dispatch:
 
+concurrency:
+  group: rigging-line-closure-v1
+  cancel-in-progress: true
+
 jobs:
   rigging-line-closure:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, realsas, gpu]
     timeout-minutes: 20
+    env:
+      PY: /home/monster/realsas-ml312/bin/python
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - name: Install test dependencies
+          fetch-depth: 0
+      - name: Verify bound Python runtime
+        shell: bash
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install numpy scipy pytest
+          set -euo pipefail
+          test -x "$PY"
+          "$PY" - <<'PY'
+          import numpy, scipy, pytest
+          print('python-runtime-ok')
+          print('numpy', numpy.__version__)
+          print('scipy', scipy.__version__)
+          print('pytest', pytest.__version__)
+          PY
       - name: Compile changed rigging sources
+        shell: bash
         run: |
-          python -m py_compile \
+          set -euo pipefail
+          "$PY" -m py_compile \
             compiler/realsas_compiler_core/skeleton_admission_v1.py \
             compiler/realsas_compiler_core/substrate/validation.py \
             compiler/realsas_compiler_core/substrate/__init__.py \
@@ -39,7 +54,10 @@ jobs:
             models/geppetto/v2/geppetto_conditioning_v2.py \
             tests/compiler/test_rigging_line_closure_v1.py
       - name: Run rigging closure behavioral gates
+        shell: bash
         env:
           PYTHONHASHSEED: '0'
         run: |
-          python -m pytest -q -s tests/compiler/test_rigging_line_closure_v1.py
+          set -euo pipefail
+          PYTHONPATH="$GITHUB_WORKSPACE" "$PY" -m pytest -q -s \
+            tests/compiler/test_rigging_line_closure_v1.py

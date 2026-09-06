@@ -1,6 +1,22 @@
 from __future__ import annotations
 from .surface import build_surface_from_persistence, rigging_surface_from_d2_arrays
-from .rig import qualify_skeleton, qualify_skeleton_v2
+from .rig import (
+    qualify_skeleton,
+    qualify_skeleton_v2,
+    compile_scene_first_rigging_v1,
+    assert_single_deform_tree_product_v1,
+)
+from .skeleton_admission_v1 import (
+    admit_skeleton_proposal_v1,
+    COMPAT_SKELETON_ADMISSION_POLICY_V1,
+    PRODUCT_SKELETON_ADMISSION_POLICY_V1,
+)
+from .substrate.validation import (
+    audit_rigging_surface_ir_v1,
+    validate_rigging_surface_ir_v1,
+    rigging_surface_boundary_audit_hash_v1,
+    rigging_surface_topology_fingerprint_v1,
+)
 from .skin import qualify_skin
 from .mesh_binding import (
     mesh_candidate_lineage_hash, mesh_lineage_hash, mesh_skin_lineage_hash,
@@ -35,67 +51,81 @@ from .bundle_routes import write_typed_artifact, route_for
 class CompilerFacade:
     """Single current programmatic entrypoint for compiler qualification.
 
-    V1/V2 compatibility remains available, but V4 composition authority terminates
-    in a directional 2D/2.5D CanonicalPuppetGraph.v3 + ProductProofBundleIR.
-    World/camera-space mechanical evidence never implies full-3D reconstruction authority.
+    Scene-first rigging promotion authority terminates at
+    ``compile_scene_first_rigging_v1``. The older ``qualify_skeleton*`` methods
+    remain compatibility/diagnostic routes and explicitly carry no promotion
+    authority in their qualification reports.
     """
-    build_surface_from_persistence=staticmethod(build_surface_from_persistence)
-    rigging_surface_from_d2_arrays=staticmethod(rigging_surface_from_d2_arrays)
-    qualify_skeleton=staticmethod(qualify_skeleton)
-    qualify_skeleton_v2=staticmethod(qualify_skeleton_v2)
-    qualify_skin=staticmethod(qualify_skin)
-    mesh_candidate_lineage_hash=staticmethod(mesh_candidate_lineage_hash)
-    mesh_lineage_hash=staticmethod(mesh_lineage_hash)
-    mesh_skin_lineage_hash=staticmethod(mesh_skin_lineage_hash)
-    validate_surface_support_binding=staticmethod(validate_surface_support_binding)
-    derive_bound_position=staticmethod(derive_bound_position)
-    validate_mesh_candidate=staticmethod(validate_mesh_candidate)
-    validate_qualified_mesh=staticmethod(validate_qualified_mesh)
-    validate_qualified_mesh_skin=staticmethod(validate_qualified_mesh_skin)
-    qualify_identity_subset_mesh=staticmethod(qualify_identity_subset_mesh)
-    bind_identity_mesh_skin=staticmethod(bind_identity_mesh_skin)
-    qualify_directional_joint_view_binding=staticmethod(qualify_directional_joint_view_binding)
-    assert_directional_binding_for_product=staticmethod(assert_directional_binding_for_product)
-    project_mechanical_point=staticmethod(project_mechanical_point)
-    projection_for_view=staticmethod(projection_for_view)
-    joint_pivot=staticmethod(joint_pivot)
-    assemble_product=staticmethod(assemble_product)
-    assemble_product_v2=staticmethod(assemble_product_v2)
-    bind_proof=staticmethod(bind_proof)
-    require_current_proof=staticmethod(require_current_proof)
-    project_runtime_package=staticmethod(project_runtime_package)
 
-    upgrade_qualified_skeleton_v2=staticmethod(upgrade_qualified_skeleton_v2)
-    validate_qualified_skeleton_v2=staticmethod(validate_qualified_skeleton_v2)
-    validate_mechanical_state=staticmethod(validate_mechanical_state)
-    build_mechanical_state=staticmethod(build_mechanical_state)
-    build_appearance_binding=staticmethod(build_appearance_binding)
-    validate_appearance_binding=staticmethod(validate_appearance_binding)
-    qualify_visual_completion=staticmethod(qualify_visual_completion)
-    build_renderable_component=staticmethod(build_renderable_component)
-    validate_renderable_component=staticmethod(validate_renderable_component)
-    build_directional_renderable=staticmethod(build_directional_renderable)
-    validate_directional_renderable=staticmethod(validate_directional_renderable)
-    build_directional_renderable_set=staticmethod(build_directional_renderable_set)
-    validate_directional_renderable_set=staticmethod(validate_directional_renderable_set)
-    build_capability_contract=staticmethod(build_capability_contract)
-    validate_capability_contract=staticmethod(validate_capability_contract)
-    make_single_family_e2e_capability_contract=staticmethod(make_single_family_e2e_capability_contract)
-    build_joint_track=staticmethod(build_joint_track)
-    build_order_track=staticmethod(build_order_track)
-    build_visibility_track=staticmethod(build_visibility_track)
-    build_motion_state=staticmethod(build_motion_state)
-    validate_motion_state=staticmethod(validate_motion_state)
-    required_proof_domains=staticmethod(required_proof_domains)
-    validate_product_ontology=staticmethod(validate_product_ontology)
-    assemble_product_v3=staticmethod(assemble_product_v3)
-    bind_proof_plan=staticmethod(bind_proof_plan)
-    bind_measurement_report=staticmethod(bind_measurement_report)
-    bind_domain_proof=staticmethod(bind_domain_proof)
-    bind_product_proof_bundle=staticmethod(bind_product_proof_bundle)
-    require_current_proof_bundle=staticmethod(require_current_proof_bundle)
-    qualify_capability=staticmethod(qualify_capability)
-    project_runtime_package_v3=staticmethod(project_runtime_package_v3)
+    build_surface_from_persistence = staticmethod(build_surface_from_persistence)
+    rigging_surface_from_d2_arrays = staticmethod(rigging_surface_from_d2_arrays)
 
-    write_typed_artifact=staticmethod(write_typed_artifact)
-    route_for=staticmethod(route_for)
+    audit_rigging_surface_ir_v1 = staticmethod(audit_rigging_surface_ir_v1)
+    validate_rigging_surface_ir_v1 = staticmethod(validate_rigging_surface_ir_v1)
+    rigging_surface_boundary_audit_hash_v1 = staticmethod(rigging_surface_boundary_audit_hash_v1)
+    rigging_surface_topology_fingerprint_v1 = staticmethod(rigging_surface_topology_fingerprint_v1)
+
+    admit_skeleton_proposal_v1 = staticmethod(admit_skeleton_proposal_v1)
+    compat_skeleton_admission_policy_v1 = COMPAT_SKELETON_ADMISSION_POLICY_V1
+    product_skeleton_admission_policy_v1 = PRODUCT_SKELETON_ADMISSION_POLICY_V1
+    qualify_skeleton = staticmethod(qualify_skeleton)
+    qualify_skeleton_v2 = staticmethod(qualify_skeleton_v2)
+    compile_scene_first_rigging_v1 = staticmethod(compile_scene_first_rigging_v1)
+    assert_single_deform_tree_product_v1 = staticmethod(assert_single_deform_tree_product_v1)
+
+    qualify_skin = staticmethod(qualify_skin)
+    mesh_candidate_lineage_hash = staticmethod(mesh_candidate_lineage_hash)
+    mesh_lineage_hash = staticmethod(mesh_lineage_hash)
+    mesh_skin_lineage_hash = staticmethod(mesh_skin_lineage_hash)
+    validate_surface_support_binding = staticmethod(validate_surface_support_binding)
+    derive_bound_position = staticmethod(derive_bound_position)
+    validate_mesh_candidate = staticmethod(validate_mesh_candidate)
+    validate_qualified_mesh = staticmethod(validate_qualified_mesh)
+    validate_qualified_mesh_skin = staticmethod(validate_qualified_mesh_skin)
+    qualify_identity_subset_mesh = staticmethod(qualify_identity_subset_mesh)
+    bind_identity_mesh_skin = staticmethod(bind_identity_mesh_skin)
+    qualify_directional_joint_view_binding = staticmethod(qualify_directional_joint_view_binding)
+    assert_directional_binding_for_product = staticmethod(assert_directional_binding_for_product)
+    project_mechanical_point = staticmethod(project_mechanical_point)
+    projection_for_view = staticmethod(projection_for_view)
+    joint_pivot = staticmethod(joint_pivot)
+    assemble_product = staticmethod(assemble_product)
+    assemble_product_v2 = staticmethod(assemble_product_v2)
+    bind_proof = staticmethod(bind_proof)
+    require_current_proof = staticmethod(require_current_proof)
+    project_runtime_package = staticmethod(project_runtime_package)
+
+    upgrade_qualified_skeleton_v2 = staticmethod(upgrade_qualified_skeleton_v2)
+    validate_qualified_skeleton_v2 = staticmethod(validate_qualified_skeleton_v2)
+    validate_mechanical_state = staticmethod(validate_mechanical_state)
+    build_mechanical_state = staticmethod(build_mechanical_state)
+    build_appearance_binding = staticmethod(build_appearance_binding)
+    validate_appearance_binding = staticmethod(validate_appearance_binding)
+    qualify_visual_completion = staticmethod(qualify_visual_completion)
+    build_renderable_component = staticmethod(build_renderable_component)
+    validate_renderable_component = staticmethod(validate_renderable_component)
+    build_directional_renderable = staticmethod(build_directional_renderable)
+    validate_directional_renderable = staticmethod(validate_directional_renderable)
+    build_directional_renderable_set = staticmethod(build_directional_renderable_set)
+    validate_directional_renderable_set = staticmethod(validate_directional_renderable_set)
+    build_capability_contract = staticmethod(build_capability_contract)
+    validate_capability_contract = staticmethod(validate_capability_contract)
+    make_single_family_e2e_capability_contract = staticmethod(make_single_family_e2e_capability_contract)
+    build_joint_track = staticmethod(build_joint_track)
+    build_order_track = staticmethod(build_order_track)
+    build_visibility_track = staticmethod(build_visibility_track)
+    build_motion_state = staticmethod(build_motion_state)
+    validate_motion_state = staticmethod(validate_motion_state)
+    required_proof_domains = staticmethod(required_proof_domains)
+    validate_product_ontology = staticmethod(validate_product_ontology)
+    assemble_product_v3 = staticmethod(assemble_product_v3)
+    bind_proof_plan = staticmethod(bind_proof_plan)
+    bind_measurement_report = staticmethod(bind_measurement_report)
+    bind_domain_proof = staticmethod(bind_domain_proof)
+    bind_product_proof_bundle = staticmethod(bind_product_proof_bundle)
+    require_current_proof_bundle = staticmethod(require_current_proof_bundle)
+    qualify_capability = staticmethod(qualify_capability)
+    project_runtime_package_v3 = staticmethod(project_runtime_package_v3)
+
+    write_typed_artifact = staticmethod(write_typed_artifact)
+    route_for = staticmethod(route_for)

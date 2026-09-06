@@ -5,6 +5,7 @@ import math
 
 import numpy as np
 
+from ..hashing import content_sha256
 from .types import QualificationError, RiggingSurfaceIR
 
 
@@ -14,6 +15,35 @@ def _finite_vec(values, width: int) -> bool:
     except Exception:
         return False
     return a.shape == (width,) and bool(np.isfinite(a).all())
+
+
+def rigging_surface_topology_fingerprint_v1(surface: RiggingSurfaceIR) -> str:
+    """Hash the exact typed local-relation graph independently of neural policy."""
+    rows = []
+    for rel in sorted(surface.local_relations, key=lambda r: str(r.relation_id)):
+        rows.append(
+            {
+                "relation_id": str(rel.relation_id),
+                "a_surface_id": str(rel.a_surface_id),
+                "b_surface_id": str(rel.b_surface_id),
+                "relation_kind": str(rel.relation_kind),
+                "score": float(rel.score),
+                "metadata": dict(rel.metadata or {}),
+            }
+        )
+    return content_sha256(
+        {
+            "schema": "RealSaS.RiggingSurfaceTopologyFingerprint.v1",
+            "geometry_lineage_hash": str(surface.geometry_lineage_hash),
+            "relations": rows,
+        }
+    )
+
+
+def rigging_surface_boundary_audit_hash_v1(report: dict) -> str:
+    if report.get("schema") != "RealSaS.RiggingSurfaceIRBoundaryAudit.v1":
+        raise ValueError("unexpected RiggingSurfaceIR boundary audit schema")
+    return content_sha256(report)
 
 
 def audit_rigging_surface_ir_v1(
@@ -26,8 +56,8 @@ def audit_rigging_surface_ir_v1(
 
     This function does not mutate, complete, repair or reinterpret the surface.
     It centralizes invariants that were previously checked only piecemeal by
-    producers/consumers. Product paths do not call it implicitly; promotion of
-    any fail-closed interlock is a separate decision.
+    producers/consumers. Scene-first product conditioning must call the fail-closed
+    wrapper before any Geppetto feature construction.
     """
     errors: list[str] = []
     warnings: list[str] = []
@@ -159,7 +189,12 @@ def audit_rigging_surface_ir_v1(
             resolution = 0
         if resolution <= 0:
             errors.append("SCENE_FIRST:MISSING_OR_BAD_RESOLUTION")
-        for key in ("source_run_id", "source_checkpoint_sha256", "source_zero_surface_sha256", "Nd_operator_sha256"):
+        for key in (
+            "source_run_id",
+            "source_checkpoint_sha256",
+            "source_zero_surface_sha256",
+            "Nd_operator_sha256",
+        ):
             if not str(meta.get(key, "")):
                 errors.append(f"SCENE_FIRST:MISSING_{key.upper()}")
         if int(meta.get("compact_surface_node_count", -1)) != len(nodes):
@@ -168,29 +203,54 @@ def audit_rigging_surface_ir_v1(
             errors.append("SCENE_FIRST:OBSERVED_COUNT_METADATA_DRIFT")
         if int(meta.get("completed_node_count", -1)) != sum(not bool(n.support_views) for n in nodes):
             errors.append("SCENE_FIRST:COMPLETED_COUNT_METADATA_DRIFT")
+        if observed_count <= 0:
+            errors.append("SCENE_FIRST:NO_OBSERVED_SURFACE_NODE")
+        if raster_binding_count <= 0:
+            errors.append("SCENE_FIRST:NO_RASTER_EVIDENCE")
+        if not relations:
+            errors.append("SCENE_FIRST:NO_LOCAL_TOPOLOGY")
         for i, rel in enumerate(relations):
             if rel.relation_kind != "SIGNED_ZERO_SURFACE_TOPOLOGY_NEIGHBOR":
-                warnings.append(f"SCENE_FIRST:UNEXPECTED_RELATION_KIND[{i}]:{rel.relation_kind}")
+                warnings.append(
+                    f"SCENE_FIRST:UNEXPECTED_RELATION_KIND[{i}]:{rel.relation_kind}"
+                )
             if dict(rel.metadata or {}).get("teacher_truth_used") is not False:
-                errors.append(f"SCENE_FIRST:RELATION_TEACHER_TRUTH_FLAG_NOT_FALSE[{i}]")
+                errors.append(
+                    f"SCENE_FIRST:RELATION_TEACHER_TRUTH_FLAG_NOT_FALSE[{i}]"
+                )
 
-    degree_values = np.asarray([degree.get(x, 0) for x in ids], dtype=np.float64) if ids else np.zeros(0)
+    degree_values = (
+        np.asarray([degree.get(x, 0) for x in ids], dtype=np.float64)
+        if ids
+        else np.zeros(0)
+    )
     report = {
         "schema": "RealSaS.RiggingSurfaceIRBoundaryAudit.v1",
         "builder_id": str(surface.builder_id),
         "schema_version": str(surface.schema_version),
         "geometry_lineage_hash": str(surface.geometry_lineage_hash),
+        "topology_fingerprint": rigging_surface_topology_fingerprint_v1(surface),
         "node_count": len(nodes),
         "relation_count": len(relations),
         "raster_binding_count": int(raster_binding_count),
         "normal_count": int(normal_count),
         "observed_flag_count": int(observed_count),
         "completed_flag_count": int(completed_count),
-        "support_count_histogram": {str(k): int(v) for k, v in sorted(support_hist.items())},
-        "relation_kind_counts": {k: int(v) for k, v in sorted(relation_kinds.items())},
-        "mean_relation_degree": None if not len(degree_values) else float(degree_values.mean()),
-        "min_relation_degree": None if not len(degree_values) else int(degree_values.min()),
-        "max_relation_degree": None if not len(degree_values) else int(degree_values.max()),
+        "support_count_histogram": {
+            str(k): int(v) for k, v in sorted(support_hist.items())
+        },
+        "relation_kind_counts": {
+            k: int(v) for k, v in sorted(relation_kinds.items())
+        },
+        "mean_relation_degree": (
+            None if not len(degree_values) else float(degree_values.mean())
+        ),
+        "min_relation_degree": (
+            None if not len(degree_values) else int(degree_values.min())
+        ),
+        "max_relation_degree": (
+            None if not len(degree_values) else int(degree_values.max())
+        ),
         "error_count": len(errors),
         "warning_count": len(warnings),
         "errors": tuple(errors),
@@ -199,7 +259,9 @@ def audit_rigging_surface_ir_v1(
         "scene_first_profile_required": bool(require_scene_first_signed_contract),
     }
     if raise_on_error and errors:
-        raise QualificationError("RIGGING_SURFACE_IR_AUDIT_FAIL:" + ";".join(errors[:12]))
+        raise QualificationError(
+            "RIGGING_SURFACE_IR_AUDIT_FAIL:" + ";".join(errors[:12])
+        )
     return report
 
 
@@ -216,4 +278,9 @@ def validate_rigging_surface_ir_v1(
     )
 
 
-__all__ = ["audit_rigging_surface_ir_v1", "validate_rigging_surface_ir_v1"]
+__all__ = [
+    "audit_rigging_surface_ir_v1",
+    "validate_rigging_surface_ir_v1",
+    "rigging_surface_boundary_audit_hash_v1",
+    "rigging_surface_topology_fingerprint_v1",
+]

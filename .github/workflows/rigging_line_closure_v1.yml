@@ -1,0 +1,45 @@
+name: rigging-line-closure-v1
+
+on:
+  push:
+    branches:
+      - e2e/mage-scene-first-v1-20260905
+    paths:
+      - 'compiler/realsas_compiler_core/rig.py'
+      - 'compiler/realsas_compiler_core/api.py'
+      - 'compiler/realsas_compiler_core/skeleton_admission_v1.py'
+      - 'compiler/realsas_compiler_core/substrate/__init__.py'
+      - 'compiler/realsas_compiler_core/substrate/validation.py'
+      - 'models/geppetto/v2/geppetto_conditioning_v2.py'
+      - 'tests/compiler/test_rigging_line_closure_v1.py'
+      - '.github/workflows/rigging_line_closure_v1.yml'
+  workflow_dispatch:
+
+jobs:
+  rigging-line-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy pytest
+      - name: Compile changed rigging sources
+        run: |
+          python -m py_compile \
+            compiler/realsas_compiler_core/skeleton_admission_v1.py \
+            compiler/realsas_compiler_core/substrate/validation.py \
+            compiler/realsas_compiler_core/substrate/__init__.py \
+            compiler/realsas_compiler_core/rig.py \
+            compiler/realsas_compiler_core/api.py \
+            models/geppetto/v2/geppetto_conditioning_v2.py \
+            tests/compiler/test_rigging_line_closure_v1.py
+      - name: Run rigging closure behavioral gates
+        env:
+          PYTHONHASHSEED: '0'
+        run: |
+          python -m pytest -q -s tests/compiler/test_rigging_line_closure_v1.py

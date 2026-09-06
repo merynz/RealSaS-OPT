@@ -61,6 +61,8 @@ jobs:
         run: python tests/iris/test_iris_mainline_source_v1.py
       - name: Geppetto inference source gate
         run: python tests/models/test_geppetto_mainline_source_v1.py
+      - name: Geppetto lossless product-conditioning regression
+        run: python -m pytest -q tests/models/test_geppetto_lossless_conditioning_v3.py
       - name: SkinFieldCodec source/config gate
         run: python tests/models/test_skin_field_codec_mainline_source_v1.py
       - name: Arachne inference source/dependency bridge gate
@@ -90,12 +92,18 @@ jobs:
           for root in (
               Path('models/iris/v2'),
               Path('models/geppetto/v2'),
+              Path('models/geppetto/v3'),
               Path('models/skin_field_codec/v1'),
               Path('models/arachne/v2'),
               Path('experiments/family_selection_v1'),
           ):
               for path in sorted(root.glob('*.py')):
                   py_compile.compile(str(path), doraise=True)
+          for path in (
+              Path('models/geppetto/__init__.py'),
+              Path('models/geppetto/product_conditioning.py'),
+          ):
+              py_compile.compile(str(path), doraise=True)
           PY
       - name: Pre-fit status summary
         run: |

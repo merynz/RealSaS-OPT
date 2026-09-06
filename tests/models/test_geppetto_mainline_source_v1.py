@@ -30,7 +30,7 @@ class GeppettoMainlineSourceV1(unittest.TestCase):
         self.assertIn("class GeppettoCandidateV2(nn.Module):", candidate)
         self.assertIn("LatentAutoregressiveSetProposal.v3", candidate)
         self.assertIn("FEATURE_CONTRACT_V2", conditioning)
-        self.assertIn("assert len(FEATURE_CONTRACT_V2)==24", conditioning)
+        self.assertIn("assert len(FEATURE_CONTRACT_V2) == 24", conditioning)
         self.assertIn("_canonical_integer_tie_matrix", loss)
         self.assertIn("_coincident_topology_mappings", loss)
 

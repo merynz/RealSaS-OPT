@@ -2,11 +2,18 @@ name: Live Authority Map
 
 on:
   push:
+    branches: [main]
+    paths:
+      - 'CURRENT_STATE.md'
+      - 'canonical/AUTHORITY_MAP_V1.json'
+      - 'canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md'
+      - 'canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md'
+      - 'canonical/BRANCH_AUTHORITY_V1.md'
+      - 'tools/render_authority_map.py'
+      - '.github/workflows/live_authority_map.yml'
   create:
   delete:
   workflow_dispatch:
-  schedule:
-    - cron: "17 3 * * *"
 
 permissions:
   contents: write
@@ -26,10 +33,19 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Render and validate live map
-        run: python tools/render_authority_map.py --write
+      - name: Render live authority map
+        shell: bash
+        run: |
+          set +e
+          python tools/render_authority_map.py --write
+          rc=$?
+          if [ -f canonical/LIVE_AUTHORITY_MAP.md ]; then
+            cat canonical/LIVE_AUTHORITY_MAP.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit $rc
 
-      - name: Commit refreshed map when repository state changed
+      - name: Commit refreshed map when authority state changed
+        if: success()
         shell: bash
         run: |
           if git diff --quiet -- canonical/LIVE_AUTHORITY_MAP.md; then

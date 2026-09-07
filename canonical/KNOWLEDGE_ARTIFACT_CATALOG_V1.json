@@ -4,7 +4,7 @@
   "authority": "DISCOVERY_CENSUS_ONLY__NOT_SCIENTIFIC_OR_CONTINUATION_AUTHORITY",
   "scope_note": "100% census coverage refers only to main plus explicitly registered ACTIVE_EXPERIMENT/EVIDENCE_ONLY branches. Bootstrap remains incomplete until historical branch disposition/audit closes.",
   "canonical_branch": "main",
-  "canonical_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+  "canonical_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
   "registered_branch_scans": [
     {
       "branch": "demo/investor-single-specimen-e2e",
@@ -57,7 +57,7 @@
     {
       "artifact_id": "KA-E0EA25440FAA",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "a4dbada3e1e0fc425b57e72cf48ccf9d27973403",
       "path": "canonical/GEPPETTO_ARACHNE_EXTERNAL_REFERENCE_AUDIT_CLOSURE_20260831.md",
       "role": "CLOSURE",
@@ -73,7 +73,7 @@
     {
       "artifact_id": "KA-DD19F0B32355",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f8994deea4ee232f83ac8f75b77001c4c2ce4d86",
       "path": "canonical/GEPPETTO_ARACHNE_EXTERNAL_REFERENCE_CLEANROOM_AUDIT_PREREG_20260831.md",
       "role": "PREREG",
@@ -89,7 +89,7 @@
     {
       "artifact_id": "KA-F4F84EFB8CEF",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "303bcbaf9652299b2041978d826a372ea4febec5",
       "path": "canonical/GEPPETTO_ARACHNE_NATIVE_IMAGE_INTEGRITY_CLOSURE_20260831.md",
       "role": "CLOSURE",
@@ -106,7 +106,7 @@
     {
       "artifact_id": "KA-B82A2893E24E",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7b2b80b675cda98016473c5af9e6d5d08da36e59",
       "path": "experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -123,7 +123,7 @@
     {
       "artifact_id": "KA-6F4734248D1D",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "476754c10d19e162b02f4d54995868dbf9729a9c",
       "path": "experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_one_family_v1.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -141,7 +141,7 @@
     {
       "artifact_id": "KA-0C68B31527CB",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "1c9207ba651ac07ef7b5ee6d63b33ea39688e9f9",
       "path": "experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_geppetto_one_family_v1.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -159,7 +159,7 @@
     {
       "artifact_id": "KA-802134D3D69E",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f02ed9d510f32f8afbd01c3587b21ce3558e7dd9",
       "path": "experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_tail_causal_diagnostic.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -175,7 +175,7 @@
     {
       "artifact_id": "KA-CAFA6350896B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "80b9c0a37fa30464a5e609becad770eb3fc2937a",
       "path": "experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_temperature_causal_diagnostic.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -191,7 +191,7 @@
     {
       "artifact_id": "KA-FCF19CFB6679",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "85ba4de9d44dc8569557f4aca4c67fcf8e496b73",
       "path": "experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_objective_causal_diagnostic.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -207,7 +207,7 @@
     {
       "artifact_id": "KA-A241C333576F",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "0e743dbac94981f747a5c1f5b4327609c49839cb",
       "path": "canonical/GEPPETTO_ARACHNE_CANDIDATE_STACK_V1_SOURCE_CLOSURE_20260902.md",
       "role": "CLOSURE",
@@ -223,7 +223,7 @@
     {
       "artifact_id": "KA-02555231408B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "3fcdbdac9c530b765e49b7aa133ccc9db9d12e30",
       "path": "canonical/GEPPETTO_V2_SOURCE_CLOSURE_20260902.md",
       "role": "CLOSURE",
@@ -238,7 +238,7 @@
     {
       "artifact_id": "KA-2B5806E2FD8B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "c8aa8bb842ec90de2a8ec1ef815e515e44ae2214",
       "path": "canonical/fit_mage_v1/GEPPETTO_CPU_FIT_MAGE_U0_PASS_20260902.json",
       "role": "HIGH_SIGNAL_OTHER",
@@ -254,7 +254,7 @@
     {
       "artifact_id": "KA-ADC679712F34",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "3d4e34aeacefc65d12f69d132ef94d06a75589d0",
       "path": "canonical/GEPPETTO_V2_BEHAVIORAL_CLOSURE_20260903.md",
       "role": "CLOSURE",
@@ -269,7 +269,7 @@
     {
       "artifact_id": "KA-B9C9E0BE8855",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "fc5fb3062189e1c2c5c872679f10589f7b2b4774",
       "path": "canonical/R6_GEPPETTO_OBSERVATION_ORACLE_CLOSURE_20260903.md",
       "role": "CLOSURE",
@@ -284,7 +284,7 @@
     {
       "artifact_id": "KA-BB51F15DFF19",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "b5d5e84d2d7a5d7401bb2109e301bf40ffa13f42",
       "path": "canonical/REALSAS_RIGANYTHING_SKINTOKENS_END_TO_END_CLEANROOM_MATRIX_20260903.md",
       "role": "PLAN_MATRIX",
@@ -409,7 +409,7 @@
     {
       "artifact_id": "KA-CD346F2BC605",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "003f8121aa36186b7b63389f37f8f33c650d9fa0",
       "path": "canonical/AR01_RESULT_20260907.md",
       "role": "RESULT",
@@ -738,7 +738,7 @@
     {
       "artifact_id": "KA-25CE68E2A9E2",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "c65ff92d819580289f58e6a9f087959588734475",
       "path": ".github/workflows/geppetto_r6_teacher_projection_v1.yml",
       "role": "WORKFLOW",
@@ -753,7 +753,7 @@
     {
       "artifact_id": "KA-22DB6489EA62",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "8ea70486b1604c90f6f37733472130d2900907fb",
       "path": ".github/workflows/geppetto_v2_source_contract.yml",
       "role": "WORKFLOW",
@@ -768,7 +768,7 @@
     {
       "artifact_id": "KA-5501853EE8E0",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "b3f2fe2a200d73f9af4c49b4b8872240545e5457",
       "path": ".github/workflows/r6_oracle_substrate_geppetto_heterogeneous.yml",
       "role": "WORKFLOW",
@@ -784,7 +784,7 @@
     {
       "artifact_id": "KA-26C6819A508B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "ddd8bb9c8a73c1391b7f3c81f16c7b80bf65f841",
       "path": ".github/workflows/r6_oracle_substrate_geppetto_one_family.yml",
       "role": "WORKFLOW",
@@ -801,7 +801,7 @@
     {
       "artifact_id": "KA-6B96C51526F2",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "9081936d825fdd9fe80964fc5b406aa47dad6068",
       "path": "canonical/RIGANYTHING_CODE_LEVEL_REFERENCE_AUDIT_V1.md",
       "role": "AUDIT",
@@ -816,7 +816,7 @@
     {
       "artifact_id": "KA-811ACF8A0DD9",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "cdf69a1748699dbc6227f34085c5dab66b51770b",
       "path": "canonical/fit_mage_v1/GEPPETTO_64_SOFT_BUDGET_PREREG_V1.md",
       "role": "PREREG",
@@ -832,7 +832,7 @@
     {
       "artifact_id": "KA-4AB7190707C6",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "210bc9ba4b0645cb3d573adeb14125abe1c621be",
       "path": "canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json",
       "role": "HIGH_SIGNAL_OTHER",
@@ -847,7 +847,7 @@
     {
       "artifact_id": "KA-1BC56523FAAE",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "a2a97bf692b4810b7f86cfef04fe295d8d7f8abb",
       "path": "canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json",
       "role": "AUTHORITY_DECISION",
@@ -862,7 +862,7 @@
     {
       "artifact_id": "KA-43B33B33D93B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "efbf0887987183c705abdc11587e075cee4b3335",
       "path": "canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json",
       "role": "CLOSURE",
@@ -877,7 +877,7 @@
     {
       "artifact_id": "KA-43FED2611D61",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "c3df0b2e09069ade73a9d2226537f890c1820762",
       "path": "canonical/PREFIT_HARDENING_RECONCILIATION_V2_20260904.md",
       "role": "HIGH_SIGNAL_OTHER",
@@ -892,7 +892,7 @@
     {
       "artifact_id": "KA-6ECDBCF70B29",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "c299738cbf9001671e2e578305f647d248d0953d",
       "path": "canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json",
       "role": "AUTHORITY_DECISION",
@@ -908,7 +908,7 @@
     {
       "artifact_id": "KA-2D0FAD70F029",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "ed12b15305cc9acfc7462f3fdd2623578d9690f9",
       "path": "canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V2_20260904.json",
       "role": "CLOSURE",
@@ -923,7 +923,7 @@
     {
       "artifact_id": "KA-911E2A35BAEF",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "43da186b3b1b1aa0007f0f41950abaf8af69d961",
       "path": "canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V3_20260904.json",
       "role": "CLOSURE",
@@ -938,7 +938,7 @@
     {
       "artifact_id": "KA-657B7941A964",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "fc155eb8688f5a90626d5652432c935ff6e06a59",
       "path": "canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V4_20260904.json",
       "role": "CLOSURE",
@@ -953,7 +953,7 @@
     {
       "artifact_id": "KA-F32FFE8936B1",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "ee98a90548e4c5104717fd292e7113e037742312",
       "path": "canonical/RESTORATION_CLOSURE_VERDICT_V1_20260904.json",
       "role": "CLOSURE",
@@ -968,7 +968,7 @@
     {
       "artifact_id": "KA-F181A83E519A",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f885dc025af79f6dad338122bc1862be851042a0",
       "path": "canonical/LIVING_COMPILE_V4_PRODUCT_SHELL_PROMOTION_20260905.md",
       "role": "PROMOTION_RETRACTION",
@@ -1074,7 +1074,7 @@
     {
       "artifact_id": "KA-54F3D5BDF738",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "1155b2d48252664d7fa53f80ca191145446faa9a",
       "path": "canonical/COMPILER_RUNTIME_MIGRATION_COMPLETENESS_AUDIT_CLOSURE_20260901.md",
       "role": "CLOSURE",
@@ -1090,7 +1090,7 @@
     {
       "artifact_id": "KA-B882A6B5920E",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "4d211a5d765d9b0b6ac0b2ea6666f132e406995f",
       "path": "canonical/COMPILER_RUNTIME_MIGRATION_COMPLETENESS_AUDIT_PREREG_20260901.md",
       "role": "PREREG",
@@ -1106,7 +1106,7 @@
     {
       "artifact_id": "KA-45B18754F38F",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "1e8c96223d6e18a5935a7a2dedc7fb2192f8f7a5",
       "path": "canonical/END_TO_END_ARCHITECTURE_V3_SVG_CLOSURE_20260901.md",
       "role": "CLOSURE",
@@ -1121,7 +1121,7 @@
     {
       "artifact_id": "KA-2D5A8E61AAFD",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "b888d32058426109dcf11285fa1eb4d362d4325d",
       "path": "canonical/MWB0_TYPED_SEAM_IMPLEMENTATION_CLOSURE_20260901.md",
       "role": "CLOSURE",
@@ -1136,7 +1136,7 @@
     {
       "artifact_id": "KA-93B4FC602CF3",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "97dce1d939d4ed0a6c2db088c7a1bfe94e6b191d",
       "path": "canonical/MWB1_IDENTITY_SUBSET_BASELINE_CLOSURE_20260901.md",
       "role": "CLOSURE",
@@ -1151,7 +1151,7 @@
     {
       "artifact_id": "KA-3FE146F181D1",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "81cffed0607429f04b358ec920d66f2d9a68d0e8",
       "path": "canonical/MWB1_IDENTITY_SUBSET_BASELINE_PREREG_20260901.md",
       "role": "PREREG",
@@ -1166,7 +1166,7 @@
     {
       "artifact_id": "KA-417DBAC8B321",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "b9622cbc76b93c0dcf3c6de6ff4f9f6bd10708a2",
       "path": "canonical/MWB1_IDENTITY_SUBSET_BASELINE_PREREG_AMENDMENT_20260901.md",
       "role": "PREREG",
@@ -1181,7 +1181,7 @@
     {
       "artifact_id": "KA-3909E8338439",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "2e8a59d075639bd8388fd7d1bf0cce5cbb0b5f1e",
       "path": "experiments/mwb1_identity_subset_20260901/MWB1_IDENTITY_SUBSET_BASELINE_RESULT_V1.json",
       "role": "RESULT",
@@ -1196,7 +1196,7 @@
     {
       "artifact_id": "KA-FB806FCC9F56",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "0db714852121a2923d6c2d03f1c88dd5d4e14f04",
       "path": "canonical/ARCHITECTURE_V4_SOURCE_CLOSURE_20260902.md",
       "role": "CLOSURE",
@@ -1211,7 +1211,7 @@
     {
       "artifact_id": "KA-974E05874A1F",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7dc85424fde896a0d08f3f68434c352ca5c3d0d2",
       "path": "canonical/CANONICAL_REALSaS_COMPLETION_MATRIX_20260902.json",
       "role": "PLAN_MATRIX",
@@ -1226,7 +1226,7 @@
     {
       "artifact_id": "KA-078671A692D6",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "db57329c730f4c83da7e1224ec46552e065d1532",
       "path": "canonical/CANONICAL_REALSaS_COMPLETION_PLAN_20260902.md",
       "role": "PLAN_MATRIX",
@@ -1241,7 +1241,7 @@
     {
       "artifact_id": "KA-90690B7A0472",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "31fe72f5a70d2111e422cf2371f411ec02988818",
       "path": "canonical/DINO_TOKEN_PARITY_V1_SEAL_20260902.json",
       "role": "AUTHORITY_DECISION",
@@ -1256,7 +1256,7 @@
     {
       "artifact_id": "KA-CF2AF803FCC8",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "29d7ff76bda08b1386f5797fb2b3634c5d09bd81",
       "path": "canonical/GENERIC_SOURCE_COMPLETION_CLOSURE_20260902.md",
       "role": "CLOSURE",
@@ -1271,7 +1271,7 @@
     {
       "artifact_id": "KA-A6E1C72DDFAD",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "ac24207d9937ec93238ed7e945978e01b281203e",
       "path": "canonical/PREFIT_VISUAL_AUDIT_COHORT_V1_20260902.json",
       "role": "AUDIT",
@@ -1286,7 +1286,7 @@
     {
       "artifact_id": "KA-01438FF4F46C",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "a25bdb317a2a846b9e1b989ac6a8e3c411cb5465",
       "path": "canonical/SINGLE_FAMILY_DATA_SOURCE_CLOSURE_20260902.md",
       "role": "CLOSURE",
@@ -1301,7 +1301,7 @@
     {
       "artifact_id": "KA-0DC34FDC4CAF",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "e63dce9cc51e1a296221a3d547576481525ec701",
       "path": "canonical/SINGLE_FAMILY_E2E_FIT_CONTRACT_20260902.md",
       "role": "HIGH_SIGNAL_OTHER",
@@ -1316,7 +1316,7 @@
     {
       "artifact_id": "KA-9C4AFD686C3C",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "217bac5544f791ad26a95d00728136a595e22269",
       "path": "canonical/fit/mage_u0/ARACHNE_A1_BASE_RESULT_20260902.json",
       "role": "RESULT",
@@ -1332,7 +1332,7 @@
     {
       "artifact_id": "KA-A859509FC99C",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "dc9f9f802553be249f74a201ae076256bb637c41",
       "path": "canonical/fit/mage_u0/ARACHNE_A1_TAIL_REMEDIATION_RESULT_20260902.json",
       "role": "RESULT",
@@ -1348,7 +1348,7 @@
     {
       "artifact_id": "KA-F7EC173C807F",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "e64d0b390433342575054f2efd0d25d2d72afe34",
       "path": "canonical/fit/mage_u0/CODEC_A0_EXACT_CONDITIONING_RESULT_20260902.json",
       "role": "RESULT",
@@ -1363,7 +1363,7 @@
     {
       "artifact_id": "KA-3FCD63DB0183",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "568691b8ab80dcdddbdcc8b2fcc6fcc5ff29565b",
       "path": "canonical/fit_mage_v1/CODEC_CPU_FIT_MAGE_A0_CORE_20260902.json",
       "role": "HIGH_SIGNAL_OTHER",
@@ -1378,7 +1378,7 @@
     {
       "artifact_id": "KA-41CAFDBA24BF",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "dc01c1ce0434f8890e7e71835a5db87825a07caf",
       "path": "canonical/APPEARANCE_PIXEL_CENTER_BEHAVIORAL_CLOSURE_20260903.md",
       "role": "CLOSURE",
@@ -1393,7 +1393,7 @@
     {
       "artifact_id": "KA-8BA554E77442",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "d79a76e14e6b16c6569febd3a00bdabebf561699",
       "path": "canonical/APPEARANCE_PIXEL_CENTER_BEHAVIORAL_PREREG_20260903.md",
       "role": "PREREG",
@@ -1408,7 +1408,7 @@
     {
       "artifact_id": "KA-905AD2801F25",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "9bf5411fc0a323f1a8fc873cf8802b95cbd25e5f",
       "path": "canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md",
       "role": "PREREG",
@@ -1423,7 +1423,7 @@
     {
       "artifact_id": "KA-C7752DB008DD",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f926dc7833ef83392b1b5be4d668c949a75505b9",
       "path": "canonical/ARACHNE_SHIPPING_BEHAVIORAL_CLOSURE_20260903.md",
       "role": "CLOSURE",
@@ -1438,7 +1438,7 @@
     {
       "artifact_id": "KA-8668BAAA6BB2",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6ba02c7c8c1f9a478f658ab251619bbd8138281b",
       "path": "canonical/AUTHORED_MOTION_PROOF_PROMOTION_V1_20260903.json",
       "role": "PROMOTION_RETRACTION",
@@ -1453,7 +1453,7 @@
     {
       "artifact_id": "KA-4878D06B8548",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "af2a6c5e2687e389a7cb42bfa8431b5423a28230",
       "path": "canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json",
       "role": "PROMOTION_RETRACTION",
@@ -1468,7 +1468,7 @@
     {
       "artifact_id": "KA-8EB6204E730D",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6715a8c03584651a6938177738b9fe4280ea9026",
       "path": "canonical/BEHAVIORAL_HARDENING_LEDGER_20260903.md",
       "role": "PLAN_MATRIX",
@@ -1483,7 +1483,7 @@
     {
       "artifact_id": "KA-AEB5D5E823EF",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "8c44a4f7572e7f178c047539611729cae1937bb1",
       "path": "canonical/BOUNDED_REPAIR_LOOP_PROMOTION_V1_20260903.json",
       "role": "PROMOTION_RETRACTION",
@@ -1498,7 +1498,7 @@
     {
       "artifact_id": "KA-AF05B68692E0",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "857bfd9977d72e3708035c0f705ab1a163468928",
       "path": "canonical/COMPILER_CORE_MESH_LAYOUT_SEAL_V1_20260903.json",
       "role": "AUTHORITY_DECISION",
@@ -1513,7 +1513,7 @@
     {
       "artifact_id": "KA-90E6EA4D54A2",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "db0d0293f7f39386412b016953d9b0ff885ca520",
       "path": "canonical/COMPILER_CORE_SUBSTRATE_LAYOUT_SEAL_V1_20260903.json",
       "role": "AUTHORITY_DECISION",
@@ -1528,7 +1528,7 @@
     {
       "artifact_id": "KA-6BD7480EC23F",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7b14b8a670436eb5a797df116d3c4b4718f0d948",
       "path": "canonical/COMPILER_LBS_PRODUCTION_PROMOTION_V1_20260903.json",
       "role": "PROMOTION_RETRACTION",
@@ -1544,7 +1544,7 @@
     {
       "artifact_id": "KA-F51DC5A3C620",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "15c2866f33d83922c13a972678c320df32620a83",
       "path": "canonical/COMPILER_PROOF_REPAIR_PROMOTION_MANIFEST_V1_20260903.json",
       "role": "PROMOTION_RETRACTION",
@@ -1559,7 +1559,7 @@
     {
       "artifact_id": "KA-88F2E6A5EAFF",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "46e8f498a34b0dab82d9fff1496cd403950f6dae",
       "path": "canonical/COMPILER_RUNTIME_DEPLOY_BAKE_PROMOTION_V1_20260903.json",
       "role": "PROMOTION_RETRACTION",
@@ -1575,7 +1575,7 @@
     {
       "artifact_id": "KA-CEDF089713A1",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "39d3754f04821977c5926881b0d36da471279feb",
       "path": "canonical/COMPILER_RUNTIME_PROMOTION_PLAN_V1_20260903.md",
       "role": "PROMOTION_RETRACTION",
@@ -1591,7 +1591,7 @@
     {
       "artifact_id": "KA-B95FF3E2F18E",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6e4f5a98130075b958f4d5d285035e2ecaad59f5",
       "path": "canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json",
       "role": "PROMOTION_RETRACTION",
@@ -1607,7 +1607,7 @@
     {
       "artifact_id": "KA-E0868EB0F846",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "2b6107151e773c70b23feeca088c4c83a93a07d4",
       "path": "canonical/CONTROLLED_OWNER_ATTRIBUTION_PROMOTION_V1_20260903.json",
       "role": "PROMOTION_RETRACTION",
@@ -1622,7 +1622,7 @@
     {
       "artifact_id": "KA-41D02CD1D7A5",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "64eb661bb24fe79a1a2d3b813c9857648e974cb2",
       "path": "canonical/MOTION_DEFORMATION_BEHAVIORAL_PREREG_20260903.md",
       "role": "PREREG",
@@ -1637,7 +1637,7 @@
     {
       "artifact_id": "KA-A32C16815DBD",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "493167c7b4ea214e95a16f190723a53cb1d72570",
       "path": "canonical/MWB2_DIRECTIONAL_BEHAVIORAL_CLOSURE_20260903.md",
       "role": "CLOSURE",
@@ -1652,7 +1652,7 @@
     {
       "artifact_id": "KA-0445205615FC",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "c1278a138e6b6d2b7f41ac72e9ad5618e87b65ee",
       "path": "canonical/MWB2_DIRECTIONAL_BEHAVIORAL_PREREG_20260903.md",
       "role": "PREREG",
@@ -1667,7 +1667,7 @@
     {
       "artifact_id": "KA-C3BDC5D6F236",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "8830df672044101fd24384d9aa4fbc7a0676a32e",
       "path": "canonical/R6_ARACHNE_OBSERVATION_ORACLE_CLOSURE_20260903.md",
       "role": "CLOSURE",
@@ -1682,7 +1682,7 @@
     {
       "artifact_id": "KA-47D67050B93A",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7777b5ee7e7dece793d519123c74401542818afa",
       "path": "canonical/R6_ARACHNE_ORACLE_SUBSTRATE_HETEROGENEOUS_PREREG_20260903.md",
       "role": "PREREG",
@@ -1698,7 +1698,7 @@
     {
       "artifact_id": "KA-A8D9DC0F9CBD",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "e7faf69372df16012c59d912a5af1af5a4543f7b",
       "path": "canonical/R6_ARACHNE_ORACLE_SUBSTRATE_ONE_FAMILY_RESULT_20260903.md",
       "role": "RESULT",
@@ -1715,7 +1715,7 @@
     {
       "artifact_id": "KA-ABFCD729FE3D",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "bd4eb4f66a5f0a003a7ad0fe763a0c8f8ca740fe",
       "path": "canonical/R6_ARACHNE_ORACLE_SUBSTRATE_PREREG_20260903.md",
       "role": "PREREG",
@@ -1731,7 +1731,7 @@
     {
       "artifact_id": "KA-DFFD1A05FF9E",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "37b7634e3d914fc4554228a5e3aaf954a328635e",
       "path": "canonical/R6_G_ORACLE_SUBSTRATE_ONE_FAMILY_RESULT_20260903.md",
       "role": "RESULT",
@@ -1747,7 +1747,7 @@
     {
       "artifact_id": "KA-5C4C75ACE12B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "b74b9aa9d23b0025f1e16e6d33a52b2f3d4761a6",
       "path": "canonical/R6_ORACLE_SUBSTRATE_INFORMATION_SUFFICIENCY_PREREG_20260903.md",
       "role": "PREREG",
@@ -1762,7 +1762,7 @@
     {
       "artifact_id": "KA-42DF336795B2",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "fa1b33942040fc50b75f98d41f5667c66db2bad6",
       "path": "experiments/iris_controlled_v1/CEILING_PASS_AND_OPEN_PILOT_DECISION_20260823.md",
       "role": "AUTHORITY_DECISION",
@@ -1777,7 +1777,7 @@
     {
       "artifact_id": "KA-F99C823ED322",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "59cbfe1cb9fe5da48435bc79141d00539ea355f4",
       "path": "experiments/iris_controlled_v1/MINI256_AND_MATCHER_V1_PREREG_20260823.md",
       "role": "PREREG",
@@ -1792,7 +1792,7 @@
     {
       "artifact_id": "KA-B8D56A1D1BEA",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "5591ecc4ff39b8b218376f3fdfb8fdad05548c5f",
       "path": "experiments/m4_identity_audit/VERY_IMPORTANT_AUDIT_M4_IDENTITY_AMBIGUITY_EQUIVALENT_SUBSTRATE_20260823.md",
       "role": "AUDIT",
@@ -1808,7 +1808,7 @@
     {
       "artifact_id": "KA-14941C336264",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "8d5c96ed1c5bb3b3913f09688ee0e7eed3fece03",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_B_SAFETY_CALIBRATION_PREREG_V1.md",
       "role": "PREREG",
@@ -1823,7 +1823,7 @@
     {
       "artifact_id": "KA-B09A3300EBA6",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6bff6a9feb3a3d1be415a4dd3f1458513baefabd",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_B_SAFETY_CALIBRATION_RESULT_V1.md",
       "role": "RESULT",
@@ -1838,7 +1838,7 @@
     {
       "artifact_id": "KA-96EC2DA7B9B7",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "cb723ca9b2c500ad098ac6c4ecc795d3e857e906",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_DOWNSTREAM_PROXY_MARGIN_DECISION_V1.json",
       "role": "AUTHORITY_DECISION",
@@ -1853,7 +1853,7 @@
     {
       "artifact_id": "KA-1BA266C2A541",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "3b537f74588cbae4dd409a4b3831367aa4c4d1ef",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_DOWNSTREAM_PROXY_MARGIN_DECISION_V1.md",
       "role": "AUTHORITY_DECISION",
@@ -1868,7 +1868,7 @@
     {
       "artifact_id": "KA-2253F643B1D0",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f871510eca6cefd6806c9aa2dbbe803fa03f9284",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_DOWNSTREAM_PROXY_PREREG_V1.md",
       "role": "PREREG",
@@ -1883,7 +1883,7 @@
     {
       "artifact_id": "KA-722DEFEAA937",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "9364444c80395270e224ac3508157eadf7b4b306",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_DOWNSTREAM_PROXY_SEAL_V1_3.json",
       "role": "AUTHORITY_DECISION",
@@ -1898,7 +1898,7 @@
     {
       "artifact_id": "KA-C1266A0E0801",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "431f298ac177d01a81940925edfc1ba134f0441a",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_OBSERVABLE_GEOMETRY_PREREG_V1.md",
       "role": "PREREG",
@@ -1913,7 +1913,7 @@
     {
       "artifact_id": "KA-7A988B288350",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f63c64cfb7db49be772a47a3b05babd4fadea597",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PRE_PROXY32_DIAGNOSTICS_RESULT_V1.json",
       "role": "RESULT",
@@ -1928,7 +1928,7 @@
     {
       "artifact_id": "KA-C833799C38EB",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "57b569213bc90c63b86a0de5c84481c8d97cbdd5",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PRE_PROXY32_DIAGNOSTIC_PREREG_V1.md",
       "role": "PREREG",
@@ -1943,7 +1943,7 @@
     {
       "artifact_id": "KA-7F6C643261E5",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "8e4c5d733ddd2ee466e2371a1472720f99214279",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PRE_PROXY32_DIAGNOSTIC_RESULT_NOTE_V1.md",
       "role": "RESULT",
@@ -1958,7 +1958,7 @@
     {
       "artifact_id": "KA-15DBBEFD05E3",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "9175b5739d632815d174a9c6fa5e5cfa43a551f9",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PROXY27_QUALIFICATION_CANONICAL_REPORT_V1.md",
       "role": "AUDIT",
@@ -1973,7 +1973,7 @@
     {
       "artifact_id": "KA-3BECF1DED3CD",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "fd30df1b9b61ce2d80efaf6d2fbed3e15dfde032",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PROXY27_QUALIFICATION_PREREG_V1.md",
       "role": "PREREG",
@@ -1988,7 +1988,7 @@
     {
       "artifact_id": "KA-FEE8694827F2",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "665d41424ec40227d2c917663830499320fb933b",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/N_B3_CANONICAL_REPORT_V1.md",
       "role": "AUDIT",
@@ -2003,7 +2003,7 @@
     {
       "artifact_id": "KA-D2C8FF04E841",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "35ef4ea5d595302840413169844e801537db8b28",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/N_B3_EPSILON_PREREG_AMENDMENT_V1_1.md",
       "role": "PREREG",
@@ -2018,7 +2018,7 @@
     {
       "artifact_id": "KA-B0B6710630B0",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "c926328098b7cc0918c56bb900befc18e7136156",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/N_B3_EPSILON_PREREG_V1.md",
       "role": "PREREG",
@@ -2033,7 +2033,7 @@
     {
       "artifact_id": "KA-D5A540AF22B0",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "701d475ef18c2577afe9ac6ff3b6a42e3c5d2379",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/N_B3_OPERATIONAL_FREEZE_V1_2.md",
       "role": "AUTHORITY_DECISION",
@@ -2048,7 +2048,7 @@
     {
       "artifact_id": "KA-69A45AF8D6D7",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7f8cf23980afd1f558c6bc60ee0a93bc504a7571",
       "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/PRETRAINED_CONSUMER_CONTAMINATION_AUDIT_V1.md",
       "role": "AUDIT",
@@ -2063,7 +2063,7 @@
     {
       "artifact_id": "KA-D05D27A09DEB",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f3fd0bca57d6c7d57c566b6c9aa41fccfcf0461b",
       "path": "canonical/COMPILER_RUNTIME_RESTORATION_CLOSURE_20260828.md",
       "role": "CLOSURE",
@@ -2080,7 +2080,7 @@
     {
       "artifact_id": "KA-1057B6C145B4",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "5500badb09f4ef8af9de297a244d057a01d7f5fb",
       "path": "canonical/CONSUMER_VALIDITY_INTERLOCK_CLOSURE_20260829.md",
       "role": "CLOSURE",
@@ -2095,7 +2095,7 @@
     {
       "artifact_id": "KA-ADF7D883AD0F",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "df4e1a9103ef63f61c838fae53cfa0487066e0d8",
       "path": "canonical/DTB_ND1_ROBUST_LOCAL_PLANE_CLOSURE_20260829.md",
       "role": "CLOSURE",
@@ -2110,7 +2110,7 @@
     {
       "artifact_id": "KA-96A0AA51F339",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "2935676c3bf919e629e8279fb8545c3abb3768b1",
       "path": "canonical/FIT_PROXY32_COORDINATE_AND_RESIDUAL_AUDIT_20260829.md",
       "role": "AUDIT",
@@ -2125,7 +2125,7 @@
     {
       "artifact_id": "KA-219C26B59F1E",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f930a80f2e75cedc80ca91f528b5482052b7f10c",
       "path": "canonical/M4R_ALL8_BOUNDARY_REFINEMENT_CLOSURE_20260829.md",
       "role": "CLOSURE",
@@ -2140,7 +2140,7 @@
     {
       "artifact_id": "KA-890510047434",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f4d6e02d2b10f9652807582fa95285802a7ee2c2",
       "path": "canonical/M4_EXECUTION_SEAL_CLOSURE_20260829.md",
       "role": "CLOSURE",
@@ -2155,7 +2155,7 @@
     {
       "artifact_id": "KA-35F325C34374",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "44b9c661fe91a22fe390177caf70e3e4f0c93f7b",
       "path": "canonical/M4_SURFACE_GRID_CLOSURE_20260829.md",
       "role": "CLOSURE",
@@ -2170,7 +2170,7 @@
     {
       "artifact_id": "KA-22E3714FC60C",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "08d1b55e0e7343e2c862641d15eb0eec8244ab1f",
       "path": "canonical/STRUCTURED_DEPTH_BRIDGE_APPARATUS_CLOSURE_20260829.md",
       "role": "CLOSURE",
@@ -2185,7 +2185,7 @@
     {
       "artifact_id": "KA-11E9D1CDC7E5",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "9b9b1d74c640b10879a95ff4452380f55907cd4b",
       "path": "experiments/consumer_interlock_20260829/CONSUMER_COUPLING_PROBE_PREREG_V1.md",
       "role": "PREREG",
@@ -2200,7 +2200,7 @@
     {
       "artifact_id": "KA-B97B66FF6F63",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "45c436c03546b06b9d13bec33bc9160ed73bd155",
       "path": "experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_COUPLING_PROBE_RESULT_V1.json",
       "role": "RESULT",
@@ -2215,7 +2215,7 @@
     {
       "artifact_id": "KA-BB9963B50A56",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "92896c28b3c1d629f67a36f2d90845d1ae46d642",
       "path": "experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_EXACT_COMPILER_CLEAN_RESULT_V1.json",
       "role": "RESULT",
@@ -2231,7 +2231,7 @@
     {
       "artifact_id": "KA-D5A69A668DC9",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "92faab9ee2ce2bbcd5f0f5fc3cf5bd52553b6d28",
       "path": "experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_V0_I0_AUDIT_V2.json",
       "role": "AUDIT",
@@ -2246,7 +2246,7 @@
     {
       "artifact_id": "KA-4A03E634DC31",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "4cdb7743f5a6175145fbbaa527a95cffd18e7c40",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_MANIFEST_V1.json",
       "role": "PLAN_MATRIX",
@@ -2261,7 +2261,7 @@
     {
       "artifact_id": "KA-AD1BDD5E9FD1",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "dcac1e86d97da86bd1bfe840bda42fe8669ac66b",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_MANIFEST_V2.json",
       "role": "PLAN_MATRIX",
@@ -2276,7 +2276,7 @@
     {
       "artifact_id": "KA-51BD784AC587",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "b9e52f7f5c05c1b191770cdcf253758182ed0561",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_STAGE_A_RESULT_V1.json",
       "role": "RESULT",
@@ -2291,7 +2291,7 @@
     {
       "artifact_id": "KA-F9ACC8A95E90",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "b789d8432535137154b584f8ff1fae3803b86a00",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_STAGE_B_M2_RESULT_V1.json",
       "role": "RESULT",
@@ -2306,7 +2306,7 @@
     {
       "artifact_id": "KA-E3E2924DA502",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "3b1de4db36965f9c40936eac72897b874228b7d7",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_STAGE_C_M3_RESULT_V1.json",
       "role": "RESULT",
@@ -2321,7 +2321,7 @@
     {
       "artifact_id": "KA-10F7746CCAFA",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "c4617a0e025f7ee5c9f243b95c57bb64defc31a8",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/DEPTH_TOLERANCE_BRIDGE_PREOPEN_PREREG_V1.md",
       "role": "PREREG",
@@ -2336,7 +2336,7 @@
     {
       "artifact_id": "KA-B67A208E2872",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "4f3e47cf0fb01cd79d0d9e22e27ba00e8b82bffd",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/DTB_ND1_ROBUST_LOCAL_PLANE_PREREG_V1.md",
       "role": "PREREG",
@@ -2351,7 +2351,7 @@
     {
       "artifact_id": "KA-2E94B8446EA5",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f4aafcca4b48d7b43c40da6d4584b2e5dfb17130",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/DTB_ND1_ROBUST_LOCAL_PLANE_PREREG_V1_1.md",
       "role": "PREREG",
@@ -2366,7 +2366,7 @@
     {
       "artifact_id": "KA-0B3B9BBD652A",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "3805b18e90a5dcd8684edfdc77211482ea696f15",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/DTB_ND1_ROBUST_LOCAL_PLANE_RESULT_V1.json",
       "role": "RESULT",
@@ -2381,7 +2381,7 @@
     {
       "artifact_id": "KA-97790395C275",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "023ec5041821f1ac773b8074db8f8e5c331e1751",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/EXPERIMENT_NAMESPACE_V1.md",
       "role": "HIGH_SIGNAL_OTHER",
@@ -2396,7 +2396,7 @@
     {
       "artifact_id": "KA-7C50727EBFCB",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "892b1ca663ad95841cd3458b58ec18252cc37ee0",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/FIT_PROXY32_COORDINATE_AND_RESIDUAL_AUDIT_V1.json",
       "role": "AUDIT",
@@ -2412,7 +2412,7 @@
     {
       "artifact_id": "KA-7DE8BC1294AA",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "ad0ebf623f65b55fe249e077da49a4a55483b90f",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4R_ALL8_BOUNDARY_REFINEMENT_DECISION_TABLE_V1.json",
       "role": "AUTHORITY_DECISION",
@@ -2427,7 +2427,7 @@
     {
       "artifact_id": "KA-3DE6D689270E",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "242ab16c77cdaa2ae470854bc8dfbf42c2f14c73",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4R_ALL8_BOUNDARY_REFINEMENT_PREREG_V1.json",
       "role": "PREREG",
@@ -2442,7 +2442,7 @@
     {
       "artifact_id": "KA-880DB0B88406",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7830471b598ad0f3ddf41b41dba86c4f23d532d1",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4R_ALL8_BOUNDARY_REFINEMENT_RESULT_V1.sha256.json",
       "role": "RESULT",
@@ -2457,7 +2457,7 @@
     {
       "artifact_id": "KA-008E5FA3A36E",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "b62e34b5806282275fdd670297817cc31a4745a5",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4_EXECUTION_SEAL_V1.json",
       "role": "AUTHORITY_DECISION",
@@ -2472,7 +2472,7 @@
     {
       "artifact_id": "KA-19E55385216A",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7ec1b6d61d37db445fea260fa41d07c69f9f116b",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4_RAW_SOURCE_MANIFEST_V2.json",
       "role": "PLAN_MATRIX",
@@ -2487,7 +2487,7 @@
     {
       "artifact_id": "KA-3000F386B0FB",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7b2412971b5890eda279598620bbdba3ca6597b0",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4_SURFACE_GRID_PREREG_V1.json",
       "role": "PREREG",
@@ -2502,7 +2502,7 @@
     {
       "artifact_id": "KA-335B7EB7B48C",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "83e043c719efba8242708de27bf0980fb7ef8939",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4_SURFACE_GRID_PREREG_V1.md",
       "role": "PREREG",
@@ -2517,7 +2517,7 @@
     {
       "artifact_id": "KA-255B287114F0",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6843025858047e84488469d2b7f5f167eadfa65b",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/MINIMUM_FIRST_RESULT_PATH_V1.md",
       "role": "RESULT",
@@ -2532,7 +2532,7 @@
     {
       "artifact_id": "KA-C8F98195F725",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "4e612978c3f70a537dcf3189948dc19a38b6e582",
       "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/robust_local_plane_v1.py",
       "role": "PLAN_MATRIX",
@@ -2547,7 +2547,7 @@
     {
       "artifact_id": "KA-A2537682A2E4",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "9dd5409e37f137e7a68a75c2ad2d846f319a98d5",
       "path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_AMENDMENT_V1_1.json",
       "role": "PREREG",
@@ -2562,7 +2562,7 @@
     {
       "artifact_id": "KA-7BB0E0B1B00C",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "11a890047aa928c3efa21039cd840855e19df869",
       "path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_AMENDMENT_V1_1.md",
       "role": "PREREG",
@@ -2577,7 +2577,7 @@
     {
       "artifact_id": "KA-5525872B51B7",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "72ec4a9cf4e281c0d5512a1d522d0d4916ff1d68",
       "path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_V1.json",
       "role": "PREREG",
@@ -2592,7 +2592,7 @@
     {
       "artifact_id": "KA-A161EB65FA9E",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7c95923954491056beafb7bb25237923f63e8bc6",
       "path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_V1.md",
       "role": "PREREG",
@@ -2607,7 +2607,7 @@
     {
       "artifact_id": "KA-70B07B69A6DF",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "733b42afe719c33bec7835b5df7eb8b21552ad91",
       "path": "experiments/iris_dino_controlled_20260829/DINO_FROZEN_APPARATUS_CODE_AUDIT_V1.json",
       "role": "AUDIT",
@@ -2622,7 +2622,7 @@
     {
       "artifact_id": "KA-B6196F24185B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f0a154154b56201bad38000b8cd65efe974406e8",
       "path": "experiments/iris_dino_controlled_20260829/FROZEN_APPARATUS_AUDIT_GATE_V1.md",
       "role": "AUDIT",
@@ -2637,7 +2637,7 @@
     {
       "artifact_id": "KA-45AE9A7C4A91",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "4cef5c8f6e393cf50990c9480755d92fd014f900",
       "path": "canonical/CORPUS_VISUAL_ANOMALY_TRIAGE_PREREG_20260831.md",
       "role": "PREREG",
@@ -2652,7 +2652,7 @@
     {
       "artifact_id": "KA-76CB6B88692A",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "ce26bc2b645ced5c488510d4ce14bb6940de9b19",
       "path": "canonical/DETERMINISTIC_DOWNSTREAM_LAYER_OWNERSHIP_OVERLAP_AUDIT_20260831.md",
       "role": "AUDIT",
@@ -2667,7 +2667,7 @@
     {
       "artifact_id": "KA-F085A4C8BFF1",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "e7b3037d3d7c330f02d117184f0401e5eba81e5f",
       "path": "canonical/DINO_FROZEN_APPARATUS_CODE_AUDIT_CLOSURE_20260831.md",
       "role": "CLOSURE",
@@ -2682,7 +2682,7 @@
     {
       "artifact_id": "KA-B244F3484242",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "c67f7fc35ce3e7bbea1dd50f6f8ff8dbabbf9023",
       "path": "canonical/DINO_LADDER_S1_EARLY_TERMINATION_CLOSURE_20260831.md",
       "role": "CLOSURE",
@@ -2697,7 +2697,7 @@
     {
       "artifact_id": "KA-3D8F163A6C27",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6281fc36890bf81d910ef4057833eedc206194ca",
       "path": "canonical/IRIS_REPROJECTION_CENTERED_V2_PREREG_20260831.md",
       "role": "PREREG",
@@ -2712,7 +2712,7 @@
     {
       "artifact_id": "KA-C942A21DC046",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "03318ae59a58fcf18a2a98a0f1a1d2026fb33e20",
       "path": "canonical/IRIS_REPROJECTION_V2_GATE0_SYNTHETIC_CLOSURE_20260831.md",
       "role": "CLOSURE",
@@ -2727,7 +2727,7 @@
     {
       "artifact_id": "KA-A241C89D2977",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "3205e022aafc111fdb88bcd8141ab5b31f2db21b",
       "path": "canonical/IRIS_REPROJECTION_V2_REAL_CORPUS_GATE0_EXECUTION_PREREG_20260831.md",
       "role": "PREREG",
@@ -2742,7 +2742,7 @@
     {
       "artifact_id": "KA-C5987156803C",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "5662480f5b3064d1591a412328fc20109b09399f",
       "path": "canonical/IRIS_REPROJECTION_V2_REAL_GATE0_MEMBERSHIP_HASH_VERIFIER_ERRATUM_20260831.md",
       "role": "HIGH_SIGNAL_OTHER",
@@ -2757,7 +2757,7 @@
     {
       "artifact_id": "KA-BB832FF8E750",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "81b676149cca8b75b1a9890cccbf9a8ecbf15c87",
       "path": "experiments/iris_reprojection_v2_20260831/GATE0_SYNTHETIC_PREFLIGHT_RESULT_V1.json",
       "role": "RESULT",
@@ -2772,7 +2772,7 @@
     {
       "artifact_id": "KA-EDBFC6FA7F02",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "38cb21de1860123de9d5fae9941f06a82f48488e",
       "path": "experiments/iris_reprojection_v2_20260831/IRIS_REPROJECTION_V2_PREREG_V1.json",
       "role": "PREREG",
@@ -2787,7 +2787,7 @@
     {
       "artifact_id": "KA-834A053EF50A",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "5491dcffb25571b879f4fc20628452dca031e318",
       "path": "experiments/iris_reprojection_v2_20260831/gate0_geometry_v1.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -2802,7 +2802,7 @@
     {
       "artifact_id": "KA-E1930762A1B7",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "39784390006fb7b4041fdd32b4c3041637548a19",
       "path": "experiments/iris_reprojection_v2_20260831/gate0_real_corpus_v1.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -2817,7 +2817,7 @@
     {
       "artifact_id": "KA-E806F78D405A",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "aef3d3a8e4b6b0a02cafc1d56745f90e22da8022",
       "path": "experiments/iris_reprojection_v2_20260831/gate0_real_corpus_v1_1_hashfix.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -2832,7 +2832,7 @@
     {
       "artifact_id": "KA-6B94FD595F4D",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "e2db97a69d883f71786f1580cc58be4eb1812f27",
       "path": "experiments/iris_reprojection_v2_20260831/run_gate0_synthetic_preflight_v1.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -2847,7 +2847,7 @@
     {
       "artifact_id": "KA-4825D36EC9D5",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "e78ea25d84cf4f1b147b4bf7898c3df3a67235af",
       "path": "experiments/iris_reprojection_v2_20260831/test_gate0_geometry_v1.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -2862,7 +2862,7 @@
     {
       "artifact_id": "KA-1A3AA498B1A9",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "bb088b6fdce22d9e97f6cafc571f8ffd2dab6c72",
       "path": "experiments/iris_reprojection_v2_20260831/test_gate0_real_corpus_v1.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -2877,7 +2877,7 @@
     {
       "artifact_id": "KA-2FC1CCAE2CBB",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "d731f4ec9918dd1c3cbb9de884f8323edb50c73a",
       "path": "experiments/iris_reprojection_v2_20260831/test_gate0_real_corpus_v1_1_hashfix.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -3192,7 +3192,7 @@
     {
       "artifact_id": "KA-AF6CF11478B7",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "57ddbca877eabf3408ea3e6f111b026386422d22",
       "path": ".github/workflows/arachne_codec_v2_source_contract.yml",
       "role": "WORKFLOW",
@@ -3207,7 +3207,7 @@
     {
       "artifact_id": "KA-22E7EFB358E3",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "98091b98c93982e15c2741127a3f2cf0e5fae179",
       "path": ".github/workflows/arachne_shipping_boundary.yml",
       "role": "WORKFLOW",
@@ -3222,7 +3222,7 @@
     {
       "artifact_id": "KA-D100D1438015",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "fd69813186e54c6c454832e7dc2eeb4b21899b3e",
       "path": ".github/workflows/architecture_freeze_source_gate.yml",
       "role": "WORKFLOW",
@@ -3237,7 +3237,7 @@
     {
       "artifact_id": "KA-987B1FC6C0D1",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "35cae071018b9e8d68c3b920aa4d39821a9cbb5e",
       "path": ".github/workflows/architecture_freeze_v2_candidate.yml",
       "role": "WORKFLOW",
@@ -3252,7 +3252,7 @@
     {
       "artifact_id": "KA-20CDF68A75CE",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "71f18fb3d715bd3c946d2f24618942ded32814eb",
       "path": ".github/workflows/completion_audit_contract.yml",
       "role": "WORKFLOW",
@@ -3267,7 +3267,7 @@
     {
       "artifact_id": "KA-DAE04D7A1C66",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7c2cebf8ffd009c4e424dbafe9a75dc0531da18a",
       "path": ".github/workflows/iris_reprojection_v2_gate0.yml",
       "role": "WORKFLOW",
@@ -3282,7 +3282,7 @@
     {
       "artifact_id": "KA-DE5B93031E92",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "493e9a208c9cace2731ac335eddd16f5a309e41e",
       "path": ".github/workflows/iris_scene_first_signed_promotion_v3.yml",
       "role": "WORKFLOW",
@@ -3298,7 +3298,7 @@
     {
       "artifact_id": "KA-515B286F9F19",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "286a4f1a36137daaa5d226e34d79aaa34e1636ab",
       "path": ".github/workflows/iris_v2_source_contract.yml",
       "role": "WORKFLOW",
@@ -3313,7 +3313,7 @@
     {
       "artifact_id": "KA-6AFEA36BB50A",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f05bd4e0fd125f0f84d1390e7be5438b2731896b",
       "path": ".github/workflows/p0_directional_binding_closure.yml",
       "role": "WORKFLOW",
@@ -3328,7 +3328,7 @@
     {
       "artifact_id": "KA-486335AE813B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f60020dad3bc5d670660f2ff657ed222aefb4b68",
       "path": ".github/workflows/post_freeze_family_selector_v1.yml",
       "role": "WORKFLOW",
@@ -3343,7 +3343,7 @@
     {
       "artifact_id": "KA-D2D319509ACF",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "16bf42a72ecc41c2eaac95c412a5078c2f315e4b",
       "path": ".github/workflows/pre_fit_visible_optimizer_once_v1.yml",
       "role": "WORKFLOW",
@@ -3358,7 +3358,7 @@
     {
       "artifact_id": "KA-03510A41D0D4",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "b04004000018e34700e40c5fa68b2db48b6142db",
       "path": ".github/workflows/prefit_observation_authority_v1.yml",
       "role": "WORKFLOW",
@@ -3374,7 +3374,7 @@
     {
       "artifact_id": "KA-DE1C18742E5A",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "2fad848fd29e0fccfa3447ee196d7bcabd002f27",
       "path": ".github/workflows/proof_service_promotion_gate.yml",
       "role": "WORKFLOW",
@@ -3389,7 +3389,7 @@
     {
       "artifact_id": "KA-EB08B871C080",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "8a413bb6d6486ea6438a65aac0ab973e98e5db69",
       "path": ".github/workflows/r6_oracle_substrate_arachne_heterogeneous.yml",
       "role": "WORKFLOW",
@@ -3405,7 +3405,7 @@
     {
       "artifact_id": "KA-FB381934DDD7",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "3385d65b4b9503811f713392305dffde49783372",
       "path": ".github/workflows/r6_oracle_substrate_arachne_one_family.yml",
       "role": "WORKFLOW",
@@ -3422,7 +3422,7 @@
     {
       "artifact_id": "KA-6CA3BBDF2808",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "0e688312a4b57595a47330a649f450331d89fbc9",
       "path": ".github/workflows/restoration_closure_manual.yml",
       "role": "WORKFLOW",
@@ -3437,7 +3437,7 @@
     {
       "artifact_id": "KA-ACDFED9D82EF",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "5cb3ff2c659bf5f7791aa78602bf99b68d185acf",
       "path": ".github/workflows/restoration_closure_trigger_once.yml",
       "role": "WORKFLOW",
@@ -3452,7 +3452,7 @@
     {
       "artifact_id": "KA-9D658E0AA530",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "06c7f8fd3d7ca42e481fde2598c9ff4da337d0b5",
       "path": ".github/workflows/runtime_deploy_bake_promotion_gate.yml",
       "role": "WORKFLOW",
@@ -3468,7 +3468,7 @@
     {
       "artifact_id": "KA-FDE35053B8A7",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "929df12d859ec30280e61f3e7b2131e9613e07c0",
       "path": ".github/workflows/single_family_data_contract_v1.yml",
       "role": "WORKFLOW",
@@ -3483,7 +3483,7 @@
     {
       "artifact_id": "KA-06BB330B60C5",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "057b42a70c42fcf94109bfa6b517e0409965bda3",
       "path": "AGENTS.md",
       "role": "HIGH_SIGNAL_OTHER",
@@ -3498,7 +3498,7 @@
     {
       "artifact_id": "KA-91F98EA9D74E",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "acac2bfc64b91ea0711da832897dc2d41de16d10",
       "path": "CURRENT_STATE.md",
       "role": "PLAN_MATRIX",
@@ -3513,7 +3513,7 @@
     {
       "artifact_id": "KA-9B016FEAC499",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "55f55368cd021edcb37f26b67a051a241409bf3b",
       "path": "REPOSITORY_MAP.md",
       "role": "HIGH_SIGNAL_OTHER",
@@ -3528,7 +3528,7 @@
     {
       "artifact_id": "KA-74CB26AB09B6",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "0699f21920d0202069c40c401b66beb8f37cd529",
       "path": "RESTORATION_STATE.md",
       "role": "PLAN_MATRIX",
@@ -3543,7 +3543,7 @@
     {
       "artifact_id": "KA-1A6C1F7769B0",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "8a94874382b1c2ef86a615a5c8a06ab88128946b",
       "path": "SYSTEM_INDEX.md",
       "role": "HIGH_SIGNAL_OTHER",
@@ -3556,10 +3556,10 @@
       "semantic_reason": "continuity spine file"
     },
     {
-      "artifact_id": "KA-B0012D6BE886",
+      "artifact_id": "KA-1F8A46417AA8",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
-      "blob_sha": "d0fa01124bca923804501dc9821df539212ab16c",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
+      "blob_sha": "a04b70754ee80224864eca9ea3c9ee66d3cc945d",
       "path": "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
       "role": "AUTHORITY_DECISION",
       "subsystems": [
@@ -3573,7 +3573,7 @@
     {
       "artifact_id": "KA-6DFA57CE1953",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "12aeada67cebfabdee621c6fcae822866a36c3fd",
       "path": "canonical/ARCHITECTURE_FREEZE_V1.json",
       "role": "AUTHORITY_DECISION",
@@ -3588,7 +3588,7 @@
     {
       "artifact_id": "KA-95F34F1203AE",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "07baa586ffaa8070738e0ed188f04bff2674ea73",
       "path": "canonical/ARCHITECTURE_FREEZE_V2.json",
       "role": "AUTHORITY_DECISION",
@@ -3603,7 +3603,7 @@
     {
       "artifact_id": "KA-7D9AFD69B539",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "913888547d3f9f20008feb6f79085af59c829b7a",
       "path": "canonical/AUTHORITY_MAP_V1.json",
       "role": "AUTHORITY_DECISION",
@@ -3618,7 +3618,7 @@
     {
       "artifact_id": "KA-72122B1004C4",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7db9443b638282ba18a8d59a27d677e9ccc8a372",
       "path": "canonical/BOOTSTRAP_COVERAGE_STATE_V1.json",
       "role": "PLAN_MATRIX",
@@ -3633,7 +3633,7 @@
     {
       "artifact_id": "KA-3EF73B254804",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "abc5234448eed6de5308b6d6a1a3b5416b8d30d3",
       "path": "canonical/BRANCH_AUTHORITY_V1.md",
       "role": "AUTHORITY_DECISION",
@@ -3648,7 +3648,7 @@
     {
       "artifact_id": "KA-ADA25AD7C5B0",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "d3b3197b3ae761678d8b23b2c186261384e322b4",
       "path": "canonical/COMPILER_RUNTIME_MIGRATION_COMPLETENESS_AUDIT_V1.json",
       "role": "AUDIT",
@@ -3662,10 +3662,10 @@
       "semantic_reason": "present in census; semantic role/provenance not yet reconciled"
     },
     {
-      "artifact_id": "KA-EAB0EDCEEDB7",
+      "artifact_id": "KA-5BE78972B64E",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
-      "blob_sha": "56127f95065a76af72f240e4076757dd017cecfa",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
+      "blob_sha": "a2c4a21fdcd7a29ba437d86858353284ed185492",
       "path": "canonical/CONTEXT_STATE_V1.json",
       "role": "PLAN_MATRIX",
       "subsystems": [
@@ -3677,10 +3677,10 @@
       "semantic_reason": "continuity spine file"
     },
     {
-      "artifact_id": "KA-2DDCACB7A3DF",
+      "artifact_id": "KA-25ED8C237DE4",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
-      "blob_sha": "747104644328c70b91b63d627b92b64f42afaab2",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
+      "blob_sha": "c7937a5246b14ddfe53ddd6839f938ccddbc22ab",
       "path": "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
       "role": "AUTHORITY_DECISION",
       "subsystems": [
@@ -3694,7 +3694,7 @@
     {
       "artifact_id": "KA-F5767E678510",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "175a7bb66380b4a5c00c8d7d067fccbbbed03a50",
       "path": "canonical/EXPERIMENT_REGISTRY_V1.json",
       "role": "HIGH_SIGNAL_OTHER",
@@ -3709,7 +3709,7 @@
     {
       "artifact_id": "KA-DC74ABB19F22",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "c01e1a65f75e1983ed7957b10ac9d3f7d57a3895",
       "path": "canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json",
       "role": "PREREG",
@@ -3725,7 +3725,7 @@
     {
       "artifact_id": "KA-E1571E78A4A5",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "36aef9ae6ecd543a1f467709e1608f9225b4459b",
       "path": "canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md",
       "role": "PREREG",
@@ -3740,7 +3740,7 @@
     {
       "artifact_id": "KA-8E2B95544900",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6cb3fa9ad7adf3d5f68a77bdaa092b97d83a9743",
       "path": "canonical/N1D_DESCRIPTOR_GLOBAL_FOREGROUND_TOP4_OPENDEV_CANONICAL_REPORT_V1.md",
       "role": "AUDIT",
@@ -3755,7 +3755,7 @@
     {
       "artifact_id": "KA-6D537D565D43",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7aa500477d926d3ffa2f597729fa02325ec4976e",
       "path": "canonical/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_CANONICAL_REPORT_V1.md",
       "role": "AUDIT",
@@ -3770,7 +3770,7 @@
     {
       "artifact_id": "KA-7073E0F1801F",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "8cfab1a5799a0b35e92f2b1f05cc4a04ad1218aa",
       "path": "canonical/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_STAGE_A_CANONICAL_REPORT_V1.md",
       "role": "AUDIT",
@@ -3785,7 +3785,7 @@
     {
       "artifact_id": "KA-03AAD1E34A0F",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "3e66bed1b76ee4fae57697455807268778e28cfd",
       "path": "canonical/SKINTOKENS_CODE_LEVEL_REFERENCE_AUDIT_V1.md",
       "role": "AUDIT",
@@ -3800,7 +3800,7 @@
     {
       "artifact_id": "KA-788E432F4CEA",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "aa520c4f604e1aa46ad71d16069a4c1988e1d04f",
       "path": "canonical/SOLVER_AUTHORITY_MATRIX_V1.md",
       "role": "AUTHORITY_DECISION",
@@ -3816,7 +3816,7 @@
     {
       "artifact_id": "KA-3BC70C83D01C",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "633e3c7fa537f0f431d5e834fba434f0922ce5de",
       "path": "canonical/architecture_freeze_gate_v1.py",
       "role": "AUTHORITY_DECISION",
@@ -3831,7 +3831,7 @@
     {
       "artifact_id": "KA-826B723D908A",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "d87a404470623afdfce70065b25bc6110e6c51a1",
       "path": "canonical/architecture_freeze_gate_v2.py",
       "role": "AUTHORITY_DECISION",
@@ -3846,7 +3846,7 @@
     {
       "artifact_id": "KA-249218A33EA0",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "b9774b3296e6f04831d5a6259e25d90de15c0b08",
       "path": "canonical/fit_mage_v1/ARACHNE_A1_CPU_PREREG_V1.md",
       "role": "PREREG",
@@ -3862,7 +3862,7 @@
     {
       "artifact_id": "KA-4BA36C81DC37",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "647d375bb65ab17b1afb58db88310fe9581e0f5f",
       "path": "canonical/fit_mage_v1/CODEC_A0_EXACT_CONDITIONING_RESULT.json",
       "role": "RESULT",
@@ -3877,7 +3877,7 @@
     {
       "artifact_id": "KA-2F8418D24D3C",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "4edcee0fffff8f340d1f66a736594a986dc410ca",
       "path": "canonical/fit_mage_v1/FIT_MAGE_CPU_V1_STATUS.md",
       "role": "HIGH_SIGNAL_OTHER",
@@ -3892,7 +3892,7 @@
     {
       "artifact_id": "KA-3E39698373DA",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "85013f79c7b96ae3ee6043b03abb152dce191b59",
       "path": "canonical/validate_completion_plan_v1.py",
       "role": "PLAN_MATRIX",
@@ -3907,7 +3907,7 @@
     {
       "artifact_id": "KA-402A1F2E8E27",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6571a60a422371f8034af364bbd6593bf365188a",
       "path": "experiments/family_selection_v1/post_freeze_family_selector_v1.py",
       "role": "AUTHORITY_DECISION",
@@ -3922,7 +3922,7 @@
     {
       "artifact_id": "KA-214B09AD73A1",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "837db0a307a357c27c1f95f26d530eb0ff45c1b5",
       "path": "experiments/family_selection_v1/prefit_family_truth_eligibility_v1.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -3937,7 +3937,7 @@
     {
       "artifact_id": "KA-C12556C15A7B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "2f32e05d523368fa1e883c2f7ff7cf9132a27976",
       "path": "experiments/family_selection_v1/prefit_observation_authority_v1.py",
       "role": "AUTHORITY_DECISION",
@@ -3953,7 +3953,7 @@
     {
       "artifact_id": "KA-1F97F2E183D1",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "01e128dbb7934948cde23429ca68ed22d8744266",
       "path": "experiments/family_selection_v1/test_post_freeze_family_selector_v1.py",
       "role": "AUTHORITY_DECISION",
@@ -3968,7 +3968,7 @@
     {
       "artifact_id": "KA-63B1788D3B44",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "1c11d7d2aeb5f7a96f1eaf01d46cc8150b775313",
       "path": "experiments/family_selection_v1/test_prefit_family_truth_eligibility_v1.py",
       "role": "HIGH_SIGNAL_OTHER",
@@ -3983,7 +3983,7 @@
     {
       "artifact_id": "KA-E435DDB5D448",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "644e8aa9bcd6fb46805accb757a77f89337aec70",
       "path": "experiments/g0_g1_single_pose_geometry/G0_CONTRACT_FREEZE.json",
       "role": "AUTHORITY_DECISION",
@@ -3998,7 +3998,7 @@
     {
       "artifact_id": "KA-0C6940AFE2D3",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f9caeb90f82a856f6b369aacc4756a13cb987d89",
       "path": "experiments/g0_g1_single_pose_geometry/G1_FREEZE_MANIFEST.json",
       "role": "AUTHORITY_DECISION",
@@ -4013,7 +4013,7 @@
     {
       "artifact_id": "KA-0144238CA79F",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "415af64055225528f3946bbf0c3d694fda9a006b",
       "path": "experiments/g0_g1_single_pose_geometry/G1_PREREG_DRAFT.json",
       "role": "PREREG",
@@ -4028,7 +4028,7 @@
     {
       "artifact_id": "KA-B2BC05E0E5B3",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "702ea74b99d2ba8aa61f2ef9718b000341c1cd02",
       "path": "experiments/g0_g1_single_pose_geometry/G1_PREREG_V1.json",
       "role": "PREREG",
@@ -4043,7 +4043,7 @@
     {
       "artifact_id": "KA-85ADD229E1C9",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "7787f03abbbc93ace9404b30c9001c8a21c95c96",
       "path": "experiments/g0_g1_single_pose_geometry/G1_SPLIT_FREEZE.json",
       "role": "AUTHORITY_DECISION",
@@ -4058,7 +4058,7 @@
     {
       "artifact_id": "KA-7AC25C4825B3",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "c393ad03d26dd441004711eaf2bc31e481639b7b",
       "path": "experiments/g0_g1_single_pose_geometry/N1D_TO_G1_MIGRATION_REPORT.json",
       "role": "AUDIT",
@@ -4073,7 +4073,7 @@
     {
       "artifact_id": "KA-22E21779326B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "679eb723851c604e493751447d12c84d2e856eae",
       "path": "experiments/g0_g1_single_pose_geometry/PRESERVATION_LEDGER.json",
       "role": "PLAN_MATRIX",
@@ -4088,7 +4088,7 @@
     {
       "artifact_id": "KA-23FDE2D5C202",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "68ef141f52f643860cc8eeb8f1e777e7b69c5c61",
       "path": "experiments/g0_g1_single_pose_geometry/REALSAS_MASTER_CORPUS_SOURCE_AUDIT_V1.md",
       "role": "AUDIT",
@@ -4103,7 +4103,7 @@
     {
       "artifact_id": "KA-15094A8FD011",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "8206aa032dc3598be4269ffb8b3ef50b6804a56e",
       "path": "experiments/g0_g1_single_pose_geometry/STARTER_MANIFEST.json",
       "role": "PLAN_MATRIX",
@@ -4118,7 +4118,7 @@
     {
       "artifact_id": "KA-38BBF4FD7C0C",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "86fa199fb94aaac7d0b171f22b8f1f47e333b174",
       "path": "experiments/g0_g1_single_pose_geometry/legacy_reserve/D2_RESULT.md",
       "role": "RESULT",
@@ -4133,7 +4133,7 @@
     {
       "artifact_id": "KA-6C57ED7411BF",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "dd6c3363bab400e23907558b507e9b7a38c6c00d",
       "path": "experiments/g0_g1_single_pose_geometry/schemas/REALSAS_MASTER_CORPUS_MANIFEST_SCHEMA_V1.json",
       "role": "PLAN_MATRIX",
@@ -4148,7 +4148,7 @@
     {
       "artifact_id": "KA-59DF32C61C82",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "cc0af11b166b9f428ab8587f9675746d613b36f0",
       "path": "experiments/g0_g1_single_pose_geometry/schemas/REALSAS_MODEL_EXPORT_MANIFEST_SCHEMA_V1.json",
       "role": "PLAN_MATRIX",
@@ -4163,7 +4163,7 @@
     {
       "artifact_id": "KA-816B66BE2201",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f4abe1e01b6a2641983008f7b339a8c323af3c20",
       "path": "experiments/iris_controlled_v1/AUTHORITY_POINTERS_V1.json",
       "role": "AUTHORITY_DECISION",
@@ -4179,7 +4179,7 @@
     {
       "artifact_id": "KA-67431298A278",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "958bcf5bd3d1af77295ec1cfa7c6b666f337582a",
       "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256.ipynb",
       "role": "NOTEBOOK",
@@ -4194,7 +4194,7 @@
     {
       "artifact_id": "KA-D064513AEABF",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6a3ce0a061882f6b72f91e9916995d6fe2f7ed3e",
       "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256_PREREG.md",
       "role": "PREREG",
@@ -4209,7 +4209,7 @@
     {
       "artifact_id": "KA-F03BC01B0A5B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "313d88f2f4fcaca0fd6cabb6ebb37447aabd95a4",
       "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256_PREREG_V1_1.md",
       "role": "PREREG",
@@ -4224,7 +4224,7 @@
     {
       "artifact_id": "KA-CD3ED284455E",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6c9c796fd8df84d704a28a48ed26a57c79c481b7",
       "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256_V1_2.ipynb",
       "role": "NOTEBOOK",
@@ -4239,7 +4239,7 @@
     {
       "artifact_id": "KA-2B2D48906A96",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "700a7e4d81e0ea44bb10e842dd1332efdb22773e",
       "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_PREREG.md",
       "role": "PREREG",
@@ -4254,7 +4254,7 @@
     {
       "artifact_id": "KA-5634B9A9F1C6",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "287e5a903bbdec3e26187f887948862566974267",
       "path": "experiments/iris_controlled_v1/M256_DENSE_AUTHORITY_POINTERS_V1_2.json",
       "role": "AUTHORITY_DECISION",
@@ -4270,7 +4270,7 @@
     {
       "artifact_id": "KA-A80F187C5D5D",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "e973228a947a0e2b42816ed30aa6f855ac006503",
       "path": "experiments/iris_controlled_v1/PACKAGE_MANIFEST_V1.json",
       "role": "PLAN_MATRIX",
@@ -4285,7 +4285,7 @@
     {
       "artifact_id": "KA-FECAA0775C14",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "072550d0c00e9e4d0b0ff20718dd45d4353a2769",
       "path": "experiments/iris_controlled_v1/PACKAGE_SEAL_V1.json",
       "role": "AUTHORITY_DECISION",
@@ -4300,7 +4300,7 @@
     {
       "artifact_id": "KA-65F48BDA2F0C",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "a40132db3b0ee73924d29d807dd2d044d72ebbe8",
       "path": "experiments/iris_controlled_v1/TRAINING_READY_REPORT_V1.md",
       "role": "AUDIT",
@@ -4315,7 +4315,7 @@
     {
       "artifact_id": "KA-FFEC5AC592BD",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "ec99b044d7c15394185fb7a251b243f072b196f6",
       "path": "experiments/iris_controlled_v1/build_seed_manifest.py",
       "role": "PLAN_MATRIX",
@@ -4330,7 +4330,7 @@
     {
       "artifact_id": "KA-56606CBD6EDE",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "b064b360172637964a28df691d4367aef5a247e5",
       "path": "experiments/n1d/post_n1d/N1D_DESCRIPTOR_GLOBAL_FOREGROUND_TOP4_UNTOUCHED_OPENDEV_RESULT_V1.json",
       "role": "RESULT",
@@ -4345,7 +4345,7 @@
     {
       "artifact_id": "KA-AE596923BF5B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "3bb169fde4e5ea5fb714c005f64b726c39246c8b",
       "path": "experiments/n1d/post_n1d/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_CANONICAL_RESULT_V1.json",
       "role": "RESULT",
@@ -4360,7 +4360,7 @@
     {
       "artifact_id": "KA-7E3C8843DB9F",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "011c09900e36704c1a2b5be5f4c632addeed5a42",
       "path": "experiments/n1d/post_n1d/N1D_GLOBAL_FOREGROUND_GFDR_CAUSAL_REPLAY_CANONICAL_RESULT_V1.json",
       "role": "RESULT",
@@ -4375,7 +4375,7 @@
     {
       "artifact_id": "KA-B64A5EA377F2",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "ee9b2c7b2ea3a190f763d3f3ad97c9a55c627bb2",
       "path": "experiments/n1d/post_n1d/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_STAGE_A_CANONICAL_RESULT_V1.json",
       "role": "RESULT",
@@ -4390,7 +4390,7 @@
     {
       "artifact_id": "KA-F3650E602303",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "e9a87786fd3109772480068bea047aa0c2c0d945",
       "path": "experiments/post_corpus_audit/GATE0_GATE1_LIVE_DRIVE_RESULT_V1.json",
       "role": "RESULT",
@@ -4405,7 +4405,7 @@
     {
       "artifact_id": "KA-C7A7A0C4004F",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "bfaa1c5b6abad853257e776a894f7f6ea1c4faed",
       "path": "experiments/post_corpus_audit/GATE3_LINKED_APPEARANCE_REMATERIALIZATION_PREREG_V1.md",
       "role": "PREREG",
@@ -4420,7 +4420,7 @@
     {
       "artifact_id": "KA-74C23D4E0857",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "547938c36b425df574e49b02d065835cbe94836b",
       "path": "experiments/post_corpus_audit/IRIS_USABLE_CONTROLLED_CORPUS_FREEZE_V1.md",
       "role": "AUTHORITY_DECISION",
@@ -4435,7 +4435,7 @@
     {
       "artifact_id": "KA-52156EE56CCC",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "5b44bcdf000cfe4c16502e42ecbc60880e860408",
       "path": "experiments/post_corpus_audit/POST_CORPUS_80_CHECK_CLOSURE_MATRIX_V1.md",
       "role": "CLOSURE",
@@ -4450,7 +4450,7 @@
     {
       "artifact_id": "KA-66B187663343",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "bed6b68f87350844b5cfa2c251dcf20ef12ec9b6",
       "path": "experiments/post_corpus_audit/POST_CORPUS_AUDIT_STATUS.md",
       "role": "AUDIT",
@@ -4465,7 +4465,7 @@
     {
       "artifact_id": "KA-96DB824CED44",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6cc334f49bffa892d541364339ff8e087f5f6b6e",
       "path": "experiments/post_corpus_audit/POST_CORPUS_STAGE_A_CLOSURE_DECISION_V2.md",
       "role": "CLOSURE",
@@ -4480,7 +4480,7 @@
     {
       "artifact_id": "KA-731F02930053",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6f5f3219d68561787b1a417ac73d2f85e01ee083",
       "path": "experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_STUDY_V1_PREREG.md",
       "role": "PREREG",
@@ -4495,7 +4495,7 @@
     {
       "artifact_id": "KA-545F2A47552B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "ca8900a1b771832e9c8d3e0fa90b12bdf720bdaf",
       "path": "experiments/post_corpus_audit/audit_master_corpus.py",
       "role": "AUDIT",
@@ -4510,7 +4510,7 @@
     {
       "artifact_id": "KA-8A1DC57C0973",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "27523106c33e1d459d572a5513d8626721efa541",
       "path": "experiments/post_corpus_audit/audit_master_corpus_fast.py",
       "role": "AUDIT",
@@ -4525,7 +4525,7 @@
     {
       "artifact_id": "KA-BF957F2998BD",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "aafa4c456f3b5a21ee820fc2944e932970c6c86e",
       "path": "experiments/post_corpus_audit/post_corpus_stage_a_closure_v2.py",
       "role": "CLOSURE",
@@ -4540,7 +4540,7 @@
     {
       "artifact_id": "KA-FC572DEF11D0",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "9bba8d4aafc7033077b63608788409eb9bc7ceef",
       "path": "experiments/post_corpus_audit/post_corpus_stage_b6_freeze_repair_staging_v1.py",
       "role": "AUTHORITY_DECISION",
@@ -4555,7 +4555,7 @@
     {
       "artifact_id": "KA-496FB5F54F2A",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "837a9d0159c65a6d0f2a743345a92b6d6d531087",
       "path": "experiments/post_corpus_audit/post_corpus_stage_b_selective_authority_v1.py",
       "role": "AUTHORITY_DECISION",
@@ -4570,7 +4570,7 @@
     {
       "artifact_id": "KA-CD1959D9885B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "8b1a8487f0d31b9b351d8d334a892a4eaa1d13dc",
       "path": "experiments/s0_rigging_substrate/S0_A_CORPUS_BINDING_REPORT.md",
       "role": "AUDIT",
@@ -4585,7 +4585,7 @@
     {
       "artifact_id": "KA-6071C2431DB7",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "4781c72a02137d30dec007ab36a1b652d54be86a",
       "path": "experiments/s0_rigging_substrate/S0_A_INFORMATION_DERIVABILITY_MATRIX.json",
       "role": "PLAN_MATRIX",
@@ -4600,7 +4600,7 @@
     {
       "artifact_id": "KA-3AB40AA8EEF2",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "cd393008097b3b69042a5cd621ba59cc80cc9bba",
       "path": "experiments/s0_rigging_substrate/S0_B2_DERIVED_NORMAL_FALSIFICATION_REPORT_V1.md",
       "role": "AUDIT",
@@ -4615,7 +4615,7 @@
     {
       "artifact_id": "KA-D08CD72879BA",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "4825397eec6fd90cdaf174496c916816f0ef6cbc",
       "path": "experiments/s0_rigging_substrate/S0_B2_PREREG_V1.md",
       "role": "PREREG",
@@ -4630,7 +4630,7 @@
     {
       "artifact_id": "KA-F011C6E394A8",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "5ddc31c2625fb4071d9ec6d6c859e3fe82c4bc32",
       "path": "experiments/s0_rigging_substrate/S0_B2_RESULT_V1.json",
       "role": "RESULT",
@@ -4645,7 +4645,7 @@
     {
       "artifact_id": "KA-2CEA34CCFD57",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "f81b8678dfef19734e5ccc601068b573dbed9ef3",
       "path": "experiments/s0_rigging_substrate/S0_B_PILOT_REPORT_V1.md",
       "role": "AUDIT",
@@ -4660,7 +4660,7 @@
     {
       "artifact_id": "KA-F9AC50E77CFA",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "ee24f2d226231226f7715ea505a7f3941dc99c21",
       "path": "experiments/s0_rigging_substrate/S0_B_PILOT_RESULT_V1.json",
       "role": "RESULT",
@@ -4675,7 +4675,7 @@
     {
       "artifact_id": "KA-6E0B09EAFC48",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "cf36713ca2ddfcfaf2e7c5b48856d903bd3f6d04",
       "path": "experiments/s0_rigging_substrate/S0_PLAN_AND_PREREG_V1.md",
       "role": "PREREG",
@@ -4690,7 +4690,7 @@
     {
       "artifact_id": "KA-010725BF929F",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "6b6cb76d8433e1c9ec8f48323173a688a9f0a79c",
       "path": "experiments/single_family_e2e_v1/data_manifest_v1.py",
       "role": "PLAN_MATRIX",
@@ -4705,7 +4705,7 @@
     {
       "artifact_id": "KA-15304CCCBC90",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "415af64055225528f3946bbf0c3d694fda9a006b",
       "path": "prereg/iris/G1_SINGLE_POSE_GEOMETRY_PREREG_DRAFT.json",
       "role": "PREREG",
@@ -4720,7 +4720,7 @@
     {
       "artifact_id": "KA-71805E8F1B99",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "702ea74b99d2ba8aa61f2ef9718b000341c1cd02",
       "path": "prereg/iris/G1_SINGLE_POSE_GEOMETRY_PREREG_V1.json",
       "role": "PREREG",
@@ -4735,7 +4735,7 @@
     {
       "artifact_id": "KA-DD9BF604B130",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "172348785b64045eb468527d4c911170dcf79c7b",
       "path": "prereg/n1d/N1D_DESCRIPTOR_GLOBAL_FOREGROUND_TOP4_UNTOUCHED_OPENDEV_PREREG_V1.json",
       "role": "PREREG",
@@ -4750,7 +4750,7 @@
     {
       "artifact_id": "KA-71EB299F884D",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "1f63d14b6c16c1470510133ca2bd3f5efdae0069",
       "path": "prereg/n1d/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_PREREG_V1.json",
       "role": "PREREG",
@@ -4765,7 +4765,7 @@
     {
       "artifact_id": "KA-CEC4A4424F15",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "29f7aac944a50665c4ae31fc6947324a0b05e586",
       "path": "prereg/n1d/N1D_GLOBAL_FOREGROUND_GFDR_CAUSAL_REPLAY_PREREG_V1.json",
       "role": "PREREG",
@@ -4780,7 +4780,7 @@
     {
       "artifact_id": "KA-3B3218B9898B",
       "source_ref": "main",
-      "source_head": "0af2c0aa12069914b5ab97ddce096f8263433b30",
+      "source_head": "6d9ae888b5f04074849d987629ea725a27b4da5c",
       "blob_sha": "fca9dca905fee3f84deed5232b9f0242469db70f",
       "path": "prereg/n1d/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_OPENDEV_PREREG_V1.json",
       "role": "PREREG",

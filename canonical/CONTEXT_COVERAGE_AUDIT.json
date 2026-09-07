@@ -12,8 +12,8 @@
   "explained_high_signal_count": 264,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 80,
-  "safe_default_evidence_only_branch_count": 76,
+  "live_branch_count": 81,
+  "safe_default_evidence_only_branch_count": 77,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -167,6 +167,12 @@
       "reason": "explicit authority-map override"
     },
     {
+      "name": "exp/geppetto-reference-strength-fullstack-v1-20260907",
+      "sha": "217b2d39185e8a44ee3a15f6eac98e1d70966d60",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "exp/lossless-rigging-evidence-v1-20260906",
       "sha": "d840d96ece57705e0f519d1650119db180d9f5c4",
       "class": "EVIDENCE_ONLY",
@@ -306,7 +312,7 @@
     },
     {
       "name": "main",
-      "sha": "c76c45fcd917403ac755e448ff0dc1c9721e82dc",
+      "sha": "217b2d39185e8a44ee3a15f6eac98e1d70966d60",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

@@ -7,17 +7,17 @@ This repository is intentionally structured so a new AI agent/chat/session can r
 Before making any architecture, experiment, branch, or scientific-state claim:
 
 1. `canonical/REHYDRATION_PACKET.md`
-2. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
-3. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
-4. `CURRENT_STATE.md`
-5. `canonical/FIT1_COMMIT_LINEAGE_V1.md` when exact FIT1-to-now chronology/commit provenance matters
-6. `canonical/CONTEXT_COVERAGE_AUDIT.md`
-7. `canonical/LIVE_AUTHORITY_MAP.md`
-8. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
-9. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-10. `canonical/EXPERIMENT_REGISTRY_V1.json`
-11. `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` when locating exact older evidence
-12. `canonical/SCIENTIFIC_JOURNAL_V1.jsonl` when historical reasoning/decision sequence matters
+2. `canonical/SCIENTIFIC_JOURNAL_V1.jsonl` — inspect the recent tail first so the ordered sequence of decisions/requests and the reason for the current task are recovered, not only the final state
+3. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
+4. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
+5. `CURRENT_STATE.md`
+6. `canonical/FIT1_COMMIT_LINEAGE_V1.md` when exact FIT1-to-now chronology/commit provenance matters
+7. `canonical/CONTEXT_COVERAGE_AUDIT.md`
+8. `canonical/LIVE_AUTHORITY_MAP.md`
+9. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
+10. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
+11. `canonical/EXPERIMENT_REGISTRY_V1.json`
+12. `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` when locating exact older evidence
 
 If `canonical/BOOTSTRAP_COVERAGE_STATE_V1.json` says `BOOTSTRAP_AUDIT_CLOSED`, also read `canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md` before interpreting coverage semantics.
 
@@ -118,13 +118,19 @@ Every experiment claim should answer:
 
 These fields belong in `canonical/EXPERIMENT_REGISTRY_V1.json`, not only in prose reports.
 
-## Chronology rule
+## Chronology rule — live continuation memory
 
-Scientific chronology is append-only in `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`.
+Scientific and project chronology is append-only in `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`.
 
 - New events require exact RFC3339 UTC timestamps.
 - Historical backfill must preserve the strongest verified time precision; never invent clock times.
 - Corrections/retractions are new journal events. Do not silently rewrite history.
+- **Before ending a session, append every substantive user/project decision that changes the next work item, architecture constraint, experiment selection, demo artifact queue, promotion interpretation, or stop/go state.**
+- Record requests and priorities as requests/priorities; never upgrade them into experimental PASS, promotion or scientific evidence merely because the user chose the next direction.
+- A new chat/agent must inspect the recent journal tail and be able to reconstruct the causal sequence: what was learned, what was decided next, what artifact/work was queued, and why the project moved on.
+- The journal is not a miscellaneous diary. Only continuity-relevant decisions, corrections, experiments, promotions, architecture changes and engineering-queue changes belong there.
+
+The continuity requirement is stronger than “know the latest state”: the agent should be able to answer questions such as “what did we decide immediately after IRIS FIT1?” from repository chronology without asking the user to repeat it.
 
 ## Current known context guards
 

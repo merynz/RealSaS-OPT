@@ -29,7 +29,7 @@
     "fit/single-family-mage-v1-20260902": "f2cd746f8bebf24c9c0c20d5c33743d24f9b0fa2",
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
-    "main": "e781665a5d960a8e64165d18a06cf8db3146cfbe",
+    "main": "394f5c898287af7acd676f2f26f119b71b7b5bdc",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "promote/iris-scene-first-signed-main-v3-20260905": "dfb087c6a23e39c0360c4cd4d89fdb6b9e9c9957",
@@ -52,7 +52,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 793,
+  "commit_count": 796,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -32837,6 +32837,76 @@
       "main_reachable": true,
       "changed_paths": [
         "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "40294e2d7190da0a17eb754db97010157017c1fb",
+      "parents": [
+        "e781665a5d960a8e64165d18a06cf8db3146cfbe"
+      ],
+      "author_time": "2026-09-07T13:57:11+03:00",
+      "committer_time": "2026-09-07T13:57:11+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3a83b7e5101181535535028c8b9894601cba5bb4",
+      "parents": [
+        "40294e2d7190da0a17eb754db97010157017c1fb"
+      ],
+      "author_time": "2026-09-07T13:57:32+03:00",
+      "committer_time": "2026-09-07T13:57:32+03:00",
+      "subject": "Append AOA closure and ownership boundary events",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/SCIENTIFIC_JOURNAL_V1.jsonl"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "394f5c898287af7acd676f2f26f119b71b7b5bdc",
+      "parents": [
+        "3a83b7e5101181535535028c8b9894601cba5bb4"
+      ],
+      "author_time": "2026-09-07T13:57:54+03:00",
+      "committer_time": "2026-09-07T13:57:54+03:00",
+      "subject": "Close bootstrap audit-of-audits",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_COVERAGE_STATE_V1.json"
       ],
       "subsystem_tags": [
         "GOVERNANCE_CONTINUITY"

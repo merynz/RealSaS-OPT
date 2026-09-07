@@ -11,7 +11,7 @@
 - **Current state:** `POST_AR01_DIAGNOSIS_REQUIRED__NO_NEW_EXPERIMENT_PREREGISTERED`
 - **Active experiment:** `NONE`
 - **Most recent closed gate:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
-- **Canonical main:** `e781665a5d96`
+- **Canonical main:** `394f5c898287`
 - **Promotion block:** No Geppetto refreeze/promotion until scientifically necessary post-AR-01 gate(s) close and a separate promotion transaction reconciles source, evidence and authority.
 - **Scope warning:** AR-01 was a minimal feedback intervention, not a full RigAnything formulation test. Do not bundle the three remaining questions post hoc.
 - **Next visible product milestone:** Mage idle/breathing after genuine Geppetto closure/refreeze and current-chain Arachne FIT1 closure
@@ -35,13 +35,14 @@ Read `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` before moving responsibilit
 
 ## Historical-memory health
 
-- **Bootstrap/AOA:** `BOOTSTRAP_AUDIT_INCOMPLETE`
+- **Bootstrap/AOA:** `BOOTSTRAP_AUDIT_CLOSED`
 - **High-signal artifacts:** 264
 - **Explained by continuity policy:** 264
 - **Unexplained:** 0
 - **Coverage:** 100.0%
-- Missing historical detail remains `UNKNOWN / NEEDS AUDIT`; never infer absence.
-- Use `canonical/BOOTSTRAP_AUDIT_QUEUE.md` + artifact catalog for unresolved evidence.
+- Closure authority: `canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md`.
+- Residual/disposition policy: `canonical/AOA_ARTIFACT_DISPOSITION_V1.json`.
+- Closure means context/provenance coverage, **not** retroactive validation of every historical artifact.
 
 ## Current scientific question
 

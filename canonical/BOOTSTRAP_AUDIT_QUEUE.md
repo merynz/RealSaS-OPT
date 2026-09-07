@@ -1,13 +1,13 @@
 # RealSaS — Bootstrap Audit Queue
 
 > **GENERATED DISCOVERY VIEW — NOT SCIENTIFIC AUTHORITY.**
-> Bootstrap: `BOOTSTRAP_AUDIT_INCOMPLETE`
+> Bootstrap: `BOOTSTRAP_AUDIT_CLOSED`
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
 - Census artifacts in declared scope: **316 / 316 discovered (100%)**
-- Semantically reconciled: **42**
-- Catalogued but unreviewed: **274**
-- Semantic coverage: **13.3%**
+- Semantically reconciled: **43**
+- Catalogued but unreviewed: **273**
+- Semantic coverage: **13.6%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -108,10 +108,9 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-B97B66FF6F63` `RESULT` — `main` :: `experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_COUPLING_PROBE_RESULT_V1.json` @ blob `45c436c03546`
 - `KA-D5A69A668DC9` `AUDIT` — `main` :: `experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_V0_I0_AUDIT_V2.json` @ blob `92faab9ee2ce`
 
-### 2026-08-31 :: CROSS_CUTTING_OTHER (2)
+### 2026-08-31 :: CROSS_CUTTING_OTHER (1)
 
 - `KA-45AE9A7C4A91` `PREREG` — `main` :: `canonical/CORPUS_VISUAL_ANOMALY_TRIAGE_PREREG_20260831.md` @ blob `4cef5c8f6e39`
-- `KA-76CB6B88692A` `AUDIT` — `main` :: `canonical/DETERMINISTIC_DOWNSTREAM_LAYER_OWNERSHIP_OVERLAP_AUDIT_20260831.md` @ blob `ce26bc2b645c`
 
 ### 2026-08-31 :: GEPPETTO (3)
 

@@ -5,7 +5,7 @@
 
 ## Coverage
 
-- Git-tracked files: **820**
+- Git-tracked files: **821**
 - High-signal knowledge artifacts: **258**
 - Indexed/referenced by continuity spine: **22**
 - Unindexed high-signal artifacts: **236**
@@ -306,7 +306,7 @@ During bootstrap, **UNINDEXED does not mean irrelevant or false**. It means the 
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
-| `main` | `f7876ab694bb` | `CANONICAL` | canonical branch |
+| `main` | `0af2c0aa1206` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |

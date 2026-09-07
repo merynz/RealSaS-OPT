@@ -11,7 +11,7 @@
 - **Current module:** `Geppetto`
 - **Active gate:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
 - **Active branch:** `exp/geppetto-ar01-skeleton-causal-v1-20260907` @ `58ea876d3e61`
-- **Canonical main:** `f7876ab694bb`
+- **Canonical main:** `0af2c0aa1206`
 - **Promotion block:** No Geppetto refreeze/promotion before AR-01 closes under preregistered rules.
 - **Scope warning:** AR-01 is a minimal feedback intervention, not a full RigAnything formulation test.
 - **Next visible product milestone:** Mage idle/breathing after Geppetto + Arachne FIT1 closure
@@ -111,3 +111,4 @@ result/provenance + implementation + experiment ledger + architecture ledger if 
 
 **INVALID — context/authority drift detected.**
 - context current gate must match exactly one active authority experiment: AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE
+- CURRENT_STATE.md does not name context current branch

@@ -5,9 +5,9 @@
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
 - Census artifacts in declared scope: **311 / 311 discovered (100%)**
-- Semantically reconciled: **36**
-- Catalogued but unreviewed: **275**
-- Semantic coverage: **11.6%**
+- Semantically reconciled: **37**
+- Catalogued but unreviewed: **274**
+- Semantic coverage: **11.9%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -312,9 +312,8 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-8A1DC57C0973` `AUDIT` — `main` :: `experiments/post_corpus_audit/audit_master_corpus_fast.py` @ blob `27523106c33e`
 - `KA-BF957F2998BD` `CLOSURE` — `main` :: `experiments/post_corpus_audit/post_corpus_stage_a_closure_v2.py` @ blob `aafa4c456f3b`
 
-### UNKNOWN_DATE :: FIT_PRODUCT (23)
+### UNKNOWN_DATE :: FIT_PRODUCT (22)
 
-- `KA-F88CAFEA8E55` `PREREG` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `experiments/mage_scene_first_e2e_v1/AR01_SKELETON_CAUSAL_AUTOREGRESSION_PREREG_V1.md` @ blob `3e5aaa4be7f6`
 - `KA-533B890E7E65` `AUTHORITY_DECISION` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `experiments/mage_scene_first_e2e_v1/B1S_FULL_STEP0_EPS1E4_DECISION.md` @ blob `f0ce368c8f5c`
 - `KA-1A1CA571A364` `PREREG` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `experiments/mage_scene_first_e2e_v1/B1S_PHASE_EPS_SWITCH_PREREG.md` @ blob `b74ff9dbbd64`
 - `KA-6FBC2E704555` `AUDIT` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `experiments/mage_scene_first_e2e_v1/GSA_RIGGINGSURFACE_BOUNDARY_AUDIT_V1.md` @ blob `1628d5b1aece`

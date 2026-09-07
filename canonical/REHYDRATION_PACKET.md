@@ -1,36 +1,53 @@
 # RealSaS — Rehydration Packet
 
-> **GENERATED NAVIGATION/CACHE — DO NOT TREAT AS INDEPENDENT SCIENTIFIC AUTHORITY.**  
-> Source state: `canonical/CONTEXT_STATE_V1.json` + `canonical/AUTHORITY_MAP_V1.json` + bootstrap/census state + live remote refs.  
-> If this packet conflicts with `CURRENT_STATE.md`, `CURRENT_STATE.md` wins.
+> **GENERATED NAVIGATION/CACHE — NOT INDEPENDENT SCIENTIFIC AUTHORITY.**  
+> Continuation authority remains `CURRENT_STATE.md`; scientific claims require the referenced source/prereg/result authority.
 
 ## 60-second state
 
 - **Product:** 8-direction editable 2D/2.5D puppet compiled from raster artwork; preserve 2D appearance while inferring/editing mechanical rig and deformation.
 - **Current witness:** `Mage FIT1`
 - **Current module:** `Geppetto`
-- **Active gate:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
-- **Active branch:** `exp/geppetto-ar01-skeleton-causal-v1-20260907` @ `58ea876d3e61`
-- **Canonical main:** `0af2c0aa1206`
-- **Promotion block:** No Geppetto refreeze/promotion before AR-01 closes under preregistered rules.
-- **Scope warning:** AR-01 is a minimal feedback intervention, not a full RigAnything formulation test.
+- **Current state:** `POST_AR01_DIAGNOSIS_REQUIRED__NO_NEW_EXPERIMENT_PREREGISTERED`
+- **Active experiment:** `NONE`
+- **Most recent closed gate:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
+- **Canonical main:** `49944cdb29f4`
+- **Promotion block:** No Geppetto refreeze/promotion until the scientifically necessary post-AR-01 gate(s) close and a separate promotion transaction reconciles authority.
+- **Scope warning:** AR-01 was a minimal feedback intervention, not a full RigAnything formulation test. Do not bundle the three remaining questions post hoc.
 - **Next visible product milestone:** Mage idle/breathing after Geppetto + Arachne FIT1 closure
+
+## Mandatory ownership memory
+
+Read `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` before moving responsibilities between learned and deterministic layers.
+
+- **IRIS shorthand:** observations/cameras -> learned evidence -> deterministic GSA/RiggingSurfaceIR assembly/provenance.
+- **Geppetto shorthand:** lossless RiggingSurfaceIR -> learned SkeletonProposalIR/evidence -> Compiler exact graph qualification/canonical IDs.
+- **Arachne shorthand:** qualified surface+skeleton -> learned skin/deformation proposal -> Compiler skin/mesh qualification.
+- **Memory guard:** **Geppetto is proposal, not canonical rig authority.** Compiler may constrain legality; it may not secretly repair missing Geppetto semantics.
+
+## FIT1 scientific memory
+
+- Semantic spine: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`.
+- Exhaustive commit/provenance ledger: `canonical/FIT1_COMMIT_LINEAGE_V1.md`.
+- FIT1 gate anchor: `f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee`.
+- First executable FIT base: `de1a44cae1195dd9cbad3b23ef75d58ae80aa9b3`.
+- FIT1 is one-witness architecture/mechanism qualification; it is not generalization proof.
 
 ## Historical-memory health
 
-- **Bootstrap:** `BOOTSTRAP_AUDIT_INCOMPLETE`
-- **Artifact census:** 311 high-signal artifacts discovered; census coverage **100% by construction**.
-- **Semantically reconciled:** 36.
-- **Catalogued but unreviewed:** 275.
-- **Semantic coverage:** 11.6%.
-- **Honesty rule:** missing historical details are `UNKNOWN / NEEDS AUDIT`, never inferred absent from the registry.
-- Use `canonical/BOOTSTRAP_AUDIT_QUEUE.md` + `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` to locate unreviewed evidence.
+- **Bootstrap/AOA:** `BOOTSTRAP_AUDIT_INCOMPLETE`
+- **High-signal artifacts:** 262
+- **Explained by continuity policy:** 180
+- **Unexplained:** 82
+- **Coverage:** 68.7%
+- Missing historical detail remains `UNKNOWN / NEEDS AUDIT`; never infer absence.
+- Use `canonical/BOOTSTRAP_AUDIT_QUEUE.md` + artifact catalog for unresolved evidence.
 
-## What we are testing right now
+## Current scientific question
 
-Does minimal joint+parent mechanical recurrent feedback improve Mage FIT1 reachability/retention and structural prediction relative to matched feedback-off AR0?
+Which single next falsifiable gate should resolve the remaining Geppetto uncertainty: AR0 residual terminal stability, AR1 generated-state exposure/recovery, or the already-existing fuller RigAnything C3/C4 formulation?
 
-Do **not** widen the result beyond the exact gate semantics in `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`.
+Do **not** widen the result beyond exact gate semantics in the experiment ledger/result authority.
 
 ## Pipeline ownership
 
@@ -38,23 +55,23 @@ Do **not** widen the result beyond the exact gate semantics in `canonical/EXPERI
 |---|---|---|
 | **IRIS** | learned image perception / signed geometry and support evidence | evidence only; no final canonical IDs |
 | **GSA/RiggingSurfaceIR** | deterministic assembly/validation/provenance of lossless per-view surface evidence | lossless evidence boundary is binding |
-| **Geppetto** | learned skeleton/control proposal, parent/root evidence, future mechanical salience | architecture promotion currently on AR-01 hold |
+| **Geppetto** | learned skeleton/control proposal, parent/root evidence, future mechanical salience | post-AR-01 diagnosis; no refreeze currently authorized |
 | **Compiler** | deterministic exact legality, canonicalization, proof/fail-close | no geometry-only dedup; no hidden deform-node completion; canonical IDs after exact solve |
-| **Arachne** | learned skin/weight/deformation proposal conditioned on qualified skeleton + IRIS/Geppetto outputs | future FIT1 training; SkinTokens clean-room mechanism audit planned |
+| **Arachne** | learned skin/weight/deformation proposal conditioned on qualified skeleton + IRIS/Geppetto outputs | future FIT1 training after Geppetto refreeze; SkinTokens clean-room mechanism audit planned |
 | **Runtime** | consume qualified/proof-owned puppet state and motion | must not replay solver/evaluator authority at export/runtime |
 
 ## Critical RigAnything memory
 
-- Clean-room studied: **TRUE**
 - Fuller challenger already exists: **TRUE**
-- Implementation: `models/geppetto/challengers/riganything_mechanisms_v1.py`
+- Creation implementation: `models/geppetto/challengers/riganything_mechanisms_v1.py`
+- Creation commit: `ba634955777479ee05a5b199742710b1736123b5`
 - Contains:
   - per-step full-surface cross-attention
   - conditional diffusion locus
   - joint + parent geometry feedback token
   - sibling/BFS-order helper
 - **Memory guard:** Never propose building a RigAnything-equivalent challenger from scratch without first inspecting the existing challenger and its experiment lineage.
-- Canonical status: research implementation only; component tests do not imply full-formulation closure
+- Canonical status: research implementation only; component tests and AR-01 do not imply full-formulation closure
 
 ## FIT science guardrails
 
@@ -73,14 +90,18 @@ Do **not** widen the result beyond the exact gate semantics in `canonical/EXPERI
 - Mechanical salience / functional simplification belongs to neural Geppetto-side evidence, not legality heuristics.
 - Source existence != mechanism test; mechanism test != full formulation test; FIT1 != generalization.
 - No post-hoc gate widening after results are visible.
+- Repository prereg/result hashes outrank detached generated/chat drafts when they conflict.
+- Unindexed historical evidence means UNKNOWN/UNRECONCILED, never ABSENT.
 
-## Context traps — check these before claiming something is missing
+## Context traps
 
-- **Confusing a research challenger with canonical Geppetto** → Check architecture ledger row + implementation path + canonical status separately.
-- **Calling AR-01 a RigAnything formulation test** → Experiment ledger explicitly limits AR-01 to the minimal feedback delta.
+- **Confusing a research challenger with canonical Geppetto** → Check architecture ledger row + implementation commit/blob + canonical status separately.
+- **Calling AR-01 a RigAnything formulation test** → AR-01 result and RigAnything lineage dossier explicitly limit the claim to minimal feedback.
+- **Treating an earlier 48-check streak as terminal stability** → AR-01 requires the final contiguous streak >=48; AR0 ended at streak 1.
+- **Treating the detached conditional-diffusion prereg draft as AR-01 authority** → Repo prereg SHA 78981b... freezes the direct three-mode locus head and outranks the detached draft.
 - **Treating old restoration/hold reports as current authority** → CURRENT_STATE + authority map outrank historical reports; historical docs are evidence only unless explicitly promoted.
 - **Assuming GitHub-hosted runners** → Execution authority is local self-hosted RealSaS runner.
-- **Reconstructing state by reading many reports in arbitrary order** → Read REHYDRATION_PACKET first; descend only through referenced ledgers/artifacts.
+- **Reconstructing state by reading many reports in arbitrary order** → Read REHYDRATION_PACKET first and inspect coverage gaps before inferring absence.
 
 ## Execution environment
 
@@ -92,16 +113,14 @@ Do **not** widen the result beyond the exact gate semantics in `canonical/EXPERI
 
 ## Rehydration drill-down
 
-Read only as needed, in this order:
-
-1. `CURRENT_STATE.md` — stop/go and continuation authority.
-2. `canonical/CONTEXT_COVERAGE_AUDIT.md` + `canonical/BOOTSTRAP_AUDIT_QUEUE.md` — know what memory remains unresolved.
-3. `canonical/LIVE_AUTHORITY_MAP.md` or run `python3 tools/render_authority_map.py --write` — live branch/active-experiment navigation.
-4. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` — mechanism implementation vs test vs canonical status.
-5. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md` — exact gate meaning and explicit non-claims.
-6. `canonical/EXPERIMENT_REGISTRY_V1.json` — experiment structure and scientific-flow dependencies.
-7. `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` — discover historical evidence not yet semantically reconciled.
-8. Only then descend into referenced reports, notebooks, source commits and historical branches.
+1. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` — learned/deterministic responsibility envelope.
+2. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md` — FIT1-to-now scientific flow.
+3. `CURRENT_STATE.md` — current stop/go authority.
+4. `canonical/FIT1_COMMIT_LINEAGE_V1.md` — exact FIT1-descendant commit discovery.
+5. `canonical/CONTEXT_COVERAGE_AUDIT.md` — AOA coverage/regression state.
+6. `canonical/LIVE_AUTHORITY_MAP.md` — branch/authority navigation.
+7. architecture + experiment ledgers/registry — implementation/test/promotion distinctions.
+8. exact prereg/result/source artifacts only as needed.
 
 ## Completion transaction
 
@@ -109,6 +128,4 @@ result/provenance + implementation + experiment ledger + architecture ledger if 
 
 ## Packet validity
 
-**INVALID — context/authority drift detected.**
-- context current gate must match exactly one active authority experiment: AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE
-- CURRENT_STATE.md does not name context current branch
+**VALID — current state, authority manifest, ownership/FIT1 continuity guards, and live refs agree.**

@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **791**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **793**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -803,6 +803,8 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-07T13:55:07+03:00` | `b998475adaf3` | yes | GOVERNANCE_CONTINUITY | Record AOA closure contract and corrections | `canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md` | `main` |
 | `2026-09-07T13:55:45+03:00` | `173e6ffb69c1` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
 | `2026-09-07T13:56:07+03:00` | `50b3c7e2dcfa` | yes | GOVERNANCE_CONTINUITY | Bind AOA closure and ownership envelopes into context state | `canonical/CONTEXT_STATE_V1.json` | `main` |
+| `2026-09-07T13:56:43+03:00` | `02800325c52b` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-07T13:56:48+03:00` | `e781665a5d96` | yes | GOVERNANCE_CONTINUITY | Close AOA in current continuation state | `CURRENT_STATE.md` | `main` |
 
 ## Use rule
 

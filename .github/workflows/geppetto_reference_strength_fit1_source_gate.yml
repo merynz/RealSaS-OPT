@@ -1,0 +1,55 @@
+name: geppetto-reference-strength-fit1-source-gate
+
+on:
+  push:
+    branches:
+      - exp/geppetto-reference-strength-fullstack-v1-20260907
+    paths:
+      - 'experiments/geppetto_reference_strength_fullstack_v1/**'
+      - 'tests/experiments/test_geppetto_reference_strength_*.py'
+      - 'tests/models/test_geppetto_reference_strength_fullstack_v1.py'
+      - 'notebooks/REALSaS_GEPPETTO_REFERENCE_STRENGTH_FIT1_V1.ipynb'
+      - '.github/workflows/geppetto_reference_strength_fit1_source_gate.yml'
+  workflow_dispatch:
+
+jobs:
+  source-only-preactivation:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install lightweight regression dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pytest
+      - name: Verify torch runtime exists
+        run: python -c "import torch; print('torch', torch.__version__, 'cuda', torch.cuda.is_available())"
+      - name: Compile reference-strength source
+        run: |
+          python -m py_compile \
+            experiments/geppetto_reference_strength_fullstack_v1/rigging_surface_tensorization_v1.py \
+            experiments/geppetto_reference_strength_fullstack_v1/geppetto_reference_strength_candidate_v1.py \
+            experiments/geppetto_reference_strength_fullstack_v1/geppetto_reference_strength_no_learned_slot_v1.py \
+            experiments/geppetto_reference_strength_fullstack_v1/mechanical_core_target_v1.py \
+            experiments/geppetto_reference_strength_fullstack_v1/geppetto_reference_strength_loss_v1.py \
+            experiments/geppetto_reference_strength_fullstack_v1/preflight_real_mage_stack_v1.py \
+            experiments/geppetto_reference_strength_fullstack_v1/run_geppetto_reference_strength_fit1_v1.py
+      - name: Run reference-strength ownership and loss tests
+        run: |
+          PYTHONPATH=. python -m pytest -q \
+            tests/models/test_geppetto_reference_strength_fullstack_v1.py \
+            tests/experiments/test_geppetto_reference_strength_mechanical_core_target_v1.py \
+            tests/experiments/test_geppetto_reference_strength_no_learned_slot_v1.py \
+            tests/experiments/test_geppetto_reference_strength_loss_v1.py
+      - name: Assert preactivation authority remains closed
+        run: |
+          grep -F '**Active experiment gate:** `NONE`' CURRENT_STATE.md
+          echo 'GEPPETTO_REFERENCE_STRENGTH_SOURCE_GATE_PASS'
+          echo "commit=$GITHUB_SHA"
+          echo 'training_executed=false'
+          echo 'promotion_authorized=false'

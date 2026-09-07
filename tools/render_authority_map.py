@@ -2,7 +2,8 @@
 """Render the RealSaS live authority map from repository truth.
 
 The machine-readable policy lives in canonical/AUTHORITY_MAP_V1.json.
-Repository branch existence/head/date are observed live from git refs.
+Repository branch existence/head are observed live from the remote via
+`git ls-remote --heads origin`; branch trees are not fetched into the checkout.
 The generated canonical/LIVE_AUTHORITY_MAP.md is a view, never the source of truth.
 """
 
@@ -26,7 +27,6 @@ MANIFEST = ROOT / "canonical" / "AUTHORITY_MAP_V1.json"
 class Branch:
     name: str
     sha: str
-    committed: str
 
 
 def run(*args: str, check: bool = True) -> str:
@@ -50,33 +50,34 @@ def load_manifest() -> dict:
         return json.load(fh)
 
 
-def fetch_refs() -> None:
-    # Fail closed when origin cannot be refreshed: a "live" map must not silently use stale refs.
-    run(
-        "git",
-        "fetch",
-        "--prune",
-        "origin",
-        "+refs/heads/*:refs/remotes/origin/*",
-    )
+def branches(live_remote: bool = True) -> List[Branch]:
+    if live_remote:
+        raw = run("git", "ls-remote", "--heads", "origin")
+        out: List[Branch] = []
+        for line in raw.splitlines():
+            if not line.strip():
+                continue
+            sha, ref = line.split("\t", 1)
+            prefix = "refs/heads/"
+            if not ref.startswith(prefix):
+                continue
+            out.append(Branch(name=ref[len(prefix):], sha=sha))
+        return sorted(out, key=lambda b: b.name)
 
-
-def branches() -> List[Branch]:
     raw = run(
         "git",
         "for-each-ref",
-        "--format=%(refname:short)|%(objectname)|%(committerdate:iso8601-strict)",
+        "--format=%(refname:short)|%(objectname)",
         "refs/remotes/origin",
     )
-    out: List[Branch] = []
+    out = []
     for line in raw.splitlines():
         if not line.strip():
             continue
-        ref, sha, committed = line.split("|", 2)
+        ref, sha = line.split("|", 1)
         if ref == "origin/HEAD":
             continue
-        name = ref.removeprefix("origin/")
-        out.append(Branch(name=name, sha=sha, committed=committed))
+        out.append(Branch(name=ref.removeprefix("origin/"), sha=sha))
     return sorted(out, key=lambda b: b.name)
 
 
@@ -148,9 +149,7 @@ def esc(text: str) -> str:
 def fingerprint(manifest: dict, observed: Iterable[Branch]) -> str:
     payload = {
         "manifest": manifest,
-        "branches": [
-            {"name": b.name, "sha": b.sha, "committed": b.committed} for b in observed
-        ],
+        "branches": [{"name": b.name, "sha": b.sha} for b in observed],
     }
     data = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return hashlib.sha256(data).hexdigest()
@@ -171,16 +170,25 @@ def render(manifest: dict, observed: List[Branch], errors: List[str]) -> str:
         "DELETE_CANDIDATE",
     ]
 
+    execution = manifest.get("execution_authority", {})
     lines: List[str] = []
     lines += [
         "# RealSaS — Live Authority Map",
         "",
         "> **GENERATED FILE — DO NOT HAND EDIT.**  ",
-        "> Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository facts are read live from `origin/*` refs.  ",
+        "> Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  ",
         f"> State fingerprint: `{fp}`",
         "",
         f"**Continuation authority:** `{manifest['continuation_authority']}` on `{manifest['branch_policy']['canonical_branch']}`.  ",
         "A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.",
+        "",
+        "## Execution authority",
+        "",
+        f"- Runner mode: `{execution.get('actions_runner_mode', 'UNSPECIFIED')}`",
+        f"- Required labels: `{', '.join(execution.get('required_labels', []))}`",
+        f"- Known runner: `{execution.get('known_runner_name', 'UNSPECIFIED')}`",
+        f"- Operator path hint: `{execution.get('operator_path_hint', 'UNSPECIFIED')}`",
+        f"- Budget policy: {execution.get('workflow_budget_policy', 'UNSPECIFIED')}",
         "",
         "## Rehydration order",
         "",
@@ -225,10 +233,15 @@ def render(manifest: dict, observed: List[Branch], errors: List[str]) -> str:
         items = rows.get(cls, [])
         if not items:
             continue
-        lines += [f"### {cls}", "", "| Branch | Head | Last commit | Classification reason |", "|---|---|---|---|"]
+        lines += [
+            f"### {cls}",
+            "",
+            "| Branch | Head | Classification reason |",
+            "|---|---|---|",
+        ]
         for b, reason in items:
             lines.append(
-                f"| `{esc(b.name)}` | `{b.sha[:12]}` | `{esc(b.committed)}` | {esc(reason)} |"
+                f"| `{esc(b.name)}` | `{b.sha[:12]}` | {esc(reason)} |"
             )
         lines.append("")
 
@@ -249,7 +262,7 @@ def render(manifest: dict, observed: List[Branch], errors: List[str]) -> str:
         "",
         "## Update semantics",
         "",
-        "- Branch heads/dates/classification are regenerated from live git refs; do not manually copy branch SHAs into authority prose.",
+        "- Branch heads/classification are regenerated from live remote refs; do not manually copy branch SHAs into authority prose.",
         "- Creating a new non-main branch is safe by default: it appears as `EVIDENCE_ONLY_UNREGISTERED` until explicitly registered.",
         "- Starting an experiment requires adding it to `active_experiments` **and** naming its gate + branch in `CURRENT_STATE.md`; otherwise validation fails.",
         "- Closing/promoting an experiment requires one atomic reconciliation of the machine manifest, human ledgers, result/provenance, source/tests, and `CURRENT_STATE.md`.",
@@ -262,13 +275,15 @@ def render(manifest: dict, observed: List[Branch], errors: List[str]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--write", action="store_true", help="write generated live map")
-    parser.add_argument("--no-fetch", action="store_true", help="use current remote refs")
+    parser.add_argument(
+        "--cached-refs",
+        action="store_true",
+        help="use existing origin/* tracking refs instead of querying the remote",
+    )
     args = parser.parse_args()
 
     manifest = load_manifest()
-    if not args.no_fetch:
-        fetch_refs()
-    observed = branches()
+    observed = branches(live_remote=not args.cached_refs)
     errors = validate(manifest, observed)
     output = render(manifest, observed, errors)
     target = ROOT / manifest["generated_live_map"]

@@ -34,18 +34,19 @@ jobs:
           fetch-depth: 0
 
       - name: Render live authority map
+        id: render
         shell: bash
         run: |
           set +e
           python tools/render_authority_map.py --write
           rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
           if [ -f canonical/LIVE_AUTHORITY_MAP.md ]; then
             cat canonical/LIVE_AUTHORITY_MAP.md >> "$GITHUB_STEP_SUMMARY"
           fi
-          exit $rc
+          exit 0
 
-      - name: Commit refreshed map when authority state changed
-        if: success()
+      - name: Commit refreshed diagnostic/current map
         shell: bash
         run: |
           if git diff --quiet -- canonical/LIVE_AUTHORITY_MAP.md; then
@@ -57,3 +58,9 @@ jobs:
           git add canonical/LIVE_AUTHORITY_MAP.md
           git commit -m "Refresh live authority map [skip ci]"
           git push origin HEAD:main
+
+      - name: Enforce authority-map validity
+        if: steps.render.outputs.rc != '0'
+        run: |
+          echo "Live authority map is INVALID; inspect canonical/LIVE_AUTHORITY_MAP.md"
+          exit 1

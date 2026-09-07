@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **798**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **800**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -810,6 +810,8 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-07T13:57:54+03:00` | `394f5c898287` | yes | GOVERNANCE_CONTINUITY | Close bootstrap audit-of-audits | `canonical/BOOTSTRAP_COVERAGE_STATE_V1.json` | `main` |
 | `2026-09-07T13:58:35+03:00` | `efafe08e8080` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
 | `2026-09-07T14:39:14+03:00` | `e5da94b829c9` | yes | GOVERNANCE_CONTINUITY, IRIS_GSA | Record IRIS replay capsule and live continuity decisions | `canonical/SCIENTIFIC_JOURNAL_V1.jsonl` | `main` |
+| `2026-09-07T14:39:39+03:00` | `dd99f7603222` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-07T14:39:47+03:00` | `9502135e40c2` | yes | GOVERNANCE_CONTINUITY | Promote live chronological continuity to first-read authority | `AGENTS.md` | `main` |
 
 ## Use rule
 

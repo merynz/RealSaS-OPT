@@ -11,7 +11,7 @@
 - **Current state:** `POST_AR01_DIAGNOSIS_REQUIRED__NO_NEW_EXPERIMENT_PREREGISTERED`
 - **Active experiment:** `NONE`
 - **Most recent closed gate:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
-- **Canonical main:** `e5da94b829c9`
+- **Canonical main:** `9502135e40c2`
 - **Promotion block:** No Geppetto refreeze/promotion until scientifically necessary post-AR-01 gate(s) close and a separate promotion transaction reconciles source, evidence and authority.
 - **Scope warning:** AR-01 was a minimal feedback intervention, not a full RigAnything formulation test. Do not bundle the three remaining questions post hoc.
 - **Next visible product milestone:** Mage idle/breathing after genuine Geppetto closure/refreeze and current-chain Arachne FIT1 closure

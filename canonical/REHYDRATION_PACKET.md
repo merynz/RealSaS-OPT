@@ -11,10 +11,10 @@
 - **Current state:** `POST_AR01_DIAGNOSIS_REQUIRED__NO_NEW_EXPERIMENT_PREREGISTERED`
 - **Active experiment:** `NONE`
 - **Most recent closed gate:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
-- **Canonical main:** `b998475adaf3`
-- **Promotion block:** No Geppetto refreeze/promotion until the scientifically necessary post-AR-01 gate(s) close and a separate promotion transaction reconciles authority.
+- **Canonical main:** `50b3c7e2dcfa`
+- **Promotion block:** No Geppetto refreeze/promotion until scientifically necessary post-AR-01 gate(s) close and a separate promotion transaction reconciles source, evidence and authority.
 - **Scope warning:** AR-01 was a minimal feedback intervention, not a full RigAnything formulation test. Do not bundle the three remaining questions post hoc.
-- **Next visible product milestone:** Mage idle/breathing after Geppetto + Arachne FIT1 closure
+- **Next visible product milestone:** Mage idle/breathing after genuine Geppetto closure/refreeze and current-chain Arachne FIT1 closure
 
 ## Mandatory ownership memory
 
@@ -45,7 +45,7 @@ Read `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` before moving responsibilit
 
 ## Current scientific question
 
-Which single next falsifiable gate should resolve the remaining Geppetto uncertainty: AR0 residual terminal stability, AR1 generated-state exposure/recovery, or the already-existing fuller RigAnything C3/C4 formulation?
+Which single next falsifiable gate should resolve remaining Geppetto uncertainty: AR0 residual terminal stability, AR1 generated-state exposure/recovery, or the already-existing fuller RigAnything C3/C4 formulation?
 
 Do **not** widen the result beyond exact gate semantics in the experiment ledger/result authority.
 
@@ -53,12 +53,13 @@ Do **not** widen the result beyond exact gate semantics in the experiment ledger
 
 | Module | Role | Binding/current rule |
 |---|---|---|
-| **IRIS** | learned image perception / signed geometry and support evidence | evidence only; no final canonical IDs |
-| **GSA/RiggingSurfaceIR** | deterministic assembly/validation/provenance of lossless per-view surface evidence | lossless evidence boundary is binding |
-| **Geppetto** | learned skeleton/control proposal, parent/root evidence, future mechanical salience | post-AR-01 diagnosis; no refreeze currently authorized |
-| **Compiler** | deterministic exact legality, canonicalization, proof/fail-close | no geometry-only dedup; no hidden deform-node completion; canonical IDs after exact solve |
-| **Arachne** | learned skin/weight/deformation proposal conditioned on qualified skeleton + IRIS/Geppetto outputs | future FIT1 training after Geppetto refreeze; SkinTokens clean-room mechanism audit planned |
-| **Runtime** | consume qualified/proof-owned puppet state and motion | must not replay solver/evaluator authority at export/runtime |
+| **IRIS** | learned image perception / signed geometry, support, uncertainty and observation evidence | evidence only; no final canonical skeleton IDs/tree/weights; affected privileged-input historical learned artifacts remain quarantined |
+| **GSA/RiggingSurfaceIR** | deterministic compaction/local geometry/assembly/validation/provenance of lossless per-view surface evidence | lossless evidence boundary and UNKNOWN preservation are binding; no hidden semantic completion |
+| **Geppetto** | learned skeleton/control proposal, parent/root evidence and mechanical salience/functional simplification evidence | proposal only; post-AR-01 diagnosis; no refreeze currently authorized |
+| **Compiler graph qualification** | deterministic exact legal root/parent/tree selection, invariants, canonicalization and fail-close | canonical IDs after exact solve; no geometry-only semantic dedup, hidden cardinality repair or missing deform-node synthesis |
+| **Arachne** | learned semantic skin/weight/deformation proposal conditioned on current qualified surface+skeleton | current-chain FIT1 follows Geppetto refreeze; SkinTokens clean-room mechanism audit/adaptation remains planned |
+| **Compiler skin/mesh qualification** | deterministic reference/simplex/top-k/mesh-layout legality and bounded projection | may constrain/project under learned semantics; may not become a hidden semantic skinning owner |
+| **Proof / repair / runtime** | measure exact candidate; owner-route bounded repair; PASS-only runtime/export projection | proof never mutates candidate; repair creates a new candidate requiring re-proof; runtime/export is not second canonical truth |
 
 ## Critical RigAnything memory
 
@@ -66,12 +67,12 @@ Do **not** widen the result beyond exact gate semantics in the experiment ledger
 - Creation implementation: `models/geppetto/challengers/riganything_mechanisms_v1.py`
 - Creation commit: `ba634955777479ee05a5b199742710b1736123b5`
 - Contains:
-  - per-step full-surface cross-attention
-  - conditional diffusion locus
-  - joint + parent geometry feedback token
-  - sibling/BFS-order helper
+  - C1 per-step full-surface cross-attention
+  - C2 conditional diffusion locus
+  - C3 joint + parent geometry feedback token
+  - C4 sibling/BFS-order helper
 - **Memory guard:** Never propose building a RigAnything-equivalent challenger from scratch without first inspecting the existing challenger and its experiment lineage.
-- Canonical status: research implementation only; component tests and AR-01 do not imply full-formulation closure
+- Canonical status: research implementation only; component/source existence and AR-01 do not imply full-formulation closure
 
 ## FIT science guardrails
 
@@ -83,25 +84,28 @@ Do **not** widen the result beyond exact gate semantics in the experiment ledger
 
 ## Settled invariants
 
-- Compiler final legality is deterministic exact qualification.
-- Compiler cannot silently repair Geppetto by geometry-only dedup or hidden cardinality/deform-node synthesis.
-- Canonical IDs are minted after exact solve.
+- One semantic owner per question; deterministic qualification cannot silently become a second learned semantic owner.
+- Geppetto is proposal, not canonical rig authority; Compiler owns final legal root/parent/tree and canonical IDs after exact solve.
+- Compiler cannot silently repair Geppetto by geometry-only dedup, hidden cardinality repair or deform-node synthesis.
 - Lossless per-view evidence must survive into learned consumers.
-- Mechanical salience / functional simplification belongs to neural Geppetto-side evidence, not legality heuristics.
-- Source existence != mechanism test; mechanism test != full formulation test; FIT1 != generalization.
+- Mechanical salience / functional simplification belongs to neural Geppetto evidence, not legality heuristics.
+- Arachne owns semantic skin/deformation proposal; Compiler skin/mesh layer owns bounded legal projection/qualification.
+- Proof measures exact candidate state and does not mutate it; repair is owner-routed and requires re-proof.
+- Source exists != mechanism implemented != mechanism tested != full formulation tested != canonical promotion != FIT1 closure != generalization.
 - No post-hoc gate widening after results are visible.
-- Repository prereg/result hashes outrank detached generated/chat drafts when they conflict.
-- Unindexed historical evidence means UNKNOWN/UNRECONCILED, never ABSENT.
+- Repository prereg/result/source authority outranks detached generated/chat drafts when they conflict.
 
 ## Context traps
 
-- **Confusing a research challenger with canonical Geppetto** → Check architecture ledger row + implementation commit/blob + canonical status separately.
-- **Calling AR-01 a RigAnything formulation test** → AR-01 result and RigAnything lineage dossier explicitly limit the claim to minimal feedback.
-- **Treating an earlier 48-check streak as terminal stability** → AR-01 requires the final contiguous streak >=48; AR0 ended at streak 1.
-- **Treating the detached conditional-diffusion prereg draft as AR-01 authority** → Repo prereg SHA 78981b... freezes the direct three-mode locus head and outranks the detached draft.
-- **Treating old restoration/hold reports as current authority** → CURRENT_STATE + authority map outrank historical reports; historical docs are evidence only unless explicitly promoted.
-- **Assuming GitHub-hosted runners** → Execution authority is local self-hosted RealSaS runner.
-- **Reconstructing state by reading many reports in arbitrary order** → Read REHYDRATION_PACKET first and inspect coverage gaps before inferring absence.
+- **Thinking a learned model name denotes the whole subsystem** → Expand IRIS/Geppetto/Arachne to the ownership envelope before assigning or moving responsibilities.
+- **Saying Geppetto made/owns the canonical skeleton** → Geppetto proposes controls/relations; Compiler exact qualification owns final legal tree and canonical IDs.
+- **Confusing a research challenger with canonical Geppetto** → Check implementation, execution evidence and canonical promotion as separate states.
+- **Calling AR-01 a RigAnything formulation test** → AR-01 result and RigAnything lineage limit it to minimal feedback; C3/C4 remains unresolved.
+- **Calling C2 tested because C2 source exists** → Authoritative Causal Repair V2 stopped at C1 PASS; C2 was not run in that staircase.
+- **Citing old IRIS learned PASS as clean current observation-only evidence** → Affected old learned artifacts are quarantined by IRIS leak scope; firewall repair is prospective.
+- **Treating an earlier AR0 48-check streak as terminal stability** → AR-01 required final contiguous streak >=48; AR0 ended at streak 1.
+- **Treating old restoration/hold reports or branch recency as current authority** → CURRENT_STATE + authority map + explicit promotion/retraction outrank report/branch recency.
+- **Assuming GitHub-hosted runners** → Routine execution authority is the user's local self-hosted RealSaS runner.
 
 ## Execution environment
 
@@ -124,7 +128,7 @@ Do **not** widen the result beyond exact gate semantics in the experiment ledger
 
 ## Completion transaction
 
-result/provenance + implementation + experiment ledger + architecture ledger if affected + context state + CURRENT_STATE if stop/go changes + explicit supersession/revocation
+prereg + exact result/provenance + implementation + experiment registry/ledger + architecture ledger if affected + ownership check + context/CURRENT_STATE stop-go + explicit supersession/revocation
 
 ## Packet validity
 

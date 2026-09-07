@@ -11,11 +11,15 @@
   "projected_mechanical_control_count": 22,
   "projected_root_count": 1,
   "mechanical_core_rule": "SKIN_SUPPORTED_PLUS_SUPPORTED_BRIDGES__ASSEMBLY_ONLY_ROOT_EXCLUDED",
+  "position_authority": "rest_world_source[:, :3, 3]__WORLD_SOURCE_FRAME_EXPLICIT",
+  "forbidden_position_source": "normalized.npz::bone_heads__CANONICAL_NORMALIZED_FRAME",
   "support_epsilon": 1e-8,
   "selected_source_indices_provenance_only": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],
   "serialized_source_indices_provenance_only": [1,19,20,21,22,2,3,9,10,11,12,13,14,4,5,6,7,8,15,16,17,18],
   "serialized_parent_indices": [-1,0,1,2,3,0,5,6,7,8,9,10,6,6,13,14,15,16,0,18,19,20],
-  "target_content_sha256": "31425214f2dba8b61061b58d41f0684005d010833549197bac103d6cfe9152fc",
+  "target_world_bbox_min": [-0.8831325173377991,-0.09639276564121246,0.025990212336182594],
+  "target_world_bbox_max": [0.8831325173377991,0.018585912883281708,1.2414252758026123],
+  "target_content_sha256": "0b5a25c877116de60b710b7bb2a7848f30988e1622e2eda8084cad21c8ca23c9",
   "bone_names_used_by_projection": false,
   "family_specific_index_list_used_by_projection": false,
   "fixed_product_control_count": false,
@@ -23,5 +27,6 @@
   "teacher_values_enter_recurrence": false,
   "generalization_claim": false,
   "experiment_active": false,
-  "interpretation": "The generic skin-supported-plus-required-bridge projection independently reproduces the historical 22-control Mage mechanical axis without using control names or a Mage-specific source-index rule."
+  "correction_note": "An earlier draft preflight counted the correct 22 controls but incorrectly treated canonical-normalized bone_heads as world loci. That draft was never trained. World/source locus authority is now explicit and the target hash was replaced before activation.",
+  "interpretation": "The generic skin-supported-plus-required-bridge projection independently reproduces the historical 22-control Mage mechanical axis without using control names or a Mage-specific source-index rule, now in the correct world/source frame."
 }

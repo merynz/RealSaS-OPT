@@ -1,15 +1,18 @@
-name: Live Authority Map
+name: Live Authority Context
 
 on:
   push:
     branches: [main]
     paths:
       - 'CURRENT_STATE.md'
+      - 'README.md'
       - 'canonical/AUTHORITY_MAP_V1.json'
+      - 'canonical/CONTEXT_STATE_V1.json'
       - 'canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md'
       - 'canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md'
       - 'canonical/BRANCH_AUTHORITY_V1.md'
       - 'tools/render_authority_map.py'
+      - 'tools/render_rehydration_packet.py'
       - '.github/workflows/live_authority_map.yml'
   create:
   delete:
@@ -19,7 +22,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: live-authority-map
+  group: live-authority-context
   cancel-in-progress: true
 
 jobs:
@@ -34,33 +37,54 @@ jobs:
           fetch-depth: 0
 
       - name: Render live authority map
-        id: render
+        id: authority
         shell: bash
         run: |
           set +e
           python tools/render_authority_map.py --write
           rc=$?
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Render rehydration packet
+        id: context
+        shell: bash
+        run: |
+          set +e
+          python tools/render_rehydration_packet.py --write
+          rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Publish generated views to job summary
+        shell: bash
+        run: |
+          if [ -f canonical/REHYDRATION_PACKET.md ]; then
+            cat canonical/REHYDRATION_PACKET.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+          printf '\n---\n' >> "$GITHUB_STEP_SUMMARY"
           if [ -f canonical/LIVE_AUTHORITY_MAP.md ]; then
             cat canonical/LIVE_AUTHORITY_MAP.md >> "$GITHUB_STEP_SUMMARY"
           fi
-          exit 0
 
-      - name: Commit refreshed diagnostic/current map
+      - name: Commit refreshed generated views
         shell: bash
         run: |
-          if git diff --quiet -- canonical/LIVE_AUTHORITY_MAP.md; then
-            echo "Live authority map already current."
+          changed="$(git status --porcelain -- canonical/LIVE_AUTHORITY_MAP.md canonical/REHYDRATION_PACKET.md)"
+          if [ -z "$changed" ]; then
+            echo "Generated authority/context views already current."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add canonical/LIVE_AUTHORITY_MAP.md
-          git commit -m "Refresh live authority map [skip ci]"
+          git add canonical/LIVE_AUTHORITY_MAP.md canonical/REHYDRATION_PACKET.md
+          git commit -m "Refresh live authority context [skip ci]"
           git push origin HEAD:main
 
-      - name: Enforce authority-map validity
-        if: steps.render.outputs.rc != '0'
+      - name: Enforce live-context validity
+        if: steps.authority.outputs.rc != '0' || steps.context.outputs.rc != '0'
         run: |
-          echo "Live authority map is INVALID; inspect canonical/LIVE_AUTHORITY_MAP.md"
+          echo "Live authority/context state is INVALID. Inspect generated canonical views."
+          echo "authority_rc=${{ steps.authority.outputs.rc }}"
+          echo "context_rc=${{ steps.context.outputs.rc }}"
           exit 1

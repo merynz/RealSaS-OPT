@@ -7,36 +7,74 @@ This repository is intentionally structured so a new AI agent/chat/session can r
 Before making any architecture, experiment, branch, or scientific-state claim:
 
 1. `canonical/REHYDRATION_PACKET.md`
-2. `CURRENT_STATE.md`
-3. `canonical/CONTEXT_COVERAGE_AUDIT.md`
-4. `canonical/BOOTSTRAP_AUDIT_QUEUE.md` when bootstrap is incomplete
-5. `canonical/LIVE_AUTHORITY_MAP.md`
-6. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
-7. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-8. `canonical/EXPERIMENT_REGISTRY_V1.json`
-9. `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` when searching for prior evidence not yet semantically indexed
-10. `canonical/SCIENTIFIC_JOURNAL_V1.jsonl` when historical reasoning/decision sequence matters
+2. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
+3. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
+4. `CURRENT_STATE.md`
+5. `canonical/FIT1_COMMIT_LINEAGE_V1.md` when exact FIT1-to-now chronology/commit provenance matters
+6. `canonical/CONTEXT_COVERAGE_AUDIT.md`
+7. `canonical/LIVE_AUTHORITY_MAP.md`
+8. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
+9. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
+10. `canonical/EXPERIMENT_REGISTRY_V1.json`
+11. `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` when locating exact older evidence
+12. `canonical/SCIENTIFIC_JOURNAL_V1.jsonl` when historical reasoning/decision sequence matters
+
+If `canonical/BOOTSTRAP_COVERAGE_STATE_V1.json` says `BOOTSTRAP_AUDIT_CLOSED`, also read `canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md` before interpreting coverage semantics.
 
 If generated views are missing or stale, regenerate locally:
 
 ```bash
+python3 tools/render_fit1_commit_lineage.py
 python3 tools/build_knowledge_artifact_catalog.py
 python3 tools/audit_context_coverage.py
 python3 tools/render_authority_map.py --write
 python3 tools/render_rehydration_packet.py --write
 ```
 
+## Learned model shorthand expansion — mandatory
+
+A RealSaS learned model is **not** the whole subsystem around that model. Unless the discussion is explicitly restricted to model internals, expand subsystem shorthand before reasoning about responsibility:
+
+- **IRIS** means: observation/camera contract -> learned IRIS evidence -> deterministic GSA/RiggingSurfaceIR assembly, validation and provenance -> learned consumers.
+- **Geppetto** means: lossless RiggingSurfaceIR -> learned skeleton/control/parent/root/mechanical-salience proposal evidence -> Compiler exact graph qualification -> QualifiedSkeletonIR/canonical IDs.
+- **Arachne** means: qualified surface+skeleton -> learned skin/deformation proposal -> Compiler skin/mesh/reference/simplex qualification -> qualified editable deformation state.
+- **Compiler** is deterministic qualification/canonicalization/proof/routing authority; it is **not permission to invent missing learned semantics**.
+
+Binding memory guard:
+
+> **Geppetto is proposal, not canonical rig authority.**
+
+If a future statement says “Geppetto made the skeleton,” restate it more precisely: Geppetto proposed controls/relations and the Compiler selected/qualified the legal canonical skeleton. Apply the equivalent distinction to IRIS/GSA and Arachne/Compiler.
+
+Before moving a responsibility across layers, inspect `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` and ask whether the move creates a second semantic owner, hides model failure with deterministic repair, or violates fail-close.
+
+## FIT1 continuity rule
+
+The scientific FIT1 gate began at commit:
+
+`f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee`
+
+The first executable FIT base is:
+
+`de1a44cae1195dd9cbad3b23ef75d58ae80aa9b3`
+
+`canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md` is the semantic epoch map. `canonical/FIT1_COMMIT_LINEAGE_V1.md/.json` is the exhaustive discovery/provenance ledger for commits descended from the FIT1 gate across live refs.
+
+Every FIT1-descendant commit is contextually important. A commit subject proves only that a change exists; it does not prove that a mechanism was run, passed, promoted, or generalized. Use exact prereg/result/source/authority evidence for those claims.
+
 ## Census vs semantic memory
 
 Never confuse **discoverability** with **understanding**.
 
-- `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` is the complete automated census of high-signal tracked knowledge artifacts. It proves that an artifact was discovered, not what it means.
-- `canonical/CONTEXT_COVERAGE_AUDIT.md` measures semantic reconciliation into the continuity spine.
-- An artifact may therefore be `CATALOGUED_UNREVIEWED`: known to exist, but not safe to summarize from filename/memory alone.
+- `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` is the automated census of high-signal tracked artifacts.
+- `canonical/FIT1_COMMIT_LINEAGE_V1.json` makes FIT1-to-now changes chronologically recoverable.
+- `canonical/CONTEXT_COVERAGE_AUDIT.md` applies the AOA disposition policy.
+- `FIT1_COMMIT_LEDGER_COVERED` means exact change provenance is recoverable, **not** that its scientific claim is promoted.
+- `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL` means the artifact already existed at the FIT1 gate and remains discoverable historical evidence unless explicitly promoted elsewhere.
 
-If a historical claim is not semantically indexed, locate candidate evidence in the catalog, inspect the source artifact/commit/workflow, then backfill the registry/ledger/journal. Do not guess.
+For any numerical/mechanistic historical claim, locate and inspect the exact source artifact rather than reconstructing it from a filename or memory.
 
-## Bootstrap honesty rule
+## Bootstrap / AOA honesty rule
 
 Read `canonical/BOOTSTRAP_COVERAGE_STATE_V1.json`.
 
@@ -44,10 +82,14 @@ While it says `BOOTSTRAP_AUDIT_INCOMPLETE`:
 
 - an unindexed historical experiment/mechanism/report is **UNKNOWN / NEEDS AUDIT**, not absent;
 - do not infer completeness from the experiment registry;
-- do not reconstruct numerical historical claims from memory alone;
-- use the artifact catalog + bootstrap audit queue to find the exact evidence cluster that needs backfill.
+- do not reconstruct numerical historical claims from memory alone.
 
-After bootstrap closure, newly unindexed high-signal artifacts are continuity regressions.
+After `BOOTSTRAP_AUDIT_CLOSED`:
+
+- closure means **context/provenance coverage**, not retroactive scientific validation of every historical file;
+- FIT1-to-now changes must remain recoverable through the exhaustive commit ledger;
+- pre-FIT high-signal residuals remain historical provenance by explicit disposition;
+- any new high-signal artifact that is neither explicitly indexed nor ancestry/ledger-covered is a continuity regression and CI must fail.
 
 ## Scientific claim discipline
 
@@ -84,19 +126,28 @@ Scientific chronology is append-only in `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`.
 - Historical backfill must preserve the strongest verified time precision; never invent clock times.
 - Corrections/retractions are new journal events. Do not silently rewrite history.
 
-## Current known context guard
+## Current known context guards
 
-Before claiming that RealSaS still needs a RigAnything-equivalent Geppetto challenger, inspect:
+Before claiming RealSaS needs a RigAnything-equivalent Geppetto challenger from scratch, inspect:
 
-`models/geppetto/challengers/riganything_mechanisms_v1.py`
+- `canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md`
+- `models/geppetto/challengers/riganything_mechanisms_v1.py`
 
-A fuller research challenger already exists. Current AR-01 is a narrower minimal mechanical-feedback isolation experiment and must not be widened into a full RigAnything-formulation verdict.
+A fuller research challenger already exists. AR-01 was a narrower minimal mechanical-feedback isolation experiment and must not be widened into a full RigAnything-formulation verdict.
+
+Before citing an old IRIS learned result as clean current observation-only evidence, inspect:
+
+- `canonical/IRIS_LEAK_SCOPE_20260903.md`
+- `canonical/IRIS_PRIVILEGED_INPUT_FIREWALL_REPAIR_V1_20260903.md`
+
+Affected historical learned IRIS results remain quarantined; the repaired source firewall does not retroactively cleanse them.
 
 ## Branch rule
 
 Only `main/CURRENT_STATE.md` is continuation authority.
 
 - Active experiment branches are named in `canonical/AUTHORITY_MAP_V1.json` and `CURRENT_STATE.md`.
+- Zero active experiments is a valid state and must not be treated as a manifest error.
 - Unregistered non-main branches are evidence-only by safe default.
 - Branch recency does not imply authority.
 - Do not delete evidence branches automatically; classify/dispose them first.
@@ -122,8 +173,8 @@ An experiment is not complete merely because a notebook/report exists. Closing a
 - `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`;
 - experiment authority ledger;
 - architecture authority ledger when an architecture belief changed;
-- context state / bootstrap coverage;
+- context state / AOA coverage;
 - `CURRENT_STATE.md` when stop/go changes;
 - explicit supersession/retraction of any old interpretation.
 
-The goal is not more documentation. The goal is **deterministic context reconstruction**.
+The goal is not more documentation. The goal is **deterministic context reconstruction with scientific responsibility boundaries intact**.

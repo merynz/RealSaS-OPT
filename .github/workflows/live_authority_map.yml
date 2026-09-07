@@ -13,12 +13,17 @@ on:
       - 'canonical/AUTHORITY_MAP_V1.json'
       - 'canonical/CONTEXT_STATE_V1.json'
       - 'canonical/BOOTSTRAP_COVERAGE_STATE_V1.json'
+      - 'canonical/AOA_ARTIFACT_DISPOSITION_V1.json'
+      - 'canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md'
+      - 'canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md'
+      - 'canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md'
       - 'canonical/EXPERIMENT_REGISTRY_V1.json'
       - 'canonical/SCIENTIFIC_JOURNAL_V1.jsonl'
       - 'canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md'
       - 'canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md'
       - 'canonical/BRANCH_AUTHORITY_V1.md'
       - 'tools/build_knowledge_artifact_catalog.py'
+      - 'tools/render_fit1_commit_lineage.py'
       - 'tools/render_authority_map.py'
       - 'tools/render_rehydration_packet.py'
       - 'tools/audit_context_coverage.py'
@@ -39,11 +44,25 @@ jobs:
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 10
     steps:
-      - name: Checkout canonical main
+      - name: Checkout canonical main with full history
         uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
+
+      - name: Fetch all live branch refs for FIT1 lineage
+        shell: bash
+        run: git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
+
+      - name: Render exhaustive FIT1 commit lineage
+        id: fit1lineage
+        shell: bash
+        run: |
+          set +e
+          python3 tools/render_fit1_commit_lineage.py
+          rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
 
       - name: Build complete knowledge artifact census
         id: census
@@ -55,7 +74,7 @@ jobs:
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           exit 0
 
-      - name: Audit semantic context coverage
+      - name: Audit AOA context coverage
         id: coverage
         shell: bash
         run: |
@@ -88,40 +107,52 @@ jobs:
       - name: Publish generated views to job summary
         shell: bash
         run: |
-          if [ -f canonical/REHYDRATION_PACKET.md ]; then
-            cat canonical/REHYDRATION_PACKET.md >> "$GITHUB_STEP_SUMMARY"
-          fi
-          printf '\n---\n' >> "$GITHUB_STEP_SUMMARY"
-          if [ -f canonical/CONTEXT_COVERAGE_AUDIT.md ]; then
-            cat canonical/CONTEXT_COVERAGE_AUDIT.md >> "$GITHUB_STEP_SUMMARY"
-          fi
-          printf '\n---\n' >> "$GITHUB_STEP_SUMMARY"
-          if [ -f canonical/BOOTSTRAP_AUDIT_QUEUE.md ]; then
-            head -n 120 canonical/BOOTSTRAP_AUDIT_QUEUE.md >> "$GITHUB_STEP_SUMMARY"
-          fi
-          printf '\n---\n' >> "$GITHUB_STEP_SUMMARY"
-          if [ -f canonical/LIVE_AUTHORITY_MAP.md ]; then
-            cat canonical/LIVE_AUTHORITY_MAP.md >> "$GITHUB_STEP_SUMMARY"
-          fi
+          for f in \
+            canonical/REHYDRATION_PACKET.md \
+            canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md \
+            canonical/CONTEXT_COVERAGE_AUDIT.md \
+            canonical/LIVE_AUTHORITY_MAP.md; do
+            if [ -f "$f" ]; then
+              cat "$f" >> "$GITHUB_STEP_SUMMARY"
+              printf '\n---\n' >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
 
       - name: Commit refreshed generated views
         shell: bash
         run: |
-          changed="$(git status --porcelain -- canonical/LIVE_AUTHORITY_MAP.md canonical/REHYDRATION_PACKET.md canonical/CONTEXT_COVERAGE_AUDIT.md canonical/CONTEXT_COVERAGE_AUDIT.json canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json canonical/BOOTSTRAP_AUDIT_QUEUE.md)"
+          changed="$(git status --porcelain -- \
+            canonical/LIVE_AUTHORITY_MAP.md \
+            canonical/REHYDRATION_PACKET.md \
+            canonical/CONTEXT_COVERAGE_AUDIT.md \
+            canonical/CONTEXT_COVERAGE_AUDIT.json \
+            canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json \
+            canonical/BOOTSTRAP_AUDIT_QUEUE.md \
+            canonical/FIT1_COMMIT_LINEAGE_V1.md \
+            canonical/FIT1_COMMIT_LINEAGE_V1.json)"
           if [ -z "$changed" ]; then
             echo "Generated authority/context views already current."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add canonical/LIVE_AUTHORITY_MAP.md canonical/REHYDRATION_PACKET.md canonical/CONTEXT_COVERAGE_AUDIT.md canonical/CONTEXT_COVERAGE_AUDIT.json canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json canonical/BOOTSTRAP_AUDIT_QUEUE.md
+          git add \
+            canonical/LIVE_AUTHORITY_MAP.md \
+            canonical/REHYDRATION_PACKET.md \
+            canonical/CONTEXT_COVERAGE_AUDIT.md \
+            canonical/CONTEXT_COVERAGE_AUDIT.json \
+            canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json \
+            canonical/BOOTSTRAP_AUDIT_QUEUE.md \
+            canonical/FIT1_COMMIT_LINEAGE_V1.md \
+            canonical/FIT1_COMMIT_LINEAGE_V1.json
           git commit -m "Refresh live authority context [skip ci]"
           git push origin HEAD:main
 
       - name: Enforce live-context validity
-        if: steps.census.outputs.rc != '0' || steps.coverage.outputs.rc != '0' || steps.authority.outputs.rc != '0' || steps.context.outputs.rc != '0'
+        if: steps.fit1lineage.outputs.rc != '0' || steps.census.outputs.rc != '0' || steps.coverage.outputs.rc != '0' || steps.authority.outputs.rc != '0' || steps.context.outputs.rc != '0'
         run: |
-          echo "Live authority/context state is INVALID. Inspect generated canonical views."
+          echo "Live authority/AOA context state is INVALID. Inspect generated canonical views."
+          echo "fit1lineage_rc=${{ steps.fit1lineage.outputs.rc }}"
           echo "census_rc=${{ steps.census.outputs.rc }}"
           echo "coverage_rc=${{ steps.coverage.outputs.rc }}"
           echo "authority_rc=${{ steps.authority.outputs.rc }}"

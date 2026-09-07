@@ -88,10 +88,18 @@ bone names or a family-specific index list. Current Mage preflight independently
 produces 22 controls and one projected root; `22` is a FIT target result, never
 an architectural output cap.
 
-Pinned current Mage target content SHA-256:
-`31425214f2dba8b61061b58d41f0684005d010833549197bac103d6cfe9152fc`.
+Position authority is explicitly world/source frame. For the current normalized
+corpus the accepted locus source is:
+`rest_world_source[:, :3, 3]`.
+The corpus `bone_heads` array is canonical-normalized and is forbidden as direct
+world-locus supervision unless explicitly transformed back to world/source frame.
 
-Any target hash drift aborts before the first optimizer step.
+Pinned current Mage target content SHA-256:
+`0b5a25c877116de60b710b7bb2a7848f30988e1622e2eda8084cad21c8ca23c9`.
+
+A prior draft target hash based on canonical-normalized `bone_heads` is invalid
+and was never authorized for training. Any current target hash drift aborts
+before the first optimizer step.
 
 ## Frozen model arm
 

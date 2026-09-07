@@ -6,7 +6,9 @@
     "branch_policy": "canonical/BRANCH_AUTHORITY_V1.md",
     "machine_authority_map": "canonical/AUTHORITY_MAP_V1.json",
     "architecture_ledger": "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
-    "experiment_ledger": "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md"
+    "experiment_ledger": "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
+    "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V1.json",
+    "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V1.jsonl"
   },
   "product": {
     "name": "RealSaS",
@@ -29,7 +31,7 @@
     {
       "name": "Geppetto",
       "role": "learned skeleton/control proposal, parent/root evidence, future mechanical salience",
-      "canonical_rule": "architecture promotion currently on AR-01 hold"
+      "canonical_rule": "post-AR-01 diagnosis; no refreeze currently authorized"
     },
     {
       "name": "Compiler",
@@ -39,7 +41,7 @@
     {
       "name": "Arachne",
       "role": "learned skin/weight/deformation proposal conditioned on qualified skeleton + IRIS/Geppetto outputs",
-      "canonical_rule": "future FIT1 training; SkinTokens clean-room mechanism audit planned"
+      "canonical_rule": "future FIT1 training after Geppetto refreeze; SkinTokens clean-room mechanism audit planned"
     },
     {
       "name": "Runtime",
@@ -49,16 +51,66 @@
   ],
   "current_focus": {
     "module": "Geppetto",
-    "gate": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
-    "branch": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
-    "scientific_question": "Does minimal joint+parent mechanical recurrent feedback improve Mage FIT1 reachability/retention and structural prediction relative to matched feedback-off AR0?",
-    "scope_warning": "AR-01 is a minimal feedback intervention, not a full RigAnything formulation test.",
-    "promotion_block": "No Geppetto refreeze/promotion before AR-01 closes under preregistered rules."
+    "state": "POST_AR01_DIAGNOSIS_REQUIRED__NO_NEW_EXPERIMENT_PREREGISTERED",
+    "active_experiment": null,
+    "most_recent_closed_gate": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
+    "categorical_verdict": "AR01_NO_TERMINAL_CLOSURE",
+    "result_authority": "canonical/AR01_RESULT_20260907.md",
+    "scientific_question": "Which single next falsifiable gate should resolve the remaining Geppetto uncertainty: AR0 residual terminal stability, AR1 generated-state exposure/recovery, or the already-existing fuller RigAnything C3/C4 formulation?",
+    "scope_warning": "AR-01 was a minimal feedback intervention, not a full RigAnything formulation test. Do not bundle the three remaining questions post hoc.",
+    "promotion_block": "No Geppetto refreeze/promotion until the scientifically necessary post-AR-01 gate(s) close and a separate promotion transaction reconciles authority."
+  },
+  "ar01_closed_result": {
+    "contract_tag": "41055bd073538d6b",
+    "closed_at_utc": "2026-09-07T06:00:52.301304Z",
+    "verdict": "AR01_NO_TERMINAL_CLOSURE",
+    "promotion_authority": false,
+    "ar0": {
+      "feedback": false,
+      "first_structural_pass_step": 2368,
+      "first_48_check_streak_step": 11840,
+      "max_structural_pass_streak_checks": 61,
+      "final_step": 16384,
+      "final_structural_pass": true,
+      "terminal_structural_pass_streak": 1,
+      "terminal_stability_pass": false,
+      "final_outside": 0,
+      "final_parent_accuracy": 1.0,
+      "final_slot_p95": 0.0008499497780576348,
+      "interpretation": "strong same-witness reachability/capacity but unresolved late trajectory/optimizer stability"
+    },
+    "ar1": {
+      "feedback": true,
+      "first_structural_pass_step": null,
+      "first_48_check_streak_step": null,
+      "final_step": 16384,
+      "final_structural_pass": false,
+      "terminal_structural_pass_streak": 0,
+      "terminal_stability_pass": false,
+      "final_outside": 28,
+      "final_parent_accuracy": 0.5,
+      "final_slot_p95": 0.47583022713661194,
+      "final_teacher_forced_structural_pass": true,
+      "final_teacher_forced_parent_accuracy": 1.0,
+      "final_teacher_forced_slot_p95": 0.00206305761821568,
+      "teacher_forced_vs_free_position_max_abs": 0.4984188377857208,
+      "interpretation": "teacher-forced task learned strongly; generated-state free-running feedback exhibits severe exposure/recurrent error-amplification failure"
+    },
+    "nonclaims": [
+      "not a full RigAnything C3/C4 formulation verdict",
+      "does not falsify all structural autoregression",
+      "does not establish scheduled sampling or soft feedback as the required repair",
+      "does not establish generalization",
+      "does not authorize Geppetto refreeze"
+    ]
   },
   "riganything_state": {
     "paper_mechanisms_cleanroom_studied": true,
     "fuller_research_challenger_already_exists": true,
-    "implementation": "models/geppetto/challengers/riganything_mechanisms_v1.py",
+    "lineage_dossier": "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md",
+    "implementation_at_creation_commit": "models/geppetto/challengers/riganything_mechanisms_v1.py",
+    "creation_commit": "ba634955777479ee05a5b199742710b1736123b5",
+    "creation_blob_sha": "136d358572be6ff72ba15999474b6d3be600f5bc",
     "contains": [
       "per-step full-surface cross-attention",
       "conditional diffusion locus",
@@ -66,15 +118,33 @@
       "sibling/BFS-order helper"
     ],
     "critical_memory_rule": "Never propose building a RigAnything-equivalent challenger from scratch without first inspecting the existing challenger and its experiment lineage.",
-    "canonical_status": "research implementation only; component tests do not imply full-formulation closure"
+    "canonical_status": "research implementation only; component tests and AR-01 do not imply full-formulation closure"
   },
   "geppetto_current_architecture": {
     "mainline_id": "RealSaS.GeppettoCandidate.LatentAutoregressiveSetProposal.v3",
+    "status": "MAINLINE_ON_HOLD__NOT_REFROZEN",
     "important_distinction": "latent-state recurrent != generated-skeleton-conditioned structural autoregressive",
     "known_historical_reason": "old hard-MAP locus feedback was removed because multimodal crossover could rewrite later anonymous states; this did not prove all skeleton-causal feedback unnecessary",
     "lossless_evidence": "binding consumer-boundary requirement; do not regress to summary-only 24D authority",
-    "mechanical_salience": "open neural responsibility; explicitly outside AR-01 and must not migrate into Compiler heuristics"
+    "mechanical_salience": "open neural responsibility; must not migrate into Compiler heuristics"
   },
+  "post_ar01_hypothesis_partition": [
+    {
+      "id": "AR0_RESIDUAL_TERMINAL_STABILITY",
+      "question": "What causes long exact no-feedback runs to later leave the target region under the current optimizer/trajectory?",
+      "status": "OPEN_DIAGNOSIS"
+    },
+    {
+      "id": "AR1_EXPOSURE_RECOVERY_POLICY",
+      "question": "What feedback/training policy makes generated joint+parent state robust rather than teacher-forced-only?",
+      "status": "OPEN_DIAGNOSIS"
+    },
+    {
+      "id": "RIGANYTHING_FULL_FORMULATION_C3_C4",
+      "question": "Does the already-existing fuller diffusion+mechanical-token+order formulation materially change the outcome under a formulation-level prereg?",
+      "status": "IMPLEMENTED_RESEARCH__NOT_AUTHORITATIVELY_CLOSED"
+    }
+  ],
   "fit_science": {
     "principle": "FIT1 fits a generic/generalization-oriented architecture to one witness; architecture is not designed specifically for FIT1.",
     "fit1_is": "mechanism/capacity/controlled-witness qualification and financing/demo gate",
@@ -89,7 +159,9 @@
     "Lossless per-view evidence must survive into learned consumers.",
     "Mechanical salience / functional simplification belongs to neural Geppetto-side evidence, not legality heuristics.",
     "Source existence != mechanism test; mechanism test != full formulation test; FIT1 != generalization.",
-    "No post-hoc gate widening after results are visible."
+    "No post-hoc gate widening after results are visible.",
+    "Repository prereg/result hashes outrank detached generated/chat drafts when they conflict.",
+    "Unindexed historical evidence means UNKNOWN/UNRECONCILED, never ABSENT."
   ],
   "execution_environment": {
     "actions": "local self-hosted",
@@ -101,11 +173,19 @@
   "known_context_traps": [
     {
       "trap": "Confusing a research challenger with canonical Geppetto",
-      "defense": "Check architecture ledger row + implementation path + canonical status separately."
+      "defense": "Check architecture ledger row + implementation commit/blob + canonical status separately."
     },
     {
       "trap": "Calling AR-01 a RigAnything formulation test",
-      "defense": "Experiment ledger explicitly limits AR-01 to the minimal feedback delta."
+      "defense": "AR-01 result and RigAnything lineage dossier explicitly limit the claim to minimal feedback."
+    },
+    {
+      "trap": "Treating an earlier 48-check streak as terminal stability",
+      "defense": "AR-01 requires the final contiguous streak >=48; AR0 ended at streak 1."
+    },
+    {
+      "trap": "Treating the detached conditional-diffusion prereg draft as AR-01 authority",
+      "defense": "Repo prereg SHA 78981b... freezes the direct three-mode locus head and outranks the detached draft."
     },
     {
       "trap": "Treating old restoration/hold reports as current authority",
@@ -117,16 +197,20 @@
     },
     {
       "trap": "Reconstructing state by reading many reports in arbitrary order",
-      "defense": "Read REHYDRATION_PACKET first; descend only through referenced ledgers/artifacts."
+      "defense": "Read REHYDRATION_PACKET first and inspect coverage gaps before inferring absence."
     }
   ],
   "continuation_protocol": {
     "first_read": "canonical/REHYDRATION_PACKET.md",
     "then": [
       "CURRENT_STATE.md",
+      "canonical/CONTEXT_COVERAGE_AUDIT.md",
       "canonical/LIVE_AUTHORITY_MAP.md or run tools/render_authority_map.py",
+      "canonical/CONTEXT_STATE_V1.json",
       "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
-      "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md"
+      "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
+      "canonical/EXPERIMENT_REGISTRY_V1.json",
+      "canonical/SCIENTIFIC_JOURNAL_V1.jsonl"
     ],
     "rule": "Do not infer current truth from filename recency, branch recency, report count, or memory alone.",
     "experiment_completion_definition": "result/provenance + implementation + experiment ledger + architecture ledger if affected + context state + CURRENT_STATE if stop/go changes + explicit supersession/revocation"

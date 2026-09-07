@@ -11,7 +11,7 @@
 - **Current module:** `Geppetto`
 - **Active gate:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
 - **Active branch:** `exp/geppetto-ar01-skeleton-causal-v1-20260907` @ `58ea876d3e61`
-- **Canonical main:** `28f73b1e9125`
+- **Canonical main:** `e35b63b90d59`
 - **Promotion block:** No Geppetto refreeze/promotion before AR-01 closes under preregistered rules.
 - **Scope warning:** AR-01 is a minimal feedback intervention, not a full RigAnything formulation test.
 - **Next visible product milestone:** Mage idle/breathing after Geppetto + Arachne FIT1 closure
@@ -19,10 +19,10 @@
 ## Historical-memory health
 
 - **Bootstrap:** `BOOTSTRAP_AUDIT_INCOMPLETE`
-- **Artifact census:** 257 high-signal artifacts discovered; census coverage **100% by construction**.
-- **Semantically reconciled:** 21.
-- **Catalogued but unreviewed:** 236.
-- **Semantic coverage:** 8.2%.
+- **Artifact census:** 310 high-signal artifacts discovered; census coverage **100% by construction**.
+- **Semantically reconciled:** 35.
+- **Catalogued but unreviewed:** 275.
+- **Semantic coverage:** 11.3%.
 - **Honesty rule:** missing historical details are `UNKNOWN / NEEDS AUDIT`, never inferred absent from the registry.
 - Use `canonical/BOOTSTRAP_AUDIT_QUEUE.md` + `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` to locate unreviewed evidence.
 

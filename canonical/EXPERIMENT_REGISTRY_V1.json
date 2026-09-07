@@ -111,8 +111,9 @@
       "cannot_prove": ["full RigAnything formulation verdict", "skeleton-causal feedback necessity"],
       "target_effect": "Preserved causal identifiability by preventing multiple RigAnything mechanisms from entering one unexplained bundle.",
       "necessity_assessment": "Methodologically useful isolation; final necessity unresolved here.",
-      "source_pointers": ["models/geppetto/challengers/riganything_mechanisms_v1.py"],
-      "next_dependencies": ["RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4", "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE"]
+      "source_pointers": ["models/geppetto/challengers/riganything_mechanisms_v1.py", "RealSaS_MAGE_GEPPETTO_CAUSAL_REPAIR_V2_RUN_ALL_NO_TOKEN_FINAL.ipynb"],
+      "next_dependencies": ["RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4", "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE"],
+      "index_note": "Causal Repair V2 prereg verifies C2 = C1 + diffusion with geometry_feedback=False; exact terminal result pointer still needs bootstrap normalization."
     },
     {
       "id": "FIT1_TRUNK_ACTUAL_UPDATE_CAP_0_005",
@@ -136,16 +137,16 @@
       "target_effect": "Clarified that some instability is optimizer-mediated, but did not remove the need to audit Geppetto architecture causality.",
       "necessity_assessment": "Useful diagnostic/containment mechanism; not a generic architecture answer.",
       "source_pointers": [],
-      "next_dependencies": ["AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE"],
+      "next_dependencies": ["AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE", "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION"],
       "index_note": "Backfill exact prereg/result artifact pointer before numerical reuse."
     },
     {
       "id": "RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4",
-      "date": "2026-09-06",
-      "time_precision": "date_only",
+      "date": "2026-09-05",
+      "time_precision": "creation_commit_exact__run_status_open",
       "started_at_utc": null,
       "closed_at_utc": null,
-      "recorded_at_utc": "2026-09-07T04:35:00Z",
+      "recorded_at_utc": "2026-09-07T10:05:10Z",
       "module": "Geppetto research challenger",
       "witness": "Mage FIT1 / formulation research",
       "status": "IMPLEMENTED_NOT_AUTHORITATIVELY_RUN",
@@ -154,38 +155,91 @@
       "arms": ["C3 = C2 + joint/parent mechanical feedback", "C4 = C3 + sibling/BFS-order augmentation"],
       "mechanisms_present": ["per-step full-surface cross-attention", "conditional diffusion locus", "joint geometry feedback token", "parent geometry feedback token", "sibling/BFS-order helper in C4"],
       "mechanisms_absent_or_not_claimed": ["canonical product authority", "authoritative full-formulation result"],
-      "outcome_summary": "Executable research challenger already exists. Source existence is not a scientific result; a complete authoritative C3/C4 run is not currently registered as closed.",
+      "outcome_summary": "Executable research challenger already exists. Creation commit and blob are now indexed, but a complete authoritative C3/C4 result is not registered as closed.",
       "falsified_or_weakened": [],
       "survived_or_supported": ["RealSaS already translated the fuller RigAnything mechanism family into a research challenger"],
       "cannot_prove": ["the formulation works on Mage", "the formulation is necessary", "canonical Geppetto contains these mechanisms"],
       "target_effect": "Prevents repeated clean-room reimplementation and preserves the option of a formulation-level test after isolated mechanisms are understood.",
       "necessity_assessment": "Important preserved challenger; run only if the dependency graph makes it scientifically necessary.",
-      "source_pointers": ["models/geppetto/challengers/riganything_mechanisms_v1.py"],
-      "next_dependencies": ["AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE"]
+      "source_pointers": [
+        "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md",
+        "commit:ba634955777479ee05a5b199742710b1736123b5",
+        "blob:136d358572be6ff72ba15999474b6d3be600f5bc",
+        "models/geppetto/challengers/riganything_mechanisms_v1.py"
+      ],
+      "next_dependencies": ["POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION"]
     },
     {
       "id": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
       "date": "2026-09-07",
-      "time_precision": "exact_run_time_to_be_bound_from_result_artifact",
+      "time_precision": "closed_exact__start_time_not_yet_normalized",
       "started_at_utc": null,
-      "closed_at_utc": null,
-      "recorded_at_utc": "2026-09-07T04:35:00Z",
+      "closed_at_utc": "2026-09-07T06:00:52.301304Z",
+      "recorded_at_utc": "2026-09-07T10:05:10Z",
       "module": "Geppetto",
       "witness": "Mage FIT1",
-      "status": "ACTIVE_RUNNING",
-      "local_question": "With lossless evidence, full-surface policy, locus head, serialization, optimizer, seed/backend and free-running evaluation matched, does minimal joint+parent mechanical recurrent feedback improve FIT1 reachability/retention and structural prediction?",
+      "status": "CLOSED_FAIL",
+      "local_question": "With lossless evidence, full-surface policy, direct locus head, serialization, optimizer, seed/backend and free-running evaluation matched, does minimal joint+parent mechanical recurrent feedback improve FIT1 reachability/retention and structural prediction?",
       "global_purpose": "Isolate the generated-skeleton causal-state hypothesis from the rest of the RigAnything mechanism bundle before Geppetto architecture refreeze.",
       "arms": ["AR0 = matched feedback OFF", "AR1 = matched joint+parent mechanical feedback ON"],
-      "mechanisms_present": ["lossless V3 evidence", "full-surface access", "causal parent prediction", "direct locus head", "matched structural serialization", "joint+parent recurrent mechanical feedback only in AR1"],
+      "mechanisms_present": ["lossless V3 evidence", "full-surface access", "causal parent prediction", "direct three-mode locus head", "matched structural serialization", "joint+parent recurrent mechanical feedback only in AR1"],
       "mechanisms_absent_or_not_claimed": ["conditional diffusion locus", "sibling/BFS-order augmentation", "full RigAnything formulation equivalence", "mechanical salience closure", "generalization"],
-      "outcome_summary": "RUNNING. Interim AR0/AR1 traces are diagnostics only; no final outcome is authorized before both arms hit the preregistered fixed horizon and terminal gate is evaluated.",
-      "falsified_or_weakened": [],
-      "survived_or_supported": [],
-      "cannot_prove": ["full RigAnything formulation verdict", "generalization", "mechanical salience", "automatic product promotion"],
-      "target_effect": "If closed cleanly, removes one major architecture ambiguity before Geppetto refreeze regardless of which arm wins.",
-      "necessity_assessment": "Current mandatory architecture gate.",
-      "source_pointers": ["exp/geppetto-ar01-skeleton-causal-v1-20260907", "models/geppetto/challengers/ar01_skeleton_causal_v1.py"],
-      "next_dependencies": ["GEPPETTO_REFREEZE_DECISION", "RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4"],
+      "outcome_summary": "Both arms completed step 16384 and failed the preregistered terminal 48-check structural-stability gate. Categorical verdict: AR01_NO_TERMINAL_CLOSURE. AR0 reached the exact region early and sustained a maximum 61-check structural streak but later collapsed and ended with terminal streak 1. AR1 never achieved a free-running structural PASS; its final teacher-forced state was exact while free-running remained 28 outside with parent accuracy 0.50.",
+      "falsified_or_weakened": [
+        "the exact AR-01 minimal residual joint+parent feedback implementation is a terminal FIT1 repair under this frozen protocol",
+        "AR0 reaching a long stable-looking region is sufficient evidence of terminal closure"
+      ],
+      "survived_or_supported": [
+        "AR0 has strong Mage same-witness reachability/capacity",
+        "AR0 residual terminal optimizer/trajectory instability remains real",
+        "AR1 has a severe teacher-forced/generated-state exposure and recurrent-error-amplification failure mode",
+        "the fuller RigAnything C3/C4 question remains scientifically open"
+      ],
+      "cannot_prove": [
+        "full RigAnything formulation verdict",
+        "all structural autoregression is harmful",
+        "scheduled sampling or soft uncertainty-aware feedback is necessary",
+        "generalization",
+        "mechanical salience",
+        "automatic product promotion"
+      ],
+      "target_effect": "Closed the minimal-feedback ambiguity but did not authorize refreeze. The remaining problem is now explicitly partitioned into AR0 residual stability, AR1 exposure/recovery, and optional fuller C3/C4 formulation testing.",
+      "necessity_assessment": "Scientifically useful negative closure: eliminated one promotion candidate and sharpened the next causal questions.",
+      "source_pointers": [
+        "canonical/AR01_RESULT_20260907.md",
+        "canonical/AR01_RUNTIME_BACKEND_AMENDMENT_20260907.md",
+        "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md",
+        "exp/geppetto-ar01-skeleton-causal-v1-20260907",
+        "contract:41055bd073538d6b"
+      ],
+      "terminal_result": {
+        "verdict": "AR01_NO_TERMINAL_CLOSURE",
+        "ar0": {
+          "terminal_stability_pass": false,
+          "first_structural_pass_step": 2368,
+          "first_48_streak_step": 11840,
+          "max_structural_streak_checks": 61,
+          "final_structural_pass": true,
+          "final_streak": 1,
+          "final_outside": 0,
+          "final_parent_accuracy": 1.0,
+          "final_slot_p95": 0.0008499497780576348
+        },
+        "ar1": {
+          "terminal_stability_pass": false,
+          "first_structural_pass_step": null,
+          "final_structural_pass": false,
+          "final_streak": 0,
+          "final_outside": 28,
+          "final_parent_accuracy": 0.5,
+          "final_slot_p95": 0.47583022713661194,
+          "teacher_forced_structural_pass": true,
+          "teacher_forced_parent_accuracy": 1.0,
+          "teacher_forced_slot_p95": 0.00206305761821568,
+          "teacher_forced_vs_free_position_max_abs": 0.4984188377857208
+        }
+      },
+      "next_dependencies": ["POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION"],
       "preregistered_outcome_logic": {
         "AR1_PASS_AR0_FAIL": "minimal skeleton-causal feedback rescues this FIT1 configuration",
         "AR0_PASS_AR1_PASS": "minimal feedback is compatible but not necessary on this witness",
@@ -194,26 +248,55 @@
       }
     },
     {
+      "id": "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION",
+      "date": "2026-09-07",
+      "time_precision": "decision_state_exact",
+      "started_at_utc": null,
+      "closed_at_utc": null,
+      "recorded_at_utc": "2026-09-07T10:05:10Z",
+      "module": "Geppetto scientific governance",
+      "witness": "Mage FIT1 / architecture decision",
+      "status": "OPEN_NOT_RUN",
+      "local_question": "Which single remaining causal uncertainty must be tested next: AR0 residual terminal stability, AR1 generated-state exposure/recovery, or fuller C3/C4 formulation behavior?",
+      "global_purpose": "Prevent a bundled post-hoc repair after AR-01 and select a falsifiable next gate whose result can be interpreted without semantic widening.",
+      "arms": [],
+      "mechanisms_present": [],
+      "mechanisms_absent_or_not_claimed": ["no new mechanism has been selected or authorized yet"],
+      "outcome_summary": "OPEN DECISION STATE. No new scientific run is preregistered yet.",
+      "falsified_or_weakened": [],
+      "survived_or_supported": ["the remaining questions are separable and must remain separately addressable"],
+      "cannot_prove": ["any mechanism is superior before a new preregistered test"],
+      "target_effect": "Keeps Geppetto moving toward refreeze without allowing AR-01's negative result to trigger an uncontrolled architecture bundle.",
+      "necessity_assessment": "Required scientific-governance transition after AR-01.",
+      "source_pointers": ["CURRENT_STATE.md", "canonical/AR01_RESULT_20260907.md", "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md"],
+      "candidate_next_hypotheses": [
+        "AR0_RESIDUAL_TERMINAL_STABILITY",
+        "AR1_GENERATED_STATE_EXPOSURE_RECOVERY",
+        "RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4"
+      ],
+      "next_dependencies": ["GEPPETTO_REFREEZE_DECISION"]
+    },
+    {
       "id": "GEPPETTO_REFREEZE_DECISION",
       "date": null,
       "time_precision": "future",
       "started_at_utc": null,
       "closed_at_utc": null,
-      "recorded_at_utc": "2026-09-07T04:35:00Z",
+      "recorded_at_utc": "2026-09-07T10:05:10Z",
       "module": "Geppetto",
-      "witness": "post-AR-01 architecture decision",
+      "witness": "post-required-gates architecture decision",
       "status": "OPEN_NOT_RUN",
-      "local_question": "Which Geppetto architecture/mechanism set is justified after AR-01 and any scientifically necessary formulation-level follow-up?",
+      "local_question": "Which Geppetto architecture/mechanism set is justified after AR-01 and the scientifically necessary post-AR-01 follow-up gate(s)?",
       "global_purpose": "Freeze a generic/generalization-oriented Geppetto before moving the product-science bottleneck to Arachne.",
       "arms": [],
       "mechanisms_present": [],
       "mechanisms_absent_or_not_claimed": [],
-      "outcome_summary": "OPEN.",
+      "outcome_summary": "BLOCKED by POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION and any selected required gate.",
       "falsified_or_weakened": [],
       "survived_or_supported": [],
       "cannot_prove": ["generalization without later FIT-k/FIT8/LOFO/scaling gates"],
-      "target_effect": "Unlocks Arachne FIT1 conditioning on a qualified Geppetto output contract.",
-      "necessity_assessment": "Required transition gate.",
+      "target_effect": "Unlocks Arachne FIT1 conditioning on a qualified Geppetto output contract only after genuine refreeze.",
+      "necessity_assessment": "Required transition gate; not currently ready.",
       "source_pointers": ["CURRENT_STATE.md"],
       "next_dependencies": ["ARACHNE_FIT1_SKINTOKENS_CLEANROOM"]
     },
@@ -232,7 +315,7 @@
       "arms": [],
       "mechanisms_present": ["planned IRIS+Geppetto conditioning", "planned SkinTokens clean-room mechanism audit"],
       "mechanisms_absent_or_not_claimed": ["unqualified teacher-exact shipping path"],
-      "outcome_summary": "FUTURE.",
+      "outcome_summary": "FUTURE — blocked until Geppetto refreeze.",
       "falsified_or_weakened": [],
       "survived_or_supported": [],
       "cannot_prove": ["generalization from FIT1 alone"],
@@ -274,22 +357,29 @@
       "GEPPETTO_C2_CONDITIONAL_DIFFUSION_LOCUS",
       "FIT1_TRUNK_ACTUAL_UPDATE_CAP_0_005",
       "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
+      "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION",
       "GEPPETTO_REFREEZE_DECISION",
       "ARACHNE_FIT1_SKINTOKENS_CLEANROOM",
       "MAGE_IDLE_BREATHING_PRODUCT_WITNESS"
     ],
     "conditional_forks": [
       {
-        "after": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
-        "condition": "AR-01 result leaves formulation-level ambiguity scientifically material",
-        "then": "RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4",
-        "why": "The fuller challenger already exists and should be run/adapted rather than reimplemented if AR-01's minimal intervention cannot answer the broader formulation question."
+        "after": "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION",
+        "condition": "AR0 residual terminal instability is selected as the next blocking causal uncertainty",
+        "then": "NEW_PREREG_AR0_TERMINAL_STABILITY_GATE",
+        "why": "AR0 demonstrated capacity and long exact retention but still failed the terminal gate."
       },
       {
-        "after": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
-        "condition": "AR0 closes FIT1 and AR1 is unnecessary/harmful, with no remaining formulation question required for refreeze",
-        "then": "GEPPETTO_REFREEZE_DECISION",
-        "why": "Do not add mechanisms merely because they exist in a reference model; preserve the simplest architecture supported by evidence while keeping the fuller challenger as research lineage."
+        "after": "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION",
+        "condition": "AR1 generated-state exposure/recovery is selected as the next blocking architectural uncertainty",
+        "then": "NEW_PREREG_AR1_EXPOSURE_RECOVERY_GATE",
+        "why": "AR1 was exact teacher-forced but failed badly free-running; the feedback/training policy must be isolated rather than assumed."
+      },
+      {
+        "after": "POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION",
+        "condition": "Fuller formulation-level ambiguity remains scientifically material before refreeze",
+        "then": "RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4",
+        "why": "The fuller challenger already exists and should be adapted/run rather than reimplemented."
       }
     ]
   }

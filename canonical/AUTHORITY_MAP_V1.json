@@ -13,6 +13,8 @@
     "required_labels": ["self-hosted", "linux", "x64", "realsas"],
     "known_runner_name": "realsas-wsl-1660ti",
     "operator_path_hint": "~/actions-runner",
+    "migration_reason": "Routine GitHub-hosted Actions previously generated excessive workflow usage and triggered a quota/usage warning email; RealSaS therefore moved routine scientific/mainline execution to the user's local self-hosted runner.",
+    "workflow_budget_policy": "Do not fan out authority-map or routine science workflows across every experimental branch push. Prefer main authority changes, branch create/delete events, explicit manual dispatch, or already-required self-hosted scientific jobs.",
     "rule": "Scientific/mainline Actions execution authority is the user's local self-hosted RealSaS runner. A GitHub-hosted runner attempt is apparatus/config evidence only and cannot be interpreted as model-science evidence."
   },
   "branch_policy": {
@@ -77,6 +79,7 @@
   "invariants": [
     "Only main/CURRENT_STATE.md is continuation authority.",
     "Scientific/mainline GitHub Actions run on the local self-hosted RealSaS runner; hosted-runner failures are apparatus/config only.",
+    "Routine authority tracking must not create workflow-run fan-out across every experimental branch push.",
     "A branch is never active merely because it exists or has a recent commit.",
     "Every ACTIVE_EXPERIMENT branch and gate id must be named by CURRENT_STATE.md.",
     "Source existence is not experimental evidence.",

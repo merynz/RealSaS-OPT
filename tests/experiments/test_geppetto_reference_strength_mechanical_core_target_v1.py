@@ -6,6 +6,7 @@ from experiments.geppetto_reference_strength_fullstack_v1.mechanical_core_target
     RULE,
     build_mechanical_core_target_v1,
     target_content_sha256_v1,
+    world_heads_from_rest_world_source_v1,
 )
 
 
@@ -17,15 +18,12 @@ def _skin(rows: int, cols: int, supported: tuple[int, ...]) -> np.ndarray:
 
 
 def test_assembly_root_and_helper_leaves_are_not_promoted() -> None:
-    # 0 assembly root -> 1 -> 2 -> 3 are deform path; 4/5 are helper leaves.
     parents = np.asarray([-1, 0, 1, 2, 0, 0], np.int64)
     deform = np.ones(6, dtype=bool)
     skin = _skin(3, 6, (1, 2, 3))
-    heads = np.asarray(
-        [[0, 0, i] for i in range(6)], dtype=np.float32
-    )
+    heads = np.asarray([[0, 0, i] for i in range(6)], dtype=np.float32)
     target = build_mechanical_core_target_v1(
-        parents=parents, deform_mask=deform, skin=skin, bone_heads=heads
+        parents=parents, deform_mask=deform, skin=skin, bone_heads_world=heads
     )
     assert target.count == 3
     assert target.rule == RULE
@@ -35,30 +33,24 @@ def test_assembly_root_and_helper_leaves_are_not_promoted() -> None:
 
 
 def test_unsupported_required_bridge_is_retained() -> None:
-    # 1 and 3 are skin-supported. 2 carries no skin but is required to preserve
-    # the supported ancestor/descendant path. Assembly root 0 remains excluded.
     parents = np.asarray([-1, 0, 1, 2], np.int64)
     deform = np.ones(4, dtype=bool)
     skin = _skin(2, 4, (1, 3))
-    heads = np.asarray(
-        [[0, 0, 0], [0, 0, 1], [0, 0, 2], [0, 0, 3]], dtype=np.float32
-    )
+    heads = np.asarray([[0, 0, 0], [0, 0, 1], [0, 0, 2], [0, 0, 3]], dtype=np.float32)
     target = build_mechanical_core_target_v1(
-        parents=parents, deform_mask=deform, skin=skin, bone_heads=heads
+        parents=parents, deform_mask=deform, skin=skin, bone_heads_world=heads
     )
     assert set(target.source_indices_provenance_only.tolist()) == {1, 2, 3}
     assert target.parent_indices.tolist() == [-1, 0, 1]
 
 
 def test_unconnected_unsupported_chain_is_not_promoted() -> None:
-    # Skin-supported 2 hangs below unsupported 1 and assembly root 0. Since the
-    # chain does not reach another selected ancestor, neither 0 nor 1 is added.
     parents = np.asarray([-1, 0, 1], np.int64)
     deform = np.ones(3, dtype=bool)
     skin = _skin(1, 3, (2,))
     heads = np.asarray([[0, 0, 0], [0, 0, 1], [0, 0, 2]], dtype=np.float32)
     target = build_mechanical_core_target_v1(
-        parents=parents, deform_mask=deform, skin=skin, bone_heads=heads
+        parents=parents, deform_mask=deform, skin=skin, bone_heads_world=heads
     )
     assert target.count == 1
     assert target.source_indices_provenance_only.tolist() == [2]
@@ -71,10 +63,9 @@ def test_target_content_hash_does_not_depend_on_source_indices() -> None:
     skin = _skin(2, 3, (1, 2))
     heads = np.asarray([[0, 0, 0], [1, 0, 0], [2, 0, 0]], dtype=np.float32)
     a = build_mechanical_core_target_v1(
-        parents=parents, deform_mask=deform, skin=skin, bone_heads=heads
+        parents=parents, deform_mask=deform, skin=skin, bone_heads_world=heads
     )
     h = target_content_sha256_v1(a)
-    # Provenance indices are intentionally excluded from identity hash.
     b = type(a)(
         positions_world=a.positions_world.copy(),
         parent_indices=a.parent_indices.copy(),
@@ -85,6 +76,14 @@ def test_target_content_hash_does_not_depend_on_source_indices() -> None:
     assert target_content_sha256_v1(b) == h
 
 
+def test_rest_world_source_extracts_translation_authority() -> None:
+    rest = np.repeat(np.eye(4, dtype=np.float64)[None], 2, axis=0)
+    rest[0, :3, 3] = [1.0, 2.0, 3.0]
+    rest[1, :3, 3] = [-1.0, 0.5, 4.0]
+    got = world_heads_from_rest_world_source_v1(rest)
+    assert np.array_equal(got, np.asarray([[1.0, 2.0, 3.0], [-1.0, 0.5, 4.0]]))
+
+
 def test_invalid_cycle_fails_closed() -> None:
     parents = np.asarray([1, 0], np.int64)
     deform = np.ones(2, dtype=bool)
@@ -92,7 +91,7 @@ def test_invalid_cycle_fails_closed() -> None:
     heads = np.asarray([[0, 0, 0], [0, 1, 0]], dtype=np.float32)
     try:
         build_mechanical_core_target_v1(
-            parents=parents, deform_mask=deform, skin=skin, bone_heads=heads
+            parents=parents, deform_mask=deform, skin=skin, bone_heads_world=heads
         )
     except ValueError as exc:
         assert "cycle" in str(exc)

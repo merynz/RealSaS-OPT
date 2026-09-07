@@ -4,10 +4,10 @@
 > Bootstrap: `BOOTSTRAP_AUDIT_INCOMPLETE`
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
-- Census artifacts in declared scope: **312 / 312 discovered (100%)**
+- Census artifacts in declared scope: **313 / 313 discovered (100%)**
 - Semantically reconciled: **38**
-- Catalogued but unreviewed: **274**
-- Semantic coverage: **12.2%**
+- Catalogued but unreviewed: **275**
+- Semantic coverage: **12.1%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -289,11 +289,12 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-F9AC50E77CFA` `RESULT` — `main` :: `experiments/s0_rigging_substrate/S0_B_PILOT_RESULT_V1.json` @ blob `ee24f2d22623`
 - `KA-6E0B09EAFC48` `PREREG` — `main` :: `experiments/s0_rigging_substrate/S0_PLAN_AND_PREREG_V1.md` @ blob `cf36713ca2dd`
 
-### UNKNOWN_DATE :: CROSS_CUTTING_OTHER (20)
+### UNKNOWN_DATE :: CROSS_CUTTING_OTHER (21)
 
 - `KA-0D7F7AEF1CE7` `WORKFLOW` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `.github/workflows/rigging_line_closure_v1.yml` @ blob `38309d804d1b`
 - `KA-34A72464D966` `WORKFLOW` — `exp/lossless-rigging-evidence-v1-20260906` :: `.github/workflows/rigging_line_closure_v1.yml` @ blob `38309d804d1b`
 - `KA-6AFEA36BB50A` `WORKFLOW` — `main` :: `.github/workflows/p0_directional_binding_closure.yml` @ blob `f05bd4e0fd12`
+- `KA-A0022E8F5EFE` `AUTHORITY_DECISION` — `main` :: `canonical/AOA_ARTIFACT_DISPOSITION_V1.json` @ blob `deb9d089cafa`
 - `KA-E435DDB5D448` `AUTHORITY_DECISION` — `main` :: `experiments/g0_g1_single_pose_geometry/G0_CONTRACT_FREEZE.json` @ blob `644e8aa9bcd6`
 - `KA-0C6940AFE2D3` `AUTHORITY_DECISION` — `main` :: `experiments/g0_g1_single_pose_geometry/G1_FREEZE_MANIFEST.json` @ blob `f9caeb90f82a`
 - `KA-0144238CA79F` `PREREG` — `main` :: `experiments/g0_g1_single_pose_geometry/G1_PREREG_DRAFT.json` @ blob `415af6405522`

@@ -6,106 +6,24 @@
 
 ## Coverage
 
-- Git-tracked files: **824**
-- High-signal knowledge artifacts: **262**
-- Explained by continuity policy: **180**
-- Unexplained high-signal artifacts: **82**
-- Coverage: **68.7%**
+- Git-tracked files: **825**
+- High-signal knowledge artifacts: **263**
+- Explained by continuity policy: **263**
+- Unexplained high-signal artifacts: **0**
+- Coverage: **100.0%**
 - Live branches: **80**
 - Safe-default evidence-only branches: **76**
 
 ### Classification counts
 
-- `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL`: **150**
-- `INDEXED_EXPLICIT`: **30**
-- `UNEXPLAINED`: **82**
+- `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL`: **147**
+- `INDEXED_EXPLICIT`: **116**
 
 `FIT1_COMMIT_LEDGER_COVERED` means exact provenance is recoverable; it does **not** mean the artifact's scientific claim is promoted. `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL` means the artifact predates the FIT1 gate and remains evidence/provenance unless another authority explicitly promotes it.
 
 ## Unexplained high-signal artifacts
 
-- `.github/workflows/arachne_codec_v2_source_contract.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/arachne_shipping_boundary.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/architecture_freeze_source_gate.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/architecture_freeze_v2_candidate.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/completion_audit_contract.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/geppetto_v2_source_contract.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/iris_scene_first_signed_promotion_v3.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/iris_v2_source_contract.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/p0_directional_binding_closure.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/post_freeze_family_selector_v1.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/prefit_observation_authority_v1.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/proof_service_promotion_gate.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/r6_oracle_substrate_arachne_heterogeneous.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/r6_oracle_substrate_arachne_one_family.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/r6_oracle_substrate_geppetto_heterogeneous.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/r6_oracle_substrate_geppetto_one_family.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/restoration_closure_manual.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/restoration_closure_trigger_once.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/runtime_deploy_bake_promotion_gate.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `.github/workflows/single_family_data_contract_v1.yml` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/APPEARANCE_PIXEL_CENTER_BEHAVIORAL_CLOSURE_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/APPEARANCE_PIXEL_CENTER_BEHAVIORAL_PREREG_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/ARACHNE_SHIPPING_BEHAVIORAL_CLOSURE_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/ARCHITECTURE_FREEZE_V1.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/ARCHITECTURE_FREEZE_V2.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/AUTHORED_MOTION_PROOF_PROMOTION_V1_20260903.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/BOUNDED_REPAIR_LOOP_PROMOTION_V1_20260903.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/COMPILER_CORE_MESH_LAYOUT_SEAL_V1_20260903.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/COMPILER_CORE_SUBSTRATE_LAYOUT_SEAL_V1_20260903.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/COMPILER_LBS_PRODUCTION_PROMOTION_V1_20260903.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/COMPILER_PROOF_REPAIR_PROMOTION_MANIFEST_V1_20260903.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/COMPILER_RUNTIME_DEPLOY_BAKE_PROMOTION_V1_20260903.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/CONTROLLED_OWNER_ATTRIBUTION_PROMOTION_V1_20260903.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/DINO_TOKEN_PARITY_V1_SEAL_20260902.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/GENERIC_SOURCE_COMPLETION_CLOSURE_20260902.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/GEPPETTO_ARACHNE_CANDIDATE_STACK_V1_SOURCE_CLOSURE_20260902.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/GEPPETTO_V2_BEHAVIORAL_CLOSURE_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/GEPPETTO_V2_SOURCE_CLOSURE_20260902.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/LIVING_COMPILE_V4_PRODUCT_SHELL_PROMOTION_20260905.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/MOTION_DEFORMATION_BEHAVIORAL_PREREG_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/MWB2_DIRECTIONAL_BEHAVIORAL_CLOSURE_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/MWB2_DIRECTIONAL_BEHAVIORAL_PREREG_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/PREFIT_HARDENING_RECONCILIATION_V2_20260904.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/PREFIT_VISUAL_AUDIT_COHORT_V1_20260902.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/R6_ARACHNE_OBSERVATION_ORACLE_CLOSURE_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/R6_ARACHNE_ORACLE_SUBSTRATE_HETEROGENEOUS_PREREG_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/R6_ARACHNE_ORACLE_SUBSTRATE_ONE_FAMILY_RESULT_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/R6_ARACHNE_ORACLE_SUBSTRATE_PREREG_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/R6_GEPPETTO_OBSERVATION_ORACLE_CLOSURE_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/R6_G_ORACLE_SUBSTRATE_ONE_FAMILY_RESULT_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/R6_ORACLE_SUBSTRATE_INFORMATION_SUFFICIENCY_PREREG_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/REALSAS_RIGANYTHING_SKINTOKENS_END_TO_END_CLEANROOM_MATRIX_20260903.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V2_20260904.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V3_20260904.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V4_20260904.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/SINGLE_FAMILY_DATA_SOURCE_CLOSURE_20260902.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/architecture_freeze_gate_v1.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/architecture_freeze_gate_v2.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/fit/mage_u0/ARACHNE_A1_BASE_RESULT_20260902.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/fit/mage_u0/ARACHNE_A1_TAIL_REMEDIATION_RESULT_20260902.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/fit/mage_u0/CODEC_A0_EXACT_CONDITIONING_RESULT_20260902.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/fit_mage_v1/ARACHNE_A1_CPU_PREREG_V1.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/fit_mage_v1/CODEC_A0_EXACT_CONDITIONING_RESULT.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/fit_mage_v1/CODEC_CPU_FIT_MAGE_A0_CORE_20260902.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/fit_mage_v1/GEPPETTO_64_SOFT_BUDGET_PREREG_V1.md` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/fit_mage_v1/GEPPETTO_CPU_FIT_MAGE_U0_PASS_20260902.json` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `canonical/validate_completion_plan_v1.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `experiments/family_selection_v1/post_freeze_family_selector_v1.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `experiments/family_selection_v1/prefit_family_truth_eligibility_v1.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `experiments/family_selection_v1/prefit_observation_authority_v1.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `experiments/family_selection_v1/test_post_freeze_family_selector_v1.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `experiments/family_selection_v1/test_prefit_family_truth_eligibility_v1.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_one_family_v1.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_geppetto_one_family_v1.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_tail_causal_diagnostic.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_temperature_causal_diagnostic.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_objective_causal_diagnostic.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
-- `experiments/single_family_e2e_v1/data_manifest_v1.py` — neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger
+_None._
 
 ## Live branch disposition
 
@@ -159,7 +77,7 @@
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `acbb1c32bbc3` | `CANONICAL` | canonical branch |
+| `main` | `ea2250328b88` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
-"""Build a complete census of high-signal RealSaS knowledge artifacts.
+"""Build a discovery census of high-signal RealSaS knowledge artifacts.
 
-Census is not semantic authority. It guarantees discoverability of repository knowledge
-while preserving a separate SEMANTICALLY_INDEXED vs CATALOGUED_UNREVIEWED distinction.
+Census is not semantic authority. It guarantees discoverability inside the explicitly
+scanned scope while preserving a separate SEMANTICALLY_INDEXED vs
+CATALOGUED_UNREVIEWED distinction.
+
+Scan scope:
+- canonical `main` checkout;
+- every ACTIVE_EXPERIMENT branch registered in AUTHORITY_MAP_V1.json;
+- every explicit EVIDENCE_ONLY branch override in AUTHORITY_MAP_V1.json.
+
+Branch scans are shallow and isolated under refs/context-census/*; they never change
+working branch or experiment refs. Branch artifacts are emitted only when their blob
+is absent from or differs from the same path on main.
 """
 
 from __future__ import annotations
@@ -18,12 +28,14 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT_JSON = ROOT / "canonical" / "KNOWLEDGE_ARTIFACT_CATALOG_V1.json"
 OUT_MD = ROOT / "canonical" / "BOOTSTRAP_AUDIT_QUEUE.md"
 BOOTSTRAP = ROOT / "canonical" / "BOOTSTRAP_COVERAGE_STATE_V1.json"
+AUTHORITY = ROOT / "canonical" / "AUTHORITY_MAP_V1.json"
 
 SEMANTIC_SPINE = [
     "CURRENT_STATE.md",
     "README.md",
     "REPOSITORY_MAP.md",
     "SYSTEM_INDEX.md",
+    "AGENTS.md",
     "canonical/README.md",
     "canonical/CONTEXT_STATE_V1.json",
     "canonical/AUTHORITY_MAP_V1.json",
@@ -74,8 +86,40 @@ def run(*args: str) -> str:
     return p.stdout.strip()
 
 
-def tracked_files() -> list[str]:
-    return [x for x in run("git", "ls-files").splitlines() if x.strip()]
+def tree(ref: str) -> dict[str, str]:
+    raw = run("git", "ls-tree", "-r", "--full-tree", ref)
+    out: dict[str, str] = {}
+    for line in raw.splitlines():
+        if not line.strip():
+            continue
+        meta, path = line.split("\t", 1)
+        _mode, kind, sha = meta.split(" ", 2)
+        if kind == "blob":
+            out[path] = sha
+    return out
+
+
+def registered_branch_scope(authority: dict) -> list[str]:
+    names: set[str] = set()
+    for exp in authority.get("active_experiments", []):
+        branch = exp.get("branch")
+        if branch:
+            names.add(branch)
+    for item in authority.get("branch_overrides", []):
+        if item.get("class") == "EVIDENCE_ONLY" and item.get("branch"):
+            names.add(item["branch"])
+    names.discard(authority["branch_policy"]["canonical_branch"])
+    return sorted(names)
+
+
+def fetch_branch_for_census(branch: str) -> str:
+    digest = hashlib.sha256(branch.encode("utf-8")).hexdigest()[:16]
+    local_ref = f"refs/context-census/{digest}"
+    run(
+        "git", "fetch", "--no-tags", "--depth=1", "origin",
+        f"refs/heads/{branch}:{local_ref}",
+    )
+    return local_ref
 
 
 def is_high_signal(path: str) -> bool:
@@ -117,15 +161,20 @@ def semantic_corpus() -> str:
     return "\n".join(chunks)
 
 
-def semantic_status(path: str, corpus: str) -> tuple[str, str]:
-    if path in SEMANTIC_SPINE:
+def semantic_status(path: str, source_ref: str, blob_sha: str, corpus: str) -> tuple[str, str]:
+    if source_ref == "main" and path in SEMANTIC_SPINE:
         return "SEMANTICALLY_INDEXED", "continuity spine file"
-    if path in corpus:
-        return "SEMANTICALLY_INDEXED", "exact path referenced by semantic spine"
-    base = Path(path).name
-    if base and base in corpus:
-        return "SEMANTICALLY_INDEXED", "basename referenced by semantic spine"
-    return "CATALOGUED_UNREVIEWED", "present in census; semantic role not yet reconciled"
+
+    path_named = path in corpus or (Path(path).name and Path(path).name in corpus)
+    if source_ref == "main" and path_named:
+        return "SEMANTICALLY_INDEXED", "main artifact referenced by semantic spine"
+
+    # Branch evidence is not considered semantically reconciled merely because the same
+    # path name appears in prose. Bind it by branch identity or exact blob SHA.
+    if source_ref != "main" and path_named and (source_ref in corpus or blob_sha in corpus):
+        return "SEMANTICALLY_INDEXED", "branch artifact explicitly provenance-bound by semantic spine"
+
+    return "CATALOGUED_UNREVIEWED", "present in census; semantic role/provenance not yet reconciled"
 
 
 def date_from_path(path: str) -> tuple[str | None, str]:
@@ -158,12 +207,12 @@ def subsystems(path: str) -> list[str]:
     return tags or ["CROSS_CUTTING_OTHER"]
 
 
-def stable_id(path: str) -> str:
-    return "KA-" + hashlib.sha256(path.encode("utf-8")).hexdigest()[:12].upper()
+def stable_id(source_ref: str, path: str, blob_sha: str) -> str:
+    raw = f"{source_ref}\0{path}\0{blob_sha}"
+    return "KA-" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12].upper()
 
 
 def priority(item: dict) -> tuple:
-    # Discovery priority only; never scientific importance authority.
     p = item["path"].lower()
     if "ar01" in p or "riganything" in p or "geppetto" in p:
         band = 0
@@ -173,39 +222,77 @@ def priority(item: dict) -> tuple:
         band = 2
     else:
         band = 3
-    return (band, item["date"] or "9999-99-99", item["path"])
+    return (band, item["date"] or "9999-99-99", item["source_ref"], item["path"])
+
+
+def make_item(path: str, blob_sha: str, source_ref: str, source_head: str, corpus: str) -> dict:
+    status, why = semantic_status(path, source_ref, blob_sha, corpus)
+    d, dsrc = date_from_path(path)
+    return {
+        "artifact_id": stable_id(source_ref, path, blob_sha),
+        "source_ref": source_ref,
+        "source_head": source_head,
+        "blob_sha": blob_sha,
+        "path": path,
+        "role": role(path),
+        "subsystems": subsystems(path),
+        "date": d,
+        "date_source": dsrc,
+        "semantic_status": status,
+        "semantic_reason": why,
+    }
 
 
 def main() -> int:
     bootstrap = json.loads(BOOTSTRAP.read_text(encoding="utf-8"))
+    authority = json.loads(AUTHORITY.read_text(encoding="utf-8"))
     corpus = semantic_corpus()
-    artifacts = []
-    for path in tracked_files():
-        if not is_high_signal(path):
-            continue
-        status, why = semantic_status(path, corpus)
-        d, dsrc = date_from_path(path)
-        artifacts.append({
-            "artifact_id": stable_id(path),
-            "path": path,
-            "role": role(path),
-            "subsystems": subsystems(path),
-            "date": d,
-            "date_source": dsrc,
-            "semantic_status": status,
-            "semantic_reason": why,
-        })
-    artifacts.sort(key=priority)
 
+    canonical_branch = authority["branch_policy"]["canonical_branch"]
+    main_head = run("git", "rev-parse", "HEAD")
+    main_tree = tree("HEAD")
+
+    artifacts: list[dict] = []
+    for path, blob in main_tree.items():
+        if is_high_signal(path):
+            artifacts.append(make_item(path, blob, canonical_branch, main_head, corpus))
+
+    scanned_branches: list[dict] = []
+    for branch in registered_branch_scope(authority):
+        local_ref = fetch_branch_for_census(branch)
+        head = run("git", "rev-parse", local_ref)
+        branch_tree = tree(local_ref)
+        differing = 0
+        high_signal_differing = 0
+        for path, blob in branch_tree.items():
+            if main_tree.get(path) == blob:
+                continue
+            differing += 1
+            if not is_high_signal(path):
+                continue
+            high_signal_differing += 1
+            artifacts.append(make_item(path, blob, branch, head, corpus))
+        scanned_branches.append({
+            "branch": branch,
+            "head": head,
+            "differing_blob_paths_vs_main": differing,
+            "high_signal_differing_artifacts": high_signal_differing,
+        })
+
+    artifacts.sort(key=priority)
     counts = Counter(x["semantic_status"] for x in artifacts)
     roles = Counter(x["role"] for x in artifacts)
     subsystem_counts = Counter(tag for x in artifacts for tag in x["subsystems"])
     payload = {
-        "schema_version": 1,
+        "schema_version": 2,
         "bootstrap_status": bootstrap["status"],
         "authority": "DISCOVERY_CENSUS_ONLY__NOT_SCIENTIFIC_OR_CONTINUATION_AUTHORITY",
+        "scope_note": "100% census coverage refers only to main plus explicitly registered ACTIVE_EXPERIMENT/EVIDENCE_ONLY branches. Bootstrap remains incomplete until historical branch disposition/audit closes.",
+        "canonical_branch": canonical_branch,
+        "canonical_head": main_head,
+        "registered_branch_scans": scanned_branches,
         "artifact_count": len(artifacts),
-        "census_coverage_fraction": 1.0,
+        "census_coverage_fraction_within_declared_scope": 1.0,
         "semantic_indexed_count": counts.get("SEMANTICALLY_INDEXED", 0),
         "semantic_unreviewed_count": counts.get("CATALOGUED_UNREVIEWED", 0),
         "semantic_coverage_fraction": (counts.get("SEMANTICALLY_INDEXED", 0) / len(artifacts)) if artifacts else 1.0,
@@ -229,10 +316,27 @@ def main() -> int:
         "> **GENERATED DISCOVERY VIEW — NOT SCIENTIFIC AUTHORITY.**",
         f"> Bootstrap: `{bootstrap['status']}`",
         "",
-        f"- Census artifacts: **{len(artifacts)} / {len(artifacts)} discovered (100%)**",
+        f"- Declared census scope: `{canonical_branch}` + {len(scanned_branches)} registered active/evidence branch(es)",
+        f"- Census artifacts in declared scope: **{len(artifacts)} / {len(artifacts)} discovered (100%)**",
         f"- Semantically reconciled: **{counts.get('SEMANTICALLY_INDEXED', 0)}**",
         f"- Catalogued but unreviewed: **{counts.get('CATALOGUED_UNREVIEWED', 0)}**",
         f"- Semantic coverage: **{payload['semantic_coverage_fraction']:.1%}**",
+        "",
+        "**Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.",
+        "",
+        "## Registered branch scan scope",
+        "",
+    ]
+    if not scanned_branches:
+        lines.append("_No registered non-main branches scanned._")
+    else:
+        lines += ["| Branch | Head | Different blobs vs main | High-signal differing artifacts |", "|---|---|---:|---:|"]
+        for b in scanned_branches:
+            lines.append(
+                f"| `{b['branch']}` | `{b['head'][:12]}` | {b['differing_blob_paths_vs_main']} | {b['high_signal_differing_artifacts']} |"
+            )
+
+    lines += [
         "",
         "The queue is a discovery aid. A path being listed does not establish what it proves, whether it is current, or whether it was ever executed.",
         "",
@@ -244,7 +348,10 @@ def main() -> int:
         lines.append(f"### {key} ({len(items)})")
         lines.append("")
         for item in items:
-            lines.append(f"- `{item['artifact_id']}` `{item['role']}` — `{item['path']}`")
+            src = "main" if item["source_ref"] == canonical_branch else item["source_ref"]
+            lines.append(
+                f"- `{item['artifact_id']}` `{item['role']}` — `{src}` :: `{item['path']}` @ blob `{item['blob_sha'][:12]}`"
+            )
         lines.append("")
 
     lines += [
@@ -252,9 +359,12 @@ def main() -> int:
         "",
         "A cluster closes only after artifacts are dispositioned from source evidence into the experiment/architecture authority system: purpose, arms/mechanisms, result, falsification boundary, current effect, provenance, and supersession where applicable.",
         "",
+        "Bootstrap cannot close until unregistered historical branches have also received explicit provenance disposition; branch-aware registered scanning prevents known evidence branches from becoming invisible in the meantime.",
+        "",
     ]
     OUT_MD.write_text("\n".join(lines), encoding="utf-8")
     print(json.dumps({
+        "scope_branches": 1 + len(scanned_branches),
         "census": len(artifacts),
         "semantic_indexed": counts.get("SEMANTICALLY_INDEXED", 0),
         "semantic_unreviewed": counts.get("CATALOGUED_UNREVIEWED", 0),

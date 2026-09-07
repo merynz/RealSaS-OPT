@@ -8,6 +8,13 @@
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
     "canonical/BRANCH_AUTHORITY_V1.md"
   ],
+  "execution_authority": {
+    "actions_runner_mode": "SELF_HOSTED_LOCAL",
+    "required_labels": ["self-hosted", "linux", "x64", "realsas"],
+    "known_runner_name": "realsas-wsl-1660ti",
+    "operator_path_hint": "~/actions-runner",
+    "rule": "Scientific/mainline Actions execution authority is the user's local self-hosted RealSaS runner. A GitHub-hosted runner attempt is apparatus/config evidence only and cannot be interpreted as model-science evidence."
+  },
   "branch_policy": {
     "canonical_branch": "main",
     "default_non_main_class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -69,6 +76,7 @@
   ],
   "invariants": [
     "Only main/CURRENT_STATE.md is continuation authority.",
+    "Scientific/mainline GitHub Actions run on the local self-hosted RealSaS runner; hosted-runner failures are apparatus/config only.",
     "A branch is never active merely because it exists or has a recent commit.",
     "Every ACTIVE_EXPERIMENT branch and gate id must be named by CURRENT_STATE.md.",
     "Source existence is not experimental evidence.",

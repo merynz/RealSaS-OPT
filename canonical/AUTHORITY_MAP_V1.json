@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "repository": "merynz/RealSaS-OPT",
+  "continuation_authority": "CURRENT_STATE.md",
+  "generated_live_map": "canonical/LIVE_AUTHORITY_MAP.md",
+  "human_ledgers": [
+    "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
+    "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
+    "canonical/BRANCH_AUTHORITY_V1.md"
+  ],
+  "branch_policy": {
+    "canonical_branch": "main",
+    "default_non_main_class": "EVIDENCE_ONLY_UNREGISTERED",
+    "delete_candidate_regex": [
+      "^(do-not-use|dummy-unused|ignore-this)$",
+      ".*(scratch|debugtmp|audit-temp|noop|mistake).*"
+    ],
+    "classes": {
+      "CANONICAL": "Only branch allowed to carry continuation authority.",
+      "ACTIVE_EXPERIMENT": "Explicitly registered live experiment branch. Never continuation authority by itself.",
+      "EVIDENCE_ONLY": "Explicit historical/research lineage retained for provenance.",
+      "EVIDENCE_ONLY_UNREGISTERED": "Observed non-main branch with no active registration. Safe default: never continuation authority.",
+      "DELETE_CANDIDATE": "Looks disposable by explicit naming rule. Do not delete automatically; review provenance first."
+    }
+  },
+  "active_experiments": [
+    {
+      "id": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
+      "branch": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
+      "status": "ACTIVE_RUNNING",
+      "question": "Does the preregistered minimal joint+parent mechanical recurrent feedback intervention improve Mage FIT1 reachability/retention and parent/root structural prediction under the matched AR0/AR1 design?",
+      "proves_if_closed": "A verdict about the exact AR-01 minimal mechanical-feedback intervention on Mage FIT1 under the preregistered design.",
+      "does_not_prove": [
+        "full RigAnything formulation equivalence or superiority",
+        "generalization",
+        "mechanical salience / functional simplification",
+        "product-wide Geppetto architecture promotion without the explicit promotion transaction"
+      ],
+      "research_sources": [
+        "models/geppetto/challengers/ar01_skeleton_causal_v1.py",
+        "models/geppetto/challengers/riganything_mechanisms_v1.py"
+      ]
+    }
+  ],
+  "branch_overrides": [
+    {
+      "branch": "exp/lossless-rigging-evidence-v1-20260906",
+      "class": "EVIDENCE_ONLY",
+      "reason": "Lossless RiggingSurfaceIR / V3 evidence lineage; no longer the active continuation experiment."
+    },
+    {
+      "branch": "demo/investor-single-specimen-e2e",
+      "class": "EVIDENCE_ONLY",
+      "reason": "Demo lineage only; never scientific continuation authority."
+    }
+  ],
+  "required_files": [
+    "CURRENT_STATE.md",
+    "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
+    "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
+    "canonical/BRANCH_AUTHORITY_V1.md"
+  ],
+  "rehydration_order": [
+    "CURRENT_STATE.md",
+    "canonical/LIVE_AUTHORITY_MAP.md",
+    "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
+    "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
+    "canonical/BRANCH_AUTHORITY_V1.md"
+  ],
+  "invariants": [
+    "Only main/CURRENT_STATE.md is continuation authority.",
+    "A branch is never active merely because it exists or has a recent commit.",
+    "Every ACTIVE_EXPERIMENT branch and gate id must be named by CURRENT_STATE.md.",
+    "Source existence is not experimental evidence.",
+    "Component evidence is not a full-formulation verdict.",
+    "Promotion requires source + tests + evidence/result + CURRENT_STATE + provenance/revocation reconciliation."
+  ]
+}

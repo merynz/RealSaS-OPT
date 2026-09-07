@@ -6,19 +6,30 @@
 
 This file is continuation authority only on `main`.
 
+**Live authority map:** `canonical/LIVE_AUTHORITY_MAP.md` (generated from repository refs + `canonical/AUTHORITY_MAP_V1.json`; never hand-edit)  
+**Active experiment gate:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`  
+**Active experiment branch:** `exp/geppetto-ar01-skeleton-causal-v1-20260907`
+
 ## One-line state
 
 `Architecture V4, the deterministic compiler/runtime ownership split, and the FIT1 product target remain binding; however Geppetto architecture promotion/refreeze is temporarily blocked because the current V2 decoder is latent-state recurrent rather than skeleton-causal autoregressive. AR-01 must isolate and test generated/teacher joint + parent geometry feedback before Geppetto is refrozen. FIT1 mechanism authority remains in its own preregistered experiment/result ledger.`
 
-## Binding authority order
+## Binding authority / rehydration order
+
+A new chat, agent, or continuation must read in this order:
 
 1. this `CURRENT_STATE.md` — continuation / stop-go authority;
-2. `canonical/BRANCH_AUTHORITY_V1.md` — branch/promotion authority;
-3. `canonical/CANONICAL_REALSaS_COMPLETION_PLAN_20260902.md` — completion/execution lineage except where superseded by this audit hold;
-4. `canonical/CANONICAL_REALSaS_COMPLETION_MATRIX_20260902.json` — machine row/dependency lineage except where superseded by this audit hold;
-5. `canonical/SYSTEM_ARCHITECTURE_V4_20260902.md` — product ontology/type authority;
-6. current `main` source;
-7. explicitly promoted historical bytes/evidence only.
+2. `canonical/LIVE_AUTHORITY_MAP.md` — generated live branch/experiment navigation view;
+3. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` — mechanism implementation/evidence/canonical-status map;
+4. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md` — exact gate semantics, including what each experiment does **not** prove;
+5. `canonical/BRANCH_AUTHORITY_V1.md` — branch/promotion law;
+6. `canonical/CANONICAL_REALSaS_COMPLETION_PLAN_20260902.md` — completion/execution lineage except where superseded by this audit hold;
+7. `canonical/CANONICAL_REALSaS_COMPLETION_MATRIX_20260902.json` — machine row/dependency lineage except where superseded by this audit hold;
+8. `canonical/SYSTEM_ARCHITECTURE_V4_20260902.md` — product ontology/type authority;
+9. current `main` source;
+10. explicitly promoted historical bytes/evidence only.
+
+`canonical/LIVE_AUTHORITY_MAP.md` is generated navigation, not independent scientific authority. Its machine policy is `canonical/AUTHORITY_MAP_V1.json`; live branch heads/dates come from repository refs.
 
 No side branch becomes current truth merely because it contains newer experiments. Experimental evidence may block continuation without being promoted as product source.
 
@@ -41,11 +52,12 @@ Its decoder is recurrent in latent state, but the emitted joint locus is not fed
 
 Historical hard-MAP locus feedback was deliberately removed because discrete multimodal crossover could rewrite all later anonymous control states. That repair proved the old hard-MAP feedback path brittle; it did **not** prove that safe continuous/mechanical skeleton feedback is unnecessary.
 
-The repository already contains a research-only RigAnything-mechanism challenger with teacher-forced/sampled joint + parent-geometry feedback. That source is evidence/design lineage only and is not product authority until a controlled AR-01 experiment closes.
+The repository already contains a research-only RigAnything-mechanism challenger with teacher-forced/sampled joint + parent-geometry feedback. That source is evidence/design lineage only and is not product authority until a controlled experiment/promotion chain closes.
 
 ## AR-01 — next scientific gate
 
-**Gate ID:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
+**Gate ID:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`  
+**Experiment branch:** `exp/geppetto-ar01-skeleton-causal-v1-20260907`
 
 Question:
 
@@ -67,6 +79,8 @@ Required isolation:
 - no compiler/cardinality repair.
 
 The exact hard-MAP recurrence previously removed must **not** be restored as the AR-01 treatment. The treatment is safe skeleton-causal feedback using joint geometry plus parent geometry/state.
+
+AR-01 is intentionally a **minimal feedback intervention**. Its result is not automatically a verdict on the full RigAnything formulation (which additionally includes its own locus-generation and serialization/order mechanisms).
 
 ## FIT1 authority during the hold
 
@@ -90,6 +104,10 @@ This responsibility is intentionally **out of scope for AR-01** so that AR-01 ch
 
 ## Experimental branch authority
 
+The machine-readable branch/experiment policy is `canonical/AUTHORITY_MAP_V1.json`; its generated live view is `canonical/LIVE_AUTHORITY_MAP.md`.
+
+Any non-main branch not explicitly registered as active is safe-defaulted to `EVIDENCE_ONLY_UNREGISTERED`. A branch becoming recent, green, or ahead of `main` does not change that classification.
+
 The lossless-rigging-evidence branch and its draft PR remain experimental/quarantined. A green source gate proves source/contract integrity only; it does not authorize architecture promotion.
 
 The historical/experimental Mage branches remain evidence lineage. Red GitHub Actions must be classified as apparatus/config, source-contract, science, or cancelled/superseded before they can affect scientific authority.
@@ -105,20 +123,21 @@ If AR-01 supports skeleton-causal autoregression, promotion must atomically reco
 3. exact AR-01 result + prereg/provenance hashes;
 4. lossless product-conditioning consumer compatibility;
 5. compiler contract compatibility;
-6. this `CURRENT_STATE.md` continuation decision;
-7. explicit revocation/supersession of the prior Geppetto architecture authority where applicable.
+6. `canonical/AUTHORITY_MAP_V1.json` experiment/mechanism status;
+7. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` and `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`;
+8. this `CURRENT_STATE.md` continuation decision;
+9. explicit revocation/supersession of the prior Geppetto architecture authority where applicable.
 
 Only then create an immutable milestone tag/commit for the refrozen architecture.
 
 ## Next execution order
 
-1. freeze AR-01 preregistration before any new optimizer step;
-2. construct the causal-isolated AR0/AR1 challenger with one feedback gate;
-3. run source/unit/causal preflights proving the two arms differ only through skeleton feedback;
-4. run the disciplined FIT1 AR-01 notebook and record full late-stability traces;
-5. decide PASS/FAIL without changing gates post-result;
-6. if PASS, promote/refreeze through the explicit main promotion rule;
-7. continue FIT1 product closure;
-8. retain `MECHANICAL_SALIENCE_FUNCTIONAL_SIMPLIFICATION` as the next separate neural-responsibility gate rather than hiding it in compiler heuristics.
+1. keep AR-01 preregistration immutable for the running scientific gate;
+2. preserve the causal-isolated AR0/AR1 source/preflight contract;
+3. run the disciplined FIT1 AR-01 notebook and record full late-stability traces;
+4. decide PASS/FAIL without changing gates post-result;
+5. if PASS, promote/refreeze through the explicit main promotion rule;
+6. continue FIT1 product closure;
+7. retain `MECHANICAL_SALIENCE_FUNCTIONAL_SIMPLIFICATION` as the next separate neural-responsibility gate rather than hiding it in compiler heuristics.
 
-Until step 5 closes, **do not treat current latent-only recurrence or the research C3 challenger as frozen generic Geppetto architecture authority.**
+Until AR-01 closes, **do not treat current latent-only recurrence or the research C3 challenger as frozen generic Geppetto architecture authority.**

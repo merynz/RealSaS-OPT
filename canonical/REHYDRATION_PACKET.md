@@ -1,7 +1,7 @@
 # RealSaS — Rehydration Packet
 
 > **GENERATED NAVIGATION/CACHE — DO NOT TREAT AS INDEPENDENT SCIENTIFIC AUTHORITY.**  
-> Source state: `canonical/CONTEXT_STATE_V1.json` + `canonical/AUTHORITY_MAP_V1.json` + live remote refs.  
+> Source state: `canonical/CONTEXT_STATE_V1.json` + `canonical/AUTHORITY_MAP_V1.json` + bootstrap/census state + live remote refs.  
 > If this packet conflicts with `CURRENT_STATE.md`, `CURRENT_STATE.md` wins.
 
 ## 60-second state
@@ -11,10 +11,20 @@
 - **Current module:** `Geppetto`
 - **Active gate:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
 - **Active branch:** `exp/geppetto-ar01-skeleton-causal-v1-20260907` @ `58ea876d3e61`
-- **Canonical main:** `4afc4b8df891`
+- **Canonical main:** `28f73b1e9125`
 - **Promotion block:** No Geppetto refreeze/promotion before AR-01 closes under preregistered rules.
 - **Scope warning:** AR-01 is a minimal feedback intervention, not a full RigAnything formulation test.
 - **Next visible product milestone:** Mage idle/breathing after Geppetto + Arachne FIT1 closure
+
+## Historical-memory health
+
+- **Bootstrap:** `BOOTSTRAP_AUDIT_INCOMPLETE`
+- **Artifact census:** 257 high-signal artifacts discovered; census coverage **100% by construction**.
+- **Semantically reconciled:** 21.
+- **Catalogued but unreviewed:** 236.
+- **Semantic coverage:** 8.2%.
+- **Honesty rule:** missing historical details are `UNKNOWN / NEEDS AUDIT`, never inferred absent from the registry.
+- Use `canonical/BOOTSTRAP_AUDIT_QUEUE.md` + `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` to locate unreviewed evidence.
 
 ## What we are testing right now
 
@@ -85,10 +95,13 @@ Do **not** widen the result beyond the exact gate semantics in `canonical/EXPERI
 Read only as needed, in this order:
 
 1. `CURRENT_STATE.md` — stop/go and continuation authority.
-2. `canonical/LIVE_AUTHORITY_MAP.md` or run `python tools/render_authority_map.py` — live branch/active-experiment navigation.
-3. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` — mechanism implementation vs test vs canonical status.
-4. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md` — exact gate meaning and explicit non-claims.
-5. Only then descend into the referenced reports, notebooks, source commits and historical branches.
+2. `canonical/CONTEXT_COVERAGE_AUDIT.md` + `canonical/BOOTSTRAP_AUDIT_QUEUE.md` — know what memory remains unresolved.
+3. `canonical/LIVE_AUTHORITY_MAP.md` or run `python3 tools/render_authority_map.py --write` — live branch/active-experiment navigation.
+4. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` — mechanism implementation vs test vs canonical status.
+5. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md` — exact gate meaning and explicit non-claims.
+6. `canonical/EXPERIMENT_REGISTRY_V1.json` — experiment structure and scientific-flow dependencies.
+7. `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` — discover historical evidence not yet semantically reconciled.
+8. Only then descend into referenced reports, notebooks, source commits and historical branches.
 
 ## Completion transaction
 

@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          python tools/audit_context_coverage.py
+          python3 tools/audit_context_coverage.py
           rc=$?
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           exit 0
@@ -56,7 +56,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          python tools/render_authority_map.py --write
+          python3 tools/render_authority_map.py --write
           rc=$?
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           exit 0
@@ -66,7 +66,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          python tools/render_rehydration_packet.py --write
+          python3 tools/render_rehydration_packet.py --write
           rc=$?
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           exit 0

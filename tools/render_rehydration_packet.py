@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Render the compact RealSaS cross-chat/cross-agent rehydration packet.
 
-Source state is canonical/CONTEXT_STATE_V1.json plus the machine authority manifest,
-bootstrap/census state, and live remote branch heads. The generated packet is
-navigation/cache, not independent scientific authority.
+The packet is navigation/cache, not independent scientific authority. It is valid
+with either one explicitly active experiment or no active experiment at all.
 """
 
 from __future__ import annotations
@@ -20,6 +19,11 @@ AUTH_PATH = ROOT / "canonical" / "AUTHORITY_MAP_V1.json"
 BOOTSTRAP_PATH = ROOT / "canonical" / "BOOTSTRAP_COVERAGE_STATE_V1.json"
 CATALOG_PATH = ROOT / "canonical" / "KNOWLEDGE_ARTIFACT_CATALOG_V1.json"
 COVERAGE_PATH = ROOT / "canonical" / "CONTEXT_COVERAGE_AUDIT.json"
+OWNERSHIP_PATH = ROOT / "canonical" / "SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md"
+FIT1_SCIENCE_PATH = ROOT / "canonical" / "FIT1_SCIENTIFIC_LINEAGE_V1.md"
+FIT1_COMMIT_PATH = ROOT / "canonical" / "FIT1_COMMIT_LINEAGE_V1.md"
+AOA_CLOSURE_PATH = ROOT / "canonical" / "AUDIT_OF_AUDITS_CLOSURE_20260907.md"
+AOA_DISPOSITION_PATH = ROOT / "canonical" / "AOA_ARTIFACT_DISPOSITION_V1.json"
 CURRENT_PATH = ROOT / "CURRENT_STATE.md"
 OUTPUT_PATH = ROOT / "canonical" / "REHYDRATION_PACKET.md"
 
@@ -32,14 +36,11 @@ def run(*args: str) -> str:
 
 
 def load(path: Path) -> dict:
-    with path.open("r", encoding="utf-8") as f:
-        return json.load(f)
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def load_optional(path: Path) -> dict | None:
-    if not path.exists():
-        return None
-    return load(path)
+    return load(path) if path.exists() else None
 
 
 def live_heads() -> dict[str, str]:
@@ -55,26 +56,45 @@ def live_heads() -> dict[str, str]:
     return out
 
 
-def validate(context: dict, authority: dict, current_text: str, heads: dict[str, str]) -> list[str]:
+def validate(context: dict, authority: dict, current_text: str, heads: dict[str, str], bootstrap: dict) -> list[str]:
     errors: list[str] = []
     focus = context["current_focus"]
     active = authority.get("active_experiments", [])
-    matches = [e for e in active if e.get("id") == focus.get("gate")]
-    if len(matches) != 1:
-        errors.append(f"context current gate must match exactly one active authority experiment: {focus.get('gate')}")
+    active_id = focus.get("active_experiment")
+
+    if active_id is None:
+        if active:
+            errors.append("context says no active experiment but authority manifest lists active experiment(s)")
+        if "Active experiment gate:** `NONE`" not in current_text:
+            errors.append("CURRENT_STATE.md does not explicitly record active experiment gate NONE")
     else:
-        exp = matches[0]
-        if exp.get("branch") != focus.get("branch"):
-            errors.append("context current branch disagrees with authority manifest")
-    if focus.get("gate") not in current_text:
-        errors.append("CURRENT_STATE.md does not name context current gate")
-    if focus.get("branch") not in current_text:
-        errors.append("CURRENT_STATE.md does not name context current branch")
-    if focus.get("branch") not in heads:
-        errors.append("context current branch does not exist on origin")
+        matches = [e for e in active if e.get("id") == active_id]
+        if len(matches) != 1:
+            errors.append(f"context active experiment must match exactly one authority experiment: {active_id}")
+        else:
+            branch = matches[0].get("branch")
+            if branch and branch not in heads:
+                errors.append(f"active experiment branch missing on origin: {branch}")
+        if active_id not in current_text:
+            errors.append("CURRENT_STATE.md does not name context active experiment")
+
+    state = focus.get("state")
+    if state and state not in current_text:
+        errors.append("CURRENT_STATE.md does not name context current state")
+    closed_gate = focus.get("most_recent_closed_gate")
+    if closed_gate and closed_gate not in current_text:
+        errors.append("CURRENT_STATE.md does not name most recent closed gate")
+
     canonical = authority["branch_policy"]["canonical_branch"]
     if canonical not in heads:
         errors.append(f"canonical branch missing on origin: {canonical}")
+
+    required = [OWNERSHIP_PATH, FIT1_SCIENCE_PATH]
+    if bootstrap.get("status") == "BOOTSTRAP_AUDIT_CLOSED":
+        required += [FIT1_COMMIT_PATH, AOA_CLOSURE_PATH, AOA_DISPOSITION_PATH]
+    for path in required:
+        if not path.exists():
+            errors.append(f"required continuity artifact missing: {path.relative_to(ROOT)}")
     return errors
 
 
@@ -89,59 +109,80 @@ def render(context: dict, authority: dict, heads: dict[str, str], errors: list[s
     env = context["execution_environment"]
     canonical_branch = authority["branch_policy"]["canonical_branch"]
     main_head = heads.get(canonical_branch, "MISSING")
-    active_head = heads.get(focus["branch"], "MISSING")
+    active_id = focus.get("active_experiment")
 
     lines: list[str] = [
         "# RealSaS — Rehydration Packet",
         "",
-        "> **GENERATED NAVIGATION/CACHE — DO NOT TREAT AS INDEPENDENT SCIENTIFIC AUTHORITY.**  ",
-        "> Source state: `canonical/CONTEXT_STATE_V1.json` + `canonical/AUTHORITY_MAP_V1.json` + bootstrap/census state + live remote refs.  ",
-        "> If this packet conflicts with `CURRENT_STATE.md`, `CURRENT_STATE.md` wins.",
+        "> **GENERATED NAVIGATION/CACHE — NOT INDEPENDENT SCIENTIFIC AUTHORITY.**  ",
+        "> Continuation authority remains `CURRENT_STATE.md`; scientific claims require the referenced source/prereg/result authority.",
         "",
         "## 60-second state",
         "",
         f"- **Product:** {product['target']}",
         f"- **Current witness:** `{product['demo_witness']}`",
         f"- **Current module:** `{focus['module']}`",
-        f"- **Active gate:** `{focus['gate']}`",
-        f"- **Active branch:** `{focus['branch']}` @ `{active_head[:12] if active_head != 'MISSING' else active_head}`",
+        f"- **Current state:** `{focus['state']}`",
+        f"- **Active experiment:** `{active_id if active_id is not None else 'NONE'}`",
+        f"- **Most recent closed gate:** `{focus.get('most_recent_closed_gate', 'NONE')}`",
         f"- **Canonical main:** `{main_head[:12] if main_head != 'MISSING' else main_head}`",
         f"- **Promotion block:** {focus['promotion_block']}",
         f"- **Scope warning:** {focus['scope_warning']}",
         f"- **Next visible product milestone:** {product['next_visible_product_milestone']}",
         "",
+        "## Mandatory ownership memory",
+        "",
+        "Read `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` before moving responsibilities between learned and deterministic layers.",
+        "",
+        "- **IRIS shorthand:** observations/cameras -> learned evidence -> deterministic GSA/RiggingSurfaceIR assembly/provenance.",
+        "- **Geppetto shorthand:** lossless RiggingSurfaceIR -> learned SkeletonProposalIR/evidence -> Compiler exact graph qualification/canonical IDs.",
+        "- **Arachne shorthand:** qualified surface+skeleton -> learned skin/deformation proposal -> Compiler skin/mesh qualification.",
+        "- **Memory guard:** **Geppetto is proposal, not canonical rig authority.** Compiler may constrain legality; it may not secretly repair missing Geppetto semantics.",
+        "",
+        "## FIT1 scientific memory",
+        "",
+        "- Semantic spine: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`.",
+        "- Exhaustive commit/provenance ledger: `canonical/FIT1_COMMIT_LINEAGE_V1.md`.",
+        "- FIT1 gate anchor: `f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee`.",
+        "- First executable FIT base: `de1a44cae1195dd9cbad3b23ef75d58ae80aa9b3`.",
+        "- FIT1 is one-witness architecture/mechanism qualification; it is not generalization proof.",
+        "",
         "## Historical-memory health",
         "",
-        f"- **Bootstrap:** `{bootstrap['status']}`",
+        f"- **Bootstrap/AOA:** `{bootstrap['status']}`",
     ]
-    if catalog:
+
+    if coverage:
         lines += [
-            f"- **Artifact census:** {catalog.get('artifact_count', '?')} high-signal artifacts discovered; census coverage **100% by construction**.",
-            f"- **Semantically reconciled:** {catalog.get('semantic_indexed_count', '?')}.",
-            f"- **Catalogued but unreviewed:** {catalog.get('semantic_unreviewed_count', '?')}.",
-            f"- **Semantic coverage:** {catalog.get('semantic_coverage_fraction', 0.0):.1%}.",
+            f"- **High-signal artifacts:** {coverage.get('high_signal_artifact_count', '?')}",
+            f"- **Explained by continuity policy:** {coverage.get('explained_high_signal_count', coverage.get('indexed_high_signal_count', '?'))}",
+            f"- **Unexplained:** {coverage.get('unexplained_high_signal_count', coverage.get('unindexed_high_signal_count', '?'))}",
+            f"- **Coverage:** {coverage.get('coverage_fraction', 0.0):.1%}",
         ]
-    elif coverage:
+    elif catalog:
+        lines.append(f"- **Artifact census:** {catalog.get('artifact_count', '?')} discovered; regenerate coverage before claiming closure health.")
+    else:
+        lines.append("- **Coverage views missing:** run local continuity refresh.")
+
+    if bootstrap["status"] == "BOOTSTRAP_AUDIT_CLOSED":
         lines += [
-            f"- **High-signal artifacts:** {coverage.get('high_signal_artifact_count', '?')}.",
-            f"- **Semantically indexed:** {coverage.get('indexed_high_signal_count', '?')}.",
-            f"- **Unreviewed:** {coverage.get('unindexed_high_signal_count', '?')}.",
+            "- Closure authority: `canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md`.",
+            "- Residual/disposition policy: `canonical/AOA_ARTIFACT_DISPOSITION_V1.json`.",
+            "- Closure means context/provenance coverage, **not** retroactive validation of every historical artifact.",
         ]
     else:
-        lines.append("- **Coverage views missing:** run the local continuity refresh before making historical completeness claims.")
-    if bootstrap["status"] != "BOOTSTRAP_AUDIT_CLOSED":
         lines += [
-            "- **Honesty rule:** missing historical details are `UNKNOWN / NEEDS AUDIT`, never inferred absent from the registry.",
-            "- Use `canonical/BOOTSTRAP_AUDIT_QUEUE.md` + `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` to locate unreviewed evidence.",
+            "- Missing historical detail remains `UNKNOWN / NEEDS AUDIT`; never infer absence.",
+            "- Use `canonical/BOOTSTRAP_AUDIT_QUEUE.md` + artifact catalog for unresolved evidence.",
         ]
 
     lines += [
         "",
-        "## What we are testing right now",
+        "## Current scientific question",
         "",
         focus["scientific_question"],
         "",
-        "Do **not** widen the result beyond the exact gate semantics in `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`.",
+        "Do **not** widen the result beyond exact gate semantics in the experiment ledger/result authority.",
         "",
         "## Pipeline ownership",
         "",
@@ -154,9 +195,9 @@ def render(context: dict, authority: dict, heads: dict[str, str], errors: list[s
     lines += ["", "## Critical RigAnything memory", ""]
     ra = context["riganything_state"]
     lines += [
-        f"- Clean-room studied: **{str(ra['paper_mechanisms_cleanroom_studied']).upper()}**",
         f"- Fuller challenger already exists: **{str(ra['fuller_research_challenger_already_exists']).upper()}**",
-        f"- Implementation: `{ra['implementation']}`",
+        f"- Creation implementation: `{ra['implementation_at_creation_commit']}`",
+        f"- Creation commit: `{ra['creation_commit']}`",
         "- Contains:",
     ]
     lines += [f"  - {x}" for x in ra["contains"]]
@@ -177,7 +218,7 @@ def render(context: dict, authority: dict, heads: dict[str, str], errors: list[s
     ]
     lines += bullets(context["settled_invariants"])
 
-    lines += ["", "## Context traps — check these before claiming something is missing", ""]
+    lines += ["", "## Context traps", ""]
     for trap in context["known_context_traps"]:
         lines.append(f"- **{trap['trap']}** → {trap['defense']}")
 
@@ -193,16 +234,14 @@ def render(context: dict, authority: dict, heads: dict[str, str], errors: list[s
         "",
         "## Rehydration drill-down",
         "",
-        "Read only as needed, in this order:",
-        "",
-        "1. `CURRENT_STATE.md` — stop/go and continuation authority.",
-        "2. `canonical/CONTEXT_COVERAGE_AUDIT.md` + `canonical/BOOTSTRAP_AUDIT_QUEUE.md` — know what memory remains unresolved.",
-        "3. `canonical/LIVE_AUTHORITY_MAP.md` or run `python3 tools/render_authority_map.py --write` — live branch/active-experiment navigation.",
-        "4. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` — mechanism implementation vs test vs canonical status.",
-        "5. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md` — exact gate meaning and explicit non-claims.",
-        "6. `canonical/EXPERIMENT_REGISTRY_V1.json` — experiment structure and scientific-flow dependencies.",
-        "7. `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` — discover historical evidence not yet semantically reconciled.",
-        "8. Only then descend into referenced reports, notebooks, source commits and historical branches.",
+        "1. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` — learned/deterministic responsibility envelope.",
+        "2. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md` — FIT1-to-now scientific flow.",
+        "3. `CURRENT_STATE.md` — current stop/go authority.",
+        "4. `canonical/FIT1_COMMIT_LINEAGE_V1.md` — exact FIT1-descendant commit discovery.",
+        "5. `canonical/CONTEXT_COVERAGE_AUDIT.md` — AOA coverage/regression state.",
+        "6. `canonical/LIVE_AUTHORITY_MAP.md` — branch/authority navigation.",
+        "7. architecture + experiment ledgers/registry — implementation/test/promotion distinctions.",
+        "8. exact prereg/result/source artifacts only as needed.",
         "",
         "## Completion transaction",
         "",
@@ -212,10 +251,10 @@ def render(context: dict, authority: dict, heads: dict[str, str], errors: list[s
         "",
     ]
     if errors:
-        lines.append("**INVALID — context/authority drift detected.**")
+        lines.append("**INVALID — context/authority/coverage drift detected.**")
         lines += [f"- {e}" for e in errors]
     else:
-        lines.append("**VALID — compact context, active experiment manifest, `CURRENT_STATE.md`, and live branch refs agree.**")
+        lines.append("**VALID — current state, authority manifest, ownership/FIT1 continuity guards, and live refs agree.**")
     lines.append("")
     return "\n".join(lines)
 
@@ -232,7 +271,7 @@ def main() -> int:
     coverage = load_optional(COVERAGE_PATH)
     current_text = CURRENT_PATH.read_text(encoding="utf-8")
     heads = live_heads()
-    errors = validate(context, authority, current_text, heads)
+    errors = validate(context, authority, current_text, heads, bootstrap)
     text = render(context, authority, heads, errors, bootstrap, catalog, coverage)
 
     if args.write:

@@ -5,11 +5,11 @@
 
 ## Coverage
 
-- Git-tracked files: **818**
-- High-signal knowledge artifacts: **257**
-- Indexed/referenced by continuity spine: **21**
+- Git-tracked files: **820**
+- High-signal knowledge artifacts: **258**
+- Indexed/referenced by continuity spine: **22**
 - Unindexed high-signal artifacts: **236**
-- Coverage: **8.2%**
+- Coverage: **8.5%**
 - Live branches: **80**
 - Safe-default unregistered branches: **76**
 
@@ -282,7 +282,7 @@ During bootstrap, **UNINDEXED does not mean irrelevant or false**. It means the 
 | `dummy-unused` | `3609f2cc0cfc` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `e2e/mage-scene-first-v1-20260905` | `c6b5108f672b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `e2e/mage-scene-first-v1-20260905-audit-temp` | `91b4593d5b2a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
-| `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | `ACTIVE_EXPERIMENT` | AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE |
+| `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | `EVIDENCE_ONLY` | explicit authority-map override |
 | `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | `EVIDENCE_ONLY` | explicit authority-map override |
 | `feature/living-compile-v4-editor` | `cd56be7300c3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `first-family-fit/charactergen-backbone-v1` | `15896da77dca` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
@@ -306,7 +306,7 @@ During bootstrap, **UNINDEXED does not mean irrelevant or false**. It means the 
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
-| `main` | `e35b63b90d59` | `CANONICAL` | canonical branch |
+| `main` | `f7876ab694bb` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |

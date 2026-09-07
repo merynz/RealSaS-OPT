@@ -11,7 +11,7 @@
 - **Current module:** `Geppetto`
 - **Active gate:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
 - **Active branch:** `exp/geppetto-ar01-skeleton-causal-v1-20260907` @ `58ea876d3e61`
-- **Canonical main:** `e35b63b90d59`
+- **Canonical main:** `f7876ab694bb`
 - **Promotion block:** No Geppetto refreeze/promotion before AR-01 closes under preregistered rules.
 - **Scope warning:** AR-01 is a minimal feedback intervention, not a full RigAnything formulation test.
 - **Next visible product milestone:** Mage idle/breathing after Geppetto + Arachne FIT1 closure
@@ -19,10 +19,10 @@
 ## Historical-memory health
 
 - **Bootstrap:** `BOOTSTRAP_AUDIT_INCOMPLETE`
-- **Artifact census:** 310 high-signal artifacts discovered; census coverage **100% by construction**.
-- **Semantically reconciled:** 35.
+- **Artifact census:** 311 high-signal artifacts discovered; census coverage **100% by construction**.
+- **Semantically reconciled:** 36.
 - **Catalogued but unreviewed:** 275.
-- **Semantic coverage:** 11.3%.
+- **Semantic coverage:** 11.6%.
 - **Honesty rule:** missing historical details are `UNKNOWN / NEEDS AUDIT`, never inferred absent from the registry.
 - Use `canonical/BOOTSTRAP_AUDIT_QUEUE.md` + `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` to locate unreviewed evidence.
 
@@ -109,4 +109,5 @@ result/provenance + implementation + experiment ledger + architecture ledger if 
 
 ## Packet validity
 
-**VALID — compact context, active experiment manifest, `CURRENT_STATE.md`, and live branch refs agree.**
+**INVALID — context/authority drift detected.**
+- context current gate must match exactly one active authority experiment: AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE

@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `afa2156be4759042e073355bea40558004805eb4328f96498d2ccb2d701c74d0`
+> State fingerprint: `c208826dca2797abb905a4d7fc50cc0c903b875720a281975d463b422f169fec`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -17,39 +17,36 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 ## Rehydration order
 
-1. `CURRENT_STATE.md`
-2. `canonical/LIVE_AUTHORITY_MAP.md`
-3. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
-4. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-5. `canonical/BRANCH_AUTHORITY_V1.md`
+1. `canonical/REHYDRATION_PACKET.md`
+2. `CURRENT_STATE.md`
+3. `canonical/CONTEXT_COVERAGE_AUDIT.md`
+4. `canonical/LIVE_AUTHORITY_MAP.md`
+5. `canonical/CONTEXT_STATE_V1.json`
+6. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
+7. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
+8. `canonical/EXPERIMENT_REGISTRY_V1.json`
+9. `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
 
 ## Live experiment register
 
-| Gate | Status | Branch | Live head | Question | Does not prove |
-|---|---|---|---|---|---|
-| `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE` | `ACTIVE_RUNNING` | `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | Does the preregistered minimal joint+parent mechanical recurrent feedback intervention improve Mage FIT1 reachability/retention and parent/root structural prediction under the matched AR0/AR1 design? | full RigAnything formulation equivalence or superiority; generalization; mechanical salience / functional simplification; product-wide Geppetto architecture promotion without the explicit promotion transaction |
+_No active experiments registered._
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **ACTIVE_EXPERIMENT: 1** / **EVIDENCE_ONLY: 2** / **EVIDENCE_ONLY_UNREGISTERED: 67** / **DELETE_CANDIDATE: 9**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 67** / **DELETE_CANDIDATE: 9**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `e35b63b90d59` | canonical continuation branch |
-
-### ACTIVE_EXPERIMENT
-
-| Branch | Head | Classification reason |
-|---|---|---|
-| `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE |
+| `main` | `f7876ab694bb` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
 | Branch | Head | Classification reason |
 |---|---|---|
 | `demo/investor-single-specimen-e2e` | `47892ffa16b7` | Demo lineage only; never scientific continuation authority. |
+| `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | AR-01 closed at contract 41055bd073538d6b with verdict AR01_NO_TERMINAL_CLOSURE; retain source/prereg/provenance only. |
 | `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | Lossless RiggingSurfaceIR / V3 evidence lineage; no longer the active continuation experiment. |
 
 ### EVIDENCE_ONLY_UNREGISTERED
@@ -148,9 +145,11 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 - Scientific/mainline GitHub Actions run on the local self-hosted RealSaS runner; hosted-runner failures are apparatus/config only.
 - Routine authority tracking must not create workflow-run fan-out across every experimental branch push.
 - A branch is never active merely because it exists or has a recent commit.
-- Every ACTIVE_EXPERIMENT branch and gate id must be named by CURRENT_STATE.md.
+- A closed experiment branch becomes evidence-only unless explicitly promoted through a separate transaction.
 - Source existence is not experimental evidence.
 - Component evidence is not a full-formulation verdict.
+- A repository prereg/hash outranks detached chat/generated drafts when they disagree.
+- Unindexed historical evidence means UNKNOWN/UNRECONCILED, never ABSENT.
 - Promotion requires source + tests + evidence/result + CURRENT_STATE + provenance/revocation reconciliation.
 
 ## Update semantics

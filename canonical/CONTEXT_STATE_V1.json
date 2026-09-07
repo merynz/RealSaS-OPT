@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "purpose": "Fast cross-chat/cross-agent reconstruction of the current RealSaS scientific and product context. This is a compact state graph, not a history log.",
+  "authority": {
+    "continuation": "CURRENT_STATE.md",
+    "branch_policy": "canonical/BRANCH_AUTHORITY_V1.md",
+    "machine_authority_map": "canonical/AUTHORITY_MAP_V1.json",
+    "architecture_ledger": "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
+    "experiment_ledger": "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md"
+  },
+  "product": {
+    "name": "RealSaS",
+    "target": "8-direction editable 2D/2.5D puppet compiled from raster artwork; preserve 2D appearance while inferring/editing mechanical rig and deformation.",
+    "non_target": "full 3D reconstruction",
+    "demo_witness": "Mage FIT1",
+    "next_visible_product_milestone": "Mage idle/breathing after Geppetto + Arachne FIT1 closure"
+  },
+  "pipeline": [
+    {
+      "name": "IRIS",
+      "role": "learned image perception / signed geometry and support evidence",
+      "canonical_rule": "evidence only; no final canonical IDs"
+    },
+    {
+      "name": "GSA/RiggingSurfaceIR",
+      "role": "deterministic assembly/validation/provenance of lossless per-view surface evidence",
+      "canonical_rule": "lossless evidence boundary is binding"
+    },
+    {
+      "name": "Geppetto",
+      "role": "learned skeleton/control proposal, parent/root evidence, future mechanical salience",
+      "canonical_rule": "architecture promotion currently on AR-01 hold"
+    },
+    {
+      "name": "Compiler",
+      "role": "deterministic exact legality, canonicalization, proof/fail-close",
+      "canonical_rule": "no geometry-only dedup; no hidden deform-node completion; canonical IDs after exact solve"
+    },
+    {
+      "name": "Arachne",
+      "role": "learned skin/weight/deformation proposal conditioned on qualified skeleton + IRIS/Geppetto outputs",
+      "canonical_rule": "future FIT1 training; SkinTokens clean-room mechanism audit planned"
+    },
+    {
+      "name": "Runtime",
+      "role": "consume qualified/proof-owned puppet state and motion",
+      "canonical_rule": "must not replay solver/evaluator authority at export/runtime"
+    }
+  ],
+  "current_focus": {
+    "module": "Geppetto",
+    "gate": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
+    "branch": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
+    "scientific_question": "Does minimal joint+parent mechanical recurrent feedback improve Mage FIT1 reachability/retention and structural prediction relative to matched feedback-off AR0?",
+    "scope_warning": "AR-01 is a minimal feedback intervention, not a full RigAnything formulation test.",
+    "promotion_block": "No Geppetto refreeze/promotion before AR-01 closes under preregistered rules."
+  },
+  "riganything_state": {
+    "paper_mechanisms_cleanroom_studied": true,
+    "fuller_research_challenger_already_exists": true,
+    "implementation": "models/geppetto/challengers/riganything_mechanisms_v1.py",
+    "contains": [
+      "per-step full-surface cross-attention",
+      "conditional diffusion locus",
+      "joint + parent geometry feedback token",
+      "sibling/BFS-order helper"
+    ],
+    "critical_memory_rule": "Never propose building a RigAnything-equivalent challenger from scratch without first inspecting the existing challenger and its experiment lineage.",
+    "canonical_status": "research implementation only; component tests do not imply full-formulation closure"
+  },
+  "geppetto_current_architecture": {
+    "mainline_id": "RealSaS.GeppettoCandidate.LatentAutoregressiveSetProposal.v3",
+    "important_distinction": "latent-state recurrent != generated-skeleton-conditioned structural autoregressive",
+    "known_historical_reason": "old hard-MAP locus feedback was removed because multimodal crossover could rewrite later anonymous states; this did not prove all skeleton-causal feedback unnecessary",
+    "lossless_evidence": "binding consumer-boundary requirement; do not regress to summary-only 24D authority",
+    "mechanical_salience": "open neural responsibility; explicitly outside AR-01 and must not migrate into Compiler heuristics"
+  },
+  "fit_science": {
+    "principle": "FIT1 fits a generic/generalization-oriented architecture to one witness; architecture is not designed specifically for FIT1.",
+    "fit1_is": "mechanism/capacity/controlled-witness qualification and financing/demo gate",
+    "fit1_is_not": "generalization proof",
+    "fit_specific_optimizer_interventions": "scientifically legitimate inside FIT1 when preregistered, but cannot be relabeled generic/generalization evidence",
+    "next_ladder": ["FIT1", "FIT-k", "FIT8/LOFO", "scaling", "generalization", "product/domain shift"]
+  },
+  "settled_invariants": [
+    "Compiler final legality is deterministic exact qualification.",
+    "Compiler cannot silently repair Geppetto by geometry-only dedup or hidden cardinality/deform-node synthesis.",
+    "Canonical IDs are minted after exact solve.",
+    "Lossless per-view evidence must survive into learned consumers.",
+    "Mechanical salience / functional simplification belongs to neural Geppetto-side evidence, not legality heuristics.",
+    "Source existence != mechanism test; mechanism test != full formulation test; FIT1 != generalization.",
+    "No post-hoc gate widening after results are visible."
+  ],
+  "execution_environment": {
+    "actions": "local self-hosted",
+    "labels": ["self-hosted", "linux", "x64", "realsas"],
+    "runner": "realsas-wsl-1660ti",
+    "operator_path": "~/actions-runner",
+    "reason": "routine hosted Actions usage previously triggered a quota/usage warning; avoid high-volume hosted/fan-out workflows"
+  },
+  "known_context_traps": [
+    {
+      "trap": "Confusing a research challenger with canonical Geppetto",
+      "defense": "Check architecture ledger row + implementation path + canonical status separately."
+    },
+    {
+      "trap": "Calling AR-01 a RigAnything formulation test",
+      "defense": "Experiment ledger explicitly limits AR-01 to the minimal feedback delta."
+    },
+    {
+      "trap": "Treating old restoration/hold reports as current authority",
+      "defense": "CURRENT_STATE + authority map outrank historical reports; historical docs are evidence only unless explicitly promoted."
+    },
+    {
+      "trap": "Assuming GitHub-hosted runners",
+      "defense": "Execution authority is local self-hosted RealSaS runner."
+    },
+    {
+      "trap": "Reconstructing state by reading many reports in arbitrary order",
+      "defense": "Read REHYDRATION_PACKET first; descend only through referenced ledgers/artifacts."
+    }
+  ],
+  "continuation_protocol": {
+    "first_read": "canonical/REHYDRATION_PACKET.md",
+    "then": [
+      "CURRENT_STATE.md",
+      "canonical/LIVE_AUTHORITY_MAP.md or run tools/render_authority_map.py",
+      "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
+      "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md"
+    ],
+    "rule": "Do not infer current truth from filename recency, branch recency, report count, or memory alone.",
+    "experiment_completion_definition": "result/provenance + implementation + experiment ledger + architecture ledger if affected + context state + CURRENT_STATE if stop/go changes + explicit supersession/revocation"
+  }
+}

@@ -1,1194 +1,512 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "bootstrap_status": "BOOTSTRAP_AUDIT_INCOMPLETE",
+  "fit1_gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
   "candidate_rule": "high-signal canonical/prereg/experiment/challenger/workflow artifacts",
-  "tracked_file_count": 821,
-  "high_signal_artifact_count": 258,
-  "indexed_high_signal_count": 22,
-  "unindexed_high_signal_count": 236,
+  "tracked_file_count": 824,
+  "high_signal_artifact_count": 262,
+  "classification_counts": {
+    "UNEXPLAINED": 82,
+    "HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL": 150,
+    "INDEXED_EXPLICIT": 30
+  },
+  "explained_high_signal_count": 180,
+  "unexplained_high_signal_count": 82,
+  "coverage_fraction": 0.6870229007633588,
   "live_branch_count": 80,
-  "unregistered_branch_count": 76,
-  "coverage_fraction": 0.08527131782945736,
-  "unindexed_high_signal_artifacts": [
+  "safe_default_evidence_only_branch_count": 76,
+  "unexplained_high_signal_artifacts": [
     {
       "path": ".github/workflows/arachne_codec_v2_source_contract.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/arachne_shipping_boundary.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/architecture_freeze_source_gate.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/architecture_freeze_v2_candidate.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/completion_audit_contract.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": ".github/workflows/geppetto_r6_teacher_projection_v1.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/geppetto_v2_source_contract.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": ".github/workflows/iris_reprojection_v2_gate0.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/iris_scene_first_signed_promotion_v3.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/iris_v2_source_contract.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/p0_directional_binding_closure.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/post_freeze_family_selector_v1.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/pre_fit_visible_optimizer_once_v1.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/prefit_observation_authority_v1.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/proof_service_promotion_gate.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/r6_oracle_substrate_arachne_heterogeneous.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/r6_oracle_substrate_arachne_one_family.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/r6_oracle_substrate_geppetto_heterogeneous.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/r6_oracle_substrate_geppetto_one_family.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/restoration_closure_manual.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/restoration_closure_trigger_once.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/runtime_deploy_bake_promotion_gate.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": ".github/workflows/single_family_data_contract_v1.yml",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/APPEARANCE_PIXEL_CENTER_BEHAVIORAL_CLOSURE_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/APPEARANCE_PIXEL_CENTER_BEHAVIORAL_PREREG_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/ARACHNE_SHIPPING_BEHAVIORAL_CLOSURE_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/ARCHITECTURE_FREEZE_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/ARCHITECTURE_FREEZE_V2.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/ARCHITECTURE_V4_SOURCE_CLOSURE_20260902.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/AUTHORED_MOTION_PROOF_PROMOTION_V1_20260903.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/BOOTSTRAP_COVERAGE_STATE_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/BOUNDED_REPAIR_LOOP_PROMOTION_V1_20260903.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/COMPILER_CORE_MESH_LAYOUT_SEAL_V1_20260903.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/COMPILER_CORE_SUBSTRATE_LAYOUT_SEAL_V1_20260903.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/COMPILER_LBS_PRODUCTION_PROMOTION_V1_20260903.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/COMPILER_PROOF_REPAIR_PROMOTION_MANIFEST_V1_20260903.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/COMPILER_RUNTIME_DEPLOY_BAKE_PROMOTION_V1_20260903.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/COMPILER_RUNTIME_MIGRATION_COMPLETENESS_AUDIT_CLOSURE_20260901.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/COMPILER_RUNTIME_MIGRATION_COMPLETENESS_AUDIT_PREREG_20260901.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/COMPILER_RUNTIME_MIGRATION_COMPLETENESS_AUDIT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/COMPILER_RUNTIME_RESTORATION_CLOSURE_20260828.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/CONSUMER_VALIDITY_INTERLOCK_CLOSURE_20260829.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/CONTROLLED_OWNER_ATTRIBUTION_PROMOTION_V1_20260903.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/CORPUS_VISUAL_ANOMALY_TRIAGE_PREREG_20260831.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/DETERMINISTIC_DOWNSTREAM_LAYER_OWNERSHIP_OVERLAP_AUDIT_20260831.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/DINO_FROZEN_APPARATUS_CODE_AUDIT_CLOSURE_20260831.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/DINO_LADDER_S1_EARLY_TERMINATION_CLOSURE_20260831.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/DINO_TOKEN_PARITY_V1_SEAL_20260902.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/DTB_ND1_ROBUST_LOCAL_PLANE_CLOSURE_20260829.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/END_TO_END_ARCHITECTURE_V3_SVG_CLOSURE_20260901.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/FIT_PROXY32_COORDINATE_AND_RESIDUAL_AUDIT_20260829.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/GENERIC_SOURCE_COMPLETION_CLOSURE_20260902.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/GEPPETTO_ARACHNE_CANDIDATE_STACK_V1_SOURCE_CLOSURE_20260902.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/GEPPETTO_ARACHNE_EXTERNAL_REFERENCE_AUDIT_CLOSURE_20260831.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/GEPPETTO_ARACHNE_EXTERNAL_REFERENCE_CLEANROOM_AUDIT_PREREG_20260831.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/GEPPETTO_ARACHNE_NATIVE_IMAGE_INTEGRITY_CLOSURE_20260831.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/GEPPETTO_V2_BEHAVIORAL_CLOSURE_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/GEPPETTO_V2_SOURCE_CLOSURE_20260902.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/IRIS_REPROJECTION_CENTERED_V2_PREREG_20260831.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/IRIS_REPROJECTION_V2_GATE0_SYNTHETIC_CLOSURE_20260831.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/IRIS_REPROJECTION_V2_REAL_CORPUS_GATE0_EXECUTION_PREREG_20260831.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/IRIS_REPROJECTION_V2_REAL_GATE0_MEMBERSHIP_HASH_VERIFIER_ERRATUM_20260831.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/LIVING_COMPILE_V4_PRODUCT_SHELL_PROMOTION_20260905.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/M4R_ALL8_BOUNDARY_REFINEMENT_CLOSURE_20260829.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/M4_EXECUTION_SEAL_CLOSURE_20260829.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/M4_SURFACE_GRID_CLOSURE_20260829.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/MOTION_DEFORMATION_BEHAVIORAL_PREREG_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/MWB0_TYPED_SEAM_IMPLEMENTATION_CLOSURE_20260901.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/MWB1_IDENTITY_SUBSET_BASELINE_CLOSURE_20260901.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/MWB1_IDENTITY_SUBSET_BASELINE_PREREG_20260901.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/MWB1_IDENTITY_SUBSET_BASELINE_PREREG_AMENDMENT_20260901.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/MWB2_DIRECTIONAL_BEHAVIORAL_CLOSURE_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/MWB2_DIRECTIONAL_BEHAVIORAL_PREREG_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/N1D_DESCRIPTOR_GLOBAL_FOREGROUND_TOP4_OPENDEV_CANONICAL_REPORT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_CANONICAL_REPORT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_STAGE_A_CANONICAL_REPORT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/PREFIT_HARDENING_RECONCILIATION_V2_20260904.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/PREFIT_VISUAL_AUDIT_COHORT_V1_20260902.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/R6_ARACHNE_OBSERVATION_ORACLE_CLOSURE_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/R6_ARACHNE_ORACLE_SUBSTRATE_HETEROGENEOUS_PREREG_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/R6_ARACHNE_ORACLE_SUBSTRATE_ONE_FAMILY_RESULT_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/R6_ARACHNE_ORACLE_SUBSTRATE_PREREG_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/R6_GEPPETTO_OBSERVATION_ORACLE_CLOSURE_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/R6_G_ORACLE_SUBSTRATE_ONE_FAMILY_RESULT_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/R6_ORACLE_SUBSTRATE_INFORMATION_SUFFICIENCY_PREREG_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/REALSAS_RIGANYTHING_SKINTOKENS_END_TO_END_CLEANROOM_MATRIX_20260903.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V2_20260904.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V3_20260904.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V4_20260904.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/RIGANYTHING_CODE_LEVEL_REFERENCE_AUDIT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/SINGLE_FAMILY_DATA_SOURCE_CLOSURE_20260902.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/SINGLE_FAMILY_E2E_FIT_CONTRACT_20260902.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/SKINTOKENS_CODE_LEVEL_REFERENCE_AUDIT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/SOLVER_AUTHORITY_MATRIX_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/STRUCTURED_DEPTH_BRIDGE_APPARATUS_CLOSURE_20260829.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/architecture_freeze_gate_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/architecture_freeze_gate_v2.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/fit/mage_u0/ARACHNE_A1_BASE_RESULT_20260902.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/fit/mage_u0/ARACHNE_A1_TAIL_REMEDIATION_RESULT_20260902.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/fit/mage_u0/CODEC_A0_EXACT_CONDITIONING_RESULT_20260902.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/fit_mage_v1/ARACHNE_A1_CPU_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/fit_mage_v1/CODEC_A0_EXACT_CONDITIONING_RESULT.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/fit_mage_v1/CODEC_CPU_FIT_MAGE_A0_CORE_20260902.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "canonical/fit_mage_v1/FIT_MAGE_CPU_V1_STATUS.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/fit_mage_v1/GEPPETTO_64_SOFT_BUDGET_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/fit_mage_v1/GEPPETTO_CPU_FIT_MAGE_U0_PASS_20260902.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "canonical/validate_completion_plan_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/consumer_interlock_20260829/CONSUMER_COUPLING_PROBE_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_COUPLING_PROBE_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_EXACT_COMPILER_CLEAN_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_V0_I0_AUDIT_V2.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "experiments/family_selection_v1/post_freeze_family_selector_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "experiments/family_selection_v1/prefit_family_truth_eligibility_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "experiments/family_selection_v1/prefit_observation_authority_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "experiments/family_selection_v1/test_post_freeze_family_selector_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "experiments/family_selection_v1/test_prefit_family_truth_eligibility_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/G0_CONTRACT_FREEZE.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/G1_FREEZE_MANIFEST.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/G1_PREREG_DRAFT.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/G1_PREREG_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/G1_SPLIT_FREEZE.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/N1D_TO_G1_MIGRATION_REPORT.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/PRESERVATION_LEDGER.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/REALSAS_MASTER_CORPUS_SOURCE_AUDIT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/STARTER_MANIFEST.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_MANIFEST_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_MANIFEST_V2.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_STAGE_A_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_STAGE_B_M2_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_STAGE_C_M3_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/DEPTH_TOLERANCE_BRIDGE_PREOPEN_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/DTB_ND1_ROBUST_LOCAL_PLANE_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/DTB_ND1_ROBUST_LOCAL_PLANE_PREREG_V1_1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/DTB_ND1_ROBUST_LOCAL_PLANE_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/EXPERIMENT_NAMESPACE_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/FIT_PROXY32_COORDINATE_AND_RESIDUAL_AUDIT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4R_ALL8_BOUNDARY_REFINEMENT_DECISION_TABLE_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4R_ALL8_BOUNDARY_REFINEMENT_PREREG_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4R_ALL8_BOUNDARY_REFINEMENT_RESULT_V1.sha256.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4_EXECUTION_SEAL_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4_RAW_SOURCE_MANIFEST_V2.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4_SURFACE_GRID_PREREG_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4_SURFACE_GRID_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/MINIMUM_FIRST_RESULT_PATH_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/robust_local_plane_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_B_SAFETY_CALIBRATION_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_B_SAFETY_CALIBRATION_RESULT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_DOWNSTREAM_PROXY_MARGIN_DECISION_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_DOWNSTREAM_PROXY_MARGIN_DECISION_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_DOWNSTREAM_PROXY_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_DOWNSTREAM_PROXY_SEAL_V1_3.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_OBSERVABLE_GEOMETRY_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PRE_PROXY32_DIAGNOSTICS_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PRE_PROXY32_DIAGNOSTIC_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PRE_PROXY32_DIAGNOSTIC_RESULT_NOTE_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PROXY27_QUALIFICATION_CANONICAL_REPORT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PROXY27_QUALIFICATION_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/N_B3_CANONICAL_REPORT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/N_B3_EPSILON_PREREG_AMENDMENT_V1_1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/N_B3_EPSILON_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/N_B3_OPERATIONAL_FREEZE_V1_2.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/PRETRAINED_CONSUMER_CONTAMINATION_AUDIT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/legacy_reserve/D2_RESULT.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/schemas/REALSAS_MASTER_CORPUS_MANIFEST_SCHEMA_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/g0_g1_single_pose_geometry/schemas/REALSAS_MODEL_EXPORT_MANIFEST_SCHEMA_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_one_family_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_geppetto_one_family_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_tail_causal_diagnostic.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_temperature_causal_diagnostic.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_objective_causal_diagnostic.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/AUTHORITY_POINTERS_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/CEILING_PASS_AND_OPEN_PILOT_DECISION_20260823.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256.ipynb",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256_PREREG.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256_PREREG_V1_1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256_V1_2.ipynb",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_PREREG.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/M256_DENSE_AUTHORITY_POINTERS_V1_2.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/MINI256_AND_MATCHER_V1_PREREG_20260823.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/PACKAGE_MANIFEST_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/PACKAGE_SEAL_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/TRAINING_READY_REPORT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_controlled_v1/build_seed_manifest.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_AMENDMENT_V1_1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_AMENDMENT_V1_1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_dino_controlled_20260829/DINO_FROZEN_APPARATUS_CODE_AUDIT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_dino_controlled_20260829/FROZEN_APPARATUS_AUDIT_GATE_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_reprojection_v2_20260831/GATE0_SYNTHETIC_PREFLIGHT_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_reprojection_v2_20260831/IRIS_REPROJECTION_V2_PREREG_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_reprojection_v2_20260831/gate0_geometry_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_reprojection_v2_20260831/gate0_real_corpus_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_reprojection_v2_20260831/gate0_real_corpus_v1_1_hashfix.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_reprojection_v2_20260831/run_gate0_synthetic_preflight_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_reprojection_v2_20260831/test_gate0_geometry_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_reprojection_v2_20260831/test_gate0_real_corpus_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/iris_reprojection_v2_20260831/test_gate0_real_corpus_v1_1_hashfix.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/m4_identity_audit/VERY_IMPORTANT_AUDIT_M4_IDENTITY_AMBIGUITY_EQUIVALENT_SUBSTRATE_20260823.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/mwb1_identity_subset_20260901/MWB1_IDENTITY_SUBSET_BASELINE_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/n1d/post_n1d/N1D_DESCRIPTOR_GLOBAL_FOREGROUND_TOP4_UNTOUCHED_OPENDEV_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/n1d/post_n1d/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_CANONICAL_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/n1d/post_n1d/N1D_GLOBAL_FOREGROUND_GFDR_CAUSAL_REPLAY_CANONICAL_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/n1d/post_n1d/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_STAGE_A_CANONICAL_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/post_corpus_audit/GATE0_GATE1_LIVE_DRIVE_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/post_corpus_audit/GATE3_LINKED_APPEARANCE_REMATERIALIZATION_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/post_corpus_audit/IRIS_USABLE_CONTROLLED_CORPUS_FREEZE_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/post_corpus_audit/POST_CORPUS_80_CHECK_CLOSURE_MATRIX_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/post_corpus_audit/POST_CORPUS_AUDIT_STATUS.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/post_corpus_audit/POST_CORPUS_STAGE_A_CLOSURE_DECISION_V2.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_STUDY_V1_PREREG.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/post_corpus_audit/audit_master_corpus.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/post_corpus_audit/audit_master_corpus_fast.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/post_corpus_audit/post_corpus_stage_a_closure_v2.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/post_corpus_audit/post_corpus_stage_b6_freeze_repair_staging_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/post_corpus_audit/post_corpus_stage_b_selective_authority_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/s0_rigging_substrate/S0_A_CORPUS_BINDING_REPORT.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/s0_rigging_substrate/S0_A_INFORMATION_DERIVABILITY_MATRIX.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/s0_rigging_substrate/S0_B2_DERIVED_NORMAL_FALSIFICATION_REPORT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/s0_rigging_substrate/S0_B2_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/s0_rigging_substrate/S0_B2_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/s0_rigging_substrate/S0_B_PILOT_REPORT_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/s0_rigging_substrate/S0_B_PILOT_RESULT_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "experiments/s0_rigging_substrate/S0_PLAN_AND_PREREG_V1.md",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     },
     {
       "path": "experiments/single_family_e2e_v1/data_manifest_v1.py",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "prereg/iris/G1_SINGLE_POSE_GEOMETRY_PREREG_DRAFT.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "prereg/iris/G1_SINGLE_POSE_GEOMETRY_PREREG_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "prereg/n1d/N1D_DESCRIPTOR_GLOBAL_FOREGROUND_TOP4_UNTOUCHED_OPENDEV_PREREG_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "prereg/n1d/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_PREREG_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "prereg/n1d/N1D_GLOBAL_FOREGROUND_GFDR_CAUSAL_REPLAY_PREREG_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
-    },
-    {
-      "path": "prereg/n1d/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_OPENDEV_PREREG_V1.json",
-      "indexed": false,
-      "reason": "no path/basename reference found in continuity spine"
+      "class": "UNEXPLAINED",
+      "reason": "neither explicitly indexed, present at FIT1 anchor, nor covered by FIT1 descendant commit ledger",
+      "explained": false
     }
   ],
   "branches": [
@@ -1196,103 +514,103 @@
       "name": "agent/n1d-global-mechanical-solver-research-20260819",
       "sha": "08620737ce526b0c0cc6c551f53910e34a1107fe",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "agent/n1d-observable-functional-audit-v2-20260820",
       "sha": "bf3ef16ae2502e5b22eb8eba951a9baac2177520",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "agent/n1d-observable-functional-quotient-rebuild-20260819",
       "sha": "161d4d5d9893e87125911b54b1918b7e0d041f84",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "agent/n1d-v2-source-parity-recovery-20260820",
       "sha": "32b06472b7ffe94e3148ce0f3ed0b22d5508f2a6",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "architecture-v3-svg-20260901",
       "sha": "f7473bc93a71eaee3c95b1f42a0e03f7d4ac28f9",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "architecture-v4-single-family-e2e-20260902",
       "sha": "c84658b8b95cf5993160a32c6c067f55a7568060",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "architecture/compiler-ir-solver-canonical-20260825",
       "sha": "7163fac1f3333d818e1e7d13a767abf10fd6c458",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "architecture/v4-generic-strength-source-completion-20260902",
       "sha": "7f39a846ad05f91560836026e5ef6dfbc74dc731",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "audit/final-completion-plan-20260902",
       "sha": "00e930e788d346eadceae22623fea834bf412a54",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "audit/geppetto-v2-frozen-base-7f39",
       "sha": "7f39a846ad05f91560836026e5ef6dfbc74dc731",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "audit/iris-architecture-discipline-20260824",
       "sha": "d7bba01c85e95eba86e29e2194f16b286e405d0a",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "baseline/h0-first-family-v1-20260904",
       "sha": "a3cec7021f0d476b111b5bab37b8d4f1fee6b4c2",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "behavioral/geppetto-v2-integrity-v1-20260903",
       "sha": "2b5d467186839401ab30f9566015d9e9d49a2a06",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "cleanroom/iris-geometry-field-v1-20260904",
       "sha": "e72636d8366da3c00cb822c6eeeeb7a901275376",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "compiler-runtime-migration-audit-20260901",
       "sha": "3267b3f1ec162a786f703027e825438b3acef3c7",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "compiler-runtime-migration-closure-20260901",
       "sha": "255910d22fea20fe33b58d9fa31424403ca406c7",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "consumer-interlock-v0-20260829",
       "sha": "81ec9fd98d901daa9d494a20e5a6d67fce5810bd",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "demo/investor-single-specimen-e2e",
@@ -1304,37 +622,37 @@
       "name": "dino-controlled-ladder-prereg-20260829",
       "sha": "753b384d864c30af70e4c96645fdbe8099fabb46",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "dino-zero-step-preflight-20260829",
       "sha": "396ac67b6d657056a9275db1e808ba5f9256a579",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "do-not-use",
       "sha": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "dummy-unused",
       "sha": "3609f2cc0cfcfde1a3b1f303d45adbed36c6d626",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "e2e/mage-scene-first-v1-20260905",
       "sha": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "e2e/mage-scene-first-v1-20260905-audit-temp",
       "sha": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
@@ -1352,137 +670,137 @@
       "name": "feature/living-compile-v4-editor",
       "sha": "cd56be7300c32fdde8a511c483149e407c4d6059",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "first-family-fit/charactergen-backbone-v1",
       "sha": "15896da77dcad836c568a14d1424ab98e00578e5",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "first-family-fit/v1-20260904",
       "sha": "d8ba99dd4fe0e8bdaee5486e557e7a71e2ecdd00",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "first-family-fit/v1-20260904-debugtmp",
       "sha": "953f2ded4911de035e8f30aceca8e0ccef39f165",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "first-family-fit/v1-20260904-diag-scratch",
       "sha": "953f2ded4911de035e8f30aceca8e0ccef39f165",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "first-family-fit/v1-20260904-work",
       "sha": "953f2ded4911de035e8f30aceca8e0ccef39f165",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "first-fit-base/main-20260904",
       "sha": "1f1d8b5bd0df9da2c62733c05c54ec4d99c05f2f",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "first-fit-base/main-20260904-v2",
       "sha": "461fd25264f4981af78bf38ddb9a42086f4c9db8",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "fit/single-family-mage-v1-20260902",
       "sha": "f2cd746f8bebf24c9c0c20d5c33743d24f9b0fa2",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "g0-g1/single-pose-geometry",
       "sha": "e423cd46200220f95452890f74640c0afb57fd28",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "geometric-substrate-rename-20260901",
       "sha": "7a27dd9fc7b4c8fa5c62ece93097671d8183acea",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "geppetto-arachne-v0-1-20260830",
       "sha": "777e1bb56d9c2572f26d567b8795402bc5e71bca",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "geppetto-r6-teacher-projection-port-20260901",
       "sha": "bfa51e74be0296ec9f0625bf345eb686fc490a2a",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "hardening/pre-fit-closure-v1-20260904",
       "sha": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "ignore-this",
       "sha": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "integration/compiler-runtime-canonical-20260828",
       "sha": "e423cd46200220f95452890f74640c0afb57fd28",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "integration/compiler-runtime-heavy-promotion-20260901",
       "sha": "47892ffa16b797cbc18294c07317790ac5f61d95",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "iris/mapanything-ortho-apache",
       "sha": "3b66a4d2beb5bbcb0a87547ac614173cfbe8ae82",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "legacy-geppetto-arachne-reconcile-20260901",
       "sha": "f687ff8e78a2dbbe084630cfa71c3fefe3b16e13",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "m4-closure-20260829",
       "sha": "95a487b92ab01cc29976d09cfff13aff8b38bca3",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "m4-execution-seal-20260829",
       "sha": "d203b82335098bd3af85344f44c6f4fd661d3381",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "m4r-closure-20260829",
       "sha": "1fcd18a4cc7015e3175a59145fcfa6eb2d6881ca",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "main",
-      "sha": "c3bb480f9ba970bcc192ffc8d07f3e1f800b9e10",
+      "sha": "d724fb93a9fba2942f31b6107737f245c1b77783",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -1490,188 +808,194 @@
       "name": "mwb0-closure-backlog-20260831",
       "sha": "916ecc2c562a3a8b7f0d299da0c321c58fbd7248",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "mwb1-identity-baseline-20260901",
       "sha": "82b888c67afd16e8addac01f54e3cb046db8eb11",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "mwbo-typed-seam-20260831",
       "sha": "095ef0d439c8b65311221ebf38b0aa9cd873b5ca",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "next/depth-bridge-route-correction-20260829",
       "sha": "dcce855b0c93ea99856e59b66f5ca83ea7e558fa",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "next/m4-grid-prereg-20260829",
       "sha": "f26fd2837619da0fcabe4a64460bc28ef988e147",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "next/proxy-evaluator-restoration-20260829",
       "sha": "8f3d288c10dea841498f21003edfdaf0b61f66c6",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "next/structured-depth-bridge-20260829",
       "sha": "e362c473c2fd6c4960a3c0209482827bbcba13af",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "noop",
       "sha": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "noop2",
       "sha": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "ops/temp-trigger-n1d-v2-recovery-20260820",
       "sha": "536b40b6a6bfd6c95a074b965227fe16056ae21f",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "ops/trigger-n1d-v2-recovery-v2-verify-20260820",
       "sha": "12a813a8f50118a4ad34c37fd5b43bd760d45d97",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "promote/iris-scene-first-signed-main-v3-20260905",
       "sha": "dfb087c6a23e39c0360c4cd4d89fdb6b9e9c9957",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "promote/iris-scene-first-signed-v3-20260905",
       "sha": "7cfb7efedbe956c2aa16003e5a7df9bb56c907bb",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "restoration/compiler-runtime-promotion-v1-20260903",
       "sha": "83aa411cc06d50d7ad38df985a276f0ae537fcbc",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall",
       "sha": "800d3ccb042ee55f9c136ceb31358438cd4b1fdc",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety",
       "sha": "2eb09fe3e8c62fb7afdfab81f3260351e649c7a9",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety2",
       "sha": "2eb09fe3e8c62fb7afdfab81f3260351e649c7a9",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
       "sha": "579a8697d7e34cd26e731df1d3e059de784d6702",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "restoration/compiler-runtime-promotion-v1-20260903-motion-bake-backup",
       "sha": "b46a39b7f1e73082e8316e359acad82106d18306",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
       "sha": "f0ce10051b4a0eda2022f9bfa90da8ae529b8d8d",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "restoration/compiler-runtime-promotion-v1-20260903-stage1-backup",
       "sha": "2b5d467186839401ab30f9566015d9e9d49a2a06",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
       "sha": "2b5d467186839401ab30f9566015d9e9d49a2a06",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "restoration/iris-mainline-promotion-v1-20260903-safety",
       "sha": "a965a22e7a9ad3bd2744f7fc69ba854d8393ebf3",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "scratch-mistake",
       "sha": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "single-family-e2e-fit-v1-20260902",
       "sha": "5fa4bf7883283ac0ae4f6b9cb8357cb1b13d6adf",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "single-family-e2e-models-v1-20260902",
       "sha": "362556db9b31960cfbbfac037727c83d6badaa9b",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "source/generic-completion-v1-20260902",
       "sha": "85a25b419a47ddd52b4a70ae3b8639cc575bb6b3",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "tmp-do-not-use",
       "sha": "953f2ded4911de035e8f30aceca8e0ccef39f165",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "tmp/appearance-witness-fetch-20260826",
       "sha": "ec623d005bdb42dd189fee70b99970d52ddd2dee",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "tmp_should_not_create",
       "sha": "a5edb2b23fc4dd26c7aab2050954227f81964304",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "tooling/export-frozen-source-7f39",
       "sha": "43a1e5b2376fee305ebdbb6699289da6f2370ddf",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default; needs disposition only if scientifically material"
+      "reason": "safe default under branch authority policy"
     }
   ],
-  "closure_rule": "During bootstrap, unindexed means UNKNOWN/NEEDS_AUDIT. After BOOTSTRAP_AUDIT_CLOSED, any new unindexed high-signal artifact is a continuity failure."
+  "semantics": {
+    "INDEXED_EXPLICIT": "continuity spine contains an explicit path/basename or the artifact is itself a spine file",
+    "FIT1_COMMIT_LEDGER_COVERED": "post-FIT1 change is exhaustively discoverable by commit; exact scientific claims still require reading source/prereg/result",
+    "HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL": "pre-existing at FIT1 gate; retained for provenance but not current authority by default",
+    "UNEXPLAINED": "continuity regression after closure"
+  },
+  "closure_rule": "After BOOTSTRAP_AUDIT_CLOSED, UNEXPLAINED must remain zero. Ledger coverage is discoverability, not scientific promotion."
 }

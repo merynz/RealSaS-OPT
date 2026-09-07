@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **787**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **789**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -799,6 +799,8 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-07T13:53:05+03:00` | `6f724efed53d` | yes | GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
 | `2026-09-07T13:53:17+03:00` | `75f8120b9b70` | yes | GOVERNANCE_CONTINUITY | Add explicit AOA artifact disposition policy | `canonical/AOA_ARTIFACT_DISPOSITION_V1.json` | `main` |
 | `2026-09-07T13:53:49+03:00` | `ea2250328b88` | yes | CI_TEST, FIT_DATA, GOVERNANCE_CONTINUITY | Run FIT1 lineage and AOA guards in local continuity CI | `.github/workflows/live_authority_map.yml` | `main` |
+| `2026-09-07T13:54:10+03:00` | `cd71e7f5b16d` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-07T13:55:07+03:00` | `b998475adaf3` | yes | GOVERNANCE_CONTINUITY | Record AOA closure contract and corrections | `canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md` | `main` |
 
 ## Use rule
 

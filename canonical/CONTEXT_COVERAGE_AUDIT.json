@@ -3,13 +3,13 @@
   "bootstrap_status": "BOOTSTRAP_AUDIT_INCOMPLETE",
   "fit1_gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
   "candidate_rule": "high-signal canonical/prereg/experiment/challenger/workflow artifacts",
-  "tracked_file_count": 825,
-  "high_signal_artifact_count": 263,
+  "tracked_file_count": 828,
+  "high_signal_artifact_count": 264,
   "classification_counts": {
-    "INDEXED_EXPLICIT": 116,
+    "INDEXED_EXPLICIT": 117,
     "HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL": 147
   },
-  "explained_high_signal_count": 263,
+  "explained_high_signal_count": 264,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
   "live_branch_count": 80,
@@ -306,7 +306,7 @@
     },
     {
       "name": "main",
-      "sha": "ea2250328b88135eaa5459f4e50c136af4b5d36d",
+      "sha": "b998475adaf34cb0ae1ec03afddcac67e394f001",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

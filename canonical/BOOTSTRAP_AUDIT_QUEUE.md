@@ -4,10 +4,10 @@
 > Bootstrap: `BOOTSTRAP_AUDIT_INCOMPLETE`
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
-- Census artifacts in declared scope: **313 / 313 discovered (100%)**
-- Semantically reconciled: **38**
+- Census artifacts in declared scope: **316 / 316 discovered (100%)**
+- Semantically reconciled: **41**
 - Catalogued but unreviewed: **275**
-- Semantic coverage: **12.1%**
+- Semantic coverage: **13.0%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 

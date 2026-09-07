@@ -11,7 +11,7 @@
 - **Current state:** `POST_AR01_DIAGNOSIS_REQUIRED__NO_NEW_EXPERIMENT_PREREGISTERED`
 - **Active experiment:** `NONE`
 - **Most recent closed gate:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
-- **Canonical main:** `ea2250328b88`
+- **Canonical main:** `b998475adaf3`
 - **Promotion block:** No Geppetto refreeze/promotion until the scientifically necessary post-AR-01 gate(s) close and a separate promotion transaction reconciles authority.
 - **Scope warning:** AR-01 was a minimal feedback intervention, not a full RigAnything formulation test. Do not bundle the three remaining questions post hoc.
 - **Next visible product milestone:** Mage idle/breathing after Geppetto + Arachne FIT1 closure
@@ -36,8 +36,8 @@ Read `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` before moving responsibilit
 ## Historical-memory health
 
 - **Bootstrap/AOA:** `BOOTSTRAP_AUDIT_INCOMPLETE`
-- **High-signal artifacts:** 263
-- **Explained by continuity policy:** 263
+- **High-signal artifacts:** 264
+- **Explained by continuity policy:** 264
 - **Unexplained:** 0
 - **Coverage:** 100.0%
 - Missing historical detail remains `UNKNOWN / NEEDS AUDIT`; never infer absence.

@@ -1,13 +1,17 @@
-# RealSaS Current System Index
+# RealSaS Structural System Index
 
-This is the shortest answer to: **"What do we currently have, where is it, and what is its status?"**
+> **STRUCTURAL/NAVIGATION INDEX — NOT CONTINUATION AUTHORITY.**
+> For the current scientific gate, active experiment, branch, next decision, and current FIT authorization, read `canonical/REHYDRATION_PACKET.md` and then `CURRENT_STATE.md`.
+> Historical gate language must never be inferred from this file as current program state.
+
+This file answers: **"What subsystems exist on current main and where do they live?"** It deliberately does **not** answer "what experiment/gate are we currently running?".
 
 ## Learned stack
 
 | Subsystem | Current mainline | State |
 |---|---|---|
 | IRIS V2 | `models/iris/v2/` | **CURRENT — inference + foundation/apparatus + checkpoint + train/eval visible** |
-| Geppetto V2 | `models/geppetto/v2/` | **CURRENT — inference/conditioning/checkpoint + V2 target/loss/train/eval visible** |
+| Geppetto V2 | `models/geppetto/v2/` | **CURRENT SOURCE HOME — architecture refreeze/promotion status is governed by `CURRENT_STATE.md`** |
 | SkinFieldCodec V1 | `models/skin_field_codec/v1/` | **CURRENT — learned codec/checkpoint/config + A0 train/eval visible** |
 | Arachne V2 | `models/arachne/v2/` | **CURRENT — inference/conditioning/geometry + base A1 train/eval visible** |
 
@@ -50,12 +54,13 @@ No fifth learned subsystem is currently authorized by V4 architecture/current so
 | Rig parent repair executor | historical candidate | **NOT CURRENT — future proposal/requalification operation only** |
 | Retained weight-candidate repair executor | historical candidate | **NOT CURRENT — future retained-candidate/requalification operation only** |
 
-Retraction evidence: `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json`.  
-P0/runtime source-closure evidence: `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`.  
-Historical numerical disposition: `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`.  
-Repair execution disposition: `canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json`.  
-Canonical-main-before-fit gate: `canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json`.  
-Restoration-wide closure verdict: `canonical/RESTORATION_CLOSURE_VERDICT_V1_20260904.json`.
+Historical restoration evidence remains valid evidence, but not current continuation state:
+- `canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json`
+- `canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json`
+- `canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json`
+- `canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json`
+- `canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json`
+- `canonical/RESTORATION_CLOSURE_VERDICT_V1_20260904.json`
 
 ## Runtime
 
@@ -66,26 +71,24 @@ Restoration-wide closure verdict: `canonical/RESTORATION_CLOSURE_VERDICT_V1_2026
 | Current V4 `.rss/.rsr` projection/materialization | Compiler export services | **CURRENT / CLOSURE PASS** |
 | Exact `.rss/.rsr` -> sealed C++ open/sample/render probe | `tests/runtime/current_v4_native_package_probe.cpp` | **CI PASS — EXACT CURRENT-V4 PACKAGE OPEN/SAMPLE/RENDER VERIFIED** |
 
-`RUNTIME_CONSUMPTION` inside the product proof is a **pre-export compatibility** proof domain, not evidence that the C++ package was executed. Post-export native execution is a separate interlock, and that interlock passed on closed source commit `7324e6a63df54d999103a59835212cb2d1dc46ee` in Actions run `33827594057`.
+`RUNTIME_CONSUMPTION` inside the product proof is a **pre-export compatibility** proof domain, not evidence that the C++ package was executed. Post-export native execution is a separate interlock; historical closure evidence records the exact successful interlock run.
 
 ## Repair behavior
 
-Automatic repair is **not** a required current product capability or proof domain. The current first-fit policy is:
+Automatic repair is **not** a required current product capability or proof domain. Current architecture policy remains:
 
 - `ProductProofBundleIR.overall_status == PASS` -> runtime export may proceed;
 - `FAIL` or `ABSTAIN` -> stop fail-closed;
 - no historical repair executor receives automatic authority;
 - future executor promotion must preserve the current distinct-child + bounded-owner-local + same-probe re-proof contract.
 
-## Canonical main promotion gate
+## Historical restoration gate — superseded for continuation
 
-Real-family fit work is forbidden until the closure-qualified tree is the canonical GitHub `main`, that exact `main` SHA passes post-merge repository integrity, and that same SHA is frozen as the first-fit base.
+The former sequence
 
-Required sequence:
+`restoration closure PASS -> canonical main ref equality -> post-merge integrity -> first-fit-base freeze`
 
-`restoration closure PASS -> explicit verdict PASS -> canonical main ref equality -> post-merge main integrity -> freeze exact main SHA -> only then may a later workflow authorize fit`
-
-The first fit must record the exact canonical `main` commit it descends from. Status language below is intentionally invariant across the branch-ref transition: it states conditions that must be true before fit, rather than a time-sensitive “next/pending” snapshot.
+is preserved as historical provenance only. **Do not use its old `FIT NOT AUTHORIZED` wording as current state.** Later work has already moved beyond that gate. Current FIT/Geppetto authorization is exclusively defined by `CURRENT_STATE.md` and the live continuity views.
 
 ## Research / evidence zones
 
@@ -95,21 +98,6 @@ The first fit must record the exact canonical `main` commit it descends from. St
 | `canonical/` | architecture, preregistration, closure, promotion/retraction and authority evidence |
 | `historical/` | provenance/source-diff reserve; never an alternate executable mainline |
 
-## Current program gate
-
-- Global architecture refreeze: **NOT PERFORMED**
-- Formal Family-1 selection: **BLOCKED**
-- Real-family FIT: **NOT AUTHORIZED**
-- Directional P0 source/math closure: **PASS**
-- Historical numerical source-diff: **DONE / NO ADDITIONAL CURRENT BACKEND PROMOTION**
-- Repair-executor seam decision: **DONE / 0 EXECUTORS ACCEPTABLE FAIL-CLOSED**
-- Native current-source interlock: **PASS — run 33827594057**
-- Restoration-wide source/regression/E2E/native closure: **PASS — verdict recorded**
-- Canonical `main` promotion: **EXACT REF EQUALITY REQUIRED BEFORE FIRST-FIT-BASE FREEZE**
-- Post-merge `main` integrity: **EXACT MAIN SHA MUST PASS BEFORE FIRST-FIT-BASE FREEZE**
-- First-fit base: **MUST BE A FROZEN REF TO THAT SAME PASSING MAIN SHA**
-- Family-1/FIT execution: **OUT OF SCOPE UNTIL A LATER EXPLICIT AUTHORIZATION**
-
 ## Promotion rule
 
 ```text
@@ -117,7 +105,7 @@ experiment / historical evidence
   -> audit / canonical decision
   -> promote, rebind, or retract code in models/compiler/runtime
   -> mainline regression + E2E
-  -> update this index + state ledger
+  -> reconcile CURRENT_STATE + machine authority/experiment registry + scientific journal
 ```
 
-If this file and the actual tree disagree, treat that disagreement as a repository-integrity bug.
+If this file and the actual tree disagree, treat that disagreement as a repository-integrity bug. If this file and `CURRENT_STATE.md` disagree about **program state**, `CURRENT_STATE.md` wins and this file must be repaired.

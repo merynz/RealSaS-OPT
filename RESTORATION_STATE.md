@@ -1,11 +1,15 @@
 # RealSaS-OPT — Restoration State
 
-**Date:** 2026-09-04  
+> **SUPERSEDED FOR CONTINUATION / PRESERVED AS HISTORICAL EVIDENCE.**  
+> This file records the 2026-09-04 restoration-era state and contains stop/go statements that were correct at that time but are **not current authority**.  
+> For present work start from `canonical/REHYDRATION_PACKET.md` and `CURRENT_STATE.md`. Do not use this file to infer whether FIT1 or a current experiment is authorized.
+
+**Historical snapshot date:** 2026-09-04  
 **Source branch:** `restoration/compiler-runtime-promotion-v1-20260903`  
 **Verified behavioral base:** `2b5d467186839401ab30f9566015d9e9d49a2a06`  
 **Global architecture refreeze:** `NOT PERFORMED`  
 **Formal Family-1 selection:** `BLOCKED`  
-**Real-family fit:** `NOT AUTHORIZED`
+**Real-family fit:** `NOT AUTHORIZED` **(historical restoration-era status; superseded for current continuation)**
 
 ## Mission
 

@@ -2,13 +2,13 @@
   "schema_version": 1,
   "bootstrap_status": "BOOTSTRAP_AUDIT_INCOMPLETE",
   "candidate_rule": "high-signal canonical/prereg/experiment/challenger/workflow artifacts",
-  "tracked_file_count": 816,
-  "high_signal_artifact_count": 256,
+  "tracked_file_count": 818,
+  "high_signal_artifact_count": 257,
   "indexed_high_signal_count": 21,
-  "unindexed_high_signal_count": 235,
+  "unindexed_high_signal_count": 236,
   "live_branch_count": 80,
   "unregistered_branch_count": 76,
-  "coverage_fraction": 0.08203125,
+  "coverage_fraction": 0.08171206225680934,
   "unindexed_high_signal_artifacts": [
     {
       "path": ".github/workflows/arachne_codec_v2_source_contract.yml",
@@ -162,6 +162,11 @@
     },
     {
       "path": "canonical/AUTHORED_MOTION_PROOF_PROMOTION_V1_20260903.json",
+      "indexed": false,
+      "reason": "no path/basename reference found in continuity spine"
+    },
+    {
+      "path": "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
       "indexed": false,
       "reason": "no path/basename reference found in continuity spine"
     },
@@ -1477,7 +1482,7 @@
     },
     {
       "name": "main",
-      "sha": "b5202fbb14ae4e0420ab16c0cb6f6a8e0b65fc33",
+      "sha": "4afc4b8df8910e2c6725886e942de130e0d16c16",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

@@ -5,10 +5,10 @@
 
 ## Coverage
 
-- Git-tracked files: **816**
-- High-signal knowledge artifacts: **256**
+- Git-tracked files: **818**
+- High-signal knowledge artifacts: **257**
 - Indexed/referenced by continuity spine: **21**
-- Unindexed high-signal artifacts: **235**
+- Unindexed high-signal artifacts: **236**
 - Coverage: **8.2%**
 - Live branches: **80**
 - Safe-default unregistered branches: **76**
@@ -48,6 +48,7 @@ During bootstrap, **UNINDEXED does not mean irrelevant or false**. It means the 
 - `canonical/ARCHITECTURE_FREEZE_V2.json` — no path/basename reference found in continuity spine
 - `canonical/ARCHITECTURE_V4_SOURCE_CLOSURE_20260902.md` — no path/basename reference found in continuity spine
 - `canonical/AUTHORED_MOTION_PROOF_PROMOTION_V1_20260903.json` — no path/basename reference found in continuity spine
+- `canonical/BOOTSTRAP_AUDIT_QUEUE.md` — no path/basename reference found in continuity spine
 - `canonical/BOOTSTRAP_COVERAGE_STATE_V1.json` — no path/basename reference found in continuity spine
 - `canonical/BOUNDED_REPAIR_LOOP_PROMOTION_V1_20260903.json` — no path/basename reference found in continuity spine
 - `canonical/COMPILER_CORE_MESH_LAYOUT_SEAL_V1_20260903.json` — no path/basename reference found in continuity spine
@@ -305,7 +306,7 @@ During bootstrap, **UNINDEXED does not mean irrelevant or false**. It means the 
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
-| `main` | `b5202fbb14ae` | `CANONICAL` | canonical branch |
+| `main` | `4afc4b8df891` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default; needs disposition only if scientifically material |

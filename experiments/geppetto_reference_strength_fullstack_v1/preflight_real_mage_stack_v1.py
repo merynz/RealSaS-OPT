@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-"""Fail-closed real Mage input/target preflight for the reference-strength Geppetto FIT.
+"""Fail-closed real Mage input/target preflight for reference-strength Geppetto FIT.
 
 No training happens here. The script reconstructs the current shipping-side
 IRIS->GSA->RiggingSurfaceIR seam from the promoted signed zero-surface and exact
 8 cameras, tensorizes that IR losslessly, and independently derives the
-training-only anonymous mechanical-core teacher target.
+training-only anonymous mechanical-core teacher target in explicit world/source
+frame.
 """
 
 import argparse
@@ -18,20 +19,23 @@ import numpy as np
 from compiler.realsas_compiler_core.substrate.scene_first_signed import (
     rigging_surface_from_scene_first_zero_mesh_v1,
 )
-from experiments.geppetto_reference_strength_fullstack_v1.mage_mechanical_core_target_v1 import (
-    project_mechanical_core_from_arrays_v1,
-    project_mechanical_core_from_normalized_npz_v1,
+from experiments.geppetto_reference_strength_fullstack_v1.mechanical_core_target_v1 import (
+    RULE,
+    build_mechanical_core_target_v1,
+    target_content_sha256_v1,
+    world_heads_from_rest_world_source_v1,
 )
 from experiments.geppetto_reference_strength_fullstack_v1.rigging_surface_tensorization_v1 import (
     tensorize_rigging_surface_v1,
 )
 
 
-SCHEMA = "RealSaS.GeppettoReferenceStrengthMagePreflight.v1"
+SCHEMA = "RealSaS.GeppettoReferenceStrengthMagePreflight.v2"
 SOURCE_RUN_ID = "20260904T220929Z"
 SOURCE_CHECKPOINT_SHA256 = "766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2"
 ZERO_SURFACE_SHA256 = "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b"
 NORMALIZED_TEACHER_SHA256 = "528bef491eceb358ebc8ecb2a46af1d37b4322a7ef500281403a8207fe7c648f"
+TARGET_CONTENT_SHA256 = "0b5a25c877116de60b710b7bb2a7848f30988e1622e2eda8084cad21c8ca23c9"
 CAMERA_SHA256 = (
     "73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541",
     "bdc172a4aff332f956d1403e36b2f8684b68059fdc82f9efddf35d05a6d9b4d4",
@@ -42,7 +46,6 @@ CAMERA_SHA256 = (
     "daa19fa58ff602977d64b720c4198956809855149d814df487c7762a963f1eec",
     "68f51fbfce4c31f94281e1569d74b44609435285668f8a8b1b278e76db6ea53f",
 )
-
 EXPECTED_NODE_COUNT = 950
 EXPECTED_EDGE_COUNT = 2813
 EXPECTED_OBSERVED_COUNT = 897
@@ -59,11 +62,16 @@ EXPECTED_MECHANICAL_ROOT_COUNT = 1
 
 
 def _file_sha(path: Path) -> str:
-    return sha256(path.read_bytes()).hexdigest()
+    h = sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def _load_cameras(camera_dir: Path) -> tuple[dict, ...]:
     cameras = []
+    yaws = (0, 45, 90, 135, 180, 225, 270, 315)
     for i, expected in enumerate(CAMERA_SHA256):
         path = camera_dir / f"V{i}.camera.json"
         if not path.is_file():
@@ -74,17 +82,19 @@ def _load_cameras(camera_dir: Path) -> tuple[dict, ...]:
         payload = json.loads(path.read_text())
         if int(payload.get("view_index", -1)) != i:
             raise RuntimeError(f"camera view_index drift V{i}")
+        if int(payload.get("yaw_deg", -999)) != yaws[i]:
+            raise RuntimeError(f"camera yaw drift V{i}")
         cameras.append(payload)
     first = cameras[0]
     center = np.asarray(first["center"], dtype=np.float64)
     half = float(first["half_extent"])
     resolution = int(first["resolution"])
-    if center.shape != (3,) or not np.isfinite(center).all() or half <= 0 or resolution <= 0:
+    if center.shape != (3,) or not np.isfinite(center).all() or half <= 0 or resolution != 1024:
         raise RuntimeError("camera normalization contract invalid")
     for i, cam in enumerate(cameras[1:], start=1):
-        if not np.allclose(np.asarray(cam["center"], float), center, atol=0.0, rtol=0.0):
+        if not np.allclose(np.asarray(cam["center"], float), center, atol=1e-10, rtol=0.0):
             raise RuntimeError(f"camera center drift V{i}")
-        if float(cam["half_extent"]) != half or int(cam["resolution"]) != resolution:
+        if abs(float(cam["half_extent"]) - half) > 1e-10 or int(cam["resolution"]) != resolution:
             raise RuntimeError(f"camera extent/resolution drift V{i}")
     return tuple(cameras)
 
@@ -111,14 +121,32 @@ def _assert_close(name: str, got: float, expected: float, *, atol: float = 2e-6)
         raise AssertionError(f"{name} drift got={got} expected={expected} atol={atol}")
 
 
-def _teacher_permutation_invariance(npz_path: Path, reference) -> dict:
+def _load_target_arrays(npz_path: Path):
     with np.load(npz_path, allow_pickle=False) as z:
+        required = ("parents", "deform_mask", "skin", "rest_world_source")
+        missing = [k for k in required if k not in z.files]
+        if missing:
+            raise RuntimeError(f"training corpus fields missing:{missing}")
         parents = np.asarray(z["parents"], dtype=np.int64)
         deform = np.asarray(z["deform_mask"], dtype=bool)
         skin = np.asarray(z["skin"], dtype=np.float64)
-        heads = np.asarray(z["bone_heads"], dtype=np.float64)
-        inverse = np.asarray(z["inverse_canonical_transform"], dtype=np.float64)
+        rest = np.asarray(z["rest_world_source"], dtype=np.float64)
+    heads_world = world_heads_from_rest_world_source_v1(rest)
+    return parents, deform, skin, heads_world, rest
 
+
+def _build_target(npz_path: Path):
+    parents, deform, skin, heads_world, _rest = _load_target_arrays(npz_path)
+    return build_mechanical_core_target_v1(
+        parents=parents,
+        deform_mask=deform,
+        skin=skin,
+        bone_heads_world=heads_world,
+    )
+
+
+def _teacher_permutation_invariance(npz_path: Path, reference) -> dict:
+    parents, deform, skin, heads_world, _rest = _load_target_arrays(npz_path)
     rng = np.random.default_rng(20260907)
     perm = rng.permutation(len(parents))
     inverse_perm = np.empty(len(parents), dtype=np.int64)
@@ -127,12 +155,11 @@ def _teacher_permutation_invariance(npz_path: Path, reference) -> dict:
         [-1 if parents[old] < 0 else inverse_perm[int(parents[old])] for old in perm],
         dtype=np.int64,
     )
-    other = project_mechanical_core_from_arrays_v1(
+    other = build_mechanical_core_target_v1(
         parents=parents_p,
         deform_mask=deform[perm],
         skin=skin[:, perm],
-        bone_heads=heads[perm],
-        inverse_canonical_transform=inverse,
+        bone_heads_world=heads_world[perm],
     )
     max_position_delta = float(
         np.max(np.abs(
@@ -142,23 +169,19 @@ def _teacher_permutation_invariance(npz_path: Path, reference) -> dict:
     )
     topology_equal = bool(np.array_equal(reference.parent_indices, other.parent_indices))
     root_equal = bool(np.array_equal(reference.root_mask, other.root_mask))
-    if max_position_delta != 0.0 or not topology_equal or not root_equal:
+    hash_equal = bool(target_content_sha256_v1(reference) == target_content_sha256_v1(other))
+    if max_position_delta != 0.0 or not topology_equal or not root_equal or not hash_equal:
         raise AssertionError("mechanical-core projection is not source-row permutation invariant")
     return {
         "seed": 20260907,
         "max_position_delta": max_position_delta,
         "topology_equal": topology_equal,
         "root_equal": root_equal,
+        "content_hash_equal": hash_equal,
     }
 
 
-def run(
-    *,
-    zero_surface_path: Path,
-    teacher_normalized_path: Path,
-    camera_dir: Path,
-    output_path: Path,
-) -> dict:
+def run(*, zero_surface_path: Path, teacher_normalized_path: Path, camera_dir: Path, output_path: Path) -> dict:
     if _file_sha(zero_surface_path) != ZERO_SURFACE_SHA256:
         raise RuntimeError("promoted zero-surface hash drift")
     if _file_sha(teacher_normalized_path) != NORMALIZED_TEACHER_SHA256:
@@ -176,7 +199,6 @@ def run(
     camera_center = np.asarray(cameras[0]["center"], dtype=np.float64)
     camera_half = float(cameras[0]["half_extent"])
     vertices_normalized = (world - camera_center[None, :]) / camera_half
-
     surface = rigging_surface_from_scene_first_zero_mesh_v1(
         vertices_normalized,
         faces,
@@ -191,7 +213,7 @@ def run(
         target_nodes=1024,
         normal_k=64,
         visibility_depth_tolerance_norm=0.02,
-        metadata={"preflight_only": True},
+        metadata={"preflight_only": True, "teacher_truth_used": False},
     )
     tensor = tensorize_rigging_surface_v1(surface, require_scene_first=True)
 
@@ -210,11 +232,14 @@ def run(
     for key, expected in EXPECTED_RASTER_STATS.items():
         _assert_close(key, raster_stats[key], expected)
 
-    target = project_mechanical_core_from_normalized_npz_v1(teacher_normalized_path)
+    target = _build_target(teacher_normalized_path)
+    target_hash = target_content_sha256_v1(target)
     if target.count != EXPECTED_MECHANICAL_CORE_COUNT:
         raise AssertionError(f"mechanical core count drift:{target.count}")
     if int(np.asarray(target.root_mask, bool).sum()) != EXPECTED_MECHANICAL_ROOT_COUNT:
         raise AssertionError("mechanical root count drift")
+    if target_hash != TARGET_CONTENT_SHA256:
+        raise AssertionError(f"mechanical target content hash drift:{target_hash}")
     permutation = _teacher_permutation_invariance(teacher_normalized_path, target)
 
     report = {
@@ -247,12 +272,12 @@ def run(
         },
         "teacher_target": {
             "role": "TRAINING_EVALUATION_ONLY",
-            "rule_id": target.rule_id,
+            "rule_id": RULE,
+            "position_authority": target.position_authority,
             "count": target.count,
             "root_count": int(np.asarray(target.root_mask, bool).sum()),
-            "content_hash": target.content_hash,
-            "source_indices_provenance_only": target.source_indices,
-            "source_parent_indices_provenance_only": target.source_parent_indices,
+            "content_hash": target_hash,
+            "source_indices_provenance_only": tuple(map(int, target.source_indices_provenance_only.tolist())),
             "source_names_used_for_selection": False,
             "handwritten_source_index_list_used_for_selection": False,
             "permutation_invariance": permutation,
@@ -260,8 +285,11 @@ def run(
         "gate": {
             "expected_node_count": EXPECTED_NODE_COUNT,
             "expected_edge_count": EXPECTED_EDGE_COUNT,
+            "expected_observed_count": EXPECTED_OBSERVED_COUNT,
+            "expected_completed_count": EXPECTED_COMPLETED_COUNT,
             "expected_support_counts": EXPECTED_SUPPORT_COUNTS,
             "expected_mechanical_core_count": EXPECTED_MECHANICAL_CORE_COUNT,
+            "expected_target_content_sha256": TARGET_CONTENT_SHA256,
             "passed": True,
         },
         "generalization_claim": False,

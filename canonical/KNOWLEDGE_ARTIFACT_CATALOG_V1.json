@@ -1,0 +1,3173 @@
+{
+  "schema_version": 1,
+  "bootstrap_status": "BOOTSTRAP_AUDIT_INCOMPLETE",
+  "authority": "DISCOVERY_CENSUS_ONLY__NOT_SCIENTIFIC_OR_CONTINUATION_AUTHORITY",
+  "artifact_count": 257,
+  "census_coverage_fraction": 1.0,
+  "semantic_indexed_count": 21,
+  "semantic_unreviewed_count": 236,
+  "semantic_coverage_fraction": 0.08171206225680934,
+  "role_counts": {
+    "AUDIT": 26,
+    "AUTHORITY_DECISION": 33,
+    "CLOSURE": 35,
+    "HIGH_SIGNAL_OTHER": 27,
+    "NOTEBOOK": 2,
+    "PLAN_MATRIX": 21,
+    "PREREG": 53,
+    "PROMOTION_RETRACTION": 10,
+    "RESULT": 27,
+    "WORKFLOW": 23
+  },
+  "subsystem_counts": {
+    "ARACHNE_SKIN": 25,
+    "COMPILER": 54,
+    "CROSS_CUTTING_OTHER": 45,
+    "FIT_PRODUCT": 38,
+    "GEPPETTO": 21,
+    "IRIS": 78,
+    "REPOSITORY_GOVERNANCE": 35,
+    "RUNTIME_EXPORT": 16
+  },
+  "artifacts": [
+    {
+      "artifact_id": "KA-FBDB9DB9C37E",
+      "path": "canonical/GEPPETTO_ARACHNE_EXTERNAL_REFERENCE_AUDIT_CLOSURE_20260831.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "GEPPETTO",
+        "ARACHNE_SKIN"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-447C6856DF53",
+      "path": "canonical/GEPPETTO_ARACHNE_EXTERNAL_REFERENCE_CLEANROOM_AUDIT_PREREG_20260831.md",
+      "role": "PREREG",
+      "subsystems": [
+        "GEPPETTO",
+        "ARACHNE_SKIN"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-C2960AF86FE2",
+      "path": "canonical/GEPPETTO_ARACHNE_NATIVE_IMAGE_INTEGRITY_CLOSURE_20260831.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "GEPPETTO",
+        "ARACHNE_SKIN",
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-E09FF4339838",
+      "path": "experiments/geppetto_arachne_r6_20260901/test_geppetto_v2_behavioral_overfit.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "GEPPETTO",
+        "ARACHNE_SKIN",
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-AC9482A58F88",
+      "path": "experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_arachne_one_family_v1.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "GEPPETTO",
+        "ARACHNE_SKIN",
+        "COMPILER",
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-B09A7E7184F4",
+      "path": "experiments/geppetto_arachne_r6_20260901/test_r6_oracle_substrate_geppetto_one_family_v1.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "GEPPETTO",
+        "ARACHNE_SKIN",
+        "COMPILER",
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-2AAC729681D9",
+      "path": "experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_tail_causal_diagnostic.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "GEPPETTO",
+        "ARACHNE_SKIN"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-69628A87A05B",
+      "path": "experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_a0_temperature_causal_diagnostic.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "GEPPETTO",
+        "ARACHNE_SKIN"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-46D39E605107",
+      "path": "experiments/geppetto_arachne_r6_20260901/test_skin_field_codec_objective_causal_diagnostic.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "GEPPETTO",
+        "ARACHNE_SKIN"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-E3F343A726AC",
+      "path": "canonical/GEPPETTO_ARACHNE_CANDIDATE_STACK_V1_SOURCE_CLOSURE_20260902.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "GEPPETTO",
+        "ARACHNE_SKIN"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-7751653E4737",
+      "path": "canonical/GEPPETTO_V2_SOURCE_CLOSURE_20260902.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "GEPPETTO"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-3BEEEEE6C95E",
+      "path": "canonical/fit_mage_v1/GEPPETTO_CPU_FIT_MAGE_U0_PASS_20260902.json",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "GEPPETTO",
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-250CAD24E150",
+      "path": "canonical/GEPPETTO_V2_BEHAVIORAL_CLOSURE_20260903.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "GEPPETTO"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-242A147C6B94",
+      "path": "canonical/R6_GEPPETTO_OBSERVATION_ORACLE_CLOSURE_20260903.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "GEPPETTO"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-40BC1196D85C",
+      "path": "canonical/REALSAS_RIGANYTHING_SKINTOKENS_END_TO_END_CLEANROOM_MATRIX_20260903.md",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "GEPPETTO",
+        "ARACHNE_SKIN"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-740BD3803D90",
+      "path": ".github/workflows/geppetto_r6_teacher_projection_v1.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "GEPPETTO"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-4FA89A1F18E3",
+      "path": ".github/workflows/geppetto_v2_source_contract.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "GEPPETTO"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-7602B112751E",
+      "path": ".github/workflows/r6_oracle_substrate_geppetto_heterogeneous.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "GEPPETTO",
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-9E16A96CE750",
+      "path": ".github/workflows/r6_oracle_substrate_geppetto_one_family.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "GEPPETTO",
+        "COMPILER",
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-98AB2D42165B",
+      "path": "canonical/RIGANYTHING_CODE_LEVEL_REFERENCE_AUDIT_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "GEPPETTO"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-B89A2935BE86",
+      "path": "canonical/fit_mage_v1/GEPPETTO_64_SOFT_BUDGET_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "GEPPETTO",
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-46FC16F43424",
+      "path": "canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-04",
+      "date_source": "filename",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "exact path referenced by semantic spine"
+    },
+    {
+      "artifact_id": "KA-19FFD67DA717",
+      "path": "canonical/HISTORICAL_NUMERICS_SOURCE_DIFF_DISPOSITION_V1_20260904.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-09-04",
+      "date_source": "filename",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "exact path referenced by semantic spine"
+    },
+    {
+      "artifact_id": "KA-E90D9A92B4D3",
+      "path": "canonical/P0_DIRECTIONAL_BINDING_RUNTIME_INTERLOCK_CLOSURE_V1_20260904.json",
+      "role": "CLOSURE",
+      "subsystems": [
+        "RUNTIME_EXPORT"
+      ],
+      "date": "2026-09-04",
+      "date_source": "filename",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "exact path referenced by semantic spine"
+    },
+    {
+      "artifact_id": "KA-2268A1F53E9B",
+      "path": "canonical/PREFIT_HARDENING_RECONCILIATION_V2_20260904.md",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-04",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-129C7D12EA46",
+      "path": "canonical/REPAIR_EXECUTION_AUTHORITY_DISPOSITION_V1_20260904.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "COMPILER",
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": "2026-09-04",
+      "date_source": "filename",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "exact path referenced by semantic spine"
+    },
+    {
+      "artifact_id": "KA-F2525B260CF5",
+      "path": "canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V2_20260904.json",
+      "role": "CLOSURE",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": "2026-09-04",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-4B0409F7C017",
+      "path": "canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V3_20260904.json",
+      "role": "CLOSURE",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": "2026-09-04",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-D1F4ED87A320",
+      "path": "canonical/RESTORATION_CLOSURE_TRIGGER_ONCE_V4_20260904.json",
+      "role": "CLOSURE",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": "2026-09-04",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-1192FC2C9805",
+      "path": "canonical/RESTORATION_CLOSURE_VERDICT_V1_20260904.json",
+      "role": "CLOSURE",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": "2026-09-04",
+      "date_source": "filename",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "exact path referenced by semantic spine"
+    },
+    {
+      "artifact_id": "KA-0DA0612DDBF4",
+      "path": "canonical/LIVING_COMPILE_V4_PRODUCT_SHELL_PROMOTION_20260905.md",
+      "role": "PROMOTION_RETRACTION",
+      "subsystems": [
+        "COMPILER",
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-05",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-5EE41684F9B1",
+      "path": "canonical/COMPILER_RUNTIME_MIGRATION_COMPLETENESS_AUDIT_CLOSURE_20260901.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "COMPILER",
+        "RUNTIME_EXPORT"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-DCB2A465264A",
+      "path": "canonical/COMPILER_RUNTIME_MIGRATION_COMPLETENESS_AUDIT_PREREG_20260901.md",
+      "role": "PREREG",
+      "subsystems": [
+        "COMPILER",
+        "RUNTIME_EXPORT"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-5E9F9FE273DE",
+      "path": "canonical/END_TO_END_ARCHITECTURE_V3_SVG_CLOSURE_20260901.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-F4BE464765CE",
+      "path": "canonical/MWB0_TYPED_SEAM_IMPLEMENTATION_CLOSURE_20260901.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-DF88F00F3234",
+      "path": "canonical/MWB1_IDENTITY_SUBSET_BASELINE_CLOSURE_20260901.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-7A44CF795B47",
+      "path": "canonical/MWB1_IDENTITY_SUBSET_BASELINE_PREREG_20260901.md",
+      "role": "PREREG",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-EECA07C698F7",
+      "path": "canonical/MWB1_IDENTITY_SUBSET_BASELINE_PREREG_AMENDMENT_20260901.md",
+      "role": "PREREG",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-F901C03DBA40",
+      "path": "experiments/mwb1_identity_subset_20260901/MWB1_IDENTITY_SUBSET_BASELINE_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-01",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-9F8C3626D466",
+      "path": "canonical/ARCHITECTURE_V4_SOURCE_CLOSURE_20260902.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-794E91F07D21",
+      "path": "canonical/CANONICAL_REALSaS_COMPLETION_MATRIX_20260902.json",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "exact path referenced by semantic spine"
+    },
+    {
+      "artifact_id": "KA-0FA2F7491518",
+      "path": "canonical/CANONICAL_REALSaS_COMPLETION_PLAN_20260902.md",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "exact path referenced by semantic spine"
+    },
+    {
+      "artifact_id": "KA-BCDCFFFA32A5",
+      "path": "canonical/DINO_TOKEN_PARITY_V1_SEAL_20260902.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-A4370A042724",
+      "path": "canonical/GENERIC_SOURCE_COMPLETION_CLOSURE_20260902.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-539DE5B802EC",
+      "path": "canonical/PREFIT_VISUAL_AUDIT_COHORT_V1_20260902.json",
+      "role": "AUDIT",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-86853D709959",
+      "path": "canonical/SINGLE_FAMILY_DATA_SOURCE_CLOSURE_20260902.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-49C416932E88",
+      "path": "canonical/SINGLE_FAMILY_E2E_FIT_CONTRACT_20260902.md",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-6E0B2774972C",
+      "path": "canonical/fit/mage_u0/ARACHNE_A1_BASE_RESULT_20260902.json",
+      "role": "RESULT",
+      "subsystems": [
+        "ARACHNE_SKIN",
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-CD3BE64C309C",
+      "path": "canonical/fit/mage_u0/ARACHNE_A1_TAIL_REMEDIATION_RESULT_20260902.json",
+      "role": "RESULT",
+      "subsystems": [
+        "ARACHNE_SKIN",
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-34F174F8D90D",
+      "path": "canonical/fit/mage_u0/CODEC_A0_EXACT_CONDITIONING_RESULT_20260902.json",
+      "role": "RESULT",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-39E94D50AAE8",
+      "path": "canonical/fit_mage_v1/CODEC_CPU_FIT_MAGE_A0_CORE_20260902.json",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-02",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-008562527259",
+      "path": "canonical/APPEARANCE_PIXEL_CENTER_BEHAVIORAL_CLOSURE_20260903.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-8FD8431B7378",
+      "path": "canonical/APPEARANCE_PIXEL_CENTER_BEHAVIORAL_PREREG_20260903.md",
+      "role": "PREREG",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-B0BBE57F5E07",
+      "path": "canonical/ARACHNE_CODEC_BEHAVIORAL_PANEL_PREREG_20260903.md",
+      "role": "PREREG",
+      "subsystems": [
+        "ARACHNE_SKIN"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-BBE55385D01F",
+      "path": "canonical/ARACHNE_SHIPPING_BEHAVIORAL_CLOSURE_20260903.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "ARACHNE_SKIN"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-D09D37DF73BF",
+      "path": "canonical/AUTHORED_MOTION_PROOF_PROMOTION_V1_20260903.json",
+      "role": "PROMOTION_RETRACTION",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-1BDCE09D7C23",
+      "path": "canonical/AUTHORED_MOTION_PROOF_RETRACTION_V1_20260903.json",
+      "role": "PROMOTION_RETRACTION",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "exact path referenced by semantic spine"
+    },
+    {
+      "artifact_id": "KA-D94863B5EFDE",
+      "path": "canonical/BEHAVIORAL_HARDENING_LEDGER_20260903.md",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "basename referenced by semantic spine"
+    },
+    {
+      "artifact_id": "KA-82F293CB3481",
+      "path": "canonical/BOUNDED_REPAIR_LOOP_PROMOTION_V1_20260903.json",
+      "role": "PROMOTION_RETRACTION",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-720F38A3C2A5",
+      "path": "canonical/COMPILER_CORE_MESH_LAYOUT_SEAL_V1_20260903.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-B04CF4F70D7B",
+      "path": "canonical/COMPILER_CORE_SUBSTRATE_LAYOUT_SEAL_V1_20260903.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-EF15383E764C",
+      "path": "canonical/COMPILER_LBS_PRODUCTION_PROMOTION_V1_20260903.json",
+      "role": "PROMOTION_RETRACTION",
+      "subsystems": [
+        "COMPILER",
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-3F12AF5AB5DB",
+      "path": "canonical/COMPILER_PROOF_REPAIR_PROMOTION_MANIFEST_V1_20260903.json",
+      "role": "PROMOTION_RETRACTION",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-40A85EB77B31",
+      "path": "canonical/COMPILER_RUNTIME_DEPLOY_BAKE_PROMOTION_V1_20260903.json",
+      "role": "PROMOTION_RETRACTION",
+      "subsystems": [
+        "COMPILER",
+        "RUNTIME_EXPORT"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-CB94311E6F4B",
+      "path": "canonical/COMPILER_RUNTIME_PROMOTION_PLAN_V1_20260903.md",
+      "role": "PROMOTION_RETRACTION",
+      "subsystems": [
+        "COMPILER",
+        "RUNTIME_EXPORT"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "basename referenced by semantic spine"
+    },
+    {
+      "artifact_id": "KA-4BA9951889B5",
+      "path": "canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json",
+      "role": "PROMOTION_RETRACTION",
+      "subsystems": [
+        "COMPILER",
+        "RUNTIME_EXPORT"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "basename referenced by semantic spine"
+    },
+    {
+      "artifact_id": "KA-FC0EC3132EF2",
+      "path": "canonical/CONTROLLED_OWNER_ATTRIBUTION_PROMOTION_V1_20260903.json",
+      "role": "PROMOTION_RETRACTION",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-4AD172125761",
+      "path": "canonical/MOTION_DEFORMATION_BEHAVIORAL_PREREG_20260903.md",
+      "role": "PREREG",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-4F0DE7FDADF7",
+      "path": "canonical/MWB2_DIRECTIONAL_BEHAVIORAL_CLOSURE_20260903.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-935FE12AE17F",
+      "path": "canonical/MWB2_DIRECTIONAL_BEHAVIORAL_PREREG_20260903.md",
+      "role": "PREREG",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-7A0EB4D635F8",
+      "path": "canonical/R6_ARACHNE_OBSERVATION_ORACLE_CLOSURE_20260903.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "ARACHNE_SKIN"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-F9FCAF30B34A",
+      "path": "canonical/R6_ARACHNE_ORACLE_SUBSTRATE_HETEROGENEOUS_PREREG_20260903.md",
+      "role": "PREREG",
+      "subsystems": [
+        "ARACHNE_SKIN",
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-6FE9980AE4D0",
+      "path": "canonical/R6_ARACHNE_ORACLE_SUBSTRATE_ONE_FAMILY_RESULT_20260903.md",
+      "role": "RESULT",
+      "subsystems": [
+        "ARACHNE_SKIN",
+        "COMPILER",
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-6ACE250810ED",
+      "path": "canonical/R6_ARACHNE_ORACLE_SUBSTRATE_PREREG_20260903.md",
+      "role": "PREREG",
+      "subsystems": [
+        "ARACHNE_SKIN",
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-A01A326FD52F",
+      "path": "canonical/R6_G_ORACLE_SUBSTRATE_ONE_FAMILY_RESULT_20260903.md",
+      "role": "RESULT",
+      "subsystems": [
+        "COMPILER",
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-BB1056AD5101",
+      "path": "canonical/R6_ORACLE_SUBSTRATE_INFORMATION_SUFFICIENCY_PREREG_20260903.md",
+      "role": "PREREG",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": "2026-09-03",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-5CA5F5D04411",
+      "path": "experiments/iris_controlled_v1/CEILING_PASS_AND_OPEN_PILOT_DECISION_20260823.md",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-23",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-5D3F30025A2D",
+      "path": "experiments/iris_controlled_v1/MINI256_AND_MATCHER_V1_PREREG_20260823.md",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-23",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-1366804A42F4",
+      "path": "experiments/m4_identity_audit/VERY_IMPORTANT_AUDIT_M4_IDENTITY_AMBIGUITY_EQUIVALENT_SUBSTRATE_20260823.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "IRIS",
+        "COMPILER"
+      ],
+      "date": "2026-08-23",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-E24786177C20",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_B_SAFETY_CALIBRATION_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-5BB63755902D",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_B_SAFETY_CALIBRATION_RESULT_V1.md",
+      "role": "RESULT",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-3967000D5508",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_DOWNSTREAM_PROXY_MARGIN_DECISION_V1.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-2CE0116DE808",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_DOWNSTREAM_PROXY_MARGIN_DECISION_V1.md",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-5543449BAC27",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_DOWNSTREAM_PROXY_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-3DE22FAFF008",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_DOWNSTREAM_PROXY_SEAL_V1_3.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-0295FA05BC57",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_OBSERVABLE_GEOMETRY_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-32A4C36BEBFF",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PRE_PROXY32_DIAGNOSTICS_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-B3F99E68591C",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PRE_PROXY32_DIAGNOSTIC_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-5FCE6DBBABA1",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PRE_PROXY32_DIAGNOSTIC_RESULT_NOTE_V1.md",
+      "role": "RESULT",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-9C097747DCB7",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PROXY27_QUALIFICATION_CANONICAL_REPORT_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-EEDA72C57325",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/E0_PROXY27_QUALIFICATION_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-D0556BEA376B",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/N_B3_CANONICAL_REPORT_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-94BFD4E0B887",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/N_B3_EPSILON_PREREG_AMENDMENT_V1_1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-0532B8C86C15",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/N_B3_EPSILON_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-61F5A064E2B8",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/N_B3_OPERATIONAL_FREEZE_V1_2.md",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-33EFE71998CB",
+      "path": "experiments/g0_g1_single_pose_geometry/e0_observable_geometry_20260827/PRETRAINED_CONSUMER_CONTAMINATION_AUDIT_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "RUNTIME_EXPORT"
+      ],
+      "date": "2026-08-27",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-AD8FED95303E",
+      "path": "canonical/COMPILER_RUNTIME_RESTORATION_CLOSURE_20260828.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "COMPILER",
+        "RUNTIME_EXPORT",
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": "2026-08-28",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-CBDAEE7DBB09",
+      "path": "canonical/CONSUMER_VALIDITY_INTERLOCK_CLOSURE_20260829.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "RUNTIME_EXPORT"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-2BE047F07832",
+      "path": "canonical/DTB_ND1_ROBUST_LOCAL_PLANE_CLOSURE_20260829.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-9F6F9338A2EE",
+      "path": "canonical/FIT_PROXY32_COORDINATE_AND_RESIDUAL_AUDIT_20260829.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-3E84EB000F40",
+      "path": "canonical/M4R_ALL8_BOUNDARY_REFINEMENT_CLOSURE_20260829.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-00A09952D085",
+      "path": "canonical/M4_EXECUTION_SEAL_CLOSURE_20260829.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-F1DE0A731D86",
+      "path": "canonical/M4_SURFACE_GRID_CLOSURE_20260829.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-0549FAE8FC14",
+      "path": "canonical/STRUCTURED_DEPTH_BRIDGE_APPARATUS_CLOSURE_20260829.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-52704F34BA2D",
+      "path": "experiments/consumer_interlock_20260829/CONSUMER_COUPLING_PROBE_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "RUNTIME_EXPORT"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-9729FC9BAD4F",
+      "path": "experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_COUPLING_PROBE_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "RUNTIME_EXPORT"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-25E24DF2F769",
+      "path": "experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_EXACT_COMPILER_CLEAN_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "COMPILER",
+        "RUNTIME_EXPORT"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-1CCF3E472119",
+      "path": "experiments/consumer_interlock_20260829/CONSUMER_INTERLOCK_V0_I0_AUDIT_V2.json",
+      "role": "AUDIT",
+      "subsystems": [
+        "RUNTIME_EXPORT"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-FB42E669C63D",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_MANIFEST_V1.json",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-BCF35D1BB1F0",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_MANIFEST_V2.json",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-5DB972C5F155",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_STAGE_A_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-343CA838E233",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_STAGE_B_M2_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-B6AA6C2F0B15",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/APPARATUS_STAGE_C_M3_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-B099CB8D51D0",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/DEPTH_TOLERANCE_BRIDGE_PREOPEN_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-33A30119CA64",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/DTB_ND1_ROBUST_LOCAL_PLANE_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-FD1F3635D3A2",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/DTB_ND1_ROBUST_LOCAL_PLANE_PREREG_V1_1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-07FBEE7C6D85",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/DTB_ND1_ROBUST_LOCAL_PLANE_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-58325E31C4F0",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/EXPERIMENT_NAMESPACE_V1.md",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-C57946F3C766",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/FIT_PROXY32_COORDINATE_AND_RESIDUAL_AUDIT_V1.json",
+      "role": "AUDIT",
+      "subsystems": [
+        "IRIS",
+        "FIT_PRODUCT"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-0F8FC1B9DF4E",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4R_ALL8_BOUNDARY_REFINEMENT_DECISION_TABLE_V1.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-182841CE4B92",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4R_ALL8_BOUNDARY_REFINEMENT_PREREG_V1.json",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-FC9B631BD3AD",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4R_ALL8_BOUNDARY_REFINEMENT_RESULT_V1.sha256.json",
+      "role": "RESULT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-573ABC0E42CC",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4_EXECUTION_SEAL_V1.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-AEDBCAD494C4",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4_RAW_SOURCE_MANIFEST_V2.json",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-CB4B9438D5EA",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4_SURFACE_GRID_PREREG_V1.json",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-406D3A5B02BB",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/M4_SURFACE_GRID_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-54F7896720E6",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/MINIMUM_FIRST_RESULT_PATH_V1.md",
+      "role": "RESULT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-9B4F79855DBA",
+      "path": "experiments/g0_g1_single_pose_geometry/depth_tolerance_bridge_20260829/robust_local_plane_v1.py",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-318FD0558BB0",
+      "path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_AMENDMENT_V1_1.json",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-91892780F0E1",
+      "path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_AMENDMENT_V1_1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-4C24922F5153",
+      "path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_V1.json",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-884D5AD24D05",
+      "path": "experiments/iris_dino_controlled_20260829/DINO_CONTROLLED_REPRESENTATION_LADDER_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-823A73EA7584",
+      "path": "experiments/iris_dino_controlled_20260829/DINO_FROZEN_APPARATUS_CODE_AUDIT_V1.json",
+      "role": "AUDIT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-7FB29C902754",
+      "path": "experiments/iris_dino_controlled_20260829/FROZEN_APPARATUS_AUDIT_GATE_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-29",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-2EC025240C7E",
+      "path": "canonical/CORPUS_VISUAL_ANOMALY_TRIAGE_PREREG_20260831.md",
+      "role": "PREREG",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-50567FE4F9CC",
+      "path": "canonical/DETERMINISTIC_DOWNSTREAM_LAYER_OWNERSHIP_OVERLAP_AUDIT_20260831.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-417206C93AD7",
+      "path": "canonical/DINO_FROZEN_APPARATUS_CODE_AUDIT_CLOSURE_20260831.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-47368B55E1CA",
+      "path": "canonical/DINO_LADDER_S1_EARLY_TERMINATION_CLOSURE_20260831.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-FFCF39E5E4A0",
+      "path": "canonical/IRIS_REPROJECTION_CENTERED_V2_PREREG_20260831.md",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-76AB5B2BD83F",
+      "path": "canonical/IRIS_REPROJECTION_V2_GATE0_SYNTHETIC_CLOSURE_20260831.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-6793C045533F",
+      "path": "canonical/IRIS_REPROJECTION_V2_REAL_CORPUS_GATE0_EXECUTION_PREREG_20260831.md",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-13D656DD01AD",
+      "path": "canonical/IRIS_REPROJECTION_V2_REAL_GATE0_MEMBERSHIP_HASH_VERIFIER_ERRATUM_20260831.md",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-80D42560F4A1",
+      "path": "experiments/iris_reprojection_v2_20260831/GATE0_SYNTHETIC_PREFLIGHT_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-E635A5EA55E5",
+      "path": "experiments/iris_reprojection_v2_20260831/IRIS_REPROJECTION_V2_PREREG_V1.json",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-ECC75457E89B",
+      "path": "experiments/iris_reprojection_v2_20260831/gate0_geometry_v1.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-6F3D3429A45E",
+      "path": "experiments/iris_reprojection_v2_20260831/gate0_real_corpus_v1.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-46677CB93839",
+      "path": "experiments/iris_reprojection_v2_20260831/gate0_real_corpus_v1_1_hashfix.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-AA56265EE336",
+      "path": "experiments/iris_reprojection_v2_20260831/run_gate0_synthetic_preflight_v1.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-B0B57E747DAE",
+      "path": "experiments/iris_reprojection_v2_20260831/test_gate0_geometry_v1.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-BFCF417DCC04",
+      "path": "experiments/iris_reprojection_v2_20260831/test_gate0_real_corpus_v1.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-6EC66859968A",
+      "path": "experiments/iris_reprojection_v2_20260831/test_gate0_real_corpus_v1_1_hashfix.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": "2026-08-31",
+      "date_source": "filename",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-97CAA10CA4BF",
+      "path": ".github/workflows/arachne_codec_v2_source_contract.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "ARACHNE_SKIN"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-1D8FA7E9098D",
+      "path": ".github/workflows/arachne_shipping_boundary.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "ARACHNE_SKIN"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-197A0E5DBAE0",
+      "path": ".github/workflows/architecture_freeze_source_gate.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-4CD636025F64",
+      "path": ".github/workflows/architecture_freeze_v2_candidate.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-2BFAF4BBF491",
+      "path": ".github/workflows/completion_audit_contract.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-D7B97E8FEF18",
+      "path": ".github/workflows/iris_reprojection_v2_gate0.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-83F052F21090",
+      "path": ".github/workflows/iris_scene_first_signed_promotion_v3.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "IRIS",
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-B4E5CB229916",
+      "path": ".github/workflows/iris_v2_source_contract.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-082FB91B945D",
+      "path": ".github/workflows/p0_directional_binding_closure.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-F86B2ADC4114",
+      "path": ".github/workflows/post_freeze_family_selector_v1.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-0FE27E5B11E6",
+      "path": ".github/workflows/pre_fit_visible_optimizer_once_v1.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-6BC7F0495384",
+      "path": ".github/workflows/prefit_observation_authority_v1.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "FIT_PRODUCT",
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-C6C701BCCF9F",
+      "path": ".github/workflows/proof_service_promotion_gate.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-E53C5FBCF1E1",
+      "path": ".github/workflows/r6_oracle_substrate_arachne_heterogeneous.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "ARACHNE_SKIN",
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-C00220F1975E",
+      "path": ".github/workflows/r6_oracle_substrate_arachne_one_family.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "ARACHNE_SKIN",
+        "COMPILER",
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-83BCB478D873",
+      "path": ".github/workflows/restoration_closure_manual.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-1B6EED75E6DF",
+      "path": ".github/workflows/restoration_closure_trigger_once.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-F7D61CC40093",
+      "path": ".github/workflows/runtime_deploy_bake_promotion_gate.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "COMPILER",
+        "RUNTIME_EXPORT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-2AB29E96400E",
+      "path": ".github/workflows/single_family_data_contract_v1.yml",
+      "role": "WORKFLOW",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-A54FF182C7E8",
+      "path": "AGENTS.md",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-73EB8B983651",
+      "path": "CURRENT_STATE.md",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "continuity spine file"
+    },
+    {
+      "artifact_id": "KA-FF5DBF8E417F",
+      "path": "REPOSITORY_MAP.md",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "continuity spine file"
+    },
+    {
+      "artifact_id": "KA-271B89351907",
+      "path": "RESTORATION_STATE.md",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "exact path referenced by semantic spine"
+    },
+    {
+      "artifact_id": "KA-35C17343D4CB",
+      "path": "SYSTEM_INDEX.md",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "continuity spine file"
+    },
+    {
+      "artifact_id": "KA-155B33F22B83",
+      "path": "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "continuity spine file"
+    },
+    {
+      "artifact_id": "KA-59679250A224",
+      "path": "canonical/ARCHITECTURE_FREEZE_V1.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-D43D44A9B6E6",
+      "path": "canonical/ARCHITECTURE_FREEZE_V2.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-F5BA014048BA",
+      "path": "canonical/AUTHORITY_MAP_V1.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "continuity spine file"
+    },
+    {
+      "artifact_id": "KA-86F0A6793B60",
+      "path": "canonical/BOOTSTRAP_COVERAGE_STATE_V1.json",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-E771A3AF2850",
+      "path": "canonical/BRANCH_AUTHORITY_V1.md",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "continuity spine file"
+    },
+    {
+      "artifact_id": "KA-0534EF6474A1",
+      "path": "canonical/COMPILER_RUNTIME_MIGRATION_COMPLETENESS_AUDIT_V1.json",
+      "role": "AUDIT",
+      "subsystems": [
+        "COMPILER",
+        "RUNTIME_EXPORT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-D3AD69D761BF",
+      "path": "canonical/CONTEXT_STATE_V1.json",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "continuity spine file"
+    },
+    {
+      "artifact_id": "KA-7872B396F67B",
+      "path": "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "continuity spine file"
+    },
+    {
+      "artifact_id": "KA-B9A346181202",
+      "path": "canonical/EXPERIMENT_REGISTRY_V1.json",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "SEMANTICALLY_INDEXED",
+      "semantic_reason": "continuity spine file"
+    },
+    {
+      "artifact_id": "KA-C8133F5AB94F",
+      "path": "canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json",
+      "role": "PREREG",
+      "subsystems": [
+        "FIT_PRODUCT",
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-A707A5BC0E5F",
+      "path": "canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-E64066971821",
+      "path": "canonical/N1D_DESCRIPTOR_GLOBAL_FOREGROUND_TOP4_OPENDEV_CANONICAL_REPORT_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-341499E4107C",
+      "path": "canonical/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_CANONICAL_REPORT_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-FEC7B3D62CA6",
+      "path": "canonical/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_STAGE_A_CANONICAL_REPORT_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-9DFD62F7BBF0",
+      "path": "canonical/SKINTOKENS_CODE_LEVEL_REFERENCE_AUDIT_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "ARACHNE_SKIN"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-407F166AE950",
+      "path": "canonical/SOLVER_AUTHORITY_MATRIX_V1.md",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "COMPILER",
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-28B42859A54D",
+      "path": "canonical/architecture_freeze_gate_v1.py",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-20CF998EBB85",
+      "path": "canonical/architecture_freeze_gate_v2.py",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-ED7046DA2F7D",
+      "path": "canonical/fit_mage_v1/ARACHNE_A1_CPU_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "ARACHNE_SKIN",
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-84856FBCEDAF",
+      "path": "canonical/fit_mage_v1/CODEC_A0_EXACT_CONDITIONING_RESULT.json",
+      "role": "RESULT",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-65BED8463DA2",
+      "path": "canonical/fit_mage_v1/FIT_MAGE_CPU_V1_STATUS.md",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-F345774B767D",
+      "path": "canonical/validate_completion_plan_v1.py",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-03EDC5EB25FB",
+      "path": "experiments/family_selection_v1/post_freeze_family_selector_v1.py",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-C62CCA720948",
+      "path": "experiments/family_selection_v1/prefit_family_truth_eligibility_v1.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-E62881739AE2",
+      "path": "experiments/family_selection_v1/prefit_observation_authority_v1.py",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "FIT_PRODUCT",
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-CD882CB403DB",
+      "path": "experiments/family_selection_v1/test_post_freeze_family_selector_v1.py",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-6942F0A822AB",
+      "path": "experiments/family_selection_v1/test_prefit_family_truth_eligibility_v1.py",
+      "role": "HIGH_SIGNAL_OTHER",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-266E5E1E7202",
+      "path": "experiments/g0_g1_single_pose_geometry/G0_CONTRACT_FREEZE.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-6763A5170DEF",
+      "path": "experiments/g0_g1_single_pose_geometry/G1_FREEZE_MANIFEST.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-2BF48E380062",
+      "path": "experiments/g0_g1_single_pose_geometry/G1_PREREG_DRAFT.json",
+      "role": "PREREG",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-C6C2E800CC0A",
+      "path": "experiments/g0_g1_single_pose_geometry/G1_PREREG_V1.json",
+      "role": "PREREG",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-7E9BF64F76A8",
+      "path": "experiments/g0_g1_single_pose_geometry/G1_SPLIT_FREEZE.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-DB5EE5545050",
+      "path": "experiments/g0_g1_single_pose_geometry/N1D_TO_G1_MIGRATION_REPORT.json",
+      "role": "AUDIT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-64C24F1B3A03",
+      "path": "experiments/g0_g1_single_pose_geometry/PRESERVATION_LEDGER.json",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-1C6FAEB79925",
+      "path": "experiments/g0_g1_single_pose_geometry/REALSAS_MASTER_CORPUS_SOURCE_AUDIT_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-BF0D4DEF78CD",
+      "path": "experiments/g0_g1_single_pose_geometry/STARTER_MANIFEST.json",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-4B43C97C12E4",
+      "path": "experiments/g0_g1_single_pose_geometry/legacy_reserve/D2_RESULT.md",
+      "role": "RESULT",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-34FE6B744367",
+      "path": "experiments/g0_g1_single_pose_geometry/schemas/REALSAS_MASTER_CORPUS_MANIFEST_SCHEMA_V1.json",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-845AFF61136F",
+      "path": "experiments/g0_g1_single_pose_geometry/schemas/REALSAS_MODEL_EXPORT_MANIFEST_SCHEMA_V1.json",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "RUNTIME_EXPORT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-F598A706767B",
+      "path": "experiments/iris_controlled_v1/AUTHORITY_POINTERS_V1.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "IRIS",
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-3CCBEAD67CDE",
+      "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256.ipynb",
+      "role": "NOTEBOOK",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-76E5E5111327",
+      "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256_PREREG.md",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-FC54CC26F664",
+      "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256_PREREG_V1_1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-5295B547461B",
+      "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_M256_V1_2.ipynb",
+      "role": "NOTEBOOK",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-6060F40A2CD4",
+      "path": "experiments/iris_controlled_v1/IRIS_CONTROLLED_V1_PREREG.md",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-942C31CD5970",
+      "path": "experiments/iris_controlled_v1/M256_DENSE_AUTHORITY_POINTERS_V1_2.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "IRIS",
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-A664112A5BF5",
+      "path": "experiments/iris_controlled_v1/PACKAGE_MANIFEST_V1.json",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-C97E47C2AD89",
+      "path": "experiments/iris_controlled_v1/PACKAGE_SEAL_V1.json",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-263E3C57B33D",
+      "path": "experiments/iris_controlled_v1/TRAINING_READY_REPORT_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-86FB019E6C46",
+      "path": "experiments/iris_controlled_v1/build_seed_manifest.py",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-6B30256F9445",
+      "path": "experiments/n1d/post_n1d/N1D_DESCRIPTOR_GLOBAL_FOREGROUND_TOP4_UNTOUCHED_OPENDEV_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-8C2A40B60CE9",
+      "path": "experiments/n1d/post_n1d/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_CANONICAL_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-4D95002384B2",
+      "path": "experiments/n1d/post_n1d/N1D_GLOBAL_FOREGROUND_GFDR_CAUSAL_REPLAY_CANONICAL_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-F021CE041779",
+      "path": "experiments/n1d/post_n1d/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_STAGE_A_CANONICAL_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-D914EEAAC5C4",
+      "path": "experiments/post_corpus_audit/GATE0_GATE1_LIVE_DRIVE_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-750C8F2C086D",
+      "path": "experiments/post_corpus_audit/GATE3_LINKED_APPEARANCE_REMATERIALIZATION_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-613EEA1A7DB7",
+      "path": "experiments/post_corpus_audit/IRIS_USABLE_CONTROLLED_CORPUS_FREEZE_V1.md",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-FE5107AF5B20",
+      "path": "experiments/post_corpus_audit/POST_CORPUS_80_CHECK_CLOSURE_MATRIX_V1.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-2440ED0F7D8D",
+      "path": "experiments/post_corpus_audit/POST_CORPUS_AUDIT_STATUS.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-1B83111DC9D6",
+      "path": "experiments/post_corpus_audit/POST_CORPUS_STAGE_A_CLOSURE_DECISION_V2.md",
+      "role": "CLOSURE",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-199D6573C67A",
+      "path": "experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_STUDY_V1_PREREG.md",
+      "role": "PREREG",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-73E7EE221315",
+      "path": "experiments/post_corpus_audit/audit_master_corpus.py",
+      "role": "AUDIT",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-0ACBCB189189",
+      "path": "experiments/post_corpus_audit/audit_master_corpus_fast.py",
+      "role": "AUDIT",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-A6C2C94D02F8",
+      "path": "experiments/post_corpus_audit/post_corpus_stage_a_closure_v2.py",
+      "role": "CLOSURE",
+      "subsystems": [
+        "CROSS_CUTTING_OTHER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-0342A7550731",
+      "path": "experiments/post_corpus_audit/post_corpus_stage_b6_freeze_repair_staging_v1.py",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-DA6D3C40C344",
+      "path": "experiments/post_corpus_audit/post_corpus_stage_b_selective_authority_v1.py",
+      "role": "AUTHORITY_DECISION",
+      "subsystems": [
+        "REPOSITORY_GOVERNANCE"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-387444CAD931",
+      "path": "experiments/s0_rigging_substrate/S0_A_CORPUS_BINDING_REPORT.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-C53EDA8BFF53",
+      "path": "experiments/s0_rigging_substrate/S0_A_INFORMATION_DERIVABILITY_MATRIX.json",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-77AC6FB747EE",
+      "path": "experiments/s0_rigging_substrate/S0_B2_DERIVED_NORMAL_FALSIFICATION_REPORT_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-CAFC99AC2895",
+      "path": "experiments/s0_rigging_substrate/S0_B2_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-D127D4060B23",
+      "path": "experiments/s0_rigging_substrate/S0_B2_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-694E229575E0",
+      "path": "experiments/s0_rigging_substrate/S0_B_PILOT_REPORT_V1.md",
+      "role": "AUDIT",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-88A8298F3195",
+      "path": "experiments/s0_rigging_substrate/S0_B_PILOT_RESULT_V1.json",
+      "role": "RESULT",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-BEA2EF0F1E0C",
+      "path": "experiments/s0_rigging_substrate/S0_PLAN_AND_PREREG_V1.md",
+      "role": "PREREG",
+      "subsystems": [
+        "COMPILER"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-7F93C1EE9B3C",
+      "path": "experiments/single_family_e2e_v1/data_manifest_v1.py",
+      "role": "PLAN_MATRIX",
+      "subsystems": [
+        "FIT_PRODUCT"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-2D6CFCD9E4B7",
+      "path": "prereg/iris/G1_SINGLE_POSE_GEOMETRY_PREREG_DRAFT.json",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-705B2B7F2F76",
+      "path": "prereg/iris/G1_SINGLE_POSE_GEOMETRY_PREREG_V1.json",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-ABC3DA3694EB",
+      "path": "prereg/n1d/N1D_DESCRIPTOR_GLOBAL_FOREGROUND_TOP4_UNTOUCHED_OPENDEV_PREREG_V1.json",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-AA8F77BAAE2C",
+      "path": "prereg/n1d/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_PREREG_V1.json",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-7580944713D1",
+      "path": "prereg/n1d/N1D_GLOBAL_FOREGROUND_GFDR_CAUSAL_REPLAY_PREREG_V1.json",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    },
+    {
+      "artifact_id": "KA-A6509E0F3845",
+      "path": "prereg/n1d/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_OPENDEV_PREREG_V1.json",
+      "role": "PREREG",
+      "subsystems": [
+        "IRIS"
+      ],
+      "date": null,
+      "date_source": "unknown",
+      "semantic_status": "CATALOGUED_UNREVIEWED",
+      "semantic_reason": "present in census; semantic role not yet reconciled"
+    }
+  ]
+}

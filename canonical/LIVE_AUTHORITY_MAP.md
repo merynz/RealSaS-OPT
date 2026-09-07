@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `dc3336e0bb51ba8f8012cd9b8e8aeae06a7f7ee05e2c09190b3b1b99a96b5fe3`
+> State fingerprint: `5af60cecc0bf0387239ad575032580635990f1e25a15cd4c57b3af7a5912f8e6`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -37,7 +37,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `f76b9ba14244` | canonical continuation branch |
+| `main` | `b5202fbb14ae` | canonical continuation branch |
 
 ### ACTIVE_EXPERIMENT
 

@@ -1,0 +1,69 @@
+{
+  "schema": "RealSaS.AOAArtifactDisposition.v1",
+  "status": "BINDING_CONTEXT_COVERAGE_POLICY",
+  "fit1_gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
+  "first_executable_fit_base": "de1a44cae1195dd9cbad3b23ef75d58ae80aa9b3",
+  "purpose": "Close bootstrap continuity without falsely declaring every historical artifact semantically or scientifically revalidated.",
+  "classes": {
+    "INDEXED_EXPLICIT": {
+      "definition": "Artifact is itself part of the continuity spine or is explicitly referenced by a spine artifact.",
+      "authority_effect": "None by class alone; exact current scientific authority is still determined by CURRENT_STATE, authority ledgers, prereg/result/source and explicit promotion/retraction."
+    },
+    "FIT1_COMMIT_LEDGER_COVERED": {
+      "definition": "Artifact was introduced or changed in history descended from the FIT1 gate anchor and the exact change is recoverable through canonical/FIT1_COMMIT_LINEAGE_V1.json.",
+      "authority_effect": "Discovery/provenance only. A commit message or changed file does not establish execution, PASS, promotion or generalization."
+    },
+    "HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL": {
+      "definition": "High-signal artifact already existed at the FIT1 gate anchor and is retained as historical evidence/provenance unless separately indexed/promoted.",
+      "authority_effect": "Historical/evidence-only by default. It cannot outrank current canonical state merely because it is detailed, newer-looking, or still tracked."
+    },
+    "UNEXPLAINED": {
+      "definition": "High-signal artifact is neither explicitly indexed, FIT1-ledger-covered, nor present at the FIT1 gate anchor.",
+      "authority_effect": "Continuity regression. Forbidden after bootstrap closure; CI must fail closed."
+    }
+  },
+  "semantic_spines": {
+    "subsystem_ownership": "canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md",
+    "fit1_science": "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
+    "fit1_exact_commit_discovery": "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+    "architecture_status": "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
+    "experiment_status": "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
+    "experiment_structure": "canonical/EXPERIMENT_REGISTRY_V1.json",
+    "chronology": "canonical/SCIENTIFIC_JOURNAL_V1.jsonl"
+  },
+  "mandatory_scientific_corrections_preserved": [
+    {
+      "topic": "Geppetto Causal Repair V2",
+      "rule": "Authoritative staircase is R2 FAIL -> C1 full-surface cross-attention PASS -> STOP. C2 conditional diffusion was implemented but not authoritatively run in that staircase. C3/C4 remain fuller source-coded research mechanisms without authoritative full-formulation closure.",
+      "authority": "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md"
+    },
+    {
+      "topic": "AR-01",
+      "rule": "Both AR0 and AR1 completed to 16384; neither satisfied terminal 48-check stability. AR0 capacity/reachability is strong but terminal stability unresolved. AR1 teacher-forced closure with free-running failure is exposure/recurrent-error-amplification evidence. No causal winner/refreeze/full-RigAnything verdict.",
+      "authority": "canonical/AR01_RESULT_20260907.md"
+    },
+    {
+      "topic": "IRIS privileged-input scope",
+      "rule": "Affected historical learned IRIS V2 checkpoints/metrics are quarantined for clean observation-only claims. Firewall repair closes the source seam prospectively; it does not retroactively cleanse quarantined learned results.",
+      "authority": "canonical/IRIS_LEAK_SCOPE_20260903.md + canonical/IRIS_PRIVILEGED_INPUT_FIREWALL_REPAIR_V1_20260903.md"
+    },
+    {
+      "topic": "Learned/deterministic ownership",
+      "rule": "IRIS/Geppetto/Arachne are learned evidence/proposal owners inside deterministic qualification envelopes. Compiler/GSA may analytically assemble, constrain legality and fail close; they may not silently invent missing learned semantics or convert repaired output into model success.",
+      "authority": "canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md + canonical/DETERMINISTIC_DOWNSTREAM_LAYER_OWNERSHIP_OVERLAP_AUDIT_20260831.md"
+    }
+  ],
+  "branch_policy": {
+    "canonical": "main",
+    "active_experiment_count_expected_now": 0,
+    "unregistered_non_main_default": "EVIDENCE_ONLY_UNREGISTERED",
+    "rule": "Branch existence/recency never implies scientific or continuation authority. Evidence branches are retained unless explicitly disposed; no automatic deletion is authorized by AOA closure."
+  },
+  "closure_nonclaims": [
+    "AOA closure does not validate every historical result.",
+    "AOA closure does not promote historical branch code.",
+    "AOA closure does not convert implemented mechanisms into executed mechanisms.",
+    "AOA closure does not prove FIT1 or unseen-family generalization.",
+    "AOA closure does not authorize a new Geppetto experiment/refreeze or Arachne training by itself."
+  ]
+}

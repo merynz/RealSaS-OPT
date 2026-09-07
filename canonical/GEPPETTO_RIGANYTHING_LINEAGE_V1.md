@@ -28,25 +28,84 @@ Architecture ID:
 
 `RealSaS.GeppettoChallenger.RigAnythingMechanisms.v1`
 
-## Mechanism decomposition
+## Mechanism decomposition — implementation vs execution
 
-The challenger preserves a mechanism ladder rather than treating RigAnything as one indivisible black box.
-
-| Rung | Mechanism delta | Scientific meaning / status |
+| Rung | Mechanism delta | Authoritative execution status |
 |---|---|---|
-| `R2/C0-family baseline` | matched historical/corrected Geppetto baseline | control lineage; exact historical/result pointer still undergoing bootstrap normalization |
-| `C1` | per-step full-surface cross-attention | component evidence exists; does not establish diffusion or skeleton-feedback necessity |
-| `C2` | C1 + conditional diffusion locus | component evidence lineage exists; joint/parent geometry feedback explicitly absent |
-| `C3` | C2 + current joint / parent geometry feedback token into subsequent generation | source-coded fuller skeleton-causal formulation; **not registered as an authoritative isolated/full-formulation closed run** |
-| `C4` | C3 + sibling/BFS-equivalent-order augmentation | source-coded order-handling extension; **not registered as an authoritative closed causal result** |
+| `R2` | corrected-raster matched historical baseline; xattn OFF; diffusion OFF; geometry feedback OFF | **RUN — stable FAIL** in Causal Repair V2 contract `233ec3bcd77e0f02` |
+| `C1` | R2 + per-step full-surface cross-attention | **RUN — stable PASS** in Causal Repair V2; winner candidate `C1` |
+| `C2` | C1 + conditional diffusion locus; geometry feedback still OFF | **IMPLEMENTED / PREREGISTERED BUT NOT RUN in authoritative Causal Repair V2** because the preregistered staircase stopped after C1 PASS |
+| `C3` | C2 + current joint / parent geometry feedback token into subsequent generation | **SOURCE-CODED; no authoritative closed full-formulation run registered** |
+| `C4` | C3 + sibling/BFS-equivalent-order augmentation | **SOURCE-CODED; no authoritative closed run registered** |
 
-The prior Causal Repair V2 prereg explicitly defined:
+This distinction is binding: **C2 source/prereg existence is not C2 experimental evidence.**
+
+## Causal Repair V2 — exact normalized result
+
+Drive authority folder:
+
+`RealSaS_MAGE_GEPPETTO_CAUSAL_REPAIR_V2_NO_TOKEN`
+
+Contract tag:
+
+`233ec3bcd77e0f02`
+
+Comparison artifact created:
+
+`2026-09-06T04:06:17.337Z`
+
+Preregistered staircase:
+
+`RUN_R2_FIRST -> IF_R2_FAIL RUN_C1 -> IF_C1_PASS STOP_MECHANISM_SEARCH -> C2 only if C1 fails`
+
+The actual run folder contains only `R2_*` and `C1_*` result/checkpoint files. There is no C2 result artifact in that authoritative run.
+
+### R2
+
+- stable PASS: `false`
+- first stable: `null`
+- best step: `12800`
+- best slot p95: `0.041321732103824615`
+- final outside: `27`
+- final occupancy L1: `27`
+- final slot p95: `0.1146610826253891`
+
+### C1
+
+- stable PASS: `true`
+- first stable: `4992`
+- epsilon switch: `4736`
+- best step: `6208`
+- best slot p95: `0.004098494071513414`
+- final outside: `0`
+- final occupancy L1: `0`
+- final slot p95: `0.005874851252883673`
+
+Winner candidate:
+
+`C1`
+
+Recorded causal interpretation:
+
+`R2_NO_STABLE_PASS_WITHIN_BUDGET__C1_XATTN_STABLE_PASS__XATTN_RESCUES_THIS_FROZEN_TRAINING_PROTOCOL__NOT_THEORETICAL_NECESSITY`
+
+Promotion authority was `false`.
+
+Therefore Causal Repair V2 provides **controlled component evidence for full-surface cross-attention under that frozen Mage FIT training protocol**. It does not provide a C2 diffusion result because C2 was never entered.
+
+## Why the mechanism ladder was split
+
+The Causal Repair V2 prereg explicitly defined:
 
 - R2: no xattn, no diffusion, no geometry feedback;
 - C1: xattn ON, diffusion OFF, geometry feedback OFF;
 - C2: xattn ON, diffusion ON, geometry feedback OFF.
 
-This separation was deliberate: it preserved causal attribution instead of changing full-surface access, locus generation, generated mechanical state, and sibling ordering simultaneously.
+This separation was deliberate: preserve causal attribution instead of changing full-surface access, locus generation, generated mechanical state, and sibling ordering simultaneously.
+
+Because C1 passed, the same causal-discipline rule **prevented C2 from running**. This is why later memory must say:
+
+> C2 existed as an executable/preregistered rung, not as a closed result in this experiment.
 
 ## Why AR-01 existed despite C3 already existing
 
@@ -91,8 +150,9 @@ A future experiment must state which one it tests. Do not bundle all three and l
 
 ## Anti-conflation rules
 
+- `C2 implemented/preregistered` != `C2 run`.
 - `source-coded C3/C4` != `C3/C4 scientifically closed`.
-- `C1 + C2 + AR-01 component evidence` != `full C3/C4 verdict`.
+- `C1 PASS + C2 source + AR-01 result` != `full C3/C4 verdict`.
 - `AR1 exposure collapse` != `all structural AR falsified`.
 - `AR0 long exact streak` != `terminal stability PASS`.
 - `FIT1` != `generalization`.
@@ -100,4 +160,12 @@ A future experiment must state which one it tests. Do not bundle all three and l
 
 ## Bootstrap audit status
 
-This lineage closes the highest-risk semantic gap that caused repeated "we already built that / why is it missing?" rediscovery. Exact historical numeric/result-pointer normalization for all C1/C2 and older Geppetto experiments remains part of the broader audit-of-audits queue until the coverage audit marks those artifacts semantically reconciled.
+The highest-risk RigAnything/Geppetto semantic gap is now materially reduced:
+
+- fuller challenger existence is commit/blob bound;
+- Causal Repair V2 R2/C1 execution is Drive-result bound;
+- C2 non-execution is explicit;
+- C3/C4 source-only status is explicit;
+- AR-01 scope/result is explicit.
+
+Older Geppetto numerical/result pointers and other modules remain in the broader audit-of-audits queue until the coverage audit marks them semantically reconciled.

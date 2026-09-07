@@ -2,7 +2,12 @@
   "schema_version": 1,
   "repository": "merynz/RealSaS-OPT",
   "continuation_authority": "CURRENT_STATE.md",
+  "context_state": "canonical/CONTEXT_STATE_V1.json",
+  "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V1.json",
+  "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
   "generated_live_map": "canonical/LIVE_AUTHORITY_MAP.md",
+  "generated_rehydration_packet": "canonical/REHYDRATION_PACKET.md",
+  "generated_coverage_audit": "canonical/CONTEXT_COVERAGE_AUDIT.md",
   "human_ledgers": [
     "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
@@ -32,26 +37,40 @@
       "DELETE_CANDIDATE": "Looks disposable by explicit naming rule. Do not delete automatically; review provenance first."
     }
   },
-  "active_experiments": [
+  "active_experiments": [],
+  "recent_closed_experiments": [
     {
       "id": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
       "branch": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
-      "status": "ACTIVE_RUNNING",
-      "question": "Does the preregistered minimal joint+parent mechanical recurrent feedback intervention improve Mage FIT1 reachability/retention and parent/root structural prediction under the matched AR0/AR1 design?",
-      "proves_if_closed": "A verdict about the exact AR-01 minimal mechanical-feedback intervention on Mage FIT1 under the preregistered design.",
-      "does_not_prove": [
-        "full RigAnything formulation equivalence or superiority",
-        "generalization",
-        "mechanical salience / functional simplification",
-        "product-wide Geppetto architecture promotion without the explicit promotion transaction"
-      ],
-      "research_sources": [
-        "models/geppetto/challengers/ar01_skeleton_causal_v1.py",
-        "models/geppetto/challengers/riganything_mechanisms_v1.py"
+      "status": "CLOSED_FAIL__NO_TERMINAL_CLOSURE",
+      "closed_utc": "2026-09-07T06:00:52.301304+00:00",
+      "categorical_verdict": "AR01_NO_TERMINAL_CLOSURE",
+      "result_authority": "canonical/AR01_RESULT_20260907.md",
+      "what_it_means": "Neither matched arm satisfied the preregistered terminal 48-check structural-stability gate; no causal winner and no promotion.",
+      "what_it_does_not_mean": [
+        "full RigAnything formulation failure",
+        "all skeleton-causal autoregression is harmful",
+        "AR0 lacks same-witness capacity",
+        "generalization verdict"
       ]
     }
   ],
+  "next_decision": {
+    "status": "POST_AR01_DIAGNOSIS_REQUIRED__NO_NEW_EXPERIMENT_PREREGISTERED",
+    "module": "Geppetto",
+    "purpose": "Choose the next falsifiable gate only after separating AR0 residual terminal instability, AR1 teacher-forced/free-running exposure failure, and the already-existing fuller RigAnything C3/C4 formulation lineage.",
+    "must_read": [
+      "canonical/AR01_RESULT_20260907.md",
+      "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md",
+      "canonical/EXPERIMENT_REGISTRY_V1.json"
+    ]
+  },
   "branch_overrides": [
+    {
+      "branch": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
+      "class": "EVIDENCE_ONLY",
+      "reason": "AR-01 closed at contract 41055bd073538d6b with verdict AR01_NO_TERMINAL_CLOSURE; retain source/prereg/provenance only."
+    },
     {
       "branch": "exp/lossless-rigging-evidence-v1-20260906",
       "class": "EVIDENCE_ONLY",
@@ -65,25 +84,34 @@
   ],
   "required_files": [
     "CURRENT_STATE.md",
+    "canonical/CONTEXT_STATE_V1.json",
     "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
+    "canonical/EXPERIMENT_REGISTRY_V1.json",
+    "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
     "canonical/BRANCH_AUTHORITY_V1.md"
   ],
   "rehydration_order": [
+    "canonical/REHYDRATION_PACKET.md",
     "CURRENT_STATE.md",
+    "canonical/CONTEXT_COVERAGE_AUDIT.md",
     "canonical/LIVE_AUTHORITY_MAP.md",
+    "canonical/CONTEXT_STATE_V1.json",
     "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
-    "canonical/BRANCH_AUTHORITY_V1.md"
+    "canonical/EXPERIMENT_REGISTRY_V1.json",
+    "canonical/SCIENTIFIC_JOURNAL_V1.jsonl"
   ],
   "invariants": [
     "Only main/CURRENT_STATE.md is continuation authority.",
     "Scientific/mainline GitHub Actions run on the local self-hosted RealSaS runner; hosted-runner failures are apparatus/config only.",
     "Routine authority tracking must not create workflow-run fan-out across every experimental branch push.",
     "A branch is never active merely because it exists or has a recent commit.",
-    "Every ACTIVE_EXPERIMENT branch and gate id must be named by CURRENT_STATE.md.",
+    "A closed experiment branch becomes evidence-only unless explicitly promoted through a separate transaction.",
     "Source existence is not experimental evidence.",
     "Component evidence is not a full-formulation verdict.",
+    "A repository prereg/hash outranks detached chat/generated drafts when they disagree.",
+    "Unindexed historical evidence means UNKNOWN/UNRECONCILED, never ABSENT.",
     "Promotion requires source + tests + evidence/result + CURRENT_STATE + provenance/revocation reconciliation."
   ]
 }

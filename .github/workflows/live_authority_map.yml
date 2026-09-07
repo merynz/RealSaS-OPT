@@ -1,0 +1,42 @@
+name: Live Authority Map
+
+on:
+  push:
+  create:
+  delete:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: live-authority-map
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout canonical main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Render and validate live map
+        run: python tools/render_authority_map.py --write
+
+      - name: Commit refreshed map when repository state changed
+        shell: bash
+        run: |
+          if git diff --quiet -- canonical/LIVE_AUTHORITY_MAP.md; then
+            echo "Live authority map already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add canonical/LIVE_AUTHORITY_MAP.md
+          git commit -m "Refresh live authority map [skip ci]"
+          git push origin HEAD:main

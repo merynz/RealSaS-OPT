@@ -9,19 +9,32 @@ Before making any architecture, experiment, branch, or scientific-state claim:
 1. `canonical/REHYDRATION_PACKET.md`
 2. `CURRENT_STATE.md`
 3. `canonical/CONTEXT_COVERAGE_AUDIT.md`
-4. `canonical/LIVE_AUTHORITY_MAP.md`
-5. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
-6. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-7. `canonical/EXPERIMENT_REGISTRY_V1.json`
-8. `canonical/SCIENTIFIC_JOURNAL_V1.jsonl` when historical reasoning/decision sequence matters
+4. `canonical/BOOTSTRAP_AUDIT_QUEUE.md` when bootstrap is incomplete
+5. `canonical/LIVE_AUTHORITY_MAP.md`
+6. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
+7. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
+8. `canonical/EXPERIMENT_REGISTRY_V1.json`
+9. `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` when searching for prior evidence not yet semantically indexed
+10. `canonical/SCIENTIFIC_JOURNAL_V1.jsonl` when historical reasoning/decision sequence matters
 
 If generated views are missing or stale, regenerate locally:
 
 ```bash
-python tools/audit_context_coverage.py
-python tools/render_authority_map.py --write
-python tools/render_rehydration_packet.py --write
+python3 tools/build_knowledge_artifact_catalog.py
+python3 tools/audit_context_coverage.py
+python3 tools/render_authority_map.py --write
+python3 tools/render_rehydration_packet.py --write
 ```
+
+## Census vs semantic memory
+
+Never confuse **discoverability** with **understanding**.
+
+- `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` is the complete automated census of high-signal tracked knowledge artifacts. It proves that an artifact was discovered, not what it means.
+- `canonical/CONTEXT_COVERAGE_AUDIT.md` measures semantic reconciliation into the continuity spine.
+- An artifact may therefore be `CATALOGUED_UNREVIEWED`: known to exist, but not safe to summarize from filename/memory alone.
+
+If a historical claim is not semantically indexed, locate candidate evidence in the catalog, inspect the source artifact/commit/workflow, then backfill the registry/ledger/journal. Do not guess.
 
 ## Bootstrap honesty rule
 
@@ -32,7 +45,7 @@ While it says `BOOTSTRAP_AUDIT_INCOMPLETE`:
 - an unindexed historical experiment/mechanism/report is **UNKNOWN / NEEDS AUDIT**, not absent;
 - do not infer completeness from the experiment registry;
 - do not reconstruct numerical historical claims from memory alone;
-- use the coverage audit to find the exact artifact/branch that needs backfill.
+- use the artifact catalog + bootstrap audit queue to find the exact evidence cluster that needs backfill.
 
 After bootstrap closure, newly unindexed high-signal artifacts are continuity regressions.
 

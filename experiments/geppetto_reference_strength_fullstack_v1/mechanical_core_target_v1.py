@@ -11,6 +11,11 @@ The projection is deliberately anonymous:
 - no fixed Mage source-index list;
 - no fixed product control count.
 
+Position authority is explicitly WORLD/SOURCE frame. Corpus arrays named merely
+``bone_heads`` may be canonical-normalized and therefore MUST NOT be passed as
+``bone_heads_world`` without an explicit transform. For the current normalized
+corpus, ``rest_world_source[:, :3, 3]`` is the accepted source/world head locus.
+
 Mechanical rule:
 1. seed controls are deform controls with non-trivial skin mass;
 2. an unsupported control is retained only when it is structurally required as
@@ -30,6 +35,7 @@ import numpy as np
 
 SCHEMA = "RealSaS.GeppettoMechanicalCoreTarget.v1"
 RULE = "SKIN_SUPPORTED_PLUS_SUPPORTED_BRIDGES__ASSEMBLY_ONLY_ROOT_EXCLUDED"
+POSITION_AUTHORITY = "WORLD_SOURCE_FRAME_EXPLICIT"
 
 
 @dataclass(frozen=True)
@@ -40,6 +46,7 @@ class MechanicalCoreTargetV1:
     source_indices_provenance_only: np.ndarray
     skin_mass: np.ndarray
     rule: str = RULE
+    position_authority: str = POSITION_AUTHORITY
     schema: str = SCHEMA
 
     @property
@@ -51,12 +58,12 @@ def _validate(
     parents: np.ndarray,
     deform_mask: np.ndarray,
     skin: np.ndarray,
-    bone_heads: np.ndarray,
+    bone_heads_world: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     p = np.asarray(parents, dtype=np.int64)
     d = np.asarray(deform_mask, dtype=bool)
     w = np.asarray(skin, dtype=np.float64)
-    h = np.asarray(bone_heads, dtype=np.float64)
+    h = np.asarray(bone_heads_world, dtype=np.float64)
     j = int(len(p))
     if j < 1 or d.shape != (j,) or h.shape != (j, 3):
         raise ValueError("teacher skeleton shape mismatch")
@@ -68,7 +75,6 @@ def _validate(
         raise ValueError("teacher skin contains negative weights")
     if np.any((p < -1) | (p >= j)) or np.any(p == np.arange(j)):
         raise ValueError("teacher parent array is invalid")
-    # Every node must terminate at a root; fail closed on cycles.
     for start in range(j):
         seen: set[int] = set()
         node = start
@@ -78,6 +84,20 @@ def _validate(
             seen.add(node)
             node = int(p[node])
     return p, d, w, h
+
+
+def world_heads_from_rest_world_source_v1(rest_world_source: np.ndarray) -> np.ndarray:
+    """Extract world/source joint-head loci from homogeneous rest transforms."""
+    a = np.asarray(rest_world_source, dtype=np.float64)
+    if a.ndim != 3 or a.shape[1:] != (4, 4) or len(a) < 1:
+        raise ValueError("rest_world_source must be [J,4,4]")
+    if not np.isfinite(a).all():
+        raise ValueError("rest_world_source contains non-finite values")
+    bottom = a[:, 3, :]
+    expected = np.asarray([0.0, 0.0, 0.0, 1.0], dtype=np.float64)
+    if not np.allclose(bottom, expected[None, :], atol=1e-6, rtol=0.0):
+        raise ValueError("rest_world_source is not homogeneous rigid-transform form")
+    return a[:, :3, 3].copy()
 
 
 def _select_mechanical_core(
@@ -93,10 +113,6 @@ def _select_mechanical_core(
     if not seed:
         raise ValueError("no skin-supported deform controls")
     selected = set(seed)
-
-    # For each selected descendant, admit an unsupported chain only if that
-    # chain actually reaches another selected ancestor. Chains ending at an
-    # unselected assembly root are not promoted.
     for child in tuple(sorted(seed)):
         chain: list[int] = []
         parent = int(parents[child])
@@ -127,10 +143,7 @@ def _position_key(x: np.ndarray) -> tuple[float, float, float]:
     return tuple(0.0 if float(v) == 0.0 else float(v) for v in a)
 
 
-def _content_serialization(
-    positions: np.ndarray,
-    parents: np.ndarray,
-) -> np.ndarray:
+def _content_serialization(positions: np.ndarray, parents: np.ndarray) -> np.ndarray:
     """Parent-before-child content serialization without source-row authority."""
     n = int(len(positions))
     children: list[list[int]] = [[] for _ in range(n)]
@@ -140,7 +153,6 @@ def _content_serialization(
             roots.append(i)
         else:
             children[int(parent)].append(i)
-
     state = np.zeros(n, dtype=np.int8)
     signatures: list[tuple | None] = [None] * n
 
@@ -172,8 +184,6 @@ def _content_serialization(
             sig = signatures[child]
             assert sig is not None
             groups.setdefault(sig, []).append(child)
-        # Exact automorphic ties intentionally remain semantically identical;
-        # no source row/control id is promoted as a learned identity.
         for sig in sorted(groups):
             for child in groups[sig]:
                 emit(child)
@@ -198,30 +208,28 @@ def build_mechanical_core_target_v1(
     parents: np.ndarray,
     deform_mask: np.ndarray,
     skin: np.ndarray,
-    bone_heads: np.ndarray,
+    bone_heads_world: np.ndarray,
     support_epsilon: float = 1e-8,
 ) -> MechanicalCoreTargetV1:
-    parents, deform_mask, skin, bone_heads = _validate(parents, deform_mask, skin, bone_heads)
+    parents, deform_mask, skin, bone_heads_world = _validate(
+        parents, deform_mask, skin, bone_heads_world
+    )
     mass = skin.sum(axis=0)
     selected = _select_mechanical_core(
         parents, deform_mask, mass, support_epsilon=support_epsilon
     )
-    positions = bone_heads[selected].copy()
+    positions = bone_heads_world[selected].copy()
     projected_parents = _project_parents(parents, selected)
-
     permutation = _content_serialization(positions, projected_parents)
     inverse = np.empty(len(permutation), dtype=np.int64)
     inverse[permutation] = np.arange(len(permutation), dtype=np.int64)
     serialized_parents = np.asarray(
-        [
-            -1 if projected_parents[old] < 0 else inverse[int(projected_parents[old])]
-            for old in permutation.tolist()
-        ],
+        [-1 if projected_parents[old] < 0 else inverse[int(projected_parents[old])]
+         for old in permutation.tolist()],
         dtype=np.int64,
     )
     if any(parent >= child for child, parent in enumerate(serialized_parents.tolist()) if parent >= 0):
         raise RuntimeError("target serialization violated parent-before-child invariant")
-
     return MechanicalCoreTargetV1(
         positions_world=positions[permutation].astype(np.float32),
         parent_indices=serialized_parents,
@@ -235,10 +243,10 @@ def target_content_sha256_v1(target: MechanicalCoreTargetV1) -> str:
     payload = {
         "schema": target.schema,
         "rule": target.rule,
+        "position_authority": target.position_authority,
         "positions_world": np.asarray(target.positions_world, np.float32).tolist(),
         "parents": np.asarray(target.parent_indices, np.int64).tolist(),
         "root_mask": np.asarray(target.root_mask, bool).astype(int).tolist(),
-        # source indices are deliberately omitted: provenance is not target identity.
     }
     return sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
@@ -248,7 +256,9 @@ def target_content_sha256_v1(target: MechanicalCoreTargetV1) -> str:
 __all__ = [
     "SCHEMA",
     "RULE",
+    "POSITION_AUTHORITY",
     "MechanicalCoreTargetV1",
+    "world_heads_from_rest_world_source_v1",
     "build_mechanical_core_target_v1",
     "target_content_sha256_v1",
 ]

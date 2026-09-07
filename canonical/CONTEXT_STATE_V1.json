@@ -1,52 +1,83 @@
 {
-  "schema_version": 1,
-  "purpose": "Fast cross-chat/cross-agent reconstruction of the current RealSaS scientific and product context. This is a compact state graph, not a history log.",
+  "schema_version": 2,
+  "purpose": "Fast deterministic cross-chat/cross-agent reconstruction of current RealSaS scientific, product, ownership and FIT1 continuity context.",
   "authority": {
     "continuation": "CURRENT_STATE.md",
     "branch_policy": "canonical/BRANCH_AUTHORITY_V1.md",
     "machine_authority_map": "canonical/AUTHORITY_MAP_V1.json",
+    "subsystem_ownership": "canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md",
+    "fit1_scientific_lineage": "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
+    "fit1_commit_lineage": "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+    "aoa_closure": "canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md",
+    "aoa_disposition": "canonical/AOA_ARTIFACT_DISPOSITION_V1.json",
     "architecture_ledger": "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "experiment_ledger": "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V1.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V1.jsonl"
+  },
+  "bootstrap_audit": {
+    "status": "BOOTSTRAP_AUDIT_CLOSED",
+    "closure": "canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md",
+    "disposition": "canonical/AOA_ARTIFACT_DISPOSITION_V1.json",
+    "closure_semantics": "context/provenance closure, not retroactive scientific validation of every historical artifact",
+    "postclosure_regression_rule": "any high-signal artifact classified UNEXPLAINED by tools/audit_context_coverage.py is a fail-closed continuity regression"
+  },
+  "fit1_lineage": {
+    "gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
+    "first_executable_fit_base": "de1a44cae1195dd9cbad3b23ef75d58ae80aa9b3",
+    "semantic_map": "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
+    "exact_commit_discovery": "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+    "rule": "Every FIT1-descendant commit is contextually discoverable; commit existence/message does not imply execution, PASS, promotion or generalization."
   },
   "product": {
     "name": "RealSaS",
     "target": "8-direction editable 2D/2.5D puppet compiled from raster artwork; preserve 2D appearance while inferring/editing mechanical rig and deformation.",
     "non_target": "full 3D reconstruction",
     "demo_witness": "Mage FIT1",
-    "next_visible_product_milestone": "Mage idle/breathing after Geppetto + Arachne FIT1 closure"
+    "next_visible_product_milestone": "Mage idle/breathing after genuine Geppetto closure/refreeze and current-chain Arachne FIT1 closure"
+  },
+  "ownership_shorthand": {
+    "IRIS": "observations/cameras -> learned IRIS signed/support evidence -> deterministic GSA/RiggingSurfaceIR assembly/validation/provenance -> learned consumers",
+    "Geppetto": "lossless RiggingSurfaceIR -> learned SkeletonProposalIR/control/root/parent/mechanical-salience evidence -> Compiler exact graph qualification -> QualifiedSkeletonIR/canonical IDs",
+    "Arachne": "qualified surface+skeleton -> learned skin/deformation proposal -> Compiler skin/mesh/reference/simplex qualification -> qualified editable deformation state",
+    "Compiler": "deterministic qualification/canonicalization/proof/routing authority; not permission to invent or silently repair missing learned semantics",
+    "mandatory_memory_guard": "Geppetto is proposal, not canonical rig authority. Apply equivalent learned-vs-deterministic separation to IRIS/GSA and Arachne/Compiler."
   },
   "pipeline": [
     {
       "name": "IRIS",
-      "role": "learned image perception / signed geometry and support evidence",
-      "canonical_rule": "evidence only; no final canonical IDs"
+      "role": "learned image perception / signed geometry, support, uncertainty and observation evidence",
+      "canonical_rule": "evidence only; no final canonical skeleton IDs/tree/weights; affected privileged-input historical learned artifacts remain quarantined"
     },
     {
       "name": "GSA/RiggingSurfaceIR",
-      "role": "deterministic assembly/validation/provenance of lossless per-view surface evidence",
-      "canonical_rule": "lossless evidence boundary is binding"
+      "role": "deterministic compaction/local geometry/assembly/validation/provenance of lossless per-view surface evidence",
+      "canonical_rule": "lossless evidence boundary and UNKNOWN preservation are binding; no hidden semantic completion"
     },
     {
       "name": "Geppetto",
-      "role": "learned skeleton/control proposal, parent/root evidence, future mechanical salience",
-      "canonical_rule": "post-AR-01 diagnosis; no refreeze currently authorized"
+      "role": "learned skeleton/control proposal, parent/root evidence and mechanical salience/functional simplification evidence",
+      "canonical_rule": "proposal only; post-AR-01 diagnosis; no refreeze currently authorized"
     },
     {
-      "name": "Compiler",
-      "role": "deterministic exact legality, canonicalization, proof/fail-close",
-      "canonical_rule": "no geometry-only dedup; no hidden deform-node completion; canonical IDs after exact solve"
+      "name": "Compiler graph qualification",
+      "role": "deterministic exact legal root/parent/tree selection, invariants, canonicalization and fail-close",
+      "canonical_rule": "canonical IDs after exact solve; no geometry-only semantic dedup, hidden cardinality repair or missing deform-node synthesis"
     },
     {
       "name": "Arachne",
-      "role": "learned skin/weight/deformation proposal conditioned on qualified skeleton + IRIS/Geppetto outputs",
-      "canonical_rule": "future FIT1 training after Geppetto refreeze; SkinTokens clean-room mechanism audit planned"
+      "role": "learned semantic skin/weight/deformation proposal conditioned on current qualified surface+skeleton",
+      "canonical_rule": "current-chain FIT1 follows Geppetto refreeze; SkinTokens clean-room mechanism audit/adaptation remains planned"
     },
     {
-      "name": "Runtime",
-      "role": "consume qualified/proof-owned puppet state and motion",
-      "canonical_rule": "must not replay solver/evaluator authority at export/runtime"
+      "name": "Compiler skin/mesh qualification",
+      "role": "deterministic reference/simplex/top-k/mesh-layout legality and bounded projection",
+      "canonical_rule": "may constrain/project under learned semantics; may not become a hidden semantic skinning owner"
+    },
+    {
+      "name": "Proof / repair / runtime",
+      "role": "measure exact candidate; owner-route bounded repair; PASS-only runtime/export projection",
+      "canonical_rule": "proof never mutates candidate; repair creates a new candidate requiring re-proof; runtime/export is not second canonical truth"
     }
   ],
   "current_focus": {
@@ -56,9 +87,9 @@
     "most_recent_closed_gate": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
     "categorical_verdict": "AR01_NO_TERMINAL_CLOSURE",
     "result_authority": "canonical/AR01_RESULT_20260907.md",
-    "scientific_question": "Which single next falsifiable gate should resolve the remaining Geppetto uncertainty: AR0 residual terminal stability, AR1 generated-state exposure/recovery, or the already-existing fuller RigAnything C3/C4 formulation?",
+    "scientific_question": "Which single next falsifiable gate should resolve remaining Geppetto uncertainty: AR0 residual terminal stability, AR1 generated-state exposure/recovery, or the already-existing fuller RigAnything C3/C4 formulation?",
     "scope_warning": "AR-01 was a minimal feedback intervention, not a full RigAnything formulation test. Do not bundle the three remaining questions post hoc.",
-    "promotion_block": "No Geppetto refreeze/promotion until the scientifically necessary post-AR-01 gate(s) close and a separate promotion transaction reconciles authority."
+    "promotion_block": "No Geppetto refreeze/promotion until scientifically necessary post-AR-01 gate(s) close and a separate promotion transaction reconciles source, evidence and authority."
   },
   "ar01_closed_result": {
     "contract_tag": "41055bd073538d6b",
@@ -82,7 +113,6 @@
     "ar1": {
       "feedback": true,
       "first_structural_pass_step": null,
-      "first_48_check_streak_step": null,
       "final_step": 16384,
       "final_structural_pass": false,
       "terminal_structural_pass_streak": 0,
@@ -112,13 +142,25 @@
     "creation_commit": "ba634955777479ee05a5b199742710b1736123b5",
     "creation_blob_sha": "136d358572be6ff72ba15999474b6d3be600f5bc",
     "contains": [
-      "per-step full-surface cross-attention",
-      "conditional diffusion locus",
-      "joint + parent geometry feedback token",
-      "sibling/BFS-order helper"
+      "C1 per-step full-surface cross-attention",
+      "C2 conditional diffusion locus",
+      "C3 joint + parent geometry feedback token",
+      "C4 sibling/BFS-order helper"
     ],
+    "execution_correction": "authoritative Causal Repair V2 staircase was R2 FAIL -> C1 PASS -> STOP; C2 was not authoritatively run there; C3/C4 remain source-coded without authoritative full-formulation closure",
     "critical_memory_rule": "Never propose building a RigAnything-equivalent challenger from scratch without first inspecting the existing challenger and its experiment lineage.",
-    "canonical_status": "research implementation only; component tests and AR-01 do not imply full-formulation closure"
+    "canonical_status": "research implementation only; component/source existence and AR-01 do not imply full-formulation closure"
+  },
+  "iris_current_state": {
+    "privileged_input_history": "old learned IRIS V2 contract admitted alpha/mask/absolute-view shortcuts; affected learned checkpoints/metrics quarantined for clean observation-only claims",
+    "firewall_repair": "RGB-only learned path + analytic camera relation + production full-frame domain + fail-close validation closes source seam prospectively",
+    "retroactive_rule": "firewall repair does not cleanse quarantined historical learned results",
+    "current_ownership_split": "IRIS owns learned signed/observation evidence; deterministic GSA owns compaction, robust local geometry, provenance and RiggingSurfaceIR assembly",
+    "authorities": [
+      "canonical/IRIS_LEAK_SCOPE_20260903.md",
+      "canonical/IRIS_PRIVILEGED_INPUT_FIREWALL_REPAIR_V1_20260903.md",
+      "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md"
+    ]
   },
   "geppetto_current_architecture": {
     "mainline_id": "RealSaS.GeppettoCandidate.LatentAutoregressiveSetProposal.v3",
@@ -127,6 +169,11 @@
     "known_historical_reason": "old hard-MAP locus feedback was removed because multimodal crossover could rewrite later anonymous states; this did not prove all skeleton-causal feedback unnecessary",
     "lossless_evidence": "binding consumer-boundary requirement; do not regress to summary-only 24D authority",
     "mechanical_salience": "open neural responsibility; must not migrate into Compiler heuristics"
+  },
+  "arachne_current_state": {
+    "historical_fit_status": "early Mage SkinFieldCodec/Arachne results are scoped historical evidence, not current complete upstream-compatible Arachne qualification",
+    "dependency": "wait for genuine Geppetto closure/refreeze; then train/evaluate on current qualified IRIS/GSA + Geppetto/Compiler outputs",
+    "reference_plan": "SkinTokens clean-room mechanism audit/adaptation after current-chain Arachne FIT1 begins/needs mechanism guidance"
   },
   "post_ar01_hypothesis_partition": [
     {
@@ -153,15 +200,16 @@
     "next_ladder": ["FIT1", "FIT-k", "FIT8/LOFO", "scaling", "generalization", "product/domain shift"]
   },
   "settled_invariants": [
-    "Compiler final legality is deterministic exact qualification.",
-    "Compiler cannot silently repair Geppetto by geometry-only dedup or hidden cardinality/deform-node synthesis.",
-    "Canonical IDs are minted after exact solve.",
+    "One semantic owner per question; deterministic qualification cannot silently become a second learned semantic owner.",
+    "Geppetto is proposal, not canonical rig authority; Compiler owns final legal root/parent/tree and canonical IDs after exact solve.",
+    "Compiler cannot silently repair Geppetto by geometry-only dedup, hidden cardinality repair or deform-node synthesis.",
     "Lossless per-view evidence must survive into learned consumers.",
-    "Mechanical salience / functional simplification belongs to neural Geppetto-side evidence, not legality heuristics.",
-    "Source existence != mechanism test; mechanism test != full formulation test; FIT1 != generalization.",
+    "Mechanical salience / functional simplification belongs to neural Geppetto evidence, not legality heuristics.",
+    "Arachne owns semantic skin/deformation proposal; Compiler skin/mesh layer owns bounded legal projection/qualification.",
+    "Proof measures exact candidate state and does not mutate it; repair is owner-routed and requires re-proof.",
+    "Source exists != mechanism implemented != mechanism tested != full formulation tested != canonical promotion != FIT1 closure != generalization.",
     "No post-hoc gate widening after results are visible.",
-    "Repository prereg/result hashes outrank detached generated/chat drafts when they conflict.",
-    "Unindexed historical evidence means UNKNOWN/UNRECONCILED, never ABSENT."
+    "Repository prereg/result/source authority outranks detached generated/chat drafts when they conflict."
   ],
   "execution_environment": {
     "actions": "local self-hosted",
@@ -172,47 +220,57 @@
   },
   "known_context_traps": [
     {
+      "trap": "Thinking a learned model name denotes the whole subsystem",
+      "defense": "Expand IRIS/Geppetto/Arachne to the ownership envelope before assigning or moving responsibilities."
+    },
+    {
+      "trap": "Saying Geppetto made/owns the canonical skeleton",
+      "defense": "Geppetto proposes controls/relations; Compiler exact qualification owns final legal tree and canonical IDs."
+    },
+    {
       "trap": "Confusing a research challenger with canonical Geppetto",
-      "defense": "Check architecture ledger row + implementation commit/blob + canonical status separately."
+      "defense": "Check implementation, execution evidence and canonical promotion as separate states."
     },
     {
       "trap": "Calling AR-01 a RigAnything formulation test",
-      "defense": "AR-01 result and RigAnything lineage dossier explicitly limit the claim to minimal feedback."
+      "defense": "AR-01 result and RigAnything lineage limit it to minimal feedback; C3/C4 remains unresolved."
     },
     {
-      "trap": "Treating an earlier 48-check streak as terminal stability",
-      "defense": "AR-01 requires the final contiguous streak >=48; AR0 ended at streak 1."
+      "trap": "Calling C2 tested because C2 source exists",
+      "defense": "Authoritative Causal Repair V2 stopped at C1 PASS; C2 was not run in that staircase."
     },
     {
-      "trap": "Treating the detached conditional-diffusion prereg draft as AR-01 authority",
-      "defense": "Repo prereg SHA 78981b... freezes the direct three-mode locus head and outranks the detached draft."
+      "trap": "Citing old IRIS learned PASS as clean current observation-only evidence",
+      "defense": "Affected old learned artifacts are quarantined by IRIS leak scope; firewall repair is prospective."
     },
     {
-      "trap": "Treating old restoration/hold reports as current authority",
-      "defense": "CURRENT_STATE + authority map outrank historical reports; historical docs are evidence only unless explicitly promoted."
+      "trap": "Treating an earlier AR0 48-check streak as terminal stability",
+      "defense": "AR-01 required final contiguous streak >=48; AR0 ended at streak 1."
+    },
+    {
+      "trap": "Treating old restoration/hold reports or branch recency as current authority",
+      "defense": "CURRENT_STATE + authority map + explicit promotion/retraction outrank report/branch recency."
     },
     {
       "trap": "Assuming GitHub-hosted runners",
-      "defense": "Execution authority is local self-hosted RealSaS runner."
-    },
-    {
-      "trap": "Reconstructing state by reading many reports in arbitrary order",
-      "defense": "Read REHYDRATION_PACKET first and inspect coverage gaps before inferring absence."
+      "defense": "Routine execution authority is the user's local self-hosted RealSaS runner."
     }
   ],
   "continuation_protocol": {
     "first_read": "canonical/REHYDRATION_PACKET.md",
     "then": [
+      "canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md",
+      "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
       "CURRENT_STATE.md",
+      "canonical/FIT1_COMMIT_LINEAGE_V1.md when exact chronology matters",
       "canonical/CONTEXT_COVERAGE_AUDIT.md",
-      "canonical/LIVE_AUTHORITY_MAP.md or run tools/render_authority_map.py",
-      "canonical/CONTEXT_STATE_V1.json",
+      "canonical/LIVE_AUTHORITY_MAP.md",
       "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
       "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
       "canonical/EXPERIMENT_REGISTRY_V1.json",
       "canonical/SCIENTIFIC_JOURNAL_V1.jsonl"
     ],
-    "rule": "Do not infer current truth from filename recency, branch recency, report count, or memory alone.",
-    "experiment_completion_definition": "result/provenance + implementation + experiment ledger + architecture ledger if affected + context state + CURRENT_STATE if stop/go changes + explicit supersession/revocation"
+    "rule": "Do not infer current truth from filename recency, branch recency, report count, commit subject or memory alone.",
+    "experiment_completion_definition": "prereg + exact result/provenance + implementation + experiment registry/ledger + architecture ledger if affected + ownership check + context/CURRENT_STATE stop-go + explicit supersession/revocation"
   }
 }

@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 
 from compiler.realsas_compiler_core.types import RiggingSurfaceIR, SurfaceNode, SurfaceRelation
-from experiments.geppetto_reference_strength_fullstack_v1.mage_mechanical_core_target_v1 import (
-    project_mechanical_core_from_arrays_v1,
+from experiments.geppetto_reference_strength_fullstack_v1.mechanical_core_target_v1 import (
+    build_mechanical_core_target_v1,
 )
 from experiments.geppetto_reference_strength_fullstack_v1.rigging_surface_tensorization_v1 import (
     tensorize_rigging_surface_v1,
@@ -18,7 +18,7 @@ def _teacher_arrays():
     skin = np.zeros((4, 5), dtype=np.float32)
     skin[0, 1] = 1.0
     skin[1, 3] = 1.0
-    heads = np.asarray(
+    heads_world = np.asarray(
         [
             [0.0, 0.0, 0.0],
             [0.0, 0.0, 1.0],
@@ -28,35 +28,32 @@ def _teacher_arrays():
         ],
         dtype=np.float32,
     )
-    inverse = np.eye(4, dtype=np.float32)
-    return parents, deform, skin, heads, inverse
+    return parents, deform, skin, heads_world
 
 
 def test_mechanical_core_uses_support_and_required_bridge_only():
-    parents, deform, skin, heads, inverse = _teacher_arrays()
-    out = project_mechanical_core_from_arrays_v1(
+    parents, deform, skin, heads_world = _teacher_arrays()
+    out = build_mechanical_core_target_v1(
         parents=parents,
         deform_mask=deform,
         skin=skin,
-        bone_heads=heads,
-        inverse_canonical_transform=inverse,
+        bone_heads_world=heads_world,
     )
     assert out.count == 3
-    assert set(out.source_indices) == {1, 2, 3}
-    assert 0 not in out.source_indices
-    assert 4 not in out.source_indices
+    assert set(out.source_indices_provenance_only.tolist()) == {1, 2, 3}
+    assert 0 not in out.source_indices_provenance_only
+    assert 4 not in out.source_indices_provenance_only
     assert int(out.root_mask.sum()) == 1
     assert np.array_equal(out.parent_indices, np.asarray([-1, 0, 1], dtype=np.int64))
 
 
 def test_mechanical_core_is_source_row_permutation_invariant():
-    parents, deform, skin, heads, inverse = _teacher_arrays()
-    ref = project_mechanical_core_from_arrays_v1(
+    parents, deform, skin, heads_world = _teacher_arrays()
+    ref = build_mechanical_core_target_v1(
         parents=parents,
         deform_mask=deform,
         skin=skin,
-        bone_heads=heads,
-        inverse_canonical_transform=inverse,
+        bone_heads_world=heads_world,
     )
     perm = np.asarray([4, 2, 0, 3, 1], dtype=np.int64)
     inv = np.empty(len(perm), dtype=np.int64)
@@ -65,12 +62,11 @@ def test_mechanical_core_is_source_row_permutation_invariant():
         [-1 if parents[old] < 0 else inv[int(parents[old])] for old in perm],
         dtype=np.int64,
     )
-    got = project_mechanical_core_from_arrays_v1(
+    got = build_mechanical_core_target_v1(
         parents=p2,
         deform_mask=deform[perm],
         skin=skin[:, perm],
-        bone_heads=heads[perm],
-        inverse_canonical_transform=inverse,
+        bone_heads_world=heads_world[perm],
     )
     assert np.array_equal(ref.positions_world, got.positions_world)
     assert np.array_equal(ref.parent_indices, got.parent_indices)

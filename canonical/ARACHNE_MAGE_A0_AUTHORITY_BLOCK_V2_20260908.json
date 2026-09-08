@@ -1,0 +1,45 @@
+{
+  "a0_optimizer_authorized": false,
+  "a1_optimizer_authorized": false,
+  "discovered_before_main_a0_optimizer_step": true,
+  "main_scientific_a0_optimizer_steps": 0,
+  "preserved_authority": {
+    "joint_identity_bridge": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_JOINT_IDENTITY_BRIDGE_V1.json",
+    "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb"
+  },
+  "recorded_at_utc": "2026-09-08T11:42:26Z",
+  "required_next_gate": [
+    "BUILD_DETERMINISTIC_FULL_SOURCE_P0_V2",
+    "REPLAY_ALL_950_PROJECTIONS",
+    "RECOMPUTE_CONFIDENCE_INVENTORY",
+    "SEAL_TARGET_AND_BINDING_HASHES",
+    "REBUILD_CONDITIONING_CACHE",
+    "REBIND_A0_PREREG_AND_RUNNER",
+    "RERUN_CPU_RESUME_TERMINAL_IDEMPOTENCE_REGRESSIONS",
+    "BUILD_SELF_CONTAINED_COLAB",
+    "RUN_MAIN_A0_CUDA"
+  ],
+  "retired_authority": {
+    "a0_prereg": "canonical/ARACHNE_MAGE_A0_PREREG_V1_20260908.json",
+    "binding_sha256": "cb41eb7055b8e2646628daecdd0e31dfc079d163d5f5adaaa1a92f1ca1dfb994",
+    "conditioning_cache_sha256": "12484afc23d5c03cbad8020266ed5b39c3201d979e78f96380e748902152be6e",
+    "historical_executable_commit": "1cc449be4cc6eea81f3e8e9768f857dfb9b72477",
+    "p0_closure": "canonical/ARACHNE_MAGE_SKIN_TARGET_P0_CLOSURE_20260908.md",
+    "p0_manifest": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_SKIN_TARGET_P0_MANIFEST_V1.json",
+    "target_npz_sha256": "f3db92194660f12de4425e015f85ac4ac995fcfc44a0272047b049ffb0d36d71",
+    "teacher_weights_content_sha256": "c15db7b78d272ac22998071e1fb1cec4c65d7366133ef16fb72824f222c852d9"
+  },
+  "schema": "RealSaS.ArachneMageA0AuthorityBlock.v2",
+  "status": "A0_BLOCKED__P0_V1_BODY_ONLY_TEACHER_RETIRED__FULL_SOURCE_P0_V2_REQUIRED",
+  "supersession_finding": {
+    "body_only_teacher_vertices": 3348,
+    "diagnostic_difference_count_is_final_v2_claim": false,
+    "diagnostic_semantic_projection_differences_observed": 9,
+    "evidence_class": "LOCAL_AUDIT_DISCOVERY_REQUIRING_DETERMINISTIC_FULL_REPLAY",
+    "full_source_faces": 5763,
+    "full_source_vertices": 5321,
+    "source_control_13_role": "handslot.r",
+    "source_control_8_role": "handslot.l"
+  }
+}

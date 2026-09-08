@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.ArachneMageA0Prereg.v1",
-  "status": "PREREGISTERED_BEFORE_A0_OUTPUT__RUNNER_PREFLIGHT_NEXT__A1_BLOCKED",
+  "status": "PREREGISTERED_BEFORE_A0_OUTPUT__NUMERIC_SCALE_PREFLIGHT_REPAIRED__RUNNER_PREFLIGHT_NEXT__A1_BLOCKED",
   "seed": 20260908,
   "input_authority": {
     "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
@@ -43,6 +43,16 @@
     "required_consecutive_full_pass_checks": 3,
     "early_stop_at_first_sustained_pass": true
   },
+  "preoutput_numeric_scale_repair": {
+    "optimizer_steps_occurred_before_repair": 0,
+    "reason": "Historical aggregate Compiler correction ceiling 1e-5 is not row-count invariant at 950 rows; tiny float32 normalization residuals accumulate despite negligible per-row correction.",
+    "diagnostic_total_correction_l1": 0.00003507733345184394,
+    "diagnostic_mean_row_correction_l1": 3.692350889667783e-08,
+    "diagnostic_row_correction_p95": 8.568167685074624e-08,
+    "diagnostic_max_row_correction_l1": 1.6391277312538532e-07,
+    "diagnostic_raw_simplex_max_abs_residual": 2.3841858e-07,
+    "semantic_model_output_observed": false
+  },
   "pass": {
     "authoritative_raw_row_l1_p95_max": 0.05,
     "authoritative_qualified_row_l1_p95_max": 0.05,
@@ -52,8 +62,9 @@
     "qualified_simplex_max_abs_residual": 0.000001,
     "negative_weight_count": 0,
     "qualified_row_count": 950,
-    "compiler_total_correction_l1_max": 0.00001,
-    "compiler_max_row_correction_l1_max": 0.00001,
+    "compiler_total_correction_l1_max": 0.0001,
+    "compiler_mean_row_correction_l1_max": 0.0000001,
+    "compiler_max_row_correction_l1_max": 0.000001,
     "max_influences": null
   },
   "resume": {

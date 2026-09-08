@@ -1,359 +1,350 @@
 # RealSaS — Arachne / SkinTokens Clean-Room Mapping V2 — 2026-09-08
 
-**Status:** `REFERENCE_MAPPING_CLOSED__FIT1_DESIGN_NOT_YET_OPTIMIZER_AUTHORIZED`
+**Status:** `REFERENCE_MAPPING_CLOSED__MAGE_TARGET_PROJECTION_NEXT__FINAL_FIT1_OPTIMIZER_NOT_AUTHORIZED`
 
-## 0. Why V2 exists
+## 0. Updated boundary
 
-The earlier 2026-08-31 clean-room audit correctly extracted SkinTokens as the primary external representation reference for Arachne, but Geppetto had not yet closed on the real Mage shipping witness.
+The earlier 2026-08-31 clean-room audit remains valid. This V2 updates it after real Mage Geppetto FIT1 closure.
 
-That boundary condition has now changed:
-
-- Geppetto Mage FIT1 is sealed `FIT1_TERMINAL_PASS`;
-- the consumer skeleton input for Arachne is now a real Compiler-qualified `QualifiedSkeletonIR` with `22` controls and exactly one deform root;
-- Arachne no longer needs any mechanism that owns skeleton cardinality, root, topology or canonical IDs.
-
-SkinTokens upstream is unchanged from the frozen audited snapshot:
+Frozen upstream reference:
 
 `VAST-AI-Research/SkinTokens@273b691d35989d71cd17ff2895fdc735097b92d1`.
 
-This document therefore updates the architecture mapping, not the upstream facts.
+RealSaS upstream boundary is now concrete:
+
+- real IRIS/GSA Mage substrate: `950` admitted nodes / `2813` local topology edges;
+- Geppetto FIT1: `FIT1_TERMINAL_PASS`, closure step `14080`, streak `48/48`;
+- Compiler-qualified Mage skeleton: `22` joints, exactly `1` deform root;
+- Arachne is not allowed to reopen joint count/root/parent/canonical-ID authority.
+
+Historical RealSaS Arachne evidence also remains authoritative:
+
+- shipping `SkinFieldCodecV1` capacity: PASS on the preregistered heterogeneous synthetic panel with cosine cooling;
+- shipping `ArachneCandidateV2 -> frozen codec -> Compiler -> verified LBS`: PASS on the same panel;
+- observation-oracle U1 consumer gate: heterogeneous `3/3 PASS`;
+- none of those results is a real Mage-family fit or generalization claim.
 
 ## 1. What SkinTokens actually does
 
-SkinTokens contains **two different learned levels** that must not be conflated.
+SkinTokens contains two distinct learned levels.
 
-### 1.1 Skin codec / field decoder
+### 1.1 Per-bone skin codec
 
-For each bone/joint influence field, an FSQ-CVAE compresses sparse skin weights conditioned on mesh geometry into a short discrete latent/token state.
+For each bone/joint influence field:
 
-Public-code decomposition:
-
-`per-bone weight field + geometry -> skin encoder -> latent -> FSQ -> SkinTokens`
+`weight field + mesh geometry -> skin encoder -> latent -> FSQ -> SkinTokens`
 
 and
 
-`SkinTokens + geometry condition -> dedicated skin-field decoder -> scalar influence field over queried mesh points`.
+`SkinTokens + mesh geometry condition -> dedicated skin-field decoder -> scalar field`.
 
-The public decoder ends in a sigmoid and therefore predicts each bone field independently in `[0,1]` before later assembly/normalization/postprocessing.
+The released skin decoder ends in a sigmoid, so each bone field is independently bounded in `[0,1]`. The assembled `N x J` skin matrix can then be row-normalized/postprocessed outside that decoder.
 
-This decoder is a **skin decoder only**. It does not decode skeleton coordinates or hierarchy.
+This decoder does **not** decode skeleton coordinates or topology.
 
-### 1.2 Unified autoregressive TokenRig model
+### 1.2 Unified TokenRig causal model
 
-TokenRig then uses a separate decoder-only causal Transformer (Qwen3-0.6B configuration) to generate one rig sequence:
+TokenRig uses a separate decoder-only causal Transformer to predict one sequence:
 
-`skeleton tokens -> skeleton delimiter/eos -> J * T_D skin tokens -> final eos`.
+`skeleton block -> skeleton delimiter/eos -> J * T_D skin tokens -> final eos`.
 
-The same causal Transformer predicts both skeleton-token vocabulary and skin-token vocabulary. A deterministic logits processor switches the allowed vocabulary after the skeleton is complete and knows how many skin tokens are required from the generated skeleton cardinality.
+The same Transformer parameters predict both vocabulary regions. A deterministic logits processor switches vocabulary after the skeleton block and derives the required skin-token count from the already-generated skeleton cardinality.
 
-After generation:
+After autoregressive generation:
 
 - skeleton tokens are decoded by the deterministic skeleton tokenizer/detokenizer;
-- skin tokens are converted through FSQ codes and decoded by the **separate frozen FSQ-CVAE skin decoder**.
+- skin tokens are mapped through FSQ and decoded by the **separate pretrained skin-field decoder**.
 
-Therefore the accurate statement is:
+Therefore:
 
-> SkinTokens shares an **autoregressive token predictor**, not a final skeleton/skin geometric decoder.
+> SkinTokens shares an autoregressive token predictor, **not** a common final skeleton/skin geometric decoder.
 
-### 1.3 Existing-skeleton path
+### 1.3 Causal asymmetry matters
 
-The released inference path explicitly supports using an existing skeleton. In that mode the existing skeleton is serialized as the prefix and the autoregressive model continues with skin tokens.
+The public sequence is skeleton-first, skin-second.
 
-Thus the SkinTokens solution class does **not** require the skin decoder to own skeleton generation.
+At inference:
 
-## 2. Shared-vs-split architecture decision for RealSaS FIT1
+- skin-token prediction can attend to the complete generated skeleton;
+- earlier skeleton-token prediction cannot attend to future skin tokens.
 
-### Decision A — common Geppetto/Arachne final decoder
+Thus the claimed skeleton/skin coupling comes from shared model parameters/training and later sequence-level RL rewards as well as the direct causal path `skeleton -> skin`; it is not a bidirectional common decoder.
 
-`REJECTED_FOR_FIT1`
+### 1.4 Geometry is not fully shared either
 
-Reason:
+The public implementation uses:
 
-- SkinTokens itself provides no such mechanism: skeleton detokenization and skin-field decoding are separate;
-- Geppetto already has a sealed real FIT1 solution and final graph authority remains Compiler-owned;
-- forcing a common final decoder would reopen solved ownership boundaries without external-reference justification;
-- it would confound attribution in Arachne FIT1.
+- a learned mesh encoder to condition the TokenRig autoregressive Transformer;
+- a separate geometry-condition encoder inside the pretrained FSQ-CVAE used for skin reconstruction.
 
-### Decision B — one shared causal Transformer for Geppetto + Arachne
+So even SkinTokens does not imply that rigging and skinning require one identical geometric backbone.
 
-`DEFERRED_FUTURE_JOINT_MODEL_ARM`
+### 1.5 Existing-skeleton mode
 
-SkinTokens provides evidence that a shared autoregressive prior can model dependencies from the generated skeleton into skin tokens. It also claims benefits from unified rig modeling.
+The released runtime explicitly supports an existing skeleton. The skeleton is serialized as the prefix and TokenRig continues with skin tokens.
 
-However this is **not required for Arachne FIT1**. The current fit experiment must first answer the narrower causal question:
+Therefore the external solution class directly supports the RealSaS authority split:
 
-> Given the already-qualified correct skeleton and admitted surface evidence, can a learned Arachne infer a valid deformation field?
+`Compiler-qualified skeleton -> learned skin prediction`.
 
-A later generalization experiment may compare:
+## 2. RealSaS shared-vs-split decisions for Mage FIT1
 
-- split Geppetto/Arachne;
-- shared surface backbone;
-- shared causal rig prior / joint fine-tuning.
+### A. Common final Geppetto/Arachne decoder
 
-No such sharing is authorized before the split FIT1 baseline closes.
+`FALSE / REJECTED`
 
-### Decision C — shared surface encoder
+No such obligation exists in SkinTokens, and it would reopen a solved Geppetto boundary without evidence.
 
-`OPTIONAL_LATER_ABLATION__NOT_REQUIRED_FOR_FIT1`
+### B. One shared causal LM for Geppetto + Arachne
 
-SkinTokens shares/globalizes mesh conditioning inside TokenRig, but the Arachne FIT1 experiment should preserve clean attribution. Arachne gets the complete product-level information available at its boundary through its own deterministic conditioning adapter.
+`NOT_FOR_FIT1__FUTURE_GENERALIZATION_ARM_ALLOWED`
 
-A frozen Geppetto surface representation may later be tested as an efficiency/generalization arm, never as hidden required evidence for the initial Arachne claim.
+A shared rig prior is scientifically interesting later, especially for joint training/reward refinement. It is unnecessary for the causal FIT1 question:
 
-### Decision D — same skin decoder for codec ceiling and predictor path
+> Given a correct qualified skeleton, can Arachne infer deformation-valid skin from admitted product evidence?
 
-`MANDATORY`
+### C. Shared surface encoder with Geppetto
 
-This is the important decoder-sharing rule for Arachne.
+`OPTIONAL_LATER_ABLATION`
 
-The exact same qualified SkinFieldCodec decoder object/config must be used in:
+No FIT1 dependency on hidden Geppetto features is permitted. Arachne must be solvable from its explicit product contract.
 
-`A0: teacher W -> codec encoder -> latent -> SAME DECODER -> W*`
+### D. Same skin decoder between codec ceiling and predictor run
 
-and
+`REQUIRED`
 
-`A1/FIT1: shipping conditioning -> Arachne predicted latent -> SAME FROZEN DECODER -> W_hat`.
+For a given Mage FIT1 attempt:
 
-No decoder substitution, retraining or special A1 reconstruction head may hide a representation seam.
+`A0: teacher W -> codec encoder -> latent -> DECODER D -> W*`
 
-## 3. A material representation difference that must be decided explicitly
+then freeze D and use:
 
-SkinTokens reference factorization:
+`A1: product conditioning -> Arachne predicted latent -> SAME DECODER D -> W_hat`.
 
-- each bone influence is an independent scalar field;
-- decoder output is bounded per field by sigmoid;
-- the dense `N x J` matrix is assembled afterward;
-- downstream code can normalize skin rows and optionally transfer/smooth sampled skin onto the original mesh.
+No special A1 decoder or decoder retraining may hide a representation seam.
 
-Current RealSaS `SkinFieldCodecV1` factorization:
+## 3. Do not redesign the proven RealSaS codec merely to look more like SkinTokens
 
-- one latent per qualified joint;
-- all joint fields are decoded jointly;
-- row-softmax produces a simplex distribution directly inside the codec.
+SkinTokens uses independent sigmoid per-bone fields. Current RealSaS `SkinFieldCodecV1` instead decodes joint latents jointly and applies row-softmax.
 
-This is **not** a source violation, but it changes responsibility.
+That is a real factorization difference, but **not** a clean-room failure. The previously frozen reference audit explicitly retained functional obligations rather than exact mechanisms, and the current row-softmax shipping codec has already passed:
 
-Compiler already owns legal skin simplex/reference policy. Therefore Arachne FIT1 must not quietly rely on an architectural simplex hard-constraint and then claim that Compiler validated an unconstrained influence proposal.
+- heterogeneous A0 capacity;
+- A1 predictor-to-frozen-codec behavior;
+- Compiler qualification;
+- verified LBS;
+- observation-oracle U1 small-panel sufficiency.
 
-### Frozen design choice for the next candidate
+Therefore the Mage FIT1 baseline retains the existing shipping/default codec architecture:
 
-`REFERENCE_STRENGTH_FIELD_MODE = INDEPENDENT_NONNEGATIVE_PER_JOINT_FIELDS`
+- hidden dim `192`;
+- latent dim `64`;
+- encoder layers `3`;
+- decoder layers `3`;
+- architecture `RealSaS.SkinFieldCodec.v1`.
 
-Preferred clean factorization:
+Independent sigmoid fields remain a **contingency ablation**, not a mandatory pre-FIT1 redesign. They may be opened only if Mage A0/A1 produces a causal failure implicating joint-coupled simplex decoding or if a later generalization experiment specifically tests factorization.
 
-1. each joint latent produces independent nonnegative `[0,1]` influence evidence per admitted surface node;
-2. Arachne emits these raw dense influence scores in `SkinProposalIR`;
-3. raw proposal quality is evaluated before qualification;
-4. Compiler owns bounded sparsification / simplex normalization / rejection;
-5. Compiler correction magnitude is reported and must remain small.
+Compiler still owns legal lineage/reference/simplex admission even when a model happens to emit an already-simplex row; qualification authority does not require the proposal to be unconstrained.
 
-The existing row-softmax `SkinFieldCodecV1` remains valid historical evidence that compact latent fields can represent skin, but it is not automatically frozen as the final Arachne FIT1 decoder merely because A0 synthetic capacity previously passed.
+## 4. Arachne predictor baseline
 
-A controlled source-level comparison must decide whether to retain row-softmax or move to independent sigmoid fields **before optimizer step 1 of the final Mage FIT1 predictor run**.
+The previously closed shipping/default predictor remains the first real-Mage baseline:
 
-## 4. Functional obligations retained from SkinTokens
+- architecture: `RealSaS.ArachneCandidate.SegmentAwareJointField.v2`;
+- model dim `128`;
+- surface encoder layers `2`;
+- attention heads `4`;
+- feedforward dim `384`;
+- frozen qualified shipping codec decoder downstream during A1.
 
-Arachne FIT1 must retain these implementation-independent obligations:
+Do not redesign this apparatus before the real Mage evidence tells us it is necessary.
 
-1. geometry-conditioned per-qualified-joint influence fields;
-2. explicit conditioning on the exact `QualifiedSkeletonIR` lineage;
-3. compact field representation with a measured codec reconstruction ceiling;
-4. active/sparse deformation regions must receive nontrivial supervision;
-5. decoder must answer on every admitted `RiggingSurfaceIR` node;
-6. no hidden full-mesh completion or teacher-only skin feature reaches inference;
-7. prediction emits only `SkinProposalIR` / influence evidence;
-8. Compiler owns final legal skin references/simplex policy;
-9. final qualification includes deformation/motion-sensitive proof, not static weight error alone.
+## 5. Frozen Arachne inference boundary
 
-## 5. Mechanisms that remain reference-supported but not mandatory
+`RiggingSurfaceIR + QualifiedSkeletonIR` only.
 
-The following SkinTokens choices are **not** frozen RealSaS requirements:
+Allowed deterministic conditioning includes product-visible/derivable fields such as:
 
-- FSQ specifically;
-- exact codebook levels;
-- exact number of SkinTokens per joint;
-- Qwen3-0.6B;
-- unified skeleton+skin autoregression;
-- skeleton tokenizer grammar/order;
-- nested-dropout exact schedule;
-- exact BCE/MSE/Dice coefficients;
-- GRPO or its exact reward recipe;
-- full-mesh nearest-neighbor skin transfer;
-- reference postprocessing.
+### Surface
 
-## 6. Product boundary for Arachne FIT1
-
-Frozen inference boundary:
-
-`RiggingSurfaceIR + QualifiedSkeletonIR`
-
-Deterministic adapter may use only information derivable from those objects, including:
-
-### Surface lane
-
-- admitted surface 3D positions;
-- valid normals;
-- exact GSA local geometric relations;
-- support/view provenance;
-- observed/completed status if present in admitted product IR;
-- raster/view bindings if present in admitted product IR;
+- admitted 3D node positions;
+- normals/normal validity;
+- GSA local geometric relations;
+- support-view provenance;
+- observed/completed status;
+- raster bindings;
 - deterministic normalization.
 
-### Skeleton lane
+### Skeleton
 
-- canonical joint IDs for deterministic serialization/binding only;
 - qualified joint positions;
-- exact parent indices/tree;
+- exact parent tree;
 - root indicator;
-- skeleton depth / deterministic graph-derived features;
-- support-surface bindings if qualified and product-visible;
+- deterministic depth/graph features;
+- qualified support-surface bindings;
+- canonical IDs only for stable binding/serialization;
 - skeleton lineage hash.
 
-Forbidden at inference:
+Forbidden inference inputs:
 
-- source bone IDs/names as semantic hints;
 - teacher skin weights;
-- source mesh vertices/faces outside admitted product geometry;
-- helper/IK controls removed from the 22-joint qualified core;
+- source bone names/IDs as semantic hints;
+- helper/IK controls excluded from the qualified 22-joint core;
+- source/full hidden mesh geometry outside admitted product S;
 - teacher active-region masks;
-- hidden full-mesh completion.
+- teacher projection confidence labels.
 
-## 7. Training-only teacher lane
+## 6. Training-only Mage skin truth lane
 
-Mage has authoritative dense source skin truth. For Arachne training this may be projected offline onto the exact admitted product surface and the exact qualified 22-joint identity order.
+The dense source corpus contains `5321 x 41` skin weights, but only source columns `1..22` carry skin mass for the rendered Mage mechanical core. The authority render mesh contains `3348` vertices in the same world frame and is an exact coordinate subset of the dense source mesh.
 
-Required target object:
+Training must produce an explicit target:
 
-`SkinFieldTeacherTarget(surface_ids, canonical_joint_ids, W_teacher)`
+`SkinFieldTeacherTarget(surface_ids, qualified_joint_ids, W_teacher_on_GSA)`.
 
-Required invariants:
+This is teacher-only projection. It must never become product inference information.
 
-- exact surface-ID alignment, never row-index assumption;
-- exact source-bone -> qualified-joint provenance mapping sealed before optimizer;
-- teacher rows finite/nonnegative and simplex;
-- helper/IK/assembly-only source bones excluded unless explicitly mapped into an admitted qualified control;
-- every admitted surface row has target coverage or is explicitly fail-closed;
-- no teacher-only field becomes inference conditioning.
+Required invariants before A0 optimizer step 1:
 
-## 8. Arachne FIT1 experimental decomposition
+1. render-authority vertices -> dense-skin source vertices mapped exactly and hash-sealed;
+2. source skin columns `1..22` -> qualified 22 joint IDs mapped and hash-sealed;
+3. GSA node -> teacher surface mapping is explicit, reproducible and measured;
+4. no row-index assumptions; all final target rows bind to exact `surface_id`;
+5. every target row finite/nonnegative/simplex after projection;
+6. projection uncertainty/coverage is reported rather than silently hidden.
 
-The experiment must remain staged so a failure is interpretable.
+## 7. Mage target-projection design
 
-### A0-MAGE — codec ceiling
+A pure nearest-3D-triangle transfer is accepted only as a diagnostic/fallback, not yet as final target authority.
+
+Reason: preliminary exact diagnostic on the current 950 GSA nodes gives approximately:
+
+- mean GSA-to-teacher-surface distance `0.00937` world units;
+- p95 `0.03069`;
+- p99 `0.06861`;
+- max `0.09476`;
+- `98.3%` of nodes within `0.05`;
+- completed-node p95 is worse than observed-node p95.
+
+Those outliers are large enough that Euclidean nearest-surface transfer could cross semantically adjacent parts.
+
+### Preferred teacher projection
+
+For observed GSA nodes:
+
+`support-view raster binding -> exact teacher camera z-buffer/rasterized triangle -> barycentric teacher skin sample`.
+
+Use all available support views and record multi-view agreement. Robustly fuse only mutually consistent teacher samples.
+
+For the 53 model-completed/no-support nodes:
+
+use an explicitly flagged 3D nearest-triangle barycentric fallback, with distance/confidence telemetry.
+
+Required projection telemetry:
+
+- valid teacher views per node;
+- cross-view skin disagreement;
+- teacher depth/ray residual;
+- nearest-3D surface distance;
+- fallback count;
+- source triangle IDs as teacher-only provenance;
+- final row simplex residual;
+- exact surface/joint binding hashes.
+
+Final projection must fail closed if ambiguity exceeds the preregistered policy.
+
+## 8. Experimental sequence
+
+### P0 — `MAGE_SKIN_TARGET_PROJECTION`
+
+Close and hash the real teacher target on the exact 950-node admitted Mage substrate and exact 22-joint qualified skeleton.
+
+No learned optimizer.
+
+### A0-MAGE — real codec representation ceiling
 
 Question:
 
-> Can the frozen candidate skin-field representation reconstruct the Mage 22-joint teacher field on the exact admitted GSA surface and survive Compiler + deformation proof?
+> Can the existing shipping/default SkinFieldCodec architecture reconstruct the projected real Mage 22-joint skin field and survive raw-W, Compiler and deformation checks?
 
-Input to encoder may include teacher W because this is a representation ceiling. Decoder sees only candidate latent + product conditioning.
+Teacher W is allowed only in the codec encoder lane.
 
-PASS is required before predictor training.
+Use the already causally supported generic cosine optimizer protocol as the initial training protocol unless a Mage-specific pre-optimizer prereg explicitly changes it.
 
-### A1-MAGE — predictor ceiling / FIT1
+A0 PASS is mandatory before A1.
+
+### A1-MAGE / Arachne FIT1
+
+Freeze the A0-qualified Mage decoder.
 
 Question:
 
-> Can Arachne infer the needed per-joint field latent from only `RiggingSurfaceIR + QualifiedSkeletonIR` and reproduce a deformation-valid skin field on Mage?
+> Can `ArachneCandidateV2` infer the required per-joint latents from only real `RiggingSurfaceIR + QualifiedSkeletonIR` and produce a deformation-valid skin field on Mage?
 
-Pipeline:
+Path:
 
-`shipping S + frozen qualified G`
-` -> Arachne predictor`
-` -> frozen A0-qualified decoder`
-` -> raw dense influence proposal`
+`real Mage S + frozen Geppetto Qualified G`
+` -> ArachneCandidateV2`
+` -> frozen Mage A0 decoder`
+` -> raw W`
 ` -> SkinProposalIR`
 ` -> Compiler.qualify_skin`
 ` -> QualifiedSkinIR`
-` -> verified deformation/motion probes`.
+` -> verified deformation/motion proof`.
 
-No teacher W is visible to the predictor at inference/evaluation.
+Teacher W is evaluation truth only during A1.
 
-## 9. Evaluation families required for FIT1
+## 9. Evaluation obligations
 
-Static metrics alone are insufficient.
+### Raw learned field
 
-Required layers:
+- row-L1 distribution / p95;
+- active influence fidelity;
+- dominant-joint fidelity;
+- finite/nonnegative checks;
+- no hidden target-conditioned inputs.
 
-### Raw field fidelity
+### Compiler
 
-- row L1 / p95;
-- active-support recall/precision or equivalent sparse-field measure;
-- dominant-joint accuracy;
-- nonfinite/negative checks;
-- raw row-sum distribution if independent field decoder is used.
-
-### Compiler qualification
-
+- exact S/G lineage;
 - exact surface coverage;
-- exact skeleton lineage;
-- illegal refs = 0;
-- correction magnitude reported;
-- correction must remain bounded and too small to rescue a materially bad raw field.
+- illegal references `0`;
+- bounded correction magnitude reported;
+- raw W must independently be good enough that Compiler rescue cannot explain PASS.
 
-### Deformation proof
+### Deformation
 
-Use verified LBS or the product-equivalent deformation operator with preregistered joint probes.
+At minimum preregister:
 
-At minimum include:
-
-- individual hinge/bend probes on limbs;
+- individual limb bends;
 - parent-child compound rotations;
 - symmetric left/right probes;
-- torso/root motion;
-- a combined stress pose;
-- deformation error relative to teacher-skinned motion;
-- finite/no-explosion checks;
-- local smoothness / fold or stretch diagnostics appropriate to the admitted surface.
+- torso/root probe;
+- combined stress pose;
+- teacher-vs-predicted deformation error;
+- finite/no-explosion;
+- local stretch/fold/smoothness diagnostics on admitted geometry.
 
-FIT1 success means the learned field behaves correctly under motion, not merely that W numerically resembles the teacher matrix.
+FIT1 authority is deformation behavior, not only matrix similarity.
 
-## 10. Current historical RealSaS evidence and what it means
-
-Historical A0 work already established that the larger shipping/default continuous `SkinFieldCodecV1` (`192 hidden / 64 latent / 3 encoder / 3 decoder`) could represent the frozen heterogeneous synthetic field panel when trained with cosine cooling. This falsified a generic representation-capacity bottleneck for that synthetic panel.
-
-That result is **supporting evidence only** for Mage FIT1 because:
-
-- it was not the real Mage admitted surface/22-joint target;
-- the current codec uses row-softmax rather than the cleaner independent-field factorization of SkinTokens;
-- it does not prove the Arachne predictor can infer the latent from product conditioning.
-
-Historical ArachneCandidateV2 (`128 model dim / 2 surface encoder layers / 4 heads / 384 FF`) is likewise a candidate starting point, not a frozen final Mage FIT1 architecture.
-
-## 11. Decisions frozen by this mapping
+## 10. Frozen decisions
 
 - `SKINTOKENS_PRIMARY_ARACHNE_REFERENCE = TRUE`
 - `SKINTOKENS_UPSTREAM_COMMIT = 273b691d35989d71cd17ff2895fdc735097b92d1`
+- `SKINTOKENS_SHARED_FINAL_SKELETON_SKIN_DECODER = FALSE`
+- `SKINTOKENS_SHARED_CAUSAL_TOKEN_PREDICTOR = TRUE`
+- `SKINTOKENS_SEQUENCE_CAUSAL_ORDER = SKELETON_THEN_SKIN`
 - `COMMON_FINAL_GEPPETTO_ARACHNE_DECODER = FALSE`
-- `SHARED_GEPPETTO_ARACHNE_CAUSAL_LM_FOR_FIT1 = FALSE`
-- `SHARED_CAUSAL_RIG_PRIOR_FUTURE_ARM = ALLOWED`
-- `SAME_SKIN_DECODER_A0_A1 = REQUIRED`
-- `QUALIFIED_SKELETON_INPUT = REQUIRED`
+- `SHARED_GEPPETTO_ARACHNE_CAUSAL_MODEL_FOR_MAGE_FIT1 = FALSE`
+- `SHARED_RIG_PRIOR_FUTURE_ARM = ALLOWED`
+- `SAME_MAGE_SKIN_DECODER_A0_A1 = REQUIRED`
+- `KEEP_PROVEN_REALSAS_SKINFIELD_CODEC_V1_FOR_INITIAL_MAGE_FIT1 = TRUE`
+- `INDEPENDENT_SIGMOID_FIELD_REDESIGN_BEFORE_MAGE_EVIDENCE = FORBIDDEN`
+- `QUALIFIED_GEPPETTO_SKELETON_IS_ARACHNE_INPUT_AUTHORITY = TRUE`
 - `GEPPETTO_REOPEN_FOR_ARACHNE_FIT1 = FORBIDDEN`
-- `TEACHER_W_AT_ARACHNE_INFERENCE = FORBIDDEN`
-- `COMPILER_FINAL_SKIN_AUTHORITY = REQUIRED`
+- `COMPILER_FINAL_SKIN_AUTHORITY = TRUE`
 - `DEFORMATION_PROOF = REQUIRED`
 - `GENERALIZATION_CLAIM = FALSE`
-- `OPTIMIZER_STEP_1_AUTHORIZED = FALSE`
-
-## 12. Immediate next gate before implementation freeze
-
-Perform one source-only controlled design closure:
-
-`D0_DECODER_FACTORISATION`
-
-Compare, without Mage predictor training:
-
-- Arm S: current joint-coupled row-softmax decoder;
-- Arm I: independent per-joint nonnegative/sigmoid field decoder with Compiler-owned simplex normalization.
-
-Both arms must use the same Mage teacher projection, surface/skeleton conditioning and deformation harness.
-
-Decision criterion is not mean reconstruction alone. Prefer the arm that:
-
-- reaches the required static/deformation ceiling;
-- requires negligible Compiler correction;
-- preserves sparse local influence structure;
-- maintains clean learned-vs-Compiler ownership;
-- avoids unnecessary coupling to joint count/order.
-
-After `D0` closes, freeze the final codec/decoder and preregister `A0-MAGE`, then `A1-MAGE/FIT1`. No final Mage Arachne optimizer run before these seals.
+- `NEXT_GATE = MAGE_SKIN_TARGET_PROJECTION`
+- `FINAL_ARACHNE_FIT1_OPTIMIZER_AUTHORIZED = FALSE`

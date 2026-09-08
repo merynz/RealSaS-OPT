@@ -1,0 +1,89 @@
+{
+  "authorization": {
+    "a0_optimizer_authorized": false,
+    "a1_optimizer_authorized": false,
+    "next_gate": "EXECUTE_COMMITTED_FS1_BUILDER__SEAL_TARGET_MANIFEST__REBUILD_CACHE",
+    "old_p0_v1_authority_remains_retired": true
+  },
+  "builder": {
+    "generation_tag": "P0_FULL_SOURCE_FS1",
+    "git_blob_sha": "4e5e54e893f145a1e57f76ee8a5751b38fceca0f",
+    "hash_authority": "GIT_BLOB_SHA_AT_PREREG",
+    "path": "experiments/arachne_skintokens_fit1_20260908/build_arachne_mage_p0_full_source_fs1.py"
+  },
+  "historical_backward_regression": {
+    "exact_old_raster_mode_byte_regression_required": false,
+    "reason": "P0 V1 temporary raster sampler and binary target were not retained in repository/Drive. Numeric thresholds are preserved, but FS1 freezes a new explicit continuous-ray sampling contract instead of tuning a replacement to historical mode counts.",
+    "required_body_teacher_faces": 4029,
+    "required_body_teacher_vertices": 3348,
+    "required_distance_low_confidence_rows": 16,
+    "required_local_semantic_ambiguity_rows": 24,
+    "required_nearest_max": 0.09476343516885569,
+    "required_nearest_mean": 0.009367747137483609,
+    "required_nearest_p95": 0.03069111655845138,
+    "required_nearest_p99": 0.06860541512023109,
+    "required_stable_rows": 915,
+    "scope": "GEOMETRIC_FOUNDATION_ONLY"
+  },
+  "input_authority": {
+    "dense_skin_shape": [5321,41],
+    "historical_body_teacher_sha256": "ac2c37571b77fa2900cc042e36f74df111432b94fb21acfb54694d5b6f962e67",
+    "joint_identity_bridge_sha256": "df8805a261326c3f58fc10d8f3f7a6354bb7241a0ba1fc3e272d89a2bc2a06e7",
+    "normalized_source_faces": 5763,
+    "normalized_source_sha256": "528bef491eceb358ebc8ecb2a46af1d37b4322a7ef500281403a8207fe7c648f",
+    "normalized_source_vertices": 5321,
+    "qualified_skeleton_file_sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992",
+    "qualified_skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "shipping_surface_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+    "zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b"
+  },
+  "main_scientific_a0_optimizer_steps_before_prereg": 0,
+  "output_acceptance": {
+    "canonical_joints": 22,
+    "confidence_counts_are_predeclared": false,
+    "finite": true,
+    "joint_ids_canonical_sorted": true,
+    "low_row_count_is_predeclared": false,
+    "mode_counts_are_predeclared": false,
+    "nearest_change_count_is_predeclared": false,
+    "negative_weight_count": 0,
+    "shape": [950,22],
+    "simplex_max_abs_error_float32": 1e-06,
+    "surface_ids_canonical_sorted": true,
+    "surface_rows": 950
+  },
+  "preseal_diagnostic_execution": {
+    "authority": false,
+    "note": "The continuous-ray policy, thresholds and zero-skin exclusion rule were selected from provenance/mechanical constraints; diagnostic counts are not acceptance targets.",
+    "occurred": true,
+    "output_dependent_policy_changes_after_this_prereg_forbidden": true,
+    "purpose": "Implementation sanity check only."
+  },
+  "projection_policy": {
+    "base": "EXACT_CLOSEST_POINT_ON_SKIN_SUPPORTED_FULL_SOURCE_FACES__BARYCENTRIC_22_CONTROL_SKIN",
+    "candidate_count": 8,
+    "distance_low_confidence_threshold_world": 0.05,
+    "local_ambiguity_distance_delta_world": 0.005,
+    "local_ambiguity_skin_l1_threshold": 0.2,
+    "multiview_override_requires_votes": 2,
+    "single_view_override_requires_candidate_within_nearest_plus_world": 0.005,
+    "support_view_sample": "CONTINUOUS_ORTHOGRAPHIC_FRONTMOST_RAY_ON_EXACT_PRODUCT_CAMERA__NO_PIXEL_QUANTIZATION",
+    "support_view_vote_l1_threshold": 0.15,
+    "support_views": "EXACT_SHIPPING_GSA_SUPPORT_VIEWS_AND_RASTER_BINDINGS",
+    "teacher_source_geometry_is_product_inference_dependency": false,
+    "tie_break": "NEAREST_CANDIDATE_RANK_THEN_ASCENDING_GLOBAL_FACE_ID"
+  },
+  "recorded_at_utc": "2026-09-08T13:00:11Z",
+  "schema": "RealSaS.ArachneMageP0FullSourceFS1Prereg.v1",
+  "source_deformation_surface_contract": {
+    "eligible_face_rule": "ALL_THREE_FACE_VERTICES_SELECTED_22_CONTROL_MASS_GT_EPS",
+    "expected_eligible_skin_supported_faces": 5683,
+    "expected_excluded_zero_skin_faces": 80,
+    "expected_zero_selected_skin_vertices": 42,
+    "non_bridge_source_control_mass_l1_must_equal": 0.0,
+    "output_deformation_teacher_surface": "SKIN_SUPPORTED_SUBSET_OF_FULL_NORMALIZED_SOURCE",
+    "reason": "Full normalized geometry includes 42 exact zero-selected-skin vertices forming 80 faces. Zero-skin geometry is provenance/render geometry but cannot be teacher deformation authority.",
+    "selected_22_control_mass_epsilon": 1e-08
+  },
+  "status": "PREREGISTERED__FULL_SOURCE_SKIN_SUPPORTED_PROJECTION__OUTPUT_NOT_AUTHORITY_UNTIL_SEALED"
+}

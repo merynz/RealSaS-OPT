@@ -1,0 +1,131 @@
+{
+  "artifact": {
+    "npz_filename": "ARACHNE_MAGE_SKIN_TARGET_P0_V1.npz",
+    "npz_sha256": "f3db92194660f12de4425e015f85ac4ac995fcfc44a0272047b049ffb0d36d71"
+  },
+  "binding": {
+    "joint_count": 22,
+    "joint_ids": [
+      "J:0e10e6a5ecb52cf94cd5",
+      "J:192f728e61f375481a7d",
+      "J:212a1c755d6a0063aab9",
+      "J:33d2c674ed9153028054",
+      "J:458b32ed8ad7feeaca6b",
+      "J:4b4125aedd60d936c94e",
+      "J:4d7da9c799d83f488538",
+      "J:69d8ebb260bf2a830c90",
+      "J:6c57ffd28437d5a273fd",
+      "J:895a71dc5192cfe34bc8",
+      "J:8a443c9a8908c701c987",
+      "J:945a3c35f01968c02ae5",
+      "J:9c150838c30f27acbbf1",
+      "J:aaf8abed7fa3ca3e0fff",
+      "J:ab27e6a42b0ca3301653",
+      "J:b08a160ca7c74e8e2013",
+      "J:beee450974f9c3e7bdaa",
+      "J:e26f9c356f9a9d917c09",
+      "J:e7d1756bc7f48460b98c",
+      "J:ee17e378e4e3cd7df5e9",
+      "J:ef0115afead216b97fdd",
+      "J:f65edd5555e95e50bae2"
+    ],
+    "negative_weight_count": 0,
+    "simplex_max_abs_error": 2.220446049250313e-16,
+    "surface_geometry_lineage_hash": "d80ff23c10c22f6c1f9a86a4435011d973862c8e9276cba04a8c73b4fed72a58",
+    "surface_node_count": 950,
+    "target_content_sha256": "c15db7b78d272ac22998071e1fb1cec4c65d7366133ef16fb72824f222c852d9",
+    "teacher_source_control_index_by_joint_id": {
+      "J:0e10e6a5ecb52cf94cd5": 19,
+      "J:192f728e61f375481a7d": 20,
+      "J:212a1c755d6a0063aab9": 9,
+      "J:33d2c674ed9153028054": 3,
+      "J:458b32ed8ad7feeaca6b": 2,
+      "J:4b4125aedd60d936c94e": 15,
+      "J:4d7da9c799d83f488538": 18,
+      "J:69d8ebb260bf2a830c90": 16,
+      "J:6c57ffd28437d5a273fd": 14,
+      "J:895a71dc5192cfe34bc8": 22,
+      "J:8a443c9a8908c701c987": 13,
+      "J:945a3c35f01968c02ae5": 10,
+      "J:9c150838c30f27acbbf1": 4,
+      "J:aaf8abed7fa3ca3e0fff": 1,
+      "J:ab27e6a42b0ca3301653": 11,
+      "J:b08a160ca7c74e8e2013": 5,
+      "J:beee450974f9c3e7bdaa": 17,
+      "J:e26f9c356f9a9d917c09": 7,
+      "J:e7d1756bc7f48460b98c": 6,
+      "J:ee17e378e4e3cd7df5e9": 21,
+      "J:ef0115afead216b97fdd": 8,
+      "J:f65edd5555e95e50bae2": 12
+    },
+    "weights_dtype": "float32",
+    "weights_shape": [950, 22]
+  },
+  "confidence_vocab": {"HIGH": 0, "LOW": 3, "MEDIUM": 1, "MEDIUM_LOW": 2},
+  "counts": {
+    "completed_rows": 53,
+    "confidence": {"HIGH": 920, "LOW": 19, "MEDIUM": 7, "MEDIUM_LOW": 4},
+    "distance_low_confidence_rows": 16,
+    "local_semantic_ambiguity_rows": 24,
+    "low_confidence_fallback_rows": 19,
+    "mode": {
+      "MULTIVIEW_DISAMBIGUATED": 7,
+      "MULTIVIEW_VALIDATED_NEAREST": 5,
+      "NEAREST3D_LOW_CONF_FALLBACK": 19,
+      "NEAREST3D_STABLE": 915,
+      "SINGLE_VIEW_LOCAL_TIEBREAK": 2,
+      "SINGLE_VIEW_VALIDATED_NEAREST": 2
+    },
+    "nearest_candidate_changed_rows": 9,
+    "observed_rows": 897
+  },
+  "distance_telemetry": {
+    "completed_p95": 0.05490223657363833,
+    "nearest_max": 0.09476343516885569,
+    "nearest_mean": 0.009367747137483609,
+    "nearest_p95": 0.03069111655845138,
+    "nearest_p99": 0.06860541512023109,
+    "observed_p95": 0.027708064554156923
+  },
+  "inputs": {
+    "final_qualified_skeleton_ir_sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992",
+    "final_skeleton_proposal_ir_sha256": "91147822d1e24c2d5d8600eea5c60543eb1c0584ad2fca9baca952fe788ded26",
+    "geppetto_target_content_sha256": "0b5a25c877116de60b710b7bb2a7848f30988e1622e2eda8084cad21c8ca23c9",
+    "iris_zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+    "joint_identity_bridge_local_sha256": "df8805a261326c3f58fc10d8f3f7a6354bb7241a0ba1fc3e272d89a2bc2a06e7",
+    "normalized_teacher_sha256": "528bef491eceb358ebc8ecb2a46af1d37b4322a46af1d37b4322a7ef500281403a8207fe7c648f",
+    "teacher_render_truth_npz_sha256": "ac2c37571b77fa2900cc042e36f74df111432b94fb21acfb54694d5b6f962e67"
+  },
+  "mode_vocab": {
+    "MULTIVIEW_DISAMBIGUATED": 0,
+    "MULTIVIEW_VALIDATED_NEAREST": 1,
+    "NEAREST3D_LOW_CONF_FALLBACK": 2,
+    "NEAREST3D_STABLE": 3,
+    "SINGLE_VIEW_LOCAL_TIEBREAK": 4,
+    "SINGLE_VIEW_VALIDATED_NEAREST": 5
+  },
+  "policy": {
+    "a0_optimizer_authorized": false,
+    "generalization_claim": false,
+    "next_gate": "A0_MAGE_PREREG__CONFIDENCE_HANDLING_AND_CODEC_CEILING",
+    "teacher_projection_is_product_inference_dependency": false,
+    "teacher_source_ids_are_learner_input": false
+  },
+  "projection_policy": {
+    "base": "EXACT_CLOSEST_POINT_ON_TEACHER_RENDER_MESH__BARYCENTRIC_SKIN",
+    "candidate_count": 8,
+    "distance_low_confidence_threshold_world": 0.05,
+    "local_ambiguity_distance_delta_world": 0.005,
+    "local_ambiguity_skin_l1_threshold": 0.2,
+    "low_confidence_rows_are_explicit": true,
+    "multiview_override_requires_votes": 2,
+    "multiview_skin_vote_l1_threshold": 0.15,
+    "nearest3d_is_not_unconditional_authority": true,
+    "single_view_override_requires_candidate_within_nearest_plus_world": 0.005,
+    "teacher_render_vertices_to_dense_skin": "EXACT_WORLD_COORDINATE_NEAREST_VERTEX_WITH_MAX_ERROR_6p143906154658885e-08",
+    "zbuffer_is_not_standalone_authority": true
+  },
+  "schema": "RealSaS.ArachneMageSkinTargetP0.v1",
+  "scientific_scope": "TEACHER_ONLY_TARGET_PROJECTION__NO_LEARNED_OPTIMIZER",
+  "status": "PASS_TARGET_PROJECTED__LOW_CONFIDENCE_ROWS_EXPLICIT__A0_NOT_YET_AUTHORIZED"
+}

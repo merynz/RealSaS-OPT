@@ -12,10 +12,16 @@
   "explained_high_signal_count": 264,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 83,
-  "safe_default_evidence_only_branch_count": 79,
+  "live_branch_count": 84,
+  "safe_default_evidence_only_branch_count": 80,
   "unexplained_high_signal_artifacts": [],
   "branches": [
+    {
+      "name": "__invalid_probe_do_not_create",
+      "sha": "a51617400b40a6f81e1c6abe6b59e25329ad9e0e",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
     {
       "name": "agent/n1d-global-mechanical-solver-research-20260819",
       "sha": "08620737ce526b0c0cc6c551f53910e34a1107fe",
@@ -162,7 +168,7 @@
     },
     {
       "name": "exp/arachne-skintokens-cleanroom-fit1-20260908",
-      "sha": "f7be46f0a97df62a793ebf91b22297c894854f39",
+      "sha": "a51617400b40a6f81e1c6abe6b59e25329ad9e0e",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -318,7 +324,7 @@
     },
     {
       "name": "main",
-      "sha": "06f0677746509d8525f05accfd0d55cff32d0d60",
+      "sha": "af95395fbcef4b061179279bbfee11ebf3870238",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -468,7 +474,7 @@
     },
     {
       "name": "seal/geppetto-reference-strength-fit1-20260908",
-      "sha": "f7be46f0a97df62a793ebf91b22297c894854f39",
+      "sha": "ae0af0cd39dd2468a012ba21890a4fed2da7c4c9",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

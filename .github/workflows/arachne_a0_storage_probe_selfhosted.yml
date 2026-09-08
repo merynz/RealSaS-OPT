@@ -1,0 +1,45 @@
+name: arachne-a0-storage-probe-selfhosted
+
+on:
+  push:
+    branches:
+      - exp/arachne-skintokens-cleanroom-fit1-20260908
+    paths:
+      - '.github/workflows/arachne_a0_storage_probe_selfhosted.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: [self-hosted, realsas, gpu]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe local and Windows-backed storage without broad file scan
+        shell: bash
+        run: |
+          set -u
+          echo '=== MOUNTS ==='
+          ls -la /mnt 2>/dev/null || true
+          mount | grep -Ei 'drvfs|google|drive|rclone' || true
+          echo '=== RCLONE ==='
+          if command -v rclone >/dev/null 2>&1; then rclone listremotes || true; else echo RCLONE_NOT_FOUND; fi
+          echo '=== WINDOWS DRIVES ==='
+          if command -v powershell.exe >/dev/null 2>&1; then
+            powershell.exe -NoProfile -Command "Get-CimInstance Win32_LogicalDisk | Select-Object DeviceID,VolumeName,DriveType,FileSystem | Format-Table -AutoSize" || true
+          else
+            echo POWERSHELL_NOT_FOUND
+          fi
+          echo '=== LIKELY PATHS ==='
+          for p in \
+            /home/monster/GoogleDrive /home/monster/'Google Drive' /home/monster/MyDrive \
+            /mnt/g /mnt/G /mnt/d /mnt/e /mnt/f /mnt/h \
+            /mnt/c/Users/*/'Google Drive' /mnt/c/Users/*/MyDrive /mnt/c/Users/*/GoogleDriveFS; do
+            if [ -e "$p" ]; then echo "FOUND_PATH:$p"; ls -la "$p" 2>/dev/null | head -40 || true; fi
+          done
+          echo '=== EXACT FOLDER LOOKUP (BOUNDED) ==='
+          timeout 60s find /home/monster /mnt -maxdepth 7 -type d -name 'RealSaS_ARACHNE_MAGE_A0_FS1_20260908' -print 2>/dev/null || true
+          echo '=== EXACT FILE LOOKUP (BOUNDED) ==='
+          timeout 60s find /home/monster /mnt -maxdepth 8 -type f \( -name 'ARACHNE_MAGE_A0_FS1_PROGRESS.pt' -o -name 'ARACHNE_MAGE_FS1_CONDITIONING_CACHE_V2.npz' \) -print 2>/dev/null || true

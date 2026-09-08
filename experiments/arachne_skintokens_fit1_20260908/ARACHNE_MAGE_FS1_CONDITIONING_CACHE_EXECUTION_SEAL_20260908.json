@@ -1,0 +1,50 @@
+{
+  "authorization": {
+    "a0_optimizer_authorized": false,
+    "a1_optimizer_authorized": false,
+    "main_scientific_a0_optimizer_steps": 0,
+    "next_gate": "REBIND_A0_PREREG_AND_RUNNER__RERUN_CPU_RESUME_TERMINAL_IDEMPOTENCE"
+  },
+  "binding": {
+    "fs1_target_binding_sha256": "ab74756e32ee5c9f4f2d4020cdb56620a110130d80d7b9384c62509af3f193cf",
+    "fs1_target_npz_sha256": "7154f5ad98b446c0019c472fd91863b5843b98846cdb38b38e4f78ba7fb5b93f",
+    "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+    "teacher_weights_content_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d"
+  },
+  "builder": {
+    "git_blob_sha": "1669d676611ac156cb096abdb3184a21af5b8814",
+    "path": "experiments/arachne_skintokens_fit1_20260908/build_arachne_mage_fs1_conditioning_cache_v2.py",
+    "sha256": "43bf396473d33cd1453585d486342fa18eb666c9b9d1aa17b8bf21f2f15b7869"
+  },
+  "conditioning": {
+    "pair_geometry_raw_sha256": "416d5e5848ec579eb67e5e402dbf6e60908f4d9a30dbe0650a1d19be7183e4e7",
+    "v1_hash": "475d71523a38c5763756713e2047b337662ad6c01735aaa89671c6297326e42c",
+    "v1_hash_semantics": "ArachneConditioningAdapter.conditioning_hashes[0]",
+    "v2_hash": "9e979b824e6e30fcaf1158e4bceeb080ce5fa1cff463290e1c4a7c2ac4f5f4e9",
+    "v2_hash_semantics": "ArachneConditioningAdapterV2.conditioning_hashes[0]"
+  },
+  "determinism": {
+    "cache_binding_sha256": "c7e3bf10fc8edf16f862b4ce58b3aabfeb2aabf14cc8e744e53e3afc0764ac9f",
+    "cache_npz_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "manifest_byte_identical": true,
+    "manifest_sha256": "5b3e63d60fce76226e16aac5d754a5f9cde114ccd8327a3242fad8a714af7d6b",
+    "npz_byte_identical": true,
+    "replay_count": 2
+  },
+  "executed_after_prereg_commit": "0a6c6d02da4cb251e28f842be0c47a61b74da974",
+  "historical_opaque_cache": {
+    "cache_sha256": "12484afc23d5c03cbad8020266ed5b39c3201d979e78f96380e748902152be6e",
+    "conditioning_v1_hash": "7b82d57b1967858c6a66de871ecd570a9bdae408b30ff84c3fcbd8e908551047",
+    "conditioning_v2_hash": "89973cd1f0ac989d10cdfeafdef89545668fda4998363df3e872961646879939",
+    "disposition": "HISTORICAL_ONLY__NOT_FS1_AUTHORITY"
+  },
+  "schema": "RealSaS.ArachneMageFS1ConditioningCacheExecutionSeal.v1",
+  "status": "PASS_DETERMINISTIC_DOUBLE_REPLAY__FS1_CACHE_SEALED__A0_REBIND_REQUIRED",
+  "supervision": {
+    "joint_count": 22,
+    "low_rows": 16,
+    "supervised_rows": 934,
+    "surface_rows": 950
+  }
+}

@@ -16,13 +16,18 @@
   "fs1_conditioning_cache": {
     "builder_git_blob_sha": "1669d676611ac156cb096abdb3184a21af5b8814",
     "builder_path": "experiments/arachne_skintokens_fit1_20260908/build_arachne_mage_fs1_conditioning_cache_v2.py",
+    "cache_binding_sha256": "c7e3bf10fc8edf16f862b4ce58b3aabfeb2aabf14cc8e744e53e3afc0764ac9f",
+    "cache_npz_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "execution_seal_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_EXECUTION_SEAL_20260908.json",
     "expected_conditioning_v1_hash": "475d71523a38c5763756713e2047b337662ad6c01735aaa89671c6297326e42c",
     "expected_conditioning_v2_hash": "9e979b824e6e30fcaf1158e4bceeb080ce5fa1cff463290e1c4a7c2ac4f5f4e9",
     "expected_low_rows": 16,
     "expected_supervised_rows": 934,
     "historical_opaque_cache_authority_retired": true,
+    "manifest_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_V2_MANIFEST.json",
+    "manifest_sha256": "5b3e63d60fce76226e16aac5d754a5f9cde114ccd8327a3242fad8a714af7d6b",
     "prereg_path": "canonical/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_PREREG_V2_20260908.json",
-    "status": "PREREGISTERED__EXECUTION_REQUIRED"
+    "status": "PASS_DETERMINISTIC_DOUBLE_REPLAY__CACHE_SEALED__A0_REBIND_REQUIRED"
   },
   "main_scientific_a0_optimizer_steps": 0,
   "pre_execution_fingerprint_repair": {
@@ -42,9 +47,6 @@
     "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb"
   },
   "required_next_gate": [
-    "EXECUTE_COMMITTED_FS1_CONDITIONING_CACHE_BUILDER_TWICE",
-    "REQUIRE_BYTE_IDENTICAL_CACHE_AND_MANIFEST",
-    "SEAL_NEW_CACHE_HASH_AND_BINDING",
     "REBIND_A0_PREREG_AND_RUNNER_TO_FS1_BINDING_AND_CACHE",
     "RERUN_CPU_RESUME_TERMINAL_IDEMPOTENCE_REGRESSIONS",
     "BUILD_SELF_CONTAINED_COLAB",
@@ -61,7 +63,7 @@
     "teacher_weights_content_sha256": "c15db7b78d272ac22998071e1fb1cec4c65d7366133ef16fb72824f222c852d9"
   },
   "schema": "RealSaS.ArachneMageA0AuthorityBlock.v2",
-  "status": "A0_BLOCKED__FS1_TARGET_SEALED__CACHE_PREREGISTERED__EXECUTION_REQUIRED",
+  "status": "A0_BLOCKED__FS1_TARGET_AND_CACHE_SEALED__A0_REBIND_REQUIRED",
   "supersession_finding": {
     "body_only_teacher_vertices": 3348,
     "eligible_skin_supported_faces": 5683,

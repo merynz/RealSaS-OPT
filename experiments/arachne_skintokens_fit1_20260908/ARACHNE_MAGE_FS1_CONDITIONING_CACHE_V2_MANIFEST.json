@@ -1,0 +1,167 @@
+{
+  "authorization": {
+    "a0_optimizer_authorized": false,
+    "a1_optimizer_authorized": false,
+    "main_scientific_a0_optimizer_steps": 0,
+    "next_gate": "DOUBLE_REPLAY_BYTE_DETERMINISM__SEAL_CACHE__REBIND_A0_PREREG_AND_RUNNER"
+  },
+  "cache": {
+    "array_inventory": {
+      "confidence_code": {
+        "content_sha256": "594d87b07e97bc313aaa1dd760af3eca37fc5a14e6224926c2506cccbb95b902",
+        "dtype": "uint8",
+        "shape": [
+          950
+        ]
+      },
+      "joint_features": {
+        "content_sha256": "cb801e706285abd7f177311023876e5cea074e7d3e5ce26c23891ab183388844",
+        "dtype": "float32",
+        "shape": [
+          22,
+          8
+        ]
+      },
+      "joint_ids": {
+        "content_sha256": "519fd2ec54a899bb7fb199fb3b0454e3108e79d87980887782864c9308d55a98",
+        "dtype": "<U22",
+        "shape": [
+          22
+        ]
+      },
+      "pair_geometry": {
+        "content_sha256": "416d5e5848ec579eb67e5e402dbf6e60908f4d9a30dbe0650a1d19be7183e4e7",
+        "dtype": "float32",
+        "shape": [
+          950,
+          22,
+          10
+        ]
+      },
+      "pair_mask": {
+        "content_sha256": "f02b46f2f0f84a7ad3b67f58342053e7280c7a83c517cee0a07cd6d5edbf06c7",
+        "dtype": "uint8",
+        "shape": [
+          950,
+          22
+        ]
+      },
+      "parent_indices": {
+        "content_sha256": "c129c340a509a0cd4f9bfae8fe10ddf6e437aebc32d590da7141bf7adaee327a",
+        "dtype": "int64",
+        "shape": [
+          22
+        ]
+      },
+      "rest_points_world": {
+        "content_sha256": "03f850e100439b9e8cefef9d72fecb9cac005eabbda00b8021197d045dd1b5be",
+        "dtype": "float32",
+        "shape": [
+          950,
+          3
+        ]
+      },
+      "surface_features": {
+        "content_sha256": "b4ff130fa431befcb442d9f39ccddad75c9a384f1d5b22d6009577bf53e07986",
+        "dtype": "float32",
+        "shape": [
+          950,
+          20
+        ]
+      },
+      "surface_ids": {
+        "content_sha256": "6c187f9276d43639088c0cc30ca19b53afba323638a4aa344d764cb6a6e274c2",
+        "dtype": "<U24",
+        "shape": [
+          950
+        ]
+      },
+      "surface_positions_normalized": {
+        "content_sha256": "f6b385826c96bfb2ed62536e39eff9e053eba1bc942a047e1470847504ded7a1",
+        "dtype": "float32",
+        "shape": [
+          950,
+          3
+        ]
+      },
+      "teacher_supervision_mask": {
+        "content_sha256": "19f6ea87126f9e32e14b657491b92e20c61b6183d79530a67912bb0ca36246c0",
+        "dtype": "uint8",
+        "shape": [
+          950
+        ]
+      },
+      "teacher_weights": {
+        "content_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d",
+        "dtype": "float32",
+        "shape": [
+          950,
+          22
+        ]
+      }
+    },
+    "binding_sha256": "c7e3bf10fc8edf16f862b4ce58b3aabfeb2aabf14cc8e744e53e3afc0764ac9f",
+    "joint_count": 22,
+    "low_rows": 16,
+    "npz_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "pair_count": 20900,
+    "supervised_rows": 934,
+    "surface_rows": 950
+  },
+  "inputs": {
+    "Nd_operator_sha256": "5b5c0e89a18c98f6f7a231941480a61e7158d93d91a9a8edcc5362d6c5e0b1be",
+    "camera_sha256": [
+      "73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541",
+      "bdc172a4aff332f956d1403e36b2f8684b68059fdc82f9efddf35d05a6d9b4d4",
+      "3c2bbc44ef9005b4a545a3381205a5d6a92af15b4791c9075071b8cad02a1a6c",
+      "24b2f115d908422d885f85e956fcc36ac78fd0c90b503f698caa62febc2b9c4d",
+      "5bf00783d6509c2ca142e05ef705d5cdb5df17ad248b782d2fe8cf8a297bee39",
+      "7ee3e50739318eeb122b5b0ec67260dd32e21d949398f48c408a6c239e5c89fe",
+      "daa19fa58ff602977d64b720c4198956809855149d814df487c7762a963f1eec",
+      "68f51fbfce4c31f94281e1569d74b44609435285668f8a8b1b278e76db6ea53f"
+    ],
+    "fs1_target_binding_sha256": "ab74756e32ee5c9f4f2d4020cdb56620a110130d80d7b9384c62509af3f193cf",
+    "fs1_target_npz_sha256": "7154f5ad98b446c0019c472fd91863b5843b98846cdb38b38e4f78ba7fb5b93f",
+    "qualified_skeleton_file_sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992",
+    "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+    "teacher_weights_content_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d",
+    "zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b"
+  },
+  "retired_historical_opaque_fields": {
+    "conditioning_v1_hash": "7b82d57b1967858c6a66de871ecd570a9bdae408b30ff84c3fcbd8e908551047",
+    "conditioning_v2_hash": "89973cd1f0ac989d10cdfeafdef89545668fda4998363df3e872961646879939",
+    "local_cache_sha256": "12484afc23d5c03cbad8020266ed5b39c3201d979e78f96380e748902152be6e",
+    "reason": "Historical report did not retain the byte-generating cache builder or hash payload semantics; values remain history and are not FS1 authority."
+  },
+  "schema": "RealSaS.ArachneMageFS1ConditioningCache.v2",
+  "scientific_scope": "DETERMINISTIC_S_G_CONDITIONING_PLUS_SEALED_FS1_TEACHER_TARGET__NO_OPTIMIZER_STEP",
+  "source_contract": {
+    "conditioning_v1_hash": "475d71523a38c5763756713e2047b337662ad6c01735aaa89671c6297326e42c",
+    "conditioning_v1_hash_semantics": "ArachneConditioningAdapter.conditioning_hashes[0]",
+    "conditioning_v2_hash": "9e979b824e6e30fcaf1158e4bceeb080ce5fa1cff463290e1c4a7c2ac4f5f4e9",
+    "conditioning_v2_hash_semantics": "ArachneConditioningAdapterV2.conditioning_hashes[0]",
+    "git_blobs": {
+      "arachne_conditioning_v1": "b3539ed6c4580ac69338bdb9bd4b93c6e78a262c",
+      "arachne_conditioning_v2": "3383cb7801b22aeb634f05551a847a04e674c7c8",
+      "arachne_geometry_v2": "0a39450b69de48da3b7748cb08972d0b69ff9700",
+      "arachne_geppetto_v2_bridge": "35a63245799710ff7ede082d0f8ffcf19f6af505",
+      "canonical_geppetto_conditioning_v2": "9a33ab34ce050842c77dfc64407123303c4bf456",
+      "scene_first_signed": "a55e431faf0680e0d7f2920a85fda6341d45117d"
+    },
+    "pair_geometry_contract": [
+      "point_control_dx",
+      "point_control_dy",
+      "point_control_dz",
+      "point_control_distance",
+      "point_segment_distance",
+      "segment_t",
+      "segment_length",
+      "normal_axis_abs_cos",
+      "normal_axis_valid",
+      "parent_exists"
+    ],
+    "pair_geometry_raw_sha256": "416d5e5848ec579eb67e5e402dbf6e60908f4d9a30dbe0650a1d19be7183e4e7"
+  },
+  "status": "FS1_CONDITIONING_CACHE_BUILT__A0_STILL_BLOCKED_UNTIL_REBIND_AND_RUNNER_REGRESSIONS"
+}

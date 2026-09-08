@@ -1,0 +1,83 @@
+{
+  "schema": "RealSaS.ArachneMageA0RunnerPreflight.v1",
+  "status": "PASS_CPU_EXECUTABLE_PREFLIGHT__EXACT_RESUME_CONTINUATION_PASS__MAIN_A0_NOT_EXECUTED",
+  "runner": {
+    "path": "experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_v1.py",
+    "git_blob_sha": "6a606accf27f79f243ce09ae219a45fefcc1e35f",
+    "sha256": "2db9894f667c3475ab4cd281593f12762bd79c82f03ec279e43ec3e39862bc9b",
+    "commit": "1c1f333abc3e2cd40e1fd4afcfa79908fb457cb5"
+  },
+  "input": {
+    "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+    "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "conditioning_cache_sha256": "12484afc23d5c03cbad8020266ed5b39c3201d979e78f96380e748902152be6e",
+    "binding_sha256": "cb41eb7055b8e2646628daecdd0e31dfc079d163d5f5adaaa1a92f1ca1dfb994",
+    "codec_config_hash": "24c9f2580be9e80a02789e9ba35a57470145114807859057398b07bef9d58715",
+    "surface_rows": 950,
+    "teacher_supervised_rows": 931,
+    "low_rows": 19,
+    "joint_count": 22
+  },
+  "preflight_execution": {
+    "device": "cpu",
+    "main_scientific_a0_run": false,
+    "disposable_optimizer_steps": 1,
+    "step0": {
+      "raw_row_l1_p95_auth": 1.909052373841405,
+      "raw_deformation_error_ratio_auth": 0.9713985323905945,
+      "raw_simplex_max_abs_residual": 1.5273690223693848e-07,
+      "compiler_total_correction_l1": 3.4991651773910726e-05,
+      "compiler_mean_row_correction_l1": 3.6833317656748135e-08,
+      "compiler_max_row_correction_l1": 1.5273690226469405e-07,
+      "qualified_row_count": 950,
+      "finite": true,
+      "negative_weight_count": 0
+    },
+    "step1_loss": {
+      "total": 0.5103439092636108,
+      "reconstruction": 0.5049710273742676,
+      "deformation_mse": 0.005372869782149792
+    },
+    "step1": {
+      "raw_row_l1_p95_auth": 1.9086326509714127,
+      "raw_deformation_error_ratio_auth": 0.9693521857261658,
+      "raw_simplex_max_abs_residual": 1.4901161193847656e-07,
+      "compiler_total_correction_l1": 3.64147126661607e-05,
+      "compiler_mean_row_correction_l1": 3.8331276490695473e-08,
+      "compiler_max_row_correction_l1": 1.4901161193153767e-07,
+      "qualified_row_count": 950,
+      "finite": true,
+      "negative_weight_count": 0
+    }
+  },
+  "resume_regression": {
+    "status": "PASS_EXACT_CPU_RESUME_CONTINUATION",
+    "checkpoint_step": 2,
+    "checkpoint_streak": 1,
+    "next_step": 3,
+    "max_loss_delta": 0.0,
+    "max_model_state_delta": 0.0,
+    "lr_uninterrupted": 0.0009999905876413003,
+    "lr_resumed": 0.0009999905876413003,
+    "scheduler_last_epoch_uninterrupted": 3,
+    "scheduler_last_epoch_resumed": 3,
+    "rng_fields": ["cuda", "numpy", "python", "torch"]
+  },
+  "preflight_findings": [
+    {
+      "finding": "OLD_GEPPETTO_SOURCE_BUNDLE_TYPES_LACKED_SKIN_IR_CLASSES",
+      "class": "TRANSPORT_SOURCE_SURFACE",
+      "scientific_failure": false,
+      "resolution": "Final A0 source bundle must use current Compiler types.py containing SkinProposalIR/QualifiedSkinIR classes."
+    },
+    {
+      "finding": "HISTORICAL_TOTAL_COMPILER_CORRECTION_1E-5_NOT_SCALE_INVARIANT_AT_950_ROWS",
+      "class": "PREOUTPUT_NUMERIC_SCALE",
+      "scientific_failure": false,
+      "optimizer_steps_before_prereg_repair": 0,
+      "resolution": "Prereg repaired before main run: per-row max <=1e-6, mean <=1e-7, total <=1e-4."
+    }
+  ],
+  "next_gate": "BUILD_SELF_CONTAINED_COLAB__REQUIRE_CUDA__RUN_MAIN_A0",
+  "a1_optimizer_authorized": false
+}

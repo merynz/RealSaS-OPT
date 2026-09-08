@@ -1,0 +1,196 @@
+{
+  "schema": "RealSaS.ArachneMageA0SkinTokensStrengthCodecV3Prereg.v1",
+  "status": "PREREGISTERED__V3_MAIN_OPTIMIZER_FORBIDDEN_UNTIL_SOURCE_CONTRACT_AND_DISPOSABLE_PREFLIGHT_PASS",
+  "created_utc": "2026-09-08T22:27:29Z",
+  "scope": "Mage FS1 A0 representation-ceiling proof; formulation-level V3, not a V1/V2 single-variable ablation",
+  "history_policy": {
+    "v1_history": "IMMUTABLE_FAIL",
+    "v2_history": "IMMUTABLE_FAIL",
+    "warm_start_from_v1_or_v2": false,
+    "threshold_relaxation": false
+  },
+  "scientific_question": "Can a RealSaS-adapted codec with the actual representational mechanisms and scale class of SkinTokens encode four discrete per-joint field tokens and reconstruct the sealed Mage FS1 skin truth under the unchanged RealSaS fidelity/deformation/Compiler gates?",
+  "upstream_reference": {
+    "repository": "VAST-AI-Research/SkinTokens",
+    "commit": "273b691d35989d71cd17ff2895fdc735097b92d1",
+    "license": "MIT",
+    "paper": "arXiv:2602.04805",
+    "official_mechanisms_carried": [
+      "separate per-bone scalar influence fields rather than direct NxJ regression",
+      "field encoder consumes geometry plus scalar influence",
+      "separate geometry-only condition encoder",
+      "frequency positional encoding of xyz",
+      "attention-based latent field encoder",
+      "multiple latent tokens per bone",
+      "finite scalar quantization into discrete token IDs",
+      "latent-memory self-attention decoder",
+      "surface-point query cross-attention decoder",
+      "sigmoid scalar field output followed by cross-joint normalization"
+    ],
+    "official_source_defaults_or_declared_values": {
+      "encoder_width": 512,
+      "decoder_width": 1024,
+      "attention_heads": 8,
+      "encoder_self_attention_layers": 8,
+      "decoder_self_attention_layers": 16,
+      "frequency_count": 8,
+      "official_declared_fsq_levels": [8, 8, 8, 5, 5, 5],
+      "official_declared_fsq_codebook_size": 64000,
+      "tokens_per_skin_from_released_TokenRig": 4
+    },
+    "released_checkpoint_evidence_separated_from_official_source": {
+      "official_checkpoint_path": "experiments/skin_vae_2_10_32768/last.ckpt",
+      "official_checkpoint_sha256": "4843f49e58afff88345806b94ca82e6cc9d8def6e7432e2853c677b154de0ed4",
+      "third_party_parity_manifest_reports_latent_channels": 512,
+      "third_party_parity_manifest_reports_condition_tokens": 384,
+      "third_party_parity_manifest_reports_codebook_size": 32768,
+      "policy": "latent=512 and condition_tokens=384 are adopted as released-checkpoint-strength evidence; FSQ factorization is NOT inferred from third-party metadata. Official-declared 64000-level configuration is used for V3 A0. No claim of released token-ID compatibility."
+    }
+  },
+  "forced_realsas_adaptations_with_equivalent_mechanisms": {
+    "surface": {
+      "upstream": "sampled closed-mesh surface xyz+normal",
+      "realsas": "950 admitted RiggingSurfaceIR nodes, normalized xyz plus derived normal and validity",
+      "equivalence_obligation": "same geometry-conditioned continuous query field semantics; no hidden teacher/source mesh at inference"
+    },
+    "skeleton_authority": {
+      "upstream": "TokenRig may generate skeleton and skin token sequence jointly",
+      "realsas": "Compiler-qualified QualifiedSkeletonIR is canonical authority before Arachne",
+      "equivalence_obligation": "A1 will predict four discrete field tokens for each already-qualified canonical joint; skeleton semantics are conditioned, never regenerated or overwritten by Arachne"
+    },
+    "field_support_sampling": {
+      "upstream": "skin-positive faces plus local halo are densely sampled per bone",
+      "realsas": "deterministic active-support plus geometry-nearest halo over admitted RiggingSurfaceIR nodes",
+      "equivalence_obligation": "field encoder receives a support-focused local scalar-field observation, while decoder remains queryable on every admitted surface node"
+    },
+    "simplex": {
+      "upstream": "independent sigmoid fields are normalized by downstream Asset/demo handling",
+      "realsas": "independent sigmoid fields are row-normalized before SkinProposalIR and then Compiler qualification",
+      "equivalence_obligation": "normalization is teacher-free and deterministic"
+    }
+  },
+  "frozen_v3_architecture": {
+    "architecture_id": "RealSaS.SkinFieldCodec.SkinTokensStrength.v3",
+    "surface_geometry_channels": 7,
+    "surface_geometry_contract": ["normalized_x", "normalized_y", "normalized_z", "normal_x", "normal_y", "normal_z", "normal_valid"],
+    "field_observation_channels": 8,
+    "field_observation_contract": ["normalized_x", "normalized_y", "normalized_z", "normal_x", "normal_y", "normal_z", "normal_valid", "scalar_joint_weight"],
+    "frequency_count": 8,
+    "frequency_embedding_include_input": true,
+    "frequency_embedding_include_pi": false,
+    "field_tokens_per_joint": 4,
+    "condition_tokens": 384,
+    "latent_channels": 512,
+    "encoder_width": 512,
+    "decoder_width": 1024,
+    "attention_heads": 8,
+    "encoder_layers": 8,
+    "decoder_layers": 16,
+    "ffn_ratio": 4,
+    "dropout": 0.0,
+    "field_query_mode": "FOUR_LEARNED_QUERIES_CROSS_ATTEND_SUPPORT_FOCUSED_FIELD_MEMORY_THEN_8X_SELF_ATTENTION",
+    "condition_query_mode": "DETERMINISTIC_FPS_384_GEOMETRY_QUERIES_CROSS_ATTEND_ALL_SURFACE_MEMORY_THEN_8X_SELF_ATTENTION",
+    "decoder_mode": "CONCAT_4_QUANTIZED_FIELD_TOKENS_PLUS_384_GEOMETRY_CONDITION_TOKENS__PROJECT_512_TO_1024__16X_SELF_ATTENTION__SURFACE_QUERY_CROSS_ATTENTION__SIGMOID",
+    "codec_decoder_joint_feature_access": false,
+    "codec_decoder_pair_geometry_access": false,
+    "fsq": {
+      "type": "finite_scalar_quantization_with_straight_through_rounding",
+      "levels": [8, 8, 8, 5, 5, 5],
+      "codebook_size": 64000,
+      "project_latent_512_to_scalar_code_dim": 6,
+      "project_scalar_code_dim_to_latent_512": true,
+      "tokens_per_joint": 4
+    }
+  },
+  "frozen_data_authority": {
+    "conditioning_cache_npz_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "conditioning_cache_binding_sha256": "c7e3bf10fc8edf16f862b4ce58b3aabfeb2aabf14cc8e744e53e3afc0764ac9f",
+    "fs1_target_binding_sha256": "ab74756e32ee5c9f4f2d4020cdb56620a110130d80d7b9384c62509af3f193cf",
+    "teacher_weights_content_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d",
+    "surface_lineage_sha256": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+    "skeleton_lineage_sha256": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "surface_rows": 950,
+    "joint_rows": 22,
+    "teacher_supervised_rows": 934,
+    "low_rows": 16,
+    "low_rows_in_field_teacher_observation": false,
+    "low_rows_in_training_loss": false,
+    "low_rows_in_geometry_condition_encoder": true,
+    "low_rows_decoded": true
+  },
+  "field_support_policy": {
+    "teacher_access_scope": "A0_ONLY",
+    "active_threshold": 1e-8,
+    "minimum_context_rows": 128,
+    "maximum_context_rows": 384,
+    "halo_metric": "normalized_xyz_euclidean_distance_to_nearest_active_supervised_row",
+    "selection": "all active supervised rows plus nearest supervised halo; if over maximum, deterministic farthest-point downselect while retaining highest-weight extrema",
+    "a1_shipping_teacher_field_access": false
+  },
+  "frozen_training_contract": {
+    "fresh_initialization": true,
+    "seed": 20260908,
+    "precision_main": "bfloat16_autocast_with_float32_optimizer_state",
+    "optimizer": "AdamW",
+    "learning_rate": 0.0002,
+    "weight_decay": 0.0001,
+    "scheduler": "CosineAnnealingLR",
+    "scheduler_t_max": 4096,
+    "max_steps": 4096,
+    "joint_schedule": "deterministic_round_robin_one_joint_field_per_optimizer_step",
+    "check_every": 64,
+    "checkpoint_every": 256,
+    "required_consecutive_pass_checks": 3,
+    "field_training_loss": {
+      "scalar_field_bce": 1.0,
+      "scalar_field_l1": 1.0,
+      "fsq_auxiliary_commitment_loss": 0.0,
+      "notes": "FSQ uses straight-through quantization; no unverified upstream training-loss claim is made"
+    },
+    "full_matrix_metrics": "decode all 22 quantized fields over all 950 rows only at checks; row-normalize across joints before RealSaS acceptance metrics",
+    "realSaS_deformation_loss_in_optimizer": false,
+    "reason_deformation_not_in_optimizer": "V3 A0 isolates SkinTokens-strength field representation rather than tuning to the RealSaS acceptance evaluator; deformation remains an unchanged acceptance gate"
+  },
+  "acceptance_gates_unchanged_from_fs1_a0": {
+    "raw_row_l1_p95_auth_max": 0.05,
+    "qualified_row_l1_p95_auth_max": 0.05,
+    "raw_deformation_error_ratio_auth_max": 0.05,
+    "qualified_deformation_error_ratio_auth_max": 0.05,
+    "raw_simplex_max_abs_residual_max": 1e-6,
+    "qualified_simplex_max_abs_residual_max": 1e-6,
+    "negative_weight_count": 0,
+    "qualified_row_count": 950,
+    "compiler_total_correction_l1_max": 0.0001,
+    "compiler_mean_row_correction_l1_max": 1e-7,
+    "compiler_max_row_correction_l1_max": 1e-6,
+    "compiler_total_sparsification_discarded_mass": 0.0
+  },
+  "information_firewall": {
+    "A0_teacher_weight_allowed": ["per-joint field encoder observation", "training target", "evaluator"],
+    "A0_teacher_weight_forbidden": ["geometry condition encoder", "surface query geometry", "Compiler inputs other than predicted proposal"],
+    "A1_and_shipping_teacher_weight_allowed": ["training loss target only"],
+    "A1_and_shipping_teacher_weight_forbidden": ["all model inputs", "all latent/token inputs", "all decoder conditions"]
+  },
+  "authorization_gates_before_first_v3_main_optimizer_step": [
+    "V3 source is in a new models/skin_field_codec/v3 namespace and V1/V2 bytes are untouched",
+    "source-level upstream-strength contract asserts widths/layers/heads/token counts/FSQ/query semantics",
+    "teacher-information-firewall causality tests pass",
+    "disposable tiny-config forward encode-quantize-decode backward pass succeeds",
+    "full frozen-config parameter count and shapes are enumerated without OOM",
+    "sealed Mage cache exact SHA and tensor bindings pass",
+    "full-config one-joint CPU-or-CUDA executable preflight succeeds without writing scientific progress",
+    "checkpoint/resume deterministic state contract passes for the V3 runner",
+    "tokenless notebook embedded source manifest is generated after final source bytes, extracted into a clean directory, rehashed entry-by-entry, and its source/bootstrap/preflight cells are executed successfully before delivery"
+  ],
+  "forbidden": [
+    "main V3 optimizer before all authorization gates pass",
+    "teacher leakage into A1/shipping inference",
+    "pair_geometry or joint_features inside the V3 codec decoder",
+    "threshold relaxation",
+    "post-hoc loss coefficient tuning on Mage result",
+    "V1/V2 checkpoint warm start",
+    "claiming released SkinTokens checkpoint token-ID compatibility",
+    "A1 training before V3 A0 terminal closure"
+  ],
+  "main_v3_scientific_optimizer_steps_at_prereg": 0
+}

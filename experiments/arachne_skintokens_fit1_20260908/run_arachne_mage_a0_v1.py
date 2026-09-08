@@ -190,8 +190,44 @@ def set_rng(s):
     random.setstate(s['python']); np.random.set_state(s['numpy']); torch.set_rng_state(s['torch'].cpu())
     if torch.cuda.is_available() and s.get('cuda'): torch.cuda.set_rng_state_all([x.cpu() for x in s['cuda']])
 
+def _optimizer_state_to_device(opt,device):
+    def move(v):
+        if torch.is_tensor(v): return v.to(device)
+        if isinstance(v,dict): return {k:move(x) for k,x in v.items()}
+        if isinstance(v,list): return [move(x) for x in v]
+        if isinstance(v,tuple): return tuple(move(x) for x in v)
+        return v
+    for state in opt.state.values():
+        for k,v in list(state.items()): state[k]=move(v)
+
 def save_progress(path,codec,opt,sched,step,streak,trace,elapsed):
     torch.save({'schema':SCHEMA+'.Progress','step':step,'streak':streak,'trace':trace,'elapsed_seconds':elapsed,'model':codec.state_dict(),'optimizer':opt.state_dict(),'scheduler':sched.state_dict(),'rng':rng_state(),'codec_config_hash':codec.config.config_hash,'cache_sha256':EXPECTED_CACHE_SHA,'binding_sha256':EXPECTED_BINDING_HASH},path)
+
+def _existing_result_exit(result_path,final_ck):
+    if not result_path.exists(): return False
+    d=json.loads(result_path.read_text())
+    required={
+        'surface_hash':EXPECTED_SURFACE_HASH,
+        'skeleton_hash':EXPECTED_SKELETON_HASH,
+        'cache_sha256':EXPECTED_CACHE_SHA,
+        'binding_sha256':EXPECTED_BINDING_HASH,
+        'codec_config_hash':EXPECTED_CODEC_HASH,
+    }
+    if d.get('schema')!=SCHEMA: raise RuntimeError('EXISTING_RESULT_SCHEMA_MISMATCH')
+    for k,v in required.items():
+        if d.get(k)!=v: raise RuntimeError(f'EXISTING_RESULT_FINGERPRINT_MISMATCH:{k}')
+    status=d.get('status')
+    if status=='A0_TERMINAL_PASS':
+        if not final_ck.exists(): raise RuntimeError('TERMINAL_PASS_FINAL_CHECKPOINT_MISSING')
+        expected=d.get('qualified_codec_checkpoint_sha256')
+        if not expected or sha(final_ck)!=expected: raise RuntimeError('TERMINAL_PASS_FINAL_CHECKPOINT_SHA_MISMATCH')
+        print('A0_ALREADY_TERMINAL_PASS='+json.dumps({'closure_step':d.get('closure_step'),'terminal_streak':d.get('terminal_streak'),'qualified_codec_checkpoint_sha256':expected},sort_keys=True),flush=True)
+        return True
+    if status=='NO_A0_TERMINAL_CLOSURE':
+        if int(d.get('final_step',-1))!=MAX_STEPS: raise RuntimeError('NO_CLOSURE_RESULT_FINAL_STEP_MISMATCH')
+        print('A0_ALREADY_NO_TERMINAL_CLOSURE='+json.dumps({'final_step':MAX_STEPS,'terminal_streak':d.get('terminal_streak')},sort_keys=True),flush=True)
+        return True
+    raise RuntimeError(f'EXISTING_RESULT_UNKNOWN_STATUS:{status}')
 
 def main(argv=None):
     ap=argparse.ArgumentParser(); ap.add_argument('--cache',type=Path,required=True); ap.add_argument('--zero-surface',type=Path,required=True); ap.add_argument('--camera-dir',type=Path,required=True); ap.add_argument('--qualified-skeleton',type=Path,required=True); ap.add_argument('--output-dir',type=Path,required=True); ap.add_argument('--require-cuda',action='store_true'); ap.add_argument('--preflight-only',action='store_true'); args=ap.parse_args(argv)
@@ -211,11 +247,14 @@ def main(argv=None):
         m0=metrics(codec,T,transforms,surface,sk,sids,jids,cache); loss=train_step(codec,opt,T,transforms); sched.step(); m1=metrics(codec,T,transforms,surface,sk,sids,jids,cache)
         pre.update({'status':'PASS_CPU_EXECUTABLE_PREFLIGHT','step0':m0,'step1_loss':loss,'step1':m1}); write_json(args.output_dir/'ARACHNE_MAGE_A0_PREFLIGHT.json',pre); print('A0_PREFLIGHT='+json.dumps(pre,sort_keys=True,default=float)); return 0
     progress=args.output_dir/'ARACHNE_MAGE_A0_PROGRESS.pt'; result_path=args.output_dir/'ARACHNE_MAGE_A0_RESULT.json'; final_ck=args.output_dir/'ARACHNE_MAGE_A0_CODEC_CHECKPOINT.pt'
+    if _existing_result_exit(result_path,final_ck): return 0
     step0=0; streak=0; trace=[]; elapsed_before=0.0
     if progress.exists():
         ck=torch.load(progress,map_location='cpu',weights_only=False)
+        if ck.get('schema')!=SCHEMA+'.Progress': raise RuntimeError('RESUME_SCHEMA_MISMATCH')
         if ck.get('codec_config_hash')!=EXPECTED_CODEC_HASH or ck.get('cache_sha256')!=EXPECTED_CACHE_SHA or ck.get('binding_sha256')!=EXPECTED_BINDING_HASH: raise RuntimeError('RESUME_FINGERPRINT_MISMATCH')
-        codec.load_state_dict(ck['model']); opt.load_state_dict(ck['optimizer']); sched.load_state_dict(ck['scheduler']); step0=int(ck['step']); streak=int(ck['streak']); trace=list(ck['trace']); elapsed_before=float(ck.get('elapsed_seconds',0.)); set_rng(ck['rng'])
+        codec.load_state_dict(ck['model']); opt.load_state_dict(ck['optimizer']); _optimizer_state_to_device(opt,device); sched.load_state_dict(ck['scheduler']); step0=int(ck['step']); streak=int(ck['streak']); trace=list(ck['trace']); elapsed_before=float(ck.get('elapsed_seconds',0.)); set_rng(ck['rng'])
+        if step0<0 or step0>MAX_STEPS: raise RuntimeError('RESUME_STEP_OUT_OF_RANGE')
         print(f'RESUME step={step0} next={step0+1} streak={streak}')
     start=time.time(); closure=None; last_metrics=None
     for step in range(step0+1,MAX_STEPS+1):

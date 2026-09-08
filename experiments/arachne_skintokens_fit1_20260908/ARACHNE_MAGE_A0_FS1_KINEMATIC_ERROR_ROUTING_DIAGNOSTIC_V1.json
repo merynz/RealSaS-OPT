@@ -1,0 +1,26 @@
+{
+  "schema": "RealSaS.ArachneMageA0FS1KinematicErrorRoutingDiagnostic.v1",
+  "status": "DIAGNOSTIC_ONLY__NON_AUTHORIZING",
+  "bad_rows": 165,
+  "top_under_to_over_pairs": [
+    {"under": "spine", "over": "hips", "count": 28},
+    {"under": "hips", "over": "spine", "count": 25},
+    {"under": "spine", "over": "chest", "count": 16},
+    {"under": "chest", "over": "spine", "count": 14},
+    {"under": "hips", "over": "chest", "count": 8},
+    {"under": "chest", "over": "hips", "count": 6},
+    {"under": "wrist.r", "over": "hand.r", "count": 5},
+    {"under": "hand.l", "over": "wrist.l", "count": 4},
+    {"under": "upperleg.l", "over": "lowerleg.l", "count": 4},
+    {"under": "hand.r", "over": "handslot.r", "count": 4},
+    {"under": "hand.l", "over": "handslot.l", "count": 3},
+    {"under": "handslot.r", "over": "hand.r", "count": 3}
+  ],
+  "top_pair_tree_distance_counts": {"1": 129, "2": 33, "3": 3},
+  "top_pair_adjacent_fraction": 0.7818181818181819,
+  "abs_error_mass_within_tree_distance_1_of_teacher_active": 0.9785619314878741,
+  "abs_error_mass_within_tree_distance_2_of_teacher_active": 0.9974401901331121,
+  "abs_error_mass_on_teacher_active_joints": 0.8768560769040546,
+  "interpretation": "A0 tail error is overwhelmingly routed along the correct kinematic neighborhood rather than to arbitrary joints. This explains deformation PASS despite teacher-exact row-L1 FAIL and implicates field-boundary sharpness / latent or decoder expressivity rather than gross anatomical confusion.",
+  "full_local_diagnostic_sha256": "a0de078f61be805f90b2e4d689d92a624b30367b16740f4353c4f9a4ea4555f5"
+}

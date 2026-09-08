@@ -1,0 +1,58 @@
+{
+  "schema": "RealSaS.ArachneMageA0FS1PostfailOracleLatentDiagnosticPrereg.v1",
+  "status": "PREREGISTERED__DIAGNOSTIC_ONLY__NO_MODEL_AUTHORIZATION",
+  "scientific_context": {
+    "a0_terminal_status": "NO_A0_TERMINAL_CLOSURE",
+    "a0_result_sha256": "a2b3a7f1d4a4b448a9e236d28efc9a92577d12de48b18e50c767448d6038f64f",
+    "a0_progress_checkpoint_sha256": "233b2c003f523060a8cedc6999c13259764238cd60d46f2d347c806ae070de34",
+    "baseline_raw_row_l1_p95_auth": 0.11468168089528862,
+    "baseline_raw_deformation_error_ratio_auth": 0.04871330037713051,
+    "kinematic_error_routing_diagnostic_sha256": "a0de078f61be805f90b2e4d689d92a624b30367b16740f4353c4f9a4ea4555f5",
+    "observed_error_routing": {
+      "bad_rows": 165,
+      "largest_under_over_pair_adjacent_fraction": 0.7818181818181819,
+      "abs_error_mass_within_tree_distance_1_of_teacher_active": 0.9785619314878741,
+      "abs_error_mass_within_tree_distance_2_of_teacher_active": 0.9974401901331121
+    }
+  },
+  "hypothesis": "If the frozen final decoder can reconstruct the FS1 teacher below the original row-L1 p95 gate when given freely optimized per-joint 64D latents, then the A0 failure is primarily attributable to the teacher encoder/latent inference bottleneck rather than decoder field expressivity. If it cannot, decoder/conditioning field expressivity remains implicated.",
+  "frozen_inputs": {
+    "cache_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "target_binding_sha256": "ab74756e32ee5c9f4f2d4020cdb56620a110130d80d7b9384c62509af3f193cf",
+    "codec_config_hash": "24c9f2580be9e80a02789e9ba35a57470145114807859057398b07bef9d58715",
+    "supervised_rows": 934,
+    "low_rows": 16
+  },
+  "intervention": {
+    "codec_parameter_updates": 0,
+    "decoder_parameters_frozen": true,
+    "encoder_parameters_frozen": true,
+    "optimized_object": "one free latent tensor shaped [1,22,64]",
+    "latent_initialization": "exact final teacher-encoder latent from sealed step-1536 checkpoint",
+    "teacher_weights_available_to_optimizer": true,
+    "shipping_or_candidate_claim_allowed": false,
+    "objective": "same frozen A0 reconstruction loss plus same frozen deformation_mse",
+    "optimizer": "Adam",
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "scheduler": "CosineAnnealingLR",
+    "scheduler_t_max": 4096,
+    "scheduler_eta_min": 0.0,
+    "steps": 4096,
+    "check_every": 128,
+    "device": "CPU",
+    "deterministic_algorithms": true,
+    "early_stop": false
+  },
+  "classification": {
+    "DECODER_EXPRESSIVE_ENCODER_LIMITING": "final raw row-L1 p95 <= 0.05 and deformation ratio <= 0.05",
+    "MATERIAL_GAIN_BUT_GATE_NOT_MET": "final row-L1 p95 > 0.05 and relative p95 reduction from baseline >= 0.25",
+    "NO_MATERIAL_GAIN_DECODER_OR_FIELD_LIMIT_REMAINS": "relative p95 reduction from baseline < 0.25"
+  },
+  "policy": {
+    "does_not_reopen_a0": true,
+    "does_not_authorize_a1": true,
+    "does_not_change_original_a0_verdict": true,
+    "no_new_candidate_training_until_diagnostic_is_sealed": true
+  }
+}

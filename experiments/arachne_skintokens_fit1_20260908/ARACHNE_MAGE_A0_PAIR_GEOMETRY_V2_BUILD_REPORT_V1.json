@@ -1,0 +1,79 @@
+{
+  "schema": "RealSaS.ArachneMageA0PairGeometryV2BuildReport.v1",
+  "status": "V2_BUILT__LOCAL_SEMANTIC_REGRESSION_PASS__LOCAL_EXECUTABLE_PREFLIGHT_PASS__HOSTED_SOURCE_CI_INFRA_FAILURE_BEFORE_STEPS__MAIN_OPTIMIZER_ZERO",
+  "branch": "exp/arachne-skintokens-cleanroom-fit1-20260908",
+  "prereg": {
+    "commit": "3f80f57f66e3d6d74210fda0cf6348939fe090be",
+    "git_blob": "4c0938b3771ae142314851c2a3870411a907fbee",
+    "main_v2_scientific_optimizer_steps_at_prereg": 0
+  },
+  "architecture": {
+    "architecture_id": "RealSaS.SkinFieldCodec.ContinuousJointField.PairGeometry.v2",
+    "config_hash": "8282eca35a1983363be8709ea3d9ea6af435dda0c424cfe0143c3e77b0dd8d2a",
+    "trainable_parameters": 414146,
+    "v1_trainable_parameters": 401154,
+    "parameter_delta": 12992,
+    "surface_embedding_dim": 192,
+    "joint_embedding_dim": 192,
+    "latent_dim": 64,
+    "pair_geometry_input_dim": 10,
+    "pair_geometry_embedding_dim": 64,
+    "pair_geometry_projection": "Linear(10,64)+GELU",
+    "decoder_input_dim": 512,
+    "teacher_encoder_pair_geometry_access": false
+  },
+  "source": {
+    "config_v2_git_blob": "b12d4473b7239d9b96b3c0a963926fcb4fb61762",
+    "codec_v2_git_blob": "815aacbeebe7686b1da4faf148a7b7013899dbaf",
+    "runner_v2_git_blob": "c5f42f4b4611d85541591304e84dedf01a9bb8e9",
+    "v1_codec_git_blob_immutable": "01d064fdbf0df1e1efb09495b788665e582e2f42",
+    "v1_config_git_blob_immutable": "622aa895968d833595fed12a6f4211705b2f6240",
+    "historical_runner_git_blob_immutable": "f32d2f75e6b9e6095e1d5455ed9227b32553a9d5",
+    "fs1_wrapper_git_blob_immutable": "00ccbd7d79707fa6dab5329baeebac20efb8f470"
+  },
+  "sealed_pair_geometry": {
+    "shape": [950, 22, 10],
+    "raw_sha256": "416d5e5848ec579eb67e5e402dbf6e60908f4d9a30dbe0650a1d19be7183e4e7",
+    "conditioning_cache_npz_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "conditioning_cache_binding_sha256": "c7e3bf10fc8edf16f862b4ce58b3aabfeb2aabf14cc8e744e53e3afc0764ac9f"
+  },
+  "local_semantic_regression": {
+    "status": "PASS_CPU_RESUME_AND_TERMINAL_IDEMPOTENCE_REGRESSIONS",
+    "engine": "frozen tokenless FS1 direct engine plus V2 pair-geometry adapter",
+    "device": "cpu",
+    "exact_resume": true,
+    "model_state_exact": true,
+    "optimizer_state_exact": true,
+    "scheduler_state_exact": true,
+    "rng_state_exact": true,
+    "loss_trace_exact": true,
+    "terminal_pass_idempotent": true,
+    "terminal_no_closure_idempotent": true,
+    "main_scientific_optimizer_steps": 0
+  },
+  "local_executable_preflight": {
+    "status": "PASS_CPU_EXECUTABLE_PREFLIGHT",
+    "device": "cpu",
+    "path": "forward -> truth-stationary loss + deformation loss -> backward -> optimizer step -> Compiler qualification -> metrics",
+    "disposable_optimizer_steps": 1,
+    "main_scientific_optimizer_steps": 0,
+    "step1_total_loss": 0.5103368163108826,
+    "step1_reconstruction_loss": 0.5048759579658508,
+    "step1_deformation_mse": 0.005460869055241346,
+    "note": "One-step random-initialization metrics are not scientific quality evidence and are not acceptance criteria."
+  },
+  "hosted_source_ci": {
+    "workflow_commit": "31c1525ec04dcac687b466dbd79a451dd00a3d5a",
+    "workflow_run_id": 34282352118,
+    "status": "COMPLETED_FAILURE_BEFORE_ANY_STEP_STARTED",
+    "job_step_count": 0,
+    "runner_id": 0,
+    "interpretation": "Infrastructure/runner allocation failure; not a source-test PASS and not evidence of a model/source assertion failure."
+  },
+  "authorization": {
+    "main_v2_scientific_optimizer_steps": 0,
+    "main_v2_optimizer_authorized_in_repo_hosted_ci": false,
+    "reason": "Hosted exact-source CI did not execute any steps. Local semantic regression and executable preflight passed, but are recorded separately rather than falsely promoted to hosted exact-source CI PASS.",
+    "a1_optimizer_authorized": false
+  }
+}

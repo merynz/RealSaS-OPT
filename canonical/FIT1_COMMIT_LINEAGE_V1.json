@@ -31,7 +31,7 @@
     "fit/single-family-mage-v1-20260902": "f2cd746f8bebf24c9c0c20d5c33743d24f9b0fa2",
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
-    "main": "a96c86275c508928c4cb183185edd8286f21820d",
+    "main": "06f0677746509d8525f05accfd0d55cff32d0d60",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "promote/iris-scene-first-signed-main-v3-20260905": "dfb087c6a23e39c0360c4cd4d89fdb6b9e9c9957",
@@ -47,6 +47,7 @@
     "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase": "2b5d467186839401ab30f9566015d9e9d49a2a06",
     "restoration/iris-mainline-promotion-v1-20260903-safety": "a965a22e7a9ad3bd2744f7fc69ba854d8393ebf3",
     "scratch-mistake": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
+    "seal/geppetto-reference-strength-fit1-20260908": "f7be46f0a97df62a793ebf91b22297c894854f39",
     "single-family-e2e-fit-v1-20260902": "5fa4bf7883283ac0ae4f6b9cb8357cb1b13d6adf",
     "single-family-e2e-models-v1-20260902": "362556db9b31960cfbbfac037727c83d6badaa9b",
     "source/generic-completion-v1-20260902": "85a25b419a47ddd52b4a70ae3b8639cc575bb6b3",
@@ -54,7 +55,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 832,
+  "commit_count": 833,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -106,6 +107,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "single-family-e2e-fit-v1-20260902",
         "single-family-e2e-models-v1-20260902",
         "source/generic-completion-v1-20260902",
@@ -191,6 +193,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "single-family-e2e-fit-v1-20260902",
         "single-family-e2e-models-v1-20260902",
         "source/generic-completion-v1-20260902",
@@ -333,6 +336,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "single-family-e2e-fit-v1-20260902",
         "source/generic-completion-v1-20260902",
         "tmp-do-not-use",
@@ -411,6 +415,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "single-family-e2e-fit-v1-20260902",
         "source/generic-completion-v1-20260902",
         "tmp-do-not-use",
@@ -529,6 +534,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "source/generic-completion-v1-20260902",
         "tmp-do-not-use",
         "tmp_should_not_create",
@@ -924,6 +930,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1070,6 +1077,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1134,6 +1142,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1199,6 +1208,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1263,6 +1273,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1328,6 +1339,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1393,6 +1405,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1457,6 +1470,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1523,6 +1537,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1587,6 +1602,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1652,6 +1668,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1716,6 +1733,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1781,6 +1799,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1846,6 +1865,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1910,6 +1930,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -1974,6 +1995,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2038,6 +2060,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2103,6 +2126,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2167,6 +2191,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2229,6 +2254,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2292,6 +2318,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2354,6 +2381,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2416,6 +2444,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2478,6 +2507,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2540,6 +2570,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2603,6 +2634,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2666,6 +2698,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2729,6 +2762,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2792,6 +2826,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2855,6 +2890,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2918,6 +2954,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -2982,6 +3019,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3046,6 +3084,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3109,6 +3148,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3172,6 +3212,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3235,6 +3276,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3298,6 +3340,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3360,6 +3403,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3423,6 +3467,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3485,6 +3530,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3547,6 +3593,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3610,6 +3657,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3672,6 +3720,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3735,6 +3784,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3799,6 +3849,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3862,6 +3913,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3925,6 +3977,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -3987,6 +4040,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4050,6 +4104,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4112,6 +4167,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4174,6 +4230,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4236,6 +4293,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4298,6 +4356,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4360,6 +4419,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4423,6 +4483,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4486,6 +4547,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4549,6 +4611,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4612,6 +4675,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4674,6 +4738,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4737,6 +4802,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4800,6 +4866,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4862,6 +4929,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4925,6 +4993,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -4988,6 +5057,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5051,6 +5121,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5115,6 +5186,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5179,6 +5251,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5243,6 +5316,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5305,6 +5379,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5367,6 +5442,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5430,6 +5506,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5493,6 +5570,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5557,6 +5635,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5620,6 +5699,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5682,6 +5762,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5744,6 +5825,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5807,6 +5889,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5869,6 +5952,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5932,6 +6016,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -5994,6 +6079,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -6056,6 +6142,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -6119,6 +6206,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -6181,6 +6269,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create",
         "tooling/export-frozen-source-7f39"
@@ -6286,6 +6375,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -6347,6 +6437,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -6407,6 +6498,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -6467,6 +6559,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -6529,6 +6622,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -6589,6 +6683,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -6651,6 +6746,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -6711,6 +6807,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -6773,6 +6870,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -6833,6 +6931,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -6895,6 +6994,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -6956,6 +7056,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7016,6 +7117,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7076,6 +7178,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7137,6 +7240,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7199,6 +7303,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7260,6 +7365,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7320,6 +7426,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7380,6 +7487,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7440,6 +7548,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7500,6 +7609,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7559,6 +7669,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7619,6 +7730,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7680,6 +7792,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7742,6 +7855,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7802,6 +7916,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7862,6 +7977,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7922,6 +8038,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -7983,6 +8100,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8043,6 +8161,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8103,6 +8222,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8163,6 +8283,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8223,6 +8344,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8283,6 +8405,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8343,6 +8466,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8404,6 +8528,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8464,6 +8589,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8524,6 +8650,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8584,6 +8711,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8644,6 +8772,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8703,6 +8832,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8762,6 +8892,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8821,6 +8952,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8880,6 +9012,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8939,6 +9072,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -8998,6 +9132,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9058,6 +9193,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9118,6 +9254,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9178,6 +9315,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9238,6 +9376,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9298,6 +9437,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9358,6 +9498,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9418,6 +9559,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9478,6 +9620,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9538,6 +9681,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9600,6 +9744,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9661,6 +9806,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9720,6 +9866,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9780,6 +9927,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9840,6 +9988,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9901,6 +10050,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -9961,6 +10111,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10022,6 +10173,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10083,6 +10235,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10143,6 +10296,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10203,6 +10357,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10264,6 +10419,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10325,6 +10481,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10385,6 +10542,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10445,6 +10603,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10504,6 +10663,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10565,6 +10725,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10625,6 +10786,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10686,6 +10848,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10747,6 +10910,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10807,6 +10971,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10867,6 +11032,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10928,6 +11094,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -10988,6 +11155,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11048,6 +11216,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11107,6 +11276,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11167,6 +11337,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11228,6 +11399,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11288,6 +11460,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11348,6 +11521,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11409,6 +11583,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11469,6 +11644,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11528,6 +11704,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11588,6 +11765,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11649,6 +11827,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11709,6 +11888,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11770,6 +11950,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11830,6 +12011,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11890,6 +12072,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -11950,6 +12133,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12011,6 +12195,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12071,6 +12256,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12132,6 +12318,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12192,6 +12379,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12253,6 +12441,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12313,6 +12502,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12374,6 +12564,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12434,6 +12625,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12494,6 +12686,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12555,6 +12748,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12614,6 +12808,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12675,6 +12870,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12735,6 +12931,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12795,6 +12992,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12856,6 +13054,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12916,6 +13115,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -12976,6 +13176,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13035,6 +13236,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13096,6 +13298,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13157,6 +13360,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13217,6 +13421,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13277,6 +13482,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13338,6 +13544,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13399,6 +13606,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13458,6 +13666,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13518,6 +13727,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13579,6 +13789,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13639,6 +13850,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13700,6 +13912,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13763,6 +13976,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13825,6 +14039,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13886,6 +14101,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -13948,6 +14164,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14009,6 +14226,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14069,6 +14287,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14130,6 +14349,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14193,6 +14413,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14255,6 +14476,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14315,6 +14537,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14376,6 +14599,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14438,6 +14662,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14499,6 +14724,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14561,6 +14787,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14621,6 +14848,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14680,6 +14908,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14739,6 +14968,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14798,6 +15028,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14858,6 +15089,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14917,6 +15149,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -14976,6 +15209,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15036,6 +15270,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15095,6 +15330,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15154,6 +15390,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15213,6 +15450,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15273,6 +15511,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15332,6 +15571,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15391,6 +15631,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15451,6 +15692,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15510,6 +15752,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15569,6 +15812,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15628,6 +15872,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15687,6 +15932,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15747,6 +15993,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15806,6 +16053,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15866,6 +16114,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15925,6 +16174,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -15982,6 +16232,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16039,6 +16290,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16095,6 +16347,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16162,6 +16415,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16232,6 +16486,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16297,6 +16552,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16357,6 +16613,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16414,6 +16671,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16475,6 +16733,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16532,6 +16791,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16594,6 +16854,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16649,6 +16910,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16704,6 +16966,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16759,6 +17022,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16814,6 +17078,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16869,6 +17134,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16924,6 +17190,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -16979,6 +17246,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17034,6 +17302,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17089,6 +17358,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "restoration/iris-mainline-promotion-v1-20260903-safety",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17143,6 +17413,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17224,6 +17495,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17286,6 +17558,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17349,6 +17622,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17417,6 +17691,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17494,6 +17769,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17549,6 +17825,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17609,6 +17886,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17677,6 +17955,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17746,6 +18025,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17808,6 +18088,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17864,6 +18145,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17924,6 +18206,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -17984,6 +18267,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -18039,6 +18323,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -18097,6 +18382,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -18151,6 +18437,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety3",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -18202,6 +18489,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -18254,6 +18542,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -18850,6 +19139,7 @@
         "restoration/compiler-runtime-promotion-v1-20260903",
         "restoration/compiler-runtime-promotion-v1-20260903-p0-directional-binding",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use",
         "tmp_should_not_create"
       ],
@@ -19613,6 +19903,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -19682,6 +19973,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -19730,6 +20022,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -19778,6 +20071,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -19826,6 +20120,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -19875,6 +20170,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -19923,6 +20219,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -19971,6 +20268,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20020,6 +20318,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20068,6 +20367,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20116,6 +20416,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20164,6 +20465,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20212,6 +20514,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20260,6 +20563,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20308,6 +20612,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20356,6 +20661,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20404,6 +20710,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20452,6 +20759,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20500,6 +20808,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20548,6 +20857,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20596,6 +20906,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20644,6 +20955,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20692,6 +21004,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20740,6 +21053,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20789,6 +21103,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20837,6 +21152,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20885,6 +21201,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20933,6 +21250,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -20981,6 +21299,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21029,6 +21348,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21077,6 +21397,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21125,6 +21446,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21173,6 +21495,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21222,6 +21545,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21271,6 +21595,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21320,6 +21645,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21369,6 +21695,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21417,6 +21744,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21466,6 +21794,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21515,6 +21844,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21564,6 +21894,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21613,6 +21944,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21661,6 +21993,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21709,6 +22042,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21757,6 +22091,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21805,6 +22140,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21853,6 +22189,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21901,6 +22238,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21949,6 +22287,7 @@
         "promote/iris-scene-first-signed-v3-20260905",
         "restoration/compiler-runtime-promotion-v1-20260903",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -21996,6 +22335,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22044,6 +22384,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22091,6 +22432,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22138,6 +22480,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22186,6 +22529,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22234,6 +22578,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22282,6 +22627,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22330,6 +22676,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22378,6 +22725,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22425,6 +22773,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22472,6 +22821,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22519,6 +22869,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22567,6 +22918,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22614,6 +22966,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22661,6 +23014,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22709,6 +23063,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22755,6 +23110,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22802,6 +23158,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22848,6 +23205,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22894,6 +23252,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22940,6 +23299,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -22986,6 +23346,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23032,6 +23393,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23078,6 +23440,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23124,6 +23487,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23170,6 +23534,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23216,6 +23581,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23263,6 +23629,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23309,6 +23676,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23355,6 +23723,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23401,6 +23770,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23447,6 +23817,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23494,6 +23865,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23540,6 +23912,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23587,6 +23960,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23634,6 +24008,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23680,6 +24055,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23727,6 +24103,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23773,6 +24150,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23819,6 +24197,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23865,6 +24244,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23911,6 +24291,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -23958,6 +24339,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24004,6 +24386,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24050,6 +24433,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24096,6 +24480,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24142,6 +24527,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24189,6 +24575,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24235,6 +24622,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24282,6 +24670,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24329,6 +24718,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24375,6 +24765,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24422,6 +24813,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24469,6 +24861,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24515,6 +24908,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24562,6 +24956,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24609,6 +25004,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24656,6 +25052,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24703,6 +25100,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24751,6 +25149,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24799,6 +25198,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24846,6 +25246,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24893,6 +25294,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24940,6 +25342,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -24987,6 +25390,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25034,6 +25438,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25080,6 +25485,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25126,6 +25532,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25172,6 +25579,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25218,6 +25626,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25264,6 +25673,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25310,6 +25720,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25357,6 +25768,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25404,6 +25816,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25451,6 +25864,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25498,6 +25912,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25544,6 +25959,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25590,6 +26006,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25636,6 +26053,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25683,6 +26101,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25729,6 +26148,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25775,6 +26195,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25821,6 +26242,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25868,6 +26290,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25915,6 +26338,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -25961,6 +26385,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26007,6 +26432,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26054,6 +26480,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26100,6 +26527,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26147,6 +26575,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26193,6 +26622,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26240,6 +26670,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26288,6 +26719,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26334,6 +26766,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26380,6 +26813,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26426,6 +26860,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26472,6 +26907,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26518,6 +26954,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -26564,6 +27001,7 @@
         "promote/iris-scene-first-signed-main-v3-20260905",
         "promote/iris-scene-first-signed-v3-20260905",
         "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908",
         "tmp-do-not-use"
       ],
       "main_reachable": true,
@@ -29014,7 +29452,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29049,7 +29488,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29084,7 +29524,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29119,7 +29560,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29156,7 +29598,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29191,7 +29634,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29226,7 +29670,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29261,7 +29706,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29296,7 +29742,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29332,7 +29779,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29368,7 +29816,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29404,7 +29853,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29442,7 +29892,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29479,7 +29930,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29516,7 +29968,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29553,7 +30006,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29589,7 +30043,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29626,7 +30081,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -29662,7 +30118,8 @@
         "noop",
         "noop2",
         "promote/iris-scene-first-signed-main-v3-20260905",
-        "scratch-mistake"
+        "scratch-mistake",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -31129,7 +31586,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -31883,7 +32341,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -31907,7 +32366,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32083,7 +32543,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32106,7 +32567,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32129,7 +32591,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32152,7 +32615,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32176,7 +32640,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32199,7 +32664,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32244,7 +32710,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32290,7 +32757,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32313,7 +32781,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32336,7 +32805,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32382,7 +32852,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32406,7 +32877,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32429,7 +32901,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32452,7 +32925,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32475,7 +32949,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32498,7 +32973,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32521,7 +32997,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32545,7 +33022,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32568,7 +33046,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32591,7 +33070,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32614,7 +33094,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32637,7 +33118,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32660,7 +33142,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32683,7 +33166,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32707,7 +33191,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32730,7 +33215,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32754,7 +33240,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32780,7 +33267,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32803,7 +33291,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32826,7 +33315,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32850,7 +33340,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32878,7 +33369,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32901,7 +33393,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32927,7 +33420,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32950,7 +33444,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32976,7 +33471,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -32999,7 +33495,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33027,7 +33524,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33051,7 +33549,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33076,7 +33575,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33099,7 +33599,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33127,7 +33628,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33151,7 +33653,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33174,7 +33677,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33201,7 +33705,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33224,7 +33729,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33247,7 +33753,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33270,7 +33777,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33296,7 +33804,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33320,7 +33829,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33343,7 +33853,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33370,7 +33881,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33394,7 +33906,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33417,7 +33930,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33440,7 +33954,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33463,7 +33978,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33489,7 +34005,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33512,7 +34029,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33536,7 +34054,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33559,7 +34078,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33582,7 +34102,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33609,7 +34130,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33632,7 +34154,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33659,7 +34182,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33683,7 +34207,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33711,7 +34236,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33734,7 +34260,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33759,7 +34286,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33790,7 +34318,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33813,7 +34342,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33844,7 +34374,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33867,7 +34398,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33898,7 +34430,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33921,7 +34454,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33951,7 +34485,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33974,7 +34509,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -33997,7 +34533,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -34028,7 +34565,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -34052,7 +34590,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -34082,7 +34621,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -34105,7 +34645,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -34135,7 +34676,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -34159,7 +34701,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -34189,7 +34732,8 @@
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
         "exp/geppetto-reference-strength-fullstack-v1-20260907",
-        "main"
+        "main",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": true,
       "changed_paths": [
@@ -34218,7 +34762,8 @@
       "subject": "Add anonymous mechanical-core teacher projection",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34241,7 +34786,8 @@
       "subject": "Add lossless RiggingSurfaceIR tensorization",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34264,7 +34810,8 @@
       "subject": "Add real Mage IRIS-GSA preflight",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34288,7 +34835,8 @@
       "subject": "Add reference-strength tensor/target contract tests",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34311,7 +34859,8 @@
       "subject": "Add direct-surface reference-strength Geppetto candidate",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34333,7 +34882,8 @@
       "subject": "Add generic mechanical-core FIT target projection",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34356,7 +34906,8 @@
       "subject": "Test generic mechanical-core target projection",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34379,7 +34930,8 @@
       "subject": "Replace learned view-slot identity with deterministic camera direction code",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34401,7 +34953,8 @@
       "subject": "Test deterministic view-direction encoding",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34424,7 +34977,8 @@
       "subject": "Record Mage mechanical-core target preflight",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34447,7 +35001,8 @@
       "subject": "Preregister reference-strength Geppetto FIT1 closure gate",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34470,7 +35025,8 @@
       "subject": "Fix mechanical target position authority to world frame",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34493,7 +35049,8 @@
       "subject": "Update mechanical-core tests for explicit world frame",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34516,7 +35073,8 @@
       "subject": "Correct Mage target preflight to world-frame loci",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34539,7 +35097,8 @@
       "subject": "Correct FIT1 prereg target frame authority",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34563,7 +35122,8 @@
       "subject": "Add reference-strength Geppetto loss contract",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34585,7 +35145,8 @@
       "subject": "Freeze reference-strength loss contract before activation",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34607,7 +35168,8 @@
       "subject": "Add fail-closed reference-strength FIT1 runner",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34630,7 +35192,8 @@
       "subject": "Add one-run Colab notebook for reference-strength FIT1",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34653,7 +35216,8 @@
       "subject": "Scrub GitHub token from cloned remote URL",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34676,7 +35240,8 @@
       "subject": "Rewire reference-strength tests to canonical target builder",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34699,7 +35264,8 @@
       "subject": "Rewire real Mage preflight to canonical world-frame target",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34722,7 +35288,8 @@
       "subject": "Remove duplicate mechanical-core target implementation",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34745,7 +35312,8 @@
       "subject": "Freeze FIT1 execution apparatus before activation",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34768,7 +35336,8 @@
       "subject": "Require real-stack preflight before FIT1 training",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34791,7 +35360,8 @@
       "subject": "Test reference-strength loss ownership guards",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34814,7 +35384,8 @@
       "subject": "Add source-only CI gate for reference-strength Geppetto FIT1",
       "branches_containing": [
         "exp/arachne-skintokens-cleanroom-fit1-20260908",
-        "exp/geppetto-reference-strength-fullstack-v1-20260907"
+        "exp/geppetto-reference-strength-fullstack-v1-20260907",
+        "seal/geppetto-reference-strength-fit1-20260908"
       ],
       "main_reachable": false,
       "changed_paths": [
@@ -34846,6 +35417,34 @@
       "subsystem_tags": [
         "FIT_DATA",
         "GEPPETTO"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "06f0677746509d8525f05accfd0d55cff32d0d60",
+      "parents": [
+        "a96c86275c508928c4cb183185edd8286f21820d"
+      ],
+      "author_time": "2026-09-08T10:22:12+03:00",
+      "committer_time": "2026-09-08T10:22:12+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

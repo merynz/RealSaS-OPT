@@ -12,8 +12,8 @@
   "explained_high_signal_count": 264,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 82,
-  "safe_default_evidence_only_branch_count": 78,
+  "live_branch_count": 83,
+  "safe_default_evidence_only_branch_count": 79,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -318,7 +318,7 @@
     },
     {
       "name": "main",
-      "sha": "a96c86275c508928c4cb183185edd8286f21820d",
+      "sha": "06f0677746509d8525f05accfd0d55cff32d0d60",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -463,6 +463,12 @@
     {
       "name": "scratch-mistake",
       "sha": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "seal/geppetto-reference-strength-fit1-20260908",
+      "sha": "f7be46f0a97df62a793ebf91b22297c894854f39",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

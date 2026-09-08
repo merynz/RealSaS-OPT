@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `27581b146e4866c62e4f51dbe78c9f5b6a4009c0316cbfce683a2628848dcae2`
+> State fingerprint: `0fcccc71b595d459ee1f3a7c71ba2aa33da5d86092307fb935aefcdc086585e3`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -33,13 +33,13 @@ _No active experiments registered._
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 69** / **DELETE_CANDIDATE: 9**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 70** / **DELETE_CANDIDATE: 9**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `a96c86275c50` | canonical continuation branch |
+| `main` | `06f067774650` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -115,6 +115,7 @@ _No active experiments registered._
 | `restoration/compiler-runtime-promotion-v1-20260903-stage1-backup` | `2b5d46718683` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase` | `2b5d46718683` | observed live; not explicitly registered active |
 | `restoration/iris-mainline-promotion-v1-20260903-safety` | `a965a22e7a9a` | observed live; not explicitly registered active |
+| `seal/geppetto-reference-strength-fit1-20260908` | `f7be46f0a97d` | observed live; not explicitly registered active |
 | `single-family-e2e-fit-v1-20260902` | `5fa4bf788328` | observed live; not explicitly registered active |
 | `single-family-e2e-models-v1-20260902` | `362556db9b31` | observed live; not explicitly registered active |
 | `source/generic-completion-v1-20260902` | `85a25b419a47` | observed live; not explicitly registered active |

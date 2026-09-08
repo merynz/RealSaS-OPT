@@ -11,8 +11,8 @@
 - Explained by continuity policy: **264**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **82**
-- Safe-default evidence-only branches: **78**
+- Live branches: **83**
+- Safe-default evidence-only branches: **79**
 
 ### Classification counts
 
@@ -79,7 +79,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `a96c86275c50` | `CANONICAL` | canonical branch |
+| `main` | `06f067774650` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -104,6 +104,7 @@ _None._
 | `restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase` | `2b5d46718683` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/iris-mainline-promotion-v1-20260903-safety` | `a965a22e7a9a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `scratch-mistake` | `91b4593d5b2a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `seal/geppetto-reference-strength-fit1-20260908` | `f7be46f0a97d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `single-family-e2e-fit-v1-20260902` | `5fa4bf788328` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `single-family-e2e-models-v1-20260902` | `362556db9b31` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `source/generic-completion-v1-20260902` | `85a25b419a47` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

@@ -11,8 +11,8 @@
 - Explained by continuity policy: **264**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **84**
-- Safe-default evidence-only branches: **80**
+- Live branches: **85**
+- Safe-default evidence-only branches: **81**
 
 ### Classification counts
 
@@ -30,6 +30,7 @@ _None._
 | Branch | Head | Class | Reason |
 |---|---|---|---|
 | `__invalid_probe_do_not_create` | `a51617400b40` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `__tmp_invalid_do_not_use` | `6d2e926892c2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `agent/n1d-global-mechanical-solver-research-20260819` | `08620737ce52` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `agent/n1d-observable-functional-audit-v2-20260820` | `bf3ef16ae250` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `agent/n1d-observable-functional-quotient-rebuild-20260819` | `161d4d5d9893` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -54,7 +55,7 @@ _None._
 | `dummy-unused` | `3609f2cc0cfc` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `e2e/mage-scene-first-v1-20260905` | `c6b5108f672b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `e2e/mage-scene-first-v1-20260905-audit-temp` | `91b4593d5b2a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `a51617400b40` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `6d2e926892c2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | `EVIDENCE_ONLY` | explicit authority-map override |
 | `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | `EVIDENCE_ONLY` | explicit authority-map override |
@@ -80,7 +81,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `af95395fbcef` | `CANONICAL` | canonical branch |
+| `main` | `d966f21dfe5a` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

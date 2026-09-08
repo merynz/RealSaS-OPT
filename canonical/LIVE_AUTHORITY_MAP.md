@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `6a21a7033c0eb2f8165428b0732d294c0f0c100480541da015d8d8bdc9de84b5`
+> State fingerprint: `e6cd423a879e90f3893e881f58972740ed025a8642e5a768e75ae3798eb50fba`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -33,13 +33,13 @@ _No active experiments registered._
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 71** / **DELETE_CANDIDATE: 9**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 72** / **DELETE_CANDIDATE: 9**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `af95395fbcef` | canonical continuation branch |
+| `main` | `d966f21dfe5a` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -54,6 +54,7 @@ _No active experiments registered._
 | Branch | Head | Classification reason |
 |---|---|---|
 | `__invalid_probe_do_not_create` | `a51617400b40` | observed live; not explicitly registered active |
+| `__tmp_invalid_do_not_use` | `6d2e926892c2` | observed live; not explicitly registered active |
 | `agent/n1d-global-mechanical-solver-research-20260819` | `08620737ce52` | observed live; not explicitly registered active |
 | `agent/n1d-observable-functional-audit-v2-20260820` | `bf3ef16ae250` | observed live; not explicitly registered active |
 | `agent/n1d-observable-functional-quotient-rebuild-20260819` | `161d4d5d9893` | observed live; not explicitly registered active |
@@ -74,7 +75,7 @@ _No active experiments registered._
 | `dino-controlled-ladder-prereg-20260829` | `753b384d864c` | observed live; not explicitly registered active |
 | `dino-zero-step-preflight-20260829` | `396ac67b6d65` | observed live; not explicitly registered active |
 | `e2e/mage-scene-first-v1-20260905` | `c6b5108f672b` | observed live; not explicitly registered active |
-| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `a51617400b40` | observed live; not explicitly registered active |
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `6d2e926892c2` | observed live; not explicitly registered active |
 | `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | observed live; not explicitly registered active |
 | `feature/living-compile-v4-editor` | `cd56be7300c3` | observed live; not explicitly registered active |
 | `first-family-fit/charactergen-backbone-v1` | `15896da77dca` | observed live; not explicitly registered active |

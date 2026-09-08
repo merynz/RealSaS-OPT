@@ -1,0 +1,107 @@
+{
+  "authorization": {
+    "a0_optimizer_authorized": false,
+    "a1_optimizer_authorized": false,
+    "next_gate": "REBUILD_CONDITIONING_CACHE__REBIND_A0_PREREG_RUNNER__RERUN_CPU_RESUME_TERMINAL_IDEMPOTENCE"
+  },
+  "binding": {
+    "joint_count": 22,
+    "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+    "surface_node_count": 950,
+    "target_binding_sha256": "ab74756e32ee5c9f4f2d4020cdb56620a110130d80d7b9384c62509af3f193cf",
+    "target_npz_sha256": "7154f5ad98b446c0019c472fd91863b5843b98846cdb38b38e4f78ba7fb5b93f",
+    "teacher_weights_content_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d",
+    "weights_dtype": "float32",
+    "weights_shape": [
+      950,
+      22
+    ]
+  },
+  "historical_body_foundation_regression": {
+    "body_to_full_source_vertex_error_max": 6.143906154658885e-08,
+    "distance_low_confidence_rows": 16,
+    "flagged_union_rows": 35,
+    "local_semantic_ambiguity_rows": 24,
+    "nearest_max": 0.09476343516885569,
+    "nearest_mean": 0.009367747137483607,
+    "nearest_p50": 0.006183238167493585,
+    "nearest_p90": 0.01895783370751569,
+    "nearest_p95": 0.03069111655845138,
+    "nearest_p99": 0.06860541512023098,
+    "stable_rows": 915
+  },
+  "inputs": {
+    "camera_sha256": [
+      "73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541",
+      "bdc172a4aff332f956d1403e36b2f8684b68059fdc82f9efddf35d05a6d9b4d4",
+      "3c2bbc44ef9005b4a545a3381205a5d6a92af15b4791c9075071b8cad02a1a6c",
+      "24b2f115d908422d885f85e956fcc36ac78fd0c90b503f698caa62febc2b9c4d",
+      "5bf00783d6509c2ca142e05ef705d5cdb5df17ad248b782d2fe8cf8a297bee39",
+      "7ee3e50739318eeb122b5b0ec67260dd32e21d949398f48c408a6c239e5c89fe",
+      "daa19fa58ff602977d64b720c4198956809855149d814df487c7762a963f1eec",
+      "68f51fbfce4c31f94281e1569d74b44609435285668f8a8b1b278e76db6ea53f"
+    ],
+    "historical_body_teacher_sha256": "ac2c37571b77fa2900cc042e36f74df111432b94fb21acfb54694d5b6f962e67",
+    "joint_identity_bridge_sha256": "3a2f4d586a14fda2f714d24e7f3e83b5c1a830f8ee41ac3f18921b32cf9384f8",
+    "normalized_source_sha256": "528bef491eceb358ebc8ecb2a46af1d37b4322a7ef500281403a8207fe7c648f",
+    "qualified_skeleton_file_sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992",
+    "zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b"
+  },
+  "projection_policy": {
+    "base": "EXACT_CLOSEST_POINT_ON_SKIN_SUPPORTED_FULL_SOURCE_FACES__BARYCENTRIC_22_CONTROL_SKIN",
+    "candidate_count": 8,
+    "contract": "RealSaS.ArachneMageP0FullSourceHybridProjection.v1",
+    "distance_low_confidence_threshold_world": 0.05,
+    "local_ambiguity_distance_delta_world": 0.005,
+    "local_ambiguity_skin_l1_threshold": 0.2,
+    "multiview_override_requires_votes": 2,
+    "single_view_override_requires_candidate_within_nearest_plus_world": 0.005,
+    "support_views": "EXACT_SHIPPING_GSA_SUPPORT_VIEWS_AND_RASTER_BINDINGS",
+    "teacher_source_geometry_is_product_inference_dependency": false,
+    "teacher_view_candidate_vote_l1_threshold": 0.15,
+    "teacher_view_sample": "CONTINUOUS_ORTHOGRAPHIC_FRONTMOST_RAY_ON_EXACT_PRODUCT_CAMERA__NO_PIXEL_QUANTIZATION",
+    "tie_breaks": "NEAREST_CANDIDATE_RANK_THEN_ASCENDING_GLOBAL_FACE_ID"
+  },
+  "result_counts": {
+    "completed_rows": 53,
+    "confidence": {
+      "HIGH": 916,
+      "LOW": 16,
+      "MEDIUM": 8,
+      "MEDIUM_LOW": 10
+    },
+    "distance_low_confidence_rows": 16,
+    "flagged_union_rows": 39,
+    "local_semantic_ambiguity_rows": 29,
+    "mode": {
+      "MULTIVIEW_DISAMBIGUATED": 8,
+      "MULTIVIEW_VALIDATED_NEAREST": 5,
+      "NEAREST3D_LOW_CONF_FALLBACK": 16,
+      "NEAREST3D_STABLE": 911,
+      "SINGLE_VIEW_LOCAL_TIEBREAK": 5,
+      "SINGLE_VIEW_VALIDATED_NEAREST": 5
+    },
+    "nearest_candidate_changed_rows": 13,
+    "observed_rows": 897
+  },
+  "schema": "RealSaS.ArachneMageSkinTargetP0FullSource.v1",
+  "scientific_scope": "TEACHER_ONLY_TARGET_PROJECTION__NO_LEARNED_OPTIMIZER",
+  "source_deformation_surface": {
+    "eligibility_rule": "ALL_3_FACE_VERTICES_SELECTED_22_CONTROL_MASS_GT_1E-8",
+    "eligible_skin_supported_faces": 5683,
+    "excluded_non_bridge_source_control_mass_l1": 0.0,
+    "excluded_zero_skin_faces": 80,
+    "full_normalized_faces": 5763,
+    "full_normalized_vertices": 5321,
+    "zero_selected_skin_vertices": 42
+  },
+  "status": "P0_FULL_SOURCE_FS1_PROJECTED__A0_STILL_BLOCKED_UNTIL_CACHE_RUNNER_REGRESSIONS",
+  "validation": {
+    "finite": true,
+    "joint_ids_canonical_sorted": true,
+    "negative_weight_count": 0,
+    "simplex_max_abs_error_float32": 4.190951585769653e-08,
+    "surface_ids_canonical_sorted": true
+  }
+}

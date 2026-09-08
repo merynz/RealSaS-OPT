@@ -1,0 +1,46 @@
+{
+  "a0_optimizer_authorized": false,
+  "a1_optimizer_authorized": false,
+  "determinism": {
+    "manifest_byte_identical": true,
+    "manifest_sha256": "9275d0347c2c58b2fc90b0beb45530260580369dec6105623ff0c19bb1e417aa",
+    "npz_byte_identical": true,
+    "npz_sha256": "7154f5ad98b446c0019c472fd91863b5843b98846cdb38b38e4f78ba7fb5b93f",
+    "replay_count": 2
+  },
+  "execution_authority": {
+    "branch_commit_before_execution": "6e95bc0963b68b41a36b096b6f5dc8b1e8134f3d",
+    "joint_identity_bridge_sha256": "3a2f4d586a14fda2f714d24e7f3e83b5c1a830f8ee41ac3f18921b32cf9384f8",
+    "projection_implementation_git_blob_sha": "4e5e54e893f145a1e57f76ee8a5751b38fceca0f",
+    "repaired_launcher_git_blob_sha": "da3f53516f2dfd066e60c955df2908e26e7d5c0d",
+    "scene_first_signed_git_blob_sha": "a55e431faf0680e0d7f2920a85fda6341d45117d"
+  },
+  "main_scientific_a0_optimizer_steps": 0,
+  "no_output_dependent_policy_change": true,
+  "result": {
+    "confidence_counts": {
+      "HIGH": 916,
+      "LOW": 16,
+      "MEDIUM": 8,
+      "MEDIUM_LOW": 10
+    },
+    "flagged_union_rows": 39,
+    "local_semantic_ambiguity_rows": 29,
+    "mode_counts": {
+      "MULTIVIEW_DISAMBIGUATED": 8,
+      "MULTIVIEW_VALIDATED_NEAREST": 5,
+      "NEAREST3D_LOW_CONF_FALLBACK": 16,
+      "NEAREST3D_STABLE": 911,
+      "SINGLE_VIEW_LOCAL_TIEBREAK": 5,
+      "SINGLE_VIEW_VALIDATED_NEAREST": 5
+    },
+    "nearest_candidate_changed_rows": 13,
+    "negative_weight_count": 0,
+    "simplex_max_abs_error_float32": 4.190951585769653e-08,
+    "target_binding_sha256": "ab74756e32ee5c9f4f2d4020cdb56620a110130d80d7b9384c62509af3f193cf",
+    "teacher_weights_content_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d",
+    "weights_shape": [950,22]
+  },
+  "schema": "RealSaS.ArachneMageP0FullSourceFS1ExecutionSeal.v1",
+  "status": "PASS_DETERMINISTIC_DOUBLE_REPLAY__FS1_TARGET_SEALED__A0_BLOCKED_CACHE_REBUILD_REQUIRED"
+}

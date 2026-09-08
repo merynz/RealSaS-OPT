@@ -1,6 +1,6 @@
 # RealSaS — Arachne Mage A0 Codec Ceiling Prereg V1 — 2026-09-08
 
-**Status:** `PREREGISTERED_BEFORE_A0_OUTPUT__A0_OPTIMIZER_AUTHORIZED_AFTER_RUNNER_PREFLIGHT__A1_BLOCKED`
+**Status:** `PREREGISTERED_BEFORE_A0_OUTPUT__NUMERIC_SCALE_PREFLIGHT_REPAIRED__A0_OPTIMIZER_AUTHORIZED_AFTER_RUNNER_PREFLIGHT__A1_BLOCKED`
 
 ## Scientific question
 
@@ -96,6 +96,28 @@ For lexicographically ordered qualified joint index `ji`, with `u=(ji+1)/J`:
 
 This is a codec sensitivity probe, not final runtime motion proof. Hierarchical limb/compound/visual probes remain mandatory at A1/FIT1 closure.
 
+## Pre-output numeric-scale preflight repair
+
+Before **any A0 optimizer step**, a disposable step-0 Compiler preflight found that carrying the historical small-panel aggregate correction ceiling `1e-5` unchanged to `950` rows is not scale-invariant.
+
+With a random untrained codec field and no top-k sparsification, measured Compiler normalization telemetry was:
+
+- total correction L1: `3.507733345184394e-05`;
+- mean row correction L1: `3.692350889667783e-08`;
+- row-correction p95: `8.568167685074624e-08`;
+- maximum row correction L1: `1.6391277312538532e-07`;
+- maximum raw simplex residual: approximately `2.3841858e-07`.
+
+The aggregate exceeded `1e-5` only because tiny float32 row-normalization residuals accumulate across 950 rows. No semantic prediction output had been observed and **optimizer step 1 had not occurred**. Therefore the prereg is repaired here, before execution, to preserve the original no-rescue intent in a row-count-aware form.
+
+Frozen Compiler correction limits for Mage A0 are now:
+
+- maximum row correction L1 `<= 1e-6`;
+- mean row correction L1 `<= 1e-7`;
+- total correction L1 `<= 1e-4`.
+
+These limits remain orders of magnitude below a semantic skin repair and admit only expected numerical normalization noise. `max_influences=None` remains frozen.
+
 ## FULL PASS criteria
 
 All must hold at the same check.
@@ -120,8 +142,9 @@ Compiler-qualified field:
 - qualified simplex max absolute residual `<= 1e-6`;
 - qualified row count `= 950`;
 - illegal/missing S/G references `= 0`;
-- Compiler total correction L1 `<= 1e-5`;
-- Compiler maximum row correction L1 `<= 1e-5`;
+- Compiler total correction L1 `<= 1e-4`;
+- Compiler mean row correction L1 `<= 1e-7`;
+- Compiler maximum row correction L1 `<= 1e-6`;
 - no top-k sparsification in A0 qualification (`max_influences=None`).
 
 Compiler is legality/lineage/simplex authority only and may not rescue semantic field error.

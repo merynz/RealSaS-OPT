@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `1ec712dba0c7690bfe68b5eb725ed9b6dd3e47f36e8b41cdd19f809ce4da9236`
+> State fingerprint: `27581b146e4866c62e4f51dbe78c9f5b6a4009c0316cbfce683a2628848dcae2`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -33,13 +33,13 @@ _No active experiments registered._
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 68** / **DELETE_CANDIDATE: 9**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 69** / **DELETE_CANDIDATE: 9**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `217b2d39185e` | canonical continuation branch |
+| `main` | `a96c86275c50` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -73,7 +73,8 @@ _No active experiments registered._
 | `dino-controlled-ladder-prereg-20260829` | `753b384d864c` | observed live; not explicitly registered active |
 | `dino-zero-step-preflight-20260829` | `396ac67b6d65` | observed live; not explicitly registered active |
 | `e2e/mage-scene-first-v1-20260905` | `c6b5108f672b` | observed live; not explicitly registered active |
-| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `217b2d39185e` | observed live; not explicitly registered active |
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `f7be46f0a97d` | observed live; not explicitly registered active |
+| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | observed live; not explicitly registered active |
 | `feature/living-compile-v4-editor` | `cd56be7300c3` | observed live; not explicitly registered active |
 | `first-family-fit/charactergen-backbone-v1` | `15896da77dca` | observed live; not explicitly registered active |
 | `first-family-fit/v1-20260904` | `d8ba99dd4fe0` | observed live; not explicitly registered active |

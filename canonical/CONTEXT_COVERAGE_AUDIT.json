@@ -12,8 +12,8 @@
   "explained_high_signal_count": 264,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 81,
-  "safe_default_evidence_only_branch_count": 77,
+  "live_branch_count": 82,
+  "safe_default_evidence_only_branch_count": 78,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -161,6 +161,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "exp/arachne-skintokens-cleanroom-fit1-20260908",
+      "sha": "f7be46f0a97df62a793ebf91b22297c894854f39",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
       "sha": "58ea876d3e6181284247822ccf2ed116e6d5f5fe",
       "class": "EVIDENCE_ONLY",
@@ -168,7 +174,7 @@
     },
     {
       "name": "exp/geppetto-reference-strength-fullstack-v1-20260907",
-      "sha": "217b2d39185e8a44ee3a15f6eac98e1d70966d60",
+      "sha": "e6cc31ed13fc4c861874663abd4514620f89f864",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -312,7 +318,7 @@
     },
     {
       "name": "main",
-      "sha": "217b2d39185e8a44ee3a15f6eac98e1d70966d60",
+      "sha": "a96c86275c508928c4cb183185edd8286f21820d",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

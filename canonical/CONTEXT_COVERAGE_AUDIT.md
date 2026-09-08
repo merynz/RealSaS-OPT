@@ -11,8 +11,8 @@
 - Explained by continuity policy: **264**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **81**
-- Safe-default evidence-only branches: **77**
+- Live branches: **82**
+- Safe-default evidence-only branches: **78**
 
 ### Classification counts
 
@@ -53,8 +53,9 @@ _None._
 | `dummy-unused` | `3609f2cc0cfc` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `e2e/mage-scene-first-v1-20260905` | `c6b5108f672b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `e2e/mage-scene-first-v1-20260905-audit-temp` | `91b4593d5b2a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `f7be46f0a97d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | `EVIDENCE_ONLY` | explicit authority-map override |
-| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `217b2d39185e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | `EVIDENCE_ONLY` | explicit authority-map override |
 | `feature/living-compile-v4-editor` | `cd56be7300c3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `first-family-fit/charactergen-backbone-v1` | `15896da77dca` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -78,7 +79,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `217b2d39185e` | `CANONICAL` | canonical branch |
+| `main` | `a96c86275c50` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

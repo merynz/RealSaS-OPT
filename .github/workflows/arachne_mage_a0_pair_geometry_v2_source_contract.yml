@@ -1,0 +1,61 @@
+name: arachne-mage-a0-pair-geometry-v2-source-contract
+
+on:
+  push:
+    branches:
+      - exp/arachne-skintokens-cleanroom-fit1-20260908
+    paths:
+      - 'models/skin_field_codec/v2/**'
+      - 'experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_pair_geometry_v2.py'
+      - 'experiments/arachne_skintokens_fit1_20260908/test_arachne_mage_a0_pair_geometry_codec_v2_source.py'
+      - 'experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_PAIR_GEOMETRY_CODEC_V2_PREREG_V1.json'
+      - '.github/workflows/arachne_mage_a0_pair_geometry_v2_source_contract.yml'
+  pull_request:
+    paths:
+      - 'models/skin_field_codec/v2/**'
+      - 'experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_pair_geometry_v2.py'
+      - 'experiments/arachne_skintokens_fit1_20260908/test_arachne_mage_a0_pair_geometry_codec_v2_source.py'
+      - 'experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_PAIR_GEOMETRY_CODEC_V2_PREREG_V1.json'
+      - '.github/workflows/arachne_mage_a0_pair_geometry_v2_source_contract.yml'
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify prereg precedes implementation and V1 history is untouched
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 3f80f57f66e3d6d74210fda0cf6348939fe090be HEAD
+          test "$(git hash-object experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_PAIR_GEOMETRY_CODEC_V2_PREREG_V1.json)" = "4c0938b3771ae142314851c2a3870411a907fbee"
+          test "$(git hash-object models/skin_field_codec/v1/skin_field_codec_v1.py)" = "01d064fdbf0df1e1efb09495b788665e582e2f42"
+          test "$(git hash-object models/skin_field_codec/v1/config_v1.py)" = "622aa895968d833595fed12a6f4211705b2f6240"
+          test "$(git hash-object experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_historical_1cc449.py)" = "f32d2f75e6b9e6095e1d5455ed9227b32553a9d5"
+          test "$(git hash-object experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_fs1_v2.py)" = "00ccbd7d79707fa6dab5329baeebac20efb8f470"
+      - name: Install CPU test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Compile V2 source
+        run: |
+          python -m py_compile \
+            models/skin_field_codec/v2/config_v2.py \
+            models/skin_field_codec/v2/skin_field_codec_v2.py \
+            experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_pair_geometry_v2.py
+      - name: Run V2 architecture and causality contract
+        run: |
+          python -m pytest -q -s experiments/arachne_skintokens_fit1_20260908/test_arachne_mage_a0_pair_geometry_codec_v2_source.py

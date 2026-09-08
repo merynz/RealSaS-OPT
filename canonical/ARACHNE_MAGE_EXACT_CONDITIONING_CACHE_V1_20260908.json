@@ -1,0 +1,33 @@
+{
+  "schema": "RealSaS.ArachneMageExactConditioningCache.v1",
+  "status": "PASS_EXACT_SHIPPING_CONDITIONING_BOUND__A0_NOT_YET_EXECUTED",
+  "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+  "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+  "Nd_operator_sha256": "5b5c0e89a18c98f6f7a231941480a61e7158d93d91a9a8edcc5362d6c5e0b1be",
+  "surface_count": 950,
+  "joint_count": 22,
+  "conditioning_v1_hash": "7b82d57b1967858c6a66de871ecd570a9bdae408b30ff84c3fcbd8e908551047",
+  "conditioning_v2_hash": "89973cd1f0ac989d10cdfeafdef89545668fda4998363df3e872961646879939",
+  "pair_geometry_contract": [
+    "point_control_dx",
+    "point_control_dy",
+    "point_control_dz",
+    "point_control_distance",
+    "point_segment_distance",
+    "segment_t",
+    "segment_length",
+    "normal_axis_abs_cos",
+    "normal_axis_valid",
+    "parent_exists"
+  ],
+  "teacher_target_binding_sha256": "cb41eb7055b8e2646628daecdd0e31dfc079d163d5f5adaaa1a92f1ca1dfb994",
+  "teacher_weights_content_sha256": "c15db7b78d272ac22998071e1fb1cec4c65d7366133ef16fb72824f222c852d9",
+  "supervised_rows": 931,
+  "low_rows": 19,
+  "row_binding": "P0_SURFACE_ID_TO_CONDITIONING_SURFACE_ID",
+  "column_binding": "P0_CANONICAL_JOINT_ID_TO_CONDITIONING_CANONICAL_JOINT_ID",
+  "local_cache_filename": "ARACHNE_MAGE_EXACT_CONDITIONING_CACHE_V1.npz",
+  "local_cache_sha256": "12484afc23d5c03cbad8020266ed5b39c3201d979e78f96380e748902152be6e",
+  "a0_optimizer_authorized": false,
+  "next_gate": "A0_MAGE_PREREG__CONFIDENCE_POLICY__MOTION_PROBES__RUNNER_PREFLIGHT"
+}

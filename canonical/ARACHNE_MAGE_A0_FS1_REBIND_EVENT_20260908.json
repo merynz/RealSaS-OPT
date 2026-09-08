@@ -1,0 +1,20 @@
+{
+  "timestamp_utc": "2026-09-08T15:20:00Z",
+  "event_type": "A0_FS1_REBIND_PREREGISTERED",
+  "module": "Arachne/repository-continuity",
+  "experiment_id": "ARACHNE_MAGE_SKINTOKENS_FIT1_A0",
+  "summary": "Rebound Mage A0 to the sealed FS1 target/cache without changing codec architecture, optimizer, scheduler or pass gates. Execution uses the byte-preserved historical A0 engine from commit 1cc449 behind a small FS1 authority wrapper.",
+  "local_effect": "Main A0 remains fail-closed at zero scientific optimizer steps until committed CPU exact-resume, terminal-idempotence and executable-preflight regressions pass.",
+  "global_effect": "A0 now has an explicit reproducible authority chain from FS1 target and deterministic conditioning cache to the historical training engine; old body-only target/cache authority remains retired.",
+  "claim_changes": [
+    "BIND: historical engine Git blob f32d2f75e6b9e6095e1d5455ed9227b32553a9d5 is preserved byte-for-byte.",
+    "BIND: FS1 wrapper Git blob 00ccbd7d79707fa6dab5329baeebac20efb8f470 changes authority/cache firewall only.",
+    "KEEP BLOCK: main A0 optimizer not yet authorized."
+  ],
+  "pointers": [
+    "canonical/ARACHNE_MAGE_A0_FS1_PREREG_V2_20260908.json",
+    "canonical/ARACHNE_MAGE_A0_AUTHORITY_BLOCK_V2_20260908.json",
+    "experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_fs1_v2.py"
+  ],
+  "record_status": "CURRENT"
+}

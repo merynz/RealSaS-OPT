@@ -9,7 +9,7 @@
     "manifest_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_SKIN_TARGET_P0_FULL_SOURCE_FS1_MANIFEST.json",
     "manifest_sha256": "9275d0347c2c58b2fc90b0beb45530260580369dec6105623ff0c19bb1e417aa",
     "projection_contract": "RealSaS.ArachneMageP0FullSourceHybridProjection.v1",
-    "status": "PASS_DETERMINISTIC_DOUBLE_REPLAY__TARGET_SEALED__CACHE_REBUILD_REQUIRED",
+    "status": "PASS_DETERMINISTIC_DOUBLE_REPLAY__TARGET_SEALED",
     "target_npz_sha256": "7154f5ad98b446c0019c472fd91863b5843b98846cdb38b38e4f78ba7fb5b93f",
     "teacher_weights_content_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d"
   },
@@ -19,36 +19,34 @@
     "cache_binding_sha256": "c7e3bf10fc8edf16f862b4ce58b3aabfeb2aabf14cc8e744e53e3afc0764ac9f",
     "cache_npz_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
     "execution_seal_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_EXECUTION_SEAL_20260908.json",
-    "expected_conditioning_v1_hash": "475d71523a38c5763756713e2047b337662ad6c01735aaa89671c6297326e42c",
-    "expected_conditioning_v2_hash": "9e979b824e6e30fcaf1158e4bceeb080ce5fa1cff463290e1c4a7c2ac4f5f4e9",
-    "expected_low_rows": 16,
-    "expected_supervised_rows": 934,
-    "historical_opaque_cache_authority_retired": true,
+    "conditioning_v1_hash": "475d71523a38c5763756713e2047b337662ad6c01735aaa89671c6297326e42c",
+    "conditioning_v2_hash": "9e979b824e6e30fcaf1158e4bceeb080ce5fa1cff463290e1c4a7c2ac4f5f4e9",
+    "low_rows": 16,
     "manifest_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_V2_MANIFEST.json",
     "manifest_sha256": "5b3e63d60fce76226e16aac5d754a5f9cde114ccd8327a3242fad8a714af7d6b",
     "prereg_path": "canonical/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_PREREG_V2_20260908.json",
-    "status": "PASS_DETERMINISTIC_DOUBLE_REPLAY__CACHE_SEALED__A0_REBIND_REQUIRED"
+    "status": "PASS_DETERMINISTIC_DOUBLE_REPLAY__CACHE_SEALED",
+    "supervised_rows": 934
+  },
+  "a0_fs1_rebind": {
+    "prereg_path": "canonical/ARACHNE_MAGE_A0_FS1_PREREG_V2_20260908.json",
+    "historical_engine_path": "experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_historical_1cc449.py",
+    "historical_engine_git_blob_sha": "f32d2f75e6b9e6095e1d5455ed9227b32553a9d5",
+    "wrapper_path": "experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_fs1_v2.py",
+    "wrapper_git_blob_sha": "00ccbd7d79707fa6dab5329baeebac20efb8f470",
+    "architecture_optimizer_and_pass_gates_changed": false,
+    "status": "PREREGISTERED__CPU_REGRESSION_AND_PREFLIGHT_REQUIRED"
   },
   "main_scientific_a0_optimizer_steps": 0,
-  "pre_execution_fingerprint_repair": {
-    "fs1_output_generated_before_repair": false,
-    "historical_repo_bridge_file_sha256": "8cb244630be97859f931d45edfe0c0b444315025e41743cd6d7bb24f2b2f505f",
-    "historical_repo_bridge_git_blob_sha": "42fcc9e94b26cc4fee3c15d9aa06f2e378aa7901",
-    "identity_mapping_changed": false,
-    "parent_topology_changed": false,
-    "projection_policy_changed": false,
-    "repaired_bridge_file_sha256": "3a2f4d586a14fda2f714d24e7f3e83b5c1a830f8ee41ac3f18921b32cf9384f8",
-    "repaired_bridge_git_blob_sha": "752aaa30b5cc01581a2456f34f328d23c78c13a8",
-    "retired_unresolved_bridge_sha256": "df8805a261326c3f58fc10d8f3f7a6354bb7241a0ba1fc3e272d89a2bc2a06e7"
-  },
   "preserved_authority": {
     "joint_identity_bridge": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_JOINT_IDENTITY_BRIDGE_V1.json",
     "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
     "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb"
   },
   "required_next_gate": [
-    "REBIND_A0_PREREG_AND_RUNNER_TO_FS1_BINDING_AND_CACHE",
-    "RERUN_CPU_RESUME_TERMINAL_IDEMPOTENCE_REGRESSIONS",
+    "EXECUTE_COMMITTED_CPU_RESUME_TERMINAL_IDEMPOTENCE_REGRESSIONS",
+    "EXECUTE_COMMITTED_CPU_PREFLIGHT",
+    "SEAL_A0_FS1_RUNNER_REGRESSION_AND_PREFLIGHT",
     "BUILD_SELF_CONTAINED_COLAB",
     "RUN_MAIN_A0_CUDA"
   ],
@@ -57,21 +55,9 @@
     "binding_sha256": "cb41eb7055b8e2646628daecdd0e31dfc079d163d5f5adaaa1a92f1ca1dfb994",
     "conditioning_cache_sha256": "12484afc23d5c03cbad8020266ed5b39c3201d979e78f96380e748902152be6e",
     "historical_executable_commit": "1cc449be4cc6eea81f3e8e9768f857dfb9b72477",
-    "p0_closure": "canonical/ARACHNE_MAGE_SKIN_TARGET_P0_CLOSURE_20260908.md",
-    "p0_manifest": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_SKIN_TARGET_P0_MANIFEST_V1.json",
     "target_npz_sha256": "f3db92194660f12de4425e015f85ac4ac995fcfc44a0272047b049ffb0d36d71",
     "teacher_weights_content_sha256": "c15db7b78d272ac22998071e1fb1cec4c65d7366133ef16fb72824f222c852d9"
   },
   "schema": "RealSaS.ArachneMageA0AuthorityBlock.v2",
-  "status": "A0_BLOCKED__FS1_TARGET_AND_CACHE_SEALED__A0_REBIND_REQUIRED",
-  "supersession_finding": {
-    "body_only_teacher_vertices": 3348,
-    "eligible_skin_supported_faces": 5683,
-    "excluded_zero_selected_skin_faces": 80,
-    "full_normalized_source_faces": 5763,
-    "full_normalized_source_vertices": 5321,
-    "source_control_13_role": "handslot.r",
-    "source_control_8_role": "handslot.l",
-    "zero_selected_skin_vertices": 42
-  }
+  "status": "A0_BLOCKED__FS1_REBIND_PREREGISTERED__CPU_REGRESSION_AND_PREFLIGHT_REQUIRED"
 }

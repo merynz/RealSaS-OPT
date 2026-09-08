@@ -1,0 +1,92 @@
+{
+  "schema": "RealSaS.ArachneMageA0FS1Prereg.v2",
+  "status": "PREREGISTERED_BEFORE_FS1_A0_OUTPUT__CPU_REGRESSION_AND_PREFLIGHT_REQUIRED__MAIN_A0_BLOCKED__A1_BLOCKED",
+  "recorded_at_utc": "2026-09-08T15:20:00Z",
+  "seed": 20260908,
+  "main_scientific_a0_optimizer_steps_before_prereg": 0,
+  "execution_source": {
+    "historical_engine_path": "experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_historical_1cc449.py",
+    "historical_engine_git_blob_sha": "f32d2f75e6b9e6095e1d5455ed9227b32553a9d5",
+    "historical_engine_source_commit": "1cc449be4cc6eea81f3e8e9768f857dfb9b72477",
+    "fs1_wrapper_path": "experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_fs1_v2.py",
+    "fs1_wrapper_git_blob_sha": "00ccbd7d79707fa6dab5329baeebac20efb8f470",
+    "policy": "BYTE_PRESERVED_HISTORICAL_ENGINE_PLUS_FS1_AUTHORITY_WRAPPER"
+  },
+  "input_authority": {
+    "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+    "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "fs1_target_npz_sha256": "7154f5ad98b446c0019c472fd91863b5843b98846cdb38b38e4f78ba7fb5b93f",
+    "target_binding_sha256": "ab74756e32ee5c9f4f2d4020cdb56620a110130d80d7b9384c62509af3f193cf",
+    "teacher_weights_content_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d",
+    "conditioning_cache_npz_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "conditioning_cache_manifest_sha256": "5b3e63d60fce76226e16aac5d754a5f9cde114ccd8327a3242fad8a714af7d6b",
+    "conditioning_cache_binding_sha256": "c7e3bf10fc8edf16f862b4ce58b3aabfeb2aabf14cc8e744e53e3afc0764ac9f",
+    "conditioning_v1_hash": "475d71523a38c5763756713e2047b337662ad6c01735aaa89671c6297326e42c",
+    "conditioning_v2_hash": "9e979b824e6e30fcaf1158e4bceeb080ce5fa1cff463290e1c4a7c2ac4f5f4e9"
+  },
+  "confidence_policy": {
+    "high_rows": 916,
+    "medium_rows": 8,
+    "medium_low_rows": 10,
+    "low_rows": 16,
+    "teacher_supervised_rows": 934,
+    "low_rows_in_teacher_encoder": false,
+    "low_rows_in_teacher_loss": false,
+    "decoder_outputs_full_950_rows": true,
+    "low_teacher_metrics_are_pass_authority": false
+  },
+  "codec": {
+    "architecture_id": "RealSaS.SkinFieldCodec.ContinuousJointField.v1",
+    "config_hash": "24c9f2580be9e80a02789e9ba35a57470145114807859057398b07bef9d58715",
+    "hidden_dim": 192,
+    "latent_dim": 64,
+    "encoder_layers": 3,
+    "decoder_layers": 3,
+    "dropout": 0.0
+  },
+  "optimizer": {
+    "type": "AdamW",
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "scheduler": "CosineAnnealingLR",
+    "t_max": 1536,
+    "eta_min": 0.0,
+    "max_steps": 1536,
+    "check_every": 32,
+    "checkpoint_every": 128,
+    "required_consecutive_full_pass_checks": 3,
+    "early_stop_at_first_sustained_pass": true
+  },
+  "pass": {
+    "authoritative_raw_row_l1_p95_max": 0.05,
+    "authoritative_qualified_row_l1_p95_max": 0.05,
+    "authoritative_raw_deformation_error_ratio_max": 0.05,
+    "authoritative_qualified_deformation_error_ratio_max": 0.05,
+    "raw_simplex_max_abs_residual": 0.000001,
+    "qualified_simplex_max_abs_residual": 0.000001,
+    "negative_weight_count": 0,
+    "qualified_row_count": 950,
+    "compiler_total_correction_l1_max": 0.0001,
+    "compiler_mean_row_correction_l1_max": 0.0000001,
+    "compiler_max_row_correction_l1_max": 0.000001,
+    "max_influences": null
+  },
+  "required_disposable_regressions": {
+    "cpu_executable_preflight": true,
+    "exact_resume_checkpoint_step": 2,
+    "exact_resume_next_step": 3,
+    "model_state_exact": true,
+    "optimizer_state_exact": true,
+    "scheduler_state_exact": true,
+    "rng_state_exact": true,
+    "loss_trace_exact": true,
+    "lr_exact": true,
+    "terminal_no_closure_idempotent": true,
+    "terminal_pass_idempotent": true
+  },
+  "authorization": {
+    "a0_optimizer_authorized": false,
+    "a1_optimizer_authorized": false,
+    "next_gate": "EXECUTE_COMMITTED_CPU_REGRESSION_AND_PREFLIGHT__SEAL_RESULTS__BUILD_SELF_CONTAINED_COLAB__THEN_MAIN_A0_CUDA"
+  }
+}

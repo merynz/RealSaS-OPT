@@ -1,0 +1,52 @@
+{
+  "schema": "RealSaS.ArachneMageA0FS1RuntimeSemanticClosure.v1",
+  "status": "PASS_SEMANTIC_RUNTIME_REGRESSION_AND_CPU_PREFLIGHT__EXACT_COMMITTED_WRAPPER_EXECUTION_STILL_REQUIRED",
+  "recorded_at_utc": "2026-09-08T15:34:00Z",
+  "authority": {
+    "prereg_commit": "513a7f344ffc0282c4dbd589b5c740b3bfcd1bec",
+    "committed_historical_engine_git_blob_sha": "f32d2f75e6b9e6095e1d5455ed9227b32553a9d5",
+    "committed_fs1_wrapper_git_blob_sha": "00ccbd7d79707fa6dab5329baeebac20efb8f470",
+    "cache_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "cache_manifest_sha256": "5b3e63d60fce76226e16aac5d754a5f9cde114ccd8327a3242fad8a714af7d6b",
+    "target_binding_sha256": "ab74756e32ee5c9f4f2d4020cdb56620a110130d80d7b9384c62509af3f193cf",
+    "supervised_rows": 934,
+    "low_rows": 16
+  },
+  "runtime_transport_boundary": {
+    "private_github_blob_materialized_byte_exact_in_local_container": false,
+    "local_reconstruction_git_blob_sha": "ee83dd923871e975663272878340907f90c8575f",
+    "expected_git_blob_sha": "f32d2f75e6b9e6095e1d5455ed9227b32553a9d5",
+    "policy": "DO_NOT_CLAIM_EXACT_COMMITTED_WRAPPER_LOCAL_EXECUTION",
+    "next_exact_execution_environment": "SELF_CONTAINED_PACKAGE_OR_EXACT_GIT_CLONE"
+  },
+  "semantic_runtime_regression": {
+    "status": "PASS_CPU_RESUME_AND_TERMINAL_IDEMPOTENCE_REGRESSIONS",
+    "report_file_sha256": "36d819fa0741cbdea8a46093751f03a2c35fa905df58c6ee0a9a50f9445b2bb6",
+    "resume_checkpoint_step": 2,
+    "resume_next_step": 3,
+    "model_state_exact": true,
+    "optimizer_state_exact": true,
+    "scheduler_state_exact": true,
+    "rng_state_exact": true,
+    "loss_trace_exact": true,
+    "lr_exact": true,
+    "terminal_no_closure_idempotent": true,
+    "terminal_pass_idempotent": true
+  },
+  "semantic_cpu_preflight": {
+    "status": "PASS_CPU_EXECUTABLE_PREFLIGHT",
+    "report_file_sha256": "c68b9c59bcf39b3a95f38fc4c14e13b14bd24882519af8c82b14dc6d7a1ab818",
+    "disposable_optimizer_steps": 1,
+    "main_scientific_a0_optimizer_steps": 0,
+    "qualified_row_count": 950,
+    "negative_weight_count_step0": 0,
+    "negative_weight_count_step1": 0,
+    "compiler_total_correction_l1_step1": 0.000035483390092766465,
+    "raw_simplex_max_abs_residual_step1": 1.2665987014770508e-7
+  },
+  "authorization": {
+    "a0_optimizer_authorized": false,
+    "a1_optimizer_authorized": false,
+    "next_gate": "BUILD_EXACT_CLONE_SELF_CONTAINED_COLAB_PACKAGE__RUN_EXACT_COMMITTED_WRAPPER_REGRESSION_AND_PREFLIGHT__THEN_MAIN_A0_CUDA"
+  }
+}

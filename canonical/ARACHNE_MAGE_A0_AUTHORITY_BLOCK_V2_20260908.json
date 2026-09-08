@@ -15,27 +15,29 @@
   },
   "fs1_conditioning_cache": {
     "builder_git_blob_sha": "1669d676611ac156cb096abdb3184a21af5b8814",
-    "builder_path": "experiments/arachne_skintokens_fit1_20260908/build_arachne_mage_fs1_conditioning_cache_v2.py",
     "cache_binding_sha256": "c7e3bf10fc8edf16f862b4ce58b3aabfeb2aabf14cc8e744e53e3afc0764ac9f",
     "cache_npz_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
-    "execution_seal_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_EXECUTION_SEAL_20260908.json",
     "conditioning_v1_hash": "475d71523a38c5763756713e2047b337662ad6c01735aaa89671c6297326e42c",
     "conditioning_v2_hash": "9e979b824e6e30fcaf1158e4bceeb080ce5fa1cff463290e1c4a7c2ac4f5f4e9",
     "low_rows": 16,
-    "manifest_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_V2_MANIFEST.json",
     "manifest_sha256": "5b3e63d60fce76226e16aac5d754a5f9cde114ccd8327a3242fad8a714af7d6b",
-    "prereg_path": "canonical/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_PREREG_V2_20260908.json",
     "status": "PASS_DETERMINISTIC_DOUBLE_REPLAY__CACHE_SEALED",
     "supervised_rows": 934
   },
   "a0_fs1_rebind": {
     "prereg_path": "canonical/ARACHNE_MAGE_A0_FS1_PREREG_V2_20260908.json",
+    "prereg_commit": "513a7f344ffc0282c4dbd589b5c740b3bfcd1bec",
     "historical_engine_path": "experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_historical_1cc449.py",
     "historical_engine_git_blob_sha": "f32d2f75e6b9e6095e1d5455ed9227b32553a9d5",
     "wrapper_path": "experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_fs1_v2.py",
     "wrapper_git_blob_sha": "00ccbd7d79707fa6dab5329baeebac20efb8f470",
     "architecture_optimizer_and_pass_gates_changed": false,
-    "status": "PREREGISTERED__CPU_REGRESSION_AND_PREFLIGHT_REQUIRED"
+    "semantic_runtime_closure_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_RUNTIME_SEMANTIC_CLOSURE_20260908.json",
+    "semantic_cpu_regression_status": "PASS",
+    "semantic_cpu_preflight_status": "PASS",
+    "exact_committed_wrapper_local_execution": false,
+    "exact_committed_wrapper_execution_required": true,
+    "status": "SEMANTIC_CPU_REGRESSION_PREFLIGHT_PASS__EXACT_CLONE_PACKAGE_EXECUTION_REQUIRED"
   },
   "main_scientific_a0_optimizer_steps": 0,
   "preserved_authority": {
@@ -44,10 +46,9 @@
     "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb"
   },
   "required_next_gate": [
-    "EXECUTE_COMMITTED_CPU_RESUME_TERMINAL_IDEMPOTENCE_REGRESSIONS",
-    "EXECUTE_COMMITTED_CPU_PREFLIGHT",
-    "SEAL_A0_FS1_RUNNER_REGRESSION_AND_PREFLIGHT",
-    "BUILD_SELF_CONTAINED_COLAB",
+    "BUILD_EXACT_CLONE_SELF_CONTAINED_COLAB_PACKAGE",
+    "RUN_EXACT_COMMITTED_WRAPPER_CPU_REGRESSION_AND_PREFLIGHT_IN_PACKAGE",
+    "SEAL_EXACT_WRAPPER_PACKAGE_PREFLIGHT",
     "RUN_MAIN_A0_CUDA"
   ],
   "retired_authority": {
@@ -59,5 +60,5 @@
     "teacher_weights_content_sha256": "c15db7b78d272ac22998071e1fb1cec4c65d7366133ef16fb72824f222c852d9"
   },
   "schema": "RealSaS.ArachneMageA0AuthorityBlock.v2",
-  "status": "A0_BLOCKED__FS1_REBIND_PREREGISTERED__CPU_REGRESSION_AND_PREFLIGHT_REQUIRED"
+  "status": "A0_BLOCKED__FS1_SEMANTIC_CPU_PASS__EXACT_CLONE_PACKAGE_PREFLIGHT_REQUIRED"
 }

@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/arachne_a0_hardrow_rootcause_hosted.yml'
       - 'experiments/arachne_skintokens_fit1_20260908/diagnose_a0_hardrow_from_sealed.py'
+      - 'experiments/arachne_skintokens_fit1_20260908/run_oracle_latent_diag_hosted.py'
   workflow_dispatch:
 
 permissions:
@@ -14,17 +15,76 @@ permissions:
 
 jobs:
   diagnose:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    runs-on: [self-hosted, realsas, gpu]
+    timeout-minutes: 20
+    env:
+      PY: /home/monster/realsas-ml312/bin/python
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+
+      - name: Verify self-hosted runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          "$PY" - <<'PY'
+          import torch, numpy
+          print('SELF_HOSTED_RUNTIME=PASS')
+          print('torch', torch.__version__, 'cuda', torch.cuda.is_available())
+          PY
+
       - name: Diagnose sealed A0 hard-row failure against frozen loss source
-        run: python experiments/arachne_skintokens_fit1_20260908/diagnose_a0_hardrow_from_sealed.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PY" experiments/arachne_skintokens_fit1_20260908/diagnose_a0_hardrow_from_sealed.py
+
+      - name: Locate exact oracle-latent inputs on runner
+        id: locate
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROGRESS_SHA='233b2c003f523060a8cedc6999c13259764238cd60d46f2d347c806ae070de34'
+          CACHE_SHA='db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd'
+          PROGRESS=''
+          CACHE=''
+          while IFS= read -r p; do
+            [ -f "$p" ] || continue
+            got=$(sha256sum "$p" | awk '{print $1}')
+            if [ "$got" = "$PROGRESS_SHA" ]; then PROGRESS="$p"; break; fi
+          done < <(find /home/monster /mnt -type f -name 'ARACHNE_MAGE_A0_FS1_PROGRESS.pt' 2>/dev/null || true)
+          while IFS= read -r p; do
+            [ -f "$p" ] || continue
+            got=$(sha256sum "$p" | awk '{print $1}')
+            if [ "$got" = "$CACHE_SHA" ]; then CACHE="$p"; break; fi
+          done < <(find /home/monster /mnt -type f -name 'ARACHNE_MAGE_FS1_CONDITIONING_CACHE_V2.npz' 2>/dev/null || true)
+          if [ -n "$PROGRESS" ] && [ -n "$CACHE" ]; then
+            echo 'ORACLE_INPUTS_LOCAL=TRUE'
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "progress=$PROGRESS" >> "$GITHUB_OUTPUT"
+            echo "cache=$CACHE" >> "$GITHUB_OUTPUT"
+          else
+            echo 'ORACLE_INPUTS_NOT_LOCAL'
+            echo "progress_found=$([ -n "$PROGRESS" ] && echo true || echo false)"
+            echo "cache_found=$([ -n "$CACHE" ] && echo true || echo false)"
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run preregistered frozen-decoder oracle-latent diagnostic
+        if: steps.locate.outputs.available == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PY" experiments/arachne_skintokens_fit1_20260908/run_oracle_latent_diag_hosted.py \
+            --progress '${{ steps.locate.outputs.progress }}' \
+            --cache '${{ steps.locate.outputs.cache }}' \
+            --out /tmp/ARACHNE_MAGE_A0_FS1_POSTFAIL_ORACLE_LATENT_DIAGNOSTIC_V1.json
+
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: arachne-a0-hardrow-rootcause-hosted-v1
-          path: /tmp/ARACHNE_MAGE_A0_FS1_HOSTED_ROOT_CAUSE_DIAGNOSTIC_V1.json
-          if-no-files-found: error
+          name: arachne-a0-hardrow-rootcause-selfhosted-v1
+          path: |
+            /tmp/ARACHNE_MAGE_A0_FS1_HOSTED_ROOT_CAUSE_DIAGNOSTIC_V1.json
+            /tmp/ARACHNE_MAGE_A0_FS1_POSTFAIL_ORACLE_LATENT_DIAGNOSTIC_V1.json
+          if-no-files-found: warn

@@ -18,8 +18,8 @@
     "cublas_workspace_config": ":4096:8",
     "bundle_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_CAPACITY_BUNDLE_V3.npz",
     "bundle_sha256": "e6841a0715e1a65e4502082ae29dfb87d1f12de668330f988fb8f5b35c42d243",
-    "bundle_manifest_sha256": "2c180b37b09610dd1724521438a37304b20cea5da71386c34687cff10b3743e9",
-    "runner_script_sha256": "3c9c67e72942b716e197f946ce49b561b6297bf6f3e0f682a01c51056e821aac"
+    "bundle_manifest_git_blob_sha": "b5044b68b1fdfc5f70e16e55008304de5ae8d095",
+    "runner_script_git_blob_sha": "a602c34f4210539bd02b9701fdcdb4b54a597bd1"
   },
   "test_a_original_oracle": {
     "source_prereg": "canonical/ARACHNE_MAGE_A0_FS1_POSTFAIL_ORACLE_LATENT_DIAGNOSTIC_PREREG_V1_20260908.json",

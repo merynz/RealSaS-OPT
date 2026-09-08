@@ -1,0 +1,121 @@
+{
+  "schema": "RealSaS.ArachneMageA0PairGeometryCodecV2Prereg.v1",
+  "status": "PREREGISTERED__MAIN_V2_OPTIMIZER_NOT_AUTHORIZED_UNTIL_SOURCE_CONTRACT_AND_PREFLIGHT_PASS",
+  "created_utc": "2026-09-08T21:35:51Z",
+  "scope": "Mage FS1 A0 representation proof only",
+  "history_policy": {
+    "v1_history": "IMMUTABLE",
+    "v1_terminal_status": "NO_CLOSURE",
+    "v1_artifacts_may_be_overwritten": false,
+    "v1_checkpoint_warm_start_allowed": false
+  },
+  "hypothesis": "The A0 V1 codec lacks explicit point-to-joint relational geometry at decode time. Adding the already-sealed 10D pair_geometry as a minimal 64D decoder lane may reduce wrong-joint mass routing while preserving the compact 64D per-joint skin-field representation.",
+  "single_scientific_intervention": {
+    "name": "EXPLICIT_PAIR_GEOMETRY_DECODER_LANE",
+    "pair_geometry_source": "sealed FS1 conditioning cache pair_geometry",
+    "pair_geometry_shape": [950, 22, 10],
+    "pair_geometry_dim": 10,
+    "pair_geometry_projection": {
+      "type": "Linear+GELU",
+      "input_dim": 10,
+      "output_dim": 64,
+      "hidden_layers": 0
+    },
+    "decoder_concat_order": [
+      "surface_embedding_192",
+      "joint_embedding_192",
+      "joint_latent_64",
+      "pair_geometry_embedding_64"
+    ],
+    "decoder_input_dim": 512,
+    "teacher_encoder_pair_geometry_access": false,
+    "decoder_pair_geometry_access": true
+  },
+  "frozen_architecture": {
+    "surface_feature_dim": 20,
+    "joint_feature_dim": 8,
+    "hidden_dim": 192,
+    "latent_dim": 64,
+    "encoder_layers": 3,
+    "decoder_layers": 3,
+    "dropout": 0.0,
+    "temperature_floor": 0.35,
+    "surface_embedding_dim": 192,
+    "joint_embedding_dim": 192,
+    "weight_embedding_dim": 192,
+    "pair_geometry_embedding_dim": 64,
+    "v1_trainable_parameter_count": 401154,
+    "v2_trainable_parameter_count": 414146,
+    "parameter_delta": 12992,
+    "architecture_id": "RealSaS.SkinFieldCodec.ContinuousJointField.PairGeometry.v2"
+  },
+  "frozen_data_authority": {
+    "conditioning_cache_npz_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "conditioning_cache_binding_sha256": "c7e3bf10fc8edf16f862b4ce58b3aabfeb2aabf14cc8e744e53e3afc0764ac9f",
+    "conditioning_v2_semantic_sha256": "9e979b824e6e30fcaf1158e4bceeb080ce5fa1cff463290e1c4a7c2ac4f5f4e9",
+    "fs1_target_binding_sha256": "ab74756e32ee5c9f4f2d4020cdb56620a110130d80d7b9384c62509af3f193cf",
+    "teacher_weights_content_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d",
+    "surface_lineage_sha256": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+    "skeleton_lineage_sha256": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "surface_rows": 950,
+    "joint_rows": 22,
+    "teacher_supervised_rows": 934,
+    "low_rows": 16,
+    "low_rows_in_teacher_encoder": false,
+    "low_rows_in_training_loss": false,
+    "low_rows_decoded": true
+  },
+  "frozen_training_contract": {
+    "fresh_initialization": true,
+    "seed": 20260908,
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "scheduler": "CosineAnnealingLR",
+    "scheduler_t_max": 1536,
+    "max_steps": 1536,
+    "check_every": 32,
+    "checkpoint_every": 128,
+    "required_consecutive_pass_checks": 3,
+    "loss": "same truth-stationary reconstruction plus verified deformation loss used by frozen A0 V1",
+    "compiler_qualification": "unchanged",
+    "acceptance_thresholds": "unchanged from frozen A0 V1/FS1 contract"
+  },
+  "acceptance_gates": {
+    "raw_row_l1_p95_auth_max": 0.05,
+    "qualified_row_l1_p95_auth_max": 0.05,
+    "raw_deformation_error_ratio_auth_max": 0.05,
+    "qualified_deformation_error_ratio_auth_max": 0.05,
+    "raw_simplex_max_abs_residual_max": 1e-6,
+    "qualified_simplex_max_abs_residual_max": 1e-6,
+    "negative_weight_count": 0,
+    "qualified_row_count": 950,
+    "compiler_total_correction_l1_max": 0.0001,
+    "compiler_mean_row_correction_l1_max": 1e-7,
+    "compiler_max_row_correction_l1_max": 1e-6,
+    "compiler_total_sparsification_discarded_mass": 0.0
+  },
+  "authorization_gates_before_main_optimizer": [
+    "V2 source files exist under a new models/skin_field_codec/v2 namespace",
+    "V1 source and V1 historical artifacts remain byte-untouched",
+    "V2 architecture/config hash and exact 414146 trainable parameter count are asserted",
+    "pair_geometry exact shape and finite-value guards pass",
+    "pair_geometry is consumed only by the decoder lane",
+    "CPU deterministic resume regression passes",
+    "CPU executable forward-loss-backward-compiler preflight passes"
+  ],
+  "forbidden_changes_in_this_experiment": [
+    "threshold tuning",
+    "loss coefficient tuning",
+    "optimizer or scheduler tuning",
+    "latent dimension change",
+    "surface/joint embedding width change",
+    "teacher target change",
+    "supervision mask change",
+    "cache regeneration",
+    "V1 checkpoint warm start",
+    "A1 predictor training",
+    "teacher leakage into shipping inference"
+  ],
+  "main_v2_scientific_optimizer_steps_at_prereg": 0
+}

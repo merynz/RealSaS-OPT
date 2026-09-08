@@ -1,0 +1,24 @@
+{
+  "schema": "RealSaS.ArachneMageSkinTargetP0Binding.v2",
+  "status": "PASS_EXACT_SHIPPING_SG_BINDING_REPAIRED__A0_NOT_AUTHORIZED",
+  "surface_node_count": 950,
+  "joint_count": 22,
+  "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+  "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+  "weights_content_sha256": "c15db7b78d272ac22998071e1fb1cec4c65d7366133ef16fb72824f222c852d9",
+  "npz_sha256": "f3db92194660f12de4425e015f85ac4ac995fcfc44a0272047b049ffb0d36d71",
+  "target_binding_sha256": "cb41eb7055b8e2646628daecdd0e31dfc079d163d5f5adaaa1a92f1ca1dfb994",
+  "surface_id_order_matches_exact_shipping_gsa": true,
+  "weights_reprojected_for_v2": false,
+  "weights_changed_for_v2": false,
+  "confidence_counts": {
+    "HIGH": 920,
+    "MEDIUM": 7,
+    "MEDIUM_LOW": 4,
+    "LOW": 19
+  },
+  "superseded_v1_surface_lineage_hash": "2f1e2f4988f56ea506353a4144b6e170dd730d5d883ce13229f9b0749c43f590",
+  "repair_reason": "V1 used a provenance-drift GSA reconstruction. Exact 950 surface IDs/order and projected W were already correct; only product lineage binding was repaired before any learned optimizer step.",
+  "a0_optimizer_authorized": false,
+  "next_gate": "A0_MAGE_PREREG__EXACT_CONDITIONING_CACHE__CONFIDENCE_HANDLING"
+}

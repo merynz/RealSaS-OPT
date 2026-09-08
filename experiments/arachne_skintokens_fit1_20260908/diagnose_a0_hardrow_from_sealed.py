@@ -1,5 +1,5 @@
 from __future__ import annotations
-import json, re
+import json
 from pathlib import Path
 
 ROOT=Path.cwd()
@@ -21,12 +21,14 @@ assert kin['abs_error_mass_within_tree_distance_2_of_teacher_active']>0.997
 assert bc['bad_active_count_mean']>bc['good_active_count_mean']+0.8
 assert bc['bad_entropy_mean']>bc['good_entropy_mean']+0.3
 
-# Inspect the actual loss implementation, not prose.
-m=re.search(r'def skin_field_codec_loss_v1\(.*?\):(.+?)(?:\n\s*def |\Z)',loss_src,re.S)
-assert m, 'LOSS_FUNCTION_NOT_FOUND'
-body=m.group(1)
-pair_mean_ce=('weighted.sum()/pair_mask.sum' in body.replace(' ',''))
-pair_mean_l1=('sum()/pair_mask.sum' in body.replace(' ','') and 'torch.abs(decoded_weights-teacher_weights)' in body.replace(' ',''))
+# Inspect the actual loss implementation, not prose. Keep this robust to type annotations.
+needle='def skin_field_codec_loss_v1'
+start=loss_src.find(needle)
+assert start>=0, 'LOSS_FUNCTION_NOT_FOUND'
+body=loss_src[start:]
+compact=''.join(body.split())
+pair_mean_ce=('ce_loss=weighted.sum()/pair_mask.sum().clamp_min(1).to(weighted.dtype)' in compact)
+pair_mean_l1=('l1=(torch.abs(decoded_weights-teacher_weights)*pair_mask.to(decoded_weights.dtype)).sum()/pair_mask.sum().clamp_min(1)' in compact)
 tail_term=any(tok in body.lower() for tok in ('topk','quantile','percentile','cvar','hard_row','tail'))
 assert pair_mean_ce and pair_mean_l1
 assert not tail_term

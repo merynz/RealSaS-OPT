@@ -5,26 +5,36 @@
     "prereg_path": "canonical/ARACHNE_MAGE_A0_FS1_PREREG_V2_20260908.json",
     "semantic_cpu_preflight_status": "PASS",
     "semantic_cpu_regression_status": "PASS",
-    "semantic_runtime_closure_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_RUNTIME_SEMANTIC_CLOSURE_20260908.json",
-    "status": "SEMANTIC_CPU_PASS__TOKENLESS_EMBEDDED_TRANSPORT_PREREGISTERED"
+    "status": "EXECUTED_TO_FROZEN_TERMINAL_BUDGET__NO_CLOSURE"
   },
   "a0_optimizer_authorized": false,
-  "a1_optimizer_authorized": false,
-  "colab_capsule": {
-    "active_transport": "RUN_ALL_NO_TOKEN__EMBEDDED_SOURCE_SNAPSHOT",
-    "drive_folder_id": "1bkfCiQVky_N5uuHgWbzxfJqZu6ghbQQ1",
-    "notebook_name": "ARACHNE_MAGE_A0_FS1_RUN_ALL_NO_TOKEN_V1.ipynb",
-    "notebook_sha256": "9a727e19a57af2c990300310b0ed046f7969757291b10f29505c0c1b7203f9f7",
-    "manifest_sha256": "c9415b7a396cc2534646d71584979af3d220756680c898aa594cd0d2777fcbca",
-    "embedded_source_bundle_sha256": "ee61ea26665ad02a712c01acdf5c799f47676cc567d9b68334d993247ce3b0a0",
-    "direct_runner_sha256": "afb7b14b813847311b076a436e70abacf6dcb023cfaaf43e06447586aa081eea",
-    "token_required": false,
-    "private_repo_network_dependency": false,
-    "transport_prereg_path": "canonical/ARACHNE_MAGE_A0_FS1_NO_TOKEN_TRANSPORT_PREREG_V1_20260908.json",
-    "previous_exact_clone_capsule_retained_as_history": true,
-    "status": "TOKENLESS_EMBEDDED_SOURCE_CAPSULE_PREREGISTERED__RUNTIME_CPU_GATES_REQUIRED"
+  "a0_terminal_result": {
+    "closure_step": null,
+    "deformation_gate_passed": true,
+    "failure_gate": "ROW_L1_P95_GT_0.05",
+    "final_step": 1536,
+    "progress_checkpoint_sha256": "233b2c003f523060a8cedc6999c13259764238cd60d46f2d347c806ae070de34",
+    "qualified_deformation_error_ratio_auth": 0.04871329292654991,
+    "qualified_row_l1_p95_auth": 0.11468171016018115,
+    "raw_deformation_error_ratio_auth": 0.04871330037713051,
+    "raw_row_l1_p95_auth": 0.11468168089528862,
+    "required_terminal_streak": 3,
+    "result_sha256": "a2b3a7f1d4a4b448a9e236d28efc9a92577d12de48b18e50c767448d6038f64f",
+    "status": "NO_A0_TERMINAL_CLOSURE",
+    "terminal_streak": 0
   },
-  "discovered_before_main_a0_optimizer_step": true,
+  "a1_optimizer_authorized": false,
+  "executed_transport": {
+    "delivery_mode": "RUN_ALL_NO_TOKEN__DRIVE_MOUNT_OK__NO_PRIVATE_REPO_NETWORK__EMBEDDED_SOURCE_SNAPSHOT",
+    "gpu": "NVIDIA L4",
+    "notebook_name": "ARACHNE_MAGE_A0_FS1_RUN_ALL_NO_TOKEN_V2.ipynb",
+    "notebook_sha256": "7a55366bf8015bb2d0c3ba111006aeab8bcf5a263d5790c70fa7394353faf977",
+    "private_repo_network_dependency": false,
+    "source_bundle_sha256": "ee61ea26665ad02a712c01acdf5c799f47676cc567d9b68334d993247ce3b0a0",
+    "source_commit_provenance": "32d2202f096eca6613aa965d609d136c40f091b8",
+    "token_required": false,
+    "transport_fix_only": true
+  },
   "fs1": {
     "binding_sha256": "ab74756e32ee5c9f4f2d4020cdb56620a110130d80d7b9384c62509af3f193cf",
     "manifest_sha256": "9275d0347c2c58b2fc90b0beb45530260580369dec6105623ff0c19bb1e417aa",
@@ -42,11 +52,21 @@
     "status": "PASS_DETERMINISTIC_DOUBLE_REPLAY__CACHE_SEALED",
     "supervised_rows": 934
   },
-  "main_scientific_a0_optimizer_steps": 0,
+  "main_scientific_a0_optimizer_steps": 1536,
   "model": {
     "architecture_id": "RealSaS.SkinFieldCodec.ContinuousJointField.v1",
     "config_hash": "24c9f2580be9e80a02789e9ba35a57470145114807859057398b07bef9d58715",
     "trainable_parameters": 401154
+  },
+  "postfailure_diagnostic": {
+    "high_confidence_bad_rows": 158,
+    "interpretation": "TAIL_ERROR_CONCENTRATES_IN_BLEND_REGIONS_PLUS_SHARP_HAND_HANDSLOT_FIELDS; LOW_CONFIDENCE_TARGETS_DO_NOT_EXPLAIN_FAILURE",
+    "path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_FAILURE_DIAGNOSTIC_SUMMARY_V1.json",
+    "rows_gt_0p05": 165,
+    "rows_gt_0p10": 59,
+    "full_diagnostic_sha256": "834e10088e508626ac533dc3fa3bcf5fbfa12247ccced86c94395e173ae2bda4",
+    "status": "PASS_DIAGNOSTIC_REPLAY__NON_AUTHORIZING",
+    "top_hard_rows_csv_sha256": "1b5bfea42a5b91aeaaf879923088141f4b36609dac2d5e0e3f6bc7de3fba3b90"
   },
   "preserved_authority": {
     "joint_identity_bridge": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_JOINT_IDENTITY_BRIDGE_V1.json",
@@ -54,18 +74,16 @@
     "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb"
   },
   "required_next_gate": [
-    "RUN_TOKENLESS_EMBEDDED_SOURCE_CPU_REGRESSION_IN_COLAB",
-    "RUN_TOKENLESS_EMBEDDED_SOURCE_CPU_PREFLIGHT_IN_COLAB",
-    "RUN_MAIN_A0_CUDA_IF_BOTH_PASS"
+    "PREREGISTER_POSTFAIL_DIAGNOSTIC_HYPOTHESIS",
+    "NO_NEW_A0_OR_A1_TRAINING_UNTIL_HYPOTHESIS_GATE_IS_SEALED"
   ],
   "retired_authority": {
     "a0_prereg": "canonical/ARACHNE_MAGE_A0_PREREG_V1_20260908.json",
     "binding_sha256": "cb41eb7055b8e2646628daecdd0e31dfc079d163d5f5adaaa1a92f1ca1dfb994",
     "conditioning_cache_sha256": "12484afc23d5c03cbad8020266ed5b39c3201d979e78f96380e748902152be6e",
     "historical_executable_commit": "1cc449be4cc6eea81f3e8e9768f857dfb9b72477",
-    "target_npz_sha256": "f3db92194660f12de4425e015f85ac4ac995fcfc44a0272047b049ffb0d36d71",
     "teacher_weights_content_sha256": "c15db7b78d272ac22998071e1fb1cec4c65d7366133ef16fb72824f222c852d9"
   },
   "schema": "RealSaS.ArachneMageA0AuthorityBlock.v2",
-  "status": "A0_BLOCKED__FS1_TOKENLESS_EMBEDDED_TRANSPORT_PREREGISTERED__RUNTIME_CPU_GATES_REQUIRED"
+  "status": "A0_CLOSED_FAIL__FS1_NO_TERMINAL_CLOSURE__POSTFAIL_DIAGNOSTIC_REQUIRED"
 }

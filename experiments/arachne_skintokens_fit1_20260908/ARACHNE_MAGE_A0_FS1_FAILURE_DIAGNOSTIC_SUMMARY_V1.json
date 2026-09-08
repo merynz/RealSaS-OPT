@@ -1,0 +1,57 @@
+{
+  "bad_complexity_vs_good": {
+    "bad_active_count_mean": 2.6303030303030304,
+    "bad_entropy_mean": 0.6496918820569537,
+    "bad_teacher_margin_mean": 0.4199203340506012,
+    "bad_teacher_max_mean": 0.690317938002673,
+    "good_active_count_mean": 1.6996098829648896,
+    "good_entropy_mean": 0.2867749099004673,
+    "good_teacher_margin_mean": 0.7363780417600078,
+    "good_teacher_max_mean": 0.8601941029566628
+  },
+  "full_diagnostic_drive_file_id": "1CywZjyQssc-lLw0AlYBywzVAtgvkTruB",
+  "full_diagnostic_sha256": "834e10088e508626ac533dc3fa3bcf5fbfa12247ccced86c94395e173ae2bda4",
+  "global": {
+    "confidence_counts_bad": {"0": 158, "1": 2, "2": 5, "3": 0},
+    "confidence_counts_supervised": {"0": 916, "1": 8, "2": 10, "3": 0},
+    "dominant_joint_mismatch_bad_rows": 8,
+    "dominant_joint_mismatch_rows": 9,
+    "fraction_gt_0p05": 0.1766595289079229,
+    "low_rows": 16,
+    "nearest_source_vertex_distance_mean": 0.03813365335887428,
+    "nearest_source_vertex_distance_p95": 0.07504164557000954,
+    "row_l1_max": 0.5880010842477147,
+    "row_l1_mean": 0.026040060552825844,
+    "row_l1_p95": 0.11468102738268096,
+    "rows_gt_0p05": 165,
+    "rows_gt_0p10": 59,
+    "supervised_rows": 934
+  },
+  "interpretation": "BAD_ROWS_ARE_PRIMARILY_HIGH_CONFIDENCE_AND_MORE_MULTI_INFLUENCE/ENTROPIC_THAN_GOOD_ROWS; ADDITIONAL_SHARP_FAILURES_EXIST_ON_HAND/HANDSLOT_FIELDS; LOW_CONFIDENCE_ROWS_DO_NOT_EXPLAIN_A0_FAILURE",
+  "schema": "RealSaS.ArachneMageA0FS1FailureDiagnosticSummary.v1",
+  "status": "POSTFAIL_DIAGNOSTIC__NON_AUTHORIZING",
+  "top_component_bad_counts": [
+    {"bad_fraction": 0.31666666666666665, "bad_gt_0p05": 95, "component": "Mage_Body", "rows": 300},
+    {"bad_fraction": 0.3333333333333333, "bad_gt_0p05": 19, "component": "Mage_ArmLeft", "rows": 57},
+    {"bad_fraction": 0.3157894736842105, "bad_gt_0p05": 18, "component": "Mage_ArmRight", "rows": 57},
+    {"bad_fraction": 0.32608695652173914, "bad_gt_0p05": 15, "component": "Mage_LegRight", "rows": 46},
+    {"bad_fraction": 0.32432432432432434, "bad_gt_0p05": 12, "component": "Mage_LegLeft", "rows": 37},
+    {"bad_fraction": 1.0, "bad_gt_0p05": 3, "component": "Spellbook_open", "rows": 3},
+    {"bad_fraction": 1.0, "bad_gt_0p05": 2, "component": "1H_Wand", "rows": 2},
+    {"bad_fraction": 0.002403846153846154, "bad_gt_0p05": 1, "component": "Mage_Head", "rows": 416}
+  ],
+  "top_dominant_joint_bad_counts": [
+    {"bad_fraction": 0.3125, "bad_gt_0p05": 45, "joint": "spine", "rows": 144},
+    {"bad_fraction": 0.35294117647058826, "bad_gt_0p05": 36, "joint": "hips", "rows": 102},
+    {"bad_fraction": 0.3269230769230769, "bad_gt_0p05": 17, "joint": "chest", "rows": 52},
+    {"bad_fraction": 0.6428571428571429, "bad_gt_0p05": 9, "joint": "lowerleg.l", "rows": 14},
+    {"bad_fraction": 0.32142857142857145, "bad_gt_0p05": 9, "joint": "lowerarm.l", "rows": 28},
+    {"bad_fraction": 0.47058823529411764, "bad_gt_0p05": 8, "joint": "hand.r", "rows": 17},
+    {"bad_fraction": 0.3888888888888889, "bad_gt_0p05": 7, "joint": "lowerleg.r", "rows": 18},
+    {"bad_fraction": 0.17857142857142858, "bad_gt_0p05": 5, "joint": "lowerarm.r", "rows": 28},
+    {"bad_fraction": 0.4166666666666667, "bad_gt_0p05": 5, "joint": "hand.l", "rows": 12},
+    {"bad_fraction": 0.3333333333333333, "bad_gt_0p05": 4, "joint": "toes.r", "rows": 12}
+  ],
+  "top_hard_rows_csv_sha256": "1b5bfea42a5b91aeaaf879923088141f4b36609dac2d5e0e3f6bc7de3fba3b90",
+  "top_hard_rows_drive_file_id": "1QG9plHWPiJNwbmMPBFvIlH6KLZwgBf5k"
+}

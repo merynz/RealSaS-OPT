@@ -1,0 +1,78 @@
+{
+  "decision": {
+    "nearest_triangle_only_as_final_teacher_projection": false,
+    "product_inference_dependency": false,
+    "reason": "Nontrivial geometric outliers remain (p95 ~0.031, max ~0.095 world units), so pure Euclidean nearest-surface transfer could cross semantically adjacent surfaces.",
+    "required_next_projection": "SUPPORT_VIEW_RASTER_BINDING_TO_TEACHER_ZBUFFER__MULTIVIEW_CONSISTENCY__NEAREST_3D_FALLBACK_FOR_COMPLETED_ONLY",
+    "teacher_only_training_projection": true
+  },
+  "gsa_to_teacher_mesh_nearest_triangle_diagnostic": {
+    "barycentric_simplex_error_max": 2.220446049250313e-16,
+    "completed_distance_p95": 0.05490223657363833,
+    "completed_nodes": 53,
+    "distance_max": 0.09476343516885569,
+    "distance_mean": 0.009367747137483609,
+    "distance_p50": 0.006183238167493585,
+    "distance_p90": 0.01895783370751569,
+    "distance_p95": 0.03069111655845138,
+    "distance_p99": 0.06860541512023109,
+    "fraction_le_0p01": 0.728421052631579,
+    "fraction_le_0p02": 0.9073684210526316,
+    "fraction_le_0p03": 0.9484210526315789,
+    "fraction_le_0p05": 0.9831578947368421,
+    "gsa_nodes": 950,
+    "observed_distance_p95": 0.027708064554156923,
+    "observed_nodes": 897,
+    "projected_weight_simplex_error_max": 6.925499418386494e-08
+  },
+  "inputs": {
+    "iris_zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+    "normalized_teacher_sha256": "528bef491eceb358ebc8ecb2a46af1d37b4322a46af1d37b4322a7ef500281403a8207fe7c648f",
+    "qualified_skeleton_ir_sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992",
+    "teacher_render_truth_sha256": "ac2c37571b77fa2900cc042e36f74df111432b94fb21acfb54694d5b6f962e67"
+  },
+  "qualified_joint_to_teacher_skin_column": {
+    "assignment": {
+      "J:0e10e6a5ecb52cf94cd5": 19,
+      "J:192f728e61f375481a7d": 20,
+      "J:212a1c755d6a0063aab9": 9,
+      "J:33d2c674ed9153028054": 3,
+      "J:458b32ed8ad7feeaca6b": 2,
+      "J:4b4125aedd60d936c94e": 15,
+      "J:4d7da9c799d83f488538": 18,
+      "J:69d8ebb260bf2a830c90": 16,
+      "J:6c57ffd28437d5a273fd": 14,
+      "J:895a71dc5192cfe34bc8": 22,
+      "J:8a443c9a8908c701c987": 13,
+      "J:945a3c35f01968c02ae5": 10,
+      "J:9c150838c30f27acbbf1": 4,
+      "J:aaf8abed7fa3ca3e0fff": 1,
+      "J:ab27e6a42b0ca3301653": 11,
+      "J:b08a160ca7c74e8e2013": 5,
+      "J:beee450974f9c3e7bdaa": 17,
+      "J:e26f9c356f9a9d917c09": 7,
+      "J:e7d1756bc7f48460b98c": 6,
+      "J:ee17e378e4e3cd7df5e9": 21,
+      "J:ef0115afead216b97fdd": 8,
+      "J:f65edd5555e95e50bae2": 12
+    },
+    "position_match_error_max": 0.02447922177607631,
+    "position_match_error_mean": 0.011942381729392954,
+    "position_match_error_p95": 0.022484874666476,
+    "qualified_joint_count": 22,
+    "source_columns_count": 22
+  },
+  "render_truth_to_dense_skin": {
+    "all_render_vertices_exactly_mapped": true,
+    "eligible_source_skin_columns": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],
+    "nearest_vertex_error_max": 6.143906154658885e-08,
+    "nearest_vertex_error_mean": 4.902559214263892e-09,
+    "nearest_vertex_error_p95": 3.003425057343598e-08,
+    "render_row_simplex_error_max": 1.1955853551626205e-07,
+    "render_vertices": 3348,
+    "render_zero_weight_rows": 0,
+    "source_vertices": 5321
+  },
+  "schema": "RealSaS.ArachneMageSkinTargetProjectionPreflight.v1",
+  "status": "PASS_PROJECTION_FOUNDATION__MULTIVIEW_BINDING_REQUIRED_BEFORE_TARGET_SEAL"
+}

@@ -17,26 +17,58 @@ jobs:
   diagnose:
     runs-on: [self-hosted, realsas, gpu]
     timeout-minutes: 20
-    env:
-      PY: /home/monster/realsas-ml312/bin/python
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify self-hosted runtime
+      - name: Resolve working Python runtime
+        id: runtime
         shell: bash
         run: |
-          set -euo pipefail
-          test -x "$PY"
-          "$PY" - <<'PY'
-          import torch, numpy
-          print('SELF_HOSTED_RUNTIME=PASS')
+          set -u
+          SYS=$(command -v python3 || true)
+          if [ -n "$SYS" ] && "$SYS" -c 'import torch, numpy' >/dev/null 2>&1; then
+            echo "py=$SYS" >> "$GITHUB_OUTPUT"
+            echo "RUNTIME=SYSTEM_PYTHON"
+            "$SYS" - <<'PY'
+          import torch, numpy, sys
+          print('python', sys.executable)
           print('torch', torch.__version__, 'cuda', torch.cuda.is_available())
           PY
+            exit 0
+          fi
+
+          VENV=/home/monster/realsas-ml312/bin/python
+          if [ -x "$VENV" ]; then
+            LIBPY=$(find /usr /usr/local /opt /home/monster -type f -name 'libpython3.12.so.1.0' -print -quit 2>/dev/null || true)
+            if [ -n "$LIBPY" ]; then
+              LDIR=$(dirname "$LIBPY")
+              export LD_LIBRARY_PATH="$LDIR:${LD_LIBRARY_PATH:-}"
+              if "$VENV" -c 'import torch, numpy' >/dev/null 2>&1; then
+                echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+                echo "py=$VENV" >> "$GITHUB_OUTPUT"
+                echo "RUNTIME=REPAIRED_VENV"
+                "$VENV" - <<'PY'
+          import torch, numpy, sys
+          print('python', sys.executable)
+          print('torch', torch.__version__, 'cuda', torch.cuda.is_available())
+          PY
+                exit 0
+              fi
+            fi
+          fi
+
+          echo 'RUNTIME_RESOLUTION_FAILED'
+          echo "system_python=$SYS"
+          [ -n "$SYS" ] && "$SYS" --version || true
+          [ -x "$VENV" ] && ldd "$VENV" || true
+          find /usr /usr/local /opt /home/monster -type f -name 'libpython3.12.so*' -print 2>/dev/null | head -20 || true
+          exit 1
 
       - name: Diagnose sealed A0 hard-row failure against frozen loss source
         shell: bash
         run: |
           set -euo pipefail
+          PY='${{ steps.runtime.outputs.py }}'
           "$PY" experiments/arachne_skintokens_fit1_20260908/diagnose_a0_hardrow_from_sealed.py
 
       - name: Locate exact oracle-latent inputs on runner
@@ -75,6 +107,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          PY='${{ steps.runtime.outputs.py }}'
           "$PY" experiments/arachne_skintokens_fit1_20260908/run_oracle_latent_diag_hosted.py \
             --progress '${{ steps.locate.outputs.progress }}' \
             --cache '${{ steps.locate.outputs.cache }}' \

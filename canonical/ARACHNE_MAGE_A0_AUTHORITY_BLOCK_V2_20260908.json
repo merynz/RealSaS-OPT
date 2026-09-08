@@ -9,9 +9,20 @@
     "manifest_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_SKIN_TARGET_P0_FULL_SOURCE_FS1_MANIFEST.json",
     "manifest_sha256": "9275d0347c2c58b2fc90b0beb45530260580369dec6105623ff0c19bb1e417aa",
     "projection_contract": "RealSaS.ArachneMageP0FullSourceHybridProjection.v1",
+    "status": "PASS_DETERMINISTIC_DOUBLE_REPLAY__TARGET_SEALED__CACHE_REBUILD_REQUIRED",
     "target_npz_sha256": "7154f5ad98b446c0019c472fd91863b5843b98846cdb38b38e4f78ba7fb5b93f",
-    "teacher_weights_content_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d",
-    "status": "PASS_DETERMINISTIC_DOUBLE_REPLAY__TARGET_SEALED__CACHE_REBUILD_REQUIRED"
+    "teacher_weights_content_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d"
+  },
+  "fs1_conditioning_cache": {
+    "builder_git_blob_sha": "1669d676611ac156cb096abdb3184a21af5b8814",
+    "builder_path": "experiments/arachne_skintokens_fit1_20260908/build_arachne_mage_fs1_conditioning_cache_v2.py",
+    "expected_conditioning_v1_hash": "475d71523a38c5763756713e2047b337662ad6c01735aaa89671c6297326e42c",
+    "expected_conditioning_v2_hash": "9e979b824e6e30fcaf1158e4bceeb080ce5fa1cff463290e1c4a7c2ac4f5f4e9",
+    "expected_low_rows": 16,
+    "expected_supervised_rows": 934,
+    "historical_opaque_cache_authority_retired": true,
+    "prereg_path": "canonical/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_PREREG_V2_20260908.json",
+    "status": "PREREGISTERED__EXECUTION_REQUIRED"
   },
   "main_scientific_a0_optimizer_steps": 0,
   "pre_execution_fingerprint_repair": {
@@ -31,8 +42,9 @@
     "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb"
   },
   "required_next_gate": [
-    "REBUILD_CONDITIONING_CACHE_FROM_FS1_TARGET",
-    "SEAL_NEW_CACHE_HASH",
+    "EXECUTE_COMMITTED_FS1_CONDITIONING_CACHE_BUILDER_TWICE",
+    "REQUIRE_BYTE_IDENTICAL_CACHE_AND_MANIFEST",
+    "SEAL_NEW_CACHE_HASH_AND_BINDING",
     "REBIND_A0_PREREG_AND_RUNNER_TO_FS1_BINDING_AND_CACHE",
     "RERUN_CPU_RESUME_TERMINAL_IDEMPOTENCE_REGRESSIONS",
     "BUILD_SELF_CONTAINED_COLAB",
@@ -49,7 +61,7 @@
     "teacher_weights_content_sha256": "c15db7b78d272ac22998071e1fb1cec4c65d7366133ef16fb72824f222c852d9"
   },
   "schema": "RealSaS.ArachneMageA0AuthorityBlock.v2",
-  "status": "A0_BLOCKED__FS1_TARGET_SEALED__CONDITIONING_CACHE_REBUILD_REQUIRED",
+  "status": "A0_BLOCKED__FS1_TARGET_SEALED__CACHE_PREREGISTERED__EXECUTION_REQUIRED",
   "supersession_finding": {
     "body_only_teacher_vertices": 3348,
     "eligible_skin_supported_faces": 5683,

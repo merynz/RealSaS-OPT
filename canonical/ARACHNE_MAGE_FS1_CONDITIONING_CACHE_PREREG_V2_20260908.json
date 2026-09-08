@@ -1,0 +1,88 @@
+{
+  "schema": "RealSaS.ArachneMageFS1ConditioningCachePrereg.v2",
+  "status": "PREREGISTERED__CACHE_EXECUTION_REQUIRED__A0_BLOCKED",
+  "recorded_at_utc": "2026-09-08T14:31:30Z",
+  "scientific_scope": "DETERMINISTIC_CONDITIONING_CACHE_REBUILD_ONLY__NO_OPTIMIZER_STEP",
+  "authorization": {
+    "a0_optimizer_authorized": false,
+    "a1_optimizer_authorized": false,
+    "main_scientific_a0_optimizer_steps": 0,
+    "output_dependent_contract_change_forbidden": true,
+    "next_gate": "EXECUTE_COMMITTED_CACHE_BUILDER_TWICE__REQUIRE_BYTE_IDENTITY__SEAL_CACHE"
+  },
+  "builder": {
+    "path": "experiments/arachne_skintokens_fit1_20260908/build_arachne_mage_fs1_conditioning_cache_v2.py",
+    "git_blob_sha": "1669d676611ac156cb096abdb3184a21af5b8814",
+    "sha256": "43bf396473d33cd1453585d486342fa18eb666c9b9d1aa17b8bf21f2f15b7869"
+  },
+  "sealed_input_authority": {
+    "fs1_target_npz_sha256": "7154f5ad98b446c0019c472fd91863b5843b98846cdb38b38e4f78ba7fb5b93f",
+    "fs1_target_binding_sha256": "ab74756e32ee5c9f4f2d4020cdb56620a110130d80d7b9384c62509af3f193cf",
+    "teacher_weights_content_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d",
+    "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+    "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "qualified_skeleton_file_sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992",
+    "zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+    "Nd_operator_sha256": "5b5c0e89a18c98f6f7a231941480a61e7158d93d91a9a8edcc5362d6c5e0b1be"
+  },
+  "source_git_blobs": {
+    "scene_first_signed": "a55e431faf0680e0d7f2920a85fda6341d45117d",
+    "arachne_conditioning_v1": "b3539ed6c4580ac69338bdb9bd4b93c6e78a262c",
+    "arachne_conditioning_v2": "3383cb7801b22aeb634f05551a847a04e674c7c8",
+    "arachne_geometry_v2": "0a39450b69de48da3b7748cb08972d0b69ff9700",
+    "arachne_geppetto_v2_bridge": "35a63245799710ff7ede082d0f8ffcf19f6af505",
+    "canonical_geppetto_conditioning_v2": "9a33ab34ce050842c77dfc64407123303c4bf456"
+  },
+  "conditioning_regression": {
+    "v1_hash_semantics": "ArachneConditioningAdapter.conditioning_hashes[0]",
+    "expected_v1_hash": "475d71523a38c5763756713e2047b337662ad6c01735aaa89671c6297326e42c",
+    "v2_hash_semantics": "ArachneConditioningAdapterV2.conditioning_hashes[0]",
+    "expected_v2_hash": "9e979b824e6e30fcaf1158e4bceeb080ce5fa1cff463290e1c4a7c2ac4f5f4e9",
+    "pair_geometry_raw_sha256": "416d5e5848ec579eb67e5e402dbf6e60908f4d9a30dbe0650a1d19be7183e4e7",
+    "surface_feature_shape": [950, 20],
+    "joint_feature_shape": [22, 8],
+    "pair_geometry_shape": [950, 22, 10]
+  },
+  "supervision_firewall": {
+    "confidence_source": "SEALED_FS1_TARGET_CONFIDENCE_CODE",
+    "low_confidence_code": 3,
+    "expected_low_rows": 16,
+    "expected_supervised_rows": 934,
+    "rule": "teacher_supervision_mask = confidence_code != LOW"
+  },
+  "cache_contract": {
+    "required_arrays": [
+      "confidence_code",
+      "joint_features",
+      "joint_ids",
+      "pair_geometry",
+      "pair_mask",
+      "parent_indices",
+      "rest_points_world",
+      "surface_features",
+      "surface_ids",
+      "surface_positions_normalized",
+      "teacher_supervision_mask",
+      "teacher_weights"
+    ],
+    "id_order": "LEXICOGRAPHIC_CANONICAL_IDS_AS_EMITTED_BY_CONDITIONING_ADAPTER",
+    "rest_points_world_order": "SAME_SORTED_SURFACE_ID_ORDER",
+    "serialization": "DETERMINISTIC_NPZ__SORTED_KEYS__FIXED_ZIP_TIMESTAMP__DEFLATE9",
+    "binding_hash_semantics": "SHA256_OF_CANONICAL_JSON_OVER_LINEAGES_FS1_AUTHORITY_CONDITIONING_HASHES_SOURCE_GIT_BLOBS_AND_PER_ARRAY_CONTENT_HASHES",
+    "npz_sha256_predeclared": false,
+    "binding_sha256_predeclared": false
+  },
+  "retired_historical_opaque_authority": {
+    "conditioning_v1_hash": "7b82d57b1967858c6a66de871ecd570a9bdae408b30ff84c3fcbd8e908551047",
+    "conditioning_v2_hash": "89973cd1f0ac989d10cdfeafdef89545668fda4998363df3e872961646879939",
+    "local_cache_sha256": "12484afc23d5c03cbad8020266ed5b39c3201d979e78f96380e748902152be6e",
+    "disposition": "HISTORICAL_ONLY__NOT_FS1_AUTHORITY",
+    "reason": "The historical cache report retained values but not the byte-generating cache builder/hash-payload semantics. Repo, Drive and Library recovery did not resolve an authoritative reproducible binary/builder."
+  },
+  "preseal_diagnostic": {
+    "occurred": true,
+    "authority": false,
+    "purpose": "Confirm exact current source blobs reconstruct expected S/G conditioning dimensions and hashes before preregistration.",
+    "no_fs1_cache_npz_was_sealed_or_authorized": true
+  }
+}

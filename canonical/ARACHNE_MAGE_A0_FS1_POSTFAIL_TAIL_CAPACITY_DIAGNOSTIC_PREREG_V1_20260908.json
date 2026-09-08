@@ -1,0 +1,54 @@
+{
+  "schema": "RealSaS.ArachneMageA0FS1PostfailTailCapacityDiagnosticPrereg.v1",
+  "status": "PREREGISTERED__DIAGNOSTIC_ONLY__NO_MODEL_AUTHORIZATION",
+  "scientific_context": {
+    "a0_terminal_status": "NO_A0_TERMINAL_CLOSURE",
+    "a0_result_sha256": "a2b3a7f1d4a4b448a9e236d28efc9a92577d12de48b18e50c767448d6038f64f",
+    "a0_progress_checkpoint_sha256": "233b2c003f523060a8cedc6999c13259764238cd60d46f2d347c806ae070de34",
+    "baseline_raw_row_l1_p95_auth": 0.11468168089528862,
+    "baseline_raw_deformation_error_ratio_auth": 0.04871330037713051,
+    "hosted_rootcause_hypothesis": "BLEND_RATIO_TAIL_UNDERFIT__OBJECTIVE_GATE_MISALIGNMENT_PRIMARY__CAPACITY_STILL_UNRESOLVED"
+  },
+  "hypothesis": "If the frozen final decoder reaches the original p95 and deformation gates when only the per-joint latent tensor is optimized with a tail-aligned objective, then decoder/64D latent capacity is sufficient and the original A0 failure is primarily objective/encoder-path underfit. If it cannot materially reduce p95, decoder/field capacity remains implicated.",
+  "frozen_inputs": {
+    "cache_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "codec_config_hash": "24c9f2580be9e80a02789e9ba35a57470145114807859057398b07bef9d58715",
+    "supervised_rows": 934,
+    "low_rows": 16
+  },
+  "intervention": {
+    "codec_parameter_updates": 0,
+    "all_codec_parameters_frozen": true,
+    "optimized_object": "one free latent tensor shaped [1,22,64]",
+    "latent_initialization": "exact final teacher-encoder latent from sealed step-1536 checkpoint",
+    "teacher_weights_available_to_optimizer": true,
+    "shipping_or_candidate_claim_allowed": false,
+    "row_l1_definition": "sum_j abs(pred_ij - teacher_ij) on each supervised row",
+    "tail_definition": "top 10 percent supervised rows by current row_l1; k=94 fixed before execution",
+    "objective": "mean(row_l1) + mean(topk(row_l1,k=94)) + deformation_mse",
+    "optimizer": "Adam",
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "scheduler": "CosineAnnealingLR",
+    "scheduler_t_max": 1024,
+    "scheduler_eta_min": 0.0,
+    "steps": 1024,
+    "check_every": 128,
+    "device": "CPU",
+    "torch_num_threads": 8,
+    "deterministic_algorithms": true,
+    "early_stop": false
+  },
+  "classification": {
+    "DECODER_LATENT_CAPACITY_SUFFICIENT_FOR_GATE": "final row-L1 p95 <= 0.05 and deformation ratio <= 0.05",
+    "TAIL_OBJECTIVE_MATERIAL_GAIN_BUT_GATE_NOT_MET": "final p95 > 0.05 and relative p95 reduction from baseline >= 0.25",
+    "DECODER_OR_FIELD_CAPACITY_LIMIT_REMAINS": "relative p95 reduction from baseline < 0.25"
+  },
+  "policy": {
+    "does_not_reopen_a0": true,
+    "does_not_authorize_a1": true,
+    "does_not_change_original_a0_verdict": true,
+    "no_threshold_change": true,
+    "no_architecture_change_during_diagnostic": true
+  }
+}

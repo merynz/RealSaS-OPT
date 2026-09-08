@@ -1,0 +1,60 @@
+{
+  "schema": "RealSaS.ArachneMageA0FS1CapacityGPUExecutionPrereg.v1",
+  "status": "PREREGISTERED__EXECUTION_ACCELERATION_ONLY__NO_MODEL_AUTHORIZATION",
+  "scientific_context": {
+    "a0_verdict": "NO_A0_TERMINAL_CLOSURE",
+    "a0_progress_checkpoint_sha256": "233b2c003f523060a8cedc6999c13259764238cd60d46f2d347c806ae070de34",
+    "cache_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "codec_config_hash": "24c9f2580be9e80a02789e9ba35a57470145114807859057398b07bef9d58715",
+    "baseline_raw_row_l1_p95_auth": 0.11468168089528862,
+    "baseline_raw_deformation_error_ratio_auth": 0.04871330037713051
+  },
+  "transport": {
+    "reason": "The preregistered CPU-only diagnostics exceeded the available local container wall-clock. This prereg changes only execution device/transport before a completed capacity result exists.",
+    "device": "CUDA_FLOAT32",
+    "runner_labels": ["self-hosted", "realsas", "gpu"],
+    "tf32": false,
+    "deterministic_algorithms": true,
+    "cublas_workspace_config": ":4096:8",
+    "bundle_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_CAPACITY_BUNDLE_V3.npz",
+    "bundle_sha256": "e6841a0715e1a65e4502082ae29dfb87d1f12de668330f988fb8f5b35c42d243",
+    "bundle_manifest_sha256": "2c180b37b09610dd1724521438a37304b20cea5da71386c34687cff10b3743e9",
+    "runner_script_sha256": "3c9c67e72942b716e197f946ce49b561b6297bf6f3e0f682a01c51056e821aac"
+  },
+  "test_a_original_oracle": {
+    "source_prereg": "canonical/ARACHNE_MAGE_A0_FS1_POSTFAIL_ORACLE_LATENT_DIAGNOSTIC_PREREG_V1_20260908.json",
+    "all_codec_parameters_frozen": true,
+    "optimized_object": "one latent tensor [1,22,64]",
+    "initialization": "exact bundled step-1536 teacher-encoder latent",
+    "objective": "frozen A0 reconstruction loss + frozen deformation_mse",
+    "optimizer": "Adam",
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "scheduler": "CosineAnnealingLR(T_max=4096, eta_min=0)",
+    "steps": 4096,
+    "early_stop": false,
+    "classification_unchanged": true
+  },
+  "test_b_tail_capacity": {
+    "source_prereg": "canonical/ARACHNE_MAGE_A0_FS1_POSTFAIL_TAIL_CAPACITY_DIAGNOSTIC_PREREG_V1_20260908.json",
+    "all_codec_parameters_frozen": true,
+    "optimized_object": "one latent tensor [1,22,64]",
+    "initialization": "same exact bundled step-1536 teacher-encoder latent",
+    "objective": "mean(supervised row_l1) + mean(top94 supervised row_l1) + frozen deformation_mse",
+    "optimizer": "Adam",
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "scheduler": "CosineAnnealingLR(T_max=1024, eta_min=0)",
+    "steps": 1024,
+    "early_stop": false,
+    "classification_unchanged": true
+  },
+  "firewall": {
+    "codec_parameter_updates": 0,
+    "architecture_changes": 0,
+    "threshold_changes": 0,
+    "a0_verdict_may_change": false,
+    "a1_authorized": false,
+    "shipping_claim_allowed": false
+  }
+}

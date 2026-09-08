@@ -1,0 +1,66 @@
+{
+  "schema": "RealSaS.ArachneMageA0Prereg.v1",
+  "status": "PREREGISTERED_BEFORE_A0_OUTPUT__RUNNER_PREFLIGHT_NEXT__A1_BLOCKED",
+  "seed": 20260908,
+  "input_authority": {
+    "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+    "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "target_binding_sha256": "cb41eb7055b8e2646628daecdd0e31dfc079d163d5f5adaaa1a92f1ca1dfb994",
+    "teacher_weights_content_sha256": "c15db7b78d272ac22998071e1fb1cec4c65d7366133ef16fb72824f222c852d9",
+    "conditioning_v1_hash": "7b82d57b1967858c6a66de871ecd570a9bdae408b30ff84c3fcbd8e908551047",
+    "conditioning_v2_hash": "89973cd1f0ac989d10cdfeafdef89545668fda4998363df3e872961646879939"
+  },
+  "codec": {
+    "architecture_id": "RealSaS.SkinFieldCodec.ContinuousJointField.v1",
+    "config_hash": "24c9f2580be9e80a02789e9ba35a57470145114807859057398b07bef9d58715",
+    "hidden_dim": 192,
+    "latent_dim": 64,
+    "encoder_layers": 3,
+    "decoder_layers": 3,
+    "dropout": 0.0
+  },
+  "confidence_policy": {
+    "high_rows": 920,
+    "medium_rows": 7,
+    "medium_low_rows": 4,
+    "low_rows": 19,
+    "teacher_supervised_rows": 931,
+    "low_rows_in_teacher_encoder": false,
+    "low_rows_in_teacher_loss": false,
+    "decoder_outputs_full_950_rows": true,
+    "low_teacher_metrics_are_pass_authority": false
+  },
+  "optimizer": {
+    "type": "AdamW",
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "scheduler": "CosineAnnealingLR",
+    "t_max": 1536,
+    "eta_min": 0.0,
+    "max_steps": 1536,
+    "check_every": 32,
+    "checkpoint_every": 128,
+    "required_consecutive_full_pass_checks": 3,
+    "early_stop_at_first_sustained_pass": true
+  },
+  "pass": {
+    "authoritative_raw_row_l1_p95_max": 0.05,
+    "authoritative_qualified_row_l1_p95_max": 0.05,
+    "authoritative_raw_deformation_error_ratio_max": 0.05,
+    "authoritative_qualified_deformation_error_ratio_max": 0.05,
+    "raw_simplex_max_abs_residual": 0.000001,
+    "qualified_simplex_max_abs_residual": 0.000001,
+    "negative_weight_count": 0,
+    "qualified_row_count": 950,
+    "compiler_total_correction_l1_max": 0.00001,
+    "compiler_max_row_correction_l1_max": 0.00001,
+    "max_influences": null
+  },
+  "resume": {
+    "exact_model_optimizer_scheduler_step_trace_streak_rng": true,
+    "terminal_streak_may_reset_on_resume": false
+  },
+  "a0_optimizer_authorized_after_runner_preflight": true,
+  "a1_optimizer_authorized": false,
+  "next_gate": "A0_RUNNER_IMPLEMENTATION__CPU_PREFLIGHT__GPU_EXECUTION"
+}

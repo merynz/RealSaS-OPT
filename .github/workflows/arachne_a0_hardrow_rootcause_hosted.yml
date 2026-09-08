@@ -1,0 +1,30 @@
+name: arachne-a0-hardrow-rootcause-hosted
+
+on:
+  push:
+    branches:
+      - exp/arachne-skintokens-cleanroom-fit1-20260908
+    paths:
+      - '.github/workflows/arachne_a0_hardrow_rootcause_hosted.yml'
+      - 'experiments/arachne_skintokens_fit1_20260908/diagnose_a0_hardrow_from_sealed.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Diagnose sealed A0 hard-row failure against frozen loss source
+        run: python experiments/arachne_skintokens_fit1_20260908/diagnose_a0_hardrow_from_sealed.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arachne-a0-hardrow-rootcause-hosted-v1
+          path: /tmp/ARACHNE_MAGE_A0_FS1_HOSTED_ROOT_CAUSE_DIAGNOSTIC_V1.json
+          if-no-files-found: error

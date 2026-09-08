@@ -1,0 +1,64 @@
+{
+  "schema": "RealSaS.ArachneMageA0FS1NoTokenTransportPrereg.v1",
+  "status": "PREREGISTERED_BEFORE_MAIN_A0__TOKENLESS_EMBEDDED_SOURCE_TRANSPORT",
+  "recorded_at_utc": "2026-09-08T15:58:00Z",
+  "main_scientific_a0_optimizer_steps_before_prereg": 0,
+  "source_commit_provenance": "32d2202f096eca6613aa965d609d136c40f091b8",
+  "delivery_mode": "RUN_ALL_NO_TOKEN__DRIVE_MOUNT_OK__NO_PRIVATE_REPO_NETWORK__EMBEDDED_SOURCE_SNAPSHOT",
+  "notebook": {
+    "name": "ARACHNE_MAGE_A0_FS1_RUN_ALL_NO_TOKEN_V1.ipynb",
+    "sha256": "9a727e19a57af2c990300310b0ed046f7969757291b10f29505c0c1b7203f9f7",
+    "drive_folder_id": "1bkfCiQVky_N5uuHgWbzxfJqZu6ghbQQ1"
+  },
+  "embedded_source": {
+    "bundle_sha256": "ee61ea26665ad02a712c01acdf5c799f47676cc567d9b68334d993247ce3b0a0",
+    "file_count": 18,
+    "direct_runner_sha256": "afb7b14b813847311b076a436e70abacf6dcb023cfaaf43e06447586aa081eea",
+    "runtime_semantic_regression_commit": "32d2202f096eca6613aa965d609d136c40f091b8",
+    "private_repo_network_dependency": false,
+    "github_token_required": false
+  },
+  "model": {
+    "architecture_id": "RealSaS.SkinFieldCodec.ContinuousJointField.v1",
+    "config_hash": "24c9f2580be9e80a02789e9ba35a57470145114807859057398b07bef9d58715",
+    "trainable_parameters": 401154,
+    "surface_feature_dim": 20,
+    "joint_feature_dim": 8,
+    "hidden_dim": 192,
+    "latent_dim": 64,
+    "encoder_layers": 3,
+    "decoder_layers": 3
+  },
+  "scientific_contract": {
+    "architecture_optimizer_scheduler_and_pass_gates_changed": false,
+    "cache_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "target_binding_sha256": "ab74756e32ee5c9f4f2d4020cdb56620a110130d80d7b9384c62509af3f193cf",
+    "cache_binding_sha256": "c7e3bf10fc8edf16f862b4ce58b3aabfeb2aabf14cc8e744e53e3afc0764ac9f",
+    "supervised_rows": 934,
+    "low_rows": 16,
+    "max_steps": 1536,
+    "check_every": 32,
+    "required_stable_checks": 3,
+    "main_cuda_may_start_only_after_runtime_cpu_regression_and_preflight_pass": true
+  },
+  "gpu_policy": {
+    "cuda_required": true,
+    "minimum_vram_gib_guard": 12.0,
+    "l4_acceptable": true,
+    "a100_required": false
+  },
+  "stdout_policy": {
+    "stage_boundaries": true,
+    "runner_check_step_1": true,
+    "runner_check_every_steps": 32,
+    "resume_status": true,
+    "final_status": true
+  },
+  "supersedes_transport_only": {
+    "previous_exact_clone_colab_capsule": true,
+    "reason": "User requires tokenless execution. Scientific A0 model, data authority, optimizer, scheduler and pass gates are unchanged."
+  },
+  "a0_optimizer_authorized_now": false,
+  "a1_optimizer_authorized": false,
+  "next_gate": "RUN_TOKENLESS_EMBEDDED_SOURCE_CPU_REGRESSION_AND_PREFLIGHT_IN_COLAB__THEN_MAIN_A0_CUDA"
+}

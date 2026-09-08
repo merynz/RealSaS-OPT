@@ -1,30 +1,28 @@
 {
   "a0_fs1_rebind": {
     "architecture_optimizer_and_pass_gates_changed": false,
-    "exact_committed_wrapper_execution_required": true,
-    "historical_engine_git_blob_sha": "f32d2f75e6b9e6095e1d5455ed9227b32553a9d5",
-    "historical_engine_path": "experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_historical_1cc449.py",
     "prereg_commit": "513a7f344ffc0282c4dbd589b5c740b3bfcd1bec",
     "prereg_path": "canonical/ARACHNE_MAGE_A0_FS1_PREREG_V2_20260908.json",
     "semantic_cpu_preflight_status": "PASS",
     "semantic_cpu_regression_status": "PASS",
     "semantic_runtime_closure_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_RUNTIME_SEMANTIC_CLOSURE_20260908.json",
-    "status": "SEMANTIC_CPU_PASS__COLAB_CAPSULE_SEALED__EXACT_CLONE_EXECUTION_REQUIRED",
-    "wrapper_git_blob_sha": "00ccbd7d79707fa6dab5329baeebac20efb8f470",
-    "wrapper_path": "experiments/arachne_skintokens_fit1_20260908/run_arachne_mage_a0_fs1_v2.py"
+    "status": "SEMANTIC_CPU_PASS__TOKENLESS_EMBEDDED_TRANSPORT_PREREGISTERED"
   },
   "a0_optimizer_authorized": false,
   "a1_optimizer_authorized": false,
   "colab_capsule": {
+    "active_transport": "RUN_ALL_NO_TOKEN__EMBEDDED_SOURCE_SNAPSHOT",
     "drive_folder_id": "1bkfCiQVky_N5uuHgWbzxfJqZu6ghbQQ1",
-    "manifest_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_COLAB_EXACT_V1_MANIFEST.json",
-    "manifest_sha256": "9de0bb4bdc07d60953eb331bc91cab47ea89511c730771485eaa4b2d0ba4a434",
-    "notebook_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_COLAB_EXACT_V1.ipynb",
-    "notebook_sha256": "8d530f07048f278e3eaefbec0c742d621cc821bf6cad5f558436e3b9eaeeea6c",
-    "pinned_source_commit": "32d2202f096eca6613aa965d609d136c40f091b8",
-    "private_repo_auth": "CLEAN_REMOTE_URL__EPHEMERAL_GIT_ASKPASS",
-    "seal_path": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_COLAB_CAPSULE_SEAL_20260908.json",
-    "status": "SEALED__EXACT_CLONE_REGRESSION_PREFLIGHT_REQUIRED"
+    "notebook_name": "ARACHNE_MAGE_A0_FS1_RUN_ALL_NO_TOKEN_V1.ipynb",
+    "notebook_sha256": "9a727e19a57af2c990300310b0ed046f7969757291b10f29505c0c1b7203f9f7",
+    "manifest_sha256": "c9415b7a396cc2534646d71584979af3d220756680c898aa594cd0d2777fcbca",
+    "embedded_source_bundle_sha256": "ee61ea26665ad02a712c01acdf5c799f47676cc567d9b68334d993247ce3b0a0",
+    "direct_runner_sha256": "afb7b14b813847311b076a436e70abacf6dcb023cfaaf43e06447586aa081eea",
+    "token_required": false,
+    "private_repo_network_dependency": false,
+    "transport_prereg_path": "canonical/ARACHNE_MAGE_A0_FS1_NO_TOKEN_TRANSPORT_PREREG_V1_20260908.json",
+    "previous_exact_clone_capsule_retained_as_history": true,
+    "status": "TOKENLESS_EMBEDDED_SOURCE_CAPSULE_PREREGISTERED__RUNTIME_CPU_GATES_REQUIRED"
   },
   "discovered_before_main_a0_optimizer_step": true,
   "fs1": {
@@ -45,15 +43,20 @@
     "supervised_rows": 934
   },
   "main_scientific_a0_optimizer_steps": 0,
+  "model": {
+    "architecture_id": "RealSaS.SkinFieldCodec.ContinuousJointField.v1",
+    "config_hash": "24c9f2580be9e80a02789e9ba35a57470145114807859057398b07bef9d58715",
+    "trainable_parameters": 401154
+  },
   "preserved_authority": {
     "joint_identity_bridge": "experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_JOINT_IDENTITY_BRIDGE_V1.json",
     "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
     "surface_geometry_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb"
   },
   "required_next_gate": [
-    "RUN_EXACT_COMMITTED_WRAPPER_CPU_REGRESSION_AND_PREFLIGHT_IN_COLAB",
-    "SEAL_EXACT_WRAPPER_PACKAGE_PREFLIGHT",
-    "RUN_MAIN_A0_CUDA"
+    "RUN_TOKENLESS_EMBEDDED_SOURCE_CPU_REGRESSION_IN_COLAB",
+    "RUN_TOKENLESS_EMBEDDED_SOURCE_CPU_PREFLIGHT_IN_COLAB",
+    "RUN_MAIN_A0_CUDA_IF_BOTH_PASS"
   ],
   "retired_authority": {
     "a0_prereg": "canonical/ARACHNE_MAGE_A0_PREREG_V1_20260908.json",
@@ -64,5 +67,5 @@
     "teacher_weights_content_sha256": "c15db7b78d272ac22998071e1fb1cec4c65d7366133ef16fb72824f222c852d9"
   },
   "schema": "RealSaS.ArachneMageA0AuthorityBlock.v2",
-  "status": "A0_BLOCKED__FS1_COLAB_CAPSULE_SEALED__EXACT_CLONE_PACKAGE_PREFLIGHT_REQUIRED"
+  "status": "A0_BLOCKED__FS1_TOKENLESS_EMBEDDED_TRANSPORT_PREREGISTERED__RUNTIME_CPU_GATES_REQUIRED"
 }

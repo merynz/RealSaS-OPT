@@ -1,10 +1,11 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "purpose": "Fast deterministic cross-chat/cross-agent reconstruction of current RealSaS scientific, product, ownership and FIT1 continuity context.",
   "authority": {
     "continuation": "CURRENT_STATE.md",
     "machine_authority_map": "canonical/AUTHORITY_MAP_V1.json",
     "fit1_evidence_index": "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
+    "geppetto_evidence_manifest": "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
     "geppetto_closure": "canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md",
     "geppetto_promotion": "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
     "architecture_ledger": "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
@@ -25,7 +26,7 @@
     {
       "name": "IRIS",
       "role": "learned image perception / signed geometry, support, uncertainty and observation evidence",
-      "canonical_rule": "evidence only; no final canonical skeleton IDs/tree/weights; affected privileged-input historical learned artifacts remain quarantined"
+      "canonical_rule": "V2 is the promoted observation/foundation evidence base; V3 is the promoted scene-first signed-geometry head used by the current Mage FIT1 witness; evidence only, deterministic GSA owns RiggingSurfaceIR, no final canonical skeleton IDs/tree/weights"
     },
     {
       "name": "GSA/RiggingSurfaceIR",
@@ -74,10 +75,26 @@
     "scope_warning": "C4 is A0 codec science only. It cannot authorize A1, full learned skinning, generalization, or PRODUCT_PASS. C3 falsified its exact point-cloud/u-q remedy, not the boundary localization itself.",
     "promotion_block": "No Arachne/V7 model is promoted. A1 remains blocked until A0 closes, the actual V7 latent/decode interface is frozen, and a separate V7-native A1 capacity/architecture preregistration is completed."
   },
+  "iris_current_state": {
+    "ownership_envelope": "single IRIS subsystem with layered promoted sources plus deterministic GSA",
+    "v2_role": "promoted observation/foundation/evidence base package",
+    "v2_home": "models/iris/v2/",
+    "v3_role": "promoted scene-first signed-geometry head used by the current Mage FIT1 upstream witness",
+    "v3_home": "models/iris/v3/",
+    "promoted_mage_witness": "models/iris/v3/PROMOTED_MAGE_FIT_WITNESS_V1.json",
+    "checkpoint_sha256": "766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2",
+    "signed_zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+    "product_inference_inputs": ["8x1024_RGBA", "8xORTHOGRAPHIC_CAMERA"],
+    "teacher_mesh_used_at_inference": false,
+    "character_gen_runtime_used": false,
+    "gsa_is_deterministic_surface_authority": true,
+    "generalization_claim": false
+  },
   "geppetto_fit1_closed_result": {
     "status": "FIT1_TERMINAL_PASS__PROMOTED_FROZEN",
     "frozen_source_commit": "f7be46f0a97df62a793ebf91b22297c894854f39",
     "seal_commit": "ae0af0cd39dd2468a012ba21890a4fed2da7c4c9",
+    "evidence_manifest": "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
     "mainline_home": "models/geppetto/reference_strength_v1/",
     "architecture_id": "RealSaS.Geppetto.ReferenceStrength.DirectSurfaceCausalDiffusion.DeterministicViewDirection.v1",
     "closure_step": 14080,
@@ -150,6 +167,7 @@
   },
   "settled_invariants": [
     "One semantic owner per question; deterministic qualification cannot silently become a second learned semantic owner.",
+    "IRIS V2 and V3 are layered sources inside one IRIS ownership envelope; deterministic GSA owns final RiggingSurfaceIR assembly/provenance.",
     "Geppetto is proposal, not canonical rig authority; Compiler owns final legal root/parent/tree and canonical IDs after exact solve.",
     "Geppetto FIT1 PASS is not generalization, Arachne closure, or PRODUCT_PASS.",
     "A0 SkinFieldCodec representation/decode closure is distinct from A1 product-time latent inference.",
@@ -159,6 +177,10 @@
     "Repository prereg/result/hash authority outranks detached chat/generated drafts when they conflict."
   ],
   "known_context_traps": [
+    {
+      "trap": "Treating IRIS current signed geometry as V2-only or V3 as a separate fifth subsystem",
+      "defense": "V2 is the promoted observation/foundation base; V3 is the promoted scene-first signed head/witness. Both are inside the one IRIS ownership envelope; deterministic GSA remains surface authority."
+    },
     {
       "trap": "Treating old Geppetto V2 as current FIT1-frozen Geppetto",
       "defense": "Current FIT1-frozen source is models/geppetto/reference_strength_v1/. V2 remains provenance."
@@ -196,7 +218,7 @@
     "reason": "Routine GitHub-hosted Actions are not execution authority for this project; use the user's local self-hosted runner and avoid hosted quota/fan-out."
   },
   "continuation_protocol": {
-    "experiment_completion_definition": "prereg + frozen source/apparatus + exact result/provenance + experiment registry/ledger + architecture ledger if affected + context/CURRENT_STATE stop-go + explicit promotion/supersession where applicable",
+    "experiment_completion_definition": "prereg + frozen source/apparatus + exact result/provenance + current experiment registry/journal + experiment ledger + architecture ledger if affected + context/CURRENT_STATE stop-go + explicit promotion/supersession where applicable",
     "promotion_rule": "Scientific PASS never promotes itself; promotion/refreeze is a separate transaction.",
     "next_action": "Complete A0 C4 exactly as preregistered; if A0 closes, freeze V7 latent/decode interface before any A1 optimizer step."
   }

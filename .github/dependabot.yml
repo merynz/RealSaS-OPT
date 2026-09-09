@@ -9,12 +9,10 @@ updates:
       - dependencies
     commit-message:
       prefix: deps
-  - package-ecosystem: github-actions
-    directory: "/"
-    schedule:
-      interval: monthly
-    open-pull-requests-limit: 5
-    labels:
-      - dependencies
-    commit-message:
-      prefix: ci-deps
+
+# GitHub Actions dependency PRs are intentionally disabled while historical/narrow
+# provenance workflows still retain their original GitHub-hosted runner declarations.
+# An automated Actions-version PR can cause the modified workflow to execute on its
+# own pull_request event, which would violate the current RealSaS self-hosted execution
+# policy. Re-enable the github-actions ecosystem only after those historical workflows
+# are retired or migrated/scoped to the canonical self-hosted runner.

@@ -30,6 +30,8 @@ OUT_MD = ROOT / "canonical" / "BOOTSTRAP_AUDIT_QUEUE.md"
 BOOTSTRAP = ROOT / "canonical" / "BOOTSTRAP_COVERAGE_STATE_V1.json"
 AUTHORITY = ROOT / "canonical" / "AUTHORITY_MAP_V1.json"
 
+# V2 is the current live registry/journal after the Geppetto promotion transaction.
+# V1 remains indexed as immutable historical continuity/provenance.
 SEMANTIC_SPINE = [
     "CURRENT_STATE.md",
     "README.md",
@@ -41,8 +43,13 @@ SEMANTIC_SPINE = [
     "canonical/AUTHORITY_MAP_V1.json",
     "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
+    "canonical/EXPERIMENT_REGISTRY_V2.json",
+    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
     "canonical/EXPERIMENT_REGISTRY_V1.json",
     "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
+    "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
+    "canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md",
+    "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
     "canonical/BRANCH_AUTHORITY_V1.md",
 ]
 
@@ -169,8 +176,6 @@ def semantic_status(path: str, source_ref: str, blob_sha: str, corpus: str) -> t
     if source_ref == "main" and path_named:
         return "SEMANTICALLY_INDEXED", "main artifact referenced by semantic spine"
 
-    # Branch evidence is not considered semantically reconciled merely because the same
-    # path name appears in prose. Bind it by branch identity or exact blob SHA.
     if source_ref != "main" and path_named and (source_ref in corpus or blob_sha in corpus):
         return "SEMANTICALLY_INDEXED", "branch artifact explicitly provenance-bound by semantic spine"
 

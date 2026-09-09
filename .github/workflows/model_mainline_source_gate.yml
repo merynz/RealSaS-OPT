@@ -9,6 +9,7 @@ on:
       - 'runtime/reference_v4/**'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'experiments/geppetto_reference_strength_fullstack_v1/**'
       - 'experiments/family_selection_v1/**'
       - 'experiments/single_family_e2e_v1/data_manifest_v1.py'
       - 'tests/compiler/**'
@@ -16,9 +17,12 @@ on:
       - 'tests/models/**'
       - 'tests/repository/test_learned_artifact_registry_v1.py'
       - 'canonical/LEARNED_ARTIFACT_REGISTRY_V1_20260904.json'
+      - 'canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md'
+      - 'canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md'
       - 'restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md'
       - '.github/workflows/model_mainline_source_gate.yml'
   push:
+    branches: [main]
     paths:
       - 'models/**'
       - 'compiler/realsas_compiler_core/**'
@@ -26,6 +30,7 @@ on:
       - 'runtime/reference_v4/**'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'experiments/geppetto_reference_strength_fullstack_v1/**'
       - 'experiments/family_selection_v1/**'
       - 'experiments/single_family_e2e_v1/data_manifest_v1.py'
       - 'tests/compiler/**'
@@ -33,6 +38,8 @@ on:
       - 'tests/models/**'
       - 'tests/repository/test_learned_artifact_registry_v1.py'
       - 'canonical/LEARNED_ARTIFACT_REGISTRY_V1_20260904.json'
+      - 'canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md'
+      - 'canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md'
       - 'restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md'
       - '.github/workflows/model_mainline_source_gate.yml'
 
@@ -59,7 +66,7 @@ jobs:
           python -m pip install --no-input --progress-bar off torch --index-url https://download.pytorch.org/whl/cpu
       - name: IRIS byte-equivalence and mainline import firewall
         run: python tests/iris/test_iris_mainline_source_v1.py
-      - name: Geppetto inference source gate
+      - name: Geppetto current FIT1-frozen source gate
         run: python tests/models/test_geppetto_mainline_source_v1.py
       - name: SkinFieldCodec source/config gate
         run: python tests/models/test_skin_field_codec_mainline_source_v1.py
@@ -89,6 +96,7 @@ jobs:
           from pathlib import Path
           for root in (
               Path('models/iris/v2'),
+              Path('models/geppetto/reference_strength_v1'),
               Path('models/geppetto/v2'),
               Path('models/skin_field_codec/v1'),
               Path('models/arachne/v2'),
@@ -97,9 +105,10 @@ jobs:
               for path in sorted(root.glob('*.py')):
                   py_compile.compile(str(path), doraise=True)
           PY
-      - name: Pre-fit status summary
+      - name: Mainline source authority summary
         run: |
-          echo 'MODEL_MAINLINE_AND_PREFIT_HARDENING_PASS'
+          echo 'MODEL_MAINLINE_SOURCE_GATE_PASS'
           echo "commit=$GITHUB_SHA"
-          echo 'scientific_fit_steps=0'
-          echo 'fit_authorized=false'
+          echo 'geppetto_fit1_frozen_promoted=true'
+          echo 'arachne_v7_a1_promoted=false'
+          echo 'product_pass_claimed=false'

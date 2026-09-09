@@ -126,23 +126,62 @@ Decision: **remove FSQ from the FIT1 learning path**. Do not treat this as a cos
 
 Practical note: 22 joints x 4 tokens x 512 scalars = 45,056 scalars. At FP16 this is ~88 KiB per character, negligible for the current demo. Therefore FIT1 scientific closure has higher priority than early token compression.
 
-## V7 preregistered next test — continuous field transport
+## V7 — continuous field transport
 
-Planned architecture: `RealSaS.Arachne.SkinFieldCodec.v7`
-Required invariants:
+Source commit: `b86e3c7c0f54053fff5fecf81b6d81e50562d977`
+Architecture: `RealSaS.Arachne.SkinFieldCodec.v7`
+Training contract:
 - no FSQ module or quantizer parameters in the model graph;
 - `encode_field()` outputs continuous 4x512 tokens directly to the forced-field decoder;
-- joint-balanced 22-field optimizer update retained;
-- sparse 50/50 decoder query sampling retained;
-- BCEWithLogits + 0.1*MSE + Dice retained;
-- nested prefix dropout retained;
-- acceptance gates unchanged;
-- telemetry must include continuous pairwise L2, pre-normalization joint pairwise L1/std, logit saturation, and zero-field ablation.
+- 22-joint balanced optimizer update;
+- 384 decoder queries per field, approximately 50% active/dense + 50% global/supervised;
+- BCEWithLogits + `0.1*MSE` + Dice;
+- nested prefix dropout 1..4 retained;
+- 192 optimizer updates / 4224 field reconstructions; cosine schedule reaches LR=0 at the final update.
 
-Expected causal readout:
-- If continuous pairwise separation and pre-normalization joint diversity remain alive while row-L1/deformation improve, FSQ was the blocking transport bottleneck.
-- If continuous representations still collapse before useful fit, the next target is encoder/training dynamics rather than decoder or quantization.
-- Do not reintroduce FSQ into FIT1 merely because the continuous codec passes. Quantization becomes a separate post-fit gate.
+Observed full result:
+- status: `NO_A0_V7CFFJB_TERMINAL_CLOSURE`; final step 192; streak 0; A1 unauthorized.
+- final raw/qualified row-L1 p95 ~= `1.84107062`.
+- final row-L1 mean ~= `1.46417796`.
+- final deformation-error ratio ~= `0.85944122`.
+- best observed p95 was ~= `1.82779122` at step 88, when LR ~= `1.1305e-4`; p95 then plateaued around 1.84 rather than converging to the acceptance region.
+- row-L1 mean improved from ~= `1.83945` at step 1 to ~= `1.46418` at step 192 (~20.4% relative improvement).
+- deformation ratio improved from ~= `0.97168` to ~= `0.85944` (~11.6% relative improvement), with best observed ~= `0.85647` around step 144.
+- continuous identity survived: final continuous pairwise L2 mean ~= `11.7058`, min ~= `0.2315`, near-equal pair fraction at 1e-6 = 0.
+- decoder field sensitivity survived: final pre-normalization joint pairwise L1 ~= `0.1039`; zero-field logits remain exactly zero; saturation fraction `|logit|>12` is 0 at final.
+- final pre-normalization probability mean ~= `0.20599`. Across 22 joints this corresponds to average raw per-row mass ~= `4.53` before simplex normalization, while the teacher row mass is 1 by definition.
+- final sampled scalar-field training loss appears numerically moderate (`mean_loss ~= 0.789`, sampled `mean_l1 ~= 0.229`) even though authoritative normalized row-L1 remains extremely poor (`mean ~= 1.464`, p95 ~= 1.841`).
+
+Critical correction to the first interpretation:
+This is **not** accurately described as "only a hard 5% tail remains." Row-L1 is bounded by 2 for simplex distributions. With mean row-L1 ~= 1.464, the error must still be widespread: even under the most favorable possible distribution, at least ~46% of rows must exceed L1=1.0 and at least ~64% must exceed L1=0.5. Therefore V7 broke the exact-uniform collapse but did not approach FIT1 closure globally.
+
+What V7 proves:
+1. Removing FSQ fixes the discrete transport collapse: continuous joint identities remain distinct through the full run.
+2. The forced-field decoder remains causally sensitive to field tokens.
+3. The old exact `1/22` attractor is no longer the only reachable output.
+4. Representation collapse is no longer the primary blocker.
+
+What V7 does **not** prove:
+- It does not show that the remaining problem is a small hard-row tail.
+- It does not justify simply extending the same run: the scheduler already drives LR to zero at step 192.
+- It does not show that larger support joints are the main failure. Late per-joint sampled loss has essentially no correlation with active support size in the bound Mage cache.
+- It does not establish whether the remaining global underfit is mainly architecture capacity, optimization recipe, or objective/inference mismatch.
+
+Strongest remaining hypothesis after V7:
+**scalar-field training objective / sampling distribution is misaligned with the authoritative normalized 22-joint matrix objective.** The decoder trains each joint independently on an active-heavy sampled query distribution, then inference normalizes all 22 positive scalar fields across joints. Final raw probability mass (~4.53 per row on average) is far from the teacher simplex mass 1. This gives the optimizer a route to reduce independent BCE/MSE/Dice while leaving relative cross-joint ratios—and therefore authoritative row-L1/deformation—bad.
+
+This is a hypothesis, not yet a sealed root cause. A targeted diagnostic should compare:
+- raw per-row field-sum distribution before normalization;
+- normalized row-L1 versus raw scalar reconstruction by row;
+- pure vs blend rows;
+- dominant-joint accuracy;
+- hard-row entropy / active-joint count;
+- counterfactual full-row coupled training objective versus the existing independent sampled scalar objective.
+
+Historical sanity check:
+The earlier non-SkinTokens Arachne A0 baseline reached row-L1 p95 around `0.1147` with deformation ratio around `0.04871`. Therefore the Mage target is demonstrably much more fit-able than V7's `1.84 / 0.859` result. V7 should not be treated as "nearly solved but tail-limited"; the current SkinTokens-inspired FIT1 recipe is still dramatically worse than the earlier baseline on the same product gates.
+
+Decision: **do not start V8 yet.** First run a row-level diagnostic on the V7 final checkpoint/result to distinguish broad objective/sampling misalignment from decoder expressivity/optimization limits. Do not reintroduce FSQ during this diagnostic.
 
 ## Current causal chain (short form)
 
@@ -152,4 +191,5 @@ Expected causal readout:
 -> clamp/saturation tested by V5: real numerical bug fixed, but decoder still ignored field tokens
 -> forced field-conditioning tested by V6: decoder causality restored
 -> V6 immediately exposed FSQ as the remaining transport bottleneck
--> V7 removes FSQ to test continuous FIT1 closure.
+-> V7 removed FSQ and eliminated representation collapse / exact-uniform lock
+-> V7 nevertheless remained globally far from FIT1 closure; current leading target is objective/sampling vs normalized-row acceptance mismatch, not a narrow hard-tail-only failure.

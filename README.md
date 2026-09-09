@@ -2,6 +2,8 @@
 
 Canonical RealSaS research, compiler, proof and runtime workspace.
 
+**License:** proprietary / all rights reserved. Repository access or source visibility does not grant permission to use, copy, modify, redistribute or commercialize RealSaS materials. See `LICENSE`. Direct third-party dependencies and attribution boundaries are recorded in `THIRD_PARTY_NOTICES.md`.
+
 ## Start here
 
 For a new chat, agent, machine session, technical reviewer, or investor due-diligence pass, **do not reconstruct current truth by reading dated reports in arbitrary order**.
@@ -50,6 +52,12 @@ IRIS V2 and V3 are layers of one IRIS ownership envelope: V2 preserves the promo
 
 Models emit evidence or proposals. `compiler/realsas_compiler_core/` remains the single canonical product/identity/qualification authority.
 
+## Direct external model dependency
+
+The current IRIS foundation directly uses **DINOv2-S** from `facebookresearch/dinov2`, bound to exact source revision and weight identity by `models/iris/v2/dinov2_foundation_v2.py`. DINO/DINOv2 may therefore retain its real upstream name where technically required. See `THIRD_PARTY_NOTICES.md`.
+
+Other external project names may appear in comparison, clean-room audit, bibliography, or historical scientific-lineage documents. That does **not** make those projects dependencies. RealSaS-owned model/package/class/architecture identities use RealSaS mechanism names rather than third-party branding; this is enforced by `tests/repository/test_model_branding_boundary_v1.py`.
+
 ## Evidence rule
 
 For a scientific claim, the repository should expose the chain:
@@ -65,6 +73,18 @@ python -m pytest -q tests/models/test_geppetto_fit1_evidence_manifest_v1.py
 ```
 
 That test requires no access to the large checkpoint bytes: it verifies the committed evidence manifest, frozen Git blob identities, checkpoint authority constants, scientific chain files, claim boundaries and external artifact hash bindings. Independent byte re-download can then verify the recorded SHA-256 identities when artifact access is granted.
+
+## Repository governance
+
+- `CONTRIBUTING.md` — scientific-change, promotion and validation rules.
+- `SECURITY.md` — private security-reporting and secret/artifact handling policy.
+- `.github/CODEOWNERS` — ownership of current authority and implementation surfaces.
+- `.github/pull_request_template.md` — scope/evidence checklist.
+- `.editorconfig`, `.gitattributes`, `.gitignore`, `.pre-commit-config.yaml` — repository hygiene.
+- `.python-version`, `pyproject.toml`, `requirements/` — pinned current development/CPU-CI environment; sealed experiments retain their own environment authority.
+- `.github/dependabot.yml` — monthly dependency update proposals.
+
+Current scientific/mainline GitHub Actions run on the local self-hosted RealSaS runner with labels `[self-hosted, linux, x64, realsas]`; GitHub-hosted runners are not current execution authority.
 
 ## Important non-claims
 

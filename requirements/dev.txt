@@ -1,0 +1,4 @@
+-r mainline-ci.txt
+pre-commit==4.3.0
+ruff==0.12.9
+pip-audit==2.9.0

@@ -125,10 +125,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
-          cache-dependency-path: |
-            requirements/mainline-ci.txt
-            requirements/torch-cpu.txt
+      # Do not enable setup-python's remote pip-cache save on the single self-hosted
+      # runner. Its local pip cache is already persistent; the action post-step can
+      # otherwise serialize the entire RealSaS CI queue after all tests have passed.
       - name: Install pinned model source-test dependencies
         env:
           PIP_DISABLE_PIP_VERSION_CHECK: '1'

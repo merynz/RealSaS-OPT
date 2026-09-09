@@ -87,7 +87,7 @@ V4 loss used `pred.clamp(1e-6, 1-1e-6)` before BCE. At saturation, clamp can zer
 
 Observed early run (stopped after decisive signature; no need to complete 192):
 - step 1: quantized pairwise L2 ~= 4.11 with 3 unique FSQ sequences, but pre-normalization joint pairwise probability L1 only ~= `1.63e-6`;
-- step 4: 4 unique sequences / quantized L2 ~= 3.22, but pre-normalization joint pairwise L1 ~= `4.05e-8`;
+- step 4: 4 unique sequences / quantized pairwise L2 ~= 3.22, but pre-normalization joint pairwise L1 ~= `4.05e-8`;
 - saturation fraction `abs(logit)>12` was 0.0 at these checks;
 - by step 12 FSQ had collapsed to one sequence and remained collapsed through the observed run.
 
@@ -183,6 +183,86 @@ The earlier non-SkinTokens Arachne A0 baseline reached row-L1 p95 around `0.1147
 
 Decision: **do not start V8 yet.** First run a row-level diagnostic on the V7 final checkpoint/result to distinguish broad objective/sampling misalignment from decoder expressivity/optimization limits. Do not reintroduce FSQ during this diagnostic.
 
+## V7 causal-triplet result — sampling and coupled-objective isolation
+
+Preregister/runtime source commit: `f2a573022f718cd390904cc4c6bfe427436bce11`
+Result-analysis supplement commit: `79b081277589468ab539ee350e44bcc38fd9ad1c`
+Shared controls: same serialized initial FP32 weights, same nested-prefix schedule, same V7 architecture, same AdamW/cosine 192-step schedule, same math-SDPA/TF32-off compute policy, one Mage character only.
+
+Arms:
+- `C0_BIASED_SCALAR`: original V7-style 384 queries/joint, 50% active + 50% global, BCEWithLogits + 0.1 MSE + Dice, no importance correction.
+- `A_UNIFORM_SCALAR`: all 934 supervised rows/joint, same independent scalar objective, active-heavy sampler removed.
+- `B_COUPLED_ROW_L1`: all 934 supervised rows, 22 fields normalized jointly after sigmoid, direct coupled mean row-L1 via exact two-pass VJP.
+
+Observed finals:
+- C0: mean `1.5863118`, p95 `1.8367123`, deformation `0.8979211`, raw mass mean `4.68213`, dominant joint 8 on 934/934 supervised rows, entropy `2.84326`.
+- A: mean `1.8356898`, p95 `1.9034000`, deformation `0.9712908`, raw mass mean `1.57780`, dominant joint 8 on 934/934 supervised rows, entropy `3.09086`.
+- B: mean `1.8395368`, p95 `1.9090910`, deformation `0.9718884`, raw mass mean `21.99999`, entropy `3.09104` (essentially `ln(22)` / uniform).
+
+Causal interpretation:
+1. Removing active-heavy sampling made FIT1 substantially worse (`C0 -> A`: mean +0.2494, p95 +0.06669, deformation +0.07337). Therefore active oversampling is not merely a bug; it supplies useful sparse-positive curriculum/signal in this one-character regime.
+2. The remaining issue with C0 sampling is calibration: uncorrected active oversampling changes each joint's effective prior differently. The correct next sampling test is importance-corrected active-heavy training, not uniform removal.
+3. The direct coupled objective as implemented was invalidated by the output coordinate system, not by the VJP implementation. A100 preflight showed two-pass logit replay max abs `0.0` and finite/nonzero field/condition/decoder gradient routes.
+4. In B, after the first update decoder logit abs mean was ~`11.65`, sigmoid probability mean `0.999987`, and saturation already ~33.6%; by step 4 saturation was ~99.6% and the coupled logit-gradient RMS fell from `1.63e-5` to `4.27e-11`. All sigmoid outputs converged toward one, raw mass toward 22, then joint normalization produced the exact `1/22` uniform signature.
+
+Decision after triplet:
+- Do not interpret the result as evidence that FIT1 needs more characters.
+- Do not remove active-heavy sampling outright.
+- `sigmoid -> normalize` is a bad coordinate system for direct coupled row optimization because it admits common-mode positive saturation and gradient death.
+- Before designing V8, test whether geometry/query conditioning is actually causal in the C0 final model, and separately test whether 192 optimizer steps are simply too short by rerunning C0 from the same initialization with a longer cosine horizon (not by resuming a zero-LR step-192 checkpoint).
+
+## V7 C0 geometry-causality autopsy — query geometry is strongly causal, but spatial output variation is compressed
+
+Diagnostic preregistration commit: `12d8ca8c39aa0bf1163e4b4b25986c98acfd7be7`
+Bound C0 final model SHA-256: `0e5f11cd5925b35235a83527b2ec6ef7903f7214734262576e9b8c45a77c9e53`
+Diagnostic classification: read-only; no optimizer/backward/training.
+
+Baseline binding re-decoded exactly:
+- mean row-L1 `1.5863117757`
+- p95 `1.8367122727`
+- sealed deformation ratio `0.8979210854`
+- dominant histogram: joint 8 on 934/934 supervised rows.
+
+Primary spatial-variation result:
+- teacher mean pairwise row-L1 = `1.4281389310`
+- predicted mean pairwise row-L1 = `0.2293737371`
+- prediction / teacher pairwise spatial-variation ratio = **`0.16061024`**
+- teacher mean joint std across rows = `0.1196695771`
+- predicted mean joint std across rows = `0.0090963392`
+- prediction / teacher joint-std ratio = **`0.07601213`**
+
+This proves the C0 output is not literally spatially constant, but its row-to-row ownership variation occupies only ~16% of teacher pairwise variation (and ~7.6% by per-joint std). The spatial output manifold is strongly compressed relative to the target.
+
+Query-geometry interventions:
+- Full supervised-row query permutation changed normalized predictions by mean row-L1 `0.235402` (p95 `0.551906`) and raw logits by mean row-L1 `22.3086`.
+- The permuted-query output matched the baseline output at the donor geometry **exactly**: donor-following mean/p95 row-L1 = `0.0 / 0.0`.
+- Position-only (geometry channels 0:3) permutation produced essentially the same response: mean normalized row-L1 `0.233739`, p95 `0.542767`, raw-logit mean row-L1 `22.1793`.
+
+Therefore query position is decisively causal and the decoder is effectively permutation-equivariant with respect to the supplied row geometry. The hypothesis "surface/query geometry does not reach the decoder output" is falsified.
+
+Condition-memory interventions:
+- Zeroing encoded condition tokens changed raw logits substantially (mean raw-logit row-L1 `4.77098`) but normalized weights only modestly (mean row-L1 `0.04427`, p95 `0.05723`) and caused zero dominant-joint flips.
+- Scrambling geometry association before the fixed FPS condition anchors changed the condition tokens measurably (mean abs token delta `0.04153`) but changed normalized outputs only `0.000328` mean row-L1 (`0.000848` p95), again with zero dominant flips.
+
+Interpretation: the condition path is not disconnected, but the final normalized ownership prediction is only weakly dependent on the encoded 384-token condition memory. Most usable spatial dependence comes directly through query geometry, especially position channels.
+
+Local position relocation (64 deterministic spatial sentinels):
+- teacher target-vs-farthest-donor mean row-L1 = `2.0000000` (chosen pairs are maximally different in teacher ownership; 100% dominant flip).
+- baseline prediction target-vs-donor mean row-L1 = only `0.310110` with zero dominant flips.
+- after replacing each target's position by its farthest donor position, the new prediction moved far from its original target (`0.302379` mean row-L1) and became extremely close to the donor's baseline prediction (`0.0137071` mean, `0.0405891` p95), again with zero dominant flips because joint 8 remains globally rank-1.
+
+Causal conclusion:
+1. **Geometry availability/path is not the primary blocker.** Query position strongly and causally controls the decoder output, and a relocated row follows the donor geometry's learned prediction almost exactly.
+2. **The learned geometry-to-ownership mapping is severely compressed/miscalibrated.** Teacher spatial ownership changes can be maximal (L1 ~2) while C0's predicted ownership changes are only ~0.31 and never change the dominant joint away from joint 8.
+3. The global joint-8 rank collapse is therefore not explained by the decoder being blind to position. The model knows where a row is, but maps different positions into a narrow, wrong ownership manifold.
+4. Encoded condition memory is secondary/weak in the current final prediction; direct query position dominates geometry causality.
+
+Decision after geometry autopsy:
+- The proposed 2000-step C0 horizon test is now scientifically meaningful: it can test whether this already-causal but compressed geometry-to-ownership mapping simply needs much more optimization time.
+- Long-horizon C0 must start from the same initial weights with `T_max=2000`; do not resume step192 because its LR is already zero.
+- Track mean and p95 independently. If mean/deformation continue improving while p95 remains around ~1.82, objective/product mismatch is strengthened. If p95 resumes sustained descent, the 192-step horizon was materially premature.
+- Do not design V8/softmax or importance-corrected sampling before the long-horizon C0 result unless new evidence appears.
+
 ## Current causal chain (short form)
 
 `V3 uniform collapse`
@@ -192,4 +272,7 @@ Decision: **do not start V8 yet.** First run a row-level diagnostic on the V7 fi
 -> forced field-conditioning tested by V6: decoder causality restored
 -> V6 immediately exposed FSQ as the remaining transport bottleneck
 -> V7 removed FSQ and eliminated representation collapse / exact-uniform lock
--> V7 nevertheless remained globally far from FIT1 closure; current leading target is objective/sampling vs normalized-row acceptance mismatch, not a narrow hard-tail-only failure.
+-> V7 remained globally far from FIT1 closure
+-> C0/A/B causal triplet showed active-heavy sampling is useful sparse curriculum but uncorrected, while `sigmoid -> normalize` coupled training has a common-mode saturation trap
+-> C0 geometry autopsy falsified geometry blindness: query position is strongly causal and donor-following, but predicted spatial ownership variation is only ~16% of teacher variation and globally rank-collapsed to joint 8
+-> next gate: long-horizon C0 from same initialization, `T_max=2000`, with mean/p95/deformation trajectory interpreted separately before V8.

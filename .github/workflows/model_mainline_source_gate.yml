@@ -8,6 +8,20 @@ on:
       - 'README.md'
       - 'REPOSITORY_MAP.md'
       - 'SYSTEM_INDEX.md'
+      - 'LICENSE'
+      - 'THIRD_PARTY_NOTICES.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - '.editorconfig'
+      - '.gitattributes'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '.python-version'
+      - 'pyproject.toml'
+      - 'requirements/**'
+      - '.github/CODEOWNERS'
+      - '.github/dependabot.yml'
+      - '.github/pull_request_template.md'
       - 'models/**'
       - 'compiler/realsas_compiler_core/**'
       - 'compiler/realsas_compiler_services/**'
@@ -22,6 +36,7 @@ on:
       - 'tests/models/**'
       - 'tests/repository/test_learned_artifact_registry_v1.py'
       - 'tests/repository/test_current_continuity_authority_v2.py'
+      - 'tests/repository/test_model_branding_boundary_v1.py'
       - 'canonical/AUTHORITY_MAP_V1.json'
       - 'canonical/CONTEXT_STATE_V1.json'
       - 'canonical/EXPERIMENT_REGISTRY_V2.json'
@@ -48,6 +63,20 @@ on:
       - 'README.md'
       - 'REPOSITORY_MAP.md'
       - 'SYSTEM_INDEX.md'
+      - 'LICENSE'
+      - 'THIRD_PARTY_NOTICES.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - '.editorconfig'
+      - '.gitattributes'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '.python-version'
+      - 'pyproject.toml'
+      - 'requirements/**'
+      - '.github/CODEOWNERS'
+      - '.github/dependabot.yml'
+      - '.github/pull_request_template.md'
       - 'models/**'
       - 'compiler/realsas_compiler_core/**'
       - 'compiler/realsas_compiler_services/**'
@@ -62,6 +91,7 @@ on:
       - 'tests/models/**'
       - 'tests/repository/test_learned_artifact_registry_v1.py'
       - 'tests/repository/test_current_continuity_authority_v2.py'
+      - 'tests/repository/test_model_branding_boundary_v1.py'
       - 'canonical/AUTHORITY_MAP_V1.json'
       - 'canonical/CONTEXT_STATE_V1.json'
       - 'canonical/EXPERIMENT_REGISTRY_V2.json'
@@ -95,15 +125,21 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install model source-test dependencies
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
+      - name: Install pinned model source-test dependencies
         env:
           PIP_DISABLE_PIP_VERSION_CHECK: '1'
           PIP_DEFAULT_TIMEOUT: '60'
         run: |
-          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pytest pillow
-          python -m pip install --no-input --progress-bar off torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
       - name: Current continuity authority gate
         run: python -m pytest -q tests/repository/test_current_continuity_authority_v2.py
+      - name: RealSaS model naming boundary
+        run: python -m pytest -q tests/repository/test_model_branding_boundary_v1.py
       - name: IRIS byte-equivalence and mainline import firewall
         run: python tests/iris/test_iris_mainline_source_v1.py
       - name: Geppetto current FIT1-frozen source gate
@@ -153,6 +189,7 @@ jobs:
           echo 'MODEL_MAINLINE_SOURCE_GATE_PASS'
           echo "commit=$GITHUB_SHA"
           echo 'current_continuity_v2_bound=true'
+          echo 'model_branding_boundary=true'
           echo 'iris_scene_first_v3_promoted_witness=true'
           echo 'geppetto_fit1_frozen_promoted=true'
           echo 'geppetto_fit1_machine_evidence_bound=true'

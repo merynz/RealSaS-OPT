@@ -1,0 +1,43 @@
+RealSaS Proprietary License
+All Rights Reserved
+
+Copyright (c) 2026 RealSaS Project contributors.
+
+Except for third-party components that carry their own license notices, all original
+source code, models, documentation, data schemas, experiment apparatus, research
+artifacts, designs, trademarks, and other materials in this repository are
+proprietary and protected by applicable copyright and other intellectual-property
+laws.
+
+NO LICENSE OR PERMISSION IS GRANTED by publication, repository access, source
+availability, cloning capability, or any other means.
+
+Without prior explicit written permission from the applicable rights holder, you may
+not, in whole or in part:
+
+- use, execute, reproduce, copy, modify, adapt, translate, or create derivative works;
+- publish, distribute, redistribute, sublicense, sell, lease, lend, host, transmit,
+  disclose, or otherwise make the materials available to another party;
+- incorporate the materials into another product, service, dataset, model, benchmark,
+  training corpus, research system, or commercial or non-commercial project;
+- reverse engineer, decompile, disassemble, extract, reproduce, or repurpose protected
+  implementation details or model artifacts except where such restriction is
+  prohibited by applicable law;
+- use RealSaS names, marks, logos, product identity, or branding in a manner implying
+  permission, affiliation, endorsement, or origin.
+
+No patent, trademark, trade-secret, model-weight, dataset, copyright, or other
+intellectual-property rights are licensed by implication, estoppel, exhaustion, or
+otherwise.
+
+THE MATERIALS ARE PROVIDED, TO THE EXTENT THEY ARE MADE AVAILABLE AT ALL, "AS IS"
+WITHOUT WARRANTY OF ANY KIND. TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE RIGHTS
+HOLDERS DISCLAIM ALL WARRANTIES AND SHALL NOT BE LIABLE FOR ANY CLAIM, DAMAGES, OR
+OTHER LIABILITY ARISING FROM ACCESS TO OR RELIANCE ON THE MATERIALS.
+
+Third-party software, models, assets, datasets, and other components remain subject
+to their respective licenses and notices. Nothing in this file expands or restricts
+rights granted by an applicable third-party license.
+
+For permission requests, contact the repository owner through the repository's
+GitHub account.

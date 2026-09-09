@@ -20,11 +20,12 @@ on:
 
 jobs:
   completion-audit-contract:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.11.9'
       - name: Validate canonical completion matrix
         run: python canonical/validate_completion_plan_v1.py

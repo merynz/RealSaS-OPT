@@ -10,19 +10,20 @@ This file answers: **"What subsystems exist on current main and where do they li
 
 | Subsystem | Current mainline | State |
 |---|---|---|
-| IRIS V2 | `models/iris/v2/` | **CURRENT — inference + foundation/apparatus + checkpoint + train/eval visible** |
+| IRIS V2 observation/foundation evidence | `models/iris/v2/` | **CURRENT PROMOTED BASE — observation/foundation/evidence package used by the later signed line where applicable** |
+| IRIS V3 scene-first signed geometry | `models/iris/v3/` | **CURRENT PROMOTED MAGE FIT1 SIGNED-GEOMETRY HEAD/WITNESS — teacher mesh not used at inference; GSA remains deterministic authority** |
 | Geppetto Reference-Strength V1 | `models/geppetto/reference_strength_v1/` | **CURRENT FIT1-FROZEN SOURCE — Mage terminal PASS promoted; generalization not claimed** |
 | SkinFieldCodec V1 | `models/skin_field_codec/v1/` | **CURRENT BASE SOURCE; active V7 A0 research is not promoted** |
 | Arachne V2 | `models/arachne/v2/` | **PRIOR/CURRENT SOURCE SCAFFOLD — no V7-native A1 FIT1 model promoted** |
 
-No fifth learned subsystem is currently authorized by V4 architecture/current source composition. Older neural implementations remain research/provenance. Models emit evidence/proposals only; Compiler qualification remains authoritative.
+No fifth learned subsystem is currently authorized by V4 architecture/current source composition. IRIS V2 and V3 are layers of the same IRIS ownership envelope, not separate learned subsystems. Older neural implementations remain research/provenance. Models emit evidence/proposals only; Compiler qualification remains authoritative.
 
 ## Compiler mainline
 
 | Layer | Canonical home | State |
 |---|---|---|
 | Typed IR / hashing / V4 contracts | `compiler/realsas_compiler_core/{types.py,v4_types.py,hashing.py,v4.py}` | CURRENT |
-| Surface/substrate/local geometry | `compiler/realsas_compiler_core/substrate/{surface.py,local_geometry.py,iris_v2.py}` | **CURRENT / PHYSICALLY NORMALIZED** |
+| Surface/substrate/local geometry | `compiler/realsas_compiler_core/substrate/{surface.py,local_geometry.py,iris_v2.py}` plus current scene-first signed bridge | **CURRENT / PHYSICALLY NORMALIZED** |
 | Skeleton qualification | `compiler/realsas_compiler_core/rig.py` | CURRENT |
 | Skin qualification | `compiler/realsas_compiler_core/skin.py` | CURRENT |
 | MWB2 mesh + skin binding | `compiler/realsas_compiler_core/mesh/{mwb2.py,mwb2_skin.py,mesh_binding.py}` | **CURRENT / PHYSICALLY NORMALIZED / BEHAVIORALLY HARDENED** |

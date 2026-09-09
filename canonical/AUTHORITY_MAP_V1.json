@@ -3,25 +3,27 @@
   "repository": "merynz/RealSaS-OPT",
   "continuation_authority": "CURRENT_STATE.md",
   "context_state": "canonical/CONTEXT_STATE_V1.json",
-  "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V1.json",
-  "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
+  "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V2.json",
+  "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
   "generated_live_map": "canonical/LIVE_AUTHORITY_MAP.md",
   "generated_rehydration_packet": "canonical/REHYDRATION_PACKET.md",
   "generated_coverage_audit": "canonical/CONTEXT_COVERAGE_AUDIT.md",
   "investor_evidence_index": "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
+  "historical_registry": "canonical/EXPERIMENT_REGISTRY_V1.json",
+  "historical_journal": "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
   "human_ledgers": [
     "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
     "canonical/BRANCH_AUTHORITY_V1.md"
   ],
   "execution_authority": {
-    "actions_runner_mode": "SELF_HOSTED_LOCAL",
+    "actions_runner_mode": "SELF_HOSTED_LOCAL_ONLY",
     "required_labels": ["self-hosted", "linux", "x64", "realsas"],
     "known_runner_name": "realsas-wsl-1660ti",
     "operator_path_hint": "~/actions-runner",
-    "migration_reason": "Routine GitHub-hosted Actions previously generated excessive workflow usage and triggered a quota/usage warning email; RealSaS therefore moved routine scientific/mainline execution to the user's local self-hosted runner.",
-    "workflow_budget_policy": "Do not fan out authority-map or routine science workflows across every experimental branch push. Prefer main authority changes, branch create/delete events, explicit manual dispatch, or already-required self-hosted scientific jobs.",
-    "rule": "Scientific/mainline Actions execution authority is the user's local self-hosted RealSaS runner. A GitHub-hosted runner attempt is apparatus/config evidence only and cannot be interpreted as model-science evidence."
+    "migration_reason": "Routine GitHub-hosted Actions previously generated excessive workflow usage and triggered a quota/usage warning email; the user explicitly reaffirmed on 2026-09-09 that this transaction must use the local self-hosted runner only.",
+    "workflow_budget_policy": "Do not fan out authority-map or routine science workflows across every experimental branch push. Prefer main authority changes, explicit manual dispatch, or already-required self-hosted scientific jobs.",
+    "rule": "Any Actions execution used for current RealSaS science/mainline authority must run on the user's local self-hosted RealSaS runner. GitHub-hosted runners are not permitted for this transaction."
   },
   "branch_policy": {
     "canonical_branch": "main",
@@ -49,6 +51,7 @@
       "prereg_authority": "experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_PREREG_20260909.md",
       "prereg_blob": "4ada6333afa1dcfe40d08eac286a88d3acc158ad",
       "source_contract": "experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_SOURCE_CONTRACT.json",
+      "source_contract_blob": "cf4401f6ef3d91a32c6615b3325d9d9fbe67813b",
       "a1_authorized": false,
       "product_pass_authorized": false
     }
@@ -77,7 +80,7 @@
       "status": "CLOSED_FAIL__NO_A0_TERMINAL_CLOSURE",
       "closed_date": "2026-09-09",
       "categorical_verdict": "C3_POINT_CLOUD_IMPORTANCE_CORRECTED_REMEDY_FALSIFIED",
-      "result_authority": "C3 combined result SHA-256 5fe9c350e2f09a1fd858d86d39c965c9c429321c76851994379a0466d925eaa0",
+      "result_authority": "combined result SHA-256 5fe9c350e2f09a1fd858d86d39c965c9c429321c76851994379a0466d925eaa0",
       "what_it_means": "The point-cloud support/near-support sampler under u/q-corrected reconstruction did not beat matched control and did not close A0.",
       "what_it_does_not_mean": [
         "boundary localization is false",
@@ -109,6 +112,7 @@
       "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
       "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
       "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
+      "canonical/EXPERIMENT_REGISTRY_V2.json",
       "experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_PREREG_20260909.md"
     ]
   },
@@ -146,8 +150,8 @@
     "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
     "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
-    "canonical/EXPERIMENT_REGISTRY_V1.json",
-    "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
+    "canonical/EXPERIMENT_REGISTRY_V2.json",
+    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
     "canonical/BRANCH_AUTHORITY_V1.md"
   ],
   "rehydration_order": [
@@ -157,9 +161,10 @@
     "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
     "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
+    "canonical/EXPERIMENT_REGISTRY_V2.json",
     "canonical/CONTEXT_STATE_V1.json",
     "canonical/LIVE_AUTHORITY_MAP.md",
-    "canonical/SCIENTIFIC_JOURNAL_V1.jsonl"
+    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl"
   ],
   "invariants": [
     "Only main/CURRENT_STATE.md is continuation authority.",
@@ -170,7 +175,7 @@
     "A0 SkinFieldCodec representation/decode closure is distinct from A1 product-time latent inference.",
     "Source existence is not experimental evidence; component evidence is not a full-formulation verdict.",
     "Repository prereg/result/hash authority outranks detached chat/generated drafts when they disagree.",
-    "Scientific/mainline Actions run on the local self-hosted RealSaS runner.",
+    "Scientific/mainline Actions for this transaction run only on the local self-hosted RealSaS runner.",
     "Promotion requires source + tests + evidence/result + CURRENT_STATE + provenance/supersession reconciliation."
   ]
 }

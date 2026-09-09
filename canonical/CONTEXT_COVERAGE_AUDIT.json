@@ -12,8 +12,8 @@
   "explained_high_signal_count": 264,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 85,
-  "safe_default_evidence_only_branch_count": 81,
+  "live_branch_count": 86,
+  "safe_default_evidence_only_branch_count": 82,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -174,7 +174,7 @@
     },
     {
       "name": "exp/arachne-skintokens-cleanroom-fit1-20260908",
-      "sha": "6d2e926892c239cb3620f1b6dfb1393ab56b2d52",
+      "sha": "2cba8bcafefe7c5e3983fe5693dac8e17a548e01",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -330,7 +330,7 @@
     },
     {
       "name": "main",
-      "sha": "d966f21dfe5ab95e80721ee95f6391cb5376da9c",
+      "sha": "b102231127edbc7ef536c6b78a71b533827677df",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -397,6 +397,12 @@
     {
       "name": "ops/trigger-n1d-v2-recovery-v2-verify-20260820",
       "sha": "12a813a8f50118a4ad34c37fd5b43bd760d45d97",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "promote/fit1-evidence-main-20260909",
+      "sha": "b102231127edbc7ef536c6b78a71b533827677df",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

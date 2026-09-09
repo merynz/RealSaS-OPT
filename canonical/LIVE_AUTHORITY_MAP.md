@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `e6cd423a879e90f3893e881f58972740ed025a8642e5a768e75ae3798eb50fba`
+> State fingerprint: `5e7b39137047dd6afb8876491ab6dcf553f8ff1be10379cf90f77095e98be278`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -33,13 +33,13 @@ _No active experiments registered._
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 72** / **DELETE_CANDIDATE: 9**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 73** / **DELETE_CANDIDATE: 9**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `d966f21dfe5a` | canonical continuation branch |
+| `main` | `b102231127ed` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -75,7 +75,7 @@ _No active experiments registered._
 | `dino-controlled-ladder-prereg-20260829` | `753b384d864c` | observed live; not explicitly registered active |
 | `dino-zero-step-preflight-20260829` | `396ac67b6d65` | observed live; not explicitly registered active |
 | `e2e/mage-scene-first-v1-20260905` | `c6b5108f672b` | observed live; not explicitly registered active |
-| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `6d2e926892c2` | observed live; not explicitly registered active |
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `2cba8bcafefe` | observed live; not explicitly registered active |
 | `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | observed live; not explicitly registered active |
 | `feature/living-compile-v4-editor` | `cd56be7300c3` | observed live; not explicitly registered active |
 | `first-family-fit/charactergen-backbone-v1` | `15896da77dca` | observed live; not explicitly registered active |
@@ -105,6 +105,7 @@ _No active experiments registered._
 | `next/structured-depth-bridge-20260829` | `e362c473c2fd` | observed live; not explicitly registered active |
 | `ops/temp-trigger-n1d-v2-recovery-20260820` | `536b40b6a6bf` | observed live; not explicitly registered active |
 | `ops/trigger-n1d-v2-recovery-v2-verify-20260820` | `12a813a8f501` | observed live; not explicitly registered active |
+| `promote/fit1-evidence-main-20260909` | `b102231127ed` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-main-v3-20260905` | `dfb087c6a23e` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-v3-20260905` | `7cfb7efedbe9` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | observed live; not explicitly registered active |

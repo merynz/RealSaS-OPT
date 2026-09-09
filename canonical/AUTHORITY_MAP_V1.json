@@ -9,6 +9,7 @@
   "generated_rehydration_packet": "canonical/REHYDRATION_PACKET.md",
   "generated_coverage_audit": "canonical/CONTEXT_COVERAGE_AUDIT.md",
   "investor_evidence_index": "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
+  "geppetto_fit1_evidence_manifest": "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
   "historical_registry": "canonical/EXPERIMENT_REGISTRY_V1.json",
   "historical_journal": "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
   "human_ledgers": [
@@ -65,6 +66,7 @@
       "categorical_verdict": "FIT1_TERMINAL_PASS",
       "result_authority": "canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md",
       "promotion_authority": "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
+      "evidence_manifest": "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
       "source_commit": "f7be46f0a97df62a793ebf91b22297c894854f39",
       "seal_commit": "ae0af0cd39dd2468a012ba21890a4fed2da7c4c9",
       "what_it_means": "The separately preregistered reference-strength Geppetto formulation reached the Mage FIT1 terminal structural-stability gate and was subsequently promoted as the FIT1-frozen Geppetto source.",
@@ -109,6 +111,7 @@
     "purpose": "Complete the preregistered C4 three-arm test. If A0 closes, freeze the actual V7 latent/decode interface and separately preregister a V7-native A1 capacity/architecture experiment.",
     "must_read": [
       "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
+      "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
       "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
       "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
       "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
@@ -147,6 +150,7 @@
     "CURRENT_STATE.md",
     "canonical/CONTEXT_STATE_V1.json",
     "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
+    "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
     "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
     "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
@@ -157,14 +161,15 @@
   "rehydration_order": [
     "canonical/REHYDRATION_PACKET.md",
     "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
+    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
+    "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
     "CURRENT_STATE.md",
     "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
     "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_REGISTRY_V2.json",
     "canonical/CONTEXT_STATE_V1.json",
-    "canonical/LIVE_AUTHORITY_MAP.md",
-    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl"
+    "canonical/LIVE_AUTHORITY_MAP.md"
   ],
   "invariants": [
     "Only main/CURRENT_STATE.md is continuation authority.",

@@ -7,7 +7,7 @@ This repository is intentionally structured so a new AI agent/chat/session can r
 Before making any architecture, experiment, branch, or scientific-state claim:
 
 1. `canonical/REHYDRATION_PACKET.md`
-2. `canonical/SCIENTIFIC_JOURNAL_V1.jsonl` — inspect the recent tail first so the ordered sequence of decisions/requests and the reason for the current task are recovered, not only the final state
+2. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl` — inspect the recent tail first so the ordered sequence of current decisions/requests and the reason for the current task are recovered, not only the final state
 3. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 4. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 5. `CURRENT_STATE.md`
@@ -16,8 +16,10 @@ Before making any architecture, experiment, branch, or scientific-state claim:
 8. `canonical/LIVE_AUTHORITY_MAP.md`
 9. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
 10. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-11. `canonical/EXPERIMENT_REGISTRY_V1.json`
+11. `canonical/EXPERIMENT_REGISTRY_V2.json`
 12. `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` when locating exact older evidence
+
+`canonical/EXPERIMENT_REGISTRY_V1.json` and `canonical/SCIENTIFIC_JOURNAL_V1.jsonl` remain historical continuity/provenance inputs. They are not the current live registry/journal after the 2026-09-09 Geppetto promotion transaction. The current machine pointers are also declared in `canonical/AUTHORITY_MAP_V1.json` and `canonical/CONTEXT_STATE_V1.json`; if a future schema supersedes V2, follow those machine pointers rather than guessing from filenames.
 
 If `canonical/BOOTSTRAP_COVERAGE_STATE_V1.json` says `BOOTSTRAP_AUDIT_CLOSED`, also read `canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md` before interpreting coverage semantics.
 
@@ -35,7 +37,7 @@ python3 tools/render_rehydration_packet.py --write
 
 A RealSaS learned model is **not** the whole subsystem around that model. Unless the discussion is explicitly restricted to model internals, expand subsystem shorthand before reasoning about responsibility:
 
-- **IRIS** means: observation/camera contract -> learned IRIS evidence -> deterministic GSA/RiggingSurfaceIR assembly, validation and provenance -> learned consumers.
+- **IRIS** means: observation/camera contract -> learned IRIS evidence -> deterministic GSA/RiggingSurfaceIR assembly, validation and provenance -> learned consumers. Current Mage FIT1 signed-geometry evidence is the promoted scene-first V3 line; V2 remains the promoted underlying observation/foundation/evidence package where referenced by that lineage.
 - **Geppetto** means: lossless RiggingSurfaceIR -> learned skeleton/control/parent/root/mechanical-salience proposal evidence -> Compiler exact graph qualification -> QualifiedSkeletonIR/canonical IDs.
 - **Arachne** means: qualified surface+skeleton -> learned skin/deformation proposal -> Compiler skin/mesh/reference/simplex qualification -> qualified editable deformation state.
 - **Compiler** is deterministic qualification/canonicalization/proof/routing authority; it is **not permission to invent missing learned semantics**.
@@ -116,18 +118,18 @@ Every experiment claim should answer:
 9. Did that move the product/scientific target closer, reveal a dead end, or merely isolate a variable?
 10. Which next dependency/fork follows and why?
 
-These fields belong in `canonical/EXPERIMENT_REGISTRY_V1.json`, not only in prose reports.
+Current experiment records belong in `canonical/EXPERIMENT_REGISTRY_V2.json`; V1 is retained as historical structure/provenance.
 
 ## Chronology rule — live continuation memory
 
-Scientific and project chronology is append-only in `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`.
+Current scientific/project chronology is append-only in `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`. The V1 journal is historical and must not be rewritten.
 
 - New events require exact RFC3339 UTC timestamps.
 - Historical backfill must preserve the strongest verified time precision; never invent clock times.
 - Corrections/retractions are new journal events. Do not silently rewrite history.
 - **Before ending a session, append every substantive user/project decision that changes the next work item, architecture constraint, experiment selection, demo artifact queue, promotion interpretation, or stop/go state.**
 - Record requests and priorities as requests/priorities; never upgrade them into experimental PASS, promotion or scientific evidence merely because the user chose the next direction.
-- A new chat/agent must inspect the recent journal tail and be able to reconstruct the causal sequence: what was learned, what was decided next, what artifact/work was queued, and why the project moved on.
+- A new chat/agent must inspect the recent current-journal tail and be able to reconstruct the causal sequence: what was learned, what was decided next, what artifact/work was queued, and why the project moved on.
 - The journal is not a miscellaneous diary. Only continuity-relevant decisions, corrections, experiments, promotions, architecture changes and engineering-queue changes belong there.
 
 The continuity requirement is stronger than “know the latest state”: the agent should be able to answer questions such as “what did we decide immediately after IRIS FIT1?” from repository chronology without asking the user to repeat it.
@@ -145,6 +147,7 @@ Before citing an old IRIS learned result as clean current observation-only evide
 
 - `canonical/IRIS_LEAK_SCOPE_20260903.md`
 - `canonical/IRIS_PRIVILEGED_INPUT_FIREWALL_REPAIR_V1_20260903.md`
+- `models/iris/v3/PROMOTED_MAGE_FIT_WITNESS_V1.json` for the current promoted Mage signed-geometry witness.
 
 Affected historical learned IRIS results remain quarantined; the repaired source firewall does not retroactively cleanse them.
 
@@ -175,8 +178,8 @@ An experiment is not complete merely because a notebook/report exists. Closing a
 - preregistration;
 - exact result/evidence/provenance;
 - implementation/source commit;
-- `canonical/EXPERIMENT_REGISTRY_V1.json`;
-- `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`;
+- current experiment registry (`canonical/EXPERIMENT_REGISTRY_V2.json`);
+- current scientific journal (`canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`);
 - experiment authority ledger;
 - architecture authority ledger when an architecture belief changed;
 - context state / AOA coverage;

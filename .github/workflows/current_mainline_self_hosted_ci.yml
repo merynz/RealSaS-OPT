@@ -14,6 +14,20 @@ on:
       - 'tests/iris/test_iris_mainline_source_v1.py'
       - 'tests/repository/**'
       - 'canonical/**'
+      - 'requirements/**'
+      - 'LICENSE'
+      - 'THIRD_PARTY_NOTICES.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - '.editorconfig'
+      - '.gitattributes'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '.python-version'
+      - 'pyproject.toml'
+      - '.github/CODEOWNERS'
+      - '.github/dependabot.yml'
+      - '.github/pull_request_template.md'
       - 'RESTORATION_STATE.md'
       - 'SYSTEM_INDEX.md'
       - '.github/workflows/current_mainline_self_hosted_ci.yml'
@@ -24,31 +38,50 @@ on:
 jobs:
   fast-current-mainline:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 20
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install CPU regression dependencies
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
+      - name: Install pinned CPU regression dependencies
         env:
           PIP_DISABLE_PIP_VERSION_CHECK: '1'
           PIP_DEFAULT_TIMEOUT: '60'
         run: |
-          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pytest
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
       - name: Compile current Python ownership roots
-        run: python -m compileall -q models compiler runtime/reference_v4
-      - name: Repository readiness + import firewall
-        run: PYTHONPATH=. python -m pytest -q tests/repository/test_canonical_main_readiness_v1.py
+        run: python -m compileall -q models compiler runtime/reference_v4 tools tests
+      - name: Repository governance and readiness
+        run: |
+          python -m pytest -q \
+            tests/repository/test_repository_governance_v1.py \
+            tests/repository/test_model_branding_boundary_v1.py \
+            tests/repository/test_current_continuity_authority_v2.py \
+            tests/repository/test_canonical_main_readiness_v1.py
       - name: Learned source ownership
         run: |
-          PYTHONPATH=. python -m pytest -q \
+          python -m pytest -q \
             tests/models \
             tests/iris/test_iris_mainline_source_v1.py
       - name: Compiler regressions
-        run: PYTHONPATH=. python -m pytest -q tests/compiler
+        run: python -m pytest -q tests/compiler
       - name: Fast gate summary
         run: |
           echo 'CURRENT_MAINLINE_FAST_GATE_PASS'
           echo "commit=$GITHUB_SHA"
+          echo 'self_hosted_only=true'
+          echo 'pinned_environment=true'
+          echo 'repository_governance=true'
           echo 'fit_authorization=UNCHANGED_FALSE_UNTIL_CANONICAL_MAIN_POST_MERGE_GATE'

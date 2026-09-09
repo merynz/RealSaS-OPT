@@ -50,6 +50,18 @@ If a future statement says “Geppetto made the skeleton,” restate it more pre
 
 Before moving a responsibility across layers, inspect `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` and ask whether the move creates a second semantic owner, hides model failure with deterministic repair, or violates fail-close.
 
+## Dependency / model naming boundary
+
+RealSaS-owned model/package/class/architecture names describe RealSaS responsibilities and mechanisms; they do not adopt external research-project branding merely because a paper or repository inspired a clean-room mechanism.
+
+- External project names may remain in comparison reports, clean-room audits, bibliographies, preregistrations and historical scientific lineage when exact provenance matters.
+- A direct incorporated dependency keeps its real upstream identity where technically or legally required.
+- **DINO/DINOv2 is the current explicit direct model dependency** and is bound by `models/iris/v2/dinov2_foundation_v2.py` plus `THIRD_PARTY_NOTICES.md`.
+- If another direct external model/code dependency is introduced, update `THIRD_PARTY_NOTICES.md` before promotion.
+- `tests/repository/test_model_branding_boundary_v1.py` protects the current promoted `models/` namespace from known external-reference branding.
+
+See `docs/repository/DEPENDENCY_AND_IP_POLICY.md`, `THIRD_PARTY_NOTICES.md`, and `LICENSE`.
+
 ## FIT1 continuity rule
 
 The scientific FIT1 gate began at commit:
@@ -136,12 +148,9 @@ The continuity requirement is stronger than “know the latest state”: the age
 
 ## Current known context guards
 
-Before claiming RealSaS needs a RigAnything-equivalent Geppetto challenger from scratch, inspect:
+Before claiming RealSaS needs a fuller Geppetto structural-generation challenger from scratch, inspect `canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md`.
 
-- `canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md`
-- `models/geppetto/challengers/riganything_mechanisms_v1.py`
-
-A fuller research challenger already exists. AR-01 was a narrower minimal mechanical-feedback isolation experiment and must not be widened into a full RigAnything-formulation verdict.
+The historical fuller clean-room challenger source is recoverable at creation commit `ba634955777479ee05a5b199742710b1736123b5` under its then-current path. It is **historical mechanism provenance, not a current promoted `models/` home**. AR-01 was a narrower minimal mechanical-feedback isolation experiment and must not be widened into a verdict on the fuller formulation.
 
 Before citing an old IRIS learned result as clean current observation-only evidence, inspect:
 
@@ -171,6 +180,8 @@ Routine RealSaS scientific/mainline GitHub Actions run on the user's local self-
 
 Do not migrate routine jobs to GitHub-hosted runners or create branch-push fan-out without an explicit reason. Prior hosted Actions volume triggered a quota/usage warning.
 
+Current repository-development/CPU-CI pins live under `requirements/` and `.python-version`. They do not retroactively redefine a sealed experiment's environment identity.
+
 ## Completion transaction
 
 An experiment is not complete merely because a notebook/report exists. Closing a scientific gate requires reconciling, as applicable:
@@ -185,5 +196,7 @@ An experiment is not complete merely because a notebook/report exists. Closing a
 - context state / AOA coverage;
 - `CURRENT_STATE.md` when stop/go changes;
 - explicit supersession/retraction of any old interpretation.
+
+A promotion/refreeze additionally requires one obvious promoted source home, machine-verifiable evidence identity, source/evidence/authority reconciliation and regression protection.
 
 The goal is not more documentation. The goal is **deterministic context reconstruction with scientific responsibility boundaries intact**.

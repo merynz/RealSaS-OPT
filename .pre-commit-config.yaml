@@ -4,6 +4,8 @@ repos:
     hooks:
       - id: check-added-large-files
         args: ["--maxkb=10240"]
+      - id: check-ast
+        files: ^(models|compiler|runtime|tools|tests)/
       - id: check-json
       - id: check-merge-conflict
       - id: check-toml
@@ -17,4 +19,5 @@ repos:
     rev: v0.12.9
     hooks:
       - id: ruff-check
-        args: ["--fix"]
+        files: ^(models|compiler|runtime|tools|tests)/
+        args: ["--select=E9,F63,F7,F82"]

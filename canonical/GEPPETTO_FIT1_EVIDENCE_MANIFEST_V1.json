@@ -1,0 +1,120 @@
+{
+  "schema": "RealSaS.GeppettoFIT1EvidenceManifest.v1",
+  "status": "FIT1_TERMINAL_PASS__PROMOTED_FROZEN__GENERALIZATION_NOT_CLAIMED",
+  "witness": "Mage FIT1",
+  "scientific_scope": "same-witness Geppetto capability and terminal stability only",
+  "source_authority": {
+    "frozen_optimizer_source_commit": "f7be46f0a97df62a793ebf91b22297c894854f39",
+    "seal_commit": "ae0af0cd39dd2468a012ba21890a4fed2da7c4c9",
+    "contract_tag": "02a7081b2a8323e6",
+    "preregistration": "experiments/geppetto_reference_strength_fullstack_v1/GEPPETTO_REFERENCE_STRENGTH_FIT1_PREREG_V1.md",
+    "apparatus_freeze": "experiments/geppetto_reference_strength_fullstack_v1/GEPPETTO_REFERENCE_STRENGTH_APPARATUS_FREEZE_V1.md",
+    "loss_freeze": "experiments/geppetto_reference_strength_fullstack_v1/GEPPETTO_REFERENCE_STRENGTH_LOSS_FREEZE_V1.md",
+    "runner": "experiments/geppetto_reference_strength_fullstack_v1/run_geppetto_reference_strength_fit1_v1.py",
+    "closure": "canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md",
+    "promotion": "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md"
+  },
+  "promoted_model": {
+    "source_home": "models/geppetto/reference_strength_v1/",
+    "entry_point": "GeppettoReferenceStrengthNoLearnedSlotV1",
+    "architecture_id": "RealSaS.Geppetto.ReferenceStrength.DirectSurfaceCausalDiffusion.DeterministicViewDirection.v1",
+    "sealed_candidate_git_blob_sha1": "e9b626815c63a96ac1d390580e1aa19f8bf1cfb2",
+    "promoted_candidate_git_blob_sha1": "e9b626815c63a96ac1d390580e1aa19f8bf1cfb2",
+    "sealed_tensorization_git_blob_sha1": "647fdcb98c305c3f7d3afd05dd61449999721034",
+    "promoted_tensorization_git_blob_sha1": "647fdcb98c305c3f7d3afd05dd61449999721034",
+    "sealed_no_learned_slot_git_blob_sha1": "770909a9c2992ada0f3018badb2a42632a124b3b",
+    "promoted_no_learned_slot_wrapper_git_blob_sha1_at_transaction": "6f2505aa9e4169cec29c2c1508cde7264971073c",
+    "wrapper_difference_policy": "semantic-home import rebinding only; algorithm and deterministic view-direction behavior remain frozen"
+  },
+  "terminal_result": {
+    "categorical_verdict": "FIT1_TERMINAL_PASS",
+    "closure_optimizer_step": 14080,
+    "terminal_streak_checks": 48,
+    "terminal_stability_optimizer_steps": 3072,
+    "qualified_control_count": 22,
+    "qualified_deform_root_count": 1,
+    "teacher_feedback_during_free_run": false,
+    "fixed_product_control_cap": false,
+    "diffusion_evaluation_seeds": [11, 23, 47, 89]
+  },
+  "content_identities": {
+    "mage_target_sha256": "0b5a25c877116de60b710b7bb2a7848f30988e1622e2eda8084cad21c8ca23c9",
+    "qualified_skeleton_ir_sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992",
+    "final_skeleton_proposal_ir_sha256": "91147822d1e24c2d5d8600eea5c60543eb1c0584ad2fca9baca952fe788ded26",
+    "final_diffusion_seed_reports_sha256": "606a66137d34cb362ea58793228b729ccd56274fd6acfc99102ff42cc428526c",
+    "final_checkpoint_sha256": "b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30",
+    "progress_checkpoint_sha256": "c47a491053ec045bd9d2b285eff32aa916e987724ff6f826da8ef5be5c9e03b3",
+    "final_result_json_sha256": "728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045",
+    "runner_process_sha256": "36c37bd8946c2fff88f90e05d016b87c23040e809669b19de0c0f66b6587e0ec",
+    "signed_zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+    "upstream_iris_checkpoint_sha256": "766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2",
+    "canonical_v0_skeleton_png_sha256": "348c7b0abe4ca63b0cb2cec525970c51fd4b1049afbb4d5487e20963a4c5e26f",
+    "pose0_raster_gsa_qualified_png_sha256": "d6590c7a63a1198a73a2724808f20662e28982ed795f3a5a6e9b4094e174f2a4",
+    "exact_v0_camera_sha256": "73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541"
+  },
+  "external_artifacts": {
+    "provider": "Google Drive",
+    "contract_folder_id": "12KG1v1WQ_1o9KAns7SobftJvSzZl1Fs8",
+    "run_folder_id": "1ZTm47BL6ByfHhN8HdRExxzZCC7kSndkZ",
+    "seal_document_id": "1ZnUdt1gt6tyVQ9mTGT2fDtRkYoYg9xkX",
+    "package_manifest_id": "1XyD8wgvhkGAU7nSWdsQWtJCeMchjTzeW",
+    "decision_id": "197IPG46ZUZa0wfMOA5KrwzOVgnJf84sk",
+    "scientific_summary_id": "1X41PBcSDDXfBeCmwPcNf4lkPeV6QwmrS",
+    "checkpoint": {
+      "id": "1ZCbqD52-5JhsHEUxEdxs99oRHgg0l01-",
+      "bytes": 46014477,
+      "sha256": "b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30"
+    },
+    "final_result": {
+      "id": "1w64sr58t4JNctknp9KZPsxqyXxyL5jED",
+      "bytes": 1921262,
+      "sha256": "728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045"
+    },
+    "qualified_skeleton": {
+      "id": "1N-UsUnbqfxUUCVUYFHVsvL18ieDX3lCM",
+      "bytes": 16604,
+      "sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992"
+    },
+    "final_skeleton_proposal": {
+      "id": "1hs160Md_zpH3FYPKfTjvAPx1ywLvNysH",
+      "bytes": 246381,
+      "sha256": "91147822d1e24c2d5d8600eea5c60543eb1c0584ad2fca9baca952fe788ded26"
+    },
+    "diffusion_seed_reports": {
+      "id": "1hxVWR_0TNEKrQRGJDHITgbMfnNSkZ3Ff",
+      "bytes": 1176731,
+      "sha256": "606a66137d34cb362ea58793228b729ccd56274fd6acfc99102ff42cc428526c"
+    },
+    "progress_checkpoint": {
+      "id": "1PHv9Wfa5B6QSV8_jaRFbhckguj48YsCw",
+      "bytes": 138236920,
+      "sha256": "c47a491053ec045bd9d2b285eff32aa916e987724ff6f826da8ef5be5c9e03b3"
+    },
+    "runner_process": {
+      "id": "1NtBJZqYx0F0HVC8BcoTkVtwmPY0a_vIW",
+      "bytes": 408,
+      "sha256": "36c37bd8946c2fff88f90e05d016b87c23040e809669b19de0c0f66b6587e0ec"
+    },
+    "canonical_v0_skeleton_png_id": "1TnqCYuj8FBc8W4xoxW0ylykd3IjAB3xj",
+    "pose0_raster_gsa_qualified_png_id": "1YO1_OKDrAG8nnpwTYcnShbv91tCl84gN",
+    "pose4_raster_gsa_qualified_png_id": "1SdmapiLWss0b1l3aY6EFVYQhxNg6mYRB",
+    "v4_demo_hero_png_id": "1u1OG7lcuCeInhYux9AsecYBAX_QRpRc5",
+    "retired_debug_3d_png_id": "13MIForhbO4RqNbBjKnTWxzPpq4gZN043"
+  },
+  "upstream_witness": {
+    "iris_promoted_witness": "models/iris/v3/PROMOTED_MAGE_FIT_WITNESS_V1.json",
+    "iris_scene_first_source": "models/iris/v3/scene_first_signed_v3.py",
+    "iris_checkpoint_sha256": "766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2",
+    "signed_zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+    "teacher_mesh_used_at_inference": false
+  },
+  "claim_boundary": {
+    "geppetto_fit1_closed": true,
+    "geppetto_promoted_frozen": true,
+    "unseen_character_generalization": false,
+    "unseen_family_generalization": false,
+    "arachne_a0_closed": false,
+    "arachne_a1_promoted": false,
+    "product_pass": false
+  }
+}

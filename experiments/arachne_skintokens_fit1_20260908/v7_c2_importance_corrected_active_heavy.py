@@ -9,7 +9,10 @@ row target. Sampled Dice semantics are deliberately held unchanged between arms.
 """
 
 from dataclasses import dataclass
+import hashlib
 import numpy as np
+import torch
+import torch.nn.functional as F
 
 
 @dataclass(frozen=True)
@@ -114,6 +117,105 @@ def exact_expectation_identity(
     return target, corrected
 
 
+def build_matched_schedule(
+    teacher_weights: np.ndarray,
+    supervised: np.ndarray,
+    *,
+    steps: int = CONTRACT.optimizer_steps,
+    query_count: int = CONTRACT.query_count,
+    dense_fraction: float = CONTRACT.dense_fraction,
+    prefix_min: int = 1,
+    prefix_max: int = 4,
+    seed: int = CONTRACT.seed,
+    active_epsilon: float = CONTRACT.active_epsilon,
+) -> tuple[dict[int, list[np.ndarray]], dict[int, list[int]], str]:
+    """Build the one frozen sample/prefix schedule consumed by both C2 arms."""
+    tw = np.asarray(teacher_weights, np.float64)
+    sup = np.asarray(supervised, bool)
+    if tw.ndim != 2 or sup.shape != (tw.shape[0],):
+        raise ValueError("teacher_weights/supervised shape drift")
+    if query_count <= 0 or steps <= 0 or not (0.0 < dense_fraction < 1.0):
+        raise ValueError("invalid schedule cardinality")
+    rng = np.random.RandomState(int(seed))
+    sup_idx = np.flatnonzero(sup).astype(np.int64)
+    dense_count = int(round(query_count * dense_fraction))
+    uniform_count = query_count - dense_count
+    samples: dict[int, list[np.ndarray]] = {}
+    prefixes: dict[int, list[int]] = {}
+    h = hashlib.sha256()
+    for step in range(1, int(steps) + 1):
+        ss: list[np.ndarray] = []
+        pp: list[int] = []
+        for j in range(tw.shape[1]):
+            active = np.flatnonzero(sup & (tw[:, j] > float(active_epsilon))).astype(np.int64)
+            if active.size == 0:
+                raise ValueError(f"joint {j} has no active support")
+            dense = rng.choice(active, size=dense_count, replace=(active.size < dense_count))
+            uniform = rng.choice(sup_idx, size=uniform_count, replace=False)
+            idx = np.concatenate([uniform, dense]).astype(np.int64)
+            rng.shuffle(idx)
+            prefix = int(rng.randint(int(prefix_min), int(prefix_max) + 1))
+            ss.append(idx)
+            pp.append(prefix)
+            h.update(np.ascontiguousarray(idx, dtype=np.int64).tobytes())
+            h.update(prefix.to_bytes(2, "little", signed=False))
+        samples[step] = ss
+        prefixes[step] = pp
+    return samples, prefixes, h.hexdigest()
+
+
+def sampled_scalar_loss(
+    logits: torch.Tensor,
+    truth: torch.Tensor,
+    supervision_mask: torch.Tensor,
+    sample_weights: torch.Tensor,
+    *,
+    arm: str,
+    mse_weight: float = CONTRACT.mse_weight,
+    dice_weight: float = CONTRACT.dice_weight,
+    dice_epsilon: float = CONTRACT.dice_epsilon,
+) -> dict[str, torch.Tensor]:
+    """Exact C2 control/treatment loss. Dice semantics are common by contract."""
+    if logits.shape != truth.shape or supervision_mask.shape != logits.shape or sample_weights.shape != logits.shape:
+        raise ValueError("C2 sampled loss shape drift")
+    with torch.autocast(device_type=logits.device.type, enabled=False):
+        z = logits.float()
+        t = truth.float()
+        m = supervision_mask.to(torch.bool)
+        p = torch.sigmoid(z)
+        bce_el = F.binary_cross_entropy_with_logits(z, t, reduction="none")
+        mse_el = (p - t).square()
+        if arm == CONTRACT.control_name:
+            bce = bce_el[m].mean()
+            mse = mse_el[m].mean()
+            effective_weight = torch.ones_like(z)
+        elif arm == CONTRACT.treatment_name:
+            w = sample_weights.float()
+            if not torch.isfinite(w).all() or bool((w < 0).any()):
+                raise ValueError("invalid C2 importance weights")
+            bce = (w[m] * bce_el[m]).mean()
+            mse = (w[m] * mse_el[m]).mean()
+            effective_weight = w
+        else:
+            raise ValueError(f"unknown C2 arm: {arm}")
+
+        pm = torch.where(m, p, torch.zeros_like(p))
+        tm = torch.where(m, t, torch.zeros_like(t))
+        reduce_dims = tuple(range(1, pm.ndim))
+        numerator = 2.0 * (pm * tm).sum(dim=reduce_dims) + float(dice_epsilon)
+        denominator = pm.square().sum(dim=reduce_dims) + tm.square().sum(dim=reduce_dims) + float(dice_epsilon)
+        dice = (1.0 - numerator / denominator).mean()
+        total = bce + float(mse_weight) * mse + float(dice_weight) * dice
+        return {
+            "total": total,
+            "bce": bce,
+            "mse": mse,
+            "dice": dice,
+            "l1": (p[m] - t[m]).abs().mean(),
+            "mean_weight": effective_weight[m].mean(),
+        }
+
+
 def run_contract_fixture() -> dict[str, object]:
     sup = np.asarray([True, True, True, True, False])
     teacher = np.asarray([1.0, 0.25, 0.0, 0.0, 0.0])
@@ -130,6 +232,27 @@ def run_contract_fixture() -> dict[str, object]:
     target, corrected = exact_expectation_identity(f, teacher, sup)
     if abs(target - corrected) > 1e-12:
         raise RuntimeError("fixture expectation identity failed")
+
+    tw = np.stack([teacher, np.asarray([0.0, 1.0, 0.5, 0.0, 0.0])], axis=1)
+    samples, prefixes, schedule_sha = build_matched_schedule(
+        tw, sup, steps=3, query_count=4, dense_fraction=0.5, prefix_min=1, prefix_max=4, seed=17
+    )
+    if len(samples) != 3 or len(prefixes) != 3 or not schedule_sha:
+        raise RuntimeError("fixture schedule failed")
+
+    z = torch.tensor([[1.0, -2.0, 0.3, -0.8]], dtype=torch.float32)
+    t = torch.tensor([[1.0, 0.0, 0.25, 0.0]], dtype=torch.float32)
+    m = torch.ones_like(z, dtype=torch.bool)
+    sw = torch.tensor([[0.5, 2.0, 0.5, 2.0]], dtype=torch.float32)
+    lc = sampled_scalar_loss(z, t, m, sw, arm=CONTRACT.control_name)
+    lt = sampled_scalar_loss(z, t, m, sw, arm=CONTRACT.treatment_name)
+    if not torch.isfinite(lc["total"]) or not torch.isfinite(lt["total"]):
+        raise RuntimeError("fixture torch loss nonfinite")
+    if float(lc["dice"]) != float(lt["dice"]):
+        raise RuntimeError("fixture Dice semantics drift")
+    if float(lc["total"]) == float(lt["total"]):
+        raise RuntimeError("fixture treatment has no effect")
+
     active = sup & (teacher > CONTRACT.active_epsilon)
     inactive = sup & ~active
     return {
@@ -141,6 +264,10 @@ def run_contract_fixture() -> dict[str, object]:
         "corrected_expectation": corrected,
         "active_weight_values": sorted(set(map(float, w[active]))),
         "inactive_weight_values": sorted(set(map(float, w[inactive]))),
+        "schedule_sha256_fixture": schedule_sha,
+        "control_total": float(lc["total"]),
+        "treatment_total": float(lt["total"]),
+        "shared_dice": float(lc["dice"]),
     }
 
 
@@ -151,5 +278,7 @@ __all__ = [
     "uniform_target_probabilities",
     "importance_weights",
     "exact_expectation_identity",
+    "build_matched_schedule",
+    "sampled_scalar_loss",
     "run_contract_fixture",
 ]

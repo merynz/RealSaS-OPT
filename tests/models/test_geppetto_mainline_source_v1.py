@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import ast
 import hashlib
 import unittest
 
@@ -27,6 +28,20 @@ def git_blob_sha1(data: bytes) -> str:
     return hashlib.sha1(header + data).hexdigest()
 
 
+def assigned_string_constant(path: Path, name: str) -> str:
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        if not any(isinstance(target, ast.Name) and target.id == name for target in node.targets):
+            continue
+        value = ast.literal_eval(node.value)
+        if not isinstance(value, str):
+            raise AssertionError(f"{name} is not a string constant in {path}")
+        return value
+    raise AssertionError(f"missing assigned string constant {name} in {path}")
+
+
 class GeppettoMainlineSourceV1(unittest.TestCase):
     def test_current_frozen_candidate_is_byte_preserved(self) -> None:
         source = (FROZEN_SOURCE / "geppetto_reference_strength_candidate_v1.py").read_bytes()
@@ -43,9 +58,10 @@ class GeppettoMainlineSourceV1(unittest.TestCase):
     def test_no_slot_algorithm_and_current_import_home_are_preserved(self) -> None:
         frozen = (FROZEN_SOURCE / "geppetto_reference_strength_no_learned_slot_v1.py").read_bytes()
         self.assertEqual(git_blob_sha1(frozen), FROZEN_NO_SLOT_GIT_BLOB)
-        current = (CURRENT / "geppetto_reference_strength_no_learned_slot_v1.py").read_text(encoding="utf-8")
+        current_path = CURRENT / "geppetto_reference_strength_no_learned_slot_v1.py"
+        current = current_path.read_text(encoding="utf-8")
         self.assertIn("from .geppetto_reference_strength_candidate_v1 import", current)
-        self.assertIn(ARCHITECTURE_ID, current)
+        self.assertEqual(assigned_string_constant(current_path, "ARCHITECTURE_ID"), ARCHITECTURE_ID)
         self.assertIn(FROZEN_SOURCE_COMMIT, current)
         self.assertNotIn("nn.Parameter", current)
 

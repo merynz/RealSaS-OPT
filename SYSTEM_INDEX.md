@@ -11,9 +11,9 @@ This file answers: **"What subsystems exist on current main and where do they li
 | Subsystem | Current mainline | State |
 |---|---|---|
 | IRIS V2 | `models/iris/v2/` | **CURRENT — inference + foundation/apparatus + checkpoint + train/eval visible** |
-| Geppetto V2 | `models/geppetto/v2/` | **CURRENT SOURCE HOME — architecture refreeze/promotion status is governed by `CURRENT_STATE.md`** |
-| SkinFieldCodec V1 | `models/skin_field_codec/v1/` | **CURRENT — learned codec/checkpoint/config + A0 train/eval visible** |
-| Arachne V2 | `models/arachne/v2/` | **CURRENT — inference/conditioning/geometry + base A1 train/eval visible** |
+| Geppetto Reference-Strength V1 | `models/geppetto/reference_strength_v1/` | **CURRENT FIT1-FROZEN SOURCE — Mage terminal PASS promoted; generalization not claimed** |
+| SkinFieldCodec V1 | `models/skin_field_codec/v1/` | **CURRENT BASE SOURCE; active V7 A0 research is not promoted** |
+| Arachne V2 | `models/arachne/v2/` | **PRIOR/CURRENT SOURCE SCAFFOLD — no V7-native A1 FIT1 model promoted** |
 
 No fifth learned subsystem is currently authorized by V4 architecture/current source composition. Older neural implementations remain research/provenance. Models emit evidence/proposals only; Compiler qualification remains authoritative.
 
@@ -88,7 +88,7 @@ The former sequence
 
 `restoration closure PASS -> canonical main ref equality -> post-merge integrity -> first-fit-base freeze`
 
-is preserved as historical provenance only. **Do not use its old `FIT NOT AUTHORIZED` wording as current state.** Later work has already moved beyond that gate. Current FIT/Geppetto authorization is exclusively defined by `CURRENT_STATE.md` and the live continuity views.
+is preserved as historical provenance only. **Do not use its old `FIT NOT AUTHORIZED` wording as current state.** Later work has already moved beyond that gate. Current FIT/Geppetto/Arachne authorization is exclusively defined by `CURRENT_STATE.md` and the live continuity views.
 
 ## Research / evidence zones
 

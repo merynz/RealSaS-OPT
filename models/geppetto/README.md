@@ -2,36 +2,46 @@
 
 Geppetto is the RealSaS learned anonymous skeleton/control proposal subsystem.
 
-## Current mainline
+## Current FIT1-frozen mainline
 
-`models/geppetto/v2/`
+`models/geppetto/reference_strength_v1/`
 
-Current inference source is byte-preserved from the audited R6 source:
+Shipping/FIT1 entry point:
 
-- `geppetto_candidate_v2.py`
-- `geppetto_conditioning_v2.py`
-- `geppetto_checkpoint_v2.py`
+`GeppettoReferenceStrengthNoLearnedSlotV1`
 
-Current V2 training/evaluation source is also visible in the same version package:
+Architecture id:
 
-- `training_targets_v2.py` — byte-preserved V2 teacher projection;
-- `geppetto_loss_v2.py` — byte-preserved anonymous/multimodal loss;
-- `geppetto_train_v2.py` — byte-preserved train step;
-- `geppetto_eval_v2.py` — byte-preserved evaluation metrics;
-- `training_targets_v1.py` — narrow compatibility target type only, rebound so V2 training does not import the historical V1 conditioning implementation.
+`RealSaS.Geppetto.ReferenceStrength.DirectSurfaceCausalDiffusion.DeterministicViewDirection.v1`
 
-The dated experiment tree remains intact as provenance and contains older V1 architecture, capacity diagnostics, overfit/panel experiments and oracle-substrate gates.
+This formulation was separately promoted after the sealed Mage FIT1 terminal PASS. Promotion authority:
+
+`canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md`
+
+Scientific closure:
+
+`canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md`
+
+The promoted formulation consumes lossless `RiggingSurfaceIR` evidence and includes exact GSA-relation message passing, global full-surface memory, prediction-only causal recurrence, per-step full-surface cross-attention, conditional residual diffusion, native STOP/count, soft internal parent feedback, deterministic camera-direction coding, and all-pairs final parent evidence.
+
+The frozen model uses no learned absolute V0..V7 slot embedding.
+
+## Prior V2 source
+
+`models/geppetto/v2/` remains preserved as prior mainline/research provenance and compatibility source. It is no longer the FIT1-frozen Geppetto formulation.
+
+Historical V1 candidates, AR-01, RigAnything mechanism challengers, capacity diagnostics and older overfit/panel work remain research/evidence unless explicitly promoted.
 
 ## Authority boundary
 
-Geppetto consumes admitted `RiggingSurfaceIR`-derived conditioning and emits anonymous, multimodal control evidence as `SkeletonProposalIR`.
+Geppetto consumes admitted `RiggingSurfaceIR`-derived evidence and emits anonymous, multimodal control evidence as `SkeletonProposalIR`.
 
 Geppetto does **not** own canonical joint IDs, final root/tree/forest selection, graph legality, skeleton qualification, product state or proof. Those remain Compiler-owned.
 
-## Training firewall
+Teacher skeleton/skin information is training/evaluation-only. The frozen free-running FIT1 result used no teacher feedback. Anonymous geometry/topology evidence and product-available surface/camera information remain the learned inference boundary.
 
-Teacher information is training/evaluation-only. Teacher control IDs may be used inside a target to reconstruct parent indices, but they never become proposal/product identity. Anonymous geometry matching and current V2 conditioning remain the learned training boundary.
+## Current downstream state
 
-## Older source
+Geppetto FIT1 is closed and promoted. The product-science bottleneck is Arachne.
 
-`geppetto_candidate_v1.py`, `geppetto_loss_v1.py`, V1 candidate config, oracle-substrate harnesses and behavioral diagnostics remain research/historical evidence unless explicitly promoted by a later decision.
+No current V7-native Arachne A1 model is promoted. The active Arachne work remains experiment-only until its own scientific and promotion gates close.

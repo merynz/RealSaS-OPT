@@ -2,27 +2,31 @@
 
 Canonical RealSaS research, compiler, proof and runtime workspace.
 
-## Start here — continuation / context rehydration
+## Start here
 
-For a new chat, agent, machine session, or resumed research thread, **do not reconstruct current truth by reading reports in arbitrary order**.
+For a new chat, agent, machine session, technical reviewer, or investor due-diligence pass, **do not reconstruct current truth by reading dated reports in arbitrary order**.
 
-1. **`canonical/REHYDRATION_PACKET.md`** — compact 2–5 minute current-context reconstruction view. Generated/cache; not independent authority.
-2. **`CURRENT_STATE.md`** — canonical stop/go and continuation authority on `main`.
-3. **`canonical/LIVE_AUTHORITY_MAP.md`** — generated live branch/experiment navigation. If stale/missing, run `python tools/render_authority_map.py`.
-4. **`canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`** — mechanism implementation vs test vs canonical status.
-5. **`canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`** — exact gate semantics, including what each experiment does **not** prove.
-6. **`REPOSITORY_MAP.md`** / **`SYSTEM_INDEX.md`** — deeper source/package navigation.
+1. **`canonical/REHYDRATION_PACKET.md`** — compact current-context reconstruction.
+2. **`canonical/FIT1_EVIDENCE_INDEX_20260909.md`** — short proof chain for the current Mage FIT1 work: exact source, prereg, hashes, terminal result, promotion and non-claims.
+3. **`CURRENT_STATE.md`** — canonical stop/go and continuation authority on `main`.
+4. **`canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`** — FIT1 scientific chronology.
+5. **`canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`** — mechanism implementation/test/promotion status.
+6. **`canonical/LIVE_AUTHORITY_MAP.md`** — generated live branch/experiment navigation.
+7. **`REPOSITORY_MAP.md`** / **`SYSTEM_INDEX.md`** — deeper source/package navigation.
 
-Machine continuity state lives in:
+## Current scientific status — 2026-09-09
 
-- `canonical/CONTEXT_STATE_V1.json`
-- `canonical/AUTHORITY_MAP_V1.json`
+**Geppetto is closed for the controlled Mage FIT1 witness and separately promoted as a frozen source.**
 
-The generated views can always be reconstructed from those files + live repository refs.
+Current Geppetto source home:
 
-## Important supersession note
+`models/geppetto/reference_strength_v1/`
 
-`RESTORATION_STATE.md` is preserved restoration-era evidence. It is **not current continuation authority** and may contain historically correct stop/go statements that have since been superseded. Always start from `CURRENT_STATE.md` / the rehydration packet.
+The promoted formulation reached `FIT1_TERMINAL_PASS` at optimizer step `14080` and maintained the required `48/48` full structural checks across `3072` optimizer steps. The exact checkpoint/result/qualified-skeleton hashes and source lineage are in `canonical/FIT1_EVIDENCE_INDEX_20260909.md`.
+
+**The current bottleneck is Arachne A0 / SkinFieldCodec.** No current V7-native Arachne A1 model is promoted, and no full end-to-end `PRODUCT_PASS` claim exists yet.
+
+This distinction is deliberate: a reviewer should be able to see both what has genuinely closed and what remains scientifically open without reading chat history.
 
 ## Product boundary
 
@@ -30,22 +34,42 @@ RealSaS ships an **eight-direction editable 2D/2.5D puppet**. World/camera-space
 
 Canonical product flow:
 
-`IRIS -> GSA/RiggingSurfaceIR -> Geppetto proposal -> Compiler qualification -> Arachne proposal -> Compiler skin/mesh/appearance/motion -> proof/repair -> export -> runtime`
+`8 raster observations + exact cameras -> IRIS -> deterministic GSA/RiggingSurfaceIR -> Geppetto proposal -> Compiler skeleton qualification -> SkinFieldCodec/Arachne proposal -> Compiler skin/mesh qualification -> appearance/motion -> proof/repair -> export -> runtime`
 
-## Authority rule
+## Current learned homes
 
-`compiler/realsas_compiler_core/` is the single canonical product/identity/qualification authority.
-Historical production knowledge may be promoted only **behind** that authority. Historical code never regains ownership merely because it is older or larger.
+- IRIS: `models/iris/v2/`
+- Geppetto FIT1-frozen: `models/geppetto/reference_strength_v1/`
+- prior Geppetto V2 provenance: `models/geppetto/v2/`
+- base SkinFieldCodec source: `models/skin_field_codec/v1/` — current V7 A0 research is not yet promoted
+- prior/current Arachne scaffold: `models/arachne/v2/` — no present V7-native A1 FIT1 promotion
+
+Models emit evidence or proposals. `compiler/realsas_compiler_core/` remains the single canonical product/identity/qualification authority.
+
+## Evidence rule
+
+For a scientific claim, the repository should expose the chain:
+
+`preregistration -> frozen source/apparatus -> run/result -> content hashes -> closure -> separate promotion decision`.
+
+The current Geppetto FIT1 chain follows exactly that pattern. Large checkpoints do not need to be committed into Git to count as evidence; their byte identity is SHA-256 bound and the source/result lineage is preserved.
+
+## Important non-claims
+
+- FIT1 same-witness success is not unseen-family generalization.
+- Geppetto FIT1 PASS is not Arachne PASS.
+- SkinFieldCodec A0 PASS would not itself be Arachne A1 PASS.
+- Learned skinning closure would still not automatically create `PRODUCT_PASS`; product acceptance has its own independent contract.
 
 ## Repository rule
 
-- production authority is obvious from path;
-- experiments never masquerade as production;
-- historical evidence is preserved, but cannot execute by provenance alone;
-- generated/archival reports do not become semantic owners;
-- every promoted historical source is SHA-bound and regression-gated;
+- production/current source authority is obvious from path or explicit promotion record;
+- experiments never masquerade as promoted product truth;
+- historical evidence is preserved but cannot execute by provenance alone;
 - source existence != mechanism test;
 - mechanism test != full-formulation verdict;
-- FIT1 witness success != generalization evidence.
+- scientific PASS != automatic promotion;
+- branch recency != authority;
+- Compiler/runtime consumers cannot mint learned semantics that their upstream models failed to provide.
 
-See `docs/repository/AUTHORITY_MODEL.md` and `docs/repository/STRUCTURE_POLICY.md`.
+See `docs/repository/AUTHORITY_MODEL.md`, `docs/repository/STRUCTURE_POLICY.md`, and `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`.

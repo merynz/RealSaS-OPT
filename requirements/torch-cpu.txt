@@ -1,5 +1,5 @@
 # Installed after requirements/mainline-ci.txt.
 # This is a developer/CI profile, not a retroactive scientific-environment claim.
---index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.8.0
 torchvision==0.23.0

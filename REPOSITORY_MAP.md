@@ -9,17 +9,20 @@ RealSaS-OPT is a **research library with a continuously upgraded executable main
 Current context is intentionally centralized so a new chat/agent does not have to reconstruct truth from hundreds of reports:
 
 1. `canonical/REHYDRATION_PACKET.md` — compact generated current-context view.
-2. `CURRENT_STATE.md` — canonical continuation / stop-go authority.
-3. `canonical/LIVE_AUTHORITY_MAP.md` — generated live branch + active-experiment navigation.
-4. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` — mechanism implementation/test/canonical-state map.
-5. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md` — exact experiment semantics and explicit non-claims.
+2. `canonical/FIT1_EVIDENCE_INDEX_20260909.md` — current technical/investor proof path.
+3. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl` — current append-only causal decision chronology.
+4. `CURRENT_STATE.md` — canonical continuation / stop-go authority.
+5. `canonical/LIVE_AUTHORITY_MAP.md` — generated live branch + active-experiment navigation.
+6. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` — mechanism implementation/test/canonical-state map.
+7. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md` — exact experiment semantics and explicit non-claims.
+8. `canonical/EXPERIMENT_REGISTRY_V2.json` — current machine experiment registry.
 
 Machine state behind those views:
 
 - `canonical/CONTEXT_STATE_V1.json`
 - `canonical/AUTHORITY_MAP_V1.json`
 
-Do **not** reconstruct current authority from old report wording, filename dates, branch recency, or workflow color.
+`canonical/EXPERIMENT_REGISTRY_V1.json` and `canonical/SCIENTIFIC_JOURNAL_V1.jsonl` are historical continuity artifacts after the 2026-09-09 Geppetto promotion transaction. Do **not** reconstruct current authority from old report wording, filename dates, branch recency, or workflow color.
 
 | Path | Meaning | May own product truth? | Local index |
 |---|---|---:|---|
@@ -36,20 +39,36 @@ Do **not** reconstruct current authority from old report wording, filename dates
 | `docs/` | Human documentation and repository policies | No | `docs/repository/` |
 | `.github/workflows/` | CI enforcement only; a green workflow proves only its named contract | No | `.github/workflows/README.md` |
 
+## Current learned-source landmarks
+
+- `models/iris/v2/` — promoted IRIS observation/foundation/evidence base package.
+- `models/iris/v3/` — promoted scene-first signed-geometry head and frozen Mage FIT1 upstream witness.
+- `models/geppetto/reference_strength_v1/` — current FIT1-frozen Geppetto source.
+- `models/geppetto/v2/` — prior Geppetto source/provenance, superseded for the Mage FIT1 frozen formulation.
+- `models/skin_field_codec/v1/` — base mainline codec source; current 278M V7 A0 apparatus remains research-only.
+- `models/arachne/v2/` — prior A1 scaffold; no V7-native A1 is promoted.
+
+IRIS V2 and V3 are layers of the same subsystem ownership envelope; they do not create a fifth learned subsystem.
+
 ## Reading order for a new engineer / new chat / new agent
 
 1. `canonical/REHYDRATION_PACKET.md`
-2. `CURRENT_STATE.md`
-3. `canonical/LIVE_AUTHORITY_MAP.md`
-4. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
-5. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-6. `models/README.md`
-7. `compiler/README.md`
-8. `compiler/realsas_compiler_services/README.md`
-9. `product/README.md`
-10. `runtime/README.md`
-11. `canonical/README.md`
-12. only then specific experiment/workflow/report indexes when a current ledger points there
+2. `canonical/FIT1_EVIDENCE_INDEX_20260909.md`
+3. recent tail of `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+4. `CURRENT_STATE.md`
+5. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
+6. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
+7. `canonical/LIVE_AUTHORITY_MAP.md`
+8. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
+9. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
+10. `canonical/EXPERIMENT_REGISTRY_V2.json`
+11. `models/README.md`
+12. `compiler/README.md`
+13. `compiler/realsas_compiler_services/README.md`
+14. `product/README.md`
+15. `runtime/README.md`
+16. `canonical/README.md`
+17. only then specific experiment/workflow/report indexes when a current ledger points there
 
 `RESTORATION_STATE.md` is preserved restoration-era evidence and is explicitly superseded for current continuation. Read it only when investigating restoration lineage.
 

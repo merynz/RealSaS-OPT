@@ -29,6 +29,8 @@ OUT_JSON = ROOT / "canonical" / "CONTEXT_COVERAGE_AUDIT.json"
 OUT_MD = ROOT / "canonical" / "CONTEXT_COVERAGE_AUDIT.md"
 FIT1_GATE_ANCHOR = "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee"
 
+# Current continuity sources come first. V1 registry/journal remain in the corpus as
+# immutable historical provenance, but no longer define current navigation.
 INDEX_FILES = [
     "AGENTS.md",
     "CURRENT_STATE.md",
@@ -40,11 +42,16 @@ INDEX_FILES = [
     "canonical/AUTHORITY_MAP_V1.json",
     "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
+    "canonical/EXPERIMENT_REGISTRY_V2.json",
+    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
     "canonical/EXPERIMENT_REGISTRY_V1.json",
     "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
     "canonical/BRANCH_AUTHORITY_V1.md",
     "canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md",
     "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
+    "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
+    "canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md",
+    "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
     "canonical/FIT1_COMMIT_LINEAGE_V1.md",
     "canonical/AOA_ARTIFACT_DISPOSITION_V1.json",
     "canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md",
@@ -169,7 +176,6 @@ def classify(path: str, corpus: str, anchor_files: set[str], changed: set[str]) 
     explicit, why = explicit_reference(path, corpus)
     if explicit:
         return {"path": path, "class": "INDEXED_EXPLICIT", "reason": why, "explained": True}
-    # Changed after FIT1 takes precedence over mere existence at the anchor.
     if path in changed:
         return {
             "path": path,

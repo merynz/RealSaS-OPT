@@ -21,6 +21,7 @@ REQUIRED = (
     "requirements/torch-cpu.txt",
     "requirements/dev.txt",
     "requirements/README.md",
+    "docs/repository/DEPENDENCY_AND_IP_POLICY.md",
     ".github/CODEOWNERS",
     ".github/dependabot.yml",
     ".github/pull_request_template.md",
@@ -30,6 +31,7 @@ CURRENT_SELF_HOSTED_WORKFLOWS = (
     ".github/workflows/current_mainline_self_hosted_ci.yml",
     ".github/workflows/model_mainline_source_gate.yml",
     ".github/workflows/live_authority_map.yml",
+    ".github/workflows/completion_audit_contract.yml",
 )
 
 

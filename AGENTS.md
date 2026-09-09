@@ -172,13 +172,14 @@ Only `main/CURRENT_STATE.md` is continuation authority.
 
 ## Execution environment
 
-Routine RealSaS scientific/mainline GitHub Actions run on the user's local self-hosted runner:
+The workflows designated as **current execution authority** run on the user's local self-hosted runner:
 
 - labels: `self-hosted, linux, x64, realsas`
 - known runner: `realsas-wsl-1660ti`
 - operator path: `~/actions-runner`
+- enumerated/regression-checked by: `tests/repository/test_repository_governance_v1.py`
 
-Do not migrate routine jobs to GitHub-hosted runners or create branch-push fan-out without an explicit reason. Prior hosted Actions volume triggered a quota/usage warning.
+Historical/narrow workflow files may preserve their original runner configuration as provenance and are not current execution authority. If a present-day change would activate a GitHub-hosted historical workflow, migrate or scope that workflow to the canonical self-hosted runner **before** making/running the change. Do not create branch-push fan-out without an explicit reason. Prior hosted Actions volume triggered a quota/usage warning.
 
 Current repository-development/CPU-CI pins live under `requirements/` and `.python-version`. They do not retroactively redefine a sealed experiment's environment identity.
 

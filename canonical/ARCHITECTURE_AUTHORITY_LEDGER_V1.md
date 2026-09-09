@@ -21,7 +21,8 @@ This ledger does **not** independently authorize promotion. It answers: **for ea
 | ID | Mechanism / responsibility | Status | Implementation / evidence | Canonical interpretation |
 |---|---|---|---|---|
 | `SYS_V4_2D_PUPPET_TARGET` | 8-direction editable 2D/2.5D puppet; not full 3D reconstruction | **BINDING** | `canonical/SYSTEM_ARCHITECTURE_V4_20260902.md` | Product target remains 2D appearance + editable rig/deformation/runtime |
-| `IRIS_SIGNED_GEOMETRY_EVIDENCE` | learned image -> signed geometry/support/uncertainty evidence | **BINDING** | `models/iris/v2/` | Neural evidence only; no final canonical IDs |
+| `IRIS_V2_OBSERVATION_FOUNDATION_EVIDENCE` | promoted observation/foundation/evidence stack used by the current IRIS lineage | **BINDING BASE LAYER** | `models/iris/v2/`; restoration source audit | V2 remains the promoted observation/foundation package; it is not the whole current signed-geometry composition |
+| `IRIS_SIGNED_GEOMETRY_EVIDENCE` | scene-first all-view signed geometry/support/uncertainty evidence for current Mage FIT1 witness | **BINDING / PROMOTED MAGE FIT1 WITNESS** | `models/iris/v3/`; `models/iris/v3/PROMOTED_MAGE_FIT_WITNESS_V1.json`; self-hosted promotion gate | V3 is the current promoted signed-field head/witness; neural evidence only, GSA owns `RiggingSurfaceIR`, no final canonical IDs |
 | `GSA_RIGGING_SURFACE_ASSEMBLY` | evidence -> typed `RiggingSurfaceIR`, packing/validation/provenance | **BINDING** | current Compiler substrate / surface assembly | Deterministic contract owner |
 | `LOSSLESS_LEARNED_EVIDENCE_BOUNDARY` | learned consumer retains lossless per-view surface/raster/support evidence | **BINDING / PROMOTED FOR GEPPETTO FIT1** | `models/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py` + sealed FIT1 source | Summary-only historical 24D conditioning is not current Geppetto FIT1 authority |
 | `GEPPETTO_REFERENCE_STRENGTH_V1` | current FIT1-frozen learned skeleton/control proposal formulation | **FIT1_FROZEN** | `models/geppetto/reference_strength_v1/`; promotion `canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md` | Mage FIT1 terminal PASS; generalization not claimed |
@@ -44,6 +45,14 @@ This ledger does **not** independently authorize promotion. It answers: **for ea
 | `ARACHNE_SKIN_PROPOSAL` | skeleton-conditioned skin/weight/deformation proposal | **BINDING ROLE; NO CURRENT V7-NATIVE FIT1 PROMOTION** | prior scaffold `models/arachne/v2/`; active research branch | Arachne owns learned proposal; Compiler owns qualification |
 | `DYNAMIC_MOTION_PROOF` | qualification-owned motion probe/bake/measurement/proof | **BINDING** | current Compiler proof services/runtime interlock | Runtime/export consumes proof-owned state |
 
+## IRIS layered-current consequence
+
+The current FIT1 upstream witness must be read as one ownership envelope, not as a filename-version contest:
+
+`8 RGBA + exact cameras -> promoted V2 observation/foundation evidence where required by the lineage -> promoted V3 scene-first all-view signed field -> deterministic GSA compaction/local geometry/provenance -> RiggingSurfaceIR`.
+
+The promoted Mage V3 witness binds IRIS checkpoint SHA-256 `766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2` and signed zero-surface SHA-256 `987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b`; teacher mesh is not used at inference. V3 therefore supersedes the old shorthand “IRIS current = V2 only” for signed-geometry FIT1 composition, while V2 remains a promoted supporting source layer.
+
 ## Geppetto reference-strength FIT1 consequence
 
 The separately preregistered reference-strength formulation closed at optimizer step `14080` with a terminal `48/48` full-structural PASS streak spanning `3072` optimizer steps.
@@ -54,7 +63,8 @@ Frozen evidence identities:
 - seal commit `ae0af0cd39dd2468a012ba21890a4fed2da7c4c9`;
 - checkpoint SHA-256 `b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30`;
 - result SHA-256 `728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045`;
-- qualified skeleton SHA-256 `48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992`.
+- qualified skeleton SHA-256 `48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992`;
+- machine evidence manifest `canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json`.
 
 The promoted architecture is not merely "AR1 repaired." It is a stronger formulation: lossless fieldwise surface access, exact relation message passing, global memory, prediction-only causal recurrence, per-step cross-attention, conditional diffusion, soft internal parent distribution, native STOP and separate all-pairs final parent evidence.
 

@@ -8,11 +8,12 @@ For a new chat, agent, machine session, technical reviewer, or investor due-dili
 
 1. **`canonical/REHYDRATION_PACKET.md`** — compact current-context reconstruction.
 2. **`canonical/FIT1_EVIDENCE_INDEX_20260909.md`** — short proof chain for the current Mage FIT1 work: exact source, prereg, hashes, terminal result, promotion and non-claims.
-3. **`CURRENT_STATE.md`** — canonical stop/go and continuation authority on `main`.
-4. **`canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`** — FIT1 scientific chronology.
-5. **`canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`** — mechanism implementation/test/promotion status.
-6. **`canonical/LIVE_AUTHORITY_MAP.md`** — generated live branch/experiment navigation.
-7. **`REPOSITORY_MAP.md`** / **`SYSTEM_INDEX.md`** — deeper source/package navigation.
+3. **`canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json`** — machine-readable frozen Geppetto evidence identities plus external artifact locators.
+4. **`CURRENT_STATE.md`** — canonical stop/go and continuation authority on `main`.
+5. **`canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`** — FIT1 scientific chronology.
+6. **`canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`** — mechanism implementation/test/promotion status.
+7. **`canonical/LIVE_AUTHORITY_MAP.md`** — generated live branch/experiment navigation.
+8. **`REPOSITORY_MAP.md`** / **`SYSTEM_INDEX.md`** — deeper source/package navigation.
 
 ## Current scientific status — 2026-09-09
 
@@ -22,7 +23,7 @@ Current Geppetto source home:
 
 `models/geppetto/reference_strength_v1/`
 
-The promoted formulation reached `FIT1_TERMINAL_PASS` at optimizer step `14080` and maintained the required `48/48` full structural checks across `3072` optimizer steps. The exact checkpoint/result/qualified-skeleton hashes and source lineage are in `canonical/FIT1_EVIDENCE_INDEX_20260909.md`.
+The promoted formulation reached `FIT1_TERMINAL_PASS` at optimizer step `14080` and maintained the required `48/48` full structural checks across `3072` optimizer steps. The exact checkpoint/result/qualified-skeleton hashes and source lineage are in `canonical/FIT1_EVIDENCE_INDEX_20260909.md` and are cross-bound by `canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json`.
 
 **The current bottleneck is Arachne A0 / SkinFieldCodec.** No current V7-native Arachne A1 model is promoted, and no full end-to-end `PRODUCT_PASS` claim exists yet.
 
@@ -38,11 +39,14 @@ Canonical product flow:
 
 ## Current learned homes
 
-- IRIS: `models/iris/v2/`
+- IRIS V2 observation/foundation evidence: `models/iris/v2/`
+- IRIS V3 scene-first signed-geometry head and promoted Mage FIT1 witness: `models/iris/v3/`
 - Geppetto FIT1-frozen: `models/geppetto/reference_strength_v1/`
 - prior Geppetto V2 provenance: `models/geppetto/v2/`
 - base SkinFieldCodec source: `models/skin_field_codec/v1/` — current V7 A0 research is not yet promoted
 - prior/current Arachne scaffold: `models/arachne/v2/` — no present V7-native A1 FIT1 promotion
+
+IRIS V2 and V3 are layers of one IRIS ownership envelope: V2 preserves the promoted observation/foundation/evidence stack, while V3 is the later promoted scene-first signed-field composition used by the frozen Mage upstream witness. Deterministic GSA remains the `RiggingSurfaceIR` authority.
 
 Models emit evidence or proposals. `compiler/realsas_compiler_core/` remains the single canonical product/identity/qualification authority.
 
@@ -52,7 +56,15 @@ For a scientific claim, the repository should expose the chain:
 
 `preregistration -> frozen source/apparatus -> run/result -> content hashes -> closure -> separate promotion decision`.
 
-The current Geppetto FIT1 chain follows exactly that pattern. Large checkpoints do not need to be committed into Git to count as evidence; their byte identity is SHA-256 bound and the source/result lineage is preserved.
+The current Geppetto FIT1 chain follows exactly that pattern. Large checkpoints do not need to be committed into Git to count as evidence; their byte identity is SHA-256 bound, external Drive artifact IDs are recorded, and the source/result lineage is preserved.
+
+Local machine-level evidence consistency check:
+
+```bash
+python -m pytest -q tests/models/test_geppetto_fit1_evidence_manifest_v1.py
+```
+
+That test requires no access to the large checkpoint bytes: it verifies the committed evidence manifest, frozen Git blob identities, checkpoint authority constants, scientific chain files, claim boundaries and external artifact hash bindings. Independent byte re-download can then verify the recorded SHA-256 identities when artifact access is granted.
 
 ## Important non-claims
 

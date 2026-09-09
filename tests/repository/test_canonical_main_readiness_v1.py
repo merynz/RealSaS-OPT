@@ -2,11 +2,23 @@ from __future__ import annotations
 
 from pathlib import Path
 import ast
+import importlib
 import json
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 MAINLINE_ROOTS = (ROOT / "models", ROOT / "compiler", ROOT / "runtime")
+FROZEN_GEPPETTO_COMPAT_PATH = Path(
+    "models/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py"
+)
+FROZEN_GEPPETTO_COMPAT_MODULE = (
+    "experiments.geppetto_reference_strength_fullstack_v1."
+    "rigging_surface_tensorization_v1"
+)
+PROMOTED_GEPPETTO_TENSORIZATION = (
+    ROOT / "models/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py"
+)
 
 
 class CanonicalMainReadinessV1(unittest.TestCase):
@@ -42,21 +54,27 @@ class CanonicalMainReadinessV1(unittest.TestCase):
             if not source_root.exists():
                 continue
             for path in source_root.rglob("*.py"):
+                rel = path.relative_to(ROOT)
                 text = path.read_text(encoding="utf-8")
                 try:
                     tree = ast.parse(text, filename=str(path))
                 except SyntaxError as exc:
-                    violations.append(f"syntax:{path.relative_to(ROOT)}:{exc}")
+                    violations.append(f"syntax:{rel}:{exc}")
                     continue
                 for node in ast.walk(tree):
                     if isinstance(node, ast.Import):
                         for alias in node.names:
                             if any(alias.name == p or alias.name.startswith(p + ".") for p in forbidden_prefixes):
-                                violations.append(f"{path.relative_to(ROOT)}:{alias.name}")
+                                violations.append(f"{rel}:{alias.name}")
                     elif isinstance(node, ast.ImportFrom):
                         module = node.module or ""
                         if any(module == p or module.startswith(p + ".") for p in forbidden_prefixes):
-                            violations.append(f"{path.relative_to(ROOT)}:{module}")
+                            allowed_frozen_geppetto_seam = (
+                                rel == FROZEN_GEPPETTO_COMPAT_PATH
+                                and module == FROZEN_GEPPETTO_COMPAT_MODULE
+                            )
+                            if not allowed_frozen_geppetto_seam:
+                                violations.append(f"{rel}:{module}")
                     elif isinstance(node, ast.Call):
                         fn = node.func
                         dynamic_import = (
@@ -69,8 +87,24 @@ class CanonicalMainReadinessV1(unittest.TestCase):
                         if dynamic_import and node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
                             name = node.args[0].value
                             if any(name == p or name.startswith(p + ".") for p in forbidden_prefixes):
-                                violations.append(f"{path.relative_to(ROOT)}:dynamic:{name}")
+                                violations.append(f"{rel}:dynamic:{name}")
         self.assertEqual(violations, [], "mainline dependency firewall violations:\n" + "\n".join(violations))
+
+        promoted = importlib.import_module(
+            "models.geppetto.reference_strength_v1.rigging_surface_tensorization_v1"
+        )
+        historical_binding = sys.modules.get(FROZEN_GEPPETTO_COMPAT_MODULE)
+        self.assertIsNotNone(historical_binding, "frozen Geppetto compatibility alias was not installed")
+        self.assertIs(
+            historical_binding,
+            promoted,
+            "historical Geppetto tensorization name must resolve to the promoted models module object",
+        )
+        self.assertEqual(
+            Path(promoted.__file__).resolve(),
+            PROMOTED_GEPPETTO_TENSORIZATION.resolve(),
+            "compatibility seam resolved outside the promoted semantic home",
+        )
 
     def test_retracted_directional_shortcut_is_not_current_source(self) -> None:
         forbidden = (
@@ -114,9 +148,16 @@ class CanonicalMainReadinessV1(unittest.TestCase):
             self.assertIn("RESTORATION_CLOSURE_VERDICT_V1_20260904.json", text)
         self.assertIn("Real-family fit:** `NOT AUTHORIZED`", state)
         self.assertIn("Full behavioral + complete-E2E restoration closure | **DONE / PASS**", state)
-        self.assertIn("Native current-source interlock: **PASS", index)
-        self.assertIn("Restoration-wide source/regression/E2E/native closure: **PASS", index)
-        self.assertIn("Canonical `main` promotion", index)
+        self.assertIn(
+            "| Native C++17 runtime | `runtime/realsas_cpp/` | **RESTORED EXACT CONSUMER; SEALED SUBTREE; CLOSURE PASS** |",
+            index,
+        )
+        self.assertIn("**CI PASS — EXACT CURRENT-V4 PACKAGE OPEN/SAMPLE/RENDER VERIFIED**", index)
+        self.assertIn("Historical restoration evidence remains valid evidence, but not current continuation state:", index)
+        self.assertIn(
+            "Current FIT/Geppetto/Arachne authorization is exclusively defined by `CURRENT_STATE.md`",
+            index,
+        )
 
     def test_closure_workflow_is_manual_only(self) -> None:
         workflow = (ROOT / ".github/workflows/restoration_closure_manual.yml").read_text(encoding="utf-8")

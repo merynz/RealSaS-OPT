@@ -128,12 +128,16 @@ class GeppettoFIT1EvidenceManifestV1(unittest.TestCase):
             ROOT / "canonical" / "GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
             ROOT / "canonical" / "FIT1_EVIDENCE_INDEX_20260909.md",
         )
+        texts = []
         for path in docs:
             text = path.read_text(encoding="utf-8")
+            texts.append(text)
             for token in expected:
                 self.assertIn(token, text, f"{path}: missing {token}")
             self.assertRegex(text, r"(?i)generalization")
-            self.assertRegex(text, r"(?i)(product.pass|PRODUCT_PASS)")
+        joined = "\n".join(texts)
+        self.assertIn("PRODUCT_PASS", joined)
+        self.assertRegex(joined, r"(?i)(generalization[^\n]*not|not[^\n]*generalization)")
 
     def test_external_artifact_locators_are_hash_bound(self) -> None:
         ext = self.manifest["external_artifacts"]

@@ -13,7 +13,7 @@ Scientific source authority:
 
 `RiggingSurfaceIR -> lossless fieldwise tensorization -> direct surface encoder + exact GSA relation message passing + full-surface transformer memory -> prediction-only causal control recurrence with per-step full-surface cross-attention -> coarse 3D locus + conditional residual diffusion -> native STOP/existence/root/salience/support evidence + all-pairs directed parent evidence -> SkeletonProposalIR -> Compiler exact qualification`
 
-The shipping entry point is:
+The shipping/FIT1 entry point is:
 
 `GeppettoReferenceStrengthNoLearnedSlotV1`
 
@@ -30,9 +30,9 @@ The canonical eight yaw views are represented by a fixed Fourier camera-directio
 - candidate blob: `e9b626815c63a96ac1d390580e1aa19f8bf1cfb2`
 - tensorization blob: `647fdcb98c305c3f7d3afd05dd61449999721034`
 
-The no-learned-slot entry file is a semantic-home rebind of frozen blob `770909a9c2992ada0f3018badb2a42632a124b3b`; its algorithm is unchanged and its import now points at this package's promoted base candidate.
+The no-learned-slot entry file is a semantic-home rebind of frozen blob `770909a9c2992ada0f3018badb2a42632a124b3b`; its algorithm is unchanged and its import points at this package's promoted base candidate.
 
-The byte-preserved base candidate retains one historical import path to the tensorization module. For reproducibility, the exact tensorization source is also preserved at `experiments/geppetto_reference_strength_fullstack_v1/rigging_surface_tensorization_v1.py` on main. This is compatibility residue, not a second semantic implementation.
+The byte-preserved base candidate still contains its historical tensorization import string. Package initialization binds that exact historical module name to this package's byte-identical promoted tensorization module **before** loading the candidate. Therefore current model execution uses the `models/` implementation while preserving the frozen candidate bytes. The exact experiment source is also retained on main as audit/provenance evidence, not as a second semantic owner.
 
 ## Authority boundary
 

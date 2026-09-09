@@ -27,11 +27,19 @@ REQUIRED = (
     ".github/pull_request_template.md",
 )
 
+# These are the workflows that currently govern promoted source/evidence, continuity,
+# completion/architecture contracts, IRIS source integrity and the current product shell.
+# Historical/narrow workflow files may remain for provenance, but are not current
+# execution authority. If a future current change would activate one of those, it must
+# first be migrated/scoped to the canonical self-hosted runner policy.
 CURRENT_SELF_HOSTED_WORKFLOWS = (
     ".github/workflows/current_mainline_self_hosted_ci.yml",
     ".github/workflows/model_mainline_source_gate.yml",
     ".github/workflows/live_authority_map.yml",
     ".github/workflows/completion_audit_contract.yml",
+    ".github/workflows/architecture_freeze_source_gate.yml",
+    ".github/workflows/iris_v2_source_contract.yml",
+    ".github/workflows/living_compile_v4.yml",
 )
 
 

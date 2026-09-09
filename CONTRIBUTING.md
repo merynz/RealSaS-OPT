@@ -57,11 +57,13 @@ RealSaS implementation names must describe RealSaS responsibilities and mechanis
 
 ## CI / runner policy
 
-Current RealSaS mainline/science GitHub Actions run only on the local self-hosted runner:
+The workflows designated as **current execution authority** run only on the local self-hosted runner:
 
 `[self-hosted, linux, x64, realsas]`
 
 Known runner: `realsas-wsl-1660ti`.
+
+The current-authority set is enumerated and regression-checked in `tests/repository/test_repository_governance_v1.py`. Historical/narrow workflow files may remain with their original runner configuration as provenance. They are not current execution authority. If a present-day change would activate such a GitHub-hosted historical workflow, migrate or scope that workflow to the canonical self-hosted runner **before** making/running the change.
 
 Do not migrate current authority/science jobs to GitHub-hosted runners without an explicit repository-policy change.
 

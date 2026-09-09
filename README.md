@@ -84,7 +84,7 @@ That test requires no access to the large checkpoint bytes: it verifies the comm
 - `.python-version`, `pyproject.toml`, `requirements/` — pinned current development/CPU-CI environment; sealed experiments retain their own environment authority.
 - `.github/dependabot.yml` — monthly dependency update proposals.
 
-Current scientific/mainline GitHub Actions run on the local self-hosted RealSaS runner with labels `[self-hosted, linux, x64, realsas]`; GitHub-hosted runners are not current execution authority.
+The explicitly enumerated **current-authority** workflows run on the local self-hosted RealSaS runner with labels `[self-hosted, linux, x64, realsas]`; `tests/repository/test_repository_governance_v1.py` enforces that set. Historical/narrow workflow files may retain their original runner configuration for provenance, but they are not current execution authority and must not be manually used for current work without first being migrated/scoped to the self-hosted policy.
 
 ## Important non-claims
 

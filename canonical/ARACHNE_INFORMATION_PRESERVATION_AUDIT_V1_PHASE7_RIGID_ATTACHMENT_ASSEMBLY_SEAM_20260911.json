@@ -1,0 +1,89 @@
+{
+  "schema": "RealSaS.ArachneInformationPreservationAudit.Phase7RigidAttachmentAssembly.v1",
+  "date": "2026-09-11",
+  "status": "OPEN_RESEARCH_AUDIT__EVIDENCE_ONLY__NO_RUNNING_A0_CHANGE__NO_A1_IMPLEMENTATION_AUTHORIZED",
+  "authority": {
+    "continuation_authority": "main/CURRENT_STATE.md",
+    "current_a0_experiment_unchanged": true,
+    "a1_authorized": false,
+    "product_pass_claimed": false
+  },
+  "mage_source": {
+    "asset_id": "kaykit_01_Mage",
+    "raw_source_sha256": "cf898585da33fab50c724d31605fb931eb2912e6d2280092141e98ca81ad507d",
+    "primary_armature": "Rig",
+    "normalized_source_sha256": "528bef491eceb358ebc8ecb2a46af1d37b4322a7ef500281403a8207fe7c648f",
+    "normalized_vertices": 5321,
+    "normalized_faces": 5763,
+    "source_bones": 41,
+    "selected_controls": 22
+  },
+  "skinned_primary": {
+    "objects": {
+      "Mage_ArmLeft": {"vertices": 330},
+      "Mage_ArmRight": {"vertices": 330},
+      "Mage_Body": {"vertices": 1275},
+      "Mage_Head": {"vertices": 761},
+      "Mage_LegLeft": {"vertices": 326},
+      "Mage_LegRight": {"vertices": 326}
+    },
+    "total_vertices": 3348
+  },
+  "rigid_attachments": {
+    "objects": {
+      "Spellbook": {"parent_bone":"handslot.l","vertices":399,"triangles":292,"exact_one_hot_parent_weight":true},
+      "Spellbook_open": {"parent_bone":"handslot.l","vertices":418,"triangles":292,"exact_one_hot_parent_weight":true},
+      "1H_Wand": {"parent_bone":"handslot.r","vertices":158,"triangles":150,"exact_one_hot_parent_weight":true},
+      "2H_Staff": {"parent_bone":"handslot.r","vertices":498,"triangles":440,"exact_one_hot_parent_weight":true},
+      "Mage_Hat": {"parent_bone":"head","vertices":402,"triangles":396,"exact_one_hot_parent_weight":true},
+      "Mage_Cape": {"parent_bone":"chest","vertices":56,"triangles":84,"exact_one_hot_parent_weight":true}
+    },
+    "total_vertices": 1931,
+    "total_triangles": 1654,
+    "extractor_semantics": "BONE_PARENTED_ZERO_WEIGHT_VERTICES_ARE_CONVERTED_TO_ONE_HOT_PARENT_BONE_SKIN"
+  },
+  "excluded_unrelated_geometry": {
+    "object": "Icosphere",
+    "classification": "NO_PRIMARY_ARMATURE_RELATION",
+    "vertices": 42,
+    "faces": 80,
+    "selected22_skin_mass": 0.0
+  },
+  "full_source_deformation_surface": {
+    "selected_skin_positive_vertices": 5279,
+    "eligible_faces": 5683,
+    "excluded_zero_selected_skin_vertices": 42,
+    "excluded_faces": 80,
+    "excluded_nonbridge_control_mass": 0.0
+  },
+  "historical_repair": {
+    "retired_teacher_surface_vertices": 3348,
+    "retired_reason": "BODY_ONLY_TEACHER_OMITTED_ATTACHMENT_ACCESSORY_GEOMETRY",
+    "found_before_scientific_a0_optimizer": true,
+    "superseded_by_full_source_fs1": true,
+    "first_full_source_vs_body_only_changed_gsa_rows": 9
+  },
+  "current_fs1_cache_attachment_evidence": {
+    "handslot_l_exact_one_hot_supervised_gsa_rows": 7,
+    "handslot_r_exact_one_hot_supervised_gsa_rows": 3,
+    "interpretation": "DIRECT_CURRENT_GSA_TARGET_EVIDENCE_FOR_RIGID_HAND_ATTACHMENT_CONTROLS",
+    "head_exact_one_hot_supervised_rows": 434,
+    "head_object_identity_warning": "Mage_Head_and_Mage_Hat_share_exact_head_weight_semantics__W_ALONE_CANNOT_OBJECT_SEGMENT",
+    "cape_object_identity_warning": "chest_influence_exists_on_body_too__W_ALONE_CANNOT_OBJECT_SEGMENT"
+  },
+  "product_semantics": {
+    "kinematic_rigid_attachment_truth": "PRESENT",
+    "qualified_explicit_assembly_typing": "PARTIAL_OPEN",
+    "current_assembly_root_binding": {},
+    "a0_codec_blocker": false,
+    "a1_rule": "A1_may_predict_one_hot_skin_for_rigid_regions_but_must_not_invent_competing_socket_or_parent_authority"
+  },
+  "verdicts": [
+    "FALSIFIED_CURRENT_A0_TEACHER_OMITS_MAGE_RIGID_ATTACHMENTS",
+    "PROVEN_HISTORICAL_BODY_ONLY_OMISSION_WAS_SUPERSEDED_BEFORE_A0_OPTIMIZATION",
+    "PROVEN_FULL_SOURCE_AUTHORITY_CONTAINS_ALL_SIX_RIGID_ATTACHMENTS_AS_ONE_HOT_PARENT_SKIN",
+    "PROVEN_41_TO_22_BRIDGE_DISCARDS_ZERO_DEFORMATION_MASS",
+    "PROVEN_CURRENT_FS1_GSA_CACHE_HAS_HANDSLOT_ATTACHMENT_TARGET_ROWS",
+    "OPEN_EXPLICIT_PRODUCT_ASSEMBLY_TYPING"
+  ]
+}

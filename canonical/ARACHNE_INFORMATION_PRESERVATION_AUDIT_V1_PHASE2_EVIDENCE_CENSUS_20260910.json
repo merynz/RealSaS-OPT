@@ -1,0 +1,136 @@
+{
+  "schema": "RealSaS.ArachneInformationPreservationAudit.Phase2EvidenceCensus.v1",
+  "date": "2026-09-10",
+  "status": "OPEN_RESEARCH_AUDIT__EVIDENCE_ONLY__NO_ARCHITECTURE_OR_TRAINING_CHANGE_AUTHORIZED",
+  "audit_branch": "audit/arachne-information-preservation-v1-20260910",
+  "parent_audit": "canonical/ARACHNE_INFORMATION_PRESERVATION_AUDIT_V1_20260910.md",
+  "authority": {
+    "continuation_authority": "main/CURRENT_STATE.md",
+    "current_a0_experiment_unchanged": true,
+    "a1_authorized": false,
+    "product_pass_claimed": false
+  },
+  "artifacts": {
+    "zero_surface": {
+      "name": "ZERO_SURFACE_PRODUCT_CLIPPED.npz",
+      "drive_file_id": "1ov5QL3H4nVNDAQmVI4j0qcr5iOmC7-cT",
+      "sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+      "bytes": 2981624,
+      "vertices_shape": [118388, 3],
+      "vertices_dtype": "float32",
+      "faces_shape": [234962, 3],
+      "faces_dtype": "int64",
+      "normals_shape": [118388, 3],
+      "normals_dtype": "float32"
+    },
+    "arachne_conditioning_cache": {
+      "name": "ARACHNE_MAGE_FS1_CONDITIONING_CACHE_V2.npz",
+      "drive_file_id": "1LDDhQu4Rbrckslcy0kMqJhZtuDrANO3B",
+      "sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+      "bytes": 579661,
+      "arrays": {
+        "surface_ids": [950],
+        "rest_points_world": [950, 3],
+        "surface_features": [950, 20],
+        "surface_positions_normalized": [950, 3],
+        "joint_ids": [22],
+        "joint_features": [22, 8],
+        "parent_indices": [22],
+        "pair_geometry": [950, 22, 10],
+        "pair_mask": [950, 22],
+        "teacher_weights": [950, 22],
+        "teacher_supervision_mask": [950],
+        "confidence_code": [950]
+      }
+    },
+    "qualified_skeleton": {
+      "name": "FINAL_QUALIFIED_SKELETON_IR.json",
+      "drive_file_id": "1N-UsUnbqfxUUCVUYFHVsvL18ieDX3lCM",
+      "sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992",
+      "bytes": 16604,
+      "joint_count": 22,
+      "assembly_root_binding": {},
+      "support_refs_total": 176,
+      "support_surface_ids_unique": 155,
+      "surface_node_count": 950,
+      "surface_nodes_not_in_any_joint_support_topk": 795,
+      "unique_support_anchor_fraction": 0.1631578947368421
+    },
+    "skeleton_proposal": {
+      "name": "FINAL_SKELETON_PROPOSAL_IR.json",
+      "drive_file_id": "1hs160Md_zpH3FYPKfTjvAPx1ywLvNysH",
+      "sha256": "91147822d1e24c2d5d8600eea5c60543eb1c0584ad2fca9baca952fe788ded26",
+      "bytes": 246381
+    }
+  },
+  "dense_to_compact": {
+    "dense_zero_surface_vertices": 118388,
+    "dense_zero_surface_faces": 234962,
+    "compact_gsa_nodes": 950,
+    "compact_gsa_undirected_relations": 2813,
+    "compact_observed_nodes": 897,
+    "compact_completed_nodes": 53,
+    "compact_node_fraction_of_dense_vertices": 0.008024461938710006,
+    "dense_vertices_per_compact_node": 124.61894736842105,
+    "mean_undirected_compact_degree": 5.922105263157895
+  },
+  "iris_uncertainty": {
+    "named_output_exists": true,
+    "output_name": "log_uncertainty",
+    "signed_grid_decoder_behavior": "DICT_QUERY_OUTPUT_IS_REDUCED_TO_y['sdf']",
+    "zero_surface_mesh_has_uncertainty_field": false,
+    "gsa_bridge_has_uncertainty_input": false,
+    "current_transition_verdict": "DROPPED_AT_SIGNED_GRID_ZERO_SURFACE_INTERFACE",
+    "calibration": "UNKNOWN",
+    "downstream_unique_value": "UNKNOWN",
+    "repair_authorized": false
+  },
+  "geppetto_support_semantics": {
+    "support_selection": "PER_JOINT_TOPK_AFTER_SUPPORT_PRESENCE_ADMISSION",
+    "support_topk_observed_in_promoted_mage_artifact": 8,
+    "is_exhaustive_surface_assignment": false,
+    "is_skin_weight_assignment": false,
+    "recommended_a1_semantics": "SPARSE_POSITIVE_MECHANICAL_EVIDENCE_OR_SOFT_ATTENTION_BIAS_ONLY",
+    "unsupported_joint_count_semantics": "NUMBER_OF_QUALIFIED_JOINTS_WITH_EMPTY_support_surface_ids",
+    "unsupported_joint_count_does_not_measure": "SURFACE_TO_ANY_JOINT_COVERAGE"
+  },
+  "mage_head_spatial_diagnostic": {
+    "head_joint_canonical_id": "J:6c57ffd28437d5a273fd",
+    "head_joint_source_proposal_id": "P:GRS:0012",
+    "head_joint_world_position": [0.005969365604079804, 0.0008779347401525195, 1.244769178966266],
+    "parent_joint_canonical_id": "J:33d2c674ed9153028054",
+    "parent_joint_source_proposal_id": "P:GRS:0006",
+    "parent_joint_world_z": 0.9742992657177943,
+    "head_support_anchor_count": 8,
+    "head_support_anchor_z_min": 1.0672807693481445,
+    "head_support_anchor_z_max": 1.2643702030181885,
+    "diagnostic_slice": {
+      "condition": "teacher_supervision_mask && world_z >= 1.3",
+      "row_count": 387,
+      "dominant_joint_is_head_fraction": 1.0,
+      "head_weight_min": 1.0,
+      "head_weight_mean": 1.0,
+      "head_weight_max": 1.0,
+      "interpretation": "UPPER_SPATIAL_REGION_IS_RIGID_HEAD_BOUND_IN_MAGE_TEACHER_FIELD"
+    },
+    "scope_warning": "Teacher-only diagnostic of Mage target semantics; not product-time predictor input and not proof that one head control is universally product-optimal."
+  },
+  "rigid_attachment_note": {
+    "current_qualified_skeleton_assembly_root_binding_empty": true,
+    "qualify_skeleton_v2_currently_constructs_empty_assembly_root_binding": true,
+    "historical_render_pipeline_has_rigid_attachment_class": true,
+    "historical_example": "helmet classified RIGID_BONE_ATTACHMENT; Icosphere excluded",
+    "mage_staff_shield_exact_current_classification": "NOT_YET_RECOVERED",
+    "a0_codec_blocker": false,
+    "future_fit_selection_requirement_candidate": "INCLUDE_AT_LEAST_ONE_GENUINE_RIGID_ATTACHMENT_ASSET"
+  },
+  "next_zero_optimizer_audits": [
+    "IRIS_V3_UNCERTAINTY_CALIBRATION_REDUNDANCY",
+    "DENSE118388_TO_GSA950_GEOMETRY_SUPPORT_CENSUS",
+    "GEPPETTO_PROPOSAL_TO_QUALIFIED_SELECTED_EVIDENCE_CENSUS",
+    "S_PLUS_G_TO_OLD_A1_FIELD_BY_FIELD_MATRIX",
+    "POST_A0_WINNER_LATENT_INTERFACE_AUDIT",
+    "POST_A0_WINNER_REGIONAL_ROW_ERROR_DIAGNOSTIC",
+    "MAGE_RIGID_ATTACHMENT_CLASSIFICATION_RECOVERY"
+  ]
+}

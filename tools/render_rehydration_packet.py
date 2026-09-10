@@ -22,6 +22,8 @@ COVERAGE_PATH = ROOT / "canonical" / "CONTEXT_COVERAGE_AUDIT.json"
 OWNERSHIP_PATH = ROOT / "canonical" / "SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md"
 FIT1_SCIENCE_PATH = ROOT / "canonical" / "FIT1_SCIENTIFIC_LINEAGE_V1.md"
 FIT1_COMMIT_PATH = ROOT / "canonical" / "FIT1_COMMIT_LINEAGE_V1.md"
+FIT1_EVIDENCE_PATH = ROOT / "canonical" / "FIT1_EVIDENCE_INDEX_20260909.md"
+GEPPETTO_EVIDENCE_PATH = ROOT / "canonical" / "GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json"
 AOA_CLOSURE_PATH = ROOT / "canonical" / "AUDIT_OF_AUDITS_CLOSURE_20260907.md"
 AOA_DISPOSITION_PATH = ROOT / "canonical" / "AOA_ARTIFACT_DISPOSITION_V1.json"
 CURRENT_PATH = ROOT / "CURRENT_STATE.md"
@@ -87,9 +89,13 @@ def validate(context: dict, authority: dict, current_text: str, heads: dict[str,
 
     canonical = authority["branch_policy"]["canonical_branch"]
     if canonical not in heads:
-        errors.append(f"canonical branch missing on origin: {canonical}")
+        errors.append(f"canonical branch missing from origin: {canonical}")
 
-    required = [OWNERSHIP_PATH, FIT1_SCIENCE_PATH]
+    required = [OWNERSHIP_PATH, FIT1_SCIENCE_PATH, FIT1_EVIDENCE_PATH, GEPPETTO_EVIDENCE_PATH]
+    for key in ("experiment_registry", "scientific_journal"):
+        rel = context.get("authority", {}).get(key)
+        if rel and not (ROOT / rel).exists():
+            errors.append(f"current authority target missing: {rel}")
     if bootstrap.get("status") == "BOOTSTRAP_AUDIT_CLOSED":
         required += [FIT1_COMMIT_PATH, AOA_CLOSURE_PATH, AOA_DISPOSITION_PATH]
     for path in required:
@@ -110,6 +116,9 @@ def render(context: dict, authority: dict, heads: dict[str, str], errors: list[s
     canonical_branch = authority["branch_policy"]["canonical_branch"]
     main_head = heads.get(canonical_branch, "MISSING")
     active_id = focus.get("active_experiment")
+    auth = context.get("authority", {})
+    geppetto = context.get("geppetto_fit1_closed_result", {})
+    arachne = context.get("arachne_current_state", {})
 
     lines: list[str] = [
         "# RealSaS — Rehydration Packet",
@@ -130,22 +139,66 @@ def render(context: dict, authority: dict, heads: dict[str, str], errors: list[s
         f"- **Scope warning:** {focus['scope_warning']}",
         f"- **Next visible product milestone:** {product['next_visible_product_milestone']}",
         "",
+        "## Current machine authority",
+        "",
+        f"- Experiment registry: `{auth.get('experiment_registry', 'UNSPECIFIED')}`",
+        f"- Scientific journal: `{auth.get('scientific_journal', 'UNSPECIFIED')}`",
+        f"- Historical registry: `{auth.get('historical_experiment_registry', 'UNSPECIFIED')}`",
+        f"- Historical journal: `{auth.get('historical_scientific_journal', 'UNSPECIFIED')}`",
+        "- Current pointers above outrank version guesses from filenames.",
+        "",
         "## Mandatory ownership memory",
         "",
         "Read `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` before moving responsibilities between learned and deterministic layers.",
         "",
-        "- **IRIS shorthand:** observations/cameras -> learned evidence -> deterministic GSA/RiggingSurfaceIR assembly/provenance.",
+        "- **IRIS shorthand:** observations/cameras -> learned evidence -> deterministic GSA/RiggingSurfaceIR assembly/provenance. Current Mage FIT1 signed witness uses promoted scene-first V3; V2 remains its promoted observation/foundation support layer where referenced by lineage.",
         "- **Geppetto shorthand:** lossless RiggingSurfaceIR -> learned SkeletonProposalIR/evidence -> Compiler exact graph qualification/canonical IDs.",
         "- **Arachne shorthand:** qualified surface+skeleton -> learned skin/deformation proposal -> Compiler skin/mesh qualification.",
         "- **Memory guard:** **Geppetto is proposal, not canonical rig authority.** Compiler may constrain legality; it may not secretly repair missing Geppetto semantics.",
         "",
         "## FIT1 scientific memory",
         "",
+        "- Investor/auditor evidence index: `canonical/FIT1_EVIDENCE_INDEX_20260909.md`.",
+        "- Machine Geppetto evidence manifest: `canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json`.",
         "- Semantic spine: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`.",
         "- Exhaustive commit/provenance ledger: `canonical/FIT1_COMMIT_LINEAGE_V1.md`.",
         "- FIT1 gate anchor: `f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee`.",
         "- First executable FIT base: `de1a44cae1195dd9cbad3b23ef75d58ae80aa9b3`.",
         "- FIT1 is one-witness architecture/mechanism qualification; it is not generalization proof.",
+    ]
+
+    if geppetto:
+        lines += [
+            "",
+            "### Most recent promoted closure — Geppetto",
+            "",
+            f"- Status: `{geppetto.get('status', 'UNKNOWN')}`",
+            f"- Frozen source commit: `{geppetto.get('frozen_source_commit', 'UNKNOWN')}`",
+            f"- Seal commit: `{geppetto.get('seal_commit', 'UNKNOWN')}`",
+            f"- Mainline home: `{geppetto.get('mainline_home', 'UNKNOWN')}`",
+            f"- Closure step / terminal streak: `{geppetto.get('closure_step', '?')}` / `{geppetto.get('terminal_streak_checks', '?')}/48`",
+            f"- Qualified controls / deform roots: `{geppetto.get('qualified_control_count', '?')}` / `{geppetto.get('qualified_deform_root_count', '?')}`",
+            f"- Checkpoint SHA-256: `{geppetto.get('checkpoint_sha256', 'UNKNOWN')}`",
+            f"- QualifiedSkeletonIR SHA-256: `{geppetto.get('qualified_skeleton_ir_sha256', 'UNKNOWN')}`",
+            f"- Result SHA-256: `{geppetto.get('result_json_sha256', 'UNKNOWN')}`",
+            f"- Generalization claimed: `{str(geppetto.get('generalization_claim', False)).lower()}`",
+            f"- Product PASS claimed: `{str(geppetto.get('product_pass_claim', False)).lower()}`",
+        ]
+
+    if arachne:
+        lines += [
+            "",
+            "### Current open learned-skinning gate",
+            "",
+            f"- Scope: `{arachne.get('scope', 'UNKNOWN')}`",
+            f"- Research branch: `{arachne.get('branch', 'UNKNOWN')}`",
+            f"- Architecture: `{arachne.get('architecture', 'UNKNOWN')}`",
+            f"- Parameters: `{arachne.get('parameters', 'UNKNOWN')}`",
+            f"- A1 authorized: `{str(arachne.get('a1_authorized', False)).lower()}`",
+            f"- A1 rule: {arachne.get('a1_rule', 'UNKNOWN')}",
+        ]
+
+    lines += [
         "",
         "## Historical-memory health",
         "",
@@ -234,14 +287,15 @@ def render(context: dict, authority: dict, heads: dict[str, str], errors: list[s
         "",
         "## Rehydration drill-down",
         "",
-        "1. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` — learned/deterministic responsibility envelope.",
-        "2. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md` — FIT1-to-now scientific flow.",
-        "3. `CURRENT_STATE.md` — current stop/go authority.",
-        "4. `canonical/FIT1_COMMIT_LINEAGE_V1.md` — exact FIT1-descendant commit discovery.",
-        "5. `canonical/CONTEXT_COVERAGE_AUDIT.md` — AOA coverage/regression state.",
-        "6. `canonical/LIVE_AUTHORITY_MAP.md` — branch/authority navigation.",
-        "7. architecture + experiment ledgers/registry — implementation/test/promotion distinctions.",
-        "8. exact prereg/result/source artifacts only as needed.",
+        "1. `canonical/FIT1_EVIDENCE_INDEX_20260909.md` — technical/investor proof path and current claim boundary.",
+        "2. current scientific journal from `canonical/CONTEXT_STATE_V1.json` — recent causal decision sequence.",
+        "3. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` — learned/deterministic responsibility envelope.",
+        "4. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md` — FIT1-to-now scientific flow.",
+        "5. `CURRENT_STATE.md` — current stop/go authority.",
+        "6. `canonical/FIT1_COMMIT_LINEAGE_V1.md` — exact FIT1-descendant commit discovery.",
+        "7. `canonical/CONTEXT_COVERAGE_AUDIT.md` + `canonical/LIVE_AUTHORITY_MAP.md` — coverage and live branch authority.",
+        "8. architecture + experiment ledgers/current registry — implementation/test/promotion distinctions.",
+        "9. exact prereg/result/source artifacts only as needed.",
         "",
         "## Completion transaction",
         "",

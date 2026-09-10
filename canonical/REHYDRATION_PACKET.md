@@ -1,136 +1,147 @@
 # RealSaS — Rehydration Packet
 
-> **GENERATED NAVIGATION/CACHE — NOT INDEPENDENT SCIENTIFIC AUTHORITY.**  
-> Continuation authority remains `CURRENT_STATE.md`; scientific claims require the referenced source/prereg/result authority.
+> **GENERATED/NAVIGATION CACHE — NOT INDEPENDENT SCIENTIFIC AUTHORITY.**  
+> Continuation authority remains `CURRENT_STATE.md`; scientific claims require the referenced prereg/result/promotion authority.
 
 ## 60-second state
 
-- **Product:** 8-direction editable 2D/2.5D puppet compiled from raster artwork; preserve 2D appearance while inferring/editing mechanical rig and deformation.
-- **Current witness:** `Mage FIT1`
-- **Current module:** `Geppetto`
-- **Current state:** `POST_AR01_DIAGNOSIS_REQUIRED__NO_NEW_EXPERIMENT_PREREGISTERED`
-- **Active experiment:** `NONE`
-- **Most recent closed gate:** `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE`
-- **Canonical main:** `b102231127ed`
-- **Promotion block:** No Geppetto refreeze/promotion until scientifically necessary post-AR-01 gate(s) close and a separate promotion transaction reconciles source, evidence and authority.
-- **Scope warning:** AR-01 was a minimal feedback intervention, not a full RigAnything formulation test. Do not bundle the three remaining questions post hoc.
-- **Next visible product milestone:** Mage idle/breathing after genuine Geppetto closure/refreeze and current-chain Arachne FIT1 closure
+- **Product:** 8-direction editable 2D/2.5D puppet compiled from raster artwork.
+- **Current witness:** `Mage FIT1`.
+- **Geppetto:** **FIT1 TERMINAL PASS + separately promoted frozen source**.
+- **Current Geppetto home:** `models/geppetto/reference_strength_v1/`.
+- **Geppetto closure step:** `14080`.
+- **Terminal structural streak:** `48/48` checks = `3072` optimizer steps.
+- **Qualified mechanical core:** `22` controls, exactly one deform root.
+- **Free-running teacher feedback:** `false`.
+- **Current bottleneck:** `Arachne / SkinFieldCodec A0`.
+- **Active research branch:** `exp/arachne-skintokens-cleanroom-fit1-20260908`.
+- **Active gate:** `V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION`.
+- **A1:** blocked / not promoted.
+- **Full product FIT1 / PRODUCT_PASS:** not closed / not claimed.
+
+Read immediately after this packet:
+
+1. `canonical/FIT1_EVIDENCE_INDEX_20260909.md`
+2. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
+3. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
+4. `CURRENT_STATE.md`
+5. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
+
+## Investor/auditor short path
+
+`canonical/FIT1_EVIDENCE_INDEX_20260909.md` is the compact proof chain. It binds the exact Geppetto source/optimizer commit, preregistration and frozen apparatus/loss, terminal result, qualified skeleton hash, checkpoint hash, result JSON hash, separate mainline promotion decision, and the current honest Arachne state/non-claims.
 
 ## Mandatory ownership memory
 
-Read `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` before moving responsibilities between learned and deterministic layers.
+### IRIS / GSA
 
-- **IRIS shorthand:** observations/cameras -> learned evidence -> deterministic GSA/RiggingSurfaceIR assembly/provenance.
-- **Geppetto shorthand:** lossless RiggingSurfaceIR -> learned SkeletonProposalIR/evidence -> Compiler exact graph qualification/canonical IDs.
-- **Arachne shorthand:** qualified surface+skeleton -> learned skin/deformation proposal -> Compiler skin/mesh qualification.
-- **Memory guard:** **Geppetto is proposal, not canonical rig authority.** Compiler may constrain legality; it may not secretly repair missing Geppetto semantics.
+`observations + exact cameras -> learned signed/support/uncertainty evidence -> deterministic GSA compaction/local geometry/provenance -> RiggingSurfaceIR`
 
-## FIT1 scientific memory
+Historical privileged-input IRIS learned artifacts remain quarantined. The current Mage downstream witness uses the later repaired scene-first signed/GSA chain.
 
-- Semantic spine: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`.
-- Exhaustive commit/provenance ledger: `canonical/FIT1_COMMIT_LINEAGE_V1.md`.
-- FIT1 gate anchor: `f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee`.
-- First executable FIT base: `de1a44cae1195dd9cbad3b23ef75d58ae80aa9b3`.
-- FIT1 is one-witness architecture/mechanism qualification; it is not generalization proof.
+### Geppetto
 
-## Historical-memory health
+`lossless RiggingSurfaceIR -> learned SkeletonProposalIR/control/root/parent/salience/support evidence -> Compiler exact graph qualification -> QualifiedSkeletonIR/canonical IDs`
 
-- **Bootstrap/AOA:** `BOOTSTRAP_AUDIT_CLOSED`
-- **High-signal artifacts:** 264
-- **Explained by continuity policy:** 264
-- **Unexplained:** 0
-- **Coverage:** 100.0%
-- Closure authority: `canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md`.
-- Residual/disposition policy: `canonical/AOA_ARTIFACT_DISPOSITION_V1.json`.
-- Closure means context/provenance coverage, **not** retroactive validation of every historical artifact.
+**Geppetto is proposal, not canonical rig authority.** Compiler owns final legal root/parent/tree and canonical IDs.
 
-## Current scientific question
+### Arachne
 
-Which single next falsifiable gate should resolve remaining Geppetto uncertainty: AR0 residual terminal stability, AR1 generated-state exposure/recovery, or the already-existing fuller RigAnything C3/C4 formulation?
+`RiggingSurfaceIR + QualifiedSkeletonIR -> learned skin-field semantics/proposal -> Compiler skin/reference/simplex/mesh qualification`
 
-Do **not** widen the result beyond exact gate semantics in the experiment ledger/result authority.
+A0 codec representation/decode and A1 learned latent inference are separate gates.
 
-## Pipeline ownership
+## Current frozen Geppetto
 
-| Module | Role | Binding/current rule |
-|---|---|---|
-| **IRIS** | learned image perception / signed geometry, support, uncertainty and observation evidence | evidence only; no final canonical skeleton IDs/tree/weights; affected privileged-input historical learned artifacts remain quarantined |
-| **GSA/RiggingSurfaceIR** | deterministic compaction/local geometry/assembly/validation/provenance of lossless per-view surface evidence | lossless evidence boundary and UNKNOWN preservation are binding; no hidden semantic completion |
-| **Geppetto** | learned skeleton/control proposal, parent/root evidence and mechanical salience/functional simplification evidence | proposal only; post-AR-01 diagnosis; no refreeze currently authorized |
-| **Compiler graph qualification** | deterministic exact legal root/parent/tree selection, invariants, canonicalization and fail-close | canonical IDs after exact solve; no geometry-only semantic dedup, hidden cardinality repair or missing deform-node synthesis |
-| **Arachne** | learned semantic skin/weight/deformation proposal conditioned on current qualified surface+skeleton | current-chain FIT1 follows Geppetto refreeze; SkinTokens clean-room mechanism audit/adaptation remains planned |
-| **Compiler skin/mesh qualification** | deterministic reference/simplex/top-k/mesh-layout legality and bounded projection | may constrain/project under learned semantics; may not become a hidden semantic skinning owner |
-| **Proof / repair / runtime** | measure exact candidate; owner-route bounded repair; PASS-only runtime/export projection | proof never mutates candidate; repair creates a new candidate requiring re-proof; runtime/export is not second canonical truth |
+Entry point:
 
-## Critical RigAnything memory
+`GeppettoReferenceStrengthNoLearnedSlotV1`
 
-- Fuller challenger already exists: **TRUE**
-- Creation implementation: `models/geppetto/challengers/riganything_mechanisms_v1.py`
-- Creation commit: `ba634955777479ee05a5b199742710b1736123b5`
-- Contains:
-  - C1 per-step full-surface cross-attention
-  - C2 conditional diffusion locus
-  - C3 joint + parent geometry feedback token
-  - C4 sibling/BFS-order helper
-- **Memory guard:** Never propose building a RigAnything-equivalent challenger from scratch without first inspecting the existing challenger and its experiment lineage.
-- Canonical status: research implementation only; component/source existence and AR-01 do not imply full-formulation closure
+Architecture id:
 
-## FIT science guardrails
+`RealSaS.Geppetto.ReferenceStrength.DirectSurfaceCausalDiffusion.DeterministicViewDirection.v1`
 
-- FIT1 fits a generic/generalization-oriented architecture to one witness; architecture is not designed specifically for FIT1.
-- FIT1 **is:** mechanism/capacity/controlled-witness qualification and financing/demo gate
-- FIT1 **is not:** generalization proof
-- FIT-specific optimizer interventions: scientifically legitimate inside FIT1 when preregistered, but cannot be relabeled generic/generalization evidence
-- Ladder: FIT1 → FIT-k → FIT8/LOFO → scaling → generalization → product/domain shift
+Frozen source/optimizer commit:
 
-## Settled invariants
+`f7be46f0a97df62a793ebf91b22297c894854f39`
 
-- One semantic owner per question; deterministic qualification cannot silently become a second learned semantic owner.
-- Geppetto is proposal, not canonical rig authority; Compiler owns final legal root/parent/tree and canonical IDs after exact solve.
-- Compiler cannot silently repair Geppetto by geometry-only dedup, hidden cardinality repair or deform-node synthesis.
-- Lossless per-view evidence must survive into learned consumers.
-- Mechanical salience / functional simplification belongs to neural Geppetto evidence, not legality heuristics.
-- Arachne owns semantic skin/deformation proposal; Compiler skin/mesh layer owns bounded legal projection/qualification.
-- Proof measures exact candidate state and does not mutate it; repair is owner-routed and requires re-proof.
-- Source exists != mechanism implemented != mechanism tested != full formulation tested != canonical promotion != FIT1 closure != generalization.
-- No post-hoc gate widening after results are visible.
-- Repository prereg/result/source authority outranks detached generated/chat drafts when they conflict.
+Seal commit:
 
-## Context traps
+`ae0af0cd39dd2468a012ba21890a4fed2da7c4c9`
 
-- **Thinking a learned model name denotes the whole subsystem** → Expand IRIS/Geppetto/Arachne to the ownership envelope before assigning or moving responsibilities.
-- **Saying Geppetto made/owns the canonical skeleton** → Geppetto proposes controls/relations; Compiler exact qualification owns final legal tree and canonical IDs.
-- **Confusing a research challenger with canonical Geppetto** → Check implementation, execution evidence and canonical promotion as separate states.
-- **Calling AR-01 a RigAnything formulation test** → AR-01 result and RigAnything lineage limit it to minimal feedback; C3/C4 remains unresolved.
-- **Calling C2 tested because C2 source exists** → Authoritative Causal Repair V2 stopped at C1 PASS; C2 was not run in that staircase.
-- **Citing old IRIS learned PASS as clean current observation-only evidence** → Affected old learned artifacts are quarantined by IRIS leak scope; firewall repair is prospective.
-- **Treating an earlier AR0 48-check streak as terminal stability** → AR-01 required final contiguous streak >=48; AR0 ended at streak 1.
-- **Treating old restoration/hold reports or branch recency as current authority** → CURRENT_STATE + authority map + explicit promotion/retraction outrank report/branch recency.
-- **Assuming GitHub-hosted runners** → Routine execution authority is the user's local self-hosted RealSaS runner.
+Authority:
+
+- closure: `canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md`
+- promotion: `canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md`
+
+Frozen artifact identities:
+
+- target SHA-256 `0b5a25c877116de60b710b7bb2a7848f30988e1622e2eda8084cad21c8ca23c9`;
+- qualified skeleton SHA-256 `48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992`;
+- checkpoint SHA-256 `b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30`;
+- final result SHA-256 `728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045`.
+
+Frozen formulation contains lossless surface tensorization, exact GSA relation message passing, global full-surface memory, prediction-only causal recurrence, per-step cross-attention, conditional residual diffusion, soft internal parent feedback, native STOP and all-pairs final parent evidence. The eight yaw directions use a deterministic Fourier code; no learned absolute view slot is present.
+
+## AR-01 memory guard
+
+AR-01 remains a valid `NO_TERMINAL_CLOSURE` result for its exact minimal feedback arms. It is not the later reference-strength formulation and does not contradict the later Geppetto FIT1 PASS.
+
+Historical order:
+
+`R2 FAIL -> C1 xattn PASS -> old staircase STOP -> AR-01 minimal feedback FAIL -> later independent reference-strength formulation FIT1 PASS -> separate promotion`.
+
+## Current Arachne state
+
+No Arachne model is promoted by the Geppetto transaction.
+
+Current campaign = **A0 SkinFieldCodec only**.
+
+V7 apparatus:
+
+- architecture `RealSaS.Arachne.SkinFieldCodec.v7`;
+- parameters `278,010,880`;
+- no FSQ;
+- cache SHA-256 `db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd`;
+- teacher-W SHA-256 `7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d`;
+- 22 joints, 934 supervised rows, 16 low-confidence rows.
+
+C3 point-cloud boundary treatment under `u/q` importance correction was worse than its matched control. Boundary localization survives; that exact remedy is falsified.
+
+C4 tests the missing source-faithful mechanisms:
+
+- real mesh-face / triangle-interior sampling;
+- barycentrically interpolated dense skin targets;
+- deliberate active/boundary objective bias rather than cancelling BCE/MSE back to uniform with `u/q`.
+
+C4 authority:
+
+`experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_PREREG_20260909.md` on the active research branch.
+
+## A0/A1 guard
+
+A0:
+
+`teacher W -> codec representation -> shared decoder -> reconstructed W`
+
+A1:
+
+`S + Qualified G -> Arachne predictor -> same frozen decoder -> W proposal`
+
+The old `models/arachne/v2/` implementation is a prior scaffold. It is not a current V7-native A1 result. After A0 closes, freeze the actual V7 latent/decode interface, perform a fresh A1 capacity/architecture audit, preregister, then train.
+
+## Non-claims
+
+- Geppetto FIT1 PASS != generalization.
+- Geppetto FIT1 PASS != Arachne PASS.
+- A0 PASS != A1 PASS.
+- A1 PASS != PRODUCT_PASS.
+- Compiler qualification != permission to invent missing learned semantics.
 
 ## Execution environment
 
-- Actions: **local self-hosted**
-- Required labels: `self-hosted, linux, x64, realsas`
-- Known runner: `realsas-wsl-1660ti`
-- Operator path: `~/actions-runner`
-- Why: routine hosted Actions usage previously triggered a quota/usage warning; avoid high-volume hosted/fan-out workflows
-
-## Rehydration drill-down
-
-1. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` — learned/deterministic responsibility envelope.
-2. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md` — FIT1-to-now scientific flow.
-3. `CURRENT_STATE.md` — current stop/go authority.
-4. `canonical/FIT1_COMMIT_LINEAGE_V1.md` — exact FIT1-descendant commit discovery.
-5. `canonical/CONTEXT_COVERAGE_AUDIT.md` — AOA coverage/regression state.
-6. `canonical/LIVE_AUTHORITY_MAP.md` — branch/authority navigation.
-7. architecture + experiment ledgers/registry — implementation/test/promotion distinctions.
-8. exact prereg/result/source artifacts only as needed.
-
-## Completion transaction
-
-prereg + exact result/provenance + implementation + experiment registry/ledger + architecture ledger if affected + ownership check + context/CURRENT_STATE stop-go + explicit supersession/revocation
+Routine Actions authority remains the local self-hosted RealSaS runner (`self-hosted, linux, x64, realsas`).
 
 ## Packet validity
 
-**VALID — current state, authority manifest, ownership/FIT1 continuity guards, and live refs agree.**
+**VALID FOR 2026-09-09 CONTINUATION — Geppetto frozen/promotion state and current Arachne A0 scope are reconciled here.**

@@ -1,0 +1,184 @@
+{
+  "schema_version": 2,
+  "supersedes_for_current_navigation": "canonical/EXPERIMENT_REGISTRY_V1.json",
+  "preservation_rule": "V1 remains historical detail/provenance. V2 is the compact current registry after the 2026-09-09 Geppetto promotion transaction.",
+  "continuation_authority": "CURRENT_STATE.md",
+  "records": [
+    {
+      "id": "GEPPETTO_CAUSAL_REPAIR_V2_R2_C1",
+      "module": "Geppetto",
+      "witness": "Mage FIT1",
+      "status": "CLOSED_PASS_COMPONENT_EVIDENCE",
+      "date": "2026-09-06",
+      "question": "Does per-step full-surface cross-attention rescue the frozen corrected-raster Geppetto protocol?",
+      "outcome": "R2 stable FAIL; C1 stable PASS; preregistered staircase stopped before C2.",
+      "can_claim": [
+        "full-surface cross-attention causally rescued this frozen protocol"
+      ],
+      "cannot_claim": [
+        "old C2 diffusion outcome",
+        "full reference-strength formulation outcome",
+        "generalization"
+      ],
+      "pointers": [
+        "canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md",
+        "contract:233ec3bcd77e0f02"
+      ]
+    },
+    {
+      "id": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
+      "module": "Geppetto",
+      "witness": "Mage FIT1",
+      "status": "CLOSED_FAIL",
+      "closed_at_utc": "2026-09-07T06:00:52.301304Z",
+      "verdict": "AR01_NO_TERMINAL_CLOSURE",
+      "question": "Does the exact minimal joint+parent recurrent feedback intervention close the terminal structural-stability gate?",
+      "outcome": "Both matched arms failed terminal 48-check closure; AR0 retained strong same-witness reachability and AR1 showed severe teacher/free divergence.",
+      "can_claim": [
+        "exact AR-01 implementation is not promotable",
+        "AR1 teacher/free exposure failure exists in that implementation"
+      ],
+      "cannot_claim": [
+        "all structural autoregression fails",
+        "later reference-strength Geppetto fails",
+        "generalization"
+      ],
+      "pointers": [
+        "canonical/AR01_RESULT_20260907.md",
+        "contract:41055bd073538d6b"
+      ]
+    },
+    {
+      "id": "GEPPETTO_REFERENCE_STRENGTH_FIT1",
+      "module": "Geppetto",
+      "witness": "Mage FIT1",
+      "status": "CLOSED_PASS_PROMOTED_FIT1_FROZEN",
+      "date": "2026-09-08",
+      "question": "Can the separately preregistered reference-strength Geppetto infer and stably maintain the Mage mechanical core from current admitted IRIS/GSA evidence under shipping-faithful free-running generation?",
+      "verdict": "FIT1_TERMINAL_PASS",
+      "source_commit": "f7be46f0a97df62a793ebf91b22297c894854f39",
+      "seal_commit": "ae0af0cd39dd2468a012ba21890a4fed2da7c4c9",
+      "closure_step": 14080,
+      "terminal_streak_checks": 48,
+      "terminal_stability_optimizer_steps": 3072,
+      "qualified_control_count": 22,
+      "qualified_deform_root_count": 1,
+      "teacher_feedback_free_run": false,
+      "checkpoint_sha256": "b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30",
+      "qualified_skeleton_ir_sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992",
+      "result_json_sha256": "728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045",
+      "can_claim": [
+        "reference-strength formulation closed the controlled Mage FIT1 terminal gate",
+        "source was separately promoted to models/geppetto/reference_strength_v1/"
+      ],
+      "cannot_claim": [
+        "unseen-character/family generalization",
+        "Arachne closure",
+        "PRODUCT_PASS"
+      ],
+      "pointers": [
+        "canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md",
+        "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
+        "models/geppetto/reference_strength_v1/"
+      ]
+    },
+    {
+      "id": "ARACHNE_V7_C2_BLEND_BOUNDARY_LOCALIZATION",
+      "module": "Arachne/SkinFieldCodec A0",
+      "witness": "Mage FIT1",
+      "status": "CLOSED_COMPONENT_EVIDENCE",
+      "date": "2026-09-09",
+      "question": "Where does the residual V7 skin-field error concentrate?",
+      "outcome": "Weak-true versus nearby-false support ordering at blend boundaries is strongly implicated.",
+      "can_claim": [
+        "blend-boundary support ordering is a strong diagnosis"
+      ],
+      "cannot_claim": [
+        "a particular sampling or custom loss remedy is required"
+      ],
+      "pointers": [
+        "exp/arachne-skintokens-cleanroom-fit1-20260908:experiments/arachne_skintokens_fit1_20260908/V7_C2_BLEND_BOUNDARY_LOCALIZATION_RESULT_20260909.md"
+      ]
+    },
+    {
+      "id": "V7_C3_SKINTOKENS_BOUNDARY_AWARE_DENSE_SAMPLING",
+      "module": "Arachne/SkinFieldCodec A0",
+      "witness": "Mage FIT1",
+      "status": "CLOSED_FAIL",
+      "date": "2026-09-09",
+      "question": "Does a point-cloud support/near-support dense sampler help when BCE/MSE are exactly importance-corrected back to the uniform row objective?",
+      "verdict": "C3_POINT_CLOUD_IMPORTANCE_CORRECTED_REMEDY_FALSIFIED",
+      "control_raw_p95": 0.18175699718563249,
+      "treatment_raw_p95": 0.19077774486726193,
+      "control_deformation_ratio": 0.06118907406926155,
+      "treatment_deformation_ratio": 0.06876000761985779,
+      "combined_result_sha256": "5fe9c350e2f09a1fd858d86d39c965c9c429321c76851994379a0466d925eaa0",
+      "can_claim": [
+        "that exact C3 point-cloud/u-q remedy did not close A0 and did not beat matched control"
+      ],
+      "cannot_claim": [
+        "boundary localization is false",
+        "real face/barycentric supervision is false",
+        "A1 was tested"
+      ],
+      "pointers": [
+        "exp/arachne-skintokens-cleanroom-fit1-20260908:experiments/arachne_skintokens_fit1_20260908/V7_C3_SKINTOKENS_BOUNDARY_AWARE_DENSE_SAMPLING_PREREG_20260909.md",
+        "source_blob:38541137776ae3a997e4e67b175699ac6e2fb881"
+      ]
+    },
+    {
+      "id": "V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION",
+      "module": "Arachne/SkinFieldCodec A0",
+      "witness": "Mage FIT1",
+      "status": "ACTIVE_RUNNING",
+      "date": "2026-09-09",
+      "branch": "exp/arachne-skintokens-cleanroom-fit1-20260908",
+      "question": "Is the remaining V7 A0 tail caused by cancellation of deliberate active-heavy objective bias and/or by missing real-face triangle-interior barycentric dense supervision?",
+      "arms": [
+        "A C4_REFERENCE_IMPORTANCE_ACTIVE_ONLY",
+        "B C4_BIASED_ACTIVE_ONLY",
+        "C C4_SKINTOKENS_FACE_BARY_BIASED"
+      ],
+      "prereg_blob": "4ada6333afa1dcfe40d08eac286a88d3acc158ad",
+      "source_contract_blob": "cf4401f6ef3d91a32c6615b3325d9d9fbe67813b",
+      "architecture": "RealSaS.Arachne.SkinFieldCodec.v7",
+      "parameters": 278010880,
+      "a1_authorized": false,
+      "product_pass_authorized": false,
+      "can_claim_after_run": [
+        "only the exact A0 causal conclusions allowed by the preregistration"
+      ],
+      "cannot_claim": [
+        "A1 learned inference closure",
+        "generalization",
+        "PRODUCT_PASS"
+      ],
+      "pointers": [
+        "exp/arachne-skintokens-cleanroom-fit1-20260908:experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_PREREG_20260909.md",
+        "exp/arachne-skintokens-cleanroom-fit1-20260908:experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_SOURCE_CONTRACT.json"
+      ]
+    },
+    {
+      "id": "ARACHNE_V7_NATIVE_A1",
+      "module": "Arachne A1",
+      "witness": "Mage FIT1",
+      "status": "BLOCKED_NOT_AUTHORIZED",
+      "question": "Can product-time S+Qualified G predict the frozen V7 codec latent/decode state without teacher W?",
+      "dependency": "A0 must close first and the actual V7 latent/decode interface must be frozen before A1 architecture/capacity preregistration.",
+      "cannot_claim": [
+        "models/arachne/v2 is already the current V7-native A1",
+        "A1 training is authorized"
+      ]
+    },
+    {
+      "id": "REALSaS_PRODUCT_ACCEPTANCE_AFTER_LEARNED_SKINNING",
+      "module": "Product proof",
+      "status": "BLOCKED_NOT_AUTHORIZED",
+      "question": "Does the independently contracted end-to-end product candidate pass product acceptance?",
+      "dependency": "A1 learned skinning and deterministic qualification must close first.",
+      "cannot_claim": [
+        "any FIT1 model-science PASS automatically yields PRODUCT_PASS"
+      ]
+    }
+  ]
+}

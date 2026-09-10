@@ -1,0 +1,23 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=10240"]
+      - id: check-ast
+        files: ^(models|compiler|runtime|tools|tests)/
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+      - id: trailing-whitespace
+        exclude: ".*\\.md$"
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.9
+    hooks:
+      - id: ruff-check
+        files: ^(models|compiler|runtime|tools|tests)/
+        args: ["--select=E9,F63,F7,F82"]

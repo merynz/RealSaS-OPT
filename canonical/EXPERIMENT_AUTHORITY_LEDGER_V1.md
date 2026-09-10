@@ -1,138 +1,160 @@
 # RealSaS — Experiment Authority Ledger V1
 
-**Date:** 2026-09-07  
+**Date:** 2026-09-09  
 **Continuation authority:** `CURRENT_STATE.md` on `main`  
-**Machine experiment register:** `canonical/AUTHORITY_MAP_V1.json`  
-**Structured dependency registry:** `canonical/EXPERIMENT_REGISTRY_V1.json`
+**Machine experiment register:** `canonical/AUTHORITY_MAP_V1.json`
 
-This ledger records what an experiment actually tested and what it did **not** test. The live branch/head/status view is generated in `canonical/LIVE_AUTHORITY_MAP.md`; do not copy live branch SHAs here.
-
-## Status vocabulary
-
-- `ACTIVE_RUNNING` — preregistered experiment has not reached its final fixed verdict.
-- `CLOSED_PASS` / `CLOSED_FAIL` — exact preregistered gate closed.
-- `COMPONENT_EVIDENCE` — mechanism-level evidence only.
-- `IMPLEMENTED_NOT_AUTHORITATIVELY_RUN` — executable/preregistered source exists but does not constitute a scientific result.
-- `OPEN_NOT_RUN` — recognized gate/question with no closed run.
-- `INDEX_GAP_NEEDS_BACKFILL` — historical evidence exists, but exact canonical result pointer must be reverified before numerical claims are relied on.
+This ledger records what an experiment actually tested and what it did **not** test. Branch existence or source existence is never enough to establish a result.
 
 ## Current gate matrix
 
-| Gate / experiment | Status | Exact scientific question | What it can establish | What it cannot establish |
+| Gate / experiment | Status | Exact scientific question | What it establishes | What it does not establish |
 |---|---|---|---|---|
-| `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE` | **CLOSED_FAIL — `AR01_NO_TERMINAL_CLOSURE`** | Matched AR0 vs AR1: does minimal joint+parent mechanical recurrent feedback improve Mage FIT1 reachability/retention and parent/root structural prediction? | Neither arm closed the terminal gate; AR0 has strong reachability with residual late collapse; AR1 shows severe teacher/free exposure failure | Full RigAnything verdict; all AR harmful; a particular recovery method necessary; generalization; promotion |
-| `POST_AR01_DIAGNOSIS_NEXT_GATE_SELECTION` | **OPEN_NOT_RUN** | Which remaining uncertainty should be isolated next: AR0 residual stability, AR1 exposure/recovery, or fuller C3/C4 behavior? | A future prereg can isolate one of these questions | Selection itself proves no mechanism |
-| `GEPPETTO_CAUSAL_REPAIR_V2_R2_C1` | **CLOSED_PASS — C1 winner** | On corrected-raster conditioning, which minimal staircase rung first stably fits Mage: R2, C1 xattn, then C2 diffusion only if needed? | R2 failed stable gate; C1 full-surface xattn passed under the frozen protocol, so the staircase stopped | C2 diffusion behavior; skeleton feedback; full C3/C4; theoretical necessity; generalization |
-| `GEPPETTO_C2_CONDITIONAL_DIFFUSION_LOCUS` | **IMPLEMENTED_NOT_AUTHORITATIVELY_RUN** | Add conditional diffusion on top of C1, with geometry feedback absent | Preserved implementation/prereg design only | No C2 outcome can be claimed from Causal Repair V2 because C1 PASS stopped the staircase before C2 |
-| `RIGANYTHING_FULL_FORMULATION_CHALLENGER_C3_C4` | **IMPLEMENTED_NOT_AUTHORITATIVELY_RUN** | Full-surface + diffusion + generated/teacher joint/parent feedback token, with sibling/BFS helper | Existing fuller formulation-level implementation/design lineage | Source existence is not evidence; C1 + AR-01 do not sum into C3/C4 verdict |
-| `V3P_LOSSLESS_EVIDENCE_STABILITY` | **COMPONENT_EVIDENCE** | Preserve lossless fixed 8-view evidence side-path | Lossless consumer-seam behavior and same-witness diagnostics | Generic promotion/generalization |
-| `V3X_FULL_SURFACE_STABILITY` | **COMPONENT_EVIDENCE** | V3P + per-step full-surface access | Reachability/stability diagnostic | Structural AR or formulation closure |
-| `FIT1_TRUNK_ACTUAL_UPDATE_CAP_0_005` | **COMPONENT_EVIDENCE** | FIT1-specific strong-trunk update containment | Mage containment evidence under preregistered use | Generic architecture stability/generalization/product-optimal threshold |
-| `MAGE_FIT1_HISTORICAL_B1S` | **INDEX_GAP_NEEDS_BACKFILL** | Historical same-witness fit of latent-only family | Same-witness capacity after exact pointer normalization | Structural-AR necessity/generalization |
-| `R6_COVERAGE_STRESS` | **INDEX_GAP_NEEDS_BACKFILL** | Coverage stress | Coverage evidence after exact pointer normalization | FIT1/AR/generalization closure |
-| `MECHANICAL_SALIENCE_FUNCTIONAL_SIMPLIFICATION` | **OPEN_NOT_RUN** | Learn whether deform controls are mechanically necessary/simplifiable | Future neural responsibility closure | Compiler legality cannot substitute for semantics |
+| `GEPPETTO_REFERENCE_STRENGTH_FIT1` | **CLOSED_PASS / PROMOTED_FIT1_FROZEN** | Can the reference-strength Geppetto infer and stably retain the Mage mechanical core from current admitted IRIS/GSA evidence under native free-running generation? | Mage FIT1 terminal closure for this formulation; 48/48 terminal structural checks; separate mainline promotion | unseen-family generalization; Arachne/skin closure; PRODUCT_PASS |
+| `V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION` | **ACTIVE_RUNNING** | On V7 A0, is the remaining tail driven by cancellation of active-heavy objective bias and/or missing real-face barycentric dense supervision? | after completion: causal A-vs-B and B-vs-C evidence for the exact A0 mechanisms | A1 product-time latent inference; generalization; PRODUCT_PASS |
+| `V7_C3_SKINTOKENS_BOUNDARY_AWARE_DENSE_SAMPLING` | **CLOSED_FAIL** | Does a point-cloud support/near-support sampler help when BCE/MSE are corrected back to the uniform row objective with exact `u/q`? | that exact proxy/remedy did not close A0 and treatment did not beat matched control | boundary localization is false; face/barycentric source-faithful sampling is false; A1 failure |
+| `V7_C2_BLEND_BOUNDARY_LOCALIZATION` | **COMPONENT_EVIDENCE** | Where do the residual V7 errors concentrate? | weak-true vs nearby-false support ordering at blend boundaries is strongly implicated | a specific remedy is necessary |
+| `AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE` | **CLOSED_FAIL / HISTORICAL SCOPED EVIDENCE** | Does the exact minimal AR0/AR1 joint+parent feedback intervention close Mage terminal stability? | exact AR-01 arms failed terminal closure; AR1 had severe teacher/free divergence | the later reference-strength formulation fails; all structural recurrence is harmful; generalization |
+| `GEPPETTO_CAUSAL_REPAIR_V2_R2_C1` | **CLOSED_PASS / COMPONENT EVIDENCE** | Does per-step full-surface cross-attention rescue the frozen corrected-raster protocol? | R2 failed and C1 passed; xattn causally rescued that protocol | old C2 diffusion outcome; full later formulation; generalization |
 
-## Causal Repair V2 exact authority
+## Geppetto reference-strength FIT1 — closed authority
 
-**Drive folder:** `RealSaS_MAGE_GEPPETTO_CAUSAL_REPAIR_V2_NO_TOKEN`  
-**Contract:** `233ec3bcd77e0f02`  
-**Comparison created:** `2026-09-06T04:06:17.337Z`
+Scientific source/optimizer commit:
 
-Preregistered staircase:
+`f7be46f0a97df62a793ebf91b22297c894854f39`
 
-`R2 -> if FAIL C1 -> if C1 FAIL C2`
+Seal commit:
 
-Authoritative runs folder contains **R2 and C1 only**.
+`ae0af0cd39dd2468a012ba21890a4fed2da7c4c9`
 
-### R2
+Preregistration and frozen apparatus are preserved on main under:
 
-- stable PASS: false
-- best slot p95: `0.041321732103824615`
-- final outside: 27
-- final occupancy L1: 27
-- final slot p95: `0.1146610826253891`
+`experiments/geppetto_reference_strength_fullstack_v1/`
 
-### C1
+Closure:
 
-- stable PASS: true
-- first stable: step 4992
-- epsilon switch: 4736
-- best step: 6208
-- best slot p95: `0.004098494071513414`
-- final outside: 0
-- final occupancy L1: 0
-- final slot p95: `0.005874851252883673`
+`canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md`
 
-Winner candidate: `C1`
+Separate promotion/refreeze:
 
-Recorded causal interpretation:
+`canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md`
 
-`R2_NO_STABLE_PASS_WITHIN_BUDGET__C1_XATTN_STABLE_PASS__XATTN_RESCUES_THIS_FROZEN_TRAINING_PROTOCOL__NOT_THEORETICAL_NECESSITY`
+Terminal result:
 
-Because C1 passed, **C2 did not run**. Any prior continuity text describing C2 as experimentally tested by this run is revoked.
+- categorical verdict `FIT1_TERMINAL_PASS`;
+- closure step `14080`;
+- terminal full-structural streak `48/48` checks = `3072` optimizer steps;
+- qualified controls `22`;
+- exactly one deform root;
+- no teacher feedback during free-running inference;
+- diffusion evaluation seeds `{11,23,47,89}`.
 
-## AR-01 closed result
+Frozen hashes:
 
-**Contract:** `41055bd073538d6b`  
-**Closed UTC:** `2026-09-07T06:00:52.301304+00:00`  
-**Authority:** `canonical/AR01_RESULT_20260907.md`  
-**Verdict:** `AR01_NO_TERMINAL_CLOSURE`
+- checkpoint SHA-256 `b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30`;
+- final result SHA-256 `728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045`;
+- qualified skeleton SHA-256 `48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992`.
 
-AR0:
-- first structural PASS step 2368;
-- max structural streak 61;
-- final check PASS but terminal streak 1;
-- terminal stability FAIL;
-- final outside 0, parent 1.0, slot p95 `0.0008499497780576348`.
+The passing formulation includes lossless fieldwise surface access, exact GSA-relation message passing, global full-surface memory, prediction-only causal recurrence, per-step cross-attention, conditional residual diffusion, soft internal parent feedback, native STOP and separate all-pairs parent evidence. Canonical IDs/final legal tree remain Compiler-owned.
 
-AR1:
-- no free-running structural PASS;
-- terminal stability FAIL;
-- final outside 28, parent 0.50, slot p95 `0.47583022713661194`;
-- final teacher-forced structural PASS true, parent 1.0, slot p95 `0.00206305761821568`;
-- teacher/free max-abs gap `0.4984188377857208`.
+## AR-01 / old RigAnything staircase — anti-conflation
 
-Interpretation: exact minimal residual feedback implementation is not promotable; AR0 residual stability and AR1 exposure/recovery remain separate open questions. No full C3/C4 verdict.
+Historical order is:
 
-## RigAnything mechanism execution map
+`R2 FAIL -> C1 xattn PASS -> old staircase STOP -> AR-01 minimal feedback FAIL -> later independent reference-strength formulation FIT1 PASS -> separate promotion`.
 
-Binding reconstruction:
+Therefore both of these statements are simultaneously true:
 
-`R2 RUN FAIL -> C1 RUN PASS -> C2 NOT RUN -> C3/C4 SOURCE-ONLY -> AR-01 separate minimal-feedback RUN, both terminal FAIL`
+1. the **old Causal Repair V2 C2 rung** was not executed because C1 passed;
+2. conditional diffusion **was later executed authoritatively** inside the separately preregistered reference-strength formulation that terminal-passed FIT1.
 
-See `canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md` for source commit/blob and rationale.
+Do not collapse those two experiments into one lineage claim.
 
-## Detached-artifact authority correction
+## Arachne / SkinFieldCodec A0 — current authority
 
-A detached generated prereg draft described conditional diffusion as shared AR-01 mechanism. It is non-authoritative. Repo prereg SHA `78981b0215c88462d7a2be607274f638494dc1517f88ed882084a4e83d11fae1` freezes the direct three-mode locus head used by the executed notebook.
+Current branch:
+
+`exp/arachne-skintokens-cleanroom-fit1-20260908`
+
+Current model:
+
+- architecture `RealSaS.Arachne.SkinFieldCodec.v7`;
+- `278,010,880` parameters;
+- config hash `e9d327cedb206e7ae5b074ae04b28e7de89c0e5caecb5f7c183203dbd8336fa1`;
+- no FSQ;
+- fixed cache SHA-256 `db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd`;
+- teacher-W SHA-256 `7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d`;
+- 22 joints / 934 supervised GSA rows / 16 low-confidence rows.
+
+### C3 closed failure
+
+C3 preregistration:
+
+`V7_C3_SKINTOKENS_BOUNDARY_AWARE_DENSE_SAMPLING_PREREG_20260909.md`
+
+Frozen source Git blob:
+
+`38541137776ae3a997e4e67b175699ac6e2fb881`
+
+Observed terminal comparison used by C4 prereg:
+
+- control raw row-L1 p95 `0.18175699718563249`;
+- treatment raw row-L1 p95 `0.19077774486726193`;
+- control raw deformation ratio `0.06118907406926155`;
+- treatment raw deformation ratio `0.06876000761985779`;
+- top-4 displacement `48 -> 47` only;
+- combined result SHA-256 `5fe9c350e2f09a1fd858d86d39c965c9c429321c76851994379a0466d925eaa0`.
+
+Interpretation: reject **that point-cloud + importance-corrected remedy**. Do not reject the boundary diagnosis itself.
+
+### C4 active
+
+Preregistration blob:
+
+`4ada6333afa1dcfe40d08eac286a88d3acc158ad`
+
+Source contract blob:
+
+`cf4401f6ef3d91a32c6615b3325d9d9fbe67813b`
+
+C4 contains three matched arms:
+
+- A: exact C3-control importance-corrected active-only reference;
+- B: exact same GSA rows without `u/q`, isolating deliberate active-heavy objective bias;
+- C: real deformation-supported source faces, area-proportional face draws, triangle-interior barycentric samples and interpolated skin targets, also without importance correction.
+
+All three use the same V7 architecture and fixed 384-step continuation protocol. The original FIT1 numerical gates remain unchanged. Top-4 remains diagnostic only.
+
+**Authority scope:** C4 is A0 codec representation/decode science. `A1_authorized=false` remains binding. Any notebook label suggesting full Arachne/product closure must be interpreted through this narrower authority boundary.
+
+## A0 / A1 separation
+
+A0 training/teacher lane:
+
+`teacher dense W -> codec representation/latent -> shared decoder -> reconstructed W`
+
+A1 shipping learned lane:
+
+`RiggingSurfaceIR S + QualifiedSkeletonIR G -> learned Arachne latent predictor -> same frozen codec decoder -> dense W proposal`
+
+Therefore:
+
+`A0 PASS -> freeze actual V7 latent/decode interface -> fresh V7-native A1 capacity/architecture prereg -> A1 FIT1 -> Compiler skin qualification -> separate product experiment`.
+
+Neither A0 nor A1 can directly mint `PRODUCT_PASS`.
 
 ## Binding anti-conflation rules
 
 1. Source exists != mechanism tested.
-2. Preregistered rung != executed rung.
-3. Mechanism tested != full formulation tested.
-4. FIT1 success != generalization evidence.
-5. Green source/contract CI != science PASS.
-6. Apparatus failure != model-science FAIL.
-7. No gate widening after results.
-8. Historical numerical claims with index gaps require exact artifact verification.
-9. Previous streak != terminal stability if terminal contiguous streak is required.
-10. `AR01_NO_TERMINAL_CLOSURE` cannot be relabeled `AR1 harms` because AR0 also failed the primary terminal gate.
-11. Detached drafts cannot override hashed repo prereg/result authority.
+2. Scientific PASS != automatic promotion.
+3. FIT1 success != generalization.
+4. Geppetto PASS != Arachne PASS.
+5. A0 Codec PASS != A1 inference PASS.
+6. A1 PASS != PRODUCT_PASS.
+7. Compiler qualification cannot silently replace missing learned semantics.
+8. Repo prereg/result/hash authority outranks detached chat/generated wording.
+9. Routine Actions/science execution uses only the local self-hosted RealSaS runner.
 
-## Closing / promotion transaction
+## Promotion transaction rule
 
-An experiment changes continuation authority only after one reconciliation updates:
-
-1. exact prereg/result/provenance pointer;
-2. implementation commit/source;
-3. `canonical/AUTHORITY_MAP_V1.json`;
-4. this ledger;
-5. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` if architecture belief changed;
-6. `canonical/EXPERIMENT_REGISTRY_V1.json`;
-7. `canonical/CONTEXT_STATE_V1.json`;
-8. `CURRENT_STATE.md` if stop/go changed;
-9. `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`;
-10. explicit supersession/revocation where required.
-
-Geppetto promotion remains blocked until scientifically necessary post-AR01 gate(s) close.
+A closure that changes current authority is incomplete until source identity, exact prereg/result, architecture/experiment ledgers, machine context, `CURRENT_STATE.md`, provenance/supersession and a separate promotion decision are reconciled.

@@ -1,0 +1,20 @@
+# Default repository owner
+* @merynz
+
+# Scientific / authority spine
+/CURRENT_STATE.md @merynz
+/AGENTS.md @merynz
+/canonical/ @merynz
+
+# Learned models and compiler/runtime authority
+/models/ @merynz
+/compiler/ @merynz
+/runtime/ @merynz
+/product/ @merynz
+
+# CI / security / dependency policy
+/.github/ @merynz
+/SECURITY.md @merynz
+/LICENSE @merynz
+/requirements/ @merynz
+/pyproject.toml @merynz

@@ -3,37 +3,112 @@ name: model-mainline-source-gate
 on:
   pull_request:
     paths:
+      - 'AGENTS.md'
+      - 'CURRENT_STATE.md'
+      - 'README.md'
+      - 'REPOSITORY_MAP.md'
+      - 'SYSTEM_INDEX.md'
+      - 'LICENSE'
+      - 'THIRD_PARTY_NOTICES.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - '.editorconfig'
+      - '.gitattributes'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '.python-version'
+      - 'pyproject.toml'
+      - 'requirements/**'
+      - '.github/CODEOWNERS'
+      - '.github/dependabot.yml'
+      - '.github/pull_request_template.md'
       - 'models/**'
       - 'compiler/realsas_compiler_core/**'
       - 'compiler/realsas_compiler_services/**'
       - 'runtime/reference_v4/**'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'experiments/geppetto_reference_strength_fullstack_v1/**'
       - 'experiments/family_selection_v1/**'
       - 'experiments/single_family_e2e_v1/data_manifest_v1.py'
       - 'tests/compiler/**'
       - 'tests/iris/**'
       - 'tests/models/**'
       - 'tests/repository/test_learned_artifact_registry_v1.py'
+      - 'tests/repository/test_current_continuity_authority_v2.py'
+      - 'tests/repository/test_model_branding_boundary_v1.py'
+      - 'canonical/AUTHORITY_MAP_V1.json'
+      - 'canonical/CONTEXT_STATE_V1.json'
+      - 'canonical/EXPERIMENT_REGISTRY_V2.json'
+      - 'canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl'
       - 'canonical/LEARNED_ARTIFACT_REGISTRY_V1_20260904.json'
+      - 'canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md'
+      - 'canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md'
+      - 'canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json'
+      - 'canonical/FIT1_EVIDENCE_INDEX_20260909.md'
+      - 'canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md'
+      - 'canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md'
+      - 'canonical/README.md'
+      - 'tools/audit_context_coverage.py'
+      - 'tools/build_knowledge_artifact_catalog.py'
+      - 'tools/render_rehydration_packet.py'
       - 'restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md'
+      - '.github/workflows/live_authority_map.yml'
       - '.github/workflows/model_mainline_source_gate.yml'
   push:
+    branches: [main]
     paths:
+      - 'AGENTS.md'
+      - 'CURRENT_STATE.md'
+      - 'README.md'
+      - 'REPOSITORY_MAP.md'
+      - 'SYSTEM_INDEX.md'
+      - 'LICENSE'
+      - 'THIRD_PARTY_NOTICES.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - '.editorconfig'
+      - '.gitattributes'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '.python-version'
+      - 'pyproject.toml'
+      - 'requirements/**'
+      - '.github/CODEOWNERS'
+      - '.github/dependabot.yml'
+      - '.github/pull_request_template.md'
       - 'models/**'
       - 'compiler/realsas_compiler_core/**'
       - 'compiler/realsas_compiler_services/**'
       - 'runtime/reference_v4/**'
       - 'experiments/iris_reprojection_v2_20260831/**'
       - 'experiments/geppetto_arachne_r6_20260901/**'
+      - 'experiments/geppetto_reference_strength_fullstack_v1/**'
       - 'experiments/family_selection_v1/**'
       - 'experiments/single_family_e2e_v1/data_manifest_v1.py'
       - 'tests/compiler/**'
       - 'tests/iris/**'
       - 'tests/models/**'
       - 'tests/repository/test_learned_artifact_registry_v1.py'
+      - 'tests/repository/test_current_continuity_authority_v2.py'
+      - 'tests/repository/test_model_branding_boundary_v1.py'
+      - 'canonical/AUTHORITY_MAP_V1.json'
+      - 'canonical/CONTEXT_STATE_V1.json'
+      - 'canonical/EXPERIMENT_REGISTRY_V2.json'
+      - 'canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl'
       - 'canonical/LEARNED_ARTIFACT_REGISTRY_V1_20260904.json'
+      - 'canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md'
+      - 'canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md'
+      - 'canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json'
+      - 'canonical/FIT1_EVIDENCE_INDEX_20260909.md'
+      - 'canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md'
+      - 'canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md'
+      - 'canonical/README.md'
+      - 'tools/audit_context_coverage.py'
+      - 'tools/build_knowledge_artifact_catalog.py'
+      - 'tools/render_rehydration_packet.py'
       - 'restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md'
+      - '.github/workflows/live_authority_map.yml'
       - '.github/workflows/model_mainline_source_gate.yml'
 
 jobs:
@@ -50,17 +125,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install model source-test dependencies
+      # Do not enable setup-python's remote pip-cache save on the single self-hosted
+      # runner. Its local pip cache is already persistent; the action post-step can
+      # otherwise serialize the entire RealSaS CI queue after all tests have passed.
+      - name: Install pinned model source-test dependencies
         env:
           PIP_DISABLE_PIP_VERSION_CHECK: '1'
           PIP_DEFAULT_TIMEOUT: '60'
         run: |
-          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pytest pillow
-          python -m pip install --no-input --progress-bar off torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Current continuity authority gate
+        run: python -m pytest -q tests/repository/test_current_continuity_authority_v2.py
+      - name: RealSaS model naming boundary
+        run: python -m pytest -q tests/repository/test_model_branding_boundary_v1.py
       - name: IRIS byte-equivalence and mainline import firewall
         run: python tests/iris/test_iris_mainline_source_v1.py
-      - name: Geppetto inference source gate
+      - name: Geppetto current FIT1-frozen source gate
         run: python tests/models/test_geppetto_mainline_source_v1.py
+      - name: Geppetto FIT1 machine evidence gate
+        run: python -m pytest -q tests/models/test_geppetto_fit1_evidence_manifest_v1.py
       - name: SkinFieldCodec source/config gate
         run: python tests/models/test_skin_field_codec_mainline_source_v1.py
       - name: Arachne inference source/dependency bridge gate
@@ -89,6 +173,8 @@ jobs:
           from pathlib import Path
           for root in (
               Path('models/iris/v2'),
+              Path('models/iris/v3'),
+              Path('models/geppetto/reference_strength_v1'),
               Path('models/geppetto/v2'),
               Path('models/skin_field_codec/v1'),
               Path('models/arachne/v2'),
@@ -97,9 +183,14 @@ jobs:
               for path in sorted(root.glob('*.py')):
                   py_compile.compile(str(path), doraise=True)
           PY
-      - name: Pre-fit status summary
+      - name: Mainline source authority summary
         run: |
-          echo 'MODEL_MAINLINE_AND_PREFIT_HARDENING_PASS'
+          echo 'MODEL_MAINLINE_SOURCE_GATE_PASS'
           echo "commit=$GITHUB_SHA"
-          echo 'scientific_fit_steps=0'
-          echo 'fit_authorized=false'
+          echo 'current_continuity_v2_bound=true'
+          echo 'model_branding_boundary=true'
+          echo 'iris_scene_first_v3_promoted_witness=true'
+          echo 'geppetto_fit1_frozen_promoted=true'
+          echo 'geppetto_fit1_machine_evidence_bound=true'
+          echo 'arachne_v7_a1_promoted=false'
+          echo 'product_pass_claimed=false'

@@ -1,0 +1,62 @@
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging / build output
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Notebook/editor state
+.ipynb_checkpoints/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local test / tool output
+*.log
+*.tmp
+*.temp
+.cache/
+
+# Local ML run output. Canonical scientific evidence must be explicitly promoted,
+# hash-bound, and force-added intentionally when it belongs in Git.
+artifacts/
+checkpoints/
+outputs/
+runs/
+wandb/
+lightning_logs/
+
+# Local secrets / environment overrides
+.env
+.env.*
+!.env.example
+
+# C/C++ local build trees
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json

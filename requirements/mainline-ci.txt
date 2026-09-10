@@ -1,0 +1,6 @@
+# Canonical current-mainline CPU regression profile for Python 3.11.
+# Historical experiments retain their separately frozen scientific environments.
+numpy==2.1.3
+Pillow==11.3.0
+pytest==8.4.1
+scipy==1.14.1

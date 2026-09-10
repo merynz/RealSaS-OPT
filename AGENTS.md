@@ -7,7 +7,7 @@ This repository is intentionally structured so a new AI agent/chat/session can r
 Before making any architecture, experiment, branch, or scientific-state claim:
 
 1. `canonical/REHYDRATION_PACKET.md`
-2. `canonical/SCIENTIFIC_JOURNAL_V1.jsonl` — inspect the recent tail first so the ordered sequence of decisions/requests and the reason for the current task are recovered, not only the final state
+2. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl` — inspect the recent tail first so the ordered sequence of current decisions/requests and the reason for the current task are recovered, not only the final state
 3. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 4. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 5. `CURRENT_STATE.md`
@@ -16,8 +16,10 @@ Before making any architecture, experiment, branch, or scientific-state claim:
 8. `canonical/LIVE_AUTHORITY_MAP.md`
 9. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
 10. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-11. `canonical/EXPERIMENT_REGISTRY_V1.json`
+11. `canonical/EXPERIMENT_REGISTRY_V2.json`
 12. `canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json` when locating exact older evidence
+
+`canonical/EXPERIMENT_REGISTRY_V1.json` and `canonical/SCIENTIFIC_JOURNAL_V1.jsonl` remain historical continuity/provenance inputs. They are not the current live registry/journal after the 2026-09-09 Geppetto promotion transaction. The current machine pointers are also declared in `canonical/AUTHORITY_MAP_V1.json` and `canonical/CONTEXT_STATE_V1.json`; if a future schema supersedes V2, follow those machine pointers rather than guessing from filenames.
 
 If `canonical/BOOTSTRAP_COVERAGE_STATE_V1.json` says `BOOTSTRAP_AUDIT_CLOSED`, also read `canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md` before interpreting coverage semantics.
 
@@ -35,7 +37,7 @@ python3 tools/render_rehydration_packet.py --write
 
 A RealSaS learned model is **not** the whole subsystem around that model. Unless the discussion is explicitly restricted to model internals, expand subsystem shorthand before reasoning about responsibility:
 
-- **IRIS** means: observation/camera contract -> learned IRIS evidence -> deterministic GSA/RiggingSurfaceIR assembly, validation and provenance -> learned consumers.
+- **IRIS** means: observation/camera contract -> learned IRIS evidence -> deterministic GSA/RiggingSurfaceIR assembly, validation and provenance -> learned consumers. Current Mage FIT1 signed-geometry evidence is the promoted scene-first V3 line; V2 remains the promoted underlying observation/foundation/evidence package where referenced by that lineage.
 - **Geppetto** means: lossless RiggingSurfaceIR -> learned skeleton/control/parent/root/mechanical-salience proposal evidence -> Compiler exact graph qualification -> QualifiedSkeletonIR/canonical IDs.
 - **Arachne** means: qualified surface+skeleton -> learned skin/deformation proposal -> Compiler skin/mesh/reference/simplex qualification -> qualified editable deformation state.
 - **Compiler** is deterministic qualification/canonicalization/proof/routing authority; it is **not permission to invent missing learned semantics**.
@@ -47,6 +49,18 @@ Binding memory guard:
 If a future statement says “Geppetto made the skeleton,” restate it more precisely: Geppetto proposed controls/relations and the Compiler selected/qualified the legal canonical skeleton. Apply the equivalent distinction to IRIS/GSA and Arachne/Compiler.
 
 Before moving a responsibility across layers, inspect `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` and ask whether the move creates a second semantic owner, hides model failure with deterministic repair, or violates fail-close.
+
+## Dependency / model naming boundary
+
+RealSaS-owned model/package/class/architecture names describe RealSaS responsibilities and mechanisms; they do not adopt external research-project branding merely because a paper or repository inspired a clean-room mechanism.
+
+- External project names may remain in comparison reports, clean-room audits, bibliographies, preregistrations and historical scientific lineage when exact provenance matters.
+- A direct incorporated dependency keeps its real upstream identity where technically or legally required.
+- **DINO/DINOv2 is the current explicit direct model dependency** and is bound by `models/iris/v2/dinov2_foundation_v2.py` plus `THIRD_PARTY_NOTICES.md`.
+- If another direct external model/code dependency is introduced, update `THIRD_PARTY_NOTICES.md` before promotion.
+- `tests/repository/test_model_branding_boundary_v1.py` protects the current promoted `models/` namespace from known external-reference branding.
+
+See `docs/repository/DEPENDENCY_AND_IP_POLICY.md`, `THIRD_PARTY_NOTICES.md`, and `LICENSE`.
 
 ## FIT1 continuity rule
 
@@ -116,35 +130,33 @@ Every experiment claim should answer:
 9. Did that move the product/scientific target closer, reveal a dead end, or merely isolate a variable?
 10. Which next dependency/fork follows and why?
 
-These fields belong in `canonical/EXPERIMENT_REGISTRY_V1.json`, not only in prose reports.
+Current experiment records belong in `canonical/EXPERIMENT_REGISTRY_V2.json`; V1 is retained as historical structure/provenance.
 
 ## Chronology rule — live continuation memory
 
-Scientific and project chronology is append-only in `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`.
+Current scientific/project chronology is append-only in `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`. The V1 journal is historical and must not be rewritten.
 
 - New events require exact RFC3339 UTC timestamps.
 - Historical backfill must preserve the strongest verified time precision; never invent clock times.
 - Corrections/retractions are new journal events. Do not silently rewrite history.
 - **Before ending a session, append every substantive user/project decision that changes the next work item, architecture constraint, experiment selection, demo artifact queue, promotion interpretation, or stop/go state.**
 - Record requests and priorities as requests/priorities; never upgrade them into experimental PASS, promotion or scientific evidence merely because the user chose the next direction.
-- A new chat/agent must inspect the recent journal tail and be able to reconstruct the causal sequence: what was learned, what was decided next, what artifact/work was queued, and why the project moved on.
+- A new chat/agent must inspect the recent current-journal tail and be able to reconstruct the causal sequence: what was learned, what was decided next, what artifact/work was queued, and why the project moved on.
 - The journal is not a miscellaneous diary. Only continuity-relevant decisions, corrections, experiments, promotions, architecture changes and engineering-queue changes belong there.
 
 The continuity requirement is stronger than “know the latest state”: the agent should be able to answer questions such as “what did we decide immediately after IRIS FIT1?” from repository chronology without asking the user to repeat it.
 
 ## Current known context guards
 
-Before claiming RealSaS needs a RigAnything-equivalent Geppetto challenger from scratch, inspect:
+Before claiming RealSaS needs a fuller Geppetto structural-generation challenger from scratch, inspect `canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md`.
 
-- `canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md`
-- `models/geppetto/challengers/riganything_mechanisms_v1.py`
-
-A fuller research challenger already exists. AR-01 was a narrower minimal mechanical-feedback isolation experiment and must not be widened into a full RigAnything-formulation verdict.
+The historical fuller clean-room challenger source is recoverable at creation commit `ba634955777479ee05a5b199742710b1736123b5` under its then-current path. It is **historical mechanism provenance, not a current promoted `models/` home**. AR-01 was a narrower minimal mechanical-feedback isolation experiment and must not be widened into a verdict on the fuller formulation.
 
 Before citing an old IRIS learned result as clean current observation-only evidence, inspect:
 
 - `canonical/IRIS_LEAK_SCOPE_20260903.md`
 - `canonical/IRIS_PRIVILEGED_INPUT_FIREWALL_REPAIR_V1_20260903.md`
+- `models/iris/v3/PROMOTED_MAGE_FIT_WITNESS_V1.json` for the current promoted Mage signed-geometry witness.
 
 Affected historical learned IRIS results remain quarantined; the repaired source firewall does not retroactively cleanse them.
 
@@ -160,13 +172,16 @@ Only `main/CURRENT_STATE.md` is continuation authority.
 
 ## Execution environment
 
-Routine RealSaS scientific/mainline GitHub Actions run on the user's local self-hosted runner:
+The workflows designated as **current execution authority** run on the user's local self-hosted runner:
 
 - labels: `self-hosted, linux, x64, realsas`
 - known runner: `realsas-wsl-1660ti`
 - operator path: `~/actions-runner`
+- enumerated/regression-checked by: `tests/repository/test_repository_governance_v1.py`
 
-Do not migrate routine jobs to GitHub-hosted runners or create branch-push fan-out without an explicit reason. Prior hosted Actions volume triggered a quota/usage warning.
+Historical/narrow workflow files may preserve their original runner configuration as provenance and are not current execution authority. If a present-day change would activate a GitHub-hosted historical workflow, migrate or scope that workflow to the canonical self-hosted runner **before** making/running the change. Do not create branch-push fan-out without an explicit reason. Prior hosted Actions volume triggered a quota/usage warning.
+
+Current repository-development/CPU-CI pins live under `requirements/` and `.python-version`. They do not retroactively redefine a sealed experiment's environment identity.
 
 ## Completion transaction
 
@@ -175,12 +190,14 @@ An experiment is not complete merely because a notebook/report exists. Closing a
 - preregistration;
 - exact result/evidence/provenance;
 - implementation/source commit;
-- `canonical/EXPERIMENT_REGISTRY_V1.json`;
-- `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`;
+- current experiment registry (`canonical/EXPERIMENT_REGISTRY_V2.json`);
+- current scientific journal (`canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`);
 - experiment authority ledger;
 - architecture authority ledger when an architecture belief changed;
 - context state / AOA coverage;
 - `CURRENT_STATE.md` when stop/go changes;
 - explicit supersession/retraction of any old interpretation.
+
+A promotion/refreeze additionally requires one obvious promoted source home, machine-verifiable evidence identity, source/evidence/authority reconciliation and regression protection.
 
 The goal is not more documentation. The goal is **deterministic context reconstruction with scientific responsibility boundaries intact**.

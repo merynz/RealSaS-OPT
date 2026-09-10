@@ -65,7 +65,7 @@ on:
 
 jobs:
   architecture-freeze-source-gate:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -134,9 +134,37 @@ jobs:
         with:
           name: generic-strength-tests-log
           path: generic-strength-tests.log
-      - name: Verify family-selection authorization state
+      - name: Verify V1 provenance / selection-authority handoff
         shell: bash
         run: |
+          V1_SUPERSEDED=$(python - <<'PY'
+          import json
+          from pathlib import Path
+
+          v1_path = Path('canonical/ARCHITECTURE_FREEZE_V1.json')
+          v2_path = Path('canonical/ARCHITECTURE_FREEZE_V2.json')
+          if not (v1_path.is_file() and v2_path.is_file()):
+              print('no')
+          else:
+              v1 = json.loads(v1_path.read_text())
+              v2 = json.loads(v2_path.read_text())
+              historical = v2.get('historical_freeze_v1', {})
+              superseded = (
+                  v1.get('schema') == 'RealSaS.ArchitectureFreezeSeal.v1'
+                  and v1.get('status') == 'PASS_ARCHITECTURE_FROZEN'
+                  and v2.get('schema') == 'RealSaS.ArchitectureFreezeSeal.v2'
+                  and historical.get('path') == 'canonical/ARCHITECTURE_FREEZE_V1.json'
+                  and historical.get('status') == 'SUPERSEDED_FOR_CURRENT_SELECTION_AUTHORITY'
+                  and historical.get('preserved_for_provenance') is True
+              )
+              print('yes' if superseded else 'no')
+          PY
+          )
+          if [ "$V1_SUPERSEDED" = "yes" ]; then
+            echo 'PASS: V1 freeze is preserved as historical provenance and explicitly superseded for current selection authority; this V1 gate does not re-authorize selection.'
+            exit 0
+          fi
+
           STATUS=$(python - <<'PY'
           import json
           from pathlib import Path
@@ -146,11 +174,11 @@ jobs:
           )
           if [ "$STATUS" = "PASS_ARCHITECTURE_FROZEN" ]; then
             python canonical/architecture_freeze_gate_v1.py --repo-root . --check-selection-authority
-            echo 'PASS: frozen fingerprint authorizes family selection'
+            echo 'PASS: frozen V1 fingerprint authorizes family selection'
           else
             if python canonical/architecture_freeze_gate_v1.py --repo-root . --check-selection-authority; then
-              echo 'ERROR: family selection became authorized while freeze is absent/invalidated'
+              echo 'ERROR: family selection became authorized while V1 freeze is absent/invalidated'
               exit 1
             fi
-            echo "PASS: family selection remains blocked while freeze status is $STATUS"
+            echo "PASS: family selection remains blocked while V1 freeze status is $STATUS"
           fi

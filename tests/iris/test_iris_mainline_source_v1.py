@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import ast
+import importlib
 from pathlib import Path
+import sys
 import unittest
 
 
@@ -39,6 +41,25 @@ MAINLINE_PYTHON_ROOTS = (
     ROOT / "compiler" / "realsas_compiler_services",
     ROOT / "runtime" / "reference_v4",
 )
+
+# One compatibility seam is deliberately admitted so the scientifically frozen
+# Geppetto candidate can remain byte-identical to the sealed FIT1 source. The
+# package __init__ must bind this historical name to the byte-identical promoted
+# models/ tensorization module before the candidate imports it. No other dated
+# experiments.* import is admitted anywhere in the current mainline.
+GEPPETTO_FROZEN_CANDIDATE = Path(
+    "models/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py"
+)
+GEPPETTO_HISTORICAL_TENSORIZATION = (
+    "experiments.geppetto_reference_strength_fullstack_v1."
+    "rigging_surface_tensorization_v1"
+)
+GEPPETTO_PROMOTED_TENSORIZATION = (
+    "models.geppetto.reference_strength_v1.rigging_surface_tensorization_v1"
+)
+APPROVED_FROZEN_IMPORT_SEAMS = {
+    (GEPPETTO_FROZEN_CANDIDATE.as_posix(), GEPPETTO_HISTORICAL_TENSORIZATION),
+}
 
 
 def _experiment_imports(path: Path) -> list[str]:
@@ -84,16 +105,35 @@ class IrisMainlineSourceV1(unittest.TestCase):
         self.assertIn("class IrisReprojectionV2(nn.Module):", source)
         self.assertIn("The only learned geometric output is forward depth/support/uncertainty", source)
 
-    def test_mainline_python_does_not_import_dated_experiments(self) -> None:
+    def test_mainline_python_has_no_unapproved_dated_experiment_imports(self) -> None:
         violations: list[str] = []
+        observed_approved: set[tuple[str, str]] = set()
         for root in MAINLINE_PYTHON_ROOTS:
             if not root.exists():
                 continue
             for path in root.rglob("*.py"):
-                bad = _experiment_imports(path)
-                if bad:
-                    violations.append(f"{path.relative_to(ROOT)} -> {bad}")
+                rel = path.relative_to(ROOT).as_posix()
+                for module in _experiment_imports(path):
+                    seam = (rel, module)
+                    if seam in APPROVED_FROZEN_IMPORT_SEAMS:
+                        observed_approved.add(seam)
+                    else:
+                        violations.append(f"{rel} -> {module}")
         self.assertEqual(violations, [], "\n".join(violations))
+        self.assertEqual(observed_approved, APPROVED_FROZEN_IMPORT_SEAMS)
+
+    def test_geppetto_frozen_import_seam_resolves_to_promoted_module(self) -> None:
+        package = importlib.import_module("models.geppetto.reference_strength_v1")
+        del package  # import side effect is the contract under test
+        promoted = importlib.import_module(GEPPETTO_PROMOTED_TENSORIZATION)
+        historical = sys.modules.get(GEPPETTO_HISTORICAL_TENSORIZATION)
+        self.assertIs(historical, promoted)
+        self.assertTrue(Path(promoted.__file__).resolve().is_relative_to(ROOT / "models"))
+
+        candidate = importlib.import_module(
+            "models.geppetto.reference_strength_v1.geppetto_reference_strength_candidate_v1"
+        )
+        self.assertIs(candidate.RiggingSurfaceTensorV1, promoted.RiggingSurfaceTensorV1)
 
 
 if __name__ == "__main__":

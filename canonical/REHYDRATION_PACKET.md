@@ -8,13 +8,13 @@
 - **Product:** 8-direction editable 2D/2.5D puppet compiled from raster artwork; preserve 2D appearance while inferring/editing mechanical rig and deformation.
 - **Current witness:** `Mage FIT1`
 - **Current module:** `Arachne/SkinFieldCodec A0`
-- **Current state:** `GEPPETTO_FIT1_FROZEN_PROMOTED__ARACHNE_A0_ACTIVE__A1_BLOCKED__FULL_PRODUCT_FIT1_OPEN`
-- **Active experiment:** `V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION`
-- **Most recent closed gate:** `GEPPETTO_REFERENCE_STRENGTH_FIT1`
-- **Canonical main:** `06b255329aa3`
-- **Promotion block:** No Arachne/V7 model is promoted. A1 remains blocked until A0 closes, the actual V7 latent/decode interface is frozen, and a separate V7-native A1 capacity/architecture preregistration is completed.
-- **Scope warning:** C4 is A0 codec science only. It cannot authorize A1, full learned skinning, generalization, or PRODUCT_PASS. C3 falsified its exact point-cloud/u-q remedy, not the boundary localization itself.
-- **Next visible product milestone:** Close SkinFieldCodec A0, then V7-native A1 learned skinning, then produce the qualified Mage idle/breathing witness under a separate product acceptance contract.
+- **Current state:** `GEPPETTO_FIT1_FROZEN_PROMOTED__ARACHNE_A0_OPEN_AFTER_C4_FAIL__A1_BLOCKED__FULL_PRODUCT_FIT1_OPEN`
+- **Active experiment:** `NONE`
+- **Most recent closed gate:** `V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION`
+- **Canonical main:** `6e67c665fc03`
+- **Promotion block:** No Arachne/V7 model is promoted. A0 remains open. A1 remains blocked until A0 closes, the actual V7 latent/decode interface is frozen, and a separate V7-native A1 capacity/architecture preregistration is completed.
+- **Scope warning:** C4 is A0 codec science only. It failed the exact tested sampling family; it did not test A1, did not falsify every topology-aware method, did not establish generalization, and did not evaluate PRODUCT_PASS.
+- **Next visible product milestone:** Close SkinFieldCodec A0 after the required within-support calibration diagnosis, then V7-native A1 learned skinning, then produce the qualified Mage idle/breathing witness under a separate product acceptance contract.
 
 ## Current machine authority
 
@@ -69,8 +69,8 @@ Read `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` before moving responsibilit
 ## Historical-memory health
 
 - **Bootstrap/AOA:** `BOOTSTRAP_AUDIT_CLOSED`
-- **High-signal artifacts:** 273
-- **Explained by continuity policy:** 273
+- **High-signal artifacts:** 275
+- **Explained by continuity policy:** 275
 - **Unexplained:** 0
 - **Coverage:** 100.0%
 - Closure authority: `canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md`.
@@ -79,7 +79,7 @@ Read `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` before moving responsibilit
 
 ## Current scientific question
 
-Can the current 278M V7 SkinFieldCodec close the Mage A0 representation/decode gate when deliberate dense objective bias and real face-topology/barycentric supervision are tested causally?
+After C4 rejected the tested objective-bias and face/barycentric sampling family, what within-true-support blend-ratio/calibration failure remains, and what minimal next intervention should be separately preregistered without changing the frozen 0.05 FIT1 gates?
 
 Do **not** widen the result beyond exact gate semantics in the experiment ledger/result authority.
 
@@ -91,7 +91,7 @@ Do **not** widen the result beyond exact gate semantics in the experiment ledger
 | **GSA/RiggingSurfaceIR** | deterministic compaction/local geometry/assembly/validation/provenance of lossless per-view surface evidence | current admitted Mage substrate; lossless evidence boundary and UNKNOWN preservation are binding |
 | **Geppetto** | learned skeleton/control proposal, parent/root evidence and mechanical-salience/support evidence | reference-strength V1 is FIT1-frozen and promoted on main; proposal only; generalization not claimed |
 | **Compiler graph qualification** | deterministic exact legal root/parent/tree selection, invariants, canonicalization and fail-close | canonical IDs after exact solve; no geometry-only semantic dedup, hidden cardinality repair or missing deform-node synthesis |
-| **SkinFieldCodec A0** | learned skin-field representation/shared decoder | current V7 FIT1 science is active research only; no V7 promotion until A0 closes |
+| **SkinFieldCodec A0** | learned skin-field representation/shared decoder | V7 remains research-only and A0 remains open; C4 closed FAIL and rejected its exact sampling family; next step is a separately preregistered within-support calibration diagnosis |
 | **Arachne A1** | product-time learned latent/skin proposal inference from admitted surface + qualified skeleton | not currently authorized for V7; models/arachne/v2 is a prior scaffold, not current V7-native FIT1 closure |
 | **Compiler skin/mesh qualification** | deterministic reference/simplex/top-k/mesh-layout legality and bounded projection | may constrain/project under learned semantics; may not become a hidden semantic skinning owner |
 | **Proof / repair / runtime** | measure exact candidate; owner-route bounded repair; PASS-only runtime/export projection | proof never mutates candidate; repair creates a new candidate requiring re-proof; PRODUCT_PASS remains a separate contract |
@@ -124,6 +124,7 @@ Do **not** widen the result beyond exact gate semantics in the experiment ledger
 - Geppetto is proposal, not canonical rig authority; Compiler owns final legal root/parent/tree and canonical IDs after exact solve.
 - Geppetto FIT1 PASS is not generalization, Arachne closure, or PRODUCT_PASS.
 - A0 SkinFieldCodec representation/decode closure is distinct from A1 product-time latent inference.
+- A scientific FAIL remains a valid terminal scientific result and may not be relabeled as infrastructure failure.
 - No Arachne model is promoted until its own scientific and promotion transactions close.
 - Source exists != mechanism tested != full formulation tested != promotion != generalization.
 - No post-hoc gate widening after results are visible.
@@ -135,7 +136,8 @@ Do **not** widen the result beyond exact gate semantics in the experiment ledger
 - **Treating old Geppetto V2 as current FIT1-frozen Geppetto** → Current FIT1-frozen source is models/geppetto/reference_strength_v1/. V2 remains provenance.
 - **Calling AR-01 a contradiction of the later Geppetto PASS** → AR-01 tested a narrower minimal-feedback formulation; the later reference-strength formulation differs materially and separately passed.
 - **Calling the old Causal Repair C2 diffusion rung tested** → That staircase stopped at C1 PASS. Diffusion was later executed inside the independent reference-strength formulation.
-- **Treating A0 Codec PASS as A1 learned skinning PASS** → A0 proves representation/decode ceiling only; A1 must infer codec latent from product-time S+G without teacher W.
+- **Treating C4 FAIL as A1 or product failure** → C4 tested only A0 representation/shared-decoder interventions. A1 was not executed and PRODUCT_PASS was not evaluated.
+- **Treating C4 as falsifying all topology-aware methods or the boundary diagnosis** → C4 rejected the exact preregistered sampling family only. The required next fork is a separate within-support calibration diagnosis.
 - **Treating models/arachne/v2 as current V7-native A1** → It is a prior scaffold. V7-native A1 requires a fresh interface/capacity audit and prereg after A0.
 - **Treating FIT1 as generalization** → FIT1 is a controlled same-witness mechanism/capacity/product-science gate only.
 - **Using GitHub-hosted Actions for routine RealSaS authority/science** → Use only the local self-hosted realsas-wsl-1660ti runner with labels self-hosted, linux, x64, realsas.

@@ -4,10 +4,10 @@
 > Bootstrap: `BOOTSTRAP_AUDIT_CLOSED`
 
 - Declared census scope: `main` + 6 registered active/evidence branch(es)
-- Census artifacts in declared scope: **428 / 428 discovered (100%)**
-- Semantically reconciled: **88**
-- Catalogued but unreviewed: **340**
-- Semantic coverage: **20.6%**
+- Census artifacts in declared scope: **432 / 432 discovered (100%)**
+- Semantically reconciled: **90**
+- Catalogued but unreviewed: **342**
+- Semantic coverage: **20.8%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -16,7 +16,7 @@
 | Branch | Head | Different blobs vs main | High-signal differing artifacts |
 |---|---|---:|---:|
 | `demo/investor-single-specimen-e2e` | `47892ffa16b7` | 13 | 2 |
-| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `2cba8bcafefe` | 151 | 66 |
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `d0b666725e79` | 153 | 68 |
 | `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | 86 | 30 |
 | `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | 43 | 16 |
 | `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | 82 | 27 |
@@ -265,7 +265,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 
 - `KA-A236ACEA1AB5` `AUDIT` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `experiments/mage_scene_first_e2e_v1/AR01_NOTEBOOK_AUDIT_20260907.md` @ blob `c7d6b82433d5`
 
-### 2026-09-08 :: ARACHNE_SKIN (43)
+### 2026-09-08 :: ARACHNE_SKIN (45)
 
 - `KA-C617D5D91D53` `AUTHORITY_DECISION` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_A0_AUTHORITY_BLOCK_V2_20260908.json` @ blob `59a0dc39d6b3`
 - `KA-AB0CF1E76B4F` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_A0_FS1_CAPACITY_GPU_EXECUTION_PREREG_V1_20260908.json` @ blob `b13032b2ee83`
@@ -307,6 +307,8 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-AACB5CAC9544` `AUDIT` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C2_SKINTOKENS_PARITY_BLOCKER_AUDIT_20260909.md` @ blob `cc6ccdc38a24`
 - `KA-DBEFB1B9DE2E` `RESULT` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C2_SKINTOKENS_TOP4_PARITY_RESULT_20260909.md` @ blob `5250f98f3f1b`
 - `KA-EF74E5BB3B6C` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C2_SKINTOKENS_TOP4_PRODUCTION_PARITY_PREREG_20260909.md` @ blob `a67c7ba632c2`
+- `KA-60A3AAD79698` `CLOSURE` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_CLOSURE_20260910.md` @ blob `87087cb06e4a`
+- `KA-ABA726C29158` `PLAN_MATRIX` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_EVIDENCE_MANIFEST_V1.json` @ blob `62217b3e902c`
 - `KA-F4F9023E558A` `AUTHORITY_DECISION` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/diagnose_a0_hardrow_from_sealed.py` @ blob `80ea896fffb8`
 - `KA-DF456B5E0EDE` `HIGH_SIGNAL_OTHER` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/objective_causal_triplet_v7.py` @ blob `81598b75268d`
 - `KA-92DAB01EEC2E` `HIGH_SIGNAL_OTHER` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/v7_geometry_causality_autopsy.py` @ blob `c6151568117a`

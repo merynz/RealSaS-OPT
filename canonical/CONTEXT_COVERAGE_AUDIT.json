@@ -3,13 +3,13 @@
   "bootstrap_status": "BOOTSTRAP_AUDIT_CLOSED",
   "fit1_gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
   "candidate_rule": "high-signal canonical/prereg/experiment/challenger/workflow artifacts",
-  "tracked_file_count": 871,
-  "high_signal_artifact_count": 273,
+  "tracked_file_count": 874,
+  "high_signal_artifact_count": 275,
   "classification_counts": {
-    "INDEXED_EXPLICIT": 126,
+    "INDEXED_EXPLICIT": 128,
     "HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL": 147
   },
-  "explained_high_signal_count": 273,
+  "explained_high_signal_count": 275,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
   "live_branch_count": 91,
@@ -204,9 +204,9 @@
     },
     {
       "name": "exp/arachne-skintokens-cleanroom-fit1-20260908",
-      "sha": "2cba8bcafefe7c5e3983fe5693dac8e17a548e01",
-      "class": "ACTIVE_EXPERIMENT",
-      "reason": "V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION"
+      "sha": "d0b666725e79f3beb0ea001f456375421cc14375",
+      "class": "EVIDENCE_ONLY",
+      "reason": "explicit authority-map override"
     },
     {
       "name": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
@@ -360,7 +360,7 @@
     },
     {
       "name": "main",
-      "sha": "06b255329aa3758a6613dee3885db44f7549f0af",
+      "sha": "6e67c665fc03bd43c7614bb7f6319c790baa5d0d",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

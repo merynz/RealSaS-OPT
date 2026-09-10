@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1033**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1038**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1045,6 +1045,11 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-10T03:18:58+03:00` | `9765608baf01` | yes | FIT_DATA, GEPPETTO, GOVERNANCE_CONTINUITY | Merge PR #29: Promote frozen Geppetto FIT1 evidence and professionalize main authority | _none_ | `dependabot/pip/numpy-2.4.6`<br>`dependabot/pip/pillow-12.3.0`<br>`dependabot/pip/pip-audit-2.10.1`<br>`dependabot/pip/pytest-9.1.1`<br>`dependabot/pip/scipy-1.17.1`<br>`main` |
 | `2026-09-10T03:21:31+03:00` | `229cba0caa9a` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
 | `2026-09-10T03:27:20+03:00` | `06b255329aa3` | yes | CI_TEST, GOVERNANCE_CONTINUITY | Repair live authority fail-close contract | `.github/workflows/live_authority_map.yml`<br>`canonical/AUTHORITY_MAP_V1.json`<br>`tests/repository/test_current_continuity_authority_v2.py` | `main` |
+| `2026-09-10T03:28:04+03:00` | `f9810c5d25a3` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-10T03:41:03+03:00` | `d0b666725e79` | no | ARACHNE_SKIN, FIT_DATA | close Arachne A0 C4 scientific result | `experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_CLOSURE_20260910.md`<br>`experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_EVIDENCE_MANIFEST_V1.json` | `exp/arachne-skintokens-cleanroom-fit1-20260908` |
+| `2026-09-10T04:02:31+03:00` | `7a155e1686c1` | yes | ARACHNE_SKIN, FIT_DATA, GOVERNANCE_CONTINUITY | reconcile Arachne A0 C4 closed-fail authority | `CURRENT_STATE.md`<br>`canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md`<br>`canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json`<br>`canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`<br>`canonical/AUTHORITY_MAP_V1.json`<br>`canonical/CONTEXT_STATE_V1.json`<br>`canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`<br>`canonical/EXPERIMENT_REGISTRY_V2.json`<br>`canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`<br>`canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl` | `main` |
+| `2026-09-10T04:06:36+03:00` | `3153f9f928fd` | yes | OTHER | make branch census refs safely refreshable | `tools/build_knowledge_artifact_catalog.py` | `main` |
+| `2026-09-10T04:06:55+03:00` | `6e67c665fc03` | yes | CI_TEST | add census ref refresh regression | `tests/repository/test_knowledge_artifact_catalog_ref_refresh_v1.py` | `main` |
 
 ## Use rule
 

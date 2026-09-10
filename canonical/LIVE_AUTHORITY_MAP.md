@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `d6b686022ebfe53b98fcc95bd5cd89c366da24d92832b3c3ef0041be2b8d0fba`
+> State fingerprint: `5d2f191ea805017d714bbfb08f4919b2838c624d2dfbf380b0ce9dbcd9b33095`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -18,44 +18,39 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 ## Rehydration order
 
 1. `canonical/REHYDRATION_PACKET.md`
-2. `canonical/FIT1_EVIDENCE_INDEX_20260909.md`
-3. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-4. `canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json`
-5. `CURRENT_STATE.md`
-6. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
-7. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
-8. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-9. `canonical/EXPERIMENT_REGISTRY_V2.json`
-10. `canonical/CONTEXT_STATE_V1.json`
-11. `canonical/LIVE_AUTHORITY_MAP.md`
+2. `canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md`
+3. `canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json`
+4. `canonical/FIT1_EVIDENCE_INDEX_20260909.md`
+5. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+6. `canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json`
+7. `CURRENT_STATE.md`
+8. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
+9. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
+10. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
+11. `canonical/EXPERIMENT_REGISTRY_V2.json`
+12. `canonical/CONTEXT_STATE_V1.json`
+13. `canonical/LIVE_AUTHORITY_MAP.md`
 
 ## Live experiment register
 
-| Gate | Status | Branch | Live head | Question | Does not prove |
-|---|---|---|---|---|---|
-| `V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION` | `ACTIVE_RUNNING` | `exp/arachne-skintokens-cleanroom-fit1-20260908` | `2cba8bcafefe` | Does removing `u/q` importance correction improve A vs B, and does source-faithful face/topology/barycentric dense supervision improve B vs C, under otherwise frozen V7 A0 FIT1 conditions? | A1 Arachne latent inference is closed or authorized; unseen-character or unseen-family generalization; PRODUCT_PASS or product acceptance |
+_No active experiments registered._
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **ACTIVE_EXPERIMENT: 1** / **EVIDENCE_ONLY: 5** / **EVIDENCE_ONLY_UNREGISTERED: 75** / **DELETE_CANDIDATE: 9**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 6** / **EVIDENCE_ONLY_UNREGISTERED: 75** / **DELETE_CANDIDATE: 9**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `06b255329aa3` | canonical continuation branch |
-
-### ACTIVE_EXPERIMENT
-
-| Branch | Head | Classification reason |
-|---|---|---|
-| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `2cba8bcafefe` | V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION |
+| `main` | `6e67c665fc03` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
 | Branch | Head | Classification reason |
 |---|---|---|
 | `demo/investor-single-specimen-e2e` | `47892ffa16b7` | Demo lineage only; never scientific continuation authority. |
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `d0b666725e79` | Arachne A0 V7 C2-C4 scientific lineage; C4 closed FAIL at d0b666725e79f3beb0ea001f456375421cc14375 and no new active experiment is currently registered. |
 | `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | AR-01 closed with verdict AR01_NO_TERMINAL_CLOSURE; retain exact scoped evidence. |
 | `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | Frozen optimizer/source lineage for the promoted reference-strength Geppetto formulation. |
 | `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | Lossless RiggingSurfaceIR / V3 evidence lineage; no longer active continuation experiment. |
@@ -164,6 +159,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 - Only main/CURRENT_STATE.md is continuation authority.
 - A branch is never active merely because it exists or has a recent commit.
 - A scientific PASS never promotes itself; promotion/refreeze is a separate transaction.
+- A scientific FAIL must remain a valid terminal scientific result and must not be recast as infrastructure failure.
 - Geppetto FIT1 PASS is not generalization, Arachne closure, or PRODUCT_PASS.
 - No Arachne model is promoted until its own gate and promotion transaction close.
 - A0 SkinFieldCodec representation/decode closure is distinct from A1 product-time latent inference.

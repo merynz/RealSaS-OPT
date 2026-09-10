@@ -1,0 +1,127 @@
+{
+  "schema": "RealSaS.ArachneInformationPreservationAudit.Phase3SemanticCalibration.v1",
+  "date": "2026-09-10",
+  "status": "OPEN_RESEARCH_AUDIT__EVIDENCE_ONLY__NO_ARCHITECTURE_OR_TRAINING_CHANGE_AUTHORIZED",
+  "authority": {
+    "continuation_authority": "main/CURRENT_STATE.md",
+    "current_a0_experiment_unchanged": true,
+    "a1_authorized": false,
+    "product_pass_claimed": false
+  },
+  "iris_v3_uncertainty": {
+    "public_output_name": "log_uncertainty",
+    "promoted_checkpoint": {
+      "drive_file_id": "1015IJL4sB8zPGYOO-QGdDZcTcoLRad6v",
+      "sha256": "766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2",
+      "schema": "RealSaS.Cleanroom.H1.SignedMesh.Checkpoint.v2",
+      "step": 512,
+      "model_state_tensor_count": 103,
+      "optimizer_param_count": 103,
+      "optimizer_state_count": 101,
+      "optimizer_ids_without_state": [101, 102],
+      "corresponding_model_parameters": ["field.unc.weight", "field.unc.bias"]
+    },
+    "v1_training_semantics": {
+      "uncertainty_direct_term": ".001*(us.square().mean()+ub.square().mean())",
+      "semantic_target": "ZERO_CENTERING_ONLY",
+      "probabilistic_or_error_calibration_target": false
+    },
+    "v2_training_semantics": {
+      "uncertainty_used_in_loss": false,
+      "warm_started_from_v1": true,
+      "uncertainty_parameters_bitwise_identical_to_v1_checkpoint": true
+    },
+    "zero_surface_interface_keeps_uncertainty": false,
+    "verdict": "LEGACY_AUXILIARY_SCALAR__NOT_CALIBRATED_AS_UNCERTAINTY_IN_PROMOTED_MAGE_LINEAGE",
+    "downstream_baseline_admission": "EXCLUDE",
+    "canonical_contract_reconciliation_needed": true
+  },
+  "geppetto_proposal_evidence": {
+    "final_mage": {
+      "joint_count": 22,
+      "directed_edge_count": 462,
+      "joint_confidence": {
+        "min": 0.982660710811615,
+        "median": 0.9957800805568695,
+        "max": 0.9977526068687439,
+        "std": 0.0029023802955907172
+      },
+      "root_score": {
+        "min": 2.925530395714304e-7,
+        "median": 2.8586365488081356e-6,
+        "max": 0.999935507774353,
+        "argmax_proposal_id": "P:GRS:0000"
+      },
+      "mechanical_salience_probability": {
+        "min": 0.9995262622833252,
+        "median": 0.9999938011169434,
+        "max": 0.9999996423721313,
+        "std": 9.780229782785539e-5,
+        "fit1_target_semantics": "ALL_PROJECTED_MECHANICAL_CORE_ROWS_POSITIVE",
+        "calibrated_magnitude_claimed": false
+      },
+      "position_sigma_joint_mean": {
+        "min": 0.00224920556259652,
+        "median": 0.004221008586076399,
+        "max": 0.01719697533796231,
+        "training_semantics": "HETEROSCEDASTIC_POSITION_NLL"
+      },
+      "selected_parent_edge_evidence": {
+        "selected_edge_count": 21,
+        "all_selected_edges_local_top1_on_mage": true,
+        "selected_vs_best_alternative_margin_min": 2.384185791015625e-7,
+        "selected_vs_best_alternative_margin_median": 0.002914249897003174,
+        "selected_vs_best_alternative_margin_max": 0.9943700800649822,
+        "margin_lt_1e-5_count": 3,
+        "margin_lt_1e-4_count": 6,
+        "margin_lt_1e-3_count": 8,
+        "margin_lt_1e-2_count": 12
+      }
+    },
+    "support_logits": {
+      "training_target": "EIGHT_NEAREST_COMPACT_SURFACE_NODES_TO_TEACHER_MECHANICAL_LOCUS",
+      "proposal_projection": "TOP8_IDS_AFTER_SUPPORT_PRESENCE_ADMISSION",
+      "skin_ownership_semantics": false,
+      "soft_field_calibration_for_a1": "UNKNOWN",
+      "verdict": "COMPRESSED_TO_SPARSE_TOP8__POTENTIALLY_USEFUL_BUT_UNCALIBRATED_FOR_A1"
+    },
+    "mechanical_salience": {
+      "verdict": "FIT1_MAGNITUDE_NOT_CALIBRATED__NEAR_CONSTANT__LOW_PRIORITY_FOR_A1"
+    },
+    "position_sigma": {
+      "verdict": "SEMANTICALLY_TRAINED__CALIBRATION_GENERALIZATION_UNKNOWN__SIDECAR_CANDIDATE"
+    },
+    "raw_parent_root_alternatives": {
+      "compiler_is_sole_authority": true,
+      "downstream_raw_competing_authority_allowed": false,
+      "preferred_if_needed": "COMPILER_QUALIFIED_STRUCTURAL_CONFIDENCE_OR_MARGIN_SIDECAR"
+    }
+  },
+  "old_a1_effective_information": {
+    "cache_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
+    "joint_feature_shape": [22, 8],
+    "joint_support_count_unique_values": [0.5],
+    "joint_support_mapping_original_ref_count": 176,
+    "joint_support_mapping_unique_surface_count": 155,
+    "joint_support_summary_discriminative_information_on_mage": "ZERO",
+    "surface_feature_shape": [950, 20],
+    "surface_normal_valid_unique_values": [1.0],
+    "surface_mean_relation_score_unique_values": [1.0],
+    "surface_support_count_equals_raster_count_bitwise": true,
+    "per_view_raster_xy_present": false,
+    "exact_gsa_edge_identity_present": false,
+    "pair_geometry_shape": [950, 22, 10],
+    "pair_mask_all_active": true,
+    "pair_geometry_verdict": "PRESERVE_AS_CANDIDATE_INDUCTIVE_BIAS",
+    "overall_verdict": "P0_CONFIRMED_MATERIAL_CONSUMER_INFORMATION_COMPRESSION"
+  },
+  "refined_rule": "PRESERVE_SEMANTICS_NOT_TENSORS__PRESERVE_LEGAL_EVIDENCE_NOT_ARBITRARY_ACTIVATIONS__OWNER_CONSUMED_DECISION_EVIDENCE_MAY_EXPOSE_ONLY_QUALIFIED_CONFIDENCE_IF_CALIBRATED_AND_USEFUL",
+  "next_actions": [
+    "FIELD_BY_FIELD_S_PLUS_G_TO_OLD_A1_TO_V7_NATIVE_MATRIX",
+    "NO_TRAINING_QUALIFIED_SKELETON_EVIDENCE_SIDECAR_DESIGN",
+    "MAGE_STAFF_SHIELD_RIGID_ATTACHMENT_CLASSIFICATION_RECOVERY",
+    "POST_A0_WINNER_REGIONAL_ROW_ERROR_DIAGNOSTIC",
+    "POST_A0_WINNER_LATENT_INTERFACE_AUDIT",
+    "AUDIT_CLOSURE_CANONICAL_UNCERTAINTY_WORDING_RECONCILIATION"
+  ]
+}

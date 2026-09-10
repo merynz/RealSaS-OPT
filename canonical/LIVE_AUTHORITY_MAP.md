@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `f1c067ba5d46e041ed3b1e048906763d5590241a8df366e2e2fd8ceb5a50b8c5`
+> State fingerprint: `adfb8f3f844fced500fec4288c20c7e4da7e2cdfd146d6fe7ac69daac5f38fc9`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -37,13 +37,13 @@ _No active experiments registered._
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 6** / **EVIDENCE_ONLY_UNREGISTERED: 81** / **DELETE_CANDIDATE: 9**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 6** / **EVIDENCE_ONLY_UNREGISTERED: 83** / **DELETE_CANDIDATE: 9**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `dc4ea7e1a6d6` | canonical continuation branch |
+| `main` | `1eeb90bc9ffa` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -90,7 +90,9 @@ _No active experiments registered._
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-canonical` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-final` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
+| `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-notebook` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-prereg` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
+| `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-sealed` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-work` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
 | `exp/arachne-v7-within-support-calibration-diagnosis-20260910` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
 | `feature/living-compile-v4-editor` | `cd56be7300c3` | observed live; not explicitly registered active |

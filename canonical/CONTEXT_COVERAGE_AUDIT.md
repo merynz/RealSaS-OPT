@@ -11,8 +11,8 @@
 - Explained by continuity policy: **275**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **97**
-- Safe-default evidence-only branches: **90**
+- Live branches: **99**
+- Safe-default evidence-only branches: **92**
 
 ### Classification counts
 
@@ -64,7 +64,9 @@ _None._
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910` | `dc4ea7e1a6d6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-canonical` | `dc4ea7e1a6d6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-final` | `dc4ea7e1a6d6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-notebook` | `dc4ea7e1a6d6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-prereg` | `dc4ea7e1a6d6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-sealed` | `dc4ea7e1a6d6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-work` | `dc4ea7e1a6d6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `exp/arachne-v7-within-support-calibration-diagnosis-20260910` | `dc4ea7e1a6d6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | `EVIDENCE_ONLY` | explicit authority-map override |
@@ -92,7 +94,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `dc4ea7e1a6d6` | `CANONICAL` | canonical branch |
+| `main` | `1eeb90bc9ffa` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

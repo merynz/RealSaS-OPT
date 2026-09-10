@@ -11,7 +11,7 @@
 - **Current state:** `GEPPETTO_FIT1_FROZEN_PROMOTED__ARACHNE_A0_OPEN_AFTER_C4_FAIL__A1_BLOCKED__FULL_PRODUCT_FIT1_OPEN`
 - **Active experiment:** `NONE`
 - **Most recent closed gate:** `V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION`
-- **Canonical main:** `dc4ea7e1a6d6`
+- **Canonical main:** `1eeb90bc9ffa`
 - **Promotion block:** No Arachne/V7 model is promoted. A0 remains open. A1 remains blocked until A0 closes, the actual V7 latent/decode interface is frozen, and a separate V7-native A1 capacity/architecture preregistration is completed.
 - **Scope warning:** C4 is A0 codec science only. It failed the exact tested sampling family; it did not test A1, did not falsify every topology-aware method, did not establish generalization, and did not evaluate PRODUCT_PASS.
 - **Next visible product milestone:** Close SkinFieldCodec A0 after the required within-support calibration diagnosis, then V7-native A1 learned skinning, then produce the qualified Mage idle/breathing witness under a separate product acceptance contract.

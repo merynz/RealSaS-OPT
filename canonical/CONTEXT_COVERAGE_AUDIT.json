@@ -12,8 +12,8 @@
   "explained_high_signal_count": 275,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 97,
-  "safe_default_evidence_only_branch_count": 90,
+  "live_branch_count": 99,
+  "safe_default_evidence_only_branch_count": 92,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -227,7 +227,19 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "exp/arachne-v7-dense-consumer-view-diagnosis-20260910-notebook",
+      "sha": "dc4ea7e1a6d64a5944c1b2192d6ea27214456392",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "exp/arachne-v7-dense-consumer-view-diagnosis-20260910-prereg",
+      "sha": "dc4ea7e1a6d64a5944c1b2192d6ea27214456392",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "exp/arachne-v7-dense-consumer-view-diagnosis-20260910-sealed",
       "sha": "dc4ea7e1a6d64a5944c1b2192d6ea27214456392",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
@@ -396,7 +408,7 @@
     },
     {
       "name": "main",
-      "sha": "dc4ea7e1a6d64a5944c1b2192d6ea27214456392",
+      "sha": "1eeb90bc9ffa6c295de6ccc306ca713dd12e6073",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

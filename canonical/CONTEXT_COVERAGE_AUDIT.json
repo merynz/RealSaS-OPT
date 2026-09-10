@@ -12,8 +12,8 @@
   "explained_high_signal_count": 275,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 99,
-  "safe_default_evidence_only_branch_count": 92,
+  "live_branch_count": 100,
+  "safe_default_evidence_only_branch_count": 93,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -73,6 +73,12 @@
     {
       "name": "architecture/v4-generic-strength-source-completion-20260902",
       "sha": "7f39a846ad05f91560836026e5ef6dfbc74dc731",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "audit/arachne-information-preservation-v1-20260910",
+      "sha": "67a1ff1f67d5d2e7f8e6ba2630f388aab9432440",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -408,7 +414,7 @@
     },
     {
       "name": "main",
-      "sha": "1eeb90bc9ffa6c295de6ccc306ca713dd12e6073",
+      "sha": "67a1ff1f67d5d2e7f8e6ba2630f388aab9432440",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

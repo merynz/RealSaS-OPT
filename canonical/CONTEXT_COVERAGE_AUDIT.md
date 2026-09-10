@@ -11,8 +11,8 @@
 - Explained by continuity policy: **275**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **99**
-- Safe-default evidence-only branches: **92**
+- Live branches: **100**
+- Safe-default evidence-only branches: **93**
 
 ### Classification counts
 
@@ -39,6 +39,7 @@ _None._
 | `architecture-v4-single-family-e2e-20260902` | `c84658b8b95c` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `architecture/compiler-ir-solver-canonical-20260825` | `7163fac1f333` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `architecture/v4-generic-strength-source-completion-20260902` | `7f39a846ad05` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `audit/arachne-information-preservation-v1-20260910` | `67a1ff1f67d5` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/final-completion-plan-20260902` | `00e930e788d3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/geppetto-v2-frozen-base-7f39` | `7f39a846ad05` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/iris-architecture-discipline-20260824` | `d7bba01c85e9` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -94,7 +95,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `1eeb90bc9ffa` | `CANONICAL` | canonical branch |
+| `main` | `67a1ff1f67d5` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

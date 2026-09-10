@@ -1,6 +1,6 @@
 # RealSaS — Architecture Authority Ledger V1
 
-**Date:** 2026-09-09  
+**Date:** 2026-09-10  
 **Scope:** cross-chat / cross-agent architecture reconstruction  
 **Continuation authority:** `CURRENT_STATE.md` on `main`
 
@@ -41,8 +41,11 @@ This ledger does **not** independently authorize promotion. It answers: **for ea
 | `CANONICAL_IDS_POST_SOLVE` | canonical identity after exact solve | **BINDING** | current Compiler | Neural model does not own final IDs |
 | `GEOMETRY_ONLY_DEDUP` | geometry-based proposal identity contraction | **FORBIDDEN** | n/a | Preserve identities absent qualified neural relation evidence |
 | `HIDDEN_DEFORM_NODE_COMPLETION` | silently add missing deform controls | **FORBIDDEN (budget 0)** | n/a | Compiler cannot repair cardinality by synthesis |
-| `SKIN_FIELD_CODEC` | learned continuous skin-field representation/shared decoder | **BINDING MODEL ROLE; CURRENT A0 SCIENCE OPEN** | base `models/skin_field_codec/v1/`; V7 research branch is not promoted | A0 representation/decode ceiling must close before V7-native A1 |
-| `ARACHNE_SKIN_PROPOSAL` | skeleton-conditioned skin/weight/deformation proposal | **BINDING ROLE; NO CURRENT V7-NATIVE FIT1 PROMOTION** | prior scaffold `models/arachne/v2/`; active research branch | Arachne owns learned proposal; Compiler owns qualification |
+| `SKIN_FIELD_CODEC` | learned continuous skin-field representation/shared decoder | **BINDING MODEL ROLE / A0 OPEN AFTER C4 FAIL** | base `models/skin_field_codec/v1/`; V7 research branch; `canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md` | V7 continuous field identity survives, but C4 rejected the tested sampling family and A0 has not closed; next requirement is separately preregistered within-support calibration diagnosis |
+| `ARACHNE_C4_OBJECTIVE_BIAS_INTERVENTION` | remove exact `u/q` correction while holding A/B queries and prefix fixed | **CLOSED_REJECTED_IMPLEMENTATION / TESTED_COMPONENT** | C4 A vs B | Unit-weight active-heavy objective worsened p95/deformation; objective-bias cancellation is not supported as the blocker |
+| `ARACHNE_C4_FACE_BARY_DENSE_SUPERVISION` | real deformation-supported faces + area draw + triangle-interior barycentric target supervision | **CLOSED_REJECTED_IMPLEMENTATION / TESTED_COMPONENT** | C4 B vs C | Exact source-face/barycentric port worsened primary metrics sharply and degraded ownership; this does not falsify all topology-aware methods |
+| `ARACHNE_WITHIN_SUPPORT_CALIBRATION_DIAGNOSIS` | isolate remaining blend-ratio/calibration failure inside true support | **OPEN_REQUIREMENT / NOT YET PREREGISTERED** | required next fork from C4 prereg/closure | Diagnostic direction only; no custom loss/treatment is authorized yet and frozen 0.05 gates remain unchanged |
+| `ARACHNE_SKIN_PROPOSAL` | skeleton-conditioned skin/weight/deformation proposal | **BINDING ROLE; NO CURRENT V7-NATIVE FIT1 PROMOTION** | prior scaffold `models/arachne/v2/`; active lineage branch retained as evidence only | Arachne owns learned proposal; Compiler owns qualification; A1 remains blocked until A0 closes |
 | `DYNAMIC_MOTION_PROOF` | qualification-owned motion probe/bake/measurement/proof | **BINDING** | current Compiler proof services/runtime interlock | Runtime/export consumes proof-owned state |
 
 ## IRIS layered-current consequence
@@ -70,11 +73,39 @@ The promoted architecture is not merely "AR1 repaired." It is a stronger formula
 
 Therefore the old post-AR-01 state `NO_REFREEZE` is superseded for continuation. AR-01 remains valid evidence about its exact arm.
 
-## Arachne consequence
+## Arachne consequence after C4
 
-No Arachne model is promoted by the Geppetto refreeze.
+No Arachne model is promoted by the Geppetto refreeze or by C4.
 
-Current 2026-09-09 work is **A0 SkinFieldCodec only**, on `exp/arachne-skintokens-cleanroom-fit1-20260908`. V7 is a 278,010,880-parameter continuous forced-field codec apparatus. The current C4 experiment tests face-topology/barycentric biased dense supervision. A1 remains unauthorized until A0 closes and a V7-facing latent/decode interface plus A1 architecture/capacity contract are frozen separately.
+Current A0 apparatus is `RealSaS.Arachne.SkinFieldCodec.v7`, `278,010,880` parameters, continuous forced-field transport, no FSQ. C4 is closed scientific evidence, not an active experiment.
+
+C4 closure authority:
+
+`canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md`
+
+Evidence manifest:
+
+`canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json`
+
+Research-branch closure commit:
+
+`d0b666725e79f3beb0ea001f456375421cc14375`
+
+Aggregate result SHA-256:
+
+`439583ac60eca855dc2b55efabf5b4a6df4de5f9617e9e35583cf136b4cb55d9`
+
+C4 established that the exact A/B objective-bias intervention and B/C source-face/barycentric intervention do not close the A0 gate. B worsened relative to A; C worsened sharply relative to B and degraded dominant ownership. The non-accuracy legality/numerical guards remained healthy, so the result is scientific FAIL rather than infrastructure failure.
+
+The architecture consequence is intentionally narrow:
+
+- retain the V7 continuous field representation as the current A0 research apparatus;
+- reject **this exact sampling family** as the next repair;
+- retain the prior blend-boundary diagnosis as unresolved rather than declaring it false;
+- require a separately preregistered **within-support blend-ratio/calibration diagnosis** before another A0 optimizer step;
+- do not auto-stack a custom calibration loss;
+- do not change the frozen `0.05` FIT1 gates;
+- keep A1 unauthorized until a future A0 terminal PASS freezes the actual V7 latent/decode interface.
 
 Do not treat the existence of `models/arachne/v2/` as evidence that the current V7-native A1 has been trained or promoted.
 
@@ -82,12 +113,9 @@ Do not treat the existence of `models/arachne/v2/` as evidence that the current 
 
 The earlier authoritative sequence remains historically correct:
 
-`R2 RUN stable FAIL -> C1 RUN stable PASS -> C2 NOT RUN (staircase stop) -> C3/C4 source-only -> AR-01 separate minimal feedback RUN -> both AR-01 arms terminal FAIL -> later independent reference-strength formulation RUN -> FIT1 TERMINAL PASS -> separate promotion`
+`R2 RUN stable FAIL -> C1 RUN stable PASS -> C2 NOT RUN (staircase stop) -> C3/C4 source-only in that old Geppetto challenger -> AR-01 separate minimal feedback RUN -> both AR-01 arms terminal FAIL -> later independent reference-strength formulation RUN -> FIT1 TERMINAL PASS -> separate promotion`.
 
-This ordering prevents two opposite mistakes:
-
-1. falsely saying diffusion had been executed in the old Causal Repair C2 rung;
-2. falsely saying diffusion still lacks any authoritative execution after the later reference-strength closure.
+This Geppetto history is distinct from the later Arachne V7 experiments that also use labels C2/C3/C4. Do not conflate experiment families by suffix alone.
 
 ## Critical anti-conflation rules
 
@@ -97,11 +125,13 @@ This ordering prevents two opposite mistakes:
 4. Historical challenger exists != current frozen Geppetto.
 5. FIT1 success != generalization.
 6. AR-01 != reference-strength formulation verdict.
-7. A Geppetto FIT1 PASS != Arachne A0/A1 PASS.
-8. A0 Codec PASS != full learned skinning closure; A1 is separate.
-9. Learned proposal != Compiler canonical authority.
-10. Repo prereg/result/hash authority outranks detached generated/chat drafts.
+7. Geppetto FIT1 PASS != Arachne A0/A1 PASS.
+8. A0 Codec science != A1 product-time latent inference.
+9. C4 A0 FAIL != A1 or product failure.
+10. C4 rejection of one sampling family != rejection of every topology-aware method.
+11. Learned proposal != Compiler canonical authority.
+12. Repo prereg/result/hash authority outranks detached generated/chat drafts.
 
 ## Required update transaction
 
-Any experiment that changes architecture belief is incomplete until reconciled across implementation/source identity, exact prereg/result, this ledger, continuation state, and explicit promotion/supersession where applicable.
+Any experiment that changes architecture belief is incomplete until reconciled across implementation/source identity, exact prereg/result, this ledger, continuation state, and explicit promotion/supersession where applicable. C4 now satisfies that requirement only after the matching main authority reconciliation; it promotes no Arachne model.

@@ -1,8 +1,8 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-09-09  
+**Date:** 2026-09-10  
 **Canonical continuation branch:** `main`  
-**Status:** `GEPPETTO_FIT1_FROZEN_PROMOTED__ARACHNE_A0_ACTIVE__A1_BLOCKED__FULL_PRODUCT_FIT1_OPEN`
+**Status:** `GEPPETTO_FIT1_FROZEN_PROMOTED__ARACHNE_A0_OPEN_AFTER_C4_FAIL__A1_BLOCKED__FULL_PRODUCT_FIT1_OPEN`
 
 This file is continuation authority only on `main`.
 
@@ -11,34 +11,34 @@ This file is continuation authority only on `main`.
 **FIT1 exact commit lineage:** `canonical/FIT1_COMMIT_LINEAGE_V1.md`  
 **Investor/auditor evidence index:** `canonical/FIT1_EVIDENCE_INDEX_20260909.md`  
 **Most recent promoted scientific closure:** `GEPPETTO_REFERENCE_STRENGTH_FIT1`  
-**Geppetto categorical result:** `FIT1_TERMINAL_PASS`  
-**Geppetto closure authority:** `canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md`  
-**Geppetto promotion authority:** `canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md`  
-**Active scientific module:** `Arachne / SkinFieldCodec A0`  
-**Active research branch:** `exp/arachne-skintokens-cleanroom-fit1-20260908`  
-**Active gate:** `V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION`  
-**Active-gate authority:** `experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_PREREG_20260909.md` on the active research branch  
+**Most recent closed scientific gate:** `V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION`  
+**Current scientific module:** `Arachne / SkinFieldCodec A0`  
+**Active experiment gate:** `NONE`  
+**Research lineage branch:** `exp/arachne-skintokens-cleanroom-fit1-20260908`  
+**C4 closure authority:** `canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md`  
+**C4 evidence manifest:** `canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json`  
+**A0 terminal closure:** `FALSE`  
 **A1 authorization:** `FALSE`  
-**Product PASS:** `NOT CLAIMED`
+**Product PASS:** `NOT EVALUATED / NOT CLAIMED`
 
 ## One-line state
 
-`IRIS/GSA provides the current admitted Mage surface evidence; the separately preregistered reference-strength Geppetto formulation reached FIT1_TERMINAL_PASS and is now the promoted FIT1-frozen Geppetto source on main; the bottleneck has moved to Arachne A0, where the current 278M V7 SkinFieldCodec representation/decode ceiling is still open. No V7-native A1 model is yet frozen or promoted, and full end-to-end/product FIT1 remains open.`
+`IRIS/GSA remains the admitted Mage surface substrate; reference-strength Geppetto is FIT1-frozen and promoted; Arachne/SkinFieldCodec V7 C4 closed as a real scientific FAIL of the tested sampling family; A0 remains open, no experiment is currently active, the required next fork is a separately preregistered within-support blend-ratio/calibration diagnosis, A1 remains blocked, and end-to-end PRODUCT_PASS remains unevaluated.`
 
 ## Mandatory rehydration order
 
-A new chat, agent, machine session, or investor-facing technical review should read in this order:
+1. `canonical/REHYDRATION_PACKET.md` — generated compact navigation/cache;
+2. `canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md` — most recent scientific closure;
+3. `canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json` — exact C4 external evidence bindings;
+4. `canonical/FIT1_EVIDENCE_INDEX_20260909.md` — short proof/evidence chain;
+5. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` — learned/deterministic responsibility boundaries;
+6. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md` — FIT1-to-now scientific flow;
+7. this `CURRENT_STATE.md` — stop/go authority;
+8. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` — exact current mechanism status;
+9. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md` and `canonical/EXPERIMENT_REGISTRY_V2.json` — exact experiment scope/status;
+10. `canonical/FIT1_COMMIT_LINEAGE_V1.md` when exact chronology is needed.
 
-1. `canonical/REHYDRATION_PACKET.md` — compact current state;
-2. `canonical/FIT1_EVIDENCE_INDEX_20260909.md` — short proof/evidence chain;
-3. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` — learned/deterministic responsibility boundaries;
-4. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md` — FIT1-to-now scientific flow;
-5. this `CURRENT_STATE.md` — stop/go authority;
-6. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` — exact current mechanism status;
-7. exact prereg/result/source artifacts referenced above;
-8. `canonical/FIT1_COMMIT_LINEAGE_V1.md` when exact chronology is needed.
-
-Branch recency never creates authority. `main/CURRENT_STATE.md` plus the exact cited prereg/result/promotion files decide continuation semantics.
+Branch recency never creates authority. `main/CURRENT_STATE.md` plus exact cited prereg/result/closure evidence decide continuation semantics.
 
 ## Product and ownership — binding
 
@@ -92,21 +92,6 @@ Seal commit:
 
 `ae0af0cd39dd2468a012ba21890a4fed2da7c4c9`
 
-The formulation consumes full product-available surface evidence and contains:
-
-- lossless fieldwise `RiggingSurfaceIR` tensorization;
-- direct geometry/view evidence encoding;
-- exact GSA-relation message passing;
-- global full-surface transformer memory;
-- prediction-only causal control recurrence;
-- per-step full-surface cross-attention;
-- coarse continuous locus prediction;
-- conditional residual diffusion;
-- soft learned previous-parent distribution for internal mechanical feedback;
-- native STOP/existence/root/mechanical-salience/support heads;
-- separate all-pairs directed parent evidence;
-- deterministic Fourier encoding of the exact eight canonical yaw directions, with no learned absolute view-slot parameter.
-
 Terminal scientific result:
 
 - `FIT1_TERMINAL_PASS`;
@@ -123,33 +108,19 @@ Frozen artifact SHA-256 identities:
 - target: `0b5a25c877116de60b710b7bb2a7848f30988e1622e2eda8084cad21c8ca23c9`;
 - qualified skeleton IR: `48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992`;
 - checkpoint: `b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30`;
-- final result JSON: `728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045`;
-- signed zero-surface: `987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b`;
-- upstream IRIS checkpoint: `766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2`.
+- final result JSON: `728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045`.
 
 Strongest allowed claim: the promoted reference-strength formulation fits and stably maintains the real Mage FIT1 22-control mechanical core from admitted current IRIS/GSA evidence under the preregistered shipping-faithful gate.
 
 Not claimed: unseen-character/family generalization, Arachne closure, or product PASS.
 
-`models/geppetto/v2/` remains preserved as prior mainline/research provenance. It is not the current FIT1-frozen formulation.
+## Arachne / SkinFieldCodec A0 — CURRENT BOTTLENECK
 
-## AR-01 — historical but still valid scoped evidence
-
-AR-01 remains `AR01_NO_TERMINAL_CLOSURE` for its exact minimal feedback arms. That result is not erased by the later Geppetto PASS.
-
-The later reference-strength formulation differs materially: it uses lossless direct surface evidence, exact relation message passing, global memory, per-step cross-attention, conditional diffusion, soft internal parent feedback, native STOP and separate all-pairs parent evidence. Therefore AR-01 cannot be treated as a contradiction of the later closure.
-
-Authority: `canonical/AR01_RESULT_20260907.md`.
-
-## Arachne — CURRENT BOTTLENECK
-
-**No Arachne model has been promoted by the Geppetto transaction.**
-
-The current campaign scope is:
+**No Arachne model is promoted.** Current campaign scope remains:
 
 `Mage A0 FIT1 SkinFieldCodec representation/decode only`.
 
-Fixed current V7 apparatus:
+Fixed V7 apparatus:
 
 - architecture: `RealSaS.Arachne.SkinFieldCodec.v7`;
 - parameter count: `278,010,880`;
@@ -159,64 +130,80 @@ Fixed current V7 apparatus:
 - teacher-W SHA-256: `7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d`;
 - 22 joints, 934 supervised rows, 16 low-confidence rows.
 
-### Current causal state
+### C4 CLOSED FAIL
 
-Earlier V3-V6 work established and repaired two real blockers: FSQ identity collapse and decoder field-token insensitivity. V7 removes FSQ and preserves continuous field identity.
+Research-branch closure commit:
 
-C2/C3 localized the remaining error to weak-true/nearby-false mixed-support boundary behavior. C3's point-cloud support/near-support treatment under exact `u/q` importance correction was worse than its matched control on authoritative p95/deformation, so that **exact remedy** was falsified.
+`d0b666725e79f3beb0ea001f456375421cc14375`
 
-The boundary localization itself survives; what failed was the C3 proxy/remedy.
+Aggregate result SHA-256:
 
-### Active C4
+`439583ac60eca855dc2b55efabf5b4a6df4de5f9617e9e35583cf136b4cb55d9`
 
-C4 tests the two SkinTokens mechanisms C3 did not actually reproduce:
+Terminal primary metrics:
 
-1. real mesh-face / triangle-interior sampling with barycentrically interpolated continuous skin targets;
-2. deliberately biased dense supervision rather than cancelling BCE/MSE sample bias back to a uniform objective with `u/q`.
+| Arm | raw p95 | raw deform | dominant accuracy | streak |
+|---|---:|---:|---:|---:|
+| A — importance-corrected active-only | 0.1817569972 | 0.0611890741 | 0.9935760171 | 0 |
+| B — biased active-only | 0.2705708147 | 0.0908120275 | 0.9935760171 | 0 |
+| C — face+bary biased | 1.4804241555 | 0.5461477637 | 0.7655246253 | 0 |
 
-C4 uses three matched arms: importance-corrected fixed-GSA reference, the exact same fixed-GSA draws without `u/q`, and real face+barycentric biased dense supervision.
+All three retained the preregistered legality/numerical guards, including 950 qualified rows, finite/nonnegative outputs, simplex bounds, Compiler correction caps and zero sparsification discarded mass. The failure is therefore **scientific**, not infrastructure.
 
-No C4 result is promoted on `main` until the scientific run completes and a separate closure transaction is written.
+Causal interpretation:
+
+- A -> B worsened p95 by `+0.0888138175` and deformation by `+0.0296229534`; objective-bias cancellation by importance correction is **not supported as the blocker**.
+- B -> C worsened p95 by `+1.2098533407`, deformation by `+0.4553357363`, and dominant accuracy by `-0.2280513919`; the exact source-face/topology/barycentric dense-supervision port is **not supported for this FIT1 target**.
+- The exact C4 sampling family is rejected. C4 does **not** falsify the earlier blend-boundary localization, every possible topology-aware approach, A1, or product skinning.
+
+Frozen FIT1 limits remain `raw/qualified p95 <= 0.05` and `raw/qualified deformation ratio <= 0.05`; no threshold is widened after seeing the result.
+
+## Required next scientific fork
+
+C4 preregistration binds the next direction because neither B nor C improved over A:
+
+`SEPARATELY_PREREGISTERED_WITHIN_SUPPORT_CALIBRATION_DIAGNOSIS`
+
+This is a **required next diagnostic direction, not an already authorized treatment**. Until a new preregistration exists:
+
+- no A0 optimizer step is authorized;
+- do not automatically add a custom blend-ratio/calibration loss;
+- do not modify the `0.05` FIT1 gate;
+- A0 remains `OPEN`;
+- A1 remains `BLOCKED_NOT_AUTHORIZED`;
+- PRODUCT_PASS remains `NOT EVALUATED`.
 
 ## A0 vs A1 — mandatory distinction
 
-A0 and A1 are separate scientific gates inside the learned skinning stack.
-
-### A0 — SkinFieldCodec
-
-Teacher/training lane:
+A0 teacher/training lane:
 
 `dense teacher W -> codec representation/latent -> shared decoder -> reconstructed W`
 
-Question: can the representation/shared decoder express the required dense weight field under current surface/skeleton conditioning?
-
-### A1 — Arachne predictor
-
-Shipping learned lane:
+A1 shipping learned lane:
 
 `RiggingSurfaceIR S + QualifiedSkeletonIR G -> Arachne latent predictor -> same frozen Codec decoder -> dense W proposal`
 
-Question: can the latent be inferred from product-time mechanical evidence without teacher W?
+Current `models/arachne/v2/` is an older A1 scaffold and is not a current V7-native A1 closure.
 
-Current `models/arachne/v2/` contains an older A1 scaffold, but it was sized for the earlier small codec contract. It is **not** a current V7-native A1 closure. A fresh V7-facing latent interface, architecture/capacity audit and preregistration are required after A0 closes.
+Only after an A0 terminal PASS may the sequence become:
 
-Therefore:
+`A0 PASS -> freeze actual V7 latent/decode interface -> fresh V7-native A1 capacity/architecture prereg -> A1 FIT1 -> Compiler skin qualification -> separate end-to-end product experiment`.
 
-`A0 PASS -> freeze actual V7 latent/decode interface -> V7-native A1 sizing/prereg -> A1 FIT1 -> Compiler skin qualification -> separate end-to-end product experiment`.
-
-A0 PASS does not imply A1 PASS. A1 PASS would not automatically create `PRODUCT_PASS`.
+A0 PASS would not imply A1 PASS. A1 PASS would not automatically create PRODUCT_PASS.
 
 ## FIT1 / investor claim boundary
 
-FIT1 is intentionally valuable as controlled same-witness engineering/science evidence and a financing/demo gate. It is not a generalization benchmark.
+FIT1 is controlled same-witness engineering/science evidence and a financing/demo gate. It is not a generalization benchmark.
 
-A reviewer should be able to inspect `canonical/FIT1_EVIDENCE_INDEX_20260909.md`, follow the exact source commit, prereg, terminal result, artifact hashes and promotion decision, and distinguish what is closed from what remains open.
+Current strongest system-level statement is therefore:
+
+`IRIS/GSA admitted substrate + promoted Geppetto FIT1 skeleton closure exist; learned skinning remains open at A0 after C4 scientifically falsified its exact sampling family.`
 
 ## Immediate execution order
 
-1. keep the Geppetto frozen source/evidence immutable except for explicit contradiction-driven reopening;
-2. finish the currently preregistered A0 C4 experiment without changing its gates after outcomes;
-3. if A0 closes, freeze the actual V7 decoder/latent interface before any A1 optimizer step;
-4. size and preregister a V7-native A1 rather than blindly training the legacy ~small Arachne scaffold;
-5. only after A1 closure proceed to the deterministic skin/mesh/deformation/product qualification sequence;
-6. keep `PRODUCT_PASS` reserved for its own independent end-to-end acceptance contract.
+1. keep promoted Geppetto source/evidence immutable except for explicit contradiction-driven reopening;
+2. use the C4 closure + evidence manifest as the starting authority for Arachne A0;
+3. design and separately preregister the within-support blend-ratio/calibration diagnosis required by C4;
+4. do not start a custom calibration treatment before that diagnostic contract exists;
+5. do not authorize V7-native A1 until A0 actually terminal-passes and the real V7 latent/decode interface is frozen;
+6. reserve PRODUCT_PASS for its own independent end-to-end acceptance contract.

@@ -8,6 +8,8 @@
     "geppetto_evidence_manifest": "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
     "geppetto_closure": "canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md",
     "geppetto_promotion": "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
+    "arachne_c4_closure": "canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md",
+    "arachne_c4_evidence_manifest": "canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json",
     "architecture_ledger": "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "experiment_ledger": "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V2.json",
@@ -20,7 +22,7 @@
     "target": "8-direction editable 2D/2.5D puppet compiled from raster artwork; preserve 2D appearance while inferring/editing mechanical rig and deformation.",
     "non_target": "full 3D reconstruction",
     "demo_witness": "Mage FIT1",
-    "next_visible_product_milestone": "Close SkinFieldCodec A0, then V7-native A1 learned skinning, then produce the qualified Mage idle/breathing witness under a separate product acceptance contract."
+    "next_visible_product_milestone": "Close SkinFieldCodec A0 after the required within-support calibration diagnosis, then V7-native A1 learned skinning, then produce the qualified Mage idle/breathing witness under a separate product acceptance contract."
   },
   "pipeline": [
     {
@@ -46,7 +48,7 @@
     {
       "name": "SkinFieldCodec A0",
       "role": "learned skin-field representation/shared decoder",
-      "canonical_rule": "current V7 FIT1 science is active research only; no V7 promotion until A0 closes"
+      "canonical_rule": "V7 remains research-only and A0 remains open; C4 closed FAIL and rejected its exact sampling family; next step is a separately preregistered within-support calibration diagnosis"
     },
     {
       "name": "Arachne A1",
@@ -66,14 +68,14 @@
   ],
   "current_focus": {
     "module": "Arachne/SkinFieldCodec A0",
-    "state": "GEPPETTO_FIT1_FROZEN_PROMOTED__ARACHNE_A0_ACTIVE__A1_BLOCKED__FULL_PRODUCT_FIT1_OPEN",
-    "active_experiment": "V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION",
-    "most_recent_closed_gate": "GEPPETTO_REFERENCE_STRENGTH_FIT1",
-    "categorical_verdict": "GEPPETTO_FIT1_TERMINAL_PASS__A0_STILL_OPEN",
-    "result_authority": "canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md",
-    "scientific_question": "Can the current 278M V7 SkinFieldCodec close the Mage A0 representation/decode gate when deliberate dense objective bias and real face-topology/barycentric supervision are tested causally?",
-    "scope_warning": "C4 is A0 codec science only. It cannot authorize A1, full learned skinning, generalization, or PRODUCT_PASS. C3 falsified its exact point-cloud/u-q remedy, not the boundary localization itself.",
-    "promotion_block": "No Arachne/V7 model is promoted. A1 remains blocked until A0 closes, the actual V7 latent/decode interface is frozen, and a separate V7-native A1 capacity/architecture preregistration is completed."
+    "state": "GEPPETTO_FIT1_FROZEN_PROMOTED__ARACHNE_A0_OPEN_AFTER_C4_FAIL__A1_BLOCKED__FULL_PRODUCT_FIT1_OPEN",
+    "active_experiment": null,
+    "most_recent_closed_gate": "V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION",
+    "categorical_verdict": "C4_CLOSED_FAIL__A0_STILL_OPEN__A1_BLOCKED",
+    "result_authority": "canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md",
+    "scientific_question": "After C4 rejected the tested objective-bias and face/barycentric sampling family, what within-true-support blend-ratio/calibration failure remains, and what minimal next intervention should be separately preregistered without changing the frozen 0.05 FIT1 gates?",
+    "scope_warning": "C4 is A0 codec science only. It failed the exact tested sampling family; it did not test A1, did not falsify every topology-aware method, did not establish generalization, and did not evaluate PRODUCT_PASS.",
+    "promotion_block": "No Arachne/V7 model is promoted. A0 remains open. A1 remains blocked until A0 closes, the actual V7 latent/decode interface is frozen, and a separate V7-native A1 capacity/architecture preregistration is completed."
   },
   "iris_current_state": {
     "ownership_envelope": "single IRIS subsystem with layered promoted sources plus deterministic GSA",
@@ -141,6 +143,11 @@
     "fsq": false,
     "conditioning_cache_sha256": "db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd",
     "teacher_weights_sha256": "7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d",
+    "c4_status": "CLOSED_FAIL__REJECT_THIS_SAMPLING_FAMILY",
+    "c4_branch_closure_commit": "d0b666725e79f3beb0ea001f456375421cc14375",
+    "c4_aggregate_result_sha256": "439583ac60eca855dc2b55efabf5b4a6df4de5f9617e9e35583cf136b4cb55d9",
+    "a0_terminal_pass": false,
+    "next_a0_gate": "SEPARATELY_PREREGISTERED_WITHIN_SUPPORT_CALIBRATION_DIAGNOSIS",
     "a1_authorized": false,
     "a1_rule": "After A0 closes, freeze the actual V7 latent/decode interface and separately size/preregister a V7-native A1. Do not treat models/arachne/v2 as current V7-native closure.",
     "product_pass_authorized": false
@@ -171,6 +178,7 @@
     "Geppetto is proposal, not canonical rig authority; Compiler owns final legal root/parent/tree and canonical IDs after exact solve.",
     "Geppetto FIT1 PASS is not generalization, Arachne closure, or PRODUCT_PASS.",
     "A0 SkinFieldCodec representation/decode closure is distinct from A1 product-time latent inference.",
+    "A scientific FAIL remains a valid terminal scientific result and may not be relabeled as infrastructure failure.",
     "No Arachne model is promoted until its own scientific and promotion transactions close.",
     "Source exists != mechanism tested != full formulation tested != promotion != generalization.",
     "No post-hoc gate widening after results are visible.",
@@ -194,8 +202,12 @@
       "defense": "That staircase stopped at C1 PASS. Diffusion was later executed inside the independent reference-strength formulation."
     },
     {
-      "trap": "Treating A0 Codec PASS as A1 learned skinning PASS",
-      "defense": "A0 proves representation/decode ceiling only; A1 must infer codec latent from product-time S+G without teacher W."
+      "trap": "Treating C4 FAIL as A1 or product failure",
+      "defense": "C4 tested only A0 representation/shared-decoder interventions. A1 was not executed and PRODUCT_PASS was not evaluated."
+    },
+    {
+      "trap": "Treating C4 as falsifying all topology-aware methods or the boundary diagnosis",
+      "defense": "C4 rejected the exact preregistered sampling family only. The required next fork is a separate within-support calibration diagnosis."
     },
     {
       "trap": "Treating models/arachne/v2 as current V7-native A1",
@@ -220,6 +232,6 @@
   "continuation_protocol": {
     "experiment_completion_definition": "prereg + frozen source/apparatus + exact result/provenance + current experiment registry/journal + experiment ledger + architecture ledger if affected + context/CURRENT_STATE stop-go + explicit promotion/supersession where applicable",
     "promotion_rule": "Scientific PASS never promotes itself; promotion/refreeze is a separate transaction.",
-    "next_action": "Complete A0 C4 exactly as preregistered; if A0 closes, freeze V7 latent/decode interface before any A1 optimizer step."
+    "next_action": "Design and separately preregister the within-support blend-ratio/calibration diagnosis required by C4. Keep the 0.05 FIT1 gates unchanged; do not authorize A1 or start a custom calibration treatment before that preregistration."
   }
 }

@@ -3,17 +3,17 @@
   "bootstrap_status": "BOOTSTRAP_AUDIT_CLOSED",
   "fit1_gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
   "candidate_rule": "high-signal canonical/prereg/experiment/challenger/workflow artifacts",
-  "tracked_file_count": 828,
-  "high_signal_artifact_count": 264,
+  "tracked_file_count": 871,
+  "high_signal_artifact_count": 273,
   "classification_counts": {
-    "INDEXED_EXPLICIT": 117,
+    "INDEXED_EXPLICIT": 126,
     "HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL": 147
   },
-  "explained_high_signal_count": 264,
+  "explained_high_signal_count": 273,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 86,
-  "safe_default_evidence_only_branch_count": 82,
+  "live_branch_count": 91,
+  "safe_default_evidence_only_branch_count": 84,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -137,6 +137,36 @@
       "reason": "explicit authority-map override"
     },
     {
+      "name": "dependabot/pip/numpy-2.4.6",
+      "sha": "c9a1ecae38714d064e837608032ea73dd00c8b07",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "dependabot/pip/pillow-12.3.0",
+      "sha": "b7bdee2eda9550c818590268f5496c3643d09c2e",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "dependabot/pip/pip-audit-2.10.1",
+      "sha": "add7ffd97461da031fc60cf7250ad837959d882b",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "dependabot/pip/pytest-9.1.1",
+      "sha": "78e3ffdc41b15820da09c1c1973b8a2f7a5621cb",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "dependabot/pip/scipy-1.17.1",
+      "sha": "55258ad65614b724d83adb06b99b3e794e6334f8",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "dino-controlled-ladder-prereg-20260829",
       "sha": "753b384d864c30af70e4c96645fdbe8099fabb46",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -175,8 +205,8 @@
     {
       "name": "exp/arachne-skintokens-cleanroom-fit1-20260908",
       "sha": "2cba8bcafefe7c5e3983fe5693dac8e17a548e01",
-      "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default under branch authority policy"
+      "class": "ACTIVE_EXPERIMENT",
+      "reason": "V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION"
     },
     {
       "name": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
@@ -187,8 +217,8 @@
     {
       "name": "exp/geppetto-reference-strength-fullstack-v1-20260907",
       "sha": "e6cc31ed13fc4c861874663abd4514620f89f864",
-      "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default under branch authority policy"
+      "class": "EVIDENCE_ONLY",
+      "reason": "explicit authority-map override"
     },
     {
       "name": "exp/lossless-rigging-evidence-v1-20260906",
@@ -330,7 +360,7 @@
     },
     {
       "name": "main",
-      "sha": "b102231127edbc7ef536c6b78a71b533827677df",
+      "sha": "9765608baf01e76cd38ab709334caf743c3185a1",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -402,7 +432,7 @@
     },
     {
       "name": "promote/fit1-evidence-main-20260909",
-      "sha": "b102231127edbc7ef536c6b78a71b533827677df",
+      "sha": "9deccb8d051fd85780c28a29591df40fbafc4570",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -487,8 +517,8 @@
     {
       "name": "seal/geppetto-reference-strength-fit1-20260908",
       "sha": "ae0af0cd39dd2468a012ba21890a4fed2da7c4c9",
-      "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default under branch authority policy"
+      "class": "EVIDENCE_ONLY",
+      "reason": "explicit authority-map override"
     },
     {
       "name": "single-family-e2e-fit-v1-20260902",

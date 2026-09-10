@@ -3,11 +3,11 @@
 > **GENERATED DISCOVERY VIEW — NOT SCIENTIFIC AUTHORITY.**
 > Bootstrap: `BOOTSTRAP_AUDIT_CLOSED`
 
-- Declared census scope: `main` + 3 registered active/evidence branch(es)
-- Census artifacts in declared scope: **316 / 316 discovered (100%)**
-- Semantically reconciled: **43**
-- Catalogued but unreviewed: **273**
-- Semantic coverage: **13.6%**
+- Declared census scope: `main` + 6 registered active/evidence branch(es)
+- Census artifacts in declared scope: **428 / 428 discovered (100%)**
+- Semantically reconciled: **88**
+- Catalogued but unreviewed: **340**
+- Semantic coverage: **20.6%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -16,8 +16,11 @@
 | Branch | Head | Different blobs vs main | High-signal differing artifacts |
 |---|---|---:|---:|
 | `demo/investor-single-specimen-e2e` | `47892ffa16b7` | 13 | 2 |
-| `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | 77 | 27 |
-| `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | 73 | 24 |
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `2cba8bcafefe` | 150 | 66 |
+| `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | 86 | 30 |
+| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | 42 | 16 |
+| `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | 82 | 27 |
+| `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | 41 | 15 |
 
 The queue is a discovery aid. A path being listed does not establish what it proves, whether it is current, or whether it was ever executed.
 
@@ -262,8 +265,61 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 
 - `KA-A236ACEA1AB5` `AUDIT` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `experiments/mage_scene_first_e2e_v1/AR01_NOTEBOOK_AUDIT_20260907.md` @ blob `c7d6b82433d5`
 
-### UNKNOWN_DATE :: ARACHNE_SKIN (6)
+### 2026-09-08 :: ARACHNE_SKIN (43)
 
+- `KA-C617D5D91D53` `AUTHORITY_DECISION` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_A0_AUTHORITY_BLOCK_V2_20260908.json` @ blob `59a0dc39d6b3`
+- `KA-AB0CF1E76B4F` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_A0_FS1_CAPACITY_GPU_EXECUTION_PREREG_V1_20260908.json` @ blob `b13032b2ee83`
+- `KA-D0B571BB11D5` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_A0_FS1_NO_TOKEN_TRANSPORT_PREREG_V1_20260908.json` @ blob `00fbaede206d`
+- `KA-19FAC121BF65` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_A0_FS1_POSTFAIL_ORACLE_LATENT_DIAGNOSTIC_PREREG_V1_20260908.json` @ blob `9c273926f364`
+- `KA-B6DF9A7F532A` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_A0_FS1_POSTFAIL_TAIL_CAPACITY_DIAGNOSTIC_PREREG_V1_20260908.json` @ blob `b5212a66d5b6`
+- `KA-A6F5131E51B1` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_A0_FS1_PREREG_V2_20260908.json` @ blob `611e8b14ffb0`
+- `KA-899992A32CDF` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_A0_PREREG_V1_20260908.json` @ blob `e9db5685342f`
+- `KA-1FDBD3BBD9C7` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_A0_PREREG_V1_20260908.md` @ blob `8346ef8e3f72`
+- `KA-EE1D46787C80` `CLOSURE` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_CLOSURE_20260908.md` @ blob `64d20c523722`
+- `KA-FF9A09A5E53B` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_PREREG_V2_20260908.json` @ blob `54f4766a9b72`
+- `KA-EF31352075AC` `CLOSURE` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_P0_FULL_SOURCE_FS1_CLOSURE_20260908.md` @ blob `f14181dc5214`
+- `KA-5EB710D4A738` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_P0_FULL_SOURCE_FS1_PREREG_20260908.json` @ blob `cf4419c3796d`
+- `KA-98C854A696C5` `CLOSURE` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `canonical/ARACHNE_MAGE_SKIN_TARGET_P0_CLOSURE_20260908.md` @ blob `83aad9a4097b`
+- `KA-E3F5EA332F71` `PLAN_MATRIX` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_A0_FIT1_CAUSAL_LEDGER_20260909.md` @ blob `a288198acc54`
+- `KA-76E9A7D8C4C1` `CLOSURE` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_CANONICAL_CLOSURE_20260908.md` @ blob `8b8fd43b2ffb`
+- `KA-E508F0F36E84` `PLAN_MATRIX` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_CAPACITY_BUNDLE_V3_MANIFEST.json` @ blob `b5044b68b1fd`
+- `KA-1DF3BDE3DAD5` `AUTHORITY_DECISION` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_COLAB_CAPSULE_SEAL_20260908.json` @ blob `9f6dd462b503`
+- `KA-672A2C5DF030` `NOTEBOOK` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_COLAB_EXACT_V1.ipynb` @ blob `0419f4b079dd`
+- `KA-4FC52E6A9C34` `PLAN_MATRIX` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_COLAB_EXACT_V1_MANIFEST.json` @ blob `80bce8c628c4`
+- `KA-75AAB8ED9C72` `AUTHORITY_DECISION` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_EXECUTION_SEAL_REPO_V1_20260908.json` @ blob `08a7dab7d50b`
+- `KA-FC4C4274714E` `CLOSURE` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_FS1_RUNTIME_SEMANTIC_CLOSURE_20260908.json` @ blob `b08a9f082774`
+- `KA-CA437DE8EB6D` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_PAIR_GEOMETRY_CODEC_V2_PREREG_V1.json` @ blob `4c0938b3771a`
+- `KA-7BB421C948D4` `AUDIT` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_PAIR_GEOMETRY_V2_BUILD_REPORT_V1.json` @ blob `dbd2b4ea0f03`
+- `KA-7DFDF377CB7B` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_A0_SKINTOKENS_STRENGTH_CODEC_V3_PREREG_V1.json` @ blob `8015cbb2d604`
+- `KA-0A26E0A71593` `AUTHORITY_DECISION` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_EXECUTION_SEAL_20260908.json` @ blob `b8fdd15c88d4`
+- `KA-77FEE98BE439` `PLAN_MATRIX` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_FS1_CONDITIONING_CACHE_V2_MANIFEST.json` @ blob `ad032b24ef4b`
+- `KA-DB144864AF46` `AUTHORITY_DECISION` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_P0_FULL_SOURCE_FS1_EXECUTION_SEAL_20260908.json` @ blob `22540b8ab634`
+- `KA-32D9AEBDA5B1` `PLAN_MATRIX` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_SKIN_TARGET_P0_FULL_SOURCE_FS1_MANIFEST.json` @ blob `2ba8050c36c9`
+- `KA-175D3C8DD16D` `PLAN_MATRIX` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/ARACHNE_MAGE_SKIN_TARGET_P0_MANIFEST_V1.json` @ blob `7cbd02345df6`
+- `KA-68D87EF9AF1A` `RESULT` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/OBJECTIVE_CAUSAL_TRIPLET_RESULT_20260909.md` @ blob `e5eb6f7b428c`
+- `KA-F6AAD6F94699` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C0_LONG_HORIZON_2000_PREREG_20260909.md` @ blob `2f2151cc3cee`
+- `KA-F5C84B56EBF3` `RESULT` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C0_NORMALIZATION_COORDINATE_AUTOPSY_RESULT_20260909.md` @ blob `050da5ddf8a6`
+- `KA-ECEF633941F3` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C1B_SPARSE_SIMPLEX_PROJECTION_PREREG_20260909.md` @ blob `d8b12ba75f3d`
+- `KA-3F76620DF6D6` `RESULT` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C1B_SPARSE_SIMPLEX_PROJECTION_RESULT_20260909.md` @ blob `559669e3949d`
+- `KA-2B051ADB7D52` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C1_FROZEN_TAIL_CALIBRATION_AUTOPSY_PREREG_20260909.md` @ blob `21ba1cf274d8`
+- `KA-6F33AE1AB23A` `RESULT` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C1_FROZEN_TAIL_CALIBRATION_RESULT_20260909.md` @ blob `b3520087570c`
+- `KA-7F4899B3B718` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C2_BLEND_BOUNDARY_LOCALIZATION_PREREG_20260909.md` @ blob `7e1632f01572`
+- `KA-AACB5CAC9544` `AUDIT` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C2_SKINTOKENS_PARITY_BLOCKER_AUDIT_20260909.md` @ blob `cc6ccdc38a24`
+- `KA-DBEFB1B9DE2E` `RESULT` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C2_SKINTOKENS_TOP4_PARITY_RESULT_20260909.md` @ blob `5250f98f3f1b`
+- `KA-EF74E5BB3B6C` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C2_SKINTOKENS_TOP4_PRODUCTION_PARITY_PREREG_20260909.md` @ blob `a67c7ba632c2`
+- `KA-F4F9023E558A` `AUTHORITY_DECISION` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/diagnose_a0_hardrow_from_sealed.py` @ blob `80ea896fffb8`
+- `KA-DF456B5E0EDE` `HIGH_SIGNAL_OTHER` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/objective_causal_triplet_v7.py` @ blob `81598b75268d`
+- `KA-92DAB01EEC2E` `HIGH_SIGNAL_OTHER` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/v7_geometry_causality_autopsy.py` @ blob `c6151568117a`
+
+### 2026-09-08 :: IRIS (1)
+
+- `KA-F23932EC4DFF` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C2_IMPORTANCE_CORRECTED_ACTIVE_HEAVY_PREREG_20260909.md` @ blob `8c0f9a48466e`
+
+### UNKNOWN_DATE :: ARACHNE_SKIN (9)
+
+- `KA-7A169011D5E9` `WORKFLOW` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `.github/workflows/arachne_a0_hardrow_rootcause_hosted.yml` @ blob `40ecf1c6a755`
+- `KA-45316F1A9C9B` `WORKFLOW` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `.github/workflows/arachne_a0_storage_probe_selfhosted.yml` @ blob `8cdaa6750202`
+- `KA-889A61EBFE1B` `WORKFLOW` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `.github/workflows/arachne_mage_a0_pair_geometry_v2_source_contract.yml` @ blob `c7273acd79e6`
 - `KA-AF6CF11478B7` `WORKFLOW` — `main` :: `.github/workflows/arachne_codec_v2_source_contract.yml` @ blob `57ddbca877ea`
 - `KA-22E7EFB358E3` `WORKFLOW` — `main` :: `.github/workflows/arachne_shipping_boundary.yml` @ blob `98091b98c939`
 - `KA-EB08B871C080` `WORKFLOW` — `main` :: `.github/workflows/r6_oracle_substrate_arachne_heterogeneous.yml` @ blob `8a413bb6d648`
@@ -336,8 +392,10 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-63B1788D3B44` `HIGH_SIGNAL_OTHER` — `main` :: `experiments/family_selection_v1/test_prefit_family_truth_eligibility_v1.py` @ blob `1c11d7d2aeb5`
 - `KA-010725BF929F` `PLAN_MATRIX` — `main` :: `experiments/single_family_e2e_v1/data_manifest_v1.py` @ blob `6b6cb76d8433`
 
-### UNKNOWN_DATE :: GEPPETTO (22)
+### UNKNOWN_DATE :: GEPPETTO (27)
 
+- `KA-7CFB6F6449EA` `WORKFLOW` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `.github/workflows/geppetto_reference_strength_fit1_source_gate.yml` @ blob `f698e49b1400`
+- `KA-F9474C86ACD3` `AUTHORITY_DECISION` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/geppetto_reference_strength_fullstack_v1/GEPPETTO_REFERENCE_STRENGTH_FIT1_SEAL_V1.md` @ blob `07eb356a1817`
 - `KA-5446D28DC606` `WORKFLOW` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `.github/workflows/mage_geppetto_assignment_stability_diag_v1.yml` @ blob `33a10b083d91`
 - `KA-12A039F4BBFA` `WORKFLOW` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `.github/workflows/mage_geppetto_capacity_diag_v1.yml` @ blob `48e3db1b3b93`
 - `KA-627FF806A0DF` `WORKFLOW` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `.github/workflows/mage_scene_first_geppetto_fit_v1.yml` @ blob `92457de8810b`
@@ -346,6 +404,8 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-48019CF2E781` `HIGH_SIGNAL_OTHER` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `experiments/mage_scene_first_e2e_v1/run_mage_geppetto_fit_v1.py` @ blob `7a8a5094e97e`
 - `KA-09079880E0C6` `HIGH_SIGNAL_OTHER` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `experiments/mage_scene_first_e2e_v1/run_mage_geppetto_fit_v2q.py` @ blob `27536dbf2159`
 - `KA-582A4DD3EBA2` `CHALLENGER_SOURCE` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `models/geppetto/challengers/__init__.py` @ blob `ac81fa9d414d`
+- `KA-F5022753B615` `WORKFLOW` — `exp/geppetto-reference-strength-fullstack-v1-20260907` :: `.github/workflows/geppetto_reference_strength_fit1_source_gate.yml` @ blob `f698e49b1400`
+- `KA-835909C7E188` `AUTHORITY_DECISION` — `exp/geppetto-reference-strength-fullstack-v1-20260907` :: `experiments/geppetto_reference_strength_fullstack_v1/GEPPETTO_REFERENCE_STRENGTH_FIT1_SEAL_V1.md` @ blob `07eb356a1817`
 - `KA-95121D7FCBB8` `WORKFLOW` — `exp/lossless-rigging-evidence-v1-20260906` :: `.github/workflows/mage_geppetto_assignment_stability_diag_v1.yml` @ blob `33a10b083d91`
 - `KA-3FBEF75F52DB` `WORKFLOW` — `exp/lossless-rigging-evidence-v1-20260906` :: `.github/workflows/mage_geppetto_capacity_diag_v1.yml` @ blob `48e3db1b3b93`
 - `KA-AFCADD7DB8A1` `WORKFLOW` — `exp/lossless-rigging-evidence-v1-20260906` :: `.github/workflows/mage_scene_first_geppetto_fit_v1.yml` @ blob `92457de8810b`
@@ -360,13 +420,18 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-26C6819A508B` `WORKFLOW` — `main` :: `.github/workflows/r6_oracle_substrate_geppetto_one_family.yml` @ blob `ddd8bb9c8a73`
 - `KA-6B96C51526F2` `AUDIT` — `main` :: `canonical/RIGANYTHING_CODE_LEVEL_REFERENCE_AUDIT_V1.md` @ blob `9081936d825f`
 - `KA-811ACF8A0DD9` `PREREG` — `main` :: `canonical/fit_mage_v1/GEPPETTO_64_SOFT_BUDGET_PREREG_V1.md` @ blob `cdf69a174869`
+- `KA-4A2C1636C4A2` `WORKFLOW` — `seal/geppetto-reference-strength-fit1-20260908` :: `.github/workflows/geppetto_reference_strength_fit1_source_gate.yml` @ blob `f698e49b1400`
 
-### UNKNOWN_DATE :: IRIS (30)
+### UNKNOWN_DATE :: IRIS (35)
 
 - `KA-8E350555053D` `WORKFLOW` — `demo/investor-single-specimen-e2e` :: `.github/workflows/iris_reprojection_v2_gate0.yml` @ blob `38a9fa6cc3ae`
+- `KA-BC0501B29B20` `WORKFLOW` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `.github/workflows/iris_v2_source_contract.yml` @ blob `286a4f1a3613`
+- `KA-A31B2E3B4E9D` `WORKFLOW` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `.github/workflows/iris_v2_source_contract.yml` @ blob `286a4f1a3613`
+- `KA-819C3F585C09` `WORKFLOW` — `exp/geppetto-reference-strength-fullstack-v1-20260907` :: `.github/workflows/iris_v2_source_contract.yml` @ blob `286a4f1a3613`
+- `KA-F01A790D1BCD` `WORKFLOW` — `exp/lossless-rigging-evidence-v1-20260906` :: `.github/workflows/iris_v2_source_contract.yml` @ blob `286a4f1a3613`
 - `KA-DAE04D7A1C66` `WORKFLOW` — `main` :: `.github/workflows/iris_reprojection_v2_gate0.yml` @ blob `7c2cebf8ffd0`
 - `KA-DE5B93031E92` `WORKFLOW` — `main` :: `.github/workflows/iris_scene_first_signed_promotion_v3.yml` @ blob `493e9a208c9c`
-- `KA-515B286F9F19` `WORKFLOW` — `main` :: `.github/workflows/iris_v2_source_contract.yml` @ blob `286a4f1a3613`
+- `KA-953D98CC3729` `WORKFLOW` — `main` :: `.github/workflows/iris_v2_source_contract.yml` @ blob `7898c1f9b776`
 - `KA-8E2B95544900` `AUDIT` — `main` :: `canonical/N1D_DESCRIPTOR_GLOBAL_FOREGROUND_TOP4_OPENDEV_CANONICAL_REPORT_V1.md` @ blob `6cb3fa9ad7ad`
 - `KA-6D537D565D43` `AUDIT` — `main` :: `canonical/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_CANONICAL_REPORT_V1.md` @ blob `7aa500477d92`
 - `KA-7073E0F1801F` `AUDIT` — `main` :: `canonical/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_STAGE_A_CANONICAL_REPORT_V1.md` @ blob `8cfab1a5799a`
@@ -393,12 +458,21 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-71EB299F884D` `PREREG` — `main` :: `prereg/n1d/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_PREREG_V1.json` @ blob `1f63d14b6c16`
 - `KA-CEC4A4424F15` `PREREG` — `main` :: `prereg/n1d/N1D_GLOBAL_FOREGROUND_GFDR_CAUSAL_REPLAY_PREREG_V1.json` @ blob `29f7aac944a5`
 - `KA-3B3218B9898B` `PREREG` — `main` :: `prereg/n1d/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_OPENDEV_PREREG_V1.json` @ blob `fca9dca905fe`
+- `KA-060D57776AF6` `WORKFLOW` — `seal/geppetto-reference-strength-fit1-20260908` :: `.github/workflows/iris_v2_source_contract.yml` @ blob `286a4f1a3613`
 
-### UNKNOWN_DATE :: REPOSITORY_GOVERNANCE (12)
+### UNKNOWN_DATE :: REPOSITORY_GOVERNANCE (22)
 
-- `KA-D100D1438015` `WORKFLOW` — `main` :: `.github/workflows/architecture_freeze_source_gate.yml` @ blob `fd69813186e5`
+- `KA-B4BCD49EACF8` `WORKFLOW` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `.github/workflows/architecture_freeze_source_gate.yml` @ blob `fd69813186e5`
+- `KA-1D6674B39CF7` `WORKFLOW` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `.github/workflows/completion_audit_contract.yml` @ blob `71f18fb3d715`
+- `KA-616F02AE3F60` `WORKFLOW` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `.github/workflows/architecture_freeze_source_gate.yml` @ blob `fd69813186e5`
+- `KA-99DB3AF1B65E` `WORKFLOW` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `.github/workflows/completion_audit_contract.yml` @ blob `71f18fb3d715`
+- `KA-7A984AF22806` `WORKFLOW` — `exp/geppetto-reference-strength-fullstack-v1-20260907` :: `.github/workflows/architecture_freeze_source_gate.yml` @ blob `fd69813186e5`
+- `KA-1A942EF91559` `WORKFLOW` — `exp/geppetto-reference-strength-fullstack-v1-20260907` :: `.github/workflows/completion_audit_contract.yml` @ blob `71f18fb3d715`
+- `KA-0F098370B747` `WORKFLOW` — `exp/lossless-rigging-evidence-v1-20260906` :: `.github/workflows/architecture_freeze_source_gate.yml` @ blob `fd69813186e5`
+- `KA-3A66C8C1B8EF` `WORKFLOW` — `exp/lossless-rigging-evidence-v1-20260906` :: `.github/workflows/completion_audit_contract.yml` @ blob `71f18fb3d715`
+- `KA-07A3989FD5C8` `WORKFLOW` — `main` :: `.github/workflows/architecture_freeze_source_gate.yml` @ blob `97e8cdbc15b4`
 - `KA-987B1FC6C0D1` `WORKFLOW` — `main` :: `.github/workflows/architecture_freeze_v2_candidate.yml` @ blob `35cae071018b`
-- `KA-20CDF68A75CE` `WORKFLOW` — `main` :: `.github/workflows/completion_audit_contract.yml` @ blob `71f18fb3d715`
+- `KA-C2714BD345F6` `WORKFLOW` — `main` :: `.github/workflows/completion_audit_contract.yml` @ blob `0a4881a2952f`
 - `KA-6CA3BBDF2808` `WORKFLOW` — `main` :: `.github/workflows/restoration_closure_manual.yml` @ blob `0e688312a4b5`
 - `KA-ACDFED9D82EF` `WORKFLOW` — `main` :: `.github/workflows/restoration_closure_trigger_once.yml` @ blob `5cb3ff2c659b`
 - `KA-6DFA57CE1953` `AUTHORITY_DECISION` — `main` :: `canonical/ARCHITECTURE_FREEZE_V1.json` @ blob `12aeada67ceb`
@@ -408,6 +482,8 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-3E39698373DA` `PLAN_MATRIX` — `main` :: `canonical/validate_completion_plan_v1.py` @ blob `85013f79c7b9`
 - `KA-731F02930053` `PREREG` — `main` :: `experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_STUDY_V1_PREREG.md` @ blob `6f5f3219d685`
 - `KA-496FB5F54F2A` `AUTHORITY_DECISION` — `main` :: `experiments/post_corpus_audit/post_corpus_stage_b_selective_authority_v1.py` @ blob `837a9d0159c6`
+- `KA-5FCA8EF86B33` `WORKFLOW` — `seal/geppetto-reference-strength-fit1-20260908` :: `.github/workflows/architecture_freeze_source_gate.yml` @ blob `fd69813186e5`
+- `KA-6BA00EEAF5C6` `WORKFLOW` — `seal/geppetto-reference-strength-fit1-20260908` :: `.github/workflows/completion_audit_contract.yml` @ blob `71f18fb3d715`
 
 ### UNKNOWN_DATE :: RUNTIME_EXPORT (1)
 

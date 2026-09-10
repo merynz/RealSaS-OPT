@@ -120,11 +120,18 @@ def registered_branch_scope(authority: dict) -> list[str]:
 
 
 def fetch_branch_for_census(branch: str) -> str:
+    """Refresh a disposable local census ref to the branch's exact remote head.
+
+    Census refs deliberately do not carry history/authority. A registered branch may
+    legitimately advance or be rebased between refreshes, so the private census ref
+    must be force-updated rather than requiring a fast-forward. The remote branch is
+    read-only here; only refs/context-census/* is replaced.
+    """
     digest = hashlib.sha256(branch.encode("utf-8")).hexdigest()[:16]
     local_ref = f"refs/context-census/{digest}"
     run(
         "git", "fetch", "--no-tags", "--depth=1", "origin",
-        f"refs/heads/{branch}:{local_ref}",
+        f"+refs/heads/{branch}:{local_ref}",
     )
     return local_ref
 

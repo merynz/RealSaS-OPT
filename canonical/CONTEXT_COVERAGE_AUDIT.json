@@ -12,8 +12,8 @@
   "explained_high_signal_count": 275,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 91,
-  "safe_default_evidence_only_branch_count": 84,
+  "live_branch_count": 92,
+  "safe_default_evidence_only_branch_count": 85,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -209,6 +209,12 @@
       "reason": "explicit authority-map override"
     },
     {
+      "name": "exp/arachne-v7-within-support-calibration-diagnosis-20260910",
+      "sha": "ea3952b2ca7cf895a7c7f2fbaf055301620bb04d",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
       "sha": "58ea876d3e6181284247822ccf2ed116e6d5f5fe",
       "class": "EVIDENCE_ONLY",
@@ -360,7 +366,7 @@
     },
     {
       "name": "main",
-      "sha": "6e67c665fc03bd43c7614bb7f6319c790baa5d0d",
+      "sha": "ea3952b2ca7cf895a7c7f2fbaf055301620bb04d",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

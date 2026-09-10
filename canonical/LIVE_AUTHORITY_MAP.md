@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `5d2f191ea805017d714bbfb08f4919b2838c624d2dfbf380b0ce9dbcd9b33095`
+> State fingerprint: `ea4feea843f4889addb24704c17f4069e9f85d620a1e39093ae2441af1b8db20`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -37,13 +37,13 @@ _No active experiments registered._
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 6** / **EVIDENCE_ONLY_UNREGISTERED: 75** / **DELETE_CANDIDATE: 9**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 6** / **EVIDENCE_ONLY_UNREGISTERED: 76** / **DELETE_CANDIDATE: 9**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `6e67c665fc03` | canonical continuation branch |
+| `main` | `ea3952b2ca7c` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -87,6 +87,7 @@ _No active experiments registered._
 | `dino-controlled-ladder-prereg-20260829` | `753b384d864c` | observed live; not explicitly registered active |
 | `dino-zero-step-preflight-20260829` | `396ac67b6d65` | observed live; not explicitly registered active |
 | `e2e/mage-scene-first-v1-20260905` | `c6b5108f672b` | observed live; not explicitly registered active |
+| `exp/arachne-v7-within-support-calibration-diagnosis-20260910` | `ea3952b2ca7c` | observed live; not explicitly registered active |
 | `feature/living-compile-v4-editor` | `cd56be7300c3` | observed live; not explicitly registered active |
 | `first-family-fit/charactergen-backbone-v1` | `15896da77dca` | observed live; not explicitly registered active |
 | `first-family-fit/v1-20260904` | `d8ba99dd4fe0` | observed live; not explicitly registered active |

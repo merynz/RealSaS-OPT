@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `ea4feea843f4889addb24704c17f4069e9f85d620a1e39093ae2441af1b8db20`
+> State fingerprint: `f1c067ba5d46e041ed3b1e048906763d5590241a8df366e2e2fd8ceb5a50b8c5`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -37,13 +37,13 @@ _No active experiments registered._
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 6** / **EVIDENCE_ONLY_UNREGISTERED: 76** / **DELETE_CANDIDATE: 9**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 6** / **EVIDENCE_ONLY_UNREGISTERED: 81** / **DELETE_CANDIDATE: 9**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `ea3952b2ca7c` | canonical continuation branch |
+| `main` | `dc4ea7e1a6d6` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -87,7 +87,12 @@ _No active experiments registered._
 | `dino-controlled-ladder-prereg-20260829` | `753b384d864c` | observed live; not explicitly registered active |
 | `dino-zero-step-preflight-20260829` | `396ac67b6d65` | observed live; not explicitly registered active |
 | `e2e/mage-scene-first-v1-20260905` | `c6b5108f672b` | observed live; not explicitly registered active |
-| `exp/arachne-v7-within-support-calibration-diagnosis-20260910` | `ea3952b2ca7c` | observed live; not explicitly registered active |
+| `exp/arachne-v7-dense-consumer-view-diagnosis-20260910` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
+| `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-canonical` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
+| `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-final` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
+| `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-prereg` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
+| `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-work` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
+| `exp/arachne-v7-within-support-calibration-diagnosis-20260910` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
 | `feature/living-compile-v4-editor` | `cd56be7300c3` | observed live; not explicitly registered active |
 | `first-family-fit/charactergen-backbone-v1` | `15896da77dca` | observed live; not explicitly registered active |
 | `first-family-fit/v1-20260904` | `d8ba99dd4fe0` | observed live; not explicitly registered active |

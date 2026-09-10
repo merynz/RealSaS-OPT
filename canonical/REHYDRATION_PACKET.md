@@ -11,7 +11,7 @@
 - **Current state:** `GEPPETTO_FIT1_FROZEN_PROMOTED__ARACHNE_A0_ACTIVE__A1_BLOCKED__FULL_PRODUCT_FIT1_OPEN`
 - **Active experiment:** `V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION`
 - **Most recent closed gate:** `GEPPETTO_REFERENCE_STRENGTH_FIT1`
-- **Canonical main:** `9765608baf01`
+- **Canonical main:** `06b255329aa3`
 - **Promotion block:** No Arachne/V7 model is promoted. A1 remains blocked until A0 closes, the actual V7 latent/decode interface is frozen, and a separate V7-native A1 capacity/architecture preregistration is completed.
 - **Scope warning:** C4 is A0 codec science only. It cannot authorize A1, full learned skinning, generalization, or PRODUCT_PASS. C3 falsified its exact point-cloud/u-q remedy, not the boundary localization itself.
 - **Next visible product milestone:** Close SkinFieldCodec A0, then V7-native A1 learned skinning, then produce the qualified Mage idle/breathing witness under a separate product acceptance contract.

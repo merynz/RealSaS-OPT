@@ -2,52 +2,64 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `5e7b39137047dd6afb8876491ab6dcf553f8ff1be10379cf90f77095e98be278`
+> State fingerprint: `d6b686022ebfe53b98fcc95bd5cd89c366da24d92832b3c3ef0041be2b8d0fba`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
 
 ## Execution authority
 
-- Runner mode: `SELF_HOSTED_LOCAL`
+- Runner mode: `SELF_HOSTED_LOCAL_ONLY`
 - Required labels: `self-hosted, linux, x64, realsas`
 - Known runner: `realsas-wsl-1660ti`
 - Operator path hint: `~/actions-runner`
-- Budget policy: Do not fan out authority-map or routine science workflows across every experimental branch push. Prefer main authority changes, branch create/delete events, explicit manual dispatch, or already-required self-hosted scientific jobs.
+- Budget policy: Do not fan out authority-map or routine science workflows across every experimental branch push. Prefer main authority changes, explicit manual dispatch, or already-required self-hosted scientific jobs.
 
 ## Rehydration order
 
 1. `canonical/REHYDRATION_PACKET.md`
-2. `CURRENT_STATE.md`
-3. `canonical/CONTEXT_COVERAGE_AUDIT.md`
-4. `canonical/LIVE_AUTHORITY_MAP.md`
-5. `canonical/CONTEXT_STATE_V1.json`
-6. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
-7. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-8. `canonical/EXPERIMENT_REGISTRY_V1.json`
-9. `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
+2. `canonical/FIT1_EVIDENCE_INDEX_20260909.md`
+3. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+4. `canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json`
+5. `CURRENT_STATE.md`
+6. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
+7. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
+8. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
+9. `canonical/EXPERIMENT_REGISTRY_V2.json`
+10. `canonical/CONTEXT_STATE_V1.json`
+11. `canonical/LIVE_AUTHORITY_MAP.md`
 
 ## Live experiment register
 
-_No active experiments registered._
+| Gate | Status | Branch | Live head | Question | Does not prove |
+|---|---|---|---|---|---|
+| `V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION` | `ACTIVE_RUNNING` | `exp/arachne-skintokens-cleanroom-fit1-20260908` | `2cba8bcafefe` | Does removing `u/q` importance correction improve A vs B, and does source-faithful face/topology/barycentric dense supervision improve B vs C, under otherwise frozen V7 A0 FIT1 conditions? | A1 Arachne latent inference is closed or authorized; unseen-character or unseen-family generalization; PRODUCT_PASS or product acceptance |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 73** / **DELETE_CANDIDATE: 9**
+**CANONICAL: 1** / **ACTIVE_EXPERIMENT: 1** / **EVIDENCE_ONLY: 5** / **EVIDENCE_ONLY_UNREGISTERED: 75** / **DELETE_CANDIDATE: 9**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `b102231127ed` | canonical continuation branch |
+| `main` | `06b255329aa3` | canonical continuation branch |
+
+### ACTIVE_EXPERIMENT
+
+| Branch | Head | Classification reason |
+|---|---|---|
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `2cba8bcafefe` | V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION |
 
 ### EVIDENCE_ONLY
 
 | Branch | Head | Classification reason |
 |---|---|---|
 | `demo/investor-single-specimen-e2e` | `47892ffa16b7` | Demo lineage only; never scientific continuation authority. |
-| `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | AR-01 closed at contract 41055bd073538d6b with verdict AR01_NO_TERMINAL_CLOSURE; retain source/prereg/provenance only. |
-| `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | Lossless RiggingSurfaceIR / V3 evidence lineage; no longer the active continuation experiment. |
+| `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | AR-01 closed with verdict AR01_NO_TERMINAL_CLOSURE; retain exact scoped evidence. |
+| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | Frozen optimizer/source lineage for the promoted reference-strength Geppetto formulation. |
+| `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | Lossless RiggingSurfaceIR / V3 evidence lineage; no longer active continuation experiment. |
+| `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | Sealed Geppetto FIT1 scientific source/result lineage; promoted source now lives on main. |
 
 ### EVIDENCE_ONLY_UNREGISTERED
 
@@ -72,11 +84,14 @@ _No active experiments registered._
 | `compiler-runtime-migration-audit-20260901` | `3267b3f1ec16` | observed live; not explicitly registered active |
 | `compiler-runtime-migration-closure-20260901` | `255910d22fea` | observed live; not explicitly registered active |
 | `consumer-interlock-v0-20260829` | `81ec9fd98d90` | observed live; not explicitly registered active |
+| `dependabot/pip/numpy-2.4.6` | `c9a1ecae3871` | observed live; not explicitly registered active |
+| `dependabot/pip/pillow-12.3.0` | `b7bdee2eda95` | observed live; not explicitly registered active |
+| `dependabot/pip/pip-audit-2.10.1` | `add7ffd97461` | observed live; not explicitly registered active |
+| `dependabot/pip/pytest-9.1.1` | `78e3ffdc41b1` | observed live; not explicitly registered active |
+| `dependabot/pip/scipy-1.17.1` | `55258ad65614` | observed live; not explicitly registered active |
 | `dino-controlled-ladder-prereg-20260829` | `753b384d864c` | observed live; not explicitly registered active |
 | `dino-zero-step-preflight-20260829` | `396ac67b6d65` | observed live; not explicitly registered active |
 | `e2e/mage-scene-first-v1-20260905` | `c6b5108f672b` | observed live; not explicitly registered active |
-| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `2cba8bcafefe` | observed live; not explicitly registered active |
-| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | observed live; not explicitly registered active |
 | `feature/living-compile-v4-editor` | `cd56be7300c3` | observed live; not explicitly registered active |
 | `first-family-fit/charactergen-backbone-v1` | `15896da77dca` | observed live; not explicitly registered active |
 | `first-family-fit/v1-20260904` | `d8ba99dd4fe0` | observed live; not explicitly registered active |
@@ -105,7 +120,7 @@ _No active experiments registered._
 | `next/structured-depth-bridge-20260829` | `e362c473c2fd` | observed live; not explicitly registered active |
 | `ops/temp-trigger-n1d-v2-recovery-20260820` | `536b40b6a6bf` | observed live; not explicitly registered active |
 | `ops/trigger-n1d-v2-recovery-v2-verify-20260820` | `12a813a8f501` | observed live; not explicitly registered active |
-| `promote/fit1-evidence-main-20260909` | `b102231127ed` | observed live; not explicitly registered active |
+| `promote/fit1-evidence-main-20260909` | `9deccb8d051f` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-main-v3-20260905` | `dfb087c6a23e` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-v3-20260905` | `7cfb7efedbe9` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | observed live; not explicitly registered active |
@@ -118,7 +133,6 @@ _No active experiments registered._
 | `restoration/compiler-runtime-promotion-v1-20260903-stage1-backup` | `2b5d46718683` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-stage1-treebase` | `2b5d46718683` | observed live; not explicitly registered active |
 | `restoration/iris-mainline-promotion-v1-20260903-safety` | `a965a22e7a9a` | observed live; not explicitly registered active |
-| `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | observed live; not explicitly registered active |
 | `single-family-e2e-fit-v1-20260902` | `5fa4bf788328` | observed live; not explicitly registered active |
 | `single-family-e2e-models-v1-20260902` | `362556db9b31` | observed live; not explicitly registered active |
 | `source/generic-completion-v1-20260902` | `85a25b419a47` | observed live; not explicitly registered active |
@@ -148,15 +162,15 @@ _No active experiments registered._
 ## Binding anti-conflation rules
 
 - Only main/CURRENT_STATE.md is continuation authority.
-- Scientific/mainline GitHub Actions run on the local self-hosted RealSaS runner; hosted-runner failures are apparatus/config only.
-- Routine authority tracking must not create workflow-run fan-out across every experimental branch push.
 - A branch is never active merely because it exists or has a recent commit.
-- A closed experiment branch becomes evidence-only unless explicitly promoted through a separate transaction.
-- Source existence is not experimental evidence.
-- Component evidence is not a full-formulation verdict.
-- A repository prereg/hash outranks detached chat/generated drafts when they disagree.
-- Unindexed historical evidence means UNKNOWN/UNRECONCILED, never ABSENT.
-- Promotion requires source + tests + evidence/result + CURRENT_STATE + provenance/revocation reconciliation.
+- A scientific PASS never promotes itself; promotion/refreeze is a separate transaction.
+- Geppetto FIT1 PASS is not generalization, Arachne closure, or PRODUCT_PASS.
+- No Arachne model is promoted until its own gate and promotion transaction close.
+- A0 SkinFieldCodec representation/decode closure is distinct from A1 product-time latent inference.
+- Source existence is not experimental evidence; component evidence is not a full-formulation verdict.
+- Repository prereg/result/hash authority outranks detached chat/generated drafts when they disagree.
+- Scientific/mainline Actions for this transaction run only on the local self-hosted RealSaS runner.
+- Promotion requires source + tests + evidence/result + CURRENT_STATE + provenance/supersession reconciliation.
 
 ## Update semantics
 

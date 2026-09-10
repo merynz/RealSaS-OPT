@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1031**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1033**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1043,6 +1043,8 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-10T02:35:26+03:00` | `85c17e3d1f9a` | yes | GOVERNANCE_CONTINUITY | Clarify self-hosted authority policy for agents | `AGENTS.md` | `dependabot/pip/numpy-2.4.6`<br>`dependabot/pip/pillow-12.3.0`<br>`dependabot/pip/pip-audit-2.10.1`<br>`dependabot/pip/pytest-9.1.1`<br>`dependabot/pip/scipy-1.17.1`<br>`main`<br>`promote/fit1-evidence-main-20260909` |
 | `2026-09-10T02:37:59+03:00` | `9deccb8d051f` | yes | OTHER | Prevent Dependabot hosted workflow fan-out | `.github/dependabot.yml` | `dependabot/pip/numpy-2.4.6`<br>`dependabot/pip/pillow-12.3.0`<br>`dependabot/pip/pip-audit-2.10.1`<br>`dependabot/pip/pytest-9.1.1`<br>`dependabot/pip/scipy-1.17.1`<br>`main`<br>`promote/fit1-evidence-main-20260909` |
 | `2026-09-10T03:18:58+03:00` | `9765608baf01` | yes | FIT_DATA, GEPPETTO, GOVERNANCE_CONTINUITY | Merge PR #29: Promote frozen Geppetto FIT1 evidence and professionalize main authority | _none_ | `dependabot/pip/numpy-2.4.6`<br>`dependabot/pip/pillow-12.3.0`<br>`dependabot/pip/pip-audit-2.10.1`<br>`dependabot/pip/pytest-9.1.1`<br>`dependabot/pip/scipy-1.17.1`<br>`main` |
+| `2026-09-10T03:21:31+03:00` | `229cba0caa9a` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-10T03:27:20+03:00` | `06b255329aa3` | yes | CI_TEST, GOVERNANCE_CONTINUITY | Repair live authority fail-close contract | `.github/workflows/live_authority_map.yml`<br>`canonical/AUTHORITY_MAP_V1.json`<br>`tests/repository/test_current_continuity_authority_v2.py` | `main` |
 
 ## Use rule
 

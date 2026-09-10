@@ -16,11 +16,11 @@
 | Branch | Head | Different blobs vs main | High-signal differing artifacts |
 |---|---|---:|---:|
 | `demo/investor-single-specimen-e2e` | `47892ffa16b7` | 13 | 2 |
-| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `2cba8bcafefe` | 150 | 66 |
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `2cba8bcafefe` | 151 | 66 |
 | `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | 86 | 30 |
-| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | 42 | 16 |
+| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | 43 | 16 |
 | `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | 82 | 27 |
-| `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | 41 | 15 |
+| `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | 42 | 15 |
 
 The queue is a discovery aid. A path being listed does not establish what it proves, whether it is current, or whether it was ever executed.
 

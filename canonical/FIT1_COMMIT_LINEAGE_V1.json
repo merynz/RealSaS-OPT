@@ -38,7 +38,7 @@
     "fit/single-family-mage-v1-20260902": "f2cd746f8bebf24c9c0c20d5c33743d24f9b0fa2",
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
-    "main": "9765608baf01e76cd38ab709334caf743c3185a1",
+    "main": "06b255329aa3758a6613dee3885db44f7549f0af",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "promote/fit1-evidence-main-20260909": "9deccb8d051fd85780c28a29591df40fbafc4570",
@@ -63,7 +63,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1031,
+  "commit_count": 1033,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -44867,6 +44867,58 @@
       "subsystem_tags": [
         "FIT_DATA",
         "GEPPETTO",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "229cba0caa9a27da79c05fa0d7fd1abd83187cb7",
+      "parents": [
+        "9765608baf01e76cd38ab709334caf743c3185a1"
+      ],
+      "author_time": "2026-09-10T03:21:31+03:00",
+      "committer_time": "2026-09-10T03:21:31+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "06b255329aa3758a6613dee3885db44f7549f0af",
+      "parents": [
+        "229cba0caa9a27da79c05fa0d7fd1abd83187cb7"
+      ],
+      "author_time": "2026-09-10T03:27:20+03:00",
+      "committer_time": "2026-09-10T03:27:20+03:00",
+      "subject": "Repair live authority fail-close contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/live_authority_map.yml",
+        "canonical/AUTHORITY_MAP_V1.json",
+        "tests/repository/test_current_continuity_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
         "GOVERNANCE_CONTINUITY"
       ],
       "is_fit1_gate_anchor": false,

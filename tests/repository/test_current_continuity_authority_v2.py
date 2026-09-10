@@ -61,6 +61,14 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
         self.assertIn("runs-on: [self-hosted, linux, x64, realsas]", workflow)
         self.assertNotIn("runs-on: ubuntu-latest", workflow)
 
+    def test_live_context_validates_before_generated_commit(self) -> None:
+        workflow = (ROOT / ".github/workflows/live_authority_map.yml").read_text(encoding="utf-8")
+        validate = workflow.index("- name: Enforce live-context validity")
+        publish = workflow.index("- name: Publish generated views to job summary")
+        commit = workflow.index("- name: Commit refreshed generated views")
+        self.assertLess(validate, publish)
+        self.assertLess(validate, commit)
+
     def test_current_source_gate_is_self_hosted(self) -> None:
         workflow = (ROOT / ".github/workflows/model_mainline_source_gate.yml").read_text(encoding="utf-8")
         self.assertIn("runs-on: [self-hosted, linux, x64, realsas]", workflow)
@@ -77,6 +85,21 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
         self.assertIn(GEPPETTO_EVIDENCE, order)
         self.assertIn(CURRENT_REGISTRY, order)
         self.assertIn(CURRENT_JOURNAL, order)
+
+    def test_active_experiment_records_satisfy_live_map_contract(self) -> None:
+        authority = json.loads((ROOT / "canonical/AUTHORITY_MAP_V1.json").read_text(encoding="utf-8"))
+        for exp in authority.get("active_experiments", []):
+            with self.subTest(experiment=exp.get("id", "<missing-id>")):
+                for key in ("id", "branch", "status", "question"):
+                    self.assertIn(key, exp)
+                    self.assertIsInstance(exp[key], str)
+                    self.assertTrue(exp[key].strip())
+                self.assertIn("does_not_prove", exp)
+                self.assertIsInstance(exp["does_not_prove"], list)
+                self.assertTrue(exp["does_not_prove"])
+                for claim in exp["does_not_prove"]:
+                    self.assertIsInstance(claim, str)
+                    self.assertTrue(claim.strip())
 
 
 if __name__ == "__main__":

@@ -49,6 +49,12 @@
       "witness": "Mage FIT1",
       "status": "ACTIVE_RUNNING",
       "scope": "A0 skin-field representation/shared-decoder only; not A1 and not product acceptance",
+      "question": "Does removing `u/q` importance correction improve A vs B, and does source-faithful face/topology/barycentric dense supervision improve B vs C, under otherwise frozen V7 A0 FIT1 conditions?",
+      "does_not_prove": [
+        "A1 Arachne latent inference is closed or authorized",
+        "unseen-character or unseen-family generalization",
+        "PRODUCT_PASS or product acceptance"
+      ],
       "prereg_authority": "experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_PREREG_20260909.md",
       "prereg_blob": "4ada6333afa1dcfe40d08eac286a88d3acc158ad",
       "source_contract": "experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_SOURCE_CONTRACT.json",

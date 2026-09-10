@@ -1,0 +1,80 @@
+{
+  "schema": "RealSaS.ArachneInformationPreservationAudit.Phase5BoundaryMatrix.v1",
+  "date": "2026-09-11",
+  "status": "OPEN_RESEARCH_AUDIT__EVIDENCE_ONLY__NO_A1_IMPLEMENTATION_OR_TRAINING_AUTHORIZED",
+  "authority": {
+    "continuation_authority": "main/CURRENT_STATE.md",
+    "current_a0_experiment_unchanged": true,
+    "a1_authorized": false,
+    "product_pass_claimed": false
+  },
+  "classes": {
+    "A": "RETAIN_AND_BASELINE_CONSUME",
+    "B": "RETAIN_AT_BOUNDARY__NEURAL_USE_BY_ABLATION",
+    "C": "RETAIN_FOR_AUTHORITY_OR_PROVENANCE__FORBID_RAW_NEURAL_SHORTCUT",
+    "D": "DO_NOT_PROMOTE_AS_DOWNSTREAM_EVIDENCE_UNDER_CURRENT_SCIENCE"
+  },
+  "surface_nodes": [
+    {"field":"surface_id","old_a1":"external row id","delta":"PRESERVED_IDENTITY","boundary":"PRESERVE_EXACT","neural":"FORBID_RAW_ID_EMBED","class":"C"},
+    {"field":"P_world_and_normalized","old_a1":"normalized xyz + separate normalized positions","delta":"PRESERVED_DERIVED","boundary":"PRESERVE_WORLD_AND_NORMALIZED","neural":"BASELINE","class":"A"},
+    {"field":"support_views","old_a1":"8 bits","delta":"PRESERVED_EXACT","boundary":"PRESERVE_EXACT","neural":"BASELINE","class":"A"},
+    {"field":"support_count","old_a1":"scalar","delta":"DERIVED_DUPLICATE","boundary":"DERIVE_IF_NEEDED","neural":"NO_PRIVILEGED_CHANNEL","class":"B"},
+    {"field":"raster_bindings_per_view_xy","old_a1":"raster_count_only","delta":"COMPRESSED_LOSS_OF_VIEW_SPATIAL_STRUCTURE","boundary":"PRESERVE_EXACT_XY_AND_VALIDITY","neural":"ABLATE_USE","class":"B"},
+    {"field":"derived_normal","old_a1":"normal xyz","delta":"PRESERVED","boundary":"PRESERVE","neural":"BASELINE","class":"A"},
+    {"field":"normal_valid","old_a1":"scalar","delta":"PRESERVED_CURRENT_MAGE_CONSTANT","boundary":"PRESERVE","neural":"BASELINE_OR_MASK","class":"A"},
+    {"field":"validity_flags","old_a1":"mostly dropped","delta":"COMPRESSED","boundary":"PRESERVE_TYPED_BITS","neural":"ABLATE_USE","class":"B"},
+    {"field":"observed_completed","old_a1":"not explicit","delta":"DROPPED","boundary":"PRESERVE","neural":"ABLATE_USE","class":"B"},
+    {"field":"provenance_refs","old_a1":"hash/certificate only","delta":"CORRECTLY_NON_NEURAL","boundary":"PRESERVE_CERTIFICATE","neural":"FORBID_RAW","class":"C"},
+    {"field":"source_observation_ids","old_a1":"omitted","delta":"CURRENT_SCENE_FIRST_EMPTY","boundary":"PRESERVE_WHEN_MEANINGFUL","neural":"NOT_BASELINE","class":"C"},
+    {"field":"persistence_group_id","old_a1":"omitted","delta":"PRODUCER_DEPENDENT","boundary":"PRESERVE_WHEN_NON_NULL","neural":"NOT_BASELINE","class":"C"},
+    {"field":"node_metadata","old_a1":"mostly omitted","delta":"MIXED","boundary":"FIELD_WHITELIST_ONLY","neural":"FORBID_GENERIC_METADATA_INGESTION","class":"C"},
+    {"field":"radius_norm","old_a1":"scalar","delta":"DETERMINISTIC_DUPLICATE_OF_POSITION","boundary":"DERIVE","neural":"DROP_OR_DERIVE","class":"B"}
+  ],
+  "surface_relations": [
+    {"field":"edge_endpoints","old_a1":"degree only","delta":"EXACT_EDGE_IDENTITY_LOST","boundary":"PRESERVE_EXACT_EDGE_INDEX","neural":"BASELINE_STRUCTURE","class":"A"},
+    {"field":"relation_kind","old_a1":"omitted","delta":"DROPPED","boundary":"PRESERVE_TYPED","neural":"ABLATE_IF_CURRENTLY_SINGLE_KIND","class":"B"},
+    {"field":"relation_score","old_a1":"node mean score","delta":"EDGE_LOCALIZATION_LOST","boundary":"PRESERVE_PER_EDGE","neural":"ABLATE_USE","class":"B"},
+    {"field":"edge_distance_normalized","old_a1":"not explicit","delta":"DERIVABLE_ONLY_IF_EDGE_IDENTITY_PRESENT","boundary":"PRESERVE_OR_DERIVE","neural":"BASELINE_CANDIDATE","class":"B"},
+    {"field":"crosses_unknown","old_a1":"omitted","delta":"DROPPED","boundary":"PRESERVE","neural":"ABLATE_USE","class":"B"},
+    {"field":"unknown_bridge","old_a1":"omitted","delta":"DROPPED","boundary":"PRESERVE","neural":"ABLATE_USE","class":"B"},
+    {"field":"relation_provenance_metadata","old_a1":"omitted","delta":"EXPECTED","boundary":"CERTIFICATE_AND_WHITELIST","neural":"FORBID_GENERIC_METADATA","class":"C"},
+    {"field":"degree","old_a1":"normalized scalar","delta":"PRESERVED_SUMMARY","boundary":"DERIVE_FROM_EDGES","neural":"OPTIONAL","class":"B"},
+    {"field":"mean_relation_score","old_a1":"scalar","delta":"CURRENT_MAGE_CONSTANT_AND_LOCALIZATION_LOST","boundary":"DERIVE","neural":"NOT_REQUIRED_BASELINE","class":"B"}
+  ],
+  "qualified_skeleton": [
+    {"field":"canonical_joint_id","old_a1":"external row id","delta":"PRESERVED_IDENTITY","boundary":"PRESERVE","neural":"FORBID_RAW_HASH_ID","class":"C"},
+    {"field":"joint_position","old_a1":"normalized xyz","delta":"PRESERVED_DERIVED","boundary":"PRESERVE_WORLD_AND_NORMALIZED","neural":"BASELINE","class":"A"},
+    {"field":"parent_graph","old_a1":"exact parent_indices","delta":"PRESERVED_EXACT","boundary":"PRESERVE_EXACT","neural":"BASELINE","class":"A"},
+    {"field":"deform_root_ids","old_a1":"root bit","delta":"PRESERVED","boundary":"PRESERVE_EXACT_SET","neural":"BASELINE_STRUCTURAL_TYPE","class":"A"},
+    {"field":"support_surface_ids","old_a1":"len/16 scalar","delta":"176_IDENTITY_RELATIONS_TO_22_CONSTANT_0_5_VALUES_ON_MAGE","boundary":"PRESERVE_EXACT_BIPARTITE_MAPPING","neural":"SOFT_EVIDENCE_ABLATION_ONLY__NEVER_HARD_SKIN_MASK","class":"B"},
+    {"field":"source_proposal_id","old_a1":"non-neural","delta":"PROVENANCE_JOIN","boundary":"PRESERVE","neural":"FORBID_RAW_ID","class":"C"},
+    {"field":"assembly_root_binding","old_a1":"not exposed","delta":"DROPPED_OR_EMPTY_CURRENT_MAGE","boundary":"PRESERVE_WHEN_NONEMPTY","neural":"FUTURE_ATTACHMENT_AWARE_ONLY","class":"B"},
+    {"field":"qualification_report","old_a1":"not neural","delta":"EXPECTED","boundary":"PRESERVE_REPORT","neural":"FORBID_GENERIC_INGESTION","class":"C"},
+    {"field":"skeleton_lineage_hash","old_a1":"preserved hash","delta":"CORRECT","boundary":"PRESERVE","neural":"FORBID_RAW","class":"C"},
+    {"field":"old_joint_constant_one","old_a1":"constant 1","delta":"NO_SEMANTIC_INFORMATION","boundary":"REMOVE_FROM_NEW_SEMANTIC_CONTRACT","neural":"NO","class":"D"}
+  ],
+  "derived_pair_geometry": {
+    "contract": ["point_control_dx","point_control_dy","point_control_dz","point_control_distance","point_segment_distance","segment_t","segment_length","normal_axis_abs_cos","normal_axis_valid","parent_exists"],
+    "mage_shape": [950,22,10],
+    "mage_pair_count": 20900,
+    "verdict": "PRESERVE_AS_DERIVED_PRODUCT_LEGAL_INDUCTIVE_BIAS_CANDIDATE",
+    "class": "A"
+  },
+  "proposal_evidence_not_baseline": [
+    {"field":"mechanical_salience_probability","reason":"FIT1 all-positive/saturated; magnitude not calibrated","class":"D"},
+    {"field":"proposal_joint_confidence","reason":"Compiler consumed; current Mage range narrow; sidecar only if justified","class":"B"},
+    {"field":"position_sigma_normalized","reason":"heteroscedastic position-NLL trained; calibration/generalization unknown","class":"B"},
+    {"field":"dense_support_logits","reason":"nearest-8 mechanical support evidence, not skin ownership; soft calibration for A1 unproven","class":"B"},
+    {"field":"raw_parent_root_alternatives","reason":"Compiler is canonical authority","class":"D"},
+    {"field":"model_private_hidden_states_attention","reason":"no public semantic contract","class":"D"},
+    {"field":"IRIS_V3_log_uncertainty","reason":"promoted Mage lineage does not calibrate it as uncertainty","class":"D"}
+  ],
+  "binding_findings": [
+    "P0_CONFIRMED_OLD_A1_MATERIAL_CONSUMER_INFORMATION_COMPRESSION",
+    "OLD_A1_NOT_EMPTY_PLACEHOLDER__POSITIONS_PARENT_GRAPH_AND_10D_PAIR_GEOMETRY_ARE_REAL",
+    "DO_NOT_REPAIR_BY_MERELY_WIDENING_20D_8D_VECTORS__PRESERVE_TYPED_SET_GRAPH_STRUCTURE",
+    "BOUNDARY_RETENTION_IS_SEPARATE_FROM_NEURAL_FEATURE_ADMISSION",
+    "COMPILER_ROOT_PARENT_TREE_AUTHORITY_MUST_NOT_BE_REOPENED_BY_RICHER_A1_INPUT"
+  ],
+  "next_phase": "NO_TRAINING_QUALIFIED_SKELETON_EVIDENCE_SIDECAR_DESIGN"
+}

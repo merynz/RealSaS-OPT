@@ -1,209 +1,117 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-09-10  
+**Date:** 2026-09-11  
 **Canonical continuation branch:** `main`  
-**Status:** `GEPPETTO_FIT1_FROZEN_PROMOTED__ARACHNE_A0_OPEN_AFTER_C4_FAIL__A1_BLOCKED__FULL_PRODUCT_FIT1_OPEN`
+**Status:** `MAGE_FIT1_RIGGING_CORE_CLOSED__IRIS_GSA_GEPPETTO_ARACHNE_V5_PROMOTED__GENERALIZATION_NOT_CLAIMED__PRODUCT_PASS_OPEN`
 
-This file is continuation authority only on `main`.
+This file is the continuation authority on `main`.
 
-**Subsystem ownership:** `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`  
-**FIT1 semantic lineage:** `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`  
-**FIT1 exact commit lineage:** `canonical/FIT1_COMMIT_LINEAGE_V1.md`  
 **Investor/auditor evidence index:** `canonical/FIT1_EVIDENCE_INDEX_20260909.md`  
-**Most recent promoted scientific closure:** `GEPPETTO_REFERENCE_STRENGTH_FIT1`  
-**Most recent closed scientific gate:** `V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION`  
-**Current scientific module:** `Arachne / SkinFieldCodec A0`  
+**Most recent promoted learned closure:** `ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1`  
+**Most recent promotion commit:** `03d9f87dbb7100a72293915cf682cbf338335a37`  
+**Current scientific module:** `Arachne V5 / generalization preparation`  
 **Active experiment gate:** `NONE`  
-**Research lineage branch:** `exp/arachne-skintokens-cleanroom-fit1-20260908`  
-**C4 closure authority:** `canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md`  
-**C4 evidence manifest:** `canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json`  
-**A0 terminal closure:** `FALSE`  
-**A1 authorization:** `FALSE`  
-**Product PASS:** `NOT EVALUATED / NOT CLAIMED`
+**Next scientific gate when work resumes:** `V5_FAMILY_DISJOINT_UNSEEN_GENERALIZATION_GATE`  
+**Mage FIT1 rigging core:** `CLOSED`  
+**Unseen-family generalization:** `NOT CLAIMED`  
+**Product PASS:** `NOT CLAIMED`
 
 ## One-line state
 
-`IRIS/GSA remains the admitted Mage surface substrate; reference-strength Geppetto is FIT1-frozen and promoted; Arachne/SkinFieldCodec V7 C4 closed as a real scientific FAIL of the tested sampling family; A0 remains open, no experiment is currently active, the required next fork is a separately preregistered within-support blend-ratio/calibration diagnosis, A1 remains blocked, and end-to-end PRODUCT_PASS remains unevaluated.`
+`The real Mage FIT1 rigging core now closes from raster observations through IRIS/GSA, Geppetto + Compiler QualifiedSkeletonIR, and Arachne V5 + Compiler QualifiedSkinIR. Arachne V5 is FIT1-frozen/promoted with GSA p95 0.04237785 and no A0 runtime dependency. Historical A0/A1/diagnostic evidence remains preserved. The next scientific step is family-disjoint unseen/FIT8-LOFO generalization, but no unseen-family or end-to-end PRODUCT_PASS claim is made.`
 
 ## Mandatory rehydration order
 
-1. `canonical/REHYDRATION_PACKET.md` — generated compact navigation/cache;
-2. `canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md` — most recent scientific closure;
-3. `canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json` — exact C4 external evidence bindings;
-4. `canonical/FIT1_EVIDENCE_INDEX_20260909.md` — short proof/evidence chain;
-5. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` — learned/deterministic responsibility boundaries;
-6. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md` — FIT1-to-now scientific flow;
-7. this `CURRENT_STATE.md` — stop/go authority;
-8. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` — exact current mechanism status;
-9. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md` and `canonical/EXPERIMENT_REGISTRY_V2.json` — exact experiment scope/status;
-10. `canonical/FIT1_COMMIT_LINEAGE_V1.md` when exact chronology is needed.
+1. `canonical/REHYDRATION_PACKET.md`
+2. `canonical/FIT1_EVIDENCE_INDEX_20260909.md`
+3. `canonical/MAGE_FIT1_RIGGING_CORE_CLOSURE_20260911.md`
+4. `canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1_PROMOTION_20260911.md`
+5. `canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json`
+6. `models/arachne/v5/PROMOTED_MAGE_FIT_WITNESS_V1.json`
+7. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
+8. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
+9. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
+10. `canonical/EXPERIMENT_REGISTRY_V2.json`
 
-Branch recency never creates authority. `main/CURRENT_STATE.md` plus exact cited prereg/result/closure evidence decide continuation semantics.
+## Product ownership
 
-## Product and ownership — binding
+RealSaS targets an **eight-direction editable 2D/2.5D puppet** compiled from raster artwork. Mechanical 3D/world evidence is an internal representation, not a full-3D product claim.
 
-RealSaS targets an **eight-direction editable 2D/2.5D puppet** compiled from raster artwork. World/camera-space geometry is mechanical evidence, not a full-3D product claim.
+Current learned/deterministic flow:
 
-Canonical flow:
+`8 raster observations + exact cameras -> IRIS learned evidence -> deterministic GSA/RiggingSurfaceIR -> Geppetto SkeletonProposalIR -> Compiler QualifiedSkeletonIR -> Arachne V5 SkinProposalIR -> Compiler QualifiedSkinIR -> appearance/motion/proof/export/runtime`
 
-`8 raster observations + exact cameras -> learned IRIS signed/support/uncertainty evidence -> deterministic GSA/RiggingSurfaceIR -> learned Geppetto skeleton proposal -> Compiler exact skeleton qualification/canonical IDs -> learned SkinFieldCodec/Arachne skin proposal -> Compiler skin/mesh qualification -> appearance/motion -> proof -> PASS-only export/runtime`
+The Compiler remains the only owner of canonical IDs, legal skeleton/tree state, skin/simplex legality, qualification and product truth.
 
-### IRIS envelope
+## Promoted Mage FIT1 stack
 
-`observations/cameras -> learned IRIS evidence -> deterministic GSA compaction/local geometry/provenance -> RiggingSurfaceIR`
+### IRIS / GSA
 
-Historical privileged-input IRIS learned artifacts remain quarantined. The current downstream Mage witness uses the later repaired scene-first signed/GSA chain.
+- IRIS checkpoint SHA-256 `766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2`;
+- signed zero-surface SHA-256 `987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b`;
+- teacher mesh is not an inference input;
+- deterministic GSA owns final `RiggingSurfaceIR` assembly/provenance.
 
-### Geppetto envelope
+### Geppetto / QualifiedSkeletonIR
 
-`lossless RiggingSurfaceIR -> learned control/root/parent/salience/support evidence -> SkeletonProposalIR -> Compiler exact graph qualification -> QualifiedSkeletonIR`
+Current source home: `models/geppetto/reference_strength_v1/`.
 
-Geppetto is proposal, not canonical rig authority. Compiler owns final legal root/parent/tree selection and canonical IDs; it may not hide model failure through geometry-only semantic deduplication, missing-control synthesis, or hidden cardinality repair.
-
-### Arachne envelope
-
-`RiggingSurfaceIR + QualifiedSkeletonIR -> learned skin-field semantics/proposal -> SkinProposalIR -> Compiler skin/reference/simplex/mesh qualification -> QualifiedSkinIR`
-
-Compiler may make bounded legal/numerical projections under learned semantics; it must not become a hidden second skinning model.
-
-### Proof/runtime envelope
-
-Proof measures the exact qualified candidate and does not mutate it. Repair creates a new candidate and requires re-proof. Runtime/export is a projection of proven state, not a second source of truth.
-
-## Geppetto — FIT1 CLOSED AND PROMOTED
-
-Current FIT1-frozen source home:
-
-`models/geppetto/reference_strength_v1/`
-
-Frozen entry point:
-
-`GeppettoReferenceStrengthNoLearnedSlotV1`
-
-Architecture id:
-
-`RealSaS.Geppetto.ReferenceStrength.DirectSurfaceCausalDiffusion.DeterministicViewDirection.v1`
-
-Scientific source/optimizer commit:
-
-`f7be46f0a97df62a793ebf91b22297c894854f39`
-
-Seal commit:
-
-`ae0af0cd39dd2468a012ba21890a4fed2da7c4c9`
-
-Terminal scientific result:
-
-- `FIT1_TERMINAL_PASS`;
+- verdict `FIT1_TERMINAL_PASS`;
 - closure step `14080`;
-- `48/48` consecutive full structural PASS checks;
-- terminal stability span `3072` optimizer steps;
-- qualified mechanical core `22` controls;
-- exactly one qualified deform root;
-- free-running teacher feedback `false`;
-- diffusion evaluation seeds `{11,23,47,89}`.
+- terminal full-structural streak `48/48` checks / `3072` optimizer steps;
+- qualified controls `22`;
+- exactly one deform root;
+- checkpoint SHA-256 `b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30`;
+- QualifiedSkeletonIR SHA-256 `48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992`.
 
-Frozen artifact SHA-256 identities:
+### Arachne V5 / QualifiedSkinIR
 
-- target: `0b5a25c877116de60b710b7bb2a7848f30988e1622e2eda8084cad21c8ca23c9`;
-- qualified skeleton IR: `48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992`;
-- checkpoint: `b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30`;
-- final result JSON: `728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045`.
+Current source home: `models/arachne/v5/`.
 
-Strongest allowed claim: the promoted reference-strength formulation fits and stably maintains the real Mage FIT1 22-control mechanical core from admitted current IRIS/GSA evidence under the preregistered shipping-faithful gate.
+Architecture: `RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5`
 
-Not claimed: unseen-character/family generalization, Arachne closure, or product PASS.
+Shipping FIT1 route:
 
-## Arachne / SkinFieldCodec A0 — CURRENT BOTTLENECK
+`RiggingSurfaceIR + QualifiedSkeletonIR -> exact A1 V4 backbone -> K4×512 Z -> 325,313-param direct row-simplex decoder -> SkinProposalIR -> Compiler QualifiedSkinIR`
 
-**No Arachne model is promoted.** Current campaign scope remains:
+Frozen composite checkpoint:
 
-`Mage A0 FIT1 SkinFieldCodec representation/decode only`.
+- V4 backbone checkpoint SHA-256 `95c441f97b02123de1a5bc83bdf5ad223363c4b97927e8d420a0d246efbc1763`, Drive ID `1HJC4GPMcWa0jEXCYgctUtW09tXn4I9ND`;
+- V5 decoder delta SHA-256 `13344178bf1b3ce96c9356456db0ad2c8a3945182a5ec63617c50137b8c52137`, Drive ID `1_o2XWO5BOSDKGvewJDSGS16jlcMuT9Dx`;
+- total parameters `138,378,466`;
+- A0 continuous-field model loaded at runtime: `false`.
 
-Fixed V7 apparatus:
+FIT1 closure:
 
-- architecture: `RealSaS.Arachne.SkinFieldCodec.v7`;
-- parameter count: `278,010,880`;
-- config hash: `e9d327cedb206e7ae5b074ae04b28e7de89c0e5caecb5f7c183203dbd8336fa1`;
-- no FSQ in the active learning graph;
-- cache SHA-256: `db87c42d65e777072b3a607178a2c7f19ab221a4969c380eac46070db2216edd`;
-- teacher-W SHA-256: `7a09f276efc41f0febc7037900c2e954f7094cb5ae5e6bad70cb04f4507b586d`;
-- 22 joints, 934 supervised rows, 16 low-confidence rows.
+- GSA row-L1 p95 `0.04237784981177733` (`<= 0.05` PASS);
+- deformation ratio `0.019856400787830353` (`<= 0.05` PASS);
+- articulated deformation ratio `0.002780771814286709`;
+- dominant accuracy `0.9957173447537473`;
+- Compiler rows `950/950`;
+- Compiler total correction L1 `2.9468642839168442e-05`;
+- holdout p95 diagnostic `0.15087631421532924`, preregistered safe;
+- teacher predictor firewall `true`.
 
-### C4 CLOSED FAIL
+The final direct-simplex diagnostic showed both H and Z routes pass; Z is retained because it is the minimal decoder-seam intervention. The passing V5 closure reproduces the parent Z diagnostic p95 to ~`1e-7` absolute difference.
 
-Research-branch closure commit:
+## Historical Arachne memory — preserved, not deleted
 
-`d0b666725e79f3beb0ea001f456375421cc14375`
+All prior A0/A1/diagnostic evidence remains valid scoped scientific memory for FIT8/LOFO and future causal debugging, including V7 C3/C4 sampling failures; A0 K4 representation/oracle closure; A1 V4 terminal failure under the frozen A0 decoder; owner-localization/boundary/feature/pair-geometry/support-shaping diagnostics; the 8K direct-simplex historical partial run; and the matched 16K H+Z direct-simplex PASS.
 
-Aggregate result SHA-256:
+Promotion supersedes these paths for **current Mage FIT1 execution** only. It does not erase or relabel their scientific results.
 
-`439583ac60eca855dc2b55efabf5b4a6df4de5f9617e9e35583cf136b4cb55d9`
+## Claim boundary
 
-Terminal primary metrics:
+Strongest current claim:
 
-| Arm | raw p95 | raw deform | dominant accuracy | streak |
-|---|---:|---:|---:|---:|
-| A — importance-corrected active-only | 0.1817569972 | 0.0611890741 | 0.9935760171 | 0 |
-| B — biased active-only | 0.2705708147 | 0.0908120275 | 0.9935760171 | 0 |
-| C — face+bary biased | 1.4804241555 | 0.5461477637 | 0.7655246253 | 0 |
+`RealSaS has a hash-bound, inspectable Mage FIT1 rigging-core chain from raster observations to Compiler-qualified skeleton and skin, with separately promoted IRIS, Geppetto and Arachne V5 learned components.`
 
-All three retained the preregistered legality/numerical guards, including 950 qualified rows, finite/nonnegative outputs, simplex bounds, Compiler correction caps and zero sparsification discarded mass. The failure is therefore **scientific**, not infrastructure.
-
-Causal interpretation:
-
-- A -> B worsened p95 by `+0.0888138175` and deformation by `+0.0296229534`; objective-bias cancellation by importance correction is **not supported as the blocker**.
-- B -> C worsened p95 by `+1.2098533407`, deformation by `+0.4553357363`, and dominant accuracy by `-0.2280513919`; the exact source-face/topology/barycentric dense-supervision port is **not supported for this FIT1 target**.
-- The exact C4 sampling family is rejected. C4 does **not** falsify the earlier blend-boundary localization, every possible topology-aware approach, A1, or product skinning.
-
-Frozen FIT1 limits remain `raw/qualified p95 <= 0.05` and `raw/qualified deformation ratio <= 0.05`; no threshold is widened after seeing the result.
-
-## Required next scientific fork
-
-C4 preregistration binds the next direction because neither B nor C improved over A:
-
-`SEPARATELY_PREREGISTERED_WITHIN_SUPPORT_CALIBRATION_DIAGNOSIS`
-
-This is a **required next diagnostic direction, not an already authorized treatment**. Until a new preregistration exists:
-
-- no A0 optimizer step is authorized;
-- do not automatically add a custom blend-ratio/calibration loss;
-- do not modify the `0.05` FIT1 gate;
-- A0 remains `OPEN`;
-- A1 remains `BLOCKED_NOT_AUTHORIZED`;
-- PRODUCT_PASS remains `NOT EVALUATED`.
-
-## A0 vs A1 — mandatory distinction
-
-A0 teacher/training lane:
-
-`dense teacher W -> codec representation/latent -> shared decoder -> reconstructed W`
-
-A1 shipping learned lane:
-
-`RiggingSurfaceIR S + QualifiedSkeletonIR G -> Arachne latent predictor -> same frozen Codec decoder -> dense W proposal`
-
-Current `models/arachne/v2/` is an older A1 scaffold and is not a current V7-native A1 closure.
-
-Only after an A0 terminal PASS may the sequence become:
-
-`A0 PASS -> freeze actual V7 latent/decode interface -> fresh V7-native A1 capacity/architecture prereg -> A1 FIT1 -> Compiler skin qualification -> separate end-to-end product experiment`.
-
-A0 PASS would not imply A1 PASS. A1 PASS would not automatically create PRODUCT_PASS.
-
-## FIT1 / investor claim boundary
-
-FIT1 is controlled same-witness engineering/science evidence and a financing/demo gate. It is not a generalization benchmark.
-
-Current strongest system-level statement is therefore:
-
-`IRIS/GSA admitted substrate + promoted Geppetto FIT1 skeleton closure exist; learned skinning remains open at A0 after C4 scientifically falsified its exact sampling family.`
+Not claimed: unseen-character/family generalization; FIT8/LOFO success; appearance/motion/editor/runtime end-to-end PRODUCT_PASS; or commercial production readiness from FIT1 alone.
 
 ## Immediate execution order
 
-1. keep promoted Geppetto source/evidence immutable except for explicit contradiction-driven reopening;
-2. use the C4 closure + evidence manifest as the starting authority for Arachne A0;
-3. design and separately preregister the within-support blend-ratio/calibration diagnosis required by C4;
-4. do not start a custom calibration treatment before that diagnostic contract exists;
-5. do not authorize V7-native A1 until A0 actually terminal-passes and the real V7 latent/decode interface is frozen;
-6. reserve PRODUCT_PASS for its own independent end-to-end acceptance contract.
+1. keep the FIT1 promoted source/evidence immutable except through explicit contradiction-driven reopening;
+2. preserve all historical experiment branches/artifacts for generalization and failure-memory;
+3. demo / investor review may use the current four-panel real-artifact witness;
+4. when science resumes, preregister and run `V5_FAMILY_DISJOINT_UNSEEN_GENERALIZATION_GATE` / FIT8-LOFO;
+5. reserve `PRODUCT_PASS` for its own independent end-to-end contract.

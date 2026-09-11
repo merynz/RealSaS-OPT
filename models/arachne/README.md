@@ -1,41 +1,27 @@
 # Arachne
 
-Arachne is the learned skin-proposal subsystem conditioned on admitted surface evidence and a Compiler-qualified skeleton.
+Arachne is the learned skin-proposal subsystem conditioned on admitted `RiggingSurfaceIR` and a Compiler-qualified skeleton.
 
 ## Current mainline
 
-`models/arachne/v2/`
+`models/arachne/v5/`
 
-Byte-preserved current inference source:
+Current route:
 
-- `arachne_candidate_v2.py`
-- `conditioning_v2.py`
-- `conditioning_v1.py` — retained compatibility base used by V2 conditioning;
-- `arachne_geometry_v2.py`
+`RiggingSurfaceIR + QualifiedSkeletonIR -> A1 V4 backbone -> K4×512 Z -> V5 direct row-simplex decoder -> SkinProposalIR -> Compiler -> QualifiedSkinIR`
 
-Dependency bridges keep those files byte-identical while ownership remains explicit:
+Mage FIT1 is closed for this route. The historical A0 continuous-field model is **not** loaded at V5 runtime.
 
-- `skin_field_codec_v1.py` -> canonical current SkinFieldCodec implementation/loss;
-- `geppetto_conditioning_v2.py` -> canonical current Geppetto V2 conditioning contract;
-- `codec_deformation_loss_v1.py` -> canonical Codec deformation-training primitive;
-- `train_codec_r6_a0_v1.py` -> canonical Codec A0 qualification token contract.
+Checkpoint authority:
 
-No duplicate learned Codec or Geppetto implementation is created inside Arachne.
+- `models/arachne/v5/checkpoint_authority_v1.py`
+- `models/arachne/v5/FROZEN_MAGE_FIT1_CHECKPOINT_V1.json`
+- `models/arachne/v5/PROMOTED_MAGE_FIT_WITNESS_V1.json`
 
-## Current A1 training/evaluation
+## Preserved historical/research lineage
 
-The current base A1 lane is now visible beside Arachne:
-
-- `arachne_tail_objective_v1.py` — generic family/semantic-ID agnostic hard-tail row objective used by current base A1 training;
-- `train_arachne_r6_a1_v1.py` — byte-preserved current A1 optimization;
-- `eval_arachne_r6_a1_v1.py` — byte-preserved current A1 evaluation.
-
-`arachne_tail_remediation_v1.py` remains in `experiments/`: it explicitly describes a conditional remediation stage after a frozen A1 p95 failure, whereas the current A1 train step already carries generic hard-tail pressure in its base objective. It is preserved as research/remediation provenance, not silently promoted as a second base training authority.
+`models/arachne/v2/`, V4 source, A0/SkinFieldCodec experiments and all diagnostic branches remain preserved for provenance and FIT8/LOFO failure-memory. They are not deleted, but they are superseded for current Mage FIT1 execution.
 
 ## Authority boundary
 
-Arachne predicts skin-field latents/dense influence proposals and emits `SkinProposalIR`. It does **not** own canonical joint identity, skeleton authority, simplex legality, sparsification, qualified skin, mesh binding, product state or proof.
-
-## Compatibility residue
-
-`conditioning_v1.py` contains both the older Geppetto and Arachne deterministic conditioning adapters because current Arachne V2 still calls the Arachne V1 base adapter before adding V2 pair geometry. The entire file is preserved for behavior stability; a later hygiene refactor may extract only the Arachne base after parity tests.
+Arachne owns learned skin semantics/proposal. It does **not** own canonical skeleton identity, simplex legality, qualified skin, mesh binding, product state or proof. Those remain Compiler-owned.

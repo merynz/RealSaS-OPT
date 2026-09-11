@@ -3,6 +3,7 @@ import json, tempfile, unittest
 from pathlib import Path
 
 from product.living_compile.authoring import save_user_layer
+from product.living_compile.common import LivingCompileError
 from product.living_compile.runtime import runtime_clips, runtime_frame
 from product.living_compile.scene import build_scene
 from product.living_compile.server import LivingCompileApplication
@@ -91,6 +92,20 @@ class LivingCompileV4Tests(unittest.TestCase):
         self.assertEqual(runtime_clips(self.root)['clips'][0]['authority'],'QUALIFICATION_OWNED_MOTION_BAKE')
         f=runtime_frame(self.root,'IDLE',.5)
         self.assertEqual(f['frame']['mesh_vertices_by_id']['V0:BODY'][0],[135.0,130.0])
+    def test_proof_block_keeps_static_scene_visible_but_runtime_withheld(self):
+        proof_path=self.root/'proof/product_proof_bundle_ir.json'
+        proof=json.loads(proof_path.read_text())
+        proof['overall_status']='ABSTAIN'
+        writej(proof_path,proof)
+        s=build_scene(self.root)
+        self.assertFalse(s['proof']['passed'])
+        self.assertTrue(s['puppet']['meshes'])
+        self.assertTrue(s['puppet']['rig']['controls'])
+        r=runtime_clips(self.root)
+        self.assertEqual(r['clips'],[])
+        self.assertFalse(r['preview_available'])
+        self.assertEqual(r['authority'],'RUNTIME_PREVIEW_WITHHELD_UNTIL_CURRENT_PASS_PROOF')
+        with self.assertRaises(LivingCompileError): runtime_frame(self.root,'IDLE',.5)
     def test_authoring_v3_is_sibling_and_validates_topology(self):
         before=(self.root/'puppet/canonical_puppet_graph_v3.json').read_bytes()
         out=save_user_layer(self.root,{'view_id':'V0','rig_topology_edits':[{'operation':'add_bone','bone_id':'user:tip','parent_id':'CHILD','anchor_xy':[250,400]}],'ik_constraints':[{'constraint_id':'IK:0','start_bone_id':'ROOT','end_bone_id':'CHILD','target_bone_id':'user:tip'}],'animation_edits':[{'clip_id':'USER','duration_seconds':1,'tracks':[{'bone_id':'CHILD','keys':[{'time_seconds':0,'rotation_degrees':0,'translation_xy':[0,0],'scale_xy':[1,1],'curve':'linear'},{'time_seconds':1,'rotation_degrees':20,'translation_xy':[0,0],'scale_xy':[1,1],'curve':'cubic'}]}]}]})

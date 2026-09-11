@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 
 from compiler.realsas_compiler_core.bundle_routes import route_for
+from compiler.realsas_compiler_core.directional_binding import assert_directional_binding_for_product
 from compiler.realsas_compiler_core.v4 import require_current_proof_bundle, project_runtime_package_v3
 
 
@@ -34,17 +35,20 @@ def _write_motion_bakes(root: Path, *, product, motion_bakes) -> list[str]:
     return files
 
 
-def export_product_bundle_v1(output_root, *, product, proof_bundle, motion_bakes=()):
-    """Materialize current V4 product + proof-owned preview sidecars.
+def export_product_bundle_v1(output_root, *, product, proof_bundle, directional_binding, motion_bakes=()):
+    """Materialize current V4 product plus exact qualified projection/proof sidecars.
 
-    Authority remains product + fresh PASS proof. Motion bakes are serialized only
-    as exact proof-produced preview/export siblings; no solver is replayed here.
+    Authority remains product + fresh PASS proof. Directional joint/view binding is
+    the exact Compiler-qualified projection consumed by motion proof and editor rig
+    overlay. Motion bakes are serialized only as exact proof-produced siblings; no
+    evaluator or solver is replayed during export.
     """
     require_current_proof_bundle(product, proof_bundle, require_pass=True)
+    assert_directional_binding_for_product(product, directional_binding)
     root = Path(output_root)
     root.mkdir(parents=True, exist_ok=True)
     files = []
-    files.append(_write(root, product)); files.append(_write(root, proof_bundle)); files.append(_write(root, product.mechanical_state)); files.append(_write(root, product.directional_renderables)); files.append(_write(root, product.capability_contract)); files.append(_write(root, product.motion_state))
+    files.append(_write(root, product)); files.append(_write(root, proof_bundle)); files.append(_write(root, product.mechanical_state)); files.append(_write(root, product.directional_renderables)); files.append(_write(root, directional_binding)); files.append(_write(root, product.capability_contract)); files.append(_write(root, product.motion_state))
     direction_count = 0; component_count = 0
     for direction in product.directional_renderables.directions:
         files.append(_write(root, direction)); direction_count += 1
@@ -57,7 +61,22 @@ def export_product_bundle_v1(output_root, *, product, proof_bundle, motion_bakes
     if direction_count != 8: raise ValueError('EXPORT_REQUIRES_EXACT_8_DIRECTIONS')
     motion_bake_files = _write_motion_bakes(root, product=product, motion_bakes=motion_bakes)
     files.extend(motion_bake_files)
-    manifest = {'schema':'RealSaS.ExportBundle.v1','source_product_state_hash':product.product_state_hash,'source_proof_hash':proof_bundle.proof_bundle_hash,'direction_count':direction_count,'component_count':component_count,'motion_bake_files':motion_bake_files,'files':sorted(set(files)),'representation_class':product.representation_class,'full_3d_reconstruction_authority':False,'export_solver_replay_forbidden':True}
+    binding_route = route_for(directional_binding)
+    directional_binding_file = f'{binding_route.section}/{binding_route.filename}'
+    manifest = {
+        'schema':'RealSaS.ExportBundle.v1',
+        'source_product_state_hash':product.product_state_hash,
+        'source_proof_hash':proof_bundle.proof_bundle_hash,
+        'direction_count':direction_count,
+        'component_count':component_count,
+        'directional_binding_file':directional_binding_file,
+        'directional_binding_set_hash':directional_binding.binding_set_hash,
+        'motion_bake_files':motion_bake_files,
+        'files':sorted(set(files)),
+        'representation_class':product.representation_class,
+        'full_3d_reconstruction_authority':False,
+        'export_solver_replay_forbidden':True,
+    }
     runtime = project_runtime_package_v3(product, proof_bundle, manifest=manifest, runtime_payload_ref='bundle_manifest.json')
     files.append(_write(root, runtime)); manifest['runtime_package_file'] = route_for(runtime).section + '/' + route_for(runtime).filename
     manifest['files'] = sorted(set(files))

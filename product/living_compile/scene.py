@@ -4,7 +4,17 @@ import re
 from pathlib import Path
 from typing import Any, Mapping
 
-from .common import Json, LivingCompileError, VIEW_LABELS, load_product, load_proof, surface_raster, view_id, weighted_xy
+from .common import (
+    Json,
+    LivingCompileError,
+    VIEW_LABELS,
+    load_directional_binding,
+    load_product,
+    load_proof,
+    surface_raster,
+    view_id,
+    weighted_xy,
+)
 from .runtime import motion_bakes
 
 
@@ -67,34 +77,40 @@ def _mesh_scene_rows(product: Mapping[str, Any]) -> list[Json]:
     return out
 
 
-def _joint_scene_rows(product: Mapping[str, Any]) -> tuple[list[Json], list[Json]]:
+def _directional_pivot_map(binding: Mapping[str, Any] | None) -> dict[tuple[int, str], list[float]]:
+    if binding is None:
+        return {}
+    return {
+        (int(row.get("view_index", -1)), str(row.get("canonical_joint_id") or "")): [float(row["raster_xy"][0]), float(row["raster_xy"][1])]
+        for row in list(binding.get("joint_pivots") or [])
+    }
+
+
+def _joint_scene_rows(product: Mapping[str, Any], binding: Mapping[str, Any] | None) -> tuple[list[Json], list[Json]]:
     mechanical = product.get("mechanical_state") or {}
     joints = list((mechanical.get("skeleton") or {}).get("joints") or [])
+    if binding is None:
+        return [], []
+    pivots = _directional_pivot_map(binding)
+    binding_hash = str(binding.get("binding_set_hash") or "")
     controls: list[Json] = []
     edges: list[Json] = []
     for view in range(8):
-        raster = surface_raster(product, view)
         for joint in joints:
             jid = str(joint.get("canonical_joint_id") or "")
-            support = list(joint.get("support_surface_ids") or [])
-            points = [raster[sid] for sid in support if sid in raster]
-            if points:
-                anchor = [sum(p[0] for p in points) / len(points), sum(p[1] for p in points) / len(points)]
-            else:
-                surface_nodes = list((mechanical.get("surface") or {}).get("surface_nodes") or [])
-                jpos = tuple(float(x) for x in (joint.get("position") or (0, 0, 0)))
-                candidates = []
-                for node in surface_nodes:
-                    sid = str(node.get("surface_id") or "")
-                    if sid not in raster:
-                        continue
-                    p = tuple(float(x) for x in (node.get("P") or (0, 0, 0)))
-                    candidates.append((sum((a - b) ** 2 for a, b in zip(jpos, p)), raster[sid]))
-                anchor = list(min(candidates, key=lambda x: x[0])[1]) if candidates else [0.0, 0.0]
+            anchor = pivots.get((view, jid))
+            if anchor is None:
+                raise LivingCompileError(f"qualified directional pivot missing: V{view}:{jid}")
             controls.append({
                 "control_id": jid, "view_id": view_id(view), "anchor": anchor,
                 "control_class": "production_skeleton_bone", "participation": "deform", "source_part_id": jid,
-                "metadata": {"production_skeleton_bone": True, "hidden_driver": False, "current_v4": True},
+                "metadata": {
+                    "production_skeleton_bone": True,
+                    "hidden_driver": False,
+                    "current_v4": True,
+                    "anchor_authority": "QUALIFIED_DIRECTIONAL_JOINT_VIEW_BINDING",
+                    "directional_binding_set_hash": binding_hash,
+                },
             })
     for joint in joints:
         parent = joint.get("parent_canonical_id")
@@ -104,22 +120,25 @@ def _joint_scene_rows(product: Mapping[str, Any]) -> tuple[list[Json], list[Json
     return controls, edges
 
 
-def _binding_rows(product: Mapping[str, Any]) -> list[Json]:
+def _binding_rows(product: Mapping[str, Any], binding: Mapping[str, Any] | None) -> list[Json]:
+    if binding is None:
+        return []
     joints = list((((product.get("mechanical_state") or {}).get("skeleton") or {}).get("joints") or []))
+    pivots = _directional_pivot_map(binding)
     out: list[Json] = []
     for view in range(8):
         raster = surface_raster(product, view)
         for joint in joints:
             jid = str(joint.get("canonical_joint_id") or "")
+            anchor = pivots.get((view, jid))
+            if anchor is None:
+                raise LivingCompileError(f"qualified directional pivot missing: V{view}:{jid}")
             support = [str(x) for x in list(joint.get("support_surface_ids") or []) if str(x) in raster]
-            if not support:
-                continue
-            points = [raster[sid] for sid in support]
-            anchor = [sum(p[0] for p in points) / len(points), sum(p[1] for p in points) / len(points)]
             out.append({
-                "binding_id": f"B:V{view}:{jid}", "view_id": view_id(view), "source_part_id": support[0],
+                "binding_id": f"B:V{view}:{jid}", "view_id": view_id(view), "source_part_id": support[0] if support else jid,
                 "primary_final_control_id": jid, "final_control_ids": [jid], "selected_anchor_xy": anchor,
                 "selected_socket_xy": anchor, "selected_pivot_xy": anchor, "selected_terminal_xy": anchor, "confidence01": 1.0,
+                "metadata": {"anchor_authority": "QUALIFIED_DIRECTIONAL_JOINT_VIEW_BINDING", "directional_binding_set_hash": binding.get("binding_set_hash")},
             })
     return out
 
@@ -182,11 +201,13 @@ def _dynamic_proof_summary(proof: Mapping[str, Any]) -> Json:
 def build_scene(root: Path) -> Json:
     product = load_product(root)
     proof = load_proof(root, product)
-    controls, edges = _joint_scene_rows(product)
+    directional_binding = load_directional_binding(root, product, required=False)
+    controls, edges = _joint_scene_rows(product, directional_binding)
     meshes = _mesh_scene_rows(product)
-    bindings = _binding_rows(product)
+    bindings = _binding_rows(product, directional_binding)
     source_rows = _source_rows(root)
     bakes = motion_bakes(root)
+    rig_warning = [] if directional_binding is not None else ["DIRECTIONAL_BINDING_NOT_EXPORTED__RIG_OVERLAY_WITHHELD"]
     clips = [{
         "animation_clip_id": str(clip.get("clip_id") or ""),
         "animation_clip_display_name": str((clip.get("metadata") or {}).get("display_name") or clip.get("clip_id") or "Clip"),
@@ -196,7 +217,12 @@ def build_scene(root: Path) -> Json:
     } for clip in list((product.get("motion_state") or {}).get("clips") or [])]
     index_payload = {
         "schema_version": "RealSaS.LivingCompileIndex.v4", "source_views": source_rows,
-        "artifact_readiness": {"canonical_product": True, "proof": True, "runtime_motion_bake": bool(bakes)},
+        "artifact_readiness": {
+            "canonical_product": True,
+            "proof": True,
+            "directional_joint_binding": directional_binding is not None,
+            "runtime_motion_bake": bool(bakes),
+        },
         "animation_clips": clips,
     }
     model_payload = {"model_id": "CURRENT_V4_MODEL_STACK", "materially_influenced": True}
@@ -204,7 +230,7 @@ def build_scene(root: Path) -> Json:
         "overall_strict_passed": proof.get("overall_status") == "PASS", "passed": proof.get("overall_status") == "PASS",
         "artifact_chain_passed": True, "compiler_flow_passed": True, "product_quality_passed": proof.get("overall_status") == "PASS",
         "blockers": [] if proof.get("overall_status") == "PASS" else [f"PRODUCT_PROOF_{proof.get('overall_status', 'UNKNOWN')}"] ,
-        "warnings": [], "recommended_claim": "CURRENT_V4_PROOF_GATED_PRODUCT", "proof_bundle_hash": proof.get("proof_bundle_hash"),
+        "warnings": rig_warning, "recommended_claim": "CURRENT_V4_PROOF_GATED_PRODUCT", "proof_bundle_hash": proof.get("proof_bundle_hash"),
     }
     return {
         "schema_version": "RealSaS.LivingCompileScene.v4", "bundle_root": str(root),
@@ -217,5 +243,12 @@ def build_scene(root: Path) -> Json:
         "counts": {"views": 8, "meshes": len(meshes), "controls": len(controls) // 8 if controls else 0, "bindings": len(bindings)},
         "weight_counts": {"final_render_meshes": len(meshes), "weighted_final_render_meshes": len(meshes)},
         "weight_heatmap_is_canonical_product_data": bool(meshes),
-        "authority": {"canonical_product_mutated_by_ui": False, "user_edits_are_optional_layer": True, "user_edits_require_dynamic_revalidation": True, "runtime_frames_are_qualification_owned_bakes": True},
+        "authority": {
+            "canonical_product_mutated_by_ui": False,
+            "user_edits_are_optional_layer": True,
+            "user_edits_require_dynamic_revalidation": True,
+            "runtime_frames_are_qualification_owned_bakes": True,
+            "rig_overlay_authority": "QUALIFIED_DIRECTIONAL_JOINT_VIEW_BINDING" if directional_binding is not None else "WITHHELD_MISSING_QUALIFIED_BINDING",
+            "directional_binding_set_hash": (directional_binding or {}).get("binding_set_hash"),
+        },
     }

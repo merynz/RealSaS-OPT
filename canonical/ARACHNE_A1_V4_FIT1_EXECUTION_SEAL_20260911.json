@@ -1,0 +1,25 @@
+{
+  "a1_architecture_config_hash": "738528eb7d94d8c8c69c9caf5838e4cf01341ddad287d5e29a78b735a53d3f96",
+  "a1_loss_config_hash": "1e609f04bafcfaa592c732503e4d3054a614cd6e72dda5c7fad911f34e6efae6",
+  "a1_parameter_count": 138053153,
+  "date": "2026-09-11",
+  "execution_source_commit": "cb2384e8db6f0771feadaff5c00482ba05a789a0",
+  "execution_tree_sha": "0bebb6201fcd6f85aa950d477cdfaf07aa92d057",
+  "frozen_a0_model_sha256": "8a57d296c55298e941402c18d215ea5a1458863df604d3e088f4fb1d2292b5a7",
+  "frozen_a0_supervision_bank_sha256": "b255a75ae9ff42295547c5f023c63d4781ffd042f06c92a74745b9c7c715211a",
+  "main_promoted_state_changed": false,
+  "optimizer_has_run": false,
+  "prereg_path": "canonical/ARACHNE_A1_V4_FIT1_PREREG_20260911.json",
+  "prereg_sha256": "0a8beade2f4d0348edc45b7bf55e893b9b17cf0b2f04bf5c34226d596ace6443",
+  "product_pass_claimed": false,
+  "research_branch": "exp/arachne-a1-v7-native-fit1-20260911",
+  "runner_git_blob_sha": "d0b74499cbcdbec2efcd67df4b97b58e8918c6f7",
+  "runner_path": "experiments/arachne_a1_v4_fit1/run_arachne_a1_v4_fit1_sealed.py",
+  "schema": "RealSaS.ArachneA1V4FIT1.ExecutionSeal.v1",
+  "status": "SEALED__READY_FOR_A100_RUN_ALL",
+  "superseded_execution_files_removed": [
+    "experiments/arachne_a1_v4_fit1/run_arachne_a1_v4_fit1.py",
+    "experiments/arachne_a1_v4_fit1/run_arachne_a1_v4_fit1_fix1.py"
+  ],
+  "unseen_generalization_claimed": false
+}

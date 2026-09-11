@@ -204,12 +204,22 @@ def run_complete_e2e_v1(output_root=None):
     if {bake.clip_id for bake in motion_bakes} != {motion.clips[0].clip_id}:
         raise RuntimeError('SYNTHETIC_E2E_MOTION_BAKE_NOT_CAPTURED')
 
-    runtime, manifest = export_product_bundle_v1(root, product=product, proof_bundle=proof, motion_bakes=motion_bakes)
+    runtime, manifest = export_product_bundle_v1(
+        root,
+        product=product,
+        proof_bundle=proof,
+        directional_binding=directional_binding,
+        motion_bakes=motion_bakes,
+    )
     expected_bake_files = {f'proof/motion_bakes/{bake.clip_id}.json' for bake in motion_bakes}
     if set(manifest.get('motion_bake_files') or ()) != expected_bake_files:
         raise RuntimeError('SYNTHETIC_E2E_EXPORTED_MOTION_BAKE_SET_MISMATCH')
     if not all((root / rel).is_file() for rel in expected_bake_files):
         raise RuntimeError('SYNTHETIC_E2E_EXPORTED_MOTION_BAKE_MISSING')
+    if manifest.get('directional_binding_set_hash') != directional_binding.binding_set_hash:
+        raise RuntimeError('SYNTHETIC_E2E_EXPORTED_DIRECTIONAL_BINDING_MISMATCH')
+    if not (root / str(manifest.get('directional_binding_file') or '')).is_file():
+        raise RuntimeError('SYNTHETIC_E2E_EXPORTED_DIRECTIONAL_BINDING_MISSING')
     consume = consume_product_v4_reference(product, proof, runtime)
 
     native_archive = root / 'native' / 'realsas_runtime.rss'

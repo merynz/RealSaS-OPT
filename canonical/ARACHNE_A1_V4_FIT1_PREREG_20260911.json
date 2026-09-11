@@ -1,0 +1,183 @@
+{
+  "architecture": {
+    "architecture_id": "RealSaS.Arachne.A1.RichQualifiedBidirectional.v4",
+    "attention_heads": 10,
+    "autoregressive": false,
+    "bidirectional_fusion_rounds": 4,
+    "capacity_selection": {
+      "candidate_parameter_counts_approx": [
+        88450000,
+        138053153,
+        198650000
+      ],
+      "claim": "ENGINEERING_DECONFOUNDING_CHOICE__NOT_OPTIMALITY_CLAIM",
+      "selected": 138053153
+    },
+    "config_hash": "738528eb7d94d8c8c69c9caf5838e4cf01341ddad287d5e29a78b735a53d3f96",
+    "decoder_trainable": false,
+    "ffn_ratio": 4,
+    "field_tokens": 4,
+    "fixed_bone_vocabulary": false,
+    "hard_nearest_joint_mask": false,
+    "head_dim": 64,
+    "joint_id_embedding": false,
+    "latent_channels": 512,
+    "model_dim": 640,
+    "parameter_count": 138053153,
+    "skeleton_graph_layers": 4,
+    "surface_graph_layers": 4,
+    "surface_transformer_layers": 6,
+    "token_self_layers": 6
+  },
+  "authority": {
+    "main_promoted_state_changed": false,
+    "product_pass_claimed": false,
+    "research_branch": "exp/arachne-a1-v7-native-fit1-20260911",
+    "source_parent_commit": "b7bfac1e2069d577bc30d866ac90e78d66dd989c",
+    "unseen_generalization_claimed": false,
+    "v3_treatment_status": "SUPERSEDED_BEFORE_ANY_A1_OPTIMIZER_CONSTRUCTION"
+  },
+  "authorization": {
+    "a1_optimizer_authorized": true,
+    "architecture_or_objective_change_requires_new_preregistration": true,
+    "product_pass_authorized": false,
+    "scope": "MAGE_FIT1_ONLY",
+    "unseen_generalization_claim_authorized": false
+  },
+  "created_utc": "2026-09-11T09:40:00Z",
+  "evaluation": {
+    "compiler_qualify_skin_required": true,
+    "disjoint_holdout_role": "DIAGNOSTIC_ONLY__SAME_CHARACTER_DISJOINT_SURFACE__NOT_UNSEEN",
+    "product_evaluation": false,
+    "unseen_evaluation": false
+  },
+  "explicit_deferred_nonbaseline_evidence": {
+    "compiler_structural_confidence": "OWNER_QUALIFIED_SIDECAR_ONLY_IF_FUTURE_ABLATION_JUSTIFIES",
+    "explicit_rigid_attachment_assembly_semantics": "PRODUCT_CAPABILITY_LANE__NOT_A1_FIT1_BLOCKER",
+    "geppetto_position_sigma": "SEMANTICALLY_TRAINED_BUT_CROSS_CHARACTER_CALIBRATION_UNKNOWN__SIDECAR_ABLATION_LATER"
+  },
+  "fit1_gate": {
+    "compiler_row_count_required": 950,
+    "compiler_total_correction_l1_max": 0.0001,
+    "gsa950_articulated_deformation_ratio_max": 0.05,
+    "gsa950_legacy_deformation_ratio_max": 0.05,
+    "gsa950_row_l1_p95_max": 0.05,
+    "minimum_closure_step": 2048,
+    "stable_observations": 3
+  },
+  "frozen_a0": {
+    "condition_tokens": 384,
+    "config_hash": "e9d327cedb206e7ae5b074ae04b28e7de89c0e5caecb5f7c183203dbd8336fa1",
+    "field_tokens": 4,
+    "fp32_full_set_permutation_max_abs_logit_delta": 5.7220458984375e-06,
+    "fp32_permutation_tolerance": 1e-05,
+    "latent_channels": 512,
+    "model_name": "A0_K4_CLOSURE_MODEL_ONLY_FP32.pt",
+    "model_sha256": "8a57d296c55298e941402c18d215ea5a1458863df604d3e088f4fb1d2292b5a7",
+    "ordered_latent_alignment_authorized": false,
+    "supervision_bank_name": "A0_K4_A1_SUPERVISION_BANK.npz",
+    "supervision_bank_sha256": "b255a75ae9ff42295547c5f023c63d4781ffd042f06c92a74745b9c7c715211a"
+  },
+  "mandatory_preflight": {
+    "a0_model_sha_match": true,
+    "articulated_probe_joint_permutation_tolerance": 1e-06,
+    "codec_frame_parity_max_abs": 5e-05,
+    "condition_query_index_exact_match": true,
+    "gsa950_node_count": 950,
+    "gsa_edge_count": 2813,
+    "joint_permutation_equivariance_tolerance": 2e-05,
+    "optimizer_created_only_after_full_preflight_and_step0_evaluation": true,
+    "predictor_input_firewall": true,
+    "qualified_joint_count": 22,
+    "source_and_skeleton_lineage_match": true,
+    "supervision_bank_sha_match": true,
+    "surface_permutation_equivariance_tolerance": 2e-05,
+    "view_camera_binding_permutation_equivariance_tolerance": 2e-05
+  },
+  "objective": {
+    "articulated_deformation_weight": 0.25,
+    "articulated_probe": "DETERMINISTIC_PARENT_RELATIVE_QUALIFIED_TREE_V1",
+    "blend_boundary_weight": 0.5,
+    "hard_tail_cvar10_weight": 0.5,
+    "legacy_translation_probe_role": "CONTINUITY_DIAGNOSTIC_ONLY",
+    "loss_config_hash": "1e609f04bafcfaa592c732503e4d3054a614cd6e72dda5c7fad911f34e6efae6",
+    "loss_id": "RealSaS.Arachne.A1.BehaviorHardTailArticulatedLoss.v4",
+    "normalized_row_l1_weight": 1.0,
+    "ordered_latent_alignment_weight": 0.0,
+    "scalar_bce_weight": 1.0,
+    "scalar_dice_weight": 1.0,
+    "scalar_mse_weight": 0.1
+  },
+  "rich_conditioning": {
+    "baseline_off": [
+      "historical_20d_surface_summary",
+      "historical_8d_joint_summary",
+      "teacher_skin_as_predictor_input",
+      "teacher_a0_latent_as_predictor_input",
+      "hidden_source_mesh_geometry",
+      "source_bone_names_or_ids",
+      "character_or_family_identity",
+      "raw_provenance_hashes_as_neural_features",
+      "raw_rejected_geppetto_parent_root_alternatives",
+      "iris_v3_legacy_log_uncertainty",
+      "geppetto_saturated_salience_probability"
+    ],
+    "baseline_on": [
+      "surface_position",
+      "surface_normal_and_validity",
+      "exact_8view_support",
+      "exact_per_view_raster_xy_and_validity",
+      "camera_bound_yaw_fourier_sidecar",
+      "observed_completed_state",
+      "exact_gsa_graph_and_edge_metadata",
+      "qualified_joint_positions",
+      "exact_qualified_parent_tree_root_deform_root",
+      "exact_sparse_joint_surface_support_anchor_identity",
+      "deterministic_10d_point_joint_parent_segment_geometry"
+    ],
+    "codec_frame_policy": "PREDICTOR_GSA_FRAME__FROZEN_DECODER_GEOMETRY7_DETERMINISTIC_2X_FRAME",
+    "fusion_policy": "DENSE_BIDIRECTIONAL_SURFACE_TO_JOINT_FIELD_AND_JOINT_FIELD_TO_SURFACE",
+    "pair_mask_policy": "EXPLICIT_ATTENTION_LEGALITY",
+    "support_anchor_semantics": "SPARSE_POSITIVE_MECHANICAL_EVIDENCE__NOT_SKIN_MASK",
+    "view_policy": "SHARED_VIEW_ENCODER_PLUS_CAMERA_YAW_BINDING__NO_FLAT_ABSOLUTE_VIEW_SLOT_VECTOR"
+  },
+  "schema": "RealSaS.ArachneA1V7NativeFIT1.v2.Preregistration.v1",
+  "scientific_question": "Can a product-time predictor infer the frozen K=4 A0 skin-field latent set from legal rich RiggingSurfaceIR plus Compiler-qualified skeleton evidence on the Mage FIT1 witness, while closing known conditioning, capacity, joint-competition, hard-tail and deformation-consequence gaps before unseen testing?",
+  "source_blobs": {
+    "compiler/realsas_compiler_core/skin.py": "7d3379df9d13338d8f560588c0f04aed47ec36d7",
+    "compiler/realsas_compiler_core/substrate/scene_first_signed.py": "a55e431faf0680e0d7f2920a85fda6341d45117d",
+    "experiments/arachne_a1_v4_fit1/run_arachne_a1_v4_fit1_sealed.py": "d0b74499cbcdbec2efcd67df4b97b58e8918c6f7",
+    "experiments/arachne_a1_v4_fit1/runtime_support_v4.py": "97c6669b7ab300c43a16a96582cf83a2e2f3f348",
+    "models/arachne/v2/arachne_geometry_v2.py": "0a39450b69de48da3b7748cb08972d0b69ff9700",
+    "models/arachne/v3/conditioning_v3.py": "8916db43ca3d33787745aaa62fbd85047f918799",
+    "models/arachne/v4/arachne_candidate_v4.py": "c42b5929d0b253e2f5e954e40d231be0ad9812ff",
+    "models/arachne/v4/articulated_probe_v1.py": "4fa8f38bb686fee80e5609402b85814edc2e5183",
+    "models/arachne/v4/loss_v4.py": "7b57eb28f9cbcba14a4982655595c452e62918bf",
+    "models/arachne/v4/proposal_v4.py": "96f90686a054a7a2164153a94d0188a9e280a013",
+    "models/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py": "647fdcb98c305c3f7d3afd05dd61449999721034",
+    "models/skin_field_codec/v7/skin_field_codec_v7.py": "be85ce3b16c7114fca5dfa39e4ed2f4ae2dda921",
+    "tests/models/test_arachne_a1_v4_contract.py": "b5e515de4b87d4b4c021aaffa69b07db41af0537"
+  },
+  "status": "AUTHORIZED",
+  "teacher_boundary": "OBJECTIVE_AND_EVALUATION_ONLY__NEVER_PREDICTOR_INPUT",
+  "training": {
+    "a100_required": true,
+    "check_every_steps": 256,
+    "frozen_codec": true,
+    "grad_clip_norm": 1.0,
+    "lr": 5e-05,
+    "lr_schedule": "COSINE_TO_0.1_FLOOR",
+    "max_steps": 12288,
+    "min_closure_step": 2048,
+    "mixed_precision": "BF16_FORWARD__FP32_MASTER_WEIGHTS_AND_LOSS",
+    "optimizer": "AdamW",
+    "optimizer_checkpoint_persisted": false,
+    "rolling_best_predictor_model_only": true,
+    "train_rows_per_step": {
+      "dense8k_product_surface": 192,
+      "gsa950_supervised": 192
+    },
+    "warmup_steps": 512,
+    "weight_decay": 0.0001
+  }
+}

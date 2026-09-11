@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "repository": "merynz/RealSaS-OPT",
   "continuation_authority": "CURRENT_STATE.md",
   "context_state": "canonical/CONTEXT_STATE_V1.json",
@@ -10,6 +10,7 @@
   "generated_coverage_audit": "canonical/CONTEXT_COVERAGE_AUDIT.md",
   "investor_evidence_index": "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
   "geppetto_fit1_evidence_manifest": "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
+  "arachne_v5_fit1_evidence_manifest": "canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json",
   "historical_registry": "canonical/EXPERIMENT_REGISTRY_V1.json",
   "historical_journal": "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
   "human_ledgers": [
@@ -19,151 +20,76 @@
   ],
   "execution_authority": {
     "actions_runner_mode": "SELF_HOSTED_LOCAL_ONLY",
-    "required_labels": ["self-hosted", "linux", "x64", "realsas"],
+    "required_labels": ["self-hosted","linux","x64","realsas"],
     "known_runner_name": "realsas-wsl-1660ti",
     "operator_path_hint": "~/actions-runner",
-    "migration_reason": "Routine GitHub-hosted Actions previously generated excessive workflow usage and triggered a quota/usage warning email; the user explicitly reaffirmed on 2026-09-09 that this transaction must use the local self-hosted runner only.",
-    "workflow_budget_policy": "Do not fan out authority-map or routine science workflows across every experimental branch push. Prefer main authority changes, explicit manual dispatch, or already-required self-hosted scientific jobs.",
-    "rule": "Any Actions execution used for current RealSaS science/mainline authority must run on the user's local self-hosted RealSaS runner. GitHub-hosted runners are not permitted for this transaction."
+    "workflow_budget_policy": "Do not fan out routine authority/science workflows across experimental branches; use main/manual/self-hosted only.",
+    "rule": "Any Actions execution used for current RealSaS science/mainline authority must run on the local self-hosted RealSaS runner."
   },
   "branch_policy": {
     "canonical_branch": "main",
     "default_non_main_class": "EVIDENCE_ONLY_UNREGISTERED",
-    "delete_candidate_regex": [
-      "^(do-not-use|dummy-unused|ignore-this)$",
-      ".*(scratch|debugtmp|audit-temp|noop|mistake).*"
-    ],
+    "delete_candidate_regex": ["^(do-not-use|dummy-unused|ignore-this)$", ".*(scratch|debugtmp|audit-temp|noop|mistake).*"],
     "classes": {
       "CANONICAL": "Only branch allowed to carry continuation authority.",
-      "ACTIVE_EXPERIMENT": "Explicitly registered live experiment branch. Never continuation authority by itself.",
+      "ACTIVE_EXPERIMENT": "Explicitly registered live experiment branch.",
       "EVIDENCE_ONLY": "Explicit historical/research lineage retained for provenance.",
-      "EVIDENCE_ONLY_UNREGISTERED": "Observed non-main branch with no active registration. Safe default: never continuation authority.",
-      "DELETE_CANDIDATE": "Looks disposable by explicit naming rule. Do not delete automatically; review provenance first."
+      "EVIDENCE_ONLY_UNREGISTERED": "Observed non-main branch with no active registration; never continuation authority by itself.",
+      "DELETE_CANDIDATE": "Advisory only; never delete automatically."
     }
   },
   "active_experiments": [],
   "recent_closed_experiments": [
     {
-      "id": "V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION",
-      "branch": "exp/arachne-skintokens-cleanroom-fit1-20260908",
-      "status": "CLOSED_FAIL__NO_A0_TERMINAL_CLOSURE",
-      "closed_date": "2026-09-10",
-      "categorical_verdict": "CLOSED_FAIL__REJECT_THIS_SAMPLING_FAMILY__DO_NOT_AUTO_STACK_CUSTOM_BLEND_RATIO_LOSS",
-      "result_authority": "canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md",
-      "evidence_manifest": "canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json",
-      "branch_closure_commit": "d0b666725e79f3beb0ea001f456375421cc14375",
-      "aggregate_result_sha256": "439583ac60eca855dc2b55efabf5b4a6df4de5f9617e9e35583cf136b4cb55d9",
-      "what_it_means": "The exact A0 C4 objective-bias and source-face/barycentric interventions failed the frozen A0 gate; B was worse than A and C was much worse than B with ownership degradation.",
-      "what_it_does_not_mean": [
-        "blend-boundary localization is false",
-        "all topology-aware methods are impossible",
-        "A1 learned inference was executed or failed",
-        "unseen-character/family generalization",
-        "PRODUCT_PASS or product failure"
-      ]
+      "id": "ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1",
+      "status": "CLOSED_PASS__PROMOTED_FIT1_FROZEN",
+      "closed_date": "2026-09-11",
+      "categorical_verdict": "PASS__MINIMAL_K4_Z_DIRECT_SIMPLEX_V5_FIT1_CLOSURE",
+      "result_authority": "canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json",
+      "promotion_authority": "canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1_PROMOTION_20260911.md",
+      "promotion_commit": "03d9f87dbb7100a72293915cf682cbf338335a37",
+      "what_it_means": "Mage FIT1 learned skin proposal + Compiler qualification closes with V5 minimal K4 direct simplex.",
+      "what_it_does_not_mean": ["unseen-family generalization","FIT8/LOFO success","full PRODUCT_PASS"]
     },
     {
       "id": "GEPPETTO_REFERENCE_STRENGTH_FIT1",
-      "branch": "seal/geppetto-reference-strength-fit1-20260908",
       "status": "CLOSED_PASS__PROMOTED_FIT1_FROZEN",
       "closed_date": "2026-09-08",
       "categorical_verdict": "FIT1_TERMINAL_PASS",
-      "result_authority": "canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md",
-      "promotion_authority": "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
-      "evidence_manifest": "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
-      "source_commit": "f7be46f0a97df62a793ebf91b22297c894854f39",
-      "seal_commit": "ae0af0cd39dd2468a012ba21890a4fed2da7c4c9",
-      "what_it_means": "The separately preregistered reference-strength Geppetto formulation reached the Mage FIT1 terminal structural-stability gate and was subsequently promoted as the FIT1-frozen Geppetto source.",
-      "what_it_does_not_mean": [
-        "unseen-character or unseen-family generalization",
-        "Arachne/SkinFieldCodec closure",
-        "end-to-end PRODUCT_PASS"
-      ]
+      "result_authority": "canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md"
     },
     {
-      "id": "V7_C3_SKINTOKENS_BOUNDARY_AWARE_DENSE_SAMPLING",
-      "branch": "exp/arachne-skintokens-cleanroom-fit1-20260908",
-      "status": "CLOSED_FAIL__NO_A0_TERMINAL_CLOSURE",
-      "closed_date": "2026-09-09",
-      "categorical_verdict": "C3_POINT_CLOUD_IMPORTANCE_CORRECTED_REMEDY_FALSIFIED",
-      "result_authority": "combined result SHA-256 5fe9c350e2f09a1fd858d86d39c965c9c429321c76851994379a0466d925eaa0",
-      "what_it_means": "The point-cloud support/near-support sampler under u/q-corrected reconstruction did not beat matched control and did not close A0.",
-      "what_it_does_not_mean": [
-        "boundary localization is false",
-        "source-faithful SkinTokens face+barycentric supervision has been falsified outside the exact C4 test",
-        "A1 was executed"
-      ]
-    },
-    {
-      "id": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
-      "branch": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
-      "status": "CLOSED_FAIL__NO_TERMINAL_CLOSURE",
-      "closed_utc": "2026-09-07T06:00:52.301304+00:00",
-      "categorical_verdict": "AR01_NO_TERMINAL_CLOSURE",
-      "result_authority": "canonical/AR01_RESULT_20260907.md",
-      "what_it_means": "Neither matched minimal-feedback arm satisfied the preregistered terminal 48-check structural-stability gate.",
-      "what_it_does_not_mean": [
-        "the later reference-strength formulation failed",
-        "all skeleton-causal autoregression is harmful",
-        "generalization verdict"
-      ]
+      "id": "V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION",
+      "status": "CLOSED_FAIL__HISTORICAL_EVIDENCE",
+      "closed_date": "2026-09-10",
+      "categorical_verdict": "CLOSED_FAIL__REJECT_THIS_SAMPLING_FAMILY__DO_NOT_AUTO_STACK_CUSTOM_BLEND_RATIO_LOSS",
+      "result_authority": "canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md"
     }
   ],
   "next_decision": {
-    "status": "ARACHNE_A0_WITHIN_SUPPORT_CALIBRATION_DIAGNOSIS_REQUIRED__NO_ACTIVE_EXPERIMENT__A1_BLOCKED",
-    "module": "Arachne/SkinFieldCodec A0",
-    "purpose": "C4 closed FAIL and rejected the tested sampling family. The next scientific action is to design and separately preregister a within-true-support blend-ratio/calibration diagnosis while preserving the existing 0.05 FIT1 gates. No optimizer step is authorized until that preregistration exists.",
-    "must_read": [
-      "canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md",
-      "canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json",
-      "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
-      "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
-      "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
-      "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
-      "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
-      "canonical/EXPERIMENT_REGISTRY_V2.json"
-    ]
+    "status": "MAGE_FIT1_RIGGING_CORE_CLOSED__DEMO_PAUSE__NEXT_GATE_NOT_ACTIVE",
+    "module": "Arachne V5 generalization",
+    "purpose": "When science resumes, separately preregister family-disjoint unseen/FIT8-LOFO evaluation."
   },
   "branch_overrides": [
-    {
-      "branch": "exp/arachne-skintokens-cleanroom-fit1-20260908",
-      "class": "EVIDENCE_ONLY",
-      "reason": "Arachne A0 V7 C2-C4 scientific lineage; C4 closed FAIL at d0b666725e79f3beb0ea001f456375421cc14375 and no new active experiment is currently registered."
-    },
-    {
-      "branch": "seal/geppetto-reference-strength-fit1-20260908",
-      "class": "EVIDENCE_ONLY",
-      "reason": "Sealed Geppetto FIT1 scientific source/result lineage; promoted source now lives on main."
-    },
-    {
-      "branch": "exp/geppetto-reference-strength-fullstack-v1-20260907",
-      "class": "EVIDENCE_ONLY",
-      "reason": "Frozen optimizer/source lineage for the promoted reference-strength Geppetto formulation."
-    },
-    {
-      "branch": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
-      "class": "EVIDENCE_ONLY",
-      "reason": "AR-01 closed with verdict AR01_NO_TERMINAL_CLOSURE; retain exact scoped evidence."
-    },
-    {
-      "branch": "exp/lossless-rigging-evidence-v1-20260906",
-      "class": "EVIDENCE_ONLY",
-      "reason": "Lossless RiggingSurfaceIR / V3 evidence lineage; no longer active continuation experiment."
-    },
-    {
-      "branch": "demo/investor-single-specimen-e2e",
-      "class": "EVIDENCE_ONLY",
-      "reason": "Demo lineage only; never scientific continuation authority."
-    }
+    {"branch":"exp/arachne-skintokens-cleanroom-fit1-20260908","class":"EVIDENCE_ONLY","reason":"A0 historical scientific lineage; retained for FIT8/LOFO failure-memory."},
+    {"branch":"seal/geppetto-reference-strength-fit1-20260908","class":"EVIDENCE_ONLY","reason":"Sealed Geppetto FIT1 source/result lineage; promoted source lives on main."},
+    {"branch":"exp/geppetto-reference-strength-fullstack-v1-20260907","class":"EVIDENCE_ONLY","reason":"Frozen optimizer/source lineage for promoted Geppetto formulation."},
+    {"branch":"exp/geppetto-ar01-skeleton-causal-v1-20260907","class":"EVIDENCE_ONLY","reason":"AR-01 closed failure retained as scoped evidence."},
+    {"branch":"exp/lossless-rigging-evidence-v1-20260906","class":"EVIDENCE_ONLY","reason":"Lossless RiggingSurfaceIR evidence lineage."},
+    {"branch":"demo/investor-single-specimen-e2e","class":"EVIDENCE_ONLY","reason":"Demo lineage only; never continuation authority."}
   ],
   "required_files": [
     "CURRENT_STATE.md",
     "canonical/CONTEXT_STATE_V1.json",
-    "canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md",
-    "canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json",
     "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
+    "canonical/MAGE_FIT1_RIGGING_CORE_CLOSURE_20260911.md",
+    "canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json",
+    "canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1_PROMOTION_20260911.md",
+    "models/arachne/v5/FROZEN_MAGE_FIT1_CHECKPOINT_V1.json",
+    "models/arachne/v5/checkpoint_authority_v1.py",
     "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
-    "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
+    "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
     "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_REGISTRY_V2.json",
@@ -172,12 +98,11 @@
   ],
   "rehydration_order": [
     "canonical/REHYDRATION_PACKET.md",
-    "canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md",
-    "canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json",
-    "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
-    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
-    "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
     "CURRENT_STATE.md",
+    "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
+    "canonical/MAGE_FIT1_RIGGING_CORE_CLOSURE_20260911.md",
+    "canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json",
+    "models/arachne/v5/FROZEN_MAGE_FIT1_CHECKPOINT_V1.json",
     "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
     "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
     "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
@@ -187,15 +112,12 @@
   ],
   "invariants": [
     "Only main/CURRENT_STATE.md is continuation authority.",
-    "A branch is never active merely because it exists or has a recent commit.",
-    "A scientific PASS never promotes itself; promotion/refreeze is a separate transaction.",
-    "A scientific FAIL must remain a valid terminal scientific result and must not be recast as infrastructure failure.",
-    "Geppetto FIT1 PASS is not generalization, Arachne closure, or PRODUCT_PASS.",
-    "No Arachne model is promoted until its own gate and promotion transaction close.",
-    "A0 SkinFieldCodec representation/decode closure is distinct from A1 product-time latent inference.",
-    "Source existence is not experimental evidence; component evidence is not a full-formulation verdict.",
-    "Repository prereg/result/hash authority outranks detached chat/generated drafts when they disagree.",
-    "Scientific/mainline Actions for this transaction run only on the local self-hosted RealSaS runner.",
-    "Promotion requires source + tests + evidence/result + CURRENT_STATE + provenance/supersession reconciliation."
+    "Scientific PASS never promotes itself; promotion/refreeze is a separate transaction.",
+    "FIT1 success is not unseen-family generalization.",
+    "Historical scientific failures remain valid evidence and are not deleted by later promotion.",
+    "Compiler qualification cannot silently replace missing learned semantics.",
+    "A0 representation/oracle evidence is distinct from the V5 shipping decoder interface.",
+    "PRODUCT_PASS remains an independent contract.",
+    "Scientific/mainline Actions run only on the local self-hosted RealSaS runner."
   ]
 }

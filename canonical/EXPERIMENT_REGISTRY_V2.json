@@ -1,158 +1,104 @@
 {
   "schema_version": 2,
-  "supersedes_for_current_navigation": "canonical/EXPERIMENT_REGISTRY_V1.json",
-  "preservation_rule": "V1 remains historical detail/provenance. V2 is the compact current registry after the 2026-09-10 Arachne A0 C4 closure reconciliation.",
   "continuation_authority": "CURRENT_STATE.md",
+  "preservation_rule": "Historical registry/journal/branches remain provenance. Promotion supersedes continuation role but never deletes scientific evidence.",
   "records": [
-    {
-      "id": "GEPPETTO_CAUSAL_REPAIR_V2_R2_C1",
-      "module": "Geppetto",
-      "witness": "Mage FIT1",
-      "status": "CLOSED_PASS_COMPONENT_EVIDENCE",
-      "date": "2026-09-06",
-      "question": "Does per-step full-surface cross-attention rescue the frozen corrected-raster Geppetto protocol?",
-      "outcome": "R2 stable FAIL; C1 stable PASS; preregistered staircase stopped before C2.",
-      "can_claim": ["full-surface cross-attention causally rescued this frozen protocol"],
-      "cannot_claim": ["old C2 diffusion outcome", "full reference-strength formulation outcome", "generalization"],
-      "pointers": ["canonical/GEPPETTO_RIGANYTHING_LINEAGE_V1.md", "contract:233ec3bcd77e0f02"]
-    },
-    {
-      "id": "AR-01_SKELETON_CAUSAL_AUTOREGRESSION_CLOSURE",
-      "module": "Geppetto",
-      "witness": "Mage FIT1",
-      "status": "CLOSED_FAIL",
-      "closed_at_utc": "2026-09-07T06:00:52.301304Z",
-      "verdict": "AR01_NO_TERMINAL_CLOSURE",
-      "question": "Does the exact minimal joint+parent recurrent feedback intervention close the terminal structural-stability gate?",
-      "outcome": "Both matched arms failed terminal 48-check closure; AR0 retained strong same-witness reachability and AR1 showed severe teacher/free divergence.",
-      "can_claim": ["exact AR-01 implementation is not promotable", "AR1 teacher/free exposure failure exists in that implementation"],
-      "cannot_claim": ["all structural autoregression fails", "later reference-strength Geppetto fails", "generalization"],
-      "pointers": ["canonical/AR01_RESULT_20260907.md", "contract:41055bd073538d6b"]
-    },
     {
       "id": "GEPPETTO_REFERENCE_STRENGTH_FIT1",
       "module": "Geppetto",
       "witness": "Mage FIT1",
       "status": "CLOSED_PASS_PROMOTED_FIT1_FROZEN",
-      "date": "2026-09-08",
-      "question": "Can the separately preregistered reference-strength Geppetto infer and stably maintain the Mage mechanical core from current admitted IRIS/GSA evidence under shipping-faithful free-running generation?",
       "verdict": "FIT1_TERMINAL_PASS",
-      "source_commit": "f7be46f0a97df62a793ebf91b22297c894854f39",
-      "seal_commit": "ae0af0cd39dd2468a012ba21890a4fed2da7c4c9",
-      "closure_step": 14080,
-      "terminal_streak_checks": 48,
-      "terminal_stability_optimizer_steps": 3072,
-      "qualified_control_count": 22,
-      "qualified_deform_root_count": 1,
-      "teacher_feedback_free_run": false,
       "checkpoint_sha256": "b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30",
       "qualified_skeleton_ir_sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992",
-      "result_json_sha256": "728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045",
-      "can_claim": ["reference-strength formulation closed the controlled Mage FIT1 terminal gate", "source was separately promoted to models/geppetto/reference_strength_v1/"],
-      "cannot_claim": ["unseen-character/family generalization", "Arachne closure", "PRODUCT_PASS"],
-      "pointers": ["canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md", "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md", "models/geppetto/reference_strength_v1/"]
-    },
-    {
-      "id": "ARACHNE_V7_C2_BLEND_BOUNDARY_LOCALIZATION",
-      "module": "Arachne/SkinFieldCodec A0",
-      "witness": "Mage FIT1",
-      "status": "CLOSED_COMPONENT_EVIDENCE",
-      "date": "2026-09-09",
-      "question": "Where does the residual V7 skin-field error concentrate?",
-      "outcome": "Weak-true versus nearby-false support ordering at blend boundaries is strongly implicated.",
-      "can_claim": ["blend-boundary support ordering is a strong diagnosis"],
-      "cannot_claim": ["a particular sampling or custom loss remedy is required"],
-      "pointers": ["exp/arachne-skintokens-cleanroom-fit1-20260908:experiments/arachne_skintokens_fit1_20260908/V7_C2_BLEND_BOUNDARY_LOCALIZATION_RESULT_20260909.md"]
-    },
-    {
-      "id": "V7_C3_SKINTOKENS_BOUNDARY_AWARE_DENSE_SAMPLING",
-      "module": "Arachne/SkinFieldCodec A0",
-      "witness": "Mage FIT1",
-      "status": "CLOSED_FAIL",
-      "date": "2026-09-09",
-      "question": "Does a point-cloud support/near-support dense sampler help when BCE/MSE are exactly importance-corrected back to the uniform row objective?",
-      "verdict": "C3_POINT_CLOUD_IMPORTANCE_CORRECTED_REMEDY_FALSIFIED",
-      "control_raw_p95": 0.18175699718563249,
-      "treatment_raw_p95": 0.19077774486726193,
-      "control_deformation_ratio": 0.06118907406926155,
-      "treatment_deformation_ratio": 0.06876000761985779,
-      "combined_result_sha256": "5fe9c350e2f09a1fd858d86d39c965c9c429321c76851994379a0466d925eaa0",
-      "can_claim": ["that exact C3 point-cloud/u-q remedy did not close A0 and did not beat matched control"],
-      "cannot_claim": ["boundary localization is false", "real face/barycentric supervision is false", "A1 was tested"],
-      "pointers": ["exp/arachne-skintokens-cleanroom-fit1-20260908:experiments/arachne_skintokens_fit1_20260908/V7_C3_SKINTOKENS_BOUNDARY_AWARE_DENSE_SAMPLING_PREREG_20260909.md", "source_blob:38541137776ae3a997e4e67b175699ac6e2fb881"]
+      "generalization_claim": false
     },
     {
       "id": "V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION",
       "module": "Arachne/SkinFieldCodec A0",
       "witness": "Mage FIT1",
       "status": "CLOSED_FAIL",
-      "date": "2026-09-10",
-      "branch": "exp/arachne-skintokens-cleanroom-fit1-20260908",
-      "question": "Is the remaining V7 A0 tail caused by cancellation of deliberate active-heavy objective bias and/or by missing real-face triangle-interior barycentric dense supervision?",
       "verdict": "CLOSED_FAIL__REJECT_THIS_SAMPLING_FAMILY__DO_NOT_AUTO_STACK_CUSTOM_BLEND_RATIO_LOSS",
-      "arms": ["A C4_REFERENCE_IMPORTANCE_ACTIVE_ONLY", "B C4_BIASED_ACTIVE_ONLY", "C C4_SKINTOKENS_FACE_BARY_BIASED"],
-      "preregister_commit": "372cb2dd510183800460b496a7ecfbeb1204369f",
-      "prereg_blob": "4ada6333afa1dcfe40d08eac286a88d3acc158ad",
-      "source_contract_commit": "cb1bea3d457fffd46f9eb69733ae9b66d6d13f22",
-      "source_contract_blob": "cf4401f6ef3d91a32c6615b3325d9d9fbe67813b",
-      "branch_closure_commit": "d0b666725e79f3beb0ea001f456375421cc14375",
-      "aggregate_result_sha256": "439583ac60eca855dc2b55efabf5b4a6df4de5f9617e9e35583cf136b4cb55d9",
-      "terminal": {
-        "A": {"raw_p95": 0.18175699718563249, "raw_deform": 0.06118907406926155, "dominant_accuracy": 0.9935760171306209, "streak": 0},
-        "B": {"raw_p95": 0.270570814735124, "raw_deform": 0.09081202745437622, "dominant_accuracy": 0.9935760171306209, "streak": 0},
-        "C": {"raw_p95": 1.4804241554775757, "raw_deform": 0.5461477637290955, "dominant_accuracy": 0.765524625267666, "streak": 0}
-      },
-      "causal_deltas": {
-        "B_minus_A": {"raw_p95": 0.08881381754949152, "raw_deform": 0.02962295338511467},
-        "C_minus_B": {"raw_p95": 1.2098533407424517, "raw_deform": 0.45533573627471924, "dominant_accuracy": -0.22805139186295498}
-      },
-      "a0_terminal_pass": false,
-      "a1_authorized": false,
-      "product_evaluation_performed": false,
-      "can_claim": [
-        "the exact B objective-bias intervention did not improve over A",
-        "the exact C face/topology/barycentric intervention did not improve over B and degraded ownership",
-        "none of A/B/C closed the frozen A0 Codec FIT1 gate"
-      ],
-      "cannot_claim": [
-        "blend-boundary localization is false",
-        "all topology-aware supervision is impossible",
-        "A1 learned inference was tested or failed",
-        "unseen-character/family generalization",
-        "PRODUCT_PASS or product failure"
-      ],
-      "pointers": [
-        "canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md",
-        "canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json",
-        "exp/arachne-skintokens-cleanroom-fit1-20260908@d0b666725e79f3beb0ea001f456375421cc14375"
-      ]
+      "aggregate_result_sha256": "439583ac60eca855dc2b55efabf5b4a6df4de5f9617e9e35583cf136b4cb55d9"
     },
     {
-      "id": "ARACHNE_V7_WITHIN_SUPPORT_CALIBRATION_DIAGNOSIS",
+      "id": "ARACHNE_A0_K4_REPRESENTATION_CLOSURE",
       "module": "Arachne/SkinFieldCodec A0",
       "witness": "Mage FIT1",
-      "status": "OPEN_NOT_PREREGISTERED",
-      "question": "After C4 rejected the tested sampling family, what within-true-support blend-ratio/calibration failure remains and which minimal intervention should be preregistered next?",
-      "dependency": "C4 closed FAIL. A new preregistration must preserve the existing 0.05 FIT1 gates and must not automatically stack a custom blend-ratio loss.",
-      "can_claim": ["this is the required next diagnostic fork from the C4 preregistration"],
-      "cannot_claim": ["a custom calibration loss is already authorized", "A0 is closed", "A1 is authorized"]
+      "status": "CLOSED_PASS_RESEARCH_ORACLE",
+      "gsa_p95": 0.04491063521144626,
+      "deformation_ratio": 0.018186409026384354,
+      "a0_model_sha256": "8a57d296c55298e941402c18d215ea5a1458863df604d3e088f4fb1d2292b5a7",
+      "claim": "K4 representation capacity is sufficient on Mage; does not choose the shipping A1 decoder interface."
     },
     {
-      "id": "ARACHNE_V7_NATIVE_A1",
+      "id": "ARACHNE_A1_V4_FIT1",
       "module": "Arachne A1",
       "witness": "Mage FIT1",
-      "status": "BLOCKED_NOT_AUTHORIZED",
-      "question": "Can product-time S+Qualified G predict the frozen V7 codec latent/decode state without teacher W?",
-      "dependency": "A0 must close first and the actual V7 latent/decode interface must be frozen before A1 architecture/capacity preregistration.",
-      "cannot_claim": ["models/arachne/v2 is already the current V7-native A1", "A1 training is authorized"]
+      "status": "CLOSED_FAIL",
+      "gsa_p95": 0.10080480042132646,
+      "deformation_ratio": 0.041447557508945465,
+      "checkpoint_sha256": "95c441f97b02123de1a5bc83bdf5ad223363c4b97927e8d420a0d246efbc1763",
+      "interpretation": "Frozen A0-decoder route failed; later direct-readout evidence shows this is not equivalent to K4/backbone information insufficiency."
     },
     {
-      "id": "REALSaS_PRODUCT_ACCEPTANCE_AFTER_LEARNED_SKINNING",
-      "module": "Product proof",
-      "status": "BLOCKED_NOT_AUTHORIZED",
-      "question": "Does the independently contracted end-to-end product candidate pass product acceptance?",
-      "dependency": "A1 learned skinning and deterministic qualification must close first.",
-      "cannot_claim": ["any FIT1 model-science PASS automatically yields PRODUCT_PASS"]
+      "id": "ARACHNE_SUPPORT_SHAPING_CAUSAL_PROBE_V1",
+      "module": "Arachne diagnostics",
+      "witness": "Mage FIT1",
+      "status": "CLOSED_DIAGNOSTIC",
+      "teacher_true_support_oracle_p95": 0.073687826,
+      "verdict": "TRUE_SUPPORT_ORACLE_FAIL__SUPPORT_LEAKAGE_NOT_SUFFICIENT__DIRECT_NXJ_SIMPLEX_BYPASS_NEXT"
+    },
+    {
+      "id": "ARACHNE_DIRECT_NXJ_SIMPLEX_V1_8K",
+      "module": "Arachne diagnostics",
+      "witness": "Mage FIT1",
+      "status": "CLOSED_HISTORICAL_PARTIAL_HORIZON_LIMITED",
+      "z_best_p95": 0.07137099339430111,
+      "h_best_p95": 0.06635279535420167,
+      "verdict": "DIRECT_SIMPLEX_PARTIAL_RESCUE__FROZEN_REPRESENTATION_NOT_SUFFICIENT_FOR_GATE_AT_8K_HORIZON"
+    },
+    {
+      "id": "ARACHNE_DIRECT_NXJ_SIMPLEX_V2_16K",
+      "module": "Arachne diagnostics",
+      "witness": "Mage FIT1",
+      "status": "CLOSED_PASS_COMPONENT_EVIDENCE",
+      "verdict": "BOTH_DIRECT_SIMPLEX_PASS__PREFER_MINIMAL_Z_DECODER_SEAM",
+      "z_p95": 0.04237794729012932,
+      "h_p95": 0.039081553225318116,
+      "z_stable_pass": true,
+      "h_stable_pass": true,
+      "report_sha256": "0ed84a22a4aa8e5d7af27ad67ec7e256c397fa48570f4c7eeb694e5d0573ad32",
+      "seal_sha256": "434ac2495c74a4169d86854dd9cccf8b2618047b99adce8e80c5c61b09d287ef"
+    },
+    {
+      "id": "ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1",
+      "module": "Arachne A1",
+      "witness": "Mage FIT1",
+      "status": "CLOSED_PASS_PROMOTED_FIT1_FROZEN",
+      "verdict": "PASS__MINIMAL_K4_Z_DIRECT_SIMPLEX_V5_FIT1_CLOSURE",
+      "promotion_commit": "03d9f87dbb7100a72293915cf682cbf338335a37",
+      "architecture_id": "RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5",
+      "gsa_p95": 0.04237784981177733,
+      "deformation_ratio": 0.019856400787830353,
+      "articulated_deformation_ratio": 0.002780771814286709,
+      "compiler_rows": 950,
+      "compiler_total_correction_l1": 2.9468642839168442e-05,
+      "backbone_checkpoint_sha256": "95c441f97b02123de1a5bc83bdf5ad223363c4b97927e8d420a0d246efbc1763",
+      "decoder_delta_sha256": "13344178bf1b3ce96c9356456db0ad2c8a3945182a5ec63617c50137b8c52137",
+      "unseen_family_claimed": false,
+      "product_pass_claimed": false,
+      "pointers": [
+        "models/arachne/v5/",
+        "canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json",
+        "canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1_PROMOTION_20260911.md",
+        "canonical/MAGE_FIT1_RIGGING_CORE_CLOSURE_20260911.md"
+      ]
     }
-  ]
+  ],
+  "next_gate": {
+    "id": "V5_FAMILY_DISJOINT_UNSEEN_GENERALIZATION_GATE",
+    "status": "NOT_ACTIVE__PREREG_REQUIRED_BEFORE_EXECUTION",
+    "claim_boundary": "FIT1 closure does not imply unseen-family/FIT8-LOFO success."
+  }
 }

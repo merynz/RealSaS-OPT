@@ -1,152 +1,94 @@
-# RealSaS — FIT1 Evidence Index — 2026-09-09
+# RealSaS — Mage FIT1 Evidence Index
 
-This file is the short audit path for anyone evaluating whether the current Mage FIT1 work is real, reproducible in lineage, and correctly scoped.
-
-Machine-readable companion:
-
-`canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json`
-
-Local consistency test:
-
-```bash
-python -m pytest -q tests/models/test_geppetto_fit1_evidence_manifest_v1.py
-```
+This is the short technical/investor audit path for the current Mage FIT1 rigging-core chain.
 
 ## Current claim status
 
 | Subsystem / gate | Status | Strongest supported claim |
 |---|---|---|
-| IRIS/GSA upstream witness | **FROZEN INPUT AUTHORITY** | promoted scene-first signed IRIS V3 witness + deterministic GSA substrate are hash-bound downstream FIT1 inputs; teacher mesh is not used at inference |
-| Geppetto | **FIT1 TERMINAL PASS / PROMOTED FROZEN SOURCE** | the reference-strength formulation fits and stably maintains the Mage 22-control mechanical core under the preregistered shipping-faithful gate |
-| SkinFieldCodec A0 | **OPEN / EXPERIMENTAL** | representation/decode ceiling is still being solved; V7/C4 is research evidence only |
-| Arachne A1 | **NOT AUTHORIZED / NOT PROMOTED** | no current V7-native learned `S+G -> latent -> W` model has been frozen |
-| Full end-to-end FIT1 product | **NOT CLOSED** | no `PRODUCT_PASS` claim exists yet |
+| IRIS/GSA | **FROZEN/PROMOTED WITNESS** | raster + exact cameras produce admitted signed/surface evidence; no teacher mesh at inference |
+| Geppetto | **FIT1 TERMINAL PASS / PROMOTED** | stable 22-control mechanical core, 48/48 terminal structural checks |
+| Compiler skeleton qualification | **PASS** | legal canonical tree / one deform root / QualifiedSkeletonIR |
+| Arachne V5 | **FIT1 PASS / PROMOTED** | direct-simplex skin proposal with GSA p95 `0.0423778498` |
+| Compiler skin qualification | **PASS** | `950/950` rows qualify; total correction L1 `2.946864e-05` |
+| Mage FIT1 rigging core | **CLOSED** | raster-to-qualified-skeleton-and-skin chain is inspectable/hash-bound |
+| Unseen family / FIT8-LOFO | **NOT CLAIMED** | next scientific gate |
+| Full PRODUCT_PASS | **NOT CLAIMED** | separate appearance/motion/editor/export/runtime contract remains |
 
-## IRIS/GSA upstream witness
-
-Current Mage signed-geometry witness:
-
-`models/iris/v3/PROMOTED_MAGE_FIT_WITNESS_V1.json`
-
-Current signed-field source:
-
-`models/iris/v3/scene_first_signed_v3.py`
-
-IRIS V2 remains the promoted observation/foundation/evidence base package under `models/iris/v2/`; V3 is the later promoted scene-first signed-field composition used by this FIT1 witness. Deterministic GSA remains the owner of compaction, local geometry, provenance and final `RiggingSurfaceIR` assembly.
-
-Frozen upstream identities and witness facts:
+## IRIS/GSA upstream authority
 
 - IRIS checkpoint SHA-256: `766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2`
 - signed zero-surface SHA-256: `987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b`
-- product inference inputs: `8x1024_RGBA + 8xORTHOGRAPHIC_CAMERA`
+- inference inputs: `8x1024_RGBA + 8xORTHOGRAPHIC_CAMERA`
 - teacher mesh used at inference: `false`
-- CharacterGen runtime used: `false`
-- zero-bracket rate: `0.9091796875`
-- predicted-to-full-truth p95 normalized: `0.019385051340437998`
-- visible-depth overall p95 normalized: `0.0464760137`
-- max single-view visible-depth p95 normalized: `0.0719296063`
-- minimum silhouette IoU: `0.946365`
-- minimum silhouette recall: `0.971979`
+- deterministic GSA remains `RiggingSurfaceIR` authority.
 
-These are Mage FIT witness/evaluation facts, not unseen-family generalization.
+## Geppetto closure
 
-## Geppetto: exact proof chain
+Source home: `models/geppetto/reference_strength_v1/`
 
-Scientific preregistration:
+- source commit `f7be46f0a97df62a793ebf91b22297c894854f39`
+- seal commit `ae0af0cd39dd2468a012ba21890a4fed2da7c4c9`
+- closure step `14080`
+- terminal streak `48/48` checks / `3072` optimizer steps
+- qualified controls `22`
+- qualified deform roots `1`
+- checkpoint SHA-256 `b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30`
+- QualifiedSkeletonIR SHA-256 `48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992`
+- result JSON SHA-256 `728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045`
 
-`experiments/geppetto_reference_strength_fullstack_v1/GEPPETTO_REFERENCE_STRENGTH_FIT1_PREREG_V1.md`
+Machine manifest: `canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json`.
 
-Frozen execution companions:
+## Arachne scientific path
 
-- `experiments/geppetto_reference_strength_fullstack_v1/GEPPETTO_REFERENCE_STRENGTH_APPARATUS_FREEZE_V1.md`
-- `experiments/geppetto_reference_strength_fullstack_v1/GEPPETTO_REFERENCE_STRENGTH_LOSS_FREEZE_V1.md`
-- `experiments/geppetto_reference_strength_fullstack_v1/run_geppetto_reference_strength_fit1_v1.py`
+The Arachne campaign did **not** jump directly from the old C4 failure to promotion. Historical evidence is retained and the causal path is:
 
-Scientific closure:
+`A0 V7 C3/C4 sampling FAIL -> A0 K4 representation/oracle closure -> A1 V4 frozen-decoder FAIL -> owner/boundary/feature diagnostics -> support-shaping oracle incomplete -> direct N×J simplex 8K partial -> matched 16K H+Z PASS -> prefer minimal Z decoder seam -> V5 transplant closure PASS -> separate mainline promotion`.
 
-`canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md`
+Key causal conclusion: the A1 V4 backbone and K4-Z retained sufficient skinning information; the dominant obstruction was the frozen A0 continuous-field decoder interface. Direct row-simplex decoding matches the skinning task more directly.
 
-Promotion/refreeze decision:
+## Arachne V5 closure
 
-`canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md`
+Source home: `models/arachne/v5/`  
+Architecture: `RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5`  
+Promotion commit: `03d9f87dbb7100a72293915cf682cbf338335a37`
 
-Frozen source / seal lineage:
+Frozen composite checkpoint:
 
-- optimizer/source commit: `f7be46f0a97df62a793ebf91b22297c894854f39`
-- seal commit: `ae0af0cd39dd2468a012ba21890a4fed2da7c4c9`
-- promoted mainline source: `models/geppetto/reference_strength_v1/`
-- architecture id: `RealSaS.Geppetto.ReferenceStrength.DirectSurfaceCausalDiffusion.DeterministicViewDirection.v1`
+- V4 backbone: SHA-256 `95c441f97b02123de1a5bc83bdf5ad223363c4b97927e8d420a0d246efbc1763`, Drive `1HJC4GPMcWa0jEXCYgctUtW09tXn4I9ND`, size `552,378,987` bytes;
+- V5 decoder delta: SHA-256 `13344178bf1b3ce96c9356456db0ad2c8a3945182a5ec63617c50137b8c52137`, Drive `1_o2XWO5BOSDKGvewJDSGS16jlcMuT9Dx`, params `325,313`;
+- total parameters `138,378,466`;
+- V5 source SHA-256 `a66adaebe92e9181873888ef90941ad87e4b3d835d21647e65176df4441a0f9e`.
 
-Terminal result:
+Terminal closure:
 
-- closure optimizer step: `14080`
-- required/observed terminal streak: `48/48` full structural checks
-- terminal stability span: `3072` optimizer steps
-- qualified controls: `22`
-- qualified deform roots: `1`
-- free-running teacher feedback: `false`
-- diffusion evaluation seeds: `11, 23, 47, 89`
+- GSA row-L1 p95 `0.04237784981177733`;
+- deformation ratio `0.019856400787830353`;
+- articulated deformation ratio `0.002780771814286709`;
+- dominant accuracy `0.9957173447537473`;
+- Compiler rows `950/950`;
+- Compiler correction L1 `2.9468642839168442e-05`;
+- holdout p95 diagnostic `0.15087631421532924`, safe under preregistered damage bound;
+- A0 runtime model loaded `false`;
+- teacher predictor firewall `true`.
 
-Artifact hashes:
+Evidence identities:
 
-- target content SHA-256: `0b5a25c877116de60b710b7bb2a7848f30988e1622e2eda8084cad21c8ca23c9`
-- qualified skeleton IR SHA-256: `48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992`
-- final checkpoint SHA-256: `b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30`
-- final result JSON SHA-256: `728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045`
-- signed zero-surface SHA-256: `987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b`
-- upstream IRIS checkpoint SHA-256: `766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2`
+- closure report SHA-256 `6ba5d63a5e9d5cab0ebc6f374bc31e86ffb2a3ed325b89dc9880b5b858ce83f4`;
+- closure seal SHA-256 `11fad459db94bc5604585fb63f22a018f538c8d30084d92c0c4e83747c619048`;
+- composite manifest SHA-256 `a6fec97b84739452e4b0126c4107a54f23a585d2f14c00548e0501d12b4c9a4f`;
+- parent 16K report SHA-256 `0ed84a22a4aa8e5d7af27ad67ec7e256c397fa48570f4c7eeb694e5d0573ad32`;
+- parent 16K seal SHA-256 `434ac2495c74a4169d86854dd9cccf8b2618047b99adce8e80c5c61b09d287ef`.
 
-## External run bytes / artifact locators
+Machine manifest: `canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json`.
 
-Large result bytes are stored outside Git and hash-bound in the machine evidence manifest. Current Google Drive locators:
+## Demo evidence
 
-- scientific contract folder: `12KG1v1WQ_1o9KAns7SobftJvSzZl1Fs8`
-- sealed package manifest: `1XyD8wgvhkGAU7nSWdsQWtJCeMchjTzeW`
-- seal document: `1ZnUdt1gt6tyVQ9mTGT2fDtRkYoYg9xkX`
-- run folder: `1ZTm47BL6ByfHhN8HdRExxzZCC7kSndkZ`
-- final checkpoint: `1ZCbqD52-5JhsHEUxEdxs99oRHgg0l01-` — `46,014,477` bytes — SHA-256 `b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30`
-- final result JSON: `1w64sr58t4JNctknp9KZPsxqyXxyL5jED` — `1,921,262` bytes — SHA-256 `728f5b5fe9e98865dd38c907ef19a741c57606f0e15557a40095d81144dc2045`
-- final QualifiedSkeletonIR: `1N-UsUnbqfxUUCVUYFHVsvL18ieDX3lCM` — `16,604` bytes — SHA-256 `48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992`
-- final SkeletonProposalIR: `1hs160Md_zpH3FYPKfTjvAPx1ywLvNysH` — `246,381` bytes — SHA-256 `91147822d1e24c2d5d8600eea5c60543eb1c0584ad2fca9baca952fe788ded26`
-- final diffusion seed reports: `1hxVWR_0TNEKrQRGJDHITgbMfnNSkZ3Ff` — `1,176,731` bytes — SHA-256 `606a66137d34cb362ea58793228b729ccd56274fd6acfc99102ff42cc428526c`
+Current full-resolution four-panel artifact with corrected real V5 joint-weight heatmap:
 
-Drive IDs are locators, not proof by themselves. The authority is the combination of exact source/prereg/result lineage plus content hashes; a reviewer with artifact access can independently download and hash the bytes.
-
-Canonical audit/demo visuals are also locator-bound in the manifest, while the old perspective 3D debug image is explicitly retired as scientific visualization evidence.
-
-## What Geppetto actually computes
-
-Current frozen learned route:
-
-`8 raster views + exact cameras -> IRIS signed evidence -> deterministic GSA/RiggingSurfaceIR -> lossless Geppetto surface tensorization -> full-surface/reference-strength Geppetto -> SkeletonProposalIR -> Compiler exact graph qualification -> QualifiedSkeletonIR`
-
-The frozen Geppetto contains direct full-surface evidence encoding, exact GSA-relation message passing, global transformer memory, prediction-only causal recurrence, per-step full-surface cross-attention, conditional residual diffusion, native STOP/count, soft internal parent feedback, and all-pairs final parent evidence. Canonical IDs and the final legal tree are not neural outputs; the Compiler owns those decisions.
-
-## Arachne: current honest state
-
-No Arachne source is promoted by the Geppetto transaction.
-
-Current research branch:
-
-`exp/arachne-skintokens-cleanroom-fit1-20260908`
-
-Current experiment scope:
-
-**Mage A0 FIT1 SkinFieldCodec only.**
-
-Current V7 apparatus:
-
-- architecture: `RealSaS.Arachne.SkinFieldCodec.v7`
-- parameters: `278,010,880`
-- no FSQ in the active learning path
-- current C4 prereg: `experiments/arachne_skintokens_fit1_20260908/V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION_PREREG_20260909.md`
-- C3 point-cloud/importance-corrected boundary treatment did not close A0
-- A1 remains unauthorized until A0 closes and the V7-facing latent/decode interface is frozen
-
-The older mainline `models/arachne/v2/` source is a prior scaffold/current source inventory item, not evidence that the present V7-native A1 has been trained or promoted.
+- Drive file ID `166xERJMQyqn6sV9DO_jGCNDkpyFmnDT-`
+- SHA-256 `ff24e037ef15c7b4be12b3d88375ec68b2e515bcda54b69187bf46271e52292a`
 
 ## Non-claims
 
-FIT1 is a controlled same-witness scientific/product-capability gate. It is **not** unseen-character or unseen-family generalization.
-
-A Geppetto FIT1 PASS is not Arachne PASS. Arachne A0 PASS would not automatically be A1 PASS. Full learned skinning closure would still require A1. Even that would not automatically be `PRODUCT_PASS`; an independent end-to-end product contract remains required.
+FIT1 is controlled same-witness engineering/science evidence. It is not unseen-family generalization. The next scientific gate is `V5_FAMILY_DISJOINT_UNSEEN_GENERALIZATION_GATE` / FIT8-LOFO-style evaluation. Full PRODUCT_PASS remains separately gated.

@@ -1,6 +1,6 @@
 # Mage FIT1 real E2E integration audit — 2026-09-12
 
-**Status:** `IN_PROGRESS__EXACT_S_G_W_PERSISTED__REAL_MWB2_X8_WIRED__VISUAL_COVERAGE_GAP_EXPOSED`
+**Status:** `IN_PROGRESS__EXACT_S_G_W_PERSISTED__REAL_MWB2_X8_WIRED__MWB2_COVERAGE_FAILURE_EXPOSED`
 
 This is an integration audit, not a new scientific closure and not a `PRODUCT_PASS` claim.
 
@@ -8,7 +8,7 @@ This is an integration audit, not a new scientific closure and not a `PRODUCT_PA
 
 Run the already-closed Mage FIT1 rigging core through the current product stack without replacing, approximating or visually repairing any scientific artifact:
 
-`real 8 images/cameras -> exact S/G/W -> MWB2 x8 -> appearance -> directional joint binding -> static Living Compile inspection -> motion/proof -> native runtime`
+`real 8 images/cameras -> exact S/G/W -> directional M/B -> appearance -> directional joint binding -> static Living Compile inspection -> motion/proof -> native runtime`
 
 If a qualification-owned artifact is absent, the real path must stop or expose an explicit block. Preview-only reconstruction, hidden geometry filling and fabricated proof are forbidden.
 
@@ -43,7 +43,7 @@ Closed on this branch. Living Compile consumes `DirectionalJointViewBindingSetIR
 
 ### LC-02 — static inspection under blocked/absent product proof
 
-Extended on this branch. Living Compile can now inspect IMAGE / MESH / RIG / WEIGHTS when product proof is either non-PASS **or absent**. Proof absence is reported as `UNAVAILABLE`; no synthetic ABSTAIN proof is created. Runtime clips/frames remain strictly unavailable until a current PASS proof exists.
+Closed on this branch. Living Compile can inspect IMAGE / MESH / RIG / WEIGHTS when product proof is either non-PASS **or absent**. Proof absence is reported as `UNAVAILABLE`; no synthetic ABSTAIN proof is created. Runtime clips/frames remain strictly unavailable until a current PASS proof exists.
 
 ### ART-01 — exact V5 `QualifiedSkinIR` persistence
 
@@ -56,7 +56,7 @@ Closed. Exact `SkinProposalIR`, Compiler `QualifiedSkinIR`, 950x22 proposal/qual
 It performs:
 
 1. strict Mage lineage/cardinality/raster-contract checks;
-2. current MWB2 candidate + qualification independently for all eight directions;
+2. current relation-complex MWB2 candidate + qualification independently for all eight directions;
 3. exact convex mesh-skin transfer from the qualified V5 skin;
 4. observation-only appearance binding;
 5. `CanonicalPuppetGraphV3` assembly as an explicitly unqualified static candidate;
@@ -65,38 +65,71 @@ It performs:
 
 The runner explicitly records `product_pass_claimed=false`, `visual_completion_used=false`, `unknown_regions_remain_empty=true` and `full_silhouette_substrate=false`.
 
-### Directional binding result
+### Directional binding result — clean
 
 A direct audit over the exact Mage substrate gives affine rank 4 in all eight directions. Normalized P->raster fit residuals are effectively numerical zero (cardinal-view p95/span approximately `4.1e-16`, `1.43e-15`, `6.17e-16`, `8.95e-16` for S/E/N/W respectively). The qualified skeleton projection is therefore not the current visual blocker.
 
-### MWB2 coverage result
+### Current MWB2 relation-complex result — real coverage failure
 
-The real MWB2 observed-safe mesh is intentionally conservative and **does not cover the full source silhouette**. Cardinal examples from the exact witness:
+The current implementation is conservative: target-view-visible S nodes + safe local-relation cliques + deterministic non-overlap selection. It does not use source mesh topology or hidden completion.
 
-| view | observed surface nodes | qualified mesh vertices | qualified faces |
-| --- | ---: | ---: | ---: |
-| V0 / S | 343 | 276 | 273 |
-| V2 / E | 309 | 222 | 220 |
-| V4 / N | 343 | 250 | 225 |
-| V6 / W | 296 | 221 | 226 |
+Cardinal exact-witness geometry:
 
-The holes are not a rendering bug and are not currently repaired. MWB2 only admits target-view-observed surface support and safe relation-supported triangles; UNKNOWN/UNOBSERVED bridges remain forbidden. This is the first real productization blocker exposed by the exact chain.
+| view | observed S nodes | qualified mesh vertices | qualified faces | source-alpha coverage |
+| --- | ---: | ---: | ---: | ---: |
+| V0 / S | 343 | 276 | 273 | 20.05% |
+| V2 / E | 309 | 222 | 220 | 22.43% |
+| V4 / N | 343 | 250 | 225 | 18.18% |
+| V6 / W | 296 | 221 | 226 | 23.76% |
 
-## Newly identified missing subsystem — visual coverage completion
+Across all eight views the measured source-alpha coverage is approximately `18.18%..32.31%`, while rasterized mesh spill outside source alpha stays below roughly `0.52%`. Therefore the current producer is safe but far too sparse to be treated as a full render mesh.
 
-The repository already defines the authority types and qualification seam:
+This is not an appearance bug and not a skeleton bug. It is the still-open MWB2 behavioral seam already described by the hardening ledger: the existing observed-safe relation complex is a bounded baseline, not product mesh-quality closure.
 
-`VisualCompletionProposalIR -> qualify_visual_completion -> QualifiedVisualCompletionIR`
+A deterministic `DirectionalCoverageMeasurement.v1` diagnostic has been added. Its default prospective quality policy is:
 
-but this audit has not found a current production **completion proposal producer** capable of turning the uncovered directional regions into separately typed, support-bound proposals. Therefore the real chain must keep those regions empty for now.
+- source-alpha coverage `>= 0.95`;
+- mesh-outside-source fraction `<= 0.01`.
 
-The next scientific/product question is not whether to hide the gaps, but which completion class is justified by the evidence:
+The measurement is diagnostic only; source alpha is not converted into geometry authority by that probe.
 
-- deterministic cross-view transport when the missing target region has sufficient admitted support in another real view;
-- learned visual completion only for residual regions that cannot be deterministically transported;
-- permanent UNKNOWN/empty output when neither path is sufficiently supported.
+## Local-convex support ceiling — why one repair class cannot solve everything
 
-Any such completion must remain outside S/G/W mechanical truth and must be independently qualified before it may enter a renderable component.
+The frozen mesh contract already types `LOCAL_CONVEX_INTERPOLATION`, and the historical contract explicitly authorizes inserted vertices only when their rest position is derived from mutually compatible admitted S support.
+
+A direct geometric ceiling audit projects **all 950 admitted S nodes** to each target view and measures the fraction of source alpha lying inside their 2D convex hull. Cardinal ceilings are:
+
+| view | source alpha inside all-S projected convex hull |
+| --- | ---: |
+| V0 / S | 75.45% |
+| V2 / E | 72.51% |
+| V4 / N | 75.43% |
+| V6 / W | 72.53% |
+
+Across all eight views the all-S convex-support ceiling is approximately `68.59%..75.45%`.
+
+Therefore two different gaps must not be conflated:
+
+1. **MWB2 discretization/topology gap:** large regions inside admissible S support are currently left uncovered by the relation-clique baseline. This is the immediate blocker and should be attacked with the already-typed MWB2 local-convex/constrained-triangulation gate.
+2. **Residual visual-only gap:** roughly one quarter to one third of the source silhouette lies outside any local-convex projection of the current S substrate. No legal `SurfaceSupportBinding` can place a mechanical mesh vertex there without changing S authority or introducing a separately typed visual completion/shell mechanism.
+
+The first gap must be closed before using visual completion as an explanation for sparse rest topology.
+
+## Immediate next gate — MWB2 local-convex / constrained triangulation
+
+The canonical mesh contract already froze this path before implementation:
+
+`S -> view-local constrained triangulation -> LOCAL_CONVEX_INTERPOLATION support -> QualifiedEditableMeshIR -> deterministic W interpolation -> QualifiedMeshSkinIR`
+
+The new real failure now supplies the demonstrated need. The next candidate must remain generic and must not use Mage-specific thresholds, source mesh topology, teacher mesh, negative/extrapolating support coefficients or UNKNOWN crossing.
+
+Only after the legal local-convex support domain is substantially discretized and deformation/provenance gates pass should residual out-of-support visual regions move to `VisualCompletionProposalIR -> QualifiedVisualCompletionIR` work.
+
+## Later visual-completion seam
+
+The repository already defines the completion types and qualifier but no current production completion-proposal producer was found during this audit. That is a real later gap, but it is **not** allowed to hide MWB2 rest-coverage failure.
+
+For residual regions that are mathematically outside admissible S support, future completion classes may include deterministic cross-view visual transport first, then separately qualified learned completion only where necessary, otherwise explicit UNKNOWN/empty output. Completion must remain outside S/G/W mechanical truth.
 
 ## Real E2E trigger contract
 
@@ -107,7 +140,8 @@ The eventual real trigger must fail closed unless all of the following hold:
 - no teacher mesh/skeleton/skin is consumed by product assembly;
 - no mock, synthetic, demo-tessellation or reconstructed-weight artifact can satisfy a real-artifact requirement;
 - MWB2 never bridges typed UNKNOWN/UNOBSERVED geometry;
-- visual completion, if used, is separately typed, support-bound and qualified and never mutates S/G/W truth;
+- inserted mesh vertices use legal nonnegative simplex `SurfaceSupportBinding` only;
+- visual completion, if used, is separately typed/support-bound/qualified and never mutates S/G/W truth;
 - per-view rig overlay uses the same qualified directional pivots as motion evaluation;
 - missing deformation/motion evidence remains blocked, never synthetic PASS;
 - native export remains forbidden until the exact current product has fresh PASS proof;
@@ -116,13 +150,14 @@ The eventual real trigger must fail closed unless all of the following hold:
 ## Current execution order
 
 1. Exact S/G/W persistence — **DONE**.
-2. Real MWB2 x8 + exact mesh-skin + observation appearance — **WIRED; coverage gap exposed**.
+2. Real current-MWB2 x8 + exact mesh-skin + observation appearance — **WIRED; REAL COVERAGE FAILURE MEASURED**.
 3. Exact directional joint/view binding — **WIRED; projection quality clean**.
 4. Proofless Living Compile static inspection — **WIRED; runtime remains blocked**.
-5. Design and qualify real visual-coverage completion without altering mechanical truth — **NEXT BLOCKER**.
-6. Add qualification-owned Mage motion evidence and run product proof.
-7. Export native runtime only after actual PASS.
-8. Promote one fresh-process real E2E trigger after all previous gates close.
+5. Implement/preregister generic MWB2 local-convex/constrained-triangulation candidate and run topology/coverage/deformation gates — **NEXT BLOCKER**.
+6. Classify residual outside-S visual regions and only then open qualified visual completion if still required.
+7. Add qualification-owned Mage motion evidence and run product proof.
+8. Export native runtime only after actual PASS.
+9. Promote one fresh-process real E2E trigger after all previous gates close.
 
 ## Claim boundary
 
@@ -130,7 +165,9 @@ The eventual real trigger must fail closed unless all of the following hold:
 
 `MAGE_EXACT_S_G_W_PERSISTENCE = CLOSED`
 
-`MAGE_REAL_STATIC_DIRECTIONAL_CHAIN = WIRED__VISUAL_COVERAGE_INCOMPLETE`
+`MAGE_DIRECTIONAL_BINDING = CLEAN`
+
+`MAGE_CURRENT_MWB2_RELATION_COMPLEX = REAL_FAIL__INSUFFICIENT_RENDER_COVERAGE`
 
 `MAGE_REAL_PRODUCT_E2E = OPEN`
 

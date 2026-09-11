@@ -1,101 +1,136 @@
 # Mage FIT1 real E2E integration audit — 2026-09-12
 
-**Status:** `IN_PROGRESS__RIGGING_CORE_CLOSED__DOWNSTREAM_SEAMS_PRESENT__EXACT_V5_QUALIFIED_SKIN_SERIALIZATION_GAP`
+**Status:** `IN_PROGRESS__EXACT_S_G_W_PERSISTED__REAL_MWB2_X8_WIRED__VISUAL_COVERAGE_GAP_EXPOSED`
 
 This is an integration audit, not a new scientific closure and not a `PRODUCT_PASS` claim.
 
 ## Goal
 
-Run the already-promoted Mage FIT1 mechanical result through the current product stack without replacing, approximating or visually repairing any scientific artifact:
+Run the already-closed Mage FIT1 rigging core through the current product stack without replacing, approximating or visually repairing any scientific artifact:
 
-`real 8 images/cameras -> promoted S/G/W -> exact 8 directional M/B -> appearance -> directional joint binding -> motion/proof -> Living Compile -> native runtime`
+`real 8 images/cameras -> exact S/G/W -> MWB2 x8 -> appearance -> directional joint binding -> static Living Compile inspection -> motion/proof -> native runtime`
 
-If an input or qualification-owned artifact is absent, the real E2E path must stop or expose an explicit `ABSTAIN/BLOCK`. Preview-only reconstruction may not be relabeled as canonical product evidence.
+If a qualification-owned artifact is absent, the real path must stop or expose an explicit block. Preview-only reconstruction, hidden geometry filling and fabricated proof are forbidden.
 
-## Audited current state
+## Exact mechanical authority now available
 
-### Promoted rigging core
+The missing exact V5 product skin serialization has been repaired with a forward-only replay of the historical FP32 V5 closure path. The final Drive transaction is sealed as:
 
-The canonical Mage FIT1 closure already records:
+`PASS__EXACT_PROMOTED_V5_S_G_W_AND_FULL_REAL_AUTHORITIES_PERSISTED`
 
-- `RiggingSurfaceIR`: 950 nodes / 2813 topology edges;
-- `QualifiedSkeletonIR`: 22 Compiler-qualified controls;
-- Arachne V5 -> Compiler-qualified skin: 950/950 rows;
-- V5 GSA row-L1 p95 `0.04237784981177733`;
-- V5 deformation ratio `0.019856400787830353`;
-- V5 articulated deformation ratio `0.002780771814286709`;
-- Compiler total skin correction L1 `2.9468642839168442e-05`.
+Current exact Mage authorities:
 
-No unseen-family or product-pass claim follows from those FIT1 numbers.
+- `RiggingSurfaceIR`: 950 nodes / 2813 local relations;
+- `QualifiedSkeletonIR.v2`: 22 Compiler-qualified joints;
+- `QualifiedSkinIR`: 950/950 rows;
+- surface lineage: `67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb`;
+- skeleton lineage: `738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306`;
+- skin lineage: `ef28f75e0306dbbabc32e75b837412ede39b180248502f6e504994310d91edaf`;
+- replay GSA row-L1 p95: `0.042377868412027`;
+- replay articulated deformation ratio: `0.002780768321827054`;
+- Compiler total skin correction L1: `2.8930073728035608e-05`;
+- full frozen composite V5 checkpoint SHA-256: `820ca65296235803d4c952f6025247e3fa09e3211f5a945a88979968e1dcc629`.
 
-### Downstream source seams already present
+The final evidence tree also contains the exact eight source PNGs and exact eight camera authorities. The teacher supervision bank is retained only under `EVALUATION_ONLY_TEACHER` and is not a product/predictor input.
 
-The repository already contains qualified/closed source mechanisms for:
+No unseen-family or product-pass claim follows from FIT1 closure or from serialization replay.
 
-1. exact-eight directional MWB2 mesh/mesh-skin construction from observed local surface relations;
-2. observation-derived per-corner appearance under native `PIXEL_CENTER_XY` semantics;
-3. Compiler-owned `DirectionalJointViewBindingSetIR` and per-view joint pivots;
-4. qualification-owned directional motion bake with current rotation-only evaluator scope;
-5. proof-owned bake -> native-v2 projection -> sealed C++ runtime interlock;
-6. Living Compile V4 product/editor shell.
-
-These mechanisms are not evidence that the promoted Mage witness has already traversed the complete product path.
-
-## Concrete integration defects/gaps found
+## Integration defects closed
 
 ### LC-01 — Living Compile rig overlay projection
 
-**Observed defect:** Living Compile derived control anchors from joint support-surface raster centroids / nearest surface nodes instead of consuming the Compiler-qualified directional joint pivots used by the motion evaluator.
+Closed on this branch. Living Compile consumes `DirectionalJointViewBindingSetIR` exact per-view pivots instead of support-surface centroids / nearest-node guesses. Missing qualified binding withholds the rig overlay.
 
-**Disposition on integration branch:** fixed. `DirectionalJointViewBindingSetIR` is now exported as a typed bundle artifact; Living Compile consumes its exact `raster_xy` pivots. If the binding is absent, the rig overlay is withheld instead of guessed.
+### LC-02 — static inspection under blocked/absent product proof
 
-### LC-02 — proof-blocked bundles could not be inspected
+Extended on this branch. Living Compile can now inspect IMAGE / MESH / RIG / WEIGHTS when product proof is either non-PASS **or absent**. Proof absence is reported as `UNAVAILABLE`; no synthetic ABSTAIN proof is created. Runtime clips/frames remain strictly unavailable until a current PASS proof exists.
 
-**Observed defect:** the UI requested runtime clips during bundle open; `/api/runtime/clips` rejected every non-PASS proof, preventing even static inspection of a truthful unqualified product state.
+### ART-01 — exact V5 `QualifiedSkinIR` persistence
 
-**Disposition on integration branch:** fixed. Static scene/mesh/rig/weight inspection remains available under `PROOF BLOCK`; runtime clips remain empty and `runtime_frame` remains strictly PASS-gated.
+Closed. Exact `SkinProposalIR`, Compiler `QualifiedSkinIR`, 950x22 proposal/qualified tensors, conditioning witness, K4x512 field tokens, exact S/G/W bundle and full composite checkpoint are persisted and hash-audited.
 
-### ART-01 — exact V5 QualifiedSkinIR bytes were not persisted in the light closure evidence folder
+## First real downstream execution result
 
-The promoted V5 evidence folder was enumerated during this audit. It contains the V5 decoder delta, source, preregistration, composite manifest, closure report/seal, evidence-light archive and visual plates. It does **not** contain a serialized `SkinProposalIR` or `QualifiedSkinIR` for the final V5 Mage closure.
+`run_mage_fit1_real_static_v1.py` is the first repository runner that consumes the exact Mage S/G/W authorities and the real 8-view observation set instead of the synthetic four-point fixture.
 
-The closure metrics prove that Compiler qualification occurred, but those metrics are not a substitute for the exact 950-row product artifact.
+It performs:
 
-A previously reconstructed V5 weight matrix from the best10752 field-token snapshot is **not authorized** as the exact promoted skin: it reproduces the closure closely but not byte/metric exactly because the full promoted V4 backbone execution is not represented by that snapshot alone.
+1. strict Mage lineage/cardinality/raster-contract checks;
+2. current MWB2 candidate + qualification independently for all eight directions;
+3. exact convex mesh-skin transfer from the qualified V5 skin;
+4. observation-only appearance binding;
+5. `CanonicalPuppetGraphV3` assembly as an explicitly unqualified static candidate;
+6. Compiler `DirectionalJointViewBindingSetIR` qualification;
+7. proofless static inspection bundle emission with runtime disabled.
 
-**Required repair:** execute the promoted composite checkpoint (`V4 backbone SHA-256 95c441...` + `V5 decoder delta SHA-256 133441...`) on the sealed Mage conditioning input, emit `SkinProposalIR`, run the current Compiler `qualify_skin`, and persist the exact `QualifiedSkinIR` with content hash and source checkpoint identities. No optimizer/backward/update is required.
+The runner explicitly records `product_pass_claimed=false`, `visual_completion_used=false`, `unknown_regions_remain_empty=true` and `full_silhouette_substrate=false`.
+
+### Directional binding result
+
+A direct audit over the exact Mage substrate gives affine rank 4 in all eight directions. Normalized P->raster fit residuals are effectively numerical zero (cardinal-view p95/span approximately `4.1e-16`, `1.43e-15`, `6.17e-16`, `8.95e-16` for S/E/N/W respectively). The qualified skeleton projection is therefore not the current visual blocker.
+
+### MWB2 coverage result
+
+The real MWB2 observed-safe mesh is intentionally conservative and **does not cover the full source silhouette**. Cardinal examples from the exact witness:
+
+| view | observed surface nodes | qualified mesh vertices | qualified faces |
+| --- | ---: | ---: | ---: |
+| V0 / S | 343 | 276 | 273 |
+| V2 / E | 309 | 222 | 220 |
+| V4 / N | 343 | 250 | 225 |
+| V6 / W | 296 | 221 | 226 |
+
+The holes are not a rendering bug and are not currently repaired. MWB2 only admits target-view-observed surface support and safe relation-supported triangles; UNKNOWN/UNOBSERVED bridges remain forbidden. This is the first real productization blocker exposed by the exact chain.
+
+## Newly identified missing subsystem — visual coverage completion
+
+The repository already defines the authority types and qualification seam:
+
+`VisualCompletionProposalIR -> qualify_visual_completion -> QualifiedVisualCompletionIR`
+
+but this audit has not found a current production **completion proposal producer** capable of turning the uncovered directional regions into separately typed, support-bound proposals. Therefore the real chain must keep those regions empty for now.
+
+The next scientific/product question is not whether to hide the gaps, but which completion class is justified by the evidence:
+
+- deterministic cross-view transport when the missing target region has sufficient admitted support in another real view;
+- learned visual completion only for residual regions that cannot be deterministically transported;
+- permanent UNKNOWN/empty output when neither path is sufficiently supported.
+
+Any such completion must remain outside S/G/W mechanical truth and must be independently qualified before it may enter a renderable component.
 
 ## Real E2E trigger contract
 
 The eventual real trigger must fail closed unless all of the following hold:
 
-- exactly 8 admitted 1024 RGBA observations and exactly 8 bound cameras;
-- promoted/expected S, G and W lineages/hashes match the selected witness;
-- no teacher mesh, teacher skeleton or teacher skin is consumed at inference/product assembly;
-- no `mock`, `synthetic`, demo-tessellation or reconstructed-weight artifact can satisfy a real-artifact requirement;
+- exactly 8 admitted source observations and 8 bound cameras;
+- expected S/G/W lineages match the selected witness;
+- no teacher mesh/skeleton/skin is consumed by product assembly;
+- no mock, synthetic, demo-tessellation or reconstructed-weight artifact can satisfy a real-artifact requirement;
 - MWB2 never bridges typed UNKNOWN/UNOBSERVED geometry;
-- visual completion, if ever used, is separately typed and qualified and never mutates S/G/W truth;
+- visual completion, if used, is separately typed, support-bound and qualified and never mutates S/G/W truth;
 - per-view rig overlay uses the same qualified directional pivots as motion evaluation;
-- missing deformation or motion frame evidence remains `ABSTAIN`, never synthetic PASS;
+- missing deformation/motion evidence remains blocked, never synthetic PASS;
 - native export remains forbidden until the exact current product has fresh PASS proof;
-- every emitted artifact records source lineage/content hashes in one reproducible bundle manifest.
+- every emitted artifact records source lineage/content hashes in one reproducible manifest.
 
-## Next execution order
+## Current execution order
 
-1. Persist/re-emit exact promoted V5 `SkinProposalIR` + `QualifiedSkinIR` for Mage.
-2. Feed exact S/G/W through current MWB2 for all eight directions.
-3. Bind exact observation-derived appearance; leave unsupported regions visibly absent.
-4. Qualify directional joint/view binding and verify S/E/N/W rig overlays against the real raster silhouette.
-5. Materialize a proof-blocked inspection bundle first if required; inspect IMAGE / MESH / RIG / WEIGHTS separately in Living Compile.
-6. Add only qualification-owned motion evidence; then run proof.
+1. Exact S/G/W persistence — **DONE**.
+2. Real MWB2 x8 + exact mesh-skin + observation appearance — **WIRED; coverage gap exposed**.
+3. Exact directional joint/view binding — **WIRED; projection quality clean**.
+4. Proofless Living Compile static inspection — **WIRED; runtime remains blocked**.
+5. Design and qualify real visual-coverage completion without altering mechanical truth — **NEXT BLOCKER**.
+6. Add qualification-owned Mage motion evidence and run product proof.
 7. Export native runtime only after actual PASS.
-8. Wrap the full path in one fresh-process real E2E trigger with the no-fabrication checks above.
+8. Promote one fresh-process real E2E trigger after all previous gates close.
 
 ## Claim boundary
 
-Until ART-01 is repaired and the real witness actually traverses the downstream path:
-
 `MAGE_FIT1_RIGGING_CORE = CLOSED`
+
+`MAGE_EXACT_S_G_W_PERSISTENCE = CLOSED`
+
+`MAGE_REAL_STATIC_DIRECTIONAL_CHAIN = WIRED__VISUAL_COVERAGE_INCOMPLETE`
 
 `MAGE_REAL_PRODUCT_E2E = OPEN`
 

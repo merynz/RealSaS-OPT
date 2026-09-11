@@ -3,10 +3,13 @@
   "status": "FIT1_FROZEN_PROMOTED",
   "architecture_id": "RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5",
   "source_home": "models/arachne/v5/",
+  "promotion_commit": "03d9f87dbb7100a72293915cf682cbf338335a37",
   "backbone": {
     "architecture_id": "RealSaS.Arachne.A1.RichQualifiedBidirectional.v4",
     "mainline_source_home": "models/arachne/v4/",
     "checkpoint_sha256": "95c441f97b02123de1a5bc83bdf5ad223363c4b97927e8d420a0d246efbc1763",
+    "checkpoint_drive_id": "1HJC4GPMcWa0jEXCYgctUtW09tXn4I9ND",
+    "checkpoint_size_bytes": 552378987,
     "best_step": 10752,
     "field_tokens": 4,
     "latent_channels": 512
@@ -15,6 +18,7 @@
     "parameter_count": 325313,
     "sealed_parent_head_sha256": "078d5155f798d7b926c19463a31bf01c19973be30787f5fbff7916be87894832",
     "delta_checkpoint_sha256": "13344178bf1b3ce96c9356456db0ad2c8a3945182a5ec63617c50137b8c52137",
+    "delta_checkpoint_drive_id": "1_o2XWO5BOSDKGvewJDSGS16jlcMuT9Dx",
     "a0_continuous_field_runtime_dependency": false
   },
   "fit1": {
@@ -37,8 +41,8 @@
     "parent_direct_simplex_16k_seal_sha256": "434ac2495c74a4169d86854dd9cccf8b2618047b99adce8e80c5c61b09d287ef",
     "v5_source_sha256": "a66adaebe92e9181873888ef90941ad87e4b3d835d21647e65176df4441a0f9e",
     "drive_folder_id": "1olTTBLOSWvTO1o_zaRJY_HCdT7l3BkTj",
-    "demo_four_panel_png_drive_id": "1QyKHf9eeT-q2pz1vtC-kWMDfOksXygnP",
-    "demo_four_panel_png_sha256": "085556205674c69ed6df58e04df60df39cef9fddbfced5fdedfa814fc519caee"
+    "demo_four_panel_png_drive_id": "166xERJMQyqn6sV9DO_jGCNDkpyFmnDT-",
+    "demo_four_panel_png_sha256": "ff24e037ef15c7b4be12b3d88375ec68b2e515bcda54b69187bf46271e52292a"
   },
   "claim_boundary": {
     "fit1_same_witness_closed": true,

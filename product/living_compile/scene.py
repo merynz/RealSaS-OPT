@@ -10,11 +10,11 @@ from .common import (
     VIEW_LABELS,
     load_directional_binding,
     load_product,
-    load_proof,
     surface_raster,
     view_id,
     weighted_xy,
 )
+from .proof_status import load_optional_proof, proof_status
 from .runtime import motion_bakes
 
 
@@ -173,7 +173,19 @@ def _source_rows(root: Path) -> list[Json]:
     return rows
 
 
-def _dynamic_proof_legacy(proof: Mapping[str, Any], bakes: Mapping[str, Json]) -> Json:
+def _dynamic_proof_legacy(proof: Mapping[str, Any] | None, bakes: Mapping[str, Json]) -> Json:
+    if proof is None:
+        return {
+            "available": False,
+            "passed": False,
+            "clip_count": 0,
+            "passed_clip_count": 0,
+            "uses_same_reference_evaluator": True,
+            "second_motion_solver_created": False,
+            "clip_reports": [],
+            "owner_findings": [],
+            "status": "PRODUCT_PROOF_UNAVAILABLE",
+        }
     motion = next((row for row in list(proof.get("domain_reports") or []) if str(row.get("proof_domain")) == "MOTION"), None)
     passed = bool(motion and motion.get("status") == "PASS")
     clips = [{
@@ -190,8 +202,10 @@ def _dynamic_proof_legacy(proof: Mapping[str, Any], bakes: Mapping[str, Json]) -
     }
 
 
-def _dynamic_proof_summary(proof: Mapping[str, Any]) -> Json:
-    return {"overall_status": proof.get("overall_status"), "domains": [{
+def _dynamic_proof_summary(proof: Mapping[str, Any] | None) -> Json:
+    if proof is None:
+        return {"overall_status": "UNAVAILABLE", "domains": [], "available": False}
+    return {"overall_status": proof.get("overall_status"), "available": True, "domains": [{
         "proof_domain": row.get("proof_domain"), "status": row.get("status"),
         "failure_signatures": list(row.get("failure_signatures") or []), "owner_attribution": list(row.get("owner_attribution") or []),
         "domain_proof_hash": row.get("domain_proof_hash"),
@@ -200,13 +214,14 @@ def _dynamic_proof_summary(proof: Mapping[str, Any]) -> Json:
 
 def build_scene(root: Path) -> Json:
     product = load_product(root)
-    proof = load_proof(root, product)
+    proof = load_optional_proof(root, product)
+    status = proof_status(proof)
     directional_binding = load_directional_binding(root, product, required=False)
     controls, edges = _joint_scene_rows(product, directional_binding)
     meshes = _mesh_scene_rows(product)
     bindings = _binding_rows(product, directional_binding)
     source_rows = _source_rows(root)
-    bakes = motion_bakes(root)
+    bakes = motion_bakes(root) if proof is not None else {}
     rig_warning = [] if directional_binding is not None else ["DIRECTIONAL_BINDING_NOT_EXPORTED__RIG_OVERLAY_WITHHELD"]
     clips = [{
         "animation_clip_id": str(clip.get("clip_id") or ""),
@@ -219,18 +234,26 @@ def build_scene(root: Path) -> Json:
         "schema_version": "RealSaS.LivingCompileIndex.v4", "source_views": source_rows,
         "artifact_readiness": {
             "canonical_product": True,
-            "proof": True,
+            "proof": proof is not None,
             "directional_joint_binding": directional_binding is not None,
-            "runtime_motion_bake": bool(bakes),
+            "runtime_motion_bake": bool(bakes) and status == "PASS",
         },
         "animation_clips": clips,
     }
     model_payload = {"model_id": "CURRENT_V4_MODEL_STACK", "materially_influenced": True}
+    passed = status == "PASS"
+    recommended_claim = "CURRENT_V4_PROOF_GATED_PRODUCT" if passed else (
+        "RIGGING_CORE_INSPECTION_ONLY__PRODUCT_UNQUALIFIED" if proof is None else "CURRENT_V4_PRODUCT_PROOF_BLOCKED"
+    )
+    blockers = [] if passed else ["PRODUCT_PROOF_UNAVAILABLE" if proof is None else f"PRODUCT_PROOF_{status}"]
     proof_payload = {
-        "overall_strict_passed": proof.get("overall_status") == "PASS", "passed": proof.get("overall_status") == "PASS",
-        "artifact_chain_passed": True, "compiler_flow_passed": True, "product_quality_passed": proof.get("overall_status") == "PASS",
-        "blockers": [] if proof.get("overall_status") == "PASS" else [f"PRODUCT_PROOF_{proof.get('overall_status', 'UNKNOWN')}"] ,
-        "warnings": rig_warning, "recommended_claim": "CURRENT_V4_PROOF_GATED_PRODUCT", "proof_bundle_hash": proof.get("proof_bundle_hash"),
+        "available": proof is not None,
+        "overall_status": status,
+        "overall_strict_passed": passed, "passed": passed,
+        "artifact_chain_passed": True, "compiler_flow_passed": True, "product_quality_passed": passed,
+        "blockers": blockers,
+        "warnings": rig_warning, "recommended_claim": recommended_claim,
+        "proof_bundle_hash": None if proof is None else proof.get("proof_bundle_hash"),
     }
     return {
         "schema_version": "RealSaS.LivingCompileScene.v4", "bundle_root": str(root),
@@ -239,7 +262,7 @@ def build_scene(root: Path) -> Json:
         "proof": proof_payload, "model": model_payload, "model_influence": model_payload,
         "dynamic_proof": _dynamic_proof_summary(proof), "dynamic_motion_closure": _dynamic_proof_legacy(proof, bakes),
         "puppet": {"meshes": meshes, "rig": {"controls": controls, "edges": edges}}, "binding": {"bindings": bindings},
-        "runtime": {"clips": clips, "proof_gated": proof.get("overall_status") == "PASS"},
+        "runtime": {"clips": clips, "proof_gated": True, "preview_available": passed and bool(bakes)},
         "counts": {"views": 8, "meshes": len(meshes), "controls": len(controls) // 8 if controls else 0, "bindings": len(bindings)},
         "weight_counts": {"final_render_meshes": len(meshes), "weighted_final_render_meshes": len(meshes)},
         "weight_heatmap_is_canonical_product_data": bool(meshes),
@@ -250,5 +273,6 @@ def build_scene(root: Path) -> Json:
             "runtime_frames_are_qualification_owned_bakes": True,
             "rig_overlay_authority": "QUALIFIED_DIRECTIONAL_JOINT_VIEW_BINDING" if directional_binding is not None else "WITHHELD_MISSING_QUALIFIED_BINDING",
             "directional_binding_set_hash": (directional_binding or {}).get("binding_set_hash"),
+            "product_proof_authority": "CURRENT_PASS_PROOF" if passed else ("ABSENT__STATIC_INSPECTION_ONLY" if proof is None else f"PRESENT_{status}"),
         },
     }

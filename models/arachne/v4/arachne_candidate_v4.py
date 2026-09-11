@@ -97,8 +97,11 @@ class EdgeMessageBlock(nn.Module):
             a, c = e[:, 0].long(), e[:, 1].long()
             if (a < 0).any() or (c < 0).any() or (a >= N).any() or (c >= N).any():
                 raise ValueError("edge endpoint outside padded surface")
-            ma = self.msg(torch.cat([xn[b, a], xn[b, c], ef], -1))
-            mc = self.msg(torch.cat([xn[b, c], xn[b, a], ef], -1))
+            # Under AMP, Linear emits BF16 while the residual accumulator stays FP32.
+            # index_add_ requires exact dtype equality, so explicitly accumulate
+            # messages in the residual dtype. This changes no graph/model semantics.
+            ma = self.msg(torch.cat([xn[b, a], xn[b, c], ef], -1)).to(dtype=out.dtype)
+            mc = self.msg(torch.cat([xn[b, c], xn[b, a], ef], -1)).to(dtype=out.dtype)
             out[b].index_add_(0, a, ma); out[b].index_add_(0, c, mc)
             one = torch.ones((len(a), 1), device=x.device, dtype=x.dtype)
             deg[b].index_add_(0, a, one); deg[b].index_add_(0, c, one)

@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `02a3fdf705b4a7ff34d521f922ae62df2fc5583377a243284568614667f2ac36`
+> State fingerprint: `2da92fe2f1c8e03074233f5e6fb355c57a6b2a441985d66af938ac402f90c45e`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -36,13 +36,13 @@ _No active experiments registered._
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 6** / **EVIDENCE_ONLY_UNREGISTERED: 86** / **DELETE_CANDIDATE: 9**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 6** / **EVIDENCE_ONLY_UNREGISTERED: 87** / **DELETE_CANDIDATE: 9**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `3c780cdcfd5b` | canonical continuation branch |
+| `main` | `1609408427d1` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -110,7 +110,7 @@ _No active experiments registered._
 | `hardening/pre-fit-closure-v1-20260904` | `d4da94279e1f` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-canonical-20260828` | `e423cd462002` | observed live; not explicitly registered active |
 | `integration/compiler-runtime-heavy-promotion-20260901` | `47892ffa16b7` | observed live; not explicitly registered active |
-| `integration/mage-real-e2e-20260912` | `3c780cdcfd5b` | observed live; not explicitly registered active |
+| `integration/mage-real-e2e-20260912` | `11d1fdfd4398` | observed live; not explicitly registered active |
 | `iris/mapanything-ortho-apache` | `3b66a4d2beb5` | observed live; not explicitly registered active |
 | `legacy-geppetto-arachne-reconcile-20260901` | `f687ff8e78a2` | observed live; not explicitly registered active |
 | `m4-closure-20260829` | `95a487b92ab0` | observed live; not explicitly registered active |
@@ -128,6 +128,7 @@ _No active experiments registered._
 | `promote/fit1-evidence-main-20260909` | `9deccb8d051f` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-main-v3-20260905` | `dfb087c6a23e` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-v3-20260905` | `7cfb7efedbe9` | observed live; not explicitly registered active |
+| `repair/mage-full-subject-reclosure-20260912` | `11d1fdfd4398` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety` | `2eb09fe3e8c6` | observed live; not explicitly registered active |

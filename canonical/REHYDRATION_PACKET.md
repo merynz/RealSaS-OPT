@@ -11,7 +11,7 @@
 - **Current state:** `MAGE_FIT1_RIGGING_CORE_CLOSED__IRIS_GSA_GEPPETTO_ARACHNE_V5_PROMOTED__GENERALIZATION_NOT_CLAIMED__PRODUCT_PASS_OPEN`
 - **Active experiment:** `NONE`
 - **Most recent closed gate:** `ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1`
-- **Canonical main:** `3c780cdcfd5b`
+- **Canonical main:** `1609408427d1`
 - **Promotion block:** No additional model promotion is authorized from FIT1 alone; the next learned-science change requires a separately preregistered family-disjoint unseen gate.
 - **Scope warning:** Mage FIT1 same-witness closure is not unseen-family generalization and is not full end-to-end PRODUCT_PASS.
 - **Next visible product milestone:** Demo the closed Mage FIT1 rigging core, then resume with family-disjoint unseen/FIT8-LOFO generalization before any PRODUCT_PASS claim.

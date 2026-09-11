@@ -12,8 +12,8 @@
   "explained_high_signal_count": 281,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 102,
-  "safe_default_evidence_only_branch_count": 95,
+  "live_branch_count": 103,
+  "safe_default_evidence_only_branch_count": 96,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -390,7 +390,7 @@
     },
     {
       "name": "integration/mage-real-e2e-20260912",
-      "sha": "3c780cdcfd5bb1edfa454f5112ca9611bbc5a8a4",
+      "sha": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -426,7 +426,7 @@
     },
     {
       "name": "main",
-      "sha": "3c780cdcfd5bb1edfa454f5112ca9611bbc5a8a4",
+      "sha": "1609408427d12fb5dee9a6277e0cf3f14185d231",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -511,6 +511,12 @@
     {
       "name": "promote/iris-scene-first-signed-v3-20260905",
       "sha": "7cfb7efedbe956c2aa16003e5a7df9bb56c907bb",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "repair/mage-full-subject-reclosure-20260912",
+      "sha": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

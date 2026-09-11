@@ -2,9 +2,11 @@
 
 **Date:** 2026-09-11  
 **Branch:** `exp/arachne-a1-v7-native-fit1-20260911`  
-**Status:** `DRAFT__ARCHITECTURE_TRANSACTION_OPEN__NO_A1_OPTIMIZER_STEP_AUTHORIZED_YET`  
+**Status:** `A0_K4_FROZEN__A1_SOURCE_AND_EXACT_PREREG_TRANSACTION_OPEN__NO_A1_OPTIMIZER_STEP_YET`  
 **Parent audit decision:** `AUDIT_V1_PRE_A1_CLOSED__A0_MAGE_GSA_PASS__K4_MANUAL_INTERFACE_SELECTION`  
 **Selected codec interface:** **4 continuous field tokens per joint**.  
+**Frozen K4 checkpoint SHA-256:** `8a57d296c55298e941402c18d215ea5a1458863df604d3e088f4fb1d2292b5a7`.  
+**A1 supervision bank SHA-256:** `b255a75ae9ff42295547c5f023c63d4781ffd042f06c92a74745b9c7c715211a`.  
 **Product PASS:** not claimed.  
 **Unseen/generalization PASS:** not claimed.
 
@@ -18,7 +20,7 @@ Can a product-time predictor infer the frozen A0 latent skin-field representatio
 
 on the same Mage FIT1 witness?
 
-A1 is a prediction problem, not a representation-capacity problem. A0 has already shown that the selected K=4 codec can represent/decode the Mage skin field at the FIT1 GSA gate.
+A1 is a prediction problem, not a representation-capacity problem. A0 has shown that the selected K=4 codec can represent/decode the Mage skin field at the FIT1 GSA gate with stable-last-3 closure.
 
 ## 2. Hard firewall
 
@@ -73,18 +75,20 @@ A1 must predict exactly the selected A0 latent/decode interface:
 
 - joint count: current qualified G cardinality, 22 on Mage;
 - field tokens per joint: **K=4**;
-- latent channel width: V7 frozen contract;
-- decoder: same frozen selected A0 V7 decoder;
+- latent channel width: **512**;
+- condition-token count: **384**;
+- V7 config hash: `e9d327cedb206e7ae5b074ae04b28e7de89c0e5caecb5f7c183203dbd8336fa1`;
+- decoder/checkpoint SHA-256: `8a57d296c55298e941402c18d215ea5a1458863df604d3e088f4fb1d2292b5a7`;
 - no FSQ / quantizer;
 - no alternate direct-W head in the baseline treatment.
 
 The predictor output is conceptually:
 
-`Z_hat: [J, K=4, C_latent]`
+`Z_hat: [J, K=4, 512]`
 
 and the frozen decoder produces scalar field logits/weights for requested geometry.
 
-No A1 implementation may silently alter token count or decoder semantics.
+The K4 token-interface audit established FP32 full-set permutation invariance (`max abs logit delta = 5.7220458984375e-06 <= 1e-05`). Therefore token rank/order is **not semantic authority**. Ordered token-1 -> token-1 latent regression is forbidden as the primary objective.
 
 ## 4. Architecture direction — provisional baseline
 
@@ -111,22 +115,24 @@ Encode the exact qualified tree with:
 
 - joint position/state;
 - parent/root structure;
-- tree-relative relation bias;
+- tree-relative mechanical context;
 - sparse support-anchor identity as a typed relation.
 
 Compiler-selected topology is immutable input authority. The network does not re-parent or re-root the skeleton.
 
 ### 4.3 Joint-field token queries
 
-Instantiate `J × K` learned/conditioned field-token queries. On Mage this is only `22 × 4 = 88` joint-field tokens.
+Instantiate `J × K` conditioned field-token queries. On Mage this is only `22 × 4 = 88` joint-field tokens.
 
 Because this cardinality is small, baseline fusion should use **dense joint-field reasoning**, not premature factorization.
+
+The four token slots may use learned symmetry-breaking query prototypes, but their numerical slot order carries no semantic authority because the frozen decoder is full-set permutation invariant in FP32.
 
 ### 4.4 Dense surface↔joint-field fusion
 
 Baseline should permit every joint-field token to attend to the complete encoded surface memory, with relation bias from legal point↔joint/segment geometry and exact support-anchor relations.
 
-A limited bidirectional refinement may allow surface memory to update from the current joint-field context before a second joint-field read. This is intended to model joint competition and shared boundaries without hard nearest-bone masking.
+A limited refinement may model joint competition and shared boundaries without hard nearest-bone masking.
 
 Do not impose a hard nearest-joint/top-k surface mask in the baseline.
 
@@ -161,21 +167,20 @@ Therefore the rich legal S+G boundary remains intact even if the first baseline 
 - explicit source component labels;
 - raw rejected parent/root alternatives.
 
-## 6. Training target hierarchy — draft
+## 6. Training target hierarchy — now constrained by K4 interface audit
 
 Teacher W is never fed to the predictor, but may define training targets.
 
-Candidate objective components, to be finalized before optimizer authorization:
+Baseline objective must be behavior-first:
 
-1. **decoded scalar-field reconstruction** using the frozen decoder;
-2. **post-normalization row competition loss** over all qualified joints, so A1 is trained on the coupled skin row rather than only independent marginals;
-3. **hard-tail / blend-boundary error term** defined prospectively from teacher W without becoming a predictor feature;
-4. **optional latent alignment** to `Z* = frozen_A0_encoder(W)` as auxiliary supervision only, with decoded field behavior retaining semantic authority;
-5. **deformation consequence loss** only if its probe is first replaced or supplemented by a parent-relative articulated, joint-permutation-consistent probe contract.
+1. **decoded scalar-field reconstruction** through the frozen K4 decoder;
+2. **post-normalization row competition loss** over all qualified joints, so A1 receives gradient on the coupled skin row rather than independent marginals only;
+3. **hard-tail / blend-boundary behavior** may be added prospectively if frozen before optimizer construction;
+4. **ordered latent alignment is disabled** because K4 token rank is not semantic;
+5. any future latent-set alignment must be permutation-aware and auxiliary only;
+6. deformation consequence loss remains off until a parent-relative articulated, joint-permutation-consistent probe is separately frozen.
 
-The current synthetic translation deformation probe is not sufficient authority by itself for a new primary training loss.
-
-Exact weights are intentionally unset in this draft.
+The current synthetic translation deformation probe remains evaluation/diagnostic only.
 
 ## 7. A1 FIT1 evaluation planes
 
@@ -183,7 +188,7 @@ A1 FIT1 must report separately:
 
 - Mage GSA950 decoded skin-field p95;
 - Mage GSA950 qualified/normalized row error;
-- Mage GSA950 deformation consequence under the accepted probe contract;
+- Mage GSA950 deformation consequence under the declared diagnostic probe;
 - disjoint-surface transfer as a diagnostic co-metric, not an unseen-character claim;
 - Compiler `qualify_skin()` legality/correction accounting;
 - rigid-attachment regional diagnostics for head/hat/book/staff where product-legal evaluation masks are available;
@@ -225,29 +230,26 @@ Not reusable as final authority:
 
 ## 10. Parameter-count policy
 
-No A1 parameter count is frozen yet.
+No claim of minimal or optimal A1 capacity is made in FIT1.
 
-The old ~0.55M predictor is known to be small and information-compressed, but this audit does not prove that raw parameter count was its dominant weakness. The new architecture must first remove the conditioning-boundary confound.
-
-A later controlled capacity ablation may compare parameter scales using the **same rich conditioning contract**.
-
-Do not preregister an arbitrary 120M/150M size without evidence.
+The old ~0.55M predictor is known to be small and information-compressed, but the audit does not prove that raw parameter count was its dominant weakness. The new baseline must first remove the conditioning-boundary confound. A later controlled capacity ablation may compare parameter scales using the **same rich conditioning contract**.
 
 ## 11. Execution gate
 
-### Design / implementation work
+### A0 interface
 
-**AUTHORIZED NOW** on this research branch.
+**CLOSED / FROZEN.**
+
+Authority record: `canonical/ARACHNE_A0_V7_K4_CLOSURE_FREEZE_20260911.md`.
+
+### A1 design / implementation work
+
+**AUTHORIZED.**
 
 ### A1 optimizer training
 
-Blocked only on two concrete items:
-
-1. freeze/materialize an actual K=4 A0 codec checkpoint matching the selected interface;
-2. convert this draft into an exact preregistration with architecture hash/config, optimizer, sampling, objective weights, evaluation/probe definitions and fixed budget.
-
-If the completed K=4 checkpoint cannot be recovered, regenerate only the K=4 closure checkpoint under the existing frozen A0 contract. Do not rerun 8/16/32.
+The frozen K4 artifact prerequisite is satisfied. The remaining blocker is now only the exact A1 source/config/objective/evaluation preregistration transaction. No optimizer object may be constructed before that record binds the final implementation hashes and training constants.
 
 ## 12. Current transition statement
 
-`A0 Mage/GSA representation gate is closed at K=4; larger token count did not show a meaningful practical holdout gain in the operator-observed completed run; K=4 is manually selected for parsimony/continuity; the pre-A1 information audit is closed; V7-native A1 design and implementation may begin now; A1 optimizer remains fail-closed until the frozen K=4 codec artifact and exact A1 preregistration exist.`
+`A0 Mage/GSA representation gate is closed and frozen at K=4; larger token count did not establish a meaningful practical gain; K=4 is manually selected for parsimony/continuity; the K4 token set is semantically unordered under FP32 full-set permutation audit; the pre-A1 information audit is closed; V7-native A1 implementation is authorized; A1 optimizer remains fail-closed only until the exact V7-native A1 source/config/objective/evaluation preregistration is sealed.`

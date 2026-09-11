@@ -11,8 +11,8 @@
 - Explained by continuity policy: **281**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **101**
-- Safe-default evidence-only branches: **94**
+- Live branches: **102**
+- Safe-default evidence-only branches: **95**
 
 ### Classification counts
 
@@ -91,12 +91,13 @@ _None._
 | `ignore-this` | `91b4593d5b2a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/compiler-runtime-canonical-20260828` | `e423cd462002` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `integration/compiler-runtime-heavy-promotion-20260901` | `47892ffa16b7` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `integration/mage-real-e2e-20260912` | `3c780cdcfd5b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `iris/mapanything-ortho-apache` | `3b66a4d2beb5` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `legacy-geppetto-arachne-reconcile-20260901` | `f687ff8e78a2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `76569049dd5a` | `CANONICAL` | canonical branch |
+| `main` | `3c780cdcfd5b` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

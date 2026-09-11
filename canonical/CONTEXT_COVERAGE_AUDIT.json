@@ -12,8 +12,8 @@
   "explained_high_signal_count": 281,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 101,
-  "safe_default_evidence_only_branch_count": 94,
+  "live_branch_count": 102,
+  "safe_default_evidence_only_branch_count": 95,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -389,6 +389,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "integration/mage-real-e2e-20260912",
+      "sha": "3c780cdcfd5bb1edfa454f5112ca9611bbc5a8a4",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "iris/mapanything-ortho-apache",
       "sha": "3b66a4d2beb5bbcb0a87547ac614173cfbe8ae82",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -420,7 +426,7 @@
     },
     {
       "name": "main",
-      "sha": "76569049dd5aec0dc35b768475e2701bacce326b",
+      "sha": "3c780cdcfd5bb1edfa454f5112ca9611bbc5a8a4",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

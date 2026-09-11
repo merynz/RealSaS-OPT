@@ -19,6 +19,7 @@ from .v4_types import (
     ProofPlanIR, MeasurementReportIR, DomainProofReportIR, ProductProofBundleIR,
     CapabilityQualificationIR,
 )
+from .directional_binding import DirectionalJointViewBindingSetIR
 
 @dataclass(frozen=True)
 class ArtifactRoute:
@@ -43,6 +44,7 @@ ARTIFACT_ROUTES: dict[type, ArtifactRoute] = {
     CanonicalPuppetGraphV2: ArtifactRoute("CANONICAL_LEGACY_V2", "Compiler.product_assembly", "puppet", "canonical_puppet_graph_v2.json", ("MotionProof", "Repair", "Export")),
     MechanicalStateIR: ArtifactRoute("CANONICAL_COMPONENT", "Compiler.product_assembly_v3", "puppet", "mechanical_state_ir.json", ("DirectionalRenderer", "Proof", "Export")),
     DirectionalRenderableSetIR: ArtifactRoute("CANONICAL_COMPONENT", "Compiler.product_assembly_v3", "renderables", "directional_renderable_set_ir.json", ("Proof", "Export")),
+    DirectionalJointViewBindingSetIR: ArtifactRoute("DERIVED_QUALIFIED_BINDING", "Compiler.directional_binding", "renderables", "directional_joint_view_binding_set_ir.json", ("MotionProof", "Export", "LivingCompile")),
     CapabilityContractIR: ArtifactRoute("CANONICAL_POLICY", "Compiler.product_assembly_v3", "puppet", "capability_contract_ir.json", ("Proof", "Export")),
     MotionStateIR: ArtifactRoute("CANONICAL_COMPONENT", "MotionCompiler", "motion", "motion_state_ir.json", ("Proof", "Runtime")),
     CanonicalPuppetGraphV3: ArtifactRoute("CANONICAL", "Compiler.product_assembly_v3", "puppet", "canonical_puppet_graph_v3.json", ("Proof", "Repair", "Export")),

@@ -1,0 +1,162 @@
+{
+  "architecture": {
+    "architecture_id": "RealSaS.Arachne.A1.RichQualifiedSurfaceSkeleton.v3",
+    "attention_heads": 8,
+    "autoregressive": false,
+    "config_hash": "2ad623648cbe94d5684416f2ddac779dc343661ca9102d526998b37c62865621",
+    "decoder_trainable": false,
+    "dropout": 0.0,
+    "ffn_ratio": 4,
+    "field_tokens": 4,
+    "fixed_bone_vocabulary": false,
+    "hard_nearest_joint_mask": false,
+    "joint_id_embedding": false,
+    "latent_channels": 512,
+    "model_dim": 512,
+    "parameter_count": 54031920,
+    "skeleton_graph_layers": 3,
+    "surface_graph_layers": 3,
+    "surface_transformer_layers": 4,
+    "token_self_layers": 4,
+    "token_surface_cross_layers": 3
+  },
+  "authority": {
+    "a0_closure_record": "canonical/ARACHNE_A0_V7_K4_CLOSURE_FREEZE_20260911.md",
+    "product_pass_claimed": false,
+    "research_branch": "exp/arachne-a1-v7-native-fit1-20260911",
+    "source_parent_commit": "01d0d0645661d960030f6639b2945425191bc7ce",
+    "unseen_generalization_claimed": false
+  },
+  "authorization": {
+    "a1_optimizer_authorized": true,
+    "architecture_change_after_prereg_requires_new_transaction": true,
+    "authorization_scope": "MAGE_FIT1_ONLY",
+    "product_pass_authorized": false,
+    "unseen_generalization_claim_authorized": false
+  },
+  "created_utc": "2026-09-11T08:55:00Z",
+  "evaluation": {
+    "compiler_qualify_skin_required": true,
+    "compiler_surface_row_count_required": 950,
+    "deformation_probe": "A0_SYNTHETIC_TRANSLATION_CONTINUITY_DIAGNOSTIC",
+    "disjoint_holdout_role": "DIAGNOSTIC_ONLY__SAME_CHARACTER_DISJOINT_SURFACE__NOT_UNSEEN",
+    "fit1_gate": {
+      "gsa950_deformation_error_ratio_max": 0.05,
+      "gsa950_row_l1_p95_max": 0.05,
+      "stable_observations": 3
+    },
+    "minimum_closure_step": 2048,
+    "product_evaluation": false,
+    "unseen_evaluation": false
+  },
+  "frozen_a0": {
+    "bf16_permutation_delta_diagnostic": 0.0016632080078125,
+    "closure_prereg_sha256": "3ffd304691f836926f2e7787d22b6608ec1a249206f6c2535177f2fd9f4fc857",
+    "closure_result_name": "ARACHNE_MAGE_A0_V7_K4_CLOSURE_REGEN_RESULT.json",
+    "closure_result_sha256": "14043d1f2b638d576e86e25568ffa80e931f84807fafe0135f3f328e027abd6c",
+    "condition_tokens": 384,
+    "config_hash": "e9d327cedb206e7ae5b074ae04b28e7de89c0e5caecb5f7c183203dbd8336fa1",
+    "field_tokens": 4,
+    "fp32_full_set_permutation_max_abs_logit_delta": 5.7220458984375e-06,
+    "fp32_permutation_tolerance": 1e-05,
+    "latent_channels": 512,
+    "model_name": "A0_K4_CLOSURE_MODEL_ONLY_FP32.pt",
+    "model_sha256": "8a57d296c55298e941402c18d215ea5a1458863df604d3e088f4fb1d2292b5a7",
+    "ordered_latent_alignment_authorized": false,
+    "supervision_bank_name": "A0_K4_A1_SUPERVISION_BANK.npz",
+    "supervision_bank_sha256": "b255a75ae9ff42295547c5f023c63d4781ffd042f06c92a74745b9c7c715211a"
+  },
+  "mandatory_preflight": {
+    "a0_model_sha_match": true,
+    "codec_frame_parity_max_abs": 5e-05,
+    "condition_query_index_exact_match": true,
+    "gsa950_node_count": 950,
+    "gsa_edge_count": 2813,
+    "joint_permutation_equivariance_tolerance": 0.0002,
+    "optimizer_created_only_after_preflight": true,
+    "qualified_joint_count": 22,
+    "source_and_skeleton_lineage_match": true,
+    "supervision_bank_sha_match": true,
+    "surface_permutation_equivariance_tolerance": 0.0002
+  },
+  "objective": {
+    "deformation_loss_weight": 0.0,
+    "deformation_probe_role": "CONTINUITY_DIAGNOSTIC_ONLY__NOT_TRAINING_AUTHORITY",
+    "loss_config_hash": "c7657fe161eaacfea28e38a1645c744f7ab7bd8c49aceabe1eacfd5f74a78458",
+    "loss_id": "RealSaS.Arachne.A1.BehaviorFirstLoss.v3",
+    "normalized_row_l1_weight": 1.0,
+    "ordered_latent_alignment_weight": 0.0,
+    "scalar_bce_weight": 1.0,
+    "scalar_dice_weight": 1.0,
+    "scalar_mse_weight": 0.1,
+    "teacher_role": "OBJECTIVE_AND_EVALUATION_ONLY__NEVER_PREDICTOR_INPUT"
+  },
+  "rich_conditioning": {
+    "baseline_off": [
+      "teacher_skin_as_predictor_input",
+      "teacher_a0_latent_as_predictor_input",
+      "hidden_source_mesh_geometry",
+      "source_bone_names_or_ids",
+      "character_or_family_identity",
+      "raw_provenance_hashes_as_neural_features",
+      "raw_rejected_geppetto_parent_root_alternatives",
+      "iris_v3_legacy_log_uncertainty",
+      "geppetto_saturated_salience_probability"
+    ],
+    "baseline_on": [
+      "surface_position",
+      "surface_normal_and_validity",
+      "exact_8view_support",
+      "exact_per_view_raster_xy_and_validity",
+      "observed_completed_state",
+      "exact_gsa_graph_and_edge_metadata",
+      "qualified_joint_positions",
+      "exact_qualified_parent_tree_root_deform_root",
+      "exact_sparse_joint_surface_support_anchor_identity",
+      "deterministic_10d_point_joint_parent_segment_geometry"
+    ],
+    "codec_frame_policy": "A1 predictor geometry uses lossless GSA BBOX_CENTER_MAX_SPAN frame; frozen V7 decoder geometry7 uses deterministic 2x normalized XYZ with same normals/validity.",
+    "support_anchor_semantics": "SPARSE_POSITIVE_MECHANICAL_EVIDENCE__NOT_SKIN_MASK"
+  },
+  "schema": "RealSaS.ArachneA1V7NativeFIT1.v1.Preregistration.v1",
+  "scientific_question": "Can a product-time predictor infer the frozen K=4 A0 skin-field latent set from legal RiggingSurfaceIR plus Compiler-qualified skeleton evidence on the Mage FIT1 witness?",
+  "source_blobs": {
+    "compiler/realsas_compiler_core/skin.py": "7d3379df9d13338d8f560588c0f04aed47ec36d7",
+    "compiler/realsas_compiler_core/substrate/scene_first_signed.py": "a55e431faf0680e0d7f2920a85fda6341d45117d",
+    "experiments/arachne_a1_v3_fit1/run_arachne_a1_v3_fit1.py": "0e5117a9a3af6f423ec62eb7088fdfe823c99c17",
+    "models/arachne/v2/arachne_geometry_v2.py": "0a39450b69de48da3b7748cb08972d0b69ff9700",
+    "models/arachne/v3/arachne_candidate_v3.py": "52bedfd7ac2f1c3521e73abecc06e24b5228f418",
+    "models/arachne/v3/conditioning_v3.py": "11dfe6ec89311942582b3d8b4e35eaaf22a4c3cc",
+    "models/arachne/v3/loss_v3.py": "1d32e2a4cc0558fb8d6a45cf1689eba2f6fd1f4b",
+    "models/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py": "647fdcb98c305c3f7d3afd05dd61449999721034",
+    "models/skin_field_codec/v7/skin_field_codec_v7.py": "be85ce3b16c7114fca5dfa39e4ed2f4ae2dda921"
+  },
+  "status": "AUTHORIZED",
+  "storage": {
+    "frozen_a0_checkpoint_not_duplicated_in_a1_checkpoint": true,
+    "result_json": true,
+    "rolling_best_predictor_model_only": true,
+    "trace_json": true
+  },
+  "training": {
+    "a100_required": true,
+    "check_every_steps": 256,
+    "frozen_codec": true,
+    "frozen_decoder": true,
+    "grad_clip_norm": 1.0,
+    "lr": 0.0001,
+    "lr_schedule": "COSINE_TO_0.1_FLOOR",
+    "max_steps": 8192,
+    "minimum_closure_step": 2048,
+    "mixed_precision": "BF16_FORWARD__FP32_MASTER_WEIGHTS_AND_LOSS",
+    "optimizer": "AdamW",
+    "seed": 20260911,
+    "tf32": false,
+    "train_rows_per_step": {
+      "dense8k_product_surface": 192,
+      "gsa950_supervised": 192
+    },
+    "warmup_steps": 256,
+    "weight_decay": 0.0001
+  }
+}

@@ -1,82 +1,146 @@
 # RealSaS — Arachne V7-Native A1 FIT1 Authorization
 
 **Date:** 2026-09-11  
-**Status:** `A1_MAGE_FIT1_OPTIMIZER_AUTHORIZED__EXACT_SOURCE_AND_PREREG_SEALED`  
+**Status:** `A1_V4_FIX1_MAGE_FIT1_OPTIMIZER_AUTHORIZED__PRE_NOTEBOOK_AUDIT_CLOSED`  
 **Branch:** `exp/arachne-a1-v7-native-fit1-20260911`  
 **Product PASS:** not authorized / not claimed.  
 **Unseen/generalization PASS:** not authorized / not claimed.
 
-## Frozen parent
+## Frozen A0 parent
 
-A0 K4 is closed and immutable for this treatment:
-
-- model SHA-256: `8a57d296c55298e941402c18d215ea5a1458863df604d3e088f4fb1d2292b5a7`
+- K4 model SHA-256: `8a57d296c55298e941402c18d215ea5a1458863df604d3e088f4fb1d2292b5a7`
 - A1 supervision/evaluation bank SHA-256: `b255a75ae9ff42295547c5f023c63d4781ffd042f06c92a74745b9c7c715211a`
 - closure result SHA-256: `14043d1f2b638d576e86e25568ffa80e931f84807fafe0135f3f328e027abd6c`
-- K4 closure prereg SHA-256: `3ffd304691f836926f2e7787d22b6608ec1a249206f6c2535177f2fd9f4fc857`
-
-The K4 decoder/interface is frozen. Ordered latent alignment remains forbidden as semantic authority because FP32 full-set token permutation invariance passed (`5.7220458984375e-06 <= 1e-05`).
-
-## Exact A1 treatment
-
-Primary preregistration authority for execution:
-
-- `canonical/ARACHNE_A1_V7_NATIVE_FIT1_PREREG_FIX1_20260911.json`
-- SHA-256: `631ee85bf2e5822f2cc514e76828652fc9341c05f53460a2459c354a6798fd08`
-
-The earlier prereg SHA `faea572a7dee8191eaaa67da90224d2fd381e9991176b26ba82de267b731aed5` was superseded **before any A1 optimizer construction** only to preserve a deterministic canonical-view yaw code beside the typed per-view evidence. Predictor architecture, objective, optimizer, gates and frozen A0 interface were not changed by that supersession.
-
-Bound model contract:
-
-- architecture: `RealSaS.Arachne.A1.RichQualifiedSurfaceSkeleton.v3`
-- architecture config hash: `2ad623648cbe94d5684416f2ddac779dc343661ca9102d526998b37c62865621`
-- trainable predictor parameters: `54,031,920`
+- closure prereg SHA-256: `3ffd304691f836926f2e7787d22b6608ec1a249206f6c2535177f2fd9f4fc857`
 - field tokens: `4`
-- latent width: `512`
+- latent channels: `512`
+- A0 GSA final p95/deformation: `0.04491063521144626 / 0.018186409026384354`
+- stable-last-3: PASS
+- FP32 K4 full-set permutation delta: `5.7220458984375e-06 <= 1e-05`
+
+The frozen decoder therefore consumes an unordered K4 set. Ordered latent alignment is forbidden as semantic authority.
+
+## Supersession
+
+The earlier V3 A1 authorization is **superseded before any A1 optimizer construction**.
+
+V3 was a useful implementation draft, but the final predictor audit found remaining gaps that were important enough to fix before the first A1 treatment: predictor capacity, one-way rather than bidirectional fusion, absolute view-slot leakage through the flat surface input, pair-mask non-consumption, missing hard-tail/blend objective terms, and no direct physically articulated deformation gradient.
+
+Primary audit closure:
+
+- `canonical/ARACHNE_A1_PREDICTOR_FINAL_AUDIT_V2_20260911.md`
+
+Primary execution preregistration:
+
+- `canonical/ARACHNE_A1_V7_NATIVE_FIT1_PREREG_V4_FIX1_20260911.json`
+
+Execution entry point:
+
+- `experiments/arachne_a1_v4_fit1/run_arachne_a1_v4_fit1_fix1.py`
+
+## Final A1 predictor contract
+
+Architecture: `RealSaS.Arachne.A1.RichQualifiedBidirectional.v4`
+
+- trainable predictor parameters: **138,053,153**
+- model width: `640`
+- attention heads: `10` (`64D/head`)
+- exact-edge surface message layers: `4`
+- global surface transformer layers: `6`
+- qualified-tree message layers: `4`
+- joint-field token self layers: `6`
+- dense bidirectional surface↔joint-field fusion rounds: `4`
+- J×K on Mage: `22 × 4 = 88` field tokens
 - non-autoregressive
-- no fixed bone vocabulary / learned joint-ID embedding
+- no fixed bone vocabulary
+- no learned semantic joint-ID embedding
 - no hard nearest-joint mask
-- frozen V7 decoder
+- exact pair legality mask is honored
+- frozen K4 V7 decoder
 
-Bound objective:
+The capacity choice is a deliberate middle point in a same-topology static sweep: `88,451,201` params at width 512, `138,053,153` at width 640, and `198,650,817` at width 768. It removes the tiny-predictor confound without claiming globally optimal capacity.
 
-- loss config hash: `c7657fe161eaacfea28e38a1645c744f7ab7bd8c49aceabe1eacfd5f74a78458`
-- scalar BCE `1.0`
-- scalar MSE `0.1`
-- scalar Dice `1.0`
-- normalized coupled row-L1 `1.0`
-- ordered latent alignment `0.0`
-- deformation training loss `0.0`
+## Rich legal conditioning
 
-Teacher W is objective/evaluation target only and is forbidden from predictor input.
+Predictor inputs preserve/use:
 
-## Rich-boundary closure of audit P0
+- compact surface P/N/normal validity;
+- exact 8-view support;
+- exact per-view raster XY + validity;
+- observed/completed state;
+- exact GSA topology + numeric edge metadata;
+- qualified joint positions;
+- exact accepted parent tree/root/deform-root;
+- exact sparse joint→surface support-anchor identity;
+- deterministic 10D point↔joint/parent-segment geometry;
+- exact pair legality mask;
+- camera-bound yaw Fourier sidecar.
 
-The treatment does not use the historical 20D/8D A1 summaries as the product information boundary. It preserves/uses typed legal evidence including exact GSA topology, per-view support/raster evidence, exact accepted qualified tree, sparse joint->surface mechanical-anchor identity, and deterministic 10D point↔joint/parent-segment geometry.
+View-specific evidence is processed only through a shared view encoder and permutation-invariant pooling. It is no longer flattened into an absolute view-slot vector.
 
-Current IRIS legacy `log_uncertainty`, saturated Geppetto salience magnitude, hidden/source teacher mesh geometry, source bone names, character identity and raw rejected parent/root alternatives are excluded from baseline neural inputs.
+Forbidden predictor evidence remains: teacher W, teacher A0 latent, hidden/source teacher mesh, source bone/component names, family/character identity, provenance hashes, rejected Geppetto root/parent alternatives, current uncalibrated IRIS `log_uncertainty`, saturated Geppetto salience, and frozen codec condition tokens as predictor evidence.
+
+## Final objective
+
+Loss config: `RealSaS.Arachne.A1.BehaviorHardTailArticulatedLoss.v4`
+
+- scalar BCE: `1.0`
+- scalar MSE: `0.1`
+- scalar Dice: `1.0`
+- normalized coupled row-L1: `1.0`
+- hard-tail CVaR10 row-L1: `0.5`
+- blend-boundary row-L1: `0.5`
+- articulated deformation consequence: `0.25`
+- ordered latent alignment: `0.0`
+
+Teacher W is objective/evaluation only.
+
+The new deformation probe is deterministic, parent-relative and based only on qualified joint geometry/tree. It has an explicit joint-permutation-equivariance preflight. The historical synthetic translation probe remains only an A0 continuity metric.
+
+## Mandatory preflight before optimizer construction
+
+- exact A0 checkpoint SHA;
+- exact supervision bank SHA;
+- surface/skeleton lineage;
+- `950` GSA nodes / `2813` edges / `22` joints;
+- exact condition query binding and codec frame parity;
+- exact V4 parameter count;
+- surface permutation equivariance;
+- joint permutation equivariance;
+- view/camera-binding permutation equivariance;
+- support-anchor remapping consistency through those tests;
+- articulated-probe joint permutation equivariance;
+- predictor-input teacher/condition-token firewall;
+- A100/BF16 and minimum VRAM gate.
+
+Optimizer creation occurs only after all of these checks.
 
 ## FIT1 execution contract
 
 - A100 + BF16 forward, FP32 master weights/loss
-- AdamW, LR `1e-4`, WD `1e-4`
-- warmup `256`, cosine floor `0.1`
-- max `8192` steps
-- minimum closure step `2048`
-- check every `256`
-- training query mix: `192 GSA950 supervised + 192 Dense8K product-surface` rows
+- AdamW, LR `5e-5`, WD `1e-4`
+- warmup `512`, cosine floor `0.1`
+- maximum `12,288` steps
+- minimum closure step `2,048`
+- evaluation every `256`
+- train rows/step: `192 GSA950 + 192 Dense8K`
 - GSA row-L1 p95 <= `0.05`
-- GSA deformation continuity diagnostic <= `0.05`
+- historical continuity deformation ratio <= `0.05`
+- Compiler qualified surface rows = `950`
+- Compiler aggregate correction L1 <= `1e-4`
 - stable observations = `3`
-- Compiler `qualify_skin()` required
 - disjoint-surface holdout remains diagnostic only
 
-The current synthetic translation deformation probe is retained only for A0-continuity reporting. It is not a training loss and is not a physical deformation proof.
+The articulated deformation metric is trained and reported in this first V4 treatment but does not receive a post-hoc numerical PASS threshold.
 
 ## Authorization
 
-All frozen-parent, source, conditioning, objective and evaluation contracts required for the Mage A1 FIT1 treatment are now sealed.
+`ARACHNE_A1_PREDICTOR_PRE_NOTEBOOK_AUDIT = CLOSED`
 
-`A1_MAGE_FIT1_OPTIMIZER_AUTHORIZED = TRUE`
+`A1_V3_EXECUTION_AUTHORITY = SUPERSEDED_PRE_OPTIMIZER`
 
-Any architecture/objective/data-boundary change after this record requires a new preregistration transaction.
+`A1_V4_FIX1_MAGE_FIT1_OPTIMIZER_AUTHORIZED = TRUE`
+
+`NOTEBOOK_GENERATION = AUTHORIZED`
+
+Any architecture, feature-boundary, objective, probe, frozen-parent or acceptance-gate change after this record requires a new preregistration transaction.

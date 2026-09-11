@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.ArachneA1V5.FIT1EvidenceManifest.v1",
+  "witness": "Mage FIT1",
+  "promotion_scope": "same-witness learned skinning + Compiler qualification; no unseen-family or PRODUCT_PASS claim",
+  "architecture_id": "RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5",
+  "source": {
+    "v5_path": "models/arachne/v5/arachne_candidate_v5.py",
+    "v5_sha256": "a66adaebe92e9181873888ef90941ad87e4b3d835d21647e65176df4441a0f9e",
+    "v4_backbone_source_commit": "80bdde251f6c9d9f2c026c1a647b6192bd09d5e2",
+    "v4_backbone_checkpoint_sha256": "95c441f97b02123de1a5bc83bdf5ad223363c4b97927e8d420a0d246efbc1763"
+  },
+  "scientific_lineage": {
+    "direct_simplex_16k_report_sha256": "0ed84a22a4aa8e5d7af27ad67ec7e256c397fa48570f4c7eeb694e5d0573ad32",
+    "direct_simplex_16k_seal_sha256": "434ac2495c74a4169d86854dd9cccf8b2618047b99adce8e80c5c61b09d287ef",
+    "direct_simplex_verdict": "BOTH_DIRECT_SIMPLEX_PASS__PREFER_MINIMAL_Z_DECODER_SEAM",
+    "v5_closure_report_sha256": "6ba5d63a5e9d5cab0ebc6f374bc31e86ffb2a3ed325b89dc9880b5b858ce83f4",
+    "v5_closure_seal_sha256": "11fad459db94bc5604585fb63f22a018f538c8d30084d92c0c4e83747c619048",
+    "v5_composite_manifest_sha256": "a6fec97b84739452e4b0126c4107a54f23a585d2f14c00548e0501d12b4c9a4f",
+    "v5_verdict": "PASS__MINIMAL_K4_Z_DIRECT_SIMPLEX_V5_FIT1_CLOSURE"
+  },
+  "metrics": {
+    "gsa_row_l1_p95": 0.04237784981177733,
+    "gsa_deformation_error_ratio": 0.019856400787830353,
+    "gsa_articulated_deformation_ratio": 0.002780771814286709,
+    "gsa_dominant_accuracy": 0.9957173447537473,
+    "compiler_total_correction_l1": 2.9468642839168442e-05,
+    "holdout_p95_diagnostic": 0.15087631421532924
+  },
+  "runtime_guards": {
+    "a0_continuous_field_model_loaded": false,
+    "optimizer_constructed": false,
+    "backward_executed": false,
+    "parameter_update_performed": false,
+    "teacher_predictor_firewall": true
+  },
+  "external_artifacts": {
+    "drive_folder_id": "1olTTBLOSWvTO1o_zaRJY_HCdT7l3BkTj",
+    "closure_report_file_id": "1G03ztpzUsD8BvKXqQtJF71KJm7s2sNXz",
+    "closure_seal_file_id": "12r1i5oY-XAmBbZ0RiuWXsX7HTx3UpoS8",
+    "decoder_delta_file_id": "1_o2XWO5BOSDKGvewJDSGS16jlcMuT9Dx",
+    "demo_four_panel_file_id": "1QyKHf9eeT-q2pz1vtC-kWMDfOksXygnP",
+    "demo_four_panel_sha256": "085556205674c69ed6df58e04df60df39cef9fddbfced5fdedfa814fc519caee"
+  },
+  "upstream_hashes": {
+    "iris_checkpoint_sha256": "766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2",
+    "signed_zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+    "geppetto_checkpoint_sha256": "b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30",
+    "qualified_skeleton_ir_sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "a0_continuous_field_model_loaded": false,
+  "a1_backbone_sha256": "95c441f97b02123de1a5bc83bdf5ad223363c4b97927e8d420a0d246efbc1763",
+  "backward_executed": false,
+  "canonical_promotion_performed": false,
+  "composite_manifest_sha256": "a6fec97b84739452e4b0126c4107a54f23a585d2f14c00548e0501d12b4c9a4f",
+  "decoder_parent_sha256": "078d5155f798d7b926c19463a31bf01c19973be30787f5fbff7916be87894832",
+  "delta_checkpoint_sha256": "13344178bf1b3ce96c9356456db0ad2c8a3945182a5ec63617c50137b8c52137",
+  "evidence_zip_sha256": "d9aa85e18dfaabfc98a3e22d70d369d03ed567d2972904fb00530894722d1a2d",
+  "next_experiment_family": "V5_FAMILY_DISJOINT_UNSEEN_GENERALIZATION_GATE",
+  "optimizer_constructed": false,
+  "parameter_update_performed": false,
+  "readme_sha256": "529cfc251f2e81b9630f50d152199f21a7a3b60d58fb83d428d138a653571bcf",
+  "report_sha256": "6ba5d63a5e9d5cab0ebc6f374bc31e86ffb2a3ed325b89dc9880b5b858ce83f4",
+  "schema": "RealSaS.ArachneA1V5.MinimalK4DirectSimplexClosureSeal.v1",
+  "status": "PASS__V5_CANDIDATE_CLOSURE_COMPLETE",
+  "unseen_family_claimed": false,
+  "v5_source_sha256": "a66adaebe92e9181873888ef90941ad87e4b3d835d21647e65176df4441a0f9e",
+  "verdict": "PASS__MINIMAL_K4_Z_DIRECT_SIMPLEX_V5_FIT1_CLOSURE"
+}

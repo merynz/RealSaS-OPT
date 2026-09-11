@@ -12,8 +12,8 @@
   "explained_high_signal_count": 275,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 100,
-  "safe_default_evidence_only_branch_count": 93,
+  "live_branch_count": 101,
+  "safe_default_evidence_only_branch_count": 94,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -78,7 +78,7 @@
     },
     {
       "name": "audit/arachne-information-preservation-v1-20260910",
-      "sha": "67a1ff1f67d5d2e7f8e6ba2630f388aab9432440",
+      "sha": "4c05c4e03103102a432f440c97f8ed2cbda82208",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -205,6 +205,12 @@
     {
       "name": "e2e/mage-scene-first-v1-20260905-audit-temp",
       "sha": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "exp/arachne-a1-v7-native-fit1-20260911",
+      "sha": "4c05c4e03103102a432f440c97f8ed2cbda82208",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -414,7 +420,7 @@
     },
     {
       "name": "main",
-      "sha": "67a1ff1f67d5d2e7f8e6ba2630f388aab9432440",
+      "sha": "af27b8a610eabec1ff7c899057b1682311a24952",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },

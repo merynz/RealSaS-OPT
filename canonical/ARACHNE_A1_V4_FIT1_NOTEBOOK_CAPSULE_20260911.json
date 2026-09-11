@@ -1,0 +1,39 @@
+{
+  "schema": "RealSaS.ArachneA1V4FIT1.NotebookCapsule.v1",
+  "date": "2026-09-11",
+  "status": "PACKAGED__NOT_EXECUTED",
+  "notebook_name": "REALSAS_ARACHNE_A1_V4_FIT1_A100_RUN_ALL.ipynb",
+  "notebook_sha256": "d9b3ebe5a39534864f4b0d2b4580f0fec69aae61e8df013e525997b012017cd1",
+  "notebook_cell_count": 9,
+  "scientific_source_commit": "cb2384e8db6f0771feadaff5c00482ba05a789a0",
+  "scientific_source_tree": "0bebb6201fcd6f85aa950d477cdfaf07aa92d057",
+  "execution_seal_commit": "8745e9f84103877c946909ebb3ffb88517f5810d",
+  "prereg_path": "canonical/ARACHNE_A1_V4_FIT1_PREREG_20260911.json",
+  "prereg_sha256": "0a8beade2f4d0348edc45b7bf55e893b9b17cf0b2f04bf5c34226d596ace6443",
+  "runner_path": "experiments/arachne_a1_v4_fit1/run_arachne_a1_v4_fit1_sealed.py",
+  "runner_git_blob_sha": "d0b74499cbcdbec2efcd67df4b97b58e8918c6f7",
+  "frozen_a0_model_sha256": "8a57d296c55298e941402c18d215ea5a1458863df604d3e088f4fb1d2292b5a7",
+  "frozen_a0_supervision_bank_sha256": "b255a75ae9ff42295547c5f023c63d4781ffd042f06c92a74745b9c7c715211a",
+  "execution_policy": {
+    "gpu": "A100_40GB_OR_GREATER",
+    "run_mode": "COLAB_RUN_ALL",
+    "private_repo_auth": "COLAB_SECRET_GITHUB_TOKEN",
+    "source_checkout": "DETACHED_EXACT_COMMIT",
+    "static_compile_before_optimizer": true,
+    "focused_contract_tests_before_optimizer": true,
+    "real_input_preflight_before_optimizer": true,
+    "optimizer_created_only_inside_sealed_runner_after_step0_preflight": true,
+    "rolling_best_predictor_only": true,
+    "optimizer_state_persisted": false
+  },
+  "expected_drive_output": "/content/drive/MyDrive/ARACHNE_MAGE_A1_V4_FIT1_20260911/MAIN",
+  "expected_primary_artifacts": [
+    "ARACHNE_A1_V4_FIT1_TRACE.json",
+    "ARACHNE_A1_V4_FIT1_MODEL_ONLY_FP32.pt",
+    "ARACHNE_A1_V4_FIT1_RESULT.json",
+    "A1_V4_NOTEBOOK_PREFLIGHT.json"
+  ],
+  "product_pass_claimed": false,
+  "unseen_generalization_claimed": false,
+  "main_promoted_state_changed": false
+}

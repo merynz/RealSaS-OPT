@@ -8,6 +8,7 @@ RiggingSurfaceIR + Compiler-qualified skeleton state:
 
 - exact GSA local-relation graph and edge metadata;
 - exact per-view support and raster coordinates/validity;
+- deterministic camera-yaw code bound to each canonical view slot;
 - observed/completed/validity state;
 - exact accepted skeleton tree/root/deform-root state;
 - exact sparse joint->surface mechanical support-anchor identity;
@@ -60,11 +61,7 @@ def _hash(v) -> str:
 
 
 def deterministic_fps(points: np.ndarray, count: int) -> np.ndarray:
-    """Deterministic farthest-point sampling matching the current A0 policy.
-
-    The first point is deterministic (row 0). Ties are resolved by NumPy's
-    first-argmax behavior, so no semantic ID or random seed enters selection.
-    """
+    """Deterministic farthest-point sampling matching the current A0 policy."""
     p = np.asarray(points, np.float64)
     if p.ndim != 2 or p.shape[1] != 3 or not np.isfinite(p).all():
         raise ValueError("FPS points must be finite [N,3]")
@@ -82,6 +79,19 @@ def deterministic_fps(points: np.ndarray, count: int) -> np.ndarray:
     if len(np.unique(out)) != count:
         raise RuntimeError("deterministic FPS produced duplicate query indices")
     return out
+
+
+def canonical_view_yaw_code() -> np.ndarray:
+    """Canonical view identity as geometry, not a learned V0..V7 slot.
+
+    The product camera contract binds view index i to yaw i*45 degrees. Keeping
+    this code beside the corresponding raster/support evidence allows a legal
+    view permutation to permute evidence and camera code together.
+    """
+    yaw = np.arange(8, dtype=np.float64) * (math.pi / 4.0)
+    return np.stack(
+        [np.sin(yaw), np.cos(yaw), np.sin(2.0*yaw), np.cos(2.0*yaw)], axis=-1
+    ).astype(np.float32)
 
 
 def _depths(parent: np.ndarray, valid: np.ndarray) -> np.ndarray:
@@ -126,6 +136,7 @@ class ArachneRichConditioningBatchV3:
     surface_support_views: np.ndarray
     surface_raster_xy: np.ndarray
     surface_raster_valid: np.ndarray
+    view_yaw_code: np.ndarray
     surface_observed: np.ndarray
     surface_completed: np.ndarray
     surface_validity_bits: np.ndarray
@@ -232,6 +243,7 @@ class ArachneRichConditioningAdapterV3:
         rkmap = {x: i for i, x in enumerate(rvocab)}
         pw=np.zeros((B,N,3),np.float32); pn=np.zeros((B,N,3),np.float32); sn=np.zeros((B,N,3),np.float32)
         snv=np.zeros((B,N),bool); sup=np.zeros((B,N,8),bool); rxy=np.zeros((B,N,8,2),np.float32); rv=np.zeros((B,N,8),bool)
+        view_yaw=np.broadcast_to(canonical_view_yaw_code()[None],(B,8,4)).copy()
         obs=np.zeros((B,N),bool); comp=np.zeros((B,N),bool); vbits=np.zeros((B,N,len(vv)),bool); sm=np.zeros((B,N),bool)
         ei=np.zeros((B,E,2),np.int64); ef=np.zeros((B,E,4),np.float32); erk=np.zeros((B,E),np.int64); em=np.zeros((B,E),bool)
         jp=np.zeros((B,J,3),np.float32); jm=np.zeros((B,J),bool); pi=np.full((B,J),-1,np.int64); root=np.zeros((B,J),bool)
@@ -259,8 +271,8 @@ class ArachneRichConditioningAdapterV3:
         geometry7=np.concatenate([2.0*pn,sn,snv[...,None].astype(np.float32)],axis=-1).astype(np.float32)
         for b in range(B):
             n=int(sm[b].sum()); j=int(jm[b].sum())
-            ch.append(_hash({"schema":SCHEMA,"surface_hash":sh[b],"skeleton_hash":gh[b],"surface_tensorization_hash":th[b],"surface_ids":sids_all[b],"joint_ids":jids_all[b],"positions_normalized":pn[b,:n],"support":sup[b,:n],"raster_xy":rxy[b,:n],"raster_valid":rv[b,:n],"observed":obs[b,:n],"completed":comp[b,:n],"validity_vocab":vv,"validity_bits":vbits[b,:n],"edge_index":ei[b,em[b]],"edge_features":ef[b,em[b]],"edge_relation_kind":erk[b,em[b]],"relation_kind_vocab":rvocab,"joint_positions":jp[b,:j],"parent_indices":pi[b,:j],"root_mask":root[b,:j],"deform_root_mask":deform[b,:j],"support_anchor_matrix":anchors[b,:j,:n],"pair_geometry_contract":PAIR_GEOMETRY_CONTRACT_V2,"condition_query_indices":qidx[b]}))
-        return ArachneRichConditioningBatchV3(tuple(sids_all),tuple(jids_all),pw,pn,sn,snv,sup,rxy,rv,obs,comp,vbits,vv,sm,ei,ef,erk,rvocab,em,jp,jm,pi,root,deform,depth,anchors,pair,pair_mask,PAIR_GEOMETRY_CONTRACT_V2,geometry7,qidx,tuple(sh),tuple(gh),tuple(th),tuple(ch),tuple(assembly_bindings))
+            ch.append(_hash({"schema":SCHEMA,"surface_hash":sh[b],"skeleton_hash":gh[b],"surface_tensorization_hash":th[b],"surface_ids":sids_all[b],"joint_ids":jids_all[b],"positions_normalized":pn[b,:n],"support":sup[b,:n],"raster_xy":rxy[b,:n],"raster_valid":rv[b,:n],"view_yaw_code":view_yaw[b],"observed":obs[b,:n],"completed":comp[b,:n],"validity_vocab":vv,"validity_bits":vbits[b,:n],"edge_index":ei[b,em[b]],"edge_features":ef[b,em[b]],"edge_relation_kind":erk[b,em[b]],"relation_kind_vocab":rvocab,"joint_positions":jp[b,:j],"parent_indices":pi[b,:j],"root_mask":root[b,:j],"deform_root_mask":deform[b,:j],"support_anchor_matrix":anchors[b,:j,:n],"pair_geometry_contract":PAIR_GEOMETRY_CONTRACT_V2,"condition_query_indices":qidx[b]}))
+        return ArachneRichConditioningBatchV3(tuple(sids_all),tuple(jids_all),pw,pn,sn,snv,sup,rxy,rv,view_yaw,obs,comp,vbits,vv,sm,ei,ef,erk,rvocab,em,jp,jm,pi,root,deform,depth,anchors,pair,pair_mask,PAIR_GEOMETRY_CONTRACT_V2,geometry7,qidx,tuple(sh),tuple(gh),tuple(th),tuple(ch),tuple(assembly_bindings))
 
 
-__all__ = ["SCHEMA","CONDITION_QUERY_COUNT","deterministic_fps","ArachneRichConditioningBatchV3","ArachneRichConditioningAdapterV3"]
+__all__ = ["SCHEMA","CONDITION_QUERY_COUNT","canonical_view_yaw_code","deterministic_fps","ArachneRichConditioningBatchV3","ArachneRichConditioningAdapterV3"]

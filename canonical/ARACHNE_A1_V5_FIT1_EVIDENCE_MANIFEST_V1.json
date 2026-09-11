@@ -3,11 +3,21 @@
   "witness": "Mage FIT1",
   "promotion_scope": "same-witness learned skinning + Compiler qualification; no unseen-family or PRODUCT_PASS claim",
   "architecture_id": "RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5",
+  "promotion_commit": "03d9f87dbb7100a72293915cf682cbf338335a37",
   "source": {
     "v5_path": "models/arachne/v5/arachne_candidate_v5.py",
     "v5_sha256": "a66adaebe92e9181873888ef90941ad87e4b3d835d21647e65176df4441a0f9e",
     "v4_backbone_source_commit": "80bdde251f6c9d9f2c026c1a647b6192bd09d5e2",
     "v4_backbone_checkpoint_sha256": "95c441f97b02123de1a5bc83bdf5ad223363c4b97927e8d420a0d246efbc1763"
+  },
+  "checkpoint": {
+    "backbone_drive_id": "1HJC4GPMcWa0jEXCYgctUtW09tXn4I9ND",
+    "backbone_size_bytes": 552378987,
+    "decoder_delta_sha256": "13344178bf1b3ce96c9356456db0ad2c8a3945182a5ec63617c50137b8c52137",
+    "decoder_delta_drive_id": "1_o2XWO5BOSDKGvewJDSGS16jlcMuT9Dx",
+    "decoder_parameters": 325313,
+    "total_parameters": 138378466,
+    "authority_path": "models/arachne/v5/FROZEN_MAGE_FIT1_CHECKPOINT_V1.json"
   },
   "scientific_lineage": {
     "direct_simplex_16k_report_sha256": "0ed84a22a4aa8e5d7af27ad67ec7e256c397fa48570f4c7eeb694e5d0573ad32",
@@ -23,6 +33,7 @@
     "gsa_deformation_error_ratio": 0.019856400787830353,
     "gsa_articulated_deformation_ratio": 0.002780771814286709,
     "gsa_dominant_accuracy": 0.9957173447537473,
+    "compiler_row_count": 950,
     "compiler_total_correction_l1": 2.9468642839168442e-05,
     "holdout_p95_diagnostic": 0.15087631421532924
   },
@@ -38,13 +49,19 @@
     "closure_report_file_id": "1G03ztpzUsD8BvKXqQtJF71KJm7s2sNXz",
     "closure_seal_file_id": "12r1i5oY-XAmBbZ0RiuWXsX7HTx3UpoS8",
     "decoder_delta_file_id": "1_o2XWO5BOSDKGvewJDSGS16jlcMuT9Dx",
-    "demo_four_panel_file_id": "1QyKHf9eeT-q2pz1vtC-kWMDfOksXygnP",
-    "demo_four_panel_sha256": "085556205674c69ed6df58e04df60df39cef9fddbfced5fdedfa814fc519caee"
+    "backbone_checkpoint_file_id": "1HJC4GPMcWa0jEXCYgctUtW09tXn4I9ND",
+    "demo_four_panel_file_id": "166xERJMQyqn6sV9DO_jGCNDkpyFmnDT-",
+    "demo_four_panel_sha256": "ff24e037ef15c7b4be12b3d88375ec68b2e515bcda54b69187bf46271e52292a"
   },
   "upstream_hashes": {
     "iris_checkpoint_sha256": "766f43cefd98925ada804853bafff93bb2352e23ba4a4e77e38174ae9e6b83a2",
     "signed_zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
     "geppetto_checkpoint_sha256": "b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30",
     "qualified_skeleton_ir_sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992"
+  },
+  "claim_boundary": {
+    "mage_fit1_rigging_core_closed": true,
+    "unseen_family_claimed": false,
+    "product_pass_claimed": false
   }
 }

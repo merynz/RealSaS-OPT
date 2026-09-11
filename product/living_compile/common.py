@@ -11,6 +11,7 @@ Json = dict[str, Any]
 VIEW_LABELS = ("S", "SE", "E", "NE", "N", "NW", "W", "SW")
 PRODUCT_SCHEMA = "RealSaS.CanonicalPuppetGraph.v3"
 PROOF_SCHEMA = "RealSaS.ProductProofBundleIR.v1"
+DIRECTIONAL_BINDING_SCHEMA = "RealSaS.DirectionalJointViewBindingSetIR.v1"
 MOTION_BAKE_SCHEMA = "RealSaS.QualificationOwnedMotionBakeIR.v1"
 USER_LAYER_SCHEMA = "RealSaS.UserPuppetEditLayer.v3"
 
@@ -116,6 +117,16 @@ def _proof_path(root: Path) -> Path:
     raise LivingCompileError("V4 product proof not found (proof/product_proof_bundle_ir.json)")
 
 
+def _directional_binding_path(root: Path) -> Path | None:
+    for path in (
+        root / "renderables" / "directional_joint_view_binding_set_ir.json",
+        root / "directional_joint_view_binding_set_ir.json",
+    ):
+        if path.is_file():
+            return path
+    return None
+
+
 def load_product(root: Path) -> Json:
     product = json_load(_product_path(root))
     if product.get("schema_version") != PRODUCT_SCHEMA:
@@ -134,6 +145,63 @@ def load_proof(root: Path, product: Mapping[str, Any]) -> Json:
     if proof.get("source_product_state_hash") != product.get("product_state_hash"):
         raise LivingCompileError("proof/product lineage mismatch")
     return proof
+
+
+def load_directional_binding(root: Path, product: Mapping[str, Any], *, required: bool = False) -> Json | None:
+    path = _directional_binding_path(root)
+    if path is None:
+        if required:
+            raise LivingCompileError("qualified directional joint/view binding not found")
+        return None
+    binding = json_load(path)
+    if binding.get("schema_version") != DIRECTIONAL_BINDING_SCHEMA:
+        raise LivingCompileError(f"unsupported directional binding schema: {binding.get('schema_version')}")
+    mechanical = product.get("mechanical_state") or {}
+    surface = mechanical.get("surface") or {}
+    skeleton = mechanical.get("skeleton") or {}
+    visuals = product.get("directional_renderables") or {}
+    expected = {
+        "source_product_state_hash": product.get("product_state_hash"),
+        "surface_lineage_hash": surface.get("geometry_lineage_hash"),
+        "skeleton_lineage_hash": skeleton.get("skeleton_lineage_hash"),
+        "directional_visual_state_hash": visuals.get("directional_visual_state_hash"),
+    }
+    for field, value in expected.items():
+        if binding.get(field) != value:
+            raise LivingCompileError(f"directional binding lineage mismatch: {field}")
+    directions = {int(row.get("view_index", -1)): row for row in list(visuals.get("directions") or [])}
+    projections = list(binding.get("projections") or [])
+    if len(projections) != 8 or set(directions) != set(range(8)):
+        raise LivingCompileError("directional binding requires exact views 0..7")
+    projection_hashes: dict[int, str] = {}
+    for row in projections:
+        view = int(row.get("view_index", -1))
+        if view not in directions or view in projection_hashes:
+            raise LivingCompileError("directional binding projection set is invalid")
+        if row.get("camera_binding_hash") != directions[view].get("camera_binding_hash"):
+            raise LivingCompileError(f"directional binding camera mismatch: V{view}")
+        ph = str(row.get("projection_binding_hash") or "")
+        if not ph:
+            raise LivingCompileError(f"directional binding projection hash missing: V{view}")
+        projection_hashes[view] = ph
+    joint_ids = {str(j.get("canonical_joint_id") or "") for j in list(skeleton.get("joints") or [])}
+    pivots: set[tuple[int, str]] = set()
+    for row in list(binding.get("joint_pivots") or []):
+        view = int(row.get("view_index", -1))
+        jid = str(row.get("canonical_joint_id") or "")
+        key = (view, jid)
+        if view not in projection_hashes or jid not in joint_ids or key in pivots:
+            raise LivingCompileError("directional binding pivot set is invalid")
+        finite_pair(row.get("raster_xy"), field=f"directional pivot V{view}:{jid}")
+        if row.get("projection_binding_hash") != projection_hashes[view]:
+            raise LivingCompileError(f"directional pivot projection mismatch: V{view}:{jid}")
+        pivots.add(key)
+    expected_pivots = {(view, jid) for view in range(8) for jid in joint_ids}
+    if pivots != expected_pivots:
+        raise LivingCompileError("directional binding pivot set is incomplete")
+    if not str(binding.get("binding_set_hash") or ""):
+        raise LivingCompileError("directional binding set hash missing")
+    return binding
 
 
 def surface_raster(product: Mapping[str, Any], view_index: int) -> dict[str, tuple[float, float]]:

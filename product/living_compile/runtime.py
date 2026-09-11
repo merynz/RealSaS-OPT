@@ -25,8 +25,16 @@ def motion_bakes(root: Path) -> dict[str, Json]:
 def runtime_clips(root: Path) -> Json:
     product = load_product(root)
     proof = load_proof(root, product)
-    if proof.get("overall_status") != "PASS":
-        raise LivingCompileError("runtime preview requires current PASS proof")
+    proof_status = str(proof.get("overall_status") or "UNKNOWN")
+    if proof_status != "PASS":
+        return {
+            "schema_version": "RealSaS.LivingCompileRuntimeIndex.v1",
+            "clips": [],
+            "proof_hash": proof.get("proof_bundle_hash"),
+            "proof_status": proof_status,
+            "preview_available": False,
+            "authority": "RUNTIME_PREVIEW_WITHHELD_UNTIL_CURRENT_PASS_PROOF",
+        }
     bakes = motion_bakes(root)
     product_clips = {str(row.get("clip_id")): row for row in list((product.get("motion_state") or {}).get("clips") or [])}
     clips = []
@@ -43,7 +51,14 @@ def runtime_clips(root: Path) -> Json:
             "bake_hash": bake.get("bake_hash"),
             "authority": "QUALIFICATION_OWNED_MOTION_BAKE",
         })
-    return {"schema_version": "RealSaS.LivingCompileRuntimeIndex.v1", "clips": clips, "proof_hash": proof.get("proof_bundle_hash")}
+    return {
+        "schema_version": "RealSaS.LivingCompileRuntimeIndex.v1",
+        "clips": clips,
+        "proof_hash": proof.get("proof_bundle_hash"),
+        "proof_status": proof_status,
+        "preview_available": True,
+        "authority": "QUALIFICATION_OWNED_MOTION_BAKE",
+    }
 
 
 def _frame_mesh_dict(frame: Mapping[str, Any]) -> dict[str, list[list[float]]]:

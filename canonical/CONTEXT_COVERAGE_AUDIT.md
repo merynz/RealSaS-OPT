@@ -6,9 +6,9 @@
 
 ## Coverage
 
-- Git-tracked files: **874**
-- High-signal knowledge artifacts: **275**
-- Explained by continuity policy: **275**
+- Git-tracked files: **893**
+- High-signal knowledge artifacts: **281**
+- Explained by continuity policy: **281**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
 - Live branches: **101**
@@ -17,7 +17,7 @@
 ### Classification counts
 
 - `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL`: **147**
-- `INDEXED_EXPLICIT`: **128**
+- `INDEXED_EXPLICIT`: **134**
 
 `FIT1_COMMIT_LEDGER_COVERED` means exact provenance is recoverable; it does **not** mean the artifact's scientific claim is promoted. `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL` means the artifact predates the FIT1 gate and remains evidence/provenance unless another authority explicitly promotes it.
 
@@ -39,7 +39,7 @@ _None._
 | `architecture-v4-single-family-e2e-20260902` | `c84658b8b95c` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `architecture/compiler-ir-solver-canonical-20260825` | `7163fac1f333` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `architecture/v4-generic-strength-source-completion-20260902` | `7f39a846ad05` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `audit/arachne-information-preservation-v1-20260910` | `4c05c4e03103` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `audit/arachne-information-preservation-v1-20260910` | `94b4ef79e9b8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/final-completion-plan-20260902` | `00e930e788d3` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/geppetto-v2-frozen-base-7f39` | `7f39a846ad05` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `audit/iris-architecture-discipline-20260824` | `d7bba01c85e9` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -61,7 +61,7 @@ _None._
 | `dummy-unused` | `3609f2cc0cfc` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `e2e/mage-scene-first-v1-20260905` | `c6b5108f672b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `e2e/mage-scene-first-v1-20260905-audit-temp` | `91b4593d5b2a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `exp/arachne-a1-v7-native-fit1-20260911` | `4c05c4e03103` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `exp/arachne-a1-v7-native-fit1-20260911` | `80bdde251f6c` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `exp/arachne-skintokens-cleanroom-fit1-20260908` | `d0b666725e79` | `EVIDENCE_ONLY` | explicit authority-map override |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910` | `dc4ea7e1a6d6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-canonical` | `dc4ea7e1a6d6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -96,7 +96,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `af27b8a610ea` | `CANONICAL` | canonical branch |
+| `main` | `76569049dd5a` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

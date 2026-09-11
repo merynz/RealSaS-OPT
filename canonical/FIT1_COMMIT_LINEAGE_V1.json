@@ -9,7 +9,7 @@
     "__invalid_probe_do_not_create": "a51617400b40a6f81e1c6abe6b59e25329ad9e0e",
     "__tmp_invalid_do_not_use": "6d2e926892c239cb3620f1b6dfb1393ab56b2d52",
     "architecture/v4-generic-strength-source-completion-20260902": "7f39a846ad05f91560836026e5ef6dfbc74dc731",
-    "audit/arachne-information-preservation-v1-20260910": "4c05c4e03103102a432f440c97f8ed2cbda82208",
+    "audit/arachne-information-preservation-v1-20260910": "94b4ef79e9b8311481b7d063d07c5ad88e071f23",
     "audit/final-completion-plan-20260902": "00e930e788d346eadceae22623fea834bf412a54",
     "audit/geppetto-v2-frozen-base-7f39": "7f39a846ad05f91560836026e5ef6dfbc74dc731",
     "baseline/h0-first-family-v1-20260904": "a3cec7021f0d476b111b5bab37b8d4f1fee6b4c2",
@@ -24,7 +24,7 @@
     "dummy-unused": "3609f2cc0cfcfde1a3b1f303d45adbed36c6d626",
     "e2e/mage-scene-first-v1-20260905": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "e2e/mage-scene-first-v1-20260905-audit-temp": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
-    "exp/arachne-a1-v7-native-fit1-20260911": "4c05c4e03103102a432f440c97f8ed2cbda82208",
+    "exp/arachne-a1-v7-native-fit1-20260911": "80bdde251f6c9d9f2c026c1a647b6192bd09d5e2",
     "exp/arachne-skintokens-cleanroom-fit1-20260908": "d0b666725e79f3beb0ea001f456375421cc14375",
     "exp/arachne-v7-dense-consumer-view-diagnosis-20260910": "dc4ea7e1a6d64a5944c1b2192d6ea27214456392",
     "exp/arachne-v7-dense-consumer-view-diagnosis-20260910-canonical": "dc4ea7e1a6d64a5944c1b2192d6ea27214456392",
@@ -48,7 +48,7 @@
     "fit/single-family-mage-v1-20260902": "f2cd746f8bebf24c9c0c20d5c33743d24f9b0fa2",
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
-    "main": "af27b8a610eabec1ff7c899057b1682311a24952",
+    "main": "76569049dd5aec0dc35b768475e2701bacce326b",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "promote/fit1-evidence-main-20260909": "9deccb8d051fd85780c28a29591df40fbafc4570",
@@ -73,7 +73,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1063,
+  "commit_count": 1123,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -52049,6 +52049,1351 @@
       "main_reachable": false,
       "changed_paths": [
         "canonical/ARACHNE_INFORMATION_PRESERVATION_AUDIT_V1_STATUS_20260911.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0572c17daf28c92d06a8483ab2b9118d5f1e555f",
+      "parents": [
+        "af27b8a610eabec1ff7c899057b1682311a24952"
+      ],
+      "author_time": "2026-09-11T08:34:48+03:00",
+      "committer_time": "2026-09-11T08:34:48+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fd254be5446c252ce96999a816e1c628dd36b102",
+      "parents": [
+        "4c05c4e03103102a432f440c97f8ed2cbda82208"
+      ],
+      "author_time": "2026-09-11T08:35:03+03:00",
+      "committer_time": "2026-09-11T08:35:03+03:00",
+      "subject": "Open V7-native A1 FIT1 architecture prereg draft",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V7_NATIVE_FIT1_PREREG_DRAFT_20260911.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a5c5e13c8c3455923c7b60ce7568518e5b9078ec",
+      "parents": [
+        "fd254be5446c252ce96999a816e1c628dd36b102"
+      ],
+      "author_time": "2026-09-11T09:02:59+03:00",
+      "committer_time": "2026-09-11T09:02:59+03:00",
+      "subject": "placeholder",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/arachne/v3/conditioning_v3.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "84b06fb3dae3e833866b85a6e83563f09ce286c4",
+      "parents": [
+        "a5c5e13c8c3455923c7b60ce7568518e5b9078ec"
+      ],
+      "author_time": "2026-09-11T09:03:55+03:00",
+      "committer_time": "2026-09-11T09:03:55+03:00",
+      "subject": "Implement rich V7-native A1 conditioning boundary",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/arachne/v3/conditioning_v3.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "86fdd4a1bfbf5269b5c516de9f2a3ed6b952caf6",
+      "parents": [
+        "84b06fb3dae3e833866b85a6e83563f09ce286c4"
+      ],
+      "author_time": "2026-09-11T11:46:55+03:00",
+      "committer_time": "2026-09-11T11:46:55+03:00",
+      "subject": "Seal A0 K4 closure and token-interface audit",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A0_V7_K4_CLOSURE_FREEZE_20260911.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1585507c8d5ebbfd5739dc3b81644c4f274d3467",
+      "parents": [
+        "86fdd4a1bfbf5269b5c516de9f2a3ed6b952caf6"
+      ],
+      "author_time": "2026-09-11T11:47:24+03:00",
+      "committer_time": "2026-09-11T11:47:24+03:00",
+      "subject": "Bind A1 draft to frozen K4 closure",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V7_NATIVE_FIT1_PREREG_DRAFT_20260911.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9a64ca938c4a7afad8ca08fa9cb94530030361c7",
+      "parents": [
+        "1585507c8d5ebbfd5739dc3b81644c4f274d3467"
+      ],
+      "author_time": "2026-09-11T11:49:43+03:00",
+      "committer_time": "2026-09-11T11:49:43+03:00",
+      "subject": "Implement V7-native rich A1 predictor",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/arachne/v3/arachne_candidate_v3.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "81a1dcd19db1bef3af9182e6e83cb04d9893f547",
+      "parents": [
+        "9a64ca938c4a7afad8ca08fa9cb94530030361c7"
+      ],
+      "author_time": "2026-09-11T11:50:01+03:00",
+      "committer_time": "2026-09-11T11:50:01+03:00",
+      "subject": "Add behavior-first A1 FIT1 loss",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/arachne/v3/loss_v3.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "14497202c63e4488fca3894bd02cd7ebbe2d8830",
+      "parents": [
+        "81a1dcd19db1bef3af9182e6e83cb04d9893f547"
+      ],
+      "author_time": "2026-09-11T11:50:09+03:00",
+      "committer_time": "2026-09-11T11:50:09+03:00",
+      "subject": "Export V7-native A1 modules",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/arachne/v3/__init__.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8b37315641ae6e66d2d6430c01b905082c589fea",
+      "parents": [
+        "14497202c63e4488fca3894bd02cd7ebbe2d8830"
+      ],
+      "author_time": "2026-09-11T11:51:41+03:00",
+      "committer_time": "2026-09-11T11:51:41+03:00",
+      "subject": "Vendor frozen A0 V7 codec source for A1",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/skin_field_codec/v7/__init__.py",
+        "models/skin_field_codec/v7/skin_field_codec_v7.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "01d0d0645661d960030f6639b2945425191bc7ce",
+      "parents": [
+        "8b37315641ae6e66d2d6430c01b905082c589fea"
+      ],
+      "author_time": "2026-09-11T11:56:53+03:00",
+      "committer_time": "2026-09-11T11:56:53+03:00",
+      "subject": "Implement fail-closed V7-native A1 FIT1 runner",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/arachne_a1_v3_fit1/run_arachne_a1_v3_fit1.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "865e2e3a3c3e00020e7e7e898f7bd4b3fb6144c2",
+      "parents": [
+        "01d0d0645661d960030f6639b2945425191bc7ce"
+      ],
+      "author_time": "2026-09-11T11:59:57+03:00",
+      "committer_time": "2026-09-11T11:59:57+03:00",
+      "subject": "Seal exact V7-native A1 FIT1 preregistration",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V7_NATIVE_FIT1_PREREG_20260911.json"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d7e5ad8540d21fe8896c299d9a6b9c298cf86da9",
+      "parents": [
+        "865e2e3a3c3e00020e7e7e898f7bd4b3fb6144c2"
+      ],
+      "author_time": "2026-09-11T12:01:38+03:00",
+      "committer_time": "2026-09-11T12:01:38+03:00",
+      "subject": "Make A1 view evidence explicitly camera-bound",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/arachne/v3/conditioning_v3.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d07999a3aff6962b0b57a77c0b0796dbf3ad40ee",
+      "parents": [
+        "d7e5ad8540d21fe8896c299d9a6b9c298cf86da9"
+      ],
+      "author_time": "2026-09-11T12:02:38+03:00",
+      "committer_time": "2026-09-11T12:02:38+03:00",
+      "subject": "Seal A1 FIT1 prereg after camera-bound evidence sidecar",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V7_NATIVE_FIT1_PREREG_FIX1_20260911.json"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b3435ec0c6589ae79057c00366e41d800e12edff",
+      "parents": [
+        "d07999a3aff6962b0b57a77c0b0796dbf3ad40ee"
+      ],
+      "author_time": "2026-09-11T12:03:21+03:00",
+      "committer_time": "2026-09-11T12:03:21+03:00",
+      "subject": "Authorize exact V7-native A1 FIT1 execution",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V7_NATIVE_FIT1_AUTHORIZATION_20260911.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "94b4ef79e9b8311481b7d063d07c5ad88e071f23",
+      "parents": [
+        "4c05c4e03103102a432f440c97f8ed2cbda82208"
+      ],
+      "author_time": "2026-09-11T12:04:00+03:00",
+      "committer_time": "2026-09-11T12:04:00+03:00",
+      "subject": "Close Phase 8 A0 interface audit",
+      "branches_containing": [
+        "audit/arachne-information-preservation-v1-20260910"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_INFORMATION_PRESERVATION_AUDIT_V1_PHASE8_A0_INTERFACE_CLOSURE_20260911.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "81fc25f04fdc4245cd98d02141a7c8d452f8eb91",
+      "parents": [
+        "b3435ec0c6589ae79057c00366e41d800e12edff"
+      ],
+      "author_time": "2026-09-11T12:20:06+03:00",
+      "committer_time": "2026-09-11T12:20:06+03:00",
+      "subject": "Add audited high-capacity bidirectional A1 predictor v4",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/arachne/v4/arachne_candidate_v4.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "42979534c04e1b4842a722b3062a85bf90b9a78c",
+      "parents": [
+        "81fc25f04fdc4245cd98d02141a7c8d452f8eb91"
+      ],
+      "author_time": "2026-09-11T12:20:23+03:00",
+      "committer_time": "2026-09-11T12:20:23+03:00",
+      "subject": "Add hard-tail coupled articulated A1 loss v4",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/arachne/v4/loss_v4.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fc53d1fc67f766047d0fde9d0a60f87b09e74c09",
+      "parents": [
+        "42979534c04e1b4842a722b3062a85bf90b9a78c"
+      ],
+      "author_time": "2026-09-11T12:20:42+03:00",
+      "committer_time": "2026-09-11T12:20:42+03:00",
+      "subject": "Add joint-permutation-safe articulated deformation probe",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/arachne/v4/articulated_probe_v1.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8336de65d11a791273dc0fa61fc9f3593114eef3",
+      "parents": [
+        "fc53d1fc67f766047d0fde9d0a60f87b09e74c09"
+      ],
+      "author_time": "2026-09-11T12:21:23+03:00",
+      "committer_time": "2026-09-11T12:21:23+03:00",
+      "subject": "Add audited A1 v4 FIT1 runner",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/arachne_a1_v4_fit1/run_arachne_a1_v4_fit1.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "84b43e9059c98b53dce0d8ccb618bda66a032a55",
+      "parents": [
+        "8336de65d11a791273dc0fa61fc9f3593114eef3"
+      ],
+      "author_time": "2026-09-11T12:22:24+03:00",
+      "committer_time": "2026-09-11T12:22:24+03:00",
+      "subject": "Export Arachne A1 v4 modules",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/arachne/v4/__init__.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "af4d620b8a2007e10637fb3e1f162d2d03910e7b",
+      "parents": [
+        "84b43e9059c98b53dce0d8ccb618bda66a032a55"
+      ],
+      "author_time": "2026-09-11T12:22:43+03:00",
+      "committer_time": "2026-09-11T12:22:43+03:00",
+      "subject": "Add A1 v4 equivariance and articulated-probe tests",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tests/models/test_arachne_a1_v4_contract.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cc63b00cab1b942874b62c912b8dec2a338c3c26",
+      "parents": [
+        "af4d620b8a2007e10637fb3e1f162d2d03910e7b"
+      ],
+      "author_time": "2026-09-11T12:24:53+03:00",
+      "committer_time": "2026-09-11T12:24:53+03:00",
+      "subject": "Add V4-native skin proposal bridge",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/arachne/v4/proposal_v4.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9016f0da0a2c5956f319ab9abcf58f39765fdd91",
+      "parents": [
+        "cc63b00cab1b942874b62c912b8dec2a338c3c26"
+      ],
+      "author_time": "2026-09-11T12:25:02+03:00",
+      "committer_time": "2026-09-11T12:25:02+03:00",
+      "subject": "Bind V4-native proposal metadata before A1 optimizer",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/arachne_a1_v4_fit1/run_arachne_a1_v4_fit1_fix1.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "52ed205a412c8b003a6a4c6c6ba2344be99486c6",
+      "parents": [
+        "9016f0da0a2c5956f319ab9abcf58f39765fdd91"
+      ],
+      "author_time": "2026-09-11T12:26:06+03:00",
+      "committer_time": "2026-09-11T12:26:06+03:00",
+      "subject": "Seal audited high-capacity A1 v4 FIT1 preregistration",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V7_NATIVE_FIT1_PREREG_V4_FIX1_20260911.json"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8273c6274a1cc2c329b06e5ead43cbada0a0292f",
+      "parents": [
+        "52ed205a412c8b003a6a4c6c6ba2344be99486c6"
+      ],
+      "author_time": "2026-09-11T12:27:07+03:00",
+      "committer_time": "2026-09-11T12:27:07+03:00",
+      "subject": "Close pre-notebook A1 predictor design audit",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_PREDICTOR_FINAL_AUDIT_V2_20260911.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c7689f8aad9e27646b674b3f53d4b9b2950b381d",
+      "parents": [
+        "8273c6274a1cc2c329b06e5ead43cbada0a0292f"
+      ],
+      "author_time": "2026-09-11T12:27:38+03:00",
+      "committer_time": "2026-09-11T12:27:38+03:00",
+      "subject": "Promote audited A1 v4 FIX1 execution authority",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V7_NATIVE_FIT1_AUTHORIZATION_20260911.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0bdad7125bd5f0c58507a1aabdbfa55c20ac8fd8",
+      "parents": [
+        "c7689f8aad9e27646b674b3f53d4b9b2950b381d"
+      ],
+      "author_time": "2026-09-11T12:31:35+03:00",
+      "committer_time": "2026-09-11T12:31:35+03:00",
+      "subject": "Decouple A1 v4 runtime support from superseded v3 runner",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/arachne_a1_v4_fit1/runtime_support_v4.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b7bfac1e2069d577bc30d866ac90e78d66dd989c",
+      "parents": [
+        "0bdad7125bd5f0c58507a1aabdbfa55c20ac8fd8"
+      ],
+      "author_time": "2026-09-11T12:55:01+03:00",
+      "committer_time": "2026-09-11T12:55:01+03:00",
+      "subject": "Add sealed A1 v4 FIT1 execution runner",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/arachne_a1_v4_fit1/run_arachne_a1_v4_fit1_sealed.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6be1cf65e6f1483e99204f10bfb7ced99d34ba52",
+      "parents": [
+        "b7bfac1e2069d577bc30d866ac90e78d66dd989c"
+      ],
+      "author_time": "2026-09-11T12:56:28+03:00",
+      "committer_time": "2026-09-11T12:56:28+03:00",
+      "subject": "Seal A1 v4 FIT1 preregistration",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V4_FIT1_PREREG_20260911.json"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "14c81876b2fb40da3131e4a897e117d9bb636023",
+      "parents": [
+        "6be1cf65e6f1483e99204f10bfb7ced99d34ba52"
+      ],
+      "author_time": "2026-09-11T12:56:55+03:00",
+      "committer_time": "2026-09-11T12:56:55+03:00",
+      "subject": "Remove superseded unsealed A1 v4 runner",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/arachne_a1_v4_fit1/run_arachne_a1_v4_fit1.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cb2384e8db6f0771feadaff5c00482ba05a789a0",
+      "parents": [
+        "14c81876b2fb40da3131e4a897e117d9bb636023"
+      ],
+      "author_time": "2026-09-11T12:57:05+03:00",
+      "committer_time": "2026-09-11T12:57:05+03:00",
+      "subject": "Remove superseded A1 v4 fix wrapper",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/arachne_a1_v4_fit1/run_arachne_a1_v4_fit1_fix1.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8745e9f84103877c946909ebb3ffb88517f5810d",
+      "parents": [
+        "cb2384e8db6f0771feadaff5c00482ba05a789a0"
+      ],
+      "author_time": "2026-09-11T12:57:41+03:00",
+      "committer_time": "2026-09-11T12:57:41+03:00",
+      "subject": "Seal A1 v4 FIT1 execution source",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V4_FIT1_EXECUTION_SEAL_20260911.json"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9012bd3f4308004de2fe9b360a6c07f66f369f20",
+      "parents": [
+        "8745e9f84103877c946909ebb3ffb88517f5810d"
+      ],
+      "author_time": "2026-09-11T13:00:40+03:00",
+      "committer_time": "2026-09-11T13:00:40+03:00",
+      "subject": "Record A1 v4 A100 notebook capsule",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V4_FIT1_NOTEBOOK_CAPSULE_20260911.json"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fe92ae39fefff086825f2e7db9f973797c1774e6",
+      "parents": [
+        "9012bd3f4308004de2fe9b360a6c07f66f369f20"
+      ],
+      "author_time": "2026-09-11T14:00:42+03:00",
+      "committer_time": "2026-09-11T14:00:42+03:00",
+      "subject": "Fix A1 V4 BF16 graph accumulation dtype [skip ci]",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "models/arachne/v4/arachne_candidate_v4.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d67c7ff91e59d7954aa9efc6a2a0f53d3625311a",
+      "parents": [
+        "fe92ae39fefff086825f2e7db9f973797c1774e6"
+      ],
+      "author_time": "2026-09-11T14:00:56+03:00",
+      "committer_time": "2026-09-11T14:00:56+03:00",
+      "subject": "Add A1 V4 AMP dtype regression [skip ci]",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tests/models/test_arachne_a1_v4_amp_dtype_contract.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "80bdde251f6c9d9f2c026c1a647b6192bd09d5e2",
+      "parents": [
+        "d67c7ff91e59d7954aa9efc6a2a0f53d3625311a"
+      ],
+      "author_time": "2026-09-11T14:01:22+03:00",
+      "committer_time": "2026-09-11T14:01:22+03:00",
+      "subject": "Seal A1 V4 BF16 runtime compatibility fix [skip ci]",
+      "branches_containing": [
+        "exp/arachne-a1-v7-native-fit1-20260911"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V4_FIT1_RUNTIME_FIX1_20260911.json"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "03d9f87dbb7100a72293915cf682cbf338335a37",
+      "parents": [
+        "0572c17daf28c92d06a8483ab2b9118d5f1e555f"
+      ],
+      "author_time": "2026-09-11T21:29:12+03:00",
+      "committer_time": "2026-09-11T21:29:12+03:00",
+      "subject": "Promote Arachne V5 minimal K4 direct simplex for Mage FIT1",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json",
+        "canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_CLOSURE_REPORT_V1.json",
+        "canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_CLOSURE_SEAL_V1.json",
+        "canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_COMPOSITE_MANIFEST_V1.json",
+        "canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1_PROMOTION_20260911.md",
+        "canonical/MAGE_FIT1_RIGGING_CORE_CLOSURE_20260911.md",
+        "docs/assets/mage_fit1_rigging_core_v5_4panel.webp",
+        "models/arachne/v4/__init__.py",
+        "models/arachne/v4/arachne_candidate_v4.py",
+        "models/arachne/v4/articulated_probe_v1.py",
+        "models/arachne/v4/loss_v4.py",
+        "models/arachne/v4/proposal_v4.py",
+        "models/arachne/v5/PROMOTED_MAGE_FIT_WITNESS_V1.json",
+        "models/arachne/v5/README.md",
+        "models/arachne/v5/__init__.py",
+        "models/arachne/v5/arachne_candidate_v5.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c4a29fd419037ab1cc968692ae10d10ea50b263a",
+      "parents": [
+        "03d9f87dbb7100a72293915cf682cbf338335a37"
+      ],
+      "author_time": "2026-09-11T22:24:36+03:00",
+      "committer_time": "2026-09-11T22:24:36+03:00",
+      "subject": "Add Arachne V5 checkpoint authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "models/arachne/v5/checkpoint_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d6df8566b6f22ced7d5e4f3316d03ab8369c6a6f",
+      "parents": [
+        "c4a29fd419037ab1cc968692ae10d10ea50b263a"
+      ],
+      "author_time": "2026-09-11T22:24:49+03:00",
+      "committer_time": "2026-09-11T22:24:49+03:00",
+      "subject": "Bind Arachne V5 frozen composite checkpoint",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "models/arachne/v5/FROZEN_MAGE_FIT1_CHECKPOINT_V1.json"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5b5a13d8e5569985fde73a25189683f96749c658",
+      "parents": [
+        "d6df8566b6f22ced7d5e4f3316d03ab8369c6a6f"
+      ],
+      "author_time": "2026-09-11T22:24:58+03:00",
+      "committer_time": "2026-09-11T22:24:58+03:00",
+      "subject": "Expose Arachne V5 checkpoint authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "models/arachne/v5/__init__.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d3d038cfe4488c38e7d9c60701f573a662201a3a",
+      "parents": [
+        "5b5a13d8e5569985fde73a25189683f96749c658"
+      ],
+      "author_time": "2026-09-11T22:25:08+03:00",
+      "committer_time": "2026-09-11T22:25:08+03:00",
+      "subject": "Document Arachne V5 frozen checkpoint",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "models/arachne/v5/README.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9ac217b2ab5d8bd541f63ba626483dd4760b62f2",
+      "parents": [
+        "d3d038cfe4488c38e7d9c60701f573a662201a3a"
+      ],
+      "author_time": "2026-09-11T22:25:24+03:00",
+      "committer_time": "2026-09-11T22:25:24+03:00",
+      "subject": "Bind Arachne V5 checkpoint and corrected demo witness",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "models/arachne/v5/PROMOTED_MAGE_FIT_WITNESS_V1.json"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "20a1a8482abd49fc37870a67a382d3c9b98392d1",
+      "parents": [
+        "9ac217b2ab5d8bd541f63ba626483dd4760b62f2"
+      ],
+      "author_time": "2026-09-11T22:25:44+03:00",
+      "committer_time": "2026-09-11T22:25:44+03:00",
+      "subject": "Extend Arachne V5 evidence with checkpoint and corrected demo",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6b6ee37e3e06d187d0f93fa84cd3be9f9368d1b7",
+      "parents": [
+        "20a1a8482abd49fc37870a67a382d3c9b98392d1"
+      ],
+      "author_time": "2026-09-11T22:25:52+03:00",
+      "committer_time": "2026-09-11T22:25:52+03:00",
+      "subject": "Add Arachne V5 checkpoint authority regression",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/models/test_arachne_v5_checkpoint_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8442969a669eca24334f3091dc8f25d0fa491561",
+      "parents": [
+        "6b6ee37e3e06d187d0f93fa84cd3be9f9368d1b7"
+      ],
+      "author_time": "2026-09-11T22:26:27+03:00",
+      "committer_time": "2026-09-11T22:26:27+03:00",
+      "subject": "Reconcile canonical state to Arachne V5 Mage FIT1 closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "38d7f78f384a00293eb6679cbccd77931b486b51",
+      "parents": [
+        "8442969a669eca24334f3091dc8f25d0fa491561"
+      ],
+      "author_time": "2026-09-11T22:26:45+03:00",
+      "committer_time": "2026-09-11T22:26:45+03:00",
+      "subject": "Refresh investor-facing README for Mage FIT1 rigging closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "README.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f7289ca36e7c324a60bd521b63a32ba35f5ee8f2",
+      "parents": [
+        "38d7f78f384a00293eb6679cbccd77931b486b51"
+      ],
+      "author_time": "2026-09-11T22:26:56+03:00",
+      "committer_time": "2026-09-11T22:26:56+03:00",
+      "subject": "Update learned-model map for promoted Arachne V5",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "models/README.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "279e54e562fb053d6efa38e90c7fa55b3001bec4",
+      "parents": [
+        "f7289ca36e7c324a60bd521b63a32ba35f5ee8f2"
+      ],
+      "author_time": "2026-09-11T22:27:04+03:00",
+      "committer_time": "2026-09-11T22:27:04+03:00",
+      "subject": "Promote Arachne V5 as current model home",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "models/arachne/README.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7bba17dd86c38923504dea11a5744b0ee796658e",
+      "parents": [
+        "279e54e562fb053d6efa38e90c7fa55b3001bec4"
+      ],
+      "author_time": "2026-09-11T22:27:17+03:00",
+      "committer_time": "2026-09-11T22:27:17+03:00",
+      "subject": "Refresh system index for Arachne V5 promotion",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "SYSTEM_INDEX.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e83fb807773df7a41390600471f8e3b03d59e5e6",
+      "parents": [
+        "7bba17dd86c38923504dea11a5744b0ee796658e"
+      ],
+      "author_time": "2026-09-11T22:27:29+03:00",
+      "committer_time": "2026-09-11T22:27:29+03:00",
+      "subject": "Refresh repository map for V5 mainline",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "REPOSITORY_MAP.md"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b969e46409f2c0ff8aaafd4cb9461d9d9fa8e6ec",
+      "parents": [
+        "e83fb807773df7a41390600471f8e3b03d59e5e6"
+      ],
+      "author_time": "2026-09-11T22:27:39+03:00",
+      "committer_time": "2026-09-11T22:27:39+03:00",
+      "subject": "Refresh canonical index for Mage FIT1 rigging closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/README.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "288257bf2e19f55f9704d176e214cad6cf839ed3",
+      "parents": [
+        "b969e46409f2c0ff8aaafd4cb9461d9d9fa8e6ec"
+      ],
+      "author_time": "2026-09-11T22:28:03+03:00",
+      "committer_time": "2026-09-11T22:28:03+03:00",
+      "subject": "Refresh FIT1 evidence index with Arachne V5 closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/FIT1_EVIDENCE_INDEX_20260909.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e0c9202b3855fcd598d7da3f995a62d7561ccb8e",
+      "parents": [
+        "288257bf2e19f55f9704d176e214cad6cf839ed3"
+      ],
+      "author_time": "2026-09-11T22:29:26+03:00",
+      "committer_time": "2026-09-11T22:29:26+03:00",
+      "subject": "Reconcile architecture ledger to promoted Arachne V5",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7501225a7e2f0e8a0394b3ccbec5dd39a6a9c4a1",
+      "parents": [
+        "e0c9202b3855fcd598d7da3f995a62d7561ccb8e"
+      ],
+      "author_time": "2026-09-11T22:29:44+03:00",
+      "committer_time": "2026-09-11T22:29:44+03:00",
+      "subject": "Reconcile experiment ledger to Arachne V5 closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bde50ccbef86cc22110378d064a64a82daf48e54",
+      "parents": [
+        "7501225a7e2f0e8a0394b3ccbec5dd39a6a9c4a1"
+      ],
+      "author_time": "2026-09-11T22:30:02+03:00",
+      "committer_time": "2026-09-11T22:30:02+03:00",
+      "subject": "Advance FIT1 scientific lineage through Arachne V5",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "504993fcba381bf274983873c9a30ce71e4fede0",
+      "parents": [
+        "bde50ccbef86cc22110378d064a64a82daf48e54"
+      ],
+      "author_time": "2026-09-11T22:30:20+03:00",
+      "committer_time": "2026-09-11T22:30:20+03:00",
+      "subject": "Reconcile experiment registry to Arachne V5 promotion",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/EXPERIMENT_REGISTRY_V2.json"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "95d72249b469fb5ee5341c9be83ee1729071f3e1",
+      "parents": [
+        "504993fcba381bf274983873c9a30ce71e4fede0"
+      ],
+      "author_time": "2026-09-11T22:30:40+03:00",
+      "committer_time": "2026-09-11T22:30:40+03:00",
+      "subject": "Append Arachne V5 closure and promotion to scientific journal",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f274e82734abc9fdc018b7f8d541d08df495c5a3",
+      "parents": [
+        "95d72249b469fb5ee5341c9be83ee1729071f3e1"
+      ],
+      "author_time": "2026-09-11T22:31:10+03:00",
+      "committer_time": "2026-09-11T22:31:10+03:00",
+      "subject": "Reconcile machine context to Mage FIT1 V5 closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CONTEXT_STATE_V1.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "76569049dd5aec0dc35b768475e2701bacce326b",
+      "parents": [
+        "f274e82734abc9fdc018b7f8d541d08df495c5a3"
+      ],
+      "author_time": "2026-09-11T22:31:37+03:00",
+      "committer_time": "2026-09-11T22:31:37+03:00",
+      "subject": "Reconcile machine authority map to Arachne V5 closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/AUTHORITY_MAP_V1.json"
       ],
       "subsystem_tags": [
         "ARACHNE_SKIN",

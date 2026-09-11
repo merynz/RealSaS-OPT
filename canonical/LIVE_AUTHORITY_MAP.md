@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `e187f09799b9ba3fee401d90600e5f48d828477ae836aa886da78e07917b7081`
+> State fingerprint: `eccbabeff2fe37ec1f4ca2cfc5d4b9d664361ee44012e4fbcf441131ebf20bd6`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -13,23 +13,22 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 - Required labels: `self-hosted, linux, x64, realsas`
 - Known runner: `realsas-wsl-1660ti`
 - Operator path hint: `~/actions-runner`
-- Budget policy: Do not fan out authority-map or routine science workflows across every experimental branch push. Prefer main authority changes, explicit manual dispatch, or already-required self-hosted scientific jobs.
+- Budget policy: Do not fan out routine authority/science workflows across experimental branches; use main/manual/self-hosted only.
 
 ## Rehydration order
 
 1. `canonical/REHYDRATION_PACKET.md`
-2. `canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md`
-3. `canonical/ARACHNE_A0_V7_C4_EVIDENCE_MANIFEST_V1.json`
-4. `canonical/FIT1_EVIDENCE_INDEX_20260909.md`
-5. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-6. `canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json`
-7. `CURRENT_STATE.md`
-8. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
-9. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
-10. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-11. `canonical/EXPERIMENT_REGISTRY_V2.json`
-12. `canonical/CONTEXT_STATE_V1.json`
-13. `canonical/LIVE_AUTHORITY_MAP.md`
+2. `CURRENT_STATE.md`
+3. `canonical/FIT1_EVIDENCE_INDEX_20260909.md`
+4. `canonical/MAGE_FIT1_RIGGING_CORE_CLOSURE_20260911.md`
+5. `canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json`
+6. `models/arachne/v5/FROZEN_MAGE_FIT1_CHECKPOINT_V1.json`
+7. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
+8. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
+9. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
+10. `canonical/EXPERIMENT_REGISTRY_V2.json`
+11. `canonical/CONTEXT_STATE_V1.json`
+12. `canonical/LIVE_AUTHORITY_MAP.md`
 
 ## Live experiment register
 
@@ -43,18 +42,18 @@ _No active experiments registered._
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `af27b8a610ea` | canonical continuation branch |
+| `main` | `76569049dd5a` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `demo/investor-single-specimen-e2e` | `47892ffa16b7` | Demo lineage only; never scientific continuation authority. |
-| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `d0b666725e79` | Arachne A0 V7 C2-C4 scientific lineage; C4 closed FAIL at d0b666725e79f3beb0ea001f456375421cc14375 and no new active experiment is currently registered. |
-| `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | AR-01 closed with verdict AR01_NO_TERMINAL_CLOSURE; retain exact scoped evidence. |
-| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | Frozen optimizer/source lineage for the promoted reference-strength Geppetto formulation. |
-| `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | Lossless RiggingSurfaceIR / V3 evidence lineage; no longer active continuation experiment. |
-| `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | Sealed Geppetto FIT1 scientific source/result lineage; promoted source now lives on main. |
+| `demo/investor-single-specimen-e2e` | `47892ffa16b7` | Demo lineage only; never continuation authority. |
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `d0b666725e79` | A0 historical scientific lineage; retained for FIT8/LOFO failure-memory. |
+| `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | AR-01 closed failure retained as scoped evidence. |
+| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | Frozen optimizer/source lineage for promoted Geppetto formulation. |
+| `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | Lossless RiggingSurfaceIR evidence lineage. |
+| `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | Sealed Geppetto FIT1 source/result lineage; promoted source lives on main. |
 
 ### EVIDENCE_ONLY_UNREGISTERED
 
@@ -70,7 +69,7 @@ _No active experiments registered._
 | `architecture-v4-single-family-e2e-20260902` | `c84658b8b95c` | observed live; not explicitly registered active |
 | `architecture/compiler-ir-solver-canonical-20260825` | `7163fac1f333` | observed live; not explicitly registered active |
 | `architecture/v4-generic-strength-source-completion-20260902` | `7f39a846ad05` | observed live; not explicitly registered active |
-| `audit/arachne-information-preservation-v1-20260910` | `4c05c4e03103` | observed live; not explicitly registered active |
+| `audit/arachne-information-preservation-v1-20260910` | `94b4ef79e9b8` | observed live; not explicitly registered active |
 | `audit/final-completion-plan-20260902` | `00e930e788d3` | observed live; not explicitly registered active |
 | `audit/geppetto-v2-frozen-base-7f39` | `7f39a846ad05` | observed live; not explicitly registered active |
 | `audit/iris-architecture-discipline-20260824` | `d7bba01c85e9` | observed live; not explicitly registered active |
@@ -88,7 +87,7 @@ _No active experiments registered._
 | `dino-controlled-ladder-prereg-20260829` | `753b384d864c` | observed live; not explicitly registered active |
 | `dino-zero-step-preflight-20260829` | `396ac67b6d65` | observed live; not explicitly registered active |
 | `e2e/mage-scene-first-v1-20260905` | `c6b5108f672b` | observed live; not explicitly registered active |
-| `exp/arachne-a1-v7-native-fit1-20260911` | `4c05c4e03103` | observed live; not explicitly registered active |
+| `exp/arachne-a1-v7-native-fit1-20260911` | `80bdde251f6c` | observed live; not explicitly registered active |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-canonical` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
 | `exp/arachne-v7-dense-consumer-view-diagnosis-20260910-final` | `dc4ea7e1a6d6` | observed live; not explicitly registered active |
@@ -167,16 +166,13 @@ _No active experiments registered._
 ## Binding anti-conflation rules
 
 - Only main/CURRENT_STATE.md is continuation authority.
-- A branch is never active merely because it exists or has a recent commit.
-- A scientific PASS never promotes itself; promotion/refreeze is a separate transaction.
-- A scientific FAIL must remain a valid terminal scientific result and must not be recast as infrastructure failure.
-- Geppetto FIT1 PASS is not generalization, Arachne closure, or PRODUCT_PASS.
-- No Arachne model is promoted until its own gate and promotion transaction close.
-- A0 SkinFieldCodec representation/decode closure is distinct from A1 product-time latent inference.
-- Source existence is not experimental evidence; component evidence is not a full-formulation verdict.
-- Repository prereg/result/hash authority outranks detached chat/generated drafts when they disagree.
-- Scientific/mainline Actions for this transaction run only on the local self-hosted RealSaS runner.
-- Promotion requires source + tests + evidence/result + CURRENT_STATE + provenance/supersession reconciliation.
+- Scientific PASS never promotes itself; promotion/refreeze is a separate transaction.
+- FIT1 success is not unseen-family generalization.
+- Historical scientific failures remain valid evidence and are not deleted by later promotion.
+- Compiler qualification cannot silently replace missing learned semantics.
+- A0 representation/oracle evidence is distinct from the V5 shipping decoder interface.
+- PRODUCT_PASS remains an independent contract.
+- Scientific/mainline Actions run only on the local self-hosted RealSaS runner.
 
 ## Update semantics
 

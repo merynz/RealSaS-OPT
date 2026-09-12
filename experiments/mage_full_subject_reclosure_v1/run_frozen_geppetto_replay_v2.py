@@ -127,7 +127,7 @@ def _build_active_surface(args, cameras, observation_masks):
         cameras,
         normalization_center=center,
         normalization_half_extent=half,
-        authority_label="H1_OBSERVABLE_PRODUCT_SURFACE_MAGE_FIT1_REPLAY_V1",
+        authority_label="H1_OBSERVABLE_PRODUCT_SURFACE:20260912T074348Z",
         source_run_id=str(args.iris_run_id),
         source_checkpoint_sha256=str(args.iris_checkpoint_sha256),
         source_zero_surface_sha256=ACTIVE_ZERO_SURFACE_SHA256,
@@ -135,15 +135,15 @@ def _build_active_surface(args, cameras, observation_masks):
         normal_k=64,
         visibility_depth_tolerance_norm=0.02,
         observation_alpha_masks=observation_masks,
-        observation_ids=tuple(f"MAGE_FIT1_V{i}" for i in range(8)),
+        observation_ids=tuple("OBS_SHA256:" + h for h in OBSERVATION_SHA256),
         observation_hashes=OBSERVATION_SHA256,
         observation_support_radius_px=1,
         require_observation_support=True,
         metadata={
-            "camera_contract": "CANONICAL_8_ORTHOGRAPHIC_YAW_45_DEG",
-            "full_subject_reclosure": True,
-            "active_substrate_id": ACTIVE_SUBSTRATE_ID,
+            "reclosure": "MAGE_FULL_SUBJECT_20260912",
+            "h1_observable_authority_reconciled": True,
             "teacher_truth_used": False,
+            "target_nodes_reason": "MWB2_EXACT_RECLOSURE_PREREG_20260912",
         },
     )
     tensor = tensorize_rigging_surface_v1(surface, require_scene_first=True)

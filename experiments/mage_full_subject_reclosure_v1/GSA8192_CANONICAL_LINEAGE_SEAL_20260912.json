@@ -1,0 +1,99 @@
+{
+  "schema": "RealSaS.GSA8192CanonicalLineageSeal.v1",
+  "status": "PASS_GSA8192_CANONICAL_LINEAGE_SEALED",
+  "date_utc": "2026-09-12",
+  "scope": "Mage full-subject reclosure after H1 observable-authority reconciliation",
+  "authority": {
+    "label": "H1_OBSERVABLE_PRODUCT_SURFACE:20260912T074348Z",
+    "source_run_id": "20260912T074348Z",
+    "h1_observable_authority_reconciled": true,
+    "teacher_truth_used": false,
+    "canonical_promotion": false,
+    "product_pass": false,
+    "unseen_pass": false
+  },
+  "inputs": {
+    "h1_checkpoint_sha256": "76fc68a8c6f2bed80ae8a678649006c875bc96b586065da8914e7f61528c8ce5",
+    "source_fit_checkpoint_sha256": "b00e33f9b5593e1ecfc69e6bc77d82d28c4d585c38edde113dd25f8899758ec6",
+    "zero_surface_product_clipped_sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+    "signed_mesh_result_sha256": "6cfb8266357621e1e54b7b76d863ff4fdfd5ce85f5d705bccaca37c3464ecfc7",
+    "input_authority_preflight_sha256": "7a8542280f56c00e1727dfdb1e121ad2934ca37ecc0dfafa1f8d3ca410b2ed91",
+    "observation_rule": "RGBA alpha >= 8",
+    "observation_image_sha256": [
+      "8e9875c16bba3047c8f2fc211b984f2399d1145f5720c7427c6fc03a3fec0616",
+      "fa94283780d5e5f3ad3943bbffc1f0592a70fc362fdd03b94a1d1cb46889dc30",
+      "777bf4f7c505b405d3a5d2a111b2f297949454f77cae7c33064bf02479d384a5",
+      "2a771c91c1d1c0b75dab14f6e98b7905a8429bbf0c0a8dd690261f93f6476d86",
+      "354bb239feb6c1a515917fee4efb42fb1e0cb9f173d0eb3191fb0901a02a6228",
+      "158fc14a75aa69f6133f2ba3ec5df2ad146afc62f477d7d3b4a41ca2cb0e42f2",
+      "e3b08836c187863819d8b8aaa53aef79eddfee167e1fabf3fb1dd8ec0484563a",
+      "87d4ad46edffec3c6bff034d305194820288d3cc6ef9a9480ac2234fb56451bc"
+    ],
+    "camera_sha256": [
+      "73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541",
+      "bdc172a4aff332f956d1403e36b2f8684b68059fdc82f9efddf35d05a6d9b4d4",
+      "3c2bbc44ef9005b4a545a3381205a5d6a92af15b4791c9075071b8cad02a1a6c",
+      "24b2f115d908422d885f85e956fcc36ac78fd0c90b503f698caa62febc2b9c4d",
+      "5bf00783d6509c2ca142e05ef705d5cdb5df17ad248b782d2fe8cf8a297bee39",
+      "7ee3e50739318eeb122b5b0ec67260dd32e21d949398f48c408a6c239e5c89fe",
+      "daa19fa58ff602977d64b720c4198956809855149d814df487c7762a963f1eec",
+      "68f51fbfce4c31f94281e1569d74b44609435285668f8a8b1b278e76db6ea53f"
+    ]
+  },
+  "builder": {
+    "producer": "RealSaS.GeometricSubstrateAssembler.SceneFirstSigned.v2",
+    "schema": "RealSaS.RiggingSurfaceIR.v1",
+    "target_nodes": 8192,
+    "actual_surface_nodes": 8171,
+    "relations": 23656,
+    "voxel_divisions": 42,
+    "normal_k": 64,
+    "visibility_depth_tolerance_normalized": 0.02,
+    "observation_radius_px": 1,
+    "require_observation_support": true,
+    "observation_authority": "EXACT_PRODUCT_ALPHA_AND_SELF_VISIBILITY",
+    "observation_support_operator": "RealSaS.GSA.ExactRasterObservationSupport.v1",
+    "normal_operator": "RealSaS.GSA.ZeroSurfaceRobustLocalPCA.v1",
+    "normal_operator_sha256": "5b5c0e89a18c98f6f7a231941480a61e7158d93d91a9a8edcc5362d6c5e0b1be",
+    "character_gen_runtime_used": false,
+    "full_hidden_mesh_completeness_hard_gate": false
+  },
+  "result": {
+    "geometry_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
+    "observed_nodes": 7391,
+    "completed_nodes": 780,
+    "self_visible_nodes": 7423,
+    "self_visibility_counts_by_view": [2560, 2786, 2238, 3052, 2789, 2905, 2235, 2820],
+    "observation_support_counts_by_view": [2537, 2765, 2194, 3021, 2772, 2871, 2183, 2803],
+    "observation_mask_content_hashes": [
+      "fe799b3188d6973e0049b963c8397b852ef710baf11feac7f8f97c9d67a4737b",
+      "4b74dec4608174b30af83377803eef44414c0c80aaa3d72e6594ba58547079f6",
+      "f5f5215bcbab781203f092fc3f430ecfb5736450919a80570af1681f8bf9962d",
+      "cd17e5db73c3263ab3aa8e08ad179f635961b10b9ec7ad70cf090de0550fc529",
+      "4dfab5b454c0980164a7c860045063775fb7483e0d629b3292463cd0615501e7",
+      "6910c803090b536ad95543a9329c7da3c3fe88b6ef6ba4d6526eab62b2985d5d",
+      "77f9da47f3de6ccede19f73163ddffcc2cd9ce61de6d619f1f48110bdfa7855b",
+      "2da9f4ffe6e33d5224058b6d344223466669684b19b616f33e93df2e356ad36f"
+    ]
+  },
+  "determinism": {
+    "replay_count": 2,
+    "equivalent_excluding_wall_clock_seconds": true,
+    "geometry_lineage_hash_identical": true,
+    "second_replay_output_sha256": "aeef98c52878fbe26b41670702e54b8d1247702c98f73ff8ae9a5fc632c6c431"
+  },
+  "scientific_boundary": {
+    "this_seal_asserts": [
+      "the reconciled H1 observable product surface can deterministically produce the canonical GSA8192 rigging substrate lineage",
+      "the exact observation-support carrier is frozen for downstream replay"
+    ],
+    "this_seal_does_not_assert": [
+      "H1 unseen generalization pass",
+      "full-subject product pass",
+      "Geppetto pass",
+      "Arachne pass",
+      "ARAP/BBW/XPBD pass"
+    ],
+    "next_gate": "frozen Geppetto replay against this sealed GSA8192 lineage and exact MWB2/CDT reclosure"
+  }
+}

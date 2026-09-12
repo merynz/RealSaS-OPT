@@ -19,7 +19,14 @@ from .types import (
 _CDT_MATCH_EPS = 1.0e-7
 
 
-def _safe_visible_graph(surface: RiggingSurfaceIR, view_index: int):
+def _safe_surface_graph(surface: RiggingSurfaceIR, view_index: int):
+    """Return full safe-S topology plus the observation-supported carriers for one view.
+
+    Component identity belongs to S, not to a view-local induced subgraph. An S carrier
+    that is temporarily invisible may therefore relay *component identity*, but it is
+    never admitted as a 2D CDT vertex for that view. Unsafe/unknown relations remain
+    forbidden and can never join components.
+    """
     nodes = {n.surface_id: n for n in surface.surface_nodes}
     visible = {sid: _visible_binding(n, int(view_index)) for sid, n in nodes.items()}
     visible = {sid: xy for sid, xy in visible.items() if xy is not None}
@@ -27,7 +34,7 @@ def _safe_visible_graph(surface: RiggingSurfaceIR, view_index: int):
     rejected_unknown = 0
     for rel in surface.local_relations:
         a, b = str(rel.a_surface_id), str(rel.b_surface_id)
-        if a == b or a not in visible or b not in visible:
+        if a == b or a not in nodes or b not in nodes:
             continue
         if not _relation_safe(rel):
             rejected_unknown += 1
@@ -36,13 +43,13 @@ def _safe_visible_graph(surface: RiggingSurfaceIR, view_index: int):
     return nodes, visible, safe_edges, rejected_unknown
 
 
-def _connected_components(visible_ids: set[str], safe_edges: set[tuple[str, str]]) -> tuple[tuple[str, ...], ...]:
-    neighbors: dict[str, set[str]] = {sid: set() for sid in visible_ids}
+def _connected_components(node_ids: set[str], safe_edges: set[tuple[str, str]]) -> tuple[tuple[str, ...], ...]:
+    neighbors: dict[str, set[str]] = {sid: set() for sid in node_ids}
     for a, b in safe_edges:
         if a in neighbors and b in neighbors:
             neighbors[a].add(b)
             neighbors[b].add(a)
-    unseen = set(visible_ids)
+    unseen = set(node_ids)
     out: list[tuple[str, ...]] = []
     while unseen:
         seed = min(unseen)
@@ -58,6 +65,19 @@ def _connected_components(visible_ids: set[str], safe_edges: set[tuple[str, str]
                     stack.append(nxt)
         out.append(tuple(sorted(component)))
     return tuple(sorted(out, key=lambda comp: comp[0]))
+
+
+def _visible_subsets_of_full_components(
+    all_components: tuple[tuple[str, ...], ...],
+    visible: dict[str, tuple[float, float]],
+) -> tuple[tuple[str, ...], ...]:
+    visible_ids = set(visible)
+    out = []
+    for component in all_components:
+        subset = tuple(sid for sid in component if sid in visible_ids)
+        if subset:
+            out.append(subset)
+    return tuple(out)
 
 
 def _dedupe_projected_ids(
@@ -140,10 +160,12 @@ def build_mwb2_observation_cdt_candidate(
 ) -> MeshDiscretizationCandidateIR:
     """Triangulate observed S carriers with the frozen v0.5 CDT numerical kernel.
 
-    Current authority remains explicit: S defines legal 3D carriers/components and
-    exact input alpha defines the admissible 2D domain. Historical CDT is numerical
-    machinery only. Quality-Steiner insertion is disabled; any output vertex that
-    cannot be rebound exactly to an admitted S carrier is rejected fail-closed.
+    Current authority remains explicit: the *full* safe S graph defines legal 3D
+    component identity, then the target view selects observation-supported carriers
+    from each component. Exact input alpha defines the admissible 2D domain.
+    Historical CDT is numerical machinery only. Quality-Steiner insertion is disabled;
+    any output vertex that cannot be rebound exactly to an admitted S carrier is
+    rejected fail-closed.
     """
     if not (0 <= int(view_index) < 8):
         raise ValueError("view_index must be in [0,7]")
@@ -157,10 +179,14 @@ def build_mwb2_observation_cdt_candidate(
     if int(observation_domain.view_index) != int(view_index):
         raise QualificationError("MWB2_OBSERVATION_DOMAIN_VIEW_MISMATCH")
 
-    nodes, visible, safe_edges, rejected_unknown = _safe_visible_graph(surface, int(view_index))
+    nodes, visible, safe_edges, rejected_unknown = _safe_surface_graph(surface, int(view_index))
     if len(visible) < 3:
         raise QualificationError("MWB2_INSUFFICIENT_OBSERVED_SURFACE_SUPPORT")
-    components = _connected_components(set(visible), safe_edges)
+    full_components = _connected_components(set(nodes), safe_edges)
+    components = _visible_subsets_of_full_components(full_components, visible)
+    visible_safe_edges = {
+        (a, b) for a, b in safe_edges if a in visible and b in visible
+    }
 
     admitted_faces: list[tuple[str, str, str]] = []
     admitted_face_xy: list[
@@ -285,8 +311,10 @@ def build_mwb2_observation_cdt_candidate(
         "edge_count": len(edge_ids),
         "vertex_count": len(vertices),
         "visible_surface_node_count": len(visible),
-        "safe_relation_edge_count": len(safe_edges),
+        "safe_relation_edge_count": len(visible_safe_edges),
+        "full_safe_relation_edge_count": len(safe_edges),
         "safe_component_count": len(components),
+        "full_safe_component_count": len(full_components),
         "cdt_component_count": int(cdt_component_count),
         "tiny_component_count": int(tiny_component_count),
         "kernel_triangle_count": int(kernel_triangle_count),
@@ -305,7 +333,7 @@ def build_mwb2_observation_cdt_candidate(
         boundary,
         "OBSERVATION_DOMAIN_CDT",
         solver_provenance={
-            "solver": "HISTORICAL_V05_CDT_CURRENT_TYPED_ADAPTER_V1",
+            "solver": "HISTORICAL_V05_CDT_CURRENT_TYPED_ADAPTER_V2",
             "historical_cdt_source_sha256": HISTORICAL_CDT_SOURCE_SHA256,
             "historical_kernel_role": "NUMERICAL_ONLY",
             "quality_refinement_enabled": False,
@@ -314,7 +342,7 @@ def build_mwb2_observation_cdt_candidate(
         },
         residual_report=residual,
         metadata={
-            "producer": "RealSaS.MWB2.ObservationDomainCDT.v1",
+            "producer": "RealSaS.MWB2.ObservationDomainCDT.v2",
             "source_mesh_used": False,
             "teacher_topology_used": False,
             "unknown_bridge_forbidden": True,
@@ -324,7 +352,7 @@ def build_mwb2_observation_cdt_candidate(
             "observation_mask_sha256": observation_domain.mask_sha256,
             "source_alpha_sha256": observation_domain.source_alpha_sha256,
             "target_view_winding": "CCW",
-            "component_partition_authority": "SAFE_SURFACE_RELATION_CONNECTED_COMPONENTS",
+            "component_partition_authority": "FULL_SAFE_SURFACE_RELATION_COMPONENTS_THEN_VISIBLE_SUBSET",
             "alpha_domain_authority": "EXACT_OBSERVATION_MASK",
         },
     )
@@ -379,7 +407,7 @@ def qualify_mwb2_observation_cdt_mesh(
         qualification_report=report,
         metadata={
             **mesh.metadata,
-            "cdt_adapter": "RealSaS.MWB2.ObservationDomainCDT.v1",
+            "cdt_adapter": "RealSaS.MWB2.ObservationDomainCDT.v2",
         },
         mesh_lineage_hash="",
     )

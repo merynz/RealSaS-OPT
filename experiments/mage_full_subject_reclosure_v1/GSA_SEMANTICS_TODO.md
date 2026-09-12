@@ -1,0 +1,1 @@
+Current GSA bridge conflates predicted-surface self-z visibility with observation support. Repair target: preserve self-z visibility as a separate signal and, when exact observation masks are supplied, derive actual observation-supported views/IDs from raster membership. Backward compatibility must not silently relabel self-visible as observed.

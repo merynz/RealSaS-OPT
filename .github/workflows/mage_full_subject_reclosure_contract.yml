@@ -6,15 +6,23 @@ on:
       - repair/mage-full-subject-reclosure-20260912
     paths:
       - 'compiler/realsas_compiler_core/component_attachment.py'
+      - 'compiler/realsas_compiler_core/component_attachment_v2.py'
       - 'compiler/realsas_compiler_core/mechanical_assembly.py'
+      - 'compiler/realsas_compiler_core/proof_engine.py'
       - 'compiler/realsas_compiler_core/substrate/scene_first_signed.py'
       - 'compiler/realsas_compiler_core/substrate/h1_observable_qualification.py'
+      - 'compiler/realsas_compiler_core/mesh/mesh_binding.py'
       - 'compiler/realsas_compiler_core/mesh/mwb2.py'
       - 'compiler/realsas_compiler_core/mesh/mwb2_cdt.py'
+      - 'compiler/realsas_compiler_core/mesh/mwb2_skin.py'
       - 'compiler/realsas_compiler_core/mesh/observation_domain.py'
+      - 'compiler/realsas_compiler_core/mesh/quality.py'
       - 'compiler/realsas_compiler_core/mesh/_historical_v05/**'
       - 'tests/compiler/test_component_attachment_v1.py'
+      - 'tests/compiler/test_component_attachment_v2.py'
       - 'tests/compiler/test_mechanical_assembly_v1.py'
+      - 'tests/compiler/test_mesh_quality_v1.py'
+      - 'tests/compiler/test_mesh_supported_steiner_v1.py'
       - 'tests/compiler/test_scene_first_signed_surface_bridge_v1.py'
       - 'tests/compiler/test_h1_observable_qualification_v1.py'
       - 'tests/compiler/test_historical_cdt_v05_loader.py'
@@ -24,6 +32,7 @@ on:
       - 'tools/audit_full_subject_fit_authority.py'
       - 'experiments/mage_full_subject_reclosure_v1/**'
       - 'canonical/MAGE_*20260912*'
+      - 'canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md'
       - '.github/workflows/mage_full_subject_reclosure_contract.yml'
   workflow_dispatch:
 
@@ -47,18 +56,26 @@ jobs:
       - name: Static compile
         run: |
           python -m py_compile compiler/realsas_compiler_core/component_attachment.py
+          python -m py_compile compiler/realsas_compiler_core/component_attachment_v2.py
           python -m py_compile compiler/realsas_compiler_core/mechanical_assembly.py
+          python -m py_compile compiler/realsas_compiler_core/proof_engine.py
           python -m py_compile compiler/realsas_compiler_core/substrate/scene_first_signed.py
           python -m py_compile compiler/realsas_compiler_core/substrate/h1_observable_qualification.py
+          python -m py_compile compiler/realsas_compiler_core/mesh/mesh_binding.py
           python -m py_compile compiler/realsas_compiler_core/mesh/observation_domain.py
+          python -m py_compile compiler/realsas_compiler_core/mesh/quality.py
           python -m py_compile compiler/realsas_compiler_core/mesh/mwb2_cdt.py
+          python -m py_compile compiler/realsas_compiler_core/mesh/mwb2_skin.py
           python -m py_compile tools/audit_full_subject_coverage.py
           python -m py_compile tools/audit_component_geometry_coverage.py
           python -m py_compile tools/audit_full_subject_fit_authority.py
           python -m py_compile experiments/mage_full_subject_reclosure_v1/build_full_subject_fit_target_v1.py
           python -m py_compile experiments/mage_full_subject_reclosure_v1/run_frozen_geppetto_replay_v1.py
           python -m py_compile tests/compiler/test_component_attachment_v1.py
+          python -m py_compile tests/compiler/test_component_attachment_v2.py
           python -m py_compile tests/compiler/test_mechanical_assembly_v1.py
+          python -m py_compile tests/compiler/test_mesh_quality_v1.py
+          python -m py_compile tests/compiler/test_mesh_supported_steiner_v1.py
           python -m py_compile tests/compiler/test_scene_first_signed_surface_bridge_v1.py
           python -m py_compile tests/compiler/test_h1_observable_qualification_v1.py
           python -m py_compile tests/compiler/test_historical_cdt_v05_loader.py
@@ -67,7 +84,10 @@ jobs:
         run: |
           PYTHONPATH=. python -m pytest -q \
             tests/compiler/test_component_attachment_v1.py \
+            tests/compiler/test_component_attachment_v2.py \
             tests/compiler/test_mechanical_assembly_v1.py \
+            tests/compiler/test_mesh_quality_v1.py \
+            tests/compiler/test_mesh_supported_steiner_v1.py \
             tests/compiler/test_scene_first_signed_surface_bridge_v1.py \
             tests/compiler/test_h1_observable_qualification_v1.py \
             tests/compiler/test_historical_cdt_v05_loader.py \

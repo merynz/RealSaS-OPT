@@ -1,0 +1,53 @@
+{
+  "branch_base_head": "e173943c8e716ed4872b61ea9c2aa838b3c0fcc6",
+  "claims": {
+    "canonical_promotion": false,
+    "mage_fit_full_subject_reclosure": "OPEN_UNTIL_EXECUTION",
+    "product_pass": false,
+    "unseen_generalization": false
+  },
+  "frozen_scientific_contract": {
+    "fit_gate_p95_norm": 0.05,
+    "gpu_guard": "VRAM_GIB>=30 AND torch.cuda.is_bf16_supported()",
+    "grid_resolution": 256,
+    "lr": 0.0001,
+    "numeric_path": "CUDA_BF16_AUTOCAST",
+    "optimizer": "AdamW",
+    "optimizer_config_changed": false,
+    "seed": 250905,
+    "train_steps": 512,
+    "training_math_changed": false,
+    "weight_decay": 0.0001,
+    "zero_bracket_gate": 0.9
+  },
+  "input_authority": {
+    "camera_set": "EXACT_HISTORICAL_V0_TO_V7_ORTHOGRAPHIC",
+    "corrected_teacher_truth_sha256": "dec2e816ea2bac5bfca44b1669484b0cde3c87d8d4f5052890cee07469c6825a",
+    "drive_latest": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/LATEST.txt",
+    "historical_h1_checkpoint_bytes": 54001811,
+    "historical_h1_checkpoint_sha256": "76fc68a8c6f2bed80ae8a678649006c875bc96b586065da8914e7f61528c8ce5",
+    "observation_set": "EXACT_HISTORICAL_V0_TO_V7_RGBA",
+    "resolved_expected_run": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT",
+    "teacher_faces": 5683,
+    "teacher_vertices": 5279
+  },
+  "new_terminal_measurement_only": {
+    "corrected_teacher_min_iou": 0.9924691004605425,
+    "corrected_teacher_min_precision": 0.9978615107277933,
+    "corrected_teacher_min_recall": 0.9945845150347653,
+    "min_iou": 0.92,
+    "min_precision": 0.95,
+    "min_recall": 0.95,
+    "name": "8_VIEW_EXACT_INPUT_ALPHA_COVERAGE",
+    "old_promoted_zero_surface_min_recall": 0.6224305562260435,
+    "used_in_training": false
+  },
+  "prepared_notebook_filename": "REALSAS_H1_SIGNED_MESH_MAGE_FULL_SUBJECT_RECLOSURE_V1_A100_RUN_ALL.ipynb",
+  "prepared_notebook_sha256": "ebf2a9e24c16b3d0b4036028dd18abfaa9ec1316085fb488175616f295be69aa",
+  "purpose": "Re-run the historical H1 V2 signed implicit-field FIT experiment against corrected full-subject Mage teacher scope while preserving exact observations, cameras, warm-start checkpoint, training math, numeric path, and optimizer configuration.",
+  "schema": "RealSaS.MageFullSubject.H1V2ReclosurePrereg.v1",
+  "source_notebook_sha256": "a5997830ec3e0b56b9dda1c7c35a9468497334fe0eb153a6e0e31380f0043aa3",
+  "static_preflight_sha256": "04dc24db6e28bc12f51b4980e8307312a77f093e0fd22117081f84aa2e8d596c",
+  "status": "PREREGISTERED__EXECUTION_NOT_YET_PERFORMED",
+  "terminal_success_string": "TERMINAL_PASS__H1_FULL_SUBJECT_RECLOSURE"
+}

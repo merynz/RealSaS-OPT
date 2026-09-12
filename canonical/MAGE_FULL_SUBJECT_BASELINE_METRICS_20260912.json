@@ -1,0 +1,37 @@
+{
+  "schema": "RealSaS.MageFullSubjectBaselineMetrics.v1",
+  "date": "2026-09-12",
+  "status": "MEASURED__RECLOSURE_BASELINE__NOT_PRODUCT_PASS",
+  "normalized_source_sha256": "528bef491eceb358ebc8ecb2a46af1d37b4322a7ef500281403a8207fe7c648f",
+  "old_promoted_zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+  "source_geometry": {
+    "vertices_total": 5321,
+    "faces_total": 5763,
+    "deformation_supported_vertices": 5279,
+    "deformation_supported_faces": 5683,
+    "zero_skin_vertices": 42
+  },
+  "per_view": [
+    {"view": 0, "full_source_alpha_recall": 0.996479, "old_zero_surface_alpha_recall": 0.624912, "old_mwb2_alpha_recall": 0.200953},
+    {"view": 1, "full_source_alpha_recall": 0.996419, "old_zero_surface_alpha_recall": 0.664198, "old_mwb2_alpha_recall": 0.272412},
+    {"view": 2, "full_source_alpha_recall": 0.994585, "old_zero_surface_alpha_recall": 0.669927, "old_mwb2_alpha_recall": 0.225241},
+    {"view": 3, "full_source_alpha_recall": 0.996239, "old_zero_surface_alpha_recall": 0.622613, "old_mwb2_alpha_recall": 0.309593},
+    {"view": 4, "full_source_alpha_recall": 0.996806, "old_zero_surface_alpha_recall": 0.624903, "old_mwb2_alpha_recall": 0.182241},
+    {"view": 5, "full_source_alpha_recall": 0.996595, "old_zero_surface_alpha_recall": 0.663568, "old_mwb2_alpha_recall": 0.307063},
+    {"view": 6, "full_source_alpha_recall": 0.994903, "old_zero_surface_alpha_recall": 0.670069, "old_mwb2_alpha_recall": 0.238660},
+    {"view": 7, "full_source_alpha_recall": 0.996292, "old_zero_surface_alpha_recall": 0.622431, "old_mwb2_alpha_recall": 0.323978}
+  ],
+  "interpretation": {
+    "camera_projection_contract": "PASS",
+    "full_source_observation_alignment": "PASS",
+    "old_promoted_signed_geometry_full_subject_coverage": "FAIL",
+    "old_current_mwb2_coverage": "FAIL",
+    "loss_decomposition": "TWO_STAGE__UPSTREAM_SUBJECT_SCOPE_LOSS_THEN_CONSERVATIVE_MWB2_LOSS",
+    "cdt_authorization": "BLOCKED_UNTIL_CORRECTED_FULL_SUBJECT_S_G_W"
+  },
+  "claim_boundary": {
+    "teacher_source_geometry_used_at_product_inference": false,
+    "product_pass": false,
+    "unseen_generalization": false
+  }
+}

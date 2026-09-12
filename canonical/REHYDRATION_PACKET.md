@@ -10,10 +10,10 @@
 - **Active branch:** `repair/mage-full-subject-reclosure-20260912`.
 - **Active gate:** `MAGE_FIT2_PIPELINE_REFIT`.
 - **Current substage:** `GEPPETTO_FRESH_REFIT`.
-- **Most recent closed gate:** `GSA8192_REAL_8VIEW_EVIDENCE`.
+- **Most recent closed scientific gate:** `GSA8192_REAL_8VIEW_EVIDENCE`.
 - **Geppetto FIT2:** fresh from scratch on corrected GSA8192; RUNNING; no PASS claimed.
 - **Arachne FIT2:** blocked until fresh Geppetto closes and real V0..V7 skeleton evidence is sealed.
-- **Mesh/product work in parallel:** contract + implementation hardening is ready; corrected FIT2 mesh result remains pending fresh G/W.
+- **Mesh/product contract:** implementation-level CLOSED PASS; exact observation rerasterization + self-hosted 41-test proof sealed; corrected real FIT2 mesh result still pending fresh G/W.
 - **Motion:** current rotation-only lane is a mechanical probe, not professional product motion.
 - **Runtime/export:** exact identity reclosure remains open.
 - **PRODUCT_PASS:** not claimed.
@@ -24,7 +24,7 @@
 1. `CURRENT_STATE.md` — exact current stop/go authority on this branch.
 2. `canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md` — causal reopening context.
 3. `canonical/MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1.json` — machine-readable FIT2 stage authority.
-4. `canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md` — mesh/runtime forensic audit and current decision.
+4. `canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md` — mesh/runtime forensic audit, implementation closure and current decision.
 5. `canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md` — frozen mesh/component thresholds before corrected result.
 6. `canonical/MAGE_FULL_SUBJECT_REOPENING_AND_ATTACHMENT_CONTRACT_20260912.md` — full-subject/attachment reopening contract.
 7. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md` — learned/deterministic ownership boundaries.
@@ -95,6 +95,8 @@ The strict current product entry point is:
 
 `compiler/realsas_compiler_core/mesh/product_qualification.py::qualify_fit2_product_mwb2_observation_cdt_mesh`
 
+It requires the exact `ObservationRasterDomain`. Product coverage is **not** trusted from `candidate.residual_report`: the exact qualified mesh is reconstructed from its admitted surface-support bindings, rerasterized against the exact alpha mask, and its coverage/topology metrics are recomputed before promotion.
+
 The lower-level:
 
 `qualify_mwb2_observation_cdt_mesh(...)`
@@ -112,7 +114,15 @@ Frozen FIT2 mesh admission requires per view:
 - minimum raster angle `>= 0.25 deg`
 - maximum raster aspect ratio `<= 250`
 
-Large holes may not be hidden behind aggregate averages. Real V0..V7 source/mesh-overlay/uncovered-heatmap evidence is mandatory.
+Self-hosted product-contract proof:
+
+- workflow run `34716890157`
+- code/test head `b1dc7fca6b6497d97c7be727d66fd9c0b64c3268`
+- runner `realsas-wsl-1660ti`
+- static compile PASS
+- `41 passed in 4.36s`
+
+This proves the contract/implementation only. The real corrected Mage V0..V7 mesh result cannot be claimed until fresh corrected G/W exists.
 
 ## Steiner / component memory
 
@@ -164,8 +174,8 @@ Do not fan out routine RealSaS science/authority jobs onto GitHub-hosted quota.
 
 ## Completion transaction
 
-For every newly closed stage: prereg/frozen source + exact result/provenance + real required artifacts + lineage hashes + registry/journal/ledgers + `CURRENT_STATE.md` + explicit promotion/supersession where applicable.
+For every newly closed stage: prereg/frozen source + exact result/provenance + mandatory real artifacts + lineage hashes + registry/journal/ledgers + `CURRENT_STATE.md` + explicit promotion/supersession where applicable.
 
 ## Packet validity
 
-**VALID FOR ACTIVE REPAIR BRANCH — generated cache synchronized manually with the 2026-09-12 FIT2 reopening state.**
+**VALID FOR ACTIVE REPAIR BRANCH — synchronized with the 2026-09-12 FIT2 reopening state and mesh-product contract closure.**

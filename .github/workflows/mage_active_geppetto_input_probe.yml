@@ -15,11 +15,11 @@ concurrency:
 jobs:
   probe:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 5
+    timeout-minutes: 4
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Probe GPU and exact replay inputs
+      - name: Probe GPU mounts and exact replay inputs
         shell: bash
         run: |
           set -uo pipefail
@@ -27,7 +27,10 @@ jobs:
           {
             echo '=== GPU ==='
             nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader || true
-            echo '=== CANDIDATE ROOTS ==='
+            echo '=== FILESYSTEMS ==='
+            df -h || true
+            echo '=== MOUNTS ==='
+            findmnt -rn -o TARGET,SOURCE,FSTYPE | head -n 200 || true
           } > probe/report.txt
 
           roots=(
@@ -47,8 +50,11 @@ jobs:
           : > probe/hits.tsv
           for root in "${roots[@]}"; do
             [ -d "$root" ] || continue
-            printf '%s\n' "$root" >> probe/report.txt
-            find "$root" -maxdepth 8 -type f \
+            {
+              echo "=== ROOT $root ==="
+              ls -la "$root" 2>&1 | head -n 100
+            } >> probe/report.txt
+            timeout 15s find "$root" -maxdepth 6 -type f \
               \( -name 'ZERO_SURFACE_PRODUCT_CLIPPED.npz' \
                  -o -name 'GEPPETTO_REFERENCE_STRENGTH_FIT1_CHECKPOINT.pt' \
                  -o -name 'normalized.npz' \
@@ -85,7 +91,7 @@ jobs:
               rows.append({'name':name,'path':path,'size_bytes':int(size),'sha256':digest,'expected_sha256':wanted.get(name),'sha_match':digest==wanted.get(name)})
           exact={name:[r for r in rows if r['name']==name and r['sha_match']] for name in wanted}
           out={
-              'schema':'RealSaS.MageActiveGeppettoInputProbe.v1',
+              'schema':'RealSaS.MageActiveGeppettoInputProbe.v2',
               'exact_required_seed_inputs_present':{name:bool(v) for name,v in exact.items()},
               'all_seed_inputs_present':all(bool(v) for v in exact.values()),
               'hits':rows,
@@ -94,11 +100,10 @@ jobs:
           print(json.dumps(out,indent=2))
           PY
       - name: Upload probe inventory
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mage-active-geppetto-input-probe-${{ github.sha }}
           path: probe
           if-no-files-found: error
           retention-days: 2
-
-# Triggered after workflow registration on the repair branch.

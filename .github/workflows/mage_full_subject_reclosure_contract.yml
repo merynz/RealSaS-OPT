@@ -17,12 +17,14 @@ on:
       - 'compiler/realsas_compiler_core/mesh/mwb2_skin.py'
       - 'compiler/realsas_compiler_core/mesh/observation_domain.py'
       - 'compiler/realsas_compiler_core/mesh/quality.py'
+      - 'compiler/realsas_compiler_core/mesh/product_qualification.py'
       - 'compiler/realsas_compiler_core/mesh/_historical_v05/**'
       - 'tests/compiler/test_component_attachment_v1.py'
       - 'tests/compiler/test_component_attachment_v2.py'
       - 'tests/compiler/test_mechanical_assembly_v1.py'
       - 'tests/compiler/test_mesh_quality_v1.py'
       - 'tests/compiler/test_mesh_supported_steiner_v1.py'
+      - 'tests/compiler/test_fit2_product_mesh_qualification_v1.py'
       - 'tests/compiler/test_scene_first_signed_surface_bridge_v1.py'
       - 'tests/compiler/test_h1_observable_qualification_v1.py'
       - 'tests/compiler/test_historical_cdt_v05_loader.py'
@@ -66,6 +68,7 @@ jobs:
           python -m py_compile compiler/realsas_compiler_core/mesh/quality.py
           python -m py_compile compiler/realsas_compiler_core/mesh/mwb2_cdt.py
           python -m py_compile compiler/realsas_compiler_core/mesh/mwb2_skin.py
+          python -m py_compile compiler/realsas_compiler_core/mesh/product_qualification.py
           python -m py_compile tools/audit_full_subject_coverage.py
           python -m py_compile tools/audit_component_geometry_coverage.py
           python -m py_compile tools/audit_full_subject_fit_authority.py
@@ -76,6 +79,7 @@ jobs:
           python -m py_compile tests/compiler/test_mechanical_assembly_v1.py
           python -m py_compile tests/compiler/test_mesh_quality_v1.py
           python -m py_compile tests/compiler/test_mesh_supported_steiner_v1.py
+          python -m py_compile tests/compiler/test_fit2_product_mesh_qualification_v1.py
           python -m py_compile tests/compiler/test_scene_first_signed_surface_bridge_v1.py
           python -m py_compile tests/compiler/test_h1_observable_qualification_v1.py
           python -m py_compile tests/compiler/test_historical_cdt_v05_loader.py
@@ -88,6 +92,7 @@ jobs:
             tests/compiler/test_mechanical_assembly_v1.py \
             tests/compiler/test_mesh_quality_v1.py \
             tests/compiler/test_mesh_supported_steiner_v1.py \
+            tests/compiler/test_fit2_product_mesh_qualification_v1.py \
             tests/compiler/test_scene_first_signed_surface_bridge_v1.py \
             tests/compiler/test_h1_observable_qualification_v1.py \
             tests/compiler/test_historical_cdt_v05_loader.py \

@@ -6,11 +6,15 @@ on:
       - repair/mage-full-subject-reclosure-20260912
     paths:
       - 'compiler/realsas_compiler_core/component_attachment.py'
+      - 'compiler/realsas_compiler_core/mechanical_assembly.py'
       - 'compiler/realsas_compiler_core/substrate/scene_first_signed.py'
       - 'tests/compiler/test_component_attachment_v1.py'
+      - 'tests/compiler/test_mechanical_assembly_v1.py'
       - 'tests/compiler/test_scene_first_signed_surface_bridge_v1.py'
       - 'tools/audit_full_subject_coverage.py'
       - 'tools/audit_component_geometry_coverage.py'
+      - 'tools/audit_full_subject_fit_authority.py'
+      - 'experiments/mage_full_subject_reclosure_v1/**'
       - 'canonical/MAGE_*20260912*'
       - '.github/workflows/mage_full_subject_reclosure_contract.yml'
   workflow_dispatch:
@@ -35,13 +39,19 @@ jobs:
       - name: Static compile
         run: |
           python -m py_compile compiler/realsas_compiler_core/component_attachment.py
+          python -m py_compile compiler/realsas_compiler_core/mechanical_assembly.py
           python -m py_compile compiler/realsas_compiler_core/substrate/scene_first_signed.py
           python -m py_compile tools/audit_full_subject_coverage.py
           python -m py_compile tools/audit_component_geometry_coverage.py
+          python -m py_compile tools/audit_full_subject_fit_authority.py
+          python -m py_compile experiments/mage_full_subject_reclosure_v1/build_full_subject_fit_target_v1.py
+          python -m py_compile experiments/mage_full_subject_reclosure_v1/run_frozen_geppetto_replay_v1.py
           python -m py_compile tests/compiler/test_component_attachment_v1.py
+          python -m py_compile tests/compiler/test_mechanical_assembly_v1.py
           python -m py_compile tests/compiler/test_scene_first_signed_surface_bridge_v1.py
       - name: Reclosure contract tests
         run: |
           PYTHONPATH=. python -m pytest -q \
             tests/compiler/test_component_attachment_v1.py \
+            tests/compiler/test_mechanical_assembly_v1.py \
             tests/compiler/test_scene_first_signed_surface_bridge_v1.py

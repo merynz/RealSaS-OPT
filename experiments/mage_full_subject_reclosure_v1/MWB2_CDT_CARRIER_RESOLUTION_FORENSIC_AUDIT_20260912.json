@@ -1,0 +1,131 @@
+{
+  "schema": "RealSaS.MageFullSubject.MWB2CDTCarrierResolutionForensicAudit.v1",
+  "date": "2026-09-12",
+  "status": "CAUSAL_AUDIT_COMPLETE__NO_PROMOTION",
+  "claims": {
+    "h1_promoted": false,
+    "gsa_promoted": false,
+    "mwb2_cdt_promoted": false,
+    "product_pass": false,
+    "unseen_generalization": false
+  },
+  "authority": {
+    "source_run_id": "20260912T074348Z",
+    "zero_surface_product_clipped_sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+    "observation_sha256": [
+      "8e9875c16bba3047c8f2fc211b984f2399d1145f5720c7427c6fc03a3fec0616",
+      "fa94283780d5e5f3ad3943bbffc1f0592a70fc362fdd03b94a1d1cb46889dc30",
+      "777bf4f7c505b405d3a5d2a111b2f297949454f77cae7c33064bf02479d384a5",
+      "2a771c91c1d1c0b75dab14f6e98b7905a8429bbf0c0a8dd690261f93f6476d86",
+      "354bb239feb6c1a515917fee4efb42fb1e0cb9f173d0eb3191fb0901a02a6228",
+      "158fc14a75aa69f6133f2ba3ec5df2ad146afc62f477d7d3b4a41ca2cb0e42f2",
+      "e3b08836c187863819d8b8aaa53aef79eddfee167e1fabf3fb1dd8ec0484563a",
+      "87d4ad46edffec3c6bff034d305194820288d3cc6ef9a9480ac2234fb56451bc"
+    ],
+    "camera_sha256": [
+      "73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541",
+      "bdc172a4aff332f956d1403e36b2f8684b68059fdc82f9efddf35d05a6d9b4d4",
+      "3c2bbc44ef9005b4a545a3381205a5d6a92af15b4791c9075071b8cad02a1a6c",
+      "24b2f115d908422d885f85e956fcc36ac78fd0c90b503f698caa62febc2b9c4d",
+      "5bf00783d6509c2ca142e05ef705d5cdb5df17ad248b782d2fe8cf8a297bee39",
+      "7ee3e50739318eeb122b5b0ec67260dd32e21d949398f48c408a6c239e5c89fe",
+      "daa19fa58ff602977d64b720c4198956809855149d814df487c7762a963f1eec",
+      "68f51fbfce4c31f94281e1569d74b44609435285668f8a8b1b278e76db6ea53f"
+    ],
+    "alpha_binary_rule": "RGBA_ALPHA_UINT8_GE_8",
+    "alpha_foreground_pixels": [544107, 482013, 397379, 517951, 544126, 481973, 397301, 517865]
+  },
+  "exact_gsa_reconstruction_check": {
+    "target_nodes": 1024,
+    "actual_nodes": 974,
+    "voxel_divisions": 15,
+    "topology_edges": 2851,
+    "self_visibility_counts_by_view": [282, 287, 228, 340, 301, 295, 233, 320],
+    "observation_support_counts_by_view": [282, 284, 223, 340, 299, 293, 228, 320],
+    "observed_any_nodes": 854,
+    "completed_nodes": 120,
+    "matches_committed_h1_1024_diagnostic": true
+  },
+  "method": {
+    "purpose": "optimizer-free causal localization before changing MWB2 or retraining IRIS",
+    "triangulation_mirror": "SCIPY_DELAUNAY_ON_THE_SAME_ADMITTED_PROJECTED_CARRIERS",
+    "historical_kernel_exact_execution": false,
+    "why_mirror_is_informative": "Current typed adapter supplies only convex-hull constraints, all remaining carriers as support points, disables quality refinement, rejects generated vertices, and applies the exact ObservationRasterDomain triangle-inside fence. This makes ordinary Delaunay a strong causal mirror, but not canonical promotion evidence.",
+    "precision_policy": "every admitted triangle must be entirely inside exact observed alpha",
+    "promotion_use": "FORBIDDEN"
+  },
+  "arms": {
+    "A_1024_VIEW_INDUCED_COMPONENTS": {
+      "actual_nodes": 974,
+      "recall_by_view": [0.7024500695635234, 0.6887760288622921, 0.5999788614899126, 0.6613888186334228, 0.5702760022494789, 0.7213433117622772, 0.5870561614493797, 0.7524489973255578],
+      "min_recall": 0.5702760022494789,
+      "precision_by_view": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "interpretation": "Typed CDT substantially improves the old relation-clique producer but fails the frozen 0.90 recall gate."
+    },
+    "B_1024_FULL_SAFE_SURFACE_COMPONENTS": {
+      "actual_nodes": 974,
+      "recall_by_view": [0.7701279343952568, 0.8213927840120495, 0.731367284129257, 0.8435913821963854, 0.7873635885805861, 0.8289157276444946, 0.7265549293860323, 0.8302298861672444],
+      "min_recall": 0.7265549293860323,
+      "precision_by_view": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "interpretation": "Computing component identity on the full safe S topology before taking the visible subset repairs view-induced fragmentation, but 1024 carriers remain too sparse for the exact alpha fence."
+    },
+    "C_2048_FULL_SAFE_SURFACE_COMPONENTS": {
+      "requested_nodes": 2048,
+      "actual_nodes": 2006,
+      "voxel_divisions": 21,
+      "topology_edges": 5886,
+      "observation_support_counts_by_view": [606, 611, 504, 694, 629, 646, 517, 648],
+      "recall_by_view": [0.8659050517637156, 0.8829450657969806, 0.8200584328814557, 0.8761948524088186, 0.8666136152288256, 0.8738456303568872, 0.8093007568568918, 0.8717271875874987],
+      "min_recall": 0.8093007568568918
+    },
+    "D_4096_FULL_SAFE_SURFACE_COMPONENTS": {
+      "requested_nodes": 4096,
+      "actual_nodes": 3903,
+      "voxel_divisions": 29,
+      "topology_edges": 11402,
+      "observation_support_counts_by_view": [1204, 1278, 1001, 1386, 1256, 1377, 1019, 1337],
+      "recall_by_view": [0.9067481212335073, 0.9148944115615139, 0.8652017343644229, 0.9233576149095185, 0.8995085697062812, 0.9168916101109398, 0.8603300771958792, 0.9137458604076352],
+      "min_recall": 0.8603300771958792
+    },
+    "E_8192_VIEW_INDUCED_COMPONENTS": {
+      "requested_nodes": 8192,
+      "actual_nodes": 8171,
+      "recall_by_view": [0.9116497306595945, 0.9273795520037841, 0.8753004059097235, 0.9213709404943711, 0.8953790114789589, 0.918337749210018, 0.8800632266216294, 0.9322159249997586],
+      "min_recall": 0.8753004059097235,
+      "interpretation": "Carrier density alone is insufficient: views 2, 4 and 6 still fail because visibility-induced graph fragmentation remains."
+    },
+    "F_8192_FULL_SAFE_SURFACE_COMPONENTS": {
+      "requested_nodes": 8192,
+      "actual_nodes": 8171,
+      "voxel_divisions": 42,
+      "topology_edges": 23656,
+      "observation_support_counts_by_view": [2537, 2765, 2194, 3021, 2772, 2871, 2183, 2803],
+      "full_safe_component_groups_with_visible_support_by_view": [10, 10, 4, 12, 9, 12, 10, 11],
+      "recall_by_view": [0.9258877389925143, 0.9406053363705958, 0.9055737721419602, 0.9412975358672925, 0.9284963409210367, 0.9379882275563154, 0.9075763715671493, 0.943664854740135],
+      "min_recall": 0.9055737721419602,
+      "precision_by_view": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "mirror_gate_0_90_pass": true,
+      "canonical_gate_pass": false
+    }
+  },
+  "causal_conclusion": {
+    "iris_retraining_needed_for_this_failure": false,
+    "old_mwb2_relation_clique_sparsity_is_not_the_only_issue": true,
+    "view_induced_component_partition_is_a_semantic_bug": true,
+    "1024_compaction_is_too_sparse_for_identity_only_cdt_under_exact_alpha_fencing_on_mage": true,
+    "joint_repair_candidate": "FULL_SAFE_S_COMPONENT_IDENTITY_THEN_VISIBLE_SUBSET + GSA_TARGET_NODES_8192",
+    "threshold_changed": false,
+    "frozen_recall_gate": 0.90
+  },
+  "next_gate": {
+    "name": "EXACT_HISTORICAL_CDT_REPLAY_ON_8192_FULL_SAFE_COMPONENT_PARTITION",
+    "requirements": [
+      "patch component partition semantics generically, without Mage labels",
+      "freeze target_nodes=8192 only for the prospective downstream reclosure arm",
+      "execute the hash-verified historical v0.5 CDT kernel, not the SciPy mirror",
+      "require min-view source alpha recall >= 0.90 and precision >= 0.995",
+      "if exact kernel fails, do not widen thresholds and do not retrain IRIS"
+    ],
+    "arap_bbw_xpbd": "LOCKED"
+  }
+}

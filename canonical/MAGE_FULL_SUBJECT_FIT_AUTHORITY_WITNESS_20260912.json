@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-12",
+  "faces_not_fully_mechanically_supported": 80,
+  "fit_authorized": true,
+  "fit_executed": false,
+  "gates": {
+    "alpha_threshold": 8,
+    "min_iou_per_view": 0.97,
+    "min_precision_per_view": 0.98,
+    "min_recall_per_view": 0.98
+  },
+  "historical_zero_surface_sha256_superseded_for_current_mage": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+  "mechanically_supported_face_count": 5683,
+  "mechanically_supported_vertex_count": 5279,
+  "minimums": {
+    "iou": 0.9924691004605425,
+    "precision": 0.9978615107277933,
+    "recall": 0.9945845150347653
+  },
+  "normalized_source_sha256": "528bef491eceb358ebc8ecb2a46af1d37b4322a7ef500281403a8207fe7c648f",
+  "optimizer_constructed": false,
+  "product_pass_claimed": false,
+  "purpose": "Pre-FIT subject-scope gate for corrected IRIS/H1 reclosure; source truth and rendered observations must describe the same visible subject.",
+  "schema": "RealSaS.MageFullSubjectFitAuthorityWitness.v1",
+  "source_face_count": 5763,
+  "source_vertex_count": 5321,
+  "status": "PASS__FULL_SUBJECT_FIT_AUTHORITY__TRAINING_NOT_RUN",
+  "teacher_policy": "SKIN_SUPPORTED_SOURCE_GEOMETRY__NO_SILENT_RENDERED_COMPONENT_OMISSION",
+  "unseen_generalization_claimed": false,
+  "views": [
+    {"camera_sha256":"73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541","iou":0.9955857104821014,"observation_sha256":"8e9875c16bba3047c8f2fc211b984f2399d1145f5720c7427c6fc03a3fec0616","precision":0.9991007575380658,"recall":0.9964786337981316,"view":0},
+    {"camera_sha256":"bdc172a4aff332f956d1403e36b2f8684b68059fdc82f9efddf35d05a6d9b4d4","iou":0.9952360822734186,"observation_sha256":"fa94283780d5e5f3ad3943bbffc1f0592a70fc362fdd03b94a1d1cb46889dc30","precision":0.9988083849769164,"recall":0.9964191837149621,"view":1},
+    {"camera_sha256":"3c2bbc44ef9005b4a545a3381205a5d6a92af15b4791c9075071b8cad02a1a6c","iou":0.9924691004605425,"observation_sha256":"777bf4f7c505b405d3a5d2a111b2f297949454f77cae7c33064bf02479d384a5","precision":0.9978615107277933,"recall":0.9945845150347653,"view":2},
+    {"camera_sha256":"24b2f115d908422d885f85e956fcc36ac78fd0c90b503f698caa62febc2b9c4d","iou":0.9953319972300612,"observation_sha256":"2a771c91c1d1c0b75dab14f6e98b7905a8429bbf0c0a8dd690261f93f6476d86","precision":0.9990861125901545,"recall":0.996239026471616,"view":3},
+    {"camera_sha256":"5bf00783d6509c2ca142e05ef705d5cdb5df17ad248b782d2fe8cf8a297bee39","iou":0.9958395605283354,"observation_sha256":"354bb239feb6c1a515917fee4efb42fb1e0cb9f173d0eb3191fb0901a02a6228","precision":0.9990274738633601,"recall":0.9968058868717907,"view":4},
+    {"camera_sha256":"7ee3e50739318eeb122b5b0ec67260dd32e21d949398f48c408a6c239e5c89fe","iou":0.995678013005346,"observation_sha256":"158fc14a75aa69f6133f2ba3ec5df2ad146afc62f477d7d3b4a41ca2cb0e42f2","precision":0.9990764930029785,"recall":0.9965952449618547,"view":5},
+    {"camera_sha256":"daa19fa58ff602977d64b720c4198956809855149d814df487c7762a963f1eec","iou":0.9932181669702871,"observation_sha256":"e3b08836c187863819d8b8aaa53aef79eddfee167e1fabf3fb1dd8ec0484563a","precision":0.9982977648693017,"recall":0.9949031087261295,"view":6},
+    {"camera_sha256":"68f51fbfce4c31f94281e1569d74b44609435285668f8a8b1b278e76db6ea53f","iou":0.9952700343559087,"observation_sha256":"87d4ad46edffec3c6bff034d305194820288d3cc6ef9a9480ac2234fb56451bc","precision":0.9989699444505757,"recall":0.9962924700452821,"view":7}
+  ],
+  "zero_or_unsupported_vertex_count": 42
+}

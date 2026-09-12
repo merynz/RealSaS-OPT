@@ -31,21 +31,22 @@
     {"name":"Geppetto","role":"learned skeleton/control proposal from corrected RiggingSurfaceIR","canonical_rule":"fresh-from-scratch FIT2 refit is active on corrected GSA8192; historical FIT1 checkpoint is preserved but forbidden as a load source"},
     {"name":"Compiler graph qualification","role":"deterministic legal root/parent/tree/canonicalization","canonical_rule":"no hidden semantic repair; new QualifiedSkeletonIR may close only after Geppetto terminal evidence + real V0..V7 stage evidence"},
     {"name":"Arachne","role":"learned skin/deformation proposal from corrected surface + newly qualified skeleton","canonical_rule":"historical V5 FIT1 remains scoped evidence; fresh corrected-lineage FIT2 refit is blocked until fresh Geppetto closes"},
-    {"name":"Directional mesh / MWB2-CDT","role":"artist-visible view-local render/deformation discretization","canonical_rule":"first-class product component; low-level CDT admission is not product closure; exact alpha-domain coverage + topology proof through the frozen FIT2 product qualifier is required"},
-    {"name":"Compiler mesh-skin/component qualification","role":"exact mesh<-skin binding, component ownership/attachment/mechanical assembly legality","canonical_rule":"position and skin for inserted vertices share the same surface-support simplex; visible surface may not disappear from component accounting"},
+    {"name":"Directional mesh / MWB2-CDT","role":"artist-visible view-local render/deformation discretization","canonical_rule":"first-class product component; low-level CDT admission is not product closure; the product qualifier must independently reconstruct and rerasterize the exact promoted mesh against exact ObservationRasterDomain authority before applying frozen coverage/topology gates"},
+    {"name":"Compiler mesh-skin/component qualification","role":"exact mesh<-skin binding, component ownership/attachment/mechanical assembly legality","canonical_rule":"position, raster placement and skin for inserted vertices share the same surface-support simplex; visible surface may not disappear from component accounting"},
     {"name":"Motion","role":"professional animation semantics plus deterministic retarget/constraint qualification","canonical_rule":"current rotation-only preset is mechanical probe only; professional motion remains open and must receive its own proposal/compiler/proof contract"},
     {"name":"Proof / runtime / export","role":"measure exact qualified candidate and project only PASS state","canonical_rule":"exact qualified skeleton+mesh+mesh-skin+components+motion must survive into runtime; hidden re-triangulation/demo fill/second mesh truth is forbidden; PRODUCT_PASS remains open"}
   ],
   "current_focus": {
     "module": "Mage FIT2 fresh pipeline refit / Geppetto",
-    "state": "MAGE_FIT1_REAL_E2E_REOPENED__FIT2_FRESH_PIPELINE_REFIT_ACTIVE__GEPPETTO_RUNNING__MESH_PRODUCT_QUALIFIER_HARDENED__MOTION_RUNTIME_RECLOSURE_PENDING__PRODUCT_PASS_OPEN",
+    "state": "MAGE_FIT1_REAL_E2E_REOPENED__FIT2_FRESH_PIPELINE_REFIT_ACTIVE__GEPPETTO_RUNNING__MESH_PRODUCT_CONTRACT_CLOSED_PASS__MOTION_RUNTIME_RECLOSURE_PENDING__PRODUCT_PASS_OPEN",
     "active_experiment": "MAGE_FIT2_PIPELINE_REFIT",
-    "most_recent_closed_gate": "GSA8192_REAL_8VIEW_EVIDENCE",
+    "most_recent_closed_scientific_gate": "GSA8192_REAL_8VIEW_EVIDENCE",
+    "parallel_closed_product_contract_gate": "FIT2_MESH_PRODUCT_RECLOSURE_CONTRACT_AND_IMPLEMENTATION",
     "categorical_verdict": "FIT1_LOCAL_CLOSURES_PRESERVED__REAL_E2E_PRODUCT_READINESS_FALSIFIED__FIT2_FRESH_REFIT_ACTIVE",
     "result_authority": "canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md",
     "scientific_question": "Can the same Mage witness reclose the exact product chain from corrected observable H1/GSA through fresh Geppetto and fresh Arachne, an art-covering mechanically supported directional mesh, professional motion and exact runtime identity without reproducing the defects exposed by the real FIT1 E2E output?",
-    "scope_warning": "Historical FIT1 local model/Compiler PASSes remain scoped evidence, but they no longer justify product-readiness. Current fresh Geppetto has not passed, Arachne FIT2 has not started, corrected FIT2 mesh result is not yet available, professional motion/runtime closure is open, and no unseen-family or PRODUCT_PASS claim exists.",
-    "promotion_block": "Do not start/close fresh Arachne before Geppetto terminal PASS plus real V0..V7 skeleton evidence; do not claim corrected mesh/product closure before fresh S/G/W mechanics and strict product-mesh qualification; do not resume unseen/FIT8-LOFO before same-Mage FIT2 product reclosure."
+    "scope_warning": "Historical FIT1 local model/Compiler PASSes remain scoped evidence, but they no longer justify product-readiness. Current fresh Geppetto has not passed, Arachne FIT2 has not started, corrected FIT2 real mesh result is not yet available, professional motion/runtime closure is open, and no unseen-family or PRODUCT_PASS claim exists. The mesh product contract/implementation itself is CLOSED PASS.",
+    "promotion_block": "Do not start/close fresh Arachne before Geppetto terminal PASS plus real V0..V7 skeleton evidence; do not claim corrected real mesh/product closure before fresh S/G/W mechanics and strict exact-observation product-mesh qualification; do not resume unseen/FIT8-LOFO before same-Mage FIT2 product reclosure."
   },
   "fit2_current_state": {
     "active_branch": "repair/mage-full-subject-reclosure-20260912",
@@ -82,16 +83,23 @@
       "actual_optimizer_run": "ACTIVE_EXTERNAL_GPU_PER_OPERATOR_CONTEXT"
     },
     "mesh_component_hardening": {
+      "status": "CLOSED_PASS__CONTRACT_AND_IMPLEMENTATION_ONLY__REAL_RESULT_PENDING",
       "historical_hardening_commit": "9dd533eb5c48408faa92bcfb3469b7d32fd39368",
       "historical_test_commit": "ebe7358dbdafbf65068dde91f3eba39b58b784b6",
       "strict_product_qualifier_commit": "3ff6c9ed2da8fd3045f4313b90f4ea6ce000c60d",
-      "strict_product_qualifier_test_commit": "76d654cc3b47a75cf1338dbc571df9c25ee0380a",
+      "exact_observation_remeasurement_commit": "3e8ef20b5b6ddbbec0a2b1c57912c7ccc21d30d8",
+      "final_regression_commit": "b1dc7fca6b6497d97c7be727d66fd9c0b64c3268",
       "audit": "canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md",
       "prereg": "canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md",
       "product_qualifier": "compiler/realsas_compiler_core/mesh/product_qualification.py::qualify_fit2_product_mwb2_observation_cdt_mesh",
+      "exact_observation_domain_required": true,
+      "candidate_reported_coverage_is_product_authority": false,
+      "exact_promoted_mesh_rerasterization_required": true,
       "low_level_cdt_qualifier_is_product_pass": false,
-      "earlier_self_hosted_contract_workflow": "PASS",
-      "new_strict_qualifier_ci_result": "NOT_YET_CLAIMED",
+      "self_hosted_workflow": "mage-full-subject-reclosure-contract",
+      "self_hosted_run_id": 34716890157,
+      "self_hosted_runner": "realsas-wsl-1660ti",
+      "self_hosted_result": "PASS__41_TESTS__4.36S",
       "corrected_fit2_mesh_result_claimed": false,
       "supported_inserted_vertex_mode": "LOCAL_CONVEX_INTERPOLATION",
       "automatic_arbitrary_quality_steiner_product_authority": false
@@ -100,7 +108,7 @@
       "new QualifiedSkeletonIR + real V0..V7 skeleton evidence",
       "fresh Arachne FIT2",
       "new QualifiedSkinIR + real V0..V7 skin/deformation evidence",
-      "directional alpha-domain MWB2/CDT candidate + strict FIT2 product mesh qualification",
+      "directional alpha-domain MWB2/CDT candidate + strict exact-observation FIT2 product mesh qualification",
       "QualifiedEditableMeshIR + QualifiedMeshSkinIR + qualified components/mechanical assembly",
       "real V0..V7 dynamic deformation proof",
       "professional motion closure",
@@ -167,7 +175,8 @@
     "No post-hoc gate widening after results are visible.",
     "Visible artwork coverage is a first-class product invariant for the directional deformation mesh.",
     "A low-level legal CDT PASS is not a product mesh PASS; the frozen FIT2 product qualifier must pass on the exact mesh.",
-    "Inserted mesh geometry may not invent mechanical semantics; rest position and skin must derive from the same admitted support authority.",
+    "Product coverage must be independently recomputed from the exact promoted mesh against exact ObservationRasterDomain authority; candidate residual coverage is diagnostic only.",
+    "Inserted mesh geometry may not invent mechanical semantics; rest position, raster placement and skin must derive from the same admitted support authority.",
     "The exact qualified mesh/skeleton/skin/component/motion identity must survive into runtime/export; hidden re-triangulation or a second runtime truth is forbidden.",
     "Rotation-only deterministic motion is a mechanical probe, not professional animation evidence.",
     "PRODUCT_PASS remains a separate exact end-to-end contract."
@@ -177,8 +186,8 @@
     {"trap":"Calling historical Geppetto/Arachne FIT1 evidence invalid or useless","defense":"Preserve it as scoped old-lineage scientific evidence; what was withdrawn is the product-readiness interpretation/current Mage product authority."},
     {"trap":"Loading the old Geppetto checkpoint for current FIT2","defense":"Active authority explicitly requires FRESH_FROM_SCRATCH__NO_HISTORICAL_GEPPETTO_CHECKPOINT."},
     {"trap":"Treating alpha coverage as cosmetic only","defense":"The directional mesh is the deformation/render domain carrying artist pixels; large uncovered regions are product failure even if remaining triangles are legal."},
-    {"trap":"Treating low-level CDT admission as product mesh closure","defense":"Only the frozen FIT2 product qualifier remeasures exact raster topology and enforces recall/IoU/connected-hole/topology gates."},
-    {"trap":"Treating legal Steiner vertices as arbitrary fill","defense":"Only support-bound LOCAL_CONVEX_INTERPOLATION is legal; position and skin use the same nonnegative simplex coefficients."},
+    {"trap":"Treating low-level CDT admission or candidate-reported coverage as product mesh closure","defense":"Only the frozen FIT2 product qualifier with exact ObservationRasterDomain re-rasterization of the exact promoted mesh can close product mesh admission."},
+    {"trap":"Treating legal Steiner vertices as arbitrary fill","defense":"Only support-bound LOCAL_CONVEX_INTERPOLATION is legal; position, raster placement and skin use the same nonnegative simplex coefficients."},
     {"trap":"Calling rotation-only preset motion product animation","defense":"It remains a mechanical probe; professional motion needs its own proposal/compiler/proof closure."},
     {"trap":"Using GitHub-hosted Actions for routine RealSaS authority/science","defense":"Use only self-hosted realsas-wsl-1660ti labels self-hosted, linux, x64, realsas."}
   ],
@@ -192,6 +201,6 @@
   "continuation_protocol": {
     "experiment_completion_definition": "prereg + frozen source/apparatus + exact result/provenance + mandatory real V0..V7 evidence + registry/journal + ledgers + CURRENT_STATE + explicit promotion/supersession where applicable",
     "promotion_rule": "Scientific PASS never promotes itself; real E2E contradiction can reopen product authority without erasing historical evidence.",
-    "next_action": "Complete the currently running fresh Geppetto FIT2. If it reaches sealed 48/48 terminal closure with required real V0..V7 evidence, advance to fresh Arachne on corrected S+G; otherwise diagnose without relaxing frozen thresholds."
+    "next_action": "Complete the currently running fresh Geppetto FIT2. If it reaches sealed 48/48 terminal closure with required real V0..V7 evidence, advance to fresh Arachne on corrected S+G; otherwise diagnose without relaxing frozen thresholds. The mesh product contract is already closed and awaits fresh G/W for its real result."
   }
 }

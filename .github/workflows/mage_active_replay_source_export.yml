@@ -25,6 +25,7 @@ jobs:
           name: mage-active-replay-source-${{ github.sha }}
           path: |
             compiler/realsas_compiler_core
+            compiler/vendor
             models/geppetto/reference_strength_v1
             experiments/geppetto_reference_strength_fullstack_v1
             experiments/mage_full_subject_reclosure_v1

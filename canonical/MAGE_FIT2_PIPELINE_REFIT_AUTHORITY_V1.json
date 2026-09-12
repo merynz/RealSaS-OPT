@@ -41,12 +41,30 @@
     "teacher_supervision_allowed_during_training": true,
     "teacher_feedback_allowed_during_free_eval": false
   },
+  "mesh_product_reclosure": {
+    "status": "CONTRACT_AND_IMPLEMENTATION_READY__FRESH_FIT2_RESULT_PENDING",
+    "audit": "canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md",
+    "preregistration": "canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md",
+    "product_qualifier": "compiler/realsas_compiler_core/mesh/product_qualification.py::qualify_fit2_product_mwb2_observation_cdt_mesh",
+    "low_level_cdt_qualifier_is_product_pass": false,
+    "minimum_source_alpha_recall": 0.94,
+    "minimum_precision_inside_alpha": 0.995,
+    "minimum_alpha_iou": 0.935,
+    "maximum_largest_uncovered_component_fraction": 0.015,
+    "minimum_large_component_recall": 0.90,
+    "large_component_minimum_foreground_fraction": 0.0025,
+    "exact_runtime_mesh_identity_required": true,
+    "hidden_runtime_retriangulation_forbidden": true,
+    "corrected_fit2_mesh_pass_claimed": false
+  },
   "stage_evidence_policy": {
-    "rule": "NO_MODEL_STAGE_CLOSES_WITHOUT_REAL_8_VIEW_ARTIFACTS",
+    "rule": "NO_MODEL_OR_PRODUCT_STAGE_CLOSES_WITHOUT_REAL_8_VIEW_ARTIFACTS",
     "synthetic_image_generation_allowed_as_evidence": false,
     "iris_gsa_required": "V0..V7 real observation + real GSA graph projection",
     "geppetto_required": "V0..V7 real observation + newly qualified skeleton projection",
     "arachne_required": "V0..V7 real observation + newly qualified skin/deformation projection",
+    "mesh_required": "V0..V7 real observation + exact qualified mesh overlay + uncovered heatmap + coverage/topology metrics",
+    "runtime_required": "frame-0 and dynamic evidence bound to exact qualified S/G/W/M/B/component/motion lineage",
     "artifact_manifest_required": true,
     "sha256_required": true
   },
@@ -57,7 +75,12 @@
     "GEPPETTO_REAL_8VIEW_EVIDENCE",
     "ARACHNE_FRESH_REFIT",
     "ARACHNE_REAL_8VIEW_EVIDENCE",
-    "DOWNSTREAM_DEFORMATION_PROOFS"
+    "DIRECTIONAL_PRODUCT_MESH_QUALIFICATION",
+    "EXACT_MESH_SKIN_BINDING",
+    "COMPONENT_MECHANICAL_ASSEMBLY_QUALIFICATION",
+    "REAL_8VIEW_DYNAMIC_DEFORMATION_PROOFS",
+    "PROFESSIONAL_MOTION_CLOSURE",
+    "EXACT_RUNTIME_EXPORT_RECLOSURE"
   ],
   "fail_closed": {
     "gsa_lineage_drift": "STOP",
@@ -65,12 +88,18 @@
     "input_sha_drift": "STOP",
     "geppetto_terminal_pass_missing": "DO_NOT_START_ARACHNE",
     "eight_view_evidence_missing": "DO_NOT_CLOSE_STAGE",
+    "mesh_product_quality_gate_missing_or_failed": "DO_NOT_PROMOTE_MESH",
+    "low_level_cdt_pass_without_product_qualification": "NOT_PRODUCT_EVIDENCE",
+    "mesh_skin_or_runtime_lineage_drift": "STOP",
+    "hidden_runtime_retriangulation": "STOP",
     "threshold_relaxation": "FORBIDDEN_WITHOUT_NEW_EXPLICIT_AUTHORITY"
   },
   "claims": {
     "product_pass": false,
     "unseen_generalization_pass": false,
     "geppetto_pass": false,
-    "arachne_pass": false
+    "arachne_pass": false,
+    "corrected_fit2_mesh_pass": false,
+    "runtime_export_reclosure_pass": false
   }
 }

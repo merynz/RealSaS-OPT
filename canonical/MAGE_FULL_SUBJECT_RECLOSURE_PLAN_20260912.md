@@ -1,119 +1,187 @@
-# RealSaS — Mage full-subject reclosure plan — 2026-09-12
+# RealSaS — Mage full-subject reclosure / FIT2 fresh-refit plan — 2026-09-12
 
-**Status:** `ACTIVE__FAIL_CLOSED__MAGE_FIT1_REOPENED`
+**Status:** `ACTIVE__FAIL_CLOSED__FIT2_FRESH_PIPELINE_REFIT`
+
+**Supersession note:** the earlier sequencing in this document that required frozen Geppetto/Arachne replay before retraining is superseded by `canonical/MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1.json`. Historical checkpoints remain preserved evidence, but the active corrected-lineage program is a **fresh refit**.
 
 ## Purpose
 
-Mage is not treated as a special-case product profile. It is used as a deliberately difficult capability witness because one asset contains a deformable body plus rigid / quasi-rigid accessory components (book, wand/staff, hat, cape) under the same eight-view product observation contract. The goal is to close generic RealSaS contracts against this witness, not to hard-code Mage semantics.
+Mage is not a special-case product profile. It is the same difficult controlled witness used to test whether RealSaS can compile a full eight-direction raster subject into an editable Spine-class puppet while preserving art, mechanics and runtime identity.
 
-## Discovered contradiction
+The goal is no longer merely to recover the old FIT1 local model gates. The first real end-to-end FIT1 product run was visibly inadequate. FIT2 therefore re-closes the entire current product chain on corrected authority before any unseen/generalization work resumes.
 
-The promoted Mage IRIS/GSA chain was built from a signed zero-surface whose source-side geometry authority did not cover the full rendered subject. The historical render/training path selected armature-modified body geometry to form geometry truth / normalization bounds while the rendered RGBA contained additional components. This produced a real mismatch between observation subject and learned geometry subject.
+Primary causal context: `canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md`.
 
-Measured on the exact eight Mage observations and exact cameras:
+## Why the line is reopened
 
-- full deformation-supported source geometry -> source alpha recall: ~99.46% to ~99.68%;
-- promoted signed zero-surface -> source alpha recall: ~62.24% to ~67.01%;
-- current conservative MWB2 relation-clique mesh -> source alpha recall: ~18.22% to ~32.40%.
+The real E2E run exposed multiple independent gaps:
 
-Therefore downstream product closure is reopened at the first contradicted authority: full-subject IRIS signed geometry.
+- old H1/IRIS subject authority did not cover the same complete rendered subject as the eight product observations;
+- the old conservative MWB2 relation complex covered only about `18.18%..32.31%` of source alpha;
+- exported runtime evidence later exposed a separate noncanonical mesh-transfer/coverage problem;
+- current motion is a rotation-only mechanical probe rather than professional animation;
+- existing proof did not enforce exact qualified product identity + perceptual/product quality through runtime.
 
-## Claim boundary
+The old scientific checkpoints remain valid as historical scoped evidence. They are not current Mage product authority.
 
-The following are **not** revoked as research history:
+## Corrected Stage 0 — already closed
 
-- architecture discovery and falsifications;
-- Geppetto/Arachne architecture choices;
-- quotient / graph results;
-- Compiler contracts unrelated to the contradicted subject boundary;
-- historical checkpoints and experiment evidence.
+### H1 observable product surface
 
-The following **are not currently product-authoritative for Mage** until reclosed on corrected full-subject S:
+Current product qualification is tied to what the eight admitted observations can actually support, not to an incoherent global watertight-sign assumption for open/mixed 2D/2.5D geometry.
 
-- promoted Mage signed zero-surface and its GSA lineage;
-- Mage QualifiedSkeletonIR derived from that S;
-- Mage Arachne/V5 QualifiedSkinIR derived from that S;
-- downstream MWB2/appearance/binding/product artifacts bound to those lineages.
+Current authority:
 
-## Mandatory execution order
+- H1 run id `20260912T074348Z`;
+- product-clipped zero-surface SHA-256 `56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925`;
+- minimum alpha recall `0.9511473445`;
+- minimum precision `0.9806321480`;
+- minimum IoU `0.9356283394`;
+- teacher geometry at product inference: forbidden;
+- historical full-hidden-teacher/global-sign metrics preserved as diagnostics.
 
-No later stage may be promoted before every earlier gate below has passed.
+### GSA8192
 
-1. **Observation authority audit**
-   - exact 8 RGBA observations;
-   - exact 8 orthographic camera records;
-   - per-view hashes;
-   - projection/raster replay;
-   - full rendered-subject component inventory.
+Deterministic corrected substrate:
 
-2. **Generic component / attachment truth audit**
-   - classify every rendered source component by geometry membership and mechanical mode;
-   - at minimum distinguish `DEFORMABLE_COMPONENT`, `RIGID_SKINNED_COMPONENT`, `RIGID_BONE_ATTACHMENT`, and explicitly unsupported/no-mechanical-authority geometry;
-   - preserve source component identity and provenance;
-   - detachable/swappable is a separate property and must not be inferred merely from rigidity.
+- `8171` nodes;
+- `23656` relations;
+- `7391` observed nodes;
+- `780` completed nodes;
+- geometry lineage `65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da`;
+- tensorization `fe351362e195164805cebb0f63b74d1861ef123458b20ac56607016e00a6c67e`;
+- exact product-alpha + self-visibility observation authority;
+- deterministic replay PASS;
+- real V0..V7 GSA evidence seal PASS.
 
-3. **Corrected full-subject IRIS geometry FIT**
-   - product inference input remains only 8 RGBA + exact cameras;
-   - teacher/source mesh may be used only for FIT training/evaluation authority;
-   - no component visible in admitted product observations may silently disappear from the target because of source-object selection;
-   - report silhouette recall / precision / IoU per view against the product observations;
-   - report component-level coverage, not only whole-character aggregate coverage.
+## Binding current execution order
 
-4. **Dense signed zero-surface gate**
-   - validate predicted-to-truth precision;
-   - validate observed silhouette completeness on all eight views;
-   - validate camera/reprojection consistency;
-   - validate component coverage for body + attachment witnesses;
-   - fail closed on missing major observed component.
+No later product stage may close before every prior stage below is sealed.
 
-5. **GSA re-emission**
-   - deterministic compaction from corrected dense zero-surface;
-   - no learned retraining;
-   - retain full provenance and exact camera bindings;
-   - distinguish self-visible predicted surface support from actual observation support in metadata/flags;
-   - emit a new surface lineage. Old 950-node lineage may not be reused.
+1. **Corrected H1 observable product surface** — `DONE`.
+2. **GSA8192 canonical lineage + real V0..V7 evidence** — `DONE`.
+3. **Fresh Geppetto FIT2** — `RUNNING`.
+   - fresh from scratch;
+   - historical Geppetto checkpoint loading forbidden;
+   - max `16384` steps;
+   - check every `64`;
+   - require `48/48` consecutive terminal checks;
+   - no threshold relaxation;
+   - training may use admitted FIT teacher supervision; free evaluation may not use teacher feedback.
+4. **New Compiler-qualified skeleton + real V0..V7 skeleton evidence** — `PENDING`.
+5. **Fresh Arachne FIT2** — `BLOCKED ON 3/4`.
+   - corrected S + newly qualified G;
+   - no reuse/copy of old 950-row W;
+   - fresh corrected-lineage skin proposal/qualification;
+   - real V0..V7 skin/deformation evidence required.
+6. **Directional alpha-domain mesh closure** — `PENDING CURRENT S/G/W`.
+   - exact observation alpha is visible-domain coverage authority;
+   - corrected GSA is mechanical-support authority;
+   - constrained triangulation may use identity carriers plus legally supported `LOCAL_CONVEX_INTERPOLATION` vertices;
+   - no unsupported UNKNOWN crossing;
+   - no hidden second mesh authority.
+7. **Qualified mesh-skin binding** — exact `M <- W` convex transfer using the same surface-support coefficients.
+8. **Qualified components / mechanical assembly** — visible component accounting + exact S/G/W lineage + mechanically verified rigid ownership.
+9. **Real V0..V7 deformation proof** — exact mesh, skin, skeleton and components.
+10. **Professional motion closure** — separate first-class product subsystem; current rotation-only preset remains a mechanical probe only.
+11. **Exact runtime/export reclosure** — runtime must consume/prove the exact qualified product identity; no re-triangulation/demo fill/second mesh truth.
+12. **PRODUCT_PASS consideration** only after all above.
+13. **Unseen/FIT8/LOFO** only after same-Mage FIT2 product reclosure; FIT2 does not claim generalization.
 
-6. **Frozen Geppetto replay first**
-   - evaluate the currently promoted Geppetto checkpoint on corrected S before authorizing any retraining;
-   - if all current skeleton gates pass, requalify only and retain architecture/checkpoint;
-   - retraining is authorized only if frozen replay fails a preregistered gate.
+## Mesh quality policy — preregistered before corrected FIT2 mesh result
 
-7. **Typed component / attachment qualification**
-   - component identity must survive into product IR;
-   - rigid joint-bound geometry must not be represented only by anonymous skin weights;
-   - Compiler must qualify joint/socket binding, component mode, provenance, and detachability state;
-   - assembly semantics must be generic and may not contain Mage-specific names or rules.
+`RealSaS.MeshQualityPolicy.v1`:
 
-8. **Frozen Arachne replay first**
-   - old 950x22 W is invalid on new S identities and cannot be copied;
-   - rebuild full-source teacher projection / evaluation authority for new S;
-   - evaluate promoted Arachne checkpoint on corrected S+G before any retraining;
-   - retrain only if frozen replay fails unchanged scientific gates.
+- source-alpha recall `>= 0.94`;
+- precision inside exact source alpha `>= 0.995`;
+- alpha IoU `>= 0.935`;
+- largest uncovered 4-connected region `<= 0.015` of foreground;
+- every foreground component occupying at least `0.0025` of foreground must have recall `>= 0.90`;
+- degenerate faces `= 0`;
+- duplicate faces `= 0`;
+- non-manifold edges `= 0`;
+- minimum raster-space triangle angle `>= 0.25 deg`;
+- maximum raster-space triangle aspect ratio `<= 250`.
 
-9. **CDT / MWB2 only after corrected S/G/W**
-   - restore historical domain/contour/local-support/CDT numerical capability behind current typed IR;
-   - solver has no semantic authority and may not invent hidden structure;
-   - measure coverage of corrected S domain and source observation alpha separately;
-   - current relation-clique implementation remains diagnostic baseline, not product authority.
+Each V0..V7 closure must emit real observation, exact mesh overlay, uncovered-pixel heatmap and metric/hash manifest.
 
-10. **Appearance + directional binding + Living Compile**
-    - exact 8-view source appearance;
-    - typed component membership preserved;
-    - exact directional joint/component bindings;
-    - static product visualization before motion/runtime;
-    - PRODUCT_PASS remains separately proof-gated.
+The contract hardening at commits `9dd533eb...` and `ebe7358...` is implementation/CI readiness only; it is not a corrected FIT2 mesh PASS.
+
+## Steiner / inserted-vertex policy
+
+Inserted vertices are encouraged where they improve directional mesh quality, but only when mechanics remain exact:
+
+`P(v_new) = Σ a_i P(S_i)`
+
+`W(v_new) = Σ a_i W(S_i)`
+
+with `a_i >= 0`, `Σa_i = 1`, and every support carrier admitted by current `RiggingSurfaceIR`.
+
+This legal typed path is implemented and regression-tested. Automatic arbitrary CDT quality-Steiner points are not product-authoritative until exact local support construction/point-location is implemented.
+
+Our target is a **directional alpha-domain watertight deformation mesh**, not a fabricated watertight 3D body. If source alpha is opaque, the directional deformation domain may not contain an arbitrary hole. If the artwork contains a genuine transparent hole, the mesh should preserve it.
+
+## Component / attachment closure
+
+The current V2 mechanical qualifier must verify:
+
+- exact surface/skeleton/skin lineage match;
+- no visible-surface disappearance from component accounting;
+- no overlapping surface ownership;
+- `RIGID_SKINNED_COMPONENT` owner joint weight `>= 0.999` for every member row;
+- non-owner mass `<= 0.001`;
+- `RIGID_BONE_ATTACHMENT` requires explicit bind/socket authority and is not inferred from skin convenience;
+- detachability/swappability is never inferred from rigidity.
+
+Mage book/wand/hat/cape are required witnesses when fresh S/G/W membership exists; product code remains generic and must not branch on Mage names.
+
+## Motion product direction
+
+The current rotation-only preset is retained solely as a deterministic mechanical probe.
+
+Preferred future product architecture to preregister separately:
+
+`intent / preset / artist clip / constraints`
+
+-> `MotionProposalIR`
+
+-> deterministic Motion Compiler retarget / contacts / joint limits / root trajectory / attachment constraints
+
+-> `QualifiedMotionIR`
+
+-> exact qualified puppet
+
+-> V0..V7 motion-quality proof
+
+-> editable curves and/or sprite bake / live puppet export.
+
+Artist-authored canonical clips should be the gold preset/reference library. Learned motion, if adopted, proposes animation semantics; the Compiler qualifies mechanics. This section is architecture direction, not a current PASS.
+
+## Exact runtime invariant
+
+Product closure must enforce:
+
+> The `QualifiedSkeletonIR + QualifiedSkinIR + QualifiedEditableMeshIR + QualifiedMeshSkinIR + QualifiedComponentSetIR + QualifiedMotionIR` that receives proof is the same authority projected into runtime/export.
+
+Frame 0 must numerically match qualified rest state. Dynamic frames must remain bound to the same mesh/topology/skin/skeleton lineages. Any hidden re-triangulation, unqualified barycentric transfer, alternate runtime mesh or synthetic proof fails closed.
 
 ## Compute policy
 
-Prefer deterministic CPU / local self-hosted execution for audits, contract tests, GSA, projection/raster replay, component qualification, mesh/CDT, and serialization. Use the local 6 GB GPU only where model inference fits safely. Escalate to Colab/A100 only when an actual model-memory or training requirement is demonstrated. Do not request large-GPU work preemptively.
+- deterministic audits/contracts/GSA/CDT/serialization: local CPU/self-hosted runner;
+- learned training/inference: use the minimum adequate GPU;
+- current Geppetto FIT2 fresh optimizer run may use Colab A100;
+- routine GitHub authority/science workflows remain on `realsas-wsl-1660ti` with labels `self-hosted, linux, x64, realsas`.
 
 ## Hard anti-shortcut rules
 
-- No Mage-specific code path.
+- No Mage-specific product code path.
 - No teacher/source geometry at product inference.
-- No reuse of old S/G/W lineages after corrected full-subject S is emitted.
-- No downstream solver may mask upstream missing geometry.
-- No aggregate metric may hide a missing component; component-level coverage is mandatory.
-- No retraining before frozen-checkpoint replay proves it necessary.
-- No threshold widening in response to failure without a separately justified contract change.
-- No PRODUCT_PASS / unseen/generalization claim from this reclosure.
+- No reuse of old S/G/W identities as current corrected authority.
+- No historical Geppetto checkpoint load in the active fresh FIT2 run.
+- No downstream solver masking upstream missing geometry.
+- No aggregate metric hiding a missing visible component.
+- No threshold widening after result observation without a separately justified contract change.
+- No corrected mesh PASS before fresh current S/G/W exists.
+- No `PROOF PASS` badge from legality alone when exact product/render/motion evidence is missing.
+- No unseen/generalization claim from same-Mage FIT2.
+- No `PRODUCT_PASS` before exact runtime dynamic reclosure.

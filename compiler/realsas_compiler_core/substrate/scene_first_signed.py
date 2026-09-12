@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import hashlib
 import math
 import numpy as np
 
@@ -11,6 +12,7 @@ from .types import QualificationError, RiggingSurfaceIR, SurfaceNode, SurfaceRel
 ZERO_SURFACE_NORMAL_OPERATOR_ID = "RealSaS.GSA.ZeroSurfaceRobustLocalPCA.v1"
 ZERO_SURFACE_COMPACTOR_ID = "RealSaS.GSA.ZeroSurfaceAdaptiveVoxel.v1"
 ZERO_SURFACE_VISIBILITY_ID = "RealSaS.GSA.ZeroSurfaceSelfZBufferSupport.v1"
+ZERO_SURFACE_OBSERVATION_SUPPORT_ID = "RealSaS.GSA.ExactRasterObservationSupport.v1"
 
 
 def zero_surface_normal_operator_identity_v1(*, k: int = 64) -> dict:
@@ -214,6 +216,65 @@ def _self_zbuffer_support(dense_points, compact_points, cameras, *, depth_tolera
     return support, raster_all, tuple(view_counts)
 
 
+def _normalize_observation_masks(observation_alpha_masks, cameras):
+    if observation_alpha_masks is None:
+        return None, ()
+    if len(observation_alpha_masks) != 8:
+        raise QualificationError("observation support requires exactly 8 alpha masks")
+    masks = []
+    hashes = []
+    for view, (mask, camera) in enumerate(zip(observation_alpha_masks, cameras)):
+        arr = np.asarray(mask)
+        resolution = int(camera["resolution"])
+        if arr.shape != (resolution, resolution):
+            raise QualificationError(
+                f"observation alpha mask V{view} shape drift: {arr.shape} != {(resolution, resolution)}"
+            )
+        if arr.dtype == np.bool_:
+            b = np.ascontiguousarray(arr)
+        else:
+            if not np.isfinite(arr).all():
+                raise QualificationError(f"observation alpha mask V{view} contains non-finite values")
+            b = np.ascontiguousarray(arr != 0)
+        h = hashlib.sha256()
+        h.update(f"{resolution}x{resolution}|bool|".encode("ascii"))
+        h.update(b.astype(np.uint8, copy=False).tobytes(order="C"))
+        masks.append(b)
+        hashes.append(h.hexdigest())
+    return tuple(masks), tuple(hashes)
+
+
+def _observation_support_from_masks(
+    self_support: np.ndarray,
+    raster: np.ndarray,
+    cameras,
+    observation_masks,
+    *,
+    radius_px: int,
+):
+    radius = int(radius_px)
+    if radius < 0 or radius > 4:
+        raise QualificationError("observation support radius must be in [0,4]")
+    support = np.zeros_like(self_support, dtype=bool)
+    for view, (camera, mask) in enumerate(zip(cameras, observation_masks)):
+        resolution = int(camera["resolution"])
+        xy = raster[:, view]
+        ix = np.rint(xy[:, 0]).astype(np.int64)
+        iy = np.rint(xy[:, 1]).astype(np.int64)
+        in_frame = (ix >= 0) & (ix < resolution) & (iy >= 0) & (iy < resolution)
+        hit = np.zeros(len(ix), dtype=bool)
+        for oy in range(-radius, radius + 1):
+            for ox in range(-radius, radius + 1):
+                xx = ix + ox
+                yy = iy + oy
+                ok = in_frame & (xx >= 0) & (xx < resolution) & (yy >= 0) & (yy < resolution)
+                rows = np.where(ok)[0]
+                if len(rows):
+                    hit[rows] |= mask[yy[rows], xx[rows]]
+        support[:, view] = self_support[:, view] & hit
+    return support
+
+
 def rigging_surface_from_scene_first_zero_mesh_v1(
     vertices_normalized,
     faces,
@@ -229,19 +290,32 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
     target_nodes: int = 1024,
     normal_k: int = 64,
     visibility_depth_tolerance_norm: float = 0.02,
+    observation_alpha_masks=None,
+    observation_ids=None,
+    observation_hashes=None,
+    observation_support_radius_px: int = 1,
+    require_observation_support: bool = False,
     metadata: dict | None = None,
 ) -> RiggingSurfaceIR:
     """Canonical GSA bridge from a predicted signed zero-surface to RiggingSurfaceIR.
 
     No hidden teacher mesh/rig/skin enters this API. Full reconstructed geometry is
-    allowed as an intermediate representation; observation support is re-derived from
-    the predicted surface itself and the exact product cameras.
+    allowed as an intermediate representation.
+
+    Self-z visibility and product-observation support are distinct authorities:
+    self visibility is derived only from predicted geometry + cameras; observed support,
+    when supplied, additionally requires the projected compact point to lie inside the
+    exact product alpha mask. Corrected product reclosure should set
+    require_observation_support=True.
     """
     vn = np.asarray(vertices_normalized, dtype=np.float64)
     f = np.asarray(faces, dtype=np.int64)
     hint = np.asarray(implicit_normals, dtype=np.float64)
     center = np.asarray(normalization_center, dtype=np.float64)
     half = float(normalization_half_extent)
+    camera_rows = tuple(cameras)
+    if len(camera_rows) != 8:
+        raise QualificationError("scene-first substrate requires exactly 8 cameras")
     if vn.ndim != 2 or vn.shape[1] != 3 or len(vn) < 4 or not np.isfinite(vn).all():
         raise QualificationError("scene-first zero-surface vertices must be finite [N,3]")
     if f.ndim != 2 or f.shape[1] != 3 or np.any(f < 0) or np.any(f >= len(vn)):
@@ -253,26 +327,84 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
     if visibility_depth_tolerance_norm <= 0:
         raise QualificationError("visibility tolerance must be positive")
 
+    masks, mask_hashes = _normalize_observation_masks(observation_alpha_masks, camera_rows)
+    if require_observation_support and masks is None:
+        raise QualificationError("observation-grounded GSA required but alpha masks were not supplied")
+
+    if masks is not None:
+        if observation_ids is None or len(observation_ids) != 8:
+            raise QualificationError("observation-grounded GSA requires exactly 8 observation ids")
+        obs_ids = tuple(str(x).strip() for x in observation_ids)
+        if any(not x for x in obs_ids):
+            raise QualificationError("observation ids must be non-empty")
+        if observation_hashes is not None:
+            if len(observation_hashes) != 8:
+                raise QualificationError("observation hashes must have cardinality 8")
+            obs_hashes = tuple(str(x).strip() for x in observation_hashes)
+            if any(not x for x in obs_hashes):
+                raise QualificationError("observation hashes must be non-empty")
+        else:
+            obs_hashes = tuple(mask_hashes)
+    else:
+        if observation_ids is not None or observation_hashes is not None:
+            raise QualificationError("observation ids/hashes cannot be supplied without alpha masks")
+        obs_ids = ()
+        obs_hashes = ()
+
     world = center[None, :] + vn * half
     dense_normals = robust_zero_surface_normals_v1(world, hint, k=normal_k)
     points, normals, edges, divisions, _inverse = _adaptive_voxel_compact(
         world, f, dense_normals, target_nodes=int(target_nodes)
     )
-    support, raster, visible_counts = _self_zbuffer_support(
+    self_support, raster, visible_counts = _self_zbuffer_support(
         world,
         points,
-        tuple(cameras),
+        camera_rows,
         depth_tolerance=float(visibility_depth_tolerance_norm) * half,
     )
+    if masks is not None:
+        observed_support = _observation_support_from_masks(
+            self_support,
+            raster,
+            camera_rows,
+            masks,
+            radius_px=int(observation_support_radius_px),
+        )
+        support = observed_support
+        support_authority = "EXACT_PRODUCT_ALPHA_AND_SELF_VISIBILITY"
+    else:
+        observed_support = np.zeros_like(self_support, dtype=bool)
+        support = self_support
+        support_authority = "SELF_VISIBILITY_ONLY__NOT_OBSERVATION_GROUNDED"
 
     op_hash = zero_surface_normal_operator_hash_v1(k=normal_k)
     nodes = []
     for i, (p, n) in enumerate(zip(points, normals)):
         views = tuple(int(v) for v in range(8) if bool(support[i, v]))
+        self_views = tuple(int(v) for v in range(8) if bool(self_support[i, v]))
+        observed_views = tuple(int(v) for v in range(8) if bool(observed_support[i, v]))
         binds = tuple((v, (float(raster[i, v, 0]), float(raster[i, v, 1]))) for v in views)
-        flags = ("OBSERVED_SIGNED_ZERO_SURFACE",) if views else ("MODEL_COMPLETED_SIGNED_ZERO_SURFACE",)
+        if masks is not None and observed_views:
+            flags = ("OBSERVED_SIGNED_ZERO_SURFACE",)
+        elif masks is not None:
+            flags = ("MODEL_COMPLETED_SIGNED_ZERO_SURFACE",)
+            if self_views:
+                flags += ("SELF_VISIBLE_OUTSIDE_OBSERVATION_ALPHA",)
+        elif self_views:
+            flags = ("SELF_VISIBLE_SIGNED_ZERO_SURFACE",)
+        else:
+            flags = ("MODEL_COMPLETED_SIGNED_ZERO_SURFACE",)
+        source_ids = tuple(obs_ids[v] for v in observed_views) if masks is not None else ()
         sid = "SFS:" + content_sha256(
-            {"index": i, "P": p.tolist(), "views": views, "source": source_zero_surface_sha256}
+            {
+                "index": i,
+                "P": p.tolist(),
+                "support_views": views,
+                "self_visible_views": self_views,
+                "observed_views": observed_views,
+                "source": source_zero_surface_sha256,
+                "observation_hashes": obs_hashes,
+            }
         )[:20]
         nodes.append(
             SurfaceNode(
@@ -280,7 +412,7 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
                 P=tuple(map(float, p)),
                 support_views=views,
                 provenance_refs=(str(authority_label),),
-                source_observation_ids=(),
+                source_observation_ids=source_ids,
                 raster_bindings=binds,
                 persistence_group_id=f"SCENE_FIRST_SIGNED_ZERO:{i:05d}",
                 derived_normal=tuple(map(float, n)),
@@ -289,6 +421,9 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
                     "normal_operator": ZERO_SURFACE_NORMAL_OPERATOR_ID,
                     "normal_operator_hash": op_hash,
                     "normal_implicit_hint_only": True,
+                    "self_visibility_views": self_views,
+                    "observation_support_views": observed_views,
+                    "observation_support_authority": support_authority,
                     "teacher_truth_used": False,
                 },
             )
@@ -314,9 +449,18 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
             )
         )
 
+    observation_contract = {
+        "operator_id": ZERO_SURFACE_OBSERVATION_SUPPORT_ID,
+        "required": bool(require_observation_support),
+        "authority": support_authority,
+        "radius_px": int(observation_support_radius_px),
+        "observation_ids": obs_ids,
+        "observation_hashes": obs_hashes,
+        "mask_content_hashes": mask_hashes,
+    }
     lineage = content_sha256(
         {
-            "schema": "RealSaS.SceneFirstSignedToRiggingSurface.v1",
+            "schema": "RealSaS.SceneFirstSignedToRiggingSurface.v2",
             "source_run_id": str(source_run_id),
             "source_checkpoint_sha256": str(source_checkpoint_sha256),
             "source_zero_surface_sha256": str(source_zero_surface_sha256),
@@ -330,10 +474,14 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
                 "id": ZERO_SURFACE_VISIBILITY_ID,
                 "depth_tolerance_norm": float(visibility_depth_tolerance_norm),
             },
+            "observation_support": observation_contract,
             "nodes": [n.to_dict() for n in nodes],
             "relations": [r.to_dict() for r in rel],
         }
     )
+    self_visible_any = np.any(self_support, axis=1)
+    observed_any = np.any(observed_support, axis=1)
+    support_any = np.any(support, axis=1)
     meta = {
         **dict(metadata or {}),
         "scene_first_signed_geometry": True,
@@ -342,11 +490,19 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
         "compact_surface_node_count": int(len(nodes)),
         "compact_voxel_divisions": int(divisions),
         "compact_target_nodes": int(target_nodes),
-        "observed_node_count": int(np.any(support, axis=1).sum()),
-        "completed_node_count": int((~np.any(support, axis=1)).sum()),
+        "observed_node_count": int(observed_any.sum()),
+        "self_visible_node_count": int(self_visible_any.sum()),
+        "completed_node_count": int((~support_any).sum()),
         "visibility_support_counts_by_view": visible_counts,
+        "observation_support_counts_by_view": tuple(int(observed_support[:, v].sum()) for v in range(8)),
+        "observation_support_authority": support_authority,
+        "observation_support_operator": ZERO_SURFACE_OBSERVATION_SUPPORT_ID,
+        "observation_support_radius_px": int(observation_support_radius_px),
+        "observation_ids": obs_ids,
+        "observation_hashes": obs_hashes,
+        "observation_mask_content_hashes": mask_hashes,
         "raster_coordinate_system": "PIXEL_CENTER_XY",
-        "resolution": int(cameras[0]["resolution"]),
+        "resolution": int(camera_rows[0]["resolution"]),
         "Nd_operator": ZERO_SURFACE_NORMAL_OPERATOR_ID,
         "Nd_operator_sha256": op_hash,
         "normal_implicit_hint_only": True,
@@ -362,7 +518,7 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
         surface_nodes=tuple(nodes),
         local_relations=tuple(sorted(rel, key=lambda r: r.relation_id)),
         geometry_lineage_hash=lineage,
-        builder_id="RealSaS.GeometricSubstrateAssembler.SceneFirstSigned.v1",
+        builder_id="RealSaS.GeometricSubstrateAssembler.SceneFirstSigned.v2",
         schema_version="RealSaS.RiggingSurfaceIR.v1",
         metadata=meta,
     )
@@ -372,6 +528,7 @@ __all__ = [
     "ZERO_SURFACE_NORMAL_OPERATOR_ID",
     "ZERO_SURFACE_COMPACTOR_ID",
     "ZERO_SURFACE_VISIBILITY_ID",
+    "ZERO_SURFACE_OBSERVATION_SUPPORT_ID",
     "zero_surface_normal_operator_identity_v1",
     "zero_surface_normal_operator_hash_v1",
     "robust_zero_surface_normals_v1",

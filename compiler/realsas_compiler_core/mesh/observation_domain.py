@@ -5,6 +5,13 @@ import hashlib
 import math
 from typing import Iterable, Sequence
 
+try:
+    import numpy as np
+    from skimage.draw import polygon as _raster_polygon
+except ImportError:  # pragma: no cover - deterministic scalar fallback
+    np = None
+    _raster_polygon = None
+
 Point2 = tuple[float, float]
 Triangle2 = tuple[Point2, Point2, Point2]
 
@@ -36,6 +43,33 @@ def _point_in_triangle(p: Point2, tri: Triangle2, *, eps: float = 1.0e-9) -> boo
     has_neg = s0 < -eps or s1 < -eps or s2 < -eps
     has_pos = s0 > eps or s1 > eps or s2 > eps
     return not (has_neg and has_pos)
+
+
+def _scalar_triangle_pixels(tri: Triangle2, *, width: int, height: int) -> set[tuple[int, int]]:
+    xs = [float(p[0]) for p in tri]
+    ys = [float(p[1]) for p in tri]
+    xmin = max(0, int(math.ceil(min(xs) - 1.0e-9)))
+    xmax = min(width - 1, int(math.floor(max(xs) + 1.0e-9)))
+    ymin = max(0, int(math.ceil(min(ys) - 1.0e-9)))
+    ymax = min(height - 1, int(math.floor(max(ys) + 1.0e-9)))
+    if xmin > xmax or ymin > ymax:
+        return set()
+    out: set[tuple[int, int]] = set()
+    for y in range(ymin, ymax + 1):
+        for x in range(xmin, xmax + 1):
+            if _point_in_triangle((float(x), float(y)), tri):
+                out.add((x, y))
+    return out
+
+
+def _triangle_indices(tri: Triangle2, *, width: int, height: int):
+    if _raster_polygon is None:
+        return None
+    return _raster_polygon(
+        [float(p[1]) for p in tri],
+        [float(p[0]) for p in tri],
+        shape=(int(height), int(width)),
+    )
 
 
 @dataclass(frozen=True)
@@ -92,32 +126,40 @@ class ObservationRasterDomain:
         return bool(self.mask_bytes[int(y) * int(self.width) + int(x)])
 
     def triangle_pixels(self, tri: Triangle2) -> set[tuple[int, int]]:
-        xs = [float(p[0]) for p in tri]
-        ys = [float(p[1]) for p in tri]
-        xmin = max(0, int(math.ceil(min(xs) - 1.0e-9)))
-        xmax = min(self.width - 1, int(math.floor(max(xs) + 1.0e-9)))
-        ymin = max(0, int(math.ceil(min(ys) - 1.0e-9)))
-        ymax = min(self.height - 1, int(math.floor(max(ys) + 1.0e-9)))
-        if xmin > xmax or ymin > ymax:
-            return set()
-        out: set[tuple[int, int]] = set()
-        for y in range(ymin, ymax + 1):
-            for x in range(xmin, xmax + 1):
-                if _point_in_triangle((float(x), float(y)), tri):
-                    out.add((x, y))
-        return out
+        indices = _triangle_indices(tri, width=self.width, height=self.height)
+        if indices is None:
+            return _scalar_triangle_pixels(tri, width=self.width, height=self.height)
+        rr, cc = indices
+        return set(zip(cc.tolist(), rr.tolist()))
 
     def triangle_inside(self, tri: Triangle2) -> bool:
-        pixels = self.triangle_pixels(tri)
-        return bool(pixels) and all(self.contains_pixel(x, y) for x, y in pixels)
+        indices = _triangle_indices(tri, width=self.width, height=self.height)
+        if indices is None:
+            pixels = _scalar_triangle_pixels(tri, width=self.width, height=self.height)
+            return bool(pixels) and all(self.contains_pixel(x, y) for x, y in pixels)
+        rr, cc = indices
+        if len(rr) == 0:
+            return False
+        authority = np.frombuffer(self.mask_bytes, dtype=np.uint8).reshape(self.height, self.width)
+        return bool(np.all(authority[rr, cc] != 0))
 
     def coverage(self, triangles: Iterable[Triangle2]) -> dict[str, float | int]:
-        predicted: set[tuple[int, int]] = set()
-        for tri in triangles:
-            predicted.update(self.triangle_pixels(tri))
-        inside = sum(1 for x, y in predicted if self.contains_pixel(x, y))
-        foreground = self.foreground_count
-        predicted_count = len(predicted)
+        if _raster_polygon is None:
+            predicted: set[tuple[int, int]] = set()
+            for tri in triangles:
+                predicted.update(_scalar_triangle_pixels(tri, width=self.width, height=self.height))
+            inside = sum(1 for x, y in predicted if self.contains_pixel(x, y))
+            foreground = self.foreground_count
+            predicted_count = len(predicted)
+        else:
+            predicted = np.zeros((self.height, self.width), dtype=np.bool_)
+            for tri in triangles:
+                rr, cc = _triangle_indices(tri, width=self.width, height=self.height)
+                predicted[rr, cc] = True
+            authority = np.frombuffer(self.mask_bytes, dtype=np.uint8).reshape(self.height, self.width) != 0
+            inside = int(np.count_nonzero(predicted & authority))
+            foreground = int(np.count_nonzero(authority))
+            predicted_count = int(np.count_nonzero(predicted))
         precision = 1.0 if predicted_count == 0 else float(inside) / float(predicted_count)
         recall = 1.0 if foreground == 0 else float(inside) / float(foreground)
         return {

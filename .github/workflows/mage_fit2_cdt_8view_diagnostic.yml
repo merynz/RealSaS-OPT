@@ -1,0 +1,137 @@
+name: mage-fit2-cdt-8view-diagnostic
+
+on:
+  push:
+    branches:
+      - repair/mage-full-subject-reclosure-20260912
+    paths:
+      - '.github/workflows/mage_fit2_cdt_8view_diagnostic.yml'
+      - 'experiments/mage_full_subject_reclosure_v1/render_fit2_cdt_8view_diagnostic_v1.py'
+  workflow_dispatch:
+
+concurrency:
+  group: mage-fit2-cdt-8view-diagnostic-realsas
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact repair branch
+        uses: actions/checkout@v4
+        with:
+          ref: repair/mage-full-subject-reclosure-20260912
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Ensure diagnostic dependencies
+        run: python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pillow scikit-image
+
+      - name: Locate exact SHA-bound Mage inputs on local operator machine
+        shell: bash
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+          from hashlib import sha256
+          import json, os
+          from pathlib import Path
+
+          expected = {
+              'zero': ('ZERO_SURFACE_PRODUCT_CLIPPED.npz', '56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925'),
+              'V0.png': ('V0.png', '8e9875c16bba3047c8f2fc211b984f2399d1145f5720c7427c6fc03a3fec0616'),
+              'V1.png': ('V1.png', 'fa94283780d5e5f3ad3943bbffc1f0592a70fc362fdd03b94a1d1cb46889dc30'),
+              'V2.png': ('V2.png', '777bf4f7c505b405d3a5d2a111b2f297949454f77cae7c33064bf02479d384a5'),
+              'V3.png': ('V3.png', '2a771c91c1d1c0b75dab14f6e98b7905a8429bbf0c0a8dd690261f93f6476d86'),
+              'V4.png': ('V4.png', '354bb239feb6c1a515917fee4efb42fb1e0cb9f173d0eb3191fb0901a02a6228'),
+              'V5.png': ('V5.png', '158fc14a75aa69f6133f2ba3ec5df2ad146afc62f477d7d3b4a41ca2cb0e42f2'),
+              'V6.png': ('V6.png', 'e3b08836c187863819d8b8aaa53aef79eddfee167e1fabf3fb1dd8ec0484563a'),
+              'V7.png': ('V7.png', '87d4ad46edffec3c6bff034d305194820288d3cc6ef9a9480ac2234fb56451bc'),
+              'V0.camera.json': ('V0.camera.json', '73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541'),
+              'V1.camera.json': ('V1.camera.json', 'bdc172a4aff332f956d1403e36b2f8684b68059fdc82f9efddf35d05a6d9b4d4'),
+              'V2.camera.json': ('V2.camera.json', '3c2bbc44ef9005b4a545a3381205a5d6a92af15b4791c9075071b8cad02a1a6c'),
+              'V3.camera.json': ('V3.camera.json', '24b2f115d908422d885f85e956fcc36ac78fd0c90b503f698caa62febc2b9c4d'),
+              'V4.camera.json': ('V4.camera.json', '5bf00783d6509c2ca142e05ef705d5cdb5df17ad248b782d2fe8cf8a297bee39'),
+              'V5.camera.json': ('V5.camera.json', '7ee3e50739318eeb122b5b0ec67260dd32e21d949398f48c408a6c239e5c89fe'),
+              'V6.camera.json': ('V6.camera.json', 'daa19fa58ff602977d64b720c4198956809855149d814df487c7762a963f1eec'),
+              'V7.camera.json': ('V7.camera.json', '68f51fbfce4c31f94281e1569d74b44609435285668f8a8b1b278e76db6ea53f'),
+          }
+
+          def digest(path: Path) -> str:
+              h = sha256()
+              with path.open('rb') as f:
+                  for b in iter(lambda: f.read(8 << 20), b''):
+                      h.update(b)
+              return h.hexdigest()
+
+          roots = []
+          for p in [Path('/home/monster/Downloads'), Path('/home/monster/Desktop'), Path('/home/monster/Documents')]:
+              if p.is_dir(): roots.append(p)
+          for base in Path('/mnt/c/Users').glob('*') if Path('/mnt/c/Users').is_dir() else []:
+              for rel in ['Downloads', 'Desktop', 'Documents', 'OneDrive']:
+                  p = base / rel
+                  if p.is_dir(): roots.append(p)
+          for p in [Path('/mnt/g/My Drive'), Path('/mnt/g/.shortcut-targets-by-id')]:
+              if p.is_dir(): roots.append(p)
+
+          names = {name for name, _ in expected.values()}
+          candidates = {name: [] for name in names}
+          for root in roots:
+              for dirpath, dirnames, filenames in os.walk(root):
+                  # keep operator scan bounded away from package/cache trees
+                  dirnames[:] = [d for d in dirnames if d not in {'.git', 'node_modules', 'AppData', '.cache'}]
+                  for filename in filenames:
+                      if filename in names:
+                          candidates[filename].append(Path(dirpath) / filename)
+
+          found = {}
+          missing = []
+          for key, (name, wanted) in expected.items():
+              match = None
+              for path in candidates.get(name, []):
+                  try:
+                      if digest(path) == wanted:
+                          match = path.resolve(); break
+                  except OSError:
+                      pass
+              if match is None:
+                  missing.append(key)
+              else:
+                  found[key] = str(match)
+
+          Path('cdt_input_locator.json').write_text(json.dumps({'roots': [str(x) for x in roots], 'found': found, 'missing': missing}, indent=2), encoding='utf-8')
+          print(json.dumps({'found_count': len(found), 'missing': missing, 'found': found}, indent=2))
+          if missing:
+              raise SystemExit('EXACT_CDT_INPUTS_NOT_FOUND_ON_SELF_HOSTED_OPERATOR_MACHINE:' + ','.join(missing))
+
+          env = Path(os.environ['GITHUB_ENV'])
+          with env.open('a', encoding='utf-8') as f:
+              f.write('CDT_ZERO=' + found['zero'] + '\n')
+              f.write('CDT_OBS=' + '|'.join(found[f'V{i}.png'] for i in range(8)) + '\n')
+              f.write('CDT_CAMS=' + '|'.join(found[f'V{i}.camera.json'] for i in range(8)) + '\n')
+          PY
+
+      - name: Render exact sealed CDT geometry
+        shell: bash
+        run: |
+          IFS='|' read -r -a OBS <<< "$CDT_OBS"
+          IFS='|' read -r -a CAMS <<< "$CDT_CAMS"
+          mkdir -p cdt_8view_output
+          PYTHONPATH=. python experiments/mage_full_subject_reclosure_v1/render_fit2_cdt_8view_diagnostic_v1.py \
+            --zero-surface "$CDT_ZERO" \
+            --cameras "${CAMS[@]}" \
+            --observations "${OBS[@]}" \
+            --output-dir cdt_8view_output
+
+      - name: Upload exact CDT diagnostic artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mage-fit2-exact-cdt-8view-diagnostic
+          path: |
+            cdt_input_locator.json
+            cdt_8view_output/*
+          if-no-files-found: error
+          retention-days: 7

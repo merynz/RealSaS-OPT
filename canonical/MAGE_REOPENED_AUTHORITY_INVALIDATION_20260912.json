@@ -1,0 +1,35 @@
+{
+  "schema": "RealSaS.MageReopenedAuthorityInvalidation.v1",
+  "date": "2026-09-12",
+  "status": "ACTIVE__MAGE_FIT1_RECLOSURE_REQUIRED",
+  "contradiction": "PROMOTED_SIGNED_ZERO_SURFACE_WAS_NOT_FULL_RENDERED_SUBJECT",
+  "invalidated_for_current_mage_product_authority": {
+    "signed_zero_surface_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+    "surface_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+    "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "skin_lineage_hash": "ef28f75e0306dbbabc32e75b837412ede39b180248502f6e504994310d91edaf"
+  },
+  "preserved_as_historical_scientific_evidence": true,
+  "preserved_architecture_findings": true,
+  "unseen_generalization_authorized": false,
+  "product_pass_authorized": false,
+  "reclosure_order": [
+    "OBSERVATION_CAMERA_AUDIT",
+    "COMPONENT_ATTACHMENT_TRUTH_AUDIT",
+    "FULL_SUBJECT_IRIS_SIGNED_GEOMETRY_FIT",
+    "DENSE_ZERO_SURFACE_GATE",
+    "GSA_REEMIT",
+    "FROZEN_GEPPETTO_REPLAY",
+    "TYPED_COMPONENT_ATTACHMENT_QUALIFICATION",
+    "FROZEN_ARACHNE_REPLAY",
+    "CDT_MWB2",
+    "APPEARANCE_DIRECTIONAL_BINDING_LIVING_COMPILE"
+  ],
+  "anti_shortcut": {
+    "mage_specific_code_forbidden": true,
+    "old_lineage_reuse_forbidden": true,
+    "retraining_before_frozen_replay_forbidden": true,
+    "downstream_solver_masking_upstream_missing_geometry_forbidden": true,
+    "aggregate_coverage_without_component_coverage_forbidden": true
+  }
+}

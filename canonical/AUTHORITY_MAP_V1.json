@@ -41,15 +41,17 @@
   "active_experiments": [
     {
       "id": "MAGE_FIT2_PIPELINE_REFIT",
-      "status": "ACTIVE__GEPPETTO_FRESH_REFIT_RUNNING__MESH_PRODUCT_QUALIFIER_HARDENED",
+      "status": "ACTIVE__GEPPETTO_FRESH_REFIT_RUNNING__MESH_PRODUCT_CONTRACT_CLOSED_PASS",
       "branch": "repair/mage-full-subject-reclosure-20260912",
       "question": "Can the same Mage witness reclose end-to-end from corrected observable H1/GSA through fresh Geppetto and fresh Arachne, an art-covering mechanically supported directional mesh, professional motion and exact runtime identity without the defects exposed by the real FIT1 E2E output?",
       "mesh_product_audit": "canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md",
       "mesh_product_prereg": "canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md",
+      "mesh_contract_self_hosted_run_id": 34716890157,
+      "mesh_contract_tests": "41 passed in 4.36s",
       "does_not_prove": [
         "Geppetto FIT2 PASS before sealed terminal evidence",
         "Arachne FIT2 PASS",
-        "corrected FIT2 mesh/component PASS",
+        "corrected FIT2 mesh/component result PASS",
         "professional motion quality",
         "exact runtime PRODUCT_PASS",
         "unseen-family generalization or FIT8/LOFO"
@@ -57,6 +59,16 @@
     }
   ],
   "recent_closed_experiments": [
+    {
+      "id": "FIT2_MESH_PRODUCT_RECLOSURE_CONTRACT_AND_IMPLEMENTATION",
+      "status": "CLOSED_PASS__IMPLEMENTATION_ONLY__REAL_RESULT_PENDING",
+      "closed_date": "2026-09-12",
+      "categorical_verdict": "PASS__EXACT_OBSERVATION_RERASTERIZATION_AND_PRODUCT_QUALIFIER_CONTRACT",
+      "result_authority": "canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md",
+      "self_hosted_run_id": 34716890157,
+      "what_it_means": "The product mesh admission seam independently rerasterizes the exact promoted mesh against exact observation authority and applies frozen coverage/topology gates fail-closed.",
+      "what_it_does_not_mean": ["corrected FIT2 real mesh PASS", "Arachne FIT2 PASS", "runtime PRODUCT_PASS"]
+    },
     {
       "id": "GSA8192_REAL_8VIEW_EVIDENCE",
       "status": "CLOSED_PASS__CORRECTED_STAGE0_ONLY",
@@ -95,7 +107,7 @@
   "next_decision": {
     "status": "MAGE_FIT2_PIPELINE_REFIT_ACTIVE__GEPPETTO_FRESH_REFIT_RUNNING",
     "module": "Mage FIT2 / Geppetto",
-    "purpose": "Wait for the preregistered fresh Geppetto terminal result; if and only if it closes with required real V0..V7 evidence, advance to fresh Arachne on corrected S+G. The strict mesh product qualifier is already prepared for the later corrected G/W closure. Same-Mage product reclosure precedes unseen/FIT8/LOFO."
+    "purpose": "Wait for the preregistered fresh Geppetto terminal result; if and only if it closes with required real V0..V7 evidence, advance to fresh Arachne on corrected S+G. The mesh product contract is already implementation-level CLOSED PASS and waits for fresh G/W to produce the real corrected Mage mesh result. Same-Mage product reclosure precedes unseen/FIT8/LOFO."
   },
   "branch_overrides": [
     {"branch": "repair/mage-full-subject-reclosure-20260912", "class": "ACTIVE_EXPERIMENT", "reason": "Current executable Mage FIT2 fresh-refit/product-reclosure lineage while main carries repository-wide continuation pointers."},
@@ -155,6 +167,7 @@
     "Compiler qualification cannot silently replace missing learned semantics.",
     "A0 representation/oracle evidence is distinct from the V5 shipping decoder interface.",
     "A lower-level CDT/surface-lineage PASS is not a product mesh PASS; frozen FIT2 product coverage/topology qualification is mandatory.",
+    "Product mesh coverage must be recomputed from the exact promoted mesh against exact observation authority; candidate-reported coverage is diagnostic only.",
     "A product-qualified mesh/skeleton/skin state must remain the exact runtime/export authority; hidden re-triangulation or second mesh truth is forbidden.",
     "Rotation-only deterministic motion is a mechanical probe, not professional animation quality evidence.",
     "PRODUCT_PASS remains an independent exact end-to-end contract.",

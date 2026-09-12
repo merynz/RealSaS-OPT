@@ -1,0 +1,93 @@
+{
+  "schema": "RealSaS.MageComponentSourceTruthWitness.v1",
+  "date": "2026-09-12",
+  "status": "FIT_EVALUATION_AUTHORITY__NOT_PRODUCT_INFERENCE_INPUT",
+  "normalized_source_sha256": "528bef491eceb358ebc8ecb2a46af1d37b4322a7ef500281403a8207fe7c648f",
+  "total_vertices": 5321,
+  "total_faces": 5763,
+  "mechanical_vertices": 5279,
+  "mechanical_faces": 5683,
+  "components": [
+    {
+      "component_family": "BODY_SET",
+      "vertex_range": [0, 3348],
+      "vertex_count": 3348,
+      "mechanical_class": "DEFORMABLE_COMPONENT",
+      "source_evidence": "historical source structure: first six body meshes",
+      "name_specific_product_logic_allowed": false
+    },
+    {
+      "component_family": "BOOK_VARIANTS",
+      "source_names": ["Spellbook", "Spellbook_open"],
+      "vertex_range": [3348, 4165],
+      "vertex_count": 817,
+      "known_subcounts": [399, 418],
+      "source_control_index": 8,
+      "source_control_name": "handslot.l",
+      "skin_truth": "ONE_HOT_1_0_ALL_ROWS",
+      "mechanical_class": "RIGID_SKINNED_COMPONENT",
+      "detachability": "UNKNOWN_FROM_SKIN_ALONE",
+      "name_specific_product_logic_allowed": false
+    },
+    {
+      "component_family": "WAND_STAFF_VARIANTS",
+      "source_names": ["1H_Wand", "2H_Staff"],
+      "vertex_range": [4165, 4821],
+      "vertex_count": 656,
+      "known_subcounts": [158, 498],
+      "source_control_index": 13,
+      "source_control_name": "handslot.r",
+      "skin_truth": "ONE_HOT_1_0_ALL_ROWS",
+      "mechanical_class": "RIGID_SKINNED_COMPONENT",
+      "detachability": "UNKNOWN_FROM_SKIN_ALONE",
+      "name_specific_product_logic_allowed": false
+    },
+    {
+      "component_family": "HAT",
+      "source_names": ["Mage_Hat"],
+      "vertex_range": [4821, 5223],
+      "vertex_count": 402,
+      "source_control_index": 14,
+      "source_control_semantics": "HEAD",
+      "skin_truth": "ONE_HOT_1_0_ALL_ROWS",
+      "mechanical_class": "RIGID_SKINNED_COMPONENT",
+      "detachability": "UNKNOWN_FROM_SKIN_ALONE",
+      "name_specific_product_logic_allowed": false
+    },
+    {
+      "component_family": "CAPE",
+      "source_names": ["Mage_Cape"],
+      "vertex_range": [5223, 5279],
+      "vertex_count": 56,
+      "source_control_index": 3,
+      "source_control_semantics": "CHEST",
+      "skin_truth": "ONE_HOT_1_0_ALL_ROWS",
+      "mechanical_class": "RIGID_SKINNED_COMPONENT",
+      "detachability": "UNKNOWN_FROM_SKIN_ALONE",
+      "name_specific_product_logic_allowed": false
+    },
+    {
+      "component_family": "ICOSPHERE",
+      "source_names": ["Icosphere"],
+      "vertex_range": [5279, 5321],
+      "vertex_count": 42,
+      "face_count": 80,
+      "skin_truth": "ZERO_SKIN",
+      "mechanical_class": "EXCLUDED_SOURCE_COMPONENT",
+      "exclusion_reason": "NO_DEFORMATION_SKIN_AUTHORITY",
+      "name_specific_product_logic_allowed": false
+    }
+  ],
+  "derivation_notes": {
+    "body_boundary": "historical body-only teacher contained exactly the first 3348 source vertices",
+    "book_and_weapon_subcounts": "historical source audit recovered exact object counts 399/418 and 158/498",
+    "post_body_contiguous_skin_runs": [
+      {"start": 3348, "count": 817, "support": "source control 8 = 1"},
+      {"start": 4165, "count": 656, "support": "source control 13 = 1"},
+      {"start": 4821, "count": 402, "support": "source control 14 = 1"},
+      {"start": 5223, "count": 56, "support": "source control 3 = 1"},
+      {"start": 5279, "count": 42, "support": "zero skin"}
+    ],
+    "important": "Component names and exact source controls are FIT/evaluation witness truth only. Generic compiler qualification must operate on typed evidence and cannot hard-code these names."
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "schema": "RealSaS.MageFullSubject.H1_1024_GSA_MWB2_Diagnostic.v1",
+  "date": "2026-09-12",
+  "status": "DIAGNOSTIC_COMPLETE__CURRENT_MWB2_STILL_SPARSE_ON_CORRECTED_FULL_SUBJECT_SURFACE",
+  "claims": {
+    "h1_promoted": false,
+    "gsa_promoted": false,
+    "mwb2_behavioral_authority_closed": false,
+    "cdt_promoted": false,
+    "product_pass": false,
+    "unseen_generalization": false
+  },
+  "source": {
+    "h1_run_id": "20260912T074348Z",
+    "h1_train_steps": 1024,
+    "zero_surface_sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+    "input_alpha_gate_status": "PASS",
+    "input_alpha_min_recall": 0.9511473445488728,
+    "input_alpha_min_precision": 0.9806321480449604,
+    "input_alpha_min_iou": 0.9356283394389125
+  },
+  "implementation_mirror": {
+    "gsa_source": "compiler/realsas_compiler_core/substrate/scene_first_signed.py",
+    "gsa_source_blob_sha": "1d6f91617544f70fff01c72f0f1097e1fe957ff0",
+    "mwb2_source": "compiler/realsas_compiler_core/mesh/mwb2.py",
+    "mwb2_source_blob_sha": "ff1376c190988c7f746e22496854a7cbe5bceeef",
+    "teacher_mesh_used": false,
+    "source_mesh_used_by_mwb2": false,
+    "observation_support_required": true,
+    "observation_support_radius_px": 1
+  },
+  "gsa": {
+    "target_nodes": 1024,
+    "actual_nodes": 974,
+    "voxel_divisions": 15,
+    "topology_edges": 2851,
+    "observed_any_nodes": 854,
+    "completed_nodes": 120,
+    "self_visibility_counts_by_view": [282, 287, 228, 340, 301, 295, 233, 320],
+    "exact_observation_support_counts_by_view": [282, 284, 223, 340, 299, 293, 228, 320]
+  },
+  "mwb2": {
+    "producer": "OBSERVED_SAFE_LOCAL_RELATION_COMPLEX",
+    "cdt_promoted": false,
+    "views": [
+      {"view": 0, "visible_nodes": 282, "safe_edges": 427, "relation_cliques": 187, "admitted_faces": 168, "used_vertices": 175, "source_alpha_recall": 0.3073255811816426, "precision_inside_source_alpha": 0.9999880397081689},
+      {"view": 1, "visible_nodes": 284, "safe_edges": 474, "relation_cliques": 231, "admitted_faces": 211, "used_vertices": 202, "source_alpha_recall": 0.3585007043378498, "precision_inside_source_alpha": 0.9997627905093062},
+      {"view": 2, "visible_nodes": 223, "safe_edges": 306, "relation_cliques": 119, "admitted_faces": 105, "used_vertices": 131, "source_alpha_recall": 0.18966528175872405, "precision_inside_source_alpha": 0.9955880216107684},
+      {"view": 3, "visible_nodes": 340, "safe_edges": 454, "relation_cliques": 178, "admitted_faces": 167, "used_vertices": 203, "source_alpha_recall": 0.27285206515674265, "precision_inside_source_alpha": 0.9988479506951169},
+      {"view": 4, "visible_nodes": 299, "safe_edges": 416, "relation_cliques": 175, "admitted_faces": 157, "used_vertices": 172, "source_alpha_recall": 0.24248979096753326, "precision_inside_source_alpha": 0.9974524122707549},
+      {"view": 5, "visible_nodes": 293, "safe_edges": 405, "relation_cliques": 169, "admitted_faces": 152, "used_vertices": 173, "source_alpha_recall": 0.30112060219140907, "precision_inside_source_alpha": 0.9990019067023685},
+      {"view": 6, "visible_nodes": 228, "safe_edges": 300, "relation_cliques": 124, "admitted_faces": 107, "used_vertices": 125, "source_alpha_recall": 0.21153231429067634, "precision_inside_source_alpha": 0.9968330783190407},
+      {"view": 7, "visible_nodes": 320, "safe_edges": 532, "relation_cliques": 247, "admitted_faces": 203, "used_vertices": 229, "source_alpha_recall": 0.3551639906153148, "precision_inside_source_alpha": 0.9995869632560339}
+    ],
+    "min_source_alpha_recall": 0.18966528175872405,
+    "max_source_alpha_recall": 0.3585007043378498,
+    "interpretation": "Correcting the H1 subject scope does not remove the MWB2 sparsity. The current relation-clique/non-overlap producer remains extremely conservative: it stays almost entirely inside observed alpha but covers only about 19-36 percent of the source silhouette. This is a distinct downstream discretization failure, not the old body-only H1 bug."
+  },
+  "decision": {
+    "h1_next": "REVIEW_OBSERVABLE_SURFACE_QUALIFICATION_CONTRACT_BEFORE_ANY_MORE_TRAINING",
+    "mwb2_next": "BEHAVIORAL_AUTHORITY_REMAINS_OPEN",
+    "cdt": "NEED_IS_NOW_SUPPORTED_BY_CORRECTED_SURFACE_DIAGNOSTIC_BUT_RESTORATION_MUST_REMAIN_TYPED_AND_NON_PROMOTED_UNTIL_H1_AUTHORITY_REVIEW_CLOSES",
+    "arap_bbw_xpbd": "LOCKED"
+  }
+}

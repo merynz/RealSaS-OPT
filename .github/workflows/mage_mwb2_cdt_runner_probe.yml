@@ -1,0 +1,92 @@
+name: mage-mwb2-cdt-runner-probe
+
+on:
+  push:
+    branches:
+      - repair/mage-full-subject-reclosure-20260912
+    paths:
+      - '.github/workflows/mage_mwb2_cdt_runner_probe.yml'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Locate Mage H1 1024 cached artifacts
+        shell: bash
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+          import json
+          import os
+          from pathlib import Path
+
+          roots = []
+          for base in (Path('/mnt/c/Users'), Path('/home')):
+              if not base.exists():
+                  continue
+              if base == Path('/mnt/c/Users'):
+                  for user in base.iterdir():
+                      for leaf in ('Downloads', 'Desktop', 'Documents'):
+                          p = user / leaf
+                          if p.exists(): roots.append(p)
+              else:
+                  roots.append(base)
+
+          exact = {'ZERO_SURFACE_PRODUCT_CLIPPED.npz'}
+          hits = []
+          seen = set()
+          prune = {'.git', 'node_modules', 'AppData', '.cache', '.npm', '.vscode', '__pycache__'}
+          for root in roots:
+              for dirpath, dirnames, filenames in os.walk(root):
+                  dirnames[:] = [d for d in dirnames if d not in prune]
+                  lowpath = dirpath.lower()
+                  interesting_dir = any(k in lowpath for k in ('realsas', 'mage', 'h1', '20260912'))
+                  for name in filenames:
+                      low = name.lower()
+                      interesting = (
+                          name in exact
+                          or ('zero_surface' in low and low.endswith('.npz'))
+                          or '20260912t074348z' in low
+                          or ('mage' in low and low.endswith(('.npz', '.json', '.png')))
+                          or (interesting_dir and low.endswith('.npz'))
+                      )
+                      if not interesting:
+                          continue
+                      p = Path(dirpath) / name
+                      key = str(p)
+                      if key in seen: continue
+                      seen.add(key)
+                      try:
+                          size = p.stat().st_size
+                      except OSError:
+                          continue
+                      hits.append({'path': key, 'size_bytes': int(size)})
+                      if len(hits) >= 500:
+                          break
+                  if len(hits) >= 500:
+                      break
+              if len(hits) >= 500:
+                  break
+
+          out = {
+              'schema': 'RealSaS.MageMWB2CDTRunnerArtifactProbe.v1',
+              'roots': [str(p) for p in roots],
+              'hit_count': len(hits),
+              'hits': sorted(hits, key=lambda r: (r['path'].lower(), r['size_bytes'])),
+          }
+          dest = Path('runner_probe')
+          dest.mkdir(exist_ok=True)
+          (dest / 'mage_h1_1024_artifact_inventory.json').write_text(json.dumps(out, indent=2), encoding='utf-8')
+          print(json.dumps({'hit_count': len(hits), 'inventory': str(dest / 'mage_h1_1024_artifact_inventory.json')}))
+          PY
+      - name: Upload probe inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: mage-h1-1024-runner-probe
+          path: runner_probe/mage_h1_1024_artifact_inventory.json
+          if-no-files-found: error
+          retention-days: 3

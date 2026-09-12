@@ -1,0 +1,76 @@
+{
+  "schema": "RealSaS.MageFIT2PipelineRefitAuthority.v1",
+  "status": "ACTIVE__FIT2_PIPELINE_REFIT_AUTHORITY",
+  "authority_id": "MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1",
+  "date_utc": "2026-09-12",
+  "semantic_scope": {
+    "fit2_meaning": "same real Mage witness, full pipeline re-fit/replay from corrected upstream input authority",
+    "new_character": false,
+    "same_mage": true,
+    "historical_fit1_destroyed_or_rewritten": false,
+    "historical_fit1_role": "PRESERVED_HISTORICAL_EVIDENCE_ONLY"
+  },
+  "active_upstream_authority": {
+    "h1_authority_label": "H1_OBSERVABLE_PRODUCT_SURFACE:20260912T074348Z",
+    "h1_source_run_id": "20260912T074348Z",
+    "h1_checkpoint_sha256": "76fc68a8c6f2bed80ae8a678649006c875bc96b586065da8914e7f61528c8ce5",
+    "zero_surface_sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+    "gsa_target_nodes": 8192,
+    "gsa_actual_nodes": 8171,
+    "gsa_relations": 23656,
+    "gsa_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
+    "gsa_tensorization_hash": "fe351362e195164805cebb0f63b74d1861ef123458b20ac56607016e00a6c67e",
+    "observed_nodes": 7391,
+    "completed_nodes": 780,
+    "observation_support_counts_by_view": [2537, 2765, 2194, 3021, 2772, 2871, 2183, 2803],
+    "observation_authority": "EXACT_PRODUCT_ALPHA_AND_SELF_VISIBILITY",
+    "observation_alpha_rule": "RGBA alpha >= 8"
+  },
+  "geppetto_refit": {
+    "runner": "experiments/mage_full_subject_reclosure_v1/run_geppetto_fit2_corrected_substrate_refit_v1.py",
+    "mode": "FRESH_FROM_SCRATCH__NO_HISTORICAL_GEPPETTO_CHECKPOINT",
+    "historical_checkpoint_sha256": "b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30",
+    "historical_checkpoint_may_be_loaded": false,
+    "target_content_sha256": "0b5a25c877116de60b710b7bb2a7848f30988e1622e2eda8084cad21c8ca23c9",
+    "target_joint_count": 22,
+    "frozen_thresholds_changed": false,
+    "max_steps": 16384,
+    "check_every": 64,
+    "terminal_checks": 48,
+    "diffusion_eval_seeds": [11, 23, 47, 89],
+    "teacher_supervision_allowed_during_training": true,
+    "teacher_feedback_allowed_during_free_eval": false
+  },
+  "stage_evidence_policy": {
+    "rule": "NO_MODEL_STAGE_CLOSES_WITHOUT_REAL_8_VIEW_ARTIFACTS",
+    "synthetic_image_generation_allowed_as_evidence": false,
+    "iris_gsa_required": "V0..V7 real observation + real GSA graph projection",
+    "geppetto_required": "V0..V7 real observation + newly qualified skeleton projection",
+    "arachne_required": "V0..V7 real observation + newly qualified skin/deformation projection",
+    "artifact_manifest_required": true,
+    "sha256_required": true
+  },
+  "stage_order": [
+    "IRIS_H1_CORRECTED_SURFACE",
+    "GSA8192_REAL_8VIEW_EVIDENCE",
+    "GEPPETTO_FRESH_REFIT",
+    "GEPPETTO_REAL_8VIEW_EVIDENCE",
+    "ARACHNE_FRESH_REFIT",
+    "ARACHNE_REAL_8VIEW_EVIDENCE",
+    "DOWNSTREAM_DEFORMATION_PROOFS"
+  ],
+  "fail_closed": {
+    "gsa_lineage_drift": "STOP",
+    "tensorization_hash_drift": "STOP",
+    "input_sha_drift": "STOP",
+    "geppetto_terminal_pass_missing": "DO_NOT_START_ARACHNE",
+    "eight_view_evidence_missing": "DO_NOT_CLOSE_STAGE",
+    "threshold_relaxation": "FORBIDDEN_WITHOUT_NEW_EXPLICIT_AUTHORITY"
+  },
+  "claims": {
+    "product_pass": false,
+    "unseen_generalization_pass": false,
+    "geppetto_pass": false,
+    "arachne_pass": false
+  }
+}

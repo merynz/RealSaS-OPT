@@ -1,0 +1,388 @@
+from __future__ import annotations
+
+from dataclasses import replace
+import math
+
+from ._historical_v05 import HISTORICAL_CDT_SOURCE_SHA256, triangulate_production_cdt
+from .hashing import content_sha256
+from .mesh_binding import mesh_lineage_hash, qualify_identity_subset_mesh, validate_qualified_mesh
+from .mwb2 import _oriented_triangle, _relation_safe, _signed_area2, _visible_binding
+from .observation_domain import ObservationRasterDomain
+from .types import (
+    MeshDiscretizationCandidateIR,
+    MeshVertexCandidate,
+    QualificationError,
+    RiggingSurfaceIR,
+    SurfaceSupportBinding,
+)
+
+_CDT_MATCH_EPS = 1.0e-7
+
+
+def _safe_visible_graph(surface: RiggingSurfaceIR, view_index: int):
+    nodes = {n.surface_id: n for n in surface.surface_nodes}
+    visible = {sid: _visible_binding(n, int(view_index)) for sid, n in nodes.items()}
+    visible = {sid: xy for sid, xy in visible.items() if xy is not None}
+    safe_edges: set[tuple[str, str]] = set()
+    rejected_unknown = 0
+    for rel in surface.local_relations:
+        a, b = str(rel.a_surface_id), str(rel.b_surface_id)
+        if a == b or a not in visible or b not in visible:
+            continue
+        if not _relation_safe(rel):
+            rejected_unknown += 1
+            continue
+        safe_edges.add(tuple(sorted((a, b))))
+    return nodes, visible, safe_edges, rejected_unknown
+
+
+def _connected_components(visible_ids: set[str], safe_edges: set[tuple[str, str]]) -> tuple[tuple[str, ...], ...]:
+    neighbors: dict[str, set[str]] = {sid: set() for sid in visible_ids}
+    for a, b in safe_edges:
+        if a in neighbors and b in neighbors:
+            neighbors[a].add(b)
+            neighbors[b].add(a)
+    unseen = set(visible_ids)
+    out: list[tuple[str, ...]] = []
+    while unseen:
+        seed = min(unseen)
+        stack = [seed]
+        unseen.remove(seed)
+        component: list[str] = []
+        while stack:
+            cur = stack.pop()
+            component.append(cur)
+            for nxt in sorted(neighbors[cur], reverse=True):
+                if nxt in unseen:
+                    unseen.remove(nxt)
+                    stack.append(nxt)
+        out.append(tuple(sorted(component)))
+    return tuple(sorted(out, key=lambda comp: comp[0]))
+
+
+def _dedupe_projected_ids(
+    ids: tuple[str, ...],
+    visible: dict[str, tuple[float, float]],
+    *,
+    eps: float = _CDT_MATCH_EPS,
+) -> tuple[str, ...]:
+    kept: list[str] = []
+    for sid in sorted(ids):
+        p = visible[sid]
+        if any(math.hypot(p[0] - visible[old][0], p[1] - visible[old][1]) <= eps for old in kept):
+            continue
+        kept.append(sid)
+    return tuple(kept)
+
+
+def _convex_hull_ids(ids: tuple[str, ...], visible: dict[str, tuple[float, float]]) -> tuple[str, ...]:
+    points = sorted(
+        ((float(visible[sid][0]), float(visible[sid][1]), sid) for sid in ids),
+        key=lambda v: (v[0], v[1], v[2]),
+    )
+    if len(points) < 3:
+        return ()
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    lower = []
+    for p in points:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 1.0e-12:
+            lower.pop()
+        lower.append(p)
+    upper = []
+    for p in reversed(points):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 1.0e-12:
+            upper.pop()
+        upper.append(p)
+    hull = lower[:-1] + upper[:-1]
+    if len(hull) < 3:
+        return ()
+    area2 = sum(
+        hull[i][0] * hull[(i + 1) % len(hull)][1] - hull[(i + 1) % len(hull)][0] * hull[i][1]
+        for i in range(len(hull))
+    )
+    if abs(area2) <= 1.0e-12:
+        return ()
+    return tuple(p[2] for p in hull)
+
+
+def _match_kernel_vertex(
+    point,
+    ids: tuple[str, ...],
+    visible: dict[str, tuple[float, float]],
+    *,
+    eps: float = _CDT_MATCH_EPS,
+) -> str | None:
+    px, py = float(point[0]), float(point[1])
+    best_sid = None
+    best_dist = float("inf")
+    for sid in ids:
+        qx, qy = visible[sid]
+        dist = math.hypot(px - float(qx), py - float(qy))
+        if dist < best_dist or (
+            abs(dist - best_dist) <= 1.0e-15 and (best_sid is None or sid < best_sid)
+        ):
+            best_dist = dist
+            best_sid = sid
+    return best_sid if best_dist <= eps else None
+
+
+def build_mwb2_observation_cdt_candidate(
+    surface: RiggingSurfaceIR,
+    *,
+    view_index: int,
+    camera_binding_hash: str,
+    observation_domain: ObservationRasterDomain,
+    min_face_area_grid: float = 1.0e-8,
+    min_component_nodes: int = 3,
+) -> MeshDiscretizationCandidateIR:
+    """Triangulate observed S carriers with the frozen v0.5 CDT numerical kernel.
+
+    Current authority remains explicit: S defines legal 3D carriers/components and
+    exact input alpha defines the admissible 2D domain. Historical CDT is numerical
+    machinery only. Quality-Steiner insertion is disabled; any output vertex that
+    cannot be rebound exactly to an admitted S carrier is rejected fail-closed.
+    """
+    if not (0 <= int(view_index) < 8):
+        raise ValueError("view_index must be in [0,7]")
+    if not camera_binding_hash:
+        raise ValueError("camera_binding_hash required")
+    if min_face_area_grid <= 0.0:
+        raise ValueError("min_face_area_grid must be positive")
+    if int(min_component_nodes) < 3:
+        raise ValueError("min_component_nodes must be >= 3")
+    observation_domain.validate()
+    if int(observation_domain.view_index) != int(view_index):
+        raise QualificationError("MWB2_OBSERVATION_DOMAIN_VIEW_MISMATCH")
+
+    nodes, visible, safe_edges, rejected_unknown = _safe_visible_graph(surface, int(view_index))
+    if len(visible) < 3:
+        raise QualificationError("MWB2_INSUFFICIENT_OBSERVED_SURFACE_SUPPORT")
+    components = _connected_components(set(visible), safe_edges)
+
+    admitted_faces: list[tuple[str, str, str]] = []
+    admitted_face_xy: list[
+        tuple[tuple[float, float], tuple[float, float], tuple[float, float]]
+    ] = []
+    cdt_component_count = 0
+    tiny_component_count = 0
+    alpha_rejected_face_count = 0
+    duplicate_projected_node_count = 0
+    kernel_triangle_count = 0
+    kernel_constraint_split_count = 0
+
+    for component in components:
+        deduped = _dedupe_projected_ids(component, visible)
+        duplicate_projected_node_count += len(component) - len(deduped)
+        if len(deduped) < int(min_component_nodes):
+            tiny_component_count += 1
+            continue
+        hull_ids = _convex_hull_ids(deduped, visible)
+        if len(hull_ids) < 3:
+            tiny_component_count += 1
+            continue
+        hull_set = set(hull_ids)
+        support_ids = tuple(sid for sid in deduped if sid not in hull_set)
+        result = triangulate_production_cdt(
+            [visible[sid] for sid in hull_ids],
+            support_points=[visible[sid] for sid in support_ids],
+            target_min_angle_deg=0.0,
+            max_boundary_vertices=max(256, len(hull_ids) + 16),
+            max_support_vertices=max(128, len(support_ids) + 16),
+            max_constraint_recovery_iterations=96,
+            max_quality_iterations=0,
+            min_feature_spacing=1.0e-8,
+        )
+        if not bool(result.success):
+            raise QualificationError(f"MWB2_CDT_KERNEL_FAILURE:{result.reason}")
+        kernel_constraint_split_count += int(result.constraint_split_count)
+        kernel_triangle_count += len(result.triangles)
+        cdt_component_count += 1
+
+        kernel_ids: list[str] = []
+        for point in result.vertices:
+            sid = _match_kernel_vertex(point, deduped, visible)
+            if sid is None:
+                raise QualificationError("MWB2_CDT_UNSUPPORTED_GENERATED_VERTEX")
+            kernel_ids.append(sid)
+        if len(set(kernel_ids)) != len(kernel_ids):
+            raise QualificationError("MWB2_CDT_VERTEX_COLLAPSE_AFTER_BINDING")
+
+        for ia, ib, ic in result.triangles:
+            tri = (kernel_ids[int(ia)], kernel_ids[int(ib)], kernel_ids[int(ic)])
+            if len(set(tri)) != 3:
+                continue
+            tri = _oriented_triangle(tri, visible)
+            pa, pb, pc = (visible[sid] for sid in tri)
+            if 0.5 * abs(_signed_area2(pa, pb, pc)) < float(min_face_area_grid):
+                continue
+            tri_xy = (pa, pb, pc)
+            if not observation_domain.triangle_inside(tri_xy):
+                alpha_rejected_face_count += 1
+                continue
+            admitted_faces.append(tri)
+            admitted_face_xy.append(tri_xy)
+
+    if not admitted_faces:
+        raise QualificationError("MWB2_CDT_NO_OBSERVATION_DOMAIN_FACE")
+
+    face_keys: set[tuple[str, str, str]] = set()
+    unique_faces: list[tuple[str, str, str]] = []
+    unique_face_xy = []
+    for tri, tri_xy in zip(admitted_faces, admitted_face_xy):
+        key = tuple(sorted(tri))
+        if key in face_keys:
+            continue
+        face_keys.add(key)
+        unique_faces.append(tri)
+        unique_face_xy.append(tri_xy)
+
+    used_ids = sorted({sid for tri in unique_faces for sid in tri})
+    candidate_id = {sid: f"MWB2CDT:{view_index}:{i:05d}" for i, sid in enumerate(used_ids)}
+    vertices = tuple(
+        MeshVertexCandidate(
+            candidate_id[sid],
+            tuple(map(float, nodes[sid].P)),
+            SurfaceSupportBinding(
+                "IDENTITY_SURFACE_NODE",
+                ((sid, 1.0),),
+                metadata={"observed_view": int(view_index), "cdt_kernel_vertex": True},
+            ),
+            metadata={
+                "source_surface_id": sid,
+                "raster_xy": tuple(map(float, visible[sid])),
+                "source_mesh_used": False,
+                "generated_geometry": False,
+            },
+        )
+        for sid in used_ids
+    )
+    face_ids = tuple(tuple(candidate_id[sid] for sid in tri) for tri in unique_faces)
+    used_edges = sorted(
+        {
+            tuple(sorted((tri[i], tri[(i + 1) % 3])))
+            for tri in unique_faces
+            for i in range(3)
+        }
+    )
+    edge_ids = tuple((candidate_id[a], candidate_id[b]) for a, b in used_edges)
+    coverage = observation_domain.coverage(unique_face_xy)
+    boundary = (
+        {
+            "kind": "EXACT_OBSERVATION_ALPHA_DOMAIN",
+            "view_index": int(view_index),
+            "mask_sha256": observation_domain.mask_sha256,
+            "source_alpha_sha256": observation_domain.source_alpha_sha256,
+            "width": int(observation_domain.width),
+            "height": int(observation_domain.height),
+        },
+    )
+    residual = {
+        **coverage,
+        "face_count": len(face_ids),
+        "edge_count": len(edge_ids),
+        "vertex_count": len(vertices),
+        "visible_surface_node_count": len(visible),
+        "safe_relation_edge_count": len(safe_edges),
+        "safe_component_count": len(components),
+        "cdt_component_count": int(cdt_component_count),
+        "tiny_component_count": int(tiny_component_count),
+        "kernel_triangle_count": int(kernel_triangle_count),
+        "alpha_rejected_face_count": int(alpha_rejected_face_count),
+        "duplicate_projected_node_count": int(duplicate_projected_node_count),
+        "kernel_constraint_split_count": int(kernel_constraint_split_count),
+    }
+    provisional = MeshDiscretizationCandidateIR(
+        vertices,
+        face_ids,
+        edge_ids,
+        surface.geometry_lineage_hash,
+        int(view_index),
+        str(camera_binding_hash),
+        "",
+        boundary,
+        "OBSERVATION_DOMAIN_CDT",
+        solver_provenance={
+            "solver": "HISTORICAL_V05_CDT_CURRENT_TYPED_ADAPTER_V1",
+            "historical_cdt_source_sha256": HISTORICAL_CDT_SOURCE_SHA256,
+            "historical_kernel_role": "NUMERICAL_ONLY",
+            "quality_refinement_enabled": False,
+            "generated_vertex_policy": "REJECT_UNLESS_EXACT_ADMITTED_SURFACE_CARRIER",
+            "cdt_promoted": False,
+        },
+        residual_report=residual,
+        metadata={
+            "producer": "RealSaS.MWB2.ObservationDomainCDT.v1",
+            "source_mesh_used": False,
+            "teacher_topology_used": False,
+            "unknown_bridge_forbidden": True,
+            "rejected_unknown_relation_count": int(rejected_unknown),
+            "observed_view": int(view_index),
+            "surface_lineage_hash": surface.geometry_lineage_hash,
+            "observation_mask_sha256": observation_domain.mask_sha256,
+            "source_alpha_sha256": observation_domain.source_alpha_sha256,
+            "target_view_winding": "CCW",
+            "component_partition_authority": "SAFE_SURFACE_RELATION_CONNECTED_COMPONENTS",
+            "alpha_domain_authority": "EXACT_OBSERVATION_MASK",
+        },
+    )
+    payload = provisional.to_dict()
+    payload.pop("candidate_lineage_hash", None)
+    return MeshDiscretizationCandidateIR(
+        **{**provisional.__dict__, "candidate_lineage_hash": content_sha256(payload)}
+    )
+
+
+def qualify_mwb2_observation_cdt_mesh(
+    surface: RiggingSurfaceIR,
+    candidate: MeshDiscretizationCandidateIR,
+    *,
+    min_source_alpha_recall: float = 0.90,
+    min_precision_inside_alpha: float = 0.995,
+):
+    """Fail-closed promotion gate for a current-authority CDT candidate."""
+    if (
+        candidate.metadata.get("source_mesh_used") is not False
+        or candidate.metadata.get("teacher_topology_used") is not False
+    ):
+        raise QualificationError("MWB2_CDT_EXTERNAL_MESH_AUTHORITY_FORBIDDEN")
+    if candidate.coverage_classification != "OBSERVATION_DOMAIN_CDT":
+        raise QualificationError("MWB2_CDT_COVERAGE_CLASSIFICATION_DRIFT")
+    if candidate.solver_provenance.get("historical_cdt_source_sha256") != HISTORICAL_CDT_SOURCE_SHA256:
+        raise QualificationError("MWB2_CDT_HISTORICAL_KERNEL_HASH_DRIFT")
+    if candidate.solver_provenance.get("quality_refinement_enabled") is not False:
+        raise QualificationError("MWB2_CDT_UNBOUND_QUALITY_STEINER_FORBIDDEN")
+    recall = float(candidate.residual_report.get("source_alpha_recall", -1.0))
+    precision = float(candidate.residual_report.get("precision_inside_alpha", -1.0))
+    if precision < float(min_precision_inside_alpha):
+        raise QualificationError(f"MWB2_CDT_ALPHA_PRECISION_GATE_FAIL:{precision}")
+    if recall < float(min_source_alpha_recall):
+        raise QualificationError(f"MWB2_CDT_ALPHA_RECALL_GATE_FAIL:{recall}")
+
+    mesh = qualify_identity_subset_mesh(surface, candidate)
+    report = dict(mesh.qualification_report)
+    report.update(
+        {
+            "status": "PASS_OBSERVATION_DOMAIN_CDT_QUALIFICATION",
+            "source_alpha_recall": recall,
+            "precision_inside_alpha": precision,
+            "historical_cdt_source_sha256": HISTORICAL_CDT_SOURCE_SHA256,
+            "historical_kernel_role": "NUMERICAL_ONLY",
+            "cdt_behavioral_gate_pass": True,
+            "numerical_solver_promoted": True,
+        }
+    )
+    updated = replace(
+        mesh,
+        qualification_report=report,
+        metadata={
+            **mesh.metadata,
+            "cdt_adapter": "RealSaS.MWB2.ObservationDomainCDT.v1",
+        },
+        mesh_lineage_hash="",
+    )
+    updated = replace(updated, mesh_lineage_hash=mesh_lineage_hash(updated))
+    validate_qualified_mesh(updated, surface)
+    return updated

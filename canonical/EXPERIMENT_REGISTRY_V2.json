@@ -1,16 +1,18 @@
 {
   "schema_version": 2,
   "continuation_authority": "CURRENT_STATE.md",
-  "preservation_rule": "Historical registry/journal/branches remain provenance. Promotion supersedes continuation role but never deletes scientific evidence.",
+  "preservation_rule": "Historical registry/journal/branches remain provenance. Promotion or contradiction-driven reopening changes continuation role but never deletes scientific evidence.",
   "records": [
     {
       "id": "GEPPETTO_REFERENCE_STRENGTH_FIT1",
       "module": "Geppetto",
       "witness": "Mage FIT1",
-      "status": "CLOSED_PASS_PROMOTED_FIT1_FROZEN",
+      "status": "CLOSED_PASS_PROMOTED_FIT1_FROZEN__HISTORICAL_SCOPED_AFTER_PRODUCT_REOPENING",
       "verdict": "FIT1_TERMINAL_PASS",
       "checkpoint_sha256": "b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30",
       "qualified_skeleton_ir_sha256": "48754ad703c596ec9d332c6f733f1dd31e74d016ef15f3ce451263a724493992",
+      "current_corrected_product_authority": false,
+      "active_fit2_checkpoint_load_allowed": false,
       "generalization_claim": false
     },
     {
@@ -29,7 +31,7 @@
       "gsa_p95": 0.04491063521144626,
       "deformation_ratio": 0.018186409026384354,
       "a0_model_sha256": "8a57d296c55298e941402c18d215ea5a1458863df604d3e088f4fb1d2292b5a7",
-      "claim": "K4 representation capacity is sufficient on Mage; does not choose the shipping A1 decoder interface."
+      "claim": "K4 representation capacity is sufficient on historical Mage FIT1; does not choose the current corrected-lineage shipping path."
     },
     {
       "id": "ARACHNE_A1_V4_FIT1",
@@ -75,7 +77,7 @@
       "id": "ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1",
       "module": "Arachne A1",
       "witness": "Mage FIT1",
-      "status": "CLOSED_PASS_PROMOTED_FIT1_FROZEN",
+      "status": "CLOSED_PASS_PROMOTED_FIT1_FROZEN__HISTORICAL_SCOPED_AFTER_PRODUCT_REOPENING",
       "verdict": "PASS__MINIMAL_K4_Z_DIRECT_SIMPLEX_V5_FIT1_CLOSURE",
       "promotion_commit": "03d9f87dbb7100a72293915cf682cbf338335a37",
       "architecture_id": "RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5",
@@ -86,6 +88,7 @@
       "compiler_total_correction_l1": 2.9468642839168442e-05,
       "backbone_checkpoint_sha256": "95c441f97b02123de1a5bc83bdf5ad223363c4b97927e8d420a0d246efbc1763",
       "decoder_delta_sha256": "13344178bf1b3ce96c9356456db0ad2c8a3945182a5ec63617c50137b8c52137",
+      "current_corrected_product_authority": false,
       "unseen_family_claimed": false,
       "product_pass_claimed": false,
       "pointers": [
@@ -94,11 +97,75 @@
         "canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1_PROMOTION_20260911.md",
         "canonical/MAGE_FIT1_RIGGING_CORE_CLOSURE_20260911.md"
       ]
+    },
+    {
+      "id": "MAGE_FIT2_PIPELINE_REFIT",
+      "module": "Mage same-witness full product reclosure",
+      "witness": "Mage FIT2 same real witness",
+      "status": "ACTIVE__GEPPETTO_FRESH_REFIT_RUNNING__MESH_PRODUCT_CONTRACT_CLOSED_PASS",
+      "active_branch": "repair/mage-full-subject-reclosure-20260912",
+      "authority_id": "MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1",
+      "historical_fit1_preserved": true,
+      "product_pass_claimed": false,
+      "unseen_family_claimed": false,
+      "closed_upstream": {
+        "h1_observable_surface": "PASS_H1_OBSERVABLE_PRODUCT_SURFACE",
+        "h1_source_run_id": "20260912T074348Z",
+        "h1_checkpoint_sha256": "76fc68a8c6f2bed80ae8a678649006c875bc96b586065da8914e7f61528c8ce5",
+        "zero_surface_sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+        "gsa_stage": "PASS__REAL_8VIEW_GSA_EVIDENCE_SEALED",
+        "gsa_nodes": 8171,
+        "gsa_relations": 23656,
+        "gsa_observed_nodes": 7391,
+        "gsa_completed_nodes": 780,
+        "gsa_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
+        "gsa_tensorization_hash": "fe351362e195164805cebb0f63b74d1861ef123458b20ac56607016e00a6c67e"
+      },
+      "active_geppetto": {
+        "mode": "FRESH_FROM_SCRATCH__NO_HISTORICAL_GEPPETTO_CHECKPOINT",
+        "historical_checkpoint_may_be_loaded": false,
+        "historical_checkpoint_sha256": "b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30",
+        "target_joint_count": 22,
+        "max_steps": 16384,
+        "check_every": 64,
+        "terminal_checks": 48,
+        "preflight_status": "PASS__FIT2_CORRECTED_SUBSTRATE__FRESH_GEPPETTO_REFIT_READY",
+        "optimizer_status": "ACTIVE_EXTERNAL_GPU_PER_OPERATOR_CONTEXT",
+        "pass_claimed": false
+      },
+      "downstream_hardening": {
+        "mesh_component_implementation_commit": "9dd533eb5c48408faa92bcfb3469b7d32fd39368",
+        "mesh_component_test_commit": "ebe7358dbdafbf65068dde91f3eba39b58b784b6",
+        "product_qualifier_initial_commit": "3ff6c9ed2da8fd3045f4313b90f4ea6ce000c60d",
+        "exact_observation_remeasurement_commit": "3e8ef20b5b6ddbbec0a2b1c57912c7ccc21d30d8",
+        "final_regression_commit": "b1dc7fca6b6497d97c7be727d66fd9c0b64c3268",
+        "mesh_product_contract_status": "CLOSED_PASS__IMPLEMENTATION_ONLY",
+        "self_hosted_contract_workflow": "mage-full-subject-reclosure-contract",
+        "self_hosted_contract_run_id": 34716890157,
+        "self_hosted_contract_runner": "realsas-wsl-1660ti",
+        "self_hosted_contract_tests": "41 passed in 4.36s",
+        "candidate_reported_coverage_is_product_authority": false,
+        "exact_observation_rerasterization_required": true,
+        "corrected_mesh_pass_claimed": false,
+        "motion_product_pass_claimed": false,
+        "runtime_reclosure_pass_claimed": false
+      },
+      "pointers": [
+        "canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md",
+        "canonical/MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1.json",
+        "canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md",
+        "experiments/mage_full_subject_reclosure_v1/H1_OBSERVABLE_AUTHORITY_RECONCILIATION_20260912.json",
+        "experiments/mage_full_subject_reclosure_v1/GSA8192_CANONICAL_LINEAGE_SEAL_20260912.json",
+        "experiments/mage_full_subject_reclosure_v1/FIT2_STAGE0_GSA_8VIEW_EVIDENCE_SEAL_20260912.json",
+        "experiments/mage_full_subject_reclosure_v1/GEPPETTO_FIT2_CORRECTED_SUBSTRATE_PREFLIGHT_20260912.json",
+        "canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md",
+        "compiler/realsas_compiler_core/mesh/product_qualification.py"
+      ]
     }
   ],
   "next_gate": {
-    "id": "V5_FAMILY_DISJOINT_UNSEEN_GENERALIZATION_GATE",
-    "status": "NOT_ACTIVE__PREREG_REQUIRED_BEFORE_EXECUTION",
-    "claim_boundary": "FIT1 closure does not imply unseen-family/FIT8-LOFO success."
+    "id": "MAGE_FIT2_GEPPETTO_TERMINAL_CLOSURE",
+    "status": "ACTIVE_AS_SUBSTAGE_OF_MAGE_FIT2_PIPELINE_REFIT",
+    "claim_boundary": "Do not start fresh Arachne until Geppetto terminal PASS + required real V0..V7 skeleton evidence. The mesh product contract is already implementation-level CLOSED PASS, but no corrected real mesh result exists until fresh G/W. Same-Mage FIT2 product reclosure precedes unseen/FIT8-LOFO."
   }
 }

@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-12  
 **Canonical continuation branch for repair:** `repair/mage-full-subject-reclosure-20260912`  
-**Status:** `MAGE_FIT1_REAL_E2E_REOPENED__FIT2_FRESH_PIPELINE_REFIT_ACTIVE__GEPPETTO_RUNNING__MESH_PRODUCT_QUALIFIER_HARDENED__MOTION_RUNTIME_RECLOSURE_PENDING__PRODUCT_PASS_OPEN`
+**Status:** `MAGE_FIT1_REAL_E2E_REOPENED__FIT2_FRESH_PIPELINE_REFIT_ACTIVE__GEPPETTO_RUNNING__MESH_PRODUCT_CONTRACT_CLOSED_PASS__MOTION_RUNTIME_RECLOSURE_PENDING__PRODUCT_PASS_OPEN`
 
 This file is the continuation authority inside the active repair branch. Repository-wide continuation authority is reconciled from `main/CURRENT_STATE.md`; this branch contains the executable repair/refit lineage.
 
@@ -17,14 +17,14 @@ This file is the continuation authority inside the active repair branch. Reposit
 **Active experiment gate:** `MAGE_FIT2_PIPELINE_REFIT`  
 **Active branch:** `repair/mage-full-subject-reclosure-20260912`  
 **Current substage:** `GEPPETTO_FRESH_REFIT`  
-**Most recent closed gate:** `GSA8192_REAL_8VIEW_EVIDENCE`  
-**Parallel non-interfering work:** `FIT2_MESH_PRODUCT_RECLOSURE_CONTRACT_AND_IMPLEMENTATION`  
+**Most recent closed scientific gate:** `GSA8192_REAL_8VIEW_EVIDENCE`  
+**Parallel product-contract gate:** `FIT2_MESH_PRODUCT_RECLOSURE_CONTRACT_AND_IMPLEMENTATION — CLOSED PASS`  
 **Unseen-family generalization:** `BLOCKED UNTIL SAME-MAGE FIT2 RECLOSES`  
 **Product PASS:** `NOT CLAIMED`
 
 ## One-line state
 
-`The controlled Mage FIT1 rigging-core experiments closed locally, but the first real eight-view end-to-end product run produced visibly poor output and exposed upstream subject-scope loss, insufficient render/deformation mesh coverage, runtime mesh-identity drift, weak product proof scope and non-professional rotation-only motion. The old Mage product chain is therefore reopened. Corrected H1 observable authority and GSA8192 are sealed; a fresh-from-scratch Geppetto FIT2 refit is now running on corrected S. In parallel, the mesh/component contract has been hardened with a strict frozen product qualifier so a legal-but-visibly-incomplete mesh can no longer masquerade as product closure. Fresh Arachne, corrected mesh result, professional motion and exact runtime reclosure remain pending.`
+`The controlled Mage FIT1 rigging-core experiments closed locally, but the first real eight-view end-to-end product run produced visibly poor output and exposed upstream subject-scope loss, insufficient render/deformation mesh coverage, runtime mesh-identity drift, weak product proof scope and non-professional rotation-only motion. The old Mage product chain is therefore reopened. Corrected H1 observable authority and GSA8192 are sealed; a fresh-from-scratch Geppetto FIT2 refit is running on corrected S. In parallel, the mesh/component product contract has now closed implementation-level PASS with exact observation-authority rerasterization and self-hosted regression proof, preventing legal-but-visibly-incomplete or optimistically reported meshes from masquerading as product closure. Fresh Arachne, corrected real mesh result, professional motion and exact runtime reclosure remain pending.`
 
 ## Why FIT1 was reopened
 
@@ -94,20 +94,23 @@ Geppetto is being fitted **fresh from scratch** on the corrected GSA8192 substra
 
 Arachne may not start before Geppetto terminal PASS and its mandatory real V0..V7 skeleton evidence. The mesh hardening transaction does not alter the running Geppetto optimizer, thresholds or closure rule.
 
-## Mesh / component hardening — IMPLEMENTED, NOT YET A FIT2 MESH RESULT
+## Mesh / component product contract — CLOSED PASS, REAL FIT2 RESULT STILL PENDING
 
-The product closure was hardened independently while Geppetto runs:
+The product closure was hardened independently while Geppetto runs. Earlier mesh/component work established full-safe-S component identity, observation-domain CDT, typed support binding, supported local-convex inserted vertices, exact mesh-skin transfer and mechanical component verification.
 
-- `9dd533eb5c48408faa92bcfb3469b7d32fd39368` — mesh coverage/component contract hardening;
-- `ebe7358dbdafbf65068dde91f3eba39b58b784b6` — extended self-hosted mesh/component closure tests;
-- `3ff6c9ed2da8fd3045f4313b90f4ea6ce000c60d` — strict FIT2 product mesh qualifier;
-- `76d654cc3b47a75cf1338dbc571df9c25ee0380a` — regression tests separating legacy CDT admission from product mesh admission;
-- `4d598a5e25d775d0ac2ae7554965824522d83775` — dedicated mesh product reclosure audit/decision;
-- `699e24409b33786929aac6aeb50aee7f8759dbdc` — FIT2 pipeline authority bound to the mesh product reclosure stage.
+The final missing integration seam is now closed:
 
-The earlier extended self-hosted `mage-full-subject-reclosure-contract` run at `ebe7358...` completed successfully on `realsas-wsl-1660ti`. The new strict product-qualifier regression transaction has been committed but has no CI result claimed in this file until the self-hosted runner reports it.
+- authoritative product entry point: `compiler/realsas_compiler_core/mesh/product_qualification.py::qualify_fit2_product_mwb2_observation_cdt_mesh`;
+- exact `ObservationRasterDomain` is mandatory;
+- candidate coverage residuals are diagnostics only, not product authority;
+- every promoted mesh vertex is reprojected from exact `SurfaceSupportBinding` + admitted S raster bindings;
+- exact promoted triangles are rerasterized against the exact alpha mask;
+- recall / precision / IoU / connected-hole metrics are recomputed independently;
+- topology/shape quality is independently remeasured;
+- observation mask/source-alpha hashes are bound into qualification provenance;
+- lower-level `qualify_mwb2_observation_cdt_mesh(...)` remains compatibility evidence only, never product PASS.
 
-Current frozen product-mesh admission policy includes:
+Frozen product-mesh policy:
 
 - source-alpha recall `>= 0.94`;
 - precision `>= 0.995`;
@@ -118,11 +121,17 @@ Current frozen product-mesh admission policy includes:
 - raster minimum angle `>= 0.25 deg` and maximum aspect ratio `<= 250`;
 - real V0..V7 observation + exact mesh overlay + uncovered heatmap evidence.
 
-The critical integration rule is now explicit in code and authority: `qualify_mwb2_observation_cdt_mesh(...)` is a lower-level CDT/surface-lineage compatibility gate, **not product closure**. Corrected FIT2 product admission must pass `qualify_fit2_product_mwb2_observation_cdt_mesh(...)` from `compiler/realsas_compiler_core/mesh/product_qualification.py`, which remeasures the exact qualified mesh and applies the frozen policy fail-closed.
+Self-hosted contract evidence:
 
-Component qualification checks exact S/G/W lineage and mechanically verifies rigid-skinned ownership instead of trusting labels. Visible surface may not silently disappear from component accounting.
+- workflow: `mage-full-subject-reclosure-contract`;
+- run id: `34716890157`;
+- code/test head: `b1dc7fca6b6497d97c7be727d66fd9c0b64c3268`;
+- runner: `realsas-wsl-1660ti`;
+- static compile: PASS;
+- tests: `41 passed in 4.36s`;
+- conclusion: success.
 
-These are implementation/contract gates. **No corrected FIT2 mesh product PASS exists yet** because fresh Geppetto/Arachne mechanics and the final corrected directional mesh artifacts are not yet available.
+Important claim boundary: this closes the **product-mesh qualification contract/implementation**, not the corrected real Mage mesh result. **No corrected FIT2 mesh product PASS exists yet** because fresh Geppetto/Arachne mechanics and the final V0..V7 directional mesh artifacts are not yet available.
 
 ## Supported Steiner vertices
 
@@ -132,7 +141,7 @@ For an inserted vertex:
 
 `P(v) = Σ a_i P(S_i)` and `W(v) = Σ a_i W(S_i)`, with `a_i >= 0` and `Σ a_i = 1`.
 
-Thus geometry placement and mechanical skin transfer share the same admitted surface-support authority. The typed path and regression test exist. Automatic arbitrary CDT quality-Steiner generation is still blocked until each inserted point can construct an exact legal local support simplex.
+Thus geometry placement, raster placement and mechanical skin transfer share the same admitted surface-support authority. Automatic arbitrary CDT quality-Steiner generation remains blocked until each inserted point can construct and prove an exact legal local support simplex.
 
 The desired product target is a **directional alpha-domain watertight deformation mesh**, not a hallucinated watertight 3D body: opaque artist pixels must belong to the view-local triangulated deformation domain; true transparent holes stay holes.
 
@@ -158,7 +167,7 @@ Exact runtime reclosure is mandatory after mechanics + motion are ready. Runtime
 4. new QualifiedSkeletonIR + real V0..V7 skeleton evidence — **PENDING**;
 5. fresh Arachne FIT2 on corrected S+new G — **BLOCKED ON 3/4**;
 6. new QualifiedSkinIR + real V0..V7 skin/deformation evidence — **PENDING**;
-7. directional alpha-domain CDT candidate + strict FIT2 product mesh qualification — **IMPLEMENTATION READY / RESULT PENDING CURRENT G/W**;
+7. directional alpha-domain CDT + strict FIT2 product mesh qualification — **CONTRACT/IMPLEMENTATION CLOSED PASS / REAL RESULT PENDING CURRENT G/W**;
 8. QualifiedEditableMeshIR + QualifiedMeshSkinIR + qualified components/mechanical assembly — **PENDING**;
 9. real V0..V7 dynamic deformation proof — **PENDING**;
 10. professional motion closure — **OPEN**;
@@ -170,6 +179,6 @@ Exact runtime reclosure is mandatory after mechanics + motion are ready. Runtime
 
 Strongest current claim:
 
-`RealSaS completed the historical Mage FIT1 model/Compiler investigations but the first real end-to-end product output exposed genuine end-to-end authority and quality gaps. The old Mage product chain is reopened. Corrected observation-bound H1 and GSA8192 are closed, fresh Geppetto FIT2 is active, and the mesh/product admission path is now hardened so lower-level legal CDT output cannot be mistaken for product closure. Fresh Arachne, corrected FIT2 mesh evidence, professional motion and exact runtime product closure remain pending.`
+`RealSaS completed the historical Mage FIT1 model/Compiler investigations but the first real end-to-end product output exposed genuine end-to-end authority and quality gaps. The old Mage product chain is reopened. Corrected observation-bound H1 and GSA8192 are closed; fresh Geppetto FIT2 is active. The mesh/product contract is now implementation-level CLOSED PASS with independent exact-observation rerasterization and self-hosted regression proof, so neither lower-level legal CDT output nor optimistic candidate metrics can be mistaken for product closure. Fresh Arachne, corrected real FIT2 mesh evidence, professional motion and exact runtime product closure remain pending.`
 
 Not claimed: Geppetto FIT2 PASS; Arachne FIT2 PASS; corrected FIT2 mesh PASS; professional motion quality; exact runtime product closure; unseen-family generalization; FIT8/LOFO; `PRODUCT_PASS`; commercial production readiness.

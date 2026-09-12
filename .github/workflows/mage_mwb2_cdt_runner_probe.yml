@@ -37,26 +37,28 @@ jobs:
             [ -d "$root" ] || continue
             find "$root" -maxdepth 8 -type f \
               \( -iname 'ZERO_SURFACE_PRODUCT_CLIPPED.npz' \
+                 -o -iname 'V?.png' \
+                 -o -iname 'V?.camera.json' \
                  -o -iname '*zero_surface*.npz' \
-                 -o -iname '*20260912T074348Z*' \
-                 -o -iname '*mage*.npz' \
-                 -o -iname '*mage*.json' \) \
+                 -o -iname '*20260912T074348Z*' \) \
               -not -path '*/AppData/*' \
               -not -path '*/node_modules/*' \
               -not -path '*/.git/*' \
               -not -path '*/.cache/*' \
               2>/dev/null >> runner_probe/candidate_paths.txt || true
           done
-          # Also inspect runner-adjacent directories but never recurse through the actions-runner work tree.
-          find /home/monster -maxdepth 4 -type f \
+          find /home/monster -maxdepth 5 -type f \
             \( -iname 'ZERO_SURFACE_PRODUCT_CLIPPED.npz' \
+               -o -iname 'V?.png' \
+               -o -iname 'V?.camera.json' \
                -o -iname '*20260912T074348Z*' \) \
             -not -path '/home/monster/actions-runner/*' \
             -not -path '*/.cache/*' \
             2>/dev/null >> runner_probe/candidate_paths.txt || true
-          sort -u runner_probe/candidate_paths.txt | head -n 1000 > runner_probe/candidate_paths.sorted.txt
+          sort -u runner_probe/candidate_paths.txt | head -n 3000 > runner_probe/candidate_paths.sorted.txt
           mv runner_probe/candidate_paths.sorted.txt runner_probe/candidate_paths.txt
           python - <<'PY'
+          from hashlib import sha256
           from pathlib import Path
           import json
           rows = []
@@ -66,18 +68,23 @@ jobs:
                   continue
               try:
                   size = p.stat().st_size
+                  h = sha256()
+                  with p.open('rb') as f:
+                      for b in iter(lambda: f.read(8 << 20), b''):
+                          h.update(b)
+                  digest = h.hexdigest()
               except OSError:
-                  size = None
-              rows.append({'path': str(p), 'size_bytes': size})
+                  size = None; digest = None
+              rows.append({'path': str(p), 'size_bytes': size, 'sha256': digest})
           out = {
-              'schema': 'RealSaS.MageMWB2CDTRunnerArtifactProbe.v3',
+              'schema': 'RealSaS.MageMWB2CDTRunnerArtifactProbe.v4',
               'hit_count': len(rows),
               'hits': rows,
           }
           Path('runner_probe/mage_h1_1024_artifact_inventory.json').write_text(
               json.dumps(out, indent=2), encoding='utf-8'
           )
-          print(json.dumps({'hit_count': len(rows), 'hits': rows[:40]}))
+          print(json.dumps({'hit_count': len(rows), 'hits': rows[:200]}, indent=2))
           PY
       - name: Upload probe inventory
         uses: actions/upload-artifact@v4

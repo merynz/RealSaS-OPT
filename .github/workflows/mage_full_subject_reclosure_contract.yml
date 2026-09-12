@@ -17,21 +17,23 @@ on:
 
 jobs:
   contract:
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Python
-        shell: bash
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install contract dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
         run: |
-          set -euo pipefail
-          python --version
-          python -m pip install -q pytest numpy pillow scipy
+          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pillow pytest scikit-image
       - name: Static compile
-        shell: bash
         run: |
-          set -euo pipefail
           python -m py_compile compiler/realsas_compiler_core/component_attachment.py
           python -m py_compile compiler/realsas_compiler_core/substrate/scene_first_signed.py
           python -m py_compile tools/audit_full_subject_coverage.py
@@ -39,9 +41,7 @@ jobs:
           python -m py_compile tests/compiler/test_component_attachment_v1.py
           python -m py_compile tests/compiler/test_scene_first_signed_surface_bridge_v1.py
       - name: Reclosure contract tests
-        shell: bash
         run: |
-          set -euo pipefail
-          python -m pytest -q \
+          PYTHONPATH=. python -m pytest -q \
             tests/compiler/test_component_attachment_v1.py \
             tests/compiler/test_scene_first_signed_surface_bridge_v1.py

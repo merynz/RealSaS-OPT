@@ -148,6 +148,132 @@ def _match_kernel_vertex(
             best_sid = sid
     return best_sid if best_dist <= eps else None
 
+def _point_on_original_hull_segment(
+    point,
+    hull_ids: tuple[str, ...],
+    visible: dict[str, tuple[float, float]],
+    *,
+    eps: float = _CDT_MATCH_EPS,
+) -> tuple[str, str, float] | None:
+    px, py = float(point[0]), float(point[1])
+    matches: list[tuple[float, str, str, float]] = []
+    for i, a_sid in enumerate(hull_ids):
+        b_sid = hull_ids[(i + 1) % len(hull_ids)]
+        ax, ay = visible[a_sid]
+        bx, by = visible[b_sid]
+        dx, dy = float(bx) - float(ax), float(by) - float(ay)
+        denom = dx * dx + dy * dy
+        if denom <= eps * eps:
+            continue
+        t = ((px - float(ax)) * dx + (py - float(ay)) * dy) / denom
+        if t <= eps or t >= 1.0 - eps:
+            continue
+        qx, qy = float(ax) + t * dx, float(ay) + t * dy
+        dist = math.hypot(px - qx, py - qy)
+        if dist <= eps:
+            matches.append((dist, a_sid, b_sid, float(t)))
+    if not matches:
+        return None
+    matches.sort(key=lambda row: (row[0], row[1], row[2], row[3]))
+    best = matches[0]
+    if len(matches) > 1 and abs(matches[1][0] - best[0]) <= 1.0e-12:
+        raise QualificationError("MWB2_CDT_AMBIGUOUS_BOUNDARY_RECOVERY_VERTEX")
+    return best[1], best[2], best[3]
+
+
+def _polygon_signed_area2(indices: list[int], points) -> float:
+    return float(
+        sum(
+            points[indices[i]][0] * points[indices[(i + 1) % len(indices)]][1]
+            - points[indices[(i + 1) % len(indices)]][0] * points[indices[i]][1]
+            for i in range(len(indices))
+        )
+    )
+
+
+def _point_in_triangle_xy(point, a, b, c, *, eps: float = 1.0e-10) -> bool:
+    s0 = _signed_area2(a, b, point)
+    s1 = _signed_area2(b, c, point)
+    s2 = _signed_area2(c, a, point)
+    has_neg = s0 < -eps or s1 < -eps or s2 < -eps
+    has_pos = s0 > eps or s1 > eps or s2 > eps
+    return not (has_neg and has_pos)
+
+
+def _ear_clip_cavity(path: list[int], points) -> list[tuple[int, int, int]]:
+    poly = list(path)
+    if len(poly) < 3 or len(set(poly)) != len(poly):
+        raise QualificationError("MWB2_CDT_BOUNDARY_CONTRACTION_INVALID_CAVITY")
+    if _polygon_signed_area2(poly, points) < 0.0:
+        poly.reverse()
+    out: list[tuple[int, int, int]] = []
+    while len(poly) > 3:
+        ears = []
+        for i, cur in enumerate(poly):
+            a, b, c = poly[i - 1], cur, poly[(i + 1) % len(poly)]
+            if _signed_area2(points[a], points[b], points[c]) <= 1.0e-10:
+                continue
+            tri = (a, b, c)
+            if any(
+                j not in tri
+                and _point_in_triangle_xy(points[j], points[a], points[b], points[c])
+                for j in poly
+            ):
+                continue
+            ears.append((tuple(sorted(tri)), i, tri))
+        if not ears:
+            raise QualificationError("MWB2_CDT_BOUNDARY_CONTRACTION_EAR_CLIP_FAIL")
+        _, index, tri = min(ears)
+        out.append(tri)
+        poly.pop(index)
+    out.append(tuple(poly))
+    return out
+
+
+def _contract_boundary_recovery_vertices(result, generated_indices: tuple[int, ...]):
+    """Remove solver-only boundary split vertices and fill their planar cavities."""
+    triangles = [tuple(map(int, tri)) for tri in result.triangles]
+    constraints = {tuple(sorted(map(int, edge))) for edge in result.constraint_edges}
+    points = result.vertices
+    for g in sorted(map(int, generated_indices)):
+        incident = [tri for tri in triangles if g in tri]
+        if not incident:
+            raise QualificationError("MWB2_CDT_BOUNDARY_RECOVERY_VERTEX_UNUSED")
+        constraint_incident = [edge for edge in constraints if g in edge]
+        if len(constraint_incident) != 2:
+            raise QualificationError("MWB2_CDT_GENERATED_VERTEX_NOT_BOUNDARY_RECOVERY")
+        endpoints = [edge[0] if edge[1] == g else edge[1] for edge in constraint_incident]
+        adjacency: dict[int, set[int]] = {}
+        for tri in incident:
+            opposite = [idx for idx in tri if idx != g]
+            if len(opposite) != 2:
+                raise QualificationError("MWB2_CDT_BOUNDARY_CONTRACTION_INVALID_STAR")
+            a, b = opposite
+            adjacency.setdefault(a, set()).add(b)
+            adjacency.setdefault(b, set()).add(a)
+        start, end = endpoints
+        path = [start]
+        previous = None
+        current = start
+        while current != end:
+            candidates = [idx for idx in sorted(adjacency.get(current, ())) if idx != previous]
+            candidates = [idx for idx in candidates if idx not in path or idx == end]
+            if len(candidates) != 1:
+                raise QualificationError("MWB2_CDT_BOUNDARY_CONTRACTION_NONMANIFOLD_STAR")
+            nxt = candidates[0]
+            previous, current = current, nxt
+            path.append(current)
+            if len(path) > len(adjacency) + 1:
+                raise QualificationError("MWB2_CDT_BOUNDARY_CONTRACTION_PATH_LOOP")
+        replacement = _ear_clip_cavity(path, points)
+        triangles = [tri for tri in triangles if g not in tri] + replacement
+        for edge in constraint_incident:
+            constraints.remove(tuple(sorted(edge)))
+        constraints.add(tuple(sorted((start, end))))
+    if any(any(g in tri for g in generated_indices) for tri in triangles):
+        raise QualificationError("MWB2_CDT_BOUNDARY_RECOVERY_CONTRACTION_INCOMPLETE")
+    return tuple(triangles)
+
 
 def build_mwb2_observation_cdt_candidate(
     surface: RiggingSurfaceIR,
@@ -198,6 +324,8 @@ def build_mwb2_observation_cdt_candidate(
     duplicate_projected_node_count = 0
     kernel_triangle_count = 0
     kernel_constraint_split_count = 0
+    contracted_boundary_recovery_vertex_count = 0
+    post_contraction_triangle_count = 0
 
     for component in components:
         deduped = _dedupe_projected_ids(component, visible)
@@ -227,17 +355,36 @@ def build_mwb2_observation_cdt_candidate(
         kernel_triangle_count += len(result.triangles)
         cdt_component_count += 1
 
-        kernel_ids: list[str] = []
-        for point in result.vertices:
+        kernel_ids: list[str | None] = []
+        generated_indices: list[int] = []
+        for vertex_index, point in enumerate(result.vertices):
             sid = _match_kernel_vertex(point, deduped, visible)
             if sid is None:
-                raise QualificationError("MWB2_CDT_UNSUPPORTED_GENERATED_VERTEX")
+                if _point_on_original_hull_segment(point, hull_ids, visible) is None:
+                    raise QualificationError("MWB2_CDT_UNSUPPORTED_GENERATED_VERTEX")
+                generated_indices.append(int(vertex_index))
             kernel_ids.append(sid)
-        if len(set(kernel_ids)) != len(kernel_ids):
+        if generated_indices:
+            if int(getattr(result, "quality_insert_count", 0)) != 0 or int(
+                getattr(result, "inserted_steiner_count", 0)
+            ) != 0:
+                raise QualificationError("MWB2_CDT_UNBOUND_QUALITY_STEINER_FORBIDDEN")
+            if len(generated_indices) != int(result.constraint_split_count):
+                raise QualificationError("MWB2_CDT_CONSTRAINT_SPLIT_BINDING_COUNT_MISMATCH")
+            kernel_triangles = _contract_boundary_recovery_vertices(result, tuple(generated_indices))
+            contracted_boundary_recovery_vertex_count += len(generated_indices)
+        else:
+            kernel_triangles = tuple(result.triangles)
+        matched_ids = [sid for sid in kernel_ids if sid is not None]
+        if len(set(matched_ids)) != len(matched_ids):
             raise QualificationError("MWB2_CDT_VERTEX_COLLAPSE_AFTER_BINDING")
+        post_contraction_triangle_count += len(kernel_triangles)
 
-        for ia, ib, ic in result.triangles:
-            tri = (kernel_ids[int(ia)], kernel_ids[int(ib)], kernel_ids[int(ic)])
+        for ia, ib, ic in kernel_triangles:
+            tri_raw = (kernel_ids[int(ia)], kernel_ids[int(ib)], kernel_ids[int(ic)])
+            if any(sid is None for sid in tri_raw):
+                raise QualificationError("MWB2_CDT_BOUNDARY_RECOVERY_CONTRACTION_INCOMPLETE")
+            tri = (str(tri_raw[0]), str(tri_raw[1]), str(tri_raw[2]))
             if len(set(tri)) != 3:
                 continue
             tri = _oriented_triangle(tri, visible)
@@ -321,6 +468,8 @@ def build_mwb2_observation_cdt_candidate(
         "alpha_rejected_face_count": int(alpha_rejected_face_count),
         "duplicate_projected_node_count": int(duplicate_projected_node_count),
         "kernel_constraint_split_count": int(kernel_constraint_split_count),
+        "contracted_boundary_recovery_vertex_count": int(contracted_boundary_recovery_vertex_count),
+        "post_contraction_triangle_count": int(post_contraction_triangle_count),
     }
     provisional = MeshDiscretizationCandidateIR(
         vertices,
@@ -333,16 +482,16 @@ def build_mwb2_observation_cdt_candidate(
         boundary,
         "OBSERVATION_DOMAIN_CDT",
         solver_provenance={
-            "solver": "HISTORICAL_V05_CDT_CURRENT_TYPED_ADAPTER_V2",
+            "solver": "HISTORICAL_V05_CDT_CURRENT_TYPED_ADAPTER_V3",
             "historical_cdt_source_sha256": HISTORICAL_CDT_SOURCE_SHA256,
             "historical_kernel_role": "NUMERICAL_ONLY",
             "quality_refinement_enabled": False,
-            "generated_vertex_policy": "REJECT_UNLESS_EXACT_ADMITTED_SURFACE_CARRIER",
+            "generated_vertex_policy": "CONTRACT_BOUNDARY_RECOVERY_VERTICES__REJECT_OTHER_GENERATED_VERTICES",
             "cdt_promoted": False,
         },
         residual_report=residual,
         metadata={
-            "producer": "RealSaS.MWB2.ObservationDomainCDT.v2",
+            "producer": "RealSaS.MWB2.ObservationDomainCDT.v3",
             "source_mesh_used": False,
             "teacher_topology_used": False,
             "unknown_bridge_forbidden": True,
@@ -407,7 +556,7 @@ def qualify_mwb2_observation_cdt_mesh(
         qualification_report=report,
         metadata={
             **mesh.metadata,
-            "cdt_adapter": "RealSaS.MWB2.ObservationDomainCDT.v2",
+            "cdt_adapter": "RealSaS.MWB2.ObservationDomainCDT.v3",
         },
         mesh_lineage_hash="",
     )

@@ -194,3 +194,39 @@ def test_unbound_kernel_generated_vertex_is_rejected():
                 camera_binding_hash="camera",
                 observation_domain=domain,
             )
+
+
+
+def test_boundary_recovery_midpoint_is_solver_internal_only():
+    surface = _chain_square_surface()
+    domain = ObservationRasterDomain.from_rows(
+        _rect_mask(10, 10, [(1, 1, 8, 8)]), view_index=0
+    )
+    fake = SimpleNamespace(
+        success=True,
+        reason="ok",
+        vertices=[(1.0, 1.0), (8.0, 1.0), (8.0, 8.0), (1.0, 8.0), (4.5, 1.0)],
+        triangles=[(0, 4, 3), (4, 2, 3), (4, 1, 2)],
+        constraint_edges=[(0, 4), (4, 1), (1, 2), (2, 3), (3, 0)],
+        constraint_split_count=1,
+        quality_insert_count=0,
+        inserted_steiner_count=0,
+    )
+    with patch(
+        "compiler.realsas_compiler_core.mesh.mwb2_cdt.triangulate_production_cdt",
+        return_value=fake,
+    ):
+        candidate = build_mwb2_observation_cdt_candidate(
+            surface,
+            view_index=0,
+            camera_binding_hash="camera",
+            observation_domain=domain,
+        )
+    assert candidate.residual_report["contracted_boundary_recovery_vertex_count"] == 1
+    assert candidate.residual_report["post_contraction_triangle_count"] == 2
+    assert candidate.residual_report["source_alpha_recall"] == 1.0
+    assert candidate.residual_report["precision_inside_alpha"] == 1.0
+    assert all(v.support_binding.mode == "IDENTITY_SURFACE_NODE" for v in candidate.vertices)
+    assert all(v.metadata["generated_geometry"] is False for v in candidate.vertices)
+    qualified = qualify_mwb2_observation_cdt_mesh(surface, candidate)
+    assert qualified.qualification_report["cdt_behavioral_gate_pass"] is True

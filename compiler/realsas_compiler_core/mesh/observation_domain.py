@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass
 import hashlib
 import math
@@ -70,6 +71,107 @@ def _triangle_indices(tri: Triangle2, *, width: int, height: int):
         [float(p[0]) for p in tri],
         shape=(int(height), int(width)),
     )
+
+
+def _connected_component_metrics(
+    authority_bytes: bytes,
+    predicted_bytes: bytes,
+    *,
+    width: int,
+    height: int,
+    max_component_rows: int = 64,
+) -> dict:
+    """Exact 4-connected alpha accounting, including large-hole visibility.
+
+    Aggregate recall alone can hide a missing hat/book/limb. These summaries make
+    connected foreground loss explicit without assigning semantic component names.
+    """
+    n = int(width) * int(height)
+    if len(authority_bytes) != n or len(predicted_bytes) != n:
+        raise ValueError("coverage component mask byte count mismatch")
+
+    authority = authority_bytes
+    predicted = predicted_bytes
+    visited = bytearray(n)
+    components: list[tuple[int, int]] = []  # (foreground pixels, covered pixels)
+
+    for seed in range(n):
+        if not authority[seed] or visited[seed]:
+            continue
+        visited[seed] = 1
+        q = deque([seed])
+        size = covered = 0
+        while q:
+            idx = q.popleft()
+            size += 1
+            covered += 1 if predicted[idx] else 0
+            x = idx % width
+            y = idx // width
+            if x > 0:
+                nxt = idx - 1
+                if authority[nxt] and not visited[nxt]: visited[nxt] = 1; q.append(nxt)
+            if x + 1 < width:
+                nxt = idx + 1
+                if authority[nxt] and not visited[nxt]: visited[nxt] = 1; q.append(nxt)
+            if y > 0:
+                nxt = idx - width
+                if authority[nxt] and not visited[nxt]: visited[nxt] = 1; q.append(nxt)
+            if y + 1 < height:
+                nxt = idx + width
+                if authority[nxt] and not visited[nxt]: visited[nxt] = 1; q.append(nxt)
+        components.append((size, covered))
+
+    foreground = int(sum(authority))
+    components.sort(key=lambda row: (-row[0], -row[1]))
+    component_rows = tuple(
+        {
+            "component_index": int(i),
+            "foreground_pixel_count": int(size),
+            "covered_pixel_count": int(covered),
+            "foreground_fraction": 0.0 if foreground == 0 else float(size) / float(foreground),
+            "recall": 1.0 if size == 0 else float(covered) / float(size),
+        }
+        for i, (size, covered) in enumerate(components[: int(max_component_rows)])
+    )
+
+    uncovered = bytearray(n)
+    for i in range(n):
+        uncovered[i] = 1 if authority[i] and not predicted[i] else 0
+    visited = bytearray(n)
+    uncovered_sizes: list[int] = []
+    for seed in range(n):
+        if not uncovered[seed] or visited[seed]:
+            continue
+        visited[seed] = 1
+        q = deque([seed])
+        size = 0
+        while q:
+            idx = q.popleft(); size += 1
+            x = idx % width; y = idx // width
+            if x > 0:
+                nxt = idx - 1
+                if uncovered[nxt] and not visited[nxt]: visited[nxt] = 1; q.append(nxt)
+            if x + 1 < width:
+                nxt = idx + 1
+                if uncovered[nxt] and not visited[nxt]: visited[nxt] = 1; q.append(nxt)
+            if y > 0:
+                nxt = idx - width
+                if uncovered[nxt] and not visited[nxt]: visited[nxt] = 1; q.append(nxt)
+            if y + 1 < height:
+                nxt = idx + width
+                if uncovered[nxt] and not visited[nxt]: visited[nxt] = 1; q.append(nxt)
+        uncovered_sizes.append(size)
+
+    largest_uncovered = max(uncovered_sizes, default=0)
+    return {
+        "foreground_component_count": len(components),
+        "foreground_component_recalls": component_rows,
+        "uncovered_component_count": len(uncovered_sizes),
+        "largest_uncovered_component_pixels": int(largest_uncovered),
+        "largest_uncovered_component_fraction": (
+            0.0 if foreground == 0 else float(largest_uncovered) / float(foreground)
+        ),
+    }
 
 
 @dataclass(frozen=True)
@@ -143,14 +245,17 @@ class ObservationRasterDomain:
         authority = np.frombuffer(self.mask_bytes, dtype=np.uint8).reshape(self.height, self.width)
         return bool(np.all(authority[rr, cc] != 0))
 
-    def coverage(self, triangles: Iterable[Triangle2]) -> dict[str, float | int]:
+    def coverage(self, triangles: Iterable[Triangle2]) -> dict:
         if _raster_polygon is None:
-            predicted: set[tuple[int, int]] = set()
+            predicted_set: set[tuple[int, int]] = set()
             for tri in triangles:
-                predicted.update(_scalar_triangle_pixels(tri, width=self.width, height=self.height))
-            inside = sum(1 for x, y in predicted if self.contains_pixel(x, y))
+                predicted_set.update(_scalar_triangle_pixels(tri, width=self.width, height=self.height))
+            predicted_bytes = bytearray(self.width * self.height)
+            for x, y in predicted_set:
+                predicted_bytes[y * self.width + x] = 1
+            inside = sum(1 for x, y in predicted_set if self.contains_pixel(x, y))
             foreground = self.foreground_count
-            predicted_count = len(predicted)
+            predicted_count = len(predicted_set)
         else:
             predicted = np.zeros((self.height, self.width), dtype=np.bool_)
             for tri in triangles:
@@ -160,12 +265,26 @@ class ObservationRasterDomain:
             inside = int(np.count_nonzero(predicted & authority))
             foreground = int(np.count_nonzero(authority))
             predicted_count = int(np.count_nonzero(predicted))
+            predicted_bytes = bytearray(predicted.astype(np.uint8).tobytes())
+
         precision = 1.0 if predicted_count == 0 else float(inside) / float(predicted_count)
         recall = 1.0 if foreground == 0 else float(inside) / float(foreground)
+        union = foreground + predicted_count - inside
+        iou = 1.0 if union == 0 else float(inside) / float(union)
+        f1 = 1.0 if precision + recall == 0.0 else 2.0 * precision * recall / (precision + recall)
+        component_metrics = _connected_component_metrics(
+            self.mask_bytes,
+            bytes(predicted_bytes),
+            width=self.width,
+            height=self.height,
+        )
         return {
             "predicted_pixel_count": int(predicted_count),
             "inside_alpha_pixel_count": int(inside),
             "foreground_pixel_count": int(foreground),
             "precision_inside_alpha": float(precision),
             "source_alpha_recall": float(recall),
+            "alpha_iou": float(iou),
+            "alpha_f1": float(f1),
+            **component_metrics,
         }

@@ -19,6 +19,12 @@ from .deformation import (
     mesh_triangle_area_report,
     verified_mesh_lbs_measurement,
 )
+from .mesh.quality import (
+    FIT2_PRODUCT_MESH_QUALITY_POLICY_V1,
+    evaluate_mesh_quality,
+    mesh_raster_quality_report,
+    raster_quality_gate_failures,
+)
 from .types import QualificationError
 from .v4 import (
     bind_domain_proof,
@@ -49,12 +55,96 @@ def _mechanical(product):
 
 
 def _mesh(product):
-    reports = [mesh_triangle_area_report(c.mesh) for d in product.directional_renderables.directions for c in d.components]
+    policy = FIT2_PRODUCT_MESH_QUALITY_POLICY_V1
+    rows = []
+    area_reports = []
+    raster_reports = []
+    cdt_rows = []
+    for direction in product.directional_renderables.directions:
+        for component in direction.components:
+            area = mesh_triangle_area_report(component.mesh)
+            raster = mesh_raster_quality_report(
+                component.mesh,
+                surface=product.mechanical_state.surface,
+                view_index=int(direction.view_index),
+            )
+            area_reports.append(area)
+            raster_reports.append(raster)
+            qreport = dict(component.mesh.qualification_report or {})
+            coverage = dict(qreport.get("candidate_residual_report") or {})
+            row = {
+                "view_index": int(direction.view_index),
+                "component_id": str(component.component_id),
+                "coverage_classification": str(component.mesh.support_coverage_classification),
+                **area,
+                **raster,
+            }
+            if component.mesh.support_coverage_classification == "OBSERVATION_DOMAIN_CDT":
+                # Older qualifier revisions also copy recall/precision to the top level;
+                # candidate_residual_report is the exact complete coverage envelope.
+                for key in ("source_alpha_recall", "precision_inside_alpha"):
+                    if key not in coverage and key in qreport:
+                        coverage[key] = qreport[key]
+                evaluated = evaluate_mesh_quality(
+                    coverage=coverage,
+                    raster_report=raster,
+                    policy=policy,
+                )
+                row.update({
+                    "strict_product_mesh_gate": True,
+                    "mesh_quality_passed": bool(evaluated["passed"]),
+                    "mesh_quality_failure_invariants": tuple(evaluated["failure_invariants"]),
+                    "coverage": coverage,
+                })
+                cdt_rows.append(evaluated)
+            else:
+                failures = raster_quality_gate_failures(raster, policy=policy)
+                row.update({
+                    "strict_product_mesh_gate": False,
+                    "mesh_quality_passed": not failures,
+                    "mesh_quality_failure_invariants": tuple(failures),
+                })
+            rows.append(row)
+
     return {
-        "component_count": len(reports),
-        "face_count": sum(r["face_count"] for r in reports),
-        "degenerate_faces": sum(r["degenerate_faces"] for r in reports),
-        "min_area": min((r["min_area"] for r in reports), default=0.0),
+        "component_count": len(rows),
+        "face_count": sum(r["face_count"] for r in area_reports),
+        "degenerate_faces": sum(r["degenerate_faces"] for r in area_reports),
+        "min_area": min((r["min_area"] for r in area_reports), default=0.0),
+        "duplicate_faces": sum(int(r["duplicate_faces"]) for r in raster_reports),
+        "nonmanifold_edges": sum(int(r["nonmanifold_edges"]) for r in raster_reports),
+        "min_raster_triangle_angle_deg": min(
+            (float(r["min_raster_triangle_angle_deg"]) for r in raster_reports),
+            default=0.0,
+        ),
+        "max_raster_triangle_aspect_ratio": max(
+            (float(r["max_raster_triangle_aspect_ratio"]) for r in raster_reports),
+            default=0.0,
+        ),
+        "strict_cdt_component_count": len(cdt_rows),
+        "strict_cdt_pass_count": sum(bool(r["passed"]) for r in cdt_rows),
+        "min_source_alpha_recall": min(
+            (float(r.get("source_alpha_recall", 1.0)) for r in cdt_rows),
+            default=1.0,
+        ),
+        "min_precision_inside_alpha": min(
+            (float(r.get("precision_inside_alpha", 1.0)) for r in cdt_rows),
+            default=1.0,
+        ),
+        "min_alpha_iou": min(
+            (float(r.get("alpha_iou", 1.0)) for r in cdt_rows),
+            default=1.0,
+        ),
+        "max_largest_uncovered_component_fraction": max(
+            (float(r.get("largest_uncovered_component_fraction", 0.0)) for r in cdt_rows),
+            default=0.0,
+        ),
+        "min_large_alpha_component_recall": min(
+            (float(r.get("min_large_alpha_component_recall", 1.0)) for r in cdt_rows),
+            default=1.0,
+        ),
+        "mesh_quality_policy": policy.to_dict(),
+        "component_reports": rows,
     }
 
 
@@ -169,7 +259,22 @@ def _status(domain, m):
     if domain == "MECHANICAL_STRUCTURE":
         ok = m["joint_count"] > 0 and m["deform_root_count"] > 0 and m["illegal_parent_count"] == 0 and m["unsupported_joint_count"] == 0
     elif domain == "MESH_QUALITY":
-        ok = m["component_count"] >= 8 and m["face_count"] > 0 and m["degenerate_faces"] == 0 and m["min_area"] > 1e-12
+        policy = FIT2_PRODUCT_MESH_QUALITY_POLICY_V1
+        base_ok = (
+            m["component_count"] >= 8
+            and m["face_count"] > 0
+            and m["degenerate_faces"] == 0
+            and m["min_area"] > 1e-12
+            and m["duplicate_faces"] <= policy.max_duplicate_faces
+            and m["nonmanifold_edges"] <= policy.max_nonmanifold_edges
+            and m["min_raster_triangle_angle_deg"] >= policy.min_raster_triangle_angle_deg
+            and m["max_raster_triangle_aspect_ratio"] <= policy.max_raster_triangle_aspect_ratio
+        )
+        cdt_ok = (
+            int(m.get("strict_cdt_component_count", 0)) == 0
+            or int(m.get("strict_cdt_pass_count", 0)) == int(m.get("strict_cdt_component_count", 0))
+        )
+        ok = base_ok and cdt_ok
     elif domain == "DIRECTIONAL_VISUAL":
         ok = m["direction_count"] == 8 and m["view_order"] == list(range(8)) and m["corner_binding_count"] > 0
     elif domain == "MOTION":
@@ -208,6 +313,10 @@ def evaluate_product_proof(product, *, deformation_fixture: dict | None = None, 
     joint/view binding, evaluator policy and proof plan. Missing evidence is
     ABSTAIN; arbitrary callables are rejected. Direct mechanical-joint/P.xy
     evaluation is forbidden.
+
+    MESH_QUALITY now measures the exact raster mesh, including alpha-domain coverage
+    for ObservationDomainCDT components. Aggregate face existence can no longer hide
+    a large untriangulated visible region.
 
     The historical domain name RUNTIME_CONSUMPTION is retained for contract
     compatibility, but this pre-export proof measures runtime-contract compatibility
@@ -250,7 +359,13 @@ def evaluate_product_proof(product, *, deformation_fixture: dict | None = None, 
             "causal_owner_attribution": "NOT_PERFORMED",
             "owner_attribution_requires_controlled_fault_experiment": True,
         }
-        if domain == "MOTION":
+        if domain == "MESH_QUALITY":
+            metadata.update({
+                "alpha_domain_coverage_required_for_observation_cdt": True,
+                "large_uncovered_region_gate_required": True,
+                "mesh_quality_policy": FIT2_PRODUCT_MESH_QUALITY_POLICY_V1.to_dict(),
+            })
+        elif domain == "MOTION":
             metadata.update({
                 "qualification_owned_bake_hashes": {clip_id: bake.bake_hash for clip_id, bake in sorted(domain_motion_bakes.items())},
                 "qualification_owned_bake_hash": next(iter(domain_motion_bakes.values())).bake_hash if len(domain_motion_bakes) == 1 else "",
@@ -273,14 +388,22 @@ def evaluate_product_proof(product, *, deformation_fixture: dict | None = None, 
             })
         reports.append(bind_domain_proof(product, plan, measurement_report, status=status, failure_signatures=failures, owner_attribution=no_owner_attribution(), metadata=metadata))
     return bind_product_proof_bundle(product, tuple(reports), metadata={
-        "engine": "RealSaS.ProofEngine.v5.typed_motion_preexport_runtime_compatibility",
+        "engine": "RealSaS.ProofEngine.v6.mesh_coverage_typed_motion_preexport_runtime_compatibility",
         "heavy_solver_promoted": False,
         "post_export_native_interlock_required": "RUNTIME_CONSUMPTION" in required,
     })
 
 
 def mutation_worsens_measurement(domain: str, baseline: dict, mutated: dict) -> bool:
-    if domain == "MESH_QUALITY": return mutated.get("degenerate_faces", 0) > baseline.get("degenerate_faces", 0) or mutated.get("min_area", 0) < baseline.get("min_area", 0)
+    if domain == "MESH_QUALITY":
+        return (
+            mutated.get("degenerate_faces", 0) > baseline.get("degenerate_faces", 0)
+            or mutated.get("min_area", 0) < baseline.get("min_area", 0)
+            or mutated.get("nonmanifold_edges", 0) > baseline.get("nonmanifold_edges", 0)
+            or mutated.get("duplicate_faces", 0) > baseline.get("duplicate_faces", 0)
+            or mutated.get("min_source_alpha_recall", 1.0) < baseline.get("min_source_alpha_recall", 1.0)
+            or mutated.get("max_largest_uncovered_component_fraction", 0.0) > baseline.get("max_largest_uncovered_component_fraction", 0.0)
+        )
     if domain == "DEFORMATION": return mutated.get("rms", 0) > baseline.get("rms", 0) or mutated.get("p95", 0) > baseline.get("p95", 0)
     if domain == "DIRECTIONAL_VISUAL": return mutated.get("direction_count", 8) < baseline.get("direction_count", 8) or mutated.get("corner_binding_count", 0) < baseline.get("corner_binding_count", 0)
     if domain == "MOTION": return mutated.get("effective_joint_track_count", 0) < baseline.get("effective_joint_track_count", 0)

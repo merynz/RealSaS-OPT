@@ -68,6 +68,8 @@ def validate_surface_support_binding(binding: SurfaceSupportBinding, *, known_su
     if binding.mode == "IDENTITY_SURFACE_NODE":
         if len(binding.coefficients) != 1 or abs(float(binding.coefficients[0][1]) - 1.0) > _SIMPLEX_TOL:
             raise QualificationError("MESH_VERTEX_SUPPORT_INVALID: identity binding must be exactly one coefficient of 1")
+    elif len(binding.coefficients) < 2:
+        raise QualificationError("MESH_VERTEX_SUPPORT_INVALID: local convex interpolation requires >=2 supports")
 
 
 def derive_bound_position(surface: RiggingSurfaceIR, binding: SurfaceSupportBinding) -> Vec3:
@@ -159,31 +161,94 @@ def validate_qualified_mesh_skin(mesh_skin: QualifiedMeshSkinIR, *, surface: Rig
     if seen_rows != mesh_vertex_ids: raise QualificationError("MESH_WEIGHT_UNSUPPORTED_VERTEX: missing mesh vertex row")
 
 
+def qualify_supported_mesh(
+    surface: RiggingSurfaceIR,
+    candidate: MeshDiscretizationCandidateIR,
+    *,
+    allowed_binding_modes: tuple[str, ...] = ("IDENTITY_SURFACE_NODE", "LOCAL_CONVEX_INTERPOLATION"),
+) -> QualifiedEditableMeshIR:
+    """Qualify an exact surface-supported mesh without creating geometry authority.
+
+    Unlike the MWB-1 identity baseline, this path admits local convex inserted
+    vertices when every inserted rest position is exactly derived from admitted S.
+    """
+    validate_mesh_candidate(candidate, surface)
+    allowed = set(map(str, allowed_binding_modes))
+    if not allowed or not allowed.issubset(_ALLOWED_BINDING_MODES):
+        raise ValueError("allowed_binding_modes must be a non-empty subset of supported modes")
+    for vertex in candidate.vertices:
+        if vertex.support_binding.mode not in allowed:
+            raise QualificationError(
+                f"MESH_VERTEX_SUPPORT_MODE_NOT_ADMITTED:{vertex.support_binding.mode}"
+            )
+
+    ordered = tuple(sorted(candidate.vertices, key=lambda v: v.candidate_vertex_id))
+    id_map = {v.candidate_vertex_id: f"MV:{i:05d}" for i, v in enumerate(ordered)}
+    vertices = tuple(
+        QualifiedMeshVertex(
+            id_map[v.candidate_vertex_id],
+            v.P,
+            v.support_binding,
+            v.candidate_vertex_id,
+            dict(v.metadata),
+        )
+        for v in ordered
+    )
+    faces = tuple(tuple(id_map[x] for x in face) for face in candidate.faces)
+    edges = tuple((id_map[a], id_map[b]) for a, b in candidate.edges)
+    interpolation_count = sum(v.support_binding.mode == "LOCAL_CONVEX_INTERPOLATION" for v in ordered)
+    report = {
+        "status": "PASS_SURFACE_SUPPORTED_MESH_QUALIFICATION",
+        "candidate_lineage_hash": candidate.candidate_lineage_hash,
+        "vertex_count": len(vertices),
+        "face_count": len(faces),
+        "edge_count": len(edges),
+        "identity_vertex_count": len(vertices) - int(interpolation_count),
+        "local_convex_interpolation_vertex_count": int(interpolation_count),
+        "allowed_binding_modes": tuple(sorted(allowed)),
+        "coverage_classification": candidate.coverage_classification,
+        "candidate_residual_report": dict(candidate.residual_report or {}),
+        "no_new_geometry_authority": True,
+        "camera_geometry_consumed": bool(candidate.metadata.get("camera_geometry_consumed", False)),
+        "numerical_solver_promoted": False,
+    }
+    mesh = QualifiedEditableMeshIR(
+        vertices,
+        faces,
+        edges,
+        surface.geometry_lineage_hash,
+        candidate.view_index,
+        candidate.camera_binding_hash,
+        report,
+        "",
+        candidate.boundary_constraints,
+        candidate.coverage_classification,
+        metadata={"source_candidate_lineage_hash": candidate.candidate_lineage_hash},
+    )
+    mesh = QualifiedEditableMeshIR(**{**mesh.__dict__, "mesh_lineage_hash": mesh_lineage_hash(mesh)})
+    validate_qualified_mesh(mesh, surface)
+    return mesh
+
+
 def qualify_identity_subset_mesh(surface: RiggingSurfaceIR, candidate: MeshDiscretizationCandidateIR) -> QualifiedEditableMeshIR:
     """MWB-1 baseline qualifier: admit only identity-bound existing surface nodes.
 
     Topology is supplied by the candidate; this function does not triangulate or create geometry.
     """
-    validate_mesh_candidate(candidate, surface)
-    for vertex in candidate.vertices:
-        if vertex.support_binding.mode != "IDENTITY_SURFACE_NODE":
-            raise QualificationError("MWB1 requires IDENTITY_SURFACE_NODE bindings only")
-    ordered = tuple(sorted(candidate.vertices, key=lambda v: v.candidate_vertex_id))
-    id_map = {v.candidate_vertex_id: f"MV:{i:04d}" for i, v in enumerate(ordered)}
-    vertices = tuple(QualifiedMeshVertex(id_map[v.candidate_vertex_id], v.P, v.support_binding, v.candidate_vertex_id, dict(v.metadata)) for v in ordered)
-    faces = tuple(tuple(id_map[x] for x in face) for face in candidate.faces)
-    edges = tuple((id_map[a], id_map[b]) for a, b in candidate.edges)
-    report = {
-        "status": "PASS_IDENTITY_SUBSET_QUALIFICATION",
-        "candidate_lineage_hash": candidate.candidate_lineage_hash,
-        "vertex_count": len(vertices),
-        "face_count": len(faces),
-        "edge_count": len(edges),
-        "no_new_geometry_authority": True,
-        "camera_geometry_consumed": bool(candidate.metadata.get("camera_geometry_consumed", False)),
-        "numerical_solver_promoted": False,
-    }
-    mesh = QualifiedEditableMeshIR(vertices, faces, edges, surface.geometry_lineage_hash, candidate.view_index, candidate.camera_binding_hash, report, "", candidate.boundary_constraints, candidate.coverage_classification, metadata={"source_candidate_lineage_hash": candidate.candidate_lineage_hash})
+    mesh = qualify_supported_mesh(
+        surface,
+        candidate,
+        allowed_binding_modes=("IDENTITY_SURFACE_NODE",),
+    )
+    report = dict(mesh.qualification_report)
+    report["status"] = "PASS_IDENTITY_SUBSET_QUALIFICATION"
+    mesh = QualifiedEditableMeshIR(
+        **{
+            **mesh.__dict__,
+            "qualification_report": report,
+            "mesh_lineage_hash": "",
+        }
+    )
     mesh = QualifiedEditableMeshIR(**{**mesh.__dict__, "mesh_lineage_hash": mesh_lineage_hash(mesh)})
     validate_qualified_mesh(mesh, surface)
     return mesh

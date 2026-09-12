@@ -8,9 +8,17 @@ on:
       - 'compiler/realsas_compiler_core/component_attachment.py'
       - 'compiler/realsas_compiler_core/mechanical_assembly.py'
       - 'compiler/realsas_compiler_core/substrate/scene_first_signed.py'
+      - 'compiler/realsas_compiler_core/substrate/h1_observable_qualification.py'
+      - 'compiler/realsas_compiler_core/mesh/mwb2.py'
+      - 'compiler/realsas_compiler_core/mesh/mwb2_cdt.py'
+      - 'compiler/realsas_compiler_core/mesh/observation_domain.py'
+      - 'compiler/realsas_compiler_core/mesh/_historical_v05/**'
       - 'tests/compiler/test_component_attachment_v1.py'
       - 'tests/compiler/test_mechanical_assembly_v1.py'
       - 'tests/compiler/test_scene_first_signed_surface_bridge_v1.py'
+      - 'tests/compiler/test_h1_observable_qualification_v1.py'
+      - 'tests/compiler/test_historical_cdt_v05_loader.py'
+      - 'tests/compiler/test_mwb2_observation_cdt_v1.py'
       - 'tools/audit_full_subject_coverage.py'
       - 'tools/audit_component_geometry_coverage.py'
       - 'tools/audit_full_subject_fit_authority.py'
@@ -41,6 +49,9 @@ jobs:
           python -m py_compile compiler/realsas_compiler_core/component_attachment.py
           python -m py_compile compiler/realsas_compiler_core/mechanical_assembly.py
           python -m py_compile compiler/realsas_compiler_core/substrate/scene_first_signed.py
+          python -m py_compile compiler/realsas_compiler_core/substrate/h1_observable_qualification.py
+          python -m py_compile compiler/realsas_compiler_core/mesh/observation_domain.py
+          python -m py_compile compiler/realsas_compiler_core/mesh/mwb2_cdt.py
           python -m py_compile tools/audit_full_subject_coverage.py
           python -m py_compile tools/audit_component_geometry_coverage.py
           python -m py_compile tools/audit_full_subject_fit_authority.py
@@ -49,9 +60,15 @@ jobs:
           python -m py_compile tests/compiler/test_component_attachment_v1.py
           python -m py_compile tests/compiler/test_mechanical_assembly_v1.py
           python -m py_compile tests/compiler/test_scene_first_signed_surface_bridge_v1.py
+          python -m py_compile tests/compiler/test_h1_observable_qualification_v1.py
+          python -m py_compile tests/compiler/test_historical_cdt_v05_loader.py
+          python -m py_compile tests/compiler/test_mwb2_observation_cdt_v1.py
       - name: Reclosure contract tests
         run: |
           PYTHONPATH=. python -m pytest -q \
             tests/compiler/test_component_attachment_v1.py \
             tests/compiler/test_mechanical_assembly_v1.py \
-            tests/compiler/test_scene_first_signed_surface_bridge_v1.py
+            tests/compiler/test_scene_first_signed_surface_bridge_v1.py \
+            tests/compiler/test_h1_observable_qualification_v1.py \
+            tests/compiler/test_historical_cdt_v05_loader.py \
+            tests/compiler/test_mwb2_observation_cdt_v1.py

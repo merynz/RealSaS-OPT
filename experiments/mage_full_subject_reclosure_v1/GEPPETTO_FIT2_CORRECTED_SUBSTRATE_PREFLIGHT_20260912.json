@@ -1,0 +1,44 @@
+{
+  "schema": "RealSaS.MageFIT2.GeppettoCorrectedSubstratePreflightEvidence.v1",
+  "status": "PASS__FIT2_CORRECTED_SUBSTRATE__FRESH_GEPPETTO_REFIT_READY",
+  "date_utc": "2026-09-12",
+  "authority_id": "MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1",
+  "source_branch": "repair/mage-full-subject-reclosure-20260912",
+  "source_head_after_runner_and_renderer": "1fd891aa149ab06f1c99078edc62dc23dbbc4fa7",
+  "execution_scope": "REAL_INPUT_CPU_PREFLIGHT_ONLY__NO_OPTIMIZER_STEP",
+  "cuda_available_in_execution_environment": false,
+  "training_executed": false,
+  "historical_checkpoint_loaded": false,
+  "thresholds_changed": false,
+  "inputs": {
+    "zero_surface_sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+    "normalized_corpus_sha256": "528bef491eceb358ebc8ecb2a46af1d37b4322a7ef500281403a8207fe7c648f",
+    "h1_source_run_id": "20260912T074348Z",
+    "h1_checkpoint_sha256": "76fc68a8c6f2bed80ae8a678649006c875bc96b586065da8914e7f61528c8ce5",
+    "target_content_sha256": "0b5a25c877116de60b710b7bb2a7848f30988e1622e2eda8084cad21c8ca23c9",
+    "target_joint_count": 22
+  },
+  "substrate": {
+    "gsa_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
+    "surface_node_count": 8171,
+    "surface_edge_count": 23656,
+    "tensorization_hash": "fe351362e195164805cebb0f63b74d1861ef123458b20ac56607016e00a6c67e",
+    "observed_nodes": 7391,
+    "completed_nodes": 780,
+    "observation_support_counts": [2537, 2765, 2194, 3021, 2772, 2871, 2183, 2803]
+  },
+  "model": {
+    "architecture_id": "RealSaS.Geppetto.ReferenceStrength.DirectSurfaceCausalDiffusion.DeterministicViewDirection.v1",
+    "config_hash": "7df469f08b39daf4aeaa65cec3bb2452bce83c7876845cd09cc993b7d40517d0",
+    "training_mode": "FRESH_FROM_SCRATCH__NO_HISTORICAL_GEPPETTO_CHECKPOINT",
+    "historical_checkpoint_sha256": "b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30",
+    "max_steps": 16384,
+    "check_every": 64,
+    "terminal_checks": 48,
+    "diffusion_eval_seeds": [11, 23, 47, 89]
+  },
+  "next_required_action": "RUN_FRESH_GEPPETTO_REFIT_ON_CUDA__A100_COLAB_PREFERRED",
+  "arachne_refit_authorized": false,
+  "product_pass_claimed": false,
+  "unseen_generalization_claimed": false
+}

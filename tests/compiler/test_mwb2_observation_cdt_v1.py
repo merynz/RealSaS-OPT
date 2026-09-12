@@ -144,8 +144,36 @@ def test_disconnected_surface_components_never_receive_cross_component_faces():
     for face in candidate.faces:
         prefixes = {source_id[v][0] for v in face}
         assert len(prefixes) == 1
-    assert candidate.residual_report["cdt_component_count"] == 2
+    assert candidate.residual_report["safe_component_count"] == 2
+    assert candidate.residual_report["full_safe_component_count"] == 2
     assert candidate.residual_report["precision_inside_alpha"] == 1.0
+
+
+def test_invisible_safe_carrier_does_not_split_full_surface_component():
+    surface = _chain_square_surface()
+    nodes = list(surface.surface_nodes)
+    nodes[4] = replace(nodes[4], support_views=(), raster_bindings=())
+    surface = replace(surface, surface_nodes=tuple(nodes))
+    domain = ObservationRasterDomain.from_rows(
+        _rect_mask(10, 10, [(1, 1, 8, 8)]),
+        view_index=0,
+    )
+
+    candidate = build_mwb2_observation_cdt_candidate(
+        surface,
+        view_index=0,
+        camera_binding_hash="camera",
+        observation_domain=domain,
+    )
+
+    assert candidate.residual_report["visible_surface_node_count"] == 6
+    assert candidate.residual_report["full_safe_component_count"] == 1
+    assert candidate.residual_report["safe_component_count"] == 1
+    assert candidate.residual_report["cdt_component_count"] == 1
+    assert (
+        candidate.metadata["component_partition_authority"]
+        == "FULL_SAFE_SURFACE_RELATION_COMPONENTS_THEN_VISIBLE_SUBSET"
+    )
 
 
 def test_unbound_kernel_generated_vertex_is_rejected():

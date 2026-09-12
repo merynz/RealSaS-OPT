@@ -1,0 +1,65 @@
+{
+  "schema": "RealSaS.MageFIT1ReplaySubstrate.v1",
+  "date": "2026-09-12",
+  "artifact_id": "MAGE_FIT1_REPLAY_SUBSTRATE_V1",
+  "status": "VALID_DETERMINISTIC_REPLAY_SUBSTRATE__DEMO_ELIGIBLE__DOWNSTREAM_REEVAL_PENDING",
+  "role": "IMMUTABLE_CORRECTED_MAGE_FIT1_SUBSTRATE_IDENTITY",
+  "preservation_policy": {
+    "historical_fit1_artifacts_preserved": true,
+    "historical_artifacts_deleted_or_rewritten": false,
+    "this_artifact_supersedes_only_demo_substrate_selection": true,
+    "scientific_history_remains_append_only": true
+  },
+  "h1_observable_authority": {
+    "source_run_id": "20260912T074348Z",
+    "qualification_status": "PASS_H1_OBSERVABLE_PRODUCT_SURFACE",
+    "qualification_report": "experiments/mage_full_subject_reclosure_v1/H1_OBSERVABLE_AUTHORITY_RECONCILIATION_20260912.json",
+    "product_clipped_zero_surface_sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+    "drive_folder_id": "1fMgG3irsUM3zeOydUsFoNOJScifYbjLD",
+    "drive_zero_surface_file_id": "1PBGUxZVDjs8crU3TDnxvmHvMU1Mljw7x",
+    "input_alpha_min_recall": 0.9511473445488728,
+    "input_alpha_min_precision": 0.9806321480449604,
+    "input_alpha_min_iou": 0.9356283394389125,
+    "teacher_mesh_used_at_product_inference": false
+  },
+  "gsa8192": {
+    "builder": "RealSaS.GeometricSubstrateAssembler.SceneFirstSigned.v2",
+    "normal_operator": "RealSaS.GSA.ZeroSurfaceRobustLocalPCA.v1",
+    "normal_operator_sha256": "5b5c0e89a18c98f6f7a231941480a61e7158d93d91a9a8edcc5362d6c5e0b1be",
+    "requested_target_nodes": 8192,
+    "actual_surface_nodes": 8171,
+    "relation_count": 23656,
+    "voxel_divisions": 42,
+    "observed_node_count": 7391,
+    "completed_node_count": 780,
+    "observation_supported_nodes_by_view": [2537, 2765, 2194, 3021, 2772, 2871, 2183, 2803],
+    "geometry_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
+    "deterministic_replay": true,
+    "teacher_truth_used": false,
+    "observation_support_authority": "EXACT_PRODUCT_ALPHA_AND_SELF_VISIBILITY"
+  },
+  "mwb2_cdt": {
+    "qualification_status": "PASS_MWB2_CDT_EXACT_BEHAVIORAL_RECLOSURE",
+    "report": "experiments/mage_full_subject_reclosure_v1/MWB2_CDT_EXACT_RECLOSURE_REPORT_20260912.json",
+    "historical_cdt_source_sha256": "dd21ae3fc570b2eb5d3c439a5c31fd25fed2ad0743d34a71119d5b391806854d",
+    "adapter": "HISTORICAL_V05_CDT_CURRENT_TYPED_ADAPTER_V3",
+    "minimum_source_alpha_recall": 0.9055737721419602,
+    "minimum_precision_inside_alpha": 1.0,
+    "all_eight_views_pass": true,
+    "threshold_changed": false,
+    "generated_mesh_vertices_after_contraction": 0
+  },
+  "demo_selection": {
+    "eligible": true,
+    "selected_by": "canonical/MAGE_DEMO_ACTIVE_SUBSTRATE_V1.json",
+    "meaning": "Use this corrected H1 -> GSA8192 -> exact CDT substrate lineage for current Mage demo replays. Do not silently fall back to the superseded old-S FIT1 substrate."
+  },
+  "downstream_state": {
+    "frozen_geppetto_replay": "PENDING",
+    "frozen_arachne_v5_replay": "BLOCKED_ON_GEPPETTO_AND_ATTACHMENT_QUALIFICATION",
+    "arap_bbw_xpbd": "LOCKED",
+    "product_pass": false,
+    "unseen_generalization": false
+  },
+  "claim_boundary": "This seals the corrected deterministic Mage FIT1 substrate identity and its exact eight-view mesh behavioral closure. It does not by itself revalidate historical Geppetto/Arachne outputs on the new S lineage and does not claim PRODUCT_PASS or unseen generalization."
+}

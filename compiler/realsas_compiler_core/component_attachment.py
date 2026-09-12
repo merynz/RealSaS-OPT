@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict, field, replace
 from typing import Any
 
 from .hashing import content_sha256
@@ -183,7 +183,7 @@ def qualify_component_evidence_v1(
         component_lineage_hash="",
         metadata=dict(evidence.metadata or {}),
     )
-    return QualifiedComponentIR(**{**provisional.to_dict(), "component_lineage_hash": qualified_component_lineage_hash(provisional)})
+    return replace(provisional, component_lineage_hash=qualified_component_lineage_hash(provisional))
 
 
 def qualify_component_set_v1(
@@ -234,7 +234,7 @@ def qualify_component_set_v1(
         qualification_report=report,
         component_set_lineage_hash="",
     )
-    return QualifiedComponentSetIR(**{
-        **provisional.to_dict(),
-        "component_set_lineage_hash": qualified_component_set_lineage_hash(provisional),
-    })
+    # Do not reconstruct this dataclass through asdict(): that recursively converts
+    # QualifiedComponentIR children into plain dicts and silently destroys typed
+    # attachment authority. Preserve the typed tuple and replace only the hash.
+    return replace(provisional, component_set_lineage_hash=qualified_component_set_lineage_hash(provisional))

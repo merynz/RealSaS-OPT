@@ -1,0 +1,102 @@
+name: mage-active-geppetto-input-probe
+
+on:
+  push:
+    branches:
+      - repair/mage-full-subject-reclosure-20260912
+    paths:
+      - '.github/workflows/mage_active_geppetto_input_probe.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: mage-active-geppetto-input-probe-realsas
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Probe GPU and exact replay inputs
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p probe
+          {
+            echo '=== GPU ==='
+            nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader || true
+            echo '=== CANDIDATE ROOTS ==='
+          } > probe/report.txt
+
+          roots=(
+            /mnt/g
+            /mnt/d
+            /mnt/e
+            /home/monster/GoogleDrive
+            '/home/monster/Google Drive'
+            /home/monster/MyDrive
+            /home/monster/drive
+            /mnt/c/Users/monster/GoogleDrive
+            '/mnt/c/Users/monster/Google Drive'
+            '/mnt/c/Users/monster/My Drive'
+            /mnt/c/Users/monster/MyDrive
+            /mnt/c/Users/monster/Downloads
+          )
+          : > probe/hits.tsv
+          for root in "${roots[@]}"; do
+            [ -d "$root" ] || continue
+            printf '%s\n' "$root" >> probe/report.txt
+            find "$root" -maxdepth 8 -type f \
+              \( -name 'ZERO_SURFACE_PRODUCT_CLIPPED.npz' \
+                 -o -name 'GEPPETTO_REFERENCE_STRENGTH_FIT1_CHECKPOINT.pt' \
+                 -o -name 'normalized.npz' \
+                 -o -name 'V0.png' \
+                 -o -name 'V0.camera.json' \) \
+              -not -path '*/.git/*' -not -path '*/node_modules/*' -not -path '*/AppData/*' \
+              -printf '%f\t%p\t%s\n' 2>/dev/null >> probe/hits.tsv || true
+          done
+          sort -u probe/hits.tsv -o probe/hits.tsv
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          wanted = {
+              'ZERO_SURFACE_PRODUCT_CLIPPED.npz': '56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925',
+              'GEPPETTO_REFERENCE_STRENGTH_FIT1_CHECKPOINT.pt': 'b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30',
+              'normalized.npz': '528bef491eceb358ebc8ecb2a46af1d37b4322a7ef500281403a8207fe7c648f',
+              'V0.png': '8e9875c16bba3047c8f2fc211b984f2399d1145f5720c7427c6fc03a3fec0616',
+              'V0.camera.json': '73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541',
+          }
+          rows=[]
+          for line in Path('probe/hits.tsv').read_text(errors='replace').splitlines():
+              if not line.strip():
+                  continue
+              name,path,size=line.split('\t',2)
+              p=Path(path)
+              h=hashlib.sha256()
+              try:
+                  with p.open('rb') as f:
+                      for b in iter(lambda:f.read(8<<20),b''):
+                          h.update(b)
+                  digest=h.hexdigest()
+              except Exception as exc:
+                  digest='ERROR:'+repr(exc)
+              rows.append({'name':name,'path':path,'size_bytes':int(size),'sha256':digest,'expected_sha256':wanted.get(name),'sha_match':digest==wanted.get(name)})
+          exact={name:[r for r in rows if r['name']==name and r['sha_match']] for name in wanted}
+          out={
+              'schema':'RealSaS.MageActiveGeppettoInputProbe.v1',
+              'exact_required_seed_inputs_present':{name:bool(v) for name,v in exact.items()},
+              'all_seed_inputs_present':all(bool(v) for v in exact.values()),
+              'hits':rows,
+          }
+          Path('probe/inventory.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          PY
+      - name: Upload probe inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: mage-active-geppetto-input-probe-${{ github.sha }}
+          path: probe
+          if-no-files-found: error
+          retention-days: 2

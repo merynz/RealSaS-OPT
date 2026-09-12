@@ -3,17 +3,17 @@
   "bootstrap_status": "BOOTSTRAP_AUDIT_CLOSED",
   "fit1_gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
   "candidate_rule": "high-signal canonical/prereg/experiment/challenger/workflow artifacts",
-  "tracked_file_count": 893,
-  "high_signal_artifact_count": 281,
+  "tracked_file_count": 894,
+  "high_signal_artifact_count": 282,
   "classification_counts": {
-    "INDEXED_EXPLICIT": 134,
+    "INDEXED_EXPLICIT": 135,
     "HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL": 147
   },
-  "explained_high_signal_count": 281,
+  "explained_high_signal_count": 282,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
   "live_branch_count": 103,
-  "safe_default_evidence_only_branch_count": 96,
+  "safe_default_evidence_only_branch_count": 95,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -426,7 +426,7 @@
     },
     {
       "name": "main",
-      "sha": "1609408427d12fb5dee9a6277e0cf3f14185d231",
+      "sha": "d659fad8d22842aa0e92956188d7efe25dd9c5ac",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -516,9 +516,9 @@
     },
     {
       "name": "repair/mage-full-subject-reclosure-20260912",
-      "sha": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-      "class": "EVIDENCE_ONLY_UNREGISTERED",
-      "reason": "safe default under branch authority policy"
+      "sha": "d02b2188a5eae1b893a8b90f4e97f76152183d8d",
+      "class": "ACTIVE_EXPERIMENT",
+      "reason": "MAGE_FIT2_PIPELINE_REFIT"
     },
     {
       "name": "restoration/compiler-runtime-promotion-v1-20260903",

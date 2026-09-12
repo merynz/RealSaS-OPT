@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `2da92fe2f1c8e03074233f5e6fb355c57a6b2a441985d66af938ac402f90c45e`
+> State fingerprint: `a3d37231bea4f42306d78ee5568ba107fc5596ca6d6d46673fd6e274b3fd5438`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -19,41 +19,49 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 1. `canonical/REHYDRATION_PACKET.md`
 2. `CURRENT_STATE.md`
-3. `canonical/FIT1_EVIDENCE_INDEX_20260909.md`
-4. `canonical/MAGE_FIT1_RIGGING_CORE_CLOSURE_20260911.md`
-5. `canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json`
-6. `models/arachne/v5/FROZEN_MAGE_FIT1_CHECKPOINT_V1.json`
-7. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
-8. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
-9. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-10. `canonical/EXPERIMENT_REGISTRY_V2.json`
-11. `canonical/CONTEXT_STATE_V1.json`
-12. `canonical/LIVE_AUTHORITY_MAP.md`
+3. `canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md`
+4. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+5. `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
+6. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
+7. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
+8. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`
+9. `canonical/EXPERIMENT_REGISTRY_V2.json`
+10. `canonical/CONTEXT_STATE_V1.json`
+11. `canonical/LIVE_AUTHORITY_MAP.md`
+12. `canonical/FIT1_EVIDENCE_INDEX_20260909.md`
 
 ## Live experiment register
 
-_No active experiments registered._
+| Gate | Status | Branch | Live head | Question | Does not prove |
+|---|---|---|---|---|---|
+| `MAGE_FIT2_PIPELINE_REFIT` | `ACTIVE__GEPPETTO_FRESH_REFIT_RUNNING` | `repair/mage-full-subject-reclosure-20260912` | `d02b2188a5ea` | Can the same Mage witness reclose end-to-end from corrected observable H1/GSA through fresh Geppetto and fresh Arachne, an art-covering mechanically supported directional mesh, professional motion and exact runtime identity without the defects exposed by the real FIT1 E2E output? | Geppetto FIT2 PASS before sealed terminal evidence; Arachne FIT2 PASS; corrected FIT2 mesh/component PASS; professional motion quality; exact runtime PRODUCT_PASS; unseen-family generalization or FIT8/LOFO |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 6** / **EVIDENCE_ONLY_UNREGISTERED: 87** / **DELETE_CANDIDATE: 9**
+**CANONICAL: 1** / **ACTIVE_EXPERIMENT: 1** / **EVIDENCE_ONLY: 6** / **EVIDENCE_ONLY_UNREGISTERED: 86** / **DELETE_CANDIDATE: 9**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `1609408427d1` | canonical continuation branch |
+| `main` | `d659fad8d228` | canonical continuation branch |
+
+### ACTIVE_EXPERIMENT
+
+| Branch | Head | Classification reason |
+|---|---|---|
+| `repair/mage-full-subject-reclosure-20260912` | `d02b2188a5ea` | MAGE_FIT2_PIPELINE_REFIT |
 
 ### EVIDENCE_ONLY
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `demo/investor-single-specimen-e2e` | `47892ffa16b7` | Demo lineage only; never continuation authority. |
-| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `d0b666725e79` | A0 historical scientific lineage; retained for FIT8/LOFO failure-memory. |
+| `demo/investor-single-specimen-e2e` | `47892ffa16b7` | Historical demo lineage only; never continuation authority. |
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `d0b666725e79` | A0 historical scientific lineage; retained for future generalization/failure-memory. |
 | `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | AR-01 closed failure retained as scoped evidence. |
-| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | Frozen optimizer/source lineage for promoted Geppetto formulation. |
+| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | Historical frozen optimizer/source lineage for the FIT1 formulation. |
 | `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | Lossless RiggingSurfaceIR evidence lineage. |
-| `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | Sealed Geppetto FIT1 source/result lineage; promoted source lives on main. |
+| `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | Sealed historical Geppetto FIT1 source/result lineage; not current corrected-lineage authority. |
 
 ### EVIDENCE_ONLY_UNREGISTERED
 
@@ -128,7 +136,6 @@ _No active experiments registered._
 | `promote/fit1-evidence-main-20260909` | `9deccb8d051f` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-main-v3-20260905` | `dfb087c6a23e` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-v3-20260905` | `7cfb7efedbe9` | observed live; not explicitly registered active |
-| `repair/mage-full-subject-reclosure-20260912` | `11d1fdfd4398` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety` | `2eb09fe3e8c6` | observed live; not explicitly registered active |
@@ -167,13 +174,17 @@ _No active experiments registered._
 
 ## Binding anti-conflation rules
 
-- Only main/CURRENT_STATE.md is continuation authority.
+- Only main/CURRENT_STATE.md is repository-wide continuation authority; active executable work may live on an explicitly registered ACTIVE_EXPERIMENT branch.
 - Scientific PASS never promotes itself; promotion/refreeze is a separate transaction.
-- FIT1 success is not unseen-family generalization.
-- Historical scientific failures remain valid evidence and are not deleted by later promotion.
+- Historical FIT1 local PASSes remain evidence but do not override a later real end-to-end contradiction.
+- Real E2E product quality can falsify product-readiness inference even when local model/Compiler gates passed.
+- FIT1 or same-Mage FIT2 success is not unseen-family generalization.
+- Historical scientific failures remain valid evidence and are not deleted by later promotion/reopening.
 - Compiler qualification cannot silently replace missing learned semantics.
 - A0 representation/oracle evidence is distinct from the V5 shipping decoder interface.
-- PRODUCT_PASS remains an independent contract.
+- A product-qualified mesh/skeleton/skin state must remain the exact runtime/export authority; hidden re-triangulation or second mesh truth is forbidden.
+- Rotation-only deterministic motion is a mechanical probe, not professional animation quality evidence.
+- PRODUCT_PASS remains an independent exact end-to-end contract.
 - Scientific/mainline Actions run only on the local self-hosted RealSaS runner.
 
 ## Update semantics

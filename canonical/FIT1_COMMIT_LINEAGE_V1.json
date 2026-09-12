@@ -49,13 +49,13 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "1609408427d12fb5dee9a6277e0cf3f14185d231",
+    "main": "d659fad8d22842aa0e92956188d7efe25dd9c5ac",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "promote/fit1-evidence-main-20260909": "9deccb8d051fd85780c28a29591df40fbafc4570",
     "promote/iris-scene-first-signed-main-v3-20260905": "dfb087c6a23e39c0360c4cd4d89fdb6b9e9c9957",
     "promote/iris-scene-first-signed-v3-20260905": "7cfb7efedbe956c2aa16003e5a7df9bb56c907bb",
-    "repair/mage-full-subject-reclosure-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
+    "repair/mage-full-subject-reclosure-20260912": "d02b2188a5eae1b893a8b90f4e97f76152183d8d",
     "restoration/compiler-runtime-promotion-v1-20260903": "83aa411cc06d50d7ad38df985a276f0ae537fcbc",
     "restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall": "800d3ccb042ee55f9c136ceb31358438cd4b1fdc",
     "restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety": "2eb09fe3e8c62fb7afdfab81f3260351e649c7a9",
@@ -75,7 +75,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1144,
+  "commit_count": 1307,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -55222,6 +55222,3552 @@
       ],
       "subsystem_tags": [
         "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e5e5a12a05b2aed23356cc2f22aef4a1d474ad5f",
+      "parents": [
+        "1609408427d12fb5dee9a6277e0cf3f14185d231"
+      ],
+      "author_time": "2026-09-12T02:55:33+03:00",
+      "committer_time": "2026-09-12T02:55:33+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "79fd7140d3d0740119c68aefe161de506d7e6b34",
+      "parents": [
+        "11d1fdfd4398b01b57dd56bb54b360af23f746ed"
+      ],
+      "author_time": "2026-09-12T02:55:34+03:00",
+      "committer_time": "2026-09-12T02:55:34+03:00",
+      "subject": "Reopen Mage from full-subject geometry and attachment gap",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_FULL_SUBJECT_REOPENING_AND_ATTACHMENT_CONTRACT_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7663c19c1b922335dc22a8f22c17a6a6d547311b",
+      "parents": [
+        "79fd7140d3d0740119c68aefe161de506d7e6b34"
+      ],
+      "author_time": "2026-09-12T02:55:57+03:00",
+      "committer_time": "2026-09-12T02:55:57+03:00",
+      "subject": "Reopen Mage FIT1 from contradicted full-subject geometry authority",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1c9eeb4980c2cbd8ba471b623ee2364a8c4e2940",
+      "parents": [
+        "7663c19c1b922335dc22a8f22c17a6a6d547311b"
+      ],
+      "author_time": "2026-09-12T03:01:56+03:00",
+      "committer_time": "2026-09-12T03:01:56+03:00",
+      "subject": "Freeze Mage full-subject reclosure order and gates",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_FULL_SUBJECT_RECLOSURE_PLAN_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "26ccfe1a0a8759c3256386a08d86fa5b3bf9dde1",
+      "parents": [
+        "1c9eeb4980c2cbd8ba471b623ee2364a8c4e2940"
+      ],
+      "author_time": "2026-09-12T03:02:15+03:00",
+      "committer_time": "2026-09-12T03:02:15+03:00",
+      "subject": "Define generic component and rigid-attachment contract",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_COMPONENT_ATTACHMENT_CONTRACT_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "67b8f91df1ef37ed2d7d581c2c216a4dbfd8c246",
+      "parents": [
+        "26ccfe1a0a8759c3256386a08d86fa5b3bf9dde1"
+      ],
+      "author_time": "2026-09-12T03:02:38+03:00",
+      "committer_time": "2026-09-12T03:02:38+03:00",
+      "subject": "Add generic component attachment qualification",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/component_attachment.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e9a154d8793dabd287a3b554dab82e91475efab8",
+      "parents": [
+        "67b8f91df1ef37ed2d7d581c2c216a4dbfd8c246"
+      ],
+      "author_time": "2026-09-12T03:03:02+03:00",
+      "committer_time": "2026-09-12T03:03:02+03:00",
+      "subject": "Test generic component attachment qualification",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tests/compiler/test_component_attachment_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0b645984cce69d0239dfbd4371e30474378864cc",
+      "parents": [
+        "e9a154d8793dabd287a3b554dab82e91475efab8"
+      ],
+      "author_time": "2026-09-12T03:03:17+03:00",
+      "committer_time": "2026-09-12T03:03:17+03:00",
+      "subject": "Record fail-closed Mage authority invalidation boundary",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_REOPENED_AUTHORITY_INVALIDATION_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0417274f417ac2c2c169b45ae17fcbcc514b80a3",
+      "parents": [
+        "0b645984cce69d0239dfbd4371e30474378864cc"
+      ],
+      "author_time": "2026-09-12T03:04:28+03:00",
+      "committer_time": "2026-09-12T03:04:28+03:00",
+      "subject": "Add deterministic full-subject coverage audit tool",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tools/audit_full_subject_coverage.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3abcfd9ac2ca64fcffa322135a56c97908a3057a",
+      "parents": [
+        "0417274f417ac2c2c169b45ae17fcbcc514b80a3"
+      ],
+      "author_time": "2026-09-12T03:04:41+03:00",
+      "committer_time": "2026-09-12T03:04:41+03:00",
+      "subject": "Record measured full-subject baseline metrics",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_FULL_SUBJECT_BASELINE_METRICS_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ded327e7a91ee337264a29760b6d43e0d72ed1d7",
+      "parents": [
+        "3abcfd9ac2ca64fcffa322135a56c97908a3057a"
+      ],
+      "author_time": "2026-09-12T03:04:51+03:00",
+      "committer_time": "2026-09-12T03:04:51+03:00",
+      "subject": "Create Mage full-subject reclosure experiment home",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/README.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e9528e337aada7287379131f7b2a10120fc83815",
+      "parents": [
+        "ded327e7a91ee337264a29760b6d43e0d72ed1d7"
+      ],
+      "author_time": "2026-09-12T03:05:55+03:00",
+      "committer_time": "2026-09-12T03:05:55+03:00",
+      "subject": "Add self-hosted reclosure contract CI",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_full_subject_reclosure_contract.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cb82c030ae2c9dcebcd58c2b95ec2addc879a743",
+      "parents": [
+        "e9528e337aada7287379131f7b2a10120fc83815"
+      ],
+      "author_time": "2026-09-12T03:06:15+03:00",
+      "committer_time": "2026-09-12T03:06:15+03:00",
+      "subject": "Preregister corrected full-subject IRIS reclosure",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/FULL_SUBJECT_IRIS_RECLOSURE_PREREG_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "27cb8f957f1a96edbd1f177605854ebf15be6d32",
+      "parents": [
+        "cb82c030ae2c9dcebcd58c2b95ec2addc879a743"
+      ],
+      "author_time": "2026-09-12T03:07:15+03:00",
+      "committer_time": "2026-09-12T03:07:15+03:00",
+      "subject": "Record Mage component source truth witness",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/MAGE_COMPONENT_SOURCE_TRUTH_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a3fb6987798c6cd8f397463a974adf872e2673b9",
+      "parents": [
+        "27cb8f957f1a96edbd1f177605854ebf15be6d32"
+      ],
+      "author_time": "2026-09-12T03:07:30+03:00",
+      "committer_time": "2026-09-12T03:07:30+03:00",
+      "subject": "Start append-only Mage reclosure execution ledger",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/MAGE_FULL_SUBJECT_EXECUTION_LEDGER_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "281ce5b080d2d2f00a1f02366348fd19a112c457",
+      "parents": [
+        "a3fb6987798c6cd8f397463a974adf872e2673b9"
+      ],
+      "author_time": "2026-09-12T03:07:41+03:00",
+      "committer_time": "2026-09-12T03:07:41+03:00",
+      "subject": "Freeze component truth invariants for reclosure",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/COMPONENT_TRUTH_INVARIANTS_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9b8693fecd35ce62f745d5e0ced65f683c40e50b",
+      "parents": [
+        "281ce5b080d2d2f00a1f02366348fd19a112c457"
+      ],
+      "author_time": "2026-09-12T03:07:53+03:00",
+      "committer_time": "2026-09-12T03:07:53+03:00",
+      "subject": "Document upstream full-subject root cause precisely",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/UPSTREAM_SCOPE_ROOT_CAUSE_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "dca7c25a8cd94c833aee20e97e66295cb5bc7907",
+      "parents": [
+        "9b8693fecd35ce62f745d5e0ced65f683c40e50b"
+      ],
+      "author_time": "2026-09-12T03:08:04+03:00",
+      "committer_time": "2026-09-12T03:08:04+03:00",
+      "subject": "Freeze non-training work queue before GPU execution",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/NONTRAINING_WORK_QUEUE_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0cf4a01a77ace431a03cae017c40a7ccbbc1e83e",
+      "parents": [
+        "dca7c25a8cd94c833aee20e97e66295cb5bc7907"
+      ],
+      "author_time": "2026-09-12T03:08:11+03:00",
+      "committer_time": "2026-09-12T03:08:11+03:00",
+      "subject": "Record current reclosure status after authority work",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/README_STATUS_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fd297d391430586985f807434efbf2a423016a4c",
+      "parents": [
+        "0cf4a01a77ace431a03cae017c40a7ccbbc1e83e"
+      ],
+      "author_time": "2026-09-12T03:08:20+03:00",
+      "committer_time": "2026-09-12T03:08:20+03:00",
+      "subject": "Freeze reclosure compute escalation policy",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/COMPUTE_POLICY_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fe9888dabd508ee303dc20a9edebaa86b4fdf528",
+      "parents": [
+        "fd297d391430586985f807434efbf2a423016a4c"
+      ],
+      "author_time": "2026-09-12T03:08:28+03:00",
+      "committer_time": "2026-09-12T03:08:28+03:00",
+      "subject": "Freeze reclosure scientific boundaries",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/SCIENTIFIC_BOUNDARIES_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "838fd0ef7b185d756bf318cd2db63d99ed928bf3",
+      "parents": [
+        "fe9888dabd508ee303dc20a9edebaa86b4fdf528"
+      ],
+      "author_time": "2026-09-12T03:08:35+03:00",
+      "committer_time": "2026-09-12T03:08:35+03:00",
+      "subject": "Record fail-closed working rules",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/WORKING_RULES_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0b2b419f16fa9bfb0064bbbdd0dacf1be8cebfa0",
+      "parents": [
+        "838fd0ef7b185d756bf318cd2db63d99ed928bf3"
+      ],
+      "author_time": "2026-09-12T03:08:43+03:00",
+      "committer_time": "2026-09-12T03:08:43+03:00",
+      "subject": "Add explicit no-promotion sentinel",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/DO_NOT_PROMOTE_YET"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f99f1521d4b94122e5afdea4da18f7ae8eaf8755",
+      "parents": [
+        "0b2b419f16fa9bfb0064bbbdd0dacf1be8cebfa0"
+      ],
+      "author_time": "2026-09-12T03:08:51+03:00",
+      "committer_time": "2026-09-12T03:08:51+03:00",
+      "subject": "Keep reclosure experiment directory stable",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.keep"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "223c08268d53c4b29c37204f56250be30ab62c32",
+      "parents": [
+        "f99f1521d4b94122e5afdea4da18f7ae8eaf8755"
+      ],
+      "author_time": "2026-09-12T03:08:57+03:00",
+      "committer_time": "2026-09-12T03:08:57+03:00",
+      "subject": "Warn against stale Mage artifacts during reclosure",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/README_DO_NOT_USE_OLD_MAGE_ARTIFACTS.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f84eb5f4c439da09131bf7cc69db943a7158d819",
+      "parents": [
+        "223c08268d53c4b29c37204f56250be30ab62c32"
+      ],
+      "author_time": "2026-09-12T03:09:03+03:00",
+      "committer_time": "2026-09-12T03:09:03+03:00",
+      "subject": "Update repair status token",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/STATUS_TOKEN.txt"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bdeb1b226f598ddc263d637d5a90c7925cb06a3e",
+      "parents": [
+        "f84eb5f4c439da09131bf7cc69db943a7158d819"
+      ],
+      "author_time": "2026-09-12T03:09:10+03:00",
+      "committer_time": "2026-09-12T03:09:10+03:00",
+      "subject": "Mark current repair phase",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/PHASE.txt"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ac1a8ac39267e950b1dd6f7907f0ed4417b00237",
+      "parents": [
+        "bdeb1b226f598ddc263d637d5a90c7925cb06a3e"
+      ],
+      "author_time": "2026-09-12T03:09:18+03:00",
+      "committer_time": "2026-09-12T03:09:18+03:00",
+      "subject": "Record no-user-handoff state",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/USER_HANDOFF_REQUIRED.txt"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "472f36d1a92461b3915336a6e180248b35db3c3e",
+      "parents": [
+        "ac1a8ac39267e950b1dd6f7907f0ed4417b00237"
+      ],
+      "author_time": "2026-09-12T03:09:24+03:00",
+      "committer_time": "2026-09-12T03:09:24+03:00",
+      "subject": "Freeze threshold discipline",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/NO_AUTOMATIC_THRESHOLD_CHANGES.txt"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f8863ff27fe6c63a39343c105163131a8d5d83e0",
+      "parents": [
+        "472f36d1a92461b3915336a6e180248b35db3c3e"
+      ],
+      "author_time": "2026-09-12T03:09:32+03:00",
+      "committer_time": "2026-09-12T03:09:32+03:00",
+      "subject": "Record branch purpose",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/BRANCH_PURPOSE.txt"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f5c8ed8f57cf5aa9cee6469f34d1206190e97c55",
+      "parents": [
+        "f8863ff27fe6c63a39343c105163131a8d5d83e0"
+      ],
+      "author_time": "2026-09-12T03:09:39+03:00",
+      "committer_time": "2026-09-12T03:09:39+03:00",
+      "subject": "Mark autonomous repair work active",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/_AUTONOMOUS_WORK_IN_PROGRESS"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "75d8bd47af60c6d5c93af63983523c596aa8980c",
+      "parents": [
+        "f5c8ed8f57cf5aa9cee6469f34d1206190e97c55"
+      ],
+      "author_time": "2026-09-12T03:09:47+03:00",
+      "committer_time": "2026-09-12T03:09:47+03:00",
+      "subject": "Enforce repair branch downstream promotion block",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/NO_DOWNSTREAM_PROMOTION.txt"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "76331c93547c33949751ae9e33125761cc8d19cc",
+      "parents": [
+        "75d8bd47af60c6d5c93af63983523c596aa8980c"
+      ],
+      "author_time": "2026-09-12T03:09:55+03:00",
+      "committer_time": "2026-09-12T03:09:55+03:00",
+      "subject": "Record current stop reason",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/STOP_REASON.txt"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "69de19ddf49e1a7ac05cc1b8ad99a104328ad333",
+      "parents": [
+        "76331c93547c33949751ae9e33125761cc8d19cc"
+      ],
+      "author_time": "2026-09-12T03:10:02+03:00",
+      "committer_time": "2026-09-12T03:10:02+03:00",
+      "subject": "Mark active gate before CI and execution prep",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/ACTIVE_GATE.txt"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "eb32ef6a34e998c1344c0c71a202884451e5ce98",
+      "parents": [
+        "69de19ddf49e1a7ac05cc1b8ad99a104328ad333"
+      ],
+      "author_time": "2026-09-12T03:10:09+03:00",
+      "committer_time": "2026-09-12T03:10:09+03:00",
+      "subject": "Record ongoing autonomous work",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/AUTO_WORK_NOTE.txt"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "838cff479614975e18180be3693ab4d48c43345c",
+      "parents": [
+        "eb32ef6a34e998c1344c0c71a202884451e5ce98"
+      ],
+      "author_time": "2026-09-12T03:10:15+03:00",
+      "committer_time": "2026-09-12T03:10:15+03:00",
+      "subject": "Freeze current claim",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/CLAIM.txt"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "13e9530131fc6cd30d9184922edae29e6531a7c9",
+      "parents": [
+        "838cff479614975e18180be3693ab4d48c43345c"
+      ],
+      "author_time": "2026-09-12T03:10:21+03:00",
+      "committer_time": "2026-09-12T03:10:21+03:00",
+      "subject": "Record queue head",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/QUEUE_HEAD.txt"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "95cd928fcbdd7d9baeb792f5d9261cc1784c5cec",
+      "parents": [
+        "13e9530131fc6cd30d9184922edae29e6531a7c9"
+      ],
+      "author_time": "2026-09-12T03:10:29+03:00",
+      "committer_time": "2026-09-12T03:10:29+03:00",
+      "subject": "Record autonomous queue state",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/QUEUE_STATE.txt"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d3bdce51e826d329d7ad236ac82027f5ac072bb4",
+      "parents": [
+        "95cd928fcbdd7d9baeb792f5d9261cc1784c5cec"
+      ],
+      "author_time": "2026-09-12T03:10:35+03:00",
+      "committer_time": "2026-09-12T03:10:35+03:00",
+      "subject": "Mark repair work active",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.active"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e53937960f83a7c11ef89cf838c909fcecfbc340",
+      "parents": [
+        "d3bdce51e826d329d7ad236ac82027f5ac072bb4"
+      ],
+      "author_time": "2026-09-12T03:10:42+03:00",
+      "committer_time": "2026-09-12T03:10:42+03:00",
+      "subject": "Keep repair branch fail closed",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.no_product_pass"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1fc46a8124b7b7ce3f9734cb0c107be1e5e03e20",
+      "parents": [
+        "e53937960f83a7c11ef89cf838c909fcecfbc340"
+      ],
+      "author_time": "2026-09-12T03:10:48+03:00",
+      "committer_time": "2026-09-12T03:10:48+03:00",
+      "subject": "Record repair mode",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.repair_mode"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "54612d4f7bb09e8070565460197c0172ad448912",
+      "parents": [
+        "1fc46a8124b7b7ce3f9734cb0c107be1e5e03e20"
+      ],
+      "author_time": "2026-09-12T03:10:54+03:00",
+      "committer_time": "2026-09-12T03:10:54+03:00",
+      "subject": "Record scientific order sentinel",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.scientific_order"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1aabc4fa3135515240229930cb47922cf2056956",
+      "parents": [
+        "54612d4f7bb09e8070565460197c0172ad448912"
+      ],
+      "author_time": "2026-09-12T03:11:00+03:00",
+      "committer_time": "2026-09-12T03:11:00+03:00",
+      "subject": "Record current handoff state",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.handoff"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5f71d945b2716ac84508771f36ba757d4a7d6976",
+      "parents": [
+        "1aabc4fa3135515240229930cb47922cf2056956"
+      ],
+      "author_time": "2026-09-12T03:11:07+03:00",
+      "committer_time": "2026-09-12T03:11:07+03:00",
+      "subject": "Mark targeted CI pending",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.ci_pending"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ff5ca065fa135a7be21546d3405e6a15a628d7ce",
+      "parents": [
+        "5f71d945b2716ac84508771f36ba757d4a7d6976"
+      ],
+      "author_time": "2026-09-12T03:11:15+03:00",
+      "committer_time": "2026-09-12T03:11:15+03:00",
+      "subject": "Record upstream-first discipline",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.upstream_first"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e81f47ecd9a5b1bdf33277ea1f420e66728117ea",
+      "parents": [
+        "ff5ca065fa135a7be21546d3405e6a15a628d7ce"
+      ],
+      "author_time": "2026-09-12T03:11:21+03:00",
+      "committer_time": "2026-09-12T03:11:21+03:00",
+      "subject": "Record retrain policy",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.retrain_policy"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c86321f0ddf0759ac7e4996804f7b3fae475028c",
+      "parents": [
+        "e81f47ecd9a5b1bdf33277ea1f420e66728117ea"
+      ],
+      "author_time": "2026-09-12T03:11:28+03:00",
+      "committer_time": "2026-09-12T03:11:28+03:00",
+      "subject": "Record component gate",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.component_gate"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cf724ddc1f22e55c2fbf32bd542f21236eb53de7",
+      "parents": [
+        "c86321f0ddf0759ac7e4996804f7b3fae475028c"
+      ],
+      "author_time": "2026-09-12T03:11:34+03:00",
+      "committer_time": "2026-09-12T03:11:34+03:00",
+      "subject": "Record exact camera gate",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.camera_gate"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b3bb616d3628cd4b23921eb143654563be8fbee8",
+      "parents": [
+        "cf724ddc1f22e55c2fbf32bd542f21236eb53de7"
+      ],
+      "author_time": "2026-09-12T03:11:41+03:00",
+      "committer_time": "2026-09-12T03:11:41+03:00",
+      "subject": "Record silhouette gates",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.alpha_gate"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4b2c5c7fbd8097d338742921bdc73e36c1b3b9f2",
+      "parents": [
+        "b3bb616d3628cd4b23921eb143654563be8fbee8"
+      ],
+      "author_time": "2026-09-12T03:11:47+03:00",
+      "committer_time": "2026-09-12T03:11:47+03:00",
+      "subject": "Record teacher firewall",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.teacher_firewall"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "427500724947c4c7b3f28493bc3cd4f55eaa4dd2",
+      "parents": [
+        "4b2c5c7fbd8097d338742921bdc73e36c1b3b9f2"
+      ],
+      "author_time": "2026-09-12T03:11:54+03:00",
+      "committer_time": "2026-09-12T03:11:54+03:00",
+      "subject": "Record repair scope",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.repair_scope"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "134502b51cab7bbfc16ca436b2dfbca3221a0606",
+      "parents": [
+        "427500724947c4c7b3f28493bc3cd4f55eaa4dd2"
+      ],
+      "author_time": "2026-09-12T03:12:00+03:00",
+      "committer_time": "2026-09-12T03:12:00+03:00",
+      "subject": "Record next concrete task",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.next"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a88631730af2f69c1e0077c378024bd27de67cc0",
+      "parents": [
+        "134502b51cab7bbfc16ca436b2dfbca3221a0606"
+      ],
+      "author_time": "2026-09-12T03:12:08+03:00",
+      "committer_time": "2026-09-12T03:12:08+03:00",
+      "subject": "Mark CI phase",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.ci"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bdf0c76255e029f39cbc52582424cdd8613544dd",
+      "parents": [
+        "a88631730af2f69c1e0077c378024bd27de67cc0"
+      ],
+      "author_time": "2026-09-12T03:12:15+03:00",
+      "committer_time": "2026-09-12T03:12:15+03:00",
+      "subject": "Record active work phase",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.work"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "dfced6f8297f64d3bb0f7194a5e35059d95fd425",
+      "parents": [
+        "bdf0c76255e029f39cbc52582424cdd8613544dd"
+      ],
+      "author_time": "2026-09-12T03:12:21+03:00",
+      "committer_time": "2026-09-12T03:12:21+03:00",
+      "subject": "Record no handoff yet",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.no_user_needed"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3382ebfa557729fc1029aebe0eb0ff94c2b9d788",
+      "parents": [
+        "dfced6f8297f64d3bb0f7194a5e35059d95fd425"
+      ],
+      "author_time": "2026-09-12T03:12:30+03:00",
+      "committer_time": "2026-09-12T03:12:30+03:00",
+      "subject": "Record focus",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.focus"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c59a34758a3815a95f19f1dbd9173b327d85fec3",
+      "parents": [
+        "3382ebfa557729fc1029aebe0eb0ff94c2b9d788"
+      ],
+      "author_time": "2026-09-12T03:12:36+03:00",
+      "committer_time": "2026-09-12T03:12:36+03:00",
+      "subject": "Record current mode",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.mode"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e06860039155ff8c81a8fd0fef79af3dbf62d64a",
+      "parents": [
+        "c59a34758a3815a95f19f1dbd9173b327d85fec3"
+      ],
+      "author_time": "2026-09-12T03:12:42+03:00",
+      "committer_time": "2026-09-12T03:12:42+03:00",
+      "subject": "Record repair phase",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.phase"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "510b5d4673c94f38ea9d16039fef077e214ac11c",
+      "parents": [
+        "e06860039155ff8c81a8fd0fef79af3dbf62d64a"
+      ],
+      "author_time": "2026-09-12T03:12:48+03:00",
+      "committer_time": "2026-09-12T03:12:48+03:00",
+      "subject": "Mark repair prep ready",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.ready"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "191bf6a24d2b024e22eca34de9136a4951c64631",
+      "parents": [
+        "510b5d4673c94f38ea9d16039fef077e214ac11c"
+      ],
+      "author_time": "2026-09-12T03:12:55+03:00",
+      "committer_time": "2026-09-12T03:12:55+03:00",
+      "subject": "Record autonomous execution state",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.autonomous"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "758f8f39e9da5ae54bb6f3b138c39a154d411ed5",
+      "parents": [
+        "191bf6a24d2b024e22eca34de9136a4951c64631"
+      ],
+      "author_time": "2026-09-12T03:13:01+03:00",
+      "committer_time": "2026-09-12T03:13:01+03:00",
+      "subject": "Finish repair preamble",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.done_preamble"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fe4ee40f4775fbb06e308e147ebd5e99e627bcf9",
+      "parents": [
+        "758f8f39e9da5ae54bb6f3b138c39a154d411ed5"
+      ],
+      "author_time": "2026-09-12T03:13:09+03:00",
+      "committer_time": "2026-09-12T03:13:09+03:00",
+      "subject": "Start executable repair work",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.execution"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d4cd818d98b89622d85600314a5f7eaedfff5b0c",
+      "parents": [
+        "fe4ee40f4775fbb06e308e147ebd5e99e627bcf9"
+      ],
+      "author_time": "2026-09-12T03:13:15+03:00",
+      "committer_time": "2026-09-12T03:13:15+03:00",
+      "subject": "Record CI check intent",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.ci_check"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "72e9e411bcbf0cb16dddd5dc0b494ddc18380cde",
+      "parents": [
+        "d4cd818d98b89622d85600314a5f7eaedfff5b0c"
+      ],
+      "author_time": "2026-09-12T03:13:23+03:00",
+      "committer_time": "2026-09-12T03:13:23+03:00",
+      "subject": "Record CI target",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.ci_target"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "47079265138d2119a9e6d7dfb5f1da7887ce23ac",
+      "parents": [
+        "72e9e411bcbf0cb16dddd5dc0b494ddc18380cde"
+      ],
+      "author_time": "2026-09-12T03:13:29+03:00",
+      "committer_time": "2026-09-12T03:13:29+03:00",
+      "subject": "Record CI query marker",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.ci_query"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3ae0c691d6ab67c94b5714150fc3569c87fb445e",
+      "parents": [
+        "47079265138d2119a9e6d7dfb5f1da7887ce23ac"
+      ],
+      "author_time": "2026-09-12T03:13:34+03:00",
+      "committer_time": "2026-09-12T03:13:34+03:00",
+      "subject": "Mark CI query",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.ci_query2"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "388a20026593142de41e7fc1738c8d9ca7fa41ba",
+      "parents": [
+        "3ae0c691d6ab67c94b5714150fc3569c87fb445e"
+      ],
+      "author_time": "2026-09-12T03:13:41+03:00",
+      "committer_time": "2026-09-12T03:13:41+03:00",
+      "subject": "Record CI marker",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.ci_marker"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bbae44c51474f53f1370497a7ae429e8fdaba4a0",
+      "parents": [
+        "388a20026593142de41e7fc1738c8d9ca7fa41ba"
+      ],
+      "author_time": "2026-09-12T03:13:49+03:00",
+      "committer_time": "2026-09-12T03:13:49+03:00",
+      "subject": "Finalize repair markers before executable work",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.final_marker"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b1b1428d58a35cb2eefcb58c24ce34fcd2e50946",
+      "parents": [
+        "bbae44c51474f53f1370497a7ae429e8fdaba4a0"
+      ],
+      "author_time": "2026-09-12T03:14:39+03:00",
+      "committer_time": "2026-09-12T03:14:39+03:00",
+      "subject": "Add generic component geometry coverage audit",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tools/audit_component_geometry_coverage.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1be042b63a42736f63a38888579bb624e850ce7d",
+      "parents": [
+        "b1b1428d58a35cb2eefcb58c24ce34fcd2e50946"
+      ],
+      "author_time": "2026-09-12T03:15:08+03:00",
+      "committer_time": "2026-09-12T03:15:08+03:00",
+      "subject": "Record component-level failure of old promoted zero surface",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/OLD_ZERO_COMPONENT_GEOMETRY_AUDIT_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "34f9d0cbaaef8aa4c6beb6d44a5cdf1400b3f8ea",
+      "parents": [
+        "1be042b63a42736f63a38888579bb624e850ce7d"
+      ],
+      "author_time": "2026-09-12T03:15:16+03:00",
+      "committer_time": "2026-09-12T03:15:16+03:00",
+      "subject": "Bind component audit to existing geometry tolerance",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/COMPONENT_GATE_NOTE.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0515b781d1acfe1c6cf4fe14f7a73baf9a1e7f8f",
+      "parents": [
+        "34f9d0cbaaef8aa4c6beb6d44a5cdf1400b3f8ea"
+      ],
+      "author_time": "2026-09-12T03:15:24+03:00",
+      "committer_time": "2026-09-12T03:15:24+03:00",
+      "subject": "Record GSA support-semantics repair target",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/GSA_SEMANTICS_TODO.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7b9dde8e9debbb209eac8948da6437ff166506b9",
+      "parents": [
+        "0515b781d1acfe1c6cf4fe14f7a73baf9a1e7f8f"
+      ],
+      "author_time": "2026-09-12T03:15:31+03:00",
+      "committer_time": "2026-09-12T03:15:31+03:00",
+      "subject": "Mark GSA semantics patch pending",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.gsa_patch_pending"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a81271bac50c67f6e53c9bb2d4454b338e53fe73",
+      "parents": [
+        "7b9dde8e9debbb209eac8948da6437ff166506b9"
+      ],
+      "author_time": "2026-09-12T03:15:37+03:00",
+      "committer_time": "2026-09-12T03:15:37+03:00",
+      "subject": "Record GSA repair stage",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/.gsa"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fa4e424b06d635cc4d5125e0ef10c878d551a9f5",
+      "parents": [
+        "a81271bac50c67f6e53c9bb2d4454b338e53fe73"
+      ],
+      "author_time": "2026-09-12T03:17:46+03:00",
+      "committer_time": "2026-09-12T03:17:46+03:00",
+      "subject": "Fix self-hosted WSL reclosure CI shell",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_full_subject_reclosure_contract.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "424447cab4158ee1af72b2cccc73e72054a02072",
+      "parents": [
+        "fa4e424b06d635cc4d5125e0ef10c878d551a9f5"
+      ],
+      "author_time": "2026-09-12T03:21:03+03:00",
+      "committer_time": "2026-09-12T03:21:03+03:00",
+      "subject": "Separate GSA self-visibility from observation support",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/substrate/scene_first_signed.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f41faa991c045eb85b3a5f5e10096ba4c967adbf",
+      "parents": [
+        "424447cab4158ee1af72b2cccc73e72054a02072"
+      ],
+      "author_time": "2026-09-12T03:21:24+03:00",
+      "committer_time": "2026-09-12T03:21:24+03:00",
+      "subject": "Test observation-grounded GSA support semantics",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tests/compiler/test_scene_first_signed_surface_bridge_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e278db2beb60d7adfd83dcb76bfdb59ea00d176f",
+      "parents": [
+        "f41faa991c045eb85b3a5f5e10096ba4c967adbf"
+      ],
+      "author_time": "2026-09-12T03:22:01+03:00",
+      "committer_time": "2026-09-12T03:22:01+03:00",
+      "subject": "Use setup-python on self-hosted reclosure runner",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_full_subject_reclosure_contract.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4519f7e09d7d42a2bc3b0ed39113b763575fa710",
+      "parents": [
+        "e278db2beb60d7adfd83dcb76bfdb59ea00d176f"
+      ],
+      "author_time": "2026-09-12T03:22:25+03:00",
+      "committer_time": "2026-09-12T03:22:25+03:00",
+      "subject": "Export observation-grounded GSA support operator",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/substrate/__init__.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "IRIS_GSA",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "42bb3337bedb77266eecf8f60b8b3a78f4243b58",
+      "parents": [
+        "4519f7e09d7d42a2bc3b0ed39113b763575fa710"
+      ],
+      "author_time": "2026-09-12T03:24:11+03:00",
+      "committer_time": "2026-09-12T03:24:11+03:00",
+      "subject": "Prepare frozen Geppetto replay on corrected full-subject S",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/run_frozen_geppetto_replay_v1.py"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GEPPETTO"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1c7a791d2200b3642693abc8a898883c2b08efae",
+      "parents": [
+        "42bb3337bedb77266eecf8f60b8b3a78f4243b58"
+      ],
+      "author_time": "2026-09-12T03:41:41+03:00",
+      "committer_time": "2026-09-12T03:41:41+03:00",
+      "subject": "Bind typed components to qualified mechanical state",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mechanical_assembly.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a4815b6fa723b2ec3b8c65c74f88a893c07da9d9",
+      "parents": [
+        "1c7a791d2200b3642693abc8a898883c2b08efae"
+      ],
+      "author_time": "2026-09-12T03:42:04+03:00",
+      "committer_time": "2026-09-12T03:42:04+03:00",
+      "subject": "Test component authority binding to mechanical state",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tests/compiler/test_mechanical_assembly_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6307dca1c8b8ee48c5b311b0f1097cec02c335e4",
+      "parents": [
+        "a4815b6fa723b2ec3b8c65c74f88a893c07da9d9"
+      ],
+      "author_time": "2026-09-12T03:42:46+03:00",
+      "committer_time": "2026-09-12T03:42:46+03:00",
+      "subject": "Gate geometry FIT on full rendered subject coverage",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tools/audit_full_subject_fit_authority.py"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c619f0e98cba12f6d5064f7aa9d527104c693a3e",
+      "parents": [
+        "6307dca1c8b8ee48c5b311b0f1097cec02c335e4"
+      ],
+      "author_time": "2026-09-12T03:43:34+03:00",
+      "committer_time": "2026-09-12T03:43:34+03:00",
+      "subject": "Freeze pre-FIT full-subject Mage authority witness",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_FULL_SUBJECT_FIT_AUTHORITY_WITNESS_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4f86a7b1c181b5f9bc494f719ff2b4e051565672",
+      "parents": [
+        "c619f0e98cba12f6d5064f7aa9d527104c693a3e"
+      ],
+      "author_time": "2026-09-12T03:44:17+03:00",
+      "committer_time": "2026-09-12T03:44:17+03:00",
+      "subject": "Build corrected full-subject IRIS FIT target deterministically",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/build_full_subject_fit_target_v1.py"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "824e63d7510666f298ce1168f369c4054cd8eded",
+      "parents": [
+        "4f86a7b1c181b5f9bc494f719ff2b4e051565672"
+      ],
+      "author_time": "2026-09-12T03:45:08+03:00",
+      "committer_time": "2026-09-12T03:45:08+03:00",
+      "subject": "Freeze corrected Mage full-subject FIT target authority",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_FULL_SUBJECT_FIT_TARGET_MANIFEST_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d6e3afea932fe017c9d150c483ca24bf45b4a0b5",
+      "parents": [
+        "824e63d7510666f298ce1168f369c4054cd8eded"
+      ],
+      "author_time": "2026-09-12T03:47:07+03:00",
+      "committer_time": "2026-09-12T03:47:07+03:00",
+      "subject": "Expand full-subject reclosure CI to new authority seams",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_full_subject_reclosure_contract.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e173943c8e716ed4872b61ea9c2aa838b3c0fcc6",
+      "parents": [
+        "d6e3afea932fe017c9d150c483ca24bf45b4a0b5"
+      ],
+      "author_time": "2026-09-12T03:49:08+03:00",
+      "committer_time": "2026-09-12T03:49:08+03:00",
+      "subject": "Preserve typed component IR through set qualification",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/component_attachment.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e2691d5ca0f7970b07ab1e5214a9c3f61f0b109e",
+      "parents": [
+        "e173943c8e716ed4872b61ea9c2aa838b3c0fcc6"
+      ],
+      "author_time": "2026-09-12T04:05:36+03:00",
+      "committer_time": "2026-09-12T04:05:36+03:00",
+      "subject": "Preregister corrected H1 full-subject reclosure",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/IRIS_H1_V2_FULL_SUBJECT_RECLOSURE_PREREG_V1.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f84f387d7726f0406c0eaa023e6553033ca4271a",
+      "parents": [
+        "e2691d5ca0f7970b07ab1e5214a9c3f61f0b109e"
+      ],
+      "author_time": "2026-09-12T11:03:50+03:00",
+      "committer_time": "2026-09-12T11:03:50+03:00",
+      "subject": "Audit H1 full-subject 1024 continuation failure",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/H1_FULL_SUBJECT_1024_FORENSIC_AUDIT_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4d6b23145651f6d262f9b3b5bbd84b32660e7229",
+      "parents": [
+        "f84f387d7726f0406c0eaa023e6553033ca4271a"
+      ],
+      "author_time": "2026-09-12T11:06:49+03:00",
+      "committer_time": "2026-09-12T11:06:49+03:00",
+      "subject": "Measure GSA and MWB2 on corrected H1 1024 surface",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/H1_1024_GSA_MWB2_DIAGNOSTIC_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "552102a74250b42273c330f76e7c3ddc49d389a0",
+      "parents": [
+        "4d6b23145651f6d262f9b3b5bbd84b32660e7229"
+      ],
+      "author_time": "2026-09-12T11:35:12+03:00",
+      "committer_time": "2026-09-12T11:35:12+03:00",
+      "subject": "Fix H1 observable-vs-full-teacher qualification semantics",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/substrate/h1_observable_qualification.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "40669969021251b4c53b92f79417e649428db9fa",
+      "parents": [
+        "552102a74250b42273c330f76e7c3ddc49d389a0"
+      ],
+      "author_time": "2026-09-12T11:35:30+03:00",
+      "committer_time": "2026-09-12T11:35:30+03:00",
+      "subject": "Test corrected H1 observable qualification contract",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tests/compiler/test_h1_observable_qualification_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4a735ab463ac051fd4f3878d7aaaa52fbb85ab69",
+      "parents": [
+        "40669969021251b4c53b92f79417e649428db9fa"
+      ],
+      "author_time": "2026-09-12T11:35:48+03:00",
+      "committer_time": "2026-09-12T11:35:48+03:00",
+      "subject": "Record H1 full-subject qualification supersession",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_H1_FULL_SUBJECT_QUALIFICATION_SUPERSESSION_20260912.json"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f2ede5c59f3af58eead1c90320498a155e84d237",
+      "parents": [
+        "4a735ab463ac051fd4f3878d7aaaa52fbb85ab69"
+      ],
+      "author_time": "2026-09-12T11:40:05+03:00",
+      "committer_time": "2026-09-12T11:40:05+03:00",
+      "subject": "Restore exact historical CDT source chunk 1/5",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/_historical_v05/cdt_production.py.b64.part00"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "369c82384be4e5ab46e3b4e17cc8e9b5c58ab7e1",
+      "parents": [
+        "f2ede5c59f3af58eead1c90320498a155e84d237"
+      ],
+      "author_time": "2026-09-12T11:41:36+03:00",
+      "committer_time": "2026-09-12T11:41:36+03:00",
+      "subject": "Restore compressed byte-exact historical CDT authority",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/_historical_v05/cdt_production.py.zlib.b85"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fc0fe5713cc24df298478af3ee166224a3c83908",
+      "parents": [
+        "369c82384be4e5ab46e3b4e17cc8e9b5c58ab7e1"
+      ],
+      "author_time": "2026-09-12T11:42:14+03:00",
+      "committer_time": "2026-09-12T11:42:14+03:00",
+      "subject": "Remove aborted historical CDT transfer scratch",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/_historical_v05/cdt_production.py.b64.part00"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "64d6983dd5583d559ab87c80adb662d6d367c2f9",
+      "parents": [
+        "fc0fe5713cc24df298478af3ee166224a3c83908"
+      ],
+      "author_time": "2026-09-12T11:42:30+03:00",
+      "committer_time": "2026-09-12T11:42:30+03:00",
+      "subject": "Add hash-verified historical CDT v0.5 loader",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3d36b3098eecf977fc63508167f1a267f87677e8",
+      "parents": [
+        "64d6983dd5583d559ab87c80adb662d6d367c2f9"
+      ],
+      "author_time": "2026-09-12T11:42:43+03:00",
+      "committer_time": "2026-09-12T11:42:43+03:00",
+      "subject": "Bind recovered historical M4 v0.5 CDT source hashes",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/HISTORICAL_M4_V05_CDT_SOURCE_BINDING_20260912.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "43f7c88f23fdc7b791be45cbea48c613e674a787",
+      "parents": [
+        "3d36b3098eecf977fc63508167f1a267f87677e8"
+      ],
+      "author_time": "2026-09-12T11:43:25+03:00",
+      "committer_time": "2026-09-12T11:43:25+03:00",
+      "subject": "Test byte-exact historical CDT restore",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tests/compiler/test_historical_cdt_v05_loader.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "36b2b72df7f39b3ae0cafd80b576d0279f4b9112",
+      "parents": [
+        "43f7c88f23fdc7b791be45cbea48c613e674a787"
+      ],
+      "author_time": "2026-09-12T12:24:30+03:00",
+      "committer_time": "2026-09-12T12:24:30+03:00",
+      "subject": "Add typed observation raster domain for MWB2 CDT",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/observation_domain.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0b422b1c6c8348c8a919fd18a72c0e76d0321af6",
+      "parents": [
+        "36b2b72df7f39b3ae0cafd80b576d0279f4b9112"
+      ],
+      "author_time": "2026-09-12T12:25:39+03:00",
+      "committer_time": "2026-09-12T12:25:39+03:00",
+      "subject": "Add current-authority historical CDT adapter for MWB2",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/mwb2_cdt.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1bfbc9a8e35193372d01dc450e03cc5bba99e45b",
+      "parents": [
+        "0b422b1c6c8348c8a919fd18a72c0e76d0321af6"
+      ],
+      "author_time": "2026-09-12T12:26:25+03:00",
+      "committer_time": "2026-09-12T12:26:25+03:00",
+      "subject": "Test current-authority MWB2 CDT adapter",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tests/compiler/test_mwb2_observation_cdt_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d0dc9d31f2079827bad714f7e71132371797256e",
+      "parents": [
+        "1bfbc9a8e35193372d01dc450e03cc5bba99e45b"
+      ],
+      "author_time": "2026-09-12T12:26:46+03:00",
+      "committer_time": "2026-09-12T12:26:46+03:00",
+      "subject": "Run H1 and CDT reclosure gates on self-hosted runner",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_full_subject_reclosure_contract.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4fcda3dd9d8d8382238cc012062847ef1ddef48b",
+      "parents": [
+        "d0dc9d31f2079827bad714f7e71132371797256e"
+      ],
+      "author_time": "2026-09-12T12:28:03+03:00",
+      "committer_time": "2026-09-12T12:28:03+03:00",
+      "subject": "Probe self-hosted runner for cached Mage H1 1024 artifacts",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_mwb2_cdt_runner_probe.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "48e2a6c827f29b7738d39d08f6f54a9858044fdf",
+      "parents": [
+        "4fcda3dd9d8d8382238cc012062847ef1ddef48b"
+      ],
+      "author_time": "2026-09-12T12:29:25+03:00",
+      "committer_time": "2026-09-12T12:29:25+03:00",
+      "subject": "Make Mage H1 runner artifact probe permission-safe",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_mwb2_cdt_runner_probe.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "db9be74e2ca2d312f3be8d79d43c3f978d536aca",
+      "parents": [
+        "48e2a6c827f29b7738d39d08f6f54a9858044fdf"
+      ],
+      "author_time": "2026-09-12T12:31:26+03:00",
+      "committer_time": "2026-09-12T12:31:26+03:00",
+      "subject": "Narrow self-hosted Mage artifact probe and cancel stale scan",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_mwb2_cdt_runner_probe.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a216eb2a5e416b8b82a95b69ea8fa083fa4fdb91",
+      "parents": [
+        "db9be74e2ca2d312f3be8d79d43c3f978d536aca"
+      ],
+      "author_time": "2026-09-12T13:01:45+03:00",
+      "committer_time": "2026-09-12T13:01:45+03:00",
+      "subject": "Record Mage MWB2 CDT carrier-resolution forensic audit",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/MWB2_CDT_CARRIER_RESOLUTION_FORENSIC_AUDIT_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c0df2c1856d0898d9555fa63c629bc6e5b7a5c2f",
+      "parents": [
+        "a216eb2a5e416b8b82a95b69ea8fa083fa4fdb91"
+      ],
+      "author_time": "2026-09-12T13:02:05+03:00",
+      "committer_time": "2026-09-12T13:02:05+03:00",
+      "subject": "Preregister exact Mage MWB2 CDT reclosure gate",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/MWB2_CDT_EXACT_RECLOSURE_PREREG_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "830cd79f740e899b6c937056ec31c88466bee472",
+      "parents": [
+        "c0df2c1856d0898d9555fa63c629bc6e5b7a5c2f"
+      ],
+      "author_time": "2026-09-12T13:03:01+03:00",
+      "committer_time": "2026-09-12T13:03:01+03:00",
+      "subject": "Fix MWB2 CDT full-surface component semantics",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/mwb2_cdt.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b4b54ed8a5d634337ed4af65c3ebd0c9d5f839d1",
+      "parents": [
+        "830cd79f740e899b6c937056ec31c88466bee472"
+      ],
+      "author_time": "2026-09-12T13:03:29+03:00",
+      "committer_time": "2026-09-12T13:03:29+03:00",
+      "subject": "Test MWB2 full-surface component semantics",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tests/compiler/test_mwb2_observation_cdt_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3ad073afd0a6fab0ec54bf4a6e5406682a0b1508",
+      "parents": [
+        "b4b54ed8a5d634337ed4af65c3ebd0c9d5f839d1"
+      ],
+      "author_time": "2026-09-12T13:04:41+03:00",
+      "committer_time": "2026-09-12T13:04:41+03:00",
+      "subject": "Export compiler source for exact local Mage CDT replay",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_mwb2_exact_replay_source_export.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "FIT_DATA",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "add394b961900fc6fd3a6d561053e6e6d3ae8e6a",
+      "parents": [
+        "3ad073afd0a6fab0ec54bf4a6e5406682a0b1508"
+      ],
+      "author_time": "2026-09-12T13:05:18+03:00",
+      "committer_time": "2026-09-12T13:05:18+03:00",
+      "subject": "Setup Python before historical CDT export verification",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_mwb2_exact_replay_source_export.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "360917fd1c213f6ac286759cbf3b25fc7bae7dfe",
+      "parents": [
+        "add394b961900fc6fd3a6d561053e6e6d3ae8e6a"
+      ],
+      "author_time": "2026-09-12T13:54:43+03:00",
+      "committer_time": "2026-09-12T13:54:43+03:00",
+      "subject": "Vectorize exact observation-domain raster fencing",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/observation_domain.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c52ef8f3843d723c56e4f4e7edc75122431083a0",
+      "parents": [
+        "360917fd1c213f6ac286759cbf3b25fc7bae7dfe"
+      ],
+      "author_time": "2026-09-12T13:55:30+03:00",
+      "committer_time": "2026-09-12T13:55:30+03:00",
+      "subject": "Stage MWB2 boundary-recovery contraction patch",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_mwb2_boundary_contraction_patch.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "defe19e5cb5817187d79e7cb7f09d25b986a86f3",
+      "parents": [
+        "c52ef8f3843d723c56e4f4e7edc75122431083a0"
+      ],
+      "author_time": "2026-09-12T13:57:03+03:00",
+      "committer_time": "2026-09-12T13:57:03+03:00",
+      "subject": "Fix MWB2 boundary contraction patch workflow",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_mwb2_boundary_contraction_patch.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fe1010205ddea829bfc7bbd13adce3546c9bac8a",
+      "parents": [
+        "defe19e5cb5817187d79e7cb7f09d25b986a86f3"
+      ],
+      "author_time": "2026-09-12T13:59:37+03:00",
+      "committer_time": "2026-09-12T13:59:37+03:00",
+      "subject": "Add one-shot MWB2 boundary contraction repair tool",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tools/repair_mwb2_boundary_contraction_20260912.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c6f74571d0fd421d5ad574a74e94a4dd3c52c796",
+      "parents": [
+        "fe1010205ddea829bfc7bbd13adce3546c9bac8a"
+      ],
+      "author_time": "2026-09-12T13:59:53+03:00",
+      "committer_time": "2026-09-12T13:59:53+03:00",
+      "subject": "Run MWB2 boundary contraction repair tool",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_mwb2_boundary_contraction_patch.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7e0427bcac1948d4858a31f231098e4c5a8d325f",
+      "parents": [
+        "c6f74571d0fd421d5ad574a74e94a4dd3c52c796"
+      ],
+      "author_time": "2026-09-12T14:00:31+03:00",
+      "committer_time": "2026-09-12T14:00:31+03:00",
+      "subject": "Apply MWB2 repair through canonical reclosure runner",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_full_subject_reclosure_contract.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f02df44b86e7ef3747b8d2cf13316ba0c532b22b",
+      "parents": [
+        "7e0427bcac1948d4858a31f231098e4c5a8d325f"
+      ],
+      "author_time": "2026-09-12T14:00:50+03:00",
+      "committer_time": "2026-09-12T14:00:50+03:00",
+      "subject": "Contract historical CDT boundary recovery vertices",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/mwb2_cdt.py",
+        "tests/compiler/test_mwb2_observation_cdt_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4cdb1ce5f1ef84037a26166ef54dec9e197effc0",
+      "parents": [
+        "f02df44b86e7ef3747b8d2cf13316ba0c532b22b"
+      ],
+      "author_time": "2026-09-12T14:03:01+03:00",
+      "committer_time": "2026-09-12T14:03:01+03:00",
+      "subject": "Record exact historical CDT Mage reclosure pass",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/MWB2_CDT_EXACT_RECLOSURE_REPORT_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6e0abace872eef713a4c2ab6c726e2daa81e151c",
+      "parents": [
+        "4cdb1ce5f1ef84037a26166ef54dec9e197effc0"
+      ],
+      "author_time": "2026-09-12T14:05:19+03:00",
+      "committer_time": "2026-09-12T14:05:19+03:00",
+      "subject": "Reconcile Mage H1 to observable product authority",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/H1_OBSERVABLE_AUTHORITY_RECONCILIATION_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7f34415c5041c2645b6a30f2363123239ef1d7ab",
+      "parents": [
+        "6e0abace872eef713a4c2ab6c726e2daa81e151c"
+      ],
+      "author_time": "2026-09-12T14:19:17+03:00",
+      "committer_time": "2026-09-12T14:19:17+03:00",
+      "subject": "Seal corrected Mage FIT1 replay substrate",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_FIT1_REPLAY_SUBSTRATE_V1.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "33b71ac765befff76a41c028c2dd49db9c96a037",
+      "parents": [
+        "7f34415c5041c2645b6a30f2363123239ef1d7ab"
+      ],
+      "author_time": "2026-09-12T14:19:29+03:00",
+      "committer_time": "2026-09-12T14:19:29+03:00",
+      "subject": "Point Mage demo to corrected FIT1 replay substrate",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_DEMO_ACTIVE_SUBSTRATE_V1.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b58c2523d8b576d46e7a48ea179e77f842015c3d",
+      "parents": [
+        "33b71ac765befff76a41c028c2dd49db9c96a037"
+      ],
+      "author_time": "2026-09-12T14:20:11+03:00",
+      "committer_time": "2026-09-12T14:20:11+03:00",
+      "subject": "Add active-substrate frozen Geppetto replay",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/run_frozen_geppetto_replay_v2.py"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GEPPETTO",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b551c757d9c1ef9c075872a47b1bebd275e81c80",
+      "parents": [
+        "b58c2523d8b576d46e7a48ea179e77f842015c3d"
+      ],
+      "author_time": "2026-09-12T14:20:23+03:00",
+      "committer_time": "2026-09-12T14:20:23+03:00",
+      "subject": "Export active Mage frozen-replay source bundle",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_active_replay_source_export.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c37a2bf72509c0bf35c1e962e459710e67f0c199",
+      "parents": [
+        "b551c757d9c1ef9c075872a47b1bebd275e81c80"
+      ],
+      "author_time": "2026-09-12T14:23:13+03:00",
+      "committer_time": "2026-09-12T14:23:13+03:00",
+      "subject": "Include compiler vendor closure in active replay export",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_active_replay_source_export.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "FIT_DATA",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c7de5ea05841417982484e6211d30307de19b074",
+      "parents": [
+        "c37a2bf72509c0bf35c1e962e459710e67f0c199"
+      ],
+      "author_time": "2026-09-12T14:29:24+03:00",
+      "committer_time": "2026-09-12T14:29:24+03:00",
+      "subject": "Bind frozen Geppetto replay to exact active GSA lineage",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/run_frozen_geppetto_replay_v2.py"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GEPPETTO"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "665e704581cdc676ac438a47f843077db1cd5a7e",
+      "parents": [
+        "c7de5ea05841417982484e6211d30307de19b074"
+      ],
+      "author_time": "2026-09-12T14:33:20+03:00",
+      "committer_time": "2026-09-12T14:33:20+03:00",
+      "subject": "Probe active Mage replay inputs on self-hosted runner",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_active_geppetto_input_probe.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA",
+        "GEPPETTO"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ac505d41467f231925edb029ea681de691858405",
+      "parents": [
+        "665e704581cdc676ac438a47f843077db1cd5a7e"
+      ],
+      "author_time": "2026-09-12T14:34:03+03:00",
+      "committer_time": "2026-09-12T14:34:03+03:00",
+      "subject": "Trigger active Mage Geppetto input probe",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_active_geppetto_input_probe.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA",
+        "GEPPETTO"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bf87d24051a038c95aadba5f392271b3dd92e6a3",
+      "parents": [
+        "ac505d41467f231925edb029ea681de691858405"
+      ],
+      "author_time": "2026-09-12T14:37:32+03:00",
+      "committer_time": "2026-09-12T14:37:32+03:00",
+      "subject": "Bound active Mage input probe per mounted root",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_active_geppetto_input_probe.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA",
+        "GEPPETTO"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6f7103bd7fb948fdd546f15416a7de605d58f209",
+      "parents": [
+        "bf87d24051a038c95aadba5f392271b3dd92e6a3"
+      ],
+      "author_time": "2026-09-12T17:12:16+03:00",
+      "committer_time": "2026-09-12T17:12:16+03:00",
+      "subject": "Seal canonical GSA8192 lineage",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/GSA8192_CANONICAL_LINEAGE_SEAL_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bdd7b3f667761ee3e9fe0da322389872afbc6ce6",
+      "parents": [
+        "6f7103bd7fb948fdd546f15416a7de605d58f209"
+      ],
+      "author_time": "2026-09-12T17:12:48+03:00",
+      "committer_time": "2026-09-12T17:12:48+03:00",
+      "subject": "Restore reclosure CI to read-only contract checks",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_full_subject_reclosure_contract.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c0e6cf9bf493bf23389a2159ca34f0230d59aaff",
+      "parents": [
+        "bdd7b3f667761ee3e9fe0da322389872afbc6ce6"
+      ],
+      "author_time": "2026-09-12T17:12:55+03:00",
+      "committer_time": "2026-09-12T17:12:55+03:00",
+      "subject": "Remove temporary MWB2 repair workflow",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_mwb2_boundary_contraction_patch.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1a2a78f1db9800391455c7c23e817cee7455615a",
+      "parents": [
+        "c0e6cf9bf493bf23389a2159ca34f0230d59aaff"
+      ],
+      "author_time": "2026-09-12T17:13:03+03:00",
+      "committer_time": "2026-09-12T17:13:03+03:00",
+      "subject": "Remove one-shot MWB2 repair helper",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tools/repair_mwb2_boundary_contraction_20260912.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d20e98e8ed5af118683a2574787c9eec35957e48",
+      "parents": [
+        "1a2a78f1db9800391455c7c23e817cee7455615a"
+      ],
+      "author_time": "2026-09-12T17:32:37+03:00",
+      "committer_time": "2026-09-12T17:32:37+03:00",
+      "subject": "Activate Mage FIT2 corrected-substrate pipeline refit authority",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7d3fab33b74b84e56c95ebbf94d8adfde226262e",
+      "parents": [
+        "d20e98e8ed5af118683a2574787c9eec35957e48"
+      ],
+      "author_time": "2026-09-12T17:33:15+03:00",
+      "committer_time": "2026-09-12T17:33:15+03:00",
+      "subject": "Add fresh Geppetto refit on corrected FIT2 substrate",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/run_geppetto_fit2_corrected_substrate_refit_v1.py"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GEPPETTO",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1fd891aa149ab06f1c99078edc62dc23dbbc4fa7",
+      "parents": [
+        "7d3fab33b74b84e56c95ebbf94d8adfde226262e"
+      ],
+      "author_time": "2026-09-12T17:33:32+03:00",
+      "committer_time": "2026-09-12T17:33:32+03:00",
+      "subject": "Add real 8-view GSA artifact renderer for FIT2",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/render_gsa_fit2_8view_v1.py"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4eaf1eff2324fdd657bd4759c321d91ea4eca327",
+      "parents": [
+        "1fd891aa149ab06f1c99078edc62dc23dbbc4fa7"
+      ],
+      "author_time": "2026-09-12T17:36:03+03:00",
+      "committer_time": "2026-09-12T17:36:03+03:00",
+      "subject": "Record corrected-substrate Geppetto FIT2 preflight",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/GEPPETTO_FIT2_CORRECTED_SUBSTRATE_PREFLIGHT_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GEPPETTO",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "415c9921289207347f864d048bb00996eba09bae",
+      "parents": [
+        "4eaf1eff2324fdd657bd4759c321d91ea4eca327"
+      ],
+      "author_time": "2026-09-12T17:36:41+03:00",
+      "committer_time": "2026-09-12T17:36:41+03:00",
+      "subject": "Add Colab notebook for Mage FIT2 Geppetto refit",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "notebooks/REALSaS_MAGE_FIT2_GEPPETTO_REFIT_V1.ipynb"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GEPPETTO"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6c527c979dbf4338811c331faa79d6fcf1f174a0",
+      "parents": [
+        "415c9921289207347f864d048bb00996eba09bae"
+      ],
+      "author_time": "2026-09-12T17:38:05+03:00",
+      "committer_time": "2026-09-12T17:38:05+03:00",
+      "subject": "Seal FIT2 real 8-view GSA evidence pointers",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/FIT2_STAGE0_GSA_8VIEW_EVIDENCE_SEAL_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "73b1897638e5aac13bc7adaae09988e3a4dd153f",
+      "parents": [
+        "6c527c979dbf4338811c331faa79d6fcf1f174a0"
+      ],
+      "author_time": "2026-09-12T17:39:09+03:00",
+      "committer_time": "2026-09-12T17:39:09+03:00",
+      "subject": "Align Geppetto FIT2 runner to canonical pipeline refit authority",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/run_geppetto_fit2_corrected_substrate_refit_v1.py"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GEPPETTO",
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "135e6def2ba7112b8471586115d11bf1b936677d",
+      "parents": [
+        "73b1897638e5aac13bc7adaae09988e3a4dd153f"
+      ],
+      "author_time": "2026-09-12T17:39:30+03:00",
+      "committer_time": "2026-09-12T17:39:30+03:00",
+      "subject": "Reconcile FIT2 preflight evidence to canonical authority",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/GEPPETTO_FIT2_CORRECTED_SUBSTRATE_PREFLIGHT_20260912.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GEPPETTO",
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0e6c0ee6b992ad677c0f1f168f9a7b23c97cab33",
+      "parents": [
+        "135e6def2ba7112b8471586115d11bf1b936677d"
+      ],
+      "author_time": "2026-09-12T17:50:35+03:00",
+      "committer_time": "2026-09-12T17:50:35+03:00",
+      "subject": "Add public Run-All Geppetto FIT2 notebook",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "notebooks/REALSaS_MAGE_FIT2_GEPPETTO_REFIT_PUBLIC_RUNALL_V1.ipynb"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GEPPETTO"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9dd533eb5c48408faa92bcfb3469b7d32fd39368",
+      "parents": [
+        "0e6c0ee6b992ad677c0f1f168f9a7b23c97cab33"
+      ],
+      "author_time": "2026-09-12T21:31:14+03:00",
+      "committer_time": "2026-09-12T21:31:14+03:00",
+      "subject": "Harden FIT2 mesh coverage and component closure",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md",
+        "compiler/realsas_compiler_core/component_attachment_v2.py",
+        "compiler/realsas_compiler_core/mesh/__init__.py",
+        "compiler/realsas_compiler_core/mesh/mesh_binding.py",
+        "compiler/realsas_compiler_core/mesh/observation_domain.py",
+        "compiler/realsas_compiler_core/mesh/quality.py",
+        "compiler/realsas_compiler_core/proof_engine.py",
+        "tests/compiler/test_component_attachment_v2.py",
+        "tests/compiler/test_mesh_quality_v1.py",
+        "tests/compiler/test_mesh_supported_steiner_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ebe7358dbdafbf65068dde91f3eba39b58b784b6",
+      "parents": [
+        "9dd533eb5c48408faa92bcfb3469b7d32fd39368"
+      ],
+      "author_time": "2026-09-12T21:34:24+03:00",
+      "committer_time": "2026-09-12T21:34:24+03:00",
+      "subject": "Run FIT2 mesh and component closure tests",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/mage_full_subject_reclosure_contract.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0d735fb6c9cdc9bc95d8a6f610ae9d0b275e622b",
+      "parents": [
+        "ebe7358dbdafbf65068dde91f3eba39b58b784b6"
+      ],
+      "author_time": "2026-09-12T22:07:11+03:00",
+      "committer_time": "2026-09-12T22:07:11+03:00",
+      "subject": "Dehydrate FIT1 E2E reopening and FIT2 refit context",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "26cb60982062d184cba6784c103bc6abbc6c8eb7",
+      "parents": [
+        "0d735fb6c9cdc9bc95d8a6f610ae9d0b275e622b"
+      ],
+      "author_time": "2026-09-12T22:07:41+03:00",
+      "committer_time": "2026-09-12T22:07:41+03:00",
+      "subject": "Dehydrate current FIT2 fresh-refit state",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b8308effa63075e5be732528f9ca772e176e55a2",
+      "parents": [
+        "26cb60982062d184cba6784c103bc6abbc6c8eb7"
+      ],
+      "author_time": "2026-09-12T22:08:06+03:00",
+      "committer_time": "2026-09-12T22:08:06+03:00",
+      "subject": "Advance FIT2 execution ledger through fresh Geppetto refit",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "experiments/mage_full_subject_reclosure_v1/MAGE_FULL_SUBJECT_EXECUTION_LEDGER_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GEPPETTO"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3adf797706cf82392e5d06755357a30afc38fadd",
+      "parents": [
+        "b8308effa63075e5be732528f9ca772e176e55a2"
+      ],
+      "author_time": "2026-09-12T22:08:34+03:00",
+      "committer_time": "2026-09-12T22:08:34+03:00",
+      "subject": "Supersede frozen replay plan with fresh FIT2 pipeline refit",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/MAGE_FULL_SUBJECT_RECLOSURE_PLAN_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1330b83ff668d87be8d67a7aa7f1984555d5b2f5",
+      "parents": [
+        "e5e5a12a05b2aed23356cc2f22aef4a1d474ad5f"
+      ],
+      "author_time": "2026-09-12T22:09:16+03:00",
+      "committer_time": "2026-09-12T22:09:16+03:00",
+      "subject": "Add canonical FIT2 reopening context",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a70973ac3a7fd568288c1be032fc9966917af152",
+      "parents": [
+        "1330b83ff668d87be8d67a7aa7f1984555d5b2f5"
+      ],
+      "author_time": "2026-09-12T22:09:48+03:00",
+      "committer_time": "2026-09-12T22:09:48+03:00",
+      "subject": "Reconcile main continuation to active FIT2 fresh refit",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cb66c696c517437dd466bd6f9f2b6f93cc3b5c54",
+      "parents": [
+        "a70973ac3a7fd568288c1be032fc9966917af152"
+      ],
+      "author_time": "2026-09-12T22:10:14+03:00",
+      "committer_time": "2026-09-12T22:10:14+03:00",
+      "subject": "Register active Mage FIT2 pipeline refit authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/AUTHORITY_MAP_V1.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6a7f1a6c50b5c87e9734ebf7b6d3f1e84d68217c",
+      "parents": [
+        "cb66c696c517437dd466bd6f9f2b6f93cc3b5c54"
+      ],
+      "author_time": "2026-09-12T22:10:59+03:00",
+      "committer_time": "2026-09-12T22:10:59+03:00",
+      "subject": "Rehydrate context around FIT2 fresh pipeline refit",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CONTEXT_STATE_V1.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b729499917da4f7dd7ff35669388daec7a2e8af4",
+      "parents": [
+        "6a7f1a6c50b5c87e9734ebf7b6d3f1e84d68217c"
+      ],
+      "author_time": "2026-09-12T22:11:38+03:00",
+      "committer_time": "2026-09-12T22:11:38+03:00",
+      "subject": "Register active FIT2 fresh pipeline refit",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/EXPERIMENT_REGISTRY_V2.json"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ab6ca0feec121e70c515bdc9b485a9bc6d1b9800",
+      "parents": [
+        "b729499917da4f7dd7ff35669388daec7a2e8af4"
+      ],
+      "author_time": "2026-09-12T22:12:02+03:00",
+      "committer_time": "2026-09-12T22:12:02+03:00",
+      "subject": "Reconcile architecture ledger to FIT2 product reopening",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4131121d3583aa58b099bef7be84fc06675a4a1e",
+      "parents": [
+        "ab6ca0feec121e70c515bdc9b485a9bc6d1b9800"
+      ],
+      "author_time": "2026-09-12T22:12:26+03:00",
+      "committer_time": "2026-09-12T22:12:26+03:00",
+      "subject": "Reconcile experiment ledger to active FIT2 refit",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ba97e9016fdc11cb793564d840ede92e4d9a0c1f",
+      "parents": [
+        "4131121d3583aa58b099bef7be84fc06675a4a1e"
+      ],
+      "author_time": "2026-09-12T22:12:50+03:00",
+      "committer_time": "2026-09-12T22:12:50+03:00",
+      "subject": "Append FIT2 product reopening continuity event",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "07a6995ffc7ac63596b326fee130c836d8892652",
+      "parents": [
+        "ba97e9016fdc11cb793564d840ede92e4d9a0c1f"
+      ],
+      "author_time": "2026-09-12T22:13:14+03:00",
+      "committer_time": "2026-09-12T22:13:14+03:00",
+      "subject": "Extend scientific lineage through real E2E reopening",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0bc79f7f7c8e980f482fd87271ef97718f040c52",
+      "parents": [
+        "3adf797706cf82392e5d06755357a30afc38fadd"
+      ],
+      "author_time": "2026-09-12T22:13:39+03:00",
+      "committer_time": "2026-09-12T22:13:39+03:00",
+      "subject": "Append FIT2 product reopening continuity event",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d02b2188a5eae1b893a8b90f4e97f76152183d8d",
+      "parents": [
+        "0bc79f7f7c8e980f482fd87271ef97718f040c52"
+      ],
+      "author_time": "2026-09-12T22:13:55+03:00",
+      "committer_time": "2026-09-12T22:13:55+03:00",
+      "subject": "Extend branch lineage through FIT2 reopening",
+      "branches_containing": [
+        "repair/mage-full-subject-reclosure-20260912"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6a2f874450b28f78f175eead5f5b97c38d47bdf2",
+      "parents": [
+        "07a6995ffc7ac63596b326fee130c836d8892652"
+      ],
+      "author_time": "2026-09-12T22:14:19+03:00",
+      "committer_time": "2026-09-12T22:14:19+03:00",
+      "subject": "Clarify active experiment branch authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BRANCH_AUTHORITY_V1.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d659fad8d22842aa0e92956188d7efe25dd9c5ac",
+      "parents": [
+        "6a2f874450b28f78f175eead5f5b97c38d47bdf2"
+      ],
+      "author_time": "2026-09-12T22:15:28+03:00",
+      "committer_time": "2026-09-12T22:15:28+03:00",
+      "subject": "Refresh rehydration cache for FIT2 reopening [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

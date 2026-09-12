@@ -6,18 +6,18 @@
 
 ## Coverage
 
-- Git-tracked files: **893**
-- High-signal knowledge artifacts: **281**
-- Explained by continuity policy: **281**
+- Git-tracked files: **894**
+- High-signal knowledge artifacts: **282**
+- Explained by continuity policy: **282**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
 - Live branches: **103**
-- Safe-default evidence-only branches: **96**
+- Safe-default evidence-only branches: **95**
 
 ### Classification counts
 
 - `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL`: **147**
-- `INDEXED_EXPLICIT`: **134**
+- `INDEXED_EXPLICIT`: **135**
 
 `FIT1_COMMIT_LEDGER_COVERED` means exact provenance is recoverable; it does **not** mean the artifact's scientific claim is promoted. `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL` means the artifact predates the FIT1 gate and remains evidence/provenance unless another authority explicitly promotes it.
 
@@ -97,7 +97,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `1609408427d1` | `CANONICAL` | canonical branch |
+| `main` | `d659fad8d228` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -112,7 +112,7 @@ _None._
 | `promote/fit1-evidence-main-20260909` | `9deccb8d051f` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `promote/iris-scene-first-signed-main-v3-20260905` | `dfb087c6a23e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `promote/iris-scene-first-signed-v3-20260905` | `7cfb7efedbe9` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `repair/mage-full-subject-reclosure-20260912` | `11d1fdfd4398` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `repair/mage-full-subject-reclosure-20260912` | `d02b2188a5ea` | `ACTIVE_EXPERIMENT` | MAGE_FIT2_PIPELINE_REFIT |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety` | `2eb09fe3e8c6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

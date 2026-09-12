@@ -1,0 +1,46 @@
+{
+  "schema": "RealSaS.MageFIT2.Stage0GSA8ViewEvidenceSeal.v1",
+  "status": "PASS__REAL_8VIEW_GSA_EVIDENCE_SEALED",
+  "date_utc": "2026-09-12",
+  "authority_id": "MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1",
+  "stage": "GSA8192_REAL_8VIEW_EVIDENCE",
+  "source": {
+    "h1_run_id": "20260912T074348Z",
+    "h1_checkpoint_sha256": "76fc68a8c6f2bed80ae8a678649006c875bc96b586065da8914e7f61528c8ce5",
+    "zero_surface_sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+    "gsa_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
+    "tensorization_hash": "fe351362e195164805cebb0f63b74d1861ef123458b20ac56607016e00a6c67e",
+    "nodes": 8171,
+    "edges": 23656,
+    "observed_nodes": 7391,
+    "completed_nodes": 780,
+    "support_counts": [2537, 2765, 2194, 3021, 2772, 2871, 2183, 2803]
+  },
+  "render": {
+    "basis": "REAL_OBSERVATIONS_PLUS_REAL_GSA_GRAPH_PROJECTION",
+    "synthetic_image_generation_used": false,
+    "views": 8,
+    "contact_sheet_sha256": "a1e61699ca1d482e2bc90b7ce61db06050f95803f81e6c618e34c087db340010",
+    "view_sha256": [
+      "a7f40ca98e9e3795a7961ef894458b9e847177704642d57692ebd4de5d852cd1",
+      "5dcfe433ac1a567d4875736c5d8545973a907f2a846db4eb9afb93fa28e0ca4e",
+      "13e4c66d97c232455d657a6f38cfc2f0ec3ec0c94d77c1dcedce5a73c6255755",
+      "cc7aa8ddcb7da49a927b6bc8ff60680ba96a326fe8cc3cb0f116a0b0711b5e65",
+      "ca4e409842b6b2ad83da521d9863f7d86abbde260051112828cead590927bf8d",
+      "69e710e0f31b92cb21b45ee2d11216e35daa680148c26c81a225c76e4f79142f",
+      "db3e88a8cb263182f72fdccf199664e5d3d2d2972093fd4cdfab6b7c2a9147b2",
+      "fa19aacf405e067afa34589bcc42c81cbc1b14971870ba285e871d01ac38ab0a"
+    ]
+  },
+  "drive": {
+    "fit2_root_folder_id": "1_UafA_xG0w5X6USfUEwNLSLSSGECX7cl",
+    "gsa_evidence_folder_id": "1vqo9aaFQT5RSubGnM1JJG_G-Wmb1exyx",
+    "contact_sheet_file_id": "1nI1M0cNn0vM4MY1dC6hvab1OgJ39cG9_",
+    "artifact_zip_file_id": "1rbAToYFyvLXU5w603VQ-Rtv8H3wsForj",
+    "manifest_file_id": "1AP6bD6-1x4DxwcVvzXaBtF-vNYVngknU"
+  },
+  "next_gate": "GEPPETTO_FRESH_REFIT",
+  "geppetto_pass_claimed": false,
+  "arachne_pass_claimed": false,
+  "product_pass_claimed": false
+}

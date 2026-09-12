@@ -1,0 +1,38 @@
+name: mage-mwb2-exact-replay-source-export
+
+on:
+  push:
+    branches:
+      - repair/mage-full-subject-reclosure-20260912
+    paths:
+      - '.github/workflows/mage_mwb2_exact_replay_source_export.yml'
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Verify historical CDT payload
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64, hashlib, zlib
+          p = Path('compiler/realsas_compiler_core/mesh/_historical_v05/cdt_production.py.zlib.b85')
+          raw = zlib.decompress(base64.b85decode(p.read_text(encoding='ascii').strip().encode('ascii')))
+          digest = hashlib.sha256(raw).hexdigest()
+          assert len(raw) == 20221, len(raw)
+          assert digest == 'dd21ae3fc570b2eb5d3c439a5c31fd25fed2ad0743d34a71119d5b391806854d', digest
+          print('historical_cdt_sha256=' + digest)
+          PY
+      - name: Upload compiler source
+        uses: actions/upload-artifact@v4
+        with:
+          name: realsas-compiler-source-${{ github.sha }}
+          path: compiler/realsas_compiler_core
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 6

@@ -8,10 +8,14 @@ on:
       - '.github/workflows/mage_mwb2_cdt_runner_probe.yml'
   workflow_dispatch:
 
+concurrency:
+  group: mage-mwb2-cdt-runner-probe-realsas
+  cancel-in-progress: true
+
 jobs:
   probe:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 10
+    timeout-minutes: 3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,21 +24,36 @@ jobs:
         run: |
           mkdir -p runner_probe
           : > runner_probe/candidate_paths.txt
-          for root in /mnt/c/Users /home; do
-            if [ -d "$root" ]; then
-              find "$root" -type f \
-                \( -iname 'ZERO_SURFACE_PRODUCT_CLIPPED.npz' \
-                   -o -iname '*zero_surface*.npz' \
-                   -o -iname '*20260912T074348Z*' \
-                   -o -iname '*mage*.npz' \
-                   -o -iname '*mage*.json' \) \
-                -not -path '*/AppData/*' \
-                -not -path '*/node_modules/*' \
-                -not -path '*/.git/*' \
-                -not -path '*/.cache/*' \
-                2>/dev/null >> runner_probe/candidate_paths.txt || true
-            fi
+          shopt -s nullglob
+          roots=(
+            /home/monster/Downloads
+            /home/monster/Desktop
+            /home/monster/Documents
+            /mnt/c/Users/*/Downloads
+            /mnt/c/Users/*/Desktop
+            /mnt/c/Users/*/Documents
+          )
+          for root in "${roots[@]}"; do
+            [ -d "$root" ] || continue
+            find "$root" -maxdepth 8 -type f \
+              \( -iname 'ZERO_SURFACE_PRODUCT_CLIPPED.npz' \
+                 -o -iname '*zero_surface*.npz' \
+                 -o -iname '*20260912T074348Z*' \
+                 -o -iname '*mage*.npz' \
+                 -o -iname '*mage*.json' \) \
+              -not -path '*/AppData/*' \
+              -not -path '*/node_modules/*' \
+              -not -path '*/.git/*' \
+              -not -path '*/.cache/*' \
+              2>/dev/null >> runner_probe/candidate_paths.txt || true
           done
+          # Also inspect runner-adjacent directories but never recurse through the actions-runner work tree.
+          find /home/monster -maxdepth 4 -type f \
+            \( -iname 'ZERO_SURFACE_PRODUCT_CLIPPED.npz' \
+               -o -iname '*20260912T074348Z*' \) \
+            -not -path '/home/monster/actions-runner/*' \
+            -not -path '*/.cache/*' \
+            2>/dev/null >> runner_probe/candidate_paths.txt || true
           sort -u runner_probe/candidate_paths.txt | head -n 1000 > runner_probe/candidate_paths.sorted.txt
           mv runner_probe/candidate_paths.sorted.txt runner_probe/candidate_paths.txt
           python - <<'PY'
@@ -51,14 +70,14 @@ jobs:
                   size = None
               rows.append({'path': str(p), 'size_bytes': size})
           out = {
-              'schema': 'RealSaS.MageMWB2CDTRunnerArtifactProbe.v2',
+              'schema': 'RealSaS.MageMWB2CDTRunnerArtifactProbe.v3',
               'hit_count': len(rows),
               'hits': rows,
           }
           Path('runner_probe/mage_h1_1024_artifact_inventory.json').write_text(
               json.dumps(out, indent=2), encoding='utf-8'
           )
-          print(json.dumps({'hit_count': len(rows)}))
+          print(json.dumps({'hit_count': len(rows), 'hits': rows[:40]}))
           PY
       - name: Upload probe inventory
         uses: actions/upload-artifact@v4

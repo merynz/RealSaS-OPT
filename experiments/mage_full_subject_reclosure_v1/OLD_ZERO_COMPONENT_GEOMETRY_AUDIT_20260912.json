@@ -1,0 +1,25 @@
+{
+  "schema": "RealSaS.ComponentGeometryCoverageAudit.v1",
+  "date": "2026-09-12",
+  "status": "FAIL__OLD_PROMOTED_ZERO_SURFACE_MISSES_REQUIRED_COMPONENT_GEOMETRY",
+  "normalized_source_sha256": "528bef491eceb358ebc8ecb2a46af1d37b4322a7ef500281403a8207fe7c648f",
+  "prediction_sha256": "987f7d18ce202454c4ea5101225bfaed54aeb4638cba1077e70efc15f2038e9b",
+  "normalization_half_extent_source": "EXACT_MAGE_CAMERA_CONTRACT",
+  "existing_fit_geometry_p95_gate_norm": 0.05,
+  "components": [
+    {"component_id":"BODY_SET","mechanical_class":"DEFORMABLE_COMPONENT","source_vertex_count":3348,"source_to_prediction_mean_norm":0.019238432306819653,"source_to_prediction_p95_norm":0.07728469530937607,"source_vertices_within_0_05_fraction":0.9059139784946236,"prediction_vertices_nearest_to_component":115839,"required_visible_component":true},
+    {"component_id":"BOOK_VARIANTS","mechanical_class":"RIGID_SKINNED_COMPONENT","source_vertex_count":817,"source_to_prediction_mean_norm":0.1173710839298138,"source_to_prediction_p95_norm":0.33443993135065553,"source_vertices_within_0_05_fraction":0.2607099143206854,"prediction_vertices_nearest_to_component":601,"required_visible_component":true},
+    {"component_id":"WAND_STAFF_VARIANTS","mechanical_class":"RIGID_SKINNED_COMPONENT","source_vertex_count":656,"source_to_prediction_mean_norm":0.4052207070417257,"source_to_prediction_p95_norm":0.7975210731636881,"source_vertices_within_0_05_fraction":0.22408536585365854,"prediction_vertices_nearest_to_component":262,"required_visible_component":true},
+    {"component_id":"HAT","mechanical_class":"RIGID_SKINNED_COMPONENT","source_vertex_count":402,"source_to_prediction_mean_norm":0.2112553848495399,"source_to_prediction_p95_norm":0.4542596619815958,"source_vertices_within_0_05_fraction":0.13681592039800994,"prediction_vertices_nearest_to_component":1467,"required_visible_component":true},
+    {"component_id":"CAPE","mechanical_class":"RIGID_SKINNED_COMPONENT","source_vertex_count":56,"source_to_prediction_mean_norm":0.11234847291657607,"source_to_prediction_p95_norm":0.20483242294659992,"source_vertices_within_0_05_fraction":0.08928571428571429,"prediction_vertices_nearest_to_component":219,"required_visible_component":true},
+    {"component_id":"ICOSPHERE","mechanical_class":"EXCLUDED_SOURCE_COMPONENT","source_vertex_count":42,"source_to_prediction_mean_norm":0.5024787825042015,"source_to_prediction_p95_norm":0.724933361894271,"source_vertices_within_0_05_fraction":0.0,"prediction_vertices_nearest_to_component":0,"required_visible_component":false}
+  ],
+  "interpretation": {
+    "aggregate_metric_masking_confirmed": true,
+    "body_is_substantially_better_than_accessories": true,
+    "required_accessory_components_are_not_reliably_reconstructed": true,
+    "icosphere_is_expected_mechanical_exclusion": true,
+    "teacher_component_truth_used_at_product_inference": false
+  },
+  "claim_boundary": "EVALUATION_ONLY__NO_CANONICAL_PROMOTION"
+}

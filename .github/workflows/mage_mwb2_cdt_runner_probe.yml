@@ -18,75 +18,54 @@ jobs:
       - name: Locate Mage H1 1024 cached artifacts
         shell: bash
         run: |
+          mkdir -p runner_probe
+          : > runner_probe/candidate_paths.txt
+          for root in /mnt/c/Users /home; do
+            if [ -d "$root" ]; then
+              find "$root" -type f \
+                \( -iname 'ZERO_SURFACE_PRODUCT_CLIPPED.npz' \
+                   -o -iname '*zero_surface*.npz' \
+                   -o -iname '*20260912T074348Z*' \
+                   -o -iname '*mage*.npz' \
+                   -o -iname '*mage*.json' \) \
+                -not -path '*/AppData/*' \
+                -not -path '*/node_modules/*' \
+                -not -path '*/.git/*' \
+                -not -path '*/.cache/*' \
+                2>/dev/null >> runner_probe/candidate_paths.txt || true
+            fi
+          done
+          sort -u runner_probe/candidate_paths.txt | head -n 1000 > runner_probe/candidate_paths.sorted.txt
+          mv runner_probe/candidate_paths.sorted.txt runner_probe/candidate_paths.txt
           python - <<'PY'
-          from __future__ import annotations
-          import json
-          import os
           from pathlib import Path
-
-          roots = []
-          for base in (Path('/mnt/c/Users'), Path('/home')):
-              if not base.exists():
+          import json
+          rows = []
+          for raw in Path('runner_probe/candidate_paths.txt').read_text(encoding='utf-8', errors='replace').splitlines():
+              p = Path(raw.strip())
+              if not raw.strip():
                   continue
-              if base == Path('/mnt/c/Users'):
-                  for user in base.iterdir():
-                      for leaf in ('Downloads', 'Desktop', 'Documents'):
-                          p = user / leaf
-                          if p.exists(): roots.append(p)
-              else:
-                  roots.append(base)
-
-          exact = {'ZERO_SURFACE_PRODUCT_CLIPPED.npz'}
-          hits = []
-          seen = set()
-          prune = {'.git', 'node_modules', 'AppData', '.cache', '.npm', '.vscode', '__pycache__'}
-          for root in roots:
-              for dirpath, dirnames, filenames in os.walk(root):
-                  dirnames[:] = [d for d in dirnames if d not in prune]
-                  lowpath = dirpath.lower()
-                  interesting_dir = any(k in lowpath for k in ('realsas', 'mage', 'h1', '20260912'))
-                  for name in filenames:
-                      low = name.lower()
-                      interesting = (
-                          name in exact
-                          or ('zero_surface' in low and low.endswith('.npz'))
-                          or '20260912t074348z' in low
-                          or ('mage' in low and low.endswith(('.npz', '.json', '.png')))
-                          or (interesting_dir and low.endswith('.npz'))
-                      )
-                      if not interesting:
-                          continue
-                      p = Path(dirpath) / name
-                      key = str(p)
-                      if key in seen: continue
-                      seen.add(key)
-                      try:
-                          size = p.stat().st_size
-                      except OSError:
-                          continue
-                      hits.append({'path': key, 'size_bytes': int(size)})
-                      if len(hits) >= 500:
-                          break
-                  if len(hits) >= 500:
-                      break
-              if len(hits) >= 500:
-                  break
-
+              try:
+                  size = p.stat().st_size
+              except OSError:
+                  size = None
+              rows.append({'path': str(p), 'size_bytes': size})
           out = {
-              'schema': 'RealSaS.MageMWB2CDTRunnerArtifactProbe.v1',
-              'roots': [str(p) for p in roots],
-              'hit_count': len(hits),
-              'hits': sorted(hits, key=lambda r: (r['path'].lower(), r['size_bytes'])),
+              'schema': 'RealSaS.MageMWB2CDTRunnerArtifactProbe.v2',
+              'hit_count': len(rows),
+              'hits': rows,
           }
-          dest = Path('runner_probe')
-          dest.mkdir(exist_ok=True)
-          (dest / 'mage_h1_1024_artifact_inventory.json').write_text(json.dumps(out, indent=2), encoding='utf-8')
-          print(json.dumps({'hit_count': len(hits), 'inventory': str(dest / 'mage_h1_1024_artifact_inventory.json')}))
+          Path('runner_probe/mage_h1_1024_artifact_inventory.json').write_text(
+              json.dumps(out, indent=2), encoding='utf-8'
+          )
+          print(json.dumps({'hit_count': len(rows)}))
           PY
       - name: Upload probe inventory
         uses: actions/upload-artifact@v4
         with:
           name: mage-h1-1024-runner-probe
-          path: runner_probe/mage_h1_1024_artifact_inventory.json
+          path: |
+            runner_probe/mage_h1_1024_artifact_inventory.json
+            runner_probe/candidate_paths.txt
           if-no-files-found: error
           retention-days: 3

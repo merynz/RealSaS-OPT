@@ -22,14 +22,10 @@ on:
       - 'tools/audit_full_subject_coverage.py'
       - 'tools/audit_component_geometry_coverage.py'
       - 'tools/audit_full_subject_fit_authority.py'
-      - 'tools/repair_mwb2_boundary_contraction_20260912.py'
       - 'experiments/mage_full_subject_reclosure_v1/**'
       - 'canonical/MAGE_*20260912*'
       - '.github/workflows/mage_full_subject_reclosure_contract.yml'
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   contract:
@@ -48,8 +44,6 @@ jobs:
           PIP_DEFAULT_TIMEOUT: '60'
         run: |
           python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pillow pytest scikit-image
-      - name: Apply one-shot MWB2 repair
-        run: python tools/repair_mwb2_boundary_contraction_20260912.py
       - name: Static compile
         run: |
           python -m py_compile compiler/realsas_compiler_core/component_attachment.py
@@ -61,7 +55,6 @@ jobs:
           python -m py_compile tools/audit_full_subject_coverage.py
           python -m py_compile tools/audit_component_geometry_coverage.py
           python -m py_compile tools/audit_full_subject_fit_authority.py
-          python -m py_compile tools/repair_mwb2_boundary_contraction_20260912.py
           python -m py_compile experiments/mage_full_subject_reclosure_v1/build_full_subject_fit_target_v1.py
           python -m py_compile experiments/mage_full_subject_reclosure_v1/run_frozen_geppetto_replay_v1.py
           python -m py_compile tests/compiler/test_component_attachment_v1.py
@@ -79,12 +72,3 @@ jobs:
             tests/compiler/test_h1_observable_qualification_v1.py \
             tests/compiler/test_historical_cdt_v05_loader.py \
             tests/compiler/test_mwb2_observation_cdt_v1.py
-      - name: Commit repaired adapter
-        shell: bash
-        run: |
-          git config user.name 'RealSaS - OPT'
-          git config user.email '140457344+merynz@users.noreply.github.com'
-          git add compiler/realsas_compiler_core/mesh/mwb2_cdt.py tests/compiler/test_mwb2_observation_cdt_v1.py
-          git diff --cached --quiet && exit 0
-          git commit -m 'Contract historical CDT boundary recovery vertices'
-          git push origin HEAD:repair/mage-full-subject-reclosure-20260912

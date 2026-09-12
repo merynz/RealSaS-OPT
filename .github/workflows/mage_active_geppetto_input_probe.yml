@@ -100,3 +100,5 @@ jobs:
           path: probe
           if-no-files-found: error
           retention-days: 2
+
+# Triggered after workflow registration on the repair branch.

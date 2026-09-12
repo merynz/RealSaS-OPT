@@ -1,0 +1,134 @@
+{
+  "schema": "RealSaS.MageFullSubject.H1ObservableAuthorityReconciliation.v1",
+  "date": "2026-09-12",
+  "status": "PASS_H1_OBSERVABLE_PRODUCT_SURFACE__HISTORICAL_FULL_TEACHER_SIGN_FAIL_PRESERVED_AS_DIAGNOSTIC",
+  "claim_boundary": {
+    "h1_observable_product_surface_gate": true,
+    "historical_h1_full_teacher_sign_gate": false,
+    "canonical_product_pass": false,
+    "unseen_generalization": false,
+    "teacher_geometry_product_authority": false
+  },
+  "source_authority": {
+    "run_id": "20260912T074348Z",
+    "signed_mesh_result_sha256": "6cfb8266357621e1e54b7b76d863ff4fdfd5ce85f5d705bccaca37c3464ecfc7",
+    "product_clipped_zero_surface_sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+    "input_authority_preflight_sha256": "7a8542280f56c00e1727dfdb1e121ad2934ca37ecc0dfafa1f8d3ca410b2ed91",
+    "source_checkpoint_sha256": "b00e33f9b5593e1ecfc69e6bc77d82d28c4d585c38edde113dd25f8899758ec6",
+    "h1_checkpoint_sha256": "76fc68a8c6f2bed80ae8a678649006c875bc96b586065da8914e7f61528c8ce5",
+    "product_inference_inputs": ["8x1024_RGBA", "8xORTHOGRAPHIC_CAMERA"],
+    "teacher_mesh_used_at_inference": false,
+    "observation_sha256": [
+      "8e9875c16bba3047c8f2fc211b984f2399d1145f5720c7427c6fc03a3fec0616",
+      "fa94283780d5e5f3ad3943bbffc1f0592a70fc362fdd03b94a1d1cb46889dc30",
+      "777bf4f7c505b405d3a5d2a111b2f297949454f77cae7c33064bf02479d384a5",
+      "2a771c91c1d1c0b75dab14f6e98b7905a8429bbf0c0a8dd690261f93f6476d86",
+      "354bb239feb6c1a515917fee4efb42fb1e0cb9f173d0eb3191fb0901a02a6228",
+      "158fc14a75aa69f6133f2ba3ec5df2ad146afc62f477d7d3b4a41ca2cb0e42f2",
+      "e3b08836c187863819d8b8aaa53aef79eddfee167e1fabf3fb1dd8ec0484563a",
+      "87d4ad46edffec3c6bff034d305194820288d3cc6ef9a9480ac2234fb56451bc"
+    ],
+    "camera_sha256": [
+      "73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541",
+      "bdc172a4aff332f956d1403e36b2f8684b68059fdc82f9efddf35d05a6d9b4d4",
+      "3c2bbc44ef9005b4a545a3381205a5d6a92af15b4791c9075071b8cad02a1a6c",
+      "24b2f115d908422d885f85e956fcc36ac78fd0c90b503f698caa62febc2b9c4d",
+      "5bf00783d6509c2ca142e05ef705d5cdb5df17ad248b782d2fe8cf8a297bee39",
+      "7ee3e50739318eeb122b5b0ec67260dd32e21d949398f48c408a6c239e5c89fe",
+      "daa19fa58ff602977d64b720c4198956809855149d814df487c7762a963f1eec",
+      "68f51fbfce4c31f94281e1569d74b44609435285668f8a8b1b278e76db6ea53f"
+    ]
+  },
+  "surface_sign_contract_evidence": {
+    "classification": "OPEN_OR_MIXED_SURFACE",
+    "forensic_source": "H1_FULL_SUBJECT_1024_FORENSIC_AUDIT_20260912.json",
+    "forensic_source_blob_sha": "c252745b553640fb3fcae0661eb5e4b46b2cc58c",
+    "all_teacher_components_have_boundary_edges": true,
+    "any_nonmanifold_edge_degree_gt_2": false,
+    "first_hit_faces_seen_from_both_oriented_sides": 59,
+    "supported_rays_on_two_sided_hit_faces": 1633,
+    "two_sided_localization": {
+      "component": "Mage_Cape",
+      "cape_hit_faces": 80,
+      "cape_two_sided_hit_faces": 59,
+      "fraction_cape_hit_faces_two_sided": 0.7375,
+      "cape_supported_rays": 1945,
+      "cape_rays_on_two_sided_faces": 1633,
+      "fraction_cape_rays_on_two_sided_faces": 0.8395886889460155
+    },
+    "conclusion": "A universal watertight inside/outside sign contract is not coherent for the corrected full subject; global sign and hidden full-teacher completeness are retained as diagnostics rather than product-surface hard gates."
+  },
+  "qualification_implementation": {
+    "path": "compiler/realsas_compiler_core/substrate/h1_observable_qualification.py",
+    "blob_sha": "1fca559388c57f3fa54942268499886056e08d8d",
+    "function": "qualify_h1_observable_surface_v1",
+    "surface_sign_contract": "OPEN_OR_MIXED_SURFACE",
+    "local_replay_output_sha256": "a63a60979f50d900a8e51b0e3993891ab92386066870d2bc058a50b4bdd9b0b1"
+  },
+  "qualification": {
+    "schema": "RealSaS.H1ObservableSurfaceQualification.v1",
+    "status": "PASS_H1_OBSERVABLE_PRODUCT_SURFACE",
+    "pass": true,
+    "surface_sign_contract": "OPEN_OR_MIXED_SURFACE",
+    "product_inference_inputs": ["8x1024_RGBA", "8xORTHOGRAPHIC_CAMERA"],
+    "teacher_mesh_used_at_inference": false,
+    "hard_gates": {
+      "input_alpha_coverage": {
+        "pass": true,
+        "minimums": {
+          "recall": 0.9511473445488728,
+          "precision": 0.9806321480449604,
+          "iou": 0.9356283394389125
+        },
+        "thresholds": {
+          "min_recall": 0.95,
+          "min_precision": 0.95,
+          "min_iou": 0.92
+        }
+      },
+      "observable_first_hit_geometry": {
+        "pass": true,
+        "p95_norm_max": 0.05,
+        "strata": [
+          {"name": "support_1_2", "n": 10744, "p95_norm": 0.040687738730924204, "pass": true},
+          {"name": "support_3_4", "n": 572, "p95_norm": 0.024123951564970204, "pass": true},
+          {"name": "support_5_8", "n": 2, "p95_norm": 0.008030098852479932, "pass": true}
+        ]
+      },
+      "closed_watertight_global_sign": {
+        "applicable": false,
+        "pass": true
+      }
+    },
+    "historical_full_teacher_and_sign_metrics": {
+      "zero_bracket_rate": 0.798828125,
+      "truth_to_pred_p95_norm": 0.13903570709611163,
+      "pred_to_truth_p95_norm": 0.07577677401856454,
+      "qualification_role": "DIAGNOSTIC_ONLY__GLOBAL_SIGN_OR_FULL_HIDDEN_TEACHER_NOT_PRODUCT_AUTHORITY",
+      "preserved_as_scientific_history": true
+    },
+    "authority_boundary": {
+      "teacher_geometry_allowed_at_fit_evaluation": true,
+      "teacher_geometry_allowed_at_product_inference": false,
+      "full_hidden_teacher_completeness_hard_gate": false,
+      "product_observation_authority": "EXACT_8_RGBA_ALPHA_PLUS_EXACT_8_CAMERAS"
+    },
+    "canonical_promotion_authorized": false,
+    "product_pass_claimed": false,
+    "unseen_generalization_claimed": false
+  },
+  "historical_record_policy": {
+    "original_full_subject_fit_pass_false_is_preserved": true,
+    "original_zero_bracket_and_full_teacher_residuals_are_preserved": true,
+    "historical_result_is_not_rewritten_to_pass": true,
+    "supersession_scope": "QUALIFICATION_SEMANTICS_FOR_PRODUCT_OBSERVABLE_SURFACE_ONLY"
+  },
+  "decision": {
+    "blind_additional_h1_training": "NOT_AUTHORIZED",
+    "h1_observable_surface_gate": "PASS",
+    "gsa8192_lineage_seal": "AUTHORIZED_AS_NEXT_GATE",
+    "mwb2_cdt_exact_behavioral_reclosure": "ALREADY_PASS__SEE_MWB2_CDT_EXACT_RECLOSURE_REPORT_20260912.json",
+    "arap_bbw_xpbd": "LOCKED_UNTIL_GSA8192_LINEAGE_SEAL_AND_FROZEN_DOWNSTREAM_REPLAY",
+    "product_pass": false
+  }
+}

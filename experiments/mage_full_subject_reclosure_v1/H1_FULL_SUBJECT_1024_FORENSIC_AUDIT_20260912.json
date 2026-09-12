@@ -1,0 +1,124 @@
+{
+  "schema": "RealSaS.MageFullSubject.H1V2ContinuationForensicAudit.v1",
+  "date": "2026-09-12",
+  "status": "FAIL_PRESERVED__OBSERVATION_GATE_PASS__FULL_TEACHER_GEOMETRY_GATE_NOT_CLOSED__QUALIFICATION_CONTRACT_REVIEW_REQUIRED",
+  "claims": {
+    "h1_full_subject_pass": false,
+    "canonical_promotion": false,
+    "product_pass": false,
+    "unseen_generalization": false,
+    "gsa_reclosure_authorized": false,
+    "cdt_authorized": false
+  },
+  "source_run": {
+    "run_id": "20260912T074348Z",
+    "drive_path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_CONTINUATION_RUNS/20260912T074348Z",
+    "train_steps": 1024,
+    "corrected_teacher_sha256": "dec2e816ea2bac5bfca44b1669484b0cde3c87d8d4f5052890cee07469c6825a",
+    "product_zero_surface_sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+    "signed_history_sha256": "f10211978669a19979d19c5e96b1110896e0d3720815a0aa6f47325282ebe9a5"
+  },
+  "terminal_metrics": {
+    "zero_bracket_rate": 0.798828125,
+    "truth_to_pred_mean_norm": 0.035666847814643125,
+    "truth_to_pred_p95_norm": 0.13903570709611163,
+    "pred_to_truth_mean_norm": 0.023330832212306824,
+    "pred_to_truth_p95_norm": 0.07577677401856454,
+    "input_alpha_coverage": {
+      "status": "PASS",
+      "minimum_recall": 0.9511473445488728,
+      "minimum_precision": 0.9806321480449604,
+      "minimum_iou": 0.9356283394389125,
+      "mean_recall": 0.9591174242261618,
+      "mean_precision": 0.9886616054952025,
+      "mean_iou": 0.9487081071256647
+    },
+    "observable_support_strata": {
+      "support_1_2": {"n": 10744, "mean_norm": 0.016239323521575266, "p95_norm": 0.040687738730924204},
+      "support_3_4": {"n": 572, "mean_norm": 0.010172938708729649, "p95_norm": 0.024123951564970204},
+      "support_5_8": {"n": 2, "mean_norm": 0.00659662983717831, "p95_norm": 0.008030098852479932}
+    }
+  },
+  "continuation_trend": {
+    "step_512": {"loss": 0.024080021306872368, "zero_bracket_rate": 0.734375},
+    "step_768": {"loss": 0.019152484834194183, "zero_bracket_rate": 0.794921875},
+    "step_832": {"loss": 0.01979168690741062, "zero_bracket_rate": 0.775390625},
+    "step_896": {"loss": 0.020612023770809174, "zero_bracket_rate": 0.771484375},
+    "step_960": {"loss": 0.019976846873760223, "zero_bracket_rate": 0.7744140625},
+    "step_1024": {"loss": 0.019631411880254745, "zero_bracket_rate": 0.798828125},
+    "interpretation": "Additional optimization improves observation silhouette and pred-to-truth error, but the signed bracket is not monotonically converging toward 0.90 and full-teacher truth-to-pred p95 remains high. A blind further continuation is not authorized."
+  },
+  "component_target_to_prediction_residual_norm": {
+    "body_first_six_aggregate": {"vertices": 3348, "mean": 0.026207891408291818, "p95": 0.10065238942242209, "max": 0.22580310139186974, "fraction_gt_0_05": 0.1520310633213859, "fraction_gt_0_10": 0.051075268817204304},
+    "Spellbook": {"vertices": 399, "mean": 0.02955602222151926, "p95": 0.06958834546958158, "max": 0.08424858155601085, "fraction_gt_0_05": 0.20551378446115287, "fraction_gt_0_10": 0.0},
+    "Spellbook_open": {"vertices": 418, "mean": 0.024387645442895033, "p95": 0.07216337444837784, "max": 0.09029132816896798, "fraction_gt_0_05": 0.15311004784688995, "fraction_gt_0_10": 0.0},
+    "1H_Wand": {"vertices": 158, "mean": 0.01896368768673032, "p95": 0.03545093611809742, "max": 0.08817931693605864, "fraction_gt_0_05": 0.0379746835443038, "fraction_gt_0_10": 0.0},
+    "2H_Staff": {"vertices": 498, "mean": 0.07062275177796833, "p95": 0.2537250772092537, "max": 0.34859225742360783, "fraction_gt_0_05": 0.3534136546184739, "fraction_gt_0_10": 0.25301204819277107},
+    "Mage_Hat": {"vertices": 402, "mean": 0.037966352202258455, "p95": 0.16588550129411814, "max": 0.31816643332811095, "fraction_gt_0_05": 0.19402985074626866, "fraction_gt_0_10": 0.12686567164179105},
+    "Mage_Cape": {"vertices": 56, "mean": 0.022330575905270218, "p95": 0.08178813189926426, "max": 0.1547680233840619, "fraction_gt_0_05": 0.14285714285714285, "fraction_gt_0_10": 0.05357142857142857},
+    "global_vertices_gt_0_10": 351,
+    "staff_plus_hat_vertices_gt_0_10": 177
+  },
+  "teacher_topology_audit": {
+    "all_components_have_boundary_edges": true,
+    "any_nonmanifold_edge_degree_gt_2": false,
+    "components": {
+      "body_0": {"boundary_edge_fraction": 0.24060150375939848},
+      "body_1": {"boundary_edge_fraction": 0.24060150375939848},
+      "body_2": {"boundary_edge_fraction": 0.4739454094292804},
+      "body_3": {"boundary_edge_fraction": 0.25735294117647056},
+      "leg_0": {"boundary_edge_fraction": 0.30997304582210244},
+      "leg_1": {"boundary_edge_fraction": 0.30997304582210244},
+      "Spellbook": {"boundary_edge_fraction": 0.6248037676609105},
+      "Spellbook_open": {"boundary_edge_fraction": 0.650231124807396},
+      "1H_Wand": {"boundary_edge_fraction": 0.5148514851485149},
+      "2H_Staff": {"boundary_edge_fraction": 0.5462555066079295},
+      "Mage_Hat": {"boundary_edge_fraction": 0.46113989637305697},
+      "Mage_Cape": {"boundary_edge_fraction": 0.18705035971223022}
+    }
+  },
+  "exact_stride16_first_hit_supervision_audit": {
+    "supported_rays": 15108,
+    "unique_hit_faces": 2516,
+    "teacher_faces_total": 5683,
+    "components": {
+      "body_0": {"supported_rays": 314, "hit_faces": 166, "faces_total": 468, "hit_face_fraction": 0.3547008547008547},
+      "body_1": {"supported_rays": 380, "hit_faces": 190, "faces_total": 468, "hit_face_fraction": 0.405982905982906},
+      "body_2": {"supported_rays": 1999, "hit_faces": 572, "faces_total": 1230, "hit_face_fraction": 0.46504065040650405},
+      "body_3": {"supported_rays": 2072, "hit_faces": 493, "faces_total": 1027, "hit_face_fraction": 0.4800389483933788},
+      "leg_0": {"supported_rays": 351, "hit_faces": 161, "faces_total": 418, "hit_face_fraction": 0.38516746411483255},
+      "leg_1": {"supported_rays": 349, "hit_faces": 158, "faces_total": 418, "hit_face_fraction": 0.37799043062200954},
+      "Spellbook": {"supported_rays": 565, "hit_faces": 74, "faces_total": 292, "hit_face_fraction": 0.2534246575342466},
+      "Spellbook_open": {"supported_rays": 894, "hit_faces": 84, "faces_total": 292, "hit_face_fraction": 0.2876712328767123},
+      "1H_Wand": {"supported_rays": 8, "hit_faces": 3, "faces_total": 150, "hit_face_fraction": 0.02},
+      "2H_Staff": {"supported_rays": 834, "hit_faces": 259, "faces_total": 440, "hit_face_fraction": 0.5886363636363636},
+      "Mage_Hat": {"supported_rays": 5397, "hit_faces": 276, "faces_total": 396, "hit_face_fraction": 0.696969696969697},
+      "Mage_Cape": {"supported_rays": 1945, "hit_faces": 80, "faces_total": 84, "hit_face_fraction": 0.9523809523809523}
+    }
+  },
+  "exact_open_surface_sign_semantics_audit": {
+    "hit_faces_total": 2516,
+    "faces_hit_as_first_surface_from_both_oriented_sides": 59,
+    "supported_rays_on_two_sided_hit_faces": 1633,
+    "fraction_all_supported_rays_on_two_sided_hit_faces": 0.10808842997087635,
+    "localization": {
+      "component": "Mage_Cape",
+      "cape_hit_faces": 80,
+      "cape_two_sided_hit_faces": 59,
+      "fraction_cape_hit_faces_two_sided": 0.7375,
+      "cape_supported_rays": 1945,
+      "cape_rays_on_two_sided_faces": 1633,
+      "fraction_cape_rays_on_two_sided_faces": 0.8395886889460155
+    },
+    "interpretation": "The current local signed supervision assigns before-first-hit as positive and behind-first-hit as negative. On an open cape, the same oriented source faces are first-hit from both sides across the canonical cameras. Therefore the global inside/outside signed-field interpretation is not a coherent universal qualification semantics for the full corrected subject. This does not authorize a gate change by itself; it requires a separately preregistered qualification-contract audit."
+  },
+  "decision": {
+    "blind_additional_training": "FORBIDDEN_UNTIL_CAUSAL_REVIEW",
+    "historical_full_teacher_bidirectional_p95_gate": "REQUIRES_AUTHORITY_REVIEW__IT_EVALUATES_ALL_TEACHER_SURFACES_WHILE_TRAINING_IS_FIRST_HIT_OBSERVATION_BASED",
+    "zero_bracket_gate": "REQUIRES_AUTHORITY_REVIEW_FOR_OPEN_TWO_SIDED_COMPONENTS",
+    "observation_alpha_gate": "PASS",
+    "observable_first_hit_geometry_p95": "PASS_AT_0_05_IN_ALL_SUPPORT_STRATA",
+    "next_gate": "OPTIMIZER_FREE_H1_OBSERVABLE_SURFACE_AUTHORITY_AUDIT",
+    "downstream_policy": "NO_GSA_PROMOTION_NO_MWB2_PRODUCT_CLAIM_NO_CDT_UNTIL_H1_AUTHORITY_REVIEW_CLOSES"
+  }
+}

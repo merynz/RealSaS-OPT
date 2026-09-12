@@ -6,8 +6,11 @@ on:
       - repair/mage-full-subject-reclosure-20260912
     paths:
       - 'compiler/realsas_compiler_core/component_attachment.py'
+      - 'compiler/realsas_compiler_core/substrate/scene_first_signed.py'
       - 'tests/compiler/test_component_attachment_v1.py'
+      - 'tests/compiler/test_scene_first_signed_surface_bridge_v1.py'
       - 'tools/audit_full_subject_coverage.py'
+      - 'tools/audit_component_geometry_coverage.py'
       - 'canonical/MAGE_*20260912*'
       - '.github/workflows/mage_full_subject_reclosure_contract.yml'
   workflow_dispatch:
@@ -20,17 +23,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Python
-        shell: powershell
+        shell: bash
         run: |
+          set -euo pipefail
           python --version
-          python -m pip install -q pytest numpy pillow
+          python -m pip install -q pytest numpy pillow scipy
       - name: Static compile
-        shell: powershell
+        shell: bash
         run: |
+          set -euo pipefail
           python -m py_compile compiler/realsas_compiler_core/component_attachment.py
+          python -m py_compile compiler/realsas_compiler_core/substrate/scene_first_signed.py
           python -m py_compile tools/audit_full_subject_coverage.py
+          python -m py_compile tools/audit_component_geometry_coverage.py
           python -m py_compile tests/compiler/test_component_attachment_v1.py
-      - name: Component attachment contract tests
-        shell: powershell
+          python -m py_compile tests/compiler/test_scene_first_signed_surface_bridge_v1.py
+      - name: Reclosure contract tests
+        shell: bash
         run: |
-          python -m pytest -q tests/compiler/test_component_attachment_v1.py
+          set -euo pipefail
+          python -m pytest -q \
+            tests/compiler/test_component_attachment_v1.py \
+            tests/compiler/test_scene_first_signed_surface_bridge_v1.py

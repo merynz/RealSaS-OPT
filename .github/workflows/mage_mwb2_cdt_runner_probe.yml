@@ -15,7 +15,7 @@ concurrency:
 jobs:
   probe:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 3
+    timeout-minutes: 6
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
             2>/dev/null >> runner_probe/candidate_paths.txt || true
           sort -u runner_probe/candidate_paths.txt | head -n 3000 > runner_probe/candidate_paths.sorted.txt
           mv runner_probe/candidate_paths.sorted.txt runner_probe/candidate_paths.txt
-          python - <<'PY'
+          python3 - <<'PY'
           from hashlib import sha256
           from pathlib import Path
           import json

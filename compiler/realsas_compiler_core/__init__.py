@@ -81,5 +81,6 @@ from .mesh_binding import *
 from .directional_binding import *
 from .product import *
 from .v4 import *
+from .compile_transaction import *
 from .api import CompilerFacade
 from .bundle_routes import *

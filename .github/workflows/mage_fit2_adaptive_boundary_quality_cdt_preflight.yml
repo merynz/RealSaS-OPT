@@ -14,7 +14,7 @@ on:
 jobs:
   preflight:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       PYTHONPATH: .:compiler
       PYTHONHASHSEED: '20260912'
@@ -24,11 +24,19 @@ jobs:
       NUMEXPR_NUM_THREADS: '1'
     steps:
       - uses: actions/checkout@v4
+      - name: Isolated Python environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .preflight-venv
+          python3 -m venv .preflight-venv
+          .preflight-venv/bin/python -m pip install -q --upgrade pip
+          .preflight-venv/bin/python -m pip install -q numpy scipy pillow scikit-image pytest
       - name: Runtime dependency probe
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
+          .preflight-venv/bin/python - <<'PY'
           import numpy, scipy, PIL, skimage, pytest
           print('DEPENDENCY_PROBE_PASS')
           print('numpy', numpy.__version__)
@@ -39,8 +47,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m py_compile experiments/mage_full_subject_reclosure_v1/run_fit2_adaptive_boundary_quality_cdt_v1.py
-          python3 - <<'PY'
+          .preflight-venv/bin/python -m py_compile experiments/mage_full_subject_reclosure_v1/run_fit2_adaptive_boundary_quality_cdt_v1.py
+          .preflight-venv/bin/python - <<'PY'
           import experiments.mage_full_subject_reclosure_v1.run_fit2_adaptive_boundary_quality_cdt_v1 as m
           assert [x['name'] for x in m.TREATMENTS] == ['B4_G16','B2_G12','B1_G8']
           assert m._PARENT_LOCAL_HOPS == 2
@@ -50,4 +58,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m pytest -q tests/compiler/test_fit2_adaptive_boundary_quality_cdt_contract_v1.py
+          .preflight-venv/bin/python -m pytest -q tests/compiler/test_fit2_adaptive_boundary_quality_cdt_contract_v1.py

@@ -1,0 +1,147 @@
+{
+  "schema": "RealSaS.HistoricalProductPowerP0Closure.v1",
+  "date": "2026-09-13",
+  "status": "P0_CLOSED_PASS__CURRENT_TYPED_TRANSACTION_AUTHORITY__NO_HISTORICAL_OWNER_RESTORED",
+  "branch": "audit/historical-product-power-rebind-20260913",
+  "base_main_sha": "bbdde6ec851717dddfba52107a28343e91864d68",
+  "scope": "historical orchestration source reacquisition + source diff + current exact-identity compile transaction contract",
+  "scientific_authority_changes": false,
+  "main_promotion": false,
+  "historical_wholesale_restore": false,
+  "source_archives": [
+    {
+      "label": "v0.5 canonical mechanical meaning",
+      "name": "RealSaS_M4_v0_5_CANONICAL_MECHANICAL_MEANING_SOURCE.zip",
+      "sha256": "03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130",
+      "size_bytes": 12957145,
+      "library_file_id": "file_00000000bfc882468863c7c880514416"
+    },
+    {
+      "label": "Aug-7 all-systems-online source",
+      "name": "RealSaS_V19_27R5D3_ALL_SYSTEMS_ONLINE_ARCHITECTURE_SOURCE_20260807.zip",
+      "sha256": "ccf27f2a4546c7a0998ad22bc34a6712b543c8dbfe308d01d354fde829e1da2b",
+      "size_bytes": 12616430,
+      "library_file_id": "file_00000000d38481f48d1e9bb280c21dea"
+    },
+    {
+      "label": "V19_30R1",
+      "name": "RealSaS_V19_30R1_GLOBAL_PARTITION_IDENTITY_SOURCE_20260808.zip",
+      "sha256": "535472ebcaed7d5ea687edef72b2701e04c5c8a26af9aa87ad99ca9b50885d07",
+      "size_bytes": 12653141,
+      "library_file_id": "file_000000003dfc820aa23c8d3970a63f66"
+    },
+    {
+      "label": "V19_30R2",
+      "name": "RealSaS_V19_30R2_GLOBAL_PARTITION_REPAIR_SOURCE.zip",
+      "sha256": "679b8d4d80f284b1dbce2244b425a65c341b7f99351ab0a6dfa627f86cdd0786",
+      "size_bytes": 12835944,
+      "library_file_id": "file_0000000018c8820abb144a5b0f2328bf"
+    },
+    {
+      "label": "v97.39 single-truth lineage",
+      "name": "SaS_AnimationSystem_20260524_v97_39_final_package_singletruth_rebind_integrated_full.zip",
+      "sha256": "3f01a2df96c25ca82890709b6d3746384d26b6494ecd9929e50e6e4ddb061fe5",
+      "size_bytes": 80309879,
+      "library_file_id": "file_00000000bd5471f496ce75e1665caa66"
+    }
+  ],
+  "source_diff": {
+    "comparison_set": ["v0.5", "Aug-7", "V19_30R1", "V19_30R2"],
+    "result": "BYTE_IDENTICAL_FOR_AUDITED_ORCHESTRATOR_AND_REFERENCE_RUNTIME_FILES",
+    "audited_files": [
+      ["compiler/realsas_orchestrator/attempt_executor.py", 5834, "87f454466e906a00579a82e38960e70d94f9f0e785c4706336f708fc3d19dedc"],
+      ["compiler/realsas_orchestrator/budget_adaptive_retry.py", 12009, "8bf6050cad5978dfb7e6ab0f56dc6d85ed108303f5c032994a6dd675c21752a0"],
+      ["compiler/realsas_orchestrator/decomposition_retry.py", 15278, "ad35e7f2e227525627bafd11426693505ed68efe9ac6bea467a4ddeef2d5432b"],
+      ["compiler/realsas_orchestrator/feedback.py", 19207, "1b70470d03b6db113df611e90689a799089ba1df573d04b07a5bb3c9f0518bac"],
+      ["compiler/realsas_orchestrator/meaningful_proof_loop.py", 40505, "a50b3429e17cbf8456a6ad8274e053084ce134f25be332acffed28535ec60348"],
+      ["compiler/realsas_orchestrator/motion_qualification.py", 5099, "dbccde412adc4da7f9c3bc30b9c21284807817be44846b86459be1fec704d321"],
+      ["compiler/realsas_orchestrator/pipeline.py", 255433, "d47f29f5c853a180a3f0de7347e2ab8861b7c29015fd98fd79b38c817c2be614"],
+      ["compiler/realsas_orchestrator/policy.py", 8821, "0f97f4b43f325aecd9a653fd4c1c4ee350b5bd6402fc3514c99ec0ea7fd36f40"],
+      ["compiler/realsas_orchestrator/repair_worker.py", 1483, "77a8a5613cd92f3b9874957590141fa8f825d14345c2a5034d48ede940b379c8"],
+      ["compiler/realsas_orchestrator/visual_issue_router.py", 16321, "47949bd9dcc61dede1801cdddc9f17b3b77e7050f6166472537efa2ab4c052dc"],
+      ["compiler/realsas_reference_runtime/animation_state.py", 11047, "e4c819976637d1c16f4276ae8c4fe4b0bdf6c9f3a41e69393c4372b7a6aadc4c"],
+      ["compiler/realsas_reference_runtime/deformation_evaluator.py", 42500, "16cca7f09f81959c9ecbb3365d9c736e1f7de6196007629cf05ea78e0b841bd4"],
+      ["compiler/realsas_reference_runtime/runtime.py", 11116, "f654da3cef568d5143f6ba9fde70662016ceff293ac131be2520b1bed14dfbf9"]
+    ],
+    "historical_pipeline_import_finding": {
+      "imports_superseded_authorities": true,
+      "examples": ["realsas_decomposition", "realsas_truth", "realsas_prior", "realsas_hypothesis", "realsas_reasoning"],
+      "decision": "WHOLESALE_PIPELINE_IMPORT_FORBIDDEN"
+    },
+    "historical_mechanisms_retained_semantically": [
+      "immutable attempts",
+      "process-isolated attempt execution as optional service mechanism",
+      "bounded retry budgets",
+      "explicit FAIL/ABSTAIN propagation",
+      "monotonic/no-regression child selection",
+      "probe-measure-diagnose-repair-reproof loop",
+      "same-probe child re-proof",
+      "exact artifact identity through final package"
+    ],
+    "historical_mechanisms_rejected_as_current_authority": [
+      "old weighted attempt score as product acceptance policy",
+      "old decomposition/front-brain ownership",
+      "old truth/teacher authority",
+      "stable/latest filesystem path as artifact identity",
+      "historical repair executor implicit promotion",
+      "monolithic pipeline product ownership"
+    ]
+  },
+  "current_rebind": {
+    "module": "compiler/realsas_compiler_core/compile_transaction.py",
+    "schema_types": [
+      "CompileStageContractIR",
+      "CompileRequestIR",
+      "CompileArtifactBindingIR",
+      "CompileStageResultIR",
+      "CompileTransactionIR",
+      "CompileResultIR"
+    ],
+    "invariants": [
+      "request freezes stage policy_hash and implementation_binding_hash",
+      "exact source observation and camera bundle hashes are immutable",
+      "required views are exactly V0..V7",
+      "stage order is frozen",
+      "PASS requires exact output binding",
+      "same slot cannot be rebound in place",
+      "FAIL and ABSTAIN are terminal and require explicit blocker",
+      "retry/repair is a distinct child transaction with exact parent_transaction_hash",
+      "literal latest/current/newest artifact aliases are forbidden",
+      "S/G/W/M/B/components/motion/product/proof/runtime use exact content identities",
+      "runtime package must bind the exact product and exact proof bundle",
+      "hidden retriangulation and implicit repair credit are forbidden"
+    ],
+    "commit_chain": [
+      ["compile transaction authority", "7ee4845b2f699b404b02890e697096f5ec60c727"],
+      ["core export", "3dcf0ef557cf981c5c101926caec72192c096e75"],
+      ["CompilerFacade wiring", "7bcc3b094b0976c84797d554ea1742268ef1eece"],
+      ["bundle routes", "2a4070024db90add82d4653de65314ea139b35c2"],
+      ["contract tests", "ee468c16725e61acf20824fecece77605f7889f6"],
+      ["self-hosted workflow", "eaccc5b866bcf6be6a7cdc0bd66f4f7f310a7db1"]
+    ]
+  },
+  "verification": {
+    "workflow": ".github/workflows/historical_product_power_rebind_contract.yml",
+    "run_id": 34762089212,
+    "head_sha": "eaccc5b866bcf6be6a7cdc0bd66f4f7f310a7db1",
+    "runner": "realsas-wsl-1660ti",
+    "labels": ["self-hosted", "linux", "x64", "realsas"],
+    "conclusion": "success",
+    "syntax_compile": "PASS",
+    "compile_transaction_tests": "9/9 PASS",
+    "bounded_repair_loop_tests": "5/5 PASS",
+    "architecture_v4_tests": "10/10 PASS",
+    "living_compile_tests": "4/4 PASS",
+    "total_behavioral_tests": "28/28 PASS"
+  },
+  "claim_boundary": {
+    "p0_architecture_and_transaction_contract": "CLOSED_PASS",
+    "corrected_geppetto_G": "NOT_CLAIMED_BY_THIS_AUDIT",
+    "corrected_arachne_W": "NOT_CLAIMED_BY_THIS_AUDIT",
+    "corrected_real_mesh_M_B": "NOT_CLAIMED_BY_THIS_AUDIT",
+    "professional_motion": "NOT_CLAIMED_BY_THIS_AUDIT",
+    "runtime_product_pass": "NOT_CLAIMED_BY_THIS_AUDIT",
+    "PRODUCT_PASS": false
+  },
+  "next": "P1_BIND_FRESH_CORRECTED_G_W_M_B_COMPONENTS_INTO_THE_CLOSED_TRANSACTION_CONTRACT_WHEN_THEIR_EXISTING_SCIENTIFIC_PRODUCT_GATES_CLOSE"
+}

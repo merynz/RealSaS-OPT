@@ -1,0 +1,52 @@
+# Product contract gate for independently qualified render support + continuity composition.
+# Canonical RealSaS CI runs on the local/self-hosted runner.
+
+name: External Render Continuity Contract
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/continuity_underlay.py'
+      - 'compiler/realsas_compiler_core/proof_engine.py'
+      - 'compiler/realsas_compiler_core/product_external_render.py'
+      - 'compiler/realsas_compiler_core/render_support.py'
+      - 'compiler/realsas_compiler_core/component_attachment.py'
+      - 'compiler/realsas_compiler_core/mesh/quality.py'
+      - 'tests/product/test_external_render_support_v1.py'
+      - 'tests/product/test_component_attachment_v1.py'
+      - 'tests/product/test_external_product_proof_and_continuity_v1.py'
+      - 'tests/product/test_mage_topology_motion_deformation_v1.py'
+      - '.github/workflows/external_render_continuity_contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  external-render-continuity:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check numpy pytest
+      - name: Compile contract sources
+        run: |
+          python -m py_compile \
+            compiler/realsas_compiler_core/continuity_underlay.py \
+            compiler/realsas_compiler_core/proof_engine.py \
+            compiler/realsas_compiler_core/product_external_render.py \
+            compiler/realsas_compiler_core/render_support.py \
+            compiler/realsas_compiler_core/component_attachment.py \
+            compiler/realsas_compiler_core/mesh/quality.py
+      - name: Run external render and continuity regressions
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python -m pytest -q \
+            tests/product/test_external_render_support_v1.py \
+            tests/product/test_component_attachment_v1.py \
+            tests/product/test_external_product_proof_and_continuity_v1.py \
+            tests/product/test_mage_topology_motion_deformation_v1.py

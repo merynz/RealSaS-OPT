@@ -1,0 +1,40 @@
+name: mage-demo-fit1-v5-p1-contract
+
+on:
+  push:
+    branches:
+      - product/mage-fit1-v5-p1-demo-20260913
+    paths:
+      - 'compiler/realsas_compiler_core/mesh/direct_model_skin.py'
+      - 'experiments/mage_demo_fit1_v5_p1/**'
+      - 'tests/compiler/test_direct_model_mesh_skin_v1.py'
+      - 'canonical/MAGE_DEMO_FIT1_V5_P1_EXECUTION_AUTHORITY_V1.json'
+      - '.github/workflows/mage_demo_fit1_v5_p1_contract.yml'
+  workflow_dispatch:
+
+jobs:
+  contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install contract dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pillow pytest scikit-image torch
+      - name: Static compile
+        run: |
+          python -m py_compile compiler/realsas_compiler_core/mesh/direct_model_skin.py
+          python -m py_compile experiments/mage_demo_fit1_v5_p1/materialize_p1_b2_g10_v1.py
+          python -m py_compile experiments/mage_demo_fit1_v5_p1/run_v5_direct_p1_binding_v1.py
+          python -m py_compile tests/compiler/test_direct_model_mesh_skin_v1.py
+      - name: Direct model mesh-skin contract tests
+        run: |
+          PYTHONPATH=. python -m pytest -q tests/compiler/test_direct_model_mesh_skin_v1.py

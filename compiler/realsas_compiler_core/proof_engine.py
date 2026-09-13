@@ -96,10 +96,6 @@ def _mesh(product):
             area = mesh_triangle_area_report(component.mesh)
             external = _external_component_claim(component)
             if external:
-                # External render meshes such as P1/P1Q are independently sealed
-                # substrates. Their support ids are intentionally not canonical S.
-                # Validate the external qualification first, then measure using the
-                # mesh-hash-bound cached raster witness. Never fall back to scientific S.
                 validate_external_renderable_component(component, product.mechanical_state)
                 raster = mesh_raster_quality_report(
                     component.mesh,
@@ -129,8 +125,6 @@ def _mesh(product):
                 **raster,
             }
             if component.mesh.support_coverage_classification == "OBSERVATION_DOMAIN_CDT":
-                # Older qualifier revisions also copy recall/precision to the top level;
-                # candidate_residual_report is the exact complete coverage envelope.
                 for key in ("source_alpha_recall", "precision_inside_alpha"):
                     if key not in coverage and key in qreport:
                         coverage[key] = qreport[key]
@@ -289,7 +283,7 @@ def _motion(product, plan, *, motion_bake_provider=None, motion_policy=None):
         "max_edge_stretch_ratio": max((float(row.get("max_edge_stretch_ratio", 1.0)) for row in rows), default=1.0),
         "max_area_change_ratio": max((float(row.get("max_area_change_ratio", 1.0)) for row in rows), default=1.0),
         "flipped_triangles": sum(int(row.get("flipped_triangles", 0)) for row in rows),
-        "max_loop_seam_error01": max((float(row.get("max_loop_seam_error01", 0.0)) for row in rows), default=0.0),
+        "max_loop_seam_error01": max((float(row.get("loop_seam_error01", 0.0)) for row in rows), default=0.0),
         "return_to_rest_error01": max((float(row.get("return_to_rest_error01", 0.0)) for row in rows), default=0.0),
         "max_return_to_rest_error01": max((float(row.get("return_to_rest_error01", 0.0)) for row in rows), default=0.0),
         "frozen_policy_thresholds": {**RESTORED_V05_POLICY_V1, **dict(motion_policy or {})},

@@ -1,184 +1,153 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-09-12  
+**Date:** 2026-09-13  
 **Canonical continuation branch for repair:** `repair/mage-full-subject-reclosure-20260912`  
-**Status:** `MAGE_FIT1_REAL_E2E_REOPENED__FIT2_FRESH_PIPELINE_REFIT_ACTIVE__GEPPETTO_RUNNING__MESH_PRODUCT_CONTRACT_CLOSED_PASS__MOTION_RUNTIME_RECLOSURE_PENDING__PRODUCT_PASS_OPEN`
+**Status:** `MAGE_FIT2_GEPPETTO_TERMINAL_PASS__MESH_BASELINE_PRESERVING_PATCH_EXPERIMENT_ACTIVE__ARACHNE_AUTHORIZED_NOT_STARTED__PRODUCT_PASS_OPEN`
 
-This file is the continuation authority inside the active repair branch. Repository-wide continuation authority is reconciled from `main/CURRENT_STATE.md`; this branch contains the executable repair/refit lineage.
+This file is the continuation authority inside the active repair branch. Repository-wide/main reconciliation remains a separate transaction and must not be inferred from this branch.
 
-**Primary current context:** `canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md`  
+**Read first for exact chat continuation:** `canonical/DEHYDRATED_CONTEXT_20260913.md`  
+**Primary reopening context:** `canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md`  
 **Pipeline refit authority:** `canonical/MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1.json`  
-**Mesh product reclosure audit / decision:** `canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md`  
-**Reopening contract:** `canonical/MAGE_FULL_SUBJECT_REOPENING_AND_ATTACHMENT_CONTRACT_20260912.md`  
-**Mesh/component prereg:** `canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md`  
-**Historical FIT1 evidence:** preserved, scoped historical evidence only where bound to the superseded old-S lineage
-
-**Current scientific module:** `Mage FIT2 fresh pipeline refit / Geppetto`  
-**Active experiment gate:** `MAGE_FIT2_PIPELINE_REFIT`  
-**Active branch:** `repair/mage-full-subject-reclosure-20260912`  
-**Current substage:** `GEPPETTO_FRESH_REFIT`  
-**Most recent closed scientific gate:** `GSA8192_REAL_8VIEW_EVIDENCE`  
-**Parallel product-contract gate:** `FIT2_MESH_PRODUCT_RECLOSURE_CONTRACT_AND_IMPLEMENTATION — CLOSED PASS`  
-**Unseen-family generalization:** `BLOCKED UNTIL SAME-MAGE FIT2 RECLOSES`  
-**Product PASS:** `NOT CLAIMED`
+**Mesh product reclosure audit:** `canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md`  
+**Current mesh prereg:** `canonical/FIT2_BASELINE_PRESERVING_ADAPTIVE_PATCH_CDT_PREREG_20260913.md`  
+**Historical FIT1 evidence:** preserved as historical/scoped evidence only where bound to superseded old-S lineage
 
 ## One-line state
 
-`The controlled Mage FIT1 rigging-core experiments closed locally, but the first real eight-view end-to-end product run produced visibly poor output and exposed upstream subject-scope loss, insufficient render/deformation mesh coverage, runtime mesh-identity drift, weak product proof scope and non-professional rotation-only motion. The old Mage product chain is therefore reopened. Corrected H1 observable authority and GSA8192 are sealed; a fresh-from-scratch Geppetto FIT2 refit is running on corrected S. In parallel, the mesh/component product contract has now closed implementation-level PASS with exact observation-authority rerasterization and self-hosted regression proof, preventing legal-but-visibly-incomplete or optimistically reported meshes from masquerading as product closure. Fresh Arachne, corrected real mesh result, professional motion and exact runtime reclosure remain pending.`
-
-## Why FIT1 was reopened
-
-The real product stack was finally exercised rather than inferred from local scientific gates. That output was not remotely sufficient as an Automatic-Spine product witness.
-
-The failure was not one bug:
-
-1. **Upstream subject-scope loss.** Historical H1 geometry did not cover the same complete subject present in the eight product RGBA observations.
-2. **Mesh coverage/authority weakness.** The old conservative MWB2 relation-complex covered only about `18.18%..32.31%` of source alpha. A separate exported-runtime bundle forensic audit showed an alpha-clipped barycentric demo mesh with roughly `64%..72%` source-alpha recall, proving a second mesh identity/coverage drift between locally reasoned mechanics and rendered runtime.
-3. **Motion quality gap.** Current product motion is a rotation-only mechanical probe, not a professional idle/run animation system.
-4. **Proof gap.** Local legality/finite-deformation PASS did not prove the exact exported puppet preserved the artwork or moved credibly.
-5. **Runtime equivalence gap.** Product qualification did not yet enforce that exact qualified skeleton + skin + mesh identity survived unchanged into the runtime package.
-
-The full causal snapshot is frozen in `canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md`. The mesh-specific forensic decision and current product admission rule are frozen in `canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md`.
+`Corrected H1 and GSA8192 are closed. Fresh Geppetto FIT2 has now reached a verified 48/48 terminal PASS on corrected S with persisted 8-view evidence and an Arachne handoff. In parallel, mesh reclosure has moved from failed global uniform/adaptive families to a baseline-preserving local adaptive strategy: P1 already lifts all eight views to ~97–99% recall at 100% precision, but inherited baseline shape-quality outliers remain and P2/P3 are still running. Fresh Arachne is authorized by the Geppetto handoff and may proceed independently of the mesh run. PRODUCT_PASS remains open.`
 
 ## Corrected upstream authority — CLOSED
 
 ### H1 observable product surface
 
-Current H1 product authority is observation-bound rather than global-watertight-hidden-teacher authority:
-
-- run id: `20260912T074348Z`;
-- H1 checkpoint SHA-256: `76fc68a8c6f2bed80ae8a678649006c875bc96b586065da8914e7f61528c8ce5`;
-- product-clipped zero-surface SHA-256: `56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925`;
-- minimum V0..V7 alpha recall: `0.9511473445`;
-- minimum precision: `0.9806321480`;
-- minimum IoU: `0.9356283394`;
-- product inference still uses only `8x RGBA + exact 8 orthographic cameras`;
-- teacher mesh at product inference: `false`.
-
-Historical global-sign/full-hidden-teacher residuals remain preserved diagnostics and are not rewritten into a PASS.
+- source run: `20260912T074348Z`
+- H1 checkpoint SHA-256: `76fc68a8c6f2bed80ae8a678649006c875bc96b586065da8914e7f61528c8ce5`
+- product-clipped zero-surface SHA-256: `56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925`
+- minimum V0..V7 alpha recall: `0.9511473445`
+- minimum precision: `0.9806321480`
+- minimum IoU: `0.9356283394`
+- product inference input remains `8x RGBA + exact 8 orthographic cameras`
+- teacher mesh at product inference: `false`
 
 ### GSA8192
 
-Corrected H1 deterministically emits the current downstream substrate:
-
-- nodes: `8171`;
-- relations: `23656`;
-- observed nodes: `7391`;
-- completed nodes: `780`;
-- geometry lineage hash: `65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da`;
-- tensorization hash: `fe351362e195164805cebb0f63b74d1861ef123458b20ac56607016e00a6c67e`;
-- observation authority: `EXACT_PRODUCT_ALPHA_AND_SELF_VISIBILITY`;
-- deterministic replay: PASS;
-- real V0..V7 GSA evidence seal: PASS.
+- nodes: `8171`
+- relations: `23656`
+- observed/completed: `7391 / 780`
+- geometry lineage hash: `65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da`
+- tensorization hash: `fe351362e195164805cebb0f63b74d1861ef123458b20ac56607016e00a6c67e`
+- observation authority: `EXACT_PRODUCT_ALPHA_AND_SELF_VISIBILITY`
 
 No old 950-node Mage surface lineage is current product authority.
 
-## Active stage — fresh Geppetto FIT2
+## Geppetto FIT2 — VERIFIED TERMINAL PASS
 
-The active authority is `MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1`.
+Fresh Geppetto was trained from scratch on corrected GSA8192 under the frozen refit contract.
 
-Geppetto is being fitted **fresh from scratch** on the corrected GSA8192 substrate:
+Exact result:
 
-- runner: `experiments/mage_full_subject_reclosure_v1/run_geppetto_fit2_corrected_substrate_refit_v1.py`;
-- mode: `FRESH_FROM_SCRATCH__NO_HISTORICAL_GEPPETTO_CHECKPOINT`;
-- historical checkpoint SHA-256 `b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30` is preserved but loading it is forbidden;
-- target joints: `22`;
-- max steps: `16384`;
-- check every: `64`;
-- terminal closure: `48/48` consecutive checks;
-- evaluation seeds: `[11, 23, 47, 89]`;
-- thresholds changed: `false`;
-- CPU real-input preflight: PASS;
-- actual optimizer run: active external GPU run per operator context;
-- Geppetto FIT2 PASS claimed: `false` until sealed result/evidence exists.
+`REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/MAGE_FIT2_PIPELINE_REFIT/GEPPETTO_REFIT/MAIN/GEPPETTO_FIT2_CORRECTED_SUBSTRATE_RESULT.json`
 
-Arachne may not start before Geppetto terminal PASS and its mandatory real V0..V7 skeleton evidence. The mesh hardening transaction does not alter the running Geppetto optimizer, thresholds or closure rule.
+Verified closure:
 
-## Mesh / component product contract — CLOSED PASS, REAL FIT2 RESULT STILL PENDING
+- result status: `FIT2_GEPPETTO_TERMINAL_PASS`
+- closure step: `12160`
+- terminal streak: `48/48`
+- final seeds: `[11,23,47,89]`
+- every final seed: `22` joints, PASS, root accuracy `1.0`, parent accuracy `1.0`, unsupported joints `0`, illegal parents `0`, deform roots `1`
+- teacher feedback during free eval: `false`
+- historical Geppetto checkpoint loaded: `false`
+- thresholds changed: `false`
+- source/result repo head: `135e6def2ba7112b8471586115d11bf1b936677d`
 
-The product closure was hardened independently while Geppetto runs. Earlier mesh/component work established full-safe-S component identity, observation-domain CDT, typed support binding, supported local-convex inserted vertices, exact mesh-skin transfer and mechanical component verification.
+Persisted evidence:
 
-The final missing integration seam is now closed:
+- checkpoint SHA-256: `2e1f35d196af6eea957bb6377bc0b0e1b045c20dc652d798b74b107198ae80e9`
+- result SHA-256: `91a7d4cb45f0402a0980a59a548c0555137fddd288f508500b8fdee6ab99afb5`
+- run-log SHA-256: `14377a0e4302e24fc000f18989c0311f717e3c46db3e90d70bcfbd66255694e6`
+- 8-view skeleton contact-sheet SHA-256: `865b215d88bc13e730adfcc7377755c4e3a25aec4d6f89af849e37ef9f453eaa`
+- evidence manifest status: `PASS`
 
-- authoritative product entry point: `compiler/realsas_compiler_core/mesh/product_qualification.py::qualify_fit2_product_mwb2_observation_cdt_mesh`;
-- exact `ObservationRasterDomain` is mandatory;
-- candidate coverage residuals are diagnostics only, not product authority;
-- every promoted mesh vertex is reprojected from exact `SurfaceSupportBinding` + admitted S raster bindings;
-- exact promoted triangles are rerasterized against the exact alpha mask;
-- recall / precision / IoU / connected-hole metrics are recomputed independently;
-- topology/shape quality is independently remeasured;
-- observation mask/source-alpha hashes are bound into qualification provenance;
-- lower-level `qualify_mwb2_observation_cdt_mesh(...)` remains compatibility evidence only, never product PASS.
+`ARACHNE_FIT2_INPUT_HANDOFF.json` is persisted and states `AUTHORIZED_BY_GEPPETTO_FIT2_TERMINAL_PASS` with `arachne_refit_authorized=true`, matching corrected GSA/tensorization and exact Geppetto checkpoint hash.
 
-Frozen product-mesh policy:
+Claim boundary: this closes the **Geppetto FIT2 stage**. It does not claim `PRODUCT_PASS`; the Geppetto result itself keeps `product_pass_claimed=false` and `promotion_authorized=false`.
 
-- source-alpha recall `>= 0.94`;
-- precision `>= 0.995`;
-- alpha IoU `>= 0.935`;
-- largest uncovered connected region `<= 0.015` of foreground;
-- each alpha component occupying at least `0.0025` of foreground has recall `>= 0.90`;
-- no degenerate/duplicate/non-manifold triangles;
-- raster minimum angle `>= 0.25 deg` and maximum aspect ratio `<= 250`;
-- real V0..V7 observation + exact mesh overlay + uncovered heatmap evidence.
+## Mesh reclosure — ACTIVE BASELINE-PRESERVING PATCH EXPERIMENT
 
-Self-hosted contract evidence:
+The mesh/product qualification contract remains implementation-level CLOSED PASS. The corrected real Mage mesh result is still under active scientific reclosure.
 
-- workflow: `mage-full-subject-reclosure-contract`;
-- run id: `34716890157`;
-- code/test head: `b1dc7fca6b6497d97c7be727d66fd9c0b64c3268`;
-- runner: `realsas-wsl-1660ti`;
-- static compile: PASS;
-- tests: `41 passed in 4.36s`;
-- conclusion: success.
+Previous global family outcomes:
 
-Important claim boundary: this closes the **product-mesh qualification contract/implementation**, not the corrected real Mage mesh result. **No corrected FIT2 mesh product PASS exists yet** because fresh Geppetto/Arachne mechanics and the final V0..V7 directional mesh artifacts are not yet available.
+- uniform legal-Steiner `n={2,3,4}`: falsified as final global product family;
+- global adaptive boundary/quality Delaunay `B4_G16 -> B2_G12 -> B1_G8`: falsified as the sole global final solver because admitted triangles were healthy but whole-character coverage fell to about the 70% band;
+- legal support/adaptive triangulation survives as a **local** repair/recovery operator.
 
-## Supported Steiner vertices
+Current preregistered experiment:
 
-`LOCAL_CONVEX_INTERPOLATION` is a legal qualified mesh-vertex route.
+`BASELINE-PRESERVING ADAPTIVE PATCH CDT`
 
-For an inserted vertex:
+Source/preflight:
 
-`P(v) = Σ a_i P(S_i)` and `W(v) = Σ a_i W(S_i)`, with `a_i >= 0` and `Σ a_i = 1`.
+- runner: `experiments/mage_full_subject_reclosure_v1/run_fit2_baseline_preserving_adaptive_patch_cdt_v1.py`
+- branch head/source preflight at experiment start: `c69ab78eac42ec89d2bed650fd9aa607d6f44a00`
+- self-hosted preflight: run `34752599677` — PASS
+- frozen treatment order: `P1_B2_G10 -> P2_B1_G8 -> P2_B1_G6`
 
-Thus geometry placement, raster placement and mechanical skin transfer share the same admitted surface-support authority. Automatic arbitrary CDT quality-Steiner generation remains blocked until each inserted point can construct and prove an exact legal local support simplex.
+Architecture:
 
-The desired product target is a **directional alpha-domain watertight deformation mesh**, not a hallucinated watertight 3D body: opaque artist pixels must belong to the view-local triangulated deformation domain; true transparent holes stay holes.
+> sealed historical CDT = coverage authority  
+> adaptive support-derived CDT = local quality/recovery operator
 
-## Motion / runtime status
+The baseline is **not** assumed universally correct. Every baseline face is scanned against frozen raster shape-quality gates. Quality-fail faces become repair cavities; healthy faces are preserved; supported residual parents are recovered locally. Current experiment treats faces that already pass the frozen policy as sufficient/KEEP, not globally optimal.
 
-Motion remains an open first-class product problem.
+### P1_B2_G10 observed partial result
 
-The current lane is `ROTATION_ONLY_CURRENT_PRESET_V1`; it is retained as a mechanical deformation probe only. It is not evidence of professional idle/run quality.
+| View | baseline recall | final recall | precision | largest hole | P1 |
+|---|---:|---:|---:|---:|---|
+| V0 | 92.589% | 97.230% | 100.000% | 0.997% | quality FAIL |
+| V1 | 94.061% | 98.948% | 100.000% | 0.322% | PASS |
+| V2 | 90.557% | 97.679% | 100.000% | 1.373% | quality FAIL |
+| V3 | 94.130% | 98.339% | 100.000% | 0.645% | quality FAIL |
+| V4 | 92.850% | 97.343% | 100.000% | 1.001% | quality FAIL |
+| V5 | 93.799% | 98.863% | 100.000% | 0.395% | PASS |
+| V6 | 90.758% | 97.502% | 100.000% | 1.374% | PASS |
+| V7 | 94.366% | 98.230% | 100.000% | 0.625% | quality FAIL |
 
-Preferred future architecture under consideration:
+P1 validates the asymmetric hybrid for coverage. Precision is 100% in all views and holes are already below the frozen 1.5% limit. Remaining failures are inherited shape-quality outliers. P1 quality repair accepted `0` cavities, leaving `18` reported bad faces across V0/V2/V3/V4/V7.
 
-`intent / artist clip / constraints -> MotionProposalIR -> deterministic Motion Compiler retarget + constraints -> QualifiedMotionIR -> exact S/G/W/M/B -> V0..V7 motion-quality proof -> editable curves / sprite bake / live puppet export`.
+`P2_B1_G8` / `P2_B1_G6`: **pending/running at this state snapshot**. Do not infer outcome.
 
-This is a proposed product architecture, not yet a promoted model closure.
+If the current full frozen policy is later judged insufficient for deformation quality, first measure the full triangle-quality distribution and actual deformation strain/flip behavior, then preregister a separate quality-uplift experiment. Do not post-hoc reinterpret this run or assume every policy-passing baseline triangle is optimal.
 
-Exact runtime reclosure is mandatory after mechanics + motion are ready. Runtime frame 0 and dynamic frames must preserve exact qualified mesh, mesh-skin and skeleton identity; no hidden re-triangulation, barycentric demo transfer or second runtime truth may be accepted.
+## UI skeleton overflow — root cause closed at adapter level
+
+The previously observed UI skeleton displacement was not evidence that Geppetto generated an invalid rig.
+
+Old UI adapter behavior used support-centroid / nearest-surface raster anchors instead of the qualified directional joint pivot. This can displace the same correct skeleton by tens to >100 pixels. Correct static rendering must consume qualified directional joint binding; if unavailable, rig overlay is withheld. Animated rig overlay likewise requires qualified per-frame joint/control state or must be withheld.
 
 ## Current mandatory execution order
 
-1. corrected H1 observable product surface — **DONE**;
-2. GSA8192 canonical lineage + real V0..V7 evidence — **DONE**;
-3. fresh Geppetto FIT2 — **RUNNING**;
-4. new QualifiedSkeletonIR + real V0..V7 skeleton evidence — **PENDING**;
-5. fresh Arachne FIT2 on corrected S+new G — **BLOCKED ON 3/4**;
-6. new QualifiedSkinIR + real V0..V7 skin/deformation evidence — **PENDING**;
-7. directional alpha-domain CDT + strict FIT2 product mesh qualification — **CONTRACT/IMPLEMENTATION CLOSED PASS / REAL RESULT PENDING CURRENT G/W**;
-8. QualifiedEditableMeshIR + QualifiedMeshSkinIR + qualified components/mechanical assembly — **PENDING**;
-9. real V0..V7 dynamic deformation proof — **PENDING**;
-10. professional motion closure — **OPEN**;
-11. exact runtime/export reclosure — **OPEN**;
-12. only then consider `PRODUCT_PASS`;
-13. unseen/FIT8/LOFO remains after same-Mage FIT2 product reclosure, not before it.
+1. corrected H1 observable product surface — **DONE**
+2. GSA8192 canonical lineage + evidence — **DONE**
+3. fresh Geppetto FIT2 — **TERMINAL PASS VERIFIED**
+4. Geppetto real V0..V7 skeleton evidence + hash manifest — **VERIFIED**
+5. fresh Arachne FIT2 on corrected S + Geppetto handoff — **AUTHORIZED / NOT YET CLOSED**
+6. QualifiedSkinIR + exact W proof — **PENDING**
+7. baseline-preserving directional mesh experiment — **ACTIVE; P1 observed, P2/P3 pending**
+8. strict final QualifiedEditableMeshIR + exact mesh-skin transfer — **PENDING**
+9. qualified components + mechanical/dynamic deformation proof — **PENDING**
+10. professional motion closure — **OPEN**
+11. exact runtime/export identity reclosure — **OPEN**
+12. only then consider `PRODUCT_PASS`
+13. unseen/FIT8/LOFO remains after same-Mage FIT2 product reclosure
+
+Arachne no longer needs to wait for the mesh experiment to finish; its authorization dependency was Geppetto stage closure, which is now verified. Final mesh-skin/component product closure still waits for both W and the final mesh decision.
 
 ## Claim boundary
 
 Strongest current claim:
 
-`RealSaS completed the historical Mage FIT1 model/Compiler investigations but the first real end-to-end product output exposed genuine end-to-end authority and quality gaps. The old Mage product chain is reopened. Corrected observation-bound H1 and GSA8192 are closed; fresh Geppetto FIT2 is active. The mesh/product contract is now implementation-level CLOSED PASS with independent exact-observation rerasterization and self-hosted regression proof, so neither lower-level legal CDT output nor optimistic candidate metrics can be mistaken for product closure. Fresh Arachne, corrected real FIT2 mesh evidence, professional motion and exact runtime product closure remain pending.`
+`Corrected H1/GSA8192 are closed; fresh Geppetto FIT2 has reached a verified terminal 48/48 stage PASS with complete persisted 8-view evidence and an authorized Arachne handoff. Mesh science has converged on a baseline-preserving local-adaptive architecture; P1 already demonstrates ~97–99% recall at 100% precision but the preregistered P2/P3 run is not yet final. Arachne, final mesh/skin mechanics, professional motion and exact runtime reclosure remain open. PRODUCT_PASS is not claimed.`
 
-Not claimed: Geppetto FIT2 PASS; Arachne FIT2 PASS; corrected FIT2 mesh PASS; professional motion quality; exact runtime product closure; unseen-family generalization; FIT8/LOFO; `PRODUCT_PASS`; commercial production readiness.
+Not claimed: Arachne FIT2 PASS; final corrected FIT2 mesh PASS; final mesh-skin/component mechanics PASS; professional motion quality; exact runtime product closure; unseen-family generalization; FIT8/LOFO; `PRODUCT_PASS`; commercial production readiness.

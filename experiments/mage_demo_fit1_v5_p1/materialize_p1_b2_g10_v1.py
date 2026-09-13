@@ -15,7 +15,6 @@ Scientific/product boundaries:
 """
 
 import argparse
-from dataclasses import asdict
 from hashlib import sha256
 import io
 import json
@@ -220,10 +219,21 @@ def run(args) -> dict:
     }
     manifest_path = out / "P1_B2_G10_MATERIALIZATION_MANIFEST.json"
     _write_json(manifest_path, manifest)
-    manifest["manifest_sha256"] = _sha(manifest_path)
-    _write_json(manifest_path, manifest)
-    print("P1_B2_G10_MATERIALIZATION=" + json.dumps(manifest, sort_keys=True), flush=True)
-    return manifest
+    seal = {
+        "schema": SCHEMA + ".Seal.v1",
+        "status": "SEALED__EXACT_P1_B2_G10_V0_V7_MATERIALIZATION",
+        "manifest": manifest_path.name,
+        "manifest_sha256": _sha(manifest_path),
+        "artifact_count": len(artifacts),
+        "artifacts": artifacts,
+        "required_mesh_lineage_hashes": {f"V{k}": v for k, v in EXPECTED_MESH_LINEAGE.items()},
+        "mesh_scientific_pass_claimed": False,
+        "product_pass_claimed": False,
+    }
+    seal_path = out / "P1_B2_G10_MATERIALIZATION_SEAL.json"
+    _write_json(seal_path, seal)
+    print("P1_B2_G10_MATERIALIZATION=" + json.dumps(seal, sort_keys=True), flush=True)
+    return {"manifest": manifest, "seal": seal}
 
 
 def parse_args():

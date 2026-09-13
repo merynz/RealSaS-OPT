@@ -33,7 +33,7 @@ jobs:
           persist-credentials: true
 
       - name: Synchronize parent manifests
-        run: python tools/sync_historical_product_power_p0_manifest.py
+        run: python3 tools/sync_historical_product_power_p0_manifest.py
 
       - name: Commit synchronized manifests if needed
         shell: bash

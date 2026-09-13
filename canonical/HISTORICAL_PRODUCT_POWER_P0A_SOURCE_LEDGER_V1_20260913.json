@@ -1,0 +1,78 @@
+{
+  "schema": "RealSaS.HistoricalProductPowerP0ASourceLedger.v1",
+  "date": "2026-09-13",
+  "status": "SOURCE_INDEX_SEALED__IMPLEMENTATION_BYTES_NOT_PROMOTED",
+  "parent_manifest": "canonical/HISTORICAL_PRODUCT_POWER_REBIND_MANIFEST_V1_20260913.json",
+  "historical_source_authority": {
+    "archive": "RealSaS_M4_v0_5_CANONICAL_MECHANICAL_MEANING_SOURCE.zip",
+    "archive_sha256": "03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130",
+    "release_binding": "ALL_SYSTEMS_ONLINE_RELEASE_BINDING.json",
+    "zip_integrity_ledger": "RealSaS_M4_v0_5_ZIP_TEST.txt",
+    "integrity": "PASS"
+  },
+  "orchestrator_family": {
+    "indexed_file_count": 12,
+    "indexed_total_size_bytes": 385031,
+    "classification": "HIGH_VALUE_EXTERNAL_SOURCE_RESERVE__NO_WHOLESALE_RESTORE",
+    "files": [
+      {"path":"compiler/realsas_orchestrator/__init__.py","sha256":"d001ba55d4c4c53e2860def2e42f7c5fb689835f05f08627e0ffc96965d69ad7","size_bytes":822,"disposition":"REFERENCE_ONLY","reason":"namespace/package surface only"},
+      {"path":"compiler/realsas_orchestrator/artifact_gc.py","sha256":"89d2a013ed6b193fbd6b8e199ca695470e6311a2a56a69145158b780b29dc63f","size_bytes":4219,"disposition":"REFERENCE_ONLY","reason":"artifact lifecycle ideas; current run/hash ownership must remain current"},
+      {"path":"compiler/realsas_orchestrator/attempt_executor.py","sha256":"87f454466e906a00579a82e38960e70d94f9f0e785c4706336f708fc3d19dedc","size_bytes":5834,"disposition":"REOPEN_SOURCE_DIFF","reason":"candidate for current typed bounded stage-attempt execution"},
+      {"path":"compiler/realsas_orchestrator/budget_adaptive_retry.py","sha256":"8bf6050cad5978dfb7e6ab0f56dc6d85ed108303f5c032994a6dd675c21752a0","size_bytes":12009,"disposition":"REOPEN_SOURCE_DIFF","reason":"candidate bounded retry policy; must not mutate scientific thresholds or search post-hoc"},
+      {"path":"compiler/realsas_orchestrator/decomposition_retry.py","sha256":"ad35e7f2e227525627bafd11426693505ed68efe9ac6bea467a4ddeef2d5432b","size_bytes":15278,"disposition":"REJECT_OBSOLETE_AUTHORITY__PORT_GENERIC_TESTS_ONLY","reason":"coupled to superseded front-brain/decomposition ownership; generic retry invariants may be mined only"},
+      {"path":"compiler/realsas_orchestrator/feedback.py","sha256":"1b70470d03b6db113df611e90689a799089ba1df573d04b07a5bb3c9f0518bac","size_bytes":19207,"disposition":"REOPEN_SOURCE_DIFF","reason":"candidate residual/failure feedback routing behind current typed reports"},
+      {"path":"compiler/realsas_orchestrator/meaningful_proof_loop.py","sha256":"a50b3429e17cbf8456a6ad8274e053084ce134f25be332acffed28535ec60348","size_bytes":40505,"disposition":"REOPEN_SOURCE_DIFF__HIGH_PRIORITY","reason":"probe-measure-diagnose-repair-reproof control behavior is directly relevant to current product proof loop"},
+      {"path":"compiler/realsas_orchestrator/motion_qualification.py","sha256":"dbccde412adc4da7f9c3bc30b9c21284807817be44846b86459be1fec704d321","size_bytes":5099,"disposition":"REOPEN_SOURCE_DIFF__P2","reason":"motion qualification semantics useful after exact corrected product state; old acceptance ownership rejected"},
+      {"path":"compiler/realsas_orchestrator/pipeline.py","sha256":"d47f29f5c853a180a3f0de7347e2ab8861b7c29015fd98fd79b38c817c2be614","size_bytes":255433,"disposition":"REUSE_CORE_REBIND_SHELL__NO_WHOLESALE_IMPORT","reason":"largest historical coordinator; mine stage-state, attempt, failure, trace and transaction behavior only"},
+      {"path":"compiler/realsas_orchestrator/policy.py","sha256":"0f97f4b43f325aecd9a653fd4c1c4ee350b5bd6402fc3514c99ec0ea7fd36f40","size_bytes":8821,"disposition":"REOPEN_SOURCE_DIFF","reason":"recover generic bounded execution policy only; current frozen scientific/product policies remain authoritative"},
+      {"path":"compiler/realsas_orchestrator/repair_worker.py","sha256":"77a8a5613cd92f3b9874957590141fa8f825d14345c2a5034d48ede940b379c8","size_bytes":1483,"disposition":"PORT_TESTS_AND_INVARIANTS__NO_EXECUTOR_PROMOTION","reason":"current repair architecture intentionally has zero promoted heavy executors; worker lifecycle may inform future typed executor shell"},
+      {"path":"compiler/realsas_orchestrator/visual_issue_router.py","sha256":"47949bd9dcc61dede1801cdddc9f17b3b77e7050f6166472537efa2ab4c052dc","size_bytes":16321,"disposition":"REOPEN_SOURCE_DIFF","reason":"candidate typed issue/failure routing to diagnostics/editor; cannot define acceptance"}
+    ]
+  },
+  "reference_runtime_family": {
+    "indexed_file_count": 9,
+    "classification": "SOURCE_DIFF_AGAINST_CURRENT_REFERENCE_V4_AND_NATIVE_RUNTIME",
+    "files": [
+      {"path":"compiler/realsas_reference_runtime/__init__.py","sha256":"0d47f38627b85889de522bbe811fe4640cf7e07e0dafe4489fc4e4c86b8aaad8","size_bytes":2713,"disposition":"REFERENCE_ONLY"},
+      {"path":"compiler/realsas_reference_runtime/animation_state.py","sha256":"e4c819976637d1c16f4276ae8c4fe4b0bdf6c9f3a41e69393c4372b7a6aadc4c","size_bytes":11047,"disposition":"REOPEN_SOURCE_DIFF__P3","reason":"runtime state-machine behavior candidate"},
+      {"path":"compiler/realsas_reference_runtime/authoring.py","sha256":"3595d64bd4c0dd86a6f6c437f71289d4d20da4ee84233295976d9d137671d9ea","size_bytes":15701,"disposition":"REFERENCE_ONLY","reason":"mine authoring UX/contract ideas; Living Compile owns current editor surface"},
+      {"path":"compiler/realsas_reference_runtime/bundle_loader.py","sha256":"c2a49d1041566d73956b52391b8a964b2153e00f6c90b76eb97900887a0d2924","size_bytes":3043,"disposition":"REOPEN_SOURCE_DIFF__P3","reason":"compare package-loading invariants to current runtime-v2 package"},
+      {"path":"compiler/realsas_reference_runtime/capability.py","sha256":"59f138664604979cac2bb68c89b8a53a739820adcf13fbf89bc3f40c927ca769","size_bytes":7927,"disposition":"PORT_TESTS_AND_INVARIANTS","reason":"recover capability/feature reporting without old authority"},
+      {"path":"compiler/realsas_reference_runtime/deformation_evaluator.py","sha256":"16cca7f09f81959c9ecbb3365d9c736e1f7de6196007629cf05ea78e0b841bd4","size_bytes":42500,"disposition":"PORT_TESTS_AND_INVARIANTS__P2_P3","reason":"mine deformation/runtime parity tests; current proof/runtime state remains authoritative"},
+      {"path":"compiler/realsas_reference_runtime/evaluator.py","sha256":"cd1ffa8100280b0842c2a5c5b2dc5eb4d45b4b2b8c032ea37e52dab44b406110","size_bytes":9922,"disposition":"PORT_TESTS_AND_INVARIANTS","reason":"reference consumer behavior and failure cases"},
+      {"path":"compiler/realsas_reference_runtime/packed_runtime.py","sha256":"de36ba16f8419f8e0f313d552a63b6aad2d858dc2893b5233564c655f0133354","size_bytes":10910,"disposition":"REOPEN_SOURCE_DIFF__P3","reason":"compare packing/runtime state to current native-v2 projection"},
+      {"path":"compiler/realsas_reference_runtime/runtime.py","sha256":"f654da3cef568d5143f6ba9fde70662016ceff293ac131be2520b1bed14dfbf9","size_bytes":11116,"disposition":"REOPEN_SOURCE_DIFF__P3","reason":"compare conductor semantics with current reference_v4/native consumer"}
+    ]
+  },
+  "verified_archive_reports": [
+    "docs/archive/root_history/runtime_compiler/REALSAS_MOTION_REPAIR_PLACEMENT_GRADE_AUDIT_AND_IMPLEMENTATION_REPORT_20260712.md",
+    "docs/archive/root_history/runtime_compiler/REALSAS_V18_43P2_HONEST_MOTION_QUALIFICATION_AND_LOCALIZED_MEASUREMENT_REPORT_20260712.md",
+    "docs/archive/root_history/runtime_compiler/REALSAS_V18_43P4_CAUSAL_REPAIR_AND_REFERENCE_RUNTIME_REPORT_20260712.md"
+  ],
+  "source_access_state": {
+    "file_inventory_and_per_file_sha_size": "VERIFIED_FROM_HASH_BOUND_RELEASE_BINDING",
+    "zip_integrity": "VERIFIED",
+    "implementation_bytes_in_current_github": "NOT_WHOLESALE_PRESENT_BY_DESIGN",
+    "implementation_level_source_diff": "PENDING_MATERIALIZATION_OR_EXACT_SOURCE_REACQUISITION",
+    "promotion_authorized": false
+  },
+  "p0a_priority_order": [
+    "compiler/realsas_orchestrator/meaningful_proof_loop.py",
+    "compiler/realsas_orchestrator/attempt_executor.py",
+    "compiler/realsas_orchestrator/budget_adaptive_retry.py",
+    "compiler/realsas_orchestrator/feedback.py",
+    "compiler/realsas_orchestrator/policy.py",
+    "compiler/realsas_orchestrator/pipeline.py",
+    "compiler/realsas_orchestrator/visual_issue_router.py"
+  ],
+  "hard_firewalls": [
+    "zero old front-brain imports in promoted code",
+    "zero AuthoringTruth/god-root product ownership",
+    "zero latest-path asset substitution",
+    "zero historical acceptance authority",
+    "zero implicit repair credit",
+    "zero scientific threshold mutation through retry policy",
+    "exact current artifact IDs/hashes at every stage boundary"
+  ],
+  "next": "MATERIALIZE_OR_REACQUIRE_PRIORITY_SOURCE_BYTES_AND_BUILD_IMPORT_CALL_SIDE_EFFECT_DEPENDENCY_CLOSURE"
+}

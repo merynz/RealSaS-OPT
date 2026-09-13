@@ -86,5 +86,6 @@ from .motion import *
 from .motion_deformation import *
 from .render_support import *
 from .product_external_render import *
+from .component_attachment import *
 from .api import CompilerFacade
 from .bundle_routes import *

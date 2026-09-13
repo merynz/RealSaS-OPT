@@ -54,6 +54,18 @@ from .product_external_render import (
     validate_external_directional_renderable_set,
     assemble_product_v3_with_external_render_support,
 )
+from .component_attachment import (
+    ComponentAttachmentEvidenceIR,
+    QualifiedComponentAttachmentIR,
+    QualifiedComponentAssemblyIR,
+    component_attachment_lineage_hash,
+    component_assembly_hash,
+    qualify_component_attachment,
+    validate_qualified_component_attachment,
+    qualify_component_assembly,
+    validate_component_assembly,
+    bind_component_assembly_to_directional_renderable_set,
+)
 from .bundle_routes import write_typed_artifact, route_for
 
 
@@ -63,7 +75,8 @@ class CompilerFacade:
     The canonical mechanical state remains scientific authority. Exact product render
     meshes may use an independently SHA-qualified support substrate through the
     external-render bridge without relabelling canonical S or restoring historical
-    barycentric skin transfer.
+    barycentric skin transfer. Visible source components receive separate typed
+    attachment qualification before product-state hashing.
     """
     build_surface_from_persistence=staticmethod(build_surface_from_persistence)
     rigging_surface_from_d2_arrays=staticmethod(rigging_surface_from_d2_arrays)
@@ -151,6 +164,14 @@ class CompilerFacade:
     build_external_directional_renderable_set=staticmethod(build_external_directional_renderable_set)
     validate_external_directional_renderable_set=staticmethod(validate_external_directional_renderable_set)
     assemble_product_v3_with_external_render_support=staticmethod(assemble_product_v3_with_external_render_support)
+
+    component_attachment_lineage_hash=staticmethod(component_attachment_lineage_hash)
+    component_assembly_hash=staticmethod(component_assembly_hash)
+    qualify_component_attachment=staticmethod(qualify_component_attachment)
+    validate_qualified_component_attachment=staticmethod(validate_qualified_component_attachment)
+    qualify_component_assembly=staticmethod(qualify_component_assembly)
+    validate_component_assembly=staticmethod(validate_component_assembly)
+    bind_component_assembly_to_directional_renderable_set=staticmethod(bind_component_assembly_to_directional_renderable_set)
 
     write_typed_artifact=staticmethod(write_typed_artifact)
     route_for=staticmethod(route_for)

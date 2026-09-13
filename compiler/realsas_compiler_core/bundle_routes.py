@@ -21,6 +21,11 @@ from .v4_types import (
 )
 from .directional_binding import DirectionalJointViewBindingSetIR
 from .compile_transaction import CompileRequestIR, CompileTransactionIR, CompileResultIR
+from .component_attachment import (
+    ComponentAttachmentEvidenceIR,
+    QualifiedComponentAttachmentIR,
+    QualifiedComponentAssemblyIR,
+)
 
 @dataclass(frozen=True)
 class ArtifactRoute:
@@ -59,6 +64,8 @@ ARTIFACT_ROUTES: dict[type, ArtifactRoute] = {
     CompileRequestIR: ArtifactRoute("EXECUTION_CONTRACT", "Compiler.compile_transaction", "orchestrator", "compile_request_ir.json", ("Compiler", "ProductShell")),
     CompileTransactionIR: ArtifactRoute("EXECUTION_LEDGER", "Compiler.compile_transaction", "orchestrator", "compile_transaction_ir.json", ("Compiler", "Proof", "Export", "ProductShell")),
     CompileResultIR: ArtifactRoute("EXECUTION_RESULT", "Compiler.compile_transaction", "orchestrator", "compile_result_ir.json", ("Export", "Runtime", "ProductShell")),
+    ComponentAttachmentEvidenceIR: ArtifactRoute("EVIDENCE", "SourceComponentRecovery", "candidates/components", "component_attachment_evidence_ir.json", ("Compiler.component_attachment_qualification",)),
+    QualifiedComponentAssemblyIR: ArtifactRoute("CANONICAL_COMPONENT", "Compiler.component_attachment_qualification", "components", "qualified_component_assembly_ir.json", ("Compiler.product_assembly_v3", "Proof", "Runtime", "ProductShell")),
 }
 
 def _slug(value: str) -> str:
@@ -84,6 +91,8 @@ def route_for(value: Any) -> ArtifactRoute:
         return ArtifactRoute("CANONICAL_VISUAL_MOTION_TRACK", "MotionCompiler", "motion/tracks", f"view_{value.view_index:02d}__visibility_{_slug(value.track_id)}.json", ("MotionState", "Runtime", "Proof"))
     if isinstance(value, CapabilityQualificationIR):
         return ArtifactRoute("DERIVED_CAPABILITY_QUALIFICATION", "ProductProof", "proof", f"capability_{_slug(value.capability_id)}.json", ("Export",))
+    if isinstance(value, QualifiedComponentAttachmentIR):
+        return ArtifactRoute("QUALIFIED_COMPONENT_ATTACHMENT", "Compiler.component_attachment_qualification", "components", f"component_{_slug(value.component_id)}__attachment_ir.json", ("Compiler.product_assembly_v3", "Proof", "Runtime", "ProductShell"))
     try:
         return ARTIFACT_ROUTES[type(value)]
     except KeyError as exc:

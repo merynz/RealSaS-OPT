@@ -1,0 +1,58 @@
+name: Mage Component Attachment Contract
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - product/mage-fit1-v5-p1-demo-20260913
+    paths:
+      - 'compiler/realsas_compiler_core/component_attachment.py'
+      - 'compiler/realsas_compiler_core/api.py'
+      - 'compiler/realsas_compiler_core/bundle_routes.py'
+      - 'compiler/realsas_compiler_core/__init__.py'
+      - 'tests/product/test_component_attachment_v1.py'
+      - '.github/workflows/mage_component_attachment_contract.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mage-component-attachment-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  component-attachment:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install contract dependencies
+        run: python3 -m pip install --disable-pip-version-check -q pytest numpy
+      - name: Compile component authority sources
+        run: |
+          python3 -m py_compile \
+            compiler/realsas_compiler_core/component_attachment.py \
+            compiler/realsas_compiler_core/api.py \
+            compiler/realsas_compiler_core/bundle_routes.py \
+            compiler/realsas_compiler_core/__init__.py \
+            tests/product/test_component_attachment_v1.py
+      - name: Run typed component attachment contract
+        run: python3 -m pytest -q tests/product/test_component_attachment_v1.py
+      - name: Preserve exact P1 external render support
+        run: python3 -m pytest -q tests/product/test_external_render_support_v1.py
+      - name: Preserve current Mage motion deformation
+        run: python3 -m pytest -q tests/product/test_mage_topology_motion_deformation_v1.py
+      - name: Preserve exact P1 V5 direct binding
+        run: python3 -m pytest -q tests/compiler/test_direct_model_mesh_skin_v1.py
+      - name: Preserve V4 architecture
+        run: python3 compiler/test_architecture_v4_contract_v1.py
+      - name: Preserve Living Compile regression
+        run: python3 -m unittest -v tests.product.test_living_compile_v4

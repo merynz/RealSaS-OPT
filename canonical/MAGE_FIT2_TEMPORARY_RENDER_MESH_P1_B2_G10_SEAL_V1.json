@@ -1,0 +1,14 @@
+{
+  "schema": "RealSaS.MageFIT2.TemporaryRenderMeshSeal.v1",
+  "date": "2026-09-13",
+  "status": "SEALED_TEMPORARY_RENDER_MESH__NOT_SCIENTIFIC_PASS__NOT_PRODUCT_PASS",
+  "treatment": "P1_B2_G10",
+  "purpose": "temporary product render/deformation mesh until a fully qualified product mesh is closed",
+  "authority_boundaries": {"arachne_input":false,"scientific_mesh_pass":false,"product_pass":false,"current_product_render_mesh":true,"may_relabel_gsa":false,"teacher_topology_used":false,"source_mesh_used":false,"cross_component_bridge_used":false,"unknown_relation_bridge_used":false},
+  "algorithm": {"family":"BASELINE_PRESERVING_ADAPTIVE_PATCH_CDT","coverage_authority":"SEALED_BASELINE_CDT_EXACT_REPLAY","quality_repair_authority":"LOCAL_ADAPTIVE_SUPPORT_CDT","repair_hops":1,"boundary_stride_px":2,"interior_spacing_px":10,"vertex_binding_modes":["IDENTITY_SURFACE_NODE","LOCAL_CONVEX_INTERPOLATION"],"global_adaptive_reconstruction":false,"global_uniform_steiner_subdivision":false,"unbound_quality_steiner":false,"monotonic_coverage_required":true},
+  "drive_evidence": {"result_file_id":"1dyxQfF-bo5ptKMAjk9MKMrLIxbc-THa1","result_filename":"FIT2_BASELINE_PRESERVING_ADAPTIVE_PATCH_CDT_RESULT.json","result_sha256":"2c7c445376936acd160d12b2919974e8921c7229678f3f1ca5201e87d4cb8e4a","run_log_file_id":"18V-jKdRbtHIM8ryQtpIeCObTop1h5-gI","folder_id":"1cPzdUNGX_EYH0JrRHttwBPC3xZjjV6g8"},
+  "summary_metrics": {"min_source_alpha_recall":0.9722958903303945,"max_source_alpha_recall":0.9894795368589644,"mean_source_alpha_recall":0.9801669924504098,"precision_all_views":1.0,"global_frozen_policy_pass":false,"views_passing_full_policy":3,"view_count":8},
+  "per_view_mesh_lineage_hashes": {"V0":"0c59f380b4817a2a05ff0489a37cf0c745b03bdf0ec219a4f41ad67abc0dd5c4","V1":"6748278190007d6f887f5f6b2cace482d938f077bc4c4bfe25d5390ccca78c07","V2":"eb8368c63cf73c05fb1ec017d724e3730617e595d9cce28d57273dcfa0e2be4c","V3":"795e56aad0aa73774f5e9f7c96f655e49877b0c99f459defe8046a232cae5c49","V4":"4f5b7a74670a1380a91048eccbcfaee1cd9beb8d4943a57d5cd1f560338bf466","V5":"6b006a76a529ff718017ecb13bdd137aa5aba506387894e007933b98ccc0aee1","V6":"1eacb8a0a73275f34e5c707a2c5ca7ad7add96b285b6446680c6c634d5c2ccfa","V7":"fd4afa11aa7eda12bdf3e842d3ed90fb143d5d18f76c1087adecd3ad0c9e2c33"},
+  "artifact_gap": "P1_B2_G10 geometry was not separately serialized by the original run; exact V0..V7 blobs must be materialized and SHA-sealed before demo/runtime binding.",
+  "demo_rule": "Use exactly P1_B2_G10; no P2 or historical low-coverage mesh substitution."
+}

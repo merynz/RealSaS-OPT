@@ -1,0 +1,40 @@
+name: Product Branch Source Snapshot
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - product/mage-fit1-v5-p1-demo-20260913
+    paths:
+      - '.github/workflows/product_branch_source_snapshot.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+          fetch-depth: 1
+      - name: Seal source identity
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf '%s\n' "${GITHUB_SHA}" > SOURCE_COMMIT_SHA256.txt
+      - name: Pack exact checkout
+        run: |
+          tar --exclude=.git --exclude=.pytest_cache --exclude='**/__pycache__' -czf realsas-product-source.tar.gz .
+          sha256sum realsas-product-source.tar.gz | tee realsas-product-source.tar.gz.sha256
+      - name: Upload exact source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: realsas-product-source-${{ github.sha }}
+          path: |
+            realsas-product-source.tar.gz
+            realsas-product-source.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0

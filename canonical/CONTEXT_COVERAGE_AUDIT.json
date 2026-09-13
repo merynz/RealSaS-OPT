@@ -3,16 +3,16 @@
   "bootstrap_status": "BOOTSTRAP_AUDIT_CLOSED",
   "fit1_gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
   "candidate_rule": "high-signal canonical/prereg/experiment/challenger/workflow artifacts",
-  "tracked_file_count": 894,
-  "high_signal_artifact_count": 282,
+  "tracked_file_count": 893,
+  "high_signal_artifact_count": 281,
   "classification_counts": {
-    "INDEXED_EXPLICIT": 135,
+    "INDEXED_EXPLICIT": 134,
     "HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL": 147
   },
-  "explained_high_signal_count": 282,
+  "explained_high_signal_count": 281,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 103,
+  "live_branch_count": 102,
   "safe_default_evidence_only_branch_count": 95,
   "unexplained_high_signal_artifacts": [],
   "branches": [
@@ -390,7 +390,7 @@
     },
     {
       "name": "integration/mage-real-e2e-20260912",
-      "sha": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
+      "sha": "3c780cdcfd5bb1edfa454f5112ca9611bbc5a8a4",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -426,7 +426,7 @@
     },
     {
       "name": "main",
-      "sha": "d659fad8d22842aa0e92956188d7efe25dd9c5ac",
+      "sha": "3c780cdcfd5bb1edfa454f5112ca9611bbc5a8a4",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -513,12 +513,6 @@
       "sha": "7cfb7efedbe956c2aa16003e5a7df9bb56c907bb",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
-    },
-    {
-      "name": "repair/mage-full-subject-reclosure-20260912",
-      "sha": "d02b2188a5eae1b893a8b90f4e97f76152183d8d",
-      "class": "ACTIVE_EXPERIMENT",
-      "reason": "MAGE_FIT2_PIPELINE_REFIT"
     },
     {
       "name": "restoration/compiler-runtime-promotion-v1-20260903",

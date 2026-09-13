@@ -1,0 +1,32 @@
+{
+  "schema": "RealSaS.MageDemoActiveSubstratePointer.v1",
+  "date": "2026-09-12",
+  "status": "ACTIVE_DEMO_SUBSTRATE",
+  "active_artifact_id": "MAGE_FIT1_REPLAY_SUBSTRATE_V1",
+  "active_artifact_path": "canonical/MAGE_FIT1_REPLAY_SUBSTRATE_V1.json",
+  "active_surface_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
+  "active_zero_surface_sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+  "active_h1_run_id": "20260912T074348Z",
+  "selection_scope": "MAGE_FIT1_DEMO_AND_CURRENT_FROZEN_DOWNSTREAM_REPLAYS",
+  "selection_rule": "Any current Mage demo or frozen downstream replay that needs the rigging substrate must resolve through this pointer unless a later explicit authority transaction supersedes it.",
+  "historical_policy": {
+    "old_fit1_artifacts_remain_preserved": true,
+    "old_fit1_artifacts_are_not_deleted": true,
+    "old_fit1_old_s_lineage_is_historical_only_for_current_demo_selection": true,
+    "supersession_is_pointer_based_not_destructive": true
+  },
+  "current_evidence": {
+    "h1_observable_gate": "PASS",
+    "gsa8192_deterministic_lineage": "SEALED_BY_ACTIVE_ARTIFACT",
+    "mwb2_cdt_exact_eight_view_gate": "PASS",
+    "minimum_mesh_source_alpha_recall": 0.9055737721419602,
+    "minimum_mesh_precision_inside_alpha": 1.0
+  },
+  "pending_before_full_demo_rig_authority": [
+    "frozen Geppetto replay on active corrected S",
+    "explicit component/attachment qualification",
+    "frozen Arachne V5 replay on corrected S+G"
+  ],
+  "product_pass": false,
+  "unseen_generalization": false
+}

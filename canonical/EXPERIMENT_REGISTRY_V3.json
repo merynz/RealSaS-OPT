@@ -1,0 +1,48 @@
+{
+  "schema": "RealSaS.ExperimentRegistry.v3",
+  "date": "2026-09-13",
+  "active_execution_branch": "fit2/mage-full-subject-reclosure",
+  "experiments": [
+    {
+      "id": "MAGE_FIT2_FULL_SUBJECT_RECLOSURE",
+      "status": "ACTIVE__ARACHNE_NEXT",
+      "branch": "fit2/mage-full-subject-reclosure",
+      "scope": "same-Mage corrected full-subject scientific reclosure",
+      "closed_stages": ["H1_CORRECTED_FULL_SUBJECT", "GSA8192_REAL_8VIEW", "GEPPETTO_FIT2_TERMINAL_PASS"],
+      "next_stage": "ARACHNE_FIT2_FRESH_REFIT",
+      "product_pass_claimed": false,
+      "unseen_claimed": false
+    },
+    {
+      "id": "FIT2_BASELINE_PRESERVING_ADAPTIVE_PATCH_CDT",
+      "status": "CLOSED_FAIL__NO_PREREGISTERED_TREATMENT_PASSES_ALL_VIEWS",
+      "branch": "fit2/mage-full-subject-reclosure",
+      "final_treatment": "P2_B1_G6",
+      "recall_range": [0.97349, 0.99093],
+      "precision_all_views": 1.0,
+      "failure": "min_raster_triangle_angle_deg / max_raster_triangle_aspect_ratio",
+      "blocks_arachne": false,
+      "product_mesh_pass_claimed": false
+    },
+    {
+      "id": "ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1",
+      "status": "CLOSED_PASS__HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT",
+      "scope": "old 950-node Mage lineage only",
+      "current_fit2_authority": false
+    },
+    {
+      "id": "GEPPETTO_REFERENCE_STRENGTH_FIT1",
+      "status": "CLOSED_PASS__HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT",
+      "scope": "old 950-node Mage lineage only",
+      "current_fit2_authority": false
+    },
+    {
+      "id": "HISTORICAL_PRODUCT_POWER_REBIND",
+      "status": "P0_CLOSED_PASS__PAUSED_UNTIL_ARACHNE_FIT2_CLOSES",
+      "branch": "audit/historical-product-power-rebind-20260913",
+      "scope": "product Compiler/runtime/editor/export restoration only",
+      "scientific_sgw_authority": false
+    }
+  ],
+  "historical_detail_registry": "canonical/EXPERIMENT_REGISTRY_V2.json"
+}

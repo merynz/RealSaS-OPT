@@ -1,0 +1,64 @@
+{
+  "schema": "RealSaS.MageH1FullSubjectQualificationSupersession.v1",
+  "status": "HISTORICAL_GATE_SUPERSEDED__OBSERVABLE_PRODUCT_SURFACE_CONTRACT_ACTIVE",
+  "date_utc": "2026-09-12",
+  "scope": "Mage FIT1 full-subject reclosure only; no unseen/generalization or product PASS claim",
+  "historical_result_preserved": {
+    "run_id": "20260912T074348Z",
+    "historical_terminal_status": "H1_SIGNED_MESH_MAGE_FULL_SUBJECT_RECLOSURE_CONTINUATION_FAIL",
+    "train_steps": 1024,
+    "zero_bracket_rate": 0.798828125,
+    "truth_to_pred_p95_norm": 0.13903570709611163,
+    "pred_to_truth_p95_norm": 0.07577677401856454,
+    "historical_fit_geometry_pass": false,
+    "reason_preserved": "Historical H1 V2 hard gate required global signed bracket >=0.90 and full-teacher bidirectional p95 <=0.05. This result remains a true FAIL under that historical contract."
+  },
+  "product_observation_result": {
+    "input_alpha_coverage_pass": true,
+    "minimum_recall": 0.9511473445488728,
+    "minimum_precision": 0.9806321480449604,
+    "minimum_iou": 0.9356283394389125,
+    "observable_support_strata_p95_norm": {
+      "support_1_2": 0.040687738730924204,
+      "support_3_4": 0.024123951564970204,
+      "support_5_8": 0.008030098852479932
+    }
+  },
+  "supersession_reason": {
+    "problem": "The historical gate conflated product-observed surface fidelity with complete reconstruction of a globally signed/watertight FIT teacher.",
+    "mage_subject_fact": "The corrected full subject contains open/mixed surfaces and rigid/deformable components; a universal inside/outside sign is not a valid product precondition for all such geometry.",
+    "authority_rule": "Exact 8 RGBA observations plus exact 8 cameras are product inference authority. FIT teacher geometry remains evaluator/training authority only and never enters product inference.",
+    "no_threshold_relaxation": true,
+    "thresholds_preserved_for_observable_gate": {
+      "min_alpha_recall": 0.95,
+      "min_alpha_precision": 0.95,
+      "min_alpha_iou": 0.92,
+      "observable_first_hit_p95_norm_max": 0.05
+    }
+  },
+  "new_contract": {
+    "open_or_mixed_surface": {
+      "hard_gates": [
+        "exact input-alpha coverage",
+        "observable first-hit surface geometry",
+        "teacher absent from product inference",
+        "exact product input contract"
+      ],
+      "diagnostic_only": [
+        "global zero-bracket rate",
+        "full hidden teacher truth-to-pred p95",
+        "full hidden teacher pred-to-truth p95"
+      ]
+    },
+    "qualified_closed_watertight_surface": {
+      "additional_hard_gates": [
+        "global zero-bracket rate",
+        "full-teacher bidirectional p95"
+      ]
+    }
+  },
+  "implementation": "compiler/realsas_compiler_core/substrate/h1_observable_qualification.py",
+  "canonical_promotion_authorized": false,
+  "product_pass_claimed": false,
+  "unseen_generalization_claimed": false
+}

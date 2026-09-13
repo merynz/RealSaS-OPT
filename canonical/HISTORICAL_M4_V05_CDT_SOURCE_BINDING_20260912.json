@@ -1,0 +1,28 @@
+{
+  "schema": "RealSaS.HistoricalM4V05CDTSourceBinding.v1",
+  "status": "RECOVERED_AND_HASH_VERIFIED__NUMERICAL_AUTHORITY_ONLY",
+  "recovered_from_library_archive": "RealSaS_V19_27R5D3_ALL_SYSTEMS_ONLINE_ARCHITECTURE_SOURCE_20260807.zip",
+  "canonical_v05_source_zip_expected_sha256": "03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130",
+  "canonical_v05_zip_currently_materialized": false,
+  "module_hashes_verified_against_historical_release_binding": {
+    "cdt_production.py": "dd21ae3fc570b2eb5d3c439a5c31fd25fed2ad0743d34a71119d5b391806854d",
+    "constrained_triangulation.py": "8bf2dab45caf667a8035ff37328a80442adfa92d29f36ecf12c558226fb4e9c8",
+    "constructive_mask_domain.py": "cee25473a55cf28b41148387357db946a9913db58671b5ebd80e140b9b764dea",
+    "contour_fidelity.py": "000386089263fa7dd18166c8c07978ff49aaef4cc5faa57fcfaca8c4fe507a8e",
+    "domain_quality.py": "db959027d8efb7e2a758d5eceb83f308c7845ccc8c18223be06e1fb8055b5350",
+    "full_silhouette_substrate.py": "042d0395ac5f9f48294da6390ff14d5ba9fcfa7693a98e8c50b93d926516d745",
+    "local_support_triangulation.py": "3838619fcd43a95aa9e2c10a04492685df13fe60bb5758e893f49977cc3cc6c1"
+  },
+  "active_restored_kernel": {
+    "historical_source": "cdt_production.py",
+    "decoded_source_sha256": "dd21ae3fc570b2eb5d3c439a5c31fd25fed2ad0743d34a71119d5b391806854d",
+    "decoded_source_bytes": 20221,
+    "storage": "compiler/realsas_compiler_core/mesh/_historical_v05/cdt_production.py.zlib.b85",
+    "loader": "compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py"
+  },
+  "authority_rule": "Historical code is restored only as a numerical kernel. Current typed IR, support binding, unknown-boundary policy, observation authority, qualification and promotion remain owned by the current Compiler.",
+  "source_mesh_product_authority": false,
+  "teacher_geometry_product_authority": false,
+  "canonical_promotion_authorized": false,
+  "product_pass_claimed": false
+}

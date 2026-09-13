@@ -3,11 +3,11 @@
 > **GENERATED DISCOVERY VIEW — NOT SCIENTIFIC AUTHORITY.**
 > Bootstrap: `BOOTSTRAP_AUDIT_CLOSED`
 
-- Declared census scope: `main` + 7 registered active/evidence branch(es)
-- Census artifacts in declared scope: **489 / 489 discovered (100%)**
-- Semantically reconciled: **96**
-- Catalogued but unreviewed: **393**
-- Semantic coverage: **19.6%**
+- Declared census scope: `main` + 6 registered active/evidence branch(es)
+- Census artifacts in declared scope: **438 / 438 discovered (100%)**
+- Semantically reconciled: **71**
+- Catalogued but unreviewed: **367**
+- Semantic coverage: **16.2%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -15,13 +15,12 @@
 
 | Branch | Head | Different blobs vs main | High-signal differing artifacts |
 |---|---|---:|---:|
-| `demo/investor-single-specimen-e2e` | `47892ffa16b7` | 14 | 3 |
-| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `d0b666725e79` | 155 | 69 |
-| `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | 88 | 31 |
-| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | 45 | 17 |
-| `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | 84 | 28 |
-| `repair/mage-full-subject-reclosure-20260912` | `d02b2188a5ea` | 153 | 44 |
-| `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | 44 | 16 |
+| `demo/investor-single-specimen-e2e` | `47892ffa16b7` | 13 | 2 |
+| `exp/arachne-skintokens-cleanroom-fit1-20260908` | `d0b666725e79` | 154 | 68 |
+| `exp/geppetto-ar01-skeleton-causal-v1-20260907` | `58ea876d3e61` | 87 | 30 |
+| `exp/geppetto-reference-strength-fullstack-v1-20260907` | `e6cc31ed13fc` | 44 | 16 |
+| `exp/lossless-rigging-evidence-v1-20260906` | `d840d96ece57` | 83 | 27 |
+| `seal/geppetto-reference-strength-fit1-20260908` | `ae0af0cd39dd` | 43 | 15 |
 
 The queue is a discovery aid. A path being listed does not establish what it proves, whether it is current, or whether it was ever executed.
 
@@ -344,26 +343,6 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 
 - `KA-F23932EC4DFF` `PREREG` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/arachne_skintokens_fit1_20260908/V7_C2_IMPORTANCE_CORRECTED_ACTIVE_HEAVY_PREREG_20260909.md` @ blob `8c0f9a48466e`
 
-### 2026-09-12 :: COMPILER (3)
-
-- `KA-B741E03490A2` `AUDIT` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/MWB2_CDT_CARRIER_RESOLUTION_FORENSIC_AUDIT_20260912.json` @ blob `53325b157e4b`
-- `KA-EFBD44B97947` `PREREG` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/MWB2_CDT_EXACT_RECLOSURE_PREREG_20260912.md` @ blob `4e1efe2d124c`
-- `KA-0E4DC0FA21CE` `CLOSURE` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/MWB2_CDT_EXACT_RECLOSURE_REPORT_20260912.json` @ blob `1d545d64dc12`
-
-### 2026-09-12 :: FIT_PRODUCT (7)
-
-- `KA-7194AF5FA3A0` `AUTHORITY_DECISION` — `repair/mage-full-subject-reclosure-20260912` :: `canonical/MAGE_FULL_SUBJECT_FIT_AUTHORITY_WITNESS_20260912.json` @ blob `d3eca1537c21`
-- `KA-BF9BE0076E86` `PLAN_MATRIX` — `repair/mage-full-subject-reclosure-20260912` :: `canonical/MAGE_FULL_SUBJECT_FIT_TARGET_MANIFEST_20260912.json` @ blob `b0d4dea62fe3`
-- `KA-8CC0555E8996` `CLOSURE` — `repair/mage-full-subject-reclosure-20260912` :: `canonical/MAGE_FULL_SUBJECT_RECLOSURE_PLAN_20260912.md` @ blob `0c4b03a32953`
-- `KA-EF94131B7D8A` `AUTHORITY_DECISION` — `repair/mage-full-subject-reclosure-20260912` :: `canonical/MAGE_REOPENED_AUTHORITY_INVALIDATION_20260912.json` @ blob `44e8dd94a3cf`
-- `KA-BB9EF7374AF7` `AUDIT` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/H1_FULL_SUBJECT_1024_FORENSIC_AUDIT_20260912.json` @ blob `c252745b5536`
-- `KA-F4310546731D` `AUDIT` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/OLD_ZERO_COMPONENT_GEOMETRY_AUDIT_20260912.json` @ blob `93535011e255`
-- `KA-CFB2E1E2140A` `AUDIT` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/single_family_e2e_v1/MAGE_FIT1_REAL_E2E_INTEGRATION_AUDIT_20260912.md` @ blob `f4a432e2d1b0`
-
-### 2026-09-12 :: IRIS (1)
-
-- `KA-3E94B98253F8` `PREREG` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/FULL_SUBJECT_IRIS_RECLOSURE_PREREG_20260912.md` @ blob `2050571e39f3`
-
 ### UNKNOWN_DATE :: ARACHNE_SKIN (13)
 
 - `KA-7A169011D5E9` `WORKFLOW` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `.github/workflows/arachne_a0_hardrow_rootcause_hosted.yml` @ blob `40ecf1c6a755`
@@ -380,7 +359,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-03AAD1E34A0F` `AUDIT` — `main` :: `canonical/SKINTOKENS_CODE_LEVEL_REFERENCE_AUDIT_V1.md` @ blob `3e66bed1b76e`
 - `KA-249218A33EA0` `PREREG` — `main` :: `canonical/fit_mage_v1/ARACHNE_A1_CPU_PREREG_V1.md` @ blob `b9774b3296e6`
 
-### UNKNOWN_DATE :: COMPILER (16)
+### UNKNOWN_DATE :: COMPILER (14)
 
 - `KA-DE1C18742E5A` `WORKFLOW` — `main` :: `.github/workflows/proof_service_promotion_gate.yml` @ blob `2fad848fd29e`
 - `KA-9D658E0AA530` `WORKFLOW` — `main` :: `.github/workflows/runtime_deploy_bake_promotion_gate.yml` @ blob `06c7f8fd3d7c`
@@ -396,8 +375,6 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-2CEA34CCFD57` `AUDIT` — `main` :: `experiments/s0_rigging_substrate/S0_B_PILOT_REPORT_V1.md` @ blob `f81b8678dfef`
 - `KA-F9AC50E77CFA` `RESULT` — `main` :: `experiments/s0_rigging_substrate/S0_B_PILOT_RESULT_V1.json` @ blob `ee24f2d22623`
 - `KA-6E0B09EAFC48` `PREREG` — `main` :: `experiments/s0_rigging_substrate/S0_PLAN_AND_PREREG_V1.md` @ blob `cf36713ca2dd`
-- `KA-A900A890B166` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `canonical/MAGE_FIT1_REPLAY_SUBSTRATE_V1.json` @ blob `f105cd3936e4`
-- `KA-60227BFFD981` `PROMOTION_RETRACTION` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/NO_DOWNSTREAM_PROMOTION.txt` @ blob `ef2f5130b857`
 
 ### UNKNOWN_DATE :: CROSS_CUTTING_OTHER (20)
 
@@ -422,7 +399,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-8A1DC57C0973` `AUDIT` — `main` :: `experiments/post_corpus_audit/audit_master_corpus_fast.py` @ blob `27523106c33e`
 - `KA-BF957F2998BD` `CLOSURE` — `main` :: `experiments/post_corpus_audit/post_corpus_stage_a_closure_v2.py` @ blob `aafa4c456f3b`
 
-### UNKNOWN_DATE :: FIT_PRODUCT (32)
+### UNKNOWN_DATE :: FIT_PRODUCT (22)
 
 - `KA-533B890E7E65` `AUTHORITY_DECISION` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `experiments/mage_scene_first_e2e_v1/B1S_FULL_STEP0_EPS1E4_DECISION.md` @ blob `f0ce368c8f5c`
 - `KA-1A1CA571A364` `PREREG` — `exp/geppetto-ar01-skeleton-causal-v1-20260907` :: `experiments/mage_scene_first_e2e_v1/B1S_PHASE_EPS_SWITCH_PREREG.md` @ blob `b74ff9dbbd64`
@@ -446,18 +423,8 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-1F97F2E183D1` `AUTHORITY_DECISION` — `main` :: `experiments/family_selection_v1/test_post_freeze_family_selector_v1.py` @ blob `01e128dbb793`
 - `KA-63B1788D3B44` `HIGH_SIGNAL_OTHER` — `main` :: `experiments/family_selection_v1/test_prefit_family_truth_eligibility_v1.py` @ blob `1c11d7d2aeb5`
 - `KA-010725BF929F` `PLAN_MATRIX` — `main` :: `experiments/single_family_e2e_v1/data_manifest_v1.py` @ blob `6b6cb76d8433`
-- `KA-57E1E53A62FE` `WORKFLOW` — `repair/mage-full-subject-reclosure-20260912` :: `.github/workflows/mage_full_subject_reclosure_contract.yml` @ blob `4d188f0614c6`
-- `KA-BF82B60779A9` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/.alpha_gate` @ blob `df3e6e9c83be`
-- `KA-992D00F0DD1B` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/.camera_gate` @ blob `5bab3d6bae83`
-- `KA-A31CC936D5BD` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/.component_gate` @ blob `675f5a1a656c`
-- `KA-4B532C2DE861` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/ACTIVE_GATE.txt` @ blob `9d06a5de19e1`
-- `KA-4C099E6CE158` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/COMPONENT_GATE_NOTE.md` @ blob `11498f8625ef`
-- `KA-F8FF72F83E4A` `PLAN_MATRIX` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/QUEUE_STATE.txt` @ blob `36a1bcc44c9b`
-- `KA-0236C862BF48` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/build_full_subject_fit_target_v1.py` @ blob `0de6e4eb7aa0`
-- `KA-585F0CC40541` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/render_gsa_fit2_8view_v1.py` @ blob `ec9e7028ba4f`
-- `KA-D66BA742F6FC` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/single_family_e2e_v1/run_mage_fit1_real_static_v1.py` @ blob `dc31f1d29bc6`
 
-### UNKNOWN_DATE :: GEPPETTO (33)
+### UNKNOWN_DATE :: GEPPETTO (31)
 
 - `KA-7CFB6F6449EA` `WORKFLOW` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `.github/workflows/geppetto_reference_strength_fit1_source_gate.yml` @ blob `f698e49b1400`
 - `KA-F9474C86ACD3` `AUTHORITY_DECISION` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `experiments/geppetto_reference_strength_fullstack_v1/GEPPETTO_REFERENCE_STRENGTH_FIT1_SEAL_V1.md` @ blob `07eb356a1817`
@@ -489,11 +456,9 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-40524E28EA8D` `PREREG` — `main` :: `experiments/geppetto_reference_strength_fullstack_v1/GEPPETTO_REFERENCE_STRENGTH_FIT1_PREREG_V1.md` @ blob `07f4f93f777a`
 - `KA-C4DCBA930A1A` `AUTHORITY_DECISION` — `main` :: `experiments/geppetto_reference_strength_fullstack_v1/GEPPETTO_REFERENCE_STRENGTH_LOSS_FREEZE_V1.md` @ blob `24981c652e3f`
 - `KA-979CBB4AE416` `HIGH_SIGNAL_OTHER` — `main` :: `experiments/geppetto_reference_strength_fullstack_v1/run_geppetto_reference_strength_fit1_v1.py` @ blob `8e6312c8faa3`
-- `KA-6C4A36DC1286` `WORKFLOW` — `repair/mage-full-subject-reclosure-20260912` :: `.github/workflows/mage_active_geppetto_input_probe.yml` @ blob `7bae6e8a6e62`
-- `KA-25CA55BA1B89` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/run_geppetto_fit2_corrected_substrate_refit_v1.py` @ blob `af177a82eab0`
 - `KA-4A2C1636C4A2` `WORKFLOW` — `seal/geppetto-reference-strength-fit1-20260908` :: `.github/workflows/geppetto_reference_strength_fit1_source_gate.yml` @ blob `f698e49b1400`
 
-### UNKNOWN_DATE :: IRIS (36)
+### UNKNOWN_DATE :: IRIS (35)
 
 - `KA-8E350555053D` `WORKFLOW` — `demo/investor-single-specimen-e2e` :: `.github/workflows/iris_reprojection_v2_gate0.yml` @ blob `38a9fa6cc3ae`
 - `KA-BC0501B29B20` `WORKFLOW` — `exp/arachne-skintokens-cleanroom-fit1-20260908` :: `.github/workflows/iris_v2_source_contract.yml` @ blob `286a4f1a3613`
@@ -529,7 +494,6 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-71EB299F884D` `PREREG` — `main` :: `prereg/n1d/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_PREREG_V1.json` @ blob `1f63d14b6c16`
 - `KA-CEC4A4424F15` `PREREG` — `main` :: `prereg/n1d/N1D_GLOBAL_FOREGROUND_GFDR_CAUSAL_REPLAY_PREREG_V1.json` @ blob `29f7aac944a5`
 - `KA-3B3218B9898B` `PREREG` — `main` :: `prereg/n1d/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_OPENDEV_PREREG_V1.json` @ blob `fca9dca905fe`
-- `KA-9B307C02C7A5` `PREREG` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/IRIS_H1_V2_FULL_SUBJECT_RECLOSURE_PREREG_V1.json` @ blob `8bf55aa736a0`
 - `KA-060D57776AF6` `WORKFLOW` — `seal/geppetto-reference-strength-fit1-20260908` :: `.github/workflows/iris_v2_source_contract.yml` @ blob `286a4f1a3613`
 
 ### UNKNOWN_DATE :: REPOSITORY_GOVERNANCE (25)

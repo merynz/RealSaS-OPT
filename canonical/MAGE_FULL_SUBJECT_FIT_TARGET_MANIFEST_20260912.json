@@ -1,0 +1,38 @@
+{
+  "camera_hashes": [
+    "73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541",
+    "bdc172a4aff332f956d1403e36b2f8684b68059fdc82f9efddf35d05a6d9b4d4",
+    "3c2bbc44ef9005b4a545a3381205a5d6a92af15b4791c9075071b8cad02a1a6c",
+    "24b2f115d908422d885f85e956fcc36ac78fd0c90b503f698caa62febc2b9c4d",
+    "5bf00783d6509c2ca142e05ef705d5cdb5df17ad248b782d2fe8cf8a297bee39",
+    "7ee3e50739318eeb122b5b0ec67260dd32e21d949398f48c408a6c239e5c89fe",
+    "daa19fa58ff602977d64b720c4198956809855149d814df487c7762a963f1eec",
+    "68f51fbfce4c31f94281e1569d74b44609435285668f8a8b1b278e76db6ea53f"
+  ],
+  "excluded_not_fully_supported_face_count": 80,
+  "excluded_zero_or_unsupported_vertex_count": 42,
+  "fit_authority_minimums": {
+    "iou": 0.9924691004605425,
+    "precision": 0.9978615107277933,
+    "recall": 0.9945845150347653
+  },
+  "fit_executed": false,
+  "normalized_source_sha256": "528bef491eceb358ebc8ecb2a46af1d37b4322a7ef500281403a8207fe7c648f",
+  "observation_hashes": [
+    "8e9875c16bba3047c8f2fc211b984f2399d1145f5720c7427c6fc03a3fec0616",
+    "fa94283780d5e5f3ad3943bbffc1f0592a70fc362fdd03b94a1d1cb46889dc30",
+    "777bf4f7c505b405d3a5d2a111b2f297949454f77cae7c33064bf02479d384a5",
+    "2a771c91c1d1c0b75dab14f6e98b7905a8429bbf0c0a8dd690261f93f6476d86",
+    "354bb239feb6c1a515917fee4efb42fb1e0cb9f173d0eb3191fb0901a02a6228",
+    "158fc14a75aa69f6133f2ba3ec5df2ad146afc62f477d7d3b4a41ca2cb0e42f2",
+    "e3b08836c187863819d8b8aaa53aef79eddfee167e1fabf3fb1dd8ec0484563a",
+    "87d4ad46edffec3c6bff034d305194820288d3cc6ef9a9480ac2234fb56451bc"
+  ],
+  "optimizer_constructed": false,
+  "product_pass_claimed": false,
+  "schema": "RealSaS.MageFullSubjectFitTarget.v1",
+  "status": "PASS__CORRECTED_FULL_SUBJECT_FIT_TARGET_BUILT",
+  "target_sha256": "dec2e816ea2bac5bfca44b1669484b0cde3c87d8d4f5052890cee07469c6825a",
+  "teacher_face_count": 5683,
+  "teacher_vertex_count": 5279
+}

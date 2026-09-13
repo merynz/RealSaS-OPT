@@ -1,0 +1,68 @@
+{
+  "schema": "RealSaS.FIT2CanonicalExecutionAuthority.v1",
+  "date": "2026-09-13",
+  "repository": "merynz/RealSaS-OPT",
+  "status": "ACTIVE__FIT2_CANONICAL_EXECUTION_AUTHORITY",
+  "canonical_continuation_branch": "main",
+  "canonical_execution_branch": "fit2/mage-full-subject-reclosure",
+  "authority_origin_head": "2fa5d4b604d5ce1dcb24feee2e6a6b8fa12476e3",
+  "superseded_transition_branch": "repair/mage-full-subject-reclosure-20260912",
+  "fit1_status": "HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT",
+  "fit1_rule": "FIT1 local scientific closures remain valid scoped evidence on the old 950-node lineage, but they are not current product authority and must not be loaded as corrected FIT2 model authority.",
+  "fit2_scientific_lineage": {
+    "witness": "Mage same-character full-subject reclosure",
+    "h1_status": "CLOSED_PASS",
+    "gsa_status": "CLOSED_PASS",
+    "gsa_nodes": 8171,
+    "gsa_relations": 23656,
+    "gsa_observed_nodes": 7391,
+    "gsa_completed_nodes": 780,
+    "gsa_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
+    "tensorization_hash": "fe351362e195164805cebb0f63b74d1861ef123458b20ac56607016e00a6c67e",
+    "geppetto_status": "TERMINAL_PASS_VERIFIED",
+    "geppetto_closure_step": 12160,
+    "geppetto_terminal_streak": 48,
+    "geppetto_checkpoint_sha256": "2e1f35d196af6eea957bb6377bc0b0e1b045c20dc652d798b74b107198ae80e9",
+    "arachne_handoff_status": "AUTHORIZED_BY_GEPPETTO_FIT2_TERMINAL_PASS",
+    "arachne_refit_authorized": true,
+    "arachne_status": "AUTHORIZED__NOT_STARTED",
+    "mesh_status": "CLOSED_FAIL__NO_PREREGISTERED_BASELINE_PRESERVING_PATCH_TREATMENT_PASSES_ALL_VIEWS",
+    "mesh_is_arachne_blocker": false,
+    "mesh_final_family": "P2_B1_G6",
+    "mesh_final_recall_range": [0.97349, 0.99093],
+    "mesh_precision_all_views": 1.0,
+    "mesh_failure_class": "RASTER_TRIANGLE_SHAPE_QUALITY__MIN_ANGLE_AND_MAX_ASPECT",
+    "mesh_product_pass_claimed": false,
+    "product_pass_claimed": false,
+    "unseen_generalization_claimed": false
+  },
+  "workstreams": [
+    {
+      "order": 1,
+      "id": "AUTHORITY_HYGIENE",
+      "status": "CLOSING_IN_THIS_TRANSACTION",
+      "purpose": "Make FIT2 branch/execution authority unambiguous and freeze FIT1 as historical scoped evidence."
+    },
+    {
+      "order": 2,
+      "id": "ARACHNE_FIT2",
+      "status": "NEXT",
+      "purpose": "Fresh corrected-lineage Arachne fit, preregistration, A100 run-all notebook, terminal evidence, QualifiedSkinIR, hashes and seal."
+    },
+    {
+      "order": 3,
+      "id": "PRODUCTIZATION_RESTORATION",
+      "status": "BLOCKED_UNTIL_ARACHNE_FIT2_CLOSES",
+      "branch": "audit/historical-product-power-rebind-20260913",
+      "purpose": "Selective historical Compiler/runtime restoration, missing product-layer implementation, exact binding/render/motion/runtime/editor closure, then demo."
+    }
+  ],
+  "hard_rules": [
+    "No old 950-node S/G/W may become current FIT2 authority.",
+    "Historical FIT1 checkpoints are evidence only; fresh FIT2 refits may not silently load them.",
+    "Arachne FIT2 depends on corrected S/G and the exact Geppetto FIT2 handoff, not on final mesh PASS.",
+    "Mesh FAIL is not relabeled PASS; high coverage/precision may be consumed only as explicitly qualified downstream experimental geometry until final product mesh closure.",
+    "The productization audit branch owns product restoration work only and must not become scientific S/G/W authority.",
+    "PRODUCT_PASS may be considered only after Arachne, final exact mesh-skin/components, professional motion, and exact runtime/export identity closure."
+  ]
+}

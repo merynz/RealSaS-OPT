@@ -1,0 +1,136 @@
+{
+  "schema": "RealSaS.HistoricalProductPowerRebindManifest.v1",
+  "date": "2026-09-13",
+  "status": "AUDIT_MANIFEST__NO_PROMOTION__NO_SGW_AUTHORITY_CHANGE",
+  "branch": "audit/historical-product-power-rebind-20260913",
+  "base_main_sha": "bbdde6ec851717dddfba52107a28343e91864d68",
+  "purpose": "Recover still-useful historical Compiler/runtime/product mechanisms behind current typed authority without restoring obsolete ownership or parallel truth.",
+  "ordering": {
+    "active_mesh_science": "CONTINUE_UNCHANGED_UNDER_EXISTING_PREREGISTRATION",
+    "p0_rebind_audit": "RUN_NOW_IN_PARALLEL",
+    "final_arachne_product_consumer_contract": "FREEZE_AFTER_P0B_TRANSACTION_IDENTITY_CONTRACT",
+    "corrected_mesh_product_integration": "BIND_IN_P1_AFTER_CURRENT_REAL_G_W_M_GATES",
+    "professional_motion": "P2_AFTER_EXACT_PRODUCT_STATE",
+    "runtime_editor_productization": "P3_AFTER_QUALIFIED_MOTION"
+  },
+  "historical_authorities": {
+    "v0_5_source": {
+      "name": "RealSaS_M4_v0_5_CANONICAL_MECHANICAL_MEANING_SOURCE.zip",
+      "sha256": "03a819f01d3cc39e806cc30ae291912718d114ca3ff6b75dc2b854d1bbfbf130",
+      "role": "orchestration/proof/repair/export chassis and source reserve"
+    },
+    "r5_3": {
+      "role": "single Compiler owner, canonical IDs, reducer/DAG discipline"
+    },
+    "v97_39": {
+      "role": "proof/repair/final-package/runtime bind same canonical product state"
+    },
+    "late_may_numerics": {
+      "role": "CDT/cotangent, BBW/KKT, ARAP, XPBD/contact optional source-diff reserve",
+      "bulk_restore_authorized": false
+    }
+  },
+  "dispositions": [
+    "KEEP_CURRENT",
+    "REUSE_CORE_REBIND_SHELL",
+    "REUSE_AS_SUBORDINATE_SERVICE",
+    "PORT_TESTS_AND_INVARIANTS",
+    "REOPEN_SOURCE_DIFF",
+    "REFERENCE_ONLY",
+    "DEFER_OPTIONAL_BACKEND",
+    "REJECT_OBSOLETE_AUTHORITY"
+  ],
+  "items": [
+    {"id":"P0-01","wave":"P0","source":"v0.5 realsas_orchestrator/pipeline.py","capability":"deterministic end-to-end stage orchestration/retry/feedback","disposition":"REUSE_CORE_REBIND_SHELL","current_gap":"no single current full compile transaction owner","hard_rule":"extract control behavior only; zero old front-brain imports"},
+    {"id":"P0-02","wave":"P0","source":"v0.5 meaningful_proof_loop.py + helpers","capability":"probe-measure-diagnose-repair-reproof loop","disposition":"REOPEN_SOURCE_DIFF","current_gap":"typed proof/repair exists but full operational loop is thin","hard_rule":"bounded attempts; same-probe child-lineage re-proof mandatory"},
+    {"id":"P0-03","wave":"P0","source":"v0.5 retry/feedback/qualification modules","capability":"failure propagation and residual routing","disposition":"REOPEN_SOURCE_DIFF","current_gap":"runner-local control behavior","hard_rule":"typed FAIL/ABSTAIN semantics; no swallowed failures"},
+    {"id":"P0-04","wave":"P0","source":"SaSCanonicalProductionPipeline","capability":"stage interface/context/trace/result envelope","disposition":"PORT_TESTS_AND_INVARIANTS","current_gap":"no reusable current stage transaction abstraction","hard_rule":"do not restore Unity/AuthoringTruth/file-presence authority"},
+    {"id":"P0-05","wave":"P0","source":"SaSAgentGoldenPathPipeline","capability":"external Build-Bake-Proof API with hashes","disposition":"REUSE_CORE_REBIND_SHELL","current_gap":"Living Compile has no canonical compile transaction API","hard_rule":"wrapper only; current Compiler owns all canonical artifacts"},
+    {"id":"P0-06","wave":"P0","source":"SaSProductionPipelineContracts + SaSPipelineContracts","capability":"request/result/issues/blockers/artifact/coverage contracts","disposition":"REUSE_CORE_REBIND_SHELL","current_gap":"no single CompileRequest/StageResult/CompileResult envelope","hard_rule":"retype to current IRs; remove duplicate stage taxonomies"},
+    {"id":"P0-07","wave":"P0","source":"SaSCanonicalDataGraph","capability":"execution dependency/residual graph","disposition":"REUSE_AS_SUBORDINATE_SERVICE","current_gap":"no compact runtime execution DAG/residual diagnostic","hard_rule":"diagnostic only; may not independently accept product"},
+    {"id":"P0-08","wave":"P0","source":"v97.39 single-truth rebind","capability":"exact product/proof/package identity continuity","disposition":"KEEP_CURRENT","current_gap":"needs broader S/G/W/M/B/component/motion regression coverage","hard_rule":"all downstream hashes equal transaction-selected identities"},
+    {"id":"P0-09","wave":"P0","source":"SaSProductionPathLockdownPipeline","capability":"non-empty tracks and clip coverage lockdown","disposition":"REUSE_CORE_REBIND_SHELL","current_gap":"professional motion/runtime coverage gate open","hard_rule":"consume QualifiedMotion/runtime manifest only; no second acceptance owner"},
+    {"id":"P0-10","wave":"P0","source":"SaSProductionOperations","capability":"thin editor-facing production operations","disposition":"REFERENCE_ONLY","current_gap":"public UI command surface","hard_rule":"no direct artifact mutation"},
+    {"id":"P0-11","wave":"P0","source":"SaSCharacterCompiler.SourceToRuntimeProduct","capability":"single production spine lifecycle","disposition":"REFERENCE_ONLY","current_gap":"lifecycle naming/transaction precedent","hard_rule":"do not restore old source/decomposition ownership"},
+    {"id":"P0-12","wave":"P0","source":"SaSPartIntakePipeline + SaSBuildCharacterPipeline","capability":"stage assembly + thin build facade","disposition":"PORT_TESTS_AND_INVARIANTS","current_gap":"transaction decomposition patterns","hard_rule":"current IR only; no stable Generated-path authority"},
+    {"id":"P0-13","wave":"P0","source":"current bundle_routes/hashing/v4_types/ProductProofBundleIR","capability":"current identities, routes and proof hashes","disposition":"KEEP_CURRENT","current_gap":"none; this is the basis","hard_rule":"new transaction consumes rather than replaces current authority"},
+    {"id":"P0-14","wave":"P0","source":"current product/living_compile","capability":"editor/product shell and user edit layer","disposition":"KEEP_CURRENT","current_gap":"needs canonical Compile command","hard_rule":"UI remains consumer; edits require requalification"},
+
+    {"id":"P1-01","wave":"P1","source":"current skeleton qualification","capability":"exact G selection","disposition":"KEEP_CURRENT","hard_rule":"one selected G hash downstream"},
+    {"id":"P1-02","wave":"P1","source":"current skin qualification","capability":"exact W selection","disposition":"KEEP_CURRENT","hard_rule":"one selected W hash downstream"},
+    {"id":"P1-03","wave":"P1","source":"current strict directional mesh product qualifier","capability":"exact M product authority","disposition":"KEEP_CURRENT","hard_rule":"real frozen mesh gate; candidate-reported coverage cannot establish PASS"},
+    {"id":"P1-04","wave":"P1","source":"current mesh-skin binding","capability":"exact B=M<-W","disposition":"KEEP_CURRENT","hard_rule":"support-bound deterministic transfer"},
+    {"id":"P1-05","wave":"P1","source":"current component/mechanical assembly","capability":"visible component/attachment product state","disposition":"KEEP_CURRENT","hard_rule":"no silently dropped qualified visible components"},
+    {"id":"P1-06","wave":"P1","source":"v97.39 continuity tests/invariants","capability":"stage identity continuity","disposition":"PORT_TESTS_AND_INVARIANTS","hard_rule":"exact upstream hash assertions at every consumer seam"},
+
+    {"id":"P2-01","wave":"P2","source":"SaSClosedLoopMotionPipeline2D","capability":"closed-loop motion retune","disposition":"REUSE_CORE_REBIND_SHELL","hard_rule":"proposal/retune only; current proof owns acceptance"},
+    {"id":"P2-02","wave":"P2","source":"SaSMotionAutoRepair2D","capability":"local motion repair candidates","disposition":"REOPEN_SOURCE_DIFF","hard_rule":"each executor separately promoted; child lineage and same-probe re-proof"},
+    {"id":"P2-03","wave":"P2","source":"SaSPhaseAwareMotionGenerator","capability":"phase-aware clip shaping","disposition":"REUSE_AS_SUBORDINATE_SERVICE","hard_rule":"proposal curves only"},
+    {"id":"P2-04","wave":"P2","source":"SaSPhysicalMotionCalibration2D","capability":"physical motion calibration","disposition":"REUSE_AS_SUBORDINATE_SERVICE","hard_rule":"report + proposed edits bound to exact product/clip"},
+    {"id":"P2-05","wave":"P2","source":"SaSAdaptivePhaseTiming2D","capability":"phase timing adaptation","disposition":"REUSE_AS_SUBORDINATE_SERVICE","hard_rule":"explicit before/after metrics"},
+    {"id":"P2-06","wave":"P2","source":"SaSMinimumJerkMotionPass2D","capability":"minimum-jerk smoothing","disposition":"REUSE_AS_SUBORDINATE_SERVICE","hard_rule":"contacts/attachments/limits remain hard constraints"},
+    {"id":"P2-07","wave":"P2","source":"SaSLoopSeamRepairPass2D","capability":"loop seam closure","disposition":"REUSE_AS_SUBORDINATE_SERVICE","hard_rule":"child clip lineage + endpoint/velocity continuity evidence"},
+    {"id":"P2-08","wave":"P2","source":"SaSImpactSpringDamperMotionPass2D","capability":"impact/settle response","disposition":"REUSE_AS_SUBORDINATE_SERVICE","hard_rule":"proposal only; proof remains current authority"},
+    {"id":"P2-09","wave":"P2","source":"OrganicFluid/PerceptualFluidity passes","capability":"artist-quality fluidity shaping","disposition":"REOPEN_SOURCE_DIFF","hard_rule":"diagnostic/polish only; aesthetic score cannot independently PASS"},
+    {"id":"P2-10","wave":"P2","source":"motion transition/readability/quality analyzers","capability":"quality diagnostics","disposition":"PORT_TESTS_AND_INVARIANTS","hard_rule":"evidence only; current policy owns acceptance"},
+    {"id":"P2-11","wave":"P2","source":"SaSBakeActionPipeline","capability":"professional clip bake lifecycle","disposition":"REUSE_CORE_REBIND_SHELL","hard_rule":"consume QualifiedMotionIR; export never re-solves"},
+    {"id":"P2-12","wave":"P2","source":"SaSMotionGraphAsset","capability":"motion program/action/transition/envelope model","disposition":"REUSE_CORE_REBIND_SHELL","hard_rule":"split product program from proof/evidence"},
+    {"id":"P2-13","wave":"P2","source":"SaSPhysicalResponseCompiler","capability":"dash/knockback/wind/cloth/secondary response","disposition":"REOPEN_SOURCE_DIFF","hard_rule":"split proposal from proof/product writes"},
+    {"id":"P2-14","wave":"P2","source":"SaSPartDrawOrderKey + visibility/order tracks","capability":"animated draw order/visibility","disposition":"REUSE_CORE_REBIND_SHELL","hard_rule":"bind current component IDs and view scope; no topology mutation"},
+    {"id":"P2-15","wave":"P2","source":"integrated motion proof pipeline","capability":"dynamic proof composition","disposition":"PORT_TESTS_AND_INVARIANTS","hard_rule":"recover failure cases/metrics, not old acceptance authority"},
+
+    {"id":"P3-01","wave":"P3","source":"current_v4_runtime_v2.py","capability":"proof-owned runtime package projection","disposition":"KEEP_CURRENT","hard_rule":"exact selected product hashes; no solver replay"},
+    {"id":"P3-02","wave":"P3","source":"runtime/realsas_cpp","capability":"native rss/rsr consumer","disposition":"KEEP_CURRENT","hard_rule":"CMake/ABI/CTest + exact package open/render interlock"},
+    {"id":"P3-03","wave":"P3","source":"SaSAnimationStateMachineController","capability":"runtime action/state conductor","disposition":"REUSE_CORE_REBIND_SHELL","hard_rule":"consume qualified motion program only"},
+    {"id":"P3-04","wave":"P3","source":"SaSBakedCharacterRuntimeController","capability":"game-facing runtime conductor","disposition":"REUSE_CORE_REBIND_SHELL","hard_rule":"adapter over exact current runtime package; no reconstruction"},
+    {"id":"P3-05","wave":"P3","source":"historical baked runtime consumption report","capability":"runtime consumption evidence","disposition":"PORT_TESTS_AND_INVARIANTS","hard_rule":"prove exact package/clip/mesh/frame identities actually consumed"},
+    {"id":"P3-06","wave":"P3","source":"historical rss/realsas/rsr product boundary","capability":"engine-neutral package contract","disposition":"KEEP_CURRENT","hard_rule":"only backward-compatible typed additions when current product requires them"},
+    {"id":"P3-07","wave":"P3","source":"current Living Compile","capability":"editable puppet UI/runtime preview","disposition":"KEEP_CURRENT","hard_rule":"compile delegates to canonical transaction; edits requalify"},
+    {"id":"P3-08","wave":"P3","source":"parked clip/recipe/editor surfaces","capability":"UX/workflow patterns","disposition":"REFERENCE_ONLY","hard_rule":"no old serialized truth or Generated-path authority"},
+    {"id":"P3-09","wave":"P3","source":"historical golden-path/handoff/report layers","capability":"one-click result surfacing","disposition":"REFERENCE_ONLY","hard_rule":"aggregate canonical facts only"},
+
+    {"id":"P4-01","wave":"P4","source":"late-May CDT/cotangent","capability":"optional stronger mesh backend","disposition":"DEFER_OPTIONAL_BACKEND","hard_rule":"reopen only on measured current mesh blocker and typed support-lineage adapter"},
+    {"id":"P4-02","wave":"P4","source":"BBW/active-set/KKT","capability":"optional deterministic weight backend","disposition":"DEFER_OPTIONAL_BACKEND","hard_rule":"never second W owner"},
+    {"id":"P4-03","wave":"P4","source":"ARAP","capability":"optional corrective deformation","disposition":"DEFER_OPTIONAL_BACKEND","hard_rule":"exact product identity + proof-owned correction contract"},
+    {"id":"P4-04","wave":"P4","source":"XPBD/contact/SDF","capability":"optional secondary dynamics/contact","disposition":"DEFER_OPTIONAL_BACKEND","hard_rule":"only after core product/motion closure"},
+    {"id":"P4-05","wave":"P4","source":"historical rig assembly/graph variants","capability":"optional graph/assembly backend","disposition":"DEFER_OPTIONAL_BACKEND","hard_rule":"only on measured current graph blocker"}
+  ],
+  "rejects": [
+    "old front-brain image decomposition / teacher-exact owner ontology",
+    "SaSAuthoringTruthAsset god-root semantics",
+    "RealCompiler cache/R-assets as direct runtime truth",
+    "proof/handoff code mutating runtime product",
+    "stable Generated path as identity",
+    "file-presence-only PASS gates",
+    "hidden runtime retriangulation or replacement topology",
+    "export-time evaluator/solver replay",
+    "wholesale import of the monolithic v0.5 orchestrator"
+  ],
+  "required_transaction_identity_fields": [
+    "run_id",
+    "source_observation_set_hash",
+    "surface_id","surface_hash",
+    "skeleton_id","skeleton_hash",
+    "skin_id","skin_hash",
+    "mesh_id[8]","mesh_hash[8]",
+    "mesh_skin_binding_id[8]","mesh_skin_binding_hash[8]",
+    "component_assembly_id","component_assembly_hash",
+    "motion_program_id","motion_program_hash",
+    "qualified_motion_id","qualified_motion_hash",
+    "proof_bundle_hash",
+    "runtime_package_hash",
+    "compiler_semantic_version",
+    "policy_bundle_hash"
+  ],
+  "next_action": {
+    "wave": "P0A",
+    "instruction": "Reacquire/materialize exact historical orchestration/proof/retry/feedback source by recorded SHA where accessible; produce file-level dependency closure and current-equivalent map before implementing a current transaction shell.",
+    "no_new_5k_orchestrator_from_scratch": true
+  },
+  "claims": {
+    "restored_product_capability": false,
+    "product_pass": false,
+    "scientific_gate_changes": false,
+    "historical_numerical_promotion": false
+  }
+}

@@ -1,0 +1,73 @@
+# Product-branch restoration gate. Uses only the canonical local/self-hosted runner.
+name: Mage Product Restoration P0 Contract
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - product/mage-fit1-v5-p1-demo-20260913
+    paths:
+      - 'compiler/realsas_compiler_core/compile_transaction.py'
+      - 'compiler/realsas_compiler_core/api.py'
+      - 'compiler/realsas_compiler_core/bundle_routes.py'
+      - 'compiler/realsas_compiler_core/__init__.py'
+      - 'compiler/realsas_compiler_core/directional_binding.py'
+      - 'tests/compiler/test_compile_transaction_v1.py'
+      - 'tests/compiler/test_bounded_repair_loop_v1.py'
+      - 'tests/compiler/test_direct_model_mesh_skin_v1.py'
+      - '.github/workflows/mage_product_restoration_p0_contract.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mage-product-restoration-p0-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  p0-contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - name: Checkout Mage product branch
+        uses: actions/checkout@v4
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install contract dependencies
+        run: python3 -m pip install --disable-pip-version-check -q pytest numpy
+
+      - name: Compile transaction and current product sources
+        run: |
+          python3 -m py_compile \
+            compiler/realsas_compiler_core/compile_transaction.py \
+            compiler/realsas_compiler_core/api.py \
+            compiler/realsas_compiler_core/bundle_routes.py \
+            compiler/realsas_compiler_core/__init__.py \
+            compiler/realsas_compiler_core/directional_binding.py \
+            tests/compiler/test_compile_transaction_v1.py \
+            tests/compiler/test_bounded_repair_loop_v1.py \
+            tests/compiler/test_direct_model_mesh_skin_v1.py
+
+      - name: Run exact compile-transaction contract
+        run: python3 -m pytest -q tests/compiler/test_compile_transaction_v1.py
+
+      - name: Run bounded child-attempt repair regression
+        run: python3 -m pytest -q tests/compiler/test_bounded_repair_loop_v1.py
+
+      - name: Guard current direct P1 binding semantics
+        run: python3 -m pytest -q tests/compiler/test_direct_model_mesh_skin_v1.py
+
+      - name: Run V4 architecture regression
+        run: python3 compiler/test_architecture_v4_contract_v1.py
+
+      - name: Run Living Compile identity regression
+        run: python3 -m unittest -v tests.product.test_living_compile_v4

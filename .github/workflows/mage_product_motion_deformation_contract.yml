@@ -1,0 +1,62 @@
+name: Mage Product Motion Deformation Contract
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - product/mage-fit1-v5-p1-demo-20260913
+    paths:
+      - 'compiler/realsas_compiler_core/motion.py'
+      - 'compiler/realsas_compiler_core/motion_deformation.py'
+      - 'compiler/realsas_compiler_core/deformation.py'
+      - 'compiler/realsas_compiler_core/api.py'
+      - 'compiler/realsas_compiler_core/__init__.py'
+      - 'tests/product/test_mage_topology_motion_deformation_v1.py'
+      - '.github/workflows/mage_product_motion_deformation_contract.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mage-product-motion-deformation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  motion-contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - name: Checkout Mage product branch
+        uses: actions/checkout@v4
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install contract dependencies
+        run: python3 -m pip install --disable-pip-version-check -q pytest numpy
+
+      - name: Compile motion sources
+        run: |
+          python3 -m py_compile \
+            compiler/realsas_compiler_core/motion.py \
+            compiler/realsas_compiler_core/motion_deformation.py \
+            compiler/realsas_compiler_core/deformation.py \
+            compiler/realsas_compiler_core/api.py \
+            compiler/realsas_compiler_core/__init__.py \
+            tests/product/test_mage_topology_motion_deformation_v1.py
+
+      - name: Run Mage topology idle/run + verified LBS contract
+        run: python3 -m pytest -q tests/product/test_mage_topology_motion_deformation_v1.py
+
+      - name: Preserve existing motion deformation behavioral gate
+        run: python3 -m pytest -q compiler/test_motion_deformation_behavioral_v1.py
+
+      - name: Preserve Living Compile regression
+        run: python3 -m unittest -v tests.product.test_living_compile_v4

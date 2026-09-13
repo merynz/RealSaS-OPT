@@ -38,6 +38,8 @@ from .compile_transaction import (
     bind_runtime_package as bind_compile_runtime_package,
     seal_compile_result,
 )
+from .motion import build_deterministic_preset_motion, build_mage_topology_preset_motion
+from .motion_deformation import motion_lbs_transforms, verified_motion_deformation_report
 from .bundle_routes import write_typed_artifact, route_for
 
 
@@ -122,6 +124,11 @@ class CompilerFacade:
     bind_compile_product_proof_bundle=staticmethod(bind_compile_product_proof_bundle)
     bind_compile_runtime_package=staticmethod(bind_compile_runtime_package)
     seal_compile_result=staticmethod(seal_compile_result)
+
+    build_deterministic_preset_motion=staticmethod(build_deterministic_preset_motion)
+    build_mage_topology_preset_motion=staticmethod(build_mage_topology_preset_motion)
+    motion_lbs_transforms=staticmethod(motion_lbs_transforms)
+    verified_motion_deformation_report=staticmethod(verified_motion_deformation_report)
 
     write_typed_artifact=staticmethod(write_typed_artifact)
     route_for=staticmethod(route_for)

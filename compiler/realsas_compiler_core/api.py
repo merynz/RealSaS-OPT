@@ -40,18 +40,30 @@ from .compile_transaction import (
 )
 from .motion import build_deterministic_preset_motion, build_mage_topology_preset_motion
 from .motion_deformation import motion_lbs_transforms, verified_motion_deformation_report
+from .render_support import (
+    ExternalRenderSupportQualificationIR,
+    qualify_external_render_support,
+    validate_external_render_support_qualification,
+)
+from .product_external_render import (
+    build_external_renderable_component,
+    validate_external_renderable_component,
+    build_external_directional_renderable,
+    validate_external_directional_renderable,
+    build_external_directional_renderable_set,
+    validate_external_directional_renderable_set,
+    assemble_product_v3_with_external_render_support,
+)
 from .bundle_routes import write_typed_artifact, route_for
 
 
 class CompilerFacade:
     """Single current programmatic entrypoint for compiler qualification.
 
-    V1/V2 compatibility remains available, but V4 composition authority terminates
-    in a directional 2D/2.5D CanonicalPuppetGraph.v3 + ProductProofBundleIR.
-    World/camera-space mechanical evidence never implies full-3D reconstruction authority.
-
-    Compile transaction helpers provide the current exact-identity orchestration
-    boundary. They do not restore historical orchestrator ownership.
+    The canonical mechanical state remains scientific authority. Exact product render
+    meshes may use an independently SHA-qualified support substrate through the
+    external-render bridge without relabelling canonical S or restoring historical
+    barycentric skin transfer.
     """
     build_surface_from_persistence=staticmethod(build_surface_from_persistence)
     rigging_surface_from_d2_arrays=staticmethod(rigging_surface_from_d2_arrays)
@@ -129,6 +141,16 @@ class CompilerFacade:
     build_mage_topology_preset_motion=staticmethod(build_mage_topology_preset_motion)
     motion_lbs_transforms=staticmethod(motion_lbs_transforms)
     verified_motion_deformation_report=staticmethod(verified_motion_deformation_report)
+
+    qualify_external_render_support=staticmethod(qualify_external_render_support)
+    validate_external_render_support_qualification=staticmethod(validate_external_render_support_qualification)
+    build_external_renderable_component=staticmethod(build_external_renderable_component)
+    validate_external_renderable_component=staticmethod(validate_external_renderable_component)
+    build_external_directional_renderable=staticmethod(build_external_directional_renderable)
+    validate_external_directional_renderable=staticmethod(validate_external_directional_renderable)
+    build_external_directional_renderable_set=staticmethod(build_external_directional_renderable_set)
+    validate_external_directional_renderable_set=staticmethod(validate_external_directional_renderable_set)
+    assemble_product_v3_with_external_render_support=staticmethod(assemble_product_v3_with_external_render_support)
 
     write_typed_artifact=staticmethod(write_typed_artifact)
     route_for=staticmethod(route_for)

@@ -84,5 +84,7 @@ from .v4 import *
 from .compile_transaction import *
 from .motion import *
 from .motion_deformation import *
+from .render_support import *
+from .product_external_render import *
 from .api import CompilerFacade
 from .bundle_routes import *

@@ -1,0 +1,54 @@
+name: Mage P1 External Render Support Contract
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - product/mage-fit1-v5-p1-demo-20260913
+    paths:
+      - 'compiler/realsas_compiler_core/render_support.py'
+      - 'compiler/realsas_compiler_core/product_external_render.py'
+      - 'compiler/realsas_compiler_core/api.py'
+      - 'compiler/realsas_compiler_core/__init__.py'
+      - 'tests/product/test_external_render_support_v1.py'
+      - '.github/workflows/mage_p1_external_render_support_contract.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mage-p1-external-render-support-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  external-render-support:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install contract dependencies
+        run: python3 -m pip install --disable-pip-version-check -q pytest numpy
+      - name: Compile bridge sources
+        run: |
+          python3 -m py_compile \
+            compiler/realsas_compiler_core/render_support.py \
+            compiler/realsas_compiler_core/product_external_render.py \
+            compiler/realsas_compiler_core/api.py \
+            compiler/realsas_compiler_core/__init__.py \
+            tests/product/test_external_render_support_v1.py
+      - name: Run external render support contract
+        run: python3 -m pytest -q tests/product/test_external_render_support_v1.py
+      - name: Preserve P1 direct-binding contract
+        run: python3 -m pytest -q tests/compiler/test_direct_model_mesh_skin_v1.py
+      - name: Preserve V4 architecture contract
+        run: python3 compiler/test_architecture_v4_contract_v1.py
+      - name: Preserve Living Compile regression
+        run: python3 -m unittest -v tests.product.test_living_compile_v4

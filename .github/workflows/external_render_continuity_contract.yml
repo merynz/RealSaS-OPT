@@ -16,6 +16,8 @@ on:
       - 'compiler/realsas_compiler_core/component_attachment.py'
       - 'compiler/realsas_compiler_core/mesh/quality.py'
       - 'compiler/realsas_compiler_core/mesh/face_subset_repair.py'
+      - 'experiments/mage_demo_fit1_v5_p1/materialize_p1_b2_g10_current_authority_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/run_v5_direct_p1_current_authority_binding_v1.py'
       - 'tests/product/test_external_render_support_v1.py'
       - 'tests/product/test_component_attachment_v1.py'
       - 'tests/product/test_external_product_proof_and_continuity_v1.py'
@@ -33,6 +35,8 @@ on:
       - 'compiler/realsas_compiler_core/component_attachment.py'
       - 'compiler/realsas_compiler_core/mesh/quality.py'
       - 'compiler/realsas_compiler_core/mesh/face_subset_repair.py'
+      - 'experiments/mage_demo_fit1_v5_p1/materialize_p1_b2_g10_current_authority_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/run_v5_direct_p1_current_authority_binding_v1.py'
       - 'tests/product/test_external_render_support_v1.py'
       - 'tests/product/test_component_attachment_v1.py'
       - 'tests/product/test_external_product_proof_and_continuity_v1.py'
@@ -63,7 +67,9 @@ jobs:
             compiler/realsas_compiler_core/render_support.py \
             compiler/realsas_compiler_core/component_attachment.py \
             compiler/realsas_compiler_core/mesh/quality.py \
-            compiler/realsas_compiler_core/mesh/face_subset_repair.py
+            compiler/realsas_compiler_core/mesh/face_subset_repair.py \
+            experiments/mage_demo_fit1_v5_p1/materialize_p1_b2_g10_current_authority_v1.py \
+            experiments/mage_demo_fit1_v5_p1/run_v5_direct_p1_current_authority_binding_v1.py
       - name: Run external render and continuity regressions
         env:
           PYTHONPATH: ${{ github.workspace }}

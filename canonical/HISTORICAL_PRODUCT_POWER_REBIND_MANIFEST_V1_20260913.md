@@ -3,8 +3,24 @@
 **Date:** 2026-09-13  
 **Branch:** `audit/historical-product-power-rebind-20260913`  
 **Base:** `main` at audit start (`bbdde6ec851717dddfba52107a28343e91864d68`)  
-**Status:** `AUDIT_MANIFEST__NO_PROMOTION__NO_SGW_AUTHORITY_CHANGE`  
+**Status:** `P0_CLOSED_PASS__P1_P2_P3_OPEN__NO_MAIN_PROMOTION__NO_SCIENCE_GATE_CHANGE`  
 **Purpose:** recover still-useful historical Compiler/runtime/product machinery behind the current typed authority without restoring obsolete ownership, parallel truth, or old front-brain semantics.
+
+## P0 closure — 2026-09-13
+
+P0 is now **CLOSED PASS**. The historical source reserve was physically reacquired and SHA-bound; the audited orchestration/reference-runtime files are byte-identical across v0.5, Aug-7, V19_30R1 and V19_30R2. The old monolithic orchestrator remains rejected as a current owner because it imports superseded authority families.
+
+The reusable control semantics were rebound into the current typed transaction authority at `compiler/realsas_compiler_core/compile_transaction.py`: immutable exact artifact bindings, frozen stage policy/implementation identities, terminal `FAIL`/`ABSTAIN`, explicit child transactions for retry/repair, and exact product -> proof -> runtime identity continuity. Literal mutable `latest/current/newest` artifact aliases are forbidden.
+
+Self-hosted contract run `34762089212` on `realsas-wsl-1660ti` closed green with **28/28 behavioral tests PASS**: compile transaction `9/9`, bounded repair loop `5/5`, V4 architecture `10/10`, Living Compile identity `4/4`.
+
+Canonical closure evidence:
+
+- `canonical/HISTORICAL_PRODUCT_POWER_P0_CLOSURE_20260913.md`
+- `canonical/HISTORICAL_PRODUCT_POWER_P0_CLOSURE_20260913.json`
+- `canonical/HISTORICAL_PRODUCT_POWER_P0A_SOURCE_LEDGER_V1_20260913.json`
+
+This P0 closure does **not** claim corrected real G/W/M/B, professional motion, final runtime product closure or `PRODUCT_PASS`. P1 begins only when the already-existing corrected Geppetto/Arachne/mesh scientific and product gates close; those exact qualified artifacts then bind into the closed transaction contract without redesigning orchestration.
 
 ## 0. Decision
 
@@ -369,18 +385,13 @@ Starts after exact qualified motion. Runtime/export must consume the exact proof
 
 Only measured blockers may reopen these backends.
 
-## 15. Immediate next engineering action after this manifest
+## 15. Immediate next engineering action after P0 closure
 
-Do **not** write a new 5k-line orchestrator.
+Do **not** redesign orchestration and do **not** write a new 5k-line orchestrator. P0A/P0B/P0C are closed by the exact source ledger, current typed transaction implementation, self-hosted contract evidence and closure record.
 
-Next task is P0A:
+Next legal transition is P1: wait for the already-authorized corrected G/W/mesh gates to close, then bind those exact qualified G/W/M/B/component identities into `CompileTransactionIR`. The transaction may consume them; it may not regenerate, substitute, retopologize or silently remap them.
 
-1. reacquire/materialize exact v0.5 orchestrator/proof/retry/feedback source by recorded SHA where accessible;
-2. source-diff it against current `realsas_compiler_core`, proof/repair services, runtime/export and Living Compile;
-3. produce a file-level dependency closure with `KEEP_CURRENT / REBIND / TEST_ONLY / REJECT` decisions;
-4. then implement the smallest current typed transaction shell that reuses proven control behavior.
-
-In parallel, do not alter the frozen active mesh experiment. Do not start/freeze a new Arachne product-consumer contract until P0B has fixed exact transaction identity semantics.
+The frozen active science remains unchanged. P2 professional motion and P3 runtime/editor productization remain open downstream work; P4 numerical backends remain blocker-triggered only.
 
 ## 16. Claim boundary
 

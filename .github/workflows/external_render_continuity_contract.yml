@@ -1,10 +1,28 @@
 # Product contract gate for independently qualified render support + continuity composition.
 # Canonical RealSaS CI runs on the local/self-hosted runner.
+# The temporary product-branch push trigger is deliberate: this bounded fulfillment
+# line is rooted at the exact 2800a22 source snapshot and must be tested without
+# rebasing onto unrelated current-main authority.
 
 name: External Render Continuity Contract
 
 on:
   pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/continuity_underlay.py'
+      - 'compiler/realsas_compiler_core/proof_engine.py'
+      - 'compiler/realsas_compiler_core/product_external_render.py'
+      - 'compiler/realsas_compiler_core/render_support.py'
+      - 'compiler/realsas_compiler_core/component_attachment.py'
+      - 'compiler/realsas_compiler_core/mesh/quality.py'
+      - 'tests/product/test_external_render_support_v1.py'
+      - 'tests/product/test_component_attachment_v1.py'
+      - 'tests/product/test_external_product_proof_and_continuity_v1.py'
+      - 'tests/product/test_mage_topology_motion_deformation_v1.py'
+      - '.github/workflows/external_render_continuity_contract.yml'
+  push:
+    branches:
+      - 'product/mage-fit1-demo-fulfillment-20260914'
     paths:
       - 'compiler/realsas_compiler_core/continuity_underlay.py'
       - 'compiler/realsas_compiler_core/proof_engine.py'

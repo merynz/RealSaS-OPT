@@ -1,0 +1,76 @@
+{
+  "schema": "RealSaS.MageFIT2.TemporaryRenderMeshSeal.v1",
+  "date": "2026-09-13",
+  "status": "SEALED_TEMPORARY_RENDER_MESH__NOT_SCIENTIFIC_PASS__NOT_PRODUCT_PASS",
+  "treatment": "P1_B2_G10",
+  "purpose": "temporary product render/deformation mesh until a fully qualified product mesh is closed",
+  "authority_boundaries": {
+    "arachne_input": false,
+    "scientific_mesh_pass": false,
+    "product_pass": false,
+    "current_product_render_mesh": true,
+    "may_relabel_gsa": false,
+    "teacher_topology_used": false,
+    "source_mesh_used": false,
+    "cross_component_bridge_used": false,
+    "unknown_relation_bridge_used": false
+  },
+  "algorithm": {
+    "family": "BASELINE_PRESERVING_ADAPTIVE_PATCH_CDT",
+    "coverage_authority": "SEALED_BASELINE_CDT_EXACT_REPLAY",
+    "quality_repair_authority": "LOCAL_ADAPTIVE_SUPPORT_CDT",
+    "repair_hops": 1,
+    "boundary_stride_px": 2,
+    "interior_spacing_px": 10,
+    "vertex_binding_modes": ["IDENTITY_SURFACE_NODE", "LOCAL_CONVEX_INTERPOLATION"],
+    "global_adaptive_reconstruction": false,
+    "global_uniform_steiner_subdivision": false,
+    "unbound_quality_steiner": false,
+    "monotonic_coverage_required": true
+  },
+  "frozen_policy": {
+    "source_alpha_recall_min": 0.94,
+    "precision_inside_alpha_min": 0.995,
+    "alpha_iou_min": 0.935,
+    "largest_uncovered_component_fraction_max": 0.015,
+    "min_component_recall": 0.90,
+    "min_raster_triangle_angle_deg": 0.25,
+    "max_raster_triangle_aspect_ratio": 250.0,
+    "degenerate_faces": 0,
+    "duplicate_faces": 0,
+    "nonmanifold_edges": 0
+  },
+  "drive_evidence": {
+    "result_file_id": "1dyxQfF-bo5ptKMAjk9MKMrLIxbc-THa1",
+    "result_filename": "FIT2_BASELINE_PRESERVING_ADAPTIVE_PATCH_CDT_RESULT.json",
+    "result_sha256": "2c7c445376936acd160d12b2919974e8921c7229678f3f1ca5201e87d4cb8e4a",
+    "run_log_file_id": "18V-jKdRbtHIM8ryQtpIeCObTop1h5-gI",
+    "folder_id": "1cPzdUNGX_EYH0JrRHttwBPC3xZjjV6g8"
+  },
+  "prereg": {
+    "id": "FIT2_BASELINE_PRESERVING_ADAPTIVE_PATCH_CDT_PREREG_20260913",
+    "repo_path": "canonical/FIT2_BASELINE_PRESERVING_ADAPTIVE_PATCH_CDT_PREREG_20260913.md",
+    "repo_blob_sha": "81e541293e69f7865181c8399922642863c0dfa8"
+  },
+  "summary_metrics": {
+    "min_source_alpha_recall": 0.9722958903303945,
+    "max_source_alpha_recall": 0.9894795368589644,
+    "mean_source_alpha_recall": 0.9801669924504098,
+    "precision_all_views": 1.0,
+    "global_frozen_policy_pass": false,
+    "views_passing_full_policy": 3,
+    "view_count": 8
+  },
+  "views": [
+    {"view":0,"recall":0.9722958903303945,"precision":1.0,"iou":0.9722958903303945,"largest_hole":0.009970465368025039,"min_angle":0.20918115689282651,"max_aspect":279.41898828715756,"vertices":8383,"faces":14222,"mesh_lineage_hash":"0c59f380b4817a2a05ff0489a37cf0c745b03bdf0ec219a4f41ad67abc0dd5c4","candidate_lineage_hash":"585661f3048c41624f08c760e6fdf52b45cac752d9ab121fa43fec239efd7b16","passed":false,"failure_invariants":["min_raster_triangle_angle_deg","max_raster_triangle_aspect_ratio"]},
+    {"view":1,"recall":0.9894795368589644,"precision":1.0,"iou":0.9894795368589644,"largest_hole":0.003219830170555566,"min_angle":0.2539904552941958,"max_aspect":249.9999999999716,"vertices":8569,"faces":14659,"mesh_lineage_hash":"6748278190007d6f887f5f6b2cace482d938f077bc4c4bfe25d5390ccca78c07","candidate_lineage_hash":"79ac5d0fd67d3574c14a04392c9a32aab191d4d6c3fcc40e694995b433020b88","passed":true,"failure_invariants":[]},
+    {"view":2,"recall":0.9767929357112479,"precision":1.0,"iou":0.9767929357112479,"largest_hole":0.013732482088887435,"min_angle":0.13601067151691074,"max_aspect":598.0947326592868,"vertices":9739,"faces":16225,"mesh_lineage_hash":"eb8368c63cf73c05fb1ec017d724e3730617e595d9cce28d57273dcfa0e2be4c","candidate_lineage_hash":"6841ee55fcd5582ddf7d6590b3246743f9e743748ac9315f21da02b3e2b507c1","passed":false,"failure_invariants":["min_raster_triangle_angle_deg","max_raster_triangle_aspect_ratio"]},
+    {"view":3,"recall":0.98338839002145,"precision":1.0,"iou":0.98338839002145,"largest_hole":0.006450417124399799,"min_angle":0.19470319703682956,"max_aspect":294.3986894982261,"vertices":8633,"faces":14706,"mesh_lineage_hash":"795e56aad0aa73774f5e9f7c96f655e49877b0c99f459defe8046a232cae5c49","candidate_lineage_hash":"3f64bf949e5116a826775948a1dc05efd6bf3acc817fc4c46165c564161b88c9","passed":false,"failure_invariants":["min_raster_triangle_angle_deg","max_raster_triangle_aspect_ratio"]},
+    {"view":4,"recall":0.9734271106324638,"precision":1.0,"iou":0.9734271106324638,"largest_hole":0.010014224646497318,"min_angle":0.04062027802192737,"max_aspect":1584.925698193294,"vertices":8531,"faces":14608,"mesh_lineage_hash":"4f5b7a74670a1380a91048eccbcfaee1cd9beb8d4943a57d5cd1f560338bf466","candidate_lineage_hash":"88dc2c60f34f47830484df2200f51ecaa49a65bdc37bd4a6e9815e6fad36cac1","passed":false,"failure_invariants":["min_raster_triangle_angle_deg","max_raster_triangle_aspect_ratio"]},
+    {"view":5,"recall":0.9886321432943339,"precision":1.0,"iou":0.9886321432943339,"largest_hole":0.003952503563477622,"min_angle":0.25019832019848426,"max_aspect":249.35471357176218,"vertices":8864,"faces":15329,"mesh_lineage_hash":"6b006a76a529ff718017ecb13bdd137aa5aba506387894e007933b98ccc0aee1","candidate_lineage_hash":"7c97889beef2389e5bd2958fcb6e3905e8871825c6e4a6b7e411af976d63b38b","passed":true,"failure_invariants":[]},
+    {"view":6,"recall":0.9750214572830171,"precision":1.0,"iou":0.9750214572830171,"largest_hole":0.013735178114326417,"min_angle":0.25971735482866976,"max_aspect":249.95509685286356,"vertices":9379,"faces":15489,"mesh_lineage_hash":"1eacb8a0a73275f34e5c707a2c5ca7ad7add96b285b6446680c6c634d5c2ccfa","candidate_lineage_hash":"014e933c12f3594c3a5bb2c45438feb95e9e5b1f0a18e0e6fe84ba3bc5d98508","passed":true,"failure_invariants":[]},
+    {"view":7,"recall":0.9822984754714067,"precision":1.0,"iou":0.9822984754714067,"largest_hole":0.006254525793401755,"min_angle":0.1262892615322164,"max_aspect":476.92244153934945,"vertices":8078,"faces":13793,"mesh_lineage_hash":"fd4afa11aa7eda12bdf3e842d3ed90fb143d5d18f76c1087adecd3ad0c9e2c33","candidate_lineage_hash":"4ca98339e86947558442cc4d040f539c82f1f44af716e2aa19d04901d43461c1","passed":false,"failure_invariants":["min_raster_triangle_angle_deg","max_raster_triangle_aspect_ratio"]}
+  ],
+  "reason_not_pass": "Five of eight views violate frozen min-angle/max-aspect shape-quality gates; coverage/precision are high and no topology integrity failure is reported.",
+  "demo_rule": "Use exactly the P1_B2_G10 reconstruction lineage for temporary product rendering. Do not substitute P2_B1_G8, P2_B1_G6, historical ~20-30% Living Compile mesh, or a newest/latest mesh alias."
+}

@@ -29,6 +29,15 @@ from .v4 import (
     bind_proof_plan, bind_measurement_report, bind_domain_proof, bind_product_proof_bundle,
     require_current_proof_bundle, qualify_capability, project_runtime_package_v3,
 )
+from .compile_transaction import (
+    make_stage_contract, make_compile_request, validate_compile_request,
+    make_artifact_binding, validate_artifact_binding,
+    start_compile_transaction, fork_compile_transaction, append_compile_stage,
+    validate_compile_transaction, bind_current_product_v3,
+    bind_product_proof_bundle as bind_compile_product_proof_bundle,
+    bind_runtime_package as bind_compile_runtime_package,
+    seal_compile_result,
+)
 from .bundle_routes import write_typed_artifact, route_for
 
 
@@ -38,6 +47,9 @@ class CompilerFacade:
     V1/V2 compatibility remains available, but V4 composition authority terminates
     in a directional 2D/2.5D CanonicalPuppetGraph.v3 + ProductProofBundleIR.
     World/camera-space mechanical evidence never implies full-3D reconstruction authority.
+
+    Compile transaction helpers provide the current exact-identity orchestration
+    boundary. They do not restore historical orchestrator ownership.
     """
     build_surface_from_persistence=staticmethod(build_surface_from_persistence)
     rigging_surface_from_d2_arrays=staticmethod(rigging_surface_from_d2_arrays)
@@ -96,6 +108,20 @@ class CompilerFacade:
     require_current_proof_bundle=staticmethod(require_current_proof_bundle)
     qualify_capability=staticmethod(qualify_capability)
     project_runtime_package_v3=staticmethod(project_runtime_package_v3)
+
+    make_stage_contract=staticmethod(make_stage_contract)
+    make_compile_request=staticmethod(make_compile_request)
+    validate_compile_request=staticmethod(validate_compile_request)
+    make_artifact_binding=staticmethod(make_artifact_binding)
+    validate_artifact_binding=staticmethod(validate_artifact_binding)
+    start_compile_transaction=staticmethod(start_compile_transaction)
+    fork_compile_transaction=staticmethod(fork_compile_transaction)
+    append_compile_stage=staticmethod(append_compile_stage)
+    validate_compile_transaction=staticmethod(validate_compile_transaction)
+    bind_current_product_v3=staticmethod(bind_current_product_v3)
+    bind_compile_product_proof_bundle=staticmethod(bind_compile_product_proof_bundle)
+    bind_compile_runtime_package=staticmethod(bind_compile_runtime_package)
+    seal_compile_result=staticmethod(seal_compile_result)
 
     write_typed_artifact=staticmethod(write_typed_artifact)
     route_for=staticmethod(route_for)

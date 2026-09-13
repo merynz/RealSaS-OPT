@@ -1,0 +1,42 @@
+{
+  "schema": "RealSaS.ContextState.v2",
+  "date": "2026-09-13",
+  "continuation_branch": "main",
+  "execution_branch": "fit2/mage-full-subject-reclosure",
+  "execution_authority": "canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json",
+  "status": "FIT2_CANONICAL_EXECUTION__ARACHNE_NEXT__PRODUCTIZATION_AFTER_ARACHNE",
+  "fit1": {
+    "status": "HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT",
+    "surface_lineage": "OLD_950_NODE_MAGE",
+    "local_scientific_passes_preserved": true,
+    "current_product_authority": false
+  },
+  "fit2": {
+    "h1": "CLOSED_PASS",
+    "gsa": "CLOSED_PASS__8171_NODES__23656_RELATIONS",
+    "geppetto": "TERMINAL_PASS_VERIFIED__48_OF_48",
+    "arachne": "AUTHORIZED__NOT_STARTED",
+    "mesh": "CLOSED_FAIL__HIGH_COVERAGE_HIGH_PRECISION__SHAPE_QUALITY_OUTLIERS",
+    "mesh_blocks_arachne": false,
+    "product_pass": false
+  },
+  "next": {
+    "workstream": "ARACHNE_FIT2",
+    "required": [
+      "fresh corrected-lineage preregistration",
+      "no historical FIT1 checkpoint load",
+      "exact Geppetto FIT2 handoff hash verification",
+      "A100 public Run-All notebook",
+      "terminal scientific gate",
+      "real V0..V7 skin/deformation evidence",
+      "checkpoint/result/evidence SHA manifests",
+      "Compiler QualifiedSkinIR qualification and seal"
+    ]
+  },
+  "after_arachne": {
+    "workstream": "PRODUCTIZATION_RESTORATION",
+    "branch": "audit/historical-product-power-rebind-20260913",
+    "p0": "CLOSED_PASS",
+    "scope": "selective historical Compiler/runtime recovery plus missing product-layer implementation; no scientific S/G/W ownership"
+  }
+}

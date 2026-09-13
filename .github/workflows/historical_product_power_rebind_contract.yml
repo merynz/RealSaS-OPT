@@ -1,0 +1,73 @@
+# IMPORTANT: RealSaS CI uses the canonical LOCAL/SELF-HOSTED runner.
+# Historical product-power rebind work must not consume GitHub-hosted minutes or
+# silently change scientific/product authority. Expected labels:
+# [self-hosted, linux, x64, realsas].
+
+name: Historical Product Power Rebind Contract
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - audit/historical-product-power-rebind-20260913
+    paths:
+      - 'compiler/realsas_compiler_core/**'
+      - 'compiler/realsas_compiler_services/proof/**'
+      - 'tests/compiler/test_compile_transaction_v1.py'
+      - 'tests/compiler/test_bounded_repair_loop_v1.py'
+      - 'compiler/test_architecture_v4_contract_v1.py'
+      - 'tests/product/test_living_compile_v4.py'
+      - 'canonical/HISTORICAL_PRODUCT_POWER_REBIND_MANIFEST_V1_20260913.*'
+      - 'canonical/HISTORICAL_PRODUCT_POWER_P0A_SOURCE_LEDGER_V1_20260913.json'
+      - '.github/workflows/historical_product_power_rebind_contract.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: historical-product-power-rebind-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  p0-contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - name: Checkout audit branch
+        uses: actions/checkout@v4
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install contract dependencies
+        run: python -m pip install --disable-pip-version-check -q pytest numpy
+
+      - name: Compile current transaction and proof sources
+        run: |
+          python -m py_compile \
+            compiler/realsas_compiler_core/compile_transaction.py \
+            compiler/realsas_compiler_core/api.py \
+            compiler/realsas_compiler_core/bundle_routes.py \
+            compiler/realsas_compiler_core/__init__.py \
+            compiler/realsas_compiler_services/proof/repair_loop.py \
+            tests/compiler/test_compile_transaction_v1.py \
+            tests/compiler/test_bounded_repair_loop_v1.py
+
+      - name: Run exact compile-transaction contract
+        run: python -m pytest -q tests/compiler/test_compile_transaction_v1.py
+
+      - name: Run bounded child-attempt repair regression
+        run: python -m pytest -q tests/compiler/test_bounded_repair_loop_v1.py
+
+      - name: Run V4 architecture regression
+        run: python compiler/test_architecture_v4_contract_v1.py
+
+      - name: Run Living Compile identity regression
+        run: python -m unittest -v tests.product.test_living_compile_v4

@@ -1,0 +1,82 @@
+{
+  "schema": "RealSaS.MageDemoFIT1V5P1ExecutionAuthority.v1",
+  "date": "2026-09-13",
+  "status": "ACTIVE_DEMO_PRODUCT_EXECUTION_AUTHORITY__PRODUCT_PASS_NOT_CLAIMED",
+  "branch": "product/mage-fit1-v5-p1-demo-20260913",
+  "decision": {
+    "fit2_h1_gsa_geppetto": "SEALED_AND_PRESERVED__DEFERRED_FROM_DEMO_EXECUTION",
+    "arachne_fit2": "DEFERRED__NOT_A_DEMO_BLOCKER__NO_NEW_OPTIMIZER_STEPS_AUTHORIZED",
+    "demo_science_basis": "SEALED_MAGE_FIT1_S_G_ARACHNE_V5",
+    "demo_render_mesh": "P1_B2_G10_TEMPORARY_RENDER_MESH",
+    "product_pass": false,
+    "unseen_generalization_claimed": false
+  },
+  "fit1_authority": {
+    "arachne_architecture": "RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5",
+    "arachne_fit1_verdict": "PASS__MINIMAL_K4_Z_DIRECT_SIMPLEX_V5_FIT1_CLOSURE",
+    "surface_lineage_hash": "67184f2cdbc3b2fca958e705d7b279d7fa5354f15d181712c2c183f8af2856eb",
+    "skeleton_lineage_hash": "738891b236f9a261d521d17657b56d23ad47d145d9baf0f38a1bbc7d0e69c306",
+    "skin_lineage_hash": "ef28f75e0306dbbabc32e75b837412ede39b180248502f6e504994310d91edaf",
+    "backbone_checkpoint_sha256": "95c441f97b02123de1a5bc83bdf5ad223363c4b97927e8d420a0d246efbc1763",
+    "decoder_delta_sha256": "13344178bf1b3ce96c9356456db0ad2c8a3945182a5ec63617c50137b8c52137",
+    "full_composite_checkpoint_sha256": "820ca65296235803d4c952f6025247e3fa09e3211f5a945a88979968e1dcc629",
+    "field_tokens_gsa_fp32_sha256": "67c33f61fd3a417fb1c8b36d753b62d23d6167b1720c352458dde54784573ec6",
+    "exact_s_g_w_bundle_sha256": "980a9edfe7ed8cc9646d6edab825a8c9283cd630c636a28ecafba9c7cff25fbd",
+    "closure_report": "canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_CLOSURE_REPORT_V1.json",
+    "model_authority": "models/arachne/v5/checkpoint_authority_v1.py"
+  },
+  "temporary_render_mesh": {
+    "treatment": "P1_B2_G10",
+    "status": "SEALED_TEMPORARY_RENDER_MESH__NOT_SCIENTIFIC_PASS__NOT_PRODUCT_PASS",
+    "seal": "canonical/MAGE_FIT2_TEMPORARY_RENDER_MESH_P1_B2_G10_SEAL_V1.json",
+    "mean_source_alpha_recall": 0.9801669924504098,
+    "precision_all_views": 1.0,
+    "materialization_required": true,
+    "required_lineage_hashes": {
+      "V0": "0c59f380b4817a2a05ff0489a37cf0c745b03bdf0ec219a4f41ad67abc0dd5c4",
+      "V1": "6748278190007d6f887f5f6b2cace482d938f077bc4c4bfe25d5390ccca78c07",
+      "V2": "eb8368c63cf73c05fb1ec017d724e3730617e595d9cce28d57273dcfa0e2be4c",
+      "V3": "795e56aad0aa73774f5e9f7c96f655e49877b0c99f459defe8046a232cae5c49",
+      "V4": "4f5b7a74670a1380a91048eccbcfaee1cd9beb8d4943a57d5cd1f560338bf466",
+      "V5": "6b006a76a529ff718017ecb13bdd137aa5aba506387894e007933b98ccc0aee1",
+      "V6": "1eacb8a0a73275f34e5c707a2c5ca7ad7add96b285b6446680c6c634d5c2ccfa",
+      "V7": "fd4afa11aa7eda12bdf3e842d3ed90fb143d5d18f76c1087adecd3ad0c9e2c33"
+    }
+  },
+  "binding_policy": {
+    "historical_barycentric_skin_transfer": "FORBIDDEN",
+    "exact_mesh_vertex_v5_query": "REQUIRED",
+    "query_inputs": ["exact P1 mesh vertex normalized position", "derived/interpolated normal + validity", "FIT1 G22 parent tree", "sealed V5 K4x512 field tokens"],
+    "decoder": "V5_DIRECT_SIMPLEX",
+    "compiler_qualification": "REQUIRED",
+    "exact_mesh_weight_binding": "REQUIRED",
+    "runtime_mesh_retriangulation": "FORBIDDEN"
+  },
+  "component_policy": {
+    "book_staff_hat_and_other_rigid_or_semirigid_parts": "MECHANICAL_ATTACHMENT_OWNER",
+    "do_not_require_arachne_fit2_for_component_inclusion": true,
+    "component_attachment_must_be_qualified_before_dynamic_demo": true
+  },
+  "execution_order": [
+    "MATERIALIZE_AND_SHA_SEAL_P1_B2_G10_V0_V7",
+    "DIRECT_V5_WEIGHT_QUERY_ON_EXACT_P1_VERTICES",
+    "COMPILER_EXACT_M_W_G_BINDING_QUALIFICATION",
+    "COMPONENT_MECHANICAL_ATTACHMENT_QUALIFICATION",
+    "HISTORICAL_PRODUCT_POWER_RESTORATION",
+    "FRAME0_EXACT_RENDER_IDENTITY_PROOF",
+    "DYNAMIC_DEFORMATION_PROOF",
+    "PROFESSIONAL_MOTION_CLOSURE",
+    "RUNTIME_EDITOR_EXPORT_RECLOSURE",
+    "DEMO"
+  ],
+  "fail_closed": {
+    "p1_lineage_mismatch": "STOP",
+    "fit1_model_or_sgw_hash_mismatch": "STOP",
+    "hidden_weight_transfer": "STOP",
+    "mesh_weight_vertex_count_or_id_mismatch": "STOP",
+    "runtime_mesh_hash_mismatch": "STOP",
+    "frame0_identity_failure": "STOP",
+    "dynamic_deformation_failure": "STOP",
+    "product_pass_before_all_required_proofs": "FORBIDDEN"
+  }
+}

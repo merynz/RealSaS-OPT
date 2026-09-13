@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - product/mage-fit1-v5-p1-demo-20260913
+      - product/mage-fit1-demo-fulfillment-20260914
     paths:
       - '.github/workflows/product_branch_source_snapshot.yml'
 

@@ -1,0 +1,63 @@
+name: Mage FIT2 Baseline Preserving Adaptive Patch CDT Preflight
+
+on:
+  push:
+    branches:
+      - repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp
+    paths:
+      - 'experiments/mage_full_subject_reclosure_v1/run_fit2_baseline_preserving_adaptive_patch_cdt_v1.py'
+      - 'tests/compiler/test_fit2_baseline_preserving_adaptive_patch_cdt_contract_v1.py'
+      - 'canonical/FIT2_BASELINE_PRESERVING_ADAPTIVE_PATCH_CDT_PREREG_20260913.md'
+      - '.github/workflows/mage_fit2_baseline_preserving_adaptive_patch_cdt_preflight.yml'
+  workflow_dispatch:
+
+jobs:
+  preflight:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .:compiler
+      PYTHONHASHSEED: '20260912'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Isolated Python environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .preflight-venv
+          python3 -m venv .preflight-venv
+          .preflight-venv/bin/python -m pip install -q --upgrade pip
+          .preflight-venv/bin/python -m pip install -q numpy scipy pillow scikit-image pytest
+          .preflight-venv/bin/python -m pip install -q --index-url https://download.pytorch.org/whl/cpu torch
+      - name: Runtime dependency probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          .preflight-venv/bin/python - <<'PY'
+          import numpy, scipy, PIL, skimage, pytest, torch
+          print('DEPENDENCY_PROBE_PASS')
+          print('numpy', numpy.__version__)
+          print('scipy', scipy.__version__)
+          print('skimage', skimage.__version__)
+          print('torch', torch.__version__)
+          PY
+      - name: Syntax and import preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          .preflight-venv/bin/python -m py_compile experiments/mage_full_subject_reclosure_v1/run_fit2_baseline_preserving_adaptive_patch_cdt_v1.py
+          .preflight-venv/bin/python - <<'PY'
+          import experiments.mage_full_subject_reclosure_v1.run_fit2_baseline_preserving_adaptive_patch_cdt_v1 as m
+          assert [x['name'] for x in m.TREATMENTS] == ['P1_B2_G10','P2_B1_G8','P2_B1_G6']
+          assert m.PREREG_ID == 'FIT2_BASELINE_PRESERVING_ADAPTIVE_PATCH_CDT_PREREG_20260913'
+          print('IMPORT_PREFLIGHT_PASS', m.SCHEMA, m.TREATMENTS)
+          PY
+      - name: Baseline preserving adaptive patch contract tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          .preflight-venv/bin/python -m pytest -q tests/compiler/test_fit2_baseline_preserving_adaptive_patch_cdt_contract_v1.py

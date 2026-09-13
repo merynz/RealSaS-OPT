@@ -1,0 +1,49 @@
+# Audit-branch-only synchronizer. It performs a deterministic in-place update of
+# the two parent manifests after P0 closure and commits only when content changed.
+name: Historical Product Power P0 Manifest Sync
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - audit/historical-product-power-rebind-20260913
+    paths:
+      - 'canonical/HISTORICAL_PRODUCT_POWER_P0_CLOSURE_20260913.md'
+      - 'canonical/HISTORICAL_PRODUCT_POWER_P0_CLOSURE_20260913.json'
+      - 'tools/sync_historical_product_power_p0_manifest.py'
+      - '.github/workflows/historical_product_power_p0_manifest_sync.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: historical-product-power-p0-manifest-sync-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout audit branch
+        uses: actions/checkout@v4
+        with:
+          clean: true
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Synchronize parent manifests
+        run: python tools/sync_historical_product_power_p0_manifest.py
+
+      - name: Commit synchronized manifests if needed
+        shell: bash
+        run: |
+          if git diff --quiet -- canonical/HISTORICAL_PRODUCT_POWER_REBIND_MANIFEST_V1_20260913.md canonical/HISTORICAL_PRODUCT_POWER_REBIND_MANIFEST_V1_20260913.json; then
+            echo 'Parent manifests already synchronized.'
+            exit 0
+          fi
+          git config user.name 'RealSaS Audit Bot'
+          git config user.email '140457344+merynz@users.noreply.github.com'
+          git add canonical/HISTORICAL_PRODUCT_POWER_REBIND_MANIFEST_V1_20260913.md canonical/HISTORICAL_PRODUCT_POWER_REBIND_MANIFEST_V1_20260913.json
+          git commit -m 'audit: synchronize P0 closed parent manifests'
+          git push origin HEAD:${GITHUB_REF_NAME}

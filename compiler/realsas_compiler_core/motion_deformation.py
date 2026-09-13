@@ -28,6 +28,16 @@ def _identity_key_state():
     return (0.0, 0.0), 0.0, (1.0, 1.0), 0.0
 
 
+def _state_is_exact_identity(state) -> bool:
+    translation, rotation, scale, depth = state
+    return (
+        tuple(float(x) for x in translation) == (0.0, 0.0)
+        and float(rotation) == 0.0
+        and tuple(float(x) for x in scale) == (1.0, 1.0)
+        and float(depth) == 0.0
+    )
+
+
 def _sample_track(track, t_sec: float):
     keys = track.keys
     if not keys:
@@ -93,6 +103,23 @@ def motion_lbs_transforms(skeleton, motion_state, clip_id: str, time_sec: float)
             raise QualificationError("MOTION_DEFORMATION_UNKNOWN_JOINT_TRACK")
         tracks[track.canonical_joint_id] = track
 
+    sampled = {
+        joint.canonical_joint_id: (
+            _sample_track(tracks[joint.canonical_joint_id], t_sec)
+            if joint.canonical_joint_id in tracks
+            else _identity_key_state()
+        )
+        for joint in joints
+    }
+
+    # The authored rest frame and loop endpoint are product identity contracts, not
+    # merely samples that happen to evaluate close to identity.  Returning literal
+    # identity matrices here prevents rest-pose cancellation arithmetic from turning
+    # an exact authority statement into a tolerance-dependent one.
+    if all(_state_is_exact_identity(state) for state in sampled.values()):
+        transforms = np.repeat(np.eye(4, dtype=np.float64)[None, ...], len(joints), axis=0)
+        return transforms[None, ...], tuple(j.canonical_joint_id for j in joints)
+
     rest = {
         jid: np.asarray((-float(j.position[0]), float(j.position[2])), dtype=np.float64)
         for jid, j in by_id.items()
@@ -103,7 +130,7 @@ def motion_lbs_transforms(skeleton, motion_state, clip_id: str, time_sec: float)
         if jid in global_pose:
             return global_pose[jid]
         joint = by_id[jid]
-        translation, rotation, scale, _depth = _sample_track(tracks[jid], t_sec) if jid in tracks else _identity_key_state()
+        translation, rotation, scale, _depth = sampled[jid]
         local_anim = _t(float(translation[0]), float(translation[1])) @ _r(rotation) @ _s(scale[0], scale[1])
         parent = joint.parent_canonical_id
         if parent is None:
@@ -136,26 +163,49 @@ def verified_motion_deformation_report(mesh, mesh_skin, skeleton, motion_state, 
     frames = []
     displacement_rms = []
     displacement_max = []
+    transform_exact_identity = []
     finite = True
+    identity_bank = np.repeat(np.eye(4, dtype=np.float64)[None, ...], len(joint_order), axis=0)[None, ...]
     for t_sec in times:
         transforms, transform_joint_order = motion_lbs_transforms(skeleton, motion_state, clip_id, float(t_sec))
         if tuple(transform_joint_order) != tuple(joint_order):
             raise QualificationError("MOTION_DEFORMATION_JOINT_ORDER_MISMATCH")
+        transform_exact_identity.append(bool(np.array_equal(transforms, identity_bank)))
         moved = apply_lbs_probe_v1(points, weights, transforms)[0].astype(np.float64)
         finite = finite and bool(np.isfinite(moved).all())
         displacement = np.linalg.norm(moved - points, axis=1)
         displacement_rms.append(float(np.sqrt(np.mean(displacement ** 2))))
         displacement_max.append(float(displacement.max(initial=0.0)))
         frames.append(moved)
+
     frame0 = np.linalg.norm(frames[0] - points, axis=1)
     loop = np.linalg.norm(frames[-1] - points, axis=1)
     frame0_max = float(frame0.max(initial=0.0))
     loop_max = float(loop.max(initial=0.0))
     peak_max = float(max(displacement_max, default=0.0))
     peak_rms = float(max(displacement_rms, default=0.0))
-    status = "PASS" if finite and frame0_max <= 1.0e-10 and loop_max <= 1.0e-9 and peak_max > 1.0e-7 else "FAIL"
+
+    # apply_lbs_probe_v1 intentionally returns float32.  Preserve an exact transform
+    # authority gate, then judge the numerical rest-frame projection at a tolerance
+    # derived from float32 machine epsilon and current coordinate magnitude.
+    coord_scale = float(max(1.0, np.max(np.abs(points), initial=0.0)))
+    float32_identity_tolerance = float(4.0 * np.finfo(np.float32).eps * coord_scale)
+    frame0_transform_exact = bool(transform_exact_identity[0])
+    loop_transform_exact = bool(transform_exact_identity[-1])
+    frame0_numeric_pass = bool(frame0_max <= float32_identity_tolerance)
+    loop_numeric_pass = bool(loop_max <= float32_identity_tolerance)
+    dynamic_threshold = max(1.0e-7, 4.0 * float32_identity_tolerance)
+    dynamic_nonzero = bool(peak_max > dynamic_threshold)
+    status = "PASS" if (
+        finite
+        and frame0_transform_exact
+        and loop_transform_exact
+        and frame0_numeric_pass
+        and loop_numeric_pass
+        and dynamic_nonzero
+    ) else "FAIL"
     return {
-        "schema": "RealSaS.VerifiedMotionDeformationReport.v1",
+        "schema": "RealSaS.VerifiedMotionDeformationReport.v2",
         "status": status,
         "clip_id": clip_id,
         "duration_sec": float(clip.duration_sec),
@@ -167,10 +217,16 @@ def verified_motion_deformation_report(mesh, mesh_skin, skeleton, motion_state, 
         "loop_closure_max_displacement": loop_max,
         "peak_rms_displacement": peak_rms,
         "peak_max_displacement": peak_max,
+        "float32_identity_tolerance": float32_identity_tolerance,
+        "dynamic_nonzero_threshold": float(dynamic_threshold),
         "finite": bool(finite),
-        "frame0_exact_identity_pass": bool(frame0_max <= 1.0e-10),
-        "loop_closure_identity_pass": bool(loop_max <= 1.0e-9),
-        "dynamic_nonzero_pass": bool(peak_max > 1.0e-7),
+        "frame0_transform_exact_identity_pass": frame0_transform_exact,
+        "loop_transform_exact_identity_pass": loop_transform_exact,
+        "frame0_numeric_projection_pass": frame0_numeric_pass,
+        "loop_numeric_projection_pass": loop_numeric_pass,
+        "frame0_exact_identity_pass": bool(frame0_transform_exact and frame0_numeric_pass),
+        "loop_closure_identity_pass": bool(loop_transform_exact and loop_numeric_pass),
+        "dynamic_nonzero_pass": dynamic_nonzero,
         "historical_mesh_authority_used": False,
         "historical_weight_authority_used": False,
     }

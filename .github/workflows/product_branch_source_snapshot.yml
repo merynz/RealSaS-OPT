@@ -24,17 +24,22 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           printf '%s\n' "${GITHUB_SHA}" > SOURCE_COMMIT_SHA256.txt
-      - name: Pack exact checkout
+      - name: Pack exact checkout outside working tree
         run: |
-          tar --exclude=.git --exclude=.pytest_cache --exclude='**/__pycache__' -czf realsas-product-source.tar.gz .
-          sha256sum realsas-product-source.tar.gz | tee realsas-product-source.tar.gz.sha256
+          ARCHIVE="${RUNNER_TEMP}/realsas-product-source.tar.gz"
+          SUM="${RUNNER_TEMP}/realsas-product-source.tar.gz.sha256"
+          rm -f "${ARCHIVE}" "${SUM}"
+          tar --exclude=.git --exclude=.pytest_cache --exclude='**/__pycache__' -czf "${ARCHIVE}" .
+          sha256sum "${ARCHIVE}" | sed "s#${ARCHIVE}#realsas-product-source.tar.gz#" | tee "${SUM}"
+          test -s "${ARCHIVE}"
+          test -s "${SUM}"
       - name: Upload exact source snapshot
         uses: actions/upload-artifact@v4
         with:
           name: realsas-product-source-${{ github.sha }}
           path: |
-            realsas-product-source.tar.gz
-            realsas-product-source.tar.gz.sha256
+            ${{ runner.temp }}/realsas-product-source.tar.gz
+            ${{ runner.temp }}/realsas-product-source.tar.gz.sha256
           if-no-files-found: error
           retention-days: 1
           compression-level: 0

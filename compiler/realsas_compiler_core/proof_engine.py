@@ -25,6 +25,10 @@ from .mesh.quality import (
     mesh_raster_quality_report,
     raster_quality_gate_failures,
 )
+from .product_external_render import (
+    validate_external_directional_renderable_set,
+    validate_external_renderable_component,
+)
 from .types import QualificationError
 from .v4 import (
     bind_domain_proof,
@@ -41,6 +45,9 @@ _REQUIRED = {
     "MECHANICAL_STRUCTURE", "MESH_QUALITY", "DEFORMATION",
     "DIRECTIONAL_VISUAL", "MOTION", "RUNTIME_CONSUMPTION",
 }
+_EXTERNAL_QUALIFICATION_KEY = "external_render_support_qualification"
+_EXTERNAL_RASTER_AUTHORITY = "QUALIFIED_EXTERNAL_COMPONENT_CACHED_RASTER_WITNESS"
+_SCIENTIFIC_RASTER_AUTHORITY = "CANONICAL_MECHANICAL_SURFACE_RASTER_BINDING"
 
 
 def _mechanical(product):
@@ -54,20 +61,60 @@ def _mechanical(product):
     }
 
 
+def _external_component_claim(component) -> bool:
+    metadata = dict(component.metadata or {})
+    flag = metadata.get("external_render_support") is True
+    qualification_present = _EXTERNAL_QUALIFICATION_KEY in metadata
+    if flag != qualification_present:
+        raise QualificationError("EXTERNAL_RENDER_SUPPORT_METADATA_INCONSISTENT")
+    return flag
+
+
+def _external_render_set_claim(value) -> bool:
+    directions = tuple(value.directions)
+    components = tuple(component for direction in directions for component in direction.components)
+    flags = tuple(_external_component_claim(component) for component in components)
+    set_flag = dict(value.metadata or {}).get("external_render_support") is True
+    any_external = any(flags)
+    all_external = bool(flags) and all(flags)
+    if set_flag != any_external:
+        raise QualificationError("EXTERNAL_RENDER_SUPPORT_SET_METADATA_INCONSISTENT")
+    if any_external and not all_external:
+        raise QualificationError("MIXED_EXTERNAL_AND_CANONICAL_RENDER_SUPPORT_FORBIDDEN")
+    return any_external
+
+
 def _mesh(product):
     policy = FIT2_PRODUCT_MESH_QUALITY_POLICY_V1
     rows = []
     area_reports = []
     raster_reports = []
     cdt_rows = []
+    external_component_count = 0
     for direction in product.directional_renderables.directions:
         for component in direction.components:
             area = mesh_triangle_area_report(component.mesh)
-            raster = mesh_raster_quality_report(
-                component.mesh,
-                surface=product.mechanical_state.surface,
-                view_index=int(direction.view_index),
-            )
+            external = _external_component_claim(component)
+            if external:
+                # External render meshes such as P1/P1Q are independently sealed
+                # substrates. Their support ids are intentionally not canonical S.
+                # Validate the external qualification first, then measure using the
+                # mesh-hash-bound cached raster witness. Never fall back to scientific S.
+                validate_external_renderable_component(component, product.mechanical_state)
+                raster = mesh_raster_quality_report(
+                    component.mesh,
+                    surface=None,
+                    view_index=int(direction.view_index),
+                )
+                raster_authority = _EXTERNAL_RASTER_AUTHORITY
+                external_component_count += 1
+            else:
+                raster = mesh_raster_quality_report(
+                    component.mesh,
+                    surface=product.mechanical_state.surface,
+                    view_index=int(direction.view_index),
+                )
+                raster_authority = _SCIENTIFIC_RASTER_AUTHORITY
             area_reports.append(area)
             raster_reports.append(raster)
             qreport = dict(component.mesh.qualification_report or {})
@@ -76,6 +123,8 @@ def _mesh(product):
                 "view_index": int(direction.view_index),
                 "component_id": str(component.component_id),
                 "coverage_classification": str(component.mesh.support_coverage_classification),
+                "raster_authority": raster_authority,
+                "external_render_support": bool(external),
                 **area,
                 **raster,
             }
@@ -108,6 +157,8 @@ def _mesh(product):
 
     return {
         "component_count": len(rows),
+        "external_render_support_component_count": external_component_count,
+        "external_render_support_fail_closed": True,
         "face_count": sum(r["face_count"] for r in area_reports),
         "degenerate_faces": sum(r["degenerate_faces"] for r in area_reports),
         "min_area": min((r["min_area"] for r in area_reports), default=0.0),
@@ -149,11 +200,22 @@ def _mesh(product):
 
 
 def _visual(product):
-    validate_directional_renderable_set(product.directional_renderables, product.mechanical_state)
+    external = _external_render_set_claim(product.directional_renderables)
+    if external:
+        validate_external_directional_renderable_set(
+            product.directional_renderables,
+            product.mechanical_state,
+        )
+        visual_authority = "QUALIFIED_EXTERNAL_RENDER_SUPPORT"
+    else:
+        validate_directional_renderable_set(product.directional_renderables, product.mechanical_state)
+        visual_authority = "CANONICAL_MECHANICAL_SURFACE"
     return {
         "direction_count": len(product.directional_renderables.directions),
         "corner_binding_count": sum(len(c.appearance.corner_bindings) for d in product.directional_renderables.directions for c in d.components),
         "view_order": [d.view_index for d in product.directional_renderables.directions],
+        "visual_validation_authority": visual_authority,
+        "external_render_support": bool(external),
     }
 
 
@@ -227,7 +289,7 @@ def _motion(product, plan, *, motion_bake_provider=None, motion_policy=None):
         "max_edge_stretch_ratio": max((float(row.get("max_edge_stretch_ratio", 1.0)) for row in rows), default=1.0),
         "max_area_change_ratio": max((float(row.get("max_area_change_ratio", 1.0)) for row in rows), default=1.0),
         "flipped_triangles": sum(int(row.get("flipped_triangles", 0)) for row in rows),
-        "max_loop_seam_error01": max((float(row.get("loop_seam_error01", 0.0)) for row in rows), default=0.0),
+        "max_loop_seam_error01": max((float(row.get("max_loop_seam_error01", 0.0)) for row in rows), default=0.0),
         "return_to_rest_error01": max((float(row.get("return_to_rest_error01", 0.0)) for row in rows), default=0.0),
         "max_return_to_rest_error01": max((float(row.get("return_to_rest_error01", 0.0)) for row in rows), default=0.0),
         "frozen_policy_thresholds": {**RESTORED_V05_POLICY_V1, **dict(motion_policy or {})},
@@ -314,9 +376,12 @@ def evaluate_product_proof(product, *, deformation_fixture: dict | None = None, 
     ABSTAIN; arbitrary callables are rejected. Direct mechanical-joint/P.xy
     evaluation is forbidden.
 
-    MESH_QUALITY now measures the exact raster mesh, including alpha-domain coverage
-    for ObservationDomainCDT components. Aggregate face existence can no longer hide
-    a large untriangulated visible region.
+    MESH_QUALITY measures the exact raster mesh. ObservationDomainCDT components
+    retain their alpha-domain coverage gate. Independently qualified external render
+    substrates (for example P1/P1Q) are measured only after their external support
+    qualification validates and then use their own mesh-hash-bound cached raster
+    witness; the scientific MechanicalStateIR surface is never relabelled or used as
+    a fallback for that external substrate.
 
     The historical domain name RUNTIME_CONSUMPTION is retained for contract
     compatibility, but this pre-export proof measures runtime-contract compatibility
@@ -364,6 +429,14 @@ def evaluate_product_proof(product, *, deformation_fixture: dict | None = None, 
                 "alpha_domain_coverage_required_for_observation_cdt": True,
                 "large_uncovered_region_gate_required": True,
                 "mesh_quality_policy": FIT2_PRODUCT_MESH_QUALITY_POLICY_V1.to_dict(),
+                "external_render_support_fail_closed": True,
+                "external_render_support_uses_scientific_surface_fallback": False,
+                "external_raster_authority": _EXTERNAL_RASTER_AUTHORITY,
+            })
+        elif domain == "DIRECTIONAL_VISUAL":
+            metadata.update({
+                "external_render_support_fail_closed": True,
+                "external_directional_validator_used_when_claimed": True,
             })
         elif domain == "MOTION":
             metadata.update({
@@ -388,7 +461,7 @@ def evaluate_product_proof(product, *, deformation_fixture: dict | None = None, 
             })
         reports.append(bind_domain_proof(product, plan, measurement_report, status=status, failure_signatures=failures, owner_attribution=no_owner_attribution(), metadata=metadata))
     return bind_product_proof_bundle(product, tuple(reports), metadata={
-        "engine": "RealSaS.ProofEngine.v6.mesh_coverage_typed_motion_preexport_runtime_compatibility",
+        "engine": "RealSaS.ProofEngine.v7.external_support_mesh_visual_fail_closed",
         "heavy_solver_promoted": False,
         "post_export_native_interlock_required": "RUNTIME_CONSUMPTION" in required,
     })

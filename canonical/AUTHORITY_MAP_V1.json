@@ -1,176 +1,72 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "repository": "merynz/RealSaS-OPT",
   "continuation_authority": "CURRENT_STATE.md",
-  "context_state": "canonical/CONTEXT_STATE_V1.json",
-  "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V2.json",
+  "execution_authority": "canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json",
+  "context_state": "canonical/CONTEXT_STATE_V2.json",
+  "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
+  "architecture_ledger": "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V2.md",
+  "experiment_ledger": "canonical/EXPERIMENT_AUTHORITY_LEDGER_V2.md",
+  "branch_authority": "canonical/BRANCH_AUTHORITY_V2.md",
   "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
   "generated_live_map": "canonical/LIVE_AUTHORITY_MAP.md",
   "generated_rehydration_packet": "canonical/REHYDRATION_PACKET.md",
-  "generated_coverage_audit": "canonical/CONTEXT_COVERAGE_AUDIT.md",
-  "investor_evidence_index": "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
-  "geppetto_fit1_evidence_manifest": "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
-  "arachne_v5_fit1_evidence_manifest": "canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json",
-  "historical_registry": "canonical/EXPERIMENT_REGISTRY_V1.json",
-  "historical_journal": "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
-  "human_ledgers": [
-    "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
-    "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
-    "canonical/BRANCH_AUTHORITY_V1.md"
-  ],
-  "execution_authority": {
-    "actions_runner_mode": "SELF_HOSTED_LOCAL_ONLY",
-    "required_labels": ["self-hosted", "linux", "x64", "realsas"],
-    "known_runner_name": "realsas-wsl-1660ti",
-    "operator_path_hint": "~/actions-runner",
-    "workflow_budget_policy": "Do not fan out routine authority/science workflows across experimental branches; use main/manual/self-hosted only.",
-    "rule": "Any Actions execution used for current RealSaS science/mainline authority must run on the local self-hosted RealSaS runner."
-  },
   "branch_policy": {
-    "canonical_branch": "main",
-    "default_non_main_class": "EVIDENCE_ONLY_UNREGISTERED",
-    "delete_candidate_regex": ["^(do-not-use|dummy-unused|ignore-this)$", ".*(scratch|debugtmp|audit-temp|noop|mistake).*"],
-    "classes": {
-      "CANONICAL": "Only branch allowed to carry repository-wide continuation authority.",
-      "ACTIVE_EXPERIMENT": "Explicitly registered live experiment branch; executable current work may live here while main carries the continuation pointer.",
-      "EVIDENCE_ONLY": "Explicit historical/research lineage retained for provenance.",
-      "EVIDENCE_ONLY_UNREGISTERED": "Observed non-main branch with no active registration; never continuation authority by itself.",
-      "DELETE_CANDIDATE": "Advisory only; never delete automatically."
-    }
+    "continuation_branch": "main",
+    "canonical_execution_branch": "fit2/mage-full-subject-reclosure",
+    "superseded_transition_branch": "repair/mage-full-subject-reclosure-20260912",
+    "productization_branch": "audit/historical-product-power-rebind-20260913",
+    "unregistered_non_main_default": "EVIDENCE_ONLY"
+  },
+  "fit1": {
+    "status": "HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT",
+    "old_surface_nodes": 950,
+    "local_scientific_closures_preserved": true,
+    "current_product_authority": false,
+    "current_fit2_checkpoint_load_authorized": false,
+    "lineage": "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md"
   },
   "active_experiments": [
     {
-      "id": "MAGE_FIT2_PIPELINE_REFIT",
-      "status": "ACTIVE__GEPPETTO_FRESH_REFIT_RUNNING__MESH_PRODUCT_CONTRACT_CLOSED_PASS",
-      "branch": "repair/mage-full-subject-reclosure-20260912",
-      "question": "Can the same Mage witness reclose end-to-end from corrected observable H1/GSA through fresh Geppetto and fresh Arachne, an art-covering mechanically supported directional mesh, professional motion and exact runtime identity without the defects exposed by the real FIT1 E2E output?",
-      "mesh_product_audit": "canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md",
-      "mesh_product_prereg": "canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md",
-      "mesh_contract_self_hosted_run_id": 34716890157,
-      "mesh_contract_tests": "41 passed in 4.36s",
-      "does_not_prove": [
-        "Geppetto FIT2 PASS before sealed terminal evidence",
-        "Arachne FIT2 PASS",
-        "corrected FIT2 mesh/component result PASS",
-        "professional motion quality",
-        "exact runtime PRODUCT_PASS",
-        "unseen-family generalization or FIT8/LOFO"
-      ]
+      "id": "MAGE_FIT2_FULL_SUBJECT_RECLOSURE",
+      "status": "ACTIVE__ARACHNE_NEXT",
+      "branch": "fit2/mage-full-subject-reclosure",
+      "closed": ["H1_CORRECTED_FULL_SUBJECT", "GSA8192_REAL_8VIEW", "GEPPETTO_FIT2_TERMINAL_PASS"],
+      "next": "ARACHNE_FIT2_FRESH_REFIT"
     }
   ],
-  "recent_closed_experiments": [
+  "parallel_workstreams": [
     {
-      "id": "FIT2_MESH_PRODUCT_RECLOSURE_CONTRACT_AND_IMPLEMENTATION",
-      "status": "CLOSED_PASS__IMPLEMENTATION_ONLY__REAL_RESULT_PENDING",
-      "closed_date": "2026-09-12",
-      "categorical_verdict": "PASS__EXACT_OBSERVATION_RERASTERIZATION_AND_PRODUCT_QUALIFIER_CONTRACT",
-      "result_authority": "canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md",
-      "self_hosted_run_id": 34716890157,
-      "what_it_means": "The product mesh admission seam independently rerasterizes the exact promoted mesh against exact observation authority and applies frozen coverage/topology gates fail-closed.",
-      "what_it_does_not_mean": ["corrected FIT2 real mesh PASS", "Arachne FIT2 PASS", "runtime PRODUCT_PASS"]
-    },
-    {
-      "id": "GSA8192_REAL_8VIEW_EVIDENCE",
-      "status": "CLOSED_PASS__CORRECTED_STAGE0_ONLY",
-      "closed_date": "2026-09-12",
-      "categorical_verdict": "PASS__REAL_8VIEW_GSA_EVIDENCE_SEALED",
-      "result_authority": "repair/mage-full-subject-reclosure-20260912:experiments/mage_full_subject_reclosure_v1/FIT2_STAGE0_GSA_8VIEW_EVIDENCE_SEAL_20260912.json",
-      "what_it_means": "Corrected observation-bound H1 authority deterministically emits the sealed 8171-node/23656-relation GSA8192 lineage with real V0..V7 evidence.",
-      "what_it_does_not_mean": ["Geppetto FIT2 PASS", "Arachne FIT2 PASS", "mesh/product PASS", "unseen generalization"]
-    },
-    {
-      "id": "ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1",
-      "status": "CLOSED_PASS__PROMOTED_FIT1_FROZEN__HISTORICAL_SCOPED_AFTER_PRODUCT_REOPENING",
-      "closed_date": "2026-09-11",
-      "categorical_verdict": "PASS__MINIMAL_K4_Z_DIRECT_SIMPLEX_V5_FIT1_CLOSURE",
-      "result_authority": "canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json",
-      "promotion_authority": "canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1_PROMOTION_20260911.md",
-      "promotion_commit": "03d9f87dbb7100a72293915cf682cbf338335a37",
-      "what_it_means": "Historical old-lineage Mage FIT1 learned skin proposal + Compiler qualification closed with V5 minimal K4 direct simplex.",
-      "what_it_does_not_mean": ["current corrected-lineage Arachne PASS", "unseen-family generalization", "full PRODUCT_PASS"]
-    },
-    {
-      "id": "GEPPETTO_REFERENCE_STRENGTH_FIT1",
-      "status": "CLOSED_PASS__PROMOTED_FIT1_FROZEN__HISTORICAL_SCOPED_AFTER_PRODUCT_REOPENING",
-      "closed_date": "2026-09-08",
-      "categorical_verdict": "FIT1_TERMINAL_PASS",
-      "result_authority": "canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md"
-    },
-    {
-      "id": "V7_C4_SKINTOKENS_FACE_BARYCENTRIC_BIASED_DENSE_SUPERVISION",
-      "status": "CLOSED_FAIL__HISTORICAL_EVIDENCE",
-      "closed_date": "2026-09-10",
-      "categorical_verdict": "CLOSED_FAIL__REJECT_THIS_SAMPLING_FAMILY__DO_NOT_AUTO_STACK_CUSTOM_BLEND_RATIO_LOSS",
-      "result_authority": "canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md"
+      "id": "HISTORICAL_PRODUCT_POWER_REBIND",
+      "branch": "audit/historical-product-power-rebind-20260913",
+      "status": "P0_CLOSED_PASS__PAUSED_UNTIL_ARACHNE_FIT2_CLOSES",
+      "scientific_sgw_authority": false
     }
   ],
-  "next_decision": {
-    "status": "MAGE_FIT2_PIPELINE_REFIT_ACTIVE__GEPPETTO_FRESH_REFIT_RUNNING",
-    "module": "Mage FIT2 / Geppetto",
-    "purpose": "Wait for the preregistered fresh Geppetto terminal result; if and only if it closes with required real V0..V7 evidence, advance to fresh Arachne on corrected S+G. The mesh product contract is already implementation-level CLOSED PASS and waits for fresh G/W to produce the real corrected Mage mesh result. Same-Mage product reclosure precedes unseen/FIT8/LOFO."
+  "current_science": {
+    "gsa_nodes": 8171,
+    "gsa_relations": 23656,
+    "gsa_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
+    "tensorization_hash": "fe351362e195164805cebb0f63b74d1861ef123458b20ac56607016e00a6c67e",
+    "geppetto_status": "TERMINAL_PASS_VERIFIED__48_OF_48",
+    "geppetto_checkpoint_sha256": "2e1f35d196af6eea957bb6377bc0b0e1b045c20dc652d798b74b107198ae80e9",
+    "arachne_status": "AUTHORIZED__NOT_STARTED",
+    "mesh_status": "CLOSED_FAIL__HIGH_COVERAGE_HIGH_PRECISION__SHAPE_QUALITY_OUTLIERS",
+    "mesh_blocks_arachne": false,
+    "product_pass": false
   },
-  "branch_overrides": [
-    {"branch": "repair/mage-full-subject-reclosure-20260912", "class": "ACTIVE_EXPERIMENT", "reason": "Current executable Mage FIT2 fresh-refit/product-reclosure lineage while main carries repository-wide continuation pointers."},
-    {"branch": "exp/arachne-skintokens-cleanroom-fit1-20260908", "class": "EVIDENCE_ONLY", "reason": "A0 historical scientific lineage; retained for future generalization/failure-memory."},
-    {"branch": "seal/geppetto-reference-strength-fit1-20260908", "class": "EVIDENCE_ONLY", "reason": "Sealed historical Geppetto FIT1 source/result lineage; not current corrected-lineage authority."},
-    {"branch": "exp/geppetto-reference-strength-fullstack-v1-20260907", "class": "EVIDENCE_ONLY", "reason": "Historical frozen optimizer/source lineage for the FIT1 formulation."},
-    {"branch": "exp/geppetto-ar01-skeleton-causal-v1-20260907", "class": "EVIDENCE_ONLY", "reason": "AR-01 closed failure retained as scoped evidence."},
-    {"branch": "exp/lossless-rigging-evidence-v1-20260906", "class": "EVIDENCE_ONLY", "reason": "Lossless RiggingSurfaceIR evidence lineage."},
-    {"branch": "demo/investor-single-specimen-e2e", "class": "EVIDENCE_ONLY", "reason": "Historical demo lineage only; never continuation authority."}
-  ],
-  "required_files": [
-    "CURRENT_STATE.md",
-    "canonical/CONTEXT_STATE_V1.json",
-    "canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md",
-    "canonical/MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1.json",
-    "canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md",
-    "canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md",
-    "compiler/realsas_compiler_core/mesh/product_qualification.py",
-    "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
-    "canonical/MAGE_FIT1_RIGGING_CORE_CLOSURE_20260911.md",
-    "canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json",
-    "canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1_PROMOTION_20260911.md",
-    "models/arachne/v5/FROZEN_MAGE_FIT1_CHECKPOINT_V1.json",
-    "models/arachne/v5/checkpoint_authority_v1.py",
-    "canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json",
-    "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
-    "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
-    "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
-    "canonical/EXPERIMENT_REGISTRY_V2.json",
-    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
-    "canonical/BRANCH_AUTHORITY_V1.md"
-  ],
-  "rehydration_order": [
-    "canonical/REHYDRATION_PACKET.md",
-    "CURRENT_STATE.md",
-    "canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md",
-    "canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md",
-    "canonical/MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1.json",
-    "canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md",
-    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
-    "canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md",
-    "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md",
-    "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
-    "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
-    "canonical/EXPERIMENT_REGISTRY_V2.json",
-    "canonical/CONTEXT_STATE_V1.json",
-    "canonical/LIVE_AUTHORITY_MAP.md",
-    "canonical/FIT1_EVIDENCE_INDEX_20260909.md"
-  ],
+  "execution_environment": {
+    "actions_runner_mode": "SELF_HOSTED_LOCAL_ONLY",
+    "required_labels": ["self-hosted", "linux", "x64", "realsas"],
+    "known_runner": "realsas-wsl-1660ti"
+  },
   "invariants": [
-    "Only main/CURRENT_STATE.md is repository-wide continuation authority; active executable work may live on an explicitly registered ACTIVE_EXPERIMENT branch.",
-    "Scientific PASS never promotes itself; promotion/refreeze is a separate transaction.",
-    "Historical FIT1 local PASSes remain evidence but do not override a later real end-to-end contradiction.",
-    "Real E2E product quality can falsify product-readiness inference even when local model/Compiler gates passed.",
-    "FIT1 or same-Mage FIT2 success is not unseen-family generalization.",
-    "Historical scientific failures remain valid evidence and are not deleted by later promotion/reopening.",
-    "Compiler qualification cannot silently replace missing learned semantics.",
-    "A0 representation/oracle evidence is distinct from the V5 shipping decoder interface.",
-    "A lower-level CDT/surface-lineage PASS is not a product mesh PASS; frozen FIT2 product coverage/topology qualification is mandatory.",
-    "Product mesh coverage must be recomputed from the exact promoted mesh against exact observation authority; candidate-reported coverage is diagnostic only.",
-    "A product-qualified mesh/skeleton/skin state must remain the exact runtime/export authority; hidden re-triangulation or second mesh truth is forbidden.",
-    "Rotation-only deterministic motion is a mechanical probe, not professional animation quality evidence.",
-    "PRODUCT_PASS remains an independent exact end-to-end contract.",
-    "Scientific/mainline Actions run only on the local self-hosted RealSaS runner."
+    "Only main carries repository-wide continuation navigation.",
+    "Only fit2/mage-full-subject-reclosure carries current corrected-lineage same-Mage scientific execution.",
+    "FIT1 is preserved evidence, not current product authority.",
+    "The productization audit branch cannot own corrected S/G/W.",
+    "Arachne FIT2 depends on corrected S/G and exact Geppetto FIT2 handoff, not on final mesh PASS.",
+    "A mesh scientific FAIL remains FAIL even when coverage/precision are useful.",
+    "PRODUCT_PASS is independent and remains open until skin, exact mesh/binding/components, professional motion and exact runtime/export identity close."
   ]
 }

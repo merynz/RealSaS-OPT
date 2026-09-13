@@ -15,9 +15,11 @@ on:
       - 'compiler/realsas_compiler_core/render_support.py'
       - 'compiler/realsas_compiler_core/component_attachment.py'
       - 'compiler/realsas_compiler_core/mesh/quality.py'
+      - 'compiler/realsas_compiler_core/mesh/face_subset_repair.py'
       - 'tests/product/test_external_render_support_v1.py'
       - 'tests/product/test_component_attachment_v1.py'
       - 'tests/product/test_external_product_proof_and_continuity_v1.py'
+      - 'tests/product/test_face_subset_repair_v1.py'
       - 'tests/product/test_mage_topology_motion_deformation_v1.py'
       - '.github/workflows/external_render_continuity_contract.yml'
   push:
@@ -30,9 +32,11 @@ on:
       - 'compiler/realsas_compiler_core/render_support.py'
       - 'compiler/realsas_compiler_core/component_attachment.py'
       - 'compiler/realsas_compiler_core/mesh/quality.py'
+      - 'compiler/realsas_compiler_core/mesh/face_subset_repair.py'
       - 'tests/product/test_external_render_support_v1.py'
       - 'tests/product/test_component_attachment_v1.py'
       - 'tests/product/test_external_product_proof_and_continuity_v1.py'
+      - 'tests/product/test_face_subset_repair_v1.py'
       - 'tests/product/test_mage_topology_motion_deformation_v1.py'
       - '.github/workflows/external_render_continuity_contract.yml'
 
@@ -58,7 +62,8 @@ jobs:
             compiler/realsas_compiler_core/product_external_render.py \
             compiler/realsas_compiler_core/render_support.py \
             compiler/realsas_compiler_core/component_attachment.py \
-            compiler/realsas_compiler_core/mesh/quality.py
+            compiler/realsas_compiler_core/mesh/quality.py \
+            compiler/realsas_compiler_core/mesh/face_subset_repair.py
       - name: Run external render and continuity regressions
         env:
           PYTHONPATH: ${{ github.workspace }}
@@ -67,4 +72,5 @@ jobs:
             tests/product/test_external_render_support_v1.py \
             tests/product/test_component_attachment_v1.py \
             tests/product/test_external_product_proof_and_continuity_v1.py \
+            tests/product/test_face_subset_repair_v1.py \
             tests/product/test_mage_topology_motion_deformation_v1.py

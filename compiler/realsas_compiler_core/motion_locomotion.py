@@ -93,21 +93,27 @@ def _pose_run(u: float, binding, by_id):
     return rotations
 
 
+def _phase_delta(phase: float, offset: float) -> float:
+    return math.sin(phase + offset) - math.sin(offset)
+
+
 def _pose_idle(u: float, binding, by_id):
     rotations = {jid: 0.0 for jid in by_id}
     phase = 2.0 * math.pi * u
     rotations[binding.root_joint_id] = 0.65 * math.sin(phase)
     for i, jid in enumerate(binding.spine_chain):
-        rotations[jid] = (0.35 + 0.10 * i) * math.sin(phase - 0.16 * (i + 1))
-    rotations[binding.head_joint_id] = -0.65 * math.sin(phase - 0.30)
+        offset = -0.16 * (i + 1)
+        rotations[jid] = (0.35 + 0.10 * i) * _phase_delta(phase, offset)
+    rotations[binding.head_joint_id] = -0.65 * _phase_delta(phase, -0.30)
     for side_index, chain in enumerate((binding.left_arm_chain, binding.right_arm_chain)):
         side = -1.0 if side_index == 0 else 1.0
         if chain:
-            rotations[chain[0]] = side * 1.8 * math.sin(phase + side * 0.20)
+            offset = side * 0.20
+            rotations[chain[0]] = side * 1.8 * _phase_delta(phase, offset)
         if len(chain) > 1:
-            rotations[chain[1]] = side * 1.1 * math.sin(phase - 0.55)
+            rotations[chain[1]] = side * 1.1 * _phase_delta(phase, -0.55)
         if len(chain) > 2:
-            rotations[chain[2]] = -side * 0.8 * math.sin(phase - 0.18)
+            rotations[chain[2]] = -side * 0.8 * _phase_delta(phase, -0.18)
     return rotations
 
 

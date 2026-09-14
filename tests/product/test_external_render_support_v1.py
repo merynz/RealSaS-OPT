@@ -190,3 +190,57 @@ def test_external_support_rejects_historical_transfer():
             materialization_manifest_sha256="sha256:materialized-p1",
             direct_binding_manifest_sha256="sha256:direct-v5",
         )
+
+
+def test_external_render_support_accepts_explicit_rigid_attachment_runtime_carry():
+    from compiler.realsas_compiler_core.mesh.rigid_attachment_skin import qualify_rigid_attachment_mesh_skin
+    mechanical = _mechanical()
+    mesh = _p1_mesh(0)
+    mesh_skin = qualify_rigid_attachment_mesh_skin(
+        mesh,
+        mechanical,
+        parent_joint_id="J:ARM",
+        component_assembly_hash="ASSEMBLY:" + "a" * 64,
+        component_lineage_hash="COMPONENT:" + "b" * 64,
+        bind_state_authority_hash="BIND:" + "c" * 64,
+    )
+    component = build_external_renderable_component(
+        component_id="BOOK",
+        view_index=0,
+        mesh=mesh,
+        mesh_skin=mesh_skin,
+        mechanical=mechanical,
+        appearance=_appearance(mesh),
+        setup_order=1,
+        coverage_classification="RIGID_FOREGROUND",
+        materialization_manifest_sha256="sha256:source-foreground",
+        direct_binding_manifest_sha256="sha256:component-assembly",
+    )
+    q = component.metadata["external_render_support_qualification"]
+    assert q["metadata"]["rigid_attachment_runtime_carry"] is True
+    assert q["metadata"]["exact_mesh_vertex_direct_model_query"] is False
+    assert all(row.influences == (("J:ARM", 1.0),) for row in mesh_skin.rows)
+
+
+def test_external_render_support_rejects_rigid_carry_without_attachment_proof():
+    from compiler.realsas_compiler_core.mesh.rigid_attachment_skin import qualify_rigid_attachment_mesh_skin
+    mechanical = _mechanical()
+    mesh = _p1_mesh(0)
+    good = qualify_rigid_attachment_mesh_skin(
+        mesh,
+        mechanical,
+        parent_joint_id="J:ARM",
+        component_assembly_hash="ASSEMBLY:" + "a" * 64,
+        component_lineage_hash="COMPONENT:" + "b" * 64,
+        bind_state_authority_hash="BIND:" + "c" * 64,
+    )
+    bad = replace(good, metadata={**good.metadata, "component_assembly_hash": ""}, mesh_skin_lineage_hash="")
+    bad = replace(bad, mesh_skin_lineage_hash=mesh_skin_lineage_hash(bad))
+    with pytest.raises(QualificationError, match="RIGID_CARRY_COMPONENT_ASSEMBLY_HASH"):
+        build_external_renderable_component(
+            component_id="BOOK", view_index=0, mesh=mesh, mesh_skin=bad,
+            mechanical=mechanical, appearance=_appearance(mesh), setup_order=1,
+            coverage_classification="RIGID_FOREGROUND",
+            materialization_manifest_sha256="sha256:source-foreground",
+            direct_binding_manifest_sha256="sha256:component-assembly",
+        )

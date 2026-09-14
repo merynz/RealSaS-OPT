@@ -21,6 +21,7 @@ from compiler.realsas_compiler_core.continuity_underlay import (
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mesh.rigid_attachment_skin import qualify_rigid_attachment_mesh_skin
 from compiler.realsas_compiler_core.mesh_binding import mesh_lineage_hash
+from compiler.realsas_compiler_core.motion_quality import compile_motion_quality
 from compiler.realsas_compiler_core.motion_rotation_only import build_mage_rotation_only_qualified_motion
 from compiler.realsas_compiler_core.product_external_render import (
     assemble_product_v3_with_external_render_support,
@@ -269,12 +270,21 @@ def build_state(args, *, persist: bool = True):
         "runtime_atlas_rebind": True,
     })
 
-    motion = build_mage_rotation_only_qualified_motion(mechanical)
+    base_motion = build_mage_rotation_only_qualified_motion(mechanical)
+    motion = compile_motion_quality(base_motion, mechanical)
     policy_hash = content_sha256({
-        "schema": "RealSaS.MageBoundedDemoCapabilityPolicy.v1",
+        "schema": "RealSaS.MageBoundedDemoCapabilityPolicy.v2",
         "fit2_training_deferred": True,
         "unseen_generalization_claimed": False,
         "rotation_only_motion_scope": True,
+        "historical_motion_quality_recovery": True,
+        "motion_quality_scope": (
+            "PHASES", "NAMED_TIMING_CURVES", "CUBIC_HERMITE_ROTATION",
+            "MINIMUM_JERK_TIMING_BLEND", "EXACT_LOOP_REPAIR",
+        ),
+        "contact_lock_claimed": False,
+        "xpbd_secondary_claimed": False,
+        "corrective_deformation_claimed": False,
         "runtime_requires_qualification_owned_bakes": True,
     })
     runtime_impl_hash = content_sha256({
@@ -289,11 +299,15 @@ def build_state(args, *, persist: bool = True):
         CapabilityRequirement("PRESET_MOTION", "REQUIRED", motion.motion_state_hash, policy_hash, ("MOTION",)),
         CapabilityRequirement("RUNTIME_BACKEND", "REQUIRED", runtime_impl_hash, policy_hash, ("RUNTIME_CONSUMPTION",)),
     )
-    capability = build_capability_contract("MAGE_FIT1_BOUNDED_DEMO_V1", requirements, metadata={
+    capability = build_capability_contract("MAGE_FIT1_BOUNDED_DEMO_V2_HISTORICAL_MOTION_QUALITY", requirements, metadata={
         "generalization_claim": False,
         "fit2_training_executed": False,
         "component_assembly_hash": assembly.component_assembly_hash,
         "continuity_underlay_set_hash": underlay_set.qualification_hash,
+        "historical_motion_engine_recovered": True,
+        "contact_lock_claimed": False,
+        "xpbd_secondary_claimed": False,
+        "corrective_deformation_claimed": False,
     })
     product = assemble_product_v3_with_external_render_support(
         mechanical, render_set, capability, motion,
@@ -301,6 +315,7 @@ def build_state(args, *, persist: bool = True):
             "bounded_demo": True,
             "component_assembly_hash": assembly.component_assembly_hash,
             "continuity_underlay_set_hash": underlay_set.qualification_hash,
+            "historical_motion_engine_recovered": True,
         },
         runtime_policy={
             "runtime_texture_layout": "ONE_ATLAS_PER_VIEW",
@@ -312,7 +327,8 @@ def build_state(args, *, persist: bool = True):
     if persist:
         _write_json(output_dir / "FINAL_DIRECTIONAL_RENDERABLE_SET.json", render_set.to_dict())
         _write_json(output_dir / "CONTINUITY_UNDERLAY_SET.json", underlay_set.to_dict())
-        _write_json(output_dir / "ROTATION_ONLY_MOTION_STATE.json", motion.to_dict())
+        _write_json(output_dir / "ROTATION_ONLY_BASE_MOTION_STATE.json", base_motion.to_dict())
+        _write_json(output_dir / "HISTORICAL_QUALITY_MOTION_STATE.json", motion.to_dict())
         _write_json(output_dir / "CAPABILITY_CONTRACT.json", capability.to_dict())
         _write_json(output_dir / "CANONICAL_PUPPET_GRAPH_V3.json", product.to_dict())
         manifest = {
@@ -322,6 +338,12 @@ def build_state(args, *, persist: bool = True):
             "mechanical_state_hash": mechanical.mechanical_state_hash,
             "directional_visual_state_hash": render_set.directional_visual_state_hash,
             "motion_state_hash": motion.motion_state_hash,
+            "base_motion_state_hash": base_motion.motion_state_hash,
+            "historical_motion_engine_recovered": True,
+            "historical_motion_recovery_scope": motion.metadata.get("historical_recovery_scope"),
+            "contact_lock_claimed": False,
+            "xpbd_secondary_claimed": False,
+            "corrective_deformation_claimed": False,
             "capability_contract_hash": capability.capability_contract_hash,
             "component_assembly_hash": assembly.component_assembly_hash,
             "continuity_underlay_set_hash": underlay_set.qualification_hash,
@@ -342,6 +364,7 @@ def build_state(args, *, persist: bool = True):
         "mechanical": mechanical,
         "render_set": render_set,
         "motion": motion,
+        "base_motion": base_motion,
         "capability": capability,
         "assembly": assembly,
         "underlay_set": underlay_set,

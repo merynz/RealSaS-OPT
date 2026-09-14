@@ -15,6 +15,7 @@ from typing import Any, Mapping
 
 from .hashing import content_sha256
 from .mesh.direct_model_skin import DIRECT_MODEL_TRANSFER_METHOD
+from .mesh.rigid_attachment_skin import RIGID_ATTACHMENT_TRANSFER_METHOD
 from .mesh_binding import mesh_lineage_hash, mesh_skin_lineage_hash
 from .types import QualificationError
 
@@ -94,12 +95,25 @@ def _validate_detached_mesh_skin(mesh_skin, mesh, mechanical) -> None:
         raise QualificationError("EXTERNAL_RENDER_SUPPORT_SKELETON_BINDING_MISMATCH")
     if mesh_skin.skin_binding_hash != mechanical.skin.skin_lineage_hash:
         raise QualificationError("EXTERNAL_RENDER_SUPPORT_SOURCE_SKIN_AUTHORITY_MISMATCH")
-    if mesh_skin.transfer_method != DIRECT_MODEL_TRANSFER_METHOD:
-        raise QualificationError("EXTERNAL_RENDER_SUPPORT_REQUIRES_DIRECT_MODEL_BINDING")
+    method = str(mesh_skin.transfer_method)
+    if method not in {DIRECT_MODEL_TRANSFER_METHOD, RIGID_ATTACHMENT_TRANSFER_METHOD}:
+        raise QualificationError("EXTERNAL_RENDER_SUPPORT_UNSUPPORTED_BINDING_METHOD")
     if bool(mesh_skin.metadata.get("historical_weight_transfer_used", True)):
         raise QualificationError("EXTERNAL_RENDER_SUPPORT_HISTORICAL_WEIGHT_TRANSFER_FORBIDDEN")
-    if not bool(mesh_skin.metadata.get("direct_model_query", False)):
-        raise QualificationError("EXTERNAL_RENDER_SUPPORT_DIRECT_MODEL_QUERY_REQUIRED")
+    if method == DIRECT_MODEL_TRANSFER_METHOD:
+        if not bool(mesh_skin.metadata.get("direct_model_query", False)):
+            raise QualificationError("EXTERNAL_RENDER_SUPPORT_DIRECT_MODEL_QUERY_REQUIRED")
+    else:
+        if bool(mesh_skin.metadata.get("direct_model_query", True)):
+            raise QualificationError("EXTERNAL_RENDER_SUPPORT_RIGID_CARRY_CANNOT_CLAIM_DIRECT_MODEL_QUERY")
+        if not bool(mesh_skin.metadata.get("runtime_representation_only", False)):
+            raise QualificationError("EXTERNAL_RENDER_SUPPORT_RIGID_CARRY_MUST_BE_RUNTIME_REPRESENTATION")
+        if mesh_skin.metadata.get("attachment_truth_source") != "QUALIFIED_COMPONENT_ATTACHMENT":
+            raise QualificationError("EXTERNAL_RENDER_SUPPORT_RIGID_CARRY_ATTACHMENT_TRUTH_REQUIRED")
+        if not bool(mesh_skin.metadata.get("one_hot_carry_compiled_from_attachment", False)):
+            raise QualificationError("EXTERNAL_RENDER_SUPPORT_RIGID_CARRY_PROOF_REQUIRED")
+        for field in ("component_assembly_hash", "component_lineage_hash", "bind_state_authority_hash", "parent_joint_id"):
+            _required_evidence_hash("RIGID_CARRY_" + field.upper(), str(mesh_skin.metadata.get(field, "")))
     legal_joints = {str(j.canonical_joint_id) for j in mechanical.skeleton.joints}
     seen: set[str] = set()
     for row in mesh_skin.rows:
@@ -112,6 +126,10 @@ def _validate_detached_mesh_skin(mesh_skin, mesh, mechanical) -> None:
             raise QualificationError("EXTERNAL_RENDER_SUPPORT_INVALID_WEIGHT_ROW")
         if abs(sum(w for _jid, w in influences) - 1.0) > 1.0e-8:
             raise QualificationError("EXTERNAL_RENDER_SUPPORT_WEIGHT_SIMPLEX_MISMATCH")
+        if method == RIGID_ATTACHMENT_TRANSFER_METHOD:
+            parent = str(mesh_skin.metadata.get("parent_joint_id", ""))
+            if influences != ((parent, 1.0),):
+                raise QualificationError("EXTERNAL_RENDER_SUPPORT_RIGID_CARRY_NOT_EXACT_ONE_HOT")
         source_coeffs = tuple((str(sid), float(w)) for sid, w in row.source_support_coefficients)
         if source_coeffs != support_by_vertex[vid]:
             raise QualificationError("EXTERNAL_RENDER_SUPPORT_SUPPORT_BINDING_DRIFT")
@@ -144,7 +162,8 @@ def qualify_external_render_support(
             "scientific_mechanical_surface_relabelled": False,
             "external_support_surface_promoted_to_scientific_authority": False,
             "historical_weight_transfer_used": False,
-            "exact_mesh_vertex_direct_model_query": True,
+            "exact_mesh_vertex_direct_model_query": mesh_skin.transfer_method == DIRECT_MODEL_TRANSFER_METHOD,
+            "rigid_attachment_runtime_carry": mesh_skin.transfer_method == RIGID_ATTACHMENT_TRANSFER_METHOD,
             **dict(metadata or {}),
         },
     )
@@ -169,7 +188,7 @@ def validate_external_render_support_qualification(value, mesh, mesh_skin, mecha
         "mesh_skin_lineage_hash": str(mesh_skin.mesh_skin_lineage_hash),
         "skeleton_lineage_hash": str(mechanical.skeleton.skeleton_lineage_hash),
         "source_skin_authority_lineage_hash": str(mechanical.skin.skin_lineage_hash),
-        "transfer_method": DIRECT_MODEL_TRANSFER_METHOD,
+        "transfer_method": str(mesh_skin.transfer_method),
     }
     for name, wanted in expected.items():
         if getattr(value, name) != wanted:

@@ -2,9 +2,11 @@ from __future__ import annotations
 
 """Qualified current directional evaluator for the present rotation-only preset lane.
 
-The evaluator consumes a Compiler-qualified DirectionalJointViewBindingSetIR. Rest
-mesh raster positions come from each mesh vertex's admitted SurfaceSupportBinding;
-joint pivots come from the separately qualified mechanical-P -> raster affine map.
+The evaluator consumes a Compiler-qualified DirectionalJointViewBindingSetIR. Canonical
+mesh rest raster positions come from admitted SurfaceSupportBinding correspondences;
+independently qualified external render meshes consume their exact hash-bound raster_xy
+witness instead of relabelling a foreign support substrate as the scientific surface.
+Joint pivots come from the separately qualified mechanical-P -> raster affine map.
 Mechanical P.xy is never used as a directional coordinate.
 
 Current operation scope is deliberately narrow and generic: authored joint rotation
@@ -50,7 +52,7 @@ class DirectionalMotionEvaluatorPolicyV1:
         return content_sha256(asdict(self))
 
 
-EVALUATOR_SEMANTIC_VERSION = "RealSaS.DirectionalMotionEvaluator.v1.rotation_only"
+EVALUATOR_SEMANTIC_VERSION = "RealSaS.DirectionalMotionEvaluator.v2.rotation_only_external_support"
 
 
 def _surface_raster(surface, view_index: int) -> dict[str, tuple[float, float]]:
@@ -64,39 +66,74 @@ def _surface_raster(surface, view_index: int) -> dict[str, tuple[float, float]]:
     return out
 
 
+def _external_mesh_rest(component, view_index: int):
+    external = dict(getattr(component, "metadata", {}) or {}).get("external_render_support_qualification")
+    if not isinstance(external, dict):
+        return None
+    if str(external.get("mesh_lineage_hash", "")) != str(component.mesh.mesh_lineage_hash):
+        raise QualificationError("DIRECTIONAL_EVALUATOR_EXTERNAL_MESH_QUALIFICATION_DRIFT")
+    if str(external.get("render_support_surface_hash", "")) != str(component.mesh.surface_binding_hash):
+        raise QualificationError("DIRECTIONAL_EVALUATOR_EXTERNAL_SURFACE_QUALIFICATION_DRIFT")
+    if int(external.get("view_index", -1)) != int(view_index):
+        raise QualificationError("DIRECTIONAL_EVALUATOR_EXTERNAL_VIEW_QUALIFICATION_DRIFT")
+    if component.mesh.camera_binding_hash != component.appearance.camera_binding_hash:
+        raise QualificationError("DIRECTIONAL_EVALUATOR_EXTERNAL_CAMERA_BINDING_DRIFT")
+
+    rest = []
+    for vertex in component.mesh.vertices:
+        raw = dict(vertex.metadata or {}).get("raster_xy")
+        if raw is None or len(tuple(raw)) != 2:
+            raise QualificationError("DIRECTIONAL_EVALUATOR_EXTERNAL_RASTER_WITNESS_REQUIRED")
+        xy = tuple(map(float, raw))
+        if not all(math.isfinite(v) for v in xy):
+            raise QualificationError("DIRECTIONAL_EVALUATOR_EXTERNAL_RASTER_WITNESS_NONFINITE")
+        rest.append(xy)
+    return np.asarray(rest, dtype=np.float64)
+
+
 def _mesh_rest_from_surface(component, surface, view_index: int, binding, policy: DirectionalMotionEvaluatorPolicyV1):
-    raster = _surface_raster(surface, view_index)
-    projection = projection_for_view(binding, view_index)
     vertices = tuple(component.mesh.vertices)
     vertex_index = {v.canonical_mesh_vertex_id: i for i, v in enumerate(vertices)}
     if len(vertex_index) != len(vertices):
         raise QualificationError("DIRECTIONAL_EVALUATOR_DUPLICATE_MESH_VERTEX")
-    rest = []
+
+    external_rest = _external_mesh_rest(component, view_index)
     residual01 = []
-    for vertex in vertices:
-        coeffs = tuple(vertex.support_binding.coefficients)
-        if not coeffs:
-            raise QualificationError("DIRECTIONAL_EVALUATOR_MESH_VERTEX_MISSING_SUPPORT")
-        x = y = total = 0.0
-        for surface_id, coefficient in coeffs:
-            if surface_id not in raster:
-                raise QualificationError(f"DIRECTIONAL_EVALUATOR_SUPPORT_NOT_RASTER_BOUND:V{view_index}:{surface_id}")
-            c = float(coefficient)
-            if not math.isfinite(c) or c < 0.0:
-                raise QualificationError("DIRECTIONAL_EVALUATOR_INVALID_SUPPORT_COEFFICIENT")
-            x += c * raster[surface_id][0]
-            y += c * raster[surface_id][1]
-            total += c
-        if abs(total - 1.0) > 1e-8:
-            raise QualificationError("DIRECTIONAL_EVALUATOR_SUPPORT_SIMPLEX_RESIDUAL")
-        xy = (float(x), float(y))
-        projected = project_mechanical_point(projection, vertex.P)
-        residual01.append(float(np.linalg.norm(np.asarray(xy) - np.asarray(projected))) / max(float(projection.raster_span_px), 1e-12))
-        rest.append(xy)
-    if residual01 and max(residual01) > float(policy.max_mesh_projection_residual01):
-        raise QualificationError(
-            f"DIRECTIONAL_EVALUATOR_MESH_PROJECTION_RESIDUAL:V{view_index}:{max(residual01)}"
-        )
+    if external_rest is not None:
+        # The external support mesh is already Compiler-qualified and its exact raster_xy
+        # witness is part of the mesh lineage hash. Do not project its foreign support
+        # substrate through the canonical scientific MechanicalState surface.
+        rest = external_rest
+    else:
+        raster = _surface_raster(surface, view_index)
+        projection = projection_for_view(binding, view_index)
+        rest_rows = []
+        for vertex in vertices:
+            coeffs = tuple(vertex.support_binding.coefficients)
+            if not coeffs:
+                raise QualificationError("DIRECTIONAL_EVALUATOR_MESH_VERTEX_MISSING_SUPPORT")
+            x = y = total = 0.0
+            for surface_id, coefficient in coeffs:
+                if surface_id not in raster:
+                    raise QualificationError(f"DIRECTIONAL_EVALUATOR_SUPPORT_NOT_RASTER_BOUND:V{view_index}:{surface_id}")
+                c = float(coefficient)
+                if not math.isfinite(c) or c < 0.0:
+                    raise QualificationError("DIRECTIONAL_EVALUATOR_INVALID_SUPPORT_COEFFICIENT")
+                x += c * raster[surface_id][0]
+                y += c * raster[surface_id][1]
+                total += c
+            if abs(total - 1.0) > 1e-8:
+                raise QualificationError("DIRECTIONAL_EVALUATOR_SUPPORT_SIMPLEX_RESIDUAL")
+            xy = (float(x), float(y))
+            projected = project_mechanical_point(projection, vertex.P)
+            residual01.append(float(np.linalg.norm(np.asarray(xy) - np.asarray(projected))) / max(float(projection.raster_span_px), 1e-12))
+            rest_rows.append(xy)
+        if residual01 and max(residual01) > float(policy.max_mesh_projection_residual01):
+            raise QualificationError(
+                f"DIRECTIONAL_EVALUATOR_MESH_PROJECTION_RESIDUAL:V{view_index}:{max(residual01)}"
+            )
+        rest = np.asarray(rest_rows, dtype=np.float64)
+
     faces = []
     for face in component.mesh.faces:
         if len(face) != 3 or any(vertex_id not in vertex_index for vertex_id in face):
@@ -104,7 +141,7 @@ def _mesh_rest_from_surface(component, surface, view_index: int, binding, policy
         faces.append(tuple(vertex_index[vertex_id] for vertex_id in face))
     if not faces:
         raise QualificationError("DIRECTIONAL_EVALUATOR_EMPTY_MESH")
-    return np.asarray(rest, dtype=np.float64), tuple(faces), max(residual01, default=0.0)
+    return rest, tuple(faces), max(residual01, default=0.0)
 
 
 def _weights(component, skeleton):
@@ -273,6 +310,7 @@ def evaluate_clip_to_qualification_bake(product, plan, clip, binding: Directiona
     rest_by_mesh = {}
     triangles_by_mesh = {}
     render_order = {}
+    mesh_rest_authority_by_mesh = {}
     max_mesh_projection_residual01 = 0.0
     for direction in sorted(product.directional_renderables.directions, key=lambda d: int(d.view_index)):
         view = int(direction.view_index)
@@ -280,6 +318,11 @@ def evaluate_clip_to_qualification_bake(product, plan, clip, binding: Directiona
         for component in sorted(direction.components, key=lambda c: (int(c.setup_order), str(c.component_id))):
             mesh_id = f"V{view}:{component.component_id}"
             rest, faces, mesh_residual = _mesh_rest_from_surface(component, product.mechanical_state.surface, view, binding, policy)
+            external = isinstance(dict(getattr(component, "metadata", {}) or {}).get("external_render_support_qualification"), dict)
+            mesh_rest_authority_by_mesh[mesh_id] = (
+                "EXTERNAL_MESH_LINEAGE_HASH_BOUND_RASTER_XY"
+                if external else "CANONICAL_SURFACE_SUPPORT_TO_ADMITTED_TARGET_RASTER"
+            )
             max_mesh_projection_residual01 = max(max_mesh_projection_residual01, float(mesh_residual))
             joint_ids, weights = _weights(component, skeleton)
             component_rows.append((view, mesh_id, rest, faces, joint_ids, weights))
@@ -342,7 +385,8 @@ def evaluate_clip_to_qualification_bake(product, plan, clip, binding: Directiona
             "evaluator_policy_hash": policy.policy_hash,
             "operation_scope": policy.operation_scope,
             "mechanical_xy_used_as_raster_xy": False,
-            "mesh_rest_authority": "SURFACE_SUPPORT_BINDING_TO_ADMITTED_TARGET_RASTER",
+            "mesh_rest_authority": "PER_MESH_TYPED_AUTHORITY",
+            "mesh_rest_authority_by_mesh": dict(sorted(mesh_rest_authority_by_mesh.items())),
             "joint_pivot_authority": "QUALIFIED_AFFINE_P_TO_RASTER_BINDING",
             "max_mesh_projection_residual01": max_mesh_projection_residual01,
             "order_visibility_semantics": "DEFAULT_COMPONENT_STATE_ONLY",

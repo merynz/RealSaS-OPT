@@ -25,7 +25,7 @@ on:
       - 'tests/product/test_motion_historical_locomotion_v1.py'
       - 'tests/product/test_motion_loop_semantics_v1.py'
       - 'tests/product/test_motion_secondary_corrective_recovery_v1.py'
-      - 'tests/product/test_external_directional_motion_evaluator_v1.py'
+      - 'tests/product/test_external_directional_motion_rest_v1.py'
       - 'tests/product/test_external_render_support_v1.py'
       - 'tests/product/test_appearance_atlas_v1.py'
       - '.github/workflows/mage_product_source_freeze.yml'
@@ -89,6 +89,6 @@ jobs:
             tests/product/test_motion_historical_locomotion_v1.py \
             tests/product/test_motion_loop_semantics_v1.py \
             tests/product/test_motion_secondary_corrective_recovery_v1.py \
-            tests/product/test_external_directional_motion_evaluator_v1.py \
+            tests/product/test_external_directional_motion_rest_v1.py \
             tests/product/test_external_render_support_v1.py \
             tests/product/test_appearance_atlas_v1.py

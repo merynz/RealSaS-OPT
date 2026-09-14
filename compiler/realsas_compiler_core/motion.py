@@ -4,6 +4,7 @@ import math
 
 from .hashing import content_sha256
 from .types import QualificationError
+from .semantic_joint_roles import infer_humanoid_joint_roles
 from .v4 import build_joint_track, build_motion_state, validate_motion_against_mechanical
 from .v4_types import JointTransformKeyIR, MotionClipIR
 
@@ -104,96 +105,17 @@ def build_deterministic_preset_motion(
     return state
 
 
-def _children(joints):
-    by_id = {j.canonical_joint_id: j for j in joints}
-    out = {jid: [] for jid in by_id}
-    for joint in joints:
-        parent = joint.parent_canonical_id
-        if parent is not None:
-            if parent not in by_id:
-                raise QualificationError("MAGE_PRESET_PARENT_JOINT_MISSING")
-            out[parent].append(joint.canonical_joint_id)
-    for rows in out.values():
-        rows.sort()
-    return out, by_id
-
-
-def _chain_from(start, children):
-    chain = [start]
-    current = start
-    while len(children[current]) == 1:
-        current = children[current][0]
-        chain.append(current)
-    return tuple(chain)
-
-
 def _infer_mage_topology(mechanical):
-    """Infer Mage control roles from canonical topology/rest geometry only."""
-    joints = tuple(mechanical.skeleton.joints)
-    if len(joints) < 7:
-        raise QualificationError("MAGE_PRESET_REQUIRES_HUMANOID_TOPOLOGY")
-    children, by_id = _children(joints)
-    roots = tuple(j.canonical_joint_id for j in joints if j.parent_canonical_id is None)
-    declared = tuple(getattr(mechanical.skeleton, "deform_root_ids", ()))
-    root_candidates = tuple(x for x in declared if x in by_id) or roots
-    if len(root_candidates) != 1:
-        raise QualificationError("MAGE_PRESET_REQUIRES_SINGLE_DEFORM_ROOT")
-    root = root_candidates[0]
-    root_pos = by_id[root].position
-    root_children = tuple(children[root])
-    if len(root_children) < 3:
-        raise QualificationError("MAGE_PRESET_REQUIRES_SPINE_AND_TWO_LEGS")
-
-    def central_up_score(jid):
-        p = by_id[jid].position
-        dz = float(p[2]) - float(root_pos[2])
-        return (0 if dz > 0.0 else 1, abs(float(p[0]) - float(root_pos[0])), -dz, jid)
-
-    spine_start = min(root_children, key=central_up_score)
-    if float(by_id[spine_start].position[2]) <= float(root_pos[2]):
-        raise QualificationError("MAGE_PRESET_CANNOT_INFER_UPWARD_SPINE")
-    legs = sorted(
-        (jid for jid in root_children if jid != spine_start),
-        key=lambda jid: (float(by_id[jid].position[0]), jid),
-    )
-    if len(legs) < 2:
-        raise QualificationError("MAGE_PRESET_REQUIRES_TWO_LEG_BRANCHES")
-    legs = legs[:2]
-
-    spine = [spine_start]
-    current = spine_start
-    while len(children[current]) == 1:
-        nxt = children[current][0]
-        if float(by_id[nxt].position[2]) <= float(by_id[current].position[2]):
-            break
-        spine.append(nxt)
-        current = nxt
-    chest = spine[-1]
-    chest_children = tuple(children[chest])
-    if len(chest_children) < 3:
-        raise QualificationError("MAGE_PRESET_REQUIRES_HEAD_AND_TWO_ARM_BRANCHES")
-    chest_pos = by_id[chest].position
-    head = min(
-        chest_children,
-        key=lambda jid: (
-            abs(float(by_id[jid].position[0]) - float(chest_pos[0])),
-            -float(by_id[jid].position[2]), jid,
-        ),
-    )
-    arms = sorted(
-        (jid for jid in chest_children if jid != head),
-        key=lambda jid: (float(by_id[jid].position[0]), jid),
-    )
-    if len(arms) < 2:
-        raise QualificationError("MAGE_PRESET_REQUIRES_TWO_ARM_BRANCHES")
-    arms = arms[:2]
+    """Use the same canonical topology-role authority as component assembly."""
+    binding = infer_humanoid_joint_roles(mechanical.skeleton)
+    by_id = {j.canonical_joint_id: j for j in mechanical.skeleton.joints}
     return {
-        "root": root,
-        "spine": tuple(spine),
-        "chest": chest,
-        "head": head,
-        "legs": tuple(_chain_from(jid, children) for jid in legs),
-        "arms": tuple(_chain_from(jid, children) for jid in arms),
+        "root": binding.root_joint_id,
+        "spine": binding.spine_chain,
+        "chest": binding.chest_joint_id,
+        "head": binding.head_joint_id,
+        "legs": (binding.left_leg_chain, binding.right_leg_chain),
+        "arms": (binding.left_arm_chain, binding.right_arm_chain),
     }, by_id
 
 
@@ -315,35 +237,36 @@ def build_mage_topology_preset_motion(mechanical, *, sample_count: int = 17):
         ))
         for jid in sorted(by_id):
             keys = tuple(
-                JointTransformKeyIR(
-                    float(t), tuple(map(float, pose[jid][0])), float(pose[jid][1]),
-                    _IDENTITY_SCALE, 0.0,
-                )
-                for t, pose in zip(times, poses)
+                JointTransformKeyIR(float(time_sec), tuple(poses[index][jid][0]), float(poses[index][jid][1]), _IDENTITY_SCALE, 0.0)
+                for index, time_sec in enumerate(times)
             )
-            if _is_effective(keys):
-                tracks.append(build_joint_track(
-                    f"TRACK:{clip_id}:{jid}", clip_id, jid, keys,
-                    metadata={
-                        "producer": "RealSaS.MotionCompiler.MageTopologyPreset.v1",
-                        "topology_role_inference": True,
-                        "authored_joint_name_dependency": False,
-                        "frame0_identity_authored": True,
-                        "loop_closure_identity_authored": True,
-                    },
-                ))
+            tracks.append(build_joint_track(
+                "TRACK:" + content_sha256({"clip": clip_id, "joint": jid})[:16],
+                clip_id, jid, keys,
+                metadata={
+                    "intent": kind.upper(), "effective": bool(_is_effective(keys)),
+                    "topology_inferred_role": next(
+                        (name for name, value in role_payload.items()
+                         if value == jid or (isinstance(value, list) and jid in value)
+                         or (isinstance(value, list) and value and isinstance(value[0], list) and any(jid in row for row in value))),
+                        "passive",
+                    ),
+                },
+            ))
     state = build_motion_state(
         tuple(clips), tuple(tracks),
         metadata={
             "producer": "RealSaS.MotionCompiler.MageTopologyPreset.v1",
-            "preset_family": "MAGE_FIT1_IDLE_RUN",
+            "motion_authority": "CURRENT_QUALIFIED_TOPOLOGY_REST_GEOMETRY",
             "authored_joint_names_used": False,
             "historical_mesh_authority_used": False,
             "historical_weight_authority_used": False,
-            "frame0_identity_authored": True,
-            "loop_closure_identity_authored": True,
-            "roles": role_payload,
+            "full_3d_motion_authority": False,
+            "topology_roles": role_payload,
         },
     )
     validate_motion_against_mechanical(state, mechanical)
     return state
+
+
+__all__ = ["build_deterministic_preset_motion", "build_mage_topology_preset_motion"]

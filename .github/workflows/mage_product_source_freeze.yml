@@ -6,6 +6,7 @@ on:
       - 'product/mage-fit1-demo-fulfillment-20260914'
     paths:
       - 'compiler/realsas_compiler_core/motion_rotation_only.py'
+      - 'compiler/realsas_compiler_core/motion_quality.py'
       - 'compiler/realsas_compiler_core/appearance_atlas.py'
       - 'compiler/realsas_compiler_core/mesh/rigid_attachment_skin.py'
       - 'compiler/realsas_compiler_core/render_support.py'
@@ -15,6 +16,7 @@ on:
       - 'experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_v1.py'
       - 'tests/product/test_mage_rotation_only_qualified_motion_v1.py'
+      - 'tests/product/test_motion_quality_recovery_v1.py'
       - 'tests/product/test_external_directional_motion_evaluator_v1.py'
       - 'tests/product/test_external_render_support_v1.py'
       - 'tests/product/test_appearance_atlas_v1.py'
@@ -39,6 +41,7 @@ jobs:
         run: |
           python -m py_compile \
             compiler/realsas_compiler_core/motion_rotation_only.py \
+            compiler/realsas_compiler_core/motion_quality.py \
             compiler/realsas_compiler_core/appearance_atlas.py \
             compiler/realsas_compiler_core/mesh/rigid_attachment_skin.py \
             compiler/realsas_compiler_core/render_support.py \
@@ -52,6 +55,7 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
         run: |
           python - <<'PY'
+          import compiler.realsas_compiler_core.motion_quality
           import experiments.mage_demo_fit1_v5_p1.materialize_p1q_current_authority_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_runtime_foreground_atlas_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_component_assembly_v1
@@ -64,6 +68,7 @@ jobs:
         run: |
           python -m pytest -q \
             tests/product/test_mage_rotation_only_qualified_motion_v1.py \
+            tests/product/test_motion_quality_recovery_v1.py \
             tests/product/test_external_directional_motion_evaluator_v1.py \
             tests/product/test_external_render_support_v1.py \
             tests/product/test_appearance_atlas_v1.py

@@ -1,0 +1,73 @@
+{
+  "schema": "RealSaS.MageArachneFIT2Closure.v1",
+  "date": "2026-09-14",
+  "status": "PASS__FRESH_FIT2_ARACHNE_COMPILER_QUALIFIED",
+  "claim_scope": {
+    "same_mage_fit2_skin": true,
+    "generalization_claimed": false,
+    "mesh_pass_claimed": false,
+    "motion_pass_claimed": false,
+    "product_pass_claimed": false
+  },
+  "authority": {
+    "surface_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
+    "tensorization_hash": "fe351362e195164805cebb0f63b74d1861ef123458b20ac56607016e00a6c67e",
+    "surface_nodes": 8171,
+    "surface_relations": 23656,
+    "skeleton_lineage_hash": "69f05e4fdef65f2cd86fed66503911210e1dbc7212ad017d69bf3dcb7b0896a1",
+    "skin_lineage_hash": "eb96b398282e4e25cd6df662e7a02e8ff1afe881818127190979bddd2f6c4006"
+  },
+  "science": {
+    "gsa_row_l1_p95": 0.04829858643934101,
+    "legacy_deformation_ratio": 0.03616836294531822,
+    "articulated_deformation_ratio": 0.006029610522091389,
+    "teacher_projection_coverage": 0.8894872108677029,
+    "teacher_projection_coverage_is_scientific_gate": false,
+    "terminal_last3_science_gate": true,
+    "science_gate": true
+  },
+  "model": {
+    "architecture_id": "RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5",
+    "training_mode": "FRESH_FROM_SCRATCH__END_TO_END_V5_DIRECT_SIMPLEX",
+    "historical_checkpoint_loaded": false,
+    "old_950_surface_loaded": false,
+    "model_sha256": "8749843ee673f5c4b84b5d58a6285bd108e9867af5d87bd4afcf2a5e64d98353",
+    "field_tokens_sha256": "520d9fe3e2bb3ae7bbf5fbf12ef05777db17eeae8db63e599e4c9b9470d79ec6"
+  },
+  "terminal_numeric_requalification": {
+    "reason": "The direct-simplex FP32 rows were scientifically valid but cumulative numeric normalization correction exceeded the fixed 1e-4 Compiler aggregate budget by 3.911099608584e-8.",
+    "original_compiler_error": "QualificationError('skin aggregate correction exceeds bounded repair budget:0.00010003911099608584')",
+    "original_result_status": "FIT2_ARACHNE_SCIENTIFIC_NON_CLOSURE",
+    "original_result_sha256": "39f344ae5dd842d11e7e8418ec6c38d41dfb21d275d08ec02831d2cd269a828c",
+    "gate_relaxation": false,
+    "retraining": false,
+    "semantic_weight_repair": false,
+    "canonicalization": "FLOAT64_ROW_SUM_NORMALIZATION_V1",
+    "raw_simplex_max_abs_residual": 1.2699257589954271e-7,
+    "canonicalization_max_row_l1": 1.2699257592935536e-7,
+    "canonicalization_total_l1": 0.00015688397023981652,
+    "canonical_simplex_max_abs_residual": 6.661338147750939e-16,
+    "compiler_total_correction_l1": 7.038233876223257e-13,
+    "compiler_row_count": 8171,
+    "compiler_budgets_unchanged": true,
+    "qualified_skin_sha256": "722fdeb60fc32aa09e2296adbdc0e589de0379bfd49f6239f214330517f01ddd",
+    "canonical_weights_sha256": "c5bdb807f28b87cd472e808b6dc4594ef881db4418fdd873887a8bbcc0fa14ab",
+    "requalification_report_sha256": "d84386b7bcfc34cfc47262dd6b2f0f3c43ae063e39dbd9e41e2a7e515471f35d"
+  },
+  "drive_artifacts": {
+    "qualified_skin": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/MAIN/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json",
+    "canonical_weights": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/MAIN/ARACHNE_FIT2_CANONICAL_SKIN_WEIGHTS_F64_FIX2.npz",
+    "product_handoff": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/MAIN/ARACHNE_FIT2_PRODUCT_HANDOFF_FIX2.json",
+    "final_seal": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/MAIN/ARACHNE_FIT2_FINAL_SEAL_FIX2.json",
+    "requalification_report": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/MAIN/ARACHNE_FIT2_COMPILER_REQUALIFICATION_FIX2.json",
+    "qualified_skeleton": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/PREFLIGHT/FINAL_QUALIFIED_SKELETON_IR.json",
+    "qualified_skeleton_sha256": "319ae46d94450d97dd6f40f21d571ac9432968104e7a517af00ace442d05b9fe"
+  },
+  "next": {
+    "active_product_branch": "product/mage-fit1-demo-fulfillment-20260914",
+    "treatment": "REPLACE_HISTORICAL_FIT1_SKIN_MECHANICAL_SEAM_WITH_FRESH_FIT2_S_G_W",
+    "binding_rule": "SURFACE_SUPPORT_CONVEX_TRANSFER_V1",
+    "causal_test": "RERUN_SAME_DYNAMIC_MOTION_PROOF_AND_COMPARE_PRIOR_CATASTROPHIC_DEFORMATION",
+    "product_pass_claimed": false
+  }
+}

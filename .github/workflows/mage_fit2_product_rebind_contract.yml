@@ -13,7 +13,12 @@ on:
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v3_motion_engine.py'
       - 'compiler/realsas_compiler_core/mesh/mwb2_skin.py'
+      - 'compiler/realsas_compiler_core/render_support.py'
       - 'tests/compiler/test_mesh_supported_steiner_v1.py'
+      - 'tests/product/test_component_attachment_v1.py'
+      - 'tests/product/test_external_render_support_v1.py'
+      - 'tests/product/test_external_render_support_surface_support_v1.py'
+      - 'tests/product/test_mage_topology_motion_deformation_v1.py'
       - '.github/workflows/mage_fit2_product_rebind_contract.yml'
 
 permissions:
@@ -52,7 +57,9 @@ jobs:
             experiments/mage_demo_fit1_v5_p1/materialize_p1q_fit2_current_authority_v1.py \
             experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_v1.py \
             experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v1.py \
-            experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v3_motion_engine.py
+            experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v3_motion_engine.py \
+            compiler/realsas_compiler_core/mesh/mwb2_skin.py \
+            compiler/realsas_compiler_core/render_support.py
 
       - name: Import FIT2 product rebind modules
         run: |
@@ -63,14 +70,20 @@ jobs:
           import experiments.mage_demo_fit1_v5_p1.materialize_component_assembly_fit2_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_v3_motion_engine
+          from compiler.realsas_compiler_core.mesh.mwb2_skin import SURFACE_SUPPORT_CONVEX_TRANSFER_METHOD
+          import compiler.realsas_compiler_core.render_support
+          assert SURFACE_SUPPORT_CONVEX_TRANSFER_METHOD == 'SURFACE_SUPPORT_CONVEX_TRANSFER_V1'
           print('FIT2_PRODUCT_REBIND_IMPORT_PASS')
           PY
 
       - name: Prove support-derived mesh skin contract
         run: python3 -m pytest -q tests/compiler/test_mesh_supported_steiner_v1.py
 
-      - name: Preserve component attachment contract
-        run: python3 -m pytest -q tests/compiler/test_component_attachment_v2.py
+      - name: Preserve active component attachment contract
+        run: python3 -m pytest -q tests/product/test_component_attachment_v1.py
+
+      - name: Prove external render support accepts and replay-verifies fresh FIT2 convex skin
+        run: python3 -m pytest -q tests/product/test_external_render_support_v1.py tests/product/test_external_render_support_surface_support_v1.py
 
       - name: Preserve motion deformation contract
         run: python3 -m pytest -q tests/product/test_mage_topology_motion_deformation_v1.py

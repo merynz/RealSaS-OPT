@@ -1,6 +1,13 @@
 from __future__ import annotations
 
-"""Evaluator-independent measurements over qualification-owned 2D frame bakes."""
+"""Evaluator-independent measurements over qualification-owned 2D frame bakes.
+
+Loop closure and return-to-rest are distinct invariants. Historical probe clips
+used both, but professional cyclic locomotion may intentionally start/end on a
+non-rest planted pose. The frozen numerical return-to-rest threshold is preserved;
+its applicability is now an explicit policy bit instead of being silently imposed
+on every loop clip.
+"""
 
 import numpy as np
 
@@ -9,6 +16,7 @@ RESTORED_V05_POLICY_V1 = {
     "max_area_change_ratio": 2.10,
     "max_loop_seam_error01": 0.025,
     "max_return_to_rest_error01": 0.025,
+    "require_return_to_rest": True,
     "min_motion01": 1.0e-4,
     "max_flipped_triangles": 0,
 }
@@ -49,10 +57,18 @@ def measure_motion_bake_geometry(bake) -> dict:
 
 def evaluate_motion_bake_metrics(measurements: dict, *, policy: dict | None = None) -> dict:
     p={**RESTORED_V05_POLICY_V1, **dict(policy or {})}; failures=[]
+    if not isinstance(p.get("require_return_to_rest"), bool):
+        raise ValueError("motion metric policy require_return_to_rest must be bool")
     if measurements["max_edge_stretch_ratio"]>float(p["max_edge_stretch_ratio"]): failures.append("bounded_edge_stretch")
     if measurements["max_area_change_ratio"]>float(p["max_area_change_ratio"]): failures.append("bounded_area_change")
     if int(measurements["flipped_triangles"])>int(p["max_flipped_triangles"]): failures.append("no_triangle_flip")
     if measurements["loop_seam_error01"]>float(p["max_loop_seam_error01"]): failures.append("loop_seam")
-    if measurements["return_to_rest_error01"]>float(p["max_return_to_rest_error01"]): failures.append("return_to_rest")
+    if bool(p["require_return_to_rest"]) and measurements["return_to_rest_error01"]>float(p["max_return_to_rest_error01"]): failures.append("return_to_rest")
     if measurements["max_motion01"]<float(p["min_motion01"]): failures.append("required_mobility")
-    return {**measurements,"policy":p,"failure_invariants":failures,"passed":not failures}
+    return {
+        **measurements,
+        "policy":p,
+        "return_to_rest_evaluated":bool(p["require_return_to_rest"]),
+        "failure_invariants":failures,
+        "passed":not failures,
+    }

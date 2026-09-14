@@ -96,12 +96,6 @@ def build_mage_rotation_only_qualified_motion(mechanical, *, sample_count: int =
                 "producer": PRODUCER,
                 "operation_scope": OPERATION_SCOPE,
                 "translation_policy": "ZERO_ALL_JOINT_TRANSLATION_XY",
-                "source_track_id": str(track.track_id),
-                "source_track_hash": str(track.track_hash),
-                "source_translation_discarded": any(
-                    tuple(map(float, key.translation_xy)) != (0.0, 0.0)
-                    for key in track.keys
-                ),
             },
         )
         projected_by_clip.setdefault(str(track.clip_id), []).append(projected)
@@ -123,12 +117,17 @@ def build_mage_rotation_only_qualified_motion(mechanical, *, sample_count: int =
             duration_sec=float(clip.duration_sec),
             loop=bool(clip.loop),
             metadata={
-                **dict(clip.metadata or {}),
+                "intent": "IDLE" if str(clip.clip_id) == "mage_fit1_idle_v2" else "RUN",
+                "display_name": "Idle" if str(clip.clip_id) == "mage_fit1_idle_v2" else "Run",
                 "spec_hash": payload_hash,
                 "qualified_operation_scope": OPERATION_SCOPE,
                 "translation_policy": "ZERO_ALL_JOINT_TRANSLATION_XY",
                 "nonzero_translation_authored": False,
-                "source_clip_payload_hash": str(clip.clip_payload_hash),
+                "semantic_joint_names_used": False,
+                "historical_mesh_authority_used": False,
+                "historical_weight_authority_used": False,
+                "frame0_identity_authored": True,
+                "loop_closure_identity_authored": True,
             },
         ))
         tracks.extend(clip_tracks)
@@ -137,13 +136,17 @@ def build_mage_rotation_only_qualified_motion(mechanical, *, sample_count: int =
         tuple(clips),
         tuple(tracks),
         metadata={
-            **dict(base.metadata or {}),
             "producer": PRODUCER,
+            "preset_family": "MAGE_FIT1_IDLE_RUN_ROTATION_ONLY_QUALIFIED",
             "qualified_operation_scope": OPERATION_SCOPE,
             "translation_policy": "ZERO_ALL_JOINT_TRANSLATION_XY",
             "nonzero_translation_authored": False,
             "source_motion_projection": "ARTICULATED_ROTATION_CURVES_PRESERVED_TRANSLATION_ZEROED",
-            "source_motion_state_hash_diagnostic_only": str(base.motion_state_hash),
+            "authored_joint_names_used": False,
+            "historical_mesh_authority_used": False,
+            "historical_weight_authority_used": False,
+            "frame0_identity_authored": True,
+            "loop_closure_identity_authored": True,
         },
     )
     validate_motion_against_mechanical(state, mechanical)

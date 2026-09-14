@@ -7,18 +7,23 @@ on:
     paths:
       - 'compiler/realsas_compiler_core/motion_rotation_only.py'
       - 'compiler/realsas_compiler_core/motion_quality.py'
+      - 'compiler/realsas_compiler_core/motion_locomotion.py'
       - 'compiler/realsas_compiler_core/motion_secondary.py'
       - 'compiler/realsas_compiler_core/motion_corrective.py'
       - 'compiler/realsas_compiler_core/appearance_atlas.py'
       - 'compiler/realsas_compiler_core/mesh/rigid_attachment_skin.py'
       - 'compiler/realsas_compiler_core/render_support.py'
       - 'compiler/realsas_compiler_services/proof/directional_motion_evaluator.py'
+      - 'compiler/realsas_compiler_services/proof/motion_frame_metrics.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_p1q_current_authority_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_runtime_foreground_atlas_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_v3_motion_engine.py'
       - 'tests/product/test_mage_rotation_only_qualified_motion_v1.py'
       - 'tests/product/test_motion_quality_recovery_v1.py'
+      - 'tests/product/test_motion_historical_locomotion_v1.py'
+      - 'tests/product/test_motion_loop_semantics_v1.py'
       - 'tests/product/test_motion_secondary_corrective_recovery_v1.py'
       - 'tests/product/test_external_directional_motion_evaluator_v1.py'
       - 'tests/product/test_external_render_support_v1.py'
@@ -45,28 +50,33 @@ jobs:
           python -m py_compile \
             compiler/realsas_compiler_core/motion_rotation_only.py \
             compiler/realsas_compiler_core/motion_quality.py \
+            compiler/realsas_compiler_core/motion_locomotion.py \
             compiler/realsas_compiler_core/motion_secondary.py \
             compiler/realsas_compiler_core/motion_corrective.py \
             compiler/realsas_compiler_core/appearance_atlas.py \
             compiler/realsas_compiler_core/mesh/rigid_attachment_skin.py \
             compiler/realsas_compiler_core/render_support.py \
             compiler/realsas_compiler_services/proof/directional_motion_evaluator.py \
+            compiler/realsas_compiler_services/proof/motion_frame_metrics.py \
             experiments/mage_demo_fit1_v5_p1/materialize_p1q_current_authority_v1.py \
             experiments/mage_demo_fit1_v5_p1/materialize_runtime_foreground_atlas_v1.py \
             experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_v1.py \
-            experiments/mage_demo_fit1_v5_p1/materialize_product_state_v1.py
+            experiments/mage_demo_fit1_v5_p1/materialize_product_state_v1.py \
+            experiments/mage_demo_fit1_v5_p1/materialize_product_state_v3_motion_engine.py
       - name: Import notebook stage modules
         env:
           PYTHONPATH: ${{ github.workspace }}
         run: |
           python - <<'PY'
           import compiler.realsas_compiler_core.motion_quality
+          import compiler.realsas_compiler_core.motion_locomotion
           import compiler.realsas_compiler_core.motion_secondary
           import compiler.realsas_compiler_core.motion_corrective
           import experiments.mage_demo_fit1_v5_p1.materialize_p1q_current_authority_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_runtime_foreground_atlas_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_component_assembly_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_product_state_v1
+          import experiments.mage_demo_fit1_v5_p1.materialize_product_state_v3_motion_engine
           print('MAGE_PRODUCT_STAGE_IMPORT_PASS')
           PY
       - name: Run source freeze regressions
@@ -76,6 +86,8 @@ jobs:
           python -m pytest -q \
             tests/product/test_mage_rotation_only_qualified_motion_v1.py \
             tests/product/test_motion_quality_recovery_v1.py \
+            tests/product/test_motion_historical_locomotion_v1.py \
+            tests/product/test_motion_loop_semantics_v1.py \
             tests/product/test_motion_secondary_corrective_recovery_v1.py \
             tests/product/test_external_directional_motion_evaluator_v1.py \
             tests/product/test_external_render_support_v1.py \

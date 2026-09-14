@@ -19,6 +19,7 @@ on:
       - 'compiler/realsas_compiler_core/motion_rotation_only.py'
       - 'compiler/realsas_compiler_core/mesh/quality.py'
       - 'compiler/realsas_compiler_core/mesh/face_subset_repair.py'
+      - 'compiler/realsas_compiler_services/proof/directional_motion_evaluator.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_p1_b2_g10_current_authority_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/run_v5_direct_p1_current_authority_binding_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/build_source_component_owner_raster_v1.py'
@@ -29,6 +30,7 @@ on:
       - 'tests/product/test_semantic_joint_roles_v1.py'
       - 'tests/product/test_mage_topology_motion_deformation_v1.py'
       - 'tests/product/test_mage_rotation_only_qualified_motion_v1.py'
+      - 'tests/product/test_external_directional_motion_rest_v1.py'
       - '.github/workflows/external_render_continuity_contract.yml'
   push:
     branches:
@@ -44,6 +46,7 @@ on:
       - 'compiler/realsas_compiler_core/motion_rotation_only.py'
       - 'compiler/realsas_compiler_core/mesh/quality.py'
       - 'compiler/realsas_compiler_core/mesh/face_subset_repair.py'
+      - 'compiler/realsas_compiler_services/proof/directional_motion_evaluator.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_p1_b2_g10_current_authority_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/run_v5_direct_p1_current_authority_binding_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/build_source_component_owner_raster_v1.py'
@@ -54,6 +57,7 @@ on:
       - 'tests/product/test_semantic_joint_roles_v1.py'
       - 'tests/product/test_mage_topology_motion_deformation_v1.py'
       - 'tests/product/test_mage_rotation_only_qualified_motion_v1.py'
+      - 'tests/product/test_external_directional_motion_rest_v1.py'
       - '.github/workflows/external_render_continuity_contract.yml'
 
 permissions:
@@ -83,6 +87,7 @@ jobs:
             compiler/realsas_compiler_core/motion_rotation_only.py \
             compiler/realsas_compiler_core/mesh/quality.py \
             compiler/realsas_compiler_core/mesh/face_subset_repair.py \
+            compiler/realsas_compiler_services/proof/directional_motion_evaluator.py \
             experiments/mage_demo_fit1_v5_p1/materialize_p1_b2_g10_current_authority_v1.py \
             experiments/mage_demo_fit1_v5_p1/run_v5_direct_p1_current_authority_binding_v1.py \
             experiments/mage_demo_fit1_v5_p1/build_source_component_owner_raster_v1.py
@@ -97,4 +102,5 @@ jobs:
             tests/product/test_face_subset_repair_v1.py \
             tests/product/test_semantic_joint_roles_v1.py \
             tests/product/test_mage_topology_motion_deformation_v1.py \
-            tests/product/test_mage_rotation_only_qualified_motion_v1.py
+            tests/product/test_mage_rotation_only_qualified_motion_v1.py \
+            tests/product/test_external_directional_motion_rest_v1.py

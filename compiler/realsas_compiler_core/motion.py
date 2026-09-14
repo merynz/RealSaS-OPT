@@ -237,36 +237,35 @@ def build_mage_topology_preset_motion(mechanical, *, sample_count: int = 17):
         ))
         for jid in sorted(by_id):
             keys = tuple(
-                JointTransformKeyIR(float(time_sec), tuple(poses[index][jid][0]), float(poses[index][jid][1]), _IDENTITY_SCALE, 0.0)
-                for index, time_sec in enumerate(times)
+                JointTransformKeyIR(
+                    float(t), tuple(map(float, pose[jid][0])), float(pose[jid][1]),
+                    _IDENTITY_SCALE, 0.0,
+                )
+                for t, pose in zip(times, poses)
             )
-            tracks.append(build_joint_track(
-                "TRACK:" + content_sha256({"clip": clip_id, "joint": jid})[:16],
-                clip_id, jid, keys,
-                metadata={
-                    "intent": kind.upper(), "effective": bool(_is_effective(keys)),
-                    "topology_inferred_role": next(
-                        (name for name, value in role_payload.items()
-                         if value == jid or (isinstance(value, list) and jid in value)
-                         or (isinstance(value, list) and value and isinstance(value[0], list) and any(jid in row for row in value))),
-                        "passive",
-                    ),
-                },
-            ))
+            if _is_effective(keys):
+                tracks.append(build_joint_track(
+                    f"TRACK:{clip_id}:{jid}", clip_id, jid, keys,
+                    metadata={
+                        "producer": "RealSaS.MotionCompiler.MageTopologyPreset.v1",
+                        "topology_role_inference": True,
+                        "authored_joint_name_dependency": False,
+                        "frame0_identity_authored": True,
+                        "loop_closure_identity_authored": True,
+                    },
+                ))
     state = build_motion_state(
         tuple(clips), tuple(tracks),
         metadata={
             "producer": "RealSaS.MotionCompiler.MageTopologyPreset.v1",
-            "motion_authority": "CURRENT_QUALIFIED_TOPOLOGY_REST_GEOMETRY",
+            "preset_family": "MAGE_FIT1_IDLE_RUN",
             "authored_joint_names_used": False,
             "historical_mesh_authority_used": False,
             "historical_weight_authority_used": False,
-            "full_3d_motion_authority": False,
-            "topology_roles": role_payload,
+            "frame0_identity_authored": True,
+            "loop_closure_identity_authored": True,
+            "roles": role_payload,
         },
     )
     validate_motion_against_mechanical(state, mechanical)
     return state
-
-
-__all__ = ["build_deterministic_preset_motion", "build_mage_topology_preset_motion"]

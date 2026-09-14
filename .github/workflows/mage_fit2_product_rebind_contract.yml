@@ -1,0 +1,98 @@
+name: Mage FIT2 Product Rebind Contract
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - product/mage-fit1-demo-fulfillment-20260914
+    paths:
+      - 'experiments/mage_demo_fit1_v5_p1/fit2_current_authority_io.py'
+      - 'experiments/mage_demo_fit1_v5_p1/materialize_fit2_p1_skin_binding_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/materialize_p1q_fit2_current_authority_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v3_motion_engine.py'
+      - 'compiler/realsas_compiler_core/mesh/mwb2_skin.py'
+      - 'tests/compiler/test_mesh_supported_steiner_v1.py'
+      - '.github/workflows/mage_fit2_product_rebind_contract.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mage-fit2-product-rebind-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fit2-product-rebind-contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - name: Checkout exact pushed commit
+        uses: actions/checkout@v4
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install contract dependencies
+        run: python3 -m pip install --disable-pip-version-check -q pytest numpy pillow scikit-image
+
+      - name: Compile FIT2 product rebind sources
+        run: |
+          python3 -m py_compile \
+            experiments/mage_demo_fit1_v5_p1/fit2_current_authority_io.py \
+            experiments/mage_demo_fit1_v5_p1/materialize_fit2_p1_skin_binding_v1.py \
+            experiments/mage_demo_fit1_v5_p1/materialize_p1q_fit2_current_authority_v1.py \
+            experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_v1.py \
+            experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v1.py \
+            experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v3_motion_engine.py
+
+      - name: Import FIT2 product rebind modules
+        run: |
+          python3 - <<'PY'
+          import experiments.mage_demo_fit1_v5_p1.fit2_current_authority_io
+          import experiments.mage_demo_fit1_v5_p1.materialize_fit2_p1_skin_binding_v1
+          import experiments.mage_demo_fit1_v5_p1.materialize_p1q_fit2_current_authority_v1
+          import experiments.mage_demo_fit1_v5_p1.materialize_component_assembly_fit2_v1
+          import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_v1
+          import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_v3_motion_engine
+          print('FIT2_PRODUCT_REBIND_IMPORT_PASS')
+          PY
+
+      - name: Prove support-derived mesh skin contract
+        run: python3 -m pytest -q tests/compiler/test_mesh_supported_steiner_v1.py
+
+      - name: Preserve component attachment contract
+        run: python3 -m pytest -q tests/compiler/test_component_attachment_v2.py
+
+      - name: Preserve motion deformation contract
+        run: python3 -m pytest -q tests/product/test_mage_topology_motion_deformation_v1.py
+
+      - name: Static authority firewall
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          files = [
+              Path('experiments/mage_demo_fit1_v5_p1/materialize_fit2_p1_skin_binding_v1.py'),
+              Path('experiments/mage_demo_fit1_v5_p1/materialize_p1q_fit2_current_authority_v1.py'),
+              Path('experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_v1.py'),
+              Path('experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v1.py'),
+          ]
+          joined='\n'.join(p.read_text(encoding='utf-8') for p in files)
+          forbidden = [
+              'MAGE_V5_EXACT_QUALIFIED_SKIN_IR.json',
+              'MAGE_FIT1_EXACT_QUALIFIED_SKIN_IR.json',
+              'FIT1V5DirectP1CurrentAuthorityBinding',
+          ]
+          hit=[x for x in forbidden if x in joined]
+          if hit:
+              raise SystemExit('FIT2_AUTHORITY_FIREWALL_FAIL:'+repr(hit))
+          print('FIT2_AUTHORITY_FIREWALL_PASS')
+          PY

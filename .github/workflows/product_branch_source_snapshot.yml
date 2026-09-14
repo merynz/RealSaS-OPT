@@ -1,3 +1,4 @@
+# Exact source snapshot for bounded Mage demo artifact execution.
 name: Product Branch Source Snapshot
 
 on:

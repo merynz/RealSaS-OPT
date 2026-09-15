@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import replace
 
 from compiler.realsas_compiler_core import proof_engine as v7
-from compiler.realsas_compiler_core.mesh_binding import mesh_lineage_hash
+from compiler.realsas_compiler_core.mesh.direct_model_skin import DIRECT_MODEL_TRANSFER_METHOD
+from compiler.realsas_compiler_core.mesh_binding import mesh_lineage_hash, mesh_skin_lineage_hash
 from compiler.realsas_compiler_core.motion import build_deterministic_preset_motion
 from compiler.realsas_compiler_core.product_external_render import (
     assemble_product_v3_with_external_render_support,
@@ -18,33 +19,162 @@ from compiler.realsas_compiler_core.proof_mesh_authority_v8 import (
     measure_mesh_quality,
     rebind_failed_mesh_domain,
 )
+from compiler.realsas_compiler_core.types import (
+    QualifiedEditableMeshIR,
+    QualifiedJoint,
+    QualifiedMeshSkinIR,
+    QualifiedMeshSkinRow,
+    QualifiedMeshVertex,
+    QualifiedSkinIR,
+    QualifiedSkinRow,
+    RiggingSurfaceIR,
+    SurfaceNode,
+    SurfaceSupportBinding,
+)
 from compiler.realsas_compiler_core.v4 import (
     bind_domain_proof,
     bind_measurement_report,
     bind_product_proof_bundle,
     bind_proof_plan,
+    build_appearance_binding,
     build_capability_contract,
+    build_mechanical_state,
+    qualified_skeleton_v2_lineage_hash,
 )
-from compiler.realsas_compiler_core.v4_types import CapabilityRequirement
-from tests.product.test_external_render_support_v1 import (
-    _appearance,
-    _mechanical,
-    _p1_mesh,
-    _p1_skin,
+from compiler.realsas_compiler_core.v4_types import (
+    AppearanceCornerBinding,
+    CapabilityRequirement,
+    QualifiedSkeletonIRV2,
 )
+
+
+def _mechanical():
+    surface = RiggingSurfaceIR(
+        (
+            SurfaceNode(
+                "FIT2:S0", (0.0, 0.0, 0.0), (0,), ("fixture",), (),
+                raster_bindings=((0, (10.0, 10.0)),),
+            ),
+            SurfaceNode(
+                "FIT2:S1", (0.3, 0.0, 0.0), (0,), ("fixture",), (),
+                raster_bindings=((0, (20.0, 10.0)),),
+            ),
+        ),
+        geometry_lineage_hash="FIT2:SCIENTIFIC:S",
+    )
+    skeleton = QualifiedSkeletonIRV2(
+        (
+            QualifiedJoint("J:ROOT", (0.0, 0.0, 0.0), None),
+            QualifiedJoint("J:ARM", (0.3, 0.0, 0.0), "J:ROOT"),
+        ),
+        ("J:ROOT",),
+        {},
+        {"status": "PASS"},
+        "",
+    )
+    skeleton = replace(
+        skeleton,
+        skeleton_lineage_hash=qualified_skeleton_v2_lineage_hash(skeleton),
+    )
+    skin = QualifiedSkinIR(
+        (
+            QualifiedSkinRow("FIT2:S0", (("J:ROOT", 1.0),), 0.0, 0.0),
+            QualifiedSkinRow("FIT2:S1", (("J:ARM", 1.0),), 0.0, 0.0),
+        ),
+        surface.geometry_lineage_hash,
+        skeleton.skeleton_lineage_hash,
+        {"status": "PASS"},
+        "FIT2:SOURCE:SKIN",
+    )
+    return build_mechanical_state(surface, skeleton, skin)
 
 
 def _collapsed_support_mesh(view: int, *, raster_degenerate: bool = False):
-    """External render triangle valid in raster space but collapsed in support P."""
-    mesh = _p1_mesh(view)
-    vertices = list(mesh.vertices)
-    third = vertices[2]
-    metadata = dict(third.metadata)
-    if raster_degenerate:
-        metadata["raster_xy"] = (15.0, 10.0)
-    vertices[2] = replace(third, P=(0.15, 0.0, 0.0), metadata=metadata)
-    mesh = replace(mesh, vertices=tuple(vertices), mesh_lineage_hash="")
+    raster_third = (15.0, 10.0) if raster_degenerate else (15.0, 20.0)
+    vertices = (
+        QualifiedMeshVertex(
+            "MV:0", (0.0, 0.0, 0.0),
+            SurfaceSupportBinding("LOCAL_CONVEX_INTERPOLATION", (("P:S0", 1.0),)),
+            metadata={"raster_xy": (10.0, 10.0)},
+        ),
+        QualifiedMeshVertex(
+            "MV:1", (0.3, 0.0, 0.0),
+            SurfaceSupportBinding("LOCAL_CONVEX_INTERPOLATION", (("P:S1", 1.0),)),
+            metadata={"raster_xy": (20.0, 10.0)},
+        ),
+        QualifiedMeshVertex(
+            "MV:2", (0.15, 0.0, 0.0),
+            SurfaceSupportBinding("LOCAL_CONVEX_INTERPOLATION", (("P:S2", 1.0),)),
+            metadata={"raster_xy": raster_third},
+        ),
+    )
+    mesh = QualifiedEditableMeshIR(
+        vertices,
+        (("MV:0", "MV:1", "MV:2"),),
+        (("MV:0", "MV:1"), ("MV:1", "MV:2"), ("MV:2", "MV:0")),
+        "EXTERNAL:RENDER:SUPPORT",
+        int(view),
+        f"CAM:{view}",
+        {"status": "PASS_EXTERNAL_SUPPORT"},
+        "",
+        support_coverage_classification="P1_FULL_SUBJECT",
+    )
     return replace(mesh, mesh_lineage_hash=mesh_lineage_hash(mesh))
+
+
+def _mesh_skin(mechanical, mesh):
+    rows = (
+        QualifiedMeshSkinRow(
+            "MV:0", (("J:ROOT", 1.0),), (("P:S0", 1.0),), 0.0, 0.0,
+        ),
+        QualifiedMeshSkinRow(
+            "MV:1", (("J:ARM", 1.0),), (("P:S1", 1.0),), 0.0, 0.0,
+        ),
+        QualifiedMeshSkinRow(
+            "MV:2", (("J:ROOT", 0.5), ("J:ARM", 0.5)),
+            (("P:S2", 1.0),), 0.0, 0.0,
+        ),
+    )
+    value = QualifiedMeshSkinIR(
+        rows,
+        mesh.surface_binding_hash,
+        mechanical.skeleton.skeleton_lineage_hash,
+        mechanical.skin.skin_lineage_hash,
+        mesh.mesh_lineage_hash,
+        DIRECT_MODEL_TRANSFER_METHOD,
+        {"status": "PASS_DIRECT_MODEL_EXACT_MESH_SKIN_QUALIFICATION"},
+        "",
+        metadata={
+            "direct_model_query": True,
+            "historical_weight_transfer_used": False,
+        },
+    )
+    return replace(value, mesh_skin_lineage_hash=mesh_skin_lineage_hash(value))
+
+
+def _appearance(mesh):
+    by_id = {v.canonical_mesh_vertex_id: v for v in mesh.vertices}
+    corners = []
+    for face_index, face in enumerate(mesh.faces):
+        for corner_index, vertex_id in enumerate(face):
+            xy = tuple(map(float, by_id[vertex_id].metadata["raster_xy"]))
+            corners.append(
+                AppearanceCornerBinding(
+                    face_index,
+                    corner_index,
+                    (xy[0] / 31.0, xy[1] / 31.0),
+                    int(mesh.view_index),
+                    xy,
+                    f"OBS:{mesh.view_index}",
+                    "OBSERVED_LOCAL",
+                )
+            )
+    return build_appearance_binding(
+        target_view_index=int(mesh.view_index),
+        mesh_binding_hash=mesh.mesh_lineage_hash,
+        camera_binding_hash=mesh.camera_binding_hash,
+        corner_bindings=tuple(corners),
+    )
 
 
 def _external_mesh_quality_product(*, raster_degenerate: bool = False):
@@ -52,7 +182,7 @@ def _external_mesh_quality_product(*, raster_degenerate: bool = False):
     directions = []
     for view in range(8):
         mesh = _collapsed_support_mesh(view, raster_degenerate=raster_degenerate)
-        mesh_skin = _p1_skin(mechanical, mesh)
+        mesh_skin = _mesh_skin(mechanical, mesh)
         component = build_external_renderable_component(
             component_id="BODY",
             view_index=view,
@@ -65,12 +195,14 @@ def _external_mesh_quality_product(*, raster_degenerate: bool = False):
             materialization_manifest_sha256="sha256:v8-raster-authority-fixture",
             direct_binding_manifest_sha256="sha256:v8-direct-binding-fixture",
         )
-        directions.append(build_external_directional_renderable(
-            view_index=view,
-            camera_binding_hash=mesh.camera_binding_hash,
-            components=(component,),
-            mechanical=mechanical,
-        ))
+        directions.append(
+            build_external_directional_renderable(
+                view_index=view,
+                camera_binding_hash=mesh.camera_binding_hash,
+                components=(component,),
+                mechanical=mechanical,
+            )
+        )
     render_set = build_external_directional_renderable_set(tuple(directions), mechanical)
     contract = build_capability_contract(
         "V8_MESH_AUTHORITY_TEST",
@@ -78,8 +210,8 @@ def _external_mesh_quality_product(*, raster_degenerate: bool = False):
             CapabilityRequirement(
                 "VISUAL_8_DIRECTION",
                 "REQUIRED",
-                "visual",
-                "policy",
+                "fixture-implementation",
+                "fixture-policy",
                 ("MESH_QUALITY",),
             ),
         ),

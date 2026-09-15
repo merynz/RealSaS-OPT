@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .anchor_unified import require_anchor_unified_topology
+from .anchor_unified import require_anchor_unified_topology as _require_anchor_unified_topology
 from .hashing import content_sha256
 from .mesh_binding import validate_qualified_mesh, validate_qualified_mesh_skin
 from .types import QualifiedMeshSkinIR, QualifiedMeshSkinRow, QualificationError
@@ -37,7 +37,7 @@ def bind_mwb2_mesh_skin(
     validate_qualified_mesh(mesh, surface)
     anchor_report = None
     if bool(require_anchor_unified_topology):
-        anchor_report = require_anchor_unified_topology(surface, mesh)
+        anchor_report = _require_anchor_unified_topology(surface, mesh)
     if skin.surface_binding_hash != surface.geometry_lineage_hash:
         raise QualificationError("MESH_WEIGHT_SKIN_LINEAGE_MISMATCH: surface")
     if skin.skeleton_binding_hash != skeleton.skeleton_lineage_hash:

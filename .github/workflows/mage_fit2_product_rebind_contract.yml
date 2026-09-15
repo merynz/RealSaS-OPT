@@ -10,10 +10,13 @@ on:
       - 'experiments/mage_demo_fit1_v5_p1/materialize_fit2_p1_skin_binding_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_fit2_anchor_unified_p1_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_fit2_dense_zero_surface_body_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/materialize_fit2_dense_zero_surface_body_v2_historical_motion.py'
       - 'experiments/mage_demo_fit1_v5_p1/seal_fit2_dense_zero_surface_body_binding_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/seal_fit2_dense_zero_surface_body_binding_v2_motion_bound.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_dense_v2.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_dense_v2.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_dense_v3_evidence_bound.py'
+      - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_dense_v4_motion_bound.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_p1q_fit2_current_authority_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v1.py'
@@ -26,6 +29,7 @@ on:
       - 'tests/compiler/test_dense_zero_surface_bridge_v1.py'
       - 'tests/compiler/test_mesh_supported_steiner_v1.py'
       - 'tests/product/test_dense_zero_surface_product_authority_v1.py'
+      - 'tests/product/test_dense_zero_surface_final_motion_binding_v1.py'
       - 'tests/product/test_component_attachment_v1.py'
       - 'tests/product/test_external_render_support_v1.py'
       - 'tests/product/test_external_render_support_surface_support_v1.py'
@@ -67,10 +71,13 @@ jobs:
             experiments/mage_demo_fit1_v5_p1/materialize_fit2_p1_skin_binding_v1.py \
             experiments/mage_demo_fit1_v5_p1/materialize_fit2_anchor_unified_p1_v1.py \
             experiments/mage_demo_fit1_v5_p1/materialize_fit2_dense_zero_surface_body_v1.py \
+            experiments/mage_demo_fit1_v5_p1/materialize_fit2_dense_zero_surface_body_v2_historical_motion.py \
             experiments/mage_demo_fit1_v5_p1/seal_fit2_dense_zero_surface_body_binding_v1.py \
+            experiments/mage_demo_fit1_v5_p1/seal_fit2_dense_zero_surface_body_binding_v2_motion_bound.py \
             experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_dense_v2.py \
             experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_dense_v2.py \
             experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_dense_v3_evidence_bound.py \
+            experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_dense_v4_motion_bound.py \
             experiments/mage_demo_fit1_v5_p1/materialize_p1q_fit2_current_authority_v1.py \
             experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_v1.py \
             experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v1.py \
@@ -87,10 +94,13 @@ jobs:
           import experiments.mage_demo_fit1_v5_p1.materialize_fit2_p1_skin_binding_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_fit2_anchor_unified_p1_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_fit2_dense_zero_surface_body_v1
+          import experiments.mage_demo_fit1_v5_p1.materialize_fit2_dense_zero_surface_body_v2_historical_motion
           import experiments.mage_demo_fit1_v5_p1.seal_fit2_dense_zero_surface_body_binding_v1
+          import experiments.mage_demo_fit1_v5_p1.seal_fit2_dense_zero_surface_body_binding_v2_motion_bound
           import experiments.mage_demo_fit1_v5_p1.materialize_component_assembly_fit2_dense_v2
           import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_dense_v2
           import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_dense_v3_evidence_bound
+          import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_dense_v4_motion_bound
           import experiments.mage_demo_fit1_v5_p1.materialize_p1q_fit2_current_authority_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_component_assembly_fit2_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_v1
@@ -114,6 +124,9 @@ jobs:
       - name: Prove dense product source authority and persisted binding evidence
         run: python3 -m pytest -q tests/product/test_dense_zero_surface_product_authority_v1.py
 
+      - name: Prove dense BODY and final product share the exact final motion authority
+        run: python3 -m pytest -q tests/product/test_dense_zero_surface_final_motion_binding_v1.py
+
       - name: Prove support-derived mesh skin contract
         run: python3 -m pytest -q tests/compiler/test_mesh_supported_steiner_v1.py
 
@@ -134,10 +147,13 @@ jobs:
               Path('experiments/mage_demo_fit1_v5_p1/materialize_fit2_p1_skin_binding_v1.py'),
               Path('experiments/mage_demo_fit1_v5_p1/materialize_fit2_anchor_unified_p1_v1.py'),
               Path('experiments/mage_demo_fit1_v5_p1/materialize_fit2_dense_zero_surface_body_v1.py'),
+              Path('experiments/mage_demo_fit1_v5_p1/materialize_fit2_dense_zero_surface_body_v2_historical_motion.py'),
               Path('experiments/mage_demo_fit1_v5_p1/seal_fit2_dense_zero_surface_body_binding_v1.py'),
+              Path('experiments/mage_demo_fit1_v5_p1/seal_fit2_dense_zero_surface_body_binding_v2_motion_bound.py'),
               Path('experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_dense_v2.py'),
               Path('experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_dense_v2.py'),
               Path('experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_dense_v3_evidence_bound.py'),
+              Path('experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_dense_v4_motion_bound.py'),
               Path('experiments/mage_demo_fit1_v5_p1/materialize_p1q_fit2_current_authority_v1.py'),
               Path('experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_v1.py'),
               Path('experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v1.py'),
@@ -153,13 +169,16 @@ jobs:
               raise SystemExit('FIT2_AUTHORITY_FIREWALL_FAIL:'+repr(hit))
           dense = '\n'.join(Path(p).read_text(encoding='utf-8') for p in [
               'experiments/mage_demo_fit1_v5_p1/materialize_fit2_dense_zero_surface_body_v1.py',
-              'experiments/mage_demo_fit1_v5_p1/seal_fit2_dense_zero_surface_body_binding_v1.py',
+              'experiments/mage_demo_fit1_v5_p1/materialize_fit2_dense_zero_surface_body_v2_historical_motion.py',
+              'experiments/mage_demo_fit1_v5_p1/seal_fit2_dense_zero_surface_body_binding_v2_motion_bound.py',
               'experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_dense_v2.py',
-              'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_dense_v3_evidence_bound.py',
+              'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_dense_v4_motion_bound.py',
           ])
           required = [
               'ZERO_SURFACE_COMPACTION_TOPOLOGY_V1',
-              'FIT2_DENSE_ZERO_SURFACE_BODY_BINDING_DERIVATION_MANIFEST.json',
+              'FIT2_DENSE_ZERO_SURFACE_BODY_BINDING_DERIVATION_V2_MANIFEST.json',
+              'HISTORICAL_PHASE_QUALITY_MOTION_STATE',
+              'dynamic_face_admission_motion_state_hash',
               'P1_or_P1Q_topology_used',
               'historical_weight_transfer_used',
           ]

@@ -36,6 +36,7 @@ SCHEMA = "RealSaS.MageFIT2.DenseProductState.v3.evidence_bound"
 PROFILE = "MAGE_FIT2_DENSE_BOUNDED_DEMO_V3_EVIDENCE_BOUND"
 DERIVATION_FILE = "FIT2_DENSE_ZERO_SURFACE_BODY_BINDING_DERIVATION_MANIFEST.json"
 DENSE_BODY_MANIFEST_FILE = "FIT2_DENSE_ZERO_SURFACE_BODY_MANIFEST.json"
+FOREGROUND_MANIFEST_FILE = "RUNTIME_FOREGROUND_ATLAS_MANIFEST.json"
 
 
 def _sha(path: Path) -> str:
@@ -77,13 +78,17 @@ def _load_derivation(args, state):
     for flag in ("topology_and_W_share_exact_compaction_address", "original_dense_zero_surface_faces_only"):
         if value.get(flag) is not True:
             raise RuntimeError(f"FIT2_DENSE_V3_DERIVATION_REQUIRED_TRUE_FLAG:{flag}")
-    for flag in ("new_adjacency_created", "P1_or_P1Q_topology_used", "source_or_teacher_mesh_topology_used", "historical_weight_transfer_used", "direct_model_query_used", "training_executed", "product_pass_claimed"):
+    for flag in (
+        "new_adjacency_created", "P1_or_P1Q_topology_used",
+        "source_or_teacher_mesh_topology_used", "historical_weight_transfer_used",
+        "direct_model_query_used", "training_executed", "product_pass_claimed",
+    ):
         if value.get(flag) is not False:
             raise RuntimeError(f"FIT2_DENSE_V3_DERIVATION_REQUIRED_FALSE_FLAG:{flag}")
     return value, body_sha, derivation_sha
 
 
-def _requalify_render_set(state, *, body_manifest_sha: str, derivation_sha: str):
+def _requalify_render_set(state, *, body_manifest_sha: str, derivation_sha: str, foreground_owner_sha: str):
     mechanical, assembly = state["mechanical"], state["assembly"]
     clean_directions, clean_underlays = [], []
     for direction in sorted(state["render_set"].directions, key=lambda d: int(d.view_index)):
@@ -129,6 +134,7 @@ def _requalify_render_set(state, *, body_manifest_sha: str, derivation_sha: str)
         ))
     if len(clean_underlays) != 8:
         raise RuntimeError("FIT2_DENSE_V3_REQUALIFIED_BODY_VIEW_SET_INCOMPLETE")
+
     render_set = build_external_directional_renderable_set(
         tuple(clean_directions), mechanical,
         metadata={
@@ -138,16 +144,12 @@ def _requalify_render_set(state, *, body_manifest_sha: str, derivation_sha: str)
             "fit2_skin_lineage_hash": state["skin"].skin_lineage_hash,
         },
     )
-    fg_owner = json.loads((Path(state["source_paths"]["foreground_manifest"])).read_text(encoding="utf-8"))["owner_manifest_sha256"] if "source_paths" in state else None
-    if not fg_owner:
-        # V2 exposes the foreground manifest SHA but not path; the caller supplies the same file path in args.
-        raise RuntimeError("FIT2_DENSE_V3_INTERNAL_FOREGROUND_OWNER_PATH_REQUIRED")
     underlay_rows = tuple(qualify_continuity_underlay(
         view_index=view,
         substrate_component=clean_underlays[view],
         mechanical=mechanical,
         component_assembly=assembly,
-        partition_authority_sha256=str(fg_owner),
+        partition_authority_sha256=str(foreground_owner_sha),
         metadata={
             "dense_zero_surface_topology": True,
             "binding_derivation_file_backed": True,
@@ -162,7 +164,7 @@ def _requalify_render_set(state, *, body_manifest_sha: str, derivation_sha: str)
     underlay_set = build_continuity_underlay_set(
         underlay_rows, component_assembly=assembly,
         metadata={
-            "partition_authority_sha256": str(fg_owner),
+            "partition_authority_sha256": str(foreground_owner_sha),
             "dense_zero_surface_topology": True,
             "binding_derivation_file_backed": True,
             "dense_binding_derivation_manifest_sha256": derivation_sha,
@@ -178,10 +180,17 @@ def _requalify_render_set(state, *, body_manifest_sha: str, derivation_sha: str)
 def build_final_state(args, *, persist: bool = True):
     # V2 is never persisted here; it is only an object constructor for exact sealed inputs.
     state = dense_v2.build_final_state(args, persist=False)
-    state["source_paths"] = {"foreground_manifest": str(Path(args.foreground_dir) / "RUNTIME_FOREGROUND_ATLAS_MANIFEST.json")}
     derivation, body_manifest_sha, derivation_sha = _load_derivation(args, state)
+    foreground_manifest_path = Path(args.foreground_dir) / FOREGROUND_MANIFEST_FILE
+    foreground_manifest = json.loads(foreground_manifest_path.read_text(encoding="utf-8"))
+    foreground_owner_sha = str(foreground_manifest.get("owner_manifest_sha256") or "")
+    if not foreground_owner_sha:
+        raise RuntimeError("FIT2_DENSE_V3_FOREGROUND_OWNER_AUTHORITY_MISSING")
     render_set, underlay_set = _requalify_render_set(
-        state, body_manifest_sha=body_manifest_sha, derivation_sha=derivation_sha
+        state,
+        body_manifest_sha=body_manifest_sha,
+        derivation_sha=derivation_sha,
+        foreground_owner_sha=foreground_owner_sha,
     )
 
     mechanical, surface, skeleton, skin = state["mechanical"], state["surface"], state["skeleton"], state["skin"]
@@ -259,7 +268,14 @@ def build_final_state(args, *, persist: bool = True):
             "corrective_deformation_unqualified_fail_closed": True,
         },
     )
-    state.update({"render_set": render_set, "underlay_set": underlay_set, "capability": capability, "product": product, "dense_derivation": derivation, "dense_derivation_sha256": derivation_sha})
+    state.update({
+        "render_set": render_set,
+        "underlay_set": underlay_set,
+        "capability": capability,
+        "product": product,
+        "dense_derivation": derivation,
+        "dense_derivation_sha256": derivation_sha,
+    })
 
     if persist:
         out = Path(args.output_dir); out.mkdir(parents=True, exist_ok=True)
@@ -304,9 +320,19 @@ def build_final_state(args, *, persist: bool = True):
 
 
 def parse_args():
-    p = dense_v2.parse_args()
+    p = argparse.ArgumentParser()
+    p.add_argument("--dense-body-dir", required=True)
     p.add_argument("--dense-derivation-dir", required=True)
-    return p
+    p.add_argument("--foreground-dir", required=True)
+    p.add_argument("--assembly-dir", required=True)
+    p.add_argument("--fit2-surface", required=True)
+    p.add_argument("--skeleton", required=True)
+    p.add_argument("--fit2-skin", required=True)
+    p.add_argument("--expected-dense-body-manifest", default="")
+    p.add_argument("--expected-foreground-manifest", default="")
+    p.add_argument("--expected-assembly-manifest", default="")
+    p.add_argument("--output-dir", required=True)
+    return p.parse_args()
 
 
 if __name__ == "__main__":

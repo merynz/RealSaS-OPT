@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-"""Seal dense BODY topology/W derivation and bind it to the final motion authority.
+"""Seal dense BODY topology/W derivation and bind final motion + mesh-quality authority.
 
-V1 proved the exact dense-zero-surface -> current GSA -> fresh FIT2 W derivation.
+V1 proves the exact dense-zero-surface -> current GSA -> fresh FIT2 W derivation.
 V2 additionally proves that every persisted dynamic face witness was qualified against
-the same historical phase-quality motion_state_hash that the final product consumes.
+the same historical phase-quality motion_state_hash consumed by the final product and
+that every final directional BODY mesh passed the frozen product raster-quality policy.
 No training, model query, topology generation, weight repair or threshold relaxation
 occurs in this stage. This stage does not claim PRODUCT_PASS.
 """
@@ -13,6 +14,8 @@ import argparse
 from hashlib import sha256
 import json
 from pathlib import Path
+
+from compiler.realsas_compiler_core.mesh.quality import FIT2_PRODUCT_MESH_QUALITY_POLICY_V1
 
 import experiments.mage_demo_fit1_v5_p1.seal_fit2_dense_zero_surface_body_binding_v1 as v1
 
@@ -48,9 +51,23 @@ def _artifact_sha_map(manifest: dict) -> dict[str, str]:
     return rows
 
 
+def _validate_static_quality_report(view: int, report: dict) -> None:
+    policy = FIT2_PRODUCT_MESH_QUALITY_POLICY_V1
+    if int(report.get("degenerate_faces", -1)) > policy.max_degenerate_faces:
+        raise RuntimeError(f"DENSE_DERIVATION_V2_DEGENERATE_FACE_DRIFT_V{view}")
+    if int(report.get("duplicate_faces", -1)) > policy.max_duplicate_faces:
+        raise RuntimeError(f"DENSE_DERIVATION_V2_DUPLICATE_FACE_DRIFT_V{view}")
+    if int(report.get("nonmanifold_edges", -1)) > policy.max_nonmanifold_edges:
+        raise RuntimeError(f"DENSE_DERIVATION_V2_NONMANIFOLD_EDGE_DRIFT_V{view}")
+    if float(report.get("min_raster_triangle_angle_deg", -1.0)) < policy.min_raster_triangle_angle_deg - 1e-12:
+        raise RuntimeError(f"DENSE_DERIVATION_V2_MIN_ANGLE_DRIFT_V{view}")
+    if float(report.get("max_raster_triangle_aspect_ratio", float("inf"))) > policy.max_raster_triangle_aspect_ratio + 1e-12:
+        raise RuntimeError(f"DENSE_DERIVATION_V2_MAX_ASPECT_DRIFT_V{view}")
+
+
 def run(args) -> dict:
-    # Re-run the evidence-only V1 seal so the base derivation is freshly validated
-    # against the exact files that V2 is about to bind to the motion witnesses.
+    # Re-run the evidence-only V1 seal so the exact topology/W derivation is freshly
+    # validated against the files V2 is about to bind to motion + static-quality proof.
     base = v1.run(args)["derivation"]
 
     body_dir = Path(args.dense_body_dir)
@@ -65,6 +82,16 @@ def run(args) -> dict:
         raise RuntimeError("DENSE_DERIVATION_V2_MOTION_AUTHORITY_DRIFT")
     if body.get("historical_motion_engine_recovered") is not True:
         raise RuntimeError("DENSE_DERIVATION_V2_HISTORICAL_MOTION_FLAG_MISSING")
+    if body.get("static_product_mesh_quality_gate_applied") is not True:
+        raise RuntimeError("DENSE_DERIVATION_V2_STATIC_MESH_QUALITY_GATE_MISSING")
+    if body.get("static_product_mesh_quality_all_views_passed") is not True:
+        raise RuntimeError("DENSE_DERIVATION_V2_STATIC_MESH_QUALITY_NOT_ALL_PASS")
+    if body.get("threshold_relaxation_used") is not False:
+        raise RuntimeError("DENSE_DERIVATION_V2_THRESHOLD_RELAXATION_FORBIDDEN")
+
+    body_static_policy = dict(body.get("static_product_mesh_quality_policy") or {})
+    if body_static_policy != FIT2_PRODUCT_MESH_QUALITY_POLICY_V1.to_dict():
+        raise RuntimeError("DENSE_DERIVATION_V2_STATIC_MESH_QUALITY_POLICY_DRIFT")
 
     policy = dict(body.get("policy") or {})
     edge_limit = float(policy.get("edge_stretch_limit", -1.0))
@@ -79,9 +106,11 @@ def run(args) -> dict:
         raise RuntimeError("DENSE_DERIVATION_V2_REQUIRES_8_VIEWS")
 
     witness_rows = []
+    mesh_quality_rows = []
     for view in range(8):
         row = views[view]
         files = dict(row.get("files") or {})
+
         dynamic_name = str(files.get("dynamic") or "")
         if not dynamic_name:
             raise RuntimeError(f"DENSE_DERIVATION_V2_DYNAMIC_FILE_MISSING_V{view}")
@@ -117,6 +146,39 @@ def run(args) -> dict:
             "selected_triangle_flip_count": int(witness["selected_triangle_flip_count"]),
         })
 
+        quality_name = str(files.get("mesh_quality") or "")
+        if not quality_name:
+            raise RuntimeError(f"DENSE_DERIVATION_V2_MESH_QUALITY_FILE_MISSING_V{view}")
+        quality_path = body_dir / quality_name
+        quality_sha = _sha(quality_path)
+        if artifacts.get(quality_name) != quality_sha:
+            raise RuntimeError(f"DENSE_DERIVATION_V2_MESH_QUALITY_FILE_SHA_DRIFT_V{view}")
+        quality = json.loads(quality_path.read_text(encoding="utf-8"))
+        if int(quality.get("view", -1)) != view:
+            raise RuntimeError(f"DENSE_DERIVATION_V2_MESH_QUALITY_VIEW_DRIFT_V{view}")
+        if quality.get("passed") is not True or tuple(quality.get("failure_invariants") or ()):
+            raise RuntimeError(f"DENSE_DERIVATION_V2_MESH_QUALITY_WITNESS_FAIL_V{view}")
+        if str(quality.get("mesh_lineage_hash") or "") != str(row.get("mesh_lineage_hash") or ""):
+            raise RuntimeError(f"DENSE_DERIVATION_V2_MESH_QUALITY_MESH_DRIFT_V{view}")
+        if dict(quality.get("policy") or {}) != FIT2_PRODUCT_MESH_QUALITY_POLICY_V1.to_dict():
+            raise RuntimeError(f"DENSE_DERIVATION_V2_MESH_QUALITY_POLICY_DRIFT_V{view}")
+        report = dict(quality.get("report") or {})
+        _validate_static_quality_report(view, report)
+        row_quality = dict(row.get("product_mesh_quality") or {})
+        if row_quality != quality:
+            raise RuntimeError(f"DENSE_DERIVATION_V2_MESH_QUALITY_INLINE_WITNESS_DRIFT_V{view}")
+        mesh_quality_rows.append({
+            "view": view,
+            "mesh_quality_witness_file": quality_name,
+            "mesh_quality_witness_file_sha256": quality_sha,
+            "mesh_lineage_hash": str(row["mesh_lineage_hash"]),
+            "min_raster_triangle_angle_deg": float(report["min_raster_triangle_angle_deg"]),
+            "max_raster_triangle_aspect_ratio": float(report["max_raster_triangle_aspect_ratio"]),
+            "degenerate_faces": int(report["degenerate_faces"]),
+            "duplicate_faces": int(report["duplicate_faces"]),
+            "nonmanifold_edges": int(report["nonmanifold_edges"]),
+        })
+
     derivation = {
         **base,
         "schema": SCHEMA,
@@ -126,6 +188,10 @@ def run(args) -> dict:
         "dynamic_motion_authority": EXPECTED_MOTION_AUTHORITY,
         "historical_motion_engine_recovered": True,
         "dynamic_witnesses": witness_rows,
+        "product_mesh_quality_policy": FIT2_PRODUCT_MESH_QUALITY_POLICY_V1.to_dict(),
+        "product_mesh_quality_witnesses": mesh_quality_rows,
+        "static_product_mesh_quality_all_views_passed": True,
+        "topology_W_motion_and_mesh_quality_share_one_persisted_authority_chain": True,
         "topology_W_and_motion_share_one_persisted_authority_chain": True,
         "product_pass_claimed": False,
     }
@@ -142,6 +208,7 @@ def run(args) -> dict:
         "source_dense_body_manifest_sha256": body_sha,
         "motion_state_hash": motion_hash,
         "dynamic_motion_authority": EXPECTED_MOTION_AUTHORITY,
+        "static_product_mesh_quality_all_views_passed": True,
         "surface_lineage_hash": derivation["surface_lineage_hash"],
         "skeleton_lineage_hash": derivation["skeleton_lineage_hash"],
         "skin_lineage_hash": derivation["skin_lineage_hash"],

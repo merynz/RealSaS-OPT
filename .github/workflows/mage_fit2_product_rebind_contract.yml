@@ -8,12 +8,15 @@ on:
     paths:
       - 'experiments/mage_demo_fit1_v5_p1/fit2_current_authority_io.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_fit2_p1_skin_binding_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/materialize_fit2_anchor_unified_p1_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_p1q_fit2_current_authority_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v3_motion_engine.py'
+      - 'compiler/realsas_compiler_core/mesh/anchor_unified.py'
       - 'compiler/realsas_compiler_core/mesh/mwb2_skin.py'
       - 'compiler/realsas_compiler_core/render_support.py'
+      - 'tests/compiler/test_anchor_unified_skin_topology_v1.py'
       - 'tests/compiler/test_mesh_supported_steiner_v1.py'
       - 'tests/product/test_component_attachment_v1.py'
       - 'tests/product/test_external_render_support_v1.py'
@@ -47,17 +50,19 @@ jobs:
           python-version: '3.11'
 
       - name: Install contract dependencies
-        run: python3 -m pip install --disable-pip-version-check -q pytest numpy pillow scikit-image
+        run: python3 -m pip install --disable-pip-version-check -q pytest numpy scipy pillow scikit-image
 
       - name: Compile FIT2 product rebind sources
         run: |
           python3 -m py_compile \
             experiments/mage_demo_fit1_v5_p1/fit2_current_authority_io.py \
             experiments/mage_demo_fit1_v5_p1/materialize_fit2_p1_skin_binding_v1.py \
+            experiments/mage_demo_fit1_v5_p1/materialize_fit2_anchor_unified_p1_v1.py \
             experiments/mage_demo_fit1_v5_p1/materialize_p1q_fit2_current_authority_v1.py \
             experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_v1.py \
             experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v1.py \
             experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v3_motion_engine.py \
+            compiler/realsas_compiler_core/mesh/anchor_unified.py \
             compiler/realsas_compiler_core/mesh/mwb2_skin.py \
             compiler/realsas_compiler_core/render_support.py
 
@@ -66,15 +71,21 @@ jobs:
           python3 - <<'PY'
           import experiments.mage_demo_fit1_v5_p1.fit2_current_authority_io
           import experiments.mage_demo_fit1_v5_p1.materialize_fit2_p1_skin_binding_v1
+          import experiments.mage_demo_fit1_v5_p1.materialize_fit2_anchor_unified_p1_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_p1q_fit2_current_authority_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_component_assembly_fit2_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_v1
           import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_v3_motion_engine
+          from compiler.realsas_compiler_core.mesh.anchor_unified import ANCHOR_UNIFIED_TOPOLOGY_METHOD
           from compiler.realsas_compiler_core.mesh.mwb2_skin import SURFACE_SUPPORT_CONVEX_TRANSFER_METHOD
           import compiler.realsas_compiler_core.render_support
+          assert ANCHOR_UNIFIED_TOPOLOGY_METHOD == 'GSA_VIEW_COMMON_ANCHOR_TOPOLOGY_V1'
           assert SURFACE_SUPPORT_CONVEX_TRANSFER_METHOD == 'SURFACE_SUPPORT_CONVEX_TRANSFER_V1'
           print('FIT2_PRODUCT_REBIND_IMPORT_PASS')
           PY
+
+      - name: Prove common-anchor topology and skin bridge
+        run: python3 -m pytest -q tests/compiler/test_anchor_unified_skin_topology_v1.py
 
       - name: Prove support-derived mesh skin contract
         run: python3 -m pytest -q tests/compiler/test_mesh_supported_steiner_v1.py
@@ -94,6 +105,7 @@ jobs:
           from pathlib import Path
           files = [
               Path('experiments/mage_demo_fit1_v5_p1/materialize_fit2_p1_skin_binding_v1.py'),
+              Path('experiments/mage_demo_fit1_v5_p1/materialize_fit2_anchor_unified_p1_v1.py'),
               Path('experiments/mage_demo_fit1_v5_p1/materialize_p1q_fit2_current_authority_v1.py'),
               Path('experiments/mage_demo_fit1_v5_p1/materialize_component_assembly_fit2_v1.py'),
               Path('experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v1.py'),

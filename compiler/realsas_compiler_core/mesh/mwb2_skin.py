@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from .anchor_unified import require_anchor_unified_topology
 from .hashing import content_sha256
 from .mesh_binding import validate_qualified_mesh, validate_qualified_mesh_skin
 from .types import QualifiedMeshSkinIR, QualifiedMeshSkinRow, QualificationError
@@ -17,6 +18,7 @@ def bind_mwb2_mesh_skin(
     *,
     max_transfer_repair_l1: float = _MESH_SKIN_TRANSFER_REPAIR_L1,
     max_total_transfer_correction_l1: float = _MESH_SKIN_TRANSFER_REPAIR_L1,
+    require_anchor_unified_topology: bool = False,
 ) -> QualifiedMeshSkinIR:
     """Bind exact mesh rows from qualified surface skin through admitted support coefficients.
 
@@ -24,10 +26,18 @@ def bind_mwb2_mesh_skin(
     not a historical cross-substrate transfer.  Each mesh vertex already owns a
     qualified SurfaceSupportBinding against ``surface``; weights are the exact convex
     combination of the current QualifiedSkinIR rows referenced by that binding.
+
+    When ``require_anchor_unified_topology`` is true, every mesh face must also be
+    licensed by one safe relation-supported GSA parent triangle.  That closes the
+    historical seam where view-space topology and support-derived W were individually
+    valid but were allowed to meet only after independent construction.
     """
     if max_transfer_repair_l1 < 0.0 or max_total_transfer_correction_l1 < 0.0:
         raise ValueError("mesh-skin transfer repair budgets must be nonnegative")
     validate_qualified_mesh(mesh, surface)
+    anchor_report = None
+    if bool(require_anchor_unified_topology):
+        anchor_report = require_anchor_unified_topology(surface, mesh)
     if skin.surface_binding_hash != surface.geometry_lineage_hash:
         raise QualificationError("MESH_WEIGHT_SKIN_LINEAGE_MISMATCH: surface")
     if skin.skeleton_binding_hash != skeleton.skeleton_lineage_hash:
@@ -88,6 +98,9 @@ def bind_mwb2_mesh_skin(
         "bounded_transfer_repair_l1_per_row": max_transfer_repair_l1,
         "bounded_transfer_correction_l1_total": max_total_transfer_correction_l1,
         "silent_normalization_forbidden": True,
+        "anchor_unified_topology_required": bool(require_anchor_unified_topology),
+        "anchor_unified_topology_passed": bool(anchor_report and anchor_report.get("passed")),
+        "anchor_unified_topology_method": "" if anchor_report is None else str(anchor_report.get("method", "")),
     }
     value = QualifiedMeshSkinIR(
         tuple(rows),
@@ -105,6 +118,8 @@ def bind_mwb2_mesh_skin(
             "direct_model_query": False,
             "historical_weight_transfer_used": False,
             "semantic_skin_synthesis": False,
+            "anchor_unified_topology": bool(anchor_report and anchor_report.get("passed")),
+            "anchor_unified_topology_method": "" if anchor_report is None else str(anchor_report.get("method", "")),
         },
     )
     payload = value.to_dict()

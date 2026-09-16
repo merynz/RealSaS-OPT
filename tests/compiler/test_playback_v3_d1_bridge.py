@@ -76,11 +76,18 @@ def _build(**kwargs):
 
 def test_d1_dense_lbs_and_runtime_xyz_depth_come_from_same_posed_3d_surface():
     runtime_clip, report = _build()
-    rest = np.asarray(runtime_clip.frames[0].posed_xyz_by_mesh["V0:body_attachment"])
-    posed = np.asarray(runtime_clip.frames[1].posed_xyz_by_mesh["V0:body_attachment"])
+    rest_payload = runtime_clip.frames[0].posed_xyz_by_mesh["V0:body_attachment"]
+    posed_payload = runtime_clip.frames[1].posed_xyz_by_mesh["V0:body_attachment"]
+    assert isinstance(rest_payload, np.ndarray)
+    assert rest_payload.dtype == np.float32
+    assert rest_payload.flags.c_contiguous
+    assert posed_payload.dtype == np.float32
+    assert posed_payload.flags.c_contiguous
+    rest = np.asarray(rest_payload)
+    posed = np.asarray(posed_payload)
     # canonical [1,0,0] -> [0,0,-1] under +90deg Y rotation.
-    assert rest[0] == pytest.approx([3.0, 2.0, 10.0], abs=1e-12)
-    assert posed[0] == pytest.approx([2.0, 2.0, 9.0], abs=1e-12)
+    assert rest[0] == pytest.approx([3.0, 2.0, 10.0], abs=1e-6)
+    assert posed[0] == pytest.approx([2.0, 2.0, 9.0], abs=1e-6)
     assert report.frame_count == 2
     assert report.vertex_count == 3
     assert report.max_weight_row_sum_error <= 1e-12

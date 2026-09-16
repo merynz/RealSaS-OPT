@@ -93,8 +93,6 @@ Implementation parity is not semantic-motion truth.
 
 ### R0 — Runtime visibility contract
 
-R0 must close before D2 product rendering.
-
 - full-surface geometry survives compilation;
 - posed per-vertex depth is available to runtime/reference renderer;
 - deformable BODY self-occlusion uses depth test, not mesh draw order;
@@ -108,7 +106,7 @@ R0 must close before D2 product rendering.
 
 The C++ reference renderer owns product raster conformance. Notebook/nvdiffrast and UI preview are diagnostic implementations and must conform to the same contract.
 
-Locked fields include:
+Locked fields:
 
 - half-integer pixel center;
 - top-left triangle fill rule;
@@ -117,8 +115,8 @@ Locked fields include:
 - clamp-to-edge;
 - sRGB RGBA8;
 - straight alpha + source-over;
-- posed camera-forward depth;
-- deterministic depth tie rule;
+- posed camera-forward depth, smaller is nearer;
+- deterministic semantic depth tie rule;
 - explicit winding/culling policy;
 - no per-frame affine fit.
 
@@ -140,7 +138,8 @@ R2-A audit can proceed before D2; R2-B final atlas baking follows posed visibili
 - bake density is quality-controlled (initial product target: sufficiently dense playback, expected ~30 fps or error-adaptive equivalent);
 - avoid visible chord shortening/jitter from sparse vertex lerp;
 - loop position and velocity continuity are qualified;
-- crossfade semantics must preserve visibility/composition correctness.
+- crossfade semantics must preserve visibility/composition correctness;
+- clipping interval transport exists in runtime-v3, but native clipping/stencil execution is **not yet qualified** and must fail closed.
 
 ### R4 — End-to-end product skeleton
 
@@ -166,27 +165,67 @@ Runtime-v2/no-depth may be exercised only as `STRUCTURAL_SMOKE_ONLY`; it cannot 
 
 1. `compiler/realsas_compiler_core/playback_runtime_v3.py`
    - generic typed runtime-v3 contract;
+   - per-view mesh variants for logical attachments;
    - full-surface/depth requirements;
    - slots, attachments, clipping intervals;
    - face/patch appearance provenance;
    - explicit current completion prohibition;
    - deterministic R1 raster contract.
-2. `tests/compiler/test_playback_runtime_v3_contract_v1.py`
+2. `compiler/realsas_compiler_services/export/runtime_v3.py`
+   - `.rss`/`.rsr` v3 writer;
+   - rest `XYZUV`;
+   - posed per-frame `XYZ`;
+   - per-view meshes, slot draw order, active attachments and clipping interval transport;
+   - source/proof/contract hashes and render-capability manifest.
+3. `runtime/realsas_cpp/src/reference_raster_v3.h`
+   - half-pixel/top-left coverage;
+   - winding-independent barycentric identity;
+   - posed-depth compare;
+   - semantic equal-depth tie;
+   - explicit depth-write/cutout policy.
+4. `runtime/realsas_cpp/src/runtime_v3_reference.{h,cpp}`
+   - native v3 binary/ZIP reader;
+   - binary and texture CRC validation;
+   - slot/active-attachment playback;
+   - XYZ interpolation;
+   - posed depth-buffer reference raster;
+   - clipping fail-closed until native clipping qualification.
+5. `runtime/realsas_cpp/examples/realsas_runtime_v3_demo.cpp`
+   - real `.rss v3 -> native C++ -> PNG` executable.
+6. `runtime/realsas_cpp/tests/runtime_v3_writer_native_e2e.py`
+   - exact production writer -> native reader/renderer test;
+   - adverse painter order witness requires near/green surface to win by depth.
+7. `tests/compiler/test_playback_runtime_v3_contract_v1.py`
    - fail-closed contract tests.
-3. `experiments/playback_stack_v1/run_runtime_reference_e2e_v1.py`
+8. `experiments/playback_stack_v1/run_runtime_reference_e2e_v1.py`
    - generic `.rss -> native C++ renderer -> PNG` R4 probe;
    - runtime-v2 is explicitly structural smoke only.
 
+## Execution evidence recorded on 2026-09-16
+
+- `R1_NATIVE_REFERENCE_TRANSLATION_UNIT_COMPILE = PASS` under local GCC C++17 with libarchive/libpng/zlib.
+- `R1_NATIVE_REFERENCE_LINK = PASS`.
+- `R1_SYNTHETIC_POSED_DEPTH_BEHAVIOR = PASS`.
+  - synthetic v3 package intentionally submitted the near/green surface before the far/red surface;
+  - a painter-only renderer would end red;
+  - native output pixel was exactly `(0,255,0,255)`;
+  - therefore posed depth, not submission order, owned the result.
+- `R4_SYNTHETIC_RUNTIME_V3_NATIVE_DEPTH_E2E = PASS`.
+- `R4_REAL_PRODUCT_V3_E2E = OPEN`.
+- `R3_NATIVE_CLIPPING = OPEN_FAIL_CLOSED`.
+- `FOUNDER_VISUAL_PASS = FALSE`.
+
+The synthetic E2E proves the format/parser/depth-render execution path. It does **not** promote Mage or any subject to product visual pass.
+
 ## Immediate next coding order
 
-1. Finish R1 native C++ depth/raster conformance primitive and tests.
-2. Add runtime binary/package v3 schema carrying posed `z`, slot/attachment composition and explicit visibility policy while retaining v1/v2 read compatibility.
-3. Implement C++ v3 depth renderer and v3 exporter.
-4. Implement D1 generic FK/LBS/projection qualification and persist per-view joint trajectories.
-5. Wire the first real TEST_SUBJECT_001 package through R4.
-6. Run R2-A appearance/under-rigid audit with `UNSEEN` unfilled.
-7. Implement D2 D-spine using the frozen D1/R0/R1 contracts.
-8. R2-B atlas bake, R3 playback qualification, then Founder Visual Pass.
+1. Implement native Spine-class clipping interval/stencil semantics and conformance tests (`R3_NATIVE_CLIPPING`).
+2. Implement the **real product -> runtime-v3 projector** from current proof-owned full-surface/appearance/motion authority; no selected-face fallback.
+3. Wire TEST_SUBJECT_001 through `.rss v3 -> realsas_runtime_v3_demo -> V0..V7 PNG` and inspect real output.
+4. Implement D1 generic FK/LBS/projection qualification and persist per-view joint trajectories where current motion authority still lacks canonical 3D posed depth.
+5. Run R2-A appearance/under-rigid audit with `UNSEEN` unfilled.
+6. Implement D2 D-spine using the frozen D1/R0/R1 contracts.
+7. R2-B atlas bake, R3 playback density/crossfade qualification, then Founder Visual Pass.
 
 ## PASS language rule
 

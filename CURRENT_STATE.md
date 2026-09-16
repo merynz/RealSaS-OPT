@@ -1,47 +1,92 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-09-13  
-**Repository continuation branch:** `main`  
-**Canonical executable FIT2 branch:** `fit2/mage-full-subject-reclosure`  
-**Status:** `FIT2_AUTHORITY_CLEAN__GEPPETTO_PASS__ARACHNE_AUTHORIZED_NEXT__MESH_CLOSED_FAIL_NONBLOCKING__PRODUCTIZATION_AFTER_ARACHNE`
+**Date:** 2026-09-16  
+**Repository continuation branch:** `playback-stack-v1-20260916`  
+**Parent product baseline:** `product/mage-fit1-demo-fulfillment-20260914` @ `e60ea9129f5576f3965f7e1b6b3d54d2e1437fe2`  
+**Scientific FIT2 authority remains:** `fit2/mage-full-subject-reclosure`  
+**Product goal:** `AUTOMATIC_8_DIRECTION_SPINE_CLASS_PUPPET_PLAYBACK`  
+**Status:** `MESH_RIG_SKIN_AVAILABLE__PLAYBACK_STACK_ACTIVE__D0_CLOSED_PASS__D1_R0_R1_R4_IN_PROGRESS__FOUNDER_VISUAL_PASS_FALSE`
 
 ## Read first
 
-1. `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json`
-2. `canonical/FIT2_AUTHORITY_HYGIENE_20260913.md`
+1. `canonical/PLAYBACK_STACK_V1_20260916.md` — current playback/runtime continuation authority.
+2. `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` — corrected FIT2 scientific execution authority.
 3. `canonical/CONTEXT_STATE_V2.json`
-4. `canonical/EXPERIMENT_REGISTRY_V3.json`
-5. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V2.md`
-6. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V2.md`
-7. `canonical/BRANCH_AUTHORITY_V2.md`
+4. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V2.md`
+5. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V2.md`
+6. `canonical/BRANCH_AUTHORITY_V2.md`
 
 ## One-line state
 
-`FIT1 remains historical scoped evidence on the superseded ~950-node lineage. The corrected same-Mage FIT2 lineage is now the sole current scientific execution authority: H1/GSA8192 are closed, fresh Geppetto FIT2 is terminal PASS, fresh Arachne FIT2 is authorized and next, the latest mesh experiment is a real high-coverage/high-precision FAIL that does not block Arachne, and productization restoration remains a separate third workstream after Arachne.`
+`Mesh, rig and skin no longer define product completion. RealSaS is now explicitly closing the generic post-rig Puppet Playback Stack: canonical 3D motion, 3D->2D deformation/projection, full-surface depth visibility, Spine-class slot/draw-order/clipping composition, source-provenance appearance, quality-controlled playback, native .rss runtime and C++ reference rendering. Mage is TEST_SUBJECT_001 only; FIT8/FITK/unseen must use the same contracts.`
 
-## FIT2 exact state
+## Hard product boundary
 
-- H1 corrected full subject: **CLOSED PASS**.
-- GSA8192: **CLOSED PASS** — `8171` nodes / `23656` relations / `7391+780` observed+completed.
-- Geppetto FIT2: **VERIFIED TERMINAL PASS** — closure step `12160`, `48/48`, exact handoff persisted.
-- Arachne FIT2: **AUTHORIZED / NOT STARTED**.
-- Mesh: **CLOSED FAIL** under the preregistered baseline-preserving adaptive-patch family; final P2_B1_G6 recall `97.349%..99.093%`, precision `100%`, remaining failures are min-angle/max-aspect outliers. **Not an Arachne blocker and not a mesh PASS.**
-- Professional motion: OPEN.
-- Exact runtime/export identity: OPEN.
-- PRODUCT_PASS: NOT CLAIMED.
-- Unseen/FIT8/LOFO: after same-Mage FIT2 product reclosure.
+The current product stack is:
 
-## Three workstreams
+`Geometry -> Rigging -> Skin -> Motion -> Projection/Deformation -> Visibility/Composition -> Appearance -> Bake/Playback -> Native Runtime -> Reference Render -> PNG`
 
-1. **Authority hygiene** — CLOSED by the 2026-09-13 transaction that created the explicit FIT2 execution branch and versioned authority set.
-2. **Arachne FIT2** — NEXT: preregister, fresh fit from corrected S+G, A100 Run-All notebook, terminal evidence, QualifiedSkinIR, SHA manifests and seal.
-3. **Productization restoration** — AFTER ARACHNE: resume `audit/historical-product-power-rebind-20260913`; restore proven historical Compiler/runtime mechanisms selectively, implement missing product layers, close exact binding/render/motion/runtime/editor/export identity, then inspect the demo.
+A PASS at one layer does not imply any downstream PASS. `PASS` without a named layer is forbidden in playback reporting.
 
-## Hard authority boundaries
+## Current closed facts
 
-- FIT1 is `HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT`, not deleted science.
-- No old 950-node S/G/W checkpoint becomes corrected FIT2 authority.
-- `repair/mage-full-subject-reclosure-20260912` is transition provenance only; new science continues on `fit2/mage-full-subject-reclosure`.
-- The productization audit branch cannot own corrected S/G/W.
-- Arachne depends on corrected S/G and exact Geppetto handoff; final mesh PASS is downstream and does not block the fit.
-- PRODUCT_PASS waits for Arachne + exact mesh-skin/components + professional motion + exact runtime/export closure.
+- Corrected H1/GSA/Geppetto scientific lineage remains preserved under FIT2 authority.
+- Mage demo uses sealed FIT1 product assets where explicitly authorized; this does not make the runtime Mage-specific.
+- Dense/full zero-surface BODY visible-rest coverage is qualified; hidden BODY under rigid components is still unmeasured.
+- ABC V2 established the selected-face visibility architecture as pathological; runtime-v3 direction is full-surface + posed depth visibility.
+- D0 FIX1: **CLOSED PASS** — axis contract, neutral baseline and exact rest-deficit localization are frozen.
+- D0 axis contract is geometry-derived; bind joint orientations/independent semantic run truth are not available.
+- Appearance diagnostic flat/filled colors are not product texture authority.
+- Historical ~98-99% rest coverage means foreground geometric coverage, not source-faithful texture and not correct visible layer.
+
+## Explicit open state
+
+- `BODY_VISIBLE_REST_COVERAGE = QUALIFIED`
+- `BODY_UNDER_RIGID_SURFACE = UNMEASURED`
+- `THIN_RIGID_COMPONENT_GEOMETRY_DEFICIT = OPEN_SEPARATE_CONCERN`
+- `D1_MOTION_IMPLEMENTATION_PASS = NOT_CLAIMED`
+- `R0_VISIBILITY_PASS = NOT_CLAIMED`
+- `R1_RASTER_CONFORMANCE_PASS = NOT_CLAIMED`
+- `R2_APPEARANCE_AUTHORITY_PASS = NOT_CLAIMED`
+- `R3_PLAYBACK_PASS = NOT_CLAIMED`
+- `R4_NATIVE_E2E_PASS = NOT_CLAIMED`
+- `APPEARANCE_PRODUCT_PASS = FALSE`
+- `FOUNDER_VISUAL_PASS = FALSE`
+
+## Genericity rule
+
+No new playback/runtime implementation may key behavior on Mage, FIT1, a Mage component name, Mage view statistics or Mage-specific topology. Subject-specific data is fixture input only. The active product target is automatic 8-direction playback for future FIT8, FITK and unseen subjects.
+
+## External behavioral references
+
+- **Spine runtime** is the primary behavioral reference for 2D runtime quality: slot/attachment state, animated draw order, clipping, deformation playback, order-preserving batching and performance discipline. RealSaS implementation is clean-room.
+- **CharacterGen** is the primary clean-room reference for full reconstructed geometry + camera/depth visibility separation.
+
+## Current code on continuation branch
+
+- `compiler/realsas_compiler_core/playback_runtime_v3.py` — typed generic R0/R1/R2 runtime-v3 contract.
+- `tests/compiler/test_playback_runtime_v3_contract_v1.py` — fail-closed contract tests.
+- `experiments/playback_stack_v1/run_runtime_reference_e2e_v1.py` — generic `.rss -> native C++ renderer -> PNG` R4 probe.
+- `canonical/PLAYBACK_STACK_V1_20260916.md` — complete architecture/continuation record.
+
+Runtime-v2 remains readable compatibility state and is explicitly **no-depth**. It may be used only for structural smoke testing, never as depth-qualified/founder visual evidence.
+
+## Immediate coding order
+
+1. R1 native C++ reference-raster depth/conformance primitive + tests.
+2. Runtime/package binary v3: posed z, slot/attachment state, clipping interval and explicit visibility policy, while keeping v1/v2 read compatibility.
+3. Native C++ v3 depth renderer + compiler exporter.
+4. D1 generic canonical 3D FK/LBS/projection qualification; save projected joint trajectories.
+5. First real TEST_SUBJECT_001 R4 package/render.
+6. R2-A source appearance + under-rigid audit; current Mage UNSEEN stays blank/marked.
+7. D2 D-spine.
+8. R2-B atlas baking + R3 playback qualification.
+9. Native Founder sheet and only then `FOUNDER_VISUAL_PASS` decision.
+
+## Current appearance policy
+
+For TEST_SUBJECT_001, unseen regions are intentionally left `UNSEEN`; synthetic/nearest-color/generative completion is forbidden from product output for now. Future high-quality completion may be enabled only by explicit policy and must preserve provenance.
+
+## Scientific continuity
+
+FIT1 remains historical/scoped evidence where superseded. Corrected FIT2 scientific authority is not replaced by this playback branch. The playback branch consumes qualified product/scientific artifacts but owns the new generic post-rig product/runtime closure.

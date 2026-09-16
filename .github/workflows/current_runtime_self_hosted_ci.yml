@@ -18,6 +18,7 @@ on:
       - 'tests/compiler/test_motion_bake_firewall_v1.py'
       - 'tests/compiler/test_playback_runtime_v3_contract_v1.py'
       - 'tests/compiler/test_playback_full_surface_v3.py'
+      - 'tests/compiler/test_motion_3d_v1.py'
       - 'experiments/single_family_e2e_v1/**'
       - 'experiments/playback_stack_v1/**'
       - 'canonical/MAIN_POST_MERGE_INTEGRITY_TRIGGER_ONCE_V1_20260904.json'
@@ -30,6 +31,7 @@ on:
       - 'tests/runtime/**'
       - 'tests/compiler/test_playback_runtime_v3_contract_v1.py'
       - 'tests/compiler/test_playback_full_surface_v3.py'
+      - 'tests/compiler/test_motion_3d_v1.py'
       - 'experiments/single_family_e2e_v1/**'
       - 'experiments/playback_stack_v1/**'
   workflow_dispatch:
@@ -56,7 +58,8 @@ jobs:
             tests/compiler/test_motion_bake_firewall_v1.py \
             tests/compiler/test_current_v4_runtime_v2_projection_v1.py \
             tests/compiler/test_playback_runtime_v3_contract_v1.py \
-            tests/compiler/test_playback_full_surface_v3.py
+            tests/compiler/test_playback_full_surface_v3.py \
+            tests/compiler/test_motion_3d_v1.py
       - name: Complete synthetic proof/export gate
         run: PYTHONPATH=. python -m pytest -q experiments/single_family_e2e_v1/test_complete_e2e_source_v1.py
       - name: Emit exact current package and probe identities

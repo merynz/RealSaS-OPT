@@ -52,13 +52,13 @@ def _compositions():
     return (row, row)
 
 
-def test_d1_dense_lbs_and_runtime_xyz_depth_come_from_same_posed_3d_surface():
+def _build(**kwargs):
     dense = np.asarray(
         [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
         dtype=np.float64,
     )
     weights = np.ones((3, 1), dtype=np.float64)
-    runtime_clip, report = build_runtime_v3_clip_from_d1(
+    return build_runtime_v3_clip_from_d1(
         d1_clip=_clip(),
         dense_vertices=dense,
         dense_weights=weights,
@@ -70,7 +70,12 @@ def test_d1_dense_lbs_and_runtime_xyz_depth_come_from_same_posed_3d_surface():
         intent="turn",
         nominal_fps=30.0,
         required_view_ids=("V0",),
+        **kwargs,
     )
+
+
+def test_d1_dense_lbs_and_runtime_xyz_depth_come_from_same_posed_3d_surface():
+    runtime_clip, report = _build()
     rest = np.asarray(runtime_clip.frames[0].posed_xyz_by_mesh["V0:body_attachment"])
     posed = np.asarray(runtime_clip.frames[1].posed_xyz_by_mesh["V0:body_attachment"])
     # canonical [1,0,0] -> [0,0,-1] under +90deg Y rotation.
@@ -79,6 +84,17 @@ def test_d1_dense_lbs_and_runtime_xyz_depth_come_from_same_posed_3d_surface():
     assert report.frame_count == 2
     assert report.vertex_count == 3
     assert report.max_weight_row_sum_error <= 1e-12
+
+
+def test_bridge_does_not_self_promote_runtime_qualification():
+    runtime_clip, report = _build()
+    assert runtime_clip.runtime_qualified is False
+    assert report.runtime_qualified is False
+
+    qualified_clip, qualified_report = _build(runtime_qualified=True)
+    assert qualified_clip.runtime_qualified is True
+    assert qualified_report.runtime_qualified is True
+    assert qualified_report.bridge_hash != report.bridge_hash
 
 
 def test_dense_weight_joint_order_is_exact_not_name_set_only():

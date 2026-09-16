@@ -65,6 +65,39 @@ def validate_unit(c):
     return validate_playback_runtime_v3_contract(c, required_view_ids=UNIT_VIEWS)
 
 
+def _clip_contract():
+    body = _mesh(mesh_id="V0:body", slot_id="body_slot", attachment_id="body_attachment")
+    clip = _mesh(
+        mesh_id="V0:clip",
+        slot_id="clip_slot",
+        attachment_id="clip_attachment",
+        kind=AttachmentKind.CLIPPING,
+    )
+    return RuntimeV3PlaybackContract(
+        slots=(
+            RuntimeV3Slot("clip_slot", "root", 0, "clip_attachment"),
+            RuntimeV3Slot("body_slot", "root", 1, "body_attachment"),
+        ),
+        meshes=(clip, body),
+        appearance_patches=(
+            RuntimeV3AppearancePatch("clip_face", "V0:clip", (0,), AppearanceProvenance.UNSEEN, None, None),
+            RuntimeV3AppearancePatch("body_face", "V0:body", (0,), AppearanceProvenance.DIRECT_SOURCE, 0, "V0"),
+        ),
+    )
+
+
+def _valid_clip_frame():
+    return RuntimeV3FrameComposition(
+        view_id="V0",
+        draw_order_slot_ids=("clip_slot", "body_slot"),
+        active_attachment_by_slot={
+            "clip_slot": "clip_attachment",
+            "body_slot": "body_attachment",
+        },
+        clip_intervals=(RuntimeV3ClipInterval("clip_attachment", "clip_slot", "body_slot"),),
+    )
+
+
 def test_v3_contract_is_subject_agnostic_and_deterministic():
     c = _contract()
     h1 = validate_unit(c)
@@ -203,25 +236,26 @@ def test_appearance_face_partition_must_be_exact():
 
 
 def test_slot_draw_order_is_exact_permutation_and_clip_is_interval_semantics():
-    body = _mesh(mesh_id="V0:body", slot_id="body_slot", attachment_id="body_attachment")
-    clip = _mesh(
-        mesh_id="V0:clip",
-        slot_id="clip_slot",
-        attachment_id="clip_attachment",
-        kind=AttachmentKind.CLIPPING,
-    )
-    c = RuntimeV3PlaybackContract(
-        slots=(
-            RuntimeV3Slot("clip_slot", "root", 0, "clip_attachment"),
-            RuntimeV3Slot("body_slot", "root", 1, "body_attachment"),
-        ),
-        meshes=(clip, body),
-        appearance_patches=(
-            RuntimeV3AppearancePatch("clip_face", "V0:clip", (0,), AppearanceProvenance.UNSEEN, None, None),
-            RuntimeV3AppearancePatch("body_face", "V0:body", (0,), AppearanceProvenance.DIRECT_SOURCE, 0, "V0"),
-        ),
-    )
+    c = _clip_contract()
     validate_unit(c)
+    validate_frame_composition_v3(c, _valid_clip_frame())
+
+
+def test_clipping_interval_must_cover_subsequent_slot():
+    c = _clip_contract()
+    frame = _valid_clip_frame()
+    bad = RuntimeV3FrameComposition(
+        view_id="V0",
+        draw_order_slot_ids=("body_slot", "clip_slot"),
+        active_attachment_by_slot=frame.active_attachment_by_slot,
+        clip_intervals=frame.clip_intervals,
+    )
+    with pytest.raises(QualificationError, match="RUNTIME_V3_CLIP_INTERVAL_MUST_COVER_SUBSEQUENT_SLOT"):
+        validate_frame_composition_v3(c, bad)
+
+
+def test_clipping_interval_start_must_equal_clipping_slot():
+    c = _clip_contract()
     frame = RuntimeV3FrameComposition(
         view_id="V0",
         draw_order_slot_ids=("clip_slot", "body_slot"),
@@ -229,15 +263,37 @@ def test_slot_draw_order_is_exact_permutation_and_clip_is_interval_semantics():
             "clip_slot": "clip_attachment",
             "body_slot": "body_attachment",
         },
+        clip_intervals=(RuntimeV3ClipInterval("clip_attachment", "body_slot", "body_slot"),),
+    )
+    with pytest.raises(QualificationError, match="RUNTIME_V3_CLIP_INTERVAL_START_MUST_EQUAL_CLIP_SLOT"):
+        validate_frame_composition_v3(c, frame)
+
+
+def test_active_clipping_attachment_requires_interval():
+    c = _clip_contract()
+    frame = RuntimeV3FrameComposition(
+        view_id="V0",
+        draw_order_slot_ids=("clip_slot", "body_slot"),
+        active_attachment_by_slot={
+            "clip_slot": "clip_attachment",
+            "body_slot": "body_attachment",
+        },
+        clip_intervals=(),
+    )
+    with pytest.raises(QualificationError, match="RUNTIME_V3_ACTIVE_CLIPPING_ATTACHMENT_REQUIRES_INTERVAL"):
+        validate_frame_composition_v3(c, frame)
+
+
+def test_clip_interval_attachment_must_be_active_at_start():
+    c = _clip_contract()
+    frame = RuntimeV3FrameComposition(
+        view_id="V0",
+        draw_order_slot_ids=("clip_slot", "body_slot"),
+        active_attachment_by_slot={
+            "clip_slot": None,
+            "body_slot": "body_attachment",
+        },
         clip_intervals=(RuntimeV3ClipInterval("clip_attachment", "clip_slot", "body_slot"),),
     )
-    validate_frame_composition_v3(c, frame)
-
-    bad = RuntimeV3FrameComposition(
-        view_id="V0",
-        draw_order_slot_ids=("body_slot", "clip_slot"),
-        active_attachment_by_slot=frame.active_attachment_by_slot,
-        clip_intervals=frame.clip_intervals,
-    )
-    with pytest.raises(QualificationError, match="RUNTIME_V3_CLIP_INTERVAL_REVERSED_IN_DRAW_ORDER"):
-        validate_frame_composition_v3(c, bad)
+    with pytest.raises(QualificationError, match="RUNTIME_V3_CLIP_INTERVAL_ATTACHMENT_NOT_ACTIVE_AT_START"):
+        validate_frame_composition_v3(c, frame)

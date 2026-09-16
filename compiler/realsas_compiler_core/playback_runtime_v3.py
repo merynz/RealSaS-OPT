@@ -336,27 +336,44 @@ def validate_frame_composition_v3(
     if set(frame.active_attachment_by_slot) != slot_ids:
         raise QualificationError("RUNTIME_V3_ACTIVE_ATTACHMENT_MAP_MUST_COVER_ALL_SLOTS")
 
-    attachment_slot: dict[str, str] = {}
+    attachment_semantics: dict[str, tuple[str, AttachmentKind]] = {}
     for mesh in contract.meshes:
-        prior = attachment_slot.setdefault(mesh.attachment_id, mesh.slot_id)
-        if prior != mesh.slot_id:
+        semantic = (mesh.slot_id, mesh.attachment_kind)
+        prior = attachment_semantics.setdefault(mesh.attachment_id, semantic)
+        if prior != semantic:
             raise QualificationError("RUNTIME_V3_ATTACHMENT_SLOT_DRIFT")
+
+    active_clipping: dict[str, str] = {}
     for slot_id, attachment_id in frame.active_attachment_by_slot.items():
         if attachment_id is None:
             continue
-        if attachment_slot.get(attachment_id) != slot_id:
+        semantic = attachment_semantics.get(attachment_id)
+        if semantic is None or semantic[0] != slot_id:
             raise QualificationError("RUNTIME_V3_ACTIVE_ATTACHMENT_SLOT_MISMATCH")
+        if semantic[1] == AttachmentKind.CLIPPING:
+            active_clipping[attachment_id] = slot_id
 
     pos = {slot_id: i for i, slot_id in enumerate(order)}
-    clipping_attachments = {
-        m.attachment_id
-        for m in contract.meshes
-        if m.attachment_kind == AttachmentKind.CLIPPING
-    }
+    interval_ids: set[str] = set()
     for interval in frame.clip_intervals:
-        if interval.clip_attachment_id not in clipping_attachments:
+        if interval.clip_attachment_id in interval_ids:
+            raise QualificationError("RUNTIME_V3_DUPLICATE_CLIP_INTERVAL")
+        interval_ids.add(interval.clip_attachment_id)
+
+        semantic = attachment_semantics.get(interval.clip_attachment_id)
+        if semantic is None or semantic[1] != AttachmentKind.CLIPPING:
             raise QualificationError("RUNTIME_V3_CLIP_INTERVAL_REQUIRES_CLIPPING_ATTACHMENT")
+        clip_slot_id = semantic[0]
+        if interval.start_slot_id != clip_slot_id:
+            raise QualificationError("RUNTIME_V3_CLIP_INTERVAL_START_MUST_EQUAL_CLIP_SLOT")
+        if frame.active_attachment_by_slot.get(clip_slot_id) != interval.clip_attachment_id:
+            raise QualificationError("RUNTIME_V3_CLIP_INTERVAL_ATTACHMENT_NOT_ACTIVE_AT_START")
         if interval.start_slot_id not in pos or interval.end_slot_id not in pos:
             raise QualificationError("RUNTIME_V3_CLIP_INTERVAL_UNKNOWN_SLOT")
-        if pos[interval.start_slot_id] > pos[interval.end_slot_id]:
-            raise QualificationError("RUNTIME_V3_CLIP_INTERVAL_REVERSED_IN_DRAW_ORDER")
+        # Spine-class semantics: the clipping attachment occupies the start
+        # slot and clips subsequent slots through end_slot inclusive.
+        if pos[interval.start_slot_id] >= pos[interval.end_slot_id]:
+            raise QualificationError("RUNTIME_V3_CLIP_INTERVAL_MUST_COVER_SUBSEQUENT_SLOT")
+
+    if set(active_clipping) != interval_ids:
+        raise QualificationError("RUNTIME_V3_ACTIVE_CLIPPING_ATTACHMENT_REQUIRES_INTERVAL")

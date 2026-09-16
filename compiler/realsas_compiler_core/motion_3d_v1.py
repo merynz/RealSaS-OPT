@@ -36,7 +36,7 @@ class D1JointSpec:
     joint_id: str
     parent_index: int | None
     rest_position: tuple[float, float, float]
-    axis_rest: tuple[float, float, float]
+    axis_rest: tuple[float, float, float] | None
 
 
 @dataclass(frozen=True)
@@ -85,12 +85,12 @@ def _validate_joints(joints: Sequence[D1JointSpec]) -> tuple[D1JointSpec, ...]:
         p = np.asarray(joint.rest_position, dtype=np.float64)
         if p.shape != (3,) or not np.isfinite(p).all():
             raise QualificationError("D1_REST_POSITION_INVALID")
-        _unit(joint.axis_rest, label="REST_AXIS")
+        if joint.axis_rest is not None:
+            _unit(joint.axis_rest, label="REST_AXIS")
         if joint.parent_index is not None:
             parent = int(joint.parent_index)
             if parent < 0 or parent >= len(rows) or parent == i:
                 raise QualificationError("D1_PARENT_INDEX_INVALID")
-    # Fail closed on cycles/disconnected parent loops.
     for start in range(len(rows)):
         seen: set[int] = set()
         cur: int | None = start
@@ -159,8 +159,14 @@ def solve_fk_v1(
         theta = float(rotation_degrees_by_joint.get(joint.joint_id, 0.0))
         if not math.isfinite(theta):
             raise QualificationError("D1_ROTATION_ANGLE_NONFINITE")
-        axis_rest = _unit(joint.axis_rest, label="REST_AXIS")
-        local_rotation = axis_angle_matrix(axis_rest, theta)
+        if joint.axis_rest is None:
+            if abs(theta) > 1.0e-12:
+                raise QualificationError(f"D1_ROTATION_REQUIRES_FROZEN_AXIS:{joint.joint_id}")
+            axis_rest = None
+            local_rotation = np.eye(3, dtype=np.float64)
+        else:
+            axis_rest = _unit(joint.axis_rest, label="REST_AXIS")
+            local_rotation = axis_angle_matrix(axis_rest, theta)
         if joint.parent_index is None:
             parent_rotation = np.eye(3, dtype=np.float64)
             positions[i] = rest[i]
@@ -169,7 +175,8 @@ def solve_fk_v1(
             parent_rotation = rotations[parent]
             rest_offset = rest[i] - rest[parent]
             positions[i] = positions[parent] + parent_rotation @ rest_offset
-        world_axes[i] = parent_rotation @ axis_rest
+        if axis_rest is not None:
+            world_axes[i] = parent_rotation @ axis_rest
         rotations[i] = parent_rotation @ local_rotation
 
     skin = np.zeros((len(rows), 4, 4), dtype=np.float64)
@@ -184,6 +191,7 @@ def solve_fk_v1(
         "axis_transport": D1_AXIS_TRANSPORT,
         "joint_ids": [j.joint_id for j in rows],
         "angles": [float(rotation_degrees_by_joint.get(j.joint_id, 0.0)) for j in rows],
+        "axis_present": [j.axis_rest is not None for j in rows],
         "positions": positions.tolist(),
         "rotations": rotations.tolist(),
     }
@@ -229,7 +237,7 @@ def apply_lbs_quaternion_reference_v1(vertices, weights, pose: D1Pose) -> np.nda
 
     try:
         from scipy.spatial.transform import Rotation
-    except ImportError as exc:  # pragma: no cover - qualification environment owns scipy.
+    except ImportError as exc:
         raise QualificationError("D1_SCIPY_ROTATION_REFERENCE_REQUIRED") from exc
 
     rotations = np.asarray(pose.joint_rotations, dtype=np.float64)
@@ -238,7 +246,6 @@ def apply_lbs_quaternion_reference_v1(vertices, weights, pose: D1Pose) -> np.nda
     q = Rotation.from_matrix(rotations)
     translations = skin[:, :3, 3]
     out = np.zeros_like(p)
-    # Deliberately different execution path from matrix/einsum LBS.
     for joint_index in range(len(rotations)):
         rotated = q[joint_index].apply(p)
         transformed = rotated + translations[joint_index][None, :]

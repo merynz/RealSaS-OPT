@@ -149,7 +149,23 @@ def loop_endpoint_errors_v1(times, joint_positions, *, body_height: float) -> tu
     return position_error, velocity_error
 
 
+def _interpolate_joint_frame(t: np.ndarray, p: np.ndarray, target: float) -> np.ndarray:
+    if target < t[0] - 1.0e-12 or target > t[-1] + 1.0e-12:
+        raise QualificationError("D1_GATE_INTERPOLATION_TARGET_OUT_OF_RANGE")
+    if target <= t[0]:
+        return p[0]
+    if target >= t[-1]:
+        return p[-1]
+    upper = int(np.searchsorted(t, target, side="left"))
+    if abs(float(t[upper] - target)) <= 1.0e-12:
+        return p[upper]
+    lower = upper - 1
+    alpha = float((target - t[lower]) / (t[upper] - t[lower]))
+    return p[lower] + (p[upper] - p[lower]) * alpha
+
+
 def half_period_bilateral_reflection_error_v1(
+    times,
     joint_positions,
     *,
     root_index: int,
@@ -157,16 +173,21 @@ def half_period_bilateral_reflection_error_v1(
     anatomical_right,
     body_height: float,
 ) -> float:
-    p = np.asarray(joint_positions, dtype=np.float64)
-    if p.ndim != 3 or p.shape[0] < 2 or p.shape[2] != 3 or not np.isfinite(p).all():
-        raise QualificationError("D1_GATE_BILATERAL_TRAJECTORY_INVALID")
-    if p.shape[0] % 2 != 0:
-        raise QualificationError("D1_GATE_BILATERAL_REQUIRES_EVEN_PERIOD_SAMPLE_COUNT")
+    """Measure left/right reflection at true t + T/2, independent of sample grid.
+
+    Endpoint-inclusive 30fps bakes therefore do not get a phase error merely
+    because the frame array length is odd or not divisible by two.
+    """
+
+    t, p = _validate_trajectory(times, joint_positions)
     if root_index < 0 or root_index >= p.shape[1]:
         raise QualificationError("D1_GATE_BILATERAL_ROOT_INDEX_INVALID")
     h = _require_positive(body_height, "BODY_HEIGHT")
     right = _unit(anatomical_right, label="ANATOMICAL_RIGHT")
-    half = p.shape[0] // 2
+    duration = float(t[-1] - t[0])
+    if duration <= 0.0:
+        raise QualificationError("D1_GATE_BILATERAL_DURATION_INVALID")
+    half_time = duration * 0.5
     worst = 0.0
 
     def reflect(v: np.ndarray) -> np.ndarray:
@@ -175,12 +196,20 @@ def half_period_bilateral_reflection_error_v1(
     for pair in bilateral_pairs:
         if min(pair.left_index, pair.right_index) < 0 or max(pair.left_index, pair.right_index) >= p.shape[1]:
             raise QualificationError("D1_GATE_BILATERAL_INDEX_OUT_OF_RANGE")
-        for i in range(half):
-            j = i + half
-            left_i = p[i, pair.left_index] - p[i, root_index]
-            right_j = p[j, pair.right_index] - p[j, root_index]
-            right_i = p[i, pair.right_index] - p[i, root_index]
-            left_j = p[j, pair.left_index] - p[j, root_index]
+
+    # Only evaluate the first half; partner frames are interpolated at +T/2.
+    for i, sample_time in enumerate(t):
+        target = float(sample_time + half_time)
+        if target > float(t[-1]) + 1.0e-12:
+            break
+        partner = _interpolate_joint_frame(t, p, target)
+        root_i = p[i, root_index]
+        root_j = partner[root_index]
+        for pair in bilateral_pairs:
+            left_i = p[i, pair.left_index] - root_i
+            right_j = partner[pair.right_index] - root_j
+            right_i = p[i, pair.right_index] - root_i
+            left_j = partner[pair.left_index] - root_j
             worst = max(worst, float(np.linalg.norm(left_i - reflect(right_j))) / h)
             worst = max(worst, float(np.linalg.norm(right_i - reflect(left_j))) / h)
     return float(worst)
@@ -224,6 +253,7 @@ def qualify_clip_gates_v1(
             ),
         )
     bilateral = half_period_bilateral_reflection_error_v1(
+        t,
         p,
         root_index=root_index,
         bilateral_pairs=bilateral_pairs,

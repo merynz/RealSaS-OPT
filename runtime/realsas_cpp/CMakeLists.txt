@@ -71,6 +71,12 @@ if(REALSAS_BUILD_TESTS)
     COMMAND ${Python3_EXECUTABLE}
       ${CMAKE_CURRENT_SOURCE_DIR}/tests/runtime_v3_clipping_native_e2e.py
       --runtime-demo $<TARGET_FILE:realsas_runtime_v3_demo>)
+
+  add_test(
+    NAME realsas_runtime_v3_unseen_native_e2e
+    COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/runtime_v3_unseen_native_e2e.py
+      --runtime-demo $<TARGET_FILE:realsas_runtime_v3_demo>)
 endif()
 
 include(GNUInstallDirs)

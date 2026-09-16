@@ -1,0 +1,282 @@
+{
+  "artifacts": {
+    "corrected_zero_surface": {
+      "bytes": 6437113,
+      "drive_id": "1PBGUxZVDjs8crU3TDnxvmHvMU1Mljw7x",
+      "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_CONTINUATION_RUNS/20260912T074348Z/ZERO_SURFACE_PRODUCT_CLIPPED.npz",
+      "sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+      "verification": "PHYSICAL_DRIVE_BYTES_REHASHED"
+    },
+    "d0_axis_contract_fix1": {
+      "bytes": 11026,
+      "drive_id": "1DWw_eveLU2X1xcXQON5MHaWRmTA3O2J5",
+      "explicit_axis_sign_rows": 20,
+      "negative_sign_rows": 3,
+      "path": "/content/drive/MyDrive/RealSaS/MageDemo_20260915_DenseZeroSurface_FinalMotion_v1/09_D0_AXIS_BASELINE_V1_FIX1/D0_AXIS_CONTRACT.json",
+      "positive_sign_rows": 17,
+      "product_pass_claimed": false,
+      "semantic_truth_claimed": false,
+      "sha256": "8bfaad13ae4f0c7750756f96dd276246bd09d37c7fb51c0e6c17936721a6c43f",
+      "verification": "PHYSICAL_DRIVE_BYTES_REHASHED"
+    },
+    "fit2_exact_skeleton": {
+      "bytes": 16582,
+      "drive_id": "1zw0aGk3RgjQf8kFKsCcC_NLNn_PxZ5Qn",
+      "joint_count": 22,
+      "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/PREFLIGHT/FINAL_QUALIFIED_SKELETON_IR.json",
+      "sha256": "319ae46d94450d97dd6f40f21d571ac9432968104e7a517af00ace442d05b9fe",
+      "skeleton_lineage_hash": "69f05e4fdef65f2cd86fed66503911210e1dbc7212ad017d69bf3dcb7b0896a1",
+      "verification": "PHYSICAL_DRIVE_BYTES_REHASHED"
+    },
+    "fit2_exact_skin": {
+      "bytes": 17447834,
+      "drive_id": "1wXwVuBZ2hYw_Mb_ndWA2w4hPgGoEK0dq",
+      "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/MAIN/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json",
+      "sha256": "722fdeb60fc32aa09e2296adbdc0e589de0379bfd49f6239f214330517f01ddd",
+      "skin_lineage_hash": "eb96b398282e4e25cd6df662e7a02e8ff1afe881818127190979bddd2f6c4006",
+      "verification": "PHYSICAL_DRIVE_BYTES_REHASHED"
+    },
+    "fit2_exact_surface": {
+      "bytes": 24098889,
+      "drive_id": "1MTU8rsXppDPIqTlFSd0CryKwbkCOs_IH",
+      "node_count": 8171,
+      "path": "/content/drive/MyDrive/RealSaS/MageDemo_20260914_ProductClosure_FIT2Rebind_v1_FIX3_CONVEX_RENDER_SUPPORT/02_FIT2_P1_BIND/CURRENT_FIT2_RIGGING_SURFACE_IR.json",
+      "relation_count": 23656,
+      "sha256": "170b8e4712fd78ef0721462f19f80ccb94eb008206fc6a7061908bfdc36f202f",
+      "surface_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
+      "verification": "PHYSICAL_DRIVE_BYTES_REHASHED"
+    },
+    "owner_manifest": {
+      "bytes": 7235,
+      "drive_id": "1c23sBP2MgECwOOynN1yZgp-8XOgRJwgq",
+      "path": "/content/drive/MyDrive/RealSaS/MageDemo_20260914_ProductClosure_MotionEngine_v3/04_SOURCE_OWNER/SOURCE_COMPONENT_OWNER_RASTER_AUTHORITY.json",
+      "sha256": "4df8d42a273840021624c854bd86414e148f6a5861730e3c3d53bade039d9167",
+      "status": "PASS__EXACT_SOURCE_FIT_TARGET_COMPONENT_OWNER_RASTER_V0_V7",
+      "verification": "PHYSICAL_DRIVE_BYTES_REHASHED"
+    }
+  },
+  "authority_scope": "PHYSICAL_EXECUTION_INPUT_LOCK_ONLY",
+  "founder_visual_pass": false,
+  "integrity": {
+    "all_drive_ids_explicit": true,
+    "all_paths_explicit": true,
+    "all_sha256_explicit": true,
+    "camera_count": 8,
+    "owner_raster_count": 8,
+    "physical_rehash_completed_for_core_authorities": true,
+    "source_rgba_count": 8,
+    "view_payload_hashes_bound_by_owner_manifest": true
+  },
+  "policy": {
+    "appearance": "SAME_VIEW_DIRECT_SOURCE_ONLY__ALL_OTHER_FACES_UNSEEN",
+    "body_only_first_smoke": true,
+    "completion_forbidden": true,
+    "donor_heuristic_forbidden": true,
+    "rigid_restoration_forbidden": true,
+    "sample_count": 9
+  },
+  "product_pass_claimed": false,
+  "repo": {
+    "base_head_sha256": "2952f6e464f94bf51d3025192113b0d04ed7d2a6",
+    "branch": "playback-stack-v1-20260916",
+    "repository": "merynz/RealSaS-OPT"
+  },
+  "runtime_qualified": false,
+  "schema": "RealSaS.PlaybackStack.TEST_SUBJECT_001.PhysicalExecutionManifest.v1",
+  "status": "PASS__PHYSICAL_EXECUTION_INPUTS_LOCKED",
+  "subject_id": "TEST_SUBJECT_001",
+  "views": [
+    {
+      "camera": {
+        "bytes": 385,
+        "drive_id": "1X4vjrW2r918wemHZ2vMnerHGg5WrBrM2",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V0.camera.json",
+        "sha256": "73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "owner_raster": {
+        "bytes": 3388262,
+        "drive_id": "1arYpDwdIkcKml98FpfEA50OSM-oEid1w",
+        "path": "/content/drive/MyDrive/RealSaS/MageDemo_20260914_ProductClosure_MotionEngine_v3/04_SOURCE_OWNER/V0_SOURCE_COMPONENT_OWNER_RASTER.npz",
+        "sha256": "a2a46df17adbfdeb72f67029207a5da3147dd22eada703e5f255abb886683b69",
+        "verification": "SEALED_OWNER_MANIFEST"
+      },
+      "source_rgba_png": {
+        "bytes": 872991,
+        "drive_id": "18NiAQabgOCwXJ7IS37D1E-P_6po6Rjf7",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V0.png",
+        "sha256": "8e9875c16bba3047c8f2fc211b984f2399d1145f5720c7427c6fc03a3fec0616",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "view": 0
+    },
+    {
+      "camera": {
+        "bytes": 463,
+        "drive_id": "1AA8jcM1CNkt__qe3_bnUelC35zVyWrBL",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V1.camera.json",
+        "sha256": "bdc172a4aff332f956d1403e36b2f8684b68059fdc82f9efddf35d05a6d9b4d4",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "owner_raster": {
+        "bytes": 3414595,
+        "drive_id": "11b2ZxlnRvBbGRhJd4_eqffWDtklf0BmA",
+        "path": "/content/drive/MyDrive/RealSaS/MageDemo_20260914_ProductClosure_MotionEngine_v3/04_SOURCE_OWNER/V1_SOURCE_COMPONENT_OWNER_RASTER.npz",
+        "sha256": "c50ea8a05fef6b3eaae40c428c960588eb37b620c6fb61580586f52a3ffc6f11",
+        "verification": "SEALED_OWNER_MANIFEST"
+      },
+      "source_rgba_png": {
+        "bytes": 852994,
+        "drive_id": "1oZog7uGGc-ANqvmsa8ztNJ2ZgtmzwLVc",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V1.png",
+        "sha256": "fa94283780d5e5f3ad3943bbffc1f0592a70fc362fdd03b94a1d1cb46889dc30",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "view": 1
+    },
+    {
+      "camera": {
+        "bytes": 440,
+        "drive_id": "1WhmVK5Ht1__m1BnV6YSQDYluNCLb_MDC",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V2.camera.json",
+        "sha256": "3c2bbc44ef9005b4a545a3381205a5d6a92af15b4791c9075071b8cad02a1a6c",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "owner_raster": {
+        "bytes": 2709292,
+        "drive_id": "184dO0g36W4TUDrdnkoRLYDl3T3CLSYG-",
+        "path": "/content/drive/MyDrive/RealSaS/MageDemo_20260914_ProductClosure_MotionEngine_v3/04_SOURCE_OWNER/V2_SOURCE_COMPONENT_OWNER_RASTER.npz",
+        "sha256": "e3b4a0b6143cbb0b35f92d16bedac300d814d084c42e80fe8b7300890ad26bcc",
+        "verification": "SEALED_OWNER_MANIFEST"
+      },
+      "source_rgba_png": {
+        "bytes": 829893,
+        "drive_id": "1M9DR14G2TLVXtPWWCUgP-mzNhBGnqUV5",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V2.png",
+        "sha256": "777bf4f7c505b405d3a5d2a111b2f297949454f77cae7c33064bf02479d384a5",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "view": 2
+    },
+    {
+      "camera": {
+        "bytes": 463,
+        "drive_id": "1ht82sIGIU5Ie6vy36M7YmDz3_Rri9MB-",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V3.camera.json",
+        "sha256": "24b2f115d908422d885f85e956fcc36ac78fd0c90b503f698caa62febc2b9c4d",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "owner_raster": {
+        "bytes": 3524692,
+        "drive_id": "1ZMSVvltZTrkSZ_FiYJusYtCL8gwVKGDd",
+        "path": "/content/drive/MyDrive/RealSaS/MageDemo_20260914_ProductClosure_MotionEngine_v3/04_SOURCE_OWNER/V3_SOURCE_COMPONENT_OWNER_RASTER.npz",
+        "sha256": "29fa0a0651b3d3ed2306056310d57224c906ec7f4b08e66bbc12b9c64b45daac",
+        "verification": "SEALED_OWNER_MANIFEST"
+      },
+      "source_rgba_png": {
+        "bytes": 887375,
+        "drive_id": "1O-x2Z17Im5eSdysXeyO2M8H-u_iDaqJo",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V3.png",
+        "sha256": "2a771c91c1d1c0b75dab14f6e98b7905a8429bbf0c0a8dd690261f93f6476d86",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "view": 3
+    },
+    {
+      "camera": {
+        "bytes": 446,
+        "drive_id": "15Pf-rmWl5JvdtTOzP_8udy-kDipucIrE",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V4.camera.json",
+        "sha256": "5bf00783d6509c2ca142e05ef705d5cdb5df17ad248b782d2fe8cf8a297bee39",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "owner_raster": {
+        "bytes": 3419345,
+        "drive_id": "1aKULbI9vlweKEUNPESbYCHD77YU1asLV",
+        "path": "/content/drive/MyDrive/RealSaS/MageDemo_20260914_ProductClosure_MotionEngine_v3/04_SOURCE_OWNER/V4_SOURCE_COMPONENT_OWNER_RASTER.npz",
+        "sha256": "7b8e0d33d6d12842992043ebaeccbe3b23398f4b3fedf65f3c6b7d0e5aa6839f",
+        "verification": "SEALED_OWNER_MANIFEST"
+      },
+      "source_rgba_png": {
+        "bytes": 894656,
+        "drive_id": "1vHL3c1fasUID2csUgS1DT7X_uRUx6scf",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V4.png",
+        "sha256": "354bb239feb6c1a515917fee4efb42fb1e0cb9f173d0eb3191fb0901a02a6228",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "view": 4
+    },
+    {
+      "camera": {
+        "bytes": 464,
+        "drive_id": "18mgXvjID4oCfk0E553Pw9jRxwgXYQv0n",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V5.camera.json",
+        "sha256": "7ee3e50739318eeb122b5b0ec67260dd32e21d949398f48c408a6c239e5c89fe",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "owner_raster": {
+        "bytes": 3292190,
+        "drive_id": "1XB6de697IC3IHjiFJ7cmuGEVsN3-W-JS",
+        "path": "/content/drive/MyDrive/RealSaS/MageDemo_20260914_ProductClosure_MotionEngine_v3/04_SOURCE_OWNER/V5_SOURCE_COMPONENT_OWNER_RASTER.npz",
+        "sha256": "947ae269b845995280f360bd366b428065d453ad7454b9394f853e60d30a1381",
+        "verification": "SEALED_OWNER_MANIFEST"
+      },
+      "source_rgba_png": {
+        "bytes": 866383,
+        "drive_id": "1jO1yC7anm1x4qxsEarV62e7IdH1BoH1q",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V5.png",
+        "sha256": "158fc14a75aa69f6133f2ba3ec5df2ad146afc62f477d7d3b4a41ca2cb0e42f2",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "view": 5
+    },
+    {
+      "camera": {
+        "bytes": 441,
+        "drive_id": "1JrC7DY5CtpgG1zIt0m9o9It0O4wfuNFo",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V6.camera.json",
+        "sha256": "daa19fa58ff602977d64b720c4198956809855149d814df487c7762a963f1eec",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "owner_raster": {
+        "bytes": 2634520,
+        "drive_id": "1qGaYHeULDKAHRc4EkvNLRfRFWCNkDJoH",
+        "path": "/content/drive/MyDrive/RealSaS/MageDemo_20260914_ProductClosure_MotionEngine_v3/04_SOURCE_OWNER/V6_SOURCE_COMPONENT_OWNER_RASTER.npz",
+        "sha256": "ac08c59204e57094a7260f503083ae19baeb83efdf8e1c01d8f68564c1a8a572",
+        "verification": "SEALED_OWNER_MANIFEST"
+      },
+      "source_rgba_png": {
+        "bytes": 829710,
+        "drive_id": "1gF4DQiLlhHn-t5HIiuL_TeyhfNxLE5yP",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V6.png",
+        "sha256": "e3b08836c187863819d8b8aaa53aef79eddfee167e1fabf3fb1dd8ec0484563a",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "view": 6
+    },
+    {
+      "camera": {
+        "bytes": 462,
+        "drive_id": "1hIa0qSyg8hBU9WS9a-5PHZ19ucUtup91",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V7.camera.json",
+        "sha256": "68f51fbfce4c31f94281e1569d74b44609435285668f8a8b1b278e76db6ea53f",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "owner_raster": {
+        "bytes": 3575793,
+        "drive_id": "1gOgnZNgfVc7SkXXHIxHezN_sSAfbilCX",
+        "path": "/content/drive/MyDrive/RealSaS/MageDemo_20260914_ProductClosure_MotionEngine_v3/04_SOURCE_OWNER/V7_SOURCE_COMPONENT_OWNER_RASTER.npz",
+        "sha256": "949e1576cdbe2c6b28531d8ce5ca7ba92bb8e4712a33231df1e6b50a9d4a4f54",
+        "verification": "SEALED_OWNER_MANIFEST"
+      },
+      "source_rgba_png": {
+        "bytes": 869960,
+        "drive_id": "14GOi3y10g75YnIC_ly-KdCr5JO05ww__",
+        "path": "/content/drive/MyDrive/REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V7.png",
+        "sha256": "87d4ad46edffec3c6bff034d305194820288d3cc6ef9a9480ac2234fb56451bc",
+        "verification": "SEALED_OWNER_MANIFEST_AND_REPO_PIN"
+      },
+      "view": 7
+    }
+  ]
+}

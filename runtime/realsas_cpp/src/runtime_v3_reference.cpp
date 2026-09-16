@@ -38,6 +38,7 @@ constexpr uint32_t kFeatureReferenceDepthRenderer = 1u << 4;
 constexpr uint32_t kFeaturePosedVertexDepth = 1u << 5;
 constexpr uint32_t kFeatureFullSurfaceAuthority = 1u << 6;
 constexpr uint32_t kFeatureSlotAttachments = 1u << 7;
+constexpr uint32_t kFeatureClipIntervals = 1u << 8;
 constexpr uint32_t kRequiredFeatureMask =
     kFeatureBakedXyzFrames |
     kFeatureReferenceDepthRenderer |
@@ -144,6 +145,12 @@ struct RuntimeData {
     std::vector<Slot> slots;
     std::vector<View> views;
     std::vector<Clip> clips;
+};
+
+struct ActiveClipMask {
+    uint32_t start_order = 0;
+    uint32_t end_order = 0;
+    std::vector<uint8_t> mask;
 };
 
 class Reader {
@@ -554,11 +561,31 @@ RuntimeData parse_runtime_v3_binary(const std::vector<uint8_t>& bytes) {
                     throw std::runtime_error("Runtime-v3 active attachment map must cover all slots");
                 }
                 fv.active_attachment_by_slot.resize(active_count);
-                for (auto& attachment : fv.active_attachment_by_slot) attachment = r.string();
+                std::unordered_set<std::string> active_clipping;
+                for (uint32_t slot_index = 0; slot_index < active_count; ++slot_index) {
+                    auto& attachment = fv.active_attachment_by_slot[slot_index];
+                    attachment = r.string();
+                    if (attachment.empty()) continue;
+                    const auto semantic = attachment_semantics.find(attachment);
+                    if (semantic == attachment_semantics.end() || semantic->second.first != slot_index) {
+                        throw std::runtime_error("Runtime-v3 active attachment slot mismatch");
+                    }
+                    if (semantic->second.second == AttachmentKind::Clipping) {
+                        active_clipping.insert(attachment);
+                    }
+                }
 
                 const uint32_t interval_count = r.u32();
                 if (interval_count > data.slots.size()) throw std::runtime_error("Invalid runtime-v3 clipping interval count");
+                if (interval_count > 0 && (data.feature_flags & kFeatureClipIntervals) == 0) {
+                    throw std::runtime_error("Runtime-v3 clipping intervals present without capability flag");
+                }
                 fv.clip_intervals.resize(interval_count);
+                std::unordered_set<std::string> interval_ids;
+                std::vector<uint32_t> position(data.slots.size());
+                for (uint32_t oi = 0; oi < fv.draw_order_slots.size(); ++oi) {
+                    position[fv.draw_order_slots[oi]] = oi;
+                }
                 for (auto& interval : fv.clip_intervals) {
                     interval.clip_attachment_id = r.string();
                     interval.start_slot_index = r.u32();
@@ -572,13 +599,25 @@ RuntimeData parse_runtime_v3_binary(const std::vector<uint8_t>& bytes) {
                         interval.end_slot_index >= data.slots.size()) {
                         throw std::runtime_error("Invalid runtime-v3 clipping interval");
                     }
-                    std::vector<uint32_t> position(data.slots.size());
-                    for (uint32_t oi = 0; oi < fv.draw_order_slots.size(); ++oi) {
-                        position[fv.draw_order_slots[oi]] = oi;
+                    if (!interval_ids.insert(interval.clip_attachment_id).second) {
+                        throw std::runtime_error("Duplicate runtime-v3 clipping interval");
                     }
-                    if (position[interval.start_slot_index] > position[interval.end_slot_index]) {
-                        throw std::runtime_error("Runtime-v3 clipping interval reversed in draw order");
+                    const auto semantic = attachment_semantics.find(interval.clip_attachment_id);
+                    if (semantic == attachment_semantics.end() || semantic->second.second != AttachmentKind::Clipping) {
+                        throw std::runtime_error("Runtime-v3 clipping interval requires clipping attachment");
                     }
+                    if (semantic->second.first != interval.start_slot_index) {
+                        throw std::runtime_error("Runtime-v3 clipping interval start must equal clipping slot");
+                    }
+                    if (fv.active_attachment_by_slot[interval.start_slot_index] != interval.clip_attachment_id) {
+                        throw std::runtime_error("Runtime-v3 clipping attachment is not active at interval start");
+                    }
+                    if (position[interval.start_slot_index] >= position[interval.end_slot_index]) {
+                        throw std::runtime_error("Runtime-v3 clipping interval must cover a subsequent slot");
+                    }
+                }
+                if (active_clipping != interval_ids) {
+                    throw std::runtime_error("Runtime-v3 active clipping attachment requires exactly one interval");
                 }
             }
             clip.frames.push_back(std::move(frame));
@@ -715,7 +754,122 @@ DepthWritePolicy depth_write_policy(AttachmentKind kind) {
         case AttachmentKind::RigidComponent: return DepthWritePolicy::CutoutOnly;
         case AttachmentKind::Clipping: break;
     }
-    throw std::runtime_error("Runtime-v3 clipping attachment reached color/depth renderer before clipping qualification");
+    throw std::runtime_error("Runtime-v3 clipping attachment cannot write color/depth");
+}
+
+std::vector<uint8_t> rasterize_clip_mask(
+    const View& view,
+    const Mesh& mesh,
+    const std::vector<Vec3>& posed_a,
+    const std::vector<Vec3>& posed_b,
+    float frame_alpha,
+    bool inverse) {
+    if (mesh.attachment_kind != AttachmentKind::Clipping) {
+        throw std::runtime_error("Runtime-v3 clip-mask raster requires clipping attachment");
+    }
+    if (posed_a.size() != mesh.vertices.size() || posed_b.size() != mesh.vertices.size()) {
+        throw std::runtime_error("Runtime-v3 clipping frame vertex count drift");
+    }
+
+    const size_t pixels = static_cast<size_t>(view.width) * view.height;
+    std::vector<uint8_t> mask(pixels, 0);
+    for (const auto& tri : mesh.triangles) {
+        const Vec3 p0 = lerp(posed_a[tri[0]], posed_b[tri[0]], frame_alpha);
+        const Vec3 p1 = lerp(posed_a[tri[1]], posed_b[tri[1]], frame_alpha);
+        const Vec3 p2 = lerp(posed_a[tri[2]], posed_b[tri[2]], frame_alpha);
+        const Vertex v0{p0.x, p0.y, p0.z, 0.0f, 0.0f};
+        const Vertex v1{p1.x, p1.y, p1.z, 0.0f, 0.0f};
+        const Vertex v2{p2.x, p2.y, p2.z, 0.0f, 0.0f};
+
+        const float min_fx = std::min({v0.x, v1.x, v2.x});
+        const float max_fx = std::max({v0.x, v1.x, v2.x});
+        const float min_fy = std::min({v0.y, v1.y, v2.y});
+        const float max_fy = std::max({v0.y, v1.y, v2.y});
+        const int min_x = std::max(0, static_cast<int>(std::floor(min_fx - 0.5f)));
+        const int max_x = std::min(static_cast<int>(view.width) - 1, static_cast<int>(std::ceil(max_fx - 0.5f)));
+        const int min_y = std::max(0, static_cast<int>(std::floor(min_fy - 0.5f)));
+        const int max_y = std::min(static_cast<int>(view.height) - 1, static_cast<int>(std::ceil(max_fy - 0.5f)));
+        if (min_x > max_x || min_y > max_y) continue;
+
+        for (int y = min_y; y <= max_y; ++y) {
+            for (int x = min_x; x <= max_x; ++x) {
+                if (!reference_raster_v3::cover_pixel_center(v0, v1, v2, x, y).covered) continue;
+                mask[static_cast<size_t>(y) * view.width + static_cast<size_t>(x)] = 1;
+            }
+        }
+    }
+    if (inverse) {
+        for (auto& value : mask) value = value ? 0 : 1;
+    }
+    return mask;
+}
+
+std::vector<ActiveClipMask> build_active_clip_masks(
+    const RuntimeData& data,
+    const View& view,
+    const FrameView& a,
+    const FrameView& b,
+    const FrameView& composition,
+    float frame_alpha) {
+    std::vector<ActiveClipMask> out;
+    if (composition.clip_intervals.empty()) return out;
+
+    std::vector<uint32_t> slot_position(data.slots.size());
+    for (uint32_t order_rank = 0; order_rank < composition.draw_order_slots.size(); ++order_rank) {
+        slot_position[composition.draw_order_slots[order_rank]] = order_rank;
+    }
+
+    out.reserve(composition.clip_intervals.size());
+    for (const auto& interval : composition.clip_intervals) {
+        if (interval.start_slot_index >= data.slots.size() || interval.end_slot_index >= data.slots.size()) {
+            throw std::runtime_error("Runtime-v3 clipping interval slot index out of range at render");
+        }
+        if (composition.active_attachment_by_slot[interval.start_slot_index] != interval.clip_attachment_id) {
+            throw std::runtime_error("Runtime-v3 clipping attachment inactive at sampled interval start");
+        }
+        const uint32_t start_order = slot_position[interval.start_slot_index];
+        const uint32_t end_order = slot_position[interval.end_slot_index];
+        if (start_order >= end_order) {
+            throw std::runtime_error("Runtime-v3 clipping interval is not forward in sampled draw order");
+        }
+
+        size_t mesh_index = 0;
+        const Mesh& mesh = resolve_active_mesh(
+            view,
+            interval.start_slot_index,
+            interval.clip_attachment_id,
+            &mesh_index);
+        if (mesh.attachment_kind != AttachmentKind::Clipping) {
+            throw std::runtime_error("Runtime-v3 clipping interval resolved non-clipping mesh");
+        }
+        if (mesh_index >= a.mesh_vertices.size() || mesh_index >= b.mesh_vertices.size()) {
+            throw std::runtime_error("Runtime-v3 clipping frame/mesh topology drift");
+        }
+
+        ActiveClipMask row;
+        row.start_order = start_order;
+        row.end_order = end_order;
+        row.mask = rasterize_clip_mask(
+            view,
+            mesh,
+            a.mesh_vertices[mesh_index],
+            b.mesh_vertices[mesh_index],
+            frame_alpha,
+            interval.inverse);
+        out.push_back(std::move(row));
+    }
+    return out;
+}
+
+bool pixel_passes_clipping(
+    size_t pixel_index,
+    uint32_t order_rank,
+    const std::vector<ActiveClipMask>& clip_masks) {
+    for (const auto& clip : clip_masks) {
+        if (order_rank <= clip.start_order || order_rank > clip.end_order) continue;
+        if (pixel_index >= clip.mask.size() || clip.mask[pixel_index] == 0) return false;
+    }
+    return true;
 }
 
 void render_triangle(
@@ -725,8 +879,10 @@ void render_triangle(
     const std::vector<Vec3>& posed_b,
     float frame_alpha,
     const std::array<uint32_t, 3>& tri,
+    uint32_t order_rank,
     uint32_t semantic_order,
     float cutout_threshold,
+    const std::vector<ActiveClipMask>& clip_masks,
     std::vector<DepthSample>& depth,
     std::vector<uint8_t>& rgba) {
     const Vec3 p0 = lerp(posed_a[tri[0]], posed_b[tri[0]], frame_alpha);
@@ -755,8 +911,10 @@ void render_triangle(
         for (int x = min_x; x <= max_x; ++x) {
             const Barycentric bc = reference_raster_v3::cover_pixel_center(v0, v1, v2, x, y);
             if (!bc.covered) continue;
-            const float z = reference_raster_v3::interpolate_depth(bc, v0, v1, v2);
             const size_t pixel_index = static_cast<size_t>(y) * view.width + static_cast<size_t>(x);
+            if (!pixel_passes_clipping(pixel_index, order_rank, clip_masks)) continue;
+
+            const float z = reference_raster_v3::interpolate_depth(bc, v0, v1, v2);
             if (!reference_raster_v3::depth_test_passes(depth[pixel_index], z, semantic_order)) continue;
 
             const float u = v0.u * bc.w0 + v1.u * bc.w1 + v2.u * bc.w2;
@@ -788,12 +946,6 @@ std::vector<uint8_t> render_frame(
     const FrameView& b = span.b->views[view_index];
     const FrameView& composition = span.alpha < 0.5f ? a : b;
 
-    // Clipping is never silently omitted. Until the native interval/stencil
-    // implementation is qualified, any sampled clipping state is a hard error.
-    if (!a.clip_intervals.empty() || !b.clip_intervals.empty()) {
-        throw std::runtime_error("RUNTIME_V3_NATIVE_CLIPPING_NOT_YET_QUALIFIED");
-    }
-
     const size_t pixels = static_cast<size_t>(view.width) * view.height;
     std::vector<uint8_t> rgba(pixels * 4, 0);
     std::vector<DepthSample> depth(pixels);
@@ -801,6 +953,7 @@ std::vector<uint8_t> render_frame(
     if (composition.active_attachment_by_slot.size() != data.slots.size()) {
         throw std::runtime_error("Runtime-v3 sampled active attachment map is incomplete");
     }
+    const auto clip_masks = build_active_clip_masks(data, view, a, b, composition, span.alpha);
 
     for (uint32_t order_rank = 0; order_rank < composition.draw_order_slots.size(); ++order_rank) {
         const uint32_t slot_index = composition.draw_order_slots[order_rank];
@@ -810,9 +963,10 @@ std::vector<uint8_t> render_frame(
 
         size_t mesh_index = 0;
         const Mesh& mesh = resolve_active_mesh(view, slot_index, active_attachment, &mesh_index);
-        if (mesh.attachment_kind == AttachmentKind::Clipping) {
-            throw std::runtime_error("RUNTIME_V3_NATIVE_CLIPPING_NOT_YET_QUALIFIED");
-        }
+        // Clipping attachments create a stencil/clip region; they do not emit
+        // color or depth themselves. Their interval applies to subsequent slots
+        // through end_slot inclusive.
+        if (mesh.attachment_kind == AttachmentKind::Clipping) continue;
         if (mesh_index >= a.mesh_vertices.size() || mesh_index >= b.mesh_vertices.size()) {
             throw std::runtime_error("Runtime-v3 frame/mesh topology drift");
         }
@@ -836,8 +990,10 @@ std::vector<uint8_t> render_frame(
                 posed_b,
                 span.alpha,
                 mesh.triangles[ti],
+                order_rank,
                 semantic_order,
                 data.alpha_cutout_threshold,
+                clip_masks,
                 depth,
                 rgba);
         }

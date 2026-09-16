@@ -7,6 +7,7 @@ It does not choose topology, appearance donors, visibility subsets, or subject p
 """
 
 from dataclasses import dataclass
+from hashlib import sha256
 from typing import Mapping, Sequence
 import math
 
@@ -15,7 +16,7 @@ import numpy as np
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.motion_3d_adapter_v1 import D1CompiledClipV1
 from compiler.realsas_compiler_core.motion_3d_v1 import apply_lbs_matrix_v1
-from compiler.realsas_compiler_core.playback_full_surface_v3 import project_posed_full_surface_frames_v3
+from compiler.realsas_compiler_core.playback_full_surface_v3 import project_points_xyz_v3, qualify_camera_v3
 from compiler.realsas_compiler_core.playback_runtime_v3 import RuntimeV3FrameComposition
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.export.runtime_v3 import RuntimeV3Clip, RuntimeV3Frame
@@ -36,6 +37,34 @@ class PlaybackV3D1BridgeReport:
     runtime_qualified: bool
     bridge_hash: str
     schema_version: str = PLAYBACK_V3_D1_BRIDGE_SCHEMA
+
+
+def _array_sha256(value: np.ndarray) -> str:
+    arr = np.ascontiguousarray(value)
+    h = sha256()
+    h.update(str(arr.dtype).encode("ascii"))
+    h.update(b"|")
+    h.update("x".join(map(str, arr.shape)).encode("ascii"))
+    h.update(b"|")
+    h.update(arr.tobytes(order="C"))
+    return h.hexdigest()
+
+
+def _project_frame_arrays(
+    posed_3d: np.ndarray,
+    cameras: Mapping[str, Mapping],
+    *,
+    attachment_id: str,
+    view_ids: tuple[str, ...],
+) -> dict[str, np.ndarray]:
+    """Keep baked frame payload contiguous/f32 until the binary writer consumes it."""
+
+    out: dict[str, np.ndarray] = {}
+    for view_index, view_id in enumerate(view_ids):
+        camera = qualify_camera_v3(cameras[view_id], view_id=view_id, view_index=view_index)
+        xyz = project_points_xyz_v3(posed_3d, camera)
+        out[f"{view_id}:{attachment_id}"] = np.ascontiguousarray(xyz, dtype=np.float32)
+    return out
 
 
 def _validate_dense_skin(
@@ -117,14 +146,13 @@ def build_runtime_v3_clip_from_d1(
             "frame_index": frame_index,
             "time_seconds": float(time_seconds),
             "shape": list(posed_3d.shape),
-            "values": posed_3d.tolist(),
+            "array_sha256": _array_sha256(np.ascontiguousarray(posed_3d, dtype=np.float64)),
         }))
-        posed_by_mesh = project_posed_full_surface_frames_v3(
+        posed_by_mesh = _project_frame_arrays(
             posed_3d,
             cameras,
             attachment_id=str(attachment_id),
-            expected_vertex_count=len(p),
-            required_view_ids=view_ids,
+            view_ids=view_ids,
         )
         composition = dict(composition_by_frame[frame_index])
         if set(composition) != set(view_ids):

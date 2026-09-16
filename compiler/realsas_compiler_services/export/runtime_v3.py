@@ -20,6 +20,7 @@ import zipfile
 import zlib
 
 from compiler.realsas_compiler_core.playback_runtime_v3 import (
+    AppearanceProvenance,
     AttachmentKind,
     RuntimeV3FrameComposition,
     RuntimeV3PlaybackContract,
@@ -47,7 +48,8 @@ FEATURE_FULL_SURFACE_AUTHORITY = 1 << 6
 FEATURE_SLOT_ATTACHMENTS = 1 << 7
 FEATURE_CLIP_INTERVALS = 1 << 8
 FEATURE_APPEARANCE_PROVENANCE = 1 << 9
-RUNTIME_V3_FEATURE_FLAGS = sum(1 << i for i in range(10))
+FEATURE_PER_FACE_APPEARANCE_PROVENANCE = 1 << 10
+RUNTIME_V3_FEATURE_FLAGS = sum(1 << i for i in range(11))
 
 _ATTACHMENT_KIND_CODE = {
     AttachmentKind.DEFORMABLE_BODY: 0,
@@ -59,6 +61,13 @@ _TOPOLOGY_CLASS_CODE = {
     TopologyClass.ATTACHMENT_DYNAMIC: 1,
     TopologyClass.CLIP_DYNAMIC: 2,
     TopologyClass.DRAW_ORDER_DYNAMIC: 3,
+}
+_APPEARANCE_PROVENANCE_CODE = {
+    AppearanceProvenance.DIRECT_SOURCE: 0,
+    AppearanceProvenance.OTHER_VIEW_SOURCE: 1,
+    AppearanceProvenance.UNDER_RIGID_SOURCE: 2,
+    AppearanceProvenance.UNSEEN: 3,
+    AppearanceProvenance.COMPLETION: 4,
 }
 
 
@@ -220,6 +229,31 @@ def _validate_clips(
     return rows
 
 
+def _face_provenance_codes(contract: RuntimeV3PlaybackContract) -> dict[str, tuple[int, ...]]:
+    mesh_by_id = {m.mesh_id: m for m in contract.meshes}
+    claims: dict[str, list[int | None]] = {
+        mesh_id: [None] * len(mesh.triangles)
+        for mesh_id, mesh in mesh_by_id.items()
+    }
+    for patch in contract.appearance_patches:
+        code = _APPEARANCE_PROVENANCE_CODE[patch.provenance]
+        row = claims.get(patch.mesh_id)
+        if row is None:
+            raise QualificationError("RUNTIME_V3_APPEARANCE_REFERENCES_UNKNOWN_MESH")
+        for face_index in patch.face_indices:
+            if face_index < 0 or face_index >= len(row):
+                raise QualificationError("RUNTIME_V3_APPEARANCE_FACE_OUT_OF_RANGE")
+            if row[face_index] is not None:
+                raise QualificationError("RUNTIME_V3_APPEARANCE_FACE_MULTI_CLAIM")
+            row[face_index] = code
+    out: dict[str, tuple[int, ...]] = {}
+    for mesh_id, row in claims.items():
+        if any(value is None for value in row):
+            raise QualificationError("RUNTIME_V3_APPEARANCE_FACE_COVERAGE_INCOMPLETE")
+        out[mesh_id] = tuple(int(value) for value in row if value is not None)
+    return out
+
+
 def write_runtime_v3_binary(
     *,
     contract: RuntimeV3PlaybackContract,
@@ -237,6 +271,7 @@ def write_runtime_v3_binary(
         for view_id in required_views
     }
     slot_index = {slot.slot_id: i for i, slot in enumerate(contract.slots)}
+    face_provenance = _face_provenance_codes(contract)
 
     w = _Writer()
     w.raw(RUNTIME_V3_BINARY_MAGIC)
@@ -281,8 +316,11 @@ def write_runtime_v3_binary(
             w.u32(len(mesh.triangles))
             for v in mesh.vertices:
                 w.f32(v.x); w.f32(v.y); w.f32(v.z); w.f32(v.u); w.f32(v.v)
-            for a, b, c in mesh.triangles:
+            provenance = face_provenance[mesh.mesh_id]
+            for face_index, (a, b, c) in enumerate(mesh.triangles):
                 w.u32(a); w.u32(b); w.u32(c)
+                w.u8(provenance[face_index])
+                w.u8(0); w.u8(0); w.u8(0)
 
     w.u32(len(clips))
     for clip in clips:
@@ -389,6 +427,8 @@ def materialize_runtime_v3_archive(
             "full_surface_geometry_authority": True,
             "semantic_slot_draw_order": True,
             "clip_intervals": True,
+            "per_face_appearance_provenance": True,
+            "unseen_face_suppression": True,
             "visibility_by_face_deletion": False,
         },
         "reference_raster": {

@@ -39,7 +39,9 @@ if(REALSAS_BUILD_EXAMPLES)
   add_executable(realsas_runtime_demo examples/realsas_runtime_demo.cpp)
   target_compile_features(realsas_runtime_demo PRIVATE cxx_std_17)
   target_link_libraries(realsas_runtime_demo PRIVATE RealSaS::Runtime PNG::PNG)
+endif()
 
+if(REALSAS_BUILD_EXAMPLES OR REALSAS_BUILD_TESTS)
   add_executable(realsas_runtime_v3_demo examples/realsas_runtime_v3_demo.cpp)
   target_compile_features(realsas_runtime_v3_demo PRIVATE cxx_std_17)
   target_link_libraries(realsas_runtime_v3_demo PRIVATE realsas_runtime_v3_reference PNG::PNG)
@@ -47,6 +49,8 @@ endif()
 
 if(REALSAS_BUILD_TESTS)
   enable_testing()
+  find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
   add_executable(realsas_runtime_abi_smoke tests/runtime_abi_smoke.cpp)
   target_compile_features(realsas_runtime_abi_smoke PRIVATE cxx_std_17)
   target_link_libraries(realsas_runtime_abi_smoke PRIVATE RealSaS::Runtime)
@@ -55,6 +59,12 @@ if(REALSAS_BUILD_TESTS)
   add_executable(realsas_reference_raster_v3 tests/reference_raster_v3.cpp)
   target_compile_features(realsas_reference_raster_v3 PRIVATE cxx_std_17)
   add_test(NAME realsas_reference_raster_v3 COMMAND realsas_reference_raster_v3)
+
+  add_test(
+    NAME realsas_runtime_v3_writer_native_e2e
+    COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/runtime_v3_writer_native_e2e.py
+      --runtime-demo $<TARGET_FILE:realsas_runtime_v3_demo>)
 endif()
 
 include(GNUInstallDirs)

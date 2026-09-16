@@ -25,10 +25,24 @@ set_target_properties(realsas_runtime PROPERTIES
   EXPORT_NAME Runtime
   POSITION_INDEPENDENT_CODE ON)
 
+# Runtime-v3 is intentionally kept behind an internal reference target until
+# parser/raster/clipping conformance closes. This keeps the stable v2/v3 C ABI
+# surface unchanged while allowing real .rss-v3 -> native PNG execution now.
+add_library(realsas_runtime_v3_reference STATIC
+  src/runtime_v3_reference.cpp)
+target_compile_features(realsas_runtime_v3_reference PUBLIC cxx_std_17)
+target_include_directories(realsas_runtime_v3_reference PRIVATE src)
+target_link_libraries(realsas_runtime_v3_reference PRIVATE LibArchive::LibArchive PNG::PNG ZLIB::ZLIB)
+set_target_properties(realsas_runtime_v3_reference PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 if(REALSAS_BUILD_EXAMPLES)
   add_executable(realsas_runtime_demo examples/realsas_runtime_demo.cpp)
   target_compile_features(realsas_runtime_demo PRIVATE cxx_std_17)
   target_link_libraries(realsas_runtime_demo PRIVATE RealSaS::Runtime PNG::PNG)
+
+  add_executable(realsas_runtime_v3_demo examples/realsas_runtime_v3_demo.cpp)
+  target_compile_features(realsas_runtime_v3_demo PRIVATE cxx_std_17)
+  target_link_libraries(realsas_runtime_v3_demo PRIVATE realsas_runtime_v3_reference PNG::PNG)
 endif()
 
 if(REALSAS_BUILD_TESTS)

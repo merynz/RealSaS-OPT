@@ -33,6 +33,7 @@ class PlaybackV3D1BridgeReport:
     view_count: int
     nominal_fps: float
     max_weight_row_sum_error: float
+    runtime_qualified: bool
     bridge_hash: str
     schema_version: str = PLAYBACK_V3_D1_BRIDGE_SCHEMA
 
@@ -73,12 +74,17 @@ def build_runtime_v3_clip_from_d1(
     display_name: str,
     intent: str,
     nominal_fps: float,
+    runtime_qualified: bool = False,
     required_view_ids: Sequence[str] = tuple(f"V{i}" for i in range(8)),
 ) -> tuple[RuntimeV3Clip, PlaybackV3D1BridgeReport]:
     """Bake one D1 clip into posed Runtime-v3 XYZ frames.
 
     X/Y and Z always come from the same deformed canonical 3D vertices. Composition
     is caller-owned and must already be qualified by the Runtime-v3 contract.
+
+    runtime_qualified is deliberately caller-owned and defaults False. This bridge
+    establishes deterministic mechanics/baking only; it must never promote a clip
+    into product qualification merely because serialization succeeded.
     """
 
     fps = float(nominal_fps)
@@ -132,6 +138,7 @@ def build_runtime_v3_clip_from_d1(
             composition_by_view=composition,
         ))
 
+    qualified = bool(runtime_qualified)
     runtime_clip = RuntimeV3Clip(
         clip_id=d1_clip.clip_id,
         display_name=str(display_name),
@@ -140,7 +147,7 @@ def build_runtime_v3_clip_from_d1(
         fps=fps,
         loop=bool(d1_clip.loop),
         frames=tuple(frames),
-        runtime_qualified=True,
+        runtime_qualified=qualified,
     )
     bridge_hash = content_sha256({
         "schema": PLAYBACK_V3_D1_BRIDGE_SCHEMA,
@@ -152,6 +159,7 @@ def build_runtime_v3_clip_from_d1(
         "joint_ids": list(d1_clip.joint_ids),
         "view_ids": list(view_ids),
         "nominal_fps": fps,
+        "runtime_qualified": qualified,
         "max_weight_row_sum_error": weight_error,
         "posed_frame_hashes": posed_hashes,
     })
@@ -163,6 +171,7 @@ def build_runtime_v3_clip_from_d1(
         view_count=len(view_ids),
         nominal_fps=fps,
         max_weight_row_sum_error=weight_error,
+        runtime_qualified=qualified,
         bridge_hash=bridge_hash,
     )
     return runtime_clip, report

@@ -47,10 +47,9 @@ inline double orient2d(Vec2 a, Vec2 b, double px, double py) noexcept {
          - (static_cast<double>(b.y) - a.y) * (px - a.x);
 }
 
-// Screen coordinates are +X right, +Y down. After triangle orientation is
-// normalized to positive orient2d area, a directed edge is top/left when it
-// travels upward, or travels right along a horizontal edge. This makes shared
-// edges single-owner under the half-integer pixel-center convention.
+// Screen coordinates are +X right, +Y down. For positive orient2d winding, a
+// directed edge is top/left when it travels upward, or right along a horizontal
+// edge. Negative winding uses the reversed directed edge for the same ownership.
 inline bool is_top_left(Vec2 a, Vec2 b) noexcept {
     const float dx = b.x - a.x;
     const float dy = b.y - a.y;
@@ -64,28 +63,27 @@ inline bool edge_accept(double e, bool top_left) noexcept {
     return top_left;
 }
 
-inline Barycentric cover_pixel_center(Vertex a, Vertex b, Vertex c, int pixel_x, int pixel_y) noexcept {
-    Vec2 p0{a.x, a.y}, p1{b.x, b.y}, p2{c.x, c.y};
-    double area = orient2d(p0, p1, p2.x, p2.y);
-    if (std::abs(area) <= 1e-12) return {};
-
-    // Normalize orientation so one exact fill rule covers both windings.
-    if (area < 0.0) {
-        std::swap(b, c);
-        p1 = {b.x, b.y};
-        p2 = {c.x, c.y};
-        area = -area;
-    }
+inline Barycentric cover_pixel_center(const Vertex& a, const Vertex& b, const Vertex& c, int pixel_x, int pixel_y) noexcept {
+    const Vec2 p0{a.x, a.y}, p1{b.x, b.y}, p2{c.x, c.y};
+    const double signed_area = orient2d(p0, p1, p2.x, p2.y);
+    if (std::abs(signed_area) <= 1e-12) return {};
 
     const double px = static_cast<double>(pixel_x) + 0.5;
     const double py = static_cast<double>(pixel_y) + 0.5;
-    const double e0 = orient2d(p1, p2, px, py);
-    const double e1 = orient2d(p2, p0, px, py);
-    const double e2 = orient2d(p0, p1, px, py);
+    const bool positive = signed_area > 0.0;
+    const double sign = positive ? 1.0 : -1.0;
+    const double area = std::abs(signed_area);
 
-    if (!edge_accept(e0, is_top_left(p1, p2))
-        || !edge_accept(e1, is_top_left(p2, p0))
-        || !edge_accept(e2, is_top_left(p0, p1))) {
+    // We preserve original vertex identity in w0/w1/w2. Only edge sign and
+    // directed-edge ownership are normalized for winding.
+    const double e0 = sign * orient2d(p1, p2, px, py);
+    const double e1 = sign * orient2d(p2, p0, px, py);
+    const double e2 = sign * orient2d(p0, p1, px, py);
+    const bool tl0 = positive ? is_top_left(p1, p2) : is_top_left(p2, p1);
+    const bool tl1 = positive ? is_top_left(p2, p0) : is_top_left(p0, p2);
+    const bool tl2 = positive ? is_top_left(p0, p1) : is_top_left(p1, p0);
+
+    if (!edge_accept(e0, tl0) || !edge_accept(e1, tl1) || !edge_accept(e2, tl2)) {
         return {};
     }
 

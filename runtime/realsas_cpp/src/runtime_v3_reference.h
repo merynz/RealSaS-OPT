@@ -49,8 +49,11 @@ public:
     // linearly interpolated between baked XYZ frames. Slot composition is
     // selected discretely at the same midpoint rule as runtime-v2.
     //
-    // Clipping intervals are parsed and preserved but intentionally fail
-    // closed here until the Spine-class clipping implementation is qualified.
+    // Spine-class clipping attachments rasterize geometry-only masks using the
+    // same half-pixel/top-left coverage rule. The clip attachment itself emits
+    // no color/depth; its mask applies to subsequent draw-order slots through
+    // end_slot inclusive. Inverse clipping is supported and overlapping active
+    // intervals combine by deterministic intersection.
     std::vector<uint8_t> render_rgba(
         uint32_t clip_index,
         uint32_t view_index,

@@ -37,6 +37,10 @@ if(REALSAS_BUILD_TESTS)
   target_compile_features(realsas_runtime_abi_smoke PRIVATE cxx_std_17)
   target_link_libraries(realsas_runtime_abi_smoke PRIVATE RealSaS::Runtime)
   add_test(NAME realsas_runtime_abi_smoke COMMAND realsas_runtime_abi_smoke)
+
+  add_executable(realsas_reference_raster_v3 tests/reference_raster_v3.cpp)
+  target_compile_features(realsas_reference_raster_v3 PRIVATE cxx_std_17)
+  add_test(NAME realsas_reference_raster_v3 COMMAND realsas_reference_raster_v3)
 endif()
 
 include(GNUInstallDirs)

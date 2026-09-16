@@ -21,8 +21,12 @@ from compiler.realsas_compiler_core.playback_runtime_v3 import (
 from compiler.realsas_compiler_core.types import QualificationError
 
 
-def _mesh(*, mesh_id: str, slot_id: str, attachment_id: str, kind=AttachmentKind.DEFORMABLE_BODY):
+UNIT_VIEWS = ("V0",)
+
+
+def _mesh(*, mesh_id: str, slot_id: str, attachment_id: str, view_id="V0", kind=AttachmentKind.DEFORMABLE_BODY):
     return RuntimeV3Mesh(
+        view_id=view_id,
         mesh_id=mesh_id,
         slot_id=slot_id,
         attachment_id=attachment_id,
@@ -38,14 +42,14 @@ def _mesh(*, mesh_id: str, slot_id: str, attachment_id: str, kind=AttachmentKind
 
 
 def _contract(*, provenance=AppearanceProvenance.DIRECT_SOURCE, allow_completion=False):
-    body = _mesh(mesh_id="body", slot_id="body_slot", attachment_id="body_attachment")
+    body = _mesh(mesh_id="V0:body", slot_id="body_slot", attachment_id="body_attachment")
     return RuntimeV3PlaybackContract(
         slots=(RuntimeV3Slot("body_slot", "root", 0, "body_attachment"),),
         meshes=(body,),
         appearance_patches=(
             RuntimeV3AppearancePatch(
                 patch_id="body_face_0",
-                mesh_id="body",
+                mesh_id="V0:body",
                 face_indices=(0,),
                 provenance=provenance,
                 donor_view_index=(0 if provenance != AppearanceProvenance.UNSEEN else None),
@@ -57,10 +61,14 @@ def _contract(*, provenance=AppearanceProvenance.DIRECT_SOURCE, allow_completion
     )
 
 
+def validate_unit(c):
+    return validate_playback_runtime_v3_contract(c, required_view_ids=UNIT_VIEWS)
+
+
 def test_v3_contract_is_subject_agnostic_and_deterministic():
     c = _contract()
-    h1 = validate_playback_runtime_v3_contract(c)
-    h2 = validate_playback_runtime_v3_contract(c)
+    h1 = validate_unit(c)
+    h2 = validate_unit(c)
     assert len(h1) == 64
     assert h1 == h2
     source = __import__(
@@ -71,9 +79,37 @@ def test_v3_contract_is_subject_agnostic_and_deterministic():
     assert "mage" not in text
 
 
+def test_product_default_requires_exact_eight_direction_view_set():
+    with pytest.raises(QualificationError, match="RUNTIME_V3_MESH_VIEW_SET_MISMATCH"):
+        validate_playback_runtime_v3_contract(_contract())
+
+
+def test_logical_attachment_can_have_one_mesh_variant_per_view():
+    meshes = tuple(
+        _mesh(
+            mesh_id=f"V{i}:body",
+            slot_id="body_slot",
+            attachment_id="body_attachment",
+            view_id=f"V{i}",
+        )
+        for i in range(8)
+    )
+    c = RuntimeV3PlaybackContract(
+        slots=(RuntimeV3Slot("body_slot", "root", 0, "body_attachment"),),
+        meshes=meshes,
+        appearance_patches=tuple(
+            RuntimeV3AppearancePatch(
+                f"V{i}:p0", f"V{i}:body", (0,), AppearanceProvenance.DIRECT_SOURCE, i, f"V{i}"
+            )
+            for i in range(8)
+        ),
+    )
+    assert len(validate_playback_runtime_v3_contract(c)) == 64
+
+
 def test_unseen_is_explicit_and_unbound_not_fake_filled():
     c = _contract(provenance=AppearanceProvenance.UNSEEN)
-    assert len(validate_playback_runtime_v3_contract(c)) == 64
+    assert len(validate_unit(c)) == 64
     patch = c.appearance_patches[0]
     assert patch.donor_view_index is None
     assert patch.atlas_id is None
@@ -81,8 +117,8 @@ def test_unseen_is_explicit_and_unbound_not_fake_filled():
 
 def test_completion_is_fail_closed_until_product_policy_enables_it():
     with pytest.raises(QualificationError, match="RUNTIME_V3_COMPLETION_NOT_ALLOWED_BY_PRODUCT_POLICY"):
-        validate_playback_runtime_v3_contract(_contract(provenance=AppearanceProvenance.COMPLETION))
-    assert len(validate_playback_runtime_v3_contract(
+        validate_unit(_contract(provenance=AppearanceProvenance.COMPLETION))
+    assert len(validate_unit(
         _contract(provenance=AppearanceProvenance.COMPLETION, allow_completion=True)
     )) == 64
 
@@ -99,12 +135,23 @@ def test_body_self_occlusion_cannot_fall_back_to_draw_order():
         ),
     )
     with pytest.raises(QualificationError, match="RUNTIME_V3_BODY_DEPTH_TEST_REQUIRED"):
-        validate_playback_runtime_v3_contract(bad)
+        validate_unit(bad)
+
+
+def test_direct_source_donor_must_match_target_view():
+    c = _contract()
+    bad_patch = RuntimeV3AppearancePatch(
+        "bad", "V0:body", (0,), AppearanceProvenance.DIRECT_SOURCE, 3, "V0"
+    )
+    bad = RuntimeV3PlaybackContract(c.slots, c.meshes, (bad_patch,))
+    with pytest.raises(QualificationError, match="RUNTIME_V3_DIRECT_SOURCE_DONOR_MUST_MATCH_TARGET_VIEW"):
+        validate_unit(bad)
 
 
 def test_appearance_authority_is_face_patch_not_unqualified_vertex_donor_mix():
     body = RuntimeV3Mesh(
-        mesh_id="body",
+        view_id="V0",
+        mesh_id="V0:body",
         slot_id="body_slot",
         attachment_id="body_attachment",
         attachment_kind=AttachmentKind.DEFORMABLE_BODY,
@@ -121,16 +168,17 @@ def test_appearance_authority_is_face_patch_not_unqualified_vertex_donor_mix():
         slots=(RuntimeV3Slot("body_slot", "root", 0, "body_attachment"),),
         meshes=(body,),
         appearance_patches=(
-            RuntimeV3AppearancePatch("p0", "body", (0,), AppearanceProvenance.DIRECT_SOURCE, 0, "V0"),
-            RuntimeV3AppearancePatch("p1", "body", (1,), AppearanceProvenance.OTHER_VIEW_SOURCE, 3, "V0_baked_cross_view"),
+            RuntimeV3AppearancePatch("p0", "V0:body", (0,), AppearanceProvenance.DIRECT_SOURCE, 0, "V0"),
+            RuntimeV3AppearancePatch("p1", "V0:body", (1,), AppearanceProvenance.OTHER_VIEW_SOURCE, 3, "V0_baked_cross_view"),
         ),
     )
-    assert len(validate_playback_runtime_v3_contract(c)) == 64
+    assert len(validate_unit(c)) == 64
 
 
 def test_appearance_face_partition_must_be_exact():
     body = RuntimeV3Mesh(
-        mesh_id="body",
+        view_id="V0",
+        mesh_id="V0:body",
         slot_id="body_slot",
         attachment_id="body_attachment",
         attachment_kind=AttachmentKind.DEFORMABLE_BODY,
@@ -147,17 +195,17 @@ def test_appearance_face_partition_must_be_exact():
         slots=(RuntimeV3Slot("body_slot", "root", 0, "body_attachment"),),
         meshes=(body,),
         appearance_patches=(
-            RuntimeV3AppearancePatch("p0", "body", (0,), AppearanceProvenance.DIRECT_SOURCE, 0, "V0"),
+            RuntimeV3AppearancePatch("p0", "V0:body", (0,), AppearanceProvenance.DIRECT_SOURCE, 0, "V0"),
         ),
     )
     with pytest.raises(QualificationError, match="RUNTIME_V3_APPEARANCE_FACE_COVERAGE_INCOMPLETE"):
-        validate_playback_runtime_v3_contract(c)
+        validate_unit(c)
 
 
 def test_slot_draw_order_is_exact_permutation_and_clip_is_interval_semantics():
-    body = _mesh(mesh_id="body", slot_id="body_slot", attachment_id="body_attachment")
+    body = _mesh(mesh_id="V0:body", slot_id="body_slot", attachment_id="body_attachment")
     clip = _mesh(
-        mesh_id="clip_mesh",
+        mesh_id="V0:clip",
         slot_id="clip_slot",
         attachment_id="clip_attachment",
         kind=AttachmentKind.CLIPPING,
@@ -169,11 +217,11 @@ def test_slot_draw_order_is_exact_permutation_and_clip_is_interval_semantics():
         ),
         meshes=(clip, body),
         appearance_patches=(
-            RuntimeV3AppearancePatch("clip_face", "clip_mesh", (0,), AppearanceProvenance.UNSEEN, None, None),
-            RuntimeV3AppearancePatch("body_face", "body", (0,), AppearanceProvenance.DIRECT_SOURCE, 0, "V0"),
+            RuntimeV3AppearancePatch("clip_face", "V0:clip", (0,), AppearanceProvenance.UNSEEN, None, None),
+            RuntimeV3AppearancePatch("body_face", "V0:body", (0,), AppearanceProvenance.DIRECT_SOURCE, 0, "V0"),
         ),
     )
-    validate_playback_runtime_v3_contract(c)
+    validate_unit(c)
     frame = RuntimeV3FrameComposition(
         view_id="V0",
         draw_order_slot_ids=("clip_slot", "body_slot"),

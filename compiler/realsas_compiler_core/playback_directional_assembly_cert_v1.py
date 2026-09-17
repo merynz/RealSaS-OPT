@@ -139,8 +139,15 @@ def certify_directional_runtime_v4_assembly_v1(
     if len(views_payload) != len(view_ids):
         raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_CONTINUITY_VIEW_CARDINALITY")
     for row in views_payload:
-        if bool(row.get("new_pixels_generated", True)):
+        row_metadata = dict(row.get("metadata") or {})
+        if bool(row_metadata.get("new_pixels_generated", True)):
             raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_UNDERLAY_NEW_PIXELS_FORBIDDEN")
+        if bool(row_metadata.get("topology_mutated", True)):
+            raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_UNDERLAY_TOPOLOGY_MUTATION_FORBIDDEN")
+        if bool(row_metadata.get("weights_mutated", True)):
+            raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_UNDERLAY_WEIGHT_MUTATION_FORBIDDEN")
+        if row_metadata.get("pixel_authority") != "EXACT_SUBSTRATE_APPEARANCE_REUSE_ONLY":
+            raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_UNDERLAY_PIXEL_AUTHORITY_DRIFT")
         if str(row.get("substrate_component_id")) != body_component_id:
             raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_UNDERLAY_SUBSTRATE_DRIFT")
 

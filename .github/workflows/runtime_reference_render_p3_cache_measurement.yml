@@ -37,13 +37,16 @@ jobs:
         run: |
           cmake --build build/p3-reference-render --target realsas_runtime_demo --parallel 2
       - name: Native cold-to-warm reference-render cache measurement
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p .runtime-reference-p3
           PYTHONPATH=. python experiments/playback_stack_v1/benchmark_reference_render_p3_cache.py \
             --runtime-demo build/p3-reference-render/realsas_runtime_demo \
             | tee .runtime-reference-p3/benchmark.log
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: runtime-reference-render-p3-cache-measurement-${{ github.sha }}
           path: .runtime-reference-p3/benchmark.log
-          if-no-files-found: error
+          if-no-files-found: warn

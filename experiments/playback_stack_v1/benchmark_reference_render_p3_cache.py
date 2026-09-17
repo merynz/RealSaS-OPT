@@ -9,9 +9,9 @@ from pathlib import Path
 from time import perf_counter
 import tempfile
 
-from compiler.realsas_compiler_services.export.runtime_v3 import materialize_runtime_v3_archive
+from compiler.realsas_compiler_services.export.runtime_v4 import materialize_runtime_v4_archive
 from experiments.playback_stack_v1.run_runtime_reference_e2e_v1 import run as run_reference_e2e
-from runtime.realsas_cpp.tests.runtime_v3_writer_native_e2e import _build_fixture
+from runtime.realsas_cpp.tests.runtime_v4_writer_native_e2e import build_fixture
 
 WARM_TARGET_SECONDS = 2.0
 VIEWS = ",".join(f"V{i}" for i in range(8))
@@ -25,7 +25,7 @@ def _run_once(*, package: Path, runtime_demo: Path, out: Path, cache_root: Path)
         runtime_demo=str(runtime_demo),
         out=str(out),
         cache_root=str(cache_root),
-        subject_id="P3_SYNTHETIC_RUNTIME_V3_FIXTURE",
+        subject_id="P3_SYNTHETIC_RUNTIME_V4_FIXTURE",
         clip="idle",
         views=VIEWS,
         times=TIMES,
@@ -52,9 +52,9 @@ def main() -> None:
     with tempfile.TemporaryDirectory(prefix="realsas_p3_reference_cache_") as temp:
         root = Path(temp)
         texture_root = root / "texture_root"
-        contract, textures, clips = _build_fixture(texture_root)
+        contract, textures, clips = build_fixture(texture_root)
         package = root / "fixture.rss"
-        materialize_runtime_v3_archive(
+        materialize_runtime_v4_archive(
             out_path=package,
             texture_root=texture_root,
             contract=contract,
@@ -103,6 +103,7 @@ def main() -> None:
         report = {
             "schema": "RealSaS.RuntimeReferenceRenderP3CacheMeasurement.v1",
             "claim_scope": "SYNTHETIC_NATIVE_REFERENCE_RENDER_CACHE_ONLY",
+            "fixture_runtime_schema": "RuntimeV4",
             "node_count": EXPECTED_NODES,
             "cold_seconds": cold_seconds,
             "cold_hits": cold_cache["hit_count"],

@@ -13,6 +13,7 @@ import argparse
 from hashlib import sha256
 import json
 from pathlib import Path
+from time import monotonic
 
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.product_external_render import assemble_product_v3_with_external_render_support
@@ -43,6 +44,36 @@ def _write_json(path: Path, payload) -> None:
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     tmp.replace(path)
+
+
+def _log(stage: str, started: float, **fields) -> None:
+    payload = {"stage": stage, "elapsed_s": round(monotonic() - started, 3), **fields}
+    print("FIT2_DENSE_V4_PROGRESS=" + json.dumps(payload, sort_keys=True), flush=True)
+
+
+def _build_v2_constructor_state(args, started: float):
+    """Use V2 only for the exact sealed object graph that V4 actually consumes.
+
+    The previous V4 path let V2 assemble and validate an intermediate canonical
+    product even though V4 immediately discarded it and assembled the final product
+    again after motion-bound requalification. On dense BODY that repeated the whole
+    directional graph validation/hashing for no product-visible benefit.
+    """
+    original_assemble = dense_v2.assemble_product_v3_with_external_render_support
+
+    def _constructor_only_product(*_args, **_kwargs):
+        return None
+
+    dense_v2.assemble_product_v3_with_external_render_support = _constructor_only_product
+    try:
+        _log("V2_CONSTRUCTOR_BEGIN", started)
+        state = dense_v2.build_final_state(args, persist=False)
+    finally:
+        dense_v2.assemble_product_v3_with_external_render_support = original_assemble
+    if state.get("render_set") is None or state.get("underlay_set") is None:
+        raise RuntimeError("FIT2_DENSE_V4_CONSTRUCTOR_STATE_INCOMPLETE")
+    _log("V2_CONSTRUCTOR_DONE", started)
+    return state
 
 
 def _load_motion_bound_derivation(args, state):
@@ -98,9 +129,22 @@ def _load_motion_bound_derivation(args, state):
 
 
 def build_final_state(args, *, persist: bool = True):
-    # V2 constructs the exact sealed inputs in memory but is never persisted/promoted here.
-    state = dense_v2.build_final_state(args, persist=False)
+    started = monotonic()
+    _log("BEGIN", started)
+
+    # V2 constructs exact sealed inputs only. Its intermediate product assembly is
+    # deliberately skipped because V4 will replace render identity and assemble the
+    # one final product below.
+    state = _build_v2_constructor_state(args, started)
+
+    _log("MOTION_BOUND_DERIVATION_BEGIN", started)
     body, derivation, body_sha, derivation_sha = _load_motion_bound_derivation(args, state)
+    _log(
+        "MOTION_BOUND_DERIVATION_DONE",
+        started,
+        body_manifest_sha256=body_sha,
+        derivation_manifest_sha256=derivation_sha,
+    )
 
     foreground_manifest_path = Path(args.foreground_dir) / FOREGROUND_MANIFEST_FILE
     foreground_manifest = json.loads(foreground_manifest_path.read_text(encoding="utf-8"))
@@ -110,11 +154,18 @@ def build_final_state(args, *, persist: bool = True):
 
     # Requalify BODY support so external-render identity binds the persisted V2
     # topology/W/final-motion derivation file SHA, not a generic replay content hash.
+    _log("REQUALIFY_RENDER_SET_BEGIN", started)
     render_set, underlay_set = dense_v3._requalify_render_set(
         state,
         body_manifest_sha=body_sha,
         derivation_sha=derivation_sha,
         foreground_owner_sha=foreground_owner_sha,
+    )
+    _log(
+        "REQUALIFY_RENDER_SET_DONE",
+        started,
+        directional_visual_state_hash=render_set.directional_visual_state_hash,
+        continuity_underlay_set_hash=underlay_set.qualification_hash,
     )
 
     mechanical = state["mechanical"]
@@ -126,6 +177,7 @@ def build_final_state(args, *, persist: bool = True):
     motion = state["motion"]
 
     motion_hash = str(motion.motion_state_hash)
+    _log("FINAL_CAPABILITY_BEGIN", started)
     policy_hash = content_sha256({
         "schema": "RealSaS.MageFIT2DenseMotionBoundHistoricalMotionEnginePolicy.v1",
         "unseen_generalization_claimed": False,
@@ -175,6 +227,9 @@ def build_final_state(args, *, persist: bool = True):
         "phase_motion_state_hash": phase_motion.motion_state_hash,
         "quality_motion_state_hash": motion_hash,
     })
+    _log("FINAL_CAPABILITY_DONE", started, capability_contract_hash=capability.capability_contract_hash)
+
+    _log("FINAL_PRODUCT_ASSEMBLY_BEGIN", started)
     product = assemble_product_v3_with_external_render_support(
         mechanical, render_set, capability, motion,
         editable_metadata={
@@ -206,6 +261,7 @@ def build_final_state(args, *, persist: bool = True):
             "corrective_deformation_unqualified_fail_closed": True,
         },
     )
+    _log("FINAL_PRODUCT_ASSEMBLY_DONE", started, product_state_hash=product.product_state_hash)
 
     state.update({
         "render_set": render_set,
@@ -219,12 +275,16 @@ def build_final_state(args, *, persist: bool = True):
     if persist:
         out = Path(args.output_dir)
         out.mkdir(parents=True, exist_ok=True)
+        _log("PERSIST_RENDER_SET_BEGIN", started)
         _write_json(out / "FIT2_DENSE_V4_DIRECTIONAL_RENDERABLE_SET.json", render_set.to_dict())
+        _log("PERSIST_RENDER_SET_DONE", started)
         _write_json(out / "FIT2_DENSE_V4_CONTINUITY_UNDERLAY_SET.json", underlay_set.to_dict())
         _write_json(out / "FIT2_DENSE_V4_HISTORICAL_PHASE_MOTION_STATE.json", phase_motion.to_dict())
         _write_json(out / "FIT2_DENSE_V4_HISTORICAL_QUALITY_MOTION_STATE.json", motion.to_dict())
         _write_json(out / "FIT2_DENSE_V4_MOTION_CAPABILITY_CONTRACT.json", capability.to_dict())
+        _log("PERSIST_PRODUCT_GRAPH_BEGIN", started)
         _write_json(out / "FIT2_DENSE_V4_CANONICAL_PUPPET_GRAPH_V3_MOTION.json", product.to_dict())
+        _log("PERSIST_PRODUCT_GRAPH_DONE", started)
         manifest = {
             "schema": SCHEMA,
             "status": "PASS__CURRENT_MAGE_FIT2_DENSE_PRODUCT_STATE_FINAL_MOTION_BOUND",
@@ -252,6 +312,7 @@ def build_final_state(args, *, persist: bool = True):
         }
         path = out / "FIT2_DENSE_V4_PRODUCT_STATE_MOTION_ENGINE_MANIFEST.json"
         _write_json(path, manifest)
+        _log("DONE", started, manifest_sha256=_sha(path))
         print("FIT2_DENSE_V4_PRODUCT_STATE=" + json.dumps({
             "product_state_hash": product.product_state_hash,
             "motion_state_hash": motion_hash,

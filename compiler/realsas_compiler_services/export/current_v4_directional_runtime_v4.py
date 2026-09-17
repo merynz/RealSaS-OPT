@@ -18,8 +18,6 @@ bakes.
 from dataclasses import dataclass
 from typing import Iterable, Mapping, Sequence
 import math
-import zlib
-
 import numpy as np
 
 from compiler.realsas_compiler_core.hashing import content_sha256
@@ -69,6 +67,7 @@ class RuntimeV4DirectionalAssemblyProjectionV1:
     runtime_source_indices_by_asset: Mapping[str, tuple[int, ...]]
     owner_view_by_asset: Mapping[str, int]
     component_id_by_asset: Mapping[str, str]
+    body_component_id: str
     projection_hash: str
     schema_version: str = DIRECTIONAL_ASSEMBLY_RUNTIME_V4_SCHEMA
 
@@ -177,6 +176,8 @@ def _asset_from_component(
     texture: RuntimeTexturePayloadV1,
     rest_xy,
     camera: CameraProjectionV3,
+    *,
+    body_component_id: str,
 ):
     view_index = int(direction.view_index)
     view_id = f"V{view_index}"
@@ -238,7 +239,7 @@ def _asset_from_component(
     asset_id = f"{attachment_id}__ASSET"
     kind = (
         AttachmentKind.DEFORMABLE_BODY
-        if component_id == BODY_COMPONENT_ID
+        if component_id == str(body_component_id)
         else AttachmentKind.RIGID_COMPONENT
     )
     sealed_source_hash = content_sha256({
@@ -276,9 +277,13 @@ def project_directional_product_bakes_to_runtime_v4(
     texture_bindings: Iterable[RuntimeTexturePayloadV1],
     cameras: Mapping[str, Mapping | CameraProjectionV3],
     required_view_ids: Sequence[str] = DEFAULT_VIEWS,
+    body_component_id: str = BODY_COMPONENT_ID,
     runtime_qualified: bool = False,
 ) -> RuntimeV4DirectionalAssemblyProjectionV1:
     view_ids = tuple(map(str, required_view_ids))
+    body_component_id = str(body_component_id)
+    if not body_component_id:
+        raise QualificationError("DIRECTIONAL_ASSEMBLY_BODY_COMPONENT_ID_REQUIRED")
     if view_ids != tuple(f"V{i}" for i in range(len(view_ids))):
         raise QualificationError("DIRECTIONAL_ASSEMBLY_VIEW_IDS_MUST_BE_DENSE_V_INDEXED")
     camera_by_view = _camera_map(cameras, view_ids)
@@ -319,8 +324,8 @@ def project_directional_product_bakes_to_runtime_v4(
             if prior[0] != int(component.setup_order):
                 raise QualificationError("DIRECTIONAL_ASSEMBLY_SETUP_ORDER_DRIFT")
     slot_order = tuple(sorted(component_rows, key=lambda cid: (component_rows[cid][0], cid)))
-    if not slot_order or slot_order[0] != BODY_COMPONENT_ID:
-        raise QualificationError("DIRECTIONAL_ASSEMBLY_BODY_UNDERLAY_MUST_BE_FIRST_SLOT")
+    if not slot_order or slot_order[0] != body_component_id:
+        raise QualificationError("DIRECTIONAL_ASSEMBLY_BODY_COMPONENT_MUST_BE_FIRST_SLOT")
     if tuple(component_rows[cid][0] for cid in slot_order) != tuple(sorted(component_rows[cid][0] for cid in slot_order)):
         raise QualificationError("DIRECTIONAL_ASSEMBLY_SLOT_ORDER_INVALID")
 
@@ -366,6 +371,7 @@ def project_directional_product_bakes_to_runtime_v4(
                 texture_by_view[view_index],
                 rest_xy,
                 camera_by_view[view_id],
+                body_component_id=body_component_id,
             )
             assets.append(asset)
             uv_by_asset[asset.asset_id] = uv
@@ -489,6 +495,7 @@ def project_directional_product_bakes_to_runtime_v4(
         "clip_bake_hashes": {bake.clip_id: bake.bake_hash for bake in bakes},
         "view_ids": list(view_ids),
         "slot_order": list(slot_order),
+        "body_component_id": body_component_id,
         "asset_count": len(assets),
         "runtime_vertex_source_indices": {
             key: list(value) for key, value in sorted(source_indices_by_asset.items())
@@ -506,6 +513,7 @@ def project_directional_product_bakes_to_runtime_v4(
         runtime_source_indices_by_asset=source_indices_by_asset,
         owner_view_by_asset=owner_by_asset,
         component_id_by_asset=component_by_asset,
+        body_component_id=body_component_id,
         projection_hash=content_sha256(payload),
     )
 

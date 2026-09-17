@@ -54,6 +54,13 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _png_dimensions(path: Path) -> tuple[int, int]:
+    data = path.read_bytes()
+    if data[:8] != PNG_MAGIC or data[12:16] != b"IHDR":
+        raise AssertionError("PNG header missing")
+    return struct.unpack(">II", data[16:24])
+
+
 def _decode_first_pixel(path: Path) -> tuple[int, int, int, int]:
     data = path.read_bytes()
     pos = len(PNG_MAGIC)
@@ -93,14 +100,17 @@ def _decode_first_pixel(path: Path) -> tuple[int, int, int, int]:
 
 def build_fixture(texture_root: Path):
     views = tuple(f"V{i}" for i in range(8))
-    rgba = bytes((255, 0, 0, 255, 0, 255, 0, 255) * 2)
+    # 4x2 source atlas, while the camera/framebuffer below is 2x2.
+    # Left half red, right half green.
+    row = bytes((255, 0, 0, 255) * 2 + (0, 255, 0, 255) * 2)
+    rgba = row * 2
     textures = []
     for view_id in views:
         rel = f"textures/{view_id}.png"
         path = texture_root / rel
-        _write_rgba_png(path, 2, 2, rgba)
+        _write_rgba_png(path, 4, 2, rgba)
         raw = path.read_bytes()
-        textures.append(RuntimeV3TexturePayload(view_id, rel, _sha(path), zlib.crc32(raw) & 0xFFFFFFFF, 2, 2))
+        textures.append(RuntimeV3TexturePayload(view_id, rel, _sha(path), zlib.crc32(raw) & 0xFFFFFFFF, 4, 2))
 
     tri = np.asarray(((0, 1, 2),), dtype=np.uint32)
     far_xyz = np.asarray(((-1, 1, 0.8), (1, 1, 0.8), (-1, -1, 0.8)), dtype=np.float32)
@@ -145,6 +155,8 @@ def run(runtime_demo: Path) -> None:
         proc = subprocess.run([str(runtime_demo), str(package), "--clip", "idle", "--view", "V0", "--time", "0.5", "--out", str(out)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         if proc.returncode != 0: raise AssertionError(proc.stdout)
         if "renderer=RUNTIME_V4_SHARED_CANONICAL_DEPTH_REFERENCE" not in proc.stdout: raise AssertionError(proc.stdout)
+        if _png_dimensions(out) != (2, 2):
+            raise AssertionError(f"Runtime-v4 framebuffer incorrectly followed atlas size: {_png_dimensions(out)}")
         pixel = _decode_first_pixel(out)
         if not (pixel[1] >= 240 and pixel[0] <= 15 and pixel[2] <= 15 and pixel[3] >= 240):
             raise AssertionError(f"Runtime-v4 posed depth failed: {pixel}\n{proc.stdout}")

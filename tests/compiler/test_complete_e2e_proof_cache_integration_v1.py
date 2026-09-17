@@ -3,6 +3,7 @@ from __future__ import annotations
 from hashlib import sha256
 from pathlib import Path
 
+from compiler.realsas_compiler_services.cache import proof_result as proof_cache_module
 from compiler.realsas_compiler_services.cache.proof_result import _exact_identity, _source_fingerprint
 from experiments.single_family_e2e_v1.run_complete_e2e_v1 import _deformation_fixture, run_complete_e2e_v1
 
@@ -11,7 +12,7 @@ def _sha256(path: str | Path) -> str:
     return sha256(Path(path).read_bytes()).hexdigest()
 
 
-def test_complete_e2e_second_transaction_reuses_exact_typed_proof(tmp_path):
+def test_complete_e2e_second_transaction_reuses_exact_typed_proof(monkeypatch, tmp_path):
     cache_root = tmp_path / "persistent-cache"
 
     cold = run_complete_e2e_v1(tmp_path / "cold-product", proof_cache_root=cache_root)
@@ -24,6 +25,11 @@ def test_complete_e2e_second_transaction_reuses_exact_typed_proof(tmp_path):
     cold_deformation_identity = _exact_identity(_deformation_fixture(cold["product"]))
     cold_source_fingerprint = _source_fingerprint()[0]
 
+    def forbidden_evaluator(*_args, **_kwargs):
+        raise AssertionError("authoritative proof evaluator ran on exact warm transaction")
+
+    monkeypatch.setattr(proof_cache_module, "evaluate_product_proof", forbidden_evaluator)
+
     warm = run_complete_e2e_v1(tmp_path / "warm-product", proof_cache_root=cache_root)
     warm_deformation_identity = _exact_identity(_deformation_fixture(warm["product"]))
     warm_source_fingerprint = _source_fingerprint()[0]
@@ -33,18 +39,10 @@ def test_complete_e2e_second_transaction_reuses_exact_typed_proof(tmp_path):
     cold_mech = cold_product.mechanical_state
     warm_mech = warm_product.mechanical_state
 
-    assert warm_mech.surface.geometry_lineage_hash == cold_mech.surface.geometry_lineage_hash, (
-        cold_mech.surface.geometry_lineage_hash, warm_mech.surface.geometry_lineage_hash
-    )
-    assert warm_mech.skeleton.skeleton_lineage_hash == cold_mech.skeleton.skeleton_lineage_hash, (
-        cold_mech.skeleton.skeleton_lineage_hash, warm_mech.skeleton.skeleton_lineage_hash
-    )
-    assert warm_mech.skin.skin_lineage_hash == cold_mech.skin.skin_lineage_hash, (
-        cold_mech.skin.skin_lineage_hash, warm_mech.skin.skin_lineage_hash
-    )
-    assert warm_product.mechanical_state_hash == cold_product.mechanical_state_hash, (
-        cold_product.mechanical_state_hash, warm_product.mechanical_state_hash
-    )
+    assert warm_mech.surface.geometry_lineage_hash == cold_mech.surface.geometry_lineage_hash
+    assert warm_mech.skeleton.skeleton_lineage_hash == cold_mech.skeleton.skeleton_lineage_hash
+    assert warm_mech.skin.skin_lineage_hash == cold_mech.skin.skin_lineage_hash
+    assert warm_product.mechanical_state_hash == cold_product.mechanical_state_hash
     assert warm_product.directional_visual_state_hash == cold_product.directional_visual_state_hash
     assert warm_product.motion_state_hash == cold_product.motion_state_hash
     assert warm_product.capability_contract_hash == cold_product.capability_contract_hash

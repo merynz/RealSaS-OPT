@@ -51,33 +51,46 @@ _EXTERNAL_KEY = "external_render_support_qualification"
 # These IRs are frozen dataclasses. During one compiler process the same immutable
 # object graph used to be recursively revalidated at component -> direction -> set ->
 # continuity -> product boundaries. Dense BODY made that pathological. Cache only
-# successful validation of the exact object identity + declared hash; loaded/replaced
-# objects get a new identity and therefore receive a full validation once.
-_VALIDATED_COMPONENTS: dict[int, tuple[weakref.ReferenceType, str]] = {}
-_VALIDATED_DIRECTIONS: dict[int, tuple[weakref.ReferenceType, str]] = {}
-_VALIDATED_SETS: dict[int, tuple[weakref.ReferenceType, str]] = {}
+# successful validation of the exact object identity + declared hash + mechanical
+# state. Loaded/replaced objects or a different mechanical authority receive one full
+# validation before they can enter the cache.
+_VALIDATED_COMPONENTS: dict[int, tuple[weakref.ReferenceType, str, str]] = {}
+_VALIDATED_DIRECTIONS: dict[int, tuple[weakref.ReferenceType, str, str]] = {}
+_VALIDATED_SETS: dict[int, tuple[weakref.ReferenceType, str, str]] = {}
 
 
-def _validation_cache_hit(cache, value, declared_hash: str) -> bool:
+def _mechanical_hash(mechanical) -> str:
+    return str(getattr(mechanical, "mechanical_state_hash", "") or "")
+
+
+def _validation_cache_hit(cache, value, declared_hash: str, mechanical) -> bool:
     key = id(value)
     row = cache.get(key)
     if row is None:
         return False
-    ref, cached_hash = row
-    if ref() is value and cached_hash == str(declared_hash):
+    ref, cached_hash, cached_mechanical_hash = row
+    if (
+        ref() is value
+        and cached_hash == str(declared_hash)
+        and cached_mechanical_hash == _mechanical_hash(mechanical)
+    ):
         return True
     cache.pop(key, None)
     return False
 
 
-def _validation_cache_mark(cache, value, declared_hash: str) -> None:
+def _validation_cache_mark(cache, value, declared_hash: str, mechanical) -> None:
     key = id(value)
 
     def _drop(_ref, *, _key=key, _cache=cache):
         _cache.pop(_key, None)
 
     try:
-        cache[key] = (weakref.ref(value, _drop), str(declared_hash))
+        cache[key] = (
+            weakref.ref(value, _drop),
+            str(declared_hash),
+            _mechanical_hash(mechanical),
+        )
     except TypeError:
         # Extremely defensive: if an alternate IR type is not weak-referenceable,
         # retain old behaviour rather than weakening validation.
@@ -170,7 +183,7 @@ def validate_external_renderable_component(
 ) -> None:
     if int(component.view_index) not in _REQUIRED_VIEWS:
         raise QualificationError("EXTERNAL_RENDERABLE_INVALID_VIEW")
-    if _validation_cache_hit(_VALIDATED_COMPONENTS, component, component.component_state_hash):
+    if _validation_cache_hit(_VALIDATED_COMPONENTS, component, component.component_state_hash, mechanical):
         # Cheap relationship checks are intentionally retained on cached calls.
         if component.mesh.view_index != component.view_index:
             raise QualificationError("EXTERNAL_RENDERABLE_MESH_VIEW_MISMATCH")
@@ -211,7 +224,7 @@ def validate_external_renderable_component(
         raise QualificationError("EXTERNAL_RENDERABLE_REQUIRED_COMPLETION_NOT_BOUND")
     if verify_component_hash and component.component_state_hash != component_state_hash(component):
         raise QualificationError("EXTERNAL_RENDERABLE_COMPONENT_HASH_MISMATCH")
-    _validation_cache_mark(_VALIDATED_COMPONENTS, component, component.component_state_hash)
+    _validation_cache_mark(_VALIDATED_COMPONENTS, component, component.component_state_hash, mechanical)
 
 
 def build_external_directional_renderable(*, view_index: int, camera_binding_hash: str, components, mechanical, metadata=None):
@@ -231,7 +244,7 @@ def validate_external_directional_renderable(
 ) -> None:
     if direction.view_index not in _REQUIRED_VIEWS or not direction.components:
         raise QualificationError("EXTERNAL_DIRECTION_INVALID_OR_EMPTY")
-    if _validation_cache_hit(_VALIDATED_DIRECTIONS, direction, direction.direction_state_hash):
+    if _validation_cache_hit(_VALIDATED_DIRECTIONS, direction, direction.direction_state_hash, mechanical):
         return
     ids = [c.component_id for c in direction.components]
     orders = [c.setup_order for c in direction.components]
@@ -245,7 +258,7 @@ def validate_external_directional_renderable(
             raise QualificationError("EXTERNAL_DIRECTION_CAMERA_BINDING_MISMATCH")
     if verify_direction_hash and direction.direction_state_hash != direction_state_hash(direction):
         raise QualificationError("EXTERNAL_DIRECTION_STATE_HASH_MISMATCH")
-    _validation_cache_mark(_VALIDATED_DIRECTIONS, direction, direction.direction_state_hash)
+    _validation_cache_mark(_VALIDATED_DIRECTIONS, direction, direction.direction_state_hash, mechanical)
 
 
 def build_external_directional_renderable_set(directions, mechanical, *, metadata=None):
@@ -275,13 +288,13 @@ def validate_external_directional_renderable_set(
         raise QualificationError("EXTERNAL_DIRECTIONAL_RENDERABLE_SET_REQUIRES_EXACTLY_8")
     if tuple(d.view_index for d in value.directions) != _REQUIRED_VIEWS:
         raise QualificationError("EXTERNAL_DIRECTIONAL_RENDERABLE_SET_VIEW_ORDER_MUST_BE_0_TO_7")
-    if _validation_cache_hit(_VALIDATED_SETS, value, value.directional_visual_state_hash):
+    if _validation_cache_hit(_VALIDATED_SETS, value, value.directional_visual_state_hash, mechanical):
         return
     for direction in value.directions:
         validate_external_directional_renderable(direction, mechanical)
     if verify_set_hash and value.directional_visual_state_hash != directional_visual_state_hash(value):
         raise QualificationError("EXTERNAL_DIRECTIONAL_RENDERABLE_SET_HASH_MISMATCH")
-    _validation_cache_mark(_VALIDATED_SETS, value, value.directional_visual_state_hash)
+    _validation_cache_mark(_VALIDATED_SETS, value, value.directional_visual_state_hash, mechanical)
 
 
 def _effective_motion(track) -> bool:

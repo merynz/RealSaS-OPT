@@ -1,0 +1,38 @@
+name: complete-e2e-proof-cache-integration
+
+on:
+  push:
+    paths:
+      - 'experiments/single_family_e2e_v1/**'
+      - 'compiler/realsas_compiler_services/cache/proof_result.py'
+      - 'compiler/realsas_compiler_core/proof_engine.py'
+      - 'compiler/realsas_compiler_core/v4.py'
+      - 'tests/compiler/test_complete_e2e_proof_cache_integration_v1.py'
+      - '.github/workflows/complete_e2e_proof_cache_integration_v1.yml'
+  pull_request:
+    paths:
+      - 'experiments/single_family_e2e_v1/**'
+      - 'compiler/realsas_compiler_services/cache/proof_result.py'
+      - 'compiler/realsas_compiler_core/proof_engine.py'
+      - 'compiler/realsas_compiler_core/v4.py'
+      - 'tests/compiler/test_complete_e2e_proof_cache_integration_v1.py'
+      - '.github/workflows/complete_e2e_proof_cache_integration_v1.yml'
+
+jobs:
+  complete-transaction-cache:
+    runs-on: [self-hosted, linux, x64, realsas]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Python dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy pytest
+      - name: Complete transaction proof-cache reuse gate
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python -m pytest -q tests/compiler/test_complete_e2e_proof_cache_integration_v1.py

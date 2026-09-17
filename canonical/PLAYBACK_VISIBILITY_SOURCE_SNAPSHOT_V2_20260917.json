@@ -1,0 +1,65 @@
+{
+  "schema": "realsas.playback_visibility_source_snapshot.v2",
+  "sealed_on": "2026-09-17",
+  "repository": "merynz/RealSaS-OPT",
+  "branch": "playback-stack-v1-20260916",
+  "source_commit": "b82106e9d559c94b3357c9e03a74f5f7c7c7c53d",
+  "role": "IMMUTABLE_PROVENANCE_SNAPSHOT__NOT_A_DEVELOPMENT_GATE__NOT_A_PRODUCT_PASS",
+  "predecessor": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json",
+    "git_blob_sha1": "e675238aef40fb97fc64c9a9180a5d539bec39af",
+    "relationship": "SUPERSEDES_FOR_CURRENT_VISIBILITY_DONOR_SOURCE_STATE__PREDECESSOR_REMAINS_VALID_HISTORICAL_PROVENANCE"
+  },
+  "changes": [
+    {
+      "path": "experiments/playback_stack_v1/build_test_subject_001_cross_view_appearance_authority_v2.py",
+      "git_blob_sha1": "1188421610e3c79bf2fa49d9773def5348f0e52e",
+      "change": "ADDED",
+      "role": "DETERMINISTIC_CROSS_VIEW_SOURCE_AUTHORITY_BUILDER",
+      "policy": "TARGET_DIRECT_ELSE_NEAREST_QUALIFIED_OTHER_VIEW_SOURCE_ELSE_UNSEEN"
+    },
+    {
+      "path": "experiments/playback_stack_v1/materialize_test_subject_001_cross_view_v2.py",
+      "git_blob_sha1": "330a1d4d6bd0561e6d12d3a61bd1572a273bb252",
+      "change": "ADDED",
+      "role": "RUNTIME_V3_CROSS_VIEW_DONOR_MATERIALIZER_FIXTURE"
+    },
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v4_reference.cpp",
+      "git_blob_sha1": "3933fd77f6fe278644e6c255d193a13b9da4a29b",
+      "change": "REPLACED",
+      "role": "NATIVE_RUNTIME_V4_DONOR_TEXTURE_AND_DONOR_UV_SAMPLING"
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/runtime_v4_other_view_source_native_e2e.py",
+      "git_blob_sha1": "d407821291cf8ae10345c1274203c67f695e6b7d",
+      "change": "ADDED",
+      "role": "BEHAVIORAL_PROOF_THAT_OTHER_VIEW_SOURCE_SAMPLES_DONOR_TEXTURE_AND_DONOR_OVERLAY_UV"
+    },
+    {
+      "path": "runtime/realsas_cpp/CMakeLists.txt",
+      "git_blob_sha1": "3da6581f4cedf2ee0d751a1e1d214b57501e3a8f",
+      "change": "REPLACED",
+      "role": "REGISTER_OTHER_VIEW_SOURCE_NATIVE_E2E_IN_CTEST"
+    }
+  ],
+  "contract": {
+    "geometry_authority_changed": false,
+    "motion_authority_changed": false,
+    "camera_contract_changed": false,
+    "same_view_direct_source_rule_changed": false,
+    "completion_allowed": false,
+    "cross_view_source_requires_independent_v1_source_evidence": true,
+    "donor_selection_is_compile_time_deterministic": true,
+    "frame_time_donor_switching_allowed": false,
+    "unseen_semantics": "NO_QUALIFIED_SOURCE_VIEW_FOR_FACE",
+    "product_pass_claimed": false,
+    "runtime_qualified_claimed": false
+  },
+  "seal_semantics": {
+    "immutable_snapshot": true,
+    "historical_snapshots_may_have_successors": true,
+    "development_must_not_pause_for_manual_seal_approval": true,
+    "new_source_state_requires_new_snapshot_not_rewriting_history": true
+  }
+}

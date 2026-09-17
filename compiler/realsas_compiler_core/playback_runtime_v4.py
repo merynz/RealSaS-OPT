@@ -333,6 +333,7 @@ def validate_playback_runtime_v4_contract(
     if tuple(view.view_id for view in contract.views) != view_ids:
         raise QualificationError("RUNTIME_V4_VIEW_ORDER_MISMATCH")
     overlay_hashes: list[str] = []
+    provenance_by_asset: dict[str, list[np.ndarray]] = {asset_id: [] for asset_id in asset_ids}
     for expected_index, view in enumerate(contract.views):
         if int(view.view_index) != expected_index:
             raise QualificationError("RUNTIME_V4_VIEW_INDEX_DRIFT")
@@ -361,6 +362,7 @@ def validate_playback_runtime_v4_contract(
             unseen = provenance == _PROVENANCE_TO_CODE[AppearanceProvenance.UNSEEN]
             completion = provenance == _PROVENANCE_TO_CODE[AppearanceProvenance.COMPLETION]
             direct = provenance == _PROVENANCE_TO_CODE[AppearanceProvenance.DIRECT_SOURCE]
+            other_view = provenance == _PROVENANCE_TO_CODE[AppearanceProvenance.OTHER_VIEW_SOURCE]
             source_bound = ~(unseen | completion)
             if np.any(donors[unseen] != -1):
                 raise QualificationError("RUNTIME_V4_UNSEEN_MUST_REMAIN_UNBOUND")
@@ -370,6 +372,9 @@ def validate_playback_runtime_v4_contract(
                 raise QualificationError("RUNTIME_V4_SOURCE_PROVENANCE_REQUIRES_DONOR")
             if np.any(donors[direct] != expected_index):
                 raise QualificationError("RUNTIME_V4_DIRECT_SOURCE_DONOR_MUST_MATCH_TARGET_VIEW")
+            if np.any(donors[other_view] == expected_index):
+                raise QualificationError("RUNTIME_V4_OTHER_VIEW_DONOR_MUST_DIFFER_FROM_TARGET_VIEW")
+            provenance_by_asset[row.asset_id].append(np.ascontiguousarray(provenance.copy()))
             per_asset_hashes.append({
                 "asset_id": row.asset_id,
                 "uv_sha256": _array_sha256(uv),
@@ -390,6 +395,19 @@ def validate_playback_runtime_v4_contract(
             },
             "assets": per_asset_hashes,
         }))
+
+    # UNSEEN is a global observation statement, never a target-view visibility statement.
+    # If any required view has source-backed evidence for an asset face, every other view
+    # must bind that same face to DIRECT/OTHER_VIEW/UNDER_RIGID rather than call it UNSEEN.
+    unseen_code = _PROVENANCE_TO_CODE[AppearanceProvenance.UNSEEN]
+    for asset_id, rows in provenance_by_asset.items():
+        if len(rows) != len(view_ids):
+            raise QualificationError("RUNTIME_V4_GLOBAL_APPEARANCE_VIEW_CARDINALITY_DRIFT")
+        stacked = np.stack(rows, axis=0)
+        any_unseen = np.any(stacked == unseen_code, axis=0)
+        all_unseen = np.all(stacked == unseen_code, axis=0)
+        if np.any(any_unseen != all_unseen):
+            raise QualificationError("RUNTIME_V4_UNSEEN_REQUIRES_ABSENCE_IN_ALL_VIEWS")
 
     # Preserve the v3 raster/visibility policy as the behavioral authority.
     if not bool(contract.visibility.body_depth_test):

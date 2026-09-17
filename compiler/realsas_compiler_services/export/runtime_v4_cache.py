@@ -33,7 +33,7 @@ from compiler.realsas_compiler_services.export.runtime_v4 import (
 
 RUNTIME_V4_CACHE_STAGE = "runtime_v4_archive"
 RUNTIME_V4_CACHE_PRODUCER = (
-    "RealSaS.RuntimeV4ArchiveCacheProducer.p2.v1"
+    "RealSaS.RuntimeV4ArchiveCacheProducer.p2.v2"
     f"|binary={RUNTIME_V4_BINARY_SCHEMA}|package={RUNTIME_V4_PACKAGE_SCHEMA}"
 )
 

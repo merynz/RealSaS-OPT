@@ -7,12 +7,14 @@ or any model family. A subject is only an opaque provenance label.
 
 The runner exercises the shipped/native presentation path rather than a notebook
 renderer. Runtime-v2 archives may be exercised in STRUCTURAL_SMOKE mode, but they
-can never produce a depth-qualified/founder visual PASS. Runtime-v3 depth
+can never produce a depth-qualified/founder visual PASS. Runtime-v3+ depth
 qualification is required for that claim.
 
 Native reference renders are content-addressed. An unchanged exact runtime package,
 renderer binary and (clip, view, time) node is restored from a hash-verified cache;
 all restored PNGs still pass the same PNG validation as cold native renders.
+Runtime-v4 cache misses are transported as one native batch so the exact package is
+opened/parsed once; node identity and cache authority remain unchanged.
 """
 
 import argparse
@@ -24,9 +26,11 @@ from compiler.realsas_compiler_services.cache.reference_render import (
     NativeReferenceRenderCache,
     REFERENCE_RENDER_CACHE_PRODUCER,
 )
+from compiler.realsas_compiler_services.cache.reference_render_batch import render_many_v4
 
 
 REPORT_SCHEMA = "RealSaS.PlaybackReferenceE2EProbe.v1"
+RUNTIME_V4_PACKAGE_SCHEMA = "RealSaS.RuntimePackage.native_v4.v1"
 
 
 def read_runtime_manifest(archive: Path) -> dict:
@@ -46,8 +50,8 @@ def read_runtime_manifest(archive: Path) -> dict:
 
 def classify_runtime(manifest: dict) -> dict:
     schema = str(manifest.get("schema_version") or "")
-    # Runtime v2 is explicitly no-depth. Future v3 packages must opt in with
-    # explicit rendering capabilities rather than inheriting an assumption.
+    # Depth qualification is always explicit. A new package schema never
+    # inherits authority merely because an older schema had it.
     caps = dict(manifest.get("render_capabilities") or {})
     depth_test = caps.get("depth_test") is True
     posed_depth = caps.get("posed_vertex_depth") is True
@@ -127,19 +131,34 @@ def run(args: argparse.Namespace) -> dict:
         cache_root=(Path(cache_root_arg).resolve() if cache_root_arg else None),
     )
 
-    frames = []
+    requests = []
     for view in views:
         for index, t in enumerate(times):
             target = out / "frames" / str(args.clip) / view / f"F{index:04d}_T{t:.6f}.png"
-            frames.append(render_frame(
+            requests.append({
+                "clip": str(args.clip),
+                "view": view,
+                "time_seconds": t,
+                "out_png": target,
+            })
+
+    if runtime["schema_version"] == RUNTIME_V4_PACKAGE_SCHEMA:
+        frames = render_many_v4(render_cache, requests)
+        render_execution_mode = "RUNTIME_V4_BATCH_MISS_TRANSPORT"
+    else:
+        frames = [
+            render_frame(
                 runtime_demo=runtime_demo,
                 archive=archive,
-                clip=args.clip,
-                view=view,
-                time=t,
-                out_png=target,
+                clip=row["clip"],
+                view=row["view"],
+                time=row["time_seconds"],
+                out_png=row["out_png"],
                 render_cache=render_cache,
-            ))
+            )
+            for row in requests
+        ]
+        render_execution_mode = "SCALAR_NATIVE_RENDER_TRANSPORT"
 
     claim = "RUNTIME_DEPTH_QUALIFIED_E2E" if runtime["depth_qualified"] else "STRUCTURAL_SMOKE_ONLY"
     cache_hits = sum(1 for frame in frames if frame.get("render_cache_hit") is True)
@@ -172,6 +191,7 @@ def run(args: argparse.Namespace) -> dict:
             "hit_count": cache_hits,
             "miss_count": cache_misses,
             "all_nodes_hit": bool(frames) and cache_misses == 0,
+            "execution_mode": render_execution_mode,
             "cache_is_acceleration_not_proof_authority": True,
         },
         "frames": frames,
@@ -185,6 +205,7 @@ def run(args: argparse.Namespace) -> dict:
         "frame_count": len(frames),
         "render_cache_hits": cache_hits,
         "render_cache_misses": cache_misses,
+        "render_execution_mode": render_execution_mode,
     }, indent=2))
     return report
 
@@ -192,7 +213,7 @@ def run(args: argparse.Namespace) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--rss", required=True, help="Compiled .rss/.realsas archive or unpacked package")
-    ap.add_argument("--runtime-demo", required=True, help="Native C++ realsas_runtime_demo executable")
+    ap.add_argument("--runtime-demo", required=True, help="Native C++ reference-render executable")
     ap.add_argument("--out", required=True)
     ap.add_argument("--cache-root", default=None, help="Persistent content-addressed cache root; defaults to REALSAS_CACHE_ROOT or ~/.cache/realsas")
     ap.add_argument("--subject-id", default="UNNAMED_TEST_SUBJECT")

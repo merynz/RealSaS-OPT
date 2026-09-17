@@ -14,6 +14,7 @@ motion bound. If the proof cannot establish positive clearance, it fails closed.
 
 from dataclasses import dataclass
 from typing import Sequence
+import math
 
 import numpy as np
 

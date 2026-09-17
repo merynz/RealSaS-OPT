@@ -153,7 +153,7 @@ def test_continuous_certificate_passes_rigid_translation():
         required_view_ids=("V0",),
     )
     assert cert.continuous_orientation_certified
-    assert cert.boundary_motion_clearance_certified
+    assert cert.boundary_nonintersection_certified
     assert cert.global_embedding_certified
     assert cert.source_alpha_recall_floor == pytest.approx(0.99)
 

@@ -21,6 +21,9 @@ from pathlib import Path
 
 import numpy as np
 
+from compiler.realsas_compiler_core.playback_appearance_authority_v2 import (
+    resolve_global_source_appearance_authority_v2,
+)
 from compiler.realsas_compiler_core.playback_full_surface_v3 import qualify_camera_v3
 from compiler.realsas_compiler_core.types import QualificationError
 from experiments.playback_stack_v1 import build_test_subject_001_same_view_appearance_authority_v1 as v1
@@ -78,7 +81,7 @@ def assign_cross_view_authority_v2(
     *,
     face_count: int,
 ) -> tuple[dict[str, dict], dict]:
-    """Pure deterministic donor assignment from already-qualified v1 evidence."""
+    """Subject adapter over the generic global source-appearance resolver."""
 
     face_count = int(face_count)
     if face_count <= 0:
@@ -86,49 +89,55 @@ def assign_cross_view_authority_v2(
     if set(direct_faces_by_view) != set(VIEW_IDS):
         raise QualificationError("R2_APPEARANCE_DONOR_DIRECT_VIEW_SET_MISMATCH")
 
-    direct_sets: dict[str, set[int]] = {}
+    direct_masks: dict[str, np.ndarray] = {}
     for view_id in VIEW_IDS:
         values = tuple(int(x) for x in direct_faces_by_view[view_id])
         if tuple(sorted(set(values))) != values:
-            raise QualificationError(f"R2_APPEARANCE_DONOR_DIRECT_SET_NOT_SORTED_UNIQUE:{view_id}")
+            raise QualificationError(
+                f"R2_APPEARANCE_DONOR_DIRECT_SET_NOT_SORTED_UNIQUE:{view_id}"
+            )
         if values and (values[0] < 0 or values[-1] >= face_count):
-            raise QualificationError(f"R2_APPEARANCE_DONOR_DIRECT_FACE_OUT_OF_RANGE:{view_id}")
-        direct_sets[view_id] = set(values)
+            raise QualificationError(
+                f"R2_APPEARANCE_DONOR_DIRECT_FACE_OUT_OF_RANGE:{view_id}"
+            )
+        mask = np.zeros(face_count, dtype=np.bool_)
+        if values:
+            mask[np.asarray(values, dtype=np.int64)] = True
+        direct_masks[view_id] = mask
 
     forward_by_view = _camera_forward_by_view(cameras)
+    resolved = resolve_global_source_appearance_authority_v2(
+        direct_masks,
+        forward_by_view,
+        view_ids=VIEW_IDS,
+    )
+
     out: dict[str, dict] = {}
     total_other = 0
     total_unseen = 0
-    for target_view_id in VIEW_IDS:
-        direct = direct_sets[target_view_id]
-        donor_groups: dict[str, list[int]] = {view_id: [] for view_id in VIEW_IDS if view_id != target_view_id}
-        unseen: list[int] = []
-        donor_order = _donor_order(target_view_id, forward_by_view)
-
-        for face_index in range(face_count):
-            if face_index in direct:
+    for target_index, target_view_id in enumerate(VIEW_IDS):
+        provenance = resolved.provenance_codes_by_view[target_view_id]
+        donors = resolved.donor_view_indices_by_view[target_view_id]
+        direct = np.flatnonzero(provenance == 0).astype(np.int64).tolist()
+        unseen = np.flatnonzero(provenance == 3).astype(np.int64).tolist()
+        donor_groups: dict[str, list[int]] = {}
+        for donor_index, donor_view_id in enumerate(VIEW_IDS):
+            if donor_index == target_index:
                 continue
-            selected = None
-            for donor_view_id in donor_order:
-                if face_index in direct_sets[donor_view_id]:
-                    selected = donor_view_id
-                    break
-            if selected is None:
-                unseen.append(face_index)
-            else:
-                donor_groups[selected].append(face_index)
+            faces = np.flatnonzero(
+                (provenance == 1) & (donors == donor_index)
+            ).astype(np.int64).tolist()
+            if faces:
+                donor_groups[donor_view_id] = faces
 
-        donor_groups = {k: v for k, v in donor_groups.items() if v}
         other_count = sum(len(v) for v in donor_groups.values())
-        if len(direct) + other_count + len(unseen) != face_count:
-            raise QualificationError(f"R2_APPEARANCE_DONOR_PARTITION_INCOMPLETE:{target_view_id}")
         total_other += other_count
         total_unseen += len(unseen)
         out[target_view_id] = {
-            "direct_source_face_indices": sorted(direct),
+            "direct_source_face_indices": direct,
             "other_view_source_face_indices_by_donor": donor_groups,
             "unseen_face_indices": unseen,
-            "donor_priority": list(donor_order),
+            "donor_priority": list(_donor_order(target_view_id, forward_by_view)),
             "stats": {
                 "direct_source_face_count": len(direct),
                 "other_view_source_face_count": other_count,
@@ -140,9 +149,9 @@ def assign_cross_view_authority_v2(
     summary = {
         "other_view_source_face_assignments_total": total_other,
         "unseen_face_assignments_total": total_unseen,
+        "generic_authority_hash": resolved.authority_hash,
     }
     return out, summary
-
 
 def build_authority(args) -> dict:
     zero_path = Path(args.zero_surface).resolve()

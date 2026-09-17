@@ -1,0 +1,51 @@
+name: runtime-reference-render-p3-dense-measurement
+
+on:
+  push:
+    branches:
+      - playback-stack-v1-20260916
+    paths:
+      - 'experiments/playback_stack_v1/benchmark_reference_render_p3_dense.py'
+      - 'experiments/playback_stack_v1/benchmark_runtime_v4_p0_p1.py'
+      - 'compiler/realsas_compiler_services/cache/reference_render.py'
+      - 'compiler/realsas_compiler_services/export/runtime_v4.py'
+      - 'runtime/realsas_cpp/src/runtime_v4_reference.cpp'
+      - 'runtime/realsas_cpp/examples/realsas_runtime_v4_demo.cpp'
+      - '.github/workflows/runtime_reference_render_p3_dense_measurement.yml'
+  workflow_dispatch:
+
+jobs:
+  dense-native-reference-render-cache:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Python dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy pytest
+      - name: Configure native runtime
+        run: |
+          cmake -S runtime/realsas_cpp -B build/p3-dense-reference -DCMAKE_BUILD_TYPE=Release -DREALSAS_BUILD_TESTS=OFF
+      - name: Build Runtime-v4 native reference renderer
+        run: |
+          cmake --build build/p3-dense-reference --target realsas_runtime_v4_demo --parallel 2
+      - name: Dense cold-to-warm reference-render measurement
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .runtime-reference-p3-dense
+          PYTHONPATH=. python experiments/playback_stack_v1/benchmark_reference_render_p3_dense.py \
+            --runtime-demo build/p3-dense-reference/realsas_runtime_v4_demo \
+            | tee .runtime-reference-p3-dense/benchmark.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runtime-reference-render-p3-dense-measurement-${{ github.sha }}
+          path: .runtime-reference-p3-dense/benchmark.log
+          if-no-files-found: warn

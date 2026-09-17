@@ -270,8 +270,8 @@ uint32_t ReferenceRuntime::feature_flags()const noexcept{return impl_->data.feat
 float ReferenceRuntime::alpha_cutout_threshold()const noexcept{return impl_->data.alpha_cutout_threshold;}
 uint32_t ReferenceRuntime::view_count()const noexcept{return uint32_t(impl_->data.views.size());}
 const std::string& ReferenceRuntime::view_id(uint32_t i)const{if(i>=impl_->data.views.size())throw std::out_of_range("view index");return impl_->data.views[i].id;}
-uint32_t ReferenceRuntime::view_width(uint32_t i)const{if(i>=impl_->data.views.size())throw std::out_of_range("view index");return impl_->data.views[i].width;}
-uint32_t ReferenceRuntime::view_height(uint32_t i)const{if(i>=impl_->data.views.size())throw std::out_of_range("view index");return impl_->data.views[i].height;}
+uint32_t ReferenceRuntime::view_width(uint32_t i)const{if(i>=impl_->data.views.size())throw std::out_of_range("view index");return impl_->data.views[i].camera.resolution;}
+uint32_t ReferenceRuntime::view_height(uint32_t i)const{if(i>=impl_->data.views.size())throw std::out_of_range("view index");return impl_->data.views[i].camera.resolution;}
 uint32_t ReferenceRuntime::find_view(const std::string&id)const noexcept{for(uint32_t i=0;i<impl_->data.views.size();++i)if(impl_->data.views[i].id==id)return i;return UINT32_MAX;}
 uint32_t ReferenceRuntime::clip_count()const noexcept{return uint32_t(impl_->data.clips.size());}
 const std::string& ReferenceRuntime::clip_id(uint32_t i)const{if(i>=impl_->data.clips.size())throw std::out_of_range("clip index");return impl_->data.clips[i].id;}
@@ -293,7 +293,10 @@ std::vector<uint8_t> ReferenceRuntime::render_rgba(uint32_t ci,uint32_t vi,float
     const FrameView&fv=(alpha<0.5f?f0.views[vi]:f1.views[vi]);
     if(!fv.clip_intervals.empty())throw std::runtime_error("Runtime-v4 P0/P1 native clipping is not yet qualified");
 
-    const size_t pixels=size_t(view.width)*view.height;
+    const uint32_t output_width=view.camera.resolution;
+    const uint32_t output_height=view.camera.resolution;
+    if(output_width==0||output_height==0)throw std::runtime_error("Runtime-v4 output resolution is zero");
+    const size_t pixels=size_t(output_width)*output_height;
     std::vector<std::array<float,4>>color(pixels,{0,0,0,0});
     std::vector<DepthSample>depth(pixels);
     std::unordered_map<uint32_t,const Overlay*>overlay_by_asset;
@@ -333,15 +336,15 @@ std::vector<uint8_t> ReferenceRuntime::render_rgba(uint32_t ci,uint32_t vi,float
             b.u=binding.overlay->uv[t[1]].x;b.v=binding.overlay->uv[t[1]].y;
             c.u=binding.overlay->uv[t[2]].x;c.v=binding.overlay->uv[t[2]].y;
             int minx=std::max(0,int(std::floor(std::min({a.x,b.x,c.x})-0.5f)));
-            int maxx=std::min(int(view.width)-1,int(std::ceil(std::max({a.x,b.x,c.x})-0.5f)));
+            int maxx=std::min(int(output_width)-1,int(std::ceil(std::max({a.x,b.x,c.x})-0.5f)));
             int miny=std::max(0,int(std::floor(std::min({a.y,b.y,c.y})-0.5f)));
-            int maxy=std::min(int(view.height)-1,int(std::ceil(std::max({a.y,b.y,c.y})-0.5f)));
+            int maxy=std::min(int(output_height)-1,int(std::ceil(std::max({a.y,b.y,c.y})-0.5f)));
             if(minx>maxx||miny>maxy)continue;
             for(int y=miny;y<=maxy;++y)for(int x=minx;x<=maxx;++x){
                 Barycentric bc=reference_raster_v3::cover_pixel_center(a,b,c,x,y);
                 if(!bc.covered)continue;
                 float z=reference_raster_v3::interpolate_depth(bc,a,b,c);
-                size_t pi=size_t(y)*view.width+size_t(x);
+                size_t pi=size_t(y)*output_width+size_t(x);
                 if(!reference_raster_v3::depth_test_passes(depth[pi],z,semantic_order))continue;
                 float u=a.u*bc.w0+b.u*bc.w1+c.u*bc.w2;
                 float v=a.v*bc.w0+b.v*bc.w1+c.v*bc.w2;

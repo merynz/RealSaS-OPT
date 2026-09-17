@@ -307,7 +307,7 @@ def _boundary_interval_nonintersection(
     p0: np.ndarray,
     p1: np.ndarray,
     boundary: tuple[tuple[int, int], ...],
-) -> float:
+) -> float | None:
     """Exact critical-time test for linearly moving nonadjacent boundary segments.
 
     Segment intersection predicates are signs of quadratic orientation polynomials.
@@ -341,7 +341,7 @@ def _boundary_interval_nonintersection(
                     p0,p1,boundary[i],boundary[j]
                 ),
             )
-    return float(best)
+    return None if not math.isfinite(best) else float(best)
 
 
 def certify_directional_body_motion_v1(
@@ -434,10 +434,16 @@ def certify_directional_body_motion_v1(
                 p1,
                 boundary,
             )
-            min_boundary_distance = min(min_boundary_distance, boundary_distance)
+            if boundary_distance is not None:
+                min_boundary_distance = min(min_boundary_distance, boundary_distance)
 
     if interval_count <= 0:
         raise QualificationError("DIRECTIONAL_BODY_CERT_REQUIRES_FRAME_INTERVALS")
+
+    min_boundary_distance = (
+        -1.0 if not math.isfinite(min_boundary_distance)
+        else float(min_boundary_distance)
+    )
 
     payload = {
         "schema": DIRECTIONAL_BODY_CERTIFICATE_SCHEMA,
@@ -449,6 +455,7 @@ def certify_directional_body_motion_v1(
         "global_embedding_certified": True,
         "min_signed_area2_margin": float(min_area_margin),
         "min_boundary_distance_at_critical_times": float(min_boundary_distance),
+        "boundary_distance_semantics": "MIN_CRITICAL_TIME_DISTANCE__NEG1_IF_NO_NONADJACENT_PAIR",
         "source_alpha_recall_floor": float(recall_floor),
         "precision_inside_alpha_floor": float(precision_floor),
         "interval_count": int(interval_count),

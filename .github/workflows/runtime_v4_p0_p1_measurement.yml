@@ -1,0 +1,38 @@
+name: runtime-v4-p0-p1-measurement
+on:
+  push:
+    branches: [playback-stack-v1-20260916]
+    paths:
+      - 'compiler/realsas_compiler_core/playback_runtime_v4.py'
+      - 'compiler/realsas_compiler_core/playback_full_surface_v4.py'
+      - 'compiler/realsas_compiler_services/export/runtime_v4.py'
+      - 'tests/compiler/test_playback_runtime_v4_contract_v1.py'
+      - 'experiments/playback_stack_v1/benchmark_runtime_v4_p0_p1.py'
+      - '.github/workflows/runtime_v4_p0_p1_measurement.yml'
+  workflow_dispatch:
+jobs:
+  shared-body-bulk-writer:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: python -m pip install --no-input --progress-bar off --only-binary=:all: numpy pytest
+      - name: Runtime-v4 compiler contract
+        run: PYTHONPATH=. python -m pytest -q tests/compiler/test_playback_runtime_v4_contract_v1.py
+      - name: Dense P0/P1 reference measurement
+        run: |
+          rm -rf .runtime-v4-p0-p1
+          mkdir -p .runtime-v4-p0-p1
+          PYTHONPATH=. python experiments/playback_stack_v1/benchmark_runtime_v4_p0_p1.py | tee .runtime-v4-p0-p1/benchmark.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runtime-v4-p0-p1-measurement-${{ github.sha }}
+          path: .runtime-v4-p0-p1/benchmark.log
+          if-no-files-found: error

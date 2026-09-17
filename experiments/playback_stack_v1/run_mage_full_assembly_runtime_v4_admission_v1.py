@@ -285,7 +285,21 @@ def run(args) -> dict:
             row.clip_id: row.certificate_hash for row in certificates
         },
     }, indent=2, sort_keys=True))
-    return report
+    return {
+        "report": report,
+        "report_path": str(report_path),
+        "report_sha256": _sha(report_path),
+        "projection": projection,
+        "product": product,
+        "state": state,
+        "binding": binding,
+        "provider": provider,
+        "plans": plans,
+        "bakes": bakes,
+        "certificates": tuple(certificates),
+        "textures": textures,
+        "cameras": cameras,
+    }
 
 
 def parse_args():

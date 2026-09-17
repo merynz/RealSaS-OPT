@@ -5,11 +5,13 @@ on:
     paths:
       - 'runtime/realsas_cpp/**'
       - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json'
       - '.github/workflows/native_runtime_source_gate.yml'
   pull_request:
     paths:
       - 'runtime/realsas_cpp/**'
       - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json'
       - '.github/workflows/native_runtime_source_gate.yml'
 
 jobs:
@@ -25,26 +27,69 @@ jobs:
           python3 --version
           dpkg -s libarchive-dev libpng-dev zlib1g-dev >/dev/null
 
-      - name: Verify sealed source bytes
+      - name: Verify historical seal + append-only Runtime-v4 extension bytes
         run: |
           python3 - <<'PY'
           import hashlib
           import json
+          import subprocess
           from pathlib import Path
 
-          seal_path = Path('canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json')
-          seal = json.loads(seal_path.read_text(encoding='utf-8'))
-          assert seal['authority']['canonical_compiler'] == 'compiler/realsas_compiler_core/'
-          assert seal['authority']['runtime_role'] == 'subordinate_deployment_consumer'
-          assert seal['authority']['historical_compiler_restored'] is False
-          assert seal['verification']['file_count'] == 9
+          base_path = Path('canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json')
+          ext_path = Path('canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json')
+          base = json.loads(base_path.read_text(encoding='utf-8'))
+          ext = json.loads(ext_path.read_text(encoding='utf-8'))
 
-          for entry in seal['files']:
-              path = Path(entry['path'])
+          def git_blob_sha1(payload: bytes) -> str:
+              return subprocess.check_output(
+                  ['git', 'hash-object', '--stdin'],
+                  input=payload,
+                  text=False,
+              ).decode('ascii').strip()
+
+          assert ext['schema'] == 'realsas.compiler_runtime_source_extension_seal.v1'
+          assert ext['base_seal']['path'] == str(base_path)
+          assert git_blob_sha1(base_path.read_bytes()) == ext['base_seal']['git_blob_sha1']
+          assert ext['authority']['historical_base_seal_mutated'] is False
+          assert ext['authority']['runtime_role'] == 'subordinate_deployment_consumer'
+
+          expected = {
+              row['path']: {
+                  'size_bytes': int(row['size_bytes']),
+                  'sha256': row['sha256'],
+                  'git_blob_sha1': row['git_blob_sha1'],
+                  'source': 'historical_base',
+              }
+              for row in base['files']
+          }
+
+          for row in ext['replacements']:
+              assert row['path'] in expected, row['path']
+              expected[row['path']] = {
+                  'size_bytes': int(row['size_bytes']),
+                  'git_blob_sha1': row['git_blob_sha1'],
+                  'source': 'extension_replacement',
+              }
+
+          for row in ext['additions']:
+              assert row['path'] not in expected, row['path']
+              expected[row['path']] = {
+                  'size_bytes': int(row['size_bytes']),
+                  'git_blob_sha1': row['git_blob_sha1'],
+                  'source': 'extension_addition',
+              }
+
+          for path_text, identity in expected.items():
+              path = Path(path_text)
               payload = path.read_bytes()
-              actual = hashlib.sha256(payload).hexdigest()
-              assert len(payload) == entry['size_bytes'], (path, len(payload), entry['size_bytes'])
-              assert actual == entry['sha256'], (path, actual, entry['sha256'])
+              assert len(payload) == identity['size_bytes'], (path, len(payload), identity['size_bytes'])
+              actual_blob = git_blob_sha1(payload)
+              assert actual_blob == identity['git_blob_sha1'], (path, actual_blob, identity['git_blob_sha1'])
+              if identity['source'] == 'historical_base':
+                  actual_sha256 = hashlib.sha256(payload).hexdigest()
+                  assert actual_sha256 == identity['sha256'], (path, actual_sha256, identity['sha256'])
+
+          print(f"NATIVE_SOURCE_SEAL_PASS files={len(expected)} base={len(base['files'])} extension={len(ext['replacements']) + len(ext['additions'])}")
           PY
 
       - name: Configure
@@ -53,5 +98,5 @@ jobs:
       - name: Build
         run: cmake --build build/native-runtime --parallel 2
 
-      - name: ABI smoke
+      - name: ABI + reference runtime tests
         run: ctest --test-dir build/native-runtime --output-on-failure

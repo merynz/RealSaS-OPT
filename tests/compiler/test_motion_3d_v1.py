@@ -117,7 +117,12 @@ def test_projected_joint_trajectories_keep_xy_and_depth_from_same_3d_pose():
     xyz = trajectories["V0"]
     assert xyz.shape == (2, 3, 3)
     # Root is stationary and remains at camera-forward depth 10.
-    assert xyz[:, 0, :] == pytest.approx([[4.0, 4.0, 10.0], [4.0, 4.0, 10.0]])
+    np.testing.assert_allclose(
+        xyz[:, 0, :],
+        np.asarray([[4.0, 4.0, 10.0], [4.0, 4.0, 10.0]], dtype=np.float64),
+        rtol=0.0,
+        atol=1e-12,
+    )
     # Hip moves from +X to +Y in world; screen Y is inverted.
     assert xyz[0, 1, :] == pytest.approx([5.0, 4.0, 10.0], abs=1e-12)
     assert xyz[1, 1, :] == pytest.approx([4.0, 3.0, 10.0], abs=1e-12)

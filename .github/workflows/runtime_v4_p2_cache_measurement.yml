@@ -1,0 +1,44 @@
+name: runtime-v4-p2-cache-measurement
+
+on:
+  push:
+    branches:
+      - playback-stack-v1-20260916
+    paths:
+      - 'compiler/realsas_compiler_services/cache/**'
+      - 'compiler/realsas_compiler_services/export/runtime_v4_cache.py'
+      - 'tests/compiler/test_content_addressed_stage_cache_v1.py'
+      - 'tests/compiler/test_runtime_v4_cache_v1.py'
+      - 'experiments/playback_stack_v1/benchmark_runtime_v4_p2_cache.py'
+      - '.github/workflows/runtime_v4_p2_cache_measurement.yml'
+  workflow_dispatch:
+
+jobs:
+  persistent-runtime-cache:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU cache-test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: python -m pip install --no-input --progress-bar off --only-binary=:all: numpy pytest
+      - name: Content-addressed cache unit gates
+        run: |
+          PYTHONPATH=. python -m pytest -q \
+            tests/compiler/test_content_addressed_stage_cache_v1.py \
+            tests/compiler/test_runtime_v4_cache_v1.py
+      - name: Dense persistent cache measurement
+        run: |
+          mkdir -p .runtime-v4-p2
+          PYTHONPATH=. python experiments/playback_stack_v1/benchmark_runtime_v4_p2_cache.py \
+            | tee .runtime-v4-p2/benchmark.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runtime-v4-p2-cache-measurement-${{ github.sha }}
+          path: .runtime-v4-p2/benchmark.log
+          if-no-files-found: error

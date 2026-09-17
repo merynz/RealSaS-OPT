@@ -15,6 +15,7 @@ from compiler.realsas_compiler_core.component_attachment import (
     validate_component_assembly,
 )
 from compiler.realsas_compiler_core.continuity_underlay import (
+    bind_continuity_underlay_set_to_directional_renderables,
     build_continuity_underlay_set,
     qualify_continuity_underlay,
 )
@@ -269,6 +270,12 @@ def build_state(args, *, persist: bool = True):
         "partition_authority_sha256": fg_manifest["owner_manifest_sha256"],
         "runtime_atlas_rebind": True,
     })
+    render_set = bind_continuity_underlay_set_to_directional_renderables(
+        render_set,
+        underlay_set,
+        assembly,
+        mechanical,
+    )
 
     base_motion = build_mage_rotation_only_qualified_motion(mechanical)
     motion = compile_motion_quality(base_motion, mechanical)

@@ -7,6 +7,7 @@ on:
       - 'compiler/realsas_compiler_services/cache/proof_result.py'
       - 'compiler/realsas_compiler_core/proof_engine.py'
       - 'compiler/realsas_compiler_core/v4.py'
+      - 'compiler/realsas_compiler_core/rig.py'
       - 'tests/compiler/test_complete_e2e_proof_cache_integration_v1.py'
       - '.github/workflows/complete_e2e_proof_cache_integration_v1.yml'
   pull_request:
@@ -15,6 +16,7 @@ on:
       - 'compiler/realsas_compiler_services/cache/proof_result.py'
       - 'compiler/realsas_compiler_core/proof_engine.py'
       - 'compiler/realsas_compiler_core/v4.py'
+      - 'compiler/realsas_compiler_core/rig.py'
       - 'tests/compiler/test_complete_e2e_proof_cache_integration_v1.py'
       - '.github/workflows/complete_e2e_proof_cache_integration_v1.yml'
 

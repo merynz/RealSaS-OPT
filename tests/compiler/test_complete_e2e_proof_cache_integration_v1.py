@@ -14,10 +14,7 @@ def _sha256(path: str | Path) -> str:
 def test_complete_e2e_second_transaction_reuses_exact_typed_proof(tmp_path):
     cache_root = tmp_path / "persistent-cache"
 
-    cold = run_complete_e2e_v1(
-        tmp_path / "cold-product",
-        proof_cache_root=cache_root,
-    )
+    cold = run_complete_e2e_v1(tmp_path / "cold-product", proof_cache_root=cache_root)
     assert cold["proof_cache_hit"] is False
     assert cold["proof"].overall_status == "PASS"
 
@@ -27,38 +24,36 @@ def test_complete_e2e_second_transaction_reuses_exact_typed_proof(tmp_path):
     cold_deformation_identity = _exact_identity(_deformation_fixture(cold["product"]))
     cold_source_fingerprint = _source_fingerprint()[0]
 
-    warm = run_complete_e2e_v1(
-        tmp_path / "warm-product",
-        proof_cache_root=cache_root,
-    )
+    warm = run_complete_e2e_v1(tmp_path / "warm-product", proof_cache_root=cache_root)
     warm_deformation_identity = _exact_identity(_deformation_fixture(warm["product"]))
     warm_source_fingerprint = _source_fingerprint()[0]
 
     cold_product = cold["product"]
     warm_product = warm["product"]
+    cold_mech = cold_product.mechanical_state
+    warm_mech = warm_product.mechanical_state
+
+    assert warm_mech.surface.geometry_lineage_hash == cold_mech.surface.geometry_lineage_hash, (
+        cold_mech.surface.geometry_lineage_hash, warm_mech.surface.geometry_lineage_hash
+    )
+    assert warm_mech.skeleton.skeleton_lineage_hash == cold_mech.skeleton.skeleton_lineage_hash, (
+        cold_mech.skeleton.skeleton_lineage_hash, warm_mech.skeleton.skeleton_lineage_hash
+    )
+    assert warm_mech.skin.skin_lineage_hash == cold_mech.skin.skin_lineage_hash, (
+        cold_mech.skin.skin_lineage_hash, warm_mech.skin.skin_lineage_hash
+    )
     assert warm_product.mechanical_state_hash == cold_product.mechanical_state_hash, (
         cold_product.mechanical_state_hash, warm_product.mechanical_state_hash
     )
-    assert warm_product.directional_visual_state_hash == cold_product.directional_visual_state_hash, (
-        cold_product.directional_visual_state_hash, warm_product.directional_visual_state_hash
-    )
-    assert warm_product.motion_state_hash == cold_product.motion_state_hash, (
-        cold_product.motion_state_hash, warm_product.motion_state_hash
-    )
-    assert warm_product.capability_contract_hash == cold_product.capability_contract_hash, (
-        cold_product.capability_contract_hash, warm_product.capability_contract_hash
-    )
+    assert warm_product.directional_visual_state_hash == cold_product.directional_visual_state_hash
+    assert warm_product.motion_state_hash == cold_product.motion_state_hash
+    assert warm_product.capability_contract_hash == cold_product.capability_contract_hash
     assert warm_product.product_state_hash == cold_product.product_state_hash
     assert warm["directional_binding_hash"] == cold["directional_binding_hash"]
     assert warm["qualified_motion_provider_hash"] == cold["qualified_motion_provider_hash"]
     assert warm_source_fingerprint == cold_source_fingerprint
-    assert warm_deformation_identity == cold_deformation_identity, (
-        cold_deformation_identity,
-        warm_deformation_identity,
-    )
-    assert warm["proof_cache_key"] == cold["proof_cache_key"], (
-        cold["proof_cache_key"], warm["proof_cache_key"], cold["proof_cache_reason"], warm["proof_cache_reason"]
-    )
+    assert warm_deformation_identity == cold_deformation_identity
+    assert warm["proof_cache_key"] == cold["proof_cache_key"]
     assert warm["proof_cache_hit"] is True, warm["proof_cache_reason"]
     assert warm["proof_cache_artifact_sha256"] == cold["proof_cache_artifact_sha256"]
     assert warm["proof"].proof_bundle_hash == cold_proof_hash

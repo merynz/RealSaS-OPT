@@ -27,7 +27,7 @@ from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.playback_directional_motion_cert_v1 import (
     _boundary_edges,
     _boundary_interval_nonintersection,
-    _interval_signed_area2_min,
+    _interval_signed_area2_min_vectorized,
     _signed_area2,
 )
 from compiler.realsas_compiler_core.playback_full_surface_v3 import project_points_xyz_v3
@@ -241,16 +241,21 @@ def certify_directional_runtime_v4_assembly_v1(
             for fi in range(len(projected) - 1):
                 p0, p1 = projected[fi], projected[fi + 1]
                 interval_count += 1
-                for ti, tri in enumerate(triangles):
-                    margin = _interval_signed_area2_min(
-                        p0, p1, tri, float(signs[ti])
+                margins = _interval_signed_area2_min_vectorized(
+                    p0,
+                    p1,
+                    triangles,
+                    signs,
+                )
+                interval_min = float(np.min(margins))
+                min_area = min(min_area, interval_min)
+                failing = np.flatnonzero(margins <= float(min_signed_area2))
+                if failing.size:
+                    ti = int(failing[0])
+                    raise QualificationError(
+                        "DIRECTIONAL_ASSEMBLY_CERT_INTERVAL_COLLAPSE_OR_INVERSION:"
+                        f"{view_id}:{asset.asset_id}:{fi}:{ti}:{float(margins[ti])}"
                     )
-                    min_area = min(min_area, margin)
-                    if margin <= float(min_signed_area2):
-                        raise QualificationError(
-                            "DIRECTIONAL_ASSEMBLY_CERT_INTERVAL_COLLAPSE_OR_INVERSION:"
-                            f"{view_id}:{asset.asset_id}:{fi}:{ti}:{margin}"
-                        )
                 boundary_distance = _boundary_interval_nonintersection(p0, p1, boundary)
                 min_boundary = min(min_boundary, boundary_distance)
 

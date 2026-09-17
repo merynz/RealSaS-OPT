@@ -47,9 +47,11 @@ def build_final_state(args, *, persist: bool = True):
     mechanical = state["mechanical"]
     assembly = state["assembly"]
     underlay_set = state["underlay_set"]
-    render_set = bind_continuity_underlay_set_to_directional_renderables(
-        state["render_set"], underlay_set, assembly, mechanical
-    )
+    render_set = state["render_set"]
+    if not bool(dict(render_set.metadata or {}).get("continuity_underlay_qualified", False)):
+        render_set = bind_continuity_underlay_set_to_directional_renderables(
+            render_set, underlay_set, assembly, mechanical
+        )
 
     phase_motion = build_mage_historical_phase_motion(mechanical)
     motion = compile_motion_quality(phase_motion, mechanical)

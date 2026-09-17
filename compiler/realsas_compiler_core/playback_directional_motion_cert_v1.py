@@ -37,11 +37,11 @@ class DirectionalBodyMotionCertificateV1:
     clip_id: str
     view_ids: tuple[str, ...]
     continuous_orientation_certified: bool
-    boundary_motion_clearance_certified: bool
+    boundary_nonintersection_certified: bool
     topology_manifold_certified: bool
     global_embedding_certified: bool
     min_signed_area2_margin: float
-    min_boundary_clearance_lower_bound: float
+    min_boundary_distance_at_critical_times: float
     source_alpha_recall_floor: float
     precision_inside_alpha_floor: float
     interval_count: int
@@ -186,61 +186,115 @@ def _segment_distance(
     )
 
 
-def _boundary_interval_clearance(
+def _orientation_quadratic_coefficients(a0, a1, b0, b1, c0, c1):
+    u0 = b0 - a0
+    v0 = c0 - a0
+    du = (b1 - a1) - u0
+    dv = (c1 - a1) - v0
+    return (
+        _cross2(u0, v0),
+        _cross2(du, v0) + _cross2(u0, dv),
+        _cross2(du, dv),
+    )
+
+
+def _quadratic_roots_unit_interval(q0: float, q1: float, q2: float) -> tuple[float, ...]:
+    roots = []
+    eps = 1.0e-14
+    if abs(q2) <= eps:
+        if abs(q1) > eps:
+            t = -q0 / q1
+            if -eps <= t <= 1.0 + eps:
+                roots.append(min(1.0, max(0.0, float(t))))
+    else:
+        disc = q1*q1 - 4.0*q2*q0
+        if disc >= -eps:
+            disc = max(0.0, disc)
+            root = float(np.sqrt(disc))
+            for t in ((-q1-root)/(2.0*q2), (-q1+root)/(2.0*q2)):
+                if -eps <= t <= 1.0 + eps:
+                    roots.append(min(1.0, max(0.0, float(t))))
+    return tuple(sorted(set(round(t, 15) for t in roots)))
+
+
+def _lerp_point(a0: np.ndarray, a1: np.ndarray, t: float) -> np.ndarray:
+    return (1.0-float(t))*a0 + float(t)*a1
+
+
+def _continuous_segment_pair_check(
+    p0: np.ndarray,
+    p1: np.ndarray,
+    edge_a: tuple[int, int],
+    edge_b: tuple[int, int],
+) -> float:
+    a,b=edge_a
+    c,d=edge_b
+    polys = (
+        _orientation_quadratic_coefficients(p0[a],p1[a],p0[b],p1[b],p0[c],p1[c]),
+        _orientation_quadratic_coefficients(p0[a],p1[a],p0[b],p1[b],p0[d],p1[d]),
+        _orientation_quadratic_coefficients(p0[c],p1[c],p0[d],p1[d],p0[a],p1[a]),
+        _orientation_quadratic_coefficients(p0[c],p1[c],p0[d],p1[d],p0[b],p1[b]),
+    )
+    critical = {0.0,1.0}
+    for poly in polys:
+        critical.update(_quadratic_roots_unit_interval(*poly))
+    ordered=sorted(critical)
+    probes=set(ordered)
+    for x,y in zip(ordered,ordered[1:]):
+        if y-x>1.0e-14:
+            probes.add((x+y)*0.5)
+
+    best=float("inf")
+    for t in sorted(probes):
+        pa=_lerp_point(p0[a],p1[a],t); pb=_lerp_point(p0[b],p1[b],t)
+        pc=_lerp_point(p0[c],p1[c],t); pd=_lerp_point(p0[d],p1[d],t)
+        dist=_segment_distance(pa,pb,pc,pd)
+        best=min(best,dist)
+        if _segments_intersect(pa,pb,pc,pd,eps=1.0e-8):
+            raise QualificationError(
+                f"DIRECTIONAL_BODY_BOUNDARY_CONTINUOUS_INTERSECTION:{t}"
+            )
+    return float(best)
+
+
+def _boundary_interval_nonintersection(
     p0: np.ndarray,
     p1: np.ndarray,
     boundary: tuple[tuple[int, int], ...],
-    *,
-    clearance: float,
 ) -> float:
-    """Conservative continuous-time separation certificate for moving boundaries.
+    """Exact critical-time test for linearly moving nonadjacent boundary segments.
 
-    Each segment's Hausdorff displacement is no greater than the larger endpoint
-    displacement under linear interpolation. Thus:
-      dist(A(t), B(t)) >= dist(A(0), B(0)) - D_A - D_B.
-    Swept AABB disjointness certifies the remaining pairs without distance work.
+    Segment intersection predicates are signs of quadratic orientation polynomials.
+    Their truth value can change only at an orientation root. We therefore test all
+    roots in [0,1] and one point in every open root interval. Swept AABBs are only a
+    broadphase; they never authorize a collision.
     """
 
-    swept = []
-    displacement = []
-    for a, b in boundary:
-        pts = np.asarray((p0[a], p0[b], p1[a], p1[b]), dtype=np.float64)
-        swept.append(
-            (
-                float(pts[:, 0].min()),
-                float(pts[:, 0].max()),
-                float(pts[:, 1].min()),
-                float(pts[:, 1].max()),
-                a,
-                b,
-            )
-        )
-        displacement.append(
-            max(
-                float(np.linalg.norm(p1[a] - p0[a])),
-                float(np.linalg.norm(p1[b] - p0[b])),
-            )
-        )
-
-    order = sorted(range(len(boundary)), key=lambda i: swept[i][0])
-    best = 1.0e30
-    for oi, i in enumerate(order):
-        minx_i, maxx_i, miny_i, maxy_i, a, b = swept[i]
-        for j in order[oi + 1 :]:
-            minx_j, maxx_j, miny_j, maxy_j, c, d = swept[j]
-            if minx_j > maxx_i + clearance:
+    swept=[]
+    for a,b in boundary:
+        pts=np.asarray((p0[a],p0[b],p1[a],p1[b]),dtype=np.float64)
+        swept.append((
+            float(pts[:,0].min()),float(pts[:,0].max()),
+            float(pts[:,1].min()),float(pts[:,1].max()),a,b,
+        ))
+    order=sorted(range(len(boundary)),key=lambda i:swept[i][0])
+    best=float("inf")
+    for oi,i in enumerate(order):
+        minx_i,maxx_i,miny_i,maxy_i,a,b=swept[i]
+        for j in order[oi+1:]:
+            minx_j,maxx_j,miny_j,maxy_j,c,d=swept[j]
+            if minx_j>maxx_i:
                 break
-            if a in (c, d) or b in (c, d):
+            if a in (c,d) or b in (c,d):
                 continue
-            if maxy_i + clearance < miny_j or maxy_j + clearance < miny_i:
+            if maxy_i<miny_j or maxy_j<miny_i:
                 continue
-            d0 = _segment_distance(p0[a], p0[b], p0[c], p0[d])
-            lower = d0 - displacement[i] - displacement[j]
-            best = min(best, lower)
-            if lower <= clearance:
-                raise QualificationError(
-                    f"DIRECTIONAL_BODY_BOUNDARY_INTERVAL_NOT_CERTIFIED:{lower}"
-                )
+            best=min(
+                best,
+                _continuous_segment_pair_check(
+                    p0,p1,boundary[i],boundary[j]
+                ),
+            )
     return float(best)
 
 
@@ -252,7 +306,6 @@ def certify_directional_body_motion_v1(
     min_source_alpha_recall: float = 0.98,
     min_precision_inside_alpha: float = 0.995,
     min_signed_area2: float = 1.0e-4,
-    min_boundary_clearance_px: float = 1.0e-4,
     required_view_ids: Sequence[str] = DEFAULT_VIEWS,
 ) -> DirectionalBodyMotionCertificateV1:
     """Certify source coverage + continuous topological safety before rendering."""
@@ -278,7 +331,7 @@ def certify_directional_body_motion_v1(
 
     asset_by_id = {asset.asset_id: asset for asset in contract.assets}
     min_area_margin = 1.0e30
-    min_boundary_margin = 1.0e30
+    min_boundary_distance = 1.0e30
     interval_count = 0
 
     for view_index, view_id in enumerate(view_ids):
@@ -328,13 +381,12 @@ def certify_directional_body_motion_v1(
                         "DIRECTIONAL_BODY_TRIANGLE_INTERVAL_INVERSION_OR_COLLAPSE:"
                         f"{view_id}:{frame_index}:{tri_index}:{margin}"
                     )
-            boundary_margin = _boundary_interval_clearance(
+            boundary_distance = _boundary_interval_nonintersection(
                 p0,
                 p1,
                 boundary,
-                clearance=float(min_boundary_clearance_px),
             )
-            min_boundary_margin = min(min_boundary_margin, boundary_margin)
+            min_boundary_distance = min(min_boundary_distance, boundary_distance)
 
     if interval_count <= 0:
         raise QualificationError("DIRECTIONAL_BODY_CERT_REQUIRES_FRAME_INTERVALS")
@@ -344,11 +396,11 @@ def certify_directional_body_motion_v1(
         "clip_id": clip.clip_id,
         "view_ids": list(view_ids),
         "continuous_orientation_certified": True,
-        "boundary_motion_clearance_certified": True,
+        "boundary_nonintersection_certified": True,
         "topology_manifold_certified": True,
         "global_embedding_certified": True,
         "min_signed_area2_margin": float(min_area_margin),
-        "min_boundary_clearance_lower_bound": float(min_boundary_margin),
+        "min_boundary_distance_at_critical_times": float(min_boundary_distance),
         "source_alpha_recall_floor": float(recall_floor),
         "precision_inside_alpha_floor": float(precision_floor),
         "interval_count": int(interval_count),
@@ -360,11 +412,11 @@ def certify_directional_body_motion_v1(
         clip_id=clip.clip_id,
         view_ids=view_ids,
         continuous_orientation_certified=True,
-        boundary_motion_clearance_certified=True,
+        boundary_nonintersection_certified=True,
         topology_manifold_certified=True,
         global_embedding_certified=True,
         min_signed_area2_margin=float(min_area_margin),
-        min_boundary_clearance_lower_bound=float(min_boundary_margin),
+        min_boundary_distance_at_critical_times=float(min_boundary_distance),
         source_alpha_recall_floor=float(recall_floor),
         precision_inside_alpha_floor=float(precision_floor),
         interval_count=int(interval_count),

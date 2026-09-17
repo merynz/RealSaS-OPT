@@ -14,6 +14,7 @@ on:
       - 'runtime/reference_v4/**'
       - 'tests/runtime/**'
       - 'tests/compiler/test_current_v4_runtime_v2_projection_v1.py'
+      - 'tests/compiler/test_current_v4_directional_runtime_v4.py'
       - 'tests/compiler/test_directional_joint_view_binding_v1.py'
       - 'tests/compiler/test_motion_bake_firewall_v1.py'
       - 'tests/compiler/test_playback_runtime_v3_contract_v1.py'
@@ -69,6 +70,7 @@ jobs:
             tests/compiler/test_directional_joint_view_binding_v1.py \
             tests/compiler/test_motion_bake_firewall_v1.py \
             tests/compiler/test_current_v4_runtime_v2_projection_v1.py \
+            tests/compiler/test_current_v4_directional_runtime_v4.py \
             tests/compiler/test_playback_runtime_v3_contract_v1.py \
             tests/compiler/test_playback_full_surface_v3.py \
             tests/compiler/test_motion_3d_v1.py \

@@ -348,6 +348,7 @@ def materialize_runtime_v4_archive(
     clips: Iterable[RuntimeV4Clip],
     source_product_state_hash: str,
     source_proof_bundle_hash: str,
+    source_authority_kind: str = "PRODUCT_PROOF_BUNDLE",
     required_views: Sequence[str] = DEFAULT_VIEWS,
 ) -> dict:
     started = perf_counter()
@@ -360,6 +361,12 @@ def materialize_runtime_v4_archive(
         validate_runtime_v4_clip(contract, clip, required_view_ids=view_ids)
     if len(source_product_state_hash) != 64 or len(source_proof_bundle_hash) != 64:
         raise QualificationError("RUNTIME_V4_SOURCE_IDENTITIES_MUST_BE_SHA256")
+    source_authority_kind = str(source_authority_kind or "").strip()
+    if source_authority_kind not in {
+        "PRODUCT_PROOF_BUNDLE",
+        "RUNTIME_V4_ADMISSION_CERTIFICATE",
+    }:
+        raise QualificationError("RUNTIME_V4_SOURCE_AUTHORITY_KIND_INVALID")
 
     root = Path(texture_root).resolve()
     texture_rows = _validate_textures(textures, texture_root=root, required_views=view_ids)
@@ -372,6 +379,13 @@ def materialize_runtime_v4_archive(
         "schema": "RealSaS.RuntimeV4SourceBinding.v1",
         "source_product_state_hash": source_product_state_hash,
         "source_proof_bundle_hash": source_proof_bundle_hash,
+        "source_authority_kind": source_authority_kind,
+        "legacy_binary_source_proof_bundle_hash_field_semantics": (
+            "PRODUCT_PROOF_BUNDLE_HASH"
+            if source_authority_kind == "PRODUCT_PROOF_BUNDLE"
+            else "RUNTIME_V4_ADMISSION_CERTIFICATE_HASH__NOT_FULL_PRODUCT_PROOF"
+        ),
+        "full_product_proof_claimed": source_authority_kind == "PRODUCT_PROOF_BUNDLE",
         "playback_contract_hash": contract_hash,
         "reference_raster_contract_hash": contract.raster.contract_hash,
         "texture_hashes": {row.view_id: row.texture_sha256 for row in texture_rows},
@@ -430,6 +444,11 @@ def materialize_runtime_v4_archive(
                 "frame_count_total": sum(len(clip.frames) for clip in clip_rows),
                 "view_count": len(view_ids),
                 "asset_count": len(contract.assets),
+            },
+            "source_authority": {
+                "kind": source_authority_kind,
+                "hash": source_proof_bundle_hash,
+                "full_product_proof_claimed": source_authority_kind == "PRODUCT_PROOF_BUNDLE",
             },
             "founder_visual_pass_claimed": False,
         }

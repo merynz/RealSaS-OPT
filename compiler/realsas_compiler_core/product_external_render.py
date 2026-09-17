@@ -10,6 +10,7 @@ refusing to relabel the scientific MechanicalStateIR surface.
 
 from dataclasses import replace
 from typing import Any, Mapping
+import weakref
 
 from .hashing import content_sha256
 from .render_support import (
@@ -47,12 +48,67 @@ _MECHANICAL_EQUIVALENCE_CLASS = "THREE_D_EQUIVALENT_MECHANICS"
 _RENDERABLE_REPRESENTATION_CLASS = "DIRECTIONAL_2D_2P5D_RENDERABLE_SET"
 _EXTERNAL_KEY = "external_render_support_qualification"
 
+# These IRs are frozen dataclasses. During one compiler process the same immutable
+# object graph used to be recursively revalidated at component -> direction -> set ->
+# continuity -> product boundaries. Dense BODY made that pathological. Cache only
+# successful validation of the exact object identity + declared hash; loaded/replaced
+# objects get a new identity and therefore receive a full validation once.
+_VALIDATED_COMPONENTS: dict[int, tuple[weakref.ReferenceType, str]] = {}
+_VALIDATED_DIRECTIONS: dict[int, tuple[weakref.ReferenceType, str]] = {}
+_VALIDATED_SETS: dict[int, tuple[weakref.ReferenceType, str]] = {}
+
+
+def _validation_cache_hit(cache, value, declared_hash: str) -> bool:
+    key = id(value)
+    row = cache.get(key)
+    if row is None:
+        return False
+    ref, cached_hash = row
+    if ref() is value and cached_hash == str(declared_hash):
+        return True
+    cache.pop(key, None)
+    return False
+
+
+def _validation_cache_mark(cache, value, declared_hash: str) -> None:
+    key = id(value)
+
+    def _drop(_ref, *, _key=key, _cache=cache):
+        _cache.pop(_key, None)
+
+    try:
+        cache[key] = (weakref.ref(value, _drop), str(declared_hash))
+    except TypeError:
+        # Extremely defensive: if an alternate IR type is not weak-referenceable,
+        # retain old behaviour rather than weakening validation.
+        pass
+
 
 def _qualification_from_component(component: RenderableComponentIR) -> Mapping[str, Any]:
     raw = component.metadata.get(_EXTERNAL_KEY)
     if not isinstance(raw, Mapping):
         raise QualificationError("EXTERNAL_RENDERABLE_REQUIRES_RENDER_SUPPORT_QUALIFICATION")
     return raw
+
+
+def _validate_exact_appearance_coverage(component: RenderableComponentIR) -> None:
+    """Exact coverage without allocating two multi-million-entry tuple sets.
+
+    validate_appearance_binding already proves corner-index uniqueness. Therefore
+    exact cardinality plus in-range face/corner coordinates is equivalent to set
+    equality with every mesh corner, while remaining O(1) auxiliary memory.
+    """
+    expected_count = sum(len(face) for face in component.mesh.faces)
+    bindings = component.appearance.corner_bindings
+    if len(bindings) != expected_count:
+        raise QualificationError("EXTERNAL_RENDERABLE_APPEARANCE_COVERAGE_INCOMPLETE")
+    faces = component.mesh.faces
+    face_count = len(faces)
+    for corner in bindings:
+        fi = int(corner.face_index)
+        ci = int(corner.corner_index)
+        if fi < 0 or fi >= face_count or ci < 0 or ci >= len(faces[fi]):
+            raise QualificationError("EXTERNAL_RENDERABLE_APPEARANCE_COVERAGE_INCOMPLETE")
 
 
 def build_external_renderable_component(
@@ -93,15 +149,47 @@ def build_external_renderable_component(
         tuple(completions), bool(default_visible), metadata=merged,
     )
     value = replace(value, component_state_hash=component_state_hash(value))
-    validate_external_renderable_component(value, mechanical)
+    # qualify_external_render_support already fully traversed mesh + skin. Validate
+    # the newly assembled envelope/appearance once, but do not replay that traversal
+    # or recompute the component hash we just produced.
+    validate_external_renderable_component(
+        value,
+        mechanical,
+        revalidate_support_payload=False,
+        verify_component_hash=False,
+    )
     return value
 
 
-def validate_external_renderable_component(component: RenderableComponentIR, mechanical) -> None:
+def validate_external_renderable_component(
+    component: RenderableComponentIR,
+    mechanical,
+    *,
+    revalidate_support_payload: bool = True,
+    verify_component_hash: bool = True,
+) -> None:
     if int(component.view_index) not in _REQUIRED_VIEWS:
         raise QualificationError("EXTERNAL_RENDERABLE_INVALID_VIEW")
+    if _validation_cache_hit(_VALIDATED_COMPONENTS, component, component.component_state_hash):
+        # Cheap relationship checks are intentionally retained on cached calls.
+        if component.mesh.view_index != component.view_index:
+            raise QualificationError("EXTERNAL_RENDERABLE_MESH_VIEW_MISMATCH")
+        if component.appearance.target_view_index != component.view_index:
+            raise QualificationError("EXTERNAL_RENDERABLE_APPEARANCE_VIEW_MISMATCH")
+        if component.appearance.mesh_binding_hash != component.mesh.mesh_lineage_hash:
+            raise QualificationError("EXTERNAL_RENDERABLE_APPEARANCE_MESH_MISMATCH")
+        if component.appearance.camera_binding_hash != component.mesh.camera_binding_hash:
+            raise QualificationError("EXTERNAL_RENDERABLE_APPEARANCE_CAMERA_MISMATCH")
+        return
+
     qualification = _qualification_from_component(component)
-    validate_external_render_support_qualification(qualification, component.mesh, component.mesh_skin, mechanical)
+    validate_external_render_support_qualification(
+        qualification,
+        component.mesh,
+        component.mesh_skin,
+        mechanical,
+        revalidate_payload=revalidate_support_payload,
+    )
     if component.mesh.view_index != component.view_index:
         raise QualificationError("EXTERNAL_RENDERABLE_MESH_VIEW_MISMATCH")
     validate_appearance_binding(component.appearance)
@@ -111,10 +199,7 @@ def validate_external_renderable_component(component: RenderableComponentIR, mec
         raise QualificationError("EXTERNAL_RENDERABLE_APPEARANCE_MESH_MISMATCH")
     if component.appearance.camera_binding_hash != component.mesh.camera_binding_hash:
         raise QualificationError("EXTERNAL_RENDERABLE_APPEARANCE_CAMERA_MISMATCH")
-    expected = {(fi, ci) for fi, face in enumerate(component.mesh.faces) for ci in range(len(face))}
-    actual = {(c.face_index, c.corner_index) for c in component.appearance.corner_bindings}
-    if actual != expected:
-        raise QualificationError("EXTERNAL_RENDERABLE_APPEARANCE_COVERAGE_INCOMPLETE")
+    _validate_exact_appearance_coverage(component)
     completion_by_id = {c.completion_id: c for c in component.completions}
     if len(completion_by_id) != len(component.completions):
         raise QualificationError("EXTERNAL_RENDERABLE_DUPLICATE_COMPLETION_ID")
@@ -124,20 +209,30 @@ def validate_external_renderable_component(component: RenderableComponentIR, mec
     required = {c.completion_id for c in component.completions if c.required}
     if not required.issubset(referenced):
         raise QualificationError("EXTERNAL_RENDERABLE_REQUIRED_COMPLETION_NOT_BOUND")
-    if component.component_state_hash != component_state_hash(component):
+    if verify_component_hash and component.component_state_hash != component_state_hash(component):
         raise QualificationError("EXTERNAL_RENDERABLE_COMPONENT_HASH_MISMATCH")
+    _validation_cache_mark(_VALIDATED_COMPONENTS, component, component.component_state_hash)
 
 
 def build_external_directional_renderable(*, view_index: int, camera_binding_hash: str, components, mechanical, metadata=None):
     value = DirectionalRenderableIR(int(view_index), str(camera_binding_hash), tuple(components), "", metadata=dict(metadata or {}))
     value = replace(value, direction_state_hash=direction_state_hash(value))
-    validate_external_directional_renderable(value, mechanical)
+    # Child components have already been validated by their builders (or are fully
+    # validated on first use below). Do not recompute the direction hash just made.
+    validate_external_directional_renderable(value, mechanical, verify_direction_hash=False)
     return value
 
 
-def validate_external_directional_renderable(direction: DirectionalRenderableIR, mechanical) -> None:
+def validate_external_directional_renderable(
+    direction: DirectionalRenderableIR,
+    mechanical,
+    *,
+    verify_direction_hash: bool = True,
+) -> None:
     if direction.view_index not in _REQUIRED_VIEWS or not direction.components:
         raise QualificationError("EXTERNAL_DIRECTION_INVALID_OR_EMPTY")
+    if _validation_cache_hit(_VALIDATED_DIRECTIONS, direction, direction.direction_state_hash):
+        return
     ids = [c.component_id for c in direction.components]
     orders = [c.setup_order for c in direction.components]
     if len(ids) != len(set(ids)) or len(orders) != len(set(orders)):
@@ -148,8 +243,9 @@ def validate_external_directional_renderable(direction: DirectionalRenderableIR,
             raise QualificationError("EXTERNAL_DIRECTION_COMPONENT_VIEW_MISMATCH")
         if component.mesh.camera_binding_hash != direction.camera_binding_hash:
             raise QualificationError("EXTERNAL_DIRECTION_CAMERA_BINDING_MISMATCH")
-    if direction.direction_state_hash != direction_state_hash(direction):
+    if verify_direction_hash and direction.direction_state_hash != direction_state_hash(direction):
         raise QualificationError("EXTERNAL_DIRECTION_STATE_HASH_MISMATCH")
+    _validation_cache_mark(_VALIDATED_DIRECTIONS, direction, direction.direction_state_hash)
 
 
 def build_external_directional_renderable_set(directions, mechanical, *, metadata=None):
@@ -163,21 +259,29 @@ def build_external_directional_renderable_set(directions, mechanical, *, metadat
         },
     )
     value = replace(value, directional_visual_state_hash=directional_visual_state_hash(value))
-    validate_external_directional_renderable_set(value, mechanical)
+    validate_external_directional_renderable_set(value, mechanical, verify_set_hash=False)
     return value
 
 
-def validate_external_directional_renderable_set(value: DirectionalRenderableSetIR, mechanical) -> None:
+def validate_external_directional_renderable_set(
+    value: DirectionalRenderableSetIR,
+    mechanical,
+    *,
+    verify_set_hash: bool = True,
+) -> None:
     if value.representation_class != _RENDERABLE_REPRESENTATION_CLASS:
         raise QualificationError("EXTERNAL_DIRECTIONAL_RENDERABLE_REPRESENTATION_CLASS_MISMATCH")
     if value.exact_cardinality != 8 or len(value.directions) != 8:
         raise QualificationError("EXTERNAL_DIRECTIONAL_RENDERABLE_SET_REQUIRES_EXACTLY_8")
     if tuple(d.view_index for d in value.directions) != _REQUIRED_VIEWS:
         raise QualificationError("EXTERNAL_DIRECTIONAL_RENDERABLE_SET_VIEW_ORDER_MUST_BE_0_TO_7")
+    if _validation_cache_hit(_VALIDATED_SETS, value, value.directional_visual_state_hash):
+        return
     for direction in value.directions:
         validate_external_directional_renderable(direction, mechanical)
-    if value.directional_visual_state_hash != directional_visual_state_hash(value):
+    if verify_set_hash and value.directional_visual_state_hash != directional_visual_state_hash(value):
         raise QualificationError("EXTERNAL_DIRECTIONAL_RENDERABLE_SET_HASH_MISMATCH")
+    _validation_cache_mark(_VALIDATED_SETS, value, value.directional_visual_state_hash)
 
 
 def _effective_motion(track) -> bool:

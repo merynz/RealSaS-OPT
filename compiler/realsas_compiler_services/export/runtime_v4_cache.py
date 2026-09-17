@@ -165,12 +165,19 @@ def runtime_v4_cache_identity(
     clips: Iterable[RuntimeV4Clip],
     source_product_state_hash: str,
     source_proof_bundle_hash: str,
+    source_authority_kind: str = "PRODUCT_PROOF_BUNDLE",
     required_views: Sequence[str] = DEFAULT_VIEWS,
     cache_root: str | Path | None = None,
 ) -> tuple[ContentAddressedStageCache, str, dict]:
     view_ids = tuple(map(str, required_views))
     if len(source_product_state_hash) != 64 or len(source_proof_bundle_hash) != 64:
         raise QualificationError("RUNTIME_V4_CACHE_SOURCE_IDENTITIES_MUST_BE_SHA256")
+    source_authority_kind = str(source_authority_kind or "").strip()
+    if source_authority_kind not in {
+        "PRODUCT_PROOF_BUNDLE",
+        "RUNTIME_V4_ADMISSION_CERTIFICATE",
+    }:
+        raise QualificationError("RUNTIME_V4_CACHE_SOURCE_AUTHORITY_KIND_INVALID")
     contract_hash = validate_playback_runtime_v4_contract(contract, required_view_ids=view_ids)
     clip_rows = tuple(clips)
     if not clip_rows or len({clip.clip_id for clip in clip_rows}) != len(clip_rows):
@@ -188,6 +195,7 @@ def runtime_v4_cache_identity(
         "reference_raster_contract_hash": contract.raster.contract_hash,
         "source_product_state_hash": source_product_state_hash,
         "source_proof_bundle_hash": source_proof_bundle_hash,
+        "source_authority_kind": source_authority_kind,
         "required_views": list(view_ids),
         "textures": texture_rows,
         "clip_set_sha256": clip_digest,
@@ -210,6 +218,7 @@ def materialize_runtime_v4_archive_cached(
     clips: Iterable[RuntimeV4Clip],
     source_product_state_hash: str,
     source_proof_bundle_hash: str,
+    source_authority_kind: str = "PRODUCT_PROOF_BUNDLE",
     required_views: Sequence[str] = DEFAULT_VIEWS,
     cache_root: str | Path | None = None,
 ) -> dict:
@@ -224,6 +233,7 @@ def materialize_runtime_v4_archive_cached(
         clips=clip_rows,
         source_product_state_hash=source_product_state_hash,
         source_proof_bundle_hash=source_proof_bundle_hash,
+        source_authority_kind=source_authority_kind,
         required_views=required_views,
         cache_root=cache_root,
     )
@@ -260,6 +270,7 @@ def materialize_runtime_v4_archive_cached(
         clips=clip_rows,
         source_product_state_hash=source_product_state_hash,
         source_proof_bundle_hash=source_proof_bundle_hash,
+        source_authority_kind=source_authority_kind,
         required_views=required_views,
     )
     materializer_wall = float(fresh.get("wall_seconds", 0.0))

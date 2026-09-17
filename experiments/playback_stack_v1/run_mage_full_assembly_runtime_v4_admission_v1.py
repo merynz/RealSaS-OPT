@@ -37,7 +37,7 @@ from compiler.realsas_compiler_services.proof.directional_motion_provider import
     make_qualified_directional_motion_provider,
 )
 
-import experiments.mage_demo_fit1_v5_p1.materialize_product_state_v3_motion_engine as product_v3
+import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_v3_motion_engine as product_v3
 
 SCHEMA = "RealSaS.MageFullAssemblyRuntimeV4Admission.v1"
 REQUIRED_CLIPS = ("mage_fit1_idle_v2", "mage_fit1_run_v2")
@@ -216,7 +216,7 @@ def run(args) -> dict:
     report = {
         "schema": SCHEMA,
         "status": "PASS__FULL_MAGE_RUNTIME_V4_RENDER_ADMITTED",
-        "subject_id": "MAGE_FIT1_CURRENT_FULL_ASSEMBLY",
+        "subject_id": "MAGE_FIT2_CURRENT_FULL_ASSEMBLY",
         "scope": "RENDER_FREE_RUNTIME_V4_ADMISSION",
         "source_product_state_hash": product.product_state_hash,
         "source_mechanical_state_hash": product.mechanical_state_hash,
@@ -304,15 +304,13 @@ def run(args) -> dict:
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--zero-surface", required=True)
     p.add_argument("--cameras", nargs=8, required=True)
-    p.add_argument("--observations", nargs=8, required=True)
     p.add_argument("--p1q-dir", required=True)
     p.add_argument("--foreground-dir", required=True)
     p.add_argument("--assembly-dir", required=True)
-    p.add_argument("--fit1-surface", required=True)
+    p.add_argument("--fit2-surface", required=True)
     p.add_argument("--skeleton", required=True)
-    p.add_argument("--fit1-skin", required=True)
+    p.add_argument("--fit2-skin", required=True)
     p.add_argument("--expected-p1q-manifest", default="")
     p.add_argument("--expected-foreground-manifest", default="")
     p.add_argument("--expected-assembly-manifest", default="")

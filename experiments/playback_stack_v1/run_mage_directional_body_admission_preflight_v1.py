@@ -42,6 +42,7 @@ from compiler.realsas_compiler_core.playback_directional_motion_cert_v1 import (
     certify_directional_body_motion_v1,
 )
 from compiler.realsas_compiler_core.playback_full_surface_v3 import qualify_camera_v3
+from compiler.realsas_compiler_core.playback_runtime_v4 import validate_playback_runtime_v4_contract
 
 import experiments.mage_demo_fit1_v5_p1.fit2_current_authority_io as fit2io
 import experiments.mage_demo_fit1_v5_p1.materialize_p1_b2_g10_v1 as mat
@@ -257,6 +258,9 @@ def run(args) -> dict:
         root_bone_id=_root_joint_id(skeleton),
         required_view_ids=VIEW_IDS,
     )
+    contract_hash = validate_playback_runtime_v4_contract(
+        contract, required_view_ids=VIEW_IDS
+    )
 
     axis_contract_path = Path(args.axis_contract).resolve()
     axis_contract = _load_json(axis_contract_path)
@@ -337,7 +341,7 @@ def run(args) -> dict:
         "rest_source_precision_floor": precision_floor,
         "view_meshes": mesh_rows,
         "mesh_skin_bindings": binding_rows,
-        "playback_contract_hash": contract.contract_hash,
+        "playback_contract_hash": contract_hash,
         "clips": clip_rows,
         "completion_used": False,
         "render_executed": False,

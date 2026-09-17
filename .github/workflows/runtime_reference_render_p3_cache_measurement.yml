@@ -6,6 +6,7 @@ on:
       - playback-stack-v1-20260916
     paths:
       - 'compiler/realsas_compiler_services/cache/reference_render.py'
+      - 'compiler/realsas_compiler_services/export/runtime_v4.py'
       - 'experiments/playback_stack_v1/run_runtime_reference_e2e_v1.py'
       - 'experiments/playback_stack_v1/benchmark_reference_render_p3_cache.py'
       - 'tests/compiler/test_reference_render_cache_v1.py'

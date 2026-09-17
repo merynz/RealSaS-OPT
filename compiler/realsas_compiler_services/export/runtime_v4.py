@@ -413,6 +413,8 @@ def materialize_runtime_v4_archive(
             },
             "render_capabilities": {
                 "depth_test": True,
+                "posed_vertex_depth": True,
+                "full_surface_geometry_authority": True,
                 "canonical_posed_xyz_once_per_attachment_per_frame": True,
                 "runtime_exact_view_projection": True,
                 "shared_canonical_geometry": True,

@@ -197,6 +197,9 @@ def qualify_external_render_support(
     direct_binding_manifest_sha256: str,
     metadata: Mapping[str, Any] | None = None,
 ) -> ExternalRenderSupportQualificationIR:
+    # Full payload validation happens exactly once here. The old implementation
+    # immediately called the public validator afterwards, which replayed the entire
+    # dense mesh/skin validation a second time before the object could be returned.
     _validate_detached_mesh_skin(mesh_skin, mesh, mechanical)
     method = str(mesh_skin.transfer_method)
     value = ExternalRenderSupportQualificationIR(
@@ -222,11 +225,20 @@ def qualify_external_render_support(
         },
     )
     value = replace(value, qualification_hash=external_render_support_hash(value))
-    validate_external_render_support_qualification(value, mesh, mesh_skin, mechanical)
+    validate_external_render_support_qualification(
+        value, mesh, mesh_skin, mechanical, revalidate_payload=False
+    )
     return value
 
 
-def validate_external_render_support_qualification(value, mesh, mesh_skin, mechanical) -> None:
+def validate_external_render_support_qualification(
+    value,
+    mesh,
+    mesh_skin,
+    mechanical,
+    *,
+    revalidate_payload: bool = True,
+) -> None:
     if isinstance(value, Mapping):
         fields = dict(value)
         fields.setdefault("metadata", {})
@@ -234,7 +246,8 @@ def validate_external_render_support_qualification(value, mesh, mesh_skin, mecha
         value = ExternalRenderSupportQualificationIR(**fields)
     if not isinstance(value, ExternalRenderSupportQualificationIR):
         raise QualificationError("EXTERNAL_RENDER_SUPPORT_QUALIFICATION_REQUIRED")
-    _validate_detached_mesh_skin(mesh_skin, mesh, mechanical)
+    if revalidate_payload:
+        _validate_detached_mesh_skin(mesh_skin, mesh, mechanical)
     expected = {
         "view_index": int(mesh.view_index),
         "render_support_surface_hash": str(mesh.surface_binding_hash),

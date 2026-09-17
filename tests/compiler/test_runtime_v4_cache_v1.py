@@ -186,3 +186,29 @@ def test_runtime_v4_cache_identity_rejects_texture_byte_drift(tmp_path: Path):
         assert "TEXTURE_SHA_MISMATCH" in str(exc)
     else:
         raise AssertionError("texture byte drift was accepted by cache identity")
+
+
+
+def test_runtime_v4_cache_identity_separates_product_proof_from_admission_authority(tmp_path: Path):
+    texture_root = tmp_path / "textures-root"
+    contract, textures, clips = _fixture(texture_root)
+    common = dict(
+        texture_root=texture_root,
+        contract=contract,
+        textures=textures,
+        clips=clips,
+        source_product_state_hash="c" * 64,
+        source_proof_bundle_hash="d" * 64,
+        cache_root=tmp_path / "cache",
+    )
+    _cache_a, product_key, product_inputs = runtime_v4_cache_identity(
+        **common,
+        source_authority_kind="PRODUCT_PROOF_BUNDLE",
+    )
+    _cache_b, admission_key, admission_inputs = runtime_v4_cache_identity(
+        **common,
+        source_authority_kind="RUNTIME_V4_ADMISSION_CERTIFICATE",
+    )
+    assert product_key != admission_key
+    assert product_inputs["source_authority_kind"] == "PRODUCT_PROOF_BUNDLE"
+    assert admission_inputs["source_authority_kind"] == "RUNTIME_V4_ADMISSION_CERTIFICATE"

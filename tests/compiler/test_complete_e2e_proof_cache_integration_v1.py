@@ -3,7 +3,8 @@ from __future__ import annotations
 from hashlib import sha256
 from pathlib import Path
 
-from experiments.single_family_e2e_v1.run_complete_e2e_v1 import run_complete_e2e_v1
+from compiler.realsas_compiler_services.cache.proof_result import _exact_identity, _source_fingerprint
+from experiments.single_family_e2e_v1.run_complete_e2e_v1 import _deformation_fixture, run_complete_e2e_v1
 
 
 def _sha256(path: str | Path) -> str:
@@ -23,12 +24,24 @@ def test_complete_e2e_second_transaction_reuses_exact_typed_proof(tmp_path):
     cold_proof_hash = cold["proof"].proof_bundle_hash
     cold_bake_hashes = tuple(bake.bake_hash for bake in cold["motion_bakes"])
     cold_runtime_sha = _sha256(cold["native_runtime_archive"])
+    cold_deformation_identity = _exact_identity(_deformation_fixture(cold["product"]))
+    cold_source_fingerprint = _source_fingerprint()[0]
 
     warm = run_complete_e2e_v1(
         tmp_path / "warm-product",
         proof_cache_root=cache_root,
     )
+    warm_deformation_identity = _exact_identity(_deformation_fixture(warm["product"]))
+    warm_source_fingerprint = _source_fingerprint()[0]
 
+    assert warm["product"].product_state_hash == cold["product"].product_state_hash
+    assert warm["directional_binding_hash"] == cold["directional_binding_hash"]
+    assert warm["qualified_motion_provider_hash"] == cold["qualified_motion_provider_hash"]
+    assert warm_source_fingerprint == cold_source_fingerprint
+    assert warm_deformation_identity == cold_deformation_identity, (
+        cold_deformation_identity,
+        warm_deformation_identity,
+    )
     assert warm["proof_cache_key"] == cold["proof_cache_key"], (
         cold["proof_cache_key"], warm["proof_cache_key"], cold["proof_cache_reason"], warm["proof_cache_reason"]
     )

@@ -141,3 +141,35 @@ def test_v4_completion_remains_disabled_by_default():
     bad = RuntimeV4PlaybackContract(contract.slots, contract.assets, tuple(views))
     with pytest.raises(QualificationError, match="RUNTIME_V4_COMPLETION_NOT_ALLOWED_BY_PRODUCT_POLICY"):
         validate_playback_runtime_v4_contract(bad)
+
+
+def test_partial_unseen_is_forbidden_when_any_required_view_has_source():
+    contract, _ = _fixture()
+    views = list(contract.views)
+    row = views[0].assets[0]
+    unseen = RuntimeV4ViewAssetOverlay(
+        row.asset_id,
+        row.uv,
+        np.asarray((provenance_code(AppearanceProvenance.UNSEEN),), dtype=np.uint8),
+        np.asarray((-1,), dtype=np.int16),
+    )
+    views[0] = RuntimeV4ViewOverlay("V0", 0, views[0].camera, (unseen,))
+    bad = RuntimeV4PlaybackContract(contract.slots, contract.assets, tuple(views))
+    with pytest.raises(QualificationError, match="RUNTIME_V4_UNSEEN_REQUIRES_ABSENCE_IN_ALL_VIEWS"):
+        validate_playback_runtime_v4_contract(bad)
+
+
+def test_other_view_source_donor_must_differ_from_target_view():
+    contract, _ = _fixture()
+    views = list(contract.views)
+    row = views[2].assets[0]
+    other = RuntimeV4ViewAssetOverlay(
+        row.asset_id,
+        row.uv,
+        np.asarray((provenance_code(AppearanceProvenance.OTHER_VIEW_SOURCE),), dtype=np.uint8),
+        np.asarray((2,), dtype=np.int16),
+    )
+    views[2] = RuntimeV4ViewOverlay("V2", 2, views[2].camera, (other,))
+    bad = RuntimeV4PlaybackContract(contract.slots, contract.assets, tuple(views))
+    with pytest.raises(QualificationError, match="RUNTIME_V4_OTHER_VIEW_DONOR_MUST_DIFFER_FROM_TARGET_VIEW"):
+        validate_playback_runtime_v4_contract(bad)

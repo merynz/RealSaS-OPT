@@ -89,6 +89,52 @@ def _interval_signed_area2_min(
     return float(min(values))
 
 
+def _cross2_rows(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    return a[:, 0] * b[:, 1] - a[:, 1] * b[:, 0]
+
+
+def _interval_signed_area2_min_vectorized(
+    p0: np.ndarray,
+    p1: np.ndarray,
+    triangles: np.ndarray,
+    orientation_signs: np.ndarray,
+) -> np.ndarray:
+    """Exact per-triangle signed double-area minima on t in [0,1], vectorized."""
+
+    tri = np.asarray(triangles, dtype=np.int64)
+    signs = np.asarray(orientation_signs, dtype=np.float64)
+    if tri.ndim != 2 or tri.shape[1] != 3 or signs.shape != (len(tri),):
+        raise QualificationError("DIRECTIONAL_BODY_VECTOR_AREA_INPUT_SHAPE_INVALID")
+    a0, b0, c0 = p0[tri[:, 0]], p0[tri[:, 1]], p0[tri[:, 2]]
+    a1, b1, c1 = p1[tri[:, 0]], p1[tri[:, 1]], p1[tri[:, 2]]
+    u0 = b0 - a0
+    v0 = c0 - a0
+    du = (b1 - a1) - u0
+    dv = (c1 - a1) - v0
+    q0 = _cross2_rows(u0, v0)
+    q1 = _cross2_rows(du, v0) + _cross2_rows(u0, dv)
+    q2 = _cross2_rows(du, dv)
+
+    end0 = signs * q0
+    end1 = signs * (q0 + q1 + q2)
+    minima = np.minimum(end0, end1)
+
+    curved = np.abs(q2) > 1.0e-18
+    t = np.zeros_like(q0)
+    t[curved] = -q1[curved] / (2.0 * q2[curved])
+    stationary = curved & (t > 0.0) & (t < 1.0)
+    if np.any(stationary):
+        ts = t[stationary]
+        q = q0[stationary] + q1[stationary] * ts + q2[stationary] * ts * ts
+        minima[stationary] = np.minimum(
+            minima[stationary],
+            signs[stationary] * q,
+        )
+    if not np.isfinite(minima).all():
+        raise QualificationError("DIRECTIONAL_BODY_VECTOR_AREA_NONFINITE")
+    return minima
+
+
 def _boundary_edges(triangles: np.ndarray) -> tuple[tuple[int, int], ...]:
     counts: dict[tuple[int, int], int] = {}
     for tri in np.asarray(triangles, dtype=np.int64):
@@ -368,19 +414,21 @@ def certify_directional_body_motion_v1(
         for frame_index in range(len(projected) - 1):
             p0, p1 = projected[frame_index], projected[frame_index + 1]
             interval_count += 1
-            for tri_index, tri in enumerate(triangles):
-                margin = _interval_signed_area2_min(
-                    p0,
-                    p1,
-                    tri,
-                    float(rest_sign[tri_index]),
+            margins = _interval_signed_area2_min_vectorized(
+                p0,
+                p1,
+                triangles,
+                rest_sign,
+            )
+            interval_min = float(np.min(margins))
+            min_area_margin = min(min_area_margin, interval_min)
+            failing = np.flatnonzero(margins <= float(min_signed_area2))
+            if failing.size:
+                tri_index = int(failing[0])
+                raise QualificationError(
+                    "DIRECTIONAL_BODY_TRIANGLE_INTERVAL_INVERSION_OR_COLLAPSE:"
+                    f"{view_id}:{frame_index}:{tri_index}:{float(margins[tri_index])}"
                 )
-                min_area_margin = min(min_area_margin, margin)
-                if margin <= float(min_signed_area2):
-                    raise QualificationError(
-                        "DIRECTIONAL_BODY_TRIANGLE_INTERVAL_INVERSION_OR_COLLAPSE:"
-                        f"{view_id}:{frame_index}:{tri_index}:{margin}"
-                    )
             boundary_distance = _boundary_interval_nonintersection(
                 p0,
                 p1,

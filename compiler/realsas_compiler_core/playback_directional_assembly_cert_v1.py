@@ -63,7 +63,11 @@ class DirectionalAssemblyMotionCertificateV1:
     schema_version: str = DIRECTIONAL_ASSEMBLY_CERTIFICATE_SCHEMA
 
 
-def _body_coverage(product, view_ids: tuple[str, ...]) -> tuple[float, float]:
+def _body_coverage(
+    product,
+    view_ids: tuple[str, ...],
+    body_component_id: str,
+) -> tuple[float, float]:
     by_view = {
         int(direction.view_index): {
             str(component.component_id): component
@@ -76,7 +80,7 @@ def _body_coverage(product, view_ids: tuple[str, ...]) -> tuple[float, float]:
     recall = []
     precision = []
     for i in range(len(view_ids)):
-        body = by_view[i].get(BODY_COMPONENT_ID)
+        body = by_view[i].get(str(body_component_id))
         if body is None:
             raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_BODY_COMPONENT_MISSING")
         report = dict(body.mesh.qualification_report or {})
@@ -99,8 +103,12 @@ def certify_directional_runtime_v4_assembly_v1(
     min_body_source_precision: float = 0.995,
     min_signed_area2: float = 1.0e-4,
     required_view_ids: Sequence[str] = DEFAULT_VIEWS,
+    body_component_id: str | None = None,
 ) -> DirectionalAssemblyMotionCertificateV1:
     view_ids = tuple(map(str, required_view_ids))
+    body_component_id = str(body_component_id or projection.body_component_id or BODY_COMPONENT_ID)
+    if body_component_id != str(projection.body_component_id):
+        raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_BODY_COMPONENT_ID_DRIFT")
     contract = projection.contract
     validate_playback_runtime_v4_contract(contract, required_view_ids=view_ids)
     clips = {clip.clip_id: clip for clip in projection.clips}
@@ -133,19 +141,19 @@ def certify_directional_runtime_v4_assembly_v1(
     for row in views_payload:
         if bool(row.get("new_pixels_generated", True)):
             raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_UNDERLAY_NEW_PIXELS_FORBIDDEN")
-        if str(row.get("substrate_component_id")) != BODY_COMPONENT_ID:
+        if str(row.get("substrate_component_id")) != body_component_id:
             raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_UNDERLAY_SUBSTRATE_DRIFT")
 
-    body_recall, body_precision = _body_coverage(product, view_ids)
+    body_recall, body_precision = _body_coverage(product, view_ids, body_component_id)
     if body_recall < float(min_body_source_alpha_recall):
         raise QualificationError(f"DIRECTIONAL_ASSEMBLY_CERT_BODY_RECALL_FAIL:{body_recall}")
     if body_precision < float(min_body_source_precision):
         raise QualificationError(f"DIRECTIONAL_ASSEMBLY_CERT_BODY_PRECISION_FAIL:{body_precision}")
 
     slot_index = {slot.slot_id: i for i, slot in enumerate(contract.slots)}
-    if BODY_COMPONENT_ID not in slot_index:
+    if body_component_id not in slot_index:
         raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_BODY_SLOT_MISSING")
-    body_slot = BODY_COMPONENT_ID
+    body_slot = body_component_id
 
     # Active owner-view assets must be direct source only. Other-view overlays exist
     # solely to make source authority total for inactive assets and may never be the
@@ -248,6 +256,7 @@ def certify_directional_runtime_v4_assembly_v1(
         "source_product_state_hash": product.product_state_hash,
         "projection_hash": projection.projection_hash,
         "continuity_underlay_set_hash": underlay_hash,
+        "body_component_id": body_component_id,
         "source_backed_active_faces_certified": True,
         "continuity_underlay_certified": True,
         "continuous_embedding_certified": True,

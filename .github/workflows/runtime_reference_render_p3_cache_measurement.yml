@@ -9,6 +9,8 @@ on:
       - 'compiler/realsas_compiler_services/export/runtime_v4.py'
       - 'experiments/playback_stack_v1/run_runtime_reference_e2e_v1.py'
       - 'experiments/playback_stack_v1/benchmark_reference_render_p3_cache.py'
+      - 'runtime/realsas_cpp/src/runtime_v4_reference.cpp'
+      - 'runtime/realsas_cpp/examples/realsas_runtime_v4_demo.cpp'
       - 'tests/compiler/test_reference_render_cache_v1.py'
       - '.github/workflows/runtime_reference_render_p3_cache_measurement.yml'
   workflow_dispatch:
@@ -34,16 +36,16 @@ jobs:
       - name: Configure native runtime
         run: |
           cmake -S runtime/realsas_cpp -B build/p3-reference-render -DCMAKE_BUILD_TYPE=Release -DREALSAS_BUILD_TESTS=OFF
-      - name: Build native reference renderer
+      - name: Build Runtime-v4 native reference renderer
         run: |
-          cmake --build build/p3-reference-render --target realsas_runtime_demo --parallel 2
+          cmake --build build/p3-reference-render --target realsas_runtime_v4_demo --parallel 2
       - name: Native cold-to-warm reference-render cache measurement
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p .runtime-reference-p3
           PYTHONPATH=. python experiments/playback_stack_v1/benchmark_reference_render_p3_cache.py \
-            --runtime-demo build/p3-reference-render/realsas_runtime_demo \
+            --runtime-demo build/p3-reference-render/realsas_runtime_v4_demo \
             | tee .runtime-reference-p3/benchmark.log
       - uses: actions/upload-artifact@v4
         if: always()

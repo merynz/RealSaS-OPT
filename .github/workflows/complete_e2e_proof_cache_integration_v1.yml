@@ -20,6 +20,10 @@ on:
       - 'tests/compiler/test_complete_e2e_proof_cache_integration_v1.py'
       - '.github/workflows/complete_e2e_proof_cache_integration_v1.yml'
 
+concurrency:
+  group: complete-e2e-proof-cache-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   complete-transaction-cache:
     runs-on: [self-hosted, linux, x64, realsas]

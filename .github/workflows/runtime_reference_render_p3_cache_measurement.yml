@@ -1,0 +1,49 @@
+name: runtime-reference-render-p3-cache-measurement
+
+on:
+  push:
+    branches:
+      - playback-stack-v1-20260916
+    paths:
+      - 'compiler/realsas_compiler_services/cache/reference_render.py'
+      - 'experiments/playback_stack_v1/run_runtime_reference_e2e_v1.py'
+      - 'experiments/playback_stack_v1/benchmark_reference_render_p3_cache.py'
+      - 'tests/compiler/test_reference_render_cache_v1.py'
+      - '.github/workflows/runtime_reference_render_p3_cache_measurement.yml'
+  workflow_dispatch:
+
+jobs:
+  native-reference-render-cache:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Python dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy pytest
+      - name: Reference-render cache unit gates
+        run: |
+          PYTHONPATH=. python -m pytest -q tests/compiler/test_reference_render_cache_v1.py
+      - name: Configure native runtime
+        run: |
+          cmake -S runtime/realsas_cpp -B build/p3-reference-render -DCMAKE_BUILD_TYPE=Release -DREALSAS_BUILD_TESTS=OFF
+      - name: Build native reference renderer
+        run: |
+          cmake --build build/p3-reference-render --target realsas_runtime_demo --parallel 2
+      - name: Native cold-to-warm reference-render cache measurement
+        run: |
+          mkdir -p .runtime-reference-p3
+          PYTHONPATH=. python experiments/playback_stack_v1/benchmark_reference_render_p3_cache.py \
+            --runtime-demo build/p3-reference-render/realsas_runtime_demo \
+            | tee .runtime-reference-p3/benchmark.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runtime-reference-render-p3-cache-measurement-${{ github.sha }}
+          path: .runtime-reference-p3/benchmark.log
+          if-no-files-found: error

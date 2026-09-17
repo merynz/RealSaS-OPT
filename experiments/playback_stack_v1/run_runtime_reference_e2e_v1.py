@@ -9,26 +9,24 @@ The runner exercises the shipped/native presentation path rather than a notebook
 renderer. Runtime-v2 archives may be exercised in STRUCTURAL_SMOKE mode, but they
 can never produce a depth-qualified/founder visual PASS. Runtime-v3 depth
 qualification is required for that claim.
+
+Native reference renders are content-addressed. An unchanged exact runtime package,
+renderer binary and (clip, view, time) node is restored from a hash-verified cache;
+all restored PNGs still pass the same PNG validation as cold native renders.
 """
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
-import subprocess
 import zipfile
+
+from compiler.realsas_compiler_services.cache.reference_render import (
+    NativeReferenceRenderCache,
+    REFERENCE_RENDER_CACHE_PRODUCER,
+)
 
 
 REPORT_SCHEMA = "RealSaS.PlaybackReferenceE2EProbe.v1"
-PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
-
-
-def sha256_file(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open("rb") as f:
-        for chunk in iter(lambda: f.read(1 << 20), b""):
-            h.update(chunk)
-    return h.hexdigest()
 
 
 def read_runtime_manifest(archive: Path) -> dict:
@@ -78,33 +76,28 @@ def parse_times(text: str) -> tuple[float, ...]:
     return out
 
 
-def render_frame(*, runtime_demo: Path, archive: Path, clip: str, view: str, time: float, out_png: Path) -> dict:
-    out_png.parent.mkdir(parents=True, exist_ok=True)
-    cmd = [
-        str(runtime_demo), str(archive),
-        "--clip", str(clip),
-        "--view", str(view),
-        "--time", f"{float(time):.9f}",
-        "--out", str(out_png),
-    ]
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-    if proc.returncode != 0:
-        raise RuntimeError(
-            "E2E_NATIVE_REFERENCE_RENDER_FAILED:"
-            f"view={view}:time={time}:rc={proc.returncode}\n{proc.stdout}"
-        )
-    if not out_png.is_file():
-        raise RuntimeError(f"E2E_REFERENCE_RENDER_DID_NOT_CREATE_PNG:{out_png}")
-    raw = out_png.read_bytes()
-    if not raw.startswith(PNG_MAGIC):
-        raise RuntimeError(f"E2E_REFERENCE_RENDER_OUTPUT_NOT_PNG:{out_png}")
-    return {
-        "view": view,
-        "time_seconds": float(time),
-        "path": str(out_png),
-        "sha256": sha256_file(out_png),
-        "stdout": proc.stdout.strip(),
-    }
+def render_frame(
+    *,
+    runtime_demo: Path,
+    archive: Path,
+    clip: str,
+    view: str,
+    time: float,
+    out_png: Path,
+    render_cache: NativeReferenceRenderCache | None = None,
+    cache_root: Path | None = None,
+) -> dict:
+    cache = render_cache or NativeReferenceRenderCache(
+        runtime_package=archive,
+        runtime_demo=runtime_demo,
+        cache_root=cache_root,
+    )
+    return cache.render(
+        clip=clip,
+        view=view,
+        time_seconds=time,
+        out_png=out_png,
+    )
 
 
 def run(args: argparse.Namespace) -> dict:
@@ -127,6 +120,13 @@ def run(args: argparse.Namespace) -> dict:
         raise RuntimeError(f"E2E_REQUIRES_EXACT_V0_TO_V7:{views}")
     times = parse_times(args.times)
 
+    cache_root_arg = getattr(args, "cache_root", None)
+    render_cache = NativeReferenceRenderCache(
+        runtime_package=archive,
+        runtime_demo=runtime_demo,
+        cache_root=(Path(cache_root_arg).resolve() if cache_root_arg else None),
+    )
+
     frames = []
     for view in views:
         for index, t in enumerate(times):
@@ -138,9 +138,14 @@ def run(args: argparse.Namespace) -> dict:
                 view=view,
                 time=t,
                 out_png=target,
+                render_cache=render_cache,
             ))
 
     claim = "RUNTIME_DEPTH_QUALIFIED_E2E" if runtime["depth_qualified"] else "STRUCTURAL_SMOKE_ONLY"
+    cache_hits = sum(1 for frame in frames if frame.get("render_cache_hit") is True)
+    cache_misses = len(frames) - cache_hits
+    package_identity = render_cache.package_identity
+    renderer_identity = render_cache.renderer_identity
     report = {
         "schema": REPORT_SCHEMA,
         "subject_id": str(args.subject_id),
@@ -154,9 +159,21 @@ def run(args: argparse.Namespace) -> dict:
         "views": list(views),
         "times": list(times),
         "runtime_package": str(archive),
-        "runtime_package_sha256": sha256_file(archive) if archive.is_file() else None,
+        # Preserve the historical file-only field while also exposing a stable
+        # content identity for unpacked runtime directories.
+        "runtime_package_sha256": package_identity["sha256"] if package_identity["kind"] == "file" else None,
+        "runtime_package_content_sha256": package_identity["sha256"],
         "native_reference_renderer": str(runtime_demo),
-        "native_reference_renderer_sha256": sha256_file(runtime_demo),
+        "native_reference_renderer_sha256": renderer_identity["sha256"],
+        "reference_render_cache": {
+            "producer_fingerprint": REFERENCE_RENDER_CACHE_PRODUCER,
+            "cache_root": str(render_cache.cache.root),
+            "node_count": len(frames),
+            "hit_count": cache_hits,
+            "miss_count": cache_misses,
+            "all_nodes_hit": bool(frames) and cache_misses == 0,
+            "cache_is_acceleration_not_proof_authority": True,
+        },
         "frames": frames,
     }
     out.mkdir(parents=True, exist_ok=True)
@@ -166,6 +183,8 @@ def run(args: argparse.Namespace) -> dict:
         "status": "PASS__" + claim,
         "report": str(report_path),
         "frame_count": len(frames),
+        "render_cache_hits": cache_hits,
+        "render_cache_misses": cache_misses,
     }, indent=2))
     return report
 
@@ -175,6 +194,7 @@ def main() -> None:
     ap.add_argument("--rss", required=True, help="Compiled .rss/.realsas archive or unpacked package")
     ap.add_argument("--runtime-demo", required=True, help="Native C++ realsas_runtime_demo executable")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--cache-root", default=None, help="Persistent content-addressed cache root; defaults to REALSAS_CACHE_ROOT or ~/.cache/realsas")
     ap.add_argument("--subject-id", default="UNNAMED_TEST_SUBJECT")
     ap.add_argument("--clip", required=True)
     ap.add_argument("--views", default=",".join(f"V{i}" for i in range(8)))

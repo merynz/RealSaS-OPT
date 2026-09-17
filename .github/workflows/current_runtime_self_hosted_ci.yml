@@ -75,6 +75,10 @@ jobs:
             tests/compiler/test_motion_3d_gates_v1.py \
             tests/compiler/test_motion_3d_adapter_v1.py \
             tests/compiler/test_playback_v3_d1_bridge.py \
+            tests/compiler/test_playback_appearance_authority_v2.py \
+            tests/compiler/test_playback_runtime_v4_contract_v1.py \
+            tests/compiler/test_playback_directional_body_v1.py \
+            tests/compiler/test_directional_edge_flip_repair_v1.py \
             tests/compiler/test_test_subject_001_materializer_v1.py \
             tests/compiler/test_test_subject_001_r2_appearance_authority_v1.py \
             tests/compiler/test_test_subject_001_d0_fix1_seal_v1.py

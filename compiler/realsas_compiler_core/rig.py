@@ -6,6 +6,35 @@ from .hashing import content_sha256
 from .canonical_graph_optimizer_authority import optimize_canonical_graph_v18_98
 from realsas_contracts.technical_part_graph import CanonicalGraphNodeCandidate, CanonicalGraphEdgeCandidate, CanonicalGraphOptimizationRequest
 
+
+def _optimizer_semantic_hash(res)->str:
+    """Stable identity of the qualified graph decision, excluding execution telemetry.
+
+    The sealed optimizer result object carries elapsed_seconds and its raw
+    content_sha256 therefore changes between otherwise identical solves.  Runtime
+    duration is useful diagnostic evidence but must never participate in canonical
+    joint IDs, skeleton lineage, product state, or persistent-cache identity.
+    """
+    payload={
+        "schema":"RealSaS.CanonicalGraphSemanticDecision.v1",
+        "result_id":str(res.result_id),
+        "request_id":str(res.request_id),
+        "selected_root_control_id":res.selected_root_control_id,
+        "selected_node_ids":tuple(sorted(res.selected_node_ids)),
+        "selected_edge_keys":tuple(sorted(res.selected_edge_keys)),
+        "parent_by_child":tuple(sorted((str(k),str(v)) for k,v in res.parent_by_child.items())),
+        "solver":str(res.solver),
+        "status":str(res.status),
+        "objective_value":float(res.objective_value),
+        "optimality_proven":bool(res.optimality_proven),
+        "feasible":bool(res.feasible),
+        "optimality_gap":None if res.optimality_gap is None else float(res.optimality_gap),
+        "blockers":tuple(sorted(res.blockers)),
+        "warnings":tuple(sorted(res.warnings)),
+    }
+    return content_sha256(payload)
+
+
 def qualify_skeleton(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, run_ilp_shadow:bool=False)->QualifiedSkeletonIR:
     if proposal.surface_binding_hash != surface.geometry_lineage_hash:
         raise QualificationError("stale/mismatched skeleton proposal: surface lineage mismatch")
@@ -47,15 +76,29 @@ def qualify_skeleton(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, r
         raise QualificationError("skeleton qualification failed:"+";".join(res.blockers or (res.status,)))
     if res.optimality_proven is not True:
         raise QualificationError("skeleton qualification failed:CANONICAL_GRAPH_OPTIMALITY_NOT_PROVEN")
-    canonical={cid:"J:"+content_sha256({"qualified_graph":res.content_sha256,"candidate":cid})[:20] for cid in res.selected_node_ids}
+    semantic_graph_hash=_optimizer_semantic_hash(res)
+    canonical={cid:"J:"+content_sha256({"qualified_graph":semantic_graph_hash,"candidate":cid})[:20] for cid in res.selected_node_ids}
     q=[]
     for cid in sorted(res.selected_node_ids):
         pid=reverse[cid]; j=joint_by[pid]; pcid=res.parent_by_child.get(cid)
         q.append(QualifiedJoint(canonical[cid],tuple(map(float,j.position)),None if pcid is None else canonical[pcid],tuple(j.support_surface_ids),pid))
     root=canonical[res.selected_root_control_id]
-    report={"solver":res.solver,"status":res.status,"objective":res.objective_value,"optimality_proven":res.optimality_proven,"blockers":res.blockers,"warnings":res.warnings,"optimizer_result_sha256":res.content_sha256,"proposal_to_candidate":internal,"candidate_to_canonical":canonical}
+    report={
+        "solver":res.solver,
+        "status":res.status,
+        "objective":res.objective_value,
+        "optimality_proven":res.optimality_proven,
+        "blockers":res.blockers,
+        "warnings":res.warnings,
+        "optimizer_result_id":res.result_id,
+        "optimizer_semantic_sha256":semantic_graph_hash,
+        "optimizer_execution_telemetry_excluded_from_identity":True,
+        "proposal_to_candidate":internal,
+        "candidate_to_canonical":canonical,
+    }
     lineage=content_sha256({"surface":surface.geometry_lineage_hash,"proposal":proposal.to_dict(),"report":report,"joints":[j.to_dict() for j in q]})
     return QualifiedSkeletonIR(tuple(q),root,report,lineage)
+
 
 def qualify_skeleton_v2(surface:RiggingSurfaceIR, proposal:SkeletonProposalIR, *, run_ilp_shadow:bool=False)->QualifiedSkeletonIRV2:
     """V4 product-facing skeleton qualifier.

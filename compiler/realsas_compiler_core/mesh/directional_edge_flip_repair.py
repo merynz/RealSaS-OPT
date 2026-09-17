@@ -219,6 +219,12 @@ def repair_directional_mesh_by_edge_flips_v1(
 
     # Edge flips over convex quads preserve the geometric union exactly. Vertex set,
     # rest positions, support bindings, and source UV/raster coordinates are untouched.
+    repaired_edges = tuple(sorted({
+        tuple(sorted((str(face[i]), str(face[(i + 1) % 3]))))
+        for face in faces
+        for i in range(3)
+    }))
+
     report = dict(mesh.qualification_report)
     report["directional_edge_flip_repair"] = {
         "schema": DIRECTIONAL_EDGE_FLIP_REPAIR_SCHEMA,
@@ -237,6 +243,7 @@ def repair_directional_mesh_by_edge_flips_v1(
     updated = replace(
         mesh,
         faces=tuple(faces),
+        edges=repaired_edges,
         qualification_report=report,
         mesh_lineage_hash="",
     )

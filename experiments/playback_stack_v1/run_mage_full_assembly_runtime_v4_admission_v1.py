@@ -289,12 +289,25 @@ def run(args) -> dict:
 
 
 def parse_args():
-    p = product_v3.parse_args()
+    p = argparse.ArgumentParser()
+    p.add_argument("--zero-surface", required=True)
+    p.add_argument("--cameras", nargs=8, required=True)
+    p.add_argument("--observations", nargs=8, required=True)
+    p.add_argument("--p1q-dir", required=True)
+    p.add_argument("--foreground-dir", required=True)
+    p.add_argument("--assembly-dir", required=True)
+    p.add_argument("--fit1-surface", required=True)
+    p.add_argument("--skeleton", required=True)
+    p.add_argument("--fit1-skin", required=True)
+    p.add_argument("--expected-p1q-manifest", default="")
+    p.add_argument("--expected-foreground-manifest", default="")
+    p.add_argument("--expected-assembly-manifest", default="")
+    p.add_argument("--output-dir", required=True)
     p.add_argument("--min-body-source-recall", type=float, default=0.97)
     p.add_argument("--min-body-source-precision", type=float, default=0.995)
     p.add_argument("--min-signed-area2", type=float, default=1.0e-4)
-    return p
+    return p.parse_args()
 
 
 if __name__ == "__main__":
-    run(parse_args().parse_args())
+    run(parse_args())

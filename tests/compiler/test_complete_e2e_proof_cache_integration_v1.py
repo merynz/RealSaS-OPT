@@ -34,7 +34,21 @@ def test_complete_e2e_second_transaction_reuses_exact_typed_proof(tmp_path):
     warm_deformation_identity = _exact_identity(_deformation_fixture(warm["product"]))
     warm_source_fingerprint = _source_fingerprint()[0]
 
-    assert warm["product"].product_state_hash == cold["product"].product_state_hash
+    cold_product = cold["product"]
+    warm_product = warm["product"]
+    assert warm_product.mechanical_state_hash == cold_product.mechanical_state_hash, (
+        cold_product.mechanical_state_hash, warm_product.mechanical_state_hash
+    )
+    assert warm_product.directional_visual_state_hash == cold_product.directional_visual_state_hash, (
+        cold_product.directional_visual_state_hash, warm_product.directional_visual_state_hash
+    )
+    assert warm_product.motion_state_hash == cold_product.motion_state_hash, (
+        cold_product.motion_state_hash, warm_product.motion_state_hash
+    )
+    assert warm_product.capability_contract_hash == cold_product.capability_contract_hash, (
+        cold_product.capability_contract_hash, warm_product.capability_contract_hash
+    )
+    assert warm_product.product_state_hash == cold_product.product_state_hash
     assert warm["directional_binding_hash"] == cold["directional_binding_hash"]
     assert warm["qualified_motion_provider_hash"] == cold["qualified_motion_provider_hash"]
     assert warm_source_fingerprint == cold_source_fingerprint

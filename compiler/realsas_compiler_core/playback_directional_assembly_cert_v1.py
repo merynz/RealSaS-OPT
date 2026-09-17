@@ -257,10 +257,12 @@ def certify_directional_runtime_v4_assembly_v1(
                         f"{view_id}:{asset.asset_id}:{fi}:{ti}:{float(margins[ti])}"
                     )
                 boundary_distance = _boundary_interval_nonintersection(p0, p1, boundary)
-                min_boundary = min(min_boundary, boundary_distance)
+                if boundary_distance is not None:
+                    min_boundary = min(min_boundary, boundary_distance)
 
     if interval_count <= 0:
         raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_NO_INTERVALS")
+    min_boundary = -1.0 if not math.isfinite(min_boundary) else float(min_boundary)
 
     payload = {
         "schema": DIRECTIONAL_ASSEMBLY_CERTIFICATE_SCHEMA,
@@ -277,6 +279,7 @@ def certify_directional_runtime_v4_assembly_v1(
         "body_source_precision_floor": body_precision,
         "min_signed_area2_margin": min_area,
         "min_boundary_distance_at_critical_times": min_boundary,
+        "boundary_distance_semantics": "MIN_CRITICAL_TIME_DISTANCE__NEG1_IF_NO_NONADJACENT_PAIR",
         "active_asset_interval_count": interval_count,
         "completion_used": False,
         "runtime_interpolation": "LINEAR_VIEW_LOCAL_EQUAL_DEPTH_DIRECTIONAL_ASSETS",

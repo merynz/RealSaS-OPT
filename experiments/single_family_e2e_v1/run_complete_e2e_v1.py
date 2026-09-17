@@ -18,9 +18,9 @@ from compiler.realsas_compiler_core.mwb2 import build_mwb2_candidate, qualify_mw
 from compiler.realsas_compiler_core.mwb2_skin import bind_mwb2_mesh_skin
 from compiler.realsas_compiler_core.appearance import build_observed_appearance_binding
 from compiler.realsas_compiler_core.motion import build_deterministic_preset_motion
-from compiler.realsas_compiler_core.proof_engine import evaluate_product_proof
 from compiler.realsas_compiler_core.deformation import mesh_skin_dense_weights
 from compiler.realsas_compiler_core.directional_binding import DirectionalBindingPolicyV1, qualify_directional_joint_view_binding
+from compiler.realsas_compiler_services.cache.proof_result import evaluate_product_proof_cached
 from compiler.realsas_compiler_services.proof.directional_motion_provider import make_qualified_directional_motion_provider
 from compiler.realsas_compiler_services.export.current_v4_runtime_v2 import (
     RuntimeTexturePayloadV1,
@@ -32,6 +32,7 @@ from runtime.reference_v4.consumer import consume_product_v4_reference
 
 
 NATIVE_RESOLUTION = 1024
+DEFAULT_PROOF_CACHE_ROOT = Path.home() / '.cache' / 'realsas' / 'proof-result-v1'
 
 
 def _grid_to_pixel_center_xy(x, y):
@@ -152,15 +153,20 @@ def _deformation_fixture(product):
     return {'view_index': 0, 'component_index': 0, 'transforms': T, 'expected': expected, 'rms_threshold': 1e-7, 'p95_threshold': 1e-7}
 
 
-def run_complete_e2e_v1(output_root=None):
+def run_complete_e2e_v1(output_root=None, proof_cache_root=None):
     """Synthetic architecture gate through current proof-owned bake and native-v2 archive.
 
     The 4-point planar binding policy is explicitly synthetic-only. Production
     DirectionalBindingPolicyV1 keeps its 8-correspondence default; this gate proves
     typed wiring and rank-3 affine-hull semantics without weakening production policy.
+
+    Proof evaluation is persistent/content-addressed. A cache HIT is accepted only
+    after current typed proof and motion-bake validators re-bind the exact artifact;
+    cache uncertainty degrades to a MISS and authoritative re-evaluation.
     """
     root = Path(output_root) if output_root is not None else Path(tempfile.mkdtemp(prefix='realsas_e2e_'))
     root.mkdir(parents=True, exist_ok=True)
+    cache_root = Path(proof_cache_root) if proof_cache_root is not None else DEFAULT_PROOF_CACHE_ROOT
     texture_root = root / 'native_texture_source'
     texture_bindings = _write_mock_textures(texture_root)
 
@@ -192,15 +198,17 @@ def run_complete_e2e_v1(output_root=None):
     directional_binding = qualify_directional_joint_view_binding(product, policy=synthetic_binding_policy)
     motion_provider = make_qualified_directional_motion_provider(directional_binding)
     proof_artifacts = {}
-    proof = evaluate_product_proof(
+    proof_result = evaluate_product_proof_cached(
         product,
+        cache_root=cache_root,
         deformation_fixture=_deformation_fixture(product),
         motion_bake_provider=motion_provider,
         artifacts_out=proof_artifacts,
     )
+    proof = proof_result.proof_bundle
     if proof.overall_status != 'PASS':
         raise RuntimeError(f'SYNTHETIC_E2E_PROOF_NOT_PASS:{proof.overall_status}')
-    motion_bakes = tuple(proof_artifacts.get('motion_bakes', {}).values())
+    motion_bakes = proof_result.motion_bakes
     if {bake.clip_id for bake in motion_bakes} != {motion.clips[0].clip_id}:
         raise RuntimeError('SYNTHETIC_E2E_MOTION_BAKE_NOT_CAPTURED')
 
@@ -247,6 +255,10 @@ def run_complete_e2e_v1(output_root=None):
         'qualified_motion_provider_hash': motion_provider.provider_hash,
         'motion_bake_hash': motion_bakes[0].bake_hash,
         'motion_bakes': motion_bakes,
+        'proof_cache_hit': bool(proof_result.cache_hit),
+        'proof_cache_key': proof_result.cache_key,
+        'proof_cache_reason': proof_result.cache_reason,
+        'proof_cache_artifact_sha256': proof_result.artifact_sha256,
         'synthetic_binding_policy_only': True,
         'texture_bindings': texture_bindings,
         'native_projection': native_projection,

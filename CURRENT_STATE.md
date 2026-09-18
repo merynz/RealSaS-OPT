@@ -5,7 +5,7 @@
 **Active experiment gate:** `SUBJECT2_KNIGHT_FULL_CLOSURE` on `main`  
 **Active run:** `SUBJECT2_KNIGHT_V1`  
 **Progress:** **0/40** — next `01_SOURCE_BYTES_SEALED`  
-**Current state:** `PRODUCT_AUTHORITY_IMPLEMENTATION__QUALIFIED_MESH_ADMISSION_ACTIVE`  
+**Current state:** `PRODUCT_AUTHORITY_PLAN_REBASED__IMPLEMENTATION`  
 **Most recent closed gate:** `GENERIC_RUNTIME_OPTIMIZATION_SPINE_PROMOTED`
 
 ## Read first

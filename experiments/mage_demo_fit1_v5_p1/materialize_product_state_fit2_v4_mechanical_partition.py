@@ -198,7 +198,7 @@ def _sanitize_legacy_p1q_carrier(
     }
 
 
-def _load_p1q_state(args, surface, skeleton, skin):
+def _load_p1q_state(args, surface, skeleton, skin, mechanical):
     p1q_dir = Path(args.p1q_dir)
     manifest_path = p1q_dir / "P1Q_FIT2_CURRENT_AUTHORITY_MATERIALIZATION_MANIFEST.json"
     if not manifest_path.is_file():
@@ -438,7 +438,7 @@ def build_final_state(args, *, persist: bool = True):
         skin=skin,
     )
     p1q_manifest_path, p1q_manifest_sha, p1q_manifest, p1q = _load_p1q_state(
-        args, surface, skeleton, skin
+        args, surface, skeleton, skin, mechanical
     )
 
     projections_by_view = {}

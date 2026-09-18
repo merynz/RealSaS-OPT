@@ -1,0 +1,523 @@
+from __future__ import annotations
+
+"""Production adapters for mainline stages 24-27.
+
+External files are never trusted by filename. Every manifest file reference carries an
+exact SHA-256, and every upstream stage artifact is selected by exact schema from the
+sealed active-run ledger.
+"""
+
+from dataclasses import asdict, replace
+import hashlib, json, os
+from pathlib import Path
+from typing import Any, Callable
+
+from compiler.realsas_compiler_core.canonical_cdt_adapter_v1 import build_canonical_cdt_candidate
+from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import build_canonical_relation_candidate
+from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
+from compiler.realsas_compiler_core.mesh.deformation_stress_v1 import (
+    expected_g3_probe_plan_hash,
+    run_g3_deformation_stress,
+)
+from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
+    ComponentObservationRasterIR,
+    build_g5_coverage_matrix,
+    camera_projection_binding_hash,
+    component_surface_set_hash,
+    g5_coverage_evidence_hash,
+    mask_sha256,
+)
+from compiler.realsas_compiler_core.mesh.product_policy_v1 import load_mesh_policy_document
+from compiler.realsas_compiler_core.motion_3d_adapter_v1 import parse_axis_contract_v1
+from compiler.realsas_compiler_core.playback_full_surface_v3 import qualify_camera_v3
+from compiler.realsas_compiler_core.playback_runtime_v3 import ReferenceRasterContractV1
+from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
+    canonical_mesh_candidate_from_dict,
+    component_carrier_policy_from_dict,
+    deformation_envelope_from_dict,
+    mechanical_partition_from_dict,
+    mesh_policy_from_dict,
+    qualified_skeleton_from_dict,
+    qualified_skin_from_dict,
+    read_json,
+    rigging_surface_from_dict,
+    write_ir_json,
+)
+from compiler.realsas_compiler_core.product_authority_v1 import (
+    ComponentBoundaryConstraintIR,
+    ComponentCarrierDecisionIR,
+    DeformationCapabilityEnvelopeIR,
+    JointCapabilityRangeIR,
+    build_component_carrier_policy,
+    deformation_envelope_lineage_hash,
+    qualify_canonical_mesh_candidate,
+    validate_component_carrier_policy,
+    validate_deformation_capability_envelope,
+    validate_mechanical_partition,
+    validate_mesh_qualification_policy,
+)
+from compiler.realsas_compiler_core.types import QualificationError
+
+Json=dict[str,Any]
+
+
+def _sha256(path:Path)->str:
+    h=hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda:f.read(1<<20),b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _resolved_path(raw:str)->Path:
+    value=os.path.expandvars(str(raw))
+    if any(token in Path(value).parts for token in ("latest","current","newest")):
+        raise QualificationError("PRODUCT_ADAPTER_MOVING_ALIAS_FORBIDDEN")
+    return Path(value).expanduser().resolve()
+
+
+def _load_file_ref(ref:dict, *, expected_schema:str|None=None, json_required:bool=True):
+    path=_resolved_path(str(ref.get("path","")))
+    expected=str(ref.get("sha256",""))
+    if not path.is_file() or len(expected)!=64:
+        raise QualificationError("PRODUCT_ADAPTER_FILE_REF_INCOMPLETE")
+    actual=_sha256(path)
+    if actual!=expected:
+        raise QualificationError("PRODUCT_ADAPTER_FILE_SHA_MISMATCH")
+    if not json_required:
+        return path
+    payload=json.loads(path.read_text(encoding="utf-8"))
+    if expected_schema is not None:
+        actual_schema=str(payload.get("schema") or payload.get("schema_version") or "")
+        if actual_schema!=expected_schema:
+            raise QualificationError(f"PRODUCT_ADAPTER_FILE_SCHEMA_MISMATCH:{actual_schema}!={expected_schema}")
+    return payload
+
+
+def _stage_output_payload(ctx:dict, stage_id:str, schema:str)->dict:
+    row=next((x for x in ctx["ledger"]["stages"] if x["id"]==stage_id),None)
+    if row is None or row.get("status") not in {"PASS","CACHE_HIT"}:
+        raise QualificationError(f"PRODUCT_ADAPTER_UPSTREAM_NOT_PASS:{stage_id}")
+    matches=[out for out in row.get("outputs",()) if out.get("schema")==schema]
+    if len(matches)!=1:
+        raise QualificationError(f"PRODUCT_ADAPTER_UPSTREAM_SCHEMA_CARDINALITY:{stage_id}:{schema}:{len(matches)}")
+    out=matches[0]
+    path=_resolved_path(out["path"])
+    if not path.is_file() or _sha256(path)!=out.get("sha256"):
+        raise QualificationError(f"PRODUCT_ADAPTER_UPSTREAM_OUTPUT_DRIFT:{stage_id}:{schema}")
+    payload=json.loads(path.read_text(encoding="utf-8"))
+    actual_schema=str(payload.get("schema") or payload.get("schema_version") or "")
+    if actual_schema!=schema:
+        raise QualificationError(f"PRODUCT_ADAPTER_UPSTREAM_EMBEDDED_SCHEMA_DRIFT:{stage_id}:{schema}")
+    return payload
+
+
+def _write_json(path:Path,payload:dict,*,authority_class:str,schema:str)->dict:
+    path.parent.mkdir(parents=True,exist_ok=True)
+    path.write_text(json.dumps(payload,indent=2,sort_keys=True,ensure_ascii=False)+"\n",encoding="utf-8")
+    return {"path":str(path),"sha256":_sha256(path),"authority_class":authority_class,"schema":schema}
+
+
+def _write_ir(path:Path,value,*,authority_class:str)->dict:
+    write_ir_json(path,value)
+    return {
+        "path":str(path),
+        "sha256":_sha256(path),
+        "authority_class":authority_class,
+        "schema":str(value.schema_version),
+    }
+
+
+def _load_surface(ctx):
+    return rigging_surface_from_dict(_stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"))
+
+
+def _load_skeleton(ctx):
+    return qualified_skeleton_from_dict(_stage_output_payload(ctx,"18_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1"))
+
+
+def _load_skin(ctx):
+    return qualified_skin_from_dict(_stage_output_payload(ctx,"22_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1"))
+
+
+def _load_partition_and_carrier(ctx):
+    partition=mechanical_partition_from_dict(
+        _stage_output_payload(ctx,"24_MECHANICAL_PARTITION_QUALIFIED","RealSaS.MechanicalPartitionIR.v1")
+    )
+    carrier=component_carrier_policy_from_dict(
+        _stage_output_payload(ctx,"24_MECHANICAL_PARTITION_QUALIFIED","RealSaS.ComponentCarrierPolicyIR.v1")
+    )
+    return partition,carrier
+
+
+def _load_envelope(ctx):
+    return deformation_envelope_from_dict(
+        _stage_output_payload(ctx,"25_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DeformationCapabilityEnvelopeIR.v1")
+    )
+
+
+def _load_candidate_and_policy(ctx):
+    candidate=canonical_mesh_candidate_from_dict(
+        _stage_output_payload(ctx,"26_MESH_CANDIDATE_BUILD","RealSaS.CanonicalMeshCandidateIR.v1")
+    )
+    policy=mesh_policy_from_dict(
+        _stage_output_payload(ctx,"26_MESH_CANDIDATE_BUILD","RealSaS.MeshQualificationPolicyIR.v1")
+    )
+    return candidate,policy
+
+
+def _axis_contract_and_cameras(ctx):
+    cfg=dict(ctx["run_manifest"].get("deformation_envelope") or {})
+    axis_payload=_load_file_ref(dict(cfg.get("axis_contract") or {}))
+    _,axis_hash=parse_axis_contract_v1(axis_payload)
+    camera_payload=_load_file_ref(
+        dict(cfg.get("camera_bundle") or {}),
+        expected_schema="RealSaS.CameraProjectionBundle.v1",
+    )
+    rows=tuple(camera_payload.get("cameras") or ())
+    if len(rows)!=8:
+        raise QualificationError("PRODUCT_ADAPTER_CAMERA_BUNDLE_REQUIRES_8")
+    cameras=[]
+    for row in sorted(rows,key=lambda x:int(x["view_index"])):
+        vi=int(row["view_index"]); view_id=str(row["view_id"])
+        camera=qualify_camera_v3(row,view_id=view_id,view_index=vi)
+        cameras.append(camera)
+    if tuple(c.view_index for c in cameras)!=tuple(range(8)):
+        raise QualificationError("PRODUCT_ADAPTER_CAMERA_VIEW_SET_INVALID")
+    return axis_payload,axis_hash,tuple(cameras)
+
+
+def qualify_mechanical_partition_and_carriers(ctx:dict)->dict:
+    surface=_load_surface(ctx)
+    cfg=dict(ctx["run_manifest"].get("components") or {})
+    overrides=[]
+    for row in tuple(cfg.get("boundary_overrides") or ()):
+        overrides.append(ComponentBoundaryConstraintIR(
+            constraint_id=str(row["constraint_id"]),
+            a_surface_id=str(row["a_surface_id"]),
+            b_surface_id=str(row["b_surface_id"]),
+            decision=str(row["decision"]),
+            evidence_refs=tuple(map(str,row.get("evidence_refs") or ())),
+            confidence=float(row.get("confidence",1.0)),
+            metadata=dict(row.get("metadata") or {}),
+        ))
+    partition=build_structural_partition(surface,boundary_overrides=tuple(overrides))
+
+    carrier_cfg=dict(ctx["run_manifest"].get("carrier_policy") or {})
+    explicit={str(row["component_id"]):row for row in tuple(carrier_cfg.get("decisions") or ())}
+    unknown=set(explicit)-{c.component_id for c in partition.components}
+    if unknown:
+        return {"status":"FAIL","blockers":["CARRIER_POLICY_UNKNOWN_COMPONENT"],"diagnostics":{"unknown_component_ids":sorted(unknown)}}
+    decisions=[]
+    for component in partition.components:
+        row=explicit.get(component.component_id)
+        if row is None:
+            decisions.append(ComponentCarrierDecisionIR(
+                component.component_id,
+                "MESH",
+                ("CONSERVATIVE_DEFAULT_MESH_CARRIER_V1",),
+                metadata={"conservative_default":True,"planar_promotion_requires_explicit_evidence":True},
+            ))
+        else:
+            decisions.append(ComponentCarrierDecisionIR(
+                component.component_id,
+                str(row["carrier_class"]),
+                tuple(map(str,row.get("evidence_refs") or ())),
+                metadata=dict(row.get("metadata") or {}),
+            ))
+    carrier=build_component_carrier_policy(
+        partition=partition,
+        decisions=tuple(decisions),
+        metadata={"default_carrier":"MESH","clip_is_presentation_only":True},
+    )
+    validate_mechanical_partition(partition,surface)
+    validate_component_carrier_policy(carrier,partition)
+    root=ctx["run_root"]/"artifacts"/"24_MECHANICAL_PARTITION_QUALIFIED"
+    return {
+        "status":"PASS",
+        "outputs":[
+            _write_ir(root/"mechanical_partition.json",partition,authority_class="QUALIFIED_MECHANICAL_PARTITION"),
+            _write_ir(root/"component_carrier_policy.json",carrier,authority_class="QUALIFIED_COMPONENT_CARRIER_POLICY"),
+        ],
+        "diagnostics":{
+            "component_count":len(partition.components),
+            "unknown_boundary_count":sum(x.decision=="UNKNOWN" for x in partition.boundary_constraints),
+            "explicit_carrier_decision_count":len(explicit),
+            "conservative_mesh_default_count":len(partition.components)-len(explicit),
+        },
+    }
+
+
+def seal_deformation_capability_envelope(ctx:dict)->dict:
+    skeleton=_load_skeleton(ctx)
+    cfg=dict(ctx["run_manifest"].get("deformation_envelope") or {})
+    axis_payload,axis_hash,cameras=_axis_contract_and_cameras(ctx)
+    ranges=[]
+    for row in tuple(cfg.get("joint_ranges") or ()):
+        ranges.append(JointCapabilityRangeIR(
+            canonical_joint_id=str(row["canonical_joint_id"]),
+            min_rotation_deg=float(row["min_rotation_deg"]),
+            max_rotation_deg=float(row["max_rotation_deg"]),
+            translation_radius=float(row.get("translation_radius",0.0)),
+            min_scale=float(row.get("min_scale",1.0)),
+            max_scale=float(row.get("max_scale",1.0)),
+            metadata=dict(row.get("metadata") or {}),
+        ))
+    if not ranges:
+        return {"status":"BLOCKED","blockers":["DEFORMATION_ENVELOPE_JOINT_RANGES_MISSING"],"diagnostics":{}}
+    camera_hashes=tuple(camera_projection_binding_hash(camera) for camera in cameras)
+    allowed=tuple(map(str,cfg.get("allowed_attachment_state_hashes") or ()))
+    probe_plan_hash=expected_g3_probe_plan_hash(
+        skeleton_lineage_hash=skeleton.skeleton_lineage_hash,
+        axis_contract_hash=axis_hash,
+        joint_ranges=tuple(ranges),
+        camera_binding_hashes=camera_hashes,
+        allowed_attachment_state_hashes=allowed,
+    )
+    envelope=DeformationCapabilityEnvelopeIR(
+        skeleton_lineage_hash=skeleton.skeleton_lineage_hash,
+        joint_ranges=tuple(ranges),
+        camera_binding_hashes=camera_hashes,
+        allowed_attachment_state_hashes=allowed,
+        axis_contract_hash=axis_hash,
+        probe_plan_hash=probe_plan_hash,
+        envelope_lineage_hash="",
+        metadata={
+            "axis_contract_schema":str(axis_payload.get("schema") or axis_payload.get("schema_version") or ""),
+            "camera_view_ids":tuple(camera.view_id for camera in cameras),
+            "translation_scale_probe_support":"IDENTITY_ONLY_V1",
+        },
+    )
+    envelope=replace(envelope,envelope_lineage_hash=deformation_envelope_lineage_hash(envelope))
+    validate_deformation_capability_envelope(
+        envelope,known_joint_ids={joint.canonical_joint_id for joint in skeleton.joints}
+    )
+    root=ctx["run_root"]/"artifacts"/"25_DEFORMATION_CAPABILITY_ENVELOPE"
+    return {
+        "status":"PASS",
+        "outputs":[_write_ir(root/"deformation_envelope.json",envelope,authority_class="QUALIFIED_DEFORMATION_CAPABILITY_ENVELOPE")],
+        "diagnostics":{"joint_range_count":len(ranges),"camera_count":len(cameras),"probe_plan_hash":probe_plan_hash},
+    }
+
+
+def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
+    surface=_load_surface(ctx)
+    partition,carrier=_load_partition_and_carrier(ctx)
+    mesh_cfg=dict(ctx["run_manifest"].get("mesh") or {})
+    policy_cfg=dict(ctx["run_manifest"].get("mesh_policy") or {})
+    policy_doc_ref=dict(policy_cfg.get("document") or {})
+    policy_path=_resolved_path(str(policy_doc_ref.get("path","")))
+    expected=str(policy_doc_ref.get("sha256",""))
+    if not policy_path.is_file() or len(expected)!=64 or _sha256(policy_path)!=expected:
+        return {"status":"BLOCKED","blockers":["MESH_POLICY_DOCUMENT_REF_INVALID"],"diagnostics":{}}
+    policy=load_mesh_policy_document(policy_path)
+    validate_mesh_qualification_policy(policy)
+
+    backend=str(mesh_cfg.get("backend") or "")
+    baseline_policy_hash=content_sha256({
+        "schema":"RealSaS.CanonicalRelationBaselinePolicy.v1",
+        "mesh_config":mesh_cfg,
+        "mesh_policy_hash":policy.qualification_policy_lineage_hash,
+    })
+    if backend=="CANONICAL_RELATION_BASELINE_V1":
+        candidate=build_canonical_relation_candidate(
+            surface,partition,carrier,producer_policy_hash=baseline_policy_hash
+        )
+    elif backend=="CANONICAL_CDT_LOCAL_CHART_V1":
+        candidate=build_canonical_cdt_candidate(
+            surface,partition,carrier,policy,
+            relation_baseline_policy_hash=baseline_policy_hash,
+            max_constraint_recovery_iterations=int(mesh_cfg.get("max_constraint_recovery_iterations",96)),
+            max_quality_iterations=int(mesh_cfg.get("max_quality_iterations",96)),
+        )
+    else:
+        return {"status":"BLOCKED","blockers":["MESH_BACKEND_NOT_EXPLICIT_OR_UNSUPPORTED"],"diagnostics":{"backend":backend}}
+    root=ctx["run_root"]/"artifacts"/"26_MESH_CANDIDATE_BUILD"
+    return {
+        "status":"PASS",
+        "outputs":[
+            _write_ir(root/"canonical_mesh_candidate.json",candidate,authority_class="DERIVED_MESH_CANDIDATE"),
+            _write_ir(root/"mesh_qualification_policy.json",policy,authority_class="FROZEN_MESH_QUALIFICATION_POLICY"),
+        ],
+        "diagnostics":{
+            "backend":backend,
+            "vertex_count":len(candidate.vertices),
+            "face_count":len(candidate.faces),
+            "candidate_lineage_hash":candidate.candidate_lineage_hash,
+            "mesh_policy_hash":policy.qualification_policy_lineage_hash,
+        },
+    }
+
+
+def _component_observations(ctx, *, partition, carrier, cameras):
+    cfg=dict(ctx["run_manifest"].get("observation") or {})
+    rows=tuple(cfg.get("component_masks") or ())
+    expected={(vi,c.component_id) for vi in range(8) for c in partition.components}
+    supplied={(int(row["view_index"]),str(row["component_id"])) for row in rows}
+    if supplied!=expected or len(rows)!=len(expected):
+        raise QualificationError("PRODUCT_ADAPTER_COMPONENT_MASK_MATRIX_INCOMPLETE")
+    camera_by_view={camera.view_index:camera for camera in cameras}
+    carrier_by_component={row.component_id:row.carrier_class for row in carrier.decisions}
+    component_by_id={row.component_id:row for row in partition.components}
+    raster_hash=ReferenceRasterContractV1().contract_hash
+    out=[]
+    for row in rows:
+        vi=int(row["view_index"]); component_id=str(row["component_id"])
+        path=_load_file_ref(dict(row.get("mask") or {}),json_required=False)
+        raw=path.read_bytes()
+        camera=camera_by_view[vi]
+        expected_count=int(camera.resolution)*int(camera.resolution)
+        if len(raw)!=expected_count:
+            raise QualificationError("PRODUCT_ADAPTER_COMPONENT_MASK_SIZE_INVALID")
+        if any(value not in (0,1) for value in raw):
+            raise QualificationError("PRODUCT_ADAPTER_COMPONENT_MASK_BINARY_REQUIRED")
+        out.append(ComponentObservationRasterIR(
+            view_index=vi,
+            component_id=component_id,
+            carrier_class=carrier_by_component[component_id],
+            partition_binding_hash=partition.partition_lineage_hash,
+            carrier_policy_binding_hash=carrier.carrier_policy_lineage_hash,
+            component_surface_set_hash=component_surface_set_hash(component_by_id[component_id]),
+            width=int(camera.resolution),
+            height=int(camera.resolution),
+            mask_bytes=raw,
+            mask_sha256=mask_sha256(raw),
+            source_observation_hash=str(row["source_observation_hash"]),
+            camera_binding_hash=camera_projection_binding_hash(camera),
+            raster_contract_hash=raster_hash,
+            metadata={"mask_file_sha256":_sha256(path)},
+        ))
+    return tuple(out)
+
+
+def qualify_canonical_mesh_stage(ctx:dict)->dict:
+    surface=_load_surface(ctx)
+    skeleton=_load_skeleton(ctx)
+    skin=_load_skin(ctx)
+    partition,carrier=_load_partition_and_carrier(ctx)
+    envelope=_load_envelope(ctx)
+    candidate,policy=_load_candidate_and_policy(ctx)
+    axis_payload,axis_hash,cameras=_axis_contract_and_cameras(ctx)
+    if axis_hash!=envelope.axis_contract_hash:
+        return {"status":"FAIL","blockers":["STAGE27_AXIS_CONTRACT_DRIFT"],"diagnostics":{}}
+
+    g3=run_g3_deformation_stress(
+        candidate,
+        surface=surface,
+        skeleton=skeleton,
+        skin=skin,
+        envelope=envelope,
+        axis_contract=axis_payload,
+        policy=policy,
+    )
+    observations=_component_observations(ctx,partition=partition,carrier=carrier,cameras=cameras)
+    g5_rows=build_g5_coverage_matrix(
+        candidate,
+        surface=surface,
+        partition=partition,
+        carrier_policy=carrier,
+        mesh_policy=policy,
+        observations=observations,
+        cameras=cameras,
+    )
+    unknown_rows=tuple(
+        {
+            "constraint_id":row.constraint_id,
+            "a_surface_id":row.a_surface_id,
+            "b_surface_id":row.b_surface_id,
+            "decision":row.decision,
+            "classification":"CONSEQUENTIAL_UNTIL_EXPLICITLY_RESOLVED",
+        }
+        for row in partition.boundary_constraints
+        if row.decision=="UNKNOWN"
+    )
+    unknown_report={
+        "schema":"RealSaS.UnknownBoundaryAnalysis.v1",
+        "partition_lineage_hash":partition.partition_lineage_hash,
+        "candidate_lineage_hash":candidate.candidate_lineage_hash,
+        "conservative_rule":"ALL_ADMITTED_UNKNOWN_BOUNDARIES_ARE_CONSEQUENTIAL_V1",
+        "rows":unknown_rows,
+        "consequential_unknown_boundary_count":len(unknown_rows),
+    }
+    unknown_hash=content_sha256(unknown_report)
+
+    blockers=[]
+    if not g3.passed:
+        blockers.append("G3_DEFORMATION_STRESS_FAIL")
+    failed_g5=[row for row in g5_rows if row["status"]!="PASS"]
+    if failed_g5:
+        blockers.append("G5_MULTIVIEW_COMPONENT_COVERAGE_FAIL")
+    if unknown_rows:
+        blockers.append("G4_CONSEQUENTIAL_UNKNOWN_BOUNDARY")
+
+    root=ctx["run_root"]/"artifacts"/"27_QUALIFIED_MESH_GATE"
+    # Diagnostic evidence is written even when admission fails, but only PASS outputs
+    # are sealed by the mainline ledger.
+    _write_ir(root/"g3_deformation_stress.json",g3,authority_class="DIAGNOSTIC_G3_EVIDENCE")
+    g5_payload={
+        "schema":"RealSaS.G5CoverageEvidence.v1",
+        "evidence_hash":g5_coverage_evidence_hash(g5_rows),
+        "rows":g5_rows,
+    }
+    _write_json(root/"g5_coverage_evidence.json",g5_payload,authority_class="DIAGNOSTIC_G5_EVIDENCE",schema=g5_payload["schema"])
+    _write_json(root/"unknown_boundary_analysis.json",unknown_report,authority_class="DIAGNOSTIC_G4_EVIDENCE",schema=unknown_report["schema"])
+
+    if blockers:
+        return {
+            "status":"FAIL",
+            "blockers":blockers,
+            "diagnostics":{
+                "g3_report_hash":g3.report_hash,
+                "g3_failures":g3.failure_invariants,
+                "g5_failed_cell_count":len(failed_g5),
+                "g5_evidence_hash":g5_payload["evidence_hash"],
+                "consequential_unknown_boundary_count":len(unknown_rows),
+                "unknown_boundary_analysis_hash":unknown_hash,
+            },
+        }
+
+    qualification_report={
+        "gates":{
+            "G1_SUPPORT_LINEAGE":"PASS",
+            "G2_TOPOLOGY":"PASS",
+            "G3_DEFORMATION":"PASS",
+            "G4_COMPONENT_BOUNDARY":"PASS",
+            "G5_MULTIVIEW_COVERAGE":"PASS",
+        },
+        "single_aggregate_score_authority":False,
+        "view_component_coverage_matrix_complete":True,
+        "consequential_unknown_boundary_count":0,
+        "unknown_boundary_analysis_hash":unknown_hash,
+        "g3_envelope_binding_hash":envelope.envelope_lineage_hash,
+        "g3_stress_probe_hash":g3.report_hash,
+        "g3_stress_probe_status":"PASS",
+        "carrier_policy_hash":carrier.carrier_policy_lineage_hash,
+        "g5_evidence_hash":g5_payload["evidence_hash"],
+        "view_component_coverage":g5_rows,
+    }
+    mesh=qualify_canonical_mesh_candidate(
+        candidate,
+        surface=surface,
+        partition=partition,
+        carrier_policy=carrier,
+        envelope=envelope,
+        policy=policy,
+        qualification_report=qualification_report,
+    )
+    outputs=[
+        _write_ir(root/"qualified_mesh.json",mesh,authority_class="QUALIFIED_PRODUCT_GEOMETRY"),
+        _write_ir(root/"g3_deformation_stress.json",g3,authority_class="QUALIFIED_G3_EVIDENCE"),
+        _write_json(root/"g5_coverage_evidence.json",g5_payload,authority_class="QUALIFIED_G5_EVIDENCE",schema=g5_payload["schema"]),
+        _write_json(root/"unknown_boundary_analysis.json",unknown_report,authority_class="QUALIFIED_G4_EVIDENCE",schema=unknown_report["schema"]),
+    ]
+    return {
+        "status":"PASS",
+        "outputs":outputs,
+        "diagnostics":{
+            "mesh_lineage_hash":mesh.mesh_lineage_hash,
+            "g3_report_hash":g3.report_hash,
+            "g5_evidence_hash":g5_payload["evidence_hash"],
+            "coverage_cell_count":len(g5_rows),
+        },
+    }

@@ -255,6 +255,7 @@ class QualifiedPresentationGraphIR:
     mesh_binding_hash: str
     partition_binding_hash: str
     carrier_policy_binding_hash: str
+    product_state_binding_hash: str
     qualification_report: Json
     presentation_lineage_hash: str
     schema_version: str = "RealSaS.QualifiedPresentationGraphIR.v1"
@@ -855,22 +856,74 @@ def qualify_canonical_mesh_candidate(
     return mesh
 
 
-def validate_qualified_presentation_graph(value: QualifiedPresentationGraphIR, *, carrier_policy: ComponentCarrierPolicyIR | None = None) -> None:
-    if not value.skeleton_binding_hash or not value.mesh_binding_hash or not value.partition_binding_hash or not value.carrier_policy_binding_hash:
+def validate_qualified_presentation_graph(
+    value: QualifiedPresentationGraphIR,
+    *,
+    carrier_policy: ComponentCarrierPolicyIR | None = None,
+    puppet_state=None,
+    skeleton=None,
+    partition: MechanicalPartitionIR | None = None,
+    envelope: DeformationCapabilityEnvelopeIR | None = None,
+    mesh: QualifiedMeshIR | None = None,
+) -> None:
+    if (
+        not value.skeleton_binding_hash
+        or not value.mesh_binding_hash
+        or not value.partition_binding_hash
+        or not value.carrier_policy_binding_hash
+        or not value.product_state_binding_hash
+    ):
         raise QualificationError("PRESENTATION_GRAPH_UPSTREAM_BINDING_MISSING")
+
+    if puppet_state is not None:
+        if value.product_state_binding_hash != puppet_state.product_state_hash:
+            raise QualificationError("PRESENTATION_GRAPH_PRODUCT_STATE_MISMATCH")
+        expected_state = {
+            "skeleton_binding_hash": puppet_state.skeleton_lineage_hash,
+            "mesh_binding_hash": puppet_state.mesh_lineage_hash,
+            "partition_binding_hash": puppet_state.partition_lineage_hash,
+            "carrier_policy_binding_hash": puppet_state.carrier_policy_lineage_hash,
+        }
+        for field_name, expected_hash in expected_state.items():
+            if getattr(value, field_name) != expected_hash:
+                raise QualificationError(f"PRESENTATION_GRAPH_STATE_BINDING_DRIFT:{field_name}")
+
+    if skeleton is not None:
+        if value.skeleton_binding_hash != skeleton.skeleton_lineage_hash:
+            raise QualificationError("PRESENTATION_GRAPH_SKELETON_MISMATCH")
+        known_bones = {joint.canonical_joint_id for joint in skeleton.joints}
+    else:
+        known_bones = None
+
+    if partition is not None:
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("PRESENTATION_GRAPH_PARTITION_MISMATCH")
+        known_components = {component.component_id for component in partition.components}
+    else:
+        known_components = None
+
     if carrier_policy is not None:
         if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
             raise QualificationError("PRESENTATION_GRAPH_CARRIER_POLICY_MISMATCH")
         expected_carrier = {row.component_id: row.carrier_class for row in carrier_policy.decisions}
     else:
         expected_carrier = None
+
+    if mesh is not None and value.mesh_binding_hash != mesh.mesh_lineage_hash:
+        raise QualificationError("PRESENTATION_GRAPH_MESH_MISMATCH")
+
     slot_ids = [s.slot_id for s in value.slots]
     if not slot_ids or len(slot_ids) != len(set(slot_ids)) or len({s.setup_order for s in value.slots}) != len(value.slots):
         raise QualificationError("PRESENTATION_SLOT_SET_INVALID")
     slot_set = set(slot_ids)
     allowed = {sid: set() for sid in slot_set}
     attachment_ids = set()
+    presented_components = set()
     for slot in value.slots:
+        if not slot.bone_id:
+            raise QualificationError("PRESENTATION_SLOT_BONE_BINDING_MISSING")
+        if known_bones is not None and slot.bone_id not in known_bones:
+            raise QualificationError("PRESENTATION_SLOT_UNKNOWN_BONE")
         if any(x not in KEYABLE_CHANNELS for x in slot.keyable_channels):
             raise QualificationError("PRESENTATION_KEYABLE_CHANNEL_INVALID")
     for attachment in value.attachments:
@@ -883,19 +936,33 @@ def validate_qualified_presentation_graph(value: QualifiedPresentationGraphIR, *
             raise QualificationError("PRESENTATION_ATTACHMENT_CLASS_INVALID")
         if not attachment.mechanical_component_ids or not attachment.carrier_binding_hash:
             raise QualificationError("PRESENTATION_ATTACHMENT_BINDING_MISSING")
+        if known_components is not None and not set(attachment.mechanical_component_ids).issubset(known_components):
+            raise QualificationError("PRESENTATION_ATTACHMENT_UNKNOWN_COMPONENT")
+        if attachment.carrier_class != "CLIP":
+            presented_components.update(attachment.mechanical_component_ids)
         if expected_carrier is not None and attachment.carrier_class != "CLIP":
             for component_id in attachment.mechanical_component_ids:
                 if expected_carrier.get(component_id) != attachment.carrier_class:
                     raise QualificationError("PRESENTATION_ATTACHMENT_CARRIER_POLICY_DRIFT")
+        if mesh is not None and attachment.carrier_class == "MESH" and attachment.carrier_binding_hash != mesh.mesh_lineage_hash:
+            raise QualificationError("PRESENTATION_MESH_ATTACHMENT_BINDING_DRIFT")
         allowed[attachment.slot_id].add(attachment.attachment_id)
+    if known_components is not None and presented_components != known_components:
+        raise QualificationError("PRESENTATION_COMPONENT_COVERAGE_INCOMPLETE")
     for slot in value.slots:
         if slot.default_attachment_id is not None and slot.default_attachment_id not in allowed[slot.slot_id]:
             raise QualificationError("PRESENTATION_DEFAULT_ATTACHMENT_INVALID")
+
     if len(value.view_overlays) != 8 or tuple(sorted(v.view_index for v in value.view_overlays)) != tuple(range(8)):
         raise QualificationError("PRESENTATION_REQUIRES_EXACT_8_VIEW_OVERLAYS")
-    for overlay in value.view_overlays:
+    ordered_overlays = tuple(sorted(value.view_overlays, key=lambda row: row.view_index))
+    for overlay in ordered_overlays:
         if not overlay.camera_binding_hash or not overlay.appearance_binding_hash or not overlay.composition_binding_hash:
             raise QualificationError("PRESENTATION_VIEW_OVERLAY_BINDING_MISSING")
+    if envelope is not None:
+        if tuple(row.camera_binding_hash for row in ordered_overlays) != tuple(envelope.camera_binding_hashes):
+            raise QualificationError("PRESENTATION_VIEW_CAMERA_SET_MISMATCH")
+
     decision_ids = set()
     for decision in value.decisions:
         if not decision.decision_id or decision.decision_id in decision_ids:

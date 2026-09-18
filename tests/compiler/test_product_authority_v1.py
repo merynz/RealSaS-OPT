@@ -297,7 +297,7 @@ def test_presentation_carrier_class_is_orthogonal_to_mechanics_but_cannot_drift_
     graph = QualifiedPresentationGraphIR(
         slots, attachments, overlays, decisions,
         "skeleton-hash", "mesh-hash", partition.partition_lineage_hash,
-        carrier_policy.carrier_policy_lineage_hash,
+        carrier_policy.carrier_policy_lineage_hash, "product-state-hash",
         {"status": "PASS"}, "",
     )
     graph = replace(graph, presentation_lineage_hash=qualified_presentation_lineage_hash(graph))
@@ -433,3 +433,65 @@ def test_deformation_envelope_requires_explicit_axis_contract_authority():
     value = replace(value, envelope_lineage_hash=deformation_envelope_lineage_hash(value))
     with pytest.raises(QualificationError, match="DEFORMATION_ENVELOPE_AUTHORITY_MISSING"):
         validate_deformation_capability_envelope(value, known_joint_ids={"j0"})
+
+
+def test_presentation_graph_rejects_slot_bone_and_camera_drift_when_exact_authorities_are_supplied():
+    surface = _surface()
+    partition = _partition(surface)
+    carrier_policy = _carrier_policy(partition, c0="MESH", c1="MESH")
+    skeleton = type("Skel", (), {
+        "skeleton_lineage_hash": "skeleton-hash",
+        "joints": (type("J", (), {"canonical_joint_id": "root"})(),),
+    })()
+    envelope = type("Envelope", (), {
+        "camera_binding_hashes": tuple(f"cam{i}" for i in range(8)),
+    })()
+    mesh = type("Mesh", (), {"mesh_lineage_hash": "mesh-hash"})()
+    state = type("State", (), {
+        "product_state_hash": "product-state-hash",
+        "skeleton_lineage_hash": "skeleton-hash",
+        "mesh_lineage_hash": "mesh-hash",
+        "partition_lineage_hash": partition.partition_lineage_hash,
+        "carrier_policy_lineage_hash": carrier_policy.carrier_policy_lineage_hash,
+    })()
+    slots = (
+        PresentationSlotIR("slot0", "root", 0, "a0", ("ATTACHMENT","ORDER")),
+        PresentationSlotIR("slot1", "root", 1, "a1", ("ATTACHMENT","ORDER")),
+    )
+    attachments = (
+        PresentationAttachmentIR("a0","slot0",("c0",),"DEFORMABLE","MESH","mesh-hash"),
+        PresentationAttachmentIR("a1","slot1",("c1",),"RIGID","MESH","mesh-hash"),
+    )
+    overlays = tuple(PresentationViewOverlayIR(i,f"cam{i}",f"app{i}",f"comp{i}") for i in range(8))
+    decisions = (
+        PresentationDecisionEvidenceIR("d0","SLOT_BINDING","MECHANICAL",("partition-evidence",)),
+    )
+    graph = QualifiedPresentationGraphIR(
+        slots,attachments,overlays,decisions,
+        "skeleton-hash","mesh-hash",partition.partition_lineage_hash,
+        carrier_policy.carrier_policy_lineage_hash,"product-state-hash",
+        {"status":"PASS"},"",
+    )
+    graph = replace(graph,presentation_lineage_hash=qualified_presentation_lineage_hash(graph))
+    validate_qualified_presentation_graph(
+        graph,carrier_policy=carrier_policy,puppet_state=state,skeleton=skeleton,
+        partition=partition,envelope=envelope,mesh=mesh,
+    )
+
+    bad_slots=(replace(slots[0],bone_id="missing"),slots[1])
+    bad=replace(graph,slots=bad_slots,presentation_lineage_hash="")
+    bad=replace(bad,presentation_lineage_hash=qualified_presentation_lineage_hash(bad))
+    with pytest.raises(QualificationError,match="UNKNOWN_BONE"):
+        validate_qualified_presentation_graph(
+            bad,carrier_policy=carrier_policy,puppet_state=state,skeleton=skeleton,
+            partition=partition,envelope=envelope,mesh=mesh,
+        )
+
+    bad_overlays=(replace(overlays[0],camera_binding_hash="other"),*overlays[1:])
+    bad=replace(graph,view_overlays=bad_overlays,presentation_lineage_hash="")
+    bad=replace(bad,presentation_lineage_hash=qualified_presentation_lineage_hash(bad))
+    with pytest.raises(QualificationError,match="CAMERA_SET_MISMATCH"):
+        validate_qualified_presentation_graph(
+            bad,carrier_policy=carrier_policy,puppet_state=state,skeleton=skeleton,
+            partition=partition,envelope=envelope,mesh=mesh,
+        )

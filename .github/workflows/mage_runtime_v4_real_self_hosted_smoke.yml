@@ -255,6 +255,8 @@ jobs:
             --fit2-skin "$MAGE_SKIN" \
             --views 2 \
             --output .runtime-real/DENSE_ZERO_MECHANICAL_PARTITION_V2_DIAGNOSTIC.json
+          echo 'DENSE_MECH_DIAGNOSTIC_ONLY_STOP'
+          exit 77
 
       - name: Build sealed native Runtime-v4 demo
         run: |

@@ -215,6 +215,10 @@ def _rasterize_admitted(
 ):
     pure = np.zeros(alpha.shape, dtype=bool)
     full = np.zeros(alpha.shape, dtype=bool)
+    component_masks = {
+        name: np.zeros(alpha.shape, dtype=bool)
+        for name in component_names
+    }
     pure_counts = Counter()
     mixed_counts = Counter()
     alpha_rejected = 0
@@ -241,13 +245,14 @@ def _rasterize_admitted(
         admitted += 1
         if len(components) == 1:
             pure[rr, cc] = True
+            component_masks[components[0]][rr, cc] = True
             pure_counts[components[0]] += 1
             admitted_pure += 1
         else:
             mixed_counts[components] += 1
             admitted_mixed += 1
 
-    return pure, full, {
+    return pure, full, component_masks, {
         "admitted_face_count": admitted,
         "admitted_pure_face_count": admitted_pure,
         "admitted_mixed_face_count": admitted_mixed,
@@ -257,6 +262,93 @@ def _rasterize_admitted(
             "|".join(key): int(value)
             for key, value in sorted(mixed_counts.items())
         },
+    }
+
+
+def _largest_hole_attribution(
+    *,
+    alpha: np.ndarray,
+    predicted: np.ndarray,
+    projected_dense_xy: np.ndarray,
+    component_index_by_dense: np.ndarray,
+    component_names: tuple[str, ...],
+    component_masks: dict[str, np.ndarray],
+) -> dict:
+    structure = np.asarray(
+        [[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=np.uint8
+    )
+    missing = alpha & ~predicted
+    labels, count = ndimage.label(missing, structure=structure)
+    if not count:
+        return {
+            "pixel_count": 0,
+            "bbox_xyxy": None,
+            "centroid_xy": None,
+            "dense_vertex_component_counts": {},
+            "boundary_component_pixel_counts": {},
+        }
+    sizes = np.bincount(labels.ravel())
+    sizes[0] = 0
+    label_id = int(np.argmax(sizes))
+    hole = labels == label_id
+    ys, xs = np.nonzero(hole)
+    bbox = (
+        int(xs.min()),
+        int(ys.min()),
+        int(xs.max()),
+        int(ys.max()),
+    )
+    centroid = (float(xs.mean()), float(ys.mean()))
+
+    rounded = np.rint(projected_dense_xy).astype(np.int64)
+    valid = (
+        np.isfinite(projected_dense_xy).all(axis=1)
+        & (rounded[:, 0] >= 0)
+        & (rounded[:, 0] < alpha.shape[1])
+        & (rounded[:, 1] >= 0)
+        & (rounded[:, 1] < alpha.shape[0])
+    )
+    dense_counts = Counter()
+    for dense_index in np.flatnonzero(valid):
+        x, y = rounded[int(dense_index)]
+        if hole[int(y), int(x)]:
+            dense_counts[
+                component_names[
+                    int(component_index_by_dense[int(dense_index)])
+                ]
+            ] += 1
+
+    ring = ndimage.binary_dilation(
+        hole,
+        structure=structure,
+        iterations=3,
+    ) & (~hole)
+    boundary_counts = {
+        name: int(np.count_nonzero(ring & mask))
+        for name, mask in component_masks.items()
+    }
+    boundary_counts = {
+        key: value
+        for key, value in boundary_counts.items()
+        if value > 0
+    }
+
+    return {
+        "pixel_count": int(sizes[label_id]),
+        "bbox_xyxy": bbox,
+        "centroid_xy": centroid,
+        "dense_vertex_component_counts": dict(
+            sorted(
+                dense_counts.items(),
+                key=lambda item: (-item[1], item[0]),
+            )
+        ),
+        "boundary_component_pixel_counts": dict(
+            sorted(
+                boundary_counts.items(),
+                key=lambda item: (-item[1], item[0]),
+            )
+        ),
     }
 
 
@@ -320,7 +412,7 @@ def run(args) -> dict:
         quality = _quality_mask(tri_xy)
         pre_alpha = np.flatnonzero(finite & in_frame & quality)
 
-        pure_mask, full_mask, counts = _rasterize_admitted(
+        pure_mask, full_mask, component_masks, counts = _rasterize_admitted(
             tri_xy,
             pre_alpha,
             component_index_by_dense,
@@ -330,6 +422,14 @@ def run(args) -> dict:
         )
         pure_coverage = _coverage(alpha, pure_mask)
         full_coverage = _coverage(alpha, full_mask)
+        largest_hole = _largest_hole_attribution(
+            alpha=alpha,
+            predicted=full_mask,
+            projected_dense_xy=xy,
+            component_index_by_dense=component_index_by_dense,
+            component_names=component_names,
+            component_masks=component_masks,
+        )
         pure_failures = _policy_failures(pure_coverage)
         full_failures = _policy_failures(full_coverage)
         row = {
@@ -342,6 +442,7 @@ def run(args) -> dict:
             "pure_plus_mixed_union_coverage": full_coverage,
             "pure_plus_mixed_union_failures": full_failures,
             "pure_plus_mixed_full_frozen_coverage_pass": not full_failures,
+            "largest_hole_attribution": largest_hole,
         }
         rows.append(row)
         print(
@@ -358,6 +459,7 @@ def run(args) -> dict:
                         "largest_uncovered_component_fraction"
                     ],
                     "mixed_faces": counts["admitted_mixed_face_count"],
+                    "largest_hole_attribution": largest_hole,
                     "failures": full_failures,
                 },
                 sort_keys=True,

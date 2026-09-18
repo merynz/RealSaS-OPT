@@ -1,0 +1,58 @@
+{
+  "schema": "RealSaS.MainlinePerformanceBaseline.v1",
+  "date": "2026-09-18",
+  "status": "HISTORICAL_SYNTHETIC_EVIDENCE__PROMOTED_AS_OPTIMIZATION_DIRECTION_NOT_PRODUCT_PASS",
+  "canonical_requirements": {
+    "exactness": "No lossy geometry/motion quantization is authorized by this baseline.",
+    "runtime": "Use shared canonical XYZ once per asset per frame; do not duplicate posed XYZ per view.",
+    "resume": "Reuse sealed upstream stage outputs when their exact input/policy/implementation fingerprints remain unchanged.",
+    "cache": "Runtime/proof/render cache hits must restore byte-exact or typed-identity-exact outputs.",
+    "render": "Use batch native miss transport for multi-node visual proof; preserve scalar/batch PNG identity."
+  },
+  "evidence": [
+    {
+      "name": "Runtime-v4 compact representation",
+      "workflow_run_id": 35289098743,
+      "head_sha": "8201259daddf8ba530b48218a825ca9db766db6e",
+      "scope": "SYNTHETIC_REPRESENTATION_AND_WRITER_ONLY",
+      "vertex_count": 257505,
+      "face_count": 500000,
+      "frame_count": 18,
+      "package_total_bytes": 38598893,
+      "runtime_binary_bytes": 93198016,
+      "xyz_reduction_factor": 8,
+      "wall_seconds": 1.6896786359993712
+    },
+    {
+      "name": "Runtime-v4 exact archive cache",
+      "workflow_run_id": 35289028790,
+      "head_sha": "d1177b42c1a4439afdf879f43240edf20779afe3",
+      "scope": "SYNTHETIC_CONTENT_ADDRESSED_RUNTIME_CACHE_ONLY",
+      "cold_seconds": 2.091940498999975,
+      "warm_copy_seconds": 0.4012567420013511,
+      "warm_same_seconds": 0.2950684570005251,
+      "restored_archive_byte_exact": true
+    },
+    {
+      "name": "Native batch reference render",
+      "workflow_run_id": 35248684082,
+      "head_sha": "e2be076d0b4b113eb68b02338da4f37e9f3cb087",
+      "scope": "SYNTHETIC_DENSE_SCALE_BATCH_TRANSPORT_ONLY",
+      "scalar_cold_seconds": 14.070031925002695,
+      "batch_cold_seconds": 0.7964556280057877,
+      "scalar_to_batch_speedup": 17.66580764860946,
+      "batch_warm_seconds": 0.005344001001503784,
+      "scalar_batch_png_hashes_exact": true
+    },
+    {
+      "name": "Proof-result exact cache",
+      "workflow_run_id": 35247741652,
+      "head_sha": "e8962c91a0bf7f7e1e0972a2c638686c95401ab6",
+      "scope": "SYNTHETIC_CURRENT_V4_PRODUCT_PROOF_CACHE_ONLY",
+      "cold_seconds": 0.09920060200238368,
+      "warm_seconds": 0.008304200004204176,
+      "exact_proof_and_bake_identity": true
+    }
+  ],
+  "product_performance_pass_claimed": false
+}

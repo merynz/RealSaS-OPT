@@ -1,72 +1,95 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "repository": "merynz/RealSaS-OPT",
   "continuation_authority": "CURRENT_STATE.md",
-  "execution_authority": "canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json",
   "context_state": "canonical/CONTEXT_STATE_V2.json",
   "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
+  "historical_experiment_registry": "canonical/EXPERIMENT_REGISTRY_V2.json",
+  "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
+  "historical_scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
   "architecture_ledger": "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V2.md",
   "experiment_ledger": "canonical/EXPERIMENT_AUTHORITY_LEDGER_V2.md",
   "branch_authority": "canonical/BRANCH_AUTHORITY_V2.md",
-  "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
+  "active_run_ledger": "canonical/ACTIVE_RUN_V1.json",
+  "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+  "performance_baseline": "canonical/MAINLINE_PERFORMANCE_BASELINE_V1.json",
   "generated_live_map": "canonical/LIVE_AUTHORITY_MAP.md",
   "generated_rehydration_packet": "canonical/REHYDRATION_PACKET.md",
+  "required_files": [
+    "CURRENT_STATE.md",
+    "AGENTS.md",
+    "SYSTEM_INDEX.md",
+    "canonical/CONTEXT_STATE_V2.json",
+    "canonical/EXPERIMENT_REGISTRY_V3.json",
+    "canonical/ACTIVE_RUN_V1.json",
+    "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+    "canonical/MAINLINE_PERFORMANCE_BASELINE_V1.json",
+    "canonical/REAL_SAS_MAINLINE_VNEXT_20260918.md"
+  ],
+  "rehydration_order": [
+    "canonical/ACTIVE_RUN_V1.json",
+    "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+    "CURRENT_STATE.md",
+    "canonical/AUTHORITY_MAP_V1.json",
+    "canonical/CONTEXT_STATE_V2.json",
+    "canonical/REAL_SAS_MAINLINE_VNEXT_20260918.md"
+  ],
   "branch_policy": {
+    "canonical_branch": "main",
     "continuation_branch": "main",
-    "canonical_execution_branch": "fit2/mage-full-subject-reclosure",
-    "superseded_transition_branch": "repair/mage-full-subject-reclosure-20260912",
-    "productization_branch": "audit/historical-product-power-rebind-20260913",
-    "unregistered_non_main_default": "EVIDENCE_ONLY"
+    "canonical_execution_branch": "main",
+    "default_non_main_class": "EVIDENCE_ONLY_UNREGISTERED",
+    "delete_candidate_regex": []
   },
-  "fit1": {
-    "status": "HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT",
-    "old_surface_nodes": 950,
-    "local_scientific_closures_preserved": true,
-    "current_product_authority": false,
-    "current_fit2_checkpoint_load_authorized": false,
-    "lineage": "canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md"
+  "execution_authority": {
+    "actions_runner_mode": "SELF_HOSTED_LOCAL_ONLY",
+    "required_labels": [
+      "self-hosted",
+      "linux",
+      "x64",
+      "realsas"
+    ],
+    "known_runner_name": "realsas-self-hosted",
+    "operator_path_hint": "$HOME/realsas_authority",
+    "workflow_budget_policy": "ONE_MANUAL_E2E_TRIGGER__RESUME_HASH_VERIFIED_STAGES__NO_AUTOMATIC_REFIT"
   },
   "active_experiments": [
     {
-      "id": "MAGE_FIT2_FULL_SUBJECT_RECLOSURE",
-      "status": "ACTIVE__ARACHNE_NEXT",
-      "branch": "fit2/mage-full-subject-reclosure",
-      "closed": ["H1_CORRECTED_FULL_SUBJECT", "GSA8192_REAL_8VIEW", "GEPPETTO_FIT2_TERMINAL_PASS"],
-      "next": "ARACHNE_FIT2_FRESH_REFIT"
+      "id": "SUBJECT2_KNIGHT_FULL_CLOSURE",
+      "status": "ACTIVE__MAINLINE_ORCHESTRATOR_BINDING",
+      "branch": "main",
+      "question": "Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output?",
+      "does_not_prove": [
+        "unseen-family generalization",
+        "all-subject performance",
+        "PRODUCT_PASS before stage 40",
+        "teacher-free capability beyond the exact qualified run"
+      ]
     }
   ],
-  "parallel_workstreams": [
+  "branch_overrides": [
     {
-      "id": "HISTORICAL_PRODUCT_POWER_REBIND",
-      "branch": "audit/historical-product-power-rebind-20260913",
-      "status": "P0_CLOSED_PASS__PAUSED_UNTIL_ARACHNE_FIT2_CLOSES",
-      "scientific_sgw_authority": false
+      "branch": "fit2/mage-full-subject-reclosure",
+      "class": "EVIDENCE_ONLY",
+      "reason": "historical/scoped Mage FIT2 evidence"
+    },
+    {
+      "branch": "playback-stack-v1-20260916",
+      "class": "EVIDENCE_ONLY",
+      "reason": "historical generic-implementation donor and diagnostics"
+    },
+    {
+      "branch": "repair/mage-full-subject-reclosure-20260912",
+      "class": "EVIDENCE_ONLY",
+      "reason": "historical transition provenance"
     }
   ],
-  "current_science": {
-    "gsa_nodes": 8171,
-    "gsa_relations": 23656,
-    "gsa_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
-    "tensorization_hash": "fe351362e195164805cebb0f63b74d1861ef123458b20ac56607016e00a6c67e",
-    "geppetto_status": "TERMINAL_PASS_VERIFIED__48_OF_48",
-    "geppetto_checkpoint_sha256": "2e1f35d196af6eea957bb6377bc0b0e1b045c20dc652d798b74b107198ae80e9",
-    "arachne_status": "AUTHORIZED__NOT_STARTED",
-    "mesh_status": "CLOSED_FAIL__HIGH_COVERAGE_HIGH_PRECISION__SHAPE_QUALITY_OUTLIERS",
-    "mesh_blocks_arachne": false,
-    "product_pass": false
-  },
-  "execution_environment": {
-    "actions_runner_mode": "SELF_HOSTED_LOCAL_ONLY",
-    "required_labels": ["self-hosted", "linux", "x64", "realsas"],
-    "known_runner": "realsas-wsl-1660ti"
-  },
   "invariants": [
-    "Only main carries repository-wide continuation navigation.",
-    "Only fit2/mage-full-subject-reclosure carries current corrected-lineage same-Mage scientific execution.",
-    "FIT1 is preserved evidence, not current product authority.",
-    "The productization audit branch cannot own corrected S/G/W.",
-    "Arachne FIT2 depends on corrected S/G and exact Geppetto FIT2 handoff, not on final mesh PASS.",
-    "A mesh scientific FAIL remains FAIL even when coverage/precision are useful.",
-    "PRODUCT_PASS is independent and remains open until skin, exact mesh/binding/components, professional motion and exact runtime/export identity close."
+    "main is the sole continuation and execution branch.",
+    "Subject identity may appear in run artifacts/registries but not generic product control flow.",
+    "Verified upstream stage outputs survive downstream failure and are reused only under exact hash identity.",
+    "Mage remains historical/scoped evidence.",
+    "Runtime/export may consume but may not mint geometry, rig, skin or RGB appearance authority.",
+    "PRODUCT_PASS requires stage 40 and visible native motion evidence."
   ]
 }

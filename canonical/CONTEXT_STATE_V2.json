@@ -1,42 +1,122 @@
 {
   "schema": "RealSaS.ContextState.v2",
-  "date": "2026-09-13",
+  "date": "2026-09-18",
   "continuation_branch": "main",
-  "execution_branch": "fit2/mage-full-subject-reclosure",
-  "execution_authority": "canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json",
-  "status": "FIT2_CANONICAL_EXECUTION__ARACHNE_NEXT__PRODUCTIZATION_AFTER_ARACHNE",
-  "fit1": {
-    "status": "HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT",
-    "surface_lineage": "OLD_950_NODE_MAGE",
-    "local_scientific_passes_preserved": true,
-    "current_product_authority": false
+  "execution_branch": "main",
+  "status": "MAINLINE_ORCHESTRATOR_AND_CONTINUITY_RECLOSURE",
+  "authority": {
+    "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
+    "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
+    "historical_experiment_registry": "canonical/EXPERIMENT_REGISTRY_V2.json",
+    "historical_scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
+    "active_run_ledger": "canonical/ACTIVE_RUN_V1.json"
   },
-  "fit2": {
-    "h1": "CLOSED_PASS",
-    "gsa": "CLOSED_PASS__8171_NODES__23656_RELATIONS",
-    "geppetto": "TERMINAL_PASS_VERIFIED__48_OF_48",
-    "arachne": "AUTHORIZED__NOT_STARTED",
-    "mesh": "CLOSED_FAIL__HIGH_COVERAGE_HIGH_PRECISION__SHAPE_QUALITY_OUTLIERS",
-    "mesh_blocks_arachne": false,
-    "product_pass": false
+  "product": {
+    "target": "automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics",
+    "demo_witness": "Subject-2 Knight (run data only; architecture generic)",
+    "next_visible_product_milestone": "border-safe 8-view Knight observation contact sheet, then visible run motion through native Runtime-v4"
   },
-  "next": {
-    "workstream": "ARACHNE_FIT2",
-    "required": [
-      "fresh corrected-lineage preregistration",
-      "no historical FIT1 checkpoint load",
-      "exact Geppetto FIT2 handoff hash verification",
-      "A100 public Run-All notebook",
-      "terminal scientific gate",
-      "real V0..V7 skin/deformation evidence",
-      "checkpoint/result/evidence SHA manifests",
-      "Compiler QualifiedSkinIR qualification and seal"
+  "current_focus": {
+    "module": "Mainline orchestration",
+    "state": "MAINLINE_ORCHESTRATOR_AND_CONTINUITY_RECLOSURE",
+    "active_experiment": "SUBJECT2_KNIGHT_FULL_CLOSURE",
+    "most_recent_closed_gate": "GENERIC_RUNTIME_OPTIMIZATION_SPINE_PROMOTED",
+    "promotion_block": "production stage adapters after source sealing are not all bound yet",
+    "scope_warning": "optimization evidence is synthetic/historical until repeated on the active Knight run",
+    "scientific_question": "Can the subject-agnostic corrected pipeline carry one exact 8-view witness through sealed S/G/W, drawable, run motion and compact native .rss without hidden authority changes?"
+  },
+  "execution_environment": {
+    "actions": "SELF_HOSTED_LOCAL_ONLY",
+    "labels": [
+      "self-hosted",
+      "linux",
+      "x64",
+      "realsas"
+    ],
+    "runner": "realsas-self-hosted",
+    "operator_path": "$HOME/realsas_authority",
+    "reason": "large artifacts/checkpoints and exact cache reuse stay on the persistent self-hosted authority root"
+  },
+  "fit_science": {
+    "principle": "A FIT pass is scoped capability evidence on one exact witness and exact apparatus.",
+    "fit1_is": "historical one-witness evidence",
+    "fit1_is_not": "current Knight authority or unseen generalization",
+    "fit_specific_optimizer_interventions": "forbidden in generic product code",
+    "next_ladder": [
+      "Knight exact FIT closure",
+      "FITK",
+      "large unseen/generalization study"
     ]
   },
-  "after_arachne": {
-    "workstream": "PRODUCTIZATION_RESTORATION",
-    "branch": "audit/historical-product-power-rebind-20260913",
-    "p0": "CLOSED_PASS",
-    "scope": "selective historical Compiler/runtime recovery plus missing product-layer implementation; no scientific S/G/W ownership"
+  "pipeline": [
+    {
+      "name": "Observation",
+      "role": "exact 8 source views + calibrated cameras",
+      "canonical_rule": "full admitted subject, border-safe; OOF=UNKNOWN"
+    },
+    {
+      "name": "IRIS",
+      "role": "learned signed geometry evidence",
+      "canonical_rule": "fresh run checkpoint; teacher excluded from product inference"
+    },
+    {
+      "name": "GSA",
+      "role": "qualified mechanical surface",
+      "canonical_rule": "Compiler owns RiggingSurfaceIR/provenance"
+    },
+    {
+      "name": "Geppetto",
+      "role": "skeleton proposal",
+      "canonical_rule": "Compiler owns legal canonical SkeletonIR"
+    },
+    {
+      "name": "Arachne",
+      "role": "skin proposal",
+      "canonical_rule": "Compiler owns legal simplex SkinIR"
+    },
+    {
+      "name": "Drawable",
+      "role": "deformation/render carrier",
+      "canonical_rule": "same dense lineage + explicit local support binding"
+    },
+    {
+      "name": "Appearance",
+      "role": "source RGB provenance",
+      "canonical_rule": "canonical 3D never RGB authority"
+    },
+    {
+      "name": "Motion",
+      "role": "3D FK/LBS + proof",
+      "canonical_rule": "sealed checkpoints reused when unchanged"
+    },
+    {
+      "name": "Runtime",
+      "role": "compact .rss + native playback",
+      "canonical_rule": "shared XYZ once/frame + exact caches + batch visual proof"
+    }
+  ],
+  "settled_invariants": [
+    "No subject-specific compiler/runtime branch.",
+    "No latest/current alias can substitute an exact artifact hash.",
+    "Downstream failure cannot erase verified upstream PASS.",
+    "Rest source preservation precedes motion authority.",
+    "Visible native motion is required before product closure."
+  ],
+  "known_context_traps": [
+    {
+      "trap": "A green downstream gate hides an upstream apparatus defect",
+      "defense": "each stage binds exact upstream hashes and may not rewrite authority"
+    },
+    {
+      "trap": "Global metric hides a coherent visible hole",
+      "defense": "visual/rest gates include coherent-hole evidence"
+    },
+    {
+      "trap": "Re-running all models after a motion-only change",
+      "defense": "resume ledger verifies and reuses sealed S/G/W checkpoints"
+    }
+  ],
+  "continuation_protocol": {
+    "experiment_completion_definition": "A stage closes only when its ledger row is PASS/CACHE_HIT, exact output hashes verify, and the next stage consumes those exact bindings. Stage 40 alone may close PRODUCT_PASS."
   }
 }

@@ -1,47 +1,43 @@
 {
   "schema": "RealSaS.ExperimentRegistry.v3",
-  "date": "2026-09-13",
-  "active_execution_branch": "fit2/mage-full-subject-reclosure",
+  "date": "2026-09-18",
+  "active_execution_branch": "main",
   "experiments": [
     {
-      "id": "MAGE_FIT2_FULL_SUBJECT_RECLOSURE",
-      "status": "ACTIVE__ARACHNE_NEXT",
-      "branch": "fit2/mage-full-subject-reclosure",
-      "scope": "same-Mage corrected full-subject scientific reclosure",
-      "closed_stages": ["H1_CORRECTED_FULL_SUBJECT", "GSA8192_REAL_8VIEW", "GEPPETTO_FIT2_TERMINAL_PASS"],
-      "next_stage": "ARACHNE_FIT2_FRESH_REFIT",
+      "id": "SUBJECT2_KNIGHT_FULL_CLOSURE",
+      "status": "ACTIVE__MAINLINE_ORCHESTRATOR_BINDING",
+      "branch": "main",
+      "scope": "Knight as exact controlled witness under subject-agnostic architecture",
+      "next_stage": "01_SOURCE_BYTES_SEALED",
+      "progress": "0/40",
       "product_pass_claimed": false,
       "unseen_claimed": false
     },
     {
-      "id": "FIT2_BASELINE_PRESERVING_ADAPTIVE_PATCH_CDT",
-      "status": "CLOSED_FAIL__NO_PREREGISTERED_TREATMENT_PASSES_ALL_VIEWS",
+      "id": "MAGE_FIT2_FULL_SUBJECT_RECLOSURE",
+      "status": "HISTORICAL_SCOPED__REOPENED_BY_OBSERVATION_APPARATUS_CONTRADICTION",
       "branch": "fit2/mage-full-subject-reclosure",
-      "final_treatment": "P2_B1_G6",
-      "recall_range": [0.97349, 0.99093],
-      "precision_all_views": 1.0,
-      "failure": "min_raster_triangle_angle_deg / max_raster_triangle_aspect_ratio",
-      "blocks_arachne": false,
-      "product_mesh_pass_claimed": false
-    },
-    {
-      "id": "ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1",
-      "status": "CLOSED_PASS__HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT",
-      "scope": "old 950-node Mage lineage only",
-      "current_fit2_authority": false
+      "scope": "Mage corrected/full-subject research evidence only",
+      "current_execution_authority": false,
+      "product_pass_claimed": false
     },
     {
       "id": "GEPPETTO_REFERENCE_STRENGTH_FIT1",
-      "status": "CLOSED_PASS__HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT",
-      "scope": "old 950-node Mage lineage only",
-      "current_fit2_authority": false
+      "status": "CLOSED_PASS__HISTORICAL_SCOPED",
+      "scope": "old Mage lineage only",
+      "current_execution_authority": false
     },
     {
-      "id": "HISTORICAL_PRODUCT_POWER_REBIND",
-      "status": "P0_CLOSED_PASS__PAUSED_UNTIL_ARACHNE_FIT2_CLOSES",
-      "branch": "audit/historical-product-power-rebind-20260913",
-      "scope": "product Compiler/runtime/editor/export restoration only",
-      "scientific_sgw_authority": false
+      "id": "ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1",
+      "status": "CLOSED_PASS__HISTORICAL_SCOPED",
+      "scope": "old Mage lineage only",
+      "current_execution_authority": false
+    },
+    {
+      "id": "PLAYBACK_STACK_V1_20260916",
+      "status": "HISTORICAL_IMPLEMENTATION_DONOR__NOT_EXECUTION_AUTHORITY",
+      "branch": "playback-stack-v1-20260916",
+      "scope": "generic runtime/cache/render mechanisms selectively promotable after review"
     }
   ],
   "historical_detail_registry": "canonical/EXPERIMENT_REGISTRY_V2.json"

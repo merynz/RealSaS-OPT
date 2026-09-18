@@ -1,90 +1,45 @@
 {
   "schema_version": 2,
-  "status": "COMPATIBILITY_CURRENT__SEE_V3_FOR_CLEAN_CONTINUATION",
+  "status": "HISTORICAL_DETAIL_REGISTRY__CURRENT_NAVIGATION_IN_V3",
   "continuation_authority": "CURRENT_STATE.md",
   "successor": "canonical/EXPERIMENT_REGISTRY_V3.json",
-  "preservation_rule": "Historical experiment evidence remains provenance; current status changes do not erase earlier results.",
+  "preservation_rule": "Historical experiment evidence remains immutable/scoped; V3 defines current navigation.",
   "records": [
     {
       "id": "GEPPETTO_REFERENCE_STRENGTH_FIT1",
-      "module": "Geppetto",
-      "witness": "Mage FIT1 old 950-node lineage",
-      "status": "CLOSED_PASS__HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT",
-      "checkpoint_sha256": "b75f991564b64cfcec9b50b006544380ee482362a8439775bb505002349cbc30",
-      "current_corrected_product_authority": false,
-      "active_fit2_checkpoint_load_allowed": false
+      "status": "CLOSED_PASS__HISTORICAL_SCOPED",
+      "witness": "Mage FIT1 old lineage"
     },
     {
       "id": "ARACHNE_A0_K4_REPRESENTATION_CLOSURE",
-      "module": "Arachne/SkinFieldCodec A0",
-      "witness": "Mage FIT1 old lineage",
       "status": "CLOSED_PASS_RESEARCH_ORACLE__HISTORICAL_SCOPED",
-      "gsa_p95": 0.04491063521144626
+      "witness": "Mage FIT1 old lineage"
     },
     {
       "id": "ARACHNE_A1_V4_FIT1",
-      "module": "Arachne A1",
-      "witness": "Mage FIT1 old lineage",
       "status": "CLOSED_FAIL__HISTORICAL_SCOPED",
-      "gsa_p95": 0.10080480042132646
-    },
-    {
-      "id": "ARACHNE_DIRECT_NXJ_SIMPLEX_V2_16K",
-      "module": "Arachne diagnostics",
-      "witness": "Mage FIT1 old lineage",
-      "status": "CLOSED_PASS_COMPONENT_EVIDENCE__HISTORICAL_SCOPED",
-      "z_p95": 0.04237794729012932,
-      "h_p95": 0.039081553225318116
+      "witness": "Mage FIT1 old lineage"
     },
     {
       "id": "ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1",
-      "module": "Arachne A1",
-      "witness": "Mage FIT1 old 950-node lineage",
-      "status": "CLOSED_PASS__HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT",
-      "architecture_id": "RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5",
-      "gsa_p95": 0.04237784981177733,
-      "deformation_ratio": 0.019856400787830353,
-      "current_corrected_product_authority": false,
-      "active_fit2_checkpoint_load_allowed": false
+      "status": "CLOSED_PASS__HISTORICAL_SCOPED",
+      "witness": "Mage FIT1 old lineage"
     },
     {
       "id": "MAGE_FIT2_FULL_SUBJECT_RECLOSURE",
-      "module": "Mage corrected-lineage same-witness reclosure",
+      "status": "HISTORICAL_SCOPED__REOPENED",
       "witness": "Mage FIT2",
-      "status": "ACTIVE__ARACHNE_AUTHORIZED_NEXT",
-      "active_branch": "fit2/mage-full-subject-reclosure",
-      "closed_upstream": {
-        "h1": "CLOSED_PASS",
-        "gsa8192": "CLOSED_PASS",
-        "geppetto": "TERMINAL_PASS_VERIFIED__48_OF_48"
-      },
-      "arachne": {
-        "status": "AUTHORIZED__NOT_STARTED",
-        "historical_checkpoint_load_allowed": false
-      },
-      "mesh": {
-        "status": "CLOSED_FAIL__NO_PREREGISTERED_BASELINE_PRESERVING_PATCH_TREATMENT_PASSES_ALL_VIEWS",
-        "final_treatment": "P2_B1_G6",
-        "recall_range": [0.97349, 0.99093],
-        "precision_all_views": 1.0,
-        "failure_class": "MIN_ANGLE_MAX_ASPECT",
-        "blocks_arachne": false,
-        "product_mesh_pass_claimed": false
-      },
-      "product_pass_claimed": false,
-      "unseen_family_claimed": false
+      "product_pass_claimed": false
     },
     {
       "id": "HISTORICAL_PRODUCT_POWER_REBIND",
-      "module": "Productization",
-      "status": "P0_CLOSED_PASS__PAUSED_UNTIL_ARACHNE_FIT2_CLOSES",
-      "branch": "audit/historical-product-power-rebind-20260913",
+      "status": "HISTORICAL_PRODUCTIZATION_EVIDENCE",
       "scientific_sgw_authority": false
     }
   ],
   "next_gate": {
-    "id": "ARACHNE_FIT2_FRESH_REFIT",
-    "status": "AUTHORIZED__PREREG_AND_NOTEBOOK_NEXT",
-    "claim_boundary": "Fresh corrected-lineage Arachne only. No FIT1 checkpoint load, no mesh PASS inference, no PRODUCT_PASS inference."
+    "id": "SUBJECT2_KNIGHT_FULL_CLOSURE",
+    "status": "CURRENT_IN_V3",
+    "claim_boundary": "Knight is one exact witness; no unseen/generalization or PRODUCT_PASS claim before stage 40."
   }
 }

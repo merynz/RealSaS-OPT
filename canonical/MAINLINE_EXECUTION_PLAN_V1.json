@@ -1,0 +1,664 @@
+{
+  "schema": "RealSaS.MainlineExecutionPlan.v1",
+  "date": "2026-09-18",
+  "canonical_branch": "main",
+  "architecture_scope": "SUBJECT_AGNOSTIC__EXACT_8_VIEW_PUPPET_COMPILER",
+  "subject_specific_code_forbidden": true,
+  "stage_count": 40,
+  "resume_contract": {
+    "rule": "PASS_OR_CACHE_HIT_STAGE_IS_REUSED_ONLY_WHEN_INPUT_FINGERPRINT_AND_OUTPUT_SHA256_STILL_VERIFY",
+    "failure_semantics": "A_STAGE_FAILURE_PRESERVES_ALL_VERIFIED_UPSTREAM_STAGE_OUTPUTS",
+    "invalidation_semantics": "CHANGED_INPUT_POLICY_OR_IMPLEMENTATION_INVALIDATES_ONLY_THAT_STAGE_AND_DEPENDENT_DOWNSTREAM",
+    "latest_alias_forbidden": true
+  },
+  "performance_contract": {
+    "runtime_representation": "SHARED_CANONICAL_XYZ_ONCE_PER_ASSET_PER_FRAME__VIEW_OVERLAYS_STATIC",
+    "per_view_xyz_duplication_forbidden": true,
+    "expected_exact_8view_xyz_reduction_factor": 8,
+    "runtime_archive": "STREAMED_BINARY__ZIP_DEFLATED_LEVEL_1",
+    "runtime_materialization_cache": "CONTENT_ADDRESSED_EXACT_BYTES",
+    "proof_cache": "CONTENT_ADDRESSED_EXACT_TYPED_PROOF_AND_MOTION_BAKES",
+    "visual_test_rendering": "NATIVE_BATCH_MISS_TRANSPORT_PLUS_CONTENT_ADDRESSED_PNG_CACHE",
+    "performance_evidence": "canonical/MAINLINE_PERFORMANCE_BASELINE_V1.json"
+  },
+  "stages": [
+    {
+      "ordinal": 1,
+      "id": "01_SOURCE_BYTES_SEALED",
+      "title": "Source bytes sealed",
+      "group": "source",
+      "depends_on": [],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.source:seal_source_bytes",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 2,
+      "id": "02_SOURCE_LICENSE_PROVENANCE",
+      "title": "Source/license provenance sealed",
+      "group": "source",
+      "depends_on": [
+        "01_SOURCE_BYTES_SEALED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.source:seal_source_license_provenance",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 3,
+      "id": "03_SOURCE_MECHANICAL_AUDIT",
+      "title": "Source mechanical audit",
+      "group": "source",
+      "depends_on": [
+        "02_SOURCE_LICENSE_PROVENANCE"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 4,
+      "id": "04_FULL_SUBJECT_ADMISSION",
+      "title": "Full-subject admission",
+      "group": "observation",
+      "depends_on": [
+        "03_SOURCE_MECHANICAL_AUDIT"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 5,
+      "id": "05_CAMERA_CONTRACT_SOLVED",
+      "title": "Common 8-view camera contract",
+      "group": "observation",
+      "depends_on": [
+        "04_FULL_SUBJECT_ADMISSION"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 6,
+      "id": "06_OBSERVATION_RENDER_8VIEW",
+      "title": "Render exact 8 observations",
+      "group": "observation",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 7,
+      "id": "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "title": "Observation contract qualification",
+      "group": "observation",
+      "depends_on": [
+        "06_OBSERVATION_RENDER_8VIEW"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 8,
+      "id": "08_NORMALIZATION_DOMAIN_QUALIFIED",
+      "title": "Normalization/field-domain qualification",
+      "group": "geometry",
+      "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 9,
+      "id": "09_IRIS_FIT_PREREGISTERED",
+      "title": "IRIS fit preregistration",
+      "group": "geometry",
+      "depends_on": [
+        "08_NORMALIZATION_DOMAIN_QUALIFIED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 10,
+      "id": "10_IRIS_FIT",
+      "title": "IRIS signed-geometry fit",
+      "group": "geometry",
+      "depends_on": [
+        "09_IRIS_FIT_PREREGISTERED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 11,
+      "id": "11_IRIS_CHECKPOINT_SEALED",
+      "title": "IRIS checkpoint seal",
+      "group": "geometry",
+      "depends_on": [
+        "10_IRIS_FIT"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 12,
+      "id": "12_ZERO_SURFACE_DECODED",
+      "title": "Dense zero-surface decode",
+      "group": "geometry",
+      "depends_on": [
+        "11_IRIS_CHECKPOINT_SEALED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 13,
+      "id": "13_REST_REPROJECTION_GEOMETRY_GATE",
+      "title": "Raw rest reprojection geometry gate",
+      "group": "geometry",
+      "depends_on": [
+        "12_ZERO_SURFACE_DECODED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 14,
+      "id": "14_GSA_BUILD",
+      "title": "GSA build",
+      "group": "geometry",
+      "depends_on": [
+        "13_REST_REPROJECTION_GEOMETRY_GATE"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 15,
+      "id": "15_RIGGING_SURFACE_QUALIFIED",
+      "title": "RiggingSurfaceIR qualification",
+      "group": "rig",
+      "depends_on": [
+        "14_GSA_BUILD"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 16,
+      "id": "16_GEPPETTO_FIT_PREREGISTERED",
+      "title": "Geppetto fit preregistration",
+      "group": "rig",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 17,
+      "id": "17_GEPPETTO_FIT",
+      "title": "Geppetto fit",
+      "group": "rig",
+      "depends_on": [
+        "16_GEPPETTO_FIT_PREREGISTERED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 18,
+      "id": "18_SKELETON_QUALIFIED",
+      "title": "Compiler skeleton qualification",
+      "group": "rig",
+      "depends_on": [
+        "17_GEPPETTO_FIT"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 19,
+      "id": "19_GEPPETTO_CHECKPOINT_SEALED",
+      "title": "Geppetto checkpoint seal",
+      "group": "rig",
+      "depends_on": [
+        "18_SKELETON_QUALIFIED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 20,
+      "id": "20_ARACHNE_FIT_PREREGISTERED",
+      "title": "Arachne fit preregistration",
+      "group": "skin",
+      "depends_on": [
+        "19_GEPPETTO_CHECKPOINT_SEALED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 21,
+      "id": "21_ARACHNE_FIT",
+      "title": "Arachne fit",
+      "group": "skin",
+      "depends_on": [
+        "20_ARACHNE_FIT_PREREGISTERED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 22,
+      "id": "22_SKIN_QUALIFIED",
+      "title": "Compiler skin qualification",
+      "group": "skin",
+      "depends_on": [
+        "21_ARACHNE_FIT"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 23,
+      "id": "23_ARACHNE_CHECKPOINT_SEALED",
+      "title": "Arachne checkpoint seal",
+      "group": "skin",
+      "depends_on": [
+        "22_SKIN_QUALIFIED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 24,
+      "id": "24_COMPONENT_EVIDENCE_AUDIT",
+      "title": "Mechanical component evidence audit",
+      "group": "components",
+      "depends_on": [
+        "23_ARACHNE_CHECKPOINT_SEALED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 25,
+      "id": "25_COMPONENT_ASSEMBLY_QUALIFIED",
+      "title": "Component/attachment assembly qualification",
+      "group": "components",
+      "depends_on": [
+        "24_COMPONENT_EVIDENCE_AUDIT"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 26,
+      "id": "26_DRAWABLE_CONDITION",
+      "title": "Drawable surface conditioning",
+      "group": "drawable",
+      "depends_on": [
+        "25_COMPONENT_ASSEMBLY_QUALIFIED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 27,
+      "id": "27_DRAWABLE_SUPPORT_BIND",
+      "title": "DrawableSupportBindingIR",
+      "group": "drawable",
+      "depends_on": [
+        "26_DRAWABLE_CONDITION"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 28,
+      "id": "28_DRAWABLE_SKIN_TRANSFER",
+      "title": "Skin transfer to drawable",
+      "group": "drawable",
+      "depends_on": [
+        "27_DRAWABLE_SUPPORT_BIND"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 29,
+      "id": "29_DEFORMATION_PROBE",
+      "title": "Synthetic deformation probe",
+      "group": "drawable",
+      "depends_on": [
+        "28_DRAWABLE_SKIN_TRANSFER"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 30,
+      "id": "30_APPEARANCE_DONOR_BIND",
+      "title": "Source-provenance appearance binding",
+      "group": "appearance",
+      "depends_on": [
+        "29_DEFORMATION_PROBE"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 31,
+      "id": "31_REST_RENDER_8VIEW",
+      "title": "8-view rest render",
+      "group": "appearance",
+      "depends_on": [
+        "30_APPEARANCE_DONOR_BIND"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 32,
+      "id": "32_REST_SOURCE_PRESERVATION_GATE",
+      "title": "Rest source-preservation gate",
+      "group": "appearance",
+      "depends_on": [
+        "31_REST_RENDER_8VIEW"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 33,
+      "id": "33_MOTION_SOURCE_OR_PRESET_SEAL",
+      "title": "Motion source/preset seal",
+      "group": "motion",
+      "depends_on": [
+        "32_REST_SOURCE_PRESERVATION_GATE"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 34,
+      "id": "34_MOTION_COMPILE_RUN",
+      "title": "Run/idle motion compilation",
+      "group": "motion",
+      "depends_on": [
+        "33_MOTION_SOURCE_OR_PRESET_SEAL"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 35,
+      "id": "35_MOTION_DYNAMIC_PROOF",
+      "title": "Dynamic motion/deformation proof",
+      "group": "motion",
+      "depends_on": [
+        "34_MOTION_COMPILE_RUN"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 36,
+      "id": "36_RUNTIME_V4_PROJECT",
+      "title": "Compact Runtime-v4 projection",
+      "group": "runtime",
+      "depends_on": [
+        "35_MOTION_DYNAMIC_PROOF"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 37,
+      "id": "37_RSS_MATERIALIZE_COMPACT",
+      "title": "Compact .rss materialization",
+      "group": "runtime",
+      "depends_on": [
+        "36_RUNTIME_V4_PROJECT"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 38,
+      "id": "38_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "title": "Native package open/playback",
+      "group": "runtime",
+      "depends_on": [
+        "37_RSS_MATERIALIZE_COMPACT"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 39,
+      "id": "39_VISUAL_MOTION_RENDER_BAKE",
+      "title": "Visual motion render/bake",
+      "group": "runtime",
+      "depends_on": [
+        "38_NATIVE_PACKAGE_OPEN_PLAYBACK"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      }
+    },
+    {
+      "ordinal": 40,
+      "id": "40_PRODUCT_CLOSURE_SEAL",
+      "title": "Product closure seal",
+      "group": "closure",
+      "depends_on": [
+        "39_VISUAL_MOTION_RENDER_BAKE"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": true
+      }
+    }
+  ]
+}

@@ -1,36 +1,39 @@
 # RealSaS-OPT — Current State
 
 **Date:** 2026-09-18  
-**Continuation pointer:** `main`  
-**Current product subject:** **Subject-2 pending selection**  
-**Mage:** historical/scoped evidence only; not current full-subject product authority  
-**Product target:** automatic 8-direction Spine-class 2D puppet playback
+**Canonical continuation/execution branch:** `main`  
+**Active experiment gate:** `SUBJECT2_KNIGHT_FULL_CLOSURE` on `main`  
+**Active run:** `SUBJECT2_KNIGHT_V1`  
+**Progress:** **0/40** — next `01_SOURCE_BYTES_SEALED`  
+**Current state:** `MAINLINE_ORCHESTRATOR_AND_CONTINUITY_RECLOSURE`  
+**Most recent closed gate:** `GENERIC_RUNTIME_OPTIMIZATION_SPINE_PROMOTED`
 
 ## Read first
+1. `canonical/ACTIVE_RUN_V1.json`
+2. `canonical/MAINLINE_EXECUTION_PLAN_V1.json`
+3. `canonical/REAL_SAS_MAINLINE_VNEXT_20260918.md`
+4. `canonical/AUTHORITY_MAP_V1.json`
+5. this file
 
-1. `canonical/REAL_SAS_MAINLINE_VNEXT_20260918.md`
-2. `AGENTS.md`
-3. `canonical/AUTHORITY_MAP_V1.json`
-4. relevant model/compiler/runtime ledgers only when their scope is needed
+## Canonical architecture
+`8 qualified observations -> IRIS dense signed geometry -> GSA/RiggingSurfaceIR -> Geppetto/QualifiedSkeletonIR -> Arachne/QualifiedSkinIR -> DrawableSurfaceIR + explicit support binding -> canonical 3D FK/LBS -> source-provenance 2D appearance -> motion proof -> compact Runtime-v4 -> .rss -> native visual playback`
 
-## One-line architecture
+The architecture is subject-agnostic. **Knight is run data, never a branch in generic compiler/runtime code.**
 
-`qualified 8-view observations -> dense geometry evidence -> RiggingSurfaceIR -> SkeletonIR + SkinIR -> conditioned DrawableSurfaceIR + explicit support binding -> 3D FK/LBS -> real depth visibility -> source-provenance 2D appearance -> slots/attachments/secondary motion -> runtime/bake`
+## Execution rule
+There is one 40-stage plan and one active-run ledger. A PASS stage is reusable only while its exact input fingerprint, implementation hash, policy hash and output SHA-256 identities still verify. A downstream failure does not erase upstream PASS artifacts. Upstream changes invalidate only the affected stage and descendants.
 
-## Current hard conclusions
+## Performance rule
+The promoted runtime direction is the measured compact path: shared canonical XYZ once per asset per frame, static per-view overlays, streamed Runtime-v4 writer, content-addressed runtime/proof/render caches and native batch reference rendering. Historical synthetic evidence records an exact 8x XYZ reduction and 17.7x scalar-to-batch render speedup; this is optimization evidence, not a Knight or PRODUCT_PASS claim.
 
-- The model families are preserved. IRIS, Geppetto and Arachne are not discarded.
-- Compiler and native runtime gains are preserved selectively on main.
-- Historical Mage FIT checkpoints remain evidence, not Subject-2 authority.
-- A downstream PASS may not compensate for a failed observation contract.
-- Out-of-frame evidence is UNKNOWN, never negative.
-- Canonical 3D geometry is not RGB appearance authority.
-- Rest source preservation must pass before motion can authorize a subject.
-- No Mage-specific implementation is allowed in current product code.
+## Current task
+Finish binding generic production adapters into the 40-stage orchestrator, reconcile continuity CI to this main-only authority, then stage exact Knight source bytes. Fresh Knight S/G/W checkpoints are fit and sealed only after observation and normalization gates pass. Motion runs consume those sealed checkpoints rather than refitting unchanged upstream models.
 
-## Current work
-
-Select a new stylized Subject-2 from the existing controlled corpus, regenerate a complete
-8-view observation set under the new framing contract, then refit the learned S/G/W stack
-against that subject. Build the new drawable/deformation/render path from the qualified
-geometry rather than reviving Mage-specific mesh repairs.
+## Hard boundaries
+- Mage FIT/FIT2 remains historical/scoped evidence; it is not current execution authority.
+- No `if subject == "Knight"` product code.
+- Teacher/source rig is FIT evaluation evidence, never hidden shipping authority.
+- Out-of-frame is UNKNOWN and cannot delete geometry.
+- Canonical 3D geometry is never RGB appearance authority.
+- Rest source preservation must pass before motion.
+- Product closure requires visible native motion output, not JSON-only metrics.

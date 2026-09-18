@@ -35,6 +35,8 @@ from .types import (
     QualifiedSkeletonIR,
     QualifiedSkinIR,
     QualifiedSkinRow,
+    QualifiedMeshSkinIR,
+    QualifiedMeshSkinRow,
     RiggingSurfaceIR,
     SurfaceNode,
     SurfaceRelation,
@@ -316,6 +318,31 @@ def qualified_mesh_from_dict(payload: Json) -> QualifiedMeshIR:
         qualification_report=dict(payload.get("qualification_report") or {}),
         mesh_lineage_hash=str(payload["mesh_lineage_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedMeshIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def qualified_mesh_skin_from_dict(payload: Json) -> QualifiedMeshSkinIR:
+    _schema(payload, "RealSaS.QualifiedMeshSkinIR.v1")
+    return QualifiedMeshSkinIR(
+        rows=tuple(
+            QualifiedMeshSkinRow(
+                canonical_mesh_vertex_id=str(row["canonical_mesh_vertex_id"]),
+                influences=tuple((str(jid),float(weight)) for jid,weight in (row.get("influences") or ())),
+                source_support_coefficients=tuple((str(sid),float(weight)) for sid,weight in (row.get("source_support_coefficients") or ())),
+                simplex_residual_before=float(row.get("simplex_residual_before",0.0)),
+                correction_l1=float(row.get("correction_l1",0.0)),
+            )
+            for row in (payload.get("rows") or ())
+        ),
+        surface_binding_hash=str(payload["surface_binding_hash"]),
+        skeleton_binding_hash=str(payload["skeleton_binding_hash"]),
+        skin_binding_hash=str(payload["skin_binding_hash"]),
+        mesh_binding_hash=str(payload["mesh_binding_hash"]),
+        transfer_method=str(payload["transfer_method"]),
+        qualification_report=dict(payload.get("qualification_report") or {}),
+        mesh_skin_lineage_hash=str(payload["mesh_skin_lineage_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedMeshSkinIR.v1"),
         metadata=dict(payload.get("metadata") or {}),
     )
 

@@ -34,6 +34,7 @@ from compiler.realsas_compiler_core.playback_full_surface_v3 import qualify_came
 from compiler.realsas_compiler_core.playback_runtime_v3 import ReferenceRasterContractV1
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_mesh_candidate_from_dict,
+    qualified_mesh_from_dict,
     component_carrier_policy_from_dict,
     deformation_envelope_from_dict,
     mechanical_partition_from_dict,
@@ -44,6 +45,7 @@ from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     rigging_surface_from_dict,
     write_ir_json,
 )
+from compiler.realsas_compiler_core.product_mesh_skin_v1 import bind_product_mesh_skin
 from compiler.realsas_compiler_core.product_authority_v1 import (
     ComponentBoundaryConstraintIR,
     ComponentCarrierDecisionIR,
@@ -519,5 +521,38 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
             "g3_report_hash":g3.report_hash,
             "g5_evidence_hash":g5_payload["evidence_hash"],
             "coverage_cell_count":len(g5_rows),
+        },
+    }
+
+
+def bind_qualified_mesh_skin_stage(ctx:dict)->dict:
+    surface=_load_surface(ctx)
+    skeleton=_load_skeleton(ctx)
+    skin=_load_skin(ctx)
+    partition,carrier=_load_partition_and_carrier(ctx)
+    envelope=_load_envelope(ctx)
+    _,policy=_load_candidate_and_policy(ctx)
+    mesh=qualified_mesh_from_dict(
+        _stage_output_payload(ctx,"27_QUALIFIED_MESH_GATE","RealSaS.QualifiedMeshIR.v1")
+    )
+    bound=bind_product_mesh_skin(
+        surface=surface,
+        skeleton=skeleton,
+        skin=skin,
+        mesh=mesh,
+        partition=partition,
+        carrier_policy=carrier,
+        envelope=envelope,
+        policy=policy,
+    )
+    root=ctx["run_root"]/"artifacts"/"28_QUALIFIED_MESH_SKIN_TRANSFER"
+    return {
+        "status":"PASS",
+        "outputs":[_write_ir(root/"qualified_mesh_skin.json",bound,authority_class="QUALIFIED_PRODUCT_MESH_SKIN")],
+        "diagnostics":{
+            "mesh_skin_lineage_hash":bound.mesh_skin_lineage_hash,
+            "mesh_binding_hash":bound.mesh_binding_hash,
+            "skin_binding_hash":bound.skin_binding_hash,
+            "row_count":len(bound.rows),
         },
     }

@@ -16,6 +16,7 @@ from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     component_carrier_policy_from_dict,
     mechanical_partition_from_dict,
     qualified_mesh_from_dict,
+    qualified_mesh_skin_from_dict,
     read_json,
     write_ir_json,
 )
@@ -30,6 +31,7 @@ from compiler.realsas_compiler_core.types import (
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
     build_canonical_mesh_candidate_stage,
+    bind_qualified_mesh_skin_stage,
     qualify_canonical_mesh_stage,
     qualify_mechanical_partition_and_carriers,
     seal_deformation_capability_envelope,
@@ -188,3 +190,12 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     assert len(mesh.qualification_report["view_component_coverage"])==8
     assert mesh.qualification_report["consequential_unknown_boundary_count"]==0
     assert len(mesh.mesh_lineage_hash)==64
+    _install_stage_outputs(ctx,"27_QUALIFIED_MESH_GATE",r27)
+
+    r28=bind_qualified_mesh_skin_stage(ctx)
+    assert r28["status"]=="PASS",r28
+    bound=qualified_mesh_skin_from_dict(read_json(r28["outputs"][0]["path"]))
+    assert bound.mesh_binding_hash==mesh.mesh_lineage_hash
+    assert bound.skin_binding_hash=="skin-hash"
+    assert len(bound.rows)==len(mesh.vertices)
+    assert len(bound.mesh_skin_lineage_hash)==64

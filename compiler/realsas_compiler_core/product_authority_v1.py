@@ -122,6 +122,7 @@ class DeformationCapabilityEnvelopeIR:
     joint_ranges: tuple[JointCapabilityRangeIR, ...]
     camera_binding_hashes: tuple[str, ...]
     allowed_attachment_state_hashes: tuple[str, ...]
+    axis_contract_hash: str
     probe_plan_hash: str
     envelope_lineage_hash: str
     schema_version: str = "RealSaS.DeformationCapabilityEnvelopeIR.v1"
@@ -400,7 +401,7 @@ def build_mesh_qualification_policy(*, g1_max_normal_refinement_ratio, g1_max_ta
 
 
 def validate_deformation_capability_envelope(value: DeformationCapabilityEnvelopeIR, *, known_joint_ids=None) -> None:
-    if not value.skeleton_lineage_hash or not value.probe_plan_hash:
+    if not value.skeleton_lineage_hash or not value.axis_contract_hash or not value.probe_plan_hash:
         raise QualificationError("DEFORMATION_ENVELOPE_AUTHORITY_MISSING")
     if len(value.camera_binding_hashes) != 8 or len(set(value.camera_binding_hashes)) != 8:
         raise QualificationError("DEFORMATION_ENVELOPE_REQUIRES_EXACT_8_CAMERAS")

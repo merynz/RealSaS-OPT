@@ -208,6 +208,7 @@ def deformation_envelope_from_dict(payload: Json) -> DeformationCapabilityEnvelo
         ),
         camera_binding_hashes=tuple(map(str, payload.get("camera_binding_hashes") or ())),
         allowed_attachment_state_hashes=tuple(map(str, payload.get("allowed_attachment_state_hashes") or ())),
+        axis_contract_hash=str(payload["axis_contract_hash"]),
         probe_plan_hash=str(payload["probe_plan_hash"]),
         envelope_lineage_hash=str(payload["envelope_lineage_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.DeformationCapabilityEnvelopeIR.v1"),

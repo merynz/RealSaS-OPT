@@ -41,7 +41,7 @@ The envelope is a qualification-policy artifact shared by:
 - UNSEEN exposure qualification,
 - MotionProof clip admissibility.
 
-It binds exact skeleton identity, bounded joint transform ranges, exact eight-camera set, allowed attachment state space and an exact probe-plan hash. It is not a third product geometry authority.
+It binds exact skeleton identity, a frozen 3D joint-axis contract, bounded joint transform ranges, exact eight-camera set, allowed attachment state space and an exact probe-plan hash. It is not a third product geometry authority.
 
 ## Structural vs presentation segmentation
 

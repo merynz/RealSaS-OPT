@@ -94,6 +94,7 @@ def _envelope():
         (JointCapabilityRangeIR("j0", -45.0, 45.0),),
         tuple(f"cam{i}" for i in range(8)),
         (),
+        "axis-contract-hash",
         "probe-plan-hash",
         "",
     )
@@ -415,3 +416,18 @@ def test_g5_interior_uncovered_metric_is_a_hard_gate_against_peppering():
             bad, surface=surface, partition=partition, carrier_policy=carrier_policy,
             envelope=envelope, policy=policy,
         )
+
+
+def test_deformation_envelope_requires_explicit_axis_contract_authority():
+    value = DeformationCapabilityEnvelopeIR(
+        "skeleton-hash",
+        (JointCapabilityRangeIR("j0", -10.0, 10.0),),
+        tuple(f"cam{i}" for i in range(8)),
+        (),
+        "",
+        "probe-plan-hash",
+        "",
+    )
+    value = replace(value, envelope_lineage_hash=deformation_envelope_lineage_hash(value))
+    with pytest.raises(QualificationError, match="DEFORMATION_ENVELOPE_AUTHORITY_MISSING"):
+        validate_deformation_capability_envelope(value, known_joint_ids={"j0"})

@@ -138,6 +138,7 @@ def _valid_mesh(surface, partition, carrier_policy, envelope, policy):
         "unknown_boundary_analysis_hash": "unknown-analysis-hash",
         "g3_envelope_binding_hash": envelope.envelope_lineage_hash,
         "g3_stress_probe_hash": "stress-probe-hash",
+        "g3_stress_probe_status": "PASS",
         "carrier_policy_hash": carrier_policy.carrier_policy_lineage_hash,
         "view_component_coverage": tuple(
             {
@@ -346,6 +347,7 @@ def test_candidate_promotion_is_deterministic_and_compiler_mints_intrinsic_audit
         "unknown_boundary_analysis_hash": "unknown-analysis-hash",
         "g3_envelope_binding_hash": envelope.envelope_lineage_hash,
         "g3_stress_probe_hash": "stress-probe-hash",
+        "g3_stress_probe_status": "PASS",
         "carrier_policy_hash": carrier_policy.carrier_policy_lineage_hash,
         "view_component_coverage": tuple(
             {

@@ -12,6 +12,7 @@ on:
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v4_mechanical_partition.py'
       - 'experiments/playback_stack_v1/run_mage_full_assembly_runtime_v4_admission_v1.py'
       - 'experiments/playback_stack_v1/run_mage_full_assembly_runtime_v4_native_smoke_v1.py'
+      - 'experiments/playback_stack_v1/stage_mage_runtime_v4_authorities_windows.ps1'
 
 permissions:
   contents: read
@@ -51,7 +52,7 @@ jobs:
           python -m pip install --no-input --progress-bar off --only-binary=:all: \
             numpy scipy pillow pytest
 
-      - name: Resolve exact Google Drive Desktop roots
+      - name: Resolve or stage exact Google Drive Desktop authorities
         shell: bash
         run: |
           set -euo pipefail
@@ -80,6 +81,7 @@ jobs:
             fi
           }
 
+          # Fast path: an already mounted/synced Drive visible directly in WSL.
           shopt -s nullglob
           for mount in /mnt/[d-z]; do
             [[ -d "$mount" ]] || continue
@@ -105,32 +107,44 @@ jobs:
             done
           done
 
-          if [[ -z "$h1_root" ]]; then
-            echo 'MAGE_DRIVE_SYNC_H1_ROOT_NOT_FOUND'
-            exit 41
-          fi
-          if [[ -z "$product_root" ]]; then
-            echo 'MAGE_DRIVE_SYNC_PRODUCT_ROOT_NOT_FOUND'
-            exit 42
-          fi
+          if [[ -n "$h1_root" && -n "$product_root" ]]; then
+            input_root="$h1_root/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT"
+            skeleton="$h1_root/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/PREFLIGHT/FINAL_QUALIFIED_SKELETON_IR.json"
+            skin="$h1_root/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/MAIN/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json"
+            p1q="$product_root/03_P1Q_FIT2"
+            surface="$product_root/02_FIT2_P1_BIND/CURRENT_FIT2_RIGGING_SURFACE_IR.json"
+            echo 'MAGE_DRIVE_SYNC_EXACT_ROOTS_PASS'
+          else
+            # Google Drive Desktop may exist only as a Windows virtual drive (for
+            # example G:) and therefore not appear below /mnt. Ask Windows itself
+            # for the exact named roots and hydrate/copy only the manifest-bound
+            # files into the Linux workspace.
+            if ! command -v powershell.exe >/dev/null 2>&1; then
+              echo 'MAGE_WINDOWS_POWERSHELL_UNAVAILABLE'
+              exit 41
+            fi
+            stage_linux="$GITHUB_WORKSPACE/.drive-stage"
+            stage_windows="$(wslpath -w "$stage_linux")"
+            script_windows="$(wslpath -w "$GITHUB_WORKSPACE/experiments/playback_stack_v1/stage_mage_runtime_v4_authorities_windows.ps1")"
+            powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass \
+              -File "$script_windows" -Destination "$stage_windows"
 
-          input_root="$h1_root/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT"
-          skeleton="$h1_root/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/PREFLIGHT/FINAL_QUALIFIED_SKELETON_IR.json"
-          skin="$h1_root/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/MAIN/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json"
-          p1q="$product_root/03_P1Q_FIT2"
-          surface="$product_root/02_FIT2_P1_BIND/CURRENT_FIT2_RIGGING_SURFACE_IR.json"
+            input_root="$stage_linux/input"
+            skeleton="$stage_linux/mechanics/FINAL_QUALIFIED_SKELETON_IR.json"
+            skin="$stage_linux/mechanics/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json"
+            p1q="$stage_linux/p1q"
+            surface="$stage_linux/mechanics/CURRENT_FIT2_RIGGING_SURFACE_IR.json"
+            test -f "$stage_linux/STAGE_REPORT.json"
+            echo 'MAGE_WINDOWS_DRIVE_EXACT_STAGE_PASS'
+          fi
 
           {
-            echo "MAGE_H1_ROOT=$h1_root"
-            echo "MAGE_PRODUCT_ROOT=$product_root"
             echo "MAGE_INPUT_ROOT=$input_root"
             echo "MAGE_SKELETON=$skeleton"
             echo "MAGE_SKIN=$skin"
             echo "MAGE_P1Q=$p1q"
             echo "MAGE_SURFACE=$surface"
           } >> "$GITHUB_ENV"
-
-          echo 'MAGE_DRIVE_SYNC_EXACT_ROOTS_PASS'
 
       - name: Verify exact scientific byte authorities
         shell: bash

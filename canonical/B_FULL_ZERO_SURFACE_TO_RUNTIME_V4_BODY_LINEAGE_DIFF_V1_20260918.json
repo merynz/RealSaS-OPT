@@ -1,0 +1,151 @@
+{
+  "schema": "RealSaS.BFullZeroSurfaceToRuntimeV4BodyLineageDiff.v1",
+  "date": "2026-09-18",
+  "status": "CLOSED_AUDIT__DRAWABLE_REPRESENTATION_REGRESSION_LOCATED__PEPPER_ROOT_CAUSE_NOT_YET_PROVEN",
+  "audited_parent_commit": "2dbf386e2e989fc2b627dde752fca84b58237bc6",
+  "execution_authority": "SELF_HOSTED_REALSAS_RUNNER_ONLY",
+  "b_full": {
+    "zero_surface_sha256": "56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925",
+    "dense_vertex_count": 257505,
+    "abc_face_universe_count": 507377,
+    "topology_family": "FULL_ORIGINAL_ZERO_SURFACE",
+    "p1_or_p1q_topology_used": false,
+    "source_or_teacher_mesh_topology_used": false,
+    "source_colored_face_count": 372278,
+    "nearest_surface_fill_face_count": 135099,
+    "diagnostic_fill_fraction": 0.2662694603815309,
+    "appearance_authority": "DIAGNOSTIC_HUMAN_READABLE_ONLY_NOT_PRODUCT_TEXTURE_AUTHORITY",
+    "product_pass_claimed": false
+  },
+  "preserved_authority": {
+    "surface_lineage_hash": "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da",
+    "skeleton_lineage_hash": "69f05e4fdef65f2cd86fed66503911210e1dbc7212ad017d69bf3dcb7b0896a1",
+    "skin_lineage_hash": "eb96b398282e4e25cd6df662e7a02e8ff1afe881818127190979bddd2f6c4006",
+    "historical_fit1_skin_used": false,
+    "new_model_query_used": false
+  },
+  "current_runtime_v4_body": {
+    "authority": "P1Q_DIRECTIONAL_MESHES_THROUGH_TYPED_COMPONENT_ASSEMBLY",
+    "p1q_manifest_sha256": "c945377822561319c40e6e5774235ddb5a586cb230599c0939e100ccf32b14e4",
+    "component_assembly_hash": "1b7e5eb83ea2dac66473c96df8f081f9958978c31616b4eb58e01e0bc0ab6575",
+    "component_id": "BODY_UNDERLAY",
+    "mechanical_class": "DEFORMABLE_COMPONENT",
+    "active_joint_count": 22,
+    "component_lineage_hash": "b5d50c89a0b7441171c5d054a594af34c739e0ac8fdcae2c73d3c87dd6dba678",
+    "geometry_lineage_hash": "0a7b0a87607b2753c1edf4b05e7aee41e61eba6f83db65398b0d92aaa67aae44",
+    "skin_deformer_lineage_hash": "fc06d2d6c1788514f7fef1bd4780d5472be79f0ae20bcfd697122d3c000d6b18",
+    "per_view_face_instance_total": 119013,
+    "per_view_vertex_instance_total": 70176
+  },
+  "per_view": [
+    {
+      "view": 0,
+      "dense_candidate_faces": 55862,
+      "dense_selected_faces": 13437,
+      "dense_selected_vertices": 17995,
+      "dense_rest_recall": 0.9800020951761327,
+      "p1q_faces": 14219,
+      "p1q_vertices": 8383,
+      "p1q_rest_recall": 0.9721433468049483,
+      "p1q_uncovered_components": 509,
+      "p1q_largest_uncovered_component_px": 5425
+    },
+    {
+      "view": 1,
+      "dense_candidate_faces": 85872,
+      "dense_selected_faces": 26417,
+      "dense_selected_vertices": 31367,
+      "dense_rest_recall": 0.9800026140373808,
+      "p1q_faces": 14659,
+      "p1q_vertices": 8569,
+      "p1q_rest_recall": 0.9894795368589644,
+      "p1q_uncovered_components": 599,
+      "p1q_largest_uncovered_component_px": 1552
+    },
+    {
+      "view": 2,
+      "dense_candidate_faces": 128492,
+      "dense_selected_faces": 39487,
+      "dense_selected_vertices": 49766,
+      "dense_rest_recall": 0.9800014595637917,
+      "p1q_faces": 16221,
+      "p1q_vertices": 9739,
+      "p1q_rest_recall": 0.9767551883718063,
+      "p1q_uncovered_components": 732,
+      "p1q_largest_uncovered_component_px": 5457
+    },
+    {
+      "view": 3,
+      "dense_candidate_faces": 154361,
+      "dense_selected_faces": 49732,
+      "dense_selected_vertices": 58228,
+      "dense_rest_recall": 0.9800019692982541,
+      "p1q_faces": 14704,
+      "p1q_vertices": 8633,
+      "p1q_rest_recall": 0.983376805914073,
+      "p1q_uncovered_components": 530,
+      "p1q_largest_uncovered_component_px": 3341
+    },
+    {
+      "view": 4,
+      "dense_candidate_faces": 168101,
+      "dense_selected_faces": 47401,
+      "dense_selected_vertices": 59675,
+      "dense_rest_recall": 0.98000279347063,
+      "p1q_faces": 14605,
+      "p1q_vertices": 8531,
+      "p1q_rest_recall": 0.9732672211950908,
+      "p1q_uncovered_components": 517,
+      "p1q_largest_uncovered_component_px": 5449
+    },
+    {
+      "view": 5,
+      "dense_candidate_faces": 159154,
+      "dense_selected_faces": 50263,
+      "dense_selected_vertices": 59006,
+      "dense_rest_recall": 0.9800030292153294,
+      "p1q_faces": 15329,
+      "p1q_vertices": 8864,
+      "p1q_rest_recall": 0.9886321432943339,
+      "p1q_uncovered_components": 516,
+      "p1q_largest_uncovered_component_px": 1905
+    },
+    {
+      "view": 6,
+      "dense_candidate_faces": 107816,
+      "dense_selected_faces": 36029,
+      "dense_selected_vertices": 44566,
+      "dense_rest_recall": 0.9800000503396669,
+      "p1q_faces": 15489,
+      "p1q_vertices": 9379,
+      "p1q_rest_recall": 0.9750214572830171,
+      "p1q_uncovered_components": 691,
+      "p1q_largest_uncovered_component_px": 5457
+    },
+    {
+      "view": 7,
+      "dense_candidate_faces": 88448,
+      "dense_selected_faces": 28898,
+      "dense_selected_vertices": 34446,
+      "dense_rest_recall": 0.9800025103067401,
+      "p1q_faces": 13787,
+      "p1q_vertices": 8078,
+      "p1q_rest_recall": 0.981964411574445,
+      "p1q_uncovered_components": 492,
+      "p1q_largest_uncovered_component_px": 3239
+    }
+  ],
+  "abc_selection_evidence": {
+    "c_face_count": 284604,
+    "full_face_count": 507377,
+    "rigid_positive_removed_face_count": 222773,
+    "rigid_removal_rule": "INTERIOR_RIGID_GT_0_AND_INTERIOR_BODY_EQ_0",
+    "views_with_dynamic_amplification": 8,
+    "selection_architecture_hypothesis_supported": true,
+    "selected_surface_topology_pathology_supported": true
+  },
+  "next_product_object": "QualifiedDrawableCoverageSubstrateV1",
+  "regression_candidate": "FULL_ZERO_SURFACE_CONTINUOUS_SUBSTRATE_NOT_CARRIED_FORWARD_TO_CURRENT_RUNTIME_BODY",
+  "pepper_root_cause": "OPEN",
+  "product_pass_claimed": false
+}

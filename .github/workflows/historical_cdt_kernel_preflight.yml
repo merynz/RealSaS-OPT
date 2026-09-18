@@ -1,0 +1,39 @@
+name: historical-cdt-kernel-preflight
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'compiler/realsas_compiler_core/mesh/_historical_v05/**'
+      - 'compiler/realsas_compiler_core/mesh/canonical_cdt_adapter_v1.py'
+      - 'tests/compiler/test_historical_cdt_v05.py'
+      - '.github/workflows/historical_cdt_kernel_preflight.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned CPU dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Verify exact historical payload and loader
+        run: python -m pytest -q tests/compiler/test_historical_cdt_v05.py
+      - name: Report numerical kernel API
+        run: |
+          python - <<'PY'
+          import inspect
+          from compiler.realsas_compiler_core.mesh._historical_v05 import load_historical_cdt_module_v05
+          module = load_historical_cdt_module_v05()
+          fn = module.triangulate_production_cdt
+          print("HISTORICAL_CDT_CALLABLE=", fn.__name__)
+          print("HISTORICAL_CDT_SIGNATURE=", inspect.signature(fn))
+          print("HISTORICAL_CDT_MODULE=", module.__file__)
+          PY

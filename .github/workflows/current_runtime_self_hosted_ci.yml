@@ -72,6 +72,9 @@ jobs:
           PIP_DEFAULT_TIMEOUT: '60'
         run: |
           python -m pip install --no-input --progress-bar off --only-binary=:all: numpy scipy pytest
+      - name: Verify append-only native source seal chain
+        run: PYTHONPATH=. python tools/verify_native_runtime_source_seal_v2.py
+
       - name: Directional binding / bake / projection regressions
         run: |
           PYTHONPATH=. python -m pytest -q \
@@ -131,6 +134,11 @@ jobs:
             -DREALSAS_BUILD_TESTS=ON
           cmake --build .runtime-ci/native-build --parallel
           ctest --test-dir .runtime-ci/native-build --output-on-failure
+      - name: Dense Runtime-v4 P0/P1 representation measurement
+        run: |
+          PYTHONPATH=. python experiments/playback_stack_v1/benchmark_runtime_v4_p0_p1.py \
+            | tee .runtime-ci/runtime-v4-p0-p1-benchmark.log
+
       - name: Build external package probe
         run: |
           c++ -std=c++17 \
@@ -153,4 +161,6 @@ jobs:
         run: |
           echo 'CURRENT_RUNTIME_NATIVE_INTERLOCK_PASS'
           echo 'PLAYBACK_V3_NATIVE_CONFORMANCE_PASS'
+          echo 'RUNTIME_V4_P0_P1_MEASUREMENT_PASS'
+          echo 'NATIVE_SOURCE_SEAL_CHAIN_PASS'
           echo "commit=$GITHUB_SHA"

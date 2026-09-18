@@ -14,9 +14,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-from compiler.realsas_compiler_services.orchestrator.mainline import validate_ledger
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from compiler.realsas_compiler_services.orchestrator.mainline import validate_ledger
 CONTEXT_PATH = ROOT / "canonical" / "CONTEXT_STATE_V2.json"
 AUTH_PATH = ROOT / "canonical" / "AUTHORITY_MAP_V1.json"
 PLAN_PATH = ROOT / "canonical" / "MAINLINE_EXECUTION_PLAN_V1.json"

@@ -30,6 +30,11 @@ on:
       - 'experiments/single_family_e2e_v1/**'
       - 'experiments/playback_stack_v1/**'
       - 'canonical/MAIN_POST_MERGE_INTEGRITY_TRIGGER_ONCE_V1_20260904.json'
+      - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json'
+      - 'tools/verify_native_runtime_source_seal_v2.py'
       - '.github/workflows/current_runtime_self_hosted_ci.yml'
   pull_request:
     branches: [main]

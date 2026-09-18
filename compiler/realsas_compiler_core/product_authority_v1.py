@@ -5,6 +5,7 @@ import math
 from typing import Any
 
 from .hashing import content_sha256
+from .mesh.conditioning_v1 import triangle_rest_metric
 from .types import QualificationError, RiggingSurfaceIR, SurfaceSupportBinding, Vec3
 
 Json = dict[str, Any]
@@ -16,6 +17,15 @@ PRESENTATION_EVIDENCE_CLASSES = {
     "MOTION_OVERRIDE", "SOURCE_APPEARANCE",
 }
 KEYABLE_CHANNELS = {"ATTACHMENT", "TINT", "CLIPPING", "ORDER", "VISIBILITY"}
+
+# Frozen subject-free numerical conditioning floor from
+# ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_PREREG_20260918.md.
+# A later visual/raster study may make these stricter, never weaker.
+G3_NUMERICAL_MIN_ANGLE_DEG = 7.5
+G3_NUMERICAL_MAX_ASPECT = 16.0
+_SUPPORT_SIMPLEX_TOL = 1e-9
+_POSITION_REL_TOL = 1e-9
+_POSITION_ABS_TOL = 1e-12
 
 
 @dataclass(frozen=True)
@@ -282,8 +292,239 @@ def validate_deformation_capability_envelope(value: DeformationCapabilityEnvelop
         raise QualificationError("DEFORMATION_ENVELOPE_LINEAGE_HASH_MISMATCH")
 
 
+def _vec_finite(p: Vec3) -> bool:
+    return len(p) == 3 and all(math.isfinite(float(x)) for x in p)
+
+
+def _vec_close(a: Vec3, b: Vec3) -> bool:
+    return all(math.isclose(float(x), float(y), rel_tol=_POSITION_REL_TOL, abs_tol=_POSITION_ABS_TOL) for x, y in zip(a, b))
+
+
+def _support_position(surface_nodes: dict[str, Any], binding: SurfaceSupportBinding) -> Vec3:
+    if binding.mode not in {"IDENTITY_SURFACE_NODE", "LOCAL_CONVEX_INTERPOLATION"} or not binding.coefficients:
+        raise QualificationError("QUALIFIED_MESH_G1_SUPPORT_MODE_INVALID")
+    seen = set()
+    total = 0.0
+    xyz = [0.0, 0.0, 0.0]
+    for sid, coeff in binding.coefficients:
+        if sid in seen or sid not in surface_nodes:
+            raise QualificationError("QUALIFIED_MESH_G1_SUPPORT_ID_INVALID")
+        seen.add(sid)
+        c = float(coeff)
+        if not math.isfinite(c) or c < 0.0:
+            raise QualificationError("QUALIFIED_MESH_G1_SUPPORT_COEFFICIENT_INVALID")
+        total += c
+        p = surface_nodes[sid].P
+        for axis in range(3):
+            xyz[axis] += c * float(p[axis])
+    if abs(total - 1.0) > _SUPPORT_SIMPLEX_TOL:
+        raise QualificationError("QUALIFIED_MESH_G1_SUPPORT_SIMPLEX_INVALID")
+    if binding.mode == "IDENTITY_SURFACE_NODE":
+        if len(binding.coefficients) != 1 or abs(float(binding.coefficients[0][1]) - 1.0) > _SUPPORT_SIMPLEX_TOL:
+            raise QualificationError("QUALIFIED_MESH_G1_IDENTITY_SUPPORT_INVALID")
+    return (xyz[0], xyz[1], xyz[2])
+
+
+def _edge_key(a: str, b: str) -> tuple[str, str]:
+    if not a or not b or a == b:
+        raise QualificationError("QUALIFIED_MESH_G2_EDGE_INVALID")
+    return (a, b) if a < b else (b, a)
+
+
+def _mesh_connected_labels(vertex_ids: set[str], edges: set[tuple[str, str]]) -> dict[str, str]:
+    adjacency = {vid: set() for vid in vertex_ids}
+    for a, b in edges:
+        adjacency[a].add(b)
+        adjacency[b].add(a)
+    labels: dict[str, str] = {}
+    for seed in sorted(vertex_ids):
+        if seed in labels:
+            continue
+        label = seed
+        stack = [seed]
+        while stack:
+            current = stack.pop()
+            if current in labels:
+                continue
+            labels[current] = label
+            stack.extend(sorted(adjacency[current] - labels.keys()))
+    return labels
+
+
+def qualified_mesh_intrinsic_audit(value: QualifiedMeshIR, *, surface, partition) -> Json:
+    """Recompute G1/G2/G4 invariants from the exact product mesh.
+
+    This is deliberately independent of candidate-reported PASS flags. G3 dynamic
+    stress and G5 raster measurements remain separate evidence, but rest
+    conditioning and matrix structure are checked again here.
+    """
+    surface_nodes = {node.surface_id: node for node in surface.surface_nodes}
+    owner = {}
+    for component in partition.components:
+        for sid in component.surface_ids:
+            owner[sid] = component.component_id
+    component_ids = {component.component_id for component in partition.components}
+
+    if len(value.vertices) < 3 or not value.faces:
+        raise QualificationError("QUALIFIED_MESH_EMPTY_PRODUCT_GEOMETRY")
+
+    vertex_by_id = {}
+    support_ids_by_vertex: dict[str, set[str]] = {}
+    component_vertex_ids = {cid: set() for cid in component_ids}
+    refinement_count = 0
+    max_refinement_normal_ratio = 0.0
+    max_refinement_tangent_to_normal = 0.0
+
+    for vertex in value.vertices:
+        vid = vertex.canonical_mesh_vertex_id
+        if not vid or vid in vertex_by_id or not _vec_finite(vertex.P):
+            raise QualificationError("QUALIFIED_MESH_G1_VERTEX_INVALID")
+        if vertex.component_id not in component_ids:
+            raise QualificationError("QUALIFIED_MESH_G1_COMPONENT_INVALID")
+        base = _support_position(surface_nodes, vertex.support_binding)
+        sids = {sid for sid, _ in vertex.support_binding.coefficients}
+        if any(owner.get(sid) != vertex.component_id for sid in sids):
+            raise QualificationError("QUALIFIED_MESH_G1_CROSS_COMPONENT_SUPPORT")
+        support_ids_by_vertex[vid] = sids
+        component_vertex_ids[vertex.component_id].add(vid)
+
+        if vertex.refinement is None:
+            if not _vec_close(vertex.P, base):
+                raise QualificationError("QUALIFIED_MESH_G1_UNDECLARED_GEOMETRIC_REFINEMENT")
+        else:
+            refinement_count += 1
+            r = vertex.refinement
+            if not r.dense_lineage_hash or not r.method:
+                raise QualificationError("QUALIFIED_MESH_G1_REFINEMENT_LINEAGE_MISSING")
+            if not _vec_finite(r.base_position) or not _vec_finite(r.refined_position):
+                raise QualificationError("QUALIFIED_MESH_G1_REFINEMENT_POSITION_INVALID")
+            if not _vec_close(r.base_position, base) or not _vec_close(r.refined_position, vertex.P):
+                raise QualificationError("QUALIFIED_MESH_G1_REFINEMENT_BINDING_MISMATCH")
+            if not math.isfinite(float(r.local_scale)) or float(r.local_scale) <= 0.0:
+                raise QualificationError("QUALIFIED_MESH_G1_REFINEMENT_LOCAL_SCALE_INVALID")
+            normal = float(r.normal_component)
+            tangent = float(r.tangential_component)
+            if not math.isfinite(normal) or not math.isfinite(tangent) or tangent < 0.0:
+                raise QualificationError("QUALIFIED_MESH_G1_REFINEMENT_COMPONENT_INVALID")
+            displacement = math.dist(tuple(map(float, base)), tuple(map(float, vertex.P)))
+            declared = math.hypot(normal, tangent)
+            if not math.isclose(displacement, declared, rel_tol=1e-6, abs_tol=float(r.local_scale) * 1e-9):
+                raise QualificationError("QUALIFIED_MESH_G1_REFINEMENT_DECOMPOSITION_MISMATCH")
+            max_refinement_normal_ratio = max(max_refinement_normal_ratio, abs(normal) / float(r.local_scale))
+            if abs(normal) > 1e-15:
+                max_refinement_tangent_to_normal = max(max_refinement_tangent_to_normal, tangent / abs(normal))
+            elif tangent > 1e-15:
+                max_refinement_tangent_to_normal = float("inf")
+        vertex_by_id[vid] = vertex
+
+    face_keys = set()
+    derived_edges: set[tuple[str, str]] = set()
+    face_count_by_component = {cid: 0 for cid in component_ids}
+    min_angle = float("inf")
+    max_aspect = 0.0
+    for face in value.faces:
+        if len(face) != 3 or len(set(face)) != 3 or any(vid not in vertex_by_id for vid in face):
+            raise QualificationError("QUALIFIED_MESH_G2_FACE_INVALID")
+        key = tuple(sorted(face))
+        if key in face_keys:
+            raise QualificationError("QUALIFIED_MESH_G2_DUPLICATE_FACE")
+        face_keys.add(key)
+        components = {vertex_by_id[vid].component_id for vid in face}
+        if len(components) != 1:
+            raise QualificationError("QUALIFIED_MESH_G4_FACE_CROSSES_COMPONENT_BOUNDARY")
+        component_id = next(iter(components))
+        face_count_by_component[component_id] += 1
+        points = tuple(vertex_by_id[vid].P for vid in face)
+        metric = triangle_rest_metric(points)
+        if metric["degenerate"]:
+            raise QualificationError("QUALIFIED_MESH_G2_DEGENERATE_FACE")
+        min_angle = min(min_angle, float(metric["min_angle_deg"]))
+        max_aspect = max(max_aspect, float(metric["aspect_longest_over_min_altitude"]))
+        derived_edges.update((_edge_key(face[0], face[1]), _edge_key(face[1], face[2]), _edge_key(face[2], face[0])))
+
+    if any(count <= 0 for count in face_count_by_component.values()):
+        raise QualificationError("QUALIFIED_MESH_G4_COMPONENT_WITHOUT_PRODUCT_FACE")
+
+    declared_edges = set()
+    for edge in value.edges:
+        if len(edge) != 2 or edge[0] not in vertex_by_id or edge[1] not in vertex_by_id:
+            raise QualificationError("QUALIFIED_MESH_G2_EDGE_INVALID")
+        key = _edge_key(edge[0], edge[1])
+        if key in declared_edges:
+            raise QualificationError("QUALIFIED_MESH_G2_DUPLICATE_EDGE")
+        declared_edges.add(key)
+    if declared_edges != derived_edges:
+        raise QualificationError("QUALIFIED_MESH_G2_EDGE_FACE_TOPOLOGY_MISMATCH")
+
+    if min_angle + 1e-9 < G3_NUMERICAL_MIN_ANGLE_DEG:
+        raise QualificationError("QUALIFIED_MESH_G3_NUMERICAL_MIN_ANGLE_FAIL")
+    if max_aspect - 1e-9 > G3_NUMERICAL_MAX_ASPECT:
+        raise QualificationError("QUALIFIED_MESH_G3_NUMERICAL_ASPECT_FAIL")
+
+    labels = _mesh_connected_labels(set(vertex_by_id), declared_edges)
+    preserve_checked = 0
+    for constraint in partition.boundary_constraints:
+        if constraint.decision != "PRESERVE_CONTINUITY":
+            continue
+        left = [vid for vid, sids in support_ids_by_vertex.items() if constraint.a_surface_id in sids]
+        right = [vid for vid, sids in support_ids_by_vertex.items() if constraint.b_surface_id in sids]
+        if not left or not right:
+            raise QualificationError("QUALIFIED_MESH_G4_PRESERVE_SUPPORT_NOT_REPRESENTED")
+        if not any(labels[a] == labels[b] for a in left for b in right):
+            raise QualificationError("QUALIFIED_MESH_G4_PRESERVE_CONTINUITY_BROKEN")
+        preserve_checked += 1
+
+    return {
+        "vertex_count": len(value.vertices),
+        "face_count": len(value.faces),
+        "edge_count": len(declared_edges),
+        "component_count": len(component_ids),
+        "component_face_counts": {k: face_count_by_component[k] for k in sorted(face_count_by_component)},
+        "refinement_vertex_count": refinement_count,
+        "max_refinement_normal_ratio": max_refinement_normal_ratio,
+        "max_refinement_tangent_to_normal": max_refinement_tangent_to_normal,
+        "rest_min_angle_deg": min_angle,
+        "rest_max_aspect_longest_over_min_altitude": max_aspect,
+        "g3_numerical_min_angle_floor_deg": G3_NUMERICAL_MIN_ANGLE_DEG,
+        "g3_numerical_max_aspect_ceiling": G3_NUMERICAL_MAX_ASPECT,
+        "preserve_continuity_constraints_checked": preserve_checked,
+    }
+
+
+def _validate_g5_matrix(report: Json, *, component_ids: set[str]) -> None:
+    rows = tuple(report.get("view_component_coverage") or ())
+    expected = {(view, component_id) for view in range(8) for component_id in component_ids}
+    actual = set()
+    carrier_by_component = {}
+    for row in rows:
+        try:
+            view = int(row["view_index"])
+            component_id = str(row["component_id"])
+            carrier = str(row["carrier_class"])
+        except Exception as exc:
+            raise QualificationError("QUALIFIED_MESH_G5_MATRIX_ROW_INVALID") from exc
+        key = (view, component_id)
+        if key in actual or key not in expected or carrier not in CARRIER_CLASSES:
+            raise QualificationError("QUALIFIED_MESH_G5_MATRIX_ROW_INVALID")
+        actual.add(key)
+        prior = carrier_by_component.setdefault(component_id, carrier)
+        if prior != carrier:
+            raise QualificationError("QUALIFIED_MESH_G5_CARRIER_CLASS_DRIFT")
+        for metric in ("recall", "precision", "largest_coherent_hole_fraction"):
+            value = float(row.get(metric, float("nan")))
+            if not math.isfinite(value) or value < 0.0 or value > 1.0:
+                raise QualificationError("QUALIFIED_MESH_G5_METRIC_INVALID")
+        if row.get("status") != "PASS":
+            raise QualificationError("QUALIFIED_MESH_G5_CELL_NOT_PASS")
+    if actual != expected:
+        raise QualificationError("QUALIFIED_MESH_G5_MATRIX_INCOMPLETE")
+    if not report.get("carrier_policy_hash"):
+        raise QualificationError("QUALIFIED_MESH_G5_CARRIER_POLICY_BINDING_MISSING")
+
+
 def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, envelope) -> None:
     validate_mechanical_partition(partition, surface)
+    validate_deformation_capability_envelope(envelope)
     if value.surface_binding_hash != surface.geometry_lineage_hash:
         raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
     if value.partition_binding_hash != partition.partition_lineage_hash:
@@ -292,16 +533,31 @@ def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, envel
         raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
     if not value.qualification_policy_hash:
         raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISSING")
+
+    intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+    if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
+        raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
+
     required = {"G1_SUPPORT_LINEAGE","G2_TOPOLOGY","G3_DEFORMATION","G4_COMPONENT_BOUNDARY","G5_MULTIVIEW_COVERAGE"}
     gates = dict(value.qualification_report.get("gates") or {})
     if set(gates) != required or any(gates[k] != "PASS" for k in required):
         raise QualificationError("QUALIFIED_MESH_REQUIRES_ALL_FIVE_GATES_PASS")
     if value.qualification_report.get("single_aggregate_score_authority") is not False:
         raise QualificationError("QUALIFIED_MESH_AGGREGATE_SCORE_AUTHORITY_FORBIDDEN")
-    if value.qualification_report.get("view_component_coverage_matrix_complete") is not True:
-        raise QualificationError("QUALIFIED_MESH_VIEW_COMPONENT_COVERAGE_REQUIRED")
+    if value.qualification_report.get("g3_envelope_binding_hash") != envelope.envelope_lineage_hash:
+        raise QualificationError("QUALIFIED_MESH_G3_ENVELOPE_BINDING_MISMATCH")
+    if not value.qualification_report.get("g3_stress_probe_hash"):
+        raise QualificationError("QUALIFIED_MESH_G3_STRESS_PROBE_MISSING")
     if int(value.qualification_report.get("consequential_unknown_boundary_count", -1)) != 0:
         raise QualificationError("QUALIFIED_MESH_CONSEQUENTIAL_UNKNOWN_BOUNDARY")
+    if any(row.decision == "UNKNOWN" for row in partition.boundary_constraints):
+        if not value.qualification_report.get("unknown_boundary_analysis_hash"):
+            raise QualificationError("QUALIFIED_MESH_G4_UNKNOWN_ANALYSIS_MISSING")
+
+    component_ids = {component.component_id for component in partition.components}
+    _validate_g5_matrix(value.qualification_report, component_ids=component_ids)
+    if value.qualification_report.get("view_component_coverage_matrix_complete") is not True:
+        raise QualificationError("QUALIFIED_MESH_VIEW_COMPONENT_COVERAGE_REQUIRED")
     if value.mesh_lineage_hash != qualified_mesh_lineage_hash(value):
         raise QualificationError("QUALIFIED_MESH_LINEAGE_HASH_MISMATCH")
 

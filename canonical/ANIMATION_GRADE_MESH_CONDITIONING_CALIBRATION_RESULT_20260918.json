@@ -1,0 +1,21 @@
+{
+  "schema": "RealSaS.AnimationMeshConditioningCalibrationResult.v1",
+  "status": "SUBJECT_FREE_SYNTHETIC_CALIBRATION_PASS",
+  "claim_boundary": "Numerical G3 conditioning floor only; not artist-quality topology and not Knight/Mage product evidence.",
+  "source_commit": "6320392e70ec773c14fa4154daf883d29be8a602",
+  "workflow_run_id": 35391303224,
+  "workflow_job_id": 105750039140,
+  "preregistration_path": "canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_PREREG_20260918.md",
+  "preregistration_blob_sha": "a701bb3d26826de33d2083181a10a3c32031094a",
+  "conditioning_implementation_blob_sha": "7a2c5b4b162a0acb6ec4db09a49d374e3bc8d004",
+  "forbidden_subject_inputs_observed": false,
+  "sample_count": 780,
+  "selection_rule": {
+    "maximum_worst_relative_metric_error": 0.05
+  },
+  "selected_numerical_floor": {
+    "minimum_angle_deg": 7.5,
+    "maximum_aspect_longest_over_min_altitude": 16
+  },
+  "evidence_note": "7.5 degrees was the smallest preregistered swept angle whose worst relative error stayed <=5% over all frozen scales, transforms and perturbation amplitudes. A later visual/raster study may only make product admission stricter."
+}

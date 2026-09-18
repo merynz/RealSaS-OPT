@@ -10,6 +10,7 @@ on:
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json'
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json'
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V4_20260918.json'
       - '.github/workflows/native_runtime_source_gate.yml'
   pull_request:
     branches-ignore:

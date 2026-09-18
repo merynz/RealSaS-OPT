@@ -25,18 +25,91 @@ set_target_properties(realsas_runtime PROPERTIES
   EXPORT_NAME Runtime
   POSITION_INDEPENDENT_CODE ON)
 
+# Runtime-v3 is intentionally kept behind an internal reference target until
+# parser/raster/clipping conformance closes. This keeps the stable v2/v3 C ABI
+# surface unchanged while allowing real .rss-v3 -> native PNG execution now.
+add_library(realsas_runtime_v3_reference STATIC
+  src/runtime_v3_reference.cpp)
+target_compile_features(realsas_runtime_v3_reference PUBLIC cxx_std_17)
+target_include_directories(realsas_runtime_v3_reference PRIVATE src)
+target_link_libraries(realsas_runtime_v3_reference PRIVATE LibArchive::LibArchive PNG::PNG ZLIB::ZLIB)
+set_target_properties(realsas_runtime_v3_reference PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+# Runtime-v4 P0/P1 is also internal while shared-canonical geometry and bulk
+# serialization are measured against Runtime-v3 parity. It does not alter the
+# stable public ABI or claim product qualification.
+add_library(realsas_runtime_v4_reference STATIC
+  src/runtime_v4_reference.cpp)
+target_compile_features(realsas_runtime_v4_reference PUBLIC cxx_std_17)
+target_include_directories(realsas_runtime_v4_reference PRIVATE src)
+target_link_libraries(realsas_runtime_v4_reference PRIVATE LibArchive::LibArchive PNG::PNG ZLIB::ZLIB)
+set_target_properties(realsas_runtime_v4_reference PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 if(REALSAS_BUILD_EXAMPLES)
   add_executable(realsas_runtime_demo examples/realsas_runtime_demo.cpp)
   target_compile_features(realsas_runtime_demo PRIVATE cxx_std_17)
   target_link_libraries(realsas_runtime_demo PRIVATE RealSaS::Runtime PNG::PNG)
 endif()
 
+if(REALSAS_BUILD_EXAMPLES OR REALSAS_BUILD_TESTS)
+  add_executable(realsas_runtime_v3_demo examples/realsas_runtime_v3_demo.cpp)
+  target_compile_features(realsas_runtime_v3_demo PRIVATE cxx_std_17)
+  target_link_libraries(realsas_runtime_v3_demo PRIVATE realsas_runtime_v3_reference PNG::PNG)
+
+  add_executable(realsas_runtime_v4_demo examples/realsas_runtime_v4_demo.cpp)
+  target_compile_features(realsas_runtime_v4_demo PRIVATE cxx_std_17)
+  target_link_libraries(realsas_runtime_v4_demo PRIVATE realsas_runtime_v4_reference PNG::PNG)
+endif()
+
 if(REALSAS_BUILD_TESTS)
   enable_testing()
+  find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
   add_executable(realsas_runtime_abi_smoke tests/runtime_abi_smoke.cpp)
   target_compile_features(realsas_runtime_abi_smoke PRIVATE cxx_std_17)
   target_link_libraries(realsas_runtime_abi_smoke PRIVATE RealSaS::Runtime)
   add_test(NAME realsas_runtime_abi_smoke COMMAND realsas_runtime_abi_smoke)
+
+  add_executable(realsas_reference_raster_v3 tests/reference_raster_v3.cpp)
+  target_compile_features(realsas_reference_raster_v3 PRIVATE cxx_std_17)
+  add_test(NAME realsas_reference_raster_v3 COMMAND realsas_reference_raster_v3)
+
+  add_test(
+    NAME realsas_runtime_v3_writer_native_e2e
+    COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/runtime_v3_writer_native_e2e.py
+      --runtime-demo $<TARGET_FILE:realsas_runtime_v3_demo>)
+
+  add_test(
+    NAME realsas_runtime_v3_clipping_native_e2e
+    COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/runtime_v3_clipping_native_e2e.py
+      --runtime-demo $<TARGET_FILE:realsas_runtime_v3_demo>)
+
+  add_test(
+    NAME realsas_runtime_v3_unseen_native_e2e
+    COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/runtime_v3_unseen_native_e2e.py
+      --runtime-demo $<TARGET_FILE:realsas_runtime_v3_demo>)
+
+  add_test(
+    NAME realsas_runtime_v4_writer_native_e2e
+    COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/runtime_v4_writer_native_e2e.py
+      --runtime-demo $<TARGET_FILE:realsas_runtime_v4_demo>)
+
+  add_test(
+    NAME realsas_runtime_v4_other_view_source_native_e2e
+    COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/runtime_v4_other_view_source_native_e2e.py
+      --runtime-demo $<TARGET_FILE:realsas_runtime_v4_demo>)
+
+  add_test(
+    NAME realsas_runtime_v4_v3_parity_e2e
+    COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/runtime_v4_v3_parity_e2e.py
+      --runtime-v3-demo $<TARGET_FILE:realsas_runtime_v3_demo>
+      --runtime-v4-demo $<TARGET_FILE:realsas_runtime_v4_demo>)
 endif()
 
 include(GNUInstallDirs)

@@ -1,0 +1,161 @@
+{
+  "schema": "RealSaS.MageObservationFramingContradiction.v1",
+  "date": "2026-09-18",
+  "status": "FAIL__CURRENT_MAGE_FULL_SUBJECT_OBSERVATION_AUTHORITY_IS_BODY_ONLY_FRAMED",
+  "claim_boundary": {
+    "product_pass": false,
+    "unseen_generalization": false,
+    "historical_results_deleted_or_rewritten": false,
+    "current_mage_full_subject_product_authority_reopened": true,
+    "architecture_globally_falsified": false
+  },
+  "exact_current_camera": {
+    "center": [
+      0,
+      0.11449065804481506,
+      1.1013257503509521
+    ],
+    "half_extent": 1.233514747619629,
+    "resolution": 1024
+  },
+  "body_only_derivation": {
+    "body_vertex_count": 3348,
+    "body_bbox_min": [
+      -0.9712533950805664,
+      -0.5192027688026428,
+      -0.000026597417711163865
+    ],
+    "body_bbox_max": [
+      0.9712533950805664,
+      0.748184084892273,
+      2.2026782035827637
+    ],
+    "body_bbox_center": [
+      0,
+      0.11449065804481506,
+      1.1013258025820254
+    ],
+    "body_max_axis_half_span": 1.1013524005002182,
+    "camera_half_extent_over_body_half_span": 1.120000053624421,
+    "conclusion": "CURRENT_CAMERA_IS_BODY_ONLY_BBOX_CENTER_PLUS_12_PERCENT_MARGIN"
+  },
+  "current_observation_alpha_bbox_xyxy": [
+    [
+      0,
+      0,
+      980,
+      969
+    ],
+    [
+      102,
+      0,
+      1023,
+      969
+    ],
+    [
+      137,
+      0,
+      1023,
+      969
+    ],
+    [
+      21,
+      0,
+      992,
+      969
+    ],
+    [
+      43,
+      0,
+      1023,
+      969
+    ],
+    [
+      0,
+      0,
+      921,
+      969
+    ],
+    [
+      0,
+      0,
+      886,
+      969
+    ],
+    [
+      31,
+      0,
+      1002,
+      969
+    ]
+  ],
+  "framing_failures": {
+    "top_border_contact_views": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "left_border_contact_views": [
+      0,
+      5,
+      6
+    ],
+    "right_border_contact_views": [
+      1,
+      2,
+      4
+    ],
+    "bottom_border_contact_views": [],
+    "all_views_top_clipped": true,
+    "side_clipped_view_count": 6
+  },
+  "full_supported_teacher_domain_audit": {
+    "vertex_count": 5279,
+    "face_count": 5683,
+    "bbox_min": [
+      -1.12850022315979,
+      -1.2542544603347778,
+      -0.000026597417711163865
+    ],
+    "bbox_max": [
+      1.2972171306610107,
+      1.0171501636505127,
+      2.7156479358673096
+    ],
+    "vertices_outside_current_normalized_cube": 119,
+    "component_outside_counts": {
+      "BODY_SET": 0,
+      "BOOK_VARIANTS": 29,
+      "WAND_STAFF_VARIANTS": 38,
+      "HAT": 52,
+      "CAPE": 0
+    },
+    "max_abs_normalized_xyz": [
+      1.05164298,
+      1.10963012,
+      1.30871738
+    ],
+    "conclusion": "CURRENT_H1_MINUS1_PLUS1_FIELD_DOMAIN_CANNOT_REPRESENT_ALL_FULL_SUBJECT_TEACHER_VERTICES"
+  },
+  "causal_context": {
+    "h1_raw_zero_surface_vertices": 292358,
+    "h1_raw_zero_surface_faces": 584194,
+    "product_clipped_zero_surface_vertices": 257505,
+    "product_clipped_zero_surface_faces": 507377,
+    "v2_current_largest_missing_pixels": 9679,
+    "v2_missing_pixels_present_in_raw_but_removed_by_product_clip": 7411,
+    "v2_recovered_fraction": 0.765678272548817,
+    "interpretation": "BAD_OBSERVATION_FRAMING_AND_BODY_ONLY_FIELD_DOMAIN_PRECEDE_DOWNSTREAM_DRAWABLE_MESH_FAILURES"
+  },
+  "authority_decision": {
+    "preserve_current_s_g_w_as": "HISTORICAL_SCOPED_EVIDENCE",
+    "forbid_current_s_g_w_as": "FULL_SUBJECT_MAGE_PRODUCT_PROOF",
+    "next_required_evidence": "RERENDER_SAME_FULL_SUBJECT_AND_SAME_2D_APPEARANCE_WITH_FULL_SUBJECT_CAMERA_FRAMING_THEN_REOPEN_H1_FROM_CORRECTED_OBSERVATIONS",
+    "no_threshold_relaxation": true
+  }
+}

@@ -703,6 +703,128 @@ def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carri
         raise QualificationError("QUALIFIED_MESH_LINEAGE_HASH_MISMATCH")
 
 
+def validate_canonical_mesh_candidate(value: CanonicalMeshCandidateIR, *, surface, partition, carrier_policy) -> None:
+    validate_mechanical_partition(partition, surface)
+    validate_component_carrier_policy(carrier_policy, partition)
+    if value.surface_binding_hash != surface.geometry_lineage_hash:
+        raise QualificationError("MESH_CANDIDATE_SURFACE_LINEAGE_MISMATCH")
+    if value.partition_binding_hash != partition.partition_lineage_hash:
+        raise QualificationError("MESH_CANDIDATE_PARTITION_LINEAGE_MISMATCH")
+    if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+        raise QualificationError("MESH_CANDIDATE_CARRIER_POLICY_LINEAGE_MISMATCH")
+    if not value.producer_id or not value.producer_policy_hash:
+        raise QualificationError("MESH_CANDIDATE_PRODUCER_AUTHORITY_MISSING")
+    if value.candidate_lineage_hash != canonical_mesh_candidate_lineage_hash(value):
+        raise QualificationError("MESH_CANDIDATE_LINEAGE_HASH_MISMATCH")
+    if len(value.vertices) < 3 or not value.faces:
+        raise QualificationError("MESH_CANDIDATE_EMPTY")
+
+    known_surface_ids = {node.surface_id for node in surface.surface_nodes}
+    component_ids = {component.component_id for component in partition.components}
+    vertex_ids = set()
+    for vertex in value.vertices:
+        if not vertex.candidate_vertex_id or vertex.candidate_vertex_id in vertex_ids:
+            raise QualificationError("MESH_CANDIDATE_VERTEX_ID_INVALID")
+        vertex_ids.add(vertex.candidate_vertex_id)
+        if vertex.component_id not in component_ids or not _vec_finite(vertex.P):
+            raise QualificationError("MESH_CANDIDATE_VERTEX_INVALID")
+        if not vertex.support_binding.coefficients:
+            raise QualificationError("MESH_CANDIDATE_SUPPORT_MISSING")
+        for sid, coeff in vertex.support_binding.coefficients:
+            if sid not in known_surface_ids or not math.isfinite(float(coeff)):
+                raise QualificationError("MESH_CANDIDATE_SUPPORT_INVALID")
+
+    for face in value.faces:
+        if len(face) != 3 or len(set(face)) != 3 or any(vid not in vertex_ids for vid in face):
+            raise QualificationError("MESH_CANDIDATE_FACE_INVALID")
+    for edge in value.edges:
+        if len(edge) != 2 or edge[0] == edge[1] or any(vid not in vertex_ids for vid in edge):
+            raise QualificationError("MESH_CANDIDATE_EDGE_INVALID")
+
+
+def qualify_canonical_mesh_candidate(
+    candidate: CanonicalMeshCandidateIR,
+    *,
+    surface,
+    partition,
+    carrier_policy,
+    envelope,
+    policy,
+    qualification_report: Json,
+) -> QualifiedMeshIR:
+    """Promote one exact candidate into the sole product-geometry authority.
+
+    Intrinsic G1/G2/G4 and rest-conditioning evidence is recomputed here; callers
+    cannot inject their own intrinsic audit hash. External stress/raster evidence
+    remains hash-bound in qualification_report and is validated fail-closed.
+    """
+    validate_canonical_mesh_candidate(
+        candidate,
+        surface=surface,
+        partition=partition,
+        carrier_policy=carrier_policy,
+    )
+    validate_deformation_capability_envelope(envelope)
+    validate_mesh_qualification_policy(policy)
+
+    id_map = {
+        vertex.candidate_vertex_id: "MV:" + content_sha256({
+            "candidate_lineage_hash": candidate.candidate_lineage_hash,
+            "candidate_vertex_id": vertex.candidate_vertex_id,
+        })[:24]
+        for vertex in candidate.vertices
+    }
+    vertices = tuple(
+        QualifiedMeshVertexIR(
+            canonical_mesh_vertex_id=id_map[vertex.candidate_vertex_id],
+            support_binding=vertex.support_binding,
+            component_id=vertex.component_id,
+            P=vertex.P,
+            source_candidate_vertex_id=vertex.candidate_vertex_id,
+            refinement=vertex.refinement,
+            metadata=dict(vertex.metadata or {}),
+        )
+        for vertex in candidate.vertices
+    )
+    faces = tuple(tuple(id_map[vid] for vid in face) for face in candidate.faces)
+    edges = tuple(tuple(id_map[vid] for vid in edge) for edge in candidate.edges)
+
+    report = dict(qualification_report or {})
+    report.pop("intrinsic_audit_hash", None)
+    mesh = QualifiedMeshIR(
+        vertices=vertices,
+        faces=faces,
+        edges=edges,
+        surface_binding_hash=surface.geometry_lineage_hash,
+        partition_binding_hash=partition.partition_lineage_hash,
+        carrier_policy_binding_hash=carrier_policy.carrier_policy_lineage_hash,
+        envelope_binding_hash=envelope.envelope_lineage_hash,
+        qualification_policy_hash=policy.qualification_policy_lineage_hash,
+        qualification_report=report,
+        mesh_lineage_hash="",
+        metadata={
+            "source_candidate_lineage_hash": candidate.candidate_lineage_hash,
+            "source_producer_id": candidate.producer_id,
+            "source_producer_policy_hash": candidate.producer_policy_hash,
+        },
+    )
+    intrinsic = qualified_mesh_intrinsic_audit(mesh, surface=surface, partition=partition)
+    mesh = replace(
+        mesh,
+        qualification_report={**report, "intrinsic_audit_hash": content_sha256(intrinsic)},
+    )
+    mesh = replace(mesh, mesh_lineage_hash=qualified_mesh_lineage_hash(mesh))
+    validate_qualified_mesh(
+        mesh,
+        surface=surface,
+        partition=partition,
+        carrier_policy=carrier_policy,
+        envelope=envelope,
+        policy=policy,
+    )
+    return mesh
+
+
 def validate_qualified_presentation_graph(value: QualifiedPresentationGraphIR, *, carrier_policy: ComponentCarrierPolicyIR | None = None) -> None:
     if not value.skeleton_binding_hash or not value.mesh_binding_hash or not value.partition_binding_hash or not value.carrier_policy_binding_hash:
         raise QualificationError("PRESENTATION_GRAPH_UPSTREAM_BINDING_MISSING")

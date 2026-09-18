@@ -4,6 +4,8 @@ import pytest
 
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.product_authority_v1 import (
+    CanonicalMeshCandidateIR,
+    CanonicalMeshVertexCandidateIR,
     CarrierCoverageThresholdIR,
     ComponentBoundaryConstraintIR,
     ComponentCarrierDecisionIR,
@@ -21,9 +23,11 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
     build_mechanical_partition,
     build_mesh_qualification_policy,
     deformation_envelope_lineage_hash,
+    canonical_mesh_candidate_lineage_hash,
     qualified_mesh_intrinsic_audit,
     qualified_mesh_lineage_hash,
     qualified_presentation_lineage_hash,
+    qualify_canonical_mesh_candidate,
     validate_deformation_capability_envelope,
     validate_qualified_mesh,
     validate_qualified_presentation_graph,
@@ -299,3 +303,83 @@ def test_presentation_carrier_class_is_orthogonal_to_mechanics_but_cannot_drift_
     validate_qualified_presentation_graph(graph, carrier_policy=carrier_policy)
     assert graph.attachments[0].mechanical_class == "RIGID"
     assert graph.attachments[0].carrier_class == "PLANAR"
+
+
+def test_candidate_promotion_is_deterministic_and_compiler_mints_intrinsic_audit():
+    surface, partition, carrier_policy, envelope, policy = _context()
+    candidate_vertices = tuple(
+        CanonicalMeshVertexCandidateIR(
+            f"cv{i}",
+            SurfaceSupportBinding("IDENTITY_SURFACE_NODE", ((f"s{i}", 1.0),)),
+            "c0" if i < 3 else "c1",
+            surface.surface_nodes[i].P,
+        )
+        for i in range(6)
+    )
+    candidate = CanonicalMeshCandidateIR(
+        candidate_vertices,
+        (("cv0", "cv1", "cv2"), ("cv3", "cv4", "cv5")),
+        (
+            ("cv0", "cv1"), ("cv1", "cv2"), ("cv0", "cv2"),
+            ("cv3", "cv4"), ("cv4", "cv5"), ("cv3", "cv5"),
+        ),
+        surface.geometry_lineage_hash,
+        partition.partition_lineage_hash,
+        carrier_policy.carrier_policy_lineage_hash,
+        "TEST_CANONICAL_MESH_PRODUCER",
+        "producer-policy-hash",
+        "",
+    )
+    candidate = replace(candidate, candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(candidate))
+    carrier_by_component = {row.component_id: row.carrier_class for row in carrier_policy.decisions}
+    report = {
+        "gates": {
+            "G1_SUPPORT_LINEAGE": "PASS",
+            "G2_TOPOLOGY": "PASS",
+            "G3_DEFORMATION": "PASS",
+            "G4_COMPONENT_BOUNDARY": "PASS",
+            "G5_MULTIVIEW_COVERAGE": "PASS",
+        },
+        "single_aggregate_score_authority": False,
+        "view_component_coverage_matrix_complete": True,
+        "consequential_unknown_boundary_count": 0,
+        "unknown_boundary_analysis_hash": "unknown-analysis-hash",
+        "g3_envelope_binding_hash": envelope.envelope_lineage_hash,
+        "g3_stress_probe_hash": "stress-probe-hash",
+        "carrier_policy_hash": carrier_policy.carrier_policy_lineage_hash,
+        "view_component_coverage": tuple(
+            {
+                "view_index": view,
+                "component_id": component_id,
+                "carrier_class": carrier_by_component[component_id],
+                "recall": 1.0,
+                "precision": 1.0,
+                "largest_coherent_hole_fraction": 0.0,
+                "status": "PASS",
+            }
+            for view in range(8)
+            for component_id in ("c0", "c1")
+        ),
+        "intrinsic_audit_hash": "CALLER_MUST_NOT_CONTROL_THIS",
+    }
+    mesh_a = qualify_canonical_mesh_candidate(
+        candidate,
+        surface=surface,
+        partition=partition,
+        carrier_policy=carrier_policy,
+        envelope=envelope,
+        policy=policy,
+        qualification_report=report,
+    )
+    mesh_b = qualify_canonical_mesh_candidate(
+        candidate,
+        surface=surface,
+        partition=partition,
+        carrier_policy=carrier_policy,
+        envelope=envelope,
+        policy=policy,
+        qualification_report=report,
+    )
+    assert mesh_a.mesh_lineage_hash == mesh_b.mesh_lineage_hash
+    assert mesh_a.qualification_report["intrinsic_audit_hash"] != "CALLER_MUST_NOT_CONTROL_THIS"
+    assert all(v.canonical_mesh_vertex_id.startswith("MV:") for v in mesh_a.vertices)

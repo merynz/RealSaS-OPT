@@ -15,6 +15,10 @@ on:
       - '.github/workflows/runtime_v4_p0_p1_measurement.yml'
   workflow_dispatch:
 
+concurrency:
+  group: realsas-self-hosted-runtime-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   shared-body-bulk-writer:
     runs-on: [self-hosted, linux, x64, realsas]

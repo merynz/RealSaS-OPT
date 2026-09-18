@@ -236,14 +236,24 @@ def _assert_runtime_interpolation_triangle_safety(
             q2 = de1[:, 0] * de2[:, 1] - de1[:, 1] * de2[:, 0]
             qend = q0 + q1 + q2
 
-            if np.any(np.abs(q0) <= eps) or np.any(np.abs(qend) <= eps):
+            endpoint_bad = np.flatnonzero(
+                (np.abs(q0) <= eps) | (np.abs(qend) <= eps)
+            )
+            if endpoint_bad.size:
+                tri_index = int(endpoint_bad[0])
                 raise QualificationError(
-                    f"DIRECTIONAL_ASSEMBLY_RUNTIME_ENDPOINT_TRIANGLE_DEGENERATE:{mesh_id}:F{frame_index}"
+                    "DIRECTIONAL_ASSEMBLY_RUNTIME_ENDPOINT_TRIANGLE_DEGENERATE:"
+                    f"{bake.clip_id}:{mesh_id}:F{frame_index}:T{tri_index}:"
+                    f"q0={float(q0[tri_index])}:qend={float(qend[tri_index])}"
                 )
             sign = np.where(q0 > 0.0, 1.0, -1.0)
-            if np.any(sign * qend <= eps):
+            flip = np.flatnonzero(sign * qend <= eps)
+            if flip.size:
+                tri_index = int(flip[0])
                 raise QualificationError(
-                    f"DIRECTIONAL_ASSEMBLY_RUNTIME_INTERFRAME_TRIANGLE_FLIP:{mesh_id}:F{frame_index}"
+                    "DIRECTIONAL_ASSEMBLY_RUNTIME_INTERFRAME_TRIANGLE_FLIP:"
+                    f"{bake.clip_id}:{mesh_id}:F{frame_index}:T{tri_index}:"
+                    f"q0={float(q0[tri_index])}:qend={float(qend[tri_index])}"
                 )
 
             curved = np.abs(q2) > eps
@@ -256,9 +266,18 @@ def _assert_runtime_interpolation_triangle_safety(
                     + q1[interior] * alpha_star[interior]
                     + q2[interior] * alpha_star[interior] ** 2
                 )
-                if np.any(sign[interior] * qstar <= eps):
+                collapsed_local = np.flatnonzero(
+                    sign[interior] * qstar <= eps
+                )
+                if collapsed_local.size:
+                    interior_indices = np.flatnonzero(interior)
+                    tri_index = int(interior_indices[int(collapsed_local[0])])
+                    local_index = int(collapsed_local[0])
                     raise QualificationError(
-                        f"DIRECTIONAL_ASSEMBLY_RUNTIME_INTERFRAME_TRIANGLE_COLLAPSE:{mesh_id}:F{frame_index}"
+                        "DIRECTIONAL_ASSEMBLY_RUNTIME_INTERFRAME_TRIANGLE_COLLAPSE:"
+                        f"{bake.clip_id}:{mesh_id}:F{frame_index}:T{tri_index}:"
+                        f"alpha={float(alpha_star[tri_index])}:"
+                        f"qstar={float(qstar[local_index])}"
                     )
 
 

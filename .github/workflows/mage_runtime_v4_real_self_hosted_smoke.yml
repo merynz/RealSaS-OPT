@@ -9,6 +9,9 @@ on:
       - '.github/workflows/mage_runtime_v4_real_self_hosted_smoke.yml'
       - 'compiler/realsas_compiler_core/mechanical_component_partition.py'
       - 'compiler/realsas_compiler_core/mesh/component_partition.py'
+      - 'compiler/realsas_compiler_core/mesh/component_materialization.py'
+      - 'compiler/realsas_compiler_core/mesh/mwb2_cdt.py'
+      - 'compiler/realsas_compiler_services/export/current_v4_directional_runtime_v4.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v4_mechanical_partition.py'
       - 'experiments/playback_stack_v1/run_mage_full_assembly_runtime_v4_admission_v1.py'
       - 'experiments/playback_stack_v1/run_mage_full_assembly_runtime_v4_native_smoke_v1.py'
@@ -27,7 +30,6 @@ jobs:
     timeout-minutes: 45
     env:
       PYTHONPATH: ${{ github.workspace }}
-      EXPECTED_P1Q_MANIFEST_SHA256: c945377822561319c40e6e5774235ddb5a586cb230599c0939e100ccf32b14e4
       EXPECTED_SURFACE_SHA256: 170b8e4712fd78ef0721462f19f80ccb94eb008206fc6a7061908bfdc36f202f
       EXPECTED_SKELETON_SHA256: 319ae46d94450d97dd6f40f21d571ac9432968104e7a517af00ace442d05b9fe
       EXPECTED_SKIN_SHA256: 722fdeb60fc32aa09e2296adbdc0e589de0379bfd49f6239f214330517f01ddd
@@ -63,12 +65,10 @@ jobs:
           product_root=''
 
           local_authority_root="$HOME/realsas_authority"
-          local_p1q_root="$HOME/realsas_authority/p1q"
-          if [[ -f "$local_authority_root/V0.png"             && -f "$local_authority_root/V7.png"             && -f "$local_authority_root/V0.camera.json"             && -f "$local_authority_root/V7.camera.json"             && -f "$local_authority_root/CURRENT_FIT2_RIGGING_SURFACE_IR.json"             && -f "$local_authority_root/FINAL_QUALIFIED_SKELETON_IR.json"             && -f "$local_authority_root/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json"             && -f "$local_p1q_root/P1Q_FIT2_CURRENT_AUTHORITY_MATERIALIZATION_MANIFEST.json" ]]; then
+          if [[ -f "$local_authority_root/V0.png"             && -f "$local_authority_root/V7.png"             && -f "$local_authority_root/V0.camera.json"             && -f "$local_authority_root/V7.camera.json"             && -f "$local_authority_root/CURRENT_FIT2_RIGGING_SURFACE_IR.json"             && -f "$local_authority_root/FINAL_QUALIFIED_SKELETON_IR.json"             && -f "$local_authority_root/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json" ]]; then
             input_root="$local_authority_root"
             skeleton="$local_authority_root/FINAL_QUALIFIED_SKELETON_IR.json"
             skin="$local_authority_root/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json"
-            p1q="$local_p1q_root"
             surface="$local_authority_root/CURRENT_FIT2_RIGGING_SURFACE_IR.json"
             echo 'MAGE_LOCAL_EXACT_AUTHORITY_STAGE_PASS'
           fi
@@ -86,7 +86,6 @@ jobs:
           consider_product() {
             local p="$1"
             if [[ -z "$product_root" \
-              && -f "$p/03_P1Q_FIT2/P1Q_FIT2_CURRENT_AUTHORITY_MATERIALIZATION_MANIFEST.json" \
               && -f "$p/02_FIT2_P1_BIND/CURRENT_FIT2_RIGGING_SURFACE_IR.json" ]]; then
               product_root="$p"
             fi
@@ -123,7 +122,6 @@ jobs:
             input_root="$h1_root/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT"
             skeleton="$h1_root/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/PREFLIGHT/FINAL_QUALIFIED_SKELETON_IR.json"
             skin="$h1_root/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/MAIN/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json"
-            p1q="$product_root/03_P1Q_FIT2"
             surface="$product_root/02_FIT2_P1_BIND/CURRENT_FIT2_RIGGING_SURFACE_IR.json"
             echo 'MAGE_DRIVE_SYNC_EXACT_ROOTS_PASS'
           else
@@ -144,7 +142,6 @@ jobs:
             input_root="$stage_linux/input"
             skeleton="$stage_linux/mechanics/FINAL_QUALIFIED_SKELETON_IR.json"
             skin="$stage_linux/mechanics/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json"
-            p1q="$stage_linux/p1q"
             surface="$stage_linux/mechanics/CURRENT_FIT2_RIGGING_SURFACE_IR.json"
             test -f "$stage_linux/STAGE_REPORT.json"
             echo 'MAGE_WINDOWS_DRIVE_EXACT_STAGE_PASS'
@@ -155,7 +152,6 @@ jobs:
             echo "MAGE_INPUT_ROOT=$input_root"
             echo "MAGE_SKELETON=$skeleton"
             echo "MAGE_SKIN=$skin"
-            echo "MAGE_P1Q=$p1q"
             echo "MAGE_SURFACE=$surface"
           } >> "$GITHUB_ENV"
 
@@ -174,8 +170,6 @@ jobs:
             echo "MAGE_AUTHORITY_SHA_PASS:$label:$actual"
           }
 
-          verify_sha "$MAGE_P1Q/P1Q_FIT2_CURRENT_AUTHORITY_MATERIALIZATION_MANIFEST.json" \
-            "$EXPECTED_P1Q_MANIFEST_SHA256" P1Q_MANIFEST
           verify_sha "$MAGE_SURFACE" "$EXPECTED_SURFACE_SHA256" FIT2_SURFACE
           verify_sha "$MAGE_SKELETON" "$EXPECTED_SKELETON_SHA256" FIT2_SKELETON
           verify_sha "$MAGE_SKIN" "$EXPECTED_SKIN_SHA256" FIT2_SKIN
@@ -224,6 +218,7 @@ jobs:
         run: |
           PYTHONPATH=. python -m pytest -q \
             tests/compiler/test_mechanical_component_partition_v1.py \
+            tests/compiler/test_mwb2_observation_cdt_v1.py \
             tests/compiler/test_mage_runtime_v4_exact_input_resolver_v1.py \
             tests/compiler/test_mage_runtime_v4_native_smoke_gate_v1.py \
             tests/compiler/test_playback_runtime_v4_contract_v1.py
@@ -258,11 +253,9 @@ jobs:
             experiments/playback_stack_v1/run_mage_full_assembly_runtime_v4_native_smoke_v1.py \
             --cameras "${cameras[@]}" \
             --observations "${observations[@]}" \
-            --p1q-dir "$MAGE_P1Q" \
             --fit2-surface "$MAGE_SURFACE" \
             --skeleton "$MAGE_SKELETON" \
             --fit2-skin "$MAGE_SKIN" \
-            --expected-p1q-manifest "$EXPECTED_P1Q_MANIFEST_SHA256" \
             --output-dir .runtime-real/mage \
             --cache-root "$HOME/.cache/realsas/runtime_v4" \
             --runtime-demo .runtime-real/native-build/realsas_runtime_v4_demo \
@@ -305,6 +298,9 @@ jobs:
             .runtime-real/mage_native_smoke.log
             .runtime-real/mage/MAGE_RUNTIME_V4_NATIVE_RENDER_AUTHORITY_V1.json
             .runtime-real/mage/MAGE_FULL_ASSEMBLY_RUNTIME_V4_NATIVE_SMOKE_V1.json
+            .runtime-real/mage/DIRECTIONAL_JOINT_VIEW_BINDING_SET.json
+            .runtime-real/mage/*_MOTION_ADMISSION_PLAN.json
+            .runtime-real/mage/*_QUALIFICATION_OWNED_MOTION_BAKE.json
             .runtime-real/mage/native_render/*_8VIEW_RUNTIME_V4.gif
             .runtime-real/mage/native_render/*_8VIEW_RUNTIME_V4_FRAME0.png
             .runtime-real/mage/native_render/RUNTIME_V4_BATCH_RENDER_REQUESTS.tsv

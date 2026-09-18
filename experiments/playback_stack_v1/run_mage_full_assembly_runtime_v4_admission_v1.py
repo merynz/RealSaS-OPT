@@ -193,8 +193,14 @@ def run(args) -> dict:
         flush=True,
     )
     render_metadata = dict(product.directional_renderables.metadata or {})
-    if render_metadata.get("continuity_underlay_qualified") is not True:
-        raise RuntimeError("MAGE_V4_ADMISSION_CONTINUITY_UNDERLAY_NOT_BOUND")
+    if render_metadata.get("component_local_materialization_qualified") is not True:
+        raise RuntimeError(
+            "MAGE_V4_ADMISSION_COMPONENT_LOCAL_MATERIALIZATION_NOT_BOUND"
+        )
+    if render_metadata.get("historical_full_subject_mesh_used") is not False:
+        raise RuntimeError(
+            "MAGE_V4_ADMISSION_HISTORICAL_FULL_SUBJECT_MESH_FORBIDDEN"
+        )
 
     stage_t0 = perf_counter()
     print("MAGE_V4_ADMISSION_STAGE=MOTION_BAKES_START", flush=True)
@@ -203,6 +209,17 @@ def run(args) -> dict:
         f"MAGE_V4_ADMISSION_STAGE=MOTION_BAKES_PASS elapsed_s={perf_counter()-stage_t0:.3f}",
         flush=True,
     )
+
+    # Persist exact qualification-owned motion evidence before Runtime-v4 projection.
+    # If a downstream topology/admission gate fails, the failing bake remains available
+    # as evidence instead of collapsing the artifact bundle to the terminal log only.
+    _write_json(out / "DIRECTIONAL_JOINT_VIEW_BINDING_SET.json", binding.to_dict())
+    for plan, bake in zip(plans, bakes):
+        _write_json(out / f"{bake.clip_id}_MOTION_ADMISSION_PLAN.json", plan.to_dict())
+        _write_json(
+            out / f"{bake.clip_id}_QUALIFICATION_OWNED_MOTION_BAKE.json",
+            bake.to_dict(),
+        )
 
     stage_t0 = perf_counter()
     print("MAGE_V4_ADMISSION_STAGE=TEXTURE_CAMERA_BINDING_START", flush=True)
@@ -345,11 +362,9 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--cameras", nargs=8, required=True)
     p.add_argument("--observations", nargs=8, required=True)
-    p.add_argument("--p1q-dir", required=True)
     p.add_argument("--fit2-surface", required=True)
     p.add_argument("--skeleton", required=True)
     p.add_argument("--fit2-skin", required=True)
-    p.add_argument("--expected-p1q-manifest", default="")
     p.add_argument("--output-dir", required=True)
     return p.parse_args()
 

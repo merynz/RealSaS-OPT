@@ -283,6 +283,8 @@ def build_mwb2_observation_cdt_candidate(
     observation_domain: ObservationRasterDomain,
     min_face_area_grid: float = 1.0e-8,
     min_component_nodes: int = 3,
+    allowed_surface_ids=None,
+    candidate_namespace: str = "",
 ) -> MeshDiscretizationCandidateIR:
     """Triangulate observed S carriers with the frozen v0.5 CDT numerical kernel.
 
@@ -306,6 +308,29 @@ def build_mwb2_observation_cdt_candidate(
         raise QualificationError("MWB2_OBSERVATION_DOMAIN_VIEW_MISMATCH")
 
     nodes, visible, safe_edges, rejected_unknown = _safe_surface_graph(surface, int(view_index))
+    allowed_domain_hash = ""
+    allowed_domain_applied = allowed_surface_ids is not None
+    if allowed_domain_applied:
+        allowed = {str(sid) for sid in allowed_surface_ids}
+        if not allowed:
+            raise QualificationError("MWB2_CDT_ALLOWED_SURFACE_DOMAIN_EMPTY")
+        unknown_allowed = allowed - set(nodes)
+        if unknown_allowed:
+            raise QualificationError(
+                f"MWB2_CDT_ALLOWED_SURFACE_UNKNOWN:{sorted(unknown_allowed)[:8]}"
+            )
+        nodes = {sid: node for sid, node in nodes.items() if sid in allowed}
+        visible = {sid: xy for sid, xy in visible.items() if sid in allowed}
+        safe_edges = {
+            (a, b) for a, b in safe_edges if a in allowed and b in allowed
+        }
+        allowed_domain_hash = content_sha256(
+            {
+                "schema": "RealSaS.MWB2.AllowedSurfaceDomain.v1",
+                "surface_lineage_hash": surface.geometry_lineage_hash,
+                "surface_ids": tuple(sorted(allowed)),
+            }
+        )
     if len(visible) < 3:
         raise QualificationError("MWB2_INSUFFICIENT_OBSERVED_SURFACE_SUPPORT")
     full_components = _connected_components(set(nodes), safe_edges)
@@ -413,7 +438,15 @@ def build_mwb2_observation_cdt_candidate(
         unique_face_xy.append(tri_xy)
 
     used_ids = sorted({sid for tri in unique_faces for sid in tri})
-    candidate_id = {sid: f"MWB2CDT:{view_index}:{i:05d}" for i, sid in enumerate(used_ids)}
+    namespace = str(candidate_namespace or "").strip()
+    candidate_id = {
+        sid: (
+            f"MWB2CDT:{view_index}:{namespace}:{i:05d}"
+            if namespace
+            else f"MWB2CDT:{view_index}:{i:05d}"
+        )
+        for i, sid in enumerate(used_ids)
+    }
     vertices = tuple(
         MeshVertexCandidate(
             candidate_id[sid],
@@ -471,6 +504,38 @@ def build_mwb2_observation_cdt_candidate(
         "contracted_boundary_recovery_vertex_count": int(contracted_boundary_recovery_vertex_count),
         "post_contraction_triangle_count": int(post_contraction_triangle_count),
     }
+    metadata = {
+        "producer": "RealSaS.MWB2.ObservationDomainCDT.v3",
+        "source_mesh_used": False,
+        "teacher_topology_used": False,
+        "unknown_bridge_forbidden": True,
+        "rejected_unknown_relation_count": int(rejected_unknown),
+        "observed_view": int(view_index),
+        "surface_lineage_hash": surface.geometry_lineage_hash,
+        "observation_mask_sha256": observation_domain.mask_sha256,
+        "source_alpha_sha256": observation_domain.source_alpha_sha256,
+        "target_view_winding": "CCW",
+        "component_partition_authority": "FULL_SAFE_SURFACE_RELATION_COMPONENTS_THEN_VISIBLE_SUBSET",
+        "alpha_domain_authority": "EXACT_OBSERVATION_MASK",
+    }
+    if allowed_domain_applied:
+        metadata.update(
+            {
+                "allowed_surface_domain_applied": True,
+                "allowed_surface_domain_hash": allowed_domain_hash,
+                "allowed_surface_domain_count": len(nodes),
+                "candidate_namespace": namespace,
+                "component_partition_authority": (
+                    "QUALIFIED_ALLOWED_SURFACE_IDS__SAFE_RELATIONS_RESTRICTED"
+                ),
+            }
+        )
+        residual = {
+            **residual,
+            "allowed_surface_domain_count": len(nodes),
+            "allowed_surface_domain_hash": allowed_domain_hash,
+        }
+
     provisional = MeshDiscretizationCandidateIR(
         vertices,
         face_ids,
@@ -490,20 +555,7 @@ def build_mwb2_observation_cdt_candidate(
             "cdt_promoted": False,
         },
         residual_report=residual,
-        metadata={
-            "producer": "RealSaS.MWB2.ObservationDomainCDT.v3",
-            "source_mesh_used": False,
-            "teacher_topology_used": False,
-            "unknown_bridge_forbidden": True,
-            "rejected_unknown_relation_count": int(rejected_unknown),
-            "observed_view": int(view_index),
-            "surface_lineage_hash": surface.geometry_lineage_hash,
-            "observation_mask_sha256": observation_domain.mask_sha256,
-            "source_alpha_sha256": observation_domain.source_alpha_sha256,
-            "target_view_winding": "CCW",
-            "component_partition_authority": "FULL_SAFE_SURFACE_RELATION_COMPONENTS_THEN_VISIBLE_SUBSET",
-            "alpha_domain_authority": "EXACT_OBSERVATION_MASK",
-        },
+        metadata=metadata,
     )
     payload = provisional.to_dict()
     payload.pop("candidate_lineage_hash", None)
@@ -557,6 +609,99 @@ def qualify_mwb2_observation_cdt_mesh(
         metadata={
             **mesh.metadata,
             "cdt_adapter": "RealSaS.MWB2.ObservationDomainCDT.v3",
+        },
+        mesh_lineage_hash="",
+    )
+    updated = replace(updated, mesh_lineage_hash=mesh_lineage_hash(updated))
+    validate_qualified_mesh(updated, surface)
+    return updated
+
+
+def qualify_mwb2_component_observation_cdt_mesh(
+    surface: RiggingSurfaceIR,
+    candidate: MeshDiscretizationCandidateIR,
+    *,
+    allowed_surface_ids,
+    min_precision_inside_alpha: float = 0.995,
+):
+    """Promote a component-local CDT without pretending it covers the full subject.
+
+    The exact observation alpha remains a hard containment fence. Full-subject recall
+    is intentionally diagnostic here and is qualified only after all mechanical
+    component meshes are unioned by the component materialization operator.
+    """
+    allowed = tuple(sorted({str(sid) for sid in allowed_surface_ids}))
+    if not allowed:
+        raise QualificationError("MWB2_COMPONENT_CDT_ALLOWED_SURFACE_DOMAIN_EMPTY")
+    surface_ids = {str(node.surface_id) for node in surface.surface_nodes}
+    unknown = set(allowed) - surface_ids
+    if unknown:
+        raise QualificationError(
+            f"MWB2_COMPONENT_CDT_ALLOWED_SURFACE_UNKNOWN:{sorted(unknown)[:8]}"
+        )
+    expected_domain_hash = content_sha256(
+        {
+            "schema": "RealSaS.MWB2.AllowedSurfaceDomain.v1",
+            "surface_lineage_hash": surface.geometry_lineage_hash,
+            "surface_ids": allowed,
+        }
+    )
+    metadata = dict(candidate.metadata or {})
+    if metadata.get("allowed_surface_domain_applied") is not True:
+        raise QualificationError("MWB2_COMPONENT_CDT_DOMAIN_NOT_APPLIED")
+    if metadata.get("allowed_surface_domain_hash") != expected_domain_hash:
+        raise QualificationError("MWB2_COMPONENT_CDT_DOMAIN_HASH_DRIFT")
+    if candidate.coverage_classification != "OBSERVATION_DOMAIN_CDT":
+        raise QualificationError("MWB2_COMPONENT_CDT_COVERAGE_CLASSIFICATION_DRIFT")
+    if (
+        metadata.get("source_mesh_used") is not False
+        or metadata.get("teacher_topology_used") is not False
+    ):
+        raise QualificationError("MWB2_COMPONENT_CDT_EXTERNAL_MESH_AUTHORITY_FORBIDDEN")
+    precision = float(candidate.residual_report.get("precision_inside_alpha", -1.0))
+    if precision < float(min_precision_inside_alpha):
+        raise QualificationError(
+            f"MWB2_COMPONENT_CDT_ALPHA_PRECISION_GATE_FAIL:{precision}"
+        )
+
+    allowed_set = set(allowed)
+    for vertex in candidate.vertices:
+        positive_support = {
+            str(sid)
+            for sid, coeff in vertex.support_binding.coefficients
+            if float(coeff) > 1.0e-12
+        }
+        if not positive_support or not positive_support <= allowed_set:
+            raise QualificationError(
+                "MWB2_COMPONENT_CDT_VERTEX_ESCAPES_ALLOWED_SURFACE_DOMAIN"
+            )
+
+    mesh = qualify_identity_subset_mesh(surface, candidate)
+    report = dict(mesh.qualification_report)
+    report.update(
+        {
+            "status": "PASS_COMPONENT_OBSERVATION_DOMAIN_CDT_QUALIFICATION",
+            "precision_inside_alpha": precision,
+            "source_alpha_recall_diagnostic_only": float(
+                candidate.residual_report.get("source_alpha_recall", -1.0)
+            ),
+            "full_subject_recall_claimed": False,
+            "allowed_surface_domain_hash": expected_domain_hash,
+            "allowed_surface_domain_count": len(allowed),
+            "historical_cdt_source_sha256": HISTORICAL_CDT_SOURCE_SHA256,
+            "historical_kernel_role": "NUMERICAL_ONLY",
+            "cdt_behavioral_gate_pass": True,
+            "numerical_solver_promoted": True,
+        }
+    )
+    updated = replace(
+        mesh,
+        qualification_report=report,
+        metadata={
+            **mesh.metadata,
+            "cdt_adapter": "RealSaS.MWB2.ObservationDomainCDT.v3",
+            "component_local_surface_domain": True,
+            "allowed_surface_domain_hash": expected_domain_hash,
         },
         mesh_lineage_hash="",
     )

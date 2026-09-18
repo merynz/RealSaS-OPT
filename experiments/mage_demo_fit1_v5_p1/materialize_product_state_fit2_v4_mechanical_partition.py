@@ -1,18 +1,27 @@
 from __future__ import annotations
 
-"""Current Mage product state from qualified S/G/W mechanical component partition.
+"""Current Mage product state from compiler-owned component-first materialization.
 
-This path intentionally does not consume source component truth, source owner rasters,
-or the historical rigid-foreground atlas.  P1Q is used only as an already-qualified
-render/deformation carrier; Compiler mechanics partition its supported faces before
-product assembly.
+The product path is now partition-first by construction:
+
+    qualified Surface/Skeleton/Skin
+        -> Compiler mechanical component partition
+        -> component-local source-backed CDT
+        -> exact current-skin binding + observation appearance
+        -> typed component assembly
+        -> Runtime-v4
+
+Historical P1/P1Q full-subject meshes, source-component truth, source-owner rasters,
+and teacher topology are not product inputs on this path.
 """
 
 import argparse
-from dataclasses import replace
 import hashlib
 import json
 from pathlib import Path
+
+import numpy as np
+from PIL import Image
 
 from compiler.realsas_compiler_core.component_attachment import (
     ComponentAttachmentEvidenceIR,
@@ -20,24 +29,14 @@ from compiler.realsas_compiler_core.component_attachment import (
     qualify_component_assembly,
     qualify_component_attachment,
 )
-from compiler.realsas_compiler_core.continuity_underlay import (
-    bind_continuity_underlay_set_to_directional_renderables,
-    build_continuity_underlay_set,
-    qualify_continuity_underlay,
-)
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mechanical_component_partition import (
     derive_mechanical_component_partition,
 )
-from compiler.realsas_compiler_core.mesh.component_partition import (
-    project_mesh_to_mechanical_components,
+from compiler.realsas_compiler_core.mesh.component_materialization import (
+    materialize_mechanical_component_view,
 )
-from compiler.realsas_compiler_core.mesh.mesh_binding import (
-    mesh_lineage_hash,
-    mesh_skin_lineage_hash,
-    validate_qualified_mesh,
-    validate_qualified_mesh_skin,
-)
+from compiler.realsas_compiler_core.mesh.observation_domain import ObservationRasterDomain
 from compiler.realsas_compiler_core.motion_locomotion import (
     build_mage_historical_phase_motion,
 )
@@ -48,19 +47,15 @@ from compiler.realsas_compiler_core.product_external_render import (
     build_external_directional_renderable_set,
     build_external_renderable_component,
 )
-from compiler.realsas_compiler_core.v4 import build_appearance_binding, build_capability_contract
+from compiler.realsas_compiler_core.v4 import build_capability_contract
 from compiler.realsas_compiler_core.v4_types import CapabilityRequirement
 
 import experiments.mage_demo_fit1_v5_p1.fit2_current_authority_io as fit2io
-import experiments.mage_demo_fit1_v5_p1.materialize_p1q_current_authority_v1 as legacy_p1q
-import experiments.mage_demo_fit1_v5_p1.materialize_product_state_v1 as legacy_state
-import experiments.mage_demo_fit1_v5_p1.run_v5_direct_p1_binding_v1 as v5base
 
 
-SCHEMA = "RealSaS.MageFIT2.CurrentProductState.v4.mechanical_component_partition"
-PROFILE = "MAGE_FIT2_BOUNDED_DEMO_V4_MECHANICAL_COMPONENT_PARTITION"
+SCHEMA = "RealSaS.MageFIT2.CurrentProductState.v5.component_first"
+PROFILE = "MAGE_FIT2_BOUNDED_DEMO_V5_COMPONENT_FIRST"
 BODY_COMPONENT_ID = "BODY_UNDERLAY"
-LEGACY_P1Q_SOURCE_TRUTH_SHA256 = "a23565b0904e9683d11083984a87405f4e0a1069984ca11b690ad431f35f5e86"
 SETUP_ORDER = {
     "BODY_UNDERLAY": 0,
     "RIGID_CHEST": 1,
@@ -86,196 +81,55 @@ def _write_json(path: Path, payload) -> None:
     )
 
 
-def _strip_legacy_truth_keys(value):
-    if isinstance(value, dict):
-        return {
-            str(key): _strip_legacy_truth_keys(item)
-            for key, item in value.items()
-            if not str(key).lower().startswith("source_truth")
-        }
-    if isinstance(value, list):
-        return [_strip_legacy_truth_keys(item) for item in value]
-    if isinstance(value, tuple):
-        return tuple(_strip_legacy_truth_keys(item) for item in value)
-    return value
+def _observation_contexts(args, surface):
+    camera_paths = tuple(Path(path).resolve() for path in args.cameras)
+    observation_paths = tuple(Path(path).resolve() for path in args.observations)
+    if len(camera_paths) != 8 or len(observation_paths) != 8:
+        raise RuntimeError("FIT2_V5_COMPONENT_FIRST_REQUIRES_EXACT_8_CAMERAS_AND_OBSERVATIONS")
+    if any(not path.is_file() for path in camera_paths):
+        raise RuntimeError("FIT2_V5_COMPONENT_FIRST_CAMERA_MISSING")
+    if any(not path.is_file() for path in observation_paths):
+        raise RuntimeError("FIT2_V5_COMPONENT_FIRST_OBSERVATION_MISSING")
 
+    expected_resolution = int(dict(surface.metadata or {}).get("resolution", 0))
+    if expected_resolution <= 0:
+        raise RuntimeError("FIT2_V5_COMPONENT_FIRST_SURFACE_RESOLUTION_MISSING")
 
-def _sanitize_legacy_p1q_carrier(
-    *,
-    mesh,
-    mesh_skin,
-    appearance,
-    mechanical,
-    manifest_sha: str,
-    view: int,
-):
-    """Remove historical teacher-witness metadata without changing geometry/pixels/weights."""
-    old_mesh_hash = str(mesh.mesh_lineage_hash)
-    old_mesh_skin_hash = str(mesh_skin.mesh_skin_lineage_hash)
-    old_appearance_hash = str(appearance.appearance_lineage_hash)
-
-    mesh_report = _strip_legacy_truth_keys(dict(mesh.qualification_report or {}))
-    mesh_metadata = _strip_legacy_truth_keys(dict(mesh.metadata or {}))
-    mesh_report.update({
-        "historical_source_truth_witness_removed": True,
-        "teacher_truth_used": False,
-        "source_component_truth_used": False,
-    })
-    mesh_metadata.update({
-        "historical_source_truth_witness_removed": True,
-        "historical_mesh_lineage_hash": old_mesh_hash,
-        "legacy_p1q_manifest_sha256": str(manifest_sha),
-        "teacher_truth_used": False,
-        "source_component_truth_used": False,
-        "geometry_payload_mutated": False,
-        "surface_support_payload_mutated": False,
-    })
-    mesh = replace(
-        mesh,
-        qualification_report=mesh_report,
-        metadata=mesh_metadata,
-        mesh_lineage_hash="",
-    )
-    mesh = replace(mesh, mesh_lineage_hash=mesh_lineage_hash(mesh))
-    validate_qualified_mesh(mesh, mechanical.surface)
-
-    mesh_skin = replace(
-        mesh_skin,
-        mesh_binding_hash=str(mesh.mesh_lineage_hash),
-        qualification_report={
-            **_strip_legacy_truth_keys(dict(mesh_skin.qualification_report or {})),
-            "historical_source_truth_witness_removed": True,
-            "teacher_truth_used": False,
-            "weight_values_mutated": False,
-        },
-        metadata={
-            **_strip_legacy_truth_keys(dict(mesh_skin.metadata or {})),
-            "historical_mesh_skin_lineage_hash": old_mesh_skin_hash,
-            "legacy_p1q_manifest_sha256": str(manifest_sha),
-            "teacher_truth_used": False,
-            "weight_values_mutated": False,
-        },
-        mesh_skin_lineage_hash="",
-    )
-    mesh_skin = replace(
-        mesh_skin,
-        mesh_skin_lineage_hash=mesh_skin_lineage_hash(mesh_skin),
-    )
-    validate_qualified_mesh_skin(
-        mesh_skin,
-        surface=mechanical.surface,
-        skeleton=mechanical.skeleton,
-        skin=mechanical.skin,
-        mesh=mesh,
-    )
-
-    appearance = build_appearance_binding(
-        target_view_index=int(appearance.target_view_index),
-        mesh_binding_hash=str(mesh.mesh_lineage_hash),
-        camera_binding_hash=str(appearance.camera_binding_hash),
-        corner_bindings=tuple(appearance.corner_bindings),
-        atlas_payload_hash=str(appearance.atlas_payload_hash),
-        metadata={
-            **_strip_legacy_truth_keys(dict(appearance.metadata or {})),
-            "historical_appearance_lineage_hash": old_appearance_hash,
-            "legacy_p1q_manifest_sha256": str(manifest_sha),
-            "historical_source_truth_witness_removed": True,
-            "teacher_truth_used": False,
-            "artist_corner_payload_mutated": False,
-        },
-    )
-    return mesh, mesh_skin, appearance, {
-        "view": int(view),
-        "historical_mesh_lineage_hash": old_mesh_hash,
-        "sanitized_mesh_lineage_hash": str(mesh.mesh_lineage_hash),
-        "historical_mesh_skin_lineage_hash": old_mesh_skin_hash,
-        "sanitized_mesh_skin_lineage_hash": str(mesh_skin.mesh_skin_lineage_hash),
-        "historical_appearance_lineage_hash": old_appearance_hash,
-        "sanitized_appearance_lineage_hash": str(appearance.appearance_lineage_hash),
-        "geometry_payload_mutated": False,
-        "weight_values_mutated": False,
-        "artist_corner_payload_mutated": False,
+    camera_hash_by_view = {view: _sha(path) for view, path in enumerate(camera_paths)}
+    observation_hash_by_view = {
+        view: _sha(path) for view, path in enumerate(observation_paths)
     }
-
-
-def _load_p1q_state(args, surface, skeleton, skin, mechanical):
-    p1q_dir = Path(args.p1q_dir)
-    manifest_path = p1q_dir / "P1Q_FIT2_CURRENT_AUTHORITY_MATERIALIZATION_MANIFEST.json"
-    if not manifest_path.is_file():
-        raise RuntimeError(f"FIT2_V4_P1Q_MANIFEST_MISSING:{manifest_path}")
-    manifest_sha = _sha(manifest_path)
-    if str(getattr(args, "expected_p1q_manifest", "") or ""):
-        if manifest_sha != str(args.expected_p1q_manifest):
-            raise RuntimeError("FIT2_V4_P1Q_MANIFEST_SHA_DRIFT")
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("status") != "PASS__FIT2_P1Q_CURRENT_AUTHORITY_V0_V7_FROZEN_FACE_POLICY":
-        raise RuntimeError("FIT2_V4_P1Q_STATUS_INVALID")
-
-    legacy_truth_witness = "source_truth_sha256" in manifest
-    if legacy_truth_witness:
-        if str(manifest.get("source_truth_sha256")) != LEGACY_P1Q_SOURCE_TRUTH_SHA256:
-            raise RuntimeError("FIT2_V4_P1Q_UNKNOWN_LEGACY_TRUTH_WITNESS")
-    elif manifest.get("teacher_truth_used") is not False:
-        raise RuntimeError("FIT2_V4_P1Q_TEACHER_TRUTH_POLICY_MISSING")
-    if manifest.get("source_component_truth_used") not in (None, False):
-        raise RuntimeError("FIT2_V4_P1Q_SOURCE_COMPONENT_TRUTH_FORBIDDEN")
-
-    if manifest.get("current_gsa_lineage_hash") != surface.geometry_lineage_hash:
-        raise RuntimeError("FIT2_V4_P1Q_SURFACE_LINEAGE_DRIFT")
-    if manifest.get("current_skeleton_lineage_hash") != skeleton.skeleton_lineage_hash:
-        raise RuntimeError("FIT2_V4_P1Q_SKELETON_LINEAGE_DRIFT")
-    if manifest.get("current_skin_lineage_hash") != skin.skin_lineage_hash:
-        raise RuntimeError("FIT2_V4_P1Q_SKIN_LINEAGE_DRIFT")
-
-    rows = {int(row["view"]): row for row in manifest.get("views") or ()}
-    if set(rows) != set(range(8)):
-        raise RuntimeError("FIT2_V4_P1Q_REQUIRES_8_VIEWS")
-    out = {}
-    migration_rows = []
-    for view in range(8):
-        row = rows[view]
-        mesh = v5base._load_mesh(
-            p1q_dir / str(row["files"]["mesh"]),
-            surface,
-            str(row["mesh_lineage_hash"]),
+    domains = {}
+    atlas_hash_by_view = {}
+    for view, path in enumerate(observation_paths):
+        with Image.open(path) as image:
+            source = image.convert("RGBA")
+            if source.size != (expected_resolution, expected_resolution):
+                raise RuntimeError(
+                    f"FIT2_V5_COMPONENT_FIRST_OBSERVATION_RESOLUTION_DRIFT:"
+                    f"V{view}:{source.size}:{expected_resolution}"
+                )
+            alpha = np.asarray(source, dtype=np.uint8)[..., 3] >= 8
+        domains[view] = ObservationRasterDomain.from_rows(
+            alpha.tolist(),
+            view_index=view,
+            source_alpha_sha256=observation_hash_by_view[view],
         )
-        mesh_skin = legacy_p1q._load_mesh_skin(
-            p1q_dir / str(row["files"]["skin"]),
-            mesh.mesh_lineage_hash,
+        atlas_hash_by_view[view] = content_sha256(
+            {
+                "observation_sha256": observation_hash_by_view[view],
+                "view": view,
+                "authority": "EXACT_SOURCE_OBSERVATION",
+            }
         )
-        appearance = legacy_state._load_appearance(
-            p1q_dir / str(row["files"]["appearance"])
-        )
-        if mesh_skin.surface_binding_hash != surface.geometry_lineage_hash:
-            raise RuntimeError(f"FIT2_V4_P1Q_MESH_SKIN_SURFACE_DRIFT_V{view}")
-        if mesh_skin.skeleton_binding_hash != skeleton.skeleton_lineage_hash:
-            raise RuntimeError(f"FIT2_V4_P1Q_MESH_SKIN_SKELETON_DRIFT_V{view}")
-        if mesh_skin.skin_binding_hash != skin.skin_lineage_hash:
-            raise RuntimeError(f"FIT2_V4_P1Q_MESH_SKIN_SKIN_DRIFT_V{view}")
-        if appearance.mesh_binding_hash != mesh.mesh_lineage_hash:
-            raise RuntimeError(f"FIT2_V4_P1Q_APPEARANCE_MESH_DRIFT_V{view}")
-        if legacy_truth_witness:
-            mesh, mesh_skin, appearance, migration = _sanitize_legacy_p1q_carrier(
-                mesh=mesh,
-                mesh_skin=mesh_skin,
-                appearance=appearance,
-                mechanical=mechanical,
-                manifest_sha=manifest_sha,
-                view=view,
-            )
-            migration_rows.append(migration)
-        out[view] = (mesh, mesh_skin, appearance)
-
-    effective_manifest = {
-        **manifest,
-        "teacher_truth_used": False,
-        "source_component_truth_used": False,
-        "legacy_source_truth_witness_present": bool(legacy_truth_witness),
-        "legacy_source_truth_witness_runtime_authority": False,
-        "legacy_source_truth_witness_sanitized": bool(legacy_truth_witness),
-        "runtime_carrier_migration_rows": migration_rows,
-    }
-    return manifest_path, manifest_sha, effective_manifest, out
+    return (
+        camera_paths,
+        observation_paths,
+        camera_hash_by_view,
+        observation_hash_by_view,
+        domains,
+        atlas_hash_by_view,
+    )
 
 
 def _active_joint_count(surface_ids, skin) -> int:
@@ -303,7 +157,7 @@ def _verify_rigid_projected_skin(projected, *, parent_joint_id: str) -> None:
             )
 
 
-def _build_assembly(partition, projections_by_view, skeleton, skin, p1q_manifest_sha):
+def _build_assembly(partition, projections_by_view, skeleton, skin, materialization_authority_hash):
     qualified = []
     for component_id in sorted(partition.component_surface_ids):
         mechanical_class = str(partition.component_mechanical_classes[component_id])
@@ -354,7 +208,7 @@ def _build_assembly(partition, projections_by_view, skeleton, skin, p1q_manifest
             component_id=component_id,
             source_provenance_refs=(
                 str(partition.partition_hash),
-                str(p1q_manifest_sha),
+                str(materialization_authority_hash),
                 str(skin.skin_lineage_hash),
             ),
             mechanical_class=mechanical_class,
@@ -414,7 +268,7 @@ def _build_assembly(partition, projections_by_view, skeleton, skin, p1q_manifest
             "surface_lineage_hash": partition.surface_binding_hash,
             "skeleton_lineage_hash": partition.skeleton_binding_hash,
             "skin_lineage_hash": partition.skin_binding_hash,
-            "p1q_manifest_sha256": p1q_manifest_sha,
+            "component_materialization_authority_hash": materialization_authority_hash,
             "teacher_truth_used": False,
             "source_component_truth_used": False,
             "mechanical_role_components_only": True,
@@ -437,45 +291,78 @@ def build_final_state(args, *, persist: bool = True):
         skeleton=skeleton,
         skin=skin,
     )
-    p1q_manifest_path, p1q_manifest_sha, p1q_manifest, p1q = _load_p1q_state(
-        args, surface, skeleton, skin, mechanical
-    )
+    (
+        _camera_paths,
+        _observation_paths,
+        camera_hash_by_view,
+        observation_hash_by_view,
+        domains,
+        atlas_hash_by_view,
+    ) = _observation_contexts(args, surface)
 
     projections_by_view = {}
     projection_rows = []
     for view in range(8):
-        mesh, mesh_skin, appearance = p1q[view]
-        projection = project_mesh_to_mechanical_components(
-            source_mesh=mesh,
-            source_mesh_skin=mesh_skin,
-            source_appearance=appearance,
-            partition=partition,
+        projection = materialize_mechanical_component_view(
+            surface=surface,
+            skeleton=skeleton,
+            skin=skin,
             mechanical=mechanical,
+            partition=partition,
+            view_index=view,
+            camera_binding_hash=camera_hash_by_view[view],
+            observation_domain=domains[view],
+            observation_hash_by_view=observation_hash_by_view,
+            atlas_payload_hash=atlas_hash_by_view[view],
+            require_product_mesh_quality=True,
         )
         projections_by_view[view] = projection
-        projection_rows.append({
-            "view": view,
-            "source_mesh_lineage_hash": projection.source_mesh_lineage_hash,
-            "underlay_face_count": projection.qualification_report["underlay_face_count"],
-            "rigid_overlay_face_count": projection.qualification_report["rigid_overlay_face_count"],
-            "cross_component_face_count": projection.qualification_report["cross_component_face_count"],
-            "ambiguous_vertex_count": projection.qualification_report["ambiguous_vertex_count"],
-            "component_face_counts": {
-                row.component_id: len(row.mesh.faces)
-                for row in projection.components
-            },
-        })
+        projection_rows.append(
+            {
+                "view": view,
+                "materialization_hash": projection.materialization_hash,
+                "union_coverage": dict(projection.union_coverage_report),
+                "component_face_counts": {
+                    row.component_id: len(row.mesh.faces)
+                    for row in projection.components
+                },
+                "component_vertex_counts": {
+                    row.component_id: len(row.mesh.vertices)
+                    for row in projection.components
+                },
+                "component_mesh_lineage_hashes": {
+                    row.component_id: row.mesh.mesh_lineage_hash
+                    for row in projection.components
+                },
+                "cross_component_faces_generated": False,
+                "historical_full_subject_mesh_used": False,
+            }
+        )
+
+    materialization_authority_hash = content_sha256(
+        {
+            "schema": SCHEMA + ".ComponentMaterializationAuthority.v1",
+            "component_partition_hash": partition.partition_hash,
+            "view_materialization_hashes": tuple(
+                projections_by_view[view].materialization_hash
+                for view in range(8)
+            ),
+            "camera_hashes": tuple(camera_hash_by_view[view] for view in range(8)),
+            "observation_hashes": tuple(
+                observation_hash_by_view[view] for view in range(8)
+            ),
+        }
+    )
 
     assembly = _build_assembly(
         partition,
         projections_by_view,
         skeleton,
         skin,
-        p1q_manifest_sha,
+        materialization_authority_hash,
     )
 
     directions = []
-    underlay_components = []
     for view in range(8):
         projected_by_id = {
             row.component_id: row
@@ -487,7 +374,9 @@ def build_final_state(args, *, persist: bool = True):
             key=lambda cid: (SETUP_ORDER.get(cid, 100), cid),
         ):
             if component_id not in SETUP_ORDER:
-                raise RuntimeError(f"FIT2_V4_COMPONENT_SETUP_ORDER_MISSING:{component_id}")
+                raise RuntimeError(
+                    f"FIT2_V5_COMPONENT_SETUP_ORDER_MISSING:{component_id}"
+                )
             row = projected_by_id[component_id]
             component = build_external_renderable_component(
                 component_id=component_id,
@@ -498,45 +387,47 @@ def build_final_state(args, *, persist: bool = True):
                 appearance=row.appearance,
                 setup_order=SETUP_ORDER[component_id],
                 coverage_classification=row.mesh.support_coverage_classification,
-                materialization_manifest_sha256=p1q_manifest_sha,
+                materialization_manifest_sha256=materialization_authority_hash,
                 direct_binding_manifest_sha256=partition.partition_hash,
                 metadata={
                     "product_role": (
-                        "CONTINUITY_DEFORMABLE_UNDERLAY"
+                        "MECHANICAL_DEFORMABLE_COMPONENT"
                         if component_id == BODY_COMPONENT_ID
-                        else "MECHANICAL_RIGID_FOREGROUND"
+                        else "MECHANICAL_RIGID_COMPONENT"
                     ),
                     "component_partition_hash": partition.partition_hash,
-                    "source_full_subject_mesh_lineage_hash": (
-                        projection.source_mesh_lineage_hash
-                        if component_id == BODY_COMPONENT_ID
-                        else row.mesh.metadata.get("source_mesh_lineage_hash", "")
-                    ),
+                    "component_materialization_hash": projections_by_view[
+                        view
+                    ].materialization_hash,
+                    "full_silhouette_substrate": False,
+                    "component_local_mesh": True,
+                    "historical_full_subject_mesh_used": False,
                     "teacher_truth_used": False,
                     "source_component_truth_used": False,
+                    "source_owner_raster_used": False,
                     "new_pixels_generated": False,
                 },
             )
             components.append(component)
-            if component_id == BODY_COMPONENT_ID:
-                underlay_components.append(component)
         if len(components) != len(partition.component_surface_ids):
-            raise RuntimeError(f"FIT2_V4_COMPONENT_SET_INCOMPLETE_V{view}")
+            raise RuntimeError(f"FIT2_V5_COMPONENT_SET_INCOMPLETE_V{view}")
         directions.append(
             build_external_directional_renderable(
                 view_index=view,
-                camera_binding_hash=components[0].mesh.camera_binding_hash,
+                camera_binding_hash=camera_hash_by_view[view],
                 components=tuple(components),
                 mechanical=mechanical,
                 metadata={
                     "component_partition_hash": partition.partition_hash,
+                    "component_materialization_hash": projections_by_view[
+                        view
+                    ].materialization_hash,
                     "runtime_texture_layout": "ONE_EXACT_SOURCE_OBSERVATION_PER_VIEW",
+                    "component_local_materialization_qualified": True,
                     "teacher_truth_used": False,
                 },
             )
         )
-    if len(underlay_components) != 8:
-        raise RuntimeError("FIT2_V4_BODY_UNDERLAY_REQUIRES_8_VIEWS")
 
     render_set = build_external_directional_renderable_set(
         tuple(directions),
@@ -544,7 +435,9 @@ def build_final_state(args, *, persist: bool = True):
         metadata={
             "runtime_texture_layout": "ONE_EXACT_SOURCE_OBSERVATION_PER_VIEW",
             "component_partition_hash": partition.partition_hash,
-            "p1q_manifest_sha256": p1q_manifest_sha,
+            "component_materialization_authority_hash": materialization_authority_hash,
+            "component_local_materialization_qualified": True,
+            "historical_full_subject_mesh_used": False,
             "teacher_truth_used": False,
             "source_component_truth_used": False,
         },
@@ -555,58 +448,29 @@ def build_final_state(args, *, persist: bool = True):
         skeleton,
     )
 
-    underlays = tuple(
-        qualify_continuity_underlay(
-            view_index=view,
-            substrate_component=underlay_components[view],
-            mechanical=mechanical,
-            component_assembly=assembly,
-            partition_authority_sha256=partition.partition_hash,
-            metadata={
-                "component_partition_hash": partition.partition_hash,
-                "new_pixels_generated": False,
-                "topology_mutated": False,
-                "weights_mutated": False,
-                "scientific_mechanical_surface_relabelled": False,
-                "teacher_truth_used": False,
-            },
-        )
-        for view in range(8)
-    )
-    underlay_set = build_continuity_underlay_set(
-        underlays,
-        component_assembly=assembly,
-        metadata={
-            "partition_authority_sha256": partition.partition_hash,
-            "component_partition_hash": partition.partition_hash,
-            "teacher_truth_used": False,
-        },
-    )
-    render_set = bind_continuity_underlay_set_to_directional_renderables(
-        render_set,
-        underlay_set,
-        assembly,
-        mechanical,
-    )
-
     phase_motion = build_mage_historical_phase_motion(mechanical)
     motion = compile_motion_quality(phase_motion, mechanical)
-    policy_hash = content_sha256({
-        "schema": "RealSaS.MageFIT2BoundedDemoMechanicalPartitionPolicy.v1",
-        "unseen_generalization_claimed": False,
-        "fresh_fit2_mechanics": True,
-        "component_partition_hash": partition.partition_hash,
-        "teacher_truth_used": False,
-        "historical_motion_engine_recovered": True,
-        "surface_lineage_hash": surface.geometry_lineage_hash,
-        "skeleton_lineage_hash": skeleton.skeleton_lineage_hash,
-        "skin_lineage_hash": skin.skin_lineage_hash,
-    })
-    runtime_impl_hash = content_sha256({
-        "runtime": "RealSaS.NativeRuntimeV4+C++17",
-        "draw_order": "QUALIFICATION_OWNED_PER_FRAME_PER_VIEW",
-        "solver_replay": False,
-    })
+    policy_hash = content_sha256(
+        {
+            "schema": "RealSaS.MageFIT2BoundedDemoComponentFirstPolicy.v1",
+            "unseen_generalization_claimed": False,
+            "fresh_fit2_mechanics": True,
+            "component_partition_hash": partition.partition_hash,
+            "component_materialization_authority_hash": materialization_authority_hash,
+            "teacher_truth_used": False,
+            "historical_motion_engine_recovered": True,
+            "surface_lineage_hash": surface.geometry_lineage_hash,
+            "skeleton_lineage_hash": skeleton.skeleton_lineage_hash,
+            "skin_lineage_hash": skin.skin_lineage_hash,
+        }
+    )
+    runtime_impl_hash = content_sha256(
+        {
+            "runtime": "RealSaS.NativeRuntimeV4+C++17",
+            "draw_order": "QUALIFICATION_OWNED_PER_FRAME_PER_VIEW",
+            "solver_replay": False,
+        }
+    )
     requirements = (
         CapabilityRequirement(
             "MECHANICAL_STRUCTURE", "REQUIRED",
@@ -637,7 +501,8 @@ def build_final_state(args, *, persist: bool = True):
             "fresh_fit2_mechanics": True,
             "component_partition_hash": partition.partition_hash,
             "component_assembly_hash": assembly.component_assembly_hash,
-            "continuity_underlay_set_hash": underlay_set.qualification_hash,
+            "component_materialization_authority_hash": materialization_authority_hash,
+            "component_local_materialization_qualified": True,
             "historical_motion_engine_recovered": True,
             "teacher_truth_used": False,
         },
@@ -652,7 +517,9 @@ def build_final_state(args, *, persist: bool = True):
             "fresh_fit2_mechanics": True,
             "component_partition_hash": partition.partition_hash,
             "component_assembly_hash": assembly.component_assembly_hash,
-            "continuity_underlay_set_hash": underlay_set.qualification_hash,
+            "component_materialization_authority_hash": materialization_authority_hash,
+            "component_local_materialization_qualified": True,
+            "historical_full_subject_mesh_used": False,
             "teacher_truth_used": False,
             "source_component_truth_used": False,
         },
@@ -660,8 +527,8 @@ def build_final_state(args, *, persist: bool = True):
             "runtime_texture_layout": "ONE_EXACT_SOURCE_OBSERVATION_PER_VIEW",
             "qualification_owned_motion_bake_required": True,
             "export_solver_replay_forbidden": True,
-            "mechanical_continuity_underlay_required": True,
-            "continuity_underlay_set_hash": underlay_set.qualification_hash,
+            "component_local_materialization_required": True,
+            "component_materialization_authority_hash": materialization_authority_hash,
             "component_assembly_hash": assembly.component_assembly_hash,
             "component_partition_hash": partition.partition_hash,
             "contact_lock_unqualified_fail_closed": True,
@@ -678,84 +545,92 @@ def build_final_state(args, *, persist: bool = True):
         "partition": partition,
         "assembly": assembly,
         "render_set": render_set,
-        "underlay_set": underlay_set,
+        "component_materializations": projections_by_view,
+        "component_materialization_authority_hash": materialization_authority_hash,
         "phase_motion": phase_motion,
         "motion": motion,
         "capability": capability,
         "product": product,
-        "p1q_manifest": p1q_manifest,
-        "p1q_manifest_sha256": p1q_manifest_sha,
-        "p1q_manifest_path": str(p1q_manifest_path),
         "projection_rows": tuple(projection_rows),
         "source_hashes": {
-            "p1q_manifest": p1q_manifest_sha,
+            "component_materialization": materialization_authority_hash,
             "component_partition": partition.partition_hash,
+            "observations": tuple(observation_hash_by_view[view] for view in range(8)),
+            "cameras": tuple(camera_hash_by_view[view] for view in range(8)),
         },
     }
 
     if persist:
         _write_json(output_dir / "FIT2_MECHANICAL_COMPONENT_PARTITION.json", partition.to_dict())
         _write_json(output_dir / "FIT2_MECHANICAL_COMPONENT_ASSEMBLY.json", assembly.to_dict())
-        _write_json(output_dir / "FIT2_COMPONENT_PARTITION_PROJECTION.json", {
-            "schema": SCHEMA + ".Projection.v1",
-            "component_partition_hash": partition.partition_hash,
-            "views": projection_rows,
-            "teacher_truth_used": False,
-            "source_component_truth_used": False,
-        })
-        _write_json(output_dir / "FIT2_DIRECTIONAL_RENDERABLE_SET_V4.json", render_set.to_dict())
-        _write_json(output_dir / "FIT2_CONTINUITY_UNDERLAY_SET_V4.json", underlay_set.to_dict())
-        _write_json(output_dir / "FIT2_HISTORICAL_PHASE_MOTION_STATE_V4.json", phase_motion.to_dict())
-        _write_json(output_dir / "FIT2_HISTORICAL_QUALITY_MOTION_STATE_V4.json", motion.to_dict())
-        _write_json(output_dir / "FIT2_CANONICAL_PUPPET_GRAPH_V3_COMPONENT_PARTITION.json", product.to_dict())
+        _write_json(
+            output_dir / "FIT2_COMPONENT_LOCAL_MATERIALIZATION.json",
+            {
+                "schema": SCHEMA + ".ComponentLocalMaterialization.v1",
+                "component_partition_hash": partition.partition_hash,
+                "component_materialization_authority_hash": materialization_authority_hash,
+                "views": projection_rows,
+                "teacher_truth_used": False,
+                "source_component_truth_used": False,
+                "historical_full_subject_mesh_used": False,
+            },
+        )
+        _write_json(output_dir / "FIT2_DIRECTIONAL_RENDERABLE_SET_V5.json", render_set.to_dict())
+        _write_json(output_dir / "FIT2_HISTORICAL_PHASE_MOTION_STATE_V5.json", phase_motion.to_dict())
+        _write_json(output_dir / "FIT2_HISTORICAL_QUALITY_MOTION_STATE_V5.json", motion.to_dict())
+        _write_json(
+            output_dir / "FIT2_CANONICAL_PUPPET_GRAPH_V3_COMPONENT_FIRST.json",
+            product.to_dict(),
+        )
         manifest = {
             "schema": SCHEMA,
-            "status": "PASS__CURRENT_MAGE_FIT2_MECHANICAL_COMPONENT_PARTITION_BOUND",
+            "status": "PASS__CURRENT_MAGE_FIT2_COMPONENT_FIRST_MATERIALIZATION_BOUND",
             "product_state_hash": product.product_state_hash,
             "mechanical_state_hash": mechanical.mechanical_state_hash,
             "directional_visual_state_hash": render_set.directional_visual_state_hash,
             "motion_state_hash": motion.motion_state_hash,
             "component_partition_hash": partition.partition_hash,
             "component_assembly_hash": assembly.component_assembly_hash,
-            "continuity_underlay_set_hash": underlay_set.qualification_hash,
-            "p1q_manifest_sha256": p1q_manifest_sha,
+            "component_materialization_authority_hash": materialization_authority_hash,
             "surface_lineage_hash": surface.geometry_lineage_hash,
             "skeleton_lineage_hash": skeleton.skeleton_lineage_hash,
             "skin_lineage_hash": skin.skin_lineage_hash,
             "teacher_truth_used": False,
             "source_component_truth_used": False,
-            "legacy_source_truth_witness_present": bool(
-                p1q_manifest.get("legacy_source_truth_witness_present", False)
-            ),
-            "legacy_source_truth_witness_runtime_authority": False,
-            "legacy_source_truth_witness_sanitized": bool(
-                p1q_manifest.get("legacy_source_truth_witness_sanitized", False)
-            ),
-            "foreground_owner_raster_used": False,
+            "source_owner_raster_used": False,
+            "historical_full_subject_mesh_used": False,
             "foreground_atlas_used": False,
             "product_pass_claimed": False,
         }
-        manifest_path = output_dir / "FIT2_PRODUCT_STATE_V4_MANIFEST.json"
+        manifest_path = output_dir / "FIT2_PRODUCT_STATE_V5_MANIFEST.json"
         _write_json(manifest_path, manifest)
-        print("FIT2_V4_PRODUCT_STATE=" + json.dumps({
-            "product_state_hash": product.product_state_hash,
-            "component_partition_hash": partition.partition_hash,
-            "component_assembly_hash": assembly.component_assembly_hash,
-            "manifest_sha256": _sha(manifest_path),
-        }, sort_keys=True), flush=True)
+        print(
+            "FIT2_V5_PRODUCT_STATE="
+            + json.dumps(
+                {
+                    "product_state_hash": product.product_state_hash,
+                    "component_partition_hash": partition.partition_hash,
+                    "component_assembly_hash": assembly.component_assembly_hash,
+                    "component_materialization_authority_hash": materialization_authority_hash,
+                    "manifest_sha256": _sha(manifest_path),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
     return state
 
 
 def parse_args():
-    p = argparse.ArgumentParser()
-    p.add_argument("--p1q-dir", required=True)
-    p.add_argument("--fit2-surface", required=True)
-    p.add_argument("--skeleton", required=True)
-    p.add_argument("--fit2-skin", required=True)
-    p.add_argument("--expected-p1q-manifest", default="")
-    p.add_argument("--output-dir", required=True)
-    return p.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cameras", nargs=8, required=True)
+    parser.add_argument("--observations", nargs=8, required=True)
+    parser.add_argument("--fit2-surface", required=True)
+    parser.add_argument("--skeleton", required=True)
+    parser.add_argument("--fit2-skin", required=True)
+    parser.add_argument("--output-dir", required=True)
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    build_final_state(parse_args(), persist=True)
+    build_final_state(parse_args())

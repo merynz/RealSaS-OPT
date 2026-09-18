@@ -9,6 +9,7 @@ import pytest
 from compiler.realsas_compiler_core.mesh.mwb2 import build_mwb2_candidate
 from compiler.realsas_compiler_core.mesh.mwb2_cdt import (
     build_mwb2_observation_cdt_candidate,
+    qualify_mwb2_component_observation_cdt_mesh,
     qualify_mwb2_observation_cdt_mesh,
 )
 from compiler.realsas_compiler_core.mesh.observation_domain import ObservationRasterDomain
@@ -230,3 +231,81 @@ def test_boundary_recovery_midpoint_is_solver_internal_only():
     assert all(v.metadata["generated_geometry"] is False for v in candidate.vertices)
     qualified = qualify_mwb2_observation_cdt_mesh(surface, candidate)
     assert qualified.qualification_report["cdt_behavioral_gate_pass"] is True
+
+
+
+def test_component_local_cdt_restricts_surface_domain_without_claiming_full_subject_recall():
+    coords = [
+        (1, 1), (4, 1), (4, 4), (1, 4),
+        (7, 1), (10, 1), (10, 4), (7, 4),
+    ]
+    ids = ["A0", "A1", "A2", "A3", "B0", "B1", "B2", "B3"]
+    edges = [
+        (0, 1), (1, 2), (2, 3), (3, 0),
+        (4, 5), (5, 6), (6, 7), (7, 4),
+        (3, 4),
+    ]
+    surface = _surface(coords, edges, prefixes=ids)
+    domain = ObservationRasterDomain.from_rows(
+        _rect_mask(12, 6, [(1, 1, 4, 4), (7, 1, 10, 4)]),
+        view_index=0,
+    )
+
+    candidate = build_mwb2_observation_cdt_candidate(
+        surface,
+        view_index=0,
+        camera_binding_hash="camera",
+        observation_domain=domain,
+        allowed_surface_ids=("A0", "A1", "A2", "A3"),
+        candidate_namespace="BODY",
+    )
+    admitted = {
+        sid
+        for vertex in candidate.vertices
+        for sid, coeff in vertex.support_binding.coefficients
+        if float(coeff) > 0.0
+    }
+    assert admitted == {"A0", "A1", "A2", "A3"}
+    assert candidate.metadata["allowed_surface_domain_applied"] is True
+    assert (
+        candidate.metadata["component_partition_authority"]
+        == "QUALIFIED_ALLOWED_SURFACE_IDS__SAFE_RELATIONS_RESTRICTED"
+    )
+    assert candidate.residual_report["precision_inside_alpha"] == 1.0
+    assert candidate.residual_report["source_alpha_recall"] < 0.90
+
+    with pytest.raises(QualificationError, match="ALPHA_RECALL_GATE_FAIL"):
+        qualify_mwb2_observation_cdt_mesh(surface, candidate)
+
+    qualified = qualify_mwb2_component_observation_cdt_mesh(
+        surface,
+        candidate,
+        allowed_surface_ids=("A0", "A1", "A2", "A3"),
+    )
+    assert (
+        qualified.qualification_report["status"]
+        == "PASS_COMPONENT_OBSERVATION_DOMAIN_CDT_QUALIFICATION"
+    )
+    assert qualified.qualification_report["full_subject_recall_claimed"] is False
+
+
+def test_component_local_cdt_rejects_domain_escape():
+    surface = _chain_square_surface()
+    domain = ObservationRasterDomain.from_rows(
+        _rect_mask(10, 10, [(1, 1, 8, 8)]),
+        view_index=0,
+    )
+    candidate = build_mwb2_observation_cdt_candidate(
+        surface,
+        view_index=0,
+        camera_binding_hash="camera",
+        observation_domain=domain,
+        allowed_surface_ids=("n0", "n1", "n2", "n3", "n4", "n5", "n6"),
+        candidate_namespace="ALL",
+    )
+    with pytest.raises(QualificationError, match="DOMAIN_HASH_DRIFT"):
+        qualify_mwb2_component_observation_cdt_mesh(
+            surface,
+            candidate,
+            allowed_surface_ids=("n0", "n1", "n2"),
+        )

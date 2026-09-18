@@ -62,69 +62,15 @@ def test_reference_render_admission_has_no_global_boundary_certificate_dependenc
     assert admission.SCHEMA.endswith(".v3")
     assert "REFERENCE_INPUT_ADMITTED" in admission.PASS_STATUS
 
-
-
-def test_legacy_p1q_sanitization_receives_mechanical_authority(monkeypatch, tmp_path):
+def test_runtime_product_path_is_component_first_and_has_no_legacy_full_subject_loader():
     product_v4 = admission.product_v4
-    manifest = {
-        "status": "PASS__FIT2_P1Q_CURRENT_AUTHORITY_V0_V7_FROZEN_FACE_POLICY",
-        "source_truth_sha256": product_v4.LEGACY_P1Q_SOURCE_TRUTH_SHA256,
-        "current_gsa_lineage_hash": "SURFACE",
-        "current_skeleton_lineage_hash": "SKELETON",
-        "current_skin_lineage_hash": "SKIN",
-        "views": [
-            {
-                "view": view,
-                "mesh_lineage_hash": "MESH",
-                "files": {
-                    "mesh": f"V{view}_mesh.json",
-                    "skin": f"V{view}_skin.json",
-                    "appearance": f"V{view}_appearance.json",
-                },
-            }
-            for view in range(8)
-        ],
-    }
-    import json
-    (tmp_path / "P1Q_FIT2_CURRENT_AUTHORITY_MATERIALIZATION_MANIFEST.json").write_text(
-        json.dumps(manifest),
-        encoding="utf-8",
-    )
+    assert product_v4.SCHEMA.endswith(".v5.component_first")
+    assert hasattr(product_v4, "_observation_contexts")
+    assert hasattr(product_v4, "materialize_mechanical_component_view")
+    assert not hasattr(product_v4, "_load_p1q_state")
+    assert not hasattr(product_v4, "_sanitize_legacy_p1q_carrier")
+    assert not hasattr(product_v4, "legacy_p1q")
+    assert not hasattr(product_v4, "legacy_state")
+    assert not hasattr(product_v4, "v5base")
+    assert not hasattr(product_v4, "project_mesh_to_mechanical_components")
 
-    mesh = SimpleNamespace(mesh_lineage_hash="MESH")
-    mesh_skin = SimpleNamespace(
-        surface_binding_hash="SURFACE",
-        skeleton_binding_hash="SKELETON",
-        skin_binding_hash="SKIN",
-    )
-    appearance = SimpleNamespace(mesh_binding_hash="MESH")
-    mechanical = object()
-    seen = []
-
-    monkeypatch.setattr(product_v4.v5base, "_load_mesh", lambda *a, **k: mesh)
-    monkeypatch.setattr(product_v4.legacy_p1q, "_load_mesh_skin", lambda *a, **k: mesh_skin)
-    monkeypatch.setattr(product_v4.legacy_state, "_load_appearance", lambda *a, **k: appearance)
-
-    def fake_sanitize(**kwargs):
-        seen.append(kwargs["mechanical"])
-        return mesh, mesh_skin, appearance, {"view": kwargs["view"]}
-
-    monkeypatch.setattr(product_v4, "_sanitize_legacy_p1q_carrier", fake_sanitize)
-
-    args = SimpleNamespace(p1q_dir=str(tmp_path), expected_p1q_manifest="")
-    surface = SimpleNamespace(geometry_lineage_hash="SURFACE")
-    skeleton = SimpleNamespace(skeleton_lineage_hash="SKELETON")
-    skin = SimpleNamespace(skin_lineage_hash="SKIN")
-
-    _path, _sha, effective, loaded = product_v4._load_p1q_state(
-        args,
-        surface,
-        skeleton,
-        skin,
-        mechanical,
-    )
-
-    assert seen == [mechanical] * 8
-    assert set(loaded) == set(range(8))
-    assert effective["legacy_source_truth_witness_sanitized"] is True
-    assert effective["legacy_source_truth_witness_runtime_authority"] is False

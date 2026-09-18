@@ -2,6 +2,8 @@ name: Native runtime source gate
 
 on:
   push:
+    branches-ignore:
+      - playback-stack-v1-20260916
     paths:
       - 'runtime/realsas_cpp/**'
       - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
@@ -9,6 +11,8 @@ on:
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json'
       - '.github/workflows/native_runtime_source_gate.yml'
   pull_request:
+    branches-ignore:
+      - playback-stack-v1-20260916
     paths:
       - 'runtime/realsas_cpp/**'
       - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'

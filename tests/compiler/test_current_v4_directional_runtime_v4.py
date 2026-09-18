@@ -8,7 +8,11 @@ import pytest
 
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.playback_directional_assembly_cert_v1 import (
+    _source_topology_boundary_edges,
     certify_directional_runtime_v4_assembly_v1,
+)
+from compiler.realsas_compiler_core.playback_directional_motion_cert_v1 import (
+    _boundary_edges,
 )
 from compiler.realsas_compiler_core.playback_full_surface_v3 import (
     CameraProjectionV3,
@@ -213,6 +217,30 @@ def _fixture(*, body_first: bool = True):
     )
     cameras = {view_id: _camera(view_id, i) for i, view_id in enumerate(VIEWS)}
     return product, (bake,), textures, cameras
+
+
+def test_source_topology_boundary_collapses_runtime_uv_seam_vertex_splits():
+    # Runtime appearance vertices 0 and 3 are the same source/mechanical vertex.
+    # Vertex 2 remains shared, so raw runtime topology sees a degree-4 branch.
+    triangles = np.asarray(((0, 1, 2), (3, 2, 4)), dtype=np.uint32)
+    runtime_source_indices = (0, 1, 2, 0, 3)
+
+    with pytest.raises(
+        QualificationError,
+        match="DIRECTIONAL_BODY_OPEN_OR_BRANCHING_BOUNDARY",
+    ):
+        _boundary_edges(triangles)
+
+    boundary = _source_topology_boundary_edges(
+        triangles,
+        runtime_source_indices,
+    )
+    assert set(tuple(sorted(edge)) for edge in boundary) == {
+        (0, 1),
+        (0, 4),
+        (1, 2),
+        (2, 4),
+    }
 
 
 def test_directional_assembly_bridge_roundtrips_qualification_bake_xy_exactly():

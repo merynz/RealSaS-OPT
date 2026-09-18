@@ -63,6 +63,55 @@ class DirectionalAssemblyMotionCertificateV1:
     schema_version: str = DIRECTIONAL_ASSEMBLY_CERTIFICATE_SCHEMA
 
 
+def _source_topology_boundary_edges(
+    triangles: np.ndarray,
+    runtime_source_indices: Sequence[int],
+) -> tuple[tuple[int, int], ...]:
+    """Return geometric boundary edges while collapsing render-only UV seam splits.
+
+    Runtime-v4 duplicates a mechanical/source vertex when one source vertex needs
+    multiple per-corner UVs. Those duplicate runtime vertices are appearance
+    vertices, not distinct geometry. Boundary topology must therefore be counted
+    in source-index space, then mapped back to stable runtime representatives for
+    the continuous segment-intersection proof.
+    """
+
+    runtime_triangles = np.asarray(triangles, dtype=np.int64)
+    source_indices = np.asarray(tuple(runtime_source_indices), dtype=np.int64)
+    if runtime_triangles.ndim != 2 or runtime_triangles.shape[1] != 3:
+        raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_TRIANGLE_SHAPE_INVALID")
+    if source_indices.ndim != 1:
+        raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_SOURCE_INDEX_SHAPE_INVALID")
+    if runtime_triangles.size:
+        if int(runtime_triangles.min()) < 0 or int(runtime_triangles.max()) >= len(source_indices):
+            raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_RUNTIME_INDEX_OUT_OF_RANGE")
+    if np.any(source_indices < 0):
+        raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_SOURCE_INDEX_NEGATIVE")
+
+    source_triangles = source_indices[runtime_triangles]
+    if np.any(
+        (source_triangles[:, 0] == source_triangles[:, 1])
+        | (source_triangles[:, 1] == source_triangles[:, 2])
+        | (source_triangles[:, 2] == source_triangles[:, 0])
+    ):
+        raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_SOURCE_TRIANGLE_DEGENERATE")
+
+    source_boundary = _boundary_edges(source_triangles)
+    representative: dict[int, int] = {}
+    for runtime_index, source_index in enumerate(source_indices.tolist()):
+        representative.setdefault(int(source_index), int(runtime_index))
+
+    try:
+        return tuple(
+            (representative[int(a)], representative[int(b)])
+            for a, b in source_boundary
+        )
+    except KeyError as exc:
+        raise QualificationError(
+            "DIRECTIONAL_ASSEMBLY_CERT_SOURCE_BOUNDARY_REPRESENTATIVE_MISSING"
+        ) from exc
+
+
 def _body_coverage(
     product,
     view_ids: tuple[str, ...],
@@ -215,7 +264,12 @@ def certify_directional_runtime_v4_assembly_v1(
             raise QualificationError("DIRECTIONAL_ASSEMBLY_CERT_OWNER_ASSET_COUNT_DRIFT")
         for asset in owner_assets:
             triangles = np.asarray(asset.triangles, dtype=np.int64)
-            boundary = _boundary_edges(triangles)
+            source_indices = projection.runtime_source_indices_by_asset.get(asset.asset_id)
+            if source_indices is None:
+                raise QualificationError(
+                    "DIRECTIONAL_ASSEMBLY_CERT_SOURCE_INDEX_MAPPING_MISSING"
+                )
+            boundary = _source_topology_boundary_edges(triangles, source_indices)
             projected = [
                 project_points_xyz_v3(
                     np.asarray(frame.canonical_posed_xyz_by_asset[asset.asset_id], dtype=np.float64),
@@ -280,6 +334,7 @@ def certify_directional_runtime_v4_assembly_v1(
         "min_signed_area2_margin": min_area,
         "min_boundary_distance_at_critical_times": min_boundary,
         "boundary_distance_semantics": "MIN_CRITICAL_TIME_DISTANCE__NEG1_IF_NO_NONADJACENT_PAIR",
+        "boundary_topology_semantics": "SOURCE_TOPOLOGY_COLLAPSED_FROM_RUNTIME_UV_SPLITS",
         "active_asset_interval_count": interval_count,
         "completion_used": False,
         "runtime_interpolation": "LINEAR_VIEW_LOCAL_EQUAL_DEPTH_DIRECTIONAL_ASSETS",

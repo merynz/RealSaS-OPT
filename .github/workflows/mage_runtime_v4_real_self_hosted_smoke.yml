@@ -1,0 +1,282 @@
+name: Mage Runtime-v4 Real Self-Hosted Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - playback-stack-v1-20260916
+    paths:
+      - '.github/workflows/mage_runtime_v4_real_self_hosted_smoke.yml'
+      - 'compiler/realsas_compiler_core/mechanical_component_partition.py'
+      - 'compiler/realsas_compiler_core/mesh/component_partition.py'
+      - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v4_mechanical_partition.py'
+      - 'experiments/playback_stack_v1/run_mage_full_assembly_runtime_v4_admission_v1.py'
+      - 'experiments/playback_stack_v1/run_mage_full_assembly_runtime_v4_native_smoke_v1.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mage-runtime-v4-real-self-hosted-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  real-mage-native-smoke:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      EXPECTED_P1Q_MANIFEST_SHA256: c945377822561319c40e6e5774235ddb5a586cb230599c0939e100ccf32b14e4
+      EXPECTED_SURFACE_SHA256: 170b8e4712fd78ef0721462f19f80ccb94eb008206fc6a7061908bfdc36f202f
+      EXPECTED_SKELETON_SHA256: 319ae46d94450d97dd6f40f21d571ac9432968104e7a517af00ace442d05b9fe
+      EXPECTED_SKIN_SHA256: 722fdeb60fc32aa09e2296adbdc0e589de0379bfd49f6239f214330517f01ddd
+
+    steps:
+      - name: Checkout exact pushed commit
+        uses: actions/checkout@v4
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install bounded runtime dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off --only-binary=:all: \
+            numpy scipy pillow pytest
+
+      - name: Resolve exact Google Drive Desktop roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          H1_NAME='REALSAS_MAGE_FULL_SUBJECT_RECLOSURE_20260912'
+          PRODUCT_NAME='MageDemo_20260914_ProductClosure_FIT2Rebind_v1_FIX3_CONVEX_RENDER_SUPPORT'
+
+          h1_root=''
+          product_root=''
+
+          consider_h1() {
+            local p="$1"
+            if [[ -z "$h1_root" \
+              && -f "$p/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT/V0.png" \
+              && -f "$p/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/PREFLIGHT/FINAL_QUALIFIED_SKELETON_IR.json" \
+              && -f "$p/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/MAIN/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json" ]]; then
+              h1_root="$p"
+            fi
+          }
+
+          consider_product() {
+            local p="$1"
+            if [[ -z "$product_root" \
+              && -f "$p/03_P1Q_FIT2/P1Q_FIT2_CURRENT_AUTHORITY_MATERIALIZATION_MANIFEST.json" \
+              && -f "$p/02_FIT2_P1_BIND/CURRENT_FIT2_RIGGING_SURFACE_IR.json" ]]; then
+              product_root="$p"
+            fi
+          }
+
+          shopt -s nullglob
+          for mount in /mnt/[d-z]; do
+            [[ -d "$mount" ]] || continue
+            for base in "$mount" "$mount/My Drive" "$mount/Google Drive" "$mount/Google Drive/My Drive"; do
+              [[ -d "$base" ]] || continue
+              consider_h1 "$base/$H1_NAME"
+              consider_product "$base/$PRODUCT_NAME"
+              for p in "$base"/*/"$PRODUCT_NAME" "$base"/*/*/"$PRODUCT_NAME"; do
+                [[ -d "$p" ]] && consider_product "$p"
+              done
+            done
+          done
+
+          for winhome in /mnt/c/Users/*; do
+            [[ -d "$winhome" ]] || continue
+            for base in "$winhome/My Drive" "$winhome/Google Drive" "$winhome/Google Drive/My Drive"; do
+              [[ -d "$base" ]] || continue
+              consider_h1 "$base/$H1_NAME"
+              consider_product "$base/$PRODUCT_NAME"
+              for p in "$base"/*/"$PRODUCT_NAME" "$base"/*/*/"$PRODUCT_NAME"; do
+                [[ -d "$p" ]] && consider_product "$p"
+              done
+            done
+          done
+
+          if [[ -z "$h1_root" ]]; then
+            echo 'MAGE_DRIVE_SYNC_H1_ROOT_NOT_FOUND'
+            exit 41
+          fi
+          if [[ -z "$product_root" ]]; then
+            echo 'MAGE_DRIVE_SYNC_PRODUCT_ROOT_NOT_FOUND'
+            exit 42
+          fi
+
+          input_root="$h1_root/IRIS_H1_V2_INPUT/20260912_FULL_SUBJECT"
+          skeleton="$h1_root/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/PREFLIGHT/FINAL_QUALIFIED_SKELETON_IR.json"
+          skin="$h1_root/MAGE_FIT2_PIPELINE_REFIT/ARACHNE_REFIT_V1_FIX1_TEACHER_COVERAGE_SEMANTICS/MAIN/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json"
+          p1q="$product_root/03_P1Q_FIT2"
+          surface="$product_root/02_FIT2_P1_BIND/CURRENT_FIT2_RIGGING_SURFACE_IR.json"
+
+          {
+            echo "MAGE_H1_ROOT=$h1_root"
+            echo "MAGE_PRODUCT_ROOT=$product_root"
+            echo "MAGE_INPUT_ROOT=$input_root"
+            echo "MAGE_SKELETON=$skeleton"
+            echo "MAGE_SKIN=$skin"
+            echo "MAGE_P1Q=$p1q"
+            echo "MAGE_SURFACE=$surface"
+          } >> "$GITHUB_ENV"
+
+          echo 'MAGE_DRIVE_SYNC_EXACT_ROOTS_PASS'
+
+      - name: Verify exact scientific byte authorities
+        shell: bash
+        run: |
+          set -euo pipefail
+          verify_sha() {
+            local path="$1" expected="$2" label="$3"
+            local actual
+            actual="$(sha256sum "$path" | awk '{print $1}')"
+            if [[ "$actual" != "$expected" ]]; then
+              echo "MAGE_AUTHORITY_SHA_DRIFT:$label:$actual"
+              exit 50
+            fi
+            echo "MAGE_AUTHORITY_SHA_PASS:$label:$actual"
+          }
+
+          verify_sha "$MAGE_P1Q/P1Q_FIT2_CURRENT_AUTHORITY_MATERIALIZATION_MANIFEST.json" \
+            "$EXPECTED_P1Q_MANIFEST_SHA256" P1Q_MANIFEST
+          verify_sha "$MAGE_SURFACE" "$EXPECTED_SURFACE_SHA256" FIT2_SURFACE
+          verify_sha "$MAGE_SKELETON" "$EXPECTED_SKELETON_SHA256" FIT2_SKELETON
+          verify_sha "$MAGE_SKIN" "$EXPECTED_SKIN_SHA256" FIT2_SKIN
+
+          python - <<'PY'
+          from hashlib import sha256
+          from pathlib import Path
+          import os
+
+          camera = (
+              "73004e0654b576e0c51893af544e0af8fcc4e613ce07ea9884272285d55cd541",
+              "bdc172a4aff332f956d1403e36b2f8684b68059fdc82f9efddf35d05a6d9b4d4",
+              "3c2bbc44ef9005b4a545a3381205a5d6a92af15b4791c9075071b8cad02a1a6c",
+              "24b2f115d908422d885f85e956fcc36ac78fd0c90b503f698caa62febc2b9c4d",
+              "5bf00783d6509c2ca142e05ef705d5cdb5df17ad248b782d2fe8cf8a297bee39",
+              "7ee3e50739318eeb122b5b0ec67260dd32e21d949398f48c408a6c239e5c89fe",
+              "daa19fa58ff602977d64b720c4198956809855149d814df487c7762a963f1eec",
+              "68f51fbfce4c31f94281e1569d74b44609435285668f8a8b1b278e76db6ea53f",
+          )
+          observation = (
+              "8e9875c16bba3047c8f2fc211b984f2399d1145f5720c7427c6fc03a3fec0616",
+              "fa94283780d5e5f3ad3943bbffc1f0592a70fc362fdd03b94a1d1cb46889dc30",
+              "777bf4f7c505b405d3a5d2a111b2f297949454f77cae7c33064bf02479d384a5",
+              "2a771c91c1d1c0b75dab14f6e98b7905a8429bbf0c0a8dd690261f93f6476d86",
+              "354bb239feb6c1a515917fee4efb42fb1e0cb9f173d0eb3191fb0901a02a6228",
+              "158fc14a75aa69f6133f2ba3ec5df2ad146afc62f477d7d3b4a41ca2cb0e42f2",
+              "e3b08836c187863819d8b8aaa53aef79eddfee167e1fabf3fb1dd8ec0484563a",
+              "87d4ad46edffec3c6bff034d305194820288d3cc6ef9a9480ac2234fb56451bc",
+          )
+          root = Path(os.environ["MAGE_INPUT_ROOT"])
+          for view in range(8):
+              for kind, suffix, expected in (
+                  ("CAMERA", ".camera.json", camera[view]),
+                  ("OBSERVATION", ".png", observation[view]),
+              ):
+                  path = root / f"V{view}{suffix}"
+                  actual = sha256(path.read_bytes()).hexdigest()
+                  if actual != expected:
+                      raise SystemExit(
+                          f"MAGE_AUTHORITY_SHA_DRIFT:V{view}_{kind}:{actual}"
+                      )
+                  print(f"MAGE_AUTHORITY_SHA_PASS:V{view}_{kind}:{actual}")
+          PY
+
+      - name: Prove current compiler/runtime gates
+        run: |
+          PYTHONPATH=. python -m pytest -q \
+            tests/compiler/test_mechanical_component_partition_v1.py \
+            tests/compiler/test_mage_runtime_v4_exact_input_resolver_v1.py \
+            tests/compiler/test_mage_runtime_v4_native_smoke_gate_v1.py \
+            tests/compiler/test_playback_runtime_v4_contract_v1.py
+          PYTHONPATH=. python tools/verify_native_runtime_source_seal_v2.py
+
+      - name: Build sealed native Runtime-v4 demo
+        run: |
+          rm -rf .runtime-real
+          mkdir -p .runtime-real
+          cmake -S runtime/realsas_cpp -B .runtime-real/native-build \
+            -DREALSAS_BUILD_SHARED=ON \
+            -DREALSAS_BUILD_EXAMPLES=ON \
+            -DREALSAS_BUILD_TESTS=ON
+          cmake --build .runtime-real/native-build --parallel
+          ctest --test-dir .runtime-real/native-build --output-on-failure
+          test -x .runtime-real/native-build/realsas_runtime_v4_demo
+          echo 'MAGE_RUNTIME_V4_NATIVE_BUILD_PASS'
+
+      - name: Execute exact real Mage Runtime-v4 native smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          cameras=()
+          observations=()
+          for v in {0..7}; do
+            cameras+=("$MAGE_INPUT_ROOT/V${v}.camera.json")
+            observations+=("$MAGE_INPUT_ROOT/V${v}.png")
+          done
+
+          PYTHONPATH=. python \
+            experiments/playback_stack_v1/run_mage_full_assembly_runtime_v4_native_smoke_v1.py \
+            --cameras "${cameras[@]}" \
+            --observations "${observations[@]}" \
+            --p1q-dir "$MAGE_P1Q" \
+            --fit2-surface "$MAGE_SURFACE" \
+            --skeleton "$MAGE_SKELETON" \
+            --fit2-skin "$MAGE_SKIN" \
+            --expected-p1q-manifest "$EXPECTED_P1Q_MANIFEST_SHA256" \
+            --output-dir .runtime-real/mage \
+            --cache-root "$HOME/.cache/realsas/runtime_v4" \
+            --runtime-demo .runtime-real/native-build/realsas_runtime_v4_demo \
+            --render-sample-count 9 \
+            --contact-thumb 256 \
+            | tee .runtime-real/mage_native_smoke.log
+
+      - name: Assert real native render result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path(".runtime-real/mage/MAGE_FULL_ASSEMBLY_RUNTIME_V4_NATIVE_SMOKE_V1.json")
+          if not p.is_file():
+              raise SystemExit("MAGE_REAL_NATIVE_RESULT_MISSING")
+          r = json.loads(p.read_text(encoding="utf-8"))
+          if r.get("status") != "PASS__FULL_MAGE_RUNTIME_V4_NATIVE_RENDER":
+              raise SystemExit("MAGE_REAL_NATIVE_STATUS_NOT_PASS:" + str(r.get("status")))
+          if r.get("product_pass_claimed") is not False:
+              raise SystemExit("MAGE_REAL_NATIVE_PREMATURE_PRODUCT_PASS")
+          if set((r.get("visual_outputs") or {}).keys()) != {"idle", "run"}:
+              raise SystemExit("MAGE_REAL_NATIVE_VISUAL_OUTPUT_SET_DRIFT")
+          print("MAGE_REAL_NATIVE_RENDER_PASS")
+          print("product_state_hash=" + str(r["source_product_state_hash"]))
+          print("runtime_v4_projection_hash=" + str(r["runtime_v4_projection_hash"]))
+          print("archive_sha256=" + str(r["package"]["archive_sha256"]))
+          for clip, row in sorted(r["visual_outputs"].items()):
+              print(f"{clip}_gif_sha256={row['gif_sha256']}")
+              print(f"{clip}_frame0_sha256={row['frame0_contact_png_sha256']}")
+          PY
+
+      - name: Upload real render evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mage-runtime-v4-real-self-hosted-${{ github.sha }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            .runtime-real/mage_native_smoke.log
+            .runtime-real/mage/MAGE_RUNTIME_V4_NATIVE_RENDER_AUTHORITY_V1.json
+            .runtime-real/mage/MAGE_FULL_ASSEMBLY_RUNTIME_V4_NATIVE_SMOKE_V1.json
+            .runtime-real/mage/native_render/*_8VIEW_RUNTIME_V4.gif
+            .runtime-real/mage/native_render/*_8VIEW_RUNTIME_V4_FRAME0.png
+            .runtime-real/mage/native_render/RUNTIME_V4_BATCH_RENDER_REQUESTS.tsv

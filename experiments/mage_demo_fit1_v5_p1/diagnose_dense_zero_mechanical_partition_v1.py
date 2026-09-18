@@ -462,6 +462,7 @@ def run(args) -> dict:
         ).all(axis=1)
         quality = _quality_mask(tri_xy)
         pre_alpha = np.flatnonzero(finite & in_frame & quality)
+        pre_alpha_clipped_frame = np.flatnonzero(finite & quality)
 
         pure_mask, full_mask, component_masks, counts = _rasterize_admitted(
             tri_xy,
@@ -473,6 +474,23 @@ def run(args) -> dict:
         )
         pure_coverage = _coverage(alpha, pure_mask)
         full_coverage = _coverage(alpha, full_mask)
+
+        (
+            _clipped_pure_mask,
+            clipped_full_mask,
+            _clipped_component_masks,
+            clipped_counts,
+        ) = _rasterize_admitted(
+            tri_xy,
+            pre_alpha_clipped_frame,
+            component_index_by_dense,
+            dense_faces,
+            alpha,
+            component_names,
+        )
+        clipped_full_coverage = _coverage(alpha, clipped_full_mask)
+        clipped_full_failures = _policy_failures(clipped_full_coverage)
+
         largest_hole = _largest_hole_attribution(
             alpha=alpha,
             predicted=full_mask,
@@ -508,6 +526,19 @@ def run(args) -> dict:
             "pure_plus_mixed_union_failures": full_failures,
             "pure_plus_mixed_full_frozen_coverage_pass": not full_failures,
             "largest_hole_attribution": largest_hole,
+            "frame_clip_diagnostic": {
+                "strict_in_frame_candidate_count": int(len(pre_alpha)),
+                "clipped_raster_candidate_count": int(
+                    len(pre_alpha_clipped_frame)
+                ),
+                "out_of_frame_quality_candidate_count": int(
+                    len(pre_alpha_clipped_frame) - len(pre_alpha)
+                ),
+                "strict_in_frame_coverage": full_coverage,
+                "clipped_raster_coverage": clipped_full_coverage,
+                "clipped_raster_failures": clipped_full_failures,
+                "clipped_raster_counts": clipped_counts,
+            },
         }
         rows.append(row)
         print(
@@ -525,7 +556,23 @@ def run(args) -> dict:
                     ],
                     "mixed_faces": counts["admitted_mixed_face_count"],
                     "largest_hole_attribution": largest_hole,
-                    "failures": full_failures,
+                    "strict_failures": full_failures,
+                    "frame_clip": {
+                        "out_of_frame_quality_candidates": int(
+                            len(pre_alpha_clipped_frame) - len(pre_alpha)
+                        ),
+                        "clipped_recall": clipped_full_coverage[
+                            "source_alpha_recall"
+                        ],
+                        "clipped_precision": clipped_full_coverage[
+                            "precision_inside_alpha"
+                        ],
+                        "clipped_iou": clipped_full_coverage["alpha_iou"],
+                        "clipped_largest_hole": clipped_full_coverage[
+                            "largest_uncovered_component_fraction"
+                        ],
+                        "clipped_failures": clipped_full_failures,
+                    },
                 },
                 sort_keys=True,
             ),

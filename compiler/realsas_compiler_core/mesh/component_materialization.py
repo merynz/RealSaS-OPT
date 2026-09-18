@@ -23,9 +23,11 @@ from .mwb2_cdt import (
     build_mwb2_observation_cdt_candidate,
     qualify_mwb2_component_observation_cdt_mesh,
 )
+from .mesh_binding import mesh_lineage_hash, validate_qualified_mesh
 from .mwb2_skin import bind_mwb2_mesh_skin
 from .quality import (
     FIT2_PRODUCT_MESH_QUALITY_POLICY_V1,
+    _triangle_metrics,
     coverage_gate_failures,
     mesh_raster_quality_report,
     raster_quality_gate_failures,
@@ -109,6 +111,195 @@ def _raster_triangles(mesh) -> tuple[
             )
         out.append((by_id[ids[0]], by_id[ids[1]], by_id[ids[2]]))
     return tuple(out)
+
+
+def _repair_component_policy_slivers(
+    mesh,
+    *,
+    surface,
+    view_index: int,
+    component_id: str,
+):
+    """Remove only frozen-policy sliver faces, without losing any admitted vertex.
+
+    This is deliberately narrower than remeshing: no vertex moves, no new vertex is
+    generated, no support binding changes, and no component identity changes.  The
+    repair is admitted only when every original component-local vertex remains incident
+    to at least one retained face. Full-subject coverage is re-qualified later on the
+    union of all component meshes.
+    """
+
+    policy = FIT2_PRODUCT_MESH_QUALITY_POLICY_V1
+    before = mesh_raster_quality_report(
+        mesh,
+        surface=surface,
+        view_index=int(view_index),
+    )
+    failures = tuple(
+        raster_quality_gate_failures(before, policy=policy)
+    )
+    if not failures:
+        return mesh, {
+            "performed": False,
+            "removed_face_indices": (),
+            "before": before,
+            "after": before,
+        }
+
+    allowed = {
+        "min_raster_triangle_angle_deg",
+        "max_raster_triangle_aspect_ratio",
+    }
+    if not set(failures).issubset(allowed):
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_MATERIALIZATION_UNREPAIRABLE_RASTER_QUALITY:"
+            f"V{view_index}:{component_id}:{','.join(failures)}"
+        )
+
+    raster_xy = {}
+    surface_raster = {}
+    for node in surface.surface_nodes:
+        rows = [
+            tuple(map(float, xy))
+            for v, xy in node.raster_bindings
+            if int(v) == int(view_index)
+        ]
+        if len(rows) > 1:
+            raise QualificationError(
+                "MECHANICAL_COMPONENT_MATERIALIZATION_DUPLICATE_SURFACE_RASTER:"
+                f"V{view_index}:{node.surface_id}"
+            )
+        if rows:
+            surface_raster[str(node.surface_id)] = rows[0]
+
+    for vertex in mesh.vertices:
+        cached = dict(getattr(vertex, "metadata", {}) or {}).get("raster_xy")
+        if cached is not None:
+            raster_xy[str(vertex.canonical_mesh_vertex_id)] = tuple(
+                map(float, cached)
+            )
+            continue
+        x = y = total = 0.0
+        for sid, coeff in vertex.support_binding.coefficients:
+            xy = surface_raster.get(str(sid))
+            if xy is None:
+                raise QualificationError(
+                    "MECHANICAL_COMPONENT_MATERIALIZATION_SUPPORT_RASTER_MISSING:"
+                    f"V{view_index}:{sid}"
+                )
+            w = float(coeff)
+            x += w * xy[0]
+            y += w * xy[1]
+            total += w
+        if abs(total - 1.0) > 1.0e-8:
+            raise QualificationError(
+                "MECHANICAL_COMPONENT_MATERIALIZATION_SUPPORT_SIMPLEX_DRIFT"
+            )
+        raster_xy[str(vertex.canonical_mesh_vertex_id)] = (x, y)
+
+    bad = []
+    for face_index, face in enumerate(mesh.faces):
+        ids = tuple(map(str, face))
+        pa, pb, pc = (raster_xy[vid] for vid in ids)
+        area, angle, aspect = _triangle_metrics(pa, pb, pc)
+        if float(area) <= 1.0e-12:
+            raise QualificationError(
+                "MECHANICAL_COMPONENT_MATERIALIZATION_DEGENERATE_FACE:"
+                f"V{view_index}:{component_id}:F{face_index}"
+            )
+        if (
+            float(angle) < float(policy.min_raster_triangle_angle_deg)
+            or float(aspect) > float(policy.max_raster_triangle_aspect_ratio)
+        ):
+            bad.append(int(face_index))
+
+    if not bad:
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_MATERIALIZATION_QUALITY_FAILURE_NOT_LOCALIZED:"
+            f"V{view_index}:{component_id}:{','.join(failures)}"
+        )
+    if len(bad) >= len(mesh.faces):
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_MATERIALIZATION_SLIVER_REPAIR_WOULD_EMPTY_COMPONENT:"
+            f"V{view_index}:{component_id}"
+        )
+
+    removed = set(bad)
+    retained_faces = tuple(
+        face for index, face in enumerate(mesh.faces) if index not in removed
+    )
+    before_vertices = {
+        str(vertex.canonical_mesh_vertex_id) for vertex in mesh.vertices
+    }
+    retained_vertices = {
+        str(vertex_id) for face in retained_faces for vertex_id in face
+    }
+    if retained_vertices != before_vertices:
+        lost = tuple(sorted(before_vertices - retained_vertices))
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_MATERIALIZATION_SLIVER_REPAIR_ORPHANS_VERTEX:"
+            f"V{view_index}:{component_id}:{lost[:8]}"
+        )
+
+    retained_edges = tuple(
+        sorted(
+            {
+                tuple(sorted((str(face[i]), str(face[(i + 1) % 3]))))
+                for face in retained_faces
+                for i in range(3)
+            }
+        )
+    )
+    repaired = replace(
+        mesh,
+        faces=retained_faces,
+        edges=retained_edges,
+        qualification_report={
+            **dict(mesh.qualification_report or {}),
+            "status": "PASS_COMPONENT_LOCAL_EXACT_SLIVER_FACE_SUBSET_REPAIR",
+            "source_mesh_lineage_hash": str(mesh.mesh_lineage_hash),
+            "removed_face_indices": tuple(bad),
+            "vertices_preserved_exactly": True,
+            "support_bindings_preserved_exactly": True,
+            "new_geometry_generated": False,
+            "retriangulated": False,
+            "policy_thresholds_changed": False,
+        },
+        metadata={
+            **dict(mesh.metadata or {}),
+            "component_local_exact_sliver_face_subset_repair": True,
+            "source_mesh_lineage_hash": str(mesh.mesh_lineage_hash),
+            "removed_face_indices": tuple(bad),
+        },
+        mesh_lineage_hash="",
+    )
+    repaired = replace(
+        repaired,
+        mesh_lineage_hash=mesh_lineage_hash(repaired),
+    )
+    validate_qualified_mesh(repaired, surface)
+    after = mesh_raster_quality_report(
+        repaired,
+        surface=surface,
+        view_index=int(view_index),
+    )
+    after_failures = tuple(
+        raster_quality_gate_failures(after, policy=policy)
+    )
+    if after_failures:
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_MATERIALIZATION_SLIVER_REPAIR_INCOMPLETE:"
+            f"V{view_index}:{component_id}:{','.join(after_failures)}"
+        )
+    return repaired, {
+        "performed": True,
+        "removed_face_indices": tuple(bad),
+        "before": before,
+        "after": after,
+        "vertices_preserved_exactly": True,
+        "new_geometry_generated": False,
+        "retriangulated": False,
+    }
 
 
 def _verify_rigid_skin(mesh_skin, *, component_id: str, parent_joint_id: str) -> None:
@@ -197,6 +388,25 @@ def materialize_mechanical_component_view(
             allowed_surface_ids=allowed_surface_ids,
             min_precision_inside_alpha=FIT2_PRODUCT_MESH_QUALITY_POLICY_V1.min_precision_inside_alpha,
         )
+        if require_product_mesh_quality:
+            mesh, sliver_repair = _repair_component_policy_slivers(
+                mesh,
+                surface=surface,
+                view_index=view_index,
+                component_id=str(component_id),
+            )
+        else:
+            raster_report = mesh_raster_quality_report(
+                mesh,
+                surface=surface,
+                view_index=view_index,
+            )
+            sliver_repair = {
+                "performed": False,
+                "removed_face_indices": (),
+                "before": raster_report,
+                "after": raster_report,
+            }
         raster_report = mesh_raster_quality_report(
             mesh,
             surface=surface,
@@ -209,7 +419,9 @@ def materialize_mechanical_component_view(
         if require_product_mesh_quality and raster_failures:
             raise QualificationError(
                 "MECHANICAL_COMPONENT_MATERIALIZATION_RASTER_QUALITY_FAIL:"
-                f"V{view_index}:{component_id}:{','.join(raster_failures)}"
+                f"V{view_index}:{component_id}:{','.join(raster_failures)}:"
+                f"min_angle={raster_report['min_raster_triangle_angle_deg']}:"
+                f"max_aspect={raster_report['max_raster_triangle_aspect_ratio']}"
             )
 
         mesh_skin = bind_mwb2_mesh_skin(
@@ -258,6 +470,7 @@ def materialize_mechanical_component_view(
                 candidate.residual_report.get("source_alpha_recall", -1.0)
             ),
             "raster_quality": raster_report,
+            "sliver_face_subset_repair": sliver_repair,
             "teacher_truth_used": False,
             "source_mesh_used": False,
             "cross_component_faces_possible": False,

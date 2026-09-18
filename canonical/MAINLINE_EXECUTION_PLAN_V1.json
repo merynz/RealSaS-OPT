@@ -460,7 +460,7 @@
     {
       "ordinal": 24,
       "id": "24_MECHANICAL_PARTITION_QUALIFIED",
-      "title": "Mechanical partition and boundary constraints qualified",
+      "title": "Mechanical partition, boundary constraints, and carrier policy qualified",
       "group": "components",
       "depends_on": [
         "23_ARACHNE_CHECKPOINT_SEALED"
@@ -474,6 +474,7 @@
       },
       "manifest_keys": [
         "components",
+        "carrier_policy",
         "source_audit"
       ]
     },
@@ -483,7 +484,7 @@
       "title": "Deformation capability envelope preregistered and sealed",
       "group": "mesh",
       "depends_on": [
-        "24_MECHANICAL_PARTITION_QUALIFIED"
+        "23_ARACHNE_CHECKPOINT_SEALED"
       ],
       "adapter": "UNBOUND",
       "policy": {
@@ -503,6 +504,7 @@
       "title": "View-independent canonical mesh candidate build",
       "group": "mesh",
       "depends_on": [
+        "24_MECHANICAL_PARTITION_QUALIFIED",
         "25_DEFORMATION_CAPABILITY_ENVELOPE"
       ],
       "adapter": "UNBOUND",
@@ -513,7 +515,8 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
-        "mesh"
+        "mesh",
+        "carrier_policy"
       ]
     },
     {
@@ -534,6 +537,7 @@
       "manifest_keys": [
         "mesh",
         "mesh_policy",
+        "carrier_policy",
         "observation"
       ]
     },
@@ -559,7 +563,7 @@
     {
       "ordinal": 29,
       "id": "29_CANONICAL_PUPPET_STATE_SEALED",
-      "title": "Canonical S/G/W/M/B product state sealed",
+      "title": "Canonical S/G/W/M/B plus carrier-policy product state sealed",
       "group": "product_state",
       "depends_on": [
         "28_QUALIFIED_MESH_SKIN_TRANSFER"
@@ -572,7 +576,8 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
-        "components"
+        "components",
+        "carrier_policy"
       ]
     },
     {
@@ -592,7 +597,8 @@
       },
       "manifest_keys": [
         "presentation",
-        "appearance"
+        "appearance",
+        "carrier_policy"
       ]
     },
     {

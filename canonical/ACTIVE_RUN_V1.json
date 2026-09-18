@@ -5,8 +5,8 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__SUBJECT_DATA_ONLY_IN_RUN_ARTIFACTS",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
-  "pipeline_plan_sha256": "2c33bc6d649a0299e4061388af235fd04266998c41bf5f9a8385a77f53d7cf9b",
-  "status": "PRODUCT_AUTHORITY_PLAN_REBASED__ADAPTERS_PENDING",
+  "pipeline_plan_sha256": "afe4ef66b56dcd14de4a2a493da72faede33947faf32a6121435872ba9faf83e",
+  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__QUALIFIED_MESH_ADMISSION_ACTIVE",
   "completed_count": 0,
   "total_count": 40,
   "next_stage": "01_SOURCE_BYTES_SEALED",
@@ -505,6 +505,10 @@
     {
       "event": "PRODUCT_AUTHORITY_PLAN_REBASED",
       "note": "Stages 24-30 now encode MechanicalPartition -> DeformationCapabilityEnvelope -> view-independent MeshCandidate -> QualifiedMesh G1-G5 -> QualifiedMeshSkin -> CanonicalPuppetState -> QualifiedPresentationGraph. No stage adapter was falsely bound; numeric animation-grade thresholds remain preregistration-pending."
+    },
+    {
+      "event": "CARRIER_POLICY_AND_MESH_POLICY_AUTHORITY_BOUND",
+      "note": "ComponentCarrierPolicyIR and MeshQualificationPolicyIR are now first-class hash-bound inputs. Stage 25 no longer depends on partition; stage 26 joins independent partition/carrier and deformation-envelope branches so carrier changes do not semantically own envelope calibration."
     }
   ]
 }

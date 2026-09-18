@@ -53,7 +53,7 @@ def _run_demo(demo: Path, package: Path, out: Path):
 def run(v3_demo: Path, v4_demo: Path) -> None:
     with tempfile.TemporaryDirectory(prefix="realsas_v4_v3_parity_") as tmp:
         root = Path(tmp); texture_root = root / "texture_root"
-        contract4, textures, clips4 = build_fixture(texture_root)
+        contract4, textures, clips4 = build_fixture(texture_root, separate_atlas_resolution=False)
         package4 = root / "fixture_v4.rss"
         materialize_runtime_v4_archive(out_path=package4, texture_root=texture_root, contract=contract4, textures=textures, clips=clips4, source_product_state_hash="c"*64, source_proof_bundle_hash="d"*64)
         contract3, clips3 = _v3_from_v4(contract4, clips4[0])

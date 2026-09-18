@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1786**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1792**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1798,6 +1798,12 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-18T23:57:28+03:00` | `0b59690f0d97` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: bind G5 component observations to partition authority | `compiler/realsas_compiler_core/mesh/product_coverage_v1.py`<br>`tests/compiler/test_product_coverage_v1.py` | `main` |
 | `2026-09-18T23:58:34+03:00` | `006c7c480489` | yes | CI_TEST, COMPILER_PROOF | compiler: add typed product artifact codec | `compiler/realsas_compiler_core/product_artifact_codec_v1.py`<br>`tests/compiler/test_product_artifact_codec_v1.py` | `main` |
 | `2026-09-19T00:00:04+03:00` | `c5f37196ca55` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: bind deformation envelope to frozen axis contract | `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`<br>`compiler/realsas_compiler_core/product_artifact_codec_v1.py`<br>`compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_product_authority_v1.py` | `main` |
+| `2026-09-19T00:01:11+03:00` | `e5f844f5c953` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T00:01:39+03:00` | `aef7c6205cbb` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: freeze dynamic G3 numerical conditioning bounds | `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`<br>`canonical/QUALIFIED_MESH_PRODUCT_POLICY_V1_20260918.json`<br>`compiler/realsas_compiler_core/product_artifact_codec_v1.py`<br>`compiler/realsas_compiler_core/product_authority_v1.py` | `main` |
+| `2026-09-19T00:03:14+03:00` | `2af1a0a089b9` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: add exact G3 deformation stress probe | `compiler/realsas_compiler_core/mesh/deformation_stress_v1.py`<br>`compiler/realsas_compiler_core/product_artifact_codec_v1.py`<br>`compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_deformation_stress_v1.py` | `main` |
+| `2026-09-19T00:04:10+03:00` | `7b65e64e6095` | yes | CI_TEST, COMPILER_PROOF | orchestrator: fail closed on unsealed dependencies | `compiler/realsas_compiler_services/orchestrator/mainline.py`<br>`tests/repository/test_mainline_execution_plan_v1.py` | `main` |
+| `2026-09-19T00:05:18+03:00` | `7dd997cd5aa5` | yes | CI_TEST, COMPILER_PROOF | mesh: measure G5 directly on canonical candidates | `compiler/realsas_compiler_core/mesh/product_coverage_v1.py`<br>`tests/compiler/test_product_coverage_v1.py` | `main` |
+| `2026-09-19T00:06:00+03:00` | `4e3731e649a7` | yes | CI_TEST, COMPILER_PROOF | mesh: centralize frozen product policy loading | `compiler/realsas_compiler_core/mesh/product_policy_v1.py`<br>`tests/compiler/test_product_policy_v1.py` | `main` |
 
 ## Use rule
 

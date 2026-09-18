@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "c5f37196ca556b0ab4eca626122ac7f45f428141",
+    "main": "4e3731e649a7a8aa546f0e04d0a1d04fbb529108",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1786,
+  "commit_count": 1792,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -80846,6 +80846,155 @@
         "CI_TEST",
         "COMPILER_PROOF",
         "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e5f844f5c953bedcdc1ad60121dd1cc8bdac9b2b",
+      "parents": [
+        "c5f37196ca556b0ab4eca626122ac7f45f428141"
+      ],
+      "author_time": "2026-09-19T00:01:11+03:00",
+      "committer_time": "2026-09-19T00:01:11+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "aef7c6205cbb9a3b7a0e1a1d27223db85093788f",
+      "parents": [
+        "e5f844f5c953bedcdc1ad60121dd1cc8bdac9b2b"
+      ],
+      "author_time": "2026-09-19T00:01:39+03:00",
+      "committer_time": "2026-09-19T00:01:39+03:00",
+      "subject": "mesh: freeze dynamic G3 numerical conditioning bounds",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
+        "canonical/QUALIFIED_MESH_PRODUCT_POLICY_V1_20260918.json",
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "compiler/realsas_compiler_core/product_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2af1a0a089b964b5b6290d835d92eb2dd7075b68",
+      "parents": [
+        "aef7c6205cbb9a3b7a0e1a1d27223db85093788f"
+      ],
+      "author_time": "2026-09-19T00:03:14+03:00",
+      "committer_time": "2026-09-19T00:03:14+03:00",
+      "subject": "mesh: add exact G3 deformation stress probe",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/deformation_stress_v1.py",
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "compiler/realsas_compiler_core/product_authority_v1.py",
+        "tests/compiler/test_deformation_stress_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7b65e64e609510dea11afdfbae283887ec006cbe",
+      "parents": [
+        "2af1a0a089b964b5b6290d835d92eb2dd7075b68"
+      ],
+      "author_time": "2026-09-19T00:04:10+03:00",
+      "committer_time": "2026-09-19T00:04:10+03:00",
+      "subject": "orchestrator: fail closed on unsealed dependencies",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py",
+        "tests/repository/test_mainline_execution_plan_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7dd997cd5aa5c51870b0306580d8f0ba00ef0070",
+      "parents": [
+        "7b65e64e609510dea11afdfbae283887ec006cbe"
+      ],
+      "author_time": "2026-09-19T00:05:18+03:00",
+      "committer_time": "2026-09-19T00:05:18+03:00",
+      "subject": "mesh: measure G5 directly on canonical candidates",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/product_coverage_v1.py",
+        "tests/compiler/test_product_coverage_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4e3731e649a7a8aa546f0e04d0a1d04fbb529108",
+      "parents": [
+        "7dd997cd5aa5c51870b0306580d8f0ba00ef0070"
+      ],
+      "author_time": "2026-09-19T00:06:00+03:00",
+      "committer_time": "2026-09-19T00:06:00+03:00",
+      "subject": "mesh: centralize frozen product policy loading",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/product_policy_v1.py",
+        "tests/compiler/test_product_policy_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

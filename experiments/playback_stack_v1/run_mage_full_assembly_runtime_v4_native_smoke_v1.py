@@ -84,7 +84,10 @@ def _stage_textures(admitted, root: Path) -> Path:
 
     root.mkdir(parents=True, exist_ok=True)
     foreground_dir = Path(admitted["args"].foreground_dir).resolve()
-    manifest = admitted["state"]["foreground_manifest"]
+    manifest_path = foreground_dir / "RUNTIME_FOREGROUND_ATLAS_MANIFEST.json"
+    if not manifest_path.is_file():
+        raise RuntimeError(f"MAGE_V4_NATIVE_FOREGROUND_MANIFEST_MISSING:{manifest_path}")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     rows = {int(row["view"]): row for row in manifest.get("views") or ()}
     if set(rows) != set(range(8)):
         raise RuntimeError("MAGE_V4_NATIVE_FOREGROUND_VIEW_SET_INCOMPLETE")

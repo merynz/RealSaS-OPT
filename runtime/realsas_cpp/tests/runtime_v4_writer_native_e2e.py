@@ -98,19 +98,32 @@ def _decode_first_pixel(path: Path) -> tuple[int, int, int, int]:
     return tuple(rows[0][:4])
 
 
-def build_fixture(texture_root: Path):
+def build_fixture(texture_root: Path, *, separate_atlas_resolution: bool = True):
     views = tuple(f"V{i}" for i in range(8))
-    # 4x2 source atlas, while the camera/framebuffer below is 2x2.
-    # Left half red, right half green.
-    row = bytes((255, 0, 0, 255) * 2 + (0, 255, 0, 255) * 2)
+    # Writer E2E deliberately exercises a 4x2 atlas feeding a 2x2 framebuffer.
+    # Cross-version v3/v4 parity must opt out because Runtime-v3 has no separate
+    # framebuffer-resolution contract.
+    texture_width = 4 if separate_atlas_resolution else 2
+    row = (
+        bytes((255, 0, 0, 255) * 2 + (0, 255, 0, 255) * 2)
+        if separate_atlas_resolution
+        else bytes((255, 0, 0, 255) + (0, 255, 0, 255))
+    )
     rgba = row * 2
     textures = []
     for view_id in views:
         rel = f"textures/{view_id}.png"
         path = texture_root / rel
-        _write_rgba_png(path, 4, 2, rgba)
+        _write_rgba_png(path, texture_width, 2, rgba)
         raw = path.read_bytes()
-        textures.append(RuntimeV3TexturePayload(view_id, rel, _sha(path), zlib.crc32(raw) & 0xFFFFFFFF, 4, 2))
+        textures.append(RuntimeV3TexturePayload(
+            view_id,
+            rel,
+            _sha(path),
+            zlib.crc32(raw) & 0xFFFFFFFF,
+            texture_width,
+            2,
+        ))
 
     tri = np.asarray(((0, 1, 2),), dtype=np.uint32)
     far_xyz = np.asarray(((-1, 1, 0.8), (1, 1, 0.8), (-1, -1, 0.8)), dtype=np.float32)

@@ -11,6 +11,8 @@ on:
       - 'compiler/realsas_compiler_core/mesh/component_partition.py'
       - 'compiler/realsas_compiler_core/mesh/component_materialization.py'
       - 'compiler/realsas_compiler_core/mesh/mwb2_cdt.py'
+      - 'compiler/realsas_compiler_core/mesh/dense_zero_surface_bridge.py'
+      - 'experiments/mage_demo_fit1_v5_p1/diagnose_dense_zero_mechanical_partition_v1.py'
       - 'compiler/realsas_compiler_services/export/current_v4_directional_runtime_v4.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v4_mechanical_partition.py'
       - 'experiments/playback_stack_v1/run_mage_full_assembly_runtime_v4_admission_v1.py'
@@ -33,6 +35,7 @@ jobs:
       EXPECTED_SURFACE_SHA256: 170b8e4712fd78ef0721462f19f80ccb94eb008206fc6a7061908bfdc36f202f
       EXPECTED_SKELETON_SHA256: 319ae46d94450d97dd6f40f21d571ac9432968104e7a517af00ace442d05b9fe
       EXPECTED_SKIN_SHA256: 722fdeb60fc32aa09e2296adbdc0e589de0379bfd49f6239f214330517f01ddd
+      EXPECTED_ZERO_SURFACE_SHA256: 56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925
 
     steps:
       - name: Checkout exact pushed commit
@@ -65,11 +68,12 @@ jobs:
           product_root=''
 
           local_authority_root="$HOME/realsas_authority"
-          if [[ -f "$local_authority_root/V0.png"             && -f "$local_authority_root/V7.png"             && -f "$local_authority_root/V0.camera.json"             && -f "$local_authority_root/V7.camera.json"             && -f "$local_authority_root/CURRENT_FIT2_RIGGING_SURFACE_IR.json"             && -f "$local_authority_root/FINAL_QUALIFIED_SKELETON_IR.json"             && -f "$local_authority_root/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json" ]]; then
+          if [[ -f "$local_authority_root/V0.png"             && -f "$local_authority_root/V7.png"             && -f "$local_authority_root/V0.camera.json"             && -f "$local_authority_root/V7.camera.json"             && -f "$local_authority_root/CURRENT_FIT2_RIGGING_SURFACE_IR.json"             && -f "$local_authority_root/FINAL_QUALIFIED_SKELETON_IR.json"             && -f "$local_authority_root/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json"             && -f "$local_authority_root/ZERO_SURFACE_PRODUCT_CLIPPED.npz" ]]; then
             input_root="$local_authority_root"
             skeleton="$local_authority_root/FINAL_QUALIFIED_SKELETON_IR.json"
             skin="$local_authority_root/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json"
             surface="$local_authority_root/CURRENT_FIT2_RIGGING_SURFACE_IR.json"
+            zero_surface="$local_authority_root/ZERO_SURFACE_PRODUCT_CLIPPED.npz"
             echo 'MAGE_LOCAL_EXACT_AUTHORITY_STAGE_PASS'
           fi
 
@@ -148,11 +152,16 @@ jobs:
           fi
           fi
 
+          if [[ -z "${zero_surface:-}" || ! -f "$zero_surface" ]]; then
+            echo 'MAGE_EXACT_ZERO_SURFACE_NOT_EXPLICITLY_STAGED'
+            exit 42
+          fi
           {
             echo "MAGE_INPUT_ROOT=$input_root"
             echo "MAGE_SKELETON=$skeleton"
             echo "MAGE_SKIN=$skin"
             echo "MAGE_SURFACE=$surface"
+            echo "MAGE_ZERO_SURFACE=$zero_surface"
           } >> "$GITHUB_ENV"
 
       - name: Verify exact scientific byte authorities
@@ -173,6 +182,7 @@ jobs:
           verify_sha "$MAGE_SURFACE" "$EXPECTED_SURFACE_SHA256" FIT2_SURFACE
           verify_sha "$MAGE_SKELETON" "$EXPECTED_SKELETON_SHA256" FIT2_SKELETON
           verify_sha "$MAGE_SKIN" "$EXPECTED_SKIN_SHA256" FIT2_SKIN
+          verify_sha "$MAGE_ZERO_SURFACE" "$EXPECTED_ZERO_SURFACE_SHA256" ZERO_SURFACE
 
           python - <<'PY'
           from hashlib import sha256
@@ -223,6 +233,28 @@ jobs:
             tests/compiler/test_mage_runtime_v4_native_smoke_gate_v1.py \
             tests/compiler/test_playback_runtime_v4_contract_v1.py
           PYTHONPATH=. python tools/verify_native_runtime_source_seal_v2.py
+
+      - name: Diagnose dense zero mechanical topology on V2
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .runtime-real
+          cameras=()
+          observations=()
+          for v in {0..7}; do
+            cameras+=("$MAGE_INPUT_ROOT/V${v}.camera.json")
+            observations+=("$MAGE_INPUT_ROOT/V${v}.png")
+          done
+          PYTHONPATH=. python \
+            experiments/mage_demo_fit1_v5_p1/diagnose_dense_zero_mechanical_partition_v1.py \
+            --zero-surface "$MAGE_ZERO_SURFACE" \
+            --cameras "${cameras[@]}" \
+            --observations "${observations[@]}" \
+            --fit2-surface "$MAGE_SURFACE" \
+            --skeleton "$MAGE_SKELETON" \
+            --fit2-skin "$MAGE_SKIN" \
+            --views 2 \
+            --output .runtime-real/DENSE_ZERO_MECHANICAL_PARTITION_V2_DIAGNOSTIC.json
 
       - name: Build sealed native Runtime-v4 demo
         run: |
@@ -295,6 +327,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
           path: |
+            .runtime-real/DENSE_ZERO_MECHANICAL_PARTITION_V2_DIAGNOSTIC.json
             .runtime-real/mage_native_smoke.log
             .runtime-real/mage/MAGE_RUNTIME_V4_NATIVE_RENDER_AUTHORITY_V1.json
             .runtime-real/mage/MAGE_FULL_ASSEMBLY_RUNTIME_V4_NATIVE_SMOKE_V1.json

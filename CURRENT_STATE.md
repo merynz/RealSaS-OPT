@@ -5,7 +5,7 @@
 **Active experiment gate:** `SUBJECT2_KNIGHT_FULL_CLOSURE` on `main`  
 **Active run:** `SUBJECT2_KNIGHT_V1`  
 **Progress:** **0/40** — next `01_SOURCE_BYTES_SEALED`  
-**Current state:** `MAINLINE_ORCHESTRATOR_AND_CONTINUITY_RECLOSURE`  
+**Current state:** `PRODUCT_AUTHORITY_CONTRACT_IMPLEMENTATION`  
 **Most recent closed gate:** `GENERIC_RUNTIME_OPTIMIZATION_SPINE_PROMOTED`
 
 ## Read first
@@ -16,7 +16,7 @@
 5. this file
 
 ## Canonical architecture
-`8 qualified observations -> IRIS dense signed geometry -> GSA/RiggingSurfaceIR -> Geppetto/QualifiedSkeletonIR -> Arachne/QualifiedSkinIR -> DrawableSurfaceIR + explicit support binding -> canonical 3D FK/LBS -> source-provenance 2D appearance -> motion proof -> compact Runtime-v4 -> .rss -> native visual playback`
+`8 qualified observations -> IRIS dense signed geometry -> GSA/RiggingSurfaceIR S -> Geppetto/QualifiedSkeletonIR G -> Arachne/QualifiedSkinIR W -> MechanicalPartitionIR + boundary constraints -> view-independent MeshCandidate -> canonical QualifiedMeshIR M -> QualifiedMeshSkinIR B -> QualifiedPresentationGraphIR -> rest source-preservation -> motion proof -> compact Runtime-v4 -> .rss -> native visual playback`
 
 The architecture is subject-agnostic. **Knight is run data, never a branch in generic compiler/runtime code.**
 
@@ -27,7 +27,7 @@ There is one 40-stage plan and one active-run ledger. A PASS stage is reusable o
 The promoted runtime direction is the measured compact path: shared canonical XYZ once per asset per frame, static per-view overlays, streamed Runtime-v4 writer, content-addressed runtime/proof/render caches and native batch reference rendering. Historical synthetic evidence records an exact 8x XYZ reduction and 17.7x scalar-to-batch render speedup; this is optimization evidence, not a Knight or PRODUCT_PASS claim.
 
 ## Current task
-Finish binding generic production adapters into the 40-stage orchestrator, reconcile continuity CI to this main-only authority, then stage exact Knight source bytes. Fresh Knight S/G/W checkpoints are fit and sealed only after observation and normalization gates pass. Motion runs consume those sealed checkpoints rather than refitting unchanged upstream models.
+Implement and test the frozen QualifiedMesh / QualifiedPresentationGraph authority contract, preregister animation-grade numeric mesh thresholds from controlled synthetic conditioning evidence before inspecting Knight mesh results, then rebase stages 24–30 of the 40-stage plan onto the new authority chain. Exact Knight source staging and fresh fits remain downstream of the observation/normalization gates.
 
 ## Hard boundaries
 - Mage FIT/FIT2 remains historical/scoped evidence; it is not current execution authority.

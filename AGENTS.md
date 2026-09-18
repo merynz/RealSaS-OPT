@@ -23,8 +23,13 @@ Mainline compiler/runtime/orchestrator code must not branch on Mage, Knight, fil
 - Compiler/GSA owns admitted geometry and `RiggingSurfaceIR`.
 - Geppetto proposes skeleton evidence; Compiler owns legal `QualifiedSkeletonIR`.
 - Arachne proposes skin evidence; Compiler owns legal `QualifiedSkinIR`.
-- `DrawableSurfaceIR` derives from the same dense lineage and binds explicitly to `RiggingSurfaceIR`.
+- Compiler owns `MechanicalPartitionIR` boundary semantics without mutating `RiggingSurfaceIR`.
+- Mesh backends propose view-independent candidates; Compiler owns canonical `QualifiedMeshIR` as the single product geometry authority.
+- Compiler owns `QualifiedPresentationGraphIR`; slots/attachments/carriers/view overlays are presentation authority, not runtime inventions.
 - Runtime consumes qualified identities; it cannot create hidden geometry/rig/skin/appearance truth.
+
+## Product geometry / presentation contract
+Read `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md` before changing mesh, component, appearance, visibility, slot/attachment or runtime topology semantics. Historical directional CDT is numerical evidence only; it is not canonical product geometry authority.
 
 ## Failure and cache discipline
 Every stage records input fingerprint, implementation hash, policy hash, output SHA-256 identities and blockers in the active-run ledger. Resume is fail-closed: stale or missing outputs invalidate that stage and downstream only. No `latest` aliases are authority.

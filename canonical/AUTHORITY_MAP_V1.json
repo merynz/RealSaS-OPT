@@ -24,7 +24,8 @@
     "canonical/ACTIVE_RUN_V1.json",
     "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
     "canonical/MAINLINE_PERFORMANCE_BASELINE_V1.json",
-    "canonical/REAL_SAS_MAINLINE_VNEXT_20260918.md"
+    "canonical/REAL_SAS_MAINLINE_VNEXT_20260918.md",
+    "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md"
   ],
   "rehydration_order": [
     "canonical/ACTIVE_RUN_V1.json",
@@ -89,7 +90,9 @@
     "Subject identity may appear in run artifacts/registries but not generic product control flow.",
     "Verified upstream stage outputs survive downstream failure and are reused only under exact hash identity.",
     "Mage remains historical/scoped evidence.",
-    "Runtime/export may consume but may not mint geometry, rig, skin or RGB appearance authority.",
-    "PRODUCT_PASS requires stage 40 and visible native motion evidence."
+    "PRODUCT_PASS requires stage 40 and visible native motion evidence.",
+    "RiggingSurfaceIR is immutable admitted substrate; canonical QualifiedMeshIR is the single product geometry authority after mesh qualification.",
+    "Runtime/export may consume but may not mint geometry, rig, skin, presentation or RGB appearance authority.",
+    "Presentation decisions preserve mechanical/observation/posed-geometry/motion/source-appearance evidence provenance; categorical object identity is not required product authority."
   ]
 }

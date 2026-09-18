@@ -11,7 +11,9 @@
 | GSA | `compiler/realsas_compiler_core/substrate/` | Compiler-owned `RiggingSurfaceIR` |
 | Geppetto | `models/geppetto/` | proposal only; Compiler owns qualified skeleton |
 | Arachne | `models/arachne/` | proposal only; Compiler owns qualified skin |
-| Drawable seam | `compiler/realsas_compiler_core/drawable_surface_v1.py` | same dense lineage + explicit local support |
+| Structural partition | `compiler/realsas_compiler_core/product_authority_v1.py` | immutable S + SEPARATE/PRESERVE_CONTINUITY/UNKNOWN constraints |
+| Product mesh | `compiler/realsas_compiler_core/product_authority_v1.py` | view-independent canonical `QualifiedMeshIR`; single product geometry authority |
+| Presentation | `compiler/realsas_compiler_core/product_authority_v1.py` | qualified slots/attachments/carriers/evidence/view overlays |
 | Motion | `compiler/realsas_compiler_core/motion_3d_*.py` | canonical 3D deformation |
 | Runtime | `compiler/realsas_compiler_services/export/runtime_v4.py`, `runtime_v4_cache.py` | compact shared-XYZ Runtime-v4 |
 | Native render/playback | `runtime/realsas_cpp/` | subordinate exact consumer |

@@ -1,18 +1,6 @@
 name: runtime-v4-p0-p1-measurement
 
 on:
-  push:
-    branches:
-      - playback-stack-v1-20260916
-    paths:
-      - 'compiler/realsas_compiler_core/playback_runtime_v4.py'
-      - 'compiler/realsas_compiler_core/playback_full_surface_v4.py'
-      - 'compiler/realsas_compiler_services/export/runtime_v4.py'
-      - 'compiler/realsas_compiler_services/export/playback_v4_bridge.py'
-      - 'runtime/realsas_cpp/**'
-      - 'tests/compiler/test_playback_runtime_v4_contract_v1.py'
-      - 'experiments/playback_stack_v1/benchmark_runtime_v4_p0_p1.py'
-      - '.github/workflows/runtime_v4_p0_p1_measurement.yml'
   workflow_dispatch:
 
 concurrency:

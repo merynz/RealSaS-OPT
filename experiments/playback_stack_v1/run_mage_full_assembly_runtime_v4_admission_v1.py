@@ -42,9 +42,9 @@ from compiler.realsas_compiler_services.proof.directional_motion_provider import
     make_qualified_directional_motion_provider,
 )
 
-import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_v3_motion_engine as product_v3
+import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_v4_mechanical_partition as product_v4
 
-SCHEMA = "RealSaS.MageFullAssemblyRuntimeV4Admission.v2"
+SCHEMA = "RealSaS.MageFullAssemblyRuntimeV4Admission.v3"
 PASS_STATUS = "PASS__FULL_MAGE_RUNTIME_V4_REFERENCE_INPUT_ADMITTED"
 REQUIRED_CLIPS = ("mage_fit1_idle_v2", "mage_fit1_run_v2")
 VIEW_IDS = tuple(f"V{i}" for i in range(8))
@@ -83,41 +83,54 @@ def _write_json(path: Path, value) -> None:
     tmp.replace(path)
 
 
-def _texture_bindings(state, foreground_dir: Path):
-    manifest_path = foreground_dir / "RUNTIME_FOREGROUND_ATLAS_MANIFEST.json"
-    if not manifest_path.is_file():
-        raise RuntimeError(f"MAGE_V4_ADMISSION_FOREGROUND_MANIFEST_MISSING:{manifest_path}")
-    manifest = _load_json(manifest_path)
-    expected = str(state["source_hashes"].get("foreground_manifest") or "")
-    if expected and _sha(manifest_path) != expected:
-        raise RuntimeError("MAGE_V4_ADMISSION_FOREGROUND_MANIFEST_SHA_DRIFT")
-    rows = {int(row["view"]): row for row in manifest.get("views") or ()}
-    if set(rows) != set(range(8)):
-        raise RuntimeError("MAGE_V4_ADMISSION_FOREGROUND_VIEW_SET_INCOMPLETE")
+def _png_size(path: Path) -> tuple[int, int]:
+    with path.open("rb") as f:
+        header = f.read(24)
+    if len(header) != 24 or header[:8] != b"\x89PNG\r\n\x1a\n" or header[12:16] != b"IHDR":
+        raise RuntimeError(f"MAGE_V4_ADMISSION_SOURCE_TEXTURE_MUST_BE_PNG:{path}")
+    width = int.from_bytes(header[16:20], "big")
+    height = int.from_bytes(header[20:24], "big")
+    if width <= 0 or height <= 0:
+        raise RuntimeError(f"MAGE_V4_ADMISSION_SOURCE_TEXTURE_DIMENSIONS_INVALID:{path}")
+    return width, height
+
+
+def _texture_bindings(state, observation_paths):
+    paths = tuple(Path(path).resolve() for path in observation_paths)
+    if len(paths) != 8 or any(not path.is_file() for path in paths):
+        raise RuntimeError("MAGE_V4_ADMISSION_REQUIRES_8_SOURCE_OBSERVATIONS")
+    directions = {
+        int(direction.view_index): direction
+        for direction in state["render_set"].directions
+    }
+    if set(directions) != set(range(8)):
+        raise RuntimeError("MAGE_V4_ADMISSION_RENDER_VIEW_SET_INCOMPLETE")
     out = []
-    for view in range(8):
-        row = rows[view]
-        atlas_path = foreground_dir / str(row["atlas_file"])
-        if not atlas_path.is_file():
-            raise RuntimeError(f"MAGE_V4_ADMISSION_ATLAS_MISSING:V{view}:{atlas_path}")
-        actual_sha = _sha(atlas_path)
-        if actual_sha != str(row["atlas_sha256"]):
-            raise RuntimeError(f"MAGE_V4_ADMISSION_ATLAS_SHA_DRIFT:V{view}")
-        relpath = str(row["atlas_relpath"])
-        expected_payload_hash = content_sha256({
-            "image_sha256": actual_sha,
-            "image_relpath": relpath,
+    for view, path in enumerate(paths):
+        actual_sha = _sha(path)
+        expected_atlas_hash = content_sha256({
+            "observation_sha256": actual_sha,
+            "view": view,
+            "authority": "EXACT_SOURCE_OBSERVATION",
         })
-        if expected_payload_hash != str(row["atlas_payload_hash"]):
-            raise RuntimeError(f"MAGE_V4_ADMISSION_ATLAS_PAYLOAD_DRIFT:V{view}")
+        appearance_hashes = {
+            str(component.appearance.atlas_payload_hash)
+            for component in directions[view].components
+        }
+        if appearance_hashes != {expected_atlas_hash}:
+            raise RuntimeError(
+                f"MAGE_V4_ADMISSION_SOURCE_OBSERVATION_APPEARANCE_DRIFT:V{view}:"
+                f"{sorted(appearance_hashes)}"
+            )
+        width, height = _png_size(path)
         out.append(RuntimeTexturePayloadV1(
             view_index=view,
-            image_relpath=relpath,
+            image_relpath=f"textures/V{view}_SOURCE_OBSERVATION.png",
             image_sha256=actual_sha,
-            image_crc32=_crc32(atlas_path),
-            width=int(row["atlas_width"]),
-            height=int(row["atlas_height"]),
-            atlas_payload_hash=expected_payload_hash,
+            image_crc32=_crc32(path),
+            width=width,
+            height=height,
+            atlas_payload_hash=expected_atlas_hash,
         ))
     return tuple(out)
 
@@ -168,12 +181,12 @@ def run(args) -> dict:
     out = Path(args.output_dir).resolve()
     out.mkdir(parents=True, exist_ok=True)
 
-    # Reuse the current full-Mage product materializer. It consumes the exact qualified
-    # P1Q BODY, typed foreground assembly, one-hot rigid carry, continuity underlay,
-    # and historical idle/run motion authorities. No alternate puppet truth is built.
+    # Build the current bounded Mage from qualified S/G/W mechanical partition.
+    # Source component truth, source-owner rasters and the historical foreground atlas
+    # are forbidden on this path.
     stage_t0 = perf_counter()
     print("MAGE_V4_ADMISSION_STAGE=PRODUCT_MATERIALIZATION_START", flush=True)
-    state = product_v3.build_final_state(args, persist=False)
+    state = product_v4.build_final_state(args, persist=False)
     product = state["product"]
     print(
         f"MAGE_V4_ADMISSION_STAGE=PRODUCT_MATERIALIZATION_PASS elapsed_s={perf_counter()-stage_t0:.3f}",
@@ -193,7 +206,7 @@ def run(args) -> dict:
 
     stage_t0 = perf_counter()
     print("MAGE_V4_ADMISSION_STAGE=TEXTURE_CAMERA_BINDING_START", flush=True)
-    textures = _texture_bindings(state, Path(args.foreground_dir).resolve())
+    textures = _texture_bindings(state, args.observations)
     cameras = _camera_payloads(args)
     print(
         f"MAGE_V4_ADMISSION_STAGE=TEXTURE_CAMERA_BINDING_PASS elapsed_s={perf_counter()-stage_t0:.3f}",
@@ -331,15 +344,12 @@ def run(args) -> dict:
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--cameras", nargs=8, required=True)
+    p.add_argument("--observations", nargs=8, required=True)
     p.add_argument("--p1q-dir", required=True)
-    p.add_argument("--foreground-dir", required=True)
-    p.add_argument("--assembly-dir", required=True)
     p.add_argument("--fit2-surface", required=True)
     p.add_argument("--skeleton", required=True)
     p.add_argument("--fit2-skin", required=True)
     p.add_argument("--expected-p1q-manifest", default="")
-    p.add_argument("--expected-foreground-manifest", default="")
-    p.add_argument("--expected-assembly-manifest", default="")
     p.add_argument("--output-dir", required=True)
     return p.parse_args()
 

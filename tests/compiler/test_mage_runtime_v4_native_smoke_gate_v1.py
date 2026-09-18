@@ -15,7 +15,7 @@ def test_full_mage_admission_never_persists_giant_product_graph(monkeypatch, tmp
         seen["persist"] = persist
         raise RuntimeError("STOP_AFTER_PRODUCT_ENTRY")
 
-    monkeypatch.setattr(admission.product_v3, "build_final_state", fake_build_final_state)
+    monkeypatch.setattr(admission.product_v4, "build_final_state", fake_build_final_state)
     args = SimpleNamespace(output_dir=str(tmp_path))
     with pytest.raises(RuntimeError, match="STOP_AFTER_PRODUCT_ENTRY"):
         admission.run(args)
@@ -59,5 +59,5 @@ def test_reference_render_admission_has_no_global_boundary_certificate_dependenc
     # Dynamic topology/conditioning diagnostics may exist separately but may not become
     # an implicit prerequisite for triangle rasterization.
     assert not hasattr(admission, "certify_directional_runtime_v4_assembly_v1")
-    assert admission.SCHEMA.endswith(".v2")
+    assert admission.SCHEMA.endswith(".v3")
     assert "REFERENCE_INPUT_ADMITTED" in admission.PASS_STATUS

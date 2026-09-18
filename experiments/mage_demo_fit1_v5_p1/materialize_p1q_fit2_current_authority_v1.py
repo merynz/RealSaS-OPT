@@ -36,9 +36,6 @@ import experiments.mage_full_subject_reclosure_v1.run_fit2_legal_steiner_ceiling
 
 
 SCHEMA = "RealSaS.MageFIT2.P1QCurrentAuthorityFaceSubset.v1"
-SOURCE_TRUTH_EXPECTED = "a23565b0904e9683d11083984a87405f4e0a1069984ca11b690ad431f35f5e86"
-
-
 def _sha(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -76,10 +73,6 @@ def run(args) -> dict:
         raise RuntimeError("FIT2_P1Q_BINDING_SKIN_DRIFT")
     if bind_manifest.get("historical_fit1_skin_used") is not False:
         raise RuntimeError("FIT2_P1Q_HISTORICAL_SKIN_FORBIDDEN")
-
-    source_truth = Path(args.source_truth)
-    if _sha(source_truth) != SOURCE_TRUTH_EXPECTED:
-        raise RuntimeError("FIT2_P1Q_SOURCE_TRUTH_SHA_DRIFT")
 
     current_surface, tensor, replay = ceiling_v2._preflight_surface(args)
     if not replay.get("gsa_lineage_exact_match") or current_surface.geometry_lineage_hash != fit2io.EXPECTED_SURFACE_LINEAGE:
@@ -160,10 +153,14 @@ def run(args) -> dict:
             "coverage": coverage,
         })
         ownership = content_sha256({
-            "schema": "RealSaS.FIT2P1QSourceTruthOwnershipWitness.v1",
-            "source_truth_sha256": SOURCE_TRUTH_EXPECTED,
+            "schema": "RealSaS.FIT2P1QObservationOwnershipWitness.v2",
+            "surface_lineage_hash": current_surface.geometry_lineage_hash,
+            "observation_sha256": observation_hash[view],
+            "observation_mask_sha256": domains[view].mask_sha256,
             "view": view,
-            "ownership": "FULL_SUBJECT_OBSERVATION_SUBSTRATE",
+            "ownership": "QUALIFIED_SURFACE_PLUS_EXACT_OBSERVATION_DOMAIN",
+            "teacher_truth_used": False,
+            "source_component_truth_used": False,
             "semantic_component_partition_claimed": False,
         })
 
@@ -205,7 +202,7 @@ def run(args) -> dict:
                 "status": "PASS",
                 "source_mesh_lineage_hash": mesh.mesh_lineage_hash,
                 "coverage_measurement_sha256": coverage_witness,
-                "source_truth_ownership_sha256": ownership,
+                "surface_observation_ownership_sha256": ownership,
                 "quality": quality,
             }
 
@@ -249,7 +246,7 @@ def run(args) -> dict:
             "appearance_lineage_hash": repaired_appearance.appearance_lineage_hash,
             "coverage": coverage,
             "coverage_measurement_sha256": coverage_witness,
-            "source_truth_ownership_sha256": ownership,
+            "surface_observation_ownership_sha256": ownership,
             "final_mesh_quality": final_quality,
             "files": names,
         }
@@ -271,7 +268,8 @@ def run(args) -> dict:
         "current_gsa_lineage_hash": current_surface.geometry_lineage_hash,
         "current_skeleton_lineage_hash": skeleton.skeleton_lineage_hash,
         "current_skin_lineage_hash": skin.skin_lineage_hash,
-        "source_truth_sha256": SOURCE_TRUTH_EXPECTED,
+        "teacher_truth_used": False,
+        "source_component_truth_used": False,
         "historical_fit1_skin_used": False,
         "weight_rows_mutated": False,
         "faces_only_policy": True,
@@ -360,7 +358,6 @@ def parse_args():
     p.add_argument("--fit2-binding-dir", required=True)
     p.add_argument("--skeleton", required=True)
     p.add_argument("--fit2-skin", required=True)
-    p.add_argument("--source-truth", required=True)
     p.add_argument("--expected-p1-manifest", required=True)
     p.add_argument("--expected-fit2-binding-manifest", required=True)
     p.add_argument("--output-dir", required=True)

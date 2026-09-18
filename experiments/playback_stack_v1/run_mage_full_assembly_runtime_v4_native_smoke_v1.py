@@ -85,26 +85,25 @@ def _promote_reference_input_clips(projection):
 
 
 def _stage_textures(admitted, root: Path) -> Path:
-    """Materialize exact atlas paths expected by Runtime-v4 without re-encoding."""
+    """Stage exact source observations expected by Runtime-v4 without re-encoding."""
 
     root.mkdir(parents=True, exist_ok=True)
-    foreground_dir = Path(admitted["args"].foreground_dir).resolve()
-    manifest_path = foreground_dir / "RUNTIME_FOREGROUND_ATLAS_MANIFEST.json"
-    if not manifest_path.is_file():
-        raise RuntimeError(f"MAGE_V4_NATIVE_FOREGROUND_MANIFEST_MISSING:{manifest_path}")
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    rows = {int(row["view"]): row for row in manifest.get("views") or ()}
-    if set(rows) != set(range(8)):
-        raise RuntimeError("MAGE_V4_NATIVE_FOREGROUND_VIEW_SET_INCOMPLETE")
+    observation_paths = tuple(
+        Path(path).resolve() for path in admitted["args"].observations
+    )
+    if len(observation_paths) != 8:
+        raise RuntimeError("MAGE_V4_NATIVE_REQUIRES_8_SOURCE_OBSERVATIONS")
 
     for texture in admitted["projection"].textures:
         view = int(texture.view_id[1:])
-        source = foreground_dir / str(rows[view]["atlas_file"])
+        source = observation_paths[view]
         target = (root / texture.texture_path).resolve()
         if not source.is_file():
             raise RuntimeError(f"MAGE_V4_NATIVE_TEXTURE_SOURCE_MISSING:{source}")
         if _sha(source) != texture.texture_sha256:
-            raise RuntimeError(f"MAGE_V4_NATIVE_TEXTURE_SOURCE_SHA_DRIFT:{texture.view_id}")
+            raise RuntimeError(
+                f"MAGE_V4_NATIVE_TEXTURE_SOURCE_SHA_DRIFT:{texture.view_id}"
+            )
         target.parent.mkdir(parents=True, exist_ok=True)
         if target.is_file() and _sha(target) == texture.texture_sha256:
             continue
@@ -114,7 +113,9 @@ def _stage_textures(admitted, root: Path) -> Path:
         except OSError:
             shutil.copy2(source, target)
         if _sha(target) != texture.texture_sha256:
-            raise RuntimeError(f"MAGE_V4_NATIVE_STAGED_TEXTURE_SHA_DRIFT:{texture.view_id}")
+            raise RuntimeError(
+                f"MAGE_V4_NATIVE_STAGED_TEXTURE_SHA_DRIFT:{texture.view_id}"
+            )
     return root
 
 
@@ -396,15 +397,12 @@ def run(args):
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--cameras", nargs=8, required=True)
+    p.add_argument("--observations", nargs=8, required=True)
     p.add_argument("--p1q-dir", required=True)
-    p.add_argument("--foreground-dir", required=True)
-    p.add_argument("--assembly-dir", required=True)
     p.add_argument("--fit2-surface", required=True)
     p.add_argument("--skeleton", required=True)
     p.add_argument("--fit2-skin", required=True)
     p.add_argument("--expected-p1q-manifest", default="")
-    p.add_argument("--expected-foreground-manifest", default="")
-    p.add_argument("--expected-assembly-manifest", default="")
     p.add_argument("--output-dir", required=True)
     p.add_argument("--cache-root", default="")
     p.add_argument("--runtime-demo", default="")

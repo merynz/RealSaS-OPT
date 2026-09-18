@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 from scipy import ndimage
 from skimage.draw import polygon
 
@@ -352,6 +352,57 @@ def _largest_hole_attribution(
     }
 
 
+def _write_largest_hole_overlay(
+    *,
+    observation_path: Path,
+    alpha: np.ndarray,
+    predicted: np.ndarray,
+    attribution: dict,
+    output_path: Path,
+) -> None:
+    structure = np.asarray(
+        [[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=np.uint8
+    )
+    missing = alpha & ~predicted
+    labels, count = ndimage.label(missing, structure=structure)
+    with Image.open(observation_path) as source:
+        image = source.convert("RGBA")
+    rgba = np.asarray(image, dtype=np.uint8).copy()
+    if count:
+        sizes = np.bincount(labels.ravel())
+        sizes[0] = 0
+        label_id = int(np.argmax(sizes))
+        hole = labels == label_id
+        # Red tint = exact largest missing connected component.
+        rgba[hole, 0] = 255
+        rgba[hole, 1] = (rgba[hole, 1].astype(np.uint16) // 4).astype(np.uint8)
+        rgba[hole, 2] = (rgba[hole, 2].astype(np.uint16) // 4).astype(np.uint8)
+        rgba[hole, 3] = 255
+    out = Image.fromarray(rgba, mode="RGBA")
+    draw = ImageDraw.Draw(out)
+    bbox = attribution.get("bbox_xyxy")
+    if bbox:
+        x0, y0, x1, y1 = map(int, bbox)
+        for pad in range(3):
+            draw.rectangle(
+                (x0 - pad, y0 - pad, x1 + pad, y1 + pad),
+                outline=(255, 255, 0, 255),
+            )
+        label = (
+            f"LARGEST MISSING: {int(attribution.get('pixel_count', 0))} px | "
+            f"{attribution.get('dense_vertex_component_counts', {})}"
+        )
+        tx = max(0, min(x0, out.width - 1))
+        ty = max(0, y0 - 18)
+        draw.rectangle(
+            (tx, ty, min(out.width - 1, tx + 560), min(out.height - 1, ty + 16)),
+            fill=(0, 0, 0, 220),
+        )
+        draw.text((tx + 3, ty + 2), label, fill=(255, 255, 0, 255))
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    out.save(output_path)
+
+
 def run(args) -> dict:
     surface, skeleton, skin, _mechanical = fit2io.build_exact_mechanical(
         Path(args.fit2_surface),
@@ -430,6 +481,20 @@ def run(args) -> dict:
             component_names=component_names,
             component_masks=component_masks,
         )
+        overlay_path = Path(args.output).parent / (
+            f"V{view}_LARGEST_HOLE_OVERLAY.png"
+        )
+        _write_largest_hole_overlay(
+            observation_path=Path(args.observations[view]),
+            alpha=alpha,
+            predicted=full_mask,
+            attribution=largest_hole,
+            output_path=overlay_path,
+        )
+        largest_hole = {
+            **largest_hole,
+            "overlay_path": str(overlay_path),
+        }
         pure_failures = _policy_failures(pure_coverage)
         full_failures = _policy_failures(full_coverage)
         row = {

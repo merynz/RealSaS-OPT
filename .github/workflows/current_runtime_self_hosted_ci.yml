@@ -55,7 +55,7 @@ on:
 # authority once a newer commit exists on the same ref.
 concurrency:
   group: realsas-self-hosted-runtime-${{ github.repository }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   proof-export-native:

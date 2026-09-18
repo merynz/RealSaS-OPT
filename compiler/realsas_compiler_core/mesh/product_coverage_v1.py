@@ -256,8 +256,17 @@ def camera_projection_binding_hash(camera: CameraProjectionV3) -> str:
     })
 
 
-def _mesh_component_triangles(mesh: QualifiedMeshIR, camera: CameraProjectionV3, *, component_id: str):
-    vertex_ids = [vertex.canonical_mesh_vertex_id for vertex in mesh.vertices]
+def _product_vertex_id(vertex) -> str:
+    value = getattr(vertex, "canonical_mesh_vertex_id", None)
+    if value is None:
+        value = getattr(vertex, "candidate_vertex_id", None)
+    if not value:
+        raise QualificationError("G5_PRODUCT_VERTEX_ID_MISSING")
+    return str(value)
+
+
+def _mesh_component_triangles(mesh, camera: CameraProjectionV3, *, component_id: str):
+    vertex_ids = [_product_vertex_id(vertex) for vertex in mesh.vertices]
     xyz = [tuple(map(float, vertex.P)) for vertex in mesh.vertices]
     projected = project_points_xyz_v3(xyz, camera)
     by_id = {
@@ -265,7 +274,7 @@ def _mesh_component_triangles(mesh: QualifiedMeshIR, camera: CameraProjectionV3,
         for i in range(len(vertex_ids))
     }
     component_by_id = {
-        vertex.canonical_mesh_vertex_id: vertex.component_id
+        _product_vertex_id(vertex): vertex.component_id
         for vertex in mesh.vertices
     }
 
@@ -283,7 +292,7 @@ def _mesh_component_triangles(mesh: QualifiedMeshIR, camera: CameraProjectionV3,
 
 
 def build_g5_coverage_matrix(
-    mesh: QualifiedMeshIR,
+    mesh,
     *,
     surface: RiggingSurfaceIR,
     partition,

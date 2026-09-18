@@ -134,3 +134,18 @@ def test_component_observation_surface_membership_drift_is_detected():
     )
     with pytest.raises(QualificationError, match="COMPONENT_SURFACE_SET_MISMATCH"):
         validate_component_observation(row, partition=partition, carrier_policy=carrier)
+
+
+def test_g5_projection_accepts_candidate_identity_without_minting_qualified_mesh():
+    camera=CameraProjectionV3(
+        "V0",0,(0.0,0.0,-2.0),(1.0,0.0,0.0),(0.0,1.0,0.0),(0.0,0.0,1.0),1.0,4
+    )
+    vertices=(
+        SimpleNamespace(candidate_vertex_id="cv0",P=(-0.5,-0.5,0.0),component_id="c0"),
+        SimpleNamespace(candidate_vertex_id="cv1",P=(0.5,-0.5,0.0),component_id="c0"),
+        SimpleNamespace(candidate_vertex_id="cv2",P=(0.0,0.5,0.0),component_id="c0"),
+    )
+    candidate=SimpleNamespace(vertices=vertices,faces=(("cv0","cv1","cv2"),))
+    triangles=_mesh_component_triangles(candidate,camera,component_id="c0")
+    assert len(triangles)==1
+    assert triangles[0][2] == (2.0,1.0)

@@ -275,6 +275,167 @@ def _contract_boundary_recovery_vertices(result, generated_indices: tuple[int, .
     return tuple(triangles)
 
 
+def build_mwb2_supported_kernel_id_triangles(
+    surface: RiggingSurfaceIR,
+    *,
+    view_index: int,
+    min_face_area_grid: float = 1.0e-8,
+    allowed_surface_ids=None,
+):
+    """Return pre-alpha current-S CDT parent triangles with exact surface identities.
+
+    This is a numerical support-kernel query, not a render-mesh promotion. It uses the
+    same safe-S component topology and frozen CDT kernel as the observation candidate,
+    contracts solver-only boundary recovery vertices, and returns only admitted
+    current Surface ids. No observation-alpha face acceptance is performed here.
+    """
+
+    if not (0 <= int(view_index) < 8):
+        raise ValueError("view_index must be in [0,7]")
+    if min_face_area_grid <= 0.0:
+        raise ValueError("min_face_area_grid must be positive")
+
+    nodes, visible, safe_edges, rejected_unknown = _safe_surface_graph(
+        surface, int(view_index)
+    )
+    allowed_domain_hash = ""
+    if allowed_surface_ids is not None:
+        allowed = {str(sid) for sid in allowed_surface_ids}
+        if not allowed:
+            raise QualificationError("MWB2_KERNEL_ALLOWED_SURFACE_DOMAIN_EMPTY")
+        unknown = allowed - set(nodes)
+        if unknown:
+            raise QualificationError(
+                f"MWB2_KERNEL_ALLOWED_SURFACE_UNKNOWN:{sorted(unknown)[:8]}"
+            )
+        nodes = {sid: node for sid, node in nodes.items() if sid in allowed}
+        visible = {sid: xy for sid, xy in visible.items() if sid in allowed}
+        safe_edges = {
+            (a, b) for a, b in safe_edges if a in allowed and b in allowed
+        }
+        allowed_domain_hash = content_sha256(
+            {
+                "schema": "RealSaS.MWB2.AllowedSurfaceDomain.v1",
+                "surface_lineage_hash": surface.geometry_lineage_hash,
+                "surface_ids": tuple(sorted(allowed)),
+            }
+        )
+
+    if len(visible) < 3:
+        raise QualificationError("MWB2_KERNEL_INSUFFICIENT_OBSERVED_SURFACE_SUPPORT")
+    full_components = _connected_components(set(nodes), safe_edges)
+    components = _visible_subsets_of_full_components(full_components, visible)
+
+    triangles = []
+    kernel_triangle_count = 0
+    post_contraction_triangle_count = 0
+    contracted_boundary_recovery_vertex_count = 0
+    cdt_component_count = 0
+
+    for component_index, component in enumerate(components):
+        deduped = _dedupe_projected_ids(component, visible)
+        if len(deduped) < 3:
+            continue
+        hull_ids = _convex_hull_ids(deduped, visible)
+        if len(hull_ids) < 3:
+            continue
+        hull_set = set(hull_ids)
+        support_ids = tuple(sid for sid in deduped if sid not in hull_set)
+        result = triangulate_production_cdt(
+            [visible[sid] for sid in hull_ids],
+            support_points=[visible[sid] for sid in support_ids],
+            target_min_angle_deg=0.0,
+            max_boundary_vertices=max(256, len(hull_ids) + 16),
+            max_support_vertices=max(128, len(support_ids) + 16),
+            max_constraint_recovery_iterations=96,
+            max_quality_iterations=0,
+            min_feature_spacing=1.0e-8,
+        )
+        if not bool(result.success):
+            raise QualificationError(f"MWB2_KERNEL_CDT_FAILURE:{result.reason}")
+        if int(getattr(result, "quality_insert_count", 0)) != 0 or int(
+            getattr(result, "inserted_steiner_count", 0)
+        ) != 0:
+            raise QualificationError("MWB2_KERNEL_UNBOUND_QUALITY_STEINER_FORBIDDEN")
+
+        kernel_triangle_count += len(result.triangles)
+        cdt_component_count += 1
+        kernel_ids: list[str | None] = []
+        generated_indices = []
+        for vertex_index, point in enumerate(result.vertices):
+            sid = _match_kernel_vertex(point, deduped, visible)
+            if sid is None:
+                if _point_on_original_hull_segment(
+                    point, hull_ids, visible
+                ) is None:
+                    raise QualificationError(
+                        "MWB2_KERNEL_UNSUPPORTED_GENERATED_VERTEX"
+                    )
+                generated_indices.append(int(vertex_index))
+            kernel_ids.append(sid)
+
+        if generated_indices:
+            if len(generated_indices) != int(result.constraint_split_count):
+                raise QualificationError(
+                    "MWB2_KERNEL_CONSTRAINT_SPLIT_BINDING_COUNT_MISMATCH"
+                )
+            kernel_triangles = _contract_boundary_recovery_vertices(
+                result, tuple(generated_indices)
+            )
+            contracted_boundary_recovery_vertex_count += len(generated_indices)
+        else:
+            kernel_triangles = tuple(result.triangles)
+        post_contraction_triangle_count += len(kernel_triangles)
+
+        matched = [sid for sid in kernel_ids if sid is not None]
+        if len(set(matched)) != len(matched):
+            raise QualificationError("MWB2_KERNEL_VERTEX_COLLAPSE_AFTER_BINDING")
+
+        for ia, ib, ic in kernel_triangles:
+            tri_raw = (
+                kernel_ids[int(ia)],
+                kernel_ids[int(ib)],
+                kernel_ids[int(ic)],
+            )
+            if any(sid is None for sid in tri_raw):
+                raise QualificationError(
+                    "MWB2_KERNEL_BOUNDARY_RECOVERY_CONTRACTION_INCOMPLETE"
+                )
+            tri = tuple(map(str, tri_raw))
+            if len(set(tri)) != 3:
+                continue
+            tri = _oriented_triangle(tri, visible)
+            pa, pb, pc = (visible[sid] for sid in tri)
+            if 0.5 * abs(_signed_area2(pa, pb, pc)) < float(
+                min_face_area_grid
+            ):
+                continue
+            triangles.append((int(component_index), tri))
+
+    unique = []
+    seen = set()
+    for component_index, tri in triangles:
+        key = tuple(sorted(tri))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append((component_index, tri))
+
+    return {
+        "nodes": nodes,
+        "visible": visible,
+        "triangles": tuple(unique),
+        "component_count": int(cdt_component_count),
+        "kernel_triangle_count": int(kernel_triangle_count),
+        "post_contraction_triangle_count": int(post_contraction_triangle_count),
+        "contracted_boundary_recovery_vertex_count": int(
+            contracted_boundary_recovery_vertex_count
+        ),
+        "rejected_unknown_relation_count": int(rejected_unknown),
+        "allowed_surface_domain_hash": allowed_domain_hash,
+    }
+
+
 def build_mwb2_observation_cdt_candidate(
     surface: RiggingSurfaceIR,
     *,

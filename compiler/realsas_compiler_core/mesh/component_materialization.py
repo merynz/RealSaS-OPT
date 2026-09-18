@@ -21,6 +21,7 @@ from ..mechanical_component_partition import validate_mechanical_component_parti
 from ..types import QualifiedMeshVertex, QualificationError
 from .mwb2_cdt import (
     build_mwb2_observation_cdt_candidate,
+    build_mwb2_supported_kernel_id_triangles,
     qualify_mwb2_component_observation_cdt_mesh,
 )
 from .mesh_binding import mesh_lineage_hash, validate_qualified_mesh
@@ -563,6 +564,480 @@ def _augment_body_with_boundary_seam(
     }
 
 
+def _support_binding_key(binding) -> tuple[tuple[str, float], ...]:
+    coeffs = tuple(
+        sorted(
+            (
+                str(sid),
+                round(float(weight), 14),
+            )
+            for sid, weight in binding.coefficients
+            if float(weight) > 1.0e-12
+        )
+    )
+    total = float(sum(weight for _sid, weight in coeffs))
+    if not coeffs or abs(total - 1.0) > 1.0e-9:
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_RESIDUAL_RECOVERY_SUPPORT_SIMPLEX_DRIFT"
+        )
+    return coeffs
+
+
+def _rational_support_key(
+    parent: tuple[str, str, str],
+    nums: tuple[int, int, int],
+    n: int,
+) -> tuple[tuple[str, int], ...]:
+    acc: dict[str, int] = {}
+    for sid, num in zip(parent, nums):
+        if int(num) <= 0:
+            continue
+        acc[str(sid)] = acc.get(str(sid), 0) + int(num)
+    if sum(acc.values()) != int(n):
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_RESIDUAL_RECOVERY_RATIONAL_SIMPLEX_DRIFT"
+        )
+    return tuple(sorted((sid, int(num)) for sid, num in acc.items()))
+
+
+def _binding_from_rational_support(
+    key: tuple[tuple[str, int], ...],
+    n: int,
+    *,
+    view_index: int,
+):
+    from ..types import SurfaceSupportBinding
+
+    coeffs = tuple(
+        (str(sid), float(num) / float(n))
+        for sid, num in key
+        if int(num) > 0
+    )
+    if len(coeffs) == 1 and int(key[0][1]) == int(n):
+        return SurfaceSupportBinding(
+            "IDENTITY_SURFACE_NODE",
+            ((str(coeffs[0][0]), 1.0),),
+            metadata={
+                "observed_view": int(view_index),
+                "compiler_residual_recovery": True,
+                "generated_geometry": False,
+            },
+        )
+    return SurfaceSupportBinding(
+        "LOCAL_CONVEX_INTERPOLATION",
+        coeffs,
+        metadata={
+            "observed_view": int(view_index),
+            "compiler_residual_recovery": True,
+            "generated_geometry": True,
+            "support_denominator": int(n),
+        },
+    )
+
+
+def _uniform_subtriangle_support_keys(
+    parent: tuple[str, str, str],
+    n: int,
+):
+    def q(i: int, j: int):
+        return _rational_support_key(
+            parent,
+            (int(n) - int(i) - int(j), int(i), int(j)),
+            int(n),
+        )
+
+    out = []
+    for i in range(int(n)):
+        for j in range(int(n) - i):
+            out.append((q(i, j), q(i + 1, j), q(i, j + 1)))
+            if i + j <= int(n) - 2:
+                out.append(
+                    (
+                        q(i + 1, j),
+                        q(i + 1, j + 1),
+                        q(i, j + 1),
+                    )
+                )
+    if len(out) != int(n) * int(n):
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_RESIDUAL_RECOVERY_SUBDIVISION_CARDINALITY_DRIFT"
+        )
+    return tuple(out)
+
+
+def _derive_support_point(
+    *,
+    key: tuple[tuple[str, int], ...],
+    n: int,
+    nodes,
+    raster_by_surface,
+    view_index: int,
+):
+    binding = _binding_from_rational_support(
+        key,
+        int(n),
+        view_index=int(view_index),
+    )
+    px = py = pz = rx = ry = 0.0
+    for sid, weight in binding.coefficients:
+        node = nodes.get(str(sid))
+        raster = raster_by_surface.get(str(sid))
+        if node is None or raster is None:
+            raise QualificationError(
+                f"MECHANICAL_COMPONENT_RESIDUAL_RECOVERY_SUPPORT_NOT_VISIBLE:{sid}"
+            )
+        coeff = float(weight)
+        px += coeff * float(node.P[0])
+        py += coeff * float(node.P[1])
+        pz += coeff * float(node.P[2])
+        rx += coeff * float(raster[0])
+        ry += coeff * float(raster[1])
+    return binding, (px, py, pz), (rx, ry)
+
+
+def _mesh_union_mask(meshes, observation_domain):
+    mask = bytearray(
+        int(observation_domain.height) * int(observation_domain.width)
+    )
+    width = int(observation_domain.width)
+    for mesh in meshes:
+        by_id = {
+            str(vertex.canonical_mesh_vertex_id): tuple(
+                map(float, dict(vertex.metadata or {})["raster_xy"])
+            )
+            for vertex in mesh.vertices
+        }
+        for face in mesh.faces:
+            tri = tuple(by_id[str(vertex_id)] for vertex_id in face)
+            for x, y in observation_domain.triangle_pixels(tri):
+                mask[int(y) * width + int(x)] = 1
+    return mask
+
+
+def _augment_body_with_uniform_residual_recovery(
+    body_mesh,
+    *,
+    component_meshes,
+    surface,
+    view_index: int,
+    camera_binding_hash: str,
+    observation_domain,
+    subdivision_factor: int,
+):
+    """Recover only source-alpha pixels missing after component-first materialization.
+
+    Candidate geometry comes from the pre-alpha CURRENT-S safe CDT kernel. Every new
+    vertex is either an exact Surface carrier or a bounded local convex interpolation
+    inside one current-S parent triangle. Only quality-admissible triangles fully
+    inside exact source alpha and gaining at least one previously uncovered pixel are
+    added. The operator never uses historical P1/P1Q topology or teacher semantics.
+    """
+
+    n = int(subdivision_factor)
+    if n < 2:
+        raise ValueError("subdivision_factor must be >=2")
+    view_index = int(view_index)
+    kernel = build_mwb2_supported_kernel_id_triangles(
+        surface,
+        view_index=view_index,
+    )
+    nodes = {str(node.surface_id): node for node in surface.surface_nodes}
+    raster_by_surface = {}
+    for sid, node in nodes.items():
+        rows = [
+            tuple(map(float, xy))
+            for raw_view, xy in node.raster_bindings
+            if int(raw_view) == view_index
+        ]
+        if len(rows) > 1:
+            raise QualificationError(
+                f"MECHANICAL_COMPONENT_RESIDUAL_RECOVERY_DUPLICATE_RASTER:{sid}"
+            )
+        if rows:
+            raster_by_surface[sid] = rows[0]
+
+    authority = observation_domain.mask_bytes
+    predicted = _mesh_union_mask(component_meshes, observation_domain)
+    if any(
+        bool(predicted[index]) and not bool(authority[index])
+        for index in range(len(predicted))
+    ):
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_RESIDUAL_RECOVERY_EXISTING_ALPHA_SPILL"
+        )
+    missing = bytearray(
+        1 if bool(authority[index]) and not bool(predicted[index]) else 0
+        for index in range(len(predicted))
+    )
+    missing_before = int(sum(missing))
+    if missing_before == 0:
+        return body_mesh, {
+            "performed": False,
+            "subdivision_factor": n,
+            "missing_pixels_before": 0,
+            "missing_pixels_after": 0,
+            "accepted_face_count": 0,
+            "added_vertex_count": 0,
+        }
+
+    vertices = list(body_mesh.vertices)
+    faces = [tuple(map(str, face)) for face in body_mesh.faces]
+    face_keys = {tuple(sorted(face)) for face in faces}
+    edge_incidence: dict[tuple[str, str], int] = {}
+    for face in faces:
+        for index in range(3):
+            edge = tuple(sorted((face[index], face[(index + 1) % 3])))
+            edge_incidence[edge] = edge_incidence.get(edge, 0) + 1
+
+    existing_by_binding = {}
+    for vertex in body_mesh.vertices:
+        key = _support_binding_key(vertex.support_binding)
+        existing_by_binding.setdefault(
+            key,
+            str(vertex.canonical_mesh_vertex_id),
+        )
+    generated_by_binding: dict[tuple[tuple[str, float], ...], str] = {}
+    point_cache = {}
+    accepted_face_count = 0
+    recovered_pixel_count = 0
+    rejected_quality = 0
+    rejected_alpha = 0
+    rejected_no_gain = 0
+    rejected_topology = 0
+    candidate_subtriangle_count = 0
+    policy = FIT2_PRODUCT_MESH_QUALITY_POLICY_V1
+
+    for _component_index, parent in kernel["triangles"]:
+        parent = tuple(map(str, parent))
+        for tri_keys in _uniform_subtriangle_support_keys(parent, n):
+            candidate_subtriangle_count += 1
+            payload = []
+            for key in tri_keys:
+                cache_key = (key, n)
+                row = point_cache.get(cache_key)
+                if row is None:
+                    row = _derive_support_point(
+                        key=key,
+                        n=n,
+                        nodes=nodes,
+                        raster_by_surface=raster_by_surface,
+                        view_index=view_index,
+                    )
+                    point_cache[cache_key] = row
+                payload.append(row)
+            tri_xy = tuple(row[2] for row in payload)
+            area, angle, aspect = _triangle_metrics(*tri_xy)
+            if (
+                float(area) <= 1.0e-12
+                or float(angle) < float(policy.min_raster_triangle_angle_deg)
+                or float(aspect) > float(policy.max_raster_triangle_aspect_ratio)
+            ):
+                rejected_quality += 1
+                continue
+            if not observation_domain.triangle_inside(tri_xy):
+                rejected_alpha += 1
+                continue
+            pixels = observation_domain.triangle_pixels(tri_xy)
+            if not pixels:
+                rejected_no_gain += 1
+                continue
+            width = int(observation_domain.width)
+            pixel_indices = tuple(
+                int(y) * width + int(x)
+                for x, y in pixels
+            )
+            gain = int(
+                sum(1 for index in pixel_indices if missing[index])
+            )
+            if gain <= 0:
+                rejected_no_gain += 1
+                continue
+
+            canonical_ids = []
+            staged = []
+            for binding, P, raster_xy in payload:
+                binding_key = _support_binding_key(binding)
+                vertex_id = existing_by_binding.get(binding_key)
+                if vertex_id is None:
+                    vertex_id = generated_by_binding.get(binding_key)
+                if vertex_id is None:
+                    vertex_id = (
+                        f"RECOVERY:V{view_index}:N{n}:"
+                        + content_sha256(
+                            {
+                                "surface_lineage_hash": surface.geometry_lineage_hash,
+                                "binding": binding_key,
+                            }
+                        )[:24]
+                    )
+                    staged.append(
+                        (
+                            binding_key,
+                            vertex_id,
+                            binding,
+                            P,
+                            raster_xy,
+                        )
+                    )
+                canonical_ids.append(vertex_id)
+
+            ax, ay = tri_xy[0]
+            bx, by = tri_xy[1]
+            cx, cy = tri_xy[2]
+            area2 = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax)
+            if area2 < 0.0:
+                canonical_ids = [
+                    canonical_ids[0],
+                    canonical_ids[2],
+                    canonical_ids[1],
+                ]
+            face = tuple(canonical_ids)
+            if len(set(face)) != 3:
+                rejected_topology += 1
+                continue
+            face_key = tuple(sorted(face))
+            if face_key in face_keys:
+                rejected_topology += 1
+                continue
+            face_edges = tuple(
+                tuple(sorted((face[index], face[(index + 1) % 3])))
+                for index in range(3)
+            )
+            if any(edge_incidence.get(edge, 0) >= 2 for edge in face_edges):
+                rejected_topology += 1
+                continue
+
+            for (
+                binding_key,
+                vertex_id,
+                binding,
+                P,
+                raster_xy,
+            ) in staged:
+                if (
+                    binding_key in existing_by_binding
+                    or binding_key in generated_by_binding
+                ):
+                    continue
+                generated_by_binding[binding_key] = vertex_id
+                vertices.append(
+                    QualifiedMeshVertex(
+                        canonical_mesh_vertex_id=vertex_id,
+                        P=tuple(map(float, P)),
+                        support_binding=binding,
+                        source_candidate_vertex_id="",
+                        metadata={
+                            "raster_xy": tuple(map(float, raster_xy)),
+                            "compiler_residual_recovery_vertex": True,
+                            "subdivision_factor": n,
+                            "generated_geometry": (
+                                binding.mode == "LOCAL_CONVEX_INTERPOLATION"
+                            ),
+                            "source_mesh_used": False,
+                            "teacher_topology_used": False,
+                        },
+                    )
+                )
+
+            faces.append(face)
+            face_keys.add(face_key)
+            for edge in face_edges:
+                edge_incidence[edge] = edge_incidence.get(edge, 0) + 1
+            accepted_face_count += 1
+            recovered_pixel_count += gain
+            for index in pixel_indices:
+                predicted[index] = 1
+                missing[index] = 0
+
+    if accepted_face_count == 0:
+        return body_mesh, {
+            "performed": False,
+            "subdivision_factor": n,
+            "missing_pixels_before": missing_before,
+            "missing_pixels_after": int(sum(missing)),
+            "accepted_face_count": 0,
+            "added_vertex_count": 0,
+            "candidate_subtriangle_count": candidate_subtriangle_count,
+            "rejected_quality_face_count": rejected_quality,
+            "rejected_alpha_face_count": rejected_alpha,
+            "rejected_no_gain_face_count": rejected_no_gain,
+            "rejected_topology_face_count": rejected_topology,
+        }
+
+    merged = replace(
+        body_mesh,
+        vertices=tuple(vertices),
+        faces=tuple(faces),
+        edges=tuple(sorted(edge_incidence)),
+        qualification_report={
+            **dict(body_mesh.qualification_report or {}),
+            "status": "PASS_COMPONENT_FIRST_PLUS_CURRENT_S_RESIDUAL_RECOVERY",
+            "source_body_mesh_lineage_hash": str(body_mesh.mesh_lineage_hash),
+            "residual_recovery_subdivision_factor": n,
+            "residual_recovery_face_count": accepted_face_count,
+            "residual_recovery_added_vertex_count": len(generated_by_binding),
+            "historical_full_subject_mesh_used": False,
+            "teacher_topology_used": False,
+            "mechanical_partition_mutated": False,
+        },
+        support_coverage_classification=(
+            "MECHANICAL_COMPONENT_FIRST_PLUS_CURRENT_S_RESIDUAL_RECOVERY"
+        ),
+        metadata={
+            **dict(body_mesh.metadata or {}),
+            "compiler_residual_recovery": True,
+            "residual_recovery_subdivision_factor": n,
+            "residual_recovery_face_count": accepted_face_count,
+            "residual_recovery_added_vertex_count": len(generated_by_binding),
+            "residual_recovery_authority": (
+                "CURRENT_QUALIFIED_S_LOCAL_CONVEX_SUPPORT_PLUS_EXACT_ALPHA"
+            ),
+            "source_mesh_used": False,
+            "historical_full_subject_mesh_used": False,
+            "teacher_topology_used": False,
+            "mechanical_partition_mutated": False,
+        },
+        mesh_lineage_hash="",
+    )
+    merged = replace(merged, mesh_lineage_hash=mesh_lineage_hash(merged))
+    validate_qualified_mesh(merged, surface)
+    raster_report = mesh_raster_quality_report(
+        merged,
+        surface=surface,
+        view_index=view_index,
+    )
+    failures = tuple(
+        raster_quality_gate_failures(
+            raster_report,
+            policy=FIT2_PRODUCT_MESH_QUALITY_POLICY_V1,
+        )
+    )
+    if failures:
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_RESIDUAL_RECOVERY_RASTER_QUALITY_FAIL:"
+            f"V{view_index}:N{n}:{','.join(failures)}"
+        )
+    return merged, {
+        "performed": True,
+        "subdivision_factor": n,
+        "missing_pixels_before": missing_before,
+        "missing_pixels_after": int(sum(missing)),
+        "recovered_pixel_count": int(recovered_pixel_count),
+        "accepted_face_count": int(accepted_face_count),
+        "added_vertex_count": len(generated_by_binding),
+        "candidate_subtriangle_count": int(candidate_subtriangle_count),
+        "rejected_quality_face_count": int(rejected_quality),
+        "rejected_alpha_face_count": int(rejected_alpha),
+        "rejected_no_gain_face_count": int(rejected_no_gain),
+        "rejected_topology_face_count": int(rejected_topology),
+        "kernel_parent_face_count": len(kernel["triangles"]),
+        "raster_quality": raster_report,
+        "historical_full_subject_mesh_used": False,
+        "teacher_topology_used": False,
+        "mechanical_partition_mutated": False,
+    }
+
+
 def _verify_rigid_skin(mesh_skin, *, component_id: str, parent_joint_id: str) -> None:
     parent = str(parent_joint_id)
     if not parent:
@@ -815,6 +1290,9 @@ def materialize_mechanical_component_view(
                 "face_count": len(seam_mesh.faces),
                 "raster_quality": seam_raster,
                 "compiler_boundary_seam": seam_report,
+            "compiler_residual_recovery_attempts": tuple(
+                residual_recovery_attempts
+            ),
                 "cross_component_faces_possible": True,
             }
             rows[body_index] = MaterializedMechanicalComponentIR(
@@ -834,6 +1312,166 @@ def materialize_mechanical_component_view(
             coverage_failures = coverage_gate_failures(
                 union_coverage,
                 policy=FIT2_PRODUCT_MESH_QUALITY_POLICY_V1,
+            )
+
+    residual_recovery_attempts = []
+    if require_product_mesh_quality and coverage_failures:
+        base_rows = list(rows)
+        body_index = next(
+            (
+                index
+                for index, row in enumerate(base_rows)
+                if str(row.component_id) == "BODY_UNDERLAY"
+            ),
+            None,
+        )
+        if body_index is None:
+            raise QualificationError(
+                "MECHANICAL_COMPONENT_RESIDUAL_RECOVERY_BODY_MISSING"
+            )
+        base_body = base_rows[body_index]
+        best = None
+        for subdivision_factor in (2, 3, 4):
+            recovered_mesh, recovery_report = (
+                _augment_body_with_uniform_residual_recovery(
+                    base_body.mesh,
+                    component_meshes=tuple(
+                        row.mesh for row in base_rows
+                    ),
+                    surface=surface,
+                    view_index=view_index,
+                    camera_binding_hash=str(camera_binding_hash),
+                    observation_domain=observation_domain,
+                    subdivision_factor=subdivision_factor,
+                )
+            )
+            if recovery_report.get("performed") is not True:
+                residual_recovery_attempts.append(recovery_report)
+                continue
+
+            recovered_skin = bind_mwb2_mesh_skin(
+                surface,
+                skeleton,
+                skin,
+                recovered_mesh,
+            )
+            recovered_appearance = build_observed_appearance_binding(
+                surface=surface,
+                mesh=recovered_mesh,
+                target_view_index=view_index,
+                camera_binding_hash=str(camera_binding_hash),
+                observation_hash_by_view={
+                    int(k): str(v)
+                    for k, v in observation_hash_by_view.items()
+                },
+                atlas_payload_hash=str(atlas_payload_hash),
+            )
+            recovered_raster = mesh_raster_quality_report(
+                recovered_mesh,
+                surface=surface,
+                view_index=view_index,
+            )
+            recovered_body_report = {
+                **dict(base_body.qualification_report),
+                "vertex_count": len(recovered_mesh.vertices),
+                "face_count": len(recovered_mesh.faces),
+                "raster_quality": recovered_raster,
+                "compiler_residual_recovery": recovery_report,
+                "cross_component_faces_possible": True,
+            }
+            candidate_rows = list(base_rows)
+            candidate_rows[body_index] = MaterializedMechanicalComponentIR(
+                component_id=base_body.component_id,
+                mesh=recovered_mesh,
+                mesh_skin=recovered_skin,
+                appearance=recovered_appearance,
+                qualification_report=recovered_body_report,
+            )
+            candidate_union_triangles = [
+                triangle
+                for row in candidate_rows
+                for triangle in _raster_triangles(row.mesh)
+            ]
+            candidate_coverage = observation_domain.coverage(
+                candidate_union_triangles
+            )
+            candidate_failures = coverage_gate_failures(
+                candidate_coverage,
+                policy=FIT2_PRODUCT_MESH_QUALITY_POLICY_V1,
+            )
+            attempt = {
+                **dict(recovery_report),
+                "union_source_alpha_recall": float(
+                    candidate_coverage["source_alpha_recall"]
+                ),
+                "union_precision_inside_alpha": float(
+                    candidate_coverage["precision_inside_alpha"]
+                ),
+                "union_alpha_iou": float(
+                    candidate_coverage["alpha_iou"]
+                ),
+                "union_largest_uncovered_component_fraction": float(
+                    candidate_coverage[
+                        "largest_uncovered_component_fraction"
+                    ]
+                ),
+                "union_coverage_failures": tuple(candidate_failures),
+            }
+            residual_recovery_attempts.append(attempt)
+            score = (
+                float(candidate_coverage["source_alpha_recall"]),
+                -float(
+                    candidate_coverage[
+                        "largest_uncovered_component_fraction"
+                    ]
+                ),
+            )
+            if best is None or score > best[0]:
+                best = (
+                    score,
+                    candidate_rows,
+                    candidate_coverage,
+                    candidate_failures,
+                    recovered_body_report,
+                    attempt,
+                )
+            if not candidate_failures:
+                rows = candidate_rows
+                union_triangles = candidate_union_triangles
+                union_coverage = candidate_coverage
+                coverage_failures = candidate_failures
+                component_reports["BODY_UNDERLAY"] = recovered_body_report
+                break
+
+        if coverage_failures and best is not None:
+            (
+                _score,
+                _best_rows,
+                best_coverage,
+                best_failures,
+                _best_body_report,
+                _best_attempt,
+            ) = best
+            # Keep the component-first authoritative state unchanged on failure.
+            # Best-attempt metrics are diagnostics only and cannot silently weaken
+            # the frozen admission policy.
+            residual_recovery_attempts.append(
+                {
+                    "diagnostic_best_only": True,
+                    "union_source_alpha_recall": float(
+                        best_coverage["source_alpha_recall"]
+                    ),
+                    "union_precision_inside_alpha": float(
+                        best_coverage["precision_inside_alpha"]
+                    ),
+                    "union_alpha_iou": float(best_coverage["alpha_iou"]),
+                    "union_largest_uncovered_component_fraction": float(
+                        best_coverage[
+                            "largest_uncovered_component_fraction"
+                        ]
+                    ),
+                    "union_coverage_failures": tuple(best_failures),
+                }
             )
 
     if require_product_mesh_quality and coverage_failures:
@@ -856,6 +1494,7 @@ def materialize_mechanical_component_view(
             f"foreground_pixels={union_coverage['foreground_pixel_count']}:"
             f"seam_faces={seam_report.get('accepted_face_count', 0)}:"
             f"seam_vertices={seam_report.get('added_vertex_count', 0)}:"
+            f"recovery_attempts={residual_recovery_attempts}:"
             f"components={component_diag}"
         )
 
@@ -885,6 +1524,7 @@ def materialize_mechanical_component_view(
             "mesh_order": (
                 "MECHANICAL_PARTITION_FIRST_THEN_COMPONENT_LOCAL_CDT"
                 "_THEN_CURRENT_S_BOUNDARY_SEAM_IF_COVERAGE_REQUIRED"
+                "_THEN_BOUNDED_LOCAL_CONVEX_RESIDUAL_RECOVERY"
             ),
             "observation_alpha_role": "HARD_CONTAINMENT_AND_UNION_COVERAGE_AUTHORITY",
             "component_identity_authority": "COMPILER_MECHANICAL_PARTITION",

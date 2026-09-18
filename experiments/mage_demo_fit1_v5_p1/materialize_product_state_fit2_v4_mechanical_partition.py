@@ -334,7 +334,16 @@ def build_final_state(args, *, persist: bool = True):
                     row.component_id: row.mesh.mesh_lineage_hash
                     for row in projection.components
                 },
-                "cross_component_faces_generated": False,
+                "cross_component_faces_generated": bool(
+                    projection.qualification_report.get(
+                        "cross_component_faces_generated", False
+                    )
+                ),
+                "compiler_boundary_seam": dict(
+                    projection.qualification_report.get(
+                        "compiler_boundary_seam", {}
+                    )
+                ),
                 "historical_full_subject_mesh_used": False,
             }
         )

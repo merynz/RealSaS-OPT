@@ -10,6 +10,7 @@ from typing import Any, Iterable
 
 from ..hashing import content_sha256
 from ..playback_runtime_v3 import ReferenceRasterContractV1
+from ..playback_full_surface_v3 import CameraProjectionV3, project_points_xyz_v3
 from ..product_authority_v1 import (
     ComponentCarrierPolicyIR,
     MeshQualificationPolicyIR,
@@ -211,38 +212,39 @@ def coverage_metrics(authority: bytes, predicted: bytes, *, width: int, height: 
     }
 
 
-def _surface_raster(surface: RiggingSurfaceIR, view_index: int) -> dict[str, tuple[float,float]]:
-    out = {}
-    for node in surface.surface_nodes:
-        rows = [tuple(map(float, xy)) for vi, xy in node.raster_bindings if int(vi) == int(view_index)]
-        if len(rows) > 1:
-            raise QualificationError("G5_DUPLICATE_SURFACE_RASTER_BINDING")
-        if rows:
-            out[node.surface_id] = rows[0]
-    return out
+def camera_projection_binding_hash(camera: CameraProjectionV3) -> str:
+    return content_sha256({
+        "schema": camera.schema_version,
+        "view_id": camera.view_id,
+        "view_index": int(camera.view_index),
+        "origin": tuple(map(float, camera.origin)),
+        "right": tuple(map(float, camera.right)),
+        "screen_up": tuple(map(float, camera.screen_up)),
+        "forward": tuple(map(float, camera.forward)),
+        "half_extent": float(camera.half_extent),
+        "resolution": int(camera.resolution),
+    })
 
 
-def _mesh_component_triangles(mesh: QualifiedMeshIR, surface: RiggingSurfaceIR, *, view_index: int, component_id: str):
-    raster = _surface_raster(surface, view_index)
-    by_id = {}
-    component_by_id = {}
-    for vertex in mesh.vertices:
-        x = y = total = 0.0
-        for sid, coeff in vertex.support_binding.coefficients:
-            if sid not in raster:
-                raise QualificationError("G5_MESH_SUPPORT_NOT_VISIBLE_IN_AUTHORITY_VIEW")
-            c = float(coeff)
-            x += c * raster[sid][0]
-            y += c * raster[sid][1]
-            total += c
-        if abs(total - 1.0) > 1e-9:
-            raise QualificationError("G5_MESH_SUPPORT_SIMPLEX_INVALID")
-        by_id[vertex.canonical_mesh_vertex_id] = (x, y)
-        component_by_id[vertex.canonical_mesh_vertex_id] = vertex.component_id
+def _mesh_component_triangles(mesh: QualifiedMeshIR, camera: CameraProjectionV3, *, component_id: str):
+    vertex_ids = [vertex.canonical_mesh_vertex_id for vertex in mesh.vertices]
+    xyz = [tuple(map(float, vertex.P)) for vertex in mesh.vertices]
+    projected = project_points_xyz_v3(xyz, camera)
+    by_id = {
+        vertex_ids[i]: (float(projected[i, 0]), float(projected[i, 1]))
+        for i in range(len(vertex_ids))
+    }
+    component_by_id = {
+        vertex.canonical_mesh_vertex_id: vertex.component_id
+        for vertex in mesh.vertices
+    }
 
     triangles = []
     for face in mesh.faces:
-        if any(component_by_id[vid] != component_id for vid in face):
+        components = {component_by_id[vid] for vid in face}
+        if len(components) != 1:
+            raise QualificationError("G5_FACE_CROSSES_COMPONENT_BOUNDARY")
+        if next(iter(components)) != component_id:
             continue
         triangles.append(tuple(by_id[vid] for vid in face))
     if not triangles:
@@ -258,6 +260,7 @@ def build_g5_coverage_matrix(
     carrier_policy: ComponentCarrierPolicyIR,
     mesh_policy: MeshQualificationPolicyIR,
     observations: Iterable[ComponentObservationRasterIR],
+    cameras: Iterable[CameraProjectionV3],
     raster_contract: ReferenceRasterContractV1 = ReferenceRasterContractV1(),
 ) -> tuple[dict, ...]:
     validate_component_carrier_policy(carrier_policy, partition)
@@ -269,6 +272,11 @@ def build_g5_coverage_matrix(
     component_ids = {component.component_id for component in partition.components}
     carrier_by_component = {row.component_id: row.carrier_class for row in carrier_policy.decisions}
     thresholds = {row.carrier_class: row for row in mesh_policy.coverage_thresholds}
+    camera_by_view = {int(camera.view_index): camera for camera in cameras}
+    if set(camera_by_view) != set(range(8)):
+        raise QualificationError("G5_REQUIRES_EXACT_8_CAMERAS")
+    if len(camera_by_view) != 8:
+        raise QualificationError("G5_DUPLICATE_CAMERA_VIEW")
 
     by_key = {}
     for observation in observations:
@@ -282,6 +290,11 @@ def build_g5_coverage_matrix(
             raise QualificationError("G5_OBSERVATION_CARRIER_POLICY_DRIFT")
         if observation.raster_contract_hash != raster_hash:
             raise QualificationError("G5_RASTER_CONTRACT_HASH_MISMATCH")
+        camera = camera_by_view[int(observation.view_index)]
+        if int(camera.resolution) != int(observation.width) or int(camera.resolution) != int(observation.height):
+            raise QualificationError("G5_CAMERA_OBSERVATION_DIMENSION_MISMATCH")
+        if observation.camera_binding_hash != camera_projection_binding_hash(camera):
+            raise QualificationError("G5_CAMERA_BINDING_HASH_MISMATCH")
         by_key[key] = observation
 
     expected = {(view, cid) for view in range(8) for cid in component_ids}
@@ -291,7 +304,7 @@ def build_g5_coverage_matrix(
     rows = []
     for view, component_id in sorted(expected):
         observation = by_key[(view, component_id)]
-        triangles = _mesh_component_triangles(mesh, surface, view_index=view, component_id=component_id)
+        triangles = _mesh_component_triangles(mesh, camera_by_view[view], component_id=component_id)
         predicted = rasterize_triangles_half_integer_top_left(
             triangles,
             width=observation.width,

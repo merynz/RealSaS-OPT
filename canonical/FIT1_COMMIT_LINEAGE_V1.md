@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1763**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1770**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1775,6 +1775,13 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-18T23:04:08+03:00` | `8a79ed20e3e6` | yes | CI_TEST, GOVERNANCE_CONTINUITY | continuity: rehydrate from current V2 V3 authority | `.github/workflows/live_authority_map.yml`<br>`tools/audit_context_coverage.py`<br>`tools/build_knowledge_artifact_catalog.py`<br>`tools/render_rehydration_packet.py` | `main` |
 | `2026-09-18T23:04:48+03:00` | `25d1b5022099` | yes | COMPILER_PROOF | cache: drop absent historical render fingerprint | `compiler/realsas_compiler_services/cache/proof_result.py` | `main` |
 | `2026-09-18T23:07:01+03:00` | `12c9f93c1553` | yes | GOVERNANCE_CONTINUITY | continuity: make rehydration renderer standalone | `tools/render_rehydration_packet.py` | `main` |
+| `2026-09-18T23:07:57+03:00` | `5e872bfe85de` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-18T23:09:16+03:00` | `29dff85a07ac` | yes | CI_TEST, COMPILER_PROOF | compiler: add fail-closed structural partition baseline | `compiler/realsas_compiler_core/mechanical_partition_v1.py`<br>`tests/compiler/test_mechanical_partition_v1.py` | `main` |
+| `2026-09-18T23:13:22+03:00` | `e1ea4ebc6a7e` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: preregister animation conditioning calibration | `.github/workflows/mesh_conditioning_calibration.yml`<br>`canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_PREREG_20260918.md`<br>`compiler/realsas_compiler_core/mesh/conditioning_v1.py`<br>`experiments/mesh_conditioning_v1/run_synthetic_conditioning_sweep.py`<br>`tests/compiler/test_mesh_conditioning_v1.py` | `main` |
+| `2026-09-18T23:24:39+03:00` | `6320392e70ec` | yes | CI_TEST, COMPILER_PROOF | mesh: make conditioning calibration scale invariant | `compiler/realsas_compiler_core/mesh/conditioning_v1.py`<br>`tests/compiler/test_mesh_conditioning_v1.py` | `main` |
+| `2026-09-18T23:28:30+03:00` | `5d853af697eb` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: enforce intrinsic qualified product geometry | `canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_RESULT_20260918.json`<br>`compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_product_authority_v1.py` | `main` |
+| `2026-09-18T23:31:44+03:00` | `c4d304f4fdf2` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: bind qualification to typed carrier and policy authority | `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`<br>`compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_product_authority_v1.py` | `main` |
+| `2026-09-18T23:33:15+03:00` | `6afc119be5c5` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: add deterministic candidate promotion gate | `compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_product_authority_v1.py` | `main` |
 
 ## Use rule
 

@@ -16,6 +16,10 @@ on:
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json'
       - '.github/workflows/native_runtime_source_gate.yml'
 
+concurrency:
+  group: realsas-self-hosted-runtime-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify-native-runtime:
     runs-on: [self-hosted, linux, x64, realsas]

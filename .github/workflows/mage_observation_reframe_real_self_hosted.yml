@@ -1,0 +1,176 @@
+name: Mage Observation Reframe Real Self-Hosted
+
+on:
+  push:
+    branches:
+      - playback-stack-v1-20260916
+    paths:
+      - 'experiments/mage_full_subject_reclosure_v1/render_corrected_full_subject_observations_v1.py'
+      - 'experiments/mage_full_subject_reclosure_v1/evaluate_observation_reframe_v1.py'
+      - 'experiments/playback_stack_v1/stage_mage_observation_reframe_windows.ps1'
+      - '.github/workflows/mage_observation_reframe_real_self_hosted.yml'
+  workflow_dispatch:
+
+jobs:
+  reframe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      EXPECTED_MAGE_FBX_SHA256: 93b401d56e2547316f8841a4ac0086011c64d79185c9cb7623567c2dbf125c7d
+      EXPECTED_MAGE_TEXTURE_SHA256: ea49f094b960402635fe51db9f1864960c97271b17f2e3554e5aca1b2bbba144
+      BLENDER_VERSION: 5.2.0
+      BLENDER_RELEASE_DIR: Blender5.2
+    steps:
+      - name: Checkout exact pushed commit
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install bounded evaluation dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --quiet numpy Pillow requests
+
+      - name: Stage exact current observations and source asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .observation-reframe-stage .observation-reframe
+          mkdir -p .observation-reframe-stage
+          if ! command -v powershell.exe >/dev/null 2>&1; then
+            echo MAGE_REFRAME_WINDOWS_POWERSHELL_UNAVAILABLE
+            exit 41
+          fi
+          dst_windows="$(wslpath -w "$GITHUB_WORKSPACE/.observation-reframe-stage")"
+          script_windows="$(wslpath -w "$GITHUB_WORKSPACE/experiments/playback_stack_v1/stage_mage_observation_reframe_windows.ps1")"
+          powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass \
+            -File "$script_windows" -Destination "$dst_windows"
+          test -f .observation-reframe-stage/source/Mage.fbx
+          test -f .observation-reframe-stage/source/mage_texture.png
+          for v in {0..7}; do
+            test -f ".observation-reframe-stage/current_observations/V${v}.png"
+            test -f ".observation-reframe-stage/current_observations/V${v}.camera.json"
+          done
+
+      - name: Verify source byte authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, os
+          expected = {
+              ".observation-reframe-stage/source/Mage.fbx": os.environ["EXPECTED_MAGE_FBX_SHA256"],
+              ".observation-reframe-stage/source/mage_texture.png": os.environ["EXPECTED_MAGE_TEXTURE_SHA256"],
+          }
+          for path, want in expected.items():
+              h=hashlib.sha256()
+              with open(path,"rb") as f:
+                  for b in iter(lambda:f.read(8<<20),b""): h.update(b)
+              got=h.hexdigest()
+              print("REFRAME_SHA", path, got)
+              if got != want:
+                  raise SystemExit(f"MAGE_REFRAME_SOURCE_SHA_DRIFT:{path}:{got}")
+          PY
+
+      - name: Bootstrap exact Blender 5.2.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, os, re, requests, tarfile
+          from pathlib import Path
+          version=os.environ["BLENDER_VERSION"]
+          release=os.environ["BLENDER_RELEASE_DIR"]
+          root=Path.home()/".cache"/"realsas"
+          home=root/f"blender-{version}-linux-x64"
+          binary=home/"blender"
+          if binary.exists():
+              print(f"BLENDER_BIN={binary}")
+              Path(os.environ["GITHUB_ENV"]).open("a").write(f"BLENDER_BIN={binary}\n")
+              raise SystemExit(0)
+          root.mkdir(parents=True,exist_ok=True)
+          arc=root/f"blender-{version}-linux-x64.tar.xz"
+          sha=root/f"blender-{version}.sha256"
+          bases=[f"https://mirror.blender.org/release/{release}",f"https://download.blender.org/release/{release}"]
+          def get(name,dst,minbytes):
+              errs=[]
+              for base in bases:
+                  try:
+                      with requests.get(f"{base}/{name}",stream=True,timeout=(30,600),allow_redirects=True) as r:
+                          r.raise_for_status()
+                          tmp=Path(str(dst)+".part")
+                          with tmp.open("wb") as f:
+                              for chunk in r.iter_content(8<<20):
+                                  if chunk: f.write(chunk)
+                          if tmp.stat().st_size < minbytes:
+                              raise RuntimeError("download too small")
+                          os.replace(tmp,dst)
+                          return
+                  except Exception as e:
+                      errs.append(repr(e))
+              raise RuntimeError(" | ".join(errs[-4:]))
+          get(sha.name,sha,64)
+          expected=None
+          for line in sha.read_text(errors="ignore").splitlines():
+              parts=line.split()
+              if len(parts)>=2 and Path(parts[-1].lstrip("*")).name==arc.name and re.fullmatch(r"[0-9a-fA-F]{64}",parts[0]):
+                  expected=parts[0].lower()
+                  break
+          if not expected:
+              raise RuntimeError("BLENDER_CHECKSUM_UNRESOLVED")
+          def digest(p):
+              h=hashlib.sha256()
+              with open(p,"rb") as f:
+                  for b in iter(lambda:f.read(8<<20),b""): h.update(b)
+              return h.hexdigest()
+          if not arc.exists() or digest(arc)!=expected:
+              get(arc.name,arc,100_000_000)
+          if digest(arc)!=expected:
+              raise RuntimeError("BLENDER_SHA_MISMATCH")
+          with tarfile.open(arc,"r:xz") as tf:
+              tf.extractall(root)
+          binary.chmod(binary.stat().st_mode|0o111)
+          print(f"BLENDER_BIN={binary}")
+          Path(os.environ["GITHUB_ENV"]).open("a").write(f"BLENDER_BIN={binary}\n")
+          PY
+          "$BLENDER_BIN" --version | head -3
+
+      - name: Render old-camera parity and corrected full-subject observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .observation-reframe
+          "$BLENDER_BIN" -b --factory-startup \
+            --python experiments/mage_full_subject_reclosure_v1/render_corrected_full_subject_observations_v1.py \
+            -- \
+            --source-fbx .observation-reframe-stage/source/Mage.fbx \
+            --camera-dir .observation-reframe-stage/current_observations \
+            --output-dir .observation-reframe
+
+      - name: Evaluate parity and framing
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python \
+            experiments/mage_full_subject_reclosure_v1/evaluate_observation_reframe_v1.py \
+            --stage .observation-reframe-stage \
+            --render .observation-reframe
+
+      - name: Upload observation reframe evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mage-observation-reframe-evidence
+          if-no-files-found: warn
+          path: |
+            .observation-reframe/RENDER_REPORT.json
+            .observation-reframe/OBSERVATION_REFRAME_EVALUATION.json
+            .observation-reframe/OBSERVATION_REFRAME_CONTACT_SHEET.png
+            .observation-reframe/parity_current_camera/V*.png
+            .observation-reframe/corrected_full_subject/V*.png
+            .observation-reframe/corrected_full_subject/V*.camera.json
+            .observation-reframe-stage/STAGE_REPORT.json

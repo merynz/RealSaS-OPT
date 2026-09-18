@@ -36,6 +36,20 @@ def test_deformation_metric_is_rigid_rotation_invariant():
     assert metric["condition_number"] == pytest.approx(1.0)
 
 
+def test_deformation_degeneracy_predicate_is_local_scale_invariant():
+    base = np.array([[0,0,0],[1,0,0],[0.5,0.02,0]], dtype=np.float64)
+    for scale in (1e-3, 1.0, 1e3):
+        tri = base * scale
+        metric = triangle_deformation_metric(
+            tri.astype(np.float32),
+            tri.astype(np.float32),
+            dtype=np.float32,
+        )
+        assert metric["sigma_max"] == pytest.approx(1.0, rel=1e-4)
+        assert metric["sigma_min"] == pytest.approx(1.0, rel=1e-4)
+        assert metric["condition_number"] == pytest.approx(1.0, rel=1e-4)
+
+
 def test_anisotropic_material_deformation_is_not_hidden_by_area():
     tri = np.array([[0,0,0],[1,0,0],[0.2,0.8,0]], dtype=np.float64)
     transform = np.array([[2.0,0.0],[0.0,0.5],[0.0,0.0]])

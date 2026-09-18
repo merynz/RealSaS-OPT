@@ -68,7 +68,13 @@ def triangle_deformation_metric(rest_points, posed_points, *, dtype=np.float64) 
     basis_x = e01 / l01
     x2 = float(np.dot(e02, basis_x))
     y2_sq = float(np.dot(e02, e02) - x2 * x2)
-    local_scale = max(float(np.linalg.norm(e01)), float(np.linalg.norm(e02)), 1.0)
+
+    # Degeneracy tolerance must scale with the local triangle itself.  A unit
+    # floor here would silently make the predicate depend on world units and
+    # would reject the same triangle shape at small canonical scales.
+    local_scale = max(float(np.linalg.norm(e01)), float(np.linalg.norm(e02)))
+    if not math.isfinite(local_scale) or local_scale <= 0.0:
+        raise QualificationError("MESH_DEFORMATION_REST_DEGENERATE")
     tol = float(np.finfo(dtype).eps) * local_scale * local_scale * 32.0
     if y2_sq <= tol:
         raise QualificationError("MESH_DEFORMATION_REST_DEGENERATE")

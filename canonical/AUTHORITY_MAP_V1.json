@@ -25,14 +25,18 @@
     "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
     "canonical/MAINLINE_PERFORMANCE_BASELINE_V1.json",
     "canonical/REAL_SAS_MAINLINE_VNEXT_20260918.md",
-    "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md"
+    "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
+    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl"
   ],
   "rehydration_order": [
     "canonical/ACTIVE_RUN_V1.json",
     "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
     "CURRENT_STATE.md",
     "canonical/AUTHORITY_MAP_V1.json",
+    "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
     "canonical/CONTEXT_STATE_V2.json",
+    "canonical/EXPERIMENT_REGISTRY_V3.json",
+    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
     "canonical/REAL_SAS_MAINLINE_VNEXT_20260918.md"
   ],
   "branch_policy": {
@@ -57,7 +61,7 @@
   "active_experiments": [
     {
       "id": "SUBJECT2_KNIGHT_FULL_CLOSURE",
-      "status": "ACTIVE__MAINLINE_ORCHESTRATOR_BINDING",
+      "status": "ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION",
       "branch": "main",
       "question": "Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output?",
       "does_not_prove": [

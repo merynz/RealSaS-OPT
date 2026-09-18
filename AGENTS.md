@@ -9,6 +9,13 @@ This repository must be resumable without conversational memory.
 4. `canonical/AUTHORITY_MAP_V1.json`
 5. `canonical/REAL_SAS_MAINLINE_VNEXT_20260918.md`
 
+## Evidence pointers
+- Current registry: `canonical/EXPERIMENT_REGISTRY_V3.json`
+- Current scientific journal: `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+- Historical detail registry: `canonical/EXPERIMENT_REGISTRY_V2.json`
+- Historical scientific journal: `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
+- Product geometry/presentation contract: `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`
+
 ## Resume rule
 Read `canonical/ACTIVE_RUN_V1.json`. Verify `pipeline_plan_sha256` against the canonical plan. Find the first stage whose status is not `PASS` or `CACHE_HIT`; continue there. Never rerun a verified upstream stage merely because a later stage failed.
 

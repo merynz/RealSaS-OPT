@@ -34,6 +34,8 @@ class CanonicalMainReadinessV1(unittest.TestCase):
             "compiler/realsas_compiler_core/mesh/mwb2.py",
             "compiler/realsas_compiler_core/mesh/mwb2_skin.py",
             "compiler/realsas_compiler_core/mesh/mesh_binding.py",
+            "compiler/realsas_compiler_core/product_authority_v1.py",
+            "compiler/realsas_compiler_services/orchestrator/mainline.py",
             "compiler/realsas_compiler_core/directional_binding.py",
             "compiler/realsas_compiler_services/proof/directional_motion_provider.py",
             "compiler/realsas_compiler_services/proof/directional_motion_evaluator.py",
@@ -129,35 +131,25 @@ class CanonicalMainReadinessV1(unittest.TestCase):
         missing = [path for path in required if not (ROOT / path).is_file()]
         self.assertEqual(missing, [], "missing canonical authority records:\n" + "\n".join(missing))
 
-    def test_fit_is_blocked_until_canonical_main_post_merge_integrity(self) -> None:
+    def test_historical_prefit_gate_is_preserved_but_not_current_authority(self) -> None:
         gate = json.loads((ROOT / "canonical/CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json").read_text(encoding="utf-8"))
+        restoration = (ROOT / "RESTORATION_STATE.md").read_text(encoding="utf-8")
+        current = (ROOT / "CURRENT_STATE.md").read_text(encoding="utf-8")
         self.assertFalse(bool(gate["fit_authorized_now"]))
-        self.assertFalse(bool(gate["fit_branch_may_precede_canonical_main"]))
-        self.assertFalse(bool(gate["fit_may_run_on_restoration_branch"]))
-        self.assertTrue(bool(gate["first_fit_must_record_canonical_main_base_commit"]))
-        order = tuple(gate["required_order"])
-        self.assertLess(order.index("PROMOTE_RESTORATION_TREE_TO_CANONICAL_MAIN"), order.index("ONLY_THEN_AUTHORIZE_REAL_FAMILY_FIT"))
-        self.assertLess(order.index("POST_MERGE_MAIN_REPOSITORY_INTEGRITY_CHECK"), order.index("ONLY_THEN_AUTHORIZE_REAL_FAMILY_FIT"))
+        self.assertIn("SUPERSEDED FOR CONTINUATION", restoration)
+        self.assertIn("SUBJECT2_KNIGHT_FULL_CLOSURE", current)
+        self.assertIn("QualifiedMeshIR", current)
 
-    def test_state_and_index_are_not_stale_on_closed_decisions(self) -> None:
-        state = (ROOT / "RESTORATION_STATE.md").read_text(encoding="utf-8")
+    def test_state_and_index_point_to_current_product_authorities(self) -> None:
+        restoration = (ROOT / "RESTORATION_STATE.md").read_text(encoding="utf-8")
+        state = (ROOT / "CURRENT_STATE.md").read_text(encoding="utf-8")
         index = (ROOT / "SYSTEM_INDEX.md").read_text(encoding="utf-8")
-        for text in (state, index):
-            self.assertNotIn("CURRENT_DIRECTIONAL_JOINT_VIEW_BINDING_MISSING", text)
-            self.assertIn("CANONICAL_MAIN_BEFORE_FIT_GATE_V1_20260904.json", text)
-            self.assertIn("RESTORATION_CLOSURE_VERDICT_V1_20260904.json", text)
-        self.assertIn("Real-family fit:** `NOT AUTHORIZED`", state)
-        self.assertIn("Full behavioral + complete-E2E restoration closure | **DONE / PASS**", state)
-        self.assertIn(
-            "| Native C++17 runtime | `runtime/realsas_cpp/` | **RESTORED EXACT CONSUMER; SEALED SUBTREE; CLOSURE PASS** |",
-            index,
-        )
-        self.assertIn("**CI PASS — EXACT CURRENT-V4 PACKAGE OPEN/SAMPLE/RENDER VERIFIED**", index)
-        self.assertIn("Historical restoration evidence remains valid evidence, but not current continuation state:", index)
-        self.assertIn(
-            "Current FIT/Geppetto/Arachne authorization is exclusively defined by `CURRENT_STATE.md`",
-            index,
-        )
+        self.assertIn("SUPERSEDED FOR CONTINUATION", restoration)
+        self.assertIn("QualifiedMeshIR", state)
+        self.assertIn("QualifiedPresentationGraphIR", state)
+        self.assertIn("Product mesh", index)
+        self.assertIn("Presentation", index)
+        self.assertIn("product_authority_v1.py", index)
 
     def test_closure_workflow_is_manual_only(self) -> None:
         workflow = (ROOT / ".github/workflows/restoration_closure_manual.yml").read_text(encoding="utf-8")

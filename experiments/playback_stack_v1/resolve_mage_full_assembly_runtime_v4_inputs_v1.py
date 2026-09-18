@@ -1,20 +1,6 @@
 from __future__ import annotations
 
-"""Resolve the exact current Mage Runtime-v4 smoke inputs from mounted artifact roots.
-
-This resolver is deliberately filename-light and hash-strict. It never selects
-"latest", never accepts partial SHA prefixes, and never opens giant product graph
-JSON files merely to discover the current mechanical authority.
-
-Selection rules:
-- P1Q / foreground / component-assembly directories are anchored by exact manifest
-  filename + exact SHA-256.
-- corrected FIT2 surface, G22 skeleton, FIT2 skin, and V0..V7 cameras are selected by
-  exact file SHA-256.
-- only bounded JSON candidates are hashed for anonymous authority lookup.
-- duplicate byte-identical aliases are permitted and reported; distinct hashes never
-  compete for the same authority.
-"""
+"""Resolve exact current Mage Runtime-v4 inputs without teacher component artifacts."""
 
 import argparse
 from hashlib import sha256
@@ -22,21 +8,15 @@ import json
 from pathlib import Path
 from typing import Iterable
 
-SCHEMA = "RealSaS.MageRuntimeV4ExactInputResolution.v1"
+SCHEMA = "RealSaS.MageRuntimeV4ExactInputResolution.v2"
+
+P1Q_MANIFEST_NAME = "P1Q_FIT2_CURRENT_AUTHORITY_MATERIALIZATION_MANIFEST.json"
+P1Q_STATUS = "PASS__FIT2_P1Q_CURRENT_AUTHORITY_V0_V7_FROZEN_FACE_POLICY"
+EXPECTED_SURFACE_LINEAGE = "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da"
+EXPECTED_SKELETON_LINEAGE = "69f05e4fdef65f2cd86fed66503911210e1dbc7212ad017d69bf3dcb7b0896a1"
+EXPECTED_SKIN_LINEAGE = "eb96b398282e4e25cd6df662e7a02e8ff1afe881818127190979bddd2f6c4006"
 
 EXPECTED = {
-    "p1q_manifest": {
-        "filename": "P1Q_FIT2_CURRENT_AUTHORITY_MATERIALIZATION_MANIFEST.json",
-        "sha256": "c945377822561319c40e6e5774235ddb5a586cb230599c0939e100ccf32b14e4",
-    },
-    "foreground_manifest": {
-        "filename": "RUNTIME_FOREGROUND_ATLAS_MANIFEST.json",
-        "sha256": "5a331c2a73f2fa8b425dacdde1d4890fa55873d01856fe1d65153b3b03d797bf",
-    },
-    "assembly_manifest": {
-        "filename": "FIT2_COMPONENT_ASSEMBLY_MANIFEST.json",
-        "sha256": "b678f04b7d4248709f22de8a6397ef498cb7d4c4b78ef1954f2a42cc9125592f",
-    },
     "fit2_surface": {
         "filename": "CURRENT_FIT2_RIGGING_SURFACE_IR.json",
         "sha256": "170b8e4712fd78ef0721462f19f80ccb94eb008206fc6a7061908bfdc36f202f",
@@ -60,16 +40,21 @@ CAMERA_SHA256 = (
     "daa19fa58ff602977d64b720c4198956809855149d814df487c7762a963f1eec",
     "68f51fbfce4c31f94281e1569d74b44609435285668f8a8b1b278e76db6ea53f",
 )
+OBSERVATION_SHA256 = (
+    "8e9875c16bba3047c8f2fc211b984f2399d1145f5720c7427c6fc03a3fec0616",
+    "fa94283780d5e5f3ad3943bbffc1f0592a70fc362fdd03b94a1d1cb46889dc30",
+    "777bf4f7c505b405d3a5d2a111b2f297949454f77cae7c33064bf02479d384a5",
+    "2a771c91c1d1c0b75dab14f6e98b7905a8429bbf0c0a8dd690261f93f6476d86",
+    "354bb239feb6c1a515917fee4efb42fb1e0cb9f173d0eb3191fb0901a02a6228",
+    "158fc14a75aa69f6133f2ba3ec5df2ad146afc62f477d7d3b4a41ca2cb0e42f2",
+    "e3b08836c187863819d8b8aaa53aef79eddfee167e1fabf3fb1dd8ec0484563a",
+    "87d4ad46edffec3c6bff034d305194820288d3cc6ef9a9480ac2234fb56451bc",
+)
 
-# Anonymous skeleton/skin/camera lookup should never hash giant CanonicalPuppetGraph
-# files. The corrected surface is larger, but it is name-anchored above.
 MAX_ANONYMOUS_JSON_BYTES = 64 * 1024 * 1024
+MAX_OBSERVATION_BYTES = 32 * 1024 * 1024
 SKIP_DIR_NAMES = {
-    ".git",
-    "__pycache__",
-    "node_modules",
-    ".Trash",
-    ".shortcut-targets-by-id",
+    ".git", "__pycache__", "node_modules", ".Trash", ".shortcut-targets-by-id",
 }
 
 
@@ -121,20 +106,7 @@ def _walk_files(roots: Iterable[Path]):
                     continue
 
 
-def _name_anchors(files: tuple[Path, ...]):
-    by_name: dict[str, list[Path]] = {}
-    wanted = {
-        row["filename"]
-        for row in EXPECTED.values()
-        if row.get("filename")
-    }
-    for path in files:
-        if path.name in wanted:
-            by_name.setdefault(path.name, []).append(path)
-    return by_name
-
-
-def _choose_exact(paths: Iterable[Path], expected_sha: str, label: str) -> tuple[Path, tuple[Path, ...]]:
+def _choose_exact(paths: Iterable[Path], expected_sha: str, label: str):
     matches = []
     for path in paths:
         try:
@@ -144,126 +116,154 @@ def _choose_exact(paths: Iterable[Path], expected_sha: str, label: str) -> tuple
             continue
     if not matches:
         raise RuntimeError(f"MAGE_V4_INPUT_NOT_FOUND:{label}:{expected_sha}")
-    matches = sorted(set(matches), key=lambda p: str(p))
-    return matches[0], tuple(matches)
+    matches = tuple(sorted(set(matches), key=lambda p: str(p)))
+    return matches[0], matches
+
+
+def _p1q_manifest_valid(path: Path) -> bool:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return False
+    if payload.get("status") != P1Q_STATUS:
+        return False
+    if payload.get("teacher_truth_used") is not False:
+        return False
+    if payload.get("source_component_truth_used") is not False:
+        return False
+    if payload.get("current_gsa_lineage_hash") != EXPECTED_SURFACE_LINEAGE:
+        return False
+    if payload.get("current_skeleton_lineage_hash") != EXPECTED_SKELETON_LINEAGE:
+        return False
+    if payload.get("current_skin_lineage_hash") != EXPECTED_SKIN_LINEAGE:
+        return False
+    rows = {int(row.get("view", -1)): row for row in payload.get("views") or ()}
+    if set(rows) != set(range(8)):
+        return False
+    root = path.parent
+    for view in range(8):
+        files = dict(rows[view].get("files") or {})
+        for key in ("mesh", "skin", "appearance"):
+            name = str(files.get(key) or "")
+            if not name or not (root / name).is_file():
+                return False
+    return True
+
+
+def _choose_current_p1q(paths: Iterable[Path]):
+    valid = tuple(
+        sorted(
+            {path.resolve() for path in paths if _p1q_manifest_valid(path)},
+            key=lambda p: str(p),
+        )
+    )
+    if not valid:
+        raise RuntimeError("MAGE_V4_CURRENT_NO_TEACHER_P1Q_MANIFEST_NOT_FOUND")
+    by_sha: dict[str, list[Path]] = {}
+    for path in valid:
+        by_sha.setdefault(_sha(path), []).append(path)
+    if len(by_sha) != 1:
+        raise RuntimeError(
+            "MAGE_V4_CURRENT_P1Q_MANIFEST_AMBIGUOUS:"
+            + json.dumps({digest: [str(p) for p in rows] for digest, rows in sorted(by_sha.items())})
+        )
+    digest = next(iter(by_sha))
+    aliases = tuple(sorted(by_sha[digest], key=lambda p: str(p)))
+    return aliases[0], aliases, digest
 
 
 def resolve(search_roots: Iterable[Path]) -> dict:
     roots = tuple(Path(x).expanduser().resolve() for x in search_roots)
     files = tuple(_walk_files(roots))
-    anchors = _name_anchors(files)
 
-    resolved: dict[str, Path] = {}
-    aliases: dict[str, tuple[Path, ...]] = {}
+    p1q_candidates = tuple(path for path in files if path.name == P1Q_MANIFEST_NAME)
+    p1q_manifest, p1q_aliases, p1q_manifest_sha = _choose_current_p1q(p1q_candidates)
 
-    for label in ("p1q_manifest", "foreground_manifest", "assembly_manifest", "fit2_surface"):
-        spec = EXPECTED[label]
-        path, rows = _choose_exact(
-            anchors.get(str(spec["filename"]), ()),
-            str(spec["sha256"]),
-            label,
-        )
-        resolved[label] = path
-        aliases[label] = rows
+    surface_candidates = tuple(
+        path for path in files
+        if path.name == EXPECTED["fit2_surface"]["filename"]
+    )
+    fit2_surface, surface_aliases = _choose_exact(
+        surface_candidates,
+        EXPECTED["fit2_surface"]["sha256"],
+        "fit2_surface",
+    )
 
-    anonymous_targets = {
-        str(EXPECTED["skeleton"]["sha256"]): "skeleton",
-        str(EXPECTED["fit2_skin"]["sha256"]): "fit2_skin",
+    json_targets = {
+        EXPECTED["skeleton"]["sha256"]: "skeleton",
+        EXPECTED["fit2_skin"]["sha256"]: "fit2_skin",
         **{digest: f"camera_v{i}" for i, digest in enumerate(CAMERA_SHA256)},
     }
-    remaining = set(anonymous_targets)
-    digest_paths: dict[str, list[Path]] = {digest: [] for digest in remaining}
+    json_hits: dict[str, list[Path]] = {digest: [] for digest in json_targets}
+    observation_targets = {
+        digest: f"observation_v{i}" for i, digest in enumerate(OBSERVATION_SHA256)
+    }
+    observation_hits: dict[str, list[Path]] = {digest: [] for digest in observation_targets}
+
     for path in files:
-        if not remaining:
-            break
-        if path.suffix.lower() != ".json":
-            continue
+        suffix = path.suffix.lower()
         try:
             size = path.stat().st_size
         except OSError:
             continue
-        if size <= 0 or size > MAX_ANONYMOUS_JSON_BYTES:
-            continue
-        digest = _sha(path)
-        if digest in digest_paths:
-            digest_paths[digest].append(path)
-            remaining.discard(digest)
+        if suffix == ".json" and 0 < size <= MAX_ANONYMOUS_JSON_BYTES:
+            digest = _sha(path)
+            if digest in json_hits:
+                json_hits[digest].append(path)
+        elif suffix == ".png" and 0 < size <= MAX_OBSERVATION_BYTES:
+            digest = _sha(path)
+            if digest in observation_hits:
+                observation_hits[digest].append(path)
 
-    if remaining:
-        missing = {anonymous_targets[d]: d for d in sorted(remaining)}
-        raise RuntimeError("MAGE_V4_ANONYMOUS_INPUTS_NOT_FOUND:" + json.dumps(missing, sort_keys=True))
-
-    for digest, label in anonymous_targets.items():
-        rows = tuple(sorted(set(digest_paths[digest]), key=lambda p: str(p)))
+    resolved = {"fit2_surface": fit2_surface, "p1q_manifest": p1q_manifest}
+    aliases = {
+        "fit2_surface": surface_aliases,
+        "p1q_manifest": p1q_aliases,
+    }
+    for digest, label in json_targets.items():
+        rows = tuple(sorted(set(json_hits[digest]), key=lambda p: str(p)))
+        if not rows:
+            raise RuntimeError(f"MAGE_V4_INPUT_NOT_FOUND:{label}:{digest}")
+        resolved[label] = rows[0]
+        aliases[label] = rows
+    for digest, label in observation_targets.items():
+        rows = tuple(sorted(set(observation_hits[digest]), key=lambda p: str(p)))
         if not rows:
             raise RuntimeError(f"MAGE_V4_INPUT_NOT_FOUND:{label}:{digest}")
         resolved[label] = rows[0]
         aliases[label] = rows
 
-    p1q_dir = resolved["p1q_manifest"].parent
-    foreground_dir = resolved["foreground_manifest"].parent
-    assembly_dir = resolved["assembly_manifest"].parent
+    p1q_dir = p1q_manifest.parent
     cameras = tuple(resolved[f"camera_v{i}"] for i in range(8))
-
-    # Directory completeness is part of admission: resolve only a manifest whose
-    # referenced runtime source files are physically present.
-    p1q_required = [
-        p1q_dir / f"P1Q_FIT2_CURRENT_V{i}_QUALIFIED_MESH_IR.json"
-        for i in range(8)
-    ] + [
-        p1q_dir / f"P1Q_FIT2_CURRENT_V{i}_QUALIFIED_MESH_SKIN_IR.json"
-        for i in range(8)
-    ] + [
-        p1q_dir / f"P1Q_FIT2_CURRENT_V{i}_QUALIFIED_APPEARANCE_IR.json"
-        for i in range(8)
-    ]
-    foreground_required = [
-        foreground_dir / f"V{i}_MAGE_PRODUCT_ATLAS.png"
-        for i in range(8)
-    ]
-    assembly_required = [
-        assembly_dir / "FIT2_QUALIFIED_COMPONENT_ASSEMBLY.json",
-    ]
-    missing_files = [
-        str(path)
-        for path in (*p1q_required, *foreground_required, *assembly_required)
-        if not path.is_file()
-    ]
-    if missing_files:
-        raise RuntimeError(
-            "MAGE_V4_RESOLVED_DIRECTORY_INCOMPLETE:"
-            + json.dumps(missing_files[:32], sort_keys=True)
-        )
+    observations = tuple(resolved[f"observation_v{i}"] for i in range(8))
 
     result = {
         "schema": SCHEMA,
         "status": "PASS__EXACT_MAGE_RUNTIME_V4_INPUTS_RESOLVED",
         "search_roots": [str(path) for path in roots],
         "p1q_dir": str(p1q_dir),
-        "foreground_dir": str(foreground_dir),
-        "assembly_dir": str(assembly_dir),
+        "p1q_manifest_sha256": p1q_manifest_sha,
         "fit2_surface": str(resolved["fit2_surface"]),
         "skeleton": str(resolved["skeleton"]),
         "fit2_skin": str(resolved["fit2_skin"]),
         "cameras": [str(path) for path in cameras],
+        "observations": [str(path) for path in observations],
         "expected_hashes": {
-            "p1q_manifest": EXPECTED["p1q_manifest"]["sha256"],
-            "foreground_manifest": EXPECTED["foreground_manifest"]["sha256"],
-            "assembly_manifest": EXPECTED["assembly_manifest"]["sha256"],
             "fit2_surface": EXPECTED["fit2_surface"]["sha256"],
             "skeleton": EXPECTED["skeleton"]["sha256"],
             "fit2_skin": EXPECTED["fit2_skin"]["sha256"],
             "cameras": list(CAMERA_SHA256),
+            "observations": list(OBSERVATION_SHA256),
         },
         "aliases": {
             label: [str(path) for path in rows]
             for label, rows in sorted(aliases.items())
         },
+        "teacher_component_artifacts_resolved": False,
         "giant_product_graph_scanned": False,
         "anonymous_json_size_ceiling_bytes": MAX_ANONYMOUS_JSON_BYTES,
     }
     return result
-
 
 
 def validate_resolution(value: dict) -> dict:
@@ -271,57 +271,45 @@ def validate_resolution(value: dict) -> dict:
         raise RuntimeError("MAGE_V4_RESOLUTION_SCHEMA_INVALID")
     if value.get("status") != "PASS__EXACT_MAGE_RUNTIME_V4_INPUTS_RESOLVED":
         raise RuntimeError("MAGE_V4_RESOLUTION_STATUS_INVALID")
+    if value.get("teacher_component_artifacts_resolved") is not False:
+        raise RuntimeError("MAGE_V4_RESOLUTION_TEACHER_COMPONENT_ARTIFACT_FORBIDDEN")
 
-    expected_hashes = dict(value.get("expected_hashes") or {})
     canonical_expected = {
-        "p1q_manifest": EXPECTED["p1q_manifest"]["sha256"],
-        "foreground_manifest": EXPECTED["foreground_manifest"]["sha256"],
-        "assembly_manifest": EXPECTED["assembly_manifest"]["sha256"],
         "fit2_surface": EXPECTED["fit2_surface"]["sha256"],
         "skeleton": EXPECTED["skeleton"]["sha256"],
         "fit2_skin": EXPECTED["fit2_skin"]["sha256"],
         "cameras": list(CAMERA_SHA256),
+        "observations": list(OBSERVATION_SHA256),
     }
-    if expected_hashes != canonical_expected:
+    if dict(value.get("expected_hashes") or {}) != canonical_expected:
         raise RuntimeError("MAGE_V4_RESOLUTION_EXPECTED_HASH_POLICY_DRIFT")
 
     p1q_dir = Path(value["p1q_dir"]).expanduser().resolve()
-    foreground_dir = Path(value["foreground_dir"]).expanduser().resolve()
-    assembly_dir = Path(value["assembly_dir"]).expanduser().resolve()
+    p1q_manifest = p1q_dir / P1Q_MANIFEST_NAME
+    if not p1q_manifest.is_file() or not _p1q_manifest_valid(p1q_manifest):
+        raise RuntimeError("MAGE_V4_RESOLUTION_P1Q_POLICY_DRIFT")
+    if _sha(p1q_manifest) != str(value.get("p1q_manifest_sha256") or ""):
+        raise RuntimeError("MAGE_V4_RESOLUTION_P1Q_MANIFEST_SHA_DRIFT")
+
     exact_paths = {
-        "p1q_manifest": p1q_dir / EXPECTED["p1q_manifest"]["filename"],
-        "foreground_manifest": foreground_dir / EXPECTED["foreground_manifest"]["filename"],
-        "assembly_manifest": assembly_dir / EXPECTED["assembly_manifest"]["filename"],
         "fit2_surface": Path(value["fit2_surface"]).expanduser().resolve(),
         "skeleton": Path(value["skeleton"]).expanduser().resolve(),
         "fit2_skin": Path(value["fit2_skin"]).expanduser().resolve(),
     }
     for label, path in exact_paths.items():
-        if not path.is_file():
-            raise RuntimeError(f"MAGE_V4_RESOLUTION_CACHED_PATH_MISSING:{label}:{path}")
-        if _sha(path) != str(canonical_expected[label]):
+        if not path.is_file() or _sha(path) != str(canonical_expected[label]):
             raise RuntimeError(f"MAGE_V4_RESOLUTION_CACHED_SHA_DRIFT:{label}:{path}")
 
     cameras = tuple(Path(x).expanduser().resolve() for x in value.get("cameras") or ())
-    if len(cameras) != 8:
-        raise RuntimeError("MAGE_V4_RESOLUTION_CACHED_CAMERA_CARDINALITY")
+    observations = tuple(Path(x).expanduser().resolve() for x in value.get("observations") or ())
+    if len(cameras) != 8 or len(observations) != 8:
+        raise RuntimeError("MAGE_V4_RESOLUTION_CACHED_VIEW_CARDINALITY")
     for index, (path, expected) in enumerate(zip(cameras, CAMERA_SHA256)):
         if not path.is_file() or _sha(path) != expected:
             raise RuntimeError(f"MAGE_V4_RESOLUTION_CACHED_CAMERA_DRIFT:V{index}:{path}")
-
-    required = [
-        *(p1q_dir / f"P1Q_FIT2_CURRENT_V{i}_QUALIFIED_MESH_IR.json" for i in range(8)),
-        *(p1q_dir / f"P1Q_FIT2_CURRENT_V{i}_QUALIFIED_MESH_SKIN_IR.json" for i in range(8)),
-        *(p1q_dir / f"P1Q_FIT2_CURRENT_V{i}_QUALIFIED_APPEARANCE_IR.json" for i in range(8)),
-        *(foreground_dir / f"V{i}_MAGE_PRODUCT_ATLAS.png" for i in range(8)),
-        assembly_dir / "FIT2_QUALIFIED_COMPONENT_ASSEMBLY.json",
-    ]
-    missing = [str(path) for path in required if not path.is_file()]
-    if missing:
-        raise RuntimeError(
-            "MAGE_V4_RESOLUTION_CACHED_DIRECTORY_INCOMPLETE:"
-            + json.dumps(missing[:32], sort_keys=True)
-        )
+    for index, (path, expected) in enumerate(zip(observations, OBSERVATION_SHA256)):
+        if not path.is_file() or _sha(path) != expected:
+            raise RuntimeError(f"MAGE_V4_RESOLUTION_CACHED_OBSERVATION_DRIFT:V{index}:{path}")
     return value
 
 
@@ -353,10 +341,10 @@ if __name__ == "__main__":
     print(json.dumps({
         "output": str(output),
         "p1q_dir": result["p1q_dir"],
-        "foreground_dir": result["foreground_dir"],
-        "assembly_dir": result["assembly_dir"],
+        "p1q_manifest_sha256": result["p1q_manifest_sha256"],
         "fit2_surface": result["fit2_surface"],
         "skeleton": result["skeleton"],
         "fit2_skin": result["fit2_skin"],
         "cameras": result["cameras"],
+        "observations": result["observations"],
     }, indent=2, sort_keys=True))

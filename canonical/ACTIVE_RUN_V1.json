@@ -5,7 +5,7 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__SUBJECT_DATA_ONLY_IN_RUN_ARTIFACTS",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
-  "pipeline_plan_sha256": "f3253117a8a32769d344e477e1d163381570d9080a3730fa3814f347301d778f",
+  "pipeline_plan_sha256": "accc4b92b7828fe4fb5855e45bad272866faea79684444c2cfe6ab86f18d39ed",
   "status": "PREPARING_MAINLINE_ORCHESTRATOR",
   "completed_count": 0,
   "total_count": 40,
@@ -497,6 +497,10 @@
     {
       "event": "ACTIVE_RUN_CREATED",
       "note": "Architecture remains generic; Knight is run data, not product-code authority."
+    },
+    {
+      "event": "PLAN_INPUT_SCOPES_REFINED",
+      "note": "Stage fingerprints hash only declared manifest_keys; motion-only changes preserve sealed upstream S/G/W."
     }
   ]
 }

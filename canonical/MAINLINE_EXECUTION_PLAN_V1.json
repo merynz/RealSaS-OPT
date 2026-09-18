@@ -34,7 +34,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "source_files"
+      ]
     },
     {
       "ordinal": 2,
@@ -50,7 +53,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "source_license"
+      ]
     },
     {
       "ordinal": 3,
@@ -66,7 +72,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "source_audit"
+      ]
     },
     {
       "ordinal": 4,
@@ -82,7 +91,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "admission"
+      ]
     },
     {
       "ordinal": 5,
@@ -98,7 +110,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "observation"
+      ]
     },
     {
       "ordinal": 6,
@@ -114,7 +129,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "observation"
+      ]
     },
     {
       "ordinal": 7,
@@ -130,7 +148,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "observation"
+      ]
     },
     {
       "ordinal": 8,
@@ -146,7 +167,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "normalization"
+      ]
     },
     {
       "ordinal": 9,
@@ -162,7 +186,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "iris_fit"
+      ]
     },
     {
       "ordinal": 10,
@@ -178,7 +205,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "iris_fit"
+      ]
     },
     {
       "ordinal": 11,
@@ -194,7 +224,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "iris_fit"
+      ]
     },
     {
       "ordinal": 12,
@@ -210,7 +243,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "geometry_decode"
+      ]
     },
     {
       "ordinal": 13,
@@ -226,7 +262,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "geometry_gate"
+      ]
     },
     {
       "ordinal": 14,
@@ -242,7 +281,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "gsa"
+      ]
     },
     {
       "ordinal": 15,
@@ -258,7 +300,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "gsa"
+      ]
     },
     {
       "ordinal": 16,
@@ -274,7 +319,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "geppetto_fit"
+      ]
     },
     {
       "ordinal": 17,
@@ -290,7 +338,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "geppetto_fit"
+      ]
     },
     {
       "ordinal": 18,
@@ -306,7 +357,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "geppetto_fit"
+      ]
     },
     {
       "ordinal": 19,
@@ -322,7 +376,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "geppetto_fit"
+      ]
     },
     {
       "ordinal": 20,
@@ -338,7 +395,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "arachne_fit"
+      ]
     },
     {
       "ordinal": 21,
@@ -354,7 +414,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "arachne_fit"
+      ]
     },
     {
       "ordinal": 22,
@@ -370,7 +433,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "arachne_fit"
+      ]
     },
     {
       "ordinal": 23,
@@ -386,7 +452,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "arachne_fit"
+      ]
     },
     {
       "ordinal": 24,
@@ -402,7 +471,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "components"
+      ]
     },
     {
       "ordinal": 25,
@@ -418,7 +490,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "components"
+      ]
     },
     {
       "ordinal": 26,
@@ -434,7 +509,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "drawable"
+      ]
     },
     {
       "ordinal": 27,
@@ -450,7 +528,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "drawable"
+      ]
     },
     {
       "ordinal": 28,
@@ -466,7 +547,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "drawable"
+      ]
     },
     {
       "ordinal": 29,
@@ -482,7 +566,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "drawable"
+      ]
     },
     {
       "ordinal": 30,
@@ -498,7 +585,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "appearance"
+      ]
     },
     {
       "ordinal": 31,
@@ -514,7 +604,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "appearance"
+      ]
     },
     {
       "ordinal": 32,
@@ -530,7 +623,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "appearance"
+      ]
     },
     {
       "ordinal": 33,
@@ -546,7 +642,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "motion"
+      ]
     },
     {
       "ordinal": 34,
@@ -562,7 +661,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "motion"
+      ]
     },
     {
       "ordinal": 35,
@@ -578,7 +680,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "motion"
+      ]
     },
     {
       "ordinal": 36,
@@ -594,7 +699,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "runtime"
+      ]
     },
     {
       "ordinal": 37,
@@ -610,7 +718,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "runtime"
+      ]
     },
     {
       "ordinal": 38,
@@ -626,7 +737,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "runtime"
+      ]
     },
     {
       "ordinal": 39,
@@ -642,7 +756,11 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
-      }
+      },
+      "manifest_keys": [
+        "runtime",
+        "visual"
+      ]
     },
     {
       "ordinal": 40,
@@ -658,7 +776,10 @@
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": true
-      }
+      },
+      "manifest_keys": [
+        "closure"
+      ]
     }
   ]
 }

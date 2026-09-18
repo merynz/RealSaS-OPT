@@ -1,0 +1,79 @@
+name: mainline-e2e-orchestrator
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Exact active run id
+        required: true
+        default: SUBJECT2_KNIGHT_V1
+      from_stage:
+        description: Optional exact stage id to start from
+        required: false
+        default: ''
+      to_stage:
+        description: Optional exact stage id to stop after
+        required: false
+        default: ''
+      no_resume:
+        description: Force execution instead of reusing verified PASS stages
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: realsas-mainline-e2e
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 360
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned mainline dependencies
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Validate exact 40-stage plan and ledger
+        run: python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
+      - name: Print resumable stage board
+        run: python -m compiler.realsas_compiler_services.orchestrator.mainline status
+      - name: Execute or resume exact active run
+        shell: bash
+        run: |
+          args=(execute --run-id "${{ inputs.run_id }}")
+          if [ -n "${{ inputs.from_stage }}" ]; then args+=(--from-stage "${{ inputs.from_stage }}"); fi
+          if [ -n "${{ inputs.to_stage }}" ]; then args+=(--to-stage "${{ inputs.to_stage }}"); fi
+          if [ "${{ inputs.no_resume }}" = "true" ]; then args+=(--no-resume); fi
+          python -m compiler.realsas_compiler_services.orchestrator.mainline "${args[@]}"
+      - name: Persist exact progress ledger
+        if: always()
+        shell: bash
+        run: |
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status || true
+          if git diff --quiet -- canonical/ACTIVE_RUN_V1.json; then
+            echo 'Active-run ledger unchanged.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
+          git add canonical/ACTIVE_RUN_V1.json
+          git commit -m 'run: update active execution ledger [skip ci]'
+          git pull --rebase origin main
+          git push origin HEAD:main

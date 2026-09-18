@@ -1,0 +1,95 @@
+{
+  "schema": "RealSaS.RenderArchitectureComparisonMatrix.v1",
+  "date": "2026-09-18",
+  "status": "REFERENCE_BASELINE_DEFINED__PEPPER_ROOT_CAUSE_OPEN",
+  "execution_authority": {
+    "playback_render": "SELF_HOSTED_REALSAS_RUNNER_ONLY",
+    "colab": "MODEL_TRAINING_OR_GPU_INFERENCE_ONLY__NOT_PLAYBACK_AUTHORITY"
+  },
+  "retired_active_prerequisite": "compiler/realsas_compiler_core/playback_directional_assembly_cert_v1.py",
+  "reference_rules": {
+    "global_boundary_manifold_required": false,
+    "continuous_embedding_theorem_required_for_raster": false,
+    "fixed_attachment_topology": true,
+    "crack_free_shared_edge_rule": "TOP_LEFT_HALF_OPEN",
+    "backface_culling_default": false,
+    "dynamic_geometry_quality_owner": "COMPILER_PRODUCT_QUALITY"
+  },
+  "systems": [
+    {
+      "system": "Spine",
+      "input": "artist layers/mesh/rig",
+      "mesh_authority": "editor-authored triangulation",
+      "rig_skin": "artist/editor",
+      "runtime": "deform + explicit slot draw order + raster",
+      "compiler_authority_layer": false
+    },
+    {
+      "system": "Live2D Cubism",
+      "input": "artist art layers",
+      "mesh_authority": "ArtMesh/editor",
+      "rig_skin": "deformers/parameters",
+      "runtime": "ArtMesh deformation + draw order/clipping/culling",
+      "compiler_authority_layer": false
+    },
+    {
+      "system": "Rive",
+      "input": "raster/vector art",
+      "mesh_authority": "editor mesh",
+      "rig_skin": "bones + vertex weights",
+      "runtime": "deform + raster",
+      "compiler_authority_layer": false
+    },
+    {
+      "system": "CharacterGen",
+      "input": "single image",
+      "mesh_authority": "learned multiview reconstruction -> triplane SDF -> DMTet explicit mesh",
+      "rig_skin": "downstream external rigging",
+      "runtime": "standard downstream 3D pipeline",
+      "compiler_authority_layer": false
+    },
+    {
+      "system": "RigAnything",
+      "input": "3D mesh",
+      "mesh_authority": "input mesh",
+      "rig_skin": "learned skeleton + skinning",
+      "runtime": "standard downstream 3D pipeline",
+      "compiler_authority_layer": false
+    },
+    {
+      "system": "UniRig",
+      "input": "3D mesh",
+      "mesh_authority": "input mesh",
+      "rig_skin": "autoregressive skeleton + cross-attention skinning",
+      "runtime": "standard downstream 3D pipeline",
+      "compiler_authority_layer": false
+    },
+    {
+      "system": "SkinTokens/TokenRig",
+      "input": "3D mesh",
+      "mesh_authority": "input mesh",
+      "rig_skin": "unified autoregressive skeleton + discrete skin tokens",
+      "runtime": "standard downstream 3D pipeline",
+      "compiler_authority_layer": false
+    },
+    {
+      "system": "RealSaS",
+      "input": "multi-view observations + camera/evidence contracts",
+      "mesh_authority": "model/geometric evidence -> Compiler-qualified directional drawable mesh",
+      "rig_skin": "qualified skeleton/skin evidence -> Compiler IR -> deterministic mesh-skin binding",
+      "runtime": "sealed Compiler projection -> native sample/raster/compose",
+      "compiler_authority_layer": true
+    }
+  ],
+  "realsas_unique_seams": [
+    "MODEL_EVIDENCE_NOT_RUNTIME_TRUTH",
+    "SEPARATE_SURFACE_SKELETON_SKIN_MESH_QUALIFICATION",
+    "DETERMINISTIC_SURFACE_TO_DRAWABLE_MESH_SKIN_BINDING",
+    "SOURCE_PIXEL_AND_DONOR_PROVENANCE",
+    "VIEW_LOCAL_RUNTIME_ATTACHMENTS_FROM_MULTI_VIEW_AUTHORITY",
+    "NO_MODEL_SOLVER_OR_COMPLETION_IN_RUNTIME",
+    "HASHED_COMPILER_TO_RUNTIME_LINEAGE"
+  ],
+  "next_gate": "SELF_HOSTED_REFERENCE_RENDER_CONFORMANCE_THEN_PIXEL_OWNER_DIAGNOSTIC",
+  "product_pass_claimed": false
+}

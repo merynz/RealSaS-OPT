@@ -4,21 +4,11 @@ from dataclasses import replace
 from types import SimpleNamespace
 
 import numpy as np
-import pytest
-
 from compiler.realsas_compiler_core.hashing import content_sha256
-from compiler.realsas_compiler_core.playback_directional_assembly_cert_v1 import (
-    _source_topology_boundary_edges,
-    certify_directional_runtime_v4_assembly_v1,
-)
-from compiler.realsas_compiler_core.playback_directional_motion_cert_v1 import (
-    _boundary_edges,
-)
 from compiler.realsas_compiler_core.playback_full_surface_v3 import (
     CameraProjectionV3,
     project_points_xyz_v3,
 )
-from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.export.current_v4_directional_runtime_v4 import (
     project_directional_product_bakes_to_runtime_v4,
 )
@@ -65,8 +55,19 @@ def _texture(index: int) -> RuntimeTexturePayloadV1:
     )
 
 
-def _component(view: int, component_id: str, setup_order: int, atlas_hash: str):
-    xy = ((10.0, 10.0), (22.0, 10.0), (10.0, 22.0))
+def _component(
+    view: int,
+    component_id: str,
+    setup_order: int,
+    atlas_hash: str,
+    *,
+    pinched: bool = False,
+):
+    xy = (
+        ((10.0, 10.0), (22.0, 10.0), (10.0, 22.0), (34.0, 10.0), (34.0, 22.0))
+        if pinched
+        else ((10.0, 10.0), (22.0, 10.0), (10.0, 22.0))
+    )
     vertices = tuple(
         SimpleNamespace(
             canonical_mesh_vertex_id=f"{component_id}:V{view}:{i}",
@@ -75,10 +76,17 @@ def _component(view: int, component_id: str, setup_order: int, atlas_hash: str):
         )
         for i, p in enumerate(xy)
     )
-    face = tuple(v.canonical_mesh_vertex_id for v in vertices)
+    faces = (
+        (
+            (vertices[0].canonical_mesh_vertex_id, vertices[1].canonical_mesh_vertex_id, vertices[2].canonical_mesh_vertex_id),
+            (vertices[0].canonical_mesh_vertex_id, vertices[3].canonical_mesh_vertex_id, vertices[4].canonical_mesh_vertex_id),
+        )
+        if pinched
+        else ((vertices[0].canonical_mesh_vertex_id, vertices[1].canonical_mesh_vertex_id, vertices[2].canonical_mesh_vertex_id),)
+    )
     mesh = SimpleNamespace(
         vertices=vertices,
-        faces=(face,),
+        faces=faces,
         view_index=view,
         mesh_lineage_hash=content_sha256({"mesh": component_id, "view": view}),
         qualification_report={
@@ -90,16 +98,21 @@ def _component(view: int, component_id: str, setup_order: int, atlas_hash: str):
         mesh_skin_lineage_hash=content_sha256({"skin": component_id, "view": view}),
         metadata={"parent_joint_id": "root"} if component_id != BODY else {},
     )
+    vertex_raster = {
+        vertex.canonical_mesh_vertex_id: xy[i]
+        for i, vertex in enumerate(vertices)
+    }
     corners = tuple(
         SimpleNamespace(
-            face_index=0,
-            corner_index=i,
+            face_index=face_index,
+            corner_index=corner_index,
             material_uv=(0.0, 0.0),
             donor_view_index=view,
-            donor_raster_xy=xy[i],
+            donor_raster_xy=vertex_raster[vertex_id],
             authority_class="OBSERVED_LOCAL",
         )
-        for i in range(3)
+        for face_index, face in enumerate(faces)
+        for corner_index, vertex_id in enumerate(face)
     )
     appearance = SimpleNamespace(
         target_view_index=view,
@@ -118,11 +131,17 @@ def _component(view: int, component_id: str, setup_order: int, atlas_hash: str):
     )
 
 
-def _fixture(*, body_first: bool = True):
+def _fixture(*, body_first: bool = True, pinched_body: bool = False):
     textures = tuple(_texture(i) for i in range(2))
     directions = []
     for view in range(2):
-        body = _component(view, BODY, 0, textures[view].atlas_payload_hash)
+        body = _component(
+            view,
+            BODY,
+            0,
+            textures[view].atlas_payload_hash,
+            pinched=pinched_body,
+        )
         fg = _component(view, FG, 1, textures[view].atlas_payload_hash)
         directions.append(SimpleNamespace(
             view_index=view,
@@ -174,13 +193,24 @@ def _fixture(*, body_first: bool = True):
         for component_id in (BODY, FG):
             mesh_id = f"V{view}:{component_id}"
             offset = 0.0 if component_id == BODY else 4.0
-            pts = (
-                (10.0 + offset, 10.0),
-                (22.0 + offset, 10.0),
-                (10.0 + offset, 22.0),
-            )
+            if component_id == BODY and pinched_body:
+                pts = (
+                    (10.0, 10.0),
+                    (22.0, 10.0),
+                    (10.0, 22.0),
+                    (34.0, 10.0),
+                    (34.0, 22.0),
+                )
+                tris = ((0, 1, 2), (0, 3, 4))
+            else:
+                pts = (
+                    (10.0 + offset, 10.0),
+                    (22.0 + offset, 10.0),
+                    (10.0 + offset, 22.0),
+                )
+                tris = ((0, 1, 2),)
             rest[mesh_id] = pts
-            triangles[mesh_id] = ((0, 1, 2),)
+            triangles[mesh_id] = tris
 
     for time_seconds, delta in ((0.0, 0.0), (1.0, 1.0)):
         meshes = {
@@ -219,30 +249,6 @@ def _fixture(*, body_first: bool = True):
     return product, (bake,), textures, cameras
 
 
-def test_source_topology_boundary_collapses_runtime_uv_seam_vertex_splits():
-    # Runtime appearance vertices 0 and 3 are the same source/mechanical vertex.
-    # Vertex 2 remains shared, so raw runtime topology sees a degree-4 branch.
-    triangles = np.asarray(((0, 1, 2), (3, 2, 4)), dtype=np.uint32)
-    runtime_source_indices = (0, 1, 2, 0, 3)
-
-    with pytest.raises(
-        QualificationError,
-        match="DIRECTIONAL_BODY_OPEN_OR_BRANCHING_BOUNDARY",
-    ):
-        _boundary_edges(triangles)
-
-    boundary = _source_topology_boundary_edges(
-        triangles,
-        runtime_source_indices,
-    )
-    assert set(tuple(sorted(edge)) for edge in boundary) == {
-        (0, 1),
-        (0, 4),
-        (1, 2),
-        (2, 4),
-    }
-
-
 def test_directional_assembly_bridge_roundtrips_qualification_bake_xy_exactly():
     product, bakes, textures, cameras = _fixture()
     projection = project_directional_product_bakes_to_runtime_v4(
@@ -275,8 +281,11 @@ def test_directional_assembly_bridge_roundtrips_qualification_bake_xy_exactly():
             assert np.allclose(actual, expected, atol=2e-5, rtol=0.0)
 
 
-def test_full_directional_assembly_certificate_passes_source_backed_continuous_fixture():
-    product, bakes, textures, cameras = _fixture()
+
+def test_reference_runtime_projection_accepts_pinched_triangle_soup_without_global_boundary_theorem():
+    # Two body triangles share one canonical vertex and otherwise form separate fans.
+    # This is legal raster input; no single degree-2 global boundary loop is required.
+    product, bakes, textures, cameras = _fixture(pinched_body=True)
     projection = project_directional_product_bakes_to_runtime_v4(
         product=product,
         motion_bakes=bakes,
@@ -285,78 +294,12 @@ def test_full_directional_assembly_certificate_passes_source_backed_continuous_f
         required_view_ids=VIEWS,
         body_component_id=BODY,
     )
-    cert = certify_directional_runtime_v4_assembly_v1(
-        product=product,
-        projection=projection,
-        clip_id="idle",
-        required_view_ids=VIEWS,
-        body_component_id=BODY,
-        min_body_source_alpha_recall=0.99,
-        min_body_source_precision=0.99,
-    )
-    assert cert.source_backed_active_faces_certified
-    assert cert.continuity_underlay_certified
-    assert cert.continuous_embedding_certified
-    assert cert.body_underlay_always_active_first
-    assert cert.active_asset_interval_count == 4
+    assert len(projection.clips) == 1
+    assert projection.clips[0].runtime_qualified is False
+    body_assets = [
+        asset for asset in projection.contract.assets
+        if asset.slot_id == BODY
+    ]
+    assert len(body_assets) == len(VIEWS)
+    assert all(asset.face_count == 2 for asset in body_assets)
 
-
-def test_full_directional_assembly_certificate_rejects_foreground_before_body():
-    product, bakes, textures, cameras = _fixture(body_first=False)
-    projection = project_directional_product_bakes_to_runtime_v4(
-        product=product,
-        motion_bakes=bakes,
-        texture_bindings=textures,
-        cameras=cameras,
-        required_view_ids=VIEWS,
-        body_component_id=BODY,
-    )
-    with pytest.raises(QualificationError, match="DIRECTIONAL_ASSEMBLY_CERT_BODY_NOT_FIRST"):
-        certify_directional_runtime_v4_assembly_v1(
-            product=product,
-            projection=projection,
-            clip_id="idle",
-            required_view_ids=VIEWS,
-            body_component_id=BODY,
-        )
-
-
-def test_full_directional_assembly_certificate_rejects_underlay_that_generates_pixels():
-    product, bakes, textures, cameras = _fixture()
-    metadata = dict(product.directional_renderables.metadata)
-    payload = dict(metadata["mechanical_continuity_underlay"])
-    rows = [dict(row) for row in payload["views"]]
-    rows[0] = dict(rows[0])
-    rows[0]["metadata"] = {
-        **dict(rows[0]["metadata"]),
-        "new_pixels_generated": True,
-    }
-    payload["views"] = tuple(rows)
-    metadata["mechanical_continuity_underlay"] = payload
-    bad_product = SimpleNamespace(
-        product_state_hash=product.product_state_hash,
-        directional_renderables=SimpleNamespace(
-            directions=product.directional_renderables.directions,
-            metadata=metadata,
-        ),
-        mechanical_state=product.mechanical_state,
-    )
-    projection = project_directional_product_bakes_to_runtime_v4(
-        product=bad_product,
-        motion_bakes=bakes,
-        texture_bindings=textures,
-        cameras=cameras,
-        required_view_ids=VIEWS,
-        body_component_id=BODY,
-    )
-    with pytest.raises(
-        QualificationError,
-        match="DIRECTIONAL_ASSEMBLY_CERT_UNDERLAY_NEW_PIXELS_FORBIDDEN",
-    ):
-        certify_directional_runtime_v4_assembly_v1(
-            product=bad_product,
-            projection=projection,
-            clip_id="idle",
-            required_view_ids=VIEWS,
-            body_component_id=BODY,
-        )

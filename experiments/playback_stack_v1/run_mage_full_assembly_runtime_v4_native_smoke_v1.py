@@ -8,7 +8,11 @@ One execution owns the whole product smoke path:
 
 The render authority is intentionally NOT a ProductProofBundle. The legacy Runtime-v4
 binary field named source_proof_bundle_hash transports the hash, while source_binding
-and package manifest explicitly type it as RUNTIME_V4_ADMISSION_CERTIFICATE.
+and package manifest explicitly type it as a reference-render input authority.
+
+Dynamic geometry quality is deliberately separate: this smoke proves package/native
+execution of the exact Compiler projection; it does not turn a boundary-manifold or
+continuous-embedding theorem into a renderer prerequisite.
 """
 
 import argparse
@@ -33,9 +37,9 @@ from compiler.realsas_compiler_services.export.runtime_v4_cache import (
 
 import experiments.playback_stack_v1.run_mage_full_assembly_runtime_v4_admission_v1 as admission
 
-SCHEMA = "RealSaS.MageFullAssemblyRuntimeV4NativeSmoke.v1"
-AUTHORITY_SCHEMA = "RealSaS.MageRuntimeV4NativeRenderAuthority.v1"
-AUTHORITY_KIND = "RUNTIME_V4_ADMISSION_CERTIFICATE"
+SCHEMA = "RealSaS.MageFullAssemblyRuntimeV4NativeSmoke.v2"
+AUTHORITY_SCHEMA = "RealSaS.MageRuntimeV4NativeRenderAuthority.v2"
+AUTHORITY_KIND = "RUNTIME_V4_REFERENCE_RENDER_INPUT_AUTHORITY"
 
 
 def _sha(path: Path) -> str:
@@ -56,20 +60,20 @@ def _write_json(path: Path, value) -> None:
     tmp.replace(path)
 
 
-def _promote_certified_clips(projection, certificates):
-    certified = {row.clip_id: row for row in certificates}
+def _promote_reference_input_clips(projection):
+    # runtime_qualified here means structurally executable by the sealed Runtime-v4
+    # contract. It is not a product-quality or topology theorem.
+    validate_playback_runtime_v4_contract(
+        projection.contract,
+        required_view_ids=admission.VIEW_IDS,
+    )
     clips = []
     for clip in projection.clips:
-        cert = certified.get(clip.clip_id)
-        if cert is None:
-            raise RuntimeError(f"MAGE_V4_NATIVE_CERTIFICATE_MISSING:{clip.clip_id}")
-        if not (
-            cert.source_backed_active_faces_certified
-            and cert.continuity_underlay_certified
-            and cert.continuous_embedding_certified
-            and cert.body_underlay_always_active_first
-        ):
-            raise RuntimeError(f"MAGE_V4_NATIVE_CERTIFICATE_NOT_PASS:{clip.clip_id}")
+        validate_runtime_v4_clip(
+            projection.contract,
+            clip,
+            required_view_ids=admission.VIEW_IDS,
+        )
         promoted = replace(clip, runtime_qualified=True)
         validate_runtime_v4_clip(
             projection.contract,
@@ -230,13 +234,12 @@ def run(args):
     )
     admitted["args"] = args
     report = admitted["report"]
-    if report.get("status") != "PASS__FULL_MAGE_RUNTIME_V4_RENDER_ADMITTED":
+    if report.get("status") != admission.PASS_STATUS:
         raise RuntimeError("MAGE_V4_NATIVE_ADMISSION_STATUS_NOT_PASS")
 
     projection = admitted["projection"]
     product = admitted["product"]
-    certificates = admitted["certificates"]
-    promoted_clips = _promote_certified_clips(projection, certificates)
+    promoted_clips = _promote_reference_input_clips(projection)
     contract_hash = validate_playback_runtime_v4_contract(
         projection.contract,
         required_view_ids=admission.VIEW_IDS,
@@ -253,14 +256,15 @@ def run(args):
         "runtime_v4_projection_hash": projection.projection_hash,
         "playback_contract_hash": contract_hash,
         "runtime_qualified_clip_ids": [clip.clip_id for clip in promoted_clips],
-        "certificate_hashes": {
-            row.clip_id: row.certificate_hash for row in certificates
-        },
+        "reference_input_contract_hash": admitted["playback_contract_hash"],
+        "global_boundary_manifold_required": False,
+        "continuous_embedding_theorem_required": False,
+        "dynamic_geometry_quality_claimed": False,
         "full_product_proof_claimed": False,
         "product_pass_claimed": False,
         "completion_used": False,
         "new_pixels_generated": False,
-        "authorization_scope": "NATIVE_RUNTIME_V4_VISUAL_SMOKE_AFTER_RENDER_FREE_ADMISSION",
+        "authorization_scope": "NATIVE_RUNTIME_V4_REFERENCE_RENDER_INPUT_EXECUTION_ONLY",
     }
     authority_path = output_dir / "MAGE_RUNTIME_V4_NATIVE_RENDER_AUTHORITY_V1.json"
     _write_json(authority_path, authority)
@@ -402,9 +406,6 @@ def parse_args():
     p.add_argument("--expected-foreground-manifest", default="")
     p.add_argument("--expected-assembly-manifest", default="")
     p.add_argument("--output-dir", required=True)
-    p.add_argument("--min-body-source-recall", type=float, default=0.97)
-    p.add_argument("--min-body-source-precision", type=float, default=0.995)
-    p.add_argument("--min-signed-area2", type=float, default=1.0e-4)
     p.add_argument("--cache-root", default="")
     p.add_argument("--runtime-demo", default="")
     p.add_argument("--render-sample-count", type=int, default=9)

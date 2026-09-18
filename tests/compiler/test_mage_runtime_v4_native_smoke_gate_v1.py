@@ -52,3 +52,12 @@ def test_native_smoke_cannot_package_or_render_before_exact_admission_pass(monke
         smoke.run(args)
 
     assert calls == {"package": 0, "stage": 0}
+
+
+def test_reference_render_admission_has_no_global_boundary_certificate_dependency():
+    # Regression guard: renderer admission is structural/source-authority validation.
+    # Dynamic topology/conditioning diagnostics may exist separately but may not become
+    # an implicit prerequisite for triangle rasterization.
+    assert not hasattr(admission, "certify_directional_runtime_v4_assembly_v1")
+    assert admission.SCHEMA.endswith(".v2")
+    assert "REFERENCE_INPUT_ADMITTED" in admission.PASS_STATUS

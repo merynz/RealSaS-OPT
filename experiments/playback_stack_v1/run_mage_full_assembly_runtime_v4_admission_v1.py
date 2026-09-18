@@ -1,15 +1,18 @@
 from __future__ import annotations
 
-"""Render-free full-Mage Runtime-v4 admission over current qualified product state.
+"""Reference-input admission for the complete Mage Runtime-v4 render path.
 
 This stage deliberately does not run the full product proof engine and does not render.
 It rebuilds the current bounded Mage product from its existing qualified artifacts,
-derives the current Compiler-qualified directional joint/view binding, evaluates only
-the two historical motion clips into qualification-owned bakes, projects those exact
-bakes into Runtime-v4 view-local directional attachments, and runs the continuous
-full-assembly certificate.
+derives the Compiler-qualified directional joint/view binding, evaluates the two
+historical motion clips into qualification-owned bakes, and projects those exact bakes
+into Runtime-v4 view-local directional attachments.
 
-The output is an admission artifact, not PRODUCT_PASS.
+Renderer/input correctness is validated through the Runtime-v4 contract. Global
+boundary-manifold and continuous-embedding theorems are not renderer prerequisites.
+Dynamic geometry quality remains a separate Compiler/product-quality concern.
+
+The output authorizes a reference/native render attempt. It is not PRODUCT_PASS.
 """
 
 import argparse
@@ -23,8 +26,9 @@ from compiler.realsas_compiler_core.directional_binding import (
     qualify_directional_joint_view_binding,
 )
 from compiler.realsas_compiler_core.hashing import content_sha256
-from compiler.realsas_compiler_core.playback_directional_assembly_cert_v1 import (
-    certify_directional_runtime_v4_assembly_v1,
+from compiler.realsas_compiler_core.playback_runtime_v4 import (
+    validate_playback_runtime_v4_contract,
+    validate_runtime_v4_clip,
 )
 from compiler.realsas_compiler_core.v4 import bind_proof_plan
 from compiler.realsas_compiler_services.export.current_v4_directional_runtime_v4 import (
@@ -40,7 +44,8 @@ from compiler.realsas_compiler_services.proof.directional_motion_provider import
 
 import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_v3_motion_engine as product_v3
 
-SCHEMA = "RealSaS.MageFullAssemblyRuntimeV4Admission.v1"
+SCHEMA = "RealSaS.MageFullAssemblyRuntimeV4Admission.v2"
+PASS_STATUS = "PASS__FULL_MAGE_RUNTIME_V4_REFERENCE_INPUT_ADMITTED"
 REQUIRED_CLIPS = ("mage_fit1_idle_v2", "mage_fit1_run_v2")
 VIEW_IDS = tuple(f"V{i}" for i in range(8))
 
@@ -211,38 +216,27 @@ def run(args) -> dict:
         flush=True,
     )
 
-    certificates = []
-    for clip_id in REQUIRED_CLIPS:
-        stage_t0 = perf_counter()
-        print(f"MAGE_V4_ADMISSION_STAGE=CERT_START clip={clip_id}", flush=True)
-        certificates.append(
-            certify_directional_runtime_v4_assembly_v1(
-                product=product,
-                projection=projection,
-                clip_id=clip_id,
-                min_body_source_alpha_recall=float(args.min_body_source_recall),
-                min_body_source_precision=float(args.min_body_source_precision),
-                min_signed_area2=float(args.min_signed_area2),
-                required_view_ids=VIEW_IDS,
-                body_component_id=BODY_COMPONENT_ID,
-            )
+    stage_t0 = perf_counter()
+    print("MAGE_V4_ADMISSION_STAGE=REFERENCE_INPUT_VALIDATION_START", flush=True)
+    playback_contract_hash = validate_playback_runtime_v4_contract(
+        projection.contract,
+        required_view_ids=VIEW_IDS,
+    )
+    clip_ids = tuple(clip.clip_id for clip in projection.clips)
+    if set(clip_ids) != set(REQUIRED_CLIPS) or len(clip_ids) != len(REQUIRED_CLIPS):
+        raise RuntimeError("MAGE_V4_ADMISSION_RUNTIME_CLIP_SET_DRIFT")
+    for clip in projection.clips:
+        if clip.runtime_qualified:
+            raise RuntimeError("MAGE_V4_ADMISSION_PREMATURE_RUNTIME_QUALIFICATION")
+        validate_runtime_v4_clip(
+            projection.contract,
+            clip,
+            required_view_ids=VIEW_IDS,
         )
-        print(
-            f"MAGE_V4_ADMISSION_STAGE=CERT_PASS clip={clip_id} elapsed_s={perf_counter()-stage_t0:.3f}",
-            flush=True,
-        )
-
-    cert_by_clip = {row.clip_id: row for row in certificates}
-    if set(cert_by_clip) != set(REQUIRED_CLIPS):
-        raise RuntimeError("MAGE_V4_ADMISSION_CERTIFICATE_CLIP_SET_DRIFT")
-    if not all(
-        row.source_backed_active_faces_certified
-        and row.continuity_underlay_certified
-        and row.continuous_embedding_certified
-        and row.body_underlay_always_active_first
-        for row in certificates
-    ):
-        raise RuntimeError("MAGE_V4_ADMISSION_CERTIFICATE_NOT_PASS")
+    print(
+        f"MAGE_V4_ADMISSION_STAGE=REFERENCE_INPUT_VALIDATION_PASS elapsed_s={perf_counter()-stage_t0:.3f}",
+        flush=True,
+    )
 
     # Persist typed admission evidence. Rendering is a downstream consumer and must
     # refuse to run unless this report is present and status is exact PASS.
@@ -253,7 +247,7 @@ def run(args) -> dict:
 
     report = {
         "schema": SCHEMA,
-        "status": "PASS__FULL_MAGE_RUNTIME_V4_RENDER_ADMITTED",
+        "status": PASS_STATUS,
         "subject_id": "MAGE_FIT2_CURRENT_FULL_ASSEMBLY",
         "scope": "RENDER_FREE_RUNTIME_V4_ADMISSION",
         "source_product_state_hash": product.product_state_hash,
@@ -281,20 +275,17 @@ def run(args) -> dict:
             }
             for plan, bake in zip(plans, bakes)
         },
-        "certificates": {
-            row.clip_id: {
-                "certificate_hash": row.certificate_hash,
-                "source_backed_active_faces_certified": row.source_backed_active_faces_certified,
-                "continuity_underlay_certified": row.continuity_underlay_certified,
-                "continuous_embedding_certified": row.continuous_embedding_certified,
-                "body_underlay_always_active_first": row.body_underlay_always_active_first,
-                "body_source_alpha_recall_floor": row.body_source_alpha_recall_floor,
-                "body_source_precision_floor": row.body_source_precision_floor,
-                "min_signed_area2_margin": row.min_signed_area2_margin,
-                "min_boundary_distance_at_critical_times": row.min_boundary_distance_at_critical_times,
-                "active_asset_interval_count": row.active_asset_interval_count,
-            }
-            for row in certificates
+        "reference_render_input_validation": {
+            "playback_contract_hash": playback_contract_hash,
+            "clip_ids": list(clip_ids),
+            "fixed_runtime_topology_required": True,
+            "typed_source_provenance_required": True,
+            "explicit_slot_draw_order_required": True,
+            "completion_allowed": False,
+            "global_boundary_manifold_required": False,
+            "continuous_embedding_theorem_required": False,
+            "dynamic_geometry_quality_claimed": False,
+            "dynamic_geometry_quality_owner": "COMPILER_PRODUCT_QUALITY_SEPARATE_FROM_RASTER_CORRECTNESS",
         },
         "source_hashes": dict(state["source_hashes"]),
         "completion_used": False,
@@ -304,11 +295,10 @@ def run(args) -> dict:
         "render_executed": False,
         "gif_executed": False,
         "render_gate": {
-            "required_status": "PASS__FULL_MAGE_RUNTIME_V4_RENDER_ADMITTED",
+            "required_status": PASS_STATUS,
             "required_projection_hash": projection.projection_hash,
-            "required_certificate_hashes": {
-                row.clip_id: row.certificate_hash for row in certificates
-            },
+            "required_playback_contract_hash": playback_contract_hash,
+            "topology_quality_theorem_required": False,
         },
     }
     report_path = out / "MAGE_FULL_ASSEMBLY_RUNTIME_V4_ADMISSION_V1.json"
@@ -319,9 +309,7 @@ def run(args) -> dict:
         "report_sha256": _sha(report_path),
         "product_state_hash": product.product_state_hash,
         "projection_hash": projection.projection_hash,
-        "certificates": {
-            row.clip_id: row.certificate_hash for row in certificates
-        },
+        "playback_contract_hash": playback_contract_hash,
     }, indent=2, sort_keys=True))
     return {
         "report": report,
@@ -334,7 +322,7 @@ def run(args) -> dict:
         "provider": provider,
         "plans": plans,
         "bakes": bakes,
-        "certificates": tuple(certificates),
+        "playback_contract_hash": playback_contract_hash,
         "textures": textures,
         "cameras": cameras,
     }
@@ -353,9 +341,6 @@ def parse_args():
     p.add_argument("--expected-foreground-manifest", default="")
     p.add_argument("--expected-assembly-manifest", default="")
     p.add_argument("--output-dir", required=True)
-    p.add_argument("--min-body-source-recall", type=float, default=0.97)
-    p.add_argument("--min-body-source-precision", type=float, default=0.995)
-    p.add_argument("--min-signed-area2", type=float, default=1.0e-4)
     return p.parse_args()
 
 

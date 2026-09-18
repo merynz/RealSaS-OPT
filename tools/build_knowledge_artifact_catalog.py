@@ -30,8 +30,8 @@ OUT_MD = ROOT / "canonical" / "BOOTSTRAP_AUDIT_QUEUE.md"
 BOOTSTRAP = ROOT / "canonical" / "BOOTSTRAP_COVERAGE_STATE_V1.json"
 AUTHORITY = ROOT / "canonical" / "AUTHORITY_MAP_V1.json"
 
-# V2 is the current live registry/journal after the Geppetto promotion transaction.
-# V1 remains indexed as immutable historical continuity/provenance.
+# V3/V2 are the current registry/context spine. Earlier registries and FIT-era
+# artifacts remain searchable historical continuity/provenance only.
 SEMANTIC_SPINE = [
     "CURRENT_STATE.md",
     "README.md",
@@ -39,18 +39,21 @@ SEMANTIC_SPINE = [
     "SYSTEM_INDEX.md",
     "AGENTS.md",
     "canonical/README.md",
-    "canonical/CONTEXT_STATE_V1.json",
+    "canonical/CONTEXT_STATE_V2.json",
     "canonical/AUTHORITY_MAP_V1.json",
-    "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md",
-    "canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md",
-    "canonical/EXPERIMENT_REGISTRY_V2.json",
+    "canonical/ACTIVE_RUN_V1.json",
+    "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+    "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
+    "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V2.md",
+    "canonical/EXPERIMENT_AUTHORITY_LEDGER_V2.md",
+    "canonical/EXPERIMENT_REGISTRY_V3.json",
     "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
-    "canonical/EXPERIMENT_REGISTRY_V1.json",
+    "canonical/EXPERIMENT_REGISTRY_V2.json",
     "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
     "canonical/FIT1_EVIDENCE_INDEX_20260909.md",
     "canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md",
     "canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md",
-    "canonical/BRANCH_AUTHORITY_V1.md",
+    "canonical/BRANCH_AUTHORITY_V2.md",
 ]
 
 HIGH_SIGNAL_TOKENS = re.compile(

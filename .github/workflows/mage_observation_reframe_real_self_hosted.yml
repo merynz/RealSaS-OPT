@@ -40,7 +40,12 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf .observation-reframe-stage .observation-reframe
-          mkdir -p .observation-reframe-stage
+          mkdir -p .observation-reframe-stage/current_observations
+          authority_root="$HOME/realsas_authority"
+          for v in {0..7}; do
+            cp "$authority_root/V${v}.png" ".observation-reframe-stage/current_observations/V${v}.png"
+            cp "$authority_root/V${v}.camera.json" ".observation-reframe-stage/current_observations/V${v}.camera.json"
+          done
           if ! command -v powershell.exe >/dev/null 2>&1; then
             echo MAGE_REFRAME_WINDOWS_POWERSHELL_UNAVAILABLE
             exit 41

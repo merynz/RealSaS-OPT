@@ -5,8 +5,8 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__SUBJECT_DATA_ONLY_IN_RUN_ARTIFACTS",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
-  "pipeline_plan_sha256": "accc4b92b7828fe4fb5855e45bad272866faea79684444c2cfe6ab86f18d39ed",
-  "status": "PREPARING_MAINLINE_ORCHESTRATOR",
+  "pipeline_plan_sha256": "2c33bc6d649a0299e4061388af235fd04266998c41bf5f9a8385a77f53d7cf9b",
+  "status": "PRODUCT_AUTHORITY_PLAN_REBASED__ADAPTERS_PENDING",
   "completed_count": 0,
   "total_count": 40,
   "next_stage": "01_SOURCE_BYTES_SEALED",
@@ -290,7 +290,7 @@
     },
     {
       "ordinal": 24,
-      "id": "24_COMPONENT_EVIDENCE_AUDIT",
+      "id": "24_MECHANICAL_PARTITION_QUALIFIED",
       "status": "PENDING",
       "attempts": 0,
       "input_fingerprint": "",
@@ -302,7 +302,7 @@
     },
     {
       "ordinal": 25,
-      "id": "25_COMPONENT_ASSEMBLY_QUALIFIED",
+      "id": "25_DEFORMATION_CAPABILITY_ENVELOPE",
       "status": "PENDING",
       "attempts": 0,
       "input_fingerprint": "",
@@ -314,7 +314,7 @@
     },
     {
       "ordinal": 26,
-      "id": "26_DRAWABLE_CONDITION",
+      "id": "26_MESH_CANDIDATE_BUILD",
       "status": "PENDING",
       "attempts": 0,
       "input_fingerprint": "",
@@ -326,7 +326,7 @@
     },
     {
       "ordinal": 27,
-      "id": "27_DRAWABLE_SUPPORT_BIND",
+      "id": "27_QUALIFIED_MESH_GATE",
       "status": "PENDING",
       "attempts": 0,
       "input_fingerprint": "",
@@ -338,7 +338,7 @@
     },
     {
       "ordinal": 28,
-      "id": "28_DRAWABLE_SKIN_TRANSFER",
+      "id": "28_QUALIFIED_MESH_SKIN_TRANSFER",
       "status": "PENDING",
       "attempts": 0,
       "input_fingerprint": "",
@@ -350,7 +350,7 @@
     },
     {
       "ordinal": 29,
-      "id": "29_DEFORMATION_PROBE",
+      "id": "29_CANONICAL_PUPPET_STATE_SEALED",
       "status": "PENDING",
       "attempts": 0,
       "input_fingerprint": "",
@@ -362,7 +362,7 @@
     },
     {
       "ordinal": 30,
-      "id": "30_APPEARANCE_DONOR_BIND",
+      "id": "30_QUALIFIED_PRESENTATION_GRAPH",
       "status": "PENDING",
       "attempts": 0,
       "input_fingerprint": "",
@@ -501,6 +501,10 @@
     {
       "event": "PLAN_INPUT_SCOPES_REFINED",
       "note": "Stage fingerprints hash only declared manifest_keys; motion-only changes preserve sealed upstream S/G/W."
+    },
+    {
+      "event": "PRODUCT_AUTHORITY_PLAN_REBASED",
+      "note": "Stages 24-30 now encode MechanicalPartition -> DeformationCapabilityEnvelope -> view-independent MeshCandidate -> QualifiedMesh G1-G5 -> QualifiedMeshSkin -> CanonicalPuppetState -> QualifiedPresentationGraph. No stage adapter was falsely bound; numeric animation-grade thresholds remain preregistration-pending."
     }
   ]
 }

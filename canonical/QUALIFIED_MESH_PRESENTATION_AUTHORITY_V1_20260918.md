@@ -1,6 +1,6 @@
 # RealSaS — Qualified Mesh + Presentation Authority Contract V1 — 2026-09-18
 
-**Status:** ARCHITECTURE_FROZEN__IMPLEMENTATION_STARTED  
+**Status:** ARCHITECTURE_FROZEN__MAINLINE_PLAN_REBASED__IMPLEMENTATION_STARTED  
 **Scope:** subject-agnostic product architecture; Knight is only the next witness  
 **Claim boundary:** this freezes authority and gate structure. It is not a Knight PASS and does not widen historical Mage evidence.
 
@@ -67,3 +67,7 @@ Depth and slot order must not independently solve the same physical occlusion. V
 The metric set and authority structure above are frozen before Knight product results. Animation-grade numerical thresholds are intentionally **not copied from the pathological historical Mage mesh distribution**. They must be sealed in a separate preregistration from controlled synthetic conditioning sweeps and solver behavior before any Knight QualifiedMesh result is inspected.
 
 Until that preregistration exists, no new canonical QualifiedMesh product PASS may be claimed.
+
+## Mainline execution binding
+
+Stages 24–30 are now reserved as: `MECHANICAL_PARTITION_QUALIFIED -> DEFORMATION_CAPABILITY_ENVELOPE -> MESH_CANDIDATE_BUILD -> QUALIFIED_MESH_GATE -> QUALIFIED_MESH_SKIN_TRANSFER -> CANONICAL_PUPPET_STATE_SEALED -> QUALIFIED_PRESENTATION_GRAPH`. All remain fail-closed and `UNBOUND` until their adapters satisfy this contract; the plan rename itself is not implementation PASS.

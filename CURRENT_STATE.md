@@ -5,7 +5,7 @@
 **Active experiment gate:** `SUBJECT2_KNIGHT_FULL_CLOSURE` on `main`  
 **Active run:** `SUBJECT2_KNIGHT_V1`  
 **Progress:** **0/40** — next `01_SOURCE_BYTES_SEALED`  
-**Current state:** `PRODUCT_AUTHORITY_CONTRACT_IMPLEMENTATION`  
+**Current state:** `PRODUCT_AUTHORITY_PLAN_REBASED__IMPLEMENTATION`  
 **Most recent closed gate:** `GENERIC_RUNTIME_OPTIMIZATION_SPINE_PROMOTED`
 
 ## Read first
@@ -27,7 +27,7 @@ There is one 40-stage plan and one active-run ledger. A PASS stage is reusable o
 The promoted runtime direction is the measured compact path: shared canonical XYZ once per asset per frame, static per-view overlays, streamed Runtime-v4 writer, content-addressed runtime/proof/render caches and native batch reference rendering. Historical synthetic evidence records an exact 8x XYZ reduction and 17.7x scalar-to-batch render speedup; this is optimization evidence, not a Knight or PRODUCT_PASS claim.
 
 ## Current task
-Implement and test the frozen QualifiedMesh / QualifiedPresentationGraph authority contract, preregister animation-grade numeric mesh thresholds from controlled synthetic conditioning evidence before inspecting Knight mesh results, then rebase stages 24–30 of the 40-stage plan onto the new authority chain. Exact Knight source staging and fresh fits remain downstream of the observation/normalization gates.
+Implement the newly rebased stages 24–30 and preregister animation-grade numeric mesh thresholds from controlled synthetic conditioning evidence before inspecting any Knight mesh result. Exact Knight source staging and fresh fits remain downstream of the observation/normalization gates.
 
 ## Hard boundaries
 - Mage FIT/FIT2 remains historical/scoped evidence; it is not current execution authority.

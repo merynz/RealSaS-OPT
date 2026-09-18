@@ -2,7 +2,7 @@
   "schema": "RealSaS.MainlineExecutionPlan.v1",
   "date": "2026-09-18",
   "canonical_branch": "main",
-  "architecture_scope": "SUBJECT_AGNOSTIC__EXACT_8_VIEW_PUPPET_COMPILER",
+  "architecture_scope": "SUBJECT_AGNOSTIC__EXACT_8_VIEW_PUPPET_COMPILER__CANONICAL_QUALIFIED_MESH__QUALIFIED_PRESENTATION_GRAPH",
   "subject_specific_code_forbidden": true,
   "stage_count": 40,
   "resume_contract": {
@@ -12,7 +12,7 @@
     "latest_alias_forbidden": true
   },
   "performance_contract": {
-    "runtime_representation": "SHARED_CANONICAL_XYZ_ONCE_PER_ASSET_PER_FRAME__VIEW_OVERLAYS_STATIC",
+    "runtime_representation": "QUALIFIED_CANONICAL_MESH__SHARED_CANONICAL_XYZ_ONCE_PER_ASSET_PER_FRAME__VIEW_PRESENTATION_OVERLAYS_STATIC",
     "per_view_xyz_duplication_forbidden": true,
     "expected_exact_8view_xyz_reduction_factor": 8,
     "runtime_archive": "STREAMED_BINARY__ZIP_DEFLATED_LEVEL_1",
@@ -459,8 +459,8 @@
     },
     {
       "ordinal": 24,
-      "id": "24_COMPONENT_EVIDENCE_AUDIT",
-      "title": "Mechanical component evidence audit",
+      "id": "24_MECHANICAL_PARTITION_QUALIFIED",
+      "title": "Mechanical partition and boundary constraints qualified",
       "group": "components",
       "depends_on": [
         "23_ARACHNE_CHECKPOINT_SEALED"
@@ -473,16 +473,96 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
-        "components"
+        "components",
+        "source_audit"
       ]
     },
     {
       "ordinal": 25,
-      "id": "25_COMPONENT_ASSEMBLY_QUALIFIED",
-      "title": "Component/attachment assembly qualification",
-      "group": "components",
+      "id": "25_DEFORMATION_CAPABILITY_ENVELOPE",
+      "title": "Deformation capability envelope preregistered and sealed",
+      "group": "mesh",
       "depends_on": [
-        "24_COMPONENT_EVIDENCE_AUDIT"
+        "24_MECHANICAL_PARTITION_QUALIFIED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "deformation_envelope",
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 26,
+      "id": "26_MESH_CANDIDATE_BUILD",
+      "title": "View-independent canonical mesh candidate build",
+      "group": "mesh",
+      "depends_on": [
+        "25_DEFORMATION_CAPABILITY_ENVELOPE"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "mesh"
+      ]
+    },
+    {
+      "ordinal": 27,
+      "id": "27_QUALIFIED_MESH_GATE",
+      "title": "Canonical QualifiedMesh G1-G5 qualification",
+      "group": "mesh",
+      "depends_on": [
+        "26_MESH_CANDIDATE_BUILD"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "mesh",
+        "mesh_policy",
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 28,
+      "id": "28_QUALIFIED_MESH_SKIN_TRANSFER",
+      "title": "Deterministic QualifiedMeshSkin transfer",
+      "group": "mesh",
+      "depends_on": [
+        "27_QUALIFIED_MESH_GATE"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "mesh"
+      ]
+    },
+    {
+      "ordinal": 29,
+      "id": "29_CANONICAL_PUPPET_STATE_SEALED",
+      "title": "Canonical S/G/W/M/B product state sealed",
+      "group": "product_state",
+      "depends_on": [
+        "28_QUALIFIED_MESH_SKIN_TRANSFER"
       ],
       "adapter": "UNBOUND",
       "policy": {
@@ -496,88 +576,12 @@
       ]
     },
     {
-      "ordinal": 26,
-      "id": "26_DRAWABLE_CONDITION",
-      "title": "Drawable surface conditioning",
-      "group": "drawable",
-      "depends_on": [
-        "25_COMPONENT_ASSEMBLY_QUALIFIED"
-      ],
-      "adapter": "UNBOUND",
-      "policy": {
-        "fail_closed": true,
-        "cacheable": true,
-        "output_hash_required": true,
-        "product_pass_authority": false
-      },
-      "manifest_keys": [
-        "drawable"
-      ]
-    },
-    {
-      "ordinal": 27,
-      "id": "27_DRAWABLE_SUPPORT_BIND",
-      "title": "DrawableSupportBindingIR",
-      "group": "drawable",
-      "depends_on": [
-        "26_DRAWABLE_CONDITION"
-      ],
-      "adapter": "UNBOUND",
-      "policy": {
-        "fail_closed": true,
-        "cacheable": true,
-        "output_hash_required": true,
-        "product_pass_authority": false
-      },
-      "manifest_keys": [
-        "drawable"
-      ]
-    },
-    {
-      "ordinal": 28,
-      "id": "28_DRAWABLE_SKIN_TRANSFER",
-      "title": "Skin transfer to drawable",
-      "group": "drawable",
-      "depends_on": [
-        "27_DRAWABLE_SUPPORT_BIND"
-      ],
-      "adapter": "UNBOUND",
-      "policy": {
-        "fail_closed": true,
-        "cacheable": true,
-        "output_hash_required": true,
-        "product_pass_authority": false
-      },
-      "manifest_keys": [
-        "drawable"
-      ]
-    },
-    {
-      "ordinal": 29,
-      "id": "29_DEFORMATION_PROBE",
-      "title": "Synthetic deformation probe",
-      "group": "drawable",
-      "depends_on": [
-        "28_DRAWABLE_SKIN_TRANSFER"
-      ],
-      "adapter": "UNBOUND",
-      "policy": {
-        "fail_closed": true,
-        "cacheable": true,
-        "output_hash_required": true,
-        "product_pass_authority": false
-      },
-      "manifest_keys": [
-        "drawable"
-      ]
-    },
-    {
       "ordinal": 30,
-      "id": "30_APPEARANCE_DONOR_BIND",
-      "title": "Source-provenance appearance binding",
-      "group": "appearance",
+      "id": "30_QUALIFIED_PRESENTATION_GRAPH",
+      "title": "QualifiedPresentationGraph slots attachments carriers appearance composition",
+      "group": "presentation",
       "depends_on": [
-        "29_DEFORMATION_PROBE"
+        "29_CANONICAL_PUPPET_STATE_SEALED"
       ],
       "adapter": "UNBOUND",
       "policy": {
@@ -587,6 +591,7 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
+        "presentation",
         "appearance"
       ]
     },
@@ -596,7 +601,7 @@
       "title": "8-view rest render",
       "group": "appearance",
       "depends_on": [
-        "30_APPEARANCE_DONOR_BIND"
+        "30_QUALIFIED_PRESENTATION_GRAPH"
       ],
       "adapter": "UNBOUND",
       "policy": {

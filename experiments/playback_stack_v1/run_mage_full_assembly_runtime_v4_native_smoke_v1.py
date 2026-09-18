@@ -19,6 +19,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+from time import perf_counter
 from typing import Iterable
 
 from compiler.realsas_compiler_core.hashing import content_sha256
@@ -220,7 +221,13 @@ def run(args):
     output_dir = Path(args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    stage_t0 = perf_counter()
+    print("MAGE_V4_NATIVE_STAGE=ADMISSION_START", flush=True)
     admitted = admission.run(args)
+    print(
+        f"MAGE_V4_NATIVE_STAGE=ADMISSION_PASS elapsed_s={perf_counter()-stage_t0:.3f}",
+        flush=True,
+    )
     admitted["args"] = args
     report = admitted["report"]
     if report.get("status") != "PASS__FULL_MAGE_RUNTIME_V4_RENDER_ADMITTED":
@@ -259,9 +266,15 @@ def run(args):
     _write_json(authority_path, authority)
     authority_hash = _sha(authority_path)
 
+    stage_t0 = perf_counter()
+    print("MAGE_V4_NATIVE_STAGE=TEXTURE_STAGE_START", flush=True)
     texture_root = _stage_textures(
         admitted,
         output_dir / "_runtime_v4_texture_stage",
+    )
+    print(
+        f"MAGE_V4_NATIVE_STAGE=TEXTURE_STAGE_PASS elapsed_s={perf_counter()-stage_t0:.3f}",
+        flush=True,
     )
     package_path = output_dir / "MAGE_FULL_ASSEMBLY_RUNTIME_V4.rss"
     cache_root = (
@@ -269,6 +282,8 @@ def run(args):
         if str(args.cache_root or "").strip()
         else None
     )
+    stage_t0 = perf_counter()
+    print("MAGE_V4_NATIVE_STAGE=PACKAGE_START", flush=True)
     package = materialize_runtime_v4_archive_cached(
         out_path=package_path,
         texture_root=texture_root,
@@ -281,17 +296,27 @@ def run(args):
         required_views=admission.VIEW_IDS,
         cache_root=cache_root,
     )
+    print(
+        f"MAGE_V4_NATIVE_STAGE=PACKAGE_PASS elapsed_s={perf_counter()-stage_t0:.3f} cache_hit={bool(package.get('cache_hit', False))}",
+        flush=True,
+    )
 
     native_render = None
     visual_outputs = {}
     if str(args.runtime_demo or "").strip():
         runtime_demo = Path(args.runtime_demo).expanduser().resolve()
+        stage_t0 = perf_counter()
+        print("MAGE_V4_NATIVE_STAGE=NATIVE_RENDER_START", flush=True)
         batch_path, frame_paths, stdout = _render_batch(
             runtime_demo,
             package_path,
             projection,
             output_dir / "native_render",
             int(args.render_sample_count),
+        )
+        print(
+            f"MAGE_V4_NATIVE_STAGE=NATIVE_RENDER_PASS elapsed_s={perf_counter()-stage_t0:.3f}",
+            flush=True,
         )
         native_render = {
             "runtime_demo": str(runtime_demo),
@@ -301,11 +326,17 @@ def run(args):
             "stdout": stdout,
         }
         if not bool(args.no_gifs):
+            stage_t0 = perf_counter()
+            print("MAGE_V4_NATIVE_STAGE=GIF_ASSEMBLY_START", flush=True)
             visual_outputs = _make_contact_gifs(
                 projection,
                 frame_paths,
                 output_dir / "native_render",
                 thumb=int(args.contact_thumb),
+            )
+            print(
+                f"MAGE_V4_NATIVE_STAGE=GIF_ASSEMBLY_PASS elapsed_s={perf_counter()-stage_t0:.3f}",
+                flush=True,
             )
 
     result = {

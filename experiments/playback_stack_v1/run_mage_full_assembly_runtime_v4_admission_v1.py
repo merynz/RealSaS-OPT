@@ -17,6 +17,7 @@ import json
 from hashlib import sha256
 from pathlib import Path
 import zlib
+from time import perf_counter
 
 from compiler.realsas_compiler_core.directional_binding import (
     qualify_directional_joint_view_binding,
@@ -165,16 +166,37 @@ def run(args) -> dict:
     # Reuse the current full-Mage product materializer. It consumes the exact qualified
     # P1Q BODY, typed foreground assembly, one-hot rigid carry, continuity underlay,
     # and historical idle/run motion authorities. No alternate puppet truth is built.
+    stage_t0 = perf_counter()
+    print("MAGE_V4_ADMISSION_STAGE=PRODUCT_MATERIALIZATION_START", flush=True)
     state = product_v3.build_final_state(args, persist=False)
     product = state["product"]
+    print(
+        f"MAGE_V4_ADMISSION_STAGE=PRODUCT_MATERIALIZATION_PASS elapsed_s={perf_counter()-stage_t0:.3f}",
+        flush=True,
+    )
     render_metadata = dict(product.directional_renderables.metadata or {})
     if render_metadata.get("continuity_underlay_qualified") is not True:
         raise RuntimeError("MAGE_V4_ADMISSION_CONTINUITY_UNDERLAY_NOT_BOUND")
 
+    stage_t0 = perf_counter()
+    print("MAGE_V4_ADMISSION_STAGE=MOTION_BAKES_START", flush=True)
     binding, provider, plans, bakes = _admission_bakes(product)
+    print(
+        f"MAGE_V4_ADMISSION_STAGE=MOTION_BAKES_PASS elapsed_s={perf_counter()-stage_t0:.3f}",
+        flush=True,
+    )
+
+    stage_t0 = perf_counter()
+    print("MAGE_V4_ADMISSION_STAGE=TEXTURE_CAMERA_BINDING_START", flush=True)
     textures = _texture_bindings(state, Path(args.foreground_dir).resolve())
     cameras = _camera_payloads(args)
+    print(
+        f"MAGE_V4_ADMISSION_STAGE=TEXTURE_CAMERA_BINDING_PASS elapsed_s={perf_counter()-stage_t0:.3f}",
+        flush=True,
+    )
 
+    stage_t0 = perf_counter()
+    print("MAGE_V4_ADMISSION_STAGE=RUNTIME_V4_PROJECTION_START", flush=True)
     projection = project_directional_product_bakes_to_runtime_v4(
         product=product,
         motion_bakes=bakes,
@@ -184,9 +206,15 @@ def run(args) -> dict:
         body_component_id=BODY_COMPONENT_ID,
         runtime_qualified=False,
     )
+    print(
+        f"MAGE_V4_ADMISSION_STAGE=RUNTIME_V4_PROJECTION_PASS elapsed_s={perf_counter()-stage_t0:.3f}",
+        flush=True,
+    )
 
     certificates = []
     for clip_id in REQUIRED_CLIPS:
+        stage_t0 = perf_counter()
+        print(f"MAGE_V4_ADMISSION_STAGE=CERT_START clip={clip_id}", flush=True)
         certificates.append(
             certify_directional_runtime_v4_assembly_v1(
                 product=product,
@@ -198,6 +226,10 @@ def run(args) -> dict:
                 required_view_ids=VIEW_IDS,
                 body_component_id=BODY_COMPONENT_ID,
             )
+        )
+        print(
+            f"MAGE_V4_ADMISSION_STAGE=CERT_PASS clip={clip_id} elapsed_s={perf_counter()-stage_t0:.3f}",
+            flush=True,
         )
 
     cert_by_clip = {row.clip_id: row for row in certificates}

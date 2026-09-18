@@ -16,6 +16,7 @@ import subprocess
 BASE = Path("canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json")
 EXT1 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json")
 EXT2 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json")
+EXT3 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json")
 
 
 def _blob_sha1(payload: bytes) -> str:
@@ -30,6 +31,7 @@ def verify() -> dict:
     base = json.loads(BASE.read_text(encoding="utf-8"))
     ext1 = json.loads(EXT1.read_text(encoding="utf-8"))
     ext2 = json.loads(EXT2.read_text(encoding="utf-8"))
+    ext3 = json.loads(EXT3.read_text(encoding="utf-8"))
 
     if ext1["schema"] != "realsas.compiler_runtime_source_extension_seal.v1":
         raise RuntimeError("NATIVE_SOURCE_EXT1_SCHEMA_DRIFT")
@@ -54,6 +56,21 @@ def verify() -> dict:
         raise RuntimeError("NATIVE_SOURCE_EXT2_PRIOR_MUTATION_CLAIM")
     if ext2["authority"]["runtime_role"] != "subordinate_deployment_consumer":
         raise RuntimeError("NATIVE_SOURCE_EXT2_ROLE_DRIFT")
+
+    if ext3["schema"] != "realsas.compiler_runtime_source_extension_seal.v3":
+        raise RuntimeError("NATIVE_SOURCE_EXT3_SCHEMA_DRIFT")
+    if ext3["prior_extension"]["path"] != str(EXT2):
+        raise RuntimeError("NATIVE_SOURCE_EXT3_PRIOR_PATH_DRIFT")
+    if _blob_sha1(EXT2.read_bytes()) != ext3["prior_extension"]["git_blob_sha1"]:
+        raise RuntimeError("NATIVE_SOURCE_EXT3_PRIOR_BLOB_DRIFT")
+    if ext3["authority"]["historical_base_seal_mutated"] is not False:
+        raise RuntimeError("NATIVE_SOURCE_EXT3_BASE_MUTATION_CLAIM")
+    if ext3["authority"]["prior_extension_mutated"] is not False:
+        raise RuntimeError("NATIVE_SOURCE_EXT3_PRIOR_MUTATION_CLAIM")
+    if ext3["authority"]["runtime_role"] != "subordinate_deployment_consumer":
+        raise RuntimeError("NATIVE_SOURCE_EXT3_ROLE_DRIFT")
+    if ext3["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
+        raise RuntimeError("NATIVE_SOURCE_EXT3_SUBTREE_CLOSURE_DRIFT")
 
     expected = {
         row["path"]: {
@@ -87,6 +104,36 @@ def verify() -> dict:
 
     apply_extension(ext1, "extension_v1")
     apply_extension(ext2, "extension_v2")
+    apply_extension(ext3, "extension_v3")
+
+    tracked = {
+        row.strip()
+        for row in subprocess.check_output(
+            ["git", "ls-files", "runtime/realsas_cpp"],
+            text=True,
+        ).splitlines()
+        if row.strip()
+    }
+    if tracked != set(expected):
+        missing_from_seal = sorted(tracked - set(expected))
+        stale_in_seal = sorted(set(expected) - tracked)
+        raise RuntimeError(
+            "NATIVE_SOURCE_SUBTREE_SET_DRIFT:"
+            + json.dumps(
+                {
+                    "unsealed_tracked_paths": missing_from_seal,
+                    "sealed_paths_missing_from_repo": stale_in_seal,
+                },
+                sort_keys=True,
+            )
+        )
+    closure = dict(ext3.get("closure") or {})
+    if int(closure.get("runtime_realsas_cpp_blob_count", -1)) != len(tracked):
+        raise RuntimeError("NATIVE_SOURCE_EXT3_CLOSURE_COUNT_DRIFT")
+    if int(closure.get("resulting_sealed_blob_count", -1)) != len(expected):
+        raise RuntimeError("NATIVE_SOURCE_EXT3_SEALED_COUNT_DRIFT")
+    if int(closure.get("unsealed_repository_blob_count_under_subtree", -1)) != 0:
+        raise RuntimeError("NATIVE_SOURCE_EXT3_UNSEALED_COUNT_NONZERO")
 
     verified = []
     for path_text, identity in sorted(expected.items()):
@@ -115,6 +162,8 @@ def verify() -> dict:
         "base_file_count": len(base["files"]),
         "extension_v1_change_count": len(ext1["replacements"]) + len(ext1["additions"]),
         "extension_v2_change_count": len(ext2["replacements"]) + len(ext2["additions"]),
+        "extension_v3_change_count": len(ext3["replacements"]) + len(ext3["additions"]),
+        "subtree_blob_count": len(tracked),
         "verified_paths": verified,
     }
 
@@ -126,5 +175,7 @@ if __name__ == "__main__":
         f"files={result['file_count']} "
         f"base={result['base_file_count']} "
         f"ext1={result['extension_v1_change_count']} "
-        f"ext2={result['extension_v2_change_count']}"
+        f"ext2={result['extension_v2_change_count']} "
+        f"ext3={result['extension_v3_change_count']} "
+        f"subtree={result['subtree_blob_count']}"
     )

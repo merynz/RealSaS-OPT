@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "4e3731e649a7a8aa546f0e04d0a1d04fbb529108",
+    "main": "c11dddfcf64dbbc4918f8fc616636342bb83b44e",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1792,
+  "commit_count": 1802,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -80995,6 +80995,245 @@
       "subsystem_tags": [
         "CI_TEST",
         "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c20da1e4d67ca6f0c504ae77518ea7d5129ec688",
+      "parents": [
+        "4e3731e649a7a8aa546f0e04d0a1d04fbb529108"
+      ],
+      "author_time": "2026-09-19T00:07:41+03:00",
+      "committer_time": "2026-09-19T00:07:41+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6f01f6dbe3eaac4706b71d25b9269d7eac1a16b2",
+      "parents": [
+        "c20da1e4d67ca6f0c504ae77518ea7d5129ec688"
+      ],
+      "author_time": "2026-09-19T00:08:06+03:00",
+      "committer_time": "2026-09-19T00:08:06+03:00",
+      "subject": "orchestrator: implement typed product mesh stage adapters",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json",
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a65f783d14671f024e3c33cb49c7bb26e3eef17d",
+      "parents": [
+        "6f01f6dbe3eaac4706b71d25b9269d7eac1a16b2"
+      ],
+      "author_time": "2026-09-19T00:09:04+03:00",
+      "committer_time": "2026-09-19T00:09:04+03:00",
+      "subject": "tests: cover product mesh stage 24-27 wiring",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9ba63a64147e402b3c7291608d2c61ed9bdf6ddd",
+      "parents": [
+        "a65f783d14671f024e3c33cb49c7bb26e3eef17d"
+      ],
+      "author_time": "2026-09-19T00:10:50+03:00",
+      "committer_time": "2026-09-19T00:10:50+03:00",
+      "subject": "tests: update qualified mesh fixtures for G3 status",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b95e0a9285369cb7defe91d73a102f52812a074e",
+      "parents": [
+        "9ba63a64147e402b3c7291608d2c61ed9bdf6ddd"
+      ],
+      "author_time": "2026-09-19T00:11:32+03:00",
+      "committer_time": "2026-09-19T00:11:32+03:00",
+      "subject": "orchestrator: invalidate stale upstream before resumed stage",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py",
+        "tests/repository/test_mainline_execution_plan_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "378b808b02bfa3d2d85f3f190d248866dd71f148",
+      "parents": [
+        "b95e0a9285369cb7defe91d73a102f52812a074e"
+      ],
+      "author_time": "2026-09-19T00:12:42+03:00",
+      "committer_time": "2026-09-19T00:12:42+03:00",
+      "subject": "mesh: add canonical product mesh skin binder",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_mesh_skin_v1.py",
+        "tests/compiler/test_product_mesh_skin_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f43784562a071b573b8a3719183947776d56b3fd",
+      "parents": [
+        "378b808b02bfa3d2d85f3f190d248866dd71f148"
+      ],
+      "author_time": "2026-09-19T00:14:38+03:00",
+      "committer_time": "2026-09-19T00:14:38+03:00",
+      "subject": "orchestrator: bind canonical mesh skin transfer adapter",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e0457e9604d72b09ec3b842bdec5bbef690a2fd9",
+      "parents": [
+        "f43784562a071b573b8a3719183947776d56b3fd"
+      ],
+      "author_time": "2026-09-19T00:16:20+03:00",
+      "committer_time": "2026-09-19T00:16:20+03:00",
+      "subject": "product: add canonical mechanical puppet state seal",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/canonical_puppet_state_v1.py",
+        "tests/compiler/test_canonical_puppet_state_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3a94d0aabb10b7dfbd9dd5871ce973ccf921f245",
+      "parents": [
+        "e0457e9604d72b09ec3b842bdec5bbef690a2fd9"
+      ],
+      "author_time": "2026-09-19T00:16:56+03:00",
+      "committer_time": "2026-09-19T00:16:56+03:00",
+      "subject": "orchestrator: seal canonical mechanical puppet state",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c11dddfcf64dbbc4918f8fc616636342bb83b44e",
+      "parents": [
+        "3a94d0aabb10b7dfbd9dd5871ce973ccf921f245"
+      ],
+      "author_time": "2026-09-19T00:18:50+03:00",
+      "committer_time": "2026-09-19T00:18:50+03:00",
+      "subject": "presentation: bind graph to canonical mechanical state",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
+        "compiler/realsas_compiler_core/product_authority_v1.py",
+        "tests/compiler/test_product_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

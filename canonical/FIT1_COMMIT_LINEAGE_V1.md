@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1792**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1802**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1804,6 +1804,16 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-19T00:04:10+03:00` | `7b65e64e6095` | yes | CI_TEST, COMPILER_PROOF | orchestrator: fail closed on unsealed dependencies | `compiler/realsas_compiler_services/orchestrator/mainline.py`<br>`tests/repository/test_mainline_execution_plan_v1.py` | `main` |
 | `2026-09-19T00:05:18+03:00` | `7dd997cd5aa5` | yes | CI_TEST, COMPILER_PROOF | mesh: measure G5 directly on canonical candidates | `compiler/realsas_compiler_core/mesh/product_coverage_v1.py`<br>`tests/compiler/test_product_coverage_v1.py` | `main` |
 | `2026-09-19T00:06:00+03:00` | `4e3731e649a7` | yes | CI_TEST, COMPILER_PROOF | mesh: centralize frozen product policy loading | `compiler/realsas_compiler_core/mesh/product_policy_v1.py`<br>`tests/compiler/test_product_policy_v1.py` | `main` |
+| `2026-09-19T00:07:41+03:00` | `c20da1e4d67c` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T00:08:06+03:00` | `6f01f6dbe3ea` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | orchestrator: implement typed product mesh stage adapters | `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json`<br>`compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py` | `main` |
+| `2026-09-19T00:09:04+03:00` | `a65f783d1467` | yes | CI_TEST, COMPILER_PROOF | tests: cover product mesh stage 24-27 wiring | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-19T00:10:50+03:00` | `9ba63a64147e` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | tests: update qualified mesh fixtures for G3 status | `tests/compiler/test_product_authority_v1.py` | `main` |
+| `2026-09-19T00:11:32+03:00` | `b95e0a928536` | yes | CI_TEST, COMPILER_PROOF | orchestrator: invalidate stale upstream before resumed stage | `compiler/realsas_compiler_services/orchestrator/mainline.py`<br>`tests/repository/test_mainline_execution_plan_v1.py` | `main` |
+| `2026-09-19T00:12:42+03:00` | `378b808b02bf` | yes | CI_TEST, COMPILER_PROOF | mesh: add canonical product mesh skin binder | `compiler/realsas_compiler_core/product_mesh_skin_v1.py`<br>`tests/compiler/test_product_mesh_skin_v1.py` | `main` |
+| `2026-09-19T00:14:38+03:00` | `f43784562a07` | yes | CI_TEST, COMPILER_PROOF | orchestrator: bind canonical mesh skin transfer adapter | `compiler/realsas_compiler_core/product_artifact_codec_v1.py`<br>`compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py`<br>`tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-19T00:16:20+03:00` | `e0457e9604d7` | yes | CI_TEST, COMPILER_PROOF | product: add canonical mechanical puppet state seal | `compiler/realsas_compiler_core/canonical_puppet_state_v1.py`<br>`tests/compiler/test_canonical_puppet_state_v1.py` | `main` |
+| `2026-09-19T00:16:56+03:00` | `3a94d0aabb10` | yes | CI_TEST, COMPILER_PROOF | orchestrator: seal canonical mechanical puppet state | `compiler/realsas_compiler_core/product_artifact_codec_v1.py`<br>`compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py`<br>`tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-19T00:18:50+03:00` | `c11dddfcf64d` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | presentation: bind graph to canonical mechanical state | `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`<br>`compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_product_authority_v1.py` | `main` |
 
 ## Use rule
 

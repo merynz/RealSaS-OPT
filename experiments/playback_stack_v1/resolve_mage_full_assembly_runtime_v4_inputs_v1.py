@@ -265,19 +265,91 @@ def resolve(search_roots: Iterable[Path]) -> dict:
     return result
 
 
+
+def validate_resolution(value: dict) -> dict:
+    if not isinstance(value, dict) or value.get("schema") != SCHEMA:
+        raise RuntimeError("MAGE_V4_RESOLUTION_SCHEMA_INVALID")
+    if value.get("status") != "PASS__EXACT_MAGE_RUNTIME_V4_INPUTS_RESOLVED":
+        raise RuntimeError("MAGE_V4_RESOLUTION_STATUS_INVALID")
+
+    expected_hashes = dict(value.get("expected_hashes") or {})
+    canonical_expected = {
+        "p1q_manifest": EXPECTED["p1q_manifest"]["sha256"],
+        "foreground_manifest": EXPECTED["foreground_manifest"]["sha256"],
+        "assembly_manifest": EXPECTED["assembly_manifest"]["sha256"],
+        "fit2_surface": EXPECTED["fit2_surface"]["sha256"],
+        "skeleton": EXPECTED["skeleton"]["sha256"],
+        "fit2_skin": EXPECTED["fit2_skin"]["sha256"],
+        "cameras": list(CAMERA_SHA256),
+    }
+    if expected_hashes != canonical_expected:
+        raise RuntimeError("MAGE_V4_RESOLUTION_EXPECTED_HASH_POLICY_DRIFT")
+
+    p1q_dir = Path(value["p1q_dir"]).expanduser().resolve()
+    foreground_dir = Path(value["foreground_dir"]).expanduser().resolve()
+    assembly_dir = Path(value["assembly_dir"]).expanduser().resolve()
+    exact_paths = {
+        "p1q_manifest": p1q_dir / EXPECTED["p1q_manifest"]["filename"],
+        "foreground_manifest": foreground_dir / EXPECTED["foreground_manifest"]["filename"],
+        "assembly_manifest": assembly_dir / EXPECTED["assembly_manifest"]["filename"],
+        "fit2_surface": Path(value["fit2_surface"]).expanduser().resolve(),
+        "skeleton": Path(value["skeleton"]).expanduser().resolve(),
+        "fit2_skin": Path(value["fit2_skin"]).expanduser().resolve(),
+    }
+    for label, path in exact_paths.items():
+        if not path.is_file():
+            raise RuntimeError(f"MAGE_V4_RESOLUTION_CACHED_PATH_MISSING:{label}:{path}")
+        if _sha(path) != str(canonical_expected[label]):
+            raise RuntimeError(f"MAGE_V4_RESOLUTION_CACHED_SHA_DRIFT:{label}:{path}")
+
+    cameras = tuple(Path(x).expanduser().resolve() for x in value.get("cameras") or ())
+    if len(cameras) != 8:
+        raise RuntimeError("MAGE_V4_RESOLUTION_CACHED_CAMERA_CARDINALITY")
+    for index, (path, expected) in enumerate(zip(cameras, CAMERA_SHA256)):
+        if not path.is_file() or _sha(path) != expected:
+            raise RuntimeError(f"MAGE_V4_RESOLUTION_CACHED_CAMERA_DRIFT:V{index}:{path}")
+
+    required = [
+        *(p1q_dir / f"P1Q_FIT2_CURRENT_V{i}_QUALIFIED_MESH_IR.json" for i in range(8)),
+        *(p1q_dir / f"P1Q_FIT2_CURRENT_V{i}_QUALIFIED_MESH_SKIN_IR.json" for i in range(8)),
+        *(p1q_dir / f"P1Q_FIT2_CURRENT_V{i}_QUALIFIED_APPEARANCE_IR.json" for i in range(8)),
+        *(foreground_dir / f"V{i}_MAGE_PRODUCT_ATLAS.png" for i in range(8)),
+        assembly_dir / "FIT2_QUALIFIED_COMPONENT_ASSEMBLY.json",
+    ]
+    missing = [str(path) for path in required if not path.is_file()]
+    if missing:
+        raise RuntimeError(
+            "MAGE_V4_RESOLUTION_CACHED_DIRECTORY_INCOMPLETE:"
+            + json.dumps(missing[:32], sort_keys=True)
+        )
+    return value
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--search-root", action="append", required=True)
     parser.add_argument("--output", required=True)
+    parser.add_argument("--reuse-if-valid", action="store_true")
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    result = resolve(Path(x) for x in args.search_root)
     output = Path(args.output).expanduser().resolve()
-    _write_json(output, result)
+    cache_hit = False
+    result = None
+    if args.reuse_if_valid and output.is_file():
+        try:
+            result = validate_resolution(json.loads(output.read_text(encoding="utf-8")))
+            cache_hit = True
+        except Exception as exc:
+            print("MAGE_RUNTIME_V4_EXACT_INPUT_RESOLUTION_CACHE_MISS:" + str(exc), flush=True)
+    if result is None:
+        result = resolve(Path(x) for x in args.search_root)
+        validate_resolution(result)
+        _write_json(output, result)
     print("MAGE_RUNTIME_V4_EXACT_INPUT_RESOLUTION_PASS")
+    print("MAGE_RUNTIME_V4_EXACT_INPUT_RESOLUTION_CACHE_HIT=" + str(cache_hit).lower())
     print(json.dumps({
         "output": str(output),
         "p1q_dir": result["p1q_dir"],

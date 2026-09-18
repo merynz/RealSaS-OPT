@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "6afc119be5c5bd3804b8c2bba732e5010446da29",
+    "main": "a5683ba59b694baa2e269b95639815f8d669aa93",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1770,
+  "commit_count": 1776,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -80465,6 +80465,151 @@
         "CI_TEST",
         "COMPILER_PROOF",
         "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6cb9670cc2e617101a8b784412ce6ee9b820b2f5",
+      "parents": [
+        "6afc119be5c5bd3804b8c2bba732e5010446da29"
+      ],
+      "author_time": "2026-09-18T23:34:38+03:00",
+      "committer_time": "2026-09-18T23:34:38+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b52d588440ff2c5aa11c4b49bc8b62203aff0a32",
+      "parents": [
+        "6cb9670cc2e617101a8b784412ce6ee9b820b2f5"
+      ],
+      "author_time": "2026-09-18T23:35:08+03:00",
+      "committer_time": "2026-09-18T23:35:08+03:00",
+      "subject": "mainline: bind carrier policy into scoped mesh execution",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md",
+        "canonical/ACTIVE_RUN_V1.json",
+        "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+        "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1f450622aad03d35cab10763a4b92ba05b9cf9be",
+      "parents": [
+        "b52d588440ff2c5aa11c4b49bc8b62203aff0a32"
+      ],
+      "author_time": "2026-09-18T23:36:57+03:00",
+      "committer_time": "2026-09-18T23:36:57+03:00",
+      "subject": "continuity: preserve canonical product authority state token",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0dd1fcbe7e97662f78b4665671cb8450d30c8ad8",
+      "parents": [
+        "1f450622aad03d35cab10763a4b92ba05b9cf9be"
+      ],
+      "author_time": "2026-09-18T23:37:49+03:00",
+      "committer_time": "2026-09-18T23:37:49+03:00",
+      "subject": "mesh: freeze product geometry carrier and G5 policy",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
+        "canonical/QUALIFIED_MESH_PRODUCT_POLICY_V1_20260918.json",
+        "compiler/realsas_compiler_core/product_authority_v1.py",
+        "tests/compiler/test_product_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e641332bed2d3e760e8786ff2e8cf24a2ca59771",
+      "parents": [
+        "0dd1fcbe7e97662f78b4665671cb8450d30c8ad8"
+      ],
+      "author_time": "2026-09-18T23:39:49+03:00",
+      "committer_time": "2026-09-18T23:39:49+03:00",
+      "subject": "mesh: restore sealed historical CDT numerical kernel",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py",
+        "compiler/realsas_compiler_core/mesh/_historical_v05/cdt_production.py.zlib.b85",
+        "tests/compiler/test_historical_cdt_v05.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a5683ba59b694baa2e269b95639815f8d669aa93",
+      "parents": [
+        "e641332bed2d3e760e8786ff2e8cf24a2ca59771"
+      ],
+      "author_time": "2026-09-18T23:40:17+03:00",
+      "committer_time": "2026-09-18T23:40:17+03:00",
+      "subject": "ci: add sealed historical CDT kernel preflight",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/historical_cdt_kernel_preflight.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

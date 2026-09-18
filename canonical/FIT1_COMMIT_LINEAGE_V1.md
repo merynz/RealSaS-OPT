@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1770**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1776**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1782,6 +1782,12 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-18T23:28:30+03:00` | `5d853af697eb` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: enforce intrinsic qualified product geometry | `canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_RESULT_20260918.json`<br>`compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_product_authority_v1.py` | `main` |
 | `2026-09-18T23:31:44+03:00` | `c4d304f4fdf2` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: bind qualification to typed carrier and policy authority | `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`<br>`compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_product_authority_v1.py` | `main` |
 | `2026-09-18T23:33:15+03:00` | `6afc119be5c5` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: add deterministic candidate promotion gate | `compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_product_authority_v1.py` | `main` |
+| `2026-09-18T23:34:38+03:00` | `6cb9670cc2e6` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-18T23:35:08+03:00` | `b52d588440ff` | yes | GOVERNANCE_CONTINUITY | mainline: bind carrier policy into scoped mesh execution | `CURRENT_STATE.md`<br>`canonical/ACTIVE_RUN_V1.json`<br>`canonical/MAINLINE_EXECUTION_PLAN_V1.json`<br>`canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl` | `main` |
+| `2026-09-18T23:36:57+03:00` | `1f450622aad0` | yes | GOVERNANCE_CONTINUITY | continuity: preserve canonical product authority state token | `CURRENT_STATE.md` | `main` |
+| `2026-09-18T23:37:49+03:00` | `0dd1fcbe7e97` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: freeze product geometry carrier and G5 policy | `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`<br>`canonical/QUALIFIED_MESH_PRODUCT_POLICY_V1_20260918.json`<br>`compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_product_authority_v1.py` | `main` |
+| `2026-09-18T23:39:49+03:00` | `e641332bed2d` | yes | CI_TEST, COMPILER_PROOF | mesh: restore sealed historical CDT numerical kernel | `compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py`<br>`compiler/realsas_compiler_core/mesh/_historical_v05/cdt_production.py.zlib.b85`<br>`tests/compiler/test_historical_cdt_v05.py` | `main` |
+| `2026-09-18T23:40:17+03:00` | `a5683ba59b69` | yes | CI_TEST | ci: add sealed historical CDT kernel preflight | `.github/workflows/historical_cdt_kernel_preflight.yml` | `main` |
 
 ## Use rule
 

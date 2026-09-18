@@ -50,7 +50,7 @@ jobs:
           PIP_DEFAULT_TIMEOUT: '60'
         run: |
           python -m pip install --no-input --progress-bar off --only-binary=:all: \
-            numpy scipy pillow pytest
+            numpy scipy pillow pytest scikit-image
 
       - name: Resolve or stage exact Google Drive Desktop authorities
         shell: bash
@@ -61,6 +61,17 @@ jobs:
 
           h1_root=''
           product_root=''
+
+          local_authority_root="$HOME/realsas_authority"
+          local_p1q_root="$HOME/realsas_authority/p1q"
+          if [[ -f "$local_authority_root/V0.png"             && -f "$local_authority_root/V7.png"             && -f "$local_authority_root/V0.camera.json"             && -f "$local_authority_root/V7.camera.json"             && -f "$local_authority_root/CURRENT_FIT2_RIGGING_SURFACE_IR.json"             && -f "$local_authority_root/FINAL_QUALIFIED_SKELETON_IR.json"             && -f "$local_authority_root/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json"             && -f "$local_p1q_root/P1Q_FIT2_CURRENT_AUTHORITY_MATERIALIZATION_MANIFEST.json" ]]; then
+            input_root="$local_authority_root"
+            skeleton="$local_authority_root/FINAL_QUALIFIED_SKELETON_IR.json"
+            skin="$local_authority_root/ARACHNE_FIT2_QUALIFIED_SKIN_IR_FIX2.json"
+            p1q="$local_p1q_root"
+            surface="$local_authority_root/CURRENT_FIT2_RIGGING_SURFACE_IR.json"
+            echo 'MAGE_LOCAL_EXACT_AUTHORITY_STAGE_PASS'
+          fi
 
           consider_h1() {
             local p="$1"
@@ -81,7 +92,8 @@ jobs:
             fi
           }
 
-          # Fast path: an already mounted/synced Drive visible directly in WSL.
+          if [[ -z "${input_root:-}" ]]; then
+          # Legacy fallback: an already mounted/synced Drive visible directly in WSL.
           shopt -s nullglob
           for mount in /mnt/[d-z]; do
             [[ -d "$mount" ]] || continue
@@ -136,6 +148,7 @@ jobs:
             surface="$stage_linux/mechanics/CURRENT_FIT2_RIGGING_SURFACE_IR.json"
             test -f "$stage_linux/STAGE_REPORT.json"
             echo 'MAGE_WINDOWS_DRIVE_EXACT_STAGE_PASS'
+          fi
           fi
 
           {
@@ -223,7 +236,8 @@ jobs:
           cmake -S runtime/realsas_cpp -B .runtime-real/native-build \
             -DREALSAS_BUILD_SHARED=ON \
             -DREALSAS_BUILD_EXAMPLES=ON \
-            -DREALSAS_BUILD_TESTS=ON
+            -DREALSAS_BUILD_TESTS=ON \
+            -DPython3_EXECUTABLE="$(command -v python)"
           cmake --build .runtime-real/native-build --parallel
           ctest --test-dir .runtime-real/native-build --output-on-failure
           test -x .runtime-real/native-build/realsas_runtime_v4_demo

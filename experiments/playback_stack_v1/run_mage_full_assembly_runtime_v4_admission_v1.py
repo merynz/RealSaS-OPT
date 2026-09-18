@@ -78,7 +78,13 @@ def _write_json(path: Path, value) -> None:
 
 
 def _texture_bindings(state, foreground_dir: Path):
-    manifest = state["foreground_manifest"]
+    manifest_path = foreground_dir / "RUNTIME_FOREGROUND_ATLAS_MANIFEST.json"
+    if not manifest_path.is_file():
+        raise RuntimeError(f"MAGE_V4_ADMISSION_FOREGROUND_MANIFEST_MISSING:{manifest_path}")
+    manifest = _load_json(manifest_path)
+    expected = str(state["source_hashes"].get("foreground_manifest") or "")
+    if expected and _sha(manifest_path) != expected:
+        raise RuntimeError("MAGE_V4_ADMISSION_FOREGROUND_MANIFEST_SHA_DRIFT")
     rows = {int(row["view"]): row for row in manifest.get("views") or ()}
     if set(rows) != set(range(8)):
         raise RuntimeError("MAGE_V4_ADMISSION_FOREGROUND_VIEW_SET_INCOMPLETE")

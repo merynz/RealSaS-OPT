@@ -28,6 +28,9 @@ class ComponentObservationRasterIR:
     view_index: int
     component_id: str
     carrier_class: str
+    partition_binding_hash: str
+    carrier_policy_binding_hash: str
+    component_surface_set_hash: str
     width: int
     height: int
     mask_bytes: bytes
@@ -44,6 +47,9 @@ class ComponentObservationRasterIR:
             "view_index": self.view_index,
             "component_id": self.component_id,
             "carrier_class": self.carrier_class,
+            "partition_binding_hash": self.partition_binding_hash,
+            "carrier_policy_binding_hash": self.carrier_policy_binding_hash,
+            "component_surface_set_hash": self.component_surface_set_hash,
             "width": self.width,
             "height": self.height,
             "mask_sha256": self.mask_sha256,
@@ -60,7 +66,15 @@ def mask_sha256(mask_bytes: bytes) -> str:
     return hashlib.sha256(bytes(mask_bytes)).hexdigest()
 
 
-def validate_component_observation(value: ComponentObservationRasterIR) -> None:
+def component_surface_set_hash(component) -> str:
+    return content_sha256({
+        "schema": "RealSaS.ComponentSurfaceSetBinding.v1",
+        "component_id": component.component_id,
+        "surface_ids": tuple(sorted(component.surface_ids)),
+    })
+
+
+def validate_component_observation(value: ComponentObservationRasterIR, *, partition=None, carrier_policy=None) -> None:
     if not (0 <= int(value.view_index) < 8):
         raise QualificationError("G5_OBSERVATION_VIEW_INVALID")
     if not value.component_id or not value.carrier_class:
@@ -75,6 +89,22 @@ def validate_component_observation(value: ComponentObservationRasterIR) -> None:
         raise QualificationError("G5_OBSERVATION_MASK_HASH_MISMATCH")
     if not value.source_observation_hash or not value.camera_binding_hash or not value.raster_contract_hash:
         raise QualificationError("G5_OBSERVATION_AUTHORITY_BINDING_MISSING")
+    if not value.partition_binding_hash or not value.carrier_policy_binding_hash or not value.component_surface_set_hash:
+        raise QualificationError("G5_OBSERVATION_PARTITION_BINDING_MISSING")
+    if partition is not None:
+        if value.partition_binding_hash != partition.partition_lineage_hash:
+            raise QualificationError("G5_OBSERVATION_PARTITION_LINEAGE_MISMATCH")
+        component = next((row for row in partition.components if row.component_id == value.component_id), None)
+        if component is None:
+            raise QualificationError("G5_OBSERVATION_COMPONENT_NOT_IN_PARTITION")
+        if value.component_surface_set_hash != component_surface_set_hash(component):
+            raise QualificationError("G5_OBSERVATION_COMPONENT_SURFACE_SET_MISMATCH")
+    if carrier_policy is not None:
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("G5_OBSERVATION_CARRIER_POLICY_LINEAGE_MISMATCH")
+        decision = next((row for row in carrier_policy.decisions if row.component_id == value.component_id), None)
+        if decision is None or decision.carrier_class != value.carrier_class:
+            raise QualificationError("G5_OBSERVATION_CARRIER_POLICY_DRIFT")
 
 
 def _orient2d(a, b, px: float, py: float) -> float:
@@ -280,7 +310,7 @@ def build_g5_coverage_matrix(
 
     by_key = {}
     for observation in observations:
-        validate_component_observation(observation)
+        validate_component_observation(observation, partition=partition, carrier_policy=carrier_policy)
         key = (int(observation.view_index), observation.component_id)
         if key in by_key:
             raise QualificationError("G5_DUPLICATE_COMPONENT_OBSERVATION")
@@ -327,6 +357,9 @@ def build_g5_coverage_matrix(
             "view_index": int(view),
             "component_id": component_id,
             "carrier_class": observation.carrier_class,
+            "partition_binding_hash": observation.partition_binding_hash,
+            "carrier_policy_binding_hash": observation.carrier_policy_binding_hash,
+            "component_surface_set_hash": observation.component_surface_set_hash,
             **metrics,
             "status": "PASS" if passed else "FAIL",
             "source_mask_sha256": observation.mask_sha256,

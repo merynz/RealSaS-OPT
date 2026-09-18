@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1776**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1786**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1788,6 +1788,16 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-18T23:37:49+03:00` | `0dd1fcbe7e97` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: freeze product geometry carrier and G5 policy | `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`<br>`canonical/QUALIFIED_MESH_PRODUCT_POLICY_V1_20260918.json`<br>`compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_product_authority_v1.py` | `main` |
 | `2026-09-18T23:39:49+03:00` | `e641332bed2d` | yes | CI_TEST, COMPILER_PROOF | mesh: restore sealed historical CDT numerical kernel | `compiler/realsas_compiler_core/mesh/_historical_v05/__init__.py`<br>`compiler/realsas_compiler_core/mesh/_historical_v05/cdt_production.py.zlib.b85`<br>`tests/compiler/test_historical_cdt_v05.py` | `main` |
 | `2026-09-18T23:40:17+03:00` | `a5683ba59b69` | yes | CI_TEST | ci: add sealed historical CDT kernel preflight | `.github/workflows/historical_cdt_kernel_preflight.yml` | `main` |
+| `2026-09-18T23:42:31+03:00` | `aea58e20a4e5` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-18T23:43:25+03:00` | `d28cd5ffa3c3` | yes | CI_TEST, COMPILER_PROOF | mesh: add view-independent canonical relation baseline | `compiler/realsas_compiler_core/canonical_mesh_candidate_v1.py`<br>`tests/compiler/test_canonical_mesh_candidate_v1.py` | `main` |
+| `2026-09-18T23:43:49+03:00` | `b94084d1d281` | yes | CI_TEST | ci: expose sealed CDT result contract | `.github/workflows/historical_cdt_kernel_preflight.yml` | `main` |
+| `2026-09-18T23:45:44+03:00` | `ba1c491cd1bd` | yes | CI_TEST | ci: probe sealed CDT index semantics | `.github/workflows/historical_cdt_kernel_preflight.yml` | `main` |
+| `2026-09-18T23:47:39+03:00` | `8746f7cd55cb` | yes | CI_TEST, COMPILER_PROOF | mesh: adapt sealed CDT to canonical local charts | `compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py`<br>`tests/compiler/test_canonical_cdt_adapter_v1.py` | `main` |
+| `2026-09-18T23:50:05+03:00` | `2deb6d0d0246` | yes | CI_TEST, COMPILER_PROOF | mesh: add exact native-parity G5 coverage measurement | `compiler/realsas_compiler_core/mesh/product_coverage_v1.py`<br>`tests/compiler/test_product_coverage_v1.py` | `main` |
+| `2026-09-18T23:51:06+03:00` | `46b73c24d03d` | yes | CI_TEST, COMPILER_PROOF | mesh: project canonical product geometry for G5 | `compiler/realsas_compiler_core/mesh/product_coverage_v1.py`<br>`tests/compiler/test_product_coverage_v1.py` | `main` |
+| `2026-09-18T23:57:28+03:00` | `0b59690f0d97` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: bind G5 component observations to partition authority | `compiler/realsas_compiler_core/mesh/product_coverage_v1.py`<br>`tests/compiler/test_product_coverage_v1.py` | `main` |
+| `2026-09-18T23:58:34+03:00` | `006c7c480489` | yes | CI_TEST, COMPILER_PROOF | compiler: add typed product artifact codec | `compiler/realsas_compiler_core/product_artifact_codec_v1.py`<br>`tests/compiler/test_product_artifact_codec_v1.py` | `main` |
+| `2026-09-19T00:00:04+03:00` | `c5f37196ca55` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | mesh: bind deformation envelope to frozen axis contract | `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`<br>`compiler/realsas_compiler_core/product_artifact_codec_v1.py`<br>`compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_product_authority_v1.py` | `main` |
 
 ## Use rule
 

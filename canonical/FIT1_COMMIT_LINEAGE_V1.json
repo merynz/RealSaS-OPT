@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "a5683ba59b694baa2e269b95639815f8d669aa93",
+    "main": "c5f37196ca556b0ab4eca626122ac7f45f428141",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1776,
+  "commit_count": 1786,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -80610,6 +80610,242 @@
       ],
       "subsystem_tags": [
         "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "aea58e20a4e5153b3cc8c0fc75d068d91dfa6489",
+      "parents": [
+        "a5683ba59b694baa2e269b95639815f8d669aa93"
+      ],
+      "author_time": "2026-09-18T23:42:31+03:00",
+      "committer_time": "2026-09-18T23:42:31+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d28cd5ffa3c3b9e2dd9f354166c6c8e59a693e7f",
+      "parents": [
+        "aea58e20a4e5153b3cc8c0fc75d068d91dfa6489"
+      ],
+      "author_time": "2026-09-18T23:43:25+03:00",
+      "committer_time": "2026-09-18T23:43:25+03:00",
+      "subject": "mesh: add view-independent canonical relation baseline",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/canonical_mesh_candidate_v1.py",
+        "tests/compiler/test_canonical_mesh_candidate_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b94084d1d281325f79d744b6a4ebba65488d8de3",
+      "parents": [
+        "d28cd5ffa3c3b9e2dd9f354166c6c8e59a693e7f"
+      ],
+      "author_time": "2026-09-18T23:43:49+03:00",
+      "committer_time": "2026-09-18T23:43:49+03:00",
+      "subject": "ci: expose sealed CDT result contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/historical_cdt_kernel_preflight.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ba1c491cd1bdbb7adcdf0001fdc89a69d41a3cd7",
+      "parents": [
+        "b94084d1d281325f79d744b6a4ebba65488d8de3"
+      ],
+      "author_time": "2026-09-18T23:45:44+03:00",
+      "committer_time": "2026-09-18T23:45:44+03:00",
+      "subject": "ci: probe sealed CDT index semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/historical_cdt_kernel_preflight.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8746f7cd55cba4aa52d26b3c1ea3e5dfc5300b81",
+      "parents": [
+        "ba1c491cd1bdbb7adcdf0001fdc89a69d41a3cd7"
+      ],
+      "author_time": "2026-09-18T23:47:39+03:00",
+      "committer_time": "2026-09-18T23:47:39+03:00",
+      "subject": "mesh: adapt sealed CDT to canonical local charts",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/canonical_cdt_adapter_v1.py",
+        "tests/compiler/test_canonical_cdt_adapter_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2deb6d0d024698eae78c73e730d6aa57a66f6e72",
+      "parents": [
+        "8746f7cd55cba4aa52d26b3c1ea3e5dfc5300b81"
+      ],
+      "author_time": "2026-09-18T23:50:05+03:00",
+      "committer_time": "2026-09-18T23:50:05+03:00",
+      "subject": "mesh: add exact native-parity G5 coverage measurement",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/product_coverage_v1.py",
+        "tests/compiler/test_product_coverage_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "46b73c24d03d46704df2938f0d488b5c41791e39",
+      "parents": [
+        "2deb6d0d024698eae78c73e730d6aa57a66f6e72"
+      ],
+      "author_time": "2026-09-18T23:51:06+03:00",
+      "committer_time": "2026-09-18T23:51:06+03:00",
+      "subject": "mesh: project canonical product geometry for G5",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/product_coverage_v1.py",
+        "tests/compiler/test_product_coverage_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0b59690f0d97447b804df0193a1d578d5aaefe49",
+      "parents": [
+        "46b73c24d03d46704df2938f0d488b5c41791e39"
+      ],
+      "author_time": "2026-09-18T23:57:28+03:00",
+      "committer_time": "2026-09-18T23:57:28+03:00",
+      "subject": "mesh: bind G5 component observations to partition authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/product_coverage_v1.py",
+        "tests/compiler/test_product_coverage_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "006c7c480489983d737a65a4f20c84e7cb000329",
+      "parents": [
+        "0b59690f0d97447b804df0193a1d578d5aaefe49"
+      ],
+      "author_time": "2026-09-18T23:58:34+03:00",
+      "committer_time": "2026-09-18T23:58:34+03:00",
+      "subject": "compiler: add typed product artifact codec",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "tests/compiler/test_product_artifact_codec_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c5f37196ca556b0ab4eca626122ac7f45f428141",
+      "parents": [
+        "006c7c480489983d737a65a4f20c84e7cb000329"
+      ],
+      "author_time": "2026-09-19T00:00:04+03:00",
+      "committer_time": "2026-09-19T00:00:04+03:00",
+      "subject": "mesh: bind deformation envelope to frozen axis contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "compiler/realsas_compiler_core/product_authority_v1.py",
+        "tests/compiler/test_product_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

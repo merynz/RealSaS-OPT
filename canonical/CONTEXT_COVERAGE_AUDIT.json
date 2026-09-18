@@ -3,17 +3,17 @@
   "bootstrap_status": "BOOTSTRAP_AUDIT_CLOSED",
   "fit1_gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
   "candidate_rule": "high-signal canonical/prereg/experiment/challenger/workflow artifacts",
-  "tracked_file_count": 893,
-  "high_signal_artifact_count": 281,
+  "tracked_file_count": 996,
+  "high_signal_artifact_count": 313,
   "classification_counts": {
-    "INDEXED_EXPLICIT": 134,
+    "INDEXED_EXPLICIT": 166,
     "HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL": 147
   },
-  "explained_high_signal_count": 281,
+  "explained_high_signal_count": 313,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 102,
-  "safe_default_evidence_only_branch_count": 95,
+  "live_branch_count": 115,
+  "safe_default_evidence_only_branch_count": 111,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -95,6 +95,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "audit/historical-product-power-rebind-20260913",
+      "sha": "2bba9828a3b3db66c5d3e4cdd054fc26aba00fa1",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "audit/iris-architecture-discipline-20260824",
       "sha": "d7bba01c85e95eba86e29e2194f16b286e405d0a",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -139,8 +145,8 @@
     {
       "name": "demo/investor-single-specimen-e2e",
       "sha": "47892ffa16b797cbc18294c07317790ac5f61d95",
-      "class": "EVIDENCE_ONLY",
-      "reason": "explicit authority-map override"
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "dependabot/pip/numpy-2.4.6",
@@ -217,8 +223,8 @@
     {
       "name": "exp/arachne-skintokens-cleanroom-fit1-20260908",
       "sha": "d0b666725e79f3beb0ea001f456375421cc14375",
-      "class": "EVIDENCE_ONLY",
-      "reason": "explicit authority-map override"
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "exp/arachne-v7-dense-consumer-view-diagnosis-20260910",
@@ -271,20 +277,20 @@
     {
       "name": "exp/geppetto-ar01-skeleton-causal-v1-20260907",
       "sha": "58ea876d3e6181284247822ccf2ed116e6d5f5fe",
-      "class": "EVIDENCE_ONLY",
-      "reason": "explicit authority-map override"
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "exp/geppetto-reference-strength-fullstack-v1-20260907",
       "sha": "e6cc31ed13fc4c861874663abd4514620f89f864",
-      "class": "EVIDENCE_ONLY",
-      "reason": "explicit authority-map override"
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "exp/lossless-rigging-evidence-v1-20260906",
       "sha": "d840d96ece57705e0f519d1650119db180d9f5c4",
-      "class": "EVIDENCE_ONLY",
-      "reason": "explicit authority-map override"
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "feature/living-compile-v4-editor",
@@ -341,6 +347,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "fit2/mage-full-subject-reclosure",
+      "sha": "eb7a20eb9da735369b7901eb6a989b0f26348c5e",
+      "class": "EVIDENCE_ONLY",
+      "reason": "explicit authority-map override"
+    },
+    {
       "name": "g0-g1/single-pose-geometry",
       "sha": "e423cd46200220f95452890f74640c0afb57fd28",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -390,7 +402,7 @@
     },
     {
       "name": "integration/mage-real-e2e-20260912",
-      "sha": "3c780cdcfd5bb1edfa454f5112ca9611bbc5a8a4",
+      "sha": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -426,7 +438,7 @@
     },
     {
       "name": "main",
-      "sha": "3c780cdcfd5bb1edfa454f5112ca9611bbc5a8a4",
+      "sha": "12c9f93c15534e55b3b258ae0883cedc05481d0e",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -497,6 +509,36 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "playback-stack-v1-20260916",
+      "sha": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
+      "class": "EVIDENCE_ONLY",
+      "reason": "explicit authority-map override"
+    },
+    {
+      "name": "playback-stack-v1-20260916-p0p1-staging",
+      "sha": "d88a5fc9aa660c0832d70e41fdaa7da86fb611d4",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "product/mage-fit1-demo-fulfillment-20260914",
+      "sha": "e60ea9129f5576f3965f7e1b6b3d54d2e1437fe2",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "product/mage-fit1-demo-fulfillment-20260914-role-fix-tmp",
+      "sha": "7ca58068d58ef62666c6def45db47f24f39584f6",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "product/mage-fit1-v5-p1-demo-20260913",
+      "sha": "2800a22df41471f00e6f9cf2406e8f4accb757d1",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "promote/fit1-evidence-main-20260909",
       "sha": "9deccb8d051fd85780c28a29591df40fbafc4570",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -511,6 +553,24 @@
     {
       "name": "promote/iris-scene-first-signed-v3-20260905",
       "sha": "7cfb7efedbe956c2aa16003e5a7df9bb56c907bb",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "repair/mage-full-subject-reclosure-20260912",
+      "sha": "2fa5d4b604d5ce1dcb24feee2e6a6b8fa12476e3",
+      "class": "EVIDENCE_ONLY",
+      "reason": "explicit authority-map override"
+    },
+    {
+      "name": "repair/mage-full-subject-reclosure-20260912-adaptive-steiner-tmp",
+      "sha": "221ad1b79eae8f00202af3b6e5f816ead4905bb9",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp",
+      "sha": "c69ab78eac42ec89d2bed650fd9aa607d6f44a00",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -575,6 +635,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "runtime-v4-p0-p1-20260917",
+      "sha": "e6654c065699d0641b2664a34e5a56d41193de65",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "scratch-mistake",
       "sha": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -583,8 +649,8 @@
     {
       "name": "seal/geppetto-reference-strength-fit1-20260908",
       "sha": "ae0af0cd39dd2468a012ba21890a4fed2da7c4c9",
-      "class": "EVIDENCE_ONLY",
-      "reason": "explicit authority-map override"
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "single-family-e2e-fit-v1-20260902",
@@ -611,8 +677,20 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "tmp-noop",
+      "sha": "16ee5cd54a00cb0dc322101b209566c38b9ee231",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "tmp/appearance-witness-fetch-20260826",
       "sha": "ec623d005bdb42dd189fee70b99970d52ddd2dee",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "tmp/runtime-v4-p0-p1-stage",
+      "sha": "e6654c065699d0641b2664a34e5a56d41193de65",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

@@ -1,37 +1,95 @@
 # RealSaS — Rehydration Packet
 
-> Generated/navigation cache synchronized by the 2026-09-13 FIT2 authority-hygiene transaction.
+> GENERATED NAVIGATION/CACHE — NOT INDEPENDENT SCIENTIFIC AUTHORITY.
+> Current continuation is defined by the active-run ledger, exact plan hash, authority map and CURRENT_STATE.md.
 
-## 30-second state
+## 60-second state
 
-- Repository continuation pointer: `main`.
-- **Only current executable science branch:** `fit2/mage-full-subject-reclosure`.
-- Old `repair/mage-full-subject-reclosure-20260912`: transition provenance only.
-- FIT1: `HISTORICAL_SCOPED__SUPERSEDED_FOR_CURRENT_PRODUCT`; local old-lineage PASSes preserved, not current S/G/W authority.
-- Corrected H1: CLOSED PASS.
-- GSA8192: CLOSED PASS (`8171` nodes / `23656` relations).
-- Geppetto FIT2: VERIFIED TERMINAL PASS (`12160`, `48/48`).
-- Arachne FIT2: AUTHORIZED / NOT STARTED / NEXT.
-- Mesh: CLOSED FAIL under frozen shape-quality gates; P2_B1_G6 recall `97.349%..99.093%`, precision `100%`; **does not block Arachne**.
-- Productization audit: `audit/historical-product-power-rebind-20260913`, P0 CLOSED PASS, paused until Arachne closes.
-- PRODUCT_PASS: NOT CLAIMED.
+- Product: automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics
+- Current witness: Subject-2 Knight (run data only; architecture generic)
+- Current module: QualifiedMesh + QualifiedPresentationGraph authority implementation
+- Current state: PRODUCT_AUTHORITY_PLAN_REBASED__IMPLEMENTATION
+- Active experiment: SUBJECT2_KNIGHT_FULL_CLOSURE
+- Most recent closed gate: QUALIFIED_MESH_PRESENTATION_ARCHITECTURE_FROZEN
+- Canonical main: 12c9f93c1553
+- Active run: SUBJECT2_KNIGHT_V1 — 0/40; next 01_SOURCE_BYTES_SEALED
+- Plan SHA-256: 2c33bc6d649a0299e4061388af235fd04266998c41bf5f9a8385a77f53d7cf9b
+- Promotion block: stages 24-30 are correctly named but remain UNBOUND; animation-grade mesh thresholds remain preregistration-pending
+- Scope warning: Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority
 
-## Mandatory read order
+## Current machine authority
 
-1. `CURRENT_STATE.md`
-2. `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json`
-3. `canonical/FIT2_AUTHORITY_HYGIENE_20260913.md`
-4. `canonical/AUTHORITY_MAP_V1.json`
-5. `canonical/CONTEXT_STATE_V2.json`
-6. `canonical/EXPERIMENT_REGISTRY_V3.json`
-7. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V2.md`
-8. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V2.md`
-9. `canonical/BRANCH_AUTHORITY_V2.md`
-10. recent tail of `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-11. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md` only when historical FIT1 reasoning is relevant.
+- Context: canonical/CONTEXT_STATE_V2.json
+- Experiment registry: canonical/EXPERIMENT_REGISTRY_V3.json
+- Scientific journal: canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl
+- Active run: canonical/ACTIVE_RUN_V1.json
+- Pipeline plan: canonical/MAINLINE_EXECUTION_PLAN_V1.json
+- Product geometry/presentation contract: canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md
+- Historical detail registry: canonical/EXPERIMENT_REGISTRY_V2.json
+- Historical scientific journal: canonical/SCIENTIFIC_JOURNAL_V1.jsonl
 
-## Fixed work order
+## Frozen product authority
 
-`AUTHORITY HYGIENE [CLOSED] -> ARACHNE FIT2 [NEXT] -> PRODUCTIZATION RESTORATION [AFTER ARACHNE]`
+- RiggingSurfaceIR S is immutable admitted mechanical/evidence substrate.
+- MechanicalPartitionIR declares structural membership plus SEPARATE / PRESERVE_CONTINUITY / UNKNOWN boundaries without mutating S.
+- QualifiedMeshIR M is view-independent and is the single product geometry authority after independent G1–G5 PASS.
+- DeformationCapabilityEnvelopeIR binds mesh conditioning, consequential-UNKNOWN and motion-admissibility policy.
+- QualifiedPresentationGraphIR owns slots, attachments, carrier classes, composition evidence and 8-view overlays.
+- Runtime/export consumes these exact authorities and may not create a second topology or presentation truth.
 
-Do not jump from local model PASS to demo. Productization must close exact mesh/skin/components, binding/render identity, professional motion, runtime/export identity and editor/runtime seams before `PRODUCT_PASS` is considered.
+## Pipeline
+
+| Layer | Role | Current rule |
+|---|---|---|
+| **Observation** | exact 8 source views + calibrated cameras | full admitted subject, border-safe; OOF=UNKNOWN |
+| **IRIS** | learned signed geometry evidence | fresh run checkpoint; teacher excluded from product inference |
+| **GSA** | admitted mechanical/evidence substrate | Compiler owns immutable RiggingSurfaceIR S/provenance |
+| **Geppetto** | skeleton proposal | Compiler owns legal QualifiedSkeletonIR G |
+| **Arachne** | skin proposal | Compiler owns legal QualifiedSkinIR W on S |
+| **MechanicalPartition** | structural component membership + boundary constraints | does not mutate S; SEPARATE/PRESERVE_CONTINUITY/UNKNOWN remain explicit |
+| **QualifiedMesh** | single canonical product geometry authority | view-independent candidate; independent G1-G5 PASS required |
+| **Presentation** | automatic Spine-class slots/attachments/carriers/view overlays | Compiler owns QualifiedPresentationGraphIR; categorical object identity is not required |
+| **Appearance** | source RGB provenance | source observations remain appearance authority; 3D geometry never becomes RGB truth |
+| **Motion** | 3D FK/LBS + proof | must remain inside DeformationCapabilityEnvelopeIR or requalify |
+| **Runtime** | compact .rss + native playback | consumer only; shared XYZ once/frame and no second topology/presentation truth |
+
+## Current scientific question
+
+Can the generic compiler promote one view-independent canonical mesh through G1-G5 and a qualified presentation graph without a second geometry or runtime presentation truth?
+
+## Settled invariants
+
+- No subject-specific compiler/runtime branch.
+- RiggingSurfaceIR remains immutable admitted substrate; QualifiedMeshIR is the single product geometry authority after G1-G5.
+- MechanicalPartitionIR may declare SEPARATE/PRESERVE_CONTINUITY/UNKNOWN but may not silently resolve consequential UNKNOWN at qualification.
+- QualifiedPresentationGraphIR owns slots/attachments/carriers/view overlays; runtime may not invent them.
+- No latest/current alias can substitute an exact artifact hash.
+- Downstream failure cannot erase verified upstream PASS.
+- Rest source preservation precedes motion authority.
+- Visible native motion is required before product closure.
+
+## Execution environment
+
+- Actions: SELF_HOSTED_LOCAL_ONLY
+- Runner labels: self-hosted, linux, x64, realsas
+- Known runner: realsas-self-hosted
+- Authority root: $HOME/realsas_authority
+
+## Resume
+
+Read in this order:
+1. canonical/ACTIVE_RUN_V1.json
+2. canonical/MAINLINE_EXECUTION_PLAN_V1.json
+3. CURRENT_STATE.md
+4. canonical/AUTHORITY_MAP_V1.json
+5. canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md
+6. canonical/CONTEXT_STATE_V2.json
+7. canonical/EXPERIMENT_REGISTRY_V3.json
+8. canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl
+9. canonical/REAL_SAS_MAINLINE_VNEXT_20260918.md
+
+Resume rule: A stage closes only when its ledger row is PASS/CACHE_HIT, exact output hashes verify, and the next stage consumes those exact bindings. Stage 40 alone may close PRODUCT_PASS.
+
+## Packet validity
+
+VALID — current V2/V3 context, active run, plan hash, product authority and live main agree.

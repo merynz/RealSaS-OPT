@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from .playback_full_surface_v3 import CameraProjectionV3
+from .canonical_puppet_state_v1 import CanonicalPuppetStateIR
 from .product_authority_v1 import (
     CanonicalMeshCandidateIR,
     CanonicalMeshVertexCandidateIR,
@@ -343,6 +344,25 @@ def qualified_mesh_skin_from_dict(payload: Json) -> QualifiedMeshSkinIR:
         qualification_report=dict(payload.get("qualification_report") or {}),
         mesh_skin_lineage_hash=str(payload["mesh_skin_lineage_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedMeshSkinIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def canonical_puppet_state_from_dict(payload: Json) -> CanonicalPuppetStateIR:
+    _schema(payload, "RealSaS.CanonicalPuppetStateIR.v1")
+    return CanonicalPuppetStateIR(
+        surface_lineage_hash=str(payload["surface_lineage_hash"]),
+        skeleton_lineage_hash=str(payload["skeleton_lineage_hash"]),
+        skin_lineage_hash=str(payload["skin_lineage_hash"]),
+        partition_lineage_hash=str(payload["partition_lineage_hash"]),
+        carrier_policy_lineage_hash=str(payload["carrier_policy_lineage_hash"]),
+        deformation_envelope_lineage_hash=str(payload["deformation_envelope_lineage_hash"]),
+        mesh_policy_lineage_hash=str(payload["mesh_policy_lineage_hash"]),
+        mesh_lineage_hash=str(payload["mesh_lineage_hash"]),
+        mesh_skin_lineage_hash=str(payload["mesh_skin_lineage_hash"]),
+        qualification_ledger=tuple(dict(row) for row in (payload.get("qualification_ledger") or ())),
+        product_state_hash=str(payload["product_state_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.CanonicalPuppetStateIR.v1"),
         metadata=dict(payload.get("metadata") or {}),
     )
 

@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from compiler.realsas_compiler_core.canonical_cdt_adapter_v1 import build_canonical_cdt_candidate
+from compiler.realsas_compiler_core.canonical_puppet_state_v1 import build_canonical_puppet_state
 from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import build_canonical_relation_candidate
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
@@ -35,6 +36,7 @@ from compiler.realsas_compiler_core.playback_runtime_v3 import ReferenceRasterCo
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_mesh_candidate_from_dict,
     qualified_mesh_from_dict,
+    qualified_mesh_skin_from_dict,
     component_carrier_policy_from_dict,
     deformation_envelope_from_dict,
     mechanical_partition_from_dict,
@@ -554,5 +556,46 @@ def bind_qualified_mesh_skin_stage(ctx:dict)->dict:
             "mesh_binding_hash":bound.mesh_binding_hash,
             "skin_binding_hash":bound.skin_binding_hash,
             "row_count":len(bound.rows),
+        },
+    }
+
+
+def seal_canonical_puppet_state_stage(ctx:dict)->dict:
+    surface=_load_surface(ctx)
+    skeleton=_load_skeleton(ctx)
+    skin=_load_skin(ctx)
+    partition,carrier=_load_partition_and_carrier(ctx)
+    envelope=_load_envelope(ctx)
+    _,policy=_load_candidate_and_policy(ctx)
+    mesh=qualified_mesh_from_dict(
+        _stage_output_payload(ctx,"27_QUALIFIED_MESH_GATE","RealSaS.QualifiedMeshIR.v1")
+    )
+    mesh_skin=qualified_mesh_skin_from_dict(
+        _stage_output_payload(ctx,"28_QUALIFIED_MESH_SKIN_TRANSFER","RealSaS.QualifiedMeshSkinIR.v1")
+    )
+    state=build_canonical_puppet_state(
+        surface=surface,
+        skeleton=skeleton,
+        skin=skin,
+        partition=partition,
+        carrier_policy=carrier,
+        envelope=envelope,
+        policy=policy,
+        mesh=mesh,
+        mesh_skin=mesh_skin,
+        metadata={
+            "run_id":ctx["run_id"],
+            "stage_id":"29_CANONICAL_PUPPET_STATE_SEALED",
+        },
+    )
+    root=ctx["run_root"]/"artifacts"/"29_CANONICAL_PUPPET_STATE_SEALED"
+    return {
+        "status":"PASS",
+        "outputs":[_write_ir(root/"canonical_puppet_state.json",state,authority_class="CANONICAL_MECHANICAL_PRODUCT_STATE")],
+        "diagnostics":{
+            "product_state_hash":state.product_state_hash,
+            "mesh_lineage_hash":state.mesh_lineage_hash,
+            "mesh_skin_lineage_hash":state.mesh_skin_lineage_hash,
+            "qualification_ledger_entries":len(state.qualification_ledger),
         },
     }

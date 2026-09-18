@@ -13,6 +13,7 @@ from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
 from compiler.realsas_compiler_core.playback_full_surface_v3 import qualify_camera_v3
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_mesh_candidate_from_dict,
+    canonical_puppet_state_from_dict,
     component_carrier_policy_from_dict,
     mechanical_partition_from_dict,
     qualified_mesh_from_dict,
@@ -32,6 +33,7 @@ from compiler.realsas_compiler_core.types import (
 from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
     build_canonical_mesh_candidate_stage,
     bind_qualified_mesh_skin_stage,
+    seal_canonical_puppet_state_stage,
     qualify_canonical_mesh_stage,
     qualify_mechanical_partition_and_carriers,
     seal_deformation_capability_envelope,
@@ -199,3 +201,13 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     assert bound.skin_binding_hash=="skin-hash"
     assert len(bound.rows)==len(mesh.vertices)
     assert len(bound.mesh_skin_lineage_hash)==64
+    _install_stage_outputs(ctx,"28_QUALIFIED_MESH_SKIN_TRANSFER",r28)
+
+    r29=seal_canonical_puppet_state_stage(ctx)
+    assert r29["status"]=="PASS",r29
+    state=canonical_puppet_state_from_dict(read_json(r29["outputs"][0]["path"]))
+    assert state.mesh_lineage_hash==mesh.mesh_lineage_hash
+    assert state.mesh_skin_lineage_hash==bound.mesh_skin_lineage_hash
+    assert state.metadata["presentation_bound"] is False
+    assert state.metadata["motion_bound"] is False
+    assert len(state.product_state_hash)==64

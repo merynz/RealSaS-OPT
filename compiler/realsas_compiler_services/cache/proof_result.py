@@ -40,7 +40,7 @@ _PROOF_SOURCE_MODULES = (
     "compiler.realsas_compiler_core.proof_engine",
     "compiler.realsas_compiler_core.v4",
     "compiler.realsas_compiler_core.deformation",
-    "compiler.realsas_compiler_core.mesh.quality",
+    "compiler.realsas_compiler_core.product_authority_v1",
     "compiler.realsas_compiler_core.product_external_render",
     "compiler.realsas_compiler_services.proof.failure_signatures",
     "compiler.realsas_compiler_services.proof.motion_bake",

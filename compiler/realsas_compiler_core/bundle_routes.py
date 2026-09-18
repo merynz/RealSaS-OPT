@@ -19,6 +19,7 @@ from .v4_types import (
     ProofPlanIR, MeasurementReportIR, DomainProofReportIR, ProductProofBundleIR,
     CapabilityQualificationIR,
 )
+from .compile_transaction import CompileRequestIR, CompileTransactionIR, CompileResultIR
 
 @dataclass(frozen=True)
 class ArtifactRoute:
@@ -53,6 +54,9 @@ ARTIFACT_ROUTES: dict[type, ArtifactRoute] = {
     ProductProofBundleIR: ArtifactRoute("DERIVED_PROOF_BUNDLE", "ProductProof", "proof", "product_proof_bundle_ir.json", ("Repair", "Export")),
     RepairDirective: ArtifactRoute("DERIVED_COMMAND", "Repair", "orchestrator", "repair_directive.json", ("Compiler.repair_application",)),
     RuntimePackageIR: ArtifactRoute("RUNTIME_PROJECTION", "Export", "exports", "runtime_package_ir.json", ("runtime/realsas_cpp",)),
+    CompileRequestIR: ArtifactRoute("EXECUTION_CONTRACT", "Compiler.compile_transaction", "orchestrator", "compile_request_ir.json", ("Compiler", "ProductShell")),
+    CompileTransactionIR: ArtifactRoute("EXECUTION_LEDGER", "Compiler.compile_transaction", "orchestrator", "compile_transaction_ir.json", ("Compiler", "Proof", "Export", "ProductShell")),
+    CompileResultIR: ArtifactRoute("EXECUTION_RESULT", "Compiler.compile_transaction", "orchestrator", "compile_result_ir.json", ("Export", "Runtime", "ProductShell")),
 }
 
 def _slug(value: str) -> str:

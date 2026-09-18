@@ -1,0 +1,51 @@
+{
+  "additions": [
+    {
+      "git_blob_sha1": "cda5f44d436fa08f2147d5e5d3f49462a3a0cf89",
+      "path": "runtime/realsas_cpp/examples/realsas_runtime_v4_demo.cpp",
+      "size_bytes": 1995
+    },
+    {
+      "git_blob_sha1": "c9f04aca88e6041250a4dfc92779f507872774f7",
+      "path": "runtime/realsas_cpp/src/runtime_v4_reference.cpp",
+      "size_bytes": 23835
+    },
+    {
+      "git_blob_sha1": "1d963e78f767c32ea666af9be578bc068b439ad6",
+      "path": "runtime/realsas_cpp/src/runtime_v4_reference.h",
+      "size_bytes": 1901
+    },
+    {
+      "git_blob_sha1": "77cc4d2d0df95a1c61eb33a97dce4d9dfcc3e0cd",
+      "path": "runtime/realsas_cpp/tests/runtime_v4_v3_parity_e2e.py",
+      "size_bytes": 4291
+    },
+    {
+      "git_blob_sha1": "c38caac2ea1f7fb0246bf027afabdb5a939affd2",
+      "path": "runtime/realsas_cpp/tests/runtime_v4_writer_native_e2e.py",
+      "size_bytes": 7536
+    }
+  ],
+  "authority": {
+    "canonical_compiler": "compiler/realsas_compiler_core/",
+    "extension_scope": "RUNTIME_V4_P0_P1_NATIVE_REFERENCE_EXTENSION",
+    "historical_base_seal_mutated": false,
+    "product_pass_claimed": false,
+    "runtime_role": "subordinate_deployment_consumer"
+  },
+  "base_seal": {
+    "git_blob_sha1": "6e4f5a98130075b958f4d5d285035e2ecaad59f5",
+    "path": "canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json",
+    "role": "IMMUTABLE_HISTORICAL_PROMOTION_PROVENANCE"
+  },
+  "replacements": [
+    {
+      "git_blob_sha1": "06174dee4c7f329cb52165a3f3ad7b806d3a1301",
+      "path": "runtime/realsas_cpp/CMakeLists.txt",
+      "reason": "add internal Runtime-v4 reference targets and parity tests",
+      "size_bytes": 6110
+    }
+  ],
+  "schema": "realsas.compiler_runtime_source_extension_seal.v1",
+  "sealed_on": "2026-09-17"
+}

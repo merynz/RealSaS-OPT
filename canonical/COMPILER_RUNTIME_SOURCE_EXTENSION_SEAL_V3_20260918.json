@@ -1,0 +1,98 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v3",
+  "sealed_on": "2026-09-18",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json",
+    "git_blob_sha1": "0dc75b5f9c89983556f28b7197eaa488f0603b44",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "PLAYBACK_V3_V4_DIRECTIONAL_REFERENCE_AND_CONFORMANCE_CLOSURE",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "runtime_role": "subordinate_deployment_consumer",
+    "subtree_closure": "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+  },
+  "replacements": [
+    {
+      "path": "runtime/realsas_cpp/CMakeLists.txt",
+      "size_bytes": 6358,
+      "git_blob_sha1": "3da6581f4cedf2ee0d751a1e1d214b57501e3a8f",
+      "reason": "register Runtime-v3/v4 reference consumers and conformance tests"
+    },
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v4_reference.cpp",
+      "size_bytes": 27431,
+      "git_blob_sha1": "a88ddc4181938814ec89cd0607c45233b3609827",
+      "reason": "source-backed donor rendering, separated framebuffer projection, and current Runtime-v4 reference semantics"
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/runtime_v4_v3_parity_e2e.py",
+      "size_bytes": 4324,
+      "git_blob_sha1": "14320a7d45e71921a22c1619223e40429e57f247",
+      "reason": "restrict cross-version parity to the shared framebuffer contract"
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/runtime_v4_writer_native_e2e.py",
+      "size_bytes": 8471,
+      "git_blob_sha1": "c76a705626aa25dda3371125132d7de04c3cca79",
+      "reason": "prove source-atlas dimensions are independent from Runtime-v4 framebuffer resolution"
+    }
+  ],
+  "additions": [
+    {
+      "path": "runtime/realsas_cpp/examples/realsas_runtime_v3_demo.cpp",
+      "size_bytes": 4190,
+      "git_blob_sha1": "e9dfb34dd02d366edc07092fed4ac20650fb1f0e"
+    },
+    {
+      "path": "runtime/realsas_cpp/src/reference_raster_v3.h",
+      "size_bytes": 4465,
+      "git_blob_sha1": "0b48b2a3717d0a8116dd7583fc2be37f28569ace"
+    },
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v3_reference.cpp",
+      "size_bytes": 27416,
+      "git_blob_sha1": "8f718b2be396d4c95587ae0383eaa224390aaa90"
+    },
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v3_reference.h",
+      "size_bytes": 2763,
+      "git_blob_sha1": "1a7c6760f70a5512c391d56950f860b008101a14"
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/reference_raster_v3.cpp",
+      "size_bytes": 1841,
+      "git_blob_sha1": "b7b2aaad127b2dc2c4ae11749f861decb85252a3"
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/runtime_v3_clipping_native_e2e.py",
+      "size_bytes": 10333,
+      "git_blob_sha1": "8ea9df80adb80310ade4e63275ec6f96654e8cc1"
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/runtime_v3_unseen_native_e2e.py",
+      "size_bytes": 5447,
+      "git_blob_sha1": "2d697ca45080864930c57a0a6754ee62ed75ef7f"
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/runtime_v3_writer_native_e2e.py",
+      "size_bytes": 10396,
+      "git_blob_sha1": "0e96c75222419737e879710866966f6d0de09498"
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/runtime_v4_other_view_source_native_e2e.py",
+      "size_bytes": 5884,
+      "git_blob_sha1": "d407821291cf8ae10345c1274203c67f695e6b7d"
+    }
+  ],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 23,
+    "prior_chain_entry_count": 14,
+    "replacement_count": 4,
+    "addition_count": 9,
+    "resulting_sealed_blob_count": 23,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

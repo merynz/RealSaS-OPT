@@ -1,0 +1,32 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v4",
+  "sealed_on": "2026-09-18",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json",
+    "git_blob_sha1": "31f2e5fa5835150ba334fd712aac4aee26722572",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "RUNTIME_V3_CLIP_RANK_NATIVE_CONFORMANCE_FIX",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "runtime_role": "subordinate_deployment_consumer"
+  },
+  "replacements": [
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v3_reference.cpp",
+      "size_bytes": 27413,
+      "git_blob_sha1": "2dcb6c18930510714ea4ac821ee3e42f2cc01300",
+      "reason": "apply clip intervals by decoded draw-order rank while preserving per-face depth tie-break ordering"
+    }
+  ],
+  "additions": [],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 23,
+    "replacement_count": 1,
+    "addition_count": 0,
+    "resulting_sealed_blob_count": 23,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

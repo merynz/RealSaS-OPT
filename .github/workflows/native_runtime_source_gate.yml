@@ -2,50 +2,54 @@ name: Native runtime source gate
 
 on:
   push:
+    branches-ignore:
+      - playback-stack-v1-20260916
     paths:
       - 'runtime/realsas_cpp/**'
       - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V4_20260918.json'
       - '.github/workflows/native_runtime_source_gate.yml'
   pull_request:
+    branches-ignore:
+      - playback-stack-v1-20260916
     paths:
       - 'runtime/realsas_cpp/**'
       - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json'
       - '.github/workflows/native_runtime_source_gate.yml'
+
+concurrency:
+  group: realsas-self-hosted-runtime-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   verify-native-runtime:
     runs-on: [self-hosted, linux, x64, realsas]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install native E2E Python dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off --only-binary=:all: numpy
 
       - name: Verify native dependencies
         run: |
           cmake --version
           c++ --version
-          python3 --version
+          python --version
           dpkg -s libarchive-dev libpng-dev zlib1g-dev >/dev/null
 
-      - name: Verify sealed source bytes
-        run: |
-          python3 - <<'PY'
-          import hashlib
-          import json
-          from pathlib import Path
-
-          seal_path = Path('canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json')
-          seal = json.loads(seal_path.read_text(encoding='utf-8'))
-          assert seal['authority']['canonical_compiler'] == 'compiler/realsas_compiler_core/'
-          assert seal['authority']['runtime_role'] == 'subordinate_deployment_consumer'
-          assert seal['authority']['historical_compiler_restored'] is False
-          assert seal['verification']['file_count'] == 9
-
-          for entry in seal['files']:
-              path = Path(entry['path'])
-              payload = path.read_bytes()
-              actual = hashlib.sha256(payload).hexdigest()
-              assert len(payload) == entry['size_bytes'], (path, len(payload), entry['size_bytes'])
-              assert actual == entry['sha256'], (path, actual, entry['sha256'])
-          PY
+      - name: Verify historical seal + append-only native runtime extension chain
+        run: PYTHONPATH=. python tools/verify_native_runtime_source_seal_v2.py
 
       - name: Configure
         run: cmake -S runtime/realsas_cpp -B build/native-runtime -DCMAKE_BUILD_TYPE=Release -DREALSAS_BUILD_TESTS=ON
@@ -53,5 +57,5 @@ jobs:
       - name: Build
         run: cmake --build build/native-runtime --parallel 2
 
-      - name: ABI smoke
+      - name: ABI + reference runtime tests
         run: ctest --test-dir build/native-runtime --output-on-failure

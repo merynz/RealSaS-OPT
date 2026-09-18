@@ -1,0 +1,25 @@
+{
+  "additions": [],
+  "authority": {
+    "extension_scope": "RUNTIME_V4_P5_BATCH_REFERENCE_RENDER_TRANSPORT",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "runtime_role": "subordinate_deployment_consumer"
+  },
+  "prior_extension": {
+    "git_blob_sha1": "e675238aef40fb97fc64c9a9180a5d539bec39af",
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "replacements": [
+    {
+      "git_blob_sha1": "108cd406bfe73791a7e419b13851779b8ec3ce29",
+      "path": "runtime/realsas_cpp/examples/realsas_runtime_v4_demo.cpp",
+      "reason": "add exact batch reference-render transport without changing render-node authority",
+      "size_bytes": 4751
+    }
+  ],
+  "schema": "realsas.compiler_runtime_source_extension_seal.v2",
+  "sealed_on": "2026-09-17"
+}

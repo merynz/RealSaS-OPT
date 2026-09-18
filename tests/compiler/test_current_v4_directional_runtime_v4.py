@@ -114,7 +114,7 @@ def _component(
         for corner_index, vertex_id in enumerate(face):
             donor = donor_default
             if mixed_face_donors and face_index == 0 and corner_index == 2:
-                donor = view
+                donor = (view + 1) % 2
             corner_rows.append(SimpleNamespace(
                 face_index=face_index,
                 corner_index=corner_index,

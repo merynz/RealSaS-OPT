@@ -201,7 +201,7 @@ def test_partition_uses_only_qualified_mechanics_and_accounts_every_surface():
     assert len(partition.assignments) == len(mechanical.surface.surface_nodes)
 
 
-def test_mesh_projection_drops_only_cross_component_face_and_preserves_payloads():
+def test_mesh_projection_keeps_full_underlay_and_adds_exact_rigid_overlay():
     mechanical, partition, mesh, mesh_skin, appearance = _fixture()
     projection = project_mesh_to_mechanical_components(
         source_mesh=mesh,
@@ -211,17 +211,27 @@ def test_mesh_projection_drops_only_cross_component_face_and_preserves_payloads(
         mechanical=mechanical,
     )
     assert projection.cross_component_face_indices == (2,)
-    assert projection.qualification_report["retained_pure_face_count"] == 2
+    assert projection.qualification_report["underlay_face_count"] == len(mesh.faces)
+    assert projection.qualification_report["source_face_coverage_fraction"] == 1.0
+    assert projection.qualification_report["boundary_faces_deleted"] is False
     by_id = {row.component_id: row for row in projection.components}
     assert set(by_id) == {"BODY_UNDERLAY", "RIGID_HEAD"}
-    assert len(by_id["BODY_UNDERLAY"].mesh.faces) == 1
-    assert len(by_id["RIGID_HEAD"].mesh.faces) == 1
-    assert by_id["BODY_UNDERLAY"].mesh.vertices[0].P == mesh.vertices[0].P
+
+    underlay = by_id["BODY_UNDERLAY"]
+    assert underlay.mesh is mesh
+    assert underlay.mesh_skin is mesh_skin
+    assert underlay.appearance is appearance
+    assert underlay.source_face_indices == tuple(range(len(mesh.faces)))
+    assert len(underlay.mesh.faces) == 3
+
+    head = by_id["RIGID_HEAD"]
+    assert head.source_face_indices == (1,)
+    assert len(head.mesh.faces) == 1
     assert (
-        by_id["RIGID_HEAD"].mesh_skin.rows[0].influences
+        head.mesh_skin.rows[0].influences
         == next(row.influences for row in mesh_skin.rows if row.canonical_mesh_vertex_id == "M_H0")
     )
-    assert by_id["RIGID_HEAD"].appearance.corner_bindings[0].source_observation_hash == "a" * 64
+    assert head.appearance.corner_bindings[0].source_observation_hash == "a" * 64
 
 
 

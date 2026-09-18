@@ -1,0 +1,79 @@
+{
+  "schema": "RealSaS.MageFullAssemblyRuntimeV4AdmissionClosure.v1",
+  "date_utc": "2026-09-18",
+  "branch": "playback-stack-v1-20260916",
+  "verified_source_head": "2ba0ab88acbf240797313018f464334c7199e28e",
+  "verified_workflow_run_id": 35293603359,
+  "verified_workflow_conclusion": "SUCCESS",
+  "notebook": {
+    "path": "experiments/playback_stack_v1/RealSaS_Mage_Full_Assembly_Runtime_V4_Smoke_Colab.ipynb",
+    "pinned_code_commit": "d9201d422b3c17b638d69c0719f87936a16b8480",
+    "note": "Pinned commit has the same runtime source tree as the later empty/no-op continuity metadata commit; full consolidated runtime gate passed before notebook promotion."
+  },
+  "drive_authority_anchors": {
+    "p1q_manifest_sha256": "c945377822561319c40e6e5774235ddb5a586cb230599c0939e100ccf32b14e4",
+    "foreground_manifest_sha256": "5a331c2a73f2fa8b425dacdde1d4890fa55873d01856fe1d65153b3b03d797bf",
+    "component_assembly_manifest_sha256": "b678f04b7d4248709f22de8a6397ef498cb7d4c4b78ef1954f2a42cc9125592f",
+    "byte_verified_from_drive": true
+  },
+  "generic_contracts": {
+    "unseen_semantics": "UNSEEN_IFF_NO_REQUIRED_VIEW_HAS_SOURCE_AUTHORITY",
+    "active_owner_view_faces": "DIRECT_SOURCE_ONLY",
+    "other_view_source": "STATIC_COMPILE_TIME_DONOR_AUTHORITY",
+    "completion_used": false,
+    "continuity_underlay": "EXACT_SOURCE_BACKED_SUBSTRATE_REUSE_ONLY",
+    "body_first_semantic_order": true,
+    "runtime_projection": "VIEW_LOCAL_DIRECTIONAL_ATTACHMENTS_WITH_EQUAL_DEPTH_AND_EXPLICIT_SEMANTIC_DRAW_ORDER",
+    "continuous_motion_certificate": [
+      "EXACT_QUADRATIC_SIGNED_AREA_MINIMUM_OVER_EACH_LINEAR_RUNTIME_INTERVAL",
+      "CONTINUOUS_NONADJACENT_BOUNDARY_NONINTERSECTION_AT_ORIENTATION_CRITICAL_TIMES"
+    ]
+  },
+  "full_mage_runtime": {
+    "component_slots": [
+      "BODY_UNDERLAY",
+      "CAPE_FOREGROUND",
+      "BOOK_FOREGROUND",
+      "STAFF_FOREGROUND",
+      "HAT_FOREGROUND"
+    ],
+    "view_count": 8,
+    "intended_asset_count": 40,
+    "source_motion_authority": "QUALIFICATION_OWNED_MOTION_BAKE",
+    "render_gate": "PACKAGE_AND_NATIVE_RENDER_FORBIDDEN_BEFORE_PASS__FULL_MAGE_RUNTIME_V4_RENDER_ADMITTED"
+  },
+  "regression_gates": {
+    "directional_full_assembly_tests": "PASS",
+    "mage_exact_input_resolver": "PASS",
+    "mage_admission_before_render_regression": "PASS",
+    "synthetic_proof_export_gate": "PASS",
+    "native_cpp_tests": "PASS_8_OF_8",
+    "runtime_v4_other_view_source_native_e2e": "PASS",
+    "current_v4_native_package_open_render": "PASS"
+  },
+  "synthetic_runtime_v4_measurement": {
+    "claim_scope": "SYNTHETIC_REPRESENTATION_AND_WRITER_ONLY",
+    "vertex_count": 257505,
+    "face_count": 500000,
+    "view_count": 8,
+    "frame_count": 18,
+    "v3_equivalent_xyz_bytes_per_frame": 24720480,
+    "v4_canonical_xyz_bytes_per_frame": 3090060,
+    "xyz_reduction_factor": 8,
+    "package_total_bytes": 38598891,
+    "runtime_binary_bytes": 93198016,
+    "wall_seconds": 1.6563728860019182,
+    "archive_write_seconds": 1.2459894620005798,
+    "runtime_binary_write_seconds": 0.28733727899816586,
+    "performance_pass_claimed": false,
+    "product_pass_claimed": false
+  },
+  "exact_nonclaims": [
+    "FOUNDER_VISUAL_PASS_NOT_YET_EXECUTED_ON_REAL_MAGE_RUNTIME_V4_PACKAGE",
+    "FULL_PRODUCT_PROOF_NOT_CLAIMED",
+    "PRODUCT_PASS_NOT_CLAIMED",
+    "REAL_MAGE_PACKAGE_SIZE_NOT_YET_MEASURED",
+    "SUBJECTIVE_ANIMATION_QUALITY_NOT_CERTIFIED"
+  ],
+  "next_action": "RUN_PINNED_COLAB_NOTEBOOK_ON_MOUNTED_DRIVE_AND_INSPECT_IDLE_RUN_8VIEW_NATIVE_OUTPUTS"
+}

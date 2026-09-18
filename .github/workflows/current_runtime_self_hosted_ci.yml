@@ -79,6 +79,7 @@ jobs:
             tests/compiler/test_motion_bake_firewall_v1.py \
             tests/compiler/test_current_v4_runtime_v2_projection_v1.py \
             tests/compiler/test_current_v4_directional_runtime_v4.py \
+            tests/compiler/test_mage_runtime_v4_exact_input_resolver_v1.py \
             tests/compiler/test_runtime_v4_cache_v1.py \
             tests/compiler/test_playback_runtime_v3_contract_v1.py \
             tests/compiler/test_playback_full_surface_v3.py \

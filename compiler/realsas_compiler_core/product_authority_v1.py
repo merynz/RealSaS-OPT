@@ -62,6 +62,47 @@ class MechanicalPartitionIR:
 
 
 @dataclass(frozen=True)
+class ComponentCarrierDecisionIR:
+    component_id: str
+    carrier_class: str
+    evidence_refs: tuple[str, ...]
+    metadata: Json = field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
+
+@dataclass(frozen=True)
+class ComponentCarrierPolicyIR:
+    partition_binding_hash: str
+    decisions: tuple[ComponentCarrierDecisionIR, ...]
+    carrier_policy_lineage_hash: str
+    schema_version: str = "RealSaS.ComponentCarrierPolicyIR.v1"
+    metadata: Json = field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
+
+@dataclass(frozen=True)
+class CarrierCoverageThresholdIR:
+    carrier_class: str
+    min_recall: float
+    min_precision: float
+    max_largest_coherent_hole_fraction: float
+    def to_dict(self): return asdict(self)
+
+
+@dataclass(frozen=True)
+class MeshQualificationPolicyIR:
+    g1_max_normal_refinement_ratio: float
+    g1_max_tangential_to_normal_ratio: float
+    g3_min_angle_deg: float
+    g3_max_aspect_longest_over_min_altitude: float
+    coverage_thresholds: tuple[CarrierCoverageThresholdIR, ...]
+    qualification_policy_lineage_hash: str
+    schema_version: str = "RealSaS.MeshQualificationPolicyIR.v1"
+    metadata: Json = field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
+
+@dataclass(frozen=True)
 class JointCapabilityRangeIR:
     canonical_joint_id: str
     min_rotation_deg: float
@@ -117,6 +158,7 @@ class CanonicalMeshCandidateIR:
     edges: tuple[tuple[str, str], ...]
     surface_binding_hash: str
     partition_binding_hash: str
+    carrier_policy_binding_hash: str
     producer_id: str
     producer_policy_hash: str
     candidate_lineage_hash: str
@@ -144,6 +186,7 @@ class QualifiedMeshIR:
     edges: tuple[tuple[str, str], ...]
     surface_binding_hash: str
     partition_binding_hash: str
+    carrier_policy_binding_hash: str
     envelope_binding_hash: str
     qualification_policy_hash: str
     qualification_report: Json
@@ -205,6 +248,7 @@ class QualifiedPresentationGraphIR:
     skeleton_binding_hash: str
     mesh_binding_hash: str
     partition_binding_hash: str
+    carrier_policy_binding_hash: str
     qualification_report: Json
     presentation_lineage_hash: str
     schema_version: str = "RealSaS.QualifiedPresentationGraphIR.v1"
@@ -219,6 +263,8 @@ def _hash_without(value, field_name: str) -> str:
 
 
 def mechanical_partition_lineage_hash(value): return _hash_without(value, "partition_lineage_hash")
+def component_carrier_policy_lineage_hash(value): return _hash_without(value, "carrier_policy_lineage_hash")
+def mesh_qualification_policy_lineage_hash(value): return _hash_without(value, "qualification_policy_lineage_hash")
 def deformation_envelope_lineage_hash(value): return _hash_without(value, "envelope_lineage_hash")
 def canonical_mesh_candidate_lineage_hash(value): return _hash_without(value, "candidate_lineage_hash")
 def qualified_mesh_lineage_hash(value): return _hash_without(value, "mesh_lineage_hash")
@@ -268,6 +314,81 @@ def build_mechanical_partition(*, surface, components, boundary_constraints, met
     )
     value = replace(value, partition_lineage_hash=mechanical_partition_lineage_hash(value))
     validate_mechanical_partition(value, surface)
+    return value
+
+
+def validate_component_carrier_policy(value: ComponentCarrierPolicyIR, partition: MechanicalPartitionIR) -> None:
+    if value.partition_binding_hash != partition.partition_lineage_hash:
+        raise QualificationError("CARRIER_POLICY_PARTITION_LINEAGE_MISMATCH")
+    component_ids = {component.component_id for component in partition.components}
+    seen = set()
+    for row in value.decisions:
+        if row.component_id not in component_ids or row.component_id in seen:
+            raise QualificationError("CARRIER_POLICY_COMPONENT_INVALID")
+        seen.add(row.component_id)
+        if row.carrier_class not in CARRIER_CLASSES or not row.evidence_refs:
+            raise QualificationError("CARRIER_POLICY_DECISION_INVALID")
+    if seen != component_ids:
+        raise QualificationError("CARRIER_POLICY_INCOMPLETE_COMPONENT_ACCOUNTING")
+    if value.carrier_policy_lineage_hash != component_carrier_policy_lineage_hash(value):
+        raise QualificationError("CARRIER_POLICY_LINEAGE_HASH_MISMATCH")
+
+
+def build_component_carrier_policy(*, partition, decisions, metadata=None) -> ComponentCarrierPolicyIR:
+    value = ComponentCarrierPolicyIR(
+        partition.partition_lineage_hash,
+        tuple(decisions),
+        "",
+        metadata=dict(metadata or {}),
+    )
+    value = replace(value, carrier_policy_lineage_hash=component_carrier_policy_lineage_hash(value))
+    validate_component_carrier_policy(value, partition)
+    return value
+
+
+def validate_mesh_qualification_policy(value: MeshQualificationPolicyIR) -> None:
+    scalars = (
+        value.g1_max_normal_refinement_ratio,
+        value.g1_max_tangential_to_normal_ratio,
+        value.g3_min_angle_deg,
+        value.g3_max_aspect_longest_over_min_altitude,
+    )
+    if any(not math.isfinite(float(x)) for x in scalars):
+        raise QualificationError("MESH_QUALIFICATION_POLICY_NONFINITE")
+    if value.g1_max_normal_refinement_ratio < 0.0 or value.g1_max_tangential_to_normal_ratio < 0.0:
+        raise QualificationError("MESH_QUALIFICATION_POLICY_G1_INVALID")
+    if value.g3_min_angle_deg + 1e-9 < G3_NUMERICAL_MIN_ANGLE_DEG:
+        raise QualificationError("MESH_QUALIFICATION_POLICY_WEAKER_THAN_G3_ANGLE_FLOOR")
+    if value.g3_max_aspect_longest_over_min_altitude - 1e-9 > G3_NUMERICAL_MAX_ASPECT:
+        raise QualificationError("MESH_QUALIFICATION_POLICY_WEAKER_THAN_G3_ASPECT_FLOOR")
+    if value.g3_max_aspect_longest_over_min_altitude <= 0.0:
+        raise QualificationError("MESH_QUALIFICATION_POLICY_G3_INVALID")
+    thresholds = {}
+    for row in value.coverage_thresholds:
+        if row.carrier_class not in CARRIER_CLASSES or row.carrier_class in thresholds:
+            raise QualificationError("MESH_QUALIFICATION_POLICY_G5_CARRIER_INVALID")
+        vals = (row.min_recall, row.min_precision, row.max_largest_coherent_hole_fraction)
+        if any(not math.isfinite(float(x)) or float(x) < 0.0 or float(x) > 1.0 for x in vals):
+            raise QualificationError("MESH_QUALIFICATION_POLICY_G5_THRESHOLD_INVALID")
+        thresholds[row.carrier_class] = row
+    if set(thresholds) != CARRIER_CLASSES:
+        raise QualificationError("MESH_QUALIFICATION_POLICY_REQUIRES_ALL_CARRIER_CLASSES")
+    if value.qualification_policy_lineage_hash != mesh_qualification_policy_lineage_hash(value):
+        raise QualificationError("MESH_QUALIFICATION_POLICY_LINEAGE_HASH_MISMATCH")
+
+
+def build_mesh_qualification_policy(*, g1_max_normal_refinement_ratio, g1_max_tangential_to_normal_ratio, g3_min_angle_deg, g3_max_aspect_longest_over_min_altitude, coverage_thresholds, metadata=None) -> MeshQualificationPolicyIR:
+    value = MeshQualificationPolicyIR(
+        float(g1_max_normal_refinement_ratio),
+        float(g1_max_tangential_to_normal_ratio),
+        float(g3_min_angle_deg),
+        float(g3_max_aspect_longest_over_min_altitude),
+        tuple(coverage_thresholds),
+        "",
+        metadata=dict(metadata or {}),
+    )
+    value = replace(value, qualification_policy_lineage_hash=mesh_qualification_policy_lineage_hash(value))
+    validate_mesh_qualification_policy(value)
     return value
 
 
@@ -491,11 +612,12 @@ def qualified_mesh_intrinsic_audit(value: QualifiedMeshIR, *, surface, partition
     }
 
 
-def _validate_g5_matrix(report: Json, *, component_ids: set[str]) -> None:
+def _validate_g5_matrix(report: Json, *, component_ids: set[str], carrier_policy: ComponentCarrierPolicyIR, policy: MeshQualificationPolicyIR) -> None:
     rows = tuple(report.get("view_component_coverage") or ())
     expected = {(view, component_id) for view in range(8) for component_id in component_ids}
     actual = set()
-    carrier_by_component = {}
+    carrier_by_component = {row.component_id: row.carrier_class for row in carrier_policy.decisions}
+    thresholds = {row.carrier_class: row for row in policy.coverage_thresholds}
     for row in rows:
         try:
             view = int(row["view_index"])
@@ -507,34 +629,53 @@ def _validate_g5_matrix(report: Json, *, component_ids: set[str]) -> None:
         if key in actual or key not in expected or carrier not in CARRIER_CLASSES:
             raise QualificationError("QUALIFIED_MESH_G5_MATRIX_ROW_INVALID")
         actual.add(key)
-        prior = carrier_by_component.setdefault(component_id, carrier)
-        if prior != carrier:
+        if carrier_by_component.get(component_id) != carrier:
             raise QualificationError("QUALIFIED_MESH_G5_CARRIER_CLASS_DRIFT")
-        for metric in ("recall", "precision", "largest_coherent_hole_fraction"):
-            value = float(row.get(metric, float("nan")))
-            if not math.isfinite(value) or value < 0.0 or value > 1.0:
-                raise QualificationError("QUALIFIED_MESH_G5_METRIC_INVALID")
+        recall = float(row.get("recall", float("nan")))
+        precision = float(row.get("precision", float("nan")))
+        hole = float(row.get("largest_coherent_hole_fraction", float("nan")))
+        if any(not math.isfinite(x) or x < 0.0 or x > 1.0 for x in (recall, precision, hole)):
+            raise QualificationError("QUALIFIED_MESH_G5_METRIC_INVALID")
+        threshold = thresholds[carrier]
+        if recall + 1e-12 < threshold.min_recall:
+            raise QualificationError("QUALIFIED_MESH_G5_RECALL_FAIL")
+        if precision + 1e-12 < threshold.min_precision:
+            raise QualificationError("QUALIFIED_MESH_G5_PRECISION_FAIL")
+        if hole - 1e-12 > threshold.max_largest_coherent_hole_fraction:
+            raise QualificationError("QUALIFIED_MESH_G5_COHERENT_HOLE_FAIL")
         if row.get("status") != "PASS":
             raise QualificationError("QUALIFIED_MESH_G5_CELL_NOT_PASS")
     if actual != expected:
         raise QualificationError("QUALIFIED_MESH_G5_MATRIX_INCOMPLETE")
-    if not report.get("carrier_policy_hash"):
-        raise QualificationError("QUALIFIED_MESH_G5_CARRIER_POLICY_BINDING_MISSING")
+    if report.get("carrier_policy_hash") != carrier_policy.carrier_policy_lineage_hash:
+        raise QualificationError("QUALIFIED_MESH_G5_CARRIER_POLICY_BINDING_MISMATCH")
 
 
-def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, envelope) -> None:
+def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carrier_policy, envelope, policy) -> None:
     validate_mechanical_partition(partition, surface)
+    validate_component_carrier_policy(carrier_policy, partition)
     validate_deformation_capability_envelope(envelope)
+    validate_mesh_qualification_policy(policy)
     if value.surface_binding_hash != surface.geometry_lineage_hash:
         raise QualificationError("QUALIFIED_MESH_SURFACE_LINEAGE_MISMATCH")
     if value.partition_binding_hash != partition.partition_lineage_hash:
         raise QualificationError("QUALIFIED_MESH_PARTITION_LINEAGE_MISMATCH")
+    if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+        raise QualificationError("QUALIFIED_MESH_CARRIER_POLICY_LINEAGE_MISMATCH")
     if value.envelope_binding_hash != envelope.envelope_lineage_hash:
         raise QualificationError("QUALIFIED_MESH_ENVELOPE_LINEAGE_MISMATCH")
-    if not value.qualification_policy_hash:
-        raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISSING")
+    if value.qualification_policy_hash != policy.qualification_policy_lineage_hash:
+        raise QualificationError("QUALIFIED_MESH_POLICY_BINDING_MISMATCH")
 
     intrinsic = qualified_mesh_intrinsic_audit(value, surface=surface, partition=partition)
+    if intrinsic["max_refinement_normal_ratio"] - 1e-12 > policy.g1_max_normal_refinement_ratio:
+        raise QualificationError("QUALIFIED_MESH_G1_NORMAL_REFINEMENT_BOUND_FAIL")
+    if intrinsic["max_refinement_tangent_to_normal"] - 1e-12 > policy.g1_max_tangential_to_normal_ratio:
+        raise QualificationError("QUALIFIED_MESH_G1_TANGENTIAL_REFINEMENT_BOUND_FAIL")
+    if intrinsic["rest_min_angle_deg"] + 1e-9 < policy.g3_min_angle_deg:
+        raise QualificationError("QUALIFIED_MESH_G3_POLICY_MIN_ANGLE_FAIL")
+    if intrinsic["rest_max_aspect_longest_over_min_altitude"] - 1e-9 > policy.g3_max_aspect_longest_over_min_altitude:
+        raise QualificationError("QUALIFIED_MESH_G3_POLICY_ASPECT_FAIL")
     if value.qualification_report.get("intrinsic_audit_hash") != content_sha256(intrinsic):
         raise QualificationError("QUALIFIED_MESH_INTRINSIC_AUDIT_BINDING_MISMATCH")
 
@@ -555,16 +696,22 @@ def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, envel
             raise QualificationError("QUALIFIED_MESH_G4_UNKNOWN_ANALYSIS_MISSING")
 
     component_ids = {component.component_id for component in partition.components}
-    _validate_g5_matrix(value.qualification_report, component_ids=component_ids)
+    _validate_g5_matrix(value.qualification_report, component_ids=component_ids, carrier_policy=carrier_policy, policy=policy)
     if value.qualification_report.get("view_component_coverage_matrix_complete") is not True:
         raise QualificationError("QUALIFIED_MESH_VIEW_COMPONENT_COVERAGE_REQUIRED")
     if value.mesh_lineage_hash != qualified_mesh_lineage_hash(value):
         raise QualificationError("QUALIFIED_MESH_LINEAGE_HASH_MISMATCH")
 
 
-def validate_qualified_presentation_graph(value: QualifiedPresentationGraphIR) -> None:
-    if not value.skeleton_binding_hash or not value.mesh_binding_hash or not value.partition_binding_hash:
+def validate_qualified_presentation_graph(value: QualifiedPresentationGraphIR, *, carrier_policy: ComponentCarrierPolicyIR | None = None) -> None:
+    if not value.skeleton_binding_hash or not value.mesh_binding_hash or not value.partition_binding_hash or not value.carrier_policy_binding_hash:
         raise QualificationError("PRESENTATION_GRAPH_UPSTREAM_BINDING_MISSING")
+    if carrier_policy is not None:
+        if value.carrier_policy_binding_hash != carrier_policy.carrier_policy_lineage_hash:
+            raise QualificationError("PRESENTATION_GRAPH_CARRIER_POLICY_MISMATCH")
+        expected_carrier = {row.component_id: row.carrier_class for row in carrier_policy.decisions}
+    else:
+        expected_carrier = None
     slot_ids = [s.slot_id for s in value.slots]
     if not slot_ids or len(slot_ids) != len(set(slot_ids)) or len({s.setup_order for s in value.slots}) != len(value.slots):
         raise QualificationError("PRESENTATION_SLOT_SET_INVALID")
@@ -584,6 +731,10 @@ def validate_qualified_presentation_graph(value: QualifiedPresentationGraphIR) -
             raise QualificationError("PRESENTATION_ATTACHMENT_CLASS_INVALID")
         if not attachment.mechanical_component_ids or not attachment.carrier_binding_hash:
             raise QualificationError("PRESENTATION_ATTACHMENT_BINDING_MISSING")
+        if expected_carrier is not None:
+            for component_id in attachment.mechanical_component_ids:
+                if expected_carrier.get(component_id) != attachment.carrier_class:
+                    raise QualificationError("PRESENTATION_ATTACHMENT_CARRIER_POLICY_DRIFT")
         allowed[attachment.slot_id].add(attachment.attachment_id)
     for slot in value.slots:
         if slot.default_attachment_id is not None and slot.default_attachment_id not in allowed[slot.slot_id]:

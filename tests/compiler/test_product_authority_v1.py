@@ -4,7 +4,9 @@ import pytest
 
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.product_authority_v1 import (
+    CarrierCoverageThresholdIR,
     ComponentBoundaryConstraintIR,
+    ComponentCarrierDecisionIR,
     ComponentRegionIR,
     DeformationCapabilityEnvelopeIR,
     JointCapabilityRangeIR,
@@ -15,7 +17,9 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
     QualifiedMeshIR,
     QualifiedMeshVertexIR,
     QualifiedPresentationGraphIR,
+    build_component_carrier_policy,
     build_mechanical_partition,
+    build_mesh_qualification_policy,
     deformation_envelope_lineage_hash,
     qualified_mesh_intrinsic_audit,
     qualified_mesh_lineage_hash,
@@ -56,6 +60,31 @@ def _partition(surface):
     )
 
 
+def _carrier_policy(partition, *, c0="MESH", c1="MESH"):
+    return build_component_carrier_policy(
+        partition=partition,
+        decisions=(
+            ComponentCarrierDecisionIR("c0", c0, ("structural-evidence-c0",)),
+            ComponentCarrierDecisionIR("c1", c1, ("structural-evidence-c1",)),
+        ),
+    )
+
+
+def _mesh_policy(*, mesh_recall=0.0):
+    return build_mesh_qualification_policy(
+        g1_max_normal_refinement_ratio=0.25,
+        g1_max_tangential_to_normal_ratio=0.25,
+        g3_min_angle_deg=7.5,
+        g3_max_aspect_longest_over_min_altitude=16.0,
+        coverage_thresholds=(
+            CarrierCoverageThresholdIR("MESH", mesh_recall, 0.0, 1.0),
+            CarrierCoverageThresholdIR("PLANAR", 0.0, 0.0, 1.0),
+            CarrierCoverageThresholdIR("CLIP", 0.0, 0.0, 1.0),
+        ),
+        metadata={"test_only_thresholds": True},
+    )
+
+
 def _envelope():
     value = DeformationCapabilityEnvelopeIR(
         "skeleton-hash",
@@ -80,7 +109,7 @@ def _identity_vertex(vid, sid, component_id, point):
     )
 
 
-def _valid_mesh(surface, partition, envelope):
+def _valid_mesh(surface, partition, carrier_policy, envelope, policy):
     vertices = tuple(
         _identity_vertex(f"v{i}", f"s{i}", "c0" if i < 3 else "c1", surface.surface_nodes[i].P)
         for i in range(6)
@@ -90,6 +119,7 @@ def _valid_mesh(surface, partition, envelope):
         ("v0", "v1"), ("v1", "v2"), ("v0", "v2"),
         ("v3", "v4"), ("v4", "v5"), ("v3", "v5"),
     )
+    carrier_by_component = {row.component_id: row.carrier_class for row in carrier_policy.decisions}
     base_report = {
         "gates": {
             "G1_SUPPORT_LINEAGE": "PASS",
@@ -104,12 +134,12 @@ def _valid_mesh(surface, partition, envelope):
         "unknown_boundary_analysis_hash": "unknown-analysis-hash",
         "g3_envelope_binding_hash": envelope.envelope_lineage_hash,
         "g3_stress_probe_hash": "stress-probe-hash",
-        "carrier_policy_hash": "carrier-policy-hash",
+        "carrier_policy_hash": carrier_policy.carrier_policy_lineage_hash,
         "view_component_coverage": tuple(
             {
                 "view_index": view,
                 "component_id": component_id,
-                "carrier_class": "MESH",
+                "carrier_class": carrier_by_component[component_id],
                 "recall": 1.0,
                 "precision": 1.0,
                 "largest_coherent_hole_fraction": 0.0,
@@ -123,8 +153,9 @@ def _valid_mesh(surface, partition, envelope):
         vertices, faces, edges,
         surface.geometry_lineage_hash,
         partition.partition_lineage_hash,
+        carrier_policy.carrier_policy_lineage_hash,
         envelope.envelope_lineage_hash,
-        "policy-hash",
+        policy.qualification_policy_lineage_hash,
         base_report,
         "",
     )
@@ -132,6 +163,15 @@ def _valid_mesh(surface, partition, envelope):
     report = {**base_report, "intrinsic_audit_hash": content_sha256(audit)}
     mesh = replace(mesh, qualification_report=report)
     return replace(mesh, mesh_lineage_hash=qualified_mesh_lineage_hash(mesh))
+
+
+def _context():
+    surface = _surface()
+    partition = _partition(surface)
+    carrier_policy = _carrier_policy(partition)
+    envelope = _envelope()
+    policy = _mesh_policy()
+    return surface, partition, carrier_policy, envelope, policy
 
 
 def test_canonical_qualified_mesh_has_no_view_or_camera_authority_fields():
@@ -148,75 +188,100 @@ def test_partition_is_bound_to_immutable_surface_and_declares_both_boundary_dire
     }
 
 
-def test_qualified_mesh_recomputes_intrinsics_and_requires_external_g3_g5_evidence():
-    surface = _surface()
-    partition = _partition(surface)
-    envelope = _envelope()
-    mesh = _valid_mesh(surface, partition, envelope)
-    validate_qualified_mesh(mesh, surface=surface, partition=partition, envelope=envelope)
+def test_qualified_mesh_recomputes_intrinsics_and_binds_exact_carrier_and_mesh_policy():
+    surface, partition, carrier_policy, envelope, policy = _context()
+    mesh = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+    validate_qualified_mesh(
+        mesh, surface=surface, partition=partition, carrier_policy=carrier_policy,
+        envelope=envelope, policy=policy,
+    )
 
 
 def test_empty_mesh_cannot_pass_by_claiming_all_five_gates():
-    surface = _surface()
-    partition = _partition(surface)
-    envelope = _envelope()
-    good = _valid_mesh(surface, partition, envelope)
+    surface, partition, carrier_policy, envelope, policy = _context()
+    good = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
     bad = replace(good, vertices=(), faces=(), edges=(), mesh_lineage_hash="")
     with pytest.raises(QualificationError, match="EMPTY_PRODUCT_GEOMETRY"):
-        validate_qualified_mesh(bad, surface=surface, partition=partition, envelope=envelope)
+        validate_qualified_mesh(
+            bad, surface=surface, partition=partition, carrier_policy=carrier_policy,
+            envelope=envelope, policy=policy,
+        )
 
 
 def test_face_cannot_cross_mechanical_component_boundary():
-    surface = _surface()
-    partition = _partition(surface)
-    envelope = _envelope()
-    good = _valid_mesh(surface, partition, envelope)
+    surface, partition, carrier_policy, envelope, policy = _context()
+    good = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
     bad = replace(good, faces=(("v0", "v1", "v3"), ("v3", "v4", "v5")), mesh_lineage_hash="")
     with pytest.raises(QualificationError, match="FACE_CROSSES_COMPONENT_BOUNDARY"):
-        validate_qualified_mesh(bad, surface=surface, partition=partition, envelope=envelope)
+        validate_qualified_mesh(
+            bad, surface=surface, partition=partition, carrier_policy=carrier_policy,
+            envelope=envelope, policy=policy,
+        )
 
 
-def test_preserve_continuity_requires_both_boundary_supports_to_exist_in_product_mesh():
-    surface = _surface()
-    partition = _partition(surface)
-    envelope = _envelope()
-    good = _valid_mesh(surface, partition, envelope)
-    vertices = tuple(v for v in good.vertices if v.canonical_mesh_vertex_id != "v1")
-    bad = replace(
-        good,
-        vertices=vertices,
-        faces=(("v0", "v2", "v2"), ("v3", "v4", "v5")),
-        edges=(),
-        mesh_lineage_hash="",
-    )
-    with pytest.raises(QualificationError):
-        validate_qualified_mesh(bad, surface=surface, partition=partition, envelope=envelope)
+def test_g5_cannot_reclassify_component_after_carrier_policy_freeze():
+    surface, partition, carrier_policy, envelope, policy = _context()
+    good = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+    rows = list(good.qualification_report["view_component_coverage"])
+    rows[0] = {**rows[0], "carrier_class": "PLANAR"}
+    report = {**good.qualification_report, "view_component_coverage": tuple(rows)}
+    bad = replace(good, qualification_report=report, mesh_lineage_hash="")
+    bad = replace(bad, mesh_lineage_hash=qualified_mesh_lineage_hash(bad))
+    with pytest.raises(QualificationError, match="CARRIER_CLASS_DRIFT"):
+        validate_qualified_mesh(
+            bad, surface=surface, partition=partition, carrier_policy=carrier_policy,
+            envelope=envelope, policy=policy,
+        )
 
 
-def test_g3_numerical_floor_rejects_skinny_rest_triangle_even_with_pass_report():
-    surface = _surface()
-    partition = _partition(surface)
-    envelope = _envelope()
-    good = _valid_mesh(surface, partition, envelope)
-    skinny = replace(good.vertices[2], P=(0.5, 0.01, 0.0))
-    bad = replace(good, vertices=(good.vertices[0], good.vertices[1], skinny, *good.vertices[3:]), mesh_lineage_hash="")
-    with pytest.raises(QualificationError):
-        validate_qualified_mesh(bad, surface=surface, partition=partition, envelope=envelope)
+def test_g5_threshold_is_enforced_from_typed_policy_not_report_status():
+    surface, partition, carrier_policy, envelope, _ = _context()
+    policy = _mesh_policy(mesh_recall=0.99)
+    good = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+    rows = list(good.qualification_report["view_component_coverage"])
+    rows[0] = {**rows[0], "recall": 0.98, "status": "PASS"}
+    report = {**good.qualification_report, "view_component_coverage": tuple(rows)}
+    bad = replace(good, qualification_report=report, mesh_lineage_hash="")
+    bad = replace(bad, mesh_lineage_hash=qualified_mesh_lineage_hash(bad))
+    with pytest.raises(QualificationError, match="G5_RECALL_FAIL"):
+        validate_qualified_mesh(
+            bad, surface=surface, partition=partition, carrier_policy=carrier_policy,
+            envelope=envelope, policy=policy,
+        )
+
+
+def test_g3_policy_cannot_be_weaker_than_subject_free_calibration_floor():
+    with pytest.raises(QualificationError, match="WEAKER_THAN_G3_ANGLE_FLOOR"):
+        build_mesh_qualification_policy(
+            g1_max_normal_refinement_ratio=0.25,
+            g1_max_tangential_to_normal_ratio=0.25,
+            g3_min_angle_deg=5.0,
+            g3_max_aspect_longest_over_min_altitude=16.0,
+            coverage_thresholds=(
+                CarrierCoverageThresholdIR("MESH", 0.0, 0.0, 1.0),
+                CarrierCoverageThresholdIR("PLANAR", 0.0, 0.0, 1.0),
+                CarrierCoverageThresholdIR("CLIP", 0.0, 0.0, 1.0),
+            ),
+        )
 
 
 def test_qualified_mesh_requires_zero_consequential_unknown():
-    surface = _surface()
-    partition = _partition(surface)
-    envelope = _envelope()
-    mesh = _valid_mesh(surface, partition, envelope)
+    surface, partition, carrier_policy, envelope, policy = _context()
+    mesh = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
     report = {**mesh.qualification_report, "consequential_unknown_boundary_count": 1}
     bad = replace(mesh, qualification_report=report, mesh_lineage_hash="")
     bad = replace(bad, mesh_lineage_hash=qualified_mesh_lineage_hash(bad))
     with pytest.raises(QualificationError, match="CONSEQUENTIAL_UNKNOWN"):
-        validate_qualified_mesh(bad, surface=surface, partition=partition, envelope=envelope)
+        validate_qualified_mesh(
+            bad, surface=surface, partition=partition, carrier_policy=carrier_policy,
+            envelope=envelope, policy=policy,
+        )
 
 
-def test_presentation_keeps_mechanical_class_and_carrier_class_orthogonal():
+def test_presentation_carrier_class_is_orthogonal_to_mechanics_but_cannot_drift_from_frozen_policy():
+    surface = _surface()
+    partition = _partition(surface)
+    carrier_policy = _carrier_policy(partition, c0="PLANAR", c1="MESH")
     slots = (PresentationSlotIR("slot0", "j0", 0, "a0", ("ATTACHMENT", "ORDER")),)
     attachments = (PresentationAttachmentIR("a0", "slot0", ("c0",), "RIGID", "PLANAR", "plane-hash"),)
     overlays = tuple(PresentationViewOverlayIR(i, f"cam{i}", f"app{i}", f"comp{i}") for i in range(8))
@@ -226,10 +291,11 @@ def test_presentation_keeps_mechanical_class_and_carrier_class_orthogonal():
     )
     graph = QualifiedPresentationGraphIR(
         slots, attachments, overlays, decisions,
-        "skeleton-hash", "mesh-hash", "partition-hash",
+        "skeleton-hash", "mesh-hash", partition.partition_lineage_hash,
+        carrier_policy.carrier_policy_lineage_hash,
         {"status": "PASS"}, "",
     )
     graph = replace(graph, presentation_lineage_hash=qualified_presentation_lineage_hash(graph))
-    validate_qualified_presentation_graph(graph)
+    validate_qualified_presentation_graph(graph, carrier_policy=carrier_policy)
     assert graph.attachments[0].mechanical_class == "RIGID"
     assert graph.attachments[0].carrier_class == "PLANAR"

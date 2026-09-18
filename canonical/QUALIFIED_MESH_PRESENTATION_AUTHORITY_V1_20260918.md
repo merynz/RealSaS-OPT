@@ -29,7 +29,9 @@ The five gates are independent. No aggregate score can compensate for a failed g
 - **G4 — component-boundary compliance:** `SEPARATE` and `PRESERVE_CONTINUITY` constraints are obeyed. Consequential UNKNOWN boundaries are forbidden at PASS.
 - **G5 — multiview visible coverage:** exact canonical M is projected into all eight authoritative cameras. Coverage is evaluated as a complete `(view, admitted component, carrier class)` matrix, with recall/precision and largest coherent hole as first-class measurements. A global score may not hide a missing component.
 
-Carrier-class policy must be frozen before candidate qualification. A failed MESH candidate may report `POSSIBLE_CARRIER_MISCLASSIFICATION` only as a diagnostic; reclassification to PLANAR/CLIP creates a new decision, candidate and qualification lineage.
+Carrier-class policy must be frozen before candidate qualification. `ComponentCarrierPolicyIR` binds exactly one carrier class to every admitted component and is hash-bound by the candidate, QualifiedMesh and QualifiedPresentationGraph. A failed MESH candidate may report `POSSIBLE_CARRIER_MISCLASSIFICATION` only as a diagnostic; reclassification to PLANAR/CLIP creates a new carrier-policy lineage, candidate and qualification lineage.
+
+`MeshQualificationPolicyIR` is also first-class rather than an opaque hash string. It binds G1 refinement limits, a G3 rest-conditioning policy that may be stricter but never weaker than the subject-free calibrated 7.5° / aspect-16 numerical floor, and per-carrier G5 recall/precision/coherent-hole thresholds. QualifiedMesh validation consumes the exact policy object and independently applies those thresholds; a report-level PASS flag cannot weaken them.
 
 ## DeformationCapabilityEnvelopeIR
 

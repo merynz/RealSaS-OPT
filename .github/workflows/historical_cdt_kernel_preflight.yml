@@ -36,4 +36,12 @@ jobs:
           print("HISTORICAL_CDT_CALLABLE=", fn.__name__)
           print("HISTORICAL_CDT_SIGNATURE=", inspect.signature(fn))
           print("HISTORICAL_CDT_MODULE=", module.__file__)
+          print("HISTORICAL_CDT_POINT=", getattr(module, "Point", None))
+          result_type = getattr(module, "ProductionTriangulationResult", None)
+          print("HISTORICAL_CDT_RESULT_TYPE=", result_type)
+          print("HISTORICAL_CDT_RESULT_ANNOTATIONS=", getattr(result_type, "__annotations__", {}))
+          print("HISTORICAL_CDT_PUBLIC_NAMES=", sorted(
+              name for name in module.__dict__
+              if not name.startswith("_") and ("Point" in name or "Triang" in name or "CDT" in name)
+          ))
           PY

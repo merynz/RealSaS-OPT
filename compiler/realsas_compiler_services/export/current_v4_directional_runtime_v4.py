@@ -65,6 +65,7 @@ class RuntimeV4DirectionalAssemblyProjectionV1:
     clips: tuple[RuntimeV4Clip, ...]
     textures: tuple[RuntimeV3TexturePayload, ...]
     runtime_source_indices_by_asset: Mapping[str, tuple[int, ...]]
+    runtime_face_donor_view_indices_by_asset: Mapping[str, tuple[int, ...]]
     owner_view_by_asset: Mapping[str, int]
     component_id_by_asset: Mapping[str, str]
     body_component_id: str
@@ -151,11 +152,28 @@ def _texture_rows(
     return tuple(out)
 
 
-def _native_uv(corner, texture: RuntimeTexturePayloadV1) -> tuple[float, float]:
-    if corner.authority_class != "OBSERVED_LOCAL":
-        raise QualificationError("DIRECTIONAL_ASSEMBLY_NONLOCAL_APPEARANCE_NOT_QUALIFIED")
-    if int(corner.donor_view_index) != int(texture.view_index):
-        raise QualificationError("DIRECTIONAL_ASSEMBLY_APPEARANCE_DONOR_VIEW_DRIFT")
+def _native_uv(
+    corner,
+    texture_by_view: Mapping[int, RuntimeTexturePayloadV1],
+    *,
+    target_view_index: int,
+) -> tuple[float, float, int]:
+    authority = str(corner.authority_class)
+    donor = int(corner.donor_view_index)
+    if authority == "QUALIFIED_COMPLETION":
+        raise QualificationError("DIRECTIONAL_ASSEMBLY_COMPLETION_APPEARANCE_NOT_ALLOWED")
+    if authority == "OBSERVED_LOCAL":
+        if donor != int(target_view_index):
+            raise QualificationError("DIRECTIONAL_ASSEMBLY_LOCAL_APPEARANCE_DONOR_DRIFT")
+    elif authority == "OBSERVED_CROSS_VIEW":
+        if donor == int(target_view_index):
+            raise QualificationError("DIRECTIONAL_ASSEMBLY_CROSS_VIEW_APPEARANCE_DONOR_DRIFT")
+    else:
+        raise QualificationError("DIRECTIONAL_ASSEMBLY_UNKNOWN_APPEARANCE_AUTHORITY")
+
+    texture = texture_by_view.get(donor)
+    if texture is None:
+        raise QualificationError("DIRECTIONAL_ASSEMBLY_APPEARANCE_DONOR_TEXTURE_MISSING")
     x, y = map(float, corner.donor_raster_xy)
     if not all(math.isfinite(v) for v in (x, y)):
         raise QualificationError("DIRECTIONAL_ASSEMBLY_DONOR_RASTER_NONFINITE")
@@ -167,13 +185,14 @@ def _native_uv(corner, texture: RuntimeTexturePayloadV1) -> tuple[float, float]:
     return (
         float(min(1.0, max(0.0, u))),
         float(min(1.0, max(0.0, v))),
+        donor,
     )
 
 
 def _asset_from_component(
     direction,
     component,
-    texture: RuntimeTexturePayloadV1,
+    texture_by_view: Mapping[int, RuntimeTexturePayloadV1],
     rest_xy,
     camera: CameraProjectionV3,
     *,
@@ -185,7 +204,10 @@ def _asset_from_component(
         raise QualificationError("DIRECTIONAL_ASSEMBLY_COMPONENT_VIEW_DRIFT")
     if int(component.appearance.target_view_index) != view_index:
         raise QualificationError("DIRECTIONAL_ASSEMBLY_APPEARANCE_TARGET_VIEW_DRIFT")
-    if component.appearance.atlas_payload_hash != texture.atlas_payload_hash:
+    target_texture = texture_by_view.get(view_index)
+    if target_texture is None:
+        raise QualificationError("DIRECTIONAL_ASSEMBLY_TARGET_TEXTURE_MISSING")
+    if component.appearance.atlas_payload_hash != target_texture.atlas_payload_hash:
         raise QualificationError("DIRECTIONAL_ASSEMBLY_APPEARANCE_ATLAS_DRIFT")
 
     vertices = tuple(component.mesh.vertices)
@@ -206,13 +228,15 @@ def _asset_from_component(
 
     source_indices: list[int] = []
     runtime_uv: list[tuple[float, float]] = []
-    runtime_index: dict[tuple[int, float, float], int] = {}
+    runtime_index: dict[tuple[int, int, float, float], int] = {}
     triangles: list[tuple[int, int, int]] = []
+    face_donor_view_indices: list[int] = []
 
     for face_index, face in enumerate(component.mesh.faces):
         if len(face) != 3:
             raise QualificationError("DIRECTIONAL_ASSEMBLY_REQUIRES_TRIANGULATED_MESH")
         tri = []
+        face_donor = None
         for corner_index, vertex_id in enumerate(face):
             source_index = canonical_index.get(str(vertex_id))
             if source_index is None:
@@ -220,8 +244,16 @@ def _asset_from_component(
             corner = corner_map.get((face_index, corner_index))
             if corner is None:
                 raise QualificationError("DIRECTIONAL_ASSEMBLY_APPEARANCE_CORNER_MISSING")
-            u, v = _native_uv(corner, texture)
-            key = (int(source_index), float(u), float(v))
+            u, v, donor = _native_uv(
+                corner,
+                texture_by_view,
+                target_view_index=view_index,
+            )
+            if face_donor is None:
+                face_donor = donor
+            elif donor != face_donor:
+                raise QualificationError("DIRECTIONAL_ASSEMBLY_FACE_DONOR_MUST_BE_UNIFORM")
+            key = (int(source_index), int(donor), float(u), float(v))
             index = runtime_index.get(key)
             if index is None:
                 index = len(source_indices)
@@ -229,7 +261,10 @@ def _asset_from_component(
                 source_indices.append(int(source_index))
                 runtime_uv.append((u, v))
             tri.append(index)
+        if face_donor is None:
+            raise QualificationError("DIRECTIONAL_ASSEMBLY_FACE_DONOR_MISSING")
         triangles.append(tuple(tri))
+        face_donor_view_indices.append(int(face_donor))
 
     runtime_rest_xy = rest[np.asarray(source_indices, dtype=np.int64)]
     rest_xyz = _inverse_project_xy(runtime_rest_xy, camera, camera_forward_depth=0.0)
@@ -249,9 +284,10 @@ def _asset_from_component(
         "mesh_skin_lineage_hash": str(component.mesh_skin.mesh_skin_lineage_hash),
         "appearance_lineage_hash": str(component.appearance.appearance_lineage_hash),
         "owner_view": view_index,
-        "texture_sha256": str(texture.image_sha256),
+        "target_texture_sha256": str(target_texture.image_sha256),
         "runtime_vertex_source_indices": source_indices,
         "runtime_uv": runtime_uv,
+        "runtime_face_donor_view_indices": face_donor_view_indices,
     })
     asset = RuntimeV4AttachmentAsset(
         asset_id=asset_id,
@@ -267,6 +303,7 @@ def _asset_from_component(
         asset,
         np.ascontiguousarray(runtime_uv, dtype=np.float32),
         tuple(source_indices),
+        tuple(face_donor_view_indices),
     )
 
 
@@ -350,6 +387,7 @@ def project_directional_product_bakes_to_runtime_v4(
     assets = []
     uv_by_asset = {}
     source_indices_by_asset = {}
+    face_donors_by_asset = {}
     owner_by_asset = {}
     component_by_asset = {}
     asset_id_by_view_component = {}
@@ -365,10 +403,10 @@ def project_directional_product_bakes_to_runtime_v4(
             rest_xy = ref_rest.get(mesh_id)
             if rest_xy is None:
                 raise QualificationError(f"DIRECTIONAL_ASSEMBLY_BAKE_REST_MESH_MISSING:{mesh_id}")
-            asset, uv, source_indices = _asset_from_component(
+            asset, uv, source_indices, face_donors = _asset_from_component(
                 direction,
                 component,
-                texture_by_view[view_index],
+                texture_by_view,
                 rest_xy,
                 camera_by_view[view_id],
                 body_component_id=body_component_id,
@@ -376,6 +414,7 @@ def project_directional_product_bakes_to_runtime_v4(
             assets.append(asset)
             uv_by_asset[asset.asset_id] = uv
             source_indices_by_asset[asset.asset_id] = source_indices
+            face_donors_by_asset[asset.asset_id] = face_donors
             owner_by_asset[asset.asset_id] = view_index
             component_by_asset[asset.asset_id] = cid
             asset_id_by_view_component[(view_index, cid)] = asset.asset_id
@@ -385,17 +424,22 @@ def project_directional_product_bakes_to_runtime_v4(
     for target_index, target_view_id in enumerate(view_ids):
         view_assets = []
         for asset in assets:
-            owner = int(owner_by_asset[asset.asset_id])
-            provenance = (
-                provenance_code(AppearanceProvenance.DIRECT_SOURCE)
-                if owner == target_index
-                else provenance_code(AppearanceProvenance.OTHER_VIEW_SOURCE)
+            donors = np.asarray(
+                face_donors_by_asset[asset.asset_id],
+                dtype=np.int16,
             )
+            if donors.shape != (asset.face_count,):
+                raise QualificationError("DIRECTIONAL_ASSEMBLY_FACE_DONOR_COUNT_DRIFT")
+            provenance = np.where(
+                donors == int(target_index),
+                provenance_code(AppearanceProvenance.DIRECT_SOURCE),
+                provenance_code(AppearanceProvenance.OTHER_VIEW_SOURCE),
+            ).astype(np.uint8)
             view_assets.append(RuntimeV4ViewAssetOverlay(
                 asset_id=asset.asset_id,
                 uv=uv_by_asset[asset.asset_id],
-                provenance_codes=np.full(asset.face_count, provenance, dtype=np.uint8),
-                donor_view_indices=np.full(asset.face_count, owner, dtype=np.int16),
+                provenance_codes=provenance,
+                donor_view_indices=donors,
             ))
         overlays.append(RuntimeV4ViewOverlay(
             view_id=target_view_id,
@@ -500,6 +544,9 @@ def project_directional_product_bakes_to_runtime_v4(
         "runtime_vertex_source_indices": {
             key: list(value) for key, value in sorted(source_indices_by_asset.items())
         },
+        "runtime_face_donor_view_indices": {
+            key: list(value) for key, value in sorted(face_donors_by_asset.items())
+        },
         "owner_view_by_asset": dict(sorted(owner_by_asset.items())),
         "component_id_by_asset": dict(sorted(component_by_asset.items())),
         "representation": "VIEW_LOCAL_DIRECTIONAL_ATTACHMENTS__QUALIFICATION_BAKE_XY__EQUAL_DEPTH_SEMANTIC_ORDER",
@@ -511,6 +558,7 @@ def project_directional_product_bakes_to_runtime_v4(
         clips=tuple(clips),
         textures=textures,
         runtime_source_indices_by_asset=source_indices_by_asset,
+        runtime_face_donor_view_indices_by_asset=face_donors_by_asset,
         owner_view_by_asset=owner_by_asset,
         component_id_by_asset=component_by_asset,
         body_component_id=body_component_id,

@@ -75,6 +75,8 @@ def build_observed_appearance_binding(
     corners = []
     unknown = []
     for fi, face in enumerate(mesh.faces):
+        face_support = []
+        face_nodes = []
         for ci, vid in enumerate(face):
             if vid not in vertices:
                 raise QualificationError("APPEARANCE_UNKNOWN_MESH_VERTEX")
@@ -83,12 +85,22 @@ def build_observed_appearance_binding(
                 if sid not in nodes:
                     raise QualificationError("APPEARANCE_UNKNOWN_SURFACE_SUPPORT")
                 support.append((nodes[sid], float(coeff)))
-            donor = _common_donor_view([n for n, _ in support], int(target_view_index))
-            if donor is None:
+            face_support.append((ci, support))
+            face_nodes.extend(n for n, _ in support)
+
+        # A raster triangle has one texture/source binding.  Per-corner UVs may differ,
+        # but its donor observation may not.  Choose a donor that observes every
+        # support node used by every corner of the face, preferring the target view.
+        donor = _common_donor_view(face_nodes, int(target_view_index))
+        if donor is None:
+            for ci, support in face_support:
                 unknown.append((fi, ci, tuple(n.surface_id for n, _ in support)))
-                continue
-            if donor not in observation_hash_by_view or not observation_hash_by_view[donor]:
-                raise QualificationError("APPEARANCE_MISSING_DONOR_OBSERVATION_HASH")
+            continue
+        if donor not in observation_hash_by_view or not observation_hash_by_view[donor]:
+            raise QualificationError("APPEARANCE_MISSING_DONOR_OBSERVATION_HASH")
+
+        authority = "OBSERVED_LOCAL" if donor == int(target_view_index) else "OBSERVED_CROSS_VIEW"
+        for ci, support in face_support:
             gx = gy = 0.0
             for node, coeff in support:
                 xy = _node_raster(node, donor)
@@ -96,7 +108,6 @@ def build_observed_appearance_binding(
                 gy += coeff * xy[1]
             donor_xy = (gx, gy)
             material_uv = _pixel_center_to_uv(donor_xy, resolution)
-            authority = "OBSERVED_LOCAL" if donor == int(target_view_index) else "OBSERVED_CROSS_VIEW"
             source_hash = content_sha256(
                 {
                     "observation": observation_hash_by_view[donor],

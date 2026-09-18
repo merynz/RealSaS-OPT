@@ -5,6 +5,10 @@ from types import SimpleNamespace
 
 import numpy as np
 from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.playback_runtime_v3 import AppearanceProvenance
+from compiler.realsas_compiler_core.playback_runtime_v4 import provenance_code
+from compiler.realsas_compiler_core.types import QualificationError
+import pytest
 from compiler.realsas_compiler_core.playback_full_surface_v3 import (
     CameraProjectionV3,
     project_points_xyz_v3,
@@ -62,6 +66,8 @@ def _component(
     atlas_hash: str,
     *,
     pinched: bool = False,
+    appearance_donor_view: int | None = None,
+    mixed_face_donors: bool = False,
 ):
     xy = (
         ((10.0, 10.0), (22.0, 10.0), (10.0, 22.0), (34.0, 10.0), (34.0, 22.0))
@@ -102,18 +108,24 @@ def _component(
         vertex.canonical_mesh_vertex_id: xy[i]
         for i, vertex in enumerate(vertices)
     }
-    corners = tuple(
-        SimpleNamespace(
-            face_index=face_index,
-            corner_index=corner_index,
-            material_uv=(0.0, 0.0),
-            donor_view_index=view,
-            donor_raster_xy=vertex_raster[vertex_id],
-            authority_class="OBSERVED_LOCAL",
-        )
-        for face_index, face in enumerate(faces)
-        for corner_index, vertex_id in enumerate(face)
-    )
+    donor_default = view if appearance_donor_view is None else int(appearance_donor_view)
+    corner_rows = []
+    for face_index, face in enumerate(faces):
+        for corner_index, vertex_id in enumerate(face):
+            donor = donor_default
+            if mixed_face_donors and face_index == 0 and corner_index == 2:
+                donor = view
+            corner_rows.append(SimpleNamespace(
+                face_index=face_index,
+                corner_index=corner_index,
+                material_uv=(0.0, 0.0),
+                donor_view_index=donor,
+                donor_raster_xy=vertex_raster[vertex_id],
+                authority_class=(
+                    "OBSERVED_LOCAL" if donor == view else "OBSERVED_CROSS_VIEW"
+                ),
+            ))
+    corners = tuple(corner_rows)
     appearance = SimpleNamespace(
         target_view_index=view,
         atlas_payload_hash=atlas_hash,
@@ -131,7 +143,13 @@ def _component(
     )
 
 
-def _fixture(*, body_first: bool = True, pinched_body: bool = False):
+def _fixture(
+    *,
+    body_first: bool = True,
+    pinched_body: bool = False,
+    cross_view_body_v0: bool = False,
+    mixed_body_face_donors_v0: bool = False,
+):
     textures = tuple(_texture(i) for i in range(2))
     directions = []
     for view in range(2):
@@ -141,6 +159,8 @@ def _fixture(*, body_first: bool = True, pinched_body: bool = False):
             0,
             textures[view].atlas_payload_hash,
             pinched=pinched_body,
+            appearance_donor_view=(1 if cross_view_body_v0 and view == 0 else None),
+            mixed_face_donors=(mixed_body_face_donors_v0 and view == 0),
         )
         fg = _component(view, FG, 1, textures[view].atlas_payload_hash)
         directions.append(SimpleNamespace(
@@ -303,3 +323,52 @@ def test_reference_runtime_projection_accepts_pinched_triangle_soup_without_glob
     assert len(body_assets) == len(VIEWS)
     assert all(asset.face_count == 2 for asset in body_assets)
 
+
+
+def test_directional_projection_preserves_qualified_cross_view_face_donor_authority():
+    product, bakes, textures, cameras = _fixture(cross_view_body_v0=True)
+    projection = project_directional_product_bakes_to_runtime_v4(
+        product=product,
+        motion_bakes=bakes,
+        texture_bindings=textures,
+        cameras=cameras,
+        required_view_ids=VIEWS,
+        body_component_id=BODY,
+    )
+    asset = next(
+        row for row in projection.contract.assets
+        if projection.owner_view_by_asset[row.asset_id] == 0
+        and projection.component_id_by_asset[row.asset_id] == BODY
+    )
+    asset_index = next(
+        i for i, row in enumerate(projection.contract.assets)
+        if row.asset_id == asset.asset_id
+    )
+    assert projection.runtime_face_donor_view_indices_by_asset[asset.asset_id] == (1,)
+
+    target_row = projection.contract.views[0].assets[asset_index]
+    donor_row = projection.contract.views[1].assets[asset_index]
+    assert target_row.donor_view_indices.tolist() == [1]
+    assert target_row.provenance_codes.tolist() == [
+        provenance_code(AppearanceProvenance.OTHER_VIEW_SOURCE)
+    ]
+    assert donor_row.donor_view_indices.tolist() == [1]
+    assert donor_row.provenance_codes.tolist() == [
+        provenance_code(AppearanceProvenance.DIRECT_SOURCE)
+    ]
+
+
+def test_directional_projection_rejects_mixed_donor_triangle_fail_closed():
+    product, bakes, textures, cameras = _fixture(mixed_body_face_donors_v0=True)
+    with pytest.raises(
+        QualificationError,
+        match="DIRECTIONAL_ASSEMBLY_FACE_DONOR_MUST_BE_UNIFORM",
+    ):
+        project_directional_product_bakes_to_runtime_v4(
+            product=product,
+            motion_bakes=bakes,
+            texture_bindings=textures,
+            cameras=cameras,
+            required_view_ids=VIEWS,
+            body_component_id=BODY,
+        )

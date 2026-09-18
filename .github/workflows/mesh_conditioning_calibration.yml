@@ -1,0 +1,30 @@
+name: mesh-conditioning-calibration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'compiler/realsas_compiler_core/mesh/conditioning_v1.py'
+      - 'experiments/mesh_conditioning_v1/run_synthetic_conditioning_sweep.py'
+      - 'canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_PREREG_20260918.md'
+      - '.github/workflows/mesh_conditioning_calibration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  calibrate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned CPU dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Contract regressions
+        run: python -m pytest -q tests/compiler/test_mesh_conditioning_v1.py
+      - name: Run frozen subject-free conditioning sweep
+        run: python experiments/mesh_conditioning_v1/run_synthetic_conditioning_sweep.py

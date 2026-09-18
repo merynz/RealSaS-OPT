@@ -570,6 +570,30 @@ def run(args) -> dict:
             pre_alpha_clipped_frame,
             alpha,
         )
+        finite_clipped = np.flatnonzero(finite)
+        (
+            _no_quality_pure_mask,
+            no_quality_full_mask,
+            _no_quality_component_masks,
+            no_quality_counts,
+        ) = _rasterize_admitted(
+            tri_xy,
+            finite_clipped,
+            component_index_by_dense,
+            dense_faces,
+            alpha,
+            component_names,
+        )
+        no_quality_coverage = _coverage(alpha, no_quality_full_mask)
+        no_quality_failures = _policy_failures(no_quality_coverage)
+        no_quality_hole = _largest_hole_attribution(
+            alpha=alpha,
+            predicted=no_quality_full_mask,
+            projected_dense_xy=xy,
+            component_index_by_dense=component_index_by_dense,
+            component_names=component_names,
+            component_masks=component_masks,
+        )
         bounded_coverage = _coverage(alpha, bounded_mask)
         bounded_failures = _policy_failures(bounded_coverage)
         bounded_hole = _largest_hole_attribution(
@@ -626,6 +650,13 @@ def run(args) -> dict:
             "pure_plus_mixed_union_failures": full_failures,
             "pure_plus_mixed_full_frozen_coverage_pass": not full_failures,
             "largest_hole_attribution": largest_hole,
+            "no_quality_diagnostic": {
+                "candidate_count": int(len(finite_clipped)),
+                "coverage": no_quality_coverage,
+                "failures": no_quality_failures,
+                "largest_hole_attribution": no_quality_hole,
+                "counts": no_quality_counts,
+            },
             "bounded_precision_diagnostic": {
                 "selection": bounded_selection,
                 "coverage": bounded_coverage,
@@ -666,6 +697,17 @@ def run(args) -> dict:
                     "mixed_faces": counts["admitted_mixed_face_count"],
                     "largest_hole_attribution": largest_hole,
                     "strict_failures": full_failures,
+                    "no_quality": {
+                        "recall": no_quality_coverage["source_alpha_recall"],
+                        "precision": no_quality_coverage[
+                            "precision_inside_alpha"
+                        ],
+                        "iou": no_quality_coverage["alpha_iou"],
+                        "largest_hole": no_quality_coverage[
+                            "largest_uncovered_component_fraction"
+                        ],
+                        "failures": no_quality_failures,
+                    },
                     "bounded_precision": {
                         "recall": bounded_coverage["source_alpha_recall"],
                         "precision": bounded_coverage[

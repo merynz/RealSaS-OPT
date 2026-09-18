@@ -13,6 +13,8 @@ on:
       - 'compiler/realsas_compiler_core/mesh/mwb2_cdt.py'
       - 'compiler/realsas_compiler_core/mesh/dense_zero_surface_bridge.py'
       - 'experiments/mage_demo_fit1_v5_p1/diagnose_dense_zero_mechanical_partition_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/diagnose_raw_dense_rest_reprojection_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/raw_dense_rest_raster_v1.cpp'
       - 'compiler/realsas_compiler_services/export/current_v4_directional_runtime_v4.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v4_mechanical_partition.py'
       - 'experiments/playback_stack_v1/run_mage_full_assembly_runtime_v4_admission_v1.py'
@@ -234,11 +236,14 @@ jobs:
             tests/compiler/test_playback_runtime_v4_contract_v1.py
           PYTHONPATH=. python tools/verify_native_runtime_source_seal_v2.py
 
-      - name: Diagnose dense zero mechanical topology on V2
+      - name: Diagnose raw dense zero-surface rest reprojection
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p .runtime-real
+          mkdir -p .runtime-real/raw-dense-rest
+          g++ -std=c++17 -O3 \
+            experiments/mage_demo_fit1_v5_p1/raw_dense_rest_raster_v1.cpp \
+            -o .runtime-real/raw_dense_rest_raster_v1
           cameras=()
           observations=()
           for v in {0..7}; do
@@ -246,18 +251,15 @@ jobs:
             observations+=("$MAGE_INPUT_ROOT/V${v}.png")
           done
           PYTHONPATH=. python \
-            experiments/mage_demo_fit1_v5_p1/diagnose_dense_zero_mechanical_partition_v1.py \
+            experiments/mage_demo_fit1_v5_p1/diagnose_raw_dense_rest_reprojection_v1.py \
             --zero-surface "$MAGE_ZERO_SURFACE" \
             --cameras "${cameras[@]}" \
             --observations "${observations[@]}" \
-            --fit2-surface "$MAGE_SURFACE" \
-            --skeleton "$MAGE_SKELETON" \
-            --fit2-skin "$MAGE_SKIN" \
-            --views 2 \
-            --output .runtime-real/DENSE_ZERO_MECHANICAL_PARTITION_V2_DIAGNOSTIC.json
-          echo 'DENSE_MECH_DIAGNOSTIC_ONLY_STOP'
+            --rasterizer .runtime-real/raw_dense_rest_raster_v1 \
+            --views 0 1 2 3 4 5 6 7 \
+            --output-dir .runtime-real/raw-dense-rest
+          echo 'RAW_DENSE_REST_DIAGNOSTIC_ONLY_STOP'
           exit 77
-
       - name: Build sealed native Runtime-v4 demo
         run: |
           rm -rf .runtime-real
@@ -332,6 +334,10 @@ jobs:
             .runtime-real/DENSE_ZERO_MECHANICAL_PARTITION_V2_DIAGNOSTIC.json
             .runtime-real/V2_LARGEST_HOLE_OVERLAY.png
             .runtime-real/V2_BOUNDED_PRECISION_OVERLAY.png
+            .runtime-real/raw-dense-rest/RAW_DENSE_REST_REPROJECTION_DIAGNOSTIC.json
+            .runtime-real/raw-dense-rest/RAW_DENSE_DIRECT_SOURCE_CONTACT_SHEET.png
+            .runtime-real/raw-dense-rest/V*_RAW_DENSE_DIRECT_SOURCE_REPROJECTION.png
+            .runtime-real/raw-dense-rest/V*_RAW_DENSE_COVERAGE_OVERLAY.png
             .runtime-real/mage_native_smoke.log
             .runtime-real/mage/MAGE_RUNTIME_V4_NATIVE_RENDER_AUTHORITY_V1.json
             .runtime-real/mage/MAGE_FULL_ASSEMBLY_RUNTIME_V4_NATIVE_SMOKE_V1.json

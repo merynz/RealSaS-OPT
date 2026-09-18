@@ -9,6 +9,7 @@ on:
       - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json'
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json'
       - '.github/workflows/native_runtime_source_gate.yml'
   pull_request:
     branches-ignore:
@@ -46,87 +47,8 @@ jobs:
           python --version
           dpkg -s libarchive-dev libpng-dev zlib1g-dev >/dev/null
 
-      - name: Verify historical seal + append-only Runtime-v4 extension chain
-        run: |
-          python - <<'PY'
-          import hashlib
-          import json
-          import subprocess
-          from pathlib import Path
-
-          base_path = Path('canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json')
-          ext1_path = Path('canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json')
-          ext2_path = Path('canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json')
-          base = json.loads(base_path.read_text(encoding='utf-8'))
-          ext1 = json.loads(ext1_path.read_text(encoding='utf-8'))
-          ext2 = json.loads(ext2_path.read_text(encoding='utf-8'))
-
-          def git_blob_sha1(payload: bytes) -> str:
-              return subprocess.check_output(
-                  ['git', 'hash-object', '--stdin'],
-                  input=payload,
-                  text=False,
-              ).decode('ascii').strip()
-
-          assert ext1['schema'] == 'realsas.compiler_runtime_source_extension_seal.v1'
-          assert ext1['base_seal']['path'] == str(base_path)
-          assert git_blob_sha1(base_path.read_bytes()) == ext1['base_seal']['git_blob_sha1']
-          assert ext1['authority']['historical_base_seal_mutated'] is False
-          assert ext1['authority']['runtime_role'] == 'subordinate_deployment_consumer'
-
-          assert ext2['schema'] == 'realsas.compiler_runtime_source_extension_seal.v2'
-          assert ext2['prior_extension']['path'] == str(ext1_path)
-          assert git_blob_sha1(ext1_path.read_bytes()) == ext2['prior_extension']['git_blob_sha1']
-          assert ext2['authority']['historical_base_seal_mutated'] is False
-          assert ext2['authority']['prior_extension_mutated'] is False
-          assert ext2['authority']['runtime_role'] == 'subordinate_deployment_consumer'
-
-          expected = {
-              row['path']: {
-                  'size_bytes': int(row['size_bytes']),
-                  'sha256': row['sha256'],
-                  'git_blob_sha1': row['git_blob_sha1'],
-                  'source': 'historical_base',
-              }
-              for row in base['files']
-          }
-
-          def apply_extension(ext, label):
-              for row in ext['replacements']:
-                  assert row['path'] in expected, (label, row['path'])
-                  expected[row['path']] = {
-                      'size_bytes': int(row['size_bytes']),
-                      'git_blob_sha1': row['git_blob_sha1'],
-                      'source': label + '_replacement',
-                  }
-              for row in ext['additions']:
-                  assert row['path'] not in expected, (label, row['path'])
-                  expected[row['path']] = {
-                      'size_bytes': int(row['size_bytes']),
-                      'git_blob_sha1': row['git_blob_sha1'],
-                      'source': label + '_addition',
-                  }
-
-          apply_extension(ext1, 'extension_v1')
-          apply_extension(ext2, 'extension_v2')
-
-          for path_text, identity in expected.items():
-              path = Path(path_text)
-              payload = path.read_bytes()
-              assert len(payload) == identity['size_bytes'], (path, len(payload), identity['size_bytes'])
-              actual_blob = git_blob_sha1(payload)
-              assert actual_blob == identity['git_blob_sha1'], (path, actual_blob, identity['git_blob_sha1'])
-              if identity['source'] == 'historical_base':
-                  actual_sha256 = hashlib.sha256(payload).hexdigest()
-                  assert actual_sha256 == identity['sha256'], (path, actual_sha256, identity['sha256'])
-
-          print(
-              'NATIVE_SOURCE_SEAL_PASS '
-              f"files={len(expected)} base={len(base['files'])} "
-              f"ext1={len(ext1['replacements']) + len(ext1['additions'])} "
-              f"ext2={len(ext2['replacements']) + len(ext2['additions'])}"
-          )
-          PY
+      - name: Verify historical seal + append-only native runtime extension chain
+        run: PYTHONPATH=. python tools/verify_native_runtime_source_seal_v2.py
 
       - name: Configure
         run: cmake -S runtime/realsas_cpp -B build/native-runtime -DCMAKE_BUILD_TYPE=Release -DREALSAS_BUILD_TESTS=ON

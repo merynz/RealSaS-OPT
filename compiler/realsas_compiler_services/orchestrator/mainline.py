@@ -63,6 +63,13 @@ def validate_ledger(plan:dict,ledger:dict)->None:
     if len(rows)!=40: raise RuntimeError("ACTIVE_RUN_LEDGER_STAGE_COUNT_DRIFT")
     if [x.get("id") for x in rows]!=[x["id"] for x in plan["stages"]]: raise RuntimeError("ACTIVE_RUN_LEDGER_STAGE_ID_DRIFT")
     complete=sum(x.get("status") in PASS_STATUSES for x in rows)
+    open_seen=False
+    for row in rows:
+        passed=row.get("status") in PASS_STATUSES
+        if passed and open_seen:
+            raise RuntimeError("ACTIVE_RUN_LEDGER_NONPREFIX_PASS")
+        if not passed:
+            open_seen=True
     if int(ledger.get("completed_count",-1))!=complete: raise RuntimeError("ACTIVE_RUN_LEDGER_PROGRESS_DRIFT")
     expected=next((x["id"] for x in rows if x.get("status") not in PASS_STATUSES),None)
     if ledger.get("next_stage")!=expected: raise RuntimeError("ACTIVE_RUN_LEDGER_NEXT_STAGE_DRIFT")
@@ -159,6 +166,21 @@ def execute(run_id:str,*,from_stage:str="",to_stage:str="",resume:bool=True)->in
     ids=[x["id"] for x in plan["stages"]]
     start=ids.index(from_stage) if from_stage else 0; end=ids.index(to_stage) if to_stage else len(ids)-1
     if start>end: raise RuntimeError("MAINLINE_STAGE_RANGE_INVALID")
+    for prior_index in range(start):
+        prior_stage=plan["stages"][prior_index]; prior_row=ledger["stages"][prior_index]
+        if prior_row.get("status") not in PASS_STATUSES:
+            continue
+        prior_impl=_adapter_impl_hash(prior_stage["adapter"])
+        prior_fingerprint,prior_policy_hash=_fingerprint(plan,ledger,manifest,prior_stage,prior_impl)
+        if (
+            prior_row.get("input_fingerprint")!=prior_fingerprint
+            or prior_row.get("implementation_hash")!=prior_impl
+            or prior_row.get("policy_hash")!=prior_policy_hash
+            or not _outputs_verify(prior_row)
+        ):
+            _invalidate_from(ledger,prior_index,"STALE_UPSTREAM_BEFORE_REQUESTED_START")
+            atomic_json(LEDGER_PATH,ledger)
+            return 2
     for index in range(start,end+1):
         stage=plan["stages"][index]; row=ledger["stages"][index]
         impl_hash=_adapter_impl_hash(stage["adapter"]); fingerprint,policy_hash=_fingerprint(plan,ledger,manifest,stage,impl_hash)

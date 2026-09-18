@@ -37,3 +37,14 @@ def test_stage_cannot_execute_past_unpassed_or_stale_dependency(tmp_path):
     assert _dependency_blockers(stage,ledger)==[]
     artifact.write_text("{\"drift\":true}\n",encoding="utf-8")
     assert _dependency_blockers(stage,ledger)==["DEPENDENCY_OUTPUT_IDENTITY_INVALID:23_ARACHNE_CHECKPOINT_SEALED"]
+
+def test_active_ledger_rejects_nonprefix_pass_state():
+    import copy
+    import pytest
+    plan=load("canonical/MAINLINE_EXECUTION_PLAN_V1.json")
+    ledger=copy.deepcopy(load("canonical/ACTIVE_RUN_V1.json"))
+    ledger["stages"][1]["status"]="PASS"
+    ledger["stages"][1]["outputs"]=[{"path":"/nonexistent","sha256":"0"*64}]
+    ledger["completed_count"]=1
+    with pytest.raises(RuntimeError,match="NONPREFIX_PASS"):
+        validate_ledger(plan,ledger)

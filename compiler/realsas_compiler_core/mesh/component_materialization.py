@@ -18,7 +18,7 @@ from typing import Any, Mapping
 from ..appearance import build_observed_appearance_binding
 from ..hashing import content_sha256
 from ..mechanical_component_partition import validate_mechanical_component_partition
-from ..types import QualificationError
+from ..types import QualifiedMeshVertex, QualificationError
 from .mwb2_cdt import (
     build_mwb2_observation_cdt_candidate,
     qualify_mwb2_component_observation_cdt_mesh,
@@ -302,6 +302,267 @@ def _repair_component_policy_slivers(
     }
 
 
+def _identity_surface_id(vertex) -> str:
+    binding = vertex.support_binding
+    coeffs = tuple(binding.coefficients)
+    if (
+        binding.mode != "IDENTITY_SURFACE_NODE"
+        or len(coeffs) != 1
+        or abs(float(coeffs[0][1]) - 1.0) > 1.0e-12
+    ):
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_BOUNDARY_SEAM_REQUIRES_IDENTITY_SUPPORT"
+        )
+    return str(coeffs[0][0])
+
+
+def _augment_body_with_boundary_seam(
+    body_mesh,
+    *,
+    surface,
+    partition,
+    view_index: int,
+    camera_binding_hash: str,
+    observation_domain,
+):
+    """Add only compiler-owned mixed-component seam faces from current S.
+
+    The five mechanical interiors remain component-local CDT meshes.  This operator
+    uses a fresh current-S observation-domain CDT only as a seam proposal source and
+    admits exclusively faces whose vertices span multiple qualified mechanical
+    components.  It never consumes historical P1/P1Q topology, teacher component art,
+    owner rasters, or semantic filenames.
+
+    Mixed seam vertices keep their exact current SurfaceSupportBinding and therefore
+    receive exact current skin weights downstream.  The seam is carried by the
+    deformable BODY render component solely as continuity geometry; it does not mutate
+    the MechanicalComponentPartitionIR ownership table.
+    """
+
+    view_index = int(view_index)
+    candidate = build_mwb2_observation_cdt_candidate(
+        surface,
+        view_index=view_index,
+        camera_binding_hash=str(camera_binding_hash),
+        observation_domain=observation_domain,
+        candidate_namespace="BOUNDARY_SEAM",
+    )
+    assignment = {
+        str(row.surface_id): str(row.component_id)
+        for row in partition.assignments
+    }
+    candidate_vertex = {
+        str(vertex.candidate_vertex_id): vertex
+        for vertex in candidate.vertices
+    }
+    if len(candidate_vertex) != len(candidate.vertices):
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_BOUNDARY_SEAM_DUPLICATE_CANDIDATE_VERTEX"
+        )
+
+    body_sid_to_vid = {}
+    vertices = list(body_mesh.vertices)
+    for vertex in body_mesh.vertices:
+        sid = _identity_surface_id(vertex)
+        if sid in body_sid_to_vid:
+            raise QualificationError(
+                "MECHANICAL_COMPONENT_BOUNDARY_SEAM_DUPLICATE_BODY_SURFACE"
+            )
+        body_sid_to_vid[sid] = str(vertex.canonical_mesh_vertex_id)
+
+    faces = [tuple(map(str, face)) for face in body_mesh.faces]
+    face_keys = {tuple(sorted(face)) for face in faces}
+    edge_incidence: dict[tuple[str, str], int] = {}
+    for face in faces:
+        for index in range(3):
+            edge = tuple(sorted((face[index], face[(index + 1) % 3])))
+            edge_incidence[edge] = edge_incidence.get(edge, 0) + 1
+
+    seam_vertex_by_sid: dict[str, str] = {}
+    accepted = []
+    rejected_quality = 0
+    rejected_topology = 0
+    mixed_proposal_count = 0
+    policy = FIT2_PRODUCT_MESH_QUALITY_POLICY_V1
+
+    for source_face_index, face in enumerate(candidate.faces):
+        raw_vertices = tuple(candidate_vertex[str(vertex_id)] for vertex_id in face)
+        sids = tuple(_identity_surface_id(vertex) for vertex in raw_vertices)
+        try:
+            component_ids = tuple(assignment[sid] for sid in sids)
+        except KeyError as exc:
+            raise QualificationError(
+                f"MECHANICAL_COMPONENT_BOUNDARY_SEAM_UNKNOWN_SURFACE:{exc.args[0]}"
+            ) from exc
+        if len(set(component_ids)) <= 1:
+            continue
+        mixed_proposal_count += 1
+
+        tri_xy = tuple(
+            tuple(map(float, dict(vertex.metadata or {})["raster_xy"]))
+            for vertex in raw_vertices
+        )
+        area, angle, aspect = _triangle_metrics(*tri_xy)
+        if (
+            float(area) <= 1.0e-12
+            or float(angle) < float(policy.min_raster_triangle_angle_deg)
+            or float(aspect) > float(policy.max_raster_triangle_aspect_ratio)
+        ):
+            rejected_quality += 1
+            continue
+        if not observation_domain.triangle_inside(tri_xy):
+            raise QualificationError(
+                "MECHANICAL_COMPONENT_BOUNDARY_SEAM_ESCAPES_OBSERVATION_ALPHA"
+            )
+
+        canonical_ids = []
+        staged_new = []
+        for raw_vertex, sid in zip(raw_vertices, sids):
+            canonical_id = body_sid_to_vid.get(sid)
+            if canonical_id is None:
+                canonical_id = seam_vertex_by_sid.get(sid)
+            if canonical_id is None:
+                canonical_id = f"SEAM:V{view_index}:{sid}"
+                staged_new.append((sid, canonical_id, raw_vertex))
+            canonical_ids.append(canonical_id)
+        canonical_face = tuple(canonical_ids)
+        if len(set(canonical_face)) != 3:
+            rejected_topology += 1
+            continue
+        key = tuple(sorted(canonical_face))
+        if key in face_keys:
+            continue
+
+        face_edges = tuple(
+            tuple(
+                sorted(
+                    (
+                        canonical_face[index],
+                        canonical_face[(index + 1) % 3],
+                    )
+                )
+            )
+            for index in range(3)
+        )
+        if any(edge_incidence.get(edge, 0) >= 2 for edge in face_edges):
+            rejected_topology += 1
+            continue
+
+        for sid, canonical_id, raw_vertex in staged_new:
+            if sid in seam_vertex_by_sid or sid in body_sid_to_vid:
+                continue
+            seam_vertex_by_sid[sid] = canonical_id
+            vertices.append(
+                QualifiedMeshVertex(
+                    canonical_mesh_vertex_id=canonical_id,
+                    P=tuple(map(float, raw_vertex.P)),
+                    support_binding=raw_vertex.support_binding,
+                    source_candidate_vertex_id=str(raw_vertex.candidate_vertex_id),
+                    metadata={
+                        **dict(raw_vertex.metadata or {}),
+                        "compiler_boundary_seam_vertex": True,
+                        "mechanical_component_id": assignment[sid],
+                    },
+                )
+            )
+        faces.append(canonical_face)
+        face_keys.add(key)
+        for edge in face_edges:
+            edge_incidence[edge] = edge_incidence.get(edge, 0) + 1
+        accepted.append(
+            {
+                "source_face_index": int(source_face_index),
+                "surface_ids": sids,
+                "component_ids": component_ids,
+            }
+        )
+
+    if not accepted:
+        return body_mesh, {
+            "performed": False,
+            "mixed_proposal_count": int(mixed_proposal_count),
+            "accepted_face_count": 0,
+            "added_vertex_count": 0,
+            "rejected_quality_face_count": int(rejected_quality),
+            "rejected_topology_face_count": int(rejected_topology),
+            "source_candidate_lineage_hash": candidate.candidate_lineage_hash,
+        }
+
+    edges = tuple(sorted(edge_incidence))
+    merged = replace(
+        body_mesh,
+        vertices=tuple(vertices),
+        faces=tuple(faces),
+        edges=edges,
+        qualification_report={
+            **dict(body_mesh.qualification_report or {}),
+            "status": "PASS_COMPONENT_LOCAL_PLUS_CURRENT_S_BOUNDARY_SEAM",
+            "source_component_local_mesh_lineage_hash": str(
+                body_mesh.mesh_lineage_hash
+            ),
+            "boundary_seam_source_candidate_lineage_hash": str(
+                candidate.candidate_lineage_hash
+            ),
+            "boundary_seam_face_count": len(accepted),
+            "boundary_seam_added_vertex_count": len(seam_vertex_by_sid),
+            "mechanical_partition_mutated": False,
+            "historical_full_subject_mesh_used": False,
+            "teacher_topology_used": False,
+        },
+        support_coverage_classification=(
+            "MECHANICAL_COMPONENT_LOCAL_PLUS_CURRENT_S_BOUNDARY_SEAM"
+        ),
+        metadata={
+            **dict(body_mesh.metadata or {}),
+            "compiler_boundary_seam": True,
+            "boundary_seam_source_candidate_lineage_hash": str(
+                candidate.candidate_lineage_hash
+            ),
+            "boundary_seam_face_count": len(accepted),
+            "boundary_seam_added_vertex_count": len(seam_vertex_by_sid),
+            "boundary_seam_authority": (
+                "CURRENT_QUALIFIED_S_PLUS_MECHANICAL_PARTITION_ONLY"
+            ),
+            "mechanical_partition_mutated": False,
+            "historical_full_subject_mesh_used": False,
+            "teacher_topology_used": False,
+        },
+        mesh_lineage_hash="",
+    )
+    merged = replace(merged, mesh_lineage_hash=mesh_lineage_hash(merged))
+    validate_qualified_mesh(merged, surface)
+    raster_report = mesh_raster_quality_report(
+        merged,
+        surface=surface,
+        view_index=view_index,
+    )
+    failures = tuple(
+        raster_quality_gate_failures(
+            raster_report,
+            policy=FIT2_PRODUCT_MESH_QUALITY_POLICY_V1,
+        )
+    )
+    if failures:
+        raise QualificationError(
+            "MECHANICAL_COMPONENT_BOUNDARY_SEAM_RASTER_QUALITY_FAIL:"
+            f"V{view_index}:{','.join(failures)}"
+        )
+    return merged, {
+        "performed": True,
+        "mixed_proposal_count": int(mixed_proposal_count),
+        "accepted_face_count": len(accepted),
+        "added_vertex_count": len(seam_vertex_by_sid),
+        "rejected_quality_face_count": int(rejected_quality),
+        "rejected_topology_face_count": int(rejected_topology),
+        "source_candidate_lineage_hash": candidate.candidate_lineage_hash,
+        "accepted_faces": tuple(accepted),
+        "raster_quality": raster_report,
+        "mechanical_partition_mutated": False,
+        "historical_full_subject_mesh_used": False,
+        "teacher_topology_used": False,
+    }
+
+
 def _verify_rigid_skin(mesh_skin, *, component_id: str, parent_joint_id: str) -> None:
     parent = str(parent_joint_id)
     if not parent:
@@ -336,9 +597,10 @@ def materialize_mechanical_component_view(
 ) -> MechanicalComponentViewMaterializationIR:
     """Build one view as disjoint mechanical domains directly from current S/G/W.
 
-    Every emitted mesh vertex is an admitted current Surface node in exactly one
-    compiler-qualified mechanical component.  Cross-component triangles are therefore
-    impossible by construction.  No historical full-subject mesh is subset, clipped,
+    Mechanical interiors are emitted from component-local current-S domains. If their
+    union cannot satisfy the frozen source-alpha coverage gate, an explicit compiler
+    boundary-seam pass may add only mixed-component faces from a fresh current-S CDT
+    into BODY continuity geometry. No historical full-subject mesh is subset, clipped,
     or reinterpreted.
     """
 
@@ -498,6 +760,82 @@ def materialize_mechanical_component_view(
         union_coverage,
         policy=FIT2_PRODUCT_MESH_QUALITY_POLICY_V1,
     )
+    seam_report = {
+        "performed": False,
+        "accepted_face_count": 0,
+        "added_vertex_count": 0,
+    }
+    if require_product_mesh_quality and coverage_failures:
+        body_index = next(
+            (
+                index
+                for index, row in enumerate(rows)
+                if str(row.component_id) == "BODY_UNDERLAY"
+            ),
+            None,
+        )
+        if body_index is None:
+            raise QualificationError(
+                "MECHANICAL_COMPONENT_BOUNDARY_SEAM_BODY_MISSING"
+            )
+        body_row = rows[body_index]
+        seam_mesh, seam_report = _augment_body_with_boundary_seam(
+            body_row.mesh,
+            surface=surface,
+            partition=partition,
+            view_index=view_index,
+            camera_binding_hash=str(camera_binding_hash),
+            observation_domain=observation_domain,
+        )
+        if seam_report.get("performed") is True:
+            seam_skin = bind_mwb2_mesh_skin(
+                surface,
+                skeleton,
+                skin,
+                seam_mesh,
+            )
+            seam_appearance = build_observed_appearance_binding(
+                surface=surface,
+                mesh=seam_mesh,
+                target_view_index=view_index,
+                camera_binding_hash=str(camera_binding_hash),
+                observation_hash_by_view={
+                    int(k): str(v) for k, v in observation_hash_by_view.items()
+                },
+                atlas_payload_hash=str(atlas_payload_hash),
+            )
+            seam_raster = mesh_raster_quality_report(
+                seam_mesh,
+                surface=surface,
+                view_index=view_index,
+            )
+            body_report = {
+                **dict(body_row.qualification_report),
+                "vertex_count": len(seam_mesh.vertices),
+                "face_count": len(seam_mesh.faces),
+                "raster_quality": seam_raster,
+                "compiler_boundary_seam": seam_report,
+                "cross_component_faces_possible": True,
+            }
+            rows[body_index] = MaterializedMechanicalComponentIR(
+                component_id=body_row.component_id,
+                mesh=seam_mesh,
+                mesh_skin=seam_skin,
+                appearance=seam_appearance,
+                qualification_report=body_report,
+            )
+            component_reports["BODY_UNDERLAY"] = body_report
+            union_triangles = [
+                triangle
+                for row in rows
+                for triangle in _raster_triangles(row.mesh)
+            ]
+            union_coverage = observation_domain.coverage(union_triangles)
+            coverage_failures = coverage_gate_failures(
+                union_coverage,
+                policy=FIT2_PRODUCT_MESH_QUALITY_POLICY_V1,
+            )
+
     if require_product_mesh_quality and coverage_failures:
         component_diag = ";".join(
             (
@@ -516,6 +854,8 @@ def materialize_mechanical_component_view(
             f"largest_hole={union_coverage['largest_uncovered_component_fraction']}:"
             f"predicted_pixels={union_coverage['predicted_pixel_count']}:"
             f"foreground_pixels={union_coverage['foreground_pixel_count']}:"
+            f"seam_faces={seam_report.get('accepted_face_count', 0)}:"
+            f"seam_vertices={seam_report.get('added_vertex_count', 0)}:"
             f"components={component_diag}"
         )
 
@@ -534,12 +874,18 @@ def materialize_mechanical_component_view(
             "source_component_truth_used": False,
             "historical_full_subject_mesh_used": False,
             "source_owner_raster_used": False,
-            "cross_component_faces_generated": False,
+            "cross_component_faces_generated": bool(
+                seam_report.get("accepted_face_count", 0)
+            ),
+            "compiler_boundary_seam": seam_report,
         },
         materialization_hash="",
         metadata={
             "authority": "CURRENT_QUALIFIED_S_G_W_PLUS_EXACT_SOURCE_OBSERVATION",
-            "mesh_order": "MECHANICAL_PARTITION_FIRST_THEN_COMPONENT_LOCAL_CDT",
+            "mesh_order": (
+                "MECHANICAL_PARTITION_FIRST_THEN_COMPONENT_LOCAL_CDT"
+                "_THEN_CURRENT_S_BOUNDARY_SEAM_IF_COVERAGE_REQUIRED"
+            ),
             "observation_alpha_role": "HARD_CONTAINMENT_AND_UNION_COVERAGE_AUTHORITY",
             "component_identity_authority": "COMPILER_MECHANICAL_PARTITION",
         },

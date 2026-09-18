@@ -14,6 +14,8 @@ on:
       - 'compiler/realsas_compiler_core/mesh/dense_zero_surface_bridge.py'
       - 'experiments/mage_demo_fit1_v5_p1/diagnose_dense_zero_mechanical_partition_v1.py'
       - 'experiments/mage_demo_fit1_v5_p1/diagnose_raw_dense_rest_reprojection_v1.py'
+      - 'experiments/mage_demo_fit1_v5_p1/diagnose_h1_raw_vs_product_clip_v1.py'
+      - 'experiments/playback_stack_v1/stage_h1_raw_zero_surface_windows.ps1'
       - 'experiments/mage_demo_fit1_v5_p1/raw_dense_rest_raster_v1.cpp'
       - 'compiler/realsas_compiler_services/export/current_v4_directional_runtime_v4.py'
       - 'experiments/mage_demo_fit1_v5_p1/materialize_product_state_fit2_v4_mechanical_partition.py'
@@ -38,6 +40,7 @@ jobs:
       EXPECTED_SKELETON_SHA256: 319ae46d94450d97dd6f40f21d571ac9432968104e7a517af00ace442d05b9fe
       EXPECTED_SKIN_SHA256: 722fdeb60fc32aa09e2296adbdc0e589de0379bfd49f6239f214330517f01ddd
       EXPECTED_ZERO_SURFACE_SHA256: 56073e8b348b828350c812ac44982b823237196d5ec2f361241877e9ae301925
+      EXPECTED_RAW_ZERO_SURFACE_SHA256: c2e12e34007a300be3e46730284dabb9a61b26dd61590e8c35d1d63e0084f39a
 
     steps:
       - name: Checkout exact pushed commit
@@ -158,12 +161,30 @@ jobs:
             echo 'MAGE_EXACT_ZERO_SURFACE_NOT_EXPLICITLY_STAGED'
             exit 42
           fi
+
+          raw_zero_surface="$HOME/realsas_authority/ZERO_SURFACE_RAW.npz"
+          if [[ ! -f "$raw_zero_surface" ]]; then
+            if ! command -v powershell.exe >/dev/null 2>&1; then
+              echo 'MAGE_WINDOWS_POWERSHELL_UNAVAILABLE_FOR_RAW_ZERO_SURFACE'
+              exit 43
+            fi
+            raw_stage_linux="$GITHUB_WORKSPACE/.drive-stage/raw/ZERO_SURFACE_RAW.npz"
+            raw_stage_windows="$(wslpath -w "$raw_stage_linux")"
+            raw_script_windows="$(wslpath -w "$GITHUB_WORKSPACE/experiments/playback_stack_v1/stage_h1_raw_zero_surface_windows.ps1")"
+            powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass               -File "$raw_script_windows" -Destination "$raw_stage_windows"
+            raw_zero_surface="$raw_stage_linux"
+          fi
+          if [[ ! -f "$raw_zero_surface" ]]; then
+            echo 'MAGE_EXACT_RAW_ZERO_SURFACE_NOT_STAGED'
+            exit 44
+          fi
           {
             echo "MAGE_INPUT_ROOT=$input_root"
             echo "MAGE_SKELETON=$skeleton"
             echo "MAGE_SKIN=$skin"
             echo "MAGE_SURFACE=$surface"
             echo "MAGE_ZERO_SURFACE=$zero_surface"
+            echo "MAGE_RAW_ZERO_SURFACE=$raw_zero_surface"
           } >> "$GITHUB_ENV"
 
       - name: Verify exact scientific byte authorities
@@ -185,6 +206,7 @@ jobs:
           verify_sha "$MAGE_SKELETON" "$EXPECTED_SKELETON_SHA256" FIT2_SKELETON
           verify_sha "$MAGE_SKIN" "$EXPECTED_SKIN_SHA256" FIT2_SKIN
           verify_sha "$MAGE_ZERO_SURFACE" "$EXPECTED_ZERO_SURFACE_SHA256" ZERO_SURFACE
+          verify_sha "$MAGE_RAW_ZERO_SURFACE" "$EXPECTED_RAW_ZERO_SURFACE_SHA256" RAW_ZERO_SURFACE
 
           python - <<'PY'
           from hashlib import sha256
@@ -236,11 +258,11 @@ jobs:
             tests/compiler/test_playback_runtime_v4_contract_v1.py
           PYTHONPATH=. python tools/verify_native_runtime_source_seal_v2.py
 
-      - name: Diagnose raw dense zero-surface rest reprojection
+      - name: Diagnose H1 raw zero-surface versus product clipping
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p .runtime-real/raw-dense-rest
+          mkdir -p .runtime-real/h1-raw-vs-clip
           g++ -std=c++17 -O3 \
             experiments/mage_demo_fit1_v5_p1/raw_dense_rest_raster_v1.cpp \
             -o .runtime-real/raw_dense_rest_raster_v1
@@ -251,14 +273,14 @@ jobs:
             observations+=("$MAGE_INPUT_ROOT/V${v}.png")
           done
           PYTHONPATH=. python \
-            experiments/mage_demo_fit1_v5_p1/diagnose_raw_dense_rest_reprojection_v1.py \
-            --zero-surface "$MAGE_ZERO_SURFACE" \
+            experiments/mage_demo_fit1_v5_p1/diagnose_h1_raw_vs_product_clip_v1.py \
+            --raw-zero-surface "$MAGE_RAW_ZERO_SURFACE" \
+            --clipped-zero-surface "$MAGE_ZERO_SURFACE" \
             --cameras "${cameras[@]}" \
             --observations "${observations[@]}" \
             --rasterizer .runtime-real/raw_dense_rest_raster_v1 \
-            --views 0 1 2 3 4 5 6 7 \
-            --output-dir .runtime-real/raw-dense-rest
-          echo 'RAW_DENSE_REST_DIAGNOSTIC_ONLY_STOP'
+            --output-dir .runtime-real/h1-raw-vs-clip
+          echo 'H1_RAW_VS_PRODUCT_CLIP_DIAGNOSTIC_ONLY_STOP'
           exit 77
       - name: Build sealed native Runtime-v4 demo
         run: |
@@ -338,6 +360,9 @@ jobs:
             .runtime-real/raw-dense-rest/RAW_DENSE_DIRECT_SOURCE_CONTACT_SHEET.png
             .runtime-real/raw-dense-rest/V*_RAW_DENSE_DIRECT_SOURCE_REPROJECTION.png
             .runtime-real/raw-dense-rest/V*_RAW_DENSE_COVERAGE_OVERLAY.png
+            .runtime-real/h1-raw-vs-clip/H1_RAW_VS_PRODUCT_CLIP_CAUSAL_DIAGNOSTIC.json
+            .runtime-real/h1-raw-vs-clip/RAW_VS_PRODUCT_CLIP_CAUSAL_CONTACT.png
+            .runtime-real/h1-raw-vs-clip/V*_RAW_VS_PRODUCT_CLIP_CAUSAL_OVERLAY.png
             .runtime-real/mage_native_smoke.log
             .runtime-real/mage/MAGE_RUNTIME_V4_NATIVE_RENDER_AUTHORITY_V1.json
             .runtime-real/mage/MAGE_FULL_ASSEMBLY_RUNTIME_V4_NATIVE_SMOKE_V1.json

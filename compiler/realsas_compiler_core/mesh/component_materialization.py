@@ -1240,6 +1240,8 @@ def materialize_mechanical_component_view(
         "accepted_face_count": 0,
         "added_vertex_count": 0,
     }
+    residual_recovery_attempts = []
+    adopted_residual_recovery = {}
     if require_product_mesh_quality and coverage_failures:
         body_index = next(
             (
@@ -1290,9 +1292,6 @@ def materialize_mechanical_component_view(
                 "face_count": len(seam_mesh.faces),
                 "raster_quality": seam_raster,
                 "compiler_boundary_seam": seam_report,
-            "compiler_residual_recovery_attempts": tuple(
-                residual_recovery_attempts
-            ),
                 "cross_component_faces_possible": True,
             }
             rows[body_index] = MaterializedMechanicalComponentIR(
@@ -1314,7 +1313,6 @@ def materialize_mechanical_component_view(
                 policy=FIT2_PRODUCT_MESH_QUALITY_POLICY_V1,
             )
 
-    residual_recovery_attempts = []
     if require_product_mesh_quality and coverage_failures:
         base_rows = list(rows)
         body_index = next(
@@ -1441,6 +1439,7 @@ def materialize_mechanical_component_view(
                 union_coverage = candidate_coverage
                 coverage_failures = candidate_failures
                 component_reports["BODY_UNDERLAY"] = recovered_body_report
+                adopted_residual_recovery = dict(attempt)
                 break
 
         if coverage_failures and best is not None:
@@ -1515,8 +1514,15 @@ def materialize_mechanical_component_view(
             "source_owner_raster_used": False,
             "cross_component_faces_generated": bool(
                 seam_report.get("accepted_face_count", 0)
+                or adopted_residual_recovery.get("accepted_face_count", 0)
             ),
             "compiler_boundary_seam": seam_report,
+            "compiler_residual_recovery_attempts": tuple(
+                residual_recovery_attempts
+            ),
+            "adopted_compiler_residual_recovery": dict(
+                adopted_residual_recovery
+            ),
         },
         materialization_hash="",
         metadata={

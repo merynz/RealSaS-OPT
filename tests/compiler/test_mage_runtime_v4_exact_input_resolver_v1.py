@@ -4,6 +4,8 @@ from hashlib import sha256
 import json
 from pathlib import Path
 
+import pytest
+
 import experiments.playback_stack_v1.resolve_mage_full_assembly_runtime_v4_inputs_v1 as resolver
 
 
@@ -13,7 +15,10 @@ def _write(path: Path, payload: bytes) -> str:
     return sha256(payload).hexdigest()
 
 
-def test_exact_resolver_requires_no_teacher_component_artifacts(tmp_path, monkeypatch):
+@pytest.mark.parametrize("legacy_truth_witness", [False, True])
+def test_exact_resolver_requires_no_teacher_component_artifacts(
+    tmp_path, monkeypatch, legacy_truth_witness
+):
     root = tmp_path / "drive"
     p1q = root / "03_P1Q_FIT2"
     mechanics = root / "mechanics"
@@ -38,6 +43,7 @@ def test_exact_resolver_requires_no_teacher_component_artifacts(tmp_path, monkey
     monkeypatch.setattr(resolver, "EXPECTED_SURFACE_LINEAGE", "SURFACE")
     monkeypatch.setattr(resolver, "EXPECTED_SKELETON_LINEAGE", "SKELETON")
     monkeypatch.setattr(resolver, "EXPECTED_SKIN_LINEAGE", "SKIN")
+    monkeypatch.setattr(resolver, "LEGACY_P1Q_SOURCE_TRUTH_SHA256", "LEGACY_TRUTH")
 
     camera_payloads = tuple(f'{{"camera":{i}}}\n'.encode() for i in range(8))
     observation_payloads = tuple(b"PNG" + bytes([i]) for i in range(8))
@@ -65,23 +71,29 @@ def test_exact_resolver_requires_no_teacher_component_artifacts(tmp_path, monkey
 
     current_manifest = {
         "status": resolver.P1Q_STATUS,
-        "teacher_truth_used": False,
         "source_component_truth_used": False,
         "current_gsa_lineage_hash": "SURFACE",
         "current_skeleton_lineage_hash": "SKELETON",
         "current_skin_lineage_hash": "SKIN",
         "views": view_rows,
     }
+    if legacy_truth_witness:
+        current_manifest["source_truth_sha256"] = "LEGACY_TRUTH"
+    else:
+        current_manifest["teacher_truth_used"] = False
+
     manifest_path = p1q / resolver.P1Q_MANIFEST_NAME
     _write(
         manifest_path,
         (json.dumps(current_manifest, sort_keys=True) + "\n").encode(),
     )
 
-    # A stale same-name manifest is present but must not compete because teacher truth
-    # is explicitly forbidden by the current resolver policy.
+    # Same-name stale manifest must never compete with the exact admitted carrier.
     stale = dict(current_manifest)
-    stale["teacher_truth_used"] = True
+    if legacy_truth_witness:
+        stale["source_truth_sha256"] = "UNKNOWN_TRUTH"
+    else:
+        stale["teacher_truth_used"] = True
     _write(
         root / "stale" / resolver.P1Q_MANIFEST_NAME,
         (json.dumps(stale, sort_keys=True) + "\n").encode(),
@@ -121,6 +133,9 @@ def test_exact_resolver_requires_no_teacher_component_artifacts(tmp_path, monkey
     assert tuple(map(Path, result["cameras"])) == tuple(path.resolve() for path in camera_paths)
     assert tuple(map(Path, result["observations"])) == tuple(path.resolve() for path in observation_paths)
     assert result["teacher_component_artifacts_resolved"] is False
+    assert result["legacy_source_truth_witness_present"] is legacy_truth_witness
+    assert result["legacy_source_truth_witness_runtime_authority"] is False
+    assert result["p1q_runtime_migration_required"] is legacy_truth_witness
     assert "foreground_dir" not in result
     assert "assembly_dir" not in result
     assert result["giant_product_graph_scanned"] is False

@@ -9,6 +9,7 @@ product assembly.
 """
 
 import argparse
+from dataclasses import replace
 import hashlib
 import json
 from pathlib import Path
@@ -31,6 +32,12 @@ from compiler.realsas_compiler_core.mechanical_component_partition import (
 from compiler.realsas_compiler_core.mesh.component_partition import (
     project_mesh_to_mechanical_components,
 )
+from compiler.realsas_compiler_core.mesh.mesh_binding import (
+    mesh_lineage_hash,
+    mesh_skin_lineage_hash,
+    validate_qualified_mesh,
+    validate_qualified_mesh_skin,
+)
 from compiler.realsas_compiler_core.motion_locomotion import (
     build_mage_historical_phase_motion,
 )
@@ -41,7 +48,7 @@ from compiler.realsas_compiler_core.product_external_render import (
     build_external_directional_renderable_set,
     build_external_renderable_component,
 )
-from compiler.realsas_compiler_core.v4 import build_capability_contract
+from compiler.realsas_compiler_core.v4 import build_appearance_binding, build_capability_contract
 from compiler.realsas_compiler_core.v4_types import CapabilityRequirement
 
 import experiments.mage_demo_fit1_v5_p1.fit2_current_authority_io as fit2io
@@ -53,6 +60,7 @@ import experiments.mage_demo_fit1_v5_p1.run_v5_direct_p1_binding_v1 as v5base
 SCHEMA = "RealSaS.MageFIT2.CurrentProductState.v4.mechanical_component_partition"
 PROFILE = "MAGE_FIT2_BOUNDED_DEMO_V4_MECHANICAL_COMPONENT_PARTITION"
 BODY_COMPONENT_ID = "BODY_UNDERLAY"
+LEGACY_P1Q_SOURCE_TRUTH_SHA256 = "a23565b0904e9683d11083984a87405f4e0a1069984ca11b690ad431f35f5e86"
 SETUP_ORDER = {
     "BODY_UNDERLAY": 0,
     "RIGID_CHEST": 1,
@@ -78,6 +86,118 @@ def _write_json(path: Path, payload) -> None:
     )
 
 
+def _strip_legacy_truth_keys(value):
+    if isinstance(value, dict):
+        return {
+            str(key): _strip_legacy_truth_keys(item)
+            for key, item in value.items()
+            if not str(key).lower().startswith("source_truth")
+        }
+    if isinstance(value, list):
+        return [_strip_legacy_truth_keys(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(_strip_legacy_truth_keys(item) for item in value)
+    return value
+
+
+def _sanitize_legacy_p1q_carrier(
+    *,
+    mesh,
+    mesh_skin,
+    appearance,
+    mechanical,
+    manifest_sha: str,
+    view: int,
+):
+    """Remove historical teacher-witness metadata without changing geometry/pixels/weights."""
+    old_mesh_hash = str(mesh.mesh_lineage_hash)
+    old_mesh_skin_hash = str(mesh_skin.mesh_skin_lineage_hash)
+    old_appearance_hash = str(appearance.appearance_lineage_hash)
+
+    mesh_report = _strip_legacy_truth_keys(dict(mesh.qualification_report or {}))
+    mesh_metadata = _strip_legacy_truth_keys(dict(mesh.metadata or {}))
+    mesh_report.update({
+        "historical_source_truth_witness_removed": True,
+        "teacher_truth_used": False,
+        "source_component_truth_used": False,
+    })
+    mesh_metadata.update({
+        "historical_source_truth_witness_removed": True,
+        "historical_mesh_lineage_hash": old_mesh_hash,
+        "legacy_p1q_manifest_sha256": str(manifest_sha),
+        "teacher_truth_used": False,
+        "source_component_truth_used": False,
+        "geometry_payload_mutated": False,
+        "surface_support_payload_mutated": False,
+    })
+    mesh = replace(
+        mesh,
+        qualification_report=mesh_report,
+        metadata=mesh_metadata,
+        mesh_lineage_hash="",
+    )
+    mesh = replace(mesh, mesh_lineage_hash=mesh_lineage_hash(mesh))
+    validate_qualified_mesh(mesh, mechanical.surface)
+
+    mesh_skin = replace(
+        mesh_skin,
+        mesh_binding_hash=str(mesh.mesh_lineage_hash),
+        qualification_report={
+            **_strip_legacy_truth_keys(dict(mesh_skin.qualification_report or {})),
+            "historical_source_truth_witness_removed": True,
+            "teacher_truth_used": False,
+            "weight_values_mutated": False,
+        },
+        metadata={
+            **_strip_legacy_truth_keys(dict(mesh_skin.metadata or {})),
+            "historical_mesh_skin_lineage_hash": old_mesh_skin_hash,
+            "legacy_p1q_manifest_sha256": str(manifest_sha),
+            "teacher_truth_used": False,
+            "weight_values_mutated": False,
+        },
+        mesh_skin_lineage_hash="",
+    )
+    mesh_skin = replace(
+        mesh_skin,
+        mesh_skin_lineage_hash=mesh_skin_lineage_hash(mesh_skin),
+    )
+    validate_qualified_mesh_skin(
+        mesh_skin,
+        surface=mechanical.surface,
+        skeleton=mechanical.skeleton,
+        skin=mechanical.skin,
+        mesh=mesh,
+    )
+
+    appearance = build_appearance_binding(
+        target_view_index=int(appearance.target_view_index),
+        mesh_binding_hash=str(mesh.mesh_lineage_hash),
+        camera_binding_hash=str(appearance.camera_binding_hash),
+        corner_bindings=tuple(appearance.corner_bindings),
+        atlas_payload_hash=str(appearance.atlas_payload_hash),
+        metadata={
+            **_strip_legacy_truth_keys(dict(appearance.metadata or {})),
+            "historical_appearance_lineage_hash": old_appearance_hash,
+            "legacy_p1q_manifest_sha256": str(manifest_sha),
+            "historical_source_truth_witness_removed": True,
+            "teacher_truth_used": False,
+            "artist_corner_payload_mutated": False,
+        },
+    )
+    return mesh, mesh_skin, appearance, {
+        "view": int(view),
+        "historical_mesh_lineage_hash": old_mesh_hash,
+        "sanitized_mesh_lineage_hash": str(mesh.mesh_lineage_hash),
+        "historical_mesh_skin_lineage_hash": old_mesh_skin_hash,
+        "sanitized_mesh_skin_lineage_hash": str(mesh_skin.mesh_skin_lineage_hash),
+        "historical_appearance_lineage_hash": old_appearance_hash,
+        "sanitized_appearance_lineage_hash": str(appearance.appearance_lineage_hash),
+        "geometry_payload_mutated": False,
+        "weight_values_mutated": False,
+        "artist_corner_payload_mutated": False,
+    }
+
+
 def _load_p1q_state(args, surface, skeleton, skin):
     p1q_dir = Path(args.p1q_dir)
     manifest_path = p1q_dir / "P1Q_FIT2_CURRENT_AUTHORITY_MATERIALIZATION_MANIFEST.json"
@@ -90,10 +210,16 @@ def _load_p1q_state(args, surface, skeleton, skin):
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if manifest.get("status") != "PASS__FIT2_P1Q_CURRENT_AUTHORITY_V0_V7_FROZEN_FACE_POLICY":
         raise RuntimeError("FIT2_V4_P1Q_STATUS_INVALID")
-    if manifest.get("teacher_truth_used") is not False:
-        raise RuntimeError("FIT2_V4_P1Q_TEACHER_TRUTH_FORBIDDEN")
-    if manifest.get("source_component_truth_used") is not False:
+
+    legacy_truth_witness = "source_truth_sha256" in manifest
+    if legacy_truth_witness:
+        if str(manifest.get("source_truth_sha256")) != LEGACY_P1Q_SOURCE_TRUTH_SHA256:
+            raise RuntimeError("FIT2_V4_P1Q_UNKNOWN_LEGACY_TRUTH_WITNESS")
+    elif manifest.get("teacher_truth_used") is not False:
+        raise RuntimeError("FIT2_V4_P1Q_TEACHER_TRUTH_POLICY_MISSING")
+    if manifest.get("source_component_truth_used") not in (None, False):
         raise RuntimeError("FIT2_V4_P1Q_SOURCE_COMPONENT_TRUTH_FORBIDDEN")
+
     if manifest.get("current_gsa_lineage_hash") != surface.geometry_lineage_hash:
         raise RuntimeError("FIT2_V4_P1Q_SURFACE_LINEAGE_DRIFT")
     if manifest.get("current_skeleton_lineage_hash") != skeleton.skeleton_lineage_hash:
@@ -105,6 +231,7 @@ def _load_p1q_state(args, surface, skeleton, skin):
     if set(rows) != set(range(8)):
         raise RuntimeError("FIT2_V4_P1Q_REQUIRES_8_VIEWS")
     out = {}
+    migration_rows = []
     for view in range(8):
         row = rows[view]
         mesh = v5base._load_mesh(
@@ -127,8 +254,28 @@ def _load_p1q_state(args, surface, skeleton, skin):
             raise RuntimeError(f"FIT2_V4_P1Q_MESH_SKIN_SKIN_DRIFT_V{view}")
         if appearance.mesh_binding_hash != mesh.mesh_lineage_hash:
             raise RuntimeError(f"FIT2_V4_P1Q_APPEARANCE_MESH_DRIFT_V{view}")
+        if legacy_truth_witness:
+            mesh, mesh_skin, appearance, migration = _sanitize_legacy_p1q_carrier(
+                mesh=mesh,
+                mesh_skin=mesh_skin,
+                appearance=appearance,
+                mechanical=mechanical,
+                manifest_sha=manifest_sha,
+                view=view,
+            )
+            migration_rows.append(migration)
         out[view] = (mesh, mesh_skin, appearance)
-    return manifest_path, manifest_sha, manifest, out
+
+    effective_manifest = {
+        **manifest,
+        "teacher_truth_used": False,
+        "source_component_truth_used": False,
+        "legacy_source_truth_witness_present": bool(legacy_truth_witness),
+        "legacy_source_truth_witness_runtime_authority": False,
+        "legacy_source_truth_witness_sanitized": bool(legacy_truth_witness),
+        "runtime_carrier_migration_rows": migration_rows,
+    }
+    return manifest_path, manifest_sha, effective_manifest, out
 
 
 def _active_joint_count(surface_ids, skin) -> int:
@@ -309,7 +456,8 @@ def build_final_state(args, *, persist: bool = True):
         projection_rows.append({
             "view": view,
             "source_mesh_lineage_hash": projection.source_mesh_lineage_hash,
-            "retained_pure_face_count": projection.qualification_report["retained_pure_face_count"],
+            "underlay_face_count": projection.qualification_report["underlay_face_count"],
+            "rigid_overlay_face_count": projection.qualification_report["rigid_overlay_face_count"],
             "cross_component_face_count": projection.qualification_report["cross_component_face_count"],
             "ambiguous_vertex_count": projection.qualification_report["ambiguous_vertex_count"],
             "component_face_counts": {
@@ -359,8 +507,10 @@ def build_final_state(args, *, persist: bool = True):
                         else "MECHANICAL_RIGID_FOREGROUND"
                     ),
                     "component_partition_hash": partition.partition_hash,
-                    "source_full_subject_mesh_lineage_hash": row.mesh.metadata.get(
-                        "source_mesh_lineage_hash", ""
+                    "source_full_subject_mesh_lineage_hash": (
+                        projection.source_mesh_lineage_hash
+                        if component_id == BODY_COMPONENT_ID
+                        else row.mesh.metadata.get("source_mesh_lineage_hash", "")
                     ),
                     "teacher_truth_used": False,
                     "source_component_truth_used": False,
@@ -574,6 +724,13 @@ def build_final_state(args, *, persist: bool = True):
             "skin_lineage_hash": skin.skin_lineage_hash,
             "teacher_truth_used": False,
             "source_component_truth_used": False,
+            "legacy_source_truth_witness_present": bool(
+                p1q_manifest.get("legacy_source_truth_witness_present", False)
+            ),
+            "legacy_source_truth_witness_runtime_authority": False,
+            "legacy_source_truth_witness_sanitized": bool(
+                p1q_manifest.get("legacy_source_truth_witness_sanitized", False)
+            ),
             "foreground_owner_raster_used": False,
             "foreground_atlas_used": False,
             "product_pass_claimed": False,

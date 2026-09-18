@@ -29,6 +29,8 @@ from compiler.realsas_compiler_core.v4 import (
     build_mechanical_state,
     qualified_skeleton_v2_lineage_hash,
 )
+import experiments.mage_demo_fit1_v5_p1.materialize_product_state_fit2_v4_mechanical_partition as product_v4
+
 from compiler.realsas_compiler_core.v4_types import (
     AppearanceCornerBinding,
     QualifiedSkeletonIRV2,
@@ -220,3 +222,73 @@ def test_mesh_projection_drops_only_cross_component_face_and_preserves_payloads(
         == next(row.influences for row in mesh_skin.rows if row.canonical_mesh_vertex_id == "M_H0")
     )
     assert by_id["RIGID_HEAD"].appearance.corner_bindings[0].source_observation_hash == "a" * 64
+
+
+
+def test_legacy_p1q_truth_witness_is_sanitized_without_payload_mutation():
+    mechanical, _partition, mesh, mesh_skin, appearance = _fixture()
+
+    legacy_mesh = replace(
+        mesh,
+        qualification_report={
+            **dict(mesh.qualification_report),
+            "source_truth_ownership_sha256": "legacy-witness",
+        },
+        metadata={
+            **dict(mesh.metadata),
+            "source_truth_ownership_sha256": "legacy-witness",
+        },
+        mesh_lineage_hash="",
+    )
+    legacy_mesh = replace(
+        legacy_mesh,
+        mesh_lineage_hash=mesh_lineage_hash(legacy_mesh),
+    )
+    legacy_skin = replace(
+        mesh_skin,
+        mesh_binding_hash=legacy_mesh.mesh_lineage_hash,
+        mesh_skin_lineage_hash="",
+    )
+    legacy_skin = replace(
+        legacy_skin,
+        mesh_skin_lineage_hash=mesh_skin_lineage_hash(legacy_skin),
+    )
+    legacy_appearance = build_appearance_binding(
+        target_view_index=appearance.target_view_index,
+        mesh_binding_hash=legacy_mesh.mesh_lineage_hash,
+        camera_binding_hash=appearance.camera_binding_hash,
+        corner_bindings=appearance.corner_bindings,
+        atlas_payload_hash=appearance.atlas_payload_hash,
+        metadata={
+            **dict(appearance.metadata),
+            "source_truth_note": "legacy-only",
+        },
+    )
+
+    sanitized_mesh, sanitized_skin, sanitized_appearance, report = (
+        product_v4._sanitize_legacy_p1q_carrier(
+            mesh=legacy_mesh,
+            mesh_skin=legacy_skin,
+            appearance=legacy_appearance,
+            mechanical=mechanical,
+            manifest_sha="m" * 64,
+            view=0,
+        )
+    )
+
+    assert sanitized_mesh.vertices == legacy_mesh.vertices
+    assert sanitized_mesh.faces == legacy_mesh.faces
+    assert sanitized_mesh.edges == legacy_mesh.edges
+    assert tuple(row.influences for row in sanitized_skin.rows) == tuple(
+        row.influences for row in legacy_skin.rows
+    )
+    assert sanitized_appearance.corner_bindings == legacy_appearance.corner_bindings
+    assert "source_truth_ownership_sha256" not in sanitized_mesh.qualification_report
+    assert "source_truth_ownership_sha256" not in sanitized_mesh.metadata
+    assert "source_truth_note" not in sanitized_appearance.metadata
+    assert sanitized_mesh.metadata["geometry_payload_mutated"] is False
+    assert sanitized_skin.metadata["weight_values_mutated"] is False
+    assert sanitized_appearance.metadata["artist_corner_payload_mutated"] is False
+    assert report["geometry_payload_mutated"] is False
+    assert report["weight_values_mutated"] is False
+    assert report["artist_corner_payload_mutated"] is False

@@ -1,6 +1,13 @@
 from __future__ import annotations
 
-"""Exact render-mesh projection of a Compiler mechanical component partition."""
+"""Render projection for Compiler-owned mechanical components.
+
+The continuity substrate is intentionally the complete qualified source mesh. Rigid
+mechanical-role components are exact pure-face overlays extracted from that same mesh.
+This avoids creating render holes at component boundaries: every source face is always
+present in BODY_UNDERLAY, while rigid overlays add only faces whose complete qualified
+surface support belongs to one rigid component.
+"""
 
 from dataclasses import asdict, dataclass, field, replace
 from typing import Any
@@ -15,6 +22,8 @@ from .mesh_binding import (
     validate_qualified_mesh_skin,
 )
 
+BODY_COMPONENT_ID = "BODY_UNDERLAY"
+
 
 @dataclass(frozen=True)
 class ProjectedMechanicalComponentIR:
@@ -23,7 +32,7 @@ class ProjectedMechanicalComponentIR:
     mesh: Any
     mesh_skin: Any
     appearance: Any
-    schema_version: str = "RealSaS.ProjectedMechanicalComponentIR.v1"
+    schema_version: str = "RealSaS.ProjectedMechanicalComponentIR.v2"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -46,7 +55,7 @@ class MechanicalComponentMeshProjectionIR:
     ambiguous_vertex_ids: tuple[str, ...]
     cross_component_face_indices: tuple[int, ...]
     qualification_report: dict[str, Any]
-    schema_version: str = "RealSaS.MechanicalComponentMeshProjectionIR.v1"
+    schema_version: str = "RealSaS.MechanicalComponentMeshProjectionIR.v2"
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -86,6 +95,132 @@ def _subset_edges(faces):
     return tuple(sorted(edges))
 
 
+def _subset_component(
+    *,
+    component_id: str,
+    rows: list[tuple[int, tuple[str, ...]]],
+    source_mesh,
+    source_mesh_skin,
+    source_appearance,
+    mechanical,
+    partition,
+) -> ProjectedMechanicalComponentIR:
+    source_face_indices = tuple(old_index for old_index, _face in rows)
+    faces = tuple(face for _old_index, face in rows)
+    used = {vid for face in faces for vid in face}
+    vertices = tuple(
+        vertex for vertex in source_mesh.vertices
+        if str(vertex.canonical_mesh_vertex_id) in used
+    )
+    edges = _subset_edges(faces)
+
+    mesh = replace(
+        source_mesh,
+        vertices=vertices,
+        faces=faces,
+        edges=edges,
+        qualification_report={
+            "status": "PASS_EXACT_RIGID_MECHANICAL_OVERLAY_FACE_SUBSET",
+            "passed": True,
+            "source_mesh_lineage_hash": str(source_mesh.mesh_lineage_hash),
+            "component_partition_hash": str(partition.partition_hash),
+            "component_id": component_id,
+            "source_face_count": len(source_mesh.faces),
+            "retained_face_count": len(faces),
+            "vertices_moved": False,
+            "support_bindings_mutated": False,
+            "retriangulated": False,
+            "new_geometry_generated": False,
+        },
+        mesh_lineage_hash="",
+        support_coverage_classification="MECHANICAL_RIGID_PURE_FACE_OVERLAY",
+        metadata={
+            **dict(source_mesh.metadata or {}),
+            "source_mesh_lineage_hash": str(source_mesh.mesh_lineage_hash),
+            "component_partition_hash": str(partition.partition_hash),
+            "mechanical_component_id": component_id,
+            "exact_face_subset_projection": True,
+            "continuity_underlay_owns_boundary_faces": True,
+            "new_geometry_generated": False,
+        },
+    )
+    mesh = replace(mesh, mesh_lineage_hash=mesh_lineage_hash(mesh))
+    validate_qualified_mesh(mesh, mechanical.surface)
+
+    mesh_skin = replace(
+        source_mesh_skin,
+        rows=tuple(
+            row for row in source_mesh_skin.rows
+            if str(row.canonical_mesh_vertex_id) in used
+        ),
+        mesh_binding_hash=str(mesh.mesh_lineage_hash),
+        qualification_report={
+            **dict(source_mesh_skin.qualification_report or {}),
+            "status": "PASS_EXACT_RIGID_MECHANICAL_OVERLAY_SKIN_SUBSET",
+            "source_mesh_skin_lineage_hash": str(source_mesh_skin.mesh_skin_lineage_hash),
+            "component_partition_hash": str(partition.partition_hash),
+            "component_id": component_id,
+            "weight_rows_mutated": False,
+            "only_row_subset_and_mesh_binding_changed": True,
+        },
+        mesh_skin_lineage_hash="",
+        metadata={
+            **dict(source_mesh_skin.metadata or {}),
+            "source_mesh_skin_lineage_hash": str(source_mesh_skin.mesh_skin_lineage_hash),
+            "component_partition_hash": str(partition.partition_hash),
+            "mechanical_component_id": component_id,
+            "weight_values_preserved_exactly": True,
+        },
+    )
+    mesh_skin = replace(
+        mesh_skin,
+        mesh_skin_lineage_hash=mesh_skin_lineage_hash(mesh_skin),
+    )
+    validate_qualified_mesh_skin(
+        mesh_skin,
+        surface=mechanical.surface,
+        skeleton=mechanical.skeleton,
+        skin=mechanical.skin,
+        mesh=mesh,
+    )
+
+    corner_by_key = {
+        (int(corner.face_index), int(corner.corner_index)): corner
+        for corner in source_appearance.corner_bindings
+    }
+    corners = []
+    for new_face_index, old_face_index in enumerate(source_face_indices):
+        for corner_index in range(len(source_mesh.faces[old_face_index])):
+            source_corner = corner_by_key.get((old_face_index, corner_index))
+            if source_corner is None:
+                raise QualificationError(
+                    f"MECHANICAL_COMPONENT_MESH_APPEARANCE_CORNER_MISSING:{old_face_index}:{corner_index}"
+                )
+            corners.append(replace(source_corner, face_index=int(new_face_index)))
+    appearance = build_appearance_binding(
+        target_view_index=int(source_appearance.target_view_index),
+        mesh_binding_hash=str(mesh.mesh_lineage_hash),
+        camera_binding_hash=str(source_appearance.camera_binding_hash),
+        corner_bindings=tuple(corners),
+        atlas_payload_hash=str(source_appearance.atlas_payload_hash),
+        metadata={
+            **dict(source_appearance.metadata or {}),
+            "source_appearance_lineage_hash": str(source_appearance.appearance_lineage_hash),
+            "component_partition_hash": str(partition.partition_hash),
+            "mechanical_component_id": component_id,
+            "artist_corner_payload_preserved": True,
+            "new_pixels_generated": False,
+        },
+    )
+    return ProjectedMechanicalComponentIR(
+        component_id=component_id,
+        source_face_indices=source_face_indices,
+        mesh=mesh,
+        mesh_skin=mesh_skin,
+        appearance=appearance,
+    )
+
+
 def project_mesh_to_mechanical_components(
     *,
     source_mesh,
@@ -95,12 +230,13 @@ def project_mesh_to_mechanical_components(
     mechanical,
     require_nonempty_components: bool = True,
 ) -> MechanicalComponentMeshProjectionIR:
-    """Project only faces whose complete support belongs to one qualified component.
+    """Keep full qualified geometry as continuity underlay + exact rigid overlays.
 
-    Geometry, support coefficients, skin rows and observed appearance payloads are copied
-    exactly.  Vertices with mixed component support and faces crossing component
-    boundaries are not guessed or clipped; they are reported as explicit unresolved
-    boundary work for the later component-local remesher.
+    This is deliberately not a disjoint face partition. BODY_UNDERLAY contains every
+    source face and therefore owns coverage/continuity. Rigid mechanical-role overlays
+    contain only faces whose every vertex has support exclusively inside that rigid
+    component. Mixed/cross-component faces are never guessed, clipped, or deleted;
+    they remain source-backed in the underlay.
     """
     validate_mechanical_component_partition(
         partition,
@@ -120,6 +256,8 @@ def project_mesh_to_mechanical_components(
         raise QualificationError("MECHANICAL_COMPONENT_MESH_APPEARANCE_MESH_DRIFT")
     if source_appearance.target_view_index != source_mesh.view_index:
         raise QualificationError("MECHANICAL_COMPONENT_MESH_APPEARANCE_VIEW_DRIFT")
+    if BODY_COMPONENT_ID not in partition.component_surface_ids:
+        raise QualificationError("MECHANICAL_COMPONENT_MESH_BODY_PARTITION_MISSING")
 
     assignment_by_surface = {
         str(row.surface_id): str(row.component_id)
@@ -146,10 +284,18 @@ def project_mesh_to_mechanical_components(
         else:
             vertex_component[vid] = cid
 
-    face_rows: dict[str, list[tuple[int, tuple[str, ...]]]] = {
-        str(cid): [] for cid in partition.component_surface_ids
+    rigid_ids = tuple(
+        sorted(
+            cid
+            for cid, mechanical_class in partition.component_mechanical_classes.items()
+            if str(mechanical_class) == "RIGID_SKINNED_COMPONENT"
+        )
+    )
+    rigid_face_rows: dict[str, list[tuple[int, tuple[str, ...]]]] = {
+        cid: [] for cid in rigid_ids
     }
     cross_faces = []
+    pure_body_face_count = 0
     for face_index, face in enumerate(source_mesh.faces):
         ids = tuple(map(str, face))
         labels = [vertex_component.get(vid) for vid in ids]
@@ -157,141 +303,51 @@ def project_mesh_to_mechanical_components(
             cross_faces.append(int(face_index))
             continue
         cid = str(labels[0])
-        if cid not in face_rows:
+        if cid == BODY_COMPONENT_ID:
+            pure_body_face_count += 1
+        elif cid in rigid_face_rows:
+            rigid_face_rows[cid].append((int(face_index), ids))
+        else:
             raise QualificationError("MECHANICAL_COMPONENT_MESH_FACE_COMPONENT_UNKNOWN")
-        face_rows[cid].append((int(face_index), ids))
 
-    corner_by_key = {
-        (int(corner.face_index), int(corner.corner_index)): corner
-        for corner in source_appearance.corner_bindings
-    }
-    projected = []
-    for cid in sorted(face_rows):
-        rows = face_rows[cid]
+    # Full source mesh is the continuity owner. No face is removed from BODY_UNDERLAY.
+    projected = [
+        ProjectedMechanicalComponentIR(
+            component_id=BODY_COMPONENT_ID,
+            source_face_indices=tuple(range(len(source_mesh.faces))),
+            mesh=source_mesh,
+            mesh_skin=source_mesh_skin,
+            appearance=source_appearance,
+        )
+    ]
+    for cid in rigid_ids:
+        rows = rigid_face_rows[cid]
         if not rows:
             if require_nonempty_components:
                 raise QualificationError(
-                    f"MECHANICAL_COMPONENT_MESH_COMPONENT_HAS_NO_PURE_FACE:{cid}"
+                    f"MECHANICAL_COMPONENT_MESH_RIGID_COMPONENT_HAS_NO_PURE_FACE:{cid}"
                 )
             continue
-        source_face_indices = tuple(old_index for old_index, _face in rows)
-        faces = tuple(face for _old_index, face in rows)
-        used = {vid for face in faces for vid in face}
-        vertices = tuple(
-            vertex for vertex in source_mesh.vertices
-            if str(vertex.canonical_mesh_vertex_id) in used
-        )
-        edges = _subset_edges(faces)
-
-        mesh = replace(
-            source_mesh,
-            vertices=vertices,
-            faces=faces,
-            edges=edges,
-            qualification_report={
-                "status": "PASS_EXACT_MECHANICAL_COMPONENT_FACE_PARTITION",
-                "passed": True,
-                "source_mesh_lineage_hash": str(source_mesh.mesh_lineage_hash),
-                "component_partition_hash": str(partition.partition_hash),
-                "component_id": cid,
-                "source_face_count": len(source_mesh.faces),
-                "retained_face_count": len(faces),
-                "vertices_moved": False,
-                "support_bindings_mutated": False,
-                "retriangulated": False,
-                "new_geometry_generated": False,
-            },
-            mesh_lineage_hash="",
-            support_coverage_classification="MECHANICAL_COMPONENT_PURE_FACE_SUBSET",
-            metadata={
-                **dict(source_mesh.metadata or {}),
-                "source_mesh_lineage_hash": str(source_mesh.mesh_lineage_hash),
-                "component_partition_hash": str(partition.partition_hash),
-                "mechanical_component_id": cid,
-                "exact_face_subset_projection": True,
-                "cross_component_completion_used": False,
-            },
-        )
-        mesh = replace(mesh, mesh_lineage_hash=mesh_lineage_hash(mesh))
-        validate_qualified_mesh(mesh, mechanical.surface)
-
-        mesh_skin = replace(
-            source_mesh_skin,
-            rows=tuple(
-                row for row in source_mesh_skin.rows
-                if str(row.canonical_mesh_vertex_id) in used
-            ),
-            mesh_binding_hash=str(mesh.mesh_lineage_hash),
-            qualification_report={
-                **dict(source_mesh_skin.qualification_report or {}),
-                "status": "PASS_EXACT_MECHANICAL_COMPONENT_SKIN_SUBSET",
-                "source_mesh_skin_lineage_hash": str(source_mesh_skin.mesh_skin_lineage_hash),
-                "component_partition_hash": str(partition.partition_hash),
-                "component_id": cid,
-                "weight_rows_mutated": False,
-                "only_row_subset_and_mesh_binding_changed": True,
-            },
-            mesh_skin_lineage_hash="",
-            metadata={
-                **dict(source_mesh_skin.metadata or {}),
-                "source_mesh_skin_lineage_hash": str(source_mesh_skin.mesh_skin_lineage_hash),
-                "component_partition_hash": str(partition.partition_hash),
-                "mechanical_component_id": cid,
-                "weight_values_preserved_exactly": True,
-            },
-        )
-        mesh_skin = replace(
-            mesh_skin,
-            mesh_skin_lineage_hash=mesh_skin_lineage_hash(mesh_skin),
-        )
-        validate_qualified_mesh_skin(
-            mesh_skin,
-            surface=mechanical.surface,
-            skeleton=mechanical.skeleton,
-            skin=mechanical.skin,
-            mesh=mesh,
-        )
-
-        corners = []
-        for new_face_index, old_face_index in enumerate(source_face_indices):
-            for corner_index in range(len(source_mesh.faces[old_face_index])):
-                source_corner = corner_by_key.get((old_face_index, corner_index))
-                if source_corner is None:
-                    raise QualificationError(
-                        f"MECHANICAL_COMPONENT_MESH_APPEARANCE_CORNER_MISSING:{old_face_index}:{corner_index}"
-                    )
-                corners.append(
-                    replace(source_corner, face_index=int(new_face_index))
-                )
-        appearance = build_appearance_binding(
-            target_view_index=int(source_appearance.target_view_index),
-            mesh_binding_hash=str(mesh.mesh_lineage_hash),
-            camera_binding_hash=str(source_appearance.camera_binding_hash),
-            corner_bindings=tuple(corners),
-            atlas_payload_hash=str(source_appearance.atlas_payload_hash),
-            metadata={
-                **dict(source_appearance.metadata or {}),
-                "source_appearance_lineage_hash": str(source_appearance.appearance_lineage_hash),
-                "component_partition_hash": str(partition.partition_hash),
-                "mechanical_component_id": cid,
-                "artist_corner_payload_preserved": True,
-                "new_pixels_generated": False,
-            },
-        )
         projected.append(
-            ProjectedMechanicalComponentIR(
+            _subset_component(
                 component_id=cid,
-                source_face_indices=source_face_indices,
-                mesh=mesh,
-                mesh_skin=mesh_skin,
-                appearance=appearance,
+                rows=rows,
+                source_mesh=source_mesh,
+                source_mesh_skin=source_mesh_skin,
+                source_appearance=source_appearance,
+                mechanical=mechanical,
+                partition=partition,
             )
         )
 
-    retained_faces = sum(len(row.source_face_indices) for row in projected)
     source_face_count = len(source_mesh.faces)
-    if retained_faces + len(cross_faces) != source_face_count:
-        raise QualificationError("MECHANICAL_COMPONENT_MESH_FACE_ACCOUNTING_DRIFT")
+    rigid_overlay_face_count = sum(
+        len(row.source_face_indices)
+        for row in projected
+        if row.component_id != BODY_COMPONENT_ID
+    )
+    if len(projected[0].source_face_indices) != source_face_count:
+        raise QualificationError("MECHANICAL_COMPONENT_MESH_UNDERLAY_FACE_ACCOUNTING_DRIFT")
     return MechanicalComponentMeshProjectionIR(
         source_mesh_lineage_hash=str(source_mesh.mesh_lineage_hash),
         source_mesh_skin_lineage_hash=str(source_mesh_skin.mesh_skin_lineage_hash),
@@ -303,22 +359,28 @@ def project_mesh_to_mechanical_components(
         qualification_report={
             "passed": True,
             "source_face_count": source_face_count,
-            "retained_pure_face_count": retained_faces,
+            "underlay_face_count": source_face_count,
+            "source_face_coverage_fraction": 1.0,
+            "pure_body_face_count": int(pure_body_face_count),
+            "rigid_overlay_face_count": int(rigid_overlay_face_count),
             "cross_component_face_count": len(cross_faces),
             "ambiguous_vertex_count": len(ambiguous),
-            "face_accounting_fraction": 1.0,
             "boundary_completion_performed": False,
+            "boundary_faces_deleted": False,
             "teacher_truth_used": False,
             "new_geometry_generated": False,
         },
         metadata={
             "authority": "QUALIFIED_MECHANICAL_COMPONENT_PARTITION",
-            "cross_component_faces_are_explicit_unresolved_boundary_work": True,
+            "continuity_policy": "FULL_SOURCE_MESH_UNDERLAY_PLUS_EXACT_RIGID_PURE_FACE_OVERLAYS",
+            "cross_component_faces_remain_in_underlay": True,
+            "disjoint_render_face_partition_claimed": False,
         },
     )
 
 
 __all__ = [
+    "BODY_COMPONENT_ID",
     "ProjectedMechanicalComponentIR",
     "MechanicalComponentMeshProjectionIR",
     "project_mesh_to_mechanical_components",

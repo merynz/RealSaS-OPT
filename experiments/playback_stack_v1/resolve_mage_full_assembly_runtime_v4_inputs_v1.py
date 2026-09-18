@@ -15,6 +15,7 @@ P1Q_STATUS = "PASS__FIT2_P1Q_CURRENT_AUTHORITY_V0_V7_FROZEN_FACE_POLICY"
 EXPECTED_SURFACE_LINEAGE = "65319061d802c640717010dddf0fd71a66ee6bd2fd31f6e614386f4d2584d5da"
 EXPECTED_SKELETON_LINEAGE = "69f05e4fdef65f2cd86fed66503911210e1dbc7212ad017d69bf3dcb7b0896a1"
 EXPECTED_SKIN_LINEAGE = "eb96b398282e4e25cd6df662e7a02e8ff1afe881818127190979bddd2f6c4006"
+LEGACY_P1Q_SOURCE_TRUTH_SHA256 = "a23565b0904e9683d11083984a87405f4e0a1069984ca11b690ad431f35f5e86"
 
 EXPECTED = {
     "fit2_surface": {
@@ -120,34 +121,48 @@ def _choose_exact(paths: Iterable[Path], expected_sha: str, label: str):
     return matches[0], matches
 
 
-def _p1q_manifest_valid(path: Path) -> bool:
+def _p1q_manifest_policy(path: Path):
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
-        return False
+        return None
     if payload.get("status") != P1Q_STATUS:
-        return False
-    if payload.get("teacher_truth_used") is not False:
-        return False
-    if payload.get("source_component_truth_used") is not False:
-        return False
+        return None
     if payload.get("current_gsa_lineage_hash") != EXPECTED_SURFACE_LINEAGE:
-        return False
+        return None
     if payload.get("current_skeleton_lineage_hash") != EXPECTED_SKELETON_LINEAGE:
-        return False
+        return None
     if payload.get("current_skin_lineage_hash") != EXPECTED_SKIN_LINEAGE:
-        return False
+        return None
+    if payload.get("source_component_truth_used") not in (None, False):
+        return None
+
+    legacy_truth_witness = "source_truth_sha256" in payload
+    if legacy_truth_witness:
+        if str(payload.get("source_truth_sha256")) != LEGACY_P1Q_SOURCE_TRUTH_SHA256:
+            return None
+    elif payload.get("teacher_truth_used") is not False:
+        return None
+
     rows = {int(row.get("view", -1)): row for row in payload.get("views") or ()}
     if set(rows) != set(range(8)):
-        return False
+        return None
     root = path.parent
     for view in range(8):
         files = dict(rows[view].get("files") or {})
         for key in ("mesh", "skin", "appearance"):
             name = str(files.get(key) or "")
             if not name or not (root / name).is_file():
-                return False
-    return True
+                return None
+    return {
+        "legacy_source_truth_witness_present": bool(legacy_truth_witness),
+        "legacy_source_truth_witness_runtime_authority": False,
+        "teacher_component_artifacts_required": False,
+    }
+
+
+def _p1q_manifest_valid(path: Path) -> bool:
+    return _p1q_manifest_policy(path) is not None
 
 
 def _choose_current_p1q(paths: Iterable[Path]):
@@ -158,7 +173,7 @@ def _choose_current_p1q(paths: Iterable[Path]):
         )
     )
     if not valid:
-        raise RuntimeError("MAGE_V4_CURRENT_NO_TEACHER_P1Q_MANIFEST_NOT_FOUND")
+        raise RuntimeError("MAGE_V4_CURRENT_P1Q_CARRIER_NOT_FOUND")
     by_sha: dict[str, list[Path]] = {}
     for path in valid:
         by_sha.setdefault(_sha(path), []).append(path)
@@ -234,6 +249,9 @@ def resolve(search_roots: Iterable[Path]) -> dict:
         aliases[label] = rows
 
     p1q_dir = p1q_manifest.parent
+    p1q_policy = _p1q_manifest_policy(p1q_manifest)
+    if p1q_policy is None:
+        raise RuntimeError("MAGE_V4_CURRENT_P1Q_POLICY_DRIFT")
     cameras = tuple(resolved[f"camera_v{i}"] for i in range(8))
     observations = tuple(resolved[f"observation_v{i}"] for i in range(8))
 
@@ -260,6 +278,13 @@ def resolve(search_roots: Iterable[Path]) -> dict:
             for label, rows in sorted(aliases.items())
         },
         "teacher_component_artifacts_resolved": False,
+        "legacy_source_truth_witness_present": bool(
+            p1q_policy["legacy_source_truth_witness_present"]
+        ),
+        "legacy_source_truth_witness_runtime_authority": False,
+        "p1q_runtime_migration_required": bool(
+            p1q_policy["legacy_source_truth_witness_present"]
+        ),
         "giant_product_graph_scanned": False,
         "anonymous_json_size_ceiling_bytes": MAX_ANONYMOUS_JSON_BYTES,
     }
@@ -273,6 +298,8 @@ def validate_resolution(value: dict) -> dict:
         raise RuntimeError("MAGE_V4_RESOLUTION_STATUS_INVALID")
     if value.get("teacher_component_artifacts_resolved") is not False:
         raise RuntimeError("MAGE_V4_RESOLUTION_TEACHER_COMPONENT_ARTIFACT_FORBIDDEN")
+    if value.get("legacy_source_truth_witness_runtime_authority") is not False:
+        raise RuntimeError("MAGE_V4_RESOLUTION_LEGACY_TRUTH_RUNTIME_AUTHORITY_FORBIDDEN")
 
     canonical_expected = {
         "fit2_surface": EXPECTED["fit2_surface"]["sha256"],

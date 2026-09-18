@@ -20,7 +20,11 @@
     "minimum_rest_triangle_angle_deg": 7.5,
     "maximum_rest_aspect_longest_edge_over_min_altitude": 16,
     "calibration_result": "canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_RESULT_20260918.json",
-    "note": "Subject-free numerical floor. Dynamic envelope stress proof remains independently required."
+    "note": "Subject-free numerical floor. Dynamic envelope stress proof remains independently required.",
+    "minimum_dynamic_area_ratio": 0.05,
+    "maximum_dynamic_area_ratio": 20,
+    "maximum_dynamic_condition_number": 16,
+    "dynamic_note": "Stage-27 numerical conditioning bounds only. They reject severe LBS collapse/explosion/ill-conditioning under the frozen envelope; professional motion quality remains a later proof."
   },
   "g5": {
     "MESH": {

@@ -99,6 +99,9 @@ class MeshQualificationPolicyIR:
     g3_max_aspect_longest_over_min_altitude: float
     coverage_thresholds: tuple[CarrierCoverageThresholdIR, ...]
     qualification_policy_lineage_hash: str
+    g3_min_dynamic_area_ratio: float = 0.05
+    g3_max_dynamic_area_ratio: float = 20.0
+    g3_max_dynamic_condition_number: float = 16.0
     schema_version: str = "RealSaS.MeshQualificationPolicyIR.v1"
     metadata: Json = field(default_factory=dict)
     def to_dict(self): return asdict(self)
@@ -355,6 +358,9 @@ def validate_mesh_qualification_policy(value: MeshQualificationPolicyIR) -> None
         value.g1_max_tangential_to_normal_ratio,
         value.g3_min_angle_deg,
         value.g3_max_aspect_longest_over_min_altitude,
+        value.g3_min_dynamic_area_ratio,
+        value.g3_max_dynamic_area_ratio,
+        value.g3_max_dynamic_condition_number,
     )
     if any(not math.isfinite(float(x)) for x in scalars):
         raise QualificationError("MESH_QUALIFICATION_POLICY_NONFINITE")
@@ -366,6 +372,12 @@ def validate_mesh_qualification_policy(value: MeshQualificationPolicyIR) -> None
         raise QualificationError("MESH_QUALIFICATION_POLICY_WEAKER_THAN_G3_ASPECT_FLOOR")
     if value.g3_max_aspect_longest_over_min_altitude <= 0.0:
         raise QualificationError("MESH_QUALIFICATION_POLICY_G3_INVALID")
+    if value.g3_min_dynamic_area_ratio <= 0.0 or value.g3_min_dynamic_area_ratio > 1.0:
+        raise QualificationError("MESH_QUALIFICATION_POLICY_G3_DYNAMIC_AREA_MIN_INVALID")
+    if value.g3_max_dynamic_area_ratio < 1.0 or value.g3_max_dynamic_area_ratio < value.g3_min_dynamic_area_ratio:
+        raise QualificationError("MESH_QUALIFICATION_POLICY_G3_DYNAMIC_AREA_MAX_INVALID")
+    if value.g3_max_dynamic_condition_number < 1.0:
+        raise QualificationError("MESH_QUALIFICATION_POLICY_G3_DYNAMIC_CONDITION_INVALID")
     thresholds = {}
     for row in value.coverage_thresholds:
         if row.carrier_class not in PRODUCT_GEOMETRY_CARRIER_CLASSES or row.carrier_class in thresholds:
@@ -385,7 +397,7 @@ def validate_mesh_qualification_policy(value: MeshQualificationPolicyIR) -> None
         raise QualificationError("MESH_QUALIFICATION_POLICY_LINEAGE_HASH_MISMATCH")
 
 
-def build_mesh_qualification_policy(*, g1_max_normal_refinement_ratio, g1_max_tangential_to_normal_ratio, g3_min_angle_deg, g3_max_aspect_longest_over_min_altitude, coverage_thresholds, metadata=None) -> MeshQualificationPolicyIR:
+def build_mesh_qualification_policy(*, g1_max_normal_refinement_ratio, g1_max_tangential_to_normal_ratio, g3_min_angle_deg, g3_max_aspect_longest_over_min_altitude, coverage_thresholds, g3_min_dynamic_area_ratio=0.05, g3_max_dynamic_area_ratio=20.0, g3_max_dynamic_condition_number=16.0, metadata=None) -> MeshQualificationPolicyIR:
     value = MeshQualificationPolicyIR(
         float(g1_max_normal_refinement_ratio),
         float(g1_max_tangential_to_normal_ratio),
@@ -393,6 +405,9 @@ def build_mesh_qualification_policy(*, g1_max_normal_refinement_ratio, g1_max_ta
         float(g3_max_aspect_longest_over_min_altitude),
         tuple(coverage_thresholds),
         "",
+        float(g3_min_dynamic_area_ratio),
+        float(g3_max_dynamic_area_ratio),
+        float(g3_max_dynamic_condition_number),
         metadata=dict(metadata or {}),
     )
     value = replace(value, qualification_policy_lineage_hash=mesh_qualification_policy_lineage_hash(value))
@@ -700,6 +715,8 @@ def validate_qualified_mesh(value: QualifiedMeshIR, *, surface, partition, carri
         raise QualificationError("QUALIFIED_MESH_G3_ENVELOPE_BINDING_MISMATCH")
     if not value.qualification_report.get("g3_stress_probe_hash"):
         raise QualificationError("QUALIFIED_MESH_G3_STRESS_PROBE_MISSING")
+    if value.qualification_report.get("g3_stress_probe_status") != "PASS":
+        raise QualificationError("QUALIFIED_MESH_G3_STRESS_PROBE_NOT_PASS")
     if int(value.qualification_report.get("consequential_unknown_boundary_count", -1)) != 0:
         raise QualificationError("QUALIFIED_MESH_CONSEQUENTIAL_UNKNOWN_BOUNDARY")
     if any(row.decision == "UNKNOWN" for row in partition.boundary_constraints):

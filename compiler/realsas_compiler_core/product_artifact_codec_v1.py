@@ -234,6 +234,9 @@ def mesh_policy_from_dict(payload: Json) -> MeshQualificationPolicyIR:
             for row in (payload.get("coverage_thresholds") or ())
         ),
         qualification_policy_lineage_hash=str(payload["qualification_policy_lineage_hash"]),
+        g3_min_dynamic_area_ratio=float(payload.get("g3_min_dynamic_area_ratio", 0.05)),
+        g3_max_dynamic_area_ratio=float(payload.get("g3_max_dynamic_area_ratio", 20.0)),
+        g3_max_dynamic_condition_number=float(payload.get("g3_max_dynamic_condition_number", 16.0)),
         schema_version=str(payload.get("schema_version") or "RealSaS.MeshQualificationPolicyIR.v1"),
         metadata=dict(payload.get("metadata") or {}),
     )

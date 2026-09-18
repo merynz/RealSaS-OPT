@@ -432,6 +432,8 @@ def validate_deformation_capability_envelope(value: DeformationCapabilityEnvelop
             raise QualificationError("DEFORMATION_ENVELOPE_NONFINITE")
         if row.min_rotation_deg > row.max_rotation_deg or row.translation_radius < 0 or row.min_scale <= 0 or row.min_scale > row.max_scale:
             raise QualificationError("DEFORMATION_ENVELOPE_RANGE_INVALID")
+    if known_joint_ids is not None and seen != set(known_joint_ids):
+        raise QualificationError("DEFORMATION_ENVELOPE_INCOMPLETE_JOINT_ACCOUNTING")
     if value.envelope_lineage_hash != deformation_envelope_lineage_hash(value):
         raise QualificationError("DEFORMATION_ENVELOPE_LINEAGE_HASH_MISMATCH")
 

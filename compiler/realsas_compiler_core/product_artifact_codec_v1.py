@@ -33,6 +33,8 @@ from .product_authority_v1 import (
 from .types import (
     QualifiedJoint,
     QualifiedSkeletonIR,
+    QualifiedSkinIR,
+    QualifiedSkinRow,
     RiggingSurfaceIR,
     SurfaceNode,
     SurfaceRelation,
@@ -136,6 +138,26 @@ def qualified_skeleton_from_dict(payload: Json) -> QualifiedSkeletonIR:
         qualification_report=dict(payload.get("qualification_report") or {}),
         skeleton_lineage_hash=str(payload["skeleton_lineage_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedSkeletonIR.v1"),
+    )
+
+
+def qualified_skin_from_dict(payload: Json) -> QualifiedSkinIR:
+    _schema(payload, "RealSaS.QualifiedSkinIR.v1")
+    return QualifiedSkinIR(
+        rows=tuple(
+            QualifiedSkinRow(
+                surface_id=str(row["surface_id"]),
+                influences=tuple((str(jid), float(weight)) for jid, weight in (row.get("influences") or ())),
+                simplex_residual_before=float(row.get("simplex_residual_before", 0.0)),
+                correction_l1=float(row.get("correction_l1", 0.0)),
+            )
+            for row in (payload.get("rows") or ())
+        ),
+        surface_binding_hash=str(payload["surface_binding_hash"]),
+        skeleton_binding_hash=str(payload["skeleton_binding_hash"]),
+        qualification_report=dict(payload.get("qualification_report") or {}),
+        skin_lineage_hash=str(payload["skin_lineage_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedSkinIR.v1"),
     )
 
 

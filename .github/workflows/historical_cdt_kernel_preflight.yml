@@ -44,4 +44,15 @@ jobs:
               name for name in module.__dict__
               if not name.startswith("_") and ("Point" in name or "Triang" in name or "CDT" in name)
           ))
+          sample = fn(
+              [(0.0,0.0),(1.0,0.0),(1.0,1.0),(0.0,1.0)],
+              target_min_angle_deg=7.5,
+              max_quality_iterations=0,
+          )
+          print("HISTORICAL_CDT_SAMPLE_SUCCESS=", sample.success)
+          print("HISTORICAL_CDT_SAMPLE_VERTICES=", sample.vertices)
+          print("HISTORICAL_CDT_SAMPLE_TRIANGLES=", sample.triangles)
+          print("HISTORICAL_CDT_SAMPLE_CONSTRAINT_EDGES=", sample.constraint_edges)
+          print("HISTORICAL_CDT_SAMPLE_COUNTS=", sample.boundary_vertex_count, sample.support_vertex_count, sample.inserted_steiner_count)
+          print("HISTORICAL_CDT_SAMPLE_REASON=", sample.reason)
           PY

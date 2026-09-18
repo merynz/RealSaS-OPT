@@ -24,6 +24,14 @@ int main() {
     const bool t1 = cover_pixel_center(q0, q2, q3, 0, 0).covered;
     assert(t0 != t1);
 
+    // Reversing winding must preserve coverage when culling is disabled.
+    const auto inside_reversed = cover_pixel_center(c, b, a, 0, 0);
+    assert(inside_reversed.covered);
+    assert(std::abs((inside_reversed.w0 + inside_reversed.w1 + inside_reversed.w2) - 1.0f) < 1e-6f);
+
+    // The shared-edge sample is owned by exactly one triangle: no crack and no double hit.
+    assert((t0 ? 1 : 0) + (t1 ? 1 : 0) == 1);
+
     // Smaller camera-forward depth wins independent of semantic submission.
     DepthSample depth{};
     assert(depth_test_passes(depth, 3.0f, 10));

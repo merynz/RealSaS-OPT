@@ -364,6 +364,27 @@ def qualify_component_assembly(
     return value
 
 
+def _directional_component_authority_signature(directional_renderables):
+    rows = []
+    for direction in sorted(
+        directional_renderables.directions,
+        key=lambda row: int(row.view_index),
+    ):
+        for component in sorted(
+            direction.components,
+            key=lambda row: (int(row.setup_order), str(row.component_id)),
+        ):
+            rows.append((
+                int(direction.view_index),
+                str(component.component_id),
+                str(component.component_state_hash),
+                str(component.mesh.mesh_lineage_hash),
+                str(component.mesh_skin.mesh_skin_lineage_hash),
+                str(component.appearance.appearance_lineage_hash),
+            ))
+    return tuple(rows)
+
+
 def bind_component_assembly_to_directional_renderable_set(
     directional_renderables,
     component_assembly: QualifiedComponentAssemblyIR,
@@ -380,9 +401,25 @@ def bind_component_assembly_to_directional_renderable_set(
         skeleton,
         directional_renderables=directional_renderables,
     )
+    before_authority = _directional_component_authority_signature(
+        directional_renderables
+    )
     metadata = dict(getattr(directional_renderables, "metadata", {}) or {})
     metadata["qualified_component_assembly"] = component_assembly.to_dict()
     metadata["component_assembly_hash"] = component_assembly.component_assembly_hash
     metadata["component_assembly_authority"] = "COMPILER_QUALIFIED_TYPED_ATTACHMENT_V1"
-    rebound = replace(directional_renderables, directional_visual_state_hash="", metadata=metadata)
-    return replace(rebound, directional_visual_state_hash=directional_visual_state_hash(rebound))
+    rebound = replace(
+        directional_renderables,
+        directional_visual_state_hash="",
+        metadata=metadata,
+    )
+    rebound = replace(
+        rebound,
+        directional_visual_state_hash=directional_visual_state_hash(rebound),
+    )
+    after_authority = _directional_component_authority_signature(rebound)
+    if after_authority != before_authority:
+        raise QualificationError(
+            "COMPONENT_ASSEMBLY_MUTATED_DIRECTIONAL_COMPONENT_AUTHORITY"
+        )
+    return rebound

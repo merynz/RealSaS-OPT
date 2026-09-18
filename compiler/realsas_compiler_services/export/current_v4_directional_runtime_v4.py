@@ -189,6 +189,79 @@ def _native_uv(
     )
 
 
+def _cross2(ax, ay, bx, by):
+    return ax * by - ay * bx
+
+
+def _assert_runtime_interpolation_triangle_safety(
+    bake: QualificationOwnedMotionBakeIR,
+    *,
+    area2_epsilon: float = 1.0e-9,
+) -> None:
+    triangles_by_mesh = dict(bake.triangles_by_mesh_id)
+    frames = tuple(bake.frames)
+    if len(frames) < 2:
+        return
+    eps = float(area2_epsilon)
+    for frame_index, (left, right) in enumerate(zip(frames[:-1], frames[1:])):
+        left_meshes = dict(left.mesh_vertices_by_id)
+        right_meshes = dict(right.mesh_vertices_by_id)
+        for mesh_id, triangles in triangles_by_mesh.items():
+            p0 = np.asarray(left_meshes.get(mesh_id, ()), dtype=np.float64)
+            p1 = np.asarray(right_meshes.get(mesh_id, ()), dtype=np.float64)
+            tri = np.asarray(triangles, dtype=np.int64)
+            if p0.shape != p1.shape or p0.ndim != 2 or p0.shape[1:] != (2,):
+                raise QualificationError(
+                    f"DIRECTIONAL_ASSEMBLY_INTERPOLATION_MESH_DRIFT:{mesh_id}"
+                )
+            if tri.size == 0:
+                continue
+            a0 = p0[tri[:, 0]]
+            b0 = p0[tri[:, 1]]
+            c0p = p0[tri[:, 2]]
+            da = p1[tri[:, 0]] - a0
+            db = p1[tri[:, 1]] - b0
+            dc = p1[tri[:, 2]] - c0p
+
+            e10 = b0 - a0
+            e20 = c0p - a0
+            de1 = db - da
+            de2 = dc - da
+
+            q0 = e10[:, 0] * e20[:, 1] - e10[:, 1] * e20[:, 0]
+            q1 = (
+                de1[:, 0] * e20[:, 1] - de1[:, 1] * e20[:, 0]
+                + e10[:, 0] * de2[:, 1] - e10[:, 1] * de2[:, 0]
+            )
+            q2 = de1[:, 0] * de2[:, 1] - de1[:, 1] * de2[:, 0]
+            qend = q0 + q1 + q2
+
+            if np.any(np.abs(q0) <= eps) or np.any(np.abs(qend) <= eps):
+                raise QualificationError(
+                    f"DIRECTIONAL_ASSEMBLY_RUNTIME_ENDPOINT_TRIANGLE_DEGENERATE:{mesh_id}:F{frame_index}"
+                )
+            sign = np.where(q0 > 0.0, 1.0, -1.0)
+            if np.any(sign * qend <= eps):
+                raise QualificationError(
+                    f"DIRECTIONAL_ASSEMBLY_RUNTIME_INTERFRAME_TRIANGLE_FLIP:{mesh_id}:F{frame_index}"
+                )
+
+            curved = np.abs(q2) > eps
+            alpha_star = np.zeros_like(q0)
+            alpha_star[curved] = -q1[curved] / (2.0 * q2[curved])
+            interior = curved & (alpha_star > 0.0) & (alpha_star < 1.0)
+            if np.any(interior):
+                qstar = (
+                    q0[interior]
+                    + q1[interior] * alpha_star[interior]
+                    + q2[interior] * alpha_star[interior] ** 2
+                )
+                if np.any(sign[interior] * qstar <= eps):
+                    raise QualificationError(
+                        f"DIRECTIONAL_ASSEMBLY_RUNTIME_INTERFRAME_TRIANGLE_COLLAPSE:{mesh_id}:F{frame_index}"
+                    )
+
+
 def _asset_from_component(
     direction,
     component,
@@ -346,6 +419,7 @@ def project_directional_product_bakes_to_runtime_v4(
             source_product_state_hash=product.product_state_hash,
             proof_plan_hash=bake.proof_plan_hash,
         )
+        _assert_runtime_interpolation_triangle_safety(bake)
     reference = bakes[0]
     ref_rest = dict(reference.rest_mesh_vertices_by_id)
 

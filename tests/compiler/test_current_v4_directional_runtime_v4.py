@@ -149,6 +149,7 @@ def _fixture(
     pinched_body: bool = False,
     cross_view_body_v0: bool = False,
     mixed_body_face_donors_v0: bool = False,
+    collapse_body_between_frames: bool = False,
 ):
     textures = tuple(_texture(i) for i in range(2))
     directions = []
@@ -237,6 +238,18 @@ def _fixture(
             mesh_id: tuple((x + delta, y + 0.25 * delta) for x, y in points)
             for mesh_id, points in rest.items()
         }
+        if collapse_body_between_frames and time_seconds == 1.0:
+            for view in range(2):
+                mesh_id = f"V{view}:{BODY}"
+                points = rest[mesh_id]
+                anchor_x, anchor_y = points[0]
+                meshes[mesh_id] = tuple(
+                    (
+                        anchor_x - (x - anchor_x),
+                        anchor_y - (y - anchor_y),
+                    )
+                    for x, y in points
+                )
         orders = {
             f"V{view}": (
                 (f"V{view}:{BODY}", f"V{view}:{FG}")
@@ -363,6 +376,24 @@ def test_directional_projection_rejects_mixed_donor_triangle_fail_closed():
     with pytest.raises(
         QualificationError,
         match="DIRECTIONAL_ASSEMBLY_FACE_DONOR_MUST_BE_UNIFORM",
+    ):
+        project_directional_product_bakes_to_runtime_v4(
+            product=product,
+            motion_bakes=bakes,
+            texture_bindings=textures,
+            cameras=cameras,
+            required_view_ids=VIEWS,
+            body_component_id=BODY,
+        )
+
+
+def test_runtime_projection_rejects_interframe_triangle_collapse_even_when_endpoints_keep_winding():
+    product, bakes, textures, cameras = _fixture(
+        collapse_body_between_frames=True,
+    )
+    with pytest.raises(
+        QualificationError,
+        match="RUNTIME_INTERFRAME_TRIANGLE_COLLAPSE",
     ):
         project_directional_product_bakes_to_runtime_v4(
             product=product,

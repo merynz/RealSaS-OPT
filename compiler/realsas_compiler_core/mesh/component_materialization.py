@@ -499,9 +499,24 @@ def materialize_mechanical_component_view(
         policy=FIT2_PRODUCT_MESH_QUALITY_POLICY_V1,
     )
     if require_product_mesh_quality and coverage_failures:
+        component_diag = ";".join(
+            (
+                f"{cid}:faces={component_reports[cid]['face_count']}:"
+                f"diag_recall={component_reports[cid]['source_alpha_recall_diagnostic_only']}:"
+                f"sliver_removed={len(component_reports[cid]['sliver_face_subset_repair']['removed_face_indices'])}"
+            )
+            for cid in sorted(component_reports)
+        )
         raise QualificationError(
             "MECHANICAL_COMPONENT_MATERIALIZATION_UNION_COVERAGE_FAIL:"
-            f"V{view_index}:{','.join(coverage_failures)}"
+            f"V{view_index}:{','.join(coverage_failures)}:"
+            f"recall={union_coverage['source_alpha_recall']}:"
+            f"precision={union_coverage['precision_inside_alpha']}:"
+            f"iou={union_coverage['alpha_iou']}:"
+            f"largest_hole={union_coverage['largest_uncovered_component_fraction']}:"
+            f"predicted_pixels={union_coverage['predicted_pixel_count']}:"
+            f"foreground_pixels={union_coverage['foreground_pixel_count']}:"
+            f"components={component_diag}"
         )
 
     provisional = MechanicalComponentViewMaterializationIR(

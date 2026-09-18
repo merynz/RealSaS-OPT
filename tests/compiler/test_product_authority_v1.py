@@ -81,9 +81,8 @@ def _mesh_policy(*, mesh_recall=0.0):
         g3_min_angle_deg=7.5,
         g3_max_aspect_longest_over_min_altitude=16.0,
         coverage_thresholds=(
-            CarrierCoverageThresholdIR("MESH", mesh_recall, 0.0, 1.0),
-            CarrierCoverageThresholdIR("PLANAR", 0.0, 0.0, 1.0),
-            CarrierCoverageThresholdIR("CLIP", 0.0, 0.0, 1.0),
+            CarrierCoverageThresholdIR("MESH", mesh_recall, 0.0, 1.0, 1.0),
+            CarrierCoverageThresholdIR("PLANAR", 0.0, 0.0, 1.0, 1.0),
         ),
         metadata={"test_only_thresholds": True},
     )
@@ -147,6 +146,7 @@ def _valid_mesh(surface, partition, carrier_policy, envelope, policy):
                 "recall": 1.0,
                 "precision": 1.0,
                 "largest_coherent_hole_fraction": 0.0,
+                "interior_uncovered_fraction": 0.0,
                 "status": "PASS",
             }
             for view in range(8)
@@ -262,9 +262,8 @@ def test_g3_policy_cannot_be_weaker_than_subject_free_calibration_floor():
             g3_min_angle_deg=5.0,
             g3_max_aspect_longest_over_min_altitude=16.0,
             coverage_thresholds=(
-                CarrierCoverageThresholdIR("MESH", 0.0, 0.0, 1.0),
-                CarrierCoverageThresholdIR("PLANAR", 0.0, 0.0, 1.0),
-                CarrierCoverageThresholdIR("CLIP", 0.0, 0.0, 1.0),
+                CarrierCoverageThresholdIR("MESH", 0.0, 0.0, 1.0, 1.0),
+                CarrierCoverageThresholdIR("PLANAR", 0.0, 0.0, 1.0, 1.0),
             ),
         )
 
@@ -355,6 +354,7 @@ def test_candidate_promotion_is_deterministic_and_compiler_mints_intrinsic_audit
                 "recall": 1.0,
                 "precision": 1.0,
                 "largest_coherent_hole_fraction": 0.0,
+                "interior_uncovered_fraction": 0.0,
                 "status": "PASS",
             }
             for view in range(8)
@@ -383,3 +383,35 @@ def test_candidate_promotion_is_deterministic_and_compiler_mints_intrinsic_audit
     assert mesh_a.mesh_lineage_hash == mesh_b.mesh_lineage_hash
     assert mesh_a.qualification_report["intrinsic_audit_hash"] != "CALLER_MUST_NOT_CONTROL_THIS"
     assert all(v.canonical_mesh_vertex_id.startswith("MV:") for v in mesh_a.vertices)
+
+
+def test_mechanical_carrier_policy_cannot_use_presentation_only_clip_class():
+    surface = _surface()
+    partition = _partition(surface)
+    with pytest.raises(QualificationError, match="CARRIER_POLICY_DECISION_INVALID"):
+        _carrier_policy(partition, c0="CLIP", c1="MESH")
+
+
+def test_g5_interior_uncovered_metric_is_a_hard_gate_against_peppering():
+    surface, partition, carrier_policy, envelope, _ = _context()
+    policy = build_mesh_qualification_policy(
+        g1_max_normal_refinement_ratio=0.125,
+        g1_max_tangential_to_normal_ratio=0.25,
+        g3_min_angle_deg=7.5,
+        g3_max_aspect_longest_over_min_altitude=16.0,
+        coverage_thresholds=(
+            CarrierCoverageThresholdIR("MESH", 0.97, 0.995, 0.005, 0.005),
+            CarrierCoverageThresholdIR("PLANAR", 0.99, 0.995, 0.0025, 0.0025),
+        ),
+        metadata={"policy_id": "QUALIFIED_MESH_PRODUCT_POLICY_V1_TEST"},
+    )
+    good = _valid_mesh(surface, partition, carrier_policy, envelope, policy)
+    rows = list(good.qualification_report["view_component_coverage"])
+    rows[0] = {**rows[0], "interior_uncovered_fraction": 0.006, "status": "PASS"}
+    bad = replace(good, qualification_report={**good.qualification_report, "view_component_coverage": tuple(rows)}, mesh_lineage_hash="")
+    bad = replace(bad, mesh_lineage_hash=qualified_mesh_lineage_hash(bad))
+    with pytest.raises(QualificationError, match="INTERIOR_UNCOVERED_FAIL"):
+        validate_qualified_mesh(
+            bad, surface=surface, partition=partition, carrier_policy=carrier_policy,
+            envelope=envelope, policy=policy,
+        )

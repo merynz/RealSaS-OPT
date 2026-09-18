@@ -1,0 +1,45 @@
+{
+  "schema": "RealSaS.QualifiedMeshProductPolicy.v1",
+  "status": "FROZEN_BEFORE_KNIGHT_QUALIFIED_MESH_RESULT",
+  "authority": "NORMATIVE_PRODUCT_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_FIT",
+  "claim_boundary": "These are product admission thresholds. They do not claim current Knight or Mage compliance and may only be tightened after result inspection, never relaxed to convert a failure into PASS.",
+  "metric_domain": {
+    "coverage_unit": "(authoritative_view, admitted_component, frozen_product_geometry_carrier_class)",
+    "recall": "intersection(rendered_component_alpha, source_component_alpha) / source_component_alpha",
+    "precision": "intersection(rendered_component_alpha, source_component_alpha) / rendered_component_alpha",
+    "largest_coherent_hole_fraction": "largest 4-connected uncovered source-component region / source_component_foreground_area",
+    "interior_uncovered_fraction": "uncovered source-component foreground outside the one-reference-pixel alpha boundary band / interior_source_component_foreground_area"
+  },
+  "g1": {
+    "max_normal_refinement_ratio_of_local_scale": 0.125,
+    "max_tangential_to_normal_ratio": 0.25,
+    "component_membership_change_forbidden": true,
+    "cross_component_support_forbidden": true
+  },
+  "g3": {
+    "minimum_rest_triangle_angle_deg": 7.5,
+    "maximum_rest_aspect_longest_edge_over_min_altitude": 16,
+    "calibration_result": "canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_RESULT_20260918.json",
+    "note": "Subject-free numerical floor. Dynamic envelope stress proof remains independently required."
+  },
+  "g5": {
+    "MESH": {
+      "min_recall": 0.97,
+      "min_precision": 0.995,
+      "max_largest_coherent_hole_fraction": 0.005,
+      "max_interior_uncovered_fraction": 0.005
+    },
+    "PLANAR": {
+      "min_recall": 0.99,
+      "min_precision": 0.995,
+      "max_largest_coherent_hole_fraction": 0.0025,
+      "max_interior_uncovered_fraction": 0.0025
+    }
+  },
+  "rationale": [
+    "Thresholds are frozen before inspecting a Knight QualifiedMesh result.",
+    "Historical FIT2 aggregate coverage thresholds are not reused as outcome-fitted percentiles; the new unit is view x admitted component with explicit anti-peppering evidence.",
+    "PLANAR carriers receive stricter visible coverage because their product geometry is intentionally source-facing rather than volumetric.",
+    "CLIP is excluded from product-geometry carrier qualification and remains a QualifiedPresentationGraph mask semantic."
+  ]
+}

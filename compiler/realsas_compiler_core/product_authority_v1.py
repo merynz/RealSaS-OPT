@@ -11,7 +11,8 @@ from .types import QualificationError, RiggingSurfaceIR, SurfaceSupportBinding, 
 Json = dict[str, Any]
 BOUNDARY_DECISIONS = {"SEPARATE", "PRESERVE_CONTINUITY", "UNKNOWN"}
 MECHANICAL_CLASSES = {"RIGID", "DEFORMABLE"}
-CARRIER_CLASSES = {"MESH", "PLANAR", "CLIP"}
+PRODUCT_GEOMETRY_CARRIER_CLASSES = {"MESH", "PLANAR"}
+PRESENTATION_CARRIER_CLASSES = {"MESH", "PLANAR", "CLIP"}
 PRESENTATION_EVIDENCE_CLASSES = {
     "MECHANICAL", "OBSERVATION_REST", "POSED_GEOMETRY",
     "MOTION_OVERRIDE", "SOURCE_APPEARANCE",
@@ -86,6 +87,7 @@ class CarrierCoverageThresholdIR:
     min_recall: float
     min_precision: float
     max_largest_coherent_hole_fraction: float
+    max_interior_uncovered_fraction: float
     def to_dict(self): return asdict(self)
 
 
@@ -326,7 +328,7 @@ def validate_component_carrier_policy(value: ComponentCarrierPolicyIR, partition
         if row.component_id not in component_ids or row.component_id in seen:
             raise QualificationError("CARRIER_POLICY_COMPONENT_INVALID")
         seen.add(row.component_id)
-        if row.carrier_class not in CARRIER_CLASSES or not row.evidence_refs:
+        if row.carrier_class not in PRODUCT_GEOMETRY_CARRIER_CLASSES or not row.evidence_refs:
             raise QualificationError("CARRIER_POLICY_DECISION_INVALID")
     if seen != component_ids:
         raise QualificationError("CARRIER_POLICY_INCOMPLETE_COMPONENT_ACCOUNTING")
@@ -365,13 +367,18 @@ def validate_mesh_qualification_policy(value: MeshQualificationPolicyIR) -> None
         raise QualificationError("MESH_QUALIFICATION_POLICY_G3_INVALID")
     thresholds = {}
     for row in value.coverage_thresholds:
-        if row.carrier_class not in CARRIER_CLASSES or row.carrier_class in thresholds:
+        if row.carrier_class not in PRODUCT_GEOMETRY_CARRIER_CLASSES or row.carrier_class in thresholds:
             raise QualificationError("MESH_QUALIFICATION_POLICY_G5_CARRIER_INVALID")
-        vals = (row.min_recall, row.min_precision, row.max_largest_coherent_hole_fraction)
+        vals = (
+            row.min_recall,
+            row.min_precision,
+            row.max_largest_coherent_hole_fraction,
+            row.max_interior_uncovered_fraction,
+        )
         if any(not math.isfinite(float(x)) or float(x) < 0.0 or float(x) > 1.0 for x in vals):
             raise QualificationError("MESH_QUALIFICATION_POLICY_G5_THRESHOLD_INVALID")
         thresholds[row.carrier_class] = row
-    if set(thresholds) != CARRIER_CLASSES:
+    if set(thresholds) != PRODUCT_GEOMETRY_CARRIER_CLASSES:
         raise QualificationError("MESH_QUALIFICATION_POLICY_REQUIRES_ALL_CARRIER_CLASSES")
     if value.qualification_policy_lineage_hash != mesh_qualification_policy_lineage_hash(value):
         raise QualificationError("MESH_QUALIFICATION_POLICY_LINEAGE_HASH_MISMATCH")
@@ -626,7 +633,7 @@ def _validate_g5_matrix(report: Json, *, component_ids: set[str], carrier_policy
         except Exception as exc:
             raise QualificationError("QUALIFIED_MESH_G5_MATRIX_ROW_INVALID") from exc
         key = (view, component_id)
-        if key in actual or key not in expected or carrier not in CARRIER_CLASSES:
+        if key in actual or key not in expected or carrier not in PRODUCT_GEOMETRY_CARRIER_CLASSES:
             raise QualificationError("QUALIFIED_MESH_G5_MATRIX_ROW_INVALID")
         actual.add(key)
         if carrier_by_component.get(component_id) != carrier:
@@ -634,7 +641,8 @@ def _validate_g5_matrix(report: Json, *, component_ids: set[str], carrier_policy
         recall = float(row.get("recall", float("nan")))
         precision = float(row.get("precision", float("nan")))
         hole = float(row.get("largest_coherent_hole_fraction", float("nan")))
-        if any(not math.isfinite(x) or x < 0.0 or x > 1.0 for x in (recall, precision, hole)):
+        interior = float(row.get("interior_uncovered_fraction", float("nan")))
+        if any(not math.isfinite(x) or x < 0.0 or x > 1.0 for x in (recall, precision, hole, interior)):
             raise QualificationError("QUALIFIED_MESH_G5_METRIC_INVALID")
         threshold = thresholds[carrier]
         if recall + 1e-12 < threshold.min_recall:
@@ -643,6 +651,8 @@ def _validate_g5_matrix(report: Json, *, component_ids: set[str], carrier_policy
             raise QualificationError("QUALIFIED_MESH_G5_PRECISION_FAIL")
         if hole - 1e-12 > threshold.max_largest_coherent_hole_fraction:
             raise QualificationError("QUALIFIED_MESH_G5_COHERENT_HOLE_FAIL")
+        if interior - 1e-12 > threshold.max_interior_uncovered_fraction:
+            raise QualificationError("QUALIFIED_MESH_G5_INTERIOR_UNCOVERED_FAIL")
         if row.get("status") != "PASS":
             raise QualificationError("QUALIFIED_MESH_G5_CELL_NOT_PASS")
     if actual != expected:
@@ -849,11 +859,11 @@ def validate_qualified_presentation_graph(value: QualifiedPresentationGraphIR, *
         attachment_ids.add(attachment.attachment_id)
         if attachment.slot_id not in slot_set:
             raise QualificationError("PRESENTATION_ATTACHMENT_SLOT_INVALID")
-        if attachment.mechanical_class not in MECHANICAL_CLASSES or attachment.carrier_class not in CARRIER_CLASSES:
+        if attachment.mechanical_class not in MECHANICAL_CLASSES or attachment.carrier_class not in PRESENTATION_CARRIER_CLASSES:
             raise QualificationError("PRESENTATION_ATTACHMENT_CLASS_INVALID")
         if not attachment.mechanical_component_ids or not attachment.carrier_binding_hash:
             raise QualificationError("PRESENTATION_ATTACHMENT_BINDING_MISSING")
-        if expected_carrier is not None:
+        if expected_carrier is not None and attachment.carrier_class != "CLIP":
             for component_id in attachment.mechanical_component_ids:
                 if expected_carrier.get(component_id) != attachment.carrier_class:
                     raise QualificationError("PRESENTATION_ATTACHMENT_CARRIER_POLICY_DRIFT")

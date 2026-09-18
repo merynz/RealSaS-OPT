@@ -1,7 +1,7 @@
 from __future__ import annotations
 import json
 from pathlib import Path
-from compiler.realsas_compiler_services.orchestrator.mainline import content_sha256,status_text,validate_ledger,validate_plan
+from compiler.realsas_compiler_services.orchestrator.mainline import _dependency_blockers,content_sha256,status_text,validate_ledger,validate_plan
 ROOT=Path(__file__).resolve().parents[2]
 def load(rel): return json.loads((ROOT/rel).read_text(encoding="utf-8"))
 def test_plan_is_exact_40_stage_subject_agnostic_contract():
@@ -23,3 +23,17 @@ def test_motion_manifest_scope_does_not_touch_iris_or_skin():
 def test_policy_hash_changes_on_semantic_change():
     plan=load("canonical/MAINLINE_EXECUTION_PLAN_V1.json"); policy=dict(plan["stages"][0]["policy"]); before=content_sha256(policy); policy["cacheable"]=False
     assert content_sha256(policy)!=before
+
+def test_stage_cannot_execute_past_unpassed_or_stale_dependency(tmp_path):
+    plan=load("canonical/MAINLINE_EXECUTION_PLAN_V1.json")
+    ledger=load("canonical/ACTIVE_RUN_V1.json")
+    stage=next(x for x in plan["stages"] if x["id"]=="24_MECHANICAL_PARTITION_QUALIFIED")
+    dep=next(x for x in ledger["stages"] if x["id"]=="23_ARACHNE_CHECKPOINT_SEALED")
+    assert _dependency_blockers(stage,ledger)==["DEPENDENCY_NOT_PASS:23_ARACHNE_CHECKPOINT_SEALED:PENDING"]
+    artifact=tmp_path/"sealed.json"; artifact.write_text("{}\n",encoding="utf-8")
+    import hashlib
+    dep["status"]="PASS"
+    dep["outputs"]=[{"path":str(artifact),"sha256":hashlib.sha256(artifact.read_bytes()).hexdigest()}]
+    assert _dependency_blockers(stage,ledger)==[]
+    artifact.write_text("{\"drift\":true}\n",encoding="utf-8")
+    assert _dependency_blockers(stage,ledger)==["DEPENDENCY_OUTPUT_IDENTITY_INVALID:23_ARACHNE_CHECKPOINT_SEALED"]

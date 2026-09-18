@@ -99,6 +99,22 @@ def _fingerprint(plan:dict,ledger:dict,manifest:dict,stage:dict,impl_hash:str)->
         "pipeline_plan_sha256":ledger["pipeline_plan_sha256"],
     }),policy_hash
 
+def _dependency_blockers(stage:dict,ledger:dict)->list[str]:
+    by_id={row["id"]:row for row in ledger["stages"]}
+    blockers=[]
+    for dep in stage.get("depends_on",()):
+        row=by_id.get(dep)
+        if row is None:
+            blockers.append(f"DEPENDENCY_UNKNOWN:{dep}")
+            continue
+        if row.get("status") not in PASS_STATUSES:
+            blockers.append(f"DEPENDENCY_NOT_PASS:{dep}:{row.get('status','')}")
+            continue
+        if not _outputs_verify(row):
+            blockers.append(f"DEPENDENCY_OUTPUT_IDENTITY_INVALID:{dep}")
+    return blockers
+
+
 def _outputs_verify(row:dict)->bool:
     outputs=list(row.get("outputs") or ())
     if not outputs: return False
@@ -149,6 +165,10 @@ def execute(run_id:str,*,from_stage:str="",to_stage:str="",resume:bool=True)->in
         if resume and row["status"] in PASS_STATUSES:
             if row.get("input_fingerprint")==fingerprint and _outputs_verify(row): continue
             _invalidate_from(ledger,index,"STALE_PASS_IDENTITY"); atomic_json(LEDGER_PATH,ledger); row=ledger["stages"][index]
+        dependency_blockers=_dependency_blockers(stage,ledger)
+        if dependency_blockers:
+            row.update(status="BLOCKED",attempts=int(row.get("attempts",0))+1,input_fingerprint=fingerprint,implementation_hash=impl_hash,policy_hash=policy_hash,outputs=[],diagnostics_hash=content_sha256({"dependency_blockers":dependency_blockers}),blockers=dependency_blockers)
+            _refresh(ledger); atomic_json(LEDGER_PATH,ledger); return 2
         if stage["adapter"]=="UNBOUND":
             row.update(status="BLOCKED",attempts=int(row.get("attempts",0))+1,input_fingerprint=fingerprint,implementation_hash=impl_hash,policy_hash=policy_hash,outputs=[],diagnostics_hash="",blockers=["STAGE_ADAPTER_UNBOUND"])
             _refresh(ledger); atomic_json(LEDGER_PATH,ledger); return 2

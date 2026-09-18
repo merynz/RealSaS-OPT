@@ -126,6 +126,80 @@ def _quality_mask(tri: np.ndarray) -> np.ndarray:
     )
 
 
+def _rasterize_bounded_precision(
+    tri_xy: np.ndarray,
+    face_ids: np.ndarray,
+    alpha: np.ndarray,
+):
+    """Admit quality-safe clipped triangles under the frozen global precision budget."""
+
+    width = int(alpha.shape[1])
+    truth = alpha.ravel()
+    records = []
+    for raw_face_id in face_ids.tolist():
+        face_id = int(raw_face_id)
+        q = tri_xy[face_id]
+        rr, cc = polygon(q[:, 1], q[:, 0], shape=alpha.shape)
+        if len(rr) == 0:
+            continue
+        pixels = np.unique(
+            rr.astype(np.int64) * width + cc.astype(np.int64)
+        )
+        tp = int(truth[pixels].sum())
+        fp = int(len(pixels) - tp)
+        if tp <= 0:
+            continue
+        records.append((face_id, pixels, tp, fp))
+
+    records.sort(
+        key=lambda row: (
+            row[3] == 0,
+            row[2] / float(row[3] + 1),
+            row[2],
+            -row[3],
+            -row[0],
+        ),
+        reverse=True,
+    )
+
+    predicted = np.zeros(alpha.size, dtype=bool)
+    selected = []
+    intersection = 0
+    predicted_count = 0
+    rejected_precision = 0
+    min_precision = float(
+        FIT2_PRODUCT_MESH_QUALITY_POLICY_V1.min_precision_inside_alpha
+    )
+
+    for face_id, pixels, _tp, _fp in records:
+        new = pixels[~predicted[pixels]]
+        if not len(new):
+            continue
+        tp = int(truth[new].sum())
+        fp = int(len(new) - tp)
+        if tp <= 0:
+            continue
+        next_intersection = intersection + tp
+        next_predicted_count = predicted_count + tp + fp
+        precision = float(next_intersection) / float(
+            max(next_predicted_count, 1)
+        )
+        if precision + 1.0e-15 < min_precision:
+            rejected_precision += 1
+            continue
+        predicted[new] = True
+        selected.append(int(face_id))
+        intersection = next_intersection
+        predicted_count = next_predicted_count
+
+    return predicted.reshape(alpha.shape), {
+        "selected_face_count": len(selected),
+        "selected_face_indices": tuple(selected),
+        "precision_rejected_face_count": int(rejected_precision),
+        "candidate_with_true_positive_count": len(records),
+    }
+
+
 def _coverage(authority: np.ndarray, predicted: np.ndarray) -> dict:
     foreground = int(np.count_nonzero(authority))
     predicted_count = int(np.count_nonzero(predicted))
@@ -491,6 +565,32 @@ def run(args) -> dict:
         clipped_full_coverage = _coverage(alpha, clipped_full_mask)
         clipped_full_failures = _policy_failures(clipped_full_coverage)
 
+        bounded_mask, bounded_selection = _rasterize_bounded_precision(
+            tri_xy,
+            pre_alpha_clipped_frame,
+            alpha,
+        )
+        bounded_coverage = _coverage(alpha, bounded_mask)
+        bounded_failures = _policy_failures(bounded_coverage)
+        bounded_hole = _largest_hole_attribution(
+            alpha=alpha,
+            predicted=bounded_mask,
+            projected_dense_xy=xy,
+            component_index_by_dense=component_index_by_dense,
+            component_names=component_names,
+            component_masks=component_masks,
+        )
+        bounded_overlay_path = Path(args.output).parent / (
+            f"V{view}_BOUNDED_PRECISION_OVERLAY.png"
+        )
+        _write_largest_hole_overlay(
+            observation_path=Path(args.observations[view]),
+            alpha=alpha,
+            predicted=bounded_mask,
+            attribution=bounded_hole,
+            output_path=bounded_overlay_path,
+        )
+
         largest_hole = _largest_hole_attribution(
             alpha=alpha,
             predicted=full_mask,
@@ -526,6 +626,15 @@ def run(args) -> dict:
             "pure_plus_mixed_union_failures": full_failures,
             "pure_plus_mixed_full_frozen_coverage_pass": not full_failures,
             "largest_hole_attribution": largest_hole,
+            "bounded_precision_diagnostic": {
+                "selection": bounded_selection,
+                "coverage": bounded_coverage,
+                "failures": bounded_failures,
+                "largest_hole_attribution": {
+                    **bounded_hole,
+                    "overlay_path": str(bounded_overlay_path),
+                },
+            },
             "frame_clip_diagnostic": {
                 "strict_in_frame_candidate_count": int(len(pre_alpha)),
                 "clipped_raster_candidate_count": int(
@@ -557,6 +666,20 @@ def run(args) -> dict:
                     "mixed_faces": counts["admitted_mixed_face_count"],
                     "largest_hole_attribution": largest_hole,
                     "strict_failures": full_failures,
+                    "bounded_precision": {
+                        "recall": bounded_coverage["source_alpha_recall"],
+                        "precision": bounded_coverage[
+                            "precision_inside_alpha"
+                        ],
+                        "iou": bounded_coverage["alpha_iou"],
+                        "largest_hole": bounded_coverage[
+                            "largest_uncovered_component_fraction"
+                        ],
+                        "failures": bounded_failures,
+                        "selected_faces": bounded_selection[
+                            "selected_face_count"
+                        ],
+                    },
                     "frame_clip": {
                         "out_of_frame_quality_candidates": int(
                             len(pre_alpha_clipped_frame) - len(pre_alpha)

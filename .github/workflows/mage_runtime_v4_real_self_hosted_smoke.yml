@@ -331,6 +331,7 @@ jobs:
           path: |
             .runtime-real/DENSE_ZERO_MECHANICAL_PARTITION_V2_DIAGNOSTIC.json
             .runtime-real/V2_LARGEST_HOLE_OVERLAY.png
+            .runtime-real/V2_BOUNDED_PRECISION_OVERLAY.png
             .runtime-real/mage_native_smoke.log
             .runtime-real/mage/MAGE_RUNTIME_V4_NATIVE_RENDER_AUTHORITY_V1.json
             .runtime-real/mage/MAGE_FULL_ASSEMBLY_RUNTIME_V4_NATIVE_SMOKE_V1.json

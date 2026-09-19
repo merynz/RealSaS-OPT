@@ -11,7 +11,7 @@
 - Current state: PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING
 - Active experiment: SUBJECT2_KNIGHT_FULL_CLOSURE
 - Most recent closed gate: ALL_40_STAGE_ADAPTERS_IMPLEMENTED_AND_BOUND_READY_FOR_FINAL_CI
-- Canonical main: 8cb97b62871f
+- Canonical main: c22eb646bac5
 - Active run: SUBJECT2_KNIGHT_V1 — 0/40; next 01_SOURCE_BYTES_SEALED
 - Plan SHA-256: 35d13cc7fc2e12d554bd282469a1b62075c9a9280805fcda3d061e58c17f0adf
 - Promotion block: Full-3D local-quaternion v2 is the professional motion candidate path: Stage34 compiles source motion semantics onto the exact target skeleton and Stage35 exact FK/LBS execution owns clip capability. Stage25/27 are numerical conditioning evidence only. The active plan/ledger hash is reconciled on the current candidate branch; remaining work is final CI, deterministic Blender extraction of the sealed Quaternius Idle/Run/Slash MotionSourceClip.v2 artifacts, and the exact Knight external fit/native-player inputs before 01→40 execution.

@@ -12,8 +12,8 @@
   "explained_high_signal_count": 322,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 136,
-  "safe_default_evidence_only_branch_count": 132,
+  "live_branch_count": 137,
+  "safe_default_evidence_only_branch_count": 133,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "8cb97b62871f1d81bd0506333462a4e5e8f3e2f5",
+      "sha": "c22eb646bac50a5715ade4721a9451efe9d0a6e3",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -629,6 +629,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "repair/stage14-mechanical-adequacy-v2-20260919",
+      "sha": "46504a38d7751a1145a7fe708ada4cbb5766fff9",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "repair/stage14-visible-component-eligibility-v2-20260919",
       "sha": "5caa591a7aa06b747c342f7306c1b52b7b42984e",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -684,7 +690,7 @@
     },
     {
       "name": "research/stage14-mechanical-capacity-curve-20260919",
-      "sha": "c3ba4d2dbea0c207693b21c4b1641cabb56974ae",
+      "sha": "33f96046355c2bb61fa11ed91681abfe670eab6e",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

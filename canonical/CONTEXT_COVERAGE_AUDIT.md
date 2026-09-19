@@ -11,8 +11,8 @@
 - Explained by continuity policy: **322**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **136**
-- Safe-default evidence-only branches: **132**
+- Live branches: **137**
+- Safe-default evidence-only branches: **133**
 
 ### Classification counts
 
@@ -101,7 +101,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `8cb97b62871f` | `CANONICAL` | canonical branch |
+| `main` | `c22eb646bac5` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -131,6 +131,7 @@ _None._
 | `repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp` | `c69ab78eac42` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/stage13-geometry-gate-v2-20260919` | `d577616728c2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/stage14-component-aware-compaction-v2-20260919` | `b6218afbf639` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `repair/stage14-mechanical-adequacy-v2-20260919` | `46504a38d775` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/stage14-visible-component-eligibility-v2-20260919` | `5caa591a7aa0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/g5-coverage-v2-audit-20260919` | `aeaec75e1fe6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/g5-mesh-v2-numerical-floor-20260919` | `28908a0019f6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -140,7 +141,7 @@ _None._
 | `research/stage14-gsa-v2-calibration-20260919` | `416bb7ef341d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-gsa-v2-downstream-audit-20260919` | `68eb6d2bb3ca` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-gsa-v2b-compactor-20260919` | `703ce681f4f7` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `research/stage14-mechanical-capacity-curve-20260919` | `c3ba4d2dbea0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `research/stage14-mechanical-capacity-curve-20260919` | `33f96046355c` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-surface-resident-representative-20260919` | `4ad1cce3fe93` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

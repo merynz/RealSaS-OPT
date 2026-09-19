@@ -123,7 +123,7 @@ def _policy(p):
 def _raw_eval(mesh,cameras):
     vn=np.asarray(mesh.vertices_normalized,dtype=np.float64)
     f=np.asarray(mesh.faces,dtype=np.int64)
-    hints=np.asarray(mesh.implicit_normals,dtype=np.float64)
+    hints=np.asarray(mesh.normals,dtype=np.float64)
     dense_world=vn.copy()
     dense_normals=hints/np.linalg.norm(hints,axis=1,keepdims=True).clip(min=1e-12)
     labels=_dense_component_labels(len(vn),f)
@@ -196,7 +196,7 @@ def main():
         for kind in kinds:
             mesh=extract_zero_surface_mesh_v3(_field(kind),bounds=(-1.0,1.0),level=0.0)
             surface,report=select_adequate_rigging_surface_v1(
-                mesh.vertices_normalized,mesh.faces,mesh.implicit_normals,cameras,
+                mesh.vertices_normalized,mesh.faces,mesh.normals,cameras,
                 normalization_center=(0.0,0.0,0.0),normalization_half_extent=1.0,
                 authority_label="SUBJECT_FREE_STAGE14_V2_CONFIRM",
                 source_run_id="SUBJECT_FREE_STAGE14_V2_CONFIRM",

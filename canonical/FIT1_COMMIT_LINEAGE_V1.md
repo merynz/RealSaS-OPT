@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1827**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1836**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1839,6 +1839,15 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-19T09:32:52+03:00` | `c0f6d8bbf43f` | yes | GOVERNANCE_CONTINUITY | mainline: bind camera and rest-render authorities | `canonical/ACTIVE_RUN_V1.json`<br>`canonical/CONTEXT_STATE_V2.json`<br>`canonical/MAINLINE_EXECUTION_PLAN_V1.json`<br>`canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`<br>`canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` | `main` |
 | `2026-09-19T09:35:16+03:00` | `70b685279607` | yes | GOVERNANCE_CONTINUITY | continuity: advance current state to rest-render seam | `CURRENT_STATE.md` | `main` |
 | `2026-09-19T09:35:43+03:00` | `bb983ad65a09` | yes | CI_TEST, COMPILER_PROOF | appearance: add exact overlap RGBA preservation evidence | `compiler/realsas_compiler_core/rest_preservation_v1.py`<br>`tests/compiler/test_rest_preservation_v1.py` | `main` |
+| `2026-09-19T09:36:55+03:00` | `7afc806d0859` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T09:37:54+03:00` | `02e8a368394b` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | science: preregister subject-free rest preservation calibration | `.github/workflows/rest_source_preservation_calibration.yml`<br>`canonical/REST_SOURCE_PRESERVATION_CALIBRATION_PREREG_20260919.md`<br>`experiments/rest_preservation_v1/run_subject_free_calibration.py`<br>`tests/compiler/test_rest_preservation_calibration_v1.py` | `main` |
+| `2026-09-19T09:42:03+03:00` | `546f394b25f3` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | science: seal rest preservation calibration and policy | `canonical/REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json`<br>`canonical/REST_SOURCE_PRESERVATION_POLICY_V1_20260919.json`<br>`compiler/realsas_compiler_core/rest_preservation_policy_v1.py`<br>`tests/compiler/test_rest_preservation_policy_v1.py` | `main` |
+| `2026-09-19T09:53:10+03:00` | `7ad75c9624f9` | yes | CI_TEST, COMPILER_PROOF | appearance: wire stage32 rest source preservation admission | `compiler/realsas_compiler_core/product_artifact_codec_v1.py`<br>`compiler/realsas_compiler_services/orchestrator/adapters/rest_preservation_v1.py`<br>`tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-19T09:57:56+03:00` | `32ba6a3b2238` | yes | CI_TEST, COMPILER_PROOF | appearance: fix observation pixel-center sampling seam | `compiler/realsas_compiler_core/rest_render_v1.py`<br>`tests/compiler/test_rest_render_v1.py` | `main` |
+| `2026-09-19T09:59:53+03:00` | `62f353b0e5ed` | yes | CI_TEST, COMPILER_PROOF | tests: expose rest preservation nonempty seam invariants | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-19T10:04:36+03:00` | `772c4fd01bd8` | yes | CI_TEST, COMPILER_PROOF | tests: lock stage30 donor coordinate seam | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-19T10:06:24+03:00` | `b007b13c63d4` | yes | CI_TEST, COMPILER_PROOF | tests: align synthetic observation raster domain | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-19T10:09:15+03:00` | `6000ee96ad6f` | yes | CI_TEST, GOVERNANCE_CONTINUITY | mainline: bind stage32 rest preservation authority | `CURRENT_STATE.md`<br>`canonical/ACTIVE_RUN_V1.json`<br>`canonical/CONTEXT_STATE_V2.json`<br>`canonical/MAINLINE_EXECUTION_PLAN_V1.json`<br>`canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json`<br>`canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`<br>`tests/repository/test_mainline_execution_plan_v1.py` | `main` |
 
 ## Use rule
 

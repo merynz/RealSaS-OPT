@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "bb983ad65a09e02ce451d4bed56b02dda9bec278",
+    "main": "6000ee96ad6f237d6b59231755f69681526c7a8c",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1827,
+  "commit_count": 1836,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -81843,6 +81843,228 @@
       "subsystem_tags": [
         "CI_TEST",
         "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7afc806d08591bf68a4f6eb83086b4cf1d333825",
+      "parents": [
+        "bb983ad65a09e02ce451d4bed56b02dda9bec278"
+      ],
+      "author_time": "2026-09-19T09:36:55+03:00",
+      "committer_time": "2026-09-19T09:36:55+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "02e8a368394b2408996aa3addbce51098a7886cc",
+      "parents": [
+        "7afc806d08591bf68a4f6eb83086b4cf1d333825"
+      ],
+      "author_time": "2026-09-19T09:37:54+03:00",
+      "committer_time": "2026-09-19T09:37:54+03:00",
+      "subject": "science: preregister subject-free rest preservation calibration",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/rest_source_preservation_calibration.yml",
+        "canonical/REST_SOURCE_PRESERVATION_CALIBRATION_PREREG_20260919.md",
+        "experiments/rest_preservation_v1/run_subject_free_calibration.py",
+        "tests/compiler/test_rest_preservation_calibration_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "546f394b25f3473ec7082cc91794a9593be8fa44",
+      "parents": [
+        "02e8a368394b2408996aa3addbce51098a7886cc"
+      ],
+      "author_time": "2026-09-19T09:42:03+03:00",
+      "committer_time": "2026-09-19T09:42:03+03:00",
+      "subject": "science: seal rest preservation calibration and policy",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json",
+        "canonical/REST_SOURCE_PRESERVATION_POLICY_V1_20260919.json",
+        "compiler/realsas_compiler_core/rest_preservation_policy_v1.py",
+        "tests/compiler/test_rest_preservation_policy_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7ad75c9624f98cb3af8321fda23bf96d2861ecb8",
+      "parents": [
+        "546f394b25f3473ec7082cc91794a9593be8fa44"
+      ],
+      "author_time": "2026-09-19T09:53:10+03:00",
+      "committer_time": "2026-09-19T09:53:10+03:00",
+      "subject": "appearance: wire stage32 rest source preservation admission",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/rest_preservation_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "32ba6a3b223806988705637aef6e60c9c1b4a7bc",
+      "parents": [
+        "7ad75c9624f98cb3af8321fda23bf96d2861ecb8"
+      ],
+      "author_time": "2026-09-19T09:57:56+03:00",
+      "committer_time": "2026-09-19T09:57:56+03:00",
+      "subject": "appearance: fix observation pixel-center sampling seam",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/rest_render_v1.py",
+        "tests/compiler/test_rest_render_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "62f353b0e5ed177e7782aeb357d647bb28f37f2b",
+      "parents": [
+        "32ba6a3b223806988705637aef6e60c9c1b4a7bc"
+      ],
+      "author_time": "2026-09-19T09:59:53+03:00",
+      "committer_time": "2026-09-19T09:59:53+03:00",
+      "subject": "tests: expose rest preservation nonempty seam invariants",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "772c4fd01bd8ddf70dd2ab849e69a603777a1bce",
+      "parents": [
+        "62f353b0e5ed177e7782aeb357d647bb28f37f2b"
+      ],
+      "author_time": "2026-09-19T10:04:36+03:00",
+      "committer_time": "2026-09-19T10:04:36+03:00",
+      "subject": "tests: lock stage30 donor coordinate seam",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b007b13c63d40301aa06b18f8fa0e8c7ee5072aa",
+      "parents": [
+        "772c4fd01bd8ddf70dd2ab849e69a603777a1bce"
+      ],
+      "author_time": "2026-09-19T10:06:24+03:00",
+      "committer_time": "2026-09-19T10:06:24+03:00",
+      "subject": "tests: align synthetic observation raster domain",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6000ee96ad6f237d6b59231755f69681526c7a8c",
+      "parents": [
+        "b007b13c63d40301aa06b18f8fa0e8c7ee5072aa"
+      ],
+      "author_time": "2026-09-19T10:09:15+03:00",
+      "committer_time": "2026-09-19T10:09:15+03:00",
+      "subject": "mainline: bind stage32 rest preservation authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md",
+        "canonical/ACTIVE_RUN_V1.json",
+        "canonical/CONTEXT_STATE_V2.json",
+        "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+        "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json",
+        "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
+        "tests/repository/test_mainline_execution_plan_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

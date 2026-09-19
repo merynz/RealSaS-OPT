@@ -8,13 +8,13 @@
 - Product: automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics
 - Current witness: Subject-2 Knight (run data only; architecture generic)
 - Current module: QualifiedMesh + QualifiedPresentationGraph authority implementation
-- Current state: PRODUCT_AUTHORITY_IMPLEMENTATION__CAMERA_AND_REST_RENDER_EXECUTABLE
+- Current state: PRODUCT_AUTHORITY_IMPLEMENTATION__REST_PRESERVATION_EXECUTABLE__MOTION_SEAM_OPEN
 - Active experiment: SUBJECT2_KNIGHT_FULL_CLOSURE
-- Most recent closed gate: REST_RENDER_STAGE31_IMPLEMENTATION_PASS
-- Canonical main: bb983ad65a09
+- Most recent closed gate: REST_SOURCE_PRESERVATION_STAGE32_IMPLEMENTATION_PASS
+- Canonical main: 6000ee96ad6f
 - Active run: SUBJECT2_KNIGHT_V1 — 0/40; next 01_SOURCE_BYTES_SEALED
-- Plan SHA-256: c23f076fd429db6194f3da44d0ed3965e04d5f69181626d4bbf9416ab8de1df5
-- Promotion block: Stage 05 camera authority and stages 24-31 product/presentation/rest-render adapters are executable where their upstream contracts exist. Stage 32 metrics are implemented but admission policy remains intentionally UNBOUND until subject-free preregistration closes.
+- Plan SHA-256: 06be699711786e3bac0be4d1aacca4df8198412f39dc3cdcf84a6e3000fdda1b
+- Promotion block: Stages 05 and 24-32 have executable typed adapters. Stage 32 uses a frozen subject-free admission policy and exact 8-view source replay; Stage 33 motion source/preset authority remains intentionally UNBOUND.
 - Scope warning: Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority
 
 ## Current machine authority
@@ -55,7 +55,7 @@
 
 ## Current scientific question
 
-Can the generic compiler promote one view-independent canonical mesh through G1-G5 and a qualified presentation graph without a second geometry or runtime presentation truth?
+Can the generic compiler seal a source/preset motion authority after exact rest/source preservation, then compile and prove visible run/idle motion without introducing a second mechanics or presentation truth?
 
 ## Settled invariants
 

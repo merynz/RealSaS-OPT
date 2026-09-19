@@ -8,13 +8,13 @@
 - Product: automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics
 - Current witness: Subject-2 Knight (run data only; architecture generic)
 - Current module: QualifiedMesh + QualifiedPresentationGraph authority implementation
-- Current state: PRODUCT_AUTHORITY_PLAN_REBASED__IMPLEMENTATION
+- Current state: PRODUCT_AUTHORITY_IMPLEMENTATION__CAMERA_AND_REST_RENDER_EXECUTABLE
 - Active experiment: SUBJECT2_KNIGHT_FULL_CLOSURE
-- Most recent closed gate: QUALIFIED_MESH_PRESENTATION_ARCHITECTURE_FROZEN
-- Canonical main: bfe0b9069a96
+- Most recent closed gate: REST_RENDER_STAGE31_IMPLEMENTATION_PASS
+- Canonical main: bb983ad65a09
 - Active run: SUBJECT2_KNIGHT_V1 — 0/40; next 01_SOURCE_BYTES_SEALED
-- Plan SHA-256: 71ba83a99873ef231e6b6d45e3ccf1a6c806e8ea2b8296295ccb861adc538ef3
-- Promotion block: stages 24-30 are correctly named but remain UNBOUND; animation-grade mesh thresholds remain preregistration-pending
+- Plan SHA-256: c23f076fd429db6194f3da44d0ed3965e04d5f69181626d4bbf9416ab8de1df5
+- Promotion block: Stage 05 camera authority and stages 24-31 product/presentation/rest-render adapters are executable where their upstream contracts exist. Stage 32 metrics are implemented but admission policy remains intentionally UNBOUND until subject-free preregistration closes.
 - Scope warning: Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority
 
 ## Current machine authority

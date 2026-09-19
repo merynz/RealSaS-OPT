@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "bfe0b9069a9606a9ad5fe135e8de83228ee64dc1",
+    "main": "bb983ad65a09e02ce451d4bed56b02dda9bec278",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1809,
+  "commit_count": 1827,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -81406,6 +81406,443 @@
       ],
       "subsystem_tags": [
         "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "35079a3f722f872c6842252f25e3be48ba1bcb7b",
+      "parents": [
+        "bfe0b9069a9606a9ad5fe135e8de83228ee64dc1"
+      ],
+      "author_time": "2026-09-19T09:01:57+03:00",
+      "committer_time": "2026-09-19T09:01:57+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2360766516ed939a36fbe750ae9140778102a4ee",
+      "parents": [
+        "35079a3f722f872c6842252f25e3be48ba1bcb7b"
+      ],
+      "author_time": "2026-09-19T09:07:02+03:00",
+      "committer_time": "2026-09-19T09:07:02+03:00",
+      "subject": "observation: bind exact source raster byte identity",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/observation_authority_v1.py",
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "tests/compiler/test_observation_authority_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d8023d780773e84470114e0980470b3e64a2df0e",
+      "parents": [
+        "2360766516ed939a36fbe750ae9140778102a4ee"
+      ],
+      "author_time": "2026-09-19T09:08:43+03:00",
+      "committer_time": "2026-09-19T09:08:43+03:00",
+      "subject": "appearance: add canonical mesh source-provenance binding set",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_appearance_v1.py",
+        "tests/compiler/test_product_appearance_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0dd4a0d8da164932c0116793280eda80d8fc07eb",
+      "parents": [
+        "d8023d780773e84470114e0980470b3e64a2df0e"
+      ],
+      "author_time": "2026-09-19T09:10:01+03:00",
+      "committer_time": "2026-09-19T09:10:01+03:00",
+      "subject": "presentation: add role-free mechanical slot structure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/presentation_structure_v1.py",
+        "tests/compiler/test_presentation_structure_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2b4cdd0330cab007a94a42df9c7ffdea86c5978f",
+      "parents": [
+        "0dd4a0d8da164932c0116793280eda80d8fc07eb"
+      ],
+      "author_time": "2026-09-19T09:10:55+03:00",
+      "committer_time": "2026-09-19T09:10:55+03:00",
+      "subject": "presentation: add z-visible composition authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_composition_v1.py",
+        "tests/compiler/test_product_composition_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "52078e483ee3ac15cfd76615866c7227d2cacd7a",
+      "parents": [
+        "2b4cdd0330cab007a94a42df9c7ffdea86c5978f"
+      ],
+      "author_time": "2026-09-19T09:12:19+03:00",
+      "committer_time": "2026-09-19T09:12:19+03:00",
+      "subject": "presentation: make subordinate authority hashes first-class",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_authority_v1.py",
+        "tests/compiler/test_product_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c70f43e47a76930bdd040e3152074111200aa43d",
+      "parents": [
+        "52078e483ee3ac15cfd76615866c7227d2cacd7a"
+      ],
+      "author_time": "2026-09-19T09:13:17+03:00",
+      "committer_time": "2026-09-19T09:13:17+03:00",
+      "subject": "presentation: assemble qualified structure appearance composition graph",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/presentation_graph_v1.py",
+        "tests/compiler/test_presentation_graph_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b578a8a6cfe8a45c971d6111c368eb1d8ef2dd55",
+      "parents": [
+        "c70f43e47a76930bdd040e3152074111200aa43d"
+      ],
+      "author_time": "2026-09-19T09:18:02+03:00",
+      "committer_time": "2026-09-19T09:18:02+03:00",
+      "subject": "presentation: wire stage30 qualified bundle",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/presentation_v1.py",
+        "tests/compiler/test_product_coverage_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "37ab18cd8706fe5c6d700454ba50dc1c63b1498b",
+      "parents": [
+        "b578a8a6cfe8a45c971d6111c368eb1d8ef2dd55"
+      ],
+      "author_time": "2026-09-19T09:20:57+03:00",
+      "committer_time": "2026-09-19T09:20:57+03:00",
+      "subject": "mainline: bind qualified presentation stage30",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V1.json",
+        "canonical/CONTEXT_STATE_V2.json",
+        "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+        "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
+        "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "99a2fb39b026300ef220a15d7dcfc58f70865060",
+      "parents": [
+        "37ab18cd8706fe5c6d700454ba50dc1c63b1498b"
+      ],
+      "author_time": "2026-09-19T09:22:21+03:00",
+      "committer_time": "2026-09-19T09:22:21+03:00",
+      "subject": "observation: add first-class qualified camera set",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/camera_authority_v1.py",
+        "compiler/realsas_compiler_core/mesh/product_coverage_v1.py",
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/observation_v1.py",
+        "tests/compiler/test_camera_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a39f66f06628e004079b969a924f31a3f404ce85",
+      "parents": [
+        "99a2fb39b026300ef220a15d7dcfc58f70865060"
+      ],
+      "author_time": "2026-09-19T09:22:57+03:00",
+      "committer_time": "2026-09-19T09:22:57+03:00",
+      "subject": "mesh: consume sealed camera authority in stages25-27",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d84fcda1ed1ddf42619109913b30e282d7d7f6d1",
+      "parents": [
+        "a39f66f06628e004079b969a924f31a3f404ce85"
+      ],
+      "author_time": "2026-09-19T09:24:55+03:00",
+      "committer_time": "2026-09-19T09:24:55+03:00",
+      "subject": "appearance: add deterministic canonical rest renderer",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/rest_render_v1.py",
+        "tests/compiler/test_rest_render_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "709f11e1b12a505a2e47bafc26fb59eb8f3756cd",
+      "parents": [
+        "d84fcda1ed1ddf42619109913b30e282d7d7f6d1"
+      ],
+      "author_time": "2026-09-19T09:27:09+03:00",
+      "committer_time": "2026-09-19T09:27:09+03:00",
+      "subject": "appearance: wire stage31 rest render evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/rest_render_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b42e0086f1b92966156dc8e92e5652943df99724",
+      "parents": [
+        "709f11e1b12a505a2e47bafc26fb59eb8f3756cd"
+      ],
+      "author_time": "2026-09-19T09:29:29+03:00",
+      "committer_time": "2026-09-19T09:29:29+03:00",
+      "subject": "appearance: add rest provenance and preservation metrics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "compiler/realsas_compiler_core/rest_preservation_v1.py",
+        "compiler/realsas_compiler_core/rest_render_v1.py",
+        "tests/compiler/test_rest_preservation_v1.py",
+        "tests/compiler/test_rest_render_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "59d9a86c379e002037c3d54dca0aece1089027bc",
+      "parents": [
+        "b42e0086f1b92966156dc8e92e5652943df99724"
+      ],
+      "author_time": "2026-09-19T09:30:35+03:00",
+      "committer_time": "2026-09-19T09:30:35+03:00",
+      "subject": "appearance: fix rest preservation IoU measurement",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/rest_preservation_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c0f6d8bbf43f11ad233b2dee73e19cf2c07df0e1",
+      "parents": [
+        "59d9a86c379e002037c3d54dca0aece1089027bc"
+      ],
+      "author_time": "2026-09-19T09:32:52+03:00",
+      "committer_time": "2026-09-19T09:32:52+03:00",
+      "subject": "mainline: bind camera and rest-render authorities",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V1.json",
+        "canonical/CONTEXT_STATE_V2.json",
+        "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+        "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
+        "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "70b685279607fcc5083679561a7c53098c846b11",
+      "parents": [
+        "c0f6d8bbf43f11ad233b2dee73e19cf2c07df0e1"
+      ],
+      "author_time": "2026-09-19T09:35:16+03:00",
+      "committer_time": "2026-09-19T09:35:16+03:00",
+      "subject": "continuity: advance current state to rest-render seam",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bb983ad65a09e02ce451d4bed56b02dda9bec278",
+      "parents": [
+        "70b685279607fcc5083679561a7c53098c846b11"
+      ],
+      "author_time": "2026-09-19T09:35:43+03:00",
+      "committer_time": "2026-09-19T09:35:43+03:00",
+      "subject": "appearance: add exact overlap RGBA preservation evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/rest_preservation_v1.py",
+        "tests/compiler/test_rest_preservation_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

@@ -506,10 +506,6 @@ def validate_qualified_motion(
     assets={a.clip_id:a for a in source_set.assets}
     root_modes=dict(constraints.root_trajectory_modes)
     retarget_maps={clip_id:dict(rows) for clip_id,rows in constraints.retarget_maps}
-    validate_motion_compile_constraint_set(
-        constraints,source_set=source_set,product_state=product_state,skeleton=skeleton,
-        envelope=envelope,presentation=presentation,
-    )
     envelope_by_joint=_joint_ranges(envelope)
     known={j.canonical_joint_id for j in skeleton.joints}
     for clip in value.clips:
@@ -577,6 +573,10 @@ def build_qualified_motion(
     constraints=build_motion_compile_constraint_set(
         source_set=source_set,product_state=product_state,skeleton=skeleton,envelope=envelope,
         presentation=presentation,compiler_config=cfg,
+    )
+    validate_motion_compile_constraint_set(
+        constraints,source_set=source_set,product_state=product_state,skeleton=skeleton,
+        envelope=envelope,presentation=presentation,
     )
     envelope_by_joint=_joint_ranges(envelope)
     root_modes=dict(constraints.root_trajectory_modes)

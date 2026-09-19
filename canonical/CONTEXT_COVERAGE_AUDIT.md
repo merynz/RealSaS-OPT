@@ -11,8 +11,8 @@
 - Explained by continuity policy: **320**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **124**
-- Safe-default evidence-only branches: **120**
+- Live branches: **125**
+- Safe-default evidence-only branches: **121**
 
 ### Classification counts
 
@@ -101,7 +101,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `70f942977fdd` | `CANONICAL` | canonical branch |
+| `main` | `7550a2ab7258` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -128,8 +128,9 @@ _None._
 | `repair/mage-full-subject-reclosure-20260912` | `2fa5d4b604d5` | `EVIDENCE_ONLY` | explicit authority-map override |
 | `repair/mage-full-subject-reclosure-20260912-adaptive-steiner-tmp` | `221ad1b79eae` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp` | `c69ab78eac42` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `repair/stage13-geometry-gate-v2-20260919` | `7550a2ab7258` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/knight-stage13-14-calibration-20260919` | `ee52ecf21689` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `research/stage13-geometry-gate-v2-calibration-20260919` | `e9c002f2ac76` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `research/stage13-geometry-gate-v2-calibration-20260919` | `18017348cc1b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety` | `2eb09fe3e8c6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

@@ -11,8 +11,8 @@
 - Explained by continuity policy: **319**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **117**
-- Safe-default evidence-only branches: **113**
+- Live branches: **118**
+- Safe-default evidence-only branches: **114**
 
 ### Classification counts
 
@@ -100,7 +100,8 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `18bca584f2ee` | `CANONICAL` | canonical branch |
+| `main` | `bf275b9371f4` | `CANONICAL` | canonical branch |
+| `motion/quaternius-direct-fbx-gate-v1-20260919` | `660e04da7633` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

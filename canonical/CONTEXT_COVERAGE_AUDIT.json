@@ -12,8 +12,8 @@
   "explained_high_signal_count": 319,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 117,
-  "safe_default_evidence_only_branch_count": 113,
+  "live_branch_count": 118,
+  "safe_default_evidence_only_branch_count": 114,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -444,9 +444,15 @@
     },
     {
       "name": "main",
-      "sha": "18bca584f2eeb24f29dc2d05b4d171a17c005654",
+      "sha": "bf275b9371f42f5d8901d8e2a3c54e9748d60993",
       "class": "CANONICAL",
       "reason": "canonical branch"
+    },
+    {
+      "name": "motion/quaternius-direct-fbx-gate-v1-20260919",
+      "sha": "660e04da76339a68506a2ae01150db36d93614b3",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "motion/quaternius-materializer-v1-20260919",

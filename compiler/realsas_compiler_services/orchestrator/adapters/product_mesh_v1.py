@@ -17,6 +17,7 @@ from compiler.realsas_compiler_core.canonical_puppet_state_v1 import build_canon
 from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import build_canonical_relation_candidate
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
+from compiler.realsas_compiler_core.deformation_envelope_derivation_v1 import derive_deformation_envelope_v1
 from compiler.realsas_compiler_core.mesh.deformation_stress_v1 import (
     expected_g3_probe_plan_hash,
     run_g3_deformation_stress,
@@ -186,8 +187,7 @@ def _load_camera_set(ctx):
 
 
 def _axis_contract(ctx):
-    cfg=dict(ctx["run_manifest"].get("deformation_envelope") or {})
-    axis_payload=_load_file_ref(dict(cfg.get("axis_contract") or {}))
+    axis_payload=_stage_output_payload(ctx,"25_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DerivedAxisContract.v1")
     _,axis_hash=parse_axis_contract_v1(axis_payload)
     return axis_payload,axis_hash
 
@@ -256,57 +256,27 @@ def qualify_mechanical_partition_and_carriers(ctx:dict)->dict:
 def seal_deformation_capability_envelope(ctx:dict)->dict:
     skeleton=_load_skeleton(ctx)
     cfg=dict(ctx["run_manifest"].get("deformation_envelope") or {})
-    axis_payload,axis_hash=_axis_contract(ctx)
+    if cfg:
+        return {"status":"BLOCKED","blockers":["PER_CHARACTER_DEFORMATION_AUTHORING_FORBIDDEN"],
+                "diagnostics":{"unsupported_keys":sorted(cfg)}}
     camera_set=_load_camera_set(ctx)
-    cameras=camera_set.cameras
-    ranges=[]
-    for row in tuple(cfg.get("joint_ranges") or ()):
-        ranges.append(JointCapabilityRangeIR(
-            canonical_joint_id=str(row["canonical_joint_id"]),
-            min_rotation_deg=float(row["min_rotation_deg"]),
-            max_rotation_deg=float(row["max_rotation_deg"]),
-            translation_radius=float(row.get("translation_radius",0.0)),
-            min_scale=float(row.get("min_scale",1.0)),
-            max_scale=float(row.get("max_scale",1.0)),
-            metadata=dict(row.get("metadata") or {}),
-        ))
-    if not ranges:
-        return {"status":"BLOCKED","blockers":["DEFORMATION_ENVELOPE_JOINT_RANGES_MISSING"],"diagnostics":{}}
-    camera_hashes=tuple(camera_set.camera_binding_hashes)
-    allowed=tuple(map(str,cfg.get("allowed_attachment_state_hashes") or ()))
-    probe_plan_hash=expected_g3_probe_plan_hash(
-        skeleton_lineage_hash=skeleton.skeleton_lineage_hash,
-        axis_contract_hash=axis_hash,
-        joint_ranges=tuple(ranges),
-        camera_binding_hashes=camera_hashes,
-        allowed_attachment_state_hashes=allowed,
-    )
-    envelope=DeformationCapabilityEnvelopeIR(
-        skeleton_lineage_hash=skeleton.skeleton_lineage_hash,
-        joint_ranges=tuple(ranges),
-        camera_binding_hashes=camera_hashes,
-        allowed_attachment_state_hashes=allowed,
-        axis_contract_hash=axis_hash,
-        probe_plan_hash=probe_plan_hash,
-        envelope_lineage_hash="",
-        metadata={
-            "axis_contract_schema":str(axis_payload.get("schema") or axis_payload.get("schema_version") or ""),
-            "camera_view_ids":tuple(camera.view_id for camera in cameras),
-            "camera_set_hash":camera_set.camera_set_hash,
-            "translation_scale_probe_support":"IDENTITY_ONLY_V1",
-        },
-    )
-    envelope=replace(envelope,envelope_lineage_hash=deformation_envelope_lineage_hash(envelope))
-    validate_deformation_capability_envelope(
-        envelope,known_joint_ids={joint.canonical_joint_id for joint in skeleton.joints}
-    )
+    axis_payload,envelope=derive_deformation_envelope_v1(skeleton=skeleton,camera_set=camera_set)
     root=ctx["run_root"]/"artifacts"/"25_DEFORMATION_CAPABILITY_ENVELOPE"
     return {
         "status":"PASS",
-        "outputs":[_write_ir(root/"deformation_envelope.json",envelope,authority_class="QUALIFIED_DEFORMATION_CAPABILITY_ENVELOPE")],
-        "diagnostics":{"joint_range_count":len(ranges),"camera_count":len(cameras),"probe_plan_hash":probe_plan_hash},
+        "outputs":[
+            _write_json(root/"derived_axis_contract.json",axis_payload,authority_class="QUALIFIED_DERIVED_AXIS_CONTRACT",schema="RealSaS.DerivedAxisContract.v1"),
+            _write_ir(root/"deformation_envelope.json",envelope,authority_class="QUALIFIED_DEFORMATION_CAPABILITY_ENVELOPE"),
+        ],
+        "diagnostics":{
+            "joint_range_count":len(envelope.joint_ranges),
+            "camera_count":len(camera_set.cameras),
+            "probe_plan_hash":envelope.probe_plan_hash,
+            "axis_contract_hash":envelope.axis_contract_hash,
+            "per_character_joint_range_authoring":False,
+            "per_character_axis_authoring":False,
+        },
     }
-
 
 def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
     surface=_load_surface(ctx)

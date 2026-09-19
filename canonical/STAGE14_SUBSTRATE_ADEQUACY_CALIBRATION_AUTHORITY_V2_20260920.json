@@ -1,0 +1,66 @@
+{
+  "schema":"RealSaS.Stage14SubstrateAdequacyCalibrationAuthority.v2",
+  "status":"PASS__SUBJECT_FREE__12K_CAPACITY_AND_OPERATOR_CORRECTNESS_VERIFIED",
+  "date_utc":"2026-09-20",
+  "source_main_commit":"94e99d0acbe4fd2769507357fa83f963607f8447",
+  "subject_contamination":{
+    "knight_result_used":false,
+    "mage_result_used":false,
+    "subject_inputs_used":false
+  },
+  "final_calibration":{
+    "workflow_run_id":35470254373,
+    "workflow_job_id":105969795140,
+    "artifact_id":10592422731,
+    "artifact_sha256":"bed1284787c6b2ddb51e33be296986a687e4540c3d6ab6a3efc2a757cd46ff53",
+    "result_sha256":"ee25e9071d675bb09617acda6680d5327827e7a69035053cf224eba4cbac07c4",
+    "raster_resolution":1024,
+    "all_shapes_passed":true,
+    "selected_caps":{
+      "FLAT_ELLIPSOID_15K":{"target":7168,"actual":6936},
+      "SPHERE_15K":{"target":11776,"actual":11688},
+      "TALL_ELLIPSOID_15K":{"target":9728,"actual":9578},
+      "THIN_DISCONNECTED_COMPONENT_11K":{"target":8704,"actual":8644},
+      "TORUS_CONCAVE_10K":{"target":7168,"actual":6888},
+      "TWO_CLOSE_COMPONENTS_12K":{"target":10752,"actual":10716},
+      "VISIBLE_TINY_ACCESSORY_BELOW_0P1PCT":{"target":11776,"actual":11742}
+    },
+    "tiny_visible_accessory_evidence":{
+      "fraction_eligible_component_count":1,
+      "visible_dense_component_count":2,
+      "eligible_dense_component_count":2,
+      "visibility_forced_eligible_component_count":1,
+      "minimum_nodes_per_eligible_component":12,
+      "component_alias_node_count":0
+    }
+  },
+  "operator_causal_evidence":{
+    "visible_tiny_component_workflow_run_id":35465846827,
+    "component_aware_compaction_workflow_run_id":35466253728,
+    "component_aware_result":{
+      "mixed_component_voxels_before":42,
+      "mixed_component_voxels_after":0,
+      "node_count_increase_fraction":0.0052
+    }
+  },
+  "mechanical_capacity_curve":{
+    "workflow_run_id":35467302807,
+    "artifact_id":10592025299,
+    "artifact_sha256":"7c49a170460510c01efb179815437a2381e314d4e5d2142cc8d14b83481bac03",
+    "caps":[1024,2048,4096,8192,12288],
+    "interpretation":"The 8192->12288 extension produced material downstream-proxy error reduction on analytic stress shapes; 12288 is therefore a justified search ceiling rather than a fixed selected node count."
+  },
+  "geppetto_12k_compute_feasibility":{
+    "source_result_sha256":"06a5afce9a880e16cbab6c5fa92fdfe58ec478773aa31ab2c7c0227752d05e62",
+    "repo_commit":"351ce16a5325457264edd4b776ca8c0870ff2912",
+    "gpu":"NVIDIA A100-SXM4-40GB",
+    "gpu_total_vram_gib":39.4935302734375,
+    "precision":"FP32 exact current FIT1 training semantics",
+    "operation":"DirectRiggingSurfaceEncoderV1 forward + backward + grad clip + AdamW step",
+    "8192":{"status":"PASS","peak_allocated_gib":2.182309627532959,"peak_reserved_gib":2.611328125},
+    "12288":{"status":"PASS","peak_allocated_gib":3.2480711936950684,"peak_reserved_gib":3.78515625},
+    "claim_boundary":"Encoder bottleneck feasibility only; full Geppetto heads can add fixed/non-N-scaled memory and compute. Single-run elapsed times are not used for throughput ranking."
+  },
+  "decision":"KEEP_V1_QUALITY_TOLERANCES__EXTEND_SEARCH_CEILING_TO_12288__ENABLE_VISIBLE_COMPONENT_ELIGIBILITY__ENABLE_COMPONENT_AWARE_COMPACTION",
+  "claim_boundary":"This calibrates Stage14 substrate admission only. It does not claim Knight Stage14 PASS, Geppetto fit PASS, Stage15 PASS, or PRODUCT_PASS."
+}

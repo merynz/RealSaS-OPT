@@ -1,0 +1,46 @@
+name: stage13-geometry-gate-v2-numerical-floor
+
+on:
+  push:
+    branches:
+      - research/stage13-geometry-gate-v2-calibration-20260919
+    paths:
+      - 'tools/stage13_geometry_gate_v2_numerical_floor.py'
+      - '.github/workflows/stage13_geometry_gate_v2_numerical_floor.yml'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_NUMERICAL_OUT: numerical_out
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off scikit-image==0.25.2
+      - name: Run subject-free 256-cube numerical floor
+        run: python tools/stage13_geometry_gate_v2_numerical_floor.py
+      - name: Assert no Knight or Mage subject dependency
+        run: |
+          ! grep -R -E 'SUBJECT2_KNIGHT|Knight\.fbx|MAGE_|Mage' tools/stage13_geometry_gate_v2_numerical_floor.py
+      - name: Upload numerical-floor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage13-geometry-gate-v2-numerical-floor
+          path: numerical_out/
+          if-no-files-found: error

@@ -1,0 +1,36 @@
+{
+  "schema":"RealSaS.Stage14SubstrateAdequacyPolicy.v2",
+  "status":"FROZEN_AFTER_SUBJECT_FREE_12K_CALIBRATION_BEFORE_NEW_KNIGHT_STAGE14_RESULT",
+  "authority":"NORMATIVE_STAGE14_SUBSTRATE_ADEQUACY_POLICY__NOT_EMPIRICAL_KNIGHT_OR_MAGE_RESULT",
+  "calibration_authority":"canonical/STAGE14_SUBSTRATE_ADEQUACY_CALIBRATION_AUTHORITY_V2_20260920.json",
+  "gsa":{
+    "normal_k":64,
+    "visibility_depth_tolerance_norm":0.02,
+    "adequacy_policy":{
+      "min_candidate_nodes":128,
+      "max_candidate_nodes":12288,
+      "candidate_growth_factor":2.0,
+      "refinement_rounds":3,
+      "max_dense_to_surface_p95_norm":0.03,
+      "max_dense_to_surface_max_norm":0.08,
+      "max_normal_p95_deg":30.0,
+      "max_projected_p95_px":6.0,
+      "max_projected_max_px":16.0,
+      "component_min_dense_fraction":0.001,
+      "min_nodes_per_component":8,
+      "max_component_alias_nodes":0,
+      "visible_component_always_eligible":true,
+      "component_aware_voxel_compaction":true
+    }
+  },
+  "selection_rule":"MINIMUM_ACTUAL_NODE_COUNT_AMONG_PASSING_BOUNDED_SEARCH_CANDIDATES",
+  "rationale":[
+    "Stage13 and G5 own source/rest geometry fidelity; Stage14 selects a bounded mechanical carrier without changing dense zero-surface authority.",
+    "No v1 quality tolerance was relaxed. The only search-budget change is max_candidate_nodes 8192 -> 12288.",
+    "12288 was justified by subject-free mechanical-capacity evidence and exact current Geppetto encoder FP32 forward/backward/AdamW feasibility on A100.",
+    "Every self-visible dense connected component is eligible regardless of dense-vertex fraction, closing the demonstrated tiny-visible-component escape.",
+    "Voxel compaction preserves dense connected-component identity, closing cross-component aliasing at negligible node-count cost."
+  ],
+  "mutation_rule":"After any new Knight Stage14 result is inspected, this policy may only be tightened prospectively; quality tolerances may never be relaxed to convert a failure into PASS. Search-budget changes require new subject-free capacity and compute evidence.",
+  "claim_boundary":"This policy does not claim Knight compliance, Stage14 PASS, Stage15 PASS, Geppetto fit PASS, or PRODUCT_PASS."
+}

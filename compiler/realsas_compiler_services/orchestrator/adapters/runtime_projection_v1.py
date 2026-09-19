@@ -9,13 +9,15 @@ import zlib
 from PIL import Image
 
 from compiler.realsas_compiler_core.motion_dynamic_proof_v1 import qualified_dynamic_motion_from_dict
+from compiler.realsas_compiler_core.motion_presentation_v1 import build_qualified_motion_presentation_v1
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     qualified_appearance_set_from_dict, qualified_camera_set_from_dict,
     qualified_composition_set_from_dict, qualified_mesh_from_dict,
     qualified_observation_set_from_dict, qualified_presentation_graph_from_dict,
+    rigging_surface_from_dict,
 )
 from compiler.realsas_compiler_core.runtime_projection_v1 import (
-    RuntimeTextureBindingIR, build_runtime_v4_projection,
+    RuntimeTextureBindingIR, build_runtime_v4_projection, runtime_v4_projection_hash,
 )
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
@@ -60,6 +62,9 @@ def project_runtime_v4_stage(ctx:dict)->dict:
     observation_set=qualified_observation_set_from_dict(
         _stage_output_payload(ctx,"07_OBSERVATION_CONTRACT_QUALIFIED","RealSaS.QualifiedObservationSetIR.v1")
     )
+    surface=rigging_surface_from_dict(
+        _stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
+    )
     mesh=qualified_mesh_from_dict(
         _stage_output_payload(ctx,"27_QUALIFIED_MESH_GATE","RealSaS.QualifiedMeshIR.v1")
     )
@@ -77,12 +82,29 @@ def project_runtime_v4_stage(ctx:dict)->dict:
     )
     root=ctx["run_root"]/"artifacts"/"36_RUNTIME_V4_PROJECT"
     textures=_transport_textures(ctx,observation_set,root)
+    motion_presentation=build_qualified_motion_presentation_v1(
+        dynamic=dynamic,mesh=mesh,surface=surface,appearance=appearance,
+        composition=composition,camera_set=camera_set,
+    )
     projection=build_runtime_v4_projection(
         mesh=mesh,presentation=presentation,appearance=appearance,composition=composition,
         camera_set=camera_set,dynamic=dynamic,observation_set_hash=observation_set.observation_set_hash,
         textures=textures,
     )
-    outputs=[_write_ir(root/"runtime_v4_projection.json",projection,authority_class="QUALIFIED_RUNTIME_V4_PROJECTION")]
+    projection=replace(
+        projection,
+        metadata={
+            **dict(projection.metadata or {}),
+            "motion_presentation_binding_hash":motion_presentation.motion_presentation_hash,
+            "presentation_optimization_domain":"PRESENTATION_ONLY__NO_POSE_MUTATION",
+        },
+        projection_hash="",
+    )
+    projection=replace(projection,projection_hash=runtime_v4_projection_hash(projection))
+    outputs=[
+        _write_ir(root/"qualified_motion_presentation.json",motion_presentation,authority_class="QUALIFIED_2D_MOTION_PRESENTATION"),
+        _write_ir(root/"runtime_v4_projection.json",projection,authority_class="QUALIFIED_RUNTIME_V4_PROJECTION"),
+    ]
     outputs.extend({
         "path":t.transport_png_path,"sha256":t.transport_png_sha256,
         "authority_class":"RUNTIME_SOURCE_TEXTURE_TRANSPORT","schema":"image/png",
@@ -93,5 +115,7 @@ def project_runtime_v4_stage(ctx:dict)->dict:
             "projection_hash":projection.projection_hash,"asset_count":len(projection.assets),
             "clip_count":len(projection.clips),"view_count":len(projection.views),
             "canonical_geometry_mutated":False,
+            "canonical_motion_mutated_by_presentation":False,
+            "motion_presentation_hash":motion_presentation.motion_presentation_hash,
         },
     }

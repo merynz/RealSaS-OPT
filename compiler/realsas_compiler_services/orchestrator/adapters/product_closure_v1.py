@@ -3,6 +3,7 @@ from __future__ import annotations
 """Stage-40 exact product closure adapter."""
 
 from compiler.realsas_compiler_core.product_closure_v1 import build_product_closure_seal
+from compiler.realsas_compiler_core.motion_presentation_v1 import qualified_motion_presentation_from_dict
 from compiler.realsas_compiler_core.authoring_bundle_v1 import materialize_editable_puppet_bundle_v1
 from compiler.realsas_compiler_core.motion_dynamic_proof_v1 import qualified_dynamic_motion_from_dict
 from compiler.realsas_compiler_core.runtime_projection_v1 import runtime_v4_projection_from_dict
@@ -25,6 +26,9 @@ def seal_product_closure_stage(ctx:dict)->dict:
     )
     dynamic=qualified_dynamic_motion_from_dict(
         _stage_output_payload(ctx,"35_MOTION_DYNAMIC_PROOF","RealSaS.QualifiedDynamicMotionIR.v1")
+    )
+    presentation_proof=qualified_motion_presentation_from_dict(
+        _stage_output_payload(ctx,"36_RUNTIME_V4_PROJECT","RealSaS.QualifiedMotionPresentationIR.v1")
     )
     projection=runtime_v4_projection_from_dict(
         _stage_output_payload(ctx,"36_RUNTIME_V4_PROJECT","RealSaS.RuntimeV4ProjectionIR.v1")
@@ -55,7 +59,7 @@ def seal_product_closure_stage(ctx:dict)->dict:
     )
     seal=build_product_closure_seal(
         product_state_hash=state.product_state_hash,rest=rest,dynamic=dynamic,projection=projection,
-        package=package,native=native,visual=visual,authoring=authoring,
+        presentation_proof=presentation_proof,package=package,native=native,visual=visual,authoring=authoring,
     )
     return {
         "status":"PASS",
@@ -70,6 +74,7 @@ def seal_product_closure_stage(ctx:dict)->dict:
             "professional_motion_clip_ids":list(seal.professional_motion_clip_ids),
             "founder_visual_pass_claimed":False,
             "editable_authoring_bundle_hash":authoring.authoring_bundle_hash,
+            "motion_presentation_hash":presentation_proof.motion_presentation_hash,
             "editable_export_passed":True,
         },
     }

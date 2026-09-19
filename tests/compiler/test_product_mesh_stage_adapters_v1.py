@@ -159,6 +159,7 @@ def _fixture(tmp_path):
         {"id":"22_SKIN_QUALIFIED","status":"PASS","outputs":[_out(w_path,"RealSaS.QualifiedSkinIR.v1")]},
     ]}
     return {
+        "run_id":"SUBJECT_FREE_TRIANGLE_V1",
         "run_root":run_root,
         "run_manifest":manifest,
         "ledger":ledger,

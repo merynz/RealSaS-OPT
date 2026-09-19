@@ -4,10 +4,10 @@
 > Bootstrap: `BOOTSTRAP_AUDIT_CLOSED`
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
-- Census artifacts in declared scope: **498 / 498 discovered (100%)**
+- Census artifacts in declared scope: **499 / 499 discovered (100%)**
 - Semantically reconciled: **67**
-- Catalogued but unreviewed: **431**
-- Semantic coverage: **13.5%**
+- Catalogued but unreviewed: **432**
+- Semantic coverage: **13.4%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -354,6 +354,10 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 
 - `KA-16CF961E600F` `CLOSURE` — `playback-stack-v1-20260916` :: `canonical/MAGE_FULL_ASSEMBLY_RUNTIME_V4_ADMISSION_CLOSURE_V1_20260918.json` @ blob `6e56b1298dc8`
 
+### 2026-09-19 :: COMPILER (1)
+
+- `KA-64BF978E27B0` `AUTHORITY_DECISION` — `main` :: `canonical/G5_MESH_POLICY_V2_CALIBRATION_AUTHORITY_20260919.json` @ blob `721275b52715`
+
 ### 2026-09-19 :: CROSS_CUTTING_OTHER (4)
 
 - `KA-854D0E1DF2D7` `AUDIT` — `main` :: `canonical/AUTOMATIC_SPINE_READINESS_AUDIT_20260919.md` @ blob `45a7dce977cd`
@@ -460,11 +464,11 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D2D319509ACF` `WORKFLOW` — `main` :: `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` @ blob `16bf42a72ecc`
 - `KA-03510A41D0D4` `WORKFLOW` — `main` :: `.github/workflows/prefit_observation_authority_v1.yml` @ blob `b04004000018`
 - `KA-FDE35053B8A7` `WORKFLOW` — `main` :: `.github/workflows/single_family_data_contract_v1.yml` @ blob `929df12d859e`
-- `KA-3C57C444C170` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `54de1f9d3c1f`
+- `KA-5DB63B07B57B` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `ba0e0d2cca05`
 - `KA-25BB7CDC0AB9` `AUTHORITY_DECISION` — `main` :: `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` @ blob `6b5fff12a484`
 - `KA-DC74ABB19F22` `PREREG` — `main` :: `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` @ blob `c01e1a65f75e`
 - `KA-E1571E78A4A5` `PREREG` — `main` :: `canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md` @ blob `36aef9ae6ecd`
-- `KA-54021304204D` `AUTHORITY_DECISION` — `main` :: `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` @ blob `0c7856a2d5f3`
+- `KA-A3DD558CFFBA` `AUTHORITY_DECISION` — `main` :: `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` @ blob `a08c9bc9b718`
 - `KA-4BA36C81DC37` `RESULT` — `main` :: `canonical/fit_mage_v1/CODEC_A0_EXACT_CONDITIONING_RESULT.json` @ blob `647d375bb65a`
 - `KA-2F8418D24D3C` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/fit_mage_v1/FIT_MAGE_CPU_V1_STATUS.md` @ blob `4edcee0fffff`
 - `KA-402A1F2E8E27` `AUTHORITY_DECISION` — `main` :: `experiments/family_selection_v1/post_freeze_family_selector_v1.py` @ blob `6571a60a4223`

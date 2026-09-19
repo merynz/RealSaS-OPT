@@ -19,8 +19,9 @@ from .motion_dynamic_proof_v1 import QualifiedDynamicMotionIR, qualified_dynamic
 from .playback_full_surface_v3 import CameraProjectionV3
 from .playback_runtime_v3 import (
     AppearanceProvenance, AttachmentKind, RuntimeV3FrameComposition, RuntimeV3Slot,
-    RuntimeV3TexturePayload, TopologyClass,
+    TopologyClass,
 )
+from compiler.realsas_compiler_services.export.runtime_v3 import RuntimeV3TexturePayload
 from .playback_runtime_v4 import (
     RuntimeV4AttachmentAsset, RuntimeV4Clip, RuntimeV4Frame, RuntimeV4PlaybackContract,
     RuntimeV4ViewAssetOverlay, RuntimeV4ViewOverlay, provenance_code,

@@ -3,41 +3,6 @@ name: Live Authority Context
 on:
   push:
     branches: [main]
-    paths:
-      - 'CURRENT_STATE.md'
-      - 'README.md'
-      - 'AGENTS.md'
-      - 'REPOSITORY_MAP.md'
-      - 'SYSTEM_INDEX.md'
-      - 'canonical/README.md'
-      - 'canonical/AUTHORITY_MAP_V1.json'
-      - 'canonical/CONTEXT_STATE_V2.json'
-      - 'canonical/ACTIVE_RUN_V1.json'
-      - 'canonical/MAINLINE_EXECUTION_PLAN_V1.json'
-      - 'canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md'
-      - 'canonical/BOOTSTRAP_COVERAGE_STATE_V1.json'
-      - 'canonical/AOA_ARTIFACT_DISPOSITION_V1.json'
-      - 'canonical/AUDIT_OF_AUDITS_CLOSURE_20260907.md'
-      - 'canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md'
-      - 'canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md'
-      - 'canonical/FIT1_EVIDENCE_INDEX_20260909.md'
-      - 'canonical/GEPPETTO_REFERENCE_STRENGTH_FIT1_CLOSURE_20260908.md'
-      - 'canonical/GEPPETTO_REFERENCE_STRENGTH_MAINLINE_PROMOTION_20260909.md'
-      - 'canonical/GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json'
-      - 'canonical/EXPERIMENT_REGISTRY_V3.json'
-      - 'canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl'
-      - 'canonical/EXPERIMENT_REGISTRY_V2.json'
-      - 'canonical/EXPERIMENT_REGISTRY_V1.json'
-      - 'canonical/SCIENTIFIC_JOURNAL_V1.jsonl'
-      - 'canonical/ARCHITECTURE_AUTHORITY_LEDGER_V2.md'
-      - 'canonical/EXPERIMENT_AUTHORITY_LEDGER_V2.md'
-      - 'canonical/BRANCH_AUTHORITY_V2.md'
-      - 'tools/build_knowledge_artifact_catalog.py'
-      - 'tools/render_fit1_commit_lineage.py'
-      - 'tools/render_authority_map.py'
-      - 'tools/render_rehydration_packet.py'
-      - 'tools/audit_context_coverage.py'
-      - '.github/workflows/live_authority_map.yml'
   create:
   delete:
   workflow_dispatch:

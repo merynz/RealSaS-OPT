@@ -2,6 +2,8 @@ import math
 import numpy as np
 import pytest
 
+from compiler.realsas_compiler_core.types import QualificationError
+
 from compiler.realsas_compiler_core.substrate.adequacy_v1 import (
     _eligible_dense_components,
     _mechanical_probe_metrics,

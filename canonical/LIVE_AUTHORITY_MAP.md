@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `7d6b1736d99749bd77e9fa51cf9d601191ab04802a187da4013bee09cc7ec9a3`
+> State fingerprint: `dd047fc51a1b47489c6f69e41fde2748b917a0299c435b2d3597ec65ac06b81b`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -31,17 +31,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `c22eb646bac5` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
+| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `539c0c53c8ce` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 133**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 135**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `c22eb646bac5` | canonical continuation branch |
+| `main` | `539c0c53c8ce` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -153,7 +153,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp` | `c69ab78eac42` | observed live; not explicitly registered active |
 | `repair/stage13-geometry-gate-v2-20260919` | `d577616728c2` | observed live; not explicitly registered active |
 | `repair/stage14-component-aware-compaction-v2-20260919` | `b6218afbf639` | observed live; not explicitly registered active |
-| `repair/stage14-mechanical-adequacy-v2-20260919` | `46504a38d775` | observed live; not explicitly registered active |
+| `repair/stage14-mechanical-adequacy-v2-20260919` | `bff985d65f6a` | observed live; not explicitly registered active |
 | `repair/stage14-visible-component-eligibility-v2-20260919` | `5caa591a7aa0` | observed live; not explicitly registered active |
 | `research/g5-coverage-v2-audit-20260919` | `aeaec75e1fe6` | observed live; not explicitly registered active |
 | `research/g5-mesh-v2-numerical-floor-20260919` | `28908a0019f6` | observed live; not explicitly registered active |
@@ -165,6 +165,8 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `research/stage14-gsa-v2b-compactor-20260919` | `703ce681f4f7` | observed live; not explicitly registered active |
 | `research/stage14-mechanical-capacity-curve-20260919` | `33f96046355c` | observed live; not explicitly registered active |
 | `research/stage14-surface-resident-representative-20260919` | `4ad1cce3fe93` | observed live; not explicitly registered active |
+| `research/stage14-v2-policy-calibration-20260919` | `b399a90c1c3a` | observed live; not explicitly registered active |
+| `research/stage14-v2-policy-calibration-fixed-20260919` | `f08716b32db9` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety` | `2eb09fe3e8c6` | observed live; not explicitly registered active |

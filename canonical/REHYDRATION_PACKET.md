@@ -7,14 +7,14 @@
 
 - Product: automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics
 - Current witness: Subject-2 Knight (run data only; architecture generic)
-- Current module: QualifiedMesh + QualifiedPresentationGraph authority implementation
-- Current state: PRODUCT_AUTHORITY_IMPLEMENTATION__REST_PRESERVATION_EXECUTABLE__MOTION_SEAM_OPEN
+- Current module: Motion source authority + Stage34 compiler seam
+- Current state: PRODUCT_AUTHORITY_IMPLEMENTATION__MOTION_SOURCE_EXECUTABLE__MOTION_COMPILE_SEAM_OPEN
 - Active experiment: SUBJECT2_KNIGHT_FULL_CLOSURE
-- Most recent closed gate: REST_SOURCE_PRESERVATION_STAGE32_IMPLEMENTATION_PASS
-- Canonical main: 6000ee96ad6f
+- Most recent closed gate: MOTION_SOURCE_STAGE33_IMPLEMENTATION_PASS
+- Canonical main: 330d45c5ea3b
 - Active run: SUBJECT2_KNIGHT_V1 — 0/40; next 01_SOURCE_BYTES_SEALED
-- Plan SHA-256: 06be699711786e3bac0be4d1aacca4df8198412f39dc3cdcf84a6e3000fdda1b
-- Promotion block: Stages 05 and 24-32 have executable typed adapters. Stage 32 uses a frozen subject-free admission policy and exact 8-view source replay; Stage 33 motion source/preset authority remains intentionally UNBOUND.
+- Plan SHA-256: 0332d3cf3288b497082dbb554a83c15c2eac3853b772669e3fe4b870d1f2421d
+- Promotion block: Stages 05 and 24-33 have executable typed adapters. Stage 33 seals reusable source identity separately from exact run authorization and binds Stage-29 product state plus Stage-32 rest preservation; Stage 34 motion compilation remains intentionally UNBOUND.
 - Scope warning: Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority
 
 ## Current machine authority
@@ -55,7 +55,7 @@
 
 ## Current scientific question
 
-Can the generic compiler seal a source/preset motion authority after exact rest/source preservation, then compile and prove visible run/idle motion without introducing a second mechanics or presentation truth?
+Can generic Stage 34 retarget/compile admitted source motion onto the exact canonical puppet state while preserving contacts, root trajectory, joint limits, attachment constraints and the deformation envelope before Stage 35 dynamic proof?
 
 ## Settled invariants
 

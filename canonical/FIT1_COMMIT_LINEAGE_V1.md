@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1836**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1840**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1848,6 +1848,10 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-19T10:04:36+03:00` | `772c4fd01bd8` | yes | CI_TEST, COMPILER_PROOF | tests: lock stage30 donor coordinate seam | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
 | `2026-09-19T10:06:24+03:00` | `b007b13c63d4` | yes | CI_TEST, COMPILER_PROOF | tests: align synthetic observation raster domain | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
 | `2026-09-19T10:09:15+03:00` | `6000ee96ad6f` | yes | CI_TEST, GOVERNANCE_CONTINUITY | mainline: bind stage32 rest preservation authority | `CURRENT_STATE.md`<br>`canonical/ACTIVE_RUN_V1.json`<br>`canonical/CONTEXT_STATE_V2.json`<br>`canonical/MAINLINE_EXECUTION_PLAN_V1.json`<br>`canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json`<br>`canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`<br>`tests/repository/test_mainline_execution_plan_v1.py` | `main` |
+| `2026-09-19T10:11:13+03:00` | `b8db4563fb85` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T10:11:58+03:00` | `e1cd2a148867` | yes | CI_TEST, COMPILER_PROOF | motion: add reusable source identity and run authorization seal | `compiler/realsas_compiler_core/motion_source_v1.py`<br>`tests/compiler/test_motion_source_v1.py` | `main` |
+| `2026-09-19T10:13:07+03:00` | `94e8bae46efe` | yes | CI_TEST, COMPILER_PROOF | motion: wire stage33 source and preset seal | `compiler/realsas_compiler_core/product_artifact_codec_v1.py`<br>`compiler/realsas_compiler_services/orchestrator/adapters/motion_source_v1.py`<br>`tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-19T10:26:01+03:00` | `330d45c5ea3b` | yes | CI_TEST, GOVERNANCE_CONTINUITY | mainline: bind stage33 motion source authority | `CURRENT_STATE.md`<br>`canonical/ACTIVE_RUN_V1.json`<br>`canonical/CONTEXT_STATE_V2.json`<br>`canonical/MAINLINE_EXECUTION_PLAN_V1.json`<br>`canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json`<br>`canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`<br>`tests/repository/test_mainline_execution_plan_v1.py` | `main` |
 
 ## Use rule
 

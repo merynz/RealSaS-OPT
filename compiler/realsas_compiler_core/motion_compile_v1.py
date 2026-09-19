@@ -274,11 +274,17 @@ def _external_tracks(*,asset,payload,skeleton,envelope,root_mode,retarget_map)->
     for raw_track in tuple(payload.get("tracks") or ()):
         row=dict(raw_track)
         if asset.source_space=="CANONICAL_JOINT_TRACKS_V1":
+            unknown=set(row)-{"canonical_joint_id","keyframes","metadata"}
+            if unknown:
+                raise QualificationError("MOTION_COMPILE_TRACK_FIELD_UNSUPPORTED")
             source_id=str(row.get("canonical_joint_id") or "")
             target_id=source_id
             if retarget_map:
                 raise QualificationError("MOTION_COMPILE_CANONICAL_TRACK_RETARGET_FORBIDDEN")
         elif asset.source_space=="SOURCE_RIG_TRACKS_V1":
+            unknown=set(row)-{"source_joint_id","keyframes","metadata"}
+            if unknown:
+                raise QualificationError("MOTION_COMPILE_TRACK_FIELD_UNSUPPORTED")
             source_id=str(row.get("source_joint_id") or "")
             if not source_id or source_id not in retarget_map:
                 raise QualificationError("MOTION_COMPILE_SOURCE_RIG_RETARGET_MISSING")
@@ -311,6 +317,8 @@ def _external_tracks(*,asset,payload,skeleton,envelope,root_mode,retarget_map)->
         ))
     if not tracks:
         raise QualificationError("MOTION_COMPILE_EXTERNAL_TRACKS_EMPTY")
+    if asset.source_space=="SOURCE_RIG_TRACKS_V1" and set(retarget_map)!=used_source:
+        raise QualificationError("MOTION_COMPILE_RETARGET_MAP_TRACK_ACCOUNTING_DRIFT")
     return tuple(sorted(tracks,key=lambda x:x.canonical_joint_id))
 
 

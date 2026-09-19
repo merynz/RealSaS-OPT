@@ -1,0 +1,43 @@
+name: stage13-geometry-gate-v2-calibration
+
+on:
+  push:
+    branches:
+      - research/stage13-geometry-gate-v2-calibration-20260919
+    paths:
+      - 'tools/stage13_geometry_gate_v2_subject_free_calibration.py'
+      - '.github/workflows/stage13_geometry_gate_v2_calibration.yml'
+  workflow_dispatch:
+
+jobs:
+  calibrate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_CALIBRATION_OUT: calibration_out
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Run 1024-native subject-free calibration
+        run: python tools/stage13_geometry_gate_v2_subject_free_calibration.py
+      - name: Assert no Knight or Mage subject dependency
+        run: |
+          ! grep -R -E 'SUBJECT2_KNIGHT|Knight\.fbx|MAGE_|Mage' tools/stage13_geometry_gate_v2_subject_free_calibration.py
+      - name: Upload calibration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage13-geometry-gate-v2-1024-calibration
+          path: calibration_out/
+          if-no-files-found: error

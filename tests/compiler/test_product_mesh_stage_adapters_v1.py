@@ -199,8 +199,8 @@ def _fixture(tmp_path):
         },
         "appearance":{
             "rest_preservation_policy":{
-                "path":str((ROOT/"canonical"/"REST_SOURCE_PRESERVATION_POLICY_V2_20260919.json").resolve()),
-                "sha256":_sha(ROOT/"canonical"/"REST_SOURCE_PRESERVATION_POLICY_V1_20260919.json"),
+                "path":str(rest_policy_path.resolve()),
+                "sha256":_sha(rest_policy_path),
             },
             "rest_preservation_calibration":{
                 "path":str(rest_calibration_path.resolve()),

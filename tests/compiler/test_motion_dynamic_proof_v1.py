@@ -123,4 +123,5 @@ def test_contact_plant_rejects_translating_root():
         build_qualified_dynamic_motion(
             motion=motion,constraints=constraints,product_state=state,skeleton=skeleton,
             mesh=mesh,mesh_skin=mesh_skin,presentation=presentation,mesh_policy=policy,
+            cameras=_proof_observation_args()[0],source_foreground_masks=_proof_observation_args()[1],
         )

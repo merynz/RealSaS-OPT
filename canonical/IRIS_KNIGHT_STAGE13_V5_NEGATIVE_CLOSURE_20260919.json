@@ -1,0 +1,21 @@
+{
+  "schema":"RealSaS.IRIS.KnightStage13V5NegativeClosure.v1",
+  "date_utc":"2026-09-19",
+  "subject_run_id":"SUBJECT2_KNIGHT_V1",
+  "run_id":"20260919T181853Z",
+  "status":"CLOSED_NEGATIVE_EVIDENCE",
+  "canonical_product_authority_minted":false,
+  "policy_mutation_after_result_forbidden":true,
+  "source_checkpoint_sha256":"59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+  "frozen_stage13_policy_sha256":"5fb4859ca09111c908abf3041ae46e0dd3e4c29ab3a373ea9c26ebf5c9b5c59e",
+  "prior_v4_decision_sha256":"4d0b358d661d393cb61f440f24a624c240d63621eba5a30bb7f4ee215f7fb74e",
+  "preregistration_sha256":"d2fa20a1221e512489d96c4ddf88fed1184ee2d2859774ae0d1b262e5227e799",
+  "decision_sha256":"9f020fcb3d8c81625ca5073afe0e7352b5a98168dedb22ac30445920030a5a8d",
+  "bundle_sha256":"aaaca38ba0e8ed1a782071ffb7e28ed187e3d16e0b4bfbd03352faae6d2b3da9",
+  "candidate_summary":{
+    "CONTROL_LO":{"interior":0.017352326943647384,"coherent":0.008419674749850243,"precision":0.9540383545283044,"recall":0.9698826922543609,"zero_bracket":0.908203125},
+    "SYMMETRIC_HI":{"interior":0.023838765325174104,"coherent":0.006695099491809408,"precision":0.9522813466563338,"recall":0.9613533928287074,"zero_bracket":0.9013671875},
+    "SYMMETRIC_LO":{"interior":0.016010111649462817,"coherent":0.008342022940563087,"precision":0.9511612851015618,"recall":0.9729998058737069,"zero_bracket":0.9140625}
+  },
+  "conclusion":"LOW_LR_IS_STABLE; symmetric margin repairs V4 precision collapse but margin-only optimization is insufficient for the frozen Stage13 interior gate; next test directly supervises source-interior ray occupancy."
+}

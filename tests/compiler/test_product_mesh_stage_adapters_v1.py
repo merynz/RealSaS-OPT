@@ -20,6 +20,10 @@ from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     mechanical_partition_from_dict,
     qualified_mesh_from_dict,
     qualified_mesh_skin_from_dict,
+    qualified_presentation_graph_from_dict,
+    qualified_appearance_set_from_dict,
+    qualified_composition_set_from_dict,
+    qualified_presentation_structure_from_dict,
     read_json,
     write_ir_json,
 )
@@ -32,6 +36,7 @@ from compiler.realsas_compiler_core.types import (
     SurfaceNode,
     SurfaceRelation,
 )
+from compiler.realsas_compiler_services.orchestrator.adapters.presentation_v1 import qualify_presentation_graph_stage
 from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
     build_canonical_mesh_candidate_stage,
     bind_qualified_mesh_skin_stage,
@@ -61,9 +66,9 @@ def _fixture(tmp_path):
     run_root=tmp_path/"run"
     surface=RiggingSurfaceIR(
         (
-            SurfaceNode("s0",(0.0,0.0,0.0),tuple(range(8)),("p0",),("o0",)),
-            SurfaceNode("s1",(1.0,0.0,0.0),tuple(range(8)),("p1",),("o1",)),
-            SurfaceNode("s2",(0.0,1.0,0.0),tuple(range(8)),("p2",),("o2",)),
+            SurfaceNode("s0",(0.0,0.0,0.0),tuple(range(8)),("p0",),("o0",),tuple((v,(4.0,4.0)) for v in range(8))),
+            SurfaceNode("s1",(1.0,0.0,0.0),tuple(range(8)),("p1",),("o1",),tuple((v,(6.0,4.0)) for v in range(8))),
+            SurfaceNode("s2",(0.0,1.0,0.0),tuple(range(8)),("p2",),("o2",),tuple((v,(4.0,2.0)) for v in range(8))),
         ),
         (
             SurfaceRelation("r01","s0","s1","LOCAL",1.0),
@@ -71,6 +76,7 @@ def _fixture(tmp_path):
             SurfaceRelation("r02","s0","s2","LOCAL",1.0),
         ),
         "surface-hash",
+        metadata={"raster_coordinate_system":"PIXEL_CENTER_XY","resolution":8},
     )
     skeleton=QualifiedSkeletonIR(
         (QualifiedJoint("j0",(0.0,0.0,0.0),None,("s0","s1","s2"),"proposal-root"),),
@@ -126,6 +132,7 @@ def _fixture(tmp_path):
         },
         "mesh":{"backend":"CANONICAL_RELATION_BASELINE_V1"},
         "observation":{"component_masks":[],"source_foreground_masks":[]},
+        "presentation":{"mode":"AUTO_ROLE_FREE_V1"},
     }
 
     observation_views=[]
@@ -241,3 +248,20 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     assert state.metadata["presentation_bound"] is False
     assert state.metadata["motion_bound"] is False
     assert len(state.product_state_hash)==64
+    _install_stage_outputs(ctx,"29_CANONICAL_PUPPET_STATE_SEALED",r29)
+
+    r30=qualify_presentation_graph_stage(ctx)
+    assert r30["status"]=="PASS",r30
+    by_schema={out["schema"]:out for out in r30["outputs"]}
+    structure=qualified_presentation_structure_from_dict(read_json(by_schema["RealSaS.QualifiedPresentationStructureIR.v1"]["path"]))
+    appearance=qualified_appearance_set_from_dict(read_json(by_schema["RealSaS.QualifiedAppearanceSetIR.v1"]["path"]))
+    composition=qualified_composition_set_from_dict(read_json(by_schema["RealSaS.QualifiedCompositionSetIR.v1"]["path"]))
+    graph=qualified_presentation_graph_from_dict(read_json(by_schema["RealSaS.QualifiedPresentationGraphIR.v1"]["path"]))
+    assert graph.presentation_structure_binding_hash==structure.structure_lineage_hash
+    assert graph.appearance_set_binding_hash==appearance.appearance_set_hash
+    assert graph.composition_set_binding_hash==composition.composition_set_hash
+    assert graph.product_state_binding_hash==state.product_state_hash
+    assert len(graph.view_overlays)==8
+    assert graph.qualification_report["single_canonical_mesh"] is True
+    assert graph.qualification_report["slot_order_solves_physical_occlusion"] is False
+    assert graph.qualification_report["categorical_recognition_used"] is False

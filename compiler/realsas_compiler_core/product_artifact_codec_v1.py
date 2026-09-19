@@ -16,6 +16,10 @@ from typing import Any
 from .playback_full_surface_v3 import CameraProjectionV3
 from .observation_authority_v1 import QualifiedObservationSetIR, QualifiedObservationViewIR
 from .canonical_puppet_state_v1 import CanonicalPuppetStateIR
+from .presentation_structure_v1 import QualifiedPresentationStructureIR
+from .product_appearance_v1 import QualifiedAppearanceSetIR
+from .product_composition_v1 import QualifiedCompositionSetIR, QualifiedCompositionViewIR
+from .v4_types import AppearanceBindingIR, AppearanceCornerBinding
 from .product_authority_v1 import (
     CanonicalMeshCandidateIR,
     CanonicalMeshVertexCandidateIR,
@@ -31,6 +35,11 @@ from .product_authority_v1 import (
     MeshQualificationPolicyIR,
     QualifiedMeshIR,
     QualifiedMeshVertexIR,
+    PresentationAttachmentIR,
+    PresentationDecisionEvidenceIR,
+    PresentationSlotIR,
+    PresentationViewOverlayIR,
+    QualifiedPresentationGraphIR,
 )
 from .types import (
     QualifiedJoint,
@@ -388,6 +397,168 @@ def canonical_puppet_state_from_dict(payload: Json) -> CanonicalPuppetStateIR:
         qualification_ledger=tuple(dict(row) for row in (payload.get("qualification_ledger") or ())),
         product_state_hash=str(payload["product_state_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.CanonicalPuppetStateIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def _appearance_binding_from_dict(payload: Json) -> AppearanceBindingIR:
+    _schema(payload, "RealSaS.AppearanceBindingIR.v1")
+    return AppearanceBindingIR(
+        target_view_index=int(payload["target_view_index"]),
+        mesh_binding_hash=str(payload["mesh_binding_hash"]),
+        camera_binding_hash=str(payload["camera_binding_hash"]),
+        corner_bindings=tuple(
+            AppearanceCornerBinding(
+                face_index=int(row["face_index"]),
+                corner_index=int(row["corner_index"]),
+                material_uv=tuple(map(float,row["material_uv"])),
+                donor_view_index=int(row["donor_view_index"]),
+                donor_raster_xy=tuple(map(float,row["donor_raster_xy"])),
+                source_observation_hash=str(row["source_observation_hash"]),
+                authority_class=str(row["authority_class"]),
+                completion_id=str(row.get("completion_id") or ""),
+                confidence=float(row.get("confidence",1.0)),
+            )
+            for row in (payload.get("corner_bindings") or ())
+        ),
+        appearance_lineage_hash=str(payload["appearance_lineage_hash"]),
+        atlas_payload_hash=str(payload.get("atlas_payload_hash") or ""),
+        schema_version=str(payload.get("schema_version") or "RealSaS.AppearanceBindingIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def qualified_appearance_set_from_dict(payload: Json) -> QualifiedAppearanceSetIR:
+    _schema(payload, "RealSaS.QualifiedAppearanceSetIR.v1")
+    return QualifiedAppearanceSetIR(
+        bindings=tuple(_appearance_binding_from_dict(dict(row)) for row in (payload.get("bindings") or ())),
+        surface_binding_hash=str(payload["surface_binding_hash"]),
+        mesh_binding_hash=str(payload["mesh_binding_hash"]),
+        observation_set_binding_hash=str(payload["observation_set_binding_hash"]),
+        appearance_set_hash=str(payload["appearance_set_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedAppearanceSetIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def qualified_presentation_structure_from_dict(payload: Json) -> QualifiedPresentationStructureIR:
+    _schema(payload, "RealSaS.QualifiedPresentationStructureIR.v1")
+    return QualifiedPresentationStructureIR(
+        slots=tuple(
+            PresentationSlotIR(
+                slot_id=str(row["slot_id"]),
+                bone_id=str(row["bone_id"]),
+                setup_order=int(row["setup_order"]),
+                default_attachment_id=None if row.get("default_attachment_id") is None else str(row["default_attachment_id"]),
+                keyable_channels=tuple(map(str,row.get("keyable_channels") or ())),
+                metadata=dict(row.get("metadata") or {}),
+            )
+            for row in (payload.get("slots") or ())
+        ),
+        attachments=tuple(
+            PresentationAttachmentIR(
+                attachment_id=str(row["attachment_id"]),
+                slot_id=str(row["slot_id"]),
+                mechanical_component_ids=tuple(map(str,row.get("mechanical_component_ids") or ())),
+                mechanical_class=str(row["mechanical_class"]),
+                carrier_class=str(row["carrier_class"]),
+                carrier_binding_hash=str(row["carrier_binding_hash"]),
+                metadata=dict(row.get("metadata") or {}),
+            )
+            for row in (payload.get("attachments") or ())
+        ),
+        decisions=tuple(
+            PresentationDecisionEvidenceIR(
+                decision_id=str(row["decision_id"]),
+                decision_kind=str(row["decision_kind"]),
+                authority_class=str(row["authority_class"]),
+                evidence_refs=tuple(map(str,row.get("evidence_refs") or ())),
+                metadata=dict(row.get("metadata") or {}),
+            )
+            for row in (payload.get("decisions") or ())
+        ),
+        surface_binding_hash=str(payload["surface_binding_hash"]),
+        skeleton_binding_hash=str(payload["skeleton_binding_hash"]),
+        skin_binding_hash=str(payload["skin_binding_hash"]),
+        mesh_binding_hash=str(payload["mesh_binding_hash"]),
+        partition_binding_hash=str(payload["partition_binding_hash"]),
+        carrier_policy_binding_hash=str(payload["carrier_policy_binding_hash"]),
+        product_state_binding_hash=str(payload["product_state_binding_hash"]),
+        structure_lineage_hash=str(payload["structure_lineage_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedPresentationStructureIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def qualified_composition_set_from_dict(payload: Json) -> QualifiedCompositionSetIR:
+    _schema(payload, "RealSaS.QualifiedCompositionSetIR.v1")
+    return QualifiedCompositionSetIR(
+        views=tuple(
+            QualifiedCompositionViewIR(
+                view_index=int(row["view_index"]),
+                camera_binding_hash=str(row["camera_binding_hash"]),
+                slot_order=tuple(map(str,row.get("slot_order") or ())),
+                physical_occlusion_rule=str(row["physical_occlusion_rule"]),
+                equal_depth_tiebreak=str(row["equal_depth_tiebreak"]),
+                slot_order_role=str(row["slot_order_role"]),
+                source_visible_owner_evidence_hash=str(row["source_visible_owner_evidence_hash"]),
+                composition_binding_hash=str(row["composition_binding_hash"]),
+                schema_version=str(row.get("schema_version") or "RealSaS.QualifiedCompositionViewIR.v1"),
+                metadata=dict(row.get("metadata") or {}),
+            )
+            for row in (payload.get("views") or ())
+        ),
+        product_state_binding_hash=str(payload["product_state_binding_hash"]),
+        mesh_binding_hash=str(payload["mesh_binding_hash"]),
+        observation_set_binding_hash=str(payload["observation_set_binding_hash"]),
+        presentation_structure_binding_hash=str(payload["presentation_structure_binding_hash"]),
+        composition_set_hash=str(payload["composition_set_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedCompositionSetIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def qualified_presentation_graph_from_dict(payload: Json) -> QualifiedPresentationGraphIR:
+    _schema(payload, "RealSaS.QualifiedPresentationGraphIR.v1")
+    structure=qualified_presentation_structure_from_dict({
+        "schema_version":"RealSaS.QualifiedPresentationStructureIR.v1",
+        "slots":payload.get("slots") or (),
+        "attachments":payload.get("attachments") or (),
+        "decisions":payload.get("decisions") or (),
+        "surface_binding_hash":"",
+        "skeleton_binding_hash":"",
+        "skin_binding_hash":"",
+        "mesh_binding_hash":"",
+        "partition_binding_hash":"",
+        "carrier_policy_binding_hash":"",
+        "product_state_binding_hash":"",
+        "structure_lineage_hash":"",
+    })
+    return QualifiedPresentationGraphIR(
+        slots=structure.slots,
+        attachments=structure.attachments,
+        view_overlays=tuple(
+            PresentationViewOverlayIR(
+                view_index=int(row["view_index"]),
+                camera_binding_hash=str(row["camera_binding_hash"]),
+                appearance_binding_hash=str(row["appearance_binding_hash"]),
+                composition_binding_hash=str(row["composition_binding_hash"]),
+                metadata=dict(row.get("metadata") or {}),
+            )
+            for row in (payload.get("view_overlays") or ())
+        ),
+        decisions=structure.decisions,
+        skeleton_binding_hash=str(payload["skeleton_binding_hash"]),
+        mesh_binding_hash=str(payload["mesh_binding_hash"]),
+        partition_binding_hash=str(payload["partition_binding_hash"]),
+        carrier_policy_binding_hash=str(payload["carrier_policy_binding_hash"]),
+        product_state_binding_hash=str(payload["product_state_binding_hash"]),
+        presentation_structure_binding_hash=str(payload["presentation_structure_binding_hash"]),
+        appearance_set_binding_hash=str(payload["appearance_set_binding_hash"]),
+        composition_set_binding_hash=str(payload["composition_set_binding_hash"]),
+        qualification_report=dict(payload.get("qualification_report") or {}),
+        presentation_lineage_hash=str(payload["presentation_lineage_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedPresentationGraphIR.v1"),
         metadata=dict(payload.get("metadata") or {}),
     )
 

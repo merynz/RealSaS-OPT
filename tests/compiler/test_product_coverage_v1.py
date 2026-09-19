@@ -188,7 +188,7 @@ def test_source_component_masks_must_exactly_partition_qualified_foreground():
         fg=bytes([1,1,0,0]); foreground[i]=fg
         cam_hash=camera_projection_binding_hash(cameras[i])
         views.append(QualifiedObservationViewIR(
-            i,2,2,f"obs-{i}",mask_sha256(fg),cam_hash,"PASS",(f"e-{i}",)
+            i,2,2,f"obs-{i}",f"{i+16:064x}",mask_sha256(fg),cam_hash,"PASS",(f"e-{i}",)
         ))
         for cid,mask in (("a",bytes([1,0,0,0])),("b",bytes([0,1,0,0]))):
             observations[(i,cid)]=ComponentObservationRasterIR(

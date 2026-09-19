@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "a5ebbdd94722a58699bfa1f2983a7e8cc80d9335",
+    "main": "b7beb279b38228c3c6413e50eac887f73552626c",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1869,
+  "commit_count": 1871,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -82840,6 +82840,60 @@
         "COMPILER_PROOF",
         "GOVERNANCE_CONTINUITY",
         "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c1c662b7f1d9689aafbbd186541141cc3d562a9e",
+      "parents": [
+        "a5ebbdd94722a58699bfa1f2983a7e8cc80d9335"
+      ],
+      "author_time": "2026-09-19T11:44:30+03:00",
+      "committer_time": "2026-09-19T11:44:30+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b7beb279b38228c3c6413e50eac887f73552626c",
+      "parents": [
+        "c1c662b7f1d9689aafbbd186541141cc3d562a9e"
+      ],
+      "author_time": "2026-09-19T12:18:28+03:00",
+      "committer_time": "2026-09-19T12:18:28+03:00",
+      "subject": "geometry: gate rest reprojection by source component recall",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/product_coverage_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v1.py",
+        "tests/compiler/test_stage13_source_component_recall_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "IRIS_GSA"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

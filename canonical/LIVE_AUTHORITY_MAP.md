@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `81253672d5e50dc9b4802a0b3863dcf71efe59550d0bf9b5381a9e8bda53f3b3`
+> State fingerprint: `95da2fc17887049c8a7db2c8b44027bf71fd95ae9c1acdeb4f7c5a3efee8b9dc`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -31,7 +31,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `a5ebbdd94722` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
+| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `b7beb279b382` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
 
 ## Branch inventory — observed live
 
@@ -41,7 +41,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `a5ebbdd94722` | canonical continuation branch |
+| `main` | `b7beb279b382` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 

@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.MainlineExecutionPlan.v1",
-  "date": "2026-09-18",
+  "date": "2026-09-19",
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__EXACT_8_VIEW_PUPPET_COMPILER__CANONICAL_QUALIFIED_MESH__QUALIFIED_PRESENTATION_GRAPH",
   "subject_specific_code_forbidden": true,
@@ -463,9 +463,9 @@
       "title": "Mechanical partition, boundary constraints, and carrier policy qualified",
       "group": "components",
       "depends_on": [
-        "23_ARACHNE_CHECKPOINT_SEALED"
+        "15_RIGGING_SURFACE_QUALIFIED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:qualify_mechanical_partition_and_carriers",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -474,8 +474,7 @@
       },
       "manifest_keys": [
         "components",
-        "carrier_policy",
-        "source_audit"
+        "carrier_policy"
       ]
     },
     {
@@ -484,9 +483,56 @@
       "title": "Deformation capability envelope preregistered and sealed",
       "group": "mesh",
       "depends_on": [
-        "23_ARACHNE_CHECKPOINT_SEALED"
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "18_SKELETON_QUALIFIED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:seal_deformation_capability_envelope",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "deformation_envelope"
+      ]
+    },
+    {
+      "ordinal": 26,
+      "id": "26_MESH_CANDIDATE_BUILD",
+      "title": "View-independent canonical mesh candidate build",
+      "group": "mesh",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "24_MECHANICAL_PARTITION_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:build_canonical_mesh_candidate_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "mesh",
+        "mesh_policy"
+      ]
+    },
+    {
+      "ordinal": 27,
+      "id": "27_QUALIFIED_MESH_GATE",
+      "title": "Canonical QualifiedMesh G1-G5 qualification",
+      "group": "mesh",
+      "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "18_SKELETON_QUALIFIED",
+        "22_SKIN_QUALIFIED",
+        "24_MECHANICAL_PARTITION_QUALIFIED",
+        "25_DEFORMATION_CAPABILITY_ENVELOPE",
+        "26_MESH_CANDIDATE_BUILD"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:qualify_canonical_mesh_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -499,66 +545,27 @@
       ]
     },
     {
-      "ordinal": 26,
-      "id": "26_MESH_CANDIDATE_BUILD",
-      "title": "View-independent canonical mesh candidate build",
-      "group": "mesh",
-      "depends_on": [
-        "24_MECHANICAL_PARTITION_QUALIFIED",
-        "25_DEFORMATION_CAPABILITY_ENVELOPE"
-      ],
-      "adapter": "UNBOUND",
-      "policy": {
-        "fail_closed": true,
-        "cacheable": true,
-        "output_hash_required": true,
-        "product_pass_authority": false
-      },
-      "manifest_keys": [
-        "mesh",
-        "carrier_policy"
-      ]
-    },
-    {
-      "ordinal": 27,
-      "id": "27_QUALIFIED_MESH_GATE",
-      "title": "Canonical QualifiedMesh G1-G5 qualification",
-      "group": "mesh",
-      "depends_on": [
-        "26_MESH_CANDIDATE_BUILD"
-      ],
-      "adapter": "UNBOUND",
-      "policy": {
-        "fail_closed": true,
-        "cacheable": true,
-        "output_hash_required": true,
-        "product_pass_authority": false
-      },
-      "manifest_keys": [
-        "mesh",
-        "mesh_policy",
-        "carrier_policy",
-        "observation"
-      ]
-    },
-    {
       "ordinal": 28,
       "id": "28_QUALIFIED_MESH_SKIN_TRANSFER",
       "title": "Deterministic QualifiedMeshSkin transfer",
       "group": "mesh",
       "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "18_SKELETON_QUALIFIED",
+        "22_SKIN_QUALIFIED",
+        "24_MECHANICAL_PARTITION_QUALIFIED",
+        "25_DEFORMATION_CAPABILITY_ENVELOPE",
+        "26_MESH_CANDIDATE_BUILD",
         "27_QUALIFIED_MESH_GATE"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:bind_qualified_mesh_skin_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
       },
-      "manifest_keys": [
-        "mesh"
-      ]
+      "manifest_keys": []
     },
     {
       "ordinal": 29,
@@ -566,19 +573,23 @@
       "title": "Canonical S/G/W/M/B plus carrier-policy product state sealed",
       "group": "product_state",
       "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "18_SKELETON_QUALIFIED",
+        "22_SKIN_QUALIFIED",
+        "24_MECHANICAL_PARTITION_QUALIFIED",
+        "25_DEFORMATION_CAPABILITY_ENVELOPE",
+        "26_MESH_CANDIDATE_BUILD",
+        "27_QUALIFIED_MESH_GATE",
         "28_QUALIFIED_MESH_SKIN_TRANSFER"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:seal_canonical_puppet_state_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
       },
-      "manifest_keys": [
-        "components",
-        "carrier_policy"
-      ]
+      "manifest_keys": []
     },
     {
       "ordinal": 30,

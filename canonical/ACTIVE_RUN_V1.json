@@ -5,8 +5,8 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__SUBJECT_DATA_ONLY_IN_RUN_ARTIFACTS",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
-  "pipeline_plan_sha256": "afe4ef66b56dcd14de4a2a493da72faede33947faf32a6121435872ba9faf83e",
-  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__QUALIFIED_MESH_ADMISSION_ACTIVE",
+  "pipeline_plan_sha256": "71ba83a99873ef231e6b6d45e3ccf1a6c806e8ea2b8296295ccb861adc538ef3",
+  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__STAGES_24_29_EXECUTABLE",
   "completed_count": 0,
   "total_count": 40,
   "next_stage": "01_SOURCE_BYTES_SEALED",
@@ -509,6 +509,10 @@
     {
       "event": "CARRIER_POLICY_AND_MESH_POLICY_AUTHORITY_BOUND",
       "note": "ComponentCarrierPolicyIR and MeshQualificationPolicyIR are now first-class hash-bound inputs. Stage 25 no longer depends on partition; stage 26 joins independent partition/carrier and deformation-envelope branches so carrier changes do not semantically own envelope calibration."
+    },
+    {
+      "event": "PRODUCT_MECHANICAL_STAGES_24_29_BOUND",
+      "note": "Stages 24-29 are now executable typed adapters. Dependencies were rebased to exact consumed authorities; stage 27 binds QualifiedObservationSet and z-visible G5 source partitions. Stage 30 remains intentionally UNBOUND pending presentation ownership production."
     }
   ]
 }

@@ -21,7 +21,7 @@
     "state": "PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING",
     "active_experiment": "SUBJECT2_KNIGHT_FULL_CLOSURE",
     "most_recent_closed_gate": "ALL_40_STAGE_ADAPTERS_IMPLEMENTED_AND_BOUND_READY_FOR_FINAL_CI",
-    "promotion_block": "All 40 stages have executable typed adapters and an explicit authority DAG. Repository mainline CI is green at the pre-performance-patch head; remaining work is live-context reconciliation, final CI after batch-render optimization, and exact Knight run inputs/external execution artifacts before 01→40 execution.",
+    "promotion_block": "Full-3D local-quaternion v2 is the professional motion candidate path: Stage34 compiles source motion semantics onto the exact target skeleton and Stage35 exact FK/LBS execution owns clip capability. Stage25/27 are numerical conditioning evidence only. The active plan/ledger hash is reconciled on the current candidate branch; remaining work is final CI, deterministic Blender extraction of the sealed Quaternius Idle/Run/Slash MotionSourceClip.v2 artifacts, and the exact Knight external fit/native-player inputs before 01→40 execution.",
     "scope_warning": "Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority",
     "scientific_question": "Can the exact Knight witness execute the generic 40-stage authority DAG end-to-end with hash-verified reuse, batch-native warm iteration, visible artist run motion and Stage-40 PRODUCT_PASS without subject-specific code?"
   },
@@ -96,8 +96,8 @@
     },
     {
       "name": "Motion",
-      "role": "3D FK/LBS + proof",
-      "canonical_rule": "must remain inside DeformationCapabilityEnvelopeIR or requalify"
+      "role": "full-3D quaternion compile + exact FK/LBS dynamic proof",
+      "canonical_rule": "Stage34 compiles full-3D local quaternion tracks; Stage35 exact target-skeleton FK/LBS execution mints clip capability. Stage25/27 conditioning probes do not define professional motion limits."
     },
     {
       "name": "Runtime",
@@ -114,7 +114,9 @@
     "Downstream failure cannot erase verified upstream PASS.",
     "Rest source preservation precedes motion authority.",
     "Visible native motion is required before product closure.",
-    "Multi-frame native visual proof uses content-addressed batch transport; scalar per-frame subprocess loops are not the product iteration path."
+    "Multi-frame native visual proof uses content-addressed batch transport; scalar per-frame subprocess loops are not the product iteration path.",
+    "Professional shipping motion uses MotionSourceClip.v2 full-3D local-quaternion semantics; legacy scalar motion is historical/mechanical evidence only.",
+    "Stage25 deformation-envelope and Stage27 G3 stress are numerical conditioning evidence only; Stage35 exact clip execution is the professional motion-capability authority."
   ],
   "known_context_traps": [
     {

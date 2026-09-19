@@ -194,46 +194,38 @@ def _axis_contract(ctx):
 
 def qualify_mechanical_partition_and_carriers(ctx:dict)->dict:
     surface=_load_surface(ctx)
-    cfg=dict(ctx["run_manifest"].get("components") or {})
-    overrides=[]
-    for row in tuple(cfg.get("boundary_overrides") or ()):
-        overrides.append(ComponentBoundaryConstraintIR(
-            constraint_id=str(row["constraint_id"]),
-            a_surface_id=str(row["a_surface_id"]),
-            b_surface_id=str(row["b_surface_id"]),
-            decision=str(row["decision"]),
-            evidence_refs=tuple(map(str,row.get("evidence_refs") or ())),
-            confidence=float(row.get("confidence",1.0)),
-            metadata=dict(row.get("metadata") or {}),
-        ))
-    partition=build_structural_partition(surface,boundary_overrides=tuple(overrides))
-
+    component_cfg=dict(ctx["run_manifest"].get("components") or {})
     carrier_cfg=dict(ctx["run_manifest"].get("carrier_policy") or {})
-    explicit={str(row["component_id"]):row for row in tuple(carrier_cfg.get("decisions") or ())}
-    unknown=set(explicit)-{c.component_id for c in partition.components}
-    if unknown:
-        return {"status":"FAIL","blockers":["CARRIER_POLICY_UNKNOWN_COMPONENT"],"diagnostics":{"unknown_component_ids":sorted(unknown)}}
-    decisions=[]
-    for component in partition.components:
-        row=explicit.get(component.component_id)
-        if row is None:
-            decisions.append(ComponentCarrierDecisionIR(
-                component.component_id,
-                "MESH",
-                ("CONSERVATIVE_DEFAULT_MESH_CARRIER_V1",),
-                metadata={"conservative_default":True,"planar_promotion_requires_explicit_evidence":True},
-            ))
-        else:
-            decisions.append(ComponentCarrierDecisionIR(
-                component.component_id,
-                str(row["carrier_class"]),
-                tuple(map(str,row.get("evidence_refs") or ())),
-                metadata=dict(row.get("metadata") or {}),
-            ))
+    if component_cfg:
+        return {"status":"BLOCKED","blockers":["MANUAL_COMPONENT_BOUNDARY_AUTHORING_FORBIDDEN"],
+                "diagnostics":{"unsupported_keys":sorted(component_cfg)}}
+    if carrier_cfg:
+        return {"status":"BLOCKED","blockers":["MANUAL_CARRIER_AUTHORING_FORBIDDEN"],
+                "diagnostics":{"unsupported_keys":sorted(carrier_cfg)}}
+
+    partition=build_structural_partition(surface,boundary_overrides=())
+    decisions=tuple(
+        ComponentCarrierDecisionIR(
+            component.component_id,
+            "MESH",
+            ("AUTOMATIC_CONSERVATIVE_MESH_CARRIER_V1",),
+            metadata={
+                "automatic":True,
+                "semantic_recognition_used":False,
+                "planar_optimization_deferred":True,
+            },
+        )
+        for component in partition.components
+    )
     carrier=build_component_carrier_policy(
         partition=partition,
-        decisions=tuple(decisions),
-        metadata={"default_carrier":"MESH","clip_is_presentation_only":True},
+        decisions=decisions,
+        metadata={
+            "default_carrier":"MESH",
+            "automatic":True,
+            "manual_carrier_authoring_used":False,
+            "clip_is_presentation_only":True,
+        },
     )
     validate_mechanical_partition(partition,surface)
     validate_component_carrier_policy(carrier,partition)
@@ -247,11 +239,11 @@ def qualify_mechanical_partition_and_carriers(ctx:dict)->dict:
         "diagnostics":{
             "component_count":len(partition.components),
             "unknown_boundary_count":sum(x.decision=="UNKNOWN" for x in partition.boundary_constraints),
-            "explicit_carrier_decision_count":len(explicit),
-            "conservative_mesh_default_count":len(partition.components)-len(explicit),
+            "manual_boundary_authoring":False,
+            "manual_carrier_authoring":False,
+            "all_components_mesh_carrier":True,
         },
     }
-
 
 def seal_deformation_capability_envelope(ctx:dict)->dict:
     skeleton=_load_skeleton(ctx)

@@ -18,6 +18,7 @@ class QualifiedObservationViewIR:
     width:int
     height:int
     source_observation_hash:str
+    source_raster_sha256:str
     foreground_mask_sha256:str
     camera_binding_hash:str
     qualification_state:str
@@ -51,7 +52,12 @@ def validate_qualified_observation_set(value:QualifiedObservationSetIR)->None:
     for row in rows:
         if row.width<=0 or row.height<=0:
             raise QualificationError("OBSERVATION_VIEW_DIMENSION_INVALID")
-        if not row.source_observation_hash or len(row.foreground_mask_sha256)!=64 or not row.camera_binding_hash:
+        if (
+            not row.source_observation_hash
+            or len(row.source_raster_sha256)!=64
+            or len(row.foreground_mask_sha256)!=64
+            or not row.camera_binding_hash
+        ):
             raise QualificationError("OBSERVATION_VIEW_AUTHORITY_BINDING_MISSING")
         if row.qualification_state not in _ALLOWED_STATES:
             raise QualificationError("OBSERVATION_VIEW_NOT_PRODUCT_QUALIFIED")

@@ -141,7 +141,9 @@ def _fixture(tmp_path):
         fg_path=tmp_path/f"source_fg_v{camera.view_index}.bin"; fg_path.write_bytes(fg)
         obs_hash=content_sha256({"view":camera.view_index,"fixture":"triangle"})
         observation_views.append(QualifiedObservationViewIR(
-            camera.view_index,8,8,obs_hash,_sha(fg_path),camera_projection_binding_hash(camera),
+            camera.view_index,8,8,obs_hash,
+            content_sha256({"source-raster":camera.view_index,"fixture":"triangle"}),
+            _sha(fg_path),camera_projection_binding_hash(camera),
             "PASS",(f"fixture-observation-{camera.view_index}",),
         ))
         source_foreground_rows.append({

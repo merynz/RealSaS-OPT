@@ -92,6 +92,7 @@ def qualified_observation_set_from_dict(payload: Json) -> QualifiedObservationSe
                 width=int(row["width"]),
                 height=int(row["height"]),
                 source_observation_hash=str(row["source_observation_hash"]),
+                source_raster_sha256=str(row["source_raster_sha256"]),
                 foreground_mask_sha256=str(row["foreground_mask_sha256"]),
                 camera_binding_hash=str(row["camera_binding_hash"]),
                 qualification_state=str(row["qualification_state"]),

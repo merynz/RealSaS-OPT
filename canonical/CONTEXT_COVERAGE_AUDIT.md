@@ -6,7 +6,7 @@
 
 ## Coverage
 
-- Git-tracked files: **1103**
+- Git-tracked files: **1105**
 - High-signal knowledge artifacts: **319**
 - Explained by continuity policy: **319**
 - Unexplained high-signal artifacts: **0**
@@ -100,8 +100,8 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `5b8e66071b73` | `CANONICAL` | canonical branch |
-| `motion/quaternius-materializer-v1-20260919` | `7300665c8afc` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `main` | `18bca584f2ee` | `CANONICAL` | canonical branch |
+| `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

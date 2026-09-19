@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1931**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1935**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1943,6 +1943,10 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-19T14:54:09+03:00` | `1ec74be48ab4` | no | GOVERNANCE_CONTINUITY | canonical: update current state for full-3D motion v2 | `CURRENT_STATE.md` | `fix/motion-v2-root-frame-20260919` |
 | `2026-09-19T15:00:11+03:00` | `33afc46ce883` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | motion: fix v2 root translation frame semantics | `CURRENT_STATE.md`<br>`canonical/ACTIVE_RUN_V1.json`<br>`canonical/CONTEXT_STATE_V2.json`<br>`canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_V1.json`<br>`canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`<br>`compiler/realsas_compiler_core/joint_frames_v1.py`<br>`compiler/realsas_compiler_core/motion_compile_v2.py`<br>`tests/compiler/test_motion_compile_v2.py`<br>`tests/compiler/test_motion_dynamic_proof_v2.py`<br>`tools/motion/blender_extract_motion_source_v2.py` | `main`<br>`motion/quaternius-materializer-v1-20260919` |
 | `2026-09-19T15:02:21+03:00` | `5b8e66071b73` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T15:04:05+03:00` | `7300665c8afc` | yes | OTHER | motion: add sealed Quaternius preset materializer | `tools/motion/materialize_quaternius_preset_v1.py` | `main`<br>`motion/quaternius-materializer-v1-20260919` |
+| `2026-09-19T15:04:17+03:00` | `3179a238ac8c` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T15:04:35+03:00` | `f17bc5050f2b` | yes | CI_TEST, COMPILER_PROOF | tests: lock sealed Quaternius materialization contract | `tests/compiler/test_quaternius_motion_materializer_v1.py` | `main`<br>`motion/quaternius-materializer-v1-20260919` |
+| `2026-09-19T15:18:07+03:00` | `18bca584f2ee` | yes | OTHER | Merge pull request #38 from merynz/motion/quaternius-materializer-v1-20260919 | _none_ | `main` |
 
 ## Use rule
 

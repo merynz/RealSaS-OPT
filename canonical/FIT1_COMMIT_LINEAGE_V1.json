@@ -52,8 +52,8 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "5b8e66071b73032225ba3f2877fd953a11e12467",
-    "motion/quaternius-materializer-v1-20260919": "33afc46ce883c06fee06dc869318a2b398d2ee17",
+    "main": "18bca584f2eeb24f29dc2d05b4d171a17c005654",
+    "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -89,7 +89,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1931,
+  "commit_count": 1935,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -86053,6 +86053,100 @@
       "subsystem_tags": [
         "FIT_DATA",
         "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7300665c8afc8113f0705004888dbc2c3d8d3309",
+      "parents": [
+        "33afc46ce883c06fee06dc869318a2b398d2ee17"
+      ],
+      "author_time": "2026-09-19T15:04:05+03:00",
+      "committer_time": "2026-09-19T15:04:05+03:00",
+      "subject": "motion: add sealed Quaternius preset materializer",
+      "branches_containing": [
+        "main",
+        "motion/quaternius-materializer-v1-20260919"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/motion/materialize_quaternius_preset_v1.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3179a238ac8cfff6eef49203f6af62676265cc88",
+      "parents": [
+        "5b8e66071b73032225ba3f2877fd953a11e12467"
+      ],
+      "author_time": "2026-09-19T15:04:17+03:00",
+      "committer_time": "2026-09-19T15:04:17+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
+      "parents": [
+        "7300665c8afc8113f0705004888dbc2c3d8d3309"
+      ],
+      "author_time": "2026-09-19T15:04:35+03:00",
+      "committer_time": "2026-09-19T15:04:35+03:00",
+      "subject": "tests: lock sealed Quaternius materialization contract",
+      "branches_containing": [
+        "main",
+        "motion/quaternius-materializer-v1-20260919"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_quaternius_motion_materializer_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "18bca584f2eeb24f29dc2d05b4d171a17c005654",
+      "parents": [
+        "3179a238ac8cfff6eef49203f6af62676265cc88",
+        "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125"
+      ],
+      "author_time": "2026-09-19T15:18:07+03:00",
+      "committer_time": "2026-09-19T15:18:07+03:00",
+      "subject": "Merge pull request #38 from merynz/motion/quaternius-materializer-v1-20260919",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [],
+      "subsystem_tags": [
+        "OTHER"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

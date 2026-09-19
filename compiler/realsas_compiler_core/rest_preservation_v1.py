@@ -54,6 +54,10 @@ class RestPreservationViewMeasurementIR:
     premultiplied_rgb_mae:float
     premultiplied_rgb_p95:float
     alpha_mae:float
+    overlap_pixel_count:int
+    overlap_rgba_mismatch_pixel_count:int
+    overlap_rgba_mismatch_fraction:float
+    overlap_rgba_max_abs_channel_error_u8:int
     direct_source_geometry_fraction:float
     cross_view_source_geometry_fraction:float
     metric_contract_hash:str=REST_PRESERVATION_METRIC_CONTRACT_HASH
@@ -174,7 +178,16 @@ def measure_rest_source_preservation(
         alpha_iou=1.0 if union_count==0 else float(intersection)/float(union_count)
         edge_mean,edge_p95,edge_max=_silhouette_distance(source_mask,rendered_mask)
         union=source_mask|rendered_mask
+        overlap=source_mask&rendered_mask
+        if not np.any(overlap):
+            raise QualificationError("REST_PRESERVATION_EMPTY_FOREGROUND_OVERLAP")
         rgb_mae,rgb_p95,alpha_mae=_appearance_error(source,rendered,union)
+        diff=np.abs(source.astype(np.int16)-rendered.astype(np.int16))
+        overlap_diff=diff[overlap]
+        overlap_count=int(np.count_nonzero(overlap))
+        mismatch_pixels=int(np.count_nonzero(np.any(overlap_diff!=0,axis=1)))
+        mismatch_fraction=float(mismatch_pixels)/float(overlap_count)
+        max_channel_error=int(np.max(overlap_diff)) if overlap_diff.size else 0
         geometry=max(1,int(render_row.geometry_visible_pixel_count))
         direct=float(render_row.direct_source_geometry_pixel_count)/float(geometry)
         cross=float(render_row.cross_view_source_geometry_pixel_count)/float(geometry)
@@ -195,6 +208,10 @@ def measure_rest_source_preservation(
             premultiplied_rgb_mae=rgb_mae,
             premultiplied_rgb_p95=rgb_p95,
             alpha_mae=alpha_mae,
+            overlap_pixel_count=overlap_count,
+            overlap_rgba_mismatch_pixel_count=mismatch_pixels,
+            overlap_rgba_mismatch_fraction=mismatch_fraction,
+            overlap_rgba_max_abs_channel_error_u8=max_channel_error,
             direct_source_geometry_fraction=direct,
             cross_view_source_geometry_fraction=cross,
             metadata={

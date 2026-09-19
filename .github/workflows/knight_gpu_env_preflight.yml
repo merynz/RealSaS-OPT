@@ -1,0 +1,37 @@
+name: knight-gpu-env-preflight
+
+on:
+  push:
+    branches:
+      - ops/knight-stage09-15-continuation-20260919
+    paths:
+      - '.github/workflows/knight_gpu_env_preflight.yml'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: GPU and Python probe
+        run: |
+          set -euxo pipefail
+          nvidia-smi
+          echo "PATH=$PATH"
+          for p in python3 python /usr/bin/python3 /home/monster/miniconda3/bin/python /home/monster/anaconda3/bin/python; do
+            if command -v "$p" >/dev/null 2>&1 || [ -x "$p" ]; then
+              echo "=== $p ==="
+              "$p" - <<'PY' || true
+import sys
+print("python",sys.executable,sys.version)
+try:
+ import torch
+ print("torch",torch.__version__,"cuda_build",torch.version.cuda,"available",torch.cuda.is_available())
+ if torch.cuda.is_available():
+  print("gpu",torch.cuda.get_device_name(0),"vram",torch.cuda.get_device_properties(0).total_memory)
+except Exception as e:
+ print("torch_probe_error",type(e).__name__,str(e))
+PY
+            fi
+          done

@@ -18,6 +18,7 @@ from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     source_connected_component_recall_metrics,
 )
 from compiler.realsas_compiler_core.playback_full_surface_v3 import project_points_xyz_v3
+from compiler.realsas_compiler_core.rest_preservation_v1 import silhouette_distance_metrics
 from compiler.realsas_compiler_core.preproduct_authority_v1 import (
     RestReprojectionGeometryGateIR, RestReprojectionGeometryViewIR,
     RiggingSurfaceQualificationIR, SignedZeroSurfaceSealIR,
@@ -189,6 +190,29 @@ def _source_foreground(ctx,observation):
     return out
 
 
+def _geometry_gate_policy_v2(cfg:dict)->dict|None:
+    keys=(
+        "min_recall","min_precision",
+        "max_largest_coherent_hole_fraction","max_interior_uncovered_fraction",
+        "min_component_recall","component_min_foreground_fraction",
+        "max_silhouette_edge_p95_px",
+    )
+    if any(k not in cfg for k in keys):
+        return None
+    policy={k:float(cfg[k]) for k in keys}
+    if not (
+        0<=policy["min_recall"]<=1 and 0<=policy["min_precision"]<=1 and
+        0<=policy["max_largest_coherent_hole_fraction"]<=1 and
+        0<=policy["max_interior_uncovered_fraction"]<=1 and
+        0<=policy["min_component_recall"]<=1 and
+        0<=policy["component_min_foreground_fraction"]<=1 and
+        math.isfinite(policy["max_silhouette_edge_p95_px"]) and
+        policy["max_silhouette_edge_p95_px"]>=0
+    ):
+        raise QualificationError("GEOMETRY_GATE_THRESHOLD_RANGE_INVALID")
+    return policy
+
+
 def qualify_rest_reprojection_geometry_stage(ctx:dict)->dict:
     zero=signed_zero_surface_from_dict(
         _stage_output_payload(ctx,"12_ZERO_SURFACE_DECODED","RealSaS.SignedZeroSurfaceSealIR.v1")
@@ -206,22 +230,15 @@ def qualify_rest_reprojection_geometry_stage(ctx:dict)->dict:
     world=np.asarray(normalization.center_xyz,dtype=np.float64)[None,:]+np.asarray(vertices,dtype=np.float64)*float(normalization.half_extent)
     source=_source_foreground(ctx,observation)
     cfg=dict(ctx["run_manifest"].get("geometry_gate") or {})
-    keys=(
-        "min_recall","min_precision",
-        "max_largest_coherent_hole_fraction","max_interior_uncovered_fraction",
-        "min_component_recall","component_min_foreground_fraction",
-    )
-    if any(k not in cfg for k in keys):
-        return {"status":"BLOCKED","blockers":["GEOMETRY_GATE_EXPLICIT_THRESHOLDS_REQUIRED"],"diagnostics":{"required":list(keys)}}
-    policy={k:float(cfg[k]) for k in keys}
-    if not (
-        0<=policy["min_recall"]<=1 and 0<=policy["min_precision"]<=1 and
-        0<=policy["max_largest_coherent_hole_fraction"]<=1 and
-        0<=policy["max_interior_uncovered_fraction"]<=1 and
-        0<=policy["min_component_recall"]<=1 and
-        0<=policy["component_min_foreground_fraction"]<=1
-    ):
-        raise QualificationError("GEOMETRY_GATE_THRESHOLD_RANGE_INVALID")
+    policy=_geometry_gate_policy_v2(cfg)
+    if policy is None:
+        required=(
+            "min_recall","min_precision",
+            "max_largest_coherent_hole_fraction","max_interior_uncovered_fraction",
+            "min_component_recall","component_min_foreground_fraction",
+            "max_silhouette_edge_p95_px",
+        )
+        return {"status":"BLOCKED","blockers":["GEOMETRY_GATE_EXPLICIT_THRESHOLDS_REQUIRED"],"diagnostics":{"required":list(required)}}
 
     obs={int(v.view_index):v for v in observation.views}; rows=[]
     for camera in sorted(cameras.cameras,key=lambda c:c.view_index):
@@ -237,6 +254,11 @@ def qualify_rest_reprojection_geometry_stage(ctx:dict)->dict:
             triangles,width=int(authority.width),height=int(authority.height)
         )
         metrics=coverage_metrics(source[vi],predicted,width=int(authority.width),height=int(authority.height))
+        source_mask=np.frombuffer(source[vi],dtype=np.uint8).reshape(int(authority.height),int(authority.width)).astype(bool)
+        predicted_mask=np.frombuffer(predicted,dtype=np.uint8).reshape(int(authority.height),int(authority.width)).astype(bool)
+        silhouette_edge_mean_px,silhouette_edge_p95_px,silhouette_edge_max_px=silhouette_distance_metrics(
+            source_mask,predicted_mask
+        )
         component_metrics=source_connected_component_recall_metrics(
             source[vi],predicted,
             width=int(authority.width),height=int(authority.height),
@@ -248,7 +270,8 @@ def qualify_rest_reprojection_geometry_stage(ctx:dict)->dict:
             metrics["recall"]>=policy["min_recall"] and metrics["precision"]>=policy["min_precision"] and
             metrics["largest_coherent_hole_fraction"]<=policy["max_largest_coherent_hole_fraction"] and
             metrics["interior_uncovered_fraction"]<=policy["max_interior_uncovered_fraction"] and
-            component_metrics["minimum_eligible_component_recall"]>=policy["min_component_recall"]
+            component_metrics["minimum_eligible_component_recall"]>=policy["min_component_recall"] and
+            silhouette_edge_p95_px<=policy["max_silhouette_edge_p95_px"]
         )
         rows.append(RestReprojectionGeometryViewIR(
             vi,float(metrics["recall"]),float(metrics["precision"]),
@@ -260,6 +283,12 @@ def qualify_rest_reprojection_geometry_stage(ctx:dict)->dict:
                 "component_recall_passed":bool(
                     component_metrics["minimum_eligible_component_recall"]>=policy["min_component_recall"]
                 ),
+                "silhouette_edge_mean_px":float(silhouette_edge_mean_px),
+                "silhouette_edge_p95_px":float(silhouette_edge_p95_px),
+                "silhouette_edge_max_px":float(silhouette_edge_max_px),
+                "silhouette_edge_passed":bool(
+                    silhouette_edge_p95_px<=policy["max_silhouette_edge_p95_px"]
+                ),
             },
         ))
     all_pass=all(row.passed for row in rows)
@@ -267,7 +296,11 @@ def qualify_rest_reprojection_geometry_stage(ctx:dict)->dict:
         zero.zero_surface_hash,observation.observation_set_hash,cameras.camera_set_hash,policy,tuple(rows),
         {"status":"PASS" if all_pass else "FAIL","every_view_passed":all_pass,"view_count":8,
          "appearance_authority_used":False,"teacher_truth_used":False},"",
-        metadata={"raster_fill":"HALF_INTEGER_TOP_LEFT","metric_contract":"G5_COVERAGE_METRICS_REUSE_V1"},
+        metadata={
+            "raster_fill":"HALF_INTEGER_TOP_LEFT",
+            "metric_contract":"STAGE13_GEOMETRY_V2__G5_COVERAGE_PLUS_SYMMETRIC_SILHOUETTE_DISTANCE",
+            "silhouette_metric":"SYMMETRIC_NEAREST_BOUNDARY_DISTANCE_PIXELS",
+        },
     )
     value=replace(value,geometry_gate_hash=rest_reprojection_geometry_gate_hash(value))
     if not all_pass:

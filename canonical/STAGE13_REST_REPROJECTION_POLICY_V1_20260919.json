@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.Stage13RestReprojectionPolicy.v1",
-  "status": "FROZEN_AFTER_SUBJECT_FREE_CALIBRATION_BEFORE_KNIGHT_STAGE13_RESULT",
+  "status": "SUPERSEDED__NO_NEW_PASS_AUTHORITY",
   "authority": "NORMATIVE_STAGE13_GEOMETRY_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_RESULT",
   "calibration_seal": "canonical/STAGE13_14_SUBJECT_FREE_CALIBRATION_SEAL_20260919.json",
   "selected_profile": "IRIS_FIT_VISIBLE_GATE_PLUS_PRODUCT_ANTI_HOLE",
@@ -10,7 +10,7 @@
     "max_largest_coherent_hole_fraction": 0.005,
     "max_interior_uncovered_fraction": 0.005,
     "min_component_recall": 0.96,
-    "component_min_foreground_fraction": 0.0
+    "component_min_foreground_fraction": 0
   },
   "rationale": [
     "Stage13 qualifies raw IRIS zero-surface reprojection, not final QualifiedMesh G5 product geometry.",
@@ -38,5 +38,7 @@
     "aggregate_compensation_forbidden": true
   },
   "mutation_rule": "After Knight Stage13 result inspection this policy may only be tightened prospectively; it may never be relaxed to convert a failure into PASS.",
-  "claim_boundary": "This policy does not claim Knight compliance, Stage13 PASS, Stage15 PASS, or PRODUCT_PASS."
+  "claim_boundary": "Historical policy evidence only. It MUST NOT be used to mint a new Stage13 PASS.",
+  "superseded_by": "canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json",
+  "supersession_reason": "V1 used 512x512 calibration, treated systematic one-pixel global erosion/dilation as ACCEPT, omitted silhouette-distance admission, and used a coarse candidate grid that jumped from final-mesh 0.995 precision to 0.94."
 }

@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `2176d5641444b3ba96ba70cb21d6f5198f1b26f0b17ce6d2892db4258db1453a`
+> State fingerprint: `b47013abbaaefeb9517caa6df98c5033a8c4a337a932a2c30177dedb386df3ff`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -31,17 +31,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `8d58ea0b9879` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
+| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `70f942977fdd` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 119**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 120**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `8d58ea0b9879` | canonical continuation branch |
+| `main` | `70f942977fdd` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -138,7 +138,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `noop` | `c6b5108f672b` | observed live; not explicitly registered active |
 | `noop2` | `c6b5108f672b` | observed live; not explicitly registered active |
 | `ops/knight-authority-inventory-20260919` | `5912a2cd042c` | observed live; not explicitly registered active |
-| `ops/knight-stage09-15-continuation-20260919` | `8d58ea0b9879` | observed live; not explicitly registered active |
+| `ops/knight-stage09-15-continuation-20260919` | `a431a35d613b` | observed live; not explicitly registered active |
 | `ops/temp-trigger-n1d-v2-recovery-20260820` | `536b40b6a6bf` | observed live; not explicitly registered active |
 | `ops/trigger-n1d-v2-recovery-v2-verify-20260820` | `12a813a8f501` | observed live; not explicitly registered active |
 | `playback-stack-v1-20260916-p0p1-staging` | `d88a5fc9aa66` | observed live; not explicitly registered active |
@@ -151,6 +151,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `repair/mage-full-subject-reclosure-20260912-adaptive-steiner-tmp` | `221ad1b79eae` | observed live; not explicitly registered active |
 | `repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp` | `c69ab78eac42` | observed live; not explicitly registered active |
 | `research/knight-stage13-14-calibration-20260919` | `ee52ecf21689` | observed live; not explicitly registered active |
+| `research/stage13-geometry-gate-v2-calibration-20260919` | `a9ea51c3fd8c` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety` | `2eb09fe3e8c6` | observed live; not explicitly registered active |

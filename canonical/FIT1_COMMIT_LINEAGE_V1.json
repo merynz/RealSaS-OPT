@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "3c8af916fcdb1ce55311626c07375949600b2ab6",
+    "main": "bada60d2e28c6e134a5bae3a4d3a5d718bb2f9f3",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1895,
+  "commit_count": 1901,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -83485,6 +83485,142 @@
       "subsystem_tags": [
         "CI_TEST",
         "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5685bcd3b1f51376a5a8e87e901d055853acaecc",
+      "parents": [
+        "3c8af916fcdb1ce55311626c07375949600b2ab6"
+      ],
+      "author_time": "2026-09-19T13:16:11+03:00",
+      "committer_time": "2026-09-19T13:16:11+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0d5edfa987fe5909bffc4a5d229b66b65e9f8b07",
+      "parents": [
+        "5685bcd3b1f51376a5a8e87e901d055853acaecc"
+      ],
+      "author_time": "2026-09-19T14:16:56+03:00",
+      "committer_time": "2026-09-19T14:16:56+03:00",
+      "subject": "motion: add deterministic joint-frame derivation [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/joint_frames_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "44b918db6819b6df7921fe6e4e5045a2c0a810c3",
+      "parents": [
+        "0d5edfa987fe5909bffc4a5d229b66b65e9f8b07"
+      ],
+      "author_time": "2026-09-19T14:17:46+03:00",
+      "committer_time": "2026-09-19T14:17:46+03:00",
+      "subject": "motion: add full-3D quaternion compiler v2 [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ad22990afe74a193223853dda0e3aa5253ea8748",
+      "parents": [
+        "44b918db6819b6df7921fe6e4e5045a2c0a810c3"
+      ],
+      "author_time": "2026-09-19T14:17:58+03:00",
+      "committer_time": "2026-09-19T14:17:58+03:00",
+      "subject": "tests: cover quaternion motion frames and unequal-rig retarget",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_motion_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "44fdee11b36361100e5670190ec9d5934a4f3422",
+      "parents": [
+        "ad22990afe74a193223853dda0e3aa5253ea8748"
+      ],
+      "author_time": "2026-09-19T14:18:51+03:00",
+      "committer_time": "2026-09-19T14:18:51+03:00",
+      "subject": "motion: add quaternion FK LBS dynamic proof v2 [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_dynamic_proof_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bada60d2e28c6e134a5bae3a4d3a5d718bb2f9f3",
+      "parents": [
+        "44fdee11b36361100e5670190ec9d5934a4f3422"
+      ],
+      "author_time": "2026-09-19T14:19:07+03:00",
+      "committer_time": "2026-09-19T14:19:07+03:00",
+      "subject": "tests: prove quaternion FK escapes scalar XY motion",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_motion_dynamic_proof_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

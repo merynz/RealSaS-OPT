@@ -35,13 +35,13 @@ Carrier-class policy must be frozen before candidate qualification. `ComponentCa
 
 ## DeformationCapabilityEnvelopeIR
 
-The envelope is a qualification-policy artifact shared by:
+The envelope is a numerical conditioning-policy artifact used by:
 - G3 mesh stress qualification,
 - consequential-UNKNOWN analysis,
 - UNSEEN exposure qualification,
-- MotionProof clip admissibility.
+- Stage35 diagnostics/proof lineage.
 
-It binds exact skeleton identity, a frozen 3D joint-axis contract, bounded joint transform ranges, exact eight-camera set, allowed attachment state space and an exact probe-plan hash. It is not a third product geometry authority.
+It binds exact skeleton identity, a frozen 3D joint-axis contract, bounded micro-stress transforms, exact eight-camera set, allowed attachment state space and an exact probe-plan hash. It is not a third product geometry authority and it is **not** the kinematic range or admissibility authority for professional artist clips. Stage25/27 prove bounded numerical mesh/skin conditioning only. Professional motion capability is minted only when Stage35 executes the exact Stage34 full-3D local-quaternion clip on the exact QualifiedMeshIR + QualifiedMeshSkinIR and passes the dynamic/contact/visibility gates.
 
 ## Structural vs presentation segmentation
 

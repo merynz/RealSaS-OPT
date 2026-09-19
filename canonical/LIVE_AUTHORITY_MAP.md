@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `728de6a97fab908ffd62040bdd8df9d60c7f119b0f02f228391dbb0e24b1733d`
+> State fingerprint: `a841b4cca1bee7d706ed58b1a9ab80f66fc82906610676bdcb049b766d6f223e`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -31,7 +31,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `bf275b9371f4` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
+| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `f49cf6fad810` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
 
 ## Branch inventory — observed live
 
@@ -41,7 +41,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `bf275b9371f4` | canonical continuation branch |
+| `main` | `f49cf6fad810` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -125,7 +125,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `m4-closure-20260829` | `95a487b92ab0` | observed live; not explicitly registered active |
 | `m4-execution-seal-20260829` | `d203b8233509` | observed live; not explicitly registered active |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | observed live; not explicitly registered active |
-| `motion/quaternius-direct-fbx-gate-v1-20260919` | `660e04da7633` | observed live; not explicitly registered active |
+| `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | observed live; not explicitly registered active |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | observed live; not explicitly registered active |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | observed live; not explicitly registered active |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | observed live; not explicitly registered active |

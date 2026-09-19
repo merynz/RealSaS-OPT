@@ -52,8 +52,8 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "bf275b9371f42f5d8901d8e2a3c54e9748d60993",
-    "motion/quaternius-direct-fbx-gate-v1-20260919": "bf275b9371f42f5d8901d8e2a3c54e9748d60993",
+    "main": "f49cf6fad810399bf8168158f4a01d3baf855baf",
+    "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -90,7 +90,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1936,
+  "commit_count": 1944,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -87049,6 +87049,188 @@
       "subsystem_tags": [
         "FIT_DATA",
         "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "660e04da76339a68506a2ae01150db36d93614b3",
+      "parents": [
+        "bf275b9371f42f5d8901d8e2a3c54e9748d60993"
+      ],
+      "author_time": "2026-09-19T15:21:51+03:00",
+      "committer_time": "2026-09-19T15:21:51+03:00",
+      "subject": "motion: allow exact-hash direct FBX materialization",
+      "branches_containing": [
+        "main",
+        "motion/quaternius-direct-fbx-gate-v1-20260919"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/motion/materialize_quaternius_preset_v1.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "19e20da22029ab48e1c87ac53311251471af1871",
+      "parents": [
+        "bf275b9371f42f5d8901d8e2a3c54e9748d60993"
+      ],
+      "author_time": "2026-09-19T15:21:56+03:00",
+      "committer_time": "2026-09-19T15:21:56+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ba7af6583a23f768637516b662ff787672828c70",
+      "parents": [
+        "660e04da76339a68506a2ae01150db36d93614b3"
+      ],
+      "author_time": "2026-09-19T15:22:01+03:00",
+      "committer_time": "2026-09-19T15:22:01+03:00",
+      "subject": "test: cover exact-hash direct FBX mode",
+      "branches_containing": [
+        "main",
+        "motion/quaternius-direct-fbx-gate-v1-20260919"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_quaternius_motion_materializer_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3eec40530780ed92fe2af4abe226487938b19eb2",
+      "parents": [
+        "ba7af6583a23f768637516b662ff787672828c70"
+      ],
+      "author_time": "2026-09-19T15:22:23+03:00",
+      "committer_time": "2026-09-19T15:22:23+03:00",
+      "subject": "ci: add Quaternius Blender extraction gate",
+      "branches_containing": [
+        "main",
+        "motion/quaternius-direct-fbx-gate-v1-20260919"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/quaternius_motion_external_gate.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fe76869b53c39d3c23fa32e285ab818c3d0b1c0a",
+      "parents": [
+        "3eec40530780ed92fe2af4abe226487938b19eb2"
+      ],
+      "author_time": "2026-09-19T15:23:39+03:00",
+      "committer_time": "2026-09-19T15:23:39+03:00",
+      "subject": "motion: preserve sealed archive receipt after temp cleanup",
+      "branches_containing": [
+        "main",
+        "motion/quaternius-direct-fbx-gate-v1-20260919"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/motion/materialize_quaternius_preset_v1.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "260fc477e68d7985f0926df8e7cbd575df8c43e4",
+      "parents": [
+        "fe76869b53c39d3c23fa32e285ab818c3d0b1c0a"
+      ],
+      "author_time": "2026-09-19T15:24:34+03:00",
+      "committer_time": "2026-09-19T15:24:34+03:00",
+      "subject": "ci: bootstrap pinned Blender for motion extraction gate",
+      "branches_containing": [
+        "main",
+        "motion/quaternius-direct-fbx-gate-v1-20260919"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/quaternius_motion_external_gate.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
+      "parents": [
+        "260fc477e68d7985f0926df8e7cbd575df8c43e4"
+      ],
+      "author_time": "2026-09-19T15:29:56+03:00",
+      "committer_time": "2026-09-19T15:29:56+03:00",
+      "subject": "ci: use python3 on self-hosted motion gate",
+      "branches_containing": [
+        "main",
+        "motion/quaternius-direct-fbx-gate-v1-20260919"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/quaternius_motion_external_gate.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f49cf6fad810399bf8168158f4a01d3baf855baf",
+      "parents": [
+        "19e20da22029ab48e1c87ac53311251471af1871",
+        "47fb1555455bd7a1e43940bad97f4ca0000f65ab"
+      ],
+      "author_time": "2026-09-19T15:34:42+03:00",
+      "committer_time": "2026-09-19T15:34:42+03:00",
+      "subject": "Merge pull request #39 from merynz/motion/quaternius-direct-fbx-gate-v1-20260919",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [],
+      "subsystem_tags": [
+        "OTHER"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

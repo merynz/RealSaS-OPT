@@ -3,7 +3,7 @@
   "bootstrap_status": "BOOTSTRAP_AUDIT_CLOSED",
   "fit1_gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
   "candidate_rule": "high-signal canonical/prereg/experiment/challenger/workflow artifacts",
-  "tracked_file_count": 1105,
+  "tracked_file_count": 1106,
   "high_signal_artifact_count": 319,
   "classification_counts": {
     "INDEXED_EXPLICIT": 172,
@@ -444,13 +444,13 @@
     },
     {
       "name": "main",
-      "sha": "bf275b9371f42f5d8901d8e2a3c54e9748d60993",
+      "sha": "f49cf6fad810399bf8168158f4a01d3baf855baf",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
     {
       "name": "motion/quaternius-direct-fbx-gate-v1-20260919",
-      "sha": "660e04da76339a68506a2ae01150db36d93614b3",
+      "sha": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

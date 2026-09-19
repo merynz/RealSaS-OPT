@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1936**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1944**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1948,6 +1948,14 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-19T15:04:35+03:00` | `f17bc5050f2b` | yes | CI_TEST, COMPILER_PROOF | tests: lock sealed Quaternius materialization contract | `tests/compiler/test_quaternius_motion_materializer_v1.py` | `main`<br>`motion/quaternius-direct-fbx-gate-v1-20260919`<br>`motion/quaternius-materializer-v1-20260919` |
 | `2026-09-19T15:18:07+03:00` | `18bca584f2ee` | yes | OTHER | Merge pull request #38 from merynz/motion/quaternius-materializer-v1-20260919 | _none_ | `main`<br>`motion/quaternius-direct-fbx-gate-v1-20260919` |
 | `2026-09-19T15:20:04+03:00` | `bf275b9371f4` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main`<br>`motion/quaternius-direct-fbx-gate-v1-20260919` |
+| `2026-09-19T15:21:51+03:00` | `660e04da7633` | yes | OTHER | motion: allow exact-hash direct FBX materialization | `tools/motion/materialize_quaternius_preset_v1.py` | `main`<br>`motion/quaternius-direct-fbx-gate-v1-20260919` |
+| `2026-09-19T15:21:56+03:00` | `19e20da22029` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T15:22:01+03:00` | `ba7af6583a23` | yes | CI_TEST, COMPILER_PROOF | test: cover exact-hash direct FBX mode | `tests/compiler/test_quaternius_motion_materializer_v1.py` | `main`<br>`motion/quaternius-direct-fbx-gate-v1-20260919` |
+| `2026-09-19T15:22:23+03:00` | `3eec40530780` | yes | CI_TEST | ci: add Quaternius Blender extraction gate | `.github/workflows/quaternius_motion_external_gate.yml` | `main`<br>`motion/quaternius-direct-fbx-gate-v1-20260919` |
+| `2026-09-19T15:23:39+03:00` | `fe76869b53c3` | yes | OTHER | motion: preserve sealed archive receipt after temp cleanup | `tools/motion/materialize_quaternius_preset_v1.py` | `main`<br>`motion/quaternius-direct-fbx-gate-v1-20260919` |
+| `2026-09-19T15:24:34+03:00` | `260fc477e68d` | yes | CI_TEST | ci: bootstrap pinned Blender for motion extraction gate | `.github/workflows/quaternius_motion_external_gate.yml` | `main`<br>`motion/quaternius-direct-fbx-gate-v1-20260919` |
+| `2026-09-19T15:29:56+03:00` | `47fb1555455b` | yes | CI_TEST | ci: use python3 on self-hosted motion gate | `.github/workflows/quaternius_motion_external_gate.yml` | `main`<br>`motion/quaternius-direct-fbx-gate-v1-20260919` |
+| `2026-09-19T15:34:42+03:00` | `f49cf6fad810` | yes | OTHER | Merge pull request #39 from merynz/motion/quaternius-direct-fbx-gate-v1-20260919 | _none_ | `main` |
 
 ## Use rule
 

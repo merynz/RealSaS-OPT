@@ -67,6 +67,9 @@ def build_runtime_v4_package_seal(*,projection,result:Mapping[str,Any])->Runtime
         metadata={
             "source_authority_kind":"RUNTIME_V4_ADMISSION_CERTIFICATE",
             "zip_compression":"DEFLATED_LEVEL_1",
+            "runtime_binary_write_seconds":float(result.get("runtime_binary_write_seconds",0.0)),
+            "archive_write_seconds":float(result.get("archive_write_seconds",0.0)),
+            "wall_seconds":float(result.get("wall_seconds",0.0)),
         },
     )
     return replace(value,package_seal_hash=runtime_v4_package_seal_hash(value))

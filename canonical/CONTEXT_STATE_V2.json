@@ -3,7 +3,7 @@
   "date": "2026-09-19",
   "continuation_branch": "main",
   "execution_branch": "main",
-  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__MOTION_SOURCE_EXECUTABLE__MOTION_COMPILE_SEAM_OPEN",
+  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING",
   "authority": {
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
@@ -14,16 +14,16 @@
   "product": {
     "target": "automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics",
     "demo_witness": "Subject-2 Knight (run data only; architecture generic)",
-    "next_visible_product_milestone": "border-safe 8-view Knight observation contact sheet, then visible run motion through native Runtime-v4"
+    "next_visible_product_milestone": "execute Knight 01→40 once exact external fit/native-player artifacts are supplied; preserve sub-minute warm render iteration through Runtime-v4 batch/cache"
   },
   "current_focus": {
-    "module": "Motion source authority + Stage34 compiler seam",
-    "state": "PRODUCT_AUTHORITY_IMPLEMENTATION__MOTION_SOURCE_EXECUTABLE__MOTION_COMPILE_SEAM_OPEN",
+    "module": "Full 40-stage product authority + fast native iteration",
+    "state": "PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING",
     "active_experiment": "SUBJECT2_KNIGHT_FULL_CLOSURE",
-    "most_recent_closed_gate": "MOTION_SOURCE_STAGE33_IMPLEMENTATION_PASS",
-    "promotion_block": "Stages 05 and 24-33 have executable typed adapters. Stage 33 seals reusable source identity separately from exact run authorization and binds Stage-29 product state plus Stage-32 rest preservation; Stage 34 motion compilation remains intentionally UNBOUND.",
+    "most_recent_closed_gate": "ALL_40_STAGE_ADAPTERS_IMPLEMENTED_AND_BOUND_READY_FOR_FINAL_CI",
+    "promotion_block": "All 40 stages have executable typed adapters and an explicit authority DAG. Repository mainline CI is green at the pre-performance-patch head; remaining work is live-context reconciliation, final CI after batch-render optimization, and exact Knight run inputs/external execution artifacts before 01→40 execution.",
     "scope_warning": "Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority",
-    "scientific_question": "Can generic Stage 34 retarget/compile admitted source motion onto the exact canonical puppet state while preserving contacts, root trajectory, joint limits, attachment constraints and the deformation envelope before Stage 35 dynamic proof?"
+    "scientific_question": "Can the exact Knight witness execute the generic 40-stage authority DAG end-to-end with hash-verified reuse, batch-native warm iteration, visible artist run motion and Stage-40 PRODUCT_PASS without subject-specific code?"
   },
   "execution_environment": {
     "actions": "SELF_HOSTED_LOCAL_ONLY",
@@ -113,7 +113,8 @@
     "No latest/current alias can substitute an exact artifact hash.",
     "Downstream failure cannot erase verified upstream PASS.",
     "Rest source preservation precedes motion authority.",
-    "Visible native motion is required before product closure."
+    "Visible native motion is required before product closure.",
+    "Multi-frame native visual proof uses content-addressed batch transport; scalar per-frame subprocess loops are not the product iteration path."
   ],
   "known_context_traps": [
     {

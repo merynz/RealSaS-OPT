@@ -12,8 +12,8 @@
   "explained_high_signal_count": 319,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 116,
-  "safe_default_evidence_only_branch_count": 112,
+  "live_branch_count": 117,
+  "safe_default_evidence_only_branch_count": 113,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -444,9 +444,15 @@
     },
     {
       "name": "main",
-      "sha": "33afc46ce883c06fee06dc869318a2b398d2ee17",
+      "sha": "5b8e66071b73032225ba3f2877fd953a11e12467",
       "class": "CANONICAL",
       "reason": "canonical branch"
+    },
+    {
+      "name": "motion/quaternius-materializer-v1-20260919",
+      "sha": "7300665c8afc8113f0705004888dbc2c3d8d3309",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
     },
     {
       "name": "mwb0-closure-backlog-20260831",

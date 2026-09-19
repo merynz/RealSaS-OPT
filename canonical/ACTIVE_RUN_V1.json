@@ -5,8 +5,8 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__SUBJECT_DATA_ONLY_IN_RUN_ARTIFACTS",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
-  "pipeline_plan_sha256": "803cfed9bf1fc4eecee03f9039e23989d67124041bf92eea0c536a045d20c5b6",
-  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__STAGES24_40_EXECUTABLE__EARLY_MAINLINE_BINDINGS_REMAIN",
+  "pipeline_plan_sha256": "b0b6ab5eb57b8f8f4eb27a34a9b1f7db73d2ce8a8472045ab1692ceaee741098",
+  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING",
   "completed_count": 0,
   "total_count": 40,
   "next_stage": "01_SOURCE_BYTES_SEALED",
@@ -525,6 +525,10 @@
     {
       "event": "REST_SOURCE_PRESERVATION_STAGE32_BOUND",
       "note": "Stage 32 now measures exact stage-31 replay against stage-07 source raster/foreground authority, re-derives frozen subject-free policy, and requires every view to pass every hard rule. Motion Stage 33 remains UNBOUND."
+    },
+    {
+      "event": "ALL_40_STAGE_ADAPTERS_BOUND",
+      "note": "Every canonical stage now has an executable adapter and explicit dependency DAG. This is implementation readiness only; SUBJECT2_KNIGHT_V1 remains 0/40 until exact run inputs and external execution artifacts are supplied and stages execute."
     }
   ],
   "events": [

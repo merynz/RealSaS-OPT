@@ -179,8 +179,16 @@ def _mechanical_probe_metrics(dense_normalized:np.ndarray,compact_normalized:np.
     if k==1:
         distance=distance[:,None]
         index=index[:,None]
-    weights=1.0/np.maximum(distance,1e-8)
-    weights/=weights.sum(axis=1,keepdims=True)
+    exact=distance<=1e-12
+    weights=np.zeros_like(distance,dtype=np.float64)
+    exact_rows=exact.any(axis=1)
+    if exact_rows.any():
+        counts=exact[exact_rows].sum(axis=1,keepdims=True)
+        weights[exact_rows]=exact[exact_rows].astype(np.float64)/counts
+    if (~exact_rows).any():
+        inv=1.0/np.maximum(distance[~exact_rows],1e-12)
+        inv/=inv.sum(axis=1,keepdims=True)
+        weights[~exact_rows]=inv
 
     basis={}
     aggregate_p95=0.0

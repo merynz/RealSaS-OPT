@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "330d45c5ea3b0f10740ca2c58ea16136a47a5509",
+    "main": "a5ebbdd94722a58699bfa1f2983a7e8cc80d9335",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1840,
+  "commit_count": 1869,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -82169,6 +82169,677 @@
       "subsystem_tags": [
         "CI_TEST",
         "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7a55c1af81b56ec6640db1a2aa7ada061af9253b",
+      "parents": [
+        "330d45c5ea3b0f10740ca2c58ea16136a47a5509"
+      ],
+      "author_time": "2026-09-19T10:26:39+03:00",
+      "committer_time": "2026-09-19T10:26:39+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a72da8356747a3afc3318bccca9b5c4280b9957d",
+      "parents": [
+        "7a55c1af81b56ec6640db1a2aa7ada061af9253b"
+      ],
+      "author_time": "2026-09-19T10:31:13+03:00",
+      "committer_time": "2026-09-19T10:31:13+03:00",
+      "subject": "motion: implement stage34 canonical compile seam",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_compile_v1.py",
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/motion_compile_v1.py",
+        "tests/compiler/test_motion_compile_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9e05d9b641ef3b6ebc55d25b03a794e7c182dfb2",
+      "parents": [
+        "a72da8356747a3afc3318bccca9b5c4280b9957d"
+      ],
+      "author_time": "2026-09-19T10:32:33+03:00",
+      "committer_time": "2026-09-19T10:32:33+03:00",
+      "subject": "motion: harden stage34 exact authority validation",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_compile_v1.py",
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "tests/compiler/test_motion_compile_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4bbf9d5caa9f5e870d586e8647c7260d71338e64",
+      "parents": [
+        "9e05d9b641ef3b6ebc55d25b03a794e7c182dfb2"
+      ],
+      "author_time": "2026-09-19T10:33:05+03:00",
+      "committer_time": "2026-09-19T10:33:05+03:00",
+      "subject": "motion: validate stage34 constraint seal at construction",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_compile_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7abf43cb5d2c3804e5e5a75fd10461ade7290eae",
+      "parents": [
+        "4bbf9d5caa9f5e870d586e8647c7260d71338e64"
+      ],
+      "author_time": "2026-09-19T10:33:43+03:00",
+      "committer_time": "2026-09-19T10:33:43+03:00",
+      "subject": "motion: align stage34 external source identity with stage33",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/motion_compile_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "951bf0b322f21119c6fd7d8a8049bdfa5e421857",
+      "parents": [
+        "7abf43cb5d2c3804e5e5a75fd10461ade7290eae"
+      ],
+      "author_time": "2026-09-19T10:35:05+03:00",
+      "committer_time": "2026-09-19T10:35:05+03:00",
+      "subject": "motion: close retarget map accounting",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_compile_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8e9ee6a58153031153c54a2f437ef6a8fb023b18",
+      "parents": [
+        "951bf0b322f21119c6fd7d8a8049bdfa5e421857"
+      ],
+      "author_time": "2026-09-19T10:54:35+03:00",
+      "committer_time": "2026-09-19T10:54:35+03:00",
+      "subject": "mainline: bind stage34 motion compiler authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md",
+        "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+        "tests/repository/test_mainline_execution_plan_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9a12ec77d7136c5a3407293b1aceb978c5bc8910",
+      "parents": [
+        "8e9ee6a58153031153c54a2f437ef6a8fb023b18"
+      ],
+      "author_time": "2026-09-19T10:59:23+03:00",
+      "committer_time": "2026-09-19T10:59:23+03:00",
+      "subject": "mainline: refresh active-run plan authority after stage34 binding",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e4fe739b7537401faf9ec264fe025d3bf7d91af7",
+      "parents": [
+        "9a12ec77d7136c5a3407293b1aceb978c5bc8910"
+      ],
+      "author_time": "2026-09-19T11:03:44+03:00",
+      "committer_time": "2026-09-19T11:03:44+03:00",
+      "subject": "motion: implement stage35 canonical dynamic proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_dynamic_proof_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/motion_dynamic_proof_v1.py",
+        "tests/compiler/test_motion_dynamic_proof_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4e25bfd87410c2b3b9b689e0ea2264d149ceb0d9",
+      "parents": [
+        "e4fe739b7537401faf9ec264fe025d3bf7d91af7"
+      ],
+      "author_time": "2026-09-19T11:06:04+03:00",
+      "committer_time": "2026-09-19T11:06:04+03:00",
+      "subject": "runtime: implement stage36 canonical Runtime-v4 projection",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_projection_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_projection_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e09cec8fb9aeaf138d032bb8919a978b0828d082",
+      "parents": [
+        "4e25bfd87410c2b3b9b689e0ea2264d149ceb0d9"
+      ],
+      "author_time": "2026-09-19T11:06:30+03:00",
+      "committer_time": "2026-09-19T11:06:30+03:00",
+      "subject": "runtime: carry exact product state into stage36 projection",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_projection_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "40f7c5a72b79aee12b25cb34e540e73a38f598e1",
+      "parents": [
+        "e09cec8fb9aeaf138d032bb8919a978b0828d082"
+      ],
+      "author_time": "2026-09-19T11:06:52+03:00",
+      "committer_time": "2026-09-19T11:06:52+03:00",
+      "subject": "runtime: implement stage37 exact compact rss materialization",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_package_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_package_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ef42bb88d860cc961b4a6a6b46b5009289eb1deb",
+      "parents": [
+        "40f7c5a72b79aee12b25cb34e540e73a38f598e1"
+      ],
+      "author_time": "2026-09-19T11:07:56+03:00",
+      "committer_time": "2026-09-19T11:07:56+03:00",
+      "subject": "runtime: implement stages38-39 native playback and visual proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_native_proof_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_native_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ccc1e0899ad2d98d34bdc95692a48a1b213d40e4",
+      "parents": [
+        "ef42bb88d860cc961b4a6a6b46b5009289eb1deb"
+      ],
+      "author_time": "2026-09-19T11:08:42+03:00",
+      "committer_time": "2026-09-19T11:08:42+03:00",
+      "subject": "closure: implement stage40 exact product pass seal",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_closure_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_closure_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4200b1cfe60681ac737f488347e1be93bd81ad8f",
+      "parents": [
+        "ccc1e0899ad2d98d34bdc95692a48a1b213d40e4"
+      ],
+      "author_time": "2026-09-19T11:09:54+03:00",
+      "committer_time": "2026-09-19T11:09:54+03:00",
+      "subject": "mainline: bind executable product tail stages35-40",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md",
+        "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+        "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json",
+        "tests/repository/test_mainline_execution_plan_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a04f07b7c7a458a35a7e6efc7f7497bd4e2bb6c5",
+      "parents": [
+        "4200b1cfe60681ac737f488347e1be93bd81ad8f"
+      ],
+      "author_time": "2026-09-19T11:10:10+03:00",
+      "committer_time": "2026-09-19T11:10:10+03:00",
+      "subject": "mainline: refresh plan authority after stages35-40 binding",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "571427ff44cbaa9884620d9cc52138f0525a7fa6",
+      "parents": [
+        "a04f07b7c7a458a35a7e6efc7f7497bd4e2bb6c5"
+      ],
+      "author_time": "2026-09-19T11:16:28+03:00",
+      "committer_time": "2026-09-19T11:16:28+03:00",
+      "subject": "mainline: add typed preproduct authority artifacts",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/preproduct_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "160d9ff97dcee8ede8669c322789044d43c962ea",
+      "parents": [
+        "571427ff44cbaa9884620d9cc52138f0525a7fa6"
+      ],
+      "author_time": "2026-09-19T11:17:12+03:00",
+      "committer_time": "2026-09-19T11:17:12+03:00",
+      "subject": "mainline: implement stages03-08 preflight and observation authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/preflight_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6d1a68880bbe87e563f2bf0aa439e4e39fec1349",
+      "parents": [
+        "160d9ff97dcee8ede8669c322789044d43c962ea"
+      ],
+      "author_time": "2026-09-19T11:17:49+03:00",
+      "committer_time": "2026-09-19T11:17:49+03:00",
+      "subject": "mainline: add exact-hash external fit execution helpers",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/model_execution_common_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f3215341593d06fdc66d9a43ee36bd098e958355",
+      "parents": [
+        "6d1a68880bbe87e563f2bf0aa439e4e39fec1349"
+      ],
+      "author_time": "2026-09-19T11:18:38+03:00",
+      "committer_time": "2026-09-19T11:18:38+03:00",
+      "subject": "mainline: implement stages09-15 IRIS geometry authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f1858d0716d12658fbeb2a09106132c9d9cd9c87",
+      "parents": [
+        "f3215341593d06fdc66d9a43ee36bd098e958355"
+      ],
+      "author_time": "2026-09-19T11:19:12+03:00",
+      "committer_time": "2026-09-19T11:19:12+03:00",
+      "subject": "mainline: implement stages16-23 learned mechanics authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a0816d13eeebcce79ef8348319426aca8c542e92",
+      "parents": [
+        "f1858d0716d12658fbeb2a09106132c9d9cd9c87"
+      ],
+      "author_time": "2026-09-19T11:20:23+03:00",
+      "committer_time": "2026-09-19T11:20:23+03:00",
+      "subject": "mainline: bind all remaining stages03-23",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md",
+        "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+        "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json",
+        "tests/repository/test_mainline_execution_plan_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6077aeb7966e5058fe9da54a88b1b846857b964e",
+      "parents": [
+        "a0816d13eeebcce79ef8348319426aca8c542e92"
+      ],
+      "author_time": "2026-09-19T11:20:41+03:00",
+      "committer_time": "2026-09-19T11:20:41+03:00",
+      "subject": "mainline: seal final 40-stage execution plan authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d0c5f6762220fa1e3bf09d28583ba77d2a249952",
+      "parents": [
+        "6077aeb7966e5058fe9da54a88b1b846857b964e"
+      ],
+      "author_time": "2026-09-19T11:32:44+03:00",
+      "committer_time": "2026-09-19T11:32:44+03:00",
+      "subject": "runtime: batch native proof path and reconcile final context",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md",
+        "canonical/CONTEXT_STATE_V2.json",
+        "compiler/realsas_compiler_core/runtime_package_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_native_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4fc1e83d694b9e5f401c228caa25d2ade381ec29",
+      "parents": [
+        "d0c5f6762220fa1e3bf09d28583ba77d2a249952"
+      ],
+      "author_time": "2026-09-19T11:33:45+03:00",
+      "committer_time": "2026-09-19T11:33:45+03:00",
+      "subject": "mainline: bind stage cache identity to local implementation closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py",
+        "tests/repository/test_mainline_implementation_closure_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c857c2c6bbd0733593ebcdf6ae7611ab8d82d256",
+      "parents": [
+        "4fc1e83d694b9e5f401c228caa25d2ade381ec29"
+      ],
+      "author_time": "2026-09-19T11:34:57+03:00",
+      "committer_time": "2026-09-19T11:34:57+03:00",
+      "subject": "mainline: record cold and warm execution timings",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/model_execution_common_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_native_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_package_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d03cfa6c5f5d6dd66cb7cf22baf417b05a06dc68",
+      "parents": [
+        "c857c2c6bbd0733593ebcdf6ae7611ab8d82d256"
+      ],
+      "author_time": "2026-09-19T11:36:42+03:00",
+      "committer_time": "2026-09-19T11:36:42+03:00",
+      "subject": "runtime: lock batch-native proof transport in CI",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_runtime_native_batch_policy_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "65bffb840f7ec3bd581c13c19ee9eb8652519f72",
+      "parents": [
+        "d03cfa6c5f5d6dd66cb7cf22baf417b05a06dc68"
+      ],
+      "author_time": "2026-09-19T11:37:36+03:00",
+      "committer_time": "2026-09-19T11:37:36+03:00",
+      "subject": "ci: refresh live authority on every main commit",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/live_authority_map.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a5ebbdd94722a58699bfa1f2983a7e8cc80d9335",
+      "parents": [
+        "65bffb840f7ec3bd581c13c19ee9eb8652519f72"
+      ],
+      "author_time": "2026-09-19T11:41:31+03:00",
+      "committer_time": "2026-09-19T11:41:31+03:00",
+      "subject": "runtime: fix RuntimeV3 texture payload import authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_projection_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

@@ -7,14 +7,14 @@
 
 - Product: automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics
 - Current witness: Subject-2 Knight (run data only; architecture generic)
-- Current module: Motion source authority + Stage34 compiler seam
-- Current state: PRODUCT_AUTHORITY_IMPLEMENTATION__MOTION_SOURCE_EXECUTABLE__MOTION_COMPILE_SEAM_OPEN
+- Current module: Full 40-stage product authority + fast native iteration
+- Current state: PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING
 - Active experiment: SUBJECT2_KNIGHT_FULL_CLOSURE
-- Most recent closed gate: MOTION_SOURCE_STAGE33_IMPLEMENTATION_PASS
-- Canonical main: 330d45c5ea3b
+- Most recent closed gate: ALL_40_STAGE_ADAPTERS_IMPLEMENTED_AND_BOUND_READY_FOR_FINAL_CI
+- Canonical main: a5ebbdd94722
 - Active run: SUBJECT2_KNIGHT_V1 — 0/40; next 01_SOURCE_BYTES_SEALED
-- Plan SHA-256: 0332d3cf3288b497082dbb554a83c15c2eac3853b772669e3fe4b870d1f2421d
-- Promotion block: Stages 05 and 24-33 have executable typed adapters. Stage 33 seals reusable source identity separately from exact run authorization and binds Stage-29 product state plus Stage-32 rest preservation; Stage 34 motion compilation remains intentionally UNBOUND.
+- Plan SHA-256: b0b6ab5eb57b8f8f4eb27a34a9b1f7db73d2ce8a8472045ab1692ceaee741098
+- Promotion block: All 40 stages have executable typed adapters and an explicit authority DAG. Repository mainline CI is green at the pre-performance-patch head; remaining work is live-context reconciliation, final CI after batch-render optimization, and exact Knight run inputs/external execution artifacts before 01→40 execution.
 - Scope warning: Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority
 
 ## Current machine authority
@@ -55,7 +55,7 @@
 
 ## Current scientific question
 
-Can generic Stage 34 retarget/compile admitted source motion onto the exact canonical puppet state while preserving contacts, root trajectory, joint limits, attachment constraints and the deformation envelope before Stage 35 dynamic proof?
+Can the exact Knight witness execute the generic 40-stage authority DAG end-to-end with hash-verified reuse, batch-native warm iteration, visible artist run motion and Stage-40 PRODUCT_PASS without subject-specific code?
 
 ## Settled invariants
 
@@ -67,6 +67,7 @@ Can generic Stage 34 retarget/compile admitted source motion onto the exact cano
 - Downstream failure cannot erase verified upstream PASS.
 - Rest source preservation precedes motion authority.
 - Visible native motion is required before product closure.
+- Multi-frame native visual proof uses content-addressed batch transport; scalar per-frame subprocess loops are not the product iteration path.
 
 ## Execution environment
 

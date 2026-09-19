@@ -12,8 +12,8 @@
   "explained_high_signal_count": 321,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 126,
-  "safe_default_evidence_only_branch_count": 122,
+  "live_branch_count": 127,
+  "safe_default_evidence_only_branch_count": 123,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "5130ecd45beba2989d085cc353f7ac21b996f48a",
+      "sha": "fa7ffcd3219c96228d625ea6fc0f95b89c109ed7",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -619,6 +619,12 @@
     {
       "name": "research/g5-coverage-v2-audit-20260919",
       "sha": "aeaec75e1fe6e9372f85393e5547f572a4bd026a",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "research/g5-mesh-v2-numerical-floor-20260919",
+      "sha": "3fe8d8c909d7b8c301bf78b6ee23bbbb24620f96",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

@@ -1,0 +1,30 @@
+name: stage14-visible-tiny-component-audit
+
+on:
+  push:
+    branches:
+      - research/stage14-gsa-v2-downstream-audit-20260919
+    paths:
+      - 'tools/stage14_visible_tiny_component_audit.py'
+      - '.github/workflows/stage14_visible_tiny_component_audit.yml'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: .
+      REALSAS_STAGE14_COMPONENT_OUT: stage14_component_out
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - run: python tools/stage14_visible_tiny_component_audit.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage14-visible-tiny-component-audit
+          path: stage14_component_out/
+          if-no-files-found: error

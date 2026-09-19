@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.RestSourcePreservationProductPolicy.v1",
-  "status": "FROZEN_AFTER_SUBJECT_FREE_CALIBRATION_BEFORE_KNIGHT_STAGE32_RESULT",
+  "status": "SUPERSEDED__NO_NEW_STAGE32_PASS_AUTHORITY",
   "authority": "NORMATIVE_STAGE32_PRODUCT_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_FIT",
   "calibration_result": {
     "path": "canonical/REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json",
@@ -38,5 +38,7 @@
     "overlap_rgba_mismatch_fraction"
   ],
   "mutation_rule": "After Knight Stage32 result inspection this policy may only be tightened prospectively; it may never be relaxed to turn a failure into PASS.",
-  "claim_boundary": "Policy admission semantics only. This file does not claim Knight compliance or PRODUCT_PASS."
+  "claim_boundary": "Historical evidence only. MUST NOT be used to mint a new Stage32 PASS.",
+  "superseded_by": "canonical/REST_SOURCE_PRESERVATION_POLICY_V2_20260919.json",
+  "supersession_reason": "Stage32 alpha coverage must inherit the calibrated G5 MESH v2 thresholds rather than superseded G5 v1."
 }

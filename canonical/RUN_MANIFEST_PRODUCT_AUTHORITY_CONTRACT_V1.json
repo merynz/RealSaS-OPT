@@ -13,10 +13,12 @@
       "manual_carrier_decisions_forbidden": true
     },
     "deformation_envelope": {
-      "automatic_rule": "Stage25 accepts no per-character axis contract or joint-range rows. Current canonical motion channels are XY rotations, so every qualified joint receives +Z rotation axis and the frozen pre-Knight generic deformation capability floor; translation/scale remain identity until separately qualified.",
+      "automatic_rule": "Stage25 accepts no per-character axis/joint-range authoring. It derives geometry/camera-bound joint frames and a small compatibility witness used only for pre-motion numerical lineage.",
+      "role": "NOT_MOTION_CAPABILITY_AUTHORITY",
+      "micro_stress_angle_deg": 10,
+      "motion_capability_authority": "Stage35 exact execution of the actual full-3D quaternion clip on exact QualifiedMeshIR + QualifiedMeshSkinIR.",
       "manual_axis_contract_forbidden": true,
-      "manual_joint_ranges_forbidden": true,
-      "policy_status": "FROZEN_PRE_KNIGHT_SUBJECT_FREE"
+      "manual_joint_ranges_forbidden": true
     },
     "mesh_policy": {
       "document": {
@@ -41,8 +43,9 @@
       "mode": "AUTO_ROLE_FREE_V1 only",
       "structure": "Mechanical partition and presentation segmentation are distinct. Stage30 may create multiple independently keyable presentation groups/slots inside one mechanical component when the qualified canonical mesh contains disconnected face islands. No categorical object identity or original layer-name recovery is claimed.",
       "appearance": "One canonical QualifiedMesh is reused for all eight views. Each face has exactly one observed donor view; target-local donor is preferred, cross-view color blending is forbidden, and no common observed donor fails closed.",
-      "composition": "Camera-forward 3D depth is primary physical visibility. Exact-depth/coplanar ties use target-view source provenance, then editable slot order, then stable face identity. Slot order is presentation authority/tie-break, not a substitute for 3D visibility.",
-      "current_limit": "Original artist layer names/semantics and physically separate stacked-translucency layers are not identifiable from flattened eight-view rasters and are not claimed. Opaque/cutout source-faithful puppet rendering is the demo contract."
+      "composition": "Camera-forward canonical 3D depth is primary physical visibility. Exact-depth/coplanar ties use target-view source provenance, then editable slot order, then stable face identity. Slot order is presentation tie-break authority, not a replacement for depth.",
+      "current_limit": "Original artist layer names/semantics and physically separate stacked-translucency layers are not identifiable from flattened eight-view rasters and are not claimed. Opaque/cutout source-faithful puppet rendering is the demo contract.",
+      "motion_optimization": "Stage36 performs presentation-only optimization/qualification after Stage35 baseline passes. Canonical 3D motion is not mutated and no per-view motion is solved. Target-view source art is mandatory when observed; otherwise the nearest observed one of the exact eight source directions is selected. No cross-view color blending or generated pixels."
     },
     "rest_render": {
       "authority": "Stage 31 is a deterministic consumer of exact QualifiedMeshIR + QualifiedPresentationGraph sub-authorities + QualifiedCameraSetIR + stage-07 source raster identities.",
@@ -57,22 +60,44 @@
       "coordinate_domains": "Observation PIXEL_CENTER_XY is source texel index-centered; Runtime/G5 target raster uses half-integer pixel centers. Rest rendering must preserve this distinction and may not add an extra half-pixel shift."
     },
     "motion": {
-      "sources": "The end user supplies no motion authoring input. RealSaS may use internal/bundled exact-hash preset or artist-authored library clips. SOURCE_RIG_TRACKS_V1 assets must carry their own source_skeleton rest graph as part of the preset asset.",
+      "sources": "End users supply no motion authoring truth for automatic compile. Built-in exact-hash preset assets may be externally authored. Shipping professional assets use RealSaS.MotionSourceClip.v2 / SOURCE_RIG_TRACKS_V2 and carry a source rest graph plus full-3D quaternion motion in REALSAS_OBJECT_FRAME_V1-derived joint frames. Source mesh/skin/material/texture and source skeleton are forbidden as final target authority.",
       "stage33_rule": "Consumes exact Stage-29 CanonicalPuppetStateIR and Stage-32 QualifiedRestSourcePreservationIR. It may seal source identity and run authorization only; retargeting, motion compilation and motion-quality claims are forbidden at Stage 33.",
       "stage34_boundary": "Every Stage-33 seal declares Stage-34 compilation required. Rotation-only procedural presets are mechanical probes, not professional artist-motion evidence.",
-      "stage34_rule": "Stage34 accepts no target-specific manual retarget map. For SOURCE_RIG_TRACKS_V1 it derives a one-to-one source->canonical map from source/target rooted topology plus normalized rest geometry, preserves every parent relation, and fails closed on cardinality/topology mismatch or ambiguous assignment. Stage25 envelope is a hard limit.",
-      "stage35_rule": "Stage 35 executes exact Stage-34 tracks as canonical 3D FK/LBS over the single Stage-27 QualifiedMeshIR and Stage-28 QualifiedMeshSkinIR, samples authored/contact boundaries plus a frozen uniform grid, proves contacts and dynamic conditioning, and forbids per-view motion-mesh truth. It additionally classifies final-mesh faces with zero z-visible source-foreground pixels across all eight admitted rest observations as truly unseen and fails on any newly z-visible pixel from those faces at any sampled motion frame/view; generated appearance is forbidden.",
-      "retarget_model_policy": "No fourth learned model is required for the current demo when deterministic topology/rest-geometry retarget passes. If future arbitrary source rigs remain ambiguous after this fail-closed matcher, a learned retarget/correspondence model is a future quality/generalization component, not hidden manual truth."
+      "stage34_rule": "Stage34 compiles only full-3D professional v2 motion for shipping: source-rig motion semantics are automatically retargeted onto the exact QualifiedSkeletonIR. Extra source helper/twist joints may be skipped when target-parent ancestry is preserved; ambiguous correspondence fails closed. Output is local quaternion motion on the target skeleton; no motion-quality claim is minted.",
+      "stage35_rule": "Stage35 executes the exact Stage34 target-skeleton quaternion tracks as canonical 3D FK/LBS over the single Stage27 QualifiedMeshIR + Stage28 QualifiedMeshSkinIR, samples key/contact boundaries plus frozen uniform samples, proves contacts, triangle conditioning and zero truly-unseen exposure. Actual clip capability is minted here, not by Stage25/27.",
+      "retarget_model_policy": "No fourth learned model is required for the current demo when deterministic topology/rest-geometry retarget passes. If future arbitrary source rigs remain ambiguous after this fail-closed matcher, a learned retarget/correspondence model is a future quality/generalization component, not hidden manual truth.",
+      "demo_preset_set": {
+        "library_id": "QUATERNIUS_KNIGHT_CC0_DEMO_V1",
+        "provenance_manifest": "canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_V1.json",
+        "clips": [
+          {
+            "clip_id": "demo_idle_v1",
+            "kind": "IDLE",
+            "take": "HumanArmature|Idle"
+          },
+          {
+            "clip_id": "demo_run_v1",
+            "kind": "RUN",
+            "take": "HumanArmature|Run"
+          },
+          {
+            "clip_id": "demo_slash_v1",
+            "kind": "SLASH",
+            "take": "HumanArmature|Run_swordAttack"
+          }
+        ],
+        "external_authority": "MOTION_SEMANTICS_ONLY"
+      }
     },
     "runtime": {
-      "stage36": "Projects exact Stage-35 canonical 3D frames into compact Runtime-v4. Face-corner deployment expansion is allowed only for UV seams and every projected vertex retains an exact source canonical vertex id. Source texture PNGs are transport-only re-encodings of exact Stage-07 raster authority.",
+      "stage36": "Consumes exact Stage35 posed XYZ. Emits RealSaS.QualifiedMotionPresentationIR.v1 plus Runtime-v4 projection. Runtime receives posed canonical geometry and source-authoritative view overlays; quaternion authoring state remains upstream.",
       "stage37": "Materializes the existing streamed Runtime-v4 writer without solver/FK/LBS replay. Package source authority is RUNTIME_V4_ADMISSION_CERTIFICATE, not a premature full ProductProofBundle claim.",
       "native_player": "Stages 38-39 require runtime.native_player:{path,sha256}. The exact-hash native executable must open/render the .rss through RUNTIME_V4_SHARED_CANONICAL_DEPTH_REFERENCE.",
       "stage38": "One native playback probe for every clip x 8 views; visible alpha and exact framebuffer size are required.",
       "stage39": "Native render bake at every Stage36 projected frame time x 8 views. Source RGBA comes only from exact source-raster transports. Motion/visibility comes from canonical 3D geometry; physical visibility uses depth, with source-provenance + slot-order tie semantics for exact-depth cases."
     },
     "closure": {
-      "stage40": "PRODUCT_PASS requires Stage32 every-view rest preservation, Stage35 dynamic proof, at least one nonzero professional library/artist-source motion clip, exact Stage37 .rss, Stage38 native playback, visible Stage39 motion, and a self-contained editable .rsedit authoring bundle.",
+      "stage40": "PRODUCT_PASS requires Stage32 rest preservation, Stage35 exact full-3D dynamic proof, Stage36 PASS_SOURCE_FAITHFUL_2D_PRESENTATION, at least one nonzero professional preset/artist-source motion, exact .rss native playback/visual proof, and self-contained editable .rsedit canonical authoring export.",
       "mechanical_probe_rule": "MECHANICAL_PROBE_ONLY cannot mint PRODUCT_PASS by itself.",
       "json_only_rule": "JSON-only metrics cannot mint PRODUCT_PASS; native visual motion evidence is mandatory.",
       "editability_rule": "PRODUCT_PASS must export canonical bones, mesh topology, mesh weights, presentation groups/slots, source-authoritative appearance bindings, and Stage34 motion curves. Runtime-v4/.rss is derived deployment data and is never authoring authority."
@@ -107,6 +132,11 @@
       "edit_behavior": "Click/select canonical element -> inspector edits exact authoring state. Mesh edits topology/vertices; skeleton edits joints/parents/rest pose; weights edit simplex rows; presentation edits groups/slots/order/visibility/tint.",
       "animation_editor": "Separate pose/clip/keyframe editor over Stage34 canonical motion curves; presets remain available as starting clips.",
       "reseal": "Any edit invalidates the declared downstream stage range and must be requalified/resealed before runtime export."
+    },
+    "mesh_g3": {
+      "rule": "Stage27 G3 performs local-frame X/Y/Z ±10 degree micro-stress per qualified joint to detect 3D numerical deformation instability. It makes no claim that this span is the animation envelope.",
+      "actual_motion_capability_claimed": false,
+      "actual_motion_proof": "Stage35"
     }
   },
   "upstream_stage_schemas": {
@@ -118,9 +148,9 @@
     "31_REST_RENDER_8VIEW": "RealSaS.RestRenderSetIR.v1",
     "29_CANONICAL_PUPPET_STATE_SEALED": "RealSaS.CanonicalPuppetStateIR.v1",
     "32_REST_SOURCE_PRESERVATION_GATE": "RealSaS.QualifiedRestSourcePreservationIR.v1",
-    "34_MOTION_COMPILE_RUN": "RealSaS.QualifiedMotionIR.v1 + RealSaS.MotionCompileConstraintSetIR.v1",
-    "35_MOTION_DYNAMIC_PROOF": "RealSaS.QualifiedDynamicMotionIR.v1",
-    "36_RUNTIME_V4_PROJECT": "RealSaS.RuntimeV4ProjectionIR.v1",
+    "34_MOTION_COMPILE_RUN": "RealSaS.MotionCompileConstraintSetIR.v2 + RealSaS.QualifiedMotionIR.v2",
+    "35_MOTION_DYNAMIC_PROOF": "RealSaS.QualifiedDynamicMotionIR.v1 / QuaternionV3 evaluator",
+    "36_RUNTIME_V4_PROJECT": "RealSaS.QualifiedMotionPresentationIR.v1 + RealSaS.RuntimeV4ProjectionIR.v1",
     "37_RSS_MATERIALIZE_COMPACT": "RealSaS.RuntimeV4PackageSealIR.v1 + .rss",
     "38_NATIVE_PACKAGE_OPEN_PLAYBACK": "RealSaS.QualifiedNativePlaybackIR.v1",
     "39_VISUAL_MOTION_RENDER_BAKE": "RealSaS.QualifiedVisualMotionEvidenceIR.v1",
@@ -148,8 +178,8 @@
       "RealSaS.ComponentCarrierPolicyIR.v1"
     ],
     "25": [
-      "RealSaS.DerivedAxisContract.v1",
-      "RealSaS.DeformationCapabilityEnvelopeIR.v1"
+      "RealSaS.DerivedAxisContract.v1 (compatibility witness only)",
+      "RealSaS.DeformationCapabilityEnvelopeIR.v1 (conditioning lineage only)"
     ],
     "26": [
       "RealSaS.CanonicalMeshCandidateIR.v1",
@@ -187,15 +217,16 @@
       "RealSaS.QualifiedMotionSourceSealIR.v1"
     ],
     "34": [
-      "RealSaS.MotionCompileConstraintSetIR.v1",
-      "RealSaS.QualifiedMotionIR.v1"
+      "RealSaS.MotionCompileConstraintSetIR.v2",
+      "RealSaS.QualifiedMotionIR.v2"
     ],
     "35": [
-      "RealSaS.QualifiedDynamicMotionIR.v1 (including hash-bound zero-budget truly-unseen exposure proof)"
+      "RealSaS.QualifiedDynamicMotionIR.v1 (QuaternionV3 evaluator semantics)"
     ],
     "36": [
+      "RealSaS.QualifiedMotionPresentationIR.v1",
       "RealSaS.RuntimeV4ProjectionIR.v1",
-      "8 x source-authoritative PNG transport"
+      "8 source-authoritative PNG transports"
     ],
     "37": [
       "RealSaS.RuntimeV4PackageSealIR.v1",

@@ -1,0 +1,234 @@
+name: subject2-knight-observation-preflight
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/observation/blender_controlled_8view_v1.py'
+      - '.github/workflows/subject2_knight_observation_preflight.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render-and-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_V1
+      SUBJECT_ID: SUBJECT2_KNIGHT
+      KAYKIT_COMMIT: '672074b73ba276876a19e8816ecdc5241817ab47'
+      KNIGHT_FBX_SHA256: 'b25e35cc7eaaa3c7c103f10a4f41fde1cbd81936fede9aa9ae4efbd29d40ba1b'
+      KNIGHT_TEXTURE_SHA256: '5d250ccc5da020e6126bfa3839f83bd9a465a951ed223e4d13c08b1925e154d4'
+      KAYKIT_LICENSE_SHA256: 'ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install canonical prefit Python dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Install headless Blender render libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libegl1 libgl1-mesa-dri
+
+      - name: Resolve or bootstrap pinned Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v blender >/dev/null 2>&1; then
+            echo "BLENDER_EXE=$(command -v blender)" >> "$GITHUB_ENV"
+            blender --version | head -n 2
+            exit 0
+          fi
+          version='4.5.14'
+          base="https://download.blender.org/release/Blender4.5"
+          archive="blender-${version}-linux-x64.tar.xz"
+          install_root="$RUNNER_TEMP/realsas_blender"
+          mkdir -p "$install_root"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/$archive" --output "$RUNNER_TEMP/$archive"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/blender-${version}.sha256" --output "$RUNNER_TEMP/blender.sha256"
+          (cd "$RUNNER_TEMP" && grep "  $archive\$" blender.sha256 | sha256sum --check -)
+          tar -xJf "$RUNNER_TEMP/$archive" -C "$install_root"
+          exe="$install_root/blender-${version}-linux-x64/blender"
+          test -x "$exe"
+          echo "BLENDER_EXE=$exe" >> "$GITHUB_ENV"
+          "$exe" --version | head -n 2
+
+      - name: Stage exact pinned KayKit Knight source
+        shell: bash
+        run: |
+          set -euo pipefail
+          export REALSAS_AUTHORITY_ROOT="$HOME/realsas_authority"
+          run_root="$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID"
+          source_dir="$run_root/inputs/source"
+          obs_dir="$run_root/inputs/observations"
+          mkdir -p "$source_dir" "$obs_dir"
+          base="https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/$KAYKIT_COMMIT"
+          curl --fail --location --retry 3 "$base/addons/kaykit_character_pack_adventures/Characters/fbx/Knight.fbx" -o "$source_dir/Knight.fbx"
+          curl --fail --location --retry 3 "$base/addons/kaykit_character_pack_adventures/Characters/fbx/knight_texture.png" -o "$source_dir/knight_texture.png"
+          curl --fail --location --retry 3 "$base/LICENSE.txt" -o "$source_dir/LICENSE.txt"
+          printf '%s  %s\n' "$KNIGHT_FBX_SHA256" "$source_dir/Knight.fbx" | sha256sum --check -
+          printf '%s  %s\n' "$KNIGHT_TEXTURE_SHA256" "$source_dir/knight_texture.png" | sha256sum --check -
+          printf '%s  %s\n' "$KAYKIT_LICENSE_SHA256" "$source_dir/LICENSE.txt" | sha256sum --check -
+          test "$(wc -c < "$source_dir/Knight.fbx")" = '20659324'
+          test "$(wc -c < "$source_dir/knight_texture.png")" = '14172'
+          test "$(wc -c < "$source_dir/LICENSE.txt")" = '891'
+          echo "REALSAS_AUTHORITY_ROOT=$REALSAS_AUTHORITY_ROOT" >> "$GITHUB_ENV"
+          echo "RUN_ROOT=$run_root" >> "$GITHUB_ENV"
+          echo "SOURCE_DIR=$source_dir" >> "$GITHUB_ENV"
+          echo "OBS_DIR=$obs_dir" >> "$GITHUB_ENV"
+
+      - name: Audit full subject and render exact 8-view observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$OBS_DIR"
+          mkdir -p "$OBS_DIR"
+          "$BLENDER_EXE" --background --factory-startup             --python tools/observation/blender_controlled_8view_v1.py --             --source-fbx "$SOURCE_DIR/Knight.fbx"             --out-dir "$OBS_DIR"             --subject-id "$SUBJECT_ID"             --resolution 1024             --frame-scale 1.12             --minimum-border-margin-px 8
+          test -s "$OBS_DIR/RENDER_RECEIPT.json"
+          test -s "$OBS_DIR/SUBJECT_SOURCE_AUDIT.json"
+          test -s "$OBS_DIR/camera_bundle.json"
+          test -s "$OBS_DIR/normalization.json"
+          for i in 0 1 2 3 4 5 6 7; do
+            test -s "$OBS_DIR/V$i.png"
+            test "$(wc -c < "$OBS_DIR/V$i.mask.bin")" = '1048576'
+          done
+
+      - name: Build exact run manifest through Stage08
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+
+          run_root=Path(os.environ["RUN_ROOT"]).resolve()
+          src=Path(os.environ["SOURCE_DIR"]).resolve()
+          obs=Path(os.environ["OBS_DIR"]).resolve()
+          manifest_path=run_root/"run_manifest.json"
+
+          def sha(p):
+              h=hashlib.sha256()
+              with Path(p).open("rb") as f:
+                  for b in iter(lambda:f.read(1<<20),b""): h.update(b)
+              return h.hexdigest()
+
+          receipt=json.loads((obs/"RENDER_RECEIPT.json").read_text(encoding="utf-8"))
+          norm=json.loads((obs/"normalization.json").read_text(encoding="utf-8"))
+          assert receipt["status"]=="PASS"
+          assert receipt["camera_contract"]["view_order"]==["S","SE","E","NE","N","NW","W","SW"]
+          assert receipt["camera_contract"]["view_yaw_deg"]==[0,45,90,135,180,225,270,315]
+          assert receipt["camera_contract"]["per_view_recenter"] is False
+          assert receipt["camera_contract"]["per_view_scale"] is False
+          assert receipt["minimum_observed_border_margin_px"]>=8
+          assert norm["outside_domain_vertex_count"]==0
+          assert norm["margin_to_domain_boundary"]>0
+
+          source_files=[]
+          def add(role,p):
+              p=Path(p).resolve()
+              source_files.append({"role":role,"path":str(p),"expected_sha256":sha(p),"expected_size_bytes":p.stat().st_size})
+          add("SOURCE_FBX",src/"Knight.fbx")
+          add("SOURCE_TEXTURE",src/"knight_texture.png")
+          add("SOURCE_LICENSE",src/"LICENSE.txt")
+          add("SOURCE_SCENE_AUDIT",obs/"SUBJECT_SOURCE_AUDIT.json")
+          add("SOURCE_CAMERA_BUNDLE",obs/"camera_bundle.json")
+          add("SOURCE_NORMALIZATION",obs/"normalization.json")
+          add("SOURCE_RENDER_RECEIPT",obs/"RENDER_RECEIPT.json")
+
+          rasters=[]; masks=[]
+          for row in receipt["views"]:
+              vi=int(row["view_index"])
+              rp=Path(row["raster"]["path"]).resolve()
+              mp=Path(row["foreground_mask"]["path"]).resolve()
+              assert sha(rp)==row["raster"]["sha256"]
+              assert sha(mp)==row["foreground_mask"]["sha256"]
+              add(f"SOURCE_RASTER_V{vi}",rp)
+              add(f"SOURCE_FOREGROUND_MASK_V{vi}",mp)
+              rasters.append({"view_index":vi,"image":{"path":str(rp),"sha256":sha(rp)}})
+              masks.append({"view_index":vi,"mask":{"path":str(mp),"sha256":sha(mp)}})
+
+          camera=obs/"camera_bundle.json"
+          payload={
+              "schema":"RealSaS.RunManifest.v1",
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "source_files":source_files,
+              "source_license":{
+                  "source_pack":"KayKit Character Pack Adventures 1.0",
+                  "license_name":"CC0-1.0",
+                  "license_ref":f"{src/'LICENSE.txt'}#sha256={sha(src/'LICENSE.txt')}",
+                  "source_url_or_locator":"KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0@"+os.environ["KAYKIT_COMMIT"],
+                  "notes":"Official public upstream is transport only; exact source authority is byte SHA-256 sealed."
+              },
+              "source_audit":{"minimum_border_margin_px":8},
+              "admission":{"mode":"CONTROLLED_FULL_SUBJECT_8VIEW_V1"},
+              "observation":{
+                  "camera_bundle":{"path":str(camera),"sha256":sha(camera)},
+                  "source_rasters":rasters,
+                  "source_foreground_masks":masks,
+              },
+              "normalization":{
+                  "center_xyz":norm["center_xyz"],
+                  "half_extent":norm["half_extent"],
+                  "coordinate_frame":"REALSAS_OBJECT_FRAME",
+              },
+          }
+          tmp=manifest_path.with_suffix(".json.tmp")
+          tmp.write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          tmp.replace(manifest_path)
+          print("RUN_MANIFEST",manifest_path,sha(manifest_path))
+          PY
+
+      - name: Execute canonical Stage01 through Stage08
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute             --run-id "$RUN_ID"             --from-stage 01_SOURCE_BYTES_SEALED             --to-stage 08_NORMALIZATION_DOMAIN_QUALIFIED
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status
+          python - <<'PY'
+          import json
+          p=json.load(open("canonical/ACTIVE_RUN_V1.json",encoding="utf-8"))
+          assert p["completed_count"]==8, p
+          assert p["next_stage"]=="09_IRIS_FIT_PREREGISTERED", p
+          print("SUBJECT2_PREFIT_GATE_PASS progress=8/40 next=09_IRIS_FIT_PREREGISTERED")
+          PY
+
+      - name: Bundle prefit evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/subject2_knight_prefit"
+          rm -rf "$evidence"; mkdir -p "$evidence"
+          cp "$RUN_ROOT/run_manifest.json" "$evidence/"
+          cp canonical/ACTIVE_RUN_V1.json "$evidence/"
+          cp -a "$OBS_DIR" "$evidence/observations"
+          cp -a "$RUN_ROOT/artifacts/01_SOURCE_BYTES_SEALED" "$evidence/"
+          cp -a "$RUN_ROOT/artifacts/02_SOURCE_LICENSE_PROVENANCE" "$evidence/"
+          cp -a "$RUN_ROOT/artifacts/03_SOURCE_MECHANICAL_AUDIT" "$evidence/"
+          cp -a "$RUN_ROOT/artifacts/04_FULL_SUBJECT_ADMISSION" "$evidence/"
+          cp -a "$RUN_ROOT/artifacts/05_CAMERA_CONTRACT_SOLVED" "$evidence/"
+          cp -a "$RUN_ROOT/artifacts/06_OBSERVATION_RENDER_8VIEW" "$evidence/"
+          cp -a "$RUN_ROOT/artifacts/07_OBSERVATION_CONTRACT_QUALIFIED" "$evidence/"
+          cp -a "$RUN_ROOT/artifacts/08_NORMALIZATION_DOMAIN_QUALIFIED" "$evidence/"
+          echo "EVIDENCE_DIR=$evidence" >> "$GITHUB_ENV"
+
+      - name: Upload Knight prefit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: subject2-knight-prefit-stage08
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 14

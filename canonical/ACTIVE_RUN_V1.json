@@ -5,8 +5,8 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__SUBJECT_DATA_ONLY_IN_RUN_ARTIFACTS",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
-  "pipeline_plan_sha256": "bb67a3e4842312bddae9a4f48e279048db96b0dc95cfa5961ce1599aa6879669",
-  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING",
+  "pipeline_plan_sha256": "4861ae36cb25fc4be9470f6d475d8bb0174d668eeeb4564475faaf7c5700ac1f",
+  "status": "PRODUCT_AUTHORITY_AUTOMATION_HARDENED__ALL_40_STAGES_EXECUTABLE__KNIGHT_NOT_STARTED",
   "completed_count": 0,
   "total_count": 40,
   "next_stage": "01_SOURCE_BYTES_SEALED",
@@ -533,6 +533,10 @@
     {
       "event": "SUBSTRATE_ADEQUACY_AND_TRULY_UNSEEN_PROOF_BOUND",
       "note": "Stage14 selects subject-free RiggingSurface N by bounded adequacy search; Stage35 fails on any dynamic exposure of final-mesh faces with no source-visible rest pixel across all eight admitted observations. Knight remains 0/40."
+    },
+    {
+      "event": "EIGHT_VIEW_ONLY_AUTOMATIC_PRODUCT_CONTRACT_HARDENED",
+      "note": "Pre-Knight architecture removed per-character boundary/carrier/deformation/component-mask/retarget authoring; added adaptive substrate N, component-aware geometry recall, truly-unseen motion exposure proof, presentation face-group addressability, source/depth/slot equal-depth semantics, automatic retargeting, and mandatory editable .rsedit closure. SUBJECT2_KNIGHT_V1 remains 0/40."
     }
   ],
   "events": [

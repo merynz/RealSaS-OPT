@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1909**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1916**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1921,6 +1921,13 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-19T14:24:19+03:00` | `c54257befbfc` | yes | COMPILER_PROOF | mesh: make G3 local 3D conditioning not motion capability | `compiler/realsas_compiler_core/deformation_envelope_derivation_v1.py`<br>`compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py` | `main` |
 | `2026-09-19T14:25:16+03:00` | `bc3e9a5f9ae2` | yes | CI_TEST, COMPILER_PROOF | tests: move product motion fixture to quaternion v2 | `tests/compiler/test_automatic_deformation_envelope_v1.py`<br>`tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
 | `2026-09-19T14:25:33+03:00` | `43c630ddd064` | yes | CI_TEST, COMPILER_PROOF | tests: fix deformation envelope import | `tests/compiler/test_automatic_deformation_envelope_v1.py` | `main` |
+| `2026-09-19T14:28:26+03:00` | `c4612d2a5458` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T14:28:52+03:00` | `c8934abde757` | yes | CI_TEST, COMPILER_PROOF | presentation: choose nearest observed 8-view donor without blending | `compiler/realsas_compiler_core/product_appearance_v1.py`<br>`tests/compiler/test_nearest_source_donor_v1.py` | `main` |
+| `2026-09-19T14:29:47+03:00` | `c695ecfd9bfd` | yes | COMPILER_PROOF | presentation: add hash-bound 8-view motion presentation proof [skip ci] | `compiler/realsas_compiler_core/motion_presentation_v1.py` | `main` |
+| `2026-09-19T14:30:34+03:00` | `2c3d38926f32` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | presentation: require source-faithful 2D motion proof for product pass | `compiler/realsas_compiler_core/product_closure_v1.py`<br>`compiler/realsas_compiler_services/orchestrator/adapters/product_closure_v1.py`<br>`compiler/realsas_compiler_services/orchestrator/adapters/runtime_projection_v1.py` | `main` |
+| `2026-09-19T14:33:25+03:00` | `636434f1618e` | yes | OTHER | motion: add deterministic Blender preset extractor v2 | `tools/motion/blender_extract_motion_source_v2.py` | `main` |
+| `2026-09-19T14:33:28+03:00` | `c9b026ffdcc3` | yes | GOVERNANCE_CONTINUITY | canonical: seal Idle Run Slash preset source provenance | `canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_V1.json` | `main` |
+| `2026-09-19T14:34:10+03:00` | `eb9ff1e1cfeb` | yes | RUNTIME_PRODUCT | runtime: fix equal-depth overlay scope | `runtime/realsas_cpp/src/runtime_v4_reference.cpp` | `main` |
 
 ## Use rule
 

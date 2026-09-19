@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "43c630ddd064344ae3d68b3de1b26b036654343c",
+    "main": "eb9ff1e1cfeb2002ed12fa923e5517a7ecf2b99c",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1909,
+  "commit_count": 1916,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -83815,6 +83815,166 @@
       "subsystem_tags": [
         "CI_TEST",
         "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c4612d2a5458854e897dbd6925e5de2bc376346c",
+      "parents": [
+        "43c630ddd064344ae3d68b3de1b26b036654343c"
+      ],
+      "author_time": "2026-09-19T14:28:26+03:00",
+      "committer_time": "2026-09-19T14:28:26+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c8934abde7574bd5c104a7d5e4e755f8f3d640f0",
+      "parents": [
+        "c4612d2a5458854e897dbd6925e5de2bc376346c"
+      ],
+      "author_time": "2026-09-19T14:28:52+03:00",
+      "committer_time": "2026-09-19T14:28:52+03:00",
+      "subject": "presentation: choose nearest observed 8-view donor without blending",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_appearance_v1.py",
+        "tests/compiler/test_nearest_source_donor_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c695ecfd9bfd89d85d13377f7350bdf571740ae8",
+      "parents": [
+        "c8934abde7574bd5c104a7d5e4e755f8f3d640f0"
+      ],
+      "author_time": "2026-09-19T14:29:47+03:00",
+      "committer_time": "2026-09-19T14:29:47+03:00",
+      "subject": "presentation: add hash-bound 8-view motion presentation proof [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_presentation_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2c3d38926f32e703875b19187928ec96c70d189a",
+      "parents": [
+        "c695ecfd9bfd89d85d13377f7350bdf571740ae8"
+      ],
+      "author_time": "2026-09-19T14:30:34+03:00",
+      "committer_time": "2026-09-19T14:30:34+03:00",
+      "subject": "presentation: require source-faithful 2D motion proof for product pass",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_closure_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_closure_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_projection_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "636434f1618e30b12bf143db49f658bd4b663b15",
+      "parents": [
+        "2c3d38926f32e703875b19187928ec96c70d189a"
+      ],
+      "author_time": "2026-09-19T14:33:25+03:00",
+      "committer_time": "2026-09-19T14:33:25+03:00",
+      "subject": "motion: add deterministic Blender preset extractor v2",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/motion/blender_extract_motion_source_v2.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c9b026ffdcc3e54afe3ec1cfa75b94701c2ed53a",
+      "parents": [
+        "636434f1618e30b12bf143db49f658bd4b663b15"
+      ],
+      "author_time": "2026-09-19T14:33:28+03:00",
+      "committer_time": "2026-09-19T14:33:28+03:00",
+      "subject": "canonical: seal Idle Run Slash preset source provenance",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/MOTION_PRESET_SOURCE_QUATERNIUS_KNIGHT_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "eb9ff1e1cfeb2002ed12fa923e5517a7ecf2b99c",
+      "parents": [
+        "c9b026ffdcc3e54afe3ec1cfa75b94701c2ed53a"
+      ],
+      "author_time": "2026-09-19T14:34:10+03:00",
+      "committer_time": "2026-09-19T14:34:10+03:00",
+      "subject": "runtime: fix equal-depth overlay scope",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v4_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

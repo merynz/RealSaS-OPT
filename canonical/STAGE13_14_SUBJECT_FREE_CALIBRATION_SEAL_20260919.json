@@ -1,0 +1,32 @@
+{
+  "schema": "RealSaS.Stage13_14SubjectFreeCalibrationSeal.v1",
+  "status": "PASS__FROZEN_BEFORE_KNIGHT_STAGE13_RESULT",
+  "authority": "SUBJECT_FREE_POLICY_CALIBRATION__NOT_KNIGHT_EVIDENCE",
+  "source_main_commit": "219cbfa726b298b5db88d171c702c5e055da886a",
+  "research_branch": "research/knight-stage13-14-calibration-20260919",
+  "calibration_commit": "ee52ecf21689881d7ba6bcb15b752a7dc9a9b266",
+  "workflow": {
+    "run_id": 35453693680,
+    "job_id": 105925139192,
+    "runner_name": "realsas-wsl-1660ti",
+    "python": "3.11.16",
+    "artifact_id": 10587856387,
+    "artifact_name": "stage13-14-subject-free-calibration",
+    "artifact_zip_sha256": "d87ab8e220924a935fcb4a3519465a99bf41a63ee0f35438ae49fb3b3590122c"
+  },
+  "result_files": {
+    "summary_sha256": "37c1e3887fb18b37dcb00acb9f5e13871a6eafd860462a5ad0ef632e3375e837",
+    "stage13_sha256": "dc2c1a186bb7c5b76931108f1fcbad0eb27a64784183313fd4ab179570052b04",
+    "stage14_sha256": "872786a7cb9fce3f7b2fb3423baba00598102371f02e5aa43013e79a63ad6631"
+  },
+  "contamination_checks": {
+    "subject_inputs_used": false,
+    "knight_result_used": false,
+    "knight_or_mage_path_dependency_scan": "PASS"
+  },
+  "selection_rules": {
+    "stage13": "FIRST_STRICT_TO_LOOSE_PREREGISTERED_PROFILE_THAT_ACCEPTS_ALL_ACCEPT_CASES_AND_REJECTS_ALL_REJECT_CASES",
+    "stage14": "FIRST_STRICT_TO_LOOSE_PREREGISTERED_TOLERANCE_PROFILE_WITH_AT_LEAST_ONE_PASSING_CANDIDATE_FOR_EVERY_SUBJECT_FREE_SHAPE"
+  },
+  "claim_boundary": "This seal freezes Stage13 and Stage14 policy selection evidence before any Knight Stage13 result is inspected. It is not a Knight PASS, IRIS product authority, or PRODUCT_PASS."
+}

@@ -30,24 +30,30 @@ def _source_payloads(ctx:dict,source_set)->dict:
     rows=tuple(cfg.get("sources") or ())
     by_id={}
     for raw in rows:
-        row=dict(raw); clip_id=str(row.get("clip_id") or "")
-        if not clip_id or clip_id in by_id:
-            raise QualificationError("MOTION_STAGE34_MANIFEST_SOURCE_ID_INVALID")
-        by_id[clip_id]=row
-    payloads={}
-    for asset in source_set.assets:
-        row=by_id.get(asset.clip_id)
-        if row is None:
-            raise QualificationError("MOTION_STAGE34_MANIFEST_SOURCE_MISSING")
-        if str(row.get("source_kind") or "")!=asset.source_kind:
-            raise QualificationError("MOTION_STAGE34_MANIFEST_SOURCE_KIND_DRIFT")
-        if asset.source_kind=="INLINE_PRESET_SPEC_V1":
-            payloads[asset.clip_id]=dict(row.get("spec") or {})
-        elif asset.source_kind=="EXTERNAL_ARTIST_CLIP_V1":
+        row=dict(raw)
+        kind=str(row.get("source_kind") or "")
+        if kind=="INLINE_PRESET_SPEC_V1":
+            clip_id=str(row.get("clip_id") or "")
+            payload=dict(row.get("spec") or {})
+        elif kind=="EXTERNAL_ARTIST_CLIP_V1":
             path=_load_file_ref(dict(row.get("file") or {}),expected_schema="RealSaS.MotionSourceClip.v1")
-            payloads[asset.clip_id]=json.loads(path.read_text(encoding="utf-8"))
+            payload=json.loads(path.read_text(encoding="utf-8"))
+            clip_id=str(payload.get("clip_id") or row.get("clip_id") or "")
         else:
             raise QualificationError("MOTION_STAGE34_SOURCE_KIND_UNSUPPORTED")
+        if not clip_id or clip_id in by_id:
+            raise QualificationError("MOTION_STAGE34_MANIFEST_SOURCE_ID_INVALID")
+        by_id[clip_id]=(row,payload)
+
+    payloads={}
+    for asset in source_set.assets:
+        pair=by_id.get(asset.clip_id)
+        if pair is None:
+            raise QualificationError("MOTION_STAGE34_MANIFEST_SOURCE_MISSING")
+        row,payload=pair
+        if str(row.get("source_kind") or "")!=asset.source_kind:
+            raise QualificationError("MOTION_STAGE34_MANIFEST_SOURCE_KIND_DRIFT")
+        payloads[asset.clip_id]=payload
     if set(by_id)!={a.clip_id for a in source_set.assets}:
         raise QualificationError("MOTION_STAGE34_MANIFEST_SOURCE_ACCOUNTING_DRIFT")
     return payloads

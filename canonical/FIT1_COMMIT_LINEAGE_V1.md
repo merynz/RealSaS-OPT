@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1877**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1879**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1889,6 +1889,8 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-19T12:31:54+03:00` | `06fca35142cf` | yes | GOVERNANCE_CONTINUITY | canonical: bind adequacy and unseen-motion plan hash | `canonical/ACTIVE_RUN_V1.json` | `main` |
 | `2026-09-19T12:32:24+03:00` | `baf54cbd7533` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
 | `2026-09-19T12:34:41+03:00` | `bdb9383f102d` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | motion: wire unseen exposure test authority | `compiler/realsas_compiler_core/mesh/product_coverage_v1.py`<br>`tests/compiler/test_motion_dynamic_proof_v1.py` | `main` |
+| `2026-09-19T12:37:14+03:00` | `4a8fb7fd0485` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T12:37:34+03:00` | `0594016b1030` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | tests: bind dynamic proof observation authority | `tests/compiler/test_motion_dynamic_proof_v1.py` | `main` |
 
 ## Use rule
 

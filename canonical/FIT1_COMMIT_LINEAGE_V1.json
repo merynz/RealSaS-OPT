@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "bdb9383f102d9de18508fb62c6e97df3a6a54a3a",
+    "main": "0594016b1030cec8e2715ee8c5a9d47c0bcf80f9",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1877,
+  "commit_count": 1879,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -83046,6 +83046,58 @@
       "main_reachable": true,
       "changed_paths": [
         "compiler/realsas_compiler_core/mesh/product_coverage_v1.py",
+        "tests/compiler/test_motion_dynamic_proof_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4a8fb7fd04851127c4d93d03c64a1d905b23896c",
+      "parents": [
+        "bdb9383f102d9de18508fb62c6e97df3a6a54a3a"
+      ],
+      "author_time": "2026-09-19T12:37:14+03:00",
+      "committer_time": "2026-09-19T12:37:14+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0594016b1030cec8e2715ee8c5a9d47c0bcf80f9",
+      "parents": [
+        "4a8fb7fd04851127c4d93d03c64a1d905b23896c"
+      ],
+      "author_time": "2026-09-19T12:37:34+03:00",
+      "committer_time": "2026-09-19T12:37:34+03:00",
+      "subject": "tests: bind dynamic proof observation authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
         "tests/compiler/test_motion_dynamic_proof_v1.py"
       ],
       "subsystem_tags": [

@@ -54,9 +54,9 @@
       "output": "RealSaS.RestRenderSetIR.v1 plus eight PNG evidence transports. Raw RGBA SHA in RestRenderSetIR is authority; PNG is evidence transport only."
     },
     "appearance": {
-      "rest_preservation_policy": "Exact {path,sha256} to canonical/REST_SOURCE_PRESERVATION_POLICY_V1_20260919.json or byte-identical sealed equivalent. Policy is re-derived and drift-checked at stage 32.",
+      "rest_preservation_policy": "Exact {path,sha256} to canonical/REST_SOURCE_PRESERVATION_POLICY_V2_20260919.json or byte-identical sealed equivalent. Policy is re-derived and drift-checked at stage 32.",
       "rest_preservation_calibration": "Exact {path,sha256} to canonical/REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json or byte-identical sealed equivalent. Knight/Mage outcomes may not tune thresholds.",
-      "stage32_rule": "Consumes exact stage-07 source raster/foreground authority, stage-26 MeshQualificationPolicyIR and stage-31 RestRenderSetIR. Every one of eight views must pass every hard rule; aggregate compensation is forbidden.",
+      "stage32_rule": "Consumes exact stage-07 source raster/foreground authority, stage-26 MeshQualificationPolicyIR and stage-31 RestRenderSetIR. Alpha coverage thresholds must exactly inherit calibrated G5 MESH v2; silhouette/source-RGBA/donor rules remain independently calibrated. Every one of eight views must pass every hard rule; aggregate compensation is forbidden.",
       "coordinate_domains": "Observation PIXEL_CENTER_XY is source texel index-centered; Runtime/G5 target raster uses half-integer pixel centers. Rest rendering must preserve this distinction and may not add an extra half-pixel shift."
     },
     "motion": {

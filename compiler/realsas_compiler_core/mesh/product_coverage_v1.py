@@ -6,6 +6,7 @@ from collections import deque
 from dataclasses import asdict, dataclass, field
 import hashlib
 import math
+import numpy as np
 from typing import Any, Iterable, Mapping
 
 from ..hashing import content_sha256

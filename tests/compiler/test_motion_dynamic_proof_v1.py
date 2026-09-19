@@ -10,6 +10,7 @@ from compiler.realsas_compiler_core.motion_compile_v1 import (
     compiled_motion_clip_hash, motion_constraint_set_hash, qualified_motion_hash,
 )
 from compiler.realsas_compiler_core.motion_dynamic_proof_v1 import build_qualified_dynamic_motion
+from compiler.realsas_compiler_core.playback_full_surface_v3 import CameraProjectionV3
 from compiler.realsas_compiler_core.product_authority_v1 import (
     CarrierCoverageThresholdIR, MeshQualificationPolicyIR, PresentationAttachmentIR,
     PresentationSlotIR, QualifiedMeshIR, QualifiedMeshVertexIR, QualifiedPresentationGraphIR,
@@ -21,6 +22,17 @@ from compiler.realsas_compiler_core.types import (
     QualifiedJoint, QualifiedMeshSkinIR, QualifiedMeshSkinRow, QualifiedSkeletonIR,
     QualificationError, SurfaceSupportBinding,
 )
+
+
+def _proof_observation_args():
+    cameras=tuple(
+        CameraProjectionV3(
+            f"V{i}",i,(0.0,0.0,-2.0),(1.0,0.0,0.0),(0.0,1.0,0.0),(0.0,0.0,1.0),2.0,32
+        )
+        for i in range(8)
+    )
+    masks={i:bytes([1])*(32*32) for i in range(8)}
+    return cameras,masks
 
 
 def _fixture(*,contact=False):
@@ -86,6 +98,7 @@ def test_dynamic_proof_is_single_canonical_3d_and_professional_artist_evidence()
     proof=build_qualified_dynamic_motion(
         motion=motion,constraints=constraints,product_state=state,skeleton=skeleton,
         mesh=mesh,mesh_skin=mesh_skin,presentation=presentation,mesh_policy=policy,
+        cameras=_proof_observation_args()[0],source_foreground_masks=_proof_observation_args()[1],
     )
     assert proof.qualification_report["dynamic_proof_passed"] is True
     assert proof.qualification_report["canonical_3d_single_mesh_truth"] is True

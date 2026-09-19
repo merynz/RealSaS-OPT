@@ -51,6 +51,47 @@ def presentation_structure_lineage_hash(value:QualifiedPresentationStructureIR)-
     return content_sha256(payload)
 
 
+def _presentation_face_groups(mesh, component_id:str):
+    vertex_component={str(v.canonical_mesh_vertex_id):str(v.component_id) for v in mesh.vertices}
+    face_rows=[]
+    for fi,face in enumerate(mesh.faces):
+        comps={vertex_component[str(vid)] for vid in face}
+        if len(comps)!=1:
+            raise QualificationError("PRESENTATION_FACE_CROSSES_MECHANICAL_COMPONENT")
+        if next(iter(comps))==str(component_id):
+            face_rows.append((int(fi),tuple(map(str,face))))
+    if not face_rows:
+        raise QualificationError("PRESENTATION_COMPONENT_HAS_NO_MESH_FACE")
+    edge_to_faces={}
+    for fi,face in face_rows:
+        for a,b in ((face[0],face[1]),(face[1],face[2]),(face[2],face[0])):
+            edge=tuple(sorted((a,b)))
+            edge_to_faces.setdefault(edge,[]).append(fi)
+    neighbors={fi:set() for fi,_ in face_rows}
+    for rows in edge_to_faces.values():
+        if len(rows)>1:
+            for a in rows:
+                for b in rows:
+                    if a!=b:
+                        neighbors[a].add(b)
+    unseen=set(neighbors)
+    groups=[]
+    while unseen:
+        seed=min(unseen)
+        stack=[seed]
+        group=[]
+        unseen.remove(seed)
+        while stack:
+            cur=stack.pop()
+            group.append(cur)
+            for nxt in sorted(neighbors[cur]):
+                if nxt in unseen:
+                    unseen.remove(nxt)
+                    stack.append(nxt)
+        groups.append(tuple(sorted(group)))
+    return tuple(sorted(groups,key=lambda g:(g[0],len(g),g)))
+
+
 def _component_mechanical_class(component,*,skin,threshold:float,other_max:float):
     rows={str(row.surface_id):row for row in skin.rows}
     common_owner=None
@@ -98,7 +139,8 @@ def _expected_structure(
     carrier_by_component={row.component_id:row.carrier_class for row in carrier_policy.decisions}
     slots=[]; attachments=[]; decisions=[]
     ordered=tuple(sorted(partition.components,key=lambda row:row.component_id))
-    for setup_order,component in enumerate(ordered):
+    setup_order=0
+    for component in ordered:
         carrier=carrier_by_component[component.component_id]
         if carrier!="MESH":
             raise QualificationError(
@@ -110,66 +152,86 @@ def _expected_structure(
         bone_id=rigid_owner if mechanical_class=="RIGID" else str(skeleton.root_id)
         if bone_id not in joint_ids:
             raise QualificationError("PRESENTATION_STRUCTURE_OWNER_JOINT_UNKNOWN")
-        slot_id="SLOT:"+content_sha256({
-            "product_state":product_state.product_state_hash,
-            "component_id":component.component_id,
-        })[:24]
-        attachment_id="ATT:"+content_sha256({
-            "product_state":product_state.product_state_hash,
-            "component_id":component.component_id,
-            "carrier":carrier,
-        })[:24]
-        slots.append(PresentationSlotIR(
-            slot_id=slot_id,
-            bone_id=bone_id,
-            setup_order=int(setup_order),
-            default_attachment_id=attachment_id,
-            keyable_channels=("ATTACHMENT","TINT","ORDER","VISIBILITY"),
-            metadata={
-                "mechanical_component_id":component.component_id,
-                "setup_order_role":"UI_SETUP_ONLY__NOT_PHYSICAL_OCCLUSION",
-                "categorical_identity":None,
-                "detachability_authority":"UNPROVEN",
-            },
-        ))
-        attachments.append(PresentationAttachmentIR(
-            attachment_id=attachment_id,
-            slot_id=slot_id,
-            mechanical_component_ids=(component.component_id,),
-            mechanical_class=mechanical_class,
-            carrier_class=carrier,
-            carrier_binding_hash=mesh.mesh_lineage_hash,
-            metadata={
-                "rigid_owner_joint_id":rigid_owner,
-                "minimum_owner_weight":min_owner,
-                "maximum_other_mass":max_other,
-                "detachability_authority":"UNPROVEN",
-                "replaceable_attachment_inferred":False,
-                "categorical_identity":None,
-            },
-        ))
-        decisions.append(PresentationDecisionEvidenceIR(
-            decision_id="DEC:"+content_sha256({
-                "kind":"SLOT_BINDING",
-                "component_id":component.component_id,
+        face_groups=_presentation_face_groups(mesh,component.component_id)
+        for group_index,face_indices in enumerate(face_groups):
+            group_hash=content_sha256({
+                "mesh":mesh.mesh_lineage_hash,
+                "component":component.component_id,
+                "face_indices":face_indices,
+            })
+            slot_id="SLOT:"+content_sha256({
                 "product_state":product_state.product_state_hash,
-            })[:24],
-            decision_kind="SLOT_BINDING",
-            authority_class="MECHANICAL",
-            evidence_refs=(
-                partition.partition_lineage_hash,
-                skin.skin_lineage_hash,
-                mesh.mesh_lineage_hash,
-                product_state.product_state_hash,
-            ),
-            metadata={
                 "component_id":component.component_id,
-                "mechanical_class":mechanical_class,
-                "bone_id":bone_id,
-                "rigidity_from_exact_skin":True,
-                "rigidity_does_not_imply_detachability":True,
-            },
-        ))
+                "presentation_group_hash":group_hash,
+            })[:24]
+            attachment_id="ATT:"+content_sha256({
+                "product_state":product_state.product_state_hash,
+                "component_id":component.component_id,
+                "presentation_group_hash":group_hash,
+                "carrier":carrier,
+            })[:24]
+            slots.append(PresentationSlotIR(
+                slot_id=slot_id,
+                bone_id=bone_id,
+                setup_order=int(setup_order),
+                default_attachment_id=attachment_id,
+                keyable_channels=("ATTACHMENT","TINT","ORDER","VISIBILITY"),
+                metadata={
+                    "mechanical_component_id":component.component_id,
+                    "presentation_group_index":int(group_index),
+                    "presentation_group_hash":group_hash,
+                    "mesh_face_indices":face_indices,
+                    "setup_order_role":"UI_SETUP_ONLY__NOT_PHYSICAL_OCCLUSION",
+                    "categorical_identity":None,
+                    "detachability_authority":"UNPROVEN",
+                },
+            ))
+            attachments.append(PresentationAttachmentIR(
+                attachment_id=attachment_id,
+                slot_id=slot_id,
+                mechanical_component_ids=(component.component_id,),
+                mechanical_class=mechanical_class,
+                carrier_class=carrier,
+                carrier_binding_hash=mesh.mesh_lineage_hash,
+                metadata={
+                    "rigid_owner_joint_id":rigid_owner,
+                    "minimum_owner_weight":min_owner,
+                    "maximum_other_mass":max_other,
+                    "presentation_group_hash":group_hash,
+                    "mesh_face_indices":face_indices,
+                    "detachability_authority":"UNPROVEN",
+                    "replaceable_attachment_inferred":False,
+                    "categorical_identity":None,
+                },
+            ))
+            decisions.append(PresentationDecisionEvidenceIR(
+                decision_id="DEC:"+content_sha256({
+                    "kind":"PRESENTATION_GROUP_BINDING",
+                    "component_id":component.component_id,
+                    "presentation_group_hash":group_hash,
+                    "product_state":product_state.product_state_hash,
+                })[:24],
+                decision_kind="SLOT_BINDING",
+                authority_class="MECHANICAL",
+                evidence_refs=(
+                    partition.partition_lineage_hash,
+                    skin.skin_lineage_hash,
+                    mesh.mesh_lineage_hash,
+                    product_state.product_state_hash,
+                    group_hash,
+                ),
+                metadata={
+                    "component_id":component.component_id,
+                    "presentation_group_index":int(group_index),
+                    "presentation_group_hash":group_hash,
+                    "mesh_face_indices":face_indices,
+                    "mechanical_class":mechanical_class,
+                    "bone_id":bone_id,
+                    "group_derivation":"CONNECTED_MESH_FACE_ISLAND_WITHIN_MECHANICAL_COMPONENT_V1",
+                    "categorical_recognition_used":False,
+                },
+            ))
+            setup_order+=1
     return tuple(slots),tuple(attachments),tuple(decisions)
 
 
@@ -234,12 +296,15 @@ def build_presentation_structure(
         mesh.mesh_lineage_hash,partition.partition_lineage_hash,
         carrier_policy.carrier_policy_lineage_hash,product_state.product_state_hash,"",
         metadata={
-            "producer":"ROLE_FREE_COMPONENT_ADDRESSABILITY_V1",
+            "producer":"ROLE_FREE_PRESENTATION_GROUPS_V2",
             "min_rigid_owner_weight":float(min_rigid_owner_weight),
             "max_rigid_other_mass":float(max_rigid_other_mass),
             "detachability_inference_forbidden":True,
             "categorical_recognition_used":False,
             "planar_proxy_supported":False,
+            "structural_partition_equals_presentation_segmentation":False,
+            "presentation_group_derivation":"CONNECTED_MESH_FACE_ISLAND_WITHIN_MECHANICAL_COMPONENT_V1",
+            "manual_split_merge_supported_by_authoring_bundle":True,
         },
     )
     value=replace(value,structure_lineage_hash=presentation_structure_lineage_hash(value))

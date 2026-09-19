@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "c11dddfcf64dbbc4918f8fc616636342bb83b44e",
+    "main": "bfe0b9069a9606a9ad5fe135e8de83228ee64dc1",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1802,
+  "commit_count": 1809,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -81233,6 +81233,178 @@
       "subsystem_tags": [
         "CI_TEST",
         "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b31c95ec86a0e69178b760dcdce0ee29add20ea6",
+      "parents": [
+        "c11dddfcf64dbbc4918f8fc616636342bb83b44e"
+      ],
+      "author_time": "2026-09-19T00:21:17+03:00",
+      "committer_time": "2026-09-19T00:21:17+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "526c9d0d00d88545a2e1f083a410c4eb1d919483",
+      "parents": [
+        "b31c95ec86a0e69178b760dcdce0ee29add20ea6"
+      ],
+      "author_time": "2026-09-19T08:49:36+03:00",
+      "committer_time": "2026-09-19T08:49:36+03:00",
+      "subject": "observation: add qualified eight-view product authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/observation_authority_v1.py",
+        "tests/compiler/test_observation_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e342106dfc10105a26cca617b69be568a93a828e",
+      "parents": [
+        "526c9d0d00d88545a2e1f083a410c4eb1d919483"
+      ],
+      "author_time": "2026-09-19T08:52:23+03:00",
+      "committer_time": "2026-09-19T08:52:23+03:00",
+      "subject": "mesh: make G5 source-partition and z-visibility exact",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/product_coverage_v1.py",
+        "compiler/realsas_compiler_core/product_artifact_codec_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py",
+        "tests/compiler/test_product_coverage_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bfcffdab06e1f33de5a0d49c377e5ff3b06a9fa0",
+      "parents": [
+        "e342106dfc10105a26cca617b69be568a93a828e"
+      ],
+      "author_time": "2026-09-19T08:53:24+03:00",
+      "committer_time": "2026-09-19T08:53:24+03:00",
+      "subject": "tests: harden G5 visible-owner regression coverage",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_coverage_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5a9461f6d34b32f9593887f7f852f533dbd9a9cc",
+      "parents": [
+        "bfcffdab06e1f33de5a0d49c377e5ff3b06a9fa0"
+      ],
+      "author_time": "2026-09-19T08:54:20+03:00",
+      "committer_time": "2026-09-19T08:54:20+03:00",
+      "subject": "tests: bind synthetic product wiring to explicit run id",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4fcd3bb43b66b7eea9f043e77b30e7a59e162cc7",
+      "parents": [
+        "5a9461f6d34b32f9593887f7f852f533dbd9a9cc"
+      ],
+      "author_time": "2026-09-19T08:57:07+03:00",
+      "committer_time": "2026-09-19T08:57:07+03:00",
+      "subject": "orchestrator: make cache invalidation dependency-aware",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py",
+        "tests/repository/test_mainline_execution_plan_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bfe0b9069a9606a9ad5fe135e8de83228ee64dc1",
+      "parents": [
+        "4fcd3bb43b66b7eea9f043e77b30e7a59e162cc7"
+      ],
+      "author_time": "2026-09-19T09:00:24+03:00",
+      "committer_time": "2026-09-19T09:00:24+03:00",
+      "subject": "mainline: bind product mechanical stages 24-29",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V1.json",
+        "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+        "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
+        "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json"
+      ],
+      "subsystem_tags": [
         "GOVERNANCE_CONTINUITY"
       ],
       "is_fit1_gate_anchor": false,

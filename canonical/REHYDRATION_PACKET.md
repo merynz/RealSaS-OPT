@@ -11,9 +11,9 @@
 - Current state: PRODUCT_AUTHORITY_PLAN_REBASED__IMPLEMENTATION
 - Active experiment: SUBJECT2_KNIGHT_FULL_CLOSURE
 - Most recent closed gate: QUALIFIED_MESH_PRESENTATION_ARCHITECTURE_FROZEN
-- Canonical main: c11dddfcf64d
+- Canonical main: bfe0b9069a96
 - Active run: SUBJECT2_KNIGHT_V1 — 0/40; next 01_SOURCE_BYTES_SEALED
-- Plan SHA-256: afe4ef66b56dcd14de4a2a493da72faede33947faf32a6121435872ba9faf83e
+- Plan SHA-256: 71ba83a99873ef231e6b6d45e3ccf1a6c806e8ea2b8296295ccb861adc538ef3
 - Promotion block: stages 24-30 are correctly named but remain UNBOUND; animation-grade mesh thresholds remain preregistration-pending
 - Scope warning: Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority
 

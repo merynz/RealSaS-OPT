@@ -5,9 +5,9 @@
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
 - Census artifacts in declared scope: **493 / 493 discovered (100%)**
-- Semantically reconciled: **65**
-- Catalogued but unreviewed: **428**
-- Semantic coverage: **13.2%**
+- Semantically reconciled: **67**
+- Catalogued but unreviewed: **426**
+- Semantic coverage: **13.6%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -340,10 +340,8 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-C8C2D8BC2489` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json` @ blob `e675238aef40`
 - `KA-A168B1644DC8` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json` @ blob `0dc75b5f9c89`
 
-### 2026-09-18 :: COMPILER (4)
+### 2026-09-18 :: COMPILER (2)
 
-- `KA-DCC95754A26B` `PREREG` — `main` :: `canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_PREREG_20260918.md` @ blob `a701bb3d2682`
-- `KA-0B5FDD6D0B12` `RESULT` — `main` :: `canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_RESULT_20260918.json` @ blob `f6e45dc8273f`
 - `KA-EBC69AAE60E1` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json` @ blob `31f2e5fa5835`
 - `KA-318281264871` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V4_20260918.json` @ blob `05b3f93aac51`
 
@@ -451,11 +449,11 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D2D319509ACF` `WORKFLOW` — `main` :: `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` @ blob `16bf42a72ecc`
 - `KA-03510A41D0D4` `WORKFLOW` — `main` :: `.github/workflows/prefit_observation_authority_v1.yml` @ blob `b04004000018`
 - `KA-FDE35053B8A7` `WORKFLOW` — `main` :: `.github/workflows/single_family_data_contract_v1.yml` @ blob `929df12d859e`
-- `KA-9344F23158C3` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `f14a4f4e6863`
+- `KA-C3D108BD9C4B` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `e1e2b445e771`
 - `KA-25BB7CDC0AB9` `AUTHORITY_DECISION` — `main` :: `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` @ blob `6b5fff12a484`
 - `KA-DC74ABB19F22` `PREREG` — `main` :: `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` @ blob `c01e1a65f75e`
 - `KA-E1571E78A4A5` `PREREG` — `main` :: `canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md` @ blob `36aef9ae6ecd`
-- `KA-45D9BC0F303C` `AUTHORITY_DECISION` — `main` :: `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` @ blob `8043199f6924`
+- `KA-062839C1A315` `AUTHORITY_DECISION` — `main` :: `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` @ blob `b7da0387db05`
 - `KA-4BA36C81DC37` `RESULT` — `main` :: `canonical/fit_mage_v1/CODEC_A0_EXACT_CONDITIONING_RESULT.json` @ blob `647d375bb65a`
 - `KA-2F8418D24D3C` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/fit_mage_v1/FIT_MAGE_CPU_V1_STATUS.md` @ blob `4edcee0fffff`
 - `KA-402A1F2E8E27` `AUTHORITY_DECISION` — `main` :: `experiments/family_selection_v1/post_freeze_family_selector_v1.py` @ blob `6571a60a4223`

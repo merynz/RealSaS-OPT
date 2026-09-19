@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1802**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1809**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1814,6 +1814,13 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-19T00:16:20+03:00` | `e0457e9604d7` | yes | CI_TEST, COMPILER_PROOF | product: add canonical mechanical puppet state seal | `compiler/realsas_compiler_core/canonical_puppet_state_v1.py`<br>`tests/compiler/test_canonical_puppet_state_v1.py` | `main` |
 | `2026-09-19T00:16:56+03:00` | `3a94d0aabb10` | yes | CI_TEST, COMPILER_PROOF | orchestrator: seal canonical mechanical puppet state | `compiler/realsas_compiler_core/product_artifact_codec_v1.py`<br>`compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py`<br>`tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
 | `2026-09-19T00:18:50+03:00` | `c11dddfcf64d` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | presentation: bind graph to canonical mechanical state | `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`<br>`compiler/realsas_compiler_core/product_authority_v1.py`<br>`tests/compiler/test_product_authority_v1.py` | `main` |
+| `2026-09-19T00:21:17+03:00` | `b31c95ec86a0` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T08:49:36+03:00` | `526c9d0d00d8` | yes | CI_TEST, COMPILER_PROOF, FIT_DATA, GOVERNANCE_CONTINUITY | observation: add qualified eight-view product authority | `compiler/realsas_compiler_core/observation_authority_v1.py`<br>`tests/compiler/test_observation_authority_v1.py` | `main` |
+| `2026-09-19T08:52:23+03:00` | `e342106dfc10` | yes | CI_TEST, COMPILER_PROOF | mesh: make G5 source-partition and z-visibility exact | `compiler/realsas_compiler_core/mesh/product_coverage_v1.py`<br>`compiler/realsas_compiler_core/product_artifact_codec_v1.py`<br>`compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py`<br>`tests/compiler/test_product_coverage_v1.py`<br>`tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-19T08:53:24+03:00` | `bfcffdab06e1` | yes | CI_TEST, COMPILER_PROOF | tests: harden G5 visible-owner regression coverage | `tests/compiler/test_product_coverage_v1.py`<br>`tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-19T08:54:20+03:00` | `5a9461f6d34b` | yes | CI_TEST, COMPILER_PROOF | tests: bind synthetic product wiring to explicit run id | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-19T08:57:07+03:00` | `4fcd3bb43b66` | yes | CI_TEST, COMPILER_PROOF | orchestrator: make cache invalidation dependency-aware | `compiler/realsas_compiler_services/orchestrator/mainline.py`<br>`tests/repository/test_mainline_execution_plan_v1.py` | `main` |
+| `2026-09-19T09:00:24+03:00` | `bfe0b9069a96` | yes | GOVERNANCE_CONTINUITY | mainline: bind product mechanical stages 24-29 | `canonical/ACTIVE_RUN_V1.json`<br>`canonical/MAINLINE_EXECUTION_PLAN_V1.json`<br>`canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`<br>`canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` | `main` |
 
 ## Use rule
 

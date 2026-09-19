@@ -3,6 +3,7 @@ import numpy as np
 from compiler.realsas_compiler_core.joint_frames_v1 import (
     derive_joint_frames_from_rows,
     frame_set_hash,
+    object_vector_to_joint_local,
 )
 from compiler.realsas_compiler_core.motion_compile_v2 import automatic_retarget_map_v2
 
@@ -70,3 +71,21 @@ def test_retarget_allows_extra_source_joints_but_preserves_target_tree():
     assert mapping["hips"]=="root"
     assert set(mapping.values())=={"root","hipL","footL","hipR","footR"}
     assert report["unused_source_joint_count"]==2
+
+
+def test_object_vector_to_joint_local_roundtrips_nonidentity_root_frame():
+    frames=derive_joint_frames_from_rows(
+        (
+            {"id":"root","parent":None,"p":(0.0,0.0,0.0)},
+            {"id":"child","parent":"root","p":(0.0,0.0,1.0)},
+        ),
+        joint_id_key="id",
+        parent_id_key="parent",
+        position_key="p",
+    )
+    frame=frames["root"]
+    R=np.asarray(frame.rotation_matrix,dtype=np.float64)
+    object_delta=np.asarray((0.25,-0.5,0.75),dtype=np.float64)
+    local_delta=np.asarray(object_vector_to_joint_local(frame,object_delta),dtype=np.float64)
+    assert not np.allclose(local_delta,object_delta,atol=1e-12)
+    assert np.allclose(R@local_delta,object_delta,atol=1e-12)

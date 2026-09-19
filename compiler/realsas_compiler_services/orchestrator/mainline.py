@@ -1,5 +1,5 @@
 from __future__ import annotations
-import argparse, hashlib, importlib, json, os, re
+import argparse, ast, hashlib, importlib, importlib.util, json, os, re
 from pathlib import Path
 from typing import Any
 
@@ -80,12 +80,75 @@ def authority_root()->Path:
 
 def run_manifest_path(run_id:str)->Path: return authority_root()/"runs"/run_id/"run_manifest.json"
 
+def _local_module_path(module_name:str)->Path|None:
+    rel=Path(*str(module_name).split("."))
+    file_path=(ROOT/rel).with_suffix(".py")
+    if file_path.is_file():
+        return file_path.resolve()
+    init_path=ROOT/rel/"__init__.py"
+    if init_path.is_file():
+        return init_path.resolve()
+    return None
+
+
+def _local_import_closure(module_name:str)->tuple[tuple[str,str],...]:
+    seen:set[str]=set()
+    rows:list[tuple[str,str]]=[]
+
+    def visit(name:str)->None:
+        if name in seen:
+            return
+        path=_local_module_path(name)
+        if path is None:
+            return
+        seen.add(name)
+        rows.append((name,sha256_file(path)))
+        try:
+            tree=ast.parse(path.read_text(encoding="utf-8"),filename=str(path))
+        except Exception as exc:
+            raise RuntimeError(f"MAINLINE_IMPLEMENTATION_AST_INVALID:{name}:{exc}") from exc
+        package=name.rpartition(".")[0]
+        for node in ast.walk(tree):
+            candidates:list[str]=[]
+            if isinstance(node,ast.Import):
+                candidates.extend(alias.name for alias in node.names)
+            elif isinstance(node,ast.ImportFrom):
+                if node.level:
+                    relative="."*int(node.level)+(node.module or "")
+                    try:
+                        base=importlib.util.resolve_name(relative,package or name)
+                    except Exception:
+                        base=""
+                else:
+                    base=str(node.module or "")
+                if base:
+                    candidates.append(base)
+                    for alias in node.names:
+                        child=f"{base}.{alias.name}"
+                        if _local_module_path(child) is not None:
+                            candidates.append(child)
+            for candidate in candidates:
+                visit(candidate)
+
+    visit(module_name)
+    return tuple(sorted(rows))
+
+
 def _adapter_impl_hash(adapter:str)->str:
     if adapter=="UNBOUND": return hashlib.sha256(b"UNBOUND").hexdigest()
     module_name,sep,fn_name=adapter.partition(":")
     if not sep or not module_name or not fn_name: raise RuntimeError(f"MAINLINE_ADAPTER_ID_INVALID:{adapter}")
     module=importlib.import_module(module_name)
-    return content_sha256({"adapter":adapter,"module_sha256":sha256_file(Path(module.__file__).resolve())})
+    if not callable(getattr(module,fn_name,None)):
+        raise RuntimeError(f"MAINLINE_ADAPTER_CALLABLE_MISSING:{adapter}")
+    closure=_local_import_closure(module_name)
+    if not closure:
+        raise RuntimeError(f"MAINLINE_IMPLEMENTATION_CLOSURE_EMPTY:{adapter}")
+    return content_sha256({
+        "schema":"RealSaS.AdapterImplementationClosure.v1",
+        "adapter":adapter,
+        "local_python_import_closure":[{"module":name,"sha256":digest} for name,digest in closure],
+    })
 
 def _manifest_subset(manifest:dict,stage:dict)->dict:
     return {key:manifest.get(key) for key in stage["manifest_keys"]}

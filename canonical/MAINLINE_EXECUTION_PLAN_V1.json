@@ -597,9 +597,16 @@
       "title": "QualifiedPresentationGraph slots attachments carriers appearance composition",
       "group": "presentation",
       "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "18_SKELETON_QUALIFIED",
+        "22_SKIN_QUALIFIED",
+        "24_MECHANICAL_PARTITION_QUALIFIED",
+        "25_DEFORMATION_CAPABILITY_ENVELOPE",
+        "27_QUALIFIED_MESH_GATE",
         "29_CANONICAL_PUPPET_STATE_SEALED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.presentation_v1:qualify_presentation_graph_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -607,9 +614,7 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
-        "presentation",
-        "appearance",
-        "carrier_policy"
+        "presentation"
       ]
     },
     {

@@ -1,9 +1,9 @@
 {
   "schema": "RealSaS.ContextState.v2",
-  "date": "2026-09-18",
+  "date": "2026-09-19",
   "continuation_branch": "main",
   "execution_branch": "main",
-  "status": "PRODUCT_AUTHORITY_PLAN_REBASED__IMPLEMENTATION",
+  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__STAGES_24_30_EXECUTABLE",
   "authority": {
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
@@ -18,10 +18,10 @@
   },
   "current_focus": {
     "module": "QualifiedMesh + QualifiedPresentationGraph authority implementation",
-    "state": "PRODUCT_AUTHORITY_PLAN_REBASED__IMPLEMENTATION",
+    "state": "PRODUCT_AUTHORITY_IMPLEMENTATION__STAGES_24_30_EXECUTABLE",
     "active_experiment": "SUBJECT2_KNIGHT_FULL_CLOSURE",
-    "most_recent_closed_gate": "QUALIFIED_MESH_PRESENTATION_ARCHITECTURE_FROZEN",
-    "promotion_block": "stages 24-30 are correctly named but remain UNBOUND; animation-grade mesh thresholds remain preregistration-pending",
+    "most_recent_closed_gate": "QUALIFIED_PRESENTATION_STAGE30_IMPLEMENTATION_PASS",
+    "promotion_block": "stages 24-30 are executable typed adapters; active Knight run remains 0/40 because upstream source/observation/model stages are not yet executed. Stage 31 rest-render is the next product-authority implementation seam.",
     "scope_warning": "Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority",
     "scientific_question": "Can the generic compiler promote one view-independent canonical mesh through G1-G5 and a qualified presentation graph without a second geometry or runtime presentation truth?"
   },

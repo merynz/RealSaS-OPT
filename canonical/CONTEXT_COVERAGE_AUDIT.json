@@ -12,8 +12,8 @@
   "explained_high_signal_count": 319,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 121,
-  "safe_default_evidence_only_branch_count": 117,
+  "live_branch_count": 122,
+  "safe_default_evidence_only_branch_count": 118,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -359,6 +359,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "freeze/stage13-14-policy-20260919",
+      "sha": "906181c014108ae8ff55330bed910a6302a6da79",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "g0-g1/single-pose-geometry",
       "sha": "e423cd46200220f95452890f74640c0afb57fd28",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -444,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "a4325832c000dc4fc3e3fda20cae8c102f9d1b7c",
+      "sha": "219cbfa726b298b5db88d171c702c5e055da886a",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -600,7 +606,7 @@
     },
     {
       "name": "research/knight-stage13-14-calibration-20260919",
-      "sha": "a4325832c000dc4fc3e3fda20cae8c102f9d1b7c",
+      "sha": "ee52ecf21689881d7ba6bcb15b752a7dc9a9b266",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

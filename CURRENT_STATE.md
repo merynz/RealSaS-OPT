@@ -5,8 +5,8 @@
 **Active experiment gate:** `SUBJECT2_KNIGHT_FULL_CLOSURE` on `main`  
 **Active run:** `SUBJECT2_KNIGHT_V1`  
 **Progress:** **0/40** — next `01_SOURCE_BYTES_SEALED`  
-**Current state:** `PRODUCT_AUTHORITY_IMPLEMENTATION__STAGES24_40_EXECUTABLE__EARLY_MAINLINE_BINDINGS_REMAIN`  
-**Most recent closed gate:** `PRODUCT_TAIL_STAGE24_40_IMPLEMENTED_AND_BOUND_READY_FOR_CI`
+**Current state:** `PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING`  
+**Most recent closed gate:** `ALL_40_STAGE_ADAPTERS_IMPLEMENTED_AND_BOUND_READY_FOR_FINAL_CI`
 
 ## Read first
 1. `canonical/ACTIVE_RUN_V1.json`
@@ -27,7 +27,7 @@ There is one 40-stage plan and one active-run ledger. A PASS stage is reusable o
 The promoted runtime direction is the measured compact path: shared canonical XYZ once per asset per frame, static per-view overlays, streamed Runtime-v4 writer, content-addressed runtime/proof/render caches and native batch reference rendering. Historical synthetic evidence records an exact 8x XYZ reduction and 17.7x scalar-to-batch render speedup; this is optimization evidence, not a Knight or PRODUCT_PASS claim.
 
 ## Current task
-Stages 24–40 now have executable typed authority adapters. Stage 35 proves canonical 3D dynamic motion over the single M/B truth; Stage 36 performs deployment-only Runtime-v4 projection; Stage 37 materializes exact projected frames without solver replay; Stages 38–39 require exact-hash native playback and rendered temporal evidence; Stage 40 is the only PRODUCT_PASS mint and requires nonzero artist-source motion plus native visible proof. The remaining implementation task is the earlier Stage 03–23 execution seam: replace every residual UNBOUND adapter with existing current authority where valid or a new fail-closed typed adapter, then seal the final 40-stage plan hash.
+All 40 canonical stages now have executable adapters and an explicit DAG. Stages 03–08 close source/admission/observation authority; stages 09–15 bind external IRIS fit receipts to exact zero-surface and Compiler GSA qualification; stages 16–23 bind Geppetto/Arachne proposal evidence to Compiler-owned QualifiedSkeletonIR/QualifiedSkinIR; stages 24–40 close product mesh, presentation, rest preservation, motion, Runtime-v4, native visual evidence and PRODUCT_PASS. The remaining work is final repository CI cleanup, canonical plan-hash refresh, and supplying the active Knight run's exact external fit/native-player artifacts before executing 01→40. No Knight PASS is claimed by implementation readiness alone.
 
 ## Hard boundaries
 - Mage FIT/FIT2 remains historical/scoped evidence; it is not current execution authority.

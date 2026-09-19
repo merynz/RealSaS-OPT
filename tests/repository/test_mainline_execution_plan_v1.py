@@ -49,6 +49,19 @@ def test_motion_manifest_scope_does_not_touch_iris_or_skin():
         35:"MOTION_DYNAMIC_PROOF",36:"RUNTIME_V4_PROJECT",37:"RSS_MATERIALIZE_COMPACT",
         38:"NATIVE_PACKAGE_OPEN_PLAYBACK",39:"VISUAL_MOTION_RENDER_BAKE",40:"PRODUCT_CLOSURE_SEAL"
     }[n]]["adapter"]!="UNBOUND" for n in range(35,41))
+    assert all(row["adapter"]!="UNBOUND" for row in plan["stages"])
+    assert by["03_SOURCE_MECHANICAL_AUDIT"]["depends_on"]==[
+        "01_SOURCE_BYTES_SEALED","02_SOURCE_LICENSE_PROVENANCE"
+    ]
+    assert by["05_CAMERA_CONTRACT_SOLVED"]["depends_on"]==[]
+    assert by["06_OBSERVATION_RENDER_8VIEW"]["depends_on"]==[
+        "04_FULL_SUBJECT_ADMISSION","05_CAMERA_CONTRACT_SOLVED"
+    ]
+    assert by["12_ZERO_SURFACE_DECODED"]["depends_on"]==[
+        "07_OBSERVATION_CONTRACT_QUALIFIED","08_NORMALIZATION_DOMAIN_QUALIFIED","11_IRIS_CHECKPOINT_SEALED"
+    ]
+    assert by["18_SKELETON_QUALIFIED"]["manifest_keys"]==[]
+    assert by["22_SKIN_QUALIFIED"]["manifest_keys"]==[]
 def test_policy_hash_changes_on_semantic_change():
     plan=load("canonical/MAINLINE_EXECUTION_PLAN_V1.json"); policy=dict(plan["stages"][0]["policy"]); before=content_sha256(policy); policy["cacheable"]=False
     assert content_sha256(policy)!=before

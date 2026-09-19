@@ -64,9 +64,10 @@
       "title": "Source mechanical audit",
       "group": "source",
       "depends_on": [
+        "01_SOURCE_BYTES_SEALED",
         "02_SOURCE_LICENSE_PROVENANCE"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:audit_source_mechanics_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -74,7 +75,8 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
-        "source_audit"
+        "source_audit",
+        "observation"
       ]
     },
     {
@@ -85,7 +87,7 @@
       "depends_on": [
         "03_SOURCE_MECHANICAL_AUDIT"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:admit_full_subject_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -101,9 +103,7 @@
       "id": "05_CAMERA_CONTRACT_SOLVED",
       "title": "Common 8-view camera contract",
       "group": "observation",
-      "depends_on": [
-        "04_FULL_SUBJECT_ADMISSION"
-      ],
+      "depends_on": [],
       "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.observation_v1:qualify_camera_contract_stage",
       "policy": {
         "fail_closed": true,
@@ -121,9 +121,10 @@
       "title": "Render exact 8 observations",
       "group": "observation",
       "depends_on": [
+        "04_FULL_SUBJECT_ADMISSION",
         "05_CAMERA_CONTRACT_SOLVED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:materialize_observation_render_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -140,9 +141,12 @@
       "title": "Observation contract qualification",
       "group": "observation",
       "depends_on": [
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED",
         "06_OBSERVATION_RENDER_8VIEW"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:qualify_observation_contract_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -159,9 +163,10 @@
       "title": "Normalization/field-domain qualification",
       "group": "geometry",
       "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
         "07_OBSERVATION_CONTRACT_QUALIFIED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:qualify_normalization_domain_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -178,9 +183,10 @@
       "title": "IRIS fit preregistration",
       "group": "geometry",
       "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
         "08_NORMALIZATION_DOMAIN_QUALIFIED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:preregister_iris_fit_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -199,7 +205,7 @@
       "depends_on": [
         "09_IRIS_FIT_PREREGISTERED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:execute_iris_fit_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -218,16 +224,14 @@
       "depends_on": [
         "10_IRIS_FIT"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:seal_iris_checkpoint_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
       },
-      "manifest_keys": [
-        "iris_fit"
-      ]
+      "manifest_keys": []
     },
     {
       "ordinal": 12,
@@ -235,9 +239,11 @@
       "title": "Dense zero-surface decode",
       "group": "geometry",
       "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
         "11_IRIS_CHECKPOINT_SEALED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:decode_zero_surface_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -254,9 +260,12 @@
       "title": "Raw rest reprojection geometry gate",
       "group": "geometry",
       "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
         "12_ZERO_SURFACE_DECODED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:qualify_rest_reprojection_geometry_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -264,7 +273,8 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
-        "geometry_gate"
+        "geometry_gate",
+        "observation"
       ]
     },
     {
@@ -273,9 +283,13 @@
       "title": "GSA build",
       "group": "geometry",
       "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "11_IRIS_CHECKPOINT_SEALED",
+        "12_ZERO_SURFACE_DECODED",
         "13_REST_REPROJECTION_GEOMETRY_GATE"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:build_gsa_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -294,16 +308,14 @@
       "depends_on": [
         "14_GSA_BUILD"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:qualify_rigging_surface_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
       },
-      "manifest_keys": [
-        "gsa"
-      ]
+      "manifest_keys": []
     },
     {
       "ordinal": 16,
@@ -313,7 +325,7 @@
       "depends_on": [
         "15_RIGGING_SURFACE_QUALIFIED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v1:preregister_geppetto_fit_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -332,7 +344,7 @@
       "depends_on": [
         "16_GEPPETTO_FIT_PREREGISTERED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v1:execute_geppetto_fit_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -349,18 +361,17 @@
       "title": "Compiler skeleton qualification",
       "group": "rig",
       "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
         "17_GEPPETTO_FIT"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v1:qualify_skeleton_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
       },
-      "manifest_keys": [
-        "geppetto_fit"
-      ]
+      "manifest_keys": []
     },
     {
       "ordinal": 19,
@@ -368,18 +379,17 @@
       "title": "Geppetto checkpoint seal",
       "group": "rig",
       "depends_on": [
+        "17_GEPPETTO_FIT",
         "18_SKELETON_QUALIFIED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v1:seal_geppetto_checkpoint_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
       },
-      "manifest_keys": [
-        "geppetto_fit"
-      ]
+      "manifest_keys": []
     },
     {
       "ordinal": 20,
@@ -387,9 +397,11 @@
       "title": "Arachne fit preregistration",
       "group": "skin",
       "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "18_SKELETON_QUALIFIED",
         "19_GEPPETTO_CHECKPOINT_SEALED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v1:preregister_arachne_fit_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -408,7 +420,7 @@
       "depends_on": [
         "20_ARACHNE_FIT_PREREGISTERED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v1:execute_arachne_fit_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -425,18 +437,18 @@
       "title": "Compiler skin qualification",
       "group": "skin",
       "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "18_SKELETON_QUALIFIED",
         "21_ARACHNE_FIT"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v1:qualify_skin_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
       },
-      "manifest_keys": [
-        "arachne_fit"
-      ]
+      "manifest_keys": []
     },
     {
       "ordinal": 23,
@@ -444,18 +456,17 @@
       "title": "Arachne checkpoint seal",
       "group": "skin",
       "depends_on": [
+        "21_ARACHNE_FIT",
         "22_SKIN_QUALIFIED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v1:seal_arachne_checkpoint_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
       },
-      "manifest_keys": [
-        "arachne_fit"
-      ]
+      "manifest_keys": []
     },
     {
       "ordinal": 24,

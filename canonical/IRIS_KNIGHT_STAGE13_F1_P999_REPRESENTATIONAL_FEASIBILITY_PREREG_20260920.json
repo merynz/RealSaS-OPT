@@ -1,0 +1,126 @@
+{
+  "schema": "RealSaS.IRIS.KnightStage13P999RepresentationalFeasibilityPreregistration.v1",
+  "date_utc": "2026-09-20",
+  "status": "PREREGISTERED_BEFORE_FEASIBILITY_RESULT",
+  "subject_run_id": "SUBJECT2_KNIGHT_V1",
+  "attempt_protocol": "F1_STAGE13_P999_FREE_GRID_REPRESENTATIONAL_FEASIBILITY",
+  "research_branch": "research/knight-stage13-feasibility-v1-20260920",
+  "authority_main_head_at_prereg": "47ed3f16d82f647b99914aa2fd4305574b41c5cb",
+  "authority_main_merge_commit": "29c7bb857a14bcbdb73351a85dcb2e1ba4ae1529",
+  "prior_v7": {
+    "decision_sha256": "984bd85f608b17a823e22d3eb9b275871dd693ca7b86b68f6584b690de1c4b07",
+    "overall_status": "FAIL",
+    "selected_candidate": null,
+    "interpretation": "SILHOUETTE_SANDWICH_SURVIVES__DOSE_ESCALATION_FALSIFIED__FEASIBILITY_NOT_YET_ESTABLISHED"
+  },
+  "exact_inputs": {
+    "prefit_evidence_file": "SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip",
+    "prefit_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "observation_set_binding_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+    "normalization_binding_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23",
+    "source_authority": "EXACT_STAGE07_FOREGROUND_MASKS_PLUS_EXACT_QUALIFIED_CAMERAS_PLUS_STAGE08_NORMALIZATION_ONLY",
+    "source_rgba_used_for_objective": false,
+    "teacher_mesh_used": false,
+    "teacher_checkpoint_used": false,
+    "iris_model_used": false
+  },
+  "frozen_stage13_policy": {
+    "path": "canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json",
+    "sha256": "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214",
+    "profile": "P999",
+    "thresholds": {
+      "min_recall": 0.999,
+      "min_precision": 0.999,
+      "max_largest_coherent_hole_fraction": 0.00025,
+      "max_interior_uncovered_fraction": 0.0005,
+      "min_component_recall": 0.999,
+      "component_min_foreground_fraction": 0,
+      "max_silhouette_edge_p95_px": 0.5
+    },
+    "every_view_must_pass_every_rule": true
+  },
+  "representation": {
+    "field_resolution": 256,
+    "scalar_dtype": "FP32",
+    "normalized_domain": "[-1,1]^3",
+    "zero_level_surface": "SKIMAGE_MARCHING_CUBES_LEVEL_0",
+    "grid_alignment": "LINSPACE_MINUS1_PLUS1__ALIGN_CORNERS_TRUE",
+    "product_authority": false
+  },
+  "constructive_initialization": {
+    "id": "SOURCE_SILHOUETTE_SDF_INTERSECTION",
+    "purpose": "EXPERIMENT_ONLY_INITIALIZATION_FOR_EXISTENCE_WITNESS",
+    "per_view_2d_signed_distance": "EDT_BACKGROUND_MINUS_EDT_FOREGROUND_AT_PIXEL_CENTERS",
+    "projected_sampling": "BILINEAR_AT_RUNTIME_V3_HALF_PIXEL_CAMERA_PROJECTION",
+    "distance_unit_conversion": "PIXELS_TO_NORMALIZED_WORLD_LATERAL_DISTANCE_USING_2*CAMERA_HALF_EXTENT/(RESOLUTION*NORMALIZATION_HALF_EXTENT)",
+    "field_composition": "MAX_ACROSS_VALID_VIEWS",
+    "out_of_frame_semantics": "UNKNOWN__DOES_NOT_CONTRIBUTE_A_VETO",
+    "field_clamp_norm": 0.1,
+    "visual_hull_like": true,
+    "visual_hull_clipping_of_product_output": false,
+    "product_oracle_promotion_forbidden": true
+  },
+  "free_grid_refinement": {
+    "executed_only_if_constructive_initialization_fails_stage13": true,
+    "optimizer": "Adam",
+    "learning_rate": 0.001,
+    "steps": 1200,
+    "rng_seed": 26092031,
+    "ray_depth_samples_coarse": 128,
+    "ray_depth_samples_fine": 17,
+    "fine_window": "PLUS_MINUS_ONE_COARSE_BIN_AROUND_COARSE_MINIMUM",
+    "pools": {
+      "near_foreground": "SOURCE_FOREGROUND_MINUS_4PX_CHEBYSHEV_EROSION",
+      "deep_foreground": "4PX_CHEBYSHEV_EROSION",
+      "near_background": "4PX_CHEBYSHEV_DILATION_MINUS_SOURCE_FOREGROUND",
+      "far_background": "COMPLEMENT_OF_4PX_CHEBYSHEV_DILATION",
+      "boundary": "HORIZONTAL_OR_VERTICAL_FOREGROUND_BACKGROUND_TRANSITION_MIDPOINT_BETWEEN_PIXEL_CENTERS"
+    },
+    "rays_per_view_per_step": {
+      "near_foreground": 64,
+      "deep_foreground": 16,
+      "near_background": 64,
+      "far_background": 16,
+      "boundary": 64
+    },
+    "deterministic_sampling": "PER_VIEW_PER_POOL_SEEDED_PERMUTATION_CYCLES_WITHOUT_REPLACEMENT_UNTIL_POOL_WRAP",
+    "margins_norm": {
+      "near_foreground_negative": 0.0025,
+      "deep_foreground_negative": 0.01,
+      "near_background_positive": 0.0025,
+      "far_background_positive": 0.01,
+      "boundary_zero_beta": 0.001
+    },
+    "component_weights": {
+      "near_foreground": 0.2,
+      "deep_foreground": 0.1,
+      "near_background": 0.2,
+      "far_background": 0.1,
+      "boundary": 0.4
+    },
+    "initialization_anchor_l2_weight": 0.0001,
+    "total_variation_weight": 0.00001,
+    "posthoc_hyperparameter_changes_allowed": false
+  },
+  "candidate_order": [
+    "SOURCE_SILHOUETTE_SDF_INTERSECTION",
+    "FREE_GRID_REFINE_1200"
+  ],
+  "selection_rule": "FIRST_CANDIDATE_IN_ORDER_WITH_FULL_STAGE13_V2_P999_PASS_ELSE_NONE",
+  "result_semantics": {
+    "pass": "EXISTENCE_WITNESS_ESTABLISHED_FOR_256_CUBE_SOURCE_ONLY_FIELD__DOES_NOT_PROMOTE_PRODUCT_GEOMETRY",
+    "fail": "NO_PREREGISTERED_WITNESS_FOUND__NOT_A_MATHEMATICAL_IMPOSSIBILITY_PROOF",
+    "canonical_product_authority_minted": false,
+    "stage13_policy_relaxation_allowed": false
+  },
+  "scientific_rules": {
+    "teacher_geometry_forbidden": true,
+    "iris_network_forbidden": true,
+    "checkpoint_warm_start_forbidden": true,
+    "source_mask_camera_normalization_only": true,
+    "exact_stage13_evaluator_required": true,
+    "exact_runtime_v3_half_pixel_raster_semantics_required": true,
+    "post_result_policy_mutation_forbidden": true,
+    "candidate_outputs_preserved": true
+  }
+}

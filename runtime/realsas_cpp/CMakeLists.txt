@@ -105,6 +105,12 @@ if(REALSAS_BUILD_TESTS)
       --runtime-demo $<TARGET_FILE:realsas_runtime_v4_demo>)
 
   add_test(
+    NAME realsas_runtime_v4_equal_depth_presentation_e2e
+    COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/runtime_v4_equal_depth_presentation_e2e.py
+      --runtime-demo $<TARGET_FILE:realsas_runtime_v4_demo>)
+
+  add_test(
     NAME realsas_runtime_v4_v3_parity_e2e
     COMMAND ${Python3_EXECUTABLE}
       ${CMAKE_CURRENT_SOURCE_DIR}/tests/runtime_v4_v3_parity_e2e.py

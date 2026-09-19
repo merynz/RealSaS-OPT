@@ -1,6 +1,6 @@
 {
-  "schema": "RealSaS.RestSourcePreservationProductPolicy.v1",
-  "status": "SUPERSEDED__NO_NEW_STAGE32_PASS_AUTHORITY",
+  "schema": "RealSaS.RestSourcePreservationProductPolicy.v2",
+  "status": "FROZEN_AFTER_G5_MESH_V2_REBIND__BEFORE_ANY_NEW_KNIGHT_STAGE32_PASS",
   "authority": "NORMATIVE_STAGE32_PRODUCT_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_FIT",
   "calibration_result": {
     "path": "canonical/REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json",
@@ -9,14 +9,15 @@
     "workflow_job_id": 105854920122
   },
   "inherited_mesh_policy": {
-    "path": "canonical/QUALIFIED_MESH_PRODUCT_POLICY_V1_20260918.json",
-    "carrier_class": "MESH"
+    "path": "canonical/QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json",
+    "carrier_class": "MESH",
+    "g5_calibration_authority": "canonical/G5_MESH_POLICY_V2_CALIBRATION_AUTHORITY_20260919.json"
   },
   "per_view_thresholds": {
-    "min_alpha_recall": 0.97,
-    "min_alpha_precision": 0.995,
-    "max_largest_coherent_hole_fraction": 0.005,
-    "max_interior_uncovered_fraction": 0.005,
+    "min_alpha_recall": 0.999,
+    "min_alpha_precision": 0.999,
+    "max_largest_coherent_hole_fraction": 0.00025,
+    "max_interior_uncovered_fraction": 0.0005,
     "max_silhouette_edge_p95_px": 0.5,
     "max_overlap_rgba_mismatch_pixel_count": 0,
     "max_overlap_rgba_max_abs_channel_error_u8": 0,
@@ -28,6 +29,11 @@
     "every_view_must_pass_every_rule": true,
     "aggregate_compensation_forbidden": true
   },
+  "threshold_lineage": {
+    "alpha_coverage": "INHERITED_EXACTLY_FROM_G5_MESH_V2",
+    "silhouette_p95": "UNCHANGED_SUBJECT_FREE_STAGE32_CALIBRATION_0P5PX",
+    "source_rgba_and_donor": "UNCHANGED_EXACT_STAGE32_CALIBRATION"
+  },
   "diagnostics_only": [
     "alpha_iou",
     "silhouette_edge_mean_px",
@@ -37,8 +43,6 @@
     "alpha_mae",
     "overlap_rgba_mismatch_fraction"
   ],
-  "mutation_rule": "After Knight Stage32 result inspection this policy may only be tightened prospectively; it may never be relaxed to turn a failure into PASS.",
-  "claim_boundary": "Historical evidence only. MUST NOT be used to mint a new Stage32 PASS.",
-  "superseded_by": "canonical/REST_SOURCE_PRESERVATION_POLICY_V2_20260919.json",
-  "supersession_reason": "Stage32 alpha coverage must inherit the calibrated G5 MESH v2 thresholds rather than superseded G5 v1."
+  "mutation_rule": "After any new Knight Stage32 result is inspected this policy may only be tightened prospectively; it may never be relaxed to turn a failure into PASS.",
+  "claim_boundary": "Policy admission semantics only. No Knight compliance or PRODUCT_PASS is claimed."
 }

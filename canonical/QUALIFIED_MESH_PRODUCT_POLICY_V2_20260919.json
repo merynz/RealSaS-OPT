@@ -1,0 +1,58 @@
+{
+  "schema": "RealSaS.QualifiedMeshProductPolicy.v2",
+  "status": "FROZEN_AFTER_1024_SUBJECT_FREE_G5_MESH_CALIBRATION__BEFORE_ANY_NEW_KNIGHT_QUALIFIED_MESH_PASS",
+  "authority": "NORMATIVE_PRODUCT_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_FIT",
+  "calibration_authority": "canonical/G5_MESH_POLICY_V2_CALIBRATION_AUTHORITY_20260919.json",
+  "claim_boundary": "Product admission thresholds only. No Knight/Mage compliance or PRODUCT_PASS is claimed.",
+  "metric_domain": {
+    "coverage_unit": "(authoritative_view, admitted_component, frozen_product_geometry_carrier_class)",
+    "recall": "intersection(rendered_component_alpha, source_component_alpha) / source_component_alpha",
+    "precision": "intersection(rendered_component_alpha, source_component_alpha) / rendered_component_alpha",
+    "largest_coherent_hole_fraction": "largest 4-connected uncovered source-component region / source_component_foreground_area",
+    "interior_uncovered_fraction": "uncovered source-component foreground outside the one-reference-pixel alpha boundary band / interior_source_component_foreground_area"
+  },
+  "g1": {
+    "max_normal_refinement_ratio_of_local_scale": 0.125,
+    "max_tangential_to_normal_ratio": 0.25,
+    "component_membership_change_forbidden": true,
+    "cross_component_support_forbidden": true
+  },
+  "g3": {
+    "minimum_rest_triangle_angle_deg": 7.5,
+    "maximum_rest_aspect_longest_edge_over_min_altitude": 16,
+    "calibration_result": "canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_RESULT_20260918.json",
+    "note": "Subject-free numerical floor. Dynamic envelope stress proof remains independently required.",
+    "minimum_dynamic_area_ratio": 0.05,
+    "maximum_dynamic_area_ratio": 20,
+    "maximum_dynamic_condition_number": 16,
+    "dynamic_note": "Stage-27 numerical conditioning bounds only. Professional motion capability remains Stage35 authority."
+  },
+  "g5": {
+    "MESH": {
+      "min_recall": 0.999,
+      "min_precision": 0.999,
+      "max_largest_coherent_hole_fraction": 0.00025,
+      "max_interior_uncovered_fraction": 0.0005,
+      "calibration_status": "SUBJECT_FREE_1024_AND_EXACT_G5_NUMERICAL_FLOOR_VERIFIED"
+    },
+    "PLANAR": {
+      "min_recall": 0.99,
+      "min_precision": 0.995,
+      "max_largest_coherent_hole_fraction": 0.0025,
+      "max_interior_uncovered_fraction": 0.0025,
+      "calibration_status": "HISTORICAL_THRESHOLD_RETAINED_BUT_NOT_CURRENT_AUTOMATIC_AUTHORITY__PLANAR_PROXY_UNIMPLEMENTED"
+    }
+  },
+  "automatic_carrier_scope": {
+    "current_rule": "ALL_STRUCTURAL_COMPONENTS_MESH",
+    "planar_automatic_admission": false,
+    "planar_requires_future_proxy_implementation_and_subject_free_calibration": true
+  },
+  "rationale": [
+    "The previous MESH G5 thresholds misclassified systematic one-pixel shift/erosion and several visible interior-loss controls at 1024x1024.",
+    "P999 separated all preregistered ACCEPT/REJECT controls in the subject-free retrospective audit.",
+    "The exact G5 z-buffer/component-owner rasterizer with the exact 256-cube IRIS decoder passes P999 on analytic sphere and ellipsoid controls.",
+    "PLANAR is not promoted to the new calibrated claim because its product proxy path is not implemented in the current automatic pipeline."
+  ],
+  "mutation_rule": "After any new Knight QualifiedMesh result is inspected, this policy may only be tightened prospectively; it may never be relaxed to convert a failure into PASS."
+}

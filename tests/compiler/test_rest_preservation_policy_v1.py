@@ -18,7 +18,7 @@ def _mesh_policy():
     return MeshQualificationPolicyIR(
         0.125,0.25,7.5,16.0,
         (
-            CarrierCoverageThresholdIR("MESH",0.97,0.995,0.005,0.005),
+            CarrierCoverageThresholdIR("MESH",0.999,0.999,0.00025,0.0005),
             CarrierCoverageThresholdIR("PLANAR",0.99,0.995,0.0025,0.0025),
         ),
         "mesh-policy-hash",
@@ -50,15 +50,15 @@ def _result():
 
 def _doc():
     return {
-        "schema":"RealSaS.RestSourcePreservationProductPolicy.v1",
-        "status":"FROZEN_AFTER_SUBJECT_FREE_CALIBRATION_BEFORE_KNIGHT_STAGE32_RESULT",
+        "schema":"RealSaS.RestSourcePreservationProductPolicy.v2",
+        "status":"FROZEN_AFTER_G5_MESH_V2_REBIND__BEFORE_ANY_NEW_KNIGHT_STAGE32_PASS",
         "authority":"NORMATIVE_STAGE32_PRODUCT_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_FIT",
         "calibration_result":{"source_commit":"abc","workflow_run_id":1,"workflow_job_id":2},
         "per_view_thresholds":{
-            "min_alpha_recall":0.97,
-            "min_alpha_precision":0.995,
-            "max_largest_coherent_hole_fraction":0.005,
-            "max_interior_uncovered_fraction":0.005,
+            "min_alpha_recall":0.999,
+            "min_alpha_precision":0.999,
+            "max_largest_coherent_hole_fraction":0.00025,
+            "max_interior_uncovered_fraction":0.0005,
             "max_silhouette_edge_p95_px":0.5,
             "max_overlap_rgba_mismatch_pixel_count":0,
             "max_overlap_rgba_max_abs_channel_error_u8":0,
@@ -89,7 +89,7 @@ def test_policy_is_rederived_from_calibration_and_mesh_floor():
         policy_document=_doc(),calibration_result=_result(),mesh_policy=_mesh_policy()
     )
     assert policy.max_silhouette_edge_p95_px==0.5
-    assert policy.min_alpha_recall==0.97
+    assert policy.min_alpha_recall==0.999
     assert policy.max_overlap_rgba_mismatch_pixel_count==0
     assert policy.max_cross_view_source_geometry_fraction==0.0
 

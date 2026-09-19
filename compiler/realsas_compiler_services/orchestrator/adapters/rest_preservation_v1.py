@@ -118,7 +118,7 @@ def qualify_rest_source_preservation_stage(ctx:dict)->dict:
     policy_ref=dict(appearance_cfg.get("rest_preservation_policy") or {})
     calibration_ref=dict(appearance_cfg.get("rest_preservation_calibration") or {})
     policy_document=_load_file_ref(
-        policy_ref,expected_schema="RealSaS.RestSourcePreservationProductPolicy.v1"
+        policy_ref,expected_schema="RealSaS.RestSourcePreservationProductPolicy.v2"
     )
     calibration_result=_load_file_ref(
         calibration_ref,expected_schema="RealSaS.RestSourcePreservationCalibrationResult.v1"

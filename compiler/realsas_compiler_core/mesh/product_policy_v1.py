@@ -14,9 +14,9 @@ from ..types import QualificationError
 
 
 def mesh_policy_from_product_policy_document(payload: dict) -> MeshQualificationPolicyIR:
-    if payload.get("schema") != "RealSaS.QualifiedMeshProductPolicy.v1":
+    if payload.get("schema") != "RealSaS.QualifiedMeshProductPolicy.v2":
         raise QualificationError("MESH_PRODUCT_POLICY_DOCUMENT_SCHEMA_DRIFT")
-    if payload.get("status") != "FROZEN_BEFORE_KNIGHT_QUALIFIED_MESH_RESULT":
+    if payload.get("status") != "FROZEN_AFTER_1024_SUBJECT_FREE_G5_MESH_CALIBRATION__BEFORE_ANY_NEW_KNIGHT_QUALIFIED_MESH_PASS":
         raise QualificationError("MESH_PRODUCT_POLICY_DOCUMENT_NOT_FROZEN")
     if payload.get("authority") != "NORMATIVE_PRODUCT_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_FIT":
         raise QualificationError("MESH_PRODUCT_POLICY_DOCUMENT_AUTHORITY_DRIFT")
@@ -48,6 +48,7 @@ def mesh_policy_from_product_policy_document(payload: dict) -> MeshQualification
                 "policy_document_schema":payload["schema"],
                 "policy_document_status":payload["status"],
                 "policy_document_authority":payload["authority"],
+                "g5_mesh_calibration_authority":payload.get("calibration_authority"),
             },
         )
     except (KeyError,TypeError,ValueError) as exc:

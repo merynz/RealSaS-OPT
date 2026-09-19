@@ -1,8 +1,8 @@
 {
   "schema": "RealSaS.QualifiedMeshProductPolicy.v1",
-  "status": "FROZEN_BEFORE_KNIGHT_QUALIFIED_MESH_RESULT",
+  "status": "SUPERSEDED__NO_NEW_PRODUCT_PASS_AUTHORITY",
   "authority": "NORMATIVE_PRODUCT_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_FIT",
-  "claim_boundary": "These are product admission thresholds. They do not claim current Knight or Mage compliance and may only be tightened after result inspection, never relaxed to convert a failure into PASS.",
+  "claim_boundary": "Historical evidence only. MUST NOT be used to mint a new QualifiedMesh PASS.",
   "metric_domain": {
     "coverage_unit": "(authoritative_view, admitted_component, frozen_product_geometry_carrier_class)",
     "recall": "intersection(rendered_component_alpha, source_component_alpha) / source_component_alpha",
@@ -45,5 +45,7 @@
     "Historical FIT2 aggregate coverage thresholds are not reused as outcome-fitted percentiles; the new unit is view x admitted component with explicit anti-peppering evidence.",
     "PLANAR carriers receive stricter visible coverage because their product geometry is intentionally source-facing rather than volumetric.",
     "CLIP is excluded from product-geometry carrier qualification and remains a QualifiedPresentationGraph mask semantic."
-  ]
+  ],
+  "superseded_by": "canonical/QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json",
+  "supersession_reason": "1024 subject-free audit showed current MESH/PLANAR coverage thresholds admit systematic 1px silhouette bias and visible interior-loss controls; exact G5 MESH numerical-floor probe verified P999."
 }

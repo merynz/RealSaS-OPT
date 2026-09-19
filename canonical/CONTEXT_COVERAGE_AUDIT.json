@@ -12,8 +12,8 @@
   "explained_high_signal_count": 323,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 142,
-  "safe_default_evidence_only_branch_count": 138,
+  "live_branch_count": 143,
+  "safe_default_evidence_only_branch_count": 139,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "21d879648636bad5885681512ad6d87c3f1d1c6d",
+      "sha": "47ed3f16d82f647b99914aa2fd4305574b41c5cb",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -665,8 +665,14 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "research/knight-stage13-feasibility-v1-20260920",
+      "sha": "889df21c73dd607429b40c00069687ed354cb83b",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "research/knight-stage13-v7-silhouette-20260920",
-      "sha": "21d879648636bad5885681512ad6d87c3f1d1c6d",
+      "sha": "27ed725309b192e1d49555f1579df3cd40df45f0",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

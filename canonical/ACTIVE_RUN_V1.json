@@ -5,7 +5,7 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__SUBJECT_DATA_ONLY_IN_RUN_ARTIFACTS",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
-  "pipeline_plan_sha256": "4861ae36cb25fc4be9470f6d475d8bb0174d668eeeb4564475faaf7c5700ac1f",
+  "pipeline_plan_sha256": "35d13cc7fc2e12d554bd282469a1b62075c9a9280805fcda3d061e58c17f0adf",
   "status": "PRODUCT_AUTHORITY_AUTOMATION_HARDENED__ALL_40_STAGES_EXECUTABLE__KNIGHT_NOT_STARTED",
   "completed_count": 0,
   "total_count": 40,
@@ -537,6 +537,10 @@
     {
       "event": "EIGHT_VIEW_ONLY_AUTOMATIC_PRODUCT_CONTRACT_HARDENED",
       "note": "Pre-Knight architecture removed per-character boundary/carrier/deformation/component-mask/retarget authoring; added adaptive substrate N, component-aware geometry recall, truly-unseen motion exposure proof, presentation face-group addressability, source/depth/slot equal-depth semantics, automatic retargeting, and mandatory editable .rsedit closure. SUBJECT2_KNIGHT_V1 remains 0/40."
+    },
+    {
+      "event": "FULL_3D_MOTION_V2_PLAN_REBOUND",
+      "note": "ActiveRun ledger rebound to the canonical 40-stage plan after Stage34/35 full-3D quaternion motion and Stage36 source-faithful presentation were frozen. SUBJECT2_KNIGHT_V1 remains 0/40; this lineage update does not mint a product PASS."
     }
   ],
   "events": [

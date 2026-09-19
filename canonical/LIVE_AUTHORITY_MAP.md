@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `87eaa8a8ee68dc28442a0b6b1e448a9afc06eb6c2f9218d739224d3d4792908b`
+> State fingerprint: `18d07439d6937625f3ee2ee6bc0053a2783908de50575772b14472b001da9dc2`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -31,17 +31,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `7da0f2de1429` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
+| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `26c8e3a41053` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 124**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 125**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `7da0f2de1429` | canonical continuation branch |
+| `main` | `26c8e3a41053` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -148,7 +148,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `promote/fit1-evidence-main-20260909` | `9deccb8d051f` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-main-v3-20260905` | `dfb087c6a23e` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-v3-20260905` | `7cfb7efedbe9` | observed live; not explicitly registered active |
-| `repair/g5-mesh-policy-v2-20260919` | `7da0f2de1429` | observed live; not explicitly registered active |
+| `repair/g5-mesh-policy-v2-20260919` | `96d5bda9f3d5` | observed live; not explicitly registered active |
 | `repair/mage-full-subject-reclosure-20260912-adaptive-steiner-tmp` | `221ad1b79eae` | observed live; not explicitly registered active |
 | `repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp` | `c69ab78eac42` | observed live; not explicitly registered active |
 | `repair/stage13-geometry-gate-v2-20260919` | `d577616728c2` | observed live; not explicitly registered active |
@@ -156,6 +156,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `research/g5-mesh-v2-numerical-floor-20260919` | `28908a0019f6` | observed live; not explicitly registered active |
 | `research/knight-stage13-14-calibration-20260919` | `ee52ecf21689` | observed live; not explicitly registered active |
 | `research/stage13-geometry-gate-v2-calibration-20260919` | `18017348cc1b` | observed live; not explicitly registered active |
+| `research/stage14-gsa-v2-calibration-20260919` | `26c8e3a41053` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety` | `2eb09fe3e8c6` | observed live; not explicitly registered active |

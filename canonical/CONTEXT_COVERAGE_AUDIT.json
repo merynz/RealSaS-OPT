@@ -12,8 +12,8 @@
   "explained_high_signal_count": 321,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 128,
-  "safe_default_evidence_only_branch_count": 124,
+  "live_branch_count": 129,
+  "safe_default_evidence_only_branch_count": 125,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "7da0f2de14298a1585ae5b11efe5f87a1f1f9ed3",
+      "sha": "26c8e3a4105382c354635c0983ff0916b33ae293",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -594,7 +594,7 @@
     },
     {
       "name": "repair/g5-mesh-policy-v2-20260919",
-      "sha": "7da0f2de14298a1585ae5b11efe5f87a1f1f9ed3",
+      "sha": "96d5bda9f3d576720ed13c6d2bb884cc9f13ea0a",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -643,6 +643,12 @@
     {
       "name": "research/stage13-geometry-gate-v2-calibration-20260919",
       "sha": "18017348cc1b68b7007da72aaae4421172ab037e",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "research/stage14-gsa-v2-calibration-20260919",
+      "sha": "26c8e3a4105382c354635c0983ff0916b33ae293",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

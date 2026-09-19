@@ -21,6 +21,7 @@ from .presentation_structure_v1 import QualifiedPresentationStructureIR
 from .product_appearance_v1 import QualifiedAppearanceSetIR
 from .product_composition_v1 import QualifiedCompositionSetIR, QualifiedCompositionViewIR
 from .v4_types import AppearanceBindingIR, AppearanceCornerBinding
+from .rest_render_v1 import RestRenderSetIR, RestRenderViewIR
 from .product_authority_v1 import (
     CanonicalMeshCandidateIR,
     CanonicalMeshVertexCandidateIR,
@@ -586,6 +587,37 @@ def qualified_presentation_graph_from_dict(payload: Json) -> QualifiedPresentati
         qualification_report=dict(payload.get("qualification_report") or {}),
         presentation_lineage_hash=str(payload["presentation_lineage_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedPresentationGraphIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def rest_render_set_from_dict(payload: Json) -> RestRenderSetIR:
+    _schema(payload,"RealSaS.RestRenderSetIR.v1")
+    return RestRenderSetIR(
+        views=tuple(
+            RestRenderViewIR(
+                view_index=int(row["view_index"]),
+                camera_binding_hash=str(row["camera_binding_hash"]),
+                appearance_binding_hash=str(row["appearance_binding_hash"]),
+                composition_binding_hash=str(row["composition_binding_hash"]),
+                rendered_rgba_sha256=str(row["rendered_rgba_sha256"]),
+                width=int(row["width"]),
+                height=int(row["height"]),
+                visible_pixel_count=int(row["visible_pixel_count"]),
+                render_contract_hash=str(row.get("render_contract_hash") or ""),
+                schema_version=str(row.get("schema_version") or "RealSaS.RestRenderViewIR.v1"),
+                metadata=dict(row.get("metadata") or {}),
+            )
+            for row in (payload.get("views") or ())
+        ),
+        mesh_binding_hash=str(payload["mesh_binding_hash"]),
+        presentation_binding_hash=str(payload["presentation_binding_hash"]),
+        appearance_set_binding_hash=str(payload["appearance_set_binding_hash"]),
+        composition_set_binding_hash=str(payload["composition_set_binding_hash"]),
+        camera_set_binding_hash=str(payload["camera_set_binding_hash"]),
+        observation_set_binding_hash=str(payload["observation_set_binding_hash"]),
+        render_set_hash=str(payload["render_set_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.RestRenderSetIR.v1"),
         metadata=dict(payload.get("metadata") or {}),
     )
 

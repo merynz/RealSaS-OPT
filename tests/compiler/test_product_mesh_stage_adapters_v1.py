@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import numpy as np
+from PIL import Image
 
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.observation_authority_v1 import QualifiedObservationViewIR, build_qualified_observation_set
@@ -26,6 +28,7 @@ from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     qualified_appearance_set_from_dict,
     qualified_composition_set_from_dict,
     qualified_presentation_structure_from_dict,
+    rest_render_set_from_dict,
     read_json,
     write_ir_json,
 )
@@ -39,6 +42,7 @@ from compiler.realsas_compiler_core.types import (
     SurfaceRelation,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.presentation_v1 import qualify_presentation_graph_stage
+from compiler.realsas_compiler_services.orchestrator.adapters.rest_render_v1 import qualify_rest_render_stage
 from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
     build_canonical_mesh_candidate_stage,
     bind_qualified_mesh_skin_stage,
@@ -68,9 +72,9 @@ def _fixture(tmp_path):
     run_root=tmp_path/"run"
     surface=RiggingSurfaceIR(
         (
-            SurfaceNode("s0",(0.0,0.0,0.0),tuple(range(8)),("p0",),("o0",),tuple((v,(4.0,4.0)) for v in range(8))),
-            SurfaceNode("s1",(1.0,0.0,0.0),tuple(range(8)),("p1",),("o1",),tuple((v,(6.0,4.0)) for v in range(8))),
-            SurfaceNode("s2",(0.0,1.0,0.0),tuple(range(8)),("p2",),("o2",),tuple((v,(4.0,2.0)) for v in range(8))),
+            SurfaceNode("s0",(0.0,0.0,0.0),tuple(range(8)),("p0",),("o0",),tuple((v,(4.5,4.5)) for v in range(8))),
+            SurfaceNode("s1",(1.0,0.0,0.0),tuple(range(8)),("p1",),("o1",),tuple((v,(6.5,4.5)) for v in range(8))),
+            SurfaceNode("s2",(0.0,1.0,0.0),tuple(range(8)),("p2",),("o2",),tuple((v,(4.5,2.5)) for v in range(8))),
         ),
         (
             SurfaceRelation("r01","s0","s1","LOCAL",1.0),
@@ -132,12 +136,13 @@ def _fixture(tmp_path):
             "document":{"path":str(policy_path.resolve()),"sha256":_sha(policy_path)}
         },
         "mesh":{"backend":"CANONICAL_RELATION_BASELINE_V1"},
-        "observation":{"component_masks":[],"source_foreground_masks":[]},
+        "observation":{"component_masks":[],"source_foreground_masks":[],"source_rasters":[]},
         "presentation":{"mode":"AUTO_ROLE_FREE_V1"},
     }
 
     observation_views=[]
     source_foreground_rows=[]
+    source_raster_rows=[]
     for row in cameras:
         camera=qualify_camera_v3(row,view_id=row["view_id"],view_index=int(row["view_index"]))
         # The baseline candidate is the same single triangle as S, so source foreground
@@ -147,10 +152,16 @@ def _fixture(tmp_path):
         triangle=tuple((float(p[0]),float(p[1])) for p in projected)
         fg=rasterize_triangles_half_integer_top_left((triangle,),width=8,height=8)
         fg_path=tmp_path/f"source_fg_v{camera.view_index}.bin"; fg_path.write_bytes(fg)
-        obs_hash=content_sha256({"view":camera.view_index,"fixture":"triangle"})
+        rgba=np.zeros((8,8,4),dtype=np.uint8)
+        for yy in range(8):
+            for xx in range(8):
+                rgba[yy,xx]=[xx*20,yy*20,camera.view_index*20,255 if fg[yy*8+xx] else 0]
+        source_path=tmp_path/f"source_V{camera.view_index}.png"
+        Image.fromarray(rgba,"RGBA").save(source_path,format="PNG",compress_level=1,optimize=False)
+        obs_hash=content_sha256({"view":camera.view_index,"fixture":"triangle","source_raster_sha256":_sha(source_path)})
         observation_views.append(QualifiedObservationViewIR(
             camera.view_index,8,8,obs_hash,
-            content_sha256({"source-raster":camera.view_index,"fixture":"triangle"}),
+            _sha(source_path),
             _sha(fg_path),camera_projection_binding_hash(camera),
             "PASS",(f"fixture-observation-{camera.view_index}",),
         ))
@@ -158,9 +169,14 @@ def _fixture(tmp_path):
             "view_index":camera.view_index,
             "mask":{"path":str(fg_path),"sha256":_sha(fg_path)},
         })
+        source_raster_rows.append({
+            "view_index":camera.view_index,
+            "image":{"path":str(source_path),"sha256":_sha(source_path)},
+        })
     observation_set=build_qualified_observation_set(tuple(observation_views))
     obs_path=_write(tmp_path/"observation_set.json",observation_set)
     manifest["observation"]["source_foreground_masks"]=source_foreground_rows
+    manifest["observation"]["source_rasters"]=source_raster_rows
     camera_set=build_qualified_camera_set(
         cameras,source_bundle_sha256=_sha(cam_path),
         metadata={"fixture":True},
@@ -273,3 +289,16 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     assert graph.qualification_report["single_canonical_mesh"] is True
     assert graph.qualification_report["slot_order_solves_physical_occlusion"] is False
     assert graph.qualification_report["categorical_recognition_used"] is False
+    _install_stage_outputs(ctx,"30_QUALIFIED_PRESENTATION_GRAPH",r30)
+
+    r31=qualify_rest_render_stage(ctx)
+    assert r31["status"]=="PASS",r31
+    rest_out=next(out for out in r31["outputs"] if out["schema"]=="RealSaS.RestRenderSetIR.v1")
+    rest=rest_render_set_from_dict(read_json(rest_out["path"]))
+    assert len(rest.views)==8
+    assert rest.presentation_binding_hash==graph.presentation_lineage_hash
+    assert rest.appearance_set_binding_hash==appearance.appearance_set_hash
+    assert rest.composition_set_binding_hash==composition.composition_set_hash
+    assert rest.metadata["canonical_geometry_is_never_rgb_authority"] is True
+    assert all(len(row.rendered_rgba_sha256)==64 for row in rest.views)
+    assert all(len(row.metadata["png_sha256"])==64 for row in rest.views)

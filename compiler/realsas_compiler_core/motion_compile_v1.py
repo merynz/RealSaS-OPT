@@ -15,6 +15,9 @@ from dataclasses import asdict, dataclass, field, replace
 import math
 from typing import Any, Mapping
 
+import numpy as np
+from scipy.optimize import linear_sum_assignment
+
 from .hashing import content_sha256
 from .motion_source_v1 import (
     MotionSourceSetIR,
@@ -249,6 +252,111 @@ def _keyframe_from_payload(raw:Mapping[str,Any],channels:tuple[str,...])->Motion
     )
 
 
+def _tree_features(rows, *, id_key, parent_key, pos_key):
+    ids=[str(r[id_key]) for r in rows]
+    if not ids or len(ids)!=len(set(ids)):
+        raise QualificationError("MOTION_RETARGET_SOURCE_SKELETON_ID_INVALID")
+    by={str(r[id_key]):r for r in rows}
+    roots=[jid for jid in ids if rget(by[jid],parent_key) in (None,"")]
+    if len(roots)!=1:
+        raise QualificationError("MOTION_RETARGET_SOURCE_SKELETON_ROOT_INVALID")
+    root=roots[0]
+    children={jid:[] for jid in ids}
+    parent={}
+    for jid in ids:
+        p=rget(by[jid],parent_key)
+        if p in (None,""):
+            parent[jid]=None
+        else:
+            p=str(p)
+            if p not in by or p==jid:
+                raise QualificationError("MOTION_RETARGET_SOURCE_SKELETON_PARENT_INVALID")
+            parent[jid]=p; children[p].append(jid)
+    depth={}
+    stack=[(root,0)]
+    while stack:
+        jid,d=stack.pop()
+        if jid in depth:
+            raise QualificationError("MOTION_RETARGET_SOURCE_SKELETON_CYCLE")
+        depth[jid]=d
+        for c in children[jid]:
+            stack.append((c,d+1))
+    if len(depth)!=len(ids):
+        raise QualificationError("MOTION_RETARGET_SOURCE_SKELETON_DISCONNECTED")
+    pos={}
+    for jid in ids:
+        p=np.asarray(by[jid][pos_key],dtype=np.float64)
+        if p.shape!=(3,) or not np.isfinite(p).all():
+            raise QualificationError("MOTION_RETARGET_SOURCE_SKELETON_POSITION_INVALID")
+        pos[jid]=p
+    root_pos=pos[root]
+    scale=max((float(np.linalg.norm(p-root_pos)) for p in pos.values()),default=0.0)
+    if scale<=1e-9:
+        scale=1.0
+    subtree={}
+    def size(jid):
+        if jid in subtree: return subtree[jid]
+        subtree[jid]=1+sum(size(c) for c in children[jid])
+        return subtree[jid]
+    size(root)
+    feat={}
+    for jid in ids:
+        feat[jid]=np.asarray([
+            *(pos[jid]-root_pos)/scale,
+            float(depth[jid])/max(max(depth.values()),1),
+            float(len(children[jid]))/max(max((len(x) for x in children.values()),default=1),1),
+            float(subtree[jid])/float(len(ids)),
+            1.0 if jid==root else 0.0,
+        ],dtype=np.float64)
+    return ids,parent,children,feat,root
+
+def rget(row,key):
+    return row.get(key)
+
+def _automatic_retarget_map(payload:Mapping[str,Any], skeleton:QualifiedSkeletonIR)->dict[str,str]:
+    source_rows=tuple(payload.get("source_skeleton") or ())
+    if not source_rows:
+        raise QualificationError("MOTION_COMPILE_SOURCE_RIG_RETARGET_MISSING")
+    src_ids,src_parent,src_children,src_feat,src_root=_tree_features(
+        source_rows,id_key="source_joint_id",parent_key="parent_source_joint_id",pos_key="rest_position"
+    )
+    target_rows=tuple({
+        "source_joint_id":j.canonical_joint_id,
+        "parent_source_joint_id":j.parent_canonical_id,
+        "rest_position":j.position,
+    } for j in skeleton.joints)
+    tgt_ids,tgt_parent,tgt_children,tgt_feat,tgt_root=_tree_features(
+        target_rows,id_key="source_joint_id",parent_key="parent_source_joint_id",pos_key="rest_position"
+    )
+    if len(src_ids)!=len(tgt_ids):
+        raise QualificationError("MOTION_COMPILE_AUTO_RETARGET_TOPOLOGY_CARDINALITY_MISMATCH")
+    cost=np.zeros((len(src_ids),len(tgt_ids)),dtype=np.float64)
+    for i,sid in enumerate(src_ids):
+        for j,tid in enumerate(tgt_ids):
+            sf,tf=src_feat[sid],tgt_feat[tid]
+            c=float(np.linalg.norm(sf[:3]-tf[:3])) + 0.75*abs(sf[3]-tf[3]) + 0.5*abs(sf[4]-tf[4]) + 0.5*abs(sf[5]-tf[5])
+            if (sid==src_root)!=(tid==tgt_root):
+                c+=1000.0
+            if len(src_children[sid])!=len(tgt_children[tid]):
+                c+=100.0*abs(len(src_children[sid])-len(tgt_children[tid]))
+            cost[i,j]=c
+    ri,ci=linear_sum_assignment(cost)
+    mapping={src_ids[int(i)]:tgt_ids[int(j)] for i,j in zip(ri,ci)}
+    if mapping.get(src_root)!=tgt_root:
+        raise QualificationError("MOTION_COMPILE_AUTO_RETARGET_ROOT_MISMATCH")
+    for sid in src_ids:
+        sp=src_parent[sid]
+        tid=mapping[sid]
+        tp=tgt_parent[tid]
+        expected=None if sp is None else mapping.get(sp)
+        if tp!=expected:
+            raise QualificationError("MOTION_COMPILE_AUTO_RETARGET_PARENT_RELATION_MISMATCH")
+    total=float(sum(cost[i,j] for i,j in zip(ri,ci)))
+    if not math.isfinite(total):
+        raise QualificationError("MOTION_COMPILE_AUTO_RETARGET_COST_NONFINITE")
+    return mapping
+
+
 def _external_tracks(*,asset,payload,skeleton,envelope,root_mode,retarget_map)->tuple[CanonicalJointTrackIR,...]:
     if str(payload.get("schema") or payload.get("schema_version") or "")!="RealSaS.MotionSourceClip.v1":
         raise QualificationError("MOTION_COMPILE_EXTERNAL_CLIP_SCHEMA_INVALID")
@@ -377,7 +485,9 @@ def build_motion_compile_constraint_set(
     unknown=set(cfg)-{"retarget_maps","root_trajectory_modes","contacts"}
     if unknown:
         raise QualificationError("MOTION_COMPILE_CONFIG_UNSUPPORTED")
-    retarget_maps=dict(cfg.get("retarget_maps") or {})
+    if cfg.get("retarget_maps"):
+        raise QualificationError("MOTION_COMPILE_MANUAL_RETARGET_FORBIDDEN")
+    retarget_maps={}
     root_modes=dict(cfg.get("root_trajectory_modes") or {})
     contacts_cfg=dict(cfg.get("contacts") or {})
     clip_ids={a.clip_id for a in source_set.assets}
@@ -391,10 +501,6 @@ def build_motion_compile_constraint_set(
             raise QualificationError("MOTION_COMPILE_ROOT_TRAJECTORY_MODE_INVALID")
         root_rows.append((asset.clip_id,mode))
         raw_map=dict(retarget_maps.get(asset.clip_id) or {})
-        if asset.source_space=="SOURCE_RIG_TRACKS_V1" and not raw_map:
-            raise QualificationError("MOTION_COMPILE_SOURCE_RIG_RETARGET_MISSING")
-        if asset.source_space!="SOURCE_RIG_TRACKS_V1" and raw_map:
-            raise QualificationError("MOTION_COMPILE_RETARGET_MAP_NOT_APPLICABLE")
         normalized_map=tuple(sorted((str(a),str(b)) for a,b in raw_map.items()))
         if len({a for a,_ in normalized_map})!=len(normalized_map) or len({b for _,b in normalized_map})!=len(normalized_map):
             raise QualificationError("MOTION_COMPILE_RETARGET_MAP_NOT_ONE_TO_ONE")
@@ -578,9 +684,18 @@ def build_qualified_motion(
         skeleton=skeleton,envelope=envelope,presentation=presentation,
     )
     cfg=dict(compiler_config or {})
+    if cfg.get("retarget_maps"):
+        raise QualificationError("MOTION_COMPILE_MANUAL_RETARGET_FORBIDDEN")
+    generated_maps={}
+    for asset in source_set.assets:
+        if asset.source_space=="SOURCE_RIG_TRACKS_V1":
+            payload=dict(source_payloads.get(asset.clip_id) or {})
+            generated_maps[asset.clip_id]=_automatic_retarget_map(payload,skeleton)
+    constraint_cfg={k:v for k,v in cfg.items() if k!="retarget_maps"}
+    constraint_cfg["retarget_maps"]=generated_maps
     constraints=build_motion_compile_constraint_set(
         source_set=source_set,product_state=product_state,skeleton=skeleton,envelope=envelope,
-        presentation=presentation,compiler_config=cfg,
+        presentation=presentation,compiler_config=constraint_cfg,
     )
     validate_motion_compile_constraint_set(
         constraints,source_set=source_set,product_state=product_state,skeleton=skeleton,
@@ -588,7 +703,7 @@ def build_qualified_motion(
     )
     envelope_by_joint=_joint_ranges(envelope)
     root_modes=dict(constraints.root_trajectory_modes)
-    retarget_maps=dict(cfg.get("retarget_maps") or {})
+    retarget_maps=generated_maps
     clips=[]
     for asset in source_set.assets:
         if asset.clip_id not in source_payloads:

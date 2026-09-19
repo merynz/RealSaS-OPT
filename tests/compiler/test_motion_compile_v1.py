@@ -11,7 +11,7 @@ from compiler.realsas_compiler_core.motion_source_v1 import (
 )
 from compiler.realsas_compiler_core.product_authority_v1 import (
     DeformationCapabilityEnvelopeIR, JointCapabilityRangeIR, QualifiedPresentationGraphIR,
-    deformation_envelope_lineage_hash,
+    deformation_envelope_lineage_hash, qualified_presentation_lineage_hash,
 )
 from compiler.realsas_compiler_core.canonical_puppet_state_v1 import CanonicalPuppetStateIR
 from compiler.realsas_compiler_core.types import QualifiedJoint, QualifiedSkeletonIR, QualificationError
@@ -45,8 +45,9 @@ def _authorities():
         carrier_policy_binding_hash="carrier",product_state_binding_hash=state.product_state_hash,
         presentation_structure_binding_hash="structure",appearance_set_binding_hash="appearance",
         composition_set_binding_hash="composition",qualification_report={"status":"PASS"},
-        presentation_lineage_hash="presentation",
+        presentation_lineage_hash="",
     )
+    presentation=replace(presentation,presentation_lineage_hash=qualified_presentation_lineage_hash(presentation))
     return skeleton,envelope,state,presentation
 
 

@@ -802,7 +802,10 @@ def motion_compile_constraint_set_from_dict(payload:Json)->MotionCompileConstrai
         envelope_binding_hash=str(payload["envelope_binding_hash"]),
         presentation_binding_hash=str(payload["presentation_binding_hash"]),
         root_trajectory_modes=tuple((str(a),str(b)) for a,b in (payload.get("root_trajectory_modes") or ())),
-        retarget_map_hashes=tuple((str(a),str(b)) for a,b in (payload.get("retarget_map_hashes") or ())),
+        retarget_maps=tuple(
+            (str(clip_id),tuple((str(a),str(b)) for a,b in rows))
+            for clip_id,rows in (payload.get("retarget_maps") or ())
+        ),
         contact_constraints=tuple(
             MotionContactConstraintIR(
                 contact_id=str(row["contact_id"]),

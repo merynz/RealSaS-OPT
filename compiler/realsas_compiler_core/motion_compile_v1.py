@@ -16,9 +16,19 @@ import math
 from typing import Any, Mapping
 
 from .hashing import content_sha256
-from .motion_source_v1 import MotionSourceSetIR, QualifiedMotionSourceSealIR, validate_motion_source_set
-from .product_authority_v1 import DeformationCapabilityEnvelopeIR, QualifiedPresentationGraphIR
-from .canonical_puppet_state_v1 import CanonicalPuppetStateIR
+from .motion_source_v1 import (
+    MotionSourceSetIR,
+    QualifiedMotionSourceSealIR,
+    motion_source_seal_hash,
+    validate_motion_source_set,
+)
+from .product_authority_v1 import (
+    DeformationCapabilityEnvelopeIR,
+    QualifiedPresentationGraphIR,
+    deformation_envelope_lineage_hash,
+    qualified_presentation_lineage_hash,
+)
+from .canonical_puppet_state_v1 import CanonicalPuppetStateIR, canonical_puppet_state_hash
 from .types import QualifiedSkeletonIR, QualificationError
 
 Json=dict[str,Any]
@@ -72,7 +82,7 @@ class MotionCompileConstraintSetIR:
     envelope_binding_hash:str
     presentation_binding_hash:str
     root_trajectory_modes:tuple[tuple[str,str],...]
-    retarget_map_hashes:tuple[tuple[str,str],...]
+    retarget_maps:tuple[tuple[str,tuple[tuple[str,str],...]],...]
     contact_constraints:tuple[MotionContactConstraintIR,...]
     dynamic_attachment_policy:str
     constraint_set_hash:str
@@ -151,6 +161,14 @@ def _joint_ranges(envelope:DeformationCapabilityEnvelopeIR):
 
 def _check_product_bindings(*,source_set,source_seal,product_state,skeleton,envelope,presentation)->None:
     validate_motion_source_set(source_set)
+    if source_seal.motion_source_seal_hash!=motion_source_seal_hash(source_seal):
+        raise QualificationError("MOTION_COMPILE_SOURCE_SEAL_HASH_MISMATCH")
+    if product_state.product_state_hash!=canonical_puppet_state_hash(product_state):
+        raise QualificationError("MOTION_COMPILE_PRODUCT_STATE_HASH_MISMATCH")
+    if envelope.envelope_lineage_hash!=deformation_envelope_lineage_hash(envelope):
+        raise QualificationError("MOTION_COMPILE_ENVELOPE_HASH_MISMATCH")
+    if presentation.presentation_lineage_hash!=qualified_presentation_lineage_hash(presentation):
+        raise QualificationError("MOTION_COMPILE_PRESENTATION_HASH_MISMATCH")
     if source_seal.source_set_binding_hash!=source_set.source_set_hash:
         raise QualificationError("MOTION_COMPILE_SOURCE_SET_SEAL_DRIFT")
     if tuple(source_seal.source_assets)!=tuple(source_set.assets):
@@ -369,7 +387,10 @@ def build_motion_compile_constraint_set(
             raise QualificationError("MOTION_COMPILE_SOURCE_RIG_RETARGET_MISSING")
         if asset.source_space!="SOURCE_RIG_TRACKS_V1" and raw_map:
             raise QualificationError("MOTION_COMPILE_RETARGET_MAP_NOT_APPLICABLE")
-        map_rows.append((asset.clip_id,content_sha256({"source_space":asset.source_space,"map":raw_map})))
+        normalized_map=tuple(sorted((str(a),str(b)) for a,b in raw_map.items()))
+        if len({a for a,_ in normalized_map})!=len(normalized_map) or len({b for _,b in normalized_map})!=len(normalized_map):
+            raise QualificationError("MOTION_COMPILE_RETARGET_MAP_NOT_ONE_TO_ONE")
+        map_rows.append((asset.clip_id,normalized_map))
         contacts.extend(_contacts_for_clip(
             clip_id=asset.clip_id,rows=contacts_cfg.get(asset.clip_id) or (),
             skeleton=skeleton,duration_seconds=asset.duration_seconds,
@@ -381,7 +402,7 @@ def build_motion_compile_constraint_set(
         envelope_binding_hash=envelope.envelope_lineage_hash,
         presentation_binding_hash=presentation.presentation_lineage_hash,
         root_trajectory_modes=tuple(sorted(root_rows)),
-        retarget_map_hashes=tuple(sorted(map_rows)),
+        retarget_maps=tuple(sorted(map_rows)),
         contact_constraints=tuple(sorted(contacts,key=lambda x:(x.clip_id,x.contact_id))),
         dynamic_attachment_policy="STATIC_QUALIFIED_PRESENTATION_ONLY_V1",
         constraint_set_hash="",
@@ -393,6 +414,60 @@ def build_motion_compile_constraint_set(
         },
     )
     return replace(value,constraint_set_hash=motion_constraint_set_hash(value))
+
+
+def validate_motion_compile_constraint_set(
+    value:MotionCompileConstraintSetIR,
+    *,
+    source_set:MotionSourceSetIR,
+    product_state:CanonicalPuppetStateIR,
+    skeleton:QualifiedSkeletonIR,
+    envelope:DeformationCapabilityEnvelopeIR,
+    presentation:QualifiedPresentationGraphIR,
+)->None:
+    expected={
+        "product_state_binding_hash":product_state.product_state_hash,
+        "skeleton_binding_hash":skeleton.skeleton_lineage_hash,
+        "envelope_binding_hash":envelope.envelope_lineage_hash,
+        "presentation_binding_hash":presentation.presentation_lineage_hash,
+    }
+    for field_name,expected_hash in expected.items():
+        if getattr(value,field_name)!=expected_hash:
+            raise QualificationError(f"MOTION_COMPILE_CONSTRAINT_BINDING_DRIFT:{field_name}")
+    if value.dynamic_attachment_policy!="STATIC_QUALIFIED_PRESENTATION_ONLY_V1":
+        raise QualificationError("MOTION_COMPILE_DYNAMIC_ATTACHMENT_POLICY_INVALID")
+    assets={a.clip_id:a for a in source_set.assets}
+    root_rows=dict(value.root_trajectory_modes)
+    if len(root_rows)!=len(value.root_trajectory_modes) or set(root_rows)!=set(assets):
+        raise QualificationError("MOTION_COMPILE_ROOT_POLICY_ACCOUNTING_INVALID")
+    if any(mode not in ROOT_TRAJECTORY_MODES for mode in root_rows.values()):
+        raise QualificationError("MOTION_COMPILE_ROOT_TRAJECTORY_MODE_INVALID")
+    map_rows=dict(value.retarget_maps)
+    if len(map_rows)!=len(value.retarget_maps) or set(map_rows)!=set(assets):
+        raise QualificationError("MOTION_COMPILE_RETARGET_ACCOUNTING_INVALID")
+    known={j.canonical_joint_id for j in skeleton.joints}
+    for clip_id,mapping_rows in map_rows.items():
+        asset=assets[clip_id]
+        mapping=tuple((str(a),str(b)) for a,b in mapping_rows)
+        if asset.source_space=="SOURCE_RIG_TRACKS_V1":
+            if not mapping:
+                raise QualificationError("MOTION_COMPILE_SOURCE_RIG_RETARGET_MISSING")
+            if len({a for a,_ in mapping})!=len(mapping) or len({b for _,b in mapping})!=len(mapping):
+                raise QualificationError("MOTION_COMPILE_RETARGET_MAP_NOT_ONE_TO_ONE")
+            if any(not a or b not in known for a,b in mapping):
+                raise QualificationError("MOTION_COMPILE_RETARGET_MAP_TARGET_INVALID")
+        elif mapping:
+            raise QualificationError("MOTION_COMPILE_RETARGET_MAP_NOT_APPLICABLE")
+    contact_ids=set()
+    for row in value.contact_constraints:
+        if row.contact_id in contact_ids or row.clip_id not in assets or row.canonical_joint_id not in known or row.mode not in CONTACT_MODES:
+            raise QualificationError("MOTION_COMPILE_CONTACT_IDENTITY_INVALID")
+        contact_ids.add(row.contact_id)
+        duration=assets[row.clip_id].duration_seconds
+        if not _finite(row.start_time_seconds) or not _finite(row.end_time_seconds) or row.start_time_seconds<0.0 or row.end_time_seconds<=row.start_time_seconds or row.end_time_seconds>duration+1e-9:
+            raise QualificationError("MOTION_COMPILE_CONTACT_TIME_INVALID")
+    if value.constraint_set_hash!=motion_constraint_set_hash(value):
+        raise QualificationError("MOTION_COMPILE_CONSTRAINT_HASH_MISMATCH")
 
 
 def validate_qualified_motion(
@@ -422,13 +497,54 @@ def validate_qualified_motion(
     for field_name,expected_hash in expected.items():
         if getattr(value,field_name)!=expected_hash:
             raise QualificationError(f"MOTION_QUALIFIED_BINDING_DRIFT:{field_name}")
-    if constraints.constraint_set_hash!=motion_constraint_set_hash(constraints):
-        raise QualificationError("MOTION_COMPILE_CONSTRAINT_HASH_MISMATCH")
+    validate_motion_compile_constraint_set(
+        constraints,source_set=source_set,product_state=product_state,skeleton=skeleton,
+        envelope=envelope,presentation=presentation,
+    )
     if len(value.clips)!=len(source_set.assets) or {c.clip_id for c in value.clips}!={a.clip_id for a in source_set.assets}:
         raise QualificationError("MOTION_QUALIFIED_CLIP_ACCOUNTING_INVALID")
+    assets={a.clip_id:a for a in source_set.assets}
+    root_modes=dict(constraints.root_trajectory_modes)
+    retarget_maps={clip_id:dict(rows) for clip_id,rows in constraints.retarget_maps}
+    validate_motion_compile_constraint_set(
+        constraints,source_set=source_set,product_state=product_state,skeleton=skeleton,
+        envelope=envelope,presentation=presentation,
+    )
+    envelope_by_joint=_joint_ranges(envelope)
+    known={j.canonical_joint_id for j in skeleton.joints}
     for clip in value.clips:
-        if clip.classification not in MOTION_CLASSIFICATIONS or clip.root_trajectory_mode not in ROOT_TRAJECTORY_MODES:
+        asset=assets[clip.clip_id]
+        expected_class="MECHANICAL_PROBE_ONLY" if asset.source_kind=="INLINE_PRESET_SPEC_V1" else "ARTIST_SOURCE"
+        if clip.classification!=expected_class or clip.classification not in MOTION_CLASSIFICATIONS:
             raise QualificationError("MOTION_QUALIFIED_CLIP_CLASSIFICATION_INVALID")
+        if clip.root_trajectory_mode!=root_modes[clip.clip_id] or clip.root_trajectory_mode not in ROOT_TRAJECTORY_MODES:
+            raise QualificationError("MOTION_QUALIFIED_ROOT_POLICY_DRIFT")
+        if clip.source_asset_hash!=asset.source_asset_hash or clip.source_space!=asset.source_space:
+            raise QualificationError("MOTION_QUALIFIED_SOURCE_BINDING_DRIFT")
+        if clip.clip_kind!=asset.clip_kind or abs(clip.duration_seconds-asset.duration_seconds)>1e-9 or clip.loop!=asset.loop:
+            raise QualificationError("MOTION_QUALIFIED_SOURCE_SEMANTICS_DRIFT")
+        if not clip.tracks:
+            raise QualificationError("MOTION_QUALIFIED_TRACKS_EMPTY")
+        targets=set(); sources=set()
+        for track in clip.tracks:
+            if track.canonical_joint_id not in known or track.canonical_joint_id in targets or track.source_joint_id in sources:
+                raise QualificationError("MOTION_QUALIFIED_TRACK_IDENTITY_INVALID")
+            targets.add(track.canonical_joint_id); sources.add(track.source_joint_id)
+            if track.channel_contract!=asset.channel_contract or not track.keyframes:
+                raise QualificationError("MOTION_QUALIFIED_TRACK_CHANNEL_DRIFT")
+            if asset.source_space=="SOURCE_RIG_TRACKS_V1":
+                if retarget_maps[clip.clip_id].get(track.source_joint_id)!=track.canonical_joint_id:
+                    raise QualificationError("MOTION_QUALIFIED_RETARGET_MAPPING_DRIFT")
+            elif track.source_joint_id!=track.canonical_joint_id:
+                raise QualificationError("MOTION_QUALIFIED_IDENTITY_MAPPING_DRIFT")
+            if any(b.time_seconds<=a.time_seconds for a,b in zip(track.keyframes,track.keyframes[1:])):
+                raise QualificationError("MOTION_QUALIFIED_TRACK_TIMES_NOT_STRICT")
+            for key in track.keyframes:
+                _validate_keyframe(
+                    key,channels=track.channel_contract,joint_id=track.canonical_joint_id,
+                    root_id=skeleton.root_id,root_mode=clip.root_trajectory_mode,
+                    envelope=envelope_by_joint,duration_seconds=clip.duration_seconds,
+                )
         if clip.clip_lineage_hash!=compiled_motion_clip_hash(clip):
             raise QualificationError("MOTION_QUALIFIED_CLIP_HASH_MISMATCH")
     report=dict(value.qualification_report or {})

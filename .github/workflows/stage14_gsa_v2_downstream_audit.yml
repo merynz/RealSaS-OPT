@@ -1,0 +1,43 @@
+name: stage14-gsa-v2-downstream-audit
+
+on:
+  push:
+    branches:
+      - research/stage14-gsa-v2-downstream-audit-20260919
+    paths:
+      - 'tools/stage14_gsa_v2_downstream_audit.py'
+      - '.github/workflows/stage14_gsa_v2_downstream_audit.yml'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 60
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_STAGE14_AUDIT_OUT: stage14_audit_out
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Run Stage14 subject-free downstream audit
+        run: python tools/stage14_gsa_v2_downstream_audit.py
+      - name: Assert no subject dependency
+        run: |
+          ! grep -R -E 'SUBJECT2_KNIGHT|Knight\.fbx|MAGE_|Mage' tools/stage14_gsa_v2_downstream_audit.py
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage14-gsa-v2-downstream-audit
+          path: stage14_audit_out/
+          if-no-files-found: error

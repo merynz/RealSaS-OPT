@@ -32,6 +32,8 @@ from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     rest_preservation_measurement_set_from_dict,
     rest_source_preservation_policy_from_dict,
     qualified_rest_source_preservation_from_dict,
+    motion_source_set_from_dict,
+    qualified_motion_source_seal_from_dict,
     read_json,
     write_ir_json,
 )
@@ -47,6 +49,7 @@ from compiler.realsas_compiler_core.types import (
 from compiler.realsas_compiler_services.orchestrator.adapters.presentation_v1 import qualify_presentation_graph_stage
 from compiler.realsas_compiler_services.orchestrator.adapters.rest_render_v1 import qualify_rest_render_stage
 from compiler.realsas_compiler_services.orchestrator.adapters.rest_preservation_v1 import qualify_rest_source_preservation_stage
+from compiler.realsas_compiler_services.orchestrator.adapters.motion_source_v1 import seal_motion_source_or_preset_stage
 from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
     build_canonical_mesh_candidate_stage,
     bind_qualified_mesh_skin_stage,
@@ -144,6 +147,19 @@ def _fixture(tmp_path):
         "mesh":{"backend":"CANONICAL_RELATION_BASELINE_V1"},
         "observation":{"component_masks":[],"source_foreground_masks":[],"source_rasters":[]},
         "presentation":{"mode":"AUTO_ROLE_FREE_V1"},
+        "motion":{
+            "sources":[
+                {
+                    "clip_id":"idle_probe",
+                    "clip_kind":"IDLE",
+                    "source_kind":"INLINE_PRESET_SPEC_V1",
+                    "duration_seconds":1.0,
+                    "loop":True,
+                    "channel_contract":["ROTATION_DEG"],
+                    "spec":{"preset_id":"MECHANICAL_SWAY_V1","amplitude_deg":4.0}
+                }
+            ]
+        },
         "appearance":{
             "rest_preservation_policy":{
                 "path":str((ROOT/"canonical"/"REST_SOURCE_PRESERVATION_POLICY_V1_20260919.json").resolve()),
@@ -351,3 +367,19 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     assert all(row.cross_view_source_geometry_fraction==0.0 for row in measurements.views)
     assert qualified_rest.qualification_report["every_view_passed_every_rule"] is True
     assert qualified_rest.qualification_report["motion_authorization_precondition_satisfied"] is True
+    _install_stage_outputs(ctx,"32_REST_SOURCE_PRESERVATION_GATE",r32)
+
+    r33=seal_motion_source_or_preset_stage(ctx)
+    assert r33["status"]=="PASS",r33
+    by_schema={out["schema"]:out for out in r33["outputs"]}
+    source_set=motion_source_set_from_dict(read_json(by_schema["RealSaS.MotionSourceSetIR.v1"]["path"]))
+    source_seal=qualified_motion_source_seal_from_dict(read_json(by_schema["RealSaS.QualifiedMotionSourceSealIR.v1"]["path"]))
+    assert len(source_set.assets)==1
+    assert source_set.assets[0].clip_id=="idle_probe"
+    assert source_set.assets[0].source_space=="PROCEDURAL_PARAMETER_SPACE_V1"
+    assert source_seal.source_set_binding_hash==source_set.source_set_hash
+    assert source_seal.product_state_binding_hash==state.product_state_hash
+    assert source_seal.rest_preservation_binding_hash==qualified_rest.preservation_lineage_hash
+    assert source_seal.qualification_report["retargeting_performed"] is False
+    assert source_seal.qualification_report["motion_compilation_performed"] is False
+    assert source_seal.qualification_report["motion_quality_claimed"] is False

@@ -28,6 +28,11 @@ from .rest_preservation_policy_v1 import (
     RestPreservationViewDecisionIR,
     RestSourcePreservationPolicyIR,
 )
+from .motion_source_v1 import (
+    MotionSourceAssetIR,
+    MotionSourceSetIR,
+    QualifiedMotionSourceSealIR,
+)
 from .product_authority_v1 import (
     CanonicalMeshCandidateIR,
     CanonicalMeshVertexCandidateIR,
@@ -711,6 +716,48 @@ def qualified_rest_source_preservation_from_dict(payload: Json) -> QualifiedRest
         qualification_report=dict(payload.get("qualification_report") or {}),
         preservation_lineage_hash=str(payload["preservation_lineage_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedRestSourcePreservationIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def _motion_source_asset_from_dict(payload: Json) -> MotionSourceAssetIR:
+    _schema(payload,"RealSaS.MotionSourceAssetIR.v1")
+    return MotionSourceAssetIR(
+        clip_id=str(payload["clip_id"]),
+        clip_kind=str(payload["clip_kind"]),
+        source_kind=str(payload["source_kind"]),
+        source_space=str(payload["source_space"]),
+        duration_seconds=float(payload["duration_seconds"]),
+        loop=bool(payload["loop"]),
+        channel_contract=tuple(map(str,payload.get("channel_contract") or ())),
+        source_payload_hash=str(payload["source_payload_hash"]),
+        source_ref=str(payload["source_ref"]),
+        source_asset_hash=str(payload["source_asset_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.MotionSourceAssetIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def motion_source_set_from_dict(payload: Json) -> MotionSourceSetIR:
+    _schema(payload,"RealSaS.MotionSourceSetIR.v1")
+    return MotionSourceSetIR(
+        assets=tuple(_motion_source_asset_from_dict(dict(row)) for row in (payload.get("assets") or ())),
+        source_set_hash=str(payload["source_set_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.MotionSourceSetIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def qualified_motion_source_seal_from_dict(payload: Json) -> QualifiedMotionSourceSealIR:
+    _schema(payload,"RealSaS.QualifiedMotionSourceSealIR.v1")
+    return QualifiedMotionSourceSealIR(
+        source_set_binding_hash=str(payload["source_set_binding_hash"]),
+        product_state_binding_hash=str(payload["product_state_binding_hash"]),
+        rest_preservation_binding_hash=str(payload["rest_preservation_binding_hash"]),
+        source_assets=tuple(_motion_source_asset_from_dict(dict(row)) for row in (payload.get("source_assets") or ())),
+        qualification_report=dict(payload.get("qualification_report") or {}),
+        motion_source_seal_hash=str(payload["motion_source_seal_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedMotionSourceSealIR.v1"),
         metadata=dict(payload.get("metadata") or {}),
     )
 

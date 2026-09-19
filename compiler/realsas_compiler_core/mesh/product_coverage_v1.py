@@ -9,6 +9,7 @@ import math
 from typing import Any, Iterable, Mapping
 
 from ..hashing import content_sha256
+from ..camera_authority_v1 import camera_projection_binding_hash
 from ..observation_authority_v1 import QualifiedObservationSetIR, validate_qualified_observation_set
 from ..playback_runtime_v3 import ReferenceRasterContractV1
 from ..playback_full_surface_v3 import CameraProjectionV3, project_points_xyz_v3
@@ -241,20 +242,6 @@ def coverage_metrics(authority: bytes, predicted: bytes, *, width: int, height: 
         "interior_uncovered_pixel_count": int(interior_uncovered),
         "interior_uncovered_fraction": float(interior_fraction),
     }
-
-
-def camera_projection_binding_hash(camera: CameraProjectionV3) -> str:
-    return content_sha256({
-        "schema": camera.schema_version,
-        "view_id": camera.view_id,
-        "view_index": int(camera.view_index),
-        "origin": tuple(map(float, camera.origin)),
-        "right": tuple(map(float, camera.right)),
-        "screen_up": tuple(map(float, camera.screen_up)),
-        "forward": tuple(map(float, camera.forward)),
-        "half_extent": float(camera.half_extent),
-        "resolution": int(camera.resolution),
-    })
 
 
 def _product_vertex_id(vertex) -> str:

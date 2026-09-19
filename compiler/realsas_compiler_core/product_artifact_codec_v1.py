@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from .playback_full_surface_v3 import CameraProjectionV3
+from .camera_authority_v1 import QualifiedCameraSetIR
 from .observation_authority_v1 import QualifiedObservationSetIR, QualifiedObservationViewIR
 from .canonical_puppet_state_v1 import CanonicalPuppetStateIR
 from .presentation_structure_v1 import QualifiedPresentationStructureIR
@@ -88,6 +89,32 @@ def _refinement(payload: Json | None):
         normal_component=float(payload["normal_component"]),
         tangential_component=float(payload["tangential_component"]),
         method=str(payload["method"]),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def qualified_camera_set_from_dict(payload: Json) -> QualifiedCameraSetIR:
+    _schema(payload,"RealSaS.QualifiedCameraSetIR.v1")
+    cameras=tuple(
+        CameraProjectionV3(
+            view_id=str(row["view_id"]),
+            view_index=int(row["view_index"]),
+            origin=tuple(map(float,row["origin"])),
+            right=tuple(map(float,row["right"])),
+            screen_up=tuple(map(float,row["screen_up"])),
+            forward=tuple(map(float,row["forward"])),
+            half_extent=float(row["half_extent"]),
+            resolution=int(row["resolution"]),
+            schema_version=str(row.get("schema_version") or "RealSaS.FullSurfaceCameraProjection.v3"),
+        )
+        for row in (payload.get("cameras") or ())
+    )
+    return QualifiedCameraSetIR(
+        cameras=cameras,
+        camera_binding_hashes=tuple(map(str,payload.get("camera_binding_hashes") or ())),
+        source_bundle_sha256=str(payload["source_bundle_sha256"]),
+        camera_set_hash=str(payload["camera_set_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedCameraSetIR.v1"),
         metadata=dict(payload.get("metadata") or {}),
     )
 

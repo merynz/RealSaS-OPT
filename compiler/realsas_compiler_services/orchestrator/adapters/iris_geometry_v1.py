@@ -190,6 +190,29 @@ def _source_foreground(ctx,observation):
     return out
 
 
+def _geometry_gate_policy_v2(cfg:dict)->dict|None:
+    keys=(
+        "min_recall","min_precision",
+        "max_largest_coherent_hole_fraction","max_interior_uncovered_fraction",
+        "min_component_recall","component_min_foreground_fraction",
+        "max_silhouette_edge_p95_px",
+    )
+    if any(k not in cfg for k in keys):
+        return None
+    policy={k:float(cfg[k]) for k in keys}
+    if not (
+        0<=policy["min_recall"]<=1 and 0<=policy["min_precision"]<=1 and
+        0<=policy["max_largest_coherent_hole_fraction"]<=1 and
+        0<=policy["max_interior_uncovered_fraction"]<=1 and
+        0<=policy["min_component_recall"]<=1 and
+        0<=policy["component_min_foreground_fraction"]<=1 and
+        math.isfinite(policy["max_silhouette_edge_p95_px"]) and
+        policy["max_silhouette_edge_p95_px"]>=0
+    ):
+        raise QualificationError("GEOMETRY_GATE_THRESHOLD_RANGE_INVALID")
+    return policy
+
+
 def qualify_rest_reprojection_geometry_stage(ctx:dict)->dict:
     zero=signed_zero_surface_from_dict(
         _stage_output_payload(ctx,"12_ZERO_SURFACE_DECODED","RealSaS.SignedZeroSurfaceSealIR.v1")
@@ -207,25 +230,15 @@ def qualify_rest_reprojection_geometry_stage(ctx:dict)->dict:
     world=np.asarray(normalization.center_xyz,dtype=np.float64)[None,:]+np.asarray(vertices,dtype=np.float64)*float(normalization.half_extent)
     source=_source_foreground(ctx,observation)
     cfg=dict(ctx["run_manifest"].get("geometry_gate") or {})
-    keys=(
-        "min_recall","min_precision",
-        "max_largest_coherent_hole_fraction","max_interior_uncovered_fraction",
-        "min_component_recall","component_min_foreground_fraction",
-        "max_silhouette_edge_p95_px",
-    )
-    if any(k not in cfg for k in keys):
-        return {"status":"BLOCKED","blockers":["GEOMETRY_GATE_EXPLICIT_THRESHOLDS_REQUIRED"],"diagnostics":{"required":list(keys)}}
-    policy={k:float(cfg[k]) for k in keys}
-    if not (
-        0<=policy["min_recall"]<=1 and 0<=policy["min_precision"]<=1 and
-        0<=policy["max_largest_coherent_hole_fraction"]<=1 and
-        0<=policy["max_interior_uncovered_fraction"]<=1 and
-        0<=policy["min_component_recall"]<=1 and
-        0<=policy["component_min_foreground_fraction"]<=1 and
-        math.isfinite(policy["max_silhouette_edge_p95_px"]) and
-        policy["max_silhouette_edge_p95_px"]>=0
-    ):
-        raise QualificationError("GEOMETRY_GATE_THRESHOLD_RANGE_INVALID")
+    policy=_geometry_gate_policy_v2(cfg)
+    if policy is None:
+        required=(
+            "min_recall","min_precision",
+            "max_largest_coherent_hole_fraction","max_interior_uncovered_fraction",
+            "min_component_recall","component_min_foreground_fraction",
+            "max_silhouette_edge_p95_px",
+        )
+        return {"status":"BLOCKED","blockers":["GEOMETRY_GATE_EXPLICIT_THRESHOLDS_REQUIRED"],"diagnostics":{"required":list(required)}}
 
     obs={int(v.view_index):v for v in observation.views}; rows=[]
     for camera in sorted(cameras.cameras,key=lambda c:c.view_index):

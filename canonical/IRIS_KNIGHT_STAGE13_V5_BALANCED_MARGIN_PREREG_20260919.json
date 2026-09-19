@@ -1,0 +1,57 @@
+{
+  "schema": "RealSaS.IRIS.KnightStage13BalancedMarginFactorialPreregistration.v1",
+  "date_utc": "2026-09-19",
+  "subject_run_id": "SUBJECT2_KNIGHT_V1",
+  "attempt_protocol": "V5_STAGE13_BALANCED_MARGIN_LR_FACTORIAL",
+  "source_checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+  "source_step": 4800,
+  "prior_negative_decision_sha256": "4d0b358d661d393cb61f440f24a624c240d63621eba5a30bb7f4ee215f7fb74e",
+  "frozen_stage13_policy_sha256": "5fb4859ca09111c908abf3041ae46e0dd3e4c29ab3a373ea9c26ebf5c9b5c59e",
+  "model_source_sha256": "be5e29f1119be6d93abb0219383c05eaaa6e5ff3ae07d2de44f4aa29d3b338f4",
+  "repo_commit": "b57184f1500d7378c843cc92ca96a83404ceef1d",
+  "random_seed": 46352828,
+  "additional_steps": 800,
+  "base_learning_rate": 0.00008,
+  "low_learning_rate": 0.00002,
+  "signed_margin_norm": 0.02,
+  "signed_margin_weight": 0.25,
+  "balanced_margin_definition": "0.5 * (mean(relu(margin + sdf_inside)) + mean(relu(margin - sdf_outside))) on matched local samples with |target_signed_distance| >= 0.025",
+  "arms": [
+    {
+      "arm_id": "PRIOR_CONTROL_HI",
+      "execute": false,
+      "evidence_source": "V4 sealed result",
+      "learning_rate": 0.00008,
+      "balanced_margin": false
+    },
+    {
+      "arm_id": "CONTROL_LO",
+      "execute": true,
+      "single_difference_vs_PRIOR_CONTROL_HI": "learning_rate:0.00008->0.00002",
+      "learning_rate": 0.00002,
+      "balanced_margin": false
+    },
+    {
+      "arm_id": "SYMMETRIC_HI",
+      "execute": true,
+      "single_difference_vs_PRIOR_CONTROL_HI": "balanced_matched_inside_outside_margin_added",
+      "learning_rate": 0.00008,
+      "balanced_margin": true
+    },
+    {
+      "arm_id": "SYMMETRIC_LO",
+      "execute": true,
+      "factorial_combination": ["low_learning_rate", "balanced_margin"],
+      "learning_rate": 0.00002,
+      "balanced_margin": true
+    }
+  ],
+  "selection_rule": "CONTROL_LO_IF_PASS_ELSE_SYMMETRIC_HI_IF_PASS_ELSE_SYMMETRIC_LO_IF_PASS_ELSE_NONE",
+  "decoder_resolution": 256,
+  "teacher_truth_used_for_fit": true,
+  "teacher_truth_used_at_inference": false,
+  "visual_hull_clipping": false,
+  "out_of_frame_semantics": "UNKNOWN__CANNOT_VETO_POSITIVE",
+  "posthoc_parameter_changes_allowed": false,
+  "canonical_product_authority_minted": false
+}

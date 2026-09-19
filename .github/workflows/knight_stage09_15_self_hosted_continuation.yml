@@ -1,0 +1,83 @@
+name: knight-stage09-15-self-hosted-continuation
+
+on:
+  push:
+    branches:
+      - ops/knight-stage09-15-continuation-20260919
+    paths:
+      - 'tools/continue_knight_stage09_15_v3.py'
+      - '.github/workflows/knight_stage09_15_self_hosted_continuation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  continue-knight:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      LOCAL_EVIDENCE_DIR: /home/monster/RealSaS_KNIGHT_STAGE09_12_CONTINUATION_V1
+      REALSAS_AUTHORITY_ROOT: /home/runner/realsas_authority
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned current-mainline environment
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+
+      - name: Verify persistent Knight evidence
+        run: |
+          set -euo pipefail
+          STAGE08="$LOCAL_EVIDENCE_DIR/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip"
+          IRIS="$LOCAL_EVIDENCE_DIR/IRIS_KNIGHT_FIT_BUNDLE.zip"
+          test -f "$STAGE08"
+          test -f "$IRIS"
+          test "$(sha256sum "$STAGE08" | awk '{print $1}')" = "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7"
+          test "$(sha256sum "$IRIS" | awk '{print $1}')" = "8b27de1481575b4f3cae473aa72e379674a5273877b82669084f69050cb8c645"
+          echo "KNIGHT_LOCAL_EVIDENCE_EXACT=true"
+
+      - name: Execute canonical Knight Stage09 through Stage15
+        run: |
+          python tools/continue_knight_stage09_15_v3.py             --repo "$GITHUB_WORKSPACE"             --stage08-evidence "$LOCAL_EVIDENCE_DIR/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip"             --iris-bundle "$LOCAL_EVIDENCE_DIR/IRIS_KNIGHT_FIT_BUNDLE.zip"
+
+      - name: Collect continuation evidence
+        if: always()
+        run: |
+          set +e
+          OUT="$GITHUB_WORKSPACE/continuation_out"
+          RUNROOT="$REALSAS_AUTHORITY_ROOT/runs/SUBJECT2_KNIGHT_V1"
+          mkdir -p "$OUT/artifacts" "$OUT/diagnostics"
+          cp "$GITHUB_WORKSPACE/canonical/ACTIVE_RUN_V1.json" "$OUT/ACTIVE_RUN_V1.json" 2>/dev/null
+          cp "$RUNROOT/run_manifest.json" "$OUT/run_manifest.json" 2>/dev/null
+          for n in 09 10 11 12 13 14 15; do
+            for d in "$RUNROOT/artifacts/${n}_"*; do
+              [ -d "$d" ] && cp -a "$d" "$OUT/artifacts/"
+            done
+          done
+          find "$RUNROOT/inputs/iris/STRIDE8" -maxdepth 1 -type f \( -name '*SUMMARY*.json' -o -name '*FAIL_DIAGNOSTIC.json' -o -name 'IRIS_MODEL_FIT_EXECUTION_RECEIPT.json' -o -name 'IRIS_SIGNED_ZERO_SURFACE_ARTIFACT.json' \) -exec cp {} "$OUT/diagnostics/" \; 2>/dev/null
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status > "$OUT/mainline_status.txt" 2>&1
+          sha256sum "$OUT/ACTIVE_RUN_V1.json" "$OUT/run_manifest.json" > "$OUT/top_level_sha256.txt" 2>/dev/null
+          find "$OUT" -type f -print0 | sort -z | xargs -0 sha256sum > "$OUT/all_files_sha256.txt" 2>/dev/null
+          true
+
+      - name: Upload continuation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-stage09-15-continuation
+          path: continuation_out/
+          if-no-files-found: warn

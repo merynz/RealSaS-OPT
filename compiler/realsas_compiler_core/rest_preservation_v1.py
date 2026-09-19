@@ -169,6 +169,9 @@ def measure_rest_source_preservation(
         rendered_mask=rendered[...,3]>0
         predicted=bytes(rendered_mask.astype(np.uint8).reshape(-1))
         coverage=coverage_metrics(fg,predicted,width=w,height=h)
+        intersection=int(np.count_nonzero(source_mask & rendered_mask))
+        union_count=int(np.count_nonzero(source_mask | rendered_mask))
+        alpha_iou=1.0 if union_count==0 else float(intersection)/float(union_count)
         edge_mean,edge_p95,edge_max=_silhouette_distance(source_mask,rendered_mask)
         union=source_mask|rendered_mask
         rgb_mae,rgb_p95,alpha_mae=_appearance_error(source,rendered,union)
@@ -183,7 +186,7 @@ def measure_rest_source_preservation(
             rendered_foreground_sha256=mask_sha256(predicted),
             alpha_recall=float(coverage["recall"]),
             alpha_precision=float(coverage["precision"]),
-            alpha_iou=float(coverage["iou"]),
+            alpha_iou=alpha_iou,
             largest_coherent_hole_fraction=float(coverage["largest_coherent_hole_fraction"]),
             interior_uncovered_fraction=float(coverage["interior_uncovered_fraction"]),
             silhouette_edge_mean_px=edge_mean,

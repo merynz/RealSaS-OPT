@@ -121,6 +121,7 @@ class RuntimeProjectedClipIR:
 @dataclass(frozen=True)
 class RuntimeV4ProjectionIR:
     dynamic_motion_binding_hash:str
+    product_state_binding_hash:str
     mesh_binding_hash:str
     presentation_binding_hash:str
     appearance_binding_hash:str
@@ -358,7 +359,7 @@ def build_runtime_v4_projection(
     )
     clips=_project_clips(assets=assets,dynamic=dynamic)
     value=RuntimeV4ProjectionIR(
-        dynamic.dynamic_motion_hash,mesh.mesh_lineage_hash,presentation.presentation_lineage_hash,
+        dynamic.dynamic_motion_hash,dynamic.product_state_binding_hash,mesh.mesh_lineage_hash,presentation.presentation_lineage_hash,
         appearance.appearance_set_hash,composition.composition_set_hash,camera_set.camera_set_hash,
         str(observation_set_hash),slots,assets,views,tuple(sorted(textures,key=lambda x:x.view_index)),
         clips,"",
@@ -424,7 +425,7 @@ def runtime_v4_projection_from_dict(payload:Mapping[str,Any])->RuntimeV4Projecti
             metadata=dict(c.get("metadata") or {}),
         ))
     value=RuntimeV4ProjectionIR(
-        str(payload["dynamic_motion_binding_hash"]),str(payload["mesh_binding_hash"]),
+        str(payload["dynamic_motion_binding_hash"]),str(payload["product_state_binding_hash"]),str(payload["mesh_binding_hash"]),
         str(payload["presentation_binding_hash"]),str(payload["appearance_binding_hash"]),
         str(payload["composition_binding_hash"]),str(payload["camera_set_binding_hash"]),
         str(payload["observation_set_binding_hash"]),tuple(dict(x) for x in payload.get("slots") or ()),

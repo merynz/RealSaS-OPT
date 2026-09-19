@@ -11,8 +11,8 @@
 - Explained by continuity policy: **320**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **122**
-- Safe-default evidence-only branches: **118**
+- Live branches: **123**
+- Safe-default evidence-only branches: **119**
 
 ### Classification counts
 
@@ -101,7 +101,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `70d163328b3b` | `CANONICAL` | canonical branch |
+| `main` | `8d58ea0b9879` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -114,6 +114,7 @@ _None._
 | `noop` | `c6b5108f672b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `noop2` | `c6b5108f672b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `ops/knight-authority-inventory-20260919` | `5912a2cd042c` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `ops/knight-stage09-15-continuation-20260919` | `8d58ea0b9879` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `ops/temp-trigger-n1d-v2-recovery-20260820` | `536b40b6a6bf` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `ops/trigger-n1d-v2-recovery-v2-verify-20260820` | `12a813a8f501` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `playback-stack-v1-20260916` | `46aaad438780` | `EVIDENCE_ONLY` | explicit authority-map override |

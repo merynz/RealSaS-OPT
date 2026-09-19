@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `b6a5a0e1516582dbfa5a20e3ff8d1cb0b4892df96508b9ee1ba62eed16d72ec2`
+> State fingerprint: `2176d5641444b3ba96ba70cb21d6f5198f1b26f0b17ce6d2892db4258db1453a`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -31,17 +31,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `70d163328b3b` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
+| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `8d58ea0b9879` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 118**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 119**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `70d163328b3b` | canonical continuation branch |
+| `main` | `8d58ea0b9879` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -138,6 +138,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `noop` | `c6b5108f672b` | observed live; not explicitly registered active |
 | `noop2` | `c6b5108f672b` | observed live; not explicitly registered active |
 | `ops/knight-authority-inventory-20260919` | `5912a2cd042c` | observed live; not explicitly registered active |
+| `ops/knight-stage09-15-continuation-20260919` | `8d58ea0b9879` | observed live; not explicitly registered active |
 | `ops/temp-trigger-n1d-v2-recovery-20260820` | `536b40b6a6bf` | observed live; not explicitly registered active |
 | `ops/trigger-n1d-v2-recovery-v2-verify-20260820` | `12a813a8f501` | observed live; not explicitly registered active |
 | `playback-stack-v1-20260916-p0p1-staging` | `d88a5fc9aa66` | observed live; not explicitly registered active |

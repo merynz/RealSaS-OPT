@@ -5,7 +5,7 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__SUBJECT_DATA_ONLY_IN_RUN_ARTIFACTS",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
-  "pipeline_plan_sha256": "b0b6ab5eb57b8f8f4eb27a34a9b1f7db73d2ce8a8472045ab1692ceaee741098",
+  "pipeline_plan_sha256": "bb67a3e4842312bddae9a4f48e279048db96b0dc95cfa5961ce1599aa6879669",
   "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING",
   "completed_count": 0,
   "total_count": 40,
@@ -529,6 +529,10 @@
     {
       "event": "ALL_40_STAGE_ADAPTERS_BOUND",
       "note": "Every canonical stage now has an executable adapter and explicit dependency DAG. This is implementation readiness only; SUBJECT2_KNIGHT_V1 remains 0/40 until exact run inputs and external execution artifacts are supplied and stages execute."
+    },
+    {
+      "event": "SUBSTRATE_ADEQUACY_AND_TRULY_UNSEEN_PROOF_BOUND",
+      "note": "Stage14 selects subject-free RiggingSurface N by bounded adequacy search; Stage35 fails on any dynamic exposure of final-mesh faces with no source-visible rest pixel across all eight admitted observations. Knight remains 0/40."
     }
   ],
   "events": [

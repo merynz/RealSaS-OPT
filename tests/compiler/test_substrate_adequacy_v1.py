@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from compiler.realsas_compiler_core.substrate.adequacy_v1 import (
+    _eligible_dense_components,
     select_adequate_rigging_surface_v1,
     substrate_adequacy_report_hash_v1,
 )
@@ -72,3 +73,39 @@ def test_substrate_adequacy_fails_closed_when_no_candidate_meets_policy():
     assert surface is None
     assert report["status"]=="FAIL"
     assert report["adequacy_report_hash"]==substrate_adequacy_report_hash_v1(report)
+
+
+def test_visible_tiny_component_can_be_forced_eligible_independent_of_dense_fraction():
+    labels=np.concatenate((np.zeros(4000,dtype=np.int64),np.ones(2,dtype=np.int64)))
+    support=np.zeros((len(labels),8),dtype=bool)
+    support[:,0]=True
+
+    historical,by_fraction,visible=_eligible_dense_components(
+        labels,support,component_min_dense_fraction=0.001,
+        visible_component_always_eligible=False,
+    )
+    assert historical=={0}
+    assert by_fraction=={0}
+    assert visible=={0,1}
+
+    hardened,by_fraction2,visible2=_eligible_dense_components(
+        labels,support,component_min_dense_fraction=0.001,
+        visible_component_always_eligible=True,
+    )
+    assert hardened=={0,1}
+    assert by_fraction2=={0}
+    assert visible2=={0,1}
+
+
+def test_unobserved_tiny_component_still_respects_dense_fraction_floor():
+    labels=np.concatenate((np.zeros(4000,dtype=np.int64),np.ones(2,dtype=np.int64)))
+    support=np.zeros((len(labels),8),dtype=bool)
+    support[:4000,0]=True
+
+    eligible,by_fraction,visible=_eligible_dense_components(
+        labels,support,component_min_dense_fraction=0.001,
+        visible_component_always_eligible=True,
+    )
+    assert eligible=={0}
+    assert by_fraction=={0}
+    assert visible=={0}

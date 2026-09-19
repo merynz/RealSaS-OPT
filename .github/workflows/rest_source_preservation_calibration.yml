@@ -1,0 +1,35 @@
+name: rest-source-preservation-calibration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'compiler/realsas_compiler_core/rest_preservation_v1.py'
+      - 'compiler/realsas_compiler_core/rest_render_v1.py'
+      - 'experiments/rest_preservation_v1/run_subject_free_calibration.py'
+      - 'tests/compiler/test_rest_preservation_calibration_v1.py'
+      - 'canonical/REST_SOURCE_PRESERVATION_CALIBRATION_PREREG_20260919.md'
+      - '.github/workflows/rest_source_preservation_calibration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  calibrate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned CPU dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Measurement and apparatus regressions
+        run: |
+          python -m pytest -q \
+            tests/compiler/test_rest_preservation_v1.py \
+            tests/compiler/test_rest_preservation_calibration_v1.py
+      - name: Run frozen subject-free calibration
+        run: python experiments/rest_preservation_v1/run_subject_free_calibration.py --json-out /tmp/rest_source_preservation_calibration.json

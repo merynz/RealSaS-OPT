@@ -140,6 +140,55 @@ jobs:
           print(json.dumps(report,indent=2,sort_keys=True))
           PY
 
+      - name: Locate exact KayKit Knight source in runner caches
+        shell: bash
+        env:
+          KNIGHT_FBX_SHA256: 'b25e35cc7eaaa3c7c103f10a4f41fde1cbd81936fede9aa9ae4efbd29d40ba1b'
+          KNIGHT_FBX_BYTES: '20659324'
+          KNIGHT_TEXTURE_SHA256: '5d250ccc5da020e6126bfa3839f83bd9a465a951ed223e4d13c08b1925e154d4'
+          KNIGHT_TEXTURE_BYTES: '14172'
+          KAYKIT_LICENSE_SHA256: 'ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629'
+          KAYKIT_LICENSE_BYTES: '891'
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+
+          roots=[Path.home(),Path('/mnt/c/Users')]
+          specs={
+            'Knight.fbx':(int(os.environ['KNIGHT_FBX_BYTES']),os.environ['KNIGHT_FBX_SHA256']),
+            'knight_texture.png':(int(os.environ['KNIGHT_TEXTURE_BYTES']),os.environ['KNIGHT_TEXTURE_SHA256']),
+            'LICENSE.txt':(int(os.environ['KAYKIT_LICENSE_BYTES']),os.environ['KAYKIT_LICENSE_SHA256']),
+          }
+          def sha(p):
+              h=hashlib.sha256()
+              with p.open('rb') as f:
+                  for b in iter(lambda:f.read(1<<20),b''): h.update(b)
+              return h.hexdigest()
+          hits=[]
+          seen=set()
+          for root in roots:
+              if not root.exists(): continue
+              for name,(size,want) in specs.items():
+                  try:
+                      it=root.rglob(name)
+                      for p in it:
+                          try:
+                              rp=p.resolve()
+                              if str(rp) in seen or not rp.is_file() or rp.stat().st_size!=size: continue
+                              seen.add(str(rp))
+                              got=sha(rp)
+                              hits.append({'name':name,'path':str(rp),'bytes':size,'sha256':got,'exact_match':got==want})
+                          except (OSError,PermissionError):
+                              pass
+                  except (OSError,PermissionError):
+                      pass
+          out=Path(os.environ['RUNNER_TEMP'])/'knight_source_cache_inventory.json'
+          out.write_text(json.dumps({'schema':'RealSaS.KnightSourceCacheInventory.v1','hits':hits},indent=2,sort_keys=True)+'\n')
+          print(out.read_text())
+          PY
+
       - name: Upload inventory report
         uses: actions/upload-artifact@v4
         with:

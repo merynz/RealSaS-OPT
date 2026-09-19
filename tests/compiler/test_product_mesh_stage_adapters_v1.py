@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.observation_authority_v1 import QualifiedObservationViewIR, build_qualified_observation_set
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     _mesh_component_triangles,
     camera_projection_binding_hash,
@@ -14,6 +15,7 @@ from compiler.realsas_compiler_core.playback_full_surface_v3 import qualify_came
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_mesh_candidate_from_dict,
     canonical_puppet_state_from_dict,
+    qualified_observation_set_from_dict,
     component_carrier_policy_from_dict,
     mechanical_partition_from_dict,
     qualified_mesh_from_dict,
@@ -123,9 +125,39 @@ def _fixture(tmp_path):
             "document":{"path":str(policy_path.resolve()),"sha256":_sha(policy_path)}
         },
         "mesh":{"backend":"CANONICAL_RELATION_BASELINE_V1"},
-        "observation":{"component_masks":[]},
+        "observation":{"component_masks":[],"source_foreground_masks":[]},
     }
+
+    observation_views=[]
+    source_foreground_rows=[]
+    for row in cameras:
+        camera=qualify_camera_v3(row,view_id=row["view_id"],view_index=int(row["view_index"]))
+        tri=(
+            tuple(camera_pt[:2])
+            for camera_pt in ()
+        )
+        # The baseline candidate is the same single triangle as S, so source foreground
+        # is materialized directly from exact S positions and the same camera.
+        from compiler.realsas_compiler_core.playback_full_surface_v3 import project_points_xyz_v3
+        projected=project_points_xyz_v3([node.P for node in surface.surface_nodes],camera)
+        triangle=tuple((float(p[0]),float(p[1])) for p in projected)
+        fg=rasterize_triangles_half_integer_top_left((triangle,),width=8,height=8)
+        fg_path=tmp_path/f"source_fg_v{camera.view_index}.bin"; fg_path.write_bytes(fg)
+        obs_hash=content_sha256({"view":camera.view_index,"fixture":"triangle"})
+        observation_views.append(QualifiedObservationViewIR(
+            camera.view_index,8,8,obs_hash,_sha(fg_path),camera_projection_binding_hash(camera),
+            "PASS",(f"fixture-observation-{camera.view_index}",),
+        ))
+        source_foreground_rows.append({
+            "view_index":camera.view_index,
+            "mask":{"path":str(fg_path),"sha256":_sha(fg_path)},
+        })
+    observation_set=build_qualified_observation_set(tuple(observation_views))
+    obs_path=_write(tmp_path/"observation_set.json",observation_set)
+    manifest["observation"]["source_foreground_masks"]=source_foreground_rows
+
     ledger={"stages":[
+        {"id":"07_OBSERVATION_CONTRACT_QUALIFIED","status":"PASS","outputs":[_out(obs_path,"RealSaS.QualifiedObservationSetIR.v1")]},
         {"id":"15_RIGGING_SURFACE_QUALIFIED","status":"PASS","outputs":[_out(s_path,"RealSaS.RiggingSurfaceIR.v1")]},
         {"id":"18_SKELETON_QUALIFIED","status":"PASS","outputs":[_out(g_path,"RealSaS.QualifiedSkeletonIR.v1")]},
         {"id":"22_SKIN_QUALIFIED","status":"PASS","outputs":[_out(w_path,"RealSaS.QualifiedSkinIR.v1")]},
@@ -178,7 +210,6 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
         mask_rows.append({
             "view_index":camera.view_index,
             "component_id":component_id,
-            "source_observation_hash":content_sha256({"view":camera.view_index,"fixture":"triangle"}),
             "mask":{"path":str(mask_path),"sha256":_sha(mask_path)},
         })
     ctx["run_manifest"]["observation"]["component_masks"]=mask_rows

@@ -7,6 +7,8 @@ from types import SimpleNamespace
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     ComponentObservationRasterIR,
     _mesh_component_triangles,
+    rasterize_visible_component_masks,
+    validate_source_component_partition,
     camera_projection_binding_hash,
     component_surface_set_hash,
     coverage_metrics,
@@ -15,6 +17,7 @@ from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
 )
 from compiler.realsas_compiler_core.playback_full_surface_v3 import CameraProjectionV3
 from compiler.realsas_compiler_core.playback_runtime_v3 import ReferenceRasterContractV1
+from compiler.realsas_compiler_core.observation_authority_v1 import QualifiedObservationViewIR, build_qualified_observation_set
 from compiler.realsas_compiler_core.product_authority_v1 import (
     ComponentCarrierDecisionIR,
     ComponentRegionIR,
@@ -149,3 +152,63 @@ def test_g5_projection_accepts_candidate_identity_without_minting_qualified_mesh
     triangles=_mesh_component_triangles(candidate,camera,component_id="c0")
     assert len(triangles)==1
     assert triangles[0][2] == (2.0,1.0)
+
+
+def test_zbuffer_visible_owner_suppresses_far_component_in_overlap():
+    camera=CameraProjectionV3(
+        "V0",0,(0.0,0.0,-2.0),(1.0,0.0,0.0),(0.0,1.0,0.0),(0.0,0.0,1.0),1.0,4
+    )
+    vertices=(
+        SimpleNamespace(candidate_vertex_id="n0",P=(-0.5,-0.5,-0.5),component_id="near"),
+        SimpleNamespace(candidate_vertex_id="n1",P=(0.5,-0.5,-0.5),component_id="near"),
+        SimpleNamespace(candidate_vertex_id="n2",P=(0.0,0.5,-0.5),component_id="near"),
+        SimpleNamespace(candidate_vertex_id="f0",P=(-0.5,-0.5,0.5),component_id="far"),
+        SimpleNamespace(candidate_vertex_id="f1",P=(0.5,-0.5,0.5),component_id="far"),
+        SimpleNamespace(candidate_vertex_id="f2",P=(0.0,0.5,0.5),component_id="far"),
+    )
+    mesh=SimpleNamespace(
+        vertices=vertices,
+        faces=(("n0","n1","n2"),("f0","f1","f2")),
+    )
+    masks=rasterize_visible_component_masks(mesh,camera,width=4,height=4)
+    assert sum(masks["near"])>0
+    assert sum(masks["far"])==0
+
+
+def test_source_component_masks_must_exactly_partition_qualified_foreground():
+    camera=CameraProjectionV3(
+        "V0",0,(0.0,0.0,-2.0),(1.0,0.0,0.0),(0.0,1.0,0.0),(0.0,0.0,1.0),1.0,2
+    )
+    cameras={i:replace(camera,view_id=f"V{i}",view_index=i) for i in range(8)}
+    views=[]
+    foreground={}
+    observations={}
+    contract=ReferenceRasterContractV1()
+    for i in range(8):
+        fg=bytes([1,1,0,0]); foreground[i]=fg
+        cam_hash=camera_projection_binding_hash(cameras[i])
+        views.append(QualifiedObservationViewIR(
+            i,2,2,f"obs-{i}",mask_sha256(fg),cam_hash,"PASS",(f"e-{i}",)
+        ))
+        for cid,mask in (("a",bytes([1,0,0,0])),("b",bytes([0,1,0,0]))):
+            observations[(i,cid)]=ComponentObservationRasterIR(
+                i,cid,"MESH","p","c",cid,2,2,mask,mask_sha256(mask),
+                f"obs-{i}",cam_hash,contract.contract_hash,
+            )
+    obs_set=build_qualified_observation_set(tuple(views))
+    validate_source_component_partition(
+        observations_by_key=observations,
+        component_ids={"a","b"},
+        observation_set=obs_set,
+        source_foreground_masks=foreground,
+        cameras=cameras,
+    )
+    bad=dict(observations)
+    bad[(0,"b")]=replace(bad[(0,"b")],mask_bytes=bytes([1,0,0,0]),mask_sha256=mask_sha256(bytes([1,0,0,0])))
+    import pytest
+    from compiler.realsas_compiler_core.types import QualificationError
+    with pytest.raises(QualificationError,match="DO_NOT_PARTITION"):
+        validate_source_component_partition(
+            observations_by_key=bad,component_ids={"a","b"},observation_set=obs_set,
+            source_foreground_masks=foreground,cameras=cameras,
+        )

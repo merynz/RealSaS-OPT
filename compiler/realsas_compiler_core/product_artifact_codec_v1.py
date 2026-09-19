@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from .playback_full_surface_v3 import CameraProjectionV3
+from .observation_authority_v1 import QualifiedObservationSetIR, QualifiedObservationViewIR
 from .canonical_puppet_state_v1 import CanonicalPuppetStateIR
 from .product_authority_v1 import (
     CanonicalMeshCandidateIR,
@@ -78,6 +79,29 @@ def _refinement(payload: Json | None):
         normal_component=float(payload["normal_component"]),
         tangential_component=float(payload["tangential_component"]),
         method=str(payload["method"]),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def qualified_observation_set_from_dict(payload: Json) -> QualifiedObservationSetIR:
+    _schema(payload, "RealSaS.QualifiedObservationSetIR.v1")
+    return QualifiedObservationSetIR(
+        views=tuple(
+            QualifiedObservationViewIR(
+                view_index=int(row["view_index"]),
+                width=int(row["width"]),
+                height=int(row["height"]),
+                source_observation_hash=str(row["source_observation_hash"]),
+                foreground_mask_sha256=str(row["foreground_mask_sha256"]),
+                camera_binding_hash=str(row["camera_binding_hash"]),
+                qualification_state=str(row["qualification_state"]),
+                evidence_refs=tuple(map(str,row.get("evidence_refs") or ())),
+                metadata=dict(row.get("metadata") or {}),
+            )
+            for row in (payload.get("views") or ())
+        ),
+        observation_set_hash=str(payload["observation_set_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedObservationSetIR.v1"),
         metadata=dict(payload.get("metadata") or {}),
     )
 

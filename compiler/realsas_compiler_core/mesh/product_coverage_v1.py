@@ -6,9 +6,10 @@ from collections import deque
 from dataclasses import asdict, dataclass, field
 import hashlib
 import math
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 from ..hashing import content_sha256
+from ..observation_authority_v1 import QualifiedObservationSetIR, validate_qualified_observation_set
 from ..playback_runtime_v3 import ReferenceRasterContractV1
 from ..playback_full_surface_v3 import CameraProjectionV3, project_points_xyz_v3
 from ..product_authority_v1 import (
@@ -265,6 +266,114 @@ def _product_vertex_id(vertex) -> str:
     return str(value)
 
 
+def rasterize_visible_component_masks(
+    mesh,
+    camera: CameraProjectionV3,
+    *,
+    width: int,
+    height: int,
+) -> dict[str, bytes]:
+    """Rasterize the whole canonical mesh once and return z-visible owner masks.
+
+    The fill rule is the same half-integer/TOP_LEFT rule as Runtime-v3/v4. Depth is
+    linearly interpolated from the same projected 3D triangle; smaller camera-forward
+    Z wins. Exact-depth ties use a stable lexical face key.
+    """
+    vertex_ids=[_product_vertex_id(vertex) for vertex in mesh.vertices]
+    if len(vertex_ids)!=len(set(vertex_ids)):
+        raise QualificationError("G5_DUPLICATE_PRODUCT_VERTEX_ID")
+    projected=project_points_xyz_v3([tuple(map(float,v.P)) for v in mesh.vertices],camera)
+    by_id={
+        vertex_ids[i]:(float(projected[i,0]),float(projected[i,1]),float(projected[i,2]))
+        for i in range(len(vertex_ids))
+    }
+    component_by_id={_product_vertex_id(v):str(v.component_id) for v in mesh.vertices}
+    component_ids=set(component_by_id.values())
+    depth=[float("inf")]*(int(width)*int(height))
+    owner=[None]*(int(width)*int(height))
+    tie=[None]*(int(width)*int(height))
+
+    for face in mesh.faces:
+        if len(face)!=3 or any(vid not in by_id for vid in face):
+            raise QualificationError("G5_FACE_INVALID")
+        components={component_by_id[vid] for vid in face}
+        if len(components)!=1:
+            raise QualificationError("G5_FACE_CROSSES_COMPONENT_BOUNDARY")
+        component_id=next(iter(components))
+        a,b,c=(by_id[vid] for vid in face)
+        area=_orient2d(a,b,float(c[0]),float(c[1]))
+        if abs(area)<=1e-12:
+            continue
+        xs=(a[0],b[0],c[0]); ys=(a[1],b[1],c[1])
+        minx=max(0,int(math.floor(min(xs)-0.5))); maxx=min(int(width)-1,int(math.ceil(max(xs)-0.5)))
+        miny=max(0,int(math.floor(min(ys)-0.5))); maxy=min(int(height)-1,int(math.ceil(max(ys)-0.5)))
+        face_key=(component_id,tuple(map(str,face)))
+        for y in range(miny,maxy+1):
+            for x in range(minx,maxx+1):
+                if not _covers_pixel_center(a,b,c,x,y):
+                    continue
+                px=float(x)+0.5; py=float(y)+0.5
+                w0=_orient2d(b,c,px,py)/area
+                w1=_orient2d(c,a,px,py)/area
+                w2=_orient2d(a,b,px,py)/area
+                z=w0*a[2]+w1*b[2]+w2*c[2]
+                if not math.isfinite(z):
+                    raise QualificationError("G5_DEPTH_NONFINITE")
+                idx=y*int(width)+x
+                if z < depth[idx]-1e-12 or (abs(z-depth[idx])<=1e-12 and (tie[idx] is None or face_key<tie[idx])):
+                    depth[idx]=z; owner[idx]=component_id; tie[idx]=face_key
+
+    masks={cid:bytearray(int(width)*int(height)) for cid in component_ids}
+    for idx,cid in enumerate(owner):
+        if cid is not None:
+            masks[cid][idx]=1
+    return {cid:bytes(mask) for cid,mask in masks.items()}
+
+
+def validate_source_component_partition(
+    *,
+    observations_by_key: Mapping[tuple[int,str], ComponentObservationRasterIR],
+    component_ids: set[str],
+    observation_set: QualifiedObservationSetIR,
+    source_foreground_masks: Mapping[int, bytes],
+    cameras: Mapping[int, CameraProjectionV3],
+) -> None:
+    validate_qualified_observation_set(observation_set)
+    obs_view={int(row.view_index):row for row in observation_set.views}
+    if set(obs_view)!=set(range(8)) or set(map(int,source_foreground_masks.keys()))!=set(range(8)):
+        raise QualificationError("G5_SOURCE_FOREGROUND_VIEW_SET_INCOMPLETE")
+    for view in range(8):
+        authority=obs_view[view]
+        camera=cameras[view]
+        camera_hash=camera_projection_binding_hash(camera)
+        if authority.camera_binding_hash!=camera_hash:
+            raise QualificationError("G5_SOURCE_CAMERA_AUTHORITY_MISMATCH")
+        if int(authority.width)!=int(camera.resolution) or int(authority.height)!=int(camera.resolution):
+            raise QualificationError("G5_SOURCE_FOREGROUND_DIMENSION_MISMATCH")
+        foreground=bytes(source_foreground_masks[view])
+        n=int(authority.width)*int(authority.height)
+        if len(foreground)!=n or any(x not in (0,1) for x in foreground):
+            raise QualificationError("G5_SOURCE_FOREGROUND_MASK_INVALID")
+        if mask_sha256(foreground)!=authority.foreground_mask_sha256:
+            raise QualificationError("G5_SOURCE_FOREGROUND_HASH_MISMATCH")
+
+        counts=[0]*n
+        for component_id in component_ids:
+            row=observations_by_key[(view,component_id)]
+            if row.source_observation_hash!=authority.source_observation_hash:
+                raise QualificationError("G5_SOURCE_OBSERVATION_HASH_MISMATCH")
+            if row.camera_binding_hash!=authority.camera_binding_hash:
+                raise QualificationError("G5_COMPONENT_CAMERA_AUTHORITY_MISMATCH")
+            for i,value in enumerate(row.mask_bytes):
+                counts[i]+=int(value)
+        for fg,count in zip(foreground,counts):
+            if fg:
+                if count!=1:
+                    raise QualificationError("G5_COMPONENT_MASKS_DO_NOT_PARTITION_SOURCE_FOREGROUND")
+            elif count!=0:
+                raise QualificationError("G5_COMPONENT_MASK_OUTSIDE_SOURCE_FOREGROUND")
+
+
 def _mesh_component_triangles(mesh, camera: CameraProjectionV3, *, component_id: str):
     vertex_ids = [_product_vertex_id(vertex) for vertex in mesh.vertices]
     xyz = [tuple(map(float, vertex.P)) for vertex in mesh.vertices]
@@ -300,6 +409,8 @@ def build_g5_coverage_matrix(
     mesh_policy: MeshQualificationPolicyIR,
     observations: Iterable[ComponentObservationRasterIR],
     cameras: Iterable[CameraProjectionV3],
+    observation_set: QualifiedObservationSetIR,
+    source_foreground_masks: Mapping[int, bytes],
     raster_contract: ReferenceRasterContractV1 = ReferenceRasterContractV1(),
 ) -> tuple[dict, ...]:
     validate_component_carrier_policy(carrier_policy, partition)
@@ -340,14 +451,27 @@ def build_g5_coverage_matrix(
     if set(by_key) != expected:
         raise QualificationError("G5_COMPONENT_OBSERVATION_MATRIX_INCOMPLETE")
 
+    validate_source_component_partition(
+        observations_by_key=by_key,
+        component_ids=component_ids,
+        observation_set=observation_set,
+        source_foreground_masks=source_foreground_masks,
+        cameras=camera_by_view,
+    )
+
+    predicted_by_view={}
+    for view in range(8):
+        camera=camera_by_view[view]
+        predicted_by_view[view]=rasterize_visible_component_masks(
+            mesh,camera,width=int(camera.resolution),height=int(camera.resolution)
+        )
+
     rows = []
     for view, component_id in sorted(expected):
         observation = by_key[(view, component_id)]
-        triangles = _mesh_component_triangles(mesh, camera_by_view[view], component_id=component_id)
-        predicted = rasterize_triangles_half_integer_top_left(
-            triangles,
-            width=observation.width,
-            height=observation.height,
+        predicted = predicted_by_view[view].get(
+            component_id,
+            bytes(int(observation.width)*int(observation.height)),
         )
         metrics = coverage_metrics(
             observation.mask_bytes,
@@ -375,6 +499,9 @@ def build_g5_coverage_matrix(
             "source_observation_hash": observation.source_observation_hash,
             "camera_binding_hash": observation.camera_binding_hash,
             "raster_contract_hash": raster_hash,
+            "observation_set_hash": observation_set.observation_set_hash,
+            "source_foreground_mask_sha256": mask_sha256(bytes(source_foreground_masks[view])),
+            "visibility_rule": "CANONICAL_Z_BUFFER_VISIBLE_OWNER_V1",
         })
     return tuple(rows)
 

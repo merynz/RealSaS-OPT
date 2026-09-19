@@ -37,6 +37,7 @@ from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_mesh_candidate_from_dict,
     qualified_mesh_from_dict,
     qualified_mesh_skin_from_dict,
+    qualified_observation_set_from_dict,
     component_carrier_policy_from_dict,
     deformation_envelope_from_dict,
     mechanical_partition_from_dict,
@@ -131,6 +132,12 @@ def _write_ir(path:Path,value,*,authority_class:str)->dict:
         "authority_class":authority_class,
         "schema":str(value.schema_version),
     }
+
+
+def _load_observation_set(ctx):
+    return qualified_observation_set_from_dict(
+        _stage_output_payload(ctx,"07_OBSERVATION_CONTRACT_QUALIFIED","RealSaS.QualifiedObservationSetIR.v1")
+    )
 
 
 def _load_surface(ctx):
@@ -356,6 +363,22 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
 
 def _component_observations(ctx, *, partition, carrier, cameras):
     cfg=dict(ctx["run_manifest"].get("observation") or {})
+    observation_set=_load_observation_set(ctx)
+    authority_by_view={int(row.view_index):row for row in observation_set.views}
+
+    foreground_rows=tuple(cfg.get("source_foreground_masks") or ())
+    if len(foreground_rows)!=8 or {int(row["view_index"]) for row in foreground_rows}!=set(range(8)):
+        raise QualificationError("PRODUCT_ADAPTER_SOURCE_FOREGROUND_MATRIX_INCOMPLETE")
+    source_foreground_masks={}
+    for row in foreground_rows:
+        vi=int(row["view_index"])
+        path=_load_file_ref(dict(row.get("mask") or {}),json_required=False)
+        raw=path.read_bytes()
+        authority=authority_by_view[vi]
+        if _sha256(path)!=authority.foreground_mask_sha256:
+            raise QualificationError("PRODUCT_ADAPTER_SOURCE_FOREGROUND_AUTHORITY_DRIFT")
+        source_foreground_masks[vi]=raw
+
     rows=tuple(cfg.get("component_masks") or ())
     expected={(vi,c.component_id) for vi in range(8) for c in partition.components}
     supplied={(int(row["view_index"]),str(row["component_id"])) for row in rows}
@@ -371,11 +394,14 @@ def _component_observations(ctx, *, partition, carrier, cameras):
         path=_load_file_ref(dict(row.get("mask") or {}),json_required=False)
         raw=path.read_bytes()
         camera=camera_by_view[vi]
+        authority=authority_by_view[vi]
         expected_count=int(camera.resolution)*int(camera.resolution)
         if len(raw)!=expected_count:
             raise QualificationError("PRODUCT_ADAPTER_COMPONENT_MASK_SIZE_INVALID")
         if any(value not in (0,1) for value in raw):
             raise QualificationError("PRODUCT_ADAPTER_COMPONENT_MASK_BINARY_REQUIRED")
+        if "source_observation_hash" in row and str(row["source_observation_hash"])!=authority.source_observation_hash:
+            raise QualificationError("PRODUCT_ADAPTER_COMPONENT_SOURCE_OBSERVATION_DRIFT")
         out.append(ComponentObservationRasterIR(
             view_index=vi,
             component_id=component_id,
@@ -387,12 +413,12 @@ def _component_observations(ctx, *, partition, carrier, cameras):
             height=int(camera.resolution),
             mask_bytes=raw,
             mask_sha256=mask_sha256(raw),
-            source_observation_hash=str(row["source_observation_hash"]),
+            source_observation_hash=authority.source_observation_hash,
             camera_binding_hash=camera_projection_binding_hash(camera),
             raster_contract_hash=raster_hash,
-            metadata={"mask_file_sha256":_sha256(path)},
+            metadata={"mask_file_sha256":_sha256(path),"observation_set_hash":observation_set.observation_set_hash},
         ))
-    return tuple(out)
+    return tuple(out),source_foreground_masks,observation_set
 
 
 def qualify_canonical_mesh_stage(ctx:dict)->dict:
@@ -415,7 +441,9 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         axis_contract=axis_payload,
         policy=policy,
     )
-    observations=_component_observations(ctx,partition=partition,carrier=carrier,cameras=cameras)
+    observations,source_foreground_masks,observation_set=_component_observations(
+        ctx,partition=partition,carrier=carrier,cameras=cameras
+    )
     g5_rows=build_g5_coverage_matrix(
         candidate,
         surface=surface,
@@ -424,6 +452,8 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         mesh_policy=policy,
         observations=observations,
         cameras=cameras,
+        observation_set=observation_set,
+        source_foreground_masks=source_foreground_masks,
     )
     unknown_rows=tuple(
         {

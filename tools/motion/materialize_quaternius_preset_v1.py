@@ -7,10 +7,14 @@ Blender-only MotionSourceClip.v2 extractor, re-verifies every emitted clip, and
 writes a Stage33-ready motion manifest fragment. Optionally it atomically patches
 an existing run_manifest.json.
 
-Example:
+Examples:
   python tools/motion/materialize_quaternius_preset_v1.py \
     --archive "/path/to/Knight by @Quaternius-20260919T105040Z-1-001.zip" \
     --out-dir "$REALSAS_AUTHORITY_ROOT/runs/SUBJECT2_KNIGHT_V1/inputs/motion/quaternius_knight_v1"
+
+  python tools/motion/materialize_quaternius_preset_v1.py \
+    --source-fbx "/path/to/KnightCharacter.fbx" \
+    --out-dir "/tmp/quaternius_knight_v1"
 """
 
 import argparse
@@ -132,6 +136,15 @@ def verify_archive_and_extract(
         "MOTION_MATERIALIZER_LICENSE_SHA_DRIFT",
     )
     return fbx_path, license_path
+
+
+def verify_direct_fbx(*, source_fbx: Path, spec: dict) -> Path:
+    source = dict(spec.get("source") or {})
+    expected = str(source.get("fbx_sha256") or "")
+    _require(source_fbx.is_file(), "MOTION_MATERIALIZER_DIRECT_FBX_MISSING")
+    _require(len(expected) == 64, "MOTION_MATERIALIZER_FBX_SHA_SPEC_INVALID")
+    _require(sha256(source_fbx) == expected, "MOTION_MATERIALIZER_FBX_SHA_DRIFT")
+    return source_fbx.resolve()
 
 
 def resolve_blender(raw: str | None) -> Path:
@@ -426,7 +439,9 @@ def default_out_dir(run_id: str) -> Path:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--archive", required=True)
+    source_group = ap.add_mutually_exclusive_group(required=True)
+    source_group.add_argument("--archive", default="")
+    source_group.add_argument("--source-fbx", default="")
     ap.add_argument("--blender", default="")
     ap.add_argument("--spec", default=str(DEFAULT_SPEC))
     ap.add_argument("--out-dir", default="")
@@ -435,7 +450,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--replace-motion", action="store_true")
     args = ap.parse_args(argv)
 
-    archive = Path(args.archive).expanduser().resolve()
+    archive = Path(args.archive).expanduser().resolve() if str(args.archive).strip() else None
+    direct_fbx = Path(args.source_fbx).expanduser().resolve() if str(args.source_fbx).strip() else None
     spec_path = Path(args.spec).expanduser().resolve()
     _require(spec_path.is_file(), "MOTION_MATERIALIZER_SPEC_MISSING")
     spec = _load_json(spec_path)
@@ -456,13 +472,23 @@ def main(argv: list[str] | None = None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     blender = resolve_blender(args.blender)
 
+    source_input_mode = "SEALED_ARCHIVE"
+    archive_receipt = None
     with tempfile.TemporaryDirectory(prefix="realsas_motion_materialize_") as tmp:
         temp_root = Path(tmp)
-        source_fbx, _license = verify_archive_and_extract(
-            archive=archive,
-            spec=spec,
-            temp_root=temp_root,
-        )
+        if archive is not None:
+            source_fbx, _license = verify_archive_and_extract(
+                archive=archive,
+                spec=spec,
+                temp_root=temp_root,
+            )
+            archive_receipt = {
+                "path": str(archive),
+                "sha256": sha256(archive),
+            }
+        else:
+            source_input_mode = "EXACT_FBX_SHA"
+            source_fbx = verify_direct_fbx(source_fbx=direct_fbx, spec=spec)
         run_blender(
             blender=blender,
             source_fbx=source_fbx,
@@ -504,9 +530,11 @@ def main(argv: list[str] | None = None) -> int:
     receipt = {
         "schema": MATERIALIZER_SCHEMA,
         "status": "PASS",
-        "archive": {
-            "path": str(archive),
-            "sha256": sha256(archive),
+        "source_input_mode": source_input_mode,
+        "archive": archive_receipt,
+        "source_fbx": {
+            "path": str(source_fbx),
+            "sha256": sha256(source_fbx),
         },
         "source_fbx_sha256": str(source["fbx_sha256"]),
         "license_evidence_sha256": str(source["license_evidence_sha256"]),

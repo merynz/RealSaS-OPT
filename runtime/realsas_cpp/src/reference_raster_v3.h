@@ -31,7 +31,7 @@ enum class DepthWritePolicy : uint8_t {
 
 struct DepthSample {
     float z = std::numeric_limits<float>::infinity();
-    uint32_t semantic_order = 0;
+    uint64_t semantic_order = 0;
     bool occupied = false;
 };
 
@@ -99,14 +99,15 @@ inline float interpolate_depth(const Barycentric& b, const Vertex& a, const Vert
     return a.z * b.w0 + c1.z * b.w1 + c2.z * b.w2;
 }
 
-inline bool depth_test_passes(const DepthSample& current, float incoming_z, uint32_t semantic_order) noexcept {
+inline bool depth_test_passes(const DepthSample& current, float incoming_z, uint64_t semantic_order) noexcept {
     if (!std::isfinite(incoming_z)) return false;
     if (!current.occupied) return true;
     constexpr float eps = 1e-6f;
     if (incoming_z < current.z - eps) return true;
     if (incoming_z > current.z + eps) return false;
-    // Equal-depth surfaces are resolved by explicit semantic draw order. A
-    // later slot/submission wins; address/order of triangles is never a tie-break.
+    // Equal-depth surfaces are resolved by caller-provided authority order.
+    // Runtime-v4 binds this to source-visibility provenance + stable asset/face
+    // identity, never editable slot draw order.
     return semantic_order >= current.semantic_order;
 }
 
@@ -122,7 +123,7 @@ inline bool should_write_depth(DepthWritePolicy policy, float alpha, float cutou
     return false;
 }
 
-inline void commit_depth(DepthSample& dst, float z, uint32_t semantic_order) noexcept {
+inline void commit_depth(DepthSample& dst, float z, uint64_t semantic_order) noexcept {
     dst.z = z;
     dst.semantic_order = semantic_order;
     dst.occupied = true;

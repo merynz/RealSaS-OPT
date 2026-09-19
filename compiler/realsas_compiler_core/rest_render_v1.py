@@ -31,7 +31,7 @@ REST_RENDER_CONTRACT={
     "projection":"FULL_SURFACE_CAMERA_PROJECTION_V3",
     "raster_fill":"HALF_INTEGER_TOP_LEFT",
     "visibility":"CANONICAL_Z_BUFFER_VISIBLE_OWNER_V1",
-    "equal_depth_tiebreak":"STABLE_LEXICAL_FACE_KEY_V1",
+    "equal_depth_tiebreak":"SOURCE_VISIBILITY_THEN_STABLE_FACE_KEY_V2",
     "appearance":"ONE_OBSERVED_DONOR_VIEW_PER_FACE",
     "sampling":"OBSERVATION_PIXEL_CENTER_XY_BILINEAR_RGBA_V2",
     "source_texel_center_domain":"integer index centers 0..W-1 / 0..H-1",
@@ -133,7 +133,7 @@ def _render_one(
         raise QualificationError("REST_RENDER_CAMERA_BINDING_DRIFT")
     if composition.physical_occlusion_rule!="CANONICAL_Z_BUFFER_VISIBLE_OWNER_V1":
         raise QualificationError("REST_RENDER_OCCLUSION_RULE_DRIFT")
-    if composition.equal_depth_tiebreak!="STABLE_LEXICAL_FACE_KEY_V1":
+    if composition.equal_depth_tiebreak!="SOURCE_VISIBILITY_THEN_STABLE_FACE_KEY_V2":
         raise QualificationError("REST_RENDER_DEPTH_TIEBREAK_DRIFT")
 
     projected=project_points_xyz_v3([tuple(map(float,v.P)) for v in mesh.vertices],camera)
@@ -177,7 +177,7 @@ def _render_one(
         xs=(float(a[0]),float(b[0]),float(c[0])); ys=(float(a[1]),float(b[1]),float(c[1]))
         minx=max(0,int(math.floor(min(xs)-0.5))); maxx=min(width-1,int(math.ceil(max(xs)-0.5)))
         miny=max(0,int(math.floor(min(ys)-0.5))); maxy=min(height-1,int(math.ceil(max(ys)-0.5)))
-        face_key=(component_id,tuple(map(str,face)))
+        face_key=(0 if donor==int(camera.view_index) else 1,component_id,tuple(map(str,face)))
         for y in range(miny,maxy+1):
             for x in range(minx,maxx+1):
                 if not _covers_pixel_center(a,b,c,x,y):

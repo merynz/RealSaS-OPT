@@ -345,14 +345,22 @@ std::vector<uint8_t> ReferenceRuntime::render_rgba(uint32_t ci,uint32_t vi,float
                 if(!bc.covered)continue;
                 float z=reference_raster_v3::interpolate_depth(bc,a,b,c);
                 size_t pi=size_t(y)*output_width+size_t(x);
-                if(!reference_raster_v3::depth_test_passes(depth[pi],z,semantic_order))continue;
+                const uint64_t provenance_rank =
+                    target_overlay.provenance.at(fi)==AppearanceProvenance::DirectSource ? 2ull : 1ull;
+                const uint64_t authority_order =
+                    (provenance_rank<<62) | (uint64_t(ai)<<32) | uint64_t(fi);
+                if(!reference_raster_v3::depth_test_passes(depth[pi],z,authority_order))continue;
                 float u=a.u*bc.w0+b.u*bc.w1+c.u*bc.w2;
                 float v=a.v*bc.w0+b.v*bc.w1+c.v*bc.w2;
                 auto src=sample_bilinear(*binding.view,u,v);
                 if(src[3]<=0)continue;
-                blend_source_over(color[pi],src);
-                DepthWritePolicy policy=asset.kind==AttachmentKind::DeformableBody?DepthWritePolicy::On:DepthWritePolicy::CutoutOnly;
-                if(reference_raster_v3::should_write_depth(policy,src[3],d.alpha_cutout_threshold))reference_raster_v3::commit_depth(depth[pi],z,semantic_order);
+                // Flattened 8-view art is treated as nearest-surface opaque/cutout
+                // appearance authority. Physical pixel ownership is independent of
+                // editable slot draw order; stacked translucency is not inferred.
+                color[pi]=src;
+                const DepthWritePolicy policy=DepthWritePolicy::On;
+                if(reference_raster_v3::should_write_depth(policy,src[3],d.alpha_cutout_threshold))
+                    reference_raster_v3::commit_depth(depth[pi],z,authority_order);
             }
         }
     }

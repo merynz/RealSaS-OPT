@@ -346,7 +346,7 @@ std::vector<uint8_t> ReferenceRuntime::render_rgba(uint32_t ci,uint32_t vi,float
                 float z=reference_raster_v3::interpolate_depth(bc,a,b,c);
                 size_t pi=size_t(y)*output_width+size_t(x);
                 const uint64_t provenance_rank =
-                    target_overlay.provenance.at(fi)==AppearanceProvenance::DirectSource ? 2ull : 1ull;
+                    ov.provenance.at(fi)==AppearanceProvenance::DirectSource ? 2ull : 1ull;
                 const uint64_t authority_order =
                     (provenance_rank<<62)
                     | (uint64_t(semantic_order & 0xFFFu)<<50)

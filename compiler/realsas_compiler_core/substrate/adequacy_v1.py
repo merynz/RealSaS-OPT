@@ -81,6 +81,7 @@ def _policy(policy:dict)->dict:
         raise QualificationError("SUBSTRATE_ADEQUACY_POLICY_INCOMPLETE:"+",".join(missing))
     p={k:policy[k] for k in required}
     p["visible_component_always_eligible"]=bool(policy.get("visible_component_always_eligible",False))
+    p["component_aware_voxel_compaction"]=bool(policy.get("component_aware_voxel_compaction",False))
     for k in (
         "max_dense_to_surface_p95_norm","max_dense_to_surface_max_norm",
         "max_normal_p95_deg","max_projected_p95_px","max_projected_max_px",
@@ -283,6 +284,7 @@ def select_adequate_rigging_surface_v1(
             target_nodes=cap,
             normal_k=int(normal_k),
             visibility_depth_tolerance_norm=float(visibility_depth_tolerance_norm),
+            component_aware_compaction=bool(policy.get("component_aware_voxel_compaction",False)),
             metadata={**dict(metadata or {}),"substrate_adequacy_candidate":True,"candidate_target_node_cap":cap},
         )
         metric=_metrics(

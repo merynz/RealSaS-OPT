@@ -43,7 +43,7 @@ def seal_product_closure_stage(ctx:dict)->dict:
     mesh_skin_payload=_stage_output_payload(ctx,"28_QUALIFIED_MESH_SKIN_TRANSFER","RealSaS.QualifiedMeshSkinIR.v1")
     presentation_payload=_stage_output_payload(ctx,"30_QUALIFIED_PRESENTATION_GRAPH","RealSaS.QualifiedPresentationGraphIR.v1")
     appearance_payload=_stage_output_payload(ctx,"30_QUALIFIED_PRESENTATION_GRAPH","RealSaS.QualifiedAppearanceSetIR.v1")
-    motion_payload=_stage_output_payload(ctx,"34_MOTION_COMPILE_RUN","RealSaS.QualifiedMotionIR.v1")
+    motion_payload=_stage_output_payload(ctx,"34_MOTION_COMPILE_RUN","RealSaS.QualifiedMotionIR.v2")
     state_payload=_stage_output_payload(ctx,"29_CANONICAL_PUPPET_STATE_SEALED","RealSaS.CanonicalPuppetStateIR.v1")
     root=ctx["run_root"]/"artifacts"/"40_PRODUCT_CLOSURE_SEAL"
     authoring=materialize_editable_puppet_bundle_v1(

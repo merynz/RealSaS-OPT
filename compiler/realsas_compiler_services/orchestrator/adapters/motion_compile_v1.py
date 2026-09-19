@@ -8,7 +8,7 @@ phase evidence and any motion-quality claim.
 
 import json
 
-from compiler.realsas_compiler_core.motion_compile_v1 import build_qualified_motion
+from compiler.realsas_compiler_core.motion_compile_v2 import build_qualified_motion_v2
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_puppet_state_from_dict,
     deformation_envelope_from_dict,
@@ -36,8 +36,10 @@ def _source_payloads(ctx:dict,source_set)->dict:
             clip_id=str(row.get("clip_id") or "")
             payload=dict(row.get("spec") or {})
         elif kind=="EXTERNAL_ARTIST_CLIP_V1":
-            path=_load_file_ref(dict(row.get("file") or {}),expected_schema="RealSaS.MotionSourceClip.v1")
+            path=_load_file_ref(dict(row.get("file") or {}),json_required=False)
             payload=json.loads(path.read_text(encoding="utf-8"))
+            if str(payload.get("schema") or payload.get("schema_version") or "")!="RealSaS.MotionSourceClip.v2":
+                raise QualificationError("MOTION_STAGE34_PROFESSIONAL_CLIP_REQUIRES_V2")
             clip_id=str(payload.get("clip_id") or row.get("clip_id") or "")
         else:
             raise QualificationError("MOTION_STAGE34_SOURCE_KIND_UNSUPPORTED")
@@ -83,7 +85,7 @@ def compile_motion_stage(ctx:dict)->dict:
     source_seal=qualified_motion_source_seal_from_dict(
         _stage_output_payload(ctx,"33_MOTION_SOURCE_OR_PRESET_SEAL","RealSaS.QualifiedMotionSourceSealIR.v1")
     )
-    constraints,motion=build_qualified_motion(
+    constraints,motion=build_qualified_motion_v2(
         source_set=source_set,
         source_seal=source_seal,
         source_payloads=_source_payloads(ctx,source_set),
@@ -110,5 +112,6 @@ def compile_motion_stage(ctx:dict)->dict:
             "dynamic_proof_passed":False,
             "motion_quality_claimed":False,
             "stage35_dynamic_proof_required":True,
+            "full_3d_local_quaternion_motion":True,
         },
     }

@@ -44,8 +44,10 @@ def _asset_from_manifest_row(row:dict):
         )
     if kind=="EXTERNAL_ARTIST_CLIP_V1":
         ref=dict(row.get("file") or {})
-        path=_load_file_ref(ref,expected_schema="RealSaS.MotionSourceClip.v1")
+        path=_load_file_ref(ref,json_required=False)
         payload=json.loads(path.read_text(encoding="utf-8"))
+        if str(payload.get("schema") or payload.get("schema_version") or "")!="RealSaS.MotionSourceClip.v2":
+            raise QualificationError("MOTION_STAGE33_PROFESSIONAL_CLIP_REQUIRES_V2")
         return build_motion_source_asset(
             clip_id=str(payload.get("clip_id") or row.get("clip_id") or ""),
             clip_kind=str(payload.get("clip_kind") or row.get("clip_kind") or ""),
@@ -58,7 +60,8 @@ def _asset_from_manifest_row(row:dict):
             source_ref=f"file:{path.name}:{_sha256(path)}",
             metadata={
                 "external_file_sha256":_sha256(path),
-                "external_file_schema":"RealSaS.MotionSourceClip.v1",
+                "external_file_schema":"RealSaS.MotionSourceClip.v2",
+                "full_3d_motion_required":True,
                 "stage33_only_source_identity":True,
             },
         )

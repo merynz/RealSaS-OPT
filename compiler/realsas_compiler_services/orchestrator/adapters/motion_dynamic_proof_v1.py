@@ -2,15 +2,15 @@ from __future__ import annotations
 
 """Stage-35 canonical dynamic motion proof adapter."""
 
-from compiler.realsas_compiler_core.motion_dynamic_proof_v1 import build_qualified_dynamic_motion
+from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import build_qualified_dynamic_motion_v2
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_puppet_state_from_dict,
-    motion_compile_constraint_set_from_dict,
+    motion_compile_constraint_set_v2_from_dict,
     qualified_camera_set_from_dict,
     qualified_observation_set_from_dict,
     qualified_mesh_from_dict,
     qualified_mesh_skin_from_dict,
-    qualified_motion_from_dict,
+    qualified_motion_v2_from_dict,
     qualified_presentation_graph_from_dict,
     qualified_skeleton_from_dict,
     read_json,
@@ -89,11 +89,11 @@ def prove_dynamic_motion_stage(ctx:dict)->dict:
     presentation=qualified_presentation_graph_from_dict(
         _stage_output_payload(ctx,"30_QUALIFIED_PRESENTATION_GRAPH","RealSaS.QualifiedPresentationGraphIR.v1")
     )
-    constraints=motion_compile_constraint_set_from_dict(
-        _stage_output_payload(ctx,"34_MOTION_COMPILE_RUN","RealSaS.MotionCompileConstraintSetIR.v1")
+    constraints=motion_compile_constraint_set_v2_from_dict(
+        _stage_output_payload(ctx,"34_MOTION_COMPILE_RUN","RealSaS.MotionCompileConstraintSetIR.v2")
     )
-    motion=qualified_motion_from_dict(
-        _stage_output_payload(ctx,"34_MOTION_COMPILE_RUN","RealSaS.QualifiedMotionIR.v1")
+    motion=qualified_motion_v2_from_dict(
+        _stage_output_payload(ctx,"34_MOTION_COMPILE_RUN","RealSaS.QualifiedMotionIR.v2")
     )
     cameras=qualified_camera_set_from_dict(
         _stage_output_payload(ctx,"05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1")
@@ -101,7 +101,7 @@ def prove_dynamic_motion_stage(ctx:dict)->dict:
     observation=qualified_observation_set_from_dict(
         _stage_output_payload(ctx,"07_OBSERVATION_CONTRACT_QUALIFIED","RealSaS.QualifiedObservationSetIR.v1")
     )
-    proof=build_qualified_dynamic_motion(
+    proof=build_qualified_dynamic_motion_v2(
         motion=motion,constraints=constraints,product_state=product_state,skeleton=skeleton,
         mesh=mesh,mesh_skin=mesh_skin,presentation=presentation,mesh_policy=_mesh_policy(ctx),
         cameras=cameras.cameras,source_foreground_masks=_source_foreground_masks(ctx,observation),
@@ -116,6 +116,7 @@ def prove_dynamic_motion_stage(ctx:dict)->dict:
             "professional_motion_clip_count":proof.qualification_report["professional_motion_clip_count"],
             "dynamic_proof_passed":True,
             "canonical_3d_single_mesh_truth":True,
+            "full_3d_local_quaternion_motion":True,
             "truly_unseen_dynamic_exposure_passed":proof.qualification_report["truly_unseen_dynamic_exposure_passed"],
             "truly_unseen_source_face_count":proof.qualification_report["truly_unseen_source_face_count"],
         },

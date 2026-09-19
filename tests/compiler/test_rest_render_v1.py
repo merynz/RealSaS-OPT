@@ -65,8 +65,8 @@ def _fixture():
     for view in range(8):
         row=QualifiedCompositionViewIR(
             view,cameras.camera_binding_hashes[view],("slot0",),
-            "CANONICAL_Z_BUFFER_VISIBLE_OWNER_V1","STABLE_LEXICAL_FACE_KEY_V1",
-            "UI_SETUP_ONLY__NOT_PHYSICAL_OCCLUSION","g5","",
+            "CANONICAL_Z_BUFFER_VISIBLE_OWNER_V1","SOURCE_VISIBILITY_THEN_SLOT_ORDER_THEN_STABLE_FACE_KEY_V3",
+            "PRESENTATION_EQUAL_DEPTH_TIEBREAK_ONLY","g5","",
         )
         comp_rows.append(replace(row,composition_binding_hash=composition_view_hash(row)))
     compset=QualifiedCompositionSetIR(tuple(comp_rows),"state","mesh-hash",observations.observation_set_hash,"structure","")
@@ -76,6 +76,11 @@ def _fixture():
         presentation_lineage_hash="presentation-hash",
         appearance_set_binding_hash=appset.appearance_set_hash,
         composition_set_binding_hash=compset.composition_set_hash,
+        slots=(SimpleNamespace(slot_id="slot0",setup_order=0),),
+        attachments=(SimpleNamespace(
+            slot_id="slot0",mechanical_component_ids=("c0",),
+            metadata={"mesh_face_indices":(0,)},
+        ),),
     )
     textures={}
     for view in range(8):

@@ -12,7 +12,7 @@ from .types import QualificationError
 Json=dict[str,Any]
 _PHYSICAL_OCCLUSION="CANONICAL_Z_BUFFER_VISIBLE_OWNER_V1"
 _EQUAL_DEPTH="SOURCE_VISIBILITY_THEN_SLOT_ORDER_THEN_STABLE_FACE_KEY_V3"
-_SLOT_ORDER_ROLE="UI_SETUP_ONLY__NOT_PHYSICAL_OCCLUSION"
+_SLOT_ORDER_ROLE="PRESENTATION_EQUAL_DEPTH_TIEBREAK_ONLY"
 
 
 @dataclass(frozen=True)
@@ -127,7 +127,7 @@ def build_composition_set(
             composition_binding_hash="",
             metadata={
                 "physical_depth_owner":"QUALIFIED_CANONICAL_MESH",
-                "semantic_slot_order_used_for_physical_occlusion":False,
+                "slot_order_used_only_after_equal_depth_and_source_provenance":True,
                 "motion_order_override_allowed_later":True,
                 "clip_semantics_present":False,
             },

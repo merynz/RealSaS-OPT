@@ -37,7 +37,7 @@ def _fixture():
     return observations,structure,mesh,state
 
 
-def test_composition_uses_zbuffer_and_keeps_slot_order_nonphysical():
+def test_composition_uses_zbuffer_and_keeps_slot_order_as_equal_depth_presentation_tiebreak():
     obs,structure,mesh,state=_fixture()
     value=build_composition_set(
         mesh=mesh,observation_set=obs,presentation_structure=structure,product_state=state
@@ -45,13 +45,13 @@ def test_composition_uses_zbuffer_and_keeps_slot_order_nonphysical():
     assert len(value.views)==8
     assert all(row.slot_order==("slot-a","slot-b") for row in value.views)
     assert all(row.physical_occlusion_rule=="CANONICAL_Z_BUFFER_VISIBLE_OWNER_V1" for row in value.views)
-    assert all(row.slot_order_role=="UI_SETUP_ONLY__NOT_PHYSICAL_OCCLUSION" for row in value.views)
+    assert all(row.slot_order_role=="PRESENTATION_EQUAL_DEPTH_TIEBREAK_ONLY" for row in value.views)
     validate_composition_set(
         value,mesh=mesh,observation_set=obs,presentation_structure=structure,product_state=state
     )
 
 
-def test_composition_rejects_slot_order_as_hidden_physical_occlusion_authority():
+def test_composition_rejects_slot_order_as_primary_physical_occlusion_authority():
     obs,structure,mesh,state=_fixture()
     value=build_composition_set(
         mesh=mesh,observation_set=obs,presentation_structure=structure,product_state=state

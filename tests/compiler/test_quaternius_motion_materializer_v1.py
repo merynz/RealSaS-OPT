@@ -16,6 +16,7 @@ from tools.motion.materialize_quaternius_preset_v1 import (
     patch_run_manifest,
     sha256,
     verify_archive_and_extract,
+    verify_direct_fbx,
     verify_extraction_outputs,
 )
 
@@ -180,6 +181,17 @@ def test_archive_member_and_hash_verification_is_exact(tmp_path):
     )
     assert fbx.read_bytes() == fbx_bytes
     assert license_path.read_bytes() == license_bytes
+
+
+def test_direct_fbx_mode_requires_exact_sealed_hash(tmp_path):
+    source_fbx = tmp_path / "KnightCharacter.fbx"
+    source_fbx.write_bytes(b"exact-fbx")
+    spec = {"source": {"fbx_sha256": hashlib.sha256(b"exact-fbx").hexdigest()}}
+    assert verify_direct_fbx(source_fbx=source_fbx, spec=spec) == source_fbx.resolve()
+
+    drifted = {"source": {"fbx_sha256": "0" * 64}}
+    with pytest.raises(RuntimeError, match="MOTION_MATERIALIZER_FBX_SHA_DRIFT"):
+        verify_direct_fbx(source_fbx=source_fbx, spec=drifted)
 
 
 def test_verified_outputs_build_stage33_ready_fragment_with_authority_root(tmp_path):

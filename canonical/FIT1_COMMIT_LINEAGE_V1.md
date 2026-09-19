@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1901**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1903**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1913,6 +1913,8 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-19T14:17:58+03:00` | `ad22990afe74` | yes | CI_TEST, COMPILER_PROOF | tests: cover quaternion motion frames and unequal-rig retarget | `tests/compiler/test_motion_compile_v2.py` | `main` |
 | `2026-09-19T14:18:51+03:00` | `44fdee11b363` | yes | COMPILER_PROOF | motion: add quaternion FK LBS dynamic proof v2 [skip ci] | `compiler/realsas_compiler_core/motion_dynamic_proof_v2.py` | `main` |
 | `2026-09-19T14:19:07+03:00` | `bada60d2e28c` | yes | CI_TEST, COMPILER_PROOF | tests: prove quaternion FK escapes scalar XY motion | `tests/compiler/test_motion_dynamic_proof_v2.py` | `main` |
+| `2026-09-19T14:21:10+03:00` | `d6ab148cb8c8` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T14:21:22+03:00` | `233e6cb93a48` | yes | CI_TEST, COMPILER_PROOF | tests: give presentation fixtures real mesh face groups | `tests/compiler/test_presentation_structure_v1.py` | `main` |
 
 ## Use rule
 

@@ -8,6 +8,7 @@ from compiler.realsas_compiler_core.substrate.adequacy_v1 import (
     substrate_adequacy_report_hash_v1,
 )
 from models.iris.v3.zero_surface_decoder_v3 import extract_zero_surface_mesh_v3
+from compiler.realsas_compiler_core.substrate.scene_first_signed import _adaptive_voxel_compact
 
 
 def _mesh():
@@ -109,3 +110,36 @@ def test_unobserved_tiny_component_still_respects_dense_fraction_floor():
     assert eligible=={0}
     assert by_fraction=={0}
     assert visible=={0}
+
+
+def test_component_aware_voxel_compaction_prevents_cross_component_cluster_alias():
+    # Two disconnected, spatially coincident rings intentionally stress the voxel key.
+    count=40
+    theta=np.linspace(0.0,2.0*math.pi,count,endpoint=False)
+    ring=np.column_stack((0.25*np.cos(theta),0.25*np.sin(theta),np.zeros(count)))
+    points=np.concatenate((ring,ring),axis=0)
+    normals=np.tile(np.asarray([[0.0,0.0,1.0]]),(len(points),1))
+    faces=[]
+    for offset in (0,count):
+        center=offset
+        # fan-like local triangles over ring indices; enough to establish two disjoint components
+        for i in range(1,count-1):
+            faces.append((offset,offset+i,offset+i+1))
+    faces=np.asarray(faces,dtype=np.int64)
+    dense_component=np.concatenate((np.zeros(count,dtype=np.int64),np.ones(count,dtype=np.int64)))
+
+    _,_,_,_,baseline_inverse=_adaptive_voxel_compact(
+        points,faces,normals,target_nodes=64,preserve_connected_components=False,
+    )
+    _,_,_,_,aware_inverse=_adaptive_voxel_compact(
+        points,faces,normals,target_nodes=64,preserve_connected_components=True,
+    )
+
+    def mixed_cluster_count(inverse):
+        owners={}
+        for i,cluster in enumerate(inverse):
+            owners.setdefault(int(cluster),set()).add(int(dense_component[i]))
+        return sum(len(v)>1 for v in owners.values())
+
+    assert mixed_cluster_count(baseline_inverse)>0
+    assert mixed_cluster_count(aware_inverse)==0

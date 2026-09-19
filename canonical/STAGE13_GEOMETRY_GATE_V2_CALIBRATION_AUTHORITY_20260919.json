@@ -1,0 +1,66 @@
+{
+  "schema": "RealSaS.Stage13GeometryGateV2CalibrationAuthority.v1",
+  "status": "PASS__SUBJECT_FREE__NUMERICAL_FLOOR_VERIFIED",
+  "date_utc": "2026-09-19",
+  "authority": "SUBJECT_FREE_STAGE13_POLICY_CALIBRATION__NO_KNIGHT_OR_MAGE_INPUT",
+  "source_main_commit": "7550a2ab72586d2e86dc91575ceb262ac7620098",
+  "mask_corruption_calibration": {
+    "workflow_run_id": 35462439265,
+    "workflow_job_id": 105948587013,
+    "artifact_id": 10590311444,
+    "artifact_sha256": "454865578f7349346d96cbbc117d16ddcd7664f174cd7e0f169559fbd2ffd44f",
+    "result_sha256": "6b4be8687450e4a4c2e75fbc06196c8a2287e490c787b154b31930c1088c0d08",
+    "raster_resolution": [1024, 1024],
+    "selected_profile": "P999"
+  },
+  "decoder_numerical_floor": {
+    "workflow_run_id": 35462594976,
+    "workflow_job_id": 105949009014,
+    "artifact_id": 10590920604,
+    "artifact_sha256": "21e96d08e9a9809f523fa87e8454682183b548d17925e7f7c4a977f00e70b160",
+    "result_sha256": "585d488cdd15ffd90ce0544b962d13725ea2609db97d9ef19d5be87263053b9d",
+    "decoder": "RealSaS.ZeroSurfaceDecoder.MarchingCubes.v3",
+    "decoder_resolution": 256,
+    "raster_resolution": 1024,
+    "skimage_version": "0.25.2",
+    "sphere_worst": {
+      "min_recall": 0.9999540192889083,
+      "min_precision": 1.0,
+      "max_largest_coherent_hole_fraction": 0.0000028737944432310644,
+      "max_interior_uncovered_fraction": 0.0,
+      "max_silhouette_edge_p95_px": 0.0
+    },
+    "ellipsoid_worst": {
+      "min_recall": 0.9998992692441531,
+      "min_precision": 1.0,
+      "max_largest_coherent_hole_fraction": 0.0000037065041735236995,
+      "max_interior_uncovered_fraction": 0.0,
+      "max_silhouette_edge_p95_px": 0.0
+    },
+    "p999_above_numerical_floor": true
+  },
+  "selected_thresholds": {
+    "min_recall": 0.999,
+    "min_precision": 0.999,
+    "max_largest_coherent_hole_fraction": 0.00025,
+    "max_interior_uncovered_fraction": 0.0005,
+    "min_component_recall": 0.999,
+    "component_min_foreground_fraction": 0.0,
+    "max_silhouette_edge_p95_px": 0.5
+  },
+  "accept_semantics": "Identity plus sparse isolated <=1 px raster-boundary disagreement; systematic silhouette displacement is not accepted.",
+  "reject_semantics": [
+    "systematic one-pixel translation, erosion, or dilation",
+    "visible coherent interior holes",
+    "sparse interior pepper loss",
+    "local source-interior notch loss",
+    "disconnected visible component loss",
+    "thin visible feature loss"
+  ],
+  "contamination_checks": {
+    "knight_result_used": false,
+    "mage_result_used": false,
+    "subject_inputs_used": false
+  },
+  "claim_boundary": "This calibrates Stage13 admission only. It does not claim Knight PASS, QualifiedMesh PASS, Stage15 PASS, or PRODUCT_PASS."
+}

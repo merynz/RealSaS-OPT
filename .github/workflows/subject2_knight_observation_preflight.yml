@@ -34,7 +34,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m pip install -q numpy pillow
+          python -m pip install -q numpy pillow scipy
 
       - name: Install headless Blender render libraries
         shell: bash

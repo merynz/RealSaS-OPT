@@ -80,6 +80,7 @@ def _policy(policy:dict)->dict:
     if missing:
         raise QualificationError("SUBSTRATE_ADEQUACY_POLICY_INCOMPLETE:"+",".join(missing))
     p={k:policy[k] for k in required}
+    p["visible_component_always_eligible"]=bool(policy.get("visible_component_always_eligible",False))
     for k in (
         "max_dense_to_surface_p95_norm","max_dense_to_surface_max_norm",
         "max_normal_p95_deg","max_projected_p95_px","max_projected_max_px",
@@ -129,10 +130,17 @@ def _metrics(
 
     component_count=int(dense_labels.max(initial=-1)+1)
     counts=np.bincount(dense_labels,minlength=component_count)
-    eligible={
+    visible_components={
+        int(dense_labels[i])
+        for i in np.flatnonzero(np.asarray(dense_support,dtype=bool).any(axis=1))
+    }
+    fraction_eligible={
         i for i,c in enumerate(counts)
         if float(c)/float(max(len(dense_labels),1))+1e-15 >= float(policy["component_min_dense_fraction"])
     }
+    eligible=set(fraction_eligible)
+    if bool(policy.get("visible_component_always_eligible",False)):
+        eligible.update(visible_components)
     assigned=[set() for _ in range(component_count)]
     owners={}
     for dense_i,node_i in enumerate(np.asarray(nearest,dtype=np.int64)):
@@ -184,6 +192,10 @@ def _metrics(
         "projected_max_px":projected_max,
         "dense_component_count":component_count,
         "eligible_dense_component_count":int(len(eligible)),
+        "visible_dense_component_count":int(len(visible_components)),
+        "fraction_eligible_dense_component_count":int(len(fraction_eligible)),
+        "visibility_forced_eligible_component_count":int(len(eligible-visible_components.intersection(fraction_eligible)) if False else len(visible_components-fraction_eligible)),
+        "visible_component_always_eligible":bool(policy.get("visible_component_always_eligible",False)),
         "minimum_nodes_per_eligible_component":int(min_component_nodes),
         "component_alias_node_count":int(alias_nodes),
         "projected_by_view":raster_by_view,

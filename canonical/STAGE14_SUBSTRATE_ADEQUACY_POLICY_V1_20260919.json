@@ -1,0 +1,53 @@
+{
+  "schema": "RealSaS.Stage14SubstrateAdequacyPolicy.v1",
+  "status": "FROZEN_AFTER_SUBJECT_FREE_CALIBRATION_BEFORE_KNIGHT_STAGE14_RESULT",
+  "authority": "NORMATIVE_STAGE14_SUBSTRATE_ADEQUACY_POLICY__NOT_EMPIRICAL_KNIGHT_RESULT",
+  "calibration_seal": "canonical/STAGE13_14_SUBJECT_FREE_CALIBRATION_SEAL_20260919.json",
+  "gsa": {
+    "normal_k": 64,
+    "visibility_depth_tolerance_norm": 0.02,
+    "adequacy_policy": {
+      "min_candidate_nodes": 128,
+      "max_candidate_nodes": 8192,
+      "candidate_growth_factor": 2.0,
+      "refinement_rounds": 3,
+      "max_dense_to_surface_p95_norm": 0.03,
+      "max_dense_to_surface_max_norm": 0.08,
+      "max_normal_p95_deg": 30.0,
+      "max_projected_p95_px": 6.0,
+      "max_projected_max_px": 16.0,
+      "component_min_dense_fraction": 0.001,
+      "min_nodes_per_component": 8,
+      "max_component_alias_nodes": 0
+    }
+  },
+  "selected_profile": "STRICT",
+  "subject_free_shapes": [
+    "SPHERE",
+    "TALL_THIN_ELLIPSOID",
+    "FLAT_WIDE_ELLIPSOID",
+    "TWO_COMPONENTS"
+  ],
+  "calibration_observation": {
+    "all_subject_free_shapes_have_passing_candidate": true,
+    "coarse_selected_caps_before_refinement": {
+      "SPHERE": 2048,
+      "TALL_THIN_ELLIPSOID": 2048,
+      "FLAT_WIDE_ELLIPSOID": 2048,
+      "TWO_COMPONENTS": 2048
+    },
+    "largest_observed_projected_max_px_at_selected_coarse_candidates": 5.446,
+    "largest_observed_dense_to_surface_max_norm_at_selected_coarse_candidates": 0.01806,
+    "largest_observed_normal_p95_deg_at_selected_coarse_candidates": 20.803,
+    "component_alias_nodes_at_selected_coarse_candidates": 0
+  },
+  "selection_rule": "MINIMUM_ACTUAL_NODE_COUNT_AMONG_PASSING_BOUNDED_SEARCH_CANDIDATES",
+  "rationale": [
+    "The dense signed zero-surface remains geometry authority; Stage14 selects only the minimum adequate mechanical carrier density.",
+    "128 through 8192 are search bounds, not a fixed target_nodes product truth.",
+    "The STRICT tolerance profile was the first preregistered strict-to-loose profile with a passing candidate for every subject-free calibration shape.",
+    "normal_k=64 and visibility_depth_tolerance_norm=0.02 preserve the established scene-first GSA operator settings rather than tuning them from Knight."
+  ],
+  "mutation_rule": "After Knight Stage14 result inspection this policy may only be tightened prospectively; it may never be relaxed to convert a failure into PASS.",
+  "claim_boundary": "This policy does not claim Knight compliance, Stage14 PASS, Stage15 PASS, or PRODUCT_PASS."
+}

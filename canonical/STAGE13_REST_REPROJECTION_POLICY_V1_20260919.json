@@ -1,0 +1,42 @@
+{
+  "schema": "RealSaS.Stage13RestReprojectionPolicy.v1",
+  "status": "FROZEN_AFTER_SUBJECT_FREE_CALIBRATION_BEFORE_KNIGHT_STAGE13_RESULT",
+  "authority": "NORMATIVE_STAGE13_GEOMETRY_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_RESULT",
+  "calibration_seal": "canonical/STAGE13_14_SUBJECT_FREE_CALIBRATION_SEAL_20260919.json",
+  "selected_profile": "IRIS_FIT_VISIBLE_GATE_PLUS_PRODUCT_ANTI_HOLE",
+  "thresholds": {
+    "min_recall": 0.96,
+    "min_precision": 0.94,
+    "max_largest_coherent_hole_fraction": 0.005,
+    "max_interior_uncovered_fraction": 0.005,
+    "min_component_recall": 0.96,
+    "component_min_foreground_fraction": 0.0
+  },
+  "rationale": [
+    "Stage13 qualifies raw IRIS zero-surface reprojection, not final QualifiedMesh G5 product geometry.",
+    "The stricter final-mesh precision floor 0.995 rejects the preregistered one-pixel boundary-dilation ACCEPT control at precision 0.987054 and is therefore not transplanted into this earlier raw-geometry gate.",
+    "Recall 0.96 and precision 0.94 preserve the already-preregistered IRIS visible-silhouette admission semantics while the frozen G5 anti-hole limits 0.005 are retained unchanged.",
+    "component_min_foreground_fraction is zero: every disconnected source-foreground component is eligible, so a small visible accessory cannot be discarded as noise by Stage13."
+  ],
+  "subject_free_controls": {
+    "accept": [
+      "EXACT",
+      "BOUNDARY_ERODE_1PX",
+      "BOUNDARY_DILATE_1PX"
+    ],
+    "reject": [
+      "MISSING_DISCONNECTED_ACCESSORY",
+      "COHERENT_INTERIOR_HOLE"
+    ],
+    "diagnostic_only": [
+      "ONE_PIXEL_SOURCE_SPECKLE"
+    ]
+  },
+  "aggregation": {
+    "exact_eight_views_required": true,
+    "every_view_must_pass_every_rule": true,
+    "aggregate_compensation_forbidden": true
+  },
+  "mutation_rule": "After Knight Stage13 result inspection this policy may only be tightened prospectively; it may never be relaxed to convert a failure into PASS.",
+  "claim_boundary": "This policy does not claim Knight compliance, Stage13 PASS, Stage15 PASS, or PRODUCT_PASS."
+}

@@ -47,6 +47,18 @@ def _frame_hash(jid,parent,pos,R):
     })
 
 
+def object_vector_to_joint_local(frame:DerivedJointFrameV1,vector):
+    """Express an object-frame vector in the geometry-derived joint frame."""
+    R=np.asarray(frame.rotation_matrix,dtype=np.float64)
+    v=np.asarray(vector,dtype=np.float64)
+    if R.shape!=(3,3) or v.shape!=(3,) or not (np.isfinite(R).all() and np.isfinite(v).all()):
+        raise QualificationError("JOINT_FRAME_VECTOR_INVALID")
+    if not np.allclose(R.T@R,np.eye(3),atol=1e-9,rtol=0.0) or np.linalg.det(R)<0.999999:
+        raise QualificationError("JOINT_FRAME_VECTOR_FRAME_INVALID")
+    out=R.T@v
+    return tuple(map(float,out))
+
+
 def object_basis_from_camera_set(cameras):
     rows=tuple(sorted(tuple(cameras),key=lambda c:int(c.view_index)))
     if len(rows)!=8 or tuple(int(c.view_index) for c in rows)!=tuple(range(8)):

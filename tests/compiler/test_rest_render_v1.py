@@ -9,7 +9,7 @@ from compiler.realsas_compiler_core.observation_authority_v1 import (
     QualifiedObservationViewIR,build_qualified_observation_set,
 )
 from compiler.realsas_compiler_core.product_authority_v1 import PresentationViewOverlayIR
-from compiler.realsas_compiler_core.rest_render_v1 import render_rest_views
+from compiler.realsas_compiler_core.rest_render_v1 import render_rest_views, _sample_bilinear_rgba
 from compiler.realsas_compiler_core.types import SurfaceSupportBinding
 from compiler.realsas_compiler_core.v4 import build_appearance_binding
 from compiler.realsas_compiler_core.v4_types import AppearanceCornerBinding
@@ -114,3 +114,19 @@ def test_rest_renderer_uses_target_local_source_texture_per_view():
     for view,image in images.items():
         covered=image[...,3]>0
         assert np.all(image[...,2][covered]==view*20)
+
+
+def test_observation_pixel_center_sampler_uses_integer_texel_centers_without_half_pixel_shift():
+    image=np.zeros((4,4,4),dtype=np.uint8)
+    for y in range(4):
+        for x in range(4):
+            image[y,x]=[10*x,20*y,30+x+y,255]
+    assert np.array_equal(_sample_bilinear_rgba(image,(2.0,1.0)),image[1,2])
+    expected=np.floor(
+        0.25*image[1,1].astype(np.float64)
+        +0.25*image[1,2].astype(np.float64)
+        +0.25*image[2,1].astype(np.float64)
+        +0.25*image[2,2].astype(np.float64)
+        +0.5
+    ).astype(np.uint8)
+    assert np.array_equal(_sample_bilinear_rgba(image,(1.5,1.5)),expected)

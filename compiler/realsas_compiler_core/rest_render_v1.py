@@ -33,8 +33,10 @@ REST_RENDER_CONTRACT={
     "visibility":"CANONICAL_Z_BUFFER_VISIBLE_OWNER_V1",
     "equal_depth_tiebreak":"STABLE_LEXICAL_FACE_KEY_V1",
     "appearance":"ONE_OBSERVED_DONOR_VIEW_PER_FACE",
-    "sampling":"PIXEL_CENTER_XY_BILINEAR_RGBA_V1",
-    "pixel_center_to_texel_index":"index_xy = donor_xy - (0.5,0.5)",
+    "sampling":"OBSERVATION_PIXEL_CENTER_XY_BILINEAR_RGBA_V2",
+    "source_texel_center_domain":"integer index centers 0..W-1 / 0..H-1",
+    "target_raster_center_domain":"runtime/G5 pixel centers x+0.5,y+0.5",
+    "pixel_center_to_texel_index":"index_xy = donor_xy",
     "cross_view_color_blending":False,
     "lighting":False,
     "shading":False,
@@ -92,8 +94,11 @@ def _sample_bilinear_rgba(image:np.ndarray,xy:tuple[float,float])->np.ndarray:
     if image.ndim!=3 or image.shape[2]!=4 or image.dtype!=np.uint8:
         raise QualificationError("REST_RENDER_SOURCE_RGBA_INVALID")
     h,w,_=image.shape
-    x=float(xy[0])-0.5
-    y=float(xy[1])-0.5
+    # Qualified observation PIXEL_CENTER_XY is an index-centered domain:
+    # source texel (i,j) has center coordinate (i,j). Do not subtract 0.5 here.
+    # Runtime/G5 target rasterization is a separate half-integer-center domain.
+    x=float(xy[0])
+    y=float(xy[1])
     if not (math.isfinite(x) and math.isfinite(y)):
         raise QualificationError("REST_RENDER_DONOR_COORD_NONFINITE")
     eps=1e-9

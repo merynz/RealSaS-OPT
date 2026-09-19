@@ -321,6 +321,79 @@ def _product_vertex_id(vertex) -> str:
     return str(value)
 
 
+def rasterize_visible_face_pixel_counts(
+    mesh,
+    camera: CameraProjectionV3,
+    *,
+    positions=None,
+    width: int,
+    height: int,
+    pixel_mask: bytes | None = None,
+) -> tuple[int, ...]:
+    """Exact z-visible face pixel counts under Runtime-v3/v4 fill semantics.
+
+    When pixel_mask is supplied, only visible pixels whose mask byte is 1 count
+    as source-observed evidence. Geometry still participates in the z-buffer
+    regardless of the mask, so occlusion semantics remain exact.
+    """
+    n=int(width)*int(height)
+    if pixel_mask is not None:
+        if len(pixel_mask)!=n or any(x not in (0,1) for x in pixel_mask):
+            raise QualificationError("VISIBLE_FACE_PIXEL_MASK_INVALID")
+    vertex_ids=[_product_vertex_id(v) for v in mesh.vertices]
+    if len(vertex_ids)!=len(set(vertex_ids)):
+        raise QualificationError("VISIBLE_FACE_DUPLICATE_VERTEX_ID")
+    xyz=np.asarray(
+        [v.P for v in mesh.vertices] if positions is None else positions,
+        dtype=np.float64,
+    )
+    if xyz.shape!=(len(vertex_ids),3) or not np.isfinite(xyz).all():
+        raise QualificationError("VISIBLE_FACE_POSITION_MATRIX_INVALID")
+    projected=project_points_xyz_v3(xyz,camera)
+    by_id={
+        vertex_ids[i]:(float(projected[i,0]),float(projected[i,1]),float(projected[i,2]))
+        for i in range(len(vertex_ids))
+    }
+    depth=[float("inf")]*n
+    owner=[-1]*n
+    tie=[None]*n
+    for face_index,face in enumerate(mesh.faces):
+        if len(face)!=3 or any(vid not in by_id for vid in face):
+            raise QualificationError("VISIBLE_FACE_TOPOLOGY_INVALID")
+        a,b,c=(by_id[vid] for vid in face)
+        area=_orient2d(a,b,float(c[0]),float(c[1]))
+        if abs(area)<=1e-12:
+            continue
+        xs=(a[0],b[0],c[0]); ys=(a[1],b[1],c[1])
+        minx=max(0,int(math.floor(min(xs)-0.5))); maxx=min(int(width)-1,int(math.ceil(max(xs)-0.5)))
+        miny=max(0,int(math.floor(min(ys)-0.5))); maxy=min(int(height)-1,int(math.ceil(max(ys)-0.5)))
+        face_key=tuple(sorted(map(str,face)))
+        for y in range(miny,maxy+1):
+            for x in range(minx,maxx+1):
+                if not _covers_pixel_center(a,b,c,x,y):
+                    continue
+                px=float(x)+0.5; py=float(y)+0.5
+                w0=_orient2d(b,c,px,py)/area
+                w1=_orient2d(c,a,px,py)/area
+                w2=_orient2d(a,b,px,py)/area
+                z=w0*a[2]+w1*b[2]+w2*c[2]
+                if not math.isfinite(z):
+                    raise QualificationError("VISIBLE_FACE_DEPTH_NONFINITE")
+                idx=y*int(width)+x
+                if z < depth[idx]-1e-12 or (
+                    abs(z-depth[idx])<=1e-12 and (tie[idx] is None or face_key<tie[idx])
+                ):
+                    depth[idx]=z; owner[idx]=int(face_index); tie[idx]=face_key
+    counts=[0]*len(mesh.faces)
+    for idx,face_index in enumerate(owner):
+        if face_index<0:
+            continue
+        if pixel_mask is not None and not pixel_mask[idx]:
+            continue
+        counts[int(face_index)]+=1
+    return tuple(map(int,counts))
+
+
 def rasterize_visible_component_masks(
     mesh,
     camera: CameraProjectionV3,

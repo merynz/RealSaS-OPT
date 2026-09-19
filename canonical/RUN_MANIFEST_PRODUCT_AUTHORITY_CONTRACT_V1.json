@@ -66,7 +66,7 @@
       "stage33_rule": "Consumes exact Stage-29 CanonicalPuppetStateIR and Stage-32 QualifiedRestSourcePreservationIR. It may seal source identity and run authorization only; retargeting, motion compilation and motion-quality claims are forbidden at Stage 33.",
       "stage34_boundary": "Every Stage-33 seal declares Stage-34 compilation required. Rotation-only procedural presets are mechanical probes, not professional artist-motion evidence.",
       "stage34_rule": "Stage 34 consumes exact Stage-18/25/29/30/33 authorities. SOURCE_RIG_TRACKS_V1 requires an explicit one-to-one retarget map; Stage-25 deformation envelope is a hard limit. Stage 34 claims compiled mechanics only.",
-      "stage35_rule": "Stage 35 executes exact Stage-34 tracks as canonical 3D FK/LBS over the single Stage-27 QualifiedMeshIR and Stage-28 QualifiedMeshSkinIR, samples authored/contact boundaries plus a frozen uniform grid, proves contacts and dynamic conditioning, and forbids per-view motion-mesh truth."
+      "stage35_rule": "Stage 35 executes exact Stage-34 tracks as canonical 3D FK/LBS over the single Stage-27 QualifiedMeshIR and Stage-28 QualifiedMeshSkinIR, samples authored/contact boundaries plus a frozen uniform grid, proves contacts and dynamic conditioning, and forbids per-view motion-mesh truth. It additionally classifies final-mesh faces with zero z-visible source-foreground pixels across all eight admitted rest observations as truly unseen and fails on any newly z-visible pixel from those faces at any sampled motion frame/view; generated appearance is forbidden."
     },
     "runtime": {
       "stage36": "Projects exact Stage-35 canonical 3D frames into compact Runtime-v4. Face-corner deployment expansion is allowed only for UV seams and every projected vertex retains an exact source canonical vertex id. Source texture PNGs are transport-only re-encodings of exact Stage-07 raster authority.",
@@ -179,7 +179,7 @@
       "RealSaS.QualifiedMotionIR.v1"
     ],
     "35": [
-      "RealSaS.QualifiedDynamicMotionIR.v1"
+      "RealSaS.QualifiedDynamicMotionIR.v1 (including hash-bound zero-budget truly-unseen exposure proof)"
     ],
     "36": [
       "RealSaS.RuntimeV4ProjectionIR.v1",

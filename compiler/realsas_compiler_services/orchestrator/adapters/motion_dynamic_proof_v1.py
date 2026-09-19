@@ -6,6 +6,8 @@ from compiler.realsas_compiler_core.motion_dynamic_proof_v1 import build_qualifi
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_puppet_state_from_dict,
     motion_compile_constraint_set_from_dict,
+    qualified_camera_set_from_dict,
+    qualified_observation_set_from_dict,
     qualified_mesh_from_dict,
     qualified_mesh_skin_from_dict,
     qualified_motion_from_dict,
@@ -18,6 +20,8 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
     MeshQualificationPolicyIR,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
+    _load_file_ref,
+    _sha256,
     _stage_output_payload,
     _write_ir,
 )
@@ -49,6 +53,26 @@ def _mesh_policy(ctx)->MeshQualificationPolicyIR:
     )
 
 
+def _source_foreground_masks(ctx,observation):
+    cfg=dict(ctx["run_manifest"].get("observation") or {})
+    rows=tuple(cfg.get("source_foreground_masks") or ())
+    if len(rows)!=8 or {int(r["view_index"]) for r in rows}!=set(range(8)):
+        raise ValueError("MOTION_DYNAMIC_FOREGROUND_MATRIX_INCOMPLETE")
+    authority={int(v.view_index):v for v in observation.views}
+    out={}
+    for row in rows:
+        vi=int(row["view_index"])
+        path=_load_file_ref(dict(row.get("mask") or {}),json_required=False)
+        if _sha256(path)!=authority[vi].foreground_mask_sha256:
+            raise ValueError("MOTION_DYNAMIC_FOREGROUND_AUTHORITY_DRIFT")
+        raw=path.read_bytes()
+        expected=int(authority[vi].width)*int(authority[vi].height)
+        if len(raw)!=expected or any(x not in (0,1) for x in raw):
+            raise ValueError("MOTION_DYNAMIC_FOREGROUND_MASK_INVALID")
+        out[vi]=raw
+    return out
+
+
 def prove_dynamic_motion_stage(ctx:dict)->dict:
     skeleton=qualified_skeleton_from_dict(
         _stage_output_payload(ctx,"18_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1")
@@ -71,9 +95,16 @@ def prove_dynamic_motion_stage(ctx:dict)->dict:
     motion=qualified_motion_from_dict(
         _stage_output_payload(ctx,"34_MOTION_COMPILE_RUN","RealSaS.QualifiedMotionIR.v1")
     )
+    cameras=qualified_camera_set_from_dict(
+        _stage_output_payload(ctx,"05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1")
+    )
+    observation=qualified_observation_set_from_dict(
+        _stage_output_payload(ctx,"07_OBSERVATION_CONTRACT_QUALIFIED","RealSaS.QualifiedObservationSetIR.v1")
+    )
     proof=build_qualified_dynamic_motion(
         motion=motion,constraints=constraints,product_state=product_state,skeleton=skeleton,
         mesh=mesh,mesh_skin=mesh_skin,presentation=presentation,mesh_policy=_mesh_policy(ctx),
+        cameras=cameras.cameras,source_foreground_masks=_source_foreground_masks(ctx,observation),
     )
     root=ctx["run_root"]/"artifacts"/"35_MOTION_DYNAMIC_PROOF"
     return {
@@ -85,5 +116,7 @@ def prove_dynamic_motion_stage(ctx:dict)->dict:
             "professional_motion_clip_count":proof.qualification_report["professional_motion_clip_count"],
             "dynamic_proof_passed":True,
             "canonical_3d_single_mesh_truth":True,
+            "truly_unseen_dynamic_exposure_passed":proof.qualification_report["truly_unseen_dynamic_exposure_passed"],
+            "truly_unseen_source_face_count":proof.qualification_report["truly_unseen_source_face_count"],
         },
     }

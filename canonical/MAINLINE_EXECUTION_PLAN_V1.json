@@ -719,9 +719,11 @@
     {
       "ordinal": 35,
       "id": "35_MOTION_DYNAMIC_PROOF",
-      "title": "Dynamic motion/deformation proof",
+      "title": "Dynamic motion/deformation + truly-unseen exposure proof",
       "group": "motion",
       "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
         "18_SKELETON_QUALIFIED",
         "26_MESH_CANDIDATE_BUILD",
         "27_QUALIFIED_MESH_GATE",
@@ -737,7 +739,9 @@
         "output_hash_required": true,
         "product_pass_authority": false
       },
-      "manifest_keys": []
+      "manifest_keys": [
+        "observation"
+      ]
     },
     {
       "ordinal": 36,

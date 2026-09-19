@@ -29,13 +29,14 @@ from .product_authority_v1 import (
     qualified_mesh_lineage_hash,
     qualified_presentation_lineage_hash,
 )
+from .mesh.product_coverage_v1 import rasterize_visible_face_pixel_counts
 from .types import QualifiedMeshSkinIR, QualifiedSkeletonIR, QualificationError
 
 Json=dict[str,Any]
 Vec2=tuple[float,float]
 Vec3=tuple[float,float,float]
 
-DYNAMIC_EVALUATOR_SEMANTIC_VERSION="RealSaS.CanonicalDynamicMotionEvaluator.v1"
+DYNAMIC_EVALUATOR_SEMANTIC_VERSION="RealSaS.CanonicalDynamicMotionEvaluator.v2"
 _UNIFORM_SAMPLE_COUNT=17
 _CONTACT_REL_TOL=1e-5
 _MOTION_REL_EPS=1e-8
@@ -332,6 +333,8 @@ def build_qualified_dynamic_motion(
     mesh_skin:QualifiedMeshSkinIR,
     presentation:QualifiedPresentationGraphIR,
     mesh_policy:MeshQualificationPolicyIR,
+    cameras,
+    source_foreground_masks,
 )->QualifiedDynamicMotionIR:
     _validate_bindings(
         motion=motion,constraints=constraints,product_state=product_state,skeleton=skeleton,
@@ -341,6 +344,23 @@ def build_qualified_dynamic_motion(
     vids,jids,W=_weights(mesh,mesh_skin,skeleton)
     rest=np.asarray([v.P for v in mesh.vertices],dtype=np.float64)
     if not np.isfinite(rest).all(): raise QualificationError("MOTION_DYNAMIC_REST_NONFINITE")
+    cameras=tuple(sorted(tuple(cameras),key=lambda c:int(c.view_index)))
+    if len(cameras)!=8 or tuple(int(c.view_index) for c in cameras)!=tuple(range(8)):
+        raise QualificationError("MOTION_DYNAMIC_REQUIRES_EXACT_8_CAMERAS")
+    source_foreground_masks={int(k):bytes(v) for k,v in dict(source_foreground_masks).items()}
+    if set(source_foreground_masks)!=set(range(8)):
+        raise QualificationError("MOTION_DYNAMIC_SOURCE_FOREGROUND_VIEW_SET_INCOMPLETE")
+    rest_observed_faces=set()
+    rest_source_face_counts={}
+    for camera in cameras:
+        vi=int(camera.view_index)
+        counts=rasterize_visible_face_pixel_counts(
+            mesh,camera,positions=rest,width=int(camera.resolution),height=int(camera.resolution),
+            pixel_mask=source_foreground_masks[vi],
+        )
+        rest_source_face_counts[vi]=counts
+        rest_observed_faces.update(i for i,count in enumerate(counts) if count>0)
+    truly_unseen_faces=set(range(len(mesh.faces)))-rest_observed_faces
     scale=_scale(skeleton); contact_tol=_CONTACT_REL_TOL*scale; motion_eps=_MOTION_REL_EPS*scale
     contacts_by_clip={}
     for row in constraints.contact_constraints:
@@ -374,6 +394,28 @@ def build_qualified_dynamic_motion(
                 metadata={"canonical_3d_authority":True,"view_projection_performed":False},
             )
             frame=replace(frame,frame_hash=canonical_dynamic_frame_hash(frame))
+            exposed_rows=[]
+            for camera in cameras:
+                counts=rasterize_visible_face_pixel_counts(
+                    mesh,camera,positions=posed,width=int(camera.resolution),height=int(camera.resolution)
+                )
+                exposed_faces=[i for i in truly_unseen_faces if counts[i]>0]
+                exposed_pixels=sum(counts[i] for i in exposed_faces)
+                if exposed_faces:
+                    exposed_rows.append({
+                        "time_seconds":float(t),
+                        "view_index":int(camera.view_index),
+                        "face_count":int(len(exposed_faces)),
+                        "pixel_count":int(exposed_pixels),
+                        "face_indices":tuple(map(int,sorted(exposed_faces))),
+                    })
+            if exposed_rows:
+                first=exposed_rows[0]
+                raise QualificationError(
+                    "MOTION_DYNAMIC_TRULY_UNSEEN_EXPOSURE:"
+                    f"{clip.clip_id}:t={first['time_seconds']}:v={first['view_index']}:"
+                    f"faces={first['face_count']}:pixels={first['pixel_count']}"
+                )
             frames.append(frame); poses[float(t)]=joint_positions
         contact_proofs=[]
         for row in contact_rows:
@@ -404,6 +446,11 @@ def build_qualified_dynamic_motion(
                 "frame_count":len(frames),
                 "continuous_envelope_authority":"STAGE27_G3_FULL_ENVELOPE_PASS",
                 "attachment_policy":"STATIC_QUALIFIED_PRESENTATION_ONLY_V1",
+                "truly_unseen_source_face_count":int(len(truly_unseen_faces)),
+                "truly_unseen_dynamic_exposure_status":"PASS_ZERO_EXPOSED_PIXELS",
+                "truly_unseen_definition":"NO_Z_VISIBLE_PIXEL_INSIDE_ANY_OF_8_ADMITTED_SOURCE_FOREGROUND_MASKS",
+                "source_observed_face_count":int(len(mesh.faces)-len(truly_unseen_faces)),
+                "source_view_count":8,
             },
         )
         clips.append(replace(clip_proof,clip_proof_hash=dynamic_motion_clip_proof_hash(clip_proof)))
@@ -429,6 +476,9 @@ def build_qualified_dynamic_motion(
             "all_sampled_frames_conditioned":True,
             "stage27_full_envelope_g3_bound":True,
             "attachment_invariants_preserved":True,
+            "truly_unseen_dynamic_exposure_passed":True,
+            "truly_unseen_exposed_pixel_budget":0,
+            "truly_unseen_source_face_count":int(len(truly_unseen_faces)),
             "any_clip_nonzero":True,
             "professional_motion_clip_count":sum(c.professional_motion_evidence for c in clips),
             "artist_source_clip_count":sum(c.classification=="ARTIST_SOURCE" for c in clips),
@@ -441,6 +491,7 @@ def build_qualified_dynamic_motion(
             "uniform_sample_count":_UNIFORM_SAMPLE_COUNT,
             "contact_relative_tolerance":_CONTACT_REL_TOL,
             "evaluator_semantic_version":DYNAMIC_EVALUATOR_SEMANTIC_VERSION,
+            "truly_unseen_policy":"FAIL_ON_ANY_NEW_Z_VISIBLE_PIXEL_IN_8_RUNTIME_VIEWS",
         },
     )
     return replace(value,dynamic_motion_hash=qualified_dynamic_motion_hash(value))

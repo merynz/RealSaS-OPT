@@ -51,7 +51,18 @@ def _fixture(*,rigid=True,carrier="MESH"):
             ComponentCarrierDecisionIR("part",carrier,("e",)),
         ),
     )
-    mesh=SimpleNamespace(mesh_lineage_hash="mesh-hash")
+    mesh=SimpleNamespace(
+        mesh_lineage_hash="mesh-hash",
+        vertices=(
+            SimpleNamespace(canonical_mesh_vertex_id="b0",component_id="body"),
+            SimpleNamespace(canonical_mesh_vertex_id="b1",component_id="body"),
+            SimpleNamespace(canonical_mesh_vertex_id="b2",component_id="body"),
+            SimpleNamespace(canonical_mesh_vertex_id="p0",component_id="part"),
+            SimpleNamespace(canonical_mesh_vertex_id="p1",component_id="part"),
+            SimpleNamespace(canonical_mesh_vertex_id="p2",component_id="part"),
+        ),
+        faces=(("b0","b1","b2"),("p0","p1","p2")),
+    )
     state=SimpleNamespace(product_state_hash="state-hash")
     return surface,skeleton,skin,partition,carrier_policy,mesh,state
 

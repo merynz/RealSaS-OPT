@@ -64,15 +64,42 @@ def spatial(dense,compact):
  d,_=cKDTree(compact).query(dense,k=1,workers=-1);d=np.asarray(d,float)
  return {"p95_norm":float(np.quantile(d,.95)),"max_norm":float(d.max(initial=0))}
 
-def main():
- cs=cams();out={"schema":"RealSaS.Stage14SurfaceResidentRepresentativeCausalProbe.v1","status":"PASS","single_changed_variable":"VOXEL_REPRESENTATIVE_CENTROID_TO_NEAREST_DENSE_ZERO_SURFACE_VERTEX","target_nodes":8192,"subject_inputs_used":False,"knight_result_used":False,"mage_result_used":False,"shapes":{}}
+
+def displacement(points,kind):
+ p=np.asarray(points,float)
+ if kind=="TWIST_Z":
+  a=np.deg2rad(22.0)*p[:,2];ca,sa=np.cos(a),np.sin(a);o=p.copy();o[:,0]=ca*p[:,0]-sa*p[:,1];o[:,1]=sa*p[:,0]+ca*p[:,1];return o-p
+ if kind=="BEND_Y":
+  a=np.deg2rad(18.0)*p[:,2];ca,sa=np.cos(a),np.sin(a);o=p.copy();o[:,0]=ca*p[:,0]+sa*p[:,2];o[:,2]=-sa*p[:,0]+ca*p[:,2];return o-p
+ if kind=="HINGE_Z":
+  pivot=np.array([.15,0,0]);q=p-pivot;w=np.clip((p[:,0]-.05)/.20,0,1);a=np.deg2rad(25.0)*w;ca,sa=np.cos(a),np.sin(a);o=q.copy();o[:,0]=ca*q[:,0]-sa*q[:,1];o[:,1]=sa*q[:,0]+ca*q[:,1];o+=pivot;return o-p
+ raise KeyError(kind)
+
+def project(points,cam):
+ p=np.asarray(points,float);origin=np.asarray(cam["origin"]);right=np.asarray(cam["right"]);up=np.asarray(cam["screen_up"]);d=p-origin
+ x=(d@right)/cam["half_extent"];y=-(d@up)/cam["half_extent"];r=cam["resolution"]
+ return np.stack(((x+1)*.5*r-.5,(y+1)*.5*r-.5),axis=1)
+
+def downstream_proxy(dense,compact,cs):
+ k=min(4,len(compact));dist,idx=cKDTree(compact).query(dense,k=k,workers=-1)
+ if k==1:dist=dist[:,None];idx=idx[:,None]
+ w=1.0/np.maximum(dist,1e-8);w/=w.sum(axis=1,keepdims=True);out={}
+ for kind in ("TWIST_Z","BEND_Y","HINGE_Z"):
+  dd=displacement(dense,kind);cd=displacement(compact,kind);interp=np.einsum("nk,nkd->nd",w,cd[idx]);err=np.linalg.norm(interp-dd,axis=1)
+  true=dense+dd;pred=dense+interp;px=[]
+  for cam in cs:px.extend(np.linalg.norm(project(pred,cam)-project(true,cam),axis=1).tolist())
+  px=np.asarray(px,float)
+  out[kind]={"world_p95_norm":float(np.quantile(err,.95)),"world_max_norm":float(err.max(initial=0)),"projected_p95_px":float(np.quantile(px,.95)),"projected_max_px":float(px.max(initial=0))}
+ return out
+\ndef main():
+ cs=cams();out={"schema":"RealSaS.Stage14SurfaceResidentRepresentativeCausalProbe.v2","status":"PASS","single_changed_variable":"VOXEL_REPRESENTATIVE_CENTROID_TO_NEAREST_DENSE_ZERO_SURFACE_VERTEX","target_nodes":8192,"subject_inputs_used":False,"knight_result_used":False,"mage_result_used":False,"shapes":{}}
  for name,args in {"SPHERE_15K":(.62,.62,.62),"TALL_ELLIPSOID_15K":(.28,.34,.82)}.items():
   p,f,n=ell(*args);cent,cn,e,div,inv=_adaptive_voxel_compact(p,f,n,target_nodes=8192)
   ids=medoids(p,cent,inv);med=p[ids]
   b=projected_metrics(p,cent,cs);m=projected_metrics(p,med,cs)
   row={"dense_vertex_count":len(p),"actual_nodes":len(cent),"divisions":div,
-       "baseline_centroid":{"spatial":spatial(p,cent),"projected":b},
-       "surface_medoid":{"spatial":spatial(p,med),"projected":m},
+       "baseline_centroid":{"spatial":spatial(p,cent),"projected":b,"downstream_proxy":downstream_proxy(p,cent,cs)},
+       "surface_medoid":{"spatial":spatial(p,med),"projected":m,"downstream_proxy":downstream_proxy(p,med,cs)},
        "projected_p95_improvement_fraction":float((b["p95_px"]-m["p95_px"])/b["p95_px"]),
        "support_gain_by_view":{str(v):m["by_view"][str(v)]["compact_support"]-b["by_view"][str(v)]["compact_support"] for v in range(8)}}
   out["shapes"][name]=row

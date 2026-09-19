@@ -11,9 +11,9 @@
 - Current state: PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING
 - Active experiment: SUBJECT2_KNIGHT_FULL_CLOSURE
 - Most recent closed gate: ALL_40_STAGE_ADAPTERS_IMPLEMENTED_AND_BOUND_READY_FOR_FINAL_CI
-- Canonical main: b7beb279b382
+- Canonical main: 06fca35142cf
 - Active run: SUBJECT2_KNIGHT_V1 — 0/40; next 01_SOURCE_BYTES_SEALED
-- Plan SHA-256: b0b6ab5eb57b8f8f4eb27a34a9b1f7db73d2ce8a8472045ab1692ceaee741098
+- Plan SHA-256: bb67a3e4842312bddae9a4f48e279048db96b0dc95cfa5961ce1599aa6879669
 - Promotion block: All 40 stages have executable typed adapters and an explicit authority DAG. Repository mainline CI is green at the pre-performance-patch head; remaining work is live-context reconciliation, final CI after batch-render optimization, and exact Knight run inputs/external execution artifacts before 01→40 execution.
 - Scope warning: Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority
 

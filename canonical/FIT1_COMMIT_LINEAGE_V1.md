@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1871**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1875**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1883,6 +1883,10 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-19T11:41:31+03:00` | `a5ebbdd94722` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | runtime: fix RuntimeV3 texture payload import authority | `compiler/realsas_compiler_core/runtime_projection_v1.py` | `main` |
 | `2026-09-19T11:44:30+03:00` | `c1c662b7f1d9` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
 | `2026-09-19T12:18:28+03:00` | `b7beb279b382` | yes | CI_TEST, COMPILER_PROOF, IRIS_GSA | geometry: gate rest reprojection by source component recall | `compiler/realsas_compiler_core/mesh/product_coverage_v1.py`<br>`compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v1.py`<br>`tests/compiler/test_stage13_source_component_recall_v1.py` | `main` |
+| `2026-09-19T12:20:03+03:00` | `b1409cd37966` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T12:29:03+03:00` | `de7369ba3440` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY, IRIS_GSA | geometry: select rigging substrate N by adequacy | `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json`<br>`compiler/realsas_compiler_core/substrate/adequacy_v1.py`<br>`compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v1.py`<br>`tests/compiler/test_substrate_adequacy_v1.py` | `main` |
+| `2026-09-19T12:30:58+03:00` | `5520142f383d` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | motion: fail on truly-unseen dynamic exposure [skip ci] | `canonical/MAINLINE_EXECUTION_PLAN_V1.json`<br>`canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json`<br>`compiler/realsas_compiler_core/mesh/product_coverage_v1.py`<br>`compiler/realsas_compiler_core/motion_dynamic_proof_v1.py`<br>`compiler/realsas_compiler_services/orchestrator/adapters/motion_dynamic_proof_v1.py`<br>`tests/compiler/test_dynamic_unseen_exposure_v1.py` | `main` |
+| `2026-09-19T12:31:54+03:00` | `06fca35142cf` | yes | GOVERNANCE_CONTINUITY | canonical: bind adequacy and unseen-motion plan hash | `canonical/ACTIVE_RUN_V1.json` | `main` |
 
 ## Use rule
 

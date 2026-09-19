@@ -26,6 +26,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install canonical prefit Python dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -q numpy pillow
+
       - name: Install headless Blender render libraries
         shell: bash
         run: |
@@ -100,7 +110,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
+          python - <<'PY'
           import hashlib,json,os
           from pathlib import Path
 
@@ -186,9 +196,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m compiler.realsas_compiler_services.orchestrator.mainline execute             --run-id "$RUN_ID"             --from-stage 01_SOURCE_BYTES_SEALED             --to-stage 08_NORMALIZATION_DOMAIN_QUALIFIED
-          python3 -m compiler.realsas_compiler_services.orchestrator.mainline status
-          python3 - <<'PY'
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute             --run-id "$RUN_ID"             --from-stage 01_SOURCE_BYTES_SEALED             --to-stage 08_NORMALIZATION_DOMAIN_QUALIFIED
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status
+          python - <<'PY'
           import json
           p=json.load(open("canonical/ACTIVE_RUN_V1.json",encoding="utf-8"))
           assert p["completed_count"]==8, p

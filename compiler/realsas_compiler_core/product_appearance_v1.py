@@ -80,6 +80,21 @@ def _face_donor_candidates(face,vertices,nodes)->tuple[int,...]:
     )
 
 
+def _circular_view_distance(a:int,b:int)->int:
+    raw=abs(int(a)-int(b))%8
+    return min(raw,8-raw)
+
+
+def _select_donor_view(target_view_index:int,candidates)->int|None:
+    rows=tuple(sorted({int(x) for x in candidates}))
+    if not rows:
+        return None
+    target=int(target_view_index)
+    if target in rows:
+        return target
+    return min(rows,key=lambda view:(_circular_view_distance(target,view),view))
+
+
 def _donor_xy(vertex,nodes,donor:int):
     x=y=0.0
     for node,coeff in _support_for_vertex(vertex,nodes):
@@ -110,7 +125,10 @@ def _binding_for_view(*,surface,mesh,observation_set,target_view_index:int)->App
         candidates=_face_donor_candidates(face,vertices,nodes)
         if not candidates:
             raise QualificationError(f"PRODUCT_APPEARANCE_FACE_HAS_NO_OBSERVED_DONOR:{face_index}")
-        donor=int(target_view_index) if int(target_view_index) in candidates else int(min(candidates))
+        donor=_select_donor_view(int(target_view_index),candidates)
+        if donor is None:
+            raise QualificationError(f"PRODUCT_APPEARANCE_FACE_HAS_NO_OBSERVED_DONOR:{face_index}")
+        donor=int(donor)
         donor_obs=obs[donor]
         face_donors.append(donor)
         for corner_index,vid in enumerate(face):
@@ -152,6 +170,7 @@ def _binding_for_view(*,surface,mesh,observation_set,target_view_index:int)->App
             "face_donor_view_indices":tuple(face_donors),
             "face_uniform_donor_required":True,
             "cross_view_color_blending":False,
+            "cross_view_donor_selection":"NEAREST_OBSERVED_8_DIRECTION_V1",
             "camera_refit":False,
             "source_mesh_uv_used":False,
             "unknown_completion_used":False,
@@ -200,7 +219,7 @@ def validate_product_appearance_set(
                 raise QualificationError("PRODUCT_APPEARANCE_FACE_DONOR_NOT_UNIFORM")
             donor=next(iter(donors))
             candidates=_face_donor_candidates(face,vertices,nodes)
-            expected_donor=binding.target_view_index if binding.target_view_index in candidates else (min(candidates) if candidates else None)
+            expected_donor=_select_donor_view(binding.target_view_index,candidates)
             if expected_donor is None or donor!=expected_donor:
                 raise QualificationError("PRODUCT_APPEARANCE_FACE_DONOR_AUTHORITY_DRIFT")
             donor_obs=obs[donor]
@@ -241,6 +260,7 @@ def build_product_appearance_set(*,surface,mesh,observation_set:QualifiedObserva
             "face_uniform_donor":True,
             "completion_used":False,
             "source_raster_bytes_are_appearance_authority":True,
+            "cross_view_donor_selection":"TARGET_VIEW_ELSE_NEAREST_OBSERVED_8_DIRECTION_V1",
         },
     )
     value=replace(value,appearance_set_hash=qualified_appearance_set_hash(value))

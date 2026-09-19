@@ -212,3 +212,21 @@ def test_source_component_masks_must_exactly_partition_qualified_foreground():
             observations_by_key=bad,component_ids={"a","b"},observation_set=obs_set,
             source_foreground_masks=foreground,cameras=cameras,
         )
+
+
+def test_zbuffer_exact_depth_tie_uses_stable_lexical_face_key():
+    camera=CameraProjectionV3(
+        "V0",0,(0.0,0.0,-2.0),(1.0,0.0,0.0),(0.0,1.0,0.0),(0.0,0.0,1.0),1.0,4
+    )
+    vertices=(
+        SimpleNamespace(candidate_vertex_id="a0",P=(-0.5,-0.5,0.0),component_id="a"),
+        SimpleNamespace(candidate_vertex_id="a1",P=(0.5,-0.5,0.0),component_id="a"),
+        SimpleNamespace(candidate_vertex_id="a2",P=(0.0,0.5,0.0),component_id="a"),
+        SimpleNamespace(candidate_vertex_id="b0",P=(-0.5,-0.5,0.0),component_id="b"),
+        SimpleNamespace(candidate_vertex_id="b1",P=(0.5,-0.5,0.0),component_id="b"),
+        SimpleNamespace(candidate_vertex_id="b2",P=(0.0,0.5,0.0),component_id="b"),
+    )
+    mesh=SimpleNamespace(vertices=vertices,faces=(("b0","b1","b2"),("a0","a1","a2")))
+    masks=rasterize_visible_component_masks(mesh,camera,width=4,height=4)
+    assert sum(masks["a"])>0
+    assert sum(masks["b"])==0

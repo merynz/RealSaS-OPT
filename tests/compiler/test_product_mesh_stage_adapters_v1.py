@@ -132,10 +132,6 @@ def _fixture(tmp_path):
     source_foreground_rows=[]
     for row in cameras:
         camera=qualify_camera_v3(row,view_id=row["view_id"],view_index=int(row["view_index"]))
-        tri=(
-            tuple(camera_pt[:2])
-            for camera_pt in ()
-        )
         # The baseline candidate is the same single triangle as S, so source foreground
         # is materialized directly from exact S positions and the same camera.
         from compiler.realsas_compiler_core.playback_full_surface_v3 import project_points_xyz_v3

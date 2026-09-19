@@ -1,0 +1,20 @@
+name: stage14-surface-resident-representative-probe
+on:
+  push:
+    branches: [research/stage14-surface-resident-representative-20260919]
+    paths: ['tools/stage14_surface_resident_representative_probe.py','.github/workflows/stage14_surface_resident_representative_probe.yml']
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env: {PYTHONPATH: ., REALSAS_STAGE14_MEDOID_OUT: stage14_medoid_out}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - run: python tools/stage14_surface_resident_representative_probe.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: {name: stage14-surface-resident-representative-probe, path: stage14_medoid_out/, if-no-files-found: error}

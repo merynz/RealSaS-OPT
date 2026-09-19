@@ -6,7 +6,7 @@ from scipy.spatial import cKDTree
 from compiler.realsas_compiler_core.substrate.scene_first_signed import _adaptive_voxel_compact,_self_zbuffer_support
 
 OUT=Path(os.environ.get("REALSAS_STAGE14_CURVE_OUT","stage14_curve_out"));OUT.mkdir(parents=True,exist_ok=True)
-CAPS=(1024,2048,4096,8192)
+CAPS=(1024,2048,4096,8192,12288)
 
 def cams():
  rows=[]

@@ -3,7 +3,7 @@
   "bootstrap_status": "BOOTSTRAP_AUDIT_CLOSED",
   "fit1_gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
   "candidate_rule": "high-signal canonical/prereg/experiment/challenger/workflow artifacts",
-  "tracked_file_count": 1106,
+  "tracked_file_count": 1108,
   "high_signal_artifact_count": 319,
   "classification_counts": {
     "INDEXED_EXPLICIT": 172,
@@ -444,7 +444,7 @@
     },
     {
       "name": "main",
-      "sha": "0934f677da9222c1faa9dea7c9144ed390ceb1be",
+      "sha": "b57184f1500d7378c843cc92ca96a83404ceef1d",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -696,7 +696,7 @@
     },
     {
       "name": "subject2/knight-observation-v1-20260919",
-      "sha": "89fd6321a8515e3af2530b55995d8d9c61925889",
+      "sha": "f45aed3655a2e974f20b343e8b379abeb0de209a",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

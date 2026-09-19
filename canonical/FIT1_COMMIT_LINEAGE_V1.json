@@ -52,7 +52,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "0934f677da9222c1faa9dea7c9144ed390ceb1be",
+    "main": "b57184f1500d7378c843cc92ca96a83404ceef1d",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -85,14 +85,14 @@
     "single-family-e2e-fit-v1-20260902": "5fa4bf7883283ac0ae4f6b9cb8357cb1b13d6adf",
     "single-family-e2e-models-v1-20260902": "362556db9b31960cfbbfac037727c83d6badaa9b",
     "source/generic-completion-v1-20260902": "85a25b419a47ddd52b4a70ae3b8639cc575bb6b3",
-    "subject2/knight-observation-v1-20260919": "89fd6321a8515e3af2530b55995d8d9c61925889",
+    "subject2/knight-observation-v1-20260919": "f45aed3655a2e974f20b343e8b379abeb0de209a",
     "tmp-do-not-use": "953f2ded4911de035e8f30aceca8e0ccef39f165",
     "tmp-noop": "16ee5cd54a00cb0dc322101b209566c38b9ee231",
     "tmp/runtime-v4-p0-p1-stage": "e6654c065699d0641b2664a34e5a56d41193de65",
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1953,
+  "commit_count": 1959,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -89202,6 +89202,144 @@
       "main_reachable": false,
       "changed_paths": [
         ".github/workflows/subject2_knight_observation_preflight.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b0da407c4922d4ebcdbca4e2a3efc6c8324be5da",
+      "parents": [
+        "0934f677da9222c1faa9dea7c9144ed390ceb1be"
+      ],
+      "author_time": "2026-09-19T16:02:44+03:00",
+      "committer_time": "2026-09-19T16:02:44+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "594a3d11bf18b1cc59c2488e0baa86e5f33c3ee0",
+      "parents": [
+        "89fd6321a8515e3af2530b55995d8d9c61925889"
+      ],
+      "author_time": "2026-09-19T16:03:47+03:00",
+      "committer_time": "2026-09-19T16:03:47+03:00",
+      "subject": "observation: measure exact saved PNG bytes in headless render",
+      "branches_containing": [
+        "subject2/knight-observation-v1-20260919"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tools/observation/blender_controlled_8view_v1.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f2ba123fd0b4f3d1d229723092d1e32110deccaf",
+      "parents": [
+        "594a3d11bf18b1cc59c2488e0baa86e5f33c3ee0"
+      ],
+      "author_time": "2026-09-19T16:09:00+03:00",
+      "committer_time": "2026-09-19T16:09:00+03:00",
+      "subject": "ci: install canonical prefit Python dependencies",
+      "branches_containing": [
+        "subject2/knight-observation-v1-20260919"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/subject2_knight_observation_preflight.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "eeadaaffbc958f6766d770611bf5bb9a3f53b688",
+      "parents": [
+        "f2ba123fd0b4f3d1d229723092d1e32110deccaf"
+      ],
+      "author_time": "2026-09-19T16:53:43+03:00",
+      "committer_time": "2026-09-19T16:53:43+03:00",
+      "subject": "ci: install scipy for canonical prefit adapters",
+      "branches_containing": [
+        "subject2/knight-observation-v1-20260919"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/subject2_knight_observation_preflight.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f45aed3655a2e974f20b343e8b379abeb0de209a",
+      "parents": [
+        "eeadaaffbc958f6766d770611bf5bb9a3f53b688"
+      ],
+      "author_time": "2026-09-19T16:54:11+03:00",
+      "committer_time": "2026-09-19T16:54:11+03:00",
+      "subject": "ci: align Knight prefit with pinned canonical Python profile",
+      "branches_containing": [
+        "subject2/knight-observation-v1-20260919"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        ".github/workflows/subject2_knight_observation_preflight.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b57184f1500d7378c843cc92ca96a83404ceef1d",
+      "parents": [
+        "b0da407c4922d4ebcdbca4e2a3efc6c8324be5da"
+      ],
+      "author_time": "2026-09-19T17:03:20+03:00",
+      "committer_time": "2026-09-19T17:03:20+03:00",
+      "subject": "observation: qualify Subject-2 Knight through Stage08",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/subject2_knight_observation_preflight.yml",
+        "tools/observation/blender_controlled_8view_v1.py"
       ],
       "subsystem_tags": [
         "CI_TEST"

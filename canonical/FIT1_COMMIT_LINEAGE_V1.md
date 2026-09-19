@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1953**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1959**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1965,6 +1965,12 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-19T15:59:24+03:00` | `9268a6c390ec` | no | CI_TEST, FIT_DATA | ci: run Knight prefit on isolated hosted runner | `.github/workflows/subject2_knight_observation_preflight.yml` | `subject2/knight-observation-v1-20260919` |
 | `2026-09-19T16:00:24+03:00` | `20a574619d01` | no | OTHER | observation: audit vertex-group memberships without exception spam | `tools/observation/blender_controlled_8view_v1.py` | `subject2/knight-observation-v1-20260919` |
 | `2026-09-19T16:02:16+03:00` | `89fd6321a851` | no | CI_TEST | ci: install EGL for hosted Blender render | `.github/workflows/subject2_knight_observation_preflight.yml` | `subject2/knight-observation-v1-20260919` |
+| `2026-09-19T16:02:44+03:00` | `b0da407c4922` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T16:03:47+03:00` | `594a3d11bf18` | no | OTHER | observation: measure exact saved PNG bytes in headless render | `tools/observation/blender_controlled_8view_v1.py` | `subject2/knight-observation-v1-20260919` |
+| `2026-09-19T16:09:00+03:00` | `f2ba123fd0b4` | no | CI_TEST, FIT_DATA | ci: install canonical prefit Python dependencies | `.github/workflows/subject2_knight_observation_preflight.yml` | `subject2/knight-observation-v1-20260919` |
+| `2026-09-19T16:53:43+03:00` | `eeadaaffbc95` | no | CI_TEST, FIT_DATA | ci: install scipy for canonical prefit adapters | `.github/workflows/subject2_knight_observation_preflight.yml` | `subject2/knight-observation-v1-20260919` |
+| `2026-09-19T16:54:11+03:00` | `f45aed3655a2` | no | CI_TEST, FIT_DATA | ci: align Knight prefit with pinned canonical Python profile | `.github/workflows/subject2_knight_observation_preflight.yml` | `subject2/knight-observation-v1-20260919` |
+| `2026-09-19T17:03:20+03:00` | `b57184f1500d` | yes | CI_TEST | observation: qualify Subject-2 Knight through Stage08 | `.github/workflows/subject2_knight_observation_preflight.yml`<br>`tools/observation/blender_controlled_8view_v1.py` | `main` |
 
 ## Use rule
 

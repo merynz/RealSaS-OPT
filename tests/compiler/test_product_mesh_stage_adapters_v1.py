@@ -6,6 +6,7 @@ from pathlib import Path
 
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.observation_authority_v1 import QualifiedObservationViewIR, build_qualified_observation_set
+from compiler.realsas_compiler_core.camera_authority_v1 import build_qualified_camera_set
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     _mesh_component_triangles,
     camera_projection_binding_hash,
@@ -16,6 +17,7 @@ from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_mesh_candidate_from_dict,
     canonical_puppet_state_from_dict,
     qualified_observation_set_from_dict,
+    qualified_camera_set_from_dict,
     component_carrier_policy_from_dict,
     mechanical_partition_from_dict,
     qualified_mesh_from_dict,
@@ -121,7 +123,6 @@ def _fixture(tmp_path):
         "carrier_policy":{},
         "deformation_envelope":{
             "axis_contract":{"path":str(axis_path),"sha256":_sha(axis_path)},
-            "camera_bundle":{"path":str(cam_path),"sha256":_sha(cam_path)},
             "joint_ranges":[
                 {"canonical_joint_id":"j0","min_rotation_deg":0.0,"max_rotation_deg":0.0}
             ],
@@ -160,8 +161,14 @@ def _fixture(tmp_path):
     observation_set=build_qualified_observation_set(tuple(observation_views))
     obs_path=_write(tmp_path/"observation_set.json",observation_set)
     manifest["observation"]["source_foreground_masks"]=source_foreground_rows
+    camera_set=build_qualified_camera_set(
+        cameras,source_bundle_sha256=_sha(cam_path),
+        metadata={"fixture":True},
+    )
+    camera_set_path=_write(tmp_path/"camera_set.json",camera_set)
 
     ledger={"stages":[
+        {"id":"05_CAMERA_CONTRACT_SOLVED","status":"PASS","outputs":[_out(camera_set_path,"RealSaS.QualifiedCameraSetIR.v1")]},
         {"id":"07_OBSERVATION_CONTRACT_QUALIFIED","status":"PASS","outputs":[_out(obs_path,"RealSaS.QualifiedObservationSetIR.v1")]},
         {"id":"15_RIGGING_SURFACE_QUALIFIED","status":"PASS","outputs":[_out(s_path,"RealSaS.RiggingSurfaceIR.v1")]},
         {"id":"18_SKELETON_QUALIFIED","status":"PASS","outputs":[_out(g_path,"RealSaS.QualifiedSkeletonIR.v1")]},
@@ -206,10 +213,11 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     assert len(candidate.faces)==1
 
     component_id=partition.components[0].component_id
-    camera_bundle=json.loads(Path(ctx["run_manifest"]["deformation_envelope"]["camera_bundle"]["path"]).read_text())
+    camera_set=qualified_camera_set_from_dict(
+        read_json(next(out for row in ctx["ledger"]["stages"] if row["id"]=="05_CAMERA_CONTRACT_SOLVED" for out in row["outputs"])["path"])
+    )
     mask_rows=[]
-    for row in camera_bundle["cameras"]:
-        camera=qualify_camera_v3(row,view_id=row["view_id"],view_index=int(row["view_index"]))
+    for camera in camera_set.cameras:
         triangles=_mesh_component_triangles(candidate,camera,component_id=component_id)
         mask=rasterize_triangles_half_integer_top_left(triangles,width=8,height=8)
         mask_path=tmp_path/f"mask_v{camera.view_index}.bin"; mask_path.write_bytes(mask)

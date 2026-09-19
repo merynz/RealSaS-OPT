@@ -38,6 +38,7 @@ from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     qualified_mesh_from_dict,
     qualified_mesh_skin_from_dict,
     qualified_observation_set_from_dict,
+    qualified_camera_set_from_dict,
     component_carrier_policy_from_dict,
     deformation_envelope_from_dict,
     mechanical_partition_from_dict,
@@ -178,25 +179,17 @@ def _load_candidate_and_policy(ctx):
     return candidate,policy
 
 
-def _axis_contract_and_cameras(ctx):
+def _load_camera_set(ctx):
+    return qualified_camera_set_from_dict(
+        _stage_output_payload(ctx,"05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1")
+    )
+
+
+def _axis_contract(ctx):
     cfg=dict(ctx["run_manifest"].get("deformation_envelope") or {})
     axis_payload=_load_file_ref(dict(cfg.get("axis_contract") or {}))
     _,axis_hash=parse_axis_contract_v1(axis_payload)
-    camera_payload=_load_file_ref(
-        dict(cfg.get("camera_bundle") or {}),
-        expected_schema="RealSaS.CameraProjectionBundle.v1",
-    )
-    rows=tuple(camera_payload.get("cameras") or ())
-    if len(rows)!=8:
-        raise QualificationError("PRODUCT_ADAPTER_CAMERA_BUNDLE_REQUIRES_8")
-    cameras=[]
-    for row in sorted(rows,key=lambda x:int(x["view_index"])):
-        vi=int(row["view_index"]); view_id=str(row["view_id"])
-        camera=qualify_camera_v3(row,view_id=view_id,view_index=vi)
-        cameras.append(camera)
-    if tuple(c.view_index for c in cameras)!=tuple(range(8)):
-        raise QualificationError("PRODUCT_ADAPTER_CAMERA_VIEW_SET_INVALID")
-    return axis_payload,axis_hash,tuple(cameras)
+    return axis_payload,axis_hash
 
 
 def qualify_mechanical_partition_and_carriers(ctx:dict)->dict:
@@ -263,7 +256,9 @@ def qualify_mechanical_partition_and_carriers(ctx:dict)->dict:
 def seal_deformation_capability_envelope(ctx:dict)->dict:
     skeleton=_load_skeleton(ctx)
     cfg=dict(ctx["run_manifest"].get("deformation_envelope") or {})
-    axis_payload,axis_hash,cameras=_axis_contract_and_cameras(ctx)
+    axis_payload,axis_hash=_axis_contract(ctx)
+    camera_set=_load_camera_set(ctx)
+    cameras=camera_set.cameras
     ranges=[]
     for row in tuple(cfg.get("joint_ranges") or ()):
         ranges.append(JointCapabilityRangeIR(
@@ -277,7 +272,7 @@ def seal_deformation_capability_envelope(ctx:dict)->dict:
         ))
     if not ranges:
         return {"status":"BLOCKED","blockers":["DEFORMATION_ENVELOPE_JOINT_RANGES_MISSING"],"diagnostics":{}}
-    camera_hashes=tuple(camera_projection_binding_hash(camera) for camera in cameras)
+    camera_hashes=tuple(camera_set.camera_binding_hashes)
     allowed=tuple(map(str,cfg.get("allowed_attachment_state_hashes") or ()))
     probe_plan_hash=expected_g3_probe_plan_hash(
         skeleton_lineage_hash=skeleton.skeleton_lineage_hash,
@@ -297,6 +292,7 @@ def seal_deformation_capability_envelope(ctx:dict)->dict:
         metadata={
             "axis_contract_schema":str(axis_payload.get("schema") or axis_payload.get("schema_version") or ""),
             "camera_view_ids":tuple(camera.view_id for camera in cameras),
+            "camera_set_hash":camera_set.camera_set_hash,
             "translation_scale_probe_support":"IDENTITY_ONLY_V1",
         },
     )
@@ -428,7 +424,11 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
     partition,carrier=_load_partition_and_carrier(ctx)
     envelope=_load_envelope(ctx)
     candidate,policy=_load_candidate_and_policy(ctx)
-    axis_payload,axis_hash,cameras=_axis_contract_and_cameras(ctx)
+    axis_payload,axis_hash=_axis_contract(ctx)
+    camera_set=_load_camera_set(ctx)
+    cameras=camera_set.cameras
+    if tuple(camera_set.camera_binding_hashes)!=tuple(envelope.camera_binding_hashes):
+        return {"status":"FAIL","blockers":["STAGE27_CAMERA_SET_DRIFT"],"diagnostics":{}}
     if axis_hash!=envelope.axis_contract_hash:
         return {"status":"FAIL","blockers":["STAGE27_AXIS_CONTRACT_DRIFT"],"diagnostics":{}}
 

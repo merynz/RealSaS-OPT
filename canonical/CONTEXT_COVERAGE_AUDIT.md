@@ -6,18 +6,18 @@
 
 ## Coverage
 
-- Git-tracked files: **1112**
-- High-signal knowledge artifacts: **320**
-- Explained by continuity policy: **320**
+- Git-tracked files: **1115**
+- High-signal knowledge artifacts: **321**
+- Explained by continuity policy: **321**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **125**
-- Safe-default evidence-only branches: **121**
+- Live branches: **126**
+- Safe-default evidence-only branches: **122**
 
 ### Classification counts
 
 - `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL`: **147**
-- `INDEXED_EXPLICIT`: **173**
+- `INDEXED_EXPLICIT`: **174**
 
 `FIT1_COMMIT_LEDGER_COVERED` means exact provenance is recoverable; it does **not** mean the artifact's scientific claim is promoted. `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL` means the artifact predates the FIT1 gate and remains evidence/provenance unless another authority explicitly promotes it.
 
@@ -101,7 +101,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `7550a2ab7258` | `CANONICAL` | canonical branch |
+| `main` | `5130ecd45beb` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -128,7 +128,8 @@ _None._
 | `repair/mage-full-subject-reclosure-20260912` | `2fa5d4b604d5` | `EVIDENCE_ONLY` | explicit authority-map override |
 | `repair/mage-full-subject-reclosure-20260912-adaptive-steiner-tmp` | `221ad1b79eae` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp` | `c69ab78eac42` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `repair/stage13-geometry-gate-v2-20260919` | `7550a2ab7258` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `repair/stage13-geometry-gate-v2-20260919` | `d577616728c2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `research/g5-coverage-v2-audit-20260919` | `aeaec75e1fe6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/knight-stage13-14-calibration-20260919` | `ee52ecf21689` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage13-geometry-gate-v2-calibration-20260919` | `18017348cc1b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

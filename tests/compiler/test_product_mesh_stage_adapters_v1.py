@@ -34,8 +34,8 @@ from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     qualified_rest_source_preservation_from_dict,
     motion_source_set_from_dict,
     qualified_motion_source_seal_from_dict,
-    motion_compile_constraint_set_from_dict,
-    qualified_motion_from_dict,
+    motion_compile_constraint_set_v2_from_dict,
+    qualified_motion_v2_from_dict,
     read_json,
     write_ir_json,
 )
@@ -134,6 +134,37 @@ def _fixture(tmp_path):
     cam_path=tmp_path/"cameras.json"; cam_path.write_text(json.dumps(bundle,sort_keys=True)+"\n",encoding="utf-8")
 
     policy_path=ROOT/"canonical"/"QUALIFIED_MESH_PRODUCT_POLICY_V1_20260918.json"
+    half=np.sin(np.deg2rad(5.0))
+    qw=np.cos(np.deg2rad(5.0))
+    motion_payload={
+        "schema":"RealSaS.MotionSourceClip.v2",
+        "clip_id":"idle_artist",
+        "clip_kind":"IDLE",
+        "source_space":"SOURCE_RIG_TRACKS_V2",
+        "coordinate_frame":"REALSAS_OBJECT_FRAME_V1",
+        "duration_seconds":1.0,
+        "loop":True,
+        "channel_contract":["LOCAL_ROTATION_QUAT_XYZW"],
+        "source_skeleton":[
+            {
+                "source_joint_id":"source_root",
+                "parent_source_joint_id":None,
+                "rest_position":[0.0,0.0,0.0],
+            }
+        ],
+        "tracks":[
+            {
+                "source_joint_id":"source_root",
+                "keyframes":[
+                    {"time_seconds":0.0,"local_rotation_quat_xyzw":[0.0,0.0,0.0,1.0]},
+                    {"time_seconds":0.5,"local_rotation_quat_xyzw":[float(half),0.0,0.0,float(qw)]},
+                    {"time_seconds":1.0,"local_rotation_quat_xyzw":[0.0,0.0,0.0,1.0]},
+                ],
+            }
+        ],
+    }
+    motion_path=tmp_path/"idle_artist.motion.json"
+    motion_path.write_text(json.dumps(motion_payload,sort_keys=True)+"\n",encoding="utf-8")
     manifest={
         "components":{},
         "carrier_policy":{},
@@ -147,17 +178,14 @@ def _fixture(tmp_path):
         "motion":{
             "sources":[
                 {
-                    "clip_id":"idle_probe",
+                    "clip_id":"idle_artist",
                     "clip_kind":"IDLE",
-                    "source_kind":"INLINE_PRESET_SPEC_V1",
-                    "duration_seconds":1.0,
-                    "loop":True,
-                    "channel_contract":["ROTATION_DEG"],
-                    "spec":{"preset_id":"MECHANICAL_SWAY_V1","amplitude_deg":4.0}
+                    "source_kind":"EXTERNAL_ARTIST_CLIP_V1",
+                    "file":{"path":str(motion_path),"sha256":_sha(motion_path)}
                 }
             ],
             "compiler":{
-                "root_trajectory_modes":{"idle_probe":"IN_PLACE"},
+                "root_trajectory_modes":{"idle_artist":"IN_PLACE"},
                 "contacts":{}
             }
         },
@@ -363,8 +391,8 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     source_set=motion_source_set_from_dict(read_json(by_schema["RealSaS.MotionSourceSetIR.v1"]["path"]))
     source_seal=qualified_motion_source_seal_from_dict(read_json(by_schema["RealSaS.QualifiedMotionSourceSealIR.v1"]["path"]))
     assert len(source_set.assets)==1
-    assert source_set.assets[0].clip_id=="idle_probe"
-    assert source_set.assets[0].source_space=="PROCEDURAL_PARAMETER_SPACE_V1"
+    assert source_set.assets[0].clip_id=="idle_artist"
+    assert source_set.assets[0].source_space=="SOURCE_RIG_TRACKS_V2"
     assert source_seal.source_set_binding_hash==source_set.source_set_hash
     assert source_seal.product_state_binding_hash==state.product_state_hash
     assert source_seal.rest_preservation_binding_hash==qualified_rest.preservation_lineage_hash
@@ -376,24 +404,27 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     r34=compile_motion_stage(ctx)
     assert r34["status"]=="PASS",r34
     by_schema={out["schema"]:out for out in r34["outputs"]}
-    constraints=motion_compile_constraint_set_from_dict(
-        read_json(by_schema["RealSaS.MotionCompileConstraintSetIR.v1"]["path"])
+    constraints=motion_compile_constraint_set_v2_from_dict(
+        read_json(by_schema["RealSaS.MotionCompileConstraintSetIR.v2"]["path"])
     )
-    motion=qualified_motion_from_dict(
-        read_json(by_schema["RealSaS.QualifiedMotionIR.v1"]["path"])
+    motion=qualified_motion_v2_from_dict(
+        read_json(by_schema["RealSaS.QualifiedMotionIR.v2"]["path"])
     )
     assert constraints.product_state_binding_hash==state.product_state_hash
     assert constraints.presentation_binding_hash==graph.presentation_lineage_hash
-    assert dict(constraints.root_trajectory_modes)=={"idle_probe":"IN_PLACE"}
+    assert dict(constraints.root_trajectory_modes)=={"idle_artist":"IN_PLACE"}
     assert motion.product_state_binding_hash==state.product_state_hash
     assert motion.presentation_binding_hash==graph.presentation_lineage_hash
-    assert motion.qualification_report["status"]=="PASS_COMPILED_MECHANICS_ONLY"
-    assert motion.qualification_report["mechanical_probe_clip_count"]==1
-    assert motion.qualification_report["artist_source_clip_count"]==0
+    assert motion.qualification_report["status"]=="PASS_COMPILED_FULL_3D_MECHANICS_ONLY"
+    assert motion.qualification_report["mechanical_probe_clip_count"]==0
+    assert motion.qualification_report["artist_source_clip_count"]==1
+    assert motion.qualification_report["full_3d_local_quaternion_motion"] is True
     assert motion.qualification_report["dynamic_proof_passed"] is False
     assert motion.qualification_report["motion_quality_claimed"] is False
-    assert motion.metadata["historical_rotation_only_probe_cannot_mint_quality"] is True
-    assert motion.clips[0].classification=="MECHANICAL_PROBE_ONLY"
+    assert motion.clips[0].classification=="ARTIST_SOURCE"
     assert motion.clips[0].tracks[0].canonical_joint_id=="j0"
-    assert max(k.rotation_deg for k in motion.clips[0].tracks[0].keyframes)==4.0
-    assert min(k.rotation_deg for k in motion.clips[0].tracks[0].keyframes)==-4.0
+    assert motion.clips[0].tracks[0].source_joint_id=="source_root"
+    assert any(
+        abs(k.local_rotation_quat_xyzw[0])>0.05
+        for k in motion.clips[0].tracks[0].keyframes
+    )

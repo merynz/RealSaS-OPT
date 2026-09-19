@@ -37,7 +37,7 @@ def torus(R=.48,r=.13,nu=128,nv=80):
  for i in range(nu):
   u=2*math.pi*i/nu;cu,su=math.cos(u),math.sin(u)
   for j in range(nv):
-   w=2*math.pi*j/nv;cw,sw=math.cos(w);sw=math.sin(w)
+   w=2*math.pi*j/nv;cw,sw=math.cos(w),math.sin(w)
    v.append(((R+r*cw)*cu,(R+r*cw)*su,r*sw));n.append((cw*cu,cw*su,sw))
  for i in range(nu):
   for j in range(nv):

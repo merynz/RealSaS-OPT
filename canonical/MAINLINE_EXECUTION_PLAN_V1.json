@@ -491,7 +491,7 @@
     {
       "ordinal": 25,
       "id": "25_DEFORMATION_CAPABILITY_ENVELOPE",
-      "title": "Deformation capability envelope preregistered and sealed",
+      "title": "Subject-free 3D conditioning lineage and derived joint-frame witness",
       "group": "mesh",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",
@@ -532,7 +532,7 @@
     {
       "ordinal": 27,
       "id": "27_QUALIFIED_MESH_GATE",
-      "title": "Canonical QualifiedMesh G1-G5 qualification",
+      "title": "Canonical QualifiedMesh G1-G5 + local-3D micro-stress qualification",
       "group": "mesh",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",
@@ -676,7 +676,7 @@
     {
       "ordinal": 33,
       "id": "33_MOTION_SOURCE_OR_PRESET_SEAL",
-      "title": "Motion source/preset seal",
+      "title": "Full-3D motion preset source seal",
       "group": "motion",
       "depends_on": [
         "29_CANONICAL_PUPPET_STATE_SEALED",
@@ -696,7 +696,7 @@
     {
       "ordinal": 34,
       "id": "34_MOTION_COMPILE_RUN",
-      "title": "Run/idle motion compilation",
+      "title": "Idle / Run / Slash full-3D quaternion motion compilation",
       "group": "motion",
       "depends_on": [
         "18_SKELETON_QUALIFIED",
@@ -719,7 +719,7 @@
     {
       "ordinal": 35,
       "id": "35_MOTION_DYNAMIC_PROOF",
-      "title": "Dynamic motion/deformation + truly-unseen exposure proof",
+      "title": "Exact quaternion FK/LBS dynamic proof + truly-unseen exposure",
       "group": "motion",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",
@@ -746,11 +746,12 @@
     {
       "ordinal": 36,
       "id": "36_RUNTIME_V4_PROJECT",
-      "title": "Compact Runtime-v4 projection",
+      "title": "Source-faithful 2D motion presentation proof + Runtime-v4 projection",
       "group": "runtime",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",
         "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "15_RIGGING_SURFACE_QUALIFIED",
         "27_QUALIFIED_MESH_GATE",
         "30_QUALIFIED_PRESENTATION_GRAPH",
         "35_MOTION_DYNAMIC_PROOF"

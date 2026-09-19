@@ -33,6 +33,14 @@ from .motion_source_v1 import (
     MotionSourceSetIR,
     QualifiedMotionSourceSealIR,
 )
+from .motion_compile_v1 import (
+    MotionKeyframeIR,
+    CanonicalJointTrackIR,
+    MotionContactConstraintIR,
+    MotionCompileConstraintSetIR,
+    CompiledMotionClipIR,
+    QualifiedMotionIR,
+)
 from .product_authority_v1 import (
     CanonicalMeshCandidateIR,
     CanonicalMeshVertexCandidateIR,
@@ -758,6 +766,95 @@ def qualified_motion_source_seal_from_dict(payload: Json) -> QualifiedMotionSour
         qualification_report=dict(payload.get("qualification_report") or {}),
         motion_source_seal_hash=str(payload["motion_source_seal_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedMotionSourceSealIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def _motion_keyframe_from_dict(payload:Json)->MotionKeyframeIR:
+    _schema(payload,"RealSaS.MotionKeyframeIR.v1")
+    return MotionKeyframeIR(
+        time_seconds=float(payload["time_seconds"]),
+        rotation_deg=float(payload.get("rotation_deg",0.0)),
+        translation_xy=tuple(map(float,payload.get("translation_xy") or (0.0,0.0))),
+        scale_xy=tuple(map(float,payload.get("scale_xy") or (1.0,1.0))),
+        metadata=dict(payload.get("metadata") or {}),
+        schema_version=str(payload.get("schema_version") or "RealSaS.MotionKeyframeIR.v1"),
+    )
+
+
+def _canonical_joint_track_from_dict(payload:Json)->CanonicalJointTrackIR:
+    _schema(payload,"RealSaS.CanonicalJointTrackIR.v1")
+    return CanonicalJointTrackIR(
+        canonical_joint_id=str(payload["canonical_joint_id"]),
+        source_joint_id=str(payload["source_joint_id"]),
+        channel_contract=tuple(map(str,payload.get("channel_contract") or ())),
+        keyframes=tuple(_motion_keyframe_from_dict(dict(row)) for row in (payload.get("keyframes") or ())),
+        metadata=dict(payload.get("metadata") or {}),
+        schema_version=str(payload.get("schema_version") or "RealSaS.CanonicalJointTrackIR.v1"),
+    )
+
+
+def motion_compile_constraint_set_from_dict(payload:Json)->MotionCompileConstraintSetIR:
+    _schema(payload,"RealSaS.MotionCompileConstraintSetIR.v1")
+    return MotionCompileConstraintSetIR(
+        product_state_binding_hash=str(payload["product_state_binding_hash"]),
+        skeleton_binding_hash=str(payload["skeleton_binding_hash"]),
+        envelope_binding_hash=str(payload["envelope_binding_hash"]),
+        presentation_binding_hash=str(payload["presentation_binding_hash"]),
+        root_trajectory_modes=tuple((str(a),str(b)) for a,b in (payload.get("root_trajectory_modes") or ())),
+        retarget_map_hashes=tuple((str(a),str(b)) for a,b in (payload.get("retarget_map_hashes") or ())),
+        contact_constraints=tuple(
+            MotionContactConstraintIR(
+                contact_id=str(row["contact_id"]),
+                clip_id=str(row["clip_id"]),
+                canonical_joint_id=str(row["canonical_joint_id"]),
+                start_time_seconds=float(row["start_time_seconds"]),
+                end_time_seconds=float(row["end_time_seconds"]),
+                mode=str(row["mode"]),
+                metadata=dict(row.get("metadata") or {}),
+                schema_version=str(row.get("schema_version") or "RealSaS.MotionContactConstraintIR.v1"),
+            )
+            for row in (payload.get("contact_constraints") or ())
+        ),
+        dynamic_attachment_policy=str(payload["dynamic_attachment_policy"]),
+        constraint_set_hash=str(payload["constraint_set_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.MotionCompileConstraintSetIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def _compiled_motion_clip_from_dict(payload:Json)->CompiledMotionClipIR:
+    _schema(payload,"RealSaS.CompiledMotionClipIR.v1")
+    return CompiledMotionClipIR(
+        clip_id=str(payload["clip_id"]),
+        clip_kind=str(payload["clip_kind"]),
+        duration_seconds=float(payload["duration_seconds"]),
+        loop=bool(payload["loop"]),
+        source_asset_hash=str(payload["source_asset_hash"]),
+        source_space=str(payload["source_space"]),
+        classification=str(payload["classification"]),
+        root_trajectory_mode=str(payload["root_trajectory_mode"]),
+        tracks=tuple(_canonical_joint_track_from_dict(dict(row)) for row in (payload.get("tracks") or ())),
+        clip_lineage_hash=str(payload["clip_lineage_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.CompiledMotionClipIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def qualified_motion_from_dict(payload:Json)->QualifiedMotionIR:
+    _schema(payload,"RealSaS.QualifiedMotionIR.v1")
+    return QualifiedMotionIR(
+        motion_source_seal_binding_hash=str(payload["motion_source_seal_binding_hash"]),
+        source_set_binding_hash=str(payload["source_set_binding_hash"]),
+        product_state_binding_hash=str(payload["product_state_binding_hash"]),
+        skeleton_binding_hash=str(payload["skeleton_binding_hash"]),
+        envelope_binding_hash=str(payload["envelope_binding_hash"]),
+        presentation_binding_hash=str(payload["presentation_binding_hash"]),
+        constraint_set_binding_hash=str(payload["constraint_set_binding_hash"]),
+        clips=tuple(_compiled_motion_clip_from_dict(dict(row)) for row in (payload.get("clips") or ())),
+        qualification_report=dict(payload.get("qualification_report") or {}),
+        motion_lineage_hash=str(payload["motion_lineage_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedMotionIR.v1"),
         metadata=dict(payload.get("metadata") or {}),
     )
 

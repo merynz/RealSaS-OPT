@@ -1,0 +1,20 @@
+name: stage14-gsa-v2-realistic-dense-audit
+on:
+  push:
+    branches: [research/stage14-gsa-v2-downstream-audit-20260919]
+    paths: ['tools/stage14_gsa_v2_realistic_dense_audit.py','.github/workflows/stage14_gsa_v2_realistic_dense_audit.yml']
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 60
+    env: {PYTHONPATH: ., PYTHONHASHSEED: '0', OMP_NUM_THREADS: '1', MKL_NUM_THREADS: '1', OPENBLAS_NUM_THREADS: '1', REALSAS_STAGE14_REAL_OUT: stage14_real_out}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - run: python tools/stage14_gsa_v2_realistic_dense_audit.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: {name: stage14-gsa-v2-realistic-dense-audit, path: stage14_real_out/, if-no-files-found: error}

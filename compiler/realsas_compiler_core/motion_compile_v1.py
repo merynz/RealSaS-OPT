@@ -691,6 +691,7 @@ def build_qualified_motion(
     cfg=dict(compiler_config or {})
     if cfg.get("retarget_maps"):
         raise QualificationError("MOTION_COMPILE_MANUAL_RETARGET_FORBIDDEN")
+    cfg.pop("retarget_maps",None)
     generated_maps={}
     for asset in source_set.assets:
         if asset.source_space=="SOURCE_RIG_TRACKS_V1":

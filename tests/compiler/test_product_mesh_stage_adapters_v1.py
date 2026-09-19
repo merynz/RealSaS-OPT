@@ -137,13 +137,7 @@ def _fixture(tmp_path):
     manifest={
         "components":{},
         "carrier_policy":{},
-        "deformation_envelope":{
-            "axis_contract":{"path":str(axis_path),"sha256":_sha(axis_path)},
-            "joint_ranges":[
-                {"canonical_joint_id":"j0","min_rotation_deg":-5.0,"max_rotation_deg":5.0}
-            ],
-            "allowed_attachment_state_hashes":[],
-        },
+        "deformation_envelope":{},
         "mesh_policy":{
             "document":{"path":str(policy_path.resolve()),"sha256":_sha(policy_path)}
         },
@@ -164,7 +158,6 @@ def _fixture(tmp_path):
             ],
             "compiler":{
                 "root_trajectory_modes":{"idle_probe":"IN_PLACE"},
-                "retarget_maps":{},
                 "contacts":{}
             }
         },
@@ -256,7 +249,7 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     carrier=component_carrier_policy_from_dict(read_json(r24["outputs"][1]["path"]))
     assert len(partition.components)==1
     assert carrier.decisions[0].carrier_class=="MESH"
-    assert carrier.decisions[0].metadata["conservative_default"] is True
+    assert carrier.decisions[0].metadata["automatic"] is True
 
     r25=seal_deformation_capability_envelope(ctx)
     assert r25["status"]=="PASS"
@@ -269,20 +262,7 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     assert len(candidate.faces)==1
 
     component_id=partition.components[0].component_id
-    camera_set=qualified_camera_set_from_dict(
-        read_json(next(out for row in ctx["ledger"]["stages"] if row["id"]=="05_CAMERA_CONTRACT_SOLVED" for out in row["outputs"])["path"])
-    )
-    mask_rows=[]
-    for camera in camera_set.cameras:
-        triangles=_mesh_component_triangles(candidate,camera,component_id=component_id)
-        mask=rasterize_triangles_half_integer_top_left(triangles,width=8,height=8)
-        mask_path=tmp_path/f"mask_v{camera.view_index}.bin"; mask_path.write_bytes(mask)
-        mask_rows.append({
-            "view_index":camera.view_index,
-            "component_id":component_id,
-            "mask":{"path":str(mask_path),"sha256":_sha(mask_path)},
-        })
-    ctx["run_manifest"]["observation"]["component_masks"]=mask_rows
+    assert ctx["run_manifest"]["observation"].get("component_masks")==[]
 
     r27=qualify_canonical_mesh_stage(ctx)
     assert r27["status"]=="PASS",r27

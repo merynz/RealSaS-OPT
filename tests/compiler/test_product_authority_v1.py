@@ -298,6 +298,7 @@ def test_presentation_carrier_class_is_orthogonal_to_mechanics_but_cannot_drift_
         slots, attachments, overlays, decisions,
         "skeleton-hash", "mesh-hash", partition.partition_lineage_hash,
         carrier_policy.carrier_policy_lineage_hash, "product-state-hash",
+        "structure-hash", "appearance-set-hash", "composition-set-hash",
         {"status": "PASS"}, "",
     )
     graph = replace(graph, presentation_lineage_hash=qualified_presentation_lineage_hash(graph))
@@ -470,6 +471,7 @@ def test_presentation_graph_rejects_slot_bone_and_camera_drift_when_exact_author
         slots,attachments,overlays,decisions,
         "skeleton-hash","mesh-hash",partition.partition_lineage_hash,
         carrier_policy.carrier_policy_lineage_hash,"product-state-hash",
+        "structure-hash","appearance-set-hash","composition-set-hash",
         {"status":"PASS"},"",
     )
     graph = replace(graph,presentation_lineage_hash=qualified_presentation_lineage_hash(graph))

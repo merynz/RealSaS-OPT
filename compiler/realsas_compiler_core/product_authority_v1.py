@@ -256,6 +256,9 @@ class QualifiedPresentationGraphIR:
     partition_binding_hash: str
     carrier_policy_binding_hash: str
     product_state_binding_hash: str
+    presentation_structure_binding_hash: str
+    appearance_set_binding_hash: str
+    composition_set_binding_hash: str
     qualification_report: Json
     presentation_lineage_hash: str
     schema_version: str = "RealSaS.QualifiedPresentationGraphIR.v1"
@@ -865,6 +868,9 @@ def validate_qualified_presentation_graph(
     partition: MechanicalPartitionIR | None = None,
     envelope: DeformationCapabilityEnvelopeIR | None = None,
     mesh: QualifiedMeshIR | None = None,
+    presentation_structure=None,
+    appearance_set=None,
+    composition_set=None,
 ) -> None:
     if (
         not value.skeleton_binding_hash
@@ -872,6 +878,9 @@ def validate_qualified_presentation_graph(
         or not value.partition_binding_hash
         or not value.carrier_policy_binding_hash
         or not value.product_state_binding_hash
+        or not value.presentation_structure_binding_hash
+        or not value.appearance_set_binding_hash
+        or not value.composition_set_binding_hash
     ):
         raise QualificationError("PRESENTATION_GRAPH_UPSTREAM_BINDING_MISSING")
 
@@ -911,6 +920,32 @@ def validate_qualified_presentation_graph(
 
     if mesh is not None and value.mesh_binding_hash != mesh.mesh_lineage_hash:
         raise QualificationError("PRESENTATION_GRAPH_MESH_MISMATCH")
+
+    if presentation_structure is not None:
+        if value.presentation_structure_binding_hash != presentation_structure.structure_lineage_hash:
+            raise QualificationError("PRESENTATION_GRAPH_STRUCTURE_BINDING_MISMATCH")
+        if tuple(value.slots) != tuple(presentation_structure.slots):
+            raise QualificationError("PRESENTATION_GRAPH_STRUCTURE_SLOT_DRIFT")
+        if tuple(value.attachments) != tuple(presentation_structure.attachments):
+            raise QualificationError("PRESENTATION_GRAPH_STRUCTURE_ATTACHMENT_DRIFT")
+        structure_decisions = {row.decision_id: row for row in presentation_structure.decisions}
+        graph_decisions = {row.decision_id: row for row in value.decisions}
+        if any(graph_decisions.get(key) != row for key, row in structure_decisions.items()):
+            raise QualificationError("PRESENTATION_GRAPH_STRUCTURE_DECISION_DRIFT")
+
+    if appearance_set is not None:
+        if value.appearance_set_binding_hash != appearance_set.appearance_set_hash:
+            raise QualificationError("PRESENTATION_GRAPH_APPEARANCE_SET_BINDING_MISMATCH")
+        app_by_view = {int(row.target_view_index): row for row in appearance_set.bindings}
+    else:
+        app_by_view = None
+
+    if composition_set is not None:
+        if value.composition_set_binding_hash != composition_set.composition_set_hash:
+            raise QualificationError("PRESENTATION_GRAPH_COMPOSITION_SET_BINDING_MISMATCH")
+        comp_by_view = {int(row.view_index): row for row in composition_set.views}
+    else:
+        comp_by_view = None
 
     slot_ids = [s.slot_id for s in value.slots]
     if not slot_ids or len(slot_ids) != len(set(slot_ids)) or len({s.setup_order for s in value.slots}) != len(value.slots):
@@ -959,6 +994,14 @@ def validate_qualified_presentation_graph(
     for overlay in ordered_overlays:
         if not overlay.camera_binding_hash or not overlay.appearance_binding_hash or not overlay.composition_binding_hash:
             raise QualificationError("PRESENTATION_VIEW_OVERLAY_BINDING_MISSING")
+        if app_by_view is not None:
+            row = app_by_view.get(int(overlay.view_index))
+            if row is None or overlay.appearance_binding_hash != row.appearance_lineage_hash:
+                raise QualificationError("PRESENTATION_VIEW_APPEARANCE_BINDING_DRIFT")
+        if comp_by_view is not None:
+            row = comp_by_view.get(int(overlay.view_index))
+            if row is None or overlay.composition_binding_hash != row.composition_binding_hash:
+                raise QualificationError("PRESENTATION_VIEW_COMPOSITION_BINDING_DRIFT")
     if envelope is not None:
         if tuple(row.camera_binding_hash for row in ordered_overlays) != tuple(envelope.camera_binding_hashes):
             raise QualificationError("PRESENTATION_VIEW_CAMERA_SET_MISMATCH")

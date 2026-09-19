@@ -1,0 +1,29 @@
+{
+  "schema": "RealSaS.Stage13RestReprojectionPolicy.v2",
+  "status": "FROZEN_AFTER_1024_SUBJECT_FREE_CALIBRATION_AND_256_CUBE_NUMERICAL_FLOOR__BEFORE_ANY_NEW_KNIGHT_STAGE13_PASS",
+  "authority": "NORMATIVE_STAGE13_GEOMETRY_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_OR_MAGE_RESULT",
+  "calibration_authority": "canonical/STAGE13_GEOMETRY_GATE_V2_CALIBRATION_AUTHORITY_20260919.json",
+  "selected_profile": "P999",
+  "thresholds": {
+    "min_recall": 0.999,
+    "min_precision": 0.999,
+    "max_largest_coherent_hole_fraction": 0.00025,
+    "max_interior_uncovered_fraction": 0.0005,
+    "min_component_recall": 0.999,
+    "component_min_foreground_fraction": 0.0,
+    "max_silhouette_edge_p95_px": 0.5
+  },
+  "aggregation": {
+    "exact_eight_views_required": true,
+    "every_view_must_pass_every_rule": true,
+    "aggregate_compensation_forbidden": true
+  },
+  "rationale": [
+    "Stage13 is the source-correctness firewall before GSA. Stage14 can faithfully approximate a wrong Stage12 zero-surface and therefore cannot repair source-shape error.",
+    "The superseded v1 policy was calibrated at 512x512 and incorrectly preregistered systematic one-pixel global erosion and dilation as ACCEPT controls.",
+    "The v2 calibration is native 1024x1024 and accepts only sparse isolated raster-boundary disagreement while rejecting systematic one-pixel silhouette bias and visible interior/component loss.",
+    "The exact 256-cube IRIS marching-cubes decoder followed by the exact 1024 Runtime-v3 rasterizer passes P999 on analytic sphere and ellipsoid controls, so P999 is above the measured numerical floor."
+  ],
+  "mutation_rule": "After any new Knight Stage13 result is inspected, this policy may only be tightened prospectively; it may never be relaxed to convert a failure into PASS.",
+  "claim_boundary": "This policy does not claim Knight compliance, Stage13 PASS, Stage15 PASS, QualifiedMesh PASS, or PRODUCT_PASS."
+}

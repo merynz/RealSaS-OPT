@@ -12,8 +12,8 @@
   "explained_high_signal_count": 322,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 130,
-  "safe_default_evidence_only_branch_count": 126,
+  "live_branch_count": 131,
+  "safe_default_evidence_only_branch_count": 127,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "4149f28acaf46b523b389288a6663edaf639d21b",
+      "sha": "c36d40ff8433a521225b8b0bb8739ffb842546ae",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -649,6 +649,12 @@
     {
       "name": "research/stage14-gsa-v2-calibration-20260919",
       "sha": "416bb7ef341d93c335af348e1af8e9f48f95cc90",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "research/stage14-gsa-v2-downstream-audit-20260919",
+      "sha": "c36d40ff8433a521225b8b0bb8739ffb842546ae",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

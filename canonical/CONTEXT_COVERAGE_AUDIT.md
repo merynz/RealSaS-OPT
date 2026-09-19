@@ -11,8 +11,8 @@
 - Explained by continuity policy: **322**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **130**
-- Safe-default evidence-only branches: **126**
+- Live branches: **131**
+- Safe-default evidence-only branches: **127**
 
 ### Classification counts
 
@@ -101,7 +101,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `4149f28acaf4` | `CANONICAL` | canonical branch |
+| `main` | `c36d40ff8433` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -135,6 +135,7 @@ _None._
 | `research/knight-stage13-14-calibration-20260919` | `ee52ecf21689` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage13-geometry-gate-v2-calibration-20260919` | `18017348cc1b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-gsa-v2-calibration-20260919` | `416bb7ef341d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `research/stage14-gsa-v2-downstream-audit-20260919` | `c36d40ff8433` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-gsa-v2b-compactor-20260919` | `703ce681f4f7` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

@@ -688,9 +688,13 @@
       "title": "Run/idle motion compilation",
       "group": "motion",
       "depends_on": [
+        "18_SKELETON_QUALIFIED",
+        "25_DEFORMATION_CAPABILITY_ENVELOPE",
+        "29_CANONICAL_PUPPET_STATE_SEALED",
+        "30_QUALIFIED_PRESENTATION_GRAPH",
         "33_MOTION_SOURCE_OR_PRESET_SEAL"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.motion_compile_v1:compile_motion_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,

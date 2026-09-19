@@ -12,8 +12,8 @@
   "explained_high_signal_count": 322,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 140,
-  "safe_default_evidence_only_branch_count": 136,
+  "live_branch_count": 141,
+  "safe_default_evidence_only_branch_count": 137,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "351ce16a5325457264edd4b776ca8c0870ff2912",
+      "sha": "94e99d0acbe4fd2769507357fa83f963607f8447",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -635,6 +635,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "repair/stage14-policy-v2-20260920",
+      "sha": "94e99d0acbe4fd2769507357fa83f963607f8447",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "repair/stage14-visible-component-eligibility-v2-20260919",
       "sha": "5caa591a7aa06b747c342f7306c1b52b7b42984e",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -702,7 +708,7 @@
     },
     {
       "name": "research/stage14-v2-final-calibration-20260920",
-      "sha": "351ce16a5325457264edd4b776ca8c0870ff2912",
+      "sha": "8a502d4bee421f633b596812a1955a84f1aca36d",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

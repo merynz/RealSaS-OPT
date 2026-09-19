@@ -1,0 +1,33 @@
+{
+  "github_sha": "ee52ecf21689881d7ba6bcb15b752a7dc9a9b266",
+  "knight_result_used": false,
+  "schema": "RealSaS.Stage13_14SubjectFreeCalibrationSummary.v1",
+  "stage13_selected_policy": {
+    "component_min_foreground_fraction": 0.0,
+    "max_interior_uncovered_fraction": 0.005,
+    "max_largest_coherent_hole_fraction": 0.005,
+    "min_component_recall": 0.96,
+    "min_precision": 0.94,
+    "min_recall": 0.96,
+    "profile_id": "IRIS_FIT_VISIBLE_GATE_PLUS_PRODUCT_ANTI_HOLE",
+    "provenance": "IRIS prereg visible P/R + frozen G5 anti-hole; all source components eligible"
+  },
+  "stage14_normal_k": 64,
+  "stage14_selected_adequacy_policy": {
+    "candidate_growth_factor": 2.0,
+    "component_min_dense_fraction": 0.001,
+    "max_candidate_nodes": 8192,
+    "max_component_alias_nodes": 0,
+    "max_dense_to_surface_max_norm": 0.08,
+    "max_dense_to_surface_p95_norm": 0.03,
+    "max_normal_p95_deg": 30.0,
+    "max_projected_max_px": 16.0,
+    "max_projected_p95_px": 6.0,
+    "min_candidate_nodes": 128,
+    "min_nodes_per_component": 8,
+    "refinement_rounds": 3
+  },
+  "stage14_visibility_depth_tolerance_norm": 0.02,
+  "status": "PASS",
+  "subject_inputs_used": false
+}

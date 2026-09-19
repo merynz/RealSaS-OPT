@@ -195,6 +195,74 @@ def _largest_4_connected(mask: bytes, *, width: int, height: int) -> int:
     return int(largest)
 
 
+def source_connected_component_recall_metrics(
+    authority: bytes,
+    predicted: bytes,
+    *,
+    width: int,
+    height: int,
+    minimum_foreground_fraction: float,
+) -> dict:
+    """Measure per-source-component coverage without categorical recognition.
+
+    Components are 4-connected regions in the admitted source foreground mask.
+    The minimum fraction is relative to total source foreground pixels and is a
+    preregistered noise/speckle floor, not a semantic-object threshold.
+    """
+    n=int(width)*int(height)
+    if len(authority)!=n or len(predicted)!=n:
+        raise QualificationError("SOURCE_COMPONENT_RECALL_MASK_SIZE_MISMATCH")
+    if any(x not in (0,1) for x in authority) or any(x not in (0,1) for x in predicted):
+        raise QualificationError("SOURCE_COMPONENT_RECALL_BINARY_MASK_REQUIRED")
+    floor=float(minimum_foreground_fraction)
+    if not math.isfinite(floor) or floor < 0.0 or floor > 1.0:
+        raise QualificationError("SOURCE_COMPONENT_RECALL_FRACTION_INVALID")
+    foreground=int(sum(authority))
+    visited=bytearray(n)
+    rows=[]
+    component_index=0
+    for seed in range(n):
+        if not authority[seed] or visited[seed]:
+            continue
+        visited[seed]=1
+        q=deque([seed])
+        pixels=[]
+        while q:
+            idx=q.popleft()
+            pixels.append(idx)
+            x,y=idx%int(width),idx//int(width)
+            for nxt in (
+                idx-1 if x>0 else -1,
+                idx+1 if x+1<int(width) else -1,
+                idx-int(width) if y>0 else -1,
+                idx+int(width) if y+1<int(height) else -1,
+            ):
+                if nxt>=0 and authority[nxt] and not visited[nxt]:
+                    visited[nxt]=1
+                    q.append(nxt)
+        size=len(pixels)
+        covered=sum(1 for idx in pixels if predicted[idx])
+        fraction=0.0 if foreground==0 else float(size)/float(foreground)
+        recall=1.0 if size==0 else float(covered)/float(size)
+        rows.append({
+            "component_index":int(component_index),
+            "pixel_count":int(size),
+            "foreground_fraction":float(fraction),
+            "covered_pixel_count":int(covered),
+            "recall":float(recall),
+            "eligible":bool(fraction+1e-15 >= floor),
+        })
+        component_index+=1
+    eligible=[row for row in rows if row["eligible"]]
+    return {
+        "source_component_count":int(len(rows)),
+        "eligible_component_count":int(len(eligible)),
+        "minimum_foreground_fraction":float(floor),
+        "minimum_eligible_component_recall":float(min((row["recall"] for row in eligible),default=1.0)),
+        "components":rows,
+    }
+
+
 def _interior_mask_8_neighbor(authority: bytes, *, width: int, height: int) -> bytes:
     """One-reference-pixel boundary band removal via Chebyshev-radius-1 erosion."""
     out = bytearray(int(width) * int(height))

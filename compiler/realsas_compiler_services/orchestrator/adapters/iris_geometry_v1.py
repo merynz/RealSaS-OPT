@@ -15,6 +15,7 @@ from models.geppetto.reference_strength_v1.rigging_surface_tensorization_v1 impo
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     coverage_metrics, rasterize_triangles_half_integer_top_left,
+    source_connected_component_recall_metrics,
 )
 from compiler.realsas_compiler_core.playback_full_surface_v3 import project_points_xyz_v3
 from compiler.realsas_compiler_core.preproduct_authority_v1 import (
@@ -205,12 +206,21 @@ def qualify_rest_reprojection_geometry_stage(ctx:dict)->dict:
     world=np.asarray(normalization.center_xyz,dtype=np.float64)[None,:]+np.asarray(vertices,dtype=np.float64)*float(normalization.half_extent)
     source=_source_foreground(ctx,observation)
     cfg=dict(ctx["run_manifest"].get("geometry_gate") or {})
-    keys=("min_recall","min_precision","max_largest_coherent_hole_fraction","max_interior_uncovered_fraction")
+    keys=(
+        "min_recall","min_precision",
+        "max_largest_coherent_hole_fraction","max_interior_uncovered_fraction",
+        "min_component_recall","component_min_foreground_fraction",
+    )
     if any(k not in cfg for k in keys):
         return {"status":"BLOCKED","blockers":["GEOMETRY_GATE_EXPLICIT_THRESHOLDS_REQUIRED"],"diagnostics":{"required":list(keys)}}
     policy={k:float(cfg[k]) for k in keys}
-    if not (0<=policy["min_recall"]<=1 and 0<=policy["min_precision"]<=1 and
-            0<=policy["max_largest_coherent_hole_fraction"]<=1 and 0<=policy["max_interior_uncovered_fraction"]<=1):
+    if not (
+        0<=policy["min_recall"]<=1 and 0<=policy["min_precision"]<=1 and
+        0<=policy["max_largest_coherent_hole_fraction"]<=1 and
+        0<=policy["max_interior_uncovered_fraction"]<=1 and
+        0<=policy["min_component_recall"]<=1 and
+        0<=policy["component_min_foreground_fraction"]<=1
+    ):
         raise QualificationError("GEOMETRY_GATE_THRESHOLD_RANGE_INVALID")
 
     obs={int(v.view_index):v for v in observation.views}; rows=[]
@@ -227,16 +237,30 @@ def qualify_rest_reprojection_geometry_stage(ctx:dict)->dict:
             triangles,width=int(authority.width),height=int(authority.height)
         )
         metrics=coverage_metrics(source[vi],predicted,width=int(authority.width),height=int(authority.height))
+        component_metrics=source_connected_component_recall_metrics(
+            source[vi],predicted,
+            width=int(authority.width),height=int(authority.height),
+            minimum_foreground_fraction=policy["component_min_foreground_fraction"],
+        )
+        if metrics["foreground_pixel_count"]>0 and component_metrics["eligible_component_count"]<=0:
+            raise QualificationError("GEOMETRY_GATE_COMPONENT_POLICY_SELECTS_NO_FOREGROUND")
         passed=(
             metrics["recall"]>=policy["min_recall"] and metrics["precision"]>=policy["min_precision"] and
             metrics["largest_coherent_hole_fraction"]<=policy["max_largest_coherent_hole_fraction"] and
-            metrics["interior_uncovered_fraction"]<=policy["max_interior_uncovered_fraction"]
+            metrics["interior_uncovered_fraction"]<=policy["max_interior_uncovered_fraction"] and
+            component_metrics["minimum_eligible_component_recall"]>=policy["min_component_recall"]
         )
         rows.append(RestReprojectionGeometryViewIR(
             vi,float(metrics["recall"]),float(metrics["precision"]),
             float(metrics["largest_coherent_hole_fraction"]),float(metrics["interior_uncovered_fraction"]),
             int(metrics["foreground_pixel_count"]),int(metrics["predicted_pixel_count"]),bool(passed),
-            metadata={"source_observation_hash":authority.source_observation_hash},
+            metadata={
+                "source_observation_hash":authority.source_observation_hash,
+                "source_component_recall":component_metrics,
+                "component_recall_passed":bool(
+                    component_metrics["minimum_eligible_component_recall"]>=policy["min_component_recall"]
+                ),
+            },
         ))
     all_pass=all(row.passed for row in rows)
     value=RestReprojectionGeometryGateIR(

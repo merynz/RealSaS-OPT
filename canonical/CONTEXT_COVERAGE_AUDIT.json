@@ -12,8 +12,8 @@
   "explained_high_signal_count": 319,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 120,
-  "safe_default_evidence_only_branch_count": 116,
+  "live_branch_count": 121,
+  "safe_default_evidence_only_branch_count": 117,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -444,7 +444,7 @@
     },
     {
       "name": "main",
-      "sha": "b57184f1500d7378c843cc92ca96a83404ceef1d",
+      "sha": "a4325832c000dc4fc3e3fda20cae8c102f9d1b7c",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -595,6 +595,12 @@
     {
       "name": "repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp",
       "sha": "c69ab78eac42ec89d2bed650fd9aa607d6f44a00",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "research/knight-stage13-14-calibration-20260919",
+      "sha": "a4325832c000dc4fc3e3fda20cae8c102f9d1b7c",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

@@ -1,0 +1,46 @@
+name: stage14-gsa-v2-subject-free-calibration
+
+on:
+  push:
+    branches:
+      - research/stage14-gsa-v2-calibration-20260919
+    paths:
+      - 'tools/stage14_gsa_v2_subject_free_calibration.py'
+      - '.github/workflows/stage14_gsa_v2_subject_free_calibration.yml'
+  workflow_dispatch:
+
+jobs:
+  calibrate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 60
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_STAGE14_V2_OUT: stage14_v2_out
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off scikit-image==0.25.2
+      - name: Run subject-free Stage14 v2 calibration
+        run: python tools/stage14_gsa_v2_subject_free_calibration.py
+      - name: Assert no Knight or Mage subject dependency
+        run: |
+          ! grep -R -E 'SUBJECT2_KNIGHT|Knight\.fbx|MAGE_|Mage' tools/stage14_gsa_v2_subject_free_calibration.py
+      - name: Upload calibration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage14-gsa-v2-subject-free-calibration
+          path: stage14_v2_out/
+          if-no-files-found: error

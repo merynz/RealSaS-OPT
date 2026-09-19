@@ -1,7 +1,7 @@
 from __future__ import annotations
 import json
 from pathlib import Path
-from compiler.realsas_compiler_services.orchestrator.mainline import _dependency_blockers,content_sha256,status_text,validate_ledger,validate_plan
+from compiler.realsas_compiler_services.orchestrator.mainline import _dependency_blockers,_invalidate_dependents,content_sha256,status_text,validate_ledger,validate_plan
 ROOT=Path(__file__).resolve().parents[2]
 def load(rel): return json.loads((ROOT/rel).read_text(encoding="utf-8"))
 def test_plan_is_exact_40_stage_subject_agnostic_contract():
@@ -38,13 +38,58 @@ def test_stage_cannot_execute_past_unpassed_or_stale_dependency(tmp_path):
     artifact.write_text("{\"drift\":true}\n",encoding="utf-8")
     assert _dependency_blockers(stage,ledger)==["DEPENDENCY_OUTPUT_IDENTITY_INVALID:23_ARACHNE_CHECKPOINT_SEALED"]
 
-def test_active_ledger_rejects_nonprefix_pass_state():
+def test_active_ledger_allows_nonprefix_pass_when_declared_dependencies_are_pass():
+    import copy
+    plan=load("canonical/MAINLINE_EXECUTION_PLAN_V1.json")
+    ledger=copy.deepcopy(load("canonical/ACTIVE_RUN_V1.json"))
+    # Make the prefix through stage 23 valid, leave 24 pending, then retain stage 25
+    # only if all of its declared dependencies are PASS. This models a reusable
+    # independent branch in the execution DAG.
+    for i in range(23):
+        ledger["stages"][i]["status"]="PASS"
+    stage25=next(row for row in ledger["stages"] if row["id"]=="25_DEFORMATION_CAPABILITY_ENVELOPE")
+    stage25["status"]="PASS"
+    ledger["completed_count"]=24
+    ledger["next_stage"]="24_MECHANICAL_PARTITION_QUALIFIED"
+    validate_ledger(plan,ledger)
+
+
+def test_active_ledger_rejects_pass_with_unpassed_declared_dependency():
     import copy
     import pytest
     plan=load("canonical/MAINLINE_EXECUTION_PLAN_V1.json")
     ledger=copy.deepcopy(load("canonical/ACTIVE_RUN_V1.json"))
-    ledger["stages"][1]["status"]="PASS"
-    ledger["stages"][1]["outputs"]=[{"path":"/nonexistent","sha256":"0"*64}]
+    stage25=next(row for row in ledger["stages"] if row["id"]=="25_DEFORMATION_CAPABILITY_ENVELOPE")
+    stage25["status"]="PASS"
     ledger["completed_count"]=1
-    with pytest.raises(RuntimeError,match="NONPREFIX_PASS"):
+    with pytest.raises(RuntimeError,match="PASS_WITH_UNPASSED_DEPENDENCY"):
         validate_ledger(plan,ledger)
+
+
+def test_dag_invalidation_preserves_independent_pass_rows():
+    import copy
+    plan=copy.deepcopy(load("canonical/MAINLINE_EXECUTION_PLAN_V1.json"))
+    ledger=copy.deepcopy(load("canonical/ACTIVE_RUN_V1.json"))
+    # Synthetic dependency fork: stage 24 depends on 15, stage 25 depends on 18,
+    # stage 26 depends on 24, stage 27 consumes both branches.
+    by={row["id"]:row for row in plan["stages"]}
+    by["24_MECHANICAL_PARTITION_QUALIFIED"]["depends_on"]=["15_RIGGING_SURFACE_QUALIFIED"]
+    by["25_DEFORMATION_CAPABILITY_ENVELOPE"]["depends_on"]=["18_SKELETON_QUALIFIED"]
+    by["26_MESH_CANDIDATE_BUILD"]["depends_on"]=["15_RIGGING_SURFACE_QUALIFIED","24_MECHANICAL_PARTITION_QUALIFIED"]
+    by["27_QUALIFIED_MESH_GATE"]["depends_on"]=[
+        "22_SKIN_QUALIFIED","24_MECHANICAL_PARTITION_QUALIFIED",
+        "25_DEFORMATION_CAPABILITY_ENVELOPE","26_MESH_CANDIDATE_BUILD"
+    ]
+    for row in ledger["stages"]:
+        row["status"]="PASS"
+    invalid=_invalidate_dependents(plan,ledger,"22_SKIN_QUALIFIED","TEST_SKIN_REFIT")
+    assert "22_SKIN_QUALIFIED" in invalid
+    assert "27_QUALIFIED_MESH_GATE" in invalid
+    assert "28_QUALIFIED_MESH_SKIN_TRANSFER" in invalid
+    assert "24_MECHANICAL_PARTITION_QUALIFIED" not in invalid
+    assert "25_DEFORMATION_CAPABILITY_ENVELOPE" not in invalid
+    assert "26_MESH_CANDIDATE_BUILD" not in invalid
+    status={row["id"]:row["status"] for row in ledger["stages"]}
+    assert status["24_MECHANICAL_PARTITION_QUALIFIED"]=="PASS"
+    assert status["26_MESH_CANDIDATE_BUILD"]=="PASS"
+    assert status["27_QUALIFIED_MESH_GATE"]=="PENDING"

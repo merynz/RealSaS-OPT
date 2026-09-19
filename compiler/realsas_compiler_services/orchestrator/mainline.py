@@ -63,13 +63,13 @@ def validate_ledger(plan:dict,ledger:dict)->None:
     if len(rows)!=40: raise RuntimeError("ACTIVE_RUN_LEDGER_STAGE_COUNT_DRIFT")
     if [x.get("id") for x in rows]!=[x["id"] for x in plan["stages"]]: raise RuntimeError("ACTIVE_RUN_LEDGER_STAGE_ID_DRIFT")
     complete=sum(x.get("status") in PASS_STATUSES for x in rows)
-    open_seen=False
-    for row in rows:
-        passed=row.get("status") in PASS_STATUSES
-        if passed and open_seen:
-            raise RuntimeError("ACTIVE_RUN_LEDGER_NONPREFIX_PASS")
-        if not passed:
-            open_seen=True
+    by_id={row["id"]:row for row in rows}
+    for stage,row in zip(plan["stages"],rows):
+        if row.get("status") not in PASS_STATUSES:
+            continue
+        for dep in stage.get("depends_on",()):
+            if by_id[dep].get("status") not in PASS_STATUSES:
+                raise RuntimeError(f"ACTIVE_RUN_LEDGER_PASS_WITH_UNPASSED_DEPENDENCY:{stage['id']}:{dep}")
     if int(ledger.get("completed_count",-1))!=complete: raise RuntimeError("ACTIVE_RUN_LEDGER_PROGRESS_DRIFT")
     expected=next((x["id"] for x in rows if x.get("status") not in PASS_STATUSES),None)
     if ledger.get("next_stage")!=expected: raise RuntimeError("ACTIVE_RUN_LEDGER_NEXT_STAGE_DRIFT")
@@ -140,11 +140,31 @@ def _refresh(ledger:dict)->None:
     elif any(x["status"] in FAIL_STATUSES for x in rows): ledger["status"]="BLOCKED_AT_"+str(ledger["next_stage"] or "UNKNOWN")
     else: ledger["status"]="ACTIVE"
 
-def _invalidate_from(ledger:dict,index:int,reason:str)->None:
-    for row in ledger["stages"][index:]:
+def _invalidate_dependents(plan:dict,ledger:dict,stage_id:str,reason:str)->tuple[str,...]:
+    invalid={str(stage_id)}
+    changed=True
+    while changed:
+        changed=False
+        for stage in plan["stages"]:
+            sid=stage["id"]
+            if sid in invalid:
+                continue
+            if any(dep in invalid for dep in stage.get("depends_on",())):
+                invalid.add(sid); changed=True
+    invalidated=[]
+    for row in ledger["stages"]:
+        if row["id"] not in invalid:
+            continue
         row.update(status="PENDING",input_fingerprint="",implementation_hash="",policy_hash="",outputs=[],diagnostics_hash="",blockers=[])
-    ledger.setdefault("history",[]).append({"event":"DOWNSTREAM_INVALIDATED","from_stage":ledger["stages"][index]["id"],"reason":reason})
+        invalidated.append(row["id"])
+    ledger.setdefault("history",[]).append({
+        "event":"DEPENDENCY_SUBGRAPH_INVALIDATED",
+        "source_stage":str(stage_id),
+        "reason":reason,
+        "invalidated_stages":invalidated,
+    })
     _refresh(ledger)
+    return tuple(invalidated)
 
 def _seal_outputs(outputs:list[dict])->list[dict]:
     sealed=[]
@@ -178,7 +198,7 @@ def execute(run_id:str,*,from_stage:str="",to_stage:str="",resume:bool=True)->in
             or prior_row.get("policy_hash")!=prior_policy_hash
             or not _outputs_verify(prior_row)
         ):
-            _invalidate_from(ledger,prior_index,"STALE_UPSTREAM_BEFORE_REQUESTED_START")
+            _invalidate_dependents(plan,ledger,prior_stage["id"],"STALE_UPSTREAM_BEFORE_REQUESTED_START")
             atomic_json(LEDGER_PATH,ledger)
             return 2
     for index in range(start,end+1):
@@ -186,7 +206,12 @@ def execute(run_id:str,*,from_stage:str="",to_stage:str="",resume:bool=True)->in
         impl_hash=_adapter_impl_hash(stage["adapter"]); fingerprint,policy_hash=_fingerprint(plan,ledger,manifest,stage,impl_hash)
         if resume and row["status"] in PASS_STATUSES:
             if row.get("input_fingerprint")==fingerprint and _outputs_verify(row): continue
-            _invalidate_from(ledger,index,"STALE_PASS_IDENTITY"); atomic_json(LEDGER_PATH,ledger); row=ledger["stages"][index]
+            _invalidate_dependents(plan,ledger,stage["id"],"STALE_PASS_IDENTITY"); atomic_json(LEDGER_PATH,ledger); row=ledger["stages"][index]
+        if not resume and row["status"] in PASS_STATUSES:
+            _invalidate_dependents(plan,ledger,stage["id"],"FORCED_RERUN")
+            atomic_json(LEDGER_PATH,ledger)
+            row=ledger["stages"][index]
+            impl_hash=_adapter_impl_hash(stage["adapter"]); fingerprint,policy_hash=_fingerprint(plan,ledger,manifest,stage,impl_hash)
         dependency_blockers=_dependency_blockers(stage,ledger)
         if dependency_blockers:
             row.update(status="BLOCKED",attempts=int(row.get("attempts",0))+1,input_fingerprint=fingerprint,implementation_hash=impl_hash,policy_hash=policy_hash,outputs=[],diagnostics_hash=content_sha256({"dependency_blockers":dependency_blockers}),blockers=dependency_blockers)

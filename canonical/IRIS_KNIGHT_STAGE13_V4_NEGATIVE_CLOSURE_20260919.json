@@ -1,0 +1,92 @@
+{
+  "schema": "RealSaS.IRIS.KnightStage13TopologyRepairNegativeClosure.v1",
+  "date_utc": "2026-09-19",
+  "subject_run_id": "SUBJECT2_KNIGHT_V1",
+  "source_run_id": "20260919T150323Z",
+  "failed_repair_run_id": "20260919T174948Z",
+  "status": "CLOSED_NEGATIVE_EVIDENCE",
+  "canonical_product_authority_minted": false,
+  "policy_mutation_after_result_forbidden": true,
+  "bindings": {
+    "source_checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "source_zero_surface_npz_sha256": "42d7fc790d869d4248c23a3ef3d4ae1dea9f6d3e1b7a671557858b32a04ddc59",
+    "frozen_stage13_policy_sha256": "5fb4859ca09111c908abf3041ae46e0dd3e4c29ab3a373ea9c26ebf5c9b5c59e",
+    "repair_preregistration_sha256": "32b09a3233628450455a4fdde7d078e6cee02eb51b3ca9c70e77a9de9505d3e9",
+    "repair_decision_sha256": "4d0b358d661d393cb61f440f24a624c240d63621eba5a30bb7f4ee215f7fb74e",
+    "repair_bundle_sha256": "c51df1326a27c2153a8cc29d1038cda0d77e475dd9531e4c450d8becb62dfa82"
+  },
+  "source_stage13_failure": {
+    "max_view_largest_coherent_hole_fraction": 0.009063075455372396,
+    "max_view_interior_uncovered_fraction": 0.01900492950970904,
+    "min_view_precision": 0.9538098723265838,
+    "min_view_recall": 0.9687733991513908,
+    "zero_bracket_rate": 0.90234375
+  },
+  "candidates": {
+    "DECODER_R384": {
+      "status": "FAIL",
+      "max_view_largest_coherent_hole_fraction": 0.00893550462582921,
+      "max_view_interior_uncovered_fraction": 0.018523863694245888,
+      "min_view_precision": 0.9537564424698448,
+      "min_view_recall": 0.969433428547658,
+      "zero_bracket_rate": 0.90234375
+    },
+    "DECODER_R512": {
+      "status": "FAIL",
+      "max_view_largest_coherent_hole_fraction": 0.008880039047766956,
+      "max_view_interior_uncovered_fraction": 0.018116372650559452,
+      "min_view_precision": 0.9522397736251713,
+      "min_view_recall": 0.9700158074267173,
+      "zero_bracket_rate": 0.90234375
+    },
+    "CONTROL": {
+      "status": "FAIL",
+      "checkpoint_sha256": "12fef14e8c18793b9590eb4f86339548e12f671593ae548341d5ab92739fde13",
+      "max_view_largest_coherent_hole_fraction": 0.007277595647173924,
+      "max_view_interior_uncovered_fraction": 0.02451317947225318,
+      "min_view_precision": 0.9548321787155508,
+      "min_view_recall": 0.9599756295132134,
+      "zero_bracket_rate": 0.9033203125
+    },
+    "INSIDE_MARGIN": {
+      "status": "FAIL",
+      "checkpoint_sha256": "941ac2b6b716e9425ddcc3af98f940be2b60e5d72030e5daa48c2ac34b1f4e88",
+      "zero_surface_npz_sha256": "24fce1ba605c71de9c8d11f197852e5c9069f15efb5501c23d205557c594f2b9",
+      "max_view_largest_coherent_hole_fraction": 0.004908816483653433,
+      "max_view_interior_uncovered_fraction": 0.016285326877888445,
+      "min_view_precision": 0.9189831796269126,
+      "min_view_recall": 0.9713923717606985,
+      "pred_to_truth_p95_norm": 0.03305772057066627,
+      "zero_bracket_rate": 0.89453125
+    }
+  },
+  "topology_diagnostic_only": {
+    "method": "triangle-edge incidence and connected-components audit on exact source and INSIDE_MARGIN zero-surface NPZ files",
+    "source_surface": {
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "connected_components": 21,
+      "vertex_count": 96810,
+      "face_count": 193752,
+      "normalized_surface_area": 4.190434804396872,
+      "absolute_signed_volume": 0.18904700923472365
+    },
+    "inside_margin_surface": {
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "connected_components": 26,
+      "vertex_count": 98954,
+      "face_count": 197960,
+      "normalized_surface_area": 4.288956869147777,
+      "absolute_signed_volume": 0.19569592738888272
+    },
+    "interpretation": "STAGE13_HOLE_IS_PROJECTION_UNDERCOVERAGE_NOT_OPEN_MESH_BOUNDARY; one-sided inside margin expands the learned zero-surface while reducing the largest coherent undercovered region"
+  },
+  "causal_conclusions": [
+    "DENSE_DECODER_RESOLUTION_256_TO_384_OR_512_IS_NOT_THE_PRIMARY_STAGE13_REPAIR",
+    "UNMODIFIED_PLUS_800_CONTINUATION_IS_NOT_A_VALID_REPAIR_AND_DEGRADES_INTERIOR_COVERAGE",
+    "ONE_SIDED_INSIDE_NEGATIVE_MARGIN_HAS_REAL_COHERENT_HOLE_REPAIR_EFFECT",
+    "ONE_SIDED_MARGIN_IS_ASYMMETRIC_AND_CAUSES_UNACCEPTABLE_OUTWARD_SURFACE_BIAS",
+    "NEXT_TEST_MUST_BALANCE_MATCHED_OUTSIDE_AND_INSIDE_SIGN_MARGINS_AND_SEPARATELY_TEST_CONTINUATION_LR"
+  ]
+}

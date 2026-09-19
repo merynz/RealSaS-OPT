@@ -81,9 +81,9 @@ def build_rest_source_preservation_policy(
     calibration_result:dict,
     mesh_policy,
 )->RestSourcePreservationPolicyIR:
-    if policy_document.get("schema")!="RealSaS.RestSourcePreservationProductPolicy.v1":
+    if policy_document.get("schema")!="RealSaS.RestSourcePreservationProductPolicy.v2":
         raise QualificationError("REST_POLICY_DOCUMENT_SCHEMA_DRIFT")
-    if policy_document.get("status")!="FROZEN_AFTER_SUBJECT_FREE_CALIBRATION_BEFORE_KNIGHT_STAGE32_RESULT":
+    if policy_document.get("status")!="FROZEN_AFTER_G5_MESH_V2_REBIND__BEFORE_ANY_NEW_KNIGHT_STAGE32_PASS":
         raise QualificationError("REST_POLICY_DOCUMENT_NOT_FROZEN")
     if policy_document.get("authority")!="NORMATIVE_STAGE32_PRODUCT_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_FIT":
         raise QualificationError("REST_POLICY_DOCUMENT_AUTHORITY_DRIFT")
@@ -155,6 +155,7 @@ def build_rest_source_preservation_policy(
             "workflow_job_id":calibration_result["workflow_job_id"],
             "aggregate_compensation_forbidden":True,
             "knight_result_used_for_threshold_selection":False,
+            "alpha_coverage_inherited_from_g5_mesh_v2":True,
         },
     )
     return replace(value,policy_lineage_hash=rest_source_preservation_policy_hash(value))

@@ -582,6 +582,7 @@ def build_qualified_motion_v2(
                         "retargeted":True,
                         "retarget_report_hash":report["report_hash"],
                         "rotation_semantics":"LOCAL_JOINT_FRAME_DELTA_QUATERNION",
+                        "translation_semantics":"LOCAL_JOINT_FRAME_DELTA_TRANSLATION",
                         "translation_units":"TARGET_BODY_SCALE",
                         "interpolation":"SLERP_ROTATION_LINEAR_TRANSLATION_V1",
                     },

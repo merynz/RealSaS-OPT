@@ -26,7 +26,10 @@ REPO=Path.cwd().resolve()
 if str(REPO) not in sys.path:
     sys.path.insert(0,str(REPO))
 
-from compiler.realsas_compiler_core.joint_frames_v1 import derive_joint_frames_from_rows
+from compiler.realsas_compiler_core.joint_frames_v1 import (
+    derive_joint_frames_from_rows,
+    object_vector_to_joint_local,
+)
 
 
 EXTRACTOR_SCHEMA="RealSaS.BlenderMotionExtractor.v2"
@@ -226,7 +229,8 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
             translation=(0.0,0.0,0.0)
             if jid==root_name:
                 world_delta=pose_global[jid].to_translation()-root_rest_translation
-                translation=tuple(float(x)/body_scale for x in world_delta)
+                local_delta=object_vector_to_joint_local(derived[jid],world_delta)
+                translation=tuple(float(x)/body_scale for x in local_delta)
             else:
                 local_translation=delta_local.to_translation()
                 if local_translation.length/body_scale>1e-5:
@@ -278,6 +282,7 @@ def extract_clip(*,armature,action,source_path,source_sha,license_sha,spec,C):
             "sample_frame_first":sample_frames[0],
             "sample_frame_last":sample_frames[-1],
             "source_body_scale":body_scale,
+            "root_translation_semantics":"LOCAL_DERIVED_JOINT_FRAME_NORMALIZED_BY_SOURCE_BODY_SCALE",
             "source_mesh_used_as_product_authority":False,
             "source_skin_used_as_product_authority":False,
             "source_material_used_as_product_authority":False,

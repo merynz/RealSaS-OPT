@@ -46,6 +46,7 @@
     "curve_sampling": "SOURCE_FPS_BAKED",
     "scale_animation": "FORBIDDEN",
     "nonroot_translation": "FORBIDDEN",
-    "generated_appearance": false
+    "generated_appearance": false,
+    "root_translation_semantics": "LOCAL_DERIVED_JOINT_FRAME_NORMALIZED_BY_SOURCE_BODY_SCALE"
   }
 }

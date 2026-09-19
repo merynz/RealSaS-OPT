@@ -12,8 +12,8 @@
   "explained_high_signal_count": 322,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 131,
-  "safe_default_evidence_only_branch_count": 127,
+  "live_branch_count": 132,
+  "safe_default_evidence_only_branch_count": 128,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "c36d40ff8433a521225b8b0bb8739ffb842546ae",
+      "sha": "4f894b7c533e5480ef50a2603cc57363a0c1b43c",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -623,6 +623,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "repair/stage14-visible-component-eligibility-v2-20260919",
+      "sha": "20b451a7898c5edb8e216b502e8527db731710e3",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "research/g5-coverage-v2-audit-20260919",
       "sha": "aeaec75e1fe6e9372f85393e5547f572a4bd026a",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -654,7 +660,7 @@
     },
     {
       "name": "research/stage14-gsa-v2-downstream-audit-20260919",
-      "sha": "c36d40ff8433a521225b8b0bb8739ffb842546ae",
+      "sha": "68eb6d2bb3ca3da9ad2b864457315fc1f984af26",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

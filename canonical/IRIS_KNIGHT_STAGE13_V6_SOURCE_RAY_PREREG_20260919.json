@@ -1,0 +1,29 @@
+{
+  "schema":"RealSaS.IRIS.KnightStage13SourceRayCoveragePreregistration.v1",
+  "date_utc":"2026-09-19",
+  "subject_run_id":"SUBJECT2_KNIGHT_V1",
+  "attempt_protocol":"V6_STAGE13_SOURCE_INTERIOR_RAY_COVERAGE_DOSE",
+  "source_checkpoint_sha256":"59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+  "source_step":4800,
+  "prior_v5_decision_sha256":"9f020fcb3d8c81625ca5073afe0e7352b5a98168dedb22ac30445920030a5a8d",
+  "frozen_stage13_policy_sha256":"5fb4859ca09111c908abf3041ae46e0dd3e4c29ab3a373ea9c26ebf5c9b5c59e",
+  "repo_commit":"b57184f1500d7378c843cc92ca96a83404ceef1d",
+  "continuation":{"additional_steps":800,"learning_rate":0.00002,"optimizer_state_continued":true,"base_batch_rng_seed":46352828,"ray_batch_rng_seed":46393515},
+  "source_ray_loss":{"interior_definition":"exact Stage13 radius-1 8-neighbor erosion","safe_background_definition":"radius-2 8-neighbor source-mask dilation complement","interior_rays_per_view_per_step":32,"background_rays_per_view_per_step":16,"depth_samples_per_ray":96,"interior_negative_margin_norm":0.02,"background_positive_margin_norm":0.02,"teacher_geometry_used_for_source_ray_loss":false,"visual_hull_clipping":false},
+  "arms":[
+    {"arm_id":"PRIOR_CONTROL_LO","execute":false,"reused_v5_evidence":true,"ray_loss_weight":0.0},
+    {"arm_id":"SOURCE_RAY_W0125","execute":true,"ray_loss_weight":0.125},
+    {"arm_id":"SOURCE_RAY_W0250","execute":true,"ray_loss_weight":0.25},
+    {"arm_id":"SOURCE_RAY_W0500","execute":true,"ray_loss_weight":0.5}
+  ],
+  "selection_rule":"SOURCE_RAY_W0125_IF_PASS_ELSE_SOURCE_RAY_W0250_IF_PASS_ELSE_SOURCE_RAY_W0500_IF_PASS_ELSE_NONE",
+  "single_arm_variable":"ray_loss_weight",
+  "same_parent_checkpoint":true,
+  "same_optimizer_state":true,
+  "same_base_batch_sequence_as_v5_control_lo":true,
+  "same_ray_batch_sequence_across_v6_arms":true,
+  "teacher_inference_inputs_allowed":false,
+  "frozen_stage13_policy_unchanged":true,
+  "posthoc_parameter_changes_allowed":false,
+  "canonical_product_authority_minted":false
+}

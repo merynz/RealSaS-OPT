@@ -1,0 +1,10 @@
+{
+  "schema":"RealSaS.IRIS.KnightStage13V6SupersessionRecord.v1",
+  "date_utc":"2026-09-20",
+  "status":"SUPERSEDED_UNEXECUTED__NO_RESULT_EVIDENCE",
+  "subject_run_id":"SUBJECT2_KNIGHT_V1",
+  "attempt_protocol":"V6_STAGE13_SOURCE_INTERIOR_RAY_COVERAGE_DOSE",
+  "reason":"V6 was designed against superseded Stage13 v1 coverage gates before the 1024-native P999 + silhouette-edge Stage13 v2 authority was frozen. The user did not execute V6. It is neither PASS nor FAIL evidence.",
+  "replacement":"V7_STAGE13_P999_SOURCE_SILHOUETTE_SANDWICH_DOSE",
+  "canonical_product_authority_minted":false
+}

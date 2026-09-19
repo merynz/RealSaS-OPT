@@ -7,7 +7,7 @@ from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_core.substrate.adequacy_v1 import (
     _eligible_dense_components,
     _mechanical_probe_metrics,
-    _policy,
+    _policy as _parse_adequacy_policy,
     select_adequate_rigging_surface_v1,
     substrate_adequacy_report_hash_v1,
 )
@@ -179,9 +179,9 @@ def test_mechanical_probe_policy_is_explicit_and_fail_closed():
         "mechanical_probe_enabled":True,
     }
     with pytest.raises(QualificationError,match="SUBSTRATE_ADEQUACY_MECHANICAL_POLICY_INCOMPLETE"):
-        _policy(base)
+        _parse_adequacy_policy(base)
 
-    parsed=_policy({
+    parsed=_parse_adequacy_policy({
         **base,
         "max_mechanical_probe_p95_norm":0.003,
         "max_mechanical_probe_max_norm":0.012,

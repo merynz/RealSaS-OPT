@@ -1,5 +1,6 @@
-from compiler.realsas_compiler_core.camera_authority_v1 import numpy as np
-import build_qualified_camera_set
+import numpy as np
+
+from compiler.realsas_compiler_core.camera_authority_v1 import build_qualified_camera_set
 from compiler.realsas_compiler_core.deformation_envelope_derivation_v1 import derive_deformation_envelope_v1
 from compiler.realsas_compiler_core.playback_full_surface_v3 import CameraProjectionV3
 from compiler.realsas_compiler_core.types import QualifiedJoint, QualifiedSkeletonIR

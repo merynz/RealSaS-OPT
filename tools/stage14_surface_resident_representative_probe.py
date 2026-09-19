@@ -91,7 +91,7 @@ def downstream_proxy(dense,compact,cs):
   px=np.asarray(px,float)
   out[kind]={"world_p95_norm":float(np.quantile(err,.95)),"world_max_norm":float(err.max(initial=0)),"projected_p95_px":float(np.quantile(px,.95)),"projected_max_px":float(px.max(initial=0))}
  return out
-\ndef main():
+def main():
  cs=cams();out={"schema":"RealSaS.Stage14SurfaceResidentRepresentativeCausalProbe.v2","status":"PASS","single_changed_variable":"VOXEL_REPRESENTATIVE_CENTROID_TO_NEAREST_DENSE_ZERO_SURFACE_VERTEX","target_nodes":8192,"subject_inputs_used":False,"knight_result_used":False,"mage_result_used":False,"shapes":{}}
  for name,args in {"SPHERE_15K":(.62,.62,.62),"TALL_ELLIPSOID_15K":(.28,.34,.82)}.items():
   p,f,n=ell(*args);cent,cn,e,div,inv=_adaptive_voxel_compact(p,f,n,target_nodes=8192)

@@ -234,18 +234,23 @@ def render_all(out_dir,center,half,res,min_margin):
         png=out_dir/f"V{vi}.png"
         bpy.context.scene.render.filepath=str(png)
         bpy.ops.render.render(write_still=True)
-        rr=bpy.data.images.get("Render Result")
-        if rr is None: raise RuntimeError("OBSERVATION_RENDER_RESULT_MISSING")
-        w,h=map(int,rr.size)
-        if (w,h)!=(res,res): raise RuntimeError("OBSERVATION_RESOLUTION_DRIFT")
-        pix=list(rr.pixels[:]); mask=bytearray(w*h); xs=[]; ys=[]
-        # Blender render pixels are bottom-up; observation mask bytes are top-down.
-        for yb in range(h):
-            y=h-1-yb
-            for x in range(w):
-                fg=1 if float(pix[(yb*w+x)*4+3])>1e-6 else 0
-                mask[y*w+x]=fg
-                if fg: xs.append(x); ys.append(y)
+        if not png.is_file() or png.stat().st_size<=0:
+            raise RuntimeError(f"OBSERVATION_RENDER_FILE_MISSING:V{vi}")
+        rendered=bpy.data.images.load(str(png),check_existing=False)
+        try:
+            w,h=map(int,rendered.size)
+            if (w,h)!=(res,res):
+                raise RuntimeError(f"OBSERVATION_RESOLUTION_DRIFT:V{vi}:{w}x{h}")
+            pix=list(rendered.pixels[:]); mask=bytearray(w*h); xs=[]; ys=[]
+            # Loaded PNG pixels are bottom-up; observation mask bytes are top-down.
+            for yb in range(h):
+                y=h-1-yb
+                for x in range(w):
+                    fg=1 if float(pix[(yb*w+x)*4+3])>1e-6 else 0
+                    mask[y*w+x]=fg
+                    if fg: xs.append(x); ys.append(y)
+        finally:
+            bpy.data.images.remove(rendered)
         if not xs: raise RuntimeError(f"OBSERVATION_EMPTY_FOREGROUND:V{vi}")
         mp=out_dir/f"V{vi}.mask.bin"; mp.write_bytes(bytes(mask))
         margin=int(min(min(xs),min(ys),w-1-max(xs),h-1-max(ys)))

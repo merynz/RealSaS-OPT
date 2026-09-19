@@ -1,0 +1,23 @@
+name: stage14-v2-subject-free-policy-calibration
+on:
+  push:
+    branches: [research/stage14-v2-policy-calibration-20260919]
+    paths: ['tools/stage14_v2_subject_free_policy_calibration.py','.github/workflows/stage14_v2_subject_free_policy_calibration.yml']
+  workflow_dispatch:
+jobs:
+  calibrate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 60
+    env: {PYTHONPATH: ., OMP_NUM_THREADS: '1', MKL_NUM_THREADS: '1', OPENBLAS_NUM_THREADS: '1', REALSAS_STAGE14_V2_OUT: stage14_v2_out}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - run: python tools/stage14_v2_subject_free_policy_calibration.py
+      - name: Assert no subject dependency
+        run: |
+          ! grep -R -E 'SUBJECT2_KNIGHT|Knight\.fbx|MAGE_|Mage' tools/stage14_v2_subject_free_policy_calibration.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: {name: stage14-v2-subject-free-policy-calibration, path: stage14_v2_out/, if-no-files-found: error}

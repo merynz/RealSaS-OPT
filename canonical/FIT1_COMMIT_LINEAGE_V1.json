@@ -51,7 +51,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "0594016b1030cec8e2715ee8c5a9d47c0bcf80f9",
+    "main": "3c8af916fcdb1ce55311626c07375949600b2ab6",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "noop2": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
     "playback-stack-v1-20260916": "46aaad438780adfa40e1fdc278f42c4ea651f1e9",
@@ -87,7 +87,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1879,
+  "commit_count": 1895,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -83104,6 +83104,387 @@
         "CI_TEST",
         "COMPILER_PROOF",
         "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0ea1e616a2209d6d921b659a566e278e4b71d41f",
+      "parents": [
+        "0594016b1030cec8e2715ee8c5a9d47c0bcf80f9"
+      ],
+      "author_time": "2026-09-19T12:39:25+03:00",
+      "committer_time": "2026-09-19T12:39:25+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a51707842f6806e6f824908ea3e03246bc2465f7",
+      "parents": [
+        "0ea1e616a2209d6d921b659a566e278e4b71d41f"
+      ],
+      "author_time": "2026-09-19T12:40:22+03:00",
+      "committer_time": "2026-09-19T12:40:22+03:00",
+      "subject": "canonical: seal pre-Knight automatic-Spine readiness audit [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/AUTOMATIC_SPINE_READINESS_AUDIT_20260919.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2226e2a578623146e22ed0051802f186aeee316c",
+      "parents": [
+        "a51707842f6806e6f824908ea3e03246bc2465f7"
+      ],
+      "author_time": "2026-09-19T12:55:25+03:00",
+      "committer_time": "2026-09-19T12:55:25+03:00",
+      "subject": "product: derive deformation envelope without character authoring [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/deformation_envelope_derivation_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py",
+        "tests/compiler/test_automatic_deformation_envelope_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7008ab59477ce44b53104dd01b81d5e0ed52d76d",
+      "parents": [
+        "2226e2a578623146e22ed0051802f186aeee316c"
+      ],
+      "author_time": "2026-09-19T12:56:07+03:00",
+      "committer_time": "2026-09-19T12:56:07+03:00",
+      "subject": "product: derive G5 component masks from qualified observations [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/product_coverage_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py",
+        "tests/compiler/test_automatic_component_masks_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9948ee638c7ff79488afad1b425d835715721485",
+      "parents": [
+        "7008ab59477ce44b53104dd01b81d5e0ed52d76d"
+      ],
+      "author_time": "2026-09-19T12:56:25+03:00",
+      "committer_time": "2026-09-19T12:56:25+03:00",
+      "subject": "product: forbid manual partition and carrier authoring [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "00c46459b38e50dc170041f3d2f00fcc89c4b402",
+      "parents": [
+        "9948ee638c7ff79488afad1b425d835715721485"
+      ],
+      "author_time": "2026-09-19T12:57:16+03:00",
+      "committer_time": "2026-09-19T12:57:16+03:00",
+      "subject": "presentation: separate face-group addressability from mechanics [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/presentation_structure_v1.py",
+        "tests/compiler/test_presentation_group_segmentation_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "12cbfd79deff7fe943a3103b338cda70cfe24099",
+      "parents": [
+        "00c46459b38e50dc170041f3d2f00fcc89c4b402"
+      ],
+      "author_time": "2026-09-19T12:58:19+03:00",
+      "committer_time": "2026-09-19T12:58:19+03:00",
+      "subject": "motion: derive source-rig retarget mapping automatically [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_compile_v1.py",
+        "tests/compiler/test_motion_compile_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "abb82e94da0e0d66ab316f836f4bbc568405a8a5",
+      "parents": [
+        "12cbfd79deff7fe943a3103b338cda70cfe24099"
+      ],
+      "author_time": "2026-09-19T13:01:16+03:00",
+      "committer_time": "2026-09-19T13:01:16+03:00",
+      "subject": "runtime: make physical occlusion independent of slot draw order [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_composition_v1.py",
+        "compiler/realsas_compiler_core/rest_render_v1.py",
+        "runtime/realsas_cpp/src/reference_raster_v3.h",
+        "runtime/realsas_cpp/src/runtime_v4_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1264bc24d48355d9440ecddd14a5de7e7bff3013",
+      "parents": [
+        "abb82e94da0e0d66ab316f836f4bbc568405a8a5"
+      ],
+      "author_time": "2026-09-19T13:03:32+03:00",
+      "committer_time": "2026-09-19T13:03:32+03:00",
+      "subject": "product: require editable authoring export for closure [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+        "compiler/realsas_compiler_core/authoring_bundle_v1.py",
+        "compiler/realsas_compiler_core/product_closure_v1.py",
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_closure_v1.py",
+        "tests/compiler/test_editable_authoring_bundle_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6cd502a5e68d1767e1bfcba41e9de197623ce7f7",
+      "parents": [
+        "1264bc24d48355d9440ecddd14a5de7e7bff3013"
+      ],
+      "author_time": "2026-09-19T13:05:37+03:00",
+      "committer_time": "2026-09-19T13:05:37+03:00",
+      "subject": "presentation: bind equal-depth ties to source evidence and slot order [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_compile_v1.py",
+        "compiler/realsas_compiler_core/product_composition_v1.py",
+        "compiler/realsas_compiler_core/rest_render_v1.py",
+        "runtime/realsas_cpp/src/runtime_v4_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "71d694ea14266481e711023b22e7c87b1d814bc3",
+      "parents": [
+        "6cd502a5e68d1767e1bfcba41e9de197623ce7f7"
+      ],
+      "author_time": "2026-09-19T13:06:33+03:00",
+      "committer_time": "2026-09-19T13:06:33+03:00",
+      "subject": "runtime: preserve editable presentation face groups [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/authoring_bundle_v1.py",
+        "compiler/realsas_compiler_core/runtime_projection_v1.py",
+        "tests/compiler/test_runtime_presentation_face_groups_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3b4bb795000a41ffcb68a777f1f4f50fc0ed9606",
+      "parents": [
+        "71d694ea14266481e711023b22e7c87b1d814bc3"
+      ],
+      "author_time": "2026-09-19T13:07:23+03:00",
+      "committer_time": "2026-09-19T13:07:23+03:00",
+      "subject": "canonical: freeze automatic eight-view product authority contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ad30aff05e8ca5f6370389e91bd9e234330edb8d",
+      "parents": [
+        "3b4bb795000a41ffcb68a777f1f4f50fc0ed9606"
+      ],
+      "author_time": "2026-09-19T13:07:58+03:00",
+      "committer_time": "2026-09-19T13:07:58+03:00",
+      "subject": "tests: rebase product fixture on automatic authoring-free contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_compile_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ac452e93432c15e0e6fc43abc669fec873f8965f",
+      "parents": [
+        "ad30aff05e8ca5f6370389e91bd9e234330edb8d"
+      ],
+      "author_time": "2026-09-19T13:09:00+03:00",
+      "committer_time": "2026-09-19T13:09:00+03:00",
+      "subject": "canonical: bind hardened automatic product plan",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "aed0974c684275b0bcb46c4edd541f6e45ff9803",
+      "parents": [
+        "ac452e93432c15e0e6fc43abc669fec873f8965f"
+      ],
+      "author_time": "2026-09-19T13:09:58+03:00",
+      "committer_time": "2026-09-19T13:09:58+03:00",
+      "subject": "presentation: name slot order as equal-depth authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_composition_v1.py",
+        "tests/compiler/test_product_composition_v1.py",
+        "tests/compiler/test_rest_render_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3c8af916fcdb1ce55311626c07375949600b2ab6",
+      "parents": [
+        "aed0974c684275b0bcb46c4edd541f6e45ff9803"
+      ],
+      "author_time": "2026-09-19T13:12:22+03:00",
+      "committer_time": "2026-09-19T13:12:22+03:00",
+      "subject": "runtime: gate equal-depth source and slot presentation semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/CMakeLists.txt",
+        "runtime/realsas_cpp/tests/runtime_v4_equal_depth_presentation_e2e.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "RUNTIME_PRODUCT"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

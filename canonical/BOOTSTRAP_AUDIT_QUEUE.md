@@ -4,9 +4,9 @@
 > Bootstrap: `BOOTSTRAP_AUDIT_CLOSED`
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
-- Census artifacts in declared scope: **495 / 495 discovered (100%)**
+- Census artifacts in declared scope: **496 / 496 discovered (100%)**
 - Semantically reconciled: **67**
-- Catalogued but unreviewed: **428**
+- Catalogued but unreviewed: **429**
 - Semantic coverage: **13.5%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
@@ -16,7 +16,7 @@
 | Branch | Head | Different blobs vs main | High-signal differing artifacts |
 |---|---|---:|---:|
 | `fit2/mage-full-subject-reclosure` | `eb7a20eb9da7` | 160 | 47 |
-| `playback-stack-v1-20260916` | `46aaad438780` | 326 | 86 |
+| `playback-stack-v1-20260916` | `46aaad438780` | 329 | 86 |
 | `repair/mage-full-subject-reclosure-20260912` | `2fa5d4b604d5` | 160 | 47 |
 
 The queue is a discovery aid. A path being listed does not establish what it proves, whether it is current, or whether it was ever executed.
@@ -354,8 +354,9 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 
 - `KA-16CF961E600F` `CLOSURE` — `playback-stack-v1-20260916` :: `canonical/MAGE_FULL_ASSEMBLY_RUNTIME_V4_ADMISSION_CLOSURE_V1_20260918.json` @ blob `6e56b1298dc8`
 
-### 2026-09-19 :: CROSS_CUTTING_OTHER (2)
+### 2026-09-19 :: CROSS_CUTTING_OTHER (3)
 
+- `KA-854D0E1DF2D7` `AUDIT` — `main` :: `canonical/AUTOMATIC_SPINE_READINESS_AUDIT_20260919.md` @ blob `45a7dce977cd`
 - `KA-A6E579E29956` `PREREG` — `main` :: `canonical/REST_SOURCE_PRESERVATION_CALIBRATION_PREREG_20260919.md` @ blob `c7f9d262ea7c`
 - `KA-EA7980C6A069` `RESULT` — `main` :: `canonical/REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json` @ blob `e5e6dc2c44ae`
 
@@ -454,11 +455,11 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D2D319509ACF` `WORKFLOW` — `main` :: `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` @ blob `16bf42a72ecc`
 - `KA-03510A41D0D4` `WORKFLOW` — `main` :: `.github/workflows/prefit_observation_authority_v1.yml` @ blob `b04004000018`
 - `KA-FDE35053B8A7` `WORKFLOW` — `main` :: `.github/workflows/single_family_data_contract_v1.yml` @ blob `929df12d859e`
-- `KA-219F5E724EFA` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `260fcaf90166`
+- `KA-63DE03624ED0` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `da8910c98be0`
 - `KA-25BB7CDC0AB9` `AUTHORITY_DECISION` — `main` :: `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` @ blob `6b5fff12a484`
 - `KA-DC74ABB19F22` `PREREG` — `main` :: `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` @ blob `c01e1a65f75e`
 - `KA-E1571E78A4A5` `PREREG` — `main` :: `canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md` @ blob `36aef9ae6ecd`
-- `KA-92DA02E46C64` `AUTHORITY_DECISION` — `main` :: `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` @ blob `60c7f4ddd484`
+- `KA-8869F6541F51` `AUTHORITY_DECISION` — `main` :: `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` @ blob `1d128e0c490a`
 - `KA-4BA36C81DC37` `RESULT` — `main` :: `canonical/fit_mage_v1/CODEC_A0_EXACT_CONDITIONING_RESULT.json` @ blob `647d375bb65a`
 - `KA-2F8418D24D3C` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/fit_mage_v1/FIT_MAGE_CPU_V1_STATUS.md` @ blob `4edcee0fffff`
 - `KA-402A1F2E8E27` `AUTHORITY_DECISION` — `main` :: `experiments/family_selection_v1/post_freeze_family_selector_v1.py` @ blob `6571a60a4223`

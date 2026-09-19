@@ -348,15 +348,19 @@ std::vector<uint8_t> ReferenceRuntime::render_rgba(uint32_t ci,uint32_t vi,float
                 const uint64_t provenance_rank =
                     target_overlay.provenance.at(fi)==AppearanceProvenance::DirectSource ? 2ull : 1ull;
                 const uint64_t authority_order =
-                    (provenance_rank<<62) | (uint64_t(ai)<<32) | uint64_t(fi);
+                    (provenance_rank<<62)
+                    | (uint64_t(semantic_order & 0xFFFu)<<50)
+                    | (uint64_t(ai & 0xFFFu)<<38)
+                    | uint64_t(fi);
                 if(!reference_raster_v3::depth_test_passes(depth[pi],z,authority_order))continue;
                 float u=a.u*bc.w0+b.u*bc.w1+c.u*bc.w2;
                 float v=a.v*bc.w0+b.v*bc.w1+c.v*bc.w2;
                 auto src=sample_bilinear(*binding.view,u,v);
                 if(src[3]<=0)continue;
                 // Flattened 8-view art is treated as nearest-surface opaque/cutout
-                // appearance authority. Physical pixel ownership is independent of
-                // editable slot draw order; stacked translucency is not inferred.
+                // appearance authority. Camera-forward depth is primary; exact-depth
+                // ties use source-view provenance, then editable slot order, then
+                // stable asset/face identity. Stacked translucency is not inferred.
                 color[pi]=src;
                 const DepthWritePolicy policy=DepthWritePolicy::On;
                 if(reference_raster_v3::should_write_depth(policy,src[3],d.alpha_cutout_threshold))

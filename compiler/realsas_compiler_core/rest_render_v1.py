@@ -31,7 +31,7 @@ REST_RENDER_CONTRACT={
     "projection":"FULL_SURFACE_CAMERA_PROJECTION_V3",
     "raster_fill":"HALF_INTEGER_TOP_LEFT",
     "visibility":"CANONICAL_Z_BUFFER_VISIBLE_OWNER_V1",
-    "equal_depth_tiebreak":"SOURCE_VISIBILITY_THEN_STABLE_FACE_KEY_V2",
+    "equal_depth_tiebreak":"SOURCE_VISIBILITY_THEN_SLOT_ORDER_THEN_STABLE_FACE_KEY_V3",
     "appearance":"ONE_OBSERVED_DONOR_VIEW_PER_FACE",
     "sampling":"OBSERVATION_PIXEL_CENTER_XY_BILINEAR_RGBA_V2",
     "source_texel_center_domain":"integer index centers 0..W-1 / 0..H-1",
@@ -123,6 +123,7 @@ def _render_one(
     camera,
     appearance,
     composition,
+    presentation_graph:QualifiedPresentationGraphIR,
     source_rgba_by_view:Mapping[int,np.ndarray],
 )->np.ndarray:
     if appearance.mesh_binding_hash!=mesh.mesh_lineage_hash:
@@ -133,7 +134,7 @@ def _render_one(
         raise QualificationError("REST_RENDER_CAMERA_BINDING_DRIFT")
     if composition.physical_occlusion_rule!="CANONICAL_Z_BUFFER_VISIBLE_OWNER_V1":
         raise QualificationError("REST_RENDER_OCCLUSION_RULE_DRIFT")
-    if composition.equal_depth_tiebreak!="SOURCE_VISIBILITY_THEN_STABLE_FACE_KEY_V2":
+    if composition.equal_depth_tiebreak!="SOURCE_VISIBILITY_THEN_SLOT_ORDER_THEN_STABLE_FACE_KEY_V3":
         raise QualificationError("REST_RENDER_DEPTH_TIEBREAK_DRIFT")
 
     projected=project_points_xyz_v3([tuple(map(float,v.P)) for v in mesh.vertices],camera)
@@ -142,6 +143,20 @@ def _render_one(
     if len(vertex_index)!=len(mesh.vertices):
         raise QualificationError("REST_RENDER_DUPLICATE_VERTEX_ID")
     corner_map={(int(c.face_index),int(c.corner_index)):c for c in appearance.corner_bindings}
+    slot_setup={str(s.slot_id):int(s.setup_order) for s in presentation_graph.slots}
+    component_fallback={}
+    face_setup={}
+    for attachment in presentation_graph.attachments:
+        order=slot_setup.get(str(attachment.slot_id))
+        if order is None:
+            raise QualificationError("REST_RENDER_ATTACHMENT_SLOT_UNKNOWN")
+        for cid in attachment.mechanical_component_ids:
+            component_fallback[str(cid)]=max(order,component_fallback.get(str(cid),-1))
+        for fi in tuple((attachment.metadata or {}).get("mesh_face_indices") or ()):
+            fi=int(fi)
+            if fi in face_setup and face_setup[fi]!=order:
+                raise QualificationError("REST_RENDER_FACE_PRESENTATION_ORDER_AMBIGUOUS")
+            face_setup[fi]=order
     expected={(fi,ci) for fi,face in enumerate(mesh.faces) for ci in range(len(face))}
     if set(corner_map)!=expected:
         raise QualificationError("REST_RENDER_APPEARANCE_CORNER_ACCOUNTING_DRIFT")
@@ -177,7 +192,8 @@ def _render_one(
         xs=(float(a[0]),float(b[0]),float(c[0])); ys=(float(a[1]),float(b[1]),float(c[1]))
         minx=max(0,int(math.floor(min(xs)-0.5))); maxx=min(width-1,int(math.ceil(max(xs)-0.5)))
         miny=max(0,int(math.floor(min(ys)-0.5))); maxy=min(height-1,int(math.ceil(max(ys)-0.5)))
-        face_key=(0 if donor==int(camera.view_index) else 1,component_id,tuple(map(str,face)))
+        slot_order=int(face_setup.get(fi,component_fallback.get(component_id,0)))
+        face_key=(0 if donor==int(camera.view_index) else 1,-slot_order,component_id,tuple(map(str,face)))
         for y in range(miny,maxy+1):
             for x in range(minx,maxx+1):
                 if not _covers_pixel_center(a,b,c,x,y):
@@ -297,7 +313,7 @@ def render_rest_views(
             raise QualificationError("REST_RENDER_SOURCE_TEXTURE_DIMENSION_DRIFT")
         image,donor_owner=_render_one(
             mesh=mesh,camera=cams[view],appearance=app[view],composition=comp[view],
-            source_rgba_by_view=source_rgba_by_view,
+            presentation_graph=presentation_graph,source_rgba_by_view=source_rgba_by_view,
         )
         rendered[view]=image
         geometry_visible=int(np.count_nonzero(donor_owner>=0))

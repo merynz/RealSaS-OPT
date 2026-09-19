@@ -354,6 +354,12 @@ def _automatic_retarget_map(payload:Mapping[str,Any], skeleton:QualifiedSkeleton
     total=float(sum(cost[i,j] for i,j in zip(ri,ci)))
     if not math.isfinite(total):
         raise QualificationError("MOTION_COMPILE_AUTO_RETARGET_COST_NONFINITE")
+    # Deterministic retargeting must abstain on symmetric/ambiguous matches.
+    # Geometry/topology is normalized, so this is a subject-free dimensionless margin.
+    for i,j in zip(ri,ci):
+        row=np.sort(cost[int(i)])
+        if len(row)>1 and float(row[1]-row[0])<0.02:
+            raise QualificationError("MOTION_COMPILE_AUTO_RETARGET_AMBIGUOUS")
     return mapping
 
 
@@ -480,14 +486,13 @@ def build_motion_compile_constraint_set(
     envelope:DeformationCapabilityEnvelopeIR,
     presentation:QualifiedPresentationGraphIR,
     compiler_config:Mapping[str,Any]|None=None,
+    automatic_retarget_maps:Mapping[str,Mapping[str,str]]|None=None,
 )->MotionCompileConstraintSetIR:
     cfg=dict(compiler_config or {})
-    unknown=set(cfg)-{"retarget_maps","root_trajectory_modes","contacts"}
+    unknown=set(cfg)-{"root_trajectory_modes","contacts"}
     if unknown:
         raise QualificationError("MOTION_COMPILE_CONFIG_UNSUPPORTED")
-    if cfg.get("retarget_maps"):
-        raise QualificationError("MOTION_COMPILE_MANUAL_RETARGET_FORBIDDEN")
-    retarget_maps={}
+    retarget_maps={str(k):dict(v) for k,v in dict(automatic_retarget_maps or {}).items()}
     root_modes=dict(cfg.get("root_trajectory_modes") or {})
     contacts_cfg=dict(cfg.get("contacts") or {})
     clip_ids={a.clip_id for a in source_set.assets}
@@ -691,11 +696,9 @@ def build_qualified_motion(
         if asset.source_space=="SOURCE_RIG_TRACKS_V1":
             payload=dict(source_payloads.get(asset.clip_id) or {})
             generated_maps[asset.clip_id]=_automatic_retarget_map(payload,skeleton)
-    constraint_cfg={k:v for k,v in cfg.items() if k!="retarget_maps"}
-    constraint_cfg["retarget_maps"]=generated_maps
     constraints=build_motion_compile_constraint_set(
         source_set=source_set,product_state=product_state,skeleton=skeleton,envelope=envelope,
-        presentation=presentation,compiler_config=constraint_cfg,
+        presentation=presentation,compiler_config=cfg,automatic_retarget_maps=generated_maps,
     )
     validate_motion_compile_constraint_set(
         constraints,source_set=source_set,product_state=product_state,skeleton=skeleton,

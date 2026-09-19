@@ -104,7 +104,13 @@ def _boundary(mask:np.ndarray)->np.ndarray:
     return out
 
 
-def _silhouette_distance(source:np.ndarray,predicted:np.ndarray)->tuple[float,float,float]:
+def silhouette_distance_metrics(source:np.ndarray,predicted:np.ndarray)->tuple[float,float,float]:
+    """Symmetric nearest-boundary distance in reference-raster pixels.
+
+    This is shared by Stage13 raw geometry admission and Stage32 rest/source
+    preservation so both gates measure systematic silhouette displacement with
+    one exact metric implementation.
+    """
     a=_boundary(source); b=_boundary(predicted)
     if not np.any(a) or not np.any(b):
         raise QualificationError("REST_PRESERVATION_EMPTY_SILHOUETTE_BOUNDARY")
@@ -118,6 +124,11 @@ def _silhouette_distance(source:np.ndarray,predicted:np.ndarray)->tuple[float,fl
         float(np.percentile(values,95.0)),
         float(np.max(values)),
     )
+
+
+def _silhouette_distance(source:np.ndarray,predicted:np.ndarray)->tuple[float,float,float]:
+    # Backward-compatible private alias retained for the existing Stage32 path.
+    return silhouette_distance_metrics(source,predicted)
 
 
 def _appearance_error(source_rgba:np.ndarray,rendered_rgba:np.ndarray,union:np.ndarray):

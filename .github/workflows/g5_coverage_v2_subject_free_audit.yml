@@ -1,0 +1,40 @@
+name: g5-coverage-v2-subject-free-audit
+
+on:
+  push:
+    branches:
+      - research/g5-coverage-v2-audit-20260919
+    paths:
+      - 'tools/g5_coverage_v2_subject_free_audit.py'
+      - '.github/workflows/g5_coverage_v2_subject_free_audit.yml'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_G5_AUDIT_OUT: g5_audit_out
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Run G5 subject-free retrospective audit
+        run: python tools/g5_coverage_v2_subject_free_audit.py
+      - name: Assert no subject dependency
+        run: |
+          ! grep -R -E 'SUBJECT2_KNIGHT|Knight\.fbx|MAGE_|Mage' tools/g5_coverage_v2_subject_free_audit.py
+      - name: Upload audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: g5-coverage-v2-subject-free-audit
+          path: g5_audit_out/
+          if-no-files-found: error

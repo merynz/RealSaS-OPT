@@ -12,8 +12,8 @@
   "explained_high_signal_count": 319,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 119,
-  "safe_default_evidence_only_branch_count": 115,
+  "live_branch_count": 120,
+  "safe_default_evidence_only_branch_count": 116,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -444,7 +444,7 @@
     },
     {
       "name": "main",
-      "sha": "cdb7fb2d39ccf9ebb691d82d0b5e8399cb734f48",
+      "sha": "0934f677da9222c1faa9dea7c9144ed390ceb1be",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -516,7 +516,7 @@
     },
     {
       "name": "ops/knight-authority-inventory-20260919",
-      "sha": "274414c5bc4b2791dbfe74450069b0a62d896885",
+      "sha": "5912a2cd042cc050c36ae1a90648ac2f06f63e37",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -691,6 +691,12 @@
     {
       "name": "source/generic-completion-v1-20260902",
       "sha": "85a25b419a47ddd52b4a70ae3b8639cc575bb6b3",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "subject2/knight-observation-v1-20260919",
+      "sha": "89fd6321a8515e3af2530b55995d8d9c61925889",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

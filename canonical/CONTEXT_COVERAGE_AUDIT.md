@@ -11,8 +11,8 @@
 - Explained by continuity policy: **319**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **119**
-- Safe-default evidence-only branches: **115**
+- Live branches: **120**
+- Safe-default evidence-only branches: **116**
 
 ### Classification counts
 
@@ -100,7 +100,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `cdb7fb2d39cc` | `CANONICAL` | canonical branch |
+| `main` | `0934f677da92` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -112,7 +112,7 @@ _None._
 | `next/structured-depth-bridge-20260829` | `e362c473c2fd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `noop` | `c6b5108f672b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `noop2` | `c6b5108f672b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `ops/knight-authority-inventory-20260919` | `274414c5bc4b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `ops/knight-authority-inventory-20260919` | `5912a2cd042c` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `ops/temp-trigger-n1d-v2-recovery-20260820` | `536b40b6a6bf` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `ops/trigger-n1d-v2-recovery-v2-verify-20260820` | `12a813a8f501` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `playback-stack-v1-20260916` | `46aaad438780` | `EVIDENCE_ONLY` | explicit authority-map override |
@@ -142,6 +142,7 @@ _None._
 | `single-family-e2e-fit-v1-20260902` | `5fa4bf788328` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `single-family-e2e-models-v1-20260902` | `362556db9b31` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `source/generic-completion-v1-20260902` | `85a25b419a47` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `subject2/knight-observation-v1-20260919` | `89fd6321a851` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp-do-not-use` | `953f2ded4911` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp-noop` | `16ee5cd54a00` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `tmp/appearance-witness-fetch-20260826` | `ec623d005bdb` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

@@ -12,8 +12,8 @@
   "explained_high_signal_count": 322,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 139,
-  "safe_default_evidence_only_branch_count": 135,
+  "live_branch_count": 140,
+  "safe_default_evidence_only_branch_count": 136,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "539c0c53c8ce1c3a4f7cde8c38cb48f389a3be01",
+      "sha": "351ce16a5325457264edd4b776ca8c0870ff2912",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -630,7 +630,7 @@
     },
     {
       "name": "repair/stage14-mechanical-adequacy-v2-20260919",
-      "sha": "bff985d65f6a8080ec9d389fb690a5ee51b44a22",
+      "sha": "1972a69a6bbdb04b05e11f5c8c0fd300848faa5a",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -697,6 +697,12 @@
     {
       "name": "research/stage14-surface-resident-representative-20260919",
       "sha": "4ad1cce3fe93b54f7e94f3d376658816e83fd732",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "research/stage14-v2-final-calibration-20260920",
+      "sha": "351ce16a5325457264edd4b776ca8c0870ff2912",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

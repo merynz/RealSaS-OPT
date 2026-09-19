@@ -827,11 +827,16 @@
     {
       "ordinal": 40,
       "id": "40_PRODUCT_CLOSURE_SEAL",
-      "title": "Product closure seal",
+      "title": "Product closure + editable authoring export",
       "group": "closure",
       "depends_on": [
+        "18_SKELETON_QUALIFIED",
+        "27_QUALIFIED_MESH_GATE",
+        "28_QUALIFIED_MESH_SKIN_TRANSFER",
         "29_CANONICAL_PUPPET_STATE_SEALED",
+        "30_QUALIFIED_PRESENTATION_GRAPH",
         "32_REST_SOURCE_PRESERVATION_GATE",
+        "34_MOTION_COMPILE_RUN",
         "35_MOTION_DYNAMIC_PROOF",
         "36_RUNTIME_V4_PROJECT",
         "37_RSS_MATERIALIZE_COMPACT",

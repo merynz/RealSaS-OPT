@@ -30,6 +30,7 @@ class ProductClosureSealIR:
     runtime_package_binding_hash:str
     native_playback_binding_hash:str
     visual_motion_binding_hash:str
+    authoring_bundle_binding_hash:str
     professional_motion_clip_ids:tuple[str,...]
     qualification_report:Json
     product_closure_hash:str
@@ -44,7 +45,7 @@ def product_closure_hash(value:ProductClosureSealIR)->str:
 
 
 def build_product_closure_seal(
-    *,product_state_hash:str,rest,dynamic,projection,package,native,visual,
+    *,product_state_hash:str,rest,dynamic,projection,package,native,visual,authoring,
 )->ProductClosureSealIR:
     if rest.preservation_lineage_hash!=qualified_rest_preservation_hash(rest):
         raise QualificationError("PRODUCT_CLOSURE_REST_HASH_DRIFT")
@@ -58,6 +59,13 @@ def build_product_closure_seal(
         raise QualificationError("PRODUCT_CLOSURE_NATIVE_HASH_DRIFT")
     if visual.visual_motion_hash!=visual_motion_hash(visual):
         raise QualificationError("PRODUCT_CLOSURE_VISUAL_HASH_DRIFT")
+    from .authoring_bundle_v1 import editable_puppet_bundle_hash
+    if authoring.authoring_bundle_hash!=editable_puppet_bundle_hash(authoring):
+        raise QualificationError("PRODUCT_CLOSURE_AUTHORING_HASH_DRIFT")
+    if authoring.qualification_report.get("status")!="PASS_EDITABLE_AUTHORING_BUNDLE":
+        raise QualificationError("PRODUCT_CLOSURE_AUTHORING_NOT_PASS")
+    if authoring.product_state_binding_hash!=str(product_state_hash):
+        raise QualificationError("PRODUCT_CLOSURE_AUTHORING_PRODUCT_DRIFT")
     if not bool(rest.qualification_report.get("every_view_passed_every_rule",False)):
         raise QualificationError("PRODUCT_CLOSURE_REST_NOT_PASS")
     if not bool(rest.qualification_report.get("motion_authorization_precondition_satisfied",False)):
@@ -94,7 +102,7 @@ def build_product_closure_seal(
     value=ProductClosureSealIR(
         str(product_state_hash),rest.preservation_lineage_hash,dynamic.dynamic_motion_hash,
         projection.projection_hash,package.package_seal_hash,native.native_playback_hash,
-        visual.visual_motion_hash,professional,
+        visual.visual_motion_hash,authoring.authoring_bundle_hash,professional,
         {
             "status":"PRODUCT_PASS",
             "product_pass":True,
@@ -104,6 +112,7 @@ def build_product_closure_seal(
             "runtime_v4_materialized":True,
             "native_package_open_playback_passed":True,
             "native_visible_artist_motion_passed":True,
+            "editable_authoring_export_passed":True,
             "json_only_product_pass_forbidden":True,
             "founder_visual_pass_claimed":False,
         },"",
@@ -111,7 +120,7 @@ def build_product_closure_seal(
             "single_canonical_3d_mesh_truth":True,
             "completion_used":False,
             "mechanical_probe_alone_cannot_mint_product_pass":True,
-            "closure_authority":"EXACT_STAGE32_35_36_37_38_39_LINEAGE",
+            "closure_authority":"EXACT_STAGE32_35_36_37_38_39_PLUS_EDITABLE_AUTHORING_LINEAGE",
         },
     )
     return replace(value,product_closure_hash=product_closure_hash(value))
@@ -124,7 +133,8 @@ def product_closure_from_dict(payload:Mapping[str,Any])->ProductClosureSealIR:
         str(payload["product_state_binding_hash"]),str(payload["rest_preservation_binding_hash"]),
         str(payload["dynamic_motion_binding_hash"]),str(payload["runtime_projection_binding_hash"]),
         str(payload["runtime_package_binding_hash"]),str(payload["native_playback_binding_hash"]),
-        str(payload["visual_motion_binding_hash"]),tuple(map(str,payload.get("professional_motion_clip_ids") or ())),
+        str(payload["visual_motion_binding_hash"]),str(payload["authoring_bundle_binding_hash"]),
+        tuple(map(str,payload.get("professional_motion_clip_ids") or ())),
         dict(payload.get("qualification_report") or {}),str(payload["product_closure_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.ProductClosureSealIR.v1"),
         metadata=dict(payload.get("metadata") or {}),

@@ -1,0 +1,42 @@
+{
+  "schema": "RealSaS.RestSourcePreservationProductPolicy.v1",
+  "status": "FROZEN_AFTER_SUBJECT_FREE_CALIBRATION_BEFORE_KNIGHT_STAGE32_RESULT",
+  "authority": "NORMATIVE_STAGE32_PRODUCT_ADMISSION_POLICY__NOT_EMPIRICAL_KNIGHT_FIT",
+  "calibration_result": {
+    "path": "canonical/REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json",
+    "source_commit": "02e8a368394b2408996aa3addbce51098a7886cc",
+    "workflow_run_id": 35427132585,
+    "workflow_job_id": 105854920122
+  },
+  "inherited_mesh_policy": {
+    "path": "canonical/QUALIFIED_MESH_PRODUCT_POLICY_V1_20260918.json",
+    "carrier_class": "MESH"
+  },
+  "per_view_thresholds": {
+    "min_alpha_recall": 0.97,
+    "min_alpha_precision": 0.995,
+    "max_largest_coherent_hole_fraction": 0.005,
+    "max_interior_uncovered_fraction": 0.005,
+    "max_silhouette_edge_p95_px": 0.5,
+    "max_overlap_rgba_mismatch_pixel_count": 0,
+    "max_overlap_rgba_max_abs_channel_error_u8": 0,
+    "min_direct_source_geometry_fraction": 1,
+    "max_cross_view_source_geometry_fraction": 0
+  },
+  "aggregation": {
+    "exact_eight_views_required": true,
+    "every_view_must_pass_every_rule": true,
+    "aggregate_compensation_forbidden": true
+  },
+  "diagnostics_only": [
+    "alpha_iou",
+    "silhouette_edge_mean_px",
+    "silhouette_edge_max_px",
+    "premultiplied_rgb_mae",
+    "premultiplied_rgb_p95",
+    "alpha_mae",
+    "overlap_rgba_mismatch_fraction"
+  ],
+  "mutation_rule": "After Knight Stage32 result inspection this policy may only be tightened prospectively; it may never be relaxed to turn a failure into PASS.",
+  "claim_boundary": "Policy admission semantics only. This file does not claim Knight compliance or PRODUCT_PASS."
+}

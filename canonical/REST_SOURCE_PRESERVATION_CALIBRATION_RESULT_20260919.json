@@ -1,0 +1,70 @@
+{
+  "schema": "RealSaS.RestSourcePreservationCalibrationResult.v1",
+  "status": "PASS",
+  "authority": "SUBJECT_FREE_SYNTHETIC_ONLY__NO_KNIGHT_OR_MAGE_INPUT",
+  "source_commit": "02e8a368394b2408996aa3addbce51098a7886cc",
+  "workflow_run_id": 35427132585,
+  "workflow_job_id": 105854920122,
+  "started_at_utc": "2026-09-19T06:38:08Z",
+  "completed_at_utc": "2026-09-19T06:39:02Z",
+  "preregistration": {
+    "path": "canonical/REST_SOURCE_PRESERVATION_CALIBRATION_PREREG_20260919.md",
+    "git_blob_sha": "c7f9d262ea7c4798490750693095d71824514d92"
+  },
+  "apparatus": {
+    "path": "experiments/rest_preservation_v1/run_subject_free_calibration.py",
+    "git_blob_sha": "3c8a482c2c88488f68ec288cb0d9a256ccf30404"
+  },
+  "measurement_implementation": {
+    "path": "compiler/realsas_compiler_core/rest_preservation_v1.py",
+    "git_blob_sha": "c2f7bf108a84b8c4da77634271e877aa68a2efb1",
+    "metric_contract_hash": "a1b509c4f89de370bcc266fb7b7890bcbe4f756a0bd597aef10158d67be6f2f3"
+  },
+  "apparatus_test": {
+    "path": "tests/compiler/test_rest_preservation_calibration_v1.py",
+    "git_blob_sha": "d09b2b7af1bfe5244429be20686fdd0c977ab217"
+  },
+  "workflow": {
+    "path": ".github/workflows/rest_source_preservation_calibration.yml",
+    "git_blob_sha": "11d84404c1e1d9fb587323709c5ccfea43076d70"
+  },
+  "synthetic_family": {
+    "resolutions": [
+      64,
+      128
+    ],
+    "shape_ids": [
+      "RECTANGLE",
+      "DISK",
+      "CONCAVE_L",
+      "STEPPED_ASYMMETRIC"
+    ],
+    "case_count": 64,
+    "view_measurement_count": 512
+  },
+  "silhouette_selection": {
+    "max_positive_identity_p95_px": 0,
+    "min_negative_one_pixel_shift_p95_px": 1,
+    "strictly_separated": true,
+    "selected_p95_ceiling_px": 0.5,
+    "selection_rule": "MIDPOINT(MAX_IDENTITY_P95,MIN_ONE_PIXEL_SHIFT_P95)"
+  },
+  "sensitivity": {
+    "identity_exact_rgba_and_direct_source": true,
+    "rgb_one_lsb_detected": true,
+    "visible_cross_view_detected": true,
+    "coherent_hole_detected": true
+  },
+  "inherited_g5_mesh_floors": {
+    "min_recall": 0.97,
+    "min_precision": 0.995,
+    "max_largest_coherent_hole_fraction": 0.005,
+    "max_interior_uncovered_fraction": 0.005
+  },
+  "exact_policy_candidates": {
+    "max_overlap_rgba_mismatch_pixel_count": 0,
+    "max_overlap_rgba_max_abs_channel_error_u8": 0,
+    "max_cross_view_source_geometry_fraction": 0
+  },
+  "claim_boundary": "Calibration sensitivity and threshold selection only; no Knight, subject, motion, unseen, or PRODUCT_PASS claim."
+}

@@ -112,12 +112,14 @@
     "learned_execution": {
       "common": "IRIS/Geppetto/Arachne heavy fitting is represented by a preregistered exact-source execution receipt. Receipt status alone is not product authority: prereg hash, model-source SHA, checkpoint/result/proposal SHA and upstream lineages must all match. Teacher inference inputs are forbidden.",
       "iris": "Stages 09-11 preregister/verify/seal the IRIS fit. Stage 12 admits an exact signed-zero-surface NPZ bound to the checkpoint, observation set and normalization domain.",
-      "geometry": "Stage 13 performs eight-view source-foreground reprojection against explicit preregistered global and connected-component thresholds. Stage 14 performs bounded subject-free substrate adequacy search over the dense signed zero-surface; N is selected as the smallest actual passing mechanical carrier set under explicit geometric/normal/projected/component tolerances, not a fixed product constant. Stage 15 requires exact adequacy-report binding plus current lossless Geppetto RiggingSurface tensorization.",
+      "geometry": "Stage 13 performs eight-view source-foreground reprojection against the frozen Stage13 v2 geometry policy. Stage 14 requires an exact-hash frozen Stage14 v2 policy document and performs bounded subject-free substrate adequacy search over the dense signed zero-surface; the current calibrated ceiling is 12288 nodes, not a fixed target, with unchanged v1 quality tolerances plus visible-component eligibility and component-aware compaction. Stage 15 requires exact adequacy-report binding plus current lossless Geppetto RiggingSurface tensorization.",
       "geppetto": "Stages 16-17 admit only exact SkeletonProposalIR evidence. Stage 18 alone mints QualifiedSkeletonIR through Compiler.qualify_skeleton; Stage 19 seals checkpoint+qualified lineage.",
       "arachne": "Stages 20-21 admit only exact SkinProposalIR evidence. Stage 22 alone mints QualifiedSkinIR through Compiler.qualify_skin with preregistered bounded repair policy; Stage 23 seals checkpoint+qualified lineage."
     },
     "gsa": {
-      "adequacy_policy": "Required subject-free bounded search policy: min/max candidate nodes, growth/refinement budget, dense-to-S spatial error, normal error, projected carrier spacing, dense-component preservation and aliasing limits. target_nodes as a fixed product decision is superseded.",
+      "policy_document": "Stage14 requires exact {path,sha256} to canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V2_20260920.json or a byte-identical frozen equivalent. Inline GSA values must exactly match the document; drift fails closed.",
+      "adequacy_policy": "Required subject-free bounded search policy: min/max candidate nodes, growth/refinement budget, dense-to-S spatial error, normal error, projected carrier spacing, visible-component preservation and aliasing limits. target_nodes as a fixed product decision is superseded.",
+      "operator": "V2 requires visible_component_always_eligible=true and component_aware_voxel_compaction=true. Dense zero-surface geometry remains authority; GSA may only select a mechanical carrier.",
       "selection_rule": "Stage14 selects the minimum actual node count among passing evaluated candidates; no character name or categorical recognition may affect selection."
     },
     "authoring": {

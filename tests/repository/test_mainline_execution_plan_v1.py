@@ -19,6 +19,10 @@ def test_motion_manifest_scope_does_not_touch_iris_or_skin():
     plan=load("canonical/MAINLINE_EXECUTION_PLAN_V1.json"); by={x["id"]:x for x in plan["stages"]}
     assert by["10_IRIS_FIT"]["manifest_keys"]==["iris_fit"]
     assert by["21_ARACHNE_FIT"]["manifest_keys"]==["arachne_fit"]
+    assert by["32_REST_SOURCE_PRESERVATION_GATE"]["manifest_keys"]==["appearance","observation"]
+    assert by["32_REST_SOURCE_PRESERVATION_GATE"]["depends_on"]==[
+        "07_OBSERVATION_CONTRACT_QUALIFIED","26_MESH_CANDIDATE_BUILD","31_REST_RENDER_8VIEW"
+    ]
     assert by["33_MOTION_SOURCE_OR_PRESET_SEAL"]["manifest_keys"]==["motion"]
 def test_policy_hash_changes_on_semantic_change():
     plan=load("canonical/MAINLINE_EXECUTION_PLAN_V1.json"); policy=dict(plan["stages"][0]["policy"]); before=content_sha256(policy); policy["cacheable"]=False

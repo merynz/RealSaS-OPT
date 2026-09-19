@@ -5,8 +5,8 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__SUBJECT_DATA_ONLY_IN_RUN_ARTIFACTS",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
-  "pipeline_plan_sha256": "c23f076fd429db6194f3da44d0ed3965e04d5f69181626d4bbf9416ab8de1df5",
-  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__CAMERA_AND_REST_RENDER_EXECUTABLE",
+  "pipeline_plan_sha256": "06be699711786e3bac0be4d1aacca4df8198412f39dc3cdcf84a6e3000fdda1b",
+  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__REST_PRESERVATION_EXECUTABLE__MOTION_SEAM_OPEN",
   "completed_count": 0,
   "total_count": 40,
   "next_stage": "01_SOURCE_BYTES_SEALED",
@@ -521,6 +521,10 @@
     {
       "event": "CAMERA_AND_REST_RENDER_STAGES_BOUND",
       "note": "Stage 05 now seals exact QualifiedCameraSetIR; stages 25/27 consume that camera authority instead of re-reading a manifest camera bundle. Stage 31 now materializes eight deterministic source-authoritative rest renders and a RestRenderSetIR. Stage 32 remains UNBOUND pending frozen rest-preservation admission policy."
+    },
+    {
+      "event": "REST_SOURCE_PRESERVATION_STAGE32_BOUND",
+      "note": "Stage 32 now measures exact stage-31 replay against stage-07 source raster/foreground authority, re-derives frozen subject-free policy, and requires every view to pass every hard rule. Motion Stage 33 remains UNBOUND."
     }
   ]
 }

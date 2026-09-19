@@ -646,9 +646,11 @@
       "title": "Rest source-preservation gate",
       "group": "appearance",
       "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "26_MESH_CANDIDATE_BUILD",
         "31_REST_RENDER_8VIEW"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.rest_preservation_v1:qualify_rest_source_preservation_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -656,7 +658,8 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
-        "appearance"
+        "appearance",
+        "observation"
       ]
     },
     {

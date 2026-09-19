@@ -3,7 +3,7 @@
   "date": "2026-09-19",
   "continuation_branch": "main",
   "execution_branch": "main",
-  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__CAMERA_AND_REST_RENDER_EXECUTABLE",
+  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__REST_PRESERVATION_EXECUTABLE__MOTION_SEAM_OPEN",
   "authority": {
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
@@ -18,12 +18,12 @@
   },
   "current_focus": {
     "module": "QualifiedMesh + QualifiedPresentationGraph authority implementation",
-    "state": "PRODUCT_AUTHORITY_IMPLEMENTATION__CAMERA_AND_REST_RENDER_EXECUTABLE",
+    "state": "PRODUCT_AUTHORITY_IMPLEMENTATION__REST_PRESERVATION_EXECUTABLE__MOTION_SEAM_OPEN",
     "active_experiment": "SUBJECT2_KNIGHT_FULL_CLOSURE",
-    "most_recent_closed_gate": "REST_RENDER_STAGE31_IMPLEMENTATION_PASS",
-    "promotion_block": "Stage 05 camera authority and stages 24-31 product/presentation/rest-render adapters are executable where their upstream contracts exist. Stage 32 metrics are implemented but admission policy remains intentionally UNBOUND until subject-free preregistration closes.",
+    "most_recent_closed_gate": "REST_SOURCE_PRESERVATION_STAGE32_IMPLEMENTATION_PASS",
+    "promotion_block": "Stages 05 and 24-32 have executable typed adapters. Stage 32 uses a frozen subject-free admission policy and exact 8-view source replay; Stage 33 motion source/preset authority remains intentionally UNBOUND.",
     "scope_warning": "Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority",
-    "scientific_question": "Can the generic compiler promote one view-independent canonical mesh through G1-G5 and a qualified presentation graph without a second geometry or runtime presentation truth?"
+    "scientific_question": "Can the generic compiler seal a source/preset motion authority after exact rest/source preservation, then compile and prove visible run/idle motion without introducing a second mechanics or presentation truth?"
   },
   "execution_environment": {
     "actions": "SELF_HOSTED_LOCAL_ONLY",
@@ -131,6 +131,10 @@
     {
       "trap": "Camera bytes are re-read independently downstream",
       "defense": "Stage 05 QualifiedCameraSetIR is the only camera parameter authority; downstream stages consume its exact sealed artifact."
+    },
+    {
+      "trap": "Observation source coordinates are treated as Runtime target pixel centers",
+      "defense": "Observation PIXEL_CENTER_XY is source texel index-centered while Runtime/G5 target centers are half-integer; the stage-31/32 regression locks this seam and forbids an extra 0.5 shift."
     }
   ],
   "continuation_protocol": {

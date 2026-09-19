@@ -1,0 +1,64 @@
+{
+  "schema": "RealSaS.IRIS.KnightStage13F2RasterCellSupportFeasibilityClosure.v1",
+  "date_utc": "2026-09-20",
+  "subject_run_id": "SUBJECT2_KNIGHT_V1",
+  "run_id": "20260919T225324Z",
+  "attempt_protocol": "F2_STAGE13_P999_RASTER_CELL_SUPPORT_CLOSURE",
+  "preregistration_commit": "dbee8ea421e493153354f20dca0f07301b253ed3",
+  "notebook_seal_commit": "42ad3dd903c0305c87e1e06cda0ec74443637b56",
+  "executed_result": {
+    "overall_status": "NO_WITNESS_FOUND",
+    "selected_candidate": null,
+    "decision_sha256": "ddbbde91a2dbbc7bac58a959b7bea8cb8b65a715e95f455a76a489cf84f389bb",
+    "bundle_sha256": "e04a96280cacb027ab9adcb439a7877a1577073248cc7b8883fd779891d35a8e",
+    "canonical_product_authority_minted": false
+  },
+  "f1_artifact_closure": {
+    "status": "PASS__CAUSAL_ARTIFACT_REMOVED",
+    "diagnostic_far_positive_surface_vertices_gt100px_every_view": 0,
+    "constructive_max_edge_p95_px_f1": 216.80220461531064,
+    "constructive_max_edge_p95_px_f2": 1,
+    "interpretation": "The F1 normalization-cube boundary zero-sheet was caused by pixel-center-domain validity and is eliminated by raster-cell support."
+  },
+  "candidate_metrics": {
+    "SOURCE_SILHOUETTE_SDF_INTERSECTION_RASTER_CELL_SUPPORT": {
+      "min_view_recall": 0.9982401430815266,
+      "min_view_precision": 0.9983457689059926,
+      "min_view_component_recall": 0.9982401430815266,
+      "max_view_largest_coherent_hole_fraction": 0.00014331411013402735,
+      "max_view_interior_uncovered_fraction": 0.00012288750526660738,
+      "max_view_silhouette_edge_p95_px": 1,
+      "max_view_silhouette_edge_max_px": 26,
+      "stage13_v2_pass": false
+    },
+    "FREE_GRID_REFINE_1200": {
+      "min_view_recall": 0.9984358706986444,
+      "min_view_precision": 0.991696624347862,
+      "min_view_component_recall": 0.9984358706986444,
+      "max_view_largest_coherent_hole_fraction": 0.00004012795083752766,
+      "max_view_interior_uncovered_fraction": 0.00004096154296280692,
+      "max_view_silhouette_edge_p95_px": 1.4142135623730951,
+      "max_view_silhouette_edge_max_px": 13,
+      "stage13_v2_pass": false
+    }
+  },
+  "scientific_interpretation": {
+    "f2_result_classification": "GENUINE_PREREGISTERED_NO_WITNESS_FOR_THE_TWO_F2_CONSTRUCTORS",
+    "representation_impossibility_claim": false,
+    "reason": [
+      "The corrected constructive witness is close to P999 but remains below recall/precision/component thresholds and has a one-pixel p95 silhouette displacement.",
+      "The generic source-pool free-grid refinement improves hole/interior metrics but materially worsens precision and silhouette p95.",
+      "The F2 refinement objective does not condition on the exact Stage13 false-positive/false-negative raster mismatch produced by the current decoded field.",
+      "Therefore F2 does not distinguish a 256-cube representational ceiling from an optimization/objective mismatch."
+    ],
+    "stage13_policy_unchanged": true
+  },
+  "next_experiment": {
+    "id": "F3_STAGE13_P999_EXACT_MISMATCH_REPLAY",
+    "single_causal_change": "Replace F2 generic source-pool refinement with deterministic exact-Stage13 mismatch replay refreshed from the decoded 256-cube field every fixed round.",
+    "representation": "UNCHANGED_256_CUBE",
+    "constructive_initialization": "UNCHANGED_F2_RASTER_CELL_SUPPORT",
+    "optimizer_lr_steps_anchor_tv": "UNCHANGED_TOTAL_1200_STEPS",
+    "policy": "UNCHANGED_STAGE13_V2_P999"
+  }
+}

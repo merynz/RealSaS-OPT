@@ -104,7 +104,7 @@
       "depends_on": [
         "04_FULL_SUBJECT_ADMISSION"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.observation_v1:qualify_camera_contract_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -483,7 +483,7 @@
       "title": "Deformation capability envelope preregistered and sealed",
       "group": "mesh",
       "depends_on": [
-        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "05_CAMERA_CONTRACT_SOLVED",
         "18_SKELETON_QUALIFIED"
       ],
       "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:seal_deformation_capability_envelope",
@@ -524,6 +524,7 @@
       "title": "Canonical QualifiedMesh G1-G5 qualification",
       "group": "mesh",
       "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
         "07_OBSERVATION_CONTRACT_QUALIFIED",
         "15_RIGGING_SURFACE_QUALIFIED",
         "18_SKELETON_QUALIFIED",
@@ -623,9 +624,12 @@
       "title": "8-view rest render",
       "group": "appearance",
       "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "27_QUALIFIED_MESH_GATE",
         "30_QUALIFIED_PRESENTATION_GRAPH"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.rest_render_v1:qualify_rest_render_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -633,7 +637,7 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
-        "appearance"
+        "observation"
       ]
     },
     {

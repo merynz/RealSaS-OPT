@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.RunManifestProductAuthorityContract.v1",
-  "status": "CURRENT_STAGE24_30_INPUT_OUTPUT_CONTRACT",
+  "status": "CURRENT_STAGE05_24_31_INPUT_OUTPUT_CONTRACT",
   "subject_specific_code_forbidden": true,
   "external_file_rule": "Every external file materialized by stages 24-30 must be exact-hash bound to an upstream authority or manifest contract; moving aliases latest/current/newest are forbidden.",
   "sections": {
@@ -35,10 +35,12 @@
       "max_quality_iterations": 96
     },
     "observation": {
-      "qualified_observation_authority": "Stage 07 must output RealSaS.QualifiedObservationSetIR.v1 with exact 8 source-observation hashes, foreground-mask hashes, camera-binding hashes and qualified states.",
+      "qualified_observation_authority": "Stage 07 must output RealSaS.QualifiedObservationSetIR.v1 with exact 8 source-observation hashes, source-raster byte hashes, foreground-mask hashes, camera-binding hashes and qualified states.",
       "source_foreground_masks": "Exactly 8 rows: view_index, mask:{path,sha256}. Materialized bytes are not independent authority; each sha256 must equal the corresponding stage-07 foreground_mask_sha256.",
       "component_masks": "Exactly 8 x admitted-component rows: view_index, component_id, mask:{path,sha256}. Rows must form a disjoint and complete partition of the exact stage-07 source foreground for that view.",
-      "g5_visibility": "Predicted component masks are the canonical mesh z-buffer visible-owner masks under the exact authoritative camera; smaller camera-forward Z wins and exact-depth ties use a stable lexical face key."
+      "g5_visibility": "Predicted component masks are the canonical mesh z-buffer visible-owner masks under the exact authoritative camera; smaller camera-forward Z wins and exact-depth ties use a stable lexical face key.",
+      "camera_bundle": "Stage 05 input: exact RealSaS.CameraProjectionBundle.v1 file ref {path,sha256}. Stage 05 emits QualifiedCameraSetIR; downstream camera consumers may not refit or independently reload a second camera authority.",
+      "source_rasters": "Exactly 8 rows: view_index, image:{path,sha256}. Materialized bytes are not independent authority; each sha256 must equal the corresponding stage-07 source_raster_sha256."
     },
     "presentation": {
       "mode": "AUTO_ROLE_FREE_V1 only",
@@ -46,13 +48,20 @@
       "appearance": "One canonical QualifiedMesh is reused for all eight views. Each face has exactly one observed donor view; target-local donor is preferred, cross-view color blending is forbidden, and no common observed donor fails closed.",
       "composition": "Physical occlusion is canonical z-buffer visible-owner authority bound to G5. Slot setup order is UI/editing baseline only and cannot independently solve physical occlusion.",
       "current_limit": "Automatic PLANAR proxy-plane production and qualified visual completion are not implemented; either condition blocks stage 30 rather than inventing authority."
+    },
+    "rest_render": {
+      "authority": "Stage 31 is a deterministic consumer of exact QualifiedMeshIR + QualifiedPresentationGraph sub-authorities + QualifiedCameraSetIR + stage-07 source raster identities.",
+      "rgb_rule": "Canonical geometry is visibility/deformation carrier only. RGB/RGBA comes exclusively from exact source rasters. Lighting, shading, relighting and completion are forbidden.",
+      "donor_rule": "One donor view per face. Visible donor provenance is counted as DIRECT_SOURCE vs CROSS_VIEW_SOURCE for stage-32 admission.",
+      "output": "RealSaS.RestRenderSetIR.v1 plus eight PNG evidence transports. Raw RGBA SHA in RestRenderSetIR is authority; PNG is evidence transport only."
     }
   },
   "upstream_stage_schemas": {
     "15_RIGGING_SURFACE_QUALIFIED": "RealSaS.RiggingSurfaceIR.v1",
     "18_SKELETON_QUALIFIED": "RealSaS.QualifiedSkeletonIR.v1",
     "22_SKIN_QUALIFIED": "RealSaS.QualifiedSkinIR.v1",
-    "07_OBSERVATION_CONTRACT_QUALIFIED": "RealSaS.QualifiedObservationSetIR.v1"
+    "07_OBSERVATION_CONTRACT_QUALIFIED": "RealSaS.QualifiedObservationSetIR.v1",
+    "05_CAMERA_CONTRACT_SOLVED": "RealSaS.QualifiedCameraSetIR.v1"
   },
   "outputs": {
     "24": [
@@ -83,6 +92,13 @@
       "RealSaS.QualifiedAppearanceSetIR.v1",
       "RealSaS.QualifiedCompositionSetIR.v1",
       "RealSaS.QualifiedPresentationGraphIR.v1"
+    ],
+    "31": [
+      "RealSaS.RestRenderSetIR.v1",
+      "8 x image/png evidence transports"
+    ],
+    "05": [
+      "RealSaS.QualifiedCameraSetIR.v1"
     ]
   }
 }

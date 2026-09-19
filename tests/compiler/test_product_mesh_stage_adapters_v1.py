@@ -76,9 +76,11 @@ def _fixture(tmp_path):
     run_root=tmp_path/"run"
     surface=RiggingSurfaceIR(
         (
-            SurfaceNode("s0",(0.0,0.0,0.0),tuple(range(8)),("p0",),("o0",),tuple((v,(4.5,4.5)) for v in range(8))),
-            SurfaceNode("s1",(1.0,0.0,0.0),tuple(range(8)),("p1",),("o1",),tuple((v,(6.5,4.5)) for v in range(8))),
-            SurfaceNode("s2",(0.0,1.0,0.0),tuple(range(8)),("p2",),("o2",),tuple((v,(4.5,2.5)) for v in range(8))),
+            # Observation PIXEL_CENTER_XY uses source texel index centers.
+            # For this camera these are exactly Runtime projection minus 0.5.
+            SurfaceNode("s0",(0.0,0.0,0.0),tuple(range(8)),("p0",),("o0",),tuple((v,(3.5,3.5)) for v in range(8))),
+            SurfaceNode("s1",(1.0,0.0,0.0),tuple(range(8)),("p1",),("o1",),tuple((v,(5.5,3.5)) for v in range(8))),
+            SurfaceNode("s2",(0.0,1.0,0.0),tuple(range(8)),("p2",),("o2",),tuple((v,(3.5,1.5)) for v in range(8))),
         ),
         (
             SurfaceRelation("r01","s0","s1","LOCAL",1.0),

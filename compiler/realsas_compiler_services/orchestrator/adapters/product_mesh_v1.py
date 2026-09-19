@@ -18,9 +18,8 @@ from compiler.realsas_compiler_core.canonical_mesh_candidate_v1 import build_can
 from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
 from compiler.realsas_compiler_core.deformation_envelope_derivation_v1 import derive_deformation_envelope_v1
-from compiler.realsas_compiler_core.mesh.deformation_stress_v1 import (
-    expected_g3_probe_plan_hash,
-    run_g3_deformation_stress,
+from compiler.realsas_compiler_core.mesh.deformation_stress_v2 import (
+    run_g3_local_frame_micro_stress_v2,
 )
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     build_g5_coverage_matrix,
@@ -361,13 +360,13 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
     if axis_hash!=envelope.axis_contract_hash:
         return {"status":"FAIL","blockers":["STAGE27_AXIS_CONTRACT_DRIFT"],"diagnostics":{}}
 
-    g3=run_g3_deformation_stress(
+    g3=run_g3_local_frame_micro_stress_v2(
         candidate,
         surface=surface,
         skeleton=skeleton,
         skin=skin,
         envelope=envelope,
-        axis_contract=axis_payload,
+        cameras=cameras,
         policy=policy,
     )
     observations,source_foreground_masks,observation_set=_component_observations(
@@ -453,6 +452,8 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         "consequential_unknown_boundary_count":0,
         "unknown_boundary_analysis_hash":unknown_hash,
         "g3_envelope_binding_hash":envelope.envelope_lineage_hash,
+        "g3_motion_capability_claimed":False,
+        "g3_role":"LOCAL_3D_NUMERICAL_CONDITIONING_ONLY",
         "g3_stress_probe_hash":g3.report_hash,
         "g3_stress_probe_status":"PASS",
         "carrier_policy_hash":carrier.carrier_policy_lineage_hash,

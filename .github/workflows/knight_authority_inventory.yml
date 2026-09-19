@@ -1,0 +1,149 @@
+name: knight-authority-inventory
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/knight_authority_inventory.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_V1
+      REALSAS_AUTHORITY_ROOT: ${{ github.workspace }}/_unused_default
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inventory persistent authority root
+        shell: bash
+        run: |
+          set -euo pipefail
+          AUTH_ROOT="${HOME}/realsas_authority"
+          RUN_ROOT="$AUTH_ROOT/runs/$RUN_ID"
+          MANIFEST="$RUN_ROOT/run_manifest.json"
+          REPORT="$RUNNER_TEMP/knight_authority_inventory.json"
+          export AUTH_ROOT RUN_ROOT MANIFEST REPORT
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+
+          auth_root=Path(os.environ["AUTH_ROOT"]).resolve()
+          run_root=Path(os.environ["RUN_ROOT"]).resolve()
+          manifest_path=Path(os.environ["MANIFEST"]).resolve()
+          report_path=Path(os.environ["REPORT"]).resolve()
+
+          def sha(path: Path):
+              h=hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda:f.read(1<<20),b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          def resolved(raw):
+              s=str(raw or "")
+              s=s.replace("$REALSAS_AUTHORITY_ROOT",str(auth_root))
+              return Path(os.path.expandvars(os.path.expanduser(s))).resolve()
+
+          report={
+              "schema":"RealSaS.KnightAuthorityInventory.v1",
+              "run_id":os.environ["RUN_ID"],
+              "authority_root":{"path":str(auth_root),"exists":auth_root.is_dir()},
+              "run_root":{"path":str(run_root),"exists":run_root.is_dir()},
+              "run_manifest":{"path":str(manifest_path),"exists":manifest_path.is_file()},
+              "sections":{},
+              "motion_input_dir":{},
+              "native_player":{},
+              "stage_artifacts":{},
+          }
+
+          if manifest_path.is_file():
+              report["run_manifest"]["sha256"]=sha(manifest_path)
+              m=json.loads(manifest_path.read_text(encoding="utf-8"))
+              report["run_manifest"]["schema"]=str(m.get("schema") or m.get("schema_version") or "")
+              report["run_manifest"]["top_level_keys"]=sorted(m.keys())
+
+              for key in ("source_files","source_license","source_audit","admission","observation","normalization",
+                          "iris_fit","geometry_decode","geometry_gate","gsa","geppetto_fit","arachne_fit",
+                          "components","carrier_policy","deformation_envelope","mesh","mesh_policy",
+                          "presentation","appearance","motion","runtime"):
+                  value=m.get(key)
+                  row={"present":value is not None}
+                  if isinstance(value,dict):
+                      row["keys"]=sorted(value.keys())
+                  elif isinstance(value,list):
+                      row["count"]=len(value)
+                  report["sections"][key]=row
+
+              for lane in ("iris_fit","geppetto_fit","arachne_fit"):
+                  cfg=m.get(lane) if isinstance(m.get(lane),dict) else {}
+                  lane_row=report["sections"].setdefault(lane,{"present":False})
+                  refs={}
+                  for refkey in ("preregistration","execution_receipt"):
+                      ref=cfg.get(refkey) if isinstance(cfg.get(refkey),dict) else {}
+                      p=resolved(ref.get("path")) if ref.get("path") else None
+                      refs[refkey]={
+                          "declared":bool(ref),
+                          "path":str(p) if p else "",
+                          "exists":bool(p and p.is_file()),
+                          "expected_sha256":str(ref.get("sha256") or ""),
+                          "actual_sha256":sha(p) if p and p.is_file() else "",
+                      }
+                      if p and p.is_file() and p.suffix.lower()==".json":
+                          try:
+                              payload=json.loads(p.read_text(encoding="utf-8"))
+                              refs[refkey]["schema"]=str(payload.get("schema") or payload.get("schema_version") or "")
+                              refs[refkey]["status"]=str(payload.get("status") or "")
+                              for k in ("checkpoint","result","proposal"):
+                                  rr=payload.get(k)
+                                  if isinstance(rr,dict) and rr.get("path"):
+                                      rp=resolved(rr["path"])
+                                      refs[refkey][k]={
+                                          "path":str(rp),"exists":rp.is_file(),
+                                          "expected_sha256":str(rr.get("sha256") or ""),
+                                          "actual_sha256":sha(rp) if rp.is_file() else "",
+                                      }
+                          except Exception as e:
+                              refs[refkey]["parse_error"]=type(e).__name__
+                  lane_row["refs"]=refs
+
+              runtime=m.get("runtime") if isinstance(m.get("runtime"),dict) else {}
+              ref=runtime.get("native_player") if isinstance(runtime.get("native_player"),dict) else {}
+              p=resolved(ref.get("path")) if ref.get("path") else None
+              report["native_player"]={
+                  "declared":bool(ref),
+                  "path":str(p) if p else "",
+                  "exists":bool(p and p.is_file()),
+                  "expected_sha256":str(ref.get("sha256") or ""),
+                  "actual_sha256":sha(p) if p and p.is_file() else "",
+              }
+
+          motion_dir=run_root/"inputs"/"motion"/"quaternius_knight_v1"
+          report["motion_input_dir"]={"path":str(motion_dir),"exists":motion_dir.is_dir(),"files":[]}
+          if motion_dir.is_dir():
+              for p in sorted(motion_dir.iterdir()):
+                  if p.is_file():
+                      report["motion_input_dir"]["files"].append({"name":p.name,"size":p.stat().st_size,"sha256":sha(p)})
+
+          artifacts_root=run_root/"artifacts"
+          for n in (1,7,10,15,17,18,21,22,29,32,33,34,35,36,37,38,39,40):
+              prefix=f"{n:02d}_"
+              matches=sorted(x for x in artifacts_root.glob(prefix+"*") if x.is_dir()) if artifacts_root.is_dir() else []
+              report["stage_artifacts"][str(n)]={"dirs":[str(x) for x in matches]}
+
+          report_path.write_text(json.dumps(report,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print(json.dumps(report,indent=2,sort_keys=True))
+          PY
+
+      - name: Upload inventory report
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-authority-inventory
+          path: ${{ runner.temp }}/knight_authority_inventory.json
+          if-no-files-found: error
+          retention-days: 7

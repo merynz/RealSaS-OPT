@@ -474,6 +474,7 @@ def main(argv: list[str] | None = None) -> int:
 
     source_input_mode = "SEALED_ARCHIVE"
     archive_receipt = None
+    source_fbx_receipt_path = ""
     with tempfile.TemporaryDirectory(prefix="realsas_motion_materialize_") as tmp:
         temp_root = Path(tmp)
         if archive is not None:
@@ -486,9 +487,11 @@ def main(argv: list[str] | None = None) -> int:
                 "path": str(archive),
                 "sha256": sha256(archive),
             }
+            source_fbx_receipt_path = f"{archive}!/{spec['source']['fbx_member']}"
         else:
             source_input_mode = "EXACT_FBX_SHA"
             source_fbx = verify_direct_fbx(source_fbx=direct_fbx, spec=spec)
+            source_fbx_receipt_path = str(source_fbx)
         run_blender(
             blender=blender,
             source_fbx=source_fbx,
@@ -533,8 +536,8 @@ def main(argv: list[str] | None = None) -> int:
         "source_input_mode": source_input_mode,
         "archive": archive_receipt,
         "source_fbx": {
-            "path": str(source_fbx),
-            "sha256": sha256(source_fbx),
+            "path": source_fbx_receipt_path,
+            "sha256": str(source["fbx_sha256"]),
         },
         "source_fbx_sha256": str(source["fbx_sha256"]),
         "license_evidence_sha256": str(source["license_evidence_sha256"]),

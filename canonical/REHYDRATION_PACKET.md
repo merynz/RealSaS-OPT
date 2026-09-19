@@ -11,7 +11,7 @@
 - Current state: PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING
 - Active experiment: SUBJECT2_KNIGHT_FULL_CLOSURE
 - Most recent closed gate: ALL_40_STAGE_ADAPTERS_IMPLEMENTED_AND_BOUND_READY_FOR_FINAL_CI
-- Canonical main: 233e6cb93a48
+- Canonical main: 43c630ddd064
 - Active run: SUBJECT2_KNIGHT_V1 — 0/40; next 01_SOURCE_BYTES_SEALED
 - Plan SHA-256: 4861ae36cb25fc4be9470f6d475d8bb0174d668eeeb4564475faaf7c5700ac1f
 - Promotion block: All 40 stages have executable typed adapters and an explicit authority DAG. Repository mainline CI is green at the pre-performance-patch head; remaining work is live-context reconciliation, final CI after batch-render optimization, and exact Knight run inputs/external execution artifacts before 01→40 execution.

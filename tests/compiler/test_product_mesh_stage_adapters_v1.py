@@ -133,7 +133,7 @@ def _fixture(tmp_path):
     bundle={"schema":"RealSaS.CameraProjectionBundle.v1","cameras":cameras}
     cam_path=tmp_path/"cameras.json"; cam_path.write_text(json.dumps(bundle,sort_keys=True)+"\n",encoding="utf-8")
 
-    policy_path=ROOT/"canonical"/"QUALIFIED_MESH_PRODUCT_POLICY_V1_20260918.json"
+    policy_path=ROOT/"canonical"/"QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json"
     half=np.sin(np.deg2rad(5.0))
     qw=np.cos(np.deg2rad(5.0))
     motion_payload={
@@ -191,7 +191,7 @@ def _fixture(tmp_path):
         },
         "appearance":{
             "rest_preservation_policy":{
-                "path":str((ROOT/"canonical"/"REST_SOURCE_PRESERVATION_POLICY_V1_20260919.json").resolve()),
+                "path":str((ROOT/"canonical"/"REST_SOURCE_PRESERVATION_POLICY_V2_20260919.json").resolve()),
                 "sha256":_sha(ROOT/"canonical"/"REST_SOURCE_PRESERVATION_POLICY_V1_20260919.json"),
             },
             "rest_preservation_calibration":{

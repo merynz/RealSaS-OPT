@@ -11,8 +11,8 @@
 - Explained by continuity policy: **323**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **141**
-- Safe-default evidence-only branches: **137**
+- Live branches: **142**
+- Safe-default evidence-only branches: **138**
 
 ### Classification counts
 
@@ -101,7 +101,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `29c7bb857a14` | `CANONICAL` | canonical branch |
+| `main` | `21d879648636` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -137,6 +137,7 @@ _None._
 | `research/g5-coverage-v2-audit-20260919` | `aeaec75e1fe6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/g5-mesh-v2-numerical-floor-20260919` | `28908a0019f6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/knight-stage13-14-calibration-20260919` | `ee52ecf21689` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `research/knight-stage13-v7-silhouette-20260920` | `21d879648636` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage13-geometry-gate-v2-calibration-20260919` | `18017348cc1b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-component-aware-compaction-20260919` | `4212a28fc057` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/stage14-gsa-v2-calibration-20260919` | `416bb7ef341d` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

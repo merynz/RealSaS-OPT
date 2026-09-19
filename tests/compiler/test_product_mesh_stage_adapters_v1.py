@@ -303,6 +303,11 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     assert graph.qualification_report["single_canonical_mesh"] is True
     assert graph.qualification_report["slot_order_solves_physical_occlusion"] is False
     assert graph.qualification_report["categorical_recognition_used"] is False
+    for binding in appearance.bindings:
+        assert {tuple(c.donor_raster_xy) for c in binding.corner_bindings}=={
+            (3.5,3.5),(5.5,3.5),(3.5,1.5)
+        }
+        assert {c.donor_view_index for c in binding.corner_bindings}=={binding.target_view_index}
     _install_stage_outputs(ctx,"30_QUALIFIED_PRESENTATION_GRAPH",r30)
 
     r31=qualify_rest_render_stage(ctx)
@@ -316,12 +321,12 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     assert rest.metadata["canonical_geometry_is_never_rgb_authority"] is True
     assert all(len(row.rendered_rgba_sha256)==64 for row in rest.views)
     assert all(len(row.metadata["png_sha256"])==64 for row in rest.views)
-    assert all(row.visible_pixel_count>0 for row in rest.views), [row.visible_pixel_count for row in rest.views]
-    assert all(row.geometry_visible_pixel_count>0 for row in rest.views), [row.geometry_visible_pixel_count for row in rest.views]
     assert all(
         sum(Path(row["mask"]["path"]).read_bytes())>0
         for row in ctx["run_manifest"]["observation"]["source_foreground_masks"]
-    )
+    ), [sum(Path(row["mask"]["path"]).read_bytes()) for row in ctx["run_manifest"]["observation"]["source_foreground_masks"]]
+    assert all(row.geometry_visible_pixel_count>0 for row in rest.views), [row.geometry_visible_pixel_count for row in rest.views]
+    assert all(row.visible_pixel_count>0 for row in rest.views), [row.visible_pixel_count for row in rest.views]
     _install_stage_outputs(ctx,"31_REST_RENDER_8VIEW",r31)
 
     r32=qualify_rest_source_preservation_stage(ctx)

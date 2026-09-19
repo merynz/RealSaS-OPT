@@ -53,6 +53,9 @@ class RestRenderViewIR:
     width:int
     height:int
     visible_pixel_count:int
+    geometry_visible_pixel_count:int
+    direct_source_geometry_pixel_count:int
+    cross_view_source_geometry_pixel_count:int
     render_contract_hash:str=REST_RENDER_CONTRACT_HASH
     schema_version:str="RealSaS.RestRenderViewIR.v1"
     metadata:Json=field(default_factory=dict)
@@ -140,6 +143,7 @@ def _render_one(
 
     width=int(camera.resolution); height=int(camera.resolution)
     out=np.zeros((height,width,4),dtype=np.uint8)
+    donor_owner=np.full((height,width),-1,dtype=np.int16)
     depth=np.full((height,width),np.inf,dtype=np.float64)
     tie=[[None for _x in range(width)] for _y in range(height)]
 
@@ -188,9 +192,10 @@ def _render_one(
                 sx=w0*donor_xy[0][0]+w1*donor_xy[1][0]+w2*donor_xy[2][0]
                 sy=w0*donor_xy[0][1]+w1*donor_xy[1][1]+w2*donor_xy[2][1]
                 out[y,x]=_sample_bilinear_rgba(texture,(sx,sy))
+                donor_owner[y,x]=int(donor)
                 depth[y,x]=z
                 tie[y][x]=face_key
-    return out
+    return out,donor_owner
 
 
 def camera_binding_hash(camera)->str:
@@ -239,6 +244,15 @@ def validate_rest_render_set(
             raise QualificationError("REST_RENDER_CONTRACT_DRIFT")
         if len(row.rendered_rgba_sha256)!=64 or row.width<=0 or row.height<=0:
             raise QualificationError("REST_RENDER_VIEW_IDENTITY_INVALID")
+        if min(
+            int(row.visible_pixel_count),
+            int(row.geometry_visible_pixel_count),
+            int(row.direct_source_geometry_pixel_count),
+            int(row.cross_view_source_geometry_pixel_count),
+        ) < 0:
+            raise QualificationError("REST_RENDER_VIEW_PIXEL_COUNT_INVALID")
+        if int(row.direct_source_geometry_pixel_count)+int(row.cross_view_source_geometry_pixel_count)!=int(row.geometry_visible_pixel_count):
+            raise QualificationError("REST_RENDER_VIEW_DONOR_ACCOUNTING_DRIFT")
     if value.render_set_hash!=rest_render_set_hash(value):
         raise QualificationError("REST_RENDER_SET_HASH_MISMATCH")
 
@@ -276,11 +290,14 @@ def render_rest_views(
         texture=source_rgba_by_view[view]
         if texture.shape[:2]!=(int(obs[view].height),int(obs[view].width)):
             raise QualificationError("REST_RENDER_SOURCE_TEXTURE_DIMENSION_DRIFT")
-        image=_render_one(
+        image,donor_owner=_render_one(
             mesh=mesh,camera=cams[view],appearance=app[view],composition=comp[view],
             source_rgba_by_view=source_rgba_by_view,
         )
         rendered[view]=image
+        geometry_visible=int(np.count_nonzero(donor_owner>=0))
+        direct_visible=int(np.count_nonzero(donor_owner==view))
+        cross_visible=int(np.count_nonzero((donor_owner>=0)&(donor_owner!=view)))
         rows.append(RestRenderViewIR(
             view_index=view,
             camera_binding_hash=camera_binding_hash(cams[view]),
@@ -290,6 +307,9 @@ def render_rest_views(
             width=int(image.shape[1]),
             height=int(image.shape[0]),
             visible_pixel_count=int(np.count_nonzero(image[...,3])),
+            geometry_visible_pixel_count=geometry_visible,
+            direct_source_geometry_pixel_count=direct_visible,
+            cross_view_source_geometry_pixel_count=cross_visible,
             metadata={
                 "source_raster_sha256":obs[view].source_raster_sha256,
                 "shading_used":False,

@@ -98,6 +98,9 @@ def test_rest_renderer_transports_source_rgba_without_shading():
     assert all(v.metadata["shading_used"] is False for v in result.views)
     assert all(images[i].dtype==np.uint8 and images[i].shape==(8,8,4) for i in range(8))
     assert all(v.visible_pixel_count>0 for v in result.views)
+    assert all(v.geometry_visible_pixel_count>0 for v in result.views)
+    assert all(v.direct_source_geometry_pixel_count==v.geometry_visible_pixel_count for v in result.views)
+    assert all(v.cross_view_source_geometry_pixel_count==0 for v in result.views)
 
 
 def test_rest_renderer_uses_target_local_source_texture_per_view():

@@ -81,7 +81,34 @@ def robust_zero_surface_normals_v1(points, orientation_hints, *, k: int = 64) ->
     return out.astype(np.float32)
 
 
-def _adaptive_voxel_compact(points, faces, dense_normals, *, target_nodes: int):
+def _mesh_connected_component_labels(vertex_count:int, faces:np.ndarray)->np.ndarray:
+    parent=np.arange(int(vertex_count),dtype=np.int64)
+    rank=np.zeros(int(vertex_count),dtype=np.int8)
+
+    def find(x:int)->int:
+        while parent[x]!=x:
+            parent[x]=parent[parent[x]]
+            x=int(parent[x])
+        return x
+
+    def union(a:int,b:int)->None:
+        ra,rb=find(a),find(b)
+        if ra==rb:
+            return
+        if rank[ra]<rank[rb]:
+            ra,rb=rb,ra
+        parent[rb]=ra
+        if rank[ra]==rank[rb]:
+            rank[ra]+=1
+
+    for a,b,c in np.asarray(faces,dtype=np.int64):
+        union(int(a),int(b)); union(int(b),int(c)); union(int(c),int(a))
+    roots=np.asarray([find(i) for i in range(int(vertex_count))],dtype=np.int64)
+    _,labels=np.unique(roots,return_inverse=True)
+    return labels.astype(np.int64)
+
+
+def _adaptive_voxel_compact(points, faces, dense_normals, *, target_nodes: int, preserve_connected_components: bool=False):
     p = np.asarray(points, dtype=np.float64)
     f = np.asarray(faces, dtype=np.int64)
     n = np.asarray(dense_normals, dtype=np.float64)
@@ -94,9 +121,17 @@ def _adaptive_voxel_compact(points, faces, dense_normals, *, target_nodes: int):
         lo = p.min(axis=0)
         span = np.maximum(p.max(axis=0) - lo, 1e-12)
 
+        component_labels=(
+            _mesh_connected_component_labels(len(p),f)
+            if bool(preserve_connected_components)
+            else None
+        )
+
         def labels_for(divisions: int):
             keys = np.floor((p - lo) / span * divisions).astype(np.int64)
             keys = np.clip(keys, 0, divisions - 1)
+            if component_labels is not None:
+                keys=np.column_stack((component_labels,keys))
             return np.unique(keys, axis=0, return_inverse=True)
 
         low, high = 1, 512
@@ -229,6 +264,7 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
     target_nodes: int = 1024,
     normal_k: int = 64,
     visibility_depth_tolerance_norm: float = 0.02,
+    component_aware_compaction: bool = False,
     metadata: dict | None = None,
 ) -> RiggingSurfaceIR:
     """Canonical GSA bridge from a predicted signed zero-surface to RiggingSurfaceIR.
@@ -256,7 +292,8 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
     world = center[None, :] + vn * half
     dense_normals = robust_zero_surface_normals_v1(world, hint, k=normal_k)
     points, normals, edges, divisions, _inverse = _adaptive_voxel_compact(
-        world, f, dense_normals, target_nodes=int(target_nodes)
+        world, f, dense_normals, target_nodes=int(target_nodes),
+        preserve_connected_components=bool(component_aware_compaction),
     )
     support, raster, visible_counts = _self_zbuffer_support(
         world,
@@ -325,6 +362,7 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
                 "id": ZERO_SURFACE_COMPACTOR_ID,
                 "target_nodes": int(target_nodes),
                 "voxel_divisions": int(divisions),
+                "preserve_connected_components": bool(component_aware_compaction),
             },
             "visibility": {
                 "id": ZERO_SURFACE_VISIBILITY_ID,
@@ -342,6 +380,7 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
         "compact_surface_node_count": int(len(nodes)),
         "compact_voxel_divisions": int(divisions),
         "compact_target_nodes": int(target_nodes),
+        "component_aware_compaction": bool(component_aware_compaction),
         "observed_node_count": int(np.any(support, axis=1).sum()),
         "completed_node_count": int((~np.any(support, axis=1)).sum()),
         "visibility_support_counts_by_view": visible_counts,

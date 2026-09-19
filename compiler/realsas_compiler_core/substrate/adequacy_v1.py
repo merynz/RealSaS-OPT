@@ -82,6 +82,14 @@ def _policy(policy:dict)->dict:
     p={k:policy[k] for k in required}
     p["visible_component_always_eligible"]=bool(policy.get("visible_component_always_eligible",False))
     p["component_aware_voxel_compaction"]=bool(policy.get("component_aware_voxel_compaction",False))
+    p["mechanical_probe_enabled"]=bool(policy.get("mechanical_probe_enabled",False))
+    if p["mechanical_probe_enabled"]:
+        for k in ("max_mechanical_probe_p95_norm","max_mechanical_probe_max_norm"):
+            if k not in policy:
+                raise QualificationError("SUBSTRATE_ADEQUACY_MECHANICAL_POLICY_INCOMPLETE:"+k)
+            p[k]=float(policy[k])
+            if not math.isfinite(p[k]) or p[k]<0:
+                raise QualificationError("SUBSTRATE_ADEQUACY_MECHANICAL_THRESHOLD_INVALID:"+k)
     for k in (
         "max_dense_to_surface_p95_norm","max_dense_to_surface_max_norm",
         "max_normal_p95_deg","max_projected_p95_px","max_projected_max_px",
@@ -129,6 +137,72 @@ def _eligible_dense_components(
     return eligible,fraction_eligible,visible_components
 
 
+def _mechanical_probe_displacement(points:np.ndarray,kind:str)->np.ndarray:
+    p=np.asarray(points,dtype=np.float64)
+    if kind=="TWIST_Z":
+        angle=np.deg2rad(22.0)*p[:,2]
+        ca,sa=np.cos(angle),np.sin(angle)
+        out=p.copy()
+        out[:,0]=ca*p[:,0]-sa*p[:,1]
+        out[:,1]=sa*p[:,0]+ca*p[:,1]
+        return out-p
+    if kind=="BEND_Y":
+        angle=np.deg2rad(18.0)*p[:,2]
+        ca,sa=np.cos(angle),np.sin(angle)
+        out=p.copy()
+        out[:,0]=ca*p[:,0]+sa*p[:,2]
+        out[:,2]=-sa*p[:,0]+ca*p[:,2]
+        return out-p
+    if kind=="HINGE_Z":
+        pivot=np.asarray([0.15,0.0,0.0],dtype=np.float64)
+        q=p-pivot[None,:]
+        weight=np.clip((p[:,0]-0.05)/0.20,0.0,1.0)
+        angle=np.deg2rad(25.0)*weight
+        ca,sa=np.cos(angle),np.sin(angle)
+        out=q.copy()
+        out[:,0]=ca*q[:,0]-sa*q[:,1]
+        out[:,1]=sa*q[:,0]+ca*q[:,1]
+        out+=pivot[None,:]
+        return out-p
+    raise QualificationError("SUBSTRATE_ADEQUACY_MECHANICAL_PROBE_KIND_INVALID:"+str(kind))
+
+
+def _mechanical_probe_metrics(dense_normalized:np.ndarray,compact_normalized:np.ndarray)->dict:
+    dense=np.asarray(dense_normalized,dtype=np.float64)
+    compact=np.asarray(compact_normalized,dtype=np.float64)
+    k=min(4,len(compact))
+    if k<1:
+        raise QualificationError("SUBSTRATE_ADEQUACY_MECHANICAL_PROBE_EMPTY")
+    distance,index=cKDTree(compact).query(dense,k=k,workers=-1)
+    distance=np.asarray(distance,dtype=np.float64)
+    index=np.asarray(index,dtype=np.int64)
+    if k==1:
+        distance=distance[:,None]
+        index=index[:,None]
+    weights=1.0/np.maximum(distance,1e-8)
+    weights/=weights.sum(axis=1,keepdims=True)
+
+    basis={}
+    aggregate_p95=0.0
+    aggregate_max=0.0
+    for kind in ("TWIST_Z","BEND_Y","HINGE_Z"):
+        dense_delta=_mechanical_probe_displacement(dense,kind)
+        compact_delta=_mechanical_probe_displacement(compact,kind)
+        interpolated=np.einsum("nk,nkd->nd",weights,compact_delta[index])
+        error=np.linalg.norm(interpolated-dense_delta,axis=1)
+        p95=float(np.quantile(error,0.95))
+        maximum=float(error.max(initial=0.0))
+        basis[kind]={"p95_norm":p95,"max_norm":maximum}
+        aggregate_p95=max(aggregate_p95,p95)
+        aggregate_max=max(aggregate_max,maximum)
+    return {
+        "contract":"KNN4_IDW__TWIST22_BEND18_HINGE25__NORMALIZED_CANONICAL_SPACE_V1",
+        "basis":basis,
+        "aggregate_p95_norm":float(aggregate_p95),
+        "aggregate_max_norm":float(aggregate_max),
+    }
+
+
 def _metrics(
     *,
     surface,
@@ -137,6 +211,7 @@ def _metrics(
     dense_labels:np.ndarray,
     dense_support:np.ndarray,
     dense_raster:np.ndarray,
+    normalization_center:np.ndarray,
     normalization_half_extent:float,
     policy:dict,
 )->dict:
@@ -201,6 +276,15 @@ def _metrics(
     pd=np.asarray(projected_distances,dtype=np.float64)
     projected_p95=float(np.quantile(pd,0.95)) if len(pd) else float("inf")
     projected_max=float(pd.max(initial=0.0)) if len(pd) else float("inf")
+
+    mechanical=None
+    if bool(policy.get("mechanical_probe_enabled",False)):
+        center=np.asarray(normalization_center,dtype=np.float64)
+        half=float(normalization_half_extent)
+        dense_normalized=(np.asarray(dense_world,dtype=np.float64)-center[None,:])/half
+        compact_normalized=(compact-center[None,:])/half
+        mechanical=_mechanical_probe_metrics(dense_normalized,compact_normalized)
+
     values={
         "actual_node_count":int(len(compact)),
         "relation_count":int(len(surface.local_relations)),
@@ -218,7 +302,14 @@ def _metrics(
         "minimum_nodes_per_eligible_component":int(min_component_nodes),
         "component_alias_node_count":int(alias_nodes),
         "projected_by_view":raster_by_view,
+        "mechanical_probe":mechanical,
     }
+    mechanical_passed=(
+        True if mechanical is None else (
+            mechanical["aggregate_p95_norm"]<=policy["max_mechanical_probe_p95_norm"] and
+            mechanical["aggregate_max_norm"]<=policy["max_mechanical_probe_max_norm"]
+        )
+    )
     passed=(
         values["dense_to_surface_p95_norm"]<=policy["max_dense_to_surface_p95_norm"] and
         values["dense_to_surface_max_norm"]<=policy["max_dense_to_surface_max_norm"] and
@@ -226,7 +317,8 @@ def _metrics(
         values["projected_p95_px"]<=policy["max_projected_p95_px"] and
         values["projected_max_px"]<=policy["max_projected_max_px"] and
         values["minimum_nodes_per_eligible_component"]>=policy["min_nodes_per_component"] and
-        values["component_alias_node_count"]<=policy["max_component_alias_nodes"]
+        values["component_alias_node_count"]<=policy["max_component_alias_nodes"] and
+        mechanical_passed
     )
     values["passed"]=bool(passed)
     return values
@@ -289,7 +381,8 @@ def select_adequate_rigging_surface_v1(
         )
         metric=_metrics(
             surface=surface,dense_world=dense_world,dense_normals=dense_normals,dense_labels=dense_labels,
-            dense_support=dense_support,dense_raster=dense_raster,normalization_half_extent=half,policy=policy,
+            dense_support=dense_support,dense_raster=dense_raster,
+            normalization_center=center,normalization_half_extent=half,policy=policy,
         )
         metric["candidate_target_node_cap"]=cap
         metric["surface_lineage_hash"]=surface.geometry_lineage_hash

@@ -5,7 +5,7 @@ on:
     branches:
       - ops/knight-stage09-15-continuation-20260919
     paths:
-      - 'tools/continue_knight_stage09_15_v3.py'
+      - 'tools/continue_knight_stage09_15_wrapper_v1.py'
       - '.github/workflows/knight_stage09_15_self_hosted_continuation.yml'
   workflow_dispatch:
 
@@ -44,15 +44,18 @@ jobs:
           set -euo pipefail
           STAGE08="$LOCAL_EVIDENCE_DIR/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip"
           IRIS="$LOCAL_EVIDENCE_DIR/IRIS_KNIGHT_FIT_BUNDLE.zip"
+          LEGACY="$LOCAL_EVIDENCE_DIR/continue_knight_stage09_12.py"
           test -f "$STAGE08"
           test -f "$IRIS"
+          test -f "$LEGACY"
           test "$(sha256sum "$STAGE08" | awk '{print $1}')" = "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7"
           test "$(sha256sum "$IRIS" | awk '{print $1}')" = "8b27de1481575b4f3cae473aa72e379674a5273877b82669084f69050cb8c645"
+          test "$(sha256sum "$LEGACY" | awk '{print $1}')" = "a1735c3b6de9bf5b12f2534a3c9175dd6934e32a3d80444c252c6442983184ed"
           echo "KNIGHT_LOCAL_EVIDENCE_EXACT=true"
 
       - name: Execute canonical Knight Stage09 through Stage15
         run: |
-          python tools/continue_knight_stage09_15_v3.py             --repo "$GITHUB_WORKSPACE"             --stage08-evidence "$LOCAL_EVIDENCE_DIR/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip"             --iris-bundle "$LOCAL_EVIDENCE_DIR/IRIS_KNIGHT_FIT_BUNDLE.zip"
+          python tools/continue_knight_stage09_15_wrapper_v1.py             --repo "$GITHUB_WORKSPACE"             --legacy-script "$LOCAL_EVIDENCE_DIR/continue_knight_stage09_12.py"             --stage08-evidence "$LOCAL_EVIDENCE_DIR/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip"             --iris-bundle "$LOCAL_EVIDENCE_DIR/IRIS_KNIGHT_FIT_BUNDLE.zip"
 
       - name: Collect continuation evidence
         if: always()

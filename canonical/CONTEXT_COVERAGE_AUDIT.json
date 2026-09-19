@@ -12,8 +12,8 @@
   "explained_high_signal_count": 321,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 127,
-  "safe_default_evidence_only_branch_count": 123,
+  "live_branch_count": 128,
+  "safe_default_evidence_only_branch_count": 124,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "fa7ffcd3219c96228d625ea6fc0f95b89c109ed7",
+      "sha": "7da0f2de14298a1585ae5b11efe5f87a1f1f9ed3",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -593,6 +593,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "repair/g5-mesh-policy-v2-20260919",
+      "sha": "7da0f2de14298a1585ae5b11efe5f87a1f1f9ed3",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "repair/mage-full-subject-reclosure-20260912",
       "sha": "2fa5d4b604d5ce1dcb24feee2e6a6b8fa12476e3",
       "class": "EVIDENCE_ONLY",
@@ -624,7 +630,7 @@
     },
     {
       "name": "research/g5-mesh-v2-numerical-floor-20260919",
-      "sha": "3fe8d8c909d7b8c301bf78b6ee23bbbb24620f96",
+      "sha": "28908a0019f6471dedbfaada604d0c2893dd03e2",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **1963**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **1969**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -1975,6 +1975,12 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-19T19:00:37+03:00` | `219cbfa726b2` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `freeze/stage13-14-policy-20260919`<br>`main` |
 | `2026-09-19T19:02:36+03:00` | `4ffacec76f09` | no | OTHER | research: add subject-free stage13/14 calibration | `tools/stage13_14_subject_free_calibration_v1.py` | `research/knight-stage13-14-calibration-20260919` |
 | `2026-09-19T19:02:47+03:00` | `ee52ecf21689` | no | CI_TEST | research: run stage13/14 calibration on self-hosted runner | `.github/workflows/knight_stage13_14_subject_free_calibration.yml` | `research/knight-stage13-14-calibration-20260919` |
+| `2026-09-19T19:05:30+03:00` | `e656b3044eba` | yes | GOVERNANCE_CONTINUITY | policy: seal subject-free stage13/14 calibration evidence | `canonical/STAGE13_14_SUBJECT_FREE_CALIBRATION_SEAL_20260919.json` | `freeze/stage13-14-policy-20260919`<br>`main` |
+| `2026-09-19T19:05:40+03:00` | `906181c01410` | yes | GOVERNANCE_CONTINUITY | policy: freeze stage13 rest reprojection thresholds | `canonical/STAGE13_REST_REPROJECTION_POLICY_V1_20260919.json` | `freeze/stage13-14-policy-20260919`<br>`main` |
+| `2026-09-19T19:05:48+03:00` | `0e695b730f1c` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-19T19:05:51+03:00` | `92bc051043c2` | yes | GOVERNANCE_CONTINUITY, IRIS_GSA | policy: freeze stage14 substrate adequacy search | `canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V1_20260919.json` | `freeze/stage13-14-policy-20260919`<br>`main` |
+| `2026-09-19T19:06:28+03:00` | `75f1a1c5a845` | yes | GOVERNANCE_CONTINUITY | policy: retain stage13/14 calibration summary | `canonical/STAGE13_14_SUBJECT_FREE_CALIBRATION_SUMMARY_20260919.json` | `freeze/stage13-14-policy-20260919`<br>`main` |
+| `2026-09-19T19:07:51+03:00` | `70d163328b3b` | yes | OTHER | Freeze subject-free Stage13/14 admission policies | _none_ | `main` |
 
 ## Use rule
 

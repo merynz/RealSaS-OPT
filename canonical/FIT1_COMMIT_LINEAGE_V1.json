@@ -49,11 +49,11 @@
     "fit/single-family-mage-v1-20260902": "f2cd746f8bebf24c9c0c20d5c33743d24f9b0fa2",
     "fit2/mage-full-subject-reclosure": "eb7a20eb9da735369b7901eb6a989b0f26348c5e",
     "fix/motion-v2-root-frame-20260919": "1ec74be48ab4708834663ea214a6fab79bd0b991",
-    "freeze/stage13-14-policy-20260919": "219cbfa726b298b5db88d171c702c5e055da886a",
+    "freeze/stage13-14-policy-20260919": "75f1a1c5a8459107033a09659db1b47d055b8e85",
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "219cbfa726b298b5db88d171c702c5e055da886a",
+    "main": "70d163328b3b6f4f003dac5e04da4eafa57d64d7",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -94,7 +94,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 1963,
+  "commit_count": 1969,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -91216,6 +91216,144 @@
       ],
       "subsystem_tags": [
         "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e656b3044eba4d0c0504f965b5f3cc797807a637",
+      "parents": [
+        "219cbfa726b298b5db88d171c702c5e055da886a"
+      ],
+      "author_time": "2026-09-19T19:05:30+03:00",
+      "committer_time": "2026-09-19T19:05:30+03:00",
+      "subject": "policy: seal subject-free stage13/14 calibration evidence",
+      "branches_containing": [
+        "freeze/stage13-14-policy-20260919",
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/STAGE13_14_SUBJECT_FREE_CALIBRATION_SEAL_20260919.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "906181c014108ae8ff55330bed910a6302a6da79",
+      "parents": [
+        "e656b3044eba4d0c0504f965b5f3cc797807a637"
+      ],
+      "author_time": "2026-09-19T19:05:40+03:00",
+      "committer_time": "2026-09-19T19:05:40+03:00",
+      "subject": "policy: freeze stage13 rest reprojection thresholds",
+      "branches_containing": [
+        "freeze/stage13-14-policy-20260919",
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/STAGE13_REST_REPROJECTION_POLICY_V1_20260919.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0e695b730f1c4f1021443c318cc101205204d80a",
+      "parents": [
+        "219cbfa726b298b5db88d171c702c5e055da886a"
+      ],
+      "author_time": "2026-09-19T19:05:48+03:00",
+      "committer_time": "2026-09-19T19:05:48+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "92bc051043c29417200fd898dd1c550aeebfae7a",
+      "parents": [
+        "906181c014108ae8ff55330bed910a6302a6da79"
+      ],
+      "author_time": "2026-09-19T19:05:51+03:00",
+      "committer_time": "2026-09-19T19:05:51+03:00",
+      "subject": "policy: freeze stage14 substrate adequacy search",
+      "branches_containing": [
+        "freeze/stage13-14-policy-20260919",
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V1_20260919.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "75f1a1c5a8459107033a09659db1b47d055b8e85",
+      "parents": [
+        "92bc051043c29417200fd898dd1c550aeebfae7a"
+      ],
+      "author_time": "2026-09-19T19:06:28+03:00",
+      "committer_time": "2026-09-19T19:06:28+03:00",
+      "subject": "policy: retain stage13/14 calibration summary",
+      "branches_containing": [
+        "freeze/stage13-14-policy-20260919",
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/STAGE13_14_SUBJECT_FREE_CALIBRATION_SUMMARY_20260919.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "70d163328b3b6f4f003dac5e04da4eafa57d64d7",
+      "parents": [
+        "0e695b730f1c4f1021443c318cc101205204d80a",
+        "75f1a1c5a8459107033a09659db1b47d055b8e85"
+      ],
+      "author_time": "2026-09-19T19:07:51+03:00",
+      "committer_time": "2026-09-19T19:07:51+03:00",
+      "subject": "Freeze subject-free Stage13/14 admission policies",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [],
+      "subsystem_tags": [
+        "OTHER"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

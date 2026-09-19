@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `b14d4c574d16e6eb5a56ca58841a4e9f1860ecfb1665463ab9971d2c7781513e`
+> State fingerprint: `b6a5a0e1516582dbfa5a20e3ff8d1cb0b4892df96508b9ee1ba62eed16d72ec2`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -31,7 +31,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `219cbfa726b2` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
+| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `70d163328b3b` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
 
 ## Branch inventory — observed live
 
@@ -41,7 +41,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `219cbfa726b2` | canonical continuation branch |
+| `main` | `70d163328b3b` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -111,7 +111,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `first-fit-base/main-20260904-v2` | `461fd25264f4` | observed live; not explicitly registered active |
 | `fit/single-family-mage-v1-20260902` | `f2cd746f8beb` | observed live; not explicitly registered active |
 | `fix/motion-v2-root-frame-20260919` | `1ec74be48ab4` | observed live; not explicitly registered active |
-| `freeze/stage13-14-policy-20260919` | `906181c01410` | observed live; not explicitly registered active |
+| `freeze/stage13-14-policy-20260919` | `75f1a1c5a845` | observed live; not explicitly registered active |
 | `g0-g1/single-pose-geometry` | `e423cd462002` | observed live; not explicitly registered active |
 | `geometric-substrate-rename-20260901` | `7a27dd9fc7b4` | observed live; not explicitly registered active |
 | `geppetto-arachne-v0-1-20260830` | `777e1bb56d9c` | observed live; not explicitly registered active |

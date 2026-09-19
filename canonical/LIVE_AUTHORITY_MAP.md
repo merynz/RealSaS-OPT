@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `e726648d51a2f940179aca3137c06d800ca06c1e8f72181cf6b6ff37762194d2`
+> State fingerprint: `a427b93d4ca4c5027a7c12e188901b0358e7f882d4b19258ab7ae9435a04e42f`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -31,17 +31,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `2115b8f66438` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
+| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `8cb97b62871f` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 131**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 132**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `2115b8f66438` | canonical continuation branch |
+| `main` | `8cb97b62871f` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -152,7 +152,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `repair/mage-full-subject-reclosure-20260912-adaptive-steiner-tmp` | `221ad1b79eae` | observed live; not explicitly registered active |
 | `repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp` | `c69ab78eac42` | observed live; not explicitly registered active |
 | `repair/stage13-geometry-gate-v2-20260919` | `d577616728c2` | observed live; not explicitly registered active |
-| `repair/stage14-component-aware-compaction-v2-20260919` | `f6e2235d0870` | observed live; not explicitly registered active |
+| `repair/stage14-component-aware-compaction-v2-20260919` | `b6218afbf639` | observed live; not explicitly registered active |
 | `repair/stage14-visible-component-eligibility-v2-20260919` | `5caa591a7aa0` | observed live; not explicitly registered active |
 | `research/g5-coverage-v2-audit-20260919` | `aeaec75e1fe6` | observed live; not explicitly registered active |
 | `research/g5-mesh-v2-numerical-floor-20260919` | `28908a0019f6` | observed live; not explicitly registered active |
@@ -162,6 +162,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `research/stage14-gsa-v2-calibration-20260919` | `416bb7ef341d` | observed live; not explicitly registered active |
 | `research/stage14-gsa-v2-downstream-audit-20260919` | `68eb6d2bb3ca` | observed live; not explicitly registered active |
 | `research/stage14-gsa-v2b-compactor-20260919` | `703ce681f4f7` | observed live; not explicitly registered active |
+| `research/stage14-mechanical-capacity-curve-20260919` | `c3ba4d2dbea0` | observed live; not explicitly registered active |
 | `research/stage14-surface-resident-representative-20260919` | `4ad1cce3fe93` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | observed live; not explicitly registered active |

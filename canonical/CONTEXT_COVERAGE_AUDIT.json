@@ -12,8 +12,8 @@
   "explained_high_signal_count": 322,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 135,
-  "safe_default_evidence_only_branch_count": 131,
+  "live_branch_count": 136,
+  "safe_default_evidence_only_branch_count": 132,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "2115b8f6643818138982e43603d3e982a23fe479",
+      "sha": "8cb97b62871f1d81bd0506333462a4e5e8f3e2f5",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -624,7 +624,7 @@
     },
     {
       "name": "repair/stage14-component-aware-compaction-v2-20260919",
-      "sha": "bb8162af2e0b057a15cd725d47d2a72c9a531975",
+      "sha": "b6218afbf639fa5f302d3ad591c9afc00f15bd20",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -679,6 +679,12 @@
     {
       "name": "research/stage14-gsa-v2b-compactor-20260919",
       "sha": "703ce681f4f7fda170ffead330cc030053f01454",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "research/stage14-mechanical-capacity-curve-20260919",
+      "sha": "c3ba4d2dbea0c207693b21c4b1641cabb56974ae",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

@@ -103,6 +103,31 @@ def _policy(policy:dict)->dict:
     return p
 
 
+def _eligible_dense_components(
+    dense_labels:np.ndarray,
+    dense_support:np.ndarray,
+    *,
+    component_min_dense_fraction:float,
+    visible_component_always_eligible:bool,
+)->tuple[set[int],set[int],set[int]]:
+    labels=np.asarray(dense_labels,dtype=np.int64)
+    support=np.asarray(dense_support,dtype=bool)
+    component_count=int(labels.max(initial=-1)+1)
+    counts=np.bincount(labels,minlength=component_count)
+    fraction_eligible={
+        i for i,c in enumerate(counts)
+        if float(c)/float(max(len(labels),1))+1e-15 >= float(component_min_dense_fraction)
+    }
+    visible_components={
+        int(labels[i])
+        for i in np.flatnonzero(support.any(axis=1))
+    }
+    eligible=set(fraction_eligible)
+    if bool(visible_component_always_eligible):
+        eligible.update(visible_components)
+    return eligible,fraction_eligible,visible_components
+
+
 def _metrics(
     *,
     surface,
@@ -129,18 +154,11 @@ def _metrics(
     normal_deg=np.degrees(np.arccos(dots))
 
     component_count=int(dense_labels.max(initial=-1)+1)
-    counts=np.bincount(dense_labels,minlength=component_count)
-    visible_components={
-        int(dense_labels[i])
-        for i in np.flatnonzero(np.asarray(dense_support,dtype=bool).any(axis=1))
-    }
-    fraction_eligible={
-        i for i,c in enumerate(counts)
-        if float(c)/float(max(len(dense_labels),1))+1e-15 >= float(policy["component_min_dense_fraction"])
-    }
-    eligible=set(fraction_eligible)
-    if bool(policy.get("visible_component_always_eligible",False)):
-        eligible.update(visible_components)
+    eligible,fraction_eligible,visible_components=_eligible_dense_components(
+        dense_labels,dense_support,
+        component_min_dense_fraction=float(policy["component_min_dense_fraction"]),
+        visible_component_always_eligible=bool(policy.get("visible_component_always_eligible",False)),
+    )
     assigned=[set() for _ in range(component_count)]
     owners={}
     for dense_i,node_i in enumerate(np.asarray(nearest,dtype=np.int64)):
@@ -194,7 +212,7 @@ def _metrics(
         "eligible_dense_component_count":int(len(eligible)),
         "visible_dense_component_count":int(len(visible_components)),
         "fraction_eligible_dense_component_count":int(len(fraction_eligible)),
-        "visibility_forced_eligible_component_count":int(len(eligible-visible_components.intersection(fraction_eligible)) if False else len(visible_components-fraction_eligible)),
+        "visibility_forced_eligible_component_count":int(len(visible_components-fraction_eligible)),
         "visible_component_always_eligible":bool(policy.get("visible_component_always_eligible",False)),
         "minimum_nodes_per_eligible_component":int(min_component_nodes),
         "component_alias_node_count":int(alias_nodes),

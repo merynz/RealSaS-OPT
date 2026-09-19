@@ -5,8 +5,8 @@
 **Active experiment gate:** `SUBJECT2_KNIGHT_FULL_CLOSURE` on `main`  
 **Active run:** `SUBJECT2_KNIGHT_V1`  
 **Progress:** **0/40** — next `01_SOURCE_BYTES_SEALED`  
-**Current state:** `PRODUCT_AUTHORITY_IMPLEMENTATION__MOTION_COMPILE_STAGE34_BOUND__DYNAMIC_PROOF_SEAM_OPEN`  
-**Most recent closed gate:** `MOTION_COMPILE_STAGE34_IMPLEMENTATION_AND_BINDING_READY_FOR_CI`
+**Current state:** `PRODUCT_AUTHORITY_IMPLEMENTATION__STAGES24_40_EXECUTABLE__EARLY_MAINLINE_BINDINGS_REMAIN`  
+**Most recent closed gate:** `PRODUCT_TAIL_STAGE24_40_IMPLEMENTED_AND_BOUND_READY_FOR_CI`
 
 ## Read first
 1. `canonical/ACTIVE_RUN_V1.json`
@@ -27,7 +27,7 @@ There is one 40-stage plan and one active-run ledger. A PASS stage is reusable o
 The promoted runtime direction is the measured compact path: shared canonical XYZ once per asset per frame, static per-view overlays, streamed Runtime-v4 writer, content-addressed runtime/proof/render caches and native batch reference rendering. Historical synthetic evidence records an exact 8x XYZ reduction and 17.7x scalar-to-batch render speedup; this is optimization evidence, not a Knight or PRODUCT_PASS claim.
 
 ## Current task
-Stage 05 and stages 24–34 now have executable typed authority adapters. Stage 33 separates reusable motion-source identity from run-local authorization. Stage 34 compiles admitted motion onto the exact canonical puppet, enforces explicit retarget maps, root trajectory policy and the Stage-25 DeformationCapabilityEnvelope, preserves the qualified presentation attachment policy, and carries contact declarations forward without claiming satisfaction or motion quality. Stage 34 directly depends on every authority it reads (18/25/29/30/33). The next scientific seam is Stage 35 dynamic proof: execute the compiled motion and prove contact satisfaction, deformation/attachment invariants and visible dynamic behavior before any runtime/export or motion-quality promotion.
+Stages 24–40 now have executable typed authority adapters. Stage 35 proves canonical 3D dynamic motion over the single M/B truth; Stage 36 performs deployment-only Runtime-v4 projection; Stage 37 materializes exact projected frames without solver replay; Stages 38–39 require exact-hash native playback and rendered temporal evidence; Stage 40 is the only PRODUCT_PASS mint and requires nonzero artist-source motion plus native visible proof. The remaining implementation task is the earlier Stage 03–23 execution seam: replace every residual UNBOUND adapter with existing current authority where valid or a new fail-closed typed adapter, then seal the final 40-stage plan hash.
 
 ## Hard boundaries
 - Mage FIT/FIT2 remains historical/scoped evidence; it is not current execution authority.

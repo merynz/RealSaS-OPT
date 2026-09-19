@@ -1,8 +1,8 @@
 {
   "schema": "RealSaS.RunManifestProductAuthorityContract.v1",
-  "status": "CURRENT_STAGE24_33_INPUT_OUTPUT_CONTRACT",
+  "status": "CURRENT_STAGE24_40_INPUT_OUTPUT_CONTRACT",
   "subject_specific_code_forbidden": true,
-  "external_file_rule": "Every external file materialized by stages 24-33 must be exact-hash bound to an upstream authority or manifest contract; moving aliases latest/current/newest are forbidden.",
+  "external_file_rule": "Every external file materialized by stages 24-40 must be exact-hash bound to an upstream authority or manifest contract; moving aliases latest/current/newest are forbidden.",
   "sections": {
     "components": {
       "boundary_overrides": "Optional list of ComponentBoundaryConstraintIR-like rows. Overrides only existing local-relation adjacency and require evidence_refs."
@@ -64,7 +64,21 @@
     "motion": {
       "sources": "Non-empty motion.sources list. INLINE_PRESET_SPEC_V1 is parameter-space source identity; EXTERNAL_ARTIST_CLIP_V1 must resolve an exact-hash RealSaS.MotionSourceClip.v1 file. SOURCE_RIG_TRACKS_V1 is source evidence only and is not implicitly retargeted.",
       "stage33_rule": "Consumes exact Stage-29 CanonicalPuppetStateIR and Stage-32 QualifiedRestSourcePreservationIR. It may seal source identity and run authorization only; retargeting, motion compilation and motion-quality claims are forbidden at Stage 33.",
-      "stage34_boundary": "Every Stage-33 seal declares Stage-34 compilation required. Rotation-only procedural presets are mechanical probes, not professional artist-motion evidence."
+      "stage34_boundary": "Every Stage-33 seal declares Stage-34 compilation required. Rotation-only procedural presets are mechanical probes, not professional artist-motion evidence.",
+      "stage34_rule": "Stage 34 consumes exact Stage-18/25/29/30/33 authorities. SOURCE_RIG_TRACKS_V1 requires an explicit one-to-one retarget map; Stage-25 deformation envelope is a hard limit. Stage 34 claims compiled mechanics only.",
+      "stage35_rule": "Stage 35 executes exact Stage-34 tracks as canonical 3D FK/LBS over the single Stage-27 QualifiedMeshIR and Stage-28 QualifiedMeshSkinIR, samples authored/contact boundaries plus a frozen uniform grid, proves contacts and dynamic conditioning, and forbids per-view motion-mesh truth."
+    },
+    "runtime": {
+      "stage36": "Projects exact Stage-35 canonical 3D frames into compact Runtime-v4. Face-corner deployment expansion is allowed only for UV seams and every projected vertex retains an exact source canonical vertex id. Source texture PNGs are transport-only re-encodings of exact Stage-07 raster authority.",
+      "stage37": "Materializes the existing streamed Runtime-v4 writer without solver/FK/LBS replay. Package source authority is RUNTIME_V4_ADMISSION_CERTIFICATE, not a premature full ProductProofBundle claim.",
+      "native_player": "Stages 38-39 require runtime.native_player:{path,sha256}. The exact-hash native executable must open/render the .rss through RUNTIME_V4_SHARED_CANONICAL_DEPTH_REFERENCE.",
+      "stage38": "One native playback probe for every clip x 8 views; visible alpha and exact framebuffer size are required.",
+      "stage39": "Native render bake at every Stage-36 projected frame time x 8 views. RGBA sequence hashes establish visible temporal change; no founder visual pass is fabricated."
+    },
+    "closure": {
+      "stage40": "PRODUCT_PASS requires Stage-32 every-view rest preservation, Stage-35 dynamic proof, at least one nonzero ARTIST_SOURCE clip, exact Stage-37 package, Stage-38 native playback, and visible native Stage-39 change for every professional artist-motion clip.",
+      "mechanical_probe_rule": "MECHANICAL_PROBE_ONLY cannot mint PRODUCT_PASS by itself.",
+      "json_only_rule": "JSON-only metrics cannot mint PRODUCT_PASS; native visual motion evidence is mandatory."
     }
   },
   "upstream_stage_schemas": {
@@ -75,7 +89,13 @@
     "05_CAMERA_CONTRACT_SOLVED": "RealSaS.QualifiedCameraSetIR.v1",
     "31_REST_RENDER_8VIEW": "RealSaS.RestRenderSetIR.v1",
     "29_CANONICAL_PUPPET_STATE_SEALED": "RealSaS.CanonicalPuppetStateIR.v1",
-    "32_REST_SOURCE_PRESERVATION_GATE": "RealSaS.QualifiedRestSourcePreservationIR.v1"
+    "32_REST_SOURCE_PRESERVATION_GATE": "RealSaS.QualifiedRestSourcePreservationIR.v1",
+    "34_MOTION_COMPILE_RUN": "RealSaS.QualifiedMotionIR.v1 + RealSaS.MotionCompileConstraintSetIR.v1",
+    "35_MOTION_DYNAMIC_PROOF": "RealSaS.QualifiedDynamicMotionIR.v1",
+    "36_RUNTIME_V4_PROJECT": "RealSaS.RuntimeV4ProjectionIR.v1",
+    "37_RSS_MATERIALIZE_COMPACT": "RealSaS.RuntimeV4PackageSealIR.v1 + .rss",
+    "38_NATIVE_PACKAGE_OPEN_PLAYBACK": "RealSaS.QualifiedNativePlaybackIR.v1",
+    "39_VISUAL_MOTION_RENDER_BAKE": "RealSaS.QualifiedVisualMotionEvidenceIR.v1"
   },
   "outputs": {
     "24": [
@@ -119,6 +139,32 @@
     "33": [
       "RealSaS.MotionSourceSetIR.v1",
       "RealSaS.QualifiedMotionSourceSealIR.v1"
+    ],
+    "34": [
+      "RealSaS.MotionCompileConstraintSetIR.v1",
+      "RealSaS.QualifiedMotionIR.v1"
+    ],
+    "35": [
+      "RealSaS.QualifiedDynamicMotionIR.v1"
+    ],
+    "36": [
+      "RealSaS.RuntimeV4ProjectionIR.v1",
+      "8 x source-authoritative PNG transport"
+    ],
+    "37": [
+      "RealSaS.RuntimeV4PackageSealIR.v1",
+      "application/x-realsas-rss"
+    ],
+    "38": [
+      "RealSaS.QualifiedNativePlaybackIR.v1",
+      "clip x 8 native probe PNGs"
+    ],
+    "39": [
+      "RealSaS.QualifiedVisualMotionEvidenceIR.v1",
+      "native motion frame PNG bake"
+    ],
+    "40": [
+      "RealSaS.ProductClosureSealIR.v1"
     ],
     "05": [
       "RealSaS.QualifiedCameraSetIR.v1"

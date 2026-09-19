@@ -34,6 +34,21 @@ def test_motion_manifest_scope_does_not_touch_iris_or_skin():
         "33_MOTION_SOURCE_OR_PRESET_SEAL"
     ]
     assert by["34_MOTION_COMPILE_RUN"]["adapter"]=="compiler.realsas_compiler_services.orchestrator.adapters.motion_compile_v1:compile_motion_stage"
+    assert by["35_MOTION_DYNAMIC_PROOF"]["adapter"]=="compiler.realsas_compiler_services.orchestrator.adapters.motion_dynamic_proof_v1:prove_dynamic_motion_stage"
+    assert by["35_MOTION_DYNAMIC_PROOF"]["depends_on"]==[
+        "18_SKELETON_QUALIFIED","26_MESH_CANDIDATE_BUILD","27_QUALIFIED_MESH_GATE",
+        "28_QUALIFIED_MESH_SKIN_TRANSFER","29_CANONICAL_PUPPET_STATE_SEALED",
+        "30_QUALIFIED_PRESENTATION_GRAPH","34_MOTION_COMPILE_RUN"
+    ]
+    assert by["36_RUNTIME_V4_PROJECT"]["adapter"]=="compiler.realsas_compiler_services.orchestrator.adapters.runtime_projection_v1:project_runtime_v4_stage"
+    assert by["37_RSS_MATERIALIZE_COMPACT"]["adapter"]=="compiler.realsas_compiler_services.orchestrator.adapters.runtime_package_v1:materialize_runtime_v4_stage"
+    assert by["38_NATIVE_PACKAGE_OPEN_PLAYBACK"]["adapter"]=="compiler.realsas_compiler_services.orchestrator.adapters.runtime_native_v1:native_package_open_playback_stage"
+    assert by["39_VISUAL_MOTION_RENDER_BAKE"]["adapter"]=="compiler.realsas_compiler_services.orchestrator.adapters.runtime_native_v1:visual_motion_render_bake_stage"
+    assert by["40_PRODUCT_CLOSURE_SEAL"]["adapter"]=="compiler.realsas_compiler_services.orchestrator.adapters.product_closure_v1:seal_product_closure_stage"
+    assert all(by[f"{n:02d}_"+{
+        35:"MOTION_DYNAMIC_PROOF",36:"RUNTIME_V4_PROJECT",37:"RSS_MATERIALIZE_COMPACT",
+        38:"NATIVE_PACKAGE_OPEN_PLAYBACK",39:"VISUAL_MOTION_RENDER_BAKE",40:"PRODUCT_CLOSURE_SEAL"
+    }[n]]["adapter"]!="UNBOUND" for n in range(35,41))
 def test_policy_hash_changes_on_semantic_change():
     plan=load("canonical/MAINLINE_EXECUTION_PLAN_V1.json"); policy=dict(plan["stages"][0]["policy"]); before=content_sha256(policy); policy["cacheable"]=False
     assert content_sha256(policy)!=before

@@ -711,18 +711,22 @@
       "title": "Dynamic motion/deformation proof",
       "group": "motion",
       "depends_on": [
+        "18_SKELETON_QUALIFIED",
+        "26_MESH_CANDIDATE_BUILD",
+        "27_QUALIFIED_MESH_GATE",
+        "28_QUALIFIED_MESH_SKIN_TRANSFER",
+        "29_CANONICAL_PUPPET_STATE_SEALED",
+        "30_QUALIFIED_PRESENTATION_GRAPH",
         "34_MOTION_COMPILE_RUN"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.motion_dynamic_proof_v1:prove_dynamic_motion_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
       },
-      "manifest_keys": [
-        "motion"
-      ]
+      "manifest_keys": []
     },
     {
       "ordinal": 36,
@@ -730,9 +734,13 @@
       "title": "Compact Runtime-v4 projection",
       "group": "runtime",
       "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "27_QUALIFIED_MESH_GATE",
+        "30_QUALIFIED_PRESENTATION_GRAPH",
         "35_MOTION_DYNAMIC_PROOF"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_projection_v1:project_runtime_v4_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -740,7 +748,7 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
-        "runtime"
+        "observation"
       ]
     },
     {
@@ -751,16 +759,14 @@
       "depends_on": [
         "36_RUNTIME_V4_PROJECT"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_package_v1:materialize_runtime_v4_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": false
       },
-      "manifest_keys": [
-        "runtime"
-      ]
+      "manifest_keys": []
     },
     {
       "ordinal": 38,
@@ -768,9 +774,10 @@
       "title": "Native package open/playback",
       "group": "runtime",
       "depends_on": [
+        "36_RUNTIME_V4_PROJECT",
         "37_RSS_MATERIALIZE_COMPACT"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_native_v1:native_package_open_playback_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -787,9 +794,11 @@
       "title": "Visual motion render/bake",
       "group": "runtime",
       "depends_on": [
+        "36_RUNTIME_V4_PROJECT",
+        "37_RSS_MATERIALIZE_COMPACT",
         "38_NATIVE_PACKAGE_OPEN_PLAYBACK"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_native_v1:visual_motion_render_bake_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -797,8 +806,7 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
-        "runtime",
-        "visual"
+        "runtime"
       ]
     },
     {
@@ -807,18 +815,22 @@
       "title": "Product closure seal",
       "group": "closure",
       "depends_on": [
+        "29_CANONICAL_PUPPET_STATE_SEALED",
+        "32_REST_SOURCE_PRESERVATION_GATE",
+        "35_MOTION_DYNAMIC_PROOF",
+        "36_RUNTIME_V4_PROJECT",
+        "37_RSS_MATERIALIZE_COMPACT",
+        "38_NATIVE_PACKAGE_OPEN_PLAYBACK",
         "39_VISUAL_MOTION_RENDER_BAKE"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_closure_v1:seal_product_closure_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
         "output_hash_required": true,
         "product_pass_authority": true
       },
-      "manifest_keys": [
-        "closure"
-      ]
+      "manifest_keys": []
     }
   ]
 }

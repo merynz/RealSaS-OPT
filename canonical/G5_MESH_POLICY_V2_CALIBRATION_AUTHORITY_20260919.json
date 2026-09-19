@@ -1,0 +1,56 @@
+{
+  "schema": "RealSaS.G5MeshPolicyV2CalibrationAuthority.v1",
+  "status": "PASS__SUBJECT_FREE__EXACT_G5_NUMERICAL_FLOOR_VERIFIED",
+  "date_utc": "2026-09-19",
+  "authority": "SUBJECT_FREE_G5_MESH_POLICY_CALIBRATION__NO_KNIGHT_OR_MAGE_INPUT",
+  "retrospective_1024_corruption_audit": {
+    "workflow_run_id": 35463283890,
+    "workflow_job_id": 105950858234,
+    "artifact_id": 10590097741,
+    "artifact_sha256": "ef91e346a6d0cbcbce786d4f77a0f33e00e5b4cb04f7c545506bee902efc1930",
+    "result_sha256": "1a109910833278b91a4d54fbeea4c107416d07b5b048d2131e598e8d5313efc2",
+    "raster_resolution": [1024, 1024],
+    "current_mesh_semantic_separation_pass": false,
+    "current_planar_semantic_separation_pass": false,
+    "p999_semantic_separation_pass": true
+  },
+  "exact_g5_mesh_numerical_floor": {
+    "workflow_run_id": 35463473410,
+    "workflow_job_id": 105951374328,
+    "artifact_id": 10590706682,
+    "artifact_sha256": "62f07428ed6044395c4b07c003bceb725e9888a5f108a3fd7f3a09b16fad5889",
+    "result_sha256": "7b26afb28601c442fd9f717f33175bda100b581d20f4e0d39f808c9302af91db",
+    "decoder": "RealSaS.ZeroSurfaceDecoder.MarchingCubes.v3",
+    "decoder_resolution": 256,
+    "raster_resolution": 1024,
+    "g5_rasterizer": "CANONICAL_Z_BUFFER_VISIBLE_OWNER_V1",
+    "sphere_worst": {
+      "min_recall": 0.9999540192889083,
+      "min_precision": 1.0,
+      "max_largest_coherent_hole_fraction": 0.0000028737944432310644,
+      "max_interior_uncovered_fraction": 0.0,
+      "max_silhouette_edge_p95_px": 0.0
+    },
+    "ellipsoid_worst": {
+      "min_recall": 0.9998992692441531,
+      "min_precision": 1.0,
+      "max_largest_coherent_hole_fraction": 0.0000037065041735236995,
+      "max_interior_uncovered_fraction": 0.0,
+      "max_silhouette_edge_p95_px": 0.0
+    },
+    "p999_above_exact_g5_mesh_numerical_floor": true
+  },
+  "selected_mesh_thresholds": {
+    "min_recall": 0.999,
+    "min_precision": 0.999,
+    "max_largest_coherent_hole_fraction": 0.00025,
+    "max_interior_uncovered_fraction": 0.0005
+  },
+  "planar_policy_status": "UNCHANGED_PENDING_EXPLICIT_PLANAR_PROXY_IMPLEMENTATION_AND_CALIBRATION",
+  "contamination_checks": {
+    "knight_result_used": false,
+    "mage_result_used": false,
+    "subject_inputs_used": false
+  },
+  "claim_boundary": "This calibrates automatic MESH G5 admission only. PLANAR is not claimed calibrated and is not used by the current automatic carrier policy."
+}

@@ -133,7 +133,15 @@ def _fixture(tmp_path):
     bundle={"schema":"RealSaS.CameraProjectionBundle.v1","cameras":cameras}
     cam_path=tmp_path/"cameras.json"; cam_path.write_text(json.dumps(bundle,sort_keys=True)+"\n",encoding="utf-8")
 
-    policy_path=ROOT/"canonical"/"QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json"
+    policy_src=ROOT/"canonical"/"QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json"
+    policy_path=tmp_path/policy_src.name
+    policy_path.write_bytes(policy_src.read_bytes())
+    rest_policy_src=ROOT/"canonical"/"REST_SOURCE_PRESERVATION_POLICY_V2_20260919.json"
+    rest_policy_path=tmp_path/rest_policy_src.name
+    rest_policy_path.write_bytes(rest_policy_src.read_bytes())
+    rest_calibration_src=ROOT/"canonical"/"REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json"
+    rest_calibration_path=tmp_path/rest_calibration_src.name
+    rest_calibration_path.write_bytes(rest_calibration_src.read_bytes())
     half=np.sin(np.deg2rad(5.0))
     qw=np.cos(np.deg2rad(5.0))
     motion_payload={
@@ -195,8 +203,8 @@ def _fixture(tmp_path):
                 "sha256":_sha(ROOT/"canonical"/"REST_SOURCE_PRESERVATION_POLICY_V1_20260919.json"),
             },
             "rest_preservation_calibration":{
-                "path":str((ROOT/"canonical"/"REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json").resolve()),
-                "sha256":_sha(ROOT/"canonical"/"REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json"),
+                "path":str(rest_calibration_path.resolve()),
+                "sha256":_sha(rest_calibration_path),
             },
         },
     }

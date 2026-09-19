@@ -3,7 +3,7 @@
   "date": "2026-09-19",
   "continuation_branch": "main",
   "execution_branch": "main",
-  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__REST_PRESERVATION_EXECUTABLE__MOTION_SEAM_OPEN",
+  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__MOTION_SOURCE_EXECUTABLE__MOTION_COMPILE_SEAM_OPEN",
   "authority": {
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
@@ -17,13 +17,13 @@
     "next_visible_product_milestone": "border-safe 8-view Knight observation contact sheet, then visible run motion through native Runtime-v4"
   },
   "current_focus": {
-    "module": "QualifiedMesh + QualifiedPresentationGraph authority implementation",
-    "state": "PRODUCT_AUTHORITY_IMPLEMENTATION__REST_PRESERVATION_EXECUTABLE__MOTION_SEAM_OPEN",
+    "module": "Motion source authority + Stage34 compiler seam",
+    "state": "PRODUCT_AUTHORITY_IMPLEMENTATION__MOTION_SOURCE_EXECUTABLE__MOTION_COMPILE_SEAM_OPEN",
     "active_experiment": "SUBJECT2_KNIGHT_FULL_CLOSURE",
-    "most_recent_closed_gate": "REST_SOURCE_PRESERVATION_STAGE32_IMPLEMENTATION_PASS",
-    "promotion_block": "Stages 05 and 24-32 have executable typed adapters. Stage 32 uses a frozen subject-free admission policy and exact 8-view source replay; Stage 33 motion source/preset authority remains intentionally UNBOUND.",
+    "most_recent_closed_gate": "MOTION_SOURCE_STAGE33_IMPLEMENTATION_PASS",
+    "promotion_block": "Stages 05 and 24-33 have executable typed adapters. Stage 33 seals reusable source identity separately from exact run authorization and binds Stage-29 product state plus Stage-32 rest preservation; Stage 34 motion compilation remains intentionally UNBOUND.",
     "scope_warning": "Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority",
-    "scientific_question": "Can the generic compiler seal a source/preset motion authority after exact rest/source preservation, then compile and prove visible run/idle motion without introducing a second mechanics or presentation truth?"
+    "scientific_question": "Can generic Stage 34 retarget/compile admitted source motion onto the exact canonical puppet state while preserving contacts, root trajectory, joint limits, attachment constraints and the deformation envelope before Stage 35 dynamic proof?"
   },
   "execution_environment": {
     "actions": "SELF_HOSTED_LOCAL_ONLY",

@@ -24,6 +24,11 @@ def test_motion_manifest_scope_does_not_touch_iris_or_skin():
         "07_OBSERVATION_CONTRACT_QUALIFIED","26_MESH_CANDIDATE_BUILD","31_REST_RENDER_8VIEW"
     ]
     assert by["33_MOTION_SOURCE_OR_PRESET_SEAL"]["manifest_keys"]==["motion"]
+    assert by["33_MOTION_SOURCE_OR_PRESET_SEAL"]["depends_on"]==[
+        "29_CANONICAL_PUPPET_STATE_SEALED","32_REST_SOURCE_PRESERVATION_GATE"
+    ]
+    assert by["33_MOTION_SOURCE_OR_PRESET_SEAL"]["adapter"]=="compiler.realsas_compiler_services.orchestrator.adapters.motion_source_v1:seal_motion_source_or_preset_stage"
+    assert by["34_MOTION_COMPILE_RUN"]["adapter"]=="UNBOUND"
 def test_policy_hash_changes_on_semantic_change():
     plan=load("canonical/MAINLINE_EXECUTION_PLAN_V1.json"); policy=dict(plan["stages"][0]["policy"]); before=content_sha256(policy); policy["cacheable"]=False
     assert content_sha256(policy)!=before

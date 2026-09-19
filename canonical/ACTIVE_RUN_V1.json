@@ -5,8 +5,8 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__SUBJECT_DATA_ONLY_IN_RUN_ARTIFACTS",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
-  "pipeline_plan_sha256": "06be699711786e3bac0be4d1aacca4df8198412f39dc3cdcf84a6e3000fdda1b",
-  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__REST_PRESERVATION_EXECUTABLE__MOTION_SEAM_OPEN",
+  "pipeline_plan_sha256": "0332d3cf3288b497082dbb554a83c15c2eac3853b772669e3fe4b870d1f2421d",
+  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__MOTION_SOURCE_EXECUTABLE__MOTION_COMPILE_SEAM_OPEN",
   "completed_count": 0,
   "total_count": 40,
   "next_stage": "01_SOURCE_BYTES_SEALED",
@@ -525,6 +525,12 @@
     {
       "event": "REST_SOURCE_PRESERVATION_STAGE32_BOUND",
       "note": "Stage 32 now measures exact stage-31 replay against stage-07 source raster/foreground authority, re-derives frozen subject-free policy, and requires every view to pass every hard rule. Motion Stage 33 remains UNBOUND."
+    }
+  ],
+  "events": [
+    {
+      "event": "MOTION_SOURCE_STAGE33_BOUND",
+      "note": "Stage 33 now seals reusable motion-source identity plus run-local authorization against exact Stage-29 CanonicalPuppetStateIR and Stage-32 rest-preservation lineage. It performs no retargeting, compilation, or motion-quality claim. Stage 34 remains intentionally UNBOUND."
     }
   ]
 }

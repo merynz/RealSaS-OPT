@@ -1,8 +1,8 @@
 {
   "schema": "RealSaS.RunManifestProductAuthorityContract.v1",
-  "status": "CURRENT_STAGE24_32_INPUT_OUTPUT_CONTRACT",
+  "status": "CURRENT_STAGE24_33_INPUT_OUTPUT_CONTRACT",
   "subject_specific_code_forbidden": true,
-  "external_file_rule": "Every external file materialized by stages 24-30 must be exact-hash bound to an upstream authority or manifest contract; moving aliases latest/current/newest are forbidden.",
+  "external_file_rule": "Every external file materialized by stages 24-33 must be exact-hash bound to an upstream authority or manifest contract; moving aliases latest/current/newest are forbidden.",
   "sections": {
     "components": {
       "boundary_overrides": "Optional list of ComponentBoundaryConstraintIR-like rows. Overrides only existing local-relation adjacency and require evidence_refs."
@@ -60,6 +60,11 @@
       "rest_preservation_calibration": "Exact {path,sha256} to canonical/REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json or byte-identical sealed equivalent. Knight/Mage outcomes may not tune thresholds.",
       "stage32_rule": "Consumes exact stage-07 source raster/foreground authority, stage-26 MeshQualificationPolicyIR and stage-31 RestRenderSetIR. Every one of eight views must pass every hard rule; aggregate compensation is forbidden.",
       "coordinate_domains": "Observation PIXEL_CENTER_XY is source texel index-centered; Runtime/G5 target raster uses half-integer pixel centers. Rest rendering must preserve this distinction and may not add an extra half-pixel shift."
+    },
+    "motion": {
+      "sources": "Non-empty motion.sources list. INLINE_PRESET_SPEC_V1 is parameter-space source identity; EXTERNAL_ARTIST_CLIP_V1 must resolve an exact-hash RealSaS.MotionSourceClip.v1 file. SOURCE_RIG_TRACKS_V1 is source evidence only and is not implicitly retargeted.",
+      "stage33_rule": "Consumes exact Stage-29 CanonicalPuppetStateIR and Stage-32 QualifiedRestSourcePreservationIR. It may seal source identity and run authorization only; retargeting, motion compilation and motion-quality claims are forbidden at Stage 33.",
+      "stage34_boundary": "Every Stage-33 seal declares Stage-34 compilation required. Rotation-only procedural presets are mechanical probes, not professional artist-motion evidence."
     }
   },
   "upstream_stage_schemas": {
@@ -68,7 +73,9 @@
     "22_SKIN_QUALIFIED": "RealSaS.QualifiedSkinIR.v1",
     "07_OBSERVATION_CONTRACT_QUALIFIED": "RealSaS.QualifiedObservationSetIR.v1",
     "05_CAMERA_CONTRACT_SOLVED": "RealSaS.QualifiedCameraSetIR.v1",
-    "31_REST_RENDER_8VIEW": "RealSaS.RestRenderSetIR.v1"
+    "31_REST_RENDER_8VIEW": "RealSaS.RestRenderSetIR.v1",
+    "29_CANONICAL_PUPPET_STATE_SEALED": "RealSaS.CanonicalPuppetStateIR.v1",
+    "32_REST_SOURCE_PRESERVATION_GATE": "RealSaS.QualifiedRestSourcePreservationIR.v1"
   },
   "outputs": {
     "24": [
@@ -108,6 +115,10 @@
       "RealSaS.RestPreservationMeasurementSetIR.v1",
       "RealSaS.RestSourcePreservationPolicyIR.v1",
       "RealSaS.QualifiedRestSourcePreservationIR.v1"
+    ],
+    "33": [
+      "RealSaS.MotionSourceSetIR.v1",
+      "RealSaS.QualifiedMotionSourceSealIR.v1"
     ],
     "05": [
       "RealSaS.QualifiedCameraSetIR.v1"

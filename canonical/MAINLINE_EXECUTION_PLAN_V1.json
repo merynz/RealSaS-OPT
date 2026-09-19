@@ -668,9 +668,10 @@
       "title": "Motion source/preset seal",
       "group": "motion",
       "depends_on": [
+        "29_CANONICAL_PUPPET_STATE_SEALED",
         "32_REST_SOURCE_PRESERVATION_GATE"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.motion_source_v1:seal_motion_source_or_preset_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,

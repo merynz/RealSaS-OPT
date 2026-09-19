@@ -11,8 +11,8 @@
 - Explained by continuity policy: **319**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **115**
-- Safe-default evidence-only branches: **111**
+- Live branches: **116**
+- Safe-default evidence-only branches: **112**
 
 ### Classification counts
 
@@ -85,6 +85,7 @@ _None._
 | `first-fit-base/main-20260904-v2` | `461fd25264f4` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `fit/single-family-mage-v1-20260902` | `f2cd746f8beb` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `fit2/mage-full-subject-reclosure` | `eb7a20eb9da7` | `EVIDENCE_ONLY` | explicit authority-map override |
+| `fix/motion-v2-root-frame-20260919` | `1ec74be48ab4` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `g0-g1/single-pose-geometry` | `e423cd462002` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `geometric-substrate-rename-20260901` | `7a27dd9fc7b4` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `geppetto-arachne-v0-1-20260830` | `777e1bb56d9c` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -99,7 +100,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `eb9ff1e1cfeb` | `CANONICAL` | canonical branch |
+| `main` | `33afc46ce883` | `CANONICAL` | canonical branch |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb1-identity-baseline-20260901` | `82b888c67afd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwbo-typed-seam-20260831` | `095ef0d439c8` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `41ce8b0ee100edebfc8688cd2cfdf24a1faee74bce012858c434f047f29849d6`
+> State fingerprint: `4263e8d5754e90879f787e94966809aec18882ffb64c523e8b6ea15b9c599c9e`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -31,17 +31,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `eb9ff1e1cfeb` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
+| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `33afc46ce883` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 111**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 112**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `eb9ff1e1cfeb` | canonical continuation branch |
+| `main` | `33afc46ce883` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -110,6 +110,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `first-fit-base/main-20260904` | `1f1d8b5bd0df` | observed live; not explicitly registered active |
 | `first-fit-base/main-20260904-v2` | `461fd25264f4` | observed live; not explicitly registered active |
 | `fit/single-family-mage-v1-20260902` | `f2cd746f8beb` | observed live; not explicitly registered active |
+| `fix/motion-v2-root-frame-20260919` | `1ec74be48ab4` | observed live; not explicitly registered active |
 | `g0-g1/single-pose-geometry` | `e423cd462002` | observed live; not explicitly registered active |
 | `geometric-substrate-rename-20260901` | `7a27dd9fc7b4` | observed live; not explicitly registered active |
 | `geppetto-arachne-v0-1-20260830` | `777e1bb56d9c` | observed live; not explicitly registered active |

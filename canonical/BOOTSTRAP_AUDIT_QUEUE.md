@@ -455,11 +455,11 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D2D319509ACF` `WORKFLOW` — `main` :: `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` @ blob `16bf42a72ecc`
 - `KA-03510A41D0D4` `WORKFLOW` — `main` :: `.github/workflows/prefit_observation_authority_v1.yml` @ blob `b04004000018`
 - `KA-FDE35053B8A7` `WORKFLOW` — `main` :: `.github/workflows/single_family_data_contract_v1.yml` @ blob `929df12d859e`
-- `KA-6DBEDA20D0FB` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `a0c8f3316021`
+- `KA-C94DF076DFD8` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `3601ba57674e`
 - `KA-25BB7CDC0AB9` `AUTHORITY_DECISION` — `main` :: `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` @ blob `6b5fff12a484`
 - `KA-DC74ABB19F22` `PREREG` — `main` :: `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` @ blob `c01e1a65f75e`
 - `KA-E1571E78A4A5` `PREREG` — `main` :: `canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md` @ blob `36aef9ae6ecd`
-- `KA-8869F6541F51` `AUTHORITY_DECISION` — `main` :: `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` @ blob `1d128e0c490a`
+- `KA-54021304204D` `AUTHORITY_DECISION` — `main` :: `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` @ blob `0c7856a2d5f3`
 - `KA-4BA36C81DC37` `RESULT` — `main` :: `canonical/fit_mage_v1/CODEC_A0_EXACT_CONDITIONING_RESULT.json` @ blob `647d375bb65a`
 - `KA-2F8418D24D3C` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/fit_mage_v1/FIT_MAGE_CPU_V1_STATUS.md` @ blob `4edcee0fffff`
 - `KA-402A1F2E8E27` `AUTHORITY_DECISION` — `main` :: `experiments/family_selection_v1/post_freeze_family_selector_v1.py` @ blob `6571a60a4223`

@@ -11,10 +11,10 @@
 - Current state: PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING
 - Active experiment: SUBJECT2_KNIGHT_FULL_CLOSURE
 - Most recent closed gate: ALL_40_STAGE_ADAPTERS_IMPLEMENTED_AND_BOUND_READY_FOR_FINAL_CI
-- Canonical main: eb9ff1e1cfeb
+- Canonical main: 33afc46ce883
 - Active run: SUBJECT2_KNIGHT_V1 — 0/40; next 01_SOURCE_BYTES_SEALED
-- Plan SHA-256: 4861ae36cb25fc4be9470f6d475d8bb0174d668eeeb4564475faaf7c5700ac1f
-- Promotion block: All 40 stages have executable typed adapters and an explicit authority DAG. Repository mainline CI is green at the pre-performance-patch head; remaining work is live-context reconciliation, final CI after batch-render optimization, and exact Knight run inputs/external execution artifacts before 01→40 execution.
+- Plan SHA-256: 35d13cc7fc2e12d554bd282469a1b62075c9a9280805fcda3d061e58c17f0adf
+- Promotion block: Full-3D local-quaternion v2 is the professional motion candidate path: Stage34 compiles source motion semantics onto the exact target skeleton and Stage35 exact FK/LBS execution owns clip capability. Stage25/27 are numerical conditioning evidence only. The active plan/ledger hash is reconciled on the current candidate branch; remaining work is final CI, deterministic Blender extraction of the sealed Quaternius Idle/Run/Slash MotionSourceClip.v2 artifacts, and the exact Knight external fit/native-player inputs before 01→40 execution.
 - Scope warning: Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority
 
 ## Current machine authority
@@ -50,7 +50,7 @@
 | **QualifiedMesh** | single canonical product geometry authority | view-independent candidate; independent G1-G5 PASS required |
 | **Presentation** | automatic Spine-class slots/attachments/carriers/view overlays | Compiler owns QualifiedPresentationGraphIR; categorical object identity is not required |
 | **Appearance** | source RGB provenance | source observations remain appearance authority; 3D geometry never becomes RGB truth |
-| **Motion** | 3D FK/LBS + proof | must remain inside DeformationCapabilityEnvelopeIR or requalify |
+| **Motion** | full-3D quaternion compile + exact FK/LBS dynamic proof | Stage34 compiles full-3D local quaternion tracks; Stage35 exact target-skeleton FK/LBS execution mints clip capability. Stage25/27 conditioning probes do not define professional motion limits. |
 | **Runtime** | compact .rss + native playback | consumer only; shared XYZ once/frame and no second topology/presentation truth |
 
 ## Current scientific question
@@ -68,6 +68,8 @@ Can the exact Knight witness execute the generic 40-stage authority DAG end-to-e
 - Rest source preservation precedes motion authority.
 - Visible native motion is required before product closure.
 - Multi-frame native visual proof uses content-addressed batch transport; scalar per-frame subprocess loops are not the product iteration path.
+- Professional shipping motion uses MotionSourceClip.v2 full-3D local-quaternion semantics; legacy scalar motion is historical/mechanical evidence only.
+- Stage25 deformation-envelope and Stage27 G3 stress are numerical conditioning evidence only; Stage35 exact clip execution is the professional motion-capability authority.
 
 ## Execution environment
 

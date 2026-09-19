@@ -1,6 +1,10 @@
 import math
 import numpy as np
 
+from compiler.realsas_compiler_core.joint_frames_v1 import (
+    derive_joint_frames_from_skeleton,
+    object_vector_to_joint_local,
+)
 from compiler.realsas_compiler_core.motion_compile_v2 import (
     CanonicalJointTrack3DIR,
     MotionKeyframe3DIR,
@@ -63,3 +67,23 @@ def test_quaternion_fk_moves_child_out_of_legacy_xy_rotation_plane():
     assert np.isclose(np.linalg.norm(child-np.asarray(pos["root"])),1.0,atol=1e-9)
     assert abs(child[1])>0.9
     assert abs(child[2])<1e-8
+
+
+def test_root_local_translation_reconstructs_requested_object_space_delta():
+    skeleton=Skeleton()
+    cameras=_cameras()
+    frames=derive_joint_frames_from_skeleton(skeleton,cameras=cameras)
+    desired=np.asarray((0.25,-0.4,0.15),dtype=np.float64)
+    local=object_vector_to_joint_local(frames["root"],desired)
+    track=CanonicalJointTrack3DIR(
+        "root","source_root",("LOCAL_ROTATION_QUAT_XYZW","LOCAL_TRANSLATION_XYZ"),
+        (MotionKeyframe3DIR(0.0,(0.0,0.0,0.0,1.0),tuple(local)),),
+    )
+    _,pos,_=_joint_pose_v2(
+        skeleton=skeleton,
+        tracks={"root":track},
+        time_seconds=0.0,
+        cameras=cameras,
+    )
+    actual=np.asarray(pos["root"],dtype=np.float64)-np.asarray(skeleton.joints[0].position,dtype=np.float64)
+    assert np.allclose(actual,desired,atol=1e-9)

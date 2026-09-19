@@ -139,7 +139,7 @@ def native_package_open_playback_stage(ctx:dict)->dict:
         "native_player_sha256":player_sha,
         "transport":"CONTENT_ADDRESSED_BATCH_NATIVE_V4",
         **perf,
-    }}
+    },"performance":dict(perf)}
 
 
 def visual_motion_render_bake_stage(ctx:dict)->dict:
@@ -214,4 +214,4 @@ def visual_motion_render_bake_stage(ctx:dict)->dict:
         "founder_visual_pass_claimed":False,
         "transport":"CONTENT_ADDRESSED_BATCH_NATIVE_V4",
         **perf,
-    }}
+    },"performance":dict(perf)}

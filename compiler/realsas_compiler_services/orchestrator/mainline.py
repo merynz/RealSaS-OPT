@@ -1,5 +1,6 @@
 from __future__ import annotations
 import argparse, ast, hashlib, importlib, importlib.util, json, os, re
+from time import perf_counter
 from pathlib import Path
 from typing import Any
 
@@ -218,7 +219,7 @@ def _invalidate_dependents(plan:dict,ledger:dict,stage_id:str,reason:str)->tuple
     for row in ledger["stages"]:
         if row["id"] not in invalid:
             continue
-        row.update(status="PENDING",input_fingerprint="",implementation_hash="",policy_hash="",outputs=[],diagnostics_hash="",blockers=[])
+        row.update(status="PENDING",input_fingerprint="",implementation_hash="",policy_hash="",outputs=[],diagnostics_hash="",blockers=[],wall_seconds=0.0,performance={})
         invalidated.append(row["id"])
     ledger.setdefault("history",[]).append({
         "event":"DEPENDENCY_SUBGRAPH_INVALIDATED",
@@ -286,14 +287,29 @@ def execute(run_id:str,*,from_stage:str="",to_stage:str="",resume:bool=True)->in
         row.update(status="RUNNING",attempts=int(row.get("attempts",0))+1,input_fingerprint=fingerprint,implementation_hash=impl_hash,policy_hash=policy_hash,outputs=[],diagnostics_hash="",blockers=[])
         _refresh(ledger); atomic_json(LEDGER_PATH,ledger)
         ctx={"repo_root":ROOT,"authority_root":authority_root(),"run_root":authority_root()/"runs"/run_id,"run_id":run_id,"run_manifest_path":manifest_path,"run_manifest":manifest,"stage":stage,"ledger":ledger}
+        started=perf_counter()
         try:
-            result=dict(fn(ctx) or {}); status=str(result.get("status","FAIL")).upper()
+            result=dict(fn(ctx) or {}); elapsed=perf_counter()-started; status=str(result.get("status","FAIL")).upper()
             if status!="PASS":
-                row.update(status=status if status in FAIL_STATUSES else "FAIL",diagnostics_hash=content_sha256(result.get("diagnostics",{})),blockers=list(result.get("blockers") or ["STAGE_ADAPTER_REPORTED_FAILURE"]))
+                row.update(
+                    status=status if status in FAIL_STATUSES else "FAIL",
+                    diagnostics_hash=content_sha256(result.get("diagnostics",{})),
+                    blockers=list(result.get("blockers") or ["STAGE_ADAPTER_REPORTED_FAILURE"]),
+                    wall_seconds=float(elapsed),
+                    performance=dict(result.get("performance") or {}),
+                )
                 _refresh(ledger); atomic_json(LEDGER_PATH,ledger); return 2
-            row.update(status="PASS",outputs=_seal_outputs(list(result.get("outputs") or ())),diagnostics_hash=content_sha256(result.get("diagnostics",{})),blockers=[])
+            row.update(
+                status="PASS",
+                outputs=_seal_outputs(list(result.get("outputs") or ())),
+                diagnostics_hash=content_sha256(result.get("diagnostics",{})),
+                blockers=[],
+                wall_seconds=float(elapsed),
+                performance=dict(result.get("performance") or {}),
+            )
         except Exception as exc:
-            row.update(status="FAIL",outputs=[],diagnostics_hash=content_sha256({"exception_type":type(exc).__name__,"message":str(exc)}),blockers=[f"EXCEPTION:{type(exc).__name__}:{exc}"])
+            elapsed=perf_counter()-started
+            row.update(status="FAIL",outputs=[],diagnostics_hash=content_sha256({"exception_type":type(exc).__name__,"message":str(exc)}),blockers=[f"EXCEPTION:{type(exc).__name__}:{exc}"],wall_seconds=float(elapsed),performance={})
             _refresh(ledger); atomic_json(LEDGER_PATH,ledger); raise
         _refresh(ledger); atomic_json(LEDGER_PATH,ledger)
     validate_ledger(plan,ledger); return 0

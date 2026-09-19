@@ -106,6 +106,8 @@ def build_fit_execution(ctx:dict,*,lane:str,section_key:str,prereg:ModelFitPrere
             "receipt_payload_sha256":receipt_sha,
             "external_fit_executed":True,
             "product_authority_minted":False,
+            "external_fit_wall_seconds":float(receipt.get("wall_seconds",0.0)),
+            "external_fit_timing":dict(receipt.get("timing") or {}),
         },"",
         metadata={"receipt_metadata":dict(receipt.get("metadata") or {})},
     )

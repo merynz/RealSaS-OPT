@@ -54,4 +54,10 @@ def materialize_runtime_v4_stage(ctx:dict)->dict:
             "package_total_bytes":seal.package_total_bytes,
             "solver_replay_performed":False,
         },
+        "performance":{
+            "runtime_binary_write_seconds":float(result["runtime_binary_write_seconds"]),
+            "archive_write_seconds":float(result["archive_write_seconds"]),
+            "wall_seconds":float(result["wall_seconds"]),
+            "frame_count_total":int(result["frame_count_total"]),
+        },
     }

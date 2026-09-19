@@ -12,8 +12,8 @@
   "explained_high_signal_count": 322,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 132,
-  "safe_default_evidence_only_branch_count": 128,
+  "live_branch_count": 134,
+  "safe_default_evidence_only_branch_count": 130,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "4f894b7c533e5480ef50a2603cc57363a0c1b43c",
+      "sha": "d0904e66edf819dc954b7ca68c6b6b8d9b5a6bd6",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -624,7 +624,7 @@
     },
     {
       "name": "repair/stage14-visible-component-eligibility-v2-20260919",
-      "sha": "20b451a7898c5edb8e216b502e8527db731710e3",
+      "sha": "5caa591a7aa06b747c342f7306c1b52b7b42984e",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -653,6 +653,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "research/stage14-component-aware-compaction-20260919",
+      "sha": "4212a28fc057f4f30a1edc811b82dacae67a4441",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "research/stage14-gsa-v2-calibration-20260919",
       "sha": "416bb7ef341d93c335af348e1af8e9f48f95cc90",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -667,6 +673,12 @@
     {
       "name": "research/stage14-gsa-v2b-compactor-20260919",
       "sha": "703ce681f4f7fda170ffead330cc030053f01454",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "research/stage14-surface-resident-representative-20260919",
+      "sha": "cfa70149a3249745a07740303013e2363ab15fae",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

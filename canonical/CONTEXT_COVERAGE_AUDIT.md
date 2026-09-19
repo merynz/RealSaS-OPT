@@ -6,9 +6,9 @@
 
 ## Coverage
 
-- Git-tracked files: **1118**
-- High-signal knowledge artifacts: **322**
-- Explained by continuity policy: **322**
+- Git-tracked files: **1121**
+- High-signal knowledge artifacts: **323**
+- Explained by continuity policy: **323**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
 - Live branches: **141**
@@ -17,7 +17,7 @@
 ### Classification counts
 
 - `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL`: **147**
-- `INDEXED_EXPLICIT`: **175**
+- `INDEXED_EXPLICIT`: **176**
 
 `FIT1_COMMIT_LEDGER_COVERED` means exact provenance is recoverable; it does **not** mean the artifact's scientific claim is promoted. `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL` means the artifact predates the FIT1 gate and remains evidence/provenance unless another authority explicitly promotes it.
 
@@ -101,7 +101,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `94e99d0acbe4` | `CANONICAL` | canonical branch |
+| `main` | `29c7bb857a14` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -132,7 +132,7 @@ _None._
 | `repair/stage13-geometry-gate-v2-20260919` | `d577616728c2` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/stage14-component-aware-compaction-v2-20260919` | `b6218afbf639` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/stage14-mechanical-adequacy-v2-20260919` | `1972a69a6bbd` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `repair/stage14-policy-v2-20260920` | `94e99d0acbe4` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `repair/stage14-policy-v2-20260920` | `76736ef05059` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/stage14-visible-component-eligibility-v2-20260919` | `5caa591a7aa0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/g5-coverage-v2-audit-20260919` | `aeaec75e1fe6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `research/g5-mesh-v2-numerical-floor-20260919` | `28908a0019f6` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

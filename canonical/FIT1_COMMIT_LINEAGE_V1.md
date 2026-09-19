@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2066**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2075**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2078,6 +2078,15 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-20T00:23:03+03:00` | `4ff8b1a3ccd4` | no | OTHER | research: add final Stage14 v2 12k subject-free calibration | `tools/stage14_v2_final_subject_free_calibration.py` | `research/stage14-v2-final-calibration-20260920` |
 | `2026-09-20T00:23:04+03:00` | `94e99d0acbe4` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main`<br>`repair/stage14-policy-v2-20260920` |
 | `2026-09-20T00:23:10+03:00` | `8a502d4bee42` | no | CI_TEST | research: run final Stage14 v2 calibration self-hosted | `.github/workflows/stage14_v2_final_subject_free_calibration.yml` | `research/stage14-v2-final-calibration-20260920` |
+| `2026-09-20T00:28:14+03:00` | `8a1a2cbbb714` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-20T00:28:37+03:00` | `f8fca711dc16` | yes | GOVERNANCE_CONTINUITY, IRIS_GSA | stage14: retain v2 12k subject-free calibration authority | `canonical/STAGE14_SUBSTRATE_ADEQUACY_CALIBRATION_AUTHORITY_V2_20260920.json` | `main`<br>`repair/stage14-policy-v2-20260920` |
+| `2026-09-20T00:28:39+03:00` | `eab1248dcd13` | yes | GOVERNANCE_CONTINUITY, IRIS_GSA | stage14: freeze v2 12k substrate adequacy policy | `canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V2_20260920.json` | `main`<br>`repair/stage14-policy-v2-20260920` |
+| `2026-09-20T00:29:18+03:00` | `8982604a960c` | yes | COMPILER_PROOF, IRIS_GSA | stage14: bind GSA admission to exact frozen v2 policy document | `compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v1.py` | `main`<br>`repair/stage14-policy-v2-20260920` |
+| `2026-09-20T00:29:27+03:00` | `d463b577b2b7` | yes | GOVERNANCE_CONTINUITY, IRIS_GSA | stage14: supersede v1 substrate adequacy policy | `canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V1_20260919.json` | `main`<br>`repair/stage14-policy-v2-20260920` |
+| `2026-09-20T00:29:38+03:00` | `ddda235a8520` | yes | GOVERNANCE_CONTINUITY | stage14: bind run-manifest contract to frozen v2 policy | `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` | `main`<br>`repair/stage14-policy-v2-20260920` |
+| `2026-09-20T00:29:54+03:00` | `c938758b1774` | yes | COMPILER_PROOF, IRIS_GSA | stage14: isolate frozen policy drift validation | `compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v1.py` | `main`<br>`repair/stage14-policy-v2-20260920` |
+| `2026-09-20T00:30:10+03:00` | `76736ef05059` | yes | CI_TEST, COMPILER_PROOF | tests: lock Stage14 v2 frozen-policy binding | `tests/compiler/test_stage14_policy_v2.py` | `main`<br>`repair/stage14-policy-v2-20260920` |
+| `2026-09-20T00:32:58+03:00` | `29c7bb857a14` | yes | IRIS_GSA | Freeze and enforce Stage14 substrate adequacy policy v2 | _none_ | `main` |
 
 ## Use rule
 

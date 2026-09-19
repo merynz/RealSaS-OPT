@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "94e99d0acbe4fd2769507357fa83f963607f8447",
+    "main": "29c7bb857a14bcbdb73351a85dcb2e1ba4ae1529",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -75,7 +75,7 @@
     "repair/stage13-geometry-gate-v2-20260919": "d577616728c21866d7e93fe90f0f3b7d3c602ab9",
     "repair/stage14-component-aware-compaction-v2-20260919": "b6218afbf639fa5f302d3ad591c9afc00f15bd20",
     "repair/stage14-mechanical-adequacy-v2-20260919": "1972a69a6bbdb04b05e11f5c8c0fd300848faa5a",
-    "repair/stage14-policy-v2-20260920": "94e99d0acbe4fd2769507357fa83f963607f8447",
+    "repair/stage14-policy-v2-20260920": "76736ef05059d4773b2c5ca2158ba7af1023d7b6",
     "repair/stage14-visible-component-eligibility-v2-20260919": "5caa591a7aa06b747c342f7306c1b52b7b42984e",
     "research/g5-coverage-v2-audit-20260919": "aeaec75e1fe6e9372f85393e5547f572a4bd026a",
     "research/g5-mesh-v2-numerical-floor-20260919": "28908a0019f6471dedbfaada604d0c2893dd03e2",
@@ -113,7 +113,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2066,
+  "commit_count": 2075,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -111095,6 +111095,215 @@
       ],
       "subsystem_tags": [
         "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8a1a2cbbb714d9c7548d7c9ef107829a500e249e",
+      "parents": [
+        "94e99d0acbe4fd2769507357fa83f963607f8447"
+      ],
+      "author_time": "2026-09-20T00:28:14+03:00",
+      "committer_time": "2026-09-20T00:28:14+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f8fca711dc16b77f1fae7d38f9dc22baff307ef6",
+      "parents": [
+        "94e99d0acbe4fd2769507357fa83f963607f8447"
+      ],
+      "author_time": "2026-09-20T00:28:37+03:00",
+      "committer_time": "2026-09-20T00:28:37+03:00",
+      "subject": "stage14: retain v2 12k subject-free calibration authority",
+      "branches_containing": [
+        "main",
+        "repair/stage14-policy-v2-20260920"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/STAGE14_SUBSTRATE_ADEQUACY_CALIBRATION_AUTHORITY_V2_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "eab1248dcd1306a106faf657a4acc207a91f4762",
+      "parents": [
+        "f8fca711dc16b77f1fae7d38f9dc22baff307ef6"
+      ],
+      "author_time": "2026-09-20T00:28:39+03:00",
+      "committer_time": "2026-09-20T00:28:39+03:00",
+      "subject": "stage14: freeze v2 12k substrate adequacy policy",
+      "branches_containing": [
+        "main",
+        "repair/stage14-policy-v2-20260920"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V2_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8982604a960ccb31b4411093a2ec45e09392a2d5",
+      "parents": [
+        "eab1248dcd1306a106faf657a4acc207a91f4762"
+      ],
+      "author_time": "2026-09-20T00:29:18+03:00",
+      "committer_time": "2026-09-20T00:29:18+03:00",
+      "subject": "stage14: bind GSA admission to exact frozen v2 policy document",
+      "branches_containing": [
+        "main",
+        "repair/stage14-policy-v2-20260920"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d463b577b2b76b9fb258fde56085b37483e23df2",
+      "parents": [
+        "8982604a960ccb31b4411093a2ec45e09392a2d5"
+      ],
+      "author_time": "2026-09-20T00:29:27+03:00",
+      "committer_time": "2026-09-20T00:29:27+03:00",
+      "subject": "stage14: supersede v1 substrate adequacy policy",
+      "branches_containing": [
+        "main",
+        "repair/stage14-policy-v2-20260920"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V1_20260919.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ddda235a85209d4ffd016c7b1fe8a319cb13d348",
+      "parents": [
+        "d463b577b2b76b9fb258fde56085b37483e23df2"
+      ],
+      "author_time": "2026-09-20T00:29:38+03:00",
+      "committer_time": "2026-09-20T00:29:38+03:00",
+      "subject": "stage14: bind run-manifest contract to frozen v2 policy",
+      "branches_containing": [
+        "main",
+        "repair/stage14-policy-v2-20260920"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c938758b1774bed46eb546f44051e69dd60addf2",
+      "parents": [
+        "ddda235a85209d4ffd016c7b1fe8a319cb13d348"
+      ],
+      "author_time": "2026-09-20T00:29:54+03:00",
+      "committer_time": "2026-09-20T00:29:54+03:00",
+      "subject": "stage14: isolate frozen policy drift validation",
+      "branches_containing": [
+        "main",
+        "repair/stage14-policy-v2-20260920"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "76736ef05059d4773b2c5ca2158ba7af1023d7b6",
+      "parents": [
+        "c938758b1774bed46eb546f44051e69dd60addf2"
+      ],
+      "author_time": "2026-09-20T00:30:10+03:00",
+      "committer_time": "2026-09-20T00:30:10+03:00",
+      "subject": "tests: lock Stage14 v2 frozen-policy binding",
+      "branches_containing": [
+        "main",
+        "repair/stage14-policy-v2-20260920"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_stage14_policy_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "29c7bb857a14bcbdb73351a85dcb2e1ba4ae1529",
+      "parents": [
+        "8a1a2cbbb714d9c7548d7c9ef107829a500e249e",
+        "76736ef05059d4773b2c5ca2158ba7af1023d7b6"
+      ],
+      "author_time": "2026-09-20T00:32:58+03:00",
+      "committer_time": "2026-09-20T00:32:58+03:00",
+      "subject": "Freeze and enforce Stage14 substrate adequacy policy v2",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [],
+      "subsystem_tags": [
+        "IRIS_GSA"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

@@ -23,8 +23,8 @@ from compiler.realsas_compiler_core.mesh.deformation_stress_v1 import (
     run_g3_deformation_stress,
 )
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
-    ComponentObservationRasterIR,
     build_g5_coverage_matrix,
+    derive_component_observation_rasters_v1,
     camera_projection_binding_hash,
     component_surface_set_hash,
     g5_coverage_evidence_hash,
@@ -327,11 +327,12 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
     }
 
 
-def _component_observations(ctx, *, partition, carrier, cameras):
+def _component_observations(ctx, *, surface, partition, carrier, cameras):
     cfg=dict(ctx["run_manifest"].get("observation") or {})
+    if cfg.get("component_masks"):
+        raise QualificationError("PRODUCT_ADAPTER_EXTERNAL_COMPONENT_MASKS_FORBIDDEN")
     observation_set=_load_observation_set(ctx)
     authority_by_view={int(row.view_index):row for row in observation_set.views}
-
     foreground_rows=tuple(cfg.get("source_foreground_masks") or ())
     if len(foreground_rows)!=8 or {int(row["view_index"]) for row in foreground_rows}!=set(range(8)):
         raise QualificationError("PRODUCT_ADAPTER_SOURCE_FOREGROUND_MATRIX_INCOMPLETE")
@@ -343,49 +344,15 @@ def _component_observations(ctx, *, partition, carrier, cameras):
         authority=authority_by_view[vi]
         if _sha256(path)!=authority.foreground_mask_sha256:
             raise QualificationError("PRODUCT_ADAPTER_SOURCE_FOREGROUND_AUTHORITY_DRIFT")
+        if len(raw)!=int(authority.width)*int(authority.height) or any(x not in (0,1) for x in raw):
+            raise QualificationError("PRODUCT_ADAPTER_SOURCE_FOREGROUND_INVALID")
         source_foreground_masks[vi]=raw
-
-    rows=tuple(cfg.get("component_masks") or ())
-    expected={(vi,c.component_id) for vi in range(8) for c in partition.components}
-    supplied={(int(row["view_index"]),str(row["component_id"])) for row in rows}
-    if supplied!=expected or len(rows)!=len(expected):
-        raise QualificationError("PRODUCT_ADAPTER_COMPONENT_MASK_MATRIX_INCOMPLETE")
-    camera_by_view={camera.view_index:camera for camera in cameras}
-    carrier_by_component={row.component_id:row.carrier_class for row in carrier.decisions}
-    component_by_id={row.component_id:row for row in partition.components}
-    raster_hash=ReferenceRasterContractV1().contract_hash
-    out=[]
-    for row in rows:
-        vi=int(row["view_index"]); component_id=str(row["component_id"])
-        path=_load_file_ref(dict(row.get("mask") or {}),json_required=False)
-        raw=path.read_bytes()
-        camera=camera_by_view[vi]
-        authority=authority_by_view[vi]
-        expected_count=int(camera.resolution)*int(camera.resolution)
-        if len(raw)!=expected_count:
-            raise QualificationError("PRODUCT_ADAPTER_COMPONENT_MASK_SIZE_INVALID")
-        if any(value not in (0,1) for value in raw):
-            raise QualificationError("PRODUCT_ADAPTER_COMPONENT_MASK_BINARY_REQUIRED")
-        if "source_observation_hash" in row and str(row["source_observation_hash"])!=authority.source_observation_hash:
-            raise QualificationError("PRODUCT_ADAPTER_COMPONENT_SOURCE_OBSERVATION_DRIFT")
-        out.append(ComponentObservationRasterIR(
-            view_index=vi,
-            component_id=component_id,
-            carrier_class=carrier_by_component[component_id],
-            partition_binding_hash=partition.partition_lineage_hash,
-            carrier_policy_binding_hash=carrier.carrier_policy_lineage_hash,
-            component_surface_set_hash=component_surface_set_hash(component_by_id[component_id]),
-            width=int(camera.resolution),
-            height=int(camera.resolution),
-            mask_bytes=raw,
-            mask_sha256=mask_sha256(raw),
-            source_observation_hash=authority.source_observation_hash,
-            camera_binding_hash=camera_projection_binding_hash(camera),
-            raster_contract_hash=raster_hash,
-            metadata={"mask_file_sha256":_sha256(path),"observation_set_hash":observation_set.observation_set_hash},
-        ))
-    return tuple(out),source_foreground_masks,observation_set
-
+    observations=derive_component_observation_rasters_v1(
+        surface=surface,partition=partition,carrier_policy=carrier,
+        observation_set=observation_set,source_foreground_masks=source_foreground_masks,
+        cameras=cameras,
+    )
+    return observations,source_foreground_masks,observation_set
 
 def qualify_canonical_mesh_stage(ctx:dict)->dict:
     surface=_load_surface(ctx)
@@ -412,7 +379,7 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
         policy=policy,
     )
     observations,source_foreground_masks,observation_set=_component_observations(
-        ctx,partition=partition,carrier=carrier,cameras=cameras
+        ctx,surface=surface,partition=partition,carrier=carrier,cameras=cameras
     )
     g5_rows=build_g5_coverage_matrix(
         candidate,

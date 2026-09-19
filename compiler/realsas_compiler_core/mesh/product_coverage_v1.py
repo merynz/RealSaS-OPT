@@ -7,6 +7,7 @@ from dataclasses import asdict, dataclass, field
 import hashlib
 import math
 import numpy as np
+from scipy.spatial import cKDTree
 from typing import Any, Iterable, Mapping
 
 from ..hashing import content_sha256
@@ -457,6 +458,110 @@ def rasterize_visible_component_masks(
         if cid is not None:
             masks[cid][idx]=1
     return {cid:bytes(mask) for cid,mask in masks.items()}
+
+
+def derive_component_observation_rasters_v1(
+    *,
+    surface:RiggingSurfaceIR,
+    partition,
+    carrier_policy:ComponentCarrierPolicyIR,
+    observation_set:QualifiedObservationSetIR,
+    source_foreground_masks:Mapping[int,bytes],
+    cameras:Iterable[CameraProjectionV3],
+    raster_contract:ReferenceRasterContractV1=ReferenceRasterContractV1(),
+)->tuple[ComponentObservationRasterIR,...]:
+    validate_qualified_observation_set(observation_set)
+    validate_component_carrier_policy(carrier_policy,partition)
+    camera_by_view={int(c.view_index):c for c in cameras}
+    if set(camera_by_view)!=set(range(8)):
+        raise QualificationError("G5_DERIVED_COMPONENT_REQUIRES_EXACT_8_CAMERAS")
+    obs={int(v.view_index):v for v in observation_set.views}
+    component_by_surface={}
+    component_by_id={c.component_id:c for c in partition.components}
+    for component in partition.components:
+        for sid in component.surface_ids:
+            if sid in component_by_surface:
+                raise QualificationError("G5_DERIVED_COMPONENT_SURFACE_OVERLAP")
+            component_by_surface[sid]=component.component_id
+    nodes={n.surface_id:n for n in surface.surface_nodes}
+    if set(component_by_surface)!=set(nodes):
+        raise QualificationError("G5_DERIVED_COMPONENT_SURFACE_ACCOUNTING_DRIFT")
+    carrier={d.component_id:d.carrier_class for d in carrier_policy.decisions}
+    rows=[]
+    for view in range(8):
+        authority=obs[view]
+        camera=camera_by_view[view]
+        if authority.camera_binding_hash!=camera_projection_binding_hash(camera):
+            raise QualificationError("G5_DERIVED_COMPONENT_CAMERA_DRIFT")
+        fg=bytes(source_foreground_masks[view])
+        total=int(authority.width)*int(authority.height)
+        if len(fg)!=total or any(x not in (0,1) for x in fg):
+            raise QualificationError("G5_DERIVED_COMPONENT_FOREGROUND_INVALID")
+        if mask_sha256(fg)!=authority.foreground_mask_sha256:
+            raise QualificationError("G5_DERIVED_COMPONENT_FOREGROUND_HASH_DRIFT")
+        seeds=[]
+        occupied={}
+        for node in surface.surface_nodes:
+            matches=[tuple(map(float,xy)) for vi,xy in node.raster_bindings if int(vi)==view]
+            if len(matches)>1:
+                raise QualificationError("G5_DERIVED_COMPONENT_DUPLICATE_RASTER_BINDING")
+            if not matches:
+                continue
+            cid=component_by_surface[node.surface_id]
+            xy=matches[0]
+            key=(round(xy[0],9),round(xy[1],9))
+            prior=occupied.get(key)
+            if prior is not None and prior!=cid:
+                raise QualificationError("G5_DERIVED_COMPONENT_SEED_COLLISION")
+            occupied[key]=cid
+            seeds.append((xy,cid,node.surface_id))
+        if sum(fg)>0 and not seeds:
+            raise QualificationError("G5_DERIVED_COMPONENT_FOREGROUND_WITHOUT_SEEDS")
+        masks={cid:bytearray(total) for cid in component_by_id}
+        if seeds:
+            seeds=sorted(seeds,key=lambda x:(x[1],x[2],x[0][0],x[0][1]))
+            seed_xy=np.asarray([s[0] for s in seeds],dtype=np.float64)
+            fg_indices=np.flatnonzero(np.frombuffer(fg,dtype=np.uint8))
+            pts=np.column_stack((fg_indices%int(authority.width),fg_indices//int(authority.width))).astype(np.float64)
+            d,idx=cKDTree(seed_xy).query(pts,k=1,workers=-1)
+            for pix,seed_i in zip(fg_indices,np.asarray(idx).reshape(-1)):
+                cid=seeds[int(seed_i)][1]
+                masks[cid][int(pix)]=1
+        seed_hash=content_sha256({
+            "schema":"RealSaS.ComponentObservationSeedSet.v1",
+            "view_index":view,
+            "surface":surface.geometry_lineage_hash,
+            "partition":partition.partition_lineage_hash,
+            "seeds":[(cid,sid,xy) for xy,cid,sid in seeds],
+        })
+        for cid in sorted(component_by_id):
+            raw=bytes(masks[cid])
+            rows.append(ComponentObservationRasterIR(
+                view_index=view,component_id=cid,carrier_class=carrier[cid],
+                partition_binding_hash=partition.partition_lineage_hash,
+                carrier_policy_binding_hash=carrier_policy.carrier_policy_lineage_hash,
+                component_surface_set_hash=component_surface_set_hash(component_by_id[cid]),
+                width=int(authority.width),height=int(authority.height),
+                mask_bytes=raw,mask_sha256=mask_sha256(raw),
+                source_observation_hash=authority.source_observation_hash,
+                camera_binding_hash=authority.camera_binding_hash,
+                raster_contract_hash=raster_contract.contract_hash,
+                metadata={
+                    "derivation":"SOURCE_FOREGROUND_NEAREST_QUALIFIED_S_SEED_V1",
+                    "seed_set_hash":seed_hash,
+                    "external_component_mask_used":False,
+                    "categorical_recognition_used":False,
+                },
+            ))
+    by={(r.view_index,r.component_id):r for r in rows}
+    validate_source_component_partition(
+        observations_by_key=by,
+        component_ids=set(component_by_id),
+        observation_set=observation_set,
+        source_foreground_masks=source_foreground_masks,
+        cameras=camera_by_view,
+    )
+    return tuple(rows)
 
 
 def validate_source_component_partition(

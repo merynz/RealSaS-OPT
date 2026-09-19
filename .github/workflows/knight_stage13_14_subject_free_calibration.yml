@@ -1,0 +1,44 @@
+name: knight-stage13-14-subject-free-calibration
+
+on:
+  push:
+    branches:
+      - research/knight-stage13-14-calibration-20260919
+    paths:
+      - 'tools/stage13_14_subject_free_calibration_v1.py'
+      - '.github/workflows/knight_stage13_14_subject_free_calibration.yml'
+  workflow_dispatch:
+
+jobs:
+  calibrate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_CALIBRATION_OUT: calibration_out
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned mainline dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Run subject-free Stage13/14 calibration
+        run: python tools/stage13_14_subject_free_calibration_v1.py
+      - name: Verify no Knight/Mage path dependency
+        run: |
+          ! grep -R -E 'SUBJECT2_KNIGHT|Knight\.fbx|MAGE_|Mage' tools/stage13_14_subject_free_calibration_v1.py
+      - name: Upload calibration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage13-14-subject-free-calibration
+          path: calibration_out/
+          if-no-files-found: error

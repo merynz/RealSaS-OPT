@@ -22,6 +22,12 @@ from .product_appearance_v1 import QualifiedAppearanceSetIR
 from .product_composition_v1 import QualifiedCompositionSetIR, QualifiedCompositionViewIR
 from .v4_types import AppearanceBindingIR, AppearanceCornerBinding
 from .rest_render_v1 import RestRenderSetIR, RestRenderViewIR
+from .rest_preservation_v1 import RestPreservationMeasurementSetIR, RestPreservationViewMeasurementIR
+from .rest_preservation_policy_v1 import (
+    QualifiedRestSourcePreservationIR,
+    RestPreservationViewDecisionIR,
+    RestSourcePreservationPolicyIR,
+)
 from .product_authority_v1 import (
     CanonicalMeshCandidateIR,
     CanonicalMeshVertexCandidateIR,
@@ -621,6 +627,90 @@ def rest_render_set_from_dict(payload: Json) -> RestRenderSetIR:
         observation_set_binding_hash=str(payload["observation_set_binding_hash"]),
         render_set_hash=str(payload["render_set_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.RestRenderSetIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def rest_preservation_measurement_set_from_dict(payload: Json) -> RestPreservationMeasurementSetIR:
+    _schema(payload,"RealSaS.RestPreservationMeasurementSetIR.v1")
+    return RestPreservationMeasurementSetIR(
+        views=tuple(
+            RestPreservationViewMeasurementIR(
+                view_index=int(row["view_index"]),
+                source_raster_sha256=str(row["source_raster_sha256"]),
+                source_foreground_sha256=str(row["source_foreground_sha256"]),
+                rendered_rgba_sha256=str(row["rendered_rgba_sha256"]),
+                rendered_foreground_sha256=str(row["rendered_foreground_sha256"]),
+                alpha_recall=float(row["alpha_recall"]),
+                alpha_precision=float(row["alpha_precision"]),
+                alpha_iou=float(row["alpha_iou"]),
+                largest_coherent_hole_fraction=float(row["largest_coherent_hole_fraction"]),
+                interior_uncovered_fraction=float(row["interior_uncovered_fraction"]),
+                silhouette_edge_mean_px=float(row["silhouette_edge_mean_px"]),
+                silhouette_edge_p95_px=float(row["silhouette_edge_p95_px"]),
+                silhouette_edge_max_px=float(row["silhouette_edge_max_px"]),
+                premultiplied_rgb_mae=float(row["premultiplied_rgb_mae"]),
+                premultiplied_rgb_p95=float(row["premultiplied_rgb_p95"]),
+                alpha_mae=float(row["alpha_mae"]),
+                overlap_pixel_count=int(row["overlap_pixel_count"]),
+                overlap_rgba_mismatch_pixel_count=int(row["overlap_rgba_mismatch_pixel_count"]),
+                overlap_rgba_mismatch_fraction=float(row["overlap_rgba_mismatch_fraction"]),
+                overlap_rgba_max_abs_channel_error_u8=int(row["overlap_rgba_max_abs_channel_error_u8"]),
+                direct_source_geometry_fraction=float(row["direct_source_geometry_fraction"]),
+                cross_view_source_geometry_fraction=float(row["cross_view_source_geometry_fraction"]),
+                metric_contract_hash=str(row["metric_contract_hash"]),
+                schema_version=str(row.get("schema_version") or "RealSaS.RestPreservationViewMeasurementIR.v1"),
+                metadata=dict(row.get("metadata") or {}),
+            )
+            for row in (payload.get("views") or ())
+        ),
+        rest_render_set_binding_hash=str(payload["rest_render_set_binding_hash"]),
+        observation_set_binding_hash=str(payload["observation_set_binding_hash"]),
+        measurement_set_hash=str(payload["measurement_set_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.RestPreservationMeasurementSetIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def rest_source_preservation_policy_from_dict(payload: Json) -> RestSourcePreservationPolicyIR:
+    _schema(payload,"RealSaS.RestSourcePreservationPolicyIR.v1")
+    return RestSourcePreservationPolicyIR(
+        min_alpha_recall=float(payload["min_alpha_recall"]),
+        min_alpha_precision=float(payload["min_alpha_precision"]),
+        max_largest_coherent_hole_fraction=float(payload["max_largest_coherent_hole_fraction"]),
+        max_interior_uncovered_fraction=float(payload["max_interior_uncovered_fraction"]),
+        max_silhouette_edge_p95_px=float(payload["max_silhouette_edge_p95_px"]),
+        max_overlap_rgba_mismatch_pixel_count=int(payload["max_overlap_rgba_mismatch_pixel_count"]),
+        max_overlap_rgba_max_abs_channel_error_u8=int(payload["max_overlap_rgba_max_abs_channel_error_u8"]),
+        min_direct_source_geometry_fraction=float(payload["min_direct_source_geometry_fraction"]),
+        max_cross_view_source_geometry_fraction=float(payload["max_cross_view_source_geometry_fraction"]),
+        calibration_result_binding_hash=str(payload["calibration_result_binding_hash"]),
+        mesh_policy_binding_hash=str(payload["mesh_policy_binding_hash"]),
+        policy_lineage_hash=str(payload["policy_lineage_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.RestSourcePreservationPolicyIR.v1"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+
+
+def qualified_rest_source_preservation_from_dict(payload: Json) -> QualifiedRestSourcePreservationIR:
+    _schema(payload,"RealSaS.QualifiedRestSourcePreservationIR.v1")
+    return QualifiedRestSourcePreservationIR(
+        measurement_set_binding_hash=str(payload["measurement_set_binding_hash"]),
+        rest_render_set_binding_hash=str(payload["rest_render_set_binding_hash"]),
+        observation_set_binding_hash=str(payload["observation_set_binding_hash"]),
+        policy_binding_hash=str(payload["policy_binding_hash"]),
+        view_decisions=tuple(
+            RestPreservationViewDecisionIR(
+                view_index=int(row["view_index"]),
+                status=str(row["status"]),
+                failed_rules=tuple(map(str,row.get("failed_rules") or ())),
+                metadata=dict(row.get("metadata") or {}),
+            )
+            for row in (payload.get("view_decisions") or ())
+        ),
+        qualification_report=dict(payload.get("qualification_report") or {}),
+        preservation_lineage_hash=str(payload["preservation_lineage_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.QualifiedRestSourcePreservationIR.v1"),
         metadata=dict(payload.get("metadata") or {}),
     )
 

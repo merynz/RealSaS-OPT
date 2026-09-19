@@ -29,6 +29,9 @@ from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     qualified_composition_set_from_dict,
     qualified_presentation_structure_from_dict,
     rest_render_set_from_dict,
+    rest_preservation_measurement_set_from_dict,
+    rest_source_preservation_policy_from_dict,
+    qualified_rest_source_preservation_from_dict,
     read_json,
     write_ir_json,
 )
@@ -43,6 +46,7 @@ from compiler.realsas_compiler_core.types import (
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.presentation_v1 import qualify_presentation_graph_stage
 from compiler.realsas_compiler_services.orchestrator.adapters.rest_render_v1 import qualify_rest_render_stage
+from compiler.realsas_compiler_services.orchestrator.adapters.rest_preservation_v1 import qualify_rest_source_preservation_stage
 from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
     build_canonical_mesh_candidate_stage,
     bind_qualified_mesh_skin_stage,
@@ -138,6 +142,16 @@ def _fixture(tmp_path):
         "mesh":{"backend":"CANONICAL_RELATION_BASELINE_V1"},
         "observation":{"component_masks":[],"source_foreground_masks":[],"source_rasters":[]},
         "presentation":{"mode":"AUTO_ROLE_FREE_V1"},
+        "appearance":{
+            "rest_preservation_policy":{
+                "path":str((ROOT/"canonical"/"REST_SOURCE_PRESERVATION_POLICY_V1_20260919.json").resolve()),
+                "sha256":_sha(ROOT/"canonical"/"REST_SOURCE_PRESERVATION_POLICY_V1_20260919.json"),
+            },
+            "rest_preservation_calibration":{
+                "path":str((ROOT/"canonical"/"REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json").resolve()),
+                "sha256":_sha(ROOT/"canonical"/"REST_SOURCE_PRESERVATION_CALIBRATION_RESULT_20260919.json"),
+            },
+        },
     }
 
     observation_views=[]
@@ -302,3 +316,25 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     assert rest.metadata["canonical_geometry_is_never_rgb_authority"] is True
     assert all(len(row.rendered_rgba_sha256)==64 for row in rest.views)
     assert all(len(row.metadata["png_sha256"])==64 for row in rest.views)
+    _install_stage_outputs(ctx,"31_REST_RENDER_8VIEW",r31)
+
+    r32=qualify_rest_source_preservation_stage(ctx)
+    assert r32["status"]=="PASS",r32
+    by_schema={out["schema"]:out for out in r32["outputs"]}
+    measurements=rest_preservation_measurement_set_from_dict(
+        read_json(by_schema["RealSaS.RestPreservationMeasurementSetIR.v1"]["path"])
+    )
+    policy=rest_source_preservation_policy_from_dict(
+        read_json(by_schema["RealSaS.RestSourcePreservationPolicyIR.v1"]["path"])
+    )
+    qualified_rest=qualified_rest_source_preservation_from_dict(
+        read_json(by_schema["RealSaS.QualifiedRestSourcePreservationIR.v1"]["path"])
+    )
+    assert len(measurements.views)==8
+    assert all(row.alpha_recall>=policy.min_alpha_recall for row in measurements.views)
+    assert all(row.alpha_precision>=policy.min_alpha_precision for row in measurements.views)
+    assert all(row.overlap_rgba_mismatch_pixel_count==0 for row in measurements.views)
+    assert all(row.direct_source_geometry_fraction==1.0 for row in measurements.views)
+    assert all(row.cross_view_source_geometry_fraction==0.0 for row in measurements.views)
+    assert qualified_rest.qualification_report["every_view_passed_every_rule"] is True
+    assert qualified_rest.qualification_report["motion_authorization_precondition_satisfied"] is True

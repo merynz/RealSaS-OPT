@@ -114,6 +114,22 @@ def materialize_editable_puppet_bundle_v1(
             "runtime":"Runtime-v4/.rss is derived deployment data, never authoring authority",
             "reseal_required_after_any_edit":True,
         },
+        "editor_contract":{
+            "main_viewport_modes":[
+                "ART_PREVIEW",
+                "MESH_TOPOLOGY_OVERLAY",
+                "SKELETON_OVERLAY",
+                "WEIGHT_HEATMAP",
+                "PRESENTATION_SLOT_OVERLAY"
+            ],
+            "selection_model":"click/select canonical element -> inspector edits exact authoring authority",
+            "mesh_editor":"vertex/edge/face topology overlay and direct canonical mesh editing",
+            "skeleton_editor":"joint/parent/rest-pose overlay and direct canonical skeleton editing",
+            "weight_editor":"per-vertex joint-weight heatmap/paint editing with simplex revalidation",
+            "animation_editor":"separate pose/clip/keyframe screen over Stage34 motion curves",
+            "eight_direction_preview":"V0..V7 source-authoritative view switching plus runtime motion preview",
+            "ui_layout_not_authority":True
+        },
         "invalidation_matrix":{
             "SKELETON_EDIT":"25-40","MESH_EDIT":"27-40","WEIGHT_EDIT":"28-40",
             "PRESENTATION_EDIT":"30-40","APPEARANCE_EDIT":"31-40","MOTION_CURVE_EDIT":"34-40",

@@ -191,7 +191,17 @@ def _project_assets(mesh:QualifiedMeshIR,presentation:QualifiedPresentationGraph
     claimed=set(); assets=[]; face_by_asset={}
     for attachment in sorted(presentation.attachments,key=lambda a:a.attachment_id):
         components=set(attachment.mechanical_component_ids)
-        face_indices=tuple(i for i,c in enumerate(face_component) if c in components)
+        explicit=tuple(int(x) for x in tuple((attachment.metadata or {}).get("mesh_face_indices") or ()))
+        if explicit:
+            if len(explicit)!=len(set(explicit)) or any(i<0 or i>=len(mesh.faces) for i in explicit):
+                raise QualificationError("RUNTIME_PROJECTION_ATTACHMENT_FACE_INDEX_INVALID")
+            if any(face_component[i] not in components for i in explicit):
+                raise QualificationError("RUNTIME_PROJECTION_ATTACHMENT_FACE_COMPONENT_DRIFT")
+            face_indices=tuple(sorted(explicit))
+        else:
+            # Backward-compatible fixture path. Canonical Stage30 v2 always emits
+            # explicit face groups so multiple slots may share one mechanical component.
+            face_indices=tuple(i for i,c in enumerate(face_component) if c in components)
         if not face_indices: raise QualificationError("RUNTIME_PROJECTION_ATTACHMENT_WITHOUT_FACE")
         if claimed.intersection(face_indices): raise QualificationError("RUNTIME_PROJECTION_FACE_ATTACHMENT_OVERLAP")
         claimed.update(face_indices)
@@ -210,7 +220,12 @@ def _project_assets(mesh:QualifiedMeshIR,presentation:QualifiedPresentationGraph
         assets.append(RuntimeProjectedAssetIR(
             asset_id,attachment.slot_id,attachment.attachment_id,_asset_kind(attachment.mechanical_class),
             face_indices,tuple(source_ids),tuple(rest),tuple(tris),sealed,
-            metadata={"projection_vertex_mode":"FACE_CORNER_EXPANSION","canonical_geometry_mutated":False},
+            metadata={
+                "projection_vertex_mode":"FACE_CORNER_EXPANSION",
+                "canonical_geometry_mutated":False,
+                "presentation_group_hash":str((attachment.metadata or {}).get("presentation_group_hash") or ""),
+                "presentation_group_face_indices":face_indices,
+            },
         ))
         face_by_asset[asset_id]=face_indices
     if claimed!=set(range(len(mesh.faces))):

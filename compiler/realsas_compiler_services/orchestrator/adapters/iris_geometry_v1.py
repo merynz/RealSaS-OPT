@@ -29,8 +29,8 @@ from compiler.realsas_compiler_core.preproduct_authority_v1 import (
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     qualified_camera_set_from_dict, qualified_observation_set_from_dict, rigging_surface_from_dict,
 )
-from compiler.realsas_compiler_core.substrate.scene_first_signed import (
-    rigging_surface_from_scene_first_zero_mesh_v1,
+from compiler.realsas_compiler_core.substrate.adequacy_v1 import (
+    select_adequate_rigging_surface_v1, substrate_adequacy_report_hash_v1,
 )
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.model_execution_common_v1 import (
@@ -294,14 +294,14 @@ def build_gsa_stage(ctx:dict)->dict:
     )
     vertices,faces,normals=_load_zero_arrays(zero)
     cfg=dict(ctx["run_manifest"].get("gsa") or {})
-    required=("target_nodes","normal_k","visibility_depth_tolerance_norm")
+    required=("normal_k","visibility_depth_tolerance_norm","adequacy_policy")
     if any(k not in cfg for k in required):
         return {"status":"BLOCKED","blockers":["GSA_EXPLICIT_POLICY_REQUIRED"],"diagnostics":{"required":list(required)}}
-    target_nodes=int(cfg["target_nodes"]); normal_k=int(cfg["normal_k"]); tolerance=float(cfg["visibility_depth_tolerance_norm"])
-    if target_nodes<64 or normal_k<3 or not math.isfinite(tolerance) or tolerance<=0:
+    normal_k=int(cfg["normal_k"]); tolerance=float(cfg["visibility_depth_tolerance_norm"])
+    if normal_k<3 or not math.isfinite(tolerance) or tolerance<=0:
         raise QualificationError("GSA_POLICY_INVALID")
     camera_dicts=tuple(asdict(c) for c in sorted(cameras.cameras,key=lambda c:c.view_index))
-    surface=rigging_surface_from_scene_first_zero_mesh_v1(
+    surface,adequacy=select_adequate_rigging_surface_v1(
         vertices,faces,normals,camera_dicts,
         normalization_center=normalization.center_xyz,
         normalization_half_extent=normalization.half_extent,
@@ -309,23 +309,37 @@ def build_gsa_stage(ctx:dict)->dict:
         source_run_id=str(ctx["ledger"].get("run_id") or ""),
         source_checkpoint_sha256=checkpoint.checkpoint_sha256,
         source_zero_surface_sha256=zero.npz_sha256,
-        target_nodes=target_nodes,normal_k=normal_k,
+        normal_k=normal_k,
         visibility_depth_tolerance_norm=tolerance,
+        adequacy_policy=dict(cfg.get("adequacy_policy") or {}),
         metadata={
             "rest_reprojection_geometry_gate_hash":str(gate_payload["geometry_gate_hash"]),
             "observation_set_hash":zero.observation_set_binding_hash,
         },
     )
+    if surface is None:
+        return {"status":"FAIL","blockers":["SUBSTRATE_ADEQUACY_NO_PASSING_CANDIDATE"],"diagnostics":adequacy}
     root=ctx["run_root"]/"artifacts"/"14_GSA_BUILD"
-    return {"status":"PASS","outputs":[_write_ir(root/"rigging_surface_candidate.json",surface,authority_class="GSA_RIGGING_SURFACE_CANDIDATE")],
+    return {"status":"PASS","outputs":[
+        _write_ir(root/"rigging_surface_candidate.json",surface,authority_class="GSA_RIGGING_SURFACE_CANDIDATE"),
+        _write_ir(root/"substrate_adequacy_report.json",adequacy,authority_class="SUBSTRATE_ADEQUACY_REPORT"),
+    ],
         "diagnostics":{"surface_lineage_hash":surface.geometry_lineage_hash,"node_count":len(surface.surface_nodes),
-                       "relation_count":len(surface.local_relations)}}
+                       "relation_count":len(surface.local_relations),"adequacy_report_hash":adequacy["adequacy_report_hash"],
+                       "selected_target_node_cap":adequacy["selected_target_node_cap"]}}
 
 
 def qualify_rigging_surface_stage(ctx:dict)->dict:
     surface=rigging_surface_from_dict(
         _stage_output_payload(ctx,"14_GSA_BUILD","RealSaS.RiggingSurfaceIR.v1")
     )
+    adequacy=_stage_output_payload(ctx,"14_GSA_BUILD","RealSaS.SubstrateAdequacyReport.v1")
+    if adequacy.get("adequacy_report_hash")!=substrate_adequacy_report_hash_v1(adequacy):
+        raise QualificationError("RIGGING_SURFACE_ADEQUACY_HASH_DRIFT")
+    if str(adequacy.get("status"))!="PASS" or str(adequacy.get("selected_surface_lineage_hash"))!=surface.geometry_lineage_hash:
+        raise QualificationError("RIGGING_SURFACE_ADEQUACY_BINDING_DRIFT")
+    if int(adequacy.get("selected_actual_node_count",-1))!=len(surface.surface_nodes):
+        raise QualificationError("RIGGING_SURFACE_ADEQUACY_NODE_COUNT_DRIFT")
     tensor=tensorize_rigging_surface_v1(surface,require_scene_first=True)
     if tensor.source_surface_hash!=surface.geometry_lineage_hash:
         raise QualificationError("RIGGING_SURFACE_TENSORIZATION_BINDING_DRIFT")
@@ -341,8 +355,10 @@ def qualify_rigging_surface_stage(ctx:dict)->dict:
             "teacher_truth_contamination_rejected":True,
             "lossless_fieldwise_tensorization_passed":True,
             "local_relation_graph_present":tensor.edge_count>0,
+            "substrate_adequacy_passed":True,
+            "substrate_adequacy_report_hash":adequacy["adequacy_report_hash"],
         },"",
-        metadata={"tensorization_schema":tensor.schema_version},
+        metadata={"tensorization_schema":tensor.schema_version,"substrate_adequacy_report_hash":adequacy["adequacy_report_hash"]},
     )
     value=replace(value,qualification_hash=rigging_surface_qualification_hash(value))
     root=ctx["run_root"]/"artifacts"/"15_RIGGING_SURFACE_QUALIFIED"

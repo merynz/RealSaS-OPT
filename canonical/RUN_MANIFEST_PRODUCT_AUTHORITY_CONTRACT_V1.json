@@ -90,9 +90,13 @@
     "learned_execution": {
       "common": "IRIS/Geppetto/Arachne heavy fitting is represented by a preregistered exact-source execution receipt. Receipt status alone is not product authority: prereg hash, model-source SHA, checkpoint/result/proposal SHA and upstream lineages must all match. Teacher inference inputs are forbidden.",
       "iris": "Stages 09-11 preregister/verify/seal the IRIS fit. Stage 12 admits an exact signed-zero-surface NPZ bound to the checkpoint, observation set and normalization domain.",
-      "geometry": "Stage 13 performs eight-view source-foreground reprojection against explicit preregistered thresholds. Stage 14 uses the current scene-first signed GSA bridge; Stage 15 requires current lossless Geppetto RiggingSurface tensorization.",
+      "geometry": "Stage 13 performs eight-view source-foreground reprojection against explicit preregistered global and connected-component thresholds. Stage 14 performs bounded subject-free substrate adequacy search over the dense signed zero-surface; N is selected as the smallest actual passing mechanical carrier set under explicit geometric/normal/projected/component tolerances, not a fixed product constant. Stage 15 requires exact adequacy-report binding plus current lossless Geppetto RiggingSurface tensorization.",
       "geppetto": "Stages 16-17 admit only exact SkeletonProposalIR evidence. Stage 18 alone mints QualifiedSkeletonIR through Compiler.qualify_skeleton; Stage 19 seals checkpoint+qualified lineage.",
       "arachne": "Stages 20-21 admit only exact SkinProposalIR evidence. Stage 22 alone mints QualifiedSkinIR through Compiler.qualify_skin with preregistered bounded repair policy; Stage 23 seals checkpoint+qualified lineage."
+    },
+    "gsa": {
+      "adequacy_policy": "Required subject-free bounded search policy: min/max candidate nodes, growth/refinement budget, dense-to-S spatial error, normal error, projected carrier spacing, dense-component preservation and aliasing limits. target_nodes as a fixed product decision is superseded.",
+      "selection_rule": "Stage14 selects the minimum actual node count among passing evaluated candidates; no character name or categorical recognition may affect selection."
     }
   },
   "upstream_stage_schemas": {
@@ -119,11 +123,15 @@
     "11_IRIS_CHECKPOINT_SEALED": "RealSaS.ModelCheckpointSealIR.v1",
     "12_ZERO_SURFACE_DECODED": "RealSaS.SignedZeroSurfaceSealIR.v1",
     "13_REST_REPROJECTION_GEOMETRY_GATE": "RealSaS.RestReprojectionGeometryGateIR.v1",
-    "14_GSA_BUILD": "RealSaS.RiggingSurfaceIR.v1",
+    "14_GSA_BUILD": "RealSaS.RiggingSurfaceIR.v1 + RealSaS.SubstrateAdequacyReport.v1",
     "17_GEPPETTO_FIT": "RealSaS.ModelFitExecutionIR.v1",
     "21_ARACHNE_FIT": "RealSaS.ModelFitExecutionIR.v1"
   },
   "outputs": {
+    "14": [
+      "RealSaS.RiggingSurfaceIR.v1",
+      "RealSaS.SubstrateAdequacyReport.v1"
+    ],
     "24": [
       "RealSaS.MechanicalPartitionIR.v1",
       "RealSaS.ComponentCarrierPolicyIR.v1"

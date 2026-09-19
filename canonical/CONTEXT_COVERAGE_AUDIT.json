@@ -12,8 +12,8 @@
   "explained_high_signal_count": 322,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 134,
-  "safe_default_evidence_only_branch_count": 130,
+  "live_branch_count": 135,
+  "safe_default_evidence_only_branch_count": 131,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "d0904e66edf819dc954b7ca68c6b6b8d9b5a6bd6",
+      "sha": "2115b8f6643818138982e43603d3e982a23fe479",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -623,6 +623,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "repair/stage14-component-aware-compaction-v2-20260919",
+      "sha": "bb8162af2e0b057a15cd725d47d2a72c9a531975",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "repair/stage14-visible-component-eligibility-v2-20260919",
       "sha": "5caa591a7aa06b747c342f7306c1b52b7b42984e",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
@@ -678,7 +684,7 @@
     },
     {
       "name": "research/stage14-surface-resident-representative-20260919",
-      "sha": "cfa70149a3249745a07740303013e2363ab15fae",
+      "sha": "4ad1cce3fe93b54f7e94f3d376658816e83fd732",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

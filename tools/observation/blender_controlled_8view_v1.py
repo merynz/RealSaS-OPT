@@ -180,14 +180,20 @@ def armature_rows():
 def mesh_rows(meshes,by_object):
     rows=[]
     for o in meshes:
-        group_counts=[]
-        for g in o.vertex_groups:
-            count=0; mx=0.0
-            for v in o.data.vertices:
-                try: w=float(g.weight(v.index))
-                except RuntimeError: continue
-                if w>0.0: count+=1; mx=max(mx,w)
-            if count: group_counts.append({"name":g.name,"weighted_vertex_count":count,"max_weight":mx})
+        group_stats={int(g.index):{"name":g.name,"weighted_vertex_count":0,"max_weight":0.0} for g in o.vertex_groups}
+        for v in o.data.vertices:
+            for membership in v.groups:
+                row=group_stats.get(int(membership.group))
+                if row is None:
+                    continue
+                w=float(membership.weight)
+                if w>0.0:
+                    row["weighted_vertex_count"]+=1
+                    row["max_weight"]=max(float(row["max_weight"]),w)
+        group_counts=[
+            group_stats[idx] for idx in sorted(group_stats)
+            if int(group_stats[idx]["weighted_vertex_count"])>0
+        ]
         rows.append({
             "object_name":o.name,
             "parent":o.parent.name if o.parent else None,

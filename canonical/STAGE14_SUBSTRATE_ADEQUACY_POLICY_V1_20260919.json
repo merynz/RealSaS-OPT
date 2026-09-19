@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.Stage14SubstrateAdequacyPolicy.v1",
-  "status": "FROZEN_AFTER_SUBJECT_FREE_CALIBRATION_BEFORE_KNIGHT_STAGE14_RESULT",
+  "status": "SUPERSEDED__NO_NEW_STAGE14_PASS_AUTHORITY",
   "authority": "NORMATIVE_STAGE14_SUBSTRATE_ADEQUACY_POLICY__NOT_EMPIRICAL_KNIGHT_RESULT",
   "calibration_seal": "canonical/STAGE13_14_SUBJECT_FREE_CALIBRATION_SEAL_20260919.json",
   "gsa": {
@@ -9,13 +9,13 @@
     "adequacy_policy": {
       "min_candidate_nodes": 128,
       "max_candidate_nodes": 8192,
-      "candidate_growth_factor": 2.0,
+      "candidate_growth_factor": 2,
       "refinement_rounds": 3,
       "max_dense_to_surface_p95_norm": 0.03,
       "max_dense_to_surface_max_norm": 0.08,
-      "max_normal_p95_deg": 30.0,
-      "max_projected_p95_px": 6.0,
-      "max_projected_max_px": 16.0,
+      "max_normal_p95_deg": 30,
+      "max_projected_p95_px": 6,
+      "max_projected_max_px": 16,
       "component_min_dense_fraction": 0.001,
       "min_nodes_per_component": 8,
       "max_component_alias_nodes": 0
@@ -49,5 +49,7 @@
     "normal_k=64 and visibility_depth_tolerance_norm=0.02 preserve the established scene-first GSA operator settings rather than tuning them from Knight."
   ],
   "mutation_rule": "After Knight Stage14 result inspection this policy may only be tightened prospectively; it may never be relaxed to convert a failure into PASS.",
-  "claim_boundary": "This policy does not claim Knight compliance, Stage14 PASS, Stage15 PASS, or PRODUCT_PASS."
+  "claim_boundary": "Historical calibration evidence only. It MUST NOT be used to mint a new Stage14 PASS.",
+  "superseded_by": "canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V2_20260920.json",
+  "supersession_reason": "V1 used an 8192 search ceiling that failed IRIS-scale subject-free stress surfaces and allowed small visible components to become ineligible by dense fraction; its original voxel compaction also permitted disconnected-component aliasing."
 }

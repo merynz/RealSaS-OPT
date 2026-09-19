@@ -311,6 +311,27 @@ def qualify_rest_reprojection_geometry_stage(ctx:dict)->dict:
         "diagnostics":{"geometry_gate_hash":value.geometry_gate_hash,"all_views_passed":True}}
 
 
+def _validate_gsa_policy_document_v2(cfg:dict,policy_document:dict)->tuple[int,float,dict]:
+    if str(policy_document.get("schema") or "")!="RealSaS.Stage14SubstrateAdequacyPolicy.v2":
+        raise QualificationError("GSA_POLICY_DOCUMENT_SCHEMA_INVALID")
+    if not str(policy_document.get("status") or "").startswith("FROZEN_"):
+        raise QualificationError("GSA_POLICY_DOCUMENT_NOT_FROZEN")
+    document_gsa=dict(policy_document.get("gsa") or {})
+    document_adequacy=dict(document_gsa.get("adequacy_policy") or {})
+
+    normal_k=int(cfg["normal_k"])
+    tolerance=float(cfg["visibility_depth_tolerance_norm"])
+    if normal_k<3 or not math.isfinite(tolerance) or tolerance<=0:
+        raise QualificationError("GSA_POLICY_INVALID")
+    if normal_k!=int(document_gsa.get("normal_k",-1)):
+        raise QualificationError("GSA_POLICY_DOCUMENT_DRIFT:normal_k")
+    if abs(tolerance-float(document_gsa.get("visibility_depth_tolerance_norm",-1.0)))>1e-15:
+        raise QualificationError("GSA_POLICY_DOCUMENT_DRIFT:visibility_depth_tolerance_norm")
+    if content_sha256(dict(cfg.get("adequacy_policy") or {}))!=content_sha256(document_adequacy):
+        raise QualificationError("GSA_POLICY_DOCUMENT_DRIFT:adequacy_policy")
+    return normal_k,tolerance,document_adequacy
+
+
 def build_gsa_stage(ctx:dict)->dict:
     zero=signed_zero_surface_from_dict(
         _stage_output_payload(ctx,"12_ZERO_SURFACE_DECODED","RealSaS.SignedZeroSurfaceSealIR.v1")
@@ -327,12 +348,17 @@ def build_gsa_stage(ctx:dict)->dict:
     )
     vertices,faces,normals=_load_zero_arrays(zero)
     cfg=dict(ctx["run_manifest"].get("gsa") or {})
-    required=("normal_k","visibility_depth_tolerance_norm","adequacy_policy")
+    required=("policy_document","normal_k","visibility_depth_tolerance_norm","adequacy_policy")
     if any(k not in cfg for k in required):
         return {"status":"BLOCKED","blockers":["GSA_EXPLICIT_POLICY_REQUIRED"],"diagnostics":{"required":list(required)}}
-    normal_k=int(cfg["normal_k"]); tolerance=float(cfg["visibility_depth_tolerance_norm"])
-    if normal_k<3 or not math.isfinite(tolerance) or tolerance<=0:
-        raise QualificationError("GSA_POLICY_INVALID")
+
+    policy_ref=dict(cfg.get("policy_document") or {})
+    policy_document=_load_file_ref(
+        policy_ref,expected_schema="RealSaS.Stage14SubstrateAdequacyPolicy.v2"
+    )
+    normal_k,tolerance,document_adequacy=_validate_gsa_policy_document_v2(
+        cfg,policy_document
+    )
     camera_dicts=tuple(asdict(c) for c in sorted(cameras.cameras,key=lambda c:c.view_index))
     surface,adequacy=select_adequate_rigging_surface_v1(
         vertices,faces,normals,camera_dicts,
@@ -344,12 +370,18 @@ def build_gsa_stage(ctx:dict)->dict:
         source_zero_surface_sha256=zero.npz_sha256,
         normal_k=normal_k,
         visibility_depth_tolerance_norm=tolerance,
-        adequacy_policy=dict(cfg.get("adequacy_policy") or {}),
+        adequacy_policy=document_adequacy,
         metadata={
             "rest_reprojection_geometry_gate_hash":str(gate_payload["geometry_gate_hash"]),
             "observation_set_hash":zero.observation_set_binding_hash,
+            "stage14_policy_document_path":str(policy_ref.get("path") or ""),
+            "stage14_policy_document_sha256":str(policy_ref.get("sha256") or ""),
         },
     )
+    adequacy["policy_document_path"]=str(policy_ref.get("path") or "")
+    adequacy["policy_document_sha256"]=str(policy_ref.get("sha256") or "")
+    adequacy["adequacy_report_hash"]=""
+    adequacy["adequacy_report_hash"]=substrate_adequacy_report_hash_v1(adequacy)
     if surface is None:
         return {"status":"FAIL","blockers":["SUBSTRATE_ADEQUACY_NO_PASSING_CANDIDATE"],"diagnostics":adequacy}
     root=ctx["run_root"]/"artifacts"/"14_GSA_BUILD"

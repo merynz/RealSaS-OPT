@@ -15,6 +15,15 @@ from compiler.realsas_compiler_core.product_state_v2 import (
     presentation_structure_v2_hash,
     presentation_structure_v2_from_dict,
 )
+from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import (
+    CanonicalDynamicFrameV2IR,
+    DynamicMotionClipProofV2IR,
+    QualifiedDynamicMotionV2IR,
+    canonical_dynamic_frame_v2_hash,
+    dynamic_motion_clip_proof_v2_hash,
+    qualified_dynamic_motion_v2_from_dict,
+    qualified_dynamic_motion_v2_hash,
+)
 from compiler.realsas_compiler_core.runtime_authority_v2 import (
     DynamicVisualIntegrityV2IR,
     NativePlaybackProbeV2IR,
@@ -145,6 +154,67 @@ def test_presentation_structure_decoder_rejects_unrehash_drift():
     tampered["mesh_binding_hash"] = "f" * 64
     with pytest.raises(QualificationError, match="PRESENTATION_V2_STRUCTURE_HASH_DRIFT"):
         presentation_structure_v2_from_dict(tampered)
+
+
+
+
+def test_dynamic_motion_v2_decoder_rejects_mechanical_and_frame_drift():
+    frame = CanonicalDynamicFrameV2IR(
+        time_seconds=0.0,
+        joint_world_positions=(("j0", (0.0, 0.0, 0.0)),),
+        posed_vertex_xyz=(("v0", (0.0, 0.0, 0.0)),),
+        max_vertex_displacement=0.0,
+        min_triangle_area_ratio=1.0,
+        max_triangle_area_ratio=1.0,
+        max_triangle_condition_number=1.0,
+        frame_hash="",
+        metadata={"canonical_3d_authority": True},
+    )
+    frame = replace(frame, frame_hash=canonical_dynamic_frame_v2_hash(frame))
+    clip = DynamicMotionClipProofV2IR(
+        clip_id="idle",
+        clip_kind="IDLE",
+        classification="ARTIST_SOURCE",
+        duration_seconds=1.0,
+        loop=True,
+        frames=(frame,),
+        contact_proofs=(),
+        max_vertex_displacement=0.0,
+        professional_motion_evidence=True,
+        clip_proof_hash="",
+        metadata={},
+    )
+    clip = replace(clip, clip_proof_hash=dynamic_motion_clip_proof_v2_hash(clip))
+    value = QualifiedDynamicMotionV2IR(
+        qualified_motion_binding_hash="1" * 64,
+        constraint_set_binding_hash="2" * 64,
+        mechanical_state_binding_hash="3" * 64,
+        skeleton_binding_hash="4" * 64,
+        mesh_binding_hash="5" * 64,
+        mesh_skin_binding_hash="6" * 64,
+        presentation_binding_hash="7" * 64,
+        mesh_policy_binding_hash="8" * 64,
+        evaluator_semantic_version="RealSaS.CanonicalDynamicMotionEvaluator.QuaternionV3",
+        clips=(clip,),
+        qualification_report={"status": "PASS_DYNAMIC_CANONICAL_3D"},
+        dynamic_motion_hash="",
+        metadata={},
+    )
+    value = replace(
+        value,
+        dynamic_motion_hash=qualified_dynamic_motion_v2_hash(value),
+    )
+    qualified_dynamic_motion_v2_from_dict(value.to_dict())
+
+    mechanical_tamper = value.to_dict()
+    mechanical_tamper["mechanical_state_binding_hash"] = "f" * 64
+    with pytest.raises(QualificationError, match="MOTION_V2_DYNAMIC_HASH_DRIFT"):
+        qualified_dynamic_motion_v2_from_dict(mechanical_tamper)
+
+    frame_tamper = value.to_dict()
+    frame_tamper["clips"][0]["frames"][0]["max_vertex_displacement"] = 99.0
+    with pytest.raises(QualificationError, match="MOTION_V2_DYNAMIC_FRAME_HASH_DRIFT"):
+        qualified_dynamic_motion_v2_from_dict(frame_tamper)
 
 
 def _projection():

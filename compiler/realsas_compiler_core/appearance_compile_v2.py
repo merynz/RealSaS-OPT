@@ -9,7 +9,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 from .appearance_authority_v2 import CAA_PROVENANCE
-from .playback_full_surface_v3 import project_points_xyz_v3
+from .camera_geometry_v2 import project_points_xyz_v3
 from .types import QualificationError
 from .visibility_v2 import (
     projected_xy_to_source_texel_xy,

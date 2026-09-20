@@ -10,7 +10,7 @@ from compiler.realsas_compiler_core.output_presentation_v1 import (
 from compiler.realsas_compiler_core.geometry_substrate_v2 import (
     geometry_substrate_from_dict,
 )
-from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
+from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
     mechanical_partition_from_dict,
     qualified_camera_set_from_dict,

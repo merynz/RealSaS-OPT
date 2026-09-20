@@ -4,11 +4,29 @@ on:
   push:
     branches: [main]
     paths:
-      - 'compiler/realsas_compiler_services/orchestrator/**'
-      - 'compiler/realsas_compiler_core/**'
-      - 'tests/repository/test_witness_orchestration_v2.py'
+      - 'models/**'
+      - 'compiler/**'
+      - 'runtime/realsas_cpp/**'
+      - 'tests/**'
+      - 'requirements/**'
+      - 'tools/build_knowledge_artifact_catalog.py'
+      - 'tools/render_authority_map.py'
+      - 'tools/render_rehydration_packet.py'
+      - 'tools/audit_context_coverage.py'
       - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
       - 'canonical/V2_IMPLEMENTATION_READINESS.json'
+      - 'canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json'
+      - 'canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json'
+      - 'canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json'
+      - 'canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md'
+      - 'canonical/README.md'
+      - 'README.md'
+      - 'AGENTS.md'
+      - 'SYSTEM_INDEX.md'
+      - 'REPOSITORY_MAP.md'
+      - '.github/workflows/current_mainline_self_hosted_ci.yml'
+      - '.github/workflows/live_authority_map.yml'
+      - '.github/workflows/subject2_knight_observation_preflight.yml'
       - '.github/workflows/v2_witness_orchestration_subject_free_dry_run.yml'
   workflow_dispatch:
 

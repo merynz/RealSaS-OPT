@@ -478,3 +478,64 @@ def complete_appearance_qualification_from_dict(
     if value.qualification_hash != complete_appearance_qualification_hash(value):
         raise QualificationError("CAA_QUALIFICATION_HASH_MISMATCH")
     return value
+
+
+def caa_rest_render_proof_from_dict(payload: Mapping[str, Any]) -> CAARestRenderProofIR:
+    views = tuple(
+        CAARestViewProofIR(
+            direction_index=int(row["direction_index"]),
+            rendered_rgba_sha256=str(row["rendered_rgba_sha256"]),
+            rendered_alpha_pixel_count=int(row["rendered_alpha_pixel_count"]),
+            source_locked_pixel_count=int(row["source_locked_pixel_count"]),
+            source_locked_fraction_of_source_foreground=float(
+                row["source_locked_fraction_of_source_foreground"]
+            ),
+            source_locked_exact_pixel_count=int(row["source_locked_exact_pixel_count"]),
+            source_locked_exact_fraction=float(row["source_locked_exact_fraction"]),
+            source_locked_mean_rgba_l1=float(row["source_locked_mean_rgba_l1"]),
+            source_locked_p95_rgba_l1=float(row["source_locked_p95_rgba_l1"]),
+            source_foreground_mean_rgba_l1=float(row["source_foreground_mean_rgba_l1"]),
+            source_foreground_p95_rgba_l1=float(row["source_foreground_p95_rgba_l1"]),
+            geometry_visible_pixel_count=int(row["geometry_visible_pixel_count"]),
+            final_alpha_pixel_count=int(row["final_alpha_pixel_count"]),
+            geometry_visible_final_alpha_hole_count=int(
+                row["geometry_visible_final_alpha_hole_count"]
+            ),
+            geometry_visible_final_alpha_hole_fraction=float(
+                row["geometry_visible_final_alpha_hole_fraction"]
+            ),
+            source_alpha_recall=float(row["source_alpha_recall"]),
+            source_alpha_precision=float(row["source_alpha_precision"]),
+            largest_coherent_alpha_hole_fraction=float(
+                row["largest_coherent_alpha_hole_fraction"]
+            ),
+            alpha_interior_uncovered_fraction=float(
+                row["alpha_interior_uncovered_fraction"]
+            ),
+            schema_version=str(
+                row.get("schema_version") or "RealSaS.CAARestViewProofIR.v2"
+            ),
+            metadata=dict(row.get("metadata") or {}),
+        )
+        for row in payload.get("views") or ()
+    )
+    value = CAARestRenderProofIR(
+        asset_binding_hash=str(payload["asset_binding_hash"]),
+        static_mesh_qualification_binding_hash=str(
+            payload["static_mesh_qualification_binding_hash"]
+        ),
+        camera_set_binding_hash=str(payload["camera_set_binding_hash"]),
+        views=views,
+        qualification_report=dict(payload.get("qualification_report") or {}),
+        proof_hash=str(payload["proof_hash"]),
+        schema_version=str(
+            payload.get("schema_version") or "RealSaS.CAARestRenderProofIR.v2"
+        ),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+    if value.proof_hash != caa_rest_render_proof_hash(value):
+        raise QualificationError("CAA_REST_RENDER_PROOF_HASH_DRIFT")
+    ordered = tuple(sorted(value.views, key=lambda row: row.direction_index))
+    if len(ordered) != 8 or tuple(row.direction_index for row in ordered) != tuple(range(8)):
+        raise QualificationError("CAA_REST_RENDER_PROOF_REQUIRES_V0_V7")
+    return value

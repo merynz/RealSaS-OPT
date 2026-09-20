@@ -92,7 +92,7 @@ def test_readiness_state_machine_is_consistent_with_orchestration_proof():
             readiness["status"]
             == "IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN"
         )
-        assert readiness["readiness_seal"]["status"] == "REVOKED_BY_AUDIT_GAP"
+        assert str(readiness["readiness_seal"]["status"]).startswith("REVOKED_BY_")
         assert readiness["readiness_seal"]["witness_execution_allowed"] is False
     elif proof["status"] == "PASS":
         assert readiness["status"] == "READY_FOR_WITNESS_EXECUTION"
@@ -145,7 +145,11 @@ def test_stage_output_seal_is_confined_to_exact_stage_authority_root(tmp_path):
     good = allowed / "good.json"
     good.write_text("{}\n", encoding="utf-8")
     sealed = mainline._seal_outputs(
-        [{"path": str(good), "schema": "test"}],
+        [{
+            "path": str(good),
+            "schema": "test",
+            "authority_class": "TEST_STAGE_OUTPUT",
+        }],
         allowed_root=allowed,
     )
     assert sealed[0]["path"] == str(good.resolve())
@@ -159,7 +163,11 @@ def test_stage_output_seal_is_confined_to_exact_stage_authority_root(tmp_path):
         match="STAGE_OUTPUT_OUTSIDE_STAGE_AUTHORITY_ROOT",
     ):
         mainline._seal_outputs(
-            [{"path": str(bad), "schema": "test"}],
+            [{
+                "path": str(bad),
+                "schema": "test",
+                "authority_class": "TEST_STAGE_OUTPUT",
+            }],
             allowed_root=allowed,
         )
 

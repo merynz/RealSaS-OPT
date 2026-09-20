@@ -1,72 +1,66 @@
 # Repository Map
 
-RealSaS-OPT is a research, compiler, proof and runtime workspace with explicit separation between repository-wide continuation authority and active executable experiment branches.
+RealSaS-OPT is the current RealSaS V2 research/compiler/runtime repository. The sole continuation branch is `main`.
 
-## Continuity spine
+## Current authority spine
 
-1. `canonical/REHYDRATION_PACKET.md` — current navigation/cache.
-2. `CURRENT_STATE.md` — repository-wide stop/go authority.
-3. `canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md` — why Mage product authority reopened.
-4. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl` — recent causal decisions.
-5. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md`.
-6. `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`.
-7. `canonical/EXPERIMENT_REGISTRY_V2.json`.
-8. `canonical/AUTHORITY_MAP_V1.json` / `canonical/CONTEXT_STATE_V1.json` — machine continuity.
-9. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md` / `canonical/FIT1_EVIDENCE_INDEX_20260909.md` — preserved historical FIT1 evidence.
+1. `canonical/V2_IMPLEMENTATION_READINESS.json`
+2. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
+3. `CURRENT_STATE.md`
+4. `canonical/CONTEXT_STATE_V2.json`
+5. `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
+6. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+7. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+8. `canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json`
+9. `canonical/AUTHORITY_MAP_V1.json`
+10. `canonical/EXPERIMENT_REGISTRY_V3.json`
 
-## Current active executable lineage
+Generated `canonical/REHYDRATION_PACKET.md` and `canonical/LIVE_AUTHORITY_MAP.md` are navigation/cache views, not independent scientific authority.
 
-Branch:
+## Current executable lineage
 
-`repair/mage-full-subject-reclosure-20260912`
+The current executable product path is the 46-stage V2 DAG in `canonical/MAINLINE_EXECUTION_PLAN_V2.json`.
 
-Current active branch landmarks:
+There is no alternate repair branch with current product authority. Historical branches remain evidence only unless explicitly promoted by the current authority spine.
 
-- `canonical/MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1.json` — machine-readable same-Mage FIT2 authority;
-- `canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md` — mesh/runtime forensic decision + implementation closure;
-- `canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md` — frozen mesh/component product gates;
-- `experiments/mage_full_subject_reclosure_v1/` — corrected H1/GSA evidence and fresh Geppetto FIT2 runner/evidence;
-- `compiler/realsas_compiler_core/mesh/product_qualification.py` — strict exact-observation product mesh admission;
-- `.github/workflows/mage_full_subject_reclosure_contract.yml` — local self-hosted repair-branch contract suite.
+Real execution ledgers are run-local under:
 
-`main` carries continuation/navigation authority. Active-branch implementation is not implicitly promoted to `main`.
+`$REALSAS_AUTHORITY_ROOT/runs/<run_id>/ACTIVE_RUN_V2.json`
+
+The repository `canonical/ACTIVE_RUN_V2.json` is implementation-governance state, not a subject witness ledger.
 
 ## Main areas
 
 | Path | Meaning |
 |---|---|
-| `models/` | learned source lineages: IRIS/H1, Geppetto, SkinFieldCodec, Arachne and challengers |
-| `compiler/realsas_compiler_core/` | canonical qualification/product authority: graph, skin, mesh, components, proof contracts |
-| `compiler/realsas_compiler_services/` | proof/repair/export/numerical services |
-| `product/` | user-facing consumers/editor surfaces |
-| `runtime/` | reference/native runtime consumers; never an independent semantic/topology authority |
-| `experiments/` | active/historical experiments, failures, diagnostics and upgrade evidence |
-| `canonical/` | decisions, preregistrations, evidence seals and continuity state |
-| `historical/` | preserved provenance; never alternate current authority |
+| `models/iris/` | learned geometry/surface evidence producer |
+| `models/geppetto/` | skeleton proposal model lineage |
+| `models/arachne/` | skin proposal model lineage |
+| `compiler/realsas_compiler_core/` | canonical typed authority, qualification, CAA, motion and runtime contracts |
+| `compiler/realsas_compiler_services/orchestrator/` | 46-stage V2 dependency-DAG execution |
+| `runtime/realsas_cpp/` | deterministic native CAA/depth consumer |
+| `tests/` | subject-free regression/adversarial qualification |
+| `experiments/` | active/historical scientific experiments and diagnostics |
+| `canonical/` | current decisions, preregistrations, evidence seals and continuity state |
+| `historical/` | preserved provenance only |
 
-## Current model landmarks
+## V2 product architecture
 
-- `models/iris/v2/` — promoted observation/foundation support lineage;
-- `models/iris/v3/` — historical signed-geometry Mage FIT1 lineage; current corrected H1 executable authority is on active repair branch;
-- `models/geppetto/reference_strength_v1/` — historical FIT1-frozen Geppetto source/checkpoint authority; active corrected FIT2 refit is fresh from scratch on repair branch;
-- `models/arachne/v5/` — historical FIT1-frozen Arachne direct-simplex source/checkpoint; fresh corrected Arachne FIT2 is blocked on Geppetto;
-- `models/skin_field_codec/v1/`, older Arachne versions/challengers — preserved research/failure lineage.
+`Observation -> Geometry/IRIS -> GSA -> Canonical Mesh Domain`
 
-## Current product-mechanics landmarks
+The canonical mesh domain then supports two independent authorities:
 
-- `RiggingSurfaceIR` / GSA owns admitted deterministic geometry/provenance/raster support.
-- `QualifiedSkeletonIR` is Compiler-qualified graph/control authority.
-- `QualifiedSkinIR` is Compiler-qualified surface skin authority.
-- `QualifiedEditableMeshIR` is first-class artist-visible directional deformation/render authority.
-- `QualifiedMeshSkinIR` binds exact surface mechanics to the exact qualified mesh.
-- component/mechanical assembly owns typed visible pieces and attachments.
-- motion/proof owns qualified dynamic behavior.
-- runtime/export consumes exact qualified identities; hidden retriangulation or a second mesh truth is forbidden.
+- Mechanics: Geppetto -> qualified skeleton -> Arachne -> qualified skin -> dynamic mechanical mesh.
+- Appearance: Complete Appearance Authority -> total directional art + provenance + quality proof.
 
-## Current mesh reclosure rule
+They reunite in the complete puppet seal, then motion, deterministic runtime, Dynamic Visual Integrity and Stage46 product closure.
 
-A legal low-level CDT is not sufficient product evidence. On the active branch, the strict product qualifier independently reconstructs/rerasterizes the exact promoted mesh against exact `ObservationRasterDomain` authority, recomputes coverage/topology metrics and applies frozen FIT2 thresholds fail-closed. Candidate-reported coverage is diagnostic only.
+## Hard invariants
 
-The mesh product contract/implementation is CLOSED PASS on self-hosted run `34716890157` (`41 passed in 4.36s`), while the corrected real Mage mesh result remains pending fresh Geppetto/Arachne mechanics.
-
-Promotion never deletes historical evidence. Current authority is determined by `CURRENT_STATE.md` + explicit authority/registry records, not branch recency or filename dates.
+- Geometry, mechanics and appearance are co-equal product-quality authorities.
+- Mesh is the common canonical mechanics/appearance address domain.
+- Visibility is posed canonical geometry + camera depth.
+- Runtime performs no donor search, generative appearance correction, PBR character relighting or hidden retriangulation.
+- A visually incorrect puppet is not accepted because mechanics pass.
+- Current V2 may reuse a generic historical helper only when its semantics still match; obsolete donor/UNSEEN/linear-product semantics may not enter the current import closure.
+- Subject-specific compiler/runtime branches are forbidden.

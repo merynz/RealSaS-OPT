@@ -9,6 +9,7 @@ on:
       - 'models/**'
       - 'compiler/**'
       - 'runtime/reference_v4/**'
+      - 'runtime/realsas_cpp/**'
       - 'tests/compiler/**'
       - 'tests/models/**'
       - 'tests/iris/test_iris_mainline_source_v1.py'
@@ -34,6 +35,10 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+
+concurrency:
+  group: current-mainline-self-hosted-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   fast-current-mainline:
@@ -70,7 +75,18 @@ jobs:
             tests/repository/test_repository_governance_v1.py \
             tests/repository/test_model_branding_boundary_v1.py \
             tests/repository/test_current_continuity_authority_v2.py \
-            tests/repository/test_canonical_main_readiness_v1.py
+            tests/repository/test_canonical_main_readiness_v1.py \
+            tests/repository/test_mainline_execution_plan_v2.py \
+            tests/repository/test_mainline_v2_dag_scheduler.py
+      - name: Validate V2 DAG structure
+        run: python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
+      - name: Build native V2 CAA reference player
+        run: |
+          mkdir -p "$HOME/realsas_authority/toolchain"
+          g++ -std=c++17 -O2 -Wall -Wextra -pedantic \
+            runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp \
+            -o "$HOME/realsas_authority/toolchain/runtime_v2_caa_reference"
+          sha256sum "$HOME/realsas_authority/toolchain/runtime_v2_caa_reference"
       - name: Learned source ownership
         run: |
           python -m pytest -q \
@@ -85,4 +101,6 @@ jobs:
           echo 'self_hosted_only=true'
           echo 'pinned_environment=true'
           echo 'repository_governance=true'
-          echo 'fit_authorization=UNCHANGED_FALSE_UNTIL_CANONICAL_MAIN_POST_MERGE_GATE'
+          echo 'v2_dag=true'
+          echo 'native_caa_player_built=true'
+          echo 'witness_execution=BLOCKED_UNTIL_V2_READINESS_SEAL'

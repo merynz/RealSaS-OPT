@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.V2AdversarialModuleAuditLedger.v1",
   "date": "2026-09-20",
-  "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF",
+  "status": "PASS_SUBJECT_FREE_IMPLEMENTATION_AUDIT",
   "witness_used": false,
   "threshold_tuning_from_knight_forbidden": true,
   "protocol": "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md",
@@ -14,9 +14,10 @@
       "smallest_adversarial_failure": "hash drift; moving alias; border-truncated subject",
       "repair_owner": "Stage01-04",
       "proof_hooks": [
-        "tests/repository/test_mainline_execution_plan_v2.py"
+        "tests/compiler/test_preflight_v2_adversarial.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "B",
@@ -26,9 +27,11 @@
       "smallest_adversarial_failure": "camera hash/resolution drift; mask authority drift",
       "repair_owner": "Stage05-07",
       "proof_hooks": [
+        "tests/compiler/test_preflight_v2_adversarial.py",
         "tests/compiler/test_stage13_geometry_gate_v2.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "C",
@@ -38,9 +41,10 @@
       "smallest_adversarial_failure": "missing/nonfinite center; camera refit",
       "repair_owner": "Stage08",
       "proof_hooks": [
-        "tests/repository/test_mainline_execution_plan_v2.py"
+        "tests/compiler/test_preflight_v2_adversarial.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "D",
@@ -53,7 +57,8 @@
         "tests/iris/test_iris_v2_dense_source_coverage_v2.py",
         "tests/compiler/test_stage13_geometry_gate_v2.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "E",
@@ -63,9 +68,11 @@
       "smallest_adversarial_failure": "visible component dropped by bounded compaction",
       "repair_owner": "Stage14",
       "proof_hooks": [
-        "canonical/STAGE14_SUBSTRATE_ADEQUACY_CALIBRATION_AUTHORITY_V2_20260920.json"
+        "tests/compiler/test_stage14_policy_v2.py",
+        "tests/compiler/test_substrate_adequacy_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "F",
@@ -75,9 +82,11 @@
       "smallest_adversarial_failure": "relation graph disconnected/degenerate",
       "repair_owner": "Stage14",
       "proof_hooks": [
+        "tests/compiler/test_substrate_adequacy_v1.py",
         "tests/compiler/test_relation_parent_quality_redteam_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "G",
@@ -87,9 +96,11 @@
       "smallest_adversarial_failure": "semantic/categorical invention; unresolved consequential UNKNOWN",
       "repair_owner": "Stage17",
       "proof_hooks": [
+        "tests/compiler/test_mechanical_partition_v1.py",
         "tests/compiler/test_product_authority_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "H",
@@ -101,7 +112,8 @@
       "proof_hooks": [
         "tests/compiler/test_relation_parent_quality_redteam_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "I",
@@ -111,9 +123,11 @@
       "smallest_adversarial_failure": "interior Steiner cannot repair sub-threshold parent corner without boundary split",
       "repair_owner": "Stage18 adapter/new lineage",
       "proof_hooks": [
-        "tests/compiler/test_relation_parent_quality_redteam_v1.py"
+        "tests/compiler/test_relation_parent_quality_redteam_v1.py",
+        "tests/compiler/test_canonical_cdt_adapter_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "J",
@@ -123,9 +137,11 @@
       "smallest_adversarial_failure": "unaddressed vertex/face or lineage mismatch",
       "repair_owner": "Stage18",
       "proof_hooks": [
-        "tests/repository/test_mainline_execution_plan_v2.py"
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+        "tests/compiler/test_product_authority_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "K",
@@ -135,9 +151,11 @@
       "smallest_adversarial_failure": "degenerate face/nonfinite vertex/addressing mismatch",
       "repair_owner": "Stage18 new lineage",
       "proof_hooks": [
-        "tests/repository/test_mainline_execution_plan_v2.py"
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+        "tests/compiler/test_product_authority_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "L",
@@ -148,9 +166,11 @@
       "repair_owner": "Stage20-25",
       "proof_hooks": [
         "tests/compiler/test_caa_v2_subject_free_policy.py",
-        "tests/compiler/test_visibility_and_caa_v2.py"
+        "tests/compiler/test_visibility_and_caa_v2.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "M",
@@ -160,9 +180,12 @@
       "smallest_adversarial_failure": "cycle/root/unknown joint; teacher inference input",
       "repair_owner": "Stage26-28",
       "proof_hooks": [
-        "tests/compiler/test_product_authority_v1.py"
+        "tests/models/test_geppetto_mainline_source_v1.py",
+        "tests/compiler/test_product_authority_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "N",
@@ -172,9 +195,12 @@
       "smallest_adversarial_failure": "negative/non-simplex/missing row; teacher identity leak",
       "repair_owner": "Stage30-32",
       "proof_hooks": [
-        "tests/compiler/test_product_authority_v1.py"
+        "tests/models/test_arachne_checkpoint_v2.py",
+        "tests/compiler/test_skin_repair_accounting_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "O",
@@ -184,9 +210,13 @@
       "smallest_adversarial_failure": "triangle collapse/conditioning/contact/UNKNOWN failure",
       "repair_owner": "Stage34-35 or new Stage18 lineage",
       "proof_hooks": [
-        "tests/compiler/test_product_authority_v1.py"
+        "tests/compiler/test_deformation_stress_v1.py",
+        "tests/compiler/test_product_mesh_skin_v1.py",
+        "tests/compiler/test_product_authority_v1.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "P",
@@ -196,9 +226,11 @@
       "smallest_adversarial_failure": "categorical identity/detachability invention; missing component accounting",
       "repair_owner": "Stage37",
       "proof_hooks": [
-        "tests/repository/test_mainline_execution_plan_v2.py"
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "Q",
@@ -208,9 +240,11 @@
       "smallest_adversarial_failure": "mechanical/appearance/presentation hash drift",
       "repair_owner": "Stage38 inputs",
       "proof_hooks": [
-        "tests/repository/test_mainline_execution_plan_v2.py"
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "R",
@@ -220,9 +254,11 @@
       "smallest_adversarial_failure": "source seal drift; contact fail; static clip; rest-unseen incorrectly treated as appearance failure",
       "repair_owner": "Stage39-41",
       "proof_hooks": [
-        "tests/repository/test_mainline_execution_plan_v2.py"
+        "tests/compiler/test_motion_dynamic_proof_v2.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "S",
@@ -232,9 +268,12 @@
       "smallest_adversarial_failure": "retriangulation; runtime donor/generation; package hash drift; native/reference mismatch",
       "repair_owner": "Stage42-44",
       "proof_hooks": [
-        "tests/compiler/test_runtime_v2_native_smoke.py"
+        "tests/compiler/test_runtime_v2_native_smoke.py",
+        "tests/compiler/test_v2_tail_authority_fail_closed.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "T",
@@ -245,9 +284,12 @@
       "repair_owner": "Stage45/upstream owner",
       "proof_hooks": [
         "tests/compiler/test_runtime_v2_native_smoke.py",
-        "tests/compiler/test_visibility_and_caa_v2.py"
+        "tests/compiler/test_visibility_and_caa_v2.py",
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     },
     {
       "module_id": "U",
@@ -257,9 +299,46 @@
       "smallest_adversarial_failure": "any axis absent or binding drift; non-editable export",
       "repair_owner": "owning failed upstream stage",
       "proof_hooks": [
-        "tests/repository/test_mainline_execution_plan_v2.py"
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
       ],
-      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+      "status": "PASS_SUBJECT_FREE_SELF_HOSTED",
+      "witness_used": false
     }
-  ]
+  ],
+  "closure_evidence": {
+    "implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+    "mainline_ci": {
+      "workflow": "current-mainline-self-hosted-ci",
+      "run_id": 35529673748,
+      "job_id": 106127939604,
+      "conclusion": "success",
+      "repository_tests_passed": 31,
+      "learned_and_model_tests_passed": 51,
+      "compiler_tests_passed": 274,
+      "total_tests_passed": 356,
+      "plan_stage_count": 46,
+      "plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+      "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1"
+    },
+    "model_source_gate": {
+      "workflow": "model-mainline-source-gate",
+      "run_id": 35529673786,
+      "conclusion": "success",
+      "head_sha": "44b148737dc1e7eadb23048834d2111744a12bc6"
+    },
+    "independent_runtime_ci": {
+      "workflow": "current-runtime-self-hosted-ci",
+      "run_id": 35529375697,
+      "job_id": 106127139365,
+      "conclusion": "success",
+      "head_sha": "9d9412be0e9af489962f164bea4975407a24ab30",
+      "v2_native_tests_passed": 7,
+      "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+      "marker": "V2_CAA_NATIVE_PARITY_PASS"
+    },
+    "knight_witness_observed": false,
+    "thresholds_selected_from_knight": false
+  },
+  "closure": "Every A-U implementation boundary has a subject-free adversarial proof hook exercised by the successful self-hosted mainline suite; native CAA RSS parity is independently green. This closes implementation readiness only, not Knight product performance."
 }

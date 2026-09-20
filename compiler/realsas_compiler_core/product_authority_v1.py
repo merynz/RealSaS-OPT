@@ -4,6 +4,9 @@ from dataclasses import asdict, dataclass, field, replace
 import math
 from typing import Any
 
+import numpy as np
+from scipy.spatial import cKDTree
+
 from .hashing import content_sha256
 from .mesh.conditioning_v1 import triangle_rest_metric
 from .types import QualificationError, RiggingSurfaceIR, SurfaceSupportBinding, Vec3
@@ -499,6 +502,115 @@ def _mesh_connected_labels(vertex_ids: set[str], edges: set[tuple[str, str]]) ->
             labels[current] = label
             stack.extend(sorted(adjacency[current] - labels.keys()))
     return labels
+
+
+def _geometric_topology_crack_audit(
+    vertex_by_id: dict[str, Any],
+    faces: tuple[tuple[str, str, str], ...] | list,
+) -> Json:
+    """Detect undeclared same-component geometric discontinuities.
+
+    Global manifoldness is intentionally not required. This audit targets two
+    crack-producing cases that topology-by-ID alone cannot see:
+    coincident duplicate vertices and vertex-on-edge T-junctions.
+    """
+    if not vertex_by_id:
+        raise QualificationError("QUALIFIED_MESH_G2_VERTEX_SET_EMPTY")
+    xyz_all = np.asarray([vertex.P for vertex in vertex_by_id.values()], dtype=np.float64)
+    lo = np.min(xyz_all, axis=0)
+    hi = np.max(xyz_all, axis=0)
+    scale = max(float(np.linalg.norm(hi - lo)), 1.0)
+    tolerance = max(scale * 1.0e-9, 1.0e-12)
+
+    face_incidence: dict[tuple[str, str], int] = {}
+    for face in faces:
+        for a, b in (
+            (face[0], face[1]),
+            (face[1], face[2]),
+            (face[2], face[0]),
+        ):
+            key = _edge_key(str(a), str(b))
+            face_incidence[key] = face_incidence.get(key, 0) + 1
+
+    coincident_pairs = []
+    t_junctions = []
+    component_ids = sorted(
+        {str(vertex.component_id) for vertex in vertex_by_id.values()}
+    )
+    for component_id in component_ids:
+        ids = sorted(
+            vid
+            for vid, vertex in vertex_by_id.items()
+            if str(vertex.component_id) == component_id
+        )
+        if len(ids) < 2:
+            continue
+        points = np.asarray(
+            [vertex_by_id[vid].P for vid in ids],
+            dtype=np.float64,
+        )
+        tree = cKDTree(points)
+        for a_local, b_local in sorted(tree.query_pairs(r=tolerance)):
+            coincident_pairs.append((ids[int(a_local)], ids[int(b_local)]))
+
+        index_by_id = {vid: index for index, vid in enumerate(ids)}
+        component_edges = [
+            edge
+            for edge in face_incidence
+            if edge[0] in index_by_id and edge[1] in index_by_id
+        ]
+        for a_id, b_id in component_edges:
+            a = points[index_by_id[a_id]]
+            b = points[index_by_id[b_id]]
+            ab = b - a
+            length2 = float(np.dot(ab, ab))
+            if length2 <= tolerance * tolerance:
+                continue
+            length = math.sqrt(length2)
+            midpoint = 0.5 * (a + b)
+            candidates = tree.query_ball_point(
+                midpoint,
+                r=0.5 * length + tolerance,
+            )
+            for local_index in candidates:
+                vid = ids[int(local_index)]
+                if vid == a_id or vid == b_id:
+                    continue
+                p = points[int(local_index)]
+                t = float(np.dot(p - a, ab) / length2)
+                if t <= 1.0e-9 or t >= 1.0 - 1.0e-9:
+                    continue
+                closest = a + t * ab
+                distance = float(np.linalg.norm(p - closest))
+                if distance <= tolerance:
+                    t_junctions.append(
+                        {
+                            "vertex_id": vid,
+                            "edge": [a_id, b_id],
+                            "edge_parameter": t,
+                            "distance": distance,
+                        }
+                    )
+
+    if coincident_pairs:
+        raise QualificationError(
+            "QUALIFIED_MESH_G2_COINCIDENT_DUPLICATE_VERTEX"
+        )
+    if t_junctions:
+        raise QualificationError("QUALIFIED_MESH_G2_T_JUNCTION")
+
+    return {
+        "geometric_tolerance": tolerance,
+        "coincident_duplicate_vertex_pair_count": 0,
+        "t_junction_count": 0,
+        "boundary_edge_count": int(
+            sum(1 for count in face_incidence.values() if count == 1)
+        ),
+        "nonmanifold_edge_count_diagnostic": int(
+            sum(1 for count in face_incidence.values() if count > 2)
+        ),
+        "global_two_manifold_required": False,
+    }
 
 
 def qualified_mesh_intrinsic_audit(value: QualifiedMeshIR, *, surface, partition) -> Json:

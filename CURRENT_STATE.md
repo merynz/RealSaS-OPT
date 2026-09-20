@@ -2,11 +2,11 @@
 
 **Date:** 2026-09-20  
 **Canonical branch:** `main`  
-**Current mode:** **V2 IMPLEMENTATION + WITNESS ORCHESTRATION AUDIT**  
-**Current status token:** `V2_IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN`  
+**Current mode:** **V2 STAGE-LEVEL RED-TEAM HARDENING**  
+**Current status token:** `V2_STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN`  
 **Canonical governance ledger ID:** `V2_IMPLEMENTATION_ASSEMBLY` — repository implementation governance only; not a witness run.  
-**Witness execution:** **FORBIDDEN** — the prior readiness seal was revoked after pre-Stage01 workflow/ledger contract gaps were found.  
-**Next witness:** Subject-2 Knight only after a new readiness seal that includes run-local orchestration/artifact dry-run proof  
+**Witness execution:** **FORBIDDEN** — orchestration is now green, but the readiness seal remains revoked by stage-level product-claim red-team findings RT-37 and RT-45/46.  
+**Next witness:** Subject-2 Knight only after RT-37 and RT-45/46 are resolved or deliberately narrowed, a fresh closure is green, readiness is resealed, and the user explicitly approves execution  
 **Mainline:** 46-stage dependency DAG; ordinals are display order only
 
 ## Read first
@@ -18,6 +18,22 @@
 5. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
 6. `canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md`
 7. this file
+
+## Latest exact green evidence
+
+- Functional head: `ca9d2d2e59bc517a139c743eb6a91df2e48ac761`.
+- Self-hosted mainline CI run `35536134130`: PASS; 48 repository/governance + 51 learned/model + 281 compiler tests.
+- Subject-free Stage01–08 orchestration/artifact dry-run `35536134136`: PASS.
+- Model source gate `35536134125`: PASS.
+- Pre-red-team implementation closure: `a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882`.
+- The audit then reopened readiness; green implementation evidence is preserved, not erased.
+
+## Current red-team blockers
+
+1. **RT-37 — automatic presentation segmentation:** current V2 splits disconnected face islands inside mechanical components, but does not automatically split mechanically equivalent, topologically connected visual regions that need independent Spine-style addressing.
+2. **RT-45/46 — dynamic appearance quality:** Stage45 exhaustively proves native/reference parity, provenance totality and compiled-unobserved exposure, but not dynamic 2D-art deformation quality such as screen-space texture/line distortion or temporal edge integrity. Stage46 therefore must not over-read contract closure as proof of universal Spine-class dynamic appearance.
+
+Canonical detail: `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`.
 
 ## The V2 product has three co-equal quality authorities
 

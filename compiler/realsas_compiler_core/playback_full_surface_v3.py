@@ -17,6 +17,7 @@ import math
 import numpy as np
 
 from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.camera_geometry_v2 import CameraProjectionV3
 from compiler.realsas_compiler_core.playback_runtime_v3 import (
     AppearanceProvenance,
     AttachmentKind,
@@ -30,19 +31,6 @@ from compiler.realsas_compiler_core.types import QualificationError
 
 FULL_SURFACE_RUNTIME_BRIDGE_SCHEMA = "RealSaS.FullSurfaceRuntimeBridge.v3"
 FULL_SURFACE_CAMERA_PROJECTION_SCHEMA = "RealSaS.FullSurfaceCameraProjection.v3"
-
-
-@dataclass(frozen=True)
-class CameraProjectionV3:
-    view_id: str
-    view_index: int
-    origin: tuple[float, float, float]
-    right: tuple[float, float, float]
-    screen_up: tuple[float, float, float]
-    forward: tuple[float, float, float]
-    half_extent: float
-    resolution: int
-    schema_version: str = FULL_SURFACE_CAMERA_PROJECTION_SCHEMA
 
 
 @dataclass(frozen=True)

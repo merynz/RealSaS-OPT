@@ -110,6 +110,13 @@ def erode_binary_mask(mask: np.ndarray, radius: int) -> np.ndarray:
 
 
 def bilinear_rgba_u8(image: np.ndarray, xy: np.ndarray) -> np.ndarray:
+    """Premultiplied-safe source sampling returned as straight RGBA u8.
+
+    Source rasters are transport RGBA. Interpolating straight RGB across
+    partially transparent texels can import arbitrary transparent RGB into
+    visible edge pixels, so interpolation is performed in premultiplied space
+    and converted back exactly once for the compiled transport representation.
+    """
     rgba = np.asarray(image, dtype=np.uint8)
     points = np.asarray(xy, dtype=np.float64)
     if rgba.ndim != 3 or rgba.shape[2] != 4:
@@ -125,14 +132,28 @@ def bilinear_rgba_u8(image: np.ndarray, xy: np.ndarray) -> np.ndarray:
     y1 = np.minimum(y0 + 1, h - 1)
     tx = (x - x0).reshape(-1, 1)
     ty = (y - y0).reshape(-1, 1)
-    p00 = rgba[y0, x0].astype(np.float64)
-    p10 = rgba[y0, x1].astype(np.float64)
-    p01 = rgba[y1, x0].astype(np.float64)
-    p11 = rgba[y1, x1].astype(np.float64)
-    value = (1.0 - ty) * ((1.0 - tx) * p00 + tx * p10) + ty * (
+
+    source = rgba.astype(np.float64) / 255.0
+    alpha = source[..., 3:4]
+    pm = np.concatenate((source[..., :3] * alpha, alpha), axis=2)
+    p00 = pm[y0, x0]
+    p10 = pm[y0, x1]
+    p01 = pm[y1, x0]
+    p11 = pm[y1, x1]
+    mixed = (1.0 - ty) * ((1.0 - tx) * p00 + tx * p10) + ty * (
         (1.0 - tx) * p01 + tx * p11
     )
-    return np.clip(np.floor(value + 0.5), 0.0, 255.0).astype(np.uint8)
+
+    out = np.zeros_like(mixed)
+    out[:, 3] = mixed[:, 3]
+    nonzero = mixed[:, 3] > 1.0e-12
+    if np.any(nonzero):
+        out[nonzero, :3] = np.clip(
+            mixed[nonzero, :3] / mixed[nonzero, 3:4],
+            0.0,
+            1.0,
+        )
+    return np.clip(np.floor(out * 255.0 + 0.5), 0.0, 255.0).astype(np.uint8)
 
 
 def _candidate_vertex_id(vertex) -> str:

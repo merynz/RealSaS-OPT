@@ -1,25 +1,11 @@
 name: subject2-knight-v2-observation-preflight
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
-      - 'canonical/ACTIVE_RUN_V2.json'
-      - 'canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json'
-      - 'canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json'
-      - 'compiler/realsas_compiler_services/orchestrator/mainline.py'
-      - 'compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py'
-      - 'compiler/realsas_compiler_core/output_presentation_v1.py'
-      - 'compiler/realsas_compiler_core/surface_addressing_v1.py'
-      - 'tools/observation/blender_controlled_8view_v1.py'
-      - '.github/workflows/subject2_knight_observation_preflight.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'tools/observation/blender_controlled_8view_v1.py'
-      - '.github/workflows/subject2_knight_observation_preflight.yml'
   workflow_dispatch:
+
+# Intentionally manual-only while V2 architecture is under assembly.
+# Witness execution must not start until canonical/V2_IMPLEMENTATION_READINESS.json
+# is READY_FOR_WITNESS_EXECUTION.
 
 permissions:
   contents: read
@@ -55,6 +41,7 @@ jobs:
           set -euo pipefail
           python -m compileall -q compiler
           python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
+          python -m compiler.realsas_compiler_services.orchestrator.mainline validate-readiness
           python -m pytest -q tests/repository/test_mainline_execution_plan_v2.py
 
       - name: Install headless Blender render libraries

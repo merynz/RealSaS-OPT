@@ -111,6 +111,11 @@ on:
       - '.github/workflows/live_authority_map.yml'
       - '.github/workflows/model_mainline_source_gate.yml'
 
+
+concurrency:
+  group: model-mainline-source-gate-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   source-ownership:
     runs-on: [self-hosted, linux, x64, realsas]

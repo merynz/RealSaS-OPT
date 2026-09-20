@@ -40,7 +40,7 @@ from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_observation_set_from_dict,
     rigging_surface_from_dict,
 )
-from compiler.realsas_compiler_core.rest_preservation_v1 import (
+from compiler.realsas_compiler_core.silhouette_metrics_v2 import (
     silhouette_distance_metrics,
 )
 from compiler.realsas_compiler_core.substrate.adequacy_v1 import (

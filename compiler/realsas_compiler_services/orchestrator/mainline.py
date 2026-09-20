@@ -151,9 +151,15 @@ def validate_plan(plan: dict) -> str:
 
 
 CURRENT_V2_FORBIDDEN_IMPORT_MODULES = {
+    "compiler.realsas_compiler_core.product_artifact_codec_v1",
+    "compiler.realsas_compiler_core.presentation_graph_v1",
     "compiler.realsas_compiler_core.product_appearance_v1",
     "compiler.realsas_compiler_core.product_composition_v1",
     "compiler.realsas_compiler_core.rest_render_v1",
+    "compiler.realsas_compiler_core.rest_preservation_v1",
+    "compiler.realsas_compiler_core.motion_compile_v1",
+    "compiler.realsas_compiler_core.motion_dynamic_proof_v1",
+    "compiler.realsas_compiler_core.motion_presentation_v1",
     "compiler.realsas_compiler_core.runtime_projection_v1",
     "compiler.realsas_compiler_core.playback_appearance_authority_v2",
     "compiler.realsas_compiler_core.playback_runtime_v3",

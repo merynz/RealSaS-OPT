@@ -150,6 +150,20 @@ def validate_plan(plan: dict) -> str:
     return content_sha256(plan)
 
 
+CURRENT_V2_FORBIDDEN_IMPORT_MODULES = {
+    "compiler.realsas_compiler_core.product_appearance_v1",
+    "compiler.realsas_compiler_core.product_composition_v1",
+    "compiler.realsas_compiler_core.rest_render_v1",
+    "compiler.realsas_compiler_core.runtime_projection_v1",
+    "compiler.realsas_compiler_core.playback_appearance_authority_v2",
+    "compiler.realsas_compiler_core.playback_runtime_v3",
+    "compiler.realsas_compiler_core.playback_runtime_v4",
+    "compiler.realsas_compiler_core.playback_full_surface_v4",
+    "compiler.realsas_compiler_services.export.current_v4_directional_runtime_v4",
+    "compiler.realsas_compiler_services.export.current_v4_runtime_v2",
+    "compiler.realsas_compiler_services.export.runtime_v4",
+}
+
 IMPLEMENTATION_CLOSURE_STATIC_PATHS = (
     "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
     ".github/workflows/current_mainline_self_hosted_ci.yml",
@@ -186,14 +200,35 @@ def implementation_closure_manifest(plan: dict | None = None) -> dict:
     plan = plan or load_json(PLAN_PATH)
     plan_hash = validate_plan(plan)
     adapter_rows = []
+    imported_modules: set[str] = set()
     for stage in sorted(plan["stages"], key=lambda row: int(row["ordinal"])):
         adapter = str(stage["adapter"])
+        module_name, separator, function_name = adapter.partition(":")
+        if not separator or not module_name or not function_name:
+            raise RuntimeError(f"MAINLINE_V2_ADAPTER_ID_INVALID:{adapter}")
+        closure = _local_import_closure(module_name)
+        imported_modules.update(name for name, _digest in closure)
         adapter_rows.append(
             {
                 "stage_id": str(stage["id"]),
                 "adapter": adapter,
                 "implementation_hash": _adapter_impl_hash(adapter),
+                "local_python_import_closure": [
+                    {"module": name, "sha256": digest}
+                    for name, digest in closure
+                ],
             }
+        )
+
+    forbidden = sorted(
+        module
+        for module in imported_modules
+        if module in CURRENT_V2_FORBIDDEN_IMPORT_MODULES
+    )
+    if forbidden:
+        raise RuntimeError(
+            "V2_CURRENT_CLOSURE_IMPORTS_DONOR_ERA_MODULE:"
+            + ",".join(forbidden)
         )
 
     file_rows = []
@@ -207,6 +242,8 @@ def implementation_closure_manifest(plan: dict | None = None) -> dict:
         "schema": "RealSaS.V2ImplementationClosure.v1",
         "pipeline_plan_sha256": plan_hash,
         "adapter_implementation_closures": adapter_rows,
+        "imported_module_count": len(imported_modules),
+        "forbidden_import_modules": sorted(CURRENT_V2_FORBIDDEN_IMPORT_MODULES),
         "critical_files": file_rows,
     }
 

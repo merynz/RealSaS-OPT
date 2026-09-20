@@ -1,0 +1,40 @@
+{
+  "schema": "RealSaS.PresentationPartitionPolicy.v1",
+  "status": "FROZEN_SUBJECT_FREE_V1",
+  "date": "2026-09-21",
+  "scope": "V2_ROLE_FREE_PRESENTATION_PARTITION__SUBJECT_AGNOSTIC",
+  "forbidden_inputs": [
+    "KNIGHT_RESULT",
+    "MAGE_RESULT",
+    "SUBJECT_ID",
+    "CATEGORY_LABEL",
+    "OBJECT_CLASS"
+  ],
+  "mechanical_binding_policy": {
+    "min_rigid_owner_weight": 0.999,
+    "max_rigid_other_mass": 0.001
+  },
+  "appearance_boundary_policy": {
+    "edge_samples_per_direction": 5,
+    "edge_inset_fraction": 0.15,
+    "min_source_backed_sample_pairs": 8,
+    "mean_premultiplied_rgba_l1_cut": 0.18,
+    "p95_premultiplied_rgba_l1_cut": 0.30,
+    "source_backed_provenance": [
+      "DIRECT_SOURCE",
+      "OTHER_VIEW_SOURCE"
+    ]
+  },
+  "claim_boundary": {
+    "categorical_recognition_used": false,
+    "conceptual_object_identity_claimed": false,
+    "evidence_supported_visual_partition": true,
+    "author_editability_preserved": true
+  },
+  "rationale": {
+    "mechanical": "Rigid/deformable slot binding thresholds are frozen subject-free rather than tunable per witness.",
+    "appearance": "Adjacent faces inside one mechanical component may be separated when source-backed CAA samples on the two sides of their shared edge exhibit a strong premultiplied-RGBA discontinuity. This realizes presentation segmentation as a distinct observable authority without inventing semantic object labels.",
+    "sampling": "Samples are taken slightly inside each incident face to detect region appearance on either side of an edge rather than merely sampling the shared anti-aliased boundary texel."
+  },
+  "mutable_after_witness": false
+}

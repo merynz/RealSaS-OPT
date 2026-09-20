@@ -63,20 +63,20 @@ Verdicts:
 | 34 | `DEFORMATION_CAPABILITY_ENVELOPE` | This is a bounded numerical conditioning envelope and joint-frame witness, **not** professional motion capability. Actual artist motion is proven later. | **CLOSED** |
 | 35 | `DYNAMIC_MECHANICAL_MESH_QUALIFIED` | The exact frozen mesh is stressed under the exact qualified rig/skin/envelope; repair must create new lineage rather than mutate a passing mesh in place. This proves mechanics/conditioning, not 2D art quality. | **CLOSED** |
 | 36 | `QUALIFIED_MESH_SKIN_TRANSFER` | Skin is deterministically transferred onto the already-qualified product mesh; no second runtime skin truth is allowed. | **CLOSED** |
-| 37 | `QUALIFIED_PRESENTATION_STRUCTURE` | Current automatic segmentation creates separate slots for disconnected face islands inside a mechanical component. It **cannot automatically split two independently addressable visual regions that are mechanically equivalent and topologically connected** (the head/hat class of counterexample). This is exactly where structural partition and presentation segmentation can diverge. | **REOPENED — HIGH** |
-| 38 | `CANONICAL_PUPPET_SEALED` | Exact mechanics, CAA and presentation bindings are sealed correctly, but sealing cannot repair Stage37’s missing automatic presentation partition. | **CLOSED AS SEAL; INHERITS STAGE37 GAP** |
+| 37 | `QUALIFIED_PRESENTATION_STRUCTURE` | Current automatic segmentation creates separate slots for disconnected face islands inside a mechanical component. It does **not** claim recovery/splitting of mechanically equivalent, topologically connected visual regions. The IR now records that exact automatic scope, explicitly denies artist-layer recovery, and preserves face-membership edit provenance. | **HARDENED_SCOPE — VERIFY GREEN** |
+| 38 | `CANONICAL_PUPPET_SEALED` | Exact mechanics, CAA and presentation bindings are sealed correctly. The sealed graph carries Stage37’s explicit presentation-scope boundary rather than silently widening it. | **HARDENED_SCOPE — VERIFY GREEN** |
 | 39 | `MOTION_SOURCE_OR_PRESET_SEAL` | Current V2 implementation accepts professional external MotionSourceClip.v2 assets and deliberately rejects unsupported source kinds. The stage name still says “or preset,” while inline preset execution is not current authority. | **CLOSED; TITLE/CLAIM SHOULD BE PRECISE** |
 | 40 | `MOTION_COMPILE_RUN` | Full-3D local quaternion/root-translation compilation is bound to exact skeleton/envelope/presentation/mechanical state. No legacy single-axis contract remains in current closure. | **CLOSED** |
 | 41 | `MOTION_DYNAMIC_PROOF` | Exact FK/LBS/contact/conditioning is proven over compiled clips. Rest-unseen exposure is correctly diagnostic here because appearance exposure is owned by Stage45. | **CLOSED** |
 | 42 | `RUNTIME_PROJECTION_AND_CAA_BINDING` | Runtime binds exact posed XYZ/topology/cameras/sealed CAA and forbids donor search, skin solve and appearance generation. | **CLOSED** |
 | 43 | `RSS_MATERIALIZE_COMPACT` | Package entries are replay-hashed and self-contained; materialization cannot mint a new authority. | **CLOSED** |
 | 44 | `NATIVE_PACKAGE_OPEN_PLAYBACK` | Native reader opens the actual package and is byte-compared with Python reference. This stage samples a representative frame; exhaustive frame/view checking is deliberately Stage45’s job. | **CLOSED** |
-| 45 | `DYNAMIC_VISUAL_INTEGRITY_PROOF` | The implementation exhaustively gates undefined visible provenance, compiled-unobserved exposure and native/reference byte parity over all frame/view pairs. It records alpha-hole diagnostics. **It does not yet directly measure dynamic 2D-art deformation quality** such as screen-space texture stretch/shear, line-art distortion, or temporal edge/flicker integrity. Mechanical triangle conditioning is an important proxy but is not the same claim. | **REOPENED — HIGH** |
-| 46 | `PRODUCT_CLOSURE_SEAL` | Binding closure and editable archive integrity are strong. However `appearance_authority_passed=true` / `product_pass=true` currently inherit Stage45’s narrower runtime-integrity proof and Stage37’s limited automatic segmentation. Therefore “PASS_PRODUCT_V2” must not be read as proof of universal Spine-class authored appearance/editability until those gaps are closed or the claim is narrowed. | **REOPENED BY INHERITANCE** |
+| 45 | `DYNAMIC_VISUAL_INTEGRITY_PROOF` | The implementation exhaustively gates undefined visible provenance, compiled-unobserved exposure and native/reference byte parity over all frame/view pairs. It now explicitly declares `DYNAMIC_RUNTIME_INTEGRITY_V2` scope and denies that mechanical conditioning/native parity proves professional perceptual art quality. | **HARDENED_SCOPE — VERIFY GREEN** |
+| 46 | `PRODUCT_CLOSURE_SEAL` | Binding closure and editable archive integrity remain strong. Closure now declares `product_pass_scope=V2_EXECUTABLE_CONTRACT_CLOSURE`, denies artist-layer recovery and perceptual Spine-quality proof, and requires witness visual-quality evaluation for the product target. | **HARDENED_SCOPE — VERIFY GREEN** |
 
 ## Red-team conclusions
 
-### RT-37 — automatic presentation segmentation gap — HIGH
+### RT-37 — automatic presentation segmentation claim boundary — HARDENED
 
 The frozen architecture correctly states:
 
@@ -86,9 +86,9 @@ The current V2 implementation does not fully realize that distinction. It create
 
 This does not corrupt geometry, mechanics or CAA. It limits automatic authoring/editability. A correct repair must remain role-free and may not smuggle categorical labels such as “hat” or “sword” into product authority.
 
-**Required before broad automatic Spine-class authoring claim:** add a qualified presentation-partition authority that may use generic evidence (mechanical boundaries, disconnected topology, source-visible appearance boundaries, occlusion/composition evidence) without categorical recognition, with exact merge/split provenance and author-editable override.
+`QualifiedPresentationStructureIR.v2` now makes the current automatic scope machine-readable: connected face islands inside mechanical components. It explicitly records that connected mechanically equivalent visual-region auto-splitting and original artist-layer recovery are **not** claimed, while retaining exact face membership as an edit source. This closes the **authority overclaim** for the first witness without pretending the harder generic presentation-partition problem has been solved. A richer role-free presentation-partition producer remains a future capability extension, not hidden current truth.
 
-### RT-45 — dynamic appearance-quality measurement gap — HIGH
+### RT-45 — dynamic appearance-quality proof boundary — HARDENED
 
 Stage45 is an excellent **runtime integrity** proof:
 
@@ -99,16 +99,11 @@ Stage45 is an excellent **runtime integrity** proof:
 
 But runtime correctness is not identical to **artist-quality appearance under deformation**. A reference renderer can be perfectly deterministic while both renderers agree on ugly texture stretch or line distortion.
 
-**Required before claiming dynamic Spine-class art quality as scientifically proven:** either
+Stage45 now does option (2) explicitly in machine-readable qualification data: its proof scope is `DYNAMIC_RUNTIME_INTEGRITY_V2`; `professional_dynamic_appearance_quality_claimed=false`; `spine_class_perceptual_quality_claimed=false`; and mechanical conditioning is explicitly not treated as perceptual-quality proof. A future subject-free dynamic appearance-conditioning benchmark remains desirable, but it may not be retrofitted from Knight results.
 
-1. add a subject-free preregistered dynamic appearance-conditioning gate (for example bounded screen-space surface/UV conditioning plus temporal boundary/edge integrity, with thresholds calibrated without Knight), or
-2. explicitly narrow Stage45/46 claims to runtime visual integrity and leave professional dynamic appearance quality as a witness/product-performance observation rather than a proven implementation invariant.
+### RT-46 — product closure claim boundary — HARDENED
 
-The preferred engineering direction is (1), because geometry and mechanics already receive quantitative conditioning proofs and appearance deserves the same standard.
-
-### RT-46 — closure wording currently over-broad — HIGH by inheritance
-
-Stage46 is allowed to say the exact V2 contract closed. It is not yet allowed to use that closure as evidence that all aspects of automatic Spine-class authorability and dynamic art quality have been proven. The product closure report must either consume the repaired RT-37/RT-45 authorities or make the narrower claim explicit.
+Stage46 now makes the narrower claim explicit: `product_pass_scope=V2_EXECUTABLE_CONTRACT_CLOSURE`; original artist-layer recovery, professional dynamic appearance quality and Spine-class perceptual quality are not claimed by the machine proof; witness visual-quality evaluation remains required. The product target is unchanged.
 
 ## What remains genuinely green
 
@@ -122,10 +117,10 @@ The red-team findings do **not** invalidate the successful infrastructure/implem
 - exact dry-run implementation closure SHA-256 before this red-team documentation update: `a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882`;
 - Knight data used during this audit: **none**.
 
-Those green results prove that the current system executes and enforces its existing contract. The red-team audit asks whether that contract is strong enough for the product claim, and found two high-value places where it is not yet strong enough.
+Those green results prove that the pre-hardening system executed and enforced its contract. The red-team found two places where proof wording was broader than the implementation could scientifically establish. The current hardening makes those boundaries explicit; the hardening itself must pass a fresh exact closure before promotion.
 
 ## Promotion rule
 
-**Knight remains forbidden.** Do not reseal `READY_FOR_WITNESS_EXECUTION` merely because CI and orchestration are green. RT-37 and RT-45/46 must first be resolved or have their claims deliberately narrowed and re-approved, followed by a fresh exact implementation-closure hash, full self-hosted CI, subject-free orchestration dry-run, and readiness reseal.
+**Knight remains forbidden until the hardening head itself is green and readiness is resealed.** RT-37 and RT-45/46 are resolved as explicit proof-scope boundaries in code/IR rather than by lowering the product target. Promotion requires a fresh exact implementation-closure hash, full self-hosted CI, subject-free orchestration dry-run, readiness reseal, and then explicit user approval before Knight execution.
 
-No Knight-derived threshold or design choice may be used to resolve either finding.
+No Knight-derived threshold or design choice was used to resolve either finding.

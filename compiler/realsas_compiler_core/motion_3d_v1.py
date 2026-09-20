@@ -14,7 +14,7 @@ import math
 import numpy as np
 
 from compiler.realsas_compiler_core.hashing import content_sha256
-from compiler.realsas_compiler_core.playback_full_surface_v3 import (
+from compiler.realsas_compiler_core.camera_geometry_v2 import (
     CameraProjectionV3,
     project_points_xyz_v3,
     qualify_camera_v3,

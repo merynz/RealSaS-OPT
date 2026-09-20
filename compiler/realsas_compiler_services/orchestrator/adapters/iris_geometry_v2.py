@@ -35,7 +35,7 @@ from compiler.realsas_compiler_core.preproduct_authority_v1 import (
     signed_zero_surface_from_dict,
     signed_zero_surface_hash,
 )
-from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
+from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_camera_set_from_dict,
     qualified_observation_set_from_dict,
     rigging_surface_from_dict,

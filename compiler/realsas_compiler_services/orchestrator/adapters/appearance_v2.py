@@ -492,6 +492,29 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     root.mkdir(parents=True, exist_ok=True)
+    from compiler.realsas_compiler_core.appearance_compile_v2 import face_atlas_layout
+    projected_layout = face_atlas_layout(
+        artifact.face_count,
+        tile_resolution=tile_resolution,
+        bleed_px=bleed,
+    )
+    max_atlas_resolution = int(prereg.compile_policy["max_atlas_resolution"])
+    if (
+        int(projected_layout["width"]) > max_atlas_resolution
+        or int(projected_layout["height"]) > max_atlas_resolution
+    ):
+        return {
+            "status": "FAIL",
+            "blockers": ["CAA_ATLAS_EXCEEDS_FROZEN_PRODUCT_RESOLUTION_CAP"],
+            "diagnostics": {
+                "width": int(projected_layout["width"]),
+                "height": int(projected_layout["height"]),
+                "max_atlas_resolution": max_atlas_resolution,
+                "face_count": artifact.face_count,
+                "tile_resolution": tile_resolution,
+                "bleed_px": bleed,
+            },
+        }
     texture_rows = []
     output_rows = []
     provenance_atlases = []

@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "8a2cbb2237975cccc2d2cb1b075340879e454daa",
+    "main": "d7c19f900999fee5ff77c26971131501bba0cc78",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -115,7 +115,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2307,
+  "commit_count": 2324,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -118279,6 +118279,375 @@
       ],
       "subsystem_tags": [
         "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "47d29503efdcd26816186e4535afb4c310200cfe",
+      "parents": [
+        "8a2cbb2237975cccc2d2cb1b075340879e454daa"
+      ],
+      "author_time": "2026-09-20T22:46:45+03:00",
+      "committer_time": "2026-09-20T22:46:45+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "544e5cf18e469db2ef3c738bb75820d80f32237f",
+      "parents": [
+        "47d29503efdcd26816186e4535afb4c310200cfe"
+      ],
+      "author_time": "2026-09-20T22:53:35+03:00",
+      "committer_time": "2026-09-20T22:53:35+03:00",
+      "subject": "readiness v2: bind seal to exact implementation closure fingerprint",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8d150bae476ad72647949272d93fc43f3b243f3b",
+      "parents": [
+        "544e5cf18e469db2ef3c738bb75820d80f32237f"
+      ],
+      "author_time": "2026-09-20T22:54:04+03:00",
+      "committer_time": "2026-09-20T22:54:04+03:00",
+      "subject": "dry-run v2: make orchestration proof readiness-state agnostic and bind closure hash",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/v2_witness_orchestration_subject_free_dry_run.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fee17ad61d04c60cc3a8f727c58ceeb7a0242027",
+      "parents": [
+        "8d150bae476ad72647949272d93fc43f3b243f3b"
+      ],
+      "author_time": "2026-09-20T22:54:08+03:00",
+      "committer_time": "2026-09-20T22:54:08+03:00",
+      "subject": "ci v2: print exact implementation closure fingerprint",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/current_mainline_self_hosted_ci.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b19e402f0a61ef8ea98697cf260af1cc0110517f",
+      "parents": [
+        "fee17ad61d04c60cc3a8f727c58ceeb7a0242027"
+      ],
+      "author_time": "2026-09-20T22:55:12+03:00",
+      "committer_time": "2026-09-20T22:55:12+03:00",
+      "subject": "readiness v2: forbid donor-era modules from current adapter import closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "17e54758db758a7d4526e220e7047580f474e850",
+      "parents": [
+        "b19e402f0a61ef8ea98697cf260af1cc0110517f"
+      ],
+      "author_time": "2026-09-20T22:55:24+03:00",
+      "committer_time": "2026-09-20T22:55:24+03:00",
+      "subject": "test: lock exact V2 implementation closure and donor-era exclusion",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_witness_orchestration_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c4564e0ecb976d7b46e0a4d9cf3d80b040e4c6dc",
+      "parents": [
+        "17e54758db758a7d4526e220e7047580f474e850"
+      ],
+      "author_time": "2026-09-20T22:56:07+03:00",
+      "committer_time": "2026-09-20T22:56:07+03:00",
+      "subject": "authority catalog: seed semantic spine from current V2 product authorities",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/build_knowledge_artifact_catalog.py"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "326d9d4bd0439917586d65f67f6525af919f8d8e",
+      "parents": [
+        "c4564e0ecb976d7b46e0a4d9cf3d80b040e4c6dc"
+      ],
+      "author_time": "2026-09-20T22:56:34+03:00",
+      "committer_time": "2026-09-20T22:56:34+03:00",
+      "subject": "readiness v2: include continuity tooling in implementation closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "934fbcd34546aae7263179a53fa46ef0a9a994d2",
+      "parents": [
+        "326d9d4bd0439917586d65f67f6525af919f8d8e"
+      ],
+      "author_time": "2026-09-20T22:57:11+03:00",
+      "committer_time": "2026-09-20T22:57:11+03:00",
+      "subject": "test: make readiness assertions state-machine consistent across reseal",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_witness_orchestration_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "16f784a73768dab2d82d6ecc94eae326497d867d",
+      "parents": [
+        "934fbcd34546aae7263179a53fa46ef0a9a994d2"
+      ],
+      "author_time": "2026-09-20T22:57:56+03:00",
+      "committer_time": "2026-09-20T22:57:56+03:00",
+      "subject": "docs: make canonical index V2-first and demote Mage/V1 provenance",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/README.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4ec0919a648db92e6c458d9d1a67e589f9537951",
+      "parents": [
+        "16f784a73768dab2d82d6ecc94eae326497d867d"
+      ],
+      "author_time": "2026-09-20T22:57:59+03:00",
+      "committer_time": "2026-09-20T22:57:59+03:00",
+      "subject": "docs: replace stale repair-branch repository map with V2 current lineage",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "REPOSITORY_MAP.md"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "67a3841434ced135d806cb984c055d3840ea67ec",
+      "parents": [
+        "4ec0919a648db92e6c458d9d1a67e589f9537951"
+      ],
+      "author_time": "2026-09-20T22:58:02+03:00",
+      "committer_time": "2026-09-20T22:58:02+03:00",
+      "subject": "docs: point system index at actual V2 CAA and runtime homes",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "SYSTEM_INDEX.md"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a79bb5bd022202b556cbc8451fbfcb1f9f1ce71d",
+      "parents": [
+        "67a3841434ced135d806cb984c055d3840ea67ec"
+      ],
+      "author_time": "2026-09-20T22:58:19+03:00",
+      "committer_time": "2026-09-20T22:58:19+03:00",
+      "subject": "docs: make agent execution rule closure-bound rather than assembly-hardcoded",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "AGENTS.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "029e06876fc18e86a07ad2e4d4f7633059d66697",
+      "parents": [
+        "a79bb5bd022202b556cbc8451fbfcb1f9f1ce71d"
+      ],
+      "author_time": "2026-09-20T22:58:22+03:00",
+      "committer_time": "2026-09-20T22:58:22+03:00",
+      "subject": "readiness v2: bind static engineer-facing navigation docs into closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ae4270851f1f690c7051b3cdc36a7f0c75547b2e",
+      "parents": [
+        "029e06876fc18e86a07ad2e4d4f7633059d66697"
+      ],
+      "author_time": "2026-09-20T22:59:03+03:00",
+      "committer_time": "2026-09-20T22:59:03+03:00",
+      "subject": "docs: replace stale Mage FIT2 root README with current RealSaS V2 architecture",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "README.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4fefca40affefc4fd655558661d9eade44e7899f",
+      "parents": [
+        "ae4270851f1f690c7051b3cdc36a7f0c75547b2e"
+      ],
+      "author_time": "2026-09-20T22:59:06+03:00",
+      "committer_time": "2026-09-20T22:59:06+03:00",
+      "subject": "readiness v2: bind root README into implementation closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d7c19f900999fee5ff77c26971131501bba0cc78",
+      "parents": [
+        "4fefca40affefc4fd655558661d9eade44e7899f"
+      ],
+      "author_time": "2026-09-20T22:59:22+03:00",
+      "committer_time": "2026-09-20T22:59:22+03:00",
+      "subject": "test: prevent stale Mage repair-branch navigation from reentering current V2",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_witness_orchestration_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "FIT_DATA"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

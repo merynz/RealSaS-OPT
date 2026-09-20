@@ -5,9 +5,9 @@
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
 - Census artifacts in declared scope: **510 / 510 discovered (100%)**
-- Semantically reconciled: **70**
-- Catalogued but unreviewed: **440**
-- Semantic coverage: **13.7%**
+- Semantically reconciled: **58**
+- Catalogued but unreviewed: **452**
+- Semantic coverage: **11.4%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -15,9 +15,9 @@
 
 | Branch | Head | Different blobs vs main | High-signal differing artifacts |
 |---|---|---:|---:|
-| `fit2/mage-full-subject-reclosure` | `eb7a20eb9da7` | 167 | 49 |
-| `playback-stack-v1-20260916` | `46aaad438780` | 337 | 88 |
-| `repair/mage-full-subject-reclosure-20260912` | `2fa5d4b604d5` | 167 | 49 |
+| `fit2/mage-full-subject-reclosure` | `eb7a20eb9da7` | 168 | 49 |
+| `playback-stack-v1-20260916` | `46aaad438780` | 338 | 88 |
+| `repair/mage-full-subject-reclosure-20260912` | `2fa5d4b604d5` | 168 | 49 |
 
 The queue is a discovery aid. A path being listed does not establish what it proves, whether it is current, or whether it was ever executed.
 
@@ -261,11 +261,21 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 
 - `KA-C058E0F975A2` `CLOSURE` — `main` :: `canonical/ARACHNE_A0_V7_C4_CLOSURE_20260910.md` @ blob `44a57f5f5381`
 
-### 2026-09-12 :: COMPILER (9)
+### 2026-09-11 :: ARACHNE_SKIN (1)
+
+- `KA-00C697AF948C` `PROMOTION_RETRACTION` — `main` :: `canonical/ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1_PROMOTION_20260911.md` @ blob `3779e93d3bf3`
+
+### 2026-09-11 :: FIT_PRODUCT (1)
+
+- `KA-01E01105FFB5` `CLOSURE` — `main` :: `canonical/MAGE_FIT1_RIGGING_CORE_CLOSURE_20260911.md` @ blob `04ffcd9e71c4`
+
+### 2026-09-12 :: COMPILER (11)
 
 - `KA-1B10A4A9768F` `AUDIT` — `fit2/mage-full-subject-reclosure` :: `experiments/mage_full_subject_reclosure_v1/MWB2_CDT_CARRIER_RESOLUTION_FORENSIC_AUDIT_20260912.json` @ blob `53325b157e4b`
 - `KA-553D0622C1EA` `PREREG` — `fit2/mage-full-subject-reclosure` :: `experiments/mage_full_subject_reclosure_v1/MWB2_CDT_EXACT_RECLOSURE_PREREG_20260912.md` @ blob `4e1efe2d124c`
 - `KA-E527671321EF` `CLOSURE` — `fit2/mage-full-subject-reclosure` :: `experiments/mage_full_subject_reclosure_v1/MWB2_CDT_EXACT_RECLOSURE_REPORT_20260912.json` @ blob `1d545d64dc12`
+- `KA-0F3278622291` `PREREG` — `main` :: `canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md` @ blob `af63fe525d8b`
+- `KA-FDDD955E310C` `CLOSURE` — `main` :: `canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md` @ blob `7294d9be90c9`
 - `KA-60D0AA646633` `AUDIT` — `playback-stack-v1-20260916` :: `experiments/mage_full_subject_reclosure_v1/MWB2_CDT_CARRIER_RESOLUTION_FORENSIC_AUDIT_20260912.json` @ blob `53325b157e4b`
 - `KA-5F77CC650AE7` `PREREG` — `playback-stack-v1-20260916` :: `experiments/mage_full_subject_reclosure_v1/MWB2_CDT_EXACT_RECLOSURE_PREREG_20260912.md` @ blob `4e1efe2d124c`
 - `KA-C537247DBA07` `CLOSURE` — `playback-stack-v1-20260916` :: `experiments/mage_full_subject_reclosure_v1/MWB2_CDT_EXACT_RECLOSURE_REPORT_20260912.json` @ blob `1d545d64dc12`
@@ -273,7 +283,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-EFBD44B97947` `PREREG` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/MWB2_CDT_EXACT_RECLOSURE_PREREG_20260912.md` @ blob `4e1efe2d124c`
 - `KA-0E4DC0FA21CE` `CLOSURE` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/MWB2_CDT_EXACT_RECLOSURE_REPORT_20260912.json` @ blob `1d545d64dc12`
 
-### 2026-09-12 :: FIT_PRODUCT (25)
+### 2026-09-12 :: FIT_PRODUCT (26)
 
 - `KA-046C46F608B3` `AUTHORITY_DECISION` — `fit2/mage-full-subject-reclosure` :: `experiments/mage_full_subject_reclosure_v1/FIT2_STAGE0_GSA_8VIEW_EVIDENCE_SEAL_20260912.json` @ blob `f0451b416395`
 - `KA-B6574DCD9F67` `AUTHORITY_DECISION` — `fit2/mage-full-subject-reclosure` :: `experiments/mage_full_subject_reclosure_v1/GSA8192_CANONICAL_LINEAGE_SEAL_20260912.json` @ blob `0d8a3222b1c6`
@@ -282,6 +292,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D02C428A3298` `PLAN_MATRIX` — `fit2/mage-full-subject-reclosure` :: `experiments/mage_full_subject_reclosure_v1/MAGE_FULL_SUBJECT_EXECUTION_LEDGER_20260912.md` @ blob `c07fb1db3500`
 - `KA-23E183A3886F` `AUDIT` — `fit2/mage-full-subject-reclosure` :: `experiments/mage_full_subject_reclosure_v1/OLD_ZERO_COMPONENT_GEOMETRY_AUDIT_20260912.json` @ blob `93535011e255`
 - `KA-C1094AED895B` `AUDIT` — `fit2/mage-full-subject-reclosure` :: `experiments/single_family_e2e_v1/MAGE_FIT1_REAL_E2E_INTEGRATION_AUDIT_20260912.md` @ blob `f4a432e2d1b0`
+- `KA-DDADA07457C4` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md` @ blob `bdc217af1d82`
 - `KA-199D7CD73734` `AUTHORITY_DECISION` — `main` :: `canonical/MAGE_FULL_SUBJECT_FIT_AUTHORITY_WITNESS_20260912.json` @ blob `d3eca1537c21`
 - `KA-316010223C80` `PLAN_MATRIX` — `main` :: `canonical/MAGE_FULL_SUBJECT_FIT_TARGET_MANIFEST_20260912.json` @ blob `b0d4dea62fe3`
 - `KA-27C94AB2D7A0` `CLOSURE` — `main` :: `canonical/MAGE_FULL_SUBJECT_RECLOSURE_PLAN_20260912.md` @ blob `0c4b03a32953`
@@ -340,10 +351,13 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-C8C2D8BC2489` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json` @ blob `e675238aef40`
 - `KA-A168B1644DC8` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json` @ blob `0dc75b5f9c89`
 
-### 2026-09-18 :: COMPILER (2)
+### 2026-09-18 :: COMPILER (5)
 
+- `KA-DCC95754A26B` `PREREG` — `main` :: `canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_PREREG_20260918.md` @ blob `a701bb3d2682`
+- `KA-0B5FDD6D0B12` `RESULT` — `main` :: `canonical/ANIMATION_GRADE_MESH_CONDITIONING_CALIBRATION_RESULT_20260918.json` @ blob `f6e45dc8273f`
 - `KA-EBC69AAE60E1` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json` @ blob `31f2e5fa5835`
 - `KA-318281264871` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V4_20260918.json` @ blob `05b3f93aac51`
+- `KA-E0B0CF16ECB4` `AUTHORITY_DECISION` — `main` :: `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md` @ blob `624cb6fd0f0d`
 
 ### 2026-09-18 :: REPOSITORY_GOVERNANCE (2)
 
@@ -372,10 +386,6 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 ### 2026-09-20 :: COMPILER (1)
 
 - `KA-417397CA092A` `AUTHORITY_DECISION` — `main` :: `canonical/STAGE14_SUBSTRATE_ADEQUACY_CALIBRATION_AUTHORITY_V2_20260920.json` @ blob `d20f4ab602f7`
-
-### 2026-09-20 :: CROSS_CUTTING_OTHER (1)
-
-- `KA-87C677AE58D8` `AUDIT` — `main` :: `canonical/V2_ADVERSARIAL_MODULE_AUDIT_LEDGER_20260920.json` @ blob `9766be3e191c`
 
 ### UNKNOWN_DATE :: ARACHNE_SKIN (10)
 
@@ -426,10 +436,11 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-295868B63E7C` `WORKFLOW` — `repair/mage-full-subject-reclosure-20260912` :: `.github/workflows/proof_service_promotion_gate.yml` @ blob `2fad848fd29e`
 - `KA-60227BFFD981` `PROMOTION_RETRACTION` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/NO_DOWNSTREAM_PROMOTION.txt` @ blob `ef2f5130b857`
 
-### UNKNOWN_DATE :: CROSS_CUTTING_OTHER (21)
+### UNKNOWN_DATE :: CROSS_CUTTING_OTHER (22)
 
 - `KA-6AFEA36BB50A` `WORKFLOW` — `main` :: `.github/workflows/p0_directional_binding_closure.yml` @ blob `f05bd4e0fd12`
 - `KA-95A27A7C439E` `PLAN_MATRIX` — `main` :: `canonical/BOOTSTRAP_COVERAGE_STATE_V1.json` @ blob `be0968276db7`
+- `KA-C0C4BE494F0E` `PLAN_MATRIX` — `main` :: `canonical/MAINLINE_EXECUTION_PLAN_V1.json` @ blob `0a1379353bd2`
 - `KA-E435DDB5D448` `AUTHORITY_DECISION` — `main` :: `experiments/g0_g1_single_pose_geometry/G0_CONTRACT_FREEZE.json` @ blob `644e8aa9bcd6`
 - `KA-0C6940AFE2D3` `AUTHORITY_DECISION` — `main` :: `experiments/g0_g1_single_pose_geometry/G1_FREEZE_MANIFEST.json` @ blob `f9caeb90f82a`
 - `KA-0144238CA79F` `PREREG` — `main` :: `experiments/g0_g1_single_pose_geometry/G1_PREREG_DRAFT.json` @ blob `415af6405522`
@@ -450,10 +461,11 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-A0208605A1B4` `PLAN_MATRIX` — `playback-stack-v1-20260916` :: `experiments/playback_stack_v1/TEST_SUBJECT_001_PHYSICAL_EXECUTION_MANIFEST.json` @ blob `ff4d847e2e10`
 - `KA-75ACB4966200` `AUTHORITY_DECISION` — `playback-stack-v1-20260916` :: `experiments/playback_stack_v1/materialize_test_subject_001_sealed_fix1_v1.py` @ blob `ea242c546822`
 
-### UNKNOWN_DATE :: FIT_PRODUCT (97)
+### UNKNOWN_DATE :: FIT_PRODUCT (101)
 
 - `KA-F6D3C6D90EA6` `WORKFLOW` — `fit2/mage-full-subject-reclosure` :: `.github/workflows/mage_fit2_adaptive_boundary_quality_cdt_preflight.yml` @ blob `7a43aab6bf05`
 - `KA-B39E18DE79DA` `WORKFLOW` — `fit2/mage-full-subject-reclosure` :: `.github/workflows/mage_fit2_baseline_preserving_adaptive_patch_cdt_preflight.yml` @ blob `a787a71975d6`
+- `KA-7C44AA2A166A` `WORKFLOW` — `fit2/mage-full-subject-reclosure` :: `.github/workflows/mage_full_subject_reclosure_contract.yml` @ blob `a94dcc0c3f3d`
 - `KA-8D5EBDEB50FA` `HIGH_SIGNAL_OTHER` — `fit2/mage-full-subject-reclosure` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `e928dcfc94db`
 - `KA-CBDD433206D0` `HIGH_SIGNAL_OTHER` — `fit2/mage-full-subject-reclosure` :: `experiments/mage_full_subject_reclosure_v1/.alpha_gate` @ blob `df3e6e9c83be`
 - `KA-7AE201CAD33A` `HIGH_SIGNAL_OTHER` — `fit2/mage-full-subject-reclosure` :: `experiments/mage_full_subject_reclosure_v1/.camera_gate` @ blob `5bab3d6bae83`
@@ -475,10 +487,11 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D2D319509ACF` `WORKFLOW` — `main` :: `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` @ blob `16bf42a72ecc`
 - `KA-03510A41D0D4` `WORKFLOW` — `main` :: `.github/workflows/prefit_observation_authority_v1.yml` @ blob `b04004000018`
 - `KA-FDE35053B8A7` `WORKFLOW` — `main` :: `.github/workflows/single_family_data_contract_v1.yml` @ blob `929df12d859e`
-- `KA-F7DE1154824C` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `566864c1888c`
+- `KA-CF790F32A96C` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `896e3287cdac`
 - `KA-25BB7CDC0AB9` `AUTHORITY_DECISION` — `main` :: `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` @ blob `6b5fff12a484`
 - `KA-DC74ABB19F22` `PREREG` — `main` :: `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` @ blob `c01e1a65f75e`
 - `KA-E1571E78A4A5` `PREREG` — `main` :: `canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md` @ blob `36aef9ae6ecd`
+- `KA-72DE8D24F3F9` `AUTHORITY_DECISION` — `main` :: `canonical/MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1.json` @ blob `58f60bd1771a`
 - `KA-19D7B249A189` `AUTHORITY_DECISION` — `main` :: `canonical/RUN_MANIFEST_PRODUCT_AUTHORITY_CONTRACT_V1.json` @ blob `6600543edc07`
 - `KA-4BA36C81DC37` `RESULT` — `main` :: `canonical/fit_mage_v1/CODEC_A0_EXACT_CONDITIONING_RESULT.json` @ blob `647d375bb65a`
 - `KA-2F8418D24D3C` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/fit_mage_v1/FIT_MAGE_CPU_V1_STATUS.md` @ blob `4edcee0fffff`
@@ -492,6 +505,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-51F83B42E0F1` `WORKFLOW` — `playback-stack-v1-20260916` :: `.github/workflows/mage_fit2_adaptive_boundary_quality_cdt_preflight.yml` @ blob `7a43aab6bf05`
 - `KA-0B17056BBBB9` `WORKFLOW` — `playback-stack-v1-20260916` :: `.github/workflows/mage_fit2_baseline_preserving_adaptive_patch_cdt_preflight.yml` @ blob `a787a71975d6`
 - `KA-0CE18A8C91D1` `WORKFLOW` — `playback-stack-v1-20260916` :: `.github/workflows/mage_fit2_product_rebind_contract.yml` @ blob `3d31c3f2b03b`
+- `KA-12AB2FC5B8B7` `WORKFLOW` — `playback-stack-v1-20260916` :: `.github/workflows/mage_full_subject_reclosure_contract.yml` @ blob `a94dcc0c3f3d`
 - `KA-C227CC4A6282` `WORKFLOW` — `playback-stack-v1-20260916` :: `.github/workflows/mage_product_restoration_p0_contract.yml` @ blob `b61306268d68`
 - `KA-3EA4D427579F` `WORKFLOW` — `playback-stack-v1-20260916` :: `.github/workflows/mage_product_source_freeze.yml` @ blob `c9fe8749d22a`
 - `KA-1079C84431A6` `HIGH_SIGNAL_OTHER` — `playback-stack-v1-20260916` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `e928dcfc94db`
@@ -532,6 +546,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-A7B3DCBB401F` `HIGH_SIGNAL_OTHER` — `playback-stack-v1-20260916` :: `experiments/single_family_e2e_v1/run_mage_fit1_real_static_v1.py` @ blob `dc31f1d29bc6`
 - `KA-05253DCAE6C9` `WORKFLOW` — `repair/mage-full-subject-reclosure-20260912` :: `.github/workflows/mage_fit2_adaptive_boundary_quality_cdt_preflight.yml` @ blob `7a43aab6bf05`
 - `KA-7912C0745946` `WORKFLOW` — `repair/mage-full-subject-reclosure-20260912` :: `.github/workflows/mage_fit2_baseline_preserving_adaptive_patch_cdt_preflight.yml` @ blob `a787a71975d6`
+- `KA-5CBEC243013D` `WORKFLOW` — `repair/mage-full-subject-reclosure-20260912` :: `.github/workflows/mage_full_subject_reclosure_contract.yml` @ blob `a94dcc0c3f3d`
 - `KA-D9BE2CB0DE4D` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `e928dcfc94db`
 - `KA-BF82B60779A9` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/.alpha_gate` @ blob `df3e6e9c83be`
 - `KA-992D00F0DD1B` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/.camera_gate` @ blob `5bab3d6bae83`

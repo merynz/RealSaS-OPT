@@ -11,7 +11,7 @@
 - Current state: V2_IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN
 - Active experiment: V2_IMPLEMENTATION_ASSEMBLY
 - Most recent closed gate: PRIOR_READINESS_SEAL_REVOKED_AFTER_PRE_STAGE01_ORCHESTRATION_GAP
-- Canonical main: 8a2cbb223797
+- Canonical main: d7c19f900999
 - Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
 - Plan SHA-256: a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1
 - Promotion block: Do not execute Knight. Prove run-local ledger initialization, current target-closure CLI, workflow contract and Stage01-08 artifact/output schemas before resealing readiness.

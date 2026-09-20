@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2307**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2324**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2319,6 +2319,23 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-20T22:45:10+03:00` | `212fe826ed44` | yes | CI_TEST, GOVERNANCE_CONTINUITY | test: bind continuity to V2 architecture and CAA authorities | `tests/repository/test_current_continuity_authority_v2.py` | `main` |
 | `2026-09-20T22:45:15+03:00` | `341d5d5dd867` | yes | GOVERNANCE_CONTINUITY | docs: remove donor-era presentation document from current agent authority order | `AGENTS.md` | `main` |
 | `2026-09-20T22:45:20+03:00` | `8a2cbb223797` | yes | GOVERNANCE_CONTINUITY | authority tooling: audit current V2 architecture and CAA roots, not donor-era contract | `tools/audit_context_coverage.py` | `main` |
+| `2026-09-20T22:46:45+03:00` | `47d29503efdc` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-20T22:53:35+03:00` | `544e5cf18e46` | yes | COMPILER_PROOF | readiness v2: bind seal to exact implementation closure fingerprint | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-20T22:54:04+03:00` | `8d150bae476a` | yes | CI_TEST, COMPILER_PROOF | dry-run v2: make orchestration proof readiness-state agnostic and bind closure hash | `.github/workflows/v2_witness_orchestration_subject_free_dry_run.yml` | `main` |
+| `2026-09-20T22:54:08+03:00` | `fee17ad61d04` | yes | CI_TEST | ci v2: print exact implementation closure fingerprint | `.github/workflows/current_mainline_self_hosted_ci.yml` | `main` |
+| `2026-09-20T22:55:12+03:00` | `b19e402f0a61` | yes | COMPILER_PROOF | readiness v2: forbid donor-era modules from current adapter import closure | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-20T22:55:24+03:00` | `17e54758db75` | yes | CI_TEST | test: lock exact V2 implementation closure and donor-era exclusion | `tests/repository/test_witness_orchestration_v2.py` | `main` |
+| `2026-09-20T22:56:07+03:00` | `c4564e0ecb97` | yes | GOVERNANCE_CONTINUITY | authority catalog: seed semantic spine from current V2 product authorities | `tools/build_knowledge_artifact_catalog.py` | `main` |
+| `2026-09-20T22:56:34+03:00` | `326d9d4bd043` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | readiness v2: include continuity tooling in implementation closure | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-20T22:57:11+03:00` | `934fbcd34546` | yes | CI_TEST | test: make readiness assertions state-machine consistent across reseal | `tests/repository/test_witness_orchestration_v2.py` | `main` |
+| `2026-09-20T22:57:56+03:00` | `16f784a73768` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | docs: make canonical index V2-first and demote Mage/V1 provenance | `canonical/README.md` | `main` |
+| `2026-09-20T22:57:59+03:00` | `4ec0919a648d` | yes | OTHER | docs: replace stale repair-branch repository map with V2 current lineage | `REPOSITORY_MAP.md` | `main` |
+| `2026-09-20T22:58:02+03:00` | `67a3841434ce` | yes | RUNTIME_PRODUCT | docs: point system index at actual V2 CAA and runtime homes | `SYSTEM_INDEX.md` | `main` |
+| `2026-09-20T22:58:19+03:00` | `a79bb5bd0222` | yes | GOVERNANCE_CONTINUITY | docs: make agent execution rule closure-bound rather than assembly-hardcoded | `AGENTS.md` | `main` |
+| `2026-09-20T22:58:22+03:00` | `029e06876fc1` | yes | COMPILER_PROOF | readiness v2: bind static engineer-facing navigation docs into closure | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-20T22:59:03+03:00` | `ae4270851f1f` | yes | FIT_DATA | docs: replace stale Mage FIT2 root README with current RealSaS V2 architecture | `README.md` | `main` |
+| `2026-09-20T22:59:06+03:00` | `4fefca40affe` | yes | COMPILER_PROOF | readiness v2: bind root README into implementation closure | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-20T22:59:22+03:00` | `d7c19f900999` | yes | CI_TEST, FIT_DATA | test: prevent stale Mage repair-branch navigation from reentering current V2 | `tests/repository/test_witness_orchestration_v2.py` | `main` |
 
 ## Use rule
 

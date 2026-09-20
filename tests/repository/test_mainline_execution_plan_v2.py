@@ -96,6 +96,25 @@ def test_stage41_does_not_reintroduce_rest_unseen_appearance_failure():
     assert "24_COMPLETE_APPEARANCE_QUALIFIED" in stage45["depends_on"]
 
 
+def test_stage37_consumes_qualified_caa_for_role_free_visual_partition():
+    plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
+    by = {row["id"]: row for row in plan["stages"]}
+    stage37 = by["37_QUALIFIED_PRESENTATION_STRUCTURE"]
+    assert stage37["depends_on"] == [
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+    ]
+    assert "role-free presentation partition" in stage37["title"]
+    assert by["06_OBSERVATION_RENDER_8VIEW"]["title"].startswith("Materialize")
+    assert by["39_MOTION_SOURCE_OR_PRESET_SEAL"]["title"] == (
+        "Professional external motion source seal"
+    )
+
+
 def test_current_v2_adapter_import_closure_excludes_obsolete_product_semantics():
     plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
     modules = set()

@@ -868,6 +868,8 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         "rest_min_source_lock_fraction_of_source_foreground",
         "rest_max_source_locked_mean_rgba_l1",
         "rest_max_source_locked_p95_rgba_l1",
+        "rest_max_source_foreground_mean_rgba_l1",
+        "rest_max_source_foreground_p95_rgba_l1",
         "rest_min_source_alpha_recall",
         "rest_min_source_alpha_precision",
         "rest_max_largest_coherent_alpha_hole_fraction",
@@ -934,6 +936,19 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         hole_fraction = (
             0.0 if visible_count == 0 else float(hole_count) / float(visible_count)
         )
+        foreground_pixels = source_masks[direction]
+        foreground_error = rgba_l1_premultiplied(
+            render.straight_rgba_u8[foreground_pixels],
+            source_rgba[direction][foreground_pixels],
+        )
+        foreground_mean_error = (
+            0.0 if len(foreground_error) == 0 else float(np.mean(foreground_error))
+        )
+        foreground_p95_error = (
+            0.0
+            if len(foreground_error) == 0
+            else float(np.quantile(foreground_error, 0.95))
+        )
         source_alpha_bytes = bytes(source_masks[direction].astype(np.uint8).reshape(-1))
         final_alpha_bytes = bytes(final_alpha.astype(np.uint8).reshape(-1))
         alpha_metrics = coverage_metrics(
@@ -953,6 +968,10 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             >= float(policy["rest_min_source_lock_fraction_of_source_foreground"])
             and mean_error <= float(policy["rest_max_source_locked_mean_rgba_l1"])
             and p95_error <= float(policy["rest_max_source_locked_p95_rgba_l1"])
+            and foreground_mean_error
+            <= float(policy["rest_max_source_foreground_mean_rgba_l1"])
+            and foreground_p95_error
+            <= float(policy["rest_max_source_foreground_p95_rgba_l1"])
             and float(alpha_metrics["recall"])
             >= float(policy["rest_min_source_alpha_recall"])
             and float(alpha_metrics["precision"])
@@ -974,6 +993,8 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                 source_locked_exact_fraction=exact_fraction,
                 source_locked_mean_rgba_l1=mean_error,
                 source_locked_p95_rgba_l1=p95_error,
+                source_foreground_mean_rgba_l1=foreground_mean_error,
+                source_foreground_p95_rgba_l1=foreground_p95_error,
                 geometry_visible_pixel_count=visible_count,
                 final_alpha_pixel_count=final_alpha_count,
                 geometry_visible_final_alpha_hole_count=hole_count,
@@ -1052,6 +1073,9 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             ),
             "maximum_source_locked_p95_rgba_l1": max(
                 row.source_locked_p95_rgba_l1 for row in rows
+            ),
+            "maximum_source_foreground_p95_rgba_l1": max(
+                row.source_foreground_p95_rgba_l1 for row in rows
             ),
             "minimum_source_alpha_recall": min(row.source_alpha_recall for row in rows),
             "minimum_source_alpha_precision": min(row.source_alpha_precision for row in rows),

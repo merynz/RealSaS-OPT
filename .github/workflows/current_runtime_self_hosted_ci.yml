@@ -103,7 +103,15 @@ jobs:
             "$ARCHIVE_PATH" \
             "$SOURCE_BINDING_SHA256" \
             "$PROOF_BUNDLE_SHA256"
+      - name: V2 CAA native reference build and RSS parity
+        env:
+          REALSAS_RUNTIME_V2_PLAYER: /tmp/realsas_runtime_v2_caa_reference_runtime_gate
+        run: |
+          c++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp             -o "$REALSAS_RUNTIME_V2_PLAYER"
+          sha256sum "$REALSAS_RUNTIME_V2_PLAYER"
+          PYTHONPATH=. python -m pytest -q             tests/compiler/test_runtime_v2_native_smoke.py             tests/compiler/test_v2_tail_authority_fail_closed.py
       - name: Runtime gate summary
         run: |
           echo 'CURRENT_RUNTIME_NATIVE_INTERLOCK_PASS'
+          echo 'V2_CAA_NATIVE_PARITY_PASS'
           echo "commit=$GITHUB_SHA"

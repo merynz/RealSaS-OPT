@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2354**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2356**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2366,6 +2366,8 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-20T23:14:44+03:00` | `b9f70b10f7b2` | yes | COMPILER_PROOF | motion dynamic v2: correct mesh qualification stage identity | `compiler/realsas_compiler_core/motion_dynamic_proof_v2.py` | `main` |
 | `2026-09-20T23:15:21+03:00` | `98145343e540` | yes | COMPILER_PROOF | orchestrator v2: bind cache identity to typed dependency outputs | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
 | `2026-09-20T23:15:36+03:00` | `61005d81933f` | yes | CI_TEST | test: red-team typed dependency cache identity and sealed output metadata | `tests/repository/test_mainline_v2_dag_scheduler.py` | `main` |
+| `2026-09-20T23:16:45+03:00` | `0a3c00ea4079` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-20T23:29:17+03:00` | `c2c886ec848f` | yes | CI_TEST | test: align witness audit assertions with stricter current seal contract | `tests/repository/test_witness_orchestration_v2.py` | `main` |
 
 ## Use rule
 

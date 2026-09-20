@@ -28,12 +28,12 @@ V1 modules and artifacts may remain for scientific provenance and reusable gener
 
 No subject witness is active while readiness is closed. Subject-2 Knight is minted fresh only from a valid implementation-closure-bound readiness seal and a run-local ledger.
 
+## Stage-level red-team hardening
 
-## Current stage-level red-team
+The second-pass audit is canonical at `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`.
 
-The 46-stage executable contract is green, but implementation readiness is reopened by `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`.
+- **Stage37:** current automatic presentation grouping is explicitly scoped to connected face islands inside mechanical components. Artist-layer recovery and connected mechanically-equivalent visual-region auto-splitting are not claimed.
+- **Stage45:** Dynamic Visual Integrity is explicitly a `DYNAMIC_RUNTIME_INTEGRITY_V2` proof. Native/reference parity, provenance totality and compiled-unobserved exposure do not claim perceptual Spine-class quality.
+- **Stage46:** product PASS is explicitly `V2_EXECUTABLE_CONTRACT_CLOSURE`; controlled-witness visual-quality evaluation remains required.
 
-- **Stage37:** presentation segmentation is role-free but presently limited to disconnected mesh-face islands inside mechanical components; connected mechanically equivalent visual regions are not automatically independently addressable.
-- **Stage45/46:** native/reference parity, provenance totality and compiled-unobserved exposure are exhaustive, but dynamic 2D-art deformation quality is not yet an independent quantitative appearance gate; product closure inherits that claim limitation.
-
-Knight execution remains forbidden until these findings are resolved/narrowed and readiness is resealed.
+The product target is unchanged: source-faithful Spine-class 2D art remains co-equal with geometry and mechanics. Knight remains forbidden until the exact hardening closure is green, readiness is resealed, and the user approves execution.

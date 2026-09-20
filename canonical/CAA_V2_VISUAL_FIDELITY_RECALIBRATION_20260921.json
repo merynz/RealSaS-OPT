@@ -187,6 +187,13 @@
       "owner": "Runtime raster coverage / temporal edge quality",
       "finding": "Reference and native V2 visibility use one binary pixel-center triangle coverage sample. CAA alpha is applied only after geometry ownership, so subpixel silhouette coverage has no MSAA/analytic coverage authority. Native/reference parity can therefore certify identical edge popping/jaggies during motion.",
       "required_closure": "Add subject-free moving thin-edge/subpixel-silhouette temporal controls and qualify a coverage/AA contract (analytic coverage, supersampling/MSAA-equivalent or another deterministic scheme) shared by reference/native runtime. Gate temporal edge shimmer independently from texture minification."
+    },
+    {
+      "id": "VF-25",
+      "severity": "HIGH",
+      "owner": "CAA alpha/color transport precision",
+      "finding": "Source sampling correctly premultiplies before bilinear interpolation, but immediately unpremultiplies and quantizes every compiled surface sample back to straight RGBA8. Those straight u8 samples are later baked and premultiplied again at runtime. Low-alpha anti-aliased texels can therefore lose premultiplied color precision even though metadata describes the internal alpha contract as PREMULTIPLIED.",
+      "required_closure": "Audit the real alpha representation at every compile/bake/package boundary. Add low-alpha anti-aliased dark/light edge controls, quantify PM round-trip error, and either keep sufficient premultiplied precision through the internal CAA asset or prove that the chosen transport quantization is visually lossless under the product gate."
     }
   ],
   "false_or_overstated_external_findings": [

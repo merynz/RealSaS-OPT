@@ -304,8 +304,32 @@ def coverage_metrics(authority: bytes, predicted: bytes, *, width: int, height: 
     precision = 1.0 if predicted_count == 0 else float(inside) / float(predicted_count)
 
     uncovered = bytes(1 if a and not p else 0 for a, p in zip(authority, predicted))
-    largest = _largest_4_connected(uncovered, width=width, height=height)
+    uncovered_sizes = _connected_component_sizes_4(
+        uncovered, width=width, height=height
+    )
+    largest = int(uncovered_sizes[0]) if uncovered_sizes else 0
     largest_fraction = 0.0 if foreground == 0 else float(largest) / float(foreground)
+    singleton_uncovered = int(sum(size for size in uncovered_sizes if size == 1))
+    small_uncovered = int(sum(size for size in uncovered_sizes if size <= 4))
+    singleton_uncovered_fraction = (
+        0.0 if foreground == 0 else float(singleton_uncovered) / float(foreground)
+    )
+    small_uncovered_fraction = (
+        0.0 if foreground == 0 else float(small_uncovered) / float(foreground)
+    )
+
+    excess = bytes(1 if p and not a else 0 for a, p in zip(authority, predicted))
+    excess_sizes = _connected_component_sizes_4(
+        excess, width=width, height=height
+    )
+    singleton_excess = int(sum(size for size in excess_sizes if size == 1))
+    small_excess = int(sum(size for size in excess_sizes if size <= 4))
+    singleton_excess_fraction = (
+        0.0 if predicted_count == 0 else float(singleton_excess) / float(predicted_count)
+    )
+    small_excess_fraction = (
+        0.0 if predicted_count == 0 else float(small_excess) / float(predicted_count)
+    )
 
     interior = _interior_mask_8_neighbor(authority, width=width, height=height)
     interior_count = sum(interior)
@@ -320,6 +344,16 @@ def coverage_metrics(authority: bytes, predicted: bytes, *, width: int, height: 
         "precision": float(precision),
         "largest_coherent_hole_pixels": int(largest),
         "largest_coherent_hole_fraction": float(largest_fraction),
+        "uncovered_component_count": int(len(uncovered_sizes)),
+        "singleton_uncovered_pixel_count": singleton_uncovered,
+        "singleton_uncovered_fraction": float(singleton_uncovered_fraction),
+        "small_uncovered_le4_pixel_count": small_uncovered,
+        "small_uncovered_le4_fraction": float(small_uncovered_fraction),
+        "excess_component_count": int(len(excess_sizes)),
+        "singleton_excess_pixel_count": singleton_excess,
+        "singleton_excess_fraction": float(singleton_excess_fraction),
+        "small_excess_le4_pixel_count": small_excess,
+        "small_excess_le4_fraction": float(small_excess_fraction),
         "interior_foreground_pixel_count": int(interior_count),
         "interior_uncovered_pixel_count": int(interior_uncovered),
         "interior_uncovered_fraction": float(interior_fraction),

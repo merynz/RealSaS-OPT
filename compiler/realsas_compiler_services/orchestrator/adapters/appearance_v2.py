@@ -1,15 +1,46 @@
 from __future__ import annotations
 
+"""RealSaS V2 Complete Appearance Authority stages 20-25."""
+
+from dataclasses import replace
 from pathlib import Path
 
-from compiler.realsas_compiler_core.complete_appearance_authority_v1 import (
+import numpy as np
+from PIL import Image
+
+from compiler.realsas_compiler_core.appearance_authority_v2 import (
+    AppearanceTextureIR,
+    CAACompileArtifactIR,
+    CAACompileSealIR,
+    CompleteAppearanceAssetIR,
+    CompleteAppearanceQualificationIR,
     build_caa_preregistration,
+    caa_compile_artifact_from_dict,
+    caa_compile_hash,
+    caa_compile_seal_from_dict,
+    caa_compile_seal_hash,
+    caa_preregistration_from_dict,
+    complete_appearance_asset_from_dict,
+    complete_appearance_asset_hash,
+    complete_appearance_qualification_hash,
+)
+from compiler.realsas_compiler_core.appearance_bake_v2 import (
+    bake_direction_atlas,
+)
+from compiler.realsas_compiler_core.appearance_compile_v2 import (
+    compile_deterministic_caa,
+)
+from compiler.realsas_compiler_core.appearance_quality_v2 import (
+    provenance_boundary_metrics,
+    structured_holdout_metrics,
 )
 from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
 )
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_mesh_candidate_from_dict,
+    qualified_camera_set_from_dict,
+    qualified_observation_set_from_dict,
 )
 from compiler.realsas_compiler_core.surface_addressing_v1 import (
     appearance_domain_from_dict,
@@ -17,11 +48,100 @@ from compiler.realsas_compiler_core.surface_addressing_v1 import (
     surface_addressing_from_dict,
 )
 from compiler.realsas_compiler_core.types import QualificationError
-from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
-    _sha256,
-    _stage_output_payload,
-    _write_ir,
+from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
+    load_file_ref,
+    resolved_path,
+    sha256_file,
+    stage_output_payload,
+    write_ir,
 )
+
+
+_POLICY_SCHEMA = "RealSaS.CAAQualificationPolicy.v1"
+
+
+def _load_policy_document(ctx: dict) -> dict:
+    cfg = dict(ctx["run_manifest"].get("appearance") or {})
+    ref = dict(cfg.get("policy_document") or {})
+    if not ref:
+        raise QualificationError("CAA_FROZEN_POLICY_DOCUMENT_REQUIRED")
+    policy = load_file_ref(ref, expected_schema=_POLICY_SCHEMA)
+    if not str(policy.get("status") or "").startswith("FROZEN_SUBJECT_FREE"):
+        raise QualificationError("CAA_POLICY_NOT_SUBJECT_FREE_FROZEN")
+    for key in (
+        "compile_policy",
+        "source_lock_policy",
+        "completion_quality_policy",
+    ):
+        if not isinstance(policy.get(key), dict):
+            raise QualificationError(f"CAA_POLICY_SECTION_MISSING:{key}")
+    return policy
+
+
+def _load_source_inputs(ctx: dict, observation):
+    cfg = dict(ctx["run_manifest"].get("observation") or {})
+    raster_rows = tuple(cfg.get("source_rasters") or ())
+    mask_rows = tuple(cfg.get("source_foreground_masks") or ())
+    if (
+        len(raster_rows) != 8
+        or len(mask_rows) != 8
+        or {int(row["view_index"]) for row in raster_rows} != set(range(8))
+        or {int(row["view_index"]) for row in mask_rows} != set(range(8))
+    ):
+        raise QualificationError("CAA_SOURCE_OBSERVATION_MATRIX_INCOMPLETE")
+    obs = {int(row.view_index): row for row in observation.views}
+    rgba = {}
+    masks = {}
+    for row in raster_rows:
+        view = int(row["view_index"])
+        path = load_file_ref(dict(row.get("image") or {}), json_required=False)
+        if sha256_file(path) != obs[view].source_raster_sha256:
+            raise QualificationError("CAA_SOURCE_RASTER_AUTHORITY_DRIFT")
+        image = np.asarray(Image.open(path).convert("RGBA"), dtype=np.uint8)
+        if image.shape != (int(obs[view].height), int(obs[view].width), 4):
+            raise QualificationError("CAA_SOURCE_RASTER_DIMENSION_DRIFT")
+        rgba[view] = image
+    for row in mask_rows:
+        view = int(row["view_index"])
+        path = load_file_ref(dict(row.get("mask") or {}), json_required=False)
+        if sha256_file(path) != obs[view].foreground_mask_sha256:
+            raise QualificationError("CAA_SOURCE_MASK_AUTHORITY_DRIFT")
+        raw = path.read_bytes()
+        expected = int(obs[view].width) * int(obs[view].height)
+        if len(raw) != expected or any(value not in (0, 1) for value in raw):
+            raise QualificationError("CAA_SOURCE_MASK_INVALID")
+        masks[view] = np.frombuffer(raw, dtype=np.uint8).reshape(
+            int(obs[view].height), int(obs[view].width)
+        ).astype(bool)
+    return rgba, masks
+
+
+def _save_npz(path: Path, **arrays) -> str:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(path, **arrays)
+    return sha256_file(path)
+
+
+def _load_compile_arrays(artifact: CAACompileArtifactIR) -> dict:
+    path = resolved_path(artifact.compile_npz_path)
+    if not path.is_file() or sha256_file(path) != artifact.compile_npz_sha256:
+        raise QualificationError("CAA_COMPILE_NPZ_BYTES_DRIFT")
+    with np.load(path, allow_pickle=False) as data:
+        required = {
+            "barycentric",
+            "sample_positions",
+            "sample_face_index",
+            "sample_component_index",
+            "direct_valid",
+            "direct_rgba",
+            "source_xy",
+            "rgba",
+            "provenance",
+            "source_view",
+        }
+        if not required.issubset(set(data.files)):
+            raise QualificationError("CAA_COMPILE_NPZ_ARRAYS_MISSING")
+        return {name: np.asarray(data[name]).copy() for name in required}
 
 
 def preregister_caa_backend_stage(ctx: dict) -> dict:
@@ -33,6 +153,7 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
             "blockers": ["CAA_BACKEND_MUST_BE_EXPLICIT"],
             "diagnostics": {},
         }
+    policy = _load_policy_document(ctx)
 
     contract_path = (
         Path(ctx["repo_root"])
@@ -41,66 +162,84 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
     )
     if not contract_path.is_file():
         raise QualificationError("CAA_CANONICAL_CONTRACT_MISSING")
-    contract_sha = _sha256(contract_path)
+    contract_sha = sha256_file(contract_path)
 
-    observation_payload = _stage_output_payload(
-        ctx,
-        "07_OBSERVATION_CONTRACT_QUALIFIED",
-        "RealSaS.QualifiedObservationSetIR.v1",
+    observation = qualified_observation_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "07_OBSERVATION_CONTRACT_QUALIFIED",
+            "RealSaS.QualifiedObservationSetIR.v1",
+        )
+    )
+    cameras = qualified_camera_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "05_CAMERA_CONTRACT_SOLVED",
+            "RealSaS.QualifiedCameraSetIR.v1",
+        )
     )
     directions = output_direction_set_from_dict(
-        _stage_output_payload(
+        stage_output_payload(
             ctx,
             "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
             "RealSaS.OutputPresentationDirectionSetIR.v1",
         )
     )
     candidate = canonical_mesh_candidate_from_dict(
-        _stage_output_payload(
+        stage_output_payload(
             ctx,
             "18_CANONICAL_MESH_ADDRESSING_BUILD",
             "RealSaS.CanonicalMeshCandidateIR.v1",
         )
     )
     addressing = surface_addressing_from_dict(
-        _stage_output_payload(
+        stage_output_payload(
             ctx,
             "18_CANONICAL_MESH_ADDRESSING_BUILD",
             "RealSaS.SurfaceAddressingIR.v1",
         )
     )
     domain = appearance_domain_from_dict(
-        _stage_output_payload(
+        stage_output_payload(
             ctx,
             "18_CANONICAL_MESH_ADDRESSING_BUILD",
             "RealSaS.AppearanceDomainIR.v1",
         )
     )
     static_mesh = static_mesh_qualification_from_dict(
-        _stage_output_payload(
+        stage_output_payload(
             ctx,
             "19_STATIC_CANONICAL_MESH_QUALIFIED",
             "RealSaS.StaticCanonicalMeshQualificationIR.v1",
         )
     )
 
+    observation_camera_hashes = tuple(
+        row.camera_binding_hash
+        for row in sorted(observation.views, key=lambda value: value.view_index)
+    )
+    if observation_camera_hashes != tuple(cameras.camera_binding_hashes):
+        raise QualificationError("CAA_RASTER_CORRESPONDENCE_PREREQUISITE_FAILED")
+
     prereg = build_caa_preregistration(
         backend_id=backend,
         contract_sha256=contract_sha,
-        observation_set_hash=str(observation_payload["observation_set_hash"]),
+        observation_set_hash=observation.observation_set_hash,
+        camera_set_hash=cameras.camera_set_hash,
         output_direction_set_hash=directions.direction_set_hash,
         candidate_mesh_hash=candidate.candidate_lineage_hash,
         surface_addressing_hash=addressing.addressing_hash,
         appearance_domain_hash=domain.domain_hash,
         static_mesh_qualification_hash=static_mesh.qualification_hash,
-        source_lock_policy=dict(cfg.get("source_lock_policy") or {}),
-        completion_quality_policy=dict(cfg.get("completion_quality_policy") or {}),
+        compile_policy=dict(policy["compile_policy"]),
+        source_lock_policy=dict(policy["source_lock_policy"]),
+        completion_quality_policy=dict(policy["completion_quality_policy"]),
     )
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     return {
         "status": "PASS",
         "outputs": [
-            _write_ir(
+            write_ir(
                 root / "caa_backend_preregistration.json",
                 prereg,
                 authority_class="CAA_BACKEND_PREREGISTRATION",
@@ -111,5 +250,531 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
             "shipping_eligible": prereg.shipping_eligible,
             "contract_sha256": contract_sha,
             "preregistration_hash": prereg.preregistration_hash,
+            "policy_document_sha256": str(
+                dict(cfg.get("policy_document") or {}).get("sha256") or ""
+            ),
+            "raster_correspondence_prerequisite": "PASS",
+        },
+    }
+
+
+def compile_caa_stage(ctx: dict) -> dict:
+    prereg = caa_preregistration_from_dict(
+        stage_output_payload(
+            ctx,
+            "20_CAA_BACKEND_PREREGISTERED",
+            "RealSaS.CAACompilePreregistrationIR.v2",
+        )
+    )
+    if prereg.backend_id != "DETERMINISTIC_V1":
+        return {
+            "status": "BLOCKED",
+            "blockers": [f"CAA_BACKEND_EXECUTOR_NOT_BOUND:{prereg.backend_id}"],
+            "diagnostics": {
+                "note": "LEARNED_V2 and IM2SURFTEX_RESEARCH_ONLY require separate exact-hash execution receipts."
+            },
+        }
+
+    candidate = canonical_mesh_candidate_from_dict(
+        stage_output_payload(
+            ctx,
+            "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "RealSaS.CanonicalMeshCandidateIR.v1",
+        )
+    )
+    cameras = qualified_camera_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "05_CAMERA_CONTRACT_SOLVED",
+            "RealSaS.QualifiedCameraSetIR.v1",
+        )
+    )
+    observation = qualified_observation_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "07_OBSERVATION_CONTRACT_QUALIFIED",
+            "RealSaS.QualifiedObservationSetIR.v1",
+        )
+    )
+    rgba, masks = _load_source_inputs(ctx, observation)
+
+    compile_policy = dict(prereg.compile_policy)
+    result = compile_deterministic_caa(
+        candidate=candidate,
+        cameras=cameras.cameras,
+        source_rgba_by_view=rgba,
+        foreground_mask_by_view=masks,
+        tile_resolution=int(compile_policy["tile_resolution"]),
+        source_lock_policy=prereg.source_lock_policy,
+    )
+    component_ids = tuple(result["component_ids"])
+    component_index = {component_id: index for index, component_id in enumerate(component_ids)}
+    sample_component_index = np.asarray(
+        [component_index[value] for value in result["sample_component"]],
+        dtype=np.int32,
+    )
+
+    root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+    npz_path = root / "caa_compile.npz"
+    npz_sha = _save_npz(
+        npz_path,
+        barycentric=result["barycentric"],
+        sample_positions=result["sample_positions"],
+        sample_face_index=result["sample_face_index"],
+        sample_component_index=sample_component_index,
+        direct_valid=result["direct_valid"],
+        direct_rgba=result["direct_rgba"],
+        source_xy=result["source_xy"],
+        rgba=result["rgba"],
+        provenance=result["provenance"],
+        source_view=result["source_view"],
+    )
+    counts = result["counts"]
+    total = int(result["rgba"].shape[0] * result["rgba"].shape[1])
+    artifact = CAACompileArtifactIR(
+        backend_id=prereg.backend_id,
+        preregistration_binding_hash=prereg.preregistration_hash,
+        candidate_mesh_binding_hash=prereg.candidate_mesh_binding_hash,
+        surface_addressing_binding_hash=prereg.surface_addressing_binding_hash,
+        appearance_domain_binding_hash=prereg.appearance_domain_binding_hash,
+        output_direction_set_binding_hash=prereg.output_direction_set_binding_hash,
+        compile_npz_path=str(npz_path),
+        compile_npz_sha256=npz_sha,
+        face_count=int(result["face_count"]),
+        direction_count=8,
+        tile_resolution=int(compile_policy["tile_resolution"]),
+        sample_count_per_face=int(result["sample_count_per_face"]),
+        total_sample_count=total,
+        direct_source_sample_count=int(counts["DIRECT_SOURCE"]),
+        other_view_source_sample_count=int(counts["OTHER_VIEW_SOURCE"]),
+        compiled_nearest_surface_sample_count=int(
+            counts["COMPILED_NEAREST_SURFACE"]
+        ),
+        compiled_global_surface_sample_count=int(
+            counts["COMPILED_GLOBAL_SURFACE"]
+        ),
+        compile_hash="",
+        metadata={
+            "component_ids": component_ids,
+            "total_appearance_defined": True,
+            "runtime_generation_used": False,
+            "geometry_mutated": False,
+            "visibility_authority": "RealSaS.VisibilityContract.v2",
+        },
+    )
+    artifact = replace(artifact, compile_hash=caa_compile_hash(artifact))
+    root.mkdir(parents=True, exist_ok=True)
+    return {
+        "status": "PASS",
+        "outputs": [
+            write_ir(
+                root / "caa_compile_artifact.json",
+                artifact,
+                authority_class="CAA_COMPILE_ARTIFACT",
+            ),
+            {
+                "path": str(npz_path),
+                "sha256": npz_sha,
+                "authority_class": "CAA_COMPILE_ARRAYS",
+                "schema": "RealSaS.CAACompileArrays.v2",
+            },
+        ],
+        "diagnostics": {
+            "compile_hash": artifact.compile_hash,
+            "total_sample_count": total,
+            **{f"provenance_{key.lower()}": int(value) for key, value in counts.items()},
+        },
+    }
+
+
+def seal_caa_compile_stage(ctx: dict) -> dict:
+    prereg = caa_preregistration_from_dict(
+        stage_output_payload(
+            ctx,
+            "20_CAA_BACKEND_PREREGISTERED",
+            "RealSaS.CAACompilePreregistrationIR.v2",
+        )
+    )
+    artifact = caa_compile_artifact_from_dict(
+        stage_output_payload(
+            ctx,
+            "21_CAA_COMPILE",
+            "RealSaS.CAACompileArtifactIR.v2",
+        )
+    )
+    arrays = _load_compile_arrays(artifact)
+    if artifact.preregistration_binding_hash != prereg.preregistration_hash:
+        raise QualificationError("CAA_COMPILE_PREREG_BINDING_DRIFT")
+    if np.any(arrays["provenance"] == 255):
+        raise QualificationError("CAA_COMPILE_NOT_TOTAL")
+    direct = arrays["direct_valid"]
+    direct_exact = np.all(
+        arrays["rgba"][direct] == arrays["direct_rgba"][direct],
+        axis=-1,
+    )
+    if len(direct_exact) and not np.all(direct_exact):
+        raise QualificationError("CAA_DIRECT_SOURCE_MUTATED_DURING_COMPILE")
+
+    seal = CAACompileSealIR(
+        compile_binding_hash=artifact.compile_hash,
+        preregistration_binding_hash=prereg.preregistration_hash,
+        compile_npz_sha256=artifact.compile_npz_sha256,
+        qualification_report={
+            "status": "PASS_CAA_COMPILE_SEAL",
+            "total_appearance_defined": True,
+            "direct_source_immutable": True,
+            "runtime_generation_required": False,
+            "geometry_mutation_used": False,
+        },
+        seal_hash="",
+        metadata={
+            "backend_id": artifact.backend_id,
+            "shipping_eligible": prereg.shipping_eligible,
+        },
+    )
+    seal = replace(seal, seal_hash=caa_compile_seal_hash(seal))
+    root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+    return {
+        "status": "PASS",
+        "outputs": [
+            write_ir(
+                root / "caa_compile_seal.json",
+                seal,
+                authority_class="CAA_COMPILE_SEAL",
+            )
+        ],
+        "diagnostics": {
+            "seal_hash": seal.seal_hash,
+            "direct_source_immutable": True,
+            "totality": True,
+        },
+    }
+
+
+def bake_complete_appearance_stage(ctx: dict) -> dict:
+    prereg = caa_preregistration_from_dict(
+        stage_output_payload(
+            ctx,
+            "20_CAA_BACKEND_PREREGISTERED",
+            "RealSaS.CAACompilePreregistrationIR.v2",
+        )
+    )
+    artifact = caa_compile_artifact_from_dict(
+        stage_output_payload(
+            ctx,
+            "21_CAA_COMPILE",
+            "RealSaS.CAACompileArtifactIR.v2",
+        )
+    )
+    seal = caa_compile_seal_from_dict(
+        stage_output_payload(
+            ctx,
+            "22_CAA_COMPILE_SEALED",
+            "RealSaS.CAACompileSealIR.v2",
+        )
+    )
+    if seal.compile_binding_hash != artifact.compile_hash:
+        raise QualificationError("CAA_BAKE_COMPILE_SEAL_DRIFT")
+    arrays = _load_compile_arrays(artifact)
+    bleed = int(prereg.compile_policy["bleed_px"])
+    tile_resolution = int(prereg.compile_policy["tile_resolution"])
+
+    root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+    root.mkdir(parents=True, exist_ok=True)
+    texture_rows = []
+    output_rows = []
+    provenance_atlases = []
+    reference_uv = None
+    reference_layout = None
+    for direction in range(8):
+        atlas, provenance_atlas, uv, layout = bake_direction_atlas(
+            face_sample_rgba=arrays["rgba"][direction],
+            face_sample_provenance=arrays["provenance"][direction],
+            face_count=artifact.face_count,
+            tile_resolution=tile_resolution,
+            bleed_px=bleed,
+        )
+        if reference_uv is None:
+            reference_uv = uv
+            reference_layout = layout
+        elif not np.array_equal(reference_uv, uv) or reference_layout != layout:
+            raise QualificationError("CAA_BAKE_DIRECTION_LAYOUT_DRIFT")
+        path = root / f"V{direction}_appearance.png"
+        Image.fromarray(atlas, mode="RGBA").save(
+            path,
+            format="PNG",
+            optimize=False,
+            compress_level=6,
+        )
+        digest = sha256_file(path)
+        texture_rows.append(
+            AppearanceTextureIR(
+                direction_index=direction,
+                direction_id=f"V{direction}",
+                transport_png_path=str(path),
+                transport_png_sha256=digest,
+                width=int(atlas.shape[1]),
+                height=int(atlas.shape[0]),
+                metadata={
+                    "transport_alpha": "STRAIGHT",
+                    "runtime_filtering": "PREMULTIPLIED",
+                    "atlas_bleed_px": bleed,
+                },
+            )
+        )
+        output_rows.append(
+            {
+                "path": str(path),
+                "sha256": digest,
+                "authority_class": "CAA_TRANSPORT_TEXTURE",
+                "schema": f"RealSaS.CAATransportTexture.V{direction}.v2",
+            }
+        )
+        provenance_atlases.append(provenance_atlas)
+
+    uv_path = root / "surface_uv.npz"
+    uv_sha = _save_npz(uv_path, face_uv=np.asarray(reference_uv, dtype=np.float32))
+    provenance_path = root / "provenance_atlas.npz"
+    provenance_sha = _save_npz(
+        provenance_path,
+        provenance=np.stack(provenance_atlases, axis=0).astype(np.uint8),
+    )
+
+    asset = CompleteAppearanceAssetIR(
+        compile_seal_binding_hash=seal.seal_hash,
+        candidate_mesh_binding_hash=artifact.candidate_mesh_binding_hash,
+        surface_addressing_binding_hash=artifact.surface_addressing_binding_hash,
+        appearance_domain_binding_hash=artifact.appearance_domain_binding_hash,
+        output_direction_set_binding_hash=artifact.output_direction_set_binding_hash,
+        textures=tuple(texture_rows),
+        uv_npz_path=str(uv_path),
+        uv_npz_sha256=uv_sha,
+        provenance_npz_path=str(provenance_path),
+        provenance_npz_sha256=provenance_sha,
+        atlas_layout=dict(reference_layout),
+        asset_hash="",
+        metadata={
+            "total_appearance_asset": True,
+            "unique_face_barycentric_atlas": True,
+            "internal_alpha": "PREMULTIPLIED",
+            "transport_png_alpha": "STRAIGHT",
+            "unpremultiply_export_boundary_count": 1,
+            "runtime_generation_forbidden": True,
+        },
+    )
+    asset = replace(asset, asset_hash=complete_appearance_asset_hash(asset))
+    output_rows.extend(
+        [
+            {
+                "path": str(uv_path),
+                "sha256": uv_sha,
+                "authority_class": "CAA_SURFACE_UV",
+                "schema": "RealSaS.CAASurfaceUV.v2",
+            },
+            {
+                "path": str(provenance_path),
+                "sha256": provenance_sha,
+                "authority_class": "CAA_PROVENANCE_ATLAS",
+                "schema": "RealSaS.CAAProvenanceAtlas.v2",
+            },
+            write_ir(
+                root / "complete_appearance_asset.json",
+                asset,
+                authority_class="COMPLETE_APPEARANCE_ASSET",
+            ),
+        ]
+    )
+    return {
+        "status": "PASS",
+        "outputs": output_rows,
+        "diagnostics": {
+            "asset_hash": asset.asset_hash,
+            "atlas_width": int(reference_layout["width"]),
+            "atlas_height": int(reference_layout["height"]),
+            "bleed_px": bleed,
+            "direction_count": 8,
+        },
+    }
+
+
+def qualify_complete_appearance_stage(ctx: dict) -> dict:
+    prereg = caa_preregistration_from_dict(
+        stage_output_payload(
+            ctx,
+            "20_CAA_BACKEND_PREREGISTERED",
+            "RealSaS.CAACompilePreregistrationIR.v2",
+        )
+    )
+    artifact = caa_compile_artifact_from_dict(
+        stage_output_payload(
+            ctx,
+            "21_CAA_COMPILE",
+            "RealSaS.CAACompileArtifactIR.v2",
+        )
+    )
+    asset = complete_appearance_asset_from_dict(
+        stage_output_payload(
+            ctx,
+            "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "RealSaS.CompleteAppearanceAssetIR.v2",
+        )
+    )
+    if asset.candidate_mesh_binding_hash != artifact.candidate_mesh_binding_hash:
+        raise QualificationError("CAA_QUALIFICATION_MESH_BINDING_DRIFT")
+    for texture in asset.textures:
+        path = resolved_path(texture.transport_png_path)
+        if not path.is_file() or sha256_file(path) != texture.transport_png_sha256:
+            raise QualificationError("CAA_QUALIFICATION_TEXTURE_BYTES_DRIFT")
+
+    arrays = _load_compile_arrays(artifact)
+    direct = arrays["direct_valid"]
+    direct_count = int(np.count_nonzero(direct))
+    if direct_count <= 0:
+        raise QualificationError("CAA_QUALIFICATION_REQUIRES_DIRECT_SOURCE_SAMPLES")
+    direct_exact = np.all(
+        arrays["rgba"][direct] == arrays["direct_rgba"][direct],
+        axis=-1,
+    )
+    source_exact_fraction = float(np.mean(direct_exact))
+    total_fraction = float(np.mean(arrays["provenance"] != 255))
+
+    policy = dict(prereg.completion_quality_policy)
+    required = (
+        "min_source_lock_exact_fraction",
+        "min_total_defined_fraction",
+        "holdout_band_fraction",
+        "min_structured_holdout_samples",
+        "max_structured_holdout_mean_rgba_l1",
+        "max_structured_holdout_p95_rgba_l1",
+        "max_provenance_boundary_mean_rgba_l1",
+        "max_provenance_boundary_p95_rgba_l1",
+        "max_provenance_boundary_mean_gradient_jump",
+        "max_provenance_boundary_p95_gradient_jump",
+    )
+    if any(key not in policy for key in required):
+        raise QualificationError("CAA_QUALITY_POLICY_INCOMPLETE")
+
+    holdout = structured_holdout_metrics(
+        direct_valid=arrays["direct_valid"],
+        direct_rgba=arrays["direct_rgba"],
+        source_xy=arrays["source_xy"],
+        sample_positions=arrays["sample_positions"],
+        sample_component_index=arrays["sample_component_index"],
+        band_fraction=float(policy["holdout_band_fraction"]),
+    )
+    seam = provenance_boundary_metrics(
+        rgba=arrays["rgba"],
+        provenance=arrays["provenance"],
+        sample_positions=arrays["sample_positions"],
+        sample_face_index=arrays["sample_face_index"],
+        face_count=artifact.face_count,
+        tile_resolution=artifact.tile_resolution,
+    )
+
+    passed = (
+        source_exact_fraction
+        >= float(policy["min_source_lock_exact_fraction"])
+        and total_fraction >= float(policy["min_total_defined_fraction"])
+        and int(holdout["sample_count"])
+        >= int(policy["min_structured_holdout_samples"])
+        and float(holdout["mean_rgba_l1"])
+        <= float(policy["max_structured_holdout_mean_rgba_l1"])
+        and float(holdout["p95_rgba_l1"])
+        <= float(policy["max_structured_holdout_p95_rgba_l1"])
+        and float(seam["mean_rgba_l1"])
+        <= float(policy["max_provenance_boundary_mean_rgba_l1"])
+        and float(seam["p95_rgba_l1"])
+        <= float(policy["max_provenance_boundary_p95_rgba_l1"])
+        and float(seam["mean_gradient_jump"])
+        <= float(policy["max_provenance_boundary_mean_gradient_jump"])
+        and float(seam["p95_gradient_jump"])
+        <= float(policy["max_provenance_boundary_p95_gradient_jump"])
+    )
+
+    value = CompleteAppearanceQualificationIR(
+        asset_binding_hash=asset.asset_hash,
+        preregistration_binding_hash=prereg.preregistration_hash,
+        source_lock_exact_fraction=source_exact_fraction,
+        total_defined_fraction=total_fraction,
+        structured_holdout_sample_count=int(holdout["sample_count"]),
+        structured_holdout_mean_rgba_l1=float(holdout["mean_rgba_l1"]),
+        structured_holdout_p95_rgba_l1=float(holdout["p95_rgba_l1"]),
+        provenance_boundary_pair_count=int(seam["boundary_pair_count"]),
+        provenance_boundary_mean_rgba_l1=float(seam["mean_rgba_l1"]),
+        provenance_boundary_p95_rgba_l1=float(seam["p95_rgba_l1"]),
+        provenance_boundary_gradient_pair_count=int(seam["gradient_pair_count"]),
+        provenance_boundary_mean_gradient_jump=float(seam["mean_gradient_jump"]),
+        provenance_boundary_p95_gradient_jump=float(seam["p95_gradient_jump"]),
+        qualification_report={
+            "status": "PASS_COMPLETE_APPEARANCE" if passed else "FAIL_COMPLETE_APPEARANCE",
+            "source_lock_passed": source_exact_fraction
+            >= float(policy["min_source_lock_exact_fraction"]),
+            "totality_passed": total_fraction
+            >= float(policy["min_total_defined_fraction"]),
+            "structured_holdout_passed": (
+                int(holdout["sample_count"])
+                >= int(policy["min_structured_holdout_samples"])
+                and float(holdout["mean_rgba_l1"])
+                <= float(policy["max_structured_holdout_mean_rgba_l1"])
+                and float(holdout["p95_rgba_l1"])
+                <= float(policy["max_structured_holdout_p95_rgba_l1"])
+            ),
+            "provenance_seam_passed": (
+                float(seam["mean_rgba_l1"])
+                <= float(policy["max_provenance_boundary_mean_rgba_l1"])
+                and float(seam["p95_rgba_l1"])
+                <= float(policy["max_provenance_boundary_p95_rgba_l1"])
+                and float(seam["mean_gradient_jump"])
+                <= float(policy["max_provenance_boundary_mean_gradient_jump"])
+                and float(seam["p95_gradient_jump"])
+                <= float(policy["max_provenance_boundary_p95_gradient_jump"])
+            ),
+            "appearance_is_coequal_product_authority": True,
+        },
+        qualification_hash="",
+        metadata={
+            "holdout": holdout,
+            "seam": seam,
+            "policy": policy,
+            "totality_does_not_claim_geometry_or_visibility_correctness": True,
+        },
+    )
+    value = replace(
+        value,
+        qualification_hash=complete_appearance_qualification_hash(value),
+    )
+    if not passed:
+        return {
+            "status": "FAIL",
+            "blockers": ["COMPLETE_APPEARANCE_QUALITY_GATE_FAILED"],
+            "diagnostics": value.to_dict(),
+        }
+    root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+    return {
+        "status": "PASS",
+        "outputs": [
+            write_ir(
+                root / "complete_appearance_qualification.json",
+                value,
+                authority_class="QUALIFIED_COMPLETE_APPEARANCE",
+            )
+        ],
+        "diagnostics": {
+            "qualification_hash": value.qualification_hash,
+            "source_lock_exact_fraction": source_exact_fraction,
+            "total_defined_fraction": total_fraction,
+            "holdout_p95_rgba_l1": holdout["p95_rgba_l1"],
+            "seam_p95_rgba_l1": seam["p95_rgba_l1"],
+            "seam_p95_gradient_jump": seam["p95_gradient_jump"],
+        },
+    }
+
+
+def prove_caa_reference_rest_stage(ctx: dict) -> dict:
+    return {
+        "status": "BLOCKED",
+        "blockers": ["CAA_REFERENCE_REST_RENDER_V2_NOT_BOUND_YET"],
+        "diagnostics": {
+            "reason": "Stage25 requires the V2 CAA renderer with separate geometry-visible/source-lock/final-alpha diagnostics."
         },
     }

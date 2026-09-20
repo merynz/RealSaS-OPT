@@ -16,29 +16,38 @@ def load(rel: str):
     return json.loads((ROOT / rel).read_text(encoding="utf-8"))
 
 
-def test_v2_plan_is_46_stage_subject_agnostic_contract():
+def test_v2_plan_is_clean_46_stage_subject_agnostic_dag():
     plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
     assert len(validate_plan(plan)) == 64
     assert plan["stage_count"] == 46
     assert plan["subject_specific_code_forbidden"] is True
-    assert plan["stages"][15]["id"] == "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED"
+    assert plan["stages"][12]["id"] == "13_GEOMETRY_SUBSTRATE_QUALIFIED"
     assert plan["stages"][17]["id"] == "18_CANONICAL_MESH_ADDRESSING_BUILD"
     assert plan["stages"][23]["id"] == "24_COMPLETE_APPEARANCE_QUALIFIED"
+    assert plan["stages"][44]["id"] == "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
     assert plan["stages"][45]["id"] == "46_PRODUCT_CLOSURE_SEAL"
     assert plan["appearance_contract"]["first_knight_backend"] == "DETERMINISTIC_V1"
+    assert all(stage["adapter"] != "UNBOUND" for stage in plan["stages"])
+    assert not any(
+        ".adapters." in stage["adapter"] and "_v1:" in stage["adapter"]
+        for stage in plan["stages"]
+    )
 
 
-def test_v2_active_ledger_is_fresh_knight_lineage():
+def test_v2_active_ledger_is_implementation_assembly_not_premature_witness():
     plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
     ledger = load("canonical/ACTIVE_RUN_V2.json")
     validate_ledger(plan, ledger)
     text = status_text(plan, ledger)
-    assert ledger["run_id"] == "SUBJECT2_KNIGHT_V2"
+    assert ledger["run_id"] == "V2_IMPLEMENTATION_ASSEMBLY"
+    assert ledger["subject_id"] == "NONE"
+    assert ledger["execution_enabled"] is False
     assert "progress=0/46" in text
-    assert "next=01_SOURCE_BYTES_SEALED" in text
+    assert "01_SOURCE_BYTES_SEALED" in text
+    assert "05_CAMERA_CONTRACT_SOLVED" in text
 
 
-def test_v2_mesh_birth_precedes_rig_and_caa():
+def test_v2_mesh_birth_precedes_parallel_mechanics_and_caa():
     plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
     by = {row["id"]: row for row in plan["stages"]}
     assert by["18_CANONICAL_MESH_ADDRESSING_BUILD"]["depends_on"] == [
@@ -57,7 +66,7 @@ def test_v2_mesh_birth_precedes_rig_and_caa():
     )
 
 
-def test_v2_repair_and_backend_policies_are_explicit():
+def test_v2_repair_appearance_and_visibility_policies_are_explicit():
     plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
     assert "NEW_STAGE18_LINEAGE" in plan["resume_contract"]["repair_semantics"]
     assert plan["appearance_contract"]["backend_axis"] == [
@@ -65,6 +74,22 @@ def test_v2_repair_and_backend_policies_are_explicit():
         "LEARNED_V2",
         "IM2SURFTEX_RESEARCH_ONLY",
     ]
-    assert plan["appearance_contract"]["compiled_unobserved_exposure"] == (
-        "FROZEN_BUDGET_GATE"
+    assert (
+        plan["appearance_contract"]["compiled_unobserved_exposure"]
+        == "FROZEN_BUDGET_GATE"
     )
+    assert plan["product_quality_axes"] == {
+        "geometry": "FIRST_CLASS",
+        "mechanics": "FIRST_CLASS",
+        "appearance": "FIRST_CLASS",
+        "rule": "FAIL_ON_ANY_AXIS__NO_SILENT_CROSS_LAYER_COMPENSATION",
+    }
+
+
+def test_stage41_does_not_reintroduce_rest_unseen_appearance_failure():
+    plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
+    by = {row["id"]: row for row in plan["stages"]}
+    stage41 = by["41_MOTION_DYNAMIC_PROOF"]
+    assert "24_COMPLETE_APPEARANCE_QUALIFIED" not in stage41["depends_on"]
+    stage45 = by["45_DYNAMIC_VISUAL_INTEGRITY_PROOF"]
+    assert "24_COMPLETE_APPEARANCE_QUALIFIED" in stage45["depends_on"]

@@ -528,3 +528,68 @@ def test_presentation_graph_rejects_slot_bone_and_camera_drift_when_exact_author
             bad,carrier_policy=carrier_policy,puppet_state=state,skeleton=skeleton,
             partition=partition,envelope=envelope,mesh=mesh,
         )
+
+
+def test_g4_preserve_continuity_requires_local_boundary_adjacency_not_global_connectivity():
+    points = (
+        (0.0, 0.0, 0.0),
+        (1.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0),
+        (1.0, 1.0, 0.0),
+    )
+    surface = RiggingSurfaceIR(
+        tuple(
+            SurfaceNode(f"s{i}", point, (0,), ("src",), (f"o{i}",))
+            for i, point in enumerate(points)
+        ),
+        (),
+        "surface-local-boundary",
+    )
+    partition = build_mechanical_partition(
+        surface=surface,
+        components=(ComponentRegionIR("c0", ("s0", "s1", "s2", "s3")),),
+        boundary_constraints=(
+            ComponentBoundaryConstraintIR(
+                "preserve:s0:s1",
+                "s0",
+                "s1",
+                "PRESERVE_CONTINUITY",
+                ("mechanical",),
+            ),
+        ),
+    )
+    vertices = tuple(
+        _identity_vertex(f"v{i}", f"s{i}", "c0", points[i])
+        for i in range(4)
+    )
+    # v0 and v1 are globally connected through v2/v3, but there is no direct
+    # local edge or shared-support vertex across the declared s0/s1 boundary.
+    faces = (("v0", "v2", "v3"), ("v1", "v3", "v2"))
+    edges = (
+        ("v0", "v2"),
+        ("v2", "v3"),
+        ("v0", "v3"),
+        ("v1", "v3"),
+        ("v1", "v2"),
+    )
+    mesh = QualifiedMeshIR(
+        vertices=vertices,
+        faces=faces,
+        edges=edges,
+        surface_binding_hash=surface.geometry_lineage_hash,
+        partition_binding_hash=partition.partition_lineage_hash,
+        carrier_policy_binding_hash="c" * 64,
+        envelope_binding_hash="e" * 64,
+        qualification_policy_hash="p" * 64,
+        qualification_report={},
+        mesh_lineage_hash="",
+    )
+    with pytest.raises(
+        QualificationError,
+        match="QUALIFIED_MESH_G4_PRESERVE_LOCAL_ADJACENCY_MISSING",
+    ):
+        qualified_mesh_intrinsic_audit(
+            mesh,
+            surface=surface,
+            partition=partition,
+        )

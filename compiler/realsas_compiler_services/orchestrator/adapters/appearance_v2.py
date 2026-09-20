@@ -791,6 +791,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "structured_holdout_passed": (
                 int(holdout["sample_count"])
                 >= int(policy["min_structured_holdout_samples"])
+                and holdout_per_view_passed
                 and float(holdout["mean_rgba_l1"])
                 <= float(policy["max_structured_holdout_mean_rgba_l1"])
                 and float(holdout["p95_rgba_l1"])
@@ -805,7 +806,10 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
                 <= float(policy["max_provenance_boundary_mean_gradient_jump"])
                 and float(seam["p95_gradient_jump"])
                 <= float(policy["max_provenance_boundary_p95_gradient_jump"])
+                and seam_per_view_passed
             ),
+            "holdout_every_view_passed": holdout_per_view_passed,
+            "seam_every_view_passed": seam_per_view_passed,
             "appearance_is_coequal_product_authority": True,
         },
         qualification_hash="",

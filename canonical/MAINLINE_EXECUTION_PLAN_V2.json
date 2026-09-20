@@ -2,7 +2,7 @@
   "schema": "RealSaS.MainlineExecutionPlan.v2",
   "date": "2026-09-20",
   "canonical_branch": "main",
-  "architecture_scope": "SUBJECT_AGNOSTIC__FIRST_KNIGHT_V2_EXACT8_SOURCE__OUTPUT8_SEPARATE__CANONICAL_MESH_SHARED_MECHANICS_APPEARANCE_DOMAIN__CAA",
+  "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA",
   "subject_specific_code_forbidden": true,
   "stage_count": 46,
   "resume_contract": {
@@ -195,7 +195,7 @@
         "07_OBSERVATION_CONTRACT_QUALIFIED",
         "08_NORMALIZATION_DOMAIN_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:preregister_iris_fit_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:preregister_iris_fit_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -214,7 +214,7 @@
       "depends_on": [
         "09_IRIS_FIT_PREREGISTERED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:execute_iris_fit_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:execute_iris_fit_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -233,7 +233,7 @@
       "depends_on": [
         "10_IRIS_FIT"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:seal_iris_checkpoint_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:seal_iris_checkpoint_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -252,7 +252,7 @@
         "08_NORMALIZATION_DOMAIN_QUALIFIED",
         "11_IRIS_CHECKPOINT_SEALED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:decode_zero_surface_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:decode_zero_surface_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -265,8 +265,8 @@
     },
     {
       "ordinal": 13,
-      "id": "13_REST_REPROJECTION_GEOMETRY_GATE",
-      "title": "Raw rest reprojection geometry gate",
+      "id": "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+      "title": "Dense geometry substrate qualification; silhouette/coverage carrier proof only",
       "group": "geometry",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",
@@ -274,7 +274,7 @@
         "08_NORMALIZATION_DOMAIN_QUALIFIED",
         "12_ZERO_SURFACE_DECODED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:qualify_rest_reprojection_geometry_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:qualify_geometry_substrate_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -296,9 +296,9 @@
         "08_NORMALIZATION_DOMAIN_QUALIFIED",
         "11_IRIS_CHECKPOINT_SEALED",
         "12_ZERO_SURFACE_DECODED",
-        "13_REST_REPROJECTION_GEOMETRY_GATE"
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:build_gsa_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:build_gsa_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -317,7 +317,7 @@
       "depends_on": [
         "14_GSA_BUILD"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:qualify_rigging_surface_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2:qualify_rigging_surface_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -395,7 +395,7 @@
       "group": "mesh",
       "depends_on": [
         "07_OBSERVATION_CONTRACT_QUALIFIED",
-        "13_REST_REPROJECTION_GEOMETRY_GATE",
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
         "15_RIGGING_SURFACE_QUALIFIED",
         "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
         "17_MECHANICAL_PARTITION_QUALIFIED",
@@ -987,5 +987,18 @@
       },
       "manifest_keys": []
     }
-  ]
+  ],
+  "geometry_contract": {
+    "iris_role": "SIGNED_GEOMETRY_AND_SURFACE_EVIDENCE_ONLY",
+    "stage13_role": "GEOMETRY_CARRIER_COMPATIBILITY__NOT_RGB_OR_FINAL_VISUAL_FIDELITY",
+    "silhouette_is_geometry_authority": true,
+    "appearance_may_not_rescue_geometry_failure": true,
+    "producer_gate_feasibility_required": true
+  },
+  "product_quality_axes": {
+    "geometry": "FIRST_CLASS",
+    "mechanics": "FIRST_CLASS",
+    "appearance": "FIRST_CLASS",
+    "rule": "FAIL_ON_ANY_AXIS__NO_SILENT_CROSS_LAYER_COMPENSATION"
+  }
 }

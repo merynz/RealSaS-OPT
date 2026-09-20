@@ -199,6 +199,14 @@ def validate_ledger(plan: dict, ledger: dict) -> None:
         raise RuntimeError("ACTIVE_RUN_V2_LEDGER_SCHEMA_DRIFT")
     if ledger.get("canonical_branch") != "main":
         raise RuntimeError("ACTIVE_RUN_V2_LEDGER_BRANCH_DRIFT")
+    execution_class = str(ledger.get("execution_class") or "WITNESS")
+    if execution_class not in {"WITNESS", "IMPLEMENTATION_AUDIT"}:
+        raise RuntimeError("ACTIVE_RUN_V2_EXECUTION_CLASS_INVALID")
+    if (
+        execution_class == "IMPLEMENTATION_AUDIT"
+        and not str(ledger.get("subject_id") or "").startswith("SUBJECT_FREE_")
+    ):
+        raise RuntimeError("ACTIVE_RUN_V2_AUDIT_SUBJECT_ID_INVALID")
     if ledger.get("pipeline_plan_sha256") != plan_hash:
         raise RuntimeError("ACTIVE_RUN_V2_LEDGER_PLAN_HASH_DRIFT")
 
@@ -255,6 +263,7 @@ def build_fresh_run_ledger(
     subject_id: str,
     manifest_ref: str,
     architecture_scope: str = "REALSAS_V2_FRESH_WITNESS",
+    execution_class: str = "WITNESS",
 ) -> dict:
     plan_hash = validate_plan(plan)
     rows = [
@@ -274,12 +283,18 @@ def build_fresh_run_ledger(
         }
         for stage in plan["stages"]
     ]
+    execution_class = str(execution_class).upper()
+    if execution_class not in {"WITNESS", "IMPLEMENTATION_AUDIT"}:
+        raise RuntimeError(f"RUN_EXECUTION_CLASS_INVALID:{execution_class}")
+    if execution_class == "IMPLEMENTATION_AUDIT" and not str(subject_id).startswith("SUBJECT_FREE_"):
+        raise RuntimeError("IMPLEMENTATION_AUDIT_REQUIRES_SUBJECT_FREE_SUBJECT_ID")
     ledger = {
         "schema": "RealSaS.ActiveRunLedger.v2",
         "run_id": str(run_id),
         "subject_id": str(subject_id),
         "canonical_branch": "main",
         "architecture_scope": str(architecture_scope),
+        "execution_class": execution_class,
         "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
         "pipeline_plan_sha256": plan_hash,
         "status": "ACTIVE",
@@ -699,12 +714,21 @@ def execute(
     resume: bool = True,
 ) -> int:
     plan = load_json(PLAN_PATH)
-    validate_readiness(plan)
+    validate_plan(plan)
     ledger_path = run_ledger_path(run_id)
     if not ledger_path.is_file():
         raise RuntimeError(f"RUN_LEDGER_MISSING:{ledger_path}")
     ledger = load_json(ledger_path)
     validate_ledger(plan, ledger)
+    execution_class = str(ledger.get("execution_class") or "WITNESS")
+    if execution_class == "WITNESS":
+        validate_readiness(plan)
+    elif execution_class == "IMPLEMENTATION_AUDIT":
+        manifest_preview = load_json(run_manifest_path(run_id))
+        if manifest_preview.get("implementation_audit") is not True:
+            raise RuntimeError("IMPLEMENTATION_AUDIT_MANIFEST_FLAG_REQUIRED")
+        if str(manifest_preview.get("subject_id") or "") != str(ledger.get("subject_id") or ""):
+            raise RuntimeError("IMPLEMENTATION_AUDIT_SUBJECT_ID_DRIFT")
     if ledger["run_id"] != run_id:
         raise RuntimeError(
             f"ACTIVE_RUN_V2_ID_MISMATCH:{ledger['run_id']}!={run_id}"
@@ -822,6 +846,11 @@ def main(argv: list[str] | None = None) -> int:
         "--architecture-scope",
         default="REALSAS_V2_FRESH_WITNESS",
     )
+    init.add_argument(
+        "--execution-class",
+        choices=("WITNESS", "IMPLEMENTATION_AUDIT"),
+        default="WITNESS",
+    )
     run = sub.add_parser("execute")
     run.add_argument("--run-id", required=True)
     run.add_argument(
@@ -854,7 +883,10 @@ def main(argv: list[str] | None = None) -> int:
         print(status_text(plan, ledger))
         return 0
     if args.command == "init-run":
-        validate_readiness(plan)
+        if args.execution_class == "WITNESS":
+            validate_readiness(plan)
+        else:
+            validate_plan(plan)
         manifest_path = run_manifest_path(args.run_id)
         if not manifest_path.is_file():
             raise RuntimeError(f"RUN_MANIFEST_MISSING:{manifest_path}")
@@ -867,6 +899,7 @@ def main(argv: list[str] | None = None) -> int:
             subject_id=args.subject_id,
             manifest_ref=str(manifest_path),
             architecture_scope=args.architecture_scope,
+            execution_class=args.execution_class,
         )
         atomic_json(path, ledger)
         print(

@@ -20,7 +20,7 @@ from compiler.realsas_compiler_core.preproduct_authority_v1 import (
     observation_render_set_from_dict, observation_render_set_hash,
     source_mechanical_audit_from_dict, source_mechanical_audit_hash,
 )
-from compiler.realsas_compiler_core.product_artifact_codec_v1 import qualified_camera_set_from_dict
+from compiler.realsas_compiler_core.artifact_codec_v2 import qualified_camera_set_from_dict
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     load_file_ref, stage_output_payload, write_ir,

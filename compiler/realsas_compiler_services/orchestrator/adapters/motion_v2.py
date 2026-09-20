@@ -196,7 +196,7 @@ def compile_motion_stage(ctx: dict) -> dict:
         stage_output_payload(
             ctx,
             "38_CANONICAL_PUPPET_SEALED",
-            "RealSaS.QualifiedPresentationGraphIR.v1",
+            "RealSaS.QualifiedPresentationGraphIR.v2",
         )
     )
     source_set = motion_source_set_from_dict(
@@ -332,7 +332,7 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
         stage_output_payload(
             ctx,
             "38_CANONICAL_PUPPET_SEALED",
-            "RealSaS.QualifiedPresentationGraphIR.v1",
+            "RealSaS.QualifiedPresentationGraphIR.v2",
         )
     )
     constraints = motion_compile_constraint_set_v2_from_dict(

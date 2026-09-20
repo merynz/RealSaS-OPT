@@ -308,9 +308,12 @@ class CAARestViewProofIR:
     source_locked_pixel_count: int
     source_locked_exact_pixel_count: int
     source_locked_exact_fraction: float
+    source_locked_mean_rgba_l1: float
+    source_locked_p95_rgba_l1: float
     geometry_visible_pixel_count: int
     final_alpha_pixel_count: int
     geometry_visible_final_alpha_hole_count: int
+    geometry_visible_final_alpha_hole_fraction: float
     schema_version: str = "RealSaS.CAARestViewProofIR.v2"
     metadata: Json = field(default_factory=dict)
 

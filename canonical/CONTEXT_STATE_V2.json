@@ -3,7 +3,7 @@
   "date": "2026-09-20",
   "continuation_branch": "main",
   "execution_branch": "main",
-  "status": "V2_IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN",
+  "status": "V2_STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN",
   "authority": {
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
@@ -15,21 +15,35 @@
     "complete_appearance_contract": "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
     "implementation_readiness": "canonical/V2_IMPLEMENTATION_READINESS.json",
     "architecture_transition_rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
-    "adversarial_audit_protocol": "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md"
+    "adversarial_audit_protocol": "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md",
+    "stage_by_stage_redteam": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md"
   },
   "product": {
     "target": "automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics",
     "demo_witness": "Subject-2 Knight (held; previous activation void)",
-    "next_visible_product_milestone": "pass witness orchestration/artifact dry-run proof, reseal V2 readiness, then mint a fresh Knight Stage01 run-local ledger"
+    "next_visible_product_milestone": "resolve or explicitly narrow RT-37 and RT-45/46; rerun exact self-hosted closure and dry-run; reseal readiness; present review package to user before Knight"
   },
   "current_focus": {
-    "module": "V2 implementation and witness orchestration audit",
-    "state": "V2_IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN",
+    "module": "V2 stage-level red-team hardening",
+    "state": "V2_STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN",
     "active_experiment": "V2_IMPLEMENTATION_ASSEMBLY",
-    "most_recent_closed_gate": "PRIOR_READINESS_SEAL_REVOKED_AFTER_PRE_STAGE01_ORCHESTRATION_GAP",
-    "promotion_block": "Do not execute Knight. Prove run-local ledger initialization, current target-closure CLI, workflow contract and Stage01-08 artifact/output schemas before resealing readiness.",
+    "most_recent_closed_gate": "SELF_HOSTED_MAINLINE_AND_SUBJECT_FREE_ORCHESTRATION_GREEN__STAGE_REDTEAM_REOPENED",
+    "promotion_block": "Do not execute Knight. RT-37 automatic presentation segmentation and RT-45/46 dynamic appearance-quality/closure-claim gaps must be resolved or explicitly narrowed before a new readiness seal.",
     "scope_warning": "No Knight-derived threshold choice is allowed during V2 assembly.",
-    "scientific_question": "Is current main internally capable of producing and proving a Spine-class 2D puppet with geometry, mechanics and appearance all treated as first-class audited authorities?"
+    "scientific_question": "Does every one of the 46 V2 stages prove exactly the authority needed for a source-faithful Spine-class 2D puppet, without allowing mechanics/runtime correctness to substitute for presentation or dynamic appearance quality?",
+    "latest_green_evidence": {
+      "functional_head": "ca9d2d2e59bc517a139c743eb6a91df2e48ac761",
+      "mainline_ci_run_id": 35536134130,
+      "mainline_ci_job_id": 106145391722,
+      "repository_governance_tests_passed": 48,
+      "learned_model_tests_passed": 51,
+      "compiler_tests_passed": 281,
+      "model_source_gate_run_id": 35536134125,
+      "orchestration_dry_run_id": 35536134136,
+      "orchestration_dry_run_job_id": 106145391794,
+      "implementation_closure_sha256_before_redteam_docs": "a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882",
+      "witness_used": false
+    }
   },
   "execution_environment": {
     "actions": "SELF_HOSTED_LOCAL_ONLY",

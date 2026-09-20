@@ -1,4 +1,5 @@
 from dataclasses import replace
+from types import SimpleNamespace
 
 import pytest
 
@@ -31,6 +32,7 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
     validate_deformation_capability_envelope,
     validate_qualified_mesh,
     validate_qualified_presentation_graph,
+    _geometric_topology_crack_audit,
 )
 from compiler.realsas_compiler_core.types import (
     QualificationError, RiggingSurfaceIR, SurfaceNode, SurfaceSupportBinding,
@@ -178,6 +180,35 @@ def _context():
     envelope = _envelope()
     policy = _mesh_policy()
     return surface, partition, carrier_policy, envelope, policy
+
+
+def test_g2_geometric_audit_rejects_coincident_duplicate_vertices():
+    vertices = {
+        "a": SimpleNamespace(P=(0.0, 0.0, 0.0), component_id="c0"),
+        "b": SimpleNamespace(P=(0.0, 0.0, 0.0), component_id="c0"),
+        "c": SimpleNamespace(P=(1.0, 0.0, 0.0), component_id="c0"),
+        "d": SimpleNamespace(P=(0.0, 1.0, 0.0), component_id="c0"),
+    }
+    with pytest.raises(QualificationError, match="COINCIDENT_DUPLICATE_VERTEX"):
+        _geometric_topology_crack_audit(
+            vertices,
+            (("a", "c", "d"), ("b", "d", "c")),
+        )
+
+
+def test_g2_geometric_audit_rejects_vertex_on_edge_t_junction():
+    vertices = {
+        "a": SimpleNamespace(P=(0.0, 0.0, 0.0), component_id="c0"),
+        "b": SimpleNamespace(P=(2.0, 0.0, 0.0), component_id="c0"),
+        "c": SimpleNamespace(P=(0.0, 2.0, 0.0), component_id="c0"),
+        "t": SimpleNamespace(P=(1.0, 0.0, 0.0), component_id="c0"),
+        "d": SimpleNamespace(P=(1.0, -1.0, 0.0), component_id="c0"),
+    }
+    with pytest.raises(QualificationError, match="T_JUNCTION"):
+        _geometric_topology_crack_audit(
+            vertices,
+            (("a", "b", "c"), ("t", "b", "d")),
+        )
 
 
 def test_canonical_qualified_mesh_has_no_view_or_camera_authority_fields():

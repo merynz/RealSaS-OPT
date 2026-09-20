@@ -94,6 +94,103 @@ def _load_zero_arrays(seal: SignedZeroSurfaceSealIR):
     return vertices, faces, normals
 
 
+_IRIS_DENSE_COVERAGE_POLICY_SCHEMA = "RealSaS.IRISDenseSourceCoveragePolicy.v2"
+_IRIS_DENSE_COVERAGE_POLICY_AUTHORITY = (
+    "IRIS_V2_TRAINING_OBJECTIVE_POLICY__NO_KNIGHT_OR_MAGE_RESULT"
+)
+
+
+def _iris_dense_coverage_policy(ctx: dict):
+    cfg = dict(ctx["run_manifest"].get("iris_fit") or {})
+    ref = dict(cfg.get("dense_source_coverage_policy") or {})
+    payload = load_file_ref(ref, expected_schema=_IRIS_DENSE_COVERAGE_POLICY_SCHEMA)
+    path = resolved_path(str(ref.get("path") or ""))
+    digest = sha256_file(path)
+    if str(payload.get("status") or "") != "FROZEN_PRE_KNIGHT_SUBJECT_FREE":
+        raise QualificationError("IRIS_DENSE_COVERAGE_POLICY_NOT_FROZEN")
+    if str(payload.get("authority") or "") != _IRIS_DENSE_COVERAGE_POLICY_AUTHORITY:
+        raise QualificationError("IRIS_DENSE_COVERAGE_POLICY_AUTHORITY_DRIFT")
+    if bool(payload.get("mask_is_forward_input", True)):
+        raise QualificationError("IRIS_DENSE_COVERAGE_MASK_FORWARD_INPUT_FORBIDDEN")
+    if int(payload.get("target_resolution", 0)) != 1024:
+        raise QualificationError("IRIS_DENSE_COVERAGE_RESOLUTION_DRIFT")
+    if str(payload.get("production_q_domain_authority") or "") != "RGB_CAMERA_FULL_FRAME_LATTICE_V1":
+        raise QualificationError("IRIS_DENSE_COVERAGE_Q_DOMAIN_AUTHORITY_DRIFT")
+    schedule = dict(payload.get("view_schedule") or {})
+    if (
+        str(schedule.get("mode") or "") != "ROUND_ROBIN_V0_TO_V7"
+        or not bool(schedule.get("all_views_required", False))
+        or int(schedule.get("maximum_total_step_count_imbalance", -1)) != 1
+    ):
+        raise QualificationError("IRIS_DENSE_COVERAGE_VIEW_SCHEDULE_DRIFT")
+    return ref, digest, payload
+
+
+def _validate_dense_coverage_prereg(prereg, *, policy_sha256: str, policy: dict) -> None:
+    qualification = dict(prereg.qualification_policy or {})
+    required = {
+        "dense_source_coverage_required": True,
+        "dense_source_coverage_policy_sha256": str(policy_sha256),
+        "dense_source_coverage_target_resolution": int(policy["target_resolution"]),
+        "dense_source_coverage_view_schedule": str(
+            policy["view_schedule"]["mode"]
+        ),
+        "dense_source_coverage_top_level_loss_weight": float(
+            policy["loss"]["top_level_loss_weight"]
+        ),
+    }
+    for key, expected in required.items():
+        actual = qualification.get(key)
+        if isinstance(expected, float):
+            if actual is None or abs(float(actual) - expected) > 1e-12:
+                raise QualificationError(
+                    f"IRIS_DENSE_COVERAGE_PREREG_POLICY_DRIFT:{key}"
+                )
+        elif actual != expected:
+            raise QualificationError(
+                f"IRIS_DENSE_COVERAGE_PREREG_POLICY_DRIFT:{key}"
+            )
+
+
+def _validate_dense_coverage_execution_metadata(
+    metadata: dict,
+    *,
+    policy_sha256: str,
+    policy: dict,
+) -> dict:
+    dense = dict(metadata.get("dense_source_coverage") or {})
+    if str(dense.get("policy_sha256") or "") != str(policy_sha256):
+        raise QualificationError("IRIS_DENSE_COVERAGE_EXECUTION_POLICY_DRIFT")
+    if bool(dense.get("source_foreground_masks_forward_input", True)):
+        raise QualificationError("IRIS_DENSE_COVERAGE_EXECUTION_MASK_LEAK")
+    if int(dense.get("target_resolution", 0)) != int(policy["target_resolution"]):
+        raise QualificationError("IRIS_DENSE_COVERAGE_EXECUTION_RESOLUTION_DRIFT")
+    if str(dense.get("q_domain_authority") or "") != str(
+        policy["production_q_domain_authority"]
+    ):
+        raise QualificationError("IRIS_DENSE_COVERAGE_EXECUTION_Q_DOMAIN_DRIFT")
+    if str(dense.get("view_schedule") or "") != str(
+        policy["view_schedule"]["mode"]
+    ):
+        raise QualificationError("IRIS_DENSE_COVERAGE_EXECUTION_VIEW_SCHEDULE_DRIFT")
+    counts = tuple(int(value) for value in dense.get("anchor_view_step_counts") or ())
+    if len(counts) != 8 or min(counts, default=0) <= 0:
+        raise QualificationError("IRIS_DENSE_COVERAGE_EXECUTION_VIEW_COVERAGE_INCOMPLETE")
+    if max(counts) - min(counts) > int(
+        policy["view_schedule"]["maximum_total_step_count_imbalance"]
+    ):
+        raise QualificationError("IRIS_DENSE_COVERAGE_EXECUTION_VIEW_IMBALANCE")
+    terms = set(map(str, dense.get("reported_loss_terms") or ()))
+    if "dense_source_coverage" not in terms:
+        raise QualificationError("IRIS_DENSE_COVERAGE_EXECUTION_LOSS_TERM_MISSING")
+    return {
+        "anchor_view_step_counts": counts,
+        "total_dense_supervised_steps": int(sum(counts)),
+        "maximum_step_imbalance": int(max(counts) - min(counts)),
+    }
+
+
+
 def preregister_iris_fit_stage(ctx: dict) -> dict:
     observation = qualified_observation_set_from_dict(
         stage_output_payload(
@@ -109,6 +206,7 @@ def preregister_iris_fit_stage(ctx: dict) -> dict:
             "RealSaS.NormalizationDomainIR.v1",
         )
     )
+    _dense_ref, dense_policy_sha, dense_policy = _iris_dense_coverage_policy(ctx)
     prereg, output = build_fit_preregistration(
         ctx,
         lane="IRIS",
@@ -119,6 +217,11 @@ def preregister_iris_fit_stage(ctx: dict) -> dict:
         },
         stage_id="09_IRIS_FIT_PREREGISTERED",
     )
+    _validate_dense_coverage_prereg(
+        prereg,
+        policy_sha256=dense_policy_sha,
+        policy=dense_policy,
+    )
     return {
         "status": "PASS",
         "outputs": [output],
@@ -127,17 +230,25 @@ def preregister_iris_fit_stage(ctx: dict) -> dict:
             "architecture_id": prereg.architecture_id,
             "executor_kind": prereg.executor_kind,
             "geometry_role": "SIGNED_SURFACE_EVIDENCE_NOT_APPEARANCE_AUTHORITY",
+            "dense_source_coverage_policy_sha256": dense_policy_sha,
+            "dense_source_coverage_required": True,
         },
     }
 
 
 def execute_iris_fit_stage(ctx: dict) -> dict:
+    _dense_ref, dense_policy_sha, dense_policy = _iris_dense_coverage_policy(ctx)
     prereg = model_fit_preregistration_from_dict(
         stage_output_payload(
             ctx,
             "09_IRIS_FIT_PREREGISTERED",
             "RealSaS.ModelFitPreregistrationIR.v1",
         )
+    )
+    _validate_dense_coverage_prereg(
+        prereg,
+        policy_sha256=dense_policy_sha,
+        policy=dense_policy,
     )
     execution, output = build_fit_execution(
         ctx,
@@ -147,6 +258,11 @@ def execute_iris_fit_stage(ctx: dict) -> dict:
         stage_id="10_IRIS_FIT",
         proposal_required=False,
     )
+    dense_execution = _validate_dense_coverage_execution_metadata(
+        dict(execution.metadata.get("receipt_metadata") or {}),
+        policy_sha256=dense_policy_sha,
+        policy=dense_policy,
+    )
     return {
         "status": "PASS",
         "outputs": [output],
@@ -155,6 +271,8 @@ def execute_iris_fit_stage(ctx: dict) -> dict:
             "checkpoint_sha256": execution.checkpoint_sha256,
             "result_sha256": execution.result_sha256,
             "product_authority_minted": False,
+            "dense_source_coverage_policy_sha256": dense_policy_sha,
+            "dense_source_coverage_execution": dense_execution,
         },
     }
 

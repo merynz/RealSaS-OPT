@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.WitnessActivation.v1",
   "date": "2026-09-20",
-  "status": "AUTHORIZED_ONCE",
+  "status": "VOID__PREMATURE_READINESS",
   "witness_run_id": "SUBJECT2_KNIGHT_V2",
   "subject_id": "SUBJECT2_KNIGHT",
   "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
@@ -23,5 +23,9 @@
     "stage01_started": false,
     "disposition": "USE_TARGET_CLOSURE_CLI__MATERIALIZE_RUN_LOCAL_KNIGHT_LEDGER__RETRY_SAME_FROZEN_WITNESS_CONTRACT"
   },
-  "apparatus_fix_commit": "5ff660d9bd0b49f6e2133b882367a333bf743ce5"
+  "apparatus_fix_commit": "5ff660d9bd0b49f6e2133b882367a333bf743ce5",
+  "authorized": false,
+  "void_reason": "V2 readiness was reopened because witness orchestration and run-local ledger behavior were not included in the original implementation closure.",
+  "result_admissibility": "NO_OUTPUT_FROM_ATTEMPTS_1_3_MAY_BE_USED_AS_SCIENTIFIC_WITNESS_EVIDENCE",
+  "reauthorization_rule": "ONLY_AFTER_WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN_PROOF_PASS_AND_NEW_READINESS_SEAL"
 }

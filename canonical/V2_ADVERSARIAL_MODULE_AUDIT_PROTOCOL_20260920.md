@@ -72,3 +72,23 @@ If the Knight relation-parent report is bad, thresholds remain frozen. Candidate
 A generic remesher is not automatically admissible. Any new vertex must preserve explicit SurfaceSupportBinding, component/boundary semantics, source provenance, and the frozen mesh/appearance-domain invalidation rules.
 
 No option is selected from Knight outcome alone.
+
+
+## Mandatory second pass after green closure
+
+A module-family audit may close implementation boundaries while missing a claim gap between stages. Therefore after full self-hosted CI and subject-free orchestration are green, every individual stage must be attacked again. The canonical second-pass record is `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`.
+
+The second pass must explicitly distinguish:
+
+- byte/lineage integrity from scientific/product quality;
+- rest appearance from dynamic appearance;
+- mechanical partition from presentation segmentation;
+- native/reference agreement from agreement with the intended artist-quality claim;
+- declarative provenance from independently verified external facts;
+- first controlled-witness scope from future arbitrary-user-input claims.
+
+A green stage can be reopened without erasing its previous evidence. Red-team reopening changes promotion authority, not historical truth.
+
+### Appearance parity rule
+
+Geometry, mechanics and appearance must receive comparable scientific scrutiny. In particular, deterministic rendering parity is **not** sufficient evidence of high-quality appearance: two renderers can agree perfectly on the same visually bad deformation. Dynamic appearance requires its own conditioning/integrity claim or an explicitly narrower product claim.

@@ -763,7 +763,7 @@
     {
       "ordinal": 37,
       "id": "37_QUALIFIED_PRESENTATION_STRUCTURE",
-      "title": "Qualified role-free presentation partition, slots, attachments, UI draw order and clipping; no appearance generation",
+      "title": "Qualified role-free presentation partition, authoring slots and attachments; runtime keyability not claimed",
       "group": "presentation",
       "depends_on": [
         "17_MECHANICAL_PARTITION_QUALIFIED",
@@ -778,7 +778,11 @@
         "fail_closed": true,
         "cacheable": true,
         "output_hash_required": true,
-        "product_pass_authority": false
+        "product_pass_authority": false,
+        "authoring_structure_authority": true,
+        "runtime_slot_state_execution_claimed": false,
+        "runtime_clipping_claimed": false,
+        "runtime_tint_order_visibility_claimed": false
       },
       "manifest_keys": [
         "presentation"

@@ -5,6 +5,7 @@
 **Current mode:** **V2 APPEARANCE FIDELITY RECLOSURE — WITNESS FORBIDDEN**  
 **Implementation readiness:** `REOPENED_APPEARANCE_AND_DYNAMIC_VISUAL_FIDELITY_AUDIT__WITNESS_FORBIDDEN`  
 **Current status token:** `APPEARANCE_FIDELITY_RECLOSURE__WITNESS_FORBIDDEN`  
+**Rehydration focus token:** `REOPENED__WITNESS_FORBIDDEN`  
 **Canonical governance ledger:** `V2_IMPLEMENTATION_ASSEMBLY` — implementation governance only; never a subject witness ledger.  
 **Witness execution:** **FORBIDDEN** — post-seal appearance review reopened tile density, completion quality, cross-view RGB consistency and dynamic hole/speckle gates. User approval is necessary later but is not sufficient until these blockers close.  
 **Mainline:** 46-stage dependency DAG; ordinal is display order only.

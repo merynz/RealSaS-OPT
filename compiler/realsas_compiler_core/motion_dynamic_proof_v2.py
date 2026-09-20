@@ -7,13 +7,14 @@ QualifiedDynamicMotionIR frame format because runtime needs exact posed XYZ, not
 authoring quaternion representation.
 """
 
-from dataclasses import replace
+from dataclasses import asdict, dataclass, field, replace
 import math
-from typing import Any
+from typing import Any, Mapping
 
 import numpy as np
 
 from .canonical_puppet_state_v1 import canonical_puppet_state_hash
+from .hashing import content_sha256
 from .joint_frames_v1 import derive_joint_frames_from_skeleton, frame_set_hash
 from .mesh.product_coverage_v1 import rasterize_visible_face_pixel_counts
 from .motion_compile_v2 import (
@@ -22,25 +23,286 @@ from .motion_compile_v2 import (
     qualified_motion_v2_hash,
     motion_constraint_set_v2_hash,
 )
-from .motion_dynamic_proof_v1 import (
-    CanonicalDynamicFrameIR,
-    DynamicContactProofIR,
-    DynamicMotionClipProofIR,
-    QualifiedDynamicMotionIR,
-    canonical_dynamic_frame_hash,
-    dynamic_contact_proof_hash,
-    dynamic_motion_clip_proof_hash,
-    qualified_dynamic_motion_hash,
-    _frame_metrics,
-    _mesh_skin_hash,
-    _policy_hash,
-    _scale,
-    _skin_vertices,
-    _weights,
-)
 from .product_authority_v1 import qualified_mesh_lineage_hash
 from .product_state_v2 import presentation_graph_v2_hash
 from .types import QualificationError
+
+
+Json=dict[str,Any]
+Vec2=tuple[float,float]
+Vec3=tuple[float,float,float]
+
+
+@dataclass(frozen=True)
+class DynamicContactProofV2IR:
+    contact_id:str
+    clip_id:str
+    canonical_joint_id:str
+    anchor_xy:Vec2
+    max_drift:float
+    tolerance:float
+    sample_count:int
+    status:str
+    proof_hash:str
+    schema_version:str="RealSaS.DynamicContactProofIR.v2"
+    metadata:Json=field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
+
+@dataclass(frozen=True)
+class CanonicalDynamicFrameV2IR:
+    time_seconds:float
+    joint_world_positions:tuple[tuple[str,Vec3],...]
+    posed_vertex_xyz:tuple[tuple[str,Vec3],...]
+    max_vertex_displacement:float
+    min_triangle_area_ratio:float
+    max_triangle_area_ratio:float
+    max_triangle_condition_number:float
+    frame_hash:str
+    schema_version:str="RealSaS.CanonicalDynamicFrameIR.v2"
+    metadata:Json=field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
+
+@dataclass(frozen=True)
+class DynamicMotionClipProofV2IR:
+    clip_id:str
+    clip_kind:str
+    classification:str
+    duration_seconds:float
+    loop:bool
+    frames:tuple[CanonicalDynamicFrameV2IR,...]
+    contact_proofs:tuple[DynamicContactProofV2IR,...]
+    max_vertex_displacement:float
+    professional_motion_evidence:bool
+    clip_proof_hash:str
+    schema_version:str="RealSaS.DynamicMotionClipProofIR.v2"
+    metadata:Json=field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
+
+@dataclass(frozen=True)
+class QualifiedDynamicMotionV2IR:
+    qualified_motion_binding_hash:str
+    constraint_set_binding_hash:str
+    mechanical_state_binding_hash:str
+    skeleton_binding_hash:str
+    mesh_binding_hash:str
+    mesh_skin_binding_hash:str
+    presentation_binding_hash:str
+    mesh_policy_binding_hash:str
+    evaluator_semantic_version:str
+    clips:tuple[DynamicMotionClipProofV2IR,...]
+    qualification_report:Json
+    dynamic_motion_hash:str
+    schema_version:str="RealSaS.QualifiedDynamicMotionIR.v2"
+    metadata:Json=field(default_factory=dict)
+    def to_dict(self): return asdict(self)
+
+
+def _hash_without(value,field_name:str)->str:
+    payload=value.to_dict(); payload.pop(field_name,None)
+    return content_sha256(payload)
+
+
+def dynamic_contact_proof_v2_hash(value:DynamicContactProofV2IR)->str:
+    return _hash_without(value,"proof_hash")
+
+
+def canonical_dynamic_frame_v2_hash(value:CanonicalDynamicFrameV2IR)->str:
+    return _hash_without(value,"frame_hash")
+
+
+def dynamic_motion_clip_proof_v2_hash(value:DynamicMotionClipProofV2IR)->str:
+    return _hash_without(value,"clip_proof_hash")
+
+
+def qualified_dynamic_motion_v2_hash(value:QualifiedDynamicMotionV2IR)->str:
+    return _hash_without(value,"dynamic_motion_hash")
+
+
+def _mesh_skin_hash(value)->str:
+    payload=value.to_dict(); payload.pop("mesh_skin_lineage_hash",None)
+    return content_sha256(payload)
+
+
+def _policy_hash(value)->str:
+    payload=value.to_dict(); payload.pop("qualification_policy_lineage_hash",None)
+    return content_sha256(payload)
+
+
+def _scale(skeleton)->float:
+    pts=np.asarray([j.position for j in skeleton.joints],dtype=np.float64)
+    if pts.ndim!=2 or pts.shape[1]!=3 or not np.isfinite(pts).all():
+        raise QualificationError("MOTION_V2_DYNAMIC_SKELETON_NONFINITE")
+    span=float(np.linalg.norm(pts.max(axis=0)-pts.min(axis=0))) if len(pts)>1 else 0.0
+    return max(1.0,span)
+
+
+def _weights(mesh,mesh_skin,skeleton):
+    vids=tuple(v.canonical_mesh_vertex_id for v in mesh.vertices)
+    if len(set(vids))!=len(vids):
+        raise QualificationError("MOTION_V2_DYNAMIC_DUPLICATE_MESH_VERTEX")
+    jids=tuple(sorted(j.canonical_joint_id for j in skeleton.joints))
+    ji={j:i for i,j in enumerate(jids)}
+    rows={r.canonical_mesh_vertex_id:r for r in mesh_skin.rows}
+    if set(rows)!=set(vids):
+        raise QualificationError("MOTION_V2_DYNAMIC_MESH_SKIN_ACCOUNTING_DRIFT")
+    W=np.zeros((len(vids),len(jids)),dtype=np.float64)
+    for i,vid in enumerate(vids):
+        for jid,w in rows[vid].influences:
+            if jid not in ji:
+                raise QualificationError("MOTION_V2_DYNAMIC_SKIN_JOINT_UNKNOWN")
+            W[i,ji[jid]]=float(w)
+    if (
+        not np.isfinite(W).all()
+        or np.any(W<-1e-10)
+        or not np.allclose(W.sum(axis=1),1.0,atol=1e-8,rtol=0.0)
+    ):
+        raise QualificationError("MOTION_V2_DYNAMIC_SKIN_SIMPLEX_INVALID")
+    return vids,jids,W
+
+
+def _skin_vertices(rest_xyz,weights,jids,skin_matrices):
+    hom=np.concatenate(
+        [rest_xyz,np.ones((len(rest_xyz),1),dtype=np.float64)],axis=1
+    )
+    per=np.stack(
+        [(hom@m.T)[:,:3] for m in (skin_matrices[j] for j in jids)],axis=1
+    )
+    out=np.sum(per*weights[:,:,None],axis=1)
+    if not np.isfinite(out).all():
+        raise QualificationError("MOTION_V2_DYNAMIC_NONFINITE_DEFORMATION")
+    return out
+
+
+def _condition(points)->tuple[float,float]:
+    p0,p1,p2=(np.asarray(x,dtype=np.float64) for x in points)
+    e1=p1-p0; e2=p2-p0
+    area=float(np.linalg.norm(np.cross(e1,e2)))
+    a=float(e1@e1); b=float(e1@e2); c=float(e2@e2)
+    disc=max(0.0,(a-c)*(a-c)+4.0*b*b)
+    lmax=0.5*(a+c+math.sqrt(disc))
+    lmin=0.5*(a+c-math.sqrt(disc))
+    if area<=1e-15 or lmin<=1e-15:
+        return area,float("inf")
+    return area,math.sqrt(lmax/lmin)
+
+
+def _frame_metrics(mesh,rest,posed,policy):
+    index={v.canonical_mesh_vertex_id:i for i,v in enumerate(mesh.vertices)}
+    min_ratio=float("inf"); max_ratio=0.0; max_cond=0.0
+    for face in mesh.faces:
+        ids=[index[x] for x in face]
+        ra,_=_condition(rest[ids]); pa,cond=_condition(posed[ids])
+        if ra<=1e-15 or pa<=1e-15 or not math.isfinite(cond):
+            raise QualificationError("MOTION_V2_DYNAMIC_TRIANGLE_DEGENERATE")
+        ratio=pa/ra
+        min_ratio=min(min_ratio,ratio)
+        max_ratio=max(max_ratio,ratio)
+        max_cond=max(max_cond,cond)
+        if (
+            ratio<float(policy.g3_min_dynamic_area_ratio)-1e-9
+            or ratio>float(policy.g3_max_dynamic_area_ratio)+1e-9
+        ):
+            raise QualificationError("MOTION_V2_DYNAMIC_TRIANGLE_AREA_RATIO_FAIL")
+        if cond>float(policy.g3_max_dynamic_condition_number)+1e-9:
+            raise QualificationError("MOTION_V2_DYNAMIC_TRIANGLE_CONDITION_FAIL")
+    return min_ratio,max_ratio,max_cond
+
+
+def _contact_from_dict(payload:Mapping[str,Any])->DynamicContactProofV2IR:
+    value=DynamicContactProofV2IR(
+        contact_id=str(payload["contact_id"]),
+        clip_id=str(payload["clip_id"]),
+        canonical_joint_id=str(payload["canonical_joint_id"]),
+        anchor_xy=tuple(map(float,payload["anchor_xy"])),
+        max_drift=float(payload["max_drift"]),
+        tolerance=float(payload["tolerance"]),
+        sample_count=int(payload["sample_count"]),
+        status=str(payload["status"]),
+        proof_hash=str(payload["proof_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.DynamicContactProofIR.v2"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+    if value.proof_hash!=dynamic_contact_proof_v2_hash(value):
+        raise QualificationError("MOTION_V2_DYNAMIC_CONTACT_HASH_DRIFT")
+    return value
+
+
+def _frame_from_dict(payload:Mapping[str,Any])->CanonicalDynamicFrameV2IR:
+    value=CanonicalDynamicFrameV2IR(
+        time_seconds=float(payload["time_seconds"]),
+        joint_world_positions=tuple(
+            (str(jid),tuple(map(float,xyz)))
+            for jid,xyz in payload.get("joint_world_positions") or ()
+        ),
+        posed_vertex_xyz=tuple(
+            (str(vid),tuple(map(float,xyz)))
+            for vid,xyz in payload.get("posed_vertex_xyz") or ()
+        ),
+        max_vertex_displacement=float(payload["max_vertex_displacement"]),
+        min_triangle_area_ratio=float(payload["min_triangle_area_ratio"]),
+        max_triangle_area_ratio=float(payload["max_triangle_area_ratio"]),
+        max_triangle_condition_number=float(payload["max_triangle_condition_number"]),
+        frame_hash=str(payload["frame_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.CanonicalDynamicFrameIR.v2"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+    if value.frame_hash!=canonical_dynamic_frame_v2_hash(value):
+        raise QualificationError("MOTION_V2_DYNAMIC_FRAME_HASH_DRIFT")
+    return value
+
+
+def _clip_from_dict(payload:Mapping[str,Any])->DynamicMotionClipProofV2IR:
+    value=DynamicMotionClipProofV2IR(
+        clip_id=str(payload["clip_id"]),
+        clip_kind=str(payload["clip_kind"]),
+        classification=str(payload["classification"]),
+        duration_seconds=float(payload["duration_seconds"]),
+        loop=bool(payload["loop"]),
+        frames=tuple(_frame_from_dict(row) for row in payload.get("frames") or ()),
+        contact_proofs=tuple(
+            _contact_from_dict(row) for row in payload.get("contact_proofs") or ()
+        ),
+        max_vertex_displacement=float(payload["max_vertex_displacement"]),
+        professional_motion_evidence=bool(payload["professional_motion_evidence"]),
+        clip_proof_hash=str(payload["clip_proof_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.DynamicMotionClipProofIR.v2"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+    if value.clip_proof_hash!=dynamic_motion_clip_proof_v2_hash(value):
+        raise QualificationError("MOTION_V2_DYNAMIC_CLIP_HASH_DRIFT")
+    return value
+
+
+def qualified_dynamic_motion_v2_from_dict(
+    payload:Mapping[str,Any],
+)->QualifiedDynamicMotionV2IR:
+    schema=str(payload.get("schema_version") or payload.get("schema") or "")
+    if schema!="RealSaS.QualifiedDynamicMotionIR.v2":
+        raise QualificationError(
+            f"MOTION_V2_DYNAMIC_SCHEMA_MISMATCH:{schema}"
+        )
+    value=QualifiedDynamicMotionV2IR(
+        qualified_motion_binding_hash=str(payload["qualified_motion_binding_hash"]),
+        constraint_set_binding_hash=str(payload["constraint_set_binding_hash"]),
+        mechanical_state_binding_hash=str(payload["mechanical_state_binding_hash"]),
+        skeleton_binding_hash=str(payload["skeleton_binding_hash"]),
+        mesh_binding_hash=str(payload["mesh_binding_hash"]),
+        mesh_skin_binding_hash=str(payload["mesh_skin_binding_hash"]),
+        presentation_binding_hash=str(payload["presentation_binding_hash"]),
+        mesh_policy_binding_hash=str(payload["mesh_policy_binding_hash"]),
+        evaluator_semantic_version=str(payload["evaluator_semantic_version"]),
+        clips=tuple(_clip_from_dict(row) for row in payload.get("clips") or ()),
+        qualification_report=dict(payload.get("qualification_report") or {}),
+        dynamic_motion_hash=str(payload["dynamic_motion_hash"]),
+        schema_version=schema,
+        metadata=dict(payload.get("metadata") or {}),
+    )
+    if value.dynamic_motion_hash!=qualified_dynamic_motion_v2_hash(value):
+        raise QualificationError("MOTION_V2_DYNAMIC_HASH_DRIFT")
+    return value
 
 
 DYNAMIC_EVALUATOR_SEMANTIC_VERSION_V2="RealSaS.CanonicalDynamicMotionEvaluator.QuaternionV3"
@@ -312,7 +574,7 @@ def build_qualified_dynamic_motion_v2(
             clip_max=max(clip_max,max_disp)
             min_area,max_area,max_condition=_frame_metrics(mesh,rest,posed,mesh_policy)
 
-            frame=CanonicalDynamicFrameIR(
+            frame=CanonicalDynamicFrameV2IR(
                 time_seconds=float(time_seconds),
                 joint_world_positions=tuple(
                     (jid,tuple(map(float,joint_positions[jid])))
@@ -334,7 +596,7 @@ def build_qualified_dynamic_motion_v2(
                     "derived_joint_frame_set_hash":rest_frame_hash,
                 },
             )
-            frame=replace(frame,frame_hash=canonical_dynamic_frame_hash(frame))
+            frame=replace(frame,frame_hash=canonical_dynamic_frame_v2_hash(frame))
 
             frame_rest_unseen_exposed_pixels=0
             frame_visible_pixels=0
@@ -377,20 +639,20 @@ def build_qualified_dynamic_motion_v2(
             ]
             max_drift=max(drifts,default=0.0)
             status="PASS" if max_drift<=contact_tol else "FAIL"
-            proof=DynamicContactProofIR(
+            proof=DynamicContactProofV2IR(
                 row.contact_id,row.clip_id,row.canonical_joint_id,
                 tuple(map(float,anchor)),max_drift,contact_tol,len(relevant),
                 status,"",
                 metadata={"mode":row.mode,"anchor_time_seconds":float(row.start_time_seconds)},
             )
-            proof=replace(proof,proof_hash=dynamic_contact_proof_hash(proof))
+            proof=replace(proof,proof_hash=dynamic_contact_proof_v2_hash(proof))
             if status!="PASS":
                 raise QualificationError("MOTION_V2_DYNAMIC_CONTACT_FAIL:"+row.contact_id)
             contact_proofs.append(proof)
 
         nonzero=clip_max>motion_eps
         any_nonzero=any_nonzero or nonzero
-        clip_proof=DynamicMotionClipProofIR(
+        clip_proof=DynamicMotionClipProofV2IR(
             clip_id=clip.clip_id,
             clip_kind=clip.clip_kind,
             classification=clip.classification,
@@ -414,7 +676,7 @@ def build_qualified_dynamic_motion_v2(
         clips.append(
             replace(
                 clip_proof,
-                clip_proof_hash=dynamic_motion_clip_proof_hash(clip_proof),
+                clip_proof_hash=dynamic_motion_clip_proof_v2_hash(clip_proof),
             )
         )
 
@@ -425,10 +687,10 @@ def build_qualified_dynamic_motion_v2(
     if len(frame_set_hashes)!=1:
         raise QualificationError("MOTION_V2_DYNAMIC_JOINT_FRAME_SET_DRIFT")
 
-    value=QualifiedDynamicMotionIR(
+    value=QualifiedDynamicMotionV2IR(
         qualified_motion_binding_hash=motion.motion_lineage_hash,
         constraint_set_binding_hash=constraints.constraint_set_hash,
-        product_state_binding_hash=product_state.product_state_hash,
+        mechanical_state_binding_hash=product_state.product_state_hash,
         skeleton_binding_hash=skeleton.skeleton_lineage_hash,
         mesh_binding_hash=mesh.mesh_lineage_hash,
         mesh_skin_binding_hash=mesh_skin.mesh_skin_lineage_hash,
@@ -470,4 +732,4 @@ def build_qualified_dynamic_motion_v2(
             "rest_unseen_policy":"DIAGNOSTIC_ONLY__CAA_PROVENANCE_EXPOSURE_IS_GATED_AT_DYNAMIC_VISUAL_INTEGRITY",
         },
     )
-    return replace(value,dynamic_motion_hash=qualified_dynamic_motion_hash(value))
+    return replace(value,dynamic_motion_hash=qualified_dynamic_motion_v2_hash(value))

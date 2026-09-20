@@ -142,12 +142,30 @@ def _run(ctx, stage_id, fn):
     return result
 
 
-def test_source_sha_and_license_fail_closed(tmp_path):
+def test_source_sha_alias_role_and_license_fail_closed(tmp_path):
     ctx = _fixture(tmp_path)
     ctx["run_manifest"]["source_files"][0]["expected_sha256"] = "0" * 64
     result = _run(ctx, "01_SOURCE_BYTES_SEALED", seal_source_bytes)
     assert result["status"] == "FAIL"
     assert result["blockers"] == ["SOURCE_SHA_MISMATCH:SOURCE_RASTER_V0"]
+
+    alias_ctx = _fixture(tmp_path / "alias")
+    original = Path(alias_ctx["run_manifest"]["source_files"][0]["path"])
+    alias_dir = tmp_path / "alias" / "latest"
+    alias_dir.mkdir(parents=True, exist_ok=True)
+    aliased = alias_dir / original.name
+    aliased.write_bytes(original.read_bytes())
+    alias_ctx["run_manifest"]["source_files"][0]["path"] = str(aliased)
+    alias_ctx["run_manifest"]["source_files"][0]["expected_sha256"] = _sha(aliased)
+    result = _run(alias_ctx, "01_SOURCE_BYTES_SEALED", seal_source_bytes)
+    assert result["status"] == "FAIL"
+    assert result["blockers"] == ["SOURCE_MOVING_ALIAS_FORBIDDEN:SOURCE_RASTER_V0"]
+
+    duplicate_ctx = _fixture(tmp_path / "duplicate")
+    duplicate_ctx["run_manifest"]["source_files"][1]["role"] = "SOURCE_RASTER_V0"
+    result = _run(duplicate_ctx, "01_SOURCE_BYTES_SEALED", seal_source_bytes)
+    assert result["status"] == "FAIL"
+    assert result["blockers"] == ["SOURCE_ROLE_DUPLICATE:SOURCE_RASTER_V0"]
 
     ctx = _fixture(tmp_path / "license")
     ctx["run_manifest"]["source_license"]["license_ref"] = ""

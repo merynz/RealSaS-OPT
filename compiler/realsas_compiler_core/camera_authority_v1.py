@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass, field, replace
 from typing import Any, Iterable
 
 from .hashing import content_sha256
-from .playback_full_surface_v3 import CameraProjectionV3, qualify_camera_v3
+from .camera_geometry_v2 import CameraProjectionV3, qualify_camera_v3
 from .types import QualificationError
 
 Json=dict[str,Any]

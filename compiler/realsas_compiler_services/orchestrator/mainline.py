@@ -36,7 +36,7 @@ def atomic_json(path:Path,value:dict)->None:
     tmp.replace(path)
 
 def validate_plan(plan:dict)->str:
-    if plan.get("schema")!="RealSaS.MainlineExecutionPlan.v2": raise RuntimeError("MAINLINE_PLAN_SCHEMA_DRIFT")
+    if plan.get("schema") not in {"RealSaS.MainlineExecutionPlan.v1","RealSaS.MainlineExecutionPlan.v2"}: raise RuntimeError("MAINLINE_PLAN_SCHEMA_DRIFT")
     stages=list(plan.get("stages") or ())
     expected_count=int(plan.get("stage_count",-1))
     if expected_count<=0 or len(stages)!=expected_count: raise RuntimeError("MAINLINE_PLAN_STAGE_COUNT_DRIFT")

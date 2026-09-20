@@ -694,6 +694,26 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
         "37_QUALIFIED_PRESENTATION_STRUCTURE",
         qualify_presentation_structure_stage,
     )
+    structure_v2_payload = read_json(
+        next(
+            out
+            for out in r37["outputs"]
+            if out["schema"] == "RealSaS.QualifiedPresentationStructureIR.v2"
+        )["path"]
+    )
+    assert (
+        structure_v2_payload["metadata"]["automatic_presentation_segmentation_scope"]
+        == "CONNECTED_FACE_ISLANDS_WITHIN_MECHANICAL_COMPONENT"
+    )
+    assert (
+        structure_v2_payload["metadata"][
+            "connected_mechanically_equivalent_visual_region_auto_split_claimed"
+        ]
+        is False
+    )
+    assert structure_v2_payload["metadata"]["original_artist_layer_recovery_claimed"] is False
+    assert structure_v2_payload["metadata"]["face_membership_edit_source_available"] is True
+
     r38 = run("38_CANONICAL_PUPPET_SEALED", seal_complete_puppet_stage)
     by38 = {out["schema"]: out for out in r38["outputs"]}
     assert "RealSaS.CompletePuppetStateIR.v2" in by38
@@ -736,6 +756,17 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     assert r45["diagnostics"]["native_reference_mismatch_pixel_count"] == 0
     assert r45["diagnostics"]["undefined_visible_pixel_count"] == 0
     assert r45["diagnostics"]["compiled_unobserved_visible_fraction"] == 0.0
+    dvi_payload = read_json(
+        next(
+            out
+            for out in r45["outputs"]
+            if out["schema"] == "RealSaS.DynamicVisualIntegrityIR.v2"
+        )["path"]
+    )
+    assert dvi_payload["qualification_report"]["proof_scope"] == "DYNAMIC_RUNTIME_INTEGRITY_V2"
+    assert dvi_payload["qualification_report"]["professional_dynamic_appearance_quality_claimed"] is False
+    assert dvi_payload["qualification_report"]["spine_class_perceptual_quality_claimed"] is False
+    assert dvi_payload["qualification_report"]["mechanical_conditioning_is_not_perceptual_quality_proof"] is True
 
     r46 = run("46_PRODUCT_CLOSURE_SEAL", seal_product_closure_stage)
     closure = read_json(
@@ -748,6 +779,11 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     assert closure["qualification_report"]["product_pass"] is True
     assert closure["qualification_report"]["appearance_authority_passed"] is True
     assert closure["qualification_report"]["native_visual_integrity_passed"] is True
+    assert closure["qualification_report"]["product_pass_scope"] == "V2_EXECUTABLE_CONTRACT_CLOSURE"
+    assert closure["qualification_report"]["original_artist_layer_recovery_claimed"] is False
+    assert closure["qualification_report"]["professional_dynamic_appearance_quality_claimed"] is False
+    assert closure["qualification_report"]["spine_class_perceptual_quality_claimed"] is False
+    assert closure["qualification_report"]["witness_visual_quality_evaluation_still_required"] is True
     editable = next(
         out
         for out in r46["outputs"]

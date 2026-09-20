@@ -175,6 +175,12 @@ IMPLEMENTATION_CLOSURE_STATIC_PATHS = (
     "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
     "requirements/mainline-ci.txt",
     "requirements/torch-cpu.txt",
+    "tools/build_knowledge_artifact_catalog.py",
+    "tools/render_authority_map.py",
+    "tools/render_rehydration_packet.py",
+    "tools/audit_context_coverage.py",
+    ".github/workflows/live_authority_map.yml",
+    "canonical/AUTHORITY_MAP_V1.json",
 )
 
 IMPLEMENTATION_CLOSURE_TEST_ROOTS = (

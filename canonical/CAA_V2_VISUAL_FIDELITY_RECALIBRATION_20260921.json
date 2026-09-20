@@ -166,6 +166,20 @@
       "owner": "CAA color management / runtime sampling",
       "finding": "Python and native V2 CAA samplers treat encoded RGBA8 RGB as linear values: RGB is divided by 255, premultiplied by alpha and bilinearly filtered without an explicit sRGB/linear transfer function. Native/reference byte parity can therefore certify identical gamma-space filtering rather than source-faithful color filtering.",
       "required_closure": "Make the texture color-space contract explicit and shared by compile/reference/native runtime. Calibrate subject-free opaque gradients, dark/light edges and semi-transparent anti-aliased line-art controls; qualify linear-light premultiplied filtering or explicitly prove an alternative artist-preserving encoded-space contract."
+    },
+    {
+      "id": "VF-22",
+      "severity": "HIGH",
+      "owner": "Runtime package precision",
+      "finding": "Stage42 casts canonical mesh positions, every Stage41 posed vertex frame and face UVs to float32 before packaging. Stage45 reference rendering consumes the same quantized arrays, so native/reference parity cannot detect Stage41->runtime quantization drift in screen ownership, thin features, near-depth ordering or UV sampling.",
+      "required_closure": "Add an explicit Stage41-double -> packaged-float32 projection/ownership/RGBA non-regression proof on subject-free thin-feature, near-depth and subpixel controls; select package precision from evidence or retain higher precision where needed."
+    },
+    {
+      "id": "VF-23",
+      "severity": "HIGH",
+      "owner": "End-to-end production-policy validation",
+      "finding": "The principal Stage37-46 integration fixture overrides multiple production appearance/DVI thresholds to permissive values for its tiny synthetic asset. Unit tests exercise individual production policy fields, but the exact production policy is not yet proven feasible end-to-end on a representative subject-free art/geometry/motion control.",
+      "required_closure": "Create a representative subject-free end-to-end control bank that runs the unmodified production geometry/CAA/DVI policies, including thin line art, alpha edges, occlusion completion, articulated motion, near-depth overlap and rigid/deformable presentation groups. No fixture-only threshold relaxation may count as product readiness."
     }
   ],
   "false_or_overstated_external_findings": [

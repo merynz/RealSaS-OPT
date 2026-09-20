@@ -1,0 +1,64 @@
+{
+  "schema": "RealSaS.IRIS.KnightStage13F3ExactMismatchReplayFeasibilityClosure.v1",
+  "date_utc": "2026-09-20",
+  "subject_run_id": "SUBJECT2_KNIGHT_V1",
+  "run_id": "20260920T065453Z",
+  "attempt_protocol": "F3_STAGE13_P999_EXACT_MISMATCH_REPLAY",
+  "preregistration_commit": "1aba113cdcd89cb86b432d05667c6e2315e5891a",
+  "notebook_seal_commit": "67d25e918df6dc1f2bc03f70559a581cf89171cc",
+  "executed_result": {
+    "overall_status": "NO_WITNESS_FOUND",
+    "selected_candidate": null,
+    "decision_sha256": "2e68ef396422b40990a64cbb83b9ef1f24dded789de6455e466035920f2591f1",
+    "bundle_sha256": "dd30bb1807e5acecc8b3acbd65897af68a42e1eb0e9731626476c0256726b622",
+    "canonical_product_authority_minted": false
+  },
+  "constructive_baseline": {
+    "min_view_recall": 0.9982401430815266,
+    "min_view_precision": 0.9983457689059926,
+    "min_view_component_recall": 0.9982401430815266,
+    "max_view_largest_coherent_hole_fraction": 0.00014331411013402735,
+    "max_view_interior_uncovered_fraction": 0.00012288750526660738,
+    "max_view_silhouette_edge_p95_px": 1
+  },
+  "replay_behavior": {
+    "round1_post": {
+      "min_view_recall": 0.9979810529585339,
+      "min_view_precision": 0.9787560302070116,
+      "max_view_interior_uncovered_fraction": 0.0007340261919187212,
+      "max_view_silhouette_edge_p95_px": 3
+    },
+    "final_round12_post": {
+      "min_view_recall": 0.9989337912030851,
+      "min_view_precision": 0.9879419900851798,
+      "min_view_component_recall": 0.9989337912030851,
+      "max_view_largest_coherent_hole_fraction": 0.00007765180928715639,
+      "max_view_interior_uncovered_fraction": 0.00007357602100878384,
+      "max_view_silhouette_edge_p95_px": 3
+    },
+    "interpretation": [
+      "Exact mismatch replay degraded precision and silhouette immediately in round 1.",
+      "Later rounds recovered recall and hole/interior coverage but never recovered constructive precision or edge p95.",
+      "Round 12 recall approached the 0.999 gate while precision remained far below it, demonstrating a replay-objective trade-off rather than a clean representational ceiling.",
+      "The preregistered F3 refinement objective is therefore falsified for the intended feasibility question."
+    ]
+  },
+  "scientific_interpretation": {
+    "classification": "GENUINE_NO_WITNESS__F3_REPLAY_OBJECTIVE_FALSIFIED",
+    "representation_impossibility_claim": false,
+    "stage13_policy_unchanged": true,
+    "next_question": "Does the corrected source-only constructive witness cross P999 when only scalar-field spatial resolution is increased?"
+  },
+  "next_experiment": {
+    "id": "F4_STAGE13_P999_RESOLUTION_LADDER",
+    "single_causal_variable": "FIELD_RESOLUTION",
+    "candidate_resolutions": [
+      384,
+      512
+    ],
+    "constructive_semantics": "IDENTICAL_TO_F2_F3_RASTER_CELL_SUPPORT",
+    "optimizer_used": false,
+    "stage13_policy": "UNCHANGED_P999",
+    "stop_rule": "FIRST_FULL_PASS_ELSE_NONE"
+  }
+}

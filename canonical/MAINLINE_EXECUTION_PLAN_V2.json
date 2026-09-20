@@ -127,7 +127,7 @@
     {
       "ordinal": 6,
       "id": "06_OBSERVATION_RENDER_8VIEW",
-      "title": "Render exact 8 observations",
+      "title": "Materialize exact 8 source observations",
       "group": "observation",
       "depends_on": [
         "04_FULL_SUBJECT_ADMISSION",
@@ -763,10 +763,12 @@
     {
       "ordinal": 37,
       "id": "37_QUALIFIED_PRESENTATION_STRUCTURE",
-      "title": "Qualified slots attachments draw order visibility and clipping structure; no appearance generation",
+      "title": "Qualified role-free presentation partition, slots, attachments, UI draw order and clipping; no appearance generation",
       "group": "presentation",
       "depends_on": [
         "17_MECHANICAL_PARTITION_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
         "28_SKELETON_QUALIFIED",
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
         "36_QUALIFIED_MESH_SKIN_TRANSFER"
@@ -813,7 +815,7 @@
     {
       "ordinal": 39,
       "id": "39_MOTION_SOURCE_OR_PRESET_SEAL",
-      "title": "Motion source or preset seal",
+      "title": "Professional external motion source seal",
       "group": "motion",
       "depends_on": [
         "25_CAA_REFERENCE_REST_RENDER_PROOF",

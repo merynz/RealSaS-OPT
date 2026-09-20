@@ -21,6 +21,7 @@ from compiler.realsas_compiler_core.deformation_envelope_derivation_v1 import de
 from compiler.realsas_compiler_core.mesh.deformation_stress_v2 import (
     run_g3_local_frame_micro_stress_v2,
 )
+from compiler.realsas_compiler_core.mesh.conditioning_v1 import triangle_rest_metric
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     build_g5_coverage_matrix,
     derive_component_observation_rasters_v1,
@@ -285,6 +286,59 @@ def seal_deformation_capability_envelope(ctx:dict)->dict:
         },
     }
 
+def _relation_parent_quality_report(candidate, policy)->dict:
+    vertices={str(v.candidate_vertex_id):tuple(map(float,v.P)) for v in candidate.vertices}
+    rows=[]
+    for face in candidate.faces:
+        points=tuple(vertices[str(vid)] for vid in face)
+        metric=triangle_rest_metric(points)
+        rows.append(metric)
+    if not rows:
+        raise QualificationError("RELATION_PARENT_QUALITY_REQUIRES_FACES")
+    bad_angle=sum(
+        bool(row["degenerate"]) or float(row["min_angle_deg"]) + 1e-9 < float(policy.g3_min_angle_deg)
+        for row in rows
+    )
+    bad_aspect=sum(
+        bool(row["degenerate"]) or float(row["aspect_longest_over_min_altitude"]) - 1e-9 > float(policy.g3_max_aspect_longest_over_min_altitude)
+        for row in rows
+    )
+    bad_union=sum(
+        bool(row["degenerate"])
+        or float(row["min_angle_deg"]) + 1e-9 < float(policy.g3_min_angle_deg)
+        or float(row["aspect_longest_over_min_altitude"]) - 1e-9 > float(policy.g3_max_aspect_longest_over_min_altitude)
+        for row in rows
+    )
+    finite_aspects=[
+        float(row["aspect_longest_over_min_altitude"])
+        for row in rows
+        if not bool(row["degenerate"]) and float(row["aspect_longest_over_min_altitude"]) < float("inf")
+    ]
+    return {
+        "schema":"RealSaS.RelationParentQualityReport.v1",
+        "face_count":len(rows),
+        "degenerate_face_count":sum(bool(row["degenerate"]) for row in rows),
+        "min_angle_deg":min(float(row["min_angle_deg"]) for row in rows),
+        "max_aspect_longest_over_min_altitude":max(finite_aspects,default=float("inf")),
+        "policy_min_angle_deg":float(policy.g3_min_angle_deg),
+        "policy_max_aspect_longest_over_min_altitude":float(policy.g3_max_aspect_longest_over_min_altitude),
+        "below_min_angle_face_count":int(bad_angle),
+        "above_max_aspect_face_count":int(bad_aspect),
+        "policy_violating_face_count":int(bad_union),
+        "below_min_angle_face_fraction":float(bad_angle/len(rows)),
+        "above_max_aspect_face_fraction":float(bad_aspect/len(rows)),
+        "policy_violating_face_fraction":float(bad_union/len(rows)),
+        "producer_semantics":"THREE_CLIQUES_OF_RIGGING_SURFACE_LOCAL_RELATION_GRAPH",
+        "not_raw_marching_cubes_parent_faces":True,
+        "cdt_v1_boundary_split_policy":"FORBIDDEN",
+        "cdt_v1_min_angle_repairability":(
+            "UNREPAIRABLE_IF_ANY_PARENT_CORNER_IS_BELOW_TARGET"
+            if bad_angle else "NO_PARENT_MIN_ANGLE_OBSTRUCTION_DETECTED"
+        ),
+        "proof_note":"Without boundary splits, any triangulation covering a parent triangle preserves each parent corner as a sum of incident child angles; a parent corner below the target cannot be raised above the target by interior Steiner insertion alone.",
+    }
+
+
 def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
     surface=_load_surface(ctx)
     partition,carrier=_load_partition_and_carrier(ctx)
@@ -304,11 +358,31 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
         "mesh_config":mesh_cfg,
         "mesh_policy_hash":policy.qualification_policy_lineage_hash,
     })
+    baseline=build_canonical_relation_candidate(
+        surface,partition,carrier,producer_policy_hash=baseline_policy_hash
+    )
+    parent_quality=_relation_parent_quality_report(baseline,policy)
+    root=_artifact_root(ctx,"26_MESH_CANDIDATE_BUILD")
+    parent_quality_artifact=_write_json(
+        root/"relation_parent_quality_report.json",
+        parent_quality,
+        authority_class="DIAGNOSTIC_RELATION_PARENT_QUALITY",
+        schema=parent_quality["schema"],
+    )
+
     if backend=="CANONICAL_RELATION_BASELINE_V1":
-        candidate=build_canonical_relation_candidate(
-            surface,partition,carrier,producer_policy_hash=baseline_policy_hash
-        )
+        candidate=baseline
     elif backend=="CANONICAL_CDT_LOCAL_CHART_V1":
+        if int(parent_quality["below_min_angle_face_count"])>0:
+            return {
+                "status":"FAIL",
+                "blockers":["CDT_PARENT_MIN_ANGLE_UNREPAIRABLE_WITHOUT_BOUNDARY_SPLIT"],
+                "diagnostics":{
+                    "backend":backend,
+                    "relation_parent_quality_sha256":parent_quality_artifact["sha256"],
+                    **parent_quality,
+                },
+            }
         candidate=build_canonical_cdt_candidate(
             surface,partition,carrier,policy,
             relation_baseline_policy_hash=baseline_policy_hash,
@@ -317,12 +391,12 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
         )
     else:
         return {"status":"BLOCKED","blockers":["MESH_BACKEND_NOT_EXPLICIT_OR_UNSUPPORTED"],"diagnostics":{"backend":backend}}
-    root=_artifact_root(ctx,"26_MESH_CANDIDATE_BUILD")
     return {
         "status":"PASS",
         "outputs":[
             _write_ir(root/"canonical_mesh_candidate.json",candidate,authority_class="DERIVED_MESH_CANDIDATE"),
             _write_ir(root/"mesh_qualification_policy.json",policy,authority_class="FROZEN_MESH_QUALIFICATION_POLICY"),
+            parent_quality_artifact,
         ],
         "diagnostics":{
             "backend":backend,
@@ -330,6 +404,10 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
             "face_count":len(candidate.faces),
             "candidate_lineage_hash":candidate.candidate_lineage_hash,
             "mesh_policy_hash":policy.qualification_policy_lineage_hash,
+            "relation_parent_quality_sha256":parent_quality_artifact["sha256"],
+            "relation_parent_below_min_angle_face_count":parent_quality["below_min_angle_face_count"],
+            "relation_parent_above_max_aspect_face_count":parent_quality["above_max_aspect_face_count"],
+            "relation_parent_policy_violating_face_count":parent_quality["policy_violating_face_count"],
         },
     }
 

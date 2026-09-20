@@ -1,0 +1,255 @@
+name: v2-witness-orchestration-subject-free-dry-run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'compiler/realsas_compiler_services/orchestrator/**'
+      - 'compiler/realsas_compiler_core/**'
+      - 'tests/repository/test_witness_orchestration_v2.py'
+      - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
+      - 'canonical/V2_IMPLEMENTATION_READINESS.json'
+      - '.github/workflows/v2_witness_orchestration_subject_free_dry_run.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v2-orchestration-dry-run-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  subject-free-stage01-08:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned audit dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Assert witness readiness is intentionally closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if python -m compiler.realsas_compiler_services.orchestrator.mainline validate-readiness; then
+            echo "ERROR readiness unexpectedly open during implementation audit" >&2
+            exit 1
+          fi
+          python - <<'PY'
+          import json
+          p=json.load(open("canonical/V2_IMPLEMENTATION_READINESS.json",encoding="utf-8"))
+          assert p["status"]=="IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN", p["status"]
+          proof=next(x for x in p["proofs"] if x["proof_id"]=="WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN")
+          assert proof["status"]=="IN_PROGRESS", proof
+          print("READINESS_CLOSED_AS_EXPECTED")
+          PY
+
+      - name: Build subject-free Stage01-08 fixture and manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "CANONICAL_LEDGER_BEFORE=$(sha256sum canonical/ACTIVE_RUN_V2.json | awk '{print $1}')" >> "$GITHUB_ENV"
+          echo "REALSAS_AUTHORITY_ROOT=$HOME/realsas_authority" >> "$GITHUB_ENV"
+          run_id="V2_ORCHESTRATION_AUDIT_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          echo "RUN_ID=$run_id" >> "$GITHUB_ENV"
+          export RUN_ID="$run_id"
+          export REALSAS_AUTHORITY_ROOT="$HOME/realsas_authority"
+          python - <<'PY'
+          import hashlib, json, os, shutil
+          from pathlib import Path
+          import numpy as np
+          from PIL import Image
+
+          root=Path(os.environ["REALSAS_AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
+          if root.exists():
+              shutil.rmtree(root)
+          fixture=root/"fixture"
+          fixture.mkdir(parents=True,exist_ok=True)
+
+          def sha(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+          cameras=[]
+          source_files=[]
+          raster_rows=[]
+          mask_rows=[]
+          for view in range(8):
+              rgba=np.zeros((32,32,4),dtype=np.uint8)
+              rgba[8:24,8:24]=(40+view*3,80+view,120,255)
+              raster=fixture/f"V{view}.png"
+              Image.fromarray(rgba,"RGBA").save(raster)
+              mask=np.zeros((32,32),dtype=np.uint8)
+              mask[8:24,8:24]=1
+              mask_path=fixture/f"V{view}.mask"
+              mask_path.write_bytes(mask.tobytes(order="C"))
+              source_files.append({
+                  "role":f"SOURCE_RASTER_V{view}",
+                  "path":str(raster),
+                  "expected_sha256":sha(raster),
+                  "expected_size_bytes":raster.stat().st_size,
+              })
+              raster_rows.append({
+                  "view_index":view,
+                  "image":{"path":str(raster),"sha256":sha(raster)},
+              })
+              mask_rows.append({
+                  "view_index":view,
+                  "mask":{"path":str(mask_path),"sha256":sha(mask_path)},
+              })
+              cameras.append({
+                  "schema_version":"RealSaS.FullSurfaceCameraProjection.v3",
+                  "view_id":f"V{view}",
+                  "view_index":view,
+                  "origin":[0.0,0.0,-2.0],
+                  "right":[1.0,0.0,0.0],
+                  "screen_up":[0.0,1.0,0.0],
+                  "forward":[0.0,0.0,1.0],
+                  "half_extent":1.0,
+                  "resolution":32,
+              })
+
+          camera_path=fixture/"camera_bundle.json"
+          camera_path.write_text(
+              json.dumps(
+                  {"schema":"RealSaS.CameraProjectionBundle.v1","cameras":cameras},
+                  sort_keys=True,
+              )+"\n",
+              encoding="utf-8",
+          )
+          manifest={
+              "schema":"RealSaS.RunManifest.v2",
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":"SUBJECT_FREE_ORCHESTRATION_FIXTURE",
+              "implementation_audit":True,
+              "source_files":source_files,
+              "source_license":{
+                  "source_pack":"subject-free-orchestration-fixture",
+                  "license_name":"TEST_ONLY",
+                  "license_ref":"REPOSITORY_SELF_TEST",
+                  "notes":"No Knight or product witness data.",
+              },
+              "source_audit":{"minimum_border_margin_px":2},
+              "admission":{"mode":"CONTROLLED_FULL_SUBJECT_8VIEW_V1"},
+              "observation":{
+                  "camera_bundle":{"path":str(camera_path),"sha256":sha(camera_path)},
+                  "source_rasters":raster_rows,
+                  "source_foreground_masks":mask_rows,
+              },
+              "normalization":{
+                  "center_xyz":[0.0,0.0,0.0],
+                  "half_extent":1.0,
+                  "coordinate_frame":"REALSAS_OBJECT_FRAME",
+              },
+          }
+          manifest_path=root/"run_manifest.json"
+          manifest_path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print("AUDIT_MANIFEST",manifest_path,sha(manifest_path))
+          PY
+
+      - name: Initialize run-local implementation-audit ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compiler.realsas_compiler_services.orchestrator.mainline init-run \
+            --run-id "$RUN_ID" \
+            --subject-id SUBJECT_FREE_ORCHESTRATION_FIXTURE \
+            --architecture-scope REALSAS_V2_IMPLEMENTATION_DRY_RUN \
+            --execution-class IMPLEMENTATION_AUDIT
+          test -f "$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID/ACTIVE_RUN_V2.json"
+
+      - name: Execute real Stage01-08 target closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+            --run-id "$RUN_ID" \
+            --target 08_NORMALIZATION_DOMAIN_QUALIFIED
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status \
+            --run-id "$RUN_ID"
+
+      - name: Verify run-local ledger and exact artifact schemas
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+
+          root=Path(os.environ["REALSAS_AUTHORITY_ROOT"])/"runs"/os.environ["RUN_ID"]
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text(encoding="utf-8"))
+          assert ledger["execution_class"]=="IMPLEMENTATION_AUDIT", ledger
+          assert ledger["subject_id"]=="SUBJECT_FREE_ORCHESTRATION_FIXTURE", ledger
+          assert ledger["completed_count"]==8, ledger
+          assert ledger["failed_count"]==0, ledger
+          assert "09_IRIS_FIT_PREREGISTERED" in ledger["ready_stage_ids"], ledger["ready_stage_ids"]
+
+          expected={
+              "01_SOURCE_BYTES_SEALED":"RealSaS.SourceByteSeal.v1",
+              "02_SOURCE_LICENSE_PROVENANCE":"RealSaS.SourceLicenseSeal.v1",
+              "03_SOURCE_MECHANICAL_AUDIT":"RealSaS.SourceMechanicalAuditIR.v1",
+              "04_FULL_SUBJECT_ADMISSION":"RealSaS.FullSubjectAdmissionIR.v1",
+              "05_CAMERA_CONTRACT_SOLVED":"RealSaS.QualifiedCameraSetIR.v1",
+              "06_OBSERVATION_RENDER_8VIEW":"RealSaS.ObservationRenderSetIR.v1",
+              "07_OBSERVATION_CONTRACT_QUALIFIED":"RealSaS.QualifiedObservationSetIR.v1",
+              "08_NORMALIZATION_DOMAIN_QUALIFIED":"RealSaS.NormalizationDomainIR.v1",
+          }
+          by={row["id"]:row for row in ledger["stages"]}
+          for stage_id,schema in expected.items():
+              row=by[stage_id]
+              assert row["status"]=="PASS",(stage_id,row)
+              matches=[x for x in row["outputs"] if x.get("schema")==schema]
+              assert len(matches)==1,(stage_id,schema,row["outputs"])
+              output=matches[0]
+              path=Path(output["path"])
+              assert path.is_file(),path
+              actual=hashlib.sha256(path.read_bytes()).hexdigest()
+              assert actual==output["sha256"],(stage_id,actual,output["sha256"])
+              payload=json.loads(path.read_text(encoding="utf-8"))
+              assert payload.get("schema")==schema or payload.get("schema_version")==schema,(stage_id,payload)
+          print("SUBJECT_FREE_STAGE01_08_ARTIFACT_CONTRACT_PASS")
+          PY
+
+      - name: Prove canonical assembly governance ledger was untouched
+        shell: bash
+        run: |
+          set -euo pipefail
+          after=$(sha256sum canonical/ACTIVE_RUN_V2.json | awk '{print $1}')
+          test "$after" = "$CANONICAL_LEDGER_BEFORE"
+          echo "CANONICAL_ASSEMBLY_LEDGER_UNCHANGED sha256=$after"
+
+      - name: Bundle dry-run proof evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/v2_orchestration_dry_run"
+          rm -rf "$evidence"
+          mkdir -p "$evidence"
+          cp "$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID/run_manifest.json" "$evidence/"
+          cp "$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID/ACTIVE_RUN_V2.json" "$evidence/"
+          cp -a "$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID/artifacts" "$evidence/"
+          sha256sum "$evidence/ACTIVE_RUN_V2.json" "$evidence/run_manifest.json" > "$evidence/SHA256SUMS.txt"
+          echo "EVIDENCE_DIR=$evidence" >> "$GITHUB_ENV"
+
+      - name: Upload subject-free orchestration evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2-orchestration-subject-free-stage01-08
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30

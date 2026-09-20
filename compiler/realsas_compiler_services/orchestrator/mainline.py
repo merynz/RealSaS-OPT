@@ -178,6 +178,7 @@ IMPLEMENTATION_CLOSURE_STATIC_PATHS = (
     "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
     "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
     "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json",
+    "canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json",
     "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
     "requirements/mainline-ci.txt",
     "requirements/torch-cpu.txt",

@@ -83,13 +83,14 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
         authority = json.loads((ROOT / "canonical/AUTHORITY_MAP_V1.json").read_text(encoding="utf-8"))
         active = authority.get("active_experiments", [])
         self.assertEqual(
-            [x["experiment_id"] for x in active],
+            [x["id"] for x in active],
             ["V2_IMPLEMENTATION_ASSEMBLY"],
         )
         for exp in active:
-            for key in ("experiment_id", "status", "question"):
+            for key in ("id", "branch", "status", "question"):
                 self.assertIsInstance(exp[key], str)
                 self.assertTrue(exp[key].strip())
+            self.assertEqual(exp["branch"], "main")
             self.assertIsInstance(exp["does_not_prove"], list)
             self.assertTrue(exp["does_not_prove"])
 

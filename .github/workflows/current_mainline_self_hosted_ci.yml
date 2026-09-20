@@ -51,6 +51,7 @@ jobs:
       OMP_NUM_THREADS: '1'
       MKL_NUM_THREADS: '1'
       OPENBLAS_NUM_THREADS: '1'
+      REALSAS_RUNTIME_V2_PLAYER: ${{ runner.temp }}/runtime_v2_caa_reference
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -83,11 +84,10 @@ jobs:
         run: python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
       - name: Build native V2 CAA reference player
         run: |
-          mkdir -p "$HOME/realsas_authority/toolchain"
           g++ -std=c++17 -O2 -Wall -Wextra -pedantic \
             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp \
-            -o "$HOME/realsas_authority/toolchain/runtime_v2_caa_reference"
-          sha256sum "$HOME/realsas_authority/toolchain/runtime_v2_caa_reference"
+            -o "$REALSAS_RUNTIME_V2_PLAYER"
+          sha256sum "$REALSAS_RUNTIME_V2_PLAYER"
       - name: Learned source ownership
         run: |
           python -m pytest -q \

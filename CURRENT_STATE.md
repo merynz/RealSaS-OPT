@@ -2,11 +2,11 @@
 
 **Date:** 2026-09-21  
 **Canonical branch:** `main`  
-**Current mode:** **V2 REVIEW-READY — WITNESS HELD FOR USER APPROVAL**  
-**Implementation readiness:** `READY_FOR_WITNESS_EXECUTION`  
-**Current status token:** `READY_FOR_WITNESS_EXECUTION__AWAITING_EXPLICIT_USER_APPROVAL`  
+**Current mode:** **V2 APPEARANCE FIDELITY RECLOSURE — WITNESS FORBIDDEN**  
+**Implementation readiness:** `REOPENED_APPEARANCE_AND_DYNAMIC_VISUAL_FIDELITY_AUDIT__WITNESS_FORBIDDEN`  
+**Current status token:** `APPEARANCE_FIDELITY_RECLOSURE__WITNESS_FORBIDDEN`  
 **Canonical governance ledger:** `V2_IMPLEMENTATION_ASSEMBLY` — implementation governance only; never a subject witness ledger.  
-**Witness execution:** **HELD** — the implementation is ready, but Subject-2 Knight must not start until the user explicitly approves it.  
+**Witness execution:** **FORBIDDEN** — post-seal appearance review reopened tile density, completion quality, cross-view RGB consistency and dynamic hole/speckle gates. User approval is necessary later but is not sufficient until these blockers close.  
 **Mainline:** 46-stage dependency DAG; ordinal is display order only.
 
 ## Read first
@@ -67,3 +67,7 @@ The current READY seal proves subject-free implementation readiness for the exac
 ## Next action
 
 **User review.** Do not execute Subject-2 Knight until the user explicitly approves. After approval, mint a fresh run-local Knight ledger and begin at Stage01; canonical `ACTIVE_RUN_V2.json` remains implementation governance only.
+
+## Post-seal appearance fidelity reopening — 2026-09-21
+
+The prior READY seal was revoked before Knight execution. New review found that fixed CAA tile resolution 8 was capacity-derived rather than art-frequency qualified; unobserved completion still uses nearest-surface color copy; cross-view RGB compatibility is not an explicit authority; dynamic alpha holes are currently diagnostic rather than a hard Stage45 failure; and scattered/speckled holes are not independently bounded. Current learned-model fits remain scoped FIT evidence and are not claimed final or unseen-ready.

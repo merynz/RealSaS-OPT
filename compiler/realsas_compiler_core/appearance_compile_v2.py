@@ -231,7 +231,8 @@ def compile_deterministic_caa(
         mask = np.asarray(foreground_mask_by_view[view], dtype=bool)
         if image.shape[:2] != mask.shape or image.shape[2] != 4:
             raise QualificationError("CAA_SOURCE_IMAGE_MASK_DIMENSION_DRIFT")
-        safe_mask = erode_binary_mask(mask, erosion)
+        safe_foreground = erode_binary_mask(mask, erosion)
+        safe_background = erode_binary_mask(~mask, erosion)
         visibility = rasterize_visible_owner(
             candidate,
             camera,
@@ -252,19 +253,23 @@ def compile_deterministic_caa(
             & np.isfinite(projected[:, 2])
             & (projected[:, 2] > 0.0)
         )
-        safe = np.zeros(sample_count, dtype=bool)
+        foreground_safe = np.zeros(sample_count, dtype=bool)
+        background_safe = np.zeros(sample_count, dtype=bool)
         visible = np.zeros(sample_count, dtype=bool)
-        alpha_safe = np.zeros(sample_count, dtype=bool)
+        alpha_foreground_safe = np.zeros(sample_count, dtype=bool)
+        alpha_background_safe = np.zeros(sample_count, dtype=bool)
         valid_index = np.flatnonzero(in_bounds)
         if len(valid_index):
             x = ix[valid_index]
             y = iy[valid_index]
-            safe[valid_index] = safe_mask[y, x]
+            foreground_safe[valid_index] = safe_foreground[y, x]
+            background_safe[valid_index] = safe_background[y, x]
             visible[valid_index] = (
                 visibility.owner_face_index[y, x]
                 == sample_face[valid_index]
             )
-            alpha_safe[valid_index] = image[y, x, 3] >= min_alpha
+            alpha_foreground_safe[valid_index] = image[y, x, 3] >= min_alpha
+            alpha_background_safe[valid_index] = image[y, x, 3] == 0
 
         forward = np.asarray(camera.forward, dtype=np.float64)
         forward_norm = float(np.linalg.norm(forward))
@@ -274,7 +279,11 @@ def compile_deterministic_caa(
         face_cos = np.abs(face_normals @ forward)
         angle_safe = np.repeat(face_cos >= min_cos, samples_per_face)
 
-        valid = in_bounds & safe & visible & alpha_safe & angle_safe
+        appearance_support = (
+            (foreground_safe & alpha_foreground_safe)
+            | (background_safe & alpha_background_safe)
+        )
+        valid = in_bounds & visible & appearance_support & angle_safe
         direct_valid[view] = valid
         if np.any(valid):
             direct_rgba[view, valid] = bilinear_rgba_u8(image, xy[valid])

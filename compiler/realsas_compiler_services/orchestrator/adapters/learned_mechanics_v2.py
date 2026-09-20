@@ -8,7 +8,7 @@ from compiler.realsas_compiler_core.preproduct_authority_v1 import (
     model_checkpoint_seal_from_dict, model_fit_execution_from_dict,
     model_fit_preregistration_from_dict, rigging_surface_qualification_from_dict,
 )
-from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
+from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_skeleton_from_dict, qualified_skin_from_dict, rigging_surface_from_dict,
 )
 from compiler.realsas_compiler_core.rig import qualify_skeleton

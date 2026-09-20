@@ -363,7 +363,7 @@
   "appearance_principle": "SPINE_CLASS_2D_ART_IS_A_PRIMARY_PRODUCT_REQUIREMENT_NOT_POST_RENDER_POLISH",
   "readiness_seal": {
     "status": "REVOKED",
-    "reason": "Post-seal appearance fidelity review found unresolved product blockers: fixed CAA tile_resolution=8 lacks source-frequency/texel-density qualification; deterministic unobserved completion is nearest-surface copy rather than high-fidelity source-constrained completion; cross-view RGB compatibility lacks explicit qualification authority; Stage45 dynamic alpha holes are diagnostic rather than a hard gate; speckled/scattered-hole artifact class is not independently bounded. Native CAA currently uses premultiplied bilinear only; mip/minification and anisotropic sampling stability under motion are not yet qualified.",
+    "reason": "Post-seal appearance fidelity review found unresolved product blockers: fixed CAA tile_resolution=8 lacks source-frequency/texel-density qualification; deterministic unobserved completion is nearest-surface copy rather than high-fidelity source-constrained completion; cross-view RGB compatibility lacks explicit qualification authority; Stage45 dynamic alpha holes are diagnostic rather than a hard gate; speckled/scattered-hole artifact class is not independently bounded. Native CAA currently uses premultiplied bilinear only; mip/minification and anisotropic sampling stability under motion are not yet qualified. Independent red-team additionally found Euclidean cross-surface completion risk, donor-view ranking weakness, same-provenance seam blindness/source-view provenance loss, owner-denominator crack blindness, XY-only contact proof under Z-up object frame, playback/proof sampling mismatch, missing explicit dynamic self-intersection qualification, and a referenced visual-fidelity recalibration artifact that does not yet exist.",
     "witness_execution_allowed": false,
     "witness_execution_authorized_now": false,
     "user_approval_required": true,
@@ -396,6 +396,15 @@
     "SPECKLED_SCATTERED_HOLE_ARTIFACT_CLASS_NOT_INDEPENDENTLY_BOUNDED",
     "CURRENT_LEARNED_MODELS_NOT_CLAIMED_FINAL_OR_UNSEEN_READY",
     "CAA_MINIFICATION_FILTERING_UNQUALIFIED",
-    "DYNAMIC_SCREENSPACE_SAMPLING_STABILITY_UNQUALIFIED"
+    "DYNAMIC_SCREENSPACE_SAMPLING_STABILITY_UNQUALIFIED",
+    "CAA_COMPLETION_EUCLIDEAN_KDTREE_CAN_CROSS_SURFACE_TOPOLOGY",
+    "CAA_OTHER_VIEW_DONOR_SELECTION_NOT_SUPPORT_QUALITY_RANKED",
+    "CAA_SHARED_EDGE_SEAM_METRIC_SKIPS_SAME_PROVENANCE_DIFFERENT_DONOR_CONFLICT",
+    "CAA_RUNTIME_PROVENANCE_LOSES_SOURCE_VIEW_IDENTITY",
+    "DYNAMIC_GEOMETRY_CRACKS_CAN_BE_OUTSIDE_OWNER_DENOMINATOR",
+    "DYNAMIC_CONTACT_PROOF_USES_XY_ONLY_WHILE_OBJECT_UP_IS_Z",
+    "DYNAMIC_MOTION_PROOF_SAMPLE_SET_NOT_EQUAL_TO_CONTINUOUS_OR_RUNTIME_PLAYBACK_CONTRACT",
+    "DYNAMIC_SELF_INTERSECTION_NOT_EXPLICITLY_QUALIFIED",
+    "VISUAL_FIDELITY_RECALIBRATION_AUTHORITY_REFERENCE_MISSING"
   ]
 }

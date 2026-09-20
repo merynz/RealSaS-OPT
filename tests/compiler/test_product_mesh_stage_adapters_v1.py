@@ -781,3 +781,269 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     )
     assert Path(editable["path"]).is_file()
     assert _sha(Path(editable["path"])) == editable["sha256"]
+
+
+def test_v2_stage20_to25_caa_branch_executes_real_adapters_on_subject_free_triangle(tmp_path):
+    from dataclasses import replace
+
+    from compiler.realsas_compiler_core.geometry_substrate_v2 import (
+        GeometrySubstrateViewIR,
+        build_geometry_substrate_qualification,
+    )
+    from compiler.realsas_compiler_core.output_presentation_v1 import (
+        build_output_direction_set,
+    )
+    from compiler.realsas_compiler_core.appearance_authority_v2 import (
+        caa_compile_artifact_from_dict,
+        caa_compile_seal_from_dict,
+        complete_appearance_asset_from_dict,
+        complete_appearance_qualification_from_dict,
+        caa_rest_render_proof_from_dict,
+    )
+    from compiler.realsas_compiler_services.orchestrator.adapters import mesh_v2
+    from compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture import (
+        build_canonical_mesh_addressing_stage,
+        qualify_static_canonical_mesh_stage,
+    )
+    from compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2 import (
+        preregister_caa_backend_stage,
+        compile_caa_stage,
+        seal_caa_compile_stage,
+        bake_complete_appearance_stage,
+        qualify_complete_appearance_stage,
+        prove_caa_reference_rest_stage,
+    )
+
+    ctx = _fixture(tmp_path)
+    ctx["repo_root"] = ROOT
+
+    def run(stage_id: str, fn):
+        ctx["stage"] = {"id": stage_id}
+        result = fn(ctx)
+        assert result["status"] == "PASS", result
+        _install_stage_outputs(ctx, stage_id, result)
+        return result
+
+    # Stage16 output directions are a distinct authority even though this tiny
+    # first-witness fixture uses the same eight cameras for observations.
+    cameras = qualified_camera_set_from_dict(
+        read_json(
+            next(
+                out
+                for row in ctx["ledger"]["stages"]
+                if row["id"] == "05_CAMERA_CONTRACT_SOLVED"
+                for out in row["outputs"]
+                if out["schema"] == "RealSaS.QualifiedCameraSetIR.v1"
+            )["path"]
+        )
+    )
+    directions = build_output_direction_set(cameras)
+    directions_path = _write(tmp_path / "directions_v2.json", directions)
+    ctx["ledger"]["stages"].append(
+        {
+            "id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+            "status": "PASS",
+            "outputs": [
+                _out(
+                    directions_path,
+                    "RealSaS.OutputPresentationDirectionSetIR.v1",
+                )
+            ],
+        }
+    )
+
+    run(
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        mesh_v2.qualify_mechanical_partition_and_carriers,
+    )
+    r18 = run(
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        build_canonical_mesh_addressing_stage,
+    )
+    candidate = canonical_mesh_candidate_from_dict(
+        read_json(
+            next(
+                out
+                for out in r18["outputs"]
+                if out["schema"] == "RealSaS.CanonicalMeshCandidateIR.v1"
+            )["path"]
+        )
+    )
+    assert len(candidate.faces) == 1
+
+    # Stage19 owns only static carrier/addressability and inherits Stage13's
+    # already-qualified geometry claim. For this CAA adapter integration test,
+    # provide a subject-free exact synthetic Stage13 PASS rather than invoking
+    # IRIS or using a witness.
+    observation = qualified_observation_set_from_dict(
+        read_json(
+            next(
+                out
+                for row in ctx["ledger"]["stages"]
+                if row["id"] == "07_OBSERVATION_CONTRACT_QUALIFIED"
+                for out in row["outputs"]
+                if out["schema"] == "RealSaS.QualifiedObservationSetIR.v1"
+            )["path"]
+        )
+    )
+    geometry_views = tuple(
+        GeometrySubstrateViewIR(
+            view_index=view,
+            silhouette_recall=1.0,
+            silhouette_precision=1.0,
+            largest_coherent_hole_fraction=0.0,
+            interior_uncovered_fraction=0.0,
+            source_foreground_pixel_count=1,
+            predicted_foreground_pixel_count=1,
+            component_recall=1.0,
+            silhouette_edge_p95_px=0.0,
+            passed=True,
+            metadata={"subject_free_fixture": True},
+        )
+        for view in range(8)
+    )
+    geometry = build_geometry_substrate_qualification(
+        zero_surface_binding_hash="z" * 64,
+        observation_set_binding_hash=observation.observation_set_hash,
+        camera_set_binding_hash=cameras.camera_set_hash,
+        normalization_binding_hash="n" * 64,
+        policy={"fixture": True},
+        views=geometry_views,
+        metadata={"subject_free_fixture": True},
+    )
+    geometry_path = _write(tmp_path / "geometry_substrate_v2.json", geometry)
+    ctx["ledger"]["stages"].append(
+        {
+            "id": "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+            "status": "PASS",
+            "outputs": [
+                _out(
+                    geometry_path,
+                    "RealSaS.GeometrySubstrateQualificationIR.v2",
+                )
+            ],
+        }
+    )
+    run(
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        qualify_static_canonical_mesh_stage,
+    )
+
+    # Production numerical policy is separately frozen/calibrated by
+    # test_caa_v2_subject_free_policy.py. This adapter E2E uses the same schema
+    # with only tiny-raster scale accommodations; production policy bytes are
+    # never modified.
+    production_policy = json.loads(
+        (
+            ROOT
+            / "canonical"
+            / "CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+        ).read_text(encoding="utf-8")
+    )
+    fixture_policy = json.loads(json.dumps(production_policy))
+    fixture_policy["status"] = "FROZEN_SUBJECT_FREE_TEST_FIXTURE_V1"
+    fixture_policy["scope"] = "SUBJECT_FREE_8PX_ADAPTER_INTEGRATION_ONLY"
+    fixture_policy["source_lock_policy"]["boundary_safe_erosion_px"] = 0
+    fixture_policy["source_lock_policy"]["min_abs_normal_camera_cos"] = 0.0
+    quality = fixture_policy["completion_quality_policy"]
+    quality["min_structured_holdout_samples"] = 1
+    quality["rest_min_source_lock_fraction_of_source_foreground"] = 0.0
+    quality["rest_max_source_locked_mean_rgba_l1"] = 1.0
+    quality["rest_max_source_locked_p95_rgba_l1"] = 1.0
+    quality["rest_max_source_foreground_mean_rgba_l1"] = 1.0
+    quality["rest_max_source_foreground_p95_rgba_l1"] = 1.0
+    quality["rest_min_source_alpha_recall"] = 0.0
+    quality["rest_min_source_alpha_precision"] = 0.0
+    quality["rest_max_largest_coherent_alpha_hole_fraction"] = 1.0
+    quality["rest_max_alpha_interior_uncovered_fraction"] = 1.0
+
+    policy_path = tmp_path / "caa_fixture_policy.json"
+    policy_path.write_text(
+        json.dumps(fixture_policy, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    ctx["run_manifest"]["appearance"] = {
+        "backend": "DETERMINISTIC_V1",
+        "policy_document": {
+            "path": str(policy_path.resolve()),
+            "sha256": _sha(policy_path),
+        },
+    }
+
+    r20 = run("20_CAA_BACKEND_PREREGISTERED", preregister_caa_backend_stage)
+    assert r20["diagnostics"]["shipping_eligible"] is True
+    r21 = run("21_CAA_COMPILE", compile_caa_stage)
+    compile_artifact = caa_compile_artifact_from_dict(
+        read_json(
+            next(
+                out
+                for out in r21["outputs"]
+                if out["schema"] == "RealSaS.CAACompileArtifactIR.v2"
+            )["path"]
+        )
+    )
+    assert compile_artifact.total_sample_count > 0
+    assert (
+        compile_artifact.direct_source_sample_count
+        + compile_artifact.other_view_source_sample_count
+        + compile_artifact.compiled_nearest_surface_sample_count
+        + compile_artifact.compiled_global_surface_sample_count
+        == compile_artifact.total_sample_count
+    )
+
+    r22 = run("22_CAA_COMPILE_SEALED", seal_caa_compile_stage)
+    seal = caa_compile_seal_from_dict(
+        read_json(
+            next(
+                out
+                for out in r22["outputs"]
+                if out["schema"] == "RealSaS.CAACompileSealIR.v2"
+            )["path"]
+        )
+    )
+    assert seal.qualification_report["total_appearance_defined"] is True
+    assert seal.qualification_report["direct_source_immutable"] is True
+
+    r23 = run("23_COMPLETE_APPEARANCE_ASSET_BAKED", bake_complete_appearance_stage)
+    asset = complete_appearance_asset_from_dict(
+        read_json(
+            next(
+                out
+                for out in r23["outputs"]
+                if out["schema"] == "RealSaS.CompleteAppearanceAssetIR.v2"
+            )["path"]
+        )
+    )
+    assert len(asset.textures) == 8
+    assert asset.metadata["runtime_generation_forbidden"] is True
+    assert asset.atlas_layout["width"] <= fixture_policy["compile_policy"]["max_atlas_resolution"]
+    assert asset.atlas_layout["height"] <= fixture_policy["compile_policy"]["max_atlas_resolution"]
+
+    r24 = run("24_COMPLETE_APPEARANCE_QUALIFIED", qualify_complete_appearance_stage)
+    qualification = complete_appearance_qualification_from_dict(
+        read_json(
+            next(
+                out
+                for out in r24["outputs"]
+                if out["schema"] == "RealSaS.CompleteAppearanceQualificationIR.v2"
+            )["path"]
+        )
+    )
+    assert qualification.qualification_report["status"] == "PASS_COMPLETE_APPEARANCE"
+    assert qualification.source_lock_exact_fraction == 1.0
+    assert qualification.total_defined_fraction == 1.0
+
+    r25 = run("25_CAA_REFERENCE_REST_RENDER_PROOF", prove_caa_reference_rest_stage)
+    rest = caa_rest_render_proof_from_dict(
+        read_json(
+            next(
+                out
+                for out in r25["outputs"]
+                if out["schema"] == "RealSaS.CAARestRenderProofIR.v2"
+            )["path"]
+        )
+    )
+    assert rest.qualification_report["status"] == "PASS_CAA_REFERENCE_REST"
+    assert rest.qualification_report["every_direction_passed"] is True
+    assert len(rest.views) == 8
+    assert all(row.geometry_visible_pixel_count > 0 for row in rest.views)

@@ -615,6 +615,11 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
         metadata={
             "policy": {
                 "dynamic_max_compiled_unobserved_visible_fraction": 0.20,
+                "dynamic_max_frame_compiled_unobserved_visible_fraction": 1.0,
+                "dynamic_max_connected_compiled_unobserved_visible_fraction": 1.0,
+                "dynamic_max_compiled_global_visible_fraction": 1.0,
+                "dynamic_max_micro_visible_pixel_fraction_per_frame": 1.0,
+                "dynamic_max_unmeasurable_consequential_visible_face_count": 1000000,
                 "dynamic_min_visible_pixels_per_face": 1,
                 "dynamic_min_projected_double_area_px2": 0.01,
                 "dynamic_max_uv_to_surface_condition_number": 64.0,
@@ -941,6 +946,7 @@ def test_v2_stage20_to25_caa_branch_executes_real_adapters_on_subject_free_trian
     fixture_policy["source_lock_policy"]["min_abs_normal_camera_cos"] = 0.0
     quality = fixture_policy["completion_quality_policy"]
     quality["min_structured_holdout_samples"] = 1
+    quality["min_structured_holdout_samples_per_view"] = 1
     quality["rest_min_source_lock_fraction_of_source_foreground"] = 0.0
     quality["rest_max_source_locked_mean_rgba_l1"] = 1.0
     quality["rest_max_source_locked_p95_rgba_l1"] = 1.0

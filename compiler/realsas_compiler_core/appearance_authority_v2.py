@@ -307,6 +307,7 @@ class CAARestViewProofIR:
     rendered_rgba_sha256: str
     rendered_alpha_pixel_count: int
     source_locked_pixel_count: int
+    source_locked_fraction_of_source_foreground: float
     source_locked_exact_pixel_count: int
     source_locked_exact_fraction: float
     source_locked_mean_rgba_l1: float

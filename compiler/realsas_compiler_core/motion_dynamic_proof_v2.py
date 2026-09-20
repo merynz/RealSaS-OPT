@@ -38,10 +38,8 @@ from .motion_dynamic_proof_v1 import (
     _skin_vertices,
     _weights,
 )
-from .product_authority_v1 import (
-    qualified_mesh_lineage_hash,
-    qualified_presentation_lineage_hash,
-)
+from .product_authority_v1 import qualified_mesh_lineage_hash
+from .product_state_v2 import presentation_graph_v2_hash
 from .types import QualificationError
 
 
@@ -209,7 +207,7 @@ def _validate_bindings(*,motion,constraints,product_state,skeleton,mesh,mesh_ski
         raise QualificationError("MOTION_V2_DYNAMIC_MESH_HASH_DRIFT")
     if mesh_skin.mesh_skin_lineage_hash!=_mesh_skin_hash(mesh_skin):
         raise QualificationError("MOTION_V2_DYNAMIC_MESH_SKIN_HASH_DRIFT")
-    if presentation.presentation_lineage_hash!=qualified_presentation_lineage_hash(presentation):
+    if presentation.presentation_lineage_hash!=presentation_graph_v2_hash(presentation):
         raise QualificationError("MOTION_V2_DYNAMIC_PRESENTATION_HASH_DRIFT")
     if mesh_policy.qualification_policy_lineage_hash!=_policy_hash(mesh_policy):
         raise QualificationError("MOTION_V2_DYNAMIC_MESH_POLICY_HASH_DRIFT")

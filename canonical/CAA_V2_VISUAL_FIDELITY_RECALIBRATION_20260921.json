@@ -72,7 +72,9 @@
       "severity": "HIGH",
       "owner": "Visibility",
       "finding": "V2 exact-depth ties are resolved by sealed face index and no near-depth ambiguity/z-fighting gate exists. Determinism therefore does not guarantee artist-authoritative layer order or temporal stability.",
-      "required_closure": "Add exact/near-depth overlap ambiguity evidence and either fail ambiguous physical-depth states or mint an explicit qualified presentation tie authority with a narrowly scoped contract."
+      "required_closure": "Add exact/near-depth overlap ambiguity evidence and either fail ambiguous physical-depth states or mint an explicit qualified presentation tie authority with a narrowly scoped contract.",
+      "repair": "Reference visibility now exposes runner-up depth/owner and exact-depth ambiguity. Rest and Stage45 hard-fail exact coplanar overlap while face-index-only tie semantics remain active.",
+      "status": "PARTIALLY_REPAIRED__NEAR_DEPTH_CALIBRATION_OPEN"
     },
     {
       "id": "VF-10",
@@ -108,6 +110,22 @@
       "owner": "Dynamic calibration",
       "finding": "Current dynamic appearance calibration contains affine stretch controls but no articulated LBS shoulder/elbow/hip bend cases; absolute UV-to-surface condition ceiling 32 is outside the selected relative candidate ladder.",
       "required_closure": "Add subject-free articulated LBS benign/adversarial controls and calibrate every shipping conditioning ceiling from that bank before refreeze."
+    },
+    {
+      "id": "VF-15",
+      "severity": "HIGH",
+      "owner": "Dynamic geometry/presentation continuity",
+      "finding": "Stage45 historically measures only pixels already owned by geometry. A motion-opened background gap between articulated/open-surface parts has owner=-1 and can therefore disappear from the DVI denominator instead of being counted as a hole. Current V2 has no current-authority continuity-underlay or equivalent dynamic coverage proof.",
+      "required_closure": "Introduce a current V2 dynamic continuity/underlay or equivalent coverage authority for articulated boundaries and open surfaces; prove rest+motion jointly so a rest repair cannot create dynamic gaps.",
+      "status": "OPEN"
+    },
+    {
+      "id": "VF-16",
+      "severity": "MEDIUM_HIGH",
+      "owner": "Atlas filtering",
+      "finding": "A future mip/minification repair cannot reuse the current two-pixel per-tile bleed blindly; ordinary atlas mip generation can mix neighboring face tiles across mip levels even when base-level bilinear bleed is correct.",
+      "required_closure": "Qualify mip-safe island padding or per-island/per-face mip generation together with the minification filter contract.",
+      "status": "OPEN"
     }
   ],
   "false_or_overstated_external_findings": [

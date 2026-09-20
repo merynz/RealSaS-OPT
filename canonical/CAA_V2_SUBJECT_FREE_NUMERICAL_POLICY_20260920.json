@@ -58,7 +58,9 @@
     "dynamic_max_connected_compiled_unobserved_visible_fraction": 0.01,
     "dynamic_max_compiled_global_visible_fraction": 0,
     "dynamic_max_micro_visible_pixel_fraction_per_frame": 0.005,
-    "dynamic_max_unmeasurable_consequential_visible_face_count": 0
+    "dynamic_max_unmeasurable_consequential_visible_face_count": 0,
+    "rest_max_exact_depth_ambiguous_fraction": 0,
+    "dynamic_max_exact_depth_ambiguous_fraction": 0
   },
   "rationale": {
     "angle_support": "abs(normal dot camera-forward) >= cos(80deg); at least 10deg away from exact grazing, used only for correspondence eligibility, not RGB quality.",
@@ -70,7 +72,8 @@
     "dynamic_exposure": "Compiled-unobserved appearance is bounded globally, per frame and by largest connected visible patch; COMPILED_GLOBAL visibility is forbidden. These budgets are preregistered in the subject-free visual-fidelity recalibration and may not be relaxed from Knight.",
     "dynamic_appearance_conditioning": "Every consequential dynamically visible face is checked in the intrinsic textured-surface metric. The affine UV-to-posed-3D map and generalized rest-to-posed / previous-to-posed surface metrics bound texture and line-art stretch/shear while remaining invariant to rigid 3D rotation and translation. Screen projection conditioning is diagnostic only so legitimate foreshortening is not misclassified as art deformation. Thresholds are subject-free and may not be tuned from Knight.",
     "dynamic_appearance_conditioning_calibration": "Thresholds are selected by canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json from a subject-free synthetic benign/adversarial deformation bank. They are frozen before Knight and may not be relaxed from witness outcome.",
-    "micro_face_visibility": "Visible face fragments below the conditioning pixel floor are not silently exempt: their screen-pixel mass is independently bounded, and any consequential face that still cannot support intrinsic conditioning is a hard failure."
+    "micro_face_visibility": "Visible face fragments below the conditioning pixel floor are not silently exempt: their screen-pixel mass is independently bounded, and any consequential face that still cannot support intrinsic conditioning is a hard failure.",
+    "visibility_ambiguity": "Exact coplanar overlap between distinct faces is forbidden while V2 exact-depth ties are resolved only by sealed face index. Near-depth ambiguity remains an open subject-free calibration item and may not be guessed from Knight."
   },
   "calibration_contract": "tests/compiler/test_caa_v2_subject_free_policy.py",
   "mutable_after_witness": false,

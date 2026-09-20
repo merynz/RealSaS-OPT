@@ -1,0 +1,90 @@
+{
+  "schema": "RealSaS.DynamicAppearanceConditioningCalibration.v1",
+  "date": "2026-09-21",
+  "status": "PASS_SUBJECT_FREE_SYNTHETIC_CALIBRATION",
+  "witness_used": false,
+  "subject_identity_used": false,
+  "threshold_tuning_from_knight_forbidden": true,
+  "metric_contract": {
+    "shipping_gate": "RIGID_INVARIANT_TEXTURED_SURFACE_DEFORMATION",
+    "screen_projection_conditioning": "DIAGNOSTIC_ONLY",
+    "reason": "Rigid 3D rotation and orthographic foreshortening must not be classified as intrinsic texture or line-art deformation."
+  },
+  "candidate_max_thresholds": [
+    1.5,
+    2.0,
+    2.5,
+    3.0,
+    4.0,
+    6.0,
+    8.0
+  ],
+  "selection_rule": "Choose the smallest preregistered candidate maximum that admits every benign intrinsic-deformation case and rejects every adversarial case for the corresponding metric.",
+  "benign_cases": [
+    {
+      "id": "RIGID_ROTATION",
+      "surface_scale_xy": [1.0, 1.0],
+      "expected_relative_condition": 1.0,
+      "expected_principal_stretch": 1.0
+    },
+    {
+      "id": "UNIFORM_SCALE_150",
+      "surface_scale_xy": [1.5, 1.5],
+      "expected_relative_condition": 1.0,
+      "expected_principal_stretch": 1.5
+    },
+    {
+      "id": "UNIFORM_SCALE_067",
+      "surface_scale_xy": [0.67, 0.67],
+      "expected_relative_condition": 1.0,
+      "expected_principal_stretch": 1.4925373134328357
+    },
+    {
+      "id": "MODERATE_ANISOTROPY",
+      "surface_scale_xy": [1.75, 1.0],
+      "expected_relative_condition": 1.75,
+      "expected_principal_stretch": 1.75
+    }
+  ],
+  "adversarial_cases": [
+    {
+      "id": "SEVERE_ANISOTROPIC_STRETCH",
+      "surface_scale_xy": [4.0, 1.0],
+      "expected_relative_condition": 4.0,
+      "expected_principal_stretch": 4.0
+    },
+    {
+      "id": "NEAR_COLLAPSE",
+      "surface_scale_xy": [1.0, 0.2],
+      "expected_relative_condition": 5.0,
+      "expected_principal_stretch": 5.0
+    }
+  ],
+  "temporal_cases": {
+    "benign_max_adjacent_frame_principal_stretch": 1.5,
+    "adversarial_min_adjacent_frame_principal_stretch": 3.0
+  },
+  "selected_policy": {
+    "dynamic_max_relative_surface_condition_number": 2.0,
+    "dynamic_max_relative_surface_principal_stretch": 2.0,
+    "dynamic_max_adjacent_frame_surface_principal_stretch": 2.0,
+    "dynamic_max_uv_to_surface_condition_number": 32.0,
+    "dynamic_min_visible_pixels_per_face": 4,
+    "dynamic_min_projected_double_area_px2": 1.0
+  },
+  "absolute_uv_condition_rationale": "The absolute UV-to-surface condition ceiling is a conservative address-domain guard coupled to the already-frozen subject-free mesh conditioning floor; relative and temporal deformation quality are independently calibrated above.",
+  "claim_boundary": {
+    "proves": [
+      "bounded intrinsic local texture/line-art stretch and shear on consequential visible faces",
+      "bounded abrupt intrinsic local deformation change between adjacent sampled frames",
+      "rigid-motion invariance of the shipping deformation metric"
+    ],
+    "does_not_prove": [
+      "semantic correctness",
+      "human aesthetic optimality",
+      "animation acting quality",
+      "absence of every possible perceptual artifact"
+    ]
+  },
+  "mutable_after_witness": false
+}

@@ -2,14 +2,10 @@ name: subject2-knight-v2-observation-preflight
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'canonical/SUBJECT2_KNIGHT_V2_WITNESS_ACTIVATION_20260920.json'
 
-# One-shot canonical activation is permitted only after the V2 readiness seal.
-# Ordinary pushes cannot start a witness. The push trigger is removed after the
-# activation run so future witness executions return to explicit manual control.
+# Manual-only while V2 readiness is reopened. This workflow is not scientific
+# witness authority until canonical/V2_IMPLEMENTATION_READINESS.json is resealed
+# after orchestration/artifact dry-run proof.
 
 permissions:
   contents: read

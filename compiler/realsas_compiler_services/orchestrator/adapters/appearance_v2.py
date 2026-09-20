@@ -688,6 +688,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         "min_total_defined_fraction",
         "holdout_band_fraction",
         "min_structured_holdout_samples",
+        "min_structured_holdout_samples_per_view",
         "max_structured_holdout_mean_rgba_l1",
         "max_structured_holdout_p95_rgba_l1",
         "max_provenance_boundary_mean_rgba_l1",
@@ -715,12 +716,43 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         tile_resolution=artifact.tile_resolution,
     )
 
+    holdout_per_view_passed = (
+        len(holdout["per_view"]) == 8
+        and all(
+            int(row.get("holdout_sample_count", 0))
+            >= int(policy["min_structured_holdout_samples_per_view"])
+            and float(row.get("mean_rgba_l1", float("inf")))
+            <= float(policy["max_structured_holdout_mean_rgba_l1"])
+            and float(row.get("p95_rgba_l1", float("inf")))
+            <= float(policy["max_structured_holdout_p95_rgba_l1"])
+            for row in holdout["per_view"]
+        )
+    )
+    seam_per_view_passed = (
+        len(seam["per_view"]) == 8
+        and all(
+            int(row.get("boundary_pair_count", 0)) == 0
+            or (
+                float(row.get("mean_rgba_l1", float("inf")))
+                <= float(policy["max_provenance_boundary_mean_rgba_l1"])
+                and float(row.get("p95_rgba_l1", float("inf")))
+                <= float(policy["max_provenance_boundary_p95_rgba_l1"])
+                and float(row.get("mean_gradient_jump", float("inf")))
+                <= float(policy["max_provenance_boundary_mean_gradient_jump"])
+                and float(row.get("p95_gradient_jump", float("inf")))
+                <= float(policy["max_provenance_boundary_p95_gradient_jump"])
+            )
+            for row in seam["per_view"]
+        )
+    )
+
     passed = (
         source_exact_fraction
         >= float(policy["min_source_lock_exact_fraction"])
         and total_fraction >= float(policy["min_total_defined_fraction"])
         and int(holdout["sample_count"])
         >= int(policy["min_structured_holdout_samples"])
+        and holdout_per_view_passed
         and float(holdout["mean_rgba_l1"])
         <= float(policy["max_structured_holdout_mean_rgba_l1"])
         and float(holdout["p95_rgba_l1"])
@@ -733,6 +765,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         <= float(policy["max_provenance_boundary_mean_gradient_jump"])
         and float(seam["p95_gradient_jump"])
         <= float(policy["max_provenance_boundary_p95_gradient_jump"])
+        and seam_per_view_passed
     )
 
     value = CompleteAppearanceQualificationIR(

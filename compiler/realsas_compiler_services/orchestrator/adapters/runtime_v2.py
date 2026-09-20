@@ -19,8 +19,8 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
 from compiler.realsas_compiler_core.appearance_render_v2 import (
     render_caa_reference,
 )
-from compiler.realsas_compiler_core.motion_dynamic_proof_v1 import (
-    qualified_dynamic_motion_from_dict,
+from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import (
+    qualified_dynamic_motion_v2_from_dict,
 )
 from compiler.realsas_compiler_core.camera_geometry_v2 import qualify_camera_v3
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
@@ -93,11 +93,11 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
             "RealSaS.QualifiedMeshIR.v1",
         )
     )
-    dynamic = qualified_dynamic_motion_from_dict(
+    dynamic = qualified_dynamic_motion_v2_from_dict(
         stage_output_payload(
             ctx,
             "41_MOTION_DYNAMIC_PROOF",
-            "RealSaS.QualifiedDynamicMotionIR.v1",
+            "RealSaS.QualifiedDynamicMotionIR.v2",
         )
     )
     asset = complete_appearance_asset_from_dict(

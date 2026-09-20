@@ -166,6 +166,13 @@ class DynamicVisualIntegrityV2IR:
     compiled_unobserved_visible_fraction: float
     native_reference_mismatch_pixel_count: int
     maximum_frame_native_reference_mismatch_fraction: float
+    dynamic_conditioning_sample_count: int
+    relative_conditioning_sample_count: int
+    temporal_conditioning_sample_count: int
+    maximum_uv_to_screen_condition_number: float
+    maximum_relative_screen_condition_number: float
+    maximum_relative_principal_stretch: float
+    maximum_adjacent_frame_principal_stretch: float
     qualification_report: Json
     visual_integrity_hash: str
     schema_version: str = "RealSaS.DynamicVisualIntegrityIR.v2"
@@ -318,6 +325,13 @@ def dynamic_visual_integrity_from_dict(payload: Mapping[str, Any]) -> DynamicVis
         compiled_unobserved_visible_fraction=float(payload["compiled_unobserved_visible_fraction"]),
         native_reference_mismatch_pixel_count=int(payload["native_reference_mismatch_pixel_count"]),
         maximum_frame_native_reference_mismatch_fraction=float(payload["maximum_frame_native_reference_mismatch_fraction"]),
+        dynamic_conditioning_sample_count=int(payload["dynamic_conditioning_sample_count"]),
+        relative_conditioning_sample_count=int(payload["relative_conditioning_sample_count"]),
+        temporal_conditioning_sample_count=int(payload["temporal_conditioning_sample_count"]),
+        maximum_uv_to_screen_condition_number=float(payload["maximum_uv_to_screen_condition_number"]),
+        maximum_relative_screen_condition_number=float(payload["maximum_relative_screen_condition_number"]),
+        maximum_relative_principal_stretch=float(payload["maximum_relative_principal_stretch"]),
+        maximum_adjacent_frame_principal_stretch=float(payload["maximum_adjacent_frame_principal_stretch"]),
         qualification_report=dict(payload.get("qualification_report") or {}),
         visual_integrity_hash=str(payload["visual_integrity_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.DynamicVisualIntegrityIR.v2"),

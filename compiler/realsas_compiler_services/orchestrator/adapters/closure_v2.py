@@ -15,7 +15,7 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
 from compiler.realsas_compiler_core.motion_dynamic_proof_v1 import (
     qualified_dynamic_motion_from_dict,
 )
-from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
+from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_mesh_from_dict,
     qualified_mesh_skin_from_dict,
     qualified_motion_v2_from_dict,

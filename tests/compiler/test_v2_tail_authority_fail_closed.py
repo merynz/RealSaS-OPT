@@ -352,6 +352,13 @@ def test_dynamic_visual_integrity_decoder_rejects_quality_metric_drift():
         compiled_unobserved_visible_fraction=0.1,
         native_reference_mismatch_pixel_count=0,
         maximum_frame_native_reference_mismatch_fraction=0.0,
+        dynamic_conditioning_sample_count=24,
+        relative_conditioning_sample_count=24,
+        temporal_conditioning_sample_count=16,
+        maximum_uv_to_screen_condition_number=1.2,
+        maximum_relative_screen_condition_number=1.1,
+        maximum_relative_principal_stretch=1.15,
+        maximum_adjacent_frame_principal_stretch=1.05,
         qualification_report={
             "status": "PASS_DYNAMIC_VISUAL_INTEGRITY",
             "undefined_visible_pixel_count": 0,
@@ -365,6 +372,6 @@ def test_dynamic_visual_integrity_decoder_rejects_quality_metric_drift():
     )
     dynamic_visual_integrity_from_dict(value.to_dict())
     tampered = value.to_dict()
-    tampered["compiled_unobserved_visible_fraction"] = 0.9
+    tampered["maximum_relative_principal_stretch"] = 9.0
     with pytest.raises(QualificationError, match="RUNTIME_V2_VISUAL_INTEGRITY_HASH_DRIFT"):
         dynamic_visual_integrity_from_dict(tampered)

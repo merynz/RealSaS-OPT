@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-"""Canonical full-3D motion compilation for Stage 34.
+"""Canonical full-3D motion compilation for Stage 40.
 
 Professional motion is represented as local joint-frame quaternion deltas. Source
 preset rigs are motion evidence only; the target skeleton remains the exact
 QualifiedSkeletonIR. Source clips are canonicalized into REALSAS_OBJECT_FRAME_V1
 before this module sees them.
 
-This module deliberately does not make a motion-quality claim. Stage 35 executes
+This module deliberately does not make a motion-quality claim. Stage 41 executes
 compiled motion on exact M/B and owns dynamic/product proof.
 """
 

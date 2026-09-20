@@ -1,37 +1,74 @@
 # RealSaS-OPT — Current State
 
 **Date:** 2026-09-20  
-**Canonical continuation/execution branch:** `main`  
-**Active experiment gate:** `SUBJECT2_KNIGHT_FULL_CLOSURE`  
-**Active run:** `SUBJECT2_KNIGHT_V2`  
-**Progress:** **0/46** at architecture freeze; fresh execution starts at `01_SOURCE_BYTES_SEALED`  
-**Current state:** `V2_46_STAGE_ARCHITECTURE_BOUND__KNIGHT_FRESH_LINEAGE_STARTED`
+**Canonical branch:** `main`  
+**Current mode:** **V2 IMPLEMENTATION ASSEMBLY**  
+**Witness execution:** **FORBIDDEN until `canonical/V2_IMPLEMENTATION_READINESS.json` says `READY_FOR_WITNESS_EXECUTION`**  
+**Next witness:** Subject-2 Knight, fresh Stage01 lineage after readiness seal  
+**Mainline:** 46-stage dependency DAG; ordinals are display order only
 
 ## Read first
-1. `canonical/ACTIVE_RUN_V2.json`
+
+1. `canonical/V2_IMPLEMENTATION_READINESS.json`
 2. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
-3. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
-4. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
-5. `canonical/AUTHORITY_MAP_V1.json`
-6. this file
+3. `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
+4. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+5. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+6. `canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md`
+7. this file
 
-## Canonical V2 architecture
-Source observation authority -> IRIS/GSA surface evidence -> Stage18 `CanonicalMeshCandidateIR + SurfaceAddressingIR + AppearanceDomainIR` -> Stage19 frozen static carrier -> parallel mechanics and Complete Appearance Authority branches -> presentation structure -> Stage38 complete puppet seal -> motion -> sealed-CAA runtime -> Stage45 Dynamic Visual Integrity -> Stage46 PRODUCT_PASS.
+## The V2 product has three co-equal quality authorities
 
-The mesh is the common canonical domain for mechanics and appearance. IRIS does not own RGB. CAA cannot mutate geometry. Qualified source appearance wins over completion. Runtime performs no generative appearance inference or character relighting.
+### Geometry
+Owns the renderable canonical surface: silhouette capacity, topology, stable addressability and rasterizable triangle conditioning.
 
-## First Knight V2 rule
-Knight restarts from Stage01 under a fresh lineage. The first V2 run intentionally retains the exact controlled eight source renders so the architecture change is the only new variable. This does **not** make eight input views permanent product authority; fixed output directions remain V0...V7 independently.
+### Mechanics
+Owns skeleton, skin, deformation, contacts, motion and dynamic conditioning.
 
-CAA backend order is frozen:
-1. `DETERMINISTIC_V1` first E2E baseline.
-2. `IM2SURFTEX_RESEARCH_ONLY` direct benchmark.
-3. `LEARNED_V2` only after the native deterministic baseline is visible.
+### Appearance
+Owns source-faithful total 2D art: color, alpha, line character, provenance, unseen completion quality, provenance-boundary seams, sampling behavior and temporal visual continuity.
 
-## Scientific boundaries
-- Stage13 remains the conservative geometry gate for the first V2 run; it is no longer interpreted as final appearance fidelity.
-- Numeric source-lock, holdout, seam and compiled-unobserved exposure thresholds must be preregistered subject-free before CAA qualification.
-- Stage17 UNKNOWN boundaries remain conservative in the first V2 run.
-- If Stage35 proves the frozen mesh dynamically inadequate, repair creates a new Stage18 lineage; no in-place post-skin mesh mutation.
-- CAA totality is not sufficient for source fidelity: compiled-unobserved dynamic screen exposure remains a frozen-budget gate.
-- Controlled Knight renders understate real artist cross-view inconsistency; later 8/4/2 source-view ablations must carry that caveat.
+**A failure on any one axis is a product failure. A visually wrong puppet does not pass because its mesh, rig and skin are mechanically valid.**
+
+The target remains Spine-class 2D art with internal 3D mechanics. Mechanics may be 3D; presentation must remain 2D-authored in character.
+
+## Why V2 exists
+
+V1 gave geometry and mechanics rigorous typed authorities and proofs, but appearance remained too close to donor, fallback and renderer logic. It also mixed independent failure classes: carrier coverage, visibility/depth, appearance definedness and texture sampling.
+
+V2 separates them. See `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`.
+
+Key corrections:
+- real DAG execution rather than hidden linear stage semantics;
+- source observations separated from output V0..V7 directions;
+- IRIS/GSA treated as geometry/surface evidence, not final art authority;
+- mesh producer/gate feasibility audited before downstream qualification;
+- stable mesh addressing created with the mesh domain;
+- Complete Appearance Authority makes supported appearance total before runtime;
+- CAA cannot hide geometry, depth or sampling failures;
+- visibility = posed canonical XYZ + z-buffer;
+- art = sealed CAA;
+- premultiplied-alpha filtering/compositing + atlas bleed;
+- native Dynamic Visual Integrity is a product gate, not a cosmetic screenshot.
+
+## Current assembly blocks
+
+Knight does **not** run yet. Current main must first close:
+- IRIS/GSA role and Stage13 geometry-floor redesign;
+- relation-graph / 3-clique / CDT mesh-quality audit;
+- CAA deterministic compile, bake, qualification, holdout and seam logic;
+- source-lock confidence/correspondence rules;
+- premultiplied alpha + bleed end to end;
+- removal of current-path donor/UNSEEN runtime semantics;
+- posed-XYZ visibility/equal-depth proof;
+- mechanics branch revalidation against frozen mesh;
+- presentation and complete puppet seal;
+- motion dynamic exposure budget;
+- Runtime CAA-only binding and package-load verification;
+- Dynamic Visual Integrity attribution;
+- Stage46 closure and editable-authoring export;
+- complete adversarial module audit.
+
+## Knight rule
+
+Only after the implementation-readiness seal is green do we mint a fresh Knight V2 run from Stage01. Exact controlled eight-source input remains the first witness apparatus to isolate architecture changes; it is not a permanent assertion that product input must always contain eight views.

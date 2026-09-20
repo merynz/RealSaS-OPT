@@ -10,10 +10,7 @@ on:
       - 'compiler/**'
       - 'runtime/reference_v4/**'
       - 'runtime/realsas_cpp/**'
-      - 'tests/compiler/**'
-      - 'tests/models/**'
-      - 'tests/iris/test_iris_mainline_source_v1.py'
-      - 'tests/repository/**'
+      - 'tests/**'
       - 'canonical/**'
       - 'requirements/**'
       - 'LICENSE'
@@ -32,7 +29,16 @@ on:
       - 'RESTORATION_STATE.md'
       - 'SYSTEM_INDEX.md'
       - 'AGENTS.md'
+      - 'README.md'
+      - 'REPOSITORY_MAP.md'
+      - 'tools/build_knowledge_artifact_catalog.py'
+      - 'tools/render_authority_map.py'
+      - 'tools/render_rehydration_packet.py'
+      - 'tools/audit_context_coverage.py'
       - '.github/workflows/current_mainline_self_hosted_ci.yml'
+      - '.github/workflows/live_authority_map.yml'
+      - '.github/workflows/subject2_knight_observation_preflight.yml'
+      - '.github/workflows/v2_witness_orchestration_subject_free_dry_run.yml'
   pull_request:
     branches: [main]
   workflow_dispatch:

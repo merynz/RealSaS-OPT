@@ -12,8 +12,8 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
     complete_appearance_asset_from_dict,
     complete_appearance_qualification_from_dict,
 )
-from compiler.realsas_compiler_core.motion_dynamic_proof_v1 import (
-    qualified_dynamic_motion_from_dict,
+from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import (
+    qualified_dynamic_motion_v2_from_dict,
 )
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_mesh_from_dict,
@@ -309,11 +309,11 @@ def seal_product_closure_stage(ctx: dict) -> dict:
             "RealSaS.CompletePuppetStateIR.v2",
         )
     )
-    dynamic = qualified_dynamic_motion_from_dict(
+    dynamic = qualified_dynamic_motion_v2_from_dict(
         stage_output_payload(
             ctx,
             "41_MOTION_DYNAMIC_PROOF",
-            "RealSaS.QualifiedDynamicMotionIR.v1",
+            "RealSaS.QualifiedDynamicMotionIR.v2",
         )
     )
     projection = runtime_projection_from_dict(
@@ -347,7 +347,7 @@ def seal_product_closure_stage(ctx: dict) -> dict:
 
     exact_checks = (
         (
-            dynamic.product_state_binding_hash,
+            dynamic.mechanical_state_binding_hash,
             complete.mechanical_state_binding_hash,
             "DYNAMIC_MECHANICAL_STATE",
         ),

@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.CAAQualificationPolicy.v1",
-  "status": "FROZEN_SUBJECT_FREE_V1",
+  "status": "REOPENED_SUBJECT_FREE_VISUAL_FIDELITY_RECALIBRATION_V2",
   "date": "2026-09-20",
   "scope": "V2_FIRST_PRODUCT_POLICY__SUBJECT_AGNOSTIC",
   "forbidden_inputs": [
@@ -46,25 +46,33 @@
     "rest_min_source_alpha_precision": 0.995,
     "rest_max_largest_coherent_alpha_hole_fraction": 0.001,
     "rest_max_alpha_interior_uncovered_fraction": 0.001,
-    "dynamic_max_compiled_unobserved_visible_fraction": 0.2,
+    "dynamic_max_compiled_unobserved_visible_fraction": 0.02,
     "dynamic_min_visible_pixels_per_face": 4,
     "dynamic_min_projected_double_area_px2": 1,
     "dynamic_max_uv_to_surface_condition_number": 32,
     "dynamic_max_relative_surface_condition_number": 2,
     "dynamic_max_relative_surface_principal_stretch": 2,
-    "dynamic_max_adjacent_frame_surface_principal_stretch": 2
+    "dynamic_max_adjacent_frame_surface_principal_stretch": 2,
+    "min_structured_holdout_samples_per_view": 128,
+    "dynamic_max_frame_compiled_unobserved_visible_fraction": 0.05,
+    "dynamic_max_connected_compiled_unobserved_visible_fraction": 0.01,
+    "dynamic_max_compiled_global_visible_fraction": 0,
+    "dynamic_max_micro_visible_pixel_fraction_per_frame": 0.005,
+    "dynamic_max_unmeasurable_consequential_visible_face_count": 0
   },
   "rationale": {
     "angle_support": "abs(normal dot camera-forward) >= cos(80deg); at least 10deg away from exact grazing, used only for correspondence eligibility, not RGB quality.",
     "boundary_support": "one-pixel Chebyshev safety band removes source silhouette ambiguity without globally eroding art at runtime.",
     "atlas_capacity": "tile stride is 12 texels; floor(2048/12)=170 tiles per axis, hence 28,900 unique face tiles under the 2K product texture cap.",
     "totality": "definedness is exact and non-negotiable; every supported renderable sample must carry appearance.",
-    "holdout_and_seam": "thresholds are preregistered subject-free fault-detection guardrails, not claims of perceptual optimality.",
+    "holdout_and_seam": "Every source direction must independently carry enough silhouette-adjacent holdout evidence and independently satisfy seam/color/gradient bounds; aggregate statistics may not hide a bad view. Thresholds remain subject-free and are being recalibrated for art quality before Knight.",
     "rest_art": "full source-foreground RGBA and source-alpha coverage are first-class product gates, independent of geometry qualification.",
-    "dynamic_exposure": "at most 20% of dynamically visible surface pixels may rely on genuinely compiled-unobserved provenance in the first V2 product policy.",
+    "dynamic_exposure": "Compiled-unobserved appearance is bounded globally, per frame and by largest connected visible patch; COMPILED_GLOBAL visibility is forbidden. These budgets are preregistered in the subject-free visual-fidelity recalibration and may not be relaxed from Knight.",
     "dynamic_appearance_conditioning": "Every consequential dynamically visible face is checked in the intrinsic textured-surface metric. The affine UV-to-posed-3D map and generalized rest-to-posed / previous-to-posed surface metrics bound texture and line-art stretch/shear while remaining invariant to rigid 3D rotation and translation. Screen projection conditioning is diagnostic only so legitimate foreshortening is not misclassified as art deformation. Thresholds are subject-free and may not be tuned from Knight.",
-    "dynamic_appearance_conditioning_calibration": "Thresholds are selected by canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json from a subject-free synthetic benign/adversarial deformation bank. They are frozen before Knight and may not be relaxed from witness outcome."
+    "dynamic_appearance_conditioning_calibration": "Thresholds are selected by canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json from a subject-free synthetic benign/adversarial deformation bank. They are frozen before Knight and may not be relaxed from witness outcome.",
+    "micro_face_visibility": "Visible face fragments below the conditioning pixel floor are not silently exempt: their screen-pixel mass is independently bounded, and any consequential face that still cannot support intrinsic conditioning is a hard failure."
   },
   "calibration_contract": "tests/compiler/test_caa_v2_subject_free_policy.py",
-  "mutable_after_witness": false
+  "mutable_after_witness": false,
+  "visual_fidelity_recalibration": "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
 }

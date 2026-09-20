@@ -535,11 +535,18 @@ def _outputs_verify(row: dict, *, allowed_root: Path | None = None) -> bool:
     for output in outputs:
         path = Path(str(output.get("path", ""))).expanduser().resolve()
         digest = str(output.get("sha256", ""))
+        schema = str(output.get("schema", "") or "")
+        authority_class = str(output.get("authority_class", "") or "")
+        expected_bytes = int(output.get("bytes", -1))
         if allowed_root is not None and not _path_within(path, allowed_root):
             return False
         if (
             not path.is_file()
             or len(digest) != 64
+            or schema in {"", "UNSPECIFIED"}
+            or not authority_class
+            or expected_bytes < 0
+            or path.stat().st_size != expected_bytes
             or sha256_file(path) != digest
         ):
             return False
@@ -554,13 +561,23 @@ def _fingerprint(
     implementation_hash: str,
 ) -> tuple[str, str]:
     by_id = _ledger_map(ledger)
-    dependency_outputs: list[str] = []
+    dependency_outputs: list[dict[str, Any]] = []
     for dependency in stage.get("depends_on", ()):
-        dependency_outputs.extend(
-            str(output["sha256"])
-            for output in by_id[str(dependency)].get("outputs", ())
-            if str(output.get("sha256", ""))
-        )
+        for output in by_id[str(dependency)].get("outputs", ()):
+            digest = str(output.get("sha256", "") or "")
+            if not digest:
+                continue
+            dependency_outputs.append(
+                {
+                    "dependency_stage_id": str(dependency),
+                    "sha256": digest,
+                    "bytes": int(output.get("bytes", -1)),
+                    "schema": str(output.get("schema", "") or ""),
+                    "authority_class": str(
+                        output.get("authority_class", "") or ""
+                    ),
+                }
+            )
     policy_hash = content_sha256(stage["policy"])
     fingerprint = content_sha256(
         {
@@ -568,7 +585,7 @@ def _fingerprint(
             "run_id": ledger["run_id"],
             "stage_id": stage["id"],
             "manifest_subset": _manifest_subset(manifest, stage),
-            "dependency_output_sha256": dependency_outputs,
+            "dependency_output_identities": dependency_outputs,
             "policy_hash": policy_hash,
             "implementation_hash": implementation_hash,
             "pipeline_plan_sha256": ledger["pipeline_plan_sha256"],
@@ -698,15 +715,19 @@ def _seal_outputs(
         expected = str(output.get("sha256", "") or "")
         if expected and expected != digest:
             raise RuntimeError(f"STAGE_OUTPUT_SHA_MISMATCH:{path}")
+        authority_class = str(output.get("authority_class", "") or "")
+        schema = str(output.get("schema", "") or "")
+        if not authority_class:
+            raise RuntimeError(f"STAGE_OUTPUT_AUTHORITY_CLASS_REQUIRED:{path}")
+        if schema in {"", "UNSPECIFIED"}:
+            raise RuntimeError(f"STAGE_OUTPUT_SCHEMA_REQUIRED:{path}")
         sealed.append(
             {
                 "path": str(path),
                 "sha256": digest,
                 "bytes": path.stat().st_size,
-                "authority_class": str(
-                    output.get("authority_class", "SEALED_STAGE_OUTPUT")
-                ),
-                "schema": str(output.get("schema", "UNSPECIFIED")),
+                "authority_class": authority_class,
+                "schema": schema,
             }
         )
     if not sealed:

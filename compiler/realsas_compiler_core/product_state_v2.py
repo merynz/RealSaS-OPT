@@ -94,23 +94,32 @@ def _face_groups(mesh, component_id: str, *, cut_face_pairs=()):
     return tuple(sorted(groups, key=lambda group: (group[0], len(group), group)))
 
 
-def _component_class(component_id: str, mesh, mesh_skin, *, owner_min: float, other_max: float):
+def _face_group_class(
+    face_indices,
+    mesh,
+    mesh_skin,
+    *,
+    owner_min: float,
+    other_max: float,
+):
     rows = {
         str(row.canonical_mesh_vertex_id): row
         for row in mesh_skin.rows
     }
-    vertices = [
-        vertex
-        for vertex in mesh.vertices
-        if str(vertex.component_id) == str(component_id)
-    ]
-    if not vertices:
-        raise QualificationError("PRESENTATION_V2_COMPONENT_VERTEX_EMPTY")
+    vertex_ids = sorted(
+        {
+            str(vertex_id)
+            for face_index in face_indices
+            for vertex_id in mesh.faces[int(face_index)]
+        }
+    )
+    if not vertex_ids:
+        raise QualificationError("PRESENTATION_V2_GROUP_VERTEX_EMPTY")
     common_owner = None
     minimum_owner = 1.0
     maximum_other = 0.0
-    for vertex in vertices:
-        row = rows.get(str(vertex.canonical_mesh_vertex_id))
+    for vertex_id in vertex_ids:
+        row = rows.get(vertex_id)
         if row is None or not row.influences:
             raise QualificationError("PRESENTATION_V2_MESH_SKIN_ROW_MISSING")
         ranked = sorted(
@@ -165,16 +174,6 @@ def build_presentation_structure_v2(
             raise QualificationError(
                 f"PRESENTATION_V2_NONMESH_CARRIER_UNSUPPORTED:{component.component_id}"
             )
-        mechanical_class, rigid_owner, min_owner, max_other = _component_class(
-            component.component_id,
-            mesh,
-            mesh_skin,
-            owner_min=min_rigid_owner_weight,
-            other_max=max_rigid_other_mass,
-        )
-        bone_id = rigid_owner if mechanical_class == "RIGID" else str(skeleton.root_id)
-        if bone_id not in joint_ids:
-            raise QualificationError("PRESENTATION_V2_BONE_UNKNOWN")
         for group_index, face_indices in enumerate(
             _face_groups(
                 mesh,
@@ -182,6 +181,20 @@ def build_presentation_structure_v2(
                 cut_face_pairs=presentation_cut_face_pairs,
             )
         ):
+            mechanical_class, rigid_owner, min_owner, max_other = _face_group_class(
+                face_indices,
+                mesh,
+                mesh_skin,
+                owner_min=min_rigid_owner_weight,
+                other_max=max_rigid_other_mass,
+            )
+            bone_id = (
+                rigid_owner
+                if mechanical_class == "RIGID"
+                else str(skeleton.root_id)
+            )
+            if bone_id not in joint_ids:
+                raise QualificationError("PRESENTATION_V2_BONE_UNKNOWN")
             group_hash = content_sha256(
                 {
                     "mesh": mesh.mesh_lineage_hash,
@@ -295,6 +308,7 @@ def build_presentation_structure_v2(
             "depth_authority_owned_elsewhere": True,
             "categorical_recognition_used": False,
             "conceptual_object_identity_claimed": False,
+            "mechanical_classification_scope": "PRESENTATION_FACE_GROUP",
         },
     )
     value = replace(value, structure_hash=presentation_structure_v2_hash(value))

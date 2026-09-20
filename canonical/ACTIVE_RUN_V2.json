@@ -5,7 +5,7 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-  "pipeline_plan_sha256": "182ecfbd9410782a16a894b7a705f03aee6ce9303cad03823a6fd1f351292df4",
+  "pipeline_plan_sha256": "b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f",
   "status": "ASSEMBLY_IN_PROGRESS__WITNESS_EXECUTION_DISABLED",
   "execution_enabled": false,
   "completed_count": 0,

@@ -30,6 +30,7 @@ VISIBILITY_CONTRACT_V2_HASH = content_sha256(VISIBILITY_CONTRACT_V2)
 class VisibilityRaster:
     owner_face_index: np.ndarray
     depth: np.ndarray
+    barycentric: np.ndarray
     projected_vertices: np.ndarray
     contract_hash: str = VISIBILITY_CONTRACT_V2_HASH
 
@@ -74,6 +75,7 @@ def rasterize_visible_owner(
     by_id = {vertex_ids[i]: projected[i] for i in range(len(vertex_ids))}
     owner = np.full((height, width), -1, dtype=np.int32)
     depth = np.full((height, width), np.inf, dtype=np.float64)
+    barycentric = np.full((height, width, 3), np.nan, dtype=np.float32)
     tie: list[list[tuple[str, ...] | None]] = [
         [None for _ in range(width)] for _ in range(height)
     ]
@@ -119,9 +121,10 @@ def rasterize_visible_owner(
                 ):
                     depth[y, x] = z
                     owner[y, x] = int(face_index)
+                    barycentric[y, x] = (float(w0), float(w1), float(w2))
                     tie[y][x] = face_key
 
-    return VisibilityRaster(owner, depth, projected)
+    return VisibilityRaster(owner, depth, barycentric, projected)
 
 
 def projected_xy_to_source_texel_xy(projected_xy) -> tuple[float, float]:

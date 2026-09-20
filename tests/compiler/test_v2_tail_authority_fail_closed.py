@@ -47,6 +47,9 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
 )
 from compiler.realsas_compiler_core.visibility_v2 import VISIBILITY_CONTRACT_V2_HASH
 from compiler.realsas_compiler_core.types import QualificationError
+from compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2 import (
+    _require_caa_final_mesh_candidate_binding,
+)
 
 
 H = "a" * 64
@@ -382,3 +385,29 @@ def test_dynamic_visual_integrity_decoder_rejects_quality_metric_drift():
     tampered["maximum_relative_surface_principal_stretch"] = 9.0
     with pytest.raises(QualificationError, match="RUNTIME_V2_VISUAL_INTEGRITY_HASH_DRIFT"):
         dynamic_visual_integrity_from_dict(tampered)
+
+
+def test_caa_asset_must_bind_exact_source_candidate_of_final_qualified_mesh():
+    mesh = type("Mesh", (), {
+        "metadata": {"source_candidate_lineage_hash": "a" * 64}
+    })()
+    good_asset = type("Asset", (), {
+        "candidate_mesh_binding_hash": "a" * 64
+    })()
+    assert _require_caa_final_mesh_candidate_binding(mesh, good_asset) == "a" * 64
+
+    wrong_asset = type("Asset", (), {
+        "candidate_mesh_binding_hash": "b" * 64
+    })()
+    with pytest.raises(
+        QualificationError,
+        match="PRESENTATION_V2_CAA_MESH_CANDIDATE_BINDING_DRIFT",
+    ):
+        _require_caa_final_mesh_candidate_binding(mesh, wrong_asset)
+
+    missing_mesh = type("Mesh", (), {"metadata": {}})()
+    with pytest.raises(
+        QualificationError,
+        match="PRESENTATION_V2_MESH_SOURCE_CANDIDATE_BINDING_MISSING",
+    ):
+        _require_caa_final_mesh_candidate_binding(missing_mesh, good_asset)

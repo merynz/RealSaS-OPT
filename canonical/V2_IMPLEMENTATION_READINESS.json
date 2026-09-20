@@ -3,7 +3,7 @@
   "date": "2026-09-20",
   "status": "ASSEMBLY_IN_PROGRESS__WITNESS_EXECUTION_FORBIDDEN",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-  "pipeline_plan_sha256": "94ad6de1aa5f1c5b8b9755ba33e3ca89ec147d5246f5c01ff123c6870d88be0c",
+  "pipeline_plan_sha256": "91a306baf6f1b189dc413d98aceb72e7688b31d1df3b446e1570c6f8402ce584",
   "rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
   "witness_policy": "DO_NOT_START_KNIGHT_UNTIL_STATUS_READY_FOR_WITNESS_EXECUTION",
   "required_proofs": [
@@ -57,7 +57,7 @@
       "proof_id": "VISIBILITY_DEPTH_OWNERSHIP",
       "status": "IN_PROGRESS",
       "sha256": "",
-      "note": "Runtime-v4 posed-XYZ depth exists, but old equal-depth/source-donor semantics and legacy format contradictions must be removed from current V2."
+      "note": "Implementation is bound in the 46-stage V2 DAG; compile, adversarial and native self-hosted qualification pending."
     },
     {
       "proof_id": "PREMULTIPLIED_ALPHA_AND_ATLAS_BLEED",
@@ -72,28 +72,33 @@
     },
     {
       "proof_id": "PRESENTATION_STRUCTURE",
-      "status": "PENDING",
-      "sha256": ""
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Implementation is bound in the 46-stage V2 DAG; compile, adversarial and native self-hosted qualification pending."
     },
     {
       "proof_id": "MOTION_DYNAMIC_EXPOSURE",
-      "status": "PENDING",
-      "sha256": ""
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Implementation is bound in the 46-stage V2 DAG; compile, adversarial and native self-hosted qualification pending."
     },
     {
       "proof_id": "RUNTIME_CAA_ONLY",
-      "status": "PENDING",
-      "sha256": ""
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Implementation is bound in the 46-stage V2 DAG; compile, adversarial and native self-hosted qualification pending."
     },
     {
       "proof_id": "DYNAMIC_VISUAL_INTEGRITY",
-      "status": "PENDING",
-      "sha256": ""
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Implementation is bound in the 46-stage V2 DAG; compile, adversarial and native self-hosted qualification pending."
     },
     {
       "proof_id": "PRODUCT_CLOSURE_AND_AUTHORING",
-      "status": "PENDING",
-      "sha256": ""
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Implementation is bound in the 46-stage V2 DAG; compile, adversarial and native self-hosted qualification pending."
     },
     {
       "proof_id": "ADVERSARIAL_MODULE_AUDIT",

@@ -1,0 +1,62 @@
+{
+  "schema": "RealSaS.CAAQualificationPolicy.v1",
+  "status": "FROZEN_SUBJECT_FREE_V1",
+  "date": "2026-09-20",
+  "scope": "V2_FIRST_PRODUCT_POLICY__SUBJECT_AGNOSTIC",
+  "forbidden_inputs": [
+    "KNIGHT_RESULT",
+    "MAGE_RESULT",
+    "SUBJECT_ID",
+    "SUBJECT_TOPOLOGY_COUNT"
+  ],
+  "compile_policy": {
+    "atlas_layout": "UNIQUE_FACE_BARYCENTRIC_V1",
+    "tile_resolution": 8,
+    "bleed_px": 2,
+    "max_atlas_resolution": 2048,
+    "max_supported_face_count": 28900,
+    "internal_alpha": "PREMULTIPLIED",
+    "transport_png_alpha": "STRAIGHT",
+    "unpremultiply_export_boundary_count": 1
+  },
+  "source_lock_policy": {
+    "min_abs_normal_camera_cos": 0.17364817766693041,
+    "boundary_safe_erosion_px": 1,
+    "min_source_alpha_u8": 1,
+    "transparent_safe_background_is_observed": true,
+    "correspondence_prerequisite": "EXACT_QUALIFIED_CAMERA_AND_OBSERVATION_BINDING"
+  },
+  "completion_quality_policy": {
+    "min_source_lock_exact_fraction": 1,
+    "min_total_defined_fraction": 1,
+    "holdout_band_fraction": 0.15,
+    "min_structured_holdout_samples": 128,
+    "max_structured_holdout_mean_rgba_l1": 0.08,
+    "max_structured_holdout_p95_rgba_l1": 0.2,
+    "max_provenance_boundary_mean_rgba_l1": 0.1,
+    "max_provenance_boundary_p95_rgba_l1": 0.25,
+    "max_provenance_boundary_mean_gradient_jump": 0.08,
+    "max_provenance_boundary_p95_gradient_jump": 0.2,
+    "rest_min_source_lock_fraction_of_source_foreground": 0.5,
+    "rest_max_source_locked_mean_rgba_l1": 0.015,
+    "rest_max_source_locked_p95_rgba_l1": 0.05,
+    "rest_max_source_foreground_mean_rgba_l1": 0.03,
+    "rest_max_source_foreground_p95_rgba_l1": 0.1,
+    "rest_min_source_alpha_recall": 0.995,
+    "rest_min_source_alpha_precision": 0.995,
+    "rest_max_largest_coherent_alpha_hole_fraction": 0.001,
+    "rest_max_alpha_interior_uncovered_fraction": 0.001,
+    "dynamic_max_compiled_unobserved_visible_fraction": 0.2
+  },
+  "rationale": {
+    "angle_support": "abs(normal dot camera-forward) >= cos(80deg); at least 10deg away from exact grazing, used only for correspondence eligibility, not RGB quality.",
+    "boundary_support": "one-pixel Chebyshev safety band removes source silhouette ambiguity without globally eroding art at runtime.",
+    "atlas_capacity": "tile stride is 12 texels; floor(2048/12)=170 tiles per axis, hence 28,900 unique face tiles under the 2K product texture cap.",
+    "totality": "definedness is exact and non-negotiable; every supported renderable sample must carry appearance.",
+    "holdout_and_seam": "thresholds are preregistered subject-free fault-detection guardrails, not claims of perceptual optimality.",
+    "rest_art": "full source-foreground RGBA and source-alpha coverage are first-class product gates, independent of geometry qualification.",
+    "dynamic_exposure": "at most 20% of dynamically visible surface pixels may rely on genuinely compiled-unobserved provenance in the first V2 product policy."
+  },
+  "calibration_contract": "tests/compiler/test_caa_v2_subject_free_policy.py",
+  "mutable_after_witness": false
+}

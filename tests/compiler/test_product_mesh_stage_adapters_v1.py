@@ -614,7 +614,13 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
         qualification_hash="",
         metadata={
             "policy": {
-                "dynamic_max_compiled_unobserved_visible_fraction": 0.20
+                "dynamic_max_compiled_unobserved_visible_fraction": 0.20,
+                "dynamic_min_visible_pixels_per_face": 1,
+                "dynamic_min_projected_double_area_px2": 0.01,
+                "dynamic_max_uv_to_screen_condition_number": 64.0,
+                "dynamic_max_relative_screen_condition_number": 16.0,
+                "dynamic_max_relative_principal_stretch": 8.0,
+                "dynamic_max_adjacent_frame_principal_stretch": 8.0
             },
             "fixture": True,
         },

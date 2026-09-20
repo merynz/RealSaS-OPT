@@ -1,11 +1,11 @@
 {
   "schema": "RealSaS.V2ImplementationReadiness.v1",
   "date": "2026-09-20",
-  "status": "READY_FOR_WITNESS_EXECUTION",
+  "status": "IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
   "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
   "rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
-  "witness_policy": "KNIGHT_MAY_START_ONLY_FROM_A_FRESH_STAGE01_LINEAGE_AFTER_THIS_SEAL",
+  "witness_policy": "WITNESS_FORBIDDEN_UNTIL_ORCHESTRATION_AND_ARTIFACT_DRY_RUN_PROOF_PASSES",
   "required_proofs": [
     "DAG_ORCHESTRATOR",
     "GEOMETRY_ROLE_AND_IRIS_GSA",
@@ -20,7 +20,8 @@
     "RUNTIME_CAA_ONLY",
     "DYNAMIC_VISUAL_INTEGRITY",
     "PRODUCT_CLOSURE_AND_AUTHORING",
-    "ADVERSARIAL_MODULE_AUDIT"
+    "ADVERSARIAL_MODULE_AUDIT",
+    "WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN"
   ],
   "proofs": [
     {
@@ -335,6 +336,22 @@
         "audit_file_sha256": "cd1d79c6d9e7a2909aa16aefc78d14f9df15111b4d7156eeec94e700da527a88",
         "claim": "Modules A-U PASS subject-free self-hosted adversarial audit; no Knight witness or Knight-derived threshold used."
       }
+    },
+    {
+      "proof_id": "WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN",
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Prior readiness seal omitted the actual witness orchestration contract. Two pre-Stage01 apparatus failures exposed stale CLI/ledger assumptions. Must prove fresh run-local ledger materialization, target-closure CLI, workflow contract, artifact schemas and Stage01-08 dry-run before witness re-authorization.",
+      "evidence": {
+        "previous_readiness_commit": "aeb6c2861618a40db33a8f4fc757dbf0cee57494",
+        "apparatus_fail_runs": [
+          35529977829,
+          35530032605
+        ],
+        "witness_data_admissible": false,
+        "threshold_mutation": false,
+        "current_fix_commit": "5ff660d9bd0b49f6e2133b882367a333bf743ce5"
+      }
     }
   ],
   "coequal_product_authorities": [
@@ -344,17 +361,9 @@
   ],
   "appearance_principle": "SPINE_CLASS_2D_ART_IS_A_PRIMARY_PRODUCT_REQUIREMENT_NOT_POST_RENDER_POLISH",
   "readiness_seal": {
-    "status": "PASS",
-    "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
-    "mainline_ci_run_id": 35529673748,
-    "runtime_ci_run_id": 35529375697,
-    "model_source_gate_run_id": 35529673786,
-    "audit_file_sha256": "cd1d79c6d9e7a2909aa16aefc78d14f9df15111b4d7156eeec94e700da527a88",
-    "all_required_proofs_pass": true,
-    "proof_count": 14,
-    "knight_witness_used": false,
-    "knight_threshold_tuning_used": false,
-    "claim": "IMPLEMENTATION_READY_FOR_FIRST_KNIGHT_V2_WITNESS__NOT_A_KNIGHT_PRODUCT_PASS",
-    "sha256": "a3c403158b5ed428b1949e8df07f1b915cb12862d5c58c4ec39f3ff4fca4ed9d"
+    "status": "REVOKED_BY_AUDIT_GAP",
+    "prior_sha256": "a3c403158b5ed428b1949e8df07f1b915cb12862d5c58c4ec39f3ff4fca4ed9d",
+    "reason": "Witness orchestration path was not part of the original readiness closure; stale CLI and ledger assumptions were discovered before Stage01.",
+    "witness_execution_allowed": false
   }
 }

@@ -46,7 +46,13 @@
     "rest_min_source_alpha_precision": 0.995,
     "rest_max_largest_coherent_alpha_hole_fraction": 0.001,
     "rest_max_alpha_interior_uncovered_fraction": 0.001,
-    "dynamic_max_compiled_unobserved_visible_fraction": 0.2
+    "dynamic_max_compiled_unobserved_visible_fraction": 0.2,
+    "dynamic_min_visible_pixels_per_face": 4,
+    "dynamic_min_projected_double_area_px2": 1,
+    "dynamic_max_uv_to_screen_condition_number": 32,
+    "dynamic_max_relative_screen_condition_number": 8,
+    "dynamic_max_relative_principal_stretch": 6,
+    "dynamic_max_adjacent_frame_principal_stretch": 4
   },
   "rationale": {
     "angle_support": "abs(normal dot camera-forward) >= cos(80deg); at least 10deg away from exact grazing, used only for correspondence eligibility, not RGB quality.",
@@ -55,7 +61,8 @@
     "totality": "definedness is exact and non-negotiable; every supported renderable sample must carry appearance.",
     "holdout_and_seam": "thresholds are preregistered subject-free fault-detection guardrails, not claims of perceptual optimality.",
     "rest_art": "full source-foreground RGBA and source-alpha coverage are first-class product gates, independent of geometry qualification.",
-    "dynamic_exposure": "at most 20% of dynamically visible surface pixels may rely on genuinely compiled-unobserved provenance in the first V2 product policy."
+    "dynamic_exposure": "at most 20% of dynamically visible surface pixels may rely on genuinely compiled-unobserved provenance in the first V2 product policy.",
+    "dynamic_appearance_conditioning": "For every consequential dynamically visible face, the affine map from the fixed CAA barycentric UV triangle to posed screen space is bounded by a subject-free condition-number gate. Where a stable rest projection exists, relative condition and principal stretch are also bounded; adjacent visible frames bound abrupt local deformation jumps. This constrains texture/line-art stretch and shear without using Knight results or a semantic/perceptual model."
   },
   "calibration_contract": "tests/compiler/test_caa_v2_subject_free_policy.py",
   "mutable_after_witness": false

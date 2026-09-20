@@ -267,12 +267,31 @@ PM sample_pm(const TextureSet& t,std::uint32_t view,double u,double v) {
     return mix(mix(texel_pm(t,view,x0,y0),texel_pm(t,view,x1,y0),tx),
                mix(texel_pm(t,view,x0,y1),texel_pm(t,view,x1,y1),tx),ty);
 }
-std::uint8_t sample_provenance(const ProvenanceSet& p,std::uint32_t view,double u,double v) {
-    u=std::max(0.0,std::min(1.0,u)); v=std::max(0.0,std::min(1.0,v));
-    const int x=static_cast<int>(std::nearbyint(u*static_cast<double>(p.width-1)));
-    const int y=static_cast<int>(std::nearbyint(v*static_cast<double>(p.height-1)));
+std::uint8_t provenance_texel(const ProvenanceSet& p,std::uint32_t view,int x,int y) {
+    x=std::max(0,std::min(x,static_cast<int>(p.width)-1));
+    y=std::max(0,std::min(y,static_cast<int>(p.height)-1));
     const auto idx=((static_cast<std::size_t>(view)*p.height)+static_cast<std::size_t>(y))*p.width+static_cast<std::size_t>(x);
     return p.value[idx];
+}
+std::uint8_t sample_provenance(const ProvenanceSet& p,std::uint32_t view,double u,double v) {
+    u=std::max(0.0,std::min(1.0,u)); v=std::max(0.0,std::min(1.0,v));
+    const double x=u*static_cast<double>(p.width-1), y=v*static_cast<double>(p.height-1);
+    const int x0=static_cast<int>(std::floor(x)), y0=static_cast<int>(std::floor(y));
+    const int x1=std::min(x0+1,static_cast<int>(p.width)-1), y1=std::min(y0+1,static_cast<int>(p.height)-1);
+    const double tx=x-x0, ty=y-y0;
+    const std::array<double,4> w{
+        (1.0-tx)*(1.0-ty), tx*(1.0-ty), (1.0-tx)*ty, tx*ty
+    };
+    const std::array<std::uint8_t,4> v4{
+        provenance_texel(p,view,x0,y0),
+        provenance_texel(p,view,x1,y0),
+        provenance_texel(p,view,x0,y1),
+        provenance_texel(p,view,x1,y1)
+    };
+    int risk=-1;
+    for(std::size_t i=0;i<4;++i) if(w[i]>1e-12) risk=std::max(risk,static_cast<int>(v4[i]));
+    if(risk<0) throw std::runtime_error("PROVENANCE_BILINEAR_FOOTPRINT_EMPTY");
+    return static_cast<std::uint8_t>(risk);
 }
 std::uint8_t q8(double x) {
     x=std::max(0.0,std::min(1.0,x));

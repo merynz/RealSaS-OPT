@@ -2,8 +2,8 @@
 
 **Date:** 2026-09-20  
 **Canonical branch:** `main`  
-**Current mode:** **V2 IMPLEMENTATION ASSEMBLY**  
-**Witness execution:** **FORBIDDEN until `canonical/V2_IMPLEMENTATION_READINESS.json` says `READY_FOR_WITNESS_EXECUTION`**  
+**Current mode:** **V2 IMPLEMENTATION ASSEMBLY** (`V2_IMPLEMENTATION_ASSEMBLY`)  
+**Witness execution:** **FORBIDDEN until `canonical/V2_IMPLEMENTATION_READINESS.json` says `READY_FOR_WITNESS_EXECUTION`** (`V2_IMPLEMENTATION_ASSEMBLY__WITNESS_EXECUTION_FORBIDDEN`)  
 **Next witness:** Subject-2 Knight, fresh Stage01 lineage after readiness seal  
 **Mainline:** 46-stage dependency DAG; ordinals are display order only
 
@@ -20,7 +20,7 @@
 ## The V2 product has three co-equal quality authorities
 
 ### Geometry
-Owns the renderable canonical surface: silhouette capacity, topology, stable addressability and rasterizable triangle conditioning.
+Owns the renderable canonical surface: silhouette capacity, topology, stable addressability and rasterizable triangle conditioning. The qualified single product geometry identity is `QualifiedMeshIR`; stable surface addressing is carried by `SurfaceAddressingIR`.
 
 ### Mechanics
 Owns skeleton, skin, deformation, contacts, motion and dynamic conditioning.

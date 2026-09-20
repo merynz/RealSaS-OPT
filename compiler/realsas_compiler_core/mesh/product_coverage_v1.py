@@ -170,10 +170,17 @@ def rasterize_triangles_half_integer_top_left(
     return bytes(predicted)
 
 
-def _largest_4_connected(mask: bytes, *, width: int, height: int) -> int:
+def _connected_component_sizes_4(
+    mask: bytes,
+    *,
+    width: int,
+    height: int,
+) -> tuple[int, ...]:
     n = int(width) * int(height)
+    if len(mask) != n:
+        raise QualificationError("G5_CONNECTED_MASK_SIZE_MISMATCH")
     visited = bytearray(n)
-    largest = 0
+    sizes = []
     for seed in range(n):
         if not mask[seed] or visited[seed]:
             continue
@@ -193,8 +200,13 @@ def _largest_4_connected(mask: bytes, *, width: int, height: int) -> int:
                 if nxt >= 0 and mask[nxt] and not visited[nxt]:
                     visited[nxt] = 1
                     q.append(nxt)
-        largest = max(largest, size)
-    return int(largest)
+        sizes.append(size)
+    return tuple(sorted(sizes, reverse=True))
+
+
+def _largest_4_connected(mask: bytes, *, width: int, height: int) -> int:
+    sizes = _connected_component_sizes_4(mask, width=width, height=height)
+    return int(sizes[0]) if sizes else 0
 
 
 def source_connected_component_recall_metrics(

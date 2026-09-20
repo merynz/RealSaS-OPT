@@ -180,7 +180,7 @@ IMPLEMENTATION_CLOSURE_STATIC_PATHS = (
     "tools/render_rehydration_packet.py",
     "tools/audit_context_coverage.py",
     ".github/workflows/live_authority_map.yml",
-    "canonical/AUTHORITY_MAP_V1.json",
+    "compiler/realsas_compiler_services/orchestrator/mainline.py",
     "AGENTS.md",
     "SYSTEM_INDEX.md",
     "REPOSITORY_MAP.md",

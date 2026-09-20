@@ -194,6 +194,20 @@
       "owner": "CAA alpha/color transport precision",
       "finding": "Source sampling correctly premultiplies before bilinear interpolation, but immediately unpremultiplies and quantizes every compiled surface sample back to straight RGBA8. Those straight u8 samples are later baked and premultiplied again at runtime. Low-alpha anti-aliased texels can therefore lose premultiplied color precision even though metadata describes the internal alpha contract as PREMULTIPLIED.",
       "required_closure": "Audit the real alpha representation at every compile/bake/package boundary. Add low-alpha anti-aliased dark/light edge controls, quantify PM round-trip error, and either keep sufficient premultiplied precision through the internal CAA asset or prove that the chosen transport quantization is visually lossless under the product gate."
+    },
+    {
+      "id": "VF-26",
+      "severity": "HIGH",
+      "owner": "Appearance fidelity metrics",
+      "finding": "Current source/holdout/seam quality relies heavily on mean and p95 premultiplied RGBA errors. A sparse but visually salient feature occupying less than the upper 5% of samples (eye line, brim edge, blade edge, thin highlight) can be catastrophically lost while aggregate mean/p95 remain acceptable.",
+      "required_closure": "Add topology/feature-aware visual fidelity evidence: connected high-error region bounds, thin-line/edge recall, high-contrast feature survival and per-component salient-feature controls. Tightening p95 alone is insufficient."
+    },
+    {
+      "id": "VF-27",
+      "severity": "HIGH",
+      "owner": "Cross-view appearance authority",
+      "finding": "Adjacent-view shared-canonical source compatibility is now measured and hash-bound in Stage24 metadata, but qualification explicitly records cross_view_source_compatibility_shipping_gate_frozen=false and the cross-view metrics are absent from the Stage24 passed predicate.",
+      "required_closure": "Calibrate subject-free compatible vs contradictory adjacent-view controls, freeze per-pair/per-component alpha/color/edge conflict bounds and make cross-view compatibility a hard Stage24 gate without requiring naive raw-RGB equality."
     }
   ],
   "false_or_overstated_external_findings": [

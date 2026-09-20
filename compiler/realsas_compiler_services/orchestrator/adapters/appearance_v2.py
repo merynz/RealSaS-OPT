@@ -710,6 +710,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
     seam = provenance_boundary_metrics(
         rgba=arrays["rgba"],
         provenance=arrays["provenance"],
+        source_view=arrays["source_view"],
         sample_positions=arrays["sample_positions"],
         sample_face_index=arrays["sample_face_index"],
         face_count=artifact.face_count,

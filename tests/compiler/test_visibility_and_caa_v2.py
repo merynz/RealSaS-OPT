@@ -58,12 +58,22 @@ def test_visibility_is_geometry_depth_only_and_nearer_face_wins():
     assert set(map(int, np.unique(visible))) == {0}
 
 
-def test_equal_depth_tie_is_sealed_face_index_not_appearance():
+def test_equal_depth_tie_is_sealed_face_index_but_exposed_as_ambiguity_evidence():
     result = rasterize_visible_owner(_overlap_mesh(equal_depth=True), _camera())
-    visible = result.owner_face_index[result.owner_face_index >= 0]
+    visible_mask = result.owner_face_index >= 0
+    visible = result.owner_face_index[visible_mask]
     assert len(visible) > 0
     assert set(map(int, np.unique(visible))) == {0}
     assert VISIBILITY_CONTRACT_V2["exact_depth_tie"] == "SEALED_FACE_INDEX_ONLY"
+    assert np.all(result.second_owner_face_index[visible_mask] == 1)
+    assert np.allclose(result.depth_margin[visible_mask], 0.0, atol=1e-12)
+
+
+def test_separated_overlap_exposes_positive_runner_up_depth_margin():
+    result = rasterize_visible_owner(_overlap_mesh(equal_depth=False), _camera())
+    visible_mask = result.owner_face_index >= 0
+    assert np.any(result.second_owner_face_index[visible_mask] == 1)
+    assert np.all(result.depth_margin[visible_mask] > 0.0)
 
 
 def _candidate():

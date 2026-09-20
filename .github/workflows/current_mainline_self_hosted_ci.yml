@@ -51,7 +51,7 @@ jobs:
       OMP_NUM_THREADS: '1'
       MKL_NUM_THREADS: '1'
       OPENBLAS_NUM_THREADS: '1'
-      REALSAS_RUNTIME_V2_PLAYER: ${{ runner.temp }}/runtime_v2_caa_reference
+      REALSAS_RUNTIME_V2_PLAYER: /tmp/realsas_runtime_v2_caa_reference
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

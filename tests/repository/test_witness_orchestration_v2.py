@@ -72,29 +72,21 @@ def test_witness_workflow_uses_current_cli_and_run_local_ledger_only():
     assert "push:" not in text.split("permissions:", 1)[0]
 
 
-def test_readiness_state_machine_is_consistent_with_orchestration_proof():
+def test_readiness_state_machine_is_consistent_with_required_proofs():
     readiness = json.loads(
         (ROOT / "canonical" / "V2_IMPLEMENTATION_READINESS.json").read_text(
             encoding="utf-8"
         )
     )
-    assert (
-        "WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN"
-        in readiness["required_proofs"]
+    required = tuple(readiness["required_proofs"])
+    by_id = {row["proof_id"]: row for row in readiness["proofs"]}
+    assert set(required) <= set(by_id)
+    all_pass = all(
+        by_id[proof_id]["status"] == "PASS"
+        and len(str(by_id[proof_id].get("sha256", ""))) == 64
+        for proof_id in required
     )
-    proof = next(
-        row
-        for row in readiness["proofs"]
-        if row["proof_id"] == "WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN"
-    )
-    if proof["status"] == "IN_PROGRESS":
-        assert (
-            readiness["status"]
-            == "IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN"
-        )
-        assert str(readiness["readiness_seal"]["status"]).startswith("REVOKED_BY_")
-        assert readiness["readiness_seal"]["witness_execution_allowed"] is False
-    elif proof["status"] == "PASS":
+    if all_pass:
         assert readiness["status"] == "READY_FOR_WITNESS_EXECUTION"
         assert readiness["readiness_seal"]["status"] == "PASS"
         assert readiness["readiness_seal"]["witness_execution_allowed"] is True
@@ -103,7 +95,9 @@ def test_readiness_state_machine_is_consistent_with_orchestration_proof():
             == mainline.implementation_closure_sha256(_plan())
         )
     else:
-        raise AssertionError(proof)
+        assert readiness["status"].endswith("__WITNESS_FORBIDDEN")
+        assert str(readiness["readiness_seal"]["status"]).startswith("REVOKED_BY_")
+        assert readiness["readiness_seal"]["witness_execution_allowed"] is False
 
 
 def test_implementation_audit_execution_class_is_explicit_and_subject_free():

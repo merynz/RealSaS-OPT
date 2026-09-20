@@ -9,6 +9,7 @@ from compiler.realsas_compiler_core.appearance_bake_v2 import (
     bilinear_premultiplied_rgba,
 )
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
+    bilinear_rgba_u8,
     compile_deterministic_caa,
 )
 from compiler.realsas_compiler_core.playback_full_surface_v3 import CameraProjectionV3
@@ -104,6 +105,18 @@ def test_safe_transparent_source_background_is_defined_direct_source_not_unseen(
     direct_alpha = result["rgba"][:, :, 3][direct]
     assert np.any(direct_alpha == 0)
     assert np.any(direct_alpha == 255)
+
+
+def test_source_transport_bilinear_is_premultiplied_safe():
+    image = np.asarray([[[255, 0, 0, 255], [0, 0, 255, 0]]], dtype=np.uint8)
+    sampled = bilinear_rgba_u8(
+        image,
+        np.asarray([[0.5, 0.0]], dtype=np.float64),
+    )[0]
+    assert 126 <= int(sampled[3]) <= 129
+    assert int(sampled[0]) >= 250
+    assert int(sampled[1]) == 0
+    assert int(sampled[2]) == 0
 
 
 def test_premultiplied_bilinear_filtering_does_not_bleed_transparent_rgb():

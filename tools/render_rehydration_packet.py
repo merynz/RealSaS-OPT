@@ -101,7 +101,7 @@ def render(context: dict, authority: dict, plan: dict, ledger: dict, heads: dict
         "# RealSaS — Rehydration Packet",
         "",
         "> GENERATED NAVIGATION/CACHE — NOT INDEPENDENT SCIENTIFIC AUTHORITY.",
-        "> Current continuation is defined by the active-run ledger, exact plan hash, authority map and CURRENT_STATE.md.",
+        "> Current continuation is defined by the governance ledger, exact plan hash, authority map and CURRENT_STATE.md.",
         "",
         "## 60-second state",
         "",
@@ -112,7 +112,7 @@ def render(context: dict, authority: dict, plan: dict, ledger: dict, heads: dict
         f"- Active experiment: {focus['active_experiment']}",
         f"- Most recent closed gate: {focus['most_recent_closed_gate']}",
         f"- Canonical main: {main_head[:12] if main_head != 'MISSING' else main_head}",
-        f"- Active run: {ledger['run_id']} — {ledger['completed_count']}/{ledger['total_count']}; next {ledger.get('next_stage') or 'NONE'}",
+        f"- Governance ledger: {ledger['run_id']} — {ledger['completed_count']}/{ledger['total_count']}; ready {','.join(ledger.get('ready_stage_ids') or ()) or 'NONE'}",
         f"- Plan SHA-256: {ledger['pipeline_plan_sha256']}",
         f"- Promotion block: {focus['promotion_block']}",
         f"- Scope warning: {focus['scope_warning']}",
@@ -122,7 +122,7 @@ def render(context: dict, authority: dict, plan: dict, ledger: dict, heads: dict
         "- Context: canonical/CONTEXT_STATE_V2.json",
         f"- Experiment registry: {auth['experiment_registry']}",
         f"- Scientific journal: {auth['scientific_journal']}",
-        f"- Active run: {auth['active_run_ledger']}",
+        f"- Governance ledger: {auth['active_run_ledger']} (real execution ledgers are run-local under the authority root)",
         f"- Pipeline plan: {authority['pipeline_plan']}",
         "- Product geometry/presentation contract: canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
         f"- Historical detail registry: {auth['historical_experiment_registry']}",
@@ -182,7 +182,7 @@ def render(context: dict, authority: dict, plan: dict, ledger: dict, heads: dict
         lines.append("INVALID — current authority drift detected.")
         lines += [f"- {x}" for x in errors]
     else:
-        lines.append("VALID — current V2/V3 context, active run, plan hash, product authority and live main agree.")
+        lines.append("VALID — current V2/V3 context, governance ledger, plan hash, product authority and live main agree.")
     lines.append("")
     return "\n".join(lines)
 

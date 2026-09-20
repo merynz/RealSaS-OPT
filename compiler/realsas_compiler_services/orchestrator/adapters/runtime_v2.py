@@ -656,6 +656,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         "dynamic_max_compiled_global_visible_fraction",
         "dynamic_max_micro_visible_pixel_fraction_per_frame",
         "dynamic_max_unmeasurable_consequential_visible_face_count",
+        "dynamic_max_exact_depth_ambiguous_fraction",
     )
     if any(key not in policy for key in required_dynamic_visibility):
         raise QualificationError("RUNTIME_V2_DVI_VISIBILITY_POLICY_INCOMPLETE")
@@ -677,12 +678,16 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     max_unmeasurable_consequential = int(
         policy["dynamic_max_unmeasurable_consequential_visible_face_count"]
     )
+    exact_depth_ambiguity_budget = float(
+        policy["dynamic_max_exact_depth_ambiguous_fraction"]
+    )
     for value in (
         exposure_budget,
         frame_exposure_budget,
         connected_exposure_budget,
         global_exposure_budget,
         micro_visible_budget,
+        exact_depth_ambiguity_budget,
     ):
         if not (0.0 <= value <= 1.0):
             raise QualificationError("RUNTIME_V2_DVI_VISIBILITY_BUDGET_INVALID")
@@ -729,6 +734,8 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     max_frame_compiled_fraction = 0.0
     max_connected_compiled_fraction = 0.0
     max_frame_micro_visible_fraction = 0.0
+    exact_depth_ambiguous_pixels = 0
+    max_frame_exact_depth_ambiguous_fraction = 0.0
     frame_count = 0
     conditioning_sample_count = 0
     relative_conditioning_sample_count = 0
@@ -811,6 +818,15 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     view=view,
                     frame_index=frame_index,
                 )
+                exact_depth_count = int(
+                    np.count_nonzero(reference.exact_depth_ambiguity)
+                )
+                exact_depth_ambiguous_pixels += exact_depth_count
+                if visible_count > 0:
+                    max_frame_exact_depth_ambiguous_fraction = max(
+                        max_frame_exact_depth_ambiguous_fraction,
+                        float(exact_depth_count) / float(visible_count),
+                    )
                 mismatch = np.any(rgba != reference.straight_rgba_u8, axis=2)
                 mismatch_count = int(np.count_nonzero(mismatch))
                 mismatch_pixels += mismatch_count
@@ -927,6 +943,11 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         if geometry_visible <= 0
         else float(alpha_transparent) / float(geometry_visible)
     )
+    exact_depth_ambiguous_fraction = (
+        0.0
+        if geometry_visible <= 0
+        else float(exact_depth_ambiguous_pixels) / float(geometry_visible)
+    )
     conditioning_passed = (
         conditioning_sample_count > 0
         and unmeasurable_visible_face_count <= max_unmeasurable_consequential
@@ -950,12 +971,18 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     micro_face_passed = (
         max_frame_micro_visible_fraction <= micro_visible_budget
     )
+    exact_depth_ambiguity_passed = (
+        exact_depth_ambiguous_fraction <= exact_depth_ambiguity_budget
+        and max_frame_exact_depth_ambiguous_fraction
+        <= exact_depth_ambiguity_budget
+    )
     passed = (
         geometry_visible > 0
         and undefined_visible == 0
         and mismatch_pixels == 0
         and exposure_passed
         and micro_face_passed
+        and exact_depth_ambiguity_passed
         and conditioning_passed
     )
     value = DynamicVisualIntegrityV2IR(
@@ -975,6 +1002,9 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         maximum_frame_micro_visible_pixel_fraction=max_frame_micro_visible_fraction,
         consequential_visible_face_count=consequential_visible_face_count,
         unmeasurable_consequential_visible_face_count=unmeasurable_visible_face_count,
+        exact_depth_ambiguous_pixel_count=exact_depth_ambiguous_pixels,
+        exact_depth_ambiguous_fraction=exact_depth_ambiguous_fraction,
+        maximum_frame_exact_depth_ambiguous_fraction=max_frame_exact_depth_ambiguous_fraction,
         native_reference_mismatch_pixel_count=mismatch_pixels,
         maximum_frame_native_reference_mismatch_fraction=max_mismatch_fraction,
         dynamic_conditioning_sample_count=conditioning_sample_count,
@@ -998,6 +1028,11 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "compiled_global_visible_fraction": global_exposure_fraction,
             "maximum_frame_micro_visible_pixel_fraction": max_frame_micro_visible_fraction,
             "micro_visible_face_load_passed": micro_face_passed,
+            "exact_depth_ambiguous_fraction": exact_depth_ambiguous_fraction,
+            "maximum_frame_exact_depth_ambiguous_fraction": (
+                max_frame_exact_depth_ambiguous_fraction
+            ),
+            "exact_depth_ambiguity_passed": exact_depth_ambiguity_passed,
             "native_reference_byte_parity_passed": mismatch_pixels == 0,
             "dynamic_appearance_conditioning_passed": conditioning_passed,
             "dynamic_appearance_policy": dict(conditioning_policy),
@@ -1061,5 +1096,9 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 max_adjacent_frame_surface_principal_stretch
             ),
             "transparent_visible_fraction_diagnostic": transparent_fraction,
+            "exact_depth_ambiguous_fraction": exact_depth_ambiguous_fraction,
+            "maximum_frame_exact_depth_ambiguous_fraction": (
+                max_frame_exact_depth_ambiguous_fraction
+            ),
         },
     }

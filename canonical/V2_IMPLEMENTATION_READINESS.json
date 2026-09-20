@@ -1,11 +1,11 @@
 {
   "schema": "RealSaS.V2ImplementationReadiness.v1",
   "date": "2026-09-21",
-  "status": "READY_FOR_WITNESS_EXECUTION",
+  "status": "REOPENED_APPEARANCE_AND_DYNAMIC_VISUAL_FIDELITY_AUDIT__WITNESS_FORBIDDEN",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
   "pipeline_plan_sha256": "b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f",
   "rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
-  "witness_policy": "IMPLEMENTATION_READY__WITNESS_EXECUTION_REQUIRES_EXPLICIT_USER_APPROVAL",
+  "witness_policy": "WITNESS_FORBIDDEN_UNTIL_APPEARANCE_FIDELITY_REAUDIT_CLOSES_AND_USER_APPROVES",
   "required_proofs": [
     "DAG_ORCHESTRATOR",
     "GEOMETRY_ROLE_AND_IRIS_GSA",
@@ -362,12 +362,12 @@
   ],
   "appearance_principle": "SPINE_CLASS_2D_ART_IS_A_PRIMARY_PRODUCT_REQUIREMENT_NOT_POST_RENDER_POLISH",
   "readiness_seal": {
-    "status": "PASS",
-    "reason": "All required V2 implementation proofs are PASS against the exact documentation-inclusive implementation closure; 46-stage red-team blockers are closed subject-free.",
-    "witness_execution_allowed": true,
+    "status": "REVOKED",
+    "reason": "Post-seal appearance fidelity review found unresolved product blockers: fixed CAA tile_resolution=8 lacks source-frequency/texel-density qualification; deterministic unobserved completion is nearest-surface copy rather than high-fidelity source-constrained completion; cross-view RGB compatibility lacks explicit qualification authority; Stage45 dynamic alpha holes are diagnostic rather than a hard gate; speckled/scattered-hole artifact class is not independently bounded.",
+    "witness_execution_allowed": false,
     "witness_execution_authorized_now": false,
     "user_approval_required": true,
-    "user_approval_state": "AWAITING_EXPLICIT_APPROVAL",
+    "user_approval_state": "BLOCKED_PENDING_APPEARANCE_FIDELITY_RECLOSURE",
     "knight_started": false
   },
   "stage_by_stage_redteam": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
@@ -387,5 +387,13 @@
     "plan_sha256": "b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f",
     "witness_used": false
   },
-  "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e"
+  "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+  "post_seal_reopened_findings": [
+    "CAA_TILE_DENSITY_UNQUALIFIED",
+    "CAA_UNOBSERVED_COMPLETION_QUALITY_INSUFFICIENTLY_STRONG",
+    "CROSS_VIEW_RGB_COMPATIBILITY_NOT_EXPLICITLY_QUALIFIED",
+    "DYNAMIC_ALPHA_HOLES_DIAGNOSTIC_NOT_GATE",
+    "SPECKLED_SCATTERED_HOLE_ARTIFACT_CLASS_NOT_INDEPENDENTLY_BOUNDED",
+    "CURRENT_LEARNED_MODELS_NOT_CLAIMED_FINAL_OR_UNSEEN_READY"
+  ]
 }

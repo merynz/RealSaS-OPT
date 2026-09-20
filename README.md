@@ -3,18 +3,15 @@
 Canonical RealSaS research, compiler, proof and runtime workspace. **Proprietary / all rights reserved.** See `LICENSE` and `THIRD_PARTY_NOTICES.md`.
 
 
-## Current implementation status — 2026-09-20 stage red-team
+## Current implementation status — V2 red-team hardening
 
-The executable V2 contract is infrastructure-green on the self-hosted runner, but **Knight remains forbidden** after a second-pass stage-by-stage product-claim audit.
+The 46-stage V2 contract has passed self-hosted implementation/orchestration closure before red-team. The second-pass red-team found two proof-scope overclaims and the current hardening makes both explicit in machine-readable IR:
 
-- Tested functional head before the red-team documentation commit: `ca9d2d2e59bc517a139c743eb6a91df2e48ac761`.
-- `current-mainline-self-hosted-ci` run **35536134130**: PASS — 48 repository/governance tests, 51 learned/model tests, 281 compiler tests; native CAA player built; `self_hosted_only=true`.
-- `v2-witness-orchestration-subject-free-dry-run` run **35536134136**: PASS — real Stage01–08 target closure, exact schemas/hashes, canonical governance ledger unchanged.
-- Pre-red-team implementation-closure SHA-256: `a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882`.
-- New stage-level red-team authority: `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`.
-- High findings: **RT-37 automatic presentation segmentation** and **RT-45/46 dynamic appearance-quality / closure-claim breadth**.
+- Stage37 automatic presentation segmentation is limited to connected face islands within mechanical components; original artist-layer recovery and connected mechanically-equivalent visual-region auto-splitting are **not** claimed.
+- Stage45 proves exhaustive native dynamic runtime integrity, provenance totality and compiled-unobserved exposure; it explicitly does **not** claim that runtime parity/mechanical conditioning proves professional perceptual 2D-art quality.
+- Stage46 `product_pass` means **V2 executable-contract closure**. Spine-class perceptual quality remains a first-class product target and must be evaluated on the controlled witness; it is not pre-certified by deterministic parity.
 
-The green runs prove that the existing contract executes correctly. They do not erase red-team findings about whether that contract is strong enough for the full Spine-class product claim.
+The hardening is part of the exact implementation closure. Knight may run only after that exact closure is green, readiness is resealed, and the user explicitly approves execution.
 
 ## Current product architecture — RealSaS V2
 
@@ -119,7 +116,7 @@ Current homes:
 - `compiler/realsas_compiler_core/runtime_package_v2.py`
 - `runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp`
 
-Native/reference byte parity and Dynamic Visual Integrity are product gates.
+Native/reference byte parity and Dynamic Visual Integrity are executable runtime-integrity gates. They do not substitute for controlled-witness evaluation of Spine-class perceptual 2D-art quality.
 
 ## Start here
 

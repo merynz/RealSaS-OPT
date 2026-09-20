@@ -20,7 +20,7 @@ Generated `canonical/REHYDRATION_PACKET.md` and `canonical/LIVE_AUTHORITY_MAP.md
 
 ## Current executable lineage
 
-The current executable product path is the 46-stage V2 DAG in `canonical/MAINLINE_EXECUTION_PLAN_V2.json`. The executable contract is self-hosted green, while the stage-level red-team has reopened witness readiness on RT-37 and RT-45/46.
+The current executable product path is the 46-stage V2 DAG in `canonical/MAINLINE_EXECUTION_PLAN_V2.json`. The stage-level red-team is encoded into the current closure: Stage37/45/46 now carry explicit proof-scope boundaries rather than silently overclaiming presentation recovery or perceptual art quality. The exact hardening closure must be green before readiness can be resealed.
 
 There is no alternate repair branch with current product authority. Historical branches remain evidence only unless explicitly promoted by the current authority spine.
 
@@ -63,5 +63,6 @@ They reunite in the complete puppet seal, then motion, deterministic runtime, Dy
 - Visibility is posed canonical geometry + camera depth.
 - Runtime performs no donor search, generative appearance correction, PBR character relighting or hidden retriangulation.
 - A visually incorrect puppet is not accepted because mechanics pass.
+- Runtime-integrity equality is not perceptual-quality authority; native/reference parity may not certify Spine-class visual quality.
 - Current V2 may reuse a generic historical helper only when its semantics still match; obsolete donor/UNSEEN/linear-product semantics may not enter the current import closure.
 - Subject-specific compiler/runtime branches are forbidden.

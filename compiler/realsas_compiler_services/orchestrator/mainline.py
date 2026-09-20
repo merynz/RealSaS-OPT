@@ -126,8 +126,8 @@ def validate_plan(plan: dict) -> str:
         if not _STAGE_RE.fullmatch(stage_id):
             raise RuntimeError(f"MAINLINE_V2_STAGE_ID_INVALID:{stage_id}")
         adapter = str(stage.get("adapter", "")).strip()
-        if not adapter or adapter == "UNBOUND":
-            raise RuntimeError(f"MAINLINE_V2_ADAPTER_NOT_BOUND:{stage_id}")
+        if not adapter:
+            raise RuntimeError(f"MAINLINE_V2_ADAPTER_MISSING:{stage_id}")
         keys = stage.get("manifest_keys")
         if not isinstance(keys, list) or not all(
             isinstance(item, str) and item for item in keys
@@ -164,6 +164,15 @@ def validate_readiness(plan: dict | None = None) -> str:
         )
     if readiness.get("pipeline_plan_sha256") != plan_hash:
         raise RuntimeError("V2_IMPLEMENTATION_READINESS_PLAN_HASH_DRIFT")
+    unbound = [
+        str(stage["id"])
+        for stage in plan["stages"]
+        if str(stage.get("adapter", "")).strip() == "UNBOUND"
+    ]
+    if unbound:
+        raise RuntimeError(
+            "V2_IMPLEMENTATION_UNBOUND_STAGES:" + ",".join(unbound)
+        )
     required = tuple(map(str, readiness.get("required_proofs") or ()))
     if not required:
         raise RuntimeError("V2_IMPLEMENTATION_READINESS_PROOFS_EMPTY")

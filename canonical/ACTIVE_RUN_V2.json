@@ -5,7 +5,7 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-  "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+  "pipeline_plan_sha256": "182ecfbd9410782a16a894b7a705f03aee6ce9303cad03823a6fd1f351292df4",
   "status": "ASSEMBLY_IN_PROGRESS__WITNESS_EXECUTION_DISABLED",
   "execution_enabled": false,
   "completed_count": 0,
@@ -600,6 +600,10 @@
     {
       "event": "CURRENT_DAG_V1_ADAPTER_NAMESPACE_REMOVED",
       "note": "All 46 current plan adapters now resolve through generic/current or V2 adapter namespaces; historical V1 adapters are outside current execution closure."
+    },
+    {
+      "event": "PLAN_CACHE_SCOPE_CORRECTION",
+      "note": "Stage41 now fingerprints observation manifest authority; Stage42 has no direct runtime manifest dependency; phantom PresentationTimelineIR title removed."
     }
   ]
 }

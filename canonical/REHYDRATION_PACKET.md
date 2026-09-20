@@ -1,7 +1,7 @@
 # RealSaS — Rehydration Packet
 
 > GENERATED NAVIGATION/CACHE — NOT INDEPENDENT SCIENTIFIC AUTHORITY.
-> Current continuation is defined by the active-run ledger, exact plan hash, authority map and CURRENT_STATE.md.
+> Current continuation is defined by the governance ledger, exact plan hash, authority map and CURRENT_STATE.md.
 
 ## 60-second state
 
@@ -11,8 +11,8 @@
 - Current state: V2_IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN
 - Active experiment: V2_IMPLEMENTATION_ASSEMBLY
 - Most recent closed gate: PRIOR_READINESS_SEAL_REVOKED_AFTER_PRE_STAGE01_ORCHESTRATION_GAP
-- Canonical main: 55ee92851e13
-- Active run: V2_IMPLEMENTATION_ASSEMBLY — 0/46; next NONE
+- Canonical main: 8a2cbb223797
+- Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
 - Plan SHA-256: a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1
 - Promotion block: Do not execute Knight. Prove run-local ledger initialization, current target-closure CLI, workflow contract and Stage01-08 artifact/output schemas before resealing readiness.
 - Scope warning: No Knight-derived threshold choice is allowed during V2 assembly.
@@ -22,9 +22,11 @@
 - Context: canonical/CONTEXT_STATE_V2.json
 - Experiment registry: canonical/EXPERIMENT_REGISTRY_V3.json
 - Scientific journal: canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl
-- Active run: canonical/ACTIVE_RUN_V2.json
+- Governance ledger: canonical/ACTIVE_RUN_V2.json (real execution ledgers are run-local under the authority root)
 - Pipeline plan: canonical/MAINLINE_EXECUTION_PLAN_V2.json
-- Product geometry/presentation contract: canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md
+- Canonical architecture: canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json
+- Complete appearance contract: canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json
+- Frozen CAA numerical policy: canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json
 - Historical detail registry: canonical/EXPERIMENT_REGISTRY_V2.json
 - Historical scientific journal: canonical/SCIENTIFIC_JOURNAL_V1.jsonl
 
@@ -97,12 +99,11 @@ Read in this order:
 8. canonical/ACTIVE_RUN_V2.json
 9. canonical/EXPERIMENT_REGISTRY_V3.json
 10. canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl
-11. canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md
-12. CURRENT_STATE.md
-13. canonical/CONTEXT_STATE_V2.json
+11. CURRENT_STATE.md
+12. canonical/CONTEXT_STATE_V2.json
 
 Resume rule: All required readiness proofs PASS with SHA-256 identities, every plan adapter bound, DAG and adversarial tests green, then status becomes READY_FOR_WITNESS_EXECUTION.
 
 ## Packet validity
 
-VALID — current V2/V3 context, active run, plan hash, product authority and live main agree.
+VALID — current V2/V3 context, governance ledger, plan hash, product authority and live main agree.

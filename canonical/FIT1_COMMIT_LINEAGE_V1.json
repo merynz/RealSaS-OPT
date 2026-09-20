@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "55ee92851e138108c2b72ac957f5eef69c40295e",
+    "main": "8a2cbb2237975cccc2d2cb1b075340879e454daa",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -115,7 +115,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2282,
+  "commit_count": 2307,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -117738,6 +117738,547 @@
       ],
       "subsystem_tags": [
         "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8eb5120b4657e95fcaf94ae111a1eedb07799b87",
+      "parents": [
+        "55ee92851e138108c2b72ac957f5eef69c40295e"
+      ],
+      "author_time": "2026-09-20T22:38:29+03:00",
+      "committer_time": "2026-09-20T22:38:29+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cf434caee2384e8500a9c069d9cf3046fda72e0b",
+      "parents": [
+        "8eb5120b4657e95fcaf94ae111a1eedb07799b87"
+      ],
+      "author_time": "2026-09-20T22:38:55+03:00",
+      "committer_time": "2026-09-20T22:38:55+03:00",
+      "subject": "core v2: split pure camera geometry from legacy playback ontology",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/camera_geometry_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9143576d0b4ccc107f734ce5faddb77fc196c863",
+      "parents": [
+        "cf434caee2384e8500a9c069d9cf3046fda72e0b"
+      ],
+      "author_time": "2026-09-20T22:38:58+03:00",
+      "committer_time": "2026-09-20T22:38:58+03:00",
+      "subject": "core v2: split pure raster contract from legacy playback ontology",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/raster_contract_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ac0bf266ebaae16e0e6f6fd36a8594d6c6c6bb30",
+      "parents": [
+        "9143576d0b4ccc107f734ce5faddb77fc196c863"
+      ],
+      "author_time": "2026-09-20T22:39:01+03:00",
+      "committer_time": "2026-09-20T22:39:01+03:00",
+      "subject": "core v2: split pure silhouette metrics from old rest appearance path",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/silhouette_metrics_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e731d0ebf4948fdbdd06d8cd2fc5892e9aaa415b",
+      "parents": [
+        "ac0bf266ebaae16e0e6f6fd36a8594d6c6c6bb30"
+      ],
+      "author_time": "2026-09-20T22:39:22+03:00",
+      "committer_time": "2026-09-20T22:39:22+03:00",
+      "subject": "compat: re-export neutral camera type from historical playback bridge",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/playback_full_surface_v3.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "117753ef9c37c0e95573259b6cc04973c1c76d24",
+      "parents": [
+        "e731d0ebf4948fdbdd06d8cd2fc5892e9aaa415b"
+      ],
+      "author_time": "2026-09-20T22:39:27+03:00",
+      "committer_time": "2026-09-20T22:39:27+03:00",
+      "subject": "v2 dependency boundary: use pure camera/silhouette geometry",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/camera_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "309a7d911a70b311920a454a104bfdaa5853fefc",
+      "parents": [
+        "117753ef9c37c0e95573259b6cc04973c1c76d24"
+      ],
+      "author_time": "2026-09-20T22:39:32+03:00",
+      "committer_time": "2026-09-20T22:39:32+03:00",
+      "subject": "v2 dependency boundary: use pure camera/silhouette geometry",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/artifact_codec_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9721820a4ee247c6db1fe97fd391cd000b16521a",
+      "parents": [
+        "309a7d911a70b311920a454a104bfdaa5853fefc"
+      ],
+      "author_time": "2026-09-20T22:39:36+03:00",
+      "committer_time": "2026-09-20T22:39:36+03:00",
+      "subject": "v2 dependency boundary: use pure camera/silhouette geometry",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/visibility_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "afa987789bfa2d6daa9fae95e27cd0e418d12be7",
+      "parents": [
+        "9721820a4ee247c6db1fe97fd391cd000b16521a"
+      ],
+      "author_time": "2026-09-20T22:39:42+03:00",
+      "committer_time": "2026-09-20T22:39:42+03:00",
+      "subject": "v2 dependency boundary: use pure camera/silhouette geometry",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5ce4c7f4d0fd35023d1d1d451a2d1adef5e6f469",
+      "parents": [
+        "afa987789bfa2d6daa9fae95e27cd0e418d12be7"
+      ],
+      "author_time": "2026-09-20T22:39:48+03:00",
+      "committer_time": "2026-09-20T22:39:48+03:00",
+      "subject": "v2 dependency boundary: use pure camera/silhouette geometry",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e0961a8b4315ebc44073ee6ab628850de7e63a15",
+      "parents": [
+        "5ce4c7f4d0fd35023d1d1d451a2d1adef5e6f469"
+      ],
+      "author_time": "2026-09-20T22:40:02+03:00",
+      "committer_time": "2026-09-20T22:40:02+03:00",
+      "subject": "v2 dependency boundary: use pure camera/silhouette geometry",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "399f8214f3a261a2ac3d86a337ff7686352e3da2",
+      "parents": [
+        "e0961a8b4315ebc44073ee6ab628850de7e63a15"
+      ],
+      "author_time": "2026-09-20T22:40:08+03:00",
+      "committer_time": "2026-09-20T22:40:08+03:00",
+      "subject": "v2 dependency boundary: use pure camera/silhouette geometry",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bff52f8b250119e048d743025e91dea1df908c35",
+      "parents": [
+        "399f8214f3a261a2ac3d86a337ff7686352e3da2"
+      ],
+      "author_time": "2026-09-20T22:40:13+03:00",
+      "committer_time": "2026-09-20T22:40:13+03:00",
+      "subject": "v2 dependency boundary: use pure camera/silhouette geometry",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_3d_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1615822b920833f97db9b01afc1d820a86eb4ea4",
+      "parents": [
+        "bff52f8b250119e048d743025e91dea1df908c35"
+      ],
+      "author_time": "2026-09-20T22:40:18+03:00",
+      "committer_time": "2026-09-20T22:40:18+03:00",
+      "subject": "v2 dependency boundary: use pure camera/silhouette geometry",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f482b314a19dc54f43b60a5b381055b746581325",
+      "parents": [
+        "1615822b920833f97db9b01afc1d820a86eb4ea4"
+      ],
+      "author_time": "2026-09-20T22:40:29+03:00",
+      "committer_time": "2026-09-20T22:40:29+03:00",
+      "subject": "mesh coverage: detach pure raster geometry from legacy playback ontology",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/product_coverage_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f19fa17468f6f354c0994b96ba38e11b30c99b41",
+      "parents": [
+        "f482b314a19dc54f43b60a5b381055b746581325"
+      ],
+      "author_time": "2026-09-20T22:40:47+03:00",
+      "committer_time": "2026-09-20T22:40:47+03:00",
+      "subject": "test: prove V2 pure camera and silhouette dependency split has no metric drift",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_v2_geometry_dependency_split.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ac6a56d9628d125007661914ef9e5d3a866b8bd1",
+      "parents": [
+        "f19fa17468f6f354c0994b96ba38e11b30c99b41"
+      ],
+      "author_time": "2026-09-20T22:41:25+03:00",
+      "committer_time": "2026-09-20T22:41:25+03:00",
+      "subject": "authority: replace stale 40-stage Knight registry with current V2 audit",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/EXPERIMENT_REGISTRY_V3.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b9a4383f8f971d08b744b1bfa01fb625d7631e20",
+      "parents": [
+        "ac6a56d9628d125007661914ef9e5d3a866b8bd1"
+      ],
+      "author_time": "2026-09-20T22:41:30+03:00",
+      "committer_time": "2026-09-20T22:41:30+03:00",
+      "subject": "authority tooling: render DAG ready set and governance-ledger semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/render_rehydration_packet.py"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "03354e22fac41a0755646d192c72ad46ff2800dc",
+      "parents": [
+        "b9a4383f8f971d08b744b1bfa01fb625d7631e20"
+      ],
+      "author_time": "2026-09-20T22:42:21+03:00",
+      "committer_time": "2026-09-20T22:42:21+03:00",
+      "subject": "authority: remove superseded donor-era documents from V2 rehydration path",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/AUTHORITY_MAP_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "39218562e71e5e5f628d09e3f1d28c91be26a19c",
+      "parents": [
+        "03354e22fac41a0755646d192c72ad46ff2800dc"
+      ],
+      "author_time": "2026-09-20T22:42:30+03:00",
+      "committer_time": "2026-09-20T22:42:30+03:00",
+      "subject": "authority tooling: stop presenting donor-era presentation contract as current",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/render_rehydration_packet.py"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8cc3d6cabe763897fc7b3c668c5820f186e43226",
+      "parents": [
+        "39218562e71e5e5f628d09e3f1d28c91be26a19c"
+      ],
+      "author_time": "2026-09-20T22:43:47+03:00",
+      "committer_time": "2026-09-20T22:43:47+03:00",
+      "subject": "orchestrator: lazy-load mainline to eliminate duplicate CLI module execution",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/__init__.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "74c8d56919ea53d22f5c7af57a372ed7687ed803",
+      "parents": [
+        "8cc3d6cabe763897fc7b3c668c5820f186e43226"
+      ],
+      "author_time": "2026-09-20T22:44:01+03:00",
+      "committer_time": "2026-09-20T22:44:01+03:00",
+      "subject": "test: bind Stage13 V2 geometry test to neutral silhouette metric",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_stage13_geometry_gate_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "212fe826ed448644647d03732d4d42fdc396dc2f",
+      "parents": [
+        "74c8d56919ea53d22f5c7af57a372ed7687ed803"
+      ],
+      "author_time": "2026-09-20T22:45:10+03:00",
+      "committer_time": "2026-09-20T22:45:10+03:00",
+      "subject": "test: bind continuity to V2 architecture and CAA authorities",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_current_continuity_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "341d5d5dd8675169fd22a8c033cddb60f5c59f87",
+      "parents": [
+        "212fe826ed448644647d03732d4d42fdc396dc2f"
+      ],
+      "author_time": "2026-09-20T22:45:15+03:00",
+      "committer_time": "2026-09-20T22:45:15+03:00",
+      "subject": "docs: remove donor-era presentation document from current agent authority order",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "AGENTS.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8a2cbb2237975cccc2d2cb1b075340879e454daa",
+      "parents": [
+        "341d5d5dd8675169fd22a8c033cddb60f5c59f87"
+      ],
+      "author_time": "2026-09-20T22:45:20+03:00",
+      "committer_time": "2026-09-20T22:45:20+03:00",
+      "subject": "authority tooling: audit current V2 architecture and CAA roots, not donor-era contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/audit_context_coverage.py"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

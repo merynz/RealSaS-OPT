@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `ef60782c7cf03d063f760684cac3a947f1e070ccb49c7adf0a843c4f55c2dc1e`
+> State fingerprint: `f86c5cea73b59555077b60abf2195a6c37e4d69324a4f924fd3b157b7860e5ec`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -13,7 +13,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 - Required labels: `self-hosted, linux, x64, realsas`
 - Known runner: `realsas-self-hosted`
 - Operator path hint: `$HOME/realsas_authority`
-- Budget policy: ONE_MANUAL_E2E_TRIGGER__RESUME_HASH_VERIFIED_STAGES__NO_AUTOMATIC_REFIT
+- Budget policy: LATEST_HEAD_SELF_HOSTED_AUDITS__WITNESS_MANUAL_ONLY_AFTER_READINESS__RUN_LOCAL_LEDGER_REQUIRED
 
 ## Rehydration order
 
@@ -27,15 +27,14 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 8. `canonical/ACTIVE_RUN_V2.json`
 9. `canonical/EXPERIMENT_REGISTRY_V3.json`
 10. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-11. `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`
-12. `CURRENT_STATE.md`
-13. `canonical/CONTEXT_STATE_V2.json`
+11. `CURRENT_STATE.md`
+12. `canonical/CONTEXT_STATE_V2.json`
 
 ## Live experiment register
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `V2_IMPLEMENTATION_ASSEMBLY` | `ACTIVE__WITNESS_EXECUTION_FORBIDDEN_UNTIL_READINESS_SEAL` | `main` | `55ee92851e13` | Can the 46-stage RealSaS V2 DAG be made internally complete, adversarially audited and executable with geometry, mechanics and appearance as co-equal product authorities before any Knight outcome is observed? | Knight product pass; unseen generalization; learned appearance quality; source-view cardinality reduction |
+| `V2_IMPLEMENTATION_ASSEMBLY` | `ACTIVE__IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN` | `main` | `8a2cbb223797` | Can the 46-stage RealSaS V2 DAG, run-local orchestration and artifact authority close subject-free with geometry, mechanics and appearance as co-equal product authorities before any admissible Knight witness? | Knight product pass; unseen generalization; learned appearance quality; source-view cardinality reduction |
 
 ## Branch inventory — observed live
 
@@ -45,7 +44,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `55ee92851e13` | canonical continuation branch |
+| `main` | `8a2cbb223797` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -222,6 +221,8 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 - Visibility is posed canonical geometry plus camera depth; appearance is CAA; texture alpha may not replace depth ownership.
 - CAA totality cannot rescue geometry, visibility, conditioning, sampling, or dynamic visual-integrity failures.
 - PRODUCT_PASS requires Stage46 after native dynamic visual integrity.
+- Canonical ACTIVE_RUN_V2 is implementation-governance authority only; real execution ledgers are run-local under $REALSAS_AUTHORITY_ROOT/runs/<run_id>/ACTIVE_RUN_V2.json.
+- Historical donor/QualifiedAppearanceSet/Runtime-v4 documents remain evidence only and are not current V2 execution authority.
 
 ## Update semantics
 

@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2282**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2307**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2294,6 +2294,31 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-20T22:35:00+03:00` | `a91e6258b08c` | yes | CI_TEST, COMPILER_PROOF | test: prove narrow V2 presentation codec preserves sealed IR semantics | `tests/compiler/test_artifact_codec_v2.py` | `main` |
 | `2026-09-20T22:36:52+03:00` | `e3594bb229b9` | yes | COMPILER_PROOF | orchestrator v2: confine stage outputs and bind manifest run identity | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
 | `2026-09-20T22:37:04+03:00` | `55ee92851e13` | yes | CI_TEST | test: red-team run manifest identity and stage output confinement | `tests/repository/test_witness_orchestration_v2.py` | `main` |
+| `2026-09-20T22:38:29+03:00` | `8eb5120b4657` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-20T22:38:55+03:00` | `cf434caee238` | yes | COMPILER_PROOF | core v2: split pure camera geometry from legacy playback ontology | `compiler/realsas_compiler_core/camera_geometry_v2.py` | `main` |
+| `2026-09-20T22:38:58+03:00` | `9143576d0b4c` | yes | COMPILER_PROOF | core v2: split pure raster contract from legacy playback ontology | `compiler/realsas_compiler_core/raster_contract_v2.py` | `main` |
+| `2026-09-20T22:39:01+03:00` | `ac0bf266ebaa` | yes | COMPILER_PROOF | core v2: split pure silhouette metrics from old rest appearance path | `compiler/realsas_compiler_core/silhouette_metrics_v2.py` | `main` |
+| `2026-09-20T22:39:22+03:00` | `e731d0ebf494` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | compat: re-export neutral camera type from historical playback bridge | `compiler/realsas_compiler_core/playback_full_surface_v3.py` | `main` |
+| `2026-09-20T22:39:27+03:00` | `117753ef9c37` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | v2 dependency boundary: use pure camera/silhouette geometry | `compiler/realsas_compiler_core/camera_authority_v1.py` | `main` |
+| `2026-09-20T22:39:32+03:00` | `309a7d911a70` | yes | COMPILER_PROOF | v2 dependency boundary: use pure camera/silhouette geometry | `compiler/realsas_compiler_core/artifact_codec_v2.py` | `main` |
+| `2026-09-20T22:39:36+03:00` | `9721820a4ee2` | yes | COMPILER_PROOF | v2 dependency boundary: use pure camera/silhouette geometry | `compiler/realsas_compiler_core/visibility_v2.py` | `main` |
+| `2026-09-20T22:39:42+03:00` | `afa987789bfa` | yes | COMPILER_PROOF | v2 dependency boundary: use pure camera/silhouette geometry | `compiler/realsas_compiler_core/appearance_compile_v2.py` | `main` |
+| `2026-09-20T22:39:48+03:00` | `5ce4c7f4d0fd` | yes | COMPILER_PROOF, IRIS_GSA | v2 dependency boundary: use pure camera/silhouette geometry | `compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py` | `main` |
+| `2026-09-20T22:40:02+03:00` | `e0961a8b4315` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | v2 dependency boundary: use pure camera/silhouette geometry | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
+| `2026-09-20T22:40:08+03:00` | `399f8214f3a2` | yes | COMPILER_PROOF | v2 dependency boundary: use pure camera/silhouette geometry | `compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py` | `main` |
+| `2026-09-20T22:40:13+03:00` | `bff52f8b2501` | yes | COMPILER_PROOF | v2 dependency boundary: use pure camera/silhouette geometry | `compiler/realsas_compiler_core/motion_3d_v1.py` | `main` |
+| `2026-09-20T22:40:18+03:00` | `1615822b9208` | yes | COMPILER_PROOF, IRIS_GSA | v2 dependency boundary: use pure camera/silhouette geometry | `compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py` | `main` |
+| `2026-09-20T22:40:29+03:00` | `f482b314a19d` | yes | COMPILER_PROOF | mesh coverage: detach pure raster geometry from legacy playback ontology | `compiler/realsas_compiler_core/mesh/product_coverage_v1.py` | `main` |
+| `2026-09-20T22:40:47+03:00` | `f19fa17468f6` | yes | CI_TEST, COMPILER_PROOF | test: prove V2 pure camera and silhouette dependency split has no metric drift | `tests/compiler/test_v2_geometry_dependency_split.py` | `main` |
+| `2026-09-20T22:41:25+03:00` | `ac6a56d9628d` | yes | GOVERNANCE_CONTINUITY | authority: replace stale 40-stage Knight registry with current V2 audit | `canonical/EXPERIMENT_REGISTRY_V3.json` | `main` |
+| `2026-09-20T22:41:30+03:00` | `b9a4383f8f97` | yes | GOVERNANCE_CONTINUITY | authority tooling: render DAG ready set and governance-ledger semantics | `tools/render_rehydration_packet.py` | `main` |
+| `2026-09-20T22:42:21+03:00` | `03354e22fac4` | yes | GOVERNANCE_CONTINUITY | authority: remove superseded donor-era documents from V2 rehydration path | `canonical/AUTHORITY_MAP_V1.json` | `main` |
+| `2026-09-20T22:42:30+03:00` | `39218562e71e` | yes | GOVERNANCE_CONTINUITY | authority tooling: stop presenting donor-era presentation contract as current | `tools/render_rehydration_packet.py` | `main` |
+| `2026-09-20T22:43:47+03:00` | `8cc3d6cabe76` | yes | COMPILER_PROOF | orchestrator: lazy-load mainline to eliminate duplicate CLI module execution | `compiler/realsas_compiler_services/orchestrator/__init__.py` | `main` |
+| `2026-09-20T22:44:01+03:00` | `74c8d56919ea` | yes | CI_TEST, COMPILER_PROOF | test: bind Stage13 V2 geometry test to neutral silhouette metric | `tests/compiler/test_stage13_geometry_gate_v2.py` | `main` |
+| `2026-09-20T22:45:10+03:00` | `212fe826ed44` | yes | CI_TEST, GOVERNANCE_CONTINUITY | test: bind continuity to V2 architecture and CAA authorities | `tests/repository/test_current_continuity_authority_v2.py` | `main` |
+| `2026-09-20T22:45:15+03:00` | `341d5d5dd867` | yes | GOVERNANCE_CONTINUITY | docs: remove donor-era presentation document from current agent authority order | `AGENTS.md` | `main` |
+| `2026-09-20T22:45:20+03:00` | `8a2cbb223797` | yes | GOVERNANCE_CONTINUITY | authority tooling: audit current V2 architecture and CAA roots, not donor-era contract | `tools/audit_context_coverage.py` | `main` |
 
 ## Use rule
 

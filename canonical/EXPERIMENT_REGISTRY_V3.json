@@ -1,15 +1,27 @@
 {
   "schema": "RealSaS.ExperimentRegistry.v3",
-  "date": "2026-09-18",
+  "date": "2026-09-20",
   "active_execution_branch": "main",
   "experiments": [
     {
-      "id": "SUBJECT2_KNIGHT_FULL_CLOSURE",
-      "status": "ACTIVE__MAINLINE_ORCHESTRATOR_BINDING",
+      "id": "V2_IMPLEMENTATION_ASSEMBLY",
+      "status": "ACTIVE__IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN",
       "branch": "main",
-      "scope": "Knight as exact controlled witness under subject-agnostic architecture",
-      "next_stage": "01_SOURCE_BYTES_SEALED",
-      "progress": "0/40",
+      "scope": "Subject-free completion of the 46-stage V2 DAG, run-local orchestration authority and adversarial product-path cleanup before any admissible Knight witness.",
+      "progress": "IMPLEMENTATION_AUTHORITY_AUDIT",
+      "readiness": "canonical/V2_IMPLEMENTATION_READINESS.json",
+      "required_next_proof": "WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN",
+      "product_pass_claimed": false,
+      "knight_witness_claimed": false,
+      "unseen_claimed": false
+    },
+    {
+      "id": "SUBJECT2_KNIGHT_FULL_CLOSURE",
+      "status": "HELD__PREMATURE_ACTIVATION_VOID__NO_ADMISSIBLE_WITNESS_RESULT",
+      "branch": "main",
+      "scope": "Future first V2 product witness after a new readiness seal; prior pre-Stage01 attempts are apparatus evidence only.",
+      "current_execution_authority": false,
+      "activation_record": "canonical/SUBJECT2_KNIGHT_V2_WITNESS_ACTIVATION_20260920.json",
       "product_pass_claimed": false,
       "unseen_claimed": false
     },

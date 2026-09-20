@@ -2,6 +2,9 @@ from __future__ import annotations
 
 """V2 Stage37-38 presentation and complete puppet sealing."""
 
+from PIL import Image
+import numpy as np
+
 from compiler.realsas_compiler_core.appearance_authority_v2 import (
     complete_appearance_asset_from_dict,
     complete_appearance_qualification_from_dict,
@@ -11,6 +14,14 @@ from compiler.realsas_compiler_core.canonical_puppet_state_v1 import (
 )
 from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
+)
+from compiler.realsas_compiler_core.appearance_render_v2 import (
+    load_face_uv,
+    load_provenance_atlas,
+)
+from compiler.realsas_compiler_core.presentation_partition_v2 import (
+    build_presentation_partition_evidence,
+    presentation_partition_evidence_from_dict,
 )
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     component_carrier_policy_from_dict,
@@ -30,9 +41,13 @@ from compiler.realsas_compiler_core.product_state_v2 import (
     presentation_structure_v2_from_dict,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
+    load_file_ref,
+    resolved_path,
+    sha256_file,
     stage_output_payload,
     write_ir,
 )
+from compiler.realsas_compiler_core.types import QualificationError
 
 
 def qualify_presentation_structure_stage(ctx: dict) -> dict:
@@ -69,11 +84,29 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
             "RealSaS.ComponentCarrierPolicyIR.v1",
         )
     )
+    asset = complete_appearance_asset_from_dict(
+        stage_output_payload(
+            ctx,
+            "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "RealSaS.CompleteAppearanceAssetIR.v2",
+        )
+    )
+    appearance = complete_appearance_qualification_from_dict(
+        stage_output_payload(
+            ctx,
+            "24_COMPLETE_APPEARANCE_QUALIFIED",
+            "RealSaS.CompleteAppearanceQualificationIR.v2",
+        )
+    )
+    if appearance.asset_binding_hash != asset.asset_hash:
+        raise QualificationError("PRESENTATION_V2_APPEARANCE_BINDING_DRIFT")
+    if str(appearance.qualification_report.get("status") or "") != "PASS_COMPLETE_APPEARANCE":
+        raise QualificationError("PRESENTATION_V2_APPEARANCE_NOT_QUALIFIED")
+
     cfg = dict(ctx["run_manifest"].get("presentation") or {})
     unknown = set(cfg) - {
         "mode",
-        "min_rigid_owner_weight",
-        "max_rigid_other_mass",
+        "policy_document",
     }
     if unknown:
         return {
@@ -88,30 +121,93 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
             "diagnostics": {"mode": cfg.get("mode")},
         }
 
+    policy_ref = dict(cfg.get("policy_document") or {})
+    if not policy_ref:
+        return {
+            "status": "BLOCKED",
+            "blockers": ["PRESENTATION_V2_FROZEN_POLICY_DOCUMENT_REQUIRED"],
+            "diagnostics": {},
+        }
+    policy = load_file_ref(
+        policy_ref,
+        expected_schema="RealSaS.PresentationPartitionPolicy.v1",
+    )
+    if not str(policy.get("status") or "").startswith("FROZEN_SUBJECT_FREE"):
+        raise QualificationError("PRESENTATION_V2_POLICY_NOT_SUBJECT_FREE_FROZEN")
+    forbidden = set(map(str, policy.get("forbidden_inputs") or ()))
+    if not {"KNIGHT_RESULT", "SUBJECT_ID", "CATEGORY_LABEL"}.issubset(forbidden):
+        raise QualificationError("PRESENTATION_V2_POLICY_FORBIDDEN_INPUTS_INCOMPLETE")
+    mechanical_policy = dict(policy.get("mechanical_binding_policy") or {})
+    required_mechanical = {"min_rigid_owner_weight", "max_rigid_other_mass"}
+    if not required_mechanical.issubset(mechanical_policy):
+        raise QualificationError("PRESENTATION_V2_MECHANICAL_POLICY_INCOMPLETE")
+
+    uv_path = resolved_path(asset.uv_npz_path)
+    provenance_path = resolved_path(asset.provenance_npz_path)
+    if not uv_path.is_file() or sha256_file(uv_path) != asset.uv_npz_sha256:
+        raise QualificationError("PRESENTATION_V2_CAA_UV_BYTES_DRIFT")
+    if (
+        not provenance_path.is_file()
+        or sha256_file(provenance_path) != asset.provenance_npz_sha256
+    ):
+        raise QualificationError("PRESENTATION_V2_CAA_PROVENANCE_BYTES_DRIFT")
+    face_uv = load_face_uv(asset)
+    provenance = load_provenance_atlas(asset)
+    textures = {}
+    for row in asset.textures:
+        path = resolved_path(row.transport_png_path)
+        if not path.is_file() or sha256_file(path) != row.transport_png_sha256:
+            raise QualificationError("PRESENTATION_V2_CAA_TEXTURE_BYTES_DRIFT")
+        textures[int(row.direction_index)] = np.asarray(
+            Image.open(path).convert("RGBA"),
+            dtype=np.uint8,
+        )
+
+    evidence = build_presentation_partition_evidence(
+        mesh=mesh,
+        appearance_asset_hash=asset.asset_hash,
+        appearance_qualification_hash=appearance.qualification_hash,
+        face_uv=face_uv,
+        textures_by_direction=textures,
+        provenance_by_direction=provenance,
+        policy=policy,
+    )
     structure = build_presentation_structure_v2(
         skeleton=skeleton,
         mesh=mesh,
         mesh_skin=mesh_skin,
         partition=partition,
         carrier_policy=carrier,
-        min_rigid_owner_weight=float(cfg.get("min_rigid_owner_weight", 0.999)),
-        max_rigid_other_mass=float(cfg.get("max_rigid_other_mass", 0.001)),
+        min_rigid_owner_weight=float(mechanical_policy["min_rigid_owner_weight"]),
+        max_rigid_other_mass=float(mechanical_policy["max_rigid_other_mass"]),
+        presentation_cut_face_pairs=evidence.cut_face_pairs,
+        presentation_partition_evidence_hash=evidence.evidence_hash,
     )
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     return {
         "status": "PASS",
         "outputs": [
             write_ir(
+                root / "presentation_partition_evidence_v2.json",
+                evidence,
+                authority_class="QUALIFIED_PRESENTATION_PARTITION_EVIDENCE_V2",
+            ),
+            write_ir(
                 root / "qualified_presentation_structure_v2.json",
                 structure,
                 authority_class="QUALIFIED_PRESENTATION_STRUCTURE_V2",
-            )
+            ),
         ],
         "diagnostics": {
             "structure_hash": structure.structure_hash,
             "slot_count": len(structure.slots),
             "attachment_count": len(structure.attachments),
+            "presentation_partition_evidence_hash": evidence.evidence_hash,
+            "evaluated_shared_edge_count": evidence.evaluated_shared_edge_count,
+            "source_supported_edge_count": evidence.source_supported_edge_count,
+            "appearance_boundary_cut_count": len(evidence.cut_face_pairs),
             "categorical_recognition_used": False,
+            "conceptual_object_identity_claimed": False,
             "appearance_authority_minted": False,
         },
     }
@@ -184,6 +280,13 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
             "RealSaS.QualifiedPresentationStructureIR.v2",
         )
     )
+    partition_evidence = presentation_partition_evidence_from_dict(
+        stage_output_payload(
+            ctx,
+            "37_QUALIFIED_PRESENTATION_STRUCTURE",
+            "RealSaS.PresentationPartitionEvidenceIR.v2",
+        )
+    )
     asset = complete_appearance_asset_from_dict(
         stage_output_payload(
             ctx,
@@ -207,6 +310,20 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
     )
     if appearance.asset_binding_hash != asset.asset_hash:
         raise ValueError("COMPLETE_PUPPET_CAA_QUALIFICATION_ASSET_DRIFT")
+    if partition_evidence.mesh_binding_hash != mesh.mesh_lineage_hash:
+        raise ValueError("COMPLETE_PUPPET_PRESENTATION_PARTITION_MESH_DRIFT")
+    if partition_evidence.appearance_asset_binding_hash != asset.asset_hash:
+        raise ValueError("COMPLETE_PUPPET_PRESENTATION_PARTITION_ASSET_DRIFT")
+    if (
+        partition_evidence.appearance_qualification_binding_hash
+        != appearance.qualification_hash
+    ):
+        raise ValueError("COMPLETE_PUPPET_PRESENTATION_PARTITION_QUALIFICATION_DRIFT")
+    if (
+        str(structure.metadata.get("presentation_partition_evidence_hash") or "")
+        != partition_evidence.evidence_hash
+    ):
+        raise ValueError("COMPLETE_PUPPET_PRESENTATION_PARTITION_EVIDENCE_DRIFT")
     if (
         str(appearance.qualification_report.get("status") or "")
         != "PASS_COMPLETE_APPEARANCE"

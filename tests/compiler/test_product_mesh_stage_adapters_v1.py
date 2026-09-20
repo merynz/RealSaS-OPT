@@ -34,8 +34,6 @@ from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     qualified_rest_source_preservation_from_dict,
     motion_source_set_from_dict,
     qualified_motion_source_seal_from_dict,
-    motion_compile_constraint_set_v2_from_dict,
-    qualified_motion_v2_from_dict,
     read_json,
     write_ir_json,
 )
@@ -52,7 +50,6 @@ from compiler.realsas_compiler_services.orchestrator.adapters.presentation_v1 im
 from compiler.realsas_compiler_services.orchestrator.adapters.rest_render_v1 import qualify_rest_render_stage
 from compiler.realsas_compiler_services.orchestrator.adapters.rest_preservation_v1 import qualify_rest_source_preservation_stage
 from compiler.realsas_compiler_services.orchestrator.adapters.motion_source_v1 import seal_motion_source_or_preset_stage
-from compiler.realsas_compiler_services.orchestrator.adapters.motion_compile_v1 import compile_motion_stage
 from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
     build_canonical_mesh_candidate_stage,
     bind_qualified_mesh_skin_stage,
@@ -409,33 +406,10 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     assert source_seal.qualification_report["motion_quality_claimed"] is False
     _install_stage_outputs(ctx,"33_MOTION_SOURCE_OR_PRESET_SEAL",r33)
 
-    r34=compile_motion_stage(ctx)
-    assert r34["status"]=="PASS",r34
-    by_schema={out["schema"]:out for out in r34["outputs"]}
-    constraints=motion_compile_constraint_set_v2_from_dict(
-        read_json(by_schema["RealSaS.MotionCompileConstraintSetIR.v2"]["path"])
-    )
-    motion=qualified_motion_v2_from_dict(
-        read_json(by_schema["RealSaS.QualifiedMotionIR.v2"]["path"])
-    )
-    assert constraints.product_state_binding_hash==state.product_state_hash
-    assert constraints.presentation_binding_hash==graph.presentation_lineage_hash
-    assert dict(constraints.root_trajectory_modes)=={"idle_artist":"IN_PLACE"}
-    assert motion.product_state_binding_hash==state.product_state_hash
-    assert motion.presentation_binding_hash==graph.presentation_lineage_hash
-    assert motion.qualification_report["status"]=="PASS_COMPILED_FULL_3D_MECHANICS_ONLY"
-    assert motion.qualification_report["mechanical_probe_clip_count"]==0
-    assert motion.qualification_report["artist_source_clip_count"]==1
-    assert motion.qualification_report["full_3d_local_quaternion_motion"] is True
-    assert motion.qualification_report["dynamic_proof_passed"] is False
-    assert motion.qualification_report["motion_quality_claimed"] is False
-    assert motion.clips[0].classification=="ARTIST_SOURCE"
-    assert motion.clips[0].tracks[0].canonical_joint_id=="j0"
-    assert motion.clips[0].tracks[0].source_joint_id=="source_root"
-    assert any(
-        abs(k.local_rotation_quat_xyzw[0])>0.05
-        for k in motion.clips[0].tracks[0].keyframes
-    )
+    # Stage34+ of the old V1 product path is preserved historical provenance,
+    # not current continuation authority. The motion compiler core is now
+    # intentionally V2-presentation-only; current Stage39-46 coverage lives in
+    # test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa.
 
 
 def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tmp_path):

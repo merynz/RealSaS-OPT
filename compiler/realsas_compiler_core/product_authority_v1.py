@@ -681,6 +681,7 @@ def qualified_mesh_intrinsic_audit(value: QualifiedMeshIR, *, surface, partition
 
     face_keys = set()
     derived_edges: set[tuple[str, str]] = set()
+    used_vertex_ids: set[str] = set()
     face_count_by_component = {cid: 0 for cid in component_ids}
     min_angle = float("inf")
     max_aspect = 0.0
@@ -691,6 +692,7 @@ def qualified_mesh_intrinsic_audit(value: QualifiedMeshIR, *, surface, partition
         if key in face_keys:
             raise QualificationError("QUALIFIED_MESH_G2_DUPLICATE_FACE")
         face_keys.add(key)
+        used_vertex_ids.update(map(str, face))
         components = {vertex_by_id[vid].component_id for vid in face}
         if len(components) != 1:
             raise QualificationError("QUALIFIED_MESH_G4_FACE_CROSSES_COMPONENT_BOUNDARY")
@@ -706,6 +708,8 @@ def qualified_mesh_intrinsic_audit(value: QualifiedMeshIR, *, surface, partition
 
     if any(count <= 0 for count in face_count_by_component.values()):
         raise QualificationError("QUALIFIED_MESH_G4_COMPONENT_WITHOUT_PRODUCT_FACE")
+    if used_vertex_ids != set(vertex_by_id):
+        raise QualificationError("QUALIFIED_MESH_G2_UNUSED_PRODUCT_VERTEX")
 
     declared_edges = set()
     for edge in value.edges:

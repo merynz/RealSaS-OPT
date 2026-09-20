@@ -159,6 +159,13 @@
       "repair": "Stage37 plan title/policy narrowed to implemented authoring structure; runtime keyability/clipping claims set false.",
       "required_closure": "Either implement and native-prove runtime presentation state transitions (attachment/visibility/order/tint/clipping as required by product scope) or keep those capabilities explicitly outside the first-witness claim.",
       "status": "PARTIALLY_REPAIRED__CLAIM_NARROWED__CAPABILITY_OPEN"
+    },
+    {
+      "id": "VF-21",
+      "severity": "HIGH",
+      "owner": "CAA color management / runtime sampling",
+      "finding": "Python and native V2 CAA samplers treat encoded RGBA8 RGB as linear values: RGB is divided by 255, premultiplied by alpha and bilinearly filtered without an explicit sRGB/linear transfer function. Native/reference byte parity can therefore certify identical gamma-space filtering rather than source-faithful color filtering.",
+      "required_closure": "Make the texture color-space contract explicit and shared by compile/reference/native runtime. Calibrate subject-free opaque gradients, dark/light edges and semi-transparent anti-aliased line-art controls; qualify linear-light premultiplied filtering or explicitly prove an alternative artist-preserving encoded-space contract."
     }
   ],
   "false_or_overstated_external_findings": [

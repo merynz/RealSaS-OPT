@@ -7,6 +7,7 @@ import numpy as np
 from compiler.realsas_compiler_core.appearance_bake_v2 import (
     bake_direction_atlas,
     bilinear_premultiplied_rgba,
+    conservative_bilinear_provenance,
 )
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     bilinear_rgba_u8,
@@ -129,6 +130,16 @@ def test_premultiplied_bilinear_filtering_does_not_bleed_transparent_rgb():
     assert 0.49 <= sampled[0] <= 0.51
     assert sampled[1] == 0.0
     assert sampled[2] == 0.0
+
+
+def test_bilinear_provenance_is_conservative_over_color_footprint():
+    provenance = np.asarray([[0, 2]], dtype=np.uint8)
+    sampled = conservative_bilinear_provenance(
+        provenance,
+        np.asarray([[0.49, 0.0], [0.0, 0.0]], dtype=np.float64),
+    )
+    assert int(sampled[0]) == 2
+    assert int(sampled[1]) == 0
 
 
 def test_face_atlas_bleed_leaves_no_undefined_texel():

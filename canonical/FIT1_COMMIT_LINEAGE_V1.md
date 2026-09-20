@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2388**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2433**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2400,6 +2400,51 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-20T23:51:30+03:00` | `d58ad56e0ca2` | no | COMPILER_PROOF | redteam: narrow product-pass claim to executable contract closure | `compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py` | `redteam-hardening-20260920` |
 | `2026-09-20T23:51:46+03:00` | `6731109eaeab` | no | CI_TEST, COMPILER_PROOF | test: enforce red-team claim boundaries at stages 37 45 46 | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `redteam-hardening-20260920` |
 | `2026-09-20T23:52:37+03:00` | `48d9deb9f073` | no | COMPILER_PROOF, GOVERNANCE_CONTINUITY | governance: bind stage red-team authority into implementation closure | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `redteam-hardening-20260920` |
+| `2026-09-20T23:52:56+03:00` | `44a5241fa3ec` | no | CI_TEST | test: stop pinning superseded V2 audit mode label | `tests/repository/test_canonical_main_readiness_v1.py` | `redteam-hardening-20260920` |
+| `2026-09-20T23:53:27+03:00` | `84a7b0f943ba` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-20T23:55:17+03:00` | `a814cd61e833` | no | GOVERNANCE_CONTINUITY | redteam: record explicit claim-boundary hardening | `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md` | `redteam-hardening-20260920` |
+| `2026-09-20T23:55:20+03:00` | `80c9a389f905` | no | OTHER | docs: finalize README red-team claim boundaries | `README.md` | `redteam-hardening-20260920` |
+| `2026-09-20T23:55:23+03:00` | `d67229762da9` | no | GOVERNANCE_CONTINUITY | docs: finalize agent red-team boundaries | `AGENTS.md` | `redteam-hardening-20260920` |
+| `2026-09-20T23:55:25+03:00` | `f58ab22004d4` | no | OTHER | docs: finalize system index red-team scope | `SYSTEM_INDEX.md` | `redteam-hardening-20260920` |
+| `2026-09-20T23:55:41+03:00` | `d14b28656149` | no | OTHER | docs: finalize repository map after red-team hardening | `REPOSITORY_MAP.md` | `redteam-hardening-20260920` |
+| `2026-09-20T23:55:44+03:00` | `98ce7fcba9a0` | no | GOVERNANCE_CONTINUITY | docs: finalize canonical red-team state | `canonical/README.md` | `redteam-hardening-20260920` |
+| `2026-09-20T23:55:47+03:00` | `817657320a5d` | no | GOVERNANCE_CONTINUITY | state: replace stale audit backlog with hardening verification | `CURRENT_STATE.md` | `redteam-hardening-20260920` |
+| `2026-09-20T23:56:09+03:00` | `a9aeb3fb1eac` | no | GOVERNANCE_CONTINUITY | sync: carry latest generated authority views | `canonical/BOOTSTRAP_AUDIT_QUEUE.md` | `redteam-hardening-20260920` |
+| `2026-09-21T00:05:49+03:00` | `a8014f84c18d` | yes | GOVERNANCE_CONTINUITY | presentation: freeze role-free partition policy | `canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json` | `main` |
+| `2026-09-21T00:06:23+03:00` | `f3b37b2b982b` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | presentation: add role-free appearance-boundary partition authority | `compiler/realsas_compiler_core/presentation_partition_v2.py` | `main` |
+| `2026-09-21T00:06:36+03:00` | `5d7823d88640` | yes | COMPILER_PROOF | presentation: split role-free groups on qualified visual boundaries | `compiler/realsas_compiler_core/product_state_v2.py` | `main` |
+| `2026-09-21T00:07:06+03:00` | `7bc81cb7394c` | yes | COMPILER_PROOF | presentation: bind Stage37 to frozen CAA boundary evidence | `compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py` | `main` |
+| `2026-09-21T00:07:47+03:00` | `2a9749134d0c` | yes | CI_TEST, COMPILER_PROOF | test: red-team connected visual presentation boundaries | `tests/compiler/test_presentation_partition_v2.py` | `main` |
+| `2026-09-21T00:07:58+03:00` | `162a96ef3c4a` | yes | CI_TEST, COMPILER_PROOF | test: bind V2 presentation integration to frozen partition policy | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T00:08:05+03:00` | `671a0182b569` | yes | COMPILER_PROOF | orchestrator: include frozen presentation policy in closure | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-21T00:08:14+03:00` | `2ab48d04aad6` | yes | GOVERNANCE_CONTINUITY | plan: bind Stage37 to CAA partition evidence | `canonical/MAINLINE_EXECUTION_PLAN_V2.json` | `main` |
+| `2026-09-21T00:08:52+03:00` | `e3bccd21ce24` | yes | COMPILER_PROOF | appearance: add dynamic screen-space conditioning metrics | `compiler/realsas_compiler_core/dynamic_appearance_conditioning_v2.py` | `main` |
+| `2026-09-21T00:08:59+03:00` | `881343cd8f11` | yes | GOVERNANCE_CONTINUITY | appearance: freeze dynamic screen-conditioning gates | `canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json` | `main` |
+| `2026-09-21T00:09:08+03:00` | `512099ec4d11` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | runtime: type dynamic appearance conditioning evidence | `compiler/realsas_compiler_core/runtime_authority_v2.py` | `main` |
+| `2026-09-21T00:09:51+03:00` | `8e78df8f81db` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: gate dynamic art stretch shear and temporal jumps | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
+| `2026-09-21T00:10:01+03:00` | `9bccf36ac874` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | test: bind DVI hash to dynamic appearance conditioning | `tests/compiler/test_v2_tail_authority_fail_closed.py` | `main` |
+| `2026-09-21T00:10:10+03:00` | `52dc7c101113` | yes | CI_TEST, COMPILER_PROOF | test: exercise dynamic appearance conditioning in V2 tail | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T00:10:25+03:00` | `5c8aa54e5efc` | yes | CI_TEST, COMPILER_PROOF | test: red-team dynamic texture and line-art deformation conditioning | `tests/compiler/test_dynamic_appearance_conditioning_v2.py` | `main` |
+| `2026-09-21T00:11:11+03:00` | `458a0f9db7b3` | yes | GOVERNANCE_CONTINUITY | authority: bind governance to red-team hardened V2 plan | `canonical/ACTIVE_RUN_V2.json` | `main` |
+| `2026-09-21T00:11:15+03:00` | `f1978c0d0e9e` | yes | GOVERNANCE_CONTINUITY | authority: bind governance to red-team hardened V2 plan | `canonical/V2_IMPLEMENTATION_READINESS.json` | `main` |
+| `2026-09-21T00:12:49+03:00` | `bff5a68fd283` | yes | COMPILER_PROOF | closure: require presentation partition and dynamic art conditioning | `compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py` | `main` |
+| `2026-09-21T00:13:07+03:00` | `35beaf60cd51` | yes | CI_TEST | ci: trigger dry-run on presentation partition policy | `.github/workflows/v2_witness_orchestration_subject_free_dry_run.yml` | `main` |
+| `2026-09-21T00:13:22+03:00` | `d367fd1a5153` | yes | CI_TEST, COMPILER_PROOF | test: require red-team appearance authorities at product closure | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T00:13:30+03:00` | `2d71eb600014` | yes | CI_TEST | test: freeze red-team hardened Stage37 dependency contract | `tests/repository/test_mainline_execution_plan_v2.py` | `main` |
+| `2026-09-21T00:13:55+03:00` | `45036d9dfdf4` | yes | CI_TEST | test: stop pinning superseded V2 current-mode wording | `tests/repository/test_canonical_main_readiness_v1.py` | `main` |
+| `2026-09-21T00:15:18+03:00` | `672101838e6c` | yes | COMPILER_PROOF | appearance: make dynamic conditioning rigid-motion invariant | `compiler/realsas_compiler_core/dynamic_appearance_conditioning_v2.py` | `main` |
+| `2026-09-21T00:15:29+03:00` | `f6ab9a642e9b` | yes | GOVERNANCE_CONTINUITY | appearance: gate intrinsic rather than projected art deformation | `canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json` | `main` |
+| `2026-09-21T00:15:36+03:00` | `2c5e6b989046` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | runtime: name DVI conditioning by intrinsic surface metric | `compiler/realsas_compiler_core/runtime_authority_v2.py` | `main` |
+| `2026-09-21T00:15:49+03:00` | `6adc1660385c` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: use rigid-invariant surface conditioning in Stage45 | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
+| `2026-09-21T00:16:14+03:00` | `ae4aba88751a` | yes | CI_TEST, COMPILER_PROOF | test: validate rigid-invariant dynamic appearance metrics | `tests/compiler/test_dynamic_appearance_conditioning_v2.py` | `main` |
+| `2026-09-21T00:16:20+03:00` | `720c13168498` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | test: bind DVI hash to intrinsic appearance conditioning | `tests/compiler/test_v2_tail_authority_fail_closed.py` | `main` |
+| `2026-09-21T00:16:23+03:00` | `f4f74a1e4a95` | yes | CI_TEST, COMPILER_PROOF | test: exercise intrinsic dynamic appearance gate | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T00:16:39+03:00` | `071c530d2ffb` | yes | CI_TEST, COMPILER_PROOF | test: prove DVI ignores rigid-view foreshortening | `tests/compiler/test_dynamic_appearance_conditioning_v2.py` | `main` |
+| `2026-09-21T00:17:53+03:00` | `05f9326b274b` | yes | GOVERNANCE_CONTINUITY | appearance: bind dynamic conditioning to subject-free calibration | `canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json` | `main` |
+| `2026-09-21T00:18:05+03:00` | `82ca94a7dc20` | yes | GOVERNANCE_CONTINUITY | appearance: freeze subject-free dynamic conditioning calibration | `canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json` | `main` |
+| `2026-09-21T00:18:25+03:00` | `a43bc01d13a1` | yes | CI_TEST, COMPILER_PROOF | test: calibrate dynamic appearance gates without witness data | `tests/compiler/test_dynamic_appearance_conditioning_v2.py` | `main` |
+| `2026-09-21T00:18:31+03:00` | `091ddd24a7f1` | yes | COMPILER_PROOF | orchestrator: seal dynamic appearance calibration in closure | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-21T00:18:38+03:00` | `66d2e2a0cd60` | yes | CI_TEST | ci: trigger dry-run on dynamic appearance calibration | `.github/workflows/v2_witness_orchestration_subject_free_dry_run.yml` | `main` |
 
 ## Use rule
 

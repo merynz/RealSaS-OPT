@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `b8f65015763b03656315b7aaca51cc35c0eb81007917205141066845d360394b`
+> State fingerprint: `7a4323b3376b556812d738817e2d00dae5832912dd9cb6023631d84f9e0a116d`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -34,7 +34,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `V2_IMPLEMENTATION_ASSEMBLY` | `ACTIVE__IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN` | `main` | `244c5ab2c9db` | Can the 46-stage RealSaS V2 DAG, run-local orchestration and artifact authority close subject-free with geometry, mechanics and appearance as co-equal product authorities before any admissible Knight witness? | Knight product pass; unseen generalization; learned appearance quality; source-view cardinality reduction |
+| `V2_IMPLEMENTATION_ASSEMBLY` | `ACTIVE__IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN` | `main` | `66d2e2a0cd60` | Can the 46-stage RealSaS V2 DAG, run-local orchestration and artifact authority close subject-free with geometry, mechanics and appearance as co-equal product authorities before any admissible Knight witness? | Knight product pass; unseen generalization; learned appearance quality; source-view cardinality reduction |
 
 ## Branch inventory — observed live
 
@@ -44,7 +44,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `244c5ab2c9db` | canonical continuation branch |
+| `main` | `66d2e2a0cd60` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -151,7 +151,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `promote/fit1-evidence-main-20260909` | `9deccb8d051f` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-main-v3-20260905` | `dfb087c6a23e` | observed live; not explicitly registered active |
 | `promote/iris-scene-first-signed-v3-20260905` | `7cfb7efedbe9` | observed live; not explicitly registered active |
-| `redteam-hardening-20260920` | `44a5241fa3ec` | observed live; not explicitly registered active |
+| `redteam-hardening-20260920` | `a9aeb3fb1eac` | observed live; not explicitly registered active |
 | `redteam-sync-20260920` | `1741beaff327` | observed live; not explicitly registered active |
 | `repair/g5-mesh-policy-v2-20260919` | `1d1193f26796` | observed live; not explicitly registered active |
 | `repair/mage-full-subject-reclosure-20260912-adaptive-steiner-tmp` | `221ad1b79eae` | observed live; not explicitly registered active |

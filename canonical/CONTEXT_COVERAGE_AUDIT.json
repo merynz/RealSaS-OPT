@@ -3,7 +3,7 @@
   "bootstrap_status": "BOOTSTRAP_AUDIT_CLOSED",
   "fit1_gate_anchor": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
   "candidate_rule": "high-signal canonical/prereg/experiment/challenger/workflow artifacts",
-  "tracked_file_count": 1178,
+  "tracked_file_count": 1184,
   "high_signal_artifact_count": 327,
   "classification_counts": {
     "INDEXED_EXPLICIT": 180,
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "244c5ab2c9dbfecf623c0703da75cabe779a9a38",
+      "sha": "66d2e2a0cd60a6b3fcc462db15a71d9ad0c976d1",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -594,7 +594,7 @@
     },
     {
       "name": "redteam-hardening-20260920",
-      "sha": "44a5241fa3ec174dc6cd0d44cbcf0f472e3d91cf",
+      "sha": "a9aeb3fb1eac8b8d346bb5ebf1a52dc35befa49e",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

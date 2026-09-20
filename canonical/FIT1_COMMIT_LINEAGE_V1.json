@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "244c5ab2c9dbfecf623c0703da75cabe779a9a38",
+    "main": "66d2e2a0cd60a6b3fcc462db15a71d9ad0c976d1",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -68,7 +68,7 @@
     "promote/fit1-evidence-main-20260909": "9deccb8d051fd85780c28a29591df40fbafc4570",
     "promote/iris-scene-first-signed-main-v3-20260905": "dfb087c6a23e39c0360c4cd4d89fdb6b9e9c9957",
     "promote/iris-scene-first-signed-v3-20260905": "7cfb7efedbe956c2aa16003e5a7df9bb56c907bb",
-    "redteam-hardening-20260920": "48d9deb9f0733dcd2448994bb1626fb1a81b072a",
+    "redteam-hardening-20260920": "a9aeb3fb1eac8b8d346bb5ebf1a52dc35befa49e",
     "redteam-sync-20260920": "1741beaff327b3df0580f0d6c52f62dcec9454f6",
     "repair/g5-mesh-policy-v2-20260919": "1d1193f267969110058022da81dae91c742242ac",
     "repair/mage-full-subject-reclosure-20260912": "2fa5d4b604d5ce1dcb24feee2e6a6b8fa12476e3",
@@ -117,7 +117,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2388,
+  "commit_count": 2433,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -122551,6 +122551,979 @@
       "subsystem_tags": [
         "COMPILER_PROOF",
         "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "44a5241fa3ec174dc6cd0d44cbcf0f472e3d91cf",
+      "parents": [
+        "48d9deb9f0733dcd2448994bb1626fb1a81b072a"
+      ],
+      "author_time": "2026-09-20T23:52:56+03:00",
+      "committer_time": "2026-09-20T23:52:56+03:00",
+      "subject": "test: stop pinning superseded V2 audit mode label",
+      "branches_containing": [
+        "redteam-hardening-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "tests/repository/test_canonical_main_readiness_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "84a7b0f943ba3162b9e4318b5b2250997cd2ea88",
+      "parents": [
+        "244c5ab2c9dbfecf623c0703da75cabe779a9a38"
+      ],
+      "author_time": "2026-09-20T23:53:27+03:00",
+      "committer_time": "2026-09-20T23:53:27+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a814cd61e833b815b56ed76b765d67ef351685da",
+      "parents": [
+        "44a5241fa3ec174dc6cd0d44cbcf0f472e3d91cf"
+      ],
+      "author_time": "2026-09-20T23:55:17+03:00",
+      "committer_time": "2026-09-20T23:55:17+03:00",
+      "subject": "redteam: record explicit claim-boundary hardening",
+      "branches_containing": [
+        "redteam-hardening-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "80c9a389f905de52c99695803ff974fa31cd8518",
+      "parents": [
+        "a814cd61e833b815b56ed76b765d67ef351685da"
+      ],
+      "author_time": "2026-09-20T23:55:20+03:00",
+      "committer_time": "2026-09-20T23:55:20+03:00",
+      "subject": "docs: finalize README red-team claim boundaries",
+      "branches_containing": [
+        "redteam-hardening-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "README.md"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d67229762da9337e99aab23575281c089977dafa",
+      "parents": [
+        "80c9a389f905de52c99695803ff974fa31cd8518"
+      ],
+      "author_time": "2026-09-20T23:55:23+03:00",
+      "committer_time": "2026-09-20T23:55:23+03:00",
+      "subject": "docs: finalize agent red-team boundaries",
+      "branches_containing": [
+        "redteam-hardening-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "AGENTS.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f58ab22004d4b3b1b8172bf5182202fca07d817a",
+      "parents": [
+        "d67229762da9337e99aab23575281c089977dafa"
+      ],
+      "author_time": "2026-09-20T23:55:25+03:00",
+      "committer_time": "2026-09-20T23:55:25+03:00",
+      "subject": "docs: finalize system index red-team scope",
+      "branches_containing": [
+        "redteam-hardening-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "SYSTEM_INDEX.md"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d14b28656149bec1510706a89f5a4d433d80332e",
+      "parents": [
+        "f58ab22004d4b3b1b8172bf5182202fca07d817a"
+      ],
+      "author_time": "2026-09-20T23:55:41+03:00",
+      "committer_time": "2026-09-20T23:55:41+03:00",
+      "subject": "docs: finalize repository map after red-team hardening",
+      "branches_containing": [
+        "redteam-hardening-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "REPOSITORY_MAP.md"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "98ce7fcba9a0d6a8c25a66b89a320cd6fa5dbe0b",
+      "parents": [
+        "d14b28656149bec1510706a89f5a4d433d80332e"
+      ],
+      "author_time": "2026-09-20T23:55:44+03:00",
+      "committer_time": "2026-09-20T23:55:44+03:00",
+      "subject": "docs: finalize canonical red-team state",
+      "branches_containing": [
+        "redteam-hardening-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/README.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "817657320a5d3963507603789017b5054dae4a8c",
+      "parents": [
+        "98ce7fcba9a0d6a8c25a66b89a320cd6fa5dbe0b"
+      ],
+      "author_time": "2026-09-20T23:55:47+03:00",
+      "committer_time": "2026-09-20T23:55:47+03:00",
+      "subject": "state: replace stale audit backlog with hardening verification",
+      "branches_containing": [
+        "redteam-hardening-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a9aeb3fb1eac8b8d346bb5ebf1a52dc35befa49e",
+      "parents": [
+        "817657320a5d3963507603789017b5054dae4a8c"
+      ],
+      "author_time": "2026-09-20T23:56:09+03:00",
+      "committer_time": "2026-09-20T23:56:09+03:00",
+      "subject": "sync: carry latest generated authority views",
+      "branches_containing": [
+        "redteam-hardening-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a8014f84c18d216714a36e6a5e70c49ce664c35e",
+      "parents": [
+        "84a7b0f943ba3162b9e4318b5b2250997cd2ea88"
+      ],
+      "author_time": "2026-09-21T00:05:49+03:00",
+      "committer_time": "2026-09-21T00:05:49+03:00",
+      "subject": "presentation: freeze role-free partition policy",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f3b37b2b982b9b7a1902864f3edb6962e344860d",
+      "parents": [
+        "a8014f84c18d216714a36e6a5e70c49ce664c35e"
+      ],
+      "author_time": "2026-09-21T00:06:23+03:00",
+      "committer_time": "2026-09-21T00:06:23+03:00",
+      "subject": "presentation: add role-free appearance-boundary partition authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/presentation_partition_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5d7823d88640334f60d27733bae2f42154fd030d",
+      "parents": [
+        "f3b37b2b982b9b7a1902864f3edb6962e344860d"
+      ],
+      "author_time": "2026-09-21T00:06:36+03:00",
+      "committer_time": "2026-09-21T00:06:36+03:00",
+      "subject": "presentation: split role-free groups on qualified visual boundaries",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7bc81cb7394cca9c0a7843ae39eb6c8dad24c65a",
+      "parents": [
+        "5d7823d88640334f60d27733bae2f42154fd030d"
+      ],
+      "author_time": "2026-09-21T00:07:06+03:00",
+      "committer_time": "2026-09-21T00:07:06+03:00",
+      "subject": "presentation: bind Stage37 to frozen CAA boundary evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2a9749134d0ca76a6189b44e308bd0c99c615ca9",
+      "parents": [
+        "7bc81cb7394cca9c0a7843ae39eb6c8dad24c65a"
+      ],
+      "author_time": "2026-09-21T00:07:47+03:00",
+      "committer_time": "2026-09-21T00:07:47+03:00",
+      "subject": "test: red-team connected visual presentation boundaries",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_presentation_partition_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "162a96ef3c4afb1cdfce336c3732ebebc1fb050d",
+      "parents": [
+        "2a9749134d0ca76a6189b44e308bd0c99c615ca9"
+      ],
+      "author_time": "2026-09-21T00:07:58+03:00",
+      "committer_time": "2026-09-21T00:07:58+03:00",
+      "subject": "test: bind V2 presentation integration to frozen partition policy",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "671a0182b56980172cc69809aa9fb2511ca7f073",
+      "parents": [
+        "162a96ef3c4afb1cdfce336c3732ebebc1fb050d"
+      ],
+      "author_time": "2026-09-21T00:08:05+03:00",
+      "committer_time": "2026-09-21T00:08:05+03:00",
+      "subject": "orchestrator: include frozen presentation policy in closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2ab48d04aad62bc290ca441f0a8dbd7b39c95b94",
+      "parents": [
+        "671a0182b56980172cc69809aa9fb2511ca7f073"
+      ],
+      "author_time": "2026-09-21T00:08:14+03:00",
+      "committer_time": "2026-09-21T00:08:14+03:00",
+      "subject": "plan: bind Stage37 to CAA partition evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/MAINLINE_EXECUTION_PLAN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e3bccd21ce245c2d05b0a6c6e1d04f48ae0bc515",
+      "parents": [
+        "2ab48d04aad62bc290ca441f0a8dbd7b39c95b94"
+      ],
+      "author_time": "2026-09-21T00:08:52+03:00",
+      "committer_time": "2026-09-21T00:08:52+03:00",
+      "subject": "appearance: add dynamic screen-space conditioning metrics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/dynamic_appearance_conditioning_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "881343cd8f11900f9fd9c074b3f7aa7b53e0ecb0",
+      "parents": [
+        "e3bccd21ce245c2d05b0a6c6e1d04f48ae0bc515"
+      ],
+      "author_time": "2026-09-21T00:08:59+03:00",
+      "committer_time": "2026-09-21T00:08:59+03:00",
+      "subject": "appearance: freeze dynamic screen-conditioning gates",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "512099ec4d119f9f1e048d427afb50ec1d7a1d76",
+      "parents": [
+        "881343cd8f11900f9fd9c074b3f7aa7b53e0ecb0"
+      ],
+      "author_time": "2026-09-21T00:09:08+03:00",
+      "committer_time": "2026-09-21T00:09:08+03:00",
+      "subject": "runtime: type dynamic appearance conditioning evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8e78df8f81db3f7cd4cc5f69cb264f29fb715e3a",
+      "parents": [
+        "512099ec4d119f9f1e048d427afb50ec1d7a1d76"
+      ],
+      "author_time": "2026-09-21T00:09:51+03:00",
+      "committer_time": "2026-09-21T00:09:51+03:00",
+      "subject": "runtime: gate dynamic art stretch shear and temporal jumps",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9bccf36ac874e712292744991295255c086fda21",
+      "parents": [
+        "8e78df8f81db3f7cd4cc5f69cb264f29fb715e3a"
+      ],
+      "author_time": "2026-09-21T00:10:01+03:00",
+      "committer_time": "2026-09-21T00:10:01+03:00",
+      "subject": "test: bind DVI hash to dynamic appearance conditioning",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "52dc7c1011135b72b917b7b543eca0f72425a8ed",
+      "parents": [
+        "9bccf36ac874e712292744991295255c086fda21"
+      ],
+      "author_time": "2026-09-21T00:10:10+03:00",
+      "committer_time": "2026-09-21T00:10:10+03:00",
+      "subject": "test: exercise dynamic appearance conditioning in V2 tail",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5c8aa54e5efc8f7d43e12c68d4bb4b7c88559a77",
+      "parents": [
+        "52dc7c1011135b72b917b7b543eca0f72425a8ed"
+      ],
+      "author_time": "2026-09-21T00:10:25+03:00",
+      "committer_time": "2026-09-21T00:10:25+03:00",
+      "subject": "test: red-team dynamic texture and line-art deformation conditioning",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_appearance_conditioning_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "458a0f9db7b35924c6fb4a571a6cdd333470a55d",
+      "parents": [
+        "5c8aa54e5efc8f7d43e12c68d4bb4b7c88559a77"
+      ],
+      "author_time": "2026-09-21T00:11:11+03:00",
+      "committer_time": "2026-09-21T00:11:11+03:00",
+      "subject": "authority: bind governance to red-team hardened V2 plan",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f1978c0d0e9ef5e8f1a6bc93ca5d700e6349f327",
+      "parents": [
+        "458a0f9db7b35924c6fb4a571a6cdd333470a55d"
+      ],
+      "author_time": "2026-09-21T00:11:15+03:00",
+      "committer_time": "2026-09-21T00:11:15+03:00",
+      "subject": "authority: bind governance to red-team hardened V2 plan",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_IMPLEMENTATION_READINESS.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bff5a68fd28354b9b6066611a04cca9836a9ac14",
+      "parents": [
+        "f1978c0d0e9ef5e8f1a6bc93ca5d700e6349f327"
+      ],
+      "author_time": "2026-09-21T00:12:49+03:00",
+      "committer_time": "2026-09-21T00:12:49+03:00",
+      "subject": "closure: require presentation partition and dynamic art conditioning",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "35beaf60cd51088d7d5d51a1a0948d8dbdaf321d",
+      "parents": [
+        "bff5a68fd28354b9b6066611a04cca9836a9ac14"
+      ],
+      "author_time": "2026-09-21T00:13:07+03:00",
+      "committer_time": "2026-09-21T00:13:07+03:00",
+      "subject": "ci: trigger dry-run on presentation partition policy",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/v2_witness_orchestration_subject_free_dry_run.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d367fd1a5153a6e7cf4afb1847853ea6ddd6eaeb",
+      "parents": [
+        "35beaf60cd51088d7d5d51a1a0948d8dbdaf321d"
+      ],
+      "author_time": "2026-09-21T00:13:22+03:00",
+      "committer_time": "2026-09-21T00:13:22+03:00",
+      "subject": "test: require red-team appearance authorities at product closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2d71eb6000147625407e48e6e6c25f0319f2b0eb",
+      "parents": [
+        "d367fd1a5153a6e7cf4afb1847853ea6ddd6eaeb"
+      ],
+      "author_time": "2026-09-21T00:13:30+03:00",
+      "committer_time": "2026-09-21T00:13:30+03:00",
+      "subject": "test: freeze red-team hardened Stage37 dependency contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_mainline_execution_plan_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "45036d9dfdf48e230f4e7be98da4c03e7b93d0a9",
+      "parents": [
+        "2d71eb6000147625407e48e6e6c25f0319f2b0eb"
+      ],
+      "author_time": "2026-09-21T00:13:55+03:00",
+      "committer_time": "2026-09-21T00:13:55+03:00",
+      "subject": "test: stop pinning superseded V2 current-mode wording",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_canonical_main_readiness_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "672101838e6c8e5d6795b28dea0115f0245582eb",
+      "parents": [
+        "45036d9dfdf48e230f4e7be98da4c03e7b93d0a9"
+      ],
+      "author_time": "2026-09-21T00:15:18+03:00",
+      "committer_time": "2026-09-21T00:15:18+03:00",
+      "subject": "appearance: make dynamic conditioning rigid-motion invariant",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/dynamic_appearance_conditioning_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f6ab9a642e9bd507fe573dc0fbfb3d98f648a069",
+      "parents": [
+        "672101838e6c8e5d6795b28dea0115f0245582eb"
+      ],
+      "author_time": "2026-09-21T00:15:29+03:00",
+      "committer_time": "2026-09-21T00:15:29+03:00",
+      "subject": "appearance: gate intrinsic rather than projected art deformation",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2c5e6b9890465228ad5fdeb85746ffee0572c1c4",
+      "parents": [
+        "f6ab9a642e9bd507fe573dc0fbfb3d98f648a069"
+      ],
+      "author_time": "2026-09-21T00:15:36+03:00",
+      "committer_time": "2026-09-21T00:15:36+03:00",
+      "subject": "runtime: name DVI conditioning by intrinsic surface metric",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6adc1660385c31681f3c2c8be0bf3f19c8cb22d0",
+      "parents": [
+        "2c5e6b9890465228ad5fdeb85746ffee0572c1c4"
+      ],
+      "author_time": "2026-09-21T00:15:49+03:00",
+      "committer_time": "2026-09-21T00:15:49+03:00",
+      "subject": "runtime: use rigid-invariant surface conditioning in Stage45",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ae4aba88751a9b9a72713a55c68674760e0571a5",
+      "parents": [
+        "6adc1660385c31681f3c2c8be0bf3f19c8cb22d0"
+      ],
+      "author_time": "2026-09-21T00:16:14+03:00",
+      "committer_time": "2026-09-21T00:16:14+03:00",
+      "subject": "test: validate rigid-invariant dynamic appearance metrics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_appearance_conditioning_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "720c13168498c4382c2ea2a22d5fb5110b2980ca",
+      "parents": [
+        "ae4aba88751a9b9a72713a55c68674760e0571a5"
+      ],
+      "author_time": "2026-09-21T00:16:20+03:00",
+      "committer_time": "2026-09-21T00:16:20+03:00",
+      "subject": "test: bind DVI hash to intrinsic appearance conditioning",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f4f74a1e4a95a6577da447ba926b2fdb866f7921",
+      "parents": [
+        "720c13168498c4382c2ea2a22d5fb5110b2980ca"
+      ],
+      "author_time": "2026-09-21T00:16:23+03:00",
+      "committer_time": "2026-09-21T00:16:23+03:00",
+      "subject": "test: exercise intrinsic dynamic appearance gate",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "071c530d2ffbb584af03b3130306b42107f571ee",
+      "parents": [
+        "f4f74a1e4a95a6577da447ba926b2fdb866f7921"
+      ],
+      "author_time": "2026-09-21T00:16:39+03:00",
+      "committer_time": "2026-09-21T00:16:39+03:00",
+      "subject": "test: prove DVI ignores rigid-view foreshortening",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_appearance_conditioning_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "05f9326b274bec4370abd699908d765f83848255",
+      "parents": [
+        "071c530d2ffbb584af03b3130306b42107f571ee"
+      ],
+      "author_time": "2026-09-21T00:17:53+03:00",
+      "committer_time": "2026-09-21T00:17:53+03:00",
+      "subject": "appearance: bind dynamic conditioning to subject-free calibration",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "82ca94a7dc20b16a18db134b4a637fc45e6c2ab1",
+      "parents": [
+        "05f9326b274bec4370abd699908d765f83848255"
+      ],
+      "author_time": "2026-09-21T00:18:05+03:00",
+      "committer_time": "2026-09-21T00:18:05+03:00",
+      "subject": "appearance: freeze subject-free dynamic conditioning calibration",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a43bc01d13a15de05c3cb3e026805e93259dcf89",
+      "parents": [
+        "82ca94a7dc20b16a18db134b4a637fc45e6c2ab1"
+      ],
+      "author_time": "2026-09-21T00:18:25+03:00",
+      "committer_time": "2026-09-21T00:18:25+03:00",
+      "subject": "test: calibrate dynamic appearance gates without witness data",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_appearance_conditioning_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "091ddd24a7f18fb141951aeaf11a7a904cfedbde",
+      "parents": [
+        "a43bc01d13a15de05c3cb3e026805e93259dcf89"
+      ],
+      "author_time": "2026-09-21T00:18:31+03:00",
+      "committer_time": "2026-09-21T00:18:31+03:00",
+      "subject": "orchestrator: seal dynamic appearance calibration in closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "66d2e2a0cd60a6b3fcc462db15a71d9ad0c976d1",
+      "parents": [
+        "091ddd24a7f18fb141951aeaf11a7a904cfedbde"
+      ],
+      "author_time": "2026-09-21T00:18:38+03:00",
+      "committer_time": "2026-09-21T00:18:38+03:00",
+      "subject": "ci: trigger dry-run on dynamic appearance calibration",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/v2_witness_orchestration_subject_free_dry_run.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

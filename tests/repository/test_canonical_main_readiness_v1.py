@@ -161,7 +161,7 @@ class CanonicalMainReadinessV1(unittest.TestCase):
         current = (ROOT / "CURRENT_STATE.md").read_text(encoding="utf-8")
         self.assertFalse(bool(gate["fit_authorized_now"]))
         self.assertIn("SUPERSEDED FOR CONTINUATION", restoration)
-        self.assertIn("V2 IMPLEMENTATION + WITNESS ORCHESTRATION AUDIT", current)
+        self.assertIn("**Current mode:** **V2", current)
         self.assertIn("SurfaceAddressing", current)
         self.assertIn("Complete Appearance Authority", current)
         self.assertIn("Geometry", current)

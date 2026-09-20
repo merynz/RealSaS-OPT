@@ -35,6 +35,7 @@ from compiler.realsas_compiler_core.appearance_compile_v2 import (
     compile_deterministic_caa,
 )
 from compiler.realsas_compiler_core.appearance_quality_v2 import (
+    cross_view_source_compatibility_metrics,
     provenance_boundary_metrics,
     rgba_l1_premultiplied,
     structured_holdout_metrics,
@@ -716,6 +717,11 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         face_count=artifact.face_count,
         tile_resolution=artifact.tile_resolution,
     )
+    cross_view = cross_view_source_compatibility_metrics(
+        direct_valid=arrays["direct_valid"],
+        direct_rgba=arrays["direct_rgba"],
+        sample_component_index=arrays["sample_component_index"],
+    )
 
     holdout_per_view_passed = (
         len(holdout["per_view"]) == 8
@@ -811,12 +817,15 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             ),
             "holdout_every_view_passed": holdout_per_view_passed,
             "seam_every_view_passed": seam_per_view_passed,
+            "cross_view_source_compatibility_measured": True,
+            "cross_view_source_compatibility_shipping_gate_frozen": False,
             "appearance_is_coequal_product_authority": True,
         },
         qualification_hash="",
         metadata={
             "holdout": holdout,
             "seam": seam,
+            "cross_view_source_compatibility": cross_view,
             "policy": policy,
             "totality_does_not_claim_geometry_or_visibility_correctness": True,
         },
@@ -848,6 +857,13 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "holdout_p95_rgba_l1": holdout["p95_rgba_l1"],
             "seam_p95_rgba_l1": seam["p95_rgba_l1"],
             "seam_p95_gradient_jump": seam["p95_gradient_jump"],
+            "cross_view_shared_direct_sample_count": cross_view[
+                "shared_direct_sample_count"
+            ],
+            "cross_view_p95_premultiplied_rgba_l1": cross_view[
+                "p95_premultiplied_rgba_l1"
+            ],
+            "cross_view_p95_alpha_abs": cross_view["p95_alpha_abs"],
         },
     }
 

@@ -5,12 +5,12 @@
   "experiments": [
     {
       "id": "V2_IMPLEMENTATION_ASSEMBLY",
-      "status": "REVIEW_READY__READY_FOR_WITNESS_EXECUTION__AWAITING_USER_APPROVAL",
+      "status": "REOPENED__APPEARANCE_FIDELITY_RECLOSURE__WITNESS_FORBIDDEN",
       "branch": "main",
       "scope": "Subject-free completion and red-team hardening of the 46-stage V2 DAG before the first controlled Knight witness.",
-      "progress": "IMPLEMENTATION_SEALED__USER_REVIEW_GATE",
+      "progress": "POST_SEAL_APPEARANCE_REAUDIT",
       "readiness": "canonical/V2_IMPLEMENTATION_READINESS.json",
-      "required_next_proof": "USER_APPROVAL_BEFORE_KNIGHT_STAGE01",
+      "required_next_proof": "APPEARANCE_FIDELITY_RECLOSURE_BEFORE_USER_REVIEW",
       "product_pass_claimed": false,
       "knight_witness_claimed": false,
       "unseen_claimed": false,
@@ -32,7 +32,7 @@
     },
     {
       "id": "SUBJECT2_KNIGHT_FULL_CLOSURE",
-      "status": "HELD__READY_SEAL_PRESENT__AWAITING_EXPLICIT_USER_APPROVAL",
+      "status": "BLOCKED__APPEARANCE_FIDELITY_RECLOSURE_REQUIRED",
       "branch": "main",
       "scope": "First controlled V2 product witness; may activate only after explicit user approval.",
       "current_execution_authority": false,

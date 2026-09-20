@@ -11,6 +11,90 @@ from .resource_contract_v2 import require_cuda_forward_live_set_v2
 from .world_regularizer_v2 import isotropic_world_regularizer_v2
 
 
+DENSE_SOURCE_COVERAGE_POLICY_V2 = {
+    "schema": "RealSaS.IRISDenseSourceCoveragePolicy.v2",
+    "target_authority": "QUALIFIED_OBSERVATION_FOREGROUND_MASK_ONLY",
+    "target_resolution": 1024,
+    "bce_weight": 1.0,
+    "soft_dice_weight": 1.0,
+    "boundary_multiplier": 4.0,
+    "boundary_radius_px": 1,
+    "mask_is_forward_input": False,
+    "hard_stage13_raster_gate_replaced": False,
+}
+
+
+def _dense_source_coverage_loss(
+    output: IrisReprojectionOutputV2,
+    domain: RayHypothesisDomainV2,
+    source_foreground_masks: torch.Tensor,
+) -> torch.Tensor:
+    """Differentiable dense source-mask surrogate for the exact Stage13 hard raster gate.
+
+    Source masks are training targets only. They never enter the learner forward/Q-domain.
+    Per-ray surface probability is reconstructed from predicted mode-support probability,
+    reshaped onto the sealed camera-only production lattice, then evaluated at native
+    1024x1024 resolution. Final product qualification remains the exact decoded-surface
+    Stage13 raster gate; this objective is only its direct dense training pressure.
+    """
+    if source_foreground_masks.ndim != 4 or source_foreground_masks.shape[1:] != (8, 1024, 1024):
+        raise ValueError("dense source coverage targets must be [B,8,1024,1024]")
+    if source_foreground_masks.shape[0] != domain.anchor_view.shape[0]:
+        raise ValueError("dense source coverage batch mismatch")
+    if domain.construction_authority != "RGB_CAMERA_FULL_FRAME_LATTICE_V1":
+        raise ValueError("dense source coverage requires production camera-only Q domain")
+    if domain.anchor_stride_px is None or int(domain.anchor_stride_px) <= 0:
+        raise ValueError("dense source coverage requires sealed anchor stride")
+
+    B, Q = domain.anchor_view.shape
+    anchor_view = domain.anchor_view[:, 0]
+    if not torch.equal(domain.anchor_view, anchor_view[:, None].expand_as(domain.anchor_view)):
+        raise ValueError("dense source coverage requires one analytic anchor view per batch item")
+
+    side = int(round(math.sqrt(Q)))
+    if side * side != Q:
+        raise ValueError("dense source coverage requires square full-frame anchor lattice")
+
+    probability = output.depth_output.support_probability
+    if probability.ndim != 3 or probability.shape[:2] != (B, Q):
+        raise ValueError("dense source coverage support probability shape mismatch")
+    probability = probability.clamp(0.0, 1.0)
+    ray_foreground = 1.0 - torch.prod(1.0 - probability, dim=-1)
+    coarse = ray_foreground.reshape(B, 1, side, side)
+    dense = F.interpolate(
+        coarse,
+        size=(1024, 1024),
+        mode="bilinear",
+        align_corners=False,
+    ).squeeze(1).clamp(1e-6, 1.0 - 1e-6)
+
+    b = torch.arange(B, device=dense.device)
+    target = source_foreground_masks.to(device=dense.device, dtype=dense.dtype)[
+        b, anchor_view
+    ]
+
+    radius = int(DENSE_SOURCE_COVERAGE_POLICY_V2["boundary_radius_px"])
+    kernel = 2 * radius + 1
+    target4 = target[:, None]
+    dilated = F.max_pool2d(target4, kernel_size=kernel, stride=1, padding=radius)
+    eroded = -F.max_pool2d(-target4, kernel_size=kernel, stride=1, padding=radius)
+    boundary = (dilated - eroded).abs().squeeze(1).clamp(0.0, 1.0)
+    pixel_weight = 1.0 + (
+        float(DENSE_SOURCE_COVERAGE_POLICY_V2["boundary_multiplier"]) - 1.0
+    ) * boundary
+
+    bce = F.binary_cross_entropy(dense, target, reduction="none")
+    weighted_bce = (bce * pixel_weight).sum() / pixel_weight.sum().clamp_min(1.0)
+
+    intersection = (dense * target).sum(dim=(1, 2))
+    denominator = dense.sum(dim=(1, 2)) + target.sum(dim=(1, 2))
+    dice_loss = 1.0 - ((2.0 * intersection + 1.0) / (denominator + 1.0))
+    return (
+        float(DENSE_SOURCE_COVERAGE_POLICY_V2["bce_weight"]) * weighted_bce
+        + float(DENSE_SOURCE_COVERAGE_POLICY_V2["soft_dice_weight"]) * dice_loss.mean()
+    )
+
+
 @dataclass(frozen=True)
 class IrisV2LossWeights:
     depth_mode: float = 1.0
@@ -19,10 +103,19 @@ class IrisV2LossWeights:
     support: float = 0.5
     tail_depth: float = 0.5
     world_regularizer: float = 0.02
+    dense_source_coverage: float = 1.0
     tail_fraction: float = 0.10
 
     def validate(self) -> None:
-        numeric = (self.depth_mode, self.refined_depth, self.uncertainty_nll, self.support, self.tail_depth, self.world_regularizer)
+        numeric = (
+            self.depth_mode,
+            self.refined_depth,
+            self.uncertainty_nll,
+            self.support,
+            self.tail_depth,
+            self.world_regularizer,
+            self.dense_source_coverage,
+        )
         if min(numeric) < 0 or not (0.0 < self.tail_fraction <= 1.0):
             raise ValueError("invalid IRIS V2 loss weights")
 
@@ -98,6 +191,7 @@ def iris_v2_loss(
     teacher_support: torch.Tensor,
     *,
     weights: IrisV2LossWeights = IrisV2LossWeights(),
+    source_foreground_masks: torch.Tensor | None = None,
 ) -> dict[str, torch.Tensor]:
     """Multimodal depth/support supervision with metric-aligned hard-tail pressure."""
     weights.validate()
@@ -139,6 +233,15 @@ def iris_v2_loss(
         neighbor_indices=output.field.neighbor_indices,
         neighbor_mask=output.field.neighbor_mask,
     )
+    dense_source_coverage = (
+        logits.sum() * 0.0
+        if source_foreground_masks is None
+        else _dense_source_coverage_loss(
+            output,
+            domain,
+            source_foreground_masks,
+        )
+    )
     total = (
         weights.depth_mode * mode_nll
         + weights.refined_depth * coverage
@@ -146,6 +249,7 @@ def iris_v2_loss(
         + weights.support * support
         + weights.tail_depth * tail
         + weights.world_regularizer * regularizer
+        + weights.dense_source_coverage * dense_source_coverage
     )
     return {
         "total": total,
@@ -155,6 +259,7 @@ def iris_v2_loss(
         "support": support,
         "tail_depth": tail,
         "world_regularizer": regularizer,
+        "dense_source_coverage": dense_source_coverage,
     }
 
 
@@ -162,13 +267,21 @@ def train_step_production_v2(apparatus, optimizer, batch: dict) -> dict[str, flo
     """Scientific training entrypoint: foundation maps cannot be injected by caller."""
     if "foundation_maps" in batch:
         raise ValueError("production IRIS training forbids caller-supplied foundation_maps")
+    if "source_foreground_masks" not in batch:
+        raise ValueError("production IRIS training requires dense source foreground targets")
     if not hasattr(apparatus, "runtime_seal") or not hasattr(apparatus, "source_contract_hash"):
         raise TypeError("production IRIS training requires exact foundation-bound apparatus")
     resource = require_cuda_forward_live_set_v2(apparatus, batch["domain"])
     apparatus.train()
     optimizer.zero_grad(set_to_none=True)
     output = apparatus(batch["images"], batch["domain"])
-    losses = iris_v2_loss(output, batch["domain"], batch["teacher_depth"], batch["teacher_support"])
+    losses = iris_v2_loss(
+        output,
+        batch["domain"],
+        batch["teacher_depth"],
+        batch["teacher_support"],
+        source_foreground_masks=batch["source_foreground_masks"],
+    )
     losses["total"].backward()
     optimizer.step()
     result = {k: float(v.detach().cpu()) for k, v in losses.items()}
@@ -183,7 +296,13 @@ def train_step_injected_foundation_source_test_v2(model, optimizer, batch: dict)
     model.train()
     optimizer.zero_grad(set_to_none=True)
     output = model(batch["images"], batch["foundation_maps"], batch["domain"])
-    losses = iris_v2_loss(output, batch["domain"], batch["teacher_depth"], batch["teacher_support"])
+    losses = iris_v2_loss(
+        output,
+        batch["domain"],
+        batch["teacher_depth"],
+        batch["teacher_support"],
+        source_foreground_masks=batch.get("source_foreground_masks"),
+    )
     losses["total"].backward()
     optimizer.step()
     return {k: float(v.detach().cpu()) for k, v in losses.items()}

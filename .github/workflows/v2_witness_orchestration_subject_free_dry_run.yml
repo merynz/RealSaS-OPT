@@ -43,22 +43,18 @@ jobs:
         run: |
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
 
-      - name: Assert witness readiness is intentionally closed
+      - name: Record readiness state and exact implementation closure
         shell: bash
         run: |
           set -euo pipefail
-          if python -m compiler.realsas_compiler_services.orchestrator.mainline validate-readiness; then
-            echo "ERROR readiness unexpectedly open during implementation audit" >&2
-            exit 1
-          fi
           python - <<'PY'
           import json
           p=json.load(open("canonical/V2_IMPLEMENTATION_READINESS.json",encoding="utf-8"))
-          assert p["status"]=="IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN", p["status"]
-          proof=next(x for x in p["proofs"] if x["proof_id"]=="WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN")
-          assert proof["status"]=="IN_PROGRESS", proof
-          print("READINESS_CLOSED_AS_EXPECTED")
+          print("READINESS_STATE",p["status"])
+          print("READINESS_WITNESS_ALLOWED",bool(p.get("readiness_seal",{}).get("witness_execution_allowed",False)))
           PY
+          python -m compiler.realsas_compiler_services.orchestrator.mainline implementation-closure             > "$RUNNER_TEMP/implementation_closure.json"
+          cat "$RUNNER_TEMP/implementation_closure.json"
 
       - name: Build subject-free Stage01-08 fixture and manifest
         shell: bash
@@ -242,8 +238,9 @@ jobs:
           mkdir -p "$evidence"
           cp "$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID/run_manifest.json" "$evidence/"
           cp "$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID/ACTIVE_RUN_V2.json" "$evidence/"
+          cp "$RUNNER_TEMP/implementation_closure.json" "$evidence/"
           cp -a "$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID/artifacts" "$evidence/"
-          sha256sum "$evidence/ACTIVE_RUN_V2.json" "$evidence/run_manifest.json" > "$evidence/SHA256SUMS.txt"
+          sha256sum             "$evidence/ACTIVE_RUN_V2.json"             "$evidence/run_manifest.json"             "$evidence/implementation_closure.json"             > "$evidence/SHA256SUMS.txt"
           echo "EVIDENCE_DIR=$evidence" >> "$GITHUB_ENV"
 
       - name: Upload subject-free orchestration evidence

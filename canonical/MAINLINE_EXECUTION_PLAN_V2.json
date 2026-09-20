@@ -440,7 +440,7 @@
       "depends_on": [
         "20_CAA_BACKEND_PREREGISTERED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:compile_caa_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -459,7 +459,7 @@
       "depends_on": [
         "21_CAA_COMPILE"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:seal_caa_compile_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -480,7 +480,7 @@
         "18_CANONICAL_MESH_ADDRESSING_BUILD",
         "22_CAA_COMPILE_SEALED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:bake_complete_appearance_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -503,7 +503,7 @@
         "19_STATIC_CANONICAL_MESH_QUALIFIED",
         "23_COMPLETE_APPEARANCE_ASSET_BAKED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:qualify_complete_appearance_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -527,7 +527,7 @@
         "19_STATIC_CANONICAL_MESH_QUALIFIED",
         "24_COMPLETE_APPEARANCE_QUALIFIED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:prove_caa_reference_rest_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,

@@ -2,7 +2,7 @@
 """Render the current RealSaS cross-chat/cross-agent rehydration packet.
 
 Generated navigation only. Current continuation authority is CURRENT_STATE.md,
-AUTHORITY_MAP_V1.json, ACTIVE_RUN_V1.json and the exact pipeline plan.
+AUTHORITY_MAP_V1.json, ACTIVE_RUN_V2.json and the exact pipeline plan.
 Historical FIT/restoration artifacts remain evidence, never current pointers.
 """
 
@@ -21,8 +21,8 @@ if str(ROOT) not in sys.path:
 from compiler.realsas_compiler_services.orchestrator.mainline import validate_ledger
 CONTEXT_PATH = ROOT / "canonical" / "CONTEXT_STATE_V2.json"
 AUTH_PATH = ROOT / "canonical" / "AUTHORITY_MAP_V1.json"
-PLAN_PATH = ROOT / "canonical" / "MAINLINE_EXECUTION_PLAN_V1.json"
-RUN_PATH = ROOT / "canonical" / "ACTIVE_RUN_V1.json"
+PLAN_PATH = ROOT / "canonical" / "MAINLINE_EXECUTION_PLAN_V2.json"
+RUN_PATH = ROOT / "canonical" / "ACTIVE_RUN_V2.json"
 CURRENT_PATH = ROOT / "CURRENT_STATE.md"
 OUTPUT_PATH = ROOT / "canonical" / "REHYDRATION_PACKET.md"
 
@@ -73,7 +73,7 @@ def validate(context: dict, authority: dict, plan: dict, ledger: dict, current_t
         str(active_id or ""),
         str(focus.get("state") or ""),
         "QualifiedMeshIR",
-        "QualifiedPresentationGraphIR",
+        "Complete Appearance Authority",
     ):
         if token and token not in current_text:
             errors.append(f"CURRENT_STATE.md missing current token: {token}")
@@ -134,8 +134,9 @@ def render(context: dict, authority: dict, plan: dict, ledger: dict, heads: dict
         "- MechanicalPartitionIR declares structural membership plus SEPARATE / PRESERVE_CONTINUITY / UNKNOWN boundaries without mutating S.",
         "- QualifiedMeshIR M is view-independent and is the single product geometry authority after independent G1–G5 PASS.",
         "- DeformationCapabilityEnvelopeIR binds mesh conditioning, consequential-UNKNOWN and motion-admissibility policy.",
-        "- QualifiedPresentationGraphIR owns slots, attachments, carrier classes, composition evidence and 8-view overlays.",
-        "- Runtime/export consumes these exact authorities and may not create a second topology or presentation truth.",
+        "- Complete Appearance Authority owns total source-preserving 2D art over the renderable canonical mesh domain.",
+        "- Qualified presentation owns slots, attachments and keyable presentation structure without minting appearance authority.",
+        "- Runtime/export consumes exact sealed mechanics + CAA and may not create a second topology, donor search or appearance truth.",
         "",
         "## Pipeline",
         "",

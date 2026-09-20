@@ -85,6 +85,39 @@ def _projection_arrays(projection):
         return {name: np.asarray(data[name]).copy() for name in data.files}
 
 
+def _largest_connected_fraction(mask: np.ndarray, *, denominator: int) -> float:
+    grid = np.asarray(mask, dtype=bool)
+    if grid.ndim != 2:
+        raise QualificationError("RUNTIME_V2_CONNECTED_MASK_DIMENSION_INVALID")
+    if denominator <= 0 or not np.any(grid):
+        return 0.0
+    height, width = grid.shape
+    seen = np.zeros_like(grid, dtype=bool)
+    largest = 0
+    for y0, x0 in np.argwhere(grid):
+        y0 = int(y0)
+        x0 = int(x0)
+        if seen[y0, x0]:
+            continue
+        seen[y0, x0] = True
+        stack = [(y0, x0)]
+        size = 0
+        while stack:
+            y, x = stack.pop()
+            size += 1
+            for yy, xx in ((y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)):
+                if (
+                    0 <= yy < height
+                    and 0 <= xx < width
+                    and grid[yy, xx]
+                    and not seen[yy, xx]
+                ):
+                    seen[yy, xx] = True
+                    stack.append((yy, xx))
+        largest = max(largest, size)
+    return float(largest) / float(denominator)
+
+
 def build_runtime_projection_stage(ctx: dict) -> dict:
     complete = complete_puppet_state_v2_from_dict(
         stage_output_payload(

@@ -54,6 +54,7 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
     sha256_file,
     stage_output_payload,
     write_ir,
+    write_json,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.model_execution_common_v2 import (
     build_fit_execution,
@@ -694,10 +695,11 @@ def build_gsa_stage(ctx: dict) -> dict:
                 surface,
                 authority_class="GSA_RIGGING_SURFACE_CANDIDATE",
             ),
-            write_ir(
+            write_json(
                 root / "substrate_adequacy_report.json",
                 adequacy,
                 authority_class="SUBSTRATE_ADEQUACY_REPORT",
+                schema="RealSaS.SubstrateAdequacyReport.v1",
             ),
         ],
         "diagnostics": {

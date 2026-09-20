@@ -14,14 +14,14 @@
   "threshold_mutation_after_activation_forbidden": true,
   "historical_v1_reuse_forbidden": true,
   "note": "Fresh Knight V2 witness begins only after subject-free implementation readiness sealed 14/14 PASS. This activation does not claim any Knight gate result.",
-  "attempt": 2,
+  "attempt": 3,
   "previous_attempt": {
-    "workflow_run_id": 35529977829,
+    "workflow_run_id": 35530032605,
     "status": "APPARATUS_FAIL_BEFORE_STAGE01",
-    "failure": "SELF_HOSTED_RUNNER_SUDO_REQUIRES_TERMINAL_AUTHENTICATION",
+    "failure": "V2_MAINLINE_CLI_NO_LONGER_ACCEPTS_FROM_STAGE_TO_STAGE_AND_CURRENT_MAIN_LEDGER_IS_ASSEMBLY_SCOPED",
     "witness_data_observed": false,
     "stage01_started": false,
-    "disposition": "REMOVE_ROOT_DEPENDENCY__RETRY_SAME_FROZEN_WITNESS_CONTRACT"
+    "disposition": "USE_TARGET_CLOSURE_CLI__MATERIALIZE_RUN_LOCAL_KNIGHT_LEDGER__RETRY_SAME_FROZEN_WITNESS_CONTRACT"
   },
-  "apparatus_fix_commit": "1e9cfedf938c96b36784add301e6081b546f137b"
+  "apparatus_fix_commit": "5ff660d9bd0b49f6e2133b882367a333bf743ce5"
 }

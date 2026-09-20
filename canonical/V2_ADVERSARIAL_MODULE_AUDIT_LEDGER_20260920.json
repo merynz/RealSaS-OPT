@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.V2AdversarialModuleAuditLedger.v1",
   "date": "2026-09-20",
-  "status": "PASS_SUBJECT_FREE_IMPLEMENTATION_AUDIT",
+  "status": "REOPENED_BY_46_STAGE_SECOND_PASS",
   "witness_used": false,
   "threshold_tuning_from_knight_forbidden": true,
   "protocol": "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md",
@@ -340,5 +340,51 @@
     "knight_witness_observed": false,
     "thresholds_selected_from_knight": false
   },
-  "closure": "Every A-U implementation boundary has a subject-free adversarial proof hook exercised by the successful self-hosted mainline suite; native CAA RSS parity is independently green. This closes implementation readiness only, not Knight product performance."
+  "closure": "Previous A-U subject-free proof hooks remain valid historical implementation evidence, but the audit is reopened by the 46-stage second pass. Knight remains forbidden until RT-37 and RT-45/46 are resolved or deliberately narrowed and exact readiness is resealed.",
+  "stage_level_redteam": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
+  "second_pass": {
+    "status": "REOPENED",
+    "witness_used": false,
+    "functional_head_before_redteam_docs": "ca9d2d2e59bc517a139c743eb6a91df2e48ac761",
+    "mainline_ci": {
+      "run_id": 35536134130,
+      "job_id": 106145391722,
+      "conclusion": "success",
+      "repository_tests_passed": 48,
+      "learned_and_model_tests_passed": 51,
+      "compiler_tests_passed": 281,
+      "self_hosted_only": true
+    },
+    "orchestration_dry_run": {
+      "run_id": 35536134136,
+      "job_id": 106145391794,
+      "conclusion": "success",
+      "stage01_08_artifact_contract_passed": true,
+      "canonical_assembly_ledger_unchanged": true
+    },
+    "implementation_closure_sha256_before_redteam_docs": "a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882",
+    "findings": [
+      {
+        "id": "RT-37",
+        "severity": "HIGH",
+        "stage": "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "status": "OPEN",
+        "summary": "Automatic presentation grouping only separates disconnected face islands inside a mechanical component; connected mechanically equivalent visual regions cannot yet be independently auto-addressed."
+      },
+      {
+        "id": "RT-45",
+        "severity": "HIGH",
+        "stage": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        "status": "OPEN",
+        "summary": "Dynamic visual integrity exhaustively proves provenance/exposure/native parity but lacks an independent quantitative dynamic 2D-art deformation-quality gate."
+      },
+      {
+        "id": "RT-46",
+        "severity": "HIGH_INHERITED",
+        "stage": "46_PRODUCT_CLOSURE_SEAL",
+        "status": "OPEN",
+        "summary": "Product closure wording over-reads Stage37/45 evidence if interpreted as universal Spine-class automatic authorability and dynamic appearance proof."
+      }
+    ]
+  }
 }

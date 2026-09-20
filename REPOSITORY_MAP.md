@@ -12,14 +12,15 @@ RealSaS-OPT is the current RealSaS V2 research/compiler/runtime repository. The 
 6. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
 7. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
 8. `canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json`
-9. `canonical/AUTHORITY_MAP_V1.json`
-10. `canonical/EXPERIMENT_REGISTRY_V3.json`
+9. `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`
+10. `canonical/AUTHORITY_MAP_V1.json`
+11. `canonical/EXPERIMENT_REGISTRY_V3.json`
 
 Generated `canonical/REHYDRATION_PACKET.md` and `canonical/LIVE_AUTHORITY_MAP.md` are navigation/cache views, not independent scientific authority.
 
 ## Current executable lineage
 
-The current executable product path is the 46-stage V2 DAG in `canonical/MAINLINE_EXECUTION_PLAN_V2.json`.
+The current executable product path is the 46-stage V2 DAG in `canonical/MAINLINE_EXECUTION_PLAN_V2.json`. The executable contract is self-hosted green, while the stage-level red-team has reopened witness readiness on RT-37 and RT-45/46.
 
 There is no alternate repair branch with current product authority. Historical branches remain evidence only unless explicitly promoted by the current authority spine.
 

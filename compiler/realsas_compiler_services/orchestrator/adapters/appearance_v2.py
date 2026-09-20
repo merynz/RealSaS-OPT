@@ -48,7 +48,7 @@ from compiler.realsas_compiler_core.mesh.product_coverage_v1 import coverage_met
 from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
 )
-from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
+from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
     qualified_camera_set_from_dict,
     qualified_observation_set_from_dict,

@@ -6,9 +6,12 @@ import pytest
 
 from compiler.realsas_compiler_core.product_state_v2 import (
     CompletePuppetStateV2IR,
+    QualifiedPresentationGraphV2IR,
     QualifiedPresentationStructureV2IR,
     complete_puppet_state_hash,
     complete_puppet_state_v2_from_dict,
+    presentation_graph_v2_from_dict,
+    presentation_graph_v2_hash,
     presentation_structure_v2_hash,
     presentation_structure_v2_from_dict,
 )
@@ -30,6 +33,10 @@ from compiler.realsas_compiler_core.runtime_authority_v2 import (
     runtime_projection_from_dict,
     runtime_projection_hash,
 )
+from compiler.realsas_compiler_core.product_authority_v1 import (
+    PresentationViewOverlayIR,
+)
+from compiler.realsas_compiler_core.visibility_v2 import VISIBILITY_CONTRACT_V2_HASH
 from compiler.realsas_compiler_core.types import QualificationError
 
 
@@ -55,6 +62,55 @@ def _complete_puppet():
         metadata={"geometry_mechanics_appearance_coequal": True},
     )
     return replace(value, complete_puppet_hash=complete_puppet_state_hash(value))
+
+
+
+
+def test_presentation_graph_v2_has_explicit_caa_bindings_and_rejects_legacy_drift():
+    overlay = PresentationViewOverlayIR(
+        view_index=0,
+        camera_binding_hash="c" * 64,
+        appearance_binding_hash="7" * 64,
+        composition_binding_hash="d" * 64,
+        metadata={"visibility_contract_hash": VISIBILITY_CONTRACT_V2_HASH},
+    )
+    value = QualifiedPresentationGraphV2IR(
+        slots=(),
+        attachments=(),
+        view_overlays=(overlay,),
+        decisions=(),
+        skeleton_binding_hash="1" * 64,
+        mesh_binding_hash="2" * 64,
+        partition_binding_hash="3" * 64,
+        carrier_policy_binding_hash="4" * 64,
+        mechanical_state_binding_hash="5" * 64,
+        presentation_structure_binding_hash="6" * 64,
+        complete_appearance_asset_binding_hash="7" * 64,
+        complete_appearance_qualification_binding_hash="8" * 64,
+        composition_policy_binding_hash="d" * 64,
+        qualification_report={
+            "status": "PASS_CAA_BOUND_PRESENTATION_V2",
+            "visibility_contract_hash": VISIBILITY_CONTRACT_V2_HASH,
+        },
+        presentation_lineage_hash="",
+        metadata={"legacy_appearance_set_semantics_used": False},
+    )
+    value = replace(
+        value,
+        presentation_lineage_hash=presentation_graph_v2_hash(value),
+    )
+    decoded = presentation_graph_v2_from_dict(value.to_dict())
+    assert decoded.complete_appearance_asset_binding_hash == "7" * 64
+    assert decoded.complete_appearance_qualification_binding_hash == "8" * 64
+    assert decoded.mechanical_state_binding_hash == "5" * 64
+    assert not hasattr(decoded, "appearance_set_binding_hash")
+    assert not hasattr(decoded, "composition_set_binding_hash")
+    assert not hasattr(decoded, "product_state_binding_hash")
+
+    tampered = value.to_dict()
+    tampered["complete_appearance_asset_binding_hash"] = "f" * 64
+    with pytest.raises(QualificationError, match="PRESENTATION_GRAPH_V2_HASH_DRIFT"):
+        presentation_graph_v2_from_dict(tampered)
 
 
 def test_complete_puppet_decoder_rejects_any_unrehash_binding_drift():

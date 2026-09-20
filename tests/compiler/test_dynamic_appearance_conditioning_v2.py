@@ -43,6 +43,39 @@ def test_dynamic_appearance_identity_map_is_well_conditioned():
     assert metrics["adjacent_frame_surface_principal_stretch"] == pytest.approx(1.0)
 
 
+def test_rigid_3d_rotation_does_not_count_as_intrinsic_art_deformation():
+    uv = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+    rest_xyz = (
+        (0.0, 0.0, 0.0),
+        (10.0, 0.0, 0.0),
+        (0.0, 10.0, 0.0),
+    )
+    # Rigid 60-degree rotation around Y. Intrinsic edge lengths are unchanged,
+    # while an orthographic XY projection is strongly foreshortened in X.
+    posed_xyz = (
+        (0.0, 0.0, 0.0),
+        (5.0, 0.0, -8.660254037844386),
+        (0.0, 10.0, 0.0),
+    )
+    posed_screen = (
+        (0.0, 0.0),
+        (5.0, 0.0),
+        (0.0, 10.0),
+    )
+    metrics = dynamic_face_conditioning_metrics(
+        uv_triangle=uv,
+        posed_xyz_triangle=posed_xyz,
+        rest_xyz_triangle=rest_xyz,
+        posed_screen_triangle=posed_screen,
+        previous_xyz_triangle=rest_xyz,
+        min_projected_double_area_px2=1.0,
+    )
+    assert metrics["relative_surface_condition_number"] == pytest.approx(1.0)
+    assert metrics["relative_surface_principal_stretch"] == pytest.approx(1.0)
+    assert metrics["uv_to_screen_condition_number_diagnostic"] == pytest.approx(2.0)
+    assert metrics["uv_to_surface_condition_number"] == pytest.approx(1.0)
+
+
 def test_dynamic_appearance_metrics_expose_anisotropic_art_stretch():
     rest = ((0.0, 0.0), (10.0, 0.0), (0.0, 10.0))
     posed = ((0.0, 0.0), (60.0, 0.0), (0.0, 10.0))

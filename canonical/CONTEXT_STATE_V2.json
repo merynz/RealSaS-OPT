@@ -158,7 +158,8 @@
   "continuation_protocol": {
     "first_action": "Read V2_IMPLEMENTATION_READINESS, not a witness stage ledger.",
     "assembly_completion_definition": "All required readiness proofs PASS with SHA-256 identities, every plan adapter bound, DAG and adversarial tests green, then status becomes READY_FOR_WITNESS_EXECUTION.",
-    "witness_rule": "Only after readiness seal mint a fresh Subject-2 Knight Stage01 ledger; do not reuse V1 or premature V2 witness rows."
+    "witness_rule": "Only after readiness seal mint a fresh Subject-2 Knight Stage01 ledger; do not reuse V1 or premature V2 witness rows.",
+    "experiment_completion_definition": "All required readiness proofs PASS with SHA-256 identities, every plan adapter bound, DAG and adversarial tests green, then status becomes READY_FOR_WITNESS_EXECUTION."
   },
   "product_quality_axes": {
     "geometry": {

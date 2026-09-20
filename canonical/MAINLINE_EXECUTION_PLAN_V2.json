@@ -833,7 +833,7 @@
     {
       "ordinal": 40,
       "id": "40_MOTION_COMPILE_RUN",
-      "title": "Full-3D motion compilation plus PresentationTimelineIR",
+      "title": "Full-3D canonical motion compilation",
       "group": "motion",
       "depends_on": [
         "28_SKELETON_QUALIFIED",
@@ -875,7 +875,7 @@
         "product_pass_authority": false
       },
       "manifest_keys": [
-        "appearance"
+        "observation"
       ]
     },
     {
@@ -898,9 +898,7 @@
         "output_hash_required": true,
         "product_pass_authority": false
       },
-      "manifest_keys": [
-        "runtime"
-      ]
+      "manifest_keys": []
     },
     {
       "ordinal": 43,

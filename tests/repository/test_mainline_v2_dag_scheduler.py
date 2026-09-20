@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import pytest
+from pathlib import Path
 
 from compiler.realsas_compiler_services.orchestrator.mainline import (
+    _fingerprint,
+    _outputs_verify,
+    _seal_outputs,
     _target_closure,
     dependency_failure_ids,
     ready_stage_ids,
@@ -85,3 +89,87 @@ def test_topological_order_uses_ordinal_only_as_stable_display_tiebreak():
         ]
     }
     assert topological_stage_ids(plan) == ("01_A", "02_B", "03_C")
+
+
+def test_stage_fingerprint_binds_dependency_schema_and_authority_identity():
+    plan = {
+        "stages": [
+            {
+                **_stage(1, "01_A"),
+                "manifest_keys": [],
+                "policy": {"fail_closed": True, "output_hash_required": True},
+            },
+            {
+                **_stage(2, "02_B", ("01_A",)),
+                "manifest_keys": [],
+                "policy": {"fail_closed": True, "output_hash_required": True},
+            },
+        ]
+    }
+    ledger = {
+        "run_id": "R",
+        "pipeline_plan_sha256": "p" * 64,
+        "stages": [
+            {
+                **_row(1, "01_A", "PASS"),
+                "outputs": [
+                    {
+                        "path": "/tmp/a",
+                        "sha256": "a" * 64,
+                        "bytes": 10,
+                        "schema": "Schema.A",
+                        "authority_class": "AUTH_A",
+                    }
+                ],
+            },
+            {**_row(2, "02_B", "PENDING"), "outputs": []},
+        ],
+    }
+    stage = plan["stages"][1]
+    first, _ = _fingerprint(plan, ledger, {}, stage, "i" * 64)
+    ledger["stages"][0]["outputs"][0]["schema"] = "Schema.B"
+    second, _ = _fingerprint(plan, ledger, {}, stage, "i" * 64)
+    assert second != first
+    ledger["stages"][0]["outputs"][0]["schema"] = "Schema.A"
+    ledger["stages"][0]["outputs"][0]["authority_class"] = "AUTH_B"
+    third, _ = _fingerprint(plan, ledger, {}, stage, "i" * 64)
+    assert third != first
+
+
+def test_sealed_output_requires_typed_authority_metadata(tmp_path):
+    path = tmp_path / "artifact.bin"
+    path.write_bytes(b"abc")
+    with pytest.raises(RuntimeError, match="STAGE_OUTPUT_AUTHORITY_CLASS_REQUIRED"):
+        _seal_outputs(
+            [{"path": str(path), "schema": "Schema.A"}],
+            allowed_root=tmp_path,
+        )
+    with pytest.raises(RuntimeError, match="STAGE_OUTPUT_SCHEMA_REQUIRED"):
+        _seal_outputs(
+            [{"path": str(path), "authority_class": "AUTH_A"}],
+            allowed_root=tmp_path,
+        )
+
+
+def test_existing_output_verification_rejects_size_and_schema_drift(tmp_path):
+    path = tmp_path / "artifact.bin"
+    path.write_bytes(b"abc")
+    import hashlib
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    row = {
+        "outputs": [
+            {
+                "path": str(path),
+                "sha256": digest,
+                "bytes": 3,
+                "schema": "Schema.A",
+                "authority_class": "AUTH_A",
+            }
+        ]
+    }
+    assert _outputs_verify(row, allowed_root=tmp_path)
+    row["outputs"][0]["bytes"] = 4
+    assert not _outputs_verify(row, allowed_root=tmp_path)
+    row["outputs"][0]["bytes"] = 3
+    row["outputs"][0]["schema"] = "UNSPECIFIED"
+    assert not _outputs_verify(row, allowed_root=tmp_path)

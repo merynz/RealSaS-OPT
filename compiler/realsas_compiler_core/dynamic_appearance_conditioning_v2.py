@@ -1,6 +1,12 @@
 from __future__ import annotations
 
-"""Subject-free screen-space appearance conditioning for V2 dynamic art."""
+"""Subject-free dynamic appearance conditioning for V2 art under deformation.
+
+Shipping gates are intrinsic to the textured surface and therefore invariant to
+rigid 3D rotation/translation. Screen projection conditioning is retained only
+as diagnostic evidence because legitimate foreshortening must not be mistaken
+for texture deformation.
+"""
 
 from typing import Any, Mapping
 
@@ -9,89 +15,127 @@ import numpy as np
 from .types import QualificationError
 
 
-def _triangle_matrix(points_xy) -> np.ndarray:
-    points = np.asarray(points_xy, dtype=np.float64)
-    if points.shape != (3, 2) or not np.isfinite(points).all():
+def _edge_matrix(points, *, dimension: int) -> np.ndarray:
+    value = np.asarray(points, dtype=np.float64)
+    if value.shape != (3, dimension) or not np.isfinite(value).all():
         raise QualificationError("DYNAMIC_APPEARANCE_TRIANGLE_INVALID")
-    return np.column_stack((points[1] - points[0], points[2] - points[0]))
+    return np.column_stack((value[1] - value[0], value[2] - value[0]))
 
 
-def _sv_metrics(matrix: np.ndarray) -> tuple[float, float, float]:
-    value = np.asarray(matrix, dtype=np.float64)
-    if value.shape != (2, 2) or not np.isfinite(value).all():
-        raise QualificationError("DYNAMIC_APPEARANCE_AFFINE_INVALID")
-    singular = np.linalg.svd(value, compute_uv=False)
+def _condition(matrix: np.ndarray) -> float:
+    singular = np.linalg.svd(np.asarray(matrix, dtype=np.float64), compute_uv=False)
     smax = float(np.max(singular))
     smin = float(np.min(singular))
     if not np.isfinite(smax) or not np.isfinite(smin) or smin <= 1.0e-12:
         raise QualificationError("DYNAMIC_APPEARANCE_AFFINE_DEGENERATE")
-    return smax, smin, smax / smin
+    return smax / smin
+
+
+def _surface_metric(edge_matrix_3d: np.ndarray) -> np.ndarray:
+    edges = np.asarray(edge_matrix_3d, dtype=np.float64)
+    metric = edges.T @ edges
+    if metric.shape != (2, 2) or not np.isfinite(metric).all():
+        raise QualificationError("DYNAMIC_APPEARANCE_SURFACE_METRIC_INVALID")
+    if float(np.linalg.det(metric)) <= 1.0e-14:
+        raise QualificationError("DYNAMIC_APPEARANCE_SURFACE_DEGENERATE")
+    return metric
+
+
+def _relative_surface_stretch(
+    reference_edges_3d: np.ndarray,
+    target_edges_3d: np.ndarray,
+) -> tuple[float, float]:
+    reference_metric = _surface_metric(reference_edges_3d)
+    target_metric = _surface_metric(target_edges_3d)
+    try:
+        lower = np.linalg.cholesky(reference_metric)
+        inv_lower = np.linalg.inv(lower)
+    except np.linalg.LinAlgError as exc:
+        raise QualificationError(
+            "DYNAMIC_APPEARANCE_REFERENCE_METRIC_DEGENERATE"
+        ) from exc
+    generalized = inv_lower @ target_metric @ inv_lower.T
+    generalized = 0.5 * (generalized + generalized.T)
+    eigen = np.linalg.eigvalsh(generalized)
+    if (
+        eigen.shape != (2,)
+        or not np.isfinite(eigen).all()
+        or float(np.min(eigen)) <= 1.0e-12
+    ):
+        raise QualificationError("DYNAMIC_APPEARANCE_GENERALIZED_METRIC_INVALID")
+    stretches = np.sqrt(eigen)
+    smin = float(np.min(stretches))
+    smax = float(np.max(stretches))
+    return smax / smin, max(smax, 1.0 / smin)
 
 
 def dynamic_face_conditioning_metrics(
     *,
     uv_triangle,
+    posed_xyz_triangle,
+    rest_xyz_triangle,
     posed_screen_triangle,
-    rest_screen_triangle=None,
-    previous_screen_triangle=None,
+    previous_xyz_triangle=None,
     min_projected_double_area_px2: float,
 ) -> dict[str, Any]:
     minimum_area = float(min_projected_double_area_px2)
     if not np.isfinite(minimum_area) or minimum_area <= 0.0:
         raise QualificationError("DYNAMIC_APPEARANCE_MIN_AREA_INVALID")
 
-    uv_matrix = _triangle_matrix(uv_triangle)
-    posed_matrix = _triangle_matrix(posed_screen_triangle)
-    uv_det = abs(float(np.linalg.det(uv_matrix)))
-    posed_area2 = abs(float(np.linalg.det(posed_matrix)))
+    uv_edges = _edge_matrix(uv_triangle, dimension=2)
+    posed_edges = _edge_matrix(posed_xyz_triangle, dimension=3)
+    rest_edges = _edge_matrix(rest_xyz_triangle, dimension=3)
+    screen_edges = _edge_matrix(posed_screen_triangle, dimension=2)
+
+    uv_det = abs(float(np.linalg.det(uv_edges)))
+    projected_area2 = abs(float(np.linalg.det(screen_edges)))
     if uv_det <= 1.0e-12:
         raise QualificationError("DYNAMIC_APPEARANCE_UV_DEGENERATE")
 
     result: dict[str, Any] = {
-        "posed_projected_double_area_px2": posed_area2,
-        "measurable": posed_area2 >= minimum_area,
-        "uv_to_screen_condition_number": None,
-        "relative_screen_condition_number": None,
-        "relative_principal_stretch": None,
-        "adjacent_frame_principal_stretch": None,
+        "posed_projected_double_area_px2": projected_area2,
+        "measurable": projected_area2 >= minimum_area,
+        "uv_to_surface_condition_number": None,
+        "relative_surface_condition_number": None,
+        "relative_surface_principal_stretch": None,
+        "adjacent_frame_surface_principal_stretch": None,
+        "uv_to_screen_condition_number_diagnostic": None,
     }
     if not result["measurable"]:
         return result
 
-    uv_to_screen = posed_matrix @ np.linalg.inv(uv_matrix)
-    _smax, _smin, condition = _sv_metrics(uv_to_screen)
-    result["uv_to_screen_condition_number"] = condition
+    uv_to_surface = posed_edges @ np.linalg.inv(uv_edges)
+    result["uv_to_surface_condition_number"] = _condition(uv_to_surface)
+    result["uv_to_screen_condition_number_diagnostic"] = _condition(
+        screen_edges @ np.linalg.inv(uv_edges)
+    )
 
-    if rest_screen_triangle is not None:
-        rest_matrix = _triangle_matrix(rest_screen_triangle)
-        rest_area2 = abs(float(np.linalg.det(rest_matrix)))
-        result["rest_projected_double_area_px2"] = rest_area2
-        if rest_area2 >= minimum_area:
-            relative = posed_matrix @ np.linalg.inv(rest_matrix)
-            smax, smin, condition = _sv_metrics(relative)
-            result["relative_screen_condition_number"] = condition
-            result["relative_principal_stretch"] = max(smax, 1.0 / smin)
+    relative_condition, relative_stretch = _relative_surface_stretch(
+        rest_edges, posed_edges
+    )
+    result["relative_surface_condition_number"] = relative_condition
+    result["relative_surface_principal_stretch"] = relative_stretch
 
-    if previous_screen_triangle is not None:
-        previous_matrix = _triangle_matrix(previous_screen_triangle)
-        previous_area2 = abs(float(np.linalg.det(previous_matrix)))
-        result["previous_projected_double_area_px2"] = previous_area2
-        if previous_area2 >= minimum_area:
-            step = posed_matrix @ np.linalg.inv(previous_matrix)
-            smax, smin, _condition = _sv_metrics(step)
-            result["adjacent_frame_principal_stretch"] = max(smax, 1.0 / smin)
+    if previous_xyz_triangle is not None:
+        previous_edges = _edge_matrix(previous_xyz_triangle, dimension=3)
+        _step_condition, step_stretch = _relative_surface_stretch(
+            previous_edges, posed_edges
+        )
+        result["adjacent_frame_surface_principal_stretch"] = step_stretch
 
     return result
 
 
-def validate_dynamic_appearance_policy(policy: Mapping[str, Any]) -> dict[str, float | int]:
+def validate_dynamic_appearance_policy(
+    policy: Mapping[str, Any],
+) -> dict[str, float | int]:
     required = (
         "dynamic_min_visible_pixels_per_face",
         "dynamic_min_projected_double_area_px2",
-        "dynamic_max_uv_to_screen_condition_number",
-        "dynamic_max_relative_screen_condition_number",
-        "dynamic_max_relative_principal_stretch",
-        "dynamic_max_adjacent_frame_principal_stretch",
+        "dynamic_max_uv_to_surface_condition_number",
+        "dynamic_max_relative_surface_condition_number",
+        "dynamic_max_relative_surface_principal_stretch",
+        "dynamic_max_adjacent_frame_surface_principal_stretch",
     )
     if any(key not in policy for key in required):
         raise QualificationError("DYNAMIC_APPEARANCE_POLICY_INCOMPLETE")
@@ -102,17 +146,17 @@ def validate_dynamic_appearance_policy(policy: Mapping[str, Any]) -> dict[str, f
         "dynamic_min_projected_double_area_px2": float(
             policy["dynamic_min_projected_double_area_px2"]
         ),
-        "dynamic_max_uv_to_screen_condition_number": float(
-            policy["dynamic_max_uv_to_screen_condition_number"]
+        "dynamic_max_uv_to_surface_condition_number": float(
+            policy["dynamic_max_uv_to_surface_condition_number"]
         ),
-        "dynamic_max_relative_screen_condition_number": float(
-            policy["dynamic_max_relative_screen_condition_number"]
+        "dynamic_max_relative_surface_condition_number": float(
+            policy["dynamic_max_relative_surface_condition_number"]
         ),
-        "dynamic_max_relative_principal_stretch": float(
-            policy["dynamic_max_relative_principal_stretch"]
+        "dynamic_max_relative_surface_principal_stretch": float(
+            policy["dynamic_max_relative_surface_principal_stretch"]
         ),
-        "dynamic_max_adjacent_frame_principal_stretch": float(
-            policy["dynamic_max_adjacent_frame_principal_stretch"]
+        "dynamic_max_adjacent_frame_surface_principal_stretch": float(
+            policy["dynamic_max_adjacent_frame_surface_principal_stretch"]
         ),
     }
     if int(out["dynamic_min_visible_pixels_per_face"]) < 1:

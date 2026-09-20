@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "d9b4cd073e3ea83bfe6b488503a2daef05c281c0",
+    "main": "f3e5620804a2248fe5518e59072f743ed31b7d69",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -115,7 +115,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2224,
+  "commit_count": 2230,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -116458,6 +116458,146 @@
       "main_reachable": true,
       "changed_paths": [
         "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f5711fb461015e733092db9d5ade5712426e69ef",
+      "parents": [
+        "d9b4cd073e3ea83bfe6b488503a2daef05c281c0"
+      ],
+      "author_time": "2026-09-20T21:18:05+03:00",
+      "committer_time": "2026-09-20T21:18:05+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "215bbe78457a31e9cdc1e6d281733108193e5f03",
+      "parents": [
+        "f5711fb461015e733092db9d5ade5712426e69ef"
+      ],
+      "author_time": "2026-09-20T21:29:19+03:00",
+      "committer_time": "2026-09-20T21:29:19+03:00",
+      "subject": "test: execute real V2 Stage20-25 CAA adapter branch subject-free",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "93ad9d95bd58066d3b9c5b6f91414cc1536f4898",
+      "parents": [
+        "215bbe78457a31e9cdc1e6d281733108193e5f03"
+      ],
+      "author_time": "2026-09-20T21:30:35+03:00",
+      "committer_time": "2026-09-20T21:30:35+03:00",
+      "subject": "test: red-team V2 tail authority hash drift fail-closed",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8d0f2f9afc8cfcded9fa22321200bc278904c03a",
+      "parents": [
+        "93ad9d95bd58066d3b9c5b6f91414cc1536f4898"
+      ],
+      "author_time": "2026-09-20T21:31:32+03:00",
+      "committer_time": "2026-09-20T21:31:32+03:00",
+      "subject": "appearance v2: add typed rest-proof decoder and hash verification",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9d9412be0e9af489962f164bea4975407a24ab30",
+      "parents": [
+        "8d0f2f9afc8cfcded9fa22321200bc278904c03a"
+      ],
+      "author_time": "2026-09-20T21:32:11+03:00",
+      "committer_time": "2026-09-20T21:32:11+03:00",
+      "subject": "ci: add independent V2 CAA native parity runtime gate",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/current_runtime_self_hosted_ci.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f3e5620804a2248fe5518e59072f743ed31b7d69",
+      "parents": [
+        "9d9412be0e9af489962f164bea4975407a24ab30"
+      ],
+      "author_time": "2026-09-20T21:33:11+03:00",
+      "committer_time": "2026-09-20T21:33:11+03:00",
+      "subject": "test: red-team V2 source observation and normalization authorities",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_preflight_v2_adversarial.py"
       ],
       "subsystem_tags": [
         "CI_TEST",

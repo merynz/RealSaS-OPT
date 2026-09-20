@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2224**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2230**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2236,6 +2236,12 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-20T21:12:35+03:00` | `cc974a20798e` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
 | `2026-09-20T21:14:14+03:00` | `c033ff93a592` | yes | COMPILER_PROOF | product v2: require qualified total CAA before complete puppet seal | `compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py` | `main` |
 | `2026-09-20T21:15:21+03:00` | `d9b4cd073e3e` | yes | CI_TEST, COMPILER_PROOF | test: execute V2 Stage37-46 subject-free native product tail | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-20T21:18:05+03:00` | `f5711fb46101` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-20T21:29:19+03:00` | `215bbe78457a` | yes | CI_TEST, COMPILER_PROOF | test: execute real V2 Stage20-25 CAA adapter branch subject-free | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-20T21:30:35+03:00` | `93ad9d95bd58` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | test: red-team V2 tail authority hash drift fail-closed | `tests/compiler/test_v2_tail_authority_fail_closed.py` | `main` |
+| `2026-09-20T21:31:32+03:00` | `8d0f2f9afc8c` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | appearance v2: add typed rest-proof decoder and hash verification | `compiler/realsas_compiler_core/appearance_authority_v2.py` | `main` |
+| `2026-09-20T21:32:11+03:00` | `9d9412be0e9a` | yes | CI_TEST, RUNTIME_PRODUCT | ci: add independent V2 CAA native parity runtime gate | `.github/workflows/current_runtime_self_hosted_ci.yml` | `main` |
+| `2026-09-20T21:33:11+03:00` | `f3e5620804a2` | yes | CI_TEST, COMPILER_PROOF | test: red-team V2 source observation and normalization authorities | `tests/compiler/test_preflight_v2_adversarial.py` | `main` |
 
 ## Use rule
 

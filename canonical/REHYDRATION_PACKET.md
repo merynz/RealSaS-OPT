@@ -11,7 +11,7 @@
 - Current state: V2_IMPLEMENTATION_ASSEMBLY__WITNESS_EXECUTION_FORBIDDEN
 - Active experiment: V2_IMPLEMENTATION_ASSEMBLY
 - Most recent closed gate: V1_TO_V2_AUTHORITY_RATIONALE_AND_APPEARANCE_COEQUALITY_FROZEN
-- Canonical main: d9b4cd073e3e
+- Canonical main: f3e5620804a2
 - Active run: V2_IMPLEMENTATION_ASSEMBLY — 0/46; next NONE
 - Plan SHA-256: a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1
 - Promotion block: Do not execute Knight. Bind all 46 V2 adapters, re-audit IRIS/GSA geometry role, close relation-parent mesh feasibility, implement Complete Appearance Authority and premultiplied sampling, remove donor/UNSEEN from current runtime, prove canonical posed-XYZ visibility, and close dynamic visual integrity.

@@ -3,7 +3,7 @@
   "date": "2026-09-20",
   "status": "ASSEMBLY_IN_PROGRESS__WITNESS_EXECUTION_FORBIDDEN",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-  "pipeline_plan_sha256": "abec3eefda132b150e542dbedac886485514a0baa6d090bf598b273b83a39fac",
+  "pipeline_plan_sha256": "94ad6de1aa5f1c5b8b9755ba33e3ca89ec147d5246f5c01ff123c6870d88be0c",
   "rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
   "witness_policy": "DO_NOT_START_KNIGHT_UNTIL_STATUS_READY_FOR_WITNESS_EXECUTION",
   "required_proofs": [
@@ -45,12 +45,13 @@
       "proof_id": "CAA_TOTALITY_SOURCE_LOCK_AND_BINDING",
       "status": "IN_PROGRESS",
       "sha256": "",
-      "note": "CAA contract/preregistration IR exists; compile/bake/qualification implementation pending."
+      "note": "Stages20-25 are now bound to deterministic mesh-domain CAA; synthetic/reference validation pending."
     },
     {
       "proof_id": "CAA_HOLDOUT_AND_SEAM_QUALITY",
-      "status": "PENDING",
-      "sha256": ""
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Structured anisotropic holdout plus provenance color/gradient seam gates implemented; calibration/tests pending."
     },
     {
       "proof_id": "VISIBILITY_DEPTH_OWNERSHIP",
@@ -60,8 +61,9 @@
     },
     {
       "proof_id": "PREMULTIPLIED_ALPHA_AND_ATLAS_BLEED",
-      "status": "PENDING",
-      "sha256": ""
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Unique-face atlas, mandatory bleed and premultiplied reference filtering implemented; end-to-end runtime/native tests pending."
     },
     {
       "proof_id": "MECHANICS_RIG_SKIN_DYNAMIC",

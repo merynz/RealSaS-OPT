@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from compiler.realsas_compiler_services.orchestrator.mainline import (
+    _local_import_closure,
     status_text,
     validate_ledger,
     validate_plan,
@@ -93,3 +94,27 @@ def test_stage41_does_not_reintroduce_rest_unseen_appearance_failure():
     assert "24_COMPLETE_APPEARANCE_QUALIFIED" not in stage41["depends_on"]
     stage45 = by["45_DYNAMIC_VISUAL_INTEGRITY_PROOF"]
     assert "24_COMPLETE_APPEARANCE_QUALIFIED" in stage45["depends_on"]
+
+
+def test_current_v2_adapter_import_closure_excludes_obsolete_product_semantics():
+    plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
+    modules = set()
+    for stage in plan["stages"]:
+        module_name = stage["adapter"].split(":", 1)[0]
+        modules.update(name for name, _sha in _local_import_closure(module_name))
+    forbidden = {
+        "compiler.realsas_compiler_core.product_artifact_codec_v1",
+        "compiler.realsas_compiler_core.product_appearance_v1",
+        "compiler.realsas_compiler_core.product_composition_v1",
+        "compiler.realsas_compiler_core.playback_runtime_v4",
+        "compiler.realsas_compiler_core.runtime_projection_v1",
+        "compiler.realsas_compiler_core.runtime_package_v1",
+        "compiler.realsas_compiler_core.runtime_native_proof_v1",
+        "compiler.realsas_compiler_core.motion_presentation_v1",
+        "compiler.realsas_compiler_services.orchestrator.adapters.runtime_projection_v1",
+        "compiler.realsas_compiler_services.orchestrator.adapters.runtime_package_v1",
+        "compiler.realsas_compiler_services.orchestrator.adapters.runtime_native_v1",
+        "compiler.realsas_compiler_services.orchestrator.adapters.product_closure_v1",
+        "compiler.realsas_compiler_services.orchestrator.adapters.presentation_v1",
+    }
+    assert modules.isdisjoint(forbidden), sorted(modules & forbidden)

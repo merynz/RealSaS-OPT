@@ -890,6 +890,12 @@ def main(argv: list[str] | None = None) -> int:
         manifest_path = run_manifest_path(args.run_id)
         if not manifest_path.is_file():
             raise RuntimeError(f"RUN_MANIFEST_MISSING:{manifest_path}")
+        manifest_preview = load_json(manifest_path)
+        if args.execution_class == "IMPLEMENTATION_AUDIT":
+            if manifest_preview.get("implementation_audit") is not True:
+                raise RuntimeError("IMPLEMENTATION_AUDIT_MANIFEST_FLAG_REQUIRED")
+            if str(manifest_preview.get("subject_id") or "") != str(args.subject_id):
+                raise RuntimeError("IMPLEMENTATION_AUDIT_SUBJECT_ID_DRIFT")
         path = run_ledger_path(args.run_id)
         if path.exists():
             raise RuntimeError(f"RUN_LEDGER_ALREADY_EXISTS:{path}")

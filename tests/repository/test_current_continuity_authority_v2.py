@@ -37,7 +37,9 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
         self.assertEqual(authority["active_run_ledger"], ACTIVE_RUN)
         self.assertEqual(authority["pipeline_plan"], PIPELINE_PLAN)
         for rel in (CURRENT_CONTEXT, CURRENT_REGISTRY, CURRENT_JOURNAL, HISTORICAL_REGISTRY,
-                    HISTORICAL_JOURNAL, ACTIVE_RUN, PIPELINE_PLAN, PRODUCT_AUTHORITY, ARCHITECTURE_V2, CAA_V1):
+                    HISTORICAL_JOURNAL, ACTIVE_RUN, PIPELINE_PLAN, PRODUCT_AUTHORITY, ARCHITECTURE_V2, CAA_V1,
+                    "canonical/V2_IMPLEMENTATION_READINESS.json",
+                    "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md"):
             self.assertTrue((ROOT / rel).is_file(), rel)
 
     def test_agent_contract_names_current_before_historical(self) -> None:
@@ -80,9 +82,12 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
     def test_active_experiment_records_satisfy_live_map_contract(self) -> None:
         authority = json.loads((ROOT / "canonical/AUTHORITY_MAP_V1.json").read_text(encoding="utf-8"))
         active = authority.get("active_experiments", [])
-        self.assertEqual([x["id"] for x in active], ["SUBJECT2_KNIGHT_FULL_CLOSURE"])
+        self.assertEqual(
+            [x["experiment_id"] for x in active],
+            ["V2_IMPLEMENTATION_ASSEMBLY"],
+        )
         for exp in active:
-            for key in ("id", "branch", "status", "question"):
+            for key in ("experiment_id", "status", "question"):
                 self.assertIsInstance(exp[key], str)
                 self.assertTrue(exp[key].strip())
             self.assertIsInstance(exp["does_not_prove"], list)

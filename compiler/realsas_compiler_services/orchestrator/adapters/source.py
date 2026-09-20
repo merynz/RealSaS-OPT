@@ -3,6 +3,8 @@ import hashlib, json
 from pathlib import Path
 from typing import Any
 
+_MOVING_ALIAS_TOKENS = {"latest", "current", "newest"}
+
 def _sha256(path:Path)->str:
     h=hashlib.sha256()
     with path.open("rb") as f:
@@ -18,8 +20,16 @@ def seal_source_bytes(ctx:dict)->dict:
     manifest=dict(ctx["run_manifest"]); rows=list(manifest.get("source_files") or ())
     if not rows: return {"status":"BLOCKED","blockers":["SOURCE_FILES_MISSING"],"diagnostics":{}}
     sealed=[]
+    seen_roles=set()
     for row in rows:
-        role=str(row.get("role","")).strip(); path=Path(str(row.get("path",""))).expanduser().resolve()
+        role=str(row.get("role","")).strip()
+        raw_path=Path(str(row.get("path",""))).expanduser()
+        if any(str(part).lower() in _MOVING_ALIAS_TOKENS for part in raw_path.parts):
+            return {"status":"FAIL","blockers":[f"SOURCE_MOVING_ALIAS_FORBIDDEN:{role}"],"diagnostics":{"path":str(raw_path)}}
+        path=raw_path.resolve()
+        if role in seen_roles:
+            return {"status":"FAIL","blockers":[f"SOURCE_ROLE_DUPLICATE:{role}"],"diagnostics":{}}
+        seen_roles.add(role)
         if not role or not path.is_file(): return {"status":"FAIL","blockers":[f"SOURCE_FILE_INVALID:{role}:{path}"],"diagnostics":{}}
         digest=_sha256(path); size=path.stat().st_size; expected_sha=str(row.get("expected_sha256","") or ""); expected_size=row.get("expected_size_bytes")
         if expected_sha and expected_sha!=digest: return {"status":"FAIL","blockers":[f"SOURCE_SHA_MISMATCH:{role}"],"diagnostics":{"actual_sha256":digest}}

@@ -235,11 +235,18 @@ def provenance_boundary_metrics(
                 if face_index[a] != face_index[b]:
                     pair_set.add((min(a, b), max(a, b)))
 
+    adjacency: dict[int, set[int]] = {index: set() for index in range(n)}
+    for a, b in pair_set:
+        adjacency[a].add(b)
+        adjacency[b].add(a)
+
     errors = []
+    gradient_jumps = []
     pairs_by_view = []
     for view in range(8):
         count = 0
         values = []
+        view_gradient_jumps = []
         for a, b in pair_set:
             if provenance[view, a] == provenance[view, b]:
                 continue
@@ -252,19 +259,60 @@ def provenance_boundary_metrics(
             values.append(error)
             errors.append(error)
             count += 1
+
+            same_a = [
+                neighbor
+                for neighbor in adjacency[a]
+                if neighbor != b
+                and provenance[view, neighbor] == provenance[view, a]
+            ]
+            same_b = [
+                neighbor
+                for neighbor in adjacency[b]
+                if neighbor != a
+                and provenance[view, neighbor] == provenance[view, b]
+            ]
+            if same_a and same_b:
+                grad_a = float(
+                    np.mean(
+                        rgba_l1_premultiplied(
+                            np.repeat(rgba[view, [a]], len(same_a), axis=0),
+                            rgba[view, same_a],
+                        )
+                    )
+                )
+                grad_b = float(
+                    np.mean(
+                        rgba_l1_premultiplied(
+                            np.repeat(rgba[view, [b]], len(same_b), axis=0),
+                            rgba[view, same_b],
+                        )
+                    )
+                )
+                jump = abs(grad_a - grad_b)
+                view_gradient_jumps.append(jump)
+                gradient_jumps.append(jump)
+
         pairs_by_view.append(
             {
                 "view_index": view,
                 "boundary_pair_count": count,
                 "mean_rgba_l1": float(np.mean(values)) if values else 0.0,
                 "p95_rgba_l1": float(np.quantile(values, 0.95)) if values else 0.0,
+                "gradient_pair_count": int(len(view_gradient_jumps)),
+                "mean_gradient_jump": float(np.mean(view_gradient_jumps)) if view_gradient_jumps else 0.0,
+                "p95_gradient_jump": float(np.quantile(view_gradient_jumps, 0.95)) if view_gradient_jumps else 0.0,
             }
         )
     arr = np.asarray(errors, dtype=np.float64)
+    grad = np.asarray(gradient_jumps, dtype=np.float64)
     return {
         "boundary_pair_count": int(len(arr)),
         "mean_rgba_l1": float(np.mean(arr)) if len(arr) else 0.0,
         "p95_rgba_l1": float(np.quantile(arr, 0.95)) if len(arr) else 0.0,
+        "gradient_pair_count": int(len(grad)),
+        "mean_gradient_jump": float(np.mean(grad)) if len(grad) else 0.0,
+        "p95_gradient_jump": float(np.quantile(grad, 0.95)) if len(grad) else 0.0,
         "per_view": pairs_by_view,
         "includes_shared_face_edges": True,
     }

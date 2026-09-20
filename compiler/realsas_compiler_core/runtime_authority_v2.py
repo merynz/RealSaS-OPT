@@ -164,6 +164,13 @@ class DynamicVisualIntegrityV2IR:
     final_alpha_hole_fraction: float
     compiled_unobserved_visible_pixel_count: int
     compiled_unobserved_visible_fraction: float
+    maximum_frame_compiled_unobserved_visible_fraction: float
+    maximum_connected_compiled_unobserved_visible_fraction: float
+    compiled_global_visible_pixel_count: int
+    compiled_global_visible_fraction: float
+    maximum_frame_micro_visible_pixel_fraction: float
+    consequential_visible_face_count: int
+    unmeasurable_consequential_visible_face_count: int
     native_reference_mismatch_pixel_count: int
     maximum_frame_native_reference_mismatch_fraction: float
     dynamic_conditioning_sample_count: int
@@ -323,6 +330,13 @@ def dynamic_visual_integrity_from_dict(payload: Mapping[str, Any]) -> DynamicVis
         final_alpha_hole_fraction=float(payload["final_alpha_hole_fraction"]),
         compiled_unobserved_visible_pixel_count=int(payload["compiled_unobserved_visible_pixel_count"]),
         compiled_unobserved_visible_fraction=float(payload["compiled_unobserved_visible_fraction"]),
+        maximum_frame_compiled_unobserved_visible_fraction=float(payload["maximum_frame_compiled_unobserved_visible_fraction"]),
+        maximum_connected_compiled_unobserved_visible_fraction=float(payload["maximum_connected_compiled_unobserved_visible_fraction"]),
+        compiled_global_visible_pixel_count=int(payload["compiled_global_visible_pixel_count"]),
+        compiled_global_visible_fraction=float(payload["compiled_global_visible_fraction"]),
+        maximum_frame_micro_visible_pixel_fraction=float(payload["maximum_frame_micro_visible_pixel_fraction"]),
+        consequential_visible_face_count=int(payload["consequential_visible_face_count"]),
+        unmeasurable_consequential_visible_face_count=int(payload["unmeasurable_consequential_visible_face_count"]),
         native_reference_mismatch_pixel_count=int(payload["native_reference_mismatch_pixel_count"]),
         maximum_frame_native_reference_mismatch_fraction=float(payload["maximum_frame_native_reference_mismatch_fraction"]),
         dynamic_conditioning_sample_count=int(payload["dynamic_conditioning_sample_count"]),

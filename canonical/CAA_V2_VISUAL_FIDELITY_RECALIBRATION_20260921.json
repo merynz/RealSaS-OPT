@@ -1,0 +1,136 @@
+{
+  "schema": "RealSaS.CAAVisualFidelityRecalibration.v1",
+  "date": "2026-09-21",
+  "status": "OPEN__SUBJECT_FREE_RECALIBRATION_IN_PROGRESS__WITNESS_FORBIDDEN",
+  "authority": "PRE_WITNESS_APPEARANCE_GEOMETRY_VISUAL_FIDELITY_RECLOSURE",
+  "witness_used": false,
+  "knight_data_used": false,
+  "mutable_before_reclosure": true,
+  "claim_boundary": "This document is an open preregistration/audit ledger. It authorizes no product PASS and no Knight execution.",
+  "verified_findings": [
+    {
+      "id": "VF-01",
+      "severity": "HIGH",
+      "owner": "CAA sampling",
+      "finding": "Fixed tile_resolution=8 was selected from atlas capacity, not source-frequency or projected-texel-density preservation.",
+      "required_closure": "Subject-free projected footprint / high-frequency line-art survival calibration; select fixed/adaptive tile policy from art-quality evidence."
+    },
+    {
+      "id": "VF-02",
+      "severity": "HIGH",
+      "owner": "CAA completion",
+      "finding": "COMPILED_NEAREST_SURFACE and COMPILED_GLOBAL_SURFACE are cKDTree nearest-sample color propagation, not structure-aware inpainting.",
+      "required_closure": "Replace shipping completion with source-constrained surface completion for bounded gaps; forbid visible global fill; fail/abstain on unsupported large regions."
+    },
+    {
+      "id": "VF-03",
+      "severity": "HIGH",
+      "owner": "CAA source compatibility",
+      "finding": "The same canonical surface locus can be directly observed in multiple views without an explicit cross-view appearance compatibility authority.",
+      "required_closure": "Add adjacent-view/component alpha contradiction and source-conditioned premultiplied color/edge compatibility evidence without requiring naive RGB equality."
+    },
+    {
+      "id": "VF-04",
+      "severity": "HIGH",
+      "owner": "Dynamic Visual Integrity",
+      "finding": "Historical Stage45 exempted micro-visible faces and consequential-but-unmeasurable faces from the shipping condition and aggregated inferred exposure globally.",
+      "required_closure": "Hard-gate unmeasurable consequential faces, micro-face pixel load, frame-max exposure, largest connected inferred patch and visible global-fill exposure."
+    },
+    {
+      "id": "VF-05",
+      "severity": "HIGH",
+      "owner": "Runtime sampling",
+      "finding": "Native CAA runtime uses premultiplied bilinear sampling only; no mip/minification or anisotropic sampling authority exists.",
+      "required_closure": "Add subject-free screen-space minification/shimmer controls and a qualified filtering/LOD contract shared by reference and native runtimes."
+    },
+    {
+      "id": "VF-06",
+      "severity": "HIGH",
+      "owner": "Geometry/appearance integration",
+      "finding": "CAA is baked on Stage18 candidate identity while final Stage35 QualifiedMesh only carried the candidate hash transitively; Stage37/38 lacked explicit equality enforcement.",
+      "repair": "Stage37 and Stage38 now require CompleteAppearanceAsset.candidate_mesh_binding_hash == QualifiedMesh.metadata.source_candidate_lineage_hash.",
+      "status": "REPAIRED__REGRESSION_TEST_PENDING"
+    },
+    {
+      "id": "VF-07",
+      "severity": "HIGH",
+      "owner": "Geometry continuity",
+      "finding": "PRESERVE_CONTINUITY historically required only global connected-component membership and did not prove local boundary adjacency.",
+      "repair": "Qualified-mesh intrinsic audit now requires a shared-support vertex or direct mesh edge across each PRESERVE_CONTINUITY pair.",
+      "status": "REPAIRED__REGRESSION_TEST_PENDING"
+    },
+    {
+      "id": "VF-08",
+      "severity": "HIGH",
+      "owner": "Presentation/mechanics",
+      "finding": "Rigid/deformable classification was computed once per mechanical component, so appearance-separated presentation groups inherited one class and rigid props inside deformable components could silently wobble.",
+      "repair": "Mechanical classification is now evaluated per presentation face group.",
+      "status": "REPAIRED__ADVERSARIAL_TEST_ADDED"
+    },
+    {
+      "id": "VF-09",
+      "severity": "HIGH",
+      "owner": "Visibility",
+      "finding": "V2 exact-depth ties are resolved by sealed face index and no near-depth ambiguity/z-fighting gate exists. Determinism therefore does not guarantee artist-authoritative layer order or temporal stability.",
+      "required_closure": "Add exact/near-depth overlap ambiguity evidence and either fail ambiguous physical-depth states or mint an explicit qualified presentation tie authority with a narrowly scoped contract."
+    },
+    {
+      "id": "VF-10",
+      "severity": "MEDIUM_HIGH",
+      "owner": "Directional appearance",
+      "finding": "No explicit adjacent-direction appearance continuity or direction-switch flicker authority exists for the eight separately baked CAA textures.",
+      "required_closure": "Add source-conditioned adjacent-direction compatibility plus transition/shimmer controls; do not demand raw RGB equality where view-dependent artist intent is supported."
+    },
+    {
+      "id": "VF-11",
+      "severity": "HIGH",
+      "owner": "Geometry feature survival",
+      "finding": "The 256-cube decoder numerical floor is demonstrated primarily on smooth sphere/ellipsoid controls; minimum thin-feature/concavity/gap survival through decoder->raster is not explicitly calibrated.",
+      "required_closure": "Run a 1024px subject-free feature-survival panel (thin plates/straps, narrow gaps/forks, concave notches, brims/blades, small components) and derive decoder/adaptive-resolution policy from measured survival."
+    },
+    {
+      "id": "VF-12",
+      "severity": "HIGH",
+      "owner": "Repair governance",
+      "finding": "Hash invalidation forces downstream remeasurement after an upstream repair, but no explicit dual-domain non-regression rule prevents a rest improvement from consuming dynamic quality margin or vice versa.",
+      "required_closure": "Require every geometry/appearance repair candidate to pass both static and dynamic adversarial banks before promotion, with protected-metric non-regression evidence."
+    },
+    {
+      "id": "VF-13",
+      "severity": "MEDIUM_HIGH",
+      "owner": "Presentation rigidity calibration",
+      "finding": "Rigid thresholds 0.999/0.001 can silently classify evidence-supported rigid groups as DEFORMABLE; there is no calibrated rigid-detection coverage/no-op proof.",
+      "required_closure": "Calibrate group-level rigid/deformable decisions on subject-free hard-rigid and smooth-skin controls and expose evidence-supported rigid misses as failures."
+    },
+    {
+      "id": "VF-14",
+      "severity": "HIGH",
+      "owner": "Dynamic calibration",
+      "finding": "Current dynamic appearance calibration contains affine stretch controls but no articulated LBS shoulder/elbow/hip bend cases; absolute UV-to-surface condition ceiling 32 is outside the selected relative candidate ladder.",
+      "required_closure": "Add subject-free articulated LBS benign/adversarial controls and calibrate every shipping conditioning ceiling from that bank before refreeze."
+    }
+  ],
+  "false_or_overstated_external_findings": [
+    {
+      "claim": "G5 calibration PASS hides current_mesh_semantic_separation_pass=false as an active failed shipping metric.",
+      "assessment": "OVERSTATED",
+      "reason": "Those booleans belong to a retrospective corruption-separation audit showing older/current thresholds failed to separate controls; the selected P999 profile is the promoted policy. The remaining valid concern is insufficient feature-rich numerical-floor calibration."
+    },
+    {
+      "claim": "256-cube implies exactly four source pixels per voxel at 1024.",
+      "assessment": "NOT_A_VALID_GENERAL_IDENTITY",
+      "reason": "Projected pixel scale depends on normalized bounds, object occupancy and camera framing. A fixed 256 decoder can still impose a feature ceiling, but it must be measured rather than inferred as a universal 4px/voxel ratio."
+    }
+  ],
+  "promotion_rule": {
+    "ready_allowed": false,
+    "requirements": [
+      "Every HIGH finding CLOSED with executable subject-free evidence.",
+      "Every repaired invariant has an adversarial regression test.",
+      "Static and dynamic fidelity banks both PASS on the same exact implementation closure.",
+      "No threshold is selected or relaxed from Knight.",
+      "Fresh stage-by-stage red-team finds no unscoped product-quality false-PASS.",
+      "Assistant and user explicitly approve before Knight."
+    ]
+  }
+}

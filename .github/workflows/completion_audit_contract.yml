@@ -18,6 +18,11 @@ on:
       - 'canonical/MASTER_EXECUTION_BACKLOG_V4_20260902.md'
       - '.github/workflows/completion_audit_contract.yml'
 
+
+concurrency:
+  group: completion-audit-contract-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   completion-audit-contract:
     runs-on: [self-hosted, linux, x64, realsas]

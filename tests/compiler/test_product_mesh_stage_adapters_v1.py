@@ -617,10 +617,10 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
                 "dynamic_max_compiled_unobserved_visible_fraction": 0.20,
                 "dynamic_min_visible_pixels_per_face": 1,
                 "dynamic_min_projected_double_area_px2": 0.01,
-                "dynamic_max_uv_to_screen_condition_number": 64.0,
-                "dynamic_max_relative_screen_condition_number": 16.0,
-                "dynamic_max_relative_principal_stretch": 8.0,
-                "dynamic_max_adjacent_frame_principal_stretch": 8.0
+                "dynamic_max_uv_to_surface_condition_number": 64.0,
+                "dynamic_max_relative_surface_condition_number": 16.0,
+                "dynamic_max_relative_surface_principal_stretch": 8.0,
+                "dynamic_max_adjacent_frame_surface_principal_stretch": 8.0
             },
             "fixture": True,
         },
@@ -752,8 +752,8 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     assert r45["diagnostics"]["undefined_visible_pixel_count"] == 0
     assert r45["diagnostics"]["compiled_unobserved_visible_fraction"] == 0.0
     assert r45["diagnostics"]["dynamic_conditioning_sample_count"] > 0
-    assert r45["diagnostics"]["maximum_relative_screen_condition_number"] >= 1.0
-    assert r45["diagnostics"]["maximum_relative_principal_stretch"] >= 1.0
+    assert r45["diagnostics"]["maximum_relative_surface_condition_number"] >= 1.0
+    assert r45["diagnostics"]["maximum_relative_surface_principal_stretch"] >= 1.0
 
     r46 = run("46_PRODUCT_CLOSURE_SEAL", seal_product_closure_stage)
     closure = read_json(

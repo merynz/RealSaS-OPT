@@ -734,16 +734,34 @@ def qualified_mesh_intrinsic_audit(value: QualifiedMeshIR, *, surface, partition
 
     labels = _mesh_connected_labels(set(vertex_by_id), declared_edges)
     preserve_checked = 0
+    preserve_local_adjacency_checked = 0
     for constraint in partition.boundary_constraints:
         if constraint.decision != "PRESERVE_CONTINUITY":
             continue
         left = [vid for vid, sids in support_ids_by_vertex.items() if constraint.a_surface_id in sids]
         right = [vid for vid, sids in support_ids_by_vertex.items() if constraint.b_surface_id in sids]
+        shared = [
+            vid
+            for vid, sids in support_ids_by_vertex.items()
+            if constraint.a_surface_id in sids and constraint.b_surface_id in sids
+        ]
         if not left or not right:
             raise QualificationError("QUALIFIED_MESH_G4_PRESERVE_SUPPORT_NOT_REPRESENTED")
         if not any(labels[a] == labels[b] for a in left for b in right):
             raise QualificationError("QUALIFIED_MESH_G4_PRESERVE_CONTINUITY_BROKEN")
+        direct_edge = any(
+            (
+                (a in left and b in right)
+                or (a in right and b in left)
+            )
+            for a, b in declared_edges
+        )
+        if not shared and not direct_edge:
+            raise QualificationError(
+                "QUALIFIED_MESH_G4_PRESERVE_LOCAL_ADJACENCY_MISSING"
+            )
         preserve_checked += 1
+        preserve_local_adjacency_checked += 1
 
     return {
         "vertex_count": len(value.vertices),
@@ -758,6 +776,8 @@ def qualified_mesh_intrinsic_audit(value: QualifiedMeshIR, *, surface, partition
         "rest_max_aspect_longest_over_min_altitude": max_aspect,
         "g3_numerical_min_angle_floor_deg": G3_NUMERICAL_MIN_ANGLE_DEG,
         "g3_numerical_max_aspect_ceiling": G3_NUMERICAL_MAX_ASPECT,
+        "g4_preserve_constraint_count": preserve_checked,
+        "g4_preserve_local_adjacency_count": preserve_local_adjacency_checked,
         "g2_geometric_topology": geometric_topology,
         "preserve_continuity_constraints_checked": preserve_checked,
     }

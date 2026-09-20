@@ -11,7 +11,7 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
     build_component_carrier_policy,
 )
 from compiler.realsas_compiler_core.types import RiggingSurfaceIR, SurfaceNode, SurfaceRelation
-from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
+from compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2 import (
     _relation_parent_quality_report,
 )
 

@@ -26,6 +26,9 @@ from compiler.realsas_compiler_core.product_state_v2 import (
     complete_puppet_state_v2_from_dict,
     presentation_structure_v2_from_dict,
 )
+from compiler.realsas_compiler_core.presentation_partition_v2 import (
+    presentation_partition_evidence_from_dict,
+)
 from compiler.realsas_compiler_core.runtime_authority_v2 import (
     ProductClosureV2IR,
     dynamic_visual_integrity_from_dict,
@@ -126,6 +129,11 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
         "37_QUALIFIED_PRESENTATION_STRUCTURE",
         "RealSaS.QualifiedPresentationStructureIR.v2",
     )
+    partition_evidence_payload, partition_evidence_path = _stage_json(
+        ctx,
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "RealSaS.PresentationPartitionEvidenceIR.v2",
+    )
     skeleton_payload, skeleton_path = _stage_json(
         ctx,
         "28_SKELETON_QUALIFIED",
@@ -167,6 +175,9 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
     mesh = qualified_mesh_from_dict(mesh_payload)
     mesh_skin = qualified_mesh_skin_from_dict(mesh_skin_payload)
     structure = presentation_structure_v2_from_dict(structure_payload)
+    partition_evidence = presentation_partition_evidence_from_dict(
+        partition_evidence_payload
+    )
     graph = qualified_presentation_graph_from_dict(graph_payload)
     appearance_asset = complete_appearance_asset_from_dict(appearance_asset_payload)
     appearance_qualification = complete_appearance_qualification_from_dict(
@@ -201,6 +212,16 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
             "PRESENTATION_GRAPH",
         ),
         (
+            str(structure.metadata.get("presentation_partition_evidence_hash") or ""),
+            partition_evidence.evidence_hash,
+            "PRESENTATION_PARTITION_EVIDENCE",
+        ),
+        (
+            partition_evidence.mesh_binding_hash,
+            mesh.mesh_lineage_hash,
+            "PRESENTATION_PARTITION_MESH",
+        ),
+        (
             complete.complete_appearance_asset_binding_hash,
             appearance_asset.asset_hash,
             "CAA_ASSET",
@@ -231,6 +252,10 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
             ("authority/qualified_mesh.json", mesh_path),
             ("authority/qualified_mesh_skin.json", mesh_skin_path),
             ("authority/presentation_structure_v2.json", structure_path),
+            (
+                "authority/presentation_partition_evidence_v2.json",
+                partition_evidence_path,
+            ),
             ("authority/presentation_graph.json", graph_path),
             ("appearance/complete_appearance_asset.json", appearance_asset_path),
             (
@@ -279,6 +304,7 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
             "mesh_hash": mesh.mesh_lineage_hash,
             "mesh_skin_hash": mesh_skin.mesh_skin_lineage_hash,
             "presentation_structure_hash": structure.structure_hash,
+            "presentation_partition_evidence_hash": partition_evidence.evidence_hash,
             "presentation_graph_hash": graph.presentation_lineage_hash,
             "appearance_asset_hash": appearance_asset.asset_hash,
             "appearance_qualification_hash": appearance_qualification.qualification_hash,
@@ -344,6 +370,20 @@ def seal_product_closure_stage(ctx: dict) -> dict:
             "RealSaS.DynamicVisualIntegrityIR.v2",
         )
     )
+    structure = presentation_structure_v2_from_dict(
+        stage_output_payload(
+            ctx,
+            "37_QUALIFIED_PRESENTATION_STRUCTURE",
+            "RealSaS.QualifiedPresentationStructureIR.v2",
+        )
+    )
+    partition_evidence = presentation_partition_evidence_from_dict(
+        stage_output_payload(
+            ctx,
+            "37_QUALIFIED_PRESENTATION_STRUCTURE",
+            "RealSaS.PresentationPartitionEvidenceIR.v2",
+        )
+    )
 
     exact_checks = (
         (
@@ -400,6 +440,33 @@ def seal_product_closure_stage(ctx: dict) -> dict:
         != "PASS_DYNAMIC_VISUAL_INTEGRITY"
     ):
         raise QualificationError("V2_PRODUCT_CLOSURE_VISUAL_NOT_PASS")
+    if not bool(
+        visual.qualification_report.get(
+            "dynamic_appearance_conditioning_passed", False
+        )
+    ):
+        raise QualificationError(
+            "V2_PRODUCT_CLOSURE_DYNAMIC_APPEARANCE_CONDITIONING_NOT_PASS"
+        )
+    if visual.dynamic_conditioning_sample_count <= 0:
+        raise QualificationError(
+            "V2_PRODUCT_CLOSURE_DYNAMIC_APPEARANCE_EVIDENCE_EMPTY"
+        )
+    if (
+        str(structure.metadata.get("presentation_partition_evidence_hash") or "")
+        != partition_evidence.evidence_hash
+    ):
+        raise QualificationError(
+            "V2_PRODUCT_CLOSURE_PRESENTATION_PARTITION_EVIDENCE_DRIFT"
+        )
+    if not bool(
+        partition_evidence.metadata.get(
+            "evidence_supported_visual_partition", False
+        )
+    ):
+        raise QualificationError(
+            "V2_PRODUCT_CLOSURE_PRESENTATION_PARTITION_NOT_QUALIFIED"
+        )
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     archive_path, archive_sha, authoring_manifest = _build_editable_bundle(
@@ -420,6 +487,8 @@ def seal_product_closure_stage(ctx: dict) -> dict:
             "geometry_authority_passed": True,
             "mechanics_authority_passed": True,
             "appearance_authority_passed": True,
+            "presentation_partition_authority_passed": True,
+            "dynamic_appearance_conditioning_passed": True,
             "native_visual_integrity_passed": True,
             "editable_authoring_export_passed": True,
             "runtime_generation_required": False,
@@ -428,6 +497,8 @@ def seal_product_closure_stage(ctx: dict) -> dict:
         product_closure_hash="",
         metadata={
             "authoring_manifest_sha256": authoring_manifest["manifest_sha256"],
+            "presentation_partition_evidence_hash": partition_evidence.evidence_hash,
+            "dynamic_visual_integrity_hash": visual.visual_integrity_hash,
             "geometry_mechanics_appearance_coequal": True,
             "product_stage": 46,
         },

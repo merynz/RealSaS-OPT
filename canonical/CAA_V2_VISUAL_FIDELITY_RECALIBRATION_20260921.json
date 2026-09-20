@@ -150,6 +150,15 @@
       "finding": "Native V2 proof renders only exact sealed Stage41 frame indices. No current evidence was found that native proof interpolates unproved frames; however host-side continuous interpolation semantics are not explicit in the V2 package authority.",
       "required_closure": "Declare playback sampling semantics explicitly. If hosts interpolate, prove the interpolation envelope; otherwise require exact sealed-frame playback semantics.",
       "status": "OPEN_CONTRACT_CLARIFICATION"
+    },
+    {
+      "id": "VF-20",
+      "severity": "HIGH",
+      "owner": "Presentation/runtime capability",
+      "finding": "Stage37 previously claimed UI draw order and clipping while current V2 runtime package serializes one full mesh + CAA + posed XYZ and does not execute slot/attachment tint/order/visibility/clipping state. Presentation structure is currently authoring evidence, not runtime keyability proof.",
+      "repair": "Stage37 plan title/policy narrowed to implemented authoring structure; runtime keyability/clipping claims set false.",
+      "required_closure": "Either implement and native-prove runtime presentation state transitions (attachment/visibility/order/tint/clipping as required by product scope) or keep those capabilities explicitly outside the first-witness claim.",
+      "status": "PARTIALLY_REPAIRED__CLAIM_NARROWED__CAPABILITY_OPEN"
     }
   ],
   "false_or_overstated_external_findings": [

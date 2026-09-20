@@ -2,6 +2,20 @@
 
 Canonical RealSaS research, compiler, proof and runtime workspace. **Proprietary / all rights reserved.** See `LICENSE` and `THIRD_PARTY_NOTICES.md`.
 
+
+## Current implementation status — 2026-09-20 stage red-team
+
+The executable V2 contract is infrastructure-green on the self-hosted runner, but **Knight remains forbidden** after a second-pass stage-by-stage product-claim audit.
+
+- Tested functional head before the red-team documentation commit: `ca9d2d2e59bc517a139c743eb6a91df2e48ac761`.
+- `current-mainline-self-hosted-ci` run **35536134130**: PASS — 48 repository/governance tests, 51 learned/model tests, 281 compiler tests; native CAA player built; `self_hosted_only=true`.
+- `v2-witness-orchestration-subject-free-dry-run` run **35536134136**: PASS — real Stage01–08 target closure, exact schemas/hashes, canonical governance ledger unchanged.
+- Pre-red-team implementation-closure SHA-256: `a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882`.
+- New stage-level red-team authority: `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`.
+- High findings: **RT-37 automatic presentation segmentation** and **RT-45/46 dynamic appearance-quality / closure-claim breadth**.
+
+The green runs prove that the existing contract executes correctly. They do not erase red-team findings about whether that contract is strong enough for the full Spine-class product claim.
+
 ## Current product architecture — RealSaS V2
 
 RealSaS compiles qualified multi-view 2D artwork into an editable 2D/2.5D puppet with internal 3D mechanics.

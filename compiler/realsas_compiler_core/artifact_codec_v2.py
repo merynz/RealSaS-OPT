@@ -31,7 +31,7 @@ from .observation_authority_v1 import (
     QualifiedObservationSetIR,
     QualifiedObservationViewIR,
 )
-from .playback_full_surface_v3 import CameraProjectionV3
+from .camera_geometry_v2 import CameraProjectionV3
 from .product_authority_v1 import (
     CanonicalMeshCandidateIR,
     CanonicalMeshVertexCandidateIR,

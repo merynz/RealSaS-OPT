@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from compiler.realsas_compiler_core.rest_preservation_v1 import silhouette_distance_metrics
-from compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1 import _geometry_gate_policy_v2
+from compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2 import _geometry_policy
 from compiler.realsas_compiler_core.types import QualificationError
 
 
@@ -36,10 +36,10 @@ def test_stage13_v2_policy_requires_explicit_silhouette_threshold():
         "min_component_recall":0.999,
         "component_min_foreground_fraction":0.0,
     }
-    assert _geometry_gate_policy_v2(base) is None
+    assert _geometry_policy(base) is None
 
     full={**base,"max_silhouette_edge_p95_px":0.5}
-    parsed=_geometry_gate_policy_v2(full)
+    parsed=_geometry_policy(full)
     assert parsed is not None
     assert parsed["max_silhouette_edge_p95_px"]==pytest.approx(0.5)
 
@@ -55,4 +55,4 @@ def test_stage13_v2_policy_rejects_invalid_silhouette_threshold():
         "max_silhouette_edge_p95_px":-0.1,
     }
     with pytest.raises(QualificationError,match="GEOMETRY_GATE_THRESHOLD_RANGE_INVALID"):
-        _geometry_gate_policy_v2(cfg)
+        _geometry_policy(cfg)

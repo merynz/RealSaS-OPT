@@ -106,6 +106,7 @@ def test_current_v2_adapter_import_closure_excludes_obsolete_product_semantics()
         "compiler.realsas_compiler_core.product_artifact_codec_v1",
         "compiler.realsas_compiler_core.product_appearance_v1",
         "compiler.realsas_compiler_core.product_composition_v1",
+        "compiler.realsas_compiler_core.playback_runtime_v3",
         "compiler.realsas_compiler_core.playback_runtime_v4",
         "compiler.realsas_compiler_core.runtime_projection_v1",
         "compiler.realsas_compiler_core.runtime_package_v1",

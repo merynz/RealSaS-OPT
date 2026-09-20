@@ -48,13 +48,6 @@ jobs:
           python -m compiler.realsas_compiler_services.orchestrator.mainline validate-readiness
           python -m pytest -q tests/repository/test_mainline_execution_plan_v2.py
 
-      - name: Install headless Blender render libraries
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq libegl1 libgl1-mesa-dri
-
       - name: Resolve or bootstrap pinned Blender
         shell: bash
         run: |
@@ -77,6 +70,7 @@ jobs:
           test -x "$exe"
           echo "BLENDER_EXE=$exe" >> "$GITHUB_ENV"
           "$exe" --version | head -n 2
+          "$exe" --background --factory-startup --python-expr "print('REALSAS_BLENDER_HEADLESS_PASS')" | grep REALSAS_BLENDER_HEADLESS_PASS
 
       - name: Stage exact pinned KayKit Knight source
         shell: bash

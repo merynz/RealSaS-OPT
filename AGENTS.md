@@ -20,7 +20,7 @@ This repository must be resumable without conversational memory.
 
 ## Current mode
 
-V2 implementation assembly. **Do not execute a subject witness until readiness is `READY_FOR_WITNESS_EXECUTION`.** Subject-2 Knight is the next witness, not the current run.
+Current execution authority is determined by `canonical/V2_IMPLEMENTATION_READINESS.json` plus the exact implementation-closure fingerprint. **Do not execute a subject witness unless readiness is `READY_FOR_WITNESS_EXECUTION` and closure validation passes.** Subject-2 Knight is the next witness only after that gate; the repository governance ledger is never a subject-run ledger.
 
 ## Execution semantics
 

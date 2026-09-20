@@ -17,7 +17,7 @@ from compiler.realsas_compiler_core.motion_source_v1 import (
     build_motion_source_set,
     motion_source_seal_hash,
 )
-from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
+from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_puppet_state_from_dict,
     motion_compile_constraint_set_v2_from_dict,
     motion_source_set_from_dict,
@@ -188,7 +188,7 @@ def compile_motion_stage(ctx: dict) -> dict:
         "34_DEFORMATION_CAPABILITY_ENVELOPE",
         "RealSaS.DeformationCapabilityEnvelopeIR.v1",
     )
-    from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
+    from compiler.realsas_compiler_core.artifact_codec_v2 import (
         deformation_envelope_from_dict,
     )
     envelope = deformation_envelope_from_dict(envelope_payload)

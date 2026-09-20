@@ -119,7 +119,7 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
     graph_payload, graph_path = _stage_json(
         ctx,
         "38_CANONICAL_PUPPET_SEALED",
-        "RealSaS.QualifiedPresentationGraphIR.v1",
+        "RealSaS.QualifiedPresentationGraphIR.v2",
     )
     structure_payload, structure_path = _stage_json(
         ctx,

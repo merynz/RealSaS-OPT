@@ -21,7 +21,7 @@ This repository must be resumable without conversational memory.
 
 ## Current mode
 
-Current execution authority is determined by `canonical/V2_IMPLEMENTATION_READINESS.json`, the stage-level red-team record and the exact implementation-closure fingerprint. **Do not execute a subject witness while readiness is red-team reopened.** The current infrastructure is green, but RT-37 and RT-45/46 remain product-claim blockers. Subject-2 Knight is the next witness only after those findings are closed or explicitly narrowed, a new exact readiness seal is minted, and the user approves execution. The repository governance ledger is never a subject-run ledger.
+Current execution authority is determined by `canonical/V2_IMPLEMENTATION_READINESS.json`, the stage-level red-team record and the exact implementation-closure fingerprint. RT-37/45/46 are hardened as explicit claim boundaries: Stage37 does not claim artist-layer recovery or connected equivalent-region auto-splitting; Stage45 proves runtime integrity, not perceptual art quality; Stage46 product PASS is executable-contract closure. **Do not execute a subject witness until the exact hardening closure is green, readiness is resealed, and the user explicitly approves it.** The repository governance ledger is never a subject-run ledger.
 
 ## Execution semantics
 
@@ -51,6 +51,7 @@ No layer may compensate for another layer's failure silently.
 - Texture alpha is art coverage on a visible surface, not a replacement for z-buffer ownership.
 - Runtime performs no generative/corrective appearance inference, donor search, PBR, relighting or normal-derived character shading.
 - Totality alone is insufficient: structured holdout, seam continuity and compiled-unobserved screen exposure are explicit gates.
+- Runtime-integrity proof is not perceptual-quality proof. Native/reference equality may not be promoted into a Spine-class aesthetic claim.
 
 ## Genericity
 

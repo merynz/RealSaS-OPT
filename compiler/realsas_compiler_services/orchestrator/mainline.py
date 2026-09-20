@@ -395,13 +395,23 @@ def _manifest_subset(manifest: dict, stage: dict) -> dict:
     return {key: manifest.get(key) for key in stage["manifest_keys"]}
 
 
-def _outputs_verify(row: dict) -> bool:
+def _path_within(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def _outputs_verify(row: dict, *, allowed_root: Path | None = None) -> bool:
     outputs = list(row.get("outputs") or ())
     if not outputs:
         return False
     for output in outputs:
-        path = Path(str(output.get("path", ""))).expanduser()
+        path = Path(str(output.get("path", ""))).expanduser().resolve()
         digest = str(output.get("sha256", ""))
+        if allowed_root is not None and not _path_within(path, allowed_root):
+            return False
         if (
             not path.is_file()
             or len(digest) != 64
@@ -544,10 +554,19 @@ def _invalidate_dependents(
     return tuple(invalidated)
 
 
-def _seal_outputs(outputs: list[dict]) -> list[dict]:
+def _seal_outputs(
+    outputs: list[dict],
+    *,
+    allowed_root: Path,
+) -> list[dict]:
     sealed: list[dict] = []
+    allowed_root = allowed_root.expanduser().resolve()
     for output in outputs:
         path = Path(str(output["path"])).expanduser().resolve()
+        if not _path_within(path, allowed_root):
+            raise RuntimeError(
+                f"STAGE_OUTPUT_OUTSIDE_STAGE_AUTHORITY_ROOT:{path}:{allowed_root}"
+            )
         if not path.is_file():
             raise RuntimeError(f"STAGE_OUTPUT_MISSING:{path}")
         digest = sha256_file(path)
@@ -585,7 +604,16 @@ def _verify_existing_passes(plan: dict, ledger: dict, manifest: dict) -> bool:
             row.get("input_fingerprint") != fingerprint
             or row.get("implementation_hash") != implementation_hash
             or row.get("policy_hash") != policy_hash
-            or not _outputs_verify(row)
+            or not _outputs_verify(
+                row,
+                allowed_root=(
+                    authority_root()
+                    / "runs"
+                    / str(ledger["run_id"])
+                    / "artifacts"
+                    / stage_id
+                ),
+            )
         ):
             _invalidate_dependents(
                 plan, ledger, stage_id, "STALE_PASS_IDENTITY"
@@ -677,7 +705,16 @@ def _run_stage(
         else:
             row.update(
                 status="PASS",
-                outputs=_seal_outputs(list(result.get("outputs") or ())),
+                outputs=_seal_outputs(
+                    list(result.get("outputs") or ()),
+                    allowed_root=(
+                        authority_root()
+                        / "runs"
+                        / run_id
+                        / "artifacts"
+                        / stage_id
+                    ),
+                ),
                 diagnostics_hash=content_sha256(result.get("diagnostics", {})),
                 blockers=[],
                 wall_seconds=float(elapsed),
@@ -705,6 +742,18 @@ def _run_stage(
         )
     _refresh(plan, ledger)
     atomic_json(ledger_path, ledger)
+
+
+def _validate_run_manifest_identity(
+    manifest: dict,
+    *,
+    run_id: str,
+    subject_id: str,
+) -> None:
+    if str(manifest.get("run_id") or "") != str(run_id):
+        raise RuntimeError("RUN_MANIFEST_RUN_ID_DRIFT")
+    if str(manifest.get("subject_id") or "") != str(subject_id):
+        raise RuntimeError("RUN_MANIFEST_SUBJECT_ID_DRIFT")
 
 
 def execute(
@@ -738,6 +787,11 @@ def execute(
     if not manifest_path.is_file():
         raise RuntimeError(f"RUN_MANIFEST_MISSING:{manifest_path}")
     manifest = load_json(manifest_path)
+    _validate_run_manifest_identity(
+        manifest,
+        run_id=run_id,
+        subject_id=str(ledger.get("subject_id") or ""),
+    )
     target_set = _target_closure(plan, targets)
 
     if _verify_existing_passes(plan, ledger, manifest):
@@ -891,6 +945,11 @@ def main(argv: list[str] | None = None) -> int:
         if not manifest_path.is_file():
             raise RuntimeError(f"RUN_MANIFEST_MISSING:{manifest_path}")
         manifest_preview = load_json(manifest_path)
+        _validate_run_manifest_identity(
+            manifest_preview,
+            run_id=args.run_id,
+            subject_id=args.subject_id,
+        )
         if args.execution_class == "IMPLEMENTATION_AUDIT":
             if manifest_preview.get("implementation_audit") is not True:
                 raise RuntimeError("IMPLEMENTATION_AUDIT_MANIFEST_FLAG_REQUIRED")

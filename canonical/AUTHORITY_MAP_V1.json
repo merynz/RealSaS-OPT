@@ -40,7 +40,11 @@
     "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
     "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
     "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md",
+    "canonical/AUTHORITY_MAP_V1.json",
     "canonical/ACTIVE_RUN_V2.json",
+    "canonical/EXPERIMENT_REGISTRY_V3.json",
+    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
+    "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
     "CURRENT_STATE.md",
     "canonical/CONTEXT_STATE_V2.json"
   ],

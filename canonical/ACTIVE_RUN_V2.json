@@ -1,16 +1,23 @@
 {
-  "schema": "RealSaS.ActiveRunLedger.v1",
-  "run_id": "SUBJECT2_KNIGHT_V2",
-  "subject_id": "KNIGHT",
+  "schema": "RealSaS.ActiveRunLedger.v2",
+  "run_id": "V2_IMPLEMENTATION_ASSEMBLY",
+  "subject_id": "NONE",
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__FIRST_KNIGHT_V2_EXACT8_SOURCE__OUTPUT8_SEPARATE__CANONICAL_MESH_SHARED_MECHANICS_APPEARANCE_DOMAIN__CAA",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
   "pipeline_plan_sha256": "b125cb1f9b0e53b760982da5807a6962bf9c32d7c694eab17368fe567bf62f9d",
-  "status": "V2_ARCHITECTURE_BOUND__KNIGHT_NOT_STARTED",
+  "status": "ASSEMBLY_IN_PROGRESS__WITNESS_EXECUTION_DISABLED",
+  "execution_enabled": false,
   "completed_count": 0,
+  "failed_count": 0,
   "total_count": 46,
-  "next_stage": "01_SOURCE_BYTES_SEALED",
-  "run_manifest_ref": "$REALSAS_AUTHORITY_ROOT/runs/SUBJECT2_KNIGHT_V2/run_manifest.json",
+  "ready_stage_ids": [
+    "01_SOURCE_BYTES_SEALED",
+    "05_CAMERA_CONTRACT_SOLVED"
+  ],
+  "failed_stage_ids": [],
+  "blocked_by_failed_dependency": {},
+  "run_manifest_ref": "",
   "stages": [
     {
       "ordinal": 1,
@@ -567,16 +574,16 @@
   ],
   "history": [
     {
-      "event": "V2_ACTIVE_RUN_CREATED",
-      "note": "Fresh Knight lineage begins at Stage01; V1 outputs remain research/history only."
+      "event": "V2_IMPLEMENTATION_ASSEMBLY_BECAME_CURRENT",
+      "note": "Knight witness is intentionally not active. Complete and seal V2 implementation readiness first."
     },
     {
-      "event": "CAA_BACKEND_SEQUENCE_FROZEN",
-      "note": "DETERMINISTIC_V1 first; IM2SURFTEX_RESEARCH_ONLY benchmark; LEARNED_V2 only after native E2E baseline."
+      "event": "APPEARANCE_PROMOTED_TO_COEQUAL_PRODUCT_AUTHORITY",
+      "note": "Geometry, mechanics and appearance are equal product-quality axes. Spine-class 2D art is not downstream polish."
     },
     {
-      "event": "PARTITION_REPAIR_POLICY_FROZEN",
-      "note": "Stage17 UNKNOWN stays conservative. Stage35 geometry failure may create a new Stage18 lineage; no post-skin in-place mesh mutation."
+      "event": "DAG_EXECUTION_SEMANTICS_ADOPTED",
+      "note": "Ordinals are display order only; dependencies define executable readiness."
     }
   ]
 }

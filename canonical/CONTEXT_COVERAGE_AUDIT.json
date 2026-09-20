@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "32b51f2c2eb6d234765883f53f642fca12dff376",
+      "sha": "d2c4556834d75ebeb63a149256c34d4b956960db",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -594,7 +594,7 @@
     },
     {
       "name": "redteam-sync-20260920",
-      "sha": "bbc0892d33c9e7896a723bec64e40c59ecb0c76b",
+      "sha": "1741beaff327b3df0580f0d6c52f62dcec9454f6",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

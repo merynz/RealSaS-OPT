@@ -7,14 +7,14 @@
 
 - Product: automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics
 - Current witness: Subject-2 Knight (held; previous activation void)
-- Current module: V2 implementation and witness orchestration audit
-- Current state: V2_IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN
+- Current module: V2 stage-level red-team hardening
+- Current state: V2_STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN
 - Active experiment: V2_IMPLEMENTATION_ASSEMBLY
-- Most recent closed gate: PRIOR_READINESS_SEAL_REVOKED_AFTER_PRE_STAGE01_ORCHESTRATION_GAP
-- Canonical main: 32b51f2c2eb6
+- Most recent closed gate: SELF_HOSTED_MAINLINE_AND_SUBJECT_FREE_ORCHESTRATION_GREEN__STAGE_REDTEAM_REOPENED
+- Canonical main: d2c4556834d7
 - Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
 - Plan SHA-256: 182ecfbd9410782a16a894b7a705f03aee6ce9303cad03823a6fd1f351292df4
-- Promotion block: Do not execute Knight. Prove run-local ledger initialization, current target-closure CLI, workflow contract and Stage01-08 artifact/output schemas before resealing readiness.
+- Promotion block: Do not execute Knight. RT-37 automatic presentation segmentation and RT-45/46 dynamic appearance-quality/closure-claim gaps must be resolved or explicitly narrowed before a new readiness seal.
 - Scope warning: No Knight-derived threshold choice is allowed during V2 assembly.
 
 ## Current machine authority
@@ -59,7 +59,7 @@
 
 ## Current scientific question
 
-Is current main internally capable of producing and proving a Spine-class 2D puppet with geometry, mechanics and appearance all treated as first-class audited authorities?
+Does every one of the 46 V2 stages prove exactly the authority needed for a source-faithful Spine-class 2D puppet, without allowing mechanics/runtime correctness to substitute for presentation or dynamic appearance quality?
 
 ## Settled invariants
 

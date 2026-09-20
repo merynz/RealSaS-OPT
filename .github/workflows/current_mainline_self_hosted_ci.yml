@@ -81,8 +81,10 @@ jobs:
             tests/repository/test_mainline_execution_plan_v2.py \
             tests/repository/test_mainline_v2_dag_scheduler.py \
             tests/repository/test_witness_orchestration_v2.py
-      - name: Validate V2 DAG structure
-        run: python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
+      - name: Validate V2 DAG structure and implementation closure
+        run: |
+          python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
+          python -m compiler.realsas_compiler_services.orchestrator.mainline implementation-closure
       - name: Build native V2 CAA reference player
         run: |
           g++ -std=c++17 -O2 -Wall -Wextra -pedantic \

@@ -13,9 +13,11 @@ CURRENT_REGISTRY = "canonical/EXPERIMENT_REGISTRY_V3.json"
 CURRENT_JOURNAL = "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl"
 HISTORICAL_REGISTRY = "canonical/EXPERIMENT_REGISTRY_V2.json"
 HISTORICAL_JOURNAL = "canonical/SCIENTIFIC_JOURNAL_V1.jsonl"
-ACTIVE_RUN = "canonical/ACTIVE_RUN_V1.json"
-PIPELINE_PLAN = "canonical/MAINLINE_EXECUTION_PLAN_V1.json"
+ACTIVE_RUN = "canonical/ACTIVE_RUN_V2.json"
+PIPELINE_PLAN = "canonical/MAINLINE_EXECUTION_PLAN_V2.json"
 PRODUCT_AUTHORITY = "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md"
+ARCHITECTURE_V2 = "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json"
+CAA_V1 = "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json"
 
 
 class CurrentContinuityAuthorityV2(unittest.TestCase):
@@ -35,7 +37,7 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
         self.assertEqual(authority["active_run_ledger"], ACTIVE_RUN)
         self.assertEqual(authority["pipeline_plan"], PIPELINE_PLAN)
         for rel in (CURRENT_CONTEXT, CURRENT_REGISTRY, CURRENT_JOURNAL, HISTORICAL_REGISTRY,
-                    HISTORICAL_JOURNAL, ACTIVE_RUN, PIPELINE_PLAN, PRODUCT_AUTHORITY):
+                    HISTORICAL_JOURNAL, ACTIVE_RUN, PIPELINE_PLAN, PRODUCT_AUTHORITY, ARCHITECTURE_V2, CAA_V1):
             self.assertTrue((ROOT / rel).is_file(), rel)
 
     def test_agent_contract_names_current_before_historical(self) -> None:
@@ -60,9 +62,10 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
         plan = json.loads((ROOT / PIPELINE_PLAN).read_text(encoding="utf-8"))
         ledger = json.loads((ROOT / ACTIVE_RUN).read_text(encoding="utf-8"))
         validate_ledger(plan, ledger)
-        self.assertEqual(plan["stages"][23]["id"], "24_MECHANICAL_PARTITION_QUALIFIED")
-        self.assertEqual(plan["stages"][26]["id"], "27_QUALIFIED_MESH_GATE")
-        self.assertEqual(plan["stages"][29]["id"], "30_QUALIFIED_PRESENTATION_GRAPH")
+        self.assertEqual(plan["stage_count"], 46)
+        self.assertEqual(plan["stages"][17]["id"], "18_CANONICAL_MESH_ADDRESSING_BUILD")
+        self.assertEqual(plan["stages"][23]["id"], "24_COMPLETE_APPEARANCE_QUALIFIED")
+        self.assertEqual(plan["stages"][45]["id"], "46_PRODUCT_CLOSURE_SEAL")
 
     def test_current_self_hosted_workflows_are_main_bound(self) -> None:
         for rel in (

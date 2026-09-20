@@ -1,36 +1,21 @@
 # RealSaS Structural System Index
 
-> Navigation only. `CURRENT_STATE.md` and `canonical/ACTIVE_RUN_V1.json` are current continuation/progress authority.
+> Navigation only. `CURRENT_STATE.md` and `canonical/ACTIVE_RUN_V2.json` are current continuation/progress authority.
 
-## Current mainline stack
-
-| Layer | Canonical home | Rule |
+| Layer | Canonical home | V2 rule |
 |---|---|---|
-| Observation contract | `compiler/realsas_compiler_core/observation_contract_v1.py` | exact 8-view, border-safe, OOF=UNKNOWN |
-| IRIS | `models/iris/` | learned geometry evidence; fresh checkpoint per admitted FIT witness |
-| GSA | `compiler/realsas_compiler_core/substrate/` | Compiler-owned `RiggingSurfaceIR` |
-| Geppetto | `models/geppetto/` | proposal only; Compiler owns qualified skeleton |
-| Arachne | `models/arachne/` | proposal only; Compiler owns qualified skin |
-| Structural partition | `compiler/realsas_compiler_core/product_authority_v1.py` | immutable S + SEPARATE/PRESERVE_CONTINUITY/UNKNOWN constraints |
-| Product mesh | `compiler/realsas_compiler_core/product_authority_v1.py` | view-independent canonical `QualifiedMeshIR`; single product geometry authority |
-| Presentation | `compiler/realsas_compiler_core/product_authority_v1.py` | qualified slots/attachments/carriers/evidence/view overlays |
-| Motion | `compiler/realsas_compiler_core/motion_3d_*.py` | canonical 3D deformation |
-| Runtime | `compiler/realsas_compiler_services/export/runtime_v4.py`, `runtime_v4_cache.py` | compact shared-XYZ Runtime-v4 |
-| Native render/playback | `runtime/realsas_cpp/` | subordinate exact consumer |
-| Orchestration | `compiler/realsas_compiler_services/orchestrator/` | 40-stage resumable hash-bound execution |
-
-## Optimization spine
-- shared canonical XYZ once per asset per frame; no per-view posed-XYZ duplication;
-- streamed Runtime-v4 binary/archive writer;
-- content-addressed runtime package cache;
-- exact typed product-proof + motion-bake cache;
-- content-addressed native reference-render cache;
-- batch native miss transport for visual proof.
-
-Historical synthetic measurement evidence is frozen in `canonical/MAINLINE_PERFORMANCE_BASELINE_V1.json`. It is a performance direction, not PRODUCT_PASS.
+| Observation | `compiler/realsas_compiler_core/observation_authority_v1.py` | first Knight V2 remains exact-8 source; source cardinality is not output-direction authority |
+| Output directions | `compiler/realsas_compiler_core/output_presentation_v1.py` | fixed discrete V0...V7 |
+| IRIS/GSA | `models/iris/`, `compiler/realsas_compiler_core/substrate/` | geometry/surface evidence only; no RGB ownership |
+| Product mesh | `compiler/realsas_compiler_core/product_authority_v1.py` + `surface_addressing_v1.py` | Stage18 mesh/addressing/domain transaction; Stage19 static freeze |
+| Complete Appearance | `compiler/realsas_compiler_core/complete_appearance_authority_v1.py` | source wins; total baked authority; deterministic first |
+| Geppetto | `models/geppetto/` | proposal only; Compiler owns skeleton |
+| Arachne | `models/arachne/` | proposal only; Compiler owns skin |
+| Dynamic mesh | `compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py` | Stage35 qualifies frozen carrier; repair returns to new Stage18 lineage |
+| Presentation | presentation core/adapters | structure only; may not mint appearance |
+| Motion | `compiler/realsas_compiler_core/motion_3d_*.py` | operates sealed puppet |
+| Runtime | runtime-v4 / `runtime/realsas_cpp/` | sealed CAA consumer; no donor search/generation/relighting |
+| Orchestration | `compiler/realsas_compiler_services/orchestrator/` | 46-stage resumable V2 DAG |
 
 ## Current run
-`SUBJECT2_KNIGHT_V1` is the active witness, but Knight-specific data may exist only in run/source artifacts. Generic source must remain subject-agnostic. Progress is read only from `canonical/ACTIVE_RUN_V1.json`.
-
-## Historical Mage
-Mage FIT/FIT2 branches, reports and checkpoints remain scoped evidence. They may donate generic implementations only after semantic review. Temporary Mage CDT/Steiner repairs, continuity hacks, subject seals and subject presets are not current authority.
+`SUBJECT2_KNIGHT_V2` is the active witness. Fresh lineage begins at Stage01. V1 remains historical authority/evidence only.

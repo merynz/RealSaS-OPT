@@ -1,29 +1,32 @@
 {
   "schema": "RealSaS.ContextState.v2",
-  "date": "2026-09-19",
+  "date": "2026-09-20",
   "continuation_branch": "main",
   "execution_branch": "main",
-  "status": "PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING",
+  "status": "V2_46_STAGE_ARCHITECTURE_BOUND__KNIGHT_FRESH_LINEAGE_STARTED",
   "authority": {
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
     "historical_experiment_registry": "canonical/EXPERIMENT_REGISTRY_V2.json",
     "historical_scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V1.jsonl",
-    "active_run_ledger": "canonical/ACTIVE_RUN_V1.json"
+    "active_run_ledger": "canonical/ACTIVE_RUN_V2.json",
+    "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
+    "architecture_contract": "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
+    "complete_appearance_contract": "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json"
   },
   "product": {
     "target": "automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics",
     "demo_witness": "Subject-2 Knight (run data only; architecture generic)",
-    "next_visible_product_milestone": "execute Knight 01→40 once exact external fit/native-player artifacts are supplied; preserve sub-minute warm render iteration through Runtime-v4 batch/cache"
+    "next_visible_product_milestone": "execute fresh Knight V2 Stage01 onward; first CAA backend is DETERMINISTIC_V1, Im2SurfTex is research-only benchmark, learned CAA follows native E2E baseline"
   },
   "current_focus": {
-    "module": "Full 40-stage product authority + fast native iteration",
-    "state": "PRODUCT_AUTHORITY_IMPLEMENTATION__ALL_40_STAGES_EXECUTABLE__FINAL_CI_AND_RUN_INPUTS_PENDING",
+    "module": "46-stage V2 product authority: shared mesh domain + Complete Appearance Authority",
+    "state": "V2_46_STAGE_ARCHITECTURE_BOUND__KNIGHT_FRESH_LINEAGE_STARTED",
     "active_experiment": "SUBJECT2_KNIGHT_FULL_CLOSURE",
-    "most_recent_closed_gate": "ALL_40_STAGE_ADAPTERS_IMPLEMENTED_AND_BOUND_READY_FOR_FINAL_CI",
-    "promotion_block": "Full-3D local-quaternion v2 is the professional motion candidate path: Stage34 compiles source motion semantics onto the exact target skeleton and Stage35 exact FK/LBS execution owns clip capability. Stage25/27 are numerical conditioning evidence only. The active plan/ledger hash is reconciled on the current candidate branch; remaining work is final CI, deterministic Blender extraction of the sealed Quaternius Idle/Run/Slash MotionSourceClip.v2 artifacts, and the exact Knight external fit/native-player inputs before 01→40 execution.",
+    "most_recent_closed_gate": "V2_ARCHITECTURE_AND_CAA_CONTRACT_FROZEN",
+    "promotion_block": "Fresh Knight V2 must restart at Stage01. Stage13 remains a conservative geometry floor for the first V2 run. Stage18 mints mesh + SurfaceAddressingIR + AppearanceDomainIR; Stage19 freezes the static carrier; CAA and mechanics branch from it. Numeric CAA quality thresholds remain preregistration-pending and may not be chosen from Knight outcomes.",
     "scope_warning": "Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority",
-    "scientific_question": "Can the exact Knight witness execute the generic 40-stage authority DAG end-to-end with hash-verified reuse, batch-native warm iteration, visible artist run motion and Stage-40 PRODUCT_PASS without subject-specific code?"
+    "scientific_question": "Can the exact Knight witness execute the generic 46-stage V2 DAG end-to-end, preserving source art through Complete Appearance Authority and passing native dynamic visual integrity without subject-specific code?"
   },
   "execution_environment": {
     "actions": "SELF_HOSTED_LOCAL_ONLY",
@@ -51,13 +54,13 @@
   "pipeline": [
     {
       "name": "Observation",
-      "role": "exact 8 source views + calibrated cameras",
-      "canonical_rule": "full admitted subject, border-safe; OOF=UNKNOWN"
+      "role": "first Knight V2: exact controlled 8 source views + calibrated source cameras",
+      "canonical_rule": "source observation authority is separate from output presentation direction authority; future input cardinality may differ"
     },
     {
       "name": "IRIS",
-      "role": "learned signed geometry evidence",
-      "canonical_rule": "fresh run checkpoint; teacher excluded from product inference"
+      "role": "learned signed geometry / surface evidence",
+      "canonical_rule": "produces the canonical carrier evidence; does not own RGB appearance"
     },
     {
       "name": "GSA",
@@ -65,58 +68,68 @@
       "canonical_rule": "Compiler owns immutable RiggingSurfaceIR S/provenance"
     },
     {
+      "name": "OutputPresentationDirections",
+      "role": "fixed product directions V0...V7",
+      "canonical_rule": "eight output directions are sealed independently from source view count"
+    },
+    {
+      "name": "CanonicalMeshDomain",
+      "role": "common mechanics + appearance domain",
+      "canonical_rule": "Stage18 mints CanonicalMeshCandidateIR + SurfaceAddressingIR + AppearanceDomainIR atomically; Stage19 freezes static carrier"
+    },
+    {
+      "name": "CompleteAppearanceAuthority",
+      "role": "total baked appearance over the renderable mesh domain",
+      "canonical_rule": "source wins; deterministic backend first; no runtime generation, relighting or geometry warp"
+    },
+    {
       "name": "Geppetto",
       "role": "skeleton proposal",
-      "canonical_rule": "Compiler owns legal QualifiedSkeletonIR G"
+      "canonical_rule": "Compiler owns legal QualifiedSkeletonIR"
     },
     {
       "name": "Arachne",
       "role": "skin proposal",
-      "canonical_rule": "Compiler owns legal QualifiedSkinIR W on S"
+      "canonical_rule": "Compiler owns legal QualifiedSkinIR"
     },
     {
-      "name": "MechanicalPartition",
-      "role": "structural component membership + boundary constraints",
-      "canonical_rule": "does not mutate S; SEPARATE/PRESERVE_CONTINUITY/UNKNOWN remain explicit"
-    },
-    {
-      "name": "QualifiedMesh",
-      "role": "single canonical product geometry authority",
-      "canonical_rule": "view-independent candidate; independent G1-G5 PASS required"
+      "name": "DynamicMechanicalMesh",
+      "role": "deformation qualification of the frozen static carrier",
+      "canonical_rule": "Stage35 failure requiring geometry repair creates a new Stage18 lineage; no in-place mutation"
     },
     {
       "name": "Presentation",
-      "role": "automatic Spine-class slots/attachments/carriers/view overlays",
-      "canonical_rule": "Compiler owns QualifiedPresentationGraphIR; categorical object identity is not required"
-    },
-    {
-      "name": "Appearance",
-      "role": "source RGB provenance",
-      "canonical_rule": "source observations remain appearance authority; 3D geometry never becomes RGB truth"
+      "role": "slots/attachments/order/visibility/clipping",
+      "canonical_rule": "presentation structure cannot mint appearance or geometry"
     },
     {
       "name": "Motion",
-      "role": "full-3D quaternion compile + exact FK/LBS dynamic proof",
-      "canonical_rule": "Stage34 compiles full-3D local quaternion tracks; Stage35 exact target-skeleton FK/LBS execution mints clip capability. Stage25/27 conditioning probes do not define professional motion limits."
+      "role": "full-3D quaternion compile and dynamic proof",
+      "canonical_rule": "motion operates the sealed puppet; compiled-unobserved appearance exposure is measured and budget-gated"
     },
     {
       "name": "Runtime",
       "role": "compact .rss + native playback",
-      "canonical_rule": "consumer only; shared XYZ once/frame and no second topology/presentation truth"
+      "canonical_rule": "samples sealed CAA only; package load re-verifies CAA binding"
+    },
+    {
+      "name": "VisualIntegrity",
+      "role": "native dynamic render proof",
+      "canonical_rule": "crack/pepper/bleed/seam/flicker/component/composition integrity before Stage46 closure"
     }
   ],
   "settled_invariants": [
     "No subject-specific compiler/runtime branch.",
-    "RiggingSurfaceIR remains immutable admitted substrate; QualifiedMeshIR is the single product geometry authority after G1-G5.",
-    "MechanicalPartitionIR may declare SEPARATE/PRESERVE_CONTINUITY/UNKNOWN but may not silently resolve consequential UNKNOWN at qualification.",
-    "QualifiedPresentationGraphIR owns slots/attachments/carriers/view overlays; runtime may not invent them.",
-    "No latest/current alias can substitute an exact artifact hash.",
-    "Downstream failure cannot erase verified upstream PASS.",
-    "Rest source preservation precedes motion authority.",
-    "Visible native motion is required before product closure.",
-    "Multi-frame native visual proof uses content-addressed batch transport; scalar per-frame subprocess loops are not the product iteration path.",
-    "Professional shipping motion uses MotionSourceClip.v2 full-3D local-quaternion semantics; legacy scalar motion is historical/mechanical evidence only.",
-    "Stage25 deformation-envelope and Stage27 G3 stress are numerical conditioning evidence only; Stage35 exact clip execution is the professional motion-capability authority."
+    "Mesh is the common canonical domain for mechanics and appearance.",
+    "CAA is total over every renderable surface state and may not mutate canonical geometry.",
+    "Qualified source appearance is immutable; source wins over completion.",
+    "Presentation warp is forbidden in CAA V1.",
+    "Internal appearance filtering/compositing is premultiplied alpha with canonical bleed.",
+    "Runtime performs no generative or corrective appearance inference.",
+    "MechanicalPartition UNKNOWN stays conservative in first V2; dynamic failure may repair only through a new Stage18 lineage.",
+    "Downstream failure cannot erase verified independent upstream PASS.",
+    "First Knight V2 retains exact 8 controlled source views only to isolate architecture change; this does not assert 8 inputs are a permanent product requirement.",
+    "Product closure is Stage46 and requires native dynamic visual integrity."
   ],
   "known_context_traps": [
     {
@@ -141,6 +154,6 @@
     }
   ],
   "continuation_protocol": {
-    "experiment_completion_definition": "A stage closes only when its ledger row is PASS/CACHE_HIT, exact output hashes verify, and the next stage consumes those exact bindings. Stage 40 alone may close PRODUCT_PASS."
+    "experiment_completion_definition": "A stage closes only when its ledger row is PASS/CACHE_HIT, exact output hashes verify, and the next stage consumes those exact bindings. Stage46 alone may close PRODUCT_PASS."
   }
 }

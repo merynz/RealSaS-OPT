@@ -1,5 +1,5 @@
 {
-  "schema_version": 5,
+  "schema_version": 6,
   "repository": "merynz/RealSaS-OPT",
   "continuation_authority": "CURRENT_STATE.md",
   "context_state": "canonical/CONTEXT_STATE_V2.json",
@@ -10,8 +10,8 @@
   "architecture_ledger": "canonical/ARCHITECTURE_AUTHORITY_LEDGER_V2.md",
   "experiment_ledger": "canonical/EXPERIMENT_AUTHORITY_LEDGER_V2.md",
   "branch_authority": "canonical/BRANCH_AUTHORITY_V2.md",
-  "active_run_ledger": "canonical/ACTIVE_RUN_V1.json",
-  "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+  "active_run_ledger": "canonical/ACTIVE_RUN_V2.json",
+  "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
   "performance_baseline": "canonical/MAINLINE_PERFORMANCE_BASELINE_V1.json",
   "generated_live_map": "canonical/LIVE_AUTHORITY_MAP.md",
   "generated_rehydration_packet": "canonical/REHYDRATION_PACKET.md",
@@ -21,16 +21,20 @@
     "SYSTEM_INDEX.md",
     "canonical/CONTEXT_STATE_V2.json",
     "canonical/EXPERIMENT_REGISTRY_V3.json",
-    "canonical/ACTIVE_RUN_V1.json",
-    "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+    "canonical/ACTIVE_RUN_V2.json",
+    "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
     "canonical/MAINLINE_PERFORMANCE_BASELINE_V1.json",
     "canonical/REAL_SAS_MAINLINE_VNEXT_20260918.md",
     "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
-    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl"
+    "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
+    "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
+    "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json"
   ],
   "rehydration_order": [
-    "canonical/ACTIVE_RUN_V1.json",
-    "canonical/MAINLINE_EXECUTION_PLAN_V1.json",
+    "canonical/ACTIVE_RUN_V2.json",
+    "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
+    "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
+    "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
     "CURRENT_STATE.md",
     "canonical/AUTHORITY_MAP_V1.json",
     "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md",
@@ -61,13 +65,13 @@
   "active_experiments": [
     {
       "id": "SUBJECT2_KNIGHT_FULL_CLOSURE",
-      "status": "ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION",
+      "status": "ACTIVE__V2_46_STAGE_ARCHITECTURE__KNIGHT_FRESH_LINEAGE",
       "branch": "main",
-      "question": "Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output?",
+      "question": "Can the generic V2 architecture compile the Knight witness from fresh Stage01 through a shared canonical mesh domain, Complete Appearance Authority, motion and native visual integrity into Stage46 PRODUCT_PASS?",
       "does_not_prove": [
         "unseen-family generalization",
         "all-subject performance",
-        "PRODUCT_PASS before stage 40",
+        "PRODUCT_PASS before stage 46",
         "teacher-free capability beyond the exact qualified run"
       ]
     }
@@ -94,9 +98,11 @@
     "Subject identity may appear in run artifacts/registries but not generic product control flow.",
     "Verified upstream stage outputs survive downstream failure and are reused only under exact hash identity.",
     "Mage remains historical/scoped evidence.",
-    "PRODUCT_PASS requires stage 40 and visible native motion evidence.",
+    "PRODUCT_PASS requires stage 46 and visible native motion evidence.",
     "RiggingSurfaceIR is immutable admitted substrate; canonical QualifiedMeshIR is the single product geometry authority after mesh qualification.",
     "Runtime/export may consume but may not mint geometry, rig, skin, presentation or RGB appearance authority.",
-    "Presentation decisions preserve mechanical/observation/posed-geometry/motion/source-appearance evidence provenance; categorical object identity is not required product authority."
+    "Presentation decisions preserve mechanical/observation/posed-geometry/motion/source-appearance evidence provenance; categorical object identity is not required product authority.",
+    "CompleteAppearanceAuthority is total over the renderable canonical mesh domain; source-qualified appearance wins and runtime may not generate appearance.",
+    "First Knight V2 uses exact controlled 8 source views to isolate architecture change; source view cardinality is not the same authority as the fixed eight output presentation directions."
   ]
 }

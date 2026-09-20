@@ -186,7 +186,8 @@ def _load_camera_set(ctx):
 
 
 def _axis_contract(ctx):
-    axis_payload=_stage_output_payload(ctx,"25_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DerivedAxisContract.v1")
+    stage_id=_compat_stage_id(ctx,"34_DEFORMATION_CAPABILITY_ENVELOPE","25_DEFORMATION_CAPABILITY_ENVELOPE")
+    axis_payload=_stage_output_payload(ctx,stage_id,"RealSaS.DerivedAxisContract.v1")
     _,axis_hash=parse_axis_contract_v1(axis_payload)
     return axis_payload,axis_hash
 
@@ -228,7 +229,7 @@ def qualify_mechanical_partition_and_carriers(ctx:dict)->dict:
     )
     validate_mechanical_partition(partition,surface)
     validate_component_carrier_policy(carrier,partition)
-    root=ctx["run_root"]/"artifacts"/"24_MECHANICAL_PARTITION_QUALIFIED"
+    root=_artifact_root(ctx,"24_MECHANICAL_PARTITION_QUALIFIED")
     return {
         "status":"PASS",
         "outputs":[
@@ -252,7 +253,7 @@ def seal_deformation_capability_envelope(ctx:dict)->dict:
                 "diagnostics":{"unsupported_keys":sorted(cfg)}}
     camera_set=_load_camera_set(ctx)
     axis_payload,envelope=derive_deformation_envelope_v1(skeleton=skeleton,camera_set=camera_set)
-    root=ctx["run_root"]/"artifacts"/"25_DEFORMATION_CAPABILITY_ENVELOPE"
+    root=_artifact_root(ctx,"25_DEFORMATION_CAPABILITY_ENVELOPE")
     return {
         "status":"PASS",
         "outputs":[
@@ -301,7 +302,7 @@ def build_canonical_mesh_candidate_stage(ctx:dict)->dict:
         )
     else:
         return {"status":"BLOCKED","blockers":["MESH_BACKEND_NOT_EXPLICIT_OR_UNSUPPORTED"],"diagnostics":{"backend":backend}}
-    root=ctx["run_root"]/"artifacts"/"26_MESH_CANDIDATE_BUILD"
+    root=_artifact_root(ctx,"26_MESH_CANDIDATE_BUILD")
     return {
         "status":"PASS",
         "outputs":[
@@ -413,7 +414,7 @@ def qualify_canonical_mesh_stage(ctx:dict)->dict:
     if unknown_rows:
         blockers.append("G4_CONSEQUENTIAL_UNKNOWN_BOUNDARY")
 
-    root=ctx["run_root"]/"artifacts"/"27_QUALIFIED_MESH_GATE"
+    root=_artifact_root(ctx,"27_QUALIFIED_MESH_GATE")
     # Diagnostic evidence is written even when admission fails, but only PASS outputs
     # are sealed by the mainline ledger.
     _write_ir(root/"g3_deformation_stress.json",g3,authority_class="DIAGNOSTIC_G3_EVIDENCE")
@@ -495,7 +496,7 @@ def bind_qualified_mesh_skin_stage(ctx:dict)->dict:
     envelope=_load_envelope(ctx)
     _,policy=_load_candidate_and_policy(ctx)
     mesh=qualified_mesh_from_dict(
-        _stage_output_payload(ctx,"27_QUALIFIED_MESH_GATE","RealSaS.QualifiedMeshIR.v1")
+        _stage_output_payload(ctx,_compat_stage_id(ctx,"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED","27_QUALIFIED_MESH_GATE"),"RealSaS.QualifiedMeshIR.v1")
     )
     bound=bind_product_mesh_skin(
         surface=surface,
@@ -507,7 +508,7 @@ def bind_qualified_mesh_skin_stage(ctx:dict)->dict:
         envelope=envelope,
         policy=policy,
     )
-    root=ctx["run_root"]/"artifacts"/"28_QUALIFIED_MESH_SKIN_TRANSFER"
+    root=_artifact_root(ctx,"28_QUALIFIED_MESH_SKIN_TRANSFER")
     return {
         "status":"PASS",
         "outputs":[_write_ir(root/"qualified_mesh_skin.json",bound,authority_class="QUALIFIED_PRODUCT_MESH_SKIN")],
@@ -528,10 +529,10 @@ def seal_canonical_puppet_state_stage(ctx:dict)->dict:
     envelope=_load_envelope(ctx)
     _,policy=_load_candidate_and_policy(ctx)
     mesh=qualified_mesh_from_dict(
-        _stage_output_payload(ctx,"27_QUALIFIED_MESH_GATE","RealSaS.QualifiedMeshIR.v1")
+        _stage_output_payload(ctx,_compat_stage_id(ctx,"35_DYNAMIC_MECHANICAL_MESH_QUALIFIED","27_QUALIFIED_MESH_GATE"),"RealSaS.QualifiedMeshIR.v1")
     )
     mesh_skin=qualified_mesh_skin_from_dict(
-        _stage_output_payload(ctx,"28_QUALIFIED_MESH_SKIN_TRANSFER","RealSaS.QualifiedMeshSkinIR.v1")
+        _stage_output_payload(ctx,_compat_stage_id(ctx,"36_QUALIFIED_MESH_SKIN_TRANSFER","28_QUALIFIED_MESH_SKIN_TRANSFER"),"RealSaS.QualifiedMeshSkinIR.v1")
     )
     state=build_canonical_puppet_state(
         surface=surface,
@@ -548,7 +549,7 @@ def seal_canonical_puppet_state_stage(ctx:dict)->dict:
             "stage_id":"29_CANONICAL_PUPPET_STATE_SEALED",
         },
     )
-    root=ctx["run_root"]/"artifacts"/"29_CANONICAL_PUPPET_STATE_SEALED"
+    root=_artifact_root(ctx,"29_CANONICAL_PUPPET_STATE_SEALED")
     return {
         "status":"PASS",
         "outputs":[_write_ir(root/"canonical_puppet_state.json",state,authority_class="CANONICAL_MECHANICAL_PRODUCT_STATE")],

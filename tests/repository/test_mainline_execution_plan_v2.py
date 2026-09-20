@@ -119,3 +119,13 @@ def test_current_v2_adapter_import_closure_excludes_obsolete_product_semantics()
         "compiler.realsas_compiler_services.orchestrator.adapters.presentation_v1",
     }
     assert modules.isdisjoint(forbidden), sorted(modules & forbidden)
+
+
+def test_v2_tail_manifest_fingerprint_scope_matches_current_authority_reads():
+    plan = load("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
+    by = {row["id"]: row for row in plan["stages"]}
+    assert by["40_MOTION_COMPILE_RUN"]["title"] == "Full-3D canonical motion compilation"
+    assert by["41_MOTION_DYNAMIC_PROOF"]["manifest_keys"] == ["observation"]
+    assert by["42_RUNTIME_PROJECTION_AND_CAA_BINDING"]["manifest_keys"] == []
+    assert by["44_NATIVE_PACKAGE_OPEN_PLAYBACK"]["manifest_keys"] == ["runtime"]
+    assert by["45_DYNAMIC_VISUAL_INTEGRITY_PROOF"]["manifest_keys"] == ["runtime"]

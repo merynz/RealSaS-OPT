@@ -199,6 +199,7 @@ def provenance_boundary_metrics(
     *,
     rgba: np.ndarray,
     provenance: np.ndarray,
+    source_view: np.ndarray | None = None,
     sample_positions: np.ndarray,
     sample_face_index: np.ndarray,
     face_count: int,
@@ -206,6 +207,11 @@ def provenance_boundary_metrics(
 ) -> dict:
     rgba = np.asarray(rgba, dtype=np.uint8)
     provenance = np.asarray(provenance, dtype=np.uint8)
+    donor_view = (
+        None
+        if source_view is None
+        else np.asarray(source_view, dtype=np.int16)
+    )
     positions = np.asarray(sample_positions, dtype=np.float64)
     face_index = np.asarray(sample_face_index, dtype=np.int32)
     if rgba.ndim != 3 or rgba.shape[0] != 8 or rgba.shape[2] != 4:
@@ -213,12 +219,15 @@ def provenance_boundary_metrics(
     n = rgba.shape[1]
     if provenance.shape != (8, n) or positions.shape != (n, 3) or face_index.shape != (n,):
         raise QualificationError("CAA_SEAM_ARRAY_SHAPE_DRIFT")
+    if donor_view is not None and donor_view.shape != (8, n):
+        raise QualificationError("CAA_SEAM_SOURCE_VIEW_SHAPE_DRIFT")
     per_face = int(tile_resolution) * (int(tile_resolution) + 1) // 2
     if n != int(face_count) * per_face:
         raise QualificationError("CAA_SEAM_FACE_SAMPLE_ACCOUNTING_DRIFT")
 
     local_pairs = _triangle_lattice_neighbors(tile_resolution)
     pair_set: set[tuple[int, int]] = set()
+    shared_edge_pair_set: set[tuple[int, int]] = set()
     for face in range(int(face_count)):
         base = face * per_face
         for a, b in local_pairs:
@@ -238,7 +247,9 @@ def provenance_boundary_metrics(
                 a = indices[i]
                 b = indices[j]
                 if face_index[a] != face_index[b]:
-                    pair_set.add((min(a, b), max(a, b)))
+                    pair = (min(a, b), max(a, b))
+                    pair_set.add(pair)
+                    shared_edge_pair_set.add(pair)
 
     adjacency: dict[int, set[int]] = {index: set() for index in range(n)}
     for a, b in pair_set:
@@ -252,8 +263,17 @@ def provenance_boundary_metrics(
         count = 0
         values = []
         view_gradient_jumps = []
+        donor_switch_count = 0
+        shared_edge_count = 0
+        shared_edge_errors = []
         for a, b in pair_set:
-            if provenance[view, a] == provenance[view, b]:
+            shared_edge = (a, b) in shared_edge_pair_set
+            provenance_differs = provenance[view, a] != provenance[view, b]
+            donor_differs = bool(
+                donor_view is not None
+                and int(donor_view[view, a]) != int(donor_view[view, b])
+            )
+            if not shared_edge and not provenance_differs and not donor_differs:
                 continue
             error = float(
                 rgba_l1_premultiplied(
@@ -264,6 +284,11 @@ def provenance_boundary_metrics(
             values.append(error)
             errors.append(error)
             count += 1
+            if shared_edge:
+                shared_edge_count += 1
+                shared_edge_errors.append(error)
+            if donor_differs:
+                donor_switch_count += 1
 
             same_a = [
                 neighbor
@@ -305,6 +330,10 @@ def provenance_boundary_metrics(
                 "mean_rgba_l1": float(np.mean(values)) if values else 0.0,
                 "p95_rgba_l1": float(np.quantile(values, 0.95)) if values else 0.0,
                 "gradient_pair_count": int(len(view_gradient_jumps)),
+                "shared_edge_pair_count": int(shared_edge_count),
+                "shared_edge_mean_rgba_l1": float(np.mean(shared_edge_errors)) if shared_edge_errors else 0.0,
+                "shared_edge_p95_rgba_l1": float(np.quantile(shared_edge_errors, 0.95)) if shared_edge_errors else 0.0,
+                "donor_view_switch_pair_count": int(donor_switch_count),
                 "mean_gradient_jump": float(np.mean(view_gradient_jumps)) if view_gradient_jumps else 0.0,
                 "p95_gradient_jump": float(np.quantile(view_gradient_jumps, 0.95)) if view_gradient_jumps else 0.0,
             }
@@ -320,4 +349,9 @@ def provenance_boundary_metrics(
         "p95_gradient_jump": float(np.quantile(grad, 0.95)) if len(grad) else 0.0,
         "per_view": pairs_by_view,
         "includes_shared_face_edges": True,
+        "shared_face_edges_are_compared_even_when_provenance_matches": True,
+        "source_view_identity_consumed": donor_view is not None,
+        "donor_view_switch_pair_count": int(
+            sum(row["donor_view_switch_pair_count"] for row in pairs_by_view)
+        ),
     }

@@ -620,6 +620,7 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
                 "dynamic_max_compiled_global_visible_fraction": 1.0,
                 "dynamic_max_micro_visible_pixel_fraction_per_frame": 1.0,
                 "dynamic_max_unmeasurable_consequential_visible_face_count": 1000000,
+                "dynamic_max_exact_depth_ambiguous_fraction": 1.0,
                 "dynamic_min_visible_pixels_per_face": 1,
                 "dynamic_min_projected_double_area_px2": 0.01,
                 "dynamic_max_uv_to_surface_condition_number": 64.0,

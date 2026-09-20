@@ -26,7 +26,7 @@ def _policy():
 def test_caa_policy_is_frozen_before_witness_and_atlas_capacity_is_analytic():
     policy = _policy()
     assert policy["schema"] == "RealSaS.CAAQualificationPolicy.v1"
-    assert policy["status"] == "FROZEN_SUBJECT_FREE_V1"
+    assert policy["status"] == "REOPENED_SUBJECT_FREE_VISUAL_FIDELITY_RECALIBRATION_V2"
     assert policy["mutable_after_witness"] is False
     compile_policy = policy["compile_policy"]
     assert compile_policy["tile_resolution"] == 8
@@ -198,5 +198,5 @@ def test_dynamic_compiled_unobserved_budget_rejects_inference_dominance():
     budget = _policy()["completion_quality_policy"][
         "dynamic_max_compiled_unobserved_visible_fraction"
     ]
-    assert 0.10 <= budget
-    assert 0.40 > budget
+    assert 0.0 <= budget <= 0.02
+    assert budget < 0.10

@@ -3,6 +3,8 @@
 **Date:** 2026-09-20  
 **Canonical branch:** `main`  
 **Current mode:** **V2 IMPLEMENTATION + WITNESS ORCHESTRATION AUDIT**  
+**Current status token:** `V2_IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN`  
+**Canonical governance ledger ID:** `V2_IMPLEMENTATION_ASSEMBLY` — repository implementation governance only; not a witness run.  
 **Witness execution:** **FORBIDDEN** — the prior readiness seal was revoked after pre-Stage01 workflow/ledger contract gaps were found.  
 **Next witness:** Subject-2 Knight only after a new readiness seal that includes run-local orchestration/artifact dry-run proof  
 **Mainline:** 46-stage dependency DAG; ordinals are display order only

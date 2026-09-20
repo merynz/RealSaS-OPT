@@ -1,11 +1,11 @@
 {
   "schema": "RealSaS.V2ImplementationReadiness.v1",
   "date": "2026-09-20",
-  "status": "ASSEMBLY_IN_PROGRESS__WITNESS_EXECUTION_FORBIDDEN",
+  "status": "READY_FOR_WITNESS_EXECUTION",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
   "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
   "rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
-  "witness_policy": "DO_NOT_START_KNIGHT_UNTIL_STATUS_READY_FOR_WITNESS_EXECUTION",
+  "witness_policy": "KNIGHT_MAY_START_ONLY_FROM_A_FRESH_STAGE01_LINEAGE_AFTER_THIS_SEAL",
   "required_proofs": [
     "DAG_ORCHESTRATOR",
     "GEOMETRY_ROLE_AND_IRIS_GSA",
@@ -25,86 +25,316 @@
   "proofs": [
     {
       "proof_id": "DAG_ORCHESTRATOR",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Dependency scheduler implemented; final tests/readiness binding pending."
+      "status": "PASS",
+      "sha256": "c54f181d6f464d8380a3619518242e22d53e3e9fb19835dff2bd419495dc2960",
+      "note": "46-stage dependency DAG validates; branch independence, target closure and cycle rejection pass.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/repository/test_mainline_execution_plan_v2.py",
+          "tests/repository/test_mainline_v2_dag_scheduler.py"
+        ],
+        "claim": "46-stage dependency DAG validates; branch independence, target closure and cycle rejection pass."
+      }
     },
     {
       "proof_id": "GEOMETRY_ROLE_AND_IRIS_GSA",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Current plan now binds Stage09-15 to iris_geometry_v2 and Stage13 GeometrySubstrateQualificationIR.v2; compile/adversarial tests and dense-supervision redesign remain pending."
+      "status": "PASS",
+      "sha256": "d20cf6b8e96719f59f3a102e388657bda326e15239c7544f8de63ea73ca182f5",
+      "note": "IRIS dense source-coverage supervision is loss-only, Stage13 is geometry-only, Stage14 is frozen and fail-closed.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/iris/test_iris_v2_dense_source_coverage_v2.py",
+          "tests/compiler/test_stage13_geometry_gate_v2.py",
+          "tests/compiler/test_stage14_policy_v2.py",
+          "tests/compiler/test_substrate_adequacy_v1.py"
+        ],
+        "claim": "IRIS dense source-coverage supervision is loss-only, Stage13 is geometry-only, Stage14 is frozen and fail-closed."
+      }
     },
     {
       "proof_id": "MESH_PRODUCER_GATE_FEASIBILITY",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Relation-parent quality diagnostic and no-boundary-split min-angle obstruction test added; full mesh path audit pending."
+      "status": "PASS",
+      "sha256": "a876a68239145d592d8f15681dc5a04fde2d8ecd8ef72e30c56dfe244275e2b3",
+      "note": "Relation-parent obstruction is detected before CDT; mesh gates are producer-feasible or fail upstream.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/compiler/test_relation_parent_quality_redteam_v1.py",
+          "tests/compiler/test_canonical_cdt_adapter_v1.py",
+          "tests/compiler/test_product_authority_v1.py"
+        ],
+        "claim": "Relation-parent obstruction is detected before CDT; mesh gates are producer-feasible or fail upstream."
+      }
     },
     {
       "proof_id": "CAA_TOTALITY_SOURCE_LOCK_AND_BINDING",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Stages20-25 are now bound to deterministic mesh-domain CAA; synthetic/reference validation pending."
+      "status": "PASS",
+      "sha256": "a45681d9fc7d70008d393700c4cd96f4f646e286517745c1a56d6b06739acf3a",
+      "note": "Real Stage20-25 deterministic CAA adapters execute subject-free; totality/source immutability/exact bindings pass.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+          "tests/compiler/test_visibility_and_caa_v2.py"
+        ],
+        "claim": "Real Stage20-25 deterministic CAA adapters execute subject-free; totality/source immutability/exact bindings pass."
+      }
     },
     {
       "proof_id": "CAA_HOLDOUT_AND_SEAM_QUALITY",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Structured anisotropic holdout plus provenance color/gradient seam gates implemented; calibration/tests pending."
+      "status": "PASS",
+      "sha256": "fa12229555ae0f5ce3ec839492ffd2f3313b50d605e3aed77ce0d42e900a7ae6",
+      "note": "Frozen subject-free connected holdout and seam color/gradient gates pass benign faults and reject adversarial faults.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/compiler/test_caa_v2_subject_free_policy.py"
+        ],
+        "claim": "Frozen subject-free connected holdout and seam color/gradient gates pass benign faults and reject adversarial faults."
+      }
     },
     {
       "proof_id": "VISIBILITY_DEPTH_OWNERSHIP",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Implementation is bound in the 46-stage V2 DAG; compile, adversarial and native self-hosted qualification pending."
+      "status": "PASS",
+      "sha256": "7a349de24f63f3cc73d4c51984ba72c2b6ef7c6bc0662e092a58a17af6bb580c",
+      "note": "Canonical posed geometry plus camera depth owns visibility; alpha/provenance cannot select front surface.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/compiler/test_visibility_and_caa_v2.py",
+          "tests/compiler/test_runtime_v2_native_smoke.py"
+        ],
+        "claim": "Canonical posed geometry plus camera depth owns visibility; alpha/provenance cannot select front surface."
+      }
     },
     {
       "proof_id": "PREMULTIPLIED_ALPHA_AND_ATLAS_BLEED",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Unique-face atlas, mandatory bleed and premultiplied reference filtering implemented; end-to-end runtime/native tests pending."
+      "status": "PASS",
+      "sha256": "ccbda96a94669a01bc0f494d6e8aaaf10b1cbe5cbdc25904af5c9b0f9f82fc28",
+      "note": "Premultiplied bilinear filtering, face-tile bleed, transparent source art and native byte parity pass.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/compiler/test_visibility_and_caa_v2.py",
+          "tests/compiler/test_runtime_v2_native_smoke.py"
+        ],
+        "claim": "Premultiplied bilinear filtering, face-tile bleed, transparent source art and native byte parity pass."
+      }
     },
     {
       "proof_id": "MECHANICS_RIG_SKIN_DYNAMIC",
-      "status": "IN_PROGRESS",
-      "sha256": ""
+      "status": "PASS",
+      "sha256": "3f887ce19c3aaf6a4bbb867df84b692c0ab113b8105b18c6e3561f30af65ea31",
+      "note": "Rig/skin proposal ownership, simplex repair accounting, exact mesh-skin transfer and deformation conditioning are fail-closed.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/models/test_geppetto_mainline_source_v1.py",
+          "tests/models/test_arachne_checkpoint_v2.py",
+          "tests/compiler/test_skin_repair_accounting_v1.py",
+          "tests/compiler/test_deformation_stress_v1.py",
+          "tests/compiler/test_product_mesh_skin_v1.py"
+        ],
+        "claim": "Rig/skin proposal ownership, simplex repair accounting, exact mesh-skin transfer and deformation conditioning are fail-closed."
+      }
     },
     {
       "proof_id": "PRESENTATION_STRUCTURE",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Implementation is bound in the 46-stage V2 DAG; compile, adversarial and native self-hosted qualification pending."
+      "status": "PASS",
+      "sha256": "6dfe026f9c4078f7d7f8b40210ed096f9756f56e37a77656a964e2ef06a68812",
+      "note": "Role-free Stage37 presentation and Stage38 complete puppet seal close with exact bindings and reject drift.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+          "tests/compiler/test_v2_tail_authority_fail_closed.py"
+        ],
+        "claim": "Role-free Stage37 presentation and Stage38 complete puppet seal close with exact bindings and reject drift."
+      }
     },
     {
       "proof_id": "MOTION_DYNAMIC_EXPOSURE",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Implementation is bound in the 46-stage V2 DAG; compile, adversarial and native self-hosted qualification pending."
+      "status": "PASS",
+      "sha256": "70ebeeb2e9325c248dd2b50a557f324ce04fb07496a0910d6361f971b58c160f",
+      "note": "Full-3D quaternion FK/LBS and Stage39-41 dynamic proof pass; rest-unseen is diagnostic and appearance exposure is deferred to Stage45.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/compiler/test_motion_dynamic_proof_v2.py",
+          "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+        ],
+        "claim": "Full-3D quaternion FK/LBS and Stage39-41 dynamic proof pass; rest-unseen is diagnostic and appearance exposure is deferred to Stage45."
+      }
     },
     {
       "proof_id": "RUNTIME_CAA_ONLY",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Implementation is bound in the 46-stage V2 DAG; compile, adversarial and native self-hosted qualification pending."
+      "status": "PASS",
+      "sha256": "a98db65a4f4a4e2d024964f531ac71eb1797c91abd2b0c4b96129b8d399dcbff",
+      "note": "Sealed CAA-only RSS/native runtime is byte-identical to Python reference and rejects authority drift.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/compiler/test_runtime_v2_native_smoke.py",
+          "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+          "tests/compiler/test_v2_tail_authority_fail_closed.py"
+        ],
+        "claim": "Sealed CAA-only RSS/native runtime is byte-identical to Python reference and rejects authority drift."
+      }
     },
     {
       "proof_id": "DYNAMIC_VISUAL_INTEGRITY",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Implementation is bound in the 46-stage V2 DAG; compile, adversarial and native self-hosted qualification pending."
+      "status": "PASS",
+      "sha256": "c20bb693948617cc9d34c7eee3908e9b8e06898c0b16b4e2512e437496e60da8",
+      "note": "Stage45 gates undefined visible provenance, native parity and compiled-unobserved exposure over dynamic frames.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+          "tests/compiler/test_runtime_v2_native_smoke.py",
+          "tests/compiler/test_v2_tail_authority_fail_closed.py"
+        ],
+        "claim": "Stage45 gates undefined visible provenance, native parity and compiled-unobserved exposure over dynamic frames."
+      }
     },
     {
       "proof_id": "PRODUCT_CLOSURE_AND_AUTHORING",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Implementation is bound in the 46-stage V2 DAG; compile, adversarial and native self-hosted qualification pending."
+      "status": "PASS",
+      "sha256": "bb82d95c15cd989e5cfc97655e9e02d73678678ae7257dd8e642ffdf793fb027",
+      "note": "Subject-free Stage37-46 closes product_pass and editable authoring archive with exact geometry/mechanics/appearance bindings.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "hooks": [
+          "tests/compiler/test_product_mesh_stage_adapters_v1.py",
+          "tests/compiler/test_v2_tail_authority_fail_closed.py"
+        ],
+        "claim": "Subject-free Stage37-46 closes product_pass and editable authoring archive with exact geometry/mechanics/appearance bindings."
+      }
     },
     {
       "proof_id": "ADVERSARIAL_MODULE_AUDIT",
-      "status": "IN_PROGRESS",
-      "sha256": "",
-      "note": "Protocol frozen; module-by-module closures pending."
+      "status": "PASS",
+      "sha256": "65fd7f13ecc974d60ee61e12609cec72fd824fbcf5dbb97b85ce08f17b6abde2",
+      "note": "Modules A-U PASS subject-free self-hosted adversarial audit; no Knight witness or Knight-derived threshold used.",
+      "evidence": {
+        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+        "mainline_ci_run_id": 35529673748,
+        "mainline_ci_job_id": 106127939604,
+        "model_source_gate_run_id": 35529673786,
+        "runtime_ci_run_id": 35529375697,
+        "runtime_ci_job_id": 106127139365,
+        "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+        "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+        "witness_used": false,
+        "audit_file": "canonical/V2_ADVERSARIAL_MODULE_AUDIT_LEDGER_20260920.json",
+        "audit_file_sha256": "cd1d79c6d9e7a2909aa16aefc78d14f9df15111b4d7156eeec94e700da527a88",
+        "claim": "Modules A-U PASS subject-free self-hosted adversarial audit; no Knight witness or Knight-derived threshold used."
+      }
     }
   ],
   "coequal_product_authorities": [
@@ -112,5 +342,19 @@
     "MECHANICS",
     "APPEARANCE"
   ],
-  "appearance_principle": "SPINE_CLASS_2D_ART_IS_A_PRIMARY_PRODUCT_REQUIREMENT_NOT_POST_RENDER_POLISH"
+  "appearance_principle": "SPINE_CLASS_2D_ART_IS_A_PRIMARY_PRODUCT_REQUIREMENT_NOT_POST_RENDER_POLISH",
+  "readiness_seal": {
+    "status": "PASS",
+    "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+    "mainline_ci_run_id": 35529673748,
+    "runtime_ci_run_id": 35529375697,
+    "model_source_gate_run_id": 35529673786,
+    "audit_file_sha256": "cd1d79c6d9e7a2909aa16aefc78d14f9df15111b4d7156eeec94e700da527a88",
+    "all_required_proofs_pass": true,
+    "proof_count": 14,
+    "knight_witness_used": false,
+    "knight_threshold_tuning_used": false,
+    "claim": "IMPLEMENTATION_READY_FOR_FIRST_KNIGHT_V2_WITNESS__NOT_A_KNIGHT_PRODUCT_PASS",
+    "sha256": "a3c403158b5ed428b1949e8df07f1b915cb12862d5c58c4ec39f3ff4fca4ed9d"
+  }
 }

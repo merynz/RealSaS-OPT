@@ -31,6 +31,7 @@ on:
       - '.github/pull_request_template.md'
       - 'RESTORATION_STATE.md'
       - 'SYSTEM_INDEX.md'
+      - 'AGENTS.md'
       - '.github/workflows/current_mainline_self_hosted_ci.yml'
   pull_request:
     branches: [main]

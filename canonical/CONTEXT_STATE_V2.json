@@ -3,7 +3,7 @@
   "date": "2026-09-20",
   "continuation_branch": "main",
   "execution_branch": "main",
-  "status": "V2_46_STAGE_ARCHITECTURE_BOUND__KNIGHT_FRESH_LINEAGE_STARTED",
+  "status": "V2_IMPLEMENTATION_ASSEMBLY__WITNESS_EXECUTION_FORBIDDEN",
   "authority": {
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
@@ -12,21 +12,24 @@
     "active_run_ledger": "canonical/ACTIVE_RUN_V2.json",
     "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
     "architecture_contract": "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
-    "complete_appearance_contract": "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json"
+    "complete_appearance_contract": "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
+    "implementation_readiness": "canonical/V2_IMPLEMENTATION_READINESS.json",
+    "architecture_transition_rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
+    "adversarial_audit_protocol": "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md"
   },
   "product": {
     "target": "automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics",
-    "demo_witness": "Subject-2 Knight (run data only; architecture generic)",
-    "next_visible_product_milestone": "execute fresh Knight V2 Stage01 onward; first CAA backend is DETERMINISTIC_V1, Im2SurfTex is research-only benchmark, learned CAA follows native E2E baseline"
+    "demo_witness": "Subject-2 Knight (next witness; execution intentionally held)",
+    "next_visible_product_milestone": "seal READY_FOR_WITNESS_EXECUTION only after every V2 stage is bound and Geometry/Mechanics/Appearance/runtime visual-integrity audits pass; then mint fresh Knight Stage01 lineage"
   },
   "current_focus": {
-    "module": "46-stage V2 product authority: shared mesh domain + Complete Appearance Authority",
-    "state": "V2_46_STAGE_ARCHITECTURE_BOUND__KNIGHT_FRESH_LINEAGE_STARTED",
-    "active_experiment": "SUBJECT2_KNIGHT_FULL_CLOSURE",
-    "most_recent_closed_gate": "V2_ARCHITECTURE_AND_CAA_CONTRACT_FROZEN",
-    "promotion_block": "Fresh Knight V2 must restart at Stage01. Stage13 remains a conservative geometry floor for the first V2 run. Stage18 mints mesh + SurfaceAddressingIR + AppearanceDomainIR; Stage19 freezes the static carrier; CAA and mechanics branch from it. Numeric CAA quality thresholds remain preregistration-pending and may not be chosen from Knight outcomes.",
-    "scope_warning": "Knight remains an exact witness only; historical Mage mesh thresholds are not animation-grade product authority",
-    "scientific_question": "Can the exact Knight witness execute the generic 46-stage V2 DAG end-to-end, preserving source art through Complete Appearance Authority and passing native dynamic visual integrity without subject-specific code?"
+    "module": "V2 implementation assembly and adversarial authority cleanup",
+    "state": "V2_IMPLEMENTATION_ASSEMBLY__WITNESS_EXECUTION_FORBIDDEN",
+    "active_experiment": "V2_IMPLEMENTATION_ASSEMBLY",
+    "most_recent_closed_gate": "V1_TO_V2_AUTHORITY_RATIONALE_AND_APPEARANCE_COEQUALITY_FROZEN",
+    "promotion_block": "Do not execute Knight. Bind all 46 V2 adapters, re-audit IRIS/GSA geometry role, close relation-parent mesh feasibility, implement Complete Appearance Authority and premultiplied sampling, remove donor/UNSEEN from current runtime, prove canonical posed-XYZ visibility, and close dynamic visual integrity.",
+    "scope_warning": "No Knight-derived threshold choice is allowed during V2 assembly.",
+    "scientific_question": "Is current main internally capable of producing and proving a Spine-class 2D puppet with geometry, mechanics and appearance all treated as first-class audited authorities?"
   },
   "execution_environment": {
     "actions": "SELF_HOSTED_LOCAL_ONLY",
@@ -54,82 +57,81 @@
   "pipeline": [
     {
       "name": "Observation",
-      "role": "first Knight V2: exact controlled 8 source views + calibrated source cameras",
-      "canonical_rule": "source observation authority is separate from output presentation direction authority; future input cardinality may differ"
+      "role": "qualified source evidence",
+      "canonical_rule": "input observation authority is separate from output presentation directions"
     },
     {
-      "name": "IRIS",
-      "role": "learned signed geometry / surface evidence",
-      "canonical_rule": "produces the canonical carrier evidence; does not own RGB appearance"
+      "name": "Geometry / IRIS",
+      "role": "signed field and dense surface evidence",
+      "canonical_rule": "geometry owns surface evidence and silhouette capacity; it does not own RGB"
     },
     {
       "name": "GSA",
-      "role": "admitted mechanical/evidence substrate",
-      "canonical_rule": "Compiler owns immutable RiggingSurfaceIR S/provenance"
-    },
-    {
-      "name": "OutputPresentationDirections",
-      "role": "fixed product directions V0...V7",
-      "canonical_rule": "eight output directions are sealed independently from source view count"
+      "role": "compact admitted surface substrate",
+      "canonical_rule": "relation construction is independently audited because it can alter triangle quality"
     },
     {
       "name": "CanonicalMeshDomain",
-      "role": "common mechanics + appearance domain",
-      "canonical_rule": "Stage18 mints CanonicalMeshCandidateIR + SurfaceAddressingIR + AppearanceDomainIR atomically; Stage19 freezes static carrier"
+      "role": "common geometry/mechanics/appearance address domain",
+      "canonical_rule": "mesh + stable addressing + appearance domain are born together before branch split"
     },
     {
-      "name": "CompleteAppearanceAuthority",
-      "role": "total baked appearance over the renderable mesh domain",
-      "canonical_rule": "source wins; deterministic backend first; no runtime generation, relighting or geometry warp"
+      "name": "Appearance / CAA",
+      "role": "total source-preserving 2D-art authority",
+      "canonical_rule": "source wins; totality + holdout + seam + exposure + premultiplied sampling; no geometry mutation"
     },
     {
-      "name": "Geppetto",
-      "role": "skeleton proposal",
-      "canonical_rule": "Compiler owns legal QualifiedSkeletonIR"
-    },
-    {
-      "name": "Arachne",
-      "role": "skin proposal",
-      "canonical_rule": "Compiler owns legal QualifiedSkinIR"
+      "name": "Mechanics / Geppetto+Arachne",
+      "role": "qualified skeleton and skin",
+      "canonical_rule": "models propose; Compiler owns legal canonical mechanics"
     },
     {
       "name": "DynamicMechanicalMesh",
-      "role": "deformation qualification of the frozen static carrier",
-      "canonical_rule": "Stage35 failure requiring geometry repair creates a new Stage18 lineage; no in-place mutation"
+      "role": "deformation qualification",
+      "canonical_rule": "frozen mesh is stress-tested; repair returns to new mesh lineage"
     },
     {
       "name": "Presentation",
-      "role": "slots/attachments/order/visibility/clipping",
-      "canonical_rule": "presentation structure cannot mint appearance or geometry"
+      "role": "slots attachments order visibility clipping",
+      "canonical_rule": "structure only; cannot invent geometry or appearance"
     },
     {
       "name": "Motion",
-      "role": "full-3D quaternion compile and dynamic proof",
-      "canonical_rule": "motion operates the sealed puppet; compiled-unobserved appearance exposure is measured and budget-gated"
+      "role": "full-3D compiled motion",
+      "canonical_rule": "operates sealed puppet; appearance exposure is measured, not forbidden merely for being rest-unobserved"
     },
     {
       "name": "Runtime",
-      "role": "compact .rss + native playback",
-      "canonical_rule": "samples sealed CAA only; package load re-verifies CAA binding"
+      "role": "deterministic consumer",
+      "canonical_rule": "posed canonical XYZ + z-buffer for visibility; sealed CAA for art; no donor search/generation/relighting"
     },
     {
-      "name": "VisualIntegrity",
-      "role": "native dynamic render proof",
-      "canonical_rule": "crack/pepper/bleed/seam/flicker/component/composition integrity before Stage46 closure"
+      "name": "DynamicVisualIntegrity",
+      "role": "native product image proof",
+      "canonical_rule": "separately attributes geometry holes, depth ownership, appearance definedness, alpha/sampling, seams, flicker and composition"
+    },
+    {
+      "name": "Closure",
+      "role": "Stage46 product seal",
+      "canonical_rule": "requires all three co-equal quality axes plus native runtime evidence"
     }
   ],
   "settled_invariants": [
     "No subject-specific compiler/runtime branch.",
+    "Geometry, mechanics and appearance are co-equal product-quality authorities.",
+    "A visually incorrect puppet is not a mechanically successful RealSaS product.",
     "Mesh is the common canonical domain for mechanics and appearance.",
-    "CAA is total over every renderable surface state and may not mutate canonical geometry.",
-    "Qualified source appearance is immutable; source wins over completion.",
-    "Presentation warp is forbidden in CAA V1.",
-    "Internal appearance filtering/compositing is premultiplied alpha with canonical bleed.",
-    "Runtime performs no generative or corrective appearance inference.",
-    "MechanicalPartition UNKNOWN stays conservative in first V2; dynamic failure may repair only through a new Stage18 lineage.",
-    "Downstream failure cannot erase verified independent upstream PASS.",
-    "First Knight V2 retains exact 8 controlled source views only to isolate architecture change; this does not assert 8 inputs are a permanent product requirement.",
-    "Product closure is Stage46 and requires native dynamic visual integrity."
+    "Visibility authority is canonical posed XYZ plus camera/depth; texture alpha is art coverage and cannot replace depth ownership.",
+    "CAA is total over supported renderable surface states and may not mutate canonical geometry.",
+    "Qualified source appearance wins over completion and remains provenance-locked.",
+    "Presentation geometry warp is forbidden in CAA V1.",
+    "Internal appearance filtering/compositing is premultiplied alpha with canonical atlas bleed.",
+    "Runtime performs no generative/corrective appearance inference or character relighting.",
+    "Mesh producer/gate feasibility is proved upstream; thresholds are not weakened after witness inspection.",
+    "V2 executor uses DAG dependencies; ordinals are documentation only.",
+    "Downstream failure does not erase verified independent upstream PASS.",
+    "Knight execution is forbidden until V2_IMPLEMENTATION_READINESS is READY_FOR_WITNESS_EXECUTION.",
+    "Product closure is Stage46 and requires native Dynamic Visual Integrity."
   ],
   "known_context_traps": [
     {
@@ -154,6 +156,23 @@
     }
   ],
   "continuation_protocol": {
-    "experiment_completion_definition": "A stage closes only when its ledger row is PASS/CACHE_HIT, exact output hashes verify, and the next stage consumes those exact bindings. Stage46 alone may close PRODUCT_PASS."
+    "first_action": "Read V2_IMPLEMENTATION_READINESS, not a witness stage ledger.",
+    "assembly_completion_definition": "All required readiness proofs PASS with SHA-256 identities, every plan adapter bound, DAG and adversarial tests green, then status becomes READY_FOR_WITNESS_EXECUTION.",
+    "witness_rule": "Only after readiness seal mint a fresh Subject-2 Knight Stage01 ledger; do not reuse V1 or premature V2 witness rows."
+  },
+  "product_quality_axes": {
+    "geometry": {
+      "status": "FIRST_CLASS_AUTHORITY",
+      "responsibility": "renderable canonical surface, silhouette capacity, addressability, topology and rasterizable conditioning"
+    },
+    "mechanics": {
+      "status": "FIRST_CLASS_AUTHORITY",
+      "responsibility": "skeleton, skin, deformation, contacts, motion and dynamic conditioning"
+    },
+    "appearance": {
+      "status": "FIRST_CLASS_AUTHORITY",
+      "responsibility": "source-faithful total 2D art, provenance, completion quality, seams, alpha/sampling and temporal visual continuity"
+    },
+    "rule": "A failure on any one axis is a product failure; no axis may hide another axis's error."
   }
 }

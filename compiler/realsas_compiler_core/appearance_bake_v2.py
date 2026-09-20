@@ -79,6 +79,10 @@ def bake_direction_atlas(
         255,
         dtype=np.uint8,
     )
+    allocated = np.zeros(
+        (layout["height"], layout["width"]),
+        dtype=bool,
+    )
     sample_map = _sample_index_map(tile_resolution)
     stride = int(layout["tile_stride"])
     columns = int(layout["columns"])
@@ -87,6 +91,7 @@ def bake_direction_atlas(
     for face_index in range(face_count):
         tile_x = (face_index % columns) * stride
         tile_y = (face_index // columns) * stride
+        allocated[tile_y : tile_y + stride, tile_x : tile_x + stride] = True
         for local_y in range(stride):
             for local_x in range(stride):
                 lattice_i = local_x - bleed
@@ -104,8 +109,10 @@ def bake_direction_atlas(
                     tile_y + local_y, tile_x + local_x
                 ] = provenance_samples[face_index, sample_index]
 
-    if np.any(provenance_atlas == 255):
-        raise QualificationError("CAA_BAKE_ATLAS_UNDEFINED_TEXEL")
+    if np.any(provenance_atlas[allocated] == 255):
+        raise QualificationError("CAA_BAKE_ALLOCATED_TILE_UNDEFINED_TEXEL")
+    if np.any((provenance_atlas != 255) & ~allocated):
+        raise QualificationError("CAA_BAKE_UNALLOCATED_PADDING_CONTAMINATED")
     uv = face_uv_array(layout)
     return atlas, provenance_atlas, uv, layout
 

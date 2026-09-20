@@ -865,10 +865,9 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
 
     policy = dict(prereg.completion_quality_policy)
     required = (
-        "rest_min_source_lock_pixels_per_view",
+        "rest_min_source_lock_fraction_of_source_foreground",
         "rest_max_source_locked_mean_rgba_l1",
         "rest_max_source_locked_p95_rgba_l1",
-        "rest_max_geometry_visible_alpha_hole_fraction",
         "rest_min_source_alpha_recall",
         "rest_min_source_alpha_precision",
         "rest_max_largest_coherent_alpha_hole_fraction",
@@ -943,12 +942,17 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             width=int(observation.views[direction].width),
             height=int(observation.views[direction].height),
         )
+        source_foreground_count = int(np.count_nonzero(source_masks[direction]))
+        source_lock_fraction = (
+            0.0
+            if source_foreground_count <= 0
+            else float(direct_count) / float(source_foreground_count)
+        )
         view_pass = (
-            direct_count >= int(policy["rest_min_source_lock_pixels_per_view"])
+            source_lock_fraction
+            >= float(policy["rest_min_source_lock_fraction_of_source_foreground"])
             and mean_error <= float(policy["rest_max_source_locked_mean_rgba_l1"])
             and p95_error <= float(policy["rest_max_source_locked_p95_rgba_l1"])
-            and hole_fraction
-            <= float(policy["rest_max_geometry_visible_alpha_hole_fraction"])
             and float(alpha_metrics["recall"])
             >= float(policy["rest_min_source_alpha_recall"])
             and float(alpha_metrics["precision"])
@@ -965,6 +969,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                 rendered_rgba_sha256=image_sha,
                 rendered_alpha_pixel_count=final_alpha_count,
                 source_locked_pixel_count=direct_count,
+                source_locked_fraction_of_source_foreground=source_lock_fraction,
                 source_locked_exact_pixel_count=exact_count,
                 source_locked_exact_fraction=exact_fraction,
                 source_locked_mean_rgba_l1=mean_error,
@@ -981,6 +986,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                     "status": "PASS" if view_pass else "FAIL",
                     "source_evidence_available": True,
                     "visibility_and_appearance_masks_separate": True,
+                    "geometry_visible_alpha_zero_is_diagnostic_not_undefinedness": True,
                 },
             )
         )

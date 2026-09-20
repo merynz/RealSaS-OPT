@@ -64,6 +64,7 @@ def _camera_bundle(path: Path) -> Path:
 
 
 def _fixture(tmp_path: Path):
+    tmp_path.mkdir(parents=True, exist_ok=True)
     camera_path = _camera_bundle(tmp_path / "cameras.json")
     source_files = []
     raster_rows = []

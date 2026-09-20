@@ -179,6 +179,8 @@ IMPLEMENTATION_CLOSURE_STATIC_PATHS = (
     "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
     "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json",
     "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
+    "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md",
+    "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
     "requirements/mainline-ci.txt",
     "requirements/torch-cpu.txt",
     "tools/build_knowledge_artifact_catalog.py",

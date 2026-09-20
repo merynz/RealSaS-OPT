@@ -145,36 +145,51 @@ def _load_surface(ctx):
     return rigging_surface_from_dict(_stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"))
 
 
+def _compat_stage_id(ctx,v2_id:str,v1_id:str)->str:
+    ids={str(row.get("id")) for row in ctx["ledger"]["stages"]}
+    return v2_id if v2_id in ids else v1_id
+
+
+def _artifact_root(ctx,fallback_stage_id:str):
+    stage_id=str((ctx.get("stage") or {}).get("id") or fallback_stage_id)
+    return ctx["run_root"]/"artifacts"/stage_id
+
+
 def _load_skeleton(ctx):
-    return qualified_skeleton_from_dict(_stage_output_payload(ctx,"18_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1"))
+    stage_id=_compat_stage_id(ctx,"28_SKELETON_QUALIFIED","18_SKELETON_QUALIFIED")
+    return qualified_skeleton_from_dict(_stage_output_payload(ctx,stage_id,"RealSaS.QualifiedSkeletonIR.v1"))
 
 
 def _load_skin(ctx):
-    return qualified_skin_from_dict(_stage_output_payload(ctx,"22_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1"))
+    stage_id=_compat_stage_id(ctx,"32_SKIN_QUALIFIED","22_SKIN_QUALIFIED")
+    return qualified_skin_from_dict(_stage_output_payload(ctx,stage_id,"RealSaS.QualifiedSkinIR.v1"))
 
 
 def _load_partition_and_carrier(ctx):
+    stage_id=_compat_stage_id(ctx,"17_MECHANICAL_PARTITION_QUALIFIED","24_MECHANICAL_PARTITION_QUALIFIED")
     partition=mechanical_partition_from_dict(
-        _stage_output_payload(ctx,"24_MECHANICAL_PARTITION_QUALIFIED","RealSaS.MechanicalPartitionIR.v1")
+        _stage_output_payload(ctx,stage_id,"RealSaS.MechanicalPartitionIR.v1")
     )
     carrier=component_carrier_policy_from_dict(
-        _stage_output_payload(ctx,"24_MECHANICAL_PARTITION_QUALIFIED","RealSaS.ComponentCarrierPolicyIR.v1")
+        _stage_output_payload(ctx,stage_id,"RealSaS.ComponentCarrierPolicyIR.v1")
     )
     return partition,carrier
 
 
 def _load_envelope(ctx):
+    stage_id=_compat_stage_id(ctx,"34_DEFORMATION_CAPABILITY_ENVELOPE","25_DEFORMATION_CAPABILITY_ENVELOPE")
     return deformation_envelope_from_dict(
-        _stage_output_payload(ctx,"25_DEFORMATION_CAPABILITY_ENVELOPE","RealSaS.DeformationCapabilityEnvelopeIR.v1")
+        _stage_output_payload(ctx,stage_id,"RealSaS.DeformationCapabilityEnvelopeIR.v1")
     )
 
 
 def _load_candidate_and_policy(ctx):
+    stage_id=_compat_stage_id(ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD","26_MESH_CANDIDATE_BUILD")
     candidate=canonical_mesh_candidate_from_dict(
-        _stage_output_payload(ctx,"26_MESH_CANDIDATE_BUILD","RealSaS.CanonicalMeshCandidateIR.v1")
+        _stage_output_payload(ctx,stage_id,"RealSaS.CanonicalMeshCandidateIR.v1")
     )
     policy=mesh_policy_from_dict(
-        _stage_output_payload(ctx,"26_MESH_CANDIDATE_BUILD","RealSaS.MeshQualificationPolicyIR.v1")
+        _stage_output_payload(ctx,stage_id,"RealSaS.MeshQualificationPolicyIR.v1")
     )
     return candidate,policy
 

@@ -645,7 +645,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         raise QualificationError("RUNTIME_V2_DVI_FACE_ARRAY_INVALID")
     if face_uv.shape != (len(faces), 3, 2):
         raise QualificationError("RUNTIME_V2_DVI_FACE_UV_ARRAY_INVALID")
-    rest_screen = {}
     cameras = {}
     for view in projection.views:
         camera = qualify_camera_v3(
@@ -654,9 +653,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             view_index=view.view_index,
         )
         cameras[view.view_id] = camera
-        rest_screen[view.view_id] = project_points_xyz_v3(
-            rest_vertices, camera
-        )[:, :2]
 
     geometry_visible = 0
     alpha_transparent = 0
@@ -669,10 +665,10 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     relative_conditioning_sample_count = 0
     temporal_conditioning_sample_count = 0
     unmeasurable_visible_face_count = 0
-    max_uv_to_screen_condition = 1.0
-    max_relative_screen_condition = 1.0
-    max_relative_principal_stretch = 1.0
-    max_adjacent_frame_principal_stretch = 1.0
+    max_uv_to_surface_condition = 1.0
+    max_relative_surface_condition = 1.0
+    max_relative_surface_principal_stretch = 1.0
+    max_adjacent_frame_surface_principal_stretch = 1.0
     previous_consequential_faces = {}
     outputs = []
 
@@ -766,11 +762,12 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     face = faces[face_index]
                     metrics = dynamic_face_conditioning_metrics(
                         uv_triangle=face_uv[face_index],
+                        posed_xyz_triangle=posed_vertices[face],
+                        rest_xyz_triangle=rest_vertices[face],
                         posed_screen_triangle=posed_screen[face],
-                        rest_screen_triangle=rest_screen[view.view_id][face],
-                        previous_screen_triangle=(
-                            previous_screen[face]
-                            if previous_screen is not None
+                        previous_xyz_triangle=(
+                            previous_vertices[face]
+                            if previous_vertices is not None
                             and face_index in prior_consequential
                             else None
                         ),
@@ -780,25 +777,25 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                         unmeasurable_visible_face_count += 1
                         continue
                     conditioning_sample_count += 1
-                    max_uv_to_screen_condition = max(
-                        max_uv_to_screen_condition,
-                        float(metrics["uv_to_screen_condition_number"]),
+                    max_uv_to_surface_condition = max(
+                        max_uv_to_surface_condition,
+                        float(metrics["uv_to_surface_condition_number"]),
                     )
-                    if metrics["relative_screen_condition_number"] is not None:
+                    if metrics["relative_surface_condition_number"] is not None:
                         relative_conditioning_sample_count += 1
-                        max_relative_screen_condition = max(
-                            max_relative_screen_condition,
-                            float(metrics["relative_screen_condition_number"]),
+                        max_relative_surface_condition = max(
+                            max_relative_surface_condition,
+                            float(metrics["relative_surface_condition_number"]),
                         )
-                        max_relative_principal_stretch = max(
-                            max_relative_principal_stretch,
-                            float(metrics["relative_principal_stretch"]),
+                        max_relative_surface_principal_stretch = max(
+                            max_relative_surface_principal_stretch,
+                            float(metrics["relative_surface_principal_stretch"]),
                         )
-                    if metrics["adjacent_frame_principal_stretch"] is not None:
+                    if metrics["adjacent_frame_surface_principal_stretch"] is not None:
                         temporal_conditioning_sample_count += 1
-                        max_adjacent_frame_principal_stretch = max(
-                            max_adjacent_frame_principal_stretch,
-                            float(metrics["adjacent_frame_principal_stretch"]),
+                        max_adjacent_frame_surface_principal_stretch = max(
+                            max_adjacent_frame_surface_principal_stretch,
+                            float(metrics["adjacent_frame_surface_principal_stretch"]),
                         )
                 previous_consequential_faces[prior_key] = consequential
 
@@ -828,15 +825,15 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     )
     conditioning_passed = (
         conditioning_sample_count > 0
-        and max_uv_to_screen_condition
-        <= float(conditioning_policy["dynamic_max_uv_to_screen_condition_number"])
-        and max_relative_screen_condition
-        <= float(conditioning_policy["dynamic_max_relative_screen_condition_number"])
-        and max_relative_principal_stretch
-        <= float(conditioning_policy["dynamic_max_relative_principal_stretch"])
-        and max_adjacent_frame_principal_stretch
+        and max_uv_to_surface_condition
+        <= float(conditioning_policy["dynamic_max_uv_to_surface_condition_number"])
+        and max_relative_surface_condition
+        <= float(conditioning_policy["dynamic_max_relative_surface_condition_number"])
+        and max_relative_surface_principal_stretch
+        <= float(conditioning_policy["dynamic_max_relative_surface_principal_stretch"])
+        and max_adjacent_frame_surface_principal_stretch
         <= float(
-            conditioning_policy["dynamic_max_adjacent_frame_principal_stretch"]
+            conditioning_policy["dynamic_max_adjacent_frame_surface_principal_stretch"]
         )
     )
     passed = (
@@ -861,10 +858,10 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         dynamic_conditioning_sample_count=conditioning_sample_count,
         relative_conditioning_sample_count=relative_conditioning_sample_count,
         temporal_conditioning_sample_count=temporal_conditioning_sample_count,
-        maximum_uv_to_screen_condition_number=max_uv_to_screen_condition,
-        maximum_relative_screen_condition_number=max_relative_screen_condition,
-        maximum_relative_principal_stretch=max_relative_principal_stretch,
-        maximum_adjacent_frame_principal_stretch=max_adjacent_frame_principal_stretch,
+        maximum_uv_to_surface_condition_number=max_uv_to_surface_condition,
+        maximum_relative_surface_condition_number=max_relative_surface_condition,
+        maximum_relative_surface_principal_stretch=max_relative_surface_principal_stretch,
+        maximum_adjacent_frame_surface_principal_stretch=max_adjacent_frame_surface_principal_stretch,
         qualification_report={
             "status": (
                 "PASS_DYNAMIC_VISUAL_INTEGRITY"
@@ -889,7 +886,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "geometry_visibility_appearance_sampling_attribution": True,
             "final_alpha_transparent_fraction_diagnostic": transparent_fraction,
             "dynamic_appearance_conditioning": (
-                "CAA_UV_TO_POSED_SCREEN_AFFINE_SINGULAR_VALUES"
+                "RIGID_INVARIANT_CAA_UV_TO_POSED_SURFACE_METRIC"
             ),
             "perceptual_optimality_claimed": False,
             "subject_identity_used_for_thresholds": False,
@@ -922,13 +919,13 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "native_reference_mismatch_pixel_count": 0,
             "undefined_visible_pixel_count": 0,
             "dynamic_conditioning_sample_count": conditioning_sample_count,
-            "maximum_uv_to_screen_condition_number": max_uv_to_screen_condition,
-            "maximum_relative_screen_condition_number": (
-                max_relative_screen_condition
+            "maximum_uv_to_surface_condition_number": max_uv_to_surface_condition,
+            "maximum_relative_surface_condition_number": (
+                max_relative_surface_condition
             ),
-            "maximum_relative_principal_stretch": max_relative_principal_stretch,
-            "maximum_adjacent_frame_principal_stretch": (
-                max_adjacent_frame_principal_stretch
+            "maximum_relative_surface_principal_stretch": max_relative_surface_principal_stretch,
+            "maximum_adjacent_frame_surface_principal_stretch": (
+                max_adjacent_frame_surface_principal_stretch
             ),
             "transparent_visible_fraction_diagnostic": transparent_fraction,
         },

@@ -1,0 +1,991 @@
+{
+  "schema": "RealSaS.MainlineExecutionPlan.v2",
+  "date": "2026-09-20",
+  "canonical_branch": "main",
+  "architecture_scope": "SUBJECT_AGNOSTIC__FIRST_KNIGHT_V2_EXACT8_SOURCE__OUTPUT8_SEPARATE__CANONICAL_MESH_SHARED_MECHANICS_APPEARANCE_DOMAIN__CAA",
+  "subject_specific_code_forbidden": true,
+  "stage_count": 46,
+  "resume_contract": {
+    "rule": "PASS_OR_CACHE_HIT_REUSE_REQUIRES_INPUT_FINGERPRINT_AND_OUTPUT_SHA",
+    "failure_semantics": "PRESERVE_VERIFIED_INDEPENDENT_UPSTREAM_OUTPUTS",
+    "repair_semantics": "STAGE35_GEOMETRY_REPAIR_CREATES_NEW_STAGE18_LINEAGE_NO_IN_PLACE_FROZEN_MESH_MUTATION",
+    "latest_alias_forbidden": true
+  },
+  "appearance_contract": {
+    "backend_axis": [
+      "DETERMINISTIC_V1",
+      "LEARNED_V2",
+      "IM2SURFTEX_RESEARCH_ONLY"
+    ],
+    "first_knight_backend": "DETERMINISTIC_V1",
+    "source_wins": true,
+    "presentation_warp_v1_forbidden": true,
+    "runtime_generation_forbidden": true,
+    "canonical_internal_alpha": "PREMULTIPLIED",
+    "compiled_unobserved_exposure": "FROZEN_BUDGET_GATE"
+  },
+  "first_knight_v2_contract": {
+    "source_view_count": 8,
+    "output_direction_count": 8,
+    "source_view_cardinality_generalization_deferred_until_first_v2_e2e": true,
+    "controlled_render_ablation_is_optimistic_for_artist_cross_view_inconsistency": true
+  },
+  "stages": [
+    {
+      "ordinal": 1,
+      "id": "01_SOURCE_BYTES_SEALED",
+      "title": "Source bytes sealed",
+      "group": "source",
+      "depends_on": [],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.source:seal_source_bytes",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "source_files"
+      ]
+    },
+    {
+      "ordinal": 2,
+      "id": "02_SOURCE_LICENSE_PROVENANCE",
+      "title": "Source/license provenance sealed",
+      "group": "source",
+      "depends_on": [
+        "01_SOURCE_BYTES_SEALED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.source:seal_source_license_provenance",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "source_license"
+      ]
+    },
+    {
+      "ordinal": 3,
+      "id": "03_SOURCE_MECHANICAL_AUDIT",
+      "title": "Source mechanical audit",
+      "group": "source",
+      "depends_on": [
+        "01_SOURCE_BYTES_SEALED",
+        "02_SOURCE_LICENSE_PROVENANCE"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:audit_source_mechanics_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "source_audit",
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 4,
+      "id": "04_FULL_SUBJECT_ADMISSION",
+      "title": "Full-subject admission",
+      "group": "observation",
+      "depends_on": [
+        "03_SOURCE_MECHANICAL_AUDIT"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:admit_full_subject_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "admission"
+      ]
+    },
+    {
+      "ordinal": 5,
+      "id": "05_CAMERA_CONTRACT_SOLVED",
+      "title": "Common 8-view camera contract",
+      "group": "observation",
+      "depends_on": [],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.observation_v1:qualify_camera_contract_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 6,
+      "id": "06_OBSERVATION_RENDER_8VIEW",
+      "title": "Render exact 8 observations",
+      "group": "observation",
+      "depends_on": [
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:materialize_observation_render_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 7,
+      "id": "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "title": "Observation contract qualification",
+      "group": "observation",
+      "depends_on": [
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED",
+        "06_OBSERVATION_RENDER_8VIEW"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:qualify_observation_contract_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 8,
+      "id": "08_NORMALIZATION_DOMAIN_QUALIFIED",
+      "title": "Normalization/field-domain qualification",
+      "group": "geometry",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:qualify_normalization_domain_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "normalization"
+      ]
+    },
+    {
+      "ordinal": 9,
+      "id": "09_IRIS_FIT_PREREGISTERED",
+      "title": "IRIS fit preregistration",
+      "group": "geometry",
+      "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:preregister_iris_fit_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "iris_fit"
+      ]
+    },
+    {
+      "ordinal": 10,
+      "id": "10_IRIS_FIT",
+      "title": "IRIS signed-geometry fit",
+      "group": "geometry",
+      "depends_on": [
+        "09_IRIS_FIT_PREREGISTERED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:execute_iris_fit_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "iris_fit"
+      ]
+    },
+    {
+      "ordinal": 11,
+      "id": "11_IRIS_CHECKPOINT_SEALED",
+      "title": "IRIS checkpoint seal",
+      "group": "geometry",
+      "depends_on": [
+        "10_IRIS_FIT"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:seal_iris_checkpoint_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": []
+    },
+    {
+      "ordinal": 12,
+      "id": "12_ZERO_SURFACE_DECODED",
+      "title": "Dense zero-surface decode",
+      "group": "geometry",
+      "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "11_IRIS_CHECKPOINT_SEALED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:decode_zero_surface_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "geometry_decode"
+      ]
+    },
+    {
+      "ordinal": 13,
+      "id": "13_REST_REPROJECTION_GEOMETRY_GATE",
+      "title": "Raw rest reprojection geometry gate",
+      "group": "geometry",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "12_ZERO_SURFACE_DECODED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:qualify_rest_reprojection_geometry_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "geometry_gate",
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 14,
+      "id": "14_GSA_BUILD",
+      "title": "GSA build",
+      "group": "geometry",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "11_IRIS_CHECKPOINT_SEALED",
+        "12_ZERO_SURFACE_DECODED",
+        "13_REST_REPROJECTION_GEOMETRY_GATE"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:build_gsa_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "gsa"
+      ]
+    },
+    {
+      "ordinal": 15,
+      "id": "15_RIGGING_SURFACE_QUALIFIED",
+      "title": "RiggingSurfaceIR qualification",
+      "group": "rig",
+      "depends_on": [
+        "14_GSA_BUILD"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v1:qualify_rigging_surface_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": []
+    },
+    {
+      "ordinal": 16,
+      "id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+      "title": "Eight output presentation directions sealed independently from source observation authority",
+      "group": "presentation_domain",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture:seal_output_presentation_directions_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 17,
+      "id": "17_MECHANICAL_PARTITION_QUALIFIED",
+      "title": "Conservative mechanical partition and carrier policy",
+      "group": "components",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:qualify_mechanical_partition_and_carriers",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "components",
+        "carrier_policy"
+      ]
+    },
+    {
+      "ordinal": 18,
+      "id": "18_CANONICAL_MESH_ADDRESSING_BUILD",
+      "title": "Canonical mesh candidate plus stable surface addressing and appearance domain",
+      "group": "mesh",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture:build_canonical_mesh_addressing_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "mesh",
+        "mesh_policy"
+      ]
+    },
+    {
+      "ordinal": 19,
+      "id": "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "title": "Static canonical carrier qualification before mechanics and appearance branches",
+      "group": "mesh",
+      "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "13_REST_REPROJECTION_GEOMETRY_GATE",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture:qualify_static_canonical_mesh_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": []
+    },
+    {
+      "ordinal": 20,
+      "id": "20_CAA_BACKEND_PREREGISTERED",
+      "title": "Complete Appearance Authority backend and contract preregistration",
+      "group": "appearance",
+      "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.appearance_v2:preregister_caa_backend_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "appearance"
+      ]
+    },
+    {
+      "ordinal": 21,
+      "id": "21_CAA_COMPILE",
+      "title": "Compile total appearance candidate over frozen mesh domain",
+      "group": "appearance",
+      "depends_on": [
+        "20_CAA_BACKEND_PREREGISTERED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "appearance"
+      ]
+    },
+    {
+      "ordinal": 22,
+      "id": "22_CAA_COMPILE_SEALED",
+      "title": "Seal deterministic or learned appearance compile execution",
+      "group": "appearance",
+      "depends_on": [
+        "21_CAA_COMPILE"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "appearance"
+      ]
+    },
+    {
+      "ordinal": 23,
+      "id": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+      "title": "Bake sealed premultiplied complete appearance asset",
+      "group": "appearance",
+      "depends_on": [
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "22_CAA_COMPILE_SEALED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "appearance"
+      ]
+    },
+    {
+      "ordinal": 24,
+      "id": "24_COMPLETE_APPEARANCE_QUALIFIED",
+      "title": "Qualify totality source-lock holdout seam sampling binding and exposure policy",
+      "group": "appearance",
+      "depends_on": [
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "appearance"
+      ]
+    },
+    {
+      "ordinal": 25,
+      "id": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+      "title": "Reference rest render proof with direction-class-specific evidence",
+      "group": "appearance",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "appearance"
+      ]
+    },
+    {
+      "ordinal": 26,
+      "id": "26_GEPPETTO_FIT_PREREGISTERED",
+      "title": "Geppetto fit preregistration",
+      "group": "rig",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:preregister_geppetto_fit_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "geppetto_fit"
+      ]
+    },
+    {
+      "ordinal": 27,
+      "id": "27_GEPPETTO_FIT",
+      "title": "Geppetto fit",
+      "group": "rig",
+      "depends_on": [
+        "26_GEPPETTO_FIT_PREREGISTERED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:execute_geppetto_fit_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "geppetto_fit"
+      ]
+    },
+    {
+      "ordinal": 28,
+      "id": "28_SKELETON_QUALIFIED",
+      "title": "Compiler skeleton qualification",
+      "group": "rig",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "27_GEPPETTO_FIT"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:qualify_skeleton_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": []
+    },
+    {
+      "ordinal": 29,
+      "id": "29_GEPPETTO_CHECKPOINT_SEALED",
+      "title": "Geppetto checkpoint seal",
+      "group": "rig",
+      "depends_on": [
+        "27_GEPPETTO_FIT",
+        "28_SKELETON_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:seal_geppetto_checkpoint_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": []
+    },
+    {
+      "ordinal": 30,
+      "id": "30_ARACHNE_FIT_PREREGISTERED",
+      "title": "Arachne fit preregistration",
+      "group": "skin",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "29_GEPPETTO_CHECKPOINT_SEALED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:preregister_arachne_fit_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "arachne_fit"
+      ]
+    },
+    {
+      "ordinal": 31,
+      "id": "31_ARACHNE_FIT",
+      "title": "Arachne fit",
+      "group": "skin",
+      "depends_on": [
+        "30_ARACHNE_FIT_PREREGISTERED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:execute_arachne_fit_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "arachne_fit"
+      ]
+    },
+    {
+      "ordinal": 32,
+      "id": "32_SKIN_QUALIFIED",
+      "title": "Compiler skin qualification",
+      "group": "skin",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "31_ARACHNE_FIT"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:qualify_skin_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": []
+    },
+    {
+      "ordinal": 33,
+      "id": "33_ARACHNE_CHECKPOINT_SEALED",
+      "title": "Arachne checkpoint seal",
+      "group": "skin",
+      "depends_on": [
+        "31_ARACHNE_FIT",
+        "32_SKIN_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.learned_mechanics_v2:seal_arachne_checkpoint_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": []
+    },
+    {
+      "ordinal": 34,
+      "id": "34_DEFORMATION_CAPABILITY_ENVELOPE",
+      "title": "Subject-free 3D conditioning lineage and derived joint-frame witness",
+      "group": "mesh",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "28_SKELETON_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:seal_deformation_capability_envelope",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "deformation_envelope"
+      ]
+    },
+    {
+      "ordinal": 35,
+      "id": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+      "title": "Dynamic mechanical qualification of frozen Stage18 mesh",
+      "group": "mesh",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:qualify_canonical_mesh_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 36,
+      "id": "36_QUALIFIED_MESH_SKIN_TRANSFER",
+      "title": "Deterministic skin transfer to dynamically qualified frozen mesh",
+      "group": "mesh",
+      "depends_on": [
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:bind_qualified_mesh_skin_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": []
+    },
+    {
+      "ordinal": 37,
+      "id": "37_QUALIFIED_PRESENTATION_STRUCTURE",
+      "title": "Qualified slots attachments draw order visibility and clipping structure; no appearance generation",
+      "group": "presentation",
+      "depends_on": [
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "presentation"
+      ]
+    },
+    {
+      "ordinal": 38,
+      "id": "38_CANONICAL_PUPPET_SEALED",
+      "title": "Full canonical puppet seal: Mesh Rig Skin Complete Appearance Presentation",
+      "group": "product_state",
+      "depends_on": [
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": []
+    },
+    {
+      "ordinal": 39,
+      "id": "39_MOTION_SOURCE_OR_PRESET_SEAL",
+      "title": "Motion source or preset seal",
+      "group": "motion",
+      "depends_on": [
+        "25_CAA_REFERENCE_REST_RENDER_PROOF",
+        "38_CANONICAL_PUPPET_SEALED"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "motion"
+      ]
+    },
+    {
+      "ordinal": 40,
+      "id": "40_MOTION_COMPILE_RUN",
+      "title": "Full-3D motion compilation plus PresentationTimelineIR",
+      "group": "motion",
+      "depends_on": [
+        "28_SKELETON_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "39_MOTION_SOURCE_OR_PRESET_SEAL"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "motion"
+      ]
+    },
+    {
+      "ordinal": 41,
+      "id": "41_MOTION_DYNAMIC_PROOF",
+      "title": "Canonical FK/LBS/contact proof with compiled-unobserved exposure budget",
+      "group": "motion",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "40_MOTION_COMPILE_RUN"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "appearance"
+      ]
+    },
+    {
+      "ordinal": 42,
+      "id": "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+      "title": "Runtime projection using sealed baked CAA only",
+      "group": "runtime",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "41_MOTION_DYNAMIC_PROOF"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "runtime"
+      ]
+    },
+    {
+      "ordinal": 43,
+      "id": "43_RSS_MATERIALIZE_COMPACT",
+      "title": "Compact self-contained .rss materialization",
+      "group": "runtime",
+      "depends_on": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": []
+    },
+    {
+      "ordinal": 44,
+      "id": "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+      "title": "Native package load playback and CAA binding re-verification",
+      "group": "runtime",
+      "depends_on": [
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "runtime"
+      ]
+    },
+    {
+      "ordinal": 45,
+      "id": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+      "title": "Native dynamic visual integrity proof",
+      "group": "runtime",
+      "depends_on": [
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "runtime"
+      ]
+    },
+    {
+      "ordinal": 46,
+      "id": "46_PRODUCT_CLOSURE_SEAL",
+      "title": "Product closure plus editable canonical authoring export",
+      "group": "closure",
+      "depends_on": [
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "28_SKELETON_QUALIFIED",
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        "38_CANONICAL_PUPPET_SEALED",
+        "40_MOTION_COMPILE_RUN",
+        "41_MOTION_DYNAMIC_PROOF",
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        "43_RSS_MATERIALIZE_COMPACT",
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
+      ],
+      "adapter": "UNBOUND",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": true
+      },
+      "manifest_keys": []
+    }
+  ]
+}

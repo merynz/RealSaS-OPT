@@ -81,7 +81,13 @@ def validate_caa_preregistration(value: CAACompilePreregistrationIR) -> None:
     tile_resolution = int(compile_policy.get("tile_resolution", 0))
     bleed_px = int(compile_policy.get("bleed_px", -1))
     max_atlas_resolution = int(compile_policy.get("max_atlas_resolution", 0))
-    if tile_resolution < 4 or bleed_px < 1 or max_atlas_resolution < 256:
+    max_supported_face_count = int(compile_policy.get("max_supported_face_count", 0))
+    if (
+        tile_resolution < 4
+        or bleed_px < 1
+        or max_atlas_resolution < 256
+        or max_supported_face_count <= 0
+    ):
         raise QualificationError("CAA_ATLAS_POLICY_INVALID")
     if str(compile_policy.get("atlas_layout")) != "UNIQUE_FACE_BARYCENTRIC_V1":
         raise QualificationError("CAA_ATLAS_LAYOUT_UNSUPPORTED")

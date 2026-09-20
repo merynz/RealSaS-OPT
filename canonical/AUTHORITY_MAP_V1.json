@@ -1,5 +1,5 @@
 {
-  "schema_version": 8,
+  "schema_version": 9,
   "repository": "merynz/RealSaS-OPT",
   "continuation_authority": "CURRENT_STATE.md",
   "context_state": "canonical/CONTEXT_STATE_V2.json",
@@ -28,6 +28,7 @@
     "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
     "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
     "canonical/V2_IMPLEMENTATION_READINESS.json",
+    "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
     "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
     "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md",
     "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
@@ -119,5 +120,6 @@
   ],
   "implementation_readiness": "canonical/V2_IMPLEMENTATION_READINESS.json",
   "architecture_transition_rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
-  "adversarial_audit_protocol": "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md"
+  "adversarial_audit_protocol": "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md",
+  "stage_by_stage_redteam": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md"
 }

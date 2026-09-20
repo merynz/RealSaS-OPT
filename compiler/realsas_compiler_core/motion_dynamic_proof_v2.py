@@ -486,7 +486,7 @@ def _validate_bindings(*,motion,constraints,product_state,skeleton,mesh,mesh_ski
         if actual!=wanted:
             raise QualificationError("MOTION_V2_DYNAMIC_BINDING_DRIFT:"+label)
     if str(mesh.qualification_report.get("g3_stress_probe_status"))!="PASS":
-        raise QualificationError("MOTION_V2_DYNAMIC_REQUIRES_STAGE27_G3_PASS")
+        raise QualificationError("MOTION_V2_DYNAMIC_REQUIRES_STAGE35_G3_PASS")
     components={v.component_id for v in mesh.vertices}
     owners={}
     for attachment in presentation.attachments:

@@ -5,8 +5,8 @@
 **Current mode:** **V2 STAGE-LEVEL RED-TEAM HARDENING**  
 **Current status token:** `V2_STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN`  
 **Canonical governance ledger ID:** `V2_IMPLEMENTATION_ASSEMBLY` — repository implementation governance only; not a witness run.  
-**Witness execution:** **FORBIDDEN** — orchestration is now green, but the readiness seal remains revoked by stage-level product-claim red-team findings RT-37 and RT-45/46.  
-**Next witness:** Subject-2 Knight only after RT-37 and RT-45/46 are resolved or deliberately narrowed, a fresh closure is green, readiness is resealed, and the user explicitly approves execution  
+**Witness execution:** **FORBIDDEN** — RT-37/45/46 claim-boundary hardening is implemented; the exact hardening head must now pass closure/CI/dry-run before readiness can be resealed.  
+**Next witness:** Subject-2 Knight only after the exact red-team-hardening closure is green, readiness is resealed, and the user explicitly approves execution  
 **Mainline:** 46-stage dependency DAG; ordinals are display order only
 
 ## Read first
@@ -28,12 +28,13 @@
 - Pre-red-team implementation closure: `a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882`.
 - The audit then reopened readiness; green implementation evidence is preserved, not erased.
 
-## Current red-team blockers
+## Red-team hardening now encoded
 
-1. **RT-37 — automatic presentation segmentation:** current V2 splits disconnected face islands inside mechanical components, but does not automatically split mechanically equivalent, topologically connected visual regions that need independent Spine-style addressing.
-2. **RT-45/46 — dynamic appearance quality:** Stage45 exhaustively proves native/reference parity, provenance totality and compiled-unobserved exposure, but not dynamic 2D-art deformation quality such as screen-space texture/line distortion or temporal edge integrity. Stage46 therefore must not over-read contract closure as proof of universal Spine-class dynamic appearance.
+1. **RT-37:** Stage37 records its automatic presentation-segmentation scope as connected face islands within mechanical components and explicitly denies artist-layer recovery / connected mechanically-equivalent region auto-splitting claims.
+2. **RT-45:** Stage45 explicitly proves dynamic **runtime integrity**, not perceptual Spine-class 2D-art quality.
+3. **RT-46:** Stage46 product PASS is explicitly `V2_EXECUTABLE_CONTRACT_CLOSURE`; witness visual-quality evaluation remains required.
 
-Canonical detail: `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`.
+The product target is unchanged. These changes remove proof overclaim rather than lowering the expected visual result.
 
 ## The V2 product has three co-equal quality authorities
 
@@ -69,24 +70,11 @@ Key corrections:
 - premultiplied-alpha filtering/compositing + atlas bleed;
 - native Dynamic Visual Integrity is a product gate, not a cosmetic screenshot.
 
-## Current audit blocks
+## Current promotion block
 
-Knight does **not** run yet. The prior readiness seal is not authoritative. Current main must first close:
-- IRIS/GSA role and Stage13 geometry-floor redesign;
-- relation-graph / 3-clique / CDT mesh-quality audit;
-- CAA deterministic compile, bake, qualification, holdout and seam logic;
-- source-lock confidence/correspondence rules;
-- premultiplied alpha + bleed end to end;
-- removal of current-path donor/UNSEEN runtime semantics;
-- posed-XYZ visibility/equal-depth proof;
-- mechanics branch revalidation against frozen mesh;
-- presentation and complete puppet seal;
-- motion dynamic exposure budget;
-- Runtime CAA-only binding and package-load verification;
-- Dynamic Visual Integrity attribution;
-- Stage46 closure and editable-authoring export;
-- complete adversarial module audit;
-- witness orchestration dry-run: run-local ledger initialization, target-closure CLI, artifact schema/output verification and Stage01–08 contract without subject-result admission.
+All previously listed V2 implementation families have subject-free implementation evidence. The remaining promotion step is exact verification of the red-team-hardening closure itself: repository governance, implementation closure, learned-source ownership, compiler regressions, native CAA build and Stage01–08 subject-free orchestration/artifact proof must all be green on the same closure.
+
+No Knight result may be used to tune this closure.
 
 ## Knight rule
 

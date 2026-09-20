@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any
 
 ROOT=Path(__file__).resolve().parents[3]
-PLAN_PATH=ROOT/"canonical"/"MAINLINE_EXECUTION_PLAN_V1.json"
-LEDGER_PATH=ROOT/"canonical"/"ACTIVE_RUN_V1.json"
+PLAN_PATH=ROOT/"canonical"/"MAINLINE_EXECUTION_PLAN_V2.json"
+LEDGER_PATH=ROOT/"canonical"/"ACTIVE_RUN_V2.json"
 PASS_STATUSES={"PASS","CACHE_HIT"}
 FAIL_STATUSES={"FAIL","ABSTAIN","BLOCKED"}
 _STAGE_RE=re.compile(r"^\d{2}_[A-Z0-9_]+$")
@@ -36,9 +36,10 @@ def atomic_json(path:Path,value:dict)->None:
     tmp.replace(path)
 
 def validate_plan(plan:dict)->str:
-    if plan.get("schema")!="RealSaS.MainlineExecutionPlan.v1": raise RuntimeError("MAINLINE_PLAN_SCHEMA_DRIFT")
+    if plan.get("schema")!="RealSaS.MainlineExecutionPlan.v2": raise RuntimeError("MAINLINE_PLAN_SCHEMA_DRIFT")
     stages=list(plan.get("stages") or ())
-    if int(plan.get("stage_count",-1))!=40 or len(stages)!=40: raise RuntimeError("MAINLINE_PLAN_REQUIRES_40_STAGES")
+    expected_count=int(plan.get("stage_count",-1))
+    if expected_count<=0 or len(stages)!=expected_count: raise RuntimeError("MAINLINE_PLAN_STAGE_COUNT_DRIFT")
     if plan.get("canonical_branch")!="main": raise RuntimeError("MAINLINE_PLAN_BRANCH_DRIFT")
     if plan.get("subject_specific_code_forbidden") is not True: raise RuntimeError("MAINLINE_PLAN_GENERICITY_DRIFT")
     seen=set(); ids=[]
@@ -61,7 +62,8 @@ def validate_ledger(plan:dict,ledger:dict)->None:
     if ledger.get("canonical_branch")!="main": raise RuntimeError("ACTIVE_RUN_LEDGER_BRANCH_DRIFT")
     if ledger.get("pipeline_plan_sha256")!=plan_hash: raise RuntimeError(f"ACTIVE_RUN_LEDGER_PLAN_HASH_DRIFT:{ledger.get('pipeline_plan_sha256')}!={plan_hash}")
     rows=list(ledger.get("stages") or ())
-    if len(rows)!=40: raise RuntimeError("ACTIVE_RUN_LEDGER_STAGE_COUNT_DRIFT")
+    expected_count=int(plan["stage_count"])
+    if len(rows)!=expected_count: raise RuntimeError("ACTIVE_RUN_LEDGER_STAGE_COUNT_DRIFT")
     if [x.get("id") for x in rows]!=[x["id"] for x in plan["stages"]]: raise RuntimeError("ACTIVE_RUN_LEDGER_STAGE_ID_DRIFT")
     complete=sum(x.get("status") in PASS_STATUSES for x in rows)
     by_id={row["id"]:row for row in rows}
@@ -200,7 +202,7 @@ def _refresh(ledger:dict)->None:
     ledger["completed_count"]=sum(x["status"] in PASS_STATUSES for x in rows)
     ledger["total_count"]=len(rows)
     ledger["next_stage"]=next((x["id"] for x in rows if x["status"] not in PASS_STATUSES),None)
-    if ledger["completed_count"]==len(rows): ledger["status"]="PASS__ALL_40_STAGES"
+    if ledger["completed_count"]==len(rows): ledger["status"]=f"PASS__ALL_{len(rows)}_STAGES"
     elif any(x["status"] in FAIL_STATUSES for x in rows): ledger["status"]="BLOCKED_AT_"+str(ledger["next_stage"] or "UNKNOWN")
     else: ledger["status"]="ACTIVE"
 
@@ -319,7 +321,7 @@ def status_text(plan:dict,ledger:dict)->str:
     lines=[f"run={ledger['run_id']} status={ledger['status']} progress={ledger['completed_count']}/{ledger['total_count']}",f"next={ledger.get('next_stage') or 'NONE'}"]
     for stage,row in zip(plan["stages"],ledger["stages"]):
         mark="x" if row["status"] in PASS_STATUSES else ("!" if row["status"] in FAIL_STATUSES else ("~" if row["status"]=="RUNNING" else " "))
-        lines.append(f"[{mark}] {stage['ordinal']:02d}/40 {stage['id']} — {row['status']}")
+        lines.append(f"[{mark}] {stage['ordinal']:02d}/{len(plan['stages'])} {stage['id']} — {row['status']}")
     return "\n".join(lines)
 
 def main(argv:list[str]|None=None)->int:
@@ -328,7 +330,7 @@ def main(argv:list[str]|None=None)->int:
     run.add_argument("--run-id",required=True); run.add_argument("--from-stage",default=""); run.add_argument("--to-stage",default=""); run.add_argument("--no-resume",action="store_true")
     args=parser.parse_args(argv); plan=load_json(PLAN_PATH); ledger=load_json(LEDGER_PATH)
     if args.command=="validate-plan":
-        validate_ledger(plan,ledger); print(f"MAINLINE_PLAN_PASS stages=40 plan_sha256={ledger['pipeline_plan_sha256']}"); return 0
+        validate_ledger(plan,ledger); print(f"MAINLINE_PLAN_PASS stages={plan['stage_count']} plan_sha256={ledger['pipeline_plan_sha256']}"); return 0
     if args.command=="status": print(status_text(plan,ledger)); return 0
     return execute(args.run_id,from_stage=args.from_stage,to_stage=args.to_stage,resume=not args.no_resume)
 

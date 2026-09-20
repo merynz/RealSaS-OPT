@@ -7,7 +7,10 @@ import hashlib
 
 import numpy as np
 
-from .appearance_bake_v2 import bilinear_premultiplied_rgba
+from .appearance_bake_v2 import (
+    bilinear_premultiplied_rgba,
+    conservative_bilinear_provenance,
+)
 from .types import QualificationError
 from .visibility_v2 import VISIBILITY_CONTRACT_V2_HASH, rasterize_visible_owner
 
@@ -109,7 +112,7 @@ def render_caa_reference(
         uv = np.sum(uv_tri * weights[:, :, None], axis=1)
         sampled = bilinear_premultiplied_rgba(texture_rgba_u8, uv)
         pm[visible_y, visible_x] = sampled.astype(np.float32)
-        provenance[visible_y, visible_x] = _sample_nearest_scalar(
+        provenance[visible_y, visible_x] = conservative_bilinear_provenance(
             provenance_atlas, uv
         ).astype(np.uint8)
 

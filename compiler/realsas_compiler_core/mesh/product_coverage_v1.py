@@ -13,8 +13,8 @@ from typing import Any, Iterable, Mapping
 from ..hashing import content_sha256
 from ..camera_authority_v1 import camera_projection_binding_hash
 from ..observation_authority_v1 import QualifiedObservationSetIR, validate_qualified_observation_set
-from ..playback_runtime_v3 import ReferenceRasterContractV1
-from ..playback_full_surface_v3 import CameraProjectionV3, project_points_xyz_v3
+from ..raster_contract_v2 import ReferenceRasterContractV1
+from ..camera_geometry_v2 import CameraProjectionV3, project_points_xyz_v3
 from ..product_authority_v1 import (
     ComponentCarrierPolicyIR,
     MeshQualificationPolicyIR,

@@ -312,6 +312,14 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
             "appearance_authority": "COMPLETE_APPEARANCE_AUTHORITY_V2",
             "runtime_generation_required": False,
             "editable": True,
+            "qualification_scope": "SEALED_EXPORTED_STATE_ONLY",
+            "reseal_after_edit_required": True,
+            "edited_state_inherits_product_pass": False,
+            "runtime_export_after_edit_forbidden_until_reseal": True,
+            "edit_invalidation_semantics": (
+                "ANY_AUTHORITY_EDIT_INVALIDATES_CHANGED_AUTHORITY_AND_ALL_"
+                "TRANSITIVE_DOWNSTREAM_PROOFS"
+            ),
             "files": tuple(sorted(file_rows, key=lambda row: row["name"])),
         }
         bundle_manifest["manifest_sha256"] = hashlib.sha256(

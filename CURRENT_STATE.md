@@ -4,6 +4,7 @@
 **Canonical branch:** `main`  
 **Current mode:** **V2 REVIEW-READY — WITNESS HELD FOR USER APPROVAL**  
 **Implementation readiness:** `READY_FOR_WITNESS_EXECUTION`  
+**Current status token:** `READY_FOR_WITNESS_EXECUTION__AWAITING_EXPLICIT_USER_APPROVAL`  
 **Canonical governance ledger:** `V2_IMPLEMENTATION_ASSEMBLY` — implementation governance only; never a subject witness ledger.  
 **Witness execution:** **HELD** — the implementation is ready, but Subject-2 Knight must not start until the user explicitly approves it.  
 **Mainline:** 46-stage dependency DAG; ordinal is display order only.
@@ -46,7 +47,7 @@ The second-pass audit found two real product-quality gaps and both are now close
 ## Product authority
 
 ### Geometry
-Owns the renderable canonical surface: silhouette capacity, topology, stable `SurfaceAddressing` and rasterizable conditioning.
+Owns the renderable canonical surface: silhouette capacity, topology, stable `SurfaceAddressing` and rasterizable conditioning. The single qualified product-geometry identity after mesh qualification is `QualifiedMeshIR`.
 
 ### Mechanics
 Owns skeleton, skin, deformation, contacts and full-3D motion.

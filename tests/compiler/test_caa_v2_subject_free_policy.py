@@ -200,3 +200,46 @@ def test_dynamic_compiled_unobserved_budget_rejects_inference_dominance():
     ]
     assert 0.0 <= budget <= 0.02
     assert budget < 0.10
+
+
+def test_shared_canonical_edge_is_checked_even_when_provenance_class_matches():
+    bary = triangular_barycentric_samples(8)
+    tri_a = np.asarray(
+        ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+        dtype=np.float64,
+    )
+    tri_b = np.asarray(
+        ((1.0, 0.0, 0.0), (1.0, 1.0, 0.0), (0.0, 1.0, 0.0)),
+        dtype=np.float64,
+    )
+    positions = np.concatenate((bary @ tri_a, bary @ tri_b), axis=0)
+    per_face = len(bary)
+    rgba = np.zeros((8, per_face * 2, 4), dtype=np.uint8)
+    rgba[:, :, 3] = 255
+    rgba[:, :per_face, 0] = 16
+    rgba[:, per_face:, 0] = 240
+    provenance = np.ones((8, per_face * 2), dtype=np.uint8)  # OTHER_VIEW_SOURCE on both faces.
+    source_view = np.zeros((8, per_face * 2), dtype=np.int16)
+    source_view[:, :per_face] = 1
+    source_view[:, per_face:] = 7
+    face_index = np.concatenate(
+        (
+            np.zeros(per_face, dtype=np.int32),
+            np.ones(per_face, dtype=np.int32),
+        )
+    )
+    metrics = provenance_boundary_metrics(
+        rgba=rgba,
+        provenance=provenance,
+        source_view=source_view,
+        sample_positions=positions,
+        sample_face_index=face_index,
+        face_count=2,
+        tile_resolution=8,
+    )
+    assert metrics["includes_shared_face_edges"] is True
+    assert metrics["shared_face_edges_are_compared_even_when_provenance_matches"] is True
+    assert metrics["source_view_identity_consumed"] is True
+    assert metrics["donor_view_switch_pair_count"] > 0
+    assert metrics["boundary_pair_count"] > 0
+    assert metrics["p95_rgba_l1"] > 0.1

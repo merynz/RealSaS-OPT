@@ -286,6 +286,9 @@ def build_qualified_dynamic_motion_v2(
     clips=[]
     any_nonzero=False
     frame_set_hashes=set()
+    total_dynamic_visible_pixels=0
+    total_rest_unseen_exposed_pixels=0
+    max_rest_unseen_exposed_fraction=0.0
 
     for clip in motion.clips:
         tracks={track.canonical_joint_id:track for track in clip.tracks}
@@ -335,18 +338,24 @@ def build_qualified_dynamic_motion_v2(
             )
             frame=replace(frame,frame_hash=canonical_dynamic_frame_hash(frame))
 
+            frame_rest_unseen_exposed_pixels=0
+            frame_visible_pixels=0
             for camera in cameras:
                 counts=rasterize_visible_face_pixel_counts(
                     mesh,camera,positions=posed,
                     width=int(camera.resolution),height=int(camera.resolution),
                 )
-                exposed=[i for i in truly_unseen_faces if counts[i]>0]
-                if exposed:
-                    raise QualificationError(
-                        "MOTION_V2_DYNAMIC_TRULY_UNSEEN_EXPOSURE:"
-                        f"{clip.clip_id}:t={float(time_seconds)}:"
-                        f"v={int(camera.view_index)}:faces={len(exposed)}"
-                    )
+                visible_pixels=int(sum(counts))
+                exposed_pixels=int(sum(counts[i] for i in truly_unseen_faces))
+                frame_visible_pixels+=visible_pixels
+                frame_rest_unseen_exposed_pixels+=exposed_pixels
+            total_dynamic_visible_pixels+=frame_visible_pixels
+            total_rest_unseen_exposed_pixels+=frame_rest_unseen_exposed_pixels
+            if frame_visible_pixels>0:
+                max_rest_unseen_exposed_fraction=max(
+                    max_rest_unseen_exposed_fraction,
+                    float(frame_rest_unseen_exposed_pixels)/float(frame_visible_pixels),
+                )
             frames.append(frame)
             poses[float(time_seconds)]=joint_positions
 
@@ -400,8 +409,8 @@ def build_qualified_dynamic_motion_v2(
                 "frame_count":len(frames),
                 "source_rig_is_final_skeleton_authority":False,
                 "target_skeleton_authority":skeleton.skeleton_lineage_hash,
-                "truly_unseen_source_face_count":int(len(truly_unseen_faces)),
-                "truly_unseen_dynamic_exposure_status":"PASS_ZERO_EXPOSED_PIXELS",
+                "rest_unseen_source_face_count":int(len(truly_unseen_faces)),
+                "rest_unseen_dynamic_exposure_is_diagnostic_only":True,
             },
         )
         clips.append(
@@ -437,9 +446,15 @@ def build_qualified_dynamic_motion_v2(
             "view_specific_motion_mesh_truth":False,
             "all_contacts_satisfied":True,
             "all_sampled_frames_conditioned":True,
-            "truly_unseen_dynamic_exposure_passed":True,
-            "truly_unseen_exposed_pixel_budget":0,
-            "truly_unseen_source_face_count":int(len(truly_unseen_faces)),
+            "rest_unseen_dynamic_exposure_gate_removed":True,
+            "rest_unseen_source_face_count":int(len(truly_unseen_faces)),
+            "rest_unseen_dynamic_exposed_pixel_count":int(total_rest_unseen_exposed_pixels),
+            "dynamic_visible_pixel_count":int(total_dynamic_visible_pixels),
+            "rest_unseen_dynamic_exposed_fraction":(
+                0.0 if total_dynamic_visible_pixels<=0
+                else float(total_rest_unseen_exposed_pixels)/float(total_dynamic_visible_pixels)
+            ),
+            "max_frame_rest_unseen_exposed_fraction":float(max_rest_unseen_exposed_fraction),
             "any_clip_nonzero":True,
             "professional_motion_clip_count":sum(c.professional_motion_evidence for c in clips),
             "artist_source_clip_count":sum(c.classification=="ARTIST_SOURCE" for c in clips),
@@ -454,7 +469,7 @@ def build_qualified_dynamic_motion_v2(
             "contact_relative_tolerance":_CONTACT_REL_TOL,
             "evaluator_semantic_version":DYNAMIC_EVALUATOR_SEMANTIC_VERSION_V2,
             "derived_joint_frame_set_hash":next(iter(frame_set_hashes)),
-            "truly_unseen_policy":"FAIL_ON_ANY_NEW_Z_VISIBLE_PIXEL_IN_8_RUNTIME_VIEWS",
+            "rest_unseen_policy":"DIAGNOSTIC_ONLY__CAA_PROVENANCE_EXPOSURE_IS_GATED_AT_DYNAMIC_VISUAL_INTEGRITY",
         },
     )
     return replace(value,dynamic_motion_hash=qualified_dynamic_motion_hash(value))

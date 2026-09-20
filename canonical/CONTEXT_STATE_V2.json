@@ -1,9 +1,9 @@
 {
   "schema": "RealSaS.ContextState.v2",
-  "date": "2026-09-20",
+  "date": "2026-09-21",
   "continuation_branch": "main",
   "execution_branch": "main",
-  "status": "V2_STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN",
+  "status": "READY_FOR_WITNESS_EXECUTION__AWAITING_EXPLICIT_USER_APPROVAL",
   "authority": {
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
@@ -16,32 +16,37 @@
     "implementation_readiness": "canonical/V2_IMPLEMENTATION_READINESS.json",
     "architecture_transition_rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
     "adversarial_audit_protocol": "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md",
-    "stage_by_stage_redteam": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md"
+    "stage_by_stage_redteam": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
+    "presentation_partition_policy": "canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json",
+    "dynamic_appearance_calibration": "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json"
   },
   "product": {
     "target": "automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics",
-    "demo_witness": "Subject-2 Knight (held; previous activation void)",
-    "next_visible_product_milestone": "resolve or explicitly narrow RT-37 and RT-45/46; rerun exact self-hosted closure and dry-run; reseal readiness; present review package to user before Knight"
+    "demo_witness": "Subject-2 Knight (review-ready; execution held for explicit user approval)",
+    "next_visible_product_milestone": "user reviews the sealed V2 implementation; after explicit approval only, initialize fresh run-local Knight Stage01"
   },
   "current_focus": {
-    "module": "V2 stage-level red-team hardening",
-    "state": "V2_STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN",
+    "module": "V2 review-ready seal",
+    "state": "READY_FOR_WITNESS_EXECUTION__AWAITING_EXPLICIT_USER_APPROVAL",
     "active_experiment": "V2_IMPLEMENTATION_ASSEMBLY",
-    "most_recent_closed_gate": "SELF_HOSTED_MAINLINE_AND_SUBJECT_FREE_ORCHESTRATION_GREEN__STAGE_REDTEAM_REOPENED",
-    "promotion_block": "Do not execute Knight. RT-37 automatic presentation segmentation and RT-45/46 dynamic appearance-quality/closure-claim gaps must be resolved or explicitly narrowed before a new readiness seal.",
-    "scope_warning": "No Knight-derived threshold choice is allowed during V2 assembly.",
-    "scientific_question": "Does every one of the 46 V2 stages prove exactly the authority needed for a source-faithful Spine-class 2D puppet, without allowing mechanics/runtime correctness to substitute for presentation or dynamic appearance quality?",
+    "most_recent_closed_gate": "DOCUMENTATION_INCLUSIVE_EXACT_MAINLINE_AND_ORCHESTRATION_GREEN",
+    "promotion_block": "No implementation blocker remains for the controlled first witness. Do not execute Knight until the user explicitly approves.",
+    "scope_warning": "READY is implementation readiness, not Knight product PASS or unseen generalization.",
+    "scientific_question": "After user approval, does Subject-2 Knight close the exact V2 product contract without subject-specific repair?",
     "latest_green_evidence": {
-      "functional_head": "ca9d2d2e59bc517a139c743eb6a91df2e48ac761",
-      "mainline_ci_run_id": 35536134130,
-      "mainline_ci_job_id": 106145391722,
-      "repository_governance_tests_passed": 48,
+      "implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
+      "mainline_ci_run_id": 35539075794,
+      "mainline_ci_job_id": 106153297550,
+      "repository_governance_tests_passed": 49,
       "learned_model_tests_passed": 51,
-      "compiler_tests_passed": 281,
-      "model_source_gate_run_id": 35536134125,
-      "orchestration_dry_run_id": 35536134136,
-      "orchestration_dry_run_job_id": 106145391794,
-      "implementation_closure_sha256_before_redteam_docs": "a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882",
+      "compiler_tests_passed": 288,
+      "model_source_gate_run_id": 35539075776,
+      "orchestration_dry_run_id": 35539075769,
+      "orchestration_dry_run_job_id": 106153297245,
+      "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+      "orchestration_artifact_zip_sha256": "e5d994baccae4baee42edb9b00381504f972e619d97521694f10efdb0398c1f1",
+      "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+      "plan_sha256": "b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f",
       "witness_used": false
     }
   },
@@ -53,7 +58,7 @@
       "x64",
       "realsas"
     ],
-    "runner": "realsas-self-hosted",
+    "runner": "realsas-wsl-1660ti",
     "operator_path": "$HOME/realsas_authority",
     "reason": "large artifacts/checkpoints and exact cache reuse stay on the persistent self-hosted authority root"
   },
@@ -106,8 +111,8 @@
     },
     {
       "name": "Presentation",
-      "role": "slots attachments order visibility clipping",
-      "canonical_rule": "structure only; cannot invent geometry or appearance"
+      "role": "role-free evidence-supported slots attachments grouping order visibility clipping",
+      "canonical_rule": "mechanical/topological/source-backed appearance evidence may partition presentation; categorical identity may not be minted"
     },
     {
       "name": "Motion",
@@ -121,13 +126,13 @@
     },
     {
       "name": "DynamicVisualIntegrity",
-      "role": "native product image proof",
-      "canonical_rule": "separately attributes geometry holes, depth ownership, appearance definedness, alpha/sampling, seams, flicker and composition"
+      "role": "native product image proof plus intrinsic dynamic appearance conditioning",
+      "canonical_rule": "native parity, provenance, exposure and rigid-motion-invariant UV/surface deformation conditioning; screen projection diagnostic only"
     },
     {
       "name": "Closure",
       "role": "Stage46 product seal",
-      "canonical_rule": "requires all three co-equal quality axes plus native runtime evidence"
+      "canonical_rule": "requires geometry, mechanics, appearance, presentation partition and native dynamic visual integrity"
     }
   ],
   "settled_invariants": [
@@ -144,8 +149,10 @@
     "Mesh producer/gate feasibility is proved upstream; thresholds are not weakened after witness inspection.",
     "V2 executor uses DAG dependencies; ordinals are documentation only.",
     "Downstream failure does not erase verified independent upstream PASS.",
-    "Knight execution is forbidden until V2_IMPLEMENTATION_READINESS is READY_FOR_WITNESS_EXECUTION.",
-    "Product closure is Stage46 and requires native Dynamic Visual Integrity."
+    "Product closure is Stage46 and requires native Dynamic Visual Integrity.",
+    "Presentation partition may use qualified source-backed appearance boundaries but may not invent semantic object identity.",
+    "Dynamic appearance shipping gates are intrinsic surface metrics invariant to rigid 3D motion; screen projection conditioning is diagnostic only.",
+    "Knight execution requires exact READY_FOR_WITNESS_EXECUTION and explicit user approval."
   ],
   "known_context_traps": [
     {
@@ -170,10 +177,10 @@
     }
   ],
   "continuation_protocol": {
-    "first_action": "Read V2_IMPLEMENTATION_READINESS; prior READY seal is revoked.",
-    "assembly_completion_definition": "All required readiness proofs, including WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN, PASS with SHA-256 identities before READY_FOR_WITNESS_EXECUTION may be resealed.",
-    "witness_rule": "Only after the new readiness seal, use mainline init-run to create a run-local Knight ledger under the authority root; canonical ACTIVE_RUN_V2 remains assembly governance only.",
-    "experiment_completion_definition": "All required readiness proofs PASS with SHA-256 identities, every plan adapter bound, DAG and adversarial tests green, then status becomes READY_FOR_WITNESS_EXECUTION."
+    "first_action": "Read V2_IMPLEMENTATION_READINESS and verify implementation_closure_sha256 equals exact current implementation closure.",
+    "assembly_completion_definition": "Completed: all required subject-free proofs PASS and exact closure is resealed.",
+    "witness_rule": "Do not execute Knight until explicit user approval; after approval create a fresh run-local Knight ledger under $REALSAS_AUTHORITY_ROOT and begin Stage01.",
+    "experiment_completion_definition": "Implementation assembly is review-ready; Knight remains a separate user-authorized scientific witness."
   },
   "product_quality_axes": {
     "geometry": {

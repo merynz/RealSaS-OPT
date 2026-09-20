@@ -1,11 +1,10 @@
 # RealSaS V2 — Stage-by-Stage Red-Team Audit — 2026-09-20
 
-**Status:** CURRENT RED-TEAM AUTHORITY  
+**Status:** PASS — 46-STAGE SECOND-PASS HARDENED SUBJECT-FREE  
 **Scope:** exact 46-stage V2 DAG on `main`  
 **Witness used:** **NO**  
 **Thresholds selected from Knight:** **NO**  
-**Trigger:** the exact functional head `ca9d2d2e59bc517a139c743eb6a91df2e48ac761` passed the full self-hosted current-mainline gate and the subject-free Stage01–08 orchestration/artifact dry-run before this audit was opened.
-
+**Closure evidence:** documentation-inclusive head `4419509ee0f62a7e5ca088b87feb682b1a664105`; mainline run `35539075794`; subject-free orchestration run `35539075769`; exact closure `c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e`; no Knight data used.\n
 ## Why this audit exists
 
 Module-family PASS is not enough. A system can have individually green components while still making an over-broad product claim at a boundary between them. This audit attacks each stage separately and asks:
@@ -32,7 +31,7 @@ Verdicts:
 | 03 | `SOURCE_MECHANICAL_AUDIT` | Exact source raster hashes are Stage01-bound; exact masks are hash-bound through the manifest/input fingerprint and Stage07 authority. The audit proves foreground non-emptiness/border safety, not cross-view semantic consistency or arbitrary-pose validity. | **CLOSED_WITH_SCOPE** |
 | 04 | `FULL_SUBJECT_ADMISSION` | Admission requires the controlled eight-view mode and Stage03 PASS. It is deliberately not a general real-world View Contract Resolver. | **CLOSED_WITH_SCOPE** |
 | 05 | `CAMERA_CONTRACT_SOLVED` | The exact hashed camera bundle is qualified; cameras are not inferred from the images. A wrong-but-self-consistent supplied camera bundle remains an upstream acquisition error. | **CLOSED_WITH_SCOPE** |
-| 06 | `OBSERVATION_RENDER_8VIEW` | The implementation does not synthetically rerender the subject; it materializes exact source observation bytes under the qualified cameras. The old word “Render” can mislead reviewers into assuming a new image-generation authority. | **CLOSED; TITLE SHOULD SAY MATERIALIZE** |
+| 06 | `OBSERVATION_RENDER_8VIEW` | Exact source observation bytes are materialized under qualified cameras; no new subject render is synthesized. The plan title now states materialization explicitly. | **CLOSED** |
 | 07 | `OBSERVATION_CONTRACT_QUALIFIED` | Raster, foreground, camera and admission identities are joined exactly and out-of-frame remains UNKNOWN. No aggregate score can replace those bindings. | **CLOSED** |
 | 08 | `NORMALIZATION_DOMAIN_QUALIFIED` | Center/half-extent are exact manifest authority, finite and positive. They are not inferred from arbitrary user imagery. | **CLOSED_WITH_SCOPE** |
 | 09 | `IRIS_FIT_PREREGISTERED` | Model source, architecture, executor, seed, upstream bindings, output contract and dense source-coverage policy are frozen before execution; teacher inference inputs are forbidden. | **CLOSED** |
@@ -63,69 +62,53 @@ Verdicts:
 | 34 | `DEFORMATION_CAPABILITY_ENVELOPE` | This is a bounded numerical conditioning envelope and joint-frame witness, **not** professional motion capability. Actual artist motion is proven later. | **CLOSED** |
 | 35 | `DYNAMIC_MECHANICAL_MESH_QUALIFIED` | The exact frozen mesh is stressed under the exact qualified rig/skin/envelope; repair must create new lineage rather than mutate a passing mesh in place. This proves mechanics/conditioning, not 2D art quality. | **CLOSED** |
 | 36 | `QUALIFIED_MESH_SKIN_TRANSFER` | Skin is deterministically transferred onto the already-qualified product mesh; no second runtime skin truth is allowed. | **CLOSED** |
-| 37 | `QUALIFIED_PRESENTATION_STRUCTURE` | Current automatic segmentation creates separate slots for disconnected face islands inside a mechanical component. It **cannot automatically split two independently addressable visual regions that are mechanically equivalent and topologically connected** (the head/hat class of counterexample). This is exactly where structural partition and presentation segmentation can diverge. | **REOPENED — HIGH** |
-| 38 | `CANONICAL_PUPPET_SEALED` | Exact mechanics, CAA and presentation bindings are sealed correctly, but sealing cannot repair Stage37’s missing automatic presentation partition. | **CLOSED AS SEAL; INHERITS STAGE37 GAP** |
-| 39 | `MOTION_SOURCE_OR_PRESET_SEAL` | Current V2 implementation accepts professional external MotionSourceClip.v2 assets and deliberately rejects unsupported source kinds. The stage name still says “or preset,” while inline preset execution is not current authority. | **CLOSED; TITLE/CLAIM SHOULD BE PRECISE** |
+| 37 | `QUALIFIED_PRESENTATION_STRUCTURE` | The second-pass attack showed disconnected topology alone could not split mechanically equivalent connected visual regions. Repair adds hash-bound `PresentationPartitionEvidenceIR.v2`: shared-edge adjacency may be cut only by frozen source-backed CAA appearance-boundary evidence. Categorical identity remains forbidden. | **CLOSED_WITH_SCOPE** |
+| 38 | `CANONICAL_PUPPET_SEALED` | Stage38 re-verifies presentation-partition evidence against exact mesh, CAA asset, CAA qualification and structure bindings before sealing. | **CLOSED** |
+| 39 | `MOTION_SOURCE_OR_PRESET_SEAL` | Current authority accepts professional external `MotionSourceClip.v2`; unsupported kinds fail closed. Plan title no longer implies an inline preset authority. | **CLOSED** |
 | 40 | `MOTION_COMPILE_RUN` | Full-3D local quaternion/root-translation compilation is bound to exact skeleton/envelope/presentation/mechanical state. No legacy single-axis contract remains in current closure. | **CLOSED** |
 | 41 | `MOTION_DYNAMIC_PROOF` | Exact FK/LBS/contact/conditioning is proven over compiled clips. Rest-unseen exposure is correctly diagnostic here because appearance exposure is owned by Stage45. | **CLOSED** |
 | 42 | `RUNTIME_PROJECTION_AND_CAA_BINDING` | Runtime binds exact posed XYZ/topology/cameras/sealed CAA and forbids donor search, skin solve and appearance generation. | **CLOSED** |
 | 43 | `RSS_MATERIALIZE_COMPACT` | Package entries are replay-hashed and self-contained; materialization cannot mint a new authority. | **CLOSED** |
 | 44 | `NATIVE_PACKAGE_OPEN_PLAYBACK` | Native reader opens the actual package and is byte-compared with Python reference. This stage samples a representative frame; exhaustive frame/view checking is deliberately Stage45’s job. | **CLOSED** |
-| 45 | `DYNAMIC_VISUAL_INTEGRITY_PROOF` | The implementation exhaustively gates undefined visible provenance, compiled-unobserved exposure and native/reference byte parity over all frame/view pairs. It records alpha-hole diagnostics. **It does not yet directly measure dynamic 2D-art deformation quality** such as screen-space texture stretch/shear, line-art distortion, or temporal edge/flicker integrity. Mechanical triangle conditioning is an important proxy but is not the same claim. | **REOPENED — HIGH** |
-| 46 | `PRODUCT_CLOSURE_SEAL` | Binding closure and editable archive integrity are strong. However `appearance_authority_passed=true` / `product_pass=true` currently inherit Stage45’s narrower runtime-integrity proof and Stage37’s limited automatic segmentation. Therefore “PASS_PRODUCT_V2” must not be read as proof of universal Spine-class authored appearance/editability until those gaps are closed or the claim is narrowed. | **REOPENED BY INHERITANCE** |
+| 45 | `DYNAMIC_VISUAL_INTEGRITY_PROOF` | Stage45 now gates native/reference parity, visible provenance and compiled-unobserved exposure plus rigid-motion-invariant intrinsic UV→posed-surface conditioning, rest-relative condition/principal stretch and adjacent-frame intrinsic stretch. A raw screen-space shipping gate was explicitly rejected because legitimate 3D foreshortening is not art deformation. Thresholds are frozen subject-free. | **CLOSED_WITH_SCOPE** |
+| 46 | `PRODUCT_CLOSURE_SEAL` | Stage46 now refuses product closure unless Stage37 partition evidence is bound and Stage45 dynamic appearance conditioning passed with non-empty evidence. Editable authoring export carries the partition evidence. Claim is scoped to the exact controlled V2 contract. | **CLOSED_WITH_SCOPE** |
 
 ## Red-team conclusions
 
-### RT-37 — automatic presentation segmentation gap — HIGH
+### RT-37 — CLOSED_WITH_SCOPE
 
-The frozen architecture correctly states:
+The original finding was valid: mechanical partition is not presentation segmentation. Stage37 now emits a separate hash-bound role-free presentation-partition authority. Shared-edge adjacency inside one mechanical component may be cut only when qualified source-backed CAA evidence across that edge exceeds the frozen subject-free policy. Insufficient evidence means continuity, not semantic invention.
 
-> structural/mechanical partition and presentation segmentation are different questions.
+This closes the controlled-witness implementation blocker. It does not claim recovery of an unobservable semantic object boundary.
 
-The current V2 implementation does not fully realize that distinction. It creates presentation groups from **connected mesh-face islands within each mechanical component**. That is useful and non-semantic, but insufficient when two visually distinct regions share mechanics **and** are topologically connected.
+### RT-45 — CLOSED_WITH_SCOPE
 
-This does not corrupt geometry, mechanics or CAA. It limits automatic authoring/editability. A correct repair must remain role-free and may not smuggle categorical labels such as “hat” or “sword” into product authority.
+Native/reference parity alone was insufficient because two deterministic renderers can agree on ugly art deformation. The first repair idea, raw screen-space conditioning, was itself rejected by red-team because rigid 3D rotation can legitimately create foreshortening.
 
-**Required before broad automatic Spine-class authoring claim:** add a qualified presentation-partition authority that may use generic evidence (mechanical boundaries, disconnected topology, source-visible appearance boundaries, occlusion/composition evidence) without categorical recognition, with exact merge/split provenance and author-editable override.
+Shipping gates therefore use intrinsic textured-surface metrics: UV→posed-3D conditioning, rest→posed condition/principal stretch and previous→posed temporal stretch. Screen projection conditioning is diagnostic only. Relative and temporal thresholds are frozen by `DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json` without Knight data.
 
-### RT-45 — dynamic appearance-quality measurement gap — HIGH
+This proves bounded local texture/line-art deformation under the frozen contract; it does not claim semantic correctness, animation acting quality or human aesthetic optimality.
 
-Stage45 is an excellent **runtime integrity** proof:
+### RT-46 — CLOSED_WITH_SCOPE
 
-- every dynamic frame/view is executed by the native package reader;
-- native bytes must equal the deterministic reference;
-- visible pixels require defined provenance;
-- compiled-unobserved visible exposure is budgeted.
+Stage46 consumes both repaired authorities. It will not emit `PASS_PRODUCT_V2` if presentation-partition evidence drifts or if dynamic appearance conditioning failed/was empty. The editable authoring archive includes partition evidence.
 
-But runtime correctness is not identical to **artist-quality appearance under deformation**. A reference renderer can be perfectly deterministic while both renderers agree on ugly texture stretch or line distortion.
+`PASS_PRODUCT_V2` therefore means the exact controlled V2 contract closed, not unseen generalization or universal semantic/perceptual optimality.
 
-**Required before claiming dynamic Spine-class art quality as scientifically proven:** either
+## Exact closure evidence
 
-1. add a subject-free preregistered dynamic appearance-conditioning gate (for example bounded screen-space surface/UV conditioning plus temporal boundary/edge integrity, with thresholds calibrated without Knight), or
-2. explicitly narrow Stage45/46 claims to runtime visual integrity and leave professional dynamic appearance quality as a witness/product-performance observation rather than a proven implementation invariant.
-
-The preferred engineering direction is (1), because geometry and mechanics already receive quantitative conditioning proofs and appearance deserves the same standard.
-
-### RT-46 — closure wording currently over-broad — HIGH by inheritance
-
-Stage46 is allowed to say the exact V2 contract closed. It is not yet allowed to use that closure as evidence that all aspects of automatic Spine-class authorability and dynamic art quality have been proven. The product closure report must either consume the repaired RT-37/RT-45 authorities or make the narrower claim explicit.
-
-## What remains genuinely green
-
-The red-team findings do **not** invalidate the successful infrastructure/implementation evidence:
-
-- self-hosted current-mainline CI on `ca9d2d2e59bc517a139c743eb6a91df2e48ac761`: PASS;
-- repository/governance tests: 48 PASS;
-- model/learned-source tests: 51 PASS;
-- compiler regressions: 281 PASS;
-- subject-free Stage01–08 orchestration/artifact dry-run: PASS;
-- exact dry-run implementation closure SHA-256 before this red-team documentation update: `a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882`;
-- Knight data used during this audit: **none**.
-
-Those green results prove that the current system executes and enforces its existing contract. The red-team audit asks whether that contract is strong enough for the product claim, and found two high-value places where it is not yet strong enough.
+- Documentation-inclusive implementation head: `4419509ee0f62a7e5ca088b87feb682b1a664105`.
+- Self-hosted mainline run `35539075794`, job `106153297550`: **PASS**.
+- Repository/governance: **49 PASS**.
+- Learned/model ownership: **51 PASS**.
+- Compiler regressions: **288 PASS**.
+- Plan SHA-256: `b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f`.
+- Implementation closure SHA-256: `c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e`.
+- Native V2 CAA player SHA-256: `b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1`.
+- Subject-free Stage01–08 orchestration run `35539075769`, job `106153297245`: **PASS**.
+- Orchestration evidence ZIP SHA-256: `e5d994baccae4baee42edb9b00381504f972e619d97521694f10efdb0398c1f1`.
+- Knight data used for repair/threshold selection: **none**.
 
 ## Promotion rule
 
-**Knight remains forbidden.** Do not reseal `READY_FOR_WITNESS_EXECUTION` merely because CI and orchestration are green. RT-37 and RT-45/46 must first be resolved or have their claims deliberately narrowed and re-approved, followed by a fresh exact implementation-closure hash, full self-hosted CI, subject-free orchestration dry-run, and readiness reseal.
-
-No Knight-derived threshold or design choice may be used to resolve either finding.
+The second-pass implementation blockers are closed and readiness may be sealed against the exact closure above. **READY does not itself authorize Knight.** Subject-2 Knight remains held until explicit user approval; only then may a fresh run-local witness ledger be created and Stage01 begin.

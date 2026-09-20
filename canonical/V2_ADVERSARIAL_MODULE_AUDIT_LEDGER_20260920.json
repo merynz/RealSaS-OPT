@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.V2AdversarialModuleAuditLedger.v1",
-  "date": "2026-09-20",
-  "status": "REOPENED_BY_46_STAGE_SECOND_PASS",
+  "date": "2026-09-21",
+  "status": "PASS_46_STAGE_SECOND_PASS_HARDENED_SUBJECT_FREE",
   "witness_used": false,
   "threshold_tuning_from_knight_forbidden": true,
   "protocol": "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md",
@@ -222,10 +222,11 @@
       "module_id": "P",
       "name": "PRESENTATION_STRUCTURE",
       "stages": "37",
-      "input_output_authority": "role-free mechanical components + mesh skin",
-      "smallest_adversarial_failure": "categorical identity/detachability invention; missing component accounting",
+      "input_output_authority": "role-free mechanical/topological structure + qualified CAA boundary evidence + mesh skin",
+      "smallest_adversarial_failure": "categorical identity invention; source-boundary evidence drift; missing connected visual partition",
       "repair_owner": "Stage37",
       "proof_hooks": [
+        "tests/compiler/test_presentation_partition_v2.py",
         "tests/compiler/test_product_mesh_stage_adapters_v1.py",
         "tests/compiler/test_v2_tail_authority_fail_closed.py"
       ],
@@ -279,12 +280,12 @@
       "module_id": "T",
       "name": "DYNAMIC_VISUAL_INTEGRITY",
       "stages": "45",
-      "input_output_authority": "native frame owner/provenance/RGBA over every frame-view",
-      "smallest_adversarial_failure": "undefined visible provenance; native parity mismatch; compiled-unobserved budget excess",
+      "input_output_authority": "native frame owner/provenance/RGBA over every frame-view + intrinsic textured-surface deformation metrics",
+      "smallest_adversarial_failure": "undefined visible provenance; native mismatch; exposure excess; intrinsic texture/line-art stretch/shear or temporal jump",
       "repair_owner": "Stage45/upstream owner",
       "proof_hooks": [
+        "tests/compiler/test_dynamic_appearance_conditioning_v2.py",
         "tests/compiler/test_runtime_v2_native_smoke.py",
-        "tests/compiler/test_visibility_and_caa_v2.py",
         "tests/compiler/test_product_mesh_stage_adapters_v1.py",
         "tests/compiler/test_v2_tail_authority_fail_closed.py"
       ],
@@ -295,8 +296,8 @@
       "module_id": "U",
       "name": "PRODUCT_CLOSURE",
       "stages": "46",
-      "input_output_authority": "complete puppet + motion + runtime + DVI + editable authoring exact bindings",
-      "smallest_adversarial_failure": "any axis absent or binding drift; non-editable export",
+      "input_output_authority": "complete puppet + partition evidence + motion + runtime + DVI conditioning + editable authoring exact bindings",
+      "smallest_adversarial_failure": "any quality authority absent/drifted; dynamic appearance conditioning absent; non-editable export",
       "repair_owner": "owning failed upstream stage",
       "proof_hooks": [
         "tests/compiler/test_product_mesh_stage_adapters_v1.py",
@@ -307,83 +308,67 @@
     }
   ],
   "closure_evidence": {
-    "implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+    "implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
     "mainline_ci": {
       "workflow": "current-mainline-self-hosted-ci",
-      "run_id": 35529673748,
-      "job_id": 106127939604,
+      "run_id": 35539075794,
+      "job_id": 106153297550,
       "conclusion": "success",
-      "repository_tests_passed": 31,
+      "repository_tests_passed": 49,
       "learned_and_model_tests_passed": 51,
-      "compiler_tests_passed": 274,
-      "total_tests_passed": 356,
+      "compiler_tests_passed": 288,
+      "total_tests_passed": 388,
       "plan_stage_count": 46,
-      "plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+      "plan_sha256": "b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f",
+      "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
       "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1"
     },
     "model_source_gate": {
       "workflow": "model-mainline-source-gate",
-      "run_id": 35529673786,
+      "run_id": 35539075776,
       "conclusion": "success",
-      "head_sha": "44b148737dc1e7eadb23048834d2111744a12bc6"
+      "head_sha": "4419509ee0f62a7e5ca088b87feb682b1a664105"
     },
-    "independent_runtime_ci": {
-      "workflow": "current-runtime-self-hosted-ci",
-      "run_id": 35529375697,
-      "job_id": 106127139365,
+    "orchestration_dry_run": {
+      "run_id": 35539075769,
+      "job_id": 106153297245,
       "conclusion": "success",
-      "head_sha": "9d9412be0e9af489962f164bea4975407a24ab30",
-      "v2_native_tests_passed": 7,
-      "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
-      "marker": "V2_CAA_NATIVE_PARITY_PASS"
+      "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+      "artifact_zip_sha256": "e5d994baccae4baee42edb9b00381504f972e619d97521694f10efdb0398c1f1",
+      "stage01_08_artifact_contract_passed": true,
+      "canonical_assembly_ledger_unchanged": true
     },
     "knight_witness_observed": false,
     "thresholds_selected_from_knight": false
   },
-  "closure": "Previous A-U subject-free proof hooks remain valid historical implementation evidence, but the audit is reopened by the 46-stage second pass. Knight remains forbidden until RT-37 and RT-45/46 are resolved or deliberately narrowed and exact readiness is resealed.",
+  "closure": "All 46 stages received second-pass adversarial review. RT-37 and RT-45/46 are closed subject-free with scoped claims. Implementation is review-ready; Knight remains held for explicit user approval.",
   "stage_level_redteam": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
   "second_pass": {
-    "status": "REOPENED",
+    "status": "PASS_WITH_SCOPED_CLAIMS",
     "witness_used": false,
-    "functional_head_before_redteam_docs": "ca9d2d2e59bc517a139c743eb6a91df2e48ac761",
-    "mainline_ci": {
-      "run_id": 35536134130,
-      "job_id": 106145391722,
-      "conclusion": "success",
-      "repository_tests_passed": 48,
-      "learned_and_model_tests_passed": 51,
-      "compiler_tests_passed": 281,
-      "self_hosted_only": true
-    },
-    "orchestration_dry_run": {
-      "run_id": 35536134136,
-      "job_id": 106145391794,
-      "conclusion": "success",
-      "stage01_08_artifact_contract_passed": true,
-      "canonical_assembly_ledger_unchanged": true
-    },
-    "implementation_closure_sha256_before_redteam_docs": "a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882",
+    "implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
+    "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
     "findings": [
       {
         "id": "RT-37",
         "severity": "HIGH",
         "stage": "37_QUALIFIED_PRESENTATION_STRUCTURE",
-        "status": "OPEN",
-        "summary": "Automatic presentation grouping only separates disconnected face islands inside a mechanical component; connected mechanically equivalent visual regions cannot yet be independently auto-addressed."
+        "status": "CLOSED_WITH_SCOPE",
+        "summary": "Role-free source-backed CAA boundary evidence now partitions mechanically equivalent connected presentation regions without categorical identity."
       },
       {
         "id": "RT-45",
         "severity": "HIGH",
         "stage": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
-        "status": "OPEN",
-        "summary": "Dynamic visual integrity exhaustively proves provenance/exposure/native parity but lacks an independent quantitative dynamic 2D-art deformation-quality gate."
+        "status": "CLOSED_WITH_SCOPE",
+        "summary": "Rigid-motion-invariant intrinsic dynamic appearance conditioning now complements native parity, provenance and exposure."
       },
       {
         "id": "RT-46",
         "severity": "HIGH_INHERITED",
         "stage": "46_PRODUCT_CLOSURE_SEAL",
-        "status": "OPEN",
-        "summary": "Product closure wording over-reads Stage37/45 evidence if interpreted as universal Spine-class automatic authorability and dynamic appearance proof."
+        "status": "CLOSED_WITH_SCOPE",
+        "summary": "Closure now requires Stage37 partition evidence and Stage45 dynamic appearance conditioning; claim remains controlled-contract scoped."
       }
     ]
   }

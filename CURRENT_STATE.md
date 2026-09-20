@@ -1,93 +1,68 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-09-20  
+**Date:** 2026-09-21  
 **Canonical branch:** `main`  
-**Current mode:** **V2 STAGE-LEVEL RED-TEAM HARDENING**  
-**Current status token:** `V2_STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN`  
-**Canonical governance ledger ID:** `V2_IMPLEMENTATION_ASSEMBLY` — repository implementation governance only; not a witness run.  
-**Witness execution:** **FORBIDDEN** — orchestration is now green, but the readiness seal remains revoked by stage-level product-claim red-team findings RT-37 and RT-45/46.  
-**Next witness:** Subject-2 Knight only after RT-37 and RT-45/46 are resolved or deliberately narrowed, a fresh closure is green, readiness is resealed, and the user explicitly approves execution  
-**Mainline:** 46-stage dependency DAG; ordinals are display order only
+**Current mode:** **V2 REVIEW-READY — WITNESS HELD FOR USER APPROVAL**  
+**Implementation readiness:** `READY_FOR_WITNESS_EXECUTION`  
+**Canonical governance ledger:** `V2_IMPLEMENTATION_ASSEMBLY` — implementation governance only; never a subject witness ledger.  
+**Witness execution:** **HELD** — the implementation is ready, but Subject-2 Knight must not start until the user explicitly approves it.  
+**Mainline:** 46-stage dependency DAG; ordinal is display order only.
 
 ## Read first
 
 1. `canonical/V2_IMPLEMENTATION_READINESS.json`
 2. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
-3. `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
-4. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
-5. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
-6. `canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md`
-7. this file
+3. `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`
+4. `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
+5. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+6. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+7. `canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json`
+8. `canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json`
 
-## Latest exact green evidence
+## Exact review-ready evidence
 
-- Functional head: `ca9d2d2e59bc517a139c743eb6a91df2e48ac761`.
-- Self-hosted mainline CI run `35536134130`: PASS; 48 repository/governance + 51 learned/model + 281 compiler tests.
-- Subject-free Stage01–08 orchestration/artifact dry-run `35536134136`: PASS.
-- Model source gate `35536134125`: PASS.
-- Pre-red-team implementation closure: `a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882`.
-- The audit then reopened readiness; green implementation evidence is preserved, not erased.
+- Documentation-inclusive implementation head tested: `4419509ee0f62a7e5ca088b87feb682b1a664105`.
+- Documentation-inclusive implementation closure SHA-256: `c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e`.
+- Plan SHA-256: `b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f`.
+- Self-hosted mainline CI run `35539075794`, job `106153297550`: **PASS**.
+- Repository/governance tests: **49 PASS**.
+- Learned/model ownership tests: **51 PASS**.
+- Compiler regressions: **288 PASS**.
+- Native V2 CAA player SHA-256: `b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1`.
+- Model/source ownership run `35539075776`: **PASS**.
+- Subject-free Stage01–08 orchestration run `35539075769`, job `106153297245`: **PASS**.
+- Uploaded orchestration evidence ZIP SHA-256: `e5d994baccae4baee42edb9b00381504f972e619d97521694f10efdb0398c1f1`.
+- Canonical assembly ledger remained unchanged during dry-run.
+- Knight data used during red-team repair/calibration: **none**.
 
-## Current red-team blockers
+## 46-stage red-team result
 
-1. **RT-37 — automatic presentation segmentation:** current V2 splits disconnected face islands inside mechanical components, but does not automatically split mechanically equivalent, topologically connected visual regions that need independent Spine-style addressing.
-2. **RT-45/46 — dynamic appearance quality:** Stage45 exhaustively proves native/reference parity, provenance totality and compiled-unobserved exposure, but not dynamic 2D-art deformation quality such as screen-space texture/line distortion or temporal edge integrity. Stage46 therefore must not over-read contract closure as proof of universal Spine-class dynamic appearance.
+The second-pass audit found two real product-quality gaps and both are now closed subject-free with scoped claims:
 
-Canonical detail: `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`.
+1. **RT-37 — presentation partition:** Stage37 emits hash-bound `PresentationPartitionEvidenceIR.v2`. Connected regions inside one mechanical component may split only when frozen source-backed CAA appearance-boundary evidence supports it. Categorical object identity is not minted.
+2. **RT-45 — dynamic appearance:** Stage45 gates native parity, provenance and exposure **plus rigid-motion-invariant intrinsic UV→surface deformation conditioning**. Raw screen-space conditioning was explicitly rejected as a shipping gate because legitimate 3D foreshortening is not artwork deformation.
+3. **RT-46 — product closure:** Stage46 requires both repaired authorities and exports presentation-partition evidence in the editable authoring bundle before `PASS_PRODUCT_V2`.
 
-## The V2 product has three co-equal quality authorities
+## Product authority
 
 ### Geometry
-Owns the renderable canonical surface: silhouette capacity, topology, stable addressability and rasterizable triangle conditioning. The qualified single product geometry identity is `QualifiedMeshIR`; stable surface addressing is carried by `SurfaceAddressingIR`.
+Owns the renderable canonical surface: silhouette capacity, topology, stable `SurfaceAddressing` and rasterizable conditioning.
 
 ### Mechanics
-Owns skeleton, skin, deformation, contacts, motion and dynamic conditioning.
+Owns skeleton, skin, deformation, contacts and full-3D motion.
 
 ### Appearance
-Owns source-faithful total 2D art: color, alpha, line character, provenance, unseen completion quality, provenance-boundary seams, sampling behavior and temporal visual continuity.
+The **Complete Appearance Authority** owns source-faithful total 2D art, provenance, completion, seams, premultiplied-alpha sampling, exposure and bounded intrinsic deformation.
 
-**A failure on any one axis is a product failure. A visually wrong puppet does not pass because its mesh, rig and skin are mechanically valid.**
+### Presentation
+Owns role-free slots/attachments/editable grouping from observable evidence. It may not mint semantic object identity.
 
-The target remains Spine-class 2D art with internal 3D mechanics. Mechanics may be 3D; presentation must remain 2D-authored in character.
+A failure on any one quality axis is a product failure. Mechanics/runtime correctness may not hide appearance or presentation failure.
 
-## Why V2 exists
+## Claim boundary
 
-V1 gave geometry and mechanics rigorous typed authorities and proofs, but appearance remained too close to donor, fallback and renderer logic. It also mixed independent failure classes: carrier coverage, visibility/depth, appearance definedness and texture sampling.
+The current READY seal proves subject-free implementation readiness for the exact controlled V2 witness contract. It does **not** prove Knight product performance, unseen generalization, semantic recognition or universal human aesthetic optimality.
 
-V2 separates them. See `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`.
+## Next action
 
-Key corrections:
-- real DAG execution rather than hidden linear stage semantics;
-- source observations separated from output V0..V7 directions;
-- IRIS/GSA treated as geometry/surface evidence, not final art authority;
-- mesh producer/gate feasibility audited before downstream qualification;
-- stable mesh addressing created with the mesh domain;
-- Complete Appearance Authority makes supported appearance total before runtime;
-- CAA cannot hide geometry, depth or sampling failures;
-- visibility = posed canonical XYZ + z-buffer;
-- art = sealed CAA;
-- premultiplied-alpha filtering/compositing + atlas bleed;
-- native Dynamic Visual Integrity is a product gate, not a cosmetic screenshot.
-
-## Current audit blocks
-
-Knight does **not** run yet. The prior readiness seal is not authoritative. Current main must first close:
-- IRIS/GSA role and Stage13 geometry-floor redesign;
-- relation-graph / 3-clique / CDT mesh-quality audit;
-- CAA deterministic compile, bake, qualification, holdout and seam logic;
-- source-lock confidence/correspondence rules;
-- premultiplied alpha + bleed end to end;
-- removal of current-path donor/UNSEEN runtime semantics;
-- posed-XYZ visibility/equal-depth proof;
-- mechanics branch revalidation against frozen mesh;
-- presentation and complete puppet seal;
-- motion dynamic exposure budget;
-- Runtime CAA-only binding and package-load verification;
-- Dynamic Visual Integrity attribution;
-- Stage46 closure and editable-authoring export;
-- complete adversarial module audit;
-- witness orchestration dry-run: run-local ledger initialization, target-closure CLI, artifact schema/output verification and Stage01–08 contract without subject-result admission.
-
-## Knight rule
-
-Only after a **new** implementation-readiness seal is green do we mint a fresh Knight V2 run from Stage01. The previous seal is explicitly revoked and attempts triggered from it are inadmissible as scientific witness evidence. Exact controlled eight-source input remains the first witness apparatus to isolate architecture changes; it is not a permanent assertion that product input must always contain eight views.
+**User review.** Do not execute Subject-2 Knight until the user explicitly approves. After approval, mint a fresh run-local Knight ledger and begin at Stage01; canonical `ACTIVE_RUN_V2.json` remains implementation governance only.

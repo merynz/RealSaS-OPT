@@ -1,11 +1,11 @@
 {
   "schema": "RealSaS.V2ImplementationReadiness.v1",
-  "date": "2026-09-20",
-  "status": "V2_STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN",
+  "date": "2026-09-21",
+  "status": "READY_FOR_WITNESS_EXECUTION",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
   "pipeline_plan_sha256": "b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f",
   "rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
-  "witness_policy": "WITNESS_FORBIDDEN_UNTIL_ORCHESTRATION_AND_ARTIFACT_DRY_RUN_PROOF_PASSES",
+  "witness_policy": "IMPLEMENTATION_READY__WITNESS_EXECUTION_REQUIRES_EXPLICIT_USER_APPROVAL",
   "required_proofs": [
     "DAG_ORCHESTRATOR",
     "GEOMETRY_ROLE_AND_IRIS_GSA",
@@ -208,12 +208,12 @@
     {
       "proof_id": "PRESENTATION_STRUCTURE",
       "status": "PASS",
-      "sha256": "6dfe026f9c4078f7d7f8b40210ed096f9756f56e37a77656a964e2ef06a68812",
-      "note": "Role-free Stage37 presentation and Stage38 complete puppet seal close with exact bindings and reject drift.",
+      "sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+      "note": "Stage37 consumes frozen source-backed CAA boundary evidence to create role-free presentation partition; Stage38 verifies exact bindings.",
       "evidence": {
-        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
-        "mainline_ci_run_id": 35529673748,
-        "mainline_ci_job_id": 106127939604,
+        "tested_implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
+        "mainline_ci_run_id": 35539075794,
+        "mainline_ci_job_id": 106153297550,
         "model_source_gate_run_id": 35529673786,
         "runtime_ci_run_id": 35529375697,
         "runtime_ci_job_id": 106127139365,
@@ -221,10 +221,12 @@
         "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
         "witness_used": false,
         "hooks": [
+          "tests/compiler/test_presentation_partition_v2.py",
           "tests/compiler/test_product_mesh_stage_adapters_v1.py",
           "tests/compiler/test_v2_tail_authority_fail_closed.py"
         ],
-        "claim": "Role-free Stage37 presentation and Stage38 complete puppet seal close with exact bindings and reject drift."
+        "claim": "Role-free Stage37 presentation and Stage38 complete puppet seal close with exact bindings and reject drift.",
+        "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e"
       }
     },
     {
@@ -275,12 +277,12 @@
     {
       "proof_id": "DYNAMIC_VISUAL_INTEGRITY",
       "status": "PASS",
-      "sha256": "c20bb693948617cc9d34c7eee3908e9b8e06898c0b16b4e2512e437496e60da8",
-      "note": "Stage45 gates undefined visible provenance, native parity and compiled-unobserved exposure over dynamic frames.",
+      "sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+      "note": "Stage45 proves native parity/provenance/exposure plus rigid-motion-invariant intrinsic dynamic appearance conditioning under subject-free calibration.",
       "evidence": {
-        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
-        "mainline_ci_run_id": 35529673748,
-        "mainline_ci_job_id": 106127939604,
+        "tested_implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
+        "mainline_ci_run_id": 35539075794,
+        "mainline_ci_job_id": 106153297550,
         "model_source_gate_run_id": 35529673786,
         "runtime_ci_run_id": 35529375697,
         "runtime_ci_job_id": 106127139365,
@@ -288,22 +290,23 @@
         "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
         "witness_used": false,
         "hooks": [
+          "tests/compiler/test_dynamic_appearance_conditioning_v2.py",
           "tests/compiler/test_product_mesh_stage_adapters_v1.py",
-          "tests/compiler/test_runtime_v2_native_smoke.py",
-          "tests/compiler/test_v2_tail_authority_fail_closed.py"
+          "tests/compiler/test_runtime_v2_native_smoke.py"
         ],
-        "claim": "Stage45 gates undefined visible provenance, native parity and compiled-unobserved exposure over dynamic frames."
+        "claim": "Stage45 gates undefined visible provenance, native parity and compiled-unobserved exposure over dynamic frames.",
+        "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e"
       }
     },
     {
       "proof_id": "PRODUCT_CLOSURE_AND_AUTHORING",
       "status": "PASS",
-      "sha256": "bb82d95c15cd989e5cfc97655e9e02d73678678ae7257dd8e642ffdf793fb027",
-      "note": "Subject-free Stage37-46 closes product_pass and editable authoring archive with exact geometry/mechanics/appearance bindings.",
+      "sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+      "note": "Stage46 requires presentation-partition evidence and dynamic appearance-conditioning PASS and exports partition evidence in the editable authoring archive.",
       "evidence": {
-        "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
-        "mainline_ci_run_id": 35529673748,
-        "mainline_ci_job_id": 106127939604,
+        "tested_implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
+        "mainline_ci_run_id": 35539075794,
+        "mainline_ci_job_id": 106153297550,
         "model_source_gate_run_id": 35529673786,
         "runtime_ci_run_id": 35529375697,
         "runtime_ci_job_id": 106127139365,
@@ -314,36 +317,39 @@
           "tests/compiler/test_product_mesh_stage_adapters_v1.py",
           "tests/compiler/test_v2_tail_authority_fail_closed.py"
         ],
-        "claim": "Subject-free Stage37-46 closes product_pass and editable authoring archive with exact geometry/mechanics/appearance bindings."
+        "claim": "Subject-free Stage37-46 closes product_pass and editable authoring archive with exact geometry/mechanics/appearance bindings.",
+        "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e"
       }
     },
     {
       "proof_id": "ADVERSARIAL_MODULE_AUDIT",
-      "status": "REOPENED",
-      "sha256": "",
-      "note": "Coarse A-U audit was superseded by a 46-stage second-pass red-team. RT-37 and RT-45/46 remain open.",
+      "status": "PASS",
+      "sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+      "note": "46-stage second-pass red-team closed RT-37 and RT-45/46 subject-free with scoped product claims.",
       "evidence": {
-        "previous_subject_free_module_audit_preserved": true,
+        "tested_implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
+        "mainline_ci_run_id": 35539075794,
+        "mainline_ci_job_id": 106153297550,
+        "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
         "stage_redteam": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
-        "open_findings": [
-          "RT-37",
-          "RT-45",
-          "RT-46"
-        ],
+        "presentation_policy": "canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json",
+        "dynamic_calibration": "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json",
+        "open_findings": [],
         "witness_used": false
       }
     },
     {
       "proof_id": "WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN",
       "status": "PASS",
-      "sha256": "23d58072d67f5d6bd0fc50134004b944a19153f0b4e94b0e0a2cdf1fb6becf5f",
-      "note": "Subject-free real Stage01-08 run-local orchestration and exact artifact/schema/hash contract passed on self-hosted runner.",
+      "sha256": "e5d994baccae4baee42edb9b00381504f972e619d97521694f10efdb0398c1f1",
+      "note": "Subject-free Stage01-08 run-local orchestration and exact artifact/schema/hash contract passed against the documentation-inclusive implementation closure.",
       "evidence": {
-        "tested_implementation_head": "ca9d2d2e59bc517a139c743eb6a91df2e48ac761",
-        "run_id": 35536134136,
-        "job_id": 106145391794,
-        "implementation_closure_sha256": "a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882",
-        "uploaded_artifact_zip_sha256": "23d58072d67f5d6bd0fc50134004b944a19153f0b4e94b0e0a2cdf1fb6becf5f",
+        "tested_implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
+        "run_id": 35539075769,
+        "job_id": 106153297245,
+        "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+        "uploaded_artifact_zip_sha256": "e5d994baccae4baee42edb9b00381504f972e619d97521694f10efdb0398c1f1",
+        "audit_manifest_sha256": "adef70ab4adb88fd568ee303cad1c5f5aa9d370ccdae54e5a2d634f8fcd9d0d7",
         "canonical_assembly_ledger_unchanged": true,
         "witness_used": false
       }
@@ -356,20 +362,30 @@
   ],
   "appearance_principle": "SPINE_CLASS_2D_ART_IS_A_PRIMARY_PRODUCT_REQUIREMENT_NOT_POST_RENDER_POLISH",
   "readiness_seal": {
-    "status": "REVOKED_BY_STAGE_LEVEL_REDTEAM",
-    "reason": "Exact CI and subject-free orchestration are green, but stage-level red-team found unresolved automatic presentation-segmentation and dynamic appearance-quality/closure-claim gaps.",
-    "witness_execution_allowed": false,
-    "user_approval_required_after_future_reseal": true
+    "status": "PASS",
+    "reason": "All required V2 implementation proofs are PASS against the exact documentation-inclusive implementation closure; 46-stage red-team blockers are closed subject-free.",
+    "witness_execution_allowed": true,
+    "witness_execution_authorized_now": false,
+    "user_approval_required": true,
+    "user_approval_state": "AWAITING_EXPLICIT_APPROVAL",
+    "knight_started": false
   },
   "stage_by_stage_redteam": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
   "latest_green_evidence": {
-    "functional_head": "ca9d2d2e59bc517a139c743eb6a91df2e48ac761",
-    "mainline_ci_run_id": 35536134130,
-    "mainline_ci_job_id": 106145391722,
-    "model_source_gate_run_id": 35536134125,
-    "orchestration_dry_run_id": 35536134136,
-    "orchestration_dry_run_job_id": 106145391794,
-    "implementation_closure_sha256_before_redteam_docs": "a46361fc2d9b989a2a4490829b73b835202521c5efed6916e44aab253cabf882",
+    "implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
+    "mainline_ci_run_id": 35539075794,
+    "mainline_ci_job_id": 106153297550,
+    "repository_governance_tests_passed": 49,
+    "learned_model_tests_passed": 51,
+    "compiler_tests_passed": 288,
+    "model_source_gate_run_id": 35539075776,
+    "orchestration_dry_run_id": 35539075769,
+    "orchestration_dry_run_job_id": 106153297245,
+    "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+    "orchestration_artifact_zip_sha256": "e5d994baccae4baee42edb9b00381504f972e619d97521694f10efdb0398c1f1",
+    "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
+    "plan_sha256": "b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f",
     "witness_used": false
-  }
+  },
+  "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e"
 }

@@ -1,32 +1,40 @@
 {
   "schema": "RealSaS.ExperimentRegistry.v3",
-  "date": "2026-09-20",
+  "date": "2026-09-21",
   "active_execution_branch": "main",
   "experiments": [
     {
       "id": "V2_IMPLEMENTATION_ASSEMBLY",
-      "status": "ACTIVE__STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN",
+      "status": "REVIEW_READY__READY_FOR_WITNESS_EXECUTION__AWAITING_USER_APPROVAL",
       "branch": "main",
-      "scope": "Subject-free completion of the 46-stage V2 DAG, run-local orchestration authority and adversarial product-path cleanup before any admissible Knight witness.",
-      "progress": "STAGE_LEVEL_REDTEAM_HARDENING",
+      "scope": "Subject-free completion and red-team hardening of the 46-stage V2 DAG before the first controlled Knight witness.",
+      "progress": "IMPLEMENTATION_SEALED__USER_REVIEW_GATE",
       "readiness": "canonical/V2_IMPLEMENTATION_READINESS.json",
-      "required_next_proof": "CLOSE_RT37_AND_RT45_46_THEN_RESEAL_EXACT_IMPLEMENTATION_READINESS",
+      "required_next_proof": "USER_APPROVAL_BEFORE_KNIGHT_STAGE01",
       "product_pass_claimed": false,
       "knight_witness_claimed": false,
       "unseen_claimed": false,
       "stage_redteam": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
       "latest_green": {
-        "functional_head": "ca9d2d2e59bc517a139c743eb6a91df2e48ac761",
-        "mainline_ci_run_id": 35536134130,
-        "orchestration_dry_run_id": 35536134136,
+        "implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
+        "mainline_ci_run_id": 35539075794,
+        "model_source_gate_run_id": 35539075776,
+        "orchestration_dry_run_id": 35539075769,
+        "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+        "orchestration_artifact_zip_sha256": "e5d994baccae4baee42edb9b00381504f972e619d97521694f10efdb0398c1f1",
         "witness_used": false
-      }
+      },
+      "redteam_resolution": [
+        "RT-37:CLOSED_WITH_SCOPE",
+        "RT-45:CLOSED_WITH_SCOPE",
+        "RT-46:CLOSED_WITH_SCOPE"
+      ]
     },
     {
       "id": "SUBJECT2_KNIGHT_FULL_CLOSURE",
-      "status": "HELD__PREMATURE_ACTIVATION_VOID__NO_ADMISSIBLE_WITNESS_RESULT",
+      "status": "HELD__READY_SEAL_PRESENT__AWAITING_EXPLICIT_USER_APPROVAL",
       "branch": "main",
-      "scope": "Future first V2 product witness after a new readiness seal; prior pre-Stage01 attempts are apparatus evidence only.",
+      "scope": "First controlled V2 product witness; may activate only after explicit user approval.",
       "current_execution_authority": false,
       "activation_record": "canonical/SUBJECT2_KNIGHT_V2_WITNESS_ACTIVATION_20260920.json",
       "product_pass_claimed": false,

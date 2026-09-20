@@ -6,7 +6,7 @@
   "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
   "pipeline_plan_sha256": "b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f",
-  "status": "ASSEMBLY_IN_PROGRESS__WITNESS_EXECUTION_DISABLED",
+  "status": "ASSEMBLY_COMPLETE__REVIEW_READY__WITNESS_HELD_FOR_USER_APPROVAL",
   "execution_enabled": false,
   "completed_count": 0,
   "failed_count": 0,
@@ -605,5 +605,13 @@
       "event": "PLAN_CACHE_SCOPE_CORRECTION",
       "note": "Stage41 now fingerprints observation manifest authority; Stage42 has no direct runtime manifest dependency; phantom PresentationTimelineIR title removed."
     }
-  ]
+  ],
+  "metadata": {
+    "implementation_readiness": "READY_FOR_WITNESS_EXECUTION",
+    "implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
+    "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
+    "stage_redteam": "PASS_46_STAGE_SECOND_PASS_HARDENED_SUBJECT_FREE",
+    "witness_execution_requires_explicit_user_approval": true,
+    "knight_not_started": true
+  }
 }

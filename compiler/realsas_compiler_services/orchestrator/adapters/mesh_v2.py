@@ -33,7 +33,7 @@ from compiler.realsas_compiler_core.mesh.product_policy_v1 import load_mesh_poli
 from compiler.realsas_compiler_core.motion_3d_adapter_v1 import parse_axis_contract_v1
 from compiler.realsas_compiler_core.playback_full_surface_v3 import qualify_camera_v3
 from compiler.realsas_compiler_core.playback_runtime_v3 import ReferenceRasterContractV1
-from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
+from compiler.realsas_compiler_core.artifact_codec_v2 import (
     canonical_mesh_candidate_from_dict,
     qualified_mesh_from_dict,
     qualified_mesh_skin_from_dict,

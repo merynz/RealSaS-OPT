@@ -36,11 +36,30 @@ class CanonicalMainReadinessV1(unittest.TestCase):
             "compiler/realsas_compiler_core/mesh/mesh_binding.py",
             "compiler/realsas_compiler_core/product_authority_v1.py",
             "compiler/realsas_compiler_core/surface_addressing_v1.py",
-            "compiler/realsas_compiler_core/complete_appearance_authority_v1.py",
+            "compiler/realsas_compiler_core/appearance_authority_v2.py",
+            "compiler/realsas_compiler_core/appearance_compile_v2.py",
+            "compiler/realsas_compiler_core/appearance_bake_v2.py",
+            "compiler/realsas_compiler_core/appearance_quality_v2.py",
+            "compiler/realsas_compiler_core/visibility_v2.py",
+            "compiler/realsas_compiler_core/runtime_authority_v2.py",
+            "compiler/realsas_compiler_core/runtime_package_v2.py",
             "compiler/realsas_compiler_core/output_presentation_v1.py",
             "compiler/realsas_compiler_services/orchestrator/mainline.py",
             "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
             "canonical/ACTIVE_RUN_V2.json",
+            "canonical/V2_IMPLEMENTATION_READINESS.json",
+            "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
+            "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json",
+            "compiler/realsas_compiler_services/orchestrator/adapters/preflight_v2.py",
+            "compiler/realsas_compiler_services/orchestrator/adapters/observation_v2.py",
+            "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py",
+            "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py",
+            "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py",
+            "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py",
+            "compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py",
+            "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py",
+            "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py",
+            "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
             "compiler/realsas_compiler_core/directional_binding.py",
             "compiler/realsas_compiler_services/proof/directional_motion_provider.py",
             "compiler/realsas_compiler_services/proof/directional_motion_evaluator.py",
@@ -142,21 +161,25 @@ class CanonicalMainReadinessV1(unittest.TestCase):
         current = (ROOT / "CURRENT_STATE.md").read_text(encoding="utf-8")
         self.assertFalse(bool(gate["fit_authorized_now"]))
         self.assertIn("SUPERSEDED FOR CONTINUATION", restoration)
-        self.assertIn("SUBJECT2_KNIGHT_FULL_CLOSURE", current)
-        self.assertIn("SurfaceAddressingIR", current)
+        self.assertIn("V2 IMPLEMENTATION ASSEMBLY", current)
+        self.assertIn("SurfaceAddressing", current)
         self.assertIn("Complete Appearance Authority", current)
+        self.assertIn("Geometry", current)
+        self.assertIn("Mechanics", current)
+        self.assertIn("Appearance", current)
 
     def test_state_and_index_point_to_current_product_authorities(self) -> None:
         restoration = (ROOT / "RESTORATION_STATE.md").read_text(encoding="utf-8")
         state = (ROOT / "CURRENT_STATE.md").read_text(encoding="utf-8")
         index = (ROOT / "SYSTEM_INDEX.md").read_text(encoding="utf-8")
         self.assertIn("SUPERSEDED FOR CONTINUATION", restoration)
-        self.assertIn("SurfaceAddressingIR", state)
+        self.assertIn("SurfaceAddressing", state)
         self.assertIn("Complete Appearance Authority", state)
-        self.assertIn("46-stage V2", state)
-        self.assertIn("Product mesh", index)
-        self.assertIn("Complete Appearance", index)
+        self.assertIn("46-stage", state)
+        self.assertIn("Canonical mesh domain", index)
+        self.assertIn("Appearance / CAA", index)
         self.assertIn("surface_addressing_v1.py", index)
+        self.assertIn("dependency DAG", index)
 
     def test_closure_workflow_is_manual_only(self) -> None:
         workflow = (ROOT / ".github/workflows/restoration_closure_manual.yml").read_text(encoding="utf-8")

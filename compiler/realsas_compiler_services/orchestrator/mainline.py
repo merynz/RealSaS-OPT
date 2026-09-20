@@ -244,6 +244,66 @@ def run_manifest_path(run_id: str) -> Path:
     return authority_root() / "runs" / run_id / "run_manifest.json"
 
 
+def run_ledger_path(run_id: str) -> Path:
+    return authority_root() / "runs" / run_id / "ACTIVE_RUN_V2.json"
+
+
+def build_fresh_run_ledger(
+    plan: dict,
+    *,
+    run_id: str,
+    subject_id: str,
+    manifest_ref: str,
+    architecture_scope: str = "REALSAS_V2_FRESH_WITNESS",
+) -> dict:
+    plan_hash = validate_plan(plan)
+    rows = [
+        {
+            "ordinal": int(stage["ordinal"]),
+            "id": str(stage["id"]),
+            "status": "PENDING",
+            "attempts": 0,
+            "input_fingerprint": "",
+            "implementation_hash": "",
+            "policy_hash": "",
+            "outputs": [],
+            "diagnostics_hash": "",
+            "blockers": [],
+            "wall_seconds": 0.0,
+            "performance": {},
+        }
+        for stage in plan["stages"]
+    ]
+    ledger = {
+        "schema": "RealSaS.ActiveRunLedger.v2",
+        "run_id": str(run_id),
+        "subject_id": str(subject_id),
+        "canonical_branch": "main",
+        "architecture_scope": str(architecture_scope),
+        "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
+        "pipeline_plan_sha256": plan_hash,
+        "status": "ACTIVE",
+        "execution_enabled": True,
+        "completed_count": 0,
+        "failed_count": 0,
+        "total_count": len(rows),
+        "ready_stage_ids": [],
+        "failed_stage_ids": [],
+        "blocked_by_failed_dependency": {},
+        "run_manifest_ref": str(manifest_ref),
+        "stages": rows,
+        "history": [
+            {
+                "event": "FRESH_RUN_LEDGER_MATERIALIZED",
+                "scope": str(architecture_scope),
+            }
+        ],
+    }
+    _refresh(plan, ledger)
+    validate_ledger(plan, ledger)
+    return ledger
+
+
 def _local_module_path(module_name: str) -> Path | None:
     rel = Path(*str(module_name).split("."))
     file_path = (ROOT / rel).with_suffix(".py")
@@ -549,6 +609,7 @@ def _run_stage(
     manifest_path: Path,
     run_id: str,
     stage_id: str,
+    ledger_path: Path,
 ) -> None:
     stage = _stage_map(plan)[stage_id]
     row = _ledger_map(ledger)[stage_id]
@@ -570,7 +631,7 @@ def _run_stage(
         blockers=[],
     )
     _refresh(plan, ledger)
-    atomic_json(LEDGER_PATH, ledger)
+    atomic_json(ledger_path, ledger)
 
     ctx = {
         "repo_root": ROOT,
@@ -628,7 +689,7 @@ def _run_stage(
             }
         )
     _refresh(plan, ledger)
-    atomic_json(LEDGER_PATH, ledger)
+    atomic_json(ledger_path, ledger)
 
 
 def execute(
@@ -639,7 +700,10 @@ def execute(
 ) -> int:
     plan = load_json(PLAN_PATH)
     validate_readiness(plan)
-    ledger = load_json(LEDGER_PATH)
+    ledger_path = run_ledger_path(run_id)
+    if not ledger_path.is_file():
+        raise RuntimeError(f"RUN_LEDGER_MISSING:{ledger_path}")
+    ledger = load_json(ledger_path)
     validate_ledger(plan, ledger)
     if ledger["run_id"] != run_id:
         raise RuntimeError(
@@ -653,7 +717,7 @@ def execute(
     target_set = _target_closure(plan, targets)
 
     if _verify_existing_passes(plan, ledger, manifest):
-        atomic_json(LEDGER_PATH, ledger)
+        atomic_json(ledger_path, ledger)
 
     if not resume:
         for stage_id in sorted(
@@ -679,10 +743,11 @@ def execute(
                 manifest_path=manifest_path,
                 run_id=run_id,
                 stage_id=stage_id,
+                ledger_path=ledger_path,
             )
 
     _refresh(plan, ledger)
-    atomic_json(LEDGER_PATH, ledger)
+    atomic_json(ledger_path, ledger)
     validate_ledger(plan, ledger)
 
     rows = _ledger_map(ledger)
@@ -744,7 +809,19 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("validate-plan")
     sub.add_parser("validate-readiness")
-    sub.add_parser("status")
+    status_parser = sub.add_parser("status")
+    status_parser.add_argument(
+        "--run-id",
+        default="",
+        help="Show a run-local ledger. With no run id, show canonical assembly governance ledger.",
+    )
+    init = sub.add_parser("init-run")
+    init.add_argument("--run-id", required=True)
+    init.add_argument("--subject-id", required=True)
+    init.add_argument(
+        "--architecture-scope",
+        default="REALSAS_V2_FRESH_WITNESS",
+    )
     run = sub.add_parser("execute")
     run.add_argument("--run-id", required=True)
     run.add_argument(
@@ -768,9 +845,34 @@ def main(argv: list[str] | None = None) -> int:
         print(f"MAINLINE_V2_READINESS_PASS readiness_sha256={digest}")
         return 0
 
-    ledger = load_json(LEDGER_PATH)
     if args.command == "status":
+        ledger = (
+            load_json(run_ledger_path(args.run_id))
+            if str(args.run_id).strip()
+            else load_json(LEDGER_PATH)
+        )
         print(status_text(plan, ledger))
+        return 0
+    if args.command == "init-run":
+        validate_readiness(plan)
+        manifest_path = run_manifest_path(args.run_id)
+        if not manifest_path.is_file():
+            raise RuntimeError(f"RUN_MANIFEST_MISSING:{manifest_path}")
+        path = run_ledger_path(args.run_id)
+        if path.exists():
+            raise RuntimeError(f"RUN_LEDGER_ALREADY_EXISTS:{path}")
+        ledger = build_fresh_run_ledger(
+            plan,
+            run_id=args.run_id,
+            subject_id=args.subject_id,
+            manifest_ref=str(manifest_path),
+            architecture_scope=args.architecture_scope,
+        )
+        atomic_json(path, ledger)
+        print(
+            f"MAINLINE_V2_RUN_LEDGER_INIT run={args.run_id} "
+            f"subject={args.subject_id} path={path}"
+        )
         return 0
     return execute(
         args.run_id,

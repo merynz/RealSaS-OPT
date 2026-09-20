@@ -201,19 +201,94 @@ jobs:
           print("RUN_MANIFEST",manifest_path,sha(manifest_path))
           PY
 
+      - name: Materialize fresh run-local Knight V2 ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from compiler.realsas_compiler_services.orchestrator.mainline import validate_plan
+
+          plan_path=Path("canonical/MAINLINE_EXECUTION_PLAN_V2.json")
+          ledger_path=Path("canonical/ACTIVE_RUN_V2.json")
+          plan=json.loads(plan_path.read_text(encoding="utf-8"))
+          plan_hash=validate_plan(plan)
+          rows=[]
+          for stage in plan["stages"]:
+              rows.append({
+                  "ordinal":int(stage["ordinal"]),
+                  "id":str(stage["id"]),
+                  "status":"PENDING",
+                  "attempts":0,
+                  "input_fingerprint":"",
+                  "implementation_hash":"",
+                  "policy_hash":"",
+                  "outputs":[],
+                  "diagnostics_hash":"",
+                  "blockers":[],
+                  "wall_seconds":0.0,
+                  "performance":{},
+              })
+          ledger={
+              "schema":"RealSaS.ActiveRunLedger.v2",
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "canonical_branch":"main",
+              "architecture_scope":"REALSAS_V2_FRESH_WITNESS",
+              "pipeline_plan":"canonical/MAINLINE_EXECUTION_PLAN_V2.json",
+              "pipeline_plan_sha256":plan_hash,
+              "status":"ACTIVE",
+              "execution_enabled":True,
+              "completed_count":0,
+              "failed_count":0,
+              "total_count":len(rows),
+              "ready_stage_ids":[
+                  stage["id"] for stage in plan["stages"]
+                  if not stage.get("depends_on")
+              ],
+              "failed_stage_ids":[],
+              "blocked_by_failed_dependency":{},
+              "run_manifest_ref":str(Path(os.environ["RUN_ROOT"])/"run_manifest.json"),
+              "stages":rows,
+              "history":[{
+                  "event":"FRESH_WITNESS_LEDGER_MATERIALIZED",
+                  "activation":"canonical/SUBJECT2_KNIGHT_V2_WITNESS_ACTIVATION_20260920.json",
+                  "scope":"STAGE01_THROUGH_STAGE08_OBSERVATION_PREFLIGHT_ONLY",
+              }],
+          }
+          ledger_path.write_text(json.dumps(ledger,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print("FRESH_WITNESS_LEDGER",ledger["run_id"],ledger["ready_stage_ids"])
+          PY
+
       - name: Execute canonical Stage01 through Stage08
         shell: bash
         run: |
           set -euo pipefail
-          python -m compiler.realsas_compiler_services.orchestrator.mainline execute             --run-id "$RUN_ID"             --from-stage 01_SOURCE_BYTES_SEALED             --to-stage 08_NORMALIZATION_DOMAIN_QUALIFIED
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+            --run-id "$RUN_ID" \
+            --target 02_SOURCE_LICENSE_PROVENANCE \
+            --target 08_NORMALIZATION_DOMAIN_QUALIFIED
           python -m compiler.realsas_compiler_services.orchestrator.mainline status
           python - <<'PY'
           import json
           p=json.load(open("canonical/ACTIVE_RUN_V2.json",encoding="utf-8"))
+          by={row["id"]:row for row in p["stages"]}
+          expected=[
+              "01_SOURCE_BYTES_SEALED",
+              "02_SOURCE_LICENSE_PROVENANCE",
+              "03_SOURCE_MECHANICAL_AUDIT",
+              "04_FULL_SUBJECT_ADMISSION",
+              "05_CAMERA_CONTRACT_SOLVED",
+              "06_OBSERVATION_RENDER_8VIEW",
+              "07_OBSERVATION_CONTRACT_QUALIFIED",
+              "08_NORMALIZATION_DOMAIN_QUALIFIED",
+          ]
+          assert all(by[stage]["status"]=="PASS" for stage in expected), p
           assert p["completed_count"]==8, p
-          assert p["next_stage"]=="09_IRIS_FIT_PREREGISTERED", p
+          assert by["09_IRIS_FIT_PREREGISTERED"]["status"]=="PENDING", p
           assert p["total_count"]==46, p
-          print("SUBJECT2_V2_PREFIT_GATE_PASS progress=8/46 next=09_IRIS_FIT_PREREGISTERED")
+          print("SUBJECT2_V2_PREFIT_GATE_PASS progress=8/46 next_allowed=09_IRIS_FIT_PREREGISTERED")
           PY
 
       - name: Bundle prefit evidence

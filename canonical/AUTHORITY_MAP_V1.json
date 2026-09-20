@@ -65,7 +65,8 @@
   },
   "active_experiments": [
     {
-      "experiment_id": "V2_IMPLEMENTATION_ASSEMBLY",
+      "id": "V2_IMPLEMENTATION_ASSEMBLY",
+      "branch": "main",
       "status": "ACTIVE__WITNESS_EXECUTION_FORBIDDEN_UNTIL_READINESS_SEAL",
       "question": "Can the 46-stage RealSaS V2 DAG be made internally complete, adversarially audited and executable with geometry, mechanics and appearance as co-equal product authorities before any Knight outcome is observed?",
       "does_not_prove": [

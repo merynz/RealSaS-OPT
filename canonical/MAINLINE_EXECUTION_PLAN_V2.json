@@ -771,7 +771,7 @@
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
         "36_QUALIFIED_MESH_SKIN_TRANSFER"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2:qualify_presentation_structure_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -788,14 +788,20 @@
       "title": "Full canonical puppet seal: Mesh Rig Skin Complete Appearance Presentation",
       "group": "product_state",
       "depends_on": [
-        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "15_RIGGING_SURFACE_QUALIFIED",
+        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
         "24_COMPLETE_APPEARANCE_QUALIFIED",
         "28_SKELETON_QUALIFIED",
+        "32_SKIN_QUALIFIED",
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
         "36_QUALIFIED_MESH_SKIN_TRANSFER",
         "37_QUALIFIED_PRESENTATION_STRUCTURE"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2:seal_complete_puppet_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -813,7 +819,7 @@
         "25_CAA_REFERENCE_REST_RENDER_PROOF",
         "38_CANONICAL_PUPPET_SEALED"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.motion_v2:seal_motion_source_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -832,11 +838,10 @@
       "depends_on": [
         "28_SKELETON_QUALIFIED",
         "34_DEFORMATION_CAPABILITY_ENVELOPE",
-        "37_QUALIFIED_PRESENTATION_STRUCTURE",
         "38_CANONICAL_PUPPET_SEALED",
         "39_MOTION_SOURCE_OR_PRESET_SEAL"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.motion_v2:compile_motion_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -850,20 +855,19 @@
     {
       "ordinal": 41,
       "id": "41_MOTION_DYNAMIC_PROOF",
-      "title": "Canonical FK/LBS/contact proof with compiled-unobserved exposure budget",
+      "title": "Canonical FK/LBS/contact/conditioning proof; rest-unseen exposure diagnostic only",
       "group": "motion",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",
         "07_OBSERVATION_CONTRACT_QUALIFIED",
-        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
         "28_SKELETON_QUALIFIED",
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
         "36_QUALIFIED_MESH_SKIN_TRANSFER",
-        "37_QUALIFIED_PRESENTATION_STRUCTURE",
         "38_CANONICAL_PUPPET_SEALED",
         "40_MOTION_COMPILE_RUN"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.motion_v2:prove_dynamic_motion_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -881,14 +885,13 @@
       "group": "runtime",
       "depends_on": [
         "05_CAMERA_CONTRACT_SOLVED",
-        "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
         "24_COMPLETE_APPEARANCE_QUALIFIED",
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
-        "37_QUALIFIED_PRESENTATION_STRUCTURE",
         "38_CANONICAL_PUPPET_SEALED",
         "41_MOTION_DYNAMIC_PROOF"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2:build_runtime_projection_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -907,7 +910,7 @@
       "depends_on": [
         "42_RUNTIME_PROJECTION_AND_CAA_BINDING"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2:materialize_runtime_package_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -925,7 +928,7 @@
         "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
         "43_RSS_MATERIALIZE_COMPACT"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2:prove_native_package_playback_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -939,16 +942,15 @@
     {
       "ordinal": 45,
       "id": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
-      "title": "Native dynamic visual integrity proof",
+      "title": "Native dynamic visual integrity plus compiled-unobserved appearance exposure gate",
       "group": "runtime",
       "depends_on": [
         "24_COMPLETE_APPEARANCE_QUALIFIED",
-        "41_MOTION_DYNAMIC_PROOF",
         "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
         "43_RSS_MATERIALIZE_COMPACT",
         "44_NATIVE_PACKAGE_OPEN_PLAYBACK"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2:prove_dynamic_visual_integrity_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -965,6 +967,7 @@
       "title": "Product closure plus editable canonical authoring export",
       "group": "closure",
       "depends_on": [
+        "23_COMPLETE_APPEARANCE_ASSET_BAKED",
         "24_COMPLETE_APPEARANCE_QUALIFIED",
         "28_SKELETON_QUALIFIED",
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
@@ -978,7 +981,7 @@
         "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
         "45_DYNAMIC_VISUAL_INTEGRITY_PROOF"
       ],
-      "adapter": "UNBOUND",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.closure_v2:seal_product_closure_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,

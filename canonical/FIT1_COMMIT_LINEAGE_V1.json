@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "a03826773e03fe2305325d75b59f2c11daf665ff",
+    "main": "8d0b691ed3d82be11ee8f148abc0d7d28e3d44cb",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -115,7 +115,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2210,
+  "commit_count": 2217,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -116129,6 +116129,165 @@
       "subsystem_tags": [
         "CI_TEST",
         "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "26dd52298c71803063b2da6c1dd01d99703ee203",
+      "parents": [
+        "a03826773e03fe2305325d75b59f2c11daf665ff"
+      ],
+      "author_time": "2026-09-20T21:02:52+03:00",
+      "committer_time": "2026-09-20T21:02:52+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "02efe828969b3baf95af90c34781fc0d1c6435a3",
+      "parents": [
+        "26dd52298c71803063b2da6c1dd01d99703ee203"
+      ],
+      "author_time": "2026-09-20T21:04:18+03:00",
+      "committer_time": "2026-09-20T21:04:18+03:00",
+      "subject": "iris v2: add dense source-raster coverage supervision aligned to Stage13",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "models/iris/v2/train_v2.py"
+      ],
+      "subsystem_tags": [
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5774942e257676a7f6bb3d0173d36fa5f9c21f68",
+      "parents": [
+        "02efe828969b3baf95af90c34781fc0d1c6435a3"
+      ],
+      "author_time": "2026-09-20T21:04:22+03:00",
+      "committer_time": "2026-09-20T21:04:22+03:00",
+      "subject": "iris source: mirror dense Stage13 coverage supervision into audited source",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "experiments/iris_reprojection_v2_20260831/train_v2.py"
+      ],
+      "subsystem_tags": [
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ec147ced5c2185d332fe748c61eeaf234c7c70fa",
+      "parents": [
+        "5774942e257676a7f6bb3d0173d36fa5f9c21f68"
+      ],
+      "author_time": "2026-09-20T21:04:49+03:00",
+      "committer_time": "2026-09-20T21:04:49+03:00",
+      "subject": "iris science: freeze dense source coverage objective before Knight",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/IRIS_V2_DENSE_SOURCE_COVERAGE_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "06271659c845c862213f0d0bfbb50dc33ef7ce1d",
+      "parents": [
+        "ec147ced5c2185d332fe748c61eeaf234c7c70fa"
+      ],
+      "author_time": "2026-09-20T21:05:22+03:00",
+      "committer_time": "2026-09-20T21:05:22+03:00",
+      "subject": "iris v2: fail closed prereg and receipt on dense Stage13 supervision",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ccbb8e89f49dbb6ea91d3a6fbbd1bd1ddb67710b",
+      "parents": [
+        "06271659c845c862213f0d0bfbb50dc33ef7ce1d"
+      ],
+      "author_time": "2026-09-20T21:05:55+03:00",
+      "committer_time": "2026-09-20T21:05:55+03:00",
+      "subject": "test: prove IRIS dense Stage13 coverage objective and no mask leakage",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/iris/test_iris_v2_dense_source_coverage_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8d0b691ed3d82be11ee8f148abc0d7d28e3d44cb",
+      "parents": [
+        "ccbb8e89f49dbb6ea91d3a6fbbd1bd1ddb67710b"
+      ],
+      "author_time": "2026-09-20T21:06:06+03:00",
+      "committer_time": "2026-09-20T21:06:06+03:00",
+      "subject": "ci: gate IRIS dense Stage13 supervision contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/current_mainline_self_hosted_ci.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "IRIS_GSA"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

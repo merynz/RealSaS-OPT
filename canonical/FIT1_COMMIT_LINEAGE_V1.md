@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2210**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2217**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2222,6 +2222,13 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-20T20:59:14+03:00` | `2b0335d65038` | yes | CI_TEST | ci: avoid runner-context expression in job environment | `.github/workflows/current_mainline_self_hosted_ci.yml` | `main` |
 | `2026-09-20T21:00:05+03:00` | `b376c0649f5c` | yes | CI_TEST, COMPILER_PROOF | test: bind Stage13 geometry gate red-team to current V2 adapter | `tests/compiler/test_stage13_geometry_gate_v2.py` | `main` |
 | `2026-09-20T21:00:11+03:00` | `a03826773e03` | yes | CI_TEST, COMPILER_PROOF | test: bind mesh feasibility red-team to current V2 adapter | `tests/compiler/test_relation_parent_quality_redteam_v1.py` | `main` |
+| `2026-09-20T21:02:52+03:00` | `26dd52298c71` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-20T21:04:18+03:00` | `02efe828969b` | yes | IRIS_GSA | iris v2: add dense source-raster coverage supervision aligned to Stage13 | `models/iris/v2/train_v2.py` | `main` |
+| `2026-09-20T21:04:22+03:00` | `5774942e2576` | yes | IRIS_GSA | iris source: mirror dense Stage13 coverage supervision into audited source | `experiments/iris_reprojection_v2_20260831/train_v2.py` | `main` |
+| `2026-09-20T21:04:49+03:00` | `ec147ced5c21` | yes | GOVERNANCE_CONTINUITY, IRIS_GSA | iris science: freeze dense source coverage objective before Knight | `canonical/IRIS_V2_DENSE_SOURCE_COVERAGE_POLICY_20260920.json` | `main` |
+| `2026-09-20T21:05:22+03:00` | `06271659c845` | yes | COMPILER_PROOF, IRIS_GSA | iris v2: fail closed prereg and receipt on dense Stage13 supervision | `compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py` | `main` |
+| `2026-09-20T21:05:55+03:00` | `ccbb8e89f49d` | yes | CI_TEST, IRIS_GSA | test: prove IRIS dense Stage13 coverage objective and no mask leakage | `tests/iris/test_iris_v2_dense_source_coverage_v2.py` | `main` |
+| `2026-09-20T21:06:06+03:00` | `8d0b691ed3d8` | yes | CI_TEST, IRIS_GSA | ci: gate IRIS dense Stage13 supervision contract | `.github/workflows/current_mainline_self_hosted_ci.yml` | `main` |
 
 ## Use rule
 

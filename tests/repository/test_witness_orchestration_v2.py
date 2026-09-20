@@ -72,13 +72,12 @@ def test_witness_workflow_uses_current_cli_and_run_local_ledger_only():
     assert "push:" not in text.split("permissions:", 1)[0]
 
 
-def test_readiness_is_reopened_until_witness_orchestration_proof_passes():
+def test_readiness_state_machine_is_consistent_with_orchestration_proof():
     readiness = json.loads(
         (ROOT / "canonical" / "V2_IMPLEMENTATION_READINESS.json").read_text(
             encoding="utf-8"
         )
     )
-    assert readiness["status"] == "IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN"
     assert (
         "WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN"
         in readiness["required_proofs"]
@@ -88,9 +87,23 @@ def test_readiness_is_reopened_until_witness_orchestration_proof_passes():
         for row in readiness["proofs"]
         if row["proof_id"] == "WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN"
     )
-    assert proof["status"] == "IN_PROGRESS"
-    assert readiness["readiness_seal"]["status"] == "REVOKED_BY_AUDIT_GAP"
-    assert readiness["readiness_seal"]["witness_execution_allowed"] is False
+    if proof["status"] == "IN_PROGRESS":
+        assert (
+            readiness["status"]
+            == "IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN"
+        )
+        assert readiness["readiness_seal"]["status"] == "REVOKED_BY_AUDIT_GAP"
+        assert readiness["readiness_seal"]["witness_execution_allowed"] is False
+    elif proof["status"] == "PASS":
+        assert readiness["status"] == "READY_FOR_WITNESS_EXECUTION"
+        assert readiness["readiness_seal"]["status"] == "PASS"
+        assert readiness["readiness_seal"]["witness_execution_allowed"] is True
+        assert (
+            readiness["implementation_closure_sha256"]
+            == mainline.implementation_closure_sha256(_plan())
+        )
+    else:
+        raise AssertionError(proof)
 
 
 def test_implementation_audit_execution_class_is_explicit_and_subject_free():

@@ -133,6 +133,16 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
         raise QualificationError("RUNTIME_V2_COMPLETE_PUPPET_APPEARANCE_QUAL_DRIFT")
     if dynamic.mesh_binding_hash != mesh.mesh_lineage_hash:
         raise QualificationError("RUNTIME_V2_DYNAMIC_MESH_DRIFT")
+    if (
+        dynamic.mechanical_state_binding_hash
+        != complete.mechanical_state_binding_hash
+    ):
+        raise QualificationError("RUNTIME_V2_DYNAMIC_MECHANICAL_STATE_DRIFT")
+    if (
+        dynamic.presentation_binding_hash
+        != complete.presentation_graph_binding_hash
+    ):
+        raise QualificationError("RUNTIME_V2_DYNAMIC_PRESENTATION_DRIFT")
 
     vertex_ids = [str(vertex.canonical_mesh_vertex_id) for vertex in mesh.vertices]
     vertex_index = {vertex_id: index for index, vertex_id in enumerate(vertex_ids)}

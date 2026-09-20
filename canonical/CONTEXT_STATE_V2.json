@@ -3,7 +3,7 @@
   "date": "2026-09-21",
   "continuation_branch": "main",
   "execution_branch": "main",
-  "status": "READY_FOR_WITNESS_EXECUTION__AWAITING_EXPLICIT_USER_APPROVAL",
+  "status": "APPEARANCE_FIDELITY_RECLOSURE__WITNESS_FORBIDDEN",
   "authority": {
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
@@ -26,29 +26,13 @@
     "next_visible_product_milestone": "user reviews the sealed V2 implementation; after explicit approval only, initialize fresh run-local Knight Stage01"
   },
   "current_focus": {
-    "module": "V2 review-ready seal",
-    "state": "READY_FOR_WITNESS_EXECUTION__AWAITING_EXPLICIT_USER_APPROVAL",
+    "module": "appearance fidelity + dynamic visual integrity reclosure",
+    "state": "REOPENED__WITNESS_FORBIDDEN",
     "active_experiment": "V2_IMPLEMENTATION_ASSEMBLY",
-    "most_recent_closed_gate": "DOCUMENTATION_INCLUSIVE_EXACT_MAINLINE_AND_ORCHESTRATION_GREEN",
-    "promotion_block": "No implementation blocker remains for the controlled first witness. Do not execute Knight until the user explicitly approves.",
-    "scope_warning": "READY is implementation readiness, not Knight product PASS or unseen generalization.",
-    "scientific_question": "After user approval, does Subject-2 Knight close the exact V2 product contract without subject-specific repair?",
-    "latest_green_evidence": {
-      "implementation_head": "4419509ee0f62a7e5ca088b87feb682b1a664105",
-      "mainline_ci_run_id": 35539075794,
-      "mainline_ci_job_id": 106153297550,
-      "repository_governance_tests_passed": 49,
-      "learned_model_tests_passed": 51,
-      "compiler_tests_passed": 288,
-      "model_source_gate_run_id": 35539075776,
-      "orchestration_dry_run_id": 35539075769,
-      "orchestration_dry_run_job_id": 106153297245,
-      "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
-      "orchestration_artifact_zip_sha256": "e5d994baccae4baee42edb9b00381504f972e619d97521694f10efdb0398c1f1",
-      "native_v2_player_sha256": "b1440a6c421123620ec7052d83100bd0fbea1116843f987ac312d419de1422e1",
-      "plan_sha256": "b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f",
-      "witness_used": false
-    }
+    "most_recent_closed_gate": "PRIOR_READY_SEAL_REVOKED_BY_POST_SEAL_APPEARANCE_REVIEW",
+    "promotion_block": "Close tile-density qualification, source-constrained completion quality, cross-view RGB compatibility, dynamic alpha-hole and scattered-hole/speckle gates before any Knight execution.",
+    "scope_warning": "FIT1 or single-subject closure is not unseen/generalization evidence; current learned models are not claimed final.",
+    "scientific_question": "Can geometry, appearance completion and dynamic rendering jointly eliminate visible holes/speckle while preserving source art without hallucination?"
   },
   "execution_environment": {
     "actions": "SELF_HOSTED_LOCAL_ONLY",

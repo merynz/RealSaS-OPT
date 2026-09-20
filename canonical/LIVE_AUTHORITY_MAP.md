@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `e1ddff5e71f843f8cdd578744e3029f31695768200afb2fb6c53c252bdf957b0`
+> State fingerprint: `57e3c90b65da034535238adde04c3aa24569a2a0a8b6540f83b44bf4748cfbb3`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -17,21 +17,25 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 ## Rehydration order
 
-1. `canonical/ACTIVE_RUN_V1.json`
-2. `canonical/MAINLINE_EXECUTION_PLAN_V1.json`
-3. `CURRENT_STATE.md`
-4. `canonical/AUTHORITY_MAP_V1.json`
-5. `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`
-6. `canonical/CONTEXT_STATE_V2.json`
-7. `canonical/EXPERIMENT_REGISTRY_V3.json`
-8. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-9. `canonical/REAL_SAS_MAINLINE_VNEXT_20260918.md`
+1. `canonical/V2_IMPLEMENTATION_READINESS.json`
+2. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
+3. `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
+4. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+5. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+6. `canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md`
+7. `canonical/AUTHORITY_MAP_V1.json`
+8. `canonical/ACTIVE_RUN_V2.json`
+9. `canonical/EXPERIMENT_REGISTRY_V3.json`
+10. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+11. `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`
+12. `CURRENT_STATE.md`
+13. `canonical/CONTEXT_STATE_V2.json`
 
 ## Live experiment register
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `SUBJECT2_KNIGHT_FULL_CLOSURE` | `ACTIVE__PRODUCT_AUTHORITY_IMPLEMENTATION` | `main` | `47ed3f16d82f` | Can the generic corrected 8-view architecture compile the Knight witness through source-faithful run motion into compact native .rss output? | unseen-family generalization; all-subject performance; PRODUCT_PASS before stage 40; teacher-free capability beyond the exact qualified run |
+| `V2_IMPLEMENTATION_ASSEMBLY` | `ACTIVE__WITNESS_EXECUTION_FORBIDDEN_UNTIL_READINESS_SEAL` | `main` | `a03826773e03` | Can the 46-stage RealSaS V2 DAG be made internally complete, adversarially audited and executable with geometry, mechanics and appearance as co-equal product authorities before any Knight outcome is observed? | Knight product pass; unseen generalization; learned appearance quality; source-view cardinality reduction |
 
 ## Branch inventory — observed live
 
@@ -41,7 +45,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `47ed3f16d82f` | canonical continuation branch |
+| `main` | `a03826773e03` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -159,7 +163,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `research/g5-coverage-v2-audit-20260919` | `aeaec75e1fe6` | observed live; not explicitly registered active |
 | `research/g5-mesh-v2-numerical-floor-20260919` | `28908a0019f6` | observed live; not explicitly registered active |
 | `research/knight-stage13-14-calibration-20260919` | `ee52ecf21689` | observed live; not explicitly registered active |
-| `research/knight-stage13-feasibility-v1-20260920` | `889df21c73dd` | observed live; not explicitly registered active |
+| `research/knight-stage13-feasibility-v1-20260920` | `d5f89e4fc1c1` | observed live; not explicitly registered active |
 | `research/knight-stage13-v7-silhouette-20260920` | `27ed725309b1` | observed live; not explicitly registered active |
 | `research/stage13-geometry-gate-v2-calibration-20260919` | `18017348cc1b` | observed live; not explicitly registered active |
 | `research/stage14-component-aware-compaction-20260919` | `4212a28fc057` | observed live; not explicitly registered active |
@@ -205,10 +209,19 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 - Subject identity may appear in run artifacts/registries but not generic product control flow.
 - Verified upstream stage outputs survive downstream failure and are reused only under exact hash identity.
 - Mage remains historical/scoped evidence.
-- PRODUCT_PASS requires stage 40 and visible native motion evidence.
+- PRODUCT_PASS requires stage 46 and visible native motion evidence.
 - RiggingSurfaceIR is immutable admitted substrate; canonical QualifiedMeshIR is the single product geometry authority after mesh qualification.
 - Runtime/export may consume but may not mint geometry, rig, skin, presentation or RGB appearance authority.
 - Presentation decisions preserve mechanical/observation/posed-geometry/motion/source-appearance evidence provenance; categorical object identity is not required product authority.
+- CompleteAppearanceAuthority is total over the renderable canonical mesh domain; source-qualified appearance wins and runtime may not generate appearance.
+- First Knight V2 uses exact controlled 8 source views to isolate architecture change; source view cardinality is not the same authority as the fixed eight output presentation directions.
+- Geometry, mechanics, and appearance are co-equal product-quality authorities.
+- Spine-class 2D appearance is a primary product requirement, not renderer polish.
+- V2 execution semantics are DAG/dependency based; ordinal is display order only.
+- Subject-2 Knight is not an active witness while V2 implementation readiness is not READY_FOR_WITNESS_EXECUTION.
+- Visibility is posed canonical geometry plus camera depth; appearance is CAA; texture alpha may not replace depth ownership.
+- CAA totality cannot rescue geometry, visibility, conditioning, sampling, or dynamic visual-integrity failures.
+- PRODUCT_PASS requires Stage46 after native dynamic visual integrity.
 
 ## Update semantics
 

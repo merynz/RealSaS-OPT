@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "47ed3f16d82f647b99914aa2fd4305574b41c5cb",
+    "main": "a03826773e03fe2305325d75b59f2c11daf665ff",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -80,7 +80,7 @@
     "research/g5-coverage-v2-audit-20260919": "aeaec75e1fe6e9372f85393e5547f572a4bd026a",
     "research/g5-mesh-v2-numerical-floor-20260919": "28908a0019f6471dedbfaada604d0c2893dd03e2",
     "research/knight-stage13-14-calibration-20260919": "ee52ecf21689881d7ba6bcb15b752a7dc9a9b266",
-    "research/knight-stage13-feasibility-v1-20260920": "47ed3f16d82f647b99914aa2fd4305574b41c5cb",
+    "research/knight-stage13-feasibility-v1-20260920": "d5f89e4fc1c14df3ca370f22c73bc11f0b3682d4",
     "research/knight-stage13-v7-silhouette-20260920": "27ed725309b192e1d49555f1579df3cd40df45f0",
     "research/stage13-geometry-gate-v2-calibration-20260919": "18017348cc1b68b7007da72aaae4421172ab037e",
     "research/stage14-component-aware-compaction-20260919": "4212a28fc057f4f30a1edc811b82dacae67a4441",
@@ -115,7 +115,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2080,
+  "commit_count": 2210,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -113331,6 +113331,2804 @@
       "subsystem_tags": [
         "GOVERNANCE_CONTINUITY",
         "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "889df21c73dd607429b40c00069687ed354cb83b",
+      "parents": [
+        "47ed3f16d82f647b99914aa2fd4305574b41c5cb"
+      ],
+      "author_time": "2026-09-20T01:32:35+03:00",
+      "committer_time": "2026-09-20T01:32:35+03:00",
+      "subject": "research: preregister Knight Stage13 P999 free-grid feasibility",
+      "branches_containing": [
+        "research/knight-stage13-feasibility-v1-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/IRIS_KNIGHT_STAGE13_F1_P999_REPRESENTATIONAL_FEASIBILITY_PREREG_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "06999097df2b6b33825d1d899a727cbf229a4875",
+      "parents": [
+        "47ed3f16d82f647b99914aa2fd4305574b41c5cb"
+      ],
+      "author_time": "2026-09-20T01:32:55+03:00",
+      "committer_time": "2026-09-20T01:32:55+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "aa4a3b01b432d979c47d26aaaae025ff020bc543",
+      "parents": [
+        "889df21c73dd607429b40c00069687ed354cb83b"
+      ],
+      "author_time": "2026-09-20T01:34:54+03:00",
+      "committer_time": "2026-09-20T01:34:54+03:00",
+      "subject": "research: seal Knight Stage13 F1 feasibility notebook",
+      "branches_containing": [
+        "research/knight-stage13-feasibility-v1-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/IRIS_KNIGHT_STAGE13_F1_P999_FEASIBILITY_NOTEBOOK_SEAL_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "86d9a52ab989c472bf1e52bbbab44bc29b3e0d98",
+      "parents": [
+        "aa4a3b01b432d979c47d26aaaae025ff020bc543"
+      ],
+      "author_time": "2026-09-20T01:50:15+03:00",
+      "committer_time": "2026-09-20T01:50:15+03:00",
+      "subject": "research: close Knight F1 feasibility as raster-support apparatus failure",
+      "branches_containing": [
+        "research/knight-stage13-feasibility-v1-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/IRIS_KNIGHT_STAGE13_F1_P999_FEASIBILITY_CLOSURE_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "dbee8ea421e493153354f20dca0f07301b253ed3",
+      "parents": [
+        "86d9a52ab989c472bf1e52bbbab44bc29b3e0d98"
+      ],
+      "author_time": "2026-09-20T01:50:34+03:00",
+      "committer_time": "2026-09-20T01:50:34+03:00",
+      "subject": "research: preregister Knight F2 raster-cell support feasibility",
+      "branches_containing": [
+        "research/knight-stage13-feasibility-v1-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/IRIS_KNIGHT_STAGE13_F2_P999_RASTER_CELL_SUPPORT_PREREG_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "42ad3dd903c0305c87e1e06cda0ec74443637b56",
+      "parents": [
+        "dbee8ea421e493153354f20dca0f07301b253ed3"
+      ],
+      "author_time": "2026-09-20T01:51:43+03:00",
+      "committer_time": "2026-09-20T01:51:43+03:00",
+      "subject": "research: seal Knight F2 raster-cell support feasibility notebook",
+      "branches_containing": [
+        "research/knight-stage13-feasibility-v1-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/IRIS_KNIGHT_STAGE13_F2_P999_FEASIBILITY_NOTEBOOK_SEAL_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cef7e76fdab183a2ef337ddd05cc5847b524f065",
+      "parents": [
+        "42ad3dd903c0305c87e1e06cda0ec74443637b56"
+      ],
+      "author_time": "2026-09-20T02:01:18+03:00",
+      "committer_time": "2026-09-20T02:01:18+03:00",
+      "subject": "research: close Knight F2 and isolate objective mismatch",
+      "branches_containing": [
+        "research/knight-stage13-feasibility-v1-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/IRIS_KNIGHT_STAGE13_F2_P999_FEASIBILITY_CLOSURE_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1aba113cdcd89cb86b432d05667c6e2315e5891a",
+      "parents": [
+        "cef7e76fdab183a2ef337ddd05cc5847b524f065"
+      ],
+      "author_time": "2026-09-20T02:01:35+03:00",
+      "committer_time": "2026-09-20T02:01:35+03:00",
+      "subject": "research: preregister Knight F3 exact Stage13 mismatch replay",
+      "branches_containing": [
+        "research/knight-stage13-feasibility-v1-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/IRIS_KNIGHT_STAGE13_F3_P999_EXACT_MISMATCH_REPLAY_PREREG_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "67d25e918df6dc1f2bc03f70559a581cf89171cc",
+      "parents": [
+        "1aba113cdcd89cb86b432d05667c6e2315e5891a"
+      ],
+      "author_time": "2026-09-20T02:02:53+03:00",
+      "committer_time": "2026-09-20T02:02:53+03:00",
+      "subject": "research: seal Knight F3 exact mismatch replay notebook",
+      "branches_containing": [
+        "research/knight-stage13-feasibility-v1-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/IRIS_KNIGHT_STAGE13_F3_P999_EXACT_MISMATCH_REPLAY_NOTEBOOK_SEAL_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7dfaf59ed31b014df4f31f393ffa72195cd47c4d",
+      "parents": [
+        "67d25e918df6dc1f2bc03f70559a581cf89171cc"
+      ],
+      "author_time": "2026-09-20T12:19:13+03:00",
+      "committer_time": "2026-09-20T12:19:13+03:00",
+      "subject": "research: close Knight F3 replay objective as falsified",
+      "branches_containing": [
+        "research/knight-stage13-feasibility-v1-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/IRIS_KNIGHT_STAGE13_F3_P999_FEASIBILITY_CLOSURE_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "91490279128eb5edfd96d8f9a5a3e32807eeec2c",
+      "parents": [
+        "7dfaf59ed31b014df4f31f393ffa72195cd47c4d"
+      ],
+      "author_time": "2026-09-20T12:19:34+03:00",
+      "committer_time": "2026-09-20T12:19:34+03:00",
+      "subject": "research: preregister Knight F4 resolution ladder",
+      "branches_containing": [
+        "research/knight-stage13-feasibility-v1-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/IRIS_KNIGHT_STAGE13_F4_P999_RESOLUTION_LADDER_PREREG_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d5f89e4fc1c14df3ca370f22c73bc11f0b3682d4",
+      "parents": [
+        "91490279128eb5edfd96d8f9a5a3e32807eeec2c"
+      ],
+      "author_time": "2026-09-20T12:21:23+03:00",
+      "committer_time": "2026-09-20T12:21:23+03:00",
+      "subject": "research: seal Knight F4 resolution ladder notebook",
+      "branches_containing": [
+        "research/knight-stage13-feasibility-v1-20260920"
+      ],
+      "main_reachable": false,
+      "changed_paths": [
+        "canonical/IRIS_KNIGHT_STAGE13_F4_P999_RESOLUTION_LADDER_NOTEBOOK_SEAL_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ee086ad34dd4d96049db9bc70041cec547a79342",
+      "parents": [
+        "06999097df2b6b33825d1d899a727cbf229a4875"
+      ],
+      "author_time": "2026-09-20T18:31:12+03:00",
+      "committer_time": "2026-09-20T18:31:12+03:00",
+      "subject": "mainline: make stage count dynamic and switch to V2 authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "217417ad34f31d0116175ba107869821bba15607",
+      "parents": [
+        "ee086ad34dd4d96049db9bc70041cec547a79342"
+      ],
+      "author_time": "2026-09-20T18:44:32+03:00",
+      "committer_time": "2026-09-20T18:44:32+03:00",
+      "subject": "architecture: add 46-stage V2 mainline plan",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/MAINLINE_EXECUTION_PLAN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d90f75cb60f4280037c743d81a5d0e369c436267",
+      "parents": [
+        "217417ad34f31d0116175ba107869821bba15607"
+      ],
+      "author_time": "2026-09-20T18:44:34+03:00",
+      "committer_time": "2026-09-20T18:44:34+03:00",
+      "subject": "authority: start fresh Knight V2 ledger at 0/46",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "04ae706986f1328375ee4c6bdaea6e127299b3b1",
+      "parents": [
+        "d90f75cb60f4280037c743d81a5d0e369c436267"
+      ],
+      "author_time": "2026-09-20T18:44:55+03:00",
+      "committer_time": "2026-09-20T18:44:55+03:00",
+      "subject": "authority: freeze CAA V1 architecture contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "484a2ee5e113bbab456ce1c8f2d69781fe8f98d0",
+      "parents": [
+        "04ae706986f1328375ee4c6bdaea6e127299b3b1"
+      ],
+      "author_time": "2026-09-20T18:44:58+03:00",
+      "committer_time": "2026-09-20T18:44:58+03:00",
+      "subject": "architecture: freeze RealSaS V2 authority model",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "59c5d34765c52f22978490f720972a1d33965bf2",
+      "parents": [
+        "484a2ee5e113bbab456ce1c8f2d69781fe8f98d0"
+      ],
+      "author_time": "2026-09-20T18:45:35+03:00",
+      "committer_time": "2026-09-20T18:45:35+03:00",
+      "subject": "v2: add output presentation direction authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/output_presentation_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "81ac0b68f1fbf876f9d3666ac4313105d8e700c8",
+      "parents": [
+        "59c5d34765c52f22978490f720972a1d33965bf2"
+      ],
+      "author_time": "2026-09-20T18:45:37+03:00",
+      "committer_time": "2026-09-20T18:45:37+03:00",
+      "subject": "v2: add mesh surface addressing and appearance domain IR",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/surface_addressing_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "709d6b76f1504e73eb27ebcec7af973fd89f1304",
+      "parents": [
+        "81ac0b68f1fbf876f9d3666ac4313105d8e700c8"
+      ],
+      "author_time": "2026-09-20T18:45:40+03:00",
+      "committer_time": "2026-09-20T18:45:40+03:00",
+      "subject": "v2: add CAA backend preregistration authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/complete_appearance_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "78ccb5bbbb2300fa01e1635487733e7fe4e1c3cb",
+      "parents": [
+        "709d6b76f1504e73eb27ebcec7af973fd89f1304"
+      ],
+      "author_time": "2026-09-20T18:46:08+03:00",
+      "committer_time": "2026-09-20T18:46:08+03:00",
+      "subject": "v2: bind output-direction and mesh-domain stages",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b19b235bec23bb6033a4589f1cfadab6b23ed514",
+      "parents": [
+        "78ccb5bbbb2300fa01e1635487733e7fe4e1c3cb"
+      ],
+      "author_time": "2026-09-20T18:46:11+03:00",
+      "committer_time": "2026-09-20T18:46:11+03:00",
+      "subject": "v2: bind CAA backend preregistration stage",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bc44d94cd136345c4f31f1215e1486e8bb54917b",
+      "parents": [
+        "b19b235bec23bb6033a4589f1cfadab6b23ed514"
+      ],
+      "author_time": "2026-09-20T18:46:19+03:00",
+      "committer_time": "2026-09-20T18:46:19+03:00",
+      "subject": "v2: rebind Geppetto and Arachne stages to new DAG",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py"
+      ],
+      "subsystem_tags": [
+        "ARACHNE_SKIN",
+        "COMPILER_PROOF",
+        "GEPPETTO"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a90445542b04f8663c7f84d6251729bb732238ae",
+      "parents": [
+        "bc44d94cd136345c4f31f1215e1486e8bb54917b"
+      ],
+      "author_time": "2026-09-20T18:46:37+03:00",
+      "committer_time": "2026-09-20T18:46:37+03:00",
+      "subject": "v2: rebase mesh mechanics adapters onto frozen mesh DAG",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ba7023babd1b0180446ec786002c82c4f107c6c0",
+      "parents": [
+        "a90445542b04f8663c7f84d6251729bb732238ae"
+      ],
+      "author_time": "2026-09-20T18:47:02+03:00",
+      "committer_time": "2026-09-20T18:47:02+03:00",
+      "subject": "fix v2 mesh loader stage rebinding",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0ccb98853295954ccbd005e9fc7f8f7b2562de91",
+      "parents": [
+        "ba7023babd1b0180446ec786002c82c4f107c6c0"
+      ],
+      "author_time": "2026-09-20T18:47:33+03:00",
+      "committer_time": "2026-09-20T18:47:33+03:00",
+      "subject": "mainline: preserve V1 validation while executing V2 authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9b1d79d6cfb652606e7e0c5b56b273a8d3100696",
+      "parents": [
+        "0ccb98853295954ccbd005e9fc7f8f7b2562de91"
+      ],
+      "author_time": "2026-09-20T18:48:12+03:00",
+      "committer_time": "2026-09-20T18:48:12+03:00",
+      "subject": "test: assert V2 46-stage architecture and fresh Knight lineage",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_mainline_execution_plan_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "97bcaef408218be13505d3330275df3c1ef52432",
+      "parents": [
+        "9b1d79d6cfb652606e7e0c5b56b273a8d3100696"
+      ],
+      "author_time": "2026-09-20T18:48:32+03:00",
+      "committer_time": "2026-09-20T18:48:32+03:00",
+      "subject": "knight: start V2 Stage01-08 on self-hosted runner",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/subject2_knight_observation_preflight.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a1ff73103051fc20506877b17ef54a000e77c085",
+      "parents": [
+        "97bcaef408218be13505d3330275df3c1ef52432"
+      ],
+      "author_time": "2026-09-20T18:50:40+03:00",
+      "committer_time": "2026-09-20T18:50:40+03:00",
+      "subject": "authority: promote V2 46-stage Knight lineage as current",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "AGENTS.md",
+        "CURRENT_STATE.md",
+        "SYSTEM_INDEX.md",
+        "canonical/AUTHORITY_MAP_V1.json",
+        "canonical/CONTEXT_STATE_V2.json",
+        "canonical/REHYDRATION_PACKET.md",
+        "tests/repository/test_current_continuity_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f7ade4c23ad43b9f7cdf05ff05e023c65a7fe3e2",
+      "parents": [
+        "a1ff73103051fc20506877b17ef54a000e77c085"
+      ],
+      "author_time": "2026-09-20T18:51:06+03:00",
+      "committer_time": "2026-09-20T18:51:06+03:00",
+      "subject": "test: rebase canonical readiness onto V2 mesh and CAA authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_canonical_main_readiness_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d04643064152ae4101b24e4edfc84518d44981ac",
+      "parents": [
+        "f7ade4c23ad43b9f7cdf05ff05e023c65a7fe3e2"
+      ],
+      "author_time": "2026-09-20T18:53:41+03:00",
+      "committer_time": "2026-09-20T18:53:41+03:00",
+      "subject": "mesh: red-team relation parent quality before CDT",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_mesh_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b120b49ce7fdd648278dc225d3ab92a1b54bb741",
+      "parents": [
+        "d04643064152ae4101b24e4edfc84518d44981ac"
+      ],
+      "author_time": "2026-09-20T18:54:00+03:00",
+      "committer_time": "2026-09-20T18:54:00+03:00",
+      "subject": "test: lock relation-parent CDT repairability red-team invariant",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_relation_parent_quality_redteam_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0842704ae1c2ec6c5136839a946f7c28dd55d10a",
+      "parents": [
+        "b120b49ce7fdd648278dc225d3ab92a1b54bb741"
+      ],
+      "author_time": "2026-09-20T18:54:48+03:00",
+      "committer_time": "2026-09-20T18:54:48+03:00",
+      "subject": "science: freeze adversarial per-module audit discipline for V2",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "80fded002f7fe5bd44dc80d7df6305b81526b55d",
+      "parents": [
+        "0842704ae1c2ec6c5136839a946f7c28dd55d10a"
+      ],
+      "author_time": "2026-09-20T19:04:55+03:00",
+      "committer_time": "2026-09-20T19:04:55+03:00",
+      "subject": "knight: hold witness workflow until V2 implementation readiness",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/subject2_knight_observation_preflight.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "528159a9b6078ceb05edbdf02c80aabc65ed0cf1",
+      "parents": [
+        "80fded002f7fe5bd44dc80d7df6305b81526b55d"
+      ],
+      "author_time": "2026-09-20T19:06:13+03:00",
+      "committer_time": "2026-09-20T19:06:13+03:00",
+      "subject": "mainline v2: replace linear execution with dependency DAG scheduler",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e38b352ff306f01f2ebf6f7681abc5f819d34443",
+      "parents": [
+        "528159a9b6078ceb05edbdf02c80aabc65ed0cf1"
+      ],
+      "author_time": "2026-09-20T19:09:25+03:00",
+      "committer_time": "2026-09-20T19:09:25+03:00",
+      "subject": "mainline v2: separate structural DAG validity from execution readiness",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b4c8bde32faf93bbc7dd92a44d698963ef7eb1fc",
+      "parents": [
+        "e38b352ff306f01f2ebf6f7681abc5f819d34443"
+      ],
+      "author_time": "2026-09-20T19:10:49+03:00",
+      "committer_time": "2026-09-20T19:10:49+03:00",
+      "subject": "architecture: document V1 to V2 authority transition",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f47d2f164015f035540e0e1be275c62025bef6a6",
+      "parents": [
+        "b4c8bde32faf93bbc7dd92a44d698963ef7eb1fc"
+      ],
+      "author_time": "2026-09-20T19:10:51+03:00",
+      "committer_time": "2026-09-20T19:10:51+03:00",
+      "subject": "authority: add V2 implementation readiness gate",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_IMPLEMENTATION_READINESS.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "47325e38af918115206b6bb3f532f6c70c7158c2",
+      "parents": [
+        "f47d2f164015f035540e0e1be275c62025bef6a6"
+      ],
+      "author_time": "2026-09-20T19:10:54+03:00",
+      "committer_time": "2026-09-20T19:10:54+03:00",
+      "subject": "authority: replace premature Knight run with V2 implementation assembly ledger",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4da5251fc07847e3a3bf4a4642457731efd5b868",
+      "parents": [
+        "47325e38af918115206b6bb3f532f6c70c7158c2"
+      ],
+      "author_time": "2026-09-20T19:12:37+03:00",
+      "committer_time": "2026-09-20T19:12:37+03:00",
+      "subject": "docs: make V2 assembly and coequal appearance current",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ec6332daf887419ead590e982b5930bb70932a29",
+      "parents": [
+        "4da5251fc07847e3a3bf4a4642457731efd5b868"
+      ],
+      "author_time": "2026-09-20T19:12:39+03:00",
+      "committer_time": "2026-09-20T19:12:39+03:00",
+      "subject": "docs: rehydrate from V2 readiness DAG",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "dbe314eec38062dc100d489e166ce0b1faa6a094",
+      "parents": [
+        "ec6332daf887419ead590e982b5930bb70932a29"
+      ],
+      "author_time": "2026-09-20T19:12:42+03:00",
+      "committer_time": "2026-09-20T19:12:42+03:00",
+      "subject": "docs: index geometry mechanics appearance as coequal authorities",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "SYSTEM_INDEX.md"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2013ebb5bc6bacca1462de644694f8cfcdad6a5a",
+      "parents": [
+        "dbe314eec38062dc100d489e166ce0b1faa6a094"
+      ],
+      "author_time": "2026-09-20T19:12:44+03:00",
+      "committer_time": "2026-09-20T19:12:44+03:00",
+      "subject": "docs: enforce V2 readiness and appearance authority discipline",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "AGENTS.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "488dc1b9d03084e6e78df4649030519ad4408808",
+      "parents": [
+        "2013ebb5bc6bacca1462de644694f8cfcdad6a5a"
+      ],
+      "author_time": "2026-09-20T19:13:01+03:00",
+      "committer_time": "2026-09-20T19:13:01+03:00",
+      "subject": "authority: set V2 assembly context and coequal product axes",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CONTEXT_STATE_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "29e41c724f8db1806bef179caf6cb6b971b0276a",
+      "parents": [
+        "488dc1b9d03084e6e78df4649030519ad4408808"
+      ],
+      "author_time": "2026-09-20T19:13:11+03:00",
+      "committer_time": "2026-09-20T19:13:11+03:00",
+      "subject": "authority: point current map at V2 readiness assembly",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/AUTHORITY_MAP_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "718cc2900a4e2ce2711f00329e2badf9855aed41",
+      "parents": [
+        "29e41c724f8db1806bef179caf6cb6b971b0276a"
+      ],
+      "author_time": "2026-09-20T19:14:09+03:00",
+      "committer_time": "2026-09-20T19:14:09+03:00",
+      "subject": "geometry v2: add explicit substrate qualification authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/geometry_substrate_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "42bb62624e25cb84ab18cd24775d90944caec112",
+      "parents": [
+        "718cc2900a4e2ce2711f00329e2badf9855aed41"
+      ],
+      "author_time": "2026-09-20T19:14:31+03:00",
+      "committer_time": "2026-09-20T19:14:31+03:00",
+      "subject": "orchestrator: add neutral V2 adapter IO helpers",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/adapter_io.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "881e2bad5cb1a6329a13541d1938e9fe4af786db",
+      "parents": [
+        "42bb62624e25cb84ab18cd24775d90944caec112"
+      ],
+      "author_time": "2026-09-20T19:15:07+03:00",
+      "committer_time": "2026-09-20T19:15:07+03:00",
+      "subject": "orchestrator v2: move exact-hash model execution helpers to current namespace",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/model_execution_common_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3e94e4fe6d18e8ad28afc3ba2e521d106d14422d",
+      "parents": [
+        "881e2bad5cb1a6329a13541d1938e9fe4af786db"
+      ],
+      "author_time": "2026-09-20T19:16:12+03:00",
+      "committer_time": "2026-09-20T19:16:12+03:00",
+      "subject": "geometry v2: bind clean IRIS and GSA authority lane",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e784b7267347a3bb6a10bdd340cda4efc72f7733",
+      "parents": [
+        "3e94e4fe6d18e8ad28afc3ba2e521d106d14422d"
+      ],
+      "author_time": "2026-09-20T19:16:48+03:00",
+      "committer_time": "2026-09-20T19:16:48+03:00",
+      "subject": "geometry v2: write substrate adequacy as explicit JSON authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bccd6615b5a241bedb296bf466494a6f3e94d1f2",
+      "parents": [
+        "e784b7267347a3bb6a10bdd340cda4efc72f7733"
+      ],
+      "author_time": "2026-09-20T19:16:59+03:00",
+      "committer_time": "2026-09-20T19:16:59+03:00",
+      "subject": "architecture v2: bind static mesh freeze to geometry substrate authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a2a7c2888d112f37deb10bb9c7d89a2f47726593",
+      "parents": [
+        "bccd6615b5a241bedb296bf466494a6f3e94d1f2"
+      ],
+      "author_time": "2026-09-20T19:17:25+03:00",
+      "committer_time": "2026-09-20T19:17:25+03:00",
+      "subject": "plan v2: promote geometry substrate semantics and coequal product axes",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/MAINLINE_EXECUTION_PLAN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "880b23e0d2914d288537a1009db0724db2ff5c57",
+      "parents": [
+        "a2a7c2888d112f37deb10bb9c7d89a2f47726593"
+      ],
+      "author_time": "2026-09-20T19:17:28+03:00",
+      "committer_time": "2026-09-20T19:17:28+03:00",
+      "subject": "authority: rebind readiness to geometry-substrate V2 plan",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_IMPLEMENTATION_READINESS.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "IRIS_GSA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c71693c725d2b80089c855ae5d21223c2639355a",
+      "parents": [
+        "880b23e0d2914d288537a1009db0724db2ff5c57"
+      ],
+      "author_time": "2026-09-20T19:17:30+03:00",
+      "committer_time": "2026-09-20T19:17:30+03:00",
+      "subject": "authority: rebind assembly ledger to updated V2 geometry DAG",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c26371d065c5c0cf680d311973f8f5368e23cdce",
+      "parents": [
+        "c71693c725d2b80089c855ae5d21223c2639355a"
+      ],
+      "author_time": "2026-09-20T19:19:35+03:00",
+      "committer_time": "2026-09-20T19:19:35+03:00",
+      "subject": "visibility v2: isolate canonical depth ownership from appearance",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/visibility_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cee5bc23bf3da9dd59565ddfe3dd751a8ea10b22",
+      "parents": [
+        "c26371d065c5c0cf680d311973f8f5368e23cdce"
+      ],
+      "author_time": "2026-09-20T19:21:04+03:00",
+      "committer_time": "2026-09-20T19:21:04+03:00",
+      "subject": "appearance v2: add complete typed CAA artifact chain",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fb5f535a77ce266fd1bc30c2a40275073fa8769f",
+      "parents": [
+        "cee5bc23bf3da9dd59565ddfe3dd751a8ea10b22"
+      ],
+      "author_time": "2026-09-20T19:22:20+03:00",
+      "committer_time": "2026-09-20T19:22:20+03:00",
+      "subject": "appearance v2: implement deterministic mesh-domain CAA compiler",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c1428278367300e38224da170d90f7420bbf35e5",
+      "parents": [
+        "fb5f535a77ce266fd1bc30c2a40275073fa8769f"
+      ],
+      "author_time": "2026-09-20T19:22:42+03:00",
+      "committer_time": "2026-09-20T19:22:42+03:00",
+      "subject": "appearance v2: add unique-face atlas bake and premultiplied sampling",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_bake_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9032d7ec1ebd70e1ae435a5541121caa85091727",
+      "parents": [
+        "c1428278367300e38224da170d90f7420bbf35e5"
+      ],
+      "author_time": "2026-09-20T19:23:53+03:00",
+      "committer_time": "2026-09-20T19:23:53+03:00",
+      "subject": "appearance v2: add structured holdout and provenance seam quality gates",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_quality_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6296372b42bd3fe6d8470bb856f457f6af341864",
+      "parents": [
+        "9032d7ec1ebd70e1ae435a5541121caa85091727"
+      ],
+      "author_time": "2026-09-20T19:24:40+03:00",
+      "committer_time": "2026-09-20T19:24:40+03:00",
+      "subject": "appearance v2: make seam gradient discontinuity first-class qualification",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "94538bc29a719c84c525953f8e5a9cbcbd31496b",
+      "parents": [
+        "6296372b42bd3fe6d8470bb856f457f6af341864"
+      ],
+      "author_time": "2026-09-20T19:24:54+03:00",
+      "committer_time": "2026-09-20T19:24:54+03:00",
+      "subject": "appearance v2: measure provenance boundary gradient jumps",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_quality_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "12f5c2a8db4ad6a65fd3ff5ff460f25ca78020f3",
+      "parents": [
+        "94538bc29a719c84c525953f8e5a9cbcbd31496b"
+      ],
+      "author_time": "2026-09-20T19:26:11+03:00",
+      "committer_time": "2026-09-20T19:26:11+03:00",
+      "subject": "appearance v2: bind CAA prereg compile seal bake and quality stages",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a8d98a75a26e8356f8675e6ebeacc94297062e91",
+      "parents": [
+        "12f5c2a8db4ad6a65fd3ff5ff460f25ca78020f3"
+      ],
+      "author_time": "2026-09-20T19:26:56+03:00",
+      "committer_time": "2026-09-20T19:26:56+03:00",
+      "subject": "visibility v2: expose exact owner-pixel barycentric coordinates",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/visibility_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e1b57a5e83631eeb5471c680d8d16dd01525ee36",
+      "parents": [
+        "a8d98a75a26e8356f8675e6ebeacc94297062e91"
+      ],
+      "author_time": "2026-09-20T19:47:04+03:00",
+      "committer_time": "2026-09-20T19:47:04+03:00",
+      "subject": "appearance v2: add reference renderer with separate visibility and alpha masks",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_render_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0596d8a5b4d6e6c3c5277fb686adf91ca36a3c73",
+      "parents": [
+        "e1b57a5e83631eeb5471c680d8d16dd01525ee36"
+      ],
+      "author_time": "2026-09-20T19:47:19+03:00",
+      "committer_time": "2026-09-20T19:47:19+03:00",
+      "subject": "appearance v2: enrich rest proof with source fidelity and alpha-hole metrics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c9270ca62e53203efa1734db58dea4ffafb5a230",
+      "parents": [
+        "0596d8a5b4d6e6c3c5277fb686adf91ca36a3c73"
+      ],
+      "author_time": "2026-09-20T19:47:47+03:00",
+      "committer_time": "2026-09-20T19:47:47+03:00",
+      "subject": "appearance v2: implement attributed Stage25 reference rest proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e0c87ea0031682e978490638b9e83ec85f8b8f11",
+      "parents": [
+        "c9270ca62e53203efa1734db58dea4ffafb5a230"
+      ],
+      "author_time": "2026-09-20T19:48:15+03:00",
+      "committer_time": "2026-09-20T19:48:15+03:00",
+      "subject": "plan v2: bind complete Stage20-25 CAA branch",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/MAINLINE_EXECUTION_PLAN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f18bb019b44229648c21bf728933ff9304a0d0bc",
+      "parents": [
+        "e0c87ea0031682e978490638b9e83ec85f8b8f11"
+      ],
+      "author_time": "2026-09-20T19:48:19+03:00",
+      "committer_time": "2026-09-20T19:48:19+03:00",
+      "subject": "authority: rebind readiness to fully bound CAA branch",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_IMPLEMENTATION_READINESS.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b6eb96b92c831485497c5f642b3215312ff719f1",
+      "parents": [
+        "f18bb019b44229648c21bf728933ff9304a0d0bc"
+      ],
+      "author_time": "2026-09-20T19:48:22+03:00",
+      "committer_time": "2026-09-20T19:48:22+03:00",
+      "subject": "authority: rebind assembly ledger to CAA-complete plan",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b03014000deb4444e474f948f473f9cc8255aea0",
+      "parents": [
+        "b6eb96b92c831485497c5f642b3215312ff719f1"
+      ],
+      "author_time": "2026-09-20T19:49:58+03:00",
+      "committer_time": "2026-09-20T19:49:58+03:00",
+      "subject": "motion v2: demote rest-unseen exposure to diagnostic under total CAA",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_dynamic_proof_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c10368850cf0dd53f9801ff19fbac1438a768014",
+      "parents": [
+        "b03014000deb4444e474f948f473f9cc8255aea0"
+      ],
+      "author_time": "2026-09-20T19:51:45+03:00",
+      "committer_time": "2026-09-20T19:51:45+03:00",
+      "subject": "product v2: add CAA-bound presentation and complete puppet state",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6e6e47cab24a38c5141383c3a21facc4618158f2",
+      "parents": [
+        "c10368850cf0dd53f9801ff19fbac1438a768014"
+      ],
+      "author_time": "2026-09-20T19:52:23+03:00",
+      "committer_time": "2026-09-20T19:52:23+03:00",
+      "subject": "product v2: implement Stage37-38 presentation and complete puppet seal",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "95c83b9fa33370af92d0737abfde89c1ba83523e",
+      "parents": [
+        "6e6e47cab24a38c5141383c3a21facc4618158f2"
+      ],
+      "author_time": "2026-09-20T19:53:14+03:00",
+      "committer_time": "2026-09-20T19:53:14+03:00",
+      "subject": "motion v2: implement CAA-authorized full-3D Stage39-41 chain",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "80373d633f4b03e114da42cab88696a30288a860",
+      "parents": [
+        "95c83b9fa33370af92d0737abfde89c1ba83523e"
+      ],
+      "author_time": "2026-09-20T19:54:30+03:00",
+      "committer_time": "2026-09-20T19:54:30+03:00",
+      "subject": "runtime v2: add CAA-only projection package native and visual authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "af866074080bffb4f060a3066e9d9795319c6717",
+      "parents": [
+        "80373d633f4b03e114da42cab88696a30288a860"
+      ],
+      "author_time": "2026-09-20T19:55:00+03:00",
+      "committer_time": "2026-09-20T19:55:00+03:00",
+      "subject": "runtime v2: add native-readable RSS container writer",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_package_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "39164318bd952844ace0b3a9f96432e5915fe95d",
+      "parents": [
+        "af866074080bffb4f060a3066e9d9795319c6717"
+      ],
+      "author_time": "2026-09-20T19:55:16+03:00",
+      "committer_time": "2026-09-20T19:55:16+03:00",
+      "subject": "visibility v2: freeze equal-depth tie to sealed face index",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/visibility_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "05c48ef7e1d4c1cc80f47afb3a07e8d51fcc682d",
+      "parents": [
+        "39164318bd952844ace0b3a9f96432e5915fe95d"
+      ],
+      "author_time": "2026-09-20T19:56:21+03:00",
+      "committer_time": "2026-09-20T19:56:21+03:00",
+      "subject": "runtime v2: add native CAA canonical-depth package player",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d05aad88fbe114c0ec0701765fc66ebf9153ffe5",
+      "parents": [
+        "05c48ef7e1d4c1cc80f47afb3a07e8d51fcc682d"
+      ],
+      "author_time": "2026-09-20T19:57:46+03:00",
+      "committer_time": "2026-09-20T19:57:46+03:00",
+      "subject": "appearance v2: treat safe source background as observed transparent art",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "815018c97ad3673d5f83551c139e1b6abb2b829a",
+      "parents": [
+        "d05aad88fbe114c0ec0701765fc66ebf9153ffe5"
+      ],
+      "author_time": "2026-09-20T19:57:55+03:00",
+      "committer_time": "2026-09-20T19:57:55+03:00",
+      "subject": "appearance v2: make source alpha coverage first-class rest proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bf6db1eaa94f77aae21a89fb0623cd3e2d43dcf3",
+      "parents": [
+        "815018c97ad3673d5f83551c139e1b6abb2b829a"
+      ],
+      "author_time": "2026-09-20T19:58:25+03:00",
+      "committer_time": "2026-09-20T19:58:25+03:00",
+      "subject": "appearance v2: gate reference rest alpha recall precision and coherent holes",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "58e6c05f155b7fa307e411cd3dd345649d5cf713",
+      "parents": [
+        "bf6db1eaa94f77aae21a89fb0623cd3e2d43dcf3"
+      ],
+      "author_time": "2026-09-20T19:58:38+03:00",
+      "committer_time": "2026-09-20T19:58:38+03:00",
+      "subject": "product v2: add complete puppet state decoder",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "480eec27ee6c1b5ce8a8ef10c74df151fe140905",
+      "parents": [
+        "58e6c05f155b7fa307e411cd3dd345649d5cf713"
+      ],
+      "author_time": "2026-09-20T19:58:59+03:00",
+      "committer_time": "2026-09-20T19:58:59+03:00",
+      "subject": "runtime v2: add exact package native and visual decoders",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1b4d32a43179326979770cd854497955cd027a3a",
+      "parents": [
+        "480eec27ee6c1b5ce8a8ef10c74df151fe140905"
+      ],
+      "author_time": "2026-09-20T20:00:27+03:00",
+      "committer_time": "2026-09-20T20:00:27+03:00",
+      "subject": "runtime v2: implement Stage42-45 CAA-only native product path",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "337f162539361a9ddd87a19af6e17ab83b4f72a5",
+      "parents": [
+        "1b4d32a43179326979770cd854497955cd027a3a"
+      ],
+      "author_time": "2026-09-20T20:03:02+03:00",
+      "committer_time": "2026-09-20T20:03:02+03:00",
+      "subject": "closure v2: implement Stage46 product seal and editable CAA authoring bundle",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ff1afca0b3eceff2b93cffaa255ada109174f38f",
+      "parents": [
+        "337f162539361a9ddd87a19af6e17ab83b4f72a5"
+      ],
+      "author_time": "2026-09-20T20:03:34+03:00",
+      "committer_time": "2026-09-20T20:03:34+03:00",
+      "subject": "plan v2: bind Stage37-46 and make authority dependencies exact",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/MAINLINE_EXECUTION_PLAN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7744040590abc6208c736ba6e31f88f1b1013924",
+      "parents": [
+        "ff1afca0b3eceff2b93cffaa255ada109174f38f"
+      ],
+      "author_time": "2026-09-20T20:03:38+03:00",
+      "committer_time": "2026-09-20T20:03:38+03:00",
+      "subject": "authority: bind readiness to complete 46-stage V2 implementation",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_IMPLEMENTATION_READINESS.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e3cf3cdfc090fc92801a9becd265a0c499bb0fe4",
+      "parents": [
+        "7744040590abc6208c736ba6e31f88f1b1013924"
+      ],
+      "author_time": "2026-09-20T20:03:42+03:00",
+      "committer_time": "2026-09-20T20:03:42+03:00",
+      "subject": "authority: rebind assembly ledger to fully bound 46-stage V2 DAG",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "301ad0b28fdec7b2d320b3e0e872acf91a40f859",
+      "parents": [
+        "e3cf3cdfc090fc92801a9becd265a0c499bb0fe4"
+      ],
+      "author_time": "2026-09-20T20:04:26+03:00",
+      "committer_time": "2026-09-20T20:04:26+03:00",
+      "subject": "orchestrator v2: move camera authority onto clean current adapter",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/observation_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7c5d65ad2f1b15c358dc15a352274fa8ac347bd4",
+      "parents": [
+        "301ad0b28fdec7b2d320b3e0e872acf91a40f859"
+      ],
+      "author_time": "2026-09-20T20:04:30+03:00",
+      "committer_time": "2026-09-20T20:04:30+03:00",
+      "subject": "mechanics v2: remove V1 orchestration helper dependencies",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e072849108b78ede08ea6d2c79321ecdcd4c7bb9",
+      "parents": [
+        "7c5d65ad2f1b15c358dc15a352274fa8ac347bd4"
+      ],
+      "author_time": "2026-09-20T20:04:40+03:00",
+      "committer_time": "2026-09-20T20:04:40+03:00",
+      "subject": "orchestrator v2: move source observation preflight onto clean current adapter",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/preflight_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ea99f6f67a2f79ba57f1b299ccadf2da7e2db413",
+      "parents": [
+        "e072849108b78ede08ea6d2c79321ecdcd4c7bb9"
+      ],
+      "author_time": "2026-09-20T20:05:06+03:00",
+      "committer_time": "2026-09-20T20:05:06+03:00",
+      "subject": "mesh v2: move current mesh mechanics implementation off historical compatibility adapter",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1ba31e067d25c5846d5a7fa13e21cb23408e764f",
+      "parents": [
+        "ea99f6f67a2f79ba57f1b299ccadf2da7e2db413"
+      ],
+      "author_time": "2026-09-20T20:05:16+03:00",
+      "committer_time": "2026-09-20T20:05:16+03:00",
+      "subject": "architecture v2: remove historical mesh adapter dependencies",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9bf5565ddc623f73bab537bf8a432bdb036c53a7",
+      "parents": [
+        "1ba31e067d25c5846d5a7fa13e21cb23408e764f"
+      ],
+      "author_time": "2026-09-20T20:05:37+03:00",
+      "committer_time": "2026-09-20T20:05:37+03:00",
+      "subject": "plan v2: remove historical adapter namespaces from current DAG",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/MAINLINE_EXECUTION_PLAN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8d06ffbdfd2d87d00deca98cbca135bf200607c2",
+      "parents": [
+        "9bf5565ddc623f73bab537bf8a432bdb036c53a7"
+      ],
+      "author_time": "2026-09-20T20:05:40+03:00",
+      "committer_time": "2026-09-20T20:05:40+03:00",
+      "subject": "authority: bind readiness to clean V2 adapter plan",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_IMPLEMENTATION_READINESS.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ad9de7b855ca7bb593aa5e46fd4ccbb059d186c5",
+      "parents": [
+        "8d06ffbdfd2d87d00deca98cbca135bf200607c2"
+      ],
+      "author_time": "2026-09-20T20:05:45+03:00",
+      "committer_time": "2026-09-20T20:05:45+03:00",
+      "subject": "authority: rebind assembly ledger to clean V2 adapter surface",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7af45ccf0dbdc11273f1f73d07c677b6a7d779a9",
+      "parents": [
+        "ad9de7b855ca7bb593aa5e46fd4ccbb059d186c5"
+      ],
+      "author_time": "2026-09-20T20:06:48+03:00",
+      "committer_time": "2026-09-20T20:06:48+03:00",
+      "subject": "appearance v2: bind CAA compile policy to explicit atlas size ceiling",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "11332880afeb0b81156e0355a933eb501550950a",
+      "parents": [
+        "7af45ccf0dbdc11273f1f73d07c677b6a7d779a9"
+      ],
+      "author_time": "2026-09-20T20:06:52+03:00",
+      "committer_time": "2026-09-20T20:06:52+03:00",
+      "subject": "appearance v2: fail closed when face atlas exceeds product texture cap",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "307d126e960b92708f9d6e73dfe61570d14de0d1",
+      "parents": [
+        "11332880afeb0b81156e0355a933eb501550950a"
+      ],
+      "author_time": "2026-09-20T20:07:31+03:00",
+      "committer_time": "2026-09-20T20:07:31+03:00",
+      "subject": "appearance v2: normalize rest source-lock support by source foreground",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b67bfb328793b8391fc5fa3b902fe74743217e29",
+      "parents": [
+        "307d126e960b92708f9d6e73dfe61570d14de0d1"
+      ],
+      "author_time": "2026-09-20T20:07:35+03:00",
+      "committer_time": "2026-09-20T20:07:35+03:00",
+      "subject": "appearance v2: use normalized source-lock support and correct transparent-art semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "52ac09bc981d0a598fd16e7c59f2c9fb33165b65",
+      "parents": [
+        "b67bfb328793b8391fc5fa3b902fe74743217e29"
+      ],
+      "author_time": "2026-09-20T20:08:12+03:00",
+      "committer_time": "2026-09-20T20:08:12+03:00",
+      "subject": "appearance v2: add full observed-source foreground RGB fidelity to rest proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "aed6f8e2f2d47fa24dea314dbd99ec7eea904647",
+      "parents": [
+        "52ac09bc981d0a598fd16e7c59f2c9fb33165b65"
+      ],
+      "author_time": "2026-09-20T20:08:16+03:00",
+      "committer_time": "2026-09-20T20:08:16+03:00",
+      "subject": "appearance v2: gate full source-foreground rest artwork fidelity",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f1fac26d6a78dcd4be5a9875c27f74a068764563",
+      "parents": [
+        "aed6f8e2f2d47fa24dea314dbd99ec7eea904647"
+      ],
+      "author_time": "2026-09-20T20:09:02+03:00",
+      "committer_time": "2026-09-20T20:09:02+03:00",
+      "subject": "appearance science: freeze subject-free CAA V2 numerical policy",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "13651d55f35fb62f204a8b2f729d26007e8ff5b0",
+      "parents": [
+        "f1fac26d6a78dcd4be5a9875c27f74a068764563"
+      ],
+      "author_time": "2026-09-20T20:09:04+03:00",
+      "committer_time": "2026-09-20T20:09:04+03:00",
+      "subject": "appearance science: document subject-free CAA numerical rationale",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "71fdce490df0271013d2d0c61037f8c5b7e60b4a",
+      "parents": [
+        "13651d55f35fb62f204a8b2f729d26007e8ff5b0"
+      ],
+      "author_time": "2026-09-20T20:09:17+03:00",
+      "committer_time": "2026-09-20T20:09:17+03:00",
+      "subject": "appearance v2: validate frozen face-capacity policy",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b5872d0801a7a3780421fae17d7909dd00de013a",
+      "parents": [
+        "71fdce490df0271013d2d0c61037f8c5b7e60b4a"
+      ],
+      "author_time": "2026-09-20T20:09:21+03:00",
+      "committer_time": "2026-09-20T20:09:21+03:00",
+      "subject": "appearance v2: enforce frozen unique-face capacity before bake",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0158f819d24ce0a6bf2ee6a2128a9ff20a816649",
+      "parents": [
+        "b5872d0801a7a3780421fae17d7909dd00de013a"
+      ],
+      "author_time": "2026-09-20T20:09:55+03:00",
+      "committer_time": "2026-09-20T20:09:55+03:00",
+      "subject": "test: calibrate frozen CAA V2 policy with subject-free faults",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_caa_v2_subject_free_policy.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7f0fbcda243527572dc653cd3174334519271baa",
+      "parents": [
+        "0158f819d24ce0a6bf2ee6a2128a9ff20a816649"
+      ],
+      "author_time": "2026-09-20T20:10:28+03:00",
+      "committer_time": "2026-09-20T20:10:28+03:00",
+      "subject": "test: rebase mainline assertions onto V2 assembly DAG",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_mainline_execution_plan_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2ad64b4a7b0409222c297123ca4239368dbd41d6",
+      "parents": [
+        "7f0fbcda243527572dc653cd3174334519271baa"
+      ],
+      "author_time": "2026-09-20T20:10:31+03:00",
+      "committer_time": "2026-09-20T20:10:31+03:00",
+      "subject": "test: rebase continuity authority onto V2 assembly",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_current_continuity_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "10e493dfab546dfbb4328a127e0d68a70b0bf0ca",
+      "parents": [
+        "2ad64b4a7b0409222c297123ca4239368dbd41d6"
+      ],
+      "author_time": "2026-09-20T20:10:44+03:00",
+      "committer_time": "2026-09-20T20:10:44+03:00",
+      "subject": "test: red-team V2 DAG scheduler branch independence and cycles",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_mainline_v2_dag_scheduler.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e95cea2fac72589f62bbcf1df171c62d41340c84",
+      "parents": [
+        "10e493dfab546dfbb4328a127e0d68a70b0bf0ca"
+      ],
+      "author_time": "2026-09-20T20:11:03+03:00",
+      "committer_time": "2026-09-20T20:11:03+03:00",
+      "subject": "test: make repository readiness describe current V2 product authorities",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_canonical_main_readiness_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4900efb0a7667bd56e2f299f84ebfb28083f77bf",
+      "parents": [
+        "e95cea2fac72589f62bbcf1df171c62d41340c84"
+      ],
+      "author_time": "2026-09-20T20:11:34+03:00",
+      "committer_time": "2026-09-20T20:11:34+03:00",
+      "subject": "test: red-team V2 visibility alpha and CAA sampling boundaries",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2aaf30794cd30391e0564d0bd4ada0f1baa39c47",
+      "parents": [
+        "4900efb0a7667bd56e2f299f84ebfb28083f77bf"
+      ],
+      "author_time": "2026-09-20T20:12:07+03:00",
+      "committer_time": "2026-09-20T20:12:07+03:00",
+      "subject": "ci: keep only latest V2 run and build native CAA player",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/current_mainline_self_hosted_ci.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2822e2c1a55185a9b133e999707e574f5a2d9c94",
+      "parents": [
+        "2aaf30794cd30391e0564d0bd4ada0f1baa39c47"
+      ],
+      "author_time": "2026-09-20T20:21:24+03:00",
+      "committer_time": "2026-09-20T20:21:24+03:00",
+      "subject": "authority: restore live experiment id and branch schema",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/AUTHORITY_MAP_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a5ad832f99361fa7bdb6b802d13807763119ba97",
+      "parents": [
+        "2822e2c1a55185a9b133e999707e574f5a2d9c94"
+      ],
+      "author_time": "2026-09-20T20:21:26+03:00",
+      "committer_time": "2026-09-20T20:21:26+03:00",
+      "subject": "authority: preserve live continuation completion contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CONTEXT_STATE_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ade8819731ad9ef24905edebed32225784793ded",
+      "parents": [
+        "a5ad832f99361fa7bdb6b802d13807763119ba97"
+      ],
+      "author_time": "2026-09-20T20:21:43+03:00",
+      "committer_time": "2026-09-20T20:21:43+03:00",
+      "subject": "authority tooling: rehydrate from current V2 plan and run",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/render_rehydration_packet.py"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d9125a4a985634664f5f53df8d0a58291f447ab5",
+      "parents": [
+        "ade8819731ad9ef24905edebed32225784793ded"
+      ],
+      "author_time": "2026-09-20T20:21:46+03:00",
+      "committer_time": "2026-09-20T20:21:46+03:00",
+      "subject": "authority tooling: index current V2 execution and readiness sources",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/audit_context_coverage.py"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "70c4ee45c3f5eed047d9dfbdea19ba9b46fec071",
+      "parents": [
+        "d9125a4a985634664f5f53df8d0a58291f447ab5"
+      ],
+      "author_time": "2026-09-20T20:21:49+03:00",
+      "committer_time": "2026-09-20T20:21:49+03:00",
+      "subject": "test: enforce canonical live experiment id and branch schema",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_current_continuity_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cbf6e1ff18953355358b0d97edc58b175358d1ff",
+      "parents": [
+        "70c4ee45c3f5eed047d9dfbdea19ba9b46fec071"
+      ],
+      "author_time": "2026-09-20T20:23:05+03:00",
+      "committer_time": "2026-09-20T20:23:05+03:00",
+      "subject": "appearance v2: scope atlas totality to allocated face tiles",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_bake_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d593c34b4033fc06d128f16d1e0497b2a8ef1d01",
+      "parents": [
+        "cbf6e1ff18953355358b0d97edc58b175358d1ff"
+      ],
+      "author_time": "2026-09-20T20:23:08+03:00",
+      "committer_time": "2026-09-20T20:23:08+03:00",
+      "subject": "test: distinguish CAA surface totality from atlas padding",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "686be61716f92a0f9aba4b26167f7932cd6e778c",
+      "parents": [
+        "d593c34b4033fc06d128f16d1e0497b2a8ef1d01"
+      ],
+      "author_time": "2026-09-20T20:55:15+03:00",
+      "committer_time": "2026-09-20T20:55:15+03:00",
+      "subject": "continuity: restore exact V2 machine tokens in current state",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9afd997cd2f425c4d6ca64049b4bbcf0dc451aa4",
+      "parents": [
+        "686be61716f92a0f9aba4b26167f7932cd6e778c"
+      ],
+      "author_time": "2026-09-20T20:55:21+03:00",
+      "committer_time": "2026-09-20T20:55:21+03:00",
+      "subject": "continuity: restore current and historical registry journal pointers",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "AGENTS.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f0f3d3ae565783dea7081313ac389202b6a52e27",
+      "parents": [
+        "9afd997cd2f425c4d6ca64049b4bbcf0dc451aa4"
+      ],
+      "author_time": "2026-09-20T20:55:25+03:00",
+      "committer_time": "2026-09-20T20:55:25+03:00",
+      "subject": "continuity: make V2 rehydration order self-contained",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/AUTHORITY_MAP_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "76152f801166da02b036fcdea63ebccf56a6f19c",
+      "parents": [
+        "f0f3d3ae565783dea7081313ac389202b6a52e27"
+      ],
+      "author_time": "2026-09-20T20:55:28+03:00",
+      "committer_time": "2026-09-20T20:55:28+03:00",
+      "subject": "test: preserve canonical active experiment schema",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "005e139cff71005f2a97a508d9e937edc9b95102",
+      "parents": [
+        "76152f801166da02b036fcdea63ebccf56a6f19c"
+      ],
+      "author_time": "2026-09-20T20:56:40+03:00",
+      "committer_time": "2026-09-20T20:56:40+03:00",
+      "subject": "continuity: bind agent entry to active run and product authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "AGENTS.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0b5f776c53fb669dfed3013ccc2dd836f1cfbc73",
+      "parents": [
+        "005e139cff71005f2a97a508d9e937edc9b95102"
+      ],
+      "author_time": "2026-09-20T20:56:59+03:00",
+      "committer_time": "2026-09-20T20:56:59+03:00",
+      "subject": "ci: gate AGENTS continuity changes on self-hosted mainline",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/current_mainline_self_hosted_ci.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d7c2925bcd147aeae36da65505edc4c0c4016b81",
+      "parents": [
+        "0b5f776c53fb669dfed3013ccc2dd836f1cfbc73"
+      ],
+      "author_time": "2026-09-20T20:58:05+03:00",
+      "committer_time": "2026-09-20T20:58:05+03:00",
+      "subject": "test: execute native V2 RSS player against Python reference",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_runtime_v2_native_smoke.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9e48d652bdebd03248f034087a8aaf71545456a0",
+      "parents": [
+        "d7c2925bcd147aeae36da65505edc4c0c4016b81"
+      ],
+      "author_time": "2026-09-20T20:58:08+03:00",
+      "committer_time": "2026-09-20T20:58:08+03:00",
+      "subject": "ci: execute native RSS parity smoke inside compiler suite",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/current_mainline_self_hosted_ci.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2b0335d6503856dc01f0f7010aa3c623c52ce3ba",
+      "parents": [
+        "9e48d652bdebd03248f034087a8aaf71545456a0"
+      ],
+      "author_time": "2026-09-20T20:59:14+03:00",
+      "committer_time": "2026-09-20T20:59:14+03:00",
+      "subject": "ci: avoid runner-context expression in job environment",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/current_mainline_self_hosted_ci.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b376c0649f5c6d9e5932f7ec91c78b4a7abbaa60",
+      "parents": [
+        "2b0335d6503856dc01f0f7010aa3c623c52ce3ba"
+      ],
+      "author_time": "2026-09-20T21:00:05+03:00",
+      "committer_time": "2026-09-20T21:00:05+03:00",
+      "subject": "test: bind Stage13 geometry gate red-team to current V2 adapter",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_stage13_geometry_gate_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a03826773e03fe2305325d75b59f2c11daf665ff",
+      "parents": [
+        "b376c0649f5c6d9e5932f7ec91c78b4a7abbaa60"
+      ],
+      "author_time": "2026-09-20T21:00:11+03:00",
+      "committer_time": "2026-09-20T21:00:11+03:00",
+      "subject": "test: bind mesh feasibility red-team to current V2 adapter",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_relation_parent_quality_redteam_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

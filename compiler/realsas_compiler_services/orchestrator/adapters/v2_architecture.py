@@ -25,16 +25,18 @@ from compiler.realsas_compiler_core.surface_addressing_v1 import (
     surface_addressing_from_dict,
 )
 from compiler.realsas_compiler_core.types import QualificationError
-from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
-    _stage_output_payload,
-    _write_ir,
+from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
+    stage_output_payload,
+    write_ir,
+)
+from compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2 import (
     build_canonical_mesh_candidate_stage,
 )
 
 
 def seal_output_presentation_directions_stage(ctx: dict) -> dict:
     cameras = qualified_camera_set_from_dict(
-        _stage_output_payload(
+        stage_output_payload(
             ctx, "05_CAMERA_CONTRACT_SOLVED", "RealSaS.QualifiedCameraSetIR.v1"
         )
     )
@@ -43,7 +45,7 @@ def seal_output_presentation_directions_stage(ctx: dict) -> dict:
     return {
         "status": "PASS",
         "outputs": [
-            _write_ir(
+            write_ir(
                 root / "output_presentation_directions.json",
                 value,
                 authority_class="OUTPUT_PRESENTATION_DIRECTION_AUTHORITY",
@@ -66,7 +68,7 @@ def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
         read_json(by_schema["RealSaS.CanonicalMeshCandidateIR.v1"]["path"])
     )
     directions = output_direction_set_from_dict(
-        _stage_output_payload(
+        stage_output_payload(
             ctx,
             "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
             "RealSaS.OutputPresentationDirectionSetIR.v1",
@@ -78,12 +80,12 @@ def build_canonical_mesh_addressing_stage(ctx: dict) -> dict:
     )
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     outputs = list(base["outputs"]) + [
-        _write_ir(
+        write_ir(
             root / "surface_addressing.json",
             addressing,
             authority_class="CANONICAL_SURFACE_ADDRESSING",
         ),
-        _write_ir(
+        write_ir(
             root / "appearance_domain.json",
             domain,
             authority_class="APPEARANCE_DOMAIN",
@@ -111,35 +113,35 @@ def _double_area(a, b, c) -> float:
 
 def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
     candidate = canonical_mesh_candidate_from_dict(
-        _stage_output_payload(
+        stage_output_payload(
             ctx,
             "18_CANONICAL_MESH_ADDRESSING_BUILD",
             "RealSaS.CanonicalMeshCandidateIR.v1",
         )
     )
     addressing = surface_addressing_from_dict(
-        _stage_output_payload(
+        stage_output_payload(
             ctx,
             "18_CANONICAL_MESH_ADDRESSING_BUILD",
             "RealSaS.SurfaceAddressingIR.v1",
         )
     )
     domain = appearance_domain_from_dict(
-        _stage_output_payload(
+        stage_output_payload(
             ctx,
             "18_CANONICAL_MESH_ADDRESSING_BUILD",
             "RealSaS.AppearanceDomainIR.v1",
         )
     )
     geometry = geometry_substrate_from_dict(
-        _stage_output_payload(
+        stage_output_payload(
             ctx,
             "13_GEOMETRY_SUBSTRATE_QUALIFIED",
             "RealSaS.GeometrySubstrateQualificationIR.v2",
         )
     )
     partition = mechanical_partition_from_dict(
-        _stage_output_payload(
+        stage_output_payload(
             ctx,
             "17_MECHANICAL_PARTITION_QUALIFIED",
             "RealSaS.MechanicalPartitionIR.v1",
@@ -205,7 +207,7 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
     return {
         "status": "PASS",
         "outputs": [
-            _write_ir(
+            write_ir(
                 root / "static_canonical_mesh_qualification.json",
                 value,
                 authority_class="STATIC_CANONICAL_MESH_QUALIFICATION",

@@ -723,7 +723,7 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     r38 = run("38_CANONICAL_PUPPET_SEALED", seal_complete_puppet_stage)
     by38 = {out["schema"]: out for out in r38["outputs"]}
     assert "RealSaS.CompletePuppetStateIR.v2" in by38
-    assert "RealSaS.QualifiedPresentationGraphIR.v1" in by38
+    assert "RealSaS.QualifiedPresentationGraphIR.v2" in by38
 
     r39 = run("39_MOTION_SOURCE_OR_PRESET_SEAL", seal_motion_source_stage_v2)
     r40 = run("40_MOTION_COMPILE_RUN", compile_motion_stage_v2)

@@ -122,3 +122,53 @@ def test_implementation_audit_rejects_named_product_subject():
             architecture_scope="REALSAS_V2_IMPLEMENTATION_DRY_RUN",
             execution_class="IMPLEMENTATION_AUDIT",
         )
+
+
+def test_stage_output_seal_is_confined_to_exact_stage_authority_root(tmp_path):
+    import pytest
+
+    allowed = tmp_path / "runs" / "R" / "artifacts" / "01_SOURCE_BYTES_SEALED"
+    allowed.mkdir(parents=True)
+    good = allowed / "good.json"
+    good.write_text("{}\n", encoding="utf-8")
+    sealed = mainline._seal_outputs(
+        [{"path": str(good), "schema": "test"}],
+        allowed_root=allowed,
+    )
+    assert sealed[0]["path"] == str(good.resolve())
+
+    foreign = tmp_path / "runs" / "OTHER" / "artifacts" / "01_SOURCE_BYTES_SEALED"
+    foreign.mkdir(parents=True)
+    bad = foreign / "bad.json"
+    bad.write_text("{}\n", encoding="utf-8")
+    with pytest.raises(
+        RuntimeError,
+        match="STAGE_OUTPUT_OUTSIDE_STAGE_AUTHORITY_ROOT",
+    ):
+        mainline._seal_outputs(
+            [{"path": str(bad), "schema": "test"}],
+            allowed_root=allowed,
+        )
+
+
+def test_run_manifest_identity_is_exact_for_run_and_subject():
+    import pytest
+
+    manifest = {"run_id": "R", "subject_id": "SUBJECT_FREE_TEST"}
+    mainline._validate_run_manifest_identity(
+        manifest,
+        run_id="R",
+        subject_id="SUBJECT_FREE_TEST",
+    )
+    with pytest.raises(RuntimeError, match="RUN_MANIFEST_RUN_ID_DRIFT"):
+        mainline._validate_run_manifest_identity(
+            manifest,
+            run_id="OTHER",
+            subject_id="SUBJECT_FREE_TEST",
+        )
+    with pytest.raises(RuntimeError, match="RUN_MANIFEST_SUBJECT_ID_DRIFT"):
+        mainline._validate_run_manifest_identity(
+            manifest,
+            run_id="R",
+            subject_id="OTHER",
+        )

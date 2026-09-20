@@ -1,0 +1,107 @@
+{
+  "schema": "RealSaS.IRIS.KnightStage13P999ResolutionLadderPreregistration.v1",
+  "date_utc": "2026-09-20",
+  "status": "PREREGISTERED_BEFORE_F4_RESULT",
+  "subject_run_id": "SUBJECT2_KNIGHT_V1",
+  "attempt_protocol": "F4_STAGE13_P999_RESOLUTION_LADDER",
+  "research_branch": "research/knight-stage13-feasibility-v1-20260920",
+  "authority_main_merge_commit": "29c7bb857a14bcbdb73351a85dcb2e1ba4ae1529",
+  "prior_f3": {
+    "closure_commit": "7dfaf59ed31b014df4f31f393ffa72195cd47c4d",
+    "decision_sha256": "2e68ef396422b40990a64cbb83b9ef1f24dded789de6455e466035920f2591f1",
+    "bundle_sha256": "dd30bb1807e5acecc8b3acbd65897af68a42e1eb0e9731626476c0256726b622",
+    "executed_status": "NO_WITNESS_FOUND",
+    "closure_classification": "GENUINE_NO_WITNESS__F3_REPLAY_OBJECTIVE_FALSIFIED"
+  },
+  "exact_inputs": {
+    "prefit_evidence_file": "SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip",
+    "prefit_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "observation_set_binding_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+    "normalization_binding_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23",
+    "source_authority": "EXACT_STAGE07_FOREGROUND_MASKS_PLUS_EXACT_QUALIFIED_CAMERAS_PLUS_STAGE08_NORMALIZATION_ONLY",
+    "teacher_mesh_used": false,
+    "teacher_checkpoint_used": false,
+    "iris_model_used": false
+  },
+  "frozen_stage13_policy": {
+    "path": "canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json",
+    "sha256": "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214",
+    "profile": "P999",
+    "thresholds": {
+      "min_recall": 0.999,
+      "min_precision": 0.999,
+      "max_largest_coherent_hole_fraction": 0.00025,
+      "max_interior_uncovered_fraction": 0.0005,
+      "min_component_recall": 0.999,
+      "component_min_foreground_fraction": 0,
+      "max_silhouette_edge_p95_px": 0.5
+    },
+    "every_view_must_pass_every_rule": true
+  },
+  "constructive_semantics": {
+    "id": "SOURCE_SILHOUETTE_SDF_INTERSECTION_RASTER_CELL_SUPPORT",
+    "identical_to_f2_f3": true,
+    "per_view_2d_signed_distance": "EDT_BACKGROUND_MINUS_EDT_FOREGROUND_AT_PIXEL_CENTERS",
+    "source_constraint_validity": "CONTINUOUS_RASTER_CELL_SUPPORT_[0,RESOLUTION]",
+    "half_pixel_perimeter_sampling": "NEAREST_EDGE_PIXEL_EXTENSION",
+    "true_out_of_frame_semantics": "UNKNOWN__CANNOT_VETO",
+    "field_composition": "MAX_ACROSS_VALID_VIEWS",
+    "normalized_domain": "[-1,1]^3",
+    "field_clamp_norm": 0.1,
+    "zero_level_surface": "SKIMAGE_MARCHING_CUBES_LEVEL_0",
+    "grid_alignment": "LINSPACE_MINUS1_PLUS1__ALIGN_CORNERS_TRUE",
+    "visual_hull_like": true,
+    "product_oracle_promotion_forbidden": true
+  },
+  "single_causal_variable": {
+    "name": "FIELD_RESOLUTION",
+    "historical_reference_256": {
+      "resolution": 256,
+      "source": "F2/F3 corrected constructive baseline",
+      "min_view_recall": 0.9982401430815266,
+      "min_view_precision": 0.9983457689059926,
+      "min_view_component_recall": 0.9982401430815266,
+      "max_view_largest_coherent_hole_fraction": 0.00014331411013402735,
+      "max_view_interior_uncovered_fraction": 0.00012288750526660738,
+      "max_view_silhouette_edge_p95_px": 1,
+      "stage13_v2_pass": false
+    },
+    "candidate_resolutions": [
+      384,
+      512
+    ],
+    "all_other_constructive_and_evaluator_semantics": "FROZEN"
+  },
+  "candidate_order": [
+    "SOURCE_SILHOUETTE_SDF_INTERSECTION_R384",
+    "SOURCE_SILHOUETTE_SDF_INTERSECTION_R512"
+  ],
+  "selection_rule": "FIRST_CANDIDATE_IN_ORDER_WITH_FULL_STAGE13_V2_P999_PASS_ELSE_NONE",
+  "execution": {
+    "optimizer_used": false,
+    "checkpoint_used": false,
+    "decode_dtype": "FP32",
+    "field_build_backend": "NUMPY_SCIPY_REFERENCE_SEMANTICS",
+    "field_build_chunking": "IMPLEMENTATION_ONLY__MUST_NOT_CHANGE_NUMERICAL_SEMANTICS",
+    "preserve_all_candidate_fields_surfaces_metrics": true,
+    "stop_after_first_full_pass": true
+  },
+  "result_semantics": {
+    "pass_384_or_512": "A HIGHER-RESOLUTION SOURCE-ONLY FIELD WITNESS EXISTS UNDER THE SAME CONSTRUCTION; THIS IS EVIDENCE THAT 256-CUBE DISCRETIZATION IS A MATERIAL BOTTLENECK FOR THE CORRECTED CONSTRUCTIVE CLASS. DOES_NOT_PROMOTE_PRODUCT_GEOMETRY.",
+    "fail_both": "NO_PREREGISTERED_HIGHER_RESOLUTION_CONSTRUCTIVE_WITNESS_FOUND_AT_384_OR_512. THIS DOES_NOT_PROVE SOURCE SILHOUETTE INCONSISTENCY OR MATHEMATICAL IMPOSSIBILITY.",
+    "canonical_product_authority_minted": false,
+    "stage13_policy_relaxation_allowed": false
+  },
+  "scientific_rules": {
+    "only_variable": "FIELD_RESOLUTION",
+    "optimizer_forbidden": true,
+    "source_masks_cameras_normalization_unchanged": true,
+    "constructive_formula_unchanged": true,
+    "raster_cell_support_semantics_unchanged": true,
+    "exact_stage13_evaluator_required": true,
+    "exact_runtime_v3_half_pixel_raster_semantics_required": true,
+    "teacher_geometry_forbidden": true,
+    "iris_network_forbidden": true,
+    "post_result_policy_mutation_forbidden": true
+  }
+}

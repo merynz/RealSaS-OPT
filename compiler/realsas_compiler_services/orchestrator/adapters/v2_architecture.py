@@ -7,8 +7,8 @@ from compiler.realsas_compiler_core.output_presentation_v1 import (
     build_output_direction_set,
     output_direction_set_from_dict,
 )
-from compiler.realsas_compiler_core.preproduct_authority_v1 import (
-    rest_reprojection_geometry_gate_from_dict,
+from compiler.realsas_compiler_core.geometry_substrate_v2 import (
+    geometry_substrate_from_dict,
 )
 from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
     canonical_mesh_candidate_from_dict,
@@ -131,11 +131,11 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
             "RealSaS.AppearanceDomainIR.v1",
         )
     )
-    geometry = rest_reprojection_geometry_gate_from_dict(
+    geometry = geometry_substrate_from_dict(
         _stage_output_payload(
             ctx,
-            "13_REST_REPROJECTION_GEOMETRY_GATE",
-            "RealSaS.RestReprojectionGeometryGateIR.v1",
+            "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+            "RealSaS.GeometrySubstrateQualificationIR.v2",
         )
     )
     partition = mechanical_partition_from_dict(
@@ -173,7 +173,7 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
     if len(addressing.face_address_ids) != len(candidate.faces):
         raise QualificationError("STATIC_MESH_FACE_ADDRESSABILITY_INCOMPLETE")
     if not all(view.passed for view in geometry.views):
-        raise QualificationError("STATIC_MESH_GEOMETRY_GATE_NOT_PASS")
+        raise QualificationError("STATIC_MESH_GEOMETRY_SUBSTRATE_NOT_PASS")
 
     report = {
         "status": "PASS_STATIC_CANONICAL_CARRIER",
@@ -181,7 +181,7 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         "face_count": len(candidate.faces),
         "degenerate_face_count": 0,
         "surface_addressability_fraction": 1.0,
-        "stage13_geometry_gate_inherited": True,
+        "stage13_geometry_substrate_inherited": True,
         "silhouette_is_geometry_authority_not_caa": True,
         "unknown_boundary_policy": (
             "CONSERVATIVE_UNTIL_STAGE35__NO_POST_SKIN_PARTITION_MUTATION_V1"
@@ -191,7 +191,7 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         candidate_mesh_binding_hash=candidate.candidate_lineage_hash,
         surface_addressing_binding_hash=addressing.addressing_hash,
         appearance_domain_binding_hash=domain.domain_hash,
-        geometry_gate_binding_hash=geometry.geometry_gate_hash,
+        geometry_gate_binding_hash=geometry.substrate_hash,
         partition_binding_hash=partition.partition_lineage_hash,
         qualification_report=report,
         qualification_hash="",

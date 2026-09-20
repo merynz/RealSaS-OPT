@@ -15,7 +15,8 @@ HISTORICAL_REGISTRY = "canonical/EXPERIMENT_REGISTRY_V2.json"
 HISTORICAL_JOURNAL = "canonical/SCIENTIFIC_JOURNAL_V1.jsonl"
 ACTIVE_RUN = "canonical/ACTIVE_RUN_V2.json"
 PIPELINE_PLAN = "canonical/MAINLINE_EXECUTION_PLAN_V2.json"
-PRODUCT_AUTHORITY = "canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md"
+PRODUCT_AUTHORITY = "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json"
+APPEARANCE_AUTHORITY = "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json"
 ARCHITECTURE_V2 = "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json"
 CAA_V1 = "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json"
 
@@ -37,7 +38,7 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
         self.assertEqual(authority["active_run_ledger"], ACTIVE_RUN)
         self.assertEqual(authority["pipeline_plan"], PIPELINE_PLAN)
         for rel in (CURRENT_CONTEXT, CURRENT_REGISTRY, CURRENT_JOURNAL, HISTORICAL_REGISTRY,
-                    HISTORICAL_JOURNAL, ACTIVE_RUN, PIPELINE_PLAN, PRODUCT_AUTHORITY, ARCHITECTURE_V2, CAA_V1,
+                    HISTORICAL_JOURNAL, ACTIVE_RUN, PIPELINE_PLAN, PRODUCT_AUTHORITY, APPEARANCE_AUTHORITY, ARCHITECTURE_V2, CAA_V1,
                     "canonical/V2_IMPLEMENTATION_READINESS.json",
                     "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md"):
             self.assertTrue((ROOT / rel).is_file(), rel)
@@ -45,7 +46,7 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
     def test_agent_contract_names_current_before_historical(self) -> None:
         text = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
         for token in (CURRENT_REGISTRY, CURRENT_JOURNAL, HISTORICAL_REGISTRY,
-                      HISTORICAL_JOURNAL, ACTIVE_RUN, PIPELINE_PLAN, PRODUCT_AUTHORITY):
+                      HISTORICAL_JOURNAL, ACTIVE_RUN, PIPELINE_PLAN, PRODUCT_AUTHORITY, APPEARANCE_AUTHORITY):
             self.assertIn(token, text)
         self.assertLess(text.index(CURRENT_JOURNAL), text.index(HISTORICAL_JOURNAL))
         self.assertLess(text.index(CURRENT_REGISTRY), text.index(HISTORICAL_REGISTRY))
@@ -57,7 +58,7 @@ class CurrentContinuityAuthorityV2(unittest.TestCase):
         order = authority["rehydration_order"]
         for rel in (CURRENT_CONTEXT, CURRENT_REGISTRY, CURRENT_JOURNAL, ACTIVE_RUN, PIPELINE_PLAN, PRODUCT_AUTHORITY):
             self.assertIn(rel, required)
-        for rel in (ACTIVE_RUN, PIPELINE_PLAN, "CURRENT_STATE.md", "canonical/AUTHORITY_MAP_V1.json", PRODUCT_AUTHORITY):
+        for rel in (ACTIVE_RUN, PIPELINE_PLAN, "CURRENT_STATE.md", "canonical/AUTHORITY_MAP_V1.json", PRODUCT_AUTHORITY, APPEARANCE_AUTHORITY):
             self.assertIn(rel, order)
 
     def test_plan_and_active_run_hash_contract_agree(self) -> None:

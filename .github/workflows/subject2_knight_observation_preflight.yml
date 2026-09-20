@@ -1,6 +1,19 @@
-name: subject2-knight-observation-preflight
+name: subject2-knight-v2-observation-preflight
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'canonical/MAINLINE_EXECUTION_PLAN_V2.json'
+      - 'canonical/ACTIVE_RUN_V2.json'
+      - 'canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json'
+      - 'canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json'
+      - 'compiler/realsas_compiler_services/orchestrator/mainline.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py'
+      - 'compiler/realsas_compiler_core/output_presentation_v1.py'
+      - 'compiler/realsas_compiler_core/surface_addressing_v1.py'
+      - 'tools/observation/blender_controlled_8view_v1.py'
+      - '.github/workflows/subject2_knight_observation_preflight.yml'
   pull_request:
     branches: [main]
     paths:
@@ -13,10 +26,10 @@ permissions:
 
 jobs:
   render-and-preflight:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 30
     env:
-      RUN_ID: SUBJECT2_KNIGHT_V1
+      RUN_ID: SUBJECT2_KNIGHT_V2
       SUBJECT_ID: SUBJECT2_KNIGHT
       KAYKIT_COMMIT: '672074b73ba276876a19e8816ecdc5241817ab47'
       KNIGHT_FBX_SHA256: 'b25e35cc7eaaa3c7c103f10a4f41fde1cbd81936fede9aa9ae4efbd29d40ba1b'
@@ -35,6 +48,14 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Validate V2 architecture before expensive render
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compileall -q compiler
+          python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
+          python -m pytest -q tests/repository/test_mainline_execution_plan_v2.py
 
       - name: Install headless Blender render libraries
         shell: bash
@@ -185,6 +206,9 @@ jobs:
                   "half_extent":norm["half_extent"],
                   "coordinate_frame":"REALSAS_OBJECT_FRAME",
               },
+              "appearance":{
+                  "backend":"DETERMINISTIC_V1"
+              },
           }
           tmp=manifest_path.with_suffix(".json.tmp")
           tmp.write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
@@ -200,20 +224,21 @@ jobs:
           python -m compiler.realsas_compiler_services.orchestrator.mainline status
           python - <<'PY'
           import json
-          p=json.load(open("canonical/ACTIVE_RUN_V1.json",encoding="utf-8"))
+          p=json.load(open("canonical/ACTIVE_RUN_V2.json",encoding="utf-8"))
           assert p["completed_count"]==8, p
           assert p["next_stage"]=="09_IRIS_FIT_PREREGISTERED", p
-          print("SUBJECT2_PREFIT_GATE_PASS progress=8/40 next=09_IRIS_FIT_PREREGISTERED")
+          assert p["total_count"]==46, p
+          print("SUBJECT2_V2_PREFIT_GATE_PASS progress=8/46 next=09_IRIS_FIT_PREREGISTERED")
           PY
 
       - name: Bundle prefit evidence
         shell: bash
         run: |
           set -euo pipefail
-          evidence="$RUNNER_TEMP/subject2_knight_prefit"
+          evidence="$RUNNER_TEMP/subject2_knight_v2_prefit"
           rm -rf "$evidence"; mkdir -p "$evidence"
           cp "$RUN_ROOT/run_manifest.json" "$evidence/"
-          cp canonical/ACTIVE_RUN_V1.json "$evidence/"
+          cp canonical/ACTIVE_RUN_V2.json "$evidence/"
           cp -a "$OBS_DIR" "$evidence/observations"
           cp -a "$RUN_ROOT/artifacts/01_SOURCE_BYTES_SEALED" "$evidence/"
           cp -a "$RUN_ROOT/artifacts/02_SOURCE_LICENSE_PROVENANCE" "$evidence/"
@@ -228,7 +253,7 @@ jobs:
       - name: Upload Knight prefit evidence
         uses: actions/upload-artifact@v4
         with:
-          name: subject2-knight-prefit-stage08
+          name: subject2-knight-v2-prefit-stage08
           path: ${{ env.EVIDENCE_DIR }}
           if-no-files-found: error
           retention-days: 14

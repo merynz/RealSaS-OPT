@@ -649,13 +649,45 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         "RealSaS.CompleteAppearanceQualificationIR.v2",
     )
     policy = dict(appearance_qualification.get("metadata", {}).get("policy") or {})
-    if "dynamic_max_compiled_unobserved_visible_fraction" not in policy:
-        raise QualificationError("RUNTIME_V2_DVI_EXPOSURE_BUDGET_MISSING")
+    required_dynamic_visibility = (
+        "dynamic_max_compiled_unobserved_visible_fraction",
+        "dynamic_max_frame_compiled_unobserved_visible_fraction",
+        "dynamic_max_connected_compiled_unobserved_visible_fraction",
+        "dynamic_max_compiled_global_visible_fraction",
+        "dynamic_max_micro_visible_pixel_fraction_per_frame",
+        "dynamic_max_unmeasurable_consequential_visible_face_count",
+    )
+    if any(key not in policy for key in required_dynamic_visibility):
+        raise QualificationError("RUNTIME_V2_DVI_VISIBILITY_POLICY_INCOMPLETE")
     exposure_budget = float(
         policy["dynamic_max_compiled_unobserved_visible_fraction"]
     )
-    if not (0.0 <= exposure_budget <= 1.0):
-        raise QualificationError("RUNTIME_V2_DVI_EXPOSURE_BUDGET_INVALID")
+    frame_exposure_budget = float(
+        policy["dynamic_max_frame_compiled_unobserved_visible_fraction"]
+    )
+    connected_exposure_budget = float(
+        policy["dynamic_max_connected_compiled_unobserved_visible_fraction"]
+    )
+    global_exposure_budget = float(
+        policy["dynamic_max_compiled_global_visible_fraction"]
+    )
+    micro_visible_budget = float(
+        policy["dynamic_max_micro_visible_pixel_fraction_per_frame"]
+    )
+    max_unmeasurable_consequential = int(
+        policy["dynamic_max_unmeasurable_consequential_visible_face_count"]
+    )
+    for value in (
+        exposure_budget,
+        frame_exposure_budget,
+        connected_exposure_budget,
+        global_exposure_budget,
+        micro_visible_budget,
+    ):
+        if not (0.0 <= value <= 1.0):
+            raise QualificationError("RUNTIME_V2_DVI_VISIBILITY_BUDGET_INVALID")
+    if max_unmeasurable_consequential < 0:
+        raise QualificationError("RUNTIME_V2_DVI_UNMEASURABLE_FACE_BUDGET_INVALID")
     conditioning_policy = validate_dynamic_appearance_policy(policy)
     min_visible_pixels = int(
         conditioning_policy["dynamic_min_visible_pixels_per_face"]

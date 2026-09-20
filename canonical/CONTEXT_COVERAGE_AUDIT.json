@@ -12,8 +12,8 @@
   "explained_high_signal_count": 327,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 144,
-  "safe_default_evidence_only_branch_count": 140,
+  "live_branch_count": 145,
+  "safe_default_evidence_only_branch_count": 141,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "d2c4556834d75ebeb63a149256c34d4b956960db",
+      "sha": "244c5ab2c9dbfecf623c0703da75cabe779a9a38",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -589,6 +589,12 @@
     {
       "name": "promote/iris-scene-first-signed-v3-20260905",
       "sha": "7cfb7efedbe956c2aa16003e5a7df9bb56c907bb",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "redteam-hardening-20260920",
+      "sha": "44a5241fa3ec174dc6cd0d44cbcf0f472e3d91cf",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

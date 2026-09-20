@@ -171,6 +171,9 @@ class DynamicVisualIntegrityV2IR:
     maximum_frame_micro_visible_pixel_fraction: float
     consequential_visible_face_count: int
     unmeasurable_consequential_visible_face_count: int
+    exact_depth_ambiguous_pixel_count: int
+    exact_depth_ambiguous_fraction: float
+    maximum_frame_exact_depth_ambiguous_fraction: float
     native_reference_mismatch_pixel_count: int
     maximum_frame_native_reference_mismatch_fraction: float
     dynamic_conditioning_sample_count: int
@@ -337,6 +340,9 @@ def dynamic_visual_integrity_from_dict(payload: Mapping[str, Any]) -> DynamicVis
         maximum_frame_micro_visible_pixel_fraction=float(payload["maximum_frame_micro_visible_pixel_fraction"]),
         consequential_visible_face_count=int(payload["consequential_visible_face_count"]),
         unmeasurable_consequential_visible_face_count=int(payload["unmeasurable_consequential_visible_face_count"]),
+        exact_depth_ambiguous_pixel_count=int(payload["exact_depth_ambiguous_pixel_count"]),
+        exact_depth_ambiguous_fraction=float(payload["exact_depth_ambiguous_fraction"]),
+        maximum_frame_exact_depth_ambiguous_fraction=float(payload["maximum_frame_exact_depth_ambiguous_fraction"]),
         native_reference_mismatch_pixel_count=int(payload["native_reference_mismatch_pixel_count"]),
         maximum_frame_native_reference_mismatch_fraction=float(payload["maximum_frame_native_reference_mismatch_fraction"]),
         dynamic_conditioning_sample_count=int(payload["dynamic_conditioning_sample_count"]),

@@ -50,9 +50,9 @@
     "dynamic_min_visible_pixels_per_face": 4,
     "dynamic_min_projected_double_area_px2": 1,
     "dynamic_max_uv_to_surface_condition_number": 32,
-    "dynamic_max_relative_surface_condition_number": 8,
-    "dynamic_max_relative_surface_principal_stretch": 6,
-    "dynamic_max_adjacent_frame_surface_principal_stretch": 4
+    "dynamic_max_relative_surface_condition_number": 2,
+    "dynamic_max_relative_surface_principal_stretch": 2,
+    "dynamic_max_adjacent_frame_surface_principal_stretch": 2
   },
   "rationale": {
     "angle_support": "abs(normal dot camera-forward) >= cos(80deg); at least 10deg away from exact grazing, used only for correspondence eligibility, not RGB quality.",
@@ -62,7 +62,8 @@
     "holdout_and_seam": "thresholds are preregistered subject-free fault-detection guardrails, not claims of perceptual optimality.",
     "rest_art": "full source-foreground RGBA and source-alpha coverage are first-class product gates, independent of geometry qualification.",
     "dynamic_exposure": "at most 20% of dynamically visible surface pixels may rely on genuinely compiled-unobserved provenance in the first V2 product policy.",
-    "dynamic_appearance_conditioning": "Every consequential dynamically visible face is checked in the intrinsic textured-surface metric. The affine UV-to-posed-3D map and generalized rest-to-posed / previous-to-posed surface metrics bound texture and line-art stretch/shear while remaining invariant to rigid 3D rotation and translation. Screen projection conditioning is diagnostic only so legitimate foreshortening is not misclassified as art deformation. Thresholds are subject-free and may not be tuned from Knight."
+    "dynamic_appearance_conditioning": "Every consequential dynamically visible face is checked in the intrinsic textured-surface metric. The affine UV-to-posed-3D map and generalized rest-to-posed / previous-to-posed surface metrics bound texture and line-art stretch/shear while remaining invariant to rigid 3D rotation and translation. Screen projection conditioning is diagnostic only so legitimate foreshortening is not misclassified as art deformation. Thresholds are subject-free and may not be tuned from Knight.",
+    "dynamic_appearance_conditioning_calibration": "Thresholds are selected by canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json from a subject-free synthetic benign/adversarial deformation bank. They are frozen before Knight and may not be relaxed from witness outcome."
   },
   "calibration_contract": "tests/compiler/test_caa_v2_subject_free_policy.py",
   "mutable_after_witness": false

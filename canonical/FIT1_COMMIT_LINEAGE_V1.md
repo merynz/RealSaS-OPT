@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2236**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2242**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2248,6 +2248,12 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-20T21:37:43+03:00` | `44b148737dc1` | yes | CI_TEST, COMPILER_PROOF | test: enforce source moving-alias and role uniqueness boundaries | `tests/compiler/test_preflight_v2_adversarial.py` | `main` |
 | `2026-09-20T21:40:25+03:00` | `6fe7bd3c19ce` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
 | `2026-09-20T21:40:59+03:00` | `c6fb35a5b40c` | yes | GOVERNANCE_CONTINUITY | science: seal V2 A-U subject-free adversarial implementation audit | `canonical/V2_ADVERSARIAL_MODULE_AUDIT_LEDGER_20260920.json` | `main` |
+| `2026-09-20T21:41:37+03:00` | `dd2a8f43bd0e` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-20T21:41:42+03:00` | `aeb6c2861618` | yes | GOVERNANCE_CONTINUITY | authority: seal V2 implementation READY_FOR_WITNESS_EXECUTION | `canonical/V2_IMPLEMENTATION_READINESS.json` | `main` |
+| `2026-09-20T21:42:57+03:00` | `7b7e092d6121` | yes | CI_TEST | witness: arm one-shot Knight V2 activation trigger after readiness seal | `.github/workflows/subject2_knight_observation_preflight.yml` | `main` |
+| `2026-09-20T21:43:21+03:00` | `3916486a98f1` | yes | GOVERNANCE_CONTINUITY | witness: activate fresh Knight V2 Stage01-08 preflight once | `canonical/SUBJECT2_KNIGHT_V2_WITNESS_ACTIVATION_20260920.json` | `main` |
+| `2026-09-20T21:44:13+03:00` | `1e9cfedf938c` | yes | CI_TEST | witness apparatus: remove sudo dependency and verify pinned headless Blender | `.github/workflows/subject2_knight_observation_preflight.yml` | `main` |
+| `2026-09-20T21:44:24+03:00` | `0855ab83c165` | yes | GOVERNANCE_CONTINUITY | witness: retry Knight V2 preflight after pre-Stage01 apparatus fix | `canonical/SUBJECT2_KNIGHT_V2_WITNESS_ACTIVATION_20260920.json` | `main` |
 
 ## Use rule
 

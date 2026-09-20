@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "c6fb35a5b40c44cebb55eef3736a6bd596a618bc",
+    "main": "0855ab83c165fe411c64c30600e67ca95c2a12e5",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -115,7 +115,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2236,
+  "commit_count": 2242,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -116744,6 +116744,140 @@
       "main_reachable": true,
       "changed_paths": [
         "canonical/V2_ADVERSARIAL_MODULE_AUDIT_LEDGER_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "dd2a8f43bd0ea8a2fc1ad6ceee3941c791b93bd3",
+      "parents": [
+        "c6fb35a5b40c44cebb55eef3736a6bd596a618bc"
+      ],
+      "author_time": "2026-09-20T21:41:37+03:00",
+      "committer_time": "2026-09-20T21:41:37+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "aeb6c2861618a40db33a8f4fc757dbf0cee57494",
+      "parents": [
+        "dd2a8f43bd0ea8a2fc1ad6ceee3941c791b93bd3"
+      ],
+      "author_time": "2026-09-20T21:41:42+03:00",
+      "committer_time": "2026-09-20T21:41:42+03:00",
+      "subject": "authority: seal V2 implementation READY_FOR_WITNESS_EXECUTION",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_IMPLEMENTATION_READINESS.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7b7e092d6121003a96db980d03af73645fe229bc",
+      "parents": [
+        "aeb6c2861618a40db33a8f4fc757dbf0cee57494"
+      ],
+      "author_time": "2026-09-20T21:42:57+03:00",
+      "committer_time": "2026-09-20T21:42:57+03:00",
+      "subject": "witness: arm one-shot Knight V2 activation trigger after readiness seal",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/subject2_knight_observation_preflight.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3916486a98f10557bf74e00ae64649c37b79772a",
+      "parents": [
+        "7b7e092d6121003a96db980d03af73645fe229bc"
+      ],
+      "author_time": "2026-09-20T21:43:21+03:00",
+      "committer_time": "2026-09-20T21:43:21+03:00",
+      "subject": "witness: activate fresh Knight V2 Stage01-08 preflight once",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/SUBJECT2_KNIGHT_V2_WITNESS_ACTIVATION_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1e9cfedf938c96b36784add301e6081b546f137b",
+      "parents": [
+        "3916486a98f10557bf74e00ae64649c37b79772a"
+      ],
+      "author_time": "2026-09-20T21:44:13+03:00",
+      "committer_time": "2026-09-20T21:44:13+03:00",
+      "subject": "witness apparatus: remove sudo dependency and verify pinned headless Blender",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/subject2_knight_observation_preflight.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0855ab83c165fe411c64c30600e67ca95c2a12e5",
+      "parents": [
+        "1e9cfedf938c96b36784add301e6081b546f137b"
+      ],
+      "author_time": "2026-09-20T21:44:24+03:00",
+      "committer_time": "2026-09-20T21:44:24+03:00",
+      "subject": "witness: retry Knight V2 preflight after pre-Stage01 apparatus fix",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/SUBJECT2_KNIGHT_V2_WITNESS_ACTIVATION_20260920.json"
       ],
       "subsystem_tags": [
         "GOVERNANCE_CONTINUITY"

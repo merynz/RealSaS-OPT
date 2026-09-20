@@ -3,7 +3,7 @@
   "date": "2026-09-20",
   "continuation_branch": "main",
   "execution_branch": "main",
-  "status": "V2_IMPLEMENTATION_ASSEMBLY__WITNESS_EXECUTION_FORBIDDEN",
+  "status": "V2_IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN",
   "authority": {
     "experiment_registry": "canonical/EXPERIMENT_REGISTRY_V3.json",
     "scientific_journal": "canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl",
@@ -19,15 +19,15 @@
   },
   "product": {
     "target": "automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics",
-    "demo_witness": "Subject-2 Knight (next witness; execution intentionally held)",
-    "next_visible_product_milestone": "seal READY_FOR_WITNESS_EXECUTION only after every V2 stage is bound and Geometry/Mechanics/Appearance/runtime visual-integrity audits pass; then mint fresh Knight Stage01 lineage"
+    "demo_witness": "Subject-2 Knight (held; previous activation void)",
+    "next_visible_product_milestone": "pass witness orchestration/artifact dry-run proof, reseal V2 readiness, then mint a fresh Knight Stage01 run-local ledger"
   },
   "current_focus": {
-    "module": "V2 implementation assembly and adversarial authority cleanup",
-    "state": "V2_IMPLEMENTATION_ASSEMBLY__WITNESS_EXECUTION_FORBIDDEN",
+    "module": "V2 implementation and witness orchestration audit",
+    "state": "V2_IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN",
     "active_experiment": "V2_IMPLEMENTATION_ASSEMBLY",
-    "most_recent_closed_gate": "V1_TO_V2_AUTHORITY_RATIONALE_AND_APPEARANCE_COEQUALITY_FROZEN",
-    "promotion_block": "Do not execute Knight. Bind all 46 V2 adapters, re-audit IRIS/GSA geometry role, close relation-parent mesh feasibility, implement Complete Appearance Authority and premultiplied sampling, remove donor/UNSEEN from current runtime, prove canonical posed-XYZ visibility, and close dynamic visual integrity.",
+    "most_recent_closed_gate": "PRIOR_READINESS_SEAL_REVOKED_AFTER_PRE_STAGE01_ORCHESTRATION_GAP",
+    "promotion_block": "Do not execute Knight. Prove run-local ledger initialization, current target-closure CLI, workflow contract and Stage01-08 artifact/output schemas before resealing readiness.",
     "scope_warning": "No Knight-derived threshold choice is allowed during V2 assembly.",
     "scientific_question": "Is current main internally capable of producing and proving a Spine-class 2D puppet with geometry, mechanics and appearance all treated as first-class audited authorities?"
   },
@@ -156,9 +156,9 @@
     }
   ],
   "continuation_protocol": {
-    "first_action": "Read V2_IMPLEMENTATION_READINESS, not a witness stage ledger.",
-    "assembly_completion_definition": "All required readiness proofs PASS with SHA-256 identities, every plan adapter bound, DAG and adversarial tests green, then status becomes READY_FOR_WITNESS_EXECUTION.",
-    "witness_rule": "Only after readiness seal mint a fresh Subject-2 Knight Stage01 ledger; do not reuse V1 or premature V2 witness rows.",
+    "first_action": "Read V2_IMPLEMENTATION_READINESS; prior READY seal is revoked.",
+    "assembly_completion_definition": "All required readiness proofs, including WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN, PASS with SHA-256 identities before READY_FOR_WITNESS_EXECUTION may be resealed.",
+    "witness_rule": "Only after the new readiness seal, use mainline init-run to create a run-local Knight ledger under the authority root; canonical ACTIVE_RUN_V2 remains assembly governance only.",
     "experiment_completion_definition": "All required readiness proofs PASS with SHA-256 identities, every plan adapter bound, DAG and adversarial tests green, then status becomes READY_FOR_WITNESS_EXECUTION."
   },
   "product_quality_axes": {

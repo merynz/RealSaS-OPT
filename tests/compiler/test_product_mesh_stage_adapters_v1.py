@@ -436,3 +436,348 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
         abs(k.local_rotation_quat_xyzw[0])>0.05
         for k in motion.clips[0].tracks[0].keyframes
     )
+
+
+def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tmp_path):
+    import os
+    from dataclasses import replace
+    import pytest
+
+    from compiler.realsas_compiler_core.appearance_authority_v2 import (
+        AppearanceTextureIR,
+        CAARestRenderProofIR,
+        CAARestViewProofIR,
+        CompleteAppearanceAssetIR,
+        CompleteAppearanceQualificationIR,
+        caa_rest_render_proof_hash,
+        complete_appearance_asset_hash,
+        complete_appearance_qualification_hash,
+    )
+    from compiler.realsas_compiler_core.output_presentation_v1 import (
+        build_output_direction_set,
+    )
+    from compiler.realsas_compiler_services.orchestrator.adapters import mesh_v2
+    from compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2 import (
+        qualify_presentation_structure_stage,
+        seal_complete_puppet_stage,
+    )
+    from compiler.realsas_compiler_services.orchestrator.adapters.motion_v2 import (
+        seal_motion_source_stage as seal_motion_source_stage_v2,
+        compile_motion_stage as compile_motion_stage_v2,
+        prove_dynamic_motion_stage,
+    )
+    from compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2 import (
+        build_runtime_projection_stage,
+        materialize_runtime_package_stage,
+        prove_native_package_playback_stage,
+        prove_dynamic_visual_integrity_stage,
+    )
+    from compiler.realsas_compiler_services.orchestrator.adapters.closure_v2 import (
+        seal_product_closure_stage,
+    )
+
+    ctx = _fixture(tmp_path)
+    ctx["repo_root"] = ROOT
+
+    def alias(old_id: str, new_id: str):
+        old = next(row for row in ctx["ledger"]["stages"] if row["id"] == old_id)
+        ctx["ledger"]["stages"].append(
+            {"id": new_id, "status": "PASS", "outputs": list(old["outputs"])}
+        )
+
+    def run(stage_id: str, fn):
+        ctx["stage"] = {"id": stage_id}
+        result = fn(ctx)
+        assert result["status"] == "PASS", result
+        _install_stage_outputs(ctx, stage_id, result)
+        return result
+
+    alias("18_SKELETON_QUALIFIED", "28_SKELETON_QUALIFIED")
+    alias("22_SKIN_QUALIFIED", "32_SKIN_QUALIFIED")
+
+    r17 = run(
+        "17_MECHANICAL_PARTITION_QUALIFIED",
+        mesh_v2.qualify_mechanical_partition_and_carriers,
+    )
+    r34 = run(
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        mesh_v2.seal_deformation_capability_envelope,
+    )
+    r18 = run(
+        "18_CANONICAL_MESH_ADDRESSING_BUILD",
+        mesh_v2.build_canonical_mesh_candidate_stage,
+    )
+    r35 = run(
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        mesh_v2.qualify_canonical_mesh_stage,
+    )
+    r36 = run(
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        mesh_v2.bind_qualified_mesh_skin_stage,
+    )
+
+    camera_set = qualified_camera_set_from_dict(
+        read_json(
+            next(
+                out
+                for row in ctx["ledger"]["stages"]
+                if row["id"] == "05_CAMERA_CONTRACT_SOLVED"
+                for out in row["outputs"]
+                if out["schema"] == "RealSaS.QualifiedCameraSetIR.v1"
+            )["path"]
+        )
+    )
+    directions = build_output_direction_set(camera_set)
+    direction_path = _write(tmp_path / "directions.json", directions)
+    ctx["ledger"]["stages"].append(
+        {
+            "id": "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+            "status": "PASS",
+            "outputs": [
+                _out(direction_path, "RealSaS.OutputPresentationDirectionSetIR.v1")
+            ],
+        }
+    )
+
+    candidate = canonical_mesh_candidate_from_dict(
+        read_json(
+            next(
+                out
+                for out in r18["outputs"]
+                if out["schema"] == "RealSaS.CanonicalMeshCandidateIR.v1"
+            )["path"]
+        )
+    )
+    mesh = qualified_mesh_from_dict(
+        read_json(
+            next(
+                out
+                for out in r35["outputs"]
+                if out["schema"] == "RealSaS.QualifiedMeshIR.v1"
+            )["path"]
+        )
+    )
+    assert len(mesh.faces) == 1
+
+    appearance_root = tmp_path / "appearance_v2"
+    appearance_root.mkdir(parents=True, exist_ok=True)
+    texture_rows = []
+    for vi in range(8):
+        rgba = np.zeros((16, 16, 4), dtype=np.uint8)
+        rgba[:, :, :] = (70 + vi * 5, 110, 150, 255)
+        texture_path = appearance_root / f"V{vi}.png"
+        Image.fromarray(rgba, "RGBA").save(
+            texture_path, format="PNG", optimize=False, compress_level=1
+        )
+        texture_rows.append(
+            AppearanceTextureIR(
+                direction_index=vi,
+                direction_id=f"V{vi}",
+                transport_png_path=str(texture_path.resolve()),
+                transport_png_sha256=_sha(texture_path),
+                width=16,
+                height=16,
+                metadata={"fixture": True},
+            )
+        )
+    face_uv = np.asarray(
+        [[[0.15, 0.15], [0.85, 0.15], [0.15, 0.85]]],
+        dtype=np.float32,
+    )
+    uv_path = appearance_root / "surface_uv.npz"
+    np.savez_compressed(uv_path, face_uv=face_uv)
+    provenance_path = appearance_root / "provenance.npz"
+    np.savez_compressed(
+        provenance_path,
+        provenance=np.zeros((8, 16, 16), dtype=np.uint8),
+    )
+    asset = CompleteAppearanceAssetIR(
+        compile_seal_binding_hash="c" * 64,
+        candidate_mesh_binding_hash=candidate.candidate_lineage_hash,
+        surface_addressing_binding_hash="a" * 64,
+        appearance_domain_binding_hash="d" * 64,
+        output_direction_set_binding_hash=directions.direction_set_hash,
+        textures=tuple(texture_rows),
+        uv_npz_path=str(uv_path.resolve()),
+        uv_npz_sha256=_sha(uv_path),
+        provenance_npz_path=str(provenance_path.resolve()),
+        provenance_npz_sha256=_sha(provenance_path),
+        atlas_layout={"fixture": True, "width": 16, "height": 16},
+        asset_hash="",
+        metadata={"total_appearance_asset": True, "fixture": True},
+    )
+    asset = replace(asset, asset_hash=complete_appearance_asset_hash(asset))
+    asset_path = _write(appearance_root / "complete_asset.json", asset)
+    ctx["ledger"]["stages"].append(
+        {
+            "id": "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "status": "PASS",
+            "outputs": [_out(asset_path, "RealSaS.CompleteAppearanceAssetIR.v2")],
+        }
+    )
+
+    qualification = CompleteAppearanceQualificationIR(
+        asset_binding_hash=asset.asset_hash,
+        preregistration_binding_hash="p" * 64,
+        source_lock_exact_fraction=1.0,
+        total_defined_fraction=1.0,
+        structured_holdout_sample_count=128,
+        structured_holdout_mean_rgba_l1=0.0,
+        structured_holdout_p95_rgba_l1=0.0,
+        provenance_boundary_pair_count=0,
+        provenance_boundary_mean_rgba_l1=0.0,
+        provenance_boundary_p95_rgba_l1=0.0,
+        provenance_boundary_gradient_pair_count=0,
+        provenance_boundary_mean_gradient_jump=0.0,
+        provenance_boundary_p95_gradient_jump=0.0,
+        qualification_report={
+            "status": "PASS_COMPLETE_APPEARANCE",
+            "source_lock_passed": True,
+            "totality_passed": True,
+            "holdout_passed": True,
+            "seam_passed": True,
+        },
+        qualification_hash="",
+        metadata={
+            "policy": {
+                "dynamic_max_compiled_unobserved_visible_fraction": 0.20
+            },
+            "fixture": True,
+        },
+    )
+    qualification = replace(
+        qualification,
+        qualification_hash=complete_appearance_qualification_hash(qualification),
+    )
+    qualification_path = _write(
+        appearance_root / "complete_qualification.json", qualification
+    )
+    ctx["ledger"]["stages"].append(
+        {
+            "id": "24_COMPLETE_APPEARANCE_QUALIFIED",
+            "status": "PASS",
+            "outputs": [
+                _out(
+                    qualification_path,
+                    "RealSaS.CompleteAppearanceQualificationIR.v2",
+                )
+            ],
+        }
+    )
+
+    proof_views = tuple(
+        CAARestViewProofIR(
+            direction_index=vi,
+            rendered_rgba_sha256=texture_rows[vi].transport_png_sha256,
+            rendered_alpha_pixel_count=1,
+            source_locked_pixel_count=1,
+            source_locked_fraction_of_source_foreground=1.0,
+            source_locked_exact_pixel_count=1,
+            source_locked_exact_fraction=1.0,
+            source_locked_mean_rgba_l1=0.0,
+            source_locked_p95_rgba_l1=0.0,
+            source_foreground_mean_rgba_l1=0.0,
+            source_foreground_p95_rgba_l1=0.0,
+            geometry_visible_pixel_count=1,
+            final_alpha_pixel_count=1,
+            geometry_visible_final_alpha_hole_count=0,
+            geometry_visible_final_alpha_hole_fraction=0.0,
+            source_alpha_recall=1.0,
+            source_alpha_precision=1.0,
+            largest_coherent_alpha_hole_fraction=0.0,
+            alpha_interior_uncovered_fraction=0.0,
+            metadata={"status": "PASS", "fixture": True},
+        )
+        for vi in range(8)
+    )
+    rest_proof = CAARestRenderProofIR(
+        asset_binding_hash=asset.asset_hash,
+        static_mesh_qualification_binding_hash="s" * 64,
+        camera_set_binding_hash=camera_set.camera_set_hash,
+        views=proof_views,
+        qualification_report={
+            "status": "PASS_CAA_REFERENCE_REST",
+            "every_direction_passed": True,
+        },
+        proof_hash="",
+        metadata={"fixture": True},
+    )
+    rest_proof = replace(
+        rest_proof, proof_hash=caa_rest_render_proof_hash(rest_proof)
+    )
+    rest_proof_path = _write(appearance_root / "rest_proof.json", rest_proof)
+    ctx["ledger"]["stages"].append(
+        {
+            "id": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+            "status": "PASS",
+            "outputs": [_out(rest_proof_path, "RealSaS.CAARestRenderProofIR.v2")],
+        }
+    )
+
+    ctx["run_manifest"]["presentation"] = {"mode": "AUTO_ROLE_FREE_V2"}
+
+    r37 = run(
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        qualify_presentation_structure_stage,
+    )
+    r38 = run("38_CANONICAL_PUPPET_SEALED", seal_complete_puppet_stage)
+    by38 = {out["schema"]: out for out in r38["outputs"]}
+    assert "RealSaS.CompletePuppetStateIR.v2" in by38
+    assert "RealSaS.QualifiedPresentationGraphIR.v1" in by38
+
+    r39 = run("39_MOTION_SOURCE_OR_PRESET_SEAL", seal_motion_source_stage_v2)
+    r40 = run("40_MOTION_COMPILE_RUN", compile_motion_stage_v2)
+    r41 = run("41_MOTION_DYNAMIC_PROOF", prove_dynamic_motion_stage)
+    dynamic_payload = read_json(r41["outputs"][0]["path"])
+    assert dynamic_payload["qualification_report"]["dynamic_proof_passed"] is True
+    assert dynamic_payload["qualification_report"]["any_clip_nonzero"] is True
+    assert (
+        dynamic_payload["qualification_report"]["rest_unseen_dynamic_exposure_gate_removed"]
+        is True
+    )
+
+    player_raw = os.environ.get("REALSAS_RUNTIME_V2_PLAYER", "")
+    if not player_raw:
+        pytest.skip("native V2 player is required on self-hosted product integration gate")
+    player = Path(player_raw).expanduser().resolve()
+    assert player.is_file(), player
+    ctx["run_manifest"]["runtime"] = {
+        "native_player": {"path": str(player), "sha256": _sha(player)}
+    }
+
+    r42 = run(
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        build_runtime_projection_stage,
+    )
+    r43 = run("43_RSS_MATERIALIZE_COMPACT", materialize_runtime_package_stage)
+    r44 = run(
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        prove_native_package_playback_stage,
+    )
+    assert r44["diagnostics"]["native_reference_mismatch_pixels"] == 0
+    r45 = run(
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        prove_dynamic_visual_integrity_stage,
+    )
+    assert r45["diagnostics"]["native_reference_mismatch_pixel_count"] == 0
+    assert r45["diagnostics"]["undefined_visible_pixel_count"] == 0
+    assert r45["diagnostics"]["compiled_unobserved_visible_fraction"] == 0.0
+
+    r46 = run("46_PRODUCT_CLOSURE_SEAL", seal_product_closure_stage)
+    closure = read_json(
+        next(
+            out
+            for out in r46["outputs"]
+            if out["schema"] == "RealSaS.ProductClosureIR.v2"
+        )["path"]
+    )
+    assert closure["qualification_report"]["product_pass"] is True
+    assert closure["qualification_report"]["appearance_authority_passed"] is True
+    assert closure["qualification_report"]["native_visual_integrity_passed"] is True
+    editable = next(
+        out
+        for out in r46["outputs"]
+        if out["schema"] == "application/x-realsas-editable-v2"
+    )
+    assert Path(editable["path"]).is_file()
+    assert _sha(Path(editable["path"])) == editable["sha256"]

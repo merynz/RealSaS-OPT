@@ -314,6 +314,10 @@ class CAARestViewProofIR:
     final_alpha_pixel_count: int
     geometry_visible_final_alpha_hole_count: int
     geometry_visible_final_alpha_hole_fraction: float
+    source_alpha_recall: float
+    source_alpha_precision: float
+    largest_coherent_alpha_hole_fraction: float
+    alpha_interior_uncovered_fraction: float
     schema_version: str = "RealSaS.CAARestViewProofIR.v2"
     metadata: Json = field(default_factory=dict)
 

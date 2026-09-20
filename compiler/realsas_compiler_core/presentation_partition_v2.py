@@ -8,7 +8,10 @@ from typing import Any, Mapping
 import numpy as np
 
 from .appearance_authority_v2 import CAA_PROVENANCE
-from .appearance_bake_v2 import bilinear_premultiplied_rgba
+from .appearance_bake_v2 import (
+    bilinear_premultiplied_rgba,
+    conservative_bilinear_provenance,
+)
 from .hashing import content_sha256
 from .types import QualificationError
 
@@ -193,8 +196,8 @@ def build_presentation_partition_evidence(
         )
         errors = []
         for direction in range(8):
-            prov_a = _nearest_scalar(provenance[direction], uv_a)
-            prov_b = _nearest_scalar(provenance[direction], uv_b)
+            prov_a = conservative_bilinear_provenance(provenance[direction], uv_a)
+            prov_b = conservative_bilinear_provenance(provenance[direction], uv_b)
             eligible = np.asarray(
                 [
                     int(a) in source_codes and int(b) in source_codes

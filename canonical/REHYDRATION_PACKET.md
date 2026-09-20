@@ -6,16 +6,16 @@
 ## 60-second state
 
 - Product: automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics
-- Current witness: Subject-2 Knight (held; previous activation void)
-- Current module: V2 stage-level red-team hardening
-- Current state: V2_STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN
+- Current witness: Subject-2 Knight (review-ready; execution held for explicit user approval)
+- Current module: V2 review-ready seal
+- Current state: READY_FOR_WITNESS_EXECUTION__AWAITING_EXPLICIT_USER_APPROVAL
 - Active experiment: V2_IMPLEMENTATION_ASSEMBLY
-- Most recent closed gate: SELF_HOSTED_MAINLINE_AND_SUBJECT_FREE_ORCHESTRATION_GREEN__STAGE_REDTEAM_REOPENED
-- Canonical main: 4419509ee0f6
+- Most recent closed gate: DOCUMENTATION_INCLUSIVE_EXACT_MAINLINE_AND_ORCHESTRATION_GREEN
+- Canonical main: 162816023f93
 - Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
 - Plan SHA-256: b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f
-- Promotion block: Do not execute Knight. RT-37 automatic presentation segmentation and RT-45/46 dynamic appearance-quality/closure-claim gaps must be resolved or explicitly narrowed before a new readiness seal.
-- Scope warning: No Knight-derived threshold choice is allowed during V2 assembly.
+- Promotion block: No implementation blocker remains for the controlled first witness. Do not execute Knight until the user explicitly approves.
+- Scope warning: READY is implementation readiness, not Knight product PASS or unseen generalization.
 
 ## Current machine authority
 
@@ -51,15 +51,15 @@
 | **Appearance / CAA** | total source-preserving 2D-art authority | source wins; totality + holdout + seam + exposure + premultiplied sampling; no geometry mutation |
 | **Mechanics / Geppetto+Arachne** | qualified skeleton and skin | models propose; Compiler owns legal canonical mechanics |
 | **DynamicMechanicalMesh** | deformation qualification | frozen mesh is stress-tested; repair returns to new mesh lineage |
-| **Presentation** | slots attachments order visibility clipping | structure only; cannot invent geometry or appearance |
+| **Presentation** | role-free evidence-supported slots attachments grouping order visibility clipping | mechanical/topological/source-backed appearance evidence may partition presentation; categorical identity may not be minted |
 | **Motion** | full-3D compiled motion | operates sealed puppet; appearance exposure is measured, not forbidden merely for being rest-unobserved |
 | **Runtime** | deterministic consumer | posed canonical XYZ + z-buffer for visibility; sealed CAA for art; no donor search/generation/relighting |
-| **DynamicVisualIntegrity** | native product image proof | separately attributes geometry holes, depth ownership, appearance definedness, alpha/sampling, seams, flicker and composition |
-| **Closure** | Stage46 product seal | requires all three co-equal quality axes plus native runtime evidence |
+| **DynamicVisualIntegrity** | native product image proof plus intrinsic dynamic appearance conditioning | native parity, provenance, exposure and rigid-motion-invariant UV/surface deformation conditioning; screen projection diagnostic only |
+| **Closure** | Stage46 product seal | requires geometry, mechanics, appearance, presentation partition and native dynamic visual integrity |
 
 ## Current scientific question
 
-Does every one of the 46 V2 stages prove exactly the authority needed for a source-faithful Spine-class 2D puppet, without allowing mechanics/runtime correctness to substitute for presentation or dynamic appearance quality?
+After user approval, does Subject-2 Knight close the exact V2 product contract without subject-specific repair?
 
 ## Settled invariants
 
@@ -76,14 +76,16 @@ Does every one of the 46 V2 stages prove exactly the authority needed for a sour
 - Mesh producer/gate feasibility is proved upstream; thresholds are not weakened after witness inspection.
 - V2 executor uses DAG dependencies; ordinals are documentation only.
 - Downstream failure does not erase verified independent upstream PASS.
-- Knight execution is forbidden until V2_IMPLEMENTATION_READINESS is READY_FOR_WITNESS_EXECUTION.
 - Product closure is Stage46 and requires native Dynamic Visual Integrity.
+- Presentation partition may use qualified source-backed appearance boundaries but may not invent semantic object identity.
+- Dynamic appearance shipping gates are intrinsic surface metrics invariant to rigid 3D motion; screen projection conditioning is diagnostic only.
+- Knight execution requires exact READY_FOR_WITNESS_EXECUTION and explicit user approval.
 
 ## Execution environment
 
 - Actions: SELF_HOSTED_LOCAL_ONLY
 - Runner labels: self-hosted, linux, x64, realsas
-- Known runner: realsas-self-hosted
+- Known runner: realsas-wsl-1660ti
 - Authority root: $HOME/realsas_authority
 
 ## Resume
@@ -96,13 +98,15 @@ Read in this order:
 5. canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json
 6. canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md
 7. canonical/AUTHORITY_MAP_V1.json
-8. canonical/ACTIVE_RUN_V2.json
-9. canonical/EXPERIMENT_REGISTRY_V3.json
-10. canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl
-11. CURRENT_STATE.md
-12. canonical/CONTEXT_STATE_V2.json
+8. canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json
+9. canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json
+10. canonical/ACTIVE_RUN_V2.json
+11. canonical/EXPERIMENT_REGISTRY_V3.json
+12. canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl
+13. CURRENT_STATE.md
+14. canonical/CONTEXT_STATE_V2.json
 
-Resume rule: All required readiness proofs PASS with SHA-256 identities, every plan adapter bound, DAG and adversarial tests green, then status becomes READY_FOR_WITNESS_EXECUTION.
+Resume rule: Implementation assembly is review-ready; Knight remains a separate user-authorized scientific witness.
 
 ## Packet validity
 

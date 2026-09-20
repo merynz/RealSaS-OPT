@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `df0860431c02108229cd63ad461ef83791982670d8905b18d3ed41ee34ab1985`
+> State fingerprint: `189341e4a49bc9d9f1f7780be6d05fecde8141e4194003967909b811c92284b2`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -11,9 +11,9 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 - Runner mode: `SELF_HOSTED_LOCAL_ONLY`
 - Required labels: `self-hosted, linux, x64, realsas`
-- Known runner: `realsas-self-hosted`
+- Known runner: `realsas-wsl-1660ti`
 - Operator path hint: `$HOME/realsas_authority`
-- Budget policy: LATEST_HEAD_SELF_HOSTED_AUDITS__WITNESS_MANUAL_ONLY_AFTER_READINESS__RUN_LOCAL_LEDGER_REQUIRED
+- Budget policy: SELF_HOSTED_AUDITS__WITNESS_ONLY_AFTER_EXACT_READY_AND_EXPLICIT_USER_APPROVAL
 
 ## Rehydration order
 
@@ -24,17 +24,19 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 5. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
 6. `canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md`
 7. `canonical/AUTHORITY_MAP_V1.json`
-8. `canonical/ACTIVE_RUN_V2.json`
-9. `canonical/EXPERIMENT_REGISTRY_V3.json`
-10. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-11. `CURRENT_STATE.md`
-12. `canonical/CONTEXT_STATE_V2.json`
+8. `canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json`
+9. `canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json`
+10. `canonical/ACTIVE_RUN_V2.json`
+11. `canonical/EXPERIMENT_REGISTRY_V3.json`
+12. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+13. `CURRENT_STATE.md`
+14. `canonical/CONTEXT_STATE_V2.json`
 
 ## Live experiment register
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `V2_IMPLEMENTATION_ASSEMBLY` | `ACTIVE__IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN` | `main` | `4419509ee0f6` | Can the 46-stage RealSaS V2 DAG, run-local orchestration and artifact authority close subject-free with geometry, mechanics and appearance as co-equal product authorities before any admissible Knight witness? | Knight product pass; unseen generalization; learned appearance quality; source-view cardinality reduction |
+| `V2_IMPLEMENTATION_ASSEMBLY` | `REVIEW_READY__READY_FOR_WITNESS_EXECUTION__AWAITING_USER_APPROVAL` | `main` | `162816023f93` | Is the subject-free 46-stage V2 implementation sufficiently sealed for the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction |
 
 ## Branch inventory — observed live
 
@@ -44,7 +46,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `4419509ee0f6` | canonical continuation branch |
+| `main` | `162816023f93` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -219,12 +221,14 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 - Geometry, mechanics, and appearance are co-equal product-quality authorities.
 - Spine-class 2D appearance is a primary product requirement, not renderer polish.
 - V2 execution semantics are DAG/dependency based; ordinal is display order only.
-- Subject-2 Knight is not an active witness while V2 implementation readiness is not READY_FOR_WITNESS_EXECUTION.
 - Visibility is posed canonical geometry plus camera depth; appearance is CAA; texture alpha may not replace depth ownership.
 - CAA totality cannot rescue geometry, visibility, conditioning, sampling, or dynamic visual-integrity failures.
 - PRODUCT_PASS requires Stage46 after native dynamic visual integrity.
 - Canonical ACTIVE_RUN_V2 is implementation-governance authority only; real execution ledgers are run-local under $REALSAS_AUTHORITY_ROOT/runs/<run_id>/ACTIVE_RUN_V2.json.
 - Historical donor/QualifiedAppearanceSet/Runtime-v4 documents remain evidence only and are not current V2 execution authority.
+- Presentation partition uses qualified observable evidence; categorical object identity is not minted.
+- Dynamic appearance quality gates use rigid-motion-invariant intrinsic textured-surface metrics; screen projection conditioning is diagnostic only.
+- Subject-2 Knight remains inactive until the user explicitly approves execution even when readiness is READY_FOR_WITNESS_EXECUTION.
 
 ## Update semantics
 

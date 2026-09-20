@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2435**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2438**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2447,6 +2447,9 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-21T00:18:38+03:00` | `66d2e2a0cd60` | yes | CI_TEST | ci: trigger dry-run on dynamic appearance calibration | `.github/workflows/v2_witness_orchestration_subject_free_dry_run.yml` | `main` |
 | `2026-09-21T00:22:41+03:00` | `cf32eee16a6b` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
 | `2026-09-21T00:33:25+03:00` | `4419509ee0f6` | yes | GOVERNANCE_CONTINUITY | docs: synchronize V2 red-team hardened authority navigation | `AGENTS.md`<br>`README.md`<br>`REPOSITORY_MAP.md`<br>`SYSTEM_INDEX.md`<br>`canonical/README.md` | `main` |
+| `2026-09-21T00:34:42+03:00` | `906b0ab22669` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-21T00:39:49+03:00` | `1edfbb3fb95c` | yes | GOVERNANCE_CONTINUITY | authority: seal V2 readiness after 46-stage red-team | `CURRENT_STATE.md`<br>`canonical/ACTIVE_RUN_V2.json`<br>`canonical/AUTHORITY_MAP_V1.json`<br>`canonical/CONTEXT_STATE_V2.json`<br>`canonical/EXPERIMENT_REGISTRY_V3.json`<br>`canonical/V2_ADVERSARIAL_MODULE_AUDIT_LEDGER_20260920.json`<br>`canonical/V2_IMPLEMENTATION_READINESS.json`<br>`canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md` | `main` |
+| `2026-09-21T00:42:21+03:00` | `162816023f93` | yes | GOVERNANCE_CONTINUITY | authority: restore exact rehydration continuity tokens | `CURRENT_STATE.md` | `main` |
 
 ## Use rule
 

@@ -493,6 +493,16 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     root.mkdir(parents=True, exist_ok=True)
     from compiler.realsas_compiler_core.appearance_compile_v2 import face_atlas_layout
+    max_supported_face_count = int(prereg.compile_policy["max_supported_face_count"])
+    if artifact.face_count > max_supported_face_count:
+        return {
+            "status": "FAIL",
+            "blockers": ["CAA_FACE_COUNT_EXCEEDS_FROZEN_ATLAS_CAPACITY"],
+            "diagnostics": {
+                "face_count": artifact.face_count,
+                "max_supported_face_count": max_supported_face_count,
+            },
+        }
     projected_layout = face_atlas_layout(
         artifact.face_count,
         tile_resolution=tile_resolution,

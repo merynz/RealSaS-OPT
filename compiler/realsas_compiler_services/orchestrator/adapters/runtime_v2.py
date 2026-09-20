@@ -917,6 +917,11 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         if geometry_visible <= 0
         else float(compiled_visible) / float(geometry_visible)
     )
+    global_exposure_fraction = (
+        0.0
+        if geometry_visible <= 0
+        else float(compiled_global_visible) / float(geometry_visible)
+    )
     transparent_fraction = (
         0.0
         if geometry_visible <= 0
@@ -924,6 +929,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     )
     conditioning_passed = (
         conditioning_sample_count > 0
+        and unmeasurable_visible_face_count <= max_unmeasurable_consequential
         and max_uv_to_surface_condition
         <= float(conditioning_policy["dynamic_max_uv_to_surface_condition_number"])
         and max_relative_surface_condition
@@ -935,11 +941,21 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             conditioning_policy["dynamic_max_adjacent_frame_surface_principal_stretch"]
         )
     )
+    exposure_passed = (
+        exposure_fraction <= exposure_budget
+        and max_frame_compiled_fraction <= frame_exposure_budget
+        and max_connected_compiled_fraction <= connected_exposure_budget
+        and global_exposure_fraction <= global_exposure_budget
+    )
+    micro_face_passed = (
+        max_frame_micro_visible_fraction <= micro_visible_budget
+    )
     passed = (
         geometry_visible > 0
         and undefined_visible == 0
         and mismatch_pixels == 0
-        and exposure_fraction <= exposure_budget
+        and exposure_passed
+        and micro_face_passed
         and conditioning_passed
     )
     value = DynamicVisualIntegrityV2IR(
@@ -952,6 +968,13 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         final_alpha_hole_fraction=transparent_fraction,
         compiled_unobserved_visible_pixel_count=compiled_visible,
         compiled_unobserved_visible_fraction=exposure_fraction,
+        maximum_frame_compiled_unobserved_visible_fraction=max_frame_compiled_fraction,
+        maximum_connected_compiled_unobserved_visible_fraction=max_connected_compiled_fraction,
+        compiled_global_visible_pixel_count=compiled_global_visible,
+        compiled_global_visible_fraction=global_exposure_fraction,
+        maximum_frame_micro_visible_pixel_fraction=max_frame_micro_visible_fraction,
+        consequential_visible_face_count=consequential_visible_face_count,
+        unmeasurable_consequential_visible_face_count=unmeasurable_visible_face_count,
         native_reference_mismatch_pixel_count=mismatch_pixels,
         maximum_frame_native_reference_mismatch_fraction=max_mismatch_fraction,
         dynamic_conditioning_sample_count=conditioning_sample_count,
@@ -969,11 +992,16 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             ),
             "undefined_visible_pixel_count": undefined_visible,
             "compiled_unobserved_exposure_budget": exposure_budget,
-            "compiled_unobserved_exposure_passed": exposure_fraction
-            <= exposure_budget,
+            "compiled_unobserved_exposure_passed": exposure_passed,
+            "maximum_frame_compiled_unobserved_visible_fraction": max_frame_compiled_fraction,
+            "maximum_connected_compiled_unobserved_visible_fraction": max_connected_compiled_fraction,
+            "compiled_global_visible_fraction": global_exposure_fraction,
+            "maximum_frame_micro_visible_pixel_fraction": max_frame_micro_visible_fraction,
+            "micro_visible_face_load_passed": micro_face_passed,
             "native_reference_byte_parity_passed": mismatch_pixels == 0,
             "dynamic_appearance_conditioning_passed": conditioning_passed,
             "dynamic_appearance_policy": dict(conditioning_policy),
+            "consequential_visible_face_count": consequential_visible_face_count,
             "unmeasurable_consequential_visible_face_count": (
                 unmeasurable_visible_face_count
             ),
@@ -1015,6 +1043,12 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "visual_integrity_hash": value.visual_integrity_hash,
             "frame_view_count": frame_count,
             "compiled_unobserved_visible_fraction": exposure_fraction,
+            "maximum_frame_compiled_unobserved_visible_fraction": max_frame_compiled_fraction,
+            "maximum_connected_compiled_unobserved_visible_fraction": max_connected_compiled_fraction,
+            "compiled_global_visible_fraction": global_exposure_fraction,
+            "maximum_frame_micro_visible_pixel_fraction": max_frame_micro_visible_fraction,
+            "consequential_visible_face_count": consequential_visible_face_count,
+            "unmeasurable_consequential_visible_face_count": unmeasurable_visible_face_count,
             "native_reference_mismatch_pixel_count": 0,
             "undefined_visible_pixel_count": 0,
             "dynamic_conditioning_sample_count": conditioning_sample_count,

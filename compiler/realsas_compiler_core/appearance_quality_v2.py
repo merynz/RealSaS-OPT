@@ -54,9 +54,14 @@ def _structured_band_mask(
     span = hi - lo
     if not math.isfinite(span) or span <= 0.0:
         return mask
-    center = 0.5 * (lo + hi)
-    half = 0.5 * span * float(band_fraction)
-    mask[indices] = np.abs(values - center) <= half
+    width = span * float(band_fraction)
+    # Alternate low/high image-domain edge deterministically across views so the
+    # holdout is silhouette-adjacent rather than an easy central interpolation
+    # strip. The opposite edge remains available as source support.
+    if (int(view_index) // 2) % 2 == 0:
+        mask[indices] = values <= lo + width
+    else:
+        mask[indices] = values >= hi - width
     return mask
 
 
@@ -162,7 +167,7 @@ def structured_holdout_metrics(
 
     values = np.asarray(errors, dtype=np.float64)
     return {
-        "mode": "TARGET_VIEW_ANISOTROPIC_CONNECTED_BAND_V1",
+        "mode": "TARGET_VIEW_SILHOUETTE_ADJACENT_EDGE_BAND_V2",
         "band_fraction": fraction,
         "sample_count": int(len(values)),
         "mean_rgba_l1": float(np.mean(values)) if len(values) else 0.0,

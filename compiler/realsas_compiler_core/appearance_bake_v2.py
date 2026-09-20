@@ -126,6 +126,53 @@ def straight_rgba_to_premultiplied_float(rgba_u8: np.ndarray) -> np.ndarray:
     return out
 
 
+def conservative_bilinear_provenance(
+    provenance_u8: np.ndarray,
+    uv: np.ndarray,
+) -> np.ndarray:
+    """Conservative provenance for the exact bilinear color footprint.
+
+    Provenance codes are ordered by increasing inference risk in CAA V2:
+    DIRECT_SOURCE < OTHER_VIEW_SOURCE < COMPILED_NEAREST_SURFACE
+    < COMPILED_GLOBAL_SURFACE < 255/undefined. Any texel with nonzero
+    bilinear weight contributes to the returned risk class.
+    """
+    source = np.asarray(provenance_u8, dtype=np.uint8)
+    points = np.asarray(uv, dtype=np.float64)
+    if source.ndim != 2 or points.ndim != 2 or points.shape[1] != 2:
+        raise QualificationError("CAA_PROVENANCE_SAMPLE_SHAPE_INVALID")
+    height, width = source.shape
+    x = np.clip(points[:, 0], 0.0, 1.0) * float(width - 1)
+    y = np.clip(points[:, 1], 0.0, 1.0) * float(height - 1)
+    x0 = np.floor(x).astype(np.int64)
+    y0 = np.floor(y).astype(np.int64)
+    x1 = np.minimum(x0 + 1, width - 1)
+    y1 = np.minimum(y0 + 1, height - 1)
+    tx = x - x0
+    ty = y - y0
+    weights = np.stack(
+        (
+            (1.0 - tx) * (1.0 - ty),
+            tx * (1.0 - ty),
+            (1.0 - tx) * ty,
+            tx * ty,
+        ),
+        axis=1,
+    )
+    values = np.stack(
+        (
+            source[y0, x0],
+            source[y0, x1],
+            source[y1, x0],
+            source[y1, x1],
+        ),
+        axis=1,
+    ).astype(np.int16)
+    active = weights > 1.0e-12
+    masked = np.where(active, values, -1)
+    return np.max(masked, axis=1).astype(np.uint8)
+
+
 def bilinear_premultiplied_rgba(
     straight_rgba_u8: np.ndarray,
     uv: np.ndarray,

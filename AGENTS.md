@@ -12,6 +12,9 @@ This repository must be resumable without conversational memory.
 6. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
 7. `canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md`
 8. `canonical/AUTHORITY_MAP_V1.json`
+9. `canonical/EXPERIMENT_REGISTRY_V3.json`
+10. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+11. Historical provenance only: `canonical/EXPERIMENT_REGISTRY_V2.json`, then `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
 
 ## Current mode
 

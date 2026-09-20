@@ -45,13 +45,12 @@ from .product_authority_v1 import (
     JointCapabilityRangeIR,
     MechanicalPartitionIR,
     MeshQualificationPolicyIR,
-    PresentationAttachmentIR,
-    PresentationDecisionEvidenceIR,
-    PresentationSlotIR,
-    PresentationViewOverlayIR,
     QualifiedMeshIR,
     QualifiedMeshVertexIR,
-    QualifiedPresentationGraphIR,
+)
+from .product_state_v2 import (
+    QualifiedPresentationGraphV2IR,
+    presentation_graph_v2_from_dict,
 )
 from .types import (
     QualifiedJoint,
@@ -783,84 +782,7 @@ def qualified_motion_v2_from_dict(payload: Json) -> QualifiedMotion3DIR:
 
 def qualified_presentation_graph_from_dict(
     payload: Json,
-) -> QualifiedPresentationGraphIR:
-    _schema(payload, "RealSaS.QualifiedPresentationGraphIR.v1")
-    slots = tuple(
-        PresentationSlotIR(
-            slot_id=str(row["slot_id"]),
-            bone_id=str(row["bone_id"]),
-            setup_order=int(row["setup_order"]),
-            default_attachment_id=(
-                None
-                if row.get("default_attachment_id") is None
-                else str(row["default_attachment_id"])
-            ),
-            keyable_channels=tuple(
-                map(str, row.get("keyable_channels") or ())
-            ),
-            metadata=dict(row.get("metadata") or {}),
-        )
-        for row in (payload.get("slots") or ())
-    )
-    attachments = tuple(
-        PresentationAttachmentIR(
-            attachment_id=str(row["attachment_id"]),
-            slot_id=str(row["slot_id"]),
-            mechanical_component_ids=tuple(
-                map(str, row.get("mechanical_component_ids") or ())
-            ),
-            mechanical_class=str(row["mechanical_class"]),
-            carrier_class=str(row["carrier_class"]),
-            carrier_binding_hash=str(row["carrier_binding_hash"]),
-            metadata=dict(row.get("metadata") or {}),
-        )
-        for row in (payload.get("attachments") or ())
-    )
-    decisions = tuple(
-        PresentationDecisionEvidenceIR(
-            decision_id=str(row["decision_id"]),
-            decision_kind=str(row["decision_kind"]),
-            authority_class=str(row["authority_class"]),
-            evidence_refs=tuple(map(str, row.get("evidence_refs") or ())),
-            metadata=dict(row.get("metadata") or {}),
-        )
-        for row in (payload.get("decisions") or ())
-    )
-    return QualifiedPresentationGraphIR(
-        slots=slots,
-        attachments=attachments,
-        view_overlays=tuple(
-            PresentationViewOverlayIR(
-                view_index=int(row["view_index"]),
-                camera_binding_hash=str(row["camera_binding_hash"]),
-                appearance_binding_hash=str(row["appearance_binding_hash"]),
-                composition_binding_hash=str(row["composition_binding_hash"]),
-                metadata=dict(row.get("metadata") or {}),
-            )
-            for row in (payload.get("view_overlays") or ())
-        ),
-        decisions=decisions,
-        skeleton_binding_hash=str(payload["skeleton_binding_hash"]),
-        mesh_binding_hash=str(payload["mesh_binding_hash"]),
-        partition_binding_hash=str(payload["partition_binding_hash"]),
-        carrier_policy_binding_hash=str(
-            payload["carrier_policy_binding_hash"]
-        ),
-        product_state_binding_hash=str(payload["product_state_binding_hash"]),
-        presentation_structure_binding_hash=str(
-            payload["presentation_structure_binding_hash"]
-        ),
-        appearance_set_binding_hash=str(
-            payload["appearance_set_binding_hash"]
-        ),
-        composition_set_binding_hash=str(
-            payload["composition_set_binding_hash"]
-        ),
-        qualification_report=dict(payload.get("qualification_report") or {}),
-        presentation_lineage_hash=str(payload["presentation_lineage_hash"]),
-        schema_version=str(
-            payload.get("schema_version")
-            or "RealSaS.QualifiedPresentationGraphIR.v1"
-        ),
-        metadata=dict(payload.get("metadata") or {}),
-    )
+) -> QualifiedPresentationGraphV2IR:
+    _schema(payload, "RealSaS.QualifiedPresentationGraphIR.v2")
+    return presentation_graph_v2_from_dict(payload)
+

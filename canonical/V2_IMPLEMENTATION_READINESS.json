@@ -1,0 +1,109 @@
+{
+  "schema": "RealSaS.V2ImplementationReadiness.v1",
+  "date": "2026-09-20",
+  "status": "ASSEMBLY_IN_PROGRESS__WITNESS_EXECUTION_FORBIDDEN",
+  "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
+  "pipeline_plan_sha256": "b125cb1f9b0e53b760982da5807a6962bf9c32d7c694eab17368fe567bf62f9d",
+  "rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
+  "witness_policy": "DO_NOT_START_KNIGHT_UNTIL_STATUS_READY_FOR_WITNESS_EXECUTION",
+  "required_proofs": [
+    "DAG_ORCHESTRATOR",
+    "GEOMETRY_ROLE_AND_IRIS_GSA",
+    "MESH_PRODUCER_GATE_FEASIBILITY",
+    "CAA_TOTALITY_SOURCE_LOCK_AND_BINDING",
+    "CAA_HOLDOUT_AND_SEAM_QUALITY",
+    "VISIBILITY_DEPTH_OWNERSHIP",
+    "PREMULTIPLIED_ALPHA_AND_ATLAS_BLEED",
+    "MECHANICS_RIG_SKIN_DYNAMIC",
+    "PRESENTATION_STRUCTURE",
+    "MOTION_DYNAMIC_EXPOSURE",
+    "RUNTIME_CAA_ONLY",
+    "DYNAMIC_VISUAL_INTEGRITY",
+    "PRODUCT_CLOSURE_AND_AUTHORING",
+    "ADVERSARIAL_MODULE_AUDIT"
+  ],
+  "proofs": [
+    {
+      "proof_id": "DAG_ORCHESTRATOR",
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Dependency scheduler implemented; final tests/readiness binding pending."
+    },
+    {
+      "proof_id": "GEOMETRY_ROLE_AND_IRIS_GSA",
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Stage13/IRIS role must be rebased from appearance-proxy interpretation to geometry/surface substrate qualification."
+    },
+    {
+      "proof_id": "MESH_PRODUCER_GATE_FEASIBILITY",
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Relation-parent quality diagnostic and no-boundary-split min-angle obstruction test added; full mesh path audit pending."
+    },
+    {
+      "proof_id": "CAA_TOTALITY_SOURCE_LOCK_AND_BINDING",
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "CAA contract/preregistration IR exists; compile/bake/qualification implementation pending."
+    },
+    {
+      "proof_id": "CAA_HOLDOUT_AND_SEAM_QUALITY",
+      "status": "PENDING",
+      "sha256": ""
+    },
+    {
+      "proof_id": "VISIBILITY_DEPTH_OWNERSHIP",
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Runtime-v4 posed-XYZ depth exists, but old equal-depth/source-donor semantics and legacy format contradictions must be removed from current V2."
+    },
+    {
+      "proof_id": "PREMULTIPLIED_ALPHA_AND_ATLAS_BLEED",
+      "status": "PENDING",
+      "sha256": ""
+    },
+    {
+      "proof_id": "MECHANICS_RIG_SKIN_DYNAMIC",
+      "status": "IN_PROGRESS",
+      "sha256": ""
+    },
+    {
+      "proof_id": "PRESENTATION_STRUCTURE",
+      "status": "PENDING",
+      "sha256": ""
+    },
+    {
+      "proof_id": "MOTION_DYNAMIC_EXPOSURE",
+      "status": "PENDING",
+      "sha256": ""
+    },
+    {
+      "proof_id": "RUNTIME_CAA_ONLY",
+      "status": "PENDING",
+      "sha256": ""
+    },
+    {
+      "proof_id": "DYNAMIC_VISUAL_INTEGRITY",
+      "status": "PENDING",
+      "sha256": ""
+    },
+    {
+      "proof_id": "PRODUCT_CLOSURE_AND_AUTHORING",
+      "status": "PENDING",
+      "sha256": ""
+    },
+    {
+      "proof_id": "ADVERSARIAL_MODULE_AUDIT",
+      "status": "IN_PROGRESS",
+      "sha256": "",
+      "note": "Protocol frozen; module-by-module closures pending."
+    }
+  ],
+  "coequal_product_authorities": [
+    "GEOMETRY",
+    "MECHANICS",
+    "APPEARANCE"
+  ],
+  "appearance_principle": "SPINE_CLASS_2D_ART_IS_A_PRIMARY_PRODUCT_REQUIREMENT_NOT_POST_RENDER_POLISH"
+}

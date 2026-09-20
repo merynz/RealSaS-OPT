@@ -34,8 +34,8 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
     CarrierCoverageThresholdIR,
     MeshQualificationPolicyIR,
 )
-from compiler.realsas_compiler_core.motion_dynamic_proof_v1 import (
-    qualified_dynamic_motion_hash,
+from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import (
+    qualified_dynamic_motion_v2_hash,
 )
 from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
     load_file_ref,
@@ -375,7 +375,7 @@ def prove_dynamic_motion_stage(ctx: dict) -> dict:
         cameras=cameras.cameras,
         source_foreground_masks=_source_foreground_masks(ctx, observation),
     )
-    if proof.dynamic_motion_hash != qualified_dynamic_motion_hash(proof):
+    if proof.dynamic_motion_hash != qualified_dynamic_motion_v2_hash(proof):
         raise QualificationError("MOTION_V2_DYNAMIC_HASH_DRIFT")
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     return {

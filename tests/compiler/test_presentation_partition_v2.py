@@ -150,3 +150,72 @@ def test_role_free_partition_keeps_connected_faces_when_source_backed_art_is_con
     structure = _structure(mesh, evidence)
     assert len(structure.slots) == 1
     assert len(structure.attachments) == 1
+
+
+def test_visual_groups_can_have_distinct_rigid_and_deformable_mechanics_inside_one_component():
+    mesh = _mesh()
+    atlas, prov, uv = _baked([20, 80, 230, 255])
+    evidence = build_presentation_partition_evidence(
+        mesh=mesh,
+        appearance_asset_hash="a" * 64,
+        appearance_qualification_hash="q" * 64,
+        face_uv=uv,
+        textures_by_direction={i: atlas for i in range(8)},
+        provenance_by_direction=np.stack([prov for _ in range(8)], axis=0),
+        policy=POLICY,
+    )
+    assert evidence.cut_face_pairs == ((0, 1),)
+
+    skeleton = SimpleNamespace(
+        joints=(
+            SimpleNamespace(canonical_joint_id="j0"),
+            SimpleNamespace(canonical_joint_id="j1"),
+        ),
+        root_id="j0",
+        skeleton_lineage_hash="s" * 64,
+    )
+    # Face0 (v0,v1,v2) is rigid to j1. Face1 (v1,v3,v2) shares boundary
+    # vertices, so make the second group deformable by mixed weights on v3 and
+    # the shared vertices. The group-level classifier must not smear one
+    # group's mechanical class across the entire component.
+    mesh_skin = SimpleNamespace(
+        rows=(
+            SimpleNamespace(canonical_mesh_vertex_id="v0", influences=(("j1", 1.0),)),
+            SimpleNamespace(canonical_mesh_vertex_id="v1", influences=(("j1", 1.0),)),
+            SimpleNamespace(canonical_mesh_vertex_id="v2", influences=(("j1", 1.0),)),
+            SimpleNamespace(
+                canonical_mesh_vertex_id="v3",
+                influences=(("j0", 0.6), ("j1", 0.4)),
+            ),
+        ),
+        mesh_skin_lineage_hash="w" * 64,
+    )
+    partition = SimpleNamespace(
+        components=(SimpleNamespace(component_id="c0"),),
+        partition_lineage_hash="p" * 64,
+    )
+    carrier = SimpleNamespace(
+        decisions=(SimpleNamespace(component_id="c0", carrier_class="MESH"),),
+        carrier_policy_lineage_hash="c" * 64,
+    )
+    structure = build_presentation_structure_v2(
+        skeleton=skeleton,
+        mesh=mesh,
+        mesh_skin=mesh_skin,
+        partition=partition,
+        carrier_policy=carrier,
+        min_rigid_owner_weight=0.999,
+        max_rigid_other_mass=0.001,
+        presentation_cut_face_pairs=evidence.cut_face_pairs,
+        presentation_partition_evidence_hash=evidence.evidence_hash,
+    )
+    by_faces = {
+        tuple(row.metadata["mesh_face_indices"]): row
+        for row in structure.attachments
+    }
+    assert by_faces[(0,)].mechanical_class == "RIGID"
+    assert by_faces[(0,)].metadata["rigid_owner_joint_id"] == "j1"
+    assert by_faces[(1,)].mechanical_class == "DEFORMABLE"
+    assert structure.metadata["mechanical_classification_scope"] == (
+        "PRESENTATION_FACE_GROUP"
+    )

@@ -14,6 +14,10 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
     CAACompileSealIR,
     CompleteAppearanceAssetIR,
     CompleteAppearanceQualificationIR,
+    CAARestViewProofIR,
+    CAARestRenderProofIR,
+    CAA_PROVENANCE,
+    caa_rest_render_proof_hash,
     build_caa_preregistration,
     caa_compile_artifact_from_dict,
     caa_compile_hash,
@@ -32,7 +36,13 @@ from compiler.realsas_compiler_core.appearance_compile_v2 import (
 )
 from compiler.realsas_compiler_core.appearance_quality_v2 import (
     provenance_boundary_metrics,
+    rgba_l1_premultiplied,
     structured_holdout_metrics,
+)
+from compiler.realsas_compiler_core.appearance_render_v2 import (
+    load_face_uv,
+    load_provenance_atlas,
+    render_caa_reference,
 )
 from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
@@ -771,10 +781,223 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
 
 
 def prove_caa_reference_rest_stage(ctx: dict) -> dict:
+    prereg = caa_preregistration_from_dict(
+        stage_output_payload(
+            ctx,
+            "20_CAA_BACKEND_PREREGISTERED",
+            "RealSaS.CAACompilePreregistrationIR.v2",
+        )
+    )
+    asset = complete_appearance_asset_from_dict(
+        stage_output_payload(
+            ctx,
+            "23_COMPLETE_APPEARANCE_ASSET_BAKED",
+            "RealSaS.CompleteAppearanceAssetIR.v2",
+        )
+    )
+    qualification = stage_output_payload(
+        ctx,
+        "24_COMPLETE_APPEARANCE_QUALIFIED",
+        "RealSaS.CompleteAppearanceQualificationIR.v2",
+    )
+    candidate = canonical_mesh_candidate_from_dict(
+        stage_output_payload(
+            ctx,
+            "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "RealSaS.CanonicalMeshCandidateIR.v1",
+        )
+    )
+    static_mesh = static_mesh_qualification_from_dict(
+        stage_output_payload(
+            ctx,
+            "19_STATIC_CANONICAL_MESH_QUALIFIED",
+            "RealSaS.StaticCanonicalMeshQualificationIR.v1",
+        )
+    )
+    cameras = qualified_camera_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "05_CAMERA_CONTRACT_SOLVED",
+            "RealSaS.QualifiedCameraSetIR.v1",
+        )
+    )
+    observation = qualified_observation_set_from_dict(
+        stage_output_payload(
+            ctx,
+            "07_OBSERVATION_CONTRACT_QUALIFIED",
+            "RealSaS.QualifiedObservationSetIR.v1",
+        )
+    )
+    if str(qualification.get("asset_binding_hash")) != asset.asset_hash:
+        raise QualificationError("CAA_REST_PROOF_QUALIFICATION_ASSET_DRIFT")
+    if static_mesh.candidate_mesh_binding_hash != asset.candidate_mesh_binding_hash:
+        raise QualificationError("CAA_REST_PROOF_STATIC_MESH_BINDING_DRIFT")
+
+    source_rgba, _source_masks = _load_source_inputs(ctx, observation)
+    face_uv = load_face_uv(asset)
+    provenance_all = load_provenance_atlas(asset)
+    by_camera = {int(camera.view_index): camera for camera in cameras.cameras}
+    by_texture = {int(row.direction_index): row for row in asset.textures}
+
+    policy = dict(prereg.completion_quality_policy)
+    required = (
+        "rest_min_source_lock_pixels_per_view",
+        "rest_max_source_locked_mean_rgba_l1",
+        "rest_max_source_locked_p95_rgba_l1",
+        "rest_max_geometry_visible_alpha_hole_fraction",
+    )
+    if any(key not in policy for key in required):
+        raise QualificationError("CAA_REST_PROOF_POLICY_INCOMPLETE")
+
+    root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
+    root.mkdir(parents=True, exist_ok=True)
+    rows = []
+    outputs = []
+    all_pass = True
+    for direction in range(8):
+        texture_row = by_texture[direction]
+        texture_path = resolved_path(texture_row.transport_png_path)
+        texture = np.asarray(Image.open(texture_path).convert("RGBA"), dtype=np.uint8)
+        render = render_caa_reference(
+            mesh=candidate,
+            camera=by_camera[direction],
+            face_uv=face_uv,
+            texture_rgba_u8=texture,
+            provenance_atlas=provenance_all[direction],
+        )
+        image_path = root / f"V{direction}_reference_rest.png"
+        Image.fromarray(render.straight_rgba_u8, mode="RGBA").save(
+            image_path, format="PNG", optimize=False, compress_level=6
+        )
+        image_sha = sha256_file(image_path)
+        outputs.append(
+            {
+                "path": str(image_path),
+                "sha256": image_sha,
+                "authority_class": "CAA_REFERENCE_REST_RENDER",
+                "schema": f"RealSaS.CAAReferenceRestRender.V{direction}.v2",
+            }
+        )
+
+        visible = render.geometry_visible
+        final_alpha = render.final_alpha
+        direct = visible & (
+            render.provenance_code == int(CAA_PROVENANCE["DIRECT_SOURCE"])
+        )
+        direct_count = int(np.count_nonzero(direct))
+        exact_count = 0
+        mean_error = 0.0
+        p95_error = 0.0
+        if direct_count:
+            predicted = render.straight_rgba_u8[direct]
+            truth = source_rgba[direction][direct]
+            exact = np.all(predicted == truth, axis=1)
+            exact_count = int(np.count_nonzero(exact))
+            error = rgba_l1_premultiplied(predicted, truth)
+            mean_error = float(np.mean(error))
+            p95_error = float(np.quantile(error, 0.95))
+        exact_fraction = (
+            1.0 if direct_count == 0 else float(exact_count) / float(direct_count)
+        )
+
+        visible_count = int(np.count_nonzero(visible))
+        final_alpha_count = int(np.count_nonzero(final_alpha))
+        hole = visible & ~final_alpha
+        hole_count = int(np.count_nonzero(hole))
+        hole_fraction = (
+            0.0 if visible_count == 0 else float(hole_count) / float(visible_count)
+        )
+        view_pass = (
+            direct_count >= int(policy["rest_min_source_lock_pixels_per_view"])
+            and mean_error <= float(policy["rest_max_source_locked_mean_rgba_l1"])
+            and p95_error <= float(policy["rest_max_source_locked_p95_rgba_l1"])
+            and hole_fraction
+            <= float(policy["rest_max_geometry_visible_alpha_hole_fraction"])
+        )
+        all_pass = all_pass and view_pass
+        rows.append(
+            CAARestViewProofIR(
+                direction_index=direction,
+                rendered_rgba_sha256=image_sha,
+                rendered_alpha_pixel_count=final_alpha_count,
+                source_locked_pixel_count=direct_count,
+                source_locked_exact_pixel_count=exact_count,
+                source_locked_exact_fraction=exact_fraction,
+                source_locked_mean_rgba_l1=mean_error,
+                source_locked_p95_rgba_l1=p95_error,
+                geometry_visible_pixel_count=visible_count,
+                final_alpha_pixel_count=final_alpha_count,
+                geometry_visible_final_alpha_hole_count=hole_count,
+                geometry_visible_final_alpha_hole_fraction=hole_fraction,
+                metadata={
+                    "status": "PASS" if view_pass else "FAIL",
+                    "source_evidence_available": True,
+                    "visibility_and_appearance_masks_separate": True,
+                },
+            )
+        )
+
+        diagnostic_path = root / f"V{direction}_diagnostics.npz"
+        diagnostic_sha = _save_npz(
+            diagnostic_path,
+            geometry_visible=visible.astype(np.uint8),
+            final_alpha=final_alpha.astype(np.uint8),
+            provenance=render.provenance_code.astype(np.uint8),
+            owner_face_index=render.owner_face_index.astype(np.int32),
+        )
+        outputs.append(
+            {
+                "path": str(diagnostic_path),
+                "sha256": diagnostic_sha,
+                "authority_class": "CAA_REST_DIAGNOSTIC_MASKS",
+                "schema": f"RealSaS.CAARestDiagnosticMasks.V{direction}.v2",
+            }
+        )
+
+    proof = CAARestRenderProofIR(
+        asset_binding_hash=asset.asset_hash,
+        static_mesh_qualification_binding_hash=static_mesh.qualification_hash,
+        camera_set_binding_hash=cameras.camera_set_hash,
+        views=tuple(rows),
+        qualification_report={
+            "status": "PASS_CAA_REFERENCE_REST" if all_pass else "FAIL_CAA_REFERENCE_REST",
+            "every_direction_passed": bool(all_pass),
+            "visibility_authority": "RealSaS.VisibilityContract.v2",
+            "appearance_authority": "RealSaS.CompleteAppearanceAssetIR.v2",
+            "geometry_visibility_appearance_attribution_separated": True,
+        },
+        proof_hash="",
+        metadata={
+            "policy": policy,
+            "source_observation_set_hash": observation.observation_set_hash,
+            "coequal_appearance_product_gate": True,
+        },
+    )
+    proof = replace(proof, proof_hash=caa_rest_render_proof_hash(proof))
+    if not all_pass:
+        return {
+            "status": "FAIL",
+            "blockers": ["CAA_REFERENCE_REST_RENDER_PROOF_FAILED"],
+            "diagnostics": proof.to_dict(),
+        }
+    outputs.append(
+        write_ir(
+            root / "caa_reference_rest_proof.json",
+            proof,
+            authority_class="CAA_REFERENCE_REST_PROOF",
+        )
+    )
     return {
-        "status": "BLOCKED",
-        "blockers": ["CAA_REFERENCE_REST_RENDER_V2_NOT_BOUND_YET"],
+        "status": "PASS",
+        "outputs": outputs,
         "diagnostics": {
-            "reason": "Stage25 requires the V2 CAA renderer with separate geometry-visible/source-lock/final-alpha diagnostics."
+            "proof_hash": proof.proof_hash,
+            "every_direction_passed": True,
+            "maximum_alpha_hole_fraction": max(
+                row.geometry_visible_final_alpha_hole_fraction for row in rows
+            ),
+            "maximum_source_locked_p95_rgba_l1": max(
+                row.source_locked_p95_rgba_l1 for row in rows
+            ),
         },
     }

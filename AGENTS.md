@@ -14,9 +14,9 @@ This repository must be resumable without conversational memory.
 8. `canonical/AUTHORITY_MAP_V1.json`
 9. `canonical/EXPERIMENT_REGISTRY_V3.json`
 10. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-11. `canonical/ACTIVE_RUN_V2.json`
-12. `canonical/QUALIFIED_MESH_PRESENTATION_AUTHORITY_V1_20260918.md`
-13. Historical provenance only: `canonical/EXPERIMENT_REGISTRY_V2.json`, then `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
+11. `canonical/ACTIVE_RUN_V2.json` — implementation governance ledger only
+12. `canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json`
+13. Historical provenance only (including donor-era presentation/runtime contracts): `canonical/EXPERIMENT_REGISTRY_V2.json`, then `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
 
 ## Current mode
 

@@ -1,0 +1,31 @@
+{
+  "schema": "RealSaS.IRISDenseSourceCoveragePolicy.v2",
+  "status": "FROZEN_PRE_KNIGHT_SUBJECT_FREE",
+  "date": "2026-09-20",
+  "authority": "IRIS_V2_TRAINING_OBJECTIVE_POLICY__NO_KNIGHT_OR_MAGE_RESULT",
+  "target_authority": "QUALIFIED_OBSERVATION_FOREGROUND_MASK_ONLY",
+  "target_resolution": 1024,
+  "production_q_domain_authority": "RGB_CAMERA_FULL_FRAME_LATTICE_V1",
+  "mask_is_forward_input": false,
+  "dense_reconstruction": "BILINEAR_FROM_REGULAR_CAMERA_ONLY_ANCHOR_LATTICE_TO_1024",
+  "ray_foreground_probability": "ONE_MINUS_PRODUCT_ONE_MINUS_MODE_SUPPORT_PROBABILITY",
+  "loss": {
+    "bce_weight": 1,
+    "soft_dice_weight": 1,
+    "boundary_multiplier": 4,
+    "boundary_radius_px": 1,
+    "top_level_loss_weight": 1
+  },
+  "view_schedule": {
+    "mode": "ROUND_ROBIN_V0_TO_V7",
+    "all_views_required": true,
+    "maximum_total_step_count_imbalance": 1
+  },
+  "nonclaims": [
+    "Does not replace exact Stage13 decoded-surface raster qualification.",
+    "Does not make foreground masks an inference input.",
+    "Does not use teacher mesh vertices normals triangles barycentrics or identities.",
+    "Does not prove Knight Stage13 pass."
+  ],
+  "rationale": "V5 causal diagnosis showed sparse ray supervision was being asked to satisfy a dense 1024x1024 source-raster gate. This policy adds direct dense source-coverage pressure while keeping the learner forward RGB+camera only and preserving the exact hard Stage13 gate."
+}

@@ -1,133 +1,282 @@
 from __future__ import annotations
-import argparse, ast, hashlib, importlib, importlib.util, json, os, re
-from time import perf_counter
+
+import argparse
+import ast
+import hashlib
+import importlib
+import importlib.util
+import json
+import os
+import re
 from pathlib import Path
+from time import perf_counter
 from typing import Any
 
-ROOT=Path(__file__).resolve().parents[3]
-PLAN_PATH=ROOT/"canonical"/"MAINLINE_EXECUTION_PLAN_V2.json"
-LEDGER_PATH=ROOT/"canonical"/"ACTIVE_RUN_V2.json"
-PASS_STATUSES={"PASS","CACHE_HIT"}
-FAIL_STATUSES={"FAIL","ABSTAIN","BLOCKED"}
-_STAGE_RE=re.compile(r"^\d{2}_[A-Z0-9_]+$")
+ROOT = Path(__file__).resolve().parents[3]
+PLAN_PATH = ROOT / "canonical" / "MAINLINE_EXECUTION_PLAN_V2.json"
+LEDGER_PATH = ROOT / "canonical" / "ACTIVE_RUN_V2.json"
+READINESS_PATH = ROOT / "canonical" / "V2_IMPLEMENTATION_READINESS.json"
 
-def _canon(v:Any)->Any:
-    if isinstance(v,dict): return {str(k):_canon(v[k]) for k in sorted(v)}
-    if isinstance(v,(list,tuple)): return [_canon(x) for x in v]
-    return v
+PASS_STATUSES = {"PASS", "CACHE_HIT"}
+FAIL_STATUSES = {"FAIL", "ABSTAIN", "BLOCKED"}
+_STAGE_RE = re.compile(r"^\d{2}_[A-Z0-9_]+$")
 
-def canonical_bytes(v:Any)->bytes:
-    return json.dumps(_canon(v),sort_keys=True,separators=(",",":"),ensure_ascii=False,allow_nan=False).encode("utf-8")
 
-def content_sha256(v:Any)->str: return hashlib.sha256(canonical_bytes(v)).hexdigest()
+def _canon(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {str(key): _canon(value[key]) for key in sorted(value)}
+    if isinstance(value, (list, tuple)):
+        return [_canon(item) for item in value]
+    return value
 
-def sha256_file(path:Path)->str:
-    h=hashlib.sha256()
-    with path.open("rb") as f:
-        for chunk in iter(lambda:f.read(1<<20),b""): h.update(chunk)
-    return h.hexdigest()
 
-def load_json(path:Path)->dict: return json.loads(path.read_text(encoding="utf-8"))
+def canonical_bytes(value: Any) -> bytes:
+    return json.dumps(
+        _canon(value),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
 
-def atomic_json(path:Path,value:dict)->None:
-    path.parent.mkdir(parents=True,exist_ok=True)
-    tmp=path.with_suffix(path.suffix+".tmp")
-    tmp.write_text(json.dumps(value,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+
+def content_sha256(value: Any) -> str:
+    return hashlib.sha256(canonical_bytes(value)).hexdigest()
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def load_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def atomic_json(path: Path, value: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     tmp.replace(path)
 
-def validate_plan(plan:dict)->str:
-    if plan.get("schema") not in {"RealSaS.MainlineExecutionPlan.v1","RealSaS.MainlineExecutionPlan.v2"}: raise RuntimeError("MAINLINE_PLAN_SCHEMA_DRIFT")
-    stages=list(plan.get("stages") or ())
-    expected_count=int(plan.get("stage_count",-1))
-    if expected_count<=0 or len(stages)!=expected_count: raise RuntimeError("MAINLINE_PLAN_STAGE_COUNT_DRIFT")
-    if plan.get("canonical_branch")!="main": raise RuntimeError("MAINLINE_PLAN_BRANCH_DRIFT")
-    if plan.get("subject_specific_code_forbidden") is not True: raise RuntimeError("MAINLINE_PLAN_GENERICITY_DRIFT")
-    seen=set(); ids=[]
-    for ordinal,stage in enumerate(stages,1):
-        sid=str(stage.get("id","")); ids.append(sid)
-        if int(stage.get("ordinal",-1))!=ordinal or not _STAGE_RE.fullmatch(sid): raise RuntimeError(f"MAINLINE_PLAN_STAGE_ORDER_DRIFT:{sid}")
-        if any(dep not in seen for dep in tuple(stage.get("depends_on") or ())): raise RuntimeError(f"MAINLINE_PLAN_DEPENDENCY_NOT_EARLIER:{sid}")
-        seen.add(sid)
-        if not str(stage.get("adapter","")).strip(): raise RuntimeError(f"MAINLINE_PLAN_ADAPTER_MISSING:{sid}")
-        keys=stage.get("manifest_keys")
-        if not isinstance(keys,list) or not all(isinstance(x,str) and x for x in keys): raise RuntimeError(f"MAINLINE_PLAN_MANIFEST_SCOPE_MISSING:{sid}")
-        policy=dict(stage.get("policy") or {})
-        if policy.get("fail_closed") is not True or policy.get("output_hash_required") is not True: raise RuntimeError(f"MAINLINE_PLAN_FAIL_CLOSED_POLICY_DRIFT:{sid}")
-    if len(ids)!=len(set(ids)): raise RuntimeError("MAINLINE_PLAN_DUPLICATE_STAGE")
+
+def _stage_map(plan: dict) -> dict[str, dict]:
+    return {str(stage["id"]): stage for stage in plan["stages"]}
+
+
+def _ledger_map(ledger: dict) -> dict[str, dict]:
+    return {str(row["id"]): row for row in ledger["stages"]}
+
+
+def topological_stage_ids(plan: dict) -> tuple[str, ...]:
+    stages = _stage_map(plan)
+    indegree = {stage_id: 0 for stage_id in stages}
+    children = {stage_id: set() for stage_id in stages}
+    for stage_id, stage in stages.items():
+        for dependency in stage.get("depends_on", ()):
+            dependency = str(dependency)
+            if dependency not in stages:
+                raise RuntimeError(
+                    f"MAINLINE_PLAN_DEPENDENCY_UNKNOWN:{stage_id}:{dependency}"
+                )
+            indegree[stage_id] += 1
+            children[dependency].add(stage_id)
+
+    ordinal = {str(stage["id"]): int(stage["ordinal"]) for stage in plan["stages"]}
+    ready = sorted(
+        (stage_id for stage_id, degree in indegree.items() if degree == 0),
+        key=lambda stage_id: (ordinal[stage_id], stage_id),
+    )
+    ordered: list[str] = []
+    while ready:
+        stage_id = ready.pop(0)
+        ordered.append(stage_id)
+        for child in sorted(children[stage_id], key=lambda x: (ordinal[x], x)):
+            indegree[child] -= 1
+            if indegree[child] == 0:
+                ready.append(child)
+                ready.sort(key=lambda x: (ordinal[x], x))
+    if len(ordered) != len(stages):
+        cyclic = sorted(stage_id for stage_id, degree in indegree.items() if degree > 0)
+        raise RuntimeError("MAINLINE_PLAN_CYCLE:" + ",".join(cyclic))
+    return tuple(ordered)
+
+
+def validate_plan(plan: dict) -> str:
+    if plan.get("schema") != "RealSaS.MainlineExecutionPlan.v2":
+        raise RuntimeError("MAINLINE_V2_PLAN_SCHEMA_DRIFT")
+    stages = list(plan.get("stages") or ())
+    if int(plan.get("stage_count", -1)) != 46 or len(stages) != 46:
+        raise RuntimeError("MAINLINE_V2_REQUIRES_EXACT_46_STAGES")
+    if plan.get("canonical_branch") != "main":
+        raise RuntimeError("MAINLINE_V2_BRANCH_DRIFT")
+    if plan.get("subject_specific_code_forbidden") is not True:
+        raise RuntimeError("MAINLINE_V2_GENERICITY_DRIFT")
+
+    ids: list[str] = []
+    ordinals: list[int] = []
+    for stage in stages:
+        stage_id = str(stage.get("id", ""))
+        ordinal = int(stage.get("ordinal", -1))
+        ids.append(stage_id)
+        ordinals.append(ordinal)
+        if not _STAGE_RE.fullmatch(stage_id):
+            raise RuntimeError(f"MAINLINE_V2_STAGE_ID_INVALID:{stage_id}")
+        adapter = str(stage.get("adapter", "")).strip()
+        if not adapter or adapter == "UNBOUND":
+            raise RuntimeError(f"MAINLINE_V2_ADAPTER_NOT_BOUND:{stage_id}")
+        keys = stage.get("manifest_keys")
+        if not isinstance(keys, list) or not all(
+            isinstance(item, str) and item for item in keys
+        ):
+            raise RuntimeError(f"MAINLINE_V2_MANIFEST_SCOPE_INVALID:{stage_id}")
+        policy = dict(stage.get("policy") or {})
+        if (
+            policy.get("fail_closed") is not True
+            or policy.get("output_hash_required") is not True
+        ):
+            raise RuntimeError(f"MAINLINE_V2_FAIL_CLOSED_POLICY_DRIFT:{stage_id}")
+
+    if len(ids) != len(set(ids)):
+        raise RuntimeError("MAINLINE_V2_DUPLICATE_STAGE_ID")
+    if sorted(ordinals) != list(range(1, 47)):
+        raise RuntimeError("MAINLINE_V2_ORDINAL_SET_DRIFT")
+    if len(ordinals) != len(set(ordinals)):
+        raise RuntimeError("MAINLINE_V2_DUPLICATE_ORDINAL")
+    topological_stage_ids(plan)
     return content_sha256(plan)
 
-def validate_ledger(plan:dict,ledger:dict)->None:
-    plan_hash=validate_plan(plan)
-    if ledger.get("schema")!="RealSaS.ActiveRunLedger.v1": raise RuntimeError("ACTIVE_RUN_LEDGER_SCHEMA_DRIFT")
-    if ledger.get("canonical_branch")!="main": raise RuntimeError("ACTIVE_RUN_LEDGER_BRANCH_DRIFT")
-    if ledger.get("pipeline_plan_sha256")!=plan_hash: raise RuntimeError(f"ACTIVE_RUN_LEDGER_PLAN_HASH_DRIFT:{ledger.get('pipeline_plan_sha256')}!={plan_hash}")
-    rows=list(ledger.get("stages") or ())
-    expected_count=int(plan["stage_count"])
-    if len(rows)!=expected_count: raise RuntimeError("ACTIVE_RUN_LEDGER_STAGE_COUNT_DRIFT")
-    if [x.get("id") for x in rows]!=[x["id"] for x in plan["stages"]]: raise RuntimeError("ACTIVE_RUN_LEDGER_STAGE_ID_DRIFT")
-    complete=sum(x.get("status") in PASS_STATUSES for x in rows)
-    by_id={row["id"]:row for row in rows}
-    for stage,row in zip(plan["stages"],rows):
-        if row.get("status") not in PASS_STATUSES:
-            continue
-        for dep in stage.get("depends_on",()):
-            if by_id[dep].get("status") not in PASS_STATUSES:
-                raise RuntimeError(f"ACTIVE_RUN_LEDGER_PASS_WITH_UNPASSED_DEPENDENCY:{stage['id']}:{dep}")
-    if int(ledger.get("completed_count",-1))!=complete: raise RuntimeError("ACTIVE_RUN_LEDGER_PROGRESS_DRIFT")
-    expected=next((x["id"] for x in rows if x.get("status") not in PASS_STATUSES),None)
-    if ledger.get("next_stage")!=expected: raise RuntimeError("ACTIVE_RUN_LEDGER_NEXT_STAGE_DRIFT")
 
-def authority_root()->Path:
-    raw=os.environ.get("REALSAS_AUTHORITY_ROOT","").strip()
-    return Path(raw).expanduser().resolve() if raw else (Path.home()/"realsas_authority").resolve()
+def validate_readiness(plan: dict | None = None) -> str:
+    plan = plan or load_json(PLAN_PATH)
+    plan_hash = validate_plan(plan)
+    if not READINESS_PATH.is_file():
+        raise RuntimeError("V2_IMPLEMENTATION_READINESS_MISSING")
+    readiness = load_json(READINESS_PATH)
+    if readiness.get("schema") != "RealSaS.V2ImplementationReadiness.v1":
+        raise RuntimeError("V2_IMPLEMENTATION_READINESS_SCHEMA_DRIFT")
+    if readiness.get("status") != "READY_FOR_WITNESS_EXECUTION":
+        raise RuntimeError(
+            "V2_IMPLEMENTATION_NOT_READY:" + str(readiness.get("status", "UNKNOWN"))
+        )
+    if readiness.get("pipeline_plan_sha256") != plan_hash:
+        raise RuntimeError("V2_IMPLEMENTATION_READINESS_PLAN_HASH_DRIFT")
+    required = tuple(map(str, readiness.get("required_proofs") or ()))
+    if not required:
+        raise RuntimeError("V2_IMPLEMENTATION_READINESS_PROOFS_EMPTY")
+    proof_rows = {
+        str(row.get("proof_id")): row for row in readiness.get("proofs") or ()
+    }
+    missing = [
+        proof_id
+        for proof_id in required
+        if proof_id not in proof_rows
+        or str(proof_rows[proof_id].get("status")) != "PASS"
+        or len(str(proof_rows[proof_id].get("sha256", ""))) != 64
+    ]
+    if missing:
+        raise RuntimeError(
+            "V2_IMPLEMENTATION_READINESS_PROOF_MISSING:" + ",".join(missing)
+        )
+    return content_sha256(readiness)
 
-def run_manifest_path(run_id:str)->Path: return authority_root()/"runs"/run_id/"run_manifest.json"
 
-def _local_module_path(module_name:str)->Path|None:
-    rel=Path(*str(module_name).split("."))
-    file_path=(ROOT/rel).with_suffix(".py")
+def validate_ledger(plan: dict, ledger: dict) -> None:
+    plan_hash = validate_plan(plan)
+    if ledger.get("schema") != "RealSaS.ActiveRunLedger.v2":
+        raise RuntimeError("ACTIVE_RUN_V2_LEDGER_SCHEMA_DRIFT")
+    if ledger.get("canonical_branch") != "main":
+        raise RuntimeError("ACTIVE_RUN_V2_LEDGER_BRANCH_DRIFT")
+    if ledger.get("pipeline_plan_sha256") != plan_hash:
+        raise RuntimeError("ACTIVE_RUN_V2_LEDGER_PLAN_HASH_DRIFT")
+
+    rows = list(ledger.get("stages") or ())
+    if len(rows) != 46:
+        raise RuntimeError("ACTIVE_RUN_V2_LEDGER_STAGE_COUNT_DRIFT")
+    if {str(row.get("id")) for row in rows} != {
+        str(stage["id"]) for stage in plan["stages"]
+    }:
+        raise RuntimeError("ACTIVE_RUN_V2_LEDGER_STAGE_ID_SET_DRIFT")
+
+    by_id = _ledger_map(ledger)
+    for stage in plan["stages"]:
+        row = by_id[stage["id"]]
+        if int(row.get("ordinal", -1)) != int(stage["ordinal"]):
+            raise RuntimeError(f"ACTIVE_RUN_V2_LEDGER_ORDINAL_DRIFT:{stage['id']}")
+        if row.get("status") in PASS_STATUSES:
+            for dependency in stage.get("depends_on", ()):
+                if by_id[str(dependency)].get("status") not in PASS_STATUSES:
+                    raise RuntimeError(
+                        "ACTIVE_RUN_V2_PASS_WITH_UNPASSED_DEPENDENCY:"
+                        f"{stage['id']}:{dependency}"
+                    )
+
+    completed = sum(row.get("status") in PASS_STATUSES for row in rows)
+    if int(ledger.get("completed_count", -1)) != completed:
+        raise RuntimeError("ACTIVE_RUN_V2_LEDGER_PROGRESS_DRIFT")
+    expected_ready = list(ready_stage_ids(plan, ledger))
+    if list(ledger.get("ready_stage_ids") or ()) != expected_ready:
+        raise RuntimeError("ACTIVE_RUN_V2_LEDGER_READY_SET_DRIFT")
+
+
+def authority_root() -> Path:
+    raw = os.environ.get("REALSAS_AUTHORITY_ROOT", "").strip()
+    return (
+        Path(raw).expanduser().resolve()
+        if raw
+        else (Path.home() / "realsas_authority").resolve()
+    )
+
+
+def run_manifest_path(run_id: str) -> Path:
+    return authority_root() / "runs" / run_id / "run_manifest.json"
+
+
+def _local_module_path(module_name: str) -> Path | None:
+    rel = Path(*str(module_name).split("."))
+    file_path = (ROOT / rel).with_suffix(".py")
     if file_path.is_file():
         return file_path.resolve()
-    init_path=ROOT/rel/"__init__.py"
+    init_path = ROOT / rel / "__init__.py"
     if init_path.is_file():
         return init_path.resolve()
     return None
 
 
-def _local_import_closure(module_name:str)->tuple[tuple[str,str],...]:
-    seen:set[str]=set()
-    rows:list[tuple[str,str]]=[]
+def _local_import_closure(module_name: str) -> tuple[tuple[str, str], ...]:
+    seen: set[str] = set()
+    rows: list[tuple[str, str]] = []
 
-    def visit(name:str)->None:
+    def visit(name: str) -> None:
         if name in seen:
             return
-        path=_local_module_path(name)
+        path = _local_module_path(name)
         if path is None:
             return
         seen.add(name)
-        rows.append((name,sha256_file(path)))
-        try:
-            tree=ast.parse(path.read_text(encoding="utf-8"),filename=str(path))
-        except Exception as exc:
-            raise RuntimeError(f"MAINLINE_IMPLEMENTATION_AST_INVALID:{name}:{exc}") from exc
-        package=name.rpartition(".")[0]
+        rows.append((name, sha256_file(path)))
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        package = name.rpartition(".")[0]
         for node in ast.walk(tree):
-            candidates:list[str]=[]
-            if isinstance(node,ast.Import):
+            candidates: list[str] = []
+            if isinstance(node, ast.Import):
                 candidates.extend(alias.name for alias in node.names)
-            elif isinstance(node,ast.ImportFrom):
+            elif isinstance(node, ast.ImportFrom):
                 if node.level:
-                    relative="."*int(node.level)+(node.module or "")
+                    relative = "." * int(node.level) + (node.module or "")
                     try:
-                        base=importlib.util.resolve_name(relative,package or name)
+                        base = importlib.util.resolve_name(relative, package or name)
                     except Exception:
-                        base=""
+                        base = ""
                 else:
-                    base=str(node.module or "")
+                    base = str(node.module or "")
                 if base:
                     candidates.append(base)
                     for alias in node.names:
-                        child=f"{base}.{alias.name}"
+                        child = f"{base}.{alias.name}"
                         if _local_module_path(child) is not None:
                             candidates.append(child)
             for candidate in candidates:
@@ -137,201 +286,489 @@ def _local_import_closure(module_name:str)->tuple[tuple[str,str],...]:
     return tuple(sorted(rows))
 
 
-def _adapter_impl_hash(adapter:str)->str:
-    if adapter=="UNBOUND": return hashlib.sha256(b"UNBOUND").hexdigest()
-    module_name,sep,fn_name=adapter.partition(":")
-    if not sep or not module_name or not fn_name: raise RuntimeError(f"MAINLINE_ADAPTER_ID_INVALID:{adapter}")
-    module=importlib.import_module(module_name)
-    if not callable(getattr(module,fn_name,None)):
-        raise RuntimeError(f"MAINLINE_ADAPTER_CALLABLE_MISSING:{adapter}")
-    closure=_local_import_closure(module_name)
+def _adapter_impl_hash(adapter: str) -> str:
+    module_name, separator, function_name = adapter.partition(":")
+    if not separator or not module_name or not function_name:
+        raise RuntimeError(f"MAINLINE_V2_ADAPTER_ID_INVALID:{adapter}")
+    module = importlib.import_module(module_name)
+    if not callable(getattr(module, function_name, None)):
+        raise RuntimeError(f"MAINLINE_V2_ADAPTER_CALLABLE_MISSING:{adapter}")
+    closure = _local_import_closure(module_name)
     if not closure:
-        raise RuntimeError(f"MAINLINE_IMPLEMENTATION_CLOSURE_EMPTY:{adapter}")
-    return content_sha256({
-        "schema":"RealSaS.AdapterImplementationClosure.v1",
-        "adapter":adapter,
-        "local_python_import_closure":[{"module":name,"sha256":digest} for name,digest in closure],
-    })
-
-def _manifest_subset(manifest:dict,stage:dict)->dict:
-    return {key:manifest.get(key) for key in stage["manifest_keys"]}
-
-def _fingerprint(plan:dict,ledger:dict,manifest:dict,stage:dict,impl_hash:str)->tuple[str,str]:
-    by_id={row["id"]:row for row in ledger["stages"]}; deps=[]
-    for dep in stage.get("depends_on",()):
-        deps.extend(str(out["sha256"]) for out in by_id[dep].get("outputs",()) if str(out.get("sha256","")))
-    policy_hash=content_sha256(stage["policy"])
-    return content_sha256({
-        "schema":"RealSaS.StageInputFingerprint.v1",
-        "run_id":ledger["run_id"],
-        "stage_id":stage["id"],
-        "manifest_subset":_manifest_subset(manifest,stage),
-        "dependency_output_sha256":deps,
-        "policy_hash":policy_hash,
-        "implementation_hash":impl_hash,
-        "pipeline_plan_sha256":ledger["pipeline_plan_sha256"],
-    }),policy_hash
-
-def _dependency_blockers(stage:dict,ledger:dict)->list[str]:
-    by_id={row["id"]:row for row in ledger["stages"]}
-    blockers=[]
-    for dep in stage.get("depends_on",()):
-        row=by_id.get(dep)
-        if row is None:
-            blockers.append(f"DEPENDENCY_UNKNOWN:{dep}")
-            continue
-        if row.get("status") not in PASS_STATUSES:
-            blockers.append(f"DEPENDENCY_NOT_PASS:{dep}:{row.get('status','')}")
-            continue
-        if not _outputs_verify(row):
-            blockers.append(f"DEPENDENCY_OUTPUT_IDENTITY_INVALID:{dep}")
-    return blockers
+        raise RuntimeError(f"MAINLINE_V2_IMPLEMENTATION_CLOSURE_EMPTY:{adapter}")
+    return content_sha256(
+        {
+            "schema": "RealSaS.AdapterImplementationClosure.v2",
+            "adapter": adapter,
+            "local_python_import_closure": [
+                {"module": name, "sha256": digest} for name, digest in closure
+            ],
+        }
+    )
 
 
-def _outputs_verify(row:dict)->bool:
-    outputs=list(row.get("outputs") or ())
-    if not outputs: return False
-    for out in outputs:
-        path=Path(str(out.get("path",""))).expanduser()
-        digest=str(out.get("sha256",""))
-        if not path.is_file() or len(digest)!=64 or sha256_file(path)!=digest: return False
+def _manifest_subset(manifest: dict, stage: dict) -> dict:
+    return {key: manifest.get(key) for key in stage["manifest_keys"]}
+
+
+def _outputs_verify(row: dict) -> bool:
+    outputs = list(row.get("outputs") or ())
+    if not outputs:
+        return False
+    for output in outputs:
+        path = Path(str(output.get("path", ""))).expanduser()
+        digest = str(output.get("sha256", ""))
+        if (
+            not path.is_file()
+            or len(digest) != 64
+            or sha256_file(path) != digest
+        ):
+            return False
     return True
 
-def _refresh(ledger:dict)->None:
-    rows=ledger["stages"]
-    ledger["completed_count"]=sum(x["status"] in PASS_STATUSES for x in rows)
-    ledger["total_count"]=len(rows)
-    ledger["next_stage"]=next((x["id"] for x in rows if x["status"] not in PASS_STATUSES),None)
-    if ledger["completed_count"]==len(rows): ledger["status"]=f"PASS__ALL_{len(rows)}_STAGES"
-    elif any(x["status"] in FAIL_STATUSES for x in rows): ledger["status"]="BLOCKED_AT_"+str(ledger["next_stage"] or "UNKNOWN")
-    else: ledger["status"]="ACTIVE"
 
-def _invalidate_dependents(plan:dict,ledger:dict,stage_id:str,reason:str)->tuple[str,...]:
-    invalid={str(stage_id)}
-    changed=True
+def _fingerprint(
+    plan: dict,
+    ledger: dict,
+    manifest: dict,
+    stage: dict,
+    implementation_hash: str,
+) -> tuple[str, str]:
+    by_id = _ledger_map(ledger)
+    dependency_outputs: list[str] = []
+    for dependency in stage.get("depends_on", ()):
+        dependency_outputs.extend(
+            str(output["sha256"])
+            for output in by_id[str(dependency)].get("outputs", ())
+            if str(output.get("sha256", ""))
+        )
+    policy_hash = content_sha256(stage["policy"])
+    fingerprint = content_sha256(
+        {
+            "schema": "RealSaS.StageInputFingerprint.v2",
+            "run_id": ledger["run_id"],
+            "stage_id": stage["id"],
+            "manifest_subset": _manifest_subset(manifest, stage),
+            "dependency_output_sha256": dependency_outputs,
+            "policy_hash": policy_hash,
+            "implementation_hash": implementation_hash,
+            "pipeline_plan_sha256": ledger["pipeline_plan_sha256"],
+        }
+    )
+    return fingerprint, policy_hash
+
+
+def dependency_failure_ids(plan: dict, ledger: dict, stage_id: str) -> tuple[str, ...]:
+    stages = _stage_map(plan)
+    rows = _ledger_map(ledger)
+    failures: set[str] = set()
+    stack = list(map(str, stages[stage_id].get("depends_on", ())))
+    seen: set[str] = set()
+    while stack:
+        dependency = stack.pop()
+        if dependency in seen:
+            continue
+        seen.add(dependency)
+        status = str(rows[dependency].get("status", "PENDING"))
+        if status in FAIL_STATUSES:
+            failures.add(dependency)
+        stack.extend(map(str, stages[dependency].get("depends_on", ())))
+    return tuple(sorted(failures))
+
+
+def ready_stage_ids(plan: dict, ledger: dict) -> tuple[str, ...]:
+    stages = _stage_map(plan)
+    rows = _ledger_map(ledger)
+    ordinal = {stage_id: int(stage["ordinal"]) for stage_id, stage in stages.items()}
+    ready: list[str] = []
+    for stage_id, stage in stages.items():
+        row = rows[stage_id]
+        if row.get("status") != "PENDING":
+            continue
+        dependencies = tuple(map(str, stage.get("depends_on", ())))
+        if all(rows[dependency].get("status") in PASS_STATUSES for dependency in dependencies):
+            ready.append(stage_id)
+    return tuple(sorted(ready, key=lambda stage_id: (ordinal[stage_id], stage_id)))
+
+
+def _refresh(plan: dict, ledger: dict) -> None:
+    rows = ledger["stages"]
+    ledger["completed_count"] = sum(
+        row.get("status") in PASS_STATUSES for row in rows
+    )
+    ledger["failed_count"] = sum(row.get("status") in FAIL_STATUSES for row in rows)
+    ledger["total_count"] = len(rows)
+    ledger["ready_stage_ids"] = list(ready_stage_ids(plan, ledger))
+    ledger["failed_stage_ids"] = [
+        row["id"] for row in rows if row.get("status") in FAIL_STATUSES
+    ]
+    ledger["blocked_by_failed_dependency"] = {
+        stage["id"]: list(dependency_failure_ids(plan, ledger, stage["id"]))
+        for stage in plan["stages"]
+        if dependency_failure_ids(plan, ledger, stage["id"])
+        and _ledger_map(ledger)[stage["id"]].get("status") == "PENDING"
+    }
+    if ledger["completed_count"] == len(rows):
+        ledger["status"] = "PASS__ALL_46_STAGES"
+    elif ledger["failed_count"]:
+        ledger["status"] = "ACTIVE_WITH_FAILED_BRANCHES"
+    elif ledger["ready_stage_ids"]:
+        ledger["status"] = "ACTIVE"
+    else:
+        ledger["status"] = "WAITING_FOR_EXTERNAL_INPUT_OR_STALE_REPAIR"
+
+
+def _invalidate_dependents(
+    plan: dict, ledger: dict, stage_id: str, reason: str
+) -> tuple[str, ...]:
+    invalid = {str(stage_id)}
+    changed = True
     while changed:
-        changed=False
+        changed = False
         for stage in plan["stages"]:
-            sid=stage["id"]
-            if sid in invalid:
+            current = str(stage["id"])
+            if current in invalid:
                 continue
-            if any(dep in invalid for dep in stage.get("depends_on",())):
-                invalid.add(sid); changed=True
-    invalidated=[]
+            if any(str(dep) in invalid for dep in stage.get("depends_on", ())):
+                invalid.add(current)
+                changed = True
+    invalidated: list[str] = []
     for row in ledger["stages"]:
         if row["id"] not in invalid:
             continue
-        row.update(status="PENDING",input_fingerprint="",implementation_hash="",policy_hash="",outputs=[],diagnostics_hash="",blockers=[],wall_seconds=0.0,performance={})
+        row.update(
+            status="PENDING",
+            input_fingerprint="",
+            implementation_hash="",
+            policy_hash="",
+            outputs=[],
+            diagnostics_hash="",
+            blockers=[],
+            wall_seconds=0.0,
+            performance={},
+        )
         invalidated.append(row["id"])
-    ledger.setdefault("history",[]).append({
-        "event":"DEPENDENCY_SUBGRAPH_INVALIDATED",
-        "source_stage":str(stage_id),
-        "reason":reason,
-        "invalidated_stages":invalidated,
-    })
-    _refresh(ledger)
+    ledger.setdefault("history", []).append(
+        {
+            "event": "DEPENDENCY_SUBGRAPH_INVALIDATED",
+            "source_stage": str(stage_id),
+            "reason": reason,
+            "invalidated_stages": invalidated,
+        }
+    )
+    _refresh(plan, ledger)
     return tuple(invalidated)
 
-def _seal_outputs(outputs:list[dict])->list[dict]:
-    sealed=[]
-    for out in outputs:
-        path=Path(str(out["path"])).expanduser().resolve()
-        if not path.is_file(): raise RuntimeError(f"STAGE_OUTPUT_MISSING:{path}")
-        digest=sha256_file(path); expected=str(out.get("sha256","") or "")
-        if expected and expected!=digest: raise RuntimeError(f"STAGE_OUTPUT_SHA_MISMATCH:{path}")
-        sealed.append({"path":str(path),"sha256":digest,"bytes":path.stat().st_size,"authority_class":str(out.get("authority_class","SEALED_STAGE_OUTPUT")),"schema":str(out.get("schema","UNSPECIFIED"))})
-    if not sealed: raise RuntimeError("STAGE_PASS_REQUIRES_OUTPUT")
+
+def _seal_outputs(outputs: list[dict]) -> list[dict]:
+    sealed: list[dict] = []
+    for output in outputs:
+        path = Path(str(output["path"])).expanduser().resolve()
+        if not path.is_file():
+            raise RuntimeError(f"STAGE_OUTPUT_MISSING:{path}")
+        digest = sha256_file(path)
+        expected = str(output.get("sha256", "") or "")
+        if expected and expected != digest:
+            raise RuntimeError(f"STAGE_OUTPUT_SHA_MISMATCH:{path}")
+        sealed.append(
+            {
+                "path": str(path),
+                "sha256": digest,
+                "bytes": path.stat().st_size,
+                "authority_class": str(
+                    output.get("authority_class", "SEALED_STAGE_OUTPUT")
+                ),
+                "schema": str(output.get("schema", "UNSPECIFIED")),
+            }
+        )
+    if not sealed:
+        raise RuntimeError("STAGE_PASS_REQUIRES_OUTPUT")
     return sealed
 
-def execute(run_id:str,*,from_stage:str="",to_stage:str="",resume:bool=True)->int:
-    plan=load_json(PLAN_PATH); ledger=load_json(LEDGER_PATH); validate_ledger(plan,ledger)
-    if ledger["run_id"]!=run_id: raise RuntimeError(f"ACTIVE_RUN_ID_MISMATCH:{ledger['run_id']}!={run_id}")
-    manifest_path=run_manifest_path(run_id)
-    if not manifest_path.is_file(): raise RuntimeError(f"RUN_MANIFEST_MISSING:{manifest_path}")
-    manifest=load_json(manifest_path)
-    ids=[x["id"] for x in plan["stages"]]
-    start=ids.index(from_stage) if from_stage else 0; end=ids.index(to_stage) if to_stage else len(ids)-1
-    if start>end: raise RuntimeError("MAINLINE_STAGE_RANGE_INVALID")
-    for prior_index in range(start):
-        prior_stage=plan["stages"][prior_index]; prior_row=ledger["stages"][prior_index]
-        if prior_row.get("status") not in PASS_STATUSES:
+
+def _verify_existing_passes(plan: dict, ledger: dict, manifest: dict) -> bool:
+    changed = False
+    for stage_id in topological_stage_ids(plan):
+        stage = _stage_map(plan)[stage_id]
+        row = _ledger_map(ledger)[stage_id]
+        if row.get("status") not in PASS_STATUSES:
             continue
-        prior_impl=_adapter_impl_hash(prior_stage["adapter"])
-        prior_fingerprint,prior_policy_hash=_fingerprint(plan,ledger,manifest,prior_stage,prior_impl)
+        implementation_hash = _adapter_impl_hash(stage["adapter"])
+        fingerprint, policy_hash = _fingerprint(
+            plan, ledger, manifest, stage, implementation_hash
+        )
         if (
-            prior_row.get("input_fingerprint")!=prior_fingerprint
-            or prior_row.get("implementation_hash")!=prior_impl
-            or prior_row.get("policy_hash")!=prior_policy_hash
-            or not _outputs_verify(prior_row)
+            row.get("input_fingerprint") != fingerprint
+            or row.get("implementation_hash") != implementation_hash
+            or row.get("policy_hash") != policy_hash
+            or not _outputs_verify(row)
         ):
-            _invalidate_dependents(plan,ledger,prior_stage["id"],"STALE_UPSTREAM_BEFORE_REQUESTED_START")
-            atomic_json(LEDGER_PATH,ledger)
-            return 2
-    for index in range(start,end+1):
-        stage=plan["stages"][index]; row=ledger["stages"][index]
-        impl_hash=_adapter_impl_hash(stage["adapter"]); fingerprint,policy_hash=_fingerprint(plan,ledger,manifest,stage,impl_hash)
-        if resume and row["status"] in PASS_STATUSES:
-            if row.get("input_fingerprint")==fingerprint and _outputs_verify(row): continue
-            _invalidate_dependents(plan,ledger,stage["id"],"STALE_PASS_IDENTITY"); atomic_json(LEDGER_PATH,ledger); row=ledger["stages"][index]
-        if not resume and row["status"] in PASS_STATUSES:
-            _invalidate_dependents(plan,ledger,stage["id"],"FORCED_RERUN")
-            atomic_json(LEDGER_PATH,ledger)
-            row=ledger["stages"][index]
-            impl_hash=_adapter_impl_hash(stage["adapter"]); fingerprint,policy_hash=_fingerprint(plan,ledger,manifest,stage,impl_hash)
-        dependency_blockers=_dependency_blockers(stage,ledger)
-        if dependency_blockers:
-            row.update(status="BLOCKED",attempts=int(row.get("attempts",0))+1,input_fingerprint=fingerprint,implementation_hash=impl_hash,policy_hash=policy_hash,outputs=[],diagnostics_hash=content_sha256({"dependency_blockers":dependency_blockers}),blockers=dependency_blockers)
-            _refresh(ledger); atomic_json(LEDGER_PATH,ledger); return 2
-        if stage["adapter"]=="UNBOUND":
-            row.update(status="BLOCKED",attempts=int(row.get("attempts",0))+1,input_fingerprint=fingerprint,implementation_hash=impl_hash,policy_hash=policy_hash,outputs=[],diagnostics_hash="",blockers=["STAGE_ADAPTER_UNBOUND"])
-            _refresh(ledger); atomic_json(LEDGER_PATH,ledger); return 2
-        module_name,_,fn_name=stage["adapter"].partition(":"); fn=getattr(importlib.import_module(module_name),fn_name)
-        row.update(status="RUNNING",attempts=int(row.get("attempts",0))+1,input_fingerprint=fingerprint,implementation_hash=impl_hash,policy_hash=policy_hash,outputs=[],diagnostics_hash="",blockers=[])
-        _refresh(ledger); atomic_json(LEDGER_PATH,ledger)
-        ctx={"repo_root":ROOT,"authority_root":authority_root(),"run_root":authority_root()/"runs"/run_id,"run_id":run_id,"run_manifest_path":manifest_path,"run_manifest":manifest,"stage":stage,"ledger":ledger}
-        started=perf_counter()
-        try:
-            result=dict(fn(ctx) or {}); elapsed=perf_counter()-started; status=str(result.get("status","FAIL")).upper()
-            if status!="PASS":
-                row.update(
-                    status=status if status in FAIL_STATUSES else "FAIL",
-                    diagnostics_hash=content_sha256(result.get("diagnostics",{})),
-                    blockers=list(result.get("blockers") or ["STAGE_ADAPTER_REPORTED_FAILURE"]),
-                    wall_seconds=float(elapsed),
-                    performance=dict(result.get("performance") or {}),
-                )
-                _refresh(ledger); atomic_json(LEDGER_PATH,ledger); return 2
+            _invalidate_dependents(
+                plan, ledger, stage_id, "STALE_PASS_IDENTITY"
+            )
+            changed = True
+            break
+    return changed
+
+
+def _target_closure(plan: dict, targets: tuple[str, ...]) -> set[str]:
+    stages = _stage_map(plan)
+    if not targets:
+        return set(stages)
+    unknown = [target for target in targets if target not in stages]
+    if unknown:
+        raise RuntimeError("MAINLINE_V2_TARGET_UNKNOWN:" + ",".join(unknown))
+    closure: set[str] = set()
+
+    def add(stage_id: str) -> None:
+        if stage_id in closure:
+            return
+        closure.add(stage_id)
+        for dependency in stages[stage_id].get("depends_on", ()):
+            add(str(dependency))
+
+    for target in targets:
+        add(target)
+    return closure
+
+
+def _run_stage(
+    *,
+    plan: dict,
+    ledger: dict,
+    manifest: dict,
+    manifest_path: Path,
+    run_id: str,
+    stage_id: str,
+) -> None:
+    stage = _stage_map(plan)[stage_id]
+    row = _ledger_map(ledger)[stage_id]
+    implementation_hash = _adapter_impl_hash(stage["adapter"])
+    fingerprint, policy_hash = _fingerprint(
+        plan, ledger, manifest, stage, implementation_hash
+    )
+
+    module_name, _, function_name = stage["adapter"].partition(":")
+    function = getattr(importlib.import_module(module_name), function_name)
+    row.update(
+        status="RUNNING",
+        attempts=int(row.get("attempts", 0)) + 1,
+        input_fingerprint=fingerprint,
+        implementation_hash=implementation_hash,
+        policy_hash=policy_hash,
+        outputs=[],
+        diagnostics_hash="",
+        blockers=[],
+    )
+    _refresh(plan, ledger)
+    atomic_json(LEDGER_PATH, ledger)
+
+    ctx = {
+        "repo_root": ROOT,
+        "authority_root": authority_root(),
+        "run_root": authority_root() / "runs" / run_id,
+        "run_id": run_id,
+        "run_manifest_path": manifest_path,
+        "run_manifest": manifest,
+        "stage": stage,
+        "ledger": ledger,
+    }
+    started = perf_counter()
+    try:
+        result = dict(function(ctx) or {})
+        elapsed = perf_counter() - started
+        status = str(result.get("status", "FAIL")).upper()
+        if status != "PASS":
+            row.update(
+                status=status if status in FAIL_STATUSES else "FAIL",
+                diagnostics_hash=content_sha256(result.get("diagnostics", {})),
+                blockers=list(
+                    result.get("blockers")
+                    or ["STAGE_ADAPTER_REPORTED_FAILURE"]
+                ),
+                wall_seconds=float(elapsed),
+                performance=dict(result.get("performance") or {}),
+            )
+        else:
             row.update(
                 status="PASS",
                 outputs=_seal_outputs(list(result.get("outputs") or ())),
-                diagnostics_hash=content_sha256(result.get("diagnostics",{})),
+                diagnostics_hash=content_sha256(result.get("diagnostics", {})),
                 blockers=[],
                 wall_seconds=float(elapsed),
                 performance=dict(result.get("performance") or {}),
             )
-        except Exception as exc:
-            elapsed=perf_counter()-started
-            row.update(status="FAIL",outputs=[],diagnostics_hash=content_sha256({"exception_type":type(exc).__name__,"message":str(exc)}),blockers=[f"EXCEPTION:{type(exc).__name__}:{exc}"],wall_seconds=float(elapsed),performance={})
-            _refresh(ledger); atomic_json(LEDGER_PATH,ledger); raise
-        _refresh(ledger); atomic_json(LEDGER_PATH,ledger)
-    validate_ledger(plan,ledger); return 0
+    except Exception as exc:
+        elapsed = perf_counter() - started
+        row.update(
+            status="FAIL",
+            outputs=[],
+            diagnostics_hash=content_sha256(
+                {"exception_type": type(exc).__name__, "message": str(exc)}
+            ),
+            blockers=[f"EXCEPTION:{type(exc).__name__}:{exc}"],
+            wall_seconds=float(elapsed),
+            performance={},
+        )
+        ledger.setdefault("history", []).append(
+            {
+                "event": "STAGE_EXCEPTION",
+                "stage_id": stage_id,
+                "exception_type": type(exc).__name__,
+                "message": str(exc),
+            }
+        )
+    _refresh(plan, ledger)
+    atomic_json(LEDGER_PATH, ledger)
 
-def status_text(plan:dict,ledger:dict)->str:
-    validate_ledger(plan,ledger)
-    lines=[f"run={ledger['run_id']} status={ledger['status']} progress={ledger['completed_count']}/{ledger['total_count']}",f"next={ledger.get('next_stage') or 'NONE'}"]
-    for stage,row in zip(plan["stages"],ledger["stages"]):
-        mark="x" if row["status"] in PASS_STATUSES else ("!" if row["status"] in FAIL_STATUSES else ("~" if row["status"]=="RUNNING" else " "))
-        lines.append(f"[{mark}] {stage['ordinal']:02d}/{len(plan['stages'])} {stage['id']} — {row['status']}")
+
+def execute(
+    run_id: str,
+    *,
+    targets: tuple[str, ...] = (),
+    resume: bool = True,
+) -> int:
+    plan = load_json(PLAN_PATH)
+    validate_readiness(plan)
+    ledger = load_json(LEDGER_PATH)
+    validate_ledger(plan, ledger)
+    if ledger["run_id"] != run_id:
+        raise RuntimeError(
+            f"ACTIVE_RUN_V2_ID_MISMATCH:{ledger['run_id']}!={run_id}"
+        )
+
+    manifest_path = run_manifest_path(run_id)
+    if not manifest_path.is_file():
+        raise RuntimeError(f"RUN_MANIFEST_MISSING:{manifest_path}")
+    manifest = load_json(manifest_path)
+    target_set = _target_closure(plan, targets)
+
+    if _verify_existing_passes(plan, ledger, manifest):
+        atomic_json(LEDGER_PATH, ledger)
+
+    if not resume:
+        for stage_id in sorted(
+            target_set,
+            key=lambda sid: int(_stage_map(plan)[sid]["ordinal"]),
+        ):
+            if _ledger_map(ledger)[stage_id].get("status") in PASS_STATUSES:
+                _invalidate_dependents(plan, ledger, stage_id, "FORCED_RERUN")
+
+    while True:
+        ready = [
+            stage_id
+            for stage_id in ready_stage_ids(plan, ledger)
+            if stage_id in target_set
+        ]
+        if not ready:
+            break
+        for stage_id in ready:
+            _run_stage(
+                plan=plan,
+                ledger=ledger,
+                manifest=manifest,
+                manifest_path=manifest_path,
+                run_id=run_id,
+                stage_id=stage_id,
+            )
+
+    _refresh(plan, ledger)
+    atomic_json(LEDGER_PATH, ledger)
+    validate_ledger(plan, ledger)
+
+    rows = _ledger_map(ledger)
+    target_failures = [
+        stage_id
+        for stage_id in target_set
+        if rows[stage_id].get("status") in FAIL_STATUSES
+    ]
+    unresolved = [
+        stage_id
+        for stage_id in target_set
+        if rows[stage_id].get("status") == "PENDING"
+        and dependency_failure_ids(plan, ledger, stage_id)
+    ]
+    return 2 if target_failures or unresolved else 0
+
+
+def status_text(plan: dict, ledger: dict) -> str:
+    validate_ledger(plan, ledger)
+    lines = [
+        (
+            f"run={ledger['run_id']} status={ledger['status']} "
+            f"progress={ledger['completed_count']}/{ledger['total_count']} "
+            f"failed={ledger.get('failed_count', 0)}"
+        ),
+        "ready=" + (
+            ",".join(ledger.get("ready_stage_ids") or ())
+            if ledger.get("ready_stage_ids")
+            else "NONE"
+        ),
+    ]
+    by_id = _ledger_map(ledger)
+    for stage in sorted(plan["stages"], key=lambda item: int(item["ordinal"])):
+        row = by_id[stage["id"]]
+        mark = (
+            "x"
+            if row["status"] in PASS_STATUSES
+            else "!"
+            if row["status"] in FAIL_STATUSES
+            else "~"
+            if row["status"] == "RUNNING"
+            else " "
+        )
+        failures = dependency_failure_ids(plan, ledger, stage["id"])
+        suffix = (
+            " blocked_by=" + ",".join(failures)
+            if row["status"] == "PENDING" and failures
+            else ""
+        )
+        lines.append(
+            f"[{mark}] {stage['ordinal']:02d}/46 {stage['id']} "
+            f"[{stage['group']}] — {row['status']}{suffix}"
+        )
     return "\n".join(lines)
 
-def main(argv:list[str]|None=None)->int:
-    parser=argparse.ArgumentParser(); sub=parser.add_subparsers(dest="command",required=True)
-    sub.add_parser("validate-plan"); sub.add_parser("status"); run=sub.add_parser("execute")
-    run.add_argument("--run-id",required=True); run.add_argument("--from-stage",default=""); run.add_argument("--to-stage",default=""); run.add_argument("--no-resume",action="store_true")
-    args=parser.parse_args(argv); plan=load_json(PLAN_PATH); ledger=load_json(LEDGER_PATH)
-    if args.command=="validate-plan":
-        validate_ledger(plan,ledger); print(f"MAINLINE_PLAN_PASS stages={plan['stage_count']} plan_sha256={ledger['pipeline_plan_sha256']}"); return 0
-    if args.command=="status": print(status_text(plan,ledger)); return 0
-    return execute(args.run_id,from_stage=args.from_stage,to_stage=args.to_stage,resume=not args.no_resume)
 
-if __name__=="__main__": raise SystemExit(main())
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("validate-plan")
+    sub.add_parser("validate-readiness")
+    sub.add_parser("status")
+    run = sub.add_parser("execute")
+    run.add_argument("--run-id", required=True)
+    run.add_argument(
+        "--target",
+        action="append",
+        default=[],
+        help="Execute this stage and its dependency closure. Repeatable. "
+        "With no target, saturate the whole DAG.",
+    )
+    run.add_argument("--no-resume", action="store_true")
+
+    args = parser.parse_args(argv)
+    plan = load_json(PLAN_PATH)
+
+    if args.command == "validate-plan":
+        digest = validate_plan(plan)
+        print(f"MAINLINE_V2_PLAN_PASS stages=46 plan_sha256={digest}")
+        return 0
+    if args.command == "validate-readiness":
+        digest = validate_readiness(plan)
+        print(f"MAINLINE_V2_READINESS_PASS readiness_sha256={digest}")
+        return 0
+
+    ledger = load_json(LEDGER_PATH)
+    if args.command == "status":
+        print(status_text(plan, ledger))
+        return 0
+    return execute(
+        args.run_id,
+        targets=tuple(map(str, args.target)),
+        resume=not args.no_resume,
+    )
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

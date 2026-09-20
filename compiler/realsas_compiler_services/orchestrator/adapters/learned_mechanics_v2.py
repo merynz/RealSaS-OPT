@@ -17,19 +17,19 @@ from compiler.realsas_compiler_core.types import (
     QualificationError, SkeletonProposalEdge, SkeletonProposalIR, SkeletonProposalJoint,
     SkinInfluenceProposal, SkinProposalIR,
 )
-from compiler.realsas_compiler_services.orchestrator.adapters.model_execution_common_v1 import (
+from compiler.realsas_compiler_services.orchestrator.adapters.model_execution_common_v2 import (
     build_fit_execution, build_fit_preregistration, seal_model_checkpoint,
 )
-from compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1 import (
-    _resolved_path, _sha256, _stage_output_payload, _write_ir,
+from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
+    resolved_path, sha256_file, stage_output_payload, write_ir,
 )
 
 
 def _execution_json(execution,*,expected_schema:str):
     if execution.proposal_path is None or execution.proposal_sha256 is None:
         raise QualificationError("MODEL_PROPOSAL_EXECUTION_REF_MISSING")
-    path=_resolved_path(execution.proposal_path)
-    if not path.is_file() or _sha256(path)!=execution.proposal_sha256:
+    path=resolved_path(execution.proposal_path)
+    if not path.is_file() or sha256_file(path)!=execution.proposal_sha256:
         raise QualificationError("MODEL_PROPOSAL_BYTES_DRIFT")
     payload=json.loads(path.read_text(encoding="utf-8"))
     actual=str(payload.get("schema") or payload.get("schema_version") or "")
@@ -73,10 +73,10 @@ def _skin_proposal(payload:dict)->SkinProposalIR:
 
 def preregister_geppetto_fit_stage(ctx:dict)->dict:
     surface=rigging_surface_from_dict(
-        _stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
+        stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
     )
     qualification=rigging_surface_qualification_from_dict(
-        _stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceQualificationIR.v1")
+        stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceQualificationIR.v1")
     )
     prereg,out=build_fit_preregistration(
         ctx,lane="GEPPETTO",section_key="geppetto_fit",
@@ -93,7 +93,7 @@ def preregister_geppetto_fit_stage(ctx:dict)->dict:
 
 def execute_geppetto_fit_stage(ctx:dict)->dict:
     prereg=model_fit_preregistration_from_dict(
-        _stage_output_payload(ctx,"26_GEPPETTO_FIT_PREREGISTERED","RealSaS.ModelFitPreregistrationIR.v1")
+        stage_output_payload(ctx,"26_GEPPETTO_FIT_PREREGISTERED","RealSaS.ModelFitPreregistrationIR.v1")
     )
     execution,out=build_fit_execution(
         ctx,lane="GEPPETTO",section_key="geppetto_fit",prereg=prereg,
@@ -112,10 +112,10 @@ def execute_geppetto_fit_stage(ctx:dict)->dict:
 
 def qualify_skeleton_stage(ctx:dict)->dict:
     surface=rigging_surface_from_dict(
-        _stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
+        stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
     )
     execution=model_fit_execution_from_dict(
-        _stage_output_payload(ctx,"27_GEPPETTO_FIT","RealSaS.ModelFitExecutionIR.v1")
+        stage_output_payload(ctx,"27_GEPPETTO_FIT","RealSaS.ModelFitExecutionIR.v1")
     )
     proposal=_skeleton_proposal(_execution_json(execution,expected_schema="RealSaS.SkeletonProposalIR.v1"))
     if proposal.surface_binding_hash!=surface.geometry_lineage_hash:
@@ -126,17 +126,17 @@ def qualify_skeleton_stage(ctx:dict)->dict:
         raise QualificationError(f"GEPPETTO_QUALIFICATION_POLICY_UNSUPPORTED:{sorted(unknown)}")
     skeleton=qualify_skeleton(surface,proposal,run_ilp_shadow=bool(policy.get("run_ilp_shadow",False)))
     root=ctx["run_root"]/"artifacts"/"28_SKELETON_QUALIFIED"
-    return {"status":"PASS","outputs":[_write_ir(root/"qualified_skeleton.json",skeleton,authority_class="QUALIFIED_SKELETON")],
+    return {"status":"PASS","outputs":[write_ir(root/"qualified_skeleton.json",skeleton,authority_class="QUALIFIED_SKELETON")],
         "diagnostics":{"skeleton_lineage_hash":skeleton.skeleton_lineage_hash,"joint_count":len(skeleton.joints),
                        "optimizer":skeleton.qualification_report.get("solver"),"optimality_proven":skeleton.qualification_report.get("optimality_proven")}}
 
 
 def seal_geppetto_checkpoint_stage(ctx:dict)->dict:
     execution=model_fit_execution_from_dict(
-        _stage_output_payload(ctx,"27_GEPPETTO_FIT","RealSaS.ModelFitExecutionIR.v1")
+        stage_output_payload(ctx,"27_GEPPETTO_FIT","RealSaS.ModelFitExecutionIR.v1")
     )
     skeleton=qualified_skeleton_from_dict(
-        _stage_output_payload(ctx,"28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1")
+        stage_output_payload(ctx,"28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1")
     )
     value,out=seal_model_checkpoint(
         ctx,execution=execution,qualified_output_binding_hash=skeleton.skeleton_lineage_hash,
@@ -150,13 +150,13 @@ def seal_geppetto_checkpoint_stage(ctx:dict)->dict:
 
 def preregister_arachne_fit_stage(ctx:dict)->dict:
     surface=rigging_surface_from_dict(
-        _stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
+        stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
     )
     skeleton=qualified_skeleton_from_dict(
-        _stage_output_payload(ctx,"28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1")
+        stage_output_payload(ctx,"28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1")
     )
     geppetto=model_checkpoint_seal_from_dict(
-        _stage_output_payload(ctx,"29_GEPPETTO_CHECKPOINT_SEALED","RealSaS.ModelCheckpointSealIR.v1")
+        stage_output_payload(ctx,"29_GEPPETTO_CHECKPOINT_SEALED","RealSaS.ModelCheckpointSealIR.v1")
     )
     prereg,out=build_fit_preregistration(
         ctx,lane="ARACHNE",section_key="arachne_fit",
@@ -178,7 +178,7 @@ def preregister_arachne_fit_stage(ctx:dict)->dict:
 
 def execute_arachne_fit_stage(ctx:dict)->dict:
     prereg=model_fit_preregistration_from_dict(
-        _stage_output_payload(ctx,"30_ARACHNE_FIT_PREREGISTERED","RealSaS.ModelFitPreregistrationIR.v1")
+        stage_output_payload(ctx,"30_ARACHNE_FIT_PREREGISTERED","RealSaS.ModelFitPreregistrationIR.v1")
     )
     execution,out=build_fit_execution(
         ctx,lane="ARACHNE",section_key="arachne_fit",prereg=prereg,
@@ -196,13 +196,13 @@ def execute_arachne_fit_stage(ctx:dict)->dict:
 
 def qualify_skin_stage(ctx:dict)->dict:
     surface=rigging_surface_from_dict(
-        _stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
+        stage_output_payload(ctx,"15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1")
     )
     skeleton=qualified_skeleton_from_dict(
-        _stage_output_payload(ctx,"28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1")
+        stage_output_payload(ctx,"28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1")
     )
     execution=model_fit_execution_from_dict(
-        _stage_output_payload(ctx,"31_ARACHNE_FIT","RealSaS.ModelFitExecutionIR.v1")
+        stage_output_payload(ctx,"31_ARACHNE_FIT","RealSaS.ModelFitExecutionIR.v1")
     )
     proposal=_skin_proposal(_execution_json(execution,expected_schema="RealSaS.SkinProposalIR.v1"))
     policy=dict(execution.qualification_policy or {})
@@ -222,17 +222,17 @@ def qualify_skin_stage(ctx:dict)->dict:
         max_influences=None if max_influences is None else int(max_influences),
     )
     root=ctx["run_root"]/"artifacts"/"32_SKIN_QUALIFIED"
-    return {"status":"PASS","outputs":[_write_ir(root/"qualified_skin.json",skin,authority_class="QUALIFIED_SKIN")],
+    return {"status":"PASS","outputs":[write_ir(root/"qualified_skin.json",skin,authority_class="QUALIFIED_SKIN")],
         "diagnostics":{"skin_lineage_hash":skin.skin_lineage_hash,"row_count":len(skin.rows),
                        "total_correction_l1":skin.qualification_report.get("total_correction_l1")}}
 
 
 def seal_arachne_checkpoint_stage(ctx:dict)->dict:
     execution=model_fit_execution_from_dict(
-        _stage_output_payload(ctx,"31_ARACHNE_FIT","RealSaS.ModelFitExecutionIR.v1")
+        stage_output_payload(ctx,"31_ARACHNE_FIT","RealSaS.ModelFitExecutionIR.v1")
     )
     skin=qualified_skin_from_dict(
-        _stage_output_payload(ctx,"32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1")
+        stage_output_payload(ctx,"32_SKIN_QUALIFIED","RealSaS.QualifiedSkinIR.v1")
     )
     value,out=seal_model_checkpoint(
         ctx,execution=execution,qualified_output_binding_hash=skin.skin_lineage_hash,

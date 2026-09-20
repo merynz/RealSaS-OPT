@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-"""Stage-35 execution of full-3D quaternion motion on exact canonical M/B.
+"""Stage41 full-3D quaternion execution and dynamic mechanical proof.
 
-Input motion is RealSaS.QualifiedMotionIR.v2. Output deliberately reuses the existing
-QualifiedDynamicMotionIR frame format because runtime needs exact posed XYZ, not the
-authoring quaternion representation.
+Input is RealSaS.QualifiedMotionIR.v2. Output is the V2 dynamic authority with exact
+posed canonical XYZ frames. Runtime projection consumes these sealed frames directly;
+no V1 dynamic-proof schema or alternate motion mesh is current authority.
 """
 
 from dataclasses import asdict, dataclass, field, replace

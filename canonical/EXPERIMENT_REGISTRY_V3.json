@@ -5,15 +5,22 @@
   "experiments": [
     {
       "id": "V2_IMPLEMENTATION_ASSEMBLY",
-      "status": "ACTIVE__IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN",
+      "status": "ACTIVE__STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN",
       "branch": "main",
       "scope": "Subject-free completion of the 46-stage V2 DAG, run-local orchestration authority and adversarial product-path cleanup before any admissible Knight witness.",
-      "progress": "IMPLEMENTATION_AUTHORITY_AUDIT",
+      "progress": "STAGE_LEVEL_REDTEAM_HARDENING",
       "readiness": "canonical/V2_IMPLEMENTATION_READINESS.json",
-      "required_next_proof": "WITNESS_ORCHESTRATION_AND_ARTIFACT_DRY_RUN",
+      "required_next_proof": "CLOSE_RT37_AND_RT45_46_THEN_RESEAL_EXACT_IMPLEMENTATION_READINESS",
       "product_pass_claimed": false,
       "knight_witness_claimed": false,
-      "unseen_claimed": false
+      "unseen_claimed": false,
+      "stage_redteam": "canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md",
+      "latest_green": {
+        "functional_head": "ca9d2d2e59bc517a139c743eb6a91df2e48ac761",
+        "mainline_ci_run_id": 35536134130,
+        "orchestration_dry_run_id": 35536134136,
+        "witness_used": false
+      }
     },
     {
       "id": "SUBJECT2_KNIGHT_FULL_CLOSURE",

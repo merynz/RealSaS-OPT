@@ -2,92 +2,142 @@
 
 Canonical RealSaS research, compiler, proof and runtime workspace. **Proprietary / all rights reserved.** See `LICENSE` and `THIRD_PARTY_NOTICES.md`.
 
-## Current milestone — Mage FIT2 product reclosure active
+## Current product architecture — RealSaS V2
 
-Historical Mage FIT1 Geppetto/Arachne rigging-core experiments closed locally, but the first real eight-view end-to-end product execution was visibly inadequate. That contradiction did not erase the FIT1 science; it reopened **current Mage product authority**.
+RealSaS compiles qualified multi-view 2D artwork into an editable 2D/2.5D puppet with internal 3D mechanics.
 
-The active executable repair/refit lineage lives on:
+The current product path is the 46-stage dependency DAG in:
 
-`repair/mage-full-subject-reclosure-20260912`
+`canonical/MAINLINE_EXECUTION_PLAN_V2.json`
 
-Repository-wide continuation authority remains `main/CURRENT_STATE.md`.
+The three co-equal product-quality authorities are:
 
-Current product path:
+- **Geometry** — canonical renderable surface, silhouette capacity, topology, stable addressing and rasterizable conditioning.
+- **Mechanics** — skeleton, skin, deformation, contacts and full-3D motion.
+- **Appearance** — complete source-preserving 2D art, provenance, holdout/seam quality, alpha/sampling and dynamic exposure.
 
-`8 real RGBA + exact cameras -> corrected H1 observable evidence -> deterministic GSA/RiggingSurfaceIR -> fresh Geppetto FIT2 -> Compiler QualifiedSkeletonIR -> fresh Arachne FIT2 -> Compiler QualifiedSkinIR -> strict directional product mesh qualification -> exact mesh-skin/component assembly -> motion -> proof -> runtime/export`
+A visually incorrect puppet does not pass because its mesh, rig and skin are mechanically valid.
 
-| Stage | Current status | Strongest supported claim |
-|---|---|---|
-| corrected H1 observable surface | **CLOSED PASS** | current eight-view observable Mage geometry/support authority; teacher mesh not used at product inference |
-| corrected GSA8192 | **CLOSED PASS** | sealed 8171-node / 23656-relation substrate + real V0..V7 Stage-0 evidence |
-| fresh Geppetto FIT2 | **RUNNING** | fresh-from-scratch corrected-substrate refit; historical checkpoint load forbidden; PASS not yet claimed |
-| fresh Arachne FIT2 | **BLOCKED ON GEPPETTO** | historical V5 FIT1 remains scoped evidence only; no corrected-lineage W yet |
-| FIT2 product-mesh contract | **CLOSED PASS — IMPLEMENTATION ONLY** | exact promoted mesh is independently rerasterized against exact observation authority and frozen coverage/topology gates; self-hosted `41 passed` |
-| corrected real directional mesh | **PENDING FRESH G/W** | no corrected FIT2 mesh PASS claimed yet |
-| professional motion | **OPEN** | current rotation-only lane is a mechanical probe only |
-| exact runtime/export reclosure | **OPEN / REQUIRED** | runtime may not create a second mesh/mechanical truth |
-| unseen-family generalization | **BLOCKED** | same-Mage FIT2 product reclosure comes first |
-| full PRODUCT_PASS | **NOT CLAIMED** | requires exact end-to-end closure of the full current chain |
+## Core architecture
 
-## Why FIT1 product authority reopened
+```text
+Source observations
+      │
+Geometry / IRIS
+      │
+     GSA
+      │
+Canonical Mesh Domain
+   /             \
+Mechanics       Appearance / CAA
+   \             /
+     Complete Puppet
+           │
+         Motion
+           │
+Deterministic Runtime
+           │
+Dynamic Visual Integrity
+           │
+      Stage46 Closure
+```
 
-The real E2E run exposed multiple independent gaps:
+The canonical mesh is the shared mechanics/appearance address domain.
 
-- historical H1 subject authority did not cover the same complete rendered subject as the eight product observations;
-- conservative relation-complex MWB2 left large artist-visible regions outside the deformation domain;
-- a demo/runtime path later built a different alpha-clipped barycentric mesh and transferred mechanics, breaking exact mesh identity;
-- current motion was rotation-only procedural probing rather than professional animation;
-- local legality/proof did not establish exact artist-visible runtime equivalence.
+Visibility is owned by posed canonical XYZ + camera depth. Appearance does not choose the front surface.
 
-Historical FIT1 Geppetto/Arachne evidence remains preserved and useful within its exact old-lineage scope.
+Runtime performs no donor search, generative appearance correction, hidden retriangulation, PBR character relighting or normal-derived character shading.
+
+## Current execution state
+
+The previous V2 implementation-readiness seal was revoked after pre-Stage01 orchestration gaps were discovered.
+
+Current subject-witness execution is forbidden until:
+
+1. every required readiness proof is PASS;
+2. the subject-free run-local Stage01–08 orchestration/artifact dry-run is PASS;
+3. the exact implementation-closure fingerprint matches current main;
+4. `canonical/V2_IMPLEMENTATION_READINESS.json` is resealed as `READY_FOR_WITNESS_EXECUTION`.
+
+Subject-2 Knight is the next witness only after that gate. Earlier premature Knight attempts are not admissible scientific witness evidence.
+
+## Execution authority
+
+The repository ledger:
+
+`canonical/ACTIVE_RUN_V2.json`
+
+is implementation-governance state only.
+
+Real executions use run-local ledgers:
+
+`$REALSAS_AUTHORITY_ROOT/runs/<run_id>/ACTIVE_RUN_V2.json`
+
+The orchestrator is:
+
+`compiler/realsas_compiler_services/orchestrator/mainline.py`
+
+Current execution semantics are dependency-DAG based; stage ordinals are human-readable order only.
+
+## Appearance authority
+
+Complete Appearance Authority is a first-class subsystem, not renderer polish.
+
+Current implementation homes:
+
+- `compiler/realsas_compiler_core/appearance_authority_v2.py`
+- `compiler/realsas_compiler_core/appearance_compile_v2.py`
+- `compiler/realsas_compiler_core/appearance_bake_v2.py`
+- `compiler/realsas_compiler_core/appearance_quality_v2.py`
+- `compiler/realsas_compiler_core/appearance_render_v2.py`
+- `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+- `canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json`
+
+CAA is total over supported renderable surface states, preserves explicit provenance, may not mutate canonical geometry, and uses premultiplied-alpha filtering/compositing with mandatory atlas bleed.
+
+## Native runtime
+
+The V2 runtime consumes exact qualified topology, posed XYZ, CAA UV/atlas/provenance and sealed cameras.
+
+Current homes:
+
+- `compiler/realsas_compiler_core/runtime_authority_v2.py`
+- `compiler/realsas_compiler_core/runtime_package_v2.py`
+- `runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp`
+
+Native/reference byte parity and Dynamic Visual Integrity are product gates.
 
 ## Start here
 
-1. `canonical/REHYDRATION_PACKET.md` — current navigation/cache.
-2. `CURRENT_STATE.md` — repository-wide stop/go and continuation authority.
-3. `canonical/MAGE_FIT2_REAL_E2E_REOPENING_CONTEXT_20260912.md` — causal reopening context.
-4. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl` — recent causal decisions.
-5. active branch `repair/mage-full-subject-reclosure-20260912`:
-   - `canonical/MAGE_FIT2_PIPELINE_REFIT_AUTHORITY_V1.json`;
-   - `canonical/MAGE_FIT2_MESH_PRODUCT_RECLOSURE_AUDIT_20260912.md`;
-   - `canonical/FIT2_MESH_COMPONENT_CLOSURE_PREREG_20260912.md`;
-   - `compiler/realsas_compiler_core/mesh/product_qualification.py`.
-6. `canonical/ARCHITECTURE_AUTHORITY_LEDGER_V1.md` / `canonical/EXPERIMENT_AUTHORITY_LEDGER_V1.md`.
-7. `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md` / `canonical/FIT1_EVIDENCE_INDEX_20260909.md` for preserved historical FIT1 evidence.
+1. `canonical/V2_IMPLEMENTATION_READINESS.json`
+2. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
+3. `CURRENT_STATE.md`
+4. `canonical/CONTEXT_STATE_V2.json`
+5. `canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
+6. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+7. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+8. `canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md`
+9. `REPOSITORY_MAP.md`
+10. `SYSTEM_INDEX.md`
 
-## Current mesh product invariant
+## Historical evidence
 
-`QualifiedEditableMeshIR` is first-class product deformation/render authority, not debug visualization.
+Mage FIT1/FIT2, the old 40-stage V1 product path, donor-era appearance/runtime code and historical repair branches remain preserved scientific evidence.
 
-The active branch's strict product qualifier:
+They are not current continuation authority unless explicitly promoted by the V2 authority spine.
 
-- requires exact `ObservationRasterDomain` authority;
-- reconstructs mesh raster coordinates from qualified surface-support bindings;
-- independently rerasterizes the exact promoted mesh;
-- recomputes recall / precision / IoU / connected-hole metrics;
-- remeasures topology/triangle quality;
-- applies preregistered thresholds fail-closed;
-- treats candidate-reported coverage as diagnostic only;
-- reseals exact observation provenance into mesh lineage.
-
-The lower-level CDT qualifier is support/topology compatibility evidence only and is **not** a product PASS.
-
-Self-hosted implementation proof: workflow run `34716890157`, runner `realsas-wsl-1660ti`, static compile PASS, `41 passed in 4.36s` at head `b1dc7fca6b6497d97c7be727d66fd9c0b64c3268`.
-
-## Product boundary
-
-RealSaS targets an **eight-direction editable 2D/2.5D puppet**, not a full 3D reconstruction. Learned modules emit evidence/proposals. Deterministic Compiler stages own qualified canonical IDs, legality, support/provenance and exact product-state authority within their explicit contracts.
-
-After product mesh qualification, runtime/export may project or bake the exact qualified state but may not secretly retriangulate, substitute another mesh, transfer mechanics onto a different topology, or drop qualified visible components.
+Promotion and supersession never delete scientific history; they only change what current main is allowed to claim and execute.
 
 ## Scientific boundary
 
-FIT1 and same-witness FIT2 are controlled mechanism/product-reclosure gates. Neither is unseen-family generalization. Historical failures and successes are retained as evidence; promotion or contradiction-driven reopening never deletes them.
+Same-witness FIT evidence does not establish unseen-family generalization.
+
+A product PASS requires exact Stage46 closure across Geometry, Mechanics, Appearance, Motion, Runtime and native Dynamic Visual Integrity.
 
 ## Repository governance
 
 - `CONTRIBUTING.md` — scientific change and promotion rules.
 - `SECURITY.md` — private reporting and artifact handling.
 - `.github/CODEOWNERS` — authority/source ownership.
-- `REPOSITORY_MAP.md` / `SYSTEM_INDEX.md` — deeper navigation.
-- current authority workflows run only on local self-hosted RealSaS runner labels `[self-hosted, linux, x64, realsas]`.
+- `REPOSITORY_MAP.md` / `SYSTEM_INDEX.md` — current navigation.
+- Current authority workflows run only on self-hosted RealSaS runner labels `[self-hosted, linux, x64, realsas]`.

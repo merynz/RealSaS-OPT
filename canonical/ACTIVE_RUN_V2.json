@@ -3,9 +3,9 @@
   "run_id": "V2_IMPLEMENTATION_ASSEMBLY",
   "subject_id": "NONE",
   "canonical_branch": "main",
-  "architecture_scope": "SUBJECT_AGNOSTIC__FIRST_KNIGHT_V2_EXACT8_SOURCE__OUTPUT8_SEPARATE__CANONICAL_MESH_SHARED_MECHANICS_APPEARANCE_DOMAIN__CAA",
+  "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-  "pipeline_plan_sha256": "b125cb1f9b0e53b760982da5807a6962bf9c32d7c694eab17368fe567bf62f9d",
+  "pipeline_plan_sha256": "abec3eefda132b150e542dbedac886485514a0baa6d090bf598b273b83a39fac",
   "status": "ASSEMBLY_IN_PROGRESS__WITNESS_EXECUTION_DISABLED",
   "execution_enabled": false,
   "completed_count": 0,
@@ -165,7 +165,7 @@
     },
     {
       "ordinal": 13,
-      "id": "13_REST_REPROJECTION_GEOMETRY_GATE",
+      "id": "13_GEOMETRY_SUBSTRATE_QUALIFIED",
       "status": "PENDING",
       "attempts": 0,
       "input_fingerprint": "",
@@ -584,6 +584,10 @@
     {
       "event": "DAG_EXECUTION_SEMANTICS_ADOPTED",
       "note": "Ordinals are display order only; dependencies define executable readiness."
+    },
+    {
+      "event": "GEOMETRY_SUBSTRATE_V2_BOUND",
+      "note": "Stage13 renamed and retyped as geometry carrier qualification only; appearance fidelity is independently owned by CAA."
     }
   ]
 }

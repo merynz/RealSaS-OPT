@@ -176,6 +176,115 @@ def structured_holdout_metrics(
     }
 
 
+def cross_view_source_compatibility_metrics(
+    *,
+    direct_valid: np.ndarray,
+    direct_rgba: np.ndarray,
+    sample_component_index: np.ndarray,
+) -> dict:
+    valid = np.asarray(direct_valid, dtype=bool)
+    rgba = np.asarray(direct_rgba, dtype=np.uint8)
+    component = np.asarray(sample_component_index, dtype=np.int32)
+    if valid.ndim != 2 or valid.shape[0] != 8:
+        raise QualificationError("CAA_CROSS_VIEW_VALID_SHAPE_INVALID")
+    sample_count = valid.shape[1]
+    if rgba.shape != (8, sample_count, 4) or component.shape != (sample_count,):
+        raise QualificationError("CAA_CROSS_VIEW_ARRAY_SHAPE_DRIFT")
+
+    pair_rows = []
+    component_rows = []
+    all_errors = []
+    all_alpha = []
+    for left in range(8):
+        right = (left + 1) % 8
+        shared = valid[left] & valid[right]
+        indices = np.flatnonzero(shared)
+        if len(indices):
+            errors = rgba_l1_premultiplied(
+                rgba[left, indices],
+                rgba[right, indices],
+            )
+            alpha = np.abs(
+                rgba[left, indices, 3].astype(np.float64)
+                - rgba[right, indices, 3].astype(np.float64)
+            ) / 255.0
+            all_errors.extend(map(float, errors))
+            all_alpha.extend(map(float, alpha))
+        else:
+            errors = np.asarray([], dtype=np.float64)
+            alpha = np.asarray([], dtype=np.float64)
+        pair_rows.append(
+            {
+                "left_view_index": left,
+                "right_view_index": right,
+                "shared_direct_sample_count": int(len(indices)),
+                "mean_premultiplied_rgba_l1": (
+                    float(np.mean(errors)) if len(errors) else 0.0
+                ),
+                "p95_premultiplied_rgba_l1": (
+                    float(np.quantile(errors, 0.95)) if len(errors) else 0.0
+                ),
+                "mean_alpha_abs": float(np.mean(alpha)) if len(alpha) else 0.0,
+                "p95_alpha_abs": (
+                    float(np.quantile(alpha, 0.95)) if len(alpha) else 0.0
+                ),
+            }
+        )
+        for component_id in sorted(set(map(int, component))):
+            local = shared & (component == component_id)
+            local_indices = np.flatnonzero(local)
+            if not len(local_indices):
+                continue
+            local_error = rgba_l1_premultiplied(
+                rgba[left, local_indices],
+                rgba[right, local_indices],
+            )
+            local_alpha = np.abs(
+                rgba[left, local_indices, 3].astype(np.float64)
+                - rgba[right, local_indices, 3].astype(np.float64)
+            ) / 255.0
+            component_rows.append(
+                {
+                    "left_view_index": left,
+                    "right_view_index": right,
+                    "component_index": component_id,
+                    "shared_direct_sample_count": int(len(local_indices)),
+                    "mean_premultiplied_rgba_l1": float(np.mean(local_error)),
+                    "p95_premultiplied_rgba_l1": float(
+                        np.quantile(local_error, 0.95)
+                    ),
+                    "mean_alpha_abs": float(np.mean(local_alpha)),
+                    "p95_alpha_abs": float(np.quantile(local_alpha, 0.95)),
+                }
+            )
+
+    values = np.asarray(all_errors, dtype=np.float64)
+    alpha_values = np.asarray(all_alpha, dtype=np.float64)
+    return {
+        "mode": "ADJACENT_8VIEW_SHARED_CANONICAL_DIRECT_SOURCE_V1",
+        "pair_count": 8,
+        "shared_direct_sample_count": int(len(values)),
+        "mean_premultiplied_rgba_l1": (
+            float(np.mean(values)) if len(values) else 0.0
+        ),
+        "p95_premultiplied_rgba_l1": (
+            float(np.quantile(values, 0.95)) if len(values) else 0.0
+        ),
+        "mean_alpha_abs": (
+            float(np.mean(alpha_values)) if len(alpha_values) else 0.0
+        ),
+        "p95_alpha_abs": (
+            float(np.quantile(alpha_values, 0.95))
+            if len(alpha_values)
+            else 0.0
+        ),
+        "per_pair": pair_rows,
+        "per_pair_component": component_rows,
+        "raw_rgb_equality_required": False,
+        "measurement_is_compatibility_not_color_authority": True,
+    }
+
+
 def _triangle_lattice_neighbors(tile_resolution: int) -> tuple[tuple[int, int], ...]:
     resolution = int(tile_resolution)
     index = {}

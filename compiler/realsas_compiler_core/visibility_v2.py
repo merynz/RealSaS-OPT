@@ -18,7 +18,7 @@ VISIBILITY_CONTRACT_V2 = {
     "projection": "FULL_SURFACE_CAMERA_PROJECTION_V3",
     "raster_fill": "HALF_INTEGER_TOP_LEFT",
     "depth": "CAMERA_FORWARD_Z_SMALLER_WINS",
-    "exact_depth_tie": "STABLE_FACE_ID_ONLY",
+    "exact_depth_tie": "SEALED_FACE_INDEX_ONLY",
     "appearance_input_forbidden": True,
     "source_provenance_tiebreak_forbidden": True,
     "texture_alpha_selects_front_surface": False,
@@ -76,9 +76,7 @@ def rasterize_visible_owner(
     owner = np.full((height, width), -1, dtype=np.int32)
     depth = np.full((height, width), np.inf, dtype=np.float64)
     barycentric = np.full((height, width, 3), np.nan, dtype=np.float32)
-    tie: list[list[tuple[str, ...] | None]] = [
-        [None for _ in range(width)] for _ in range(height)
-    ]
+    tie = np.full((height, width), np.iinfo(np.int32).max, dtype=np.int32)
 
     for face_index, face in enumerate(mesh.faces):
         ids = tuple(map(str, face))
@@ -95,7 +93,7 @@ def rasterize_visible_owner(
         maxx = min(width - 1, int(math.ceil(max(xs) - 0.5)))
         miny = max(0, int(math.floor(min(ys) - 0.5)))
         maxy = min(height - 1, int(math.ceil(max(ys) - 0.5)))
-        face_key = tuple(sorted(ids))
+        face_key = int(face_index)
 
         for y in range(miny, maxy + 1):
             for x in range(minx, maxx + 1):
@@ -114,15 +112,15 @@ def rasterize_visible_owner(
                 if not math.isfinite(z):
                     raise QualificationError("VISIBILITY_DEPTH_NONFINITE")
                 current = float(depth[y, x])
-                current_tie = tie[y][x]
+                current_tie = int(tie[y, x])
                 if z < current - 1e-12 or (
                     abs(z - current) <= 1e-12
-                    and (current_tie is None or face_key < current_tie)
+                    and face_key < current_tie
                 ):
                     depth[y, x] = z
                     owner[y, x] = int(face_index)
                     barycentric[y, x] = (float(w0), float(w1), float(w2))
-                    tie[y][x] = face_key
+                    tie[y, x] = face_key
 
     return VisibilityRaster(owner, depth, barycentric, projected)
 

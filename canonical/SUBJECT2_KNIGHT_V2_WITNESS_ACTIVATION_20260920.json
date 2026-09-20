@@ -1,0 +1,17 @@
+{
+  "schema": "RealSaS.WitnessActivation.v1",
+  "date": "2026-09-20",
+  "status": "AUTHORIZED_ONCE",
+  "witness_run_id": "SUBJECT2_KNIGHT_V2",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "pipeline_plan_sha256": "a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1",
+  "readiness_seal_sha256": "a3c403158b5ed428b1949e8df07f1b915cb12862d5c58c4ec39f3ff4fca4ed9d",
+  "tested_implementation_head": "44b148737dc1e7eadb23048834d2111744a12bc6",
+  "readiness_commit": "aeb6c2861618a40db33a8f4fc757dbf0cee57494",
+  "audit_commit": "c6fb35a5b40c44cebb55eef3736a6bd596a618bc",
+  "activation_scope": "STAGE01_THROUGH_STAGE08_OBSERVATION_PREFLIGHT_ONLY",
+  "next_allowed_step_if_pass": "PREPARE_STAGE09_IRIS_FIT_NOTEBOOK__DO_NOT_AUTORUN_EXPENSIVE_FIT",
+  "threshold_mutation_after_activation_forbidden": true,
+  "historical_v1_reuse_forbidden": true,
+  "note": "Fresh Knight V2 witness begins only after subject-free implementation readiness sealed 14/14 PASS. This activation does not claim any Knight gate result."
+}

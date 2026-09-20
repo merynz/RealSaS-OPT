@@ -86,17 +86,21 @@ def test_readiness_state_machine_is_consistent_with_required_proofs():
         and len(str(by_id[proof_id].get("sha256", ""))) == 64
         for proof_id in required
     )
-    if all_pass:
+    seal_status = str(readiness["readiness_seal"]["status"])
+    if seal_status == "PASS":
+        assert all_pass
         assert readiness["status"] == "READY_FOR_WITNESS_EXECUTION"
-        assert readiness["readiness_seal"]["status"] == "PASS"
         assert readiness["readiness_seal"]["witness_execution_allowed"] is True
         assert (
             readiness["implementation_closure_sha256"]
             == mainline.implementation_closure_sha256(_plan())
         )
     else:
+        # A later scientific finding may explicitly revoke a previously valid
+        # all-PASS proof bundle. Proof history remains evidence; the seal owns
+        # current witness authorization and must fail closed until reclosure.
+        assert seal_status.startswith("REVOKED")
         assert readiness["status"].endswith("__WITNESS_FORBIDDEN")
-        assert str(readiness["readiness_seal"]["status"]).startswith("REVOKED_BY_")
         assert readiness["readiness_seal"]["witness_execution_allowed"] is False
 
 

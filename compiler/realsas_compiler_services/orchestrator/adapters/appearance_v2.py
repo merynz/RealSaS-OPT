@@ -44,6 +44,7 @@ from compiler.realsas_compiler_core.appearance_render_v2 import (
     load_provenance_atlas,
     render_caa_reference,
 )
+from compiler.realsas_compiler_core.mesh.product_coverage_v1 import coverage_metrics
 from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
 )
@@ -833,7 +834,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
     if static_mesh.candidate_mesh_binding_hash != asset.candidate_mesh_binding_hash:
         raise QualificationError("CAA_REST_PROOF_STATIC_MESH_BINDING_DRIFT")
 
-    source_rgba, _source_masks = _load_source_inputs(ctx, observation)
+    source_rgba, source_masks = _load_source_inputs(ctx, observation)
     face_uv = load_face_uv(asset)
     provenance_all = load_provenance_atlas(asset)
     by_camera = {int(camera.view_index): camera for camera in cameras.cameras}
@@ -845,6 +846,10 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         "rest_max_source_locked_mean_rgba_l1",
         "rest_max_source_locked_p95_rgba_l1",
         "rest_max_geometry_visible_alpha_hole_fraction",
+        "rest_min_source_alpha_recall",
+        "rest_min_source_alpha_precision",
+        "rest_max_largest_coherent_alpha_hole_fraction",
+        "rest_max_alpha_interior_uncovered_fraction",
     )
     if any(key not in policy for key in required):
         raise QualificationError("CAA_REST_PROOF_POLICY_INCOMPLETE")
@@ -907,12 +912,28 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         hole_fraction = (
             0.0 if visible_count == 0 else float(hole_count) / float(visible_count)
         )
+        source_alpha_bytes = bytes(source_masks[direction].astype(np.uint8).reshape(-1))
+        final_alpha_bytes = bytes(final_alpha.astype(np.uint8).reshape(-1))
+        alpha_metrics = coverage_metrics(
+            source_alpha_bytes,
+            final_alpha_bytes,
+            width=int(observation.views[direction].width),
+            height=int(observation.views[direction].height),
+        )
         view_pass = (
             direct_count >= int(policy["rest_min_source_lock_pixels_per_view"])
             and mean_error <= float(policy["rest_max_source_locked_mean_rgba_l1"])
             and p95_error <= float(policy["rest_max_source_locked_p95_rgba_l1"])
             and hole_fraction
             <= float(policy["rest_max_geometry_visible_alpha_hole_fraction"])
+            and float(alpha_metrics["recall"])
+            >= float(policy["rest_min_source_alpha_recall"])
+            and float(alpha_metrics["precision"])
+            >= float(policy["rest_min_source_alpha_precision"])
+            and float(alpha_metrics["largest_coherent_hole_fraction"])
+            <= float(policy["rest_max_largest_coherent_alpha_hole_fraction"])
+            and float(alpha_metrics["interior_uncovered_fraction"])
+            <= float(policy["rest_max_alpha_interior_uncovered_fraction"])
         )
         all_pass = all_pass and view_pass
         rows.append(
@@ -929,6 +950,10 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                 final_alpha_pixel_count=final_alpha_count,
                 geometry_visible_final_alpha_hole_count=hole_count,
                 geometry_visible_final_alpha_hole_fraction=hole_fraction,
+                source_alpha_recall=float(alpha_metrics["recall"]),
+                source_alpha_precision=float(alpha_metrics["precision"]),
+                largest_coherent_alpha_hole_fraction=float(alpha_metrics["largest_coherent_hole_fraction"]),
+                alpha_interior_uncovered_fraction=float(alpha_metrics["interior_uncovered_fraction"]),
                 metadata={
                     "status": "PASS" if view_pass else "FAIL",
                     "source_evidence_available": True,
@@ -999,5 +1024,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             "maximum_source_locked_p95_rgba_l1": max(
                 row.source_locked_p95_rgba_l1 for row in rows
             ),
+            "minimum_source_alpha_recall": min(row.source_alpha_recall for row in rows),
+            "minimum_source_alpha_precision": min(row.source_alpha_precision for row in rows),
         },
     }

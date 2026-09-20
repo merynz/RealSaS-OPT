@@ -28,9 +28,11 @@ from .motion_source_v1 import (
 )
 from .product_authority_v1 import (
     DeformationCapabilityEnvelopeIR,
-    QualifiedPresentationGraphIR,
     deformation_envelope_lineage_hash,
-    qualified_presentation_lineage_hash,
+)
+from .product_state_v2 import (
+    QualifiedPresentationGraphV2IR,
+    presentation_graph_v2_hash,
 )
 from .types import QualifiedSkeletonIR, QualificationError
 
@@ -184,7 +186,7 @@ def _check_bindings(*,source_set,source_seal,product_state,skeleton,envelope,pre
         raise QualificationError("MOTION_V2_PRODUCT_STATE_HASH_DRIFT")
     if envelope.envelope_lineage_hash!=deformation_envelope_lineage_hash(envelope):
         raise QualificationError("MOTION_V2_ENVELOPE_HASH_DRIFT")
-    if presentation.presentation_lineage_hash!=qualified_presentation_lineage_hash(presentation):
+    if presentation.presentation_lineage_hash!=presentation_graph_v2_hash(presentation):
         raise QualificationError("MOTION_V2_PRESENTATION_HASH_DRIFT")
     checks=(
         (source_seal.source_set_binding_hash,source_set.source_set_hash,"SOURCE_SET"),
@@ -192,7 +194,7 @@ def _check_bindings(*,source_set,source_seal,product_state,skeleton,envelope,pre
         (product_state.skeleton_lineage_hash,skeleton.skeleton_lineage_hash,"PRODUCT_SKELETON"),
         (product_state.deformation_envelope_lineage_hash,envelope.envelope_lineage_hash,"PRODUCT_ENVELOPE"),
         (envelope.skeleton_lineage_hash,skeleton.skeleton_lineage_hash,"ENVELOPE_SKELETON"),
-        (presentation.product_state_binding_hash,product_state.product_state_hash,"PRESENTATION_PRODUCT"),
+        (presentation.mechanical_state_binding_hash,product_state.product_state_hash,"PRESENTATION_MECHANICAL_STATE"),
         (presentation.skeleton_binding_hash,skeleton.skeleton_lineage_hash,"PRESENTATION_SKELETON"),
     )
     for actual,wanted,label in checks:
@@ -458,7 +460,7 @@ def build_qualified_motion_v2(
     product_state:CanonicalPuppetStateIR,
     skeleton:QualifiedSkeletonIR,
     envelope:DeformationCapabilityEnvelopeIR,
-    presentation:QualifiedPresentationGraphIR,
+    presentation:QualifiedPresentationGraphV2IR,
     compiler_config:Mapping[str,Any]|None=None,
 ):
     _check_bindings(

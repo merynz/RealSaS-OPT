@@ -126,6 +126,30 @@
       "finding": "A future mip/minification repair cannot reuse the current two-pixel per-tile bleed blindly; ordinary atlas mip generation can mix neighboring face tiles across mip levels even when base-level bilinear bleed is correct.",
       "required_closure": "Qualify mip-safe island padding or per-island/per-face mip generation together with the minification filter contract.",
       "status": "OPEN"
+    },
+    {
+      "id": "VF-17",
+      "severity": "HIGH",
+      "owner": "Dynamic mechanics / visual integrity",
+      "finding": "Stage41 bounds triangle area ratio and local condition but has no explicit non-adjacent dynamic self-intersection/interpenetration qualification. A mesh can remain locally well-conditioned while distinct body/clothing regions pass through each other and corrupt visibility.",
+      "required_closure": "Add subject-free dynamic self-intersection evidence with adjacency exclusions and rest-existing-contact handling; gate newly introduced consequential intersections or explicitly narrow the product claim.",
+      "status": "OPEN"
+    },
+    {
+      "id": "VF-18",
+      "severity": "MEDIUM_HIGH",
+      "owner": "Motion contact authority",
+      "finding": "Current contact mode set contains only PLANT_2D and Stage41 correctly measures XY drift. This is not a contract bug, but it cannot establish full foot-ground height/penetration or 3D pinned-contact quality despite broad all_contacts_satisfied wording.",
+      "required_closure": "Narrow the claim to PLANT_2D or add calibrated PLANT_3D / ground-plane contact semantics with vertical height and penetration evidence before professional-contact quality is claimed.",
+      "status": "OPEN_CLAIM_OR_CAPABILITY"
+    },
+    {
+      "id": "VF-19",
+      "severity": "MEDIUM",
+      "owner": "Runtime temporal contract",
+      "finding": "Native V2 proof renders only exact sealed Stage41 frame indices. No current evidence was found that native proof interpolates unproved frames; however host-side continuous interpolation semantics are not explicit in the V2 package authority.",
+      "required_closure": "Declare playback sampling semantics explicitly. If hosts interpolate, prove the interpolation envelope; otherwise require exact sealed-frame playback semantics.",
+      "status": "OPEN_CONTRACT_CLARIFICATION"
     }
   ],
   "false_or_overstated_external_findings": [

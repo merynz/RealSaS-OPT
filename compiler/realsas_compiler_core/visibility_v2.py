@@ -32,6 +32,9 @@ class VisibilityRaster:
     depth: np.ndarray
     barycentric: np.ndarray
     projected_vertices: np.ndarray
+    second_owner_face_index: np.ndarray
+    second_depth: np.ndarray
+    depth_margin: np.ndarray
     contract_hash: str = VISIBILITY_CONTRACT_V2_HASH
 
 
@@ -77,6 +80,13 @@ def rasterize_visible_owner(
     depth = np.full((height, width), np.inf, dtype=np.float64)
     barycentric = np.full((height, width, 3), np.nan, dtype=np.float32)
     tie = np.full((height, width), np.iinfo(np.int32).max, dtype=np.int32)
+    second_owner = np.full((height, width), -1, dtype=np.int32)
+    second_depth = np.full((height, width), np.inf, dtype=np.float64)
+    second_tie = np.full(
+        (height, width),
+        np.iinfo(np.int32).max,
+        dtype=np.int32,
+    )
 
     for face_index, face in enumerate(mesh.faces):
         ids = tuple(map(str, face))
@@ -113,16 +123,45 @@ def rasterize_visible_owner(
                     raise QualificationError("VISIBILITY_DEPTH_NONFINITE")
                 current = float(depth[y, x])
                 current_tie = int(tie[y, x])
-                if z < current - 1e-12 or (
+                wins = z < current - 1e-12 or (
                     abs(z - current) <= 1e-12
                     and face_key < current_tie
-                ):
+                )
+                if wins:
+                    if int(owner[y, x]) >= 0:
+                        second_depth[y, x] = current
+                        second_owner[y, x] = int(owner[y, x])
+                        second_tie[y, x] = current_tie
                     depth[y, x] = z
                     owner[y, x] = int(face_index)
                     barycentric[y, x] = (float(w0), float(w1), float(w2))
                     tie[y, x] = face_key
+                else:
+                    second_current = float(second_depth[y, x])
+                    second_current_tie = int(second_tie[y, x])
+                    second_wins = z < second_current - 1e-12 or (
+                        abs(z - second_current) <= 1e-12
+                        and face_key < second_current_tie
+                    )
+                    if second_wins:
+                        second_depth[y, x] = z
+                        second_owner[y, x] = int(face_index)
+                        second_tie[y, x] = face_key
 
-    return VisibilityRaster(owner, depth, barycentric, projected)
+    margin = np.full((height, width), np.inf, dtype=np.float64)
+    has_second = second_owner >= 0
+    margin[has_second] = second_depth[has_second] - depth[has_second]
+    if np.any(margin[has_second] < -1e-10):
+        raise QualificationError("VISIBILITY_SECOND_DEPTH_ORDER_INVALID")
+    return VisibilityRaster(
+        owner,
+        depth,
+        barycentric,
+        projected,
+        second_owner,
+        second_depth,
+        margin,
+    )
 
 
 def projected_xy_to_source_texel_xy(projected_xy) -> tuple[float, float]:

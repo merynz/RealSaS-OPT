@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2219**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2221**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2231,6 +2231,8 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-20T21:06:06+03:00` | `8d0b691ed3d8` | yes | CI_TEST, IRIS_GSA | ci: gate IRIS dense Stage13 supervision contract | `.github/workflows/current_mainline_self_hosted_ci.yml` | `main` |
 | `2026-09-20T21:07:29+03:00` | `a41a574def39` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
 | `2026-09-20T21:07:36+03:00` | `4d119a698067` | yes | GOVERNANCE_CONTINUITY | science: materialize V2 adversarial audit ledger for all authority boundaries | `canonical/V2_ADVERSARIAL_MODULE_AUDIT_LEDGER_20260920.json` | `main` |
+| `2026-09-20T21:08:40+03:00` | `46295108b71b` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-20T21:10:31+03:00` | `c90733c389a7` | yes | CI_TEST, COMPILER_PROOF, IRIS_GSA | test: expect current V2 geometry substrate threshold error | `tests/compiler/test_stage13_geometry_gate_v2.py` | `main` |
 
 ## Use rule
 

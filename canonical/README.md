@@ -50,7 +50,12 @@ Mage FIT1/FIT2, V1 40-stage product contracts, donor-era appearance/runtime docu
 
 Promotion never deletes historical evidence; supersession changes continuation authority only.
 
-
 ## Current red-team state
 
-The exact functional head `ca9d2d2e59bc517a139c743eb6a91df2e48ac761` passed current-mainline self-hosted CI and the subject-free Stage01–08 orchestration dry-run. A subsequent per-stage audit reopened readiness on two product-claim gaps: automatic presentation segmentation at Stage37 and independent dynamic appearance-quality measurement at Stage45/46. See `V2_STAGE_BY_STAGE_REDTEAM_20260920.md`. Knight remains forbidden.
+The 46-stage second-pass audit is `V2_STAGE_BY_STAGE_REDTEAM_20260920.md`. Its high findings are hardened as explicit current proof boundaries:
+
+- Stage37 automatic presentation scope is connected face islands within mechanical components; artist-layer recovery and connected equivalent-region auto-splitting are not claimed.
+- Stage45 proves dynamic runtime integrity, not professional perceptual 2D-art quality.
+- Stage46 product PASS is executable-contract closure and explicitly leaves controlled-witness Spine-class visual-quality evaluation open.
+
+These boundaries do not lower the product target. They prevent the implementation proof from claiming evidence it does not possess. Knight execution still requires an exact green hardening closure, a matching readiness seal, and explicit user approval.

@@ -22,7 +22,14 @@ from compiler.realsas_compiler_core.appearance_render_v2 import (
 from compiler.realsas_compiler_core.motion_dynamic_proof_v2 import (
     qualified_dynamic_motion_v2_from_dict,
 )
-from compiler.realsas_compiler_core.camera_geometry_v2 import qualify_camera_v3
+from compiler.realsas_compiler_core.camera_geometry_v2 import (
+    project_points_xyz_v3,
+    qualify_camera_v3,
+)
+from compiler.realsas_compiler_core.dynamic_appearance_conditioning_v2 import (
+    dynamic_face_conditioning_metrics,
+    validate_dynamic_appearance_policy,
+)
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_camera_set_from_dict,
     qualified_mesh_from_dict,
@@ -616,6 +623,13 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     )
     if not (0.0 <= exposure_budget <= 1.0):
         raise QualificationError("RUNTIME_V2_DVI_EXPOSURE_BUDGET_INVALID")
+    conditioning_policy = validate_dynamic_appearance_policy(policy)
+    min_visible_pixels = int(
+        conditioning_policy["dynamic_min_visible_pixels_per_face"]
+    )
+    min_projected_area2 = float(
+        conditioning_policy["dynamic_min_projected_double_area_px2"]
+    )
 
     player, player_sha = _native_player(ctx)
     if player_sha != playback.native_player_sha256:
@@ -624,6 +638,26 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     arrays = _projection_arrays(projection)
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
 
+    faces = np.asarray(arrays["faces"], dtype=np.int64)
+    rest_vertices = np.asarray(arrays["vertices"], dtype=np.float64)
+    face_uv = np.asarray(arrays["face_uv"], dtype=np.float64)
+    if faces.ndim != 2 or faces.shape[1] != 3:
+        raise QualificationError("RUNTIME_V2_DVI_FACE_ARRAY_INVALID")
+    if face_uv.shape != (len(faces), 3, 2):
+        raise QualificationError("RUNTIME_V2_DVI_FACE_UV_ARRAY_INVALID")
+    rest_screen = {}
+    cameras = {}
+    for view in projection.views:
+        camera = qualify_camera_v3(
+            dict(view.camera),
+            view_id=view.view_id,
+            view_index=view.view_index,
+        )
+        cameras[view.view_id] = camera
+        rest_screen[view.view_id] = project_points_xyz_v3(
+            rest_vertices, camera
+        )[:, :2]
+
     geometry_visible = 0
     alpha_transparent = 0
     compiled_visible = 0
@@ -631,10 +665,29 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     mismatch_pixels = 0
     max_mismatch_fraction = 0.0
     frame_count = 0
+    conditioning_sample_count = 0
+    relative_conditioning_sample_count = 0
+    temporal_conditioning_sample_count = 0
+    unmeasurable_visible_face_count = 0
+    max_uv_to_screen_condition = 1.0
+    max_relative_screen_condition = 1.0
+    max_relative_principal_stretch = 1.0
+    max_adjacent_frame_principal_stretch = 1.0
+    previous_consequential_faces = {}
     outputs = []
 
     for clip in projection.clips:
+        positions_all = np.asarray(
+            arrays[f"{clip.array_prefix}_positions"],
+            dtype=np.float64,
+        )
+        if positions_all.shape != (clip.frame_count, len(rest_vertices), 3):
+            raise QualificationError("RUNTIME_V2_DVI_DYNAMIC_POSITION_ARRAY_INVALID")
         for frame_index in range(clip.frame_count):
+            posed_vertices = positions_all[frame_index]
+            previous_vertices = (
+                None if frame_index <= 0 else positions_all[frame_index - 1]
+            )
             for view in projection.views:
                 rgba_path, prov_path, owner_path, _stdout = _run_native(
                     player=player,
@@ -684,6 +737,71 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 )
                 frame_count += 1
 
+                if visible_count > 0:
+                    visible_faces = owner[visible].astype(np.int64)
+                    if np.any(visible_faces >= len(faces)):
+                        raise QualificationError("RUNTIME_V2_DVI_OWNER_FACE_INDEX_DRIFT")
+                    counts = np.bincount(visible_faces, minlength=len(faces))
+                    consequential = {
+                        int(index)
+                        for index in np.nonzero(counts >= min_visible_pixels)[0]
+                    }
+                else:
+                    consequential = set()
+
+                camera = cameras[view.view_id]
+                posed_screen = project_points_xyz_v3(
+                    posed_vertices, camera
+                )[:, :2]
+                previous_screen = (
+                    None
+                    if previous_vertices is None
+                    else project_points_xyz_v3(previous_vertices, camera)[:, :2]
+                )
+                prior_key = (clip.clip_id, view.view_id)
+                prior_consequential = previous_consequential_faces.get(
+                    prior_key, set()
+                )
+                for face_index in sorted(consequential):
+                    face = faces[face_index]
+                    metrics = dynamic_face_conditioning_metrics(
+                        uv_triangle=face_uv[face_index],
+                        posed_screen_triangle=posed_screen[face],
+                        rest_screen_triangle=rest_screen[view.view_id][face],
+                        previous_screen_triangle=(
+                            previous_screen[face]
+                            if previous_screen is not None
+                            and face_index in prior_consequential
+                            else None
+                        ),
+                        min_projected_double_area_px2=min_projected_area2,
+                    )
+                    if not bool(metrics["measurable"]):
+                        unmeasurable_visible_face_count += 1
+                        continue
+                    conditioning_sample_count += 1
+                    max_uv_to_screen_condition = max(
+                        max_uv_to_screen_condition,
+                        float(metrics["uv_to_screen_condition_number"]),
+                    )
+                    if metrics["relative_screen_condition_number"] is not None:
+                        relative_conditioning_sample_count += 1
+                        max_relative_screen_condition = max(
+                            max_relative_screen_condition,
+                            float(metrics["relative_screen_condition_number"]),
+                        )
+                        max_relative_principal_stretch = max(
+                            max_relative_principal_stretch,
+                            float(metrics["relative_principal_stretch"]),
+                        )
+                    if metrics["adjacent_frame_principal_stretch"] is not None:
+                        temporal_conditioning_sample_count += 1
+                        max_adjacent_frame_principal_stretch = max(
+                            max_adjacent_frame_principal_stretch,
+                            float(metrics["adjacent_frame_principal_stretch"]),
+                        )
+                previous_consequential_faces[prior_key] = consequential
+
                 for path, authority, schema in (
                     (rgba_path, "DVI_NATIVE_RGBA", "application/x-rgba8"),
                     (prov_path, "DVI_NATIVE_PROVENANCE", "application/x-u8-mask"),
@@ -708,11 +826,25 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         if geometry_visible <= 0
         else float(alpha_transparent) / float(geometry_visible)
     )
+    conditioning_passed = (
+        conditioning_sample_count > 0
+        and max_uv_to_screen_condition
+        <= float(conditioning_policy["dynamic_max_uv_to_screen_condition_number"])
+        and max_relative_screen_condition
+        <= float(conditioning_policy["dynamic_max_relative_screen_condition_number"])
+        and max_relative_principal_stretch
+        <= float(conditioning_policy["dynamic_max_relative_principal_stretch"])
+        and max_adjacent_frame_principal_stretch
+        <= float(
+            conditioning_policy["dynamic_max_adjacent_frame_principal_stretch"]
+        )
+    )
     passed = (
         geometry_visible > 0
         and undefined_visible == 0
         and mismatch_pixels == 0
         and exposure_fraction <= exposure_budget
+        and conditioning_passed
     )
     value = DynamicVisualIntegrityV2IR(
         package_binding_hash=package.package_hash,
@@ -726,13 +858,29 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         compiled_unobserved_visible_fraction=exposure_fraction,
         native_reference_mismatch_pixel_count=mismatch_pixels,
         maximum_frame_native_reference_mismatch_fraction=max_mismatch_fraction,
+        dynamic_conditioning_sample_count=conditioning_sample_count,
+        relative_conditioning_sample_count=relative_conditioning_sample_count,
+        temporal_conditioning_sample_count=temporal_conditioning_sample_count,
+        maximum_uv_to_screen_condition_number=max_uv_to_screen_condition,
+        maximum_relative_screen_condition_number=max_relative_screen_condition,
+        maximum_relative_principal_stretch=max_relative_principal_stretch,
+        maximum_adjacent_frame_principal_stretch=max_adjacent_frame_principal_stretch,
         qualification_report={
-            "status": "PASS_DYNAMIC_VISUAL_INTEGRITY" if passed else "FAIL_DYNAMIC_VISUAL_INTEGRITY",
+            "status": (
+                "PASS_DYNAMIC_VISUAL_INTEGRITY"
+                if passed
+                else "FAIL_DYNAMIC_VISUAL_INTEGRITY"
+            ),
             "undefined_visible_pixel_count": undefined_visible,
             "compiled_unobserved_exposure_budget": exposure_budget,
             "compiled_unobserved_exposure_passed": exposure_fraction
             <= exposure_budget,
             "native_reference_byte_parity_passed": mismatch_pixels == 0,
+            "dynamic_appearance_conditioning_passed": conditioning_passed,
+            "dynamic_appearance_policy": dict(conditioning_policy),
+            "unmeasurable_consequential_visible_face_count": (
+                unmeasurable_visible_face_count
+            ),
             "alpha_transparency_is_diagnostic_not_undefinedness": True,
             "renderer": "REALSAS_V2_CAA_CANONICAL_DEPTH",
         },
@@ -740,6 +888,11 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         metadata={
             "geometry_visibility_appearance_sampling_attribution": True,
             "final_alpha_transparent_fraction_diagnostic": transparent_fraction,
+            "dynamic_appearance_conditioning": (
+                "CAA_UV_TO_POSED_SCREEN_AFFINE_SINGULAR_VALUES"
+            ),
+            "perceptual_optimality_claimed": False,
+            "subject_identity_used_for_thresholds": False,
         },
     )
     value = replace(
@@ -768,6 +921,15 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "compiled_unobserved_visible_fraction": exposure_fraction,
             "native_reference_mismatch_pixel_count": 0,
             "undefined_visible_pixel_count": 0,
+            "dynamic_conditioning_sample_count": conditioning_sample_count,
+            "maximum_uv_to_screen_condition_number": max_uv_to_screen_condition,
+            "maximum_relative_screen_condition_number": (
+                max_relative_screen_condition
+            ),
+            "maximum_relative_principal_stretch": max_relative_principal_stretch,
+            "maximum_adjacent_frame_principal_stretch": (
+                max_adjacent_frame_principal_stretch
+            ),
             "transparent_visible_fraction_diagnostic": transparent_fraction,
         },
     }

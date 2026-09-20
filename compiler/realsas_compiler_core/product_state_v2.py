@@ -443,3 +443,24 @@ def presentation_structure_v2_from_dict(payload):
     if value.structure_hash != presentation_structure_v2_hash(value):
         raise QualificationError("PRESENTATION_V2_STRUCTURE_HASH_DRIFT")
     return value
+
+
+def complete_puppet_state_v2_from_dict(payload):
+    value = CompletePuppetStateV2IR(
+        mechanical_state_binding_hash=str(payload["mechanical_state_binding_hash"]),
+        skeleton_binding_hash=str(payload["skeleton_binding_hash"]),
+        mesh_binding_hash=str(payload["mesh_binding_hash"]),
+        mesh_skin_binding_hash=str(payload["mesh_skin_binding_hash"]),
+        presentation_structure_binding_hash=str(payload["presentation_structure_binding_hash"]),
+        presentation_graph_binding_hash=str(payload["presentation_graph_binding_hash"]),
+        complete_appearance_asset_binding_hash=str(payload["complete_appearance_asset_binding_hash"]),
+        complete_appearance_qualification_binding_hash=str(payload["complete_appearance_qualification_binding_hash"]),
+        output_direction_set_binding_hash=str(payload["output_direction_set_binding_hash"]),
+        qualification_ledger=tuple(dict(row) for row in payload.get("qualification_ledger") or ()),
+        complete_puppet_hash=str(payload["complete_puppet_hash"]),
+        schema_version=str(payload.get("schema_version") or "RealSaS.CompletePuppetStateIR.v2"),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+    if value.complete_puppet_hash != complete_puppet_state_hash(value):
+        raise QualificationError("COMPLETE_PUPPET_V2_HASH_DRIFT")
+    return value

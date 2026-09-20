@@ -3,7 +3,7 @@
   "date": "2026-09-20",
   "status": "V2_STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-  "pipeline_plan_sha256": "182ecfbd9410782a16a894b7a705f03aee6ce9303cad03823a6fd1f351292df4",
+  "pipeline_plan_sha256": "b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f",
   "rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
   "witness_policy": "WITNESS_FORBIDDEN_UNTIL_ORCHESTRATION_AND_ARTIFACT_DRY_RUN_PROOF_PASSES",
   "required_proofs": [

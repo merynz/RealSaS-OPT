@@ -54,5 +54,5 @@ def test_stage13_v2_policy_rejects_invalid_silhouette_threshold():
         "component_min_foreground_fraction":0.0,
         "max_silhouette_edge_p95_px":-0.1,
     }
-    with pytest.raises(QualificationError,match="GEOMETRY_GATE_THRESHOLD_RANGE_INVALID"):
+    with pytest.raises(QualificationError,match="GEOMETRY_SUBSTRATE_THRESHOLD_RANGE_INVALID"):
         _geometry_policy(cfg)

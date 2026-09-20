@@ -282,6 +282,9 @@ class CompleteAppearanceQualificationIR:
     provenance_boundary_pair_count: int
     provenance_boundary_mean_rgba_l1: float
     provenance_boundary_p95_rgba_l1: float
+    provenance_boundary_gradient_pair_count: int
+    provenance_boundary_mean_gradient_jump: float
+    provenance_boundary_p95_gradient_jump: float
     qualification_report: Json
     qualification_hash: str
     schema_version: str = "RealSaS.CompleteAppearanceQualificationIR.v2"
@@ -447,6 +450,9 @@ def complete_appearance_qualification_from_dict(
         int(payload["provenance_boundary_pair_count"]),
         float(payload["provenance_boundary_mean_rgba_l1"]),
         float(payload["provenance_boundary_p95_rgba_l1"]),
+        int(payload["provenance_boundary_gradient_pair_count"]),
+        float(payload["provenance_boundary_mean_gradient_jump"]),
+        float(payload["provenance_boundary_p95_gradient_jump"]),
         dict(payload.get("qualification_report") or {}),
         str(payload["qualification_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.CompleteAppearanceQualificationIR.v2"),

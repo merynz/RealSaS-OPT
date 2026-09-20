@@ -790,7 +790,11 @@ def qualified_presentation_graph_from_dict(
             slot_id=str(row["slot_id"]),
             bone_id=str(row["bone_id"]),
             setup_order=int(row["setup_order"]),
-            default_attachment_id=str(row["default_attachment_id"]),
+            default_attachment_id=(
+                None
+                if row.get("default_attachment_id") is None
+                else str(row["default_attachment_id"])
+            ),
             keyable_channels=tuple(
                 map(str, row.get("keyable_channels") or ())
             ),

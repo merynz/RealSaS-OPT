@@ -95,7 +95,7 @@ def test_dynamic_appearance_metrics_expose_anisotropic_art_stretch():
     policy = validate_dynamic_appearance_policy(_policy())
     assert (
         metrics["relative_surface_principal_stretch"]
-        <= policy["dynamic_max_relative_surface_principal_stretch"]
+        > policy["dynamic_max_relative_surface_principal_stretch"]
     )
     assert (
         metrics["adjacent_frame_surface_principal_stretch"]
@@ -119,3 +119,85 @@ def test_dynamic_appearance_policy_is_subject_free_and_nontrivial():
     assert 1.0 < policy["dynamic_max_relative_surface_condition_number"] < 20.0
     assert 1.0 < policy["dynamic_max_relative_surface_principal_stretch"] < 10.0
     assert 1.0 < policy["dynamic_max_adjacent_frame_surface_principal_stretch"] < 8.0
+
+
+def test_subject_free_calibration_bank_selects_frozen_relative_thresholds():
+    calibration = json.loads(
+        (
+            ROOT
+            / "canonical"
+            / "DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json"
+        ).read_text(encoding="utf-8")
+    )
+    policy = validate_dynamic_appearance_policy(_policy())
+    selected = calibration["selected_policy"]
+    assert calibration["status"] == "PASS_SUBJECT_FREE_SYNTHETIC_CALIBRATION"
+    assert calibration["witness_used"] is False
+    assert calibration["threshold_tuning_from_knight_forbidden"] is True
+    assert policy["dynamic_max_relative_surface_condition_number"] == selected[
+        "dynamic_max_relative_surface_condition_number"
+    ]
+    assert policy["dynamic_max_relative_surface_principal_stretch"] == selected[
+        "dynamic_max_relative_surface_principal_stretch"
+    ]
+    assert policy["dynamic_max_adjacent_frame_surface_principal_stretch"] == selected[
+        "dynamic_max_adjacent_frame_surface_principal_stretch"
+    ]
+
+    uv = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+    rest_xyz = (
+        (0.0, 0.0, 0.0),
+        (10.0, 0.0, 0.0),
+        (0.0, 10.0, 0.0),
+    )
+    for row in calibration["benign_cases"]:
+        sx, sy = map(float, row["surface_scale_xy"])
+        posed_xyz = (
+            (0.0, 0.0, 0.0),
+            (10.0 * sx, 0.0, 0.0),
+            (0.0, 10.0 * sy, 0.0),
+        )
+        metrics = dynamic_face_conditioning_metrics(
+            uv_triangle=uv,
+            posed_xyz_triangle=posed_xyz,
+            rest_xyz_triangle=rest_xyz,
+            posed_screen_triangle=(
+                (0.0, 0.0),
+                (10.0 * sx, 0.0),
+                (0.0, 10.0 * sy),
+            ),
+            previous_xyz_triangle=rest_xyz,
+            min_projected_double_area_px2=1.0,
+        )
+        assert metrics["relative_surface_condition_number"] <= policy[
+            "dynamic_max_relative_surface_condition_number"
+        ]
+        assert metrics["relative_surface_principal_stretch"] <= policy[
+            "dynamic_max_relative_surface_principal_stretch"
+        ]
+
+    for row in calibration["adversarial_cases"]:
+        sx, sy = map(float, row["surface_scale_xy"])
+        posed_xyz = (
+            (0.0, 0.0, 0.0),
+            (10.0 * sx, 0.0, 0.0),
+            (0.0, 10.0 * sy, 0.0),
+        )
+        metrics = dynamic_face_conditioning_metrics(
+            uv_triangle=uv,
+            posed_xyz_triangle=posed_xyz,
+            rest_xyz_triangle=rest_xyz,
+            posed_screen_triangle=(
+                (0.0, 0.0),
+                (10.0 * sx, 0.0),
+                (0.0, 10.0 * sy),
+            ),
+            previous_xyz_triangle=rest_xyz,
+            min_projected_double_area_px2=1.0,
+        )
+        assert (
+            metrics["relative_surface_condition_number"]
+            > policy["dynamic_max_relative_surface_condition_number"]
+            or metrics["relative_surface_principal_stretch"]
+            > policy["dynamic_max_relative_surface_principal_stretch"]
+        )

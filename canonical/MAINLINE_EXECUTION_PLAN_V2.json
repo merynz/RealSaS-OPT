@@ -76,7 +76,7 @@
         "01_SOURCE_BYTES_SEALED",
         "02_SOURCE_LICENSE_PROVENANCE"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:audit_source_mechanics_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:audit_source_mechanics_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -96,7 +96,7 @@
       "depends_on": [
         "03_SOURCE_MECHANICAL_AUDIT"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:admit_full_subject_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:admit_full_subject_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -113,7 +113,7 @@
       "title": "Common 8-view camera contract",
       "group": "observation",
       "depends_on": [],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.observation_v1:qualify_camera_contract_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.observation_v2:qualify_camera_contract_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -133,7 +133,7 @@
         "04_FULL_SUBJECT_ADMISSION",
         "05_CAMERA_CONTRACT_SOLVED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:materialize_observation_render_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:materialize_observation_render_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -155,7 +155,7 @@
         "05_CAMERA_CONTRACT_SOLVED",
         "06_OBSERVATION_RENDER_8VIEW"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:qualify_observation_contract_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:qualify_observation_contract_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -175,7 +175,7 @@
         "05_CAMERA_CONTRACT_SOLVED",
         "07_OBSERVATION_CONTRACT_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v1:qualify_normalization_domain_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:qualify_normalization_domain_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -354,7 +354,7 @@
       "depends_on": [
         "15_RIGGING_SURFACE_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:qualify_mechanical_partition_and_carriers",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:qualify_mechanical_partition_and_carriers",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -698,7 +698,7 @@
         "05_CAMERA_CONTRACT_SOLVED",
         "28_SKELETON_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:seal_deformation_capability_envelope",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:seal_deformation_capability_envelope",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -725,7 +725,7 @@
         "32_SKIN_QUALIFIED",
         "34_DEFORMATION_CAPABILITY_ENVELOPE"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:qualify_canonical_mesh_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:qualify_canonical_mesh_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,
@@ -751,7 +751,7 @@
         "34_DEFORMATION_CAPABILITY_ENVELOPE",
         "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
       ],
-      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.product_mesh_v1:bind_qualified_mesh_skin_stage",
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2:bind_qualified_mesh_skin_stage",
       "policy": {
         "fail_closed": true,
         "cacheable": true,

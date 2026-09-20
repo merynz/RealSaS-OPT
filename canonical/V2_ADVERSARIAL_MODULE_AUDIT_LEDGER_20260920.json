@@ -1,0 +1,265 @@
+{
+  "schema": "RealSaS.V2AdversarialModuleAuditLedger.v1",
+  "date": "2026-09-20",
+  "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF",
+  "witness_used": false,
+  "threshold_tuning_from_knight_forbidden": true,
+  "protocol": "canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md",
+  "modules": [
+    {
+      "module_id": "A",
+      "name": "SOURCE_BYTES_LICENSE_SUBJECT_AUDIT",
+      "stages": "01-04",
+      "input_output_authority": "sealed bytes/license + exact source raster/mask refs",
+      "smallest_adversarial_failure": "hash drift; moving alias; border-truncated subject",
+      "repair_owner": "Stage01-04",
+      "proof_hooks": [
+        "tests/repository/test_mainline_execution_plan_v2.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "B",
+      "name": "CAMERA_AND_OBSERVATION_CONTRACT",
+      "stages": "05-07",
+      "input_output_authority": "exact camera bundle + source observation raster/mask",
+      "smallest_adversarial_failure": "camera hash/resolution drift; mask authority drift",
+      "repair_owner": "Stage05-07",
+      "proof_hooks": [
+        "tests/compiler/test_stage13_geometry_gate_v2.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "C",
+      "name": "NORMALIZATION",
+      "stages": "08",
+      "input_output_authority": "exact object-frame center + half extent",
+      "smallest_adversarial_failure": "missing/nonfinite center; camera refit",
+      "repair_owner": "Stage08",
+      "proof_hooks": [
+        "tests/repository/test_mainline_execution_plan_v2.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "D",
+      "name": "IRIS_FIT_DECODE_STAGE13",
+      "stages": "09-13",
+      "input_output_authority": "RGB+camera learner; source mask target only; decoded zero surface",
+      "smallest_adversarial_failure": "missing dense source target; mask forward leakage; shifted silhouette",
+      "repair_owner": "Stage09-13",
+      "proof_hooks": [
+        "tests/iris/test_iris_v2_dense_source_coverage_v2.py",
+        "tests/compiler/test_stage13_geometry_gate_v2.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "E",
+      "name": "GSA_DENSE_TO_COMPACT",
+      "stages": "14",
+      "input_output_authority": "qualified dense zero-surface + frozen substrate policy",
+      "smallest_adversarial_failure": "visible component dropped by bounded compaction",
+      "repair_owner": "Stage14",
+      "proof_hooks": [
+        "canonical/STAGE14_SUBSTRATE_ADEQUACY_CALIBRATION_AUTHORITY_V2_20260920.json"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "F",
+      "name": "GSA_LOCAL_RELATIONS",
+      "stages": "14-15",
+      "input_output_authority": "scene-first compact nodes + mapped dense-face relations",
+      "smallest_adversarial_failure": "relation graph disconnected/degenerate",
+      "repair_owner": "Stage14",
+      "proof_hooks": [
+        "tests/compiler/test_relation_parent_quality_redteam_v1.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "G",
+      "name": "MECHANICAL_PARTITION_UNKNOWN",
+      "stages": "17",
+      "input_output_authority": "RiggingSurface structural relations only",
+      "smallest_adversarial_failure": "semantic/categorical invention; unresolved consequential UNKNOWN",
+      "repair_owner": "Stage17",
+      "proof_hooks": [
+        "tests/compiler/test_product_authority_v1.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "H",
+      "name": "CANONICAL_RELATION_PARENT",
+      "stages": "18",
+      "input_output_authority": "3-cliques of local relation graph",
+      "smallest_adversarial_failure": "parent corner below frozen min angle",
+      "repair_owner": "Stage14/18 producer",
+      "proof_hooks": [
+        "tests/compiler/test_relation_parent_quality_redteam_v1.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "I",
+      "name": "CDT_LOCAL_CHART",
+      "stages": "18",
+      "input_output_authority": "sealed relation-parent chart boundaries",
+      "smallest_adversarial_failure": "interior Steiner cannot repair sub-threshold parent corner without boundary split",
+      "repair_owner": "Stage18 adapter/new lineage",
+      "proof_hooks": [
+        "tests/compiler/test_relation_parent_quality_redteam_v1.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "J",
+      "name": "MESH_ADDRESSING_BIRTH",
+      "stages": "18",
+      "input_output_authority": "candidate mesh + SurfaceAddressing + AppearanceDomain same transaction",
+      "smallest_adversarial_failure": "unaddressed vertex/face or lineage mismatch",
+      "repair_owner": "Stage18",
+      "proof_hooks": [
+        "tests/repository/test_mainline_execution_plan_v2.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "K",
+      "name": "STATIC_CARRIER",
+      "stages": "19",
+      "input_output_authority": "Stage13-qualified geometry + complete addressing",
+      "smallest_adversarial_failure": "degenerate face/nonfinite vertex/addressing mismatch",
+      "repair_owner": "Stage18 new lineage",
+      "proof_hooks": [
+        "tests/repository/test_mainline_execution_plan_v2.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "L",
+      "name": "CAA",
+      "stages": "20-25",
+      "input_output_authority": "qualified mesh domain + exact observations/cameras",
+      "smallest_adversarial_failure": "undefined sample; source mutation; holdout/seam fault; alpha fringe",
+      "repair_owner": "Stage20-25",
+      "proof_hooks": [
+        "tests/compiler/test_caa_v2_subject_free_policy.py",
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "M",
+      "name": "GEPPETTO_SKELETON",
+      "stages": "26-29",
+      "input_output_authority": "RiggingSurface evidence -> proposal -> compiler-qualified skeleton",
+      "smallest_adversarial_failure": "cycle/root/unknown joint; teacher inference input",
+      "repair_owner": "Stage26-28",
+      "proof_hooks": [
+        "tests/compiler/test_product_authority_v1.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "N",
+      "name": "ARACHNE_SKIN",
+      "stages": "30-33",
+      "input_output_authority": "qualified surface+skeleton -> proposal -> compiler-qualified simplex skin",
+      "smallest_adversarial_failure": "negative/non-simplex/missing row; teacher identity leak",
+      "repair_owner": "Stage30-32",
+      "proof_hooks": [
+        "tests/compiler/test_product_authority_v1.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "O",
+      "name": "DEFORMATION_AND_DYNAMIC_MESH",
+      "stages": "34-36",
+      "input_output_authority": "qualified rig/skin/mesh + frozen envelope/policy",
+      "smallest_adversarial_failure": "triangle collapse/conditioning/contact/UNKNOWN failure",
+      "repair_owner": "Stage34-35 or new Stage18 lineage",
+      "proof_hooks": [
+        "tests/compiler/test_product_authority_v1.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "P",
+      "name": "PRESENTATION_STRUCTURE",
+      "stages": "37",
+      "input_output_authority": "role-free mechanical components + mesh skin",
+      "smallest_adversarial_failure": "categorical identity/detachability invention; missing component accounting",
+      "repair_owner": "Stage37",
+      "proof_hooks": [
+        "tests/repository/test_mainline_execution_plan_v2.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "Q",
+      "name": "COMPLETE_PUPPET_SEAL",
+      "stages": "38",
+      "input_output_authority": "mechanical state + CAA + presentation exact bindings",
+      "smallest_adversarial_failure": "mechanical/appearance/presentation hash drift",
+      "repair_owner": "Stage38 inputs",
+      "proof_hooks": [
+        "tests/repository/test_mainline_execution_plan_v2.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "R",
+      "name": "MOTION",
+      "stages": "39-41",
+      "input_output_authority": "CAA rest authorization + full-3D local quaternion motion",
+      "smallest_adversarial_failure": "source seal drift; contact fail; static clip; rest-unseen incorrectly treated as appearance failure",
+      "repair_owner": "Stage39-41",
+      "proof_hooks": [
+        "tests/repository/test_mainline_execution_plan_v2.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "S",
+      "name": "RUNTIME_PACKAGE",
+      "stages": "42-44",
+      "input_output_authority": "exact Stage41 posed XYZ + qualified topology + sealed CAA",
+      "smallest_adversarial_failure": "retriangulation; runtime donor/generation; package hash drift; native/reference mismatch",
+      "repair_owner": "Stage42-44",
+      "proof_hooks": [
+        "tests/compiler/test_runtime_v2_native_smoke.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "T",
+      "name": "DYNAMIC_VISUAL_INTEGRITY",
+      "stages": "45",
+      "input_output_authority": "native frame owner/provenance/RGBA over every frame-view",
+      "smallest_adversarial_failure": "undefined visible provenance; native parity mismatch; compiled-unobserved budget excess",
+      "repair_owner": "Stage45/upstream owner",
+      "proof_hooks": [
+        "tests/compiler/test_runtime_v2_native_smoke.py",
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    },
+    {
+      "module_id": "U",
+      "name": "PRODUCT_CLOSURE",
+      "stages": "46",
+      "input_output_authority": "complete puppet + motion + runtime + DVI + editable authoring exact bindings",
+      "smallest_adversarial_failure": "any axis absent or binding drift; non-editable export",
+      "repair_owner": "owning failed upstream stage",
+      "proof_hooks": [
+        "tests/repository/test_mainline_execution_plan_v2.py"
+      ],
+      "status": "IMPLEMENTED_PENDING_SELF_HOSTED_PROOF"
+    }
+  ]
+}

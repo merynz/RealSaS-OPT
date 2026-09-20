@@ -751,6 +751,9 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     assert r45["diagnostics"]["native_reference_mismatch_pixel_count"] == 0
     assert r45["diagnostics"]["undefined_visible_pixel_count"] == 0
     assert r45["diagnostics"]["compiled_unobserved_visible_fraction"] == 0.0
+    assert r45["diagnostics"]["dynamic_conditioning_sample_count"] > 0
+    assert r45["diagnostics"]["maximum_relative_screen_condition_number"] >= 1.0
+    assert r45["diagnostics"]["maximum_relative_principal_stretch"] >= 1.0
 
     r46 = run("46_PRODUCT_CLOSURE_SEAL", seal_product_closure_stage)
     closure = read_json(
@@ -762,6 +765,8 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     )
     assert closure["qualification_report"]["product_pass"] is True
     assert closure["qualification_report"]["appearance_authority_passed"] is True
+    assert closure["qualification_report"]["presentation_partition_authority_passed"] is True
+    assert closure["qualification_report"]["dynamic_appearance_conditioning_passed"] is True
     assert closure["qualification_report"]["native_visual_integrity_passed"] is True
     editable = next(
         out

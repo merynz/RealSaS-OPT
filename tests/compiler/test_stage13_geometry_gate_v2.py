@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from compiler.realsas_compiler_core.rest_preservation_v1 import silhouette_distance_metrics
+from compiler.realsas_compiler_core.silhouette_metrics_v2 import silhouette_distance_metrics
 from compiler.realsas_compiler_services.orchestrator.adapters.iris_geometry_v2 import _geometry_policy
 from compiler.realsas_compiler_core.types import QualificationError
 

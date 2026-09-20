@@ -3,7 +3,7 @@
   "date": "2026-09-20",
   "status": "ASSEMBLY_IN_PROGRESS__WITNESS_EXECUTION_FORBIDDEN",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-  "pipeline_plan_sha256": "b125cb1f9b0e53b760982da5807a6962bf9c32d7c694eab17368fe567bf62f9d",
+  "pipeline_plan_sha256": "abec3eefda132b150e542dbedac886485514a0baa6d090bf598b273b83a39fac",
   "rationale": "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
   "witness_policy": "DO_NOT_START_KNIGHT_UNTIL_STATUS_READY_FOR_WITNESS_EXECUTION",
   "required_proofs": [
@@ -33,7 +33,7 @@
       "proof_id": "GEOMETRY_ROLE_AND_IRIS_GSA",
       "status": "IN_PROGRESS",
       "sha256": "",
-      "note": "Stage13/IRIS role must be rebased from appearance-proxy interpretation to geometry/surface substrate qualification."
+      "note": "Current plan now binds Stage09-15 to iris_geometry_v2 and Stage13 GeometrySubstrateQualificationIR.v2; compile/adversarial tests and dense-supervision redesign remain pending."
     },
     {
       "proof_id": "MESH_PRODUCER_GATE_FEASIBILITY",

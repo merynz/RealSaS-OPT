@@ -172,3 +172,39 @@ def test_run_manifest_identity_is_exact_for_run_and_subject():
             run_id="R",
             subject_id="OTHER",
         )
+
+
+def test_implementation_closure_covers_all_current_stages_and_excludes_donor_era_modules():
+    plan = _plan()
+    manifest = mainline.implementation_closure_manifest(plan)
+    assert manifest["schema"] == "RealSaS.V2ImplementationClosure.v1"
+    assert len(manifest["adapter_implementation_closures"]) == 46
+    imported = {
+        row["module"]
+        for stage in manifest["adapter_implementation_closures"]
+        for row in stage["local_python_import_closure"]
+    }
+    assert imported.isdisjoint(mainline.CURRENT_V2_FORBIDDEN_IMPORT_MODULES)
+    critical = {row["path"] for row in manifest["critical_files"]}
+    assert "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp" in critical
+    assert ".github/workflows/subject2_knight_observation_preflight.yml" in critical
+    assert ".github/workflows/v2_witness_orchestration_subject_free_dry_run.yml" in critical
+
+
+def test_implementation_closure_hash_changes_when_critical_bytes_change(monkeypatch):
+    plan = _plan()
+    baseline = mainline.implementation_closure_sha256(plan)
+    original = mainline.sha256_file
+    target = (
+        ROOT / "runtime" / "realsas_cpp" / "src" / "runtime_v2_caa_reference.cpp"
+    ).resolve()
+
+    def fake_sha(path):
+        resolved = Path(path).resolve()
+        if resolved == target:
+            return "0" * 64
+        return original(Path(path))
+
+    monkeypatch.setattr(mainline, "sha256_file", fake_sha)
+    mutated = mainline.implementation_closure_sha256(plan)
+    assert mutated != baseline

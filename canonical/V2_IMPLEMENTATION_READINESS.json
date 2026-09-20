@@ -363,7 +363,7 @@
   "appearance_principle": "SPINE_CLASS_2D_ART_IS_A_PRIMARY_PRODUCT_REQUIREMENT_NOT_POST_RENDER_POLISH",
   "readiness_seal": {
     "status": "REVOKED",
-    "reason": "Post-seal appearance fidelity review found unresolved product blockers: fixed CAA tile_resolution=8 lacks source-frequency/texel-density qualification; deterministic unobserved completion is nearest-surface copy rather than high-fidelity source-constrained completion; cross-view RGB compatibility lacks explicit qualification authority; Stage45 dynamic alpha holes are diagnostic rather than a hard gate; speckled/scattered-hole artifact class is not independently bounded.",
+    "reason": "Post-seal appearance fidelity review found unresolved product blockers: fixed CAA tile_resolution=8 lacks source-frequency/texel-density qualification; deterministic unobserved completion is nearest-surface copy rather than high-fidelity source-constrained completion; cross-view RGB compatibility lacks explicit qualification authority; Stage45 dynamic alpha holes are diagnostic rather than a hard gate; speckled/scattered-hole artifact class is not independently bounded. Native CAA currently uses premultiplied bilinear only; mip/minification and anisotropic sampling stability under motion are not yet qualified.",
     "witness_execution_allowed": false,
     "witness_execution_authorized_now": false,
     "user_approval_required": true,
@@ -394,6 +394,8 @@
     "CROSS_VIEW_RGB_COMPATIBILITY_NOT_EXPLICITLY_QUALIFIED",
     "DYNAMIC_ALPHA_HOLES_DIAGNOSTIC_NOT_GATE",
     "SPECKLED_SCATTERED_HOLE_ARTIFACT_CLASS_NOT_INDEPENDENTLY_BOUNDED",
-    "CURRENT_LEARNED_MODELS_NOT_CLAIMED_FINAL_OR_UNSEEN_READY"
+    "CURRENT_LEARNED_MODELS_NOT_CLAIMED_FINAL_OR_UNSEEN_READY",
+    "CAA_MINIFICATION_FILTERING_UNQUALIFIED",
+    "DYNAMIC_SCREENSPACE_SAMPLING_STABILITY_UNQUALIFIED"
   ]
 }

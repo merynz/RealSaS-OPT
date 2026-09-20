@@ -132,3 +132,29 @@ def test_face_atlas_bleed_leaves_no_undefined_texel():
     assert atlas.shape[:2] == (layout["height"], layout["width"])
     assert uv.shape == (1, 3, 2)
     assert not np.any(prov == 255)
+
+
+def test_face_atlas_allows_unallocated_grid_padding_but_not_surface_undefinedness():
+    # Three faces require a 2x2 grid; the fourth tile is intentional non-surface padding.
+    per_face = 4 * (4 + 1) // 2
+    rgba = np.tile(
+        np.asarray([[10, 20, 30, 255]], dtype=np.uint8),
+        (3 * per_face, 1),
+    )
+    provenance = np.zeros(3 * per_face, dtype=np.uint8)
+    atlas, prov, uv, layout = bake_direction_atlas(
+        face_sample_rgba=rgba,
+        face_sample_provenance=provenance,
+        face_count=3,
+        tile_resolution=4,
+        bleed_px=2,
+    )
+    assert layout["columns"] == 2 and layout["rows"] == 2
+    assert uv.shape == (3, 3, 2)
+    stride = layout["tile_stride"]
+    unused = prov[stride : 2 * stride, stride : 2 * stride]
+    assert np.all(unused == 255)
+    for face in range(3):
+        tx = (face % layout["columns"]) * stride
+        ty = (face // layout["columns"]) * stride
+        assert not np.any(prov[ty : ty + stride, tx : tx + stride] == 255)

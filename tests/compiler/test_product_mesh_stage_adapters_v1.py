@@ -688,7 +688,16 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
         }
     )
 
-    ctx["run_manifest"]["presentation"] = {"mode": "AUTO_ROLE_FREE_V2"}
+    presentation_policy = (
+        ROOT / "canonical" / "PRESENTATION_PARTITION_POLICY_V1_20260921.json"
+    )
+    ctx["run_manifest"]["presentation"] = {
+        "mode": "AUTO_ROLE_FREE_V2",
+        "policy_document": {
+            "path": str(presentation_policy.resolve()),
+            "sha256": _sha(presentation_policy),
+        },
+    }
 
     r37 = run(
         "37_QUALIFIED_PRESENTATION_STRUCTURE",

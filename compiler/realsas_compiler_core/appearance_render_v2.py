@@ -22,6 +22,9 @@ class ReferenceCAARender:
     geometry_visible: np.ndarray
     final_alpha: np.ndarray
     owner_face_index: np.ndarray
+    second_owner_face_index: np.ndarray
+    depth_margin: np.ndarray
+    exact_depth_ambiguity: np.ndarray
     provenance_code: np.ndarray
     visibility_contract_hash: str = VISIBILITY_CONTRACT_V2_HASH
 
@@ -119,12 +122,20 @@ def render_caa_reference(
     straight = premultiplied_to_straight_u8(pm)
     geometry_visible = owner >= 0
     final_alpha = pm[..., 3] > 1e-8
+    exact_depth_ambiguity = (
+        (visibility.second_owner_face_index >= 0)
+        & np.isfinite(visibility.depth_margin)
+        & (np.abs(visibility.depth_margin) <= 1.0e-12)
+    )
     return ReferenceCAARender(
         premultiplied_rgba=pm,
         straight_rgba_u8=straight,
         geometry_visible=geometry_visible,
         final_alpha=final_alpha,
         owner_face_index=owner,
+        second_owner_face_index=visibility.second_owner_face_index,
+        depth_margin=visibility.depth_margin,
+        exact_depth_ambiguity=exact_depth_ambiguity,
         provenance_code=provenance,
     )
 

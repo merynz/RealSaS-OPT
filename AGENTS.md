@@ -11,16 +11,17 @@ This repository must be resumable without conversational memory.
 5. `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
 6. `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
 7. `canonical/V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md`
-8. `canonical/AUTHORITY_MAP_V1.json`
-9. `canonical/EXPERIMENT_REGISTRY_V3.json`
-10. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-11. `canonical/ACTIVE_RUN_V2.json` — implementation governance ledger only
-12. `canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json`
-13. Historical provenance only (including donor-era presentation/runtime contracts): `canonical/EXPERIMENT_REGISTRY_V2.json`, then `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
+8. `canonical/V2_STAGE_BY_STAGE_REDTEAM_20260920.md`
+9. `canonical/AUTHORITY_MAP_V1.json`
+10. `canonical/EXPERIMENT_REGISTRY_V3.json`
+11. `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+12. `canonical/ACTIVE_RUN_V2.json` — implementation governance ledger only
+13. `canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json`
+14. Historical provenance only (including donor-era presentation/runtime contracts): `canonical/EXPERIMENT_REGISTRY_V2.json`, then `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
 
 ## Current mode
 
-Current execution authority is determined by `canonical/V2_IMPLEMENTATION_READINESS.json` plus the exact implementation-closure fingerprint. **Do not execute a subject witness unless readiness is `READY_FOR_WITNESS_EXECUTION` and closure validation passes.** Subject-2 Knight is the next witness only after that gate; the repository governance ledger is never a subject-run ledger.
+Current execution authority is determined by `canonical/V2_IMPLEMENTATION_READINESS.json`, the stage-level red-team record and the exact implementation-closure fingerprint. **Do not execute a subject witness while readiness is red-team reopened.** The current infrastructure is green, but RT-37 and RT-45/46 remain product-claim blockers. Subject-2 Knight is the next witness only after those findings are closed or explicitly narrowed, a new exact readiness seal is minted, and the user approves execution. The repository governance ledger is never a subject-run ledger.
 
 ## Execution semantics
 

@@ -43,7 +43,11 @@ def presentation_structure_v2_hash(value: QualifiedPresentationStructureV2IR) ->
     return content_sha256(payload)
 
 
-def _face_groups(mesh, component_id: str):
+def _face_groups(mesh, component_id: str, *, cut_face_pairs=()):
+    cut_pairs = {
+        tuple(sorted((int(a), int(b))))
+        for a, b in cut_face_pairs
+    }
     component_by_vertex = {
         str(vertex.canonical_mesh_vertex_id): str(vertex.component_id)
         for vertex in mesh.vertices
@@ -70,7 +74,7 @@ def _face_groups(mesh, component_id: str):
     for incident in edge_to_faces.values():
         for a in incident:
             for b in incident:
-                if a != b:
+                if a != b and tuple(sorted((int(a), int(b)))) not in cut_pairs:
                     neighbors[a].add(b)
     unseen = set(neighbors)
     groups = []
@@ -145,6 +149,8 @@ def build_presentation_structure_v2(
     carrier_policy,
     min_rigid_owner_weight: float = 0.999,
     max_rigid_other_mass: float = 0.001,
+    presentation_cut_face_pairs=(),
+    presentation_partition_evidence_hash: str = "",
 ) -> QualifiedPresentationStructureV2IR:
     joint_ids = {str(joint.canonical_joint_id) for joint in skeleton.joints}
     carrier = {row.component_id: row.carrier_class for row in carrier_policy.decisions}
@@ -170,13 +176,20 @@ def build_presentation_structure_v2(
         if bone_id not in joint_ids:
             raise QualificationError("PRESENTATION_V2_BONE_UNKNOWN")
         for group_index, face_indices in enumerate(
-            _face_groups(mesh, component.component_id)
+            _face_groups(
+                mesh,
+                component.component_id,
+                cut_face_pairs=presentation_cut_face_pairs,
+            )
         ):
             group_hash = content_sha256(
                 {
                     "mesh": mesh.mesh_lineage_hash,
                     "component": component.component_id,
                     "face_indices": face_indices,
+                    "presentation_partition_evidence_hash": str(
+                        presentation_partition_evidence_hash
+                    ),
                 }
             )
             slot_id = "SLOT:" + content_sha256(
@@ -240,16 +253,18 @@ def build_presentation_structure_v2(
                         }
                     )[:24],
                     decision_kind="SLOT_BINDING",
-                    authority_class="MECHANICAL",
+                    authority_class="MECHANICAL_PLUS_ROLE_FREE_APPEARANCE_BOUNDARY",
                     evidence_refs=(
                         partition.partition_lineage_hash,
                         mesh.mesh_lineage_hash,
                         mesh_skin.mesh_skin_lineage_hash,
+                        str(presentation_partition_evidence_hash),
                         group_hash,
                     ),
                     metadata={
                         "categorical_recognition_used": False,
-                        "presentation_group_derivation": "CONNECTED_FACE_ISLAND_WITHIN_MECHANICAL_COMPONENT",
+                        "presentation_group_derivation": "CONNECTED_FACE_ISLAND_AFTER_ROLE_FREE_APPEARANCE_BOUNDARY_CUTS",
+                        "conceptual_object_identity_claimed": False,
                     },
                 )
             )
@@ -268,8 +283,18 @@ def build_presentation_structure_v2(
         metadata={
             "role_free": True,
             "appearance_authority_owned_elsewhere": True,
+            "appearance_boundary_evidence_consumed": bool(
+                presentation_partition_evidence_hash
+            ),
+            "presentation_partition_evidence_hash": str(
+                presentation_partition_evidence_hash
+            ),
+            "presentation_cut_face_pairs": [
+                [int(a), int(b)] for a, b in presentation_cut_face_pairs
+            ],
             "depth_authority_owned_elsewhere": True,
             "categorical_recognition_used": False,
+            "conceptual_object_identity_claimed": False,
         },
     )
     value = replace(value, structure_hash=presentation_structure_v2_hash(value))

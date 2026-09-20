@@ -286,6 +286,10 @@ def _build_editable_bundle(ctx: dict, root: Path) -> tuple[Path, str, dict]:
             "appearance_authority": "COMPLETE_APPEARANCE_AUTHORITY_V2",
             "runtime_generation_required": False,
             "editable": True,
+            "automatic_presentation_segmentation_scope": "CONNECTED_FACE_ISLANDS_WITHIN_MECHANICAL_COMPONENT",
+            "original_artist_layer_recovery_claimed": False,
+            "professional_dynamic_appearance_quality_proven": False,
+            "spine_class_perceptual_quality_requires_witness_evaluation": True,
             "files": tuple(sorted(file_rows, key=lambda row: row["name"])),
         }
         bundle_manifest["manifest_sha256"] = hashlib.sha256(
@@ -424,6 +428,11 @@ def seal_product_closure_stage(ctx: dict) -> dict:
             "editable_authoring_export_passed": True,
             "runtime_generation_required": False,
             "legacy_qualified_appearance_set_used": False,
+            "product_pass_scope": "V2_EXECUTABLE_CONTRACT_CLOSURE",
+            "original_artist_layer_recovery_claimed": False,
+            "professional_dynamic_appearance_quality_claimed": False,
+            "spine_class_perceptual_quality_claimed": False,
+            "witness_visual_quality_evaluation_still_required": True,
         },
         product_closure_hash="",
         metadata={

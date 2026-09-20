@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "2305465aa74a6be6a2f73064b63177aba111b72f",
+    "main": "61005d81933f2ccf7912eb7f8ab44fcffdc9edf8",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -115,7 +115,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2345,
+  "commit_count": 2354,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -119111,6 +119111,204 @@
       ],
       "subsystem_tags": [
         "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e5c0c0a66aed7510c3d768b2794298ea886c8be3",
+      "parents": [
+        "2305465aa74a6be6a2f73064b63177aba111b72f"
+      ],
+      "author_time": "2026-09-20T23:11:16+03:00",
+      "committer_time": "2026-09-20T23:11:16+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1730c36c9d8b9ba1b9aff4723c84d685a5a437bf",
+      "parents": [
+        "e5c0c0a66aed7510c3d768b2794298ea886c8be3"
+      ],
+      "author_time": "2026-09-20T23:11:30+03:00",
+      "committer_time": "2026-09-20T23:11:30+03:00",
+      "subject": "test: lock V2 tail manifest fingerprint scope and motion authority title",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_mainline_execution_plan_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7a03307a3a85f561602ba49e340238e58b3b4f1e",
+      "parents": [
+        "1730c36c9d8b9ba1b9aff4723c84d685a5a437bf"
+      ],
+      "author_time": "2026-09-20T23:12:18+03:00",
+      "committer_time": "2026-09-20T23:12:18+03:00",
+      "subject": "dry-run v2: trigger on every implementation-closure input surface",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/v2_witness_orchestration_subject_free_dry_run.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "df87541748a14136df6f3b06e0c58346840552ef",
+      "parents": [
+        "7a03307a3a85f561602ba49e340238e58b3b4f1e"
+      ],
+      "author_time": "2026-09-20T23:12:38+03:00",
+      "committer_time": "2026-09-20T23:12:38+03:00",
+      "subject": "ci v2: trigger mainline gate on every implementation-closure input",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/current_mainline_self_hosted_ci.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8e6055289eed6b03162fdacb93ae18e0fb7eaad9",
+      "parents": [
+        "df87541748a14136df6f3b06e0c58346840552ef"
+      ],
+      "author_time": "2026-09-20T23:13:22+03:00",
+      "committer_time": "2026-09-20T23:13:22+03:00",
+      "subject": "readiness v2: forbid legacy presentation motion and donor codecs from current closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b2f9318ddda1ee5b943e659d63d3973758ef51e5",
+      "parents": [
+        "8e6055289eed6b03162fdacb93ae18e0fb7eaad9"
+      ],
+      "author_time": "2026-09-20T23:14:40+03:00",
+      "committer_time": "2026-09-20T23:14:40+03:00",
+      "subject": "motion v2: align compiler documentation with Stage40-41 V2 numbering",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b9f70b10f7b252d8570a0d5b9383f4edfda11807",
+      "parents": [
+        "b2f9318ddda1ee5b943e659d63d3973758ef51e5"
+      ],
+      "author_time": "2026-09-20T23:14:44+03:00",
+      "committer_time": "2026-09-20T23:14:44+03:00",
+      "subject": "motion dynamic v2: correct mesh qualification stage identity",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_dynamic_proof_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "98145343e54070fb9ec289438a37273d7bc46cd8",
+      "parents": [
+        "b9f70b10f7b252d8570a0d5b9383f4edfda11807"
+      ],
+      "author_time": "2026-09-20T23:15:21+03:00",
+      "committer_time": "2026-09-20T23:15:21+03:00",
+      "subject": "orchestrator v2: bind cache identity to typed dependency outputs",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "61005d81933f2ccf7912eb7f8ab44fcffdc9edf8",
+      "parents": [
+        "98145343e54070fb9ec289438a37273d7bc46cd8"
+      ],
+      "author_time": "2026-09-20T23:15:36+03:00",
+      "committer_time": "2026-09-20T23:15:36+03:00",
+      "subject": "test: red-team typed dependency cache identity and sealed output metadata",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_mainline_v2_dag_scheduler.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

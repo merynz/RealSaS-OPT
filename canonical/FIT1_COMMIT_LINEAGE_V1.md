@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2345**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2354**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2357,6 +2357,15 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-20T23:09:40+03:00` | `1903449220be` | yes | GOVERNANCE_CONTINUITY | plan v2: fix Stage41 observation fingerprint and remove phantom motion timeline claim | `canonical/MAINLINE_EXECUTION_PLAN_V2.json` | `main` |
 | `2026-09-20T23:09:44+03:00` | `548b9e2b8b8a` | yes | GOVERNANCE_CONTINUITY | authority: rebind reopened readiness to corrected V2 plan | `canonical/V2_IMPLEMENTATION_READINESS.json` | `main` |
 | `2026-09-20T23:09:48+03:00` | `2305465aa74a` | yes | GOVERNANCE_CONTINUITY | authority: rebind assembly governance ledger to corrected plan | `canonical/ACTIVE_RUN_V2.json` | `main` |
+| `2026-09-20T23:11:16+03:00` | `e5c0c0a66aed` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-20T23:11:30+03:00` | `1730c36c9d8b` | yes | CI_TEST, GOVERNANCE_CONTINUITY | test: lock V2 tail manifest fingerprint scope and motion authority title | `tests/repository/test_mainline_execution_plan_v2.py` | `main` |
+| `2026-09-20T23:12:18+03:00` | `7a03307a3a85` | yes | CI_TEST | dry-run v2: trigger on every implementation-closure input surface | `.github/workflows/v2_witness_orchestration_subject_free_dry_run.yml` | `main` |
+| `2026-09-20T23:12:38+03:00` | `df87541748a1` | yes | CI_TEST | ci v2: trigger mainline gate on every implementation-closure input | `.github/workflows/current_mainline_self_hosted_ci.yml` | `main` |
+| `2026-09-20T23:13:22+03:00` | `8e6055289eed` | yes | COMPILER_PROOF | readiness v2: forbid legacy presentation motion and donor codecs from current closure | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-20T23:14:40+03:00` | `b2f9318ddda1` | yes | COMPILER_PROOF | motion v2: align compiler documentation with Stage40-41 V2 numbering | `compiler/realsas_compiler_core/motion_compile_v2.py` | `main` |
+| `2026-09-20T23:14:44+03:00` | `b9f70b10f7b2` | yes | COMPILER_PROOF | motion dynamic v2: correct mesh qualification stage identity | `compiler/realsas_compiler_core/motion_dynamic_proof_v2.py` | `main` |
+| `2026-09-20T23:15:21+03:00` | `98145343e540` | yes | COMPILER_PROOF | orchestrator v2: bind cache identity to typed dependency outputs | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-20T23:15:36+03:00` | `61005d81933f` | yes | CI_TEST | test: red-team typed dependency cache identity and sealed output metadata | `tests/repository/test_mainline_v2_dag_scheduler.py` | `main` |
 
 ## Use rule
 

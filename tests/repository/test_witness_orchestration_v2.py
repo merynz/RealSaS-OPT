@@ -28,6 +28,7 @@ def test_fresh_run_ledger_is_run_scoped_and_preserves_dag_ready_set():
     assert ledger["run_id"] == "TEST_RUN"
     assert ledger["subject_id"] == "TEST_SUBJECT"
     assert ledger["architecture_scope"] == "TEST_V2_RUN"
+    assert ledger["execution_class"] == "WITNESS"
     assert ledger["completed_count"] == 0
     assert ledger["failed_count"] == 0
     assert ledger["total_count"] == 46
@@ -90,3 +91,34 @@ def test_readiness_is_reopened_until_witness_orchestration_proof_passes():
     assert proof["status"] == "IN_PROGRESS"
     assert readiness["readiness_seal"]["status"] == "REVOKED_BY_AUDIT_GAP"
     assert readiness["readiness_seal"]["witness_execution_allowed"] is False
+
+
+def test_implementation_audit_execution_class_is_explicit_and_subject_free():
+    plan = _plan()
+    ledger = mainline.build_fresh_run_ledger(
+        plan,
+        run_id="AUDIT",
+        subject_id="SUBJECT_FREE_ORCHESTRATION_FIXTURE",
+        manifest_ref="/tmp/audit/run_manifest.json",
+        architecture_scope="REALSAS_V2_IMPLEMENTATION_DRY_RUN",
+        execution_class="IMPLEMENTATION_AUDIT",
+    )
+    assert ledger["execution_class"] == "IMPLEMENTATION_AUDIT"
+    assert ledger["subject_id"] == "SUBJECT_FREE_ORCHESTRATION_FIXTURE"
+
+
+def test_implementation_audit_rejects_named_product_subject():
+    import pytest
+
+    with pytest.raises(
+        RuntimeError,
+        match="IMPLEMENTATION_AUDIT_REQUIRES_SUBJECT_FREE_SUBJECT_ID",
+    ):
+        mainline.build_fresh_run_ledger(
+            _plan(),
+            run_id="BAD_AUDIT",
+            subject_id="SUBJECT2_KNIGHT",
+            manifest_ref="/tmp/audit/run_manifest.json",
+            architecture_scope="REALSAS_V2_IMPLEMENTATION_DRY_RUN",
+            execution_class="IMPLEMENTATION_AUDIT",
+        )

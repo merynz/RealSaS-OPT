@@ -5,7 +5,7 @@
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
-  "pipeline_plan_sha256": "94ad6de1aa5f1c5b8b9755ba33e3ca89ec147d5246f5c01ff123c6870d88be0c",
+  "pipeline_plan_sha256": "91a306baf6f1b189dc413d98aceb72e7688b31d1df3b446e1570c6f8402ce584",
   "status": "ASSEMBLY_IN_PROGRESS__WITNESS_EXECUTION_DISABLED",
   "execution_enabled": false,
   "completed_count": 0,
@@ -592,6 +592,10 @@
     {
       "event": "CAA_STAGE20_25_BOUND",
       "note": "Complete deterministic appearance branch and attributed reference-rest proof are now current V2 adapters."
+    },
+    {
+      "event": "ALL_46_STAGES_BOUND",
+      "note": "Stages37-46 now point to V2 presentation, complete-puppet, motion, runtime, visual-integrity and closure adapters. Exact direct-consumption dependency edges rebased."
     }
   ]
 }

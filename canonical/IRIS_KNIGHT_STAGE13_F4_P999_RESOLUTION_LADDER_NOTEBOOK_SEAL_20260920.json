@@ -1,0 +1,27 @@
+{
+  "schema": "RealSaS.IRIS.KnightStage13F4ResolutionLadderNotebookSeal.v1",
+  "date_utc": "2026-09-20",
+  "status": "SEALED_BEFORE_EXECUTION",
+  "subject_run_id": "SUBJECT2_KNIGHT_V1",
+  "attempt_protocol": "F4_STAGE13_P999_RESOLUTION_LADDER",
+  "research_branch": "research/knight-stage13-feasibility-v1-20260920",
+  "f3_closure_commit": "7dfaf59ed31b014df4f31f393ffa72195cd47c4d",
+  "preregistration_commit": "91490279128eb5edfd96d8f9a5a3e32807eeec2c",
+  "preregistration_path": "canonical/IRIS_KNIGHT_STAGE13_F4_P999_RESOLUTION_LADDER_PREREG_20260920.json",
+  "notebook_name": "RealSaS_IRIS_KNIGHT_A100_RUN_ALL_F4_P999_RESOLUTION_LADDER.ipynb",
+  "notebook_sha256": "9050f841aefe172ab66e5858c5cd1b3e678cff96589d197508527ebafbb15934",
+  "notebook_bytes": 23347,
+  "code_cells": 6,
+  "static_audit": {
+    "nbformat_validation": "PASS",
+    "explicit_cell_ids": "PASS",
+    "per_cell_python_compile": "PASS",
+    "concatenated_python_compile": "PASS",
+    "resolution_ladder_check": "PASS__384_THEN_512",
+    "optimizer_absence_check": "PASS",
+    "corrected_raster_cell_support_check": "PASS"
+  },
+  "execution_status_at_seal": "UNEXECUTED",
+  "result_known_at_seal": false,
+  "canonical_product_authority_minted": false
+}

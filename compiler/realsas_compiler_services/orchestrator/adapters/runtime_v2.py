@@ -779,11 +779,29 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 alpha_transparent += int(
                     np.count_nonzero(visible & (rgba[:, :, 3] == 0))
                 )
-                compiled_mask = visible & (
-                    (prov == int(CAA_PROVENANCE["COMPILED_NEAREST_SURFACE"]))
-                    | (prov == int(CAA_PROVENANCE["COMPILED_GLOBAL_SURFACE"]))
+                nearest_mask = visible & (
+                    prov == int(CAA_PROVENANCE["COMPILED_NEAREST_SURFACE"])
                 )
-                compiled_visible += int(np.count_nonzero(compiled_mask))
+                global_mask = visible & (
+                    prov == int(CAA_PROVENANCE["COMPILED_GLOBAL_SURFACE"])
+                )
+                compiled_mask = nearest_mask | global_mask
+                compiled_count = int(np.count_nonzero(compiled_mask))
+                global_count = int(np.count_nonzero(global_mask))
+                compiled_visible += compiled_count
+                compiled_global_visible += global_count
+                if visible_count > 0:
+                    max_frame_compiled_fraction = max(
+                        max_frame_compiled_fraction,
+                        float(compiled_count) / float(visible_count),
+                    )
+                    max_connected_compiled_fraction = max(
+                        max_connected_compiled_fraction,
+                        _largest_connected_fraction(
+                            compiled_mask,
+                            denominator=visible_count,
+                        ),
+                    )
                 undefined_visible += int(np.count_nonzero(visible & (prov == 255)))
 
                 reference = _reference_frame(
@@ -812,6 +830,17 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                         int(index)
                         for index in np.nonzero(counts >= min_visible_pixels)[0]
                     }
+                    micro = np.nonzero(
+                        (counts > 0) & (counts < min_visible_pixels)
+                    )[0]
+                    micro_pixels = (
+                        0 if len(micro) == 0 else int(np.sum(counts[micro]))
+                    )
+                    max_frame_micro_visible_fraction = max(
+                        max_frame_micro_visible_fraction,
+                        float(micro_pixels) / float(visible_count),
+                    )
+                    consequential_visible_face_count += len(consequential)
                 else:
                     consequential = set()
 

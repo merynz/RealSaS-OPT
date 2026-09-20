@@ -150,6 +150,71 @@ def validate_plan(plan: dict) -> str:
     return content_sha256(plan)
 
 
+IMPLEMENTATION_CLOSURE_STATIC_PATHS = (
+    "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+    ".github/workflows/current_mainline_self_hosted_ci.yml",
+    ".github/workflows/v2_witness_orchestration_subject_free_dry_run.yml",
+    ".github/workflows/subject2_knight_observation_preflight.yml",
+    "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
+    "canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json",
+    "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json",
+    "canonical/V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md",
+    "requirements/mainline-ci.txt",
+    "requirements/torch-cpu.txt",
+)
+
+IMPLEMENTATION_CLOSURE_TEST_ROOTS = (
+    "tests/repository",
+    "tests/compiler",
+    "tests/models",
+    "tests/iris",
+)
+
+
+def _implementation_closure_test_files() -> tuple[str, ...]:
+    rows: list[str] = []
+    for root_rel in IMPLEMENTATION_CLOSURE_TEST_ROOTS:
+        root = ROOT / root_rel
+        if not root.is_dir():
+            raise RuntimeError(f"V2_IMPLEMENTATION_TEST_ROOT_MISSING:{root_rel}")
+        for path in sorted(root.rglob("*.py")):
+            rows.append(str(path.relative_to(ROOT).as_posix()))
+    return tuple(rows)
+
+
+def implementation_closure_manifest(plan: dict | None = None) -> dict:
+    plan = plan or load_json(PLAN_PATH)
+    plan_hash = validate_plan(plan)
+    adapter_rows = []
+    for stage in sorted(plan["stages"], key=lambda row: int(row["ordinal"])):
+        adapter = str(stage["adapter"])
+        adapter_rows.append(
+            {
+                "stage_id": str(stage["id"]),
+                "adapter": adapter,
+                "implementation_hash": _adapter_impl_hash(adapter),
+            }
+        )
+
+    file_rows = []
+    for rel in tuple(IMPLEMENTATION_CLOSURE_STATIC_PATHS) + _implementation_closure_test_files():
+        path = ROOT / rel
+        if not path.is_file():
+            raise RuntimeError(f"V2_IMPLEMENTATION_CLOSURE_FILE_MISSING:{rel}")
+        file_rows.append({"path": rel, "sha256": sha256_file(path)})
+
+    return {
+        "schema": "RealSaS.V2ImplementationClosure.v1",
+        "pipeline_plan_sha256": plan_hash,
+        "adapter_implementation_closures": adapter_rows,
+        "critical_files": file_rows,
+    }
+
+
+def implementation_closure_sha256(plan: dict | None = None) -> str:
+    return content_sha256(implementation_closure_manifest(plan))
+
+
 def validate_readiness(plan: dict | None = None) -> str:
     plan = plan or load_json(PLAN_PATH)
     plan_hash = validate_plan(plan)
@@ -164,6 +229,12 @@ def validate_readiness(plan: dict | None = None) -> str:
         )
     if readiness.get("pipeline_plan_sha256") != plan_hash:
         raise RuntimeError("V2_IMPLEMENTATION_READINESS_PLAN_HASH_DRIFT")
+    expected_closure = implementation_closure_sha256(plan)
+    if readiness.get("implementation_closure_sha256") != expected_closure:
+        raise RuntimeError(
+            "V2_IMPLEMENTATION_READINESS_CLOSURE_HASH_DRIFT:"
+            f"{readiness.get('implementation_closure_sha256','')}!={expected_closure}"
+        )
     unbound = [
         str(stage["id"])
         for stage in plan["stages"]
@@ -887,6 +958,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("validate-plan")
     sub.add_parser("validate-readiness")
+    sub.add_parser("implementation-closure")
     status_parser = sub.add_parser("status")
     status_parser.add_argument(
         "--run-id",
@@ -926,6 +998,19 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "validate-readiness":
         digest = validate_readiness(plan)
         print(f"MAINLINE_V2_READINESS_PASS readiness_sha256={digest}")
+        return 0
+    if args.command == "implementation-closure":
+        manifest = implementation_closure_manifest(plan)
+        digest = content_sha256(manifest)
+        print(
+            json.dumps(
+                {
+                    "implementation_closure_sha256": digest,
+                    "manifest": manifest,
+                },
+                sort_keys=True,
+            )
+        )
         return 0
 
     if args.command == "status":

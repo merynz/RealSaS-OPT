@@ -1,31 +1,50 @@
 # Canonical Authority Index
 
-`canonical/` stores current decisions/evidence plus continuity state. It is not executable product ownership.
+`canonical/` contains current authority, preregistration, proof evidence and preserved historical scientific provenance.
+
+**Current continuation is RealSaS V2 on `main`.** Dated V1/Mage/FIT documents remain evidence only unless the current authority spine explicitly promotes them.
 
 ## Start here
 
-1. `REHYDRATION_PACKET.md`
-2. `../CURRENT_STATE.md`
-3. `FIT1_EVIDENCE_INDEX_20260909.md`
-4. `MAGE_FIT1_RIGGING_CORE_CLOSURE_20260911.md`
-5. `ARACHNE_A1_V5_MINIMAL_K4_DIRECT_SIMPLEX_FIT1_PROMOTION_20260911.md`
-6. `ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json`
-7. `FIT1_SCIENTIFIC_LINEAGE_V1.md`
-8. `ARCHITECTURE_AUTHORITY_LEDGER_V1.md`
-9. `EXPERIMENT_AUTHORITY_LEDGER_V1.md`
-10. `EXPERIMENT_REGISTRY_V2.json`
-11. `SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
-12. `LIVE_AUTHORITY_MAP.md`
+1. `V2_IMPLEMENTATION_READINESS.json`
+2. `MAINLINE_EXECUTION_PLAN_V2.json`
+3. `../CURRENT_STATE.md`
+4. `CONTEXT_STATE_V2.json`
+5. `V1_TO_V2_ARCHITECTURE_TRANSITION_20260920.md`
+6. `REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+7. `COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+8. `CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json`
+9. `V2_ADVERSARIAL_MODULE_AUDIT_PROTOCOL_20260920.md`
+10. `V2_ADVERSARIAL_MODULE_AUDIT_LEDGER_20260920.json`
+11. `AUTHORITY_MAP_V1.json`
+12. `EXPERIMENT_REGISTRY_V3.json`
+13. `SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+14. `REHYDRATION_PACKET.md` — generated navigation/cache, not independent authority.
 
-## Current promoted Mage FIT1 evidence
+## Current product authority
 
-- IRIS/GSA upstream signed/surface witness — promoted/frozen input authority;
-- Geppetto reference-strength V1 — FIT1 terminal PASS / promoted frozen source;
-- Arachne V5 minimal K4 direct simplex — FIT1 PASS / promoted frozen source;
-- Compiler QualifiedSkeletonIR and QualifiedSkinIR legality/qualification — PASS for Mage FIT1.
+RealSaS V2 has three co-equal product-quality authorities:
 
-The rigging-core FIT1 chain is closed. Generalization and full PRODUCT_PASS remain separate future gates.
+- **Geometry** — canonical renderable surface, silhouette capacity, topology, stable addressing and rasterizable conditioning.
+- **Mechanics** — skeleton, skin, deformation, contacts and motion.
+- **Appearance** — complete source-preserving 2D art, provenance, holdout/seam quality, alpha/sampling and dynamic exposure.
 
-## Historical evidence rule
+Visibility is owned by posed canonical XYZ + camera depth. Appearance does not choose the front surface.
 
-Dated failures and diagnostic branches remain preserved scoped evidence. A later promotion supersedes their continuation role but never rewrites the scientific outcome.
+The current mainline is a 46-stage dependency DAG. Ordinals are documentation order only.
+
+## Execution authority
+
+`canonical/ACTIVE_RUN_V2.json` is repository implementation-governance state only.
+
+Real executions use run-local ledgers:
+
+`$REALSAS_AUTHORITY_ROOT/runs/<run_id>/ACTIVE_RUN_V2.json`
+
+A subject witness is forbidden unless `V2_IMPLEMENTATION_READINESS.json` is exactly `READY_FOR_WITNESS_EXECUTION` and its implementation-closure fingerprint still matches current main.
+
+## Historical evidence
+
+Mage FIT1/FIT2, V1 40-stage product contracts, donor-era appearance/runtime documents and older branch artifacts remain preserved scientific provenance. They do not become current authority because they are newer by filename, referenced by an old report, or still importable.
+
+Promotion never deletes historical evidence; supersession changes continuation authority only.

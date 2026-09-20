@@ -22,6 +22,11 @@ on:
       - 'canonical/COMPILER_LBS_PRODUCTION_PROMOTION_V1_20260903.json'
       - '.github/workflows/proof_service_promotion_gate.yml'
 
+
+concurrency:
+  group: proof-service-promotion-gate-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   proof-service-promotion:
     runs-on: [self-hosted, linux, x64, realsas]

@@ -11,7 +11,7 @@
 - Current state: V2_STAGE_REDTEAM_REOPENED__WITNESS_FORBIDDEN
 - Active experiment: V2_IMPLEMENTATION_ASSEMBLY
 - Most recent closed gate: SELF_HOSTED_MAINLINE_AND_SUBJECT_FREE_ORCHESTRATION_GREEN__STAGE_REDTEAM_REOPENED
-- Canonical main: 66d2e2a0cd60
+- Canonical main: 4419509ee0f6
 - Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
 - Plan SHA-256: b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f
 - Promotion block: Do not execute Knight. RT-37 automatic presentation segmentation and RT-45/46 dynamic appearance-quality/closure-claim gaps must be resolved or explicitly narrowed before a new readiness seal.

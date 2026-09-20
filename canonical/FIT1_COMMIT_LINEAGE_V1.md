@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2433**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2435**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2445,6 +2445,8 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-21T00:18:25+03:00` | `a43bc01d13a1` | yes | CI_TEST, COMPILER_PROOF | test: calibrate dynamic appearance gates without witness data | `tests/compiler/test_dynamic_appearance_conditioning_v2.py` | `main` |
 | `2026-09-21T00:18:31+03:00` | `091ddd24a7f1` | yes | COMPILER_PROOF | orchestrator: seal dynamic appearance calibration in closure | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
 | `2026-09-21T00:18:38+03:00` | `66d2e2a0cd60` | yes | CI_TEST | ci: trigger dry-run on dynamic appearance calibration | `.github/workflows/v2_witness_orchestration_subject_free_dry_run.yml` | `main` |
+| `2026-09-21T00:22:41+03:00` | `cf32eee16a6b` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-21T00:33:25+03:00` | `4419509ee0f6` | yes | GOVERNANCE_CONTINUITY | docs: synchronize V2 red-team hardened authority navigation | `AGENTS.md`<br>`README.md`<br>`REPOSITORY_MAP.md`<br>`SYSTEM_INDEX.md`<br>`canonical/README.md` | `main` |
 
 ## Use rule
 

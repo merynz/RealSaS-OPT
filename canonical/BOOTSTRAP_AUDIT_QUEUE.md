@@ -5,9 +5,9 @@
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
 - Census artifacts in declared scope: **510 / 510 discovered (100%)**
-- Semantically reconciled: **58**
-- Catalogued but unreviewed: **452**
-- Semantic coverage: **11.4%**
+- Semantically reconciled: **55**
+- Catalogued but unreviewed: **455**
+- Semantic coverage: **10.8%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -487,7 +487,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D2D319509ACF` `WORKFLOW` — `main` :: `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` @ blob `16bf42a72ecc`
 - `KA-03510A41D0D4` `WORKFLOW` — `main` :: `.github/workflows/prefit_observation_authority_v1.yml` @ blob `b04004000018`
 - `KA-FDE35053B8A7` `WORKFLOW` — `main` :: `.github/workflows/single_family_data_contract_v1.yml` @ blob `929df12d859e`
-- `KA-74FF5CBF2579` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `2911b396e9c3`
+- `KA-7E7017F56954` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `204f26bd2bd2`
 - `KA-25BB7CDC0AB9` `AUTHORITY_DECISION` — `main` :: `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` @ blob `6b5fff12a484`
 - `KA-DC74ABB19F22` `PREREG` — `main` :: `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` @ blob `c01e1a65f75e`
 - `KA-E1571E78A4A5` `PREREG` — `main` :: `canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md` @ blob `36aef9ae6ecd`
@@ -619,9 +619,10 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-2AC6CF459CCF` `PREREG` — `playback-stack-v1-20260916` :: `experiments/mage_full_subject_reclosure_v1/IRIS_H1_V2_FULL_SUBJECT_RECLOSURE_PREREG_V1.json` @ blob `8bf55aa736a0`
 - `KA-9B307C02C7A5` `PREREG` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/IRIS_H1_V2_FULL_SUBJECT_RECLOSURE_PREREG_V1.json` @ blob `8bf55aa736a0`
 
-### UNKNOWN_DATE :: REPOSITORY_GOVERNANCE (18)
+### UNKNOWN_DATE :: REPOSITORY_GOVERNANCE (21)
 
 - `KA-BF916410D0E9` `WORKFLOW` — `fit2/mage-full-subject-reclosure` :: `.github/workflows/completion_audit_contract.yml` @ blob `0a4881a2952f`
+- `KA-033B4CF18084` `HIGH_SIGNAL_OTHER` — `fit2/mage-full-subject-reclosure` :: `REPOSITORY_MAP.md` @ blob `e3b4fc8a05a3`
 - `KA-07A3989FD5C8` `WORKFLOW` — `main` :: `.github/workflows/architecture_freeze_source_gate.yml` @ blob `97e8cdbc15b4`
 - `KA-987B1FC6C0D1` `WORKFLOW` — `main` :: `.github/workflows/architecture_freeze_v2_candidate.yml` @ blob `35cae071018b`
 - `KA-60E4A8375874` `WORKFLOW` — `main` :: `.github/workflows/completion_audit_contract.yml` @ blob `ff9e0488a0b4`
@@ -637,7 +638,9 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-731F02930053` `PREREG` — `main` :: `experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_STUDY_V1_PREREG.md` @ blob `6f5f3219d685`
 - `KA-496FB5F54F2A` `AUTHORITY_DECISION` — `main` :: `experiments/post_corpus_audit/post_corpus_stage_b_selective_authority_v1.py` @ blob `837a9d0159c6`
 - `KA-7256E6A8F6CD` `WORKFLOW` — `playback-stack-v1-20260916` :: `.github/workflows/completion_audit_contract.yml` @ blob `0a4881a2952f`
+- `KA-AEE91EE05F68` `HIGH_SIGNAL_OTHER` — `playback-stack-v1-20260916` :: `REPOSITORY_MAP.md` @ blob `e3b4fc8a05a3`
 - `KA-419CB3820692` `WORKFLOW` — `repair/mage-full-subject-reclosure-20260912` :: `.github/workflows/completion_audit_contract.yml` @ blob `0a4881a2952f`
+- `KA-5009D0433825` `HIGH_SIGNAL_OTHER` — `repair/mage-full-subject-reclosure-20260912` :: `REPOSITORY_MAP.md` @ blob `e3b4fc8a05a3`
 - `KA-5A86DFD4CA5A` `AUTHORITY_DECISION` — `repair/mage-full-subject-reclosure-20260912` :: `canonical/BRANCH_AUTHORITY_V1.md` @ blob `8dc100c60438`
 
 ### UNKNOWN_DATE :: RUNTIME_EXPORT (3)

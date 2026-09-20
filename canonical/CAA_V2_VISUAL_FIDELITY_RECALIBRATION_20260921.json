@@ -180,6 +180,13 @@
       "owner": "End-to-end production-policy validation",
       "finding": "The principal Stage37-46 integration fixture overrides multiple production appearance/DVI thresholds to permissive values for its tiny synthetic asset. Unit tests exercise individual production policy fields, but the exact production policy is not yet proven feasible end-to-end on a representative subject-free art/geometry/motion control.",
       "required_closure": "Create a representative subject-free end-to-end control bank that runs the unmodified production geometry/CAA/DVI policies, including thin line art, alpha edges, occlusion completion, articulated motion, near-depth overlap and rigid/deformable presentation groups. No fixture-only threshold relaxation may count as product readiness."
+    },
+    {
+      "id": "VF-24",
+      "severity": "HIGH",
+      "owner": "Runtime raster coverage / temporal edge quality",
+      "finding": "Reference and native V2 visibility use one binary pixel-center triangle coverage sample. CAA alpha is applied only after geometry ownership, so subpixel silhouette coverage has no MSAA/analytic coverage authority. Native/reference parity can therefore certify identical edge popping/jaggies during motion.",
+      "required_closure": "Add subject-free moving thin-edge/subpixel-silhouette temporal controls and qualify a coverage/AA contract (analytic coverage, supersampling/MSAA-equivalent or another deterministic scheme) shared by reference/native runtime. Gate temporal edge shimmer independently from texture minification."
     }
   ],
   "false_or_overstated_external_findings": [

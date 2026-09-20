@@ -10,6 +10,7 @@ from compiler.realsas_compiler_core.appearance_compile_v2 import (
     triangular_barycentric_samples,
 )
 from compiler.realsas_compiler_core.appearance_quality_v2 import (
+    cross_view_source_compatibility_metrics,
     provenance_boundary_metrics,
     structured_holdout_metrics,
 )
@@ -243,3 +244,36 @@ def test_shared_canonical_edge_is_checked_even_when_provenance_class_matches():
     assert metrics["donor_view_switch_pair_count"] > 0
     assert metrics["boundary_pair_count"] > 0
     assert metrics["p95_rgba_l1"] > 0.1
+
+
+def test_cross_view_compatibility_measures_same_canonical_source_without_requiring_rgb_identity():
+    count = 12
+    valid = np.ones((8, count), dtype=bool)
+    rgba = np.zeros((8, count, 4), dtype=np.uint8)
+    rgba[:, :, 3] = 255
+    component = np.asarray([0] * 6 + [1] * 6, dtype=np.int32)
+    for view in range(8):
+        rgba[view, :, 0] = 80 + view
+        rgba[view, :, 1] = 120
+    metrics = cross_view_source_compatibility_metrics(
+        direct_valid=valid,
+        direct_rgba=rgba,
+        sample_component_index=component,
+    )
+    assert metrics["pair_count"] == 8
+    assert metrics["shared_direct_sample_count"] == 8 * count
+    assert len(metrics["per_pair"]) == 8
+    assert len(metrics["per_pair_component"]) == 16
+    assert metrics["raw_rgb_equality_required"] is False
+    assert metrics["measurement_is_compatibility_not_color_authority"] is True
+
+    broken = rgba.copy()
+    broken[1, :, 0] = 255
+    bad = cross_view_source_compatibility_metrics(
+        direct_valid=valid,
+        direct_rgba=broken,
+        sample_component_index=component,
+    )
+    assert bad["p95_premultiplied_rgba_l1"] > metrics[
+        "p95_premultiplied_rgba_l1"
+    ]

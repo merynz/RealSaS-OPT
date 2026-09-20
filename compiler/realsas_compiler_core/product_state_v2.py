@@ -270,6 +270,10 @@ def build_presentation_structure_v2(
             "appearance_authority_owned_elsewhere": True,
             "depth_authority_owned_elsewhere": True,
             "categorical_recognition_used": False,
+            "automatic_presentation_segmentation_scope": "CONNECTED_FACE_ISLANDS_WITHIN_MECHANICAL_COMPONENT",
+            "connected_mechanically_equivalent_visual_region_auto_split_claimed": False,
+            "original_artist_layer_recovery_claimed": False,
+            "face_membership_edit_source_available": True,
         },
     )
     value = replace(value, structure_hash=presentation_structure_v2_hash(value))
@@ -394,6 +398,9 @@ def build_caa_bound_presentation_graph(
             "visibility_authority": VISIBILITY_CONTRACT_V2["authority"],
             "visibility_contract_hash": VISIBILITY_CONTRACT_V2_HASH,
             "runtime_donor_search_forbidden": True,
+            "automatic_presentation_segmentation_scope": "CONNECTED_FACE_ISLANDS_WITHIN_MECHANICAL_COMPONENT",
+            "connected_mechanically_equivalent_visual_region_auto_split_claimed": False,
+            "original_artist_layer_recovery_claimed": False,
         },
         presentation_lineage_hash="",
         metadata={

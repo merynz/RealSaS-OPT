@@ -50,6 +50,21 @@ from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import 
 from compiler.realsas_compiler_core.types import QualificationError
 
 
+def _require_caa_final_mesh_candidate_binding(mesh, asset) -> str:
+    source_candidate_hash = str(
+        mesh.metadata.get("source_candidate_lineage_hash") or ""
+    )
+    if not source_candidate_hash:
+        raise QualificationError(
+            "PRESENTATION_V2_MESH_SOURCE_CANDIDATE_BINDING_MISSING"
+        )
+    if str(asset.candidate_mesh_binding_hash) != source_candidate_hash:
+        raise QualificationError(
+            "PRESENTATION_V2_CAA_MESH_CANDIDATE_BINDING_DRIFT"
+        )
+    return source_candidate_hash
+
+
 def qualify_presentation_structure_stage(ctx: dict) -> dict:
     skeleton = qualified_skeleton_from_dict(
         stage_output_payload(
@@ -100,13 +115,7 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
     )
     if appearance.asset_binding_hash != asset.asset_hash:
         raise QualificationError("PRESENTATION_V2_APPEARANCE_BINDING_DRIFT")
-    source_candidate_hash = str(
-        mesh.metadata.get("source_candidate_lineage_hash") or ""
-    )
-    if not source_candidate_hash:
-        raise QualificationError("PRESENTATION_V2_MESH_SOURCE_CANDIDATE_BINDING_MISSING")
-    if asset.candidate_mesh_binding_hash != source_candidate_hash:
-        raise QualificationError("PRESENTATION_V2_CAA_MESH_CANDIDATE_BINDING_DRIFT")
+    _require_caa_final_mesh_candidate_binding(mesh, asset)
     if str(appearance.qualification_report.get("status") or "") != "PASS_COMPLETE_APPEARANCE":
         raise QualificationError("PRESENTATION_V2_APPEARANCE_NOT_QUALIFIED")
 
@@ -317,13 +326,7 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
     )
     if appearance.asset_binding_hash != asset.asset_hash:
         raise ValueError("COMPLETE_PUPPET_CAA_QUALIFICATION_ASSET_DRIFT")
-    source_candidate_hash = str(
-        mesh.metadata.get("source_candidate_lineage_hash") or ""
-    )
-    if not source_candidate_hash:
-        raise ValueError("COMPLETE_PUPPET_MESH_SOURCE_CANDIDATE_BINDING_MISSING")
-    if asset.candidate_mesh_binding_hash != source_candidate_hash:
-        raise ValueError("COMPLETE_PUPPET_CAA_MESH_CANDIDATE_BINDING_DRIFT")
+    _require_caa_final_mesh_candidate_binding(mesh, asset)
     if partition_evidence.mesh_binding_hash != mesh.mesh_lineage_hash:
         raise ValueError("COMPLETE_PUPPET_PRESENTATION_PARTITION_MESH_DRIFT")
     if partition_evidence.appearance_asset_binding_hash != asset.asset_hash:

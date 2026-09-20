@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2324**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2345**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2336,6 +2336,27 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-20T22:59:03+03:00` | `ae4270851f1f` | yes | FIT_DATA | docs: replace stale Mage FIT2 root README with current RealSaS V2 architecture | `README.md` | `main` |
 | `2026-09-20T22:59:06+03:00` | `4fefca40affe` | yes | COMPILER_PROOF | readiness v2: bind root README into implementation closure | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
 | `2026-09-20T22:59:22+03:00` | `d7c19f900999` | yes | CI_TEST, FIT_DATA | test: prevent stale Mage repair-branch navigation from reentering current V2 | `tests/repository/test_witness_orchestration_v2.py` | `main` |
+| `2026-09-20T23:00:36+03:00` | `9f328ec582e6` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-20T23:00:40+03:00` | `46421e043ae7` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | presentation v2: replace legacy appearance-set graph fields with explicit CAA authority | `compiler/realsas_compiler_core/product_state_v2.py` | `main` |
+| `2026-09-20T23:01:07+03:00` | `c227c15d2ae8` | yes | COMPILER_PROOF | codec v2: decode explicit CAA-bound presentation graph v2 | `compiler/realsas_compiler_core/artifact_codec_v2.py` | `main` |
+| `2026-09-20T23:01:23+03:00` | `80652a68ce9e` | yes | COMPILER_PROOF | motion v2: bind compiler to presentation graph v2 mechanical and CAA semantics | `compiler/realsas_compiler_core/motion_compile_v2.py` | `main` |
+| `2026-09-20T23:03:08+03:00` | `5f8df684b557` | yes | COMPILER_PROOF | motion v2: validate dynamic proof against explicit presentation graph v2 | `compiler/realsas_compiler_core/motion_dynamic_proof_v2.py` | `main` |
+| `2026-09-20T23:03:35+03:00` | `4ce25812f124` | yes | COMPILER_PROOF | motion adapter v2: consume presentation graph v2 schema | `compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py` | `main` |
+| `2026-09-20T23:03:38+03:00` | `8970ebc95839` | yes | COMPILER_PROOF | closure v2: seal explicit presentation graph v2 in editable bundle | `compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py` | `main` |
+| `2026-09-20T23:04:25+03:00` | `a1e17f2b8e19` | yes | CI_TEST, COMPILER_PROOF | test: require explicit CAA-bound presentation graph v2 semantics | `tests/compiler/test_artifact_codec_v2.py` | `main` |
+| `2026-09-20T23:05:04+03:00` | `87209a809ae8` | yes | CI_TEST, COMPILER_PROOF | test: expect explicit V2 presentation graph in current Stage38 chain | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-20T23:05:18+03:00` | `02376a3a51f2` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | test: fail closed on explicit CAA-bound presentation graph v2 drift | `tests/compiler/test_v2_tail_authority_fail_closed.py` | `main` |
+| `2026-09-20T23:06:13+03:00` | `42bed5e8e90e` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | motion dynamic v2: own typed Stage41 authority without V1 proof imports | `compiler/realsas_compiler_core/motion_dynamic_proof_v2.py` | `main` |
+| `2026-09-20T23:06:42+03:00` | `9e804c34f0c7` | yes | COMPILER_PROOF | motion adapter v2: seal typed DynamicMotionIR v2 | `compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py` | `main` |
+| `2026-09-20T23:06:46+03:00` | `bde1277648dc` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | runtime v2: consume exact DynamicMotionIR v2 authority | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
+| `2026-09-20T23:06:50+03:00` | `b28956407d2a` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | closure v2: bind product seal to DynamicMotionIR v2 mechanical authority | `compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py` | `main` |
+| `2026-09-20T23:07:24+03:00` | `f64015cf6a3a` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | test: fail closed on DynamicMotionIR v2 mechanical and frame drift | `tests/compiler/test_v2_tail_authority_fail_closed.py` | `main` |
+| `2026-09-20T23:07:58+03:00` | `c005aadba335` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | motion dynamic v2: align module contract with current Stage41 authority | `compiler/realsas_compiler_core/motion_dynamic_proof_v2.py` | `main` |
+| `2026-09-20T23:08:19+03:00` | `8b93ebb9d781` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime v2: require dynamic motion to bind exact complete puppet mechanics and presentation | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
+| `2026-09-20T23:09:01+03:00` | `38d3f8e95387` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | readiness v2: make closure stable by hashing orchestrator source not generated authority cache | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-20T23:09:40+03:00` | `1903449220be` | yes | GOVERNANCE_CONTINUITY | plan v2: fix Stage41 observation fingerprint and remove phantom motion timeline claim | `canonical/MAINLINE_EXECUTION_PLAN_V2.json` | `main` |
+| `2026-09-20T23:09:44+03:00` | `548b9e2b8b8a` | yes | GOVERNANCE_CONTINUITY | authority: rebind reopened readiness to corrected V2 plan | `canonical/V2_IMPLEMENTATION_READINESS.json` | `main` |
+| `2026-09-20T23:09:48+03:00` | `2305465aa74a` | yes | GOVERNANCE_CONTINUITY | authority: rebind assembly governance ledger to corrected plan | `canonical/ACTIVE_RUN_V2.json` | `main` |
 
 ## Use rule
 

@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "d7c19f900999fee5ff77c26971131501bba0cc78",
+    "main": "2305465aa74a6be6a2f73064b63177aba111b72f",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -115,7 +115,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2324,
+  "commit_count": 2345,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -118648,6 +118648,469 @@
       "subsystem_tags": [
         "CI_TEST",
         "FIT_DATA"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9f328ec582e6ca1980bd7f992b327f9d190ce95c",
+      "parents": [
+        "d7c19f900999fee5ff77c26971131501bba0cc78"
+      ],
+      "author_time": "2026-09-20T23:00:36+03:00",
+      "committer_time": "2026-09-20T23:00:36+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "46421e043ae74b2f010b0f657d6bb18fa18c416a",
+      "parents": [
+        "9f328ec582e6ca1980bd7f992b327f9d190ce95c"
+      ],
+      "author_time": "2026-09-20T23:00:40+03:00",
+      "committer_time": "2026-09-20T23:00:40+03:00",
+      "subject": "presentation v2: replace legacy appearance-set graph fields with explicit CAA authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c227c15d2ae8ce9dbfae8742b232139526fbcbb6",
+      "parents": [
+        "46421e043ae74b2f010b0f657d6bb18fa18c416a"
+      ],
+      "author_time": "2026-09-20T23:01:07+03:00",
+      "committer_time": "2026-09-20T23:01:07+03:00",
+      "subject": "codec v2: decode explicit CAA-bound presentation graph v2",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/artifact_codec_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "80652a68ce9e3db96d1ec4887236d2129f36a6b7",
+      "parents": [
+        "c227c15d2ae8ce9dbfae8742b232139526fbcbb6"
+      ],
+      "author_time": "2026-09-20T23:01:23+03:00",
+      "committer_time": "2026-09-20T23:01:23+03:00",
+      "subject": "motion v2: bind compiler to presentation graph v2 mechanical and CAA semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5f8df684b5577f0101df095dba4d9e03dacfff96",
+      "parents": [
+        "80652a68ce9e3db96d1ec4887236d2129f36a6b7"
+      ],
+      "author_time": "2026-09-20T23:03:08+03:00",
+      "committer_time": "2026-09-20T23:03:08+03:00",
+      "subject": "motion v2: validate dynamic proof against explicit presentation graph v2",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_dynamic_proof_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4ce25812f12416b8a7e184068a68a9aa04a1d2d6",
+      "parents": [
+        "5f8df684b5577f0101df095dba4d9e03dacfff96"
+      ],
+      "author_time": "2026-09-20T23:03:35+03:00",
+      "committer_time": "2026-09-20T23:03:35+03:00",
+      "subject": "motion adapter v2: consume presentation graph v2 schema",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8970ebc95839d034dd77d75b2495c562e20de10b",
+      "parents": [
+        "4ce25812f12416b8a7e184068a68a9aa04a1d2d6"
+      ],
+      "author_time": "2026-09-20T23:03:38+03:00",
+      "committer_time": "2026-09-20T23:03:38+03:00",
+      "subject": "closure v2: seal explicit presentation graph v2 in editable bundle",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a1e17f2b8e195d0329b377e7e1f782899010b56c",
+      "parents": [
+        "8970ebc95839d034dd77d75b2495c562e20de10b"
+      ],
+      "author_time": "2026-09-20T23:04:25+03:00",
+      "committer_time": "2026-09-20T23:04:25+03:00",
+      "subject": "test: require explicit CAA-bound presentation graph v2 semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_artifact_codec_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "87209a809ae8a10846c011aadd08dd11a7135576",
+      "parents": [
+        "a1e17f2b8e195d0329b377e7e1f782899010b56c"
+      ],
+      "author_time": "2026-09-20T23:05:04+03:00",
+      "committer_time": "2026-09-20T23:05:04+03:00",
+      "subject": "test: expect explicit V2 presentation graph in current Stage38 chain",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "02376a3a51f295f90ed0c696a3184b5011a9fec6",
+      "parents": [
+        "87209a809ae8a10846c011aadd08dd11a7135576"
+      ],
+      "author_time": "2026-09-20T23:05:18+03:00",
+      "committer_time": "2026-09-20T23:05:18+03:00",
+      "subject": "test: fail closed on explicit CAA-bound presentation graph v2 drift",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "42bed5e8e90e41aae0fb74372baabece8b45957f",
+      "parents": [
+        "02376a3a51f295f90ed0c696a3184b5011a9fec6"
+      ],
+      "author_time": "2026-09-20T23:06:13+03:00",
+      "committer_time": "2026-09-20T23:06:13+03:00",
+      "subject": "motion dynamic v2: own typed Stage41 authority without V1 proof imports",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_dynamic_proof_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9e804c34f0c7bacb1f9910832e61fcee0838c457",
+      "parents": [
+        "42bed5e8e90e41aae0fb74372baabece8b45957f"
+      ],
+      "author_time": "2026-09-20T23:06:42+03:00",
+      "committer_time": "2026-09-20T23:06:42+03:00",
+      "subject": "motion adapter v2: seal typed DynamicMotionIR v2",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bde1277648dca6f810f44258ae8ef13a8adc9878",
+      "parents": [
+        "9e804c34f0c7bacb1f9910832e61fcee0838c457"
+      ],
+      "author_time": "2026-09-20T23:06:46+03:00",
+      "committer_time": "2026-09-20T23:06:46+03:00",
+      "subject": "runtime v2: consume exact DynamicMotionIR v2 authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b28956407d2ad8a46b7e3f15f21ebaa122a0461a",
+      "parents": [
+        "bde1277648dca6f810f44258ae8ef13a8adc9878"
+      ],
+      "author_time": "2026-09-20T23:06:50+03:00",
+      "committer_time": "2026-09-20T23:06:50+03:00",
+      "subject": "closure v2: bind product seal to DynamicMotionIR v2 mechanical authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f64015cf6a3aa41d50981fc4c8e2dc532cebeafb",
+      "parents": [
+        "b28956407d2ad8a46b7e3f15f21ebaa122a0461a"
+      ],
+      "author_time": "2026-09-20T23:07:24+03:00",
+      "committer_time": "2026-09-20T23:07:24+03:00",
+      "subject": "test: fail closed on DynamicMotionIR v2 mechanical and frame drift",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c005aadba335d71728cb40f922eec6fada84ff74",
+      "parents": [
+        "f64015cf6a3aa41d50981fc4c8e2dc532cebeafb"
+      ],
+      "author_time": "2026-09-20T23:07:58+03:00",
+      "committer_time": "2026-09-20T23:07:58+03:00",
+      "subject": "motion dynamic v2: align module contract with current Stage41 authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_dynamic_proof_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8b93ebb9d78151d350060367c728c8aaf1699d9e",
+      "parents": [
+        "c005aadba335d71728cb40f922eec6fada84ff74"
+      ],
+      "author_time": "2026-09-20T23:08:19+03:00",
+      "committer_time": "2026-09-20T23:08:19+03:00",
+      "subject": "runtime v2: require dynamic motion to bind exact complete puppet mechanics and presentation",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "38d3f8e953872bf918928d250deb3e71c5b27f3f",
+      "parents": [
+        "8b93ebb9d78151d350060367c728c8aaf1699d9e"
+      ],
+      "author_time": "2026-09-20T23:09:01+03:00",
+      "committer_time": "2026-09-20T23:09:01+03:00",
+      "subject": "readiness v2: make closure stable by hashing orchestrator source not generated authority cache",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1903449220bea987cab03361d1bc4b0dd9cb19fa",
+      "parents": [
+        "38d3f8e953872bf918928d250deb3e71c5b27f3f"
+      ],
+      "author_time": "2026-09-20T23:09:40+03:00",
+      "committer_time": "2026-09-20T23:09:40+03:00",
+      "subject": "plan v2: fix Stage41 observation fingerprint and remove phantom motion timeline claim",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/MAINLINE_EXECUTION_PLAN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "548b9e2b8b8a1be75fd0d0eac532a39ee42887e8",
+      "parents": [
+        "1903449220bea987cab03361d1bc4b0dd9cb19fa"
+      ],
+      "author_time": "2026-09-20T23:09:44+03:00",
+      "committer_time": "2026-09-20T23:09:44+03:00",
+      "subject": "authority: rebind reopened readiness to corrected V2 plan",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_IMPLEMENTATION_READINESS.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2305465aa74a6be6a2f73064b63177aba111b72f",
+      "parents": [
+        "548b9e2b8b8a1be75fd0d0eac532a39ee42887e8"
+      ],
+      "author_time": "2026-09-20T23:09:48+03:00",
+      "committer_time": "2026-09-20T23:09:48+03:00",
+      "subject": "authority: rebind assembly governance ledger to corrected plan",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

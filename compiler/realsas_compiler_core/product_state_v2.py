@@ -12,9 +12,8 @@ from .product_authority_v1 import (
     PresentationDecisionEvidenceIR,
     PresentationSlotIR,
     PresentationViewOverlayIR,
-    QualifiedPresentationGraphIR,
-    qualified_presentation_lineage_hash,
 )
+from .visibility_v2 import VISIBILITY_CONTRACT_V2, VISIBILITY_CONTRACT_V2_HASH
 from .types import QualificationError
 
 Json = dict[str, Any]
@@ -278,6 +277,36 @@ def build_presentation_structure_v2(
 
 
 @dataclass(frozen=True)
+class QualifiedPresentationGraphV2IR:
+    slots: tuple[PresentationSlotIR, ...]
+    attachments: tuple[PresentationAttachmentIR, ...]
+    view_overlays: tuple[PresentationViewOverlayIR, ...]
+    decisions: tuple[PresentationDecisionEvidenceIR, ...]
+    skeleton_binding_hash: str
+    mesh_binding_hash: str
+    partition_binding_hash: str
+    carrier_policy_binding_hash: str
+    mechanical_state_binding_hash: str
+    presentation_structure_binding_hash: str
+    complete_appearance_asset_binding_hash: str
+    complete_appearance_qualification_binding_hash: str
+    composition_policy_binding_hash: str
+    qualification_report: Json
+    presentation_lineage_hash: str
+    schema_version: str = "RealSaS.QualifiedPresentationGraphIR.v2"
+    metadata: Json = field(default_factory=dict)
+
+    def to_dict(self):
+        return asdict(self)
+
+
+def presentation_graph_v2_hash(value: QualifiedPresentationGraphV2IR) -> str:
+    payload = value.to_dict()
+    payload.pop("presentation_lineage_hash", None)
+    return content_sha256(payload)
+
+
+@dataclass(frozen=True)
 class CompletePuppetStateV2IR:
     mechanical_state_binding_hash: str
     skeleton_binding_hash: str
@@ -318,8 +347,9 @@ def build_caa_bound_presentation_graph(
     composition_hash = content_sha256(
         {
             "schema": "RealSaS.CompositionPolicy.v2",
-            "visibility": "CANONICAL_POSED_XYZ_ZBUFFER",
-            "equal_depth_tie": "STABLE_FACE_ID_ONLY",
+            "visibility_contract_hash": VISIBILITY_CONTRACT_V2_HASH,
+            "visibility_authority": VISIBILITY_CONTRACT_V2["authority"],
+            "equal_depth_tie": VISIBILITY_CONTRACT_V2["exact_depth_tie"],
             "setup_order_is_physical_depth": False,
             "texture_alpha_selects_front_surface": False,
         }
@@ -339,7 +369,7 @@ def build_caa_bound_presentation_graph(
             directions.directions, key=lambda row: row.direction_index
         )
     )
-    graph = QualifiedPresentationGraphIR(
+    graph = QualifiedPresentationGraphV2IR(
         slots=structure.slots,
         attachments=structure.attachments,
         view_overlays=overlays,
@@ -348,30 +378,32 @@ def build_caa_bound_presentation_graph(
         mesh_binding_hash=mesh.mesh_lineage_hash,
         partition_binding_hash=partition.partition_lineage_hash,
         carrier_policy_binding_hash=carrier_policy.carrier_policy_lineage_hash,
-        product_state_binding_hash=product_state.product_state_hash,
+        mechanical_state_binding_hash=product_state.product_state_hash,
         presentation_structure_binding_hash=structure.structure_hash,
-        appearance_set_binding_hash=str(appearance_qualification_hash),
-        composition_set_binding_hash=composition_hash,
+        complete_appearance_asset_binding_hash=str(appearance_asset_hash),
+        complete_appearance_qualification_binding_hash=str(
+            appearance_qualification_hash
+        ),
+        composition_policy_binding_hash=composition_hash,
         qualification_report={
             "status": "PASS_CAA_BOUND_PRESENTATION_V2",
             "role_free": True,
             "categorical_recognition_used": False,
             "appearance_authority": "COMPLETE_APPEARANCE_AUTHORITY_V2",
             "appearance_total": True,
-            "visibility_authority": "CANONICAL_POSED_XYZ_ZBUFFER",
+            "visibility_authority": VISIBILITY_CONTRACT_V2["authority"],
+            "visibility_contract_hash": VISIBILITY_CONTRACT_V2_HASH,
             "runtime_donor_search_forbidden": True,
         },
         presentation_lineage_hash="",
         metadata={
-            "caa_asset_hash": str(appearance_asset_hash),
-            "caa_qualification_hash": str(appearance_qualification_hash),
-            "legacy_appearance_set_semantics_used": False,
             "setup_order_not_depth_authority": True,
+            "legacy_appearance_set_semantics_used": False,
         },
     )
     return replace(
         graph,
-        presentation_lineage_hash=qualified_presentation_lineage_hash(graph),
+        presentation_lineage_hash=presentation_graph_v2_hash(graph),
     )
 
 
@@ -463,4 +495,88 @@ def complete_puppet_state_v2_from_dict(payload):
     )
     if value.complete_puppet_hash != complete_puppet_state_hash(value):
         raise QualificationError("COMPLETE_PUPPET_V2_HASH_DRIFT")
+    return value
+
+
+def presentation_graph_v2_from_dict(payload):
+    def _slot(row):
+        return PresentationSlotIR(
+            slot_id=str(row["slot_id"]),
+            bone_id=str(row["bone_id"]),
+            setup_order=int(row["setup_order"]),
+            default_attachment_id=(
+                None
+                if row.get("default_attachment_id") is None
+                else str(row["default_attachment_id"])
+            ),
+            keyable_channels=tuple(map(str, row.get("keyable_channels") or ())),
+            metadata=dict(row.get("metadata") or {}),
+        )
+
+    def _attachment(row):
+        return PresentationAttachmentIR(
+            attachment_id=str(row["attachment_id"]),
+            slot_id=str(row["slot_id"]),
+            mechanical_component_ids=tuple(
+                map(str, row.get("mechanical_component_ids") or ())
+            ),
+            mechanical_class=str(row["mechanical_class"]),
+            carrier_class=str(row["carrier_class"]),
+            carrier_binding_hash=str(row["carrier_binding_hash"]),
+            metadata=dict(row.get("metadata") or {}),
+        )
+
+    def _overlay(row):
+        return PresentationViewOverlayIR(
+            view_index=int(row["view_index"]),
+            camera_binding_hash=str(row["camera_binding_hash"]),
+            appearance_binding_hash=str(row["appearance_binding_hash"]),
+            composition_binding_hash=str(row["composition_binding_hash"]),
+            metadata=dict(row.get("metadata") or {}),
+        )
+
+    def _decision(row):
+        return PresentationDecisionEvidenceIR(
+            decision_id=str(row["decision_id"]),
+            decision_kind=str(row["decision_kind"]),
+            authority_class=str(row["authority_class"]),
+            evidence_refs=tuple(map(str, row.get("evidence_refs") or ())),
+            metadata=dict(row.get("metadata") or {}),
+        )
+
+    value = QualifiedPresentationGraphV2IR(
+        slots=tuple(_slot(row) for row in payload.get("slots") or ()),
+        attachments=tuple(
+            _attachment(row) for row in payload.get("attachments") or ()
+        ),
+        view_overlays=tuple(
+            _overlay(row) for row in payload.get("view_overlays") or ()
+        ),
+        decisions=tuple(_decision(row) for row in payload.get("decisions") or ()),
+        skeleton_binding_hash=str(payload["skeleton_binding_hash"]),
+        mesh_binding_hash=str(payload["mesh_binding_hash"]),
+        partition_binding_hash=str(payload["partition_binding_hash"]),
+        carrier_policy_binding_hash=str(payload["carrier_policy_binding_hash"]),
+        mechanical_state_binding_hash=str(payload["mechanical_state_binding_hash"]),
+        presentation_structure_binding_hash=str(
+            payload["presentation_structure_binding_hash"]
+        ),
+        complete_appearance_asset_binding_hash=str(
+            payload["complete_appearance_asset_binding_hash"]
+        ),
+        complete_appearance_qualification_binding_hash=str(
+            payload["complete_appearance_qualification_binding_hash"]
+        ),
+        composition_policy_binding_hash=str(
+            payload["composition_policy_binding_hash"]
+        ),
+        qualification_report=dict(payload.get("qualification_report") or {}),
+        presentation_lineage_hash=str(payload["presentation_lineage_hash"]),
+        schema_version=str(
+            payload.get("schema_version") or "RealSaS.QualifiedPresentationGraphIR.v2"
+        ),
+        metadata=dict(payload.get("metadata") or {}),
+    )
+    if value.presentation_lineage_hash != presentation_graph_v2_hash(value):
+        raise QualificationError("PRESENTATION_GRAPH_V2_HASH_DRIFT")
     return value

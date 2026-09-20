@@ -922,6 +922,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         "rest_min_source_alpha_precision",
         "rest_max_largest_coherent_alpha_hole_fraction",
         "rest_max_alpha_interior_uncovered_fraction",
+        "rest_max_exact_depth_ambiguous_fraction",
     )
     if any(key not in policy for key in required):
         raise QualificationError("CAA_REST_PROOF_POLICY_INCOMPLETE")
@@ -978,6 +979,14 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         )
 
         visible_count = int(np.count_nonzero(visible))
+        exact_depth_ambiguous_count = int(
+            np.count_nonzero(render.exact_depth_ambiguity)
+        )
+        exact_depth_ambiguous_fraction = (
+            0.0
+            if visible_count <= 0
+            else float(exact_depth_ambiguous_count) / float(visible_count)
+        )
         final_alpha_count = int(np.count_nonzero(final_alpha))
         hole = visible & ~final_alpha
         hole_count = int(np.count_nonzero(hole))
@@ -1028,6 +1037,8 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             <= float(policy["rest_max_largest_coherent_alpha_hole_fraction"])
             and float(alpha_metrics["interior_uncovered_fraction"])
             <= float(policy["rest_max_alpha_interior_uncovered_fraction"])
+            and exact_depth_ambiguous_fraction
+            <= float(policy["rest_max_exact_depth_ambiguous_fraction"])
         )
         all_pass = all_pass and view_pass
         rows.append(
@@ -1056,6 +1067,12 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                     "source_evidence_available": True,
                     "visibility_and_appearance_masks_separate": True,
                     "geometry_visible_alpha_zero_is_diagnostic_not_undefinedness": True,
+                    "exact_depth_ambiguous_pixel_count": exact_depth_ambiguous_count,
+                    "exact_depth_ambiguous_fraction": exact_depth_ambiguous_fraction,
+                    "exact_depth_ambiguity_passed": (
+                        exact_depth_ambiguous_fraction
+                        <= float(policy["rest_max_exact_depth_ambiguous_fraction"])
+                    ),
                 },
             )
         )
@@ -1127,5 +1144,9 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             ),
             "minimum_source_alpha_recall": min(row.source_alpha_recall for row in rows),
             "minimum_source_alpha_precision": min(row.source_alpha_precision for row in rows),
+            "maximum_exact_depth_ambiguous_fraction": max(
+                float(row.metadata.get("exact_depth_ambiguous_fraction", 0.0))
+                for row in rows
+            ),
         },
     }

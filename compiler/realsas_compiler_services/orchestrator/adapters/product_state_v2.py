@@ -12,7 +12,7 @@ from compiler.realsas_compiler_core.canonical_puppet_state_v1 import (
 from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
 )
-from compiler.realsas_compiler_core.product_artifact_codec_v1 import (
+from compiler.realsas_compiler_core.artifact_codec_v2 import (
     component_carrier_policy_from_dict,
     deformation_envelope_from_dict,
     mechanical_partition_from_dict,

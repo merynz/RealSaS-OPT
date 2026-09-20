@@ -22,7 +22,7 @@ from compiler.realsas_compiler_core.appearance_render_v2 import (
 from compiler.realsas_compiler_core.motion_dynamic_proof_v1 import (
     qualified_dynamic_motion_from_dict,
 )
-from compiler.realsas_compiler_core.playback_full_surface_v3 import qualify_camera_v3
+from compiler.realsas_compiler_core.camera_geometry_v2 import qualify_camera_v3
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_camera_set_from_dict,
     qualified_mesh_from_dict,

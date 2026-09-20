@@ -207,6 +207,16 @@ def seal_complete_puppet_stage(ctx: dict) -> dict:
     )
     if appearance.asset_binding_hash != asset.asset_hash:
         raise ValueError("COMPLETE_PUPPET_CAA_QUALIFICATION_ASSET_DRIFT")
+    if (
+        str(appearance.qualification_report.get("status") or "")
+        != "PASS_COMPLETE_APPEARANCE"
+    ):
+        raise ValueError("COMPLETE_PUPPET_CAA_QUALIFICATION_NOT_PASS")
+    if (
+        float(appearance.total_defined_fraction) != 1.0
+        or not bool(appearance.qualification_report.get("totality_passed", False))
+    ):
+        raise ValueError("COMPLETE_PUPPET_CAA_TOTALITY_NOT_PROVEN")
 
     mechanical = build_canonical_puppet_state(
         surface=surface,

@@ -23,7 +23,7 @@ from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
     rasterize_triangles_half_integer_top_left,
     source_connected_component_recall_metrics,
 )
-from compiler.realsas_compiler_core.playback_full_surface_v3 import project_points_xyz_v3
+from compiler.realsas_compiler_core.camera_geometry_v2 import project_points_xyz_v3
 from compiler.realsas_compiler_core.preproduct_authority_v1 import (
     RiggingSurfaceQualificationIR,
     SignedZeroSurfaceSealIR,

@@ -718,6 +718,11 @@ def qualified_mesh_intrinsic_audit(value: QualifiedMeshIR, *, surface, partition
     if declared_edges != derived_edges:
         raise QualificationError("QUALIFIED_MESH_G2_EDGE_FACE_TOPOLOGY_MISMATCH")
 
+    geometric_topology = _geometric_topology_crack_audit(
+        vertex_by_id,
+        value.faces,
+    )
+
     if min_angle + 1e-9 < G3_NUMERICAL_MIN_ANGLE_DEG:
         raise QualificationError("QUALIFIED_MESH_G3_NUMERICAL_MIN_ANGLE_FAIL")
     if max_aspect - 1e-9 > G3_NUMERICAL_MAX_ASPECT:
@@ -749,6 +754,7 @@ def qualified_mesh_intrinsic_audit(value: QualifiedMeshIR, *, surface, partition
         "rest_max_aspect_longest_over_min_altitude": max_aspect,
         "g3_numerical_min_angle_floor_deg": G3_NUMERICAL_MIN_ANGLE_DEG,
         "g3_numerical_max_aspect_ceiling": G3_NUMERICAL_MAX_ASPECT,
+        "g2_geometric_topology": geometric_topology,
         "preserve_continuity_constraints_checked": preserve_checked,
     }
 

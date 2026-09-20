@@ -6,15 +6,15 @@
 ## 60-second state
 
 - Product: automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics
-- Current witness: Subject-2 Knight (next witness; execution intentionally held)
-- Current module: V2 implementation assembly and adversarial authority cleanup
-- Current state: V2_IMPLEMENTATION_ASSEMBLY__WITNESS_EXECUTION_FORBIDDEN
+- Current witness: Subject-2 Knight (held; previous activation void)
+- Current module: V2 implementation and witness orchestration audit
+- Current state: V2_IMPLEMENTATION_AUDIT_REOPENED__WITNESS_FORBIDDEN
 - Active experiment: V2_IMPLEMENTATION_ASSEMBLY
-- Most recent closed gate: V1_TO_V2_AUTHORITY_RATIONALE_AND_APPEARANCE_COEQUALITY_FROZEN
-- Canonical main: 0855ab83c165
+- Most recent closed gate: PRIOR_READINESS_SEAL_REVOKED_AFTER_PRE_STAGE01_ORCHESTRATION_GAP
+- Canonical main: 55ee92851e13
 - Active run: V2_IMPLEMENTATION_ASSEMBLY — 0/46; next NONE
 - Plan SHA-256: a311563d728faaf60500c5c88c25f3534e7f05158968ff80d7a5cf525a09caf1
-- Promotion block: Do not execute Knight. Bind all 46 V2 adapters, re-audit IRIS/GSA geometry role, close relation-parent mesh feasibility, implement Complete Appearance Authority and premultiplied sampling, remove donor/UNSEEN from current runtime, prove canonical posed-XYZ visibility, and close dynamic visual integrity.
+- Promotion block: Do not execute Knight. Prove run-local ledger initialization, current target-closure CLI, workflow contract and Stage01-08 artifact/output schemas before resealing readiness.
 - Scope warning: No Knight-derived threshold choice is allowed during V2 assembly.
 
 ## Current machine authority

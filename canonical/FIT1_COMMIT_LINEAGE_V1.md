@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2242**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2282**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2254,6 +2254,46 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-20T21:43:21+03:00` | `3916486a98f1` | yes | GOVERNANCE_CONTINUITY | witness: activate fresh Knight V2 Stage01-08 preflight once | `canonical/SUBJECT2_KNIGHT_V2_WITNESS_ACTIVATION_20260920.json` | `main` |
 | `2026-09-20T21:44:13+03:00` | `1e9cfedf938c` | yes | CI_TEST | witness apparatus: remove sudo dependency and verify pinned headless Blender | `.github/workflows/subject2_knight_observation_preflight.yml` | `main` |
 | `2026-09-20T21:44:24+03:00` | `0855ab83c165` | yes | GOVERNANCE_CONTINUITY | witness: retry Knight V2 preflight after pre-Stage01 apparatus fix | `canonical/SUBJECT2_KNIGHT_V2_WITNESS_ACTIVATION_20260920.json` | `main` |
+| `2026-09-20T21:50:15+03:00` | `fef7ceedc976` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-20T22:12:19+03:00` | `5ff660d9bd0b` | yes | CI_TEST | witness apparatus: use V2 target DAG CLI and run-local Knight ledger | `.github/workflows/subject2_knight_observation_preflight.yml` | `main` |
+| `2026-09-20T22:12:36+03:00` | `42e49fc94727` | yes | GOVERNANCE_CONTINUITY | witness: retry Knight V2 preflight with current DAG CLI | `canonical/SUBJECT2_KNIGHT_V2_WITNESS_ACTIVATION_20260920.json` | `main` |
+| `2026-09-20T22:13:53+03:00` | `4077d8b02a1f` | yes | GOVERNANCE_CONTINUITY | authority: reopen V2 readiness after witness orchestration audit gap | `canonical/V2_IMPLEMENTATION_READINESS.json` | `main` |
+| `2026-09-20T22:13:57+03:00` | `0fd169a6f56b` | yes | GOVERNANCE_CONTINUITY | authority: void premature Knight activation pending reopened V2 audit | `canonical/SUBJECT2_KNIGHT_V2_WITNESS_ACTIVATION_20260920.json` | `main` |
+| `2026-09-20T22:14:01+03:00` | `e5f47b0e295a` | yes | CI_TEST | witness: return Knight preflight to manual-only during reopened V2 audit | `.github/workflows/subject2_knight_observation_preflight.yml` | `main` |
+| `2026-09-20T22:14:35+03:00` | `a9aa6c4efdae` | yes | COMPILER_PROOF | orchestrator v2: make execution ledgers run-local and add init-run CLI | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-20T22:14:59+03:00` | `24165982c493` | yes | CI_TEST | witness apparatus: use only run-local ledger CLI contract | `.github/workflows/subject2_knight_observation_preflight.yml` | `main` |
+| `2026-09-20T22:15:18+03:00` | `89385c26f900` | yes | CI_TEST | test: lock run-local witness orchestration and reopened readiness | `tests/repository/test_witness_orchestration_v2.py` | `main` |
+| `2026-09-20T22:15:34+03:00` | `63582801acea` | yes | GOVERNANCE_CONTINUITY | docs: reflect reopened V2 readiness and witness orchestration audit | `CURRENT_STATE.md` | `main` |
+| `2026-09-20T22:15:37+03:00` | `63255cdfc6ed` | yes | GOVERNANCE_CONTINUITY | authority: record reopened witness orchestration audit in context state | `canonical/CONTEXT_STATE_V2.json` | `main` |
+| `2026-09-20T22:24:03+03:00` | `07118d75e3b1` | yes | CI_TEST | test: remove stale pre-reopen current-state expectation | `tests/repository/test_canonical_main_readiness_v1.py` | `main` |
+| `2026-09-20T22:24:07+03:00` | `0462961b7fce` | yes | CI_TEST, COMPILER_PROOF | ci: include reopened witness orchestration governance proof | `.github/workflows/current_mainline_self_hosted_ci.yml` | `main` |
+| `2026-09-20T22:25:11+03:00` | `592ece65b1ea` | yes | COMPILER_PROOF | orchestrator v2: separate subject-free implementation audit from witness authorization | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-20T22:25:23+03:00` | `5a45fd0e442f` | yes | CI_TEST | test: fail-close implementation audit execution class | `tests/repository/test_witness_orchestration_v2.py` | `main` |
+| `2026-09-20T22:25:58+03:00` | `eca2633a4c10` | yes | CI_TEST, COMPILER_PROOF | audit: add subject-free run-local Stage01-08 orchestration proof | `.github/workflows/v2_witness_orchestration_subject_free_dry_run.yml` | `main` |
+| `2026-09-20T22:26:25+03:00` | `08dfa9586a53` | yes | GOVERNANCE_CONTINUITY | docs: expose exact reopened-audit and governance ledger authority tokens | `CURRENT_STATE.md` | `main` |
+| `2026-09-20T22:27:05+03:00` | `6d2e3f0e6d3f` | yes | COMPILER_PROOF | orchestrator v2: validate audit manifest identity before ledger creation | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-20T22:27:25+03:00` | `e13a0a617022` | yes | CI_TEST | ci: cancel stale model-mainline-source-gate runs on newer head | `.github/workflows/model_mainline_source_gate.yml` | `main` |
+| `2026-09-20T22:27:28+03:00` | `92998004732c` | yes | CI_TEST, COMPILER_PROOF | ci: cancel stale proof-service-promotion-gate runs on newer head | `.github/workflows/proof_service_promotion_gate.yml` | `main` |
+| `2026-09-20T22:27:32+03:00` | `ca4e69731a73` | yes | CI_TEST | ci: cancel stale completion-audit-contract runs on newer head | `.github/workflows/completion_audit_contract.yml` | `main` |
+| `2026-09-20T22:30:56+03:00` | `4f7c1a551c20` | yes | COMPILER_PROOF | core v2: add narrow current-path artifact codec without historical appearance imports | `compiler/realsas_compiler_core/artifact_codec_v2.py` | `main` |
+| `2026-09-20T22:31:07+03:00` | `cdaa0bf5366e` | yes | COMPILER_PROOF | v2 adapters: use narrow current artifact codec | `compiler/realsas_compiler_services/orchestrator/adapters/v2_architecture.py` | `main` |
+| `2026-09-20T22:31:12+03:00` | `2cc76b0130ed` | yes | COMPILER_PROOF | v2 adapters: use narrow current artifact codec | `compiler/realsas_compiler_services/orchestrator/adapters/preflight_v2.py` | `main` |
+| `2026-09-20T22:31:16+03:00` | `0a45f3ff2a18` | yes | COMPILER_PROOF | v2 adapters: use narrow current artifact codec | `compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py` | `main` |
+| `2026-09-20T22:31:21+03:00` | `9c21e0e3679f` | yes | COMPILER_PROOF | v2 adapters: use narrow current artifact codec | `compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py` | `main` |
+| `2026-09-20T22:31:27+03:00` | `0486c8f3531a` | yes | COMPILER_PROOF | v2 adapters: use narrow current artifact codec | `compiler/realsas_compiler_services/orchestrator/adapters/motion_v2.py` | `main` |
+| `2026-09-20T22:31:31+03:00` | `a5d45a8253e6` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | v2 adapters: use narrow current artifact codec | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
+| `2026-09-20T22:31:36+03:00` | `c0e409e0558d` | yes | COMPILER_PROOF | v2 adapters: use narrow current artifact codec | `compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py` | `main` |
+| `2026-09-20T22:31:43+03:00` | `b88861940792` | yes | COMPILER_PROOF | v2 adapters: use narrow current artifact codec | `compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py` | `main` |
+| `2026-09-20T22:31:48+03:00` | `08d54e09113f` | yes | COMPILER_PROOF | v2 adapters: use narrow current artifact codec | `compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py` | `main` |
+| `2026-09-20T22:31:55+03:00` | `5eb7f91250fd` | yes | COMPILER_PROOF, IRIS_GSA | v2 adapters: use narrow current artifact codec | `compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py` | `main` |
+| `2026-09-20T22:32:16+03:00` | `c0fff78f9004` | yes | CI_TEST, RUNTIME_PRODUCT | test: forbid obsolete appearance runtime semantics in V2 import closure | `tests/repository/test_mainline_execution_plan_v2.py` | `main` |
+| `2026-09-20T22:33:27+03:00` | `63f1e3e99faf` | yes | COMPILER_PROOF | orchestrator v2: remove historical codec from shared adapter IO | `compiler/realsas_compiler_services/orchestrator/adapters/adapter_io.py` | `main` |
+| `2026-09-20T22:33:59+03:00` | `904b9c37c497` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | mesh v2: remove unused legacy playback runtime import | `compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py` | `main` |
+| `2026-09-20T22:34:04+03:00` | `01d69951cd9f` | yes | COMPILER_PROOF | core v2: preserve nullable presentation attachment binding | `compiler/realsas_compiler_core/artifact_codec_v2.py` | `main` |
+| `2026-09-20T22:34:08+03:00` | `85d8998abf14` | yes | CI_TEST, RUNTIME_PRODUCT | test: forbid legacy playback runtime ontology in V2 import closure | `tests/repository/test_mainline_execution_plan_v2.py` | `main` |
+| `2026-09-20T22:35:00+03:00` | `a91e6258b08c` | yes | CI_TEST, COMPILER_PROOF | test: prove narrow V2 presentation codec preserves sealed IR semantics | `tests/compiler/test_artifact_codec_v2.py` | `main` |
+| `2026-09-20T22:36:52+03:00` | `e3594bb229b9` | yes | COMPILER_PROOF | orchestrator v2: confine stage outputs and bind manifest run identity | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-20T22:37:04+03:00` | `55ee92851e13` | yes | CI_TEST | test: red-team run manifest identity and stage output confinement | `tests/repository/test_witness_orchestration_v2.py` | `main` |
 
 ## Use rule
 

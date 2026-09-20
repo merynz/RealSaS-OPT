@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `9dc88d074c516d67f150c98936b52501fc87f39bdb480e7f145b4f4302bccb7b`
+> State fingerprint: `ef60782c7cf03d063f760684cac3a947f1e070ccb49c7adf0a843c4f55c2dc1e`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -35,7 +35,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `V2_IMPLEMENTATION_ASSEMBLY` | `ACTIVE__WITNESS_EXECUTION_FORBIDDEN_UNTIL_READINESS_SEAL` | `main` | `0855ab83c165` | Can the 46-stage RealSaS V2 DAG be made internally complete, adversarially audited and executable with geometry, mechanics and appearance as co-equal product authorities before any Knight outcome is observed? | Knight product pass; unseen generalization; learned appearance quality; source-view cardinality reduction |
+| `V2_IMPLEMENTATION_ASSEMBLY` | `ACTIVE__WITNESS_EXECUTION_FORBIDDEN_UNTIL_READINESS_SEAL` | `main` | `55ee92851e13` | Can the 46-stage RealSaS V2 DAG be made internally complete, adversarially audited and executable with geometry, mechanics and appearance as co-equal product authorities before any Knight outcome is observed? | Knight product pass; unseen generalization; learned appearance quality; source-view cardinality reduction |
 
 ## Branch inventory — observed live
 
@@ -45,7 +45,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `0855ab83c165` | canonical continuation branch |
+| `main` | `55ee92851e13` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 

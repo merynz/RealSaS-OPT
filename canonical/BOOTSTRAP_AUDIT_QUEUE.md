@@ -4,10 +4,10 @@
 > Bootstrap: `BOOTSTRAP_AUDIT_CLOSED`
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
-- Census artifacts in declared scope: **504 / 504 discovered (100%)**
+- Census artifacts in declared scope: **510 / 510 discovered (100%)**
 - Semantically reconciled: **70**
-- Catalogued but unreviewed: **434**
-- Semantic coverage: **13.9%**
+- Catalogued but unreviewed: **440**
+- Semantic coverage: **13.7%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -15,9 +15,9 @@
 
 | Branch | Head | Different blobs vs main | High-signal differing artifacts |
 |---|---|---:|---:|
-| `fit2/mage-full-subject-reclosure` | `eb7a20eb9da7` | 164 | 47 |
-| `playback-stack-v1-20260916` | `46aaad438780` | 332 | 86 |
-| `repair/mage-full-subject-reclosure-20260912` | `2fa5d4b604d5` | 164 | 47 |
+| `fit2/mage-full-subject-reclosure` | `eb7a20eb9da7` | 167 | 49 |
+| `playback-stack-v1-20260916` | `46aaad438780` | 335 | 88 |
+| `repair/mage-full-subject-reclosure-20260912` | `2fa5d4b604d5` | 167 | 49 |
 
 The queue is a discovery aid. A path being listed does not establish what it proves, whether it is current, or whether it was ever executed.
 
@@ -390,11 +390,12 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-03AAD1E34A0F` `AUDIT` — `main` :: `canonical/SKINTOKENS_CODE_LEVEL_REFERENCE_AUDIT_V1.md` @ blob `3e66bed1b76e`
 - `KA-249218A33EA0` `PREREG` — `main` :: `canonical/fit_mage_v1/ARACHNE_A1_CPU_PREREG_V1.md` @ blob `b9774b3296e6`
 
-### UNKNOWN_DATE :: COMPILER (30)
+### UNKNOWN_DATE :: COMPILER (33)
 
+- `KA-99436DCAF74C` `WORKFLOW` — `fit2/mage-full-subject-reclosure` :: `.github/workflows/proof_service_promotion_gate.yml` @ blob `2fad848fd29e`
 - `KA-CD642EF6C9C8` `AUTHORITY_DECISION` — `fit2/mage-full-subject-reclosure` :: `canonical/MAGE_FIT2_TEMPORARY_RENDER_MESH_P1_B2_G10_SEAL_V1.json` @ blob `381a54fe7831`
 - `KA-ADDBD437A241` `PROMOTION_RETRACTION` — `fit2/mage-full-subject-reclosure` :: `experiments/mage_full_subject_reclosure_v1/NO_DOWNSTREAM_PROMOTION.txt` @ blob `ef2f5130b857`
-- `KA-DE1C18742E5A` `WORKFLOW` — `main` :: `.github/workflows/proof_service_promotion_gate.yml` @ blob `2fad848fd29e`
+- `KA-9447024F479A` `WORKFLOW` — `main` :: `.github/workflows/proof_service_promotion_gate.yml` @ blob `3ffd1bec7815`
 - `KA-9D658E0AA530` `WORKFLOW` — `main` :: `.github/workflows/runtime_deploy_bake_promotion_gate.yml` @ blob `06c7f8fd3d7c`
 - `KA-ADA25AD7C5B0` `AUDIT` — `main` :: `canonical/COMPILER_RUNTIME_MIGRATION_COMPLETENESS_AUDIT_V1.json` @ blob `d3b3197b3ae7`
 - `KA-DF48CBAEA118` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/MAGE_FIT1_REPLAY_SUBSTRATE_V1.json` @ blob `f105cd3936e4`
@@ -410,6 +411,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-2CEA34CCFD57` `AUDIT` — `main` :: `experiments/s0_rigging_substrate/S0_B_PILOT_REPORT_V1.md` @ blob `f81b8678dfef`
 - `KA-F9AC50E77CFA` `RESULT` — `main` :: `experiments/s0_rigging_substrate/S0_B_PILOT_RESULT_V1.json` @ blob `ee24f2d22623`
 - `KA-6E0B09EAFC48` `PREREG` — `main` :: `experiments/s0_rigging_substrate/S0_PLAN_AND_PREREG_V1.md` @ blob `cf36713ca2dd`
+- `KA-6DFF1A63823D` `WORKFLOW` — `playback-stack-v1-20260916` :: `.github/workflows/proof_service_promotion_gate.yml` @ blob `2fad848fd29e`
 - `KA-1B20F432979D` `AUTHORITY_DECISION` — `playback-stack-v1-20260916` :: `canonical/MAGE_FIT2_TEMPORARY_RENDER_MESH_P1_B2_G10_SEAL_V1.json` @ blob `381a54fe7831`
 - `KA-434BFF213183` `HIGH_SIGNAL_OTHER` — `playback-stack-v1-20260916` :: `experiments/mage_demo_fit1_v5_p1/materialize_fit2_dense_zero_surface_body_v2_historical_motion.py` @ blob `85cd182e1594`
 - `KA-1173511D3D10` `HIGH_SIGNAL_OTHER` — `playback-stack-v1-20260916` :: `experiments/mage_demo_fit1_v5_p1/materialize_fit2_dense_zero_surface_body_v3_product_mesh_quality.py` @ blob `90c621c1653a`
@@ -421,6 +423,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-6A4FF38889E1` `RESULT` — `playback-stack-v1-20260916` :: `experiments/playback_stack_v1/benchmark_proof_result_p4_cache.py` @ blob `57f654a795fb`
 - `KA-BE7A5825EDCD` `AUTHORITY_DECISION` — `playback-stack-v1-20260916` :: `experiments/playback_stack_v1/build_test_subject_001_cross_view_appearance_authority_v2.py` @ blob `f7db974543a9`
 - `KA-B62F37073F48` `AUTHORITY_DECISION` — `playback-stack-v1-20260916` :: `experiments/playback_stack_v1/build_test_subject_001_same_view_appearance_authority_v1.py` @ blob `58dcbd8f3893`
+- `KA-295868B63E7C` `WORKFLOW` — `repair/mage-full-subject-reclosure-20260912` :: `.github/workflows/proof_service_promotion_gate.yml` @ blob `2fad848fd29e`
 - `KA-60227BFFD981` `PROMOTION_RETRACTION` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/NO_DOWNSTREAM_PROMOTION.txt` @ blob `ef2f5130b857`
 
 ### UNKNOWN_DATE :: CROSS_CUTTING_OTHER (21)
@@ -472,7 +475,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D2D319509ACF` `WORKFLOW` — `main` :: `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` @ blob `16bf42a72ecc`
 - `KA-03510A41D0D4` `WORKFLOW` — `main` :: `.github/workflows/prefit_observation_authority_v1.yml` @ blob `b04004000018`
 - `KA-FDE35053B8A7` `WORKFLOW` — `main` :: `.github/workflows/single_family_data_contract_v1.yml` @ blob `929df12d859e`
-- `KA-91C66A3387E2` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `ecc69a11d1e4`
+- `KA-E35E44CE7ECA` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `f2b3ed35abac`
 - `KA-25BB7CDC0AB9` `AUTHORITY_DECISION` — `main` :: `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` @ blob `6b5fff12a484`
 - `KA-DC74ABB19F22` `PREREG` — `main` :: `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` @ blob `c01e1a65f75e`
 - `KA-E1571E78A4A5` `PREREG` — `main` :: `canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md` @ blob `36aef9ae6ecd`
@@ -601,11 +604,12 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-2AC6CF459CCF` `PREREG` — `playback-stack-v1-20260916` :: `experiments/mage_full_subject_reclosure_v1/IRIS_H1_V2_FULL_SUBJECT_RECLOSURE_PREREG_V1.json` @ blob `8bf55aa736a0`
 - `KA-9B307C02C7A5` `PREREG` — `repair/mage-full-subject-reclosure-20260912` :: `experiments/mage_full_subject_reclosure_v1/IRIS_H1_V2_FULL_SUBJECT_RECLOSURE_PREREG_V1.json` @ blob `8bf55aa736a0`
 
-### UNKNOWN_DATE :: REPOSITORY_GOVERNANCE (15)
+### UNKNOWN_DATE :: REPOSITORY_GOVERNANCE (18)
 
+- `KA-BF916410D0E9` `WORKFLOW` — `fit2/mage-full-subject-reclosure` :: `.github/workflows/completion_audit_contract.yml` @ blob `0a4881a2952f`
 - `KA-07A3989FD5C8` `WORKFLOW` — `main` :: `.github/workflows/architecture_freeze_source_gate.yml` @ blob `97e8cdbc15b4`
 - `KA-987B1FC6C0D1` `WORKFLOW` — `main` :: `.github/workflows/architecture_freeze_v2_candidate.yml` @ blob `35cae071018b`
-- `KA-C2714BD345F6` `WORKFLOW` — `main` :: `.github/workflows/completion_audit_contract.yml` @ blob `0a4881a2952f`
+- `KA-60E4A8375874` `WORKFLOW` — `main` :: `.github/workflows/completion_audit_contract.yml` @ blob `ff9e0488a0b4`
 - `KA-6CA3BBDF2808` `WORKFLOW` — `main` :: `.github/workflows/restoration_closure_manual.yml` @ blob `0e688312a4b5`
 - `KA-ACDFED9D82EF` `WORKFLOW` — `main` :: `.github/workflows/restoration_closure_trigger_once.yml` @ blob `5cb3ff2c659b`
 - `KA-74CB26AB09B6` `PLAN_MATRIX` — `main` :: `RESTORATION_STATE.md` @ blob `0699f21920d0`
@@ -617,6 +621,8 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-3E39698373DA` `PLAN_MATRIX` — `main` :: `canonical/validate_completion_plan_v1.py` @ blob `85013f79c7b9`
 - `KA-731F02930053` `PREREG` — `main` :: `experiments/post_corpus_audit/REPRESENTATION_AUTHORITY_STUDY_V1_PREREG.md` @ blob `6f5f3219d685`
 - `KA-496FB5F54F2A` `AUTHORITY_DECISION` — `main` :: `experiments/post_corpus_audit/post_corpus_stage_b_selective_authority_v1.py` @ blob `837a9d0159c6`
+- `KA-7256E6A8F6CD` `WORKFLOW` — `playback-stack-v1-20260916` :: `.github/workflows/completion_audit_contract.yml` @ blob `0a4881a2952f`
+- `KA-419CB3820692` `WORKFLOW` — `repair/mage-full-subject-reclosure-20260912` :: `.github/workflows/completion_audit_contract.yml` @ blob `0a4881a2952f`
 - `KA-5A86DFD4CA5A` `AUTHORITY_DECISION` — `repair/mage-full-subject-reclosure-20260912` :: `canonical/BRANCH_AUTHORITY_V1.md` @ blob `8dc100c60438`
 
 ### UNKNOWN_DATE :: RUNTIME_EXPORT (3)

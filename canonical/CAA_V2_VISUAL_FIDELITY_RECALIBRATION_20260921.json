@@ -148,8 +148,8 @@
       "owner": "Dynamic mechanics / visual integrity",
       "finding": "Stage41 bounds triangle area ratio and local condition but has no explicit non-adjacent dynamic self-intersection/interpenetration qualification. A mesh can remain locally well-conditioned while distinct body/clothing regions pass through each other and corrupt visibility.",
       "required_closure": "Add subject-free dynamic self-intersection evidence with adjacency exclusions and rest-existing-contact handling; gate newly introduced consequential intersections or explicitly narrow the product claim.",
-      "status": "PARTIALLY_REPAIRED__ADJACENT_INTERIOR_PENETRATION_CLOSED__REST_EXISTING_SEVERITY_OPEN",
-      "repair": "Stage41 now uses a topology-aware unexpected-intersection census: ordinary shared-vertex/shared-edge contact is excluded by infinitesimal inward contraction, but adjacent faces whose interiors still overlap are rejected. Newly appearing unexpected pairs remain a hard failure. Severity growth of a rest-existing tolerated pair is still open."
+      "status": "REPAIRED__REST_EXISTING_SEVERITY_NONREGRESSION__CI_PENDING",
+      "repair": "Stage41 now rejects newly introduced unexpected intersections and also measures rigid-transform-invariant homothetic intersection-persistence severity for every rest-existing unexpected pair. Posed severity may not exceed rest severity beyond the deterministic 24-step binary-search numerical slack. Direct controls require rigid-transform invariance and strictly greater severity for deeper overlap."
     },
     {
       "id": "VF-18",
@@ -157,7 +157,8 @@
       "owner": "Motion contact authority",
       "finding": "Current contact mode set contains only PLANT_2D and Stage41 correctly measures XY drift. This is not a contract bug, but it cannot establish full foot-ground height/penetration or 3D pinned-contact quality despite broad all_contacts_satisfied wording.",
       "required_closure": "Narrow the claim to PLANT_2D or add calibrated PLANT_3D / ground-plane contact semantics with vertical height and penetration evidence before professional-contact quality is claimed.",
-      "status": "OPEN_CLAIM_OR_CAPABILITY"
+      "status": "REPAIRED__CLAIM_NARROWED_TO_PLANT_2D__CI_PENDING",
+      "repair": "Current V2 authority is explicitly narrowed to declared PLANT_2D contact only: the Stage41 report exposes all_declared_plant_2d_contacts_satisfied, supported_contact_modes=[PLANT_2D], and full_3d_ground_contact_quality_claimed=false. The historical broad all_contacts_satisfied field exists only in the non-current V1 implementation and is forbidden from the V2 qualification report by integration test."
     },
     {
       "id": "VF-19",

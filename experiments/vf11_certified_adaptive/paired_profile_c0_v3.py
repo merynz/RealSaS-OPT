@@ -194,6 +194,7 @@ def run_paired_profile(
     domain_hi: float,
     max_micro_depth: int = 2,
     logger: Callable[[str], None] | None = print,
+    record_callback: Callable[[dict], None] | None = None,
 ) -> dict:
     prepared_field: PreparedField = prepare_field(field)
     prepared_planes = prepare_planes(planes)
@@ -242,7 +243,7 @@ def run_paired_profile(
                     contradiction = True
                 by_micro[str(micro)] = row
 
-            records.append({
+            record = {
                 "anchor_id": int(anchor["anchor_id"]),
                 "stratum": anchor["stratum"],
                 "anchor_point": anchor["point"],
@@ -257,7 +258,10 @@ def run_paired_profile(
                 "sampled_zero_bracket": sampled_bracket,
                 "empirical_contradiction": bool(contradiction),
                 "by_micro": by_micro,
-            })
+            }
+            records.append(record)
+            if record_callback is not None:
+                record_callback(record)
 
             done += 1
             if logger:

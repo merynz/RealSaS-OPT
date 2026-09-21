@@ -16,6 +16,7 @@ on:
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V7_20260921.json'
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V8_20260921.json'
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V9_20260921.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V10_20260921.json'
       - 'tools/verify_native_runtime_source_seal_v2.py'
       - '.github/workflows/native_runtime_source_gate.yml'
   pull_request:
@@ -33,6 +34,7 @@ on:
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V7_20260921.json'
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V8_20260921.json'
       - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V9_20260921.json'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V10_20260921.json'
       - 'tools/verify_native_runtime_source_seal_v2.py'
       - '.github/workflows/native_runtime_source_gate.yml'
 

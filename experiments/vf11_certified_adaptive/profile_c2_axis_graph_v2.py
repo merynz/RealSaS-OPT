@@ -131,7 +131,7 @@ def profile_c2_axis_graph_v2(
             entry_contradiction = False
             exit_contradiction = False
 
-            if deriv.state in C1_REGULAR:
+            if deriv.state in C1_REGULAR_STATES:
                 pts = _sample_box_points(lo, hi, per_axis=5)
                 vals = _direct_directional_samples(
                     field, pp, pts, a.axis

@@ -1,0 +1,66 @@
+{
+  "schema": "RealSaS.CAASourceViewLineageAuthority.v1",
+  "status": "REPAIR_IMPLEMENTED__V11_NATIVE_AND_EXACT_HEAD_CI_PENDING",
+  "date_utc": "2026-09-21",
+  "finding_id": "VF-36",
+  "authority": "CAA_COMPILE_TO_RUNTIME_SOURCE_VIEW_LINEAGE__DIAGNOSTIC_ONLY",
+  "problem": {
+    "historical_gap": "Stage21 retained exact source_view identity but Stage23 collapsed runtime provenance to coarse provenance class only, so two OTHER_VIEW_SOURCE texels from different donor views became indistinguishable after bake/package.",
+    "false_pass_risk": "Same coarse provenance could hide a donor-view switch seam or destroy provenance lineage even while RGB/native parity stayed green."
+  },
+  "shipping_contract": {
+    "compile_encoding": {
+      "direct_or_other_source": "INT16_0_TO_7_EXACT_SOURCE_VIEW",
+      "compiled_local_harmonic": "INT16_NEGATIVE_2"
+    },
+    "atlas_encoding": {
+      "renderable_texels": "EXACT_STAGE21_SOURCE_VIEW_IDENTITY",
+      "unallocated_padding": "INT16_MIN"
+    },
+    "runtime_package": "provenance.bin stores coarse provenance u8 followed by exact source_view int16 for the same VxHxW atlas.",
+    "bilinear_diagnostic": {
+      "unanimous_footprint": "RETURN_EXACT_DONOR_OR_NEG2_HARMONIC",
+      "mixed_active_texels": "RETURN_NEG3_MIXED",
+      "padding_sampled": "HARD_FAIL"
+    },
+    "render_authority": false,
+    "visibility_authority": false,
+    "color_authority": false,
+    "presentation_order_authority": false
+  },
+  "fail_closed_chain": [
+    "Stage23 bakes source_view with the exact face-lattice/bleed mapping used by RGBA/provenance.",
+    "Stage37 rejects missing, malformed, invalid-valued, or padding-inconsistent source_view lineage.",
+    "RSS V2 requires provenance and source_view arrays with exact matching shape and padding semantics.",
+    "Native V2 parses and validates source_view lineage and refuses any manifest that promotes donor identity to render authority."
+  ],
+  "adversarial_proof": {
+    "same_coarse_provenance_different_donors": "V0 synthetic atlas uses coarse OTHER_VIEW_SOURCE everywhere while left/right texels carry donor views 1 and 2; bilinear footprint must report NEG3_MIXED.",
+    "non_authority": "Rewriting all V0 donor identities to donor 7 must alter only the donor diagnostic bytes; RGBA, coarse provenance, and owner bytes must remain byte-identical.",
+    "manifest_tamper_rejections": [
+      "SOURCE_VIEW_IDENTITY_CONTRACT_INVALID",
+      "SOURCE_VIEW_IDENTITY_RENDER_AUTHORITY_FORBIDDEN"
+    ]
+  },
+  "implementation": {
+    "compile": "compiler/realsas_compiler_core/appearance_compile_v2.py",
+    "bake": "compiler/realsas_compiler_core/appearance_bake_v2.py",
+    "stage23": "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py",
+    "stage37": "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py",
+    "rss": "compiler/realsas_compiler_core/runtime_package_v2.py",
+    "native": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+    "native_source_seal": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V11_20260921.json",
+    "tests": [
+      "tests/compiler/test_visibility_and_caa_v2.py",
+      "tests/compiler/test_runtime_v2_native_smoke.py",
+      "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+    ]
+  },
+  "contamination_checks": {
+    "knight_result_used": false,
+    "mage_result_used": false,
+    "subject_identity_used": false,
+    "threshold_tuning_used": false
+  },
+  "claim_boundary": "Source-view lineage is preserved for provenance/audit/debug evidence. It does not become an alternate appearance, geometry, visibility, or presentation authority."
+}

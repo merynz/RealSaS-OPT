@@ -79,7 +79,7 @@ jobs:
           python -m py_compile tests/research/test_vf11_directional_regular_c1_v1.py
           python -m py_compile tests/research/test_vf11_profile_c1_handoff_v1.py
           python -m py_compile tests/research/test_vf11_directional_regular_c1_v2.py
-          python -m py_compile tests/research/test_vf11_profile_c1_handoff_v2.py tests/research/test_vf11_oriented_crossing_c2_v1.py tests/research/test_vf11_profile_c2_primary_v1.py
+          python -m py_compile tests/research/test_vf11_profile_c1_handoff_v2.py
           python -m py_compile tests/research/test_vf11_oriented_crossing_c2_v1.py
           python -m py_compile tests/research/test_vf11_profile_c2_primary_v1.py
 
@@ -136,7 +136,7 @@ jobs:
           PY
 
       - name: Run short deterministic/adversarial range tests
-        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py tests/research/test_vf11_directional_regular_c1_v1.py tests/research/test_vf11_profile_c1_handoff_v1.py tests/research/test_vf11_directional_regular_c1_v2.py tests/research/test_vf11_profile_c1_handoff_v2.py
+        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py tests/research/test_vf11_directional_regular_c1_v1.py tests/research/test_vf11_profile_c1_handoff_v1.py tests/research/test_vf11_directional_regular_c1_v2.py tests/research/test_vf11_profile_c1_handoff_v2.py tests/research/test_vf11_oriented_crossing_c2_v1.py tests/research/test_vf11_profile_c2_primary_v1.py
 
       - name: Emit smoke receipt
         shell: bash
@@ -176,6 +176,9 @@ jobs:
             'canonical/VF11_C1_DIRECTIONAL_REGULARITY_PREREGISTRATION_V1_20260921.json',
             'canonical/VF11_C1_V1_CLOSURE_20260921.json',
             'canonical/VF11_C1_V2_CORRELATED_AFFINE_PREREGISTRATION_20260921.json',
+            'canonical/VF11_C1_V2_INTERIM_REVIEW_20260921.json',
+            'canonical/VF11_C1_V2_RESEARCH_CLOSURE_20260921.json',
+            'canonical/VF11_C2_ORIENTED_CROSSING_PREREGISTRATION_20260921.json',
           ]
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()

@@ -347,6 +347,10 @@ int main(int argc,char** argv) {
             throw std::runtime_error("PLAYBACK_SAMPLING_CONTRACT_INVALID");
         if(manifest.at("host_interpolation_authorized")!="0")
             throw std::runtime_error("HOST_INTERPOLATION_MUST_BE_FORBIDDEN");
+        if(manifest.at("texture_sampling_contract")!="BASE_LEVEL_BILINEAR_LINEAR_PM_ONLY")
+            throw std::runtime_error("TEXTURE_SAMPLING_CONTRACT_INVALID");
+        if(manifest.at("mip_generation_authorized")!="0")
+            throw std::runtime_error("MIP_GENERATION_MUST_BE_FORBIDDEN");
         const auto mesh=parse_mesh(entries.at("mesh.bin"));
         const auto cameras=parse_cameras(entries.at("cameras.bin"));
         const auto textures=parse_textures(entries.at("textures.bin"));

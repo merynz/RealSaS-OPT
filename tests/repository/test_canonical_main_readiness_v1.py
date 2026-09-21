@@ -182,6 +182,30 @@ class CanonicalMainReadinessV1(unittest.TestCase):
         self.assertIn("surface_addressing_v1.py", index)
         self.assertIn("dependency DAG", index)
 
+    def test_v2_first_witness_presentation_runtime_capability_is_explicitly_excluded(self) -> None:
+        plan = json.loads(
+            (ROOT / "canonical/MAINLINE_EXECUTION_PLAN_V2.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        stage = next(
+            row
+            for row in plan["stages"]
+            if row["id"] == "37_QUALIFIED_PRESENTATION_STRUCTURE"
+        )
+        policy = stage["policy"]
+        self.assertTrue(bool(policy["authoring_structure_authority"]))
+        self.assertFalse(bool(policy["runtime_slot_state_execution_claimed"]))
+        self.assertFalse(bool(policy["runtime_clipping_claimed"]))
+        self.assertFalse(bool(policy["runtime_tint_order_visibility_claimed"]))
+
+        package_source = (
+            ROOT / "compiler/realsas_compiler_core/runtime_package_v2.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("presentation_state_execution_authorized=0", package_source)
+        self.assertIn("clipping_authorized=0", package_source)
+        self.assertIn("tint_order_visibility_authorized=0", package_source)
+
     def test_closure_workflow_is_manual_only(self) -> None:
         workflow = (ROOT / ".github/workflows/restoration_closure_manual.yml").read_text(encoding="utf-8")
         self.assertIn("workflow_dispatch", workflow)

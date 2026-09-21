@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.ActiveRunLedger.v2",
   "run_id": "V2_IMPLEMENTATION_ASSEMBLY",
-  "subject_id": "SUBJECT_FREE_VISUAL_FIDELITY_RECALIBRATION",
+  "subject_id": "NONE",
   "canonical_branch": "main",
   "architecture_scope": "SUBJECT_AGNOSTIC__DAG__COEQUAL_GEOMETRY_MECHANICS_APPEARANCE__CANONICAL_MESH_SHARED_DOMAIN__CAA",
   "pipeline_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
@@ -614,6 +614,5 @@
     "witness_execution_requires_explicit_user_approval": true,
     "knight_not_started": true,
     "redteam_authority": "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
-  },
-  "execution_class": "IMPLEMENTATION_AUDIT"
+  }
 }

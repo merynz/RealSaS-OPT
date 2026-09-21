@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.CAAQualificationPolicy.v1",
-  "status": "REOPENED_SUBJECT_FREE_VISUAL_FIDELITY_RECALIBRATION_V2",
-  "date": "2026-09-20",
+  "status": "FROZEN_SUBJECT_FREE_VISUAL_FIDELITY_V3",
+  "date": "2026-09-21",
   "scope": "V2_FIRST_PRODUCT_POLICY__SUBJECT_AGNOSTIC",
   "forbidden_inputs": [
     "KNIGHT_RESULT",
@@ -107,7 +107,7 @@
     "dynamic_appearance_conditioning": "Every consequential dynamically visible face is checked in the intrinsic textured-surface metric. The affine UV-to-posed-3D map and generalized rest-to-posed / previous-to-posed surface metrics bound texture and line-art stretch/shear while remaining invariant to rigid 3D rotation and translation. Screen projection conditioning is diagnostic only so legitimate foreshortening is not misclassified as art deformation. Thresholds are subject-free and may not be tuned from Knight.",
     "dynamic_appearance_conditioning_calibration": "Every shipping conditioning ceiling, including absolute UV-to-surface condition, is selected by canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json from subject-free affine plus articulated two-bone LBS benign/adversarial controls. The previous uncalibrated absolute ceiling 32 is revoked.",
     "micro_face_visibility": "Visible face fragments below the conditioning pixel floor are not silently exempt: their screen-pixel mass is independently bounded, and any consequential face that still cannot support intrinsic conditioning is a hard failure.",
-    "visibility_ambiguity": "Exact coplanar overlap between distinct faces is forbidden while V2 exact-depth ties are resolved only by sealed face index. Near-depth ambiguity remains an open subject-free calibration item and may not be guessed from Knight.",
+    "visibility_ambiguity": "V2 uses IEEE754 float64 software depth sorting. The existing numerical equivalence class |delta camera-Z| <= 1e-12 is explicit authority under canonical/VF09_DEPTH_EQUIVALENCE_AUTHORITY_V1_20260921.json and remains a hard ambiguity failure; outside that class canonical physical depth orders surfaces.",
     "visibility_layers": "Geometry contributes up to four exact depth-sorted layers per pixel. Appearance alpha never chooses the geometric ordering; all supported layers are composited front-to-back in linear premultiplied light. Any fifth-layer overflow is a hard product failure.",
     "surface_sidedness": "Until separately qualified backside appearance exists, a consequential face may not reverse projected orientation relative to its rest orientation in the same output camera. Dynamic orientation flips are a hard failure rather than silently rendering inside-out art.",
     "color_space": "Transport RGBA8 is encoded sRGB straight alpha. Source sampling, runtime filtering and multi-layer composition occur in linear-light premultiplied RGBA, then convert back to sRGB only at the output boundary.",
@@ -115,9 +115,12 @@
     "cross_view_compatibility": "Adjacent source views are not required to have identical RGB. Shared canonical direct-source samples must nevertheless avoid gross color/alpha contradiction. Qualification is per adjacent pair and, when sufficiently sampled, per component so aggregate averaging cannot hide one contradictory view or part.",
     "completion": "Shipping completion is source-constrained and topology-aware: direct source wins; the best qualified other source view is selected by surface support; only small source-bounded missing regions may receive deterministic harmonic extension on the canonical surface graph. Cross-component Euclidean copying and global fill are forbidden.",
     "sparse_feature_preservation": "Mean/p95 cannot protect visually salient features below five percent of samples. Rest qualification therefore also gates p99.9 error, high-error pixel mass, largest connected error island, and one-pixel-tolerant high-contrast edge recall/precision.",
-    "bilinear_minification_authority": "The current runtime has bilinear reconstruction only. Shipping therefore requires the largest screen-to-atlas footprint singular value to be <= 1 texel per output pixel in both rest and dynamic proofs; larger footprints require an explicit minification authority such as mip/aniso/EWA rather than threshold relaxation."
+    "bilinear_minification_authority": "The current runtime has bilinear reconstruction only. Shipping therefore requires the largest screen-to-atlas footprint singular value to be <= 1 texel per output pixel in both rest and dynamic proofs; larger footprints require an explicit minification authority such as mip/aniso/EWA rather than threshold relaxation.",
+    "direction_transition": "Subject-free VF-10 calibration rejected a generic adjacent-direction curvature threshold because legitimate source-authoritative view variation overlaps isolated spike residuals. Output directions are therefore exact discrete V0..V7 authorities; cross-direction blending and host interpolation are forbidden. Gross adjacent-view contradiction remains gated by the existing pair/component compatibility metrics.",
+    "dynamic_continuity": "Dynamic crack authority is topology-owned only. Stage45 requires exact projected endpoint continuity for canonical interior shared edges and Stage46 consumes that proof. Raw background/new negative space between topologically separate components is not a crack signal and no cross-component non-detachability authority is inferred."
   },
   "calibration_contract": "tests/compiler/test_caa_v2_subject_free_policy.py",
   "mutable_after_witness": false,
-  "visual_fidelity_recalibration": "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+  "visual_fidelity_recalibration": "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json",
+  "policy_freeze_authority": "canonical/CAA_V2_POLICY_REFREEZE_AUTHORITY_V1_20260921.json"
 }

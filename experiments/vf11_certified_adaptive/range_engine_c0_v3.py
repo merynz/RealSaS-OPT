@@ -282,7 +282,12 @@ def _layernorm_affine(x: _Affine, p: PreparedField) -> _Affine:
         rem_lo = min(0.0, residual)
         rem_hi = 0.0
 
-    q_c = slope * var.center + intercept + (rem_lo + rem_hi) * 0.5
+    # The unary enclosure is built over t = variance + eps.  The affine
+    # variable stored in `var` is variance itself, so the constant eps must be
+    # included in the affine center before applying the secant/tangent line.
+    # Omitting this shifts even a degenerate-point LayerNorm evaluation and can
+    # make a nominal point enclosure miss the actual PyTorch field value.
+    q_c = slope * (var.center + p.ln_eps) + intercept + (rem_lo + rem_hi) * 0.5
     q_g = slope * var.generators
     q_rad = (rem_hi - rem_lo) * 0.5
     q_g = torch.cat([q_g, torch.tensor([[q_rad]], dtype=torch.float64)], dim=1)

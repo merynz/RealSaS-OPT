@@ -330,6 +330,10 @@ int main(int argc,char** argv) {
 
         const auto entries=parse_rss(package_path);
         const auto manifest=parse_manifest(entries.at("manifest.txt"));
+        if(manifest.at("playback_sampling_contract")!="SEALED_FRAME_INDEX_ONLY")
+            throw std::runtime_error("PLAYBACK_SAMPLING_CONTRACT_INVALID");
+        if(manifest.at("host_interpolation_authorized")!="0")
+            throw std::runtime_error("HOST_INTERPOLATION_MUST_BE_FORBIDDEN");
         const auto mesh=parse_mesh(entries.at("mesh.bin"));
         const auto cameras=parse_cameras(entries.at("cameras.bin"));
         const auto textures=parse_textures(entries.at("textures.bin"));

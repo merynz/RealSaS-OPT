@@ -42,6 +42,7 @@ jobs:
           python -m compileall -q compiler
           python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
           python -m compiler.realsas_compiler_services.orchestrator.mainline validate-readiness
+          python -m compiler.realsas_compiler_services.orchestrator.mainline validate-witness-authorization
           python -m pytest -q tests/repository/test_mainline_execution_plan_v2.py
 
       - name: Resolve or bootstrap pinned Blender

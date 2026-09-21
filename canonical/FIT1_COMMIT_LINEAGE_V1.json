@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "ed870fcd64cf2a815b49c3cec93e81c51af537f4",
+    "main": "155e6b7fdee88b0c398c5fd49d43051b53406bf3",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -117,7 +117,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2597,
+  "commit_count": 2610,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -127100,6 +127100,294 @@
       "subsystem_tags": [
         "CI_TEST",
         "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "53ca24ae78f5f81ae65b84ddb40a609cc59e0e4d",
+      "parents": [
+        "ed870fcd64cf2a815b49c3cec93e81c51af537f4"
+      ],
+      "author_time": "2026-09-21T09:39:19+03:00",
+      "committer_time": "2026-09-21T09:39:19+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d717e190d541a60c0359bada615005cfdbb80815",
+      "parents": [
+        "53ca24ae78f5f81ae65b84ddb40a609cc59e0e4d"
+      ],
+      "author_time": "2026-09-21T09:39:35+03:00",
+      "committer_time": "2026-09-21T09:39:35+03:00",
+      "subject": "geometry: detect adjacent-face penetration beyond shared topology",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/dynamic_geometry_integrity_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ab6358accfb11682191f60bac21ffdd036bf1be8",
+      "parents": [
+        "d717e190d541a60c0359bada615005cfdbb80815"
+      ],
+      "author_time": "2026-09-21T09:39:41+03:00",
+      "committer_time": "2026-09-21T09:39:41+03:00",
+      "subject": "motion: use topology-aware unexpected-intersection census",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_dynamic_proof_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9f7da4e4b3ff3479d6e470e828de0d2b890a14b8",
+      "parents": [
+        "ab6358accfb11682191f60bac21ffdd036bf1be8"
+      ],
+      "author_time": "2026-09-21T09:40:01+03:00",
+      "committer_time": "2026-09-21T09:40:01+03:00",
+      "subject": "test: attack adjacent-face penetration hidden by shared topology",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_geometry_integrity_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6d3612539dce28d3b67ccbe33e23c5c2e59317e7",
+      "parents": [
+        "9f7da4e4b3ff3479d6e470e828de0d2b890a14b8"
+      ],
+      "author_time": "2026-09-21T09:40:31+03:00",
+      "committer_time": "2026-09-21T09:40:31+03:00",
+      "subject": "authority: narrow VF-15 and advance topology-aware VF-17 closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fb453053131b95ebb728d5d3472cb794903e818e",
+      "parents": [
+        "6d3612539dce28d3b67ccbe33e23c5c2e59317e7"
+      ],
+      "author_time": "2026-09-21T09:41:16+03:00",
+      "committer_time": "2026-09-21T09:41:16+03:00",
+      "subject": "geometry: centralize sidedness and visibility-load fail-closed gates",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/dynamic_geometry_integrity_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bb41b4badac6c1210be1885ce3c74fef4a5d7a57",
+      "parents": [
+        "fb453053131b95ebb728d5d3472cb794903e818e"
+      ],
+      "author_time": "2026-09-21T09:41:32+03:00",
+      "committer_time": "2026-09-21T09:41:32+03:00",
+      "subject": "runtime: bind Stage45 sidedness and visibility load to tested core gates",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "57851747059988f44213c95c9e51f8569e9c56b9",
+      "parents": [
+        "bb41b4badac6c1210be1885ce3c74fef4a5d7a57"
+      ],
+      "author_time": "2026-09-21T09:41:44+03:00",
+      "committer_time": "2026-09-21T09:41:44+03:00",
+      "subject": "test: attack Stage45 sidedness and visibility-load false PASS",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_geometry_integrity_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2636e9a2bf0abc24e323d77aa3eda0510a78f82e",
+      "parents": [
+        "57851747059988f44213c95c9e51f8569e9c56b9"
+      ],
+      "author_time": "2026-09-21T09:44:24+03:00",
+      "committer_time": "2026-09-21T09:44:24+03:00",
+      "subject": "runtime: enforce sealed-frame-only temporal contract natively",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a6317f708ee74eec9252ffee239fa1e29e0cfba0",
+      "parents": [
+        "2636e9a2bf0abc24e323d77aa3eda0510a78f82e"
+      ],
+      "author_time": "2026-09-21T09:44:45+03:00",
+      "committer_time": "2026-09-21T09:44:45+03:00",
+      "subject": "runtime: reject fractional or malformed frame indices",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "85833758fad81c37012e8700a5a64236ef84a99b",
+      "parents": [
+        "a6317f708ee74eec9252ffee239fa1e29e0cfba0"
+      ],
+      "author_time": "2026-09-21T09:45:01+03:00",
+      "committer_time": "2026-09-21T09:45:01+03:00",
+      "subject": "test: adversarially enforce sealed-frame-only native playback",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_runtime_v2_native_smoke.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c316133f366257697cdd4c0d051725de58c6cbb8",
+      "parents": [
+        "85833758fad81c37012e8700a5a64236ef84a99b"
+      ],
+      "author_time": "2026-09-21T09:45:38+03:00",
+      "committer_time": "2026-09-21T09:45:38+03:00",
+      "subject": "runtime: seal base-level-only texture sampling contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_package_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "155e6b7fdee88b0c398c5fd49d43051b53406bf3",
+      "parents": [
+        "c316133f366257697cdd4c0d051725de58c6cbb8"
+      ],
+      "author_time": "2026-09-21T09:45:42+03:00",
+      "committer_time": "2026-09-21T09:45:42+03:00",
+      "subject": "runtime: reject unqualified mip or alternate sampler authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2597**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2610**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2609,6 +2609,19 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-21T09:36:41+03:00` | `ee5fdc6691dc` | yes | CI_TEST, COMPILER_PROOF | test: isolate transparent direct-source background semantics | `tests/compiler/test_visibility_and_caa_v2.py` | `main` |
 | `2026-09-21T09:36:43+03:00` | `d622cab196bd` | yes | CI_TEST, COMPILER_PROOF, RUNTIME_PRODUCT | test: sample exact black-white midpoint in native linear-light discriminator | `tests/compiler/test_runtime_v2_native_smoke.py` | `main` |
 | `2026-09-21T09:36:52+03:00` | `ed870fcd64cf` | yes | CI_TEST, COMPILER_PROOF | test: rebase V2 integration fixtures onto new appearance contracts | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T09:39:19+03:00` | `53ca24ae78f5` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-21T09:39:35+03:00` | `d717e190d541` | yes | COMPILER_PROOF | geometry: detect adjacent-face penetration beyond shared topology | `compiler/realsas_compiler_core/dynamic_geometry_integrity_v2.py` | `main` |
+| `2026-09-21T09:39:41+03:00` | `ab6358accfb1` | yes | COMPILER_PROOF | motion: use topology-aware unexpected-intersection census | `compiler/realsas_compiler_core/motion_dynamic_proof_v2.py` | `main` |
+| `2026-09-21T09:40:01+03:00` | `9f7da4e4b3ff` | yes | CI_TEST, COMPILER_PROOF | test: attack adjacent-face penetration hidden by shared topology | `tests/compiler/test_dynamic_geometry_integrity_v2.py` | `main` |
+| `2026-09-21T09:40:31+03:00` | `6d3612539dce` | yes | GOVERNANCE_CONTINUITY | authority: narrow VF-15 and advance topology-aware VF-17 closure | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T09:41:16+03:00` | `fb453053131b` | yes | COMPILER_PROOF | geometry: centralize sidedness and visibility-load fail-closed gates | `compiler/realsas_compiler_core/dynamic_geometry_integrity_v2.py` | `main` |
+| `2026-09-21T09:41:32+03:00` | `bb41b4badac6` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: bind Stage45 sidedness and visibility load to tested core gates | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
+| `2026-09-21T09:41:44+03:00` | `578517470599` | yes | CI_TEST, COMPILER_PROOF | test: attack Stage45 sidedness and visibility-load false PASS | `tests/compiler/test_dynamic_geometry_integrity_v2.py` | `main` |
+| `2026-09-21T09:44:24+03:00` | `2636e9a2bf0a` | yes | RUNTIME_PRODUCT | runtime: enforce sealed-frame-only temporal contract natively | `runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp` | `main` |
+| `2026-09-21T09:44:45+03:00` | `a6317f708ee7` | yes | RUNTIME_PRODUCT | runtime: reject fractional or malformed frame indices | `runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp` | `main` |
+| `2026-09-21T09:45:01+03:00` | `85833758fad8` | yes | CI_TEST, COMPILER_PROOF, RUNTIME_PRODUCT | test: adversarially enforce sealed-frame-only native playback | `tests/compiler/test_runtime_v2_native_smoke.py` | `main` |
+| `2026-09-21T09:45:38+03:00` | `c316133f3662` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: seal base-level-only texture sampling contract | `compiler/realsas_compiler_core/runtime_package_v2.py` | `main` |
+| `2026-09-21T09:45:42+03:00` | `155e6b7fdee8` | yes | GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | runtime: reject unqualified mip or alternate sampler authority | `runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp` | `main` |
 
 ## Use rule
 

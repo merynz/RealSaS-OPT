@@ -1,0 +1,43 @@
+{
+  "schema": "RealSaS.VF09DepthEquivalenceAuthority.v1",
+  "status": "FROZEN_SUBJECT_FREE__FLOAT64_DEPTH_EQUIVALENCE_EXPLICIT",
+  "date_utc": "2026-09-21",
+  "authority": "CANONICAL_POSED_XYZ_PLUS_CAMERA_DEPTH__NO_SUBJECT_TUNING",
+  "finding_id": "VF-09",
+  "numerical_contract": {
+    "depth_buffer": "IEEE754_FLOAT64_SOFTWARE_SORT__NO_HARDWARE_Z_QUANTIZATION",
+    "depth_equivalence_epsilon_camera_z": 1e-12,
+    "epsilon_origin": "PROMOTED_EXISTING_REFERENCE_AND_NATIVE_NUMERICAL_COMPARATOR__NOT_SELECTED_FROM_VISUAL_WITNESS",
+    "inside_or_equal_epsilon": "AMBIGUOUS__SEALED_FACE_INDEX_ONLY_FOR_DETERMINISM__QUALIFICATION_MUST_FAIL",
+    "outside_epsilon": "CANONICAL_PHYSICAL_DEPTH_ORDER_IS_AUTHORITY",
+    "appearance_or_provenance_tiebreak_forbidden": true,
+    "hardware_z_fighting_claimed": false
+  },
+  "subject_free_adversary": {
+    "source": "tests/compiler/test_visibility_and_caa_v2.py",
+    "controls": [
+      "DELTA_Z=0.5*EPSILON -> equivalent-depth ambiguity class",
+      "DELTA_Z=+2*EPSILON -> face 0 physically nearer regardless of face-index tie semantics",
+      "DELTA_Z=-2*EPSILON -> face 1 physically nearer regardless of face-index tie semantics"
+    ],
+    "native_manifest_tamper_source": "tests/compiler/test_runtime_v2_native_smoke.py",
+    "native_rejections": [
+      "DEPTH_BUFFER_CONTRACT_INVALID",
+      "DEPTH_EQUIVALENCE_EPSILON_INVALID"
+    ]
+  },
+  "scope_boundary": {
+    "explicit_presentation_draw_order_runtime_authority": false,
+    "runtime_presentation_state_execution_authorized": false,
+    "runtime_clipping_authorized": false,
+    "runtime_tint_order_visibility_authorized": false,
+    "note": "If a future product requires artist-authored order independent of canonical physical depth, that is a new presentation-runtime authority and may not be smuggled in as a depth epsilon."
+  },
+  "contamination_checks": {
+    "knight_result_used": false,
+    "mage_result_used": false,
+    "subject_identity_used": false,
+    "threshold_relaxation_used": false
+  },
+  "claim": "Within current sealed-frame V2 runtime, there is no separate hardware-z near-depth band to calibrate. Numerical depth equivalence is the explicit 1e-12 camera-Z class; every non-equivalent depth is deterministically ordered by float64 canonical physical depth."
+}

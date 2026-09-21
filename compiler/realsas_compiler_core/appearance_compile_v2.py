@@ -382,6 +382,7 @@ def compile_deterministic_caa(
     foreground_mask_by_view: Mapping[int, np.ndarray],
     tile_resolution: int,
     source_lock_policy: Mapping[str, object],
+    completion_quality_policy: Mapping[str, object] | None = None,
 ) -> dict:
     barycentric = triangular_barycentric_samples(tile_resolution)
     positions, sample_face, sample_component, face_normals = _surface_sample_geometry(
@@ -396,11 +397,21 @@ def compile_deterministic_caa(
     min_cos = float(source_lock_policy["min_abs_normal_camera_cos"])
     erosion = int(source_lock_policy["boundary_safe_erosion_px"])
     min_alpha = int(source_lock_policy["min_source_alpha_u8"])
+    completion_policy = dict(completion_quality_policy or {})
+    max_harmonic_region = int(
+        completion_policy.get("max_local_harmonic_region_samples", 16)
+    )
+    max_harmonic_hops = int(
+        completion_policy.get("max_local_harmonic_graph_hops", 2)
+    )
+    if max_harmonic_region <= 0 or max_harmonic_hops <= 0:
+        raise QualificationError("CAA_COMPLETION_POLICY_INVALID")
 
     direct_valid = np.zeros((8, sample_count), dtype=bool)
     direct_rgba = np.zeros((8, sample_count, 4), dtype=np.uint8)
     direct_pm_linear = np.zeros((8, sample_count, 4), dtype=np.float32)
     source_xy = np.full((8, sample_count, 2), np.nan, dtype=np.float32)
+    face_support_by_view = np.zeros((8, face_count), dtype=np.float64)
 
     camera_by_view = {int(camera.view_index): camera for camera in cameras}
     if set(camera_by_view) != set(range(8)):
@@ -459,6 +470,7 @@ def compile_deterministic_caa(
             raise QualificationError("CAA_CAMERA_FORWARD_INVALID")
         forward = forward / forward_norm
         face_cos = np.abs(face_normals @ forward)
+        face_support_by_view[view] = face_cos
         angle_safe = np.repeat(face_cos >= min_cos, samples_per_face)
 
         appearance_support = (
@@ -483,6 +495,12 @@ def compile_deterministic_caa(
         dtype=np.uint8,
     )
     source_view = np.full((8, sample_count), -1, dtype=np.int16)
+    surface_neighbors = _surface_sample_neighbors(
+        positions=positions,
+        face_count=face_count,
+        tile_resolution=tile_resolution,
+    )
+    completion_rows = []
 
     for target in range(8):
         direct = direct_valid[target]
@@ -491,59 +509,61 @@ def compile_deterministic_caa(
         source_view[target, direct] = target
 
         missing = ~direct
+        best_score = np.full(sample_count, -1.0, dtype=np.float64)
+        best_view = np.full(sample_count, -1, dtype=np.int16)
         for donor in _circular_view_order(target):
             if donor == target:
                 continue
-            take = missing & direct_valid[donor]
-            if np.any(take):
-                rgba[target, take] = direct_rgba[donor, take]
-                provenance[target, take] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
-                source_view[target, take] = donor
-                missing[take] = False
+            eligible = missing & direct_valid[donor]
+            if not np.any(eligible):
+                continue
+            support = face_support_by_view[donor, sample_face]
+            improve = eligible & (support > best_score + 1.0e-12)
+            if np.any(improve):
+                best_score[improve] = support[improve]
+                best_view[improve] = donor
+        source_take = missing & (best_view >= 0)
+        if np.any(source_take):
+            indices = np.flatnonzero(source_take)
+            donors = best_view[indices].astype(np.int64)
+            rgba[target, indices] = direct_rgba[donors, indices]
+            provenance[target, indices] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
+            source_view[target, indices] = donors.astype(np.int16)
+            missing[indices] = False
 
-        observed_any = provenance[target] != 255
-        if not np.any(observed_any):
+        if not np.any(provenance[target] != 255):
             raise QualificationError("CAA_NO_SOURCE_OBSERVATION_ANYWHERE")
 
-        component_values = sorted(set(sample_component))
-        for component in component_values:
+        for component_id in sorted(set(sample_component)):
             component_mask = np.asarray(
-                [value == component for value in sample_component],
+                [value == component_id for value in sample_component],
                 dtype=bool,
             )
-            need = missing & component_mask
-            if not np.any(need):
-                continue
-            donors = observed_any & component_mask
-            if not np.any(donors):
-                continue
-            donor_indices = np.flatnonzero(donors)
-            query_indices = np.flatnonzero(need)
-            tree = cKDTree(positions[donor_indices])
-            _distance, nearest = tree.query(positions[query_indices], k=1)
-            nearest_indices = donor_indices[np.asarray(nearest, dtype=np.int64)]
-            rgba[target, query_indices] = rgba[target, nearest_indices]
-            source_view[target, query_indices] = source_view[target, nearest_indices]
-            provenance[target, query_indices] = CAA_PROVENANCE[
-                "COMPILED_NEAREST_SURFACE"
-            ]
-            missing[query_indices] = False
+            if np.any(missing & component_mask) and not np.any(
+                (~missing) & component_mask
+            ):
+                raise QualificationError(
+                    "CAA_COMPONENT_WITHOUT_SOURCE_OBSERVATION"
+                )
 
-        if np.any(missing):
-            donor_indices = np.flatnonzero(provenance[target] != 255)
-            query_indices = np.flatnonzero(missing)
-            tree = cKDTree(positions[donor_indices])
-            _distance, nearest = tree.query(positions[query_indices], k=1)
-            nearest_indices = donor_indices[np.asarray(nearest, dtype=np.int64)]
-            rgba[target, query_indices] = rgba[target, nearest_indices]
-            source_view[target, query_indices] = source_view[target, nearest_indices]
-            provenance[target, query_indices] = CAA_PROVENANCE[
-                "COMPILED_GLOBAL_SURFACE"
-            ]
-            missing[query_indices] = False
-
-        if np.any(missing) or np.any(provenance[target] == 255):
-            raise QualificationError("CAA_TOTALITY_FAILURE_AFTER_DETERMINISTIC_COMPILE")
+        stats = _bounded_surface_harmonic_fill(
+            rgba=rgba[target],
+            provenance=provenance[target],
+            source_view=source_view[target],
+            missing=missing,
+            sample_component=sample_component,
+            neighbors=surface_neighbors,
+            max_region_samples=max_harmonic_region,
+            max_graph_hops=max_harmonic_hops,
+        )
+        completion_rows.append(
+            {
+                "target_view_index": target,
+                **stats,
+            }
+        )
+        if np.any(provenance[target] == 255):
+            raise QualificationError("CAA_TOTALITY_FAILURE_AFTER_HARMONIC_COMPILE")
 
     counts = {
         name: int(np.count_nonzero(provenance == code))
@@ -563,6 +583,7 @@ def compile_deterministic_caa(
         "component_ids": tuple(sorted(set(sample_component))),
         "sample_component": tuple(sample_component),
         "counts": counts,
+        "completion_rows": tuple(completion_rows),
         "face_count": face_count,
         "sample_count_per_face": per_face_samples,
     }

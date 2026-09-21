@@ -7,6 +7,95 @@ import numpy as np
 from .types import QualificationError
 
 
+def interior_shared_edge_projection_continuity(
+    *,
+    faces: np.ndarray,
+    projected_face_vertices: np.ndarray,
+) -> dict:
+    """Prove exact screen-space agreement on topology-owned interior edges.
+
+    Only an edge referenced by exactly two faces through the same canonical vertex
+    indices is continuity authority. Geometrically nearby but topologically separate
+    faces/components are deliberately outside this census, so legitimate articulated
+    negative space cannot be misclassified as a crack.
+    """
+    tri = np.asarray(faces, dtype=np.int64)
+    projected = np.asarray(projected_face_vertices, dtype=np.float64)
+    if (
+        tri.ndim != 2
+        or tri.shape[1] != 3
+        or projected.shape != (len(tri), 3, 2)
+        or np.any(tri < 0)
+        or not np.isfinite(projected).all()
+    ):
+        raise QualificationError(
+            "DYNAMIC_GEOMETRY_SHARED_EDGE_PROJECTION_INPUT_INVALID"
+        )
+
+    incidence: dict[tuple[int, int], list[tuple[int, dict[int, np.ndarray]]]] = {}
+    for face_index, face in enumerate(tri):
+        for ia, ib in ((0, 1), (1, 2), (2, 0)):
+            a = int(face[ia])
+            b = int(face[ib])
+            key = (min(a, b), max(a, b))
+            incidence.setdefault(key, []).append(
+                (
+                    int(face_index),
+                    {
+                        a: projected[face_index, ia].copy(),
+                        b: projected[face_index, ib].copy(),
+                    },
+                )
+            )
+
+    interior = 0
+    mismatch = 0
+    max_error = 0.0
+    worst_edge = None
+    nonmanifold_excluded = 0
+    for edge, rows in sorted(incidence.items()):
+        if len(rows) > 2:
+            nonmanifold_excluded += 1
+            continue
+        if len(rows) != 2:
+            continue
+        interior += 1
+        left = rows[0][1]
+        right = rows[1][1]
+        endpoint_error = 0.0
+        exact = True
+        for vertex_index in edge:
+            if vertex_index not in left or vertex_index not in right:
+                raise QualificationError(
+                    "DYNAMIC_GEOMETRY_SHARED_EDGE_ENDPOINT_BINDING_DRIFT"
+                )
+            a = np.asarray(left[vertex_index], dtype=np.float64)
+            b = np.asarray(right[vertex_index], dtype=np.float64)
+            exact = exact and bool(np.array_equal(a, b))
+            endpoint_error = max(
+                endpoint_error,
+                float(np.max(np.abs(a - b))),
+            )
+        if not exact:
+            mismatch += 1
+            if endpoint_error >= max_error:
+                max_error = endpoint_error
+                worst_edge = [int(edge[0]), int(edge[1])]
+
+    return {
+        "mode": "TOPOLOGY_OWNED_INTERIOR_SHARED_EDGE_EXACT_PROJECTION_V1",
+        "interior_shared_edge_count": int(interior),
+        "mismatched_interior_shared_edge_count": int(mismatch),
+        "maximum_projected_endpoint_error_px": float(max_error),
+        "worst_edge_vertex_indices": worst_edge,
+        "nonmanifold_edge_count_excluded_from_continuity_authority": int(
+            nonmanifold_excluded
+        ),
+        "passed": bool(mismatch == 0),
+        "cross_component_or_geometrically_near_edges_inferred": False,
+    }
+
+
 def _aabb(triangle: np.ndarray):
     tri = np.asarray(triangle, dtype=np.float64)
     if tri.shape != (3, 3) or not np.isfinite(tri).all():

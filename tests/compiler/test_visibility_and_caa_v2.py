@@ -107,7 +107,7 @@ def test_safe_transparent_source_background_is_defined_direct_source_not_unseen(
         tile_resolution=8,
         source_lock_policy={
             "min_abs_normal_camera_cos": 0.17,
-            "boundary_safe_erosion_px": 1,
+            "boundary_safe_erosion_px": 0,
             "min_source_alpha_u8": 1,
         },
     )

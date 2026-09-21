@@ -94,6 +94,125 @@ def _face_groups(mesh, component_id: str, *, cut_face_pairs=()):
     return tuple(sorted(groups, key=lambda group: (group[0], len(group), group)))
 
 
+RIGIDITY_NOOP_RELATIVE_EDGE_TOLERANCE = 1.0e-9
+RIGIDITY_NOOP_PROBE_ROTATION_DEGREES = 37.0
+
+
+def _axis_rotation(axis: int, angle_degrees: float) -> np.ndarray:
+    angle = math.radians(float(angle_degrees))
+    c = math.cos(angle)
+    s = math.sin(angle)
+    if int(axis) == 0:
+        return np.asarray(((1.0, 0.0, 0.0), (0.0, c, -s), (0.0, s, c)))
+    if int(axis) == 1:
+        return np.asarray(((c, 0.0, s), (0.0, 1.0, 0.0), (-s, 0.0, c)))
+    if int(axis) == 2:
+        return np.asarray(((c, -s, 0.0), (s, c, 0.0), (0.0, 0.0, 1.0)))
+    raise QualificationError("PRESENTATION_V2_RIGIDITY_PROBE_AXIS_INVALID")
+
+
+def _face_group_rigidity_noop_probe(
+    face_indices,
+    mesh,
+    mesh_skin,
+) -> dict:
+    rows = {
+        str(row.canonical_mesh_vertex_id): row
+        for row in mesh_skin.rows
+    }
+    positions = {
+        str(vertex.canonical_mesh_vertex_id): np.asarray(
+            vertex.P,
+            dtype=np.float64,
+        )
+        for vertex in mesh.vertices
+    }
+    vertex_ids = sorted(
+        {
+            str(vertex_id)
+            for face_index in face_indices
+            for vertex_id in mesh.faces[int(face_index)]
+        }
+    )
+    if not vertex_ids or any(vertex_id not in positions for vertex_id in vertex_ids):
+        raise QualificationError("PRESENTATION_V2_RIGIDITY_PROBE_VERTEX_MISSING")
+    xyz = np.asarray([positions[vertex_id] for vertex_id in vertex_ids], dtype=np.float64)
+    if xyz.ndim != 2 or xyz.shape[1] != 3 or not np.isfinite(xyz).all():
+        raise QualificationError("PRESENTATION_V2_RIGIDITY_PROBE_POSITION_INVALID")
+    local = {vertex_id: index for index, vertex_id in enumerate(vertex_ids)}
+
+    edges = set()
+    for face_index in face_indices:
+        face = tuple(map(str, mesh.faces[int(face_index)]))
+        for a, b in ((face[0], face[1]), (face[1], face[2]), (face[2], face[0])):
+            edges.add(tuple(sorted((local[a], local[b]))))
+    if not edges:
+        raise QualificationError("PRESENTATION_V2_RIGIDITY_PROBE_EDGE_EMPTY")
+    edge_rows = np.asarray(sorted(edges), dtype=np.int64)
+    rest_delta = xyz[edge_rows[:, 1]] - xyz[edge_rows[:, 0]]
+    rest_length = np.linalg.norm(rest_delta, axis=1)
+    span = float(np.linalg.norm(np.ptp(xyz, axis=0)))
+    scale = max(span, float(np.max(rest_length, initial=0.0)), 1.0e-12)
+    if np.any(rest_length <= 1.0e-12 * scale):
+        raise QualificationError("PRESENTATION_V2_RIGIDITY_PROBE_DEGENERATE_EDGE")
+
+    joint_ids = sorted(
+        {
+            str(joint_id)
+            for vertex_id in vertex_ids
+            for joint_id, _weight in rows[vertex_id].influences
+        }
+    )
+    if not joint_ids:
+        raise QualificationError("PRESENTATION_V2_RIGIDITY_PROBE_JOINT_EMPTY")
+    joint_index = {joint_id: i for i, joint_id in enumerate(joint_ids)}
+    weights = np.zeros((len(vertex_ids), len(joint_ids)), dtype=np.float64)
+    for vi, vertex_id in enumerate(vertex_ids):
+        row = rows.get(vertex_id)
+        if row is None or not row.influences:
+            raise QualificationError("PRESENTATION_V2_RIGIDITY_PROBE_SKIN_ROW_MISSING")
+        for joint_id, weight in row.influences:
+            value = float(weight)
+            if not math.isfinite(value) or value < 0.0:
+                raise QualificationError("PRESENTATION_V2_RIGIDITY_PROBE_WEIGHT_INVALID")
+            weights[vi, joint_index[str(joint_id)]] += value
+    if not np.allclose(weights.sum(axis=1), 1.0, atol=1.0e-9, rtol=0.0):
+        raise QualificationError("PRESENTATION_V2_RIGIDITY_PROBE_SIMPLEX_DRIFT")
+
+    max_error = 0.0
+    worst_probe = ""
+    translation = scale * np.asarray((0.31, -0.19, 0.13), dtype=np.float64)
+
+    def measure(posed: np.ndarray, label: str) -> None:
+        nonlocal max_error, worst_probe
+        delta = posed[edge_rows[:, 1]] - posed[edge_rows[:, 0]]
+        length = np.linalg.norm(delta, axis=1)
+        error = float(np.max(np.abs(length - rest_length) / rest_length))
+        if error > max_error:
+            max_error = error
+            worst_probe = label
+
+    for joint_id, ji in joint_index.items():
+        w = weights[:, ji : ji + 1]
+        measure(xyz + w * translation[None, :], f"TRANSLATE:{joint_id}")
+        for axis in range(3):
+            rotation = _axis_rotation(axis, RIGIDITY_NOOP_PROBE_ROTATION_DEGREES)
+            rotated = xyz @ rotation.T
+            posed = xyz + w * (rotated - xyz)
+            measure(posed, f"ROTATE_{axis}:{joint_id}")
+
+    return {
+        "mode": "INDEPENDENT_JOINT_LBS_RIGID_NOOP_V1",
+        "vertex_count": int(len(vertex_ids)),
+        "edge_count": int(len(edge_rows)),
+        "influencing_joint_count": int(len(joint_ids)),
+        "max_relative_edge_error": float(max_error),
+        "tolerance": float(RIGIDITY_NOOP_RELATIVE_EDGE_TOLERANCE),
+        "passed": bool(max_error <= RIGIDITY_NOOP_RELATIVE_EDGE_TOLERANCE),
+        "worst_probe": worst_probe,
+    }
+
+
 def _face_group_class(
     face_indices,
     mesh,
@@ -136,16 +255,35 @@ def _face_group_class(
             common_owner = ""
         minimum_owner = min(minimum_owner, owner_weight)
         maximum_other = max(maximum_other, other)
-    rigid = (
+    legacy_rigid = (
         bool(common_owner)
         and minimum_owner >= float(owner_min)
         and maximum_other <= float(other_max)
     )
+    noop = _face_group_rigidity_noop_probe(
+        face_indices,
+        mesh,
+        mesh_skin,
+    )
+    noop_rigid = bool(noop["passed"])
+    if legacy_rigid and not noop_rigid:
+        raise QualificationError(
+            "PRESENTATION_V2_LEGACY_RIGID_PREDICATE_NOOP_FAIL:"
+            + str(noop["max_relative_edge_error"])
+        )
+    if noop_rigid and not common_owner:
+        raise QualificationError(
+            "PRESENTATION_V2_RIGID_NOOP_WITHOUT_COMMON_OWNER"
+        )
+    mechanical_class = "RIGID" if noop_rigid else "DEFORMABLE"
     return (
-        "RIGID" if rigid else "DEFORMABLE",
-        str(common_owner) if rigid else "",
+        mechanical_class,
+        str(common_owner) if noop_rigid else "",
         float(minimum_owner),
         float(maximum_other),
+        dict(noop),
+        bool(legacy_rigid),
+        bool(noop_rigid and not legacy_rigid),
     )
 
 
@@ -181,7 +319,15 @@ def build_presentation_structure_v2(
                 cut_face_pairs=presentation_cut_face_pairs,
             )
         ):
-            mechanical_class, rigid_owner, min_owner, max_other = _face_group_class(
+            (
+                mechanical_class,
+                rigid_owner,
+                min_owner,
+                max_other,
+                rigidity_noop,
+                legacy_rigid,
+                legacy_false_negative,
+            ) = _face_group_class(
                 face_indices,
                 mesh,
                 mesh_skin,
@@ -251,6 +397,14 @@ def build_presentation_structure_v2(
                         "rigid_owner_joint_id": rigid_owner,
                         "minimum_owner_weight": min_owner,
                         "maximum_other_mass": max_other,
+                        "rigidity_noop_probe": rigidity_noop,
+                        "legacy_weight_threshold_rigid": legacy_rigid,
+                        "legacy_weight_threshold_false_negative": (
+                            legacy_false_negative
+                        ),
+                        "rigidity_authority": (
+                            "INDEPENDENT_JOINT_LBS_RIGID_NOOP_V1"
+                        ),
                         "categorical_identity": None,
                         "detachability_authority": "UNPROVEN",
                     },
@@ -309,6 +463,13 @@ def build_presentation_structure_v2(
             "categorical_recognition_used": False,
             "conceptual_object_identity_claimed": False,
             "mechanical_classification_scope": "PRESENTATION_FACE_GROUP",
+            "rigid_classification_authority": (
+                "INDEPENDENT_JOINT_LBS_RIGID_NOOP_V1"
+            ),
+            "legacy_weight_thresholds_are_diagnostic_not_final_authority": True,
+            "rigid_noop_relative_edge_tolerance": (
+                RIGIDITY_NOOP_RELATIVE_EDGE_TOLERANCE
+            ),
         },
     )
     value = replace(value, structure_hash=presentation_structure_v2_hash(value))

@@ -653,7 +653,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         "dynamic_max_compiled_unobserved_visible_fraction",
         "dynamic_max_frame_compiled_unobserved_visible_fraction",
         "dynamic_max_connected_compiled_unobserved_visible_fraction",
-        "dynamic_max_compiled_global_visible_fraction",
         "dynamic_max_micro_visible_pixel_fraction_per_frame",
         "dynamic_max_unmeasurable_consequential_visible_face_count",
         "dynamic_max_exact_depth_ambiguous_fraction",
@@ -670,9 +669,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     )
     connected_exposure_budget = float(
         policy["dynamic_max_connected_compiled_unobserved_visible_fraction"]
-    )
-    global_exposure_budget = float(
-        policy["dynamic_max_compiled_global_visible_fraction"]
     )
     micro_visible_budget = float(
         policy["dynamic_max_micro_visible_pixel_fraction_per_frame"]
@@ -693,7 +689,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         exposure_budget,
         frame_exposure_budget,
         connected_exposure_budget,
-        global_exposure_budget,
         micro_visible_budget,
         exact_depth_ambiguity_budget,
     ):
@@ -743,7 +738,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     geometry_visible = 0
     alpha_transparent = 0
     compiled_visible = 0
-    compiled_global_visible = 0
     undefined_visible = 0
     mismatch_pixels = 0
     max_mismatch_fraction = 0.0
@@ -804,17 +798,11 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 alpha_transparent += int(
                     np.count_nonzero(visible & (rgba[:, :, 3] == 0))
                 )
-                nearest_mask = visible & (
-                    prov == int(CAA_PROVENANCE["COMPILED_NEAREST_SURFACE"])
+                compiled_mask = visible & (
+                    prov == int(CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"])
                 )
-                global_mask = visible & (
-                    prov == int(CAA_PROVENANCE["COMPILED_GLOBAL_SURFACE"])
-                )
-                compiled_mask = nearest_mask | global_mask
                 compiled_count = int(np.count_nonzero(compiled_mask))
-                global_count = int(np.count_nonzero(global_mask))
                 compiled_visible += compiled_count
-                compiled_global_visible += global_count
                 if visible_count > 0:
                     max_frame_compiled_fraction = max(
                         max_frame_compiled_fraction,
@@ -975,11 +963,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         if geometry_visible <= 0
         else float(compiled_visible) / float(geometry_visible)
     )
-    global_exposure_fraction = (
-        0.0
-        if geometry_visible <= 0
-        else float(compiled_global_visible) / float(geometry_visible)
-    )
     transparent_fraction = (
         0.0
         if geometry_visible <= 0
@@ -1008,7 +991,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         exposure_fraction <= exposure_budget
         and max_frame_compiled_fraction <= frame_exposure_budget
         and max_connected_compiled_fraction <= connected_exposure_budget
-        and global_exposure_fraction <= global_exposure_budget
     )
     micro_face_passed = (
         max_frame_micro_visible_fraction <= micro_visible_budget
@@ -1047,8 +1029,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         compiled_unobserved_visible_fraction=exposure_fraction,
         maximum_frame_compiled_unobserved_visible_fraction=max_frame_compiled_fraction,
         maximum_connected_compiled_unobserved_visible_fraction=max_connected_compiled_fraction,
-        compiled_global_visible_pixel_count=compiled_global_visible,
-        compiled_global_visible_fraction=global_exposure_fraction,
         maximum_frame_micro_visible_pixel_fraction=max_frame_micro_visible_fraction,
         consequential_visible_face_count=consequential_visible_face_count,
         unmeasurable_consequential_visible_face_count=unmeasurable_visible_face_count,
@@ -1077,7 +1057,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "compiled_unobserved_exposure_passed": exposure_passed,
             "maximum_frame_compiled_unobserved_visible_fraction": max_frame_compiled_fraction,
             "maximum_connected_compiled_unobserved_visible_fraction": max_connected_compiled_fraction,
-            "compiled_global_visible_fraction": global_exposure_fraction,
             "maximum_frame_micro_visible_pixel_fraction": max_frame_micro_visible_fraction,
             "micro_visible_face_load_passed": micro_face_passed,
             "exact_depth_ambiguous_fraction": exact_depth_ambiguous_fraction,
@@ -1136,7 +1115,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "compiled_unobserved_visible_fraction": exposure_fraction,
             "maximum_frame_compiled_unobserved_visible_fraction": max_frame_compiled_fraction,
             "maximum_connected_compiled_unobserved_visible_fraction": max_connected_compiled_fraction,
-            "compiled_global_visible_fraction": global_exposure_fraction,
             "maximum_frame_micro_visible_pixel_fraction": max_frame_micro_visible_fraction,
             "consequential_visible_face_count": consequential_visible_face_count,
             "unmeasurable_consequential_visible_face_count": unmeasurable_visible_face_count,

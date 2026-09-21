@@ -1,0 +1,89 @@
+name: VF11 geometry feature survival
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tools/vf11_geometry_feature_survival_panel.py'
+      - 'models/iris/v3/zero_surface_decoder_v3.py'
+      - 'compiler/realsas_compiler_core/mesh/product_coverage_v1.py'
+      - 'compiler/realsas_compiler_core/rest_preservation_v1.py'
+      - '.github/workflows/vf11_geometry_feature_survival.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: vf11-geometry-feature-survival-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  feature-survival:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_VF11_OUT: vf11_out
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install frozen calibration dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off scikit-image==0.25.2
+
+      - name: Compile apparatus
+        run: |
+          python -m py_compile             tools/vf11_geometry_feature_survival_panel.py             models/iris/v3/zero_surface_decoder_v3.py             compiler/realsas_compiler_core/mesh/product_coverage_v1.py             compiler/realsas_compiler_core/rest_preservation_v1.py
+
+      - name: Enforce subject-free calibration boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nEi 'SUBJECT2_KNIGHT|Knight\.fbx|MAGE_|Mage'             tools/vf11_geometry_feature_survival_panel.py; then
+            echo VF11_SUBJECT_CONTAMINATION_FORBIDDEN >&2
+            exit 1
+          fi
+          echo VF11_SUBJECT_FREE_BOUNDARY=PASS
+
+      - name: Run exact decoder-to-product-raster feature panel
+        run: python tools/vf11_geometry_feature_survival_panel.py
+
+      - name: Validate measurement claim boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          p=json.load(open('vf11_out/VF11_GEOMETRY_FEATURE_SURVIVAL_PANEL.json',encoding='utf-8'))
+          assert p['status']=='MEASURED_SUBJECT_FREE__NO_POLICY_SELECTED'
+          assert p['subject_inputs_used'] is False
+          assert p['knight_result_used'] is False
+          assert p['mage_result_used'] is False
+          assert p['teacher_geometry_used'] is False
+          assert p['policy_selected'] is False
+          assert p['decoder_resolution']==256
+          assert p['raster_resolution']==1024
+          assert len(p['cases'])==20
+          assert {c['family'] for c in p['cases']}=={
+              'THIN_STRAP','FORK_GAP','CONCAVE_NOTCH','THIN_BLADE','SMALL_COMPONENT'
+          }
+          print('VF11_MEASUREMENT_BOUNDARY=PASS')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vf11-geometry-feature-survival
+          path: vf11_out/
+          if-no-files-found: error

@@ -1,0 +1,35 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX1BKnotAlignmentPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__TRIPLANE_KNOT_ALIGNED_BLOCK_MC_CAUSAL_TEST",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "parent_x1_result_sha256": "c2e9bebf6911af1e912925f030e857ad81cc116498877c1b7683528eb06bf13d",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "subject_scope": "same frozen 12 corrected C1-primary Knight d8 roots as X1",
+  "motivation": "X1 showed direct contour-vertex residual improves approximately 4x per depth halving for most roots, but one root retained a large residual tail at d11/d12. The field is piecewise due triplane bilinear interpolation. X1B tests whether forcing contour blocks to end at exact align_corners=False triplane texel boundaries removes cross-regime interpolation error without globally increasing depth.",
+  "knot_definition": "for W=48, internal normalized-coordinate boundaries are -1 + 2*k/W, k=1..W-1",
+  "arms": [
+    "UNIFORM_ROOT_MC at effective d11 and d12",
+    "KNOT_ALIGNED_BLOCK_MC with each root split at every internal triplane knot crossing X/Y/Z and per-interval cell count ceil(interval_width / uniform_target_h)"
+  ],
+  "merge_contract": "block MC vertices are globally welded by rounded world position only for this research diagnostic; seam audit reports duplicate, degenerate and nonmanifold topology",
+  "frozen_metrics": [
+    "direct float64 field residual at emitted vertices",
+    "gradient-normalized residual |f|/max(||grad f||,1e-8)",
+    "vertex/face count",
+    "connected component count",
+    "duplicate/degenerate/nonmanifold edges",
+    "symmetric point-cloud distance versus the corresponding uniform arm",
+    "cell-count inflation from knot insertion"
+  ],
+  "primary_comparison": "per-root d11 and d12 p95 gradient-normalized residual ratio KNOT_ALIGNED / UNIFORM",
+  "interpretation": {
+    "KNOT_ALIGNMENT_CAUSAL": "knot-aligned blocks materially reduce residual on one or more knot-crossing roots without introducing seam/topology alarms, while non-knot roots remain unchanged by construction",
+    "NO_MATERIAL_KNOT_EFFECT": "residual changes are small relative to the depth effect",
+    "KNOT_ALIGNMENT_TOPOLOGY_RISK": "seam/nonmanifold/duplicate alarms appear despite residual improvement"
+  },
+  "claim_boundary": "X1B is a local causal diagnostic only. It cannot promote block MC or replace full VF11/Stage13 replay."
+}

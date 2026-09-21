@@ -14,6 +14,8 @@ on:
       - 'tests/research/test_vf11_profile_c1_handoff_v1.py'
       - 'tests/research/test_vf11_directional_regular_c1_v2.py'
       - 'tests/research/test_vf11_profile_c1_handoff_v2.py'
+      - 'tests/research/test_vf11_oriented_crossing_c2_v1.py'
+      - 'tests/research/test_vf11_profile_c2_primary_v1.py'
       - 'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json'
       - 'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json'
       - 'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json'
@@ -23,6 +25,8 @@ on:
       - 'canonical/VF11_C1_V1_CLOSURE_20260921.json'
       - 'canonical/VF11_C1_V2_CORRELATED_AFFINE_PREREGISTRATION_20260921.json'
       - 'canonical/VF11_C1_V2_INTERIM_REVIEW_20260921.json'
+      - 'canonical/VF11_C1_V2_RESEARCH_CLOSURE_20260921.json'
+      - 'canonical/VF11_C2_ORIENTED_CROSSING_PREREGISTRATION_20260921.json'
       - '.github/workflows/vf11_certified_adaptive_research_smoke.yml'
   workflow_dispatch:
 
@@ -66,6 +70,8 @@ jobs:
           python -m py_compile experiments/vf11_certified_adaptive/profile_c1_handoff_v1.py
           python -m py_compile experiments/vf11_certified_adaptive/directional_regular_c1_v2.py
           python -m py_compile experiments/vf11_certified_adaptive/profile_c1_handoff_v2.py
+          python -m py_compile experiments/vf11_certified_adaptive/oriented_crossing_c2_v1.py
+          python -m py_compile experiments/vf11_certified_adaptive/profile_c2_primary_v1.py
           python -m py_compile tests/research/test_vf11_range_engine_v1.py
           python -m py_compile tests/research/test_vf11_range_engine_c0_v2.py
           python -m py_compile tests/research/test_vf11_range_engine_c0_v3.py
@@ -73,7 +79,9 @@ jobs:
           python -m py_compile tests/research/test_vf11_directional_regular_c1_v1.py
           python -m py_compile tests/research/test_vf11_profile_c1_handoff_v1.py
           python -m py_compile tests/research/test_vf11_directional_regular_c1_v2.py
-          python -m py_compile tests/research/test_vf11_profile_c1_handoff_v2.py
+          python -m py_compile tests/research/test_vf11_profile_c1_handoff_v2.py tests/research/test_vf11_oriented_crossing_c2_v1.py tests/research/test_vf11_profile_c2_primary_v1.py
+          python -m py_compile tests/research/test_vf11_oriented_crossing_c2_v1.py
+          python -m py_compile tests/research/test_vf11_profile_c2_primary_v1.py
 
       - name: Enforce research-only claim boundary
         shell: bash
@@ -117,6 +125,13 @@ jobs:
           c1v2r=json.load(open('canonical/VF11_C1_V2_INTERIM_REVIEW_20260921.json',encoding='utf-8'))
           assert c1v2r['status']=='NONVACUOUS__MARGIN_REPORTING_REPLAY_REQUIRED_BEFORE_CLOSURE'
           assert c1v2r['product_authority_minted'] is False
+          c1close=json.load(open('canonical/VF11_C1_V2_RESEARCH_CLOSURE_20260921.json',encoding='utf-8'))
+          assert c1close['status']=='C1_V2_RESEARCH_CLOSED__C2_CROSSING_RESEARCH_AUTHORIZED'
+          assert c1close['product_authority_minted'] is False
+          c2=json.load(open('canonical/VF11_C2_ORIENTED_CROSSING_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert c2['status']=='PREREGISTERED__C2_ORIENTED_CROSSING_EXISTENCE_UNIQUENESS'
+          assert c2['product_authority_minted'] is False
+          assert c2['full_domain_traversal_authorized'] is False
           print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
           PY
 
@@ -141,6 +156,8 @@ jobs:
             'experiments/vf11_certified_adaptive/profile_c1_handoff_v1.py',
             'experiments/vf11_certified_adaptive/directional_regular_c1_v2.py',
             'experiments/vf11_certified_adaptive/profile_c1_handoff_v2.py',
+            'experiments/vf11_certified_adaptive/oriented_crossing_c2_v1.py',
+            'experiments/vf11_certified_adaptive/profile_c2_primary_v1.py',
             'tests/research/test_vf11_range_engine_v1.py',
             'tests/research/test_vf11_range_engine_c0_v2.py',
             'tests/research/test_vf11_range_engine_c0_v3.py',
@@ -149,6 +166,8 @@ jobs:
             'tests/research/test_vf11_profile_c1_handoff_v1.py',
             'tests/research/test_vf11_directional_regular_c1_v2.py',
             'tests/research/test_vf11_profile_c1_handoff_v2.py',
+            'tests/research/test_vf11_oriented_crossing_c2_v1.py',
+            'tests/research/test_vf11_profile_c2_primary_v1.py',
             'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json',
             'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json',
             'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json',
@@ -161,7 +180,7 @@ jobs:
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           out={
-            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v6',
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v7',
             'status':'PASS',
             'product_authority_minted':False,
             'files':{p:sha(p) for p in files},

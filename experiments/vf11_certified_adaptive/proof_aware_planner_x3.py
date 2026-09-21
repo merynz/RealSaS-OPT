@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-"""Proof-aware fixed-lattice narrow-band planner for VF11 X3.
+"""Proof-aware fixed-lattice narrow-band planner for VF11 X3 V2.
 
-The planner consumes the final C2 V3+V4 proof partition over the frozen d8 roots
-and maps it to aligned d13 4x4x4-cell extraction blocks.
+The proof partition is coarser than the d13 extraction blocks. A terminal
+strict-sign EMPTY leaf safely prunes all descendants. A GRAPH or
+PROVEN_ZERO_EXISTS leaf keeps all descendants query-active, but existence is
+audited at proof-leaf scope rather than incorrectly assigned to every
+descendant block.
 
-Important separation:
-- only corrected-C0 strict-sign terminal leaves become CERTIFIED_EMPTY;
-- GRAPH and C0 PROVEN_ZERO_EXISTS leaves remain PROVEN_SURFACE;
-- C0 UNKNOWN leaves remain UNCERTAIN;
-- same-sign target-lattice corners never upgrade UNKNOWN to empty.
+X3 remains research-only and ordinary float64 is not a shipping certificate.
 """
 
 from collections import defaultdict
@@ -27,7 +26,6 @@ from block_mc_x2 import (
 
 
 EMPTY_STATES = {"EMPTY_POSITIVE", "EMPTY_NEGATIVE"}
-SURFACE_C0_STATES = {"PROVEN_ZERO_EXISTS"}
 
 
 @dataclass(frozen=True)
@@ -39,11 +37,19 @@ class PlannedBlock:
     proof_relative_depth: int
     proof_state: str
     proof_c0_state: str | None
+    selected_axis: str | None
     planner_class: str
 
 
 def _child_digit(xbit: int, ybit: int, zbit: int) -> str:
     return str(int(xbit) * 4 + int(ybit) * 2 + int(zbit))
+
+
+def _decode_digit(ch: str) -> tuple[int, int, int]:
+    v = int(ch)
+    if not 0 <= v <= 7:
+        raise ValueError(f"invalid octree digit {ch}")
+    return ((v >> 2) & 1, (v >> 1) & 1, v & 1)
 
 
 def block_path_d11(block_xyz: Iterable[int]) -> str:
@@ -63,8 +69,28 @@ def block_path_d11(block_xyz: Iterable[int]) -> str:
     return "".join(chars)
 
 
+def proof_path_cell_bounds_d13(path: str) -> tuple[np.ndarray, np.ndarray]:
+    """Return inclusive-exclusive d13 cell bounds inside one d8 root.
+
+    The root contains 32 cells per axis. Every octree path digit halves all
+    three axes, so relative depths 0..3 align exactly to the d13 lattice.
+    """
+    if len(path) > 3:
+        raise ValueError("X3 target d13 supports proof relative depth <= 3")
+    lo = np.zeros(3, dtype=np.int64)
+    hi = np.full(3, 32, dtype=np.int64)
+    for ch in path:
+        bits = np.asarray(_decode_digit(ch), dtype=np.int64)
+        mid = (lo + hi) // 2
+        lo = np.where(bits == 0, lo, mid)
+        hi = np.where(bits == 0, mid, hi)
+    if np.any(hi <= lo):
+        raise RuntimeError(f"invalid proof-path bounds {path}: {lo} {hi}")
+    return lo, hi
+
+
 def final_partition_records(c2_v3_profile: dict, c2_v4_profile: dict) -> list[dict]:
-    """Return the true leaf partition, excluding historical UNRESOLVED ancestors."""
+    """Return the true leaf partition, excluding historical ancestors."""
     records = list(c2_v3_profile["records"]) + list(c2_v4_profile["new_records"])
     by_root = defaultdict(list)
     for r in records:
@@ -83,7 +109,6 @@ def final_partition_records(c2_v3_profile: dict, c2_v4_profile: dict) -> list[di
             if not has_descendant:
                 final.append(r)
 
-    # Exact partition-volume audit per root.
     for root, rows in by_root.items():
         leaves = [r for r in final if int(r["root_anchor_id"]) == root]
         weight = sum(1.0 / float(8 ** int(r["relative_depth"])) for r in leaves)
@@ -94,19 +119,19 @@ def final_partition_records(c2_v3_profile: dict, c2_v4_profile: dict) -> list[di
     return final
 
 
-def _planner_class(record: dict) -> str:
+def planner_class_for_leaf(record: dict) -> str:
     state = str(record["state"])
+    c0 = record.get("c0_state")
     if state in EMPTY_STATES:
         return "CERTIFIED_EMPTY"
     if state == "GRAPH":
-        return "PROVEN_SURFACE"
+        return "ACTIVE_GRAPH"
     if state != "UNRESOLVED":
         raise ValueError(f"unexpected proof state {state}")
-    c0 = record.get("c0_state")
-    if c0 in SURFACE_C0_STATES:
-        return "PROVEN_SURFACE"
+    if c0 == "PROVEN_ZERO_EXISTS":
+        return "ACTIVE_ZERO_EXISTS"
     if c0 == "UNKNOWN":
-        return "UNCERTAIN"
+        return "ACTIVE_UNKNOWN"
     raise ValueError(f"unexpected unresolved C0 state {c0}")
 
 
@@ -148,13 +173,104 @@ def plan_d13_blocks(c2_v3_profile: dict, c2_v4_profile: dict) -> list[PlannedBlo
                             proof_relative_depth=int(r["relative_depth"]),
                             proof_state=str(r["state"]),
                             proof_c0_state=r.get("c0_state"),
-                            planner_class=_planner_class(r),
+                            selected_axis=r.get("selected_axis"),
+                            planner_class=planner_class_for_leaf(r),
                         )
                     )
 
     if len(out) != 512 * len(by_root):
         raise RuntimeError("unexpected d13 block count")
     return out
+
+
+def mixed_cube_mask(values_zyx: np.ndarray) -> np.ndarray:
+    """Boolean [Z-1,Y-1,X-1] mask of d13 cubes with both signs at corners."""
+    f = np.asarray(values_zyx, dtype=np.float64)
+    if f.ndim != 3 or min(f.shape) < 2:
+        raise ValueError("values_zyx must be a 3D corner grid")
+    if not np.isfinite(f).all():
+        raise ValueError("non-finite target grid")
+    if np.any(f == 0.0):
+        raise ValueError("X3 exact-zero target corners are forbidden")
+    corners = [
+        f[0:-1, 0:-1, 0:-1],
+        f[0:-1, 0:-1, 1:],
+        f[0:-1, 1:, 0:-1],
+        f[0:-1, 1:, 1:],
+        f[1:, 0:-1, 0:-1],
+        f[1:, 0:-1, 1:],
+        f[1:, 1:, 0:-1],
+        f[1:, 1:, 1:],
+    ]
+    mn = np.minimum.reduce(corners)
+    mx = np.maximum.reduce(corners)
+    return (mn < 0.0) & (mx > 0.0)
+
+
+def leaf_mixed_cube_count(values_zyx: np.ndarray, proof_path: str) -> int:
+    mask = mixed_cube_mask(values_zyx)
+    lo, hi = proof_path_cell_bounds_d13(proof_path)
+    # mask is Z,Y,X while bounds are X,Y,Z.
+    sub = mask[lo[2]:hi[2], lo[1]:hi[1], lo[0]:hi[0]]
+    return int(np.count_nonzero(sub))
+
+
+def audit_graph_leaf_lines(
+    values_zyx: np.ndarray,
+    proof_path: str,
+    selected_axis: str,
+) -> dict:
+    """Audit d13 sampled capture of a certified graph leaf.
+
+    Because the graph certificate proves opposite-sign entry/exit faces and
+    strict regularity along the selected coordinate axis, every transverse
+    lattice line spanning the proof leaf should contain at least one adjacent
+    opposite-sign pair on any aligned subdivision.
+    """
+    f = np.asarray(values_zyx, dtype=np.float64)
+    if f.shape != (33, 33, 33):
+        raise ValueError("X3 graph-line audit expects one 33^3 d13 root grid")
+    if np.any(f == 0.0):
+        raise ValueError("X3 exact-zero target corners are forbidden")
+    axis_name = str(selected_axis)
+    axis = {"X": 0, "Y": 1, "Z": 2}.get(axis_name)
+    if axis is None:
+        raise ValueError(f"GRAPH leaf missing valid selected_axis: {selected_axis}")
+
+    lo, hi = proof_path_cell_bounds_d13(proof_path)
+    node_lo = lo
+    node_hi = hi + 1
+
+    total = 0
+    miss = 0
+    if axis == 0:
+        for z in range(node_lo[2], node_hi[2]):
+            for y in range(node_lo[1], node_hi[1]):
+                line = f[z, y, node_lo[0]:node_hi[0]]
+                total += 1
+                if not np.any(line[:-1] * line[1:] < 0.0):
+                    miss += 1
+    elif axis == 1:
+        for z in range(node_lo[2], node_hi[2]):
+            for x in range(node_lo[0], node_hi[0]):
+                line = f[z, node_lo[1]:node_hi[1], x]
+                total += 1
+                if not np.any(line[:-1] * line[1:] < 0.0):
+                    miss += 1
+    else:
+        for y in range(node_lo[1], node_hi[1]):
+            for x in range(node_lo[0], node_hi[0]):
+                line = f[node_lo[2]:node_hi[2], y, x]
+                total += 1
+                if not np.any(line[:-1] * line[1:] < 0.0):
+                    miss += 1
+
+    return {
+        "selected_axis": axis_name,
+        "transverse_line_count": int(total),
+        "line_miss_count": int(miss),
+        "line_capture_fraction": 1.0 if total == 0 else float((total - miss) / total),
+    }
 
 
 def block_corner_brackets(
@@ -181,7 +297,6 @@ def unique_query_corner_count(
     *,
     block_cells: int = 4,
 ) -> int:
-    """Count unique d13 lattice corners that active blocks would query per root."""
     by_root = defaultdict(set)
     for b in blocks:
         if b.planner_class == "CERTIFIED_EMPTY":
@@ -203,11 +318,10 @@ def extract_selected_d13_blocks(
     block_cells: int = 4,
     level: float = 0.0,
 ) -> BlockMCResult:
-    """Run Lewiner MC only on selected aligned blocks and weld by global edge ID."""
     measure = _require_skimage()
     field = np.asarray(root_grid_zyx, dtype=np.float32)
     if field.shape != (33, 33, 33):
-        raise ValueError("X3 local target grid must be exactly 33^3 (d13 in d8 root)")
+        raise ValueError("X3 local target grid must be exactly 33^3")
     if np.any(field == float(level)):
         raise ValueError("X3 exact-zero target corners are forbidden")
 

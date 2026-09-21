@@ -184,6 +184,128 @@ def _surface_sample_geometry(candidate, barycentric: np.ndarray):
     )
 
 
+def resolve_projected_tile_resolution(
+    *,
+    candidate,
+    cameras,
+    foreground_mask_by_view: Mapping[int, np.ndarray],
+    candidate_resolutions: tuple[int, ...],
+    max_source_pixels_per_atlas_texel: float,
+    bleed_px: int,
+    max_atlas_resolution: int,
+) -> dict:
+    resolutions = tuple(sorted(set(int(value) for value in candidate_resolutions)))
+    if not resolutions or resolutions[0] < 4:
+        raise QualificationError("CAA_TILE_CANDIDATES_INVALID")
+    limit = float(max_source_pixels_per_atlas_texel)
+    if not math.isfinite(limit) or limit <= 0.0:
+        raise QualificationError("CAA_TILE_DENSITY_LIMIT_INVALID")
+
+    vertex_ids = [_candidate_vertex_id(vertex) for vertex in candidate.vertices]
+    index = {vertex_id: i for i, vertex_id in enumerate(vertex_ids)}
+    xyz = np.asarray([vertex.P for vertex in candidate.vertices], dtype=np.float64)
+    if len(index) != len(vertex_ids) or xyz.shape != (len(vertex_ids), 3):
+        raise QualificationError("CAA_TILE_CANDIDATE_VERTEX_INVALID")
+
+    worst_sigma = 0.0
+    worst_view = -1
+    worst_face = -1
+    visible_face_observation_count = 0
+    by_view = {int(camera.view_index): camera for camera in cameras}
+    if set(by_view) != set(range(8)):
+        raise QualificationError("CAA_TILE_REQUIRES_V0_V7_CAMERAS")
+
+    for view in range(8):
+        mask = np.asarray(foreground_mask_by_view[view], dtype=bool)
+        camera = by_view[view]
+        visibility = rasterize_visible_owner(
+            candidate,
+            camera,
+            width=mask.shape[1],
+            height=mask.shape[0],
+        )
+        owner = visibility.owner_face_index
+        face_ids = np.unique(owner[mask & (owner >= 0)])
+        if not len(face_ids):
+            continue
+        projected = np.asarray(project_points_xyz_v3(xyz, camera), dtype=np.float64)
+        for face_index in map(int, face_ids):
+            face = candidate.faces[face_index]
+            try:
+                ids = [index[str(vertex_id)] for vertex_id in face]
+            except KeyError as exc:
+                raise QualificationError("CAA_TILE_FACE_VERTEX_UNKNOWN") from exc
+            tri = projected[ids, :2]
+            matrix = np.asarray(
+                [
+                    [tri[1, 0] - tri[0, 0], tri[2, 0] - tri[0, 0]],
+                    [tri[1, 1] - tri[0, 1], tri[2, 1] - tri[0, 1]],
+                ],
+                dtype=np.float64,
+            )
+            singular = np.linalg.svd(matrix, compute_uv=False)
+            sigma = float(np.max(singular))
+            if not math.isfinite(sigma):
+                raise QualificationError("CAA_TILE_PROJECTED_SCALE_NONFINITE")
+            visible_face_observation_count += 1
+            if sigma > worst_sigma:
+                worst_sigma = sigma
+                worst_view = view
+                worst_face = face_index
+
+    if visible_face_observation_count <= 0:
+        raise QualificationError("CAA_TILE_NO_SOURCE_VISIBLE_FACE")
+
+    rows = []
+    selected = None
+    face_count = len(candidate.faces)
+    for resolution in resolutions:
+        source_pixels_per_atlas_texel = worst_sigma / float(resolution - 1)
+        layout = face_atlas_layout(
+            face_count,
+            tile_resolution=resolution,
+            bleed_px=int(bleed_px),
+        )
+        density_passed = source_pixels_per_atlas_texel <= limit
+        capacity_passed = (
+            int(layout["width"]) <= int(max_atlas_resolution)
+            and int(layout["height"]) <= int(max_atlas_resolution)
+        )
+        rows.append(
+            {
+                "tile_resolution": resolution,
+                "worst_source_pixels_per_atlas_texel": source_pixels_per_atlas_texel,
+                "density_passed": bool(density_passed),
+                "atlas_width": int(layout["width"]),
+                "atlas_height": int(layout["height"]),
+                "capacity_passed": bool(capacity_passed),
+            }
+        )
+        if selected is None and density_passed and capacity_passed:
+            selected = resolution
+
+    if selected is None:
+        raise QualificationError("CAA_TILE_DENSITY_OR_CAPACITY_UNSATISFIED")
+    selected_layout = face_atlas_layout(
+        face_count,
+        tile_resolution=selected,
+        bleed_px=int(bleed_px),
+    )
+    stride = int(selected_layout["tile_stride"])
+    per_axis = int(max_atlas_resolution) // stride
+    return {
+        "mode": "PROJECTED_SOURCE_DENSITY_V1",
+        "selected_tile_resolution": int(selected),
+        "max_source_pixels_per_atlas_texel": limit,
+        "worst_projected_barycentric_sigma_px": worst_sigma,
+        "worst_view_index": int(worst_view),
+        "worst_face_index": int(worst_face),
+        "visible_face_observation_count": int(visible_face_observation_count),
+        "max_supported_face_count": int(per_axis * per_axis),
+        "candidates": rows,
+    }
+
+
 def _circular_view_order(target: int) -> tuple[int, ...]:
     return tuple(
         sorted(

@@ -230,17 +230,27 @@ def main() -> int:
         for row in adversarial_alpha
     )
 
-    if not benign_pm < adversarial_pm:
-        raise RuntimeError("VF10_PM_CONTROL_CLASSES_NOT_SEPARABLE")
-    if not benign_alpha < adversarial_alpha_floor:
-        raise RuntimeError("VF10_ALPHA_CONTROL_CLASSES_NOT_SEPARABLE")
-
-    selected_pm = 0.5 * (benign_pm + adversarial_pm)
-    selected_alpha = 0.5 * (benign_alpha + adversarial_alpha_floor)
+    pm_separable = bool(benign_pm < adversarial_pm)
+    alpha_separable = bool(benign_alpha < adversarial_alpha_floor)
+    gate_authorized = bool(pm_separable and alpha_separable)
+    selected_pm = (
+        0.5 * (benign_pm + adversarial_pm)
+        if gate_authorized
+        else None
+    )
+    selected_alpha = (
+        0.5 * (benign_alpha + adversarial_alpha_floor)
+        if gate_authorized
+        else None
+    )
 
     out = {
         "schema": "RealSaS.VF10DirectionTransitionCalibration.v1",
-        "status": "PASS_SUBJECT_FREE_SEPARATION",
+        "status": (
+            "PASS_SUBJECT_FREE_SEPARATION"
+            if gate_authorized
+            else "NEGATIVE_RESULT__CURVATURE_GATE_NOT_AUTHORIZED"
+        ),
         "subject_inputs_used": False,
         "knight_result_used": False,
         "mage_result_used": False,
@@ -249,14 +259,29 @@ def main() -> int:
         "benign": benign,
         "adversarial_rgb": adversarial_rgb,
         "adversarial_alpha": adversarial_alpha,
+        "interpretation": {
+            "raw_second_order_curvature_is_sufficient_for_transition_authority": (
+                gate_authorized
+            ),
+            "source_authoritative_view_dependent_variation_must_not_be_smoothed": True,
+            "recommended_shipping_semantics": (
+                "DISCRETE_SOURCE_AUTHORITY_NO_CROSS_DIRECTION_BLENDING"
+                if not gate_authorized
+                else "CURVATURE_GATE_AVAILABLE"
+            ),
+        },
         "selection": {
             "rule": "MIDPOINT(MAX_BENIGN,MIN_ADVERSARIAL)",
             "max_benign_pm_l1": benign_pm,
             "min_adversarial_pm_l1": adversarial_pm,
             "selected_max_triplet_p95_pm_l1": selected_pm,
+            "pm_classes_separable": pm_separable,
             "max_benign_alpha_abs": benign_alpha,
             "min_adversarial_alpha_abs": adversarial_alpha_floor,
             "selected_max_triplet_p95_alpha_abs": selected_alpha,
+            "alpha_classes_separable": alpha_separable,
+            "shipping_curvature_gate_authorized": gate_authorized,
+            "new_shipping_gate_minted": gate_authorized,
             "minimum_shared_triplet_samples": int(
                 policy["cross_view_min_shared_direct_samples_per_pair"]
             ),

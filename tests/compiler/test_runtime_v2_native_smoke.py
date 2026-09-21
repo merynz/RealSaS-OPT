@@ -243,3 +243,61 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     )
     assert rejected.returncode != 0
     assert "HOST_INTERPOLATION_MUST_BE_FORBIDDEN" in rejected.stderr
+
+    mip_tampered = entries.copy()
+    mip_manifest = mip_tampered["manifest.txt"].replace(
+        b"mip_generation_authorized=0",
+        b"mip_generation_authorized=1",
+    )
+    assert mip_manifest != mip_tampered["manifest.txt"]
+    mip_tampered["manifest.txt"] = mip_manifest
+    mip_rss = tmp_path / "tampered_mip.rss"
+    write_rss_v2(mip_rss, mip_tampered)
+    mip_rejected = subprocess.run(
+        [
+            str(player),
+            str(mip_rss),
+            "--clip",
+            "smoke",
+            "--view",
+            "V0",
+            "--frame",
+            "0",
+            "--out-rgba",
+            str(tmp_path / "tampered_mip.rgba"),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert mip_rejected.returncode != 0
+    assert "MIP_GENERATION_MUST_BE_FORBIDDEN" in mip_rejected.stderr
+
+    sampler_tampered = entries.copy()
+    sampler_manifest = sampler_tampered["manifest.txt"].replace(
+        b"texture_sampling_contract=BASE_LEVEL_BILINEAR_LINEAR_PM_ONLY",
+        b"texture_sampling_contract=UNQUALIFIED_OTHER_SAMPLER",
+    )
+    assert sampler_manifest != sampler_tampered["manifest.txt"]
+    sampler_tampered["manifest.txt"] = sampler_manifest
+    sampler_rss = tmp_path / "tampered_sampler.rss"
+    write_rss_v2(sampler_rss, sampler_tampered)
+    sampler_rejected = subprocess.run(
+        [
+            str(player),
+            str(sampler_rss),
+            "--clip",
+            "smoke",
+            "--view",
+            "V0",
+            "--frame",
+            "0",
+            "--out-rgba",
+            str(tmp_path / "tampered_sampler.rgba"),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert sampler_rejected.returncode != 0
+    assert "TEXTURE_SAMPLING_CONTRACT_INVALID" in sampler_rejected.stderr

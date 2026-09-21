@@ -340,6 +340,15 @@
       "required_closure": "Use one canonical face-atlas texel-to-lattice mapping primitive for RGBA, coarse provenance and donor-view lineage; add an adversarial identity-encoding test proving all three land on exactly the same allocated atlas texels and share identical padding.",
       "repair": "appearance_bake_v2 now exposes one _iter_face_atlas_lattice_samples mapping consumed by both bake_direction_atlas and bake_direction_source_view_atlas. The regression encodes the same face/sample identity independently into RGBA, coarse provenance and source_view and reconstructs identity from every allocated texel; any mapping divergence or padding mismatch fails.",
       "status": "REPAIRED__SINGLE_ATLAS_MAPPING_PRIMITIVE__EXACT_HEAD_CI_PENDING"
+    },
+    {
+      "id": "VF-39",
+      "severity": "HIGH",
+      "owner": "Witness execution governance",
+      "finding": "Technical READY_FOR_WITNESS_EXECUTION was validated separately from human process, but witness init and the Knight preflight workflow did not machine-enforce a distinct explicit user-approval state. After a technical reseal, a manual workflow dispatch could therefore begin a named subject witness without a canonical execution-authorization bit.",
+      "required_closure": "Keep technical readiness and witness execution authorization as separate fail-closed states. Named WITNESS initialization and Knight preflight must require technical readiness plus a separately recorded explicit user approval; implementation audits must remain unaffected.",
+      "repair": "mainline now exposes validate_witness_authorization(): it first validates the exact technical readiness/closure, then requires readiness_seal.status=PASS, witness_execution_allowed=true, user_approval_required=true, witness_execution_authorized_now=true, user_approval_state=APPROVED_EXPLICITLY_BY_USER, and knight_started=false. init-run with execution_class=WITNESS and subject2 Knight preflight use this stricter gate. Repository tests prove technical READY with AWAITING_EXPLICIT_USER_APPROVAL still hard-fails witness authorization.",
+      "status": "REPAIRED__TECHNICAL_READY_SEPARATE_FROM_EXPLICIT_USER_AUTHORIZATION__EXACT_HEAD_CI_PENDING"
     }
   ],
   "false_or_overstated_external_findings": [

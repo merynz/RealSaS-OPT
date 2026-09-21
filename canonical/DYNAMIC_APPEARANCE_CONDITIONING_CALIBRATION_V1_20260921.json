@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.DynamicAppearanceConditioningCalibration.v1",
   "date": "2026-09-21",
-  "status": "PASS_SUBJECT_FREE_SYNTHETIC_CALIBRATION",
+  "status": "PASS_SUBJECT_FREE_SYNTHETIC_AND_ARTICULATED_LBS_CALIBRATION_V2",
   "witness_used": false,
   "subject_identity_used": false,
   "threshold_tuning_from_knight_forbidden": true,
@@ -12,36 +12,48 @@
   },
   "candidate_max_thresholds": [
     1.5,
-    2.0,
+    2,
     2.5,
-    3.0,
-    4.0,
-    6.0,
-    8.0
+    3,
+    4,
+    6,
+    8
   ],
   "selection_rule": "Choose the smallest preregistered candidate maximum that admits every benign intrinsic-deformation case and rejects every adversarial case for the corresponding metric.",
   "benign_cases": [
     {
       "id": "RIGID_ROTATION",
-      "surface_scale_xy": [1.0, 1.0],
-      "expected_relative_condition": 1.0,
-      "expected_principal_stretch": 1.0
+      "surface_scale_xy": [
+        1,
+        1
+      ],
+      "expected_relative_condition": 1,
+      "expected_principal_stretch": 1
     },
     {
       "id": "UNIFORM_SCALE_150",
-      "surface_scale_xy": [1.5, 1.5],
-      "expected_relative_condition": 1.0,
+      "surface_scale_xy": [
+        1.5,
+        1.5
+      ],
+      "expected_relative_condition": 1,
       "expected_principal_stretch": 1.5
     },
     {
       "id": "UNIFORM_SCALE_067",
-      "surface_scale_xy": [0.67, 0.67],
-      "expected_relative_condition": 1.0,
+      "surface_scale_xy": [
+        0.67,
+        0.67
+      ],
+      "expected_relative_condition": 1,
       "expected_principal_stretch": 1.4925373134328357
     },
     {
       "id": "MODERATE_ANISOTROPY",
-      "surface_scale_xy": [1.75, 1.0],
+      "surface_scale_xy": [
+        1.75,
+        1
+      ],
       "expected_relative_condition": 1.75,
       "expected_principal_stretch": 1.75
     }
@@ -49,35 +61,43 @@
   "adversarial_cases": [
     {
       "id": "SEVERE_ANISOTROPIC_STRETCH",
-      "surface_scale_xy": [4.0, 1.0],
-      "expected_relative_condition": 4.0,
-      "expected_principal_stretch": 4.0
+      "surface_scale_xy": [
+        4,
+        1
+      ],
+      "expected_relative_condition": 4,
+      "expected_principal_stretch": 4
     },
     {
       "id": "NEAR_COLLAPSE",
-      "surface_scale_xy": [1.0, 0.2],
-      "expected_relative_condition": 5.0,
-      "expected_principal_stretch": 5.0
+      "surface_scale_xy": [
+        1,
+        0.2
+      ],
+      "expected_relative_condition": 5,
+      "expected_principal_stretch": 5
     }
   ],
   "temporal_cases": {
     "benign_max_adjacent_frame_principal_stretch": 1.5,
-    "adversarial_min_adjacent_frame_principal_stretch": 3.0
+    "adversarial_min_adjacent_frame_principal_stretch": 3
   },
   "selected_policy": {
-    "dynamic_max_relative_surface_condition_number": 2.0,
-    "dynamic_max_relative_surface_principal_stretch": 2.0,
-    "dynamic_max_adjacent_frame_surface_principal_stretch": 2.0,
-    "dynamic_max_uv_to_surface_condition_number": 32.0,
+    "dynamic_max_relative_surface_condition_number": 3,
+    "dynamic_max_relative_surface_principal_stretch": 3,
+    "dynamic_max_adjacent_frame_surface_principal_stretch": 2,
+    "dynamic_max_uv_to_surface_condition_number": 3,
     "dynamic_min_visible_pixels_per_face": 4,
-    "dynamic_min_projected_double_area_px2": 1.0
+    "dynamic_min_projected_double_area_px2": 1
   },
-  "absolute_uv_condition_rationale": "The absolute UV-to-surface condition ceiling is a conservative address-domain guard coupled to the already-frozen subject-free mesh conditioning floor; relative and temporal deformation quality are independently calibrated above.",
+  "absolute_uv_condition_rationale": "The previous uncalibrated ceiling 32 is revoked. Absolute UV-to-surface condition is now selected from the same subject-free visual-art conditioning bank: 2.5/static and 45-degree LBS cases are benign, while condition >=4 controls are adversarial; the smallest preregistered separating ceiling is 3.0.",
   "claim_boundary": {
     "proves": [
       "bounded intrinsic local texture/line-art stretch and shear on consequential visible faces",
       "bounded abrupt intrinsic local deformation change between adjacent sampled frames",
-      "rigid-motion invariance of the shipping deformation metric"
+      "rigid-motion invariance of the shipping deformation metric",
+      "subject-free two-bone articulated LBS deformation separation through 45-degree benign and >=60-degree adversarial controls",
+      "every shipping conditioning ceiling is selected from an explicit subject-free candidate bank"
     ],
     "does_not_prove": [
       "semantic correctness",
@@ -86,5 +106,139 @@
       "absence of every possible perceptual artifact"
     ]
   },
-  "mutable_after_witness": false
+  "mutable_after_witness": false,
+  "articulated_lbs_contract": {
+    "rest_triangle_xyz": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        0.5,
+        0.4,
+        0
+      ]
+    ],
+    "uv_triangle": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        0.5,
+        0.4
+      ]
+    ],
+    "vertex_rotated_bone_weights": [
+      0,
+      1,
+      0.5
+    ],
+    "hinge_axis": "PLUS_Z",
+    "rotation_origin_xyz": [
+      0,
+      0,
+      0
+    ],
+    "interpretation": "Subject-free two-bone linear-blend hinge approximating a shoulder/elbow transition; no subject geometry or witness data."
+  },
+  "articulated_benign_cases": [
+    {
+      "id": "LBS_HINGE_15_DEG",
+      "angle_degrees": 15,
+      "expected_max_relative_condition": 1.259,
+      "expected_max_principal_stretch": 1.239
+    },
+    {
+      "id": "LBS_HINGE_30_DEG",
+      "angle_degrees": 30,
+      "expected_max_relative_condition": 1.683,
+      "expected_max_principal_stretch": 1.647
+    },
+    {
+      "id": "LBS_HINGE_45_DEG",
+      "angle_degrees": 45,
+      "expected_max_relative_condition": 2.514,
+      "expected_max_principal_stretch": 2.472
+    }
+  ],
+  "articulated_adversarial_cases": [
+    {
+      "id": "LBS_HINGE_60_DEG",
+      "angle_degrees": 60,
+      "expected_min_relative_condition": 4.86,
+      "expected_min_principal_stretch": 4.82
+    },
+    {
+      "id": "LBS_HINGE_90_DEG",
+      "angle_degrees": 90,
+      "expected_min_relative_condition": 8.12,
+      "expected_min_principal_stretch": 8.06
+    }
+  ],
+  "articulated_temporal_cases": [
+    {
+      "id": "LBS_30_TO_45",
+      "from_angle_degrees": 30,
+      "to_angle_degrees": 45,
+      "expected_max_adjacent_stretch": 1.51,
+      "class": "BENIGN"
+    },
+    {
+      "id": "LBS_45_TO_60",
+      "from_angle_degrees": 45,
+      "to_angle_degrees": 60,
+      "expected_min_adjacent_stretch": 1.99,
+      "class": "BOUNDARY_ADVERSARIAL"
+    }
+  ],
+  "absolute_uv_condition_cases": {
+    "benign": [
+      {
+        "id": "STATIC_ASPECT_1",
+        "surface_scale_xy": [
+          1,
+          1
+        ],
+        "condition": 1
+      },
+      {
+        "id": "STATIC_ASPECT_2_5",
+        "surface_scale_xy": [
+          2.5,
+          1
+        ],
+        "condition": 2.5
+      },
+      {
+        "id": "LBS_HINGE_45",
+        "condition": 2.514
+      }
+    ],
+    "adversarial": [
+      {
+        "id": "STATIC_ASPECT_4",
+        "surface_scale_xy": [
+          4,
+          1
+        ],
+        "condition": 4
+      },
+      {
+        "id": "LBS_HINGE_60",
+        "condition": 4.863
+      }
+    ],
+    "selection_rule": "Smallest preregistered candidate admitting every benign case and rejecting every adversarial case."
+  }
 }

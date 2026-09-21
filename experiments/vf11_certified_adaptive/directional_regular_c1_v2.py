@@ -380,6 +380,8 @@ def _evaluate_candidate_v2(
     positive = negative = unresolved = evaluated = 0
     global_lower = math.inf
     global_upper = -math.inf
+    terminal_lower = math.inf
+    terminal_upper = -math.inf
     max_depth_reached = 0
     coverage_complete = True
 
@@ -395,12 +397,16 @@ def _evaluate_candidate_v2(
 
         if bound.lower > 0.0:
             positive += 1
+            terminal_lower = min(terminal_lower, bound.lower)
+            terminal_upper = max(terminal_upper, bound.upper)
             if negative:
                 coverage_complete = False
                 break
             continue
         if bound.upper < 0.0:
             negative += 1
+            terminal_lower = min(terminal_lower, bound.lower)
+            terminal_upper = max(terminal_upper, bound.upper)
             if positive:
                 coverage_complete = False
                 break
@@ -411,10 +417,19 @@ def _evaluate_candidate_v2(
         else:
             unresolved += 1
 
+    certified_terminal_lower = None
+    certified_terminal_upper = None
+    certificate_margin = None
     if positive and not negative and unresolved == 0:
         state = "PROVEN_DIRECTIONAL_REGULAR_POSITIVE"
+        certified_terminal_lower = float(terminal_lower)
+        certified_terminal_upper = float(terminal_upper)
+        certificate_margin = float(terminal_lower)
     elif negative and not positive and unresolved == 0:
         state = "PROVEN_DIRECTIONAL_REGULAR_NEGATIVE"
+        certified_terminal_lower = float(terminal_lower)
+        certified_terminal_upper = float(terminal_upper)
+        certificate_margin = float(-terminal_upper)
     else:
         state = "UNKNOWN"
 
@@ -430,6 +445,9 @@ def _evaluate_candidate_v2(
         max_micro_depth=max_micro_depth,
         max_depth_reached=max_depth_reached,
         coverage_complete=coverage_complete,
+        certified_terminal_lower=certified_terminal_lower,
+        certified_terminal_upper=certified_terminal_upper,
+        certificate_margin=certificate_margin,
     )
 
 
@@ -462,8 +480,8 @@ def certify_directional_regular_c1_v2_prepared(
             return C1Certificate(
                 state=result.state,
                 direction=result.direction,
-                derivative_lower=result.lower_margin,
-                derivative_upper=result.upper_margin,
+                derivative_lower=float(result.certified_terminal_lower),
+                derivative_upper=float(result.certified_terminal_upper),
                 evaluated_box_count=total_evals,
                 candidate_results=tuple(results),
             )

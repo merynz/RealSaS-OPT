@@ -1,0 +1,18 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX2Closure.v1",
+  "date_utc": "2026-09-21",
+  "status": "PASS__BLOCKWISE_LEWINER_MC_EQUIVALENCE",
+  "source_commit": "a1754ad805a7d2c6a85d54a216a7ecefc958cc63",
+  "self_hosted_smoke_run_id": 35649046096,
+  "self_hosted_smoke_conclusion": "success",
+  "full_research_smoke_test_count": 54,
+  "x2_specific_test_count": 5,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "result": "For oblique-plane, sphere, saddle-like and torus-like scalar lattices, blockwise skimage Lewiner marching cubes with canonical global-lattice edge welding produced the same canonical edge-key vertex set and face set as one-block dense Lewiner marching cubes across all preregistered block layouts. Exact-zero lattice corners fail closed.",
+  "semantic_consequence": "The current Lewiner MC contourer can be retained while independently changing empty-space discovery/planning. Contour topology does not need to change merely because certified empty regions are pruned.",
+  "claim_boundary": "This is sampled-lattice equivalence only. Continuous hidden-surface safety remains a planner/proof obligation, and source fidelity remains a VF11/Stage13 obligation.",
+  "next": "X3_PROOF_AWARE_NARROW_BAND_PLANNER"
+}

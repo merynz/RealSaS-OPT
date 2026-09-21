@@ -1096,6 +1096,24 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         if geometry_visible <= 0
         else float(exact_depth_ambiguous_pixels) / float(geometry_visible)
     )
+    visibility_load = dynamic_visibility_load_gate(
+        maximum_frame_micro_visible_pixel_fraction=(
+            max_frame_micro_visible_fraction
+        ),
+        unmeasurable_consequential_visible_face_count=(
+            unmeasurable_visible_face_count
+        ),
+        max_micro_visible_pixel_fraction_per_frame=micro_visible_budget,
+        max_unmeasurable_consequential_visible_face_count=(
+            max_unmeasurable_consequential
+        ),
+    )
+    micro_face_passed = bool(
+        visibility_load["micro_visible_face_load_passed"]
+    )
+    unmeasurable_face_passed = bool(
+        visibility_load["unmeasurable_consequential_face_load_passed"]
+    )
     conditioning_passed = (
         conditioning_sample_count > 0
         and unmeasurable_face_passed
@@ -1118,24 +1136,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         exposure_fraction <= exposure_budget
         and max_frame_compiled_fraction <= frame_exposure_budget
         and max_connected_compiled_fraction <= connected_exposure_budget
-    )
-    visibility_load = dynamic_visibility_load_gate(
-        maximum_frame_micro_visible_pixel_fraction=(
-            max_frame_micro_visible_fraction
-        ),
-        unmeasurable_consequential_visible_face_count=(
-            unmeasurable_visible_face_count
-        ),
-        max_micro_visible_pixel_fraction_per_frame=micro_visible_budget,
-        max_unmeasurable_consequential_visible_face_count=(
-            max_unmeasurable_consequential
-        ),
-    )
-    micro_face_passed = bool(
-        visibility_load["micro_visible_face_load_passed"]
-    )
-    unmeasurable_face_passed = bool(
-        visibility_load["unmeasurable_consequential_face_load_passed"]
     )
     exact_depth_ambiguity_passed = (
         exact_depth_ambiguous_fraction <= exact_depth_ambiguity_budget

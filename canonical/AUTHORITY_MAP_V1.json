@@ -74,14 +74,15 @@
     {
       "id": "V2_IMPLEMENTATION_ASSEMBLY",
       "branch": "main",
-      "status": "REVIEW_READY__READY_FOR_WITNESS_EXECUTION__AWAITING_USER_APPROVAL",
-      "question": "Is the subject-free 46-stage V2 implementation sufficiently sealed for the user to authorize the first controlled Knight witness?",
+      "status": "RECLOSURE_ACTIVE__WITNESS_FORBIDDEN",
+      "question": "Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness?",
       "does_not_prove": [
         "Knight product pass",
         "unseen generalization",
         "semantic object recognition",
         "human aesthetic optimality",
-        "source-view cardinality reduction"
+        "source-view cardinality reduction",
+        "witness execution authorization before explicit user approval"
       ]
     }
   ],
@@ -136,6 +137,8 @@
     "implementation_closure_sha256": "c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e",
     "mainline_ci_run_id": 35539075794,
     "orchestration_dry_run_id": 35539075769,
-    "witness_used": false
+    "witness_used": false,
+    "evidence_class": "HISTORICAL_PRE_REOPEN_GREEN__NOT_CURRENT_READINESS",
+    "current_readiness_authority": "canonical/V2_IMPLEMENTATION_READINESS.json"
   }
 }

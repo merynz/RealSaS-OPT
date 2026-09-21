@@ -17,6 +17,7 @@ from compiler.realsas_compiler_core.appearance_render_v2 import render_caa_refer
 from compiler.realsas_compiler_core.playback_full_surface_v3 import CameraProjectionV3
 from compiler.realsas_compiler_core.visibility_v2 import (
     VISIBILITY_CONTRACT_V2,
+    VISIBILITY_DEPTH_EQUIVALENCE_EPSILON,
     rasterize_visible_owner,
 )
 
@@ -68,6 +69,61 @@ def test_equal_depth_tie_is_sealed_face_index_but_exposed_as_ambiguity_evidence(
     assert VISIBILITY_CONTRACT_V2["exact_depth_tie"] == "SEALED_FACE_INDEX_ONLY__AMBIGUITY_MUST_BE_QUALIFIED"
     assert np.all(result.second_owner_face_index[visible_mask] == 1)
     assert np.allclose(result.depth_margin[visible_mask], 0.0, atol=1e-12)
+
+
+def _overlap_mesh_with_depth_delta(delta: float):
+    vertices = (
+        SimpleNamespace(canonical_mesh_vertex_id="a0", P=(-0.8, -0.8, 0.0)),
+        SimpleNamespace(canonical_mesh_vertex_id="a1", P=(0.8, -0.8, 0.0)),
+        SimpleNamespace(canonical_mesh_vertex_id="a2", P=(0.0, 0.8, 0.0)),
+        SimpleNamespace(canonical_mesh_vertex_id="b0", P=(-0.8, -0.8, float(delta))),
+        SimpleNamespace(canonical_mesh_vertex_id="b1", P=(0.8, -0.8, float(delta))),
+        SimpleNamespace(canonical_mesh_vertex_id="b2", P=(0.0, 0.8, float(delta))),
+    )
+    return SimpleNamespace(
+        vertices=vertices,
+        faces=(("a0", "a1", "a2"), ("b0", "b1", "b2")),
+    )
+
+
+def test_depth_equivalence_epsilon_is_explicit_and_fail_closed_at_boundary():
+    eps = VISIBILITY_DEPTH_EQUIVALENCE_EPSILON
+    assert eps == 1.0e-12
+    assert (
+        VISIBILITY_CONTRACT_V2["depth_buffer"]
+        == "IEEE754_FLOAT64_SOFTWARE_SORT__NO_HARDWARE_Z_QUANTIZATION"
+    )
+    assert VISIBILITY_CONTRACT_V2["depth_equivalence_epsilon_camera_z"] == eps
+
+    inside = rasterize_visible_owner(
+        _overlap_mesh_with_depth_delta(0.5 * eps),
+        _camera(),
+    )
+    inside_visible = inside.owner_face_index >= 0
+    assert np.any(inside_visible)
+    assert np.all(
+        np.abs(inside.depth_margin[inside_visible]) <= eps + 1.0e-15
+    )
+
+    outside_far = rasterize_visible_owner(
+        _overlap_mesh_with_depth_delta(2.0 * eps),
+        _camera(),
+    )
+    outside_far_visible = outside_far.owner_face_index >= 0
+    assert set(
+        map(int, np.unique(outside_far.owner_face_index[outside_far_visible]))
+    ) == {0}
+    assert np.all(outside_far.depth_margin[outside_far_visible] > eps)
+
+    outside_near = rasterize_visible_owner(
+        _overlap_mesh_with_depth_delta(-2.0 * eps),
+        _camera(),
+    )
+    outside_near_visible = outside_near.owner_face_index >= 0
+    assert set(
+        map(int, np.unique(outside_near.owner_face_index[outside_near_visible]))
+    ) == {1}
+    assert np.all(outside_near.depth_margin[outside_near_visible] > eps)
 
 
 def test_separated_overlap_exposes_positive_runner_up_depth_margin():

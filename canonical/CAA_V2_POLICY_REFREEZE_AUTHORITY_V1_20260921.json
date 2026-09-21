@@ -1,0 +1,35 @@
+{
+  "schema": "RealSaS.CAAPolicyRefreezeAuthority.v1",
+  "status": "FROZEN_SUBJECT_FREE__NO_NUMERICAL_RELAXATION",
+  "date_utc": "2026-09-21",
+  "policy_path": "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json",
+  "resulting_status": "FROZEN_SUBJECT_FREE_VISUAL_FIDELITY_V3",
+  "reason": "The visual-fidelity reopening produced explicit repairs or scoped negative decisions for the CAA/runtime policy surface. The exact production document must be directly consumable by Stage20 rather than copied into a fixture and relabeled frozen.",
+  "numerical_policy": {
+    "completion_quality_thresholds_changed_during_refreeze": false,
+    "compile_policy_thresholds_changed_during_refreeze": false,
+    "source_lock_thresholds_changed_during_refreeze": false,
+    "threshold_relaxation_from_subject_result": false
+  },
+  "supporting_authorities": [
+    "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json",
+    "canonical/VF09_DEPTH_EQUIVALENCE_AUTHORITY_V1_20260921.json",
+    "canonical/VF10_DIRECTION_TRANSITION_AUTHORITY_V1_20260921.json",
+    "canonical/VF13_RIGIDITY_NOOP_AUTHORITY_V1_20260921.json",
+    "canonical/VF15_DYNAMIC_CONTINUITY_AUTHORITY_V1_20260921.json",
+    "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json"
+  ],
+  "semantic_updates_without_threshold_relaxation": {
+    "visibility_depth_equivalence": "FLOAT64_SOFTWARE_SORT__EPSILON_1E_12",
+    "direction_transition": "DISCRETE_V0_V7__NO_CROSS_DIRECTION_BLEND",
+    "dynamic_continuity": "TOPOLOGY_OWNED_INTERIOR_SHARED_EDGE_ONLY"
+  },
+  "forbidden_inputs": [
+    "KNIGHT_RESULT",
+    "MAGE_RESULT",
+    "SUBJECT_ID",
+    "SUBJECT_TOPOLOGY_COUNT"
+  ],
+  "mutation_rule": "After any witness result is inspected, this production policy may only be tightened prospectively; no relaxation may convert a witness failure into PASS.",
+  "claim_boundary": "This refreezes the CAA/runtime numerical policy. It does not resolve the separate VF-11 geometry-decoder resolution study or claim PRODUCT_PASS."
+}

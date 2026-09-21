@@ -121,6 +121,78 @@ def bake_direction_atlas(
     return atlas, provenance_atlas, uv, layout
 
 
+def bake_direction_source_view_atlas(
+    *,
+    face_sample_source_view: np.ndarray,
+    face_count: int,
+    tile_resolution: int,
+    bleed_px: int,
+) -> np.ndarray:
+    """Bake compile-time donor/source-view lineage into the exact face atlas.
+
+    Stored texels preserve the Stage21 source-view identity:
+      0..7 -> exact source/donor view
+      -2   -> compiled local harmonic appearance
+
+    The global unallocated atlas padding uses int16 minimum and is never a
+    renderable surface texel. This lineage is diagnostic/provenance authority
+    only; it must never select geometry, color, or depth ordering.
+    """
+    source_samples = np.asarray(face_sample_source_view, dtype=np.int16)
+    face_count = int(face_count)
+    layout = face_atlas_layout(
+        face_count,
+        tile_resolution=tile_resolution,
+        bleed_px=bleed_px,
+    )
+    sample_count = tile_resolution * (tile_resolution + 1) // 2
+    if source_samples.shape != (face_count * sample_count,):
+        raise QualificationError("CAA_BAKE_SOURCE_VIEW_SAMPLE_SHAPE_INVALID")
+    valid = ((source_samples >= 0) & (source_samples < 8)) | (source_samples == -2)
+    if not np.all(valid):
+        raise QualificationError("CAA_BAKE_SOURCE_VIEW_SAMPLE_VALUE_INVALID")
+
+    source_samples = source_samples.reshape(face_count, sample_count)
+    padding = np.iinfo(np.int16).min
+    atlas = np.full(
+        (layout["height"], layout["width"]),
+        padding,
+        dtype=np.int16,
+    )
+    allocated = np.zeros(
+        (layout["height"], layout["width"]),
+        dtype=bool,
+    )
+    sample_map = _sample_index_map(tile_resolution)
+    stride = int(layout["tile_stride"])
+    columns = int(layout["columns"])
+    bleed = int(layout["bleed_px"])
+
+    for face_index in range(face_count):
+        tile_x = (face_index % columns) * stride
+        tile_y = (face_index // columns) * stride
+        allocated[tile_y : tile_y + stride, tile_x : tile_x + stride] = True
+        for local_y in range(stride):
+            for local_x in range(stride):
+                lattice_i = local_x - bleed
+                lattice_j = local_y - bleed
+                ii, jj = _nearest_triangle_lattice(
+                    lattice_i,
+                    lattice_j,
+                    tile_resolution=tile_resolution,
+                )
+                sample_index = sample_map[(ii, jj)]
+                atlas[tile_y + local_y, tile_x + local_x] = source_samples[
+                    face_index, sample_index
+                ]
+
+    if np.any(atlas[allocated] == padding):
+        raise QualificationError("CAA_BAKE_ALLOCATED_SOURCE_VIEW_UNDEFINED")
+    if np.any((atlas != padding) & ~allocated):
+        raise QualificationError("CAA_BAKE_SOURCE_VIEW_PADDING_CONTAMINATED")
+    return atlas
+
+
 def straight_rgba_to_premultiplied_float(rgba_u8: np.ndarray) -> np.ndarray:
     """Compatibility wrapper: straight sRGB RGBA8 -> linear PM RGBA."""
     return straight_srgb_rgba_u8_to_premultiplied_linear(rgba_u8)

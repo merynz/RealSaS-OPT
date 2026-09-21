@@ -53,6 +53,44 @@ def _nearest_triangle_lattice(
     return ii, jj
 
 
+def _iter_face_atlas_lattice_samples(
+    *,
+    face_count: int,
+    tile_resolution: int,
+    bleed_px: int,
+):
+    """Yield the single canonical face-atlas texel -> lattice-sample mapping.
+
+    RGBA, coarse provenance, and exact source-view lineage must consume this
+    same mapping so diagnostic lineage can never drift to a different texel.
+    """
+    layout = face_atlas_layout(
+        int(face_count),
+        tile_resolution=int(tile_resolution),
+        bleed_px=int(bleed_px),
+    )
+    sample_map = _sample_index_map(int(tile_resolution))
+    stride = int(layout["tile_stride"])
+    columns = int(layout["columns"])
+    bleed = int(layout["bleed_px"])
+    for face_index in range(int(face_count)):
+        tile_x = (face_index % columns) * stride
+        tile_y = (face_index // columns) * stride
+        for local_y in range(stride):
+            for local_x in range(stride):
+                ii, jj = _nearest_triangle_lattice(
+                    local_x - bleed,
+                    local_y - bleed,
+                    tile_resolution=int(tile_resolution),
+                )
+                yield (
+                    face_index,
+                    tile_y + local_y,
+                    tile_x + local_x,
+                    sample_map[(ii, jj)],
+                )
+
+
 def bake_direction_atlas(
     *,
     face_sample_rgba: np.ndarray,
@@ -87,31 +125,18 @@ def bake_direction_atlas(
         (layout["height"], layout["width"]),
         dtype=bool,
     )
-    sample_map = _sample_index_map(tile_resolution)
-    stride = int(layout["tile_stride"])
-    columns = int(layout["columns"])
-    bleed = int(layout["bleed_px"])
-
-    for face_index in range(face_count):
-        tile_x = (face_index % columns) * stride
-        tile_y = (face_index // columns) * stride
-        allocated[tile_y : tile_y + stride, tile_x : tile_x + stride] = True
-        for local_y in range(stride):
-            for local_x in range(stride):
-                lattice_i = local_x - bleed
-                lattice_j = local_y - bleed
-                ii, jj = _nearest_triangle_lattice(
-                    lattice_i,
-                    lattice_j,
-                    tile_resolution=tile_resolution,
-                )
-                sample_index = sample_map[(ii, jj)]
-                atlas[tile_y + local_y, tile_x + local_x] = rgba_samples[
-                    face_index, sample_index
-                ]
-                provenance_atlas[
-                    tile_y + local_y, tile_x + local_x
-                ] = provenance_samples[face_index, sample_index]
+    for face_index, atlas_y, atlas_x, sample_index in (
+        _iter_face_atlas_lattice_samples(
+            face_count=face_count,
+            tile_resolution=tile_resolution,
+            bleed_px=bleed_px,
+        )
+    ):
+        allocated[atlas_y, atlas_x] = True
+        atlas[atlas_y, atlas_x] = rgba_samples[face_index, sample_index]
+        provenance_atlas[atlas_y, atlas_x] = provenance_samples[
+            face_index, sample_index
+        ]
 
     if np.any(provenance_atlas[allocated] == 255):
         raise QualificationError("CAA_BAKE_ALLOCATED_TILE_UNDEFINED_TEXEL")
@@ -163,28 +188,15 @@ def bake_direction_source_view_atlas(
         (layout["height"], layout["width"]),
         dtype=bool,
     )
-    sample_map = _sample_index_map(tile_resolution)
-    stride = int(layout["tile_stride"])
-    columns = int(layout["columns"])
-    bleed = int(layout["bleed_px"])
-
-    for face_index in range(face_count):
-        tile_x = (face_index % columns) * stride
-        tile_y = (face_index // columns) * stride
-        allocated[tile_y : tile_y + stride, tile_x : tile_x + stride] = True
-        for local_y in range(stride):
-            for local_x in range(stride):
-                lattice_i = local_x - bleed
-                lattice_j = local_y - bleed
-                ii, jj = _nearest_triangle_lattice(
-                    lattice_i,
-                    lattice_j,
-                    tile_resolution=tile_resolution,
-                )
-                sample_index = sample_map[(ii, jj)]
-                atlas[tile_y + local_y, tile_x + local_x] = source_samples[
-                    face_index, sample_index
-                ]
+    for face_index, atlas_y, atlas_x, sample_index in (
+        _iter_face_atlas_lattice_samples(
+            face_count=face_count,
+            tile_resolution=tile_resolution,
+            bleed_px=bleed_px,
+        )
+    ):
+        allocated[atlas_y, atlas_x] = True
+        atlas[atlas_y, atlas_x] = source_samples[face_index, sample_index]
 
     if np.any(atlas[allocated] == padding):
         raise QualificationError("CAA_BAKE_ALLOCATED_SOURCE_VIEW_UNDEFINED")

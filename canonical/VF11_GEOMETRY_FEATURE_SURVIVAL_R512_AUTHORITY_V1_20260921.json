@@ -98,12 +98,15 @@
   },
   "interpretation": {
     "r512_is_general_decoder_floor": false,
-    "r512_recovers_thin_blade_family": true,
     "sparse_component_failure_remains": true,
     "connected_sharp_feature_failure_remains": true,
     "negative_space_topology_is_mostly_recovered_but_full_profile_still_fails": true,
     "uniform_resolution_escalation_to_r768_or_r1024_authorized": false,
-    "reason": "Resolution response is family-dependent and materially non-monotonic; the next causal question is lattice phase/extraction representation, not a looser threshold or another blind uniform resolution rung."
+    "reason": "Resolution response is family-dependent and materially non-monotonic; the next causal question is lattice phase/extraction representation, not a looser threshold or another blind uniform resolution rung.",
+    "r512_thin_blade_passes_existing_stage13_profile": true,
+    "r512_thin_blade_direct_feature_recall_still_below_one": true,
+    "connected_sparse_feature_gate_review_required": true,
+    "note": "The four THIN_BLADE cases pass the existing Stage13 aggregate profile, but their direct blade-only recall remains approximately 0.9935-0.9957. That is not treated as complete feature preservation; VF-11 closure must determine whether the residual is only one-pixel raster tolerance or exposes a generic connected sparse-feature blind spot."
   },
   "next_experiment": {
     "id": "VF11_X1_R512_PHASE_BANK",

@@ -1,0 +1,57 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX6A100RunPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__A100_ACCELERATOR_SCREEN_CPU_VERIFY_CONDITIONAL_FULL_DOMAIN",
+  "authority_class": "RESEARCH_LONG_RUN_PREREGISTRATION_ONLY",
+  "execution_class": "LONG__USER_RUN_ALL_NOTEBOOK_REQUIRED",
+  "parent": "canonical/VF11_EXTRACTOR_TRANSITION_X6_ACCELERATOR_SCREEN_PREREGISTRATION_20260921.json",
+  "frozen_field": {
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "scene_planes_sha256": "364f4769f1ffb04362669c1fe04b9b6c8f3afe3308bf4b7cede038d9e8226d28",
+    "triplane_size": 48,
+    "base_regime_count": 103823
+  },
+  "backend_contract": {
+    "accelerator": "CUDA float64 X5 batched C0, proposal only",
+    "cpu_confirmation": "CPU float64 X5 batched C0, every accelerator decisive proposal",
+    "prune_rule": "CPU must confirm identical strict sign before terminal EMPTY",
+    "accelerator_unknown": "remain active",
+    "accelerator_false_decisive": "CPU rejection returns node to active refinement"
+  },
+  "preflight": {
+    "sample_root_count": 256,
+    "selection": "deterministic evenly spaced 47^3 base-regime indices",
+    "max_micro_depth": 2,
+    "accelerator_batch_candidates": [128,256,512,1024,2048],
+    "required": [
+      "CUDA available",
+      "target GPU memory at least 30 GiB",
+      "16-root frozen semantic panel has zero CPU-sign disagreements on CPU-confirmed terminals",
+      "zero CPU-confirmation sign disagreement",
+      "projected full-domain wall time with 1.5x safety factor <= 45 minutes"
+    ]
+  },
+  "conditional_full_domain_execution": {
+    "authorized_only_if_all_preflight_gates_pass": true,
+    "max_micro_depth": 2,
+    "store_terminal_objects": false,
+    "output": [
+      "root state codes for all 103823 base regimes",
+      "positive/negative terminal counts per root",
+      "unresolved leaf counts per root",
+      "screen proposal / CPU confirmation / CPU rejection counts",
+      "accelerator / CPU verification / refinement-overhead timing"
+    ]
+  },
+  "abort_rules": [
+    "any CPU-confirmed terminal sign mismatch",
+    "GPU out-of-memory after automatic lower batch fallback",
+    "safety-adjusted projection above 45 minutes",
+    "non-finite bound",
+    "artifact SHA mismatch"
+  ],
+  "claim_boundary": "This run is research-only. It may measure full-domain C0 micro2 discovery, but it cannot establish shipping rigor, product authority, Knight witness approval, Stage13 fidelity, or global continuous zero-set completeness.",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

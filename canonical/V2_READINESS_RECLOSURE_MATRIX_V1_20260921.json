@@ -1,0 +1,188 @@
+{
+  "schema": "RealSaS.V2ReadinessReclosureMatrix.v1",
+  "status": "AUDIT_ACTIVE__READINESS_SEAL_REMAINS_REVOKED__WITNESS_FORBIDDEN",
+  "date_utc": "2026-09-21",
+  "source_readiness": "canonical/V2_IMPLEMENTATION_READINESS.json",
+  "visual_redteam": "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json",
+  "policy_refreeze": "canonical/CAA_V2_POLICY_REFREEZE_AUTHORITY_V1_20260921.json",
+  "rule": "A historical reopened blocker may leave the blocking set only through subject-free repair evidence or an explicit claim-scope narrowing. CI-pending rows are not closed. SCOPE_DEFERRED rows remain forbidden outside their stated scope.",
+  "rows": [
+    {
+      "blocker": "CAA_TILE_DENSITY_UNQUALIFIED",
+      "disposition": "REPAIRED_CI_PENDING",
+      "evidence": [
+        "VF-01",
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "closure": "Projected source density resolves tile size from frozen candidates; density/capacity failure is fail-closed."
+    },
+    {
+      "blocker": "CAA_UNOBSERVED_COMPLETION_QUALITY_INSUFFICIENTLY_STRONG",
+      "disposition": "REPAIRED_FAIL_CLOSED_CI_PENDING",
+      "evidence": [
+        "VF-02",
+        "VF-04"
+      ],
+      "closure": "Global Euclidean fill was replaced by bounded component/topology-aware harmonic completion with region/hop limits, structured holdout and dynamic inferred-exposure gates. No claim is made that arbitrary unseen art can always be reconstructed."
+    },
+    {
+      "blocker": "CROSS_VIEW_RGB_COMPATIBILITY_NOT_EXPLICITLY_QUALIFIED",
+      "disposition": "REPAIRED_CI_PENDING",
+      "evidence": [
+        "VF-03",
+        "VF-27",
+        "tests/compiler/test_caa_v2_subject_free_policy.py::test_cross_view_policy_accepts_small_artist_variation_and_rejects_gross_contradiction"
+      ],
+      "closure": "Cross-view compatibility is a shipping gate over shared canonical direct-source samples and per-component controls without requiring raw RGB identity."
+    },
+    {
+      "blocker": "DYNAMIC_ALPHA_HOLES_DIAGNOSTIC_NOT_GATE",
+      "disposition": "REPAIRED_CI_PENDING",
+      "evidence": [
+        "VF-04",
+        "VF-28",
+        "VF-30"
+      ],
+      "closure": "Stage45 dynamic visual integrity hard-gates contributor-aware geometry/alpha exposure and K4 layered composition."
+    },
+    {
+      "blocker": "SPECKLED_SCATTERED_HOLE_ARTIFACT_CLASS_NOT_INDEPENDENTLY_BOUNDED",
+      "disposition": "REPAIRED_CI_PENDING",
+      "evidence": [
+        "VF-04",
+        "VF-26"
+      ],
+      "closure": "Sparse-feature preservation and connected/local inferred-exposure controls prevent aggregate mean/p95 from hiding small high-value defects."
+    },
+    {
+      "blocker": "CURRENT_LEARNED_MODELS_NOT_CLAIMED_FINAL_OR_UNSEEN_READY",
+      "disposition": "SCOPE_DEFERRED__FIRST_CONTROLLED_FIT_WITNESS_ONLY",
+      "evidence": [
+        "canonical/MAINLINE_EXECUTION_PLAN_V2.json"
+      ],
+      "closure": "First Knight V2 is a controlled FIT witness and may not be represented as unseen/general product readiness. FITK/unseen/unseen10k+ remain separate future evidence."
+    },
+    {
+      "blocker": "CAA_MINIFICATION_FILTERING_UNQUALIFIED",
+      "disposition": "CAPABILITY_BOUNDED_CI_PENDING",
+      "evidence": [
+        "VF-05",
+        "VF-16"
+      ],
+      "closure": "Current runtime authorizes base-level bilinear linear-PM sampling only when footprint <=1 texel/output-pixel. Mip generation and unqualified minification are forbidden rather than silently claimed."
+    },
+    {
+      "blocker": "DYNAMIC_SCREENSPACE_SAMPLING_STABILITY_UNQUALIFIED",
+      "disposition": "REPAIRED_CI_PENDING",
+      "evidence": [
+        "VF-05",
+        "VF-14",
+        "VF-24",
+        "VF-25"
+      ],
+      "closure": "Dynamic footprint, stretch/conditioning, PM transport and 2x2 subpixel coverage are explicit shipping evidence."
+    },
+    {
+      "blocker": "CAA_COMPLETION_EUCLIDEAN_KDTREE_CAN_CROSS_SURFACE_TOPOLOGY",
+      "disposition": "REPAIRED_CI_PENDING",
+      "evidence": [
+        "VF-02"
+      ],
+      "closure": "Completion is bounded on canonical surface-sample adjacency and component boundaries; global Euclidean cross-sheet copy is not shipping authority."
+    },
+    {
+      "blocker": "CAA_OTHER_VIEW_DONOR_SELECTION_NOT_SUPPORT_QUALITY_RANKED",
+      "disposition": "REPAIRED_CI_PENDING",
+      "evidence": [
+        "VF-37",
+        "canonical/CAA_V2_DONOR_SELECTION_AUTHORITY_V1_20260921.json"
+      ],
+      "closure": "Strictly higher face/camera support wins regardless of circular view-index distance; circular order is tie determinism only."
+    },
+    {
+      "blocker": "CAA_SHARED_EDGE_SEAM_METRIC_SKIPS_SAME_PROVENANCE_DIFFERENT_DONOR_CONFLICT",
+      "disposition": "REPAIRED_CI_PENDING",
+      "evidence": [
+        "VF-36",
+        "canonical/CAA_V2_SOURCE_VIEW_LINEAGE_AUTHORITY_V1_20260921.json"
+      ],
+      "closure": "Shared canonical edges are compared even when coarse provenance matches; exact source_view identity is consumed and donor switches are counted."
+    },
+    {
+      "blocker": "CAA_RUNTIME_PROVENANCE_LOSES_SOURCE_VIEW_IDENTITY",
+      "disposition": "REPAIRED_V11_CI_PENDING",
+      "evidence": [
+        "VF-36",
+        "canonical/CAA_V2_SOURCE_VIEW_LINEAGE_AUTHORITY_V1_20260921.json",
+        "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V11_20260921.json"
+      ],
+      "closure": "Per-texel int16 source_view lineage now survives Stage23, Stage37, RSS and native parse, while manifest and adversaries forbid using it as render authority."
+    },
+    {
+      "blocker": "DYNAMIC_GEOMETRY_CRACKS_CAN_BE_OUTSIDE_OWNER_DENOMINATOR",
+      "disposition": "REPAIRED_CI_PENDING",
+      "evidence": [
+        "VF-15",
+        "canonical/VF15_DYNAMIC_CONTINUITY_AUTHORITY_V1_20260921.json"
+      ],
+      "closure": "Crack authority moved from raw owner/background denominator to exact topology-owned shared-edge endpoint continuity; legitimate inter-component negative space is excluded."
+    },
+    {
+      "blocker": "DYNAMIC_CONTACT_PROOF_USES_XY_ONLY_WHILE_OBJECT_UP_IS_Z",
+      "disposition": "CLAIM_NARROWED__FULL_3D_CONTACT_NOT_CLAIMED__CI_PENDING",
+      "evidence": [
+        "VF-18"
+      ],
+      "closure": "Current report claims only declared PLANT_2D contact. Full 3D ground-contact quality remains explicitly unclaimed and cannot be inferred from this witness."
+    },
+    {
+      "blocker": "DYNAMIC_MOTION_PROOF_SAMPLE_SET_NOT_EQUAL_TO_CONTINUOUS_OR_RUNTIME_PLAYBACK_CONTRACT",
+      "disposition": "CAPABILITY_BOUNDED_CI_PENDING",
+      "evidence": [
+        "VF-19",
+        "VF-10"
+      ],
+      "closure": "Runtime accepts sealed frame indices and sealed discrete V0..V7 directions only; host frame interpolation and cross-direction blending are forbidden. Continuous motion/yaw interpolation is not claimed."
+    },
+    {
+      "blocker": "DYNAMIC_SELF_INTERSECTION_NOT_EXPLICITLY_QUALIFIED",
+      "disposition": "REPAIRED_CI_PENDING",
+      "evidence": [
+        "VF-17"
+      ],
+      "closure": "Stage41 rejects new unexpected self-intersections and rejects worsening persistence severity of rest-existing intersections."
+    },
+    {
+      "blocker": "VISUAL_FIDELITY_RECALIBRATION_AUTHORITY_REFERENCE_MISSING",
+      "disposition": "REPAIRED",
+      "evidence": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "closure": "The referenced recalibration authority now exists and is the live red-team ledger."
+    }
+  ],
+  "new_blockers_after_reopen": [
+    {
+      "id": "VF-11",
+      "status": "BLOCKING",
+      "reason": "R256 and R384 feature-survival floors are insufficient. Byte-identical slab apparatus is validated; preregistered R512 measurement remains required."
+    },
+    {
+      "id": "VF-23",
+      "status": "BLOCKING_CI",
+      "reason": "Exact unmodified production-policy E2E representative bank must pass on an exact current implementation."
+    },
+    {
+      "id": "EXACT_HEAD_CI_CLOSURE",
+      "status": "BLOCKING_CI",
+      "reason": "Current mainline, runtime/native parity, V11 source seal, source gate and witness dry-run must all be green on a compatible exact head or explicitly bound closure set."
+    },
+    {
+      "id": "USER_APPROVAL",
+      "status": "BLOCKING_BY_GOVERNANCE",
+      "reason": "Even after technical readiness is resealed, first Knight witness execution requires explicit user approval."
+    }
+  ],
+  "reseal_allowed_now": false,
+  "knight_witness_allowed_now": false
+}

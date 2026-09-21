@@ -22,6 +22,151 @@ def rgba_l1_premultiplied(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     return np.mean(np.abs(aa - bb), axis=-1)
 
 
+def _binary_dilate_1(mask: np.ndarray) -> np.ndarray:
+    value = np.asarray(mask, dtype=bool)
+    if value.ndim != 2:
+        raise QualificationError("CAA_FEATURE_MASK_DIMENSION_INVALID")
+    padded = np.pad(value, 1, mode="constant", constant_values=False)
+    rows = [
+        padded[dy : dy + value.shape[0], dx : dx + value.shape[1]]
+        for dy in range(3)
+        for dx in range(3)
+    ]
+    return np.logical_or.reduce(rows)
+
+
+def _largest_connected_true_fraction(mask: np.ndarray, *, denominator: int) -> float:
+    grid = np.asarray(mask, dtype=bool)
+    if grid.ndim != 2:
+        raise QualificationError("CAA_FEATURE_CONNECTED_MASK_INVALID")
+    if denominator <= 0 or not np.any(grid):
+        return 0.0
+    seen = np.zeros_like(grid, dtype=bool)
+    height, width = grid.shape
+    largest = 0
+    for y0, x0 in np.argwhere(grid):
+        y0 = int(y0)
+        x0 = int(x0)
+        if seen[y0, x0]:
+            continue
+        seen[y0, x0] = True
+        stack = [(y0, x0)]
+        size = 0
+        while stack:
+            y, x = stack.pop()
+            size += 1
+            for yy, xx in ((y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)):
+                if (
+                    0 <= yy < height
+                    and 0 <= xx < width
+                    and grid[yy, xx]
+                    and not seen[yy, xx]
+                ):
+                    seen[yy, xx] = True
+                    stack.append((yy, xx))
+        largest = max(largest, size)
+    return float(largest) / float(denominator)
+
+
+def _edge_strength_pm(rgba_u8: np.ndarray) -> np.ndarray:
+    pm = straight_rgba_to_premultiplied_float(
+        np.asarray(rgba_u8, dtype=np.uint8)
+    )
+    if pm.ndim != 3 or pm.shape[2] != 4:
+        raise QualificationError("CAA_FEATURE_RGBA_SHAPE_INVALID")
+    strength = np.zeros(pm.shape[:2], dtype=np.float64)
+    if pm.shape[1] > 1:
+        diff = np.max(np.abs(pm[:, 1:] - pm[:, :-1]), axis=2)
+        strength[:, 1:] = np.maximum(strength[:, 1:], diff)
+        strength[:, :-1] = np.maximum(strength[:, :-1], diff)
+    if pm.shape[0] > 1:
+        diff = np.max(np.abs(pm[1:] - pm[:-1]), axis=2)
+        strength[1:] = np.maximum(strength[1:], diff)
+        strength[:-1] = np.maximum(strength[:-1], diff)
+    return strength
+
+
+def source_feature_preservation_metrics(
+    *,
+    predicted_rgba: np.ndarray,
+    source_rgba: np.ndarray,
+    source_foreground: np.ndarray,
+    high_error_cut_rgba_l1: float,
+    edge_gradient_cut: float,
+) -> dict:
+    predicted = np.asarray(predicted_rgba, dtype=np.uint8)
+    source = np.asarray(source_rgba, dtype=np.uint8)
+    foreground = np.asarray(source_foreground, dtype=bool)
+    if (
+        predicted.shape != source.shape
+        or predicted.ndim != 3
+        or predicted.shape[2] != 4
+        or foreground.shape != predicted.shape[:2]
+    ):
+        raise QualificationError("CAA_FEATURE_PRESERVATION_SHAPE_INVALID")
+    high_cut = float(high_error_cut_rgba_l1)
+    edge_cut = float(edge_gradient_cut)
+    if not (0.0 <= high_cut <= 1.0 and 0.0 <= edge_cut <= 1.0):
+        raise QualificationError("CAA_FEATURE_PRESERVATION_POLICY_INVALID")
+
+    error = rgba_l1_premultiplied(predicted, source)
+    foreground_count = int(np.count_nonzero(foreground))
+    values = error[foreground]
+    high_error = foreground & (error > high_cut)
+    high_error_count = int(np.count_nonzero(high_error))
+
+    source_edges = foreground & (_edge_strength_pm(source) > edge_cut)
+    predicted_edges = _edge_strength_pm(predicted) > edge_cut
+    source_edge_count = int(np.count_nonzero(source_edges))
+    predicted_edge_count = int(np.count_nonzero(predicted_edges & _binary_dilate_1(foreground)))
+    edge_recall = (
+        1.0
+        if source_edge_count == 0
+        else float(np.count_nonzero(source_edges & _binary_dilate_1(predicted_edges)))
+        / float(source_edge_count)
+    )
+    edge_precision = (
+        1.0
+        if predicted_edge_count == 0 and source_edge_count == 0
+        else (
+            0.0
+            if predicted_edge_count == 0
+            else float(
+                np.count_nonzero(
+                    predicted_edges
+                    & _binary_dilate_1(foreground)
+                    & _binary_dilate_1(source_edges)
+                )
+            )
+            / float(predicted_edge_count)
+        )
+    )
+    return {
+        "foreground_pixel_count": foreground_count,
+        "mean_rgba_l1": float(np.mean(values)) if len(values) else 0.0,
+        "p95_rgba_l1": float(np.quantile(values, 0.95)) if len(values) else 0.0,
+        "p99_rgba_l1": float(np.quantile(values, 0.99)) if len(values) else 0.0,
+        "p999_rgba_l1": float(np.quantile(values, 0.999)) if len(values) else 0.0,
+        "max_rgba_l1": float(np.max(values)) if len(values) else 0.0,
+        "high_error_pixel_count": high_error_count,
+        "high_error_fraction": (
+            0.0
+            if foreground_count <= 0
+            else float(high_error_count) / float(foreground_count)
+        ),
+        "largest_connected_high_error_fraction": _largest_connected_true_fraction(
+            high_error,
+            denominator=foreground_count,
+        ),
+        "source_edge_pixel_count": source_edge_count,
+        "predicted_edge_pixel_count": predicted_edge_count,
+        "edge_recall_1px": edge_recall,
+        "edge_precision_1px": edge_precision,
+        "high_error_cut_rgba_l1": high_cut,
+        "edge_gradient_cut": edge_cut,
+    }
+
+
 def _view_order(target: int) -> tuple[int, ...]:
     return tuple(
         sorted(

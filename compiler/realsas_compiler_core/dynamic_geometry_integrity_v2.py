@@ -200,3 +200,68 @@ def unexpected_intersection_pairs(
         active.append(i)
 
     return tuple(sorted(set(pairs)))
+
+
+def projected_orientation_flip(
+    *,
+    rest_screen_triangle: np.ndarray,
+    posed_screen_triangle: np.ndarray,
+    min_projected_double_area_px2: float,
+) -> bool:
+    rest = np.asarray(rest_screen_triangle, dtype=np.float64)
+    posed = np.asarray(posed_screen_triangle, dtype=np.float64)
+    minimum = float(min_projected_double_area_px2)
+    if (
+        rest.shape != (3, 2)
+        or posed.shape != (3, 2)
+        or not np.isfinite(rest).all()
+        or not np.isfinite(posed).all()
+        or not np.isfinite(minimum)
+        or minimum <= 0.0
+    ):
+        raise QualificationError("DYNAMIC_GEOMETRY_ORIENTATION_INPUT_INVALID")
+
+    def signed_area2(triangle: np.ndarray) -> float:
+        return float(
+            (triangle[1, 0] - triangle[0, 0])
+            * (triangle[2, 1] - triangle[0, 1])
+            - (triangle[1, 1] - triangle[0, 1])
+            * (triangle[2, 0] - triangle[0, 0])
+        )
+
+    rest_area2 = signed_area2(rest)
+    posed_area2 = signed_area2(posed)
+    if abs(rest_area2) < minimum or abs(posed_area2) < minimum:
+        return False
+    return bool(rest_area2 * posed_area2 < 0.0)
+
+
+def dynamic_visibility_load_gate(
+    *,
+    maximum_frame_micro_visible_pixel_fraction: float,
+    unmeasurable_consequential_visible_face_count: int,
+    max_micro_visible_pixel_fraction_per_frame: float,
+    max_unmeasurable_consequential_visible_face_count: int,
+) -> dict:
+    micro = float(maximum_frame_micro_visible_pixel_fraction)
+    unmeasurable = int(unmeasurable_consequential_visible_face_count)
+    micro_limit = float(max_micro_visible_pixel_fraction_per_frame)
+    unmeasurable_limit = int(max_unmeasurable_consequential_visible_face_count)
+    if (
+        not np.isfinite(micro)
+        or not np.isfinite(micro_limit)
+        or micro < 0.0
+        or micro_limit < 0.0
+        or unmeasurable < 0
+        or unmeasurable_limit < 0
+    ):
+        raise QualificationError("DYNAMIC_GEOMETRY_VISIBILITY_LOAD_INPUT_INVALID")
+    micro_passed = micro <= micro_limit
+    unmeasurable_passed = unmeasurable <= unmeasurable_limit
+    return {
+        "micro_visible_face_load_passed": bool(micro_passed),
+        "unmeasurable_consequential_face_load_passed": bool(
+            unmeasurable_passed
+        ),
+        "passed": bool(micro_passed and unmeasurable_passed),
+    }

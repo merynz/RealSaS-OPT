@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `fa8c6874f0565159609119927109ea537356ec02d8c5080b155ee36be2db29cd`
+> State fingerprint: `900a8ebbedd8b183e712ab2667c7cc9ebf350f5c7d97ffa58f7bd286d49b40dc`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -36,17 +36,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `V2_IMPLEMENTATION_ASSEMBLY` | `RECLOSURE_ACTIVE__WITNESS_FORBIDDEN` | `main` | `91de4328fbb4` | Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction; witness execution authorization before explicit user approval |
+| `V2_IMPLEMENTATION_ASSEMBLY` | `RECLOSURE_ACTIVE__WITNESS_FORBIDDEN` | `main` | `3fc8d247eed2` | Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction; witness execution authorization before explicit user approval |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 141**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 142**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `91de4328fbb4` | canonical continuation branch |
+| `main` | `3fc8d247eed2` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -178,6 +178,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `research/stage14-v2-final-calibration-20260920` | `8a502d4bee42` | observed live; not explicitly registered active |
 | `research/stage14-v2-policy-calibration-20260919` | `b399a90c1c3a` | observed live; not explicitly registered active |
 | `research/stage14-v2-policy-calibration-fixed-20260919` | `f08716b32db9` | observed live; not explicitly registered active |
+| `research/vf11-certified-adaptive-20260921` | `3fc8d247eed2` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903` | `83aa411cc06d` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-directional-binding-firewall` | `800d3ccb042e` | observed live; not explicitly registered active |
 | `restoration/compiler-runtime-promotion-v1-20260903-export-v2-safety` | `2eb09fe3e8c6` | observed live; not explicitly registered active |

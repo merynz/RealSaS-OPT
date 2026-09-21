@@ -62,5 +62,13 @@
     "subject_identity_used": false,
     "threshold_tuning_used": false
   },
-  "claim_boundary": "Source-view lineage is preserved for provenance/audit/debug evidence. It does not become an alternate appearance, geometry, visibility, or presentation authority."
+  "claim_boundary": "Source-view lineage is preserved for provenance/audit/debug evidence. It does not become an alternate appearance, geometry, visibility, or presentation authority.",
+  "compile_time_seam_authority": {
+    "metric": "provenance_boundary_metrics",
+    "same_coarse_provenance_edges_are_still_checked": true,
+    "source_view_identity_consumed": true,
+    "donor_view_switches_counted": true,
+    "adversary": "Two faces share one canonical edge and both use OTHER_VIEW_SOURCE provenance, but face A donor=1 and face B donor=7 with a strong color discontinuity. The edge must remain in the boundary census and expose nonzero donor_view_switch_pair_count and p95 RGBA error.",
+    "test": "tests/compiler/test_caa_v2_subject_free_policy.py::test_shared_canonical_edge_is_checked_even_when_provenance_class_matches"
+  }
 }

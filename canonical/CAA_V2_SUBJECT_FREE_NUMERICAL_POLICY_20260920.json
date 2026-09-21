@@ -65,7 +65,8 @@
     "dynamic_max_exact_depth_ambiguous_fraction": 0,
     "dynamic_max_visible_orientation_flip_face_count": 0,
     "dynamic_max_visibility_layer_overflow_pixel_count": 0,
-    "rest_max_visibility_layer_overflow_pixel_count": 0
+    "rest_max_visibility_layer_overflow_pixel_count": 0,
+    "max_source_sample_pm_roundtrip_abs_error": 0.0065
   },
   "rationale": {
     "angle_support": "abs(normal dot camera-forward) >= cos(80deg); at least 10deg away from exact grazing, used only for correspondence eligibility, not RGB quality.",
@@ -81,7 +82,8 @@
     "visibility_ambiguity": "Exact coplanar overlap between distinct faces is forbidden while V2 exact-depth ties are resolved only by sealed face index. Near-depth ambiguity remains an open subject-free calibration item and may not be guessed from Knight.",
     "visibility_layers": "Geometry contributes up to four exact depth-sorted layers per pixel. Appearance alpha never chooses the geometric ordering; all supported layers are composited front-to-back in linear premultiplied light. Any fifth-layer overflow is a hard product failure.",
     "surface_sidedness": "Until separately qualified backside appearance exists, a consequential face may not reverse projected orientation relative to its rest orientation in the same output camera. Dynamic orientation flips are a hard failure rather than silently rendering inside-out art.",
-    "color_space": "Transport RGBA8 is encoded sRGB straight alpha. Source sampling, runtime filtering and multi-layer composition occur in linear-light premultiplied RGBA, then convert back to sRGB only at the output boundary."
+    "color_space": "Transport RGBA8 is encoded sRGB straight alpha. Source sampling, runtime filtering and multi-layer composition occur in linear-light premultiplied RGBA, then convert back to sRGB only at the output boundary.",
+    "alpha_transport_precision": "Every direct source sample retains its pre-quantization linear-premultiplied value. Straight-sRGB8 transport round-trip error is measured in linear PM space and must remain <=0.0065 per channel; this ceiling is independently attacked by dense subject-free color/alpha controls before reclosure."
   },
   "calibration_contract": "tests/compiler/test_caa_v2_subject_free_policy.py",
   "mutable_after_witness": false,

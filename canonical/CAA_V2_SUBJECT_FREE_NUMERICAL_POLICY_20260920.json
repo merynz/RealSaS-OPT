@@ -64,7 +64,8 @@
     "rest_max_exact_depth_ambiguous_fraction": 0,
     "dynamic_max_exact_depth_ambiguous_fraction": 0,
     "dynamic_max_visible_orientation_flip_face_count": 0,
-    "dynamic_max_visibility_layer_overflow_pixel_count": 0
+    "dynamic_max_visibility_layer_overflow_pixel_count": 0,
+    "rest_max_visibility_layer_overflow_pixel_count": 0
   },
   "rationale": {
     "angle_support": "abs(normal dot camera-forward) >= cos(80deg); at least 10deg away from exact grazing, used only for correspondence eligibility, not RGB quality.",

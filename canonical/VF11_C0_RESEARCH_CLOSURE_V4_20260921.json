@@ -1,0 +1,80 @@
+{
+  "schema": "RealSaS.VF11C0ResearchClosure.v4",
+  "date_utc": "2026-09-21",
+  "status": "C0_RESEARCH_CLOSED__C1_RESEARCH_AUTHORIZED",
+  "authority_class": "RESEARCH_CLOSURE_ONLY",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "source_run_id": "20260921T132226Z",
+  "source_repo_commit": "8683e2c91b706071913830f113b52022a27a63f3",
+  "source_profile_sha256": "16c2f43535a3c577c62494e464631ca9a79680e480cfeeac92e8a97b852b8ea5",
+  "closure_claim": "C0 range machinery is non-vacuous and practically useful for conservative empty-space exclusion and bounded zero-existence evidence on the frozen Knight field. This is sufficient to authorize C1 regularity research, but not shipping proof authority.",
+  "observations": {
+    "parent_records": 256,
+    "empirical_contradiction_count": 0,
+    "volume_d6_m2_decisive": "32/32",
+    "volume_d8_m0_empty": "31/32",
+    "near_zero_d8_m2": {
+      "PROVEN_EMPTY_POSITIVE": 6,
+      "PROVEN_EMPTY_NEGATIVE": 7,
+      "PROVEN_ZERO_EXISTS": 7,
+      "UNKNOWN": 12
+    },
+    "c1_primary_handoff_cohort_d8_m2": {
+      "definition": "NEAR_ZERO cells not eliminated by C0: PROVEN_ZERO_EXISTS or UNKNOWN",
+      "count": 19,
+      "zero_exists": 7,
+      "unknown": 12
+    }
+  },
+  "cost_audit": {
+    "measured_ms_per_box_all_weighted": 13.261029168038347,
+    "measured_ms_per_box_volume_weighted": 13.459401785711972,
+    "measured_ms_per_box_near_zero_weighted": 13.137394089595368,
+    "near_zero_mean_boxes_by_depth": {
+      "5": 954.90625,
+      "6": 343.1875,
+      "7": 174.46875,
+      "8": 73.625
+    },
+    "interpretation": "Per-box cost is approximately constant; runtime is dominated by evaluated-box count.",
+    "full_traversal_cost_not_measured": true,
+    "required_before_full_domain_c1_4": [
+      "estimate surface-cell population by depth from existing sign-change / MC evidence",
+      "combine surface-cell counts with measured near-zero boxes-per-cell and per-box latency",
+      "batch/vectorize cell evaluation if projected full traversal is operationally excessive"
+    ]
+  },
+  "sampling_uncertainty": {
+    "near_zero_n_per_depth": 32,
+    "micro2_decisive_wilson95": {
+      "depth5_16_of_32": [0.3363088287, 0.6636911713],
+      "depth6_17_of_32": [0.3644951712, 0.6913061289],
+      "depth7_11_of_32": [0.2041043792, 0.5168891202],
+      "depth8_20_of_32": [0.4525440735, 0.7706611269]
+    },
+    "claim_boundary": "No monotonic near-zero depth trend or breakpoint is claimed from n=32."
+  },
+  "numeric_margin_audit": {
+    "scope": "PROVEN_EMPTY states across all recorded depth/micro combinations",
+    "empty_certificate_count": 213,
+    "margin_definition": "positive: lower_bound; negative: -upper_bound",
+    "minimum_margin": 1.1220810931550362e-05,
+    "p01_margin": 1.05885601e-04,
+    "p05_margin": 6.72068879e-04,
+    "p10_margin": 1.47826569e-03,
+    "median_margin": 4.63405955e-02,
+    "float64_machine_epsilon": 2.220446049250313e-16,
+    "float32_machine_epsilon": 1.1920928955078125e-07,
+    "interpretation": "Margins are reported as measurements only. Machine epsilon alone is not an end-to-end rounding-error bound, so these numbers do not upgrade research certificates to rigorous certificates.",
+    "backend_binding_requirement": "Any future rigorous certificate must bind to the exact numerical function/backend used by extraction. If product evaluation is float32/GPU, the error model must certify that implementation rather than a float64 surrogate."
+  },
+  "semantic_correction": {
+    "c0_decisive_is_surface_ready": false,
+    "PROVEN_ZERO_EXISTS_is_terminal": false,
+    "c1_role": "C1 regularity must take ownership of surface-containing / unresolved cells and may combine strict directional monotonicity with endpoint sign evidence to prove zero existence/uniqueness along the certified direction."
+  },
+  "next": "C1_DIRECTIONAL_REGULARITY"
+}

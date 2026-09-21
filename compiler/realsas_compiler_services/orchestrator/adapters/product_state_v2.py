@@ -182,6 +182,37 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
         raise QualificationError("PRESENTATION_V2_CAA_PROVENANCE_BYTES_DRIFT")
     face_uv = load_face_uv(asset)
     provenance = load_provenance_atlas(asset)
+    with np.load(provenance_path, allow_pickle=False) as lineage_data:
+        if "source_view" not in lineage_data.files:
+            raise QualificationError(
+                "PRESENTATION_V2_CAA_SOURCE_VIEW_LINEAGE_MISSING"
+            )
+        source_view = np.asarray(
+            lineage_data["source_view"],
+            dtype=np.int16,
+        )
+    if source_view.shape != provenance.shape:
+        raise QualificationError(
+            "PRESENTATION_V2_CAA_SOURCE_VIEW_LINEAGE_SHAPE_DRIFT"
+        )
+    padding = np.iinfo(np.int16).min
+    valid_source_view = (
+        ((source_view >= 0) & (source_view < 8))
+        | (source_view == -2)
+        | (source_view == padding)
+    )
+    if not np.all(valid_source_view):
+        raise QualificationError(
+            "PRESENTATION_V2_CAA_SOURCE_VIEW_LINEAGE_VALUE_INVALID"
+        )
+    if np.any((provenance != 255) & (source_view == padding)):
+        raise QualificationError(
+            "PRESENTATION_V2_CAA_RENDERABLE_SOURCE_VIEW_LINEAGE_MISSING"
+        )
+    if np.any((provenance == 255) & (source_view != padding)):
+        raise QualificationError(
+            "PRESENTATION_V2_CAA_SOURCE_VIEW_PADDING_DRIFT"
+        )
     textures = {}
     for row in asset.textures:
         path = resolved_path(row.transport_png_path)
@@ -244,6 +275,8 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
             "categorical_recognition_used": False,
             "conceptual_object_identity_claimed": False,
             "appearance_authority_minted": False,
+            "source_view_identity_preserved": True,
+            "source_view_identity_is_render_authority": False,
         },
     }
 

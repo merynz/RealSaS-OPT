@@ -164,8 +164,12 @@
   "new_blockers_after_reopen": [
     {
       "id": "VF-11",
-      "status": "BLOCKING",
-      "reason": "R256 and R384 feature-survival floors are insufficient. Byte-identical slab apparatus is validated; preregistered R512 measurement remains required."
+      "status": "BLOCKING_SCIENCE",
+      "reason": "R512 is also insufficient as a general floor (4/20 existing-profile PASS). Uniform-resolution escalation is paused; the preregistered R512 2x2x2 phase bank must decide whether bounded multiphase MC can close the hard families or whether extraction representation must change.",
+      "evidence": [
+        "canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R512_AUTHORITY_V1_20260921.json",
+        "tools/vf11_r512_phase_sensitivity_panel.py"
+      ]
     },
     {
       "id": "VF-23",

@@ -207,9 +207,13 @@ def _layernorm_affine(x: _Affine, layer: nn.LayerNorm) -> _Affine:
     var = _Affine(var_c.reshape(1), var_g.reshape(1, -1))
     var_lo, var_hi = var.bounds()
 
-    lo = float(var_lo.item()) + float(layer.eps)
-    hi = float(var_hi.item()) + float(layer.eps)
-    if not (math.isfinite(lo) and math.isfinite(hi)) or lo <= 0.0 or hi < lo:
+    raw_lo = float(var_lo.item())
+    raw_hi = float(var_hi.item())
+    # Variance is semantically nonnegative. Intersect the affine enclosure
+    # with that exact invariant before applying epsilon.
+    lo = max(0.0, raw_lo) + float(layer.eps)
+    hi = max(0.0, raw_hi) + float(layer.eps)
+    if not (math.isfinite(lo) and math.isfinite(hi)) or hi < lo:
         raise ValueError("LAYERNORM_VARIANCE_BOUND_INVALID")
 
     if hi - lo <= 1e-15:

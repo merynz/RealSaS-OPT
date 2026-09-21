@@ -117,7 +117,17 @@ def _face_group_rigidity_noop_probe(
     face_indices,
     mesh,
     mesh_skin,
+    *,
+    relative_edge_tolerance: float = RIGIDITY_NOOP_RELATIVE_EDGE_TOLERANCE,
+    probe_rotation_degrees: float = RIGIDITY_NOOP_PROBE_ROTATION_DEGREES,
 ) -> dict:
+    if not (
+        math.isfinite(float(relative_edge_tolerance))
+        and 0.0 < float(relative_edge_tolerance) < 1.0
+        and math.isfinite(float(probe_rotation_degrees))
+        and 0.0 < abs(float(probe_rotation_degrees)) < 180.0
+    ):
+        raise QualificationError("PRESENTATION_V2_RIGIDITY_PROBE_POLICY_INVALID")
     rows = {
         str(row.canonical_mesh_vertex_id): row
         for row in mesh_skin.rows
@@ -202,7 +212,7 @@ def _face_group_rigidity_noop_probe(
         w = weights[:, ji : ji + 1]
         measure(xyz + w * translation[None, :], f"TRANSLATE:{joint_id}")
         for axis in range(3):
-            rotation = _axis_rotation(axis, RIGIDITY_NOOP_PROBE_ROTATION_DEGREES)
+            rotation = _axis_rotation(axis, float(probe_rotation_degrees))
             rotated = xyz @ rotation.T
             posed = xyz + w * (rotated - xyz)
             measure(posed, f"ROTATE_{axis}:{joint_id}")
@@ -213,8 +223,9 @@ def _face_group_rigidity_noop_probe(
         "edge_count": int(len(edge_rows)),
         "influencing_joint_count": int(len(joint_ids)),
         "max_relative_edge_error": float(max_error),
-        "tolerance": float(RIGIDITY_NOOP_RELATIVE_EDGE_TOLERANCE),
-        "passed": bool(max_error <= RIGIDITY_NOOP_RELATIVE_EDGE_TOLERANCE),
+        "tolerance": float(relative_edge_tolerance),
+        "probe_rotation_degrees": float(probe_rotation_degrees),
+        "passed": bool(max_error <= float(relative_edge_tolerance)),
         "worst_probe": worst_probe,
     }
 
@@ -226,6 +237,8 @@ def _face_group_class(
     *,
     owner_min: float,
     other_max: float,
+    rigidity_tolerance: float,
+    rigidity_rotation_degrees: float,
 ):
     rows = {
         str(row.canonical_mesh_vertex_id): row
@@ -270,6 +283,8 @@ def _face_group_class(
         face_indices,
         mesh,
         mesh_skin,
+        relative_edge_tolerance=rigidity_tolerance,
+        probe_rotation_degrees=rigidity_rotation_degrees,
     )
     noop_rigid = bool(noop["passed"])
     if legacy_rigid and not noop_rigid:
@@ -302,6 +317,8 @@ def build_presentation_structure_v2(
     carrier_policy,
     min_rigid_owner_weight: float = 0.999,
     max_rigid_other_mass: float = 0.001,
+    rigidity_noop_relative_edge_tolerance: float = RIGIDITY_NOOP_RELATIVE_EDGE_TOLERANCE,
+    rigidity_noop_probe_rotation_degrees: float = RIGIDITY_NOOP_PROBE_ROTATION_DEGREES,
     presentation_cut_face_pairs=(),
     presentation_partition_evidence_hash: str = "",
 ) -> QualifiedPresentationStructureV2IR:
@@ -339,6 +356,8 @@ def build_presentation_structure_v2(
                 mesh_skin,
                 owner_min=min_rigid_owner_weight,
                 other_max=max_rigid_other_mass,
+                rigidity_tolerance=rigidity_noop_relative_edge_tolerance,
+                rigidity_rotation_degrees=rigidity_noop_probe_rotation_degrees,
             )
             bone_id = (
                 rigid_owner
@@ -473,8 +492,11 @@ def build_presentation_structure_v2(
                 "INDEPENDENT_JOINT_LBS_RIGID_NOOP_V1"
             ),
             "legacy_weight_thresholds_are_diagnostic_not_final_authority": True,
-            "rigid_noop_relative_edge_tolerance": (
-                RIGIDITY_NOOP_RELATIVE_EDGE_TOLERANCE
+            "rigid_noop_relative_edge_tolerance": float(
+                rigidity_noop_relative_edge_tolerance
+            ),
+            "rigid_noop_probe_rotation_degrees": float(
+                rigidity_noop_probe_rotation_degrees
             ),
         },
     )

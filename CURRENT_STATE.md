@@ -21,7 +21,7 @@
 7. `canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json`
 8. `canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json`
 
-## Exact review-ready evidence
+## Historical pre-reopen green evidence
 
 - Documentation-inclusive implementation head tested: `4419509ee0f62a7e5ca088b87feb682b1a664105`.
 - Documentation-inclusive implementation closure SHA-256: `c2ba1569285811ecbac448c54a4fbe07d57111f76ff4f7003c7482c7ce26306e`.
@@ -63,11 +63,18 @@ A failure on any one quality axis is a product failure. Mechanics/runtime correc
 
 ## Claim boundary
 
-The current READY seal proves subject-free implementation readiness for the exact controlled V2 witness contract. It does **not** prove Knight product performance, unseen generalization, semantic recognition or universal human aesthetic optimality.
+The prior READY seal is historical evidence only and is currently revoked. The live authority is the reopened subject-free visual-fidelity/governance reclosure. Nothing in the current state authorizes Knight execution, proves Knight product performance, unseen generalization, semantic recognition, or universal human aesthetic optimality.
+
+## Current reclosure blockers
+
+1. **VF-11:** R256/R384 geometry feature-survival floors were insufficient; byte-identical slabbed apparatus is validated and the preregistered R512 same-physical-feature sweep is active.
+2. **VF-23:** exact unmodified production-policy Stage20→46 same-context E2E plus representative subject-free semantic bank must pass on a current compatible implementation.
+3. **Exact-head closure:** mainline, runtime/native, source ownership, native source seal and subject-free orchestration evidence must be green and bound to the final implementation closure.
+4. **Explicit user approval:** even after technical readiness is resealed, named witness initialization is machine-blocked until `APPROVED_EXPLICITLY_BY_USER`.
 
 ## Next action
 
-**User review.** Do not execute Subject-2 Knight until the user explicitly approves. After approval, mint a fresh run-local Knight ledger and begin at Stage01; canonical `ACTIVE_RUN_V2.json` remains implementation governance only.
+Complete R512, VF-23 and exact-head reclosure. Only after technical readiness is resealed should the user be asked for explicit Knight authorization. A fresh run-local Knight ledger may then be minted; canonical `ACTIVE_RUN_V2.json` remains implementation governance only.
 
 ## Post-seal appearance fidelity reopening — 2026-09-21
 

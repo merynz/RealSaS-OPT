@@ -825,7 +825,7 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     assert _sha(Path(editable["path"])) == editable["sha256"]
 
 
-def test_v2_stage20_to25_caa_branch_executes_real_adapters_on_subject_free_triangle(tmp_path):
+def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
     from dataclasses import replace
 
     from compiler.realsas_compiler_core.geometry_substrate_v2 import (
@@ -856,7 +856,7 @@ def test_v2_stage20_to25_caa_branch_executes_real_adapters_on_subject_free_trian
         prove_caa_reference_rest_stage,
     )
 
-    ctx = _fixture(tmp_path)
+    ctx = _fixture(tmp_path, resolution=128)
     ctx["repo_root"] = ROOT
 
     def run(stage_id: str, fn):
@@ -971,61 +971,15 @@ def test_v2_stage20_to25_caa_branch_executes_real_adapters_on_subject_free_trian
         qualify_static_canonical_mesh_stage,
     )
 
-    # Production numerical policy is separately frozen/calibrated by
-    # test_caa_v2_subject_free_policy.py. This adapter E2E uses the same schema
-    # with only tiny-raster scale accommodations; production policy bytes are
-    # never modified.
-    production_policy = json.loads(
-        (
-            ROOT
-            / "canonical"
-            / "CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
-        ).read_text(encoding="utf-8")
+    # VF-23: consume the canonical production policy bytes directly. No clone,
+    # status rewrite, scale accommodation, or threshold override is permitted.
+    policy_path = (
+        ROOT
+        / "canonical"
+        / "CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
     )
-    fixture_policy = json.loads(json.dumps(production_policy))
-    fixture_policy["status"] = "FROZEN_SUBJECT_FREE_TEST_FIXTURE_V1"
-    fixture_policy["scope"] = "SUBJECT_FREE_8PX_ADAPTER_INTEGRATION_ONLY"
-    fixture_policy["source_lock_policy"]["boundary_safe_erosion_px"] = 0
-    fixture_policy["source_lock_policy"]["min_abs_normal_camera_cos"] = 0.0
-    quality = fixture_policy["completion_quality_policy"]
-    quality["min_structured_holdout_samples"] = 1
-    quality["min_structured_holdout_samples_per_view"] = 1
-    quality["rest_min_source_lock_fraction_of_source_foreground"] = 0.0
-    quality["rest_max_source_locked_mean_rgba_l1"] = 1.0
-    quality["rest_max_source_locked_p95_rgba_l1"] = 1.0
-    quality["rest_max_source_foreground_mean_rgba_l1"] = 1.0
-    quality["rest_max_source_foreground_p95_rgba_l1"] = 1.0
-    quality["rest_min_source_alpha_recall"] = 0.0
-    quality["rest_min_source_alpha_precision"] = 0.0
-    quality["rest_max_largest_coherent_alpha_hole_fraction"] = 1.0
-    quality["rest_max_alpha_interior_uncovered_fraction"] = 1.0
-    quality["rest_max_exact_depth_ambiguous_fraction"] = 1.0
-    quality["rest_max_visibility_layer_overflow_pixel_count"] = 0
-    quality["rest_max_feature_high_error_fraction"] = 1.0
-    quality["rest_max_largest_connected_high_error_fraction"] = 1.0
-    quality["rest_max_feature_p999_rgba_l1"] = 1.0
-    quality["rest_min_feature_edge_recall_1px"] = 0.0
-    quality["rest_min_feature_edge_precision_1px"] = 0.0
-    quality["rest_max_texture_texels_per_output_pixel"] = 8.0
-    quality["cross_view_min_shared_direct_samples_per_pair"] = 1
-    quality["cross_view_min_component_samples_for_gate"] = 1
-    quality["cross_view_max_pair_p95_rgba_l1"] = 1.0
-    quality["cross_view_max_pair_color_conflict_fraction"] = 1.0
-    quality["cross_view_max_pair_p95_alpha_abs"] = 1.0
-    quality["cross_view_max_pair_alpha_conflict_fraction"] = 1.0
-    quality["cross_view_max_component_color_conflict_fraction"] = 1.0
-    quality["cross_view_max_component_alpha_conflict_fraction"] = 1.0
-    quality["max_source_sample_pm_roundtrip_abs_error"] = 1.0
-    quality["max_local_harmonic_region_samples"] = 64
-    quality["max_local_harmonic_graph_hops"] = 8
-    fixture_policy["compile_policy"]["max_source_pixels_per_atlas_texel"] = 8.0
-
-
-    policy_path = tmp_path / "caa_fixture_policy.json"
-    policy_path.write_text(
-        json.dumps(fixture_policy, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    production_policy = json.loads(policy_path.read_text(encoding="utf-8"))
+    assert production_policy["status"] == "FROZEN_SUBJECT_FREE_VISUAL_FIDELITY_V3"
     ctx["run_manifest"]["appearance"] = {
         "backend": "DETERMINISTIC_V1",
         "policy_document": {
@@ -1079,8 +1033,8 @@ def test_v2_stage20_to25_caa_branch_executes_real_adapters_on_subject_free_trian
     )
     assert len(asset.textures) == 8
     assert asset.metadata["runtime_generation_forbidden"] is True
-    assert asset.atlas_layout["width"] <= fixture_policy["compile_policy"]["max_atlas_resolution"]
-    assert asset.atlas_layout["height"] <= fixture_policy["compile_policy"]["max_atlas_resolution"]
+    assert asset.atlas_layout["width"] <= production_policy["compile_policy"]["max_atlas_resolution"]
+    assert asset.atlas_layout["height"] <= production_policy["compile_policy"]["max_atlas_resolution"]
 
     r24 = run("24_COMPLETE_APPEARANCE_QUALIFIED", qualify_complete_appearance_stage)
     qualification = complete_appearance_qualification_from_dict(

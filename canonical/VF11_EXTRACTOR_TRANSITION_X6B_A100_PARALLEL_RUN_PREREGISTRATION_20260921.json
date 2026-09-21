@@ -1,0 +1,61 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX6BA100ParallelRunPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__A100_PARALLEL_CPU_CONFIRMATION_CONDITIONAL_FULL_DOMAIN",
+  "authority_class": "RESEARCH_LONG_RUN_PREREGISTRATION_ONLY",
+  "execution_class": "LONG__USER_RUN_ALL_NOTEBOOK_REQUIRED",
+  "parent": "canonical/VF11_EXTRACTOR_TRANSITION_X6B_PARALLEL_CPU_VERIFY_PREREGISTRATION_20260921.json",
+  "frozen_field": {
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "scene_planes_sha256": "364f4769f1ffb04362669c1fe04b9b6c8f3afe3308bf4b7cede038d9e8226d28",
+    "base_regime_count": 103823
+  },
+  "host_autotune": {
+    "must_run_before_cuda_context_creation": true,
+    "cpu_test_boxes": 2048,
+    "box_source": "32 deterministic base regimes expanded uniformly to all 64 micro-depth-2 children",
+    "candidate_worker_counts": [1,2,4,6,8,10,12],
+    "torch_threads_per_worker": 1,
+    "cpu_node_batch_size": 32,
+    "selection": "lowest wall time among counts <= os.cpu_count(); require exact bound equality to one-worker baseline within 1e-10",
+    "pool_lifetime": "selected fork pool is created before CUDA initialization and reused for semantic/preflight/full-domain traversal"
+  },
+  "a100_screen": {
+    "batch_candidates": [256,512,1024,2048],
+    "role": "proposal only",
+    "cpu_authority": "selected persistent X6B process pool using exact X5 float64 bounds"
+  },
+  "semantic_gate": {
+    "roots": 16,
+    "requirements": [
+      "parallel X6B root states equal serial CPU X5 root states",
+      "cpu_rejected_count = 0",
+      "all CPU-confirmed terminal signs equal accelerator proposed signs"
+    ]
+  },
+  "performance_gate": {
+    "roots": 256,
+    "safety_factor": 1.5,
+    "max_safety_adjusted_minutes": 45,
+    "full_domain_execution": "authorized inside notebook only if semantic gate and performance gate both pass"
+  },
+  "full_domain_output": [
+    "root state codes for all 103823 regimes",
+    "positive/negative terminal counts",
+    "unresolved leaf counts",
+    "accelerator proposal and CPU confirmation counts",
+    "GPU/CPU/overhead timing",
+    "selected CPU worker count and host cpu_count"
+  ],
+  "abort_rules": [
+    "worker autotune bound mismatch > 1e-10",
+    "cpu_rejected_count > 0 on frozen semantic panel or full-domain run",
+    "A100 OOM without safe lower-batch fallback",
+    "safety-adjusted projection > 45 minutes",
+    "artifact SHA mismatch"
+  ],
+  "claim_boundary": "Research-only. No product authority, no witness, no Stage13 pass, no shipping-directed-rounding certificate, no global continuous zero-set completeness.",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

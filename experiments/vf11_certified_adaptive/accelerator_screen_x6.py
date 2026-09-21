@@ -103,6 +103,7 @@ def screen_verify_single_regime_roots(
     max_micro_depth: int=2,
     accelerator_node_batch_size: int=1024,
     cpu_verify_batch_size: int=32,
+    store_terminals: bool=True,
 ) -> X6Result:
     if max_micro_depth<0:
         raise ValueError("NEGATIVE_MICRO_DEPTH")
@@ -122,6 +123,9 @@ def screen_verify_single_regime_roots(
     frontier_root=np.arange(nroots,dtype=np.int64)
 
     terminals=[]
+    terminal_count=0
+    pos_counts_arr=np.zeros(nroots,dtype=np.int64)
+    neg_counts_arr=np.zeros(nroots,dtype=np.int64)
     screen_prop=0
     cpu_confirm=0
     cpu_reject=0
@@ -171,20 +175,27 @@ def screen_verify_single_regime_roots(
             cpu_reject+=int(np.count_nonzero((s_sign[proposal_idx]!=0)&(conf==0)))
 
         term_idx=np.where(confirmed!=0)[0]
-        for j in term_idx:
-            terminals.append(
-                X6Terminal(
-                    root_id=int(frontier_root[j]),
-                    depth=int(depth),
-                    sign=int(confirmed[j]),
-                    lo=tuple(float(v) for v in frontier_lo[j]),
-                    hi=tuple(float(v) for v in frontier_hi[j]),
-                    screen_lower=float(s_lo[j]),
-                    screen_upper=float(s_hi[j]),
-                    cpu_lower=float(cpu_lo_all[j]),
-                    cpu_upper=float(cpu_hi_all[j]),
+        terminal_count+=len(term_idx)
+        if len(term_idx):
+            term_roots=frontier_root[term_idx]
+            term_signs=confirmed[term_idx]
+            np.add.at(pos_counts_arr,term_roots[term_signs>0],1)
+            np.add.at(neg_counts_arr,term_roots[term_signs<0],1)
+        if store_terminals:
+            for j in term_idx:
+                terminals.append(
+                    X6Terminal(
+                        root_id=int(frontier_root[j]),
+                        depth=int(depth),
+                        sign=int(confirmed[j]),
+                        lo=tuple(float(v) for v in frontier_lo[j]),
+                        hi=tuple(float(v) for v in frontier_hi[j]),
+                        screen_lower=float(s_lo[j]),
+                        screen_upper=float(s_hi[j]),
+                        cpu_lower=float(cpu_lo_all[j]),
+                        cpu_upper=float(cpu_hi_all[j]),
+                    )
                 )
-            )
 
         active=np.where(confirmed==0)[0]
         if depth>=max_micro_depth:
@@ -210,15 +221,13 @@ def screen_verify_single_regime_roots(
     else:
         raise RuntimeError("UNREACHABLE")
 
-    pos=Counter(t.root_id for t in terminals if t.sign>0)
-    neg=Counter(t.root_id for t in terminals if t.sign<0)
     unk=Counter(int(r) for r in final_root)
     states=[]
     pos_counts=[]
     neg_counts=[]
     unk_counts=[]
     for rid in range(nroots):
-        p=int(pos[rid]); n=int(neg[rid]); u=int(unk[rid])
+        p=int(pos_counts_arr[rid]); n=int(neg_counts_arr[rid]); u=int(unk[rid])
         states.append(_root_state(p,n,u))
         pos_counts.append(p);neg_counts.append(n);unk_counts.append(u)
 
@@ -227,7 +236,7 @@ def screen_verify_single_regime_roots(
         root_positive_terminal_counts=tuple(pos_counts),
         root_negative_terminal_counts=tuple(neg_counts),
         root_unresolved_leaf_counts=tuple(unk_counts),
-        terminal_count=len(terminals),
+        terminal_count=int(terminal_count),
         final_unresolved_leaf_count=len(final_root),
         screen_decisive_proposal_count=int(screen_prop),
         cpu_confirmed_count=int(cpu_confirm),

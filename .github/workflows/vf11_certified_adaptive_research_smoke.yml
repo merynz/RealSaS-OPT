@@ -51,6 +51,7 @@ on:
       - 'canonical/VF11_EXTRACTOR_TRANSITION_X2_PREREGISTRATION_20260921.json'
       - 'canonical/VF11_EXTRACTOR_TRANSITION_X2_CLOSURE_20260921.json'
       - 'canonical/VF11_EXTRACTOR_TRANSITION_X3_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X3_PREREGISTRATION_V2_20260921.json'
       - 'canonical/VF11_LAYERNORM_EPS_IMPACT_REPLAY_PREREGISTRATION_20260921.json'
       - '.github/workflows/vf11_certified_adaptive_research_smoke.yml'
   workflow_dispatch:
@@ -223,6 +224,10 @@ jobs:
           assert x3['status']=='PREREGISTERED__PROOF_AWARE_D13_NARROW_BAND_PLANNER'
           assert x3['product_authority_minted'] is False
           assert x3['shipping_extractor_selected'] is False
+          x3v2=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X3_PREREGISTRATION_V2_20260921.json',encoding='utf-8'))
+          assert x3v2['status']=='PREREGISTERED__PROOF_AWARE_D13_NARROW_BAND_PLANNER__SEMANTIC_CORRECTION'
+          assert x3v2['product_authority_minted'] is False
+          assert x3v2['shipping_extractor_selected'] is False
           print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
           PY
 
@@ -288,7 +293,7 @@ jobs:
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           out={
-            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v15',
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v16',
             'status':'PASS',
             'product_authority_minted':False,
             'files':{p:sha(p) for p in files},

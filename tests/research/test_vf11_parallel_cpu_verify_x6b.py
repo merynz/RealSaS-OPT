@@ -120,3 +120,46 @@ def test_parallel_path_preserves_false_decisive_rejection_rule():
     assert ss.tolist()==[1,-1,1]
     assert cs.tolist()==[0,-1,1]
     assert conf.tolist()==[0,-1,1]
+
+
+def test_preforked_verifier_can_be_reused_by_x6b_traversal():
+    torch.manual_seed(3203)
+    field=TinyField(channels=2,hidden=9).double().eval()
+    planes=torch.randn(1,3,2,8,8,dtype=torch.float64)
+    p=scalar.prepare_field(field)
+    pp=scalar.prepare_planes(planes)
+    los,his=_boxes(count=5)
+
+    serial=x6.screen_verify_single_regime_roots(
+        p,pp,p,pp,los,his,
+        max_micro_depth=2,
+        accelerator_node_batch_size=16,
+        cpu_verify_batch_size=8,
+        store_terminals=False,
+    )
+
+    verifier=x6b.ParallelCPUVerifier(
+        p,pp,workers=2,node_batch_size=8,
+        torch_threads_per_worker=1,start_method="fork"
+    )
+    verifier.__enter__()
+    try:
+        parallel=x6b.screen_verify_single_regime_roots_parallel_cpu(
+            p,pp,p,pp,los,his,
+            max_micro_depth=2,
+            accelerator_node_batch_size=16,
+            cpu_verify_batch_size=8,
+            cpu_workers=2,
+            cpu_torch_threads_per_worker=1,
+            cpu_start_method="fork",
+            store_terminals=False,
+            cpu_verifier=verifier,
+        )
+    finally:
+        verifier.__exit__(None,None,None)
+
+    assert parallel.root_states==serial.root_states
+    assert parallel.root_positive_terminal_counts==serial.root_positive_terminal_counts
+    assert parallel.root_negative_terminal_counts==serial.root_negative_terminal_counts
+    assert parallel.root_unresolved_leaf_counts==serial.root_unresolved_leaf_counts
+    assert parallel.cpu_rejected_count==0

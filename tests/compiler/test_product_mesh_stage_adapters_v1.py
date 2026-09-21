@@ -75,15 +75,21 @@ def _write(path:Path,value):
     return path
 
 
-def _fixture(tmp_path):
+def _fixture(tmp_path, *, resolution: int = 8):
+    resolution = int(resolution)
+    if resolution < 8 or resolution % 4:
+        raise ValueError("fixture resolution must be >=8 and divisible by 4")
     run_root=tmp_path/"run"
+    center = float(resolution) / 2.0 - 0.5
+    positive_quarter = 3.0 * float(resolution) / 4.0 - 0.5
+    negative_quarter = float(resolution) / 4.0 - 0.5
     surface=RiggingSurfaceIR(
         (
             # Observation PIXEL_CENTER_XY uses source texel index centers.
             # For this camera these are exactly Runtime projection minus 0.5.
-            SurfaceNode("s0",(0.0,0.0,0.0),tuple(range(8)),("p0",),("o0",),tuple((v,(3.5,3.5)) for v in range(8))),
-            SurfaceNode("s1",(1.0,0.0,0.0),tuple(range(8)),("p1",),("o1",),tuple((v,(5.5,3.5)) for v in range(8))),
-            SurfaceNode("s2",(0.0,1.0,0.0),tuple(range(8)),("p2",),("o2",),tuple((v,(3.5,1.5)) for v in range(8))),
+            SurfaceNode("s0",(0.0,0.0,0.0),tuple(range(8)),("p0",),("o0",),tuple((v,(center,center)) for v in range(8))),
+            SurfaceNode("s1",(1.0,0.0,0.0),tuple(range(8)),("p1",),("o1",),tuple((v,(positive_quarter,center)) for v in range(8))),
+            SurfaceNode("s2",(0.0,1.0,0.0),tuple(range(8)),("p2",),("o2",),tuple((v,(center,negative_quarter)) for v in range(8))),
         ),
         (
             SurfaceRelation("r01","s0","s1","LOCAL",1.0),
@@ -91,7 +97,7 @@ def _fixture(tmp_path):
             SurfaceRelation("r02","s0","s2","LOCAL",1.0),
         ),
         "surface-hash",
-        metadata={"raster_coordinate_system":"PIXEL_CENTER_XY","resolution":8},
+        metadata={"raster_coordinate_system":"PIXEL_CENTER_XY","resolution":resolution},
     )
     skeleton=QualifiedSkeletonIR(
         (QualifiedJoint("j0",(0.0,0.0,0.0),None,("s0","s1","s2"),"proposal-root"),),
@@ -125,7 +131,7 @@ def _fixture(tmp_path):
             "screen_up":[0.0,1.0,0.0],
             "forward":[0.0,0.0,1.0],
             "half_extent":2.0,
-            "resolution":8,
+            "resolution":resolution,
         })
     bundle={"schema":"RealSaS.CameraProjectionBundle.v1","cameras":cameras}
     cam_path=tmp_path/"cameras.json"; cam_path.write_text(json.dumps(bundle,sort_keys=True)+"\n",encoding="utf-8")
@@ -216,17 +222,32 @@ def _fixture(tmp_path):
         from compiler.realsas_compiler_core.playback_full_surface_v3 import project_points_xyz_v3
         projected=project_points_xyz_v3([node.P for node in surface.surface_nodes],camera)
         triangle=tuple((float(p[0]),float(p[1])) for p in projected)
-        fg=rasterize_triangles_half_integer_top_left((triangle,),width=8,height=8)
+        fg=rasterize_triangles_half_integer_top_left(
+            (triangle,),
+            width=resolution,
+            height=resolution,
+        )
         fg_path=tmp_path/f"source_fg_v{camera.view_index}.bin"; fg_path.write_bytes(fg)
-        rgba=np.zeros((8,8,4),dtype=np.uint8)
-        for yy in range(8):
-            for xx in range(8):
-                rgba[yy,xx]=[xx*20,yy*20,camera.view_index*20,255 if fg[yy*8+xx] else 0]
+        rgba=np.zeros((resolution,resolution,4),dtype=np.uint8)
+        for yy in range(resolution):
+            for xx in range(resolution):
+                if resolution == 8:
+                    red = xx * 20
+                    green = yy * 20
+                else:
+                    red = int(round(180.0 * float(xx) / float(resolution - 1)))
+                    green = int(round(180.0 * float(yy) / float(resolution - 1)))
+                rgba[yy,xx]=[
+                    red,
+                    green,
+                    camera.view_index*12,
+                    255 if fg[yy*resolution+xx] else 0,
+                ]
         source_path=tmp_path/f"source_V{camera.view_index}.png"
         Image.fromarray(rgba,"RGBA").save(source_path,format="PNG",compress_level=1,optimize=False)
         obs_hash=content_sha256({"view":camera.view_index,"fixture":"triangle","source_raster_sha256":_sha(source_path)})
         observation_views.append(QualifiedObservationViewIR(
-            camera.view_index,8,8,obs_hash,
+            camera.view_index,resolution,resolution,obs_hash,
             _sha(source_path),
             _sha(fg_path),camera_projection_binding_hash(camera),
             "PASS",(f"fixture-observation-{camera.view_index}",),

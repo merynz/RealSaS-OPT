@@ -613,7 +613,7 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
         provenance_atlases.append(provenance_atlas)
 
     uv_path = root / "surface_uv.npz"
-    uv_sha = _save_npz(uv_path, face_uv=np.asarray(reference_uv, dtype=np.float32))
+    uv_sha = _save_npz(uv_path, face_uv=np.asarray(reference_uv, dtype=np.float64))
     provenance_path = root / "provenance_atlas.npz"
     provenance_sha = _save_npz(
         provenance_path,

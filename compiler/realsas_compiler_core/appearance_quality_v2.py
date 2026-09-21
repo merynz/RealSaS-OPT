@@ -495,6 +495,129 @@ def cross_view_source_compatibility_metrics(
         "measurement_is_compatibility_not_color_authority": True,
     }
 
+def adjacent_direction_transition_metrics(
+    *,
+    direct_valid: np.ndarray,
+    direct_rgba: np.ndarray,
+    sample_component_index: np.ndarray,
+) -> dict:
+    """Measure cyclic V-1,V,V+1 appearance curvature on shared canonical samples.
+
+    This is deliberately not an RGB-equality test. The center view is compared with
+    the linear-premultiplied midpoint of its two adjacent directions. Smooth
+    view-dependent artist intent is allowed; an isolated direction spike produces
+    high second-order residual and is exposed as transition/shimmer evidence.
+    """
+    valid = np.asarray(direct_valid, dtype=bool)
+    rgba = np.asarray(direct_rgba, dtype=np.uint8)
+    component = np.asarray(sample_component_index, dtype=np.int32)
+    if valid.ndim != 2 or valid.shape[0] != 8:
+        raise QualificationError("CAA_DIRECTION_TRANSITION_VALID_SHAPE_INVALID")
+    sample_count = int(valid.shape[1])
+    if rgba.shape != (8, sample_count, 4) or component.shape != (sample_count,):
+        raise QualificationError("CAA_DIRECTION_TRANSITION_ARRAY_SHAPE_DRIFT")
+
+    pm = straight_rgba_to_premultiplied_float(rgba)
+
+    def summarize(residual: np.ndarray, alpha: np.ndarray) -> dict:
+        count = int(len(residual))
+        return {
+            "shared_triplet_sample_count": count,
+            "mean_center_residual_pm_l1": (
+                float(np.mean(residual)) if count else 0.0
+            ),
+            "p95_center_residual_pm_l1": (
+                float(np.quantile(residual, 0.95)) if count else 0.0
+            ),
+            "p99_center_residual_pm_l1": (
+                float(np.quantile(residual, 0.99)) if count else 0.0
+            ),
+            "max_center_residual_pm_l1": (
+                float(np.max(residual)) if count else 0.0
+            ),
+            "mean_center_alpha_residual": (
+                float(np.mean(alpha)) if count else 0.0
+            ),
+            "p95_center_alpha_residual": (
+                float(np.quantile(alpha, 0.95)) if count else 0.0
+            ),
+            "p99_center_alpha_residual": (
+                float(np.quantile(alpha, 0.99)) if count else 0.0
+            ),
+            "max_center_alpha_residual": (
+                float(np.max(alpha)) if count else 0.0
+            ),
+        }
+
+    triplets = []
+    component_rows = []
+    all_residual = []
+    all_alpha = []
+    component_ids = sorted(set(map(int, component)))
+    for center in range(8):
+        left = (center - 1) % 8
+        right = (center + 1) % 8
+        shared = valid[left] & valid[center] & valid[right]
+        indices = np.flatnonzero(shared)
+        if len(indices):
+            midpoint = 0.5 * (pm[left, indices] + pm[right, indices])
+            residual = np.mean(
+                np.abs(pm[center, indices] - midpoint),
+                axis=1,
+            )
+            alpha = np.abs(pm[center, indices, 3] - midpoint[:, 3])
+            all_residual.extend(map(float, residual))
+            all_alpha.extend(map(float, alpha))
+        else:
+            residual = np.asarray([], dtype=np.float64)
+            alpha = np.asarray([], dtype=np.float64)
+        triplets.append(
+            {
+                "left_view_index": left,
+                "center_view_index": center,
+                "right_view_index": right,
+                **summarize(residual, alpha),
+            }
+        )
+        for component_id in component_ids:
+            local = shared & (component == component_id)
+            local_indices = np.flatnonzero(local)
+            if not len(local_indices):
+                continue
+            local_midpoint = 0.5 * (
+                pm[left, local_indices] + pm[right, local_indices]
+            )
+            local_residual = np.mean(
+                np.abs(pm[center, local_indices] - local_midpoint),
+                axis=1,
+            )
+            local_alpha = np.abs(
+                pm[center, local_indices, 3] - local_midpoint[:, 3]
+            )
+            component_rows.append(
+                {
+                    "left_view_index": left,
+                    "center_view_index": center,
+                    "right_view_index": right,
+                    "component_index": component_id,
+                    **summarize(local_residual, local_alpha),
+                }
+            )
+
+    residual_values = np.asarray(all_residual, dtype=np.float64)
+    alpha_values = np.asarray(all_alpha, dtype=np.float64)
+    return {
+        "mode": "CYCLIC_ADJACENT_DIRECTION_LINEAR_PM_SECOND_ORDER_V1",
+        "triplet_count": 8,
+        **summarize(residual_values, alpha_values),
+        "per_triplet": triplets,
+        "per_triplet_component": component_rows,
+        "raw_rgb_equality_required": False,
+        "view_dependent_artist_intent_allowed": True,
+        "measurement_is_transition_curvature_not_color_authority": True,
+    }
+
+
 def _triangle_lattice_neighbors(tile_resolution: int) -> tuple[tuple[int, int], ...]:
     resolution = int(tile_resolution)
     index = {}

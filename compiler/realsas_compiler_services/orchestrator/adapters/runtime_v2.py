@@ -123,6 +123,30 @@ def _largest_connected_fraction(mask: np.ndarray, *, denominator: int) -> float:
     return float(largest) / float(denominator)
 
 
+def _pixel_face_counts(
+    face_grid: np.ndarray,
+    valid_grid: np.ndarray,
+    *,
+    face_count: int,
+) -> np.ndarray:
+    faces = np.asarray(face_grid, dtype=np.int64)
+    valid = np.asarray(valid_grid, dtype=bool)
+    if faces.shape != valid.shape or faces.ndim != 3:
+        raise QualificationError("RUNTIME_V2_PIXEL_FACE_GRID_SHAPE_INVALID")
+    height, width, _ = faces.shape
+    ys, xs, slots = np.nonzero(valid & (faces >= 0))
+    if not len(ys):
+        return np.zeros(int(face_count), dtype=np.int64)
+    selected = faces[ys, xs, slots]
+    if np.any(selected >= int(face_count)):
+        raise QualificationError("RUNTIME_V2_PIXEL_FACE_INDEX_DRIFT")
+    pixel = ys.astype(np.int64) * int(width) + xs.astype(np.int64)
+    packed = selected * (int(height) * int(width)) + pixel
+    unique = np.unique(packed)
+    unique_faces = unique // (int(height) * int(width))
+    return np.bincount(unique_faces, minlength=int(face_count))
+
+
 def build_runtime_projection_stage(ctx: dict) -> dict:
     complete = complete_puppet_state_v2_from_dict(
         stage_output_payload(
@@ -543,6 +567,14 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
             native_rgba = np.frombuffer(rgba.read_bytes(), dtype=np.uint8).reshape(
                 resolution, resolution, 4
             )
+            native_provenance = np.frombuffer(
+                provenance.read_bytes(),
+                dtype=np.uint8,
+            ).reshape(resolution, resolution)
+            native_owner = np.frombuffer(
+                owner.read_bytes(),
+                dtype="<i4",
+            ).reshape(resolution, resolution)
             reference = _reference_frame(
                 projection,
                 arrays,
@@ -550,11 +582,12 @@ def prove_native_package_playback_stage(ctx: dict) -> dict:
                 view=view_by_id[view.view_id],
                 frame_index=frame_index,
             )
-            mismatch = int(
-                np.count_nonzero(
-                    np.any(native_rgba != reference.straight_rgba_u8, axis=2)
-                )
+            mismatch_mask = (
+                np.any(native_rgba != reference.straight_rgba_u8, axis=2)
+                | (native_provenance != reference.provenance_code)
+                | (native_owner != reference.owner_face_index)
             )
+            mismatch = int(np.count_nonzero(mismatch_mask))
             if mismatch:
                 raise QualificationError(
                     f"RUNTIME_V2_NATIVE_REFERENCE_PARITY_FAIL:{clip.clip_id}:{view.view_id}:{mismatch}"
@@ -809,14 +842,29 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 owner = np.frombuffer(owner_path.read_bytes(), dtype="<i4").reshape(
                     resolution, resolution
                 )
-                visible = owner >= 0
+                reference = _reference_frame(
+                    projection,
+                    arrays,
+                    clip=clip,
+                    view=view,
+                    frame_index=frame_index,
+                )
+                parity_mismatch = (
+                    np.any(rgba != reference.straight_rgba_u8, axis=2)
+                    | (prov != reference.provenance_code)
+                    | (owner != reference.owner_face_index)
+                )
+                visible = np.asarray(reference.geometry_visible, dtype=bool)
                 visible_count = int(np.count_nonzero(visible))
                 geometry_visible += visible_count
                 alpha_transparent += int(
-                    np.count_nonzero(visible & (rgba[:, :, 3] == 0))
+                    np.count_nonzero(
+                        visible & (reference.straight_rgba_u8[:, :, 3] == 0)
+                    )
                 )
                 compiled_mask = visible & (
-                    prov == int(CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"])
+                    reference.provenance_code
+                    == int(CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"])
                 )
                 compiled_count = int(np.count_nonzero(compiled_mask))
                 compiled_visible += compiled_count
@@ -832,15 +880,12 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                             denominator=visible_count,
                         ),
                     )
-                undefined_visible += int(np.count_nonzero(visible & (prov == 255)))
-
-                reference = _reference_frame(
-                    projection,
-                    arrays,
-                    clip=clip,
-                    view=view,
-                    frame_index=frame_index,
+                undefined_visible += int(
+                    np.count_nonzero(
+                        visible & (reference.provenance_code == 255)
+                    )
                 )
+
                 exact_depth_count = int(
                     np.count_nonzero(reference.exact_depth_ambiguity)
                 )
@@ -853,7 +898,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                         max_frame_exact_depth_ambiguous_fraction,
                         float(exact_depth_count) / float(visible_count),
                     )
-                mismatch = np.any(rgba != reference.straight_rgba_u8, axis=2)
+                mismatch = parity_mismatch
                 mismatch_count = int(np.count_nonzero(mismatch))
                 mismatch_pixels += mismatch_count
                 frame_pixels = resolution * resolution
@@ -864,12 +909,23 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 frame_count += 1
 
                 if visible_count > 0:
-                    visible_faces = owner[visible].astype(np.int64)
-                    if np.any(visible_faces >= len(faces)):
-                        raise QualificationError("RUNTIME_V2_DVI_OWNER_FACE_INDEX_DRIFT")
-                    front_counts = np.bincount(
-                        visible_faces,
-                        minlength=len(faces),
+                    sample_owner = np.asarray(
+                        reference.coverage_sample_owner_face_index,
+                        dtype=np.int64,
+                    )
+                    if (
+                        sample_owner.ndim != 3
+                        or sample_owner.shape[:2] != owner.shape
+                        or sample_owner.shape[2]
+                        != int(reference.coverage_sample_count)
+                    ):
+                        raise QualificationError(
+                            "RUNTIME_V2_DVI_COVERAGE_SAMPLE_SHAPE_DRIFT"
+                        )
+                    front_counts = _pixel_face_counts(
+                        sample_owner,
+                        sample_owner >= 0,
+                        face_count=len(faces),
                     )
                     layer_owner = np.asarray(
                         reference.layer_owner_face_index,
@@ -886,16 +942,10 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                         raise QualificationError(
                             "RUNTIME_V2_DVI_LAYER_CONTRIBUTION_SHAPE_DRIFT"
                         )
-                    contributing_faces = layer_owner[contribution_mask]
-                    if np.any(contributing_faces < 0) or np.any(
-                        contributing_faces >= len(faces)
-                    ):
-                        raise QualificationError(
-                            "RUNTIME_V2_DVI_CONTRIBUTING_FACE_INDEX_DRIFT"
-                        )
-                    contribution_counts = np.bincount(
-                        contributing_faces,
-                        minlength=len(faces),
+                    contribution_counts = _pixel_face_counts(
+                        layer_owner,
+                        contribution_mask,
+                        face_count=len(faces),
                     )
                     # A face is consequential when it is geometrically frontmost
                     # OR actually contributes color/alpha through the qualified
@@ -918,7 +968,10 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     if len(micro) == 0:
                         micro_pixels = 0
                     else:
-                        micro_pixel_mask = np.isin(owner, micro)
+                        micro_pixel_mask = np.any(
+                            np.isin(sample_owner, micro),
+                            axis=2,
+                        )
                         contributed_micro = contribution_mask & np.isin(
                             layer_owner,
                             micro,

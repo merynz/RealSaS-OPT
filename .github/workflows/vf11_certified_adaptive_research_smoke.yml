@@ -19,6 +19,7 @@ on:
       - 'tests/research/test_vf11_axis_graph_c2_v2.py'
       - 'tests/research/test_vf11_profile_c2_axis_graph_v2.py'
       - 'tests/research/test_vf11_adaptive_empty_graph_c2_v3.py'
+      - 'tests/research/test_vf11_resume_d11_c2_v4.py'
       - 'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json'
       - 'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json'
       - 'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json'
@@ -36,6 +37,8 @@ on:
       - 'canonical/VF11_C2_V2_AXIS_GRAPH_PREREGISTRATION_20260921.json'
       - 'canonical/VF11_C2_V2_AXIS_GRAPH_RESEARCH_CLOSURE_20260921.json'
       - 'canonical/VF11_C2_V3_ADAPTIVE_REFINEMENT_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_C2_V3_ADAPTIVE_REFINEMENT_RESEARCH_CLOSURE_20260921.json'
+      - 'canonical/VF11_C2_V4_D11_RESUME_PREREGISTRATION_20260921.json'
       - 'canonical/VF11_LAYERNORM_EPS_IMPACT_REPLAY_PREREGISTRATION_20260921.json'
       - '.github/workflows/vf11_certified_adaptive_research_smoke.yml'
   workflow_dispatch:
@@ -85,6 +88,7 @@ jobs:
           python -m py_compile experiments/vf11_certified_adaptive/axis_graph_c2_v2.py
           python -m py_compile experiments/vf11_certified_adaptive/profile_c2_axis_graph_v2.py
           python -m py_compile experiments/vf11_certified_adaptive/adaptive_empty_graph_c2_v3.py
+          python -m py_compile experiments/vf11_certified_adaptive/resume_d11_c2_v4.py
           python -m py_compile tests/research/test_vf11_range_engine_v1.py
           python -m py_compile tests/research/test_vf11_range_engine_c0_v2.py
           python -m py_compile tests/research/test_vf11_range_engine_c0_v3.py
@@ -98,6 +102,7 @@ jobs:
           python -m py_compile tests/research/test_vf11_axis_graph_c2_v2.py
           python -m py_compile tests/research/test_vf11_profile_c2_axis_graph_v2.py
           python -m py_compile tests/research/test_vf11_adaptive_empty_graph_c2_v3.py
+          python -m py_compile tests/research/test_vf11_resume_d11_c2_v4.py
 
       - name: Enforce research-only claim boundary
         shell: bash
@@ -173,11 +178,18 @@ jobs:
           assert c2v3['status']=='PREREGISTERED__C2_V3_ADAPTIVE_EMPTY_OR_GRAPH_REFINEMENT'
           assert c2v3['product_authority_minted'] is False
           assert c2v3['full_domain_traversal_authorized'] is False
+          c2v3c=json.load(open('canonical/VF11_C2_V3_ADAPTIVE_REFINEMENT_RESEARCH_CLOSURE_20260921.json',encoding='utf-8'))
+          assert c2v3c['status']=='C2_V3_NONVACUOUS__D11_CONTINUATION_AUTHORIZED'
+          assert c2v3c['product_authority_minted'] is False
+          c2v4=json.load(open('canonical/VF11_C2_V4_D11_RESUME_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert c2v4['status']=='PREREGISTERED__C2_V4_D11_RESUME_CONTINUATION'
+          assert c2v4['product_authority_minted'] is False
+          assert c2v4['full_domain_traversal_authorized'] is False
           print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
           PY
 
       - name: Run short deterministic/adversarial range tests
-        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py tests/research/test_vf11_directional_regular_c1_v1.py tests/research/test_vf11_profile_c1_handoff_v1.py tests/research/test_vf11_directional_regular_c1_v2.py tests/research/test_vf11_profile_c1_handoff_v2.py tests/research/test_vf11_oriented_crossing_c2_v1.py tests/research/test_vf11_profile_c2_primary_v1.py tests/research/test_vf11_axis_graph_c2_v2.py tests/research/test_vf11_profile_c2_axis_graph_v2.py tests/research/test_vf11_adaptive_empty_graph_c2_v3.py
+        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py tests/research/test_vf11_directional_regular_c1_v1.py tests/research/test_vf11_profile_c1_handoff_v1.py tests/research/test_vf11_directional_regular_c1_v2.py tests/research/test_vf11_profile_c1_handoff_v2.py tests/research/test_vf11_oriented_crossing_c2_v1.py tests/research/test_vf11_profile_c2_primary_v1.py tests/research/test_vf11_axis_graph_c2_v2.py tests/research/test_vf11_profile_c2_axis_graph_v2.py tests/research/test_vf11_adaptive_empty_graph_c2_v3.py tests/research/test_vf11_resume_d11_c2_v4.py
 
       - name: Emit smoke receipt
         shell: bash
@@ -202,6 +214,7 @@ jobs:
             'experiments/vf11_certified_adaptive/axis_graph_c2_v2.py',
             'experiments/vf11_certified_adaptive/profile_c2_axis_graph_v2.py',
             'experiments/vf11_certified_adaptive/adaptive_empty_graph_c2_v3.py',
+            'experiments/vf11_certified_adaptive/resume_d11_c2_v4.py',
             'tests/research/test_vf11_range_engine_v1.py',
             'tests/research/test_vf11_range_engine_c0_v2.py',
             'tests/research/test_vf11_range_engine_c0_v3.py',
@@ -215,6 +228,7 @@ jobs:
             'tests/research/test_vf11_axis_graph_c2_v2.py',
             'tests/research/test_vf11_profile_c2_axis_graph_v2.py',
             'tests/research/test_vf11_adaptive_empty_graph_c2_v3.py',
+            'tests/research/test_vf11_resume_d11_c2_v4.py',
             'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json',
             'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json',
             'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json',
@@ -230,7 +244,7 @@ jobs:
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           out={
-            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v11',
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v12',
             'status':'PASS',
             'product_authority_minted':False,
             'files':{p:sha(p) for p in files},

@@ -92,6 +92,7 @@ def profile_depth(
     unresolved_counts: list[int] = []
     positive_leaf_counts: list[int] = []
     negative_leaf_counts: list[int] = []
+    cell_records: list[dict] = []
 
     start = time.perf_counter()
     for i, idx in enumerate(indices, 1):
@@ -110,6 +111,19 @@ def profile_depth(
         unresolved_counts.append(cert.unresolved_leaf_count)
         positive_leaf_counts.append(cert.positive_leaf_count)
         negative_leaf_counts.append(cert.negative_leaf_count)
+        cell_records.append({
+            "index_xyz": [int(idx[0]), int(idx[1]), int(idx[2])],
+            "state": cert.state,
+            "sign": int(cert.sign),
+            "lower": float(cert.lower),
+            "upper": float(cert.upper),
+            "regime_box_count": int(cert.regime_box_count),
+            "evaluated_box_count": int(cert.evaluated_box_count),
+            "unresolved_leaf_count": int(cert.unresolved_leaf_count),
+            "positive_leaf_count": int(cert.positive_leaf_count),
+            "negative_leaf_count": int(cert.negative_leaf_count),
+            "proof_depth": int(cert.max_depth_reached),
+        })
 
         if log_every and logger and i % int(log_every) == 0:
             logger(
@@ -150,6 +164,7 @@ def profile_depth(
         "unresolved_leaf_count": _quantiles(unresolved_counts),
         "positive_leaf_count": _quantiles(positive_leaf_counts),
         "negative_leaf_count": _quantiles(negative_leaf_counts),
+        "cell_records": cell_records,
         "elapsed_seconds": float(elapsed),
         "parent_cells_per_second": float(visited / max(elapsed, 1e-12)),
         "range_box_evaluations_per_second": float(sum(eval_counts) / max(elapsed, 1e-12)),

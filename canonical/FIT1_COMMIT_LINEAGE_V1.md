@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2645**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2682**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2657,6 +2657,43 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-21T10:28:15+03:00` | `03994aceb8ef` | yes | OTHER | research: add subject-free VF-11 geometry feature survival panel | `tools/vf11_geometry_feature_survival_panel.py` | `main` |
 | `2026-09-21T10:28:38+03:00` | `d860dcb8b9cf` | yes | CI_TEST | ci: run exact subject-free VF-11 feature survival calibration | `.github/workflows/vf11_geometry_feature_survival.yml` | `main` |
 | `2026-09-21T10:29:10+03:00` | `c5d33eff35cb` | yes | OTHER | research: retain VF-11 no-bracket cases as catastrophic measurements | `tools/vf11_geometry_feature_survival_panel.py` | `main` |
+| `2026-09-21T10:31:26+03:00` | `ba8edea1e161` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-21T10:32:06+03:00` | `76eda26aab00` | yes | CI_TEST, COMPILER_PROOF | test: keep tiny Stage37-46 wiring fixture explicitly non-shipping | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T10:32:15+03:00` | `4e13bd314479` | yes | CI_TEST | ci: make VF-11 contamination check reference-specific | `.github/workflows/vf11_geometry_feature_survival.yml` | `main` |
+| `2026-09-21T10:35:15+03:00` | `7d82baaeb43d` | yes | CI_TEST, COMPILER_PROOF | test: make tiny Stage37-46 fixture satisfy real minification contract | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T10:36:10+03:00` | `d8b3b3e9aa76` | yes | COMPILER_PROOF | geometry: measure rest-existing intersection persistence severity | `compiler/realsas_compiler_core/dynamic_geometry_integrity_v2.py` | `main` |
+| `2026-09-21T10:36:28+03:00` | `8e282c36ea65` | yes | COMPILER_PROOF | motion: reject worsening rest-existing self intersections | `compiler/realsas_compiler_core/motion_dynamic_proof_v2.py` | `main` |
+| `2026-09-21T10:36:44+03:00` | `6e76d8093cc2` | yes | CI_TEST, COMPILER_PROOF | test: attack rest-existing intersection severity growth | `tests/compiler/test_dynamic_geometry_integrity_v2.py` | `main` |
+| `2026-09-21T10:48:39+03:00` | `ba44690d7e8e` | yes | CI_TEST, COMPILER_PROOF | test: freeze V2 contact claim to declared PLANT_2D scope | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T10:48:44+03:00` | `901ca12bb325` | yes | GOVERNANCE_CONTINUITY | authority: close VF-17 severity and VF-18 contact claim scope | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T10:50:01+03:00` | `a7308378f59c` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: seal first-witness presentation capability boundary | `compiler/realsas_compiler_core/runtime_package_v2.py` | `main` |
+| `2026-09-21T10:50:05+03:00` | `1fdb381609e4` | yes | RUNTIME_PRODUCT | runtime: native-enforce first-witness presentation exclusions | `runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp` | `main` |
+| `2026-09-21T10:50:23+03:00` | `c93a3cc91d6b` | yes | CI_TEST, COMPILER_PROOF, RUNTIME_PRODUCT | test: reject unauthorized V2 presentation runtime capabilities | `tests/compiler/test_runtime_v2_native_smoke.py` | `main` |
+| `2026-09-21T10:50:28+03:00` | `31d1efdf05ab` | yes | CI_TEST | test: freeze first-witness presentation capability exclusions | `tests/repository/test_canonical_main_readiness_v1.py` | `main` |
+| `2026-09-21T10:50:45+03:00` | `cc4ecea2ff18` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: append native runtime source extension V8 | `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V8_20260921.json` | `main` |
+| `2026-09-21T10:51:18+03:00` | `c69561bc1ed4` | yes | GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: verify native runtime source seal V8 | `tools/verify_native_runtime_source_seal_v2.py` | `main` |
+| `2026-09-21T10:51:23+03:00` | `eebab92164de` | yes | CI_TEST, RUNTIME_PRODUCT | ci: bind native source gate through extension V8 | `.github/workflows/native_runtime_source_gate.yml` | `main` |
+| `2026-09-21T10:51:33+03:00` | `e2b554729984` | yes | GOVERNANCE_CONTINUITY | authority: close VF-20 by native-enforced first-witness scope | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T10:55:05+03:00` | `d376237b4348` | yes | GOVERNANCE_CONTINUITY | authority: seal VF-11 R256 feature-survival falsification | `canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_CALIBRATION_V1_20260921.json` | `main` |
+| `2026-09-21T10:55:35+03:00` | `f4562168e549` | yes | OTHER | research: parameterize VF-11 physical-feature resolution sweep | `tools/vf11_geometry_feature_survival_panel.py` | `main` |
+| `2026-09-21T10:56:36+03:00` | `84d4e3d3282d` | yes | CI_TEST | ci: reproduce VF-11 R256 under frozen Stage13 profile | `.github/workflows/vf11_geometry_feature_survival.yml` | `main` |
+| `2026-09-21T10:56:39+03:00` | `781468771ede` | yes | CI_TEST | ci: run VF-11 same-physical-feature R384 requery sweep | `.github/workflows/vf11_geometry_feature_survival_r384.yml` | `main` |
+| `2026-09-21T10:58:30+03:00` | `1761c174203f` | yes | GOVERNANCE_CONTINUITY | authority: record VF-11 R256 falsification and R384 requery | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T11:00:29+03:00` | `25be222435e4` | yes | COMPILER_PROOF | visibility: seal float64 depth-equivalence semantics | `compiler/realsas_compiler_core/visibility_v2.py` | `main` |
+| `2026-09-21T11:00:33+03:00` | `46196a5d9308` | yes | CI_TEST, COMPILER_PROOF | test: bracket V2 depth-equivalence epsilon | `tests/compiler/test_visibility_and_caa_v2.py` | `main` |
+| `2026-09-21T11:00:54+03:00` | `c93d9e0f918f` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: seal float64 depth-equivalence contract | `compiler/realsas_compiler_core/runtime_package_v2.py` | `main` |
+| `2026-09-21T11:00:58+03:00` | `487730bda6bd` | yes | RUNTIME_PRODUCT | runtime: native-enforce float64 depth-equivalence contract | `runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp` | `main` |
+| `2026-09-21T11:01:21+03:00` | `fd7c46ce4725` | yes | CI_TEST, COMPILER_PROOF, RUNTIME_PRODUCT | test: adversarially seal V2 depth-equivalence semantics | `tests/compiler/test_runtime_v2_native_smoke.py` | `main` |
+| `2026-09-21T11:01:38+03:00` | `b69c01fb3743` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: append native runtime source extension V9 | `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V9_20260921.json` | `main` |
+| `2026-09-21T11:01:58+03:00` | `f1644464117f` | yes | GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: verify native runtime source seal V9 | `tools/verify_native_runtime_source_seal_v2.py` | `main` |
+| `2026-09-21T11:02:03+03:00` | `e1a92eb3f477` | yes | CI_TEST, RUNTIME_PRODUCT | ci: bind native source gate through extension V9 | `.github/workflows/native_runtime_source_gate.yml` | `main` |
+| `2026-09-21T11:02:27+03:00` | `11f773aee554` | yes | GOVERNANCE_CONTINUITY | authority: freeze VF-09 float64 depth-equivalence semantics | `canonical/VF09_DEPTH_EQUIVALENCE_AUTHORITY_V1_20260921.json` | `main` |
+| `2026-09-21T11:02:40+03:00` | `ae5c6003e1cd` | yes | GOVERNANCE_CONTINUITY | authority: close VF-09 depth-equivalence ambiguity scope | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T11:04:49+03:00` | `60cde736ee5c` | yes | COMPILER_PROOF | appearance: measure adjacent-direction transition curvature | `compiler/realsas_compiler_core/appearance_quality_v2.py` | `main` |
+| `2026-09-21T11:05:13+03:00` | `39fcae303af8` | yes | CI_TEST, COMPILER_PROOF | test: attack adjacent-direction shimmer independently of RGB equality | `tests/compiler/test_caa_v2_subject_free_policy.py` | `main` |
+| `2026-09-21T11:07:08+03:00` | `bc292e921d54` | yes | OTHER | research: add subject-free VF-10 transition calibration | `tools/vf10_direction_transition_calibration.py` | `main` |
+| `2026-09-21T11:07:26+03:00` | `1e9e822cd08e` | yes | CI_TEST | ci: calibrate VF-10 adjacent-direction transition gate | `.github/workflows/vf10_direction_transition_calibration.yml` | `main` |
+| `2026-09-21T11:13:01+03:00` | `4c56d520023b` | yes | COMPILER_PROOF | presentation: make rigid classification require LBS no-op proof | `compiler/realsas_compiler_core/product_state_v2.py` | `main` |
 
 ## Use rule
 

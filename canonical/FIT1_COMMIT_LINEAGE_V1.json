@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "c5d33eff35cb464d6c1a1176b96d9df22dcec159",
+    "main": "4c56d520023bc9cc1df1f2a92507fd52c75810ca",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -117,7 +117,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2645,
+  "commit_count": 2682,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -128179,6 +128179,811 @@
       ],
       "subsystem_tags": [
         "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ba8edea1e16174500816728e935ec1adedaa5eab",
+      "parents": [
+        "c5d33eff35cb464d6c1a1176b96d9df22dcec159"
+      ],
+      "author_time": "2026-09-21T10:31:26+03:00",
+      "committer_time": "2026-09-21T10:31:26+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "76eda26aab00ffee22a6da2b249fd2e127719bf5",
+      "parents": [
+        "ba8edea1e16174500816728e935ec1adedaa5eab"
+      ],
+      "author_time": "2026-09-21T10:32:06+03:00",
+      "committer_time": "2026-09-21T10:32:06+03:00",
+      "subject": "test: keep tiny Stage37-46 wiring fixture explicitly non-shipping",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4e13bd3144795262e789cb4e0fd569c198e72c56",
+      "parents": [
+        "76eda26aab00ffee22a6da2b249fd2e127719bf5"
+      ],
+      "author_time": "2026-09-21T10:32:15+03:00",
+      "committer_time": "2026-09-21T10:32:15+03:00",
+      "subject": "ci: make VF-11 contamination check reference-specific",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/vf11_geometry_feature_survival.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7d82baaeb43dec80b1ca2769790f7474781f0517",
+      "parents": [
+        "4e13bd3144795262e789cb4e0fd569c198e72c56"
+      ],
+      "author_time": "2026-09-21T10:35:15+03:00",
+      "committer_time": "2026-09-21T10:35:15+03:00",
+      "subject": "test: make tiny Stage37-46 fixture satisfy real minification contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d8b3b3e9aa76fbe755507ed483d0ffdc7f041edd",
+      "parents": [
+        "7d82baaeb43dec80b1ca2769790f7474781f0517"
+      ],
+      "author_time": "2026-09-21T10:36:10+03:00",
+      "committer_time": "2026-09-21T10:36:10+03:00",
+      "subject": "geometry: measure rest-existing intersection persistence severity",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/dynamic_geometry_integrity_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8e282c36ea6564fced55b673f305a786ef178eff",
+      "parents": [
+        "d8b3b3e9aa76fbe755507ed483d0ffdc7f041edd"
+      ],
+      "author_time": "2026-09-21T10:36:28+03:00",
+      "committer_time": "2026-09-21T10:36:28+03:00",
+      "subject": "motion: reject worsening rest-existing self intersections",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_dynamic_proof_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6e76d8093cc24562b818e38eaa98240a8ce913ff",
+      "parents": [
+        "8e282c36ea6564fced55b673f305a786ef178eff"
+      ],
+      "author_time": "2026-09-21T10:36:44+03:00",
+      "committer_time": "2026-09-21T10:36:44+03:00",
+      "subject": "test: attack rest-existing intersection severity growth",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_geometry_integrity_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ba44690d7e8eeb5a0e14edd82b5c88d340e63f1b",
+      "parents": [
+        "6e76d8093cc24562b818e38eaa98240a8ce913ff"
+      ],
+      "author_time": "2026-09-21T10:48:39+03:00",
+      "committer_time": "2026-09-21T10:48:39+03:00",
+      "subject": "test: freeze V2 contact claim to declared PLANT_2D scope",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "901ca12bb3258113fc8ea8fd3d3b26e99c7e726c",
+      "parents": [
+        "ba44690d7e8eeb5a0e14edd82b5c88d340e63f1b"
+      ],
+      "author_time": "2026-09-21T10:48:44+03:00",
+      "committer_time": "2026-09-21T10:48:44+03:00",
+      "subject": "authority: close VF-17 severity and VF-18 contact claim scope",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a7308378f59c411f441ecdd6c634ebf8c994e870",
+      "parents": [
+        "901ca12bb3258113fc8ea8fd3d3b26e99c7e726c"
+      ],
+      "author_time": "2026-09-21T10:50:01+03:00",
+      "committer_time": "2026-09-21T10:50:01+03:00",
+      "subject": "runtime: seal first-witness presentation capability boundary",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_package_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1fdb381609e457c74b43528e078d4f7313183fd0",
+      "parents": [
+        "a7308378f59c411f441ecdd6c634ebf8c994e870"
+      ],
+      "author_time": "2026-09-21T10:50:05+03:00",
+      "committer_time": "2026-09-21T10:50:05+03:00",
+      "subject": "runtime: native-enforce first-witness presentation exclusions",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c93a3cc91d6be49635b00fa524d9da11cc72865b",
+      "parents": [
+        "1fdb381609e457c74b43528e078d4f7313183fd0"
+      ],
+      "author_time": "2026-09-21T10:50:23+03:00",
+      "committer_time": "2026-09-21T10:50:23+03:00",
+      "subject": "test: reject unauthorized V2 presentation runtime capabilities",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_runtime_v2_native_smoke.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "31d1efdf05abb4b9a810d7d701fb99c6b41747ed",
+      "parents": [
+        "c93a3cc91d6be49635b00fa524d9da11cc72865b"
+      ],
+      "author_time": "2026-09-21T10:50:28+03:00",
+      "committer_time": "2026-09-21T10:50:28+03:00",
+      "subject": "test: freeze first-witness presentation capability exclusions",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_canonical_main_readiness_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cc4ecea2ff18d25543d1c3404e1719e4fd8d2326",
+      "parents": [
+        "31d1efdf05abb4b9a810d7d701fb99c6b41747ed"
+      ],
+      "author_time": "2026-09-21T10:50:45+03:00",
+      "committer_time": "2026-09-21T10:50:45+03:00",
+      "subject": "authority: append native runtime source extension V8",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V8_20260921.json"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c69561bc1ed4b963c55bee0ae101ebe7e1643fba",
+      "parents": [
+        "cc4ecea2ff18d25543d1c3404e1719e4fd8d2326"
+      ],
+      "author_time": "2026-09-21T10:51:18+03:00",
+      "committer_time": "2026-09-21T10:51:18+03:00",
+      "subject": "authority: verify native runtime source seal V8",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/verify_native_runtime_source_seal_v2.py"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "eebab92164de9a42b9c4c917d6f1f6fafd9c1014",
+      "parents": [
+        "c69561bc1ed4b963c55bee0ae101ebe7e1643fba"
+      ],
+      "author_time": "2026-09-21T10:51:23+03:00",
+      "committer_time": "2026-09-21T10:51:23+03:00",
+      "subject": "ci: bind native source gate through extension V8",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/native_runtime_source_gate.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e2b554729984c54f7bf6aa2705687a8735667512",
+      "parents": [
+        "eebab92164de9a42b9c4c917d6f1f6fafd9c1014"
+      ],
+      "author_time": "2026-09-21T10:51:33+03:00",
+      "committer_time": "2026-09-21T10:51:33+03:00",
+      "subject": "authority: close VF-20 by native-enforced first-witness scope",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d376237b434801276a37c9d7d0d0a32ad67bd853",
+      "parents": [
+        "e2b554729984c54f7bf6aa2705687a8735667512"
+      ],
+      "author_time": "2026-09-21T10:55:05+03:00",
+      "committer_time": "2026-09-21T10:55:05+03:00",
+      "subject": "authority: seal VF-11 R256 feature-survival falsification",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_CALIBRATION_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f4562168e54997120299d8492e094d71a3ba271b",
+      "parents": [
+        "d376237b434801276a37c9d7d0d0a32ad67bd853"
+      ],
+      "author_time": "2026-09-21T10:55:35+03:00",
+      "committer_time": "2026-09-21T10:55:35+03:00",
+      "subject": "research: parameterize VF-11 physical-feature resolution sweep",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/vf11_geometry_feature_survival_panel.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "84d4e3d3282d2d8f03e04e0c3d73cb677dab6cf9",
+      "parents": [
+        "f4562168e54997120299d8492e094d71a3ba271b"
+      ],
+      "author_time": "2026-09-21T10:56:36+03:00",
+      "committer_time": "2026-09-21T10:56:36+03:00",
+      "subject": "ci: reproduce VF-11 R256 under frozen Stage13 profile",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/vf11_geometry_feature_survival.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "781468771ede3f1d329e5cae8b2524fb237b186a",
+      "parents": [
+        "84d4e3d3282d2d8f03e04e0c3d73cb677dab6cf9"
+      ],
+      "author_time": "2026-09-21T10:56:39+03:00",
+      "committer_time": "2026-09-21T10:56:39+03:00",
+      "subject": "ci: run VF-11 same-physical-feature R384 requery sweep",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/vf11_geometry_feature_survival_r384.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1761c174203fe6d3aeb1f29c668fbb1d69a44862",
+      "parents": [
+        "781468771ede3f1d329e5cae8b2524fb237b186a"
+      ],
+      "author_time": "2026-09-21T10:58:30+03:00",
+      "committer_time": "2026-09-21T10:58:30+03:00",
+      "subject": "authority: record VF-11 R256 falsification and R384 requery",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "25be222435e418916c3cadb2a7c8b04884be3738",
+      "parents": [
+        "1761c174203fe6d3aeb1f29c668fbb1d69a44862"
+      ],
+      "author_time": "2026-09-21T11:00:29+03:00",
+      "committer_time": "2026-09-21T11:00:29+03:00",
+      "subject": "visibility: seal float64 depth-equivalence semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/visibility_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "46196a5d9308567f4016b5cd40fc72787b6ecdeb",
+      "parents": [
+        "25be222435e418916c3cadb2a7c8b04884be3738"
+      ],
+      "author_time": "2026-09-21T11:00:33+03:00",
+      "committer_time": "2026-09-21T11:00:33+03:00",
+      "subject": "test: bracket V2 depth-equivalence epsilon",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c93d9e0f918f3aaae1b02ed9aa17c212e61eb1bd",
+      "parents": [
+        "46196a5d9308567f4016b5cd40fc72787b6ecdeb"
+      ],
+      "author_time": "2026-09-21T11:00:54+03:00",
+      "committer_time": "2026-09-21T11:00:54+03:00",
+      "subject": "runtime: seal float64 depth-equivalence contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_package_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "487730bda6bd5fc375c979d5075ca801bd7985c9",
+      "parents": [
+        "c93d9e0f918f3aaae1b02ed9aa17c212e61eb1bd"
+      ],
+      "author_time": "2026-09-21T11:00:58+03:00",
+      "committer_time": "2026-09-21T11:00:58+03:00",
+      "subject": "runtime: native-enforce float64 depth-equivalence contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fd7c46ce4725e070a428c670623a07fcdcc15eec",
+      "parents": [
+        "487730bda6bd5fc375c979d5075ca801bd7985c9"
+      ],
+      "author_time": "2026-09-21T11:01:21+03:00",
+      "committer_time": "2026-09-21T11:01:21+03:00",
+      "subject": "test: adversarially seal V2 depth-equivalence semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_runtime_v2_native_smoke.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b69c01fb3743af8092be4bf49f9a79c2a9514855",
+      "parents": [
+        "fd7c46ce4725e070a428c670623a07fcdcc15eec"
+      ],
+      "author_time": "2026-09-21T11:01:38+03:00",
+      "committer_time": "2026-09-21T11:01:38+03:00",
+      "subject": "authority: append native runtime source extension V9",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V9_20260921.json"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f1644464117fe670f70237d595e66a4ecc419dc6",
+      "parents": [
+        "b69c01fb3743af8092be4bf49f9a79c2a9514855"
+      ],
+      "author_time": "2026-09-21T11:01:58+03:00",
+      "committer_time": "2026-09-21T11:01:58+03:00",
+      "subject": "authority: verify native runtime source seal V9",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/verify_native_runtime_source_seal_v2.py"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e1a92eb3f477fcb917be946ea476471cd0f55c87",
+      "parents": [
+        "f1644464117fe670f70237d595e66a4ecc419dc6"
+      ],
+      "author_time": "2026-09-21T11:02:03+03:00",
+      "committer_time": "2026-09-21T11:02:03+03:00",
+      "subject": "ci: bind native source gate through extension V9",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/native_runtime_source_gate.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "11f773aee5543e774ff61aaf5892ee3111ba0923",
+      "parents": [
+        "e1a92eb3f477fcb917be946ea476471cd0f55c87"
+      ],
+      "author_time": "2026-09-21T11:02:27+03:00",
+      "committer_time": "2026-09-21T11:02:27+03:00",
+      "subject": "authority: freeze VF-09 float64 depth-equivalence semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/VF09_DEPTH_EQUIVALENCE_AUTHORITY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ae5c6003e1cd96072a8bb3b880282974ff1ea755",
+      "parents": [
+        "11f773aee5543e774ff61aaf5892ee3111ba0923"
+      ],
+      "author_time": "2026-09-21T11:02:40+03:00",
+      "committer_time": "2026-09-21T11:02:40+03:00",
+      "subject": "authority: close VF-09 depth-equivalence ambiguity scope",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "60cde736ee5caa39d3ce591584dd554d2f284e61",
+      "parents": [
+        "ae5c6003e1cd96072a8bb3b880282974ff1ea755"
+      ],
+      "author_time": "2026-09-21T11:04:49+03:00",
+      "committer_time": "2026-09-21T11:04:49+03:00",
+      "subject": "appearance: measure adjacent-direction transition curvature",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_quality_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "39fcae303af8008c986c2c03c40276e27f237895",
+      "parents": [
+        "60cde736ee5caa39d3ce591584dd554d2f284e61"
+      ],
+      "author_time": "2026-09-21T11:05:13+03:00",
+      "committer_time": "2026-09-21T11:05:13+03:00",
+      "subject": "test: attack adjacent-direction shimmer independently of RGB equality",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_caa_v2_subject_free_policy.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bc292e921d54f1be9928764765eb9b73569e8081",
+      "parents": [
+        "39fcae303af8008c986c2c03c40276e27f237895"
+      ],
+      "author_time": "2026-09-21T11:07:08+03:00",
+      "committer_time": "2026-09-21T11:07:08+03:00",
+      "subject": "research: add subject-free VF-10 transition calibration",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/vf10_direction_transition_calibration.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1e9e822cd08eaf1abf4fc89d902bb1388b8b1ecf",
+      "parents": [
+        "bc292e921d54f1be9928764765eb9b73569e8081"
+      ],
+      "author_time": "2026-09-21T11:07:26+03:00",
+      "committer_time": "2026-09-21T11:07:26+03:00",
+      "subject": "ci: calibrate VF-10 adjacent-direction transition gate",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/vf10_direction_transition_calibration.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4c56d520023bc9cc1df1f2a92507fd52c75810ca",
+      "parents": [
+        "1e9e822cd08eaf1abf4fc89d902bb1388b8b1ecf"
+      ],
+      "author_time": "2026-09-21T11:13:01+03:00",
+      "committer_time": "2026-09-21T11:13:01+03:00",
+      "subject": "presentation: make rigid classification require LBS no-op proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

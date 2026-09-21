@@ -4,9 +4,9 @@
 > Bootstrap: `BOOTSTRAP_AUDIT_CLOSED`
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
-- Census artifacts in declared scope: **513 / 513 discovered (100%)**
+- Census artifacts in declared scope: **516 / 516 discovered (100%)**
 - Semantically reconciled: **55**
-- Catalogued but unreviewed: **458**
+- Catalogued but unreviewed: **461**
 - Semantic coverage: **10.7%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
@@ -387,11 +387,17 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 
 - `KA-417397CA092A` `AUTHORITY_DECISION` — `main` :: `canonical/STAGE14_SUBSTRATE_ADEQUACY_CALIBRATION_AUTHORITY_V2_20260920.json` @ blob `d20f4ab602f7`
 
-### 2026-09-21 :: COMPILER (3)
+### 2026-09-21 :: COMPILER (5)
 
 - `KA-218AD4A05035` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V5_20260921.json` @ blob `cf70e8986d09`
 - `KA-C41F4F6E4D4C` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V6_20260921.json` @ blob `96252588d57c`
 - `KA-61AD2E4922B9` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V7_20260921.json` @ blob `630e66e1d06a`
+- `KA-772E3BDDCF56` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V8_20260921.json` @ blob `74a015df6899`
+- `KA-FAA73E4F13E5` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V9_20260921.json` @ blob `5aca262f0f0b`
+
+### 2026-09-21 :: IRIS (1)
+
+- `KA-BADDA90A1DA5` `AUTHORITY_DECISION` — `main` :: `canonical/VF09_DEPTH_EQUIVALENCE_AUTHORITY_V1_20260921.json` @ blob `8bf90effb763`
 
 ### UNKNOWN_DATE :: ARACHNE_SKIN (10)
 
@@ -493,7 +499,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D2D319509ACF` `WORKFLOW` — `main` :: `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` @ blob `16bf42a72ecc`
 - `KA-03510A41D0D4` `WORKFLOW` — `main` :: `.github/workflows/prefit_observation_authority_v1.yml` @ blob `b04004000018`
 - `KA-FDE35053B8A7` `WORKFLOW` — `main` :: `.github/workflows/single_family_data_contract_v1.yml` @ blob `929df12d859e`
-- `KA-7C6B93F049B1` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `9d8c95be4503`
+- `KA-93C47B9C20E9` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `66eaeaa91a2b`
 - `KA-25BB7CDC0AB9` `AUTHORITY_DECISION` — `main` :: `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` @ blob `6b5fff12a484`
 - `KA-DC74ABB19F22` `PREREG` — `main` :: `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` @ blob `c01e1a65f75e`
 - `KA-E1571E78A4A5` `PREREG` — `main` :: `canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md` @ blob `36aef9ae6ecd`

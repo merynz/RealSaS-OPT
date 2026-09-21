@@ -14,6 +14,7 @@ from typing import Any, Mapping
 import numpy as np
 
 from .canonical_puppet_state_v1 import canonical_puppet_state_hash
+from .dynamic_geometry_integrity_v2 import nonadjacent_intersection_pairs
 from .hashing import content_sha256
 from .joint_frames_v1 import derive_joint_frames_from_skeleton, frame_set_hash
 from .mesh.product_coverage_v1 import rasterize_visible_face_pixel_counts
@@ -58,6 +59,8 @@ class CanonicalDynamicFrameV2IR:
     min_triangle_area_ratio:float
     max_triangle_area_ratio:float
     max_triangle_condition_number:float
+    total_self_intersection_pair_count:int
+    new_self_intersection_pair_count:int
     frame_hash:str
     schema_version:str="RealSaS.CanonicalDynamicFrameIR.v2"
     metadata:Json=field(default_factory=dict)
@@ -245,6 +248,8 @@ def _frame_from_dict(payload:Mapping[str,Any])->CanonicalDynamicFrameV2IR:
         min_triangle_area_ratio=float(payload["min_triangle_area_ratio"]),
         max_triangle_area_ratio=float(payload["max_triangle_area_ratio"]),
         max_triangle_condition_number=float(payload["max_triangle_condition_number"]),
+        total_self_intersection_pair_count=int(payload["total_self_intersection_pair_count"]),
+        new_self_intersection_pair_count=int(payload["new_self_intersection_pair_count"]),
         frame_hash=str(payload["frame_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.CanonicalDynamicFrameIR.v2"),
         metadata=dict(payload.get("metadata") or {}),
@@ -526,6 +531,20 @@ def build_qualified_dynamic_motion_v2(
     if not np.isfinite(rest).all():
         raise QualificationError("MOTION_V2_DYNAMIC_REST_NONFINITE")
 
+    vertex_index={vid:i for i,vid in enumerate(vids)}
+    face_indices=np.asarray(
+        [[vertex_index[str(vertex_id)] for vertex_id in face] for face in mesh.faces],
+        dtype=np.int64,
+    )
+    intersection_tolerance=1.0e-8*max(1.0,_scale(skeleton))
+    rest_intersection_pairs=set(
+        nonadjacent_intersection_pairs(
+            vertices=rest,
+            faces=face_indices,
+            tolerance=intersection_tolerance,
+        )
+    )
+
     rest_observed_faces=set()
     for camera in cameras:
         counts=rasterize_visible_face_pixel_counts(
@@ -573,6 +592,19 @@ def build_qualified_dynamic_motion_v2(
             max_disp=float(displacement.max(initial=0.0))
             clip_max=max(clip_max,max_disp)
             min_area,max_area,max_condition=_frame_metrics(mesh,rest,posed,mesh_policy)
+            frame_intersection_pairs=set(
+                nonadjacent_intersection_pairs(
+                    vertices=posed,
+                    faces=face_indices,
+                    tolerance=intersection_tolerance,
+                )
+            )
+            new_intersections=frame_intersection_pairs-rest_intersection_pairs
+            if new_intersections:
+                raise QualificationError(
+                    "MOTION_V2_DYNAMIC_NEW_SELF_INTERSECTION:"
+                    + str(len(new_intersections))
+                )
 
             frame=CanonicalDynamicFrameV2IR(
                 time_seconds=float(time_seconds),
@@ -588,12 +620,17 @@ def build_qualified_dynamic_motion_v2(
                 min_triangle_area_ratio=float(min_area),
                 max_triangle_area_ratio=float(max_area),
                 max_triangle_condition_number=float(max_condition),
+                total_self_intersection_pair_count=int(len(frame_intersection_pairs)),
+                new_self_intersection_pair_count=0,
                 frame_hash="",
                 metadata={
                     "canonical_3d_authority":True,
                     "view_projection_performed":False,
                     "motion_input":"LOCAL_QUATERNION_V2",
                     "derived_joint_frame_set_hash":rest_frame_hash,
+                    "rest_self_intersection_pair_count":int(len(rest_intersection_pairs)),
+                    "self_intersection_tolerance":float(intersection_tolerance),
+                    "new_self_intersection_pair_count":0,
                 },
             )
             frame=replace(frame,frame_hash=canonical_dynamic_frame_v2_hash(frame))
@@ -706,6 +743,8 @@ def build_qualified_dynamic_motion_v2(
             "view_specific_motion_mesh_truth":False,
             "all_contacts_satisfied":True,
             "all_sampled_frames_conditioned":True,
+            "all_sampled_frames_new_self_intersection_free":True,
+            "rest_self_intersection_pair_count":int(len(rest_intersection_pairs)),
             "rest_unseen_dynamic_exposure_gate_removed":True,
             "rest_unseen_source_face_count":int(len(truly_unseen_faces)),
             "rest_unseen_dynamic_exposed_pixel_count":int(total_rest_unseen_exposed_pixels),

@@ -34,6 +34,9 @@ from compiler.realsas_compiler_core.appearance_bake_v2 import (
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     compile_deterministic_caa,
 )
+from compiler.realsas_compiler_core.appearance_color_v2 import (
+    source_sample_roundtrip_pm_error,
+)
 from compiler.realsas_compiler_core.appearance_quality_v2 import (
     cross_view_source_compatibility_metrics,
     provenance_boundary_metrics,
@@ -697,6 +700,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         "max_provenance_boundary_p95_rgba_l1",
         "max_provenance_boundary_mean_gradient_jump",
         "max_provenance_boundary_p95_gradient_jump",
+        "max_source_sample_pm_roundtrip_abs_error",
     )
     if any(key not in policy for key in required):
         raise QualificationError("CAA_QUALITY_POLICY_INCOMPLETE")
@@ -722,6 +726,20 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         direct_valid=arrays["direct_valid"],
         direct_rgba=arrays["direct_rgba"],
         sample_component_index=arrays["sample_component_index"],
+    )
+
+    direct_pm_roundtrip = source_sample_roundtrip_pm_error(
+        arrays["direct_rgba"][direct],
+        arrays["direct_pm_linear"][direct],
+    )
+    max_source_pm_roundtrip_error = (
+        0.0
+        if len(direct_pm_roundtrip) == 0
+        else float(np.max(direct_pm_roundtrip))
+    )
+    source_pm_roundtrip_passed = (
+        max_source_pm_roundtrip_error
+        <= float(policy["max_source_sample_pm_roundtrip_abs_error"])
     )
 
     holdout_per_view_passed = (
@@ -774,6 +792,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         and float(seam["p95_gradient_jump"])
         <= float(policy["max_provenance_boundary_p95_gradient_jump"])
         and seam_per_view_passed
+        and source_pm_roundtrip_passed
     )
 
     value = CompleteAppearanceQualificationIR(
@@ -820,6 +839,8 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "seam_every_view_passed": seam_per_view_passed,
             "cross_view_source_compatibility_measured": True,
             "cross_view_source_compatibility_shipping_gate_frozen": False,
+            "source_pm_roundtrip_max_abs_error": max_source_pm_roundtrip_error,
+            "source_pm_roundtrip_passed": source_pm_roundtrip_passed,
             "appearance_is_coequal_product_authority": True,
         },
         qualification_hash="",
@@ -827,6 +848,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "holdout": holdout,
             "seam": seam,
             "cross_view_source_compatibility": cross_view,
+            "source_pm_roundtrip_max_abs_error": max_source_pm_roundtrip_error,
             "policy": policy,
             "totality_does_not_claim_geometry_or_visibility_correctness": True,
         },

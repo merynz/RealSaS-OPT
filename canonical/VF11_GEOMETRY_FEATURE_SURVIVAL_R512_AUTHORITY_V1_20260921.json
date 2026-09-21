@@ -1,0 +1,123 @@
+{
+  "schema": "RealSaS.VF11GeometryFeatureSurvivalR512Authority.v1",
+  "status": "RESULT__R512_PARTIAL_ONLY__UNIFORM_RESOLUTION_ESCALATION_PAUSED__PHASE_EXTRACTION_DIAGNOSIS_AUTHORIZED",
+  "date_utc": "2026-09-21",
+  "authority": "SUBJECT_FREE_SAME_PHYSICAL_FEATURE_R512__NO_KNIGHT_OR_MAGE_INPUT",
+  "parent_authority": "canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R384_AUTHORITY_V1_20260921.json",
+  "measurement": {
+    "workflow_run_id": 35582186308,
+    "workflow_job_id": 106277364679,
+    "source_commit": "a98beed3669b10ced062be3aea04622597a5d89f",
+    "artifact_id": 10631254660,
+    "artifact_zip_sha256": "a6e7ad98f564c66d12bee027c3750a9b7dfca92e51313fe9712ebbcbf6ea8475",
+    "result_json_sha256": "475b603bfce7cfc4a84037df8a45a05fa2b6056339d61779f307f697cd74bd68",
+    "result_json_bytes": 169136,
+    "decoder_resolution": 512,
+    "reference_decoder_resolution": 256,
+    "raster_resolution": 1024,
+    "case_count": 20,
+    "frozen_profile_pass_case_count": 4,
+    "frozen_profile_fail_case_count": 16,
+    "all_pass_cases_family": "THIN_BLADE",
+    "physical_widths_held_fixed": true,
+    "threshold_relaxation_used": false,
+    "subject_inputs_used": false
+  },
+  "decisive_results": {
+    "THIN_BLADE": {
+      "profile_pass_count": 4,
+      "width_0_75": {
+        "component_recall": 0.999916142557652,
+        "feature_recall": 0.9956896551724138
+      },
+      "width_1_0": {
+        "component_recall": 0.9998933609579232,
+        "feature_recall": 0.9935344827586207
+      },
+      "width_1_5": {
+        "component_recall": 0.9998859332937902,
+        "feature_recall": 0.9949712643678161
+      },
+      "width_2_0": {
+        "component_recall": 0.9998633464925599,
+        "feature_recall": 0.9946120689655172
+      }
+    },
+    "SMALL_COMPONENT": {
+      "profile_pass_count": 0,
+      "width_0_75": {
+        "component_recall": 0.2222222222222222
+      },
+      "width_1_0": {
+        "component_recall": 0.5833333333333334
+      },
+      "width_1_5": {
+        "component_recall": 0.8125
+      },
+      "width_2_0": {
+        "component_recall": 0.8125
+      },
+      "note": "Aggregate silhouette recall is ~0.9998 while the detached feature itself remains badly incomplete."
+    },
+    "THIN_STRAP": {
+      "profile_pass_count": 0,
+      "width_0_75": {
+        "component_recall": 0.9978260869565218,
+        "largest_coherent_hole_fraction": 0.0005434782608695652
+      },
+      "width_1_0": {
+        "component_recall": 0.9864864864864865,
+        "largest_coherent_hole_fraction": 0.006756756756756757
+      },
+      "width_1_5": {
+        "component_recall": 0.9866666666666667,
+        "largest_coherent_hole_fraction": 0.006666666666666667
+      },
+      "width_2_0": {
+        "component_recall": 0.9866666666666667,
+        "largest_coherent_hole_fraction": 0.006666666666666667
+      },
+      "note": "Non-monotonic width response and near-stationary R256/R384/R512 recall at 2.0 reference voxels indicate an extraction/phase ceiling rather than simple sample scarcity."
+    },
+    "FORK_GAP": {
+      "profile_pass_count": 0,
+      "width_2_0": {
+        "recall": 0.9928787217553363,
+        "gap_preservation": 0.9993573264781491,
+        "largest_coherent_hole_fraction": 0.002807995286078842
+      }
+    },
+    "CONCAVE_NOTCH": {
+      "profile_pass_count": 0,
+      "width_2_0": {
+        "recall": 0.9972893707785283,
+        "gap_preservation": 1,
+        "largest_coherent_hole_fraction": 0.0026328652683967296
+      }
+    }
+  },
+  "interpretation": {
+    "r512_is_general_decoder_floor": false,
+    "r512_recovers_thin_blade_family": true,
+    "sparse_component_failure_remains": true,
+    "connected_sharp_feature_failure_remains": true,
+    "negative_space_topology_is_mostly_recovered_but_full_profile_still_fails": true,
+    "uniform_resolution_escalation_to_r768_or_r1024_authorized": false,
+    "reason": "Resolution response is family-dependent and materially non-monotonic; the next causal question is lattice phase/extraction representation, not a looser threshold or another blind uniform resolution rung."
+  },
+  "next_experiment": {
+    "id": "VF11_X1_R512_PHASE_BANK",
+    "resolution": 512,
+    "selected_cases": [
+      "THIN_STRAP@2.0_REFERENCE_VOXELS",
+      "SMALL_COMPONENT@2.0_REFERENCE_VOXELS",
+      "FORK_GAP@2.0_REFERENCE_VOXELS",
+      "CONCAVE_NOTCH@2.0_REFERENCE_VOXELS"
+    ],
+    "phase_bank": "2x2x2 offsets per XYZ axis: {0, +0.5 decoder voxel}; eight deterministic grids",
+    "physical_geometry_held_fixed": true,
+    "frozen_stage13_profile_held_fixed": true,
+    "decision_rule": "If no phase closes a selected family, multiphase candidate selection is insufficient for that family and sharp-feature-preserving extraction/adaptive representation must be investigated before any higher uniform resolution.",
+    "knight_witness_forbidden": true
+  }
+}

@@ -331,6 +331,15 @@
       "required_closure": "Make donor quality ranking explicit, support-ranked and independently adversarially tested. Circular direction order may remain only as deterministic tie behavior.",
       "status": "REPAIRED__CAMERA_SUPPORT_RANKED_DONOR__CI_PENDING",
       "repair": "compile_deterministic_caa now delegates donor selection to select_other_view_donor_by_support. The primary score is absolute face-normal/camera-forward support; a strictly higher support wins regardless of circular distance. A subject-free adversary makes nearest V1 score 0.20 and far V4 score 0.90 and requires V4; equal-score control preserves deterministic tie order only."
+    },
+    {
+      "id": "VF-38",
+      "severity": "HIGH",
+      "owner": "CAA atlas lineage mapping",
+      "finding": "RGBA/coarse-provenance atlas bake and exact source_view donor-lineage bake independently duplicated the face-lattice/bleed texel mapping loop. The two implementations were equivalent today, but future drift in only one loop could attach correct donor identities to the wrong transport texels while color/provenance rendering still appeared valid.",
+      "required_closure": "Use one canonical face-atlas texel-to-lattice mapping primitive for RGBA, coarse provenance and donor-view lineage; add an adversarial identity-encoding test proving all three land on exactly the same allocated atlas texels and share identical padding.",
+      "repair": "appearance_bake_v2 now exposes one _iter_face_atlas_lattice_samples mapping consumed by both bake_direction_atlas and bake_direction_source_view_atlas. The regression encodes the same face/sample identity independently into RGBA, coarse provenance and source_view and reconstructs identity from every allocated texel; any mapping divergence or padding mismatch fails.",
+      "status": "REPAIRED__SINGLE_ATLAS_MAPPING_PRIMITIVE__EXACT_HEAD_CI_PENDING"
     }
   ],
   "false_or_overstated_external_findings": [

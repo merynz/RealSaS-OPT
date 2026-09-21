@@ -28,6 +28,8 @@ class ReferenceCAARender:
     exact_depth_ambiguity: np.ndarray
     layer_overflow: np.ndarray
     contributing_layer_count: np.ndarray
+    contributing_layer_mask: np.ndarray
+    layer_owner_face_index: np.ndarray
     provenance_code: np.ndarray
     visibility_contract_hash: str = VISIBILITY_CONTRACT_V2_HASH
 
@@ -99,6 +101,10 @@ def render_caa_reference(
     risk = np.zeros((height, width), dtype=np.uint8)
     has_contribution = np.zeros((height, width), dtype=bool)
     contribution_count = np.zeros((height, width), dtype=np.uint8)
+    contribution_mask = np.zeros(
+        (height, width, visibility.layer_owner_face_index.shape[2]),
+        dtype=bool,
+    )
     layer_owner = visibility.layer_owner_face_index
     layer_bary = visibility.layer_barycentric
     layer_count = layer_owner.shape[2]
@@ -139,6 +145,7 @@ def render_caa_reference(
                 255,
                 contribution_count[cy, cx].astype(np.uint16) + 1,
             ).astype(np.uint8)
+            contribution_mask[cy, cx, layer] = True
 
     provenance = np.full((height, width), 255, dtype=np.uint8)
     provenance[has_contribution] = risk[has_contribution]
@@ -168,6 +175,8 @@ def render_caa_reference(
         exact_depth_ambiguity=exact_depth_ambiguity,
         layer_overflow=visibility.layer_overflow.copy(),
         contributing_layer_count=contribution_count,
+        contributing_layer_mask=contribution_mask,
+        layer_owner_face_index=layer_owner.copy(),
         provenance_code=provenance,
     )
 

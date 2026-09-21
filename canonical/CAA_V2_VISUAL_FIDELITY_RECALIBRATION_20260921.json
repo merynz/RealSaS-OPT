@@ -313,6 +313,15 @@
       "finding": "The native runtime source-gate push paths did not include the verifier script itself or the new extension seal, and the pull-request path set omitted older extension seals V3/V4. In addition, subtree-set drift had hidden three changed sealed blobs plus two unsealed runtime blobs behind the first failure.",
       "repair": "Append-only source extension V5 seals the exact current 25-file runtime/realsas_cpp subtree (3 replacements, 2 additions) without mutating historical seals. The verifier consumes V5 as closure authority, and push/PR triggers now include the verifier plus the full extension chain V1-V5.",
       "status": "REPAIRED__EXACT_SOURCE_GATE_CI_PENDING"
+    },
+    {
+      "id": "VF-36",
+      "severity": "HIGH",
+      "owner": "CAA provenance / runtime lineage",
+      "finding": "Stage21 compile retained exact source_view donor identity, but historical Stage23/RSS V2 preserved only coarse provenance class. Different OTHER_VIEW_SOURCE donors could therefore become indistinguishable after bake/package even though compile-time seam evidence had consumed donor identity.",
+      "required_closure": "Preserve exact donor/source-view identity through bake, asset seal, RSS and native parse without allowing it to influence RGB, geometry visibility, depth ordering or presentation. Mixed bilinear donor footprints must remain explicitly mixed rather than inventing one donor.",
+      "status": "REPAIRED__PER_TEXEL_SOURCE_VIEW_LINEAGE__V11_NATIVE_CI_PENDING",
+      "repair": "Stage23 now bakes exact int16 source_view lineage with the same lattice/bleed map as appearance. Stage37 fails closed on missing or inconsistent lineage. RSS V2 stores coarse provenance u8 plus exact source_view int16 and seals source_view_identity_render_authority=0. Native V2 reports unanimous donor IDs, -2 harmonic, or -3 mixed footprint diagnostics. An adversary rewrites donor IDs while requiring RGBA, coarse provenance and owner bytes to remain byte-identical. V11 append-only native source authority seals the implementation."
     }
   ],
   "false_or_overstated_external_findings": [

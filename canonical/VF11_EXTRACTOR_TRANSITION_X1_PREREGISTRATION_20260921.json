@@ -1,0 +1,45 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX1Preregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__KNIGHT_LOCAL_NARROW_BAND_REFERENCE_BAKEOFF",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "parent_x0_commit": "4b3247e018a40509613aefad65d0c8009d8565bf",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "subject_scope": "Frozen Knight field only; 12 corrected C1-primary regular d8 root cells. This is local research evidence, not a full Knight witness or product pass.",
+  "frozen_inputs": {
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "scene_planes_sha256": "364f4769f1ffb04362669c1fe04b9b6c8f3afe3308bf4b7cede038d9e8226d28",
+    "c1_fixed_profile_sha256": "800bb7cb3e82f2b1eeafa41fb83c843939e91ca53fb349125481731a09d927e2"
+  },
+  "root_selection": "exact 12 records with primary_handoff=true and c1_v2_state!=UNKNOWN from the corrected C1 V2 profile",
+  "local_uniform_depths": [11, 12, 13],
+  "per_root_corner_grid_resolution": {
+    "d11": 9,
+    "d12": 17,
+    "d13": 33
+  },
+  "contourers": [
+    "skimage Lewiner marching cubes",
+    "fixed-Freudenthal marching tetrahedra X0"
+  ],
+  "metrics": [
+    "surface-present root count at each depth/contourer",
+    "vertices/faces and active-cube count",
+    "direct float64 field residual at emitted vertices",
+    "autograd gradient-norm-normalized residual |f|/max(||grad f||,1e-8)",
+    "connected component count",
+    "duplicate/degenerate triangle count",
+    "MC-vs-MTet same-depth symmetric point-cloud distance",
+    "d11/d12 convergence toward d13 local MC reference as a diagnostic only"
+  ],
+  "reference_boundary": "d13 local MC is an approximation reference only, never truth or certificate.",
+  "interpretation": {
+    "DEPTH_DOMINANT": "normalized residual and local reference discrepancy improve strongly with depth while MC-vs-MTet differences remain smaller than the depth effect",
+    "CONTOURER_MATERIAL": "same-depth MC-vs-MTet discrepancy or direct residual difference is comparable to or larger than the d11->d12 depth effect on multiple surface-present roots",
+    "LOCAL_SAMPLING_INSUFFICIENT": "d13 still has large direct normalized residual or unstable surface presence/components"
+  },
+  "claim_boundary": "X1 chooses the next engineering emphasis only. It cannot promote a product extractor, claim full-domain coverage, or replace VF11/Stage13 source-fidelity gates."
+}

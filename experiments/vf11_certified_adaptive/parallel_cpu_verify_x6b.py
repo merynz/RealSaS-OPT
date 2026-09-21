@@ -10,6 +10,7 @@ CUDA context in the parent process is never inherited through fork.
 """
 
 from collections import Counter
+from contextlib import nullcontext
 import multiprocessing as mp
 import time
 
@@ -163,6 +164,7 @@ def screen_verify_single_regime_roots_parallel_cpu(
     cpu_torch_threads_per_worker: int = 1,
     cpu_start_method: str = "spawn",
     store_terminals: bool = True,
+    cpu_verifier: ParallelCPUVerifier | None = None,
 ) -> X6Result:
     if max_micro_depth < 0:
         raise ValueError("NEGATIVE_MICRO_DEPTH")
@@ -194,14 +196,19 @@ def screen_verify_single_regime_roots_parallel_cpu(
     cpu_seconds = 0.0
     overhead_seconds = 0.0
 
-    with ParallelCPUVerifier(
-        cpu_p,
-        cpu_planes,
-        workers=cpu_workers,
-        node_batch_size=cpu_verify_batch_size,
-        torch_threads_per_worker=cpu_torch_threads_per_worker,
-        start_method=cpu_start_method,
-    ) as verifier:
+    verifier_context = (
+        nullcontext(cpu_verifier)
+        if cpu_verifier is not None
+        else ParallelCPUVerifier(
+            cpu_p,
+            cpu_planes,
+            workers=cpu_workers,
+            node_batch_size=cpu_verify_batch_size,
+            torch_threads_per_worker=cpu_torch_threads_per_worker,
+            start_method=cpu_start_method,
+        )
+    )
+    with verifier_context as verifier:
         for depth in range(max_micro_depth + 1):
             t0 = time.perf_counter()
             s_lo, s_hi = _bound_batch_chunked_prepared(

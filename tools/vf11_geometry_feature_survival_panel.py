@@ -165,7 +165,10 @@ def _box_sdf(
         + np.maximum(qy, 0.0) ** 2
         + np.maximum(qz, 0.0) ** 2
     )
-    inside = np.minimum(np.maximum.reduce((qx, qy, qz)), 0.0)
+    inside = np.minimum(
+        np.maximum(np.maximum(qx, qy), qz),
+        0.0,
+    )
     return (outside + inside).astype(np.float32)
 
 

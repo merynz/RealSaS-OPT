@@ -13,21 +13,27 @@
       "severity": "HIGH",
       "owner": "CAA sampling",
       "finding": "Fixed tile_resolution=8 was selected from atlas capacity, not source-frequency or projected-texel-density preservation.",
-      "required_closure": "Subject-free projected footprint / high-frequency line-art survival calibration; select fixed/adaptive tile policy from art-quality evidence."
+      "required_closure": "Subject-free projected footprint / high-frequency line-art survival calibration; select fixed/adaptive tile policy from art-quality evidence.",
+      "status": "REPAIRED__PROJECTED_DENSITY_GATE__CI_PENDING",
+      "repair": "Tile resolution is now resolved from the worst visible source-projection barycentric singular scale under an explicit <=1 source-pixel/atlas-texel limit and atlas-capacity gate; fixed tile=8 is no longer authority."
     },
     {
       "id": "VF-02",
       "severity": "HIGH",
       "owner": "CAA completion",
       "finding": "COMPILED_NEAREST_SURFACE and COMPILED_GLOBAL_SURFACE are cKDTree nearest-sample color propagation, not structure-aware inpainting.",
-      "required_closure": "Replace shipping completion with source-constrained surface completion for bounded gaps; forbid visible global fill; fail/abstain on unsupported large regions."
+      "required_closure": "Replace shipping completion with source-constrained surface completion for bounded gaps; forbid visible global fill; fail/abstain on unsupported large regions.",
+      "status": "REPAIRED__BOUNDED_SURFACE_HARMONIC__CI_PENDING",
+      "repair": "Global/Euclidean nearest propagation was replaced by component-bounded canonical-surface harmonic completion with a frozen 16-sample/2-hop region cap and fail-closed no-boundary behavior."
     },
     {
       "id": "VF-03",
       "severity": "HIGH",
       "owner": "CAA source compatibility",
       "finding": "The same canonical surface locus can be directly observed in multiple views without an explicit cross-view appearance compatibility authority.",
-      "required_closure": "Add adjacent-view/component alpha contradiction and source-conditioned premultiplied color/edge compatibility evidence without requiring naive RGB equality."
+      "required_closure": "Add adjacent-view/component alpha contradiction and source-conditioned premultiplied color/edge compatibility evidence without requiring naive RGB equality.",
+      "status": "REPAIRED__CROSS_VIEW_SHIPPING_GATE__CI_PENDING",
+      "repair": "Stage24 now computes adjacent-view same-canonical compatibility per pair and per component and includes the frozen compatibility predicate in shipping PASS."
     },
     {
       "id": "VF-04",
@@ -41,7 +47,9 @@
       "severity": "HIGH",
       "owner": "Runtime sampling",
       "finding": "Native CAA runtime uses premultiplied bilinear sampling only; no mip/minification or anisotropic sampling authority exists.",
-      "required_closure": "Add subject-free screen-space minification/shimmer controls and a qualified filtering/LOD contract shared by reference and native runtimes."
+      "required_closure": "Add subject-free screen-space minification/shimmer controls and a qualified filtering/LOD contract shared by reference and native runtimes.",
+      "status": "REPAIRED__BILINEAR_NON_MINIFYING_AUTHORITY__CI_PENDING",
+      "repair": "Until mip/aniso exists, rest and dynamic proofs now hard-reject any contributing face whose screen-to-atlas Jacobian exceeds 1 texel per output pixel in any principal direction."
     },
     {
       "id": "VF-06",
@@ -109,7 +117,9 @@
       "severity": "HIGH",
       "owner": "Dynamic calibration",
       "finding": "Current dynamic appearance calibration contains affine stretch controls but no articulated LBS shoulder/elbow/hip bend cases; absolute UV-to-surface condition ceiling 32 is outside the selected relative candidate ladder.",
-      "required_closure": "Add subject-free articulated LBS benign/adversarial controls and calibrate every shipping conditioning ceiling from that bank before refreeze."
+      "required_closure": "Add subject-free articulated LBS benign/adversarial controls and calibrate every shipping conditioning ceiling from that bank before refreeze.",
+      "status": "REPAIRED__ARTICULATED_LBS_CALIBRATION__CI_PENDING",
+      "repair": "Dynamic appearance thresholds are bound to a subject-free articulated LBS hinge bank in addition to affine controls; Knight is not used for threshold selection."
     },
     {
       "id": "VF-15",
@@ -133,7 +143,8 @@
       "owner": "Dynamic mechanics / visual integrity",
       "finding": "Stage41 bounds triangle area ratio and local condition but has no explicit non-adjacent dynamic self-intersection/interpenetration qualification. A mesh can remain locally well-conditioned while distinct body/clothing regions pass through each other and corrupt visibility.",
       "required_closure": "Add subject-free dynamic self-intersection evidence with adjacency exclusions and rest-existing-contact handling; gate newly introduced consequential intersections or explicitly narrow the product claim.",
-      "status": "OPEN"
+      "status": "PARTIALLY_REPAIRED__NEW_PAIR_GATE__REST_BASELINE_SEVERITY_OPEN",
+      "repair": "Stage41 now rejects newly appearing non-adjacent triangle-intersection pairs, but pair-set subtraction can still miss severity growth of a rest-existing pair and shared-vertex exemption remains to be red-teamed."
     },
     {
       "id": "VF-18",
@@ -165,14 +176,18 @@
       "severity": "HIGH",
       "owner": "CAA color management / runtime sampling",
       "finding": "Python and native V2 CAA samplers treat encoded RGBA8 RGB as linear values: RGB is divided by 255, premultiplied by alpha and bilinearly filtered without an explicit sRGB/linear transfer function. Native/reference byte parity can therefore certify identical gamma-space filtering rather than source-faithful color filtering.",
-      "required_closure": "Make the texture color-space contract explicit and shared by compile/reference/native runtime. Calibrate subject-free opaque gradients, dark/light edges and semi-transparent anti-aliased line-art controls; qualify linear-light premultiplied filtering or explicitly prove an alternative artist-preserving encoded-space contract."
+      "required_closure": "Make the texture color-space contract explicit and shared by compile/reference/native runtime. Calibrate subject-free opaque gradients, dark/light edges and semi-transparent anti-aliased line-art controls; qualify linear-light premultiplied filtering or explicitly prove an alternative artist-preserving encoded-space contract.",
+      "status": "REPAIRED__LINEAR_LIGHT_PM__NATIVE_DISCRIMINATOR_CI_PENDING",
+      "repair": "Compile/reference/native now share explicit sRGB transfer functions and linear-light premultiplied filtering/compositing. Native smoke now includes a black/white midpoint discriminator that must encode linear 0.5 near sRGB 188, not gamma-space 128."
     },
     {
       "id": "VF-22",
       "severity": "HIGH",
       "owner": "Runtime package precision",
       "finding": "Stage42 casts canonical mesh positions, every Stage41 posed vertex frame and face UVs to float32 before packaging. Stage45 reference rendering consumes the same quantized arrays, so native/reference parity cannot detect Stage41->runtime quantization drift in screen ownership, thin features, near-depth ordering or UV sampling.",
-      "required_closure": "Add an explicit Stage41-double -> packaged-float32 projection/ownership/RGBA non-regression proof on subject-free thin-feature, near-depth and subpixel controls; select package precision from evidence or retain higher precision where needed."
+      "required_closure": "Add an explicit Stage41-double -> packaged-float32 projection/ownership/RGBA non-regression proof on subject-free thin-feature, near-depth and subpixel controls; select package precision from evidence or retain higher precision where needed.",
+      "status": "REPAIRED__FLOAT64_GEOMETRY_UV_TRANSPORT__CI_PENDING",
+      "repair": "Stage41 posed XYZ/runtime projection/CAA face UV authority are now preserved as float64 through compile, bake NPZ and runtime package transport rather than being born or cast to float32 before proof."
     },
     {
       "id": "VF-23",
@@ -193,35 +208,61 @@
       "severity": "HIGH",
       "owner": "CAA alpha/color transport precision",
       "finding": "Source sampling correctly premultiplies before bilinear interpolation, but immediately unpremultiplies and quantizes every compiled surface sample back to straight RGBA8. Those straight u8 samples are later baked and premultiplied again at runtime. Low-alpha anti-aliased texels can therefore lose premultiplied color precision even though metadata describes the internal alpha contract as PREMULTIPLIED.",
-      "required_closure": "Audit the real alpha representation at every compile/bake/package boundary. Add low-alpha anti-aliased dark/light edge controls, quantify PM round-trip error, and either keep sufficient premultiplied precision through the internal CAA asset or prove that the chosen transport quantization is visually lossless under the product gate."
+      "required_closure": "Audit the real alpha representation at every compile/bake/package boundary. Add low-alpha anti-aliased dark/light edge controls, quantify PM round-trip error, and either keep sufficient premultiplied precision through the internal CAA asset or prove that the chosen transport quantization is visually lossless under the product gate.",
+      "status": "REPAIRED__REAL_BILINEAR_PM_ROUNDTRIP_GATE__CI_PENDING",
+      "repair": "Stage24 gates actual pre-quantization bilinear linear-PM samples against post-straight-RGBA8 roundtrip error. The subject-free calibration test now spans high-contrast and low-alpha bilinear intermediate values rather than only exactly representable source texels."
     },
     {
       "id": "VF-26",
       "severity": "HIGH",
       "owner": "Appearance fidelity metrics",
       "finding": "Current source/holdout/seam quality relies heavily on mean and p95 premultiplied RGBA errors. A sparse but visually salient feature occupying less than the upper 5% of samples (eye line, brim edge, blade edge, thin highlight) can be catastrophically lost while aggregate mean/p95 remain acceptable.",
-      "required_closure": "Add topology/feature-aware visual fidelity evidence: connected high-error region bounds, thin-line/edge recall, high-contrast feature survival and per-component salient-feature controls. Tightening p95 alone is insufficient."
+      "required_closure": "Add topology/feature-aware visual fidelity evidence: connected high-error region bounds, thin-line/edge recall, high-contrast feature survival and per-component salient-feature controls. Tightening p95 alone is insufficient.",
+      "status": "REPAIRED__SPARSE_FEATURE_GATES__CI_PENDING",
+      "repair": "Rest proof now includes p99.9 error, connected high-error-island bounds, and 1px source-feature edge recall/precision; a one-pixel line-loss adversary is required to fail despite <5% affected area."
     },
     {
       "id": "VF-27",
       "severity": "HIGH",
       "owner": "Cross-view appearance authority",
       "finding": "Adjacent-view shared-canonical source compatibility is now measured and hash-bound in Stage24 metadata, but qualification explicitly records cross_view_source_compatibility_shipping_gate_frozen=false and the cross-view metrics are absent from the Stage24 passed predicate.",
-      "required_closure": "Calibrate subject-free compatible vs contradictory adjacent-view controls, freeze per-pair/per-component alpha/color/edge conflict bounds and make cross-view compatibility a hard Stage24 gate without requiring naive raw-RGB equality."
+      "required_closure": "Calibrate subject-free compatible vs contradictory adjacent-view controls, freeze per-pair/per-component alpha/color/edge conflict bounds and make cross-view compatibility a hard Stage24 gate without requiring naive raw-RGB equality.",
+      "status": "REPAIRED__CROSS_VIEW_SHIPPING_GATE__CI_PENDING",
+      "repair": "cross_view_source_compatibility_shipping_gate_frozen is now true and pair/component compatibility is part of the Stage24 passed predicate under frozen subject-free thresholds."
     },
     {
       "id": "VF-28",
       "severity": "CRITICAL",
       "owner": "Visibility / alpha composition",
       "finding": "Current V2 reference/native runtime resolves exactly one front geometry owner per pixel and samples/composes only that face. Texture alpha is correctly forbidden from selecting the front surface, but there is no depth peeling or ordered multi-surface alpha compositing. A transparent or semi-transparent front face can therefore suppress valid deeper character geometry and appear as a background hole rather than revealing the next surface/layer.",
-      "required_closure": "Define the product transparency/layer contract. For any supported overlapping transparent art, render and native-prove ordered multi-surface compositing (depth peeling / qualified presentation layer stack or equivalent) with premultiplied alpha. If first witness forbids overlapping transparent surfaces, qualify that restriction explicitly and reject assets that violate it rather than silently rendering holes."
+      "required_closure": "Define the product transparency/layer contract. For any supported overlapping transparent art, render and native-prove ordered multi-surface compositing (depth peeling / qualified presentation layer stack or equivalent) with premultiplied alpha. If first witness forbids overlapping transparent surfaces, qualify that restriction explicitly and reject assets that violate it rather than silently rendering holes.",
+      "status": "REPAIRED__K4_LINEAR_PM_COMPOSITE__DEEP_CONTRIBUTOR_DVI_CI_PENDING",
+      "repair": "Reference/native use a depth-sorted K=4 geometry surface stack with deterministic linear-PM front-to-back composition and hard overflow rejection. Stage45 now exposes and conditions all layers that actually contribute alpha/color, not only layer-0 owner."
     },
     {
       "id": "VF-29",
       "severity": "HIGH",
       "owner": "Visibility / surface sidedness",
       "finding": "Reference and native V2 rasterizers accept both triangle orientations; no qualified front-only/two-sided presentation-surface contract exists. Under motion a face can become back-facing yet still render the same CAA texture, producing mirrored/inside-out art without violating current intrinsic conditioning or native parity.",
-      "required_closure": "Mint explicit per-presentation-group sidedness semantics from qualified geometry/presentation evidence. Gate newly visible unsupported backfaces, or provide separately qualified back-side appearance where two-sided rendering is intended. Add articulated flip/backface adversarial controls."
+      "required_closure": "Mint explicit per-presentation-group sidedness semantics from qualified geometry/presentation evidence. Gate newly visible unsupported backfaces, or provide separately qualified back-side appearance where two-sided rendering is intended. Add articulated flip/backface adversarial controls.",
+      "status": "PARTIALLY_REPAIRED__DYNAMIC_PROJECTED_ORIENTATION_GATE__ADVERSARIAL_TEST_OPEN",
+      "repair": "Dynamic DVI now rejects consequential projected orientation sign flips relative to rest under a zero-count policy, but the explicit presentation-sidedness contract and focused adversarial flip/back-side fixture are not yet closed."
+    },
+    {
+      "id": "VF-30",
+      "severity": "HIGH",
+      "owner": "Dynamic Visual Integrity / layered visibility",
+      "finding": "After K=4 alpha compositing was implemented, Stage45 still derived consequential-face conditioning from native layer-0 owner.raw only. A transparent front face could therefore reveal a deeper visually dominant surface whose stretch/orientation was omitted from DVI.",
+      "repair": "Reference rendering now exposes per-layer contribution masks and layer owner identities. Stage45 unions front geometry with all actual visual contributors for consequential-face, micro-load, conditioning and orientation qualification.",
+      "status": "REPAIRED__ADVERSARIAL_CORE_TEST_ADDED__CI_PENDING"
+    },
+    {
+      "id": "VF-31",
+      "severity": "HIGH",
+      "owner": "CI / native proof governance",
+      "finding": "current-runtime-self-hosted-ci executed the V2 native smoke and fail-closed tail tests but its push path filter did not include those test files. Native proof authority could therefore be edited without triggering the runtime gate on that exact commit.",
+      "repair": "The runtime workflow push filter now includes tests/compiler/test_runtime_v2_native_smoke.py and tests/compiler/test_v2_tail_authority_fail_closed.py. The native smoke also contains a linear-light discriminator.",
+      "status": "REPAIRED__EXACT_HEAD_CI_PENDING"
     }
   ],
   "false_or_overstated_external_findings": [

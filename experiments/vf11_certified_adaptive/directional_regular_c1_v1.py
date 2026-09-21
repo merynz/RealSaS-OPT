@@ -68,6 +68,9 @@ class C1CandidateResult:
     max_micro_depth: int
     max_depth_reached: int
     coverage_complete: bool
+    certified_terminal_lower: float | None = None
+    certified_terminal_upper: float | None = None
+    certificate_margin: float | None = None
 
 
 @dataclass(frozen=True)

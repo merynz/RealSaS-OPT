@@ -160,6 +160,9 @@ def profile_c1_handoff_v2(
                 "lower_margin": float(x.lower_margin),
                 "upper_margin": float(x.upper_margin),
                 "width": width,
+                "certified_terminal_lower": x.certified_terminal_lower,
+                "certified_terminal_upper": x.certified_terminal_upper,
+                "certificate_margin": x.certificate_margin,
                 "evaluated_box_count": int(x.evaluated_box_count),
                 "positive_leaf_count": int(x.positive_leaf_count),
                 "negative_leaf_count": int(x.negative_leaf_count),
@@ -195,6 +198,7 @@ def profile_c1_handoff_v2(
             "c1_v2_derivative_lower": float(cert.derivative_lower),
             "c1_v2_derivative_upper": float(cert.derivative_upper),
             "c1_v2_positive_margin": cert_margin,
+            "c1_v2_certificate_margin": cert_margin,
             "c1_v2_evaluated_box_count": int(cert.evaluated_box_count),
             "c1_v2_candidate_count": int(len(cert.candidate_results)),
             "elapsed_seconds": float(elapsed),
@@ -210,6 +214,10 @@ def profile_c1_handoff_v2(
             "v2_to_v1_candidate0_width_ratio": ratio,
             "candidate_results": candidate_rows,
         }
+        if cert.state != "UNKNOWN" and (cert_margin is None or cert_margin <= 0.0):
+            raise RuntimeError(
+                f"NONPOSITIVE_CERTIFICATE_MARGIN:anchor={anchor_id}:state={cert.state}:margin={cert_margin}"
+            )
         rows.append(row)
 
         if logger:
@@ -226,7 +234,7 @@ def profile_c1_handoff_v2(
         regular = sum(v for k, v in states.items() if k != "UNKNOWN")
         n = len(subset)
         margins = np.asarray(
-            [r["c1_v2_positive_margin"] for r in subset if r["c1_v2_positive_margin"] is not None],
+            [r["c1_v2_certificate_margin"] for r in subset if r["c1_v2_certificate_margin"] is not None],
             dtype=np.float64,
         )
         boxes = np.asarray([r["c1_v2_evaluated_box_count"] for r in subset], dtype=np.float64)
@@ -265,7 +273,7 @@ def profile_c1_handoff_v2(
     unknown = [r for r in rows if r["c0_state_m2"] == "UNKNOWN"]
 
     return {
-        "schema": "RealSaS.VF11C1V2KnightHandoffProfile.v1",
+        "schema": "RealSaS.VF11C1V2KnightHandoffProfile.v2",
         "status": "RESEARCH_MEASUREMENT_ONLY__NO_PRODUCT_AUTHORITY",
         "numeric_rigor": "ORDINARY_FLOAT64__NOT_DIRECTED_ROUNDING",
         "target_depth": int(target_depth),

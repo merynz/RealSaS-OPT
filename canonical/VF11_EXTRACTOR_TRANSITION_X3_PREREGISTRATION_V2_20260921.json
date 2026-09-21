@@ -1,0 +1,39 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX3Preregistration.v2",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__PROOF_AWARE_D13_NARROW_BAND_PLANNER__SEMANTIC_CORRECTION",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "supersedes": "canonical/VF11_EXTRACTOR_TRANSITION_X3_PREREGISTRATION_20260921.json",
+  "correction": "A coarse GRAPH or PROVEN_ZERO_EXISTS proof leaf guarantees surface structure/existence somewhere in that leaf; it does not imply every descendant d13 block intersects the surface. V1 incorrectly named every descendant block PROVEN_SURFACE. V2 moves completeness audits to proof-leaf scope.",
+  "parents": [
+    "canonical/VF11_EXTRACTOR_TRANSITION_X2_CLOSURE_20260921.json",
+    "canonical/VF11_EXTRACTOR_TRANSITION_X1_RESULT_20260921.json"
+  ],
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "subject_scope": "same frozen 12 corrected C1-primary Knight d8 roots; local research only",
+  "target_lattice": {
+    "absolute_depth": 13,
+    "cells_per_d8_root_axis": 32,
+    "block_cells_per_axis": 4,
+    "blocks_per_d8_root_axis": 8
+  },
+  "planner_classes": {
+    "CERTIFIED_EMPTY": "terminal corrected-C0 strict-sign proof; all descendant target blocks may be pruned without querying",
+    "ACTIVE_GRAPH": "terminal axis-graph proof leaf; all descendant blocks remain query-active, but graph completeness is audited at proof-leaf/axis-line scope",
+    "ACTIVE_ZERO_EXISTS": "terminal C0 PROVEN_ZERO_EXISTS leaf without graph closure; all descendants remain query-active and the leaf must contain at least one d13 mixed-sign cube or target depth is insufficient",
+    "ACTIVE_UNKNOWN": "terminal C0 UNKNOWN leaf; all descendants remain query-active and same-sign target corners never upgrade it to empty"
+  },
+  "graph_leaf_audit": "For a GRAPH leaf, use its certified selected axis. On the aligned d13 lattice, every transverse lattice line spanning the leaf must contain at least one adjacent opposite-sign sample pair. Exact-zero target corners fail closed. This follows the graph certificate's opposite-sign entry/exit faces and strict directional regularity.",
+  "zero_exists_leaf_audit": "Each ACTIVE_ZERO_EXISTS proof leaf must contain at least one mixed-sign d13 cube. Absence is a target-sampling incompleteness alarm, not a proof contradiction.",
+  "mesh_audit": "Extract all mixed-sign cubes inside all non-empty proof leaves with blockwise Lewiner MC and require canonical sampled-lattice equivalence to dense d13 Lewiner MC on each root.",
+  "decision": {
+    "certified_empty_mixed_cube_or_graph_line_miss_or_mesh_mismatch": "FAIL__PROOF_OR_STITCHING_CONSISTENCY_ALARM",
+    "zero_exists_leaf_without_d13_mixed_cube_gt_0": "D13_SAMPLING_INCOMPLETE__TARGETED_LOCAL_REFINEMENT_REQUIRED",
+    "else_active_unknown_leaf_without_mixed_cube_gt_0": "D13_SAMPLED_MESH_EQUIVALENT_BUT_CONTINUOUS_COMPLETENESS_UNCLOSED",
+    "else": "D13_LOCAL_PROOF_AWARE_NARROW_BAND_READY_FOR_VF11_REPLAY"
+  },
+  "claim_boundary": "X3 V2 does not run a full Knight witness and does not claim source-raster fidelity. It tests whether the proof partition can safely drive the existing MC contourer on a fixed local d13 lattice."
+}

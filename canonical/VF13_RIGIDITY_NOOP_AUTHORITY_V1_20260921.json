@@ -1,0 +1,83 @@
+{
+  "schema": "RealSaS.VF13RigidityNoopAuthority.v1",
+  "status": "PASS_SUBJECT_FREE_CALIBRATION__IMPLEMENTATION_CI_PENDING",
+  "date_utc": "2026-09-21",
+  "finding_id": "VF-13",
+  "authority": "PRESENTATION_FACE_GROUP_MECHANICAL_RIGIDITY_BY_INDEPENDENT_JOINT_LBS_NOOP",
+  "policy_path": "canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json",
+  "calibration": {
+    "workflow_run_id": 35579315398,
+    "workflow_job_id": 106268251404,
+    "source_commit": "2d8eb726db0a437f80106428e804d60f044f8a34",
+    "artifact_id": 10629776815,
+    "artifact_sha256": "265ff450532534c485572e5c81b6a2d7aae7fc89deef56f2690affb99c1f307d",
+    "status": "PASS_SUBJECT_FREE_FROZEN_TOLERANCE_VALIDATED",
+    "threshold_search_used": false
+  },
+  "frozen_policy": {
+    "rigidity_noop_relative_edge_tolerance": 1e-9,
+    "rigidity_noop_probe_rotation_degrees": 37,
+    "min_rigid_owner_weight_legacy_diagnostic": 0.999,
+    "max_rigid_other_mass_legacy_diagnostic": 0.001,
+    "legacy_weight_thresholds_final_authority": false
+  },
+  "separation": {
+    "maximum_hard_rigid_relative_edge_error": 1.7731152444569764e-10,
+    "minimum_deformable_relative_edge_error": 0.00020118336283558858,
+    "frozen_tolerance": 1e-9,
+    "strict_open_gap": true
+  },
+  "controls": {
+    "hard_rigid": [
+      [
+        "ONE_HOT_UNIT_SCALE",
+        1.570092458683775e-16
+      ],
+      [
+        "ONE_HOT_MICRO_SCALE_TRANSLATED",
+        1.7731152444569764e-10
+      ],
+      [
+        "ONE_HOT_LARGE_SCALE_TRANSLATED",
+        3.2927225399135965e-16
+      ]
+    ],
+    "deformable": [
+      [
+        "SMOOTH_MULTIJOINT_GRADIENT",
+        0.3310311839208311
+      ],
+      [
+        "UNIFORM_0999_0001_SOFT_BLEND",
+        0.00020118336283558858
+      ],
+      [
+        "LEGACY_0999_BOUNDARY_FALSE_POSITIVE",
+        0.0006018352847869668
+      ],
+      [
+        "SPLIT_ONE_HOT_OWNERS",
+        0.6144221957745473
+      ]
+    ]
+  },
+  "decisive_result": {
+    "historical_0999_0001_predicate_would_classify_legacy_control_rigid": true,
+    "noop_probe_classifies_same_control_rigid": false,
+    "silent_legacy_rigid_false_positive_now_forbidden": true,
+    "legacy_rigid_plus_noop_fail_behavior": "HARD_QUALIFICATION_FAILURE",
+    "no_op_pass_is_final_rigid_authority": true
+  },
+  "scope_boundary": {
+    "object_category_inferred": false,
+    "detachability_inferred": false,
+    "runtime_keyability_inferred": false,
+    "artist_semantic_intent_inferred": false
+  },
+  "contamination_checks": {
+    "subject_inputs_used": false,
+    "knight_result_used": false,
+    "mage_result_used": false,
+    "category_labels_used": false
+  }
+}

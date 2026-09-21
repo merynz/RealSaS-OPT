@@ -175,7 +175,11 @@
     {
       "id": "EXACT_HEAD_CI_CLOSURE",
       "status": "BLOCKING_CI",
-      "reason": "Current mainline, runtime/native parity, V11 source seal, source gate and witness dry-run must all be green on a compatible exact head or explicitly bound closure set."
+      "reason": "Current mainline, runtime/native parity, model source ownership, V11 native source gate, repair-promotion gate, VF23 bank and witness dry-run must be green on a compatible final implementation. The final implementation_closure_sha256 now fingerprints those promotion workflows, the native seal verifier, and the complete append-only source-seal chain (VF-40).",
+      "evidence": [
+        "VF-40",
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ]
     },
     {
       "id": "USER_APPROVAL",

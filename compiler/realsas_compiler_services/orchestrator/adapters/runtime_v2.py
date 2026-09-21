@@ -31,6 +31,10 @@ from compiler.realsas_compiler_core.dynamic_appearance_conditioning_v2 import (
     screen_to_texture_max_texels_per_pixel,
     validate_dynamic_appearance_policy,
 )
+from compiler.realsas_compiler_core.dynamic_geometry_integrity_v2 import (
+    dynamic_visibility_load_gate,
+    projected_orientation_flip,
+)
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
     qualified_camera_set_from_dict,
     qualified_mesh_from_dict,
@@ -951,22 +955,10 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     face = faces[face_index]
                     rest_tri = rest_screen[face]
                     posed_tri = posed_screen[face]
-                    rest_area2 = float(
-                        (rest_tri[1, 0] - rest_tri[0, 0])
-                        * (rest_tri[2, 1] - rest_tri[0, 1])
-                        - (rest_tri[1, 1] - rest_tri[0, 1])
-                        * (rest_tri[2, 0] - rest_tri[0, 0])
-                    )
-                    posed_area2 = float(
-                        (posed_tri[1, 0] - posed_tri[0, 0])
-                        * (posed_tri[2, 1] - posed_tri[0, 1])
-                        - (posed_tri[1, 1] - posed_tri[0, 1])
-                        * (posed_tri[2, 0] - posed_tri[0, 0])
-                    )
-                    if (
-                        abs(rest_area2) >= min_projected_area2
-                        and abs(posed_area2) >= min_projected_area2
-                        and rest_area2 * posed_area2 < 0.0
+                    if projected_orientation_flip(
+                        rest_screen_triangle=rest_tri,
+                        posed_screen_triangle=posed_tri,
+                        min_projected_double_area_px2=min_projected_area2,
                     ):
                         visible_orientation_flip_faces += 1
                     metrics = dynamic_face_conditioning_metrics(
@@ -1053,7 +1045,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     )
     conditioning_passed = (
         conditioning_sample_count > 0
-        and unmeasurable_visible_face_count <= max_unmeasurable_consequential
+        and unmeasurable_face_passed
         and max_uv_to_surface_condition
         <= float(conditioning_policy["dynamic_max_uv_to_surface_condition_number"])
         and max_relative_surface_condition
@@ -1074,8 +1066,23 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         and max_frame_compiled_fraction <= frame_exposure_budget
         and max_connected_compiled_fraction <= connected_exposure_budget
     )
-    micro_face_passed = (
-        max_frame_micro_visible_fraction <= micro_visible_budget
+    visibility_load = dynamic_visibility_load_gate(
+        maximum_frame_micro_visible_pixel_fraction=(
+            max_frame_micro_visible_fraction
+        ),
+        unmeasurable_consequential_visible_face_count=(
+            unmeasurable_visible_face_count
+        ),
+        max_micro_visible_pixel_fraction_per_frame=micro_visible_budget,
+        max_unmeasurable_consequential_visible_face_count=(
+            max_unmeasurable_consequential
+        ),
+    )
+    micro_face_passed = bool(
+        visibility_load["micro_visible_face_load_passed"]
+    )
+    unmeasurable_face_passed = bool(
+        visibility_load["unmeasurable_consequential_face_load_passed"]
     )
     exact_depth_ambiguity_passed = (
         exact_depth_ambiguous_fraction <= exact_depth_ambiguity_budget
@@ -1142,6 +1149,9 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "maximum_connected_compiled_unobserved_visible_fraction": max_connected_compiled_fraction,
             "maximum_frame_micro_visible_pixel_fraction": max_frame_micro_visible_fraction,
             "micro_visible_face_load_passed": micro_face_passed,
+            "unmeasurable_consequential_face_load_passed": (
+                unmeasurable_face_passed
+            ),
             "exact_depth_ambiguous_fraction": exact_depth_ambiguous_fraction,
             "maximum_frame_exact_depth_ambiguous_fraction": (
                 max_frame_exact_depth_ambiguous_fraction

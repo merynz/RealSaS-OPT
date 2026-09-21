@@ -26,6 +26,8 @@ class ReferenceCAARender:
     second_owner_face_index: np.ndarray
     depth_margin: np.ndarray
     exact_depth_ambiguity: np.ndarray
+    layer_overflow: np.ndarray
+    contributing_layer_count: np.ndarray
     provenance_code: np.ndarray
     visibility_contract_hash: str = VISIBILITY_CONTRACT_V2_HASH
 
@@ -87,37 +89,74 @@ def render_caa_reference(
 ) -> ReferenceCAARender:
     visibility = rasterize_visible_owner(mesh, camera, positions=positions)
     owner = visibility.owner_face_index
-    bary = visibility.barycentric
     height, width = owner.shape
     if face_uv.shape != (len(mesh.faces), 3, 2):
         raise QualificationError("CAA_REFERENCE_FACE_UV_MESH_DRIFT")
     if provenance_atlas.shape[:2] != texture_rgba_u8.shape[:2]:
         raise QualificationError("CAA_REFERENCE_PROVENANCE_TEXTURE_DRIFT")
 
-    pm = np.zeros((height, width, 4), dtype=np.float32)
-    provenance = np.full((height, width), 255, dtype=np.uint8)
-    visible_y, visible_x = np.nonzero(owner >= 0)
-    if len(visible_y):
-        face_index = owner[visible_y, visible_x].astype(np.int64)
-        weights = bary[visible_y, visible_x].astype(np.float64)
+    pm = np.zeros((height, width, 4), dtype=np.float64)
+    risk = np.zeros((height, width), dtype=np.uint8)
+    has_contribution = np.zeros((height, width), dtype=bool)
+    contribution_count = np.zeros((height, width), dtype=np.uint8)
+    layer_owner = visibility.layer_owner_face_index
+    layer_bary = visibility.layer_barycentric
+    layer_count = layer_owner.shape[2]
+
+    for layer in range(layer_count):
+        layer_mask = layer_owner[:, :, layer] >= 0
+        ys, xs = np.nonzero(layer_mask)
+        if not len(ys):
+            continue
+        face_index = layer_owner[ys, xs, layer].astype(np.int64)
+        weights = layer_bary[ys, xs, layer].astype(np.float64)
         if not np.isfinite(weights).all():
             raise QualificationError("CAA_REFERENCE_BARYCENTRIC_NONFINITE")
         uv_tri = face_uv[face_index]
         uv = np.sum(uv_tri * weights[:, :, None], axis=1)
         sampled = bilinear_premultiplied_rgba(texture_rgba_u8, uv)
-        pm[visible_y, visible_x] = sampled.astype(np.float32)
-        provenance[visible_y, visible_x] = conservative_bilinear_provenance(
+        sampled_provenance = conservative_bilinear_provenance(
             provenance_atlas, uv
         ).astype(np.uint8)
 
+        existing_alpha = pm[ys, xs, 3]
+        transmission = 1.0 - np.clip(existing_alpha, 0.0, 1.0)
+        contribution = sampled * transmission[:, None]
+        pm[ys, xs] += contribution
+        contributes = contribution[:, 3] > 1.0e-12
+        if np.any(contributes):
+            cy = ys[contributes]
+            cx = xs[contributes]
+            codes = sampled_provenance[contributes]
+            prior = has_contribution[cy, cx]
+            risk[cy, cx] = np.where(
+                prior,
+                np.maximum(risk[cy, cx], codes),
+                codes,
+            )
+            has_contribution[cy, cx] = True
+            contribution_count[cy, cx] = np.minimum(
+                255,
+                contribution_count[cy, cx].astype(np.uint16) + 1,
+            ).astype(np.uint8)
+
+    provenance = np.full((height, width), 255, dtype=np.uint8)
+    provenance[has_contribution] = risk[has_contribution]
     straight = premultiplied_to_straight_u8(pm)
-    geometry_visible = owner >= 0
-    final_alpha = pm[..., 3] > 1e-8
-    exact_depth_ambiguity = (
-        (visibility.second_owner_face_index >= 0)
-        & np.isfinite(visibility.depth_margin)
-        & (np.abs(visibility.depth_margin) <= 1.0e-12)
+    geometry_visible = np.any(layer_owner >= 0, axis=2)
+    final_alpha = pm[..., 3] > 1.0e-8
+
+    occupied = layer_owner >= 0
+    adjacent = occupied[:, :, :-1] & occupied[:, :, 1:]
+    depth_delta = np.abs(
+        visibility.layer_depth[:, :, 1:]
+        - visibility.layer_depth[:, :, :-1]
     )
+    exact_depth_ambiguity = np.any(
+        adjacent & (depth_delta <= 1.0e-12),
+        axis=2,
+    )
+
     return ReferenceCAARender(
         premultiplied_rgba=pm,
         straight_rgba_u8=straight,
@@ -127,9 +166,10 @@ def render_caa_reference(
         second_owner_face_index=visibility.second_owner_face_index,
         depth_margin=visibility.depth_margin,
         exact_depth_ambiguity=exact_depth_ambiguity,
+        layer_overflow=visibility.layer_overflow.copy(),
+        contributing_layer_count=contribution_count,
         provenance_code=provenance,
     )
-
 
 def rgba_bytes_sha256(rgba_u8: np.ndarray) -> str:
     value = np.ascontiguousarray(np.asarray(rgba_u8, dtype=np.uint8))

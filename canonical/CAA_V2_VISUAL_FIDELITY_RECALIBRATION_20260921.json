@@ -40,7 +40,9 @@
       "severity": "HIGH",
       "owner": "Dynamic Visual Integrity",
       "finding": "Historical Stage45 exempted micro-visible faces and consequential-but-unmeasurable faces from the shipping condition and aggregated inferred exposure globally.",
-      "required_closure": "Hard-gate unmeasurable consequential faces, micro-face pixel load, frame-max exposure, largest connected inferred patch and visible global-fill exposure."
+      "required_closure": "Hard-gate unmeasurable consequential faces, micro-face pixel load, frame-max exposure, largest connected inferred patch and visible global-fill exposure.",
+      "status": "REPAIRED__FAIL_CLOSED_GATES_AND_ADVERSARIES__CI_PENDING",
+      "repair": "Stage45 now hard-gates frame-max and connected compiled-unobserved exposure, micro-visible pixel load, consequential-but-unmeasurable face count, and forbids undefined/global-fill visibility. The visibility-load gate has direct negative controls for micro-mass and unmeasurable consequential faces."
     },
     {
       "id": "VF-05",
@@ -56,16 +58,16 @@
       "severity": "HIGH",
       "owner": "Geometry/appearance integration",
       "finding": "CAA is baked on Stage18 candidate identity while final Stage35 QualifiedMesh only carried the candidate hash transitively; Stage37/38 lacked explicit equality enforcement.",
-      "repair": "Stage37 and Stage38 now require CompleteAppearanceAsset.candidate_mesh_binding_hash == QualifiedMesh.metadata.source_candidate_lineage_hash.",
-      "status": "REPAIRED__REGRESSION_TEST_PENDING"
+      "repair": "Stage37/38 require CompleteAppearanceAsset.candidate_mesh_binding_hash == QualifiedMesh.metadata.source_candidate_lineage_hash; test_v2_tail_authority_fail_closed.py directly attacks candidate-binding mismatch.",
+      "status": "REPAIRED__EXACT_BINDING_ADVERSARY_PRESENT__CI_PENDING"
     },
     {
       "id": "VF-07",
       "severity": "HIGH",
       "owner": "Geometry continuity",
       "finding": "PRESERVE_CONTINUITY historically required only global connected-component membership and did not prove local boundary adjacency.",
-      "repair": "Qualified-mesh intrinsic audit now requires a shared-support vertex or direct mesh edge across each PRESERVE_CONTINUITY pair.",
-      "status": "REPAIRED__REGRESSION_TEST_PENDING"
+      "repair": "Qualified mesh intrinsic audit requires a shared-support vertex or direct mesh edge for every PRESERVE_CONTINUITY relation; test_product_authority_v1.py contains a globally-connected-but-locally-disconnected adversary that must fail with QUALIFIED_MESH_G4_PRESERVE_LOCAL_ADJACENCY_MISSING.",
+      "status": "REPAIRED__LOCAL_ADJACENCY_ADVERSARY_PRESENT__CI_PENDING"
     },
     {
       "id": "VF-08",
@@ -249,8 +251,8 @@
       "owner": "Visibility / surface sidedness",
       "finding": "Reference and native V2 rasterizers accept both triangle orientations; no qualified front-only/two-sided presentation-surface contract exists. Under motion a face can become back-facing yet still render the same CAA texture, producing mirrored/inside-out art without violating current intrinsic conditioning or native parity.",
       "required_closure": "Mint explicit per-presentation-group sidedness semantics from qualified geometry/presentation evidence. Gate newly visible unsupported backfaces, or provide separately qualified back-side appearance where two-sided rendering is intended. Add articulated flip/backface adversarial controls.",
-      "status": "PARTIALLY_REPAIRED__DYNAMIC_PROJECTED_ORIENTATION_GATE__ADVERSARIAL_TEST_OPEN",
-      "repair": "Dynamic DVI now rejects consequential projected orientation sign flips relative to rest under a zero-count policy, but the explicit presentation-sidedness contract and focused adversarial flip/back-side fixture are not yet closed."
+      "status": "REPAIRED__PROJECTED_SIDEDNESS_ADVERSARY__CI_PENDING",
+      "repair": "Stage45 gates newly visible projected orientation reversal relative to the qualified rest face with a zero-count policy. The signed-area helper has direct inside-out and subpixel-degenerate adversaries. Two-sided/back-side presentation remains unsupported rather than silently rendered."
     },
     {
       "id": "VF-30",

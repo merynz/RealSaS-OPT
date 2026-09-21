@@ -12,6 +12,9 @@ from .mesh.product_coverage_v1 import _covers_pixel_center, _orient2d
 from .camera_geometry_v2 import project_points_xyz_v3
 from .types import QualificationError
 
+
+VISIBILITY_DEPTH_EQUIVALENCE_EPSILON = 1.0e-12
+
 VISIBILITY_CONTRACT_V2 = {
     "schema": "RealSaS.VisibilityContract.v2",
     "authority": "CANONICAL_POSED_XYZ_PLUS_CAMERA_DEPTH",
@@ -19,7 +22,10 @@ VISIBILITY_CONTRACT_V2 = {
     "raster_fill": "HALF_INTEGER_TOP_LEFT",
     "shipping_pixel_coverage": "FIXED_2X2_QUARTER_SUBSAMPLES__LINEAR_PM_AVERAGE",
     "depth": "CAMERA_FORWARD_Z_SMALLER_WINS",
+    "depth_buffer": "IEEE754_FLOAT64_SOFTWARE_SORT__NO_HARDWARE_Z_QUANTIZATION",
+    "depth_equivalence_epsilon_camera_z": VISIBILITY_DEPTH_EQUIVALENCE_EPSILON,
     "exact_depth_tie": "SEALED_FACE_INDEX_ONLY__AMBIGUITY_MUST_BE_QUALIFIED",
+    "near_depth_policy": "ABS_DELTA_LE_EPSILON_IS_AMBIGUOUS__OUTSIDE_EPSILON_PHYSICAL_DEPTH_IS_AUTHORITY",
     "layering": "DEPTH_SORTED_K4_GEOMETRY_LAYERS",
     "alpha_composition": "LINEAR_PREMULTIPLIED_FRONT_TO_BACK",
     "layer_overflow": "FORBIDDEN",
@@ -117,7 +123,7 @@ def rasterize_visible_owner(
         dtype=np.float32,
     )
     layer_overflow = np.zeros((height, width), dtype=bool)
-    eps = 1.0e-12
+    eps = VISIBILITY_DEPTH_EQUIVALENCE_EPSILON
 
     for face_index, face in enumerate(mesh.faces):
         ids = tuple(map(str, face))

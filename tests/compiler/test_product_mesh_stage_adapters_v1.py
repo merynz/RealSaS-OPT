@@ -537,7 +537,7 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     appearance_root.mkdir(parents=True, exist_ok=True)
     texture_rows = []
     for vi in range(8):
-        rgba = np.zeros((16, 16, 4), dtype=np.uint8)
+        rgba = np.zeros((4, 4, 4), dtype=np.uint8)
         rgba[:, :, :] = (70 + vi * 5, 110, 150, 255)
         texture_path = appearance_root / f"V{vi}.png"
         Image.fromarray(rgba, "RGBA").save(
@@ -549,13 +549,13 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
                 direction_id=f"V{vi}",
                 transport_png_path=str(texture_path.resolve()),
                 transport_png_sha256=_sha(texture_path),
-                width=16,
-                height=16,
+                width=4,
+                height=4,
                 metadata={"fixture": True},
             )
         )
     face_uv = np.asarray(
-        [[[0.15, 0.15], [0.85, 0.15], [0.15, 0.85]]],
+        [[[0.20, 0.20], [0.80, 0.20], [0.20, 0.80]]],
         dtype=np.float32,
     )
     uv_path = appearance_root / "surface_uv.npz"
@@ -563,7 +563,7 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     provenance_path = appearance_root / "provenance.npz"
     np.savez_compressed(
         provenance_path,
-        provenance=np.zeros((8, 16, 16), dtype=np.uint8),
+        provenance=np.zeros((8, 4, 4), dtype=np.uint8),
     )
     asset = CompleteAppearanceAssetIR(
         compile_seal_binding_hash="c" * 64,
@@ -576,7 +576,7 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
         uv_npz_sha256=_sha(uv_path),
         provenance_npz_path=str(provenance_path.resolve()),
         provenance_npz_sha256=_sha(provenance_path),
-        atlas_layout={"fixture": True, "width": 16, "height": 16},
+        atlas_layout={"fixture": True, "width": 4, "height": 4},
         asset_hash="",
         metadata={"total_appearance_asset": True, "fixture": True},
     )
@@ -628,7 +628,7 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
                 "dynamic_max_relative_surface_condition_number": 16.0,
                 "dynamic_max_relative_surface_principal_stretch": 8.0,
                 "dynamic_max_adjacent_frame_surface_principal_stretch": 8.0,
-                "dynamic_max_texture_texels_per_output_pixel": 8.0
+                "dynamic_max_texture_texels_per_output_pixel": 1.0
             },
             "fixture": True,
         },

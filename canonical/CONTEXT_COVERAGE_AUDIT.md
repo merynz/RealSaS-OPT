@@ -6,9 +6,9 @@
 
 ## Coverage
 
-- Git-tracked files: **1201**
-- High-signal knowledge artifacts: **333**
-- Explained by continuity policy: **333**
+- Git-tracked files: **1215**
+- High-signal knowledge artifacts: **343**
+- Explained by continuity policy: **343**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
 - Live branches: **145**
@@ -17,7 +17,7 @@
 ### Classification counts
 
 - `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL`: **147**
-- `INDEXED_EXPLICIT`: **186**
+- `INDEXED_EXPLICIT`: **196**
 
 `FIT1_COMMIT_LEDGER_COVERED` means exact provenance is recoverable; it does **not** mean the artifact's scientific claim is promoted. `HISTORICAL_PROVENANCE_ACCEPTED_RESIDUAL` means the artifact predates the FIT1 gate and remains evidence/provenance unless another authority explicitly promotes it.
 
@@ -101,7 +101,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `4c56d520023b` | `CANONICAL` | canonical branch |
+| `main` | `f46d6689cb9e` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

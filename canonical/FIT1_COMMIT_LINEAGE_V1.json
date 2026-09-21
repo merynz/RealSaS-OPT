@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "4c56d520023bc9cc1df1f2a92507fd52c75810ca",
+    "main": "f46d6689cb9e09d12452e8b106b1ca3d46e315ac",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -117,7 +117,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2682,
+  "commit_count": 2772,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -128984,6 +128984,1944 @@
       ],
       "subsystem_tags": [
         "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d867ff1746151cb3562ab12e43f460fb59e84939",
+      "parents": [
+        "4c56d520023bc9cc1df1f2a92507fd52c75810ca"
+      ],
+      "author_time": "2026-09-21T11:37:09+03:00",
+      "committer_time": "2026-09-21T11:37:09+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d396e0aa9a72a3a770678e0e5333a01f08011b87",
+      "parents": [
+        "d867ff1746151cb3562ab12e43f460fb59e84939"
+      ],
+      "author_time": "2026-09-21T11:38:46+03:00",
+      "committer_time": "2026-09-21T11:38:46+03:00",
+      "subject": "fix: import numpy for presentation rigidity no-op probe",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0328ebbe04cbabfbbf590b3a1d8a827023793ee0",
+      "parents": [
+        "d396e0aa9a72a3a770678e0e5333a01f08011b87"
+      ],
+      "author_time": "2026-09-21T11:38:51+03:00",
+      "committer_time": "2026-09-21T11:38:51+03:00",
+      "subject": "research: slab VF-11 field construction for R512 sweep",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/vf11_geometry_feature_survival_panel.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6b12ac6ec73213e40a01495e3a64e27495652de2",
+      "parents": [
+        "0328ebbe04cbabfbbf590b3a1d8a827023793ee0"
+      ],
+      "author_time": "2026-09-21T11:39:40+03:00",
+      "committer_time": "2026-09-21T11:39:40+03:00",
+      "subject": "authority: seal VF-11 R384 insufficiency and authorize R512",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R384_AUTHORITY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "291f2d4325d0f4b4b98bcc03af422267f3dffa09",
+      "parents": [
+        "6b12ac6ec73213e40a01495e3a64e27495652de2"
+      ],
+      "author_time": "2026-09-21T11:39:44+03:00",
+      "committer_time": "2026-09-21T11:39:44+03:00",
+      "subject": "ci: run VF-11 same-physical-feature R512 requery sweep",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/vf11_geometry_feature_survival_r512.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a1ac7ffadbec8b760fe3ba69cc7842c5d365379c",
+      "parents": [
+        "291f2d4325d0f4b4b98bcc03af422267f3dffa09"
+      ],
+      "author_time": "2026-09-21T11:40:34+03:00",
+      "committer_time": "2026-09-21T11:40:34+03:00",
+      "subject": "fix: fail closed on missing rigidity-probe skin rows",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5e76b6e3629595c465d7ead9c6c3478959a99cd2",
+      "parents": [
+        "a1ac7ffadbec8b760fe3ba69cc7842c5d365379c"
+      ],
+      "author_time": "2026-09-21T11:40:39+03:00",
+      "committer_time": "2026-09-21T11:40:39+03:00",
+      "subject": "test: adversarially prove presentation rigidity no-op classification",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_presentation_partition_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ae97ecbfc874b5d2f47254ab6070682116ea9066",
+      "parents": [
+        "5e76b6e3629595c465d7ead9c6c3478959a99cd2"
+      ],
+      "author_time": "2026-09-21T11:41:22+03:00",
+      "committer_time": "2026-09-21T11:41:22+03:00",
+      "subject": "presentation: bind rigidity no-op proof to explicit policy parameters",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "10dab5d4bf5b5ea92e324dcb52fa7d32d6040ab1",
+      "parents": [
+        "ae97ecbfc874b5d2f47254ab6070682116ea9066"
+      ],
+      "author_time": "2026-09-21T11:41:27+03:00",
+      "committer_time": "2026-09-21T11:41:27+03:00",
+      "subject": "presentation: consume frozen rigidity no-op policy at Stage37",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e09667d045cab7b62c7b01be83eab1a3f99976ec",
+      "parents": [
+        "10dab5d4bf5b5ea92e324dcb52fa7d32d6040ab1"
+      ],
+      "author_time": "2026-09-21T11:41:30+03:00",
+      "committer_time": "2026-09-21T11:41:30+03:00",
+      "subject": "authority: freeze VF-13 rigidity no-op policy parameters",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2b2f36b913cad3d808ecc62ebf46fdcc60df6e84",
+      "parents": [
+        "e09667d045cab7b62c7b01be83eab1a3f99976ec"
+      ],
+      "author_time": "2026-09-21T11:42:16+03:00",
+      "committer_time": "2026-09-21T11:42:16+03:00",
+      "subject": "research: add subject-free VF-13 rigidity no-op calibration",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/vf13_rigidity_noop_calibration.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2d8eb726db0a437f80106428e804d60f044f8a34",
+      "parents": [
+        "2b2f36b913cad3d808ecc62ebf46fdcc60df6e84"
+      ],
+      "author_time": "2026-09-21T11:42:33+03:00",
+      "committer_time": "2026-09-21T11:42:33+03:00",
+      "subject": "ci: validate VF-13 rigidity no-op separation",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/vf13_rigidity_noop_calibration.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "654e6293fb867689bc3f9ad75fe37a84beadf090",
+      "parents": [
+        "2d8eb726db0a437f80106428e804d60f044f8a34"
+      ],
+      "author_time": "2026-09-21T11:44:09+03:00",
+      "committer_time": "2026-09-21T11:44:09+03:00",
+      "subject": "research: record VF-10 non-separation without minting a gate",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/vf10_direction_transition_calibration.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f509771685a6495e747b7401ac45d69760ebf20c",
+      "parents": [
+        "654e6293fb867689bc3f9ad75fe37a84beadf090"
+      ],
+      "author_time": "2026-09-21T11:44:13+03:00",
+      "committer_time": "2026-09-21T11:44:13+03:00",
+      "subject": "ci: preserve VF-10 negative calibration as evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/vf10_direction_transition_calibration.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7813a8b12e983b71526a6eb41909a3f0467afb62",
+      "parents": [
+        "f509771685a6495e747b7401ac45d69760ebf20c"
+      ],
+      "author_time": "2026-09-21T11:44:30+03:00",
+      "committer_time": "2026-09-21T11:44:30+03:00",
+      "subject": "runtime: seal discrete source-authoritative direction selection",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_package_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4fd548393ca2a7edcc199cb15c92f9c9b9c248a9",
+      "parents": [
+        "7813a8b12e983b71526a6eb41909a3f0467afb62"
+      ],
+      "author_time": "2026-09-21T11:44:34+03:00",
+      "committer_time": "2026-09-21T11:44:34+03:00",
+      "subject": "runtime: native-enforce discrete direction selection",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8a33f36e3a52aea8082876d57df5b6b932e70087",
+      "parents": [
+        "4fd548393ca2a7edcc199cb15c92f9c9b9c248a9"
+      ],
+      "author_time": "2026-09-21T11:45:04+03:00",
+      "committer_time": "2026-09-21T11:45:04+03:00",
+      "subject": "test: prove discrete direction switching has no blend or hysteresis",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_runtime_v2_native_smoke.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "594284d3ca090b9b0701a47c2608c6ab77a7503d",
+      "parents": [
+        "8a33f36e3a52aea8082876d57df5b6b932e70087"
+      ],
+      "author_time": "2026-09-21T11:45:25+03:00",
+      "committer_time": "2026-09-21T11:45:25+03:00",
+      "subject": "authority: append native runtime source extension V10",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V10_20260921.json"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "edada3b2e820e2c13074530eea070386e19c7709",
+      "parents": [
+        "594284d3ca090b9b0701a47c2608c6ab77a7503d"
+      ],
+      "author_time": "2026-09-21T11:45:49+03:00",
+      "committer_time": "2026-09-21T11:45:49+03:00",
+      "subject": "authority: verify native runtime source seal V10",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/verify_native_runtime_source_seal_v2.py"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a9ce21662afc6648bd29d3d155aba32bb08bdc65",
+      "parents": [
+        "edada3b2e820e2c13074530eea070386e19c7709"
+      ],
+      "author_time": "2026-09-21T11:45:53+03:00",
+      "committer_time": "2026-09-21T11:45:53+03:00",
+      "subject": "ci: bind native source gate through extension V10",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/native_runtime_source_gate.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7e7294315c04f964429b9c2b90366892f02d5cb8",
+      "parents": [
+        "a9ce21662afc6648bd29d3d155aba32bb08bdc65"
+      ],
+      "author_time": "2026-09-21T11:46:32+03:00",
+      "committer_time": "2026-09-21T11:46:32+03:00",
+      "subject": "fix: preserve broadcast semantics in slabbed VF-11 box SDF",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/vf11_geometry_feature_survival_panel.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "96600621f15648fa77ed06bb61f95f16abffebef",
+      "parents": [
+        "7e7294315c04f964429b9c2b90366892f02d5cb8"
+      ],
+      "author_time": "2026-09-21T11:49:41+03:00",
+      "committer_time": "2026-09-21T11:49:41+03:00",
+      "subject": "geometry: add exact interior shared-edge continuity proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/dynamic_geometry_integrity_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "68ee0f61b34b8b9c220e5b42b180378069887db0",
+      "parents": [
+        "96600621f15648fa77ed06bb61f95f16abffebef"
+      ],
+      "author_time": "2026-09-21T11:49:46+03:00",
+      "committer_time": "2026-09-21T11:49:46+03:00",
+      "subject": "test: distinguish topology-owned seam cracks from articulation gaps",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_geometry_integrity_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a5d7de80a4b4a10d6112e370ed20f751b0c79a06",
+      "parents": [
+        "68ee0f61b34b8b9c220e5b42b180378069887db0"
+      ],
+      "author_time": "2026-09-21T11:50:23+03:00",
+      "committer_time": "2026-09-21T11:50:23+03:00",
+      "subject": "geometry: cover all topology-owned shared edges in continuity proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/dynamic_geometry_integrity_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d8037dadd92672ac9664c8a7c5b0c50815666da5",
+      "parents": [
+        "a5d7de80a4b4a10d6112e370ed20f751b0c79a06"
+      ],
+      "author_time": "2026-09-21T11:50:44+03:00",
+      "committer_time": "2026-09-21T11:50:44+03:00",
+      "subject": "runtime: gate Stage45 on topology-owned shared-edge continuity",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b8c1df11ba242d9a5bb527dc117d100105eaa2d6",
+      "parents": [
+        "d8037dadd92672ac9664c8a7c5b0c50815666da5"
+      ],
+      "author_time": "2026-09-21T11:51:36+03:00",
+      "committer_time": "2026-09-21T11:51:36+03:00",
+      "subject": "closure: require topology-owned dynamic seam continuity proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e280bff0c2493093d49caa326f8d4437a3aa62ae",
+      "parents": [
+        "b8c1df11ba242d9a5bb527dc117d100105eaa2d6"
+      ],
+      "author_time": "2026-09-21T11:52:03+03:00",
+      "committer_time": "2026-09-21T11:52:03+03:00",
+      "subject": "test: bind product closure to topology-owned seam continuity",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "edb5b56288996204190a755e2359b47d70f96683",
+      "parents": [
+        "e280bff0c2493093d49caa326f8d4437a3aa62ae"
+      ],
+      "author_time": "2026-09-21T11:52:54+03:00",
+      "committer_time": "2026-09-21T11:52:54+03:00",
+      "subject": "test: prove top-left raster fill leaves no shared-edge seam crack",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_geometry_integrity_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8eb744b1be5b498e9ca4a973d3070efc51afeef6",
+      "parents": [
+        "edb5b56288996204190a755e2359b47d70f96683"
+      ],
+      "author_time": "2026-09-21T11:53:22+03:00",
+      "committer_time": "2026-09-21T11:53:22+03:00",
+      "subject": "authority: freeze VF-15 topology-owned continuity scope",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/VF15_DYNAMIC_CONTINUITY_AUTHORITY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "245cae0988ecda97c10b0a18e5683a74719d8691",
+      "parents": [
+        "8eb744b1be5b498e9ca4a973d3070efc51afeef6"
+      ],
+      "author_time": "2026-09-21T11:53:35+03:00",
+      "committer_time": "2026-09-21T11:53:35+03:00",
+      "subject": "authority: record VF-15 topology-owned continuity repair",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e62b0e6ef60ca19a5ec03fe66b2972c12cb500b2",
+      "parents": [
+        "245cae0988ecda97c10b0a18e5683a74719d8691"
+      ],
+      "author_time": "2026-09-21T11:55:07+03:00",
+      "committer_time": "2026-09-21T11:55:07+03:00",
+      "subject": "authority: seal VF-13 rigidity no-op calibration",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/VF13_RIGIDITY_NOOP_AUTHORITY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d909f609f903f663c07c872eaca7935bbebd7229",
+      "parents": [
+        "e62b0e6ef60ca19a5ec03fe66b2972c12cb500b2"
+      ],
+      "author_time": "2026-09-21T11:55:10+03:00",
+      "committer_time": "2026-09-21T11:55:10+03:00",
+      "subject": "authority: seal VF-10 negative calibration and discrete direction semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/VF10_DIRECTION_TRANSITION_AUTHORITY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1fb777078e71d587abfd7f312173624f296fb428",
+      "parents": [
+        "d909f609f903f663c07c872eaca7935bbebd7229"
+      ],
+      "author_time": "2026-09-21T11:55:49+03:00",
+      "committer_time": "2026-09-21T11:55:49+03:00",
+      "subject": "authority: record VF-10 negative result, VF-11 R512, VF-13 calibration pass",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d3488162d289dac67edbc232efb00a3756f53908",
+      "parents": [
+        "1fb777078e71d587abfd7f312173624f296fb428"
+      ],
+      "author_time": "2026-09-21T11:56:35+03:00",
+      "committer_time": "2026-09-21T11:56:35+03:00",
+      "subject": "fix: deduplicate VF-15 continuity report fields",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "eb15cf134100fe0922556e4afc4f9ed6010c89d7",
+      "parents": [
+        "d3488162d289dac67edbc232efb00a3756f53908"
+      ],
+      "author_time": "2026-09-21T11:59:08+03:00",
+      "committer_time": "2026-09-21T11:59:08+03:00",
+      "subject": "test: parameterize subject-free adapter fixture resolution",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a1699facaafa48f08f9549f4e09c0242f26496d8",
+      "parents": [
+        "eb15cf134100fe0922556e4afc4f9ed6010c89d7"
+      ],
+      "author_time": "2026-09-21T12:01:19+03:00",
+      "committer_time": "2026-09-21T12:01:19+03:00",
+      "subject": "authority: refreeze exact production CAA policy after visual recalibration",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2693c6378fe01b62af19c65267584634997be027",
+      "parents": [
+        "a1699facaafa48f08f9549f4e09c0242f26496d8"
+      ],
+      "author_time": "2026-09-21T12:01:23+03:00",
+      "committer_time": "2026-09-21T12:01:23+03:00",
+      "subject": "test: require refrozen production CAA policy status",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_caa_v2_subject_free_policy.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4d7968f2191241c0e78298548b7cdca800df3166",
+      "parents": [
+        "2693c6378fe01b62af19c65267584634997be027"
+      ],
+      "author_time": "2026-09-21T12:01:28+03:00",
+      "committer_time": "2026-09-21T12:01:28+03:00",
+      "subject": "test: require refrozen production CAA policy status",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_appearance_conditioning_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fdc735b9ad6d270c69b7b37f3aa9467a3091428c",
+      "parents": [
+        "4d7968f2191241c0e78298548b7cdca800df3166"
+      ],
+      "author_time": "2026-09-21T12:01:45+03:00",
+      "committer_time": "2026-09-21T12:01:45+03:00",
+      "subject": "authority: seal CAA V2 production policy refreeze",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_POLICY_REFREEZE_AUTHORITY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "81b5794c33203948a05bc3795d372ce9b3f1c2c4",
+      "parents": [
+        "fdc735b9ad6d270c69b7b37f3aa9467a3091428c"
+      ],
+      "author_time": "2026-09-21T12:02:18+03:00",
+      "committer_time": "2026-09-21T12:02:18+03:00",
+      "subject": "test: run Stage20-25 on exact frozen production CAA policy",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bf6e39ca4276b517b914a071adf2f04c5123df42",
+      "parents": [
+        "81b5794c33203948a05bc3795d372ce9b3f1c2c4"
+      ],
+      "author_time": "2026-09-21T12:02:51+03:00",
+      "committer_time": "2026-09-21T12:02:51+03:00",
+      "subject": "test: run Stage37-46 on exact production dynamic policy",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a2a88e17e8391f4043a98eb74db1961ce1ae57ba",
+      "parents": [
+        "bf6e39ca4276b517b914a071adf2f04c5123df42"
+      ],
+      "author_time": "2026-09-21T12:12:36+03:00",
+      "committer_time": "2026-09-21T12:12:36+03:00",
+      "subject": "ci: add VF-23 exact production-policy representative bank",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/vf23_production_policy_e2e_bank.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "df60ff1683f0a8ac89f65c5c447f2db2c0561909",
+      "parents": [
+        "a2a88e17e8391f4043a98eb74db1961ce1ae57ba"
+      ],
+      "author_time": "2026-09-21T12:12:56+03:00",
+      "committer_time": "2026-09-21T12:12:56+03:00",
+      "subject": "authority: bind VF-23 to exact production-policy representative bank",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a98beed3669b10ced062be3aea04622597a5d89f",
+      "parents": [
+        "df60ff1683f0a8ac89f65c5c447f2db2c0561909"
+      ],
+      "author_time": "2026-09-21T12:14:54+03:00",
+      "committer_time": "2026-09-21T12:14:54+03:00",
+      "subject": "authority: seal VF-11 slabbed R384 byte-identical reproducibility",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R384_AUTHORITY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6bcbb42115b4c4b3ab11b0e9dfb6cbd16e6b1839",
+      "parents": [
+        "a98beed3669b10ced062be3aea04622597a5d89f"
+      ],
+      "author_time": "2026-09-21T12:14:59+03:00",
+      "committer_time": "2026-09-21T12:14:59+03:00",
+      "subject": "authority: advance VF-11 after byte-identical slab reproducibility",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2306a31ae1995cb331a7da71934b18ec69997f48",
+      "parents": [
+        "6bcbb42115b4c4b3ab11b0e9dfb6cbd16e6b1839"
+      ],
+      "author_time": "2026-09-21T12:21:14+03:00",
+      "committer_time": "2026-09-21T12:21:14+03:00",
+      "subject": "appearance: preserve donor-view lineage in baked atlas",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_bake_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "42522e4b8d2ba3a64f0ac8c78218b5b262bb82aa",
+      "parents": [
+        "2306a31ae1995cb331a7da71934b18ec69997f48"
+      ],
+      "author_time": "2026-09-21T12:21:18+03:00",
+      "committer_time": "2026-09-21T12:21:18+03:00",
+      "subject": "appearance: carry exact source-view lineage through Stage23",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "783dba5ce872f8242f021fbdaf7f97e3127de9a0",
+      "parents": [
+        "42522e4b8d2ba3a64f0ac8c78218b5b262bb82aa"
+      ],
+      "author_time": "2026-09-21T12:21:42+03:00",
+      "committer_time": "2026-09-21T12:21:42+03:00",
+      "subject": "runtime: package exact donor-view lineage as diagnostic provenance",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_package_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d62d761f4829f75f41a6ad807efaceba774b975b",
+      "parents": [
+        "783dba5ce872f8242f021fbdaf7f97e3127de9a0"
+      ],
+      "author_time": "2026-09-21T12:22:30+03:00",
+      "committer_time": "2026-09-21T12:22:30+03:00",
+      "subject": "runtime: preserve donor-view lineage as non-render diagnostic",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9f38f6369d1544050d1992e900d8056fb75ec883",
+      "parents": [
+        "d62d761f4829f75f41a6ad807efaceba774b975b"
+      ],
+      "author_time": "2026-09-21T12:23:18+03:00",
+      "committer_time": "2026-09-21T12:23:18+03:00",
+      "subject": "test: prove donor-view lineage survives without render authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_runtime_v2_native_smoke.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6b79d5f1d2fbd885bce1d6d14cd27085bdf6218d",
+      "parents": [
+        "9f38f6369d1544050d1992e900d8056fb75ec883"
+      ],
+      "author_time": "2026-09-21T12:23:23+03:00",
+      "committer_time": "2026-09-21T12:23:23+03:00",
+      "subject": "test: carry source-view lineage in VF23 synthetic appearance asset",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "957c59366de07e006cbd0f49f6f2482f89c02996",
+      "parents": [
+        "6b79d5f1d2fbd885bce1d6d14cd27085bdf6218d"
+      ],
+      "author_time": "2026-09-21T12:24:24+03:00",
+      "committer_time": "2026-09-21T12:24:24+03:00",
+      "subject": "test: preserve exact donor identities through source-view atlas bake",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "57968206250b49cc83640df137a1cf3089ecc48f",
+      "parents": [
+        "957c59366de07e006cbd0f49f6f2482f89c02996"
+      ],
+      "author_time": "2026-09-21T12:25:01+03:00",
+      "committer_time": "2026-09-21T12:25:01+03:00",
+      "subject": "presentation: fail closed if CAA donor lineage is lost",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c2ced7d1829aab93d67db630230054d006484c04",
+      "parents": [
+        "57968206250b49cc83640df137a1cf3089ecc48f"
+      ],
+      "author_time": "2026-09-21T12:25:44+03:00",
+      "committer_time": "2026-09-21T12:25:44+03:00",
+      "subject": "authority: append native runtime source extension V11",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V11_20260921.json"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5f77527a51e9decbca391839fdbce27625babd7c",
+      "parents": [
+        "c2ced7d1829aab93d67db630230054d006484c04"
+      ],
+      "author_time": "2026-09-21T12:25:48+03:00",
+      "committer_time": "2026-09-21T12:25:48+03:00",
+      "subject": "authority: verify native runtime source seal V11",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/verify_native_runtime_source_seal_v2.py"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1e73865604c6a3443283974f86d5cd258fb13efb",
+      "parents": [
+        "5f77527a51e9decbca391839fdbce27625babd7c"
+      ],
+      "author_time": "2026-09-21T12:25:53+03:00",
+      "committer_time": "2026-09-21T12:25:53+03:00",
+      "subject": "ci: bind native source gate through extension V11",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/native_runtime_source_gate.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2b4054627f1ab6b3f50a477534c200e6073f1cfd",
+      "parents": [
+        "1e73865604c6a3443283974f86d5cd258fb13efb"
+      ],
+      "author_time": "2026-09-21T12:26:55+03:00",
+      "committer_time": "2026-09-21T12:26:55+03:00",
+      "subject": "authority: define CAA donor-view lineage preservation contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SOURCE_VIEW_LINEAGE_AUTHORITY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b082fcca24130f9a9930d28b61108ac8acf4b5b4",
+      "parents": [
+        "2b4054627f1ab6b3f50a477534c200e6073f1cfd"
+      ],
+      "author_time": "2026-09-21T12:27:00+03:00",
+      "committer_time": "2026-09-21T12:27:00+03:00",
+      "subject": "authority: record VF-36 donor-view lineage repair",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bde3c23f30c450a6dcdbc4a34ba6c209470c4ee2",
+      "parents": [
+        "b082fcca24130f9a9930d28b61108ac8acf4b5b4"
+      ],
+      "author_time": "2026-09-21T12:28:33+03:00",
+      "committer_time": "2026-09-21T12:28:33+03:00",
+      "subject": "appearance: make other-view donor support ranking explicit",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d99e0ceeac24d3777b0345923646e826881a9e13",
+      "parents": [
+        "bde3c23f30c450a6dcdbc4a34ba6c209470c4ee2"
+      ],
+      "author_time": "2026-09-21T12:28:37+03:00",
+      "committer_time": "2026-09-21T12:28:37+03:00",
+      "subject": "test: reject circular-proximity donor selection",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9e7a934df8b0cb3b5ef71633c92fb6c6d0558ae6",
+      "parents": [
+        "d99e0ceeac24d3777b0345923646e826881a9e13"
+      ],
+      "author_time": "2026-09-21T12:29:22+03:00",
+      "committer_time": "2026-09-21T12:29:22+03:00",
+      "subject": "appearance: enforce provenance-to-donor lineage semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8da269e77bff7e57507f79a7a7202b19db59e986",
+      "parents": [
+        "9e7a934df8b0cb3b5ef71633c92fb6c6d0558ae6"
+      ],
+      "author_time": "2026-09-21T12:29:26+03:00",
+      "committer_time": "2026-09-21T12:29:26+03:00",
+      "subject": "runtime: validate donor lineage against provenance class",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_package_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b159f159c5e539972c72fc426d756283f0cf1dcb",
+      "parents": [
+        "8da269e77bff7e57507f79a7a7202b19db59e986"
+      ],
+      "author_time": "2026-09-21T12:29:58+03:00",
+      "committer_time": "2026-09-21T12:29:58+03:00",
+      "subject": "authority: define support-ranked CAA donor selection",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_DONOR_SELECTION_AUTHORITY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b051bf9968f96bda83dce28a8eb856f232757683",
+      "parents": [
+        "b159f159c5e539972c72fc426d756283f0cf1dcb"
+      ],
+      "author_time": "2026-09-21T12:30:03+03:00",
+      "committer_time": "2026-09-21T12:30:03+03:00",
+      "subject": "authority: record VF-37 support-ranked donor repair",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0e55c31d15d68186545431c7b06243e70a8b068e",
+      "parents": [
+        "b051bf9968f96bda83dce28a8eb856f232757683"
+      ],
+      "author_time": "2026-09-21T12:31:12+03:00",
+      "committer_time": "2026-09-21T12:31:12+03:00",
+      "subject": "authority: bind donor lineage to same-provenance seam gate",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SOURCE_VIEW_LINEAGE_AUTHORITY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8fb2b42ad3946592b63ea85ace04407da4f4bb41",
+      "parents": [
+        "0e55c31d15d68186545431c7b06243e70a8b068e"
+      ],
+      "author_time": "2026-09-21T12:31:15+03:00",
+      "committer_time": "2026-09-21T12:31:15+03:00",
+      "subject": "authority: map reopened V2 blockers to repair evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "da46ac0954726cd9191e2b738d45cc43f27bf4bd",
+      "parents": [
+        "8fb2b42ad3946592b63ea85ace04407da4f4bb41"
+      ],
+      "author_time": "2026-09-21T12:39:42+03:00",
+      "committer_time": "2026-09-21T12:39:42+03:00",
+      "subject": "appearance: unify RGBA and donor-lineage atlas mapping",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_bake_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d9787f8d1c03d4bc9f95e1ede1e33708ff2b2511",
+      "parents": [
+        "da46ac0954726cd9191e2b738d45cc43f27bf4bd"
+      ],
+      "author_time": "2026-09-21T12:40:07+03:00",
+      "committer_time": "2026-09-21T12:40:07+03:00",
+      "subject": "test: lock donor lineage to exact CAA atlas texel mapping",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "de654da829400553a57e044d01a365a2487d81f7",
+      "parents": [
+        "d9787f8d1c03d4bc9f95e1ede1e33708ff2b2511"
+      ],
+      "author_time": "2026-09-21T12:40:30+03:00",
+      "committer_time": "2026-09-21T12:40:30+03:00",
+      "subject": "authority: record VF-38 unified donor-lineage atlas mapping",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "67017ed3888c336b29737dc9c4cc2a974aa7cdca",
+      "parents": [
+        "de654da829400553a57e044d01a365a2487d81f7"
+      ],
+      "author_time": "2026-09-21T12:41:54+03:00",
+      "committer_time": "2026-09-21T12:41:54+03:00",
+      "subject": "test: chain exact production CAA artifacts through Stage46",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "16f4d80b3b0f966359a2a89ef7597085c73312f6",
+      "parents": [
+        "67017ed3888c336b29737dc9c4cc2a974aa7cdca"
+      ],
+      "author_time": "2026-09-21T12:42:15+03:00",
+      "committer_time": "2026-09-21T12:42:15+03:00",
+      "subject": "authority: strengthen VF-23 with same-context Stage20-46 chain",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6b577f4ea40a545d6fb0f5205bc2a2b1dddbe816",
+      "parents": [
+        "16f4d80b3b0f966359a2a89ef7597085c73312f6"
+      ],
+      "author_time": "2026-09-21T12:42:19+03:00",
+      "committer_time": "2026-09-21T12:42:19+03:00",
+      "subject": "authority: bind VF-23 blocker to same-context Stage20-46 proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6be6e06337edf17c14cfdbbac12a8ac619629193",
+      "parents": [
+        "6b577f4ea40a545d6fb0f5205bc2a2b1dddbe816"
+      ],
+      "author_time": "2026-09-21T12:44:25+03:00",
+      "committer_time": "2026-09-21T12:44:25+03:00",
+      "subject": "governance: require explicit user authorization before witness init",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "227edc096866de5accb9642008693ccf0251ae44",
+      "parents": [
+        "6be6e06337edf17c14cfdbbac12a8ac619629193"
+      ],
+      "author_time": "2026-09-21T12:44:30+03:00",
+      "committer_time": "2026-09-21T12:44:30+03:00",
+      "subject": "ci: hard-gate Knight preflight on explicit user approval",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/subject2_knight_observation_preflight.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6ac16360908a404dd306d8339a49f0b8d2493958",
+      "parents": [
+        "227edc096866de5accb9642008693ccf0251ae44"
+      ],
+      "author_time": "2026-09-21T12:44:46+03:00",
+      "committer_time": "2026-09-21T12:44:46+03:00",
+      "subject": "test: separate technical readiness from explicit witness approval",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_witness_orchestration_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a603b01f9a4b5156ee3917dfb7605dd22b5b72be",
+      "parents": [
+        "6ac16360908a404dd306d8339a49f0b8d2493958"
+      ],
+      "author_time": "2026-09-21T12:45:17+03:00",
+      "committer_time": "2026-09-21T12:45:17+03:00",
+      "subject": "authority: record VF-39 explicit witness approval interlock",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f913dc6c76343ce6373980343998aaf2e505e7e1",
+      "parents": [
+        "a603b01f9a4b5156ee3917dfb7605dd22b5b72be"
+      ],
+      "author_time": "2026-09-21T12:45:22+03:00",
+      "committer_time": "2026-09-21T12:45:22+03:00",
+      "subject": "authority: machine-enforce explicit user approval blocker",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "29ee7c59e8dd3697a918abdb77d0a3b0bf8f3cce",
+      "parents": [
+        "f913dc6c76343ce6373980343998aaf2e505e7e1"
+      ],
+      "author_time": "2026-09-21T12:46:30+03:00",
+      "committer_time": "2026-09-21T12:46:30+03:00",
+      "subject": "authority: remove stale READY status during V2 reclosure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/AUTHORITY_MAP_V1.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4cca6201435198416cf88c6c1cb0ca9d8dfc6de5",
+      "parents": [
+        "29ee7c59e8dd3697a918abdb77d0a3b0bf8f3cce"
+      ],
+      "author_time": "2026-09-21T12:46:35+03:00",
+      "committer_time": "2026-09-21T12:46:35+03:00",
+      "subject": "docs: align current state with active V2 reclosure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8bad8a5234490735f958510501d2a6c9453e3212",
+      "parents": [
+        "4cca6201435198416cf88c6c1cb0ca9d8dfc6de5"
+      ],
+      "author_time": "2026-09-21T12:47:16+03:00",
+      "committer_time": "2026-09-21T12:47:16+03:00",
+      "subject": "authority: align V2 context with active reclosure and approval interlock",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CONTEXT_STATE_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fd04b86f4eedc0764f1a8100f65f5695d549888b",
+      "parents": [
+        "8bad8a5234490735f958510501d2a6c9453e3212"
+      ],
+      "author_time": "2026-09-21T12:49:31+03:00",
+      "committer_time": "2026-09-21T12:49:31+03:00",
+      "subject": "governance: require explicit approval on every witness execute",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "255bc418a835358fcb9ef97b3a6fae865b2e7c8f",
+      "parents": [
+        "fd04b86f4eedc0764f1a8100f65f5695d549888b"
+      ],
+      "author_time": "2026-09-21T12:49:34+03:00",
+      "committer_time": "2026-09-21T12:49:34+03:00",
+      "subject": "test: block existing witness execution without explicit approval",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_witness_orchestration_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ed9b34a89c88b75ccdfd9c9da7125d9e190b4626",
+      "parents": [
+        "255bc418a835358fcb9ef97b3a6fae865b2e7c8f"
+      ],
+      "author_time": "2026-09-21T12:49:55+03:00",
+      "committer_time": "2026-09-21T12:49:55+03:00",
+      "subject": "authority: close VF-39 existing-ledger authorization bypass",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2491275f7fc6b085032431d2f5026827a5d5cf96",
+      "parents": [
+        "ed9b34a89c88b75ccdfd9c9da7125d9e190b4626"
+      ],
+      "author_time": "2026-09-21T12:51:15+03:00",
+      "committer_time": "2026-09-21T12:51:15+03:00",
+      "subject": "governance: fingerprint runtime and promotion gates in V2 closure",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a25f5f8754056b6722724e35502cf01d8f02c0b0",
+      "parents": [
+        "2491275f7fc6b085032431d2f5026827a5d5cf96"
+      ],
+      "author_time": "2026-09-21T12:51:20+03:00",
+      "committer_time": "2026-09-21T12:51:20+03:00",
+      "subject": "test: bind V2 closure to promotion and source-seal governance",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_witness_orchestration_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4d007d5c2b906e50e7da3ff6e178df5c7610d1bc",
+      "parents": [
+        "a25f5f8754056b6722724e35502cf01d8f02c0b0"
+      ],
+      "author_time": "2026-09-21T12:51:43+03:00",
+      "committer_time": "2026-09-21T12:51:43+03:00",
+      "subject": "authority: record VF-40 exact closure governance repair",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "727e3ba4b73184a6fd57f9e688d3f8cf950fcb8e",
+      "parents": [
+        "4d007d5c2b906e50e7da3ff6e178df5c7610d1bc"
+      ],
+      "author_time": "2026-09-21T12:51:49+03:00",
+      "committer_time": "2026-09-21T12:51:49+03:00",
+      "subject": "authority: bind exact-head blocker to expanded closure fingerprint",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c7abb5d5d6be3d84ca1d6c144e055e979cff2605",
+      "parents": [
+        "727e3ba4b73184a6fd57f9e688d3f8cf950fcb8e"
+      ],
+      "author_time": "2026-09-21T12:52:54+03:00",
+      "committer_time": "2026-09-21T12:52:54+03:00",
+      "subject": "governance: keep witness approval valid across run resume",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "91221fc46b0b0448fb234deea15b75d49dc9c3a2",
+      "parents": [
+        "c7abb5d5d6be3d84ca1d6c144e055e979cff2605"
+      ],
+      "author_time": "2026-09-21T12:53:00+03:00",
+      "committer_time": "2026-09-21T12:53:00+03:00",
+      "subject": "test: preserve explicit approval across witness resume",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_witness_orchestration_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f46d6689cb9e09d12452e8b106b1ca3d46e315ac",
+      "parents": [
+        "91221fc46b0b0448fb234deea15b75d49dc9c3a2"
+      ],
+      "author_time": "2026-09-21T12:53:16+03:00",
+      "committer_time": "2026-09-21T12:53:16+03:00",
+      "subject": "authority: finalize VF-39 durable approval semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

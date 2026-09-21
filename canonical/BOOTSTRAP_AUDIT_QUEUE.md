@@ -4,10 +4,10 @@
 > Bootstrap: `BOOTSTRAP_AUDIT_CLOSED`
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
-- Census artifacts in declared scope: **516 / 516 discovered (100%)**
-- Semantically reconciled: **55**
-- Catalogued but unreviewed: **461**
-- Semantic coverage: **10.7%**
+- Census artifacts in declared scope: **526 / 526 discovered (100%)**
+- Semantically reconciled: **57**
+- Catalogued but unreviewed: **469**
+- Semantic coverage: **10.8%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -387,17 +387,28 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 
 - `KA-417397CA092A` `AUTHORITY_DECISION` — `main` :: `canonical/STAGE14_SUBSTRATE_ADEQUACY_CALIBRATION_AUTHORITY_V2_20260920.json` @ blob `d20f4ab602f7`
 
-### 2026-09-21 :: COMPILER (5)
+### 2026-09-21 :: COMPILER (7)
 
+- `KA-7D703B10C014` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V10_20260921.json` @ blob `2589a36dcdb7`
+- `KA-4BD0219971E8` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V11_20260921.json` @ blob `922847a258df`
 - `KA-218AD4A05035` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V5_20260921.json` @ blob `cf70e8986d09`
 - `KA-C41F4F6E4D4C` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V6_20260921.json` @ blob `96252588d57c`
 - `KA-61AD2E4922B9` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V7_20260921.json` @ blob `630e66e1d06a`
 - `KA-772E3BDDCF56` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V8_20260921.json` @ blob `74a015df6899`
 - `KA-FAA73E4F13E5` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V9_20260921.json` @ blob `5aca262f0f0b`
 
-### 2026-09-21 :: IRIS (1)
+### 2026-09-21 :: CROSS_CUTTING_OTHER (1)
 
-- `KA-BADDA90A1DA5` `AUTHORITY_DECISION` — `main` :: `canonical/VF09_DEPTH_EQUIVALENCE_AUTHORITY_V1_20260921.json` @ blob `8bf90effb763`
+- `KA-F541A1071FE0` `CLOSURE` — `main` :: `canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json` @ blob `030a39522a06`
+
+### 2026-09-21 :: REPOSITORY_GOVERNANCE (6)
+
+- `KA-A55049C8D2AD` `AUTHORITY_DECISION` — `main` :: `canonical/CAA_V2_DONOR_SELECTION_AUTHORITY_V1_20260921.json` @ blob `cf24942e38a4`
+- `KA-31BB07A93F46` `AUTHORITY_DECISION` — `main` :: `canonical/CAA_V2_SOURCE_VIEW_LINEAGE_AUTHORITY_V1_20260921.json` @ blob `7d82c008e7b6`
+- `KA-FF7B7482167D` `AUTHORITY_DECISION` — `main` :: `canonical/VF10_DIRECTION_TRANSITION_AUTHORITY_V1_20260921.json` @ blob `0121a1e6388e`
+- `KA-EE2429EB5F1E` `AUTHORITY_DECISION` — `main` :: `canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R384_AUTHORITY_V1_20260921.json` @ blob `798eb3fd7621`
+- `KA-8616E5AB19E1` `AUTHORITY_DECISION` — `main` :: `canonical/VF13_RIGIDITY_NOOP_AUTHORITY_V1_20260921.json` @ blob `207f921ee9da`
+- `KA-5380C6C86298` `AUTHORITY_DECISION` — `main` :: `canonical/VF15_DYNAMIC_CONTINUITY_AUTHORITY_V1_20260921.json` @ blob `11d64f378484`
 
 ### UNKNOWN_DATE :: ARACHNE_SKIN (10)
 
@@ -499,7 +510,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D2D319509ACF` `WORKFLOW` — `main` :: `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` @ blob `16bf42a72ecc`
 - `KA-03510A41D0D4` `WORKFLOW` — `main` :: `.github/workflows/prefit_observation_authority_v1.yml` @ blob `b04004000018`
 - `KA-FDE35053B8A7` `WORKFLOW` — `main` :: `.github/workflows/single_family_data_contract_v1.yml` @ blob `929df12d859e`
-- `KA-93C47B9C20E9` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `66eaeaa91a2b`
+- `KA-40EBADED18B6` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `ef5d3785f1ec`
 - `KA-25BB7CDC0AB9` `AUTHORITY_DECISION` — `main` :: `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` @ blob `6b5fff12a484`
 - `KA-DC74ABB19F22` `PREREG` — `main` :: `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` @ blob `c01e1a65f75e`
 - `KA-E1571E78A4A5` `PREREG` — `main` :: `canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md` @ blob `36aef9ae6ecd`

@@ -6,15 +6,15 @@
 ## 60-second state
 
 - Product: automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics
-- Current witness: Subject-2 Knight (review-ready; execution held for explicit user approval)
+- Current witness: Subject-2 Knight (technical readiness reclosure active; execution forbidden)
 - Current module: appearance fidelity + dynamic visual integrity reclosure
 - Current state: REOPENED__WITNESS_FORBIDDEN
 - Active experiment: V2_IMPLEMENTATION_ASSEMBLY
 - Most recent closed gate: PRIOR_READY_SEAL_REVOKED_BY_POST_SEAL_APPEARANCE_REVIEW
-- Canonical main: 4c56d520023b
+- Canonical main: f46d6689cb9e
 - Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
 - Plan SHA-256: a41ccb9a157624fecc2177a05150646012577f443cc27938b7e93c1e0ff020e4
-- Promotion block: Close tile-density qualification, source-constrained completion quality, cross-view RGB compatibility, dynamic alpha-hole and scattered-hole/speckle gates before any Knight execution.
+- Promotion block: VF-11 R512 remains the active scientific blocker; VF-23 same-context Stage20->46 production-policy E2E and exact-head mainline/runtime/source/orchestration closure must also pass before technical reseal.
 - Scope warning: FIT1 or single-subject closure is not unseen/generalization evidence; current learned models are not claimed final.
 
 ## Current machine authority
@@ -59,7 +59,7 @@
 
 ## Current scientific question
 
-Can geometry, appearance completion and dynamic rendering jointly eliminate visible holes/speckle while preserving source art without hallucination?
+Can the reopened geometry/appearance/runtime fidelity audit be fully reclosed subject-free, including R512 feature survival and exact production-policy E2E, without relaxing thresholds or using Knight?
 
 ## Settled invariants
 
@@ -79,7 +79,7 @@ Can geometry, appearance completion and dynamic rendering jointly eliminate visi
 - Product closure is Stage46 and requires native Dynamic Visual Integrity.
 - Presentation partition may use qualified source-backed appearance boundaries but may not invent semantic object identity.
 - Dynamic appearance shipping gates are intrinsic surface metrics invariant to rigid 3D motion; screen projection conditioning is diagnostic only.
-- Knight execution requires exact READY_FOR_WITNESS_EXECUTION and explicit user approval.
+- Knight execution requires exact READY_FOR_WITNESS_EXECUTION plus the separate machine-enforced APPROVED_EXPLICITLY_BY_USER authorization state.
 
 ## Execution environment
 
@@ -106,7 +106,7 @@ Read in this order:
 13. CURRENT_STATE.md
 14. canonical/CONTEXT_STATE_V2.json
 
-Resume rule: Implementation assembly is review-ready; Knight remains a separate user-authorized scientific witness.
+Resume rule: Implementation assembly is complete only after VF-11, VF-23 and exact-head CI reclosure are sealed; technical READY still does not authorize Knight without separate explicit user approval.
 
 ## Packet validity
 

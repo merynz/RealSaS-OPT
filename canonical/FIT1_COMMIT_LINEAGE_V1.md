@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2682**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2772**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2694,6 +2694,96 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-21T11:07:08+03:00` | `bc292e921d54` | yes | OTHER | research: add subject-free VF-10 transition calibration | `tools/vf10_direction_transition_calibration.py` | `main` |
 | `2026-09-21T11:07:26+03:00` | `1e9e822cd08e` | yes | CI_TEST | ci: calibrate VF-10 adjacent-direction transition gate | `.github/workflows/vf10_direction_transition_calibration.yml` | `main` |
 | `2026-09-21T11:13:01+03:00` | `4c56d520023b` | yes | COMPILER_PROOF | presentation: make rigid classification require LBS no-op proof | `compiler/realsas_compiler_core/product_state_v2.py` | `main` |
+| `2026-09-21T11:37:09+03:00` | `d867ff174615` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-21T11:38:46+03:00` | `d396e0aa9a72` | yes | COMPILER_PROOF | fix: import numpy for presentation rigidity no-op probe | `compiler/realsas_compiler_core/product_state_v2.py` | `main` |
+| `2026-09-21T11:38:51+03:00` | `0328ebbe04cb` | yes | OTHER | research: slab VF-11 field construction for R512 sweep | `tools/vf11_geometry_feature_survival_panel.py` | `main` |
+| `2026-09-21T11:39:40+03:00` | `6b12ac6ec732` | yes | GOVERNANCE_CONTINUITY | authority: seal VF-11 R384 insufficiency and authorize R512 | `canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R384_AUTHORITY_V1_20260921.json` | `main` |
+| `2026-09-21T11:39:44+03:00` | `291f2d4325d0` | yes | CI_TEST | ci: run VF-11 same-physical-feature R512 requery sweep | `.github/workflows/vf11_geometry_feature_survival_r512.yml` | `main` |
+| `2026-09-21T11:40:34+03:00` | `a1ac7ffadbec` | yes | COMPILER_PROOF | fix: fail closed on missing rigidity-probe skin rows | `compiler/realsas_compiler_core/product_state_v2.py` | `main` |
+| `2026-09-21T11:40:39+03:00` | `5e76b6e36295` | yes | CI_TEST, COMPILER_PROOF | test: adversarially prove presentation rigidity no-op classification | `tests/compiler/test_presentation_partition_v2.py` | `main` |
+| `2026-09-21T11:41:22+03:00` | `ae97ecbfc874` | yes | COMPILER_PROOF | presentation: bind rigidity no-op proof to explicit policy parameters | `compiler/realsas_compiler_core/product_state_v2.py` | `main` |
+| `2026-09-21T11:41:27+03:00` | `10dab5d4bf5b` | yes | COMPILER_PROOF | presentation: consume frozen rigidity no-op policy at Stage37 | `compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py` | `main` |
+| `2026-09-21T11:41:30+03:00` | `e09667d045ca` | yes | GOVERNANCE_CONTINUITY | authority: freeze VF-13 rigidity no-op policy parameters | `canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json` | `main` |
+| `2026-09-21T11:42:16+03:00` | `2b2f36b913ca` | yes | OTHER | research: add subject-free VF-13 rigidity no-op calibration | `tools/vf13_rigidity_noop_calibration.py` | `main` |
+| `2026-09-21T11:42:33+03:00` | `2d8eb726db0a` | yes | CI_TEST | ci: validate VF-13 rigidity no-op separation | `.github/workflows/vf13_rigidity_noop_calibration.yml` | `main` |
+| `2026-09-21T11:44:09+03:00` | `654e6293fb86` | yes | OTHER | research: record VF-10 non-separation without minting a gate | `tools/vf10_direction_transition_calibration.py` | `main` |
+| `2026-09-21T11:44:13+03:00` | `f509771685a6` | yes | CI_TEST | ci: preserve VF-10 negative calibration as evidence | `.github/workflows/vf10_direction_transition_calibration.yml` | `main` |
+| `2026-09-21T11:44:30+03:00` | `7813a8b12e98` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: seal discrete source-authoritative direction selection | `compiler/realsas_compiler_core/runtime_package_v2.py` | `main` |
+| `2026-09-21T11:44:34+03:00` | `4fd548393ca2` | yes | RUNTIME_PRODUCT | runtime: native-enforce discrete direction selection | `runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp` | `main` |
+| `2026-09-21T11:45:04+03:00` | `8a33f36e3a52` | yes | CI_TEST, COMPILER_PROOF, RUNTIME_PRODUCT | test: prove discrete direction switching has no blend or hysteresis | `tests/compiler/test_runtime_v2_native_smoke.py` | `main` |
+| `2026-09-21T11:45:25+03:00` | `594284d3ca09` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: append native runtime source extension V10 | `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V10_20260921.json` | `main` |
+| `2026-09-21T11:45:49+03:00` | `edada3b2e820` | yes | GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: verify native runtime source seal V10 | `tools/verify_native_runtime_source_seal_v2.py` | `main` |
+| `2026-09-21T11:45:53+03:00` | `a9ce21662afc` | yes | CI_TEST, RUNTIME_PRODUCT | ci: bind native source gate through extension V10 | `.github/workflows/native_runtime_source_gate.yml` | `main` |
+| `2026-09-21T11:46:32+03:00` | `7e7294315c04` | yes | OTHER | fix: preserve broadcast semantics in slabbed VF-11 box SDF | `tools/vf11_geometry_feature_survival_panel.py` | `main` |
+| `2026-09-21T11:49:41+03:00` | `96600621f156` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | geometry: add exact interior shared-edge continuity proof | `compiler/realsas_compiler_core/dynamic_geometry_integrity_v2.py` | `main` |
+| `2026-09-21T11:49:46+03:00` | `68ee0f61b34b` | yes | CI_TEST, COMPILER_PROOF | test: distinguish topology-owned seam cracks from articulation gaps | `tests/compiler/test_dynamic_geometry_integrity_v2.py` | `main` |
+| `2026-09-21T11:50:23+03:00` | `a5d7de80a4b4` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | geometry: cover all topology-owned shared edges in continuity proof | `compiler/realsas_compiler_core/dynamic_geometry_integrity_v2.py` | `main` |
+| `2026-09-21T11:50:44+03:00` | `d8037dadd926` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | runtime: gate Stage45 on topology-owned shared-edge continuity | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
+| `2026-09-21T11:51:36+03:00` | `b8c1df11ba24` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | closure: require topology-owned dynamic seam continuity proof | `compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py` | `main` |
+| `2026-09-21T11:52:03+03:00` | `e280bff0c249` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY | test: bind product closure to topology-owned seam continuity | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T11:52:54+03:00` | `edb5b5628899` | yes | CI_TEST, COMPILER_PROOF | test: prove top-left raster fill leaves no shared-edge seam crack | `tests/compiler/test_dynamic_geometry_integrity_v2.py` | `main` |
+| `2026-09-21T11:53:22+03:00` | `8eb744b1be5b` | yes | GOVERNANCE_CONTINUITY | authority: freeze VF-15 topology-owned continuity scope | `canonical/VF15_DYNAMIC_CONTINUITY_AUTHORITY_V1_20260921.json` | `main` |
+| `2026-09-21T11:53:35+03:00` | `245cae0988ec` | yes | GOVERNANCE_CONTINUITY | authority: record VF-15 topology-owned continuity repair | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T11:55:07+03:00` | `e62b0e6ef60c` | yes | GOVERNANCE_CONTINUITY | authority: seal VF-13 rigidity no-op calibration | `canonical/VF13_RIGIDITY_NOOP_AUTHORITY_V1_20260921.json` | `main` |
+| `2026-09-21T11:55:10+03:00` | `d909f609f903` | yes | GOVERNANCE_CONTINUITY | authority: seal VF-10 negative calibration and discrete direction semantics | `canonical/VF10_DIRECTION_TRANSITION_AUTHORITY_V1_20260921.json` | `main` |
+| `2026-09-21T11:55:49+03:00` | `1fb777078e71` | yes | GOVERNANCE_CONTINUITY | authority: record VF-10 negative result, VF-11 R512, VF-13 calibration pass | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T11:56:35+03:00` | `d3488162d289` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | fix: deduplicate VF-15 continuity report fields | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
+| `2026-09-21T11:59:08+03:00` | `eb15cf134100` | yes | CI_TEST, COMPILER_PROOF | test: parameterize subject-free adapter fixture resolution | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T12:01:19+03:00` | `a1699facaafa` | yes | GOVERNANCE_CONTINUITY | authority: refreeze exact production CAA policy after visual recalibration | `canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json` | `main` |
+| `2026-09-21T12:01:23+03:00` | `2693c6378fe0` | yes | CI_TEST, COMPILER_PROOF | test: require refrozen production CAA policy status | `tests/compiler/test_caa_v2_subject_free_policy.py` | `main` |
+| `2026-09-21T12:01:28+03:00` | `4d7968f21912` | yes | CI_TEST, COMPILER_PROOF | test: require refrozen production CAA policy status | `tests/compiler/test_dynamic_appearance_conditioning_v2.py` | `main` |
+| `2026-09-21T12:01:45+03:00` | `fdc735b9ad6d` | yes | GOVERNANCE_CONTINUITY | authority: seal CAA V2 production policy refreeze | `canonical/CAA_V2_POLICY_REFREEZE_AUTHORITY_V1_20260921.json` | `main` |
+| `2026-09-21T12:02:18+03:00` | `81b5794c3320` | yes | CI_TEST, COMPILER_PROOF | test: run Stage20-25 on exact frozen production CAA policy | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T12:02:51+03:00` | `bf6e39ca4276` | yes | CI_TEST, COMPILER_PROOF | test: run Stage37-46 on exact production dynamic policy | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T12:12:36+03:00` | `a2a88e17e839` | yes | CI_TEST | ci: add VF-23 exact production-policy representative bank | `.github/workflows/vf23_production_policy_e2e_bank.yml` | `main` |
+| `2026-09-21T12:12:56+03:00` | `df60ff1683f0` | yes | GOVERNANCE_CONTINUITY | authority: bind VF-23 to exact production-policy representative bank | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T12:14:54+03:00` | `a98beed3669b` | yes | GOVERNANCE_CONTINUITY | authority: seal VF-11 slabbed R384 byte-identical reproducibility | `canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R384_AUTHORITY_V1_20260921.json` | `main` |
+| `2026-09-21T12:14:59+03:00` | `6bcbb42115b4` | yes | GOVERNANCE_CONTINUITY | authority: advance VF-11 after byte-identical slab reproducibility | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T12:21:14+03:00` | `2306a31ae199` | yes | COMPILER_PROOF | appearance: preserve donor-view lineage in baked atlas | `compiler/realsas_compiler_core/appearance_bake_v2.py` | `main` |
+| `2026-09-21T12:21:18+03:00` | `42522e4b8d2b` | yes | COMPILER_PROOF | appearance: carry exact source-view lineage through Stage23 | `compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py` | `main` |
+| `2026-09-21T12:21:42+03:00` | `783dba5ce872` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: package exact donor-view lineage as diagnostic provenance | `compiler/realsas_compiler_core/runtime_package_v2.py` | `main` |
+| `2026-09-21T12:22:30+03:00` | `d62d761f4829` | yes | RUNTIME_PRODUCT | runtime: preserve donor-view lineage as non-render diagnostic | `runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp` | `main` |
+| `2026-09-21T12:23:18+03:00` | `9f38f6369d15` | yes | CI_TEST, COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | test: prove donor-view lineage survives without render authority | `tests/compiler/test_runtime_v2_native_smoke.py` | `main` |
+| `2026-09-21T12:23:23+03:00` | `6b79d5f1d2fb` | yes | CI_TEST, COMPILER_PROOF | test: carry source-view lineage in VF23 synthetic appearance asset | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T12:24:24+03:00` | `957c59366de0` | yes | CI_TEST, COMPILER_PROOF | test: preserve exact donor identities through source-view atlas bake | `tests/compiler/test_visibility_and_caa_v2.py` | `main` |
+| `2026-09-21T12:25:01+03:00` | `57968206250b` | yes | COMPILER_PROOF | presentation: fail closed if CAA donor lineage is lost | `compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py` | `main` |
+| `2026-09-21T12:25:44+03:00` | `c2ced7d1829a` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: append native runtime source extension V11 | `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V11_20260921.json` | `main` |
+| `2026-09-21T12:25:48+03:00` | `5f77527a51e9` | yes | GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: verify native runtime source seal V11 | `tools/verify_native_runtime_source_seal_v2.py` | `main` |
+| `2026-09-21T12:25:53+03:00` | `1e73865604c6` | yes | CI_TEST, RUNTIME_PRODUCT | ci: bind native source gate through extension V11 | `.github/workflows/native_runtime_source_gate.yml` | `main` |
+| `2026-09-21T12:26:55+03:00` | `2b4054627f1a` | yes | GOVERNANCE_CONTINUITY | authority: define CAA donor-view lineage preservation contract | `canonical/CAA_V2_SOURCE_VIEW_LINEAGE_AUTHORITY_V1_20260921.json` | `main` |
+| `2026-09-21T12:27:00+03:00` | `b082fcca2413` | yes | GOVERNANCE_CONTINUITY | authority: record VF-36 donor-view lineage repair | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T12:28:33+03:00` | `bde3c23f30c4` | yes | COMPILER_PROOF | appearance: make other-view donor support ranking explicit | `compiler/realsas_compiler_core/appearance_compile_v2.py` | `main` |
+| `2026-09-21T12:28:37+03:00` | `d99e0ceeac24` | yes | CI_TEST, COMPILER_PROOF | test: reject circular-proximity donor selection | `tests/compiler/test_visibility_and_caa_v2.py` | `main` |
+| `2026-09-21T12:29:22+03:00` | `9e7a934df8b0` | yes | COMPILER_PROOF | appearance: enforce provenance-to-donor lineage semantics | `compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py` | `main` |
+| `2026-09-21T12:29:26+03:00` | `8da269e77bff` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: validate donor lineage against provenance class | `compiler/realsas_compiler_core/runtime_package_v2.py` | `main` |
+| `2026-09-21T12:29:58+03:00` | `b159f159c5e5` | yes | GOVERNANCE_CONTINUITY | authority: define support-ranked CAA donor selection | `canonical/CAA_V2_DONOR_SELECTION_AUTHORITY_V1_20260921.json` | `main` |
+| `2026-09-21T12:30:03+03:00` | `b051bf9968f9` | yes | GOVERNANCE_CONTINUITY | authority: record VF-37 support-ranked donor repair | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T12:31:12+03:00` | `0e55c31d15d6` | yes | GOVERNANCE_CONTINUITY | authority: bind donor lineage to same-provenance seam gate | `canonical/CAA_V2_SOURCE_VIEW_LINEAGE_AUTHORITY_V1_20260921.json` | `main` |
+| `2026-09-21T12:31:15+03:00` | `8fb2b42ad394` | yes | GOVERNANCE_CONTINUITY | authority: map reopened V2 blockers to repair evidence | `canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json` | `main` |
+| `2026-09-21T12:39:42+03:00` | `da46ac095472` | yes | COMPILER_PROOF | appearance: unify RGBA and donor-lineage atlas mapping | `compiler/realsas_compiler_core/appearance_bake_v2.py` | `main` |
+| `2026-09-21T12:40:07+03:00` | `d9787f8d1c03` | yes | CI_TEST, COMPILER_PROOF | test: lock donor lineage to exact CAA atlas texel mapping | `tests/compiler/test_visibility_and_caa_v2.py` | `main` |
+| `2026-09-21T12:40:30+03:00` | `de654da82940` | yes | GOVERNANCE_CONTINUITY | authority: record VF-38 unified donor-lineage atlas mapping | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T12:41:54+03:00` | `67017ed3888c` | yes | CI_TEST, COMPILER_PROOF | test: chain exact production CAA artifacts through Stage46 | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
+| `2026-09-21T12:42:15+03:00` | `16f4d80b3b0f` | yes | GOVERNANCE_CONTINUITY | authority: strengthen VF-23 with same-context Stage20-46 chain | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T12:42:19+03:00` | `6b577f4ea40a` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY | authority: bind VF-23 blocker to same-context Stage20-46 proof | `canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json` | `main` |
+| `2026-09-21T12:44:25+03:00` | `6be6e06337ed` | yes | COMPILER_PROOF | governance: require explicit user authorization before witness init | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-21T12:44:30+03:00` | `227edc096866` | yes | CI_TEST | ci: hard-gate Knight preflight on explicit user approval | `.github/workflows/subject2_knight_observation_preflight.yml` | `main` |
+| `2026-09-21T12:44:46+03:00` | `6ac16360908a` | yes | CI_TEST | test: separate technical readiness from explicit witness approval | `tests/repository/test_witness_orchestration_v2.py` | `main` |
+| `2026-09-21T12:45:17+03:00` | `a603b01f9a4b` | yes | GOVERNANCE_CONTINUITY | authority: record VF-39 explicit witness approval interlock | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T12:45:22+03:00` | `f913dc6c7634` | yes | GOVERNANCE_CONTINUITY | authority: machine-enforce explicit user approval blocker | `canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json` | `main` |
+| `2026-09-21T12:46:30+03:00` | `29ee7c59e8dd` | yes | GOVERNANCE_CONTINUITY | authority: remove stale READY status during V2 reclosure | `canonical/AUTHORITY_MAP_V1.json` | `main` |
+| `2026-09-21T12:46:35+03:00` | `4cca62014351` | yes | GOVERNANCE_CONTINUITY | docs: align current state with active V2 reclosure | `CURRENT_STATE.md` | `main` |
+| `2026-09-21T12:47:16+03:00` | `8bad8a523449` | yes | GOVERNANCE_CONTINUITY | authority: align V2 context with active reclosure and approval interlock | `canonical/CONTEXT_STATE_V2.json` | `main` |
+| `2026-09-21T12:49:31+03:00` | `fd04b86f4eed` | yes | COMPILER_PROOF | governance: require explicit approval on every witness execute | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-21T12:49:34+03:00` | `255bc418a835` | yes | CI_TEST | test: block existing witness execution without explicit approval | `tests/repository/test_witness_orchestration_v2.py` | `main` |
+| `2026-09-21T12:49:55+03:00` | `ed9b34a89c88` | yes | GOVERNANCE_CONTINUITY | authority: close VF-39 existing-ledger authorization bypass | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T12:51:15+03:00` | `2491275f7fc6` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | governance: fingerprint runtime and promotion gates in V2 closure | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-21T12:51:20+03:00` | `a25f5f875405` | yes | CI_TEST | test: bind V2 closure to promotion and source-seal governance | `tests/repository/test_witness_orchestration_v2.py` | `main` |
+| `2026-09-21T12:51:43+03:00` | `4d007d5c2b90` | yes | GOVERNANCE_CONTINUITY | authority: record VF-40 exact closure governance repair | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T12:51:49+03:00` | `727e3ba4b731` | yes | GOVERNANCE_CONTINUITY | authority: bind exact-head blocker to expanded closure fingerprint | `canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json` | `main` |
+| `2026-09-21T12:52:54+03:00` | `c7abb5d5d6be` | yes | COMPILER_PROOF | governance: keep witness approval valid across run resume | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
+| `2026-09-21T12:53:00+03:00` | `91221fc46b0b` | yes | CI_TEST | test: preserve explicit approval across witness resume | `tests/repository/test_witness_orchestration_v2.py` | `main` |
+| `2026-09-21T12:53:16+03:00` | `f46d6689cb9e` | yes | GOVERNANCE_CONTINUITY | authority: finalize VF-39 durable approval semantics | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
 
 ## Use rule
 

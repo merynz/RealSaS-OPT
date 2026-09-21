@@ -17,7 +17,9 @@
     "max_supported_face_count": 28900,
     "internal_alpha": "PREMULTIPLIED",
     "transport_png_alpha": "STRAIGHT",
-    "unpremultiply_export_boundary_count": 1
+    "unpremultiply_export_boundary_count": 1,
+    "color_space": "SRGB_TRANSPORT__LINEAR_LIGHT_PREMULTIPLIED_FILTERING",
+    "max_visibility_layers": 4
   },
   "source_lock_policy": {
     "min_abs_normal_camera_cos": 0.17364817766693041,
@@ -60,7 +62,9 @@
     "dynamic_max_micro_visible_pixel_fraction_per_frame": 0.005,
     "dynamic_max_unmeasurable_consequential_visible_face_count": 0,
     "rest_max_exact_depth_ambiguous_fraction": 0,
-    "dynamic_max_exact_depth_ambiguous_fraction": 0
+    "dynamic_max_exact_depth_ambiguous_fraction": 0,
+    "dynamic_max_visible_orientation_flip_face_count": 0,
+    "dynamic_max_visibility_layer_overflow_pixel_count": 0
   },
   "rationale": {
     "angle_support": "abs(normal dot camera-forward) >= cos(80deg); at least 10deg away from exact grazing, used only for correspondence eligibility, not RGB quality.",
@@ -73,7 +77,10 @@
     "dynamic_appearance_conditioning": "Every consequential dynamically visible face is checked in the intrinsic textured-surface metric. The affine UV-to-posed-3D map and generalized rest-to-posed / previous-to-posed surface metrics bound texture and line-art stretch/shear while remaining invariant to rigid 3D rotation and translation. Screen projection conditioning is diagnostic only so legitimate foreshortening is not misclassified as art deformation. Thresholds are subject-free and may not be tuned from Knight.",
     "dynamic_appearance_conditioning_calibration": "Thresholds are selected by canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json from a subject-free synthetic benign/adversarial deformation bank. They are frozen before Knight and may not be relaxed from witness outcome.",
     "micro_face_visibility": "Visible face fragments below the conditioning pixel floor are not silently exempt: their screen-pixel mass is independently bounded, and any consequential face that still cannot support intrinsic conditioning is a hard failure.",
-    "visibility_ambiguity": "Exact coplanar overlap between distinct faces is forbidden while V2 exact-depth ties are resolved only by sealed face index. Near-depth ambiguity remains an open subject-free calibration item and may not be guessed from Knight."
+    "visibility_ambiguity": "Exact coplanar overlap between distinct faces is forbidden while V2 exact-depth ties are resolved only by sealed face index. Near-depth ambiguity remains an open subject-free calibration item and may not be guessed from Knight.",
+    "visibility_layers": "Geometry contributes up to four exact depth-sorted layers per pixel. Appearance alpha never chooses the geometric ordering; all supported layers are composited front-to-back in linear premultiplied light. Any fifth-layer overflow is a hard product failure.",
+    "surface_sidedness": "Until separately qualified backside appearance exists, a consequential face may not reverse projected orientation relative to its rest orientation in the same output camera. Dynamic orientation flips are a hard failure rather than silently rendering inside-out art.",
+    "color_space": "Transport RGBA8 is encoded sRGB straight alpha. Source sampling, runtime filtering and multi-layer composition occur in linear-light premultiplied RGBA, then convert back to sRGB only at the output boundary."
   },
   "calibration_contract": "tests/compiler/test_caa_v2_subject_free_policy.py",
   "mutable_after_witness": false,

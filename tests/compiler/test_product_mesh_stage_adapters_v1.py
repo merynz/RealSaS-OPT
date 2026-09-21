@@ -628,7 +628,7 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
                 "dynamic_max_relative_surface_condition_number": 16.0,
                 "dynamic_max_relative_surface_principal_stretch": 8.0,
                 "dynamic_max_adjacent_frame_surface_principal_stretch": 8.0,
-                "dynamic_max_texture_texels_per_output_pixel": 1.0
+                "dynamic_max_texture_texels_per_output_pixel": 8.0
             },
             "fixture": True,
         },

@@ -11,6 +11,7 @@ on:
       - 'tests/research/test_vf11_range_engine_c0_v3.py'
       - 'tests/research/test_vf11_paired_profile_c0_v3.py'
       - 'tests/research/test_vf11_directional_regular_c1_v1.py'
+      - 'tests/research/test_vf11_profile_c1_handoff_v1.py'
       - 'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json'
       - 'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json'
       - 'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json'
@@ -57,11 +58,13 @@ jobs:
           python -m py_compile experiments/vf11_certified_adaptive/range_engine_c0_v3.py
           python -m py_compile experiments/vf11_certified_adaptive/paired_profile_c0_v3.py
           python -m py_compile experiments/vf11_certified_adaptive/directional_regular_c1_v1.py
+          python -m py_compile experiments/vf11_certified_adaptive/profile_c1_handoff_v1.py
           python -m py_compile tests/research/test_vf11_range_engine_v1.py
           python -m py_compile tests/research/test_vf11_range_engine_c0_v2.py
           python -m py_compile tests/research/test_vf11_range_engine_c0_v3.py
           python -m py_compile tests/research/test_vf11_paired_profile_c0_v3.py
           python -m py_compile tests/research/test_vf11_directional_regular_c1_v1.py
+          python -m py_compile tests/research/test_vf11_profile_c1_handoff_v1.py
 
       - name: Enforce research-only claim boundary
         shell: bash
@@ -99,7 +102,7 @@ jobs:
           PY
 
       - name: Run short deterministic/adversarial range tests
-        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py tests/research/test_vf11_directional_regular_c1_v1.py
+        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py tests/research/test_vf11_directional_regular_c1_v1.py tests/research/test_vf11_profile_c1_handoff_v1.py
 
       - name: Emit smoke receipt
         shell: bash
@@ -116,11 +119,13 @@ jobs:
             'experiments/vf11_certified_adaptive/range_engine_c0_v3.py',
             'experiments/vf11_certified_adaptive/paired_profile_c0_v3.py',
             'experiments/vf11_certified_adaptive/directional_regular_c1_v1.py',
+            'experiments/vf11_certified_adaptive/profile_c1_handoff_v1.py',
             'tests/research/test_vf11_range_engine_v1.py',
             'tests/research/test_vf11_range_engine_c0_v2.py',
             'tests/research/test_vf11_range_engine_c0_v3.py',
             'tests/research/test_vf11_paired_profile_c0_v3.py',
             'tests/research/test_vf11_directional_regular_c1_v1.py',
+            'tests/research/test_vf11_profile_c1_handoff_v1.py',
             'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json',
             'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json',
             'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json',

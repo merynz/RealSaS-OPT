@@ -155,6 +155,29 @@ def _provenance_payload(projection: RuntimeProjectionV2IR) -> bytes:
         raise QualificationError("RSS_V2_RENDERABLE_SOURCE_VIEW_MISSING")
     if np.any((value == 255) & (source_view != padding)):
         raise QualificationError("RSS_V2_SOURCE_VIEW_PADDING_DRIFT")
+    target_view = np.broadcast_to(
+        np.arange(8, dtype=np.int16)[:, None, None],
+        source_view.shape,
+    )
+    direct = value == 0
+    other = value == 1
+    harmonic = value == 2
+    defined = value != 255
+    if np.any(direct & (source_view != target_view)):
+        raise QualificationError("RSS_V2_DIRECT_SOURCE_VIEW_IDENTITY_DRIFT")
+    if np.any(
+        other
+        & (
+            (source_view < 0)
+            | (source_view >= 8)
+            | (source_view == target_view)
+        )
+    ):
+        raise QualificationError("RSS_V2_OTHER_VIEW_IDENTITY_DRIFT")
+    if np.any(harmonic & (source_view != -2)):
+        raise QualificationError("RSS_V2_HARMONIC_SOURCE_VIEW_IDENTITY_DRIFT")
+    if np.any(defined & (~direct) & (~other) & (~harmonic)):
+        raise QualificationError("RSS_V2_PROVENANCE_CLASS_INVALID")
     return (
         struct.pack("<III", value.shape[0], value.shape[1], value.shape[2])
         + value.tobytes(order="C")

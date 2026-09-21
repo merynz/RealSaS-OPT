@@ -1,0 +1,34 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v11",
+  "sealed_on": "2026-09-21",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V10_20260921.json",
+    "git_blob_sha1": "2589a36dcdb736b1bb65363a1d24dc6ddb2f52de",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "RUNTIME_V2_DONOR_SOURCE_VIEW_LINEAGE_PRESERVATION",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "knight_witness_used": false,
+    "runtime_role": "subordinate_deployment_consumer",
+    "subtree_closure": "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+  },
+  "replacements": [
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+      "size_bytes": 32057,
+      "git_blob_sha1": "adc42a744d8efb1b8b792a348aac805bc280f120",
+      "reason": "preserve per-texel int16 donor/source-view lineage, expose mixed-footprint diagnostic, and enforce that donor identity cannot become render authority"
+    }
+  ],
+  "additions": [],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 25,
+    "replacement_count": 1,
+    "addition_count": 0,
+    "resulting_sealed_blob_count": 25,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

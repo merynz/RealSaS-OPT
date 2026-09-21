@@ -84,6 +84,58 @@ class RepairApplicationRecordV1:
 
 
 @dataclass(frozen=True)
+class V2VisualRepairNonRegressionEvidenceV1:
+    child_product_state_hash: str
+    implementation_closure_hash: str
+    static_fidelity_bank_hash: str
+    dynamic_fidelity_bank_hash: str
+    static_fidelity_status: str
+    dynamic_fidelity_status: str
+    static_fidelity_passed: bool
+    dynamic_fidelity_passed: bool
+    metadata: Json = field(default_factory=dict)
+    schema_version: str = "RealSaS.V2VisualRepairNonRegressionEvidence.v1"
+
+    def to_dict(self) -> Json:
+        return asdict(self)
+
+
+def validate_v2_visual_repair_nonregression_v1(
+    *,
+    child_product_state_hash: str,
+    evidence: V2VisualRepairNonRegressionEvidenceV1,
+) -> tuple[bool, tuple[str, ...]]:
+    blockers: list[str] = []
+    if evidence.child_product_state_hash != str(child_product_state_hash):
+        blockers.append("visual_nonregression_child_product_mismatch")
+    if not evidence.implementation_closure_hash:
+        blockers.append("visual_nonregression_implementation_closure_missing")
+    if not evidence.static_fidelity_bank_hash:
+        blockers.append("visual_nonregression_static_bank_hash_missing")
+    if not evidence.dynamic_fidelity_bank_hash:
+        blockers.append("visual_nonregression_dynamic_bank_hash_missing")
+    if evidence.static_fidelity_status != "PASS":
+        blockers.append("visual_nonregression_static_bank_not_pass")
+    if evidence.dynamic_fidelity_status != "PASS":
+        blockers.append("visual_nonregression_dynamic_bank_not_pass")
+    if not bool(evidence.static_fidelity_passed):
+        blockers.append("visual_nonregression_static_bank_failed")
+    if not bool(evidence.dynamic_fidelity_passed):
+        blockers.append("visual_nonregression_dynamic_bank_failed")
+    # Both banks are required to describe one exact implementation closure.
+    static_impl = str(evidence.metadata.get("static_implementation_closure_hash") or "")
+    dynamic_impl = str(evidence.metadata.get("dynamic_implementation_closure_hash") or "")
+    if (
+        not static_impl
+        or not dynamic_impl
+        or static_impl != evidence.implementation_closure_hash
+        or dynamic_impl != evidence.implementation_closure_hash
+    ):
+        blockers.append("visual_nonregression_cross_bank_implementation_drift")
+    return not blockers, tuple(blockers)
+
+
+@dataclass(frozen=True)
 class RepairReproofEvidenceV1:
     directive_id: str
     child_product_state_hash: str
@@ -173,6 +225,7 @@ def build_bounded_repair_directives_v1(
                 "one_owner_counterfactual_per_child_attempt": True,
                 "in_place_product_mutation_forbidden": True,
                 "mandatory_reproof": True,
+                "v2_static_dynamic_visual_nonregression_required": True,
             },
         ))
     return tuple(directives)
@@ -211,6 +264,7 @@ def evaluate_repair_effect_v1(
     directive: RepairDirectiveV1,
     application: RepairApplicationRecordV1,
     reproof: RepairReproofEvidenceV1,
+    visual_nonregression: V2VisualRepairNonRegressionEvidenceV1 | None = None,
 ) -> Json:
     """Accept repair effect only after exact-lineage, same-probe re-proof."""
     app_ok, app_blockers = validate_repair_application_v1(directive, application)
@@ -229,6 +283,21 @@ def evaluate_repair_effect_v1(
         blockers.append("repair_target_not_materially_improved")
     if reproof.protected_invariant_regressions:
         blockers.append("repair_protected_invariant_regression")
+    if bool(
+        directive.metadata.get(
+            "v2_static_dynamic_visual_nonregression_required",
+            False,
+        )
+    ):
+        if visual_nonregression is None:
+            blockers.append("repair_v2_visual_nonregression_evidence_missing")
+        else:
+            visual_ok, visual_blockers = validate_v2_visual_repair_nonregression_v1(
+                child_product_state_hash=application.child_product_state_hash,
+                evidence=visual_nonregression,
+            )
+            if not visual_ok:
+                blockers.extend(visual_blockers)
     accepted = bool(app_ok and not blockers)
     payload = {
         "schema_version": "RealSaS.RepairEffectReport.v1",
@@ -249,6 +318,17 @@ def evaluate_repair_effect_v1(
         "repair_accepted": accepted,
         "blockers": blockers,
         "same_probe_reproof_required": True,
+        "v2_static_dynamic_visual_nonregression_required": bool(
+            directive.metadata.get(
+                "v2_static_dynamic_visual_nonregression_required",
+                False,
+            )
+        ),
+        "visual_nonregression_evidence": (
+            None
+            if visual_nonregression is None
+            else visual_nonregression.to_dict()
+        ),
         "in_place_product_mutation_forbidden": True,
     }
     payload["report_id"] = "REPAIR_EFFECT:" + _stable_hash(payload)[:24]

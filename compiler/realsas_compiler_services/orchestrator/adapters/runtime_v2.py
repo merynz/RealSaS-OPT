@@ -902,6 +902,12 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                         int(index)
                         for index in np.nonzero(counts >= min_visible_pixels)[0]
                     }
+                    visual_consequential = {
+                        int(index)
+                        for index in np.nonzero(
+                            contribution_counts >= min_visible_pixels
+                        )[0]
+                    }
                     micro = np.nonzero(
                         (counts > 0) & (counts < min_visible_pixels)
                     )[0]
@@ -925,6 +931,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     consequential_visible_face_count += len(consequential)
                 else:
                     consequential = set()
+                    visual_consequential = set()
 
                 camera = cameras[view.view_id]
                 rest_screen = rest_screen_by_view[view.view_id]
@@ -978,19 +985,20 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     if not bool(metrics["measurable"]):
                         unmeasurable_visible_face_count += 1
                         continue
-                    texture_width, texture_height = texture_shape_by_view[
-                        view.view_id
-                    ]
-                    footprint = screen_to_texture_max_texels_per_pixel(
-                        uv_triangle=face_uv[face_index],
-                        screen_triangle=posed_screen[face],
-                        texture_width=texture_width,
-                        texture_height=texture_height,
-                    )
-                    max_texture_texels_per_output_pixel = max(
-                        max_texture_texels_per_output_pixel,
-                        float(footprint),
-                    )
+                    if face_index in visual_consequential:
+                        texture_width, texture_height = texture_shape_by_view[
+                            view.view_id
+                        ]
+                        footprint = screen_to_texture_max_texels_per_pixel(
+                            uv_triangle=face_uv[face_index],
+                            screen_triangle=posed_screen[face],
+                            texture_width=texture_width,
+                            texture_height=texture_height,
+                        )
+                        max_texture_texels_per_output_pixel = max(
+                            max_texture_texels_per_output_pixel,
+                            float(footprint),
+                        )
                     conditioning_sample_count += 1
                     max_uv_to_surface_condition = max(
                         max_uv_to_surface_condition,

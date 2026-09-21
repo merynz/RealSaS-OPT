@@ -173,6 +173,11 @@ CURRENT_V2_FORBIDDEN_IMPORT_MODULES = {
 IMPLEMENTATION_CLOSURE_STATIC_PATHS = (
     "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
     ".github/workflows/current_mainline_self_hosted_ci.yml",
+    ".github/workflows/current_runtime_self_hosted_ci.yml",
+    ".github/workflows/model_mainline_source_gate.yml",
+    ".github/workflows/native_runtime_source_gate.yml",
+    ".github/workflows/proof_service_promotion_gate.yml",
+    ".github/workflows/vf23_production_policy_e2e_bank.yml",
     ".github/workflows/v2_witness_orchestration_subject_free_dry_run.yml",
     ".github/workflows/subject2_knight_observation_preflight.yml",
     "canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json",
@@ -187,6 +192,7 @@ IMPLEMENTATION_CLOSURE_STATIC_PATHS = (
     "tools/render_authority_map.py",
     "tools/render_rehydration_packet.py",
     "tools/audit_context_coverage.py",
+    "tools/verify_native_runtime_source_seal_v2.py",
     ".github/workflows/live_authority_map.yml",
     "compiler/realsas_compiler_services/orchestrator/mainline.py",
     "AGENTS.md",
@@ -195,6 +201,27 @@ IMPLEMENTATION_CLOSURE_STATIC_PATHS = (
     "canonical/README.md",
     "README.md",
 )
+
+IMPLEMENTATION_CLOSURE_DYNAMIC_GLOBS = (
+    "canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V*.json",
+    "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V*.json",
+)
+
+
+def _implementation_closure_dynamic_files() -> tuple[str, ...]:
+    rows: set[str] = set()
+    for pattern in IMPLEMENTATION_CLOSURE_DYNAMIC_GLOBS:
+        matches = sorted(ROOT.glob(pattern))
+        if not matches:
+            raise RuntimeError(
+                "V2_IMPLEMENTATION_DYNAMIC_CLOSURE_GLOB_EMPTY:" + pattern
+            )
+        for path in matches:
+            if not path.is_file():
+                continue
+            rows.add(str(path.relative_to(ROOT).as_posix()))
+    return tuple(sorted(rows))
+
 
 IMPLEMENTATION_CLOSURE_TEST_ROOTS = (
     "tests/repository",
@@ -251,7 +278,14 @@ def implementation_closure_manifest(plan: dict | None = None) -> dict:
         )
 
     file_rows = []
-    for rel in tuple(IMPLEMENTATION_CLOSURE_STATIC_PATHS) + _implementation_closure_test_files():
+    closure_files = (
+        tuple(IMPLEMENTATION_CLOSURE_STATIC_PATHS)
+        + _implementation_closure_dynamic_files()
+        + _implementation_closure_test_files()
+    )
+    if len(closure_files) != len(set(closure_files)):
+        raise RuntimeError("V2_IMPLEMENTATION_CLOSURE_DUPLICATE_FILE")
+    for rel in closure_files:
         path = ROOT / rel
         if not path.is_file():
             raise RuntimeError(f"V2_IMPLEMENTATION_CLOSURE_FILE_MISSING:{rel}")
@@ -263,6 +297,7 @@ def implementation_closure_manifest(plan: dict | None = None) -> dict:
         "adapter_implementation_closures": adapter_rows,
         "imported_module_count": len(imported_modules),
         "forbidden_import_modules": sorted(CURRENT_V2_FORBIDDEN_IMPORT_MODULES),
+        "dynamic_governance_files": list(_implementation_closure_dynamic_files()),
         "critical_files": file_rows,
     }
 

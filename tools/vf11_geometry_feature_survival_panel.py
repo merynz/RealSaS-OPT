@@ -15,6 +15,7 @@ consumed. This tool measures the decoder/discretization floor only and deliberat
 does not select a shipping threshold.
 """
 
+import gc
 import json
 import math
 import os
@@ -39,11 +40,25 @@ from models.iris.v3.zero_surface_decoder_v3 import extract_zero_surface_mesh_v3
 
 OUT = Path(os.environ.get("REALSAS_VF11_OUT", "vf11_out"))
 OUT.mkdir(parents=True, exist_ok=True)
-R = 256
+REFERENCE_DECODER_RESOLUTION = 256
+R = int(os.environ.get("REALSAS_VF11_DECODER_RESOLUTION", "256"))
 RES = 1024
 BOUNDS = (-1.0, 1.0)
+if R < REFERENCE_DECODER_RESOLUTION:
+    raise RuntimeError("VF11_DECODER_RESOLUTION_BELOW_REFERENCE_FORBIDDEN")
+REFERENCE_VOXEL = (
+    (BOUNDS[1] - BOUNDS[0]) / float(REFERENCE_DECODER_RESOLUTION - 1)
+)
 VOXEL = (BOUNDS[1] - BOUNDS[0]) / float(R - 1)
-WIDTH_LADDER_VOXELS = (0.75, 1.0, 1.5, 2.0)
+WIDTH_LADDER_REFERENCE_VOXELS = (0.75, 1.0, 1.5, 2.0)
+FROZEN_STAGE13_PROFILE = {
+    "min_recall": 0.999,
+    "min_precision": 0.999,
+    "max_largest_coherent_hole_fraction": 0.00025,
+    "max_interior_uncovered_fraction": 0.0005,
+    "min_component_recall": 0.999,
+    "max_silhouette_edge_p95_px": 0.5,
+}
 
 
 def _write(name: str, payload: dict) -> None:
@@ -90,8 +105,13 @@ def _box(
     }
 
 
-def _case_boxes(family: str, width_voxels: float) -> tuple[tuple[dict, ...], tuple[dict, ...], str]:
-    w = float(width_voxels) * VOXEL
+def _case_boxes(
+    family: str,
+    width_reference_voxels: float,
+) -> tuple[tuple[dict, ...], tuple[dict, ...], str]:
+    # World-space feature width is frozen to the original R256 ladder so
+    # resolution sweeps change only signed-field sampling density.
+    w = float(width_reference_voxels) * REFERENCE_VOXEL
     core = _box((0.0, 0.0, -0.10), (0.30, 0.22, 0.34))
 
     if family == "THIN_STRAP":
@@ -261,6 +281,21 @@ def _coverage(source: np.ndarray, predicted: np.ndarray) -> dict:
     }
 
 
+def _stage13_profile_pass(metrics: dict) -> bool:
+    return bool(
+        metrics["recall"] >= FROZEN_STAGE13_PROFILE["min_recall"]
+        and metrics["precision"] >= FROZEN_STAGE13_PROFILE["min_precision"]
+        and metrics["largest_coherent_hole_fraction"]
+        <= FROZEN_STAGE13_PROFILE["max_largest_coherent_hole_fraction"]
+        and metrics["interior_uncovered_fraction"]
+        <= FROZEN_STAGE13_PROFILE["max_interior_uncovered_fraction"]
+        and metrics["minimum_component_recall"]
+        >= FROZEN_STAGE13_PROFILE["min_component_recall"]
+        and metrics["silhouette_edge_p95_px"]
+        <= FROZEN_STAGE13_PROFILE["max_silhouette_edge_p95_px"]
+    )
+
+
 def _feature_metric(
     *,
     mode: str,
@@ -307,28 +342,38 @@ def main() -> int:
     )
     cameras = _cameras()
     output = {
-        "schema": "RealSaS.VF11GeometryFeatureSurvivalPanel.v1",
-        "status": "MEASURED_SUBJECT_FREE__NO_POLICY_SELECTED",
+        "schema": "RealSaS.VF11GeometryFeatureSurvivalPanel.v2",
+        "status": "MEASURED_SUBJECT_FREE__FROZEN_STAGE13_PROFILE_EVALUATED",
         "subject_inputs_used": False,
         "knight_result_used": False,
         "mage_result_used": False,
         "teacher_geometry_used": False,
+        "reference_decoder_resolution": REFERENCE_DECODER_RESOLUTION,
         "decoder_resolution": R,
         "raster_resolution": RES,
         "bounds": list(BOUNDS),
-        "voxel_size": VOXEL,
-        "pixels_per_voxel_at_cardinal_unit_extent": VOXEL * (RES / 2.0),
+        "reference_voxel_size": REFERENCE_VOXEL,
+        "decoder_voxel_size": VOXEL,
+        "pixels_per_reference_voxel_at_cardinal_unit_extent": (
+            REFERENCE_VOXEL * (RES / 2.0)
+        ),
         "decoder_id": "RealSaS.ZeroSurfaceDecoder.MarchingCubes.v3",
         "rasterizer": "HALF_INTEGER_TOP_LEFT__PRODUCT_COVERAGE_V1",
         "skimage_version": skimage.__version__,
-        "width_ladder_voxels": list(WIDTH_LADDER_VOXELS),
-        "policy_selected": False,
+        "width_ladder_reference_voxels": list(
+            WIDTH_LADDER_REFERENCE_VOXELS
+        ),
+        "frozen_stage13_profile": dict(FROZEN_STAGE13_PROFILE),
+        "new_threshold_selected": False,
         "cases": [],
     }
 
     for family in families:
-        for width_voxels in WIDTH_LADDER_VOXELS:
-            boxes, feature_boxes, feature_mode = _case_boxes(family, width_voxels)
+        for width_reference_voxels in WIDTH_LADDER_REFERENCE_VOXELS:
+            boxes, feature_boxes, feature_mode = _case_boxes(
+                family,
+                width_reference_voxels,
+            )
             grid = _field(boxes)
             fmin = float(np.min(grid))
             fmax = float(np.max(grid))
@@ -364,6 +409,9 @@ def main() -> int:
                     predicted=predicted,
                     camera=camera,
                 )
+                metrics["frozen_stage13_profile_passed"] = (
+                    _stage13_profile_pass(metrics)
+                )
                 view_rows.append(metrics)
 
             feature_recall = [
@@ -380,13 +428,26 @@ def main() -> int:
             ]
             output["cases"].append(
                 {
-                    "case_id": f"{family}__{str(width_voxels).replace('.', 'p')}VX",
+                    "case_id": (
+                        f"{family}__"
+                        f"{str(width_reference_voxels).replace('.', 'p')}REFVX"
+                        f"__R{R}"
+                    ),
                     "family": family,
-                    "feature_width_voxels": float(width_voxels),
-                    "feature_width_world": float(width_voxels) * VOXEL,
-                    "feature_width_cardinal_pixels": float(width_voxels)
-                    * VOXEL
-                    * (RES / 2.0),
+                    "feature_width_reference_voxels": float(
+                        width_reference_voxels
+                    ),
+                    "feature_width_decoder_voxels": float(
+                        width_reference_voxels * REFERENCE_VOXEL / VOXEL
+                    ),
+                    "feature_width_world": (
+                        float(width_reference_voxels) * REFERENCE_VOXEL
+                    ),
+                    "feature_width_cardinal_pixels": (
+                        float(width_reference_voxels)
+                        * REFERENCE_VOXEL
+                        * (RES / 2.0)
+                    ),
                     "decoder_status": decoder_status,
                     "field_min": fmin,
                     "field_max": fmax,
@@ -414,18 +475,30 @@ def main() -> int:
                         "min_gap_preservation": (
                             min(gap_preservation) if gap_preservation else None
                         ),
+                        "all_views_frozen_stage13_profile_passed": bool(
+                            all(
+                                row["frozen_stage13_profile_passed"]
+                                for row in view_rows
+                            )
+                        ),
                     },
                 }
             )
             del grid
             del mesh
+            gc.collect()
 
     by_family = {}
     for family in families:
         rows = [case for case in output["cases"] if case["family"] == family]
         by_family[family] = [
             {
-                "feature_width_voxels": case["feature_width_voxels"],
+                "feature_width_reference_voxels": case[
+                    "feature_width_reference_voxels"
+                ],
+                "feature_width_decoder_voxels": case[
+                    "feature_width_decoder_voxels"
+                ],
                 "feature_width_cardinal_pixels": case[
                     "feature_width_cardinal_pixels"
                 ],

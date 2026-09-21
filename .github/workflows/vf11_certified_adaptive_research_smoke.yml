@@ -13,6 +13,7 @@ on:
       - 'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json'
       - 'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json'
       - 'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json'
+      - 'canonical/VF11_C0_PAIRED_RESEARCH_PREREGISTRATION_V3_20260921.json'
       - '.github/workflows/vf11_certified_adaptive_research_smoke.yml'
   workflow_dispatch:
 
@@ -76,6 +77,11 @@ jobs:
           assert v2['status']=='PREREGISTERED__C0_RANGE_ONLY'
           assert v2['product_authority_minted'] is False
           assert v2['witness_execution'] is False
+          v3=json.load(open('canonical/VF11_C0_PAIRED_RESEARCH_PREREGISTRATION_V3_20260921.json',encoding='utf-8'))
+          assert v3['status']=='PREREGISTERED__PAIRED_MULTI_DEPTH_C0_ONLY'
+          assert v3['product_authority_minted'] is False
+          assert v3['witness_execution'] is False
+          assert v3['proven_regular']=='FORBIDDEN'
           print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
           PY
 
@@ -103,6 +109,7 @@ jobs:
             'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json',
             'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json',
             'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json',
+            'canonical/VF11_C0_PAIRED_RESEARCH_PREREGISTRATION_V3_20260921.json',
           ]
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()

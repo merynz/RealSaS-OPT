@@ -110,3 +110,93 @@ def nonadjacent_intersection_pairs(
                 pairs.append((min(i, j), max(i, j)))
         active.append(i)
     return tuple(sorted(set(pairs)))
+
+
+def unexpected_intersection_pairs(
+    *,
+    vertices: np.ndarray,
+    faces: np.ndarray,
+    tolerance: float = 1.0e-9,
+    shared_contact_exclusion_fraction: float = 1.0e-6,
+) -> tuple[tuple[int, int], ...]:
+    """Return triangle pairs whose contact exceeds declared mesh adjacency.
+
+    Ordinary shared-vertex/shared-edge contact is topologically expected and must
+    not be reported as self-intersection.  For pairs sharing vertices, both
+    triangles are contracted infinitesimally toward their centroids; expected
+    boundary-only contact disappears, while any non-zero interior overlap
+    remains.  Pairs with no shared vertices use the exact SAT census.
+    """
+    xyz = np.asarray(vertices, dtype=np.float64)
+    tri = np.asarray(faces, dtype=np.int64)
+    fraction = float(shared_contact_exclusion_fraction)
+    if (
+        xyz.ndim != 2
+        or xyz.shape[1] != 3
+        or not np.isfinite(xyz).all()
+        or tri.ndim != 2
+        or tri.shape[1] != 3
+        or np.any(tri < 0)
+        or np.any(tri >= len(xyz))
+    ):
+        raise QualificationError("DYNAMIC_GEOMETRY_TOPOLOGY_CENSUS_INVALID")
+    if not np.isfinite(fraction) or not (0.0 < fraction < 0.01):
+        raise QualificationError(
+            "DYNAMIC_GEOMETRY_SHARED_CONTACT_EXCLUSION_INVALID"
+        )
+
+    triangles = xyz[tri]
+    mins = triangles.min(axis=1)
+    maxs = triangles.max(axis=1)
+    order = np.argsort(mins[:, 0], kind="mergesort")
+    active: list[int] = []
+    pairs: list[tuple[int, int]] = []
+
+    for raw in order:
+        i = int(raw)
+        x_min = float(mins[i, 0])
+        active = [
+            j
+            for j in active
+            if float(maxs[j, 0]) >= x_min - float(tolerance)
+        ]
+        face_i = set(map(int, tri[i]))
+        for j in active:
+            if (
+                float(maxs[i, 1]) < float(mins[j, 1]) - tolerance
+                or float(maxs[j, 1]) < float(mins[i, 1]) - tolerance
+                or float(maxs[i, 2]) < float(mins[j, 2]) - tolerance
+                or float(maxs[j, 2]) < float(mins[i, 2]) - tolerance
+            ):
+                continue
+            a = triangles[i]
+            b = triangles[j]
+            if not triangles_intersect_sat(
+                a,
+                b,
+                tolerance=float(tolerance),
+            ):
+                continue
+
+            shared = face_i.intersection(map(int, tri[j]))
+            if not shared:
+                pairs.append((min(i, j), max(i, j)))
+                continue
+
+            # Remove only the expected boundary/simplex contact.  A real interior
+            # penetration survives this contraction and is still detected by SAT.
+            a_centroid = np.mean(a, axis=0)
+            b_centroid = np.mean(b, axis=0)
+            scale = 1.0 - fraction
+            a_inner = a_centroid + scale * (a - a_centroid)
+            b_inner = b_centroid + scale * (b - b_centroid)
+            if triangles_intersect_sat(
+                a_inner,
+                b_inner,
+                tolerance=float(tolerance),
+            ):
+                pairs.append((min(i, j), max(i, j)))
+
+        active.append(i)
+
+    return tuple(sorted(set(pairs)))

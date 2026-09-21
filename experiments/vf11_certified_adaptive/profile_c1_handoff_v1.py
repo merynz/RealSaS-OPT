@@ -136,6 +136,7 @@ def profile_c1_handoff(
                     "negative_leaf_count": int(x.negative_leaf_count),
                     "unresolved_leaf_count": int(x.unresolved_leaf_count),
                     "max_depth_reached": int(x.max_depth_reached),
+                    "coverage_complete": bool(x.coverage_complete),
                 }
                 for x in cert.candidate_results
             ],

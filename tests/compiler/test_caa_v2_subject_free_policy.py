@@ -51,10 +51,10 @@ def _camera(view: int = 0, resolution: int = 64):
     )
 
 
-def test_caa_policy_is_reopened_and_tile_density_is_art_quality_driven():
+def test_caa_policy_is_refrozen_and_tile_density_is_art_quality_driven():
     policy = _policy()
     assert policy["schema"] == "RealSaS.CAAQualificationPolicy.v1"
-    assert policy["status"] == "REOPENED_SUBJECT_FREE_VISUAL_FIDELITY_RECALIBRATION_V2"
+    assert policy["status"] == "FROZEN_SUBJECT_FREE_VISUAL_FIDELITY_V3"
     assert policy["mutable_after_witness"] is False
     compile_policy = policy["compile_policy"]
     assert compile_policy["tile_resolution_mode"] == "PROJECTED_SOURCE_DENSITY_V1"

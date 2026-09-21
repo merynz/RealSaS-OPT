@@ -67,7 +67,7 @@ jobs:
           python - <<'PY'
           import json
           p=json.load(open('vf10_out/VF10_DIRECTION_TRANSITION_CALIBRATION.json',encoding='utf-8'))
-          assert p['status']=='PASS_SUBJECT_FREE_SEPARATION'
+          assert p['status']=='NEGATIVE_RESULT__CURVATURE_GATE_NOT_AUTHORIZED'
           assert p['subject_inputs_used'] is False
           assert p['knight_result_used'] is False
           assert p['mage_result_used'] is False
@@ -77,9 +77,13 @@ jobs:
           assert all(x['existing_pair_policy_passed'] for x in p['adversarial_rgb'])
           assert all(x['existing_pair_policy_passed'] for x in p['adversarial_alpha'])
           s=p['selection']
-          assert s['max_benign_pm_l1'] < s['selected_max_triplet_p95_pm_l1'] < s['min_adversarial_pm_l1']
-          assert s['max_benign_alpha_abs'] < s['selected_max_triplet_p95_alpha_abs'] < s['min_adversarial_alpha_abs']
-          print('VF10_CALIBRATION_BOUNDARY=PASS')
+          assert s['shipping_curvature_gate_authorized'] is False
+          assert s['new_shipping_gate_minted'] is False
+          assert s['selected_max_triplet_p95_pm_l1'] is None
+          assert s['selected_max_triplet_p95_alpha_abs'] is None
+          assert not (s['pm_classes_separable'] and s['alpha_classes_separable'])
+          assert p['interpretation']['recommended_shipping_semantics']=='DISCRETE_SOURCE_AUTHORITY_NO_CROSS_DIRECTION_BLENDING'
+          print('VF10_NEGATIVE_CALIBRATION_BOUNDARY=PASS')
           PY
 
       - uses: actions/upload-artifact@v4

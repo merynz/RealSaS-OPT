@@ -322,6 +322,15 @@
       "required_closure": "Preserve exact donor/source-view identity through bake, asset seal, RSS and native parse without allowing it to influence RGB, geometry visibility, depth ordering or presentation. Mixed bilinear donor footprints must remain explicitly mixed rather than inventing one donor.",
       "status": "REPAIRED__PER_TEXEL_SOURCE_VIEW_LINEAGE__V11_NATIVE_CI_PENDING",
       "repair": "Stage23 now bakes exact int16 source_view lineage with the same lattice/bleed map as appearance. Stage37 fails closed on missing or inconsistent lineage. RSS V2 stores coarse provenance u8 plus exact source_view int16 and seals source_view_identity_render_authority=0. Native V2 reports unanimous donor IDs, -2 harmonic, or -3 mixed footprint diagnostics. An adversary rewrites donor IDs while requiring RGBA, coarse provenance and owner bytes to remain byte-identical. V11 append-only native source authority seals the implementation."
+    },
+    {
+      "id": "VF-37",
+      "severity": "HIGH",
+      "owner": "CAA other-view donor selection",
+      "finding": "Other-view fallback must not select a donor merely because its V0..V7 index is nearer to the target direction; a geometrically weak neighboring view can be worse evidence than a farther source-supported view.",
+      "required_closure": "Make donor quality ranking explicit, support-ranked and independently adversarially tested. Circular direction order may remain only as deterministic tie behavior.",
+      "status": "REPAIRED__CAMERA_SUPPORT_RANKED_DONOR__CI_PENDING",
+      "repair": "compile_deterministic_caa now delegates donor selection to select_other_view_donor_by_support. The primary score is absolute face-normal/camera-forward support; a strictly higher support wins regardless of circular distance. A subject-free adversary makes nearest V1 score 0.20 and far V4 score 0.90 and requires V4; equal-score control preserves deterministic tie order only."
     }
   ],
   "false_or_overstated_external_findings": [

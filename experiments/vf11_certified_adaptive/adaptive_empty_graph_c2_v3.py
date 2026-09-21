@@ -187,6 +187,7 @@ def run_adaptive_empty_or_graph(
     planes: torch.Tensor,
     c1_fixed_profile: dict,
     c2_v2_profile: dict,
+    c2_v1_profile: dict | None = None,
     *,
     domain_lo: float,
     domain_hi: float,
@@ -208,8 +209,14 @@ def run_adaptive_empty_or_graph(
     if len(roots) != 12:
         raise ValueError(f"EXPECTED_12_ROOTS:{len(roots)}")
     c2map = {int(r["anchor_id"]): r for r in c2_v2_profile["records"]}
-    if set(c2map) != {int(r["anchor_id"]) for r in roots}:
+    root_ids = {int(r["anchor_id"]) for r in roots}
+    if set(c2map) != root_ids:
         raise ValueError("C2V2_ROOT_SET_MISMATCH")
+    c2v1map = None
+    if c2_v1_profile is not None:
+        c2v1map = {int(r["anchor_id"]): r for r in c2_v1_profile["records"]}
+        if set(c2v1map) != root_ids:
+            raise ValueError("C2V1_ROOT_SET_MISMATCH")
 
     p = prepare_field(field)
     pp = prepare_planes(planes)
@@ -225,11 +232,14 @@ def run_adaptive_empty_or_graph(
         abs_depth = int(root["depth"])
         lo, hi = cell_bounds_from_index(idx, abs_depth, domain_lo, domain_hi)
         prior = c2map[anchor]
+        source_c2v1_existence = False
+        if c2v1map is not None:
+            source_c2v1_existence = bool(
+                c2v1map[anchor]["c2"]["state"] == "PROVEN_CENTER_CHORD_CROSSING"
+            )
         root_meta[anchor] = {
             "source_c0_state": root["c0_state_m2"],
-            "source_c2v1_existence": bool(
-                prior.get("c2_v1_state") == "PROVEN_CENTER_CHORD_CROSSING"
-            ),
+            "source_c2v1_existence": source_c2v1_existence,
         }
         node = {
             "root_anchor_id": anchor,
@@ -454,16 +464,17 @@ def run_adaptive_empty_or_graph(
         if final_active_roots[int(r["anchor_id"])] == 0
     ]
 
-    # Source existence roots come from the C2 V2 profile transition field when
-    # present. Fall back to C0 ZERO_EXISTS for roots without it.
+    # Source existence roots: prefer the frozen C2 V1 center-crossing evidence,
+    # which contains four existence proofs that corrected C0 alone did not have.
     existence_roots = []
     for root in roots:
         a = int(root["anchor_id"])
-        prior = c2map[a]
-        source_exists = bool(
-            prior.get("c2_v1_state") == "PROVEN_CENTER_CHORD_CROSSING"
-            or root["c0_state_m2"] == "PROVEN_ZERO_EXISTS"
-        )
+        if c2v1map is not None:
+            source_exists = bool(
+                c2v1map[a]["c2"]["state"] == "PROVEN_CENTER_CHORD_CROSSING"
+            )
+        else:
+            source_exists = bool(root["c0_state_m2"] == "PROVEN_ZERO_EXISTS")
         if source_exists:
             existence_roots.append(a)
 

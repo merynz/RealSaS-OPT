@@ -137,7 +137,7 @@ def test_dynamic_appearance_policy_is_subject_free_and_nontrivial():
     policy = validate_dynamic_appearance_policy(
         policy_doc["completion_quality_policy"]
     )
-    assert policy_doc["status"] == "REOPENED_SUBJECT_FREE_VISUAL_FIDELITY_RECALIBRATION_V2"
+    assert policy_doc["status"] == "FROZEN_SUBJECT_FREE_VISUAL_FIDELITY_V3"
     assert "KNIGHT_RESULT" in set(policy_doc["forbidden_inputs"])
     assert 1.0 < policy["dynamic_max_relative_surface_condition_number"] < 20.0
     assert 1.0 < policy["dynamic_max_relative_surface_principal_stretch"] < 10.0

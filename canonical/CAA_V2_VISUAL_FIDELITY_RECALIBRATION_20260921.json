@@ -91,7 +91,9 @@
       "severity": "MEDIUM_HIGH",
       "owner": "Directional appearance",
       "finding": "No explicit adjacent-direction appearance continuity or direction-switch flicker authority exists for the eight separately baked CAA textures.",
-      "required_closure": "Add source-conditioned adjacent-direction compatibility plus transition/shimmer controls; do not demand raw RGB equality where view-dependent artist intent is supported."
+      "required_closure": "Add source-conditioned adjacent-direction compatibility plus transition/shimmer controls; do not demand raw RGB equality where view-dependent artist intent is supported.",
+      "repair": "A subject-free cyclic V-1/V/V+1 linear-premultiplied second-order calibration was run while holding the existing Stage24 adjacent-pair policy fixed. The proposed curvature gate was scientifically rejected: legitimate smooth source-authoritative view variation reached PM residual 0.123420 while a pair-policy-blind component-local RGB spike could be only 0.081315, so no separating PM threshold exists without suppressing valid artist intent. No shipping threshold was minted. Shipping semantics are instead exact discrete V0..V7 source-authoritative selection: cross-direction blending and host interpolation are forbidden, native playback must independently match the exact reference for every direction, and V0->...->V7->V0 must return byte-identical V0. V10 native source-seal gate passed.",
+      "status": "CLOSED__CURVATURE_GATE_REJECTED__DISCRETE_NO_BLEND_AUTHORITY__RUNTIME_CI_PENDING"
     },
     {
       "id": "VF-11",
@@ -99,8 +101,8 @@
       "owner": "Geometry feature survival",
       "finding": "The 256-cube decoder numerical floor is demonstrated primarily on smooth sphere/ellipsoid controls; minimum thin-feature/concavity/gap survival through decoder->raster is not explicitly calibrated.",
       "required_closure": "Run a 1024px subject-free feature-survival panel (thin plates/straps, narrow gaps/forks, concave notches, brims/blades, small components) and derive decoder/adaptive-resolution policy from measured survival.",
-      "repair": "A 1024px subject-free five-family feature-survival panel (20 physical cases, 160 view measurements) falsified the smooth-control-only interpretation of a general R256 decoder numerical floor. At R256, 0.75/1.0-reference-voxel straps do not bracket zero; narrow fork/notch negative space collapses; detached small components can have 0% component recall while aggregate silhouette recall remains ~0.994; thin blades remain below the frozen Stage13 profile. canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_CALIBRATION_V1_20260921.json seals the negative result. The IRIS V3 signed field is arbitrary-P queryable, so the next authorized experiment holds physical feature widths fixed and re-queries the same continuous field at R384. Frozen Stage13 P999 thresholds are reused without relaxation.",
-      "status": "R256_GENERAL_FLOOR_FALSIFIED__R384_SAME_PHYSICAL_FEATURE_REQUERY_ACTIVE"
+      "repair": "The R256 panel falsified a general smooth-control numerical-floor interpretation. A same-physical-feature R384 re-query recovered narrow negative space but still produced 0/20 cases passing the unchanged frozen Stage13 P999 profile; detached small-component recall remained 0.0/0.2917/0.75/0.6979 across the 0.75/1.0/1.5/2.0 reference-voxel ladder. canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R384_AUTHORITY_V1_20260921.json therefore authorizes R512 without threshold relaxation. The R512 apparatus was memory-slabbed; an initial NumPy broadcast regression was identified as apparatus-only and fixed, and R256/R384 reproducibility plus R512 are rerunning.",
+      "status": "R256_AND_R384_INSUFFICIENT__R512_SAME_PHYSICAL_FEATURE_REQUERY_ACTIVE"
     },
     {
       "id": "VF-12",
@@ -116,7 +118,9 @@
       "severity": "MEDIUM_HIGH",
       "owner": "Presentation rigidity calibration",
       "finding": "Rigid thresholds 0.999/0.001 can silently classify evidence-supported rigid groups as DEFORMABLE; there is no calibrated rigid-detection coverage/no-op proof.",
-      "required_closure": "Calibrate group-level rigid/deformable decisions on subject-free hard-rigid and smooth-skin controls and expose evidence-supported rigid misses as failures."
+      "required_closure": "Calibrate group-level rigid/deformable decisions on subject-free hard-rigid and smooth-skin controls and expose evidence-supported rigid misses as failures.",
+      "repair": "Rigid/deformable classification now uses an independent-joint LBS mechanical no-op proof per presentation face group rather than treating 0.999/0.001 skin weights as final authority. Exact one-hot hard-rigid controls across unit/micro/large scales stayed below the frozen 1e-9 relative edge-length tolerance (worst 1.773e-10), while the weakest deformable control was 2.012e-4. A historical 0.999/0.001 predicate false-positive produced 6.018e-4 deformation and is now a hard qualification contradiction instead of silent rigid wobble. Threshold search and subject tuning were not used.",
+      "status": "REPAIRED__LBS_RIGID_NOOP_AUTHORITY__CALIBRATION_PASS__MAINLINE_CI_PENDING"
     },
     {
       "id": "VF-14",

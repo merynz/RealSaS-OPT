@@ -14,7 +14,11 @@ from typing import Any, Mapping
 import numpy as np
 
 from .canonical_puppet_state_v1 import canonical_puppet_state_hash
-from .dynamic_geometry_integrity_v2 import unexpected_intersection_pairs
+from .dynamic_geometry_integrity_v2 import (
+    INTERSECTION_PERSISTENCE_NUMERICAL_SLACK,
+    triangle_intersection_persistence_severity,
+    unexpected_intersection_pairs,
+)
 from .hashing import content_sha256
 from .joint_frames_v1 import derive_joint_frames_from_skeleton, frame_set_hash
 from .mesh.product_coverage_v1 import rasterize_visible_face_pixel_counts
@@ -544,6 +548,14 @@ def build_qualified_dynamic_motion_v2(
             tolerance=intersection_tolerance,
         )
     )
+    rest_triangles = rest[face_indices]
+    rest_intersection_severity = {
+        pair: triangle_intersection_persistence_severity(
+            rest_triangles[pair[0]],
+            rest_triangles[pair[1]],
+        )
+        for pair in sorted(rest_intersection_pairs)
+    }
 
     rest_observed_faces=set()
     for camera in cameras:
@@ -605,6 +617,30 @@ def build_qualified_dynamic_motion_v2(
                     "MOTION_V2_DYNAMIC_NEW_SELF_INTERSECTION:"
                     + str(len(new_intersections))
                 )
+            posed_triangles = posed[face_indices]
+            max_existing_intersection_severity_growth = 0.0
+            worst_existing_intersection_pair = None
+            for pair in sorted(frame_intersection_pairs & rest_intersection_pairs):
+                posed_severity = triangle_intersection_persistence_severity(
+                    posed_triangles[pair[0]],
+                    posed_triangles[pair[1]],
+                )
+                growth = float(
+                    posed_severity - rest_intersection_severity[pair]
+                )
+                if growth > max_existing_intersection_severity_growth:
+                    max_existing_intersection_severity_growth = growth
+                    worst_existing_intersection_pair = pair
+            if (
+                max_existing_intersection_severity_growth
+                > INTERSECTION_PERSISTENCE_NUMERICAL_SLACK
+            ):
+                raise QualificationError(
+                    "MOTION_V2_DYNAMIC_REST_INTERSECTION_WORSENED:"
+                    + str(worst_existing_intersection_pair)
+                    + ":"
+                    + f"{max_existing_intersection_severity_growth:.9g}"
+                )
 
             frame=CanonicalDynamicFrameV2IR(
                 time_seconds=float(time_seconds),
@@ -631,6 +667,13 @@ def build_qualified_dynamic_motion_v2(
                     "rest_self_intersection_pair_count":int(len(rest_intersection_pairs)),
                     "self_intersection_tolerance":float(intersection_tolerance),
                     "new_self_intersection_pair_count":0,
+                    "rest_existing_intersection_severity_nonregression":True,
+                    "max_rest_existing_intersection_severity_growth":float(
+                        max_existing_intersection_severity_growth
+                    ),
+                    "intersection_persistence_numerical_slack":float(
+                        INTERSECTION_PERSISTENCE_NUMERICAL_SLACK
+                    ),
                 },
             )
             frame=replace(frame,frame_hash=canonical_dynamic_frame_v2_hash(frame))
@@ -746,7 +789,11 @@ def build_qualified_dynamic_motion_v2(
             "supported_contact_modes":["PLANT_2D"],
             "all_sampled_frames_conditioned":True,
             "all_sampled_frames_new_self_intersection_free":True,
+            "all_sampled_frames_rest_existing_intersection_nonworsening":True,
             "rest_self_intersection_pair_count":int(len(rest_intersection_pairs)),
+            "intersection_persistence_numerical_slack":float(
+                INTERSECTION_PERSISTENCE_NUMERICAL_SLACK
+            ),
             "rest_unseen_dynamic_exposure_gate_removed":True,
             "rest_unseen_source_face_count":int(len(truly_unseen_faces)),
             "rest_unseen_dynamic_exposed_pixel_count":int(total_rest_unseen_exposed_pixels),

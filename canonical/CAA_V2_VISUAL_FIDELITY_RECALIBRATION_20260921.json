@@ -208,6 +208,13 @@
       "owner": "Cross-view appearance authority",
       "finding": "Adjacent-view shared-canonical source compatibility is now measured and hash-bound in Stage24 metadata, but qualification explicitly records cross_view_source_compatibility_shipping_gate_frozen=false and the cross-view metrics are absent from the Stage24 passed predicate.",
       "required_closure": "Calibrate subject-free compatible vs contradictory adjacent-view controls, freeze per-pair/per-component alpha/color/edge conflict bounds and make cross-view compatibility a hard Stage24 gate without requiring naive raw-RGB equality."
+    },
+    {
+      "id": "VF-28",
+      "severity": "CRITICAL",
+      "owner": "Visibility / alpha composition",
+      "finding": "Current V2 reference/native runtime resolves exactly one front geometry owner per pixel and samples/composes only that face. Texture alpha is correctly forbidden from selecting the front surface, but there is no depth peeling or ordered multi-surface alpha compositing. A transparent or semi-transparent front face can therefore suppress valid deeper character geometry and appear as a background hole rather than revealing the next surface/layer.",
+      "required_closure": "Define the product transparency/layer contract. For any supported overlapping transparent art, render and native-prove ordered multi-surface compositing (depth peeling / qualified presentation layer stack or equivalent) with premultiplied alpha. If first witness forbids overlapping transparent surfaces, qualify that restriction explicitly and reject assets that violate it rather than silently rendering holes."
     }
   ],
   "false_or_overstated_external_findings": [

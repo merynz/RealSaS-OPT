@@ -30,6 +30,7 @@ from compiler.realsas_compiler_core.appearance_authority_v2 import (
 )
 from compiler.realsas_compiler_core.appearance_bake_v2 import (
     bake_direction_atlas,
+    bake_direction_source_view_atlas,
 )
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     compile_deterministic_caa,
@@ -570,6 +571,7 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     texture_rows = []
     output_rows = []
     provenance_atlases = []
+    source_view_atlases = []
     reference_uv = None
     reference_layout = None
     for direction in range(8):
@@ -617,6 +619,14 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
             }
         )
         provenance_atlases.append(provenance_atlas)
+        source_view_atlases.append(
+            bake_direction_source_view_atlas(
+                face_sample_source_view=arrays["source_view"][direction],
+                face_count=artifact.face_count,
+                tile_resolution=tile_resolution,
+                bleed_px=bleed,
+            )
+        )
 
     uv_path = root / "surface_uv.npz"
     uv_sha = _save_npz(uv_path, face_uv=np.asarray(reference_uv, dtype=np.float64))
@@ -624,6 +634,7 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
     provenance_sha = _save_npz(
         provenance_path,
         provenance=np.stack(provenance_atlases, axis=0).astype(np.uint8),
+        source_view=np.stack(source_view_atlases, axis=0).astype(np.int16),
     )
 
     asset = CompleteAppearanceAssetIR(
@@ -646,6 +657,11 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
             "transport_png_alpha": "STRAIGHT",
             "unpremultiply_export_boundary_count": 1,
             "runtime_generation_forbidden": True,
+            "source_view_identity_preserved": True,
+            "source_view_identity_is_render_authority": False,
+            "source_view_identity_encoding": (
+                "INT16_0_TO_7_SOURCE_VIEW__NEG2_COMPILED_HARMONIC"
+            ),
         },
     )
     asset = replace(asset, asset_hash=complete_appearance_asset_hash(asset))

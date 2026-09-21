@@ -1,0 +1,61 @@
+{
+  "schema": "RealSaS.VF11C2V4D11ResumePreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__C2_V4_D11_RESUME_CONTINUATION",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "parent_c2_v3_closure": "canonical/VF11_C2_V3_ADAPTIVE_REFINEMENT_RESEARCH_CLOSURE_20260921.json",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_authorized": false,
+  "source_profile_sha256": "e600c97dc09c2e54a0dd4b82539962ae36fb5e33e92e5194b8d76877dc78056b",
+  "resume_contract": {
+    "source_max_relative_depth": 2,
+    "source_absolute_depth": 10,
+    "target_relative_depth": 3,
+    "target_absolute_depth": 11,
+    "source_final_unresolved_leaf_count": 72,
+    "children_to_evaluate_if_all_source_unresolved_split": 576,
+    "recompute_prior_levels": false,
+    "path_reconstruction": "root d8 box plus deterministic octant path digits 0..7",
+    "prior_terminal_partition_preserved": true
+  },
+  "classifier": {
+    "order": [
+      "corrected C0 V3 micro2 empty sign",
+      "C2 V2 coordinate-axis graph patch",
+      "otherwise UNRESOLVED"
+    ],
+    "c0_micro_depth": 2,
+    "c1_micro_depth": 2,
+    "face_micro_depth": 2
+  },
+  "audits": [
+    "source profile hash and root-set binding",
+    "source final unresolved paths are exactly relative-depth-2 UNRESOLVED records",
+    "final partition contains no historical UNRESOLVED record as terminal",
+    "C2 V1 seven existence roots cannot close with all-EMPTY descendants",
+    "empirical sign/derivative checks on every newly minted proof"
+  ],
+  "primary_metrics": [
+    "d11 EMPTY/GRAPH/UNRESOLVED child counts",
+    "fully closed root count and IDs",
+    "unresolved root-volume fraction",
+    "roots with at least one graph descendant",
+    "zero-exists unresolved leaf count",
+    "runtime and proof evaluation counts"
+  ],
+  "decision": {
+    "any_soundness_alarm": "FAIL__SOUNDNESS_ALARM",
+    "additional_root_closure_gt_0": "PRODUCTIVE_SPATIAL_REFINEMENT__REVIEW_EXTRACTOR_TRANSITION",
+    "else_relative_unresolved_volume_reduction_ge_0_25_or_graph_root_gain_gt_0": "NONVACUOUS_CONTINUED_PRODUCTIVITY__REVIEW_D12_VS_BOUND_TIGHTENING",
+    "else": "SPATIAL_REFINEMENT_PLATEAU__TIGHTEN_BOUNDS_BEFORE_DEEPER_REFINEMENT"
+  },
+  "forbidden_inferences": [
+    "global Knight topology",
+    "global single component",
+    "full extraction coverage",
+    "shipping proof under ordinary float64"
+  ]
+}

@@ -170,6 +170,7 @@ TextureSet parse_textures(const std::vector<std::uint8_t>& data) {
 struct ProvenanceSet {
     std::uint32_t views{}, height{}, width{};
     std::vector<std::uint8_t> value;
+    std::vector<std::int16_t> source_view;
 };
 
 ProvenanceSet parse_provenance(const std::vector<std::uint8_t>& data) {
@@ -178,9 +179,29 @@ ProvenanceSet parse_provenance(const std::vector<std::uint8_t>& data) {
     p.views = read_scalar<std::uint32_t>(data, off);
     p.height = read_scalar<std::uint32_t>(data, off);
     p.width = read_scalar<std::uint32_t>(data, off);
-    const auto need = static_cast<std::size_t>(p.views) * p.height * p.width;
+    const auto count = static_cast<std::size_t>(p.views) * p.height * p.width;
+    const auto need = count + count * sizeof(std::int16_t);
     if (data.size() - off != need) throw std::runtime_error("PROVENANCE_BYTES_INVALID");
-    p.value.assign(data.begin() + static_cast<std::ptrdiff_t>(off), data.end());
+    p.value.assign(
+        data.begin() + static_cast<std::ptrdiff_t>(off),
+        data.begin() + static_cast<std::ptrdiff_t>(off + count)
+    );
+    off += count;
+    p.source_view.resize(count);
+    for(auto& value : p.source_view) {
+        value = read_scalar<std::int16_t>(data, off);
+    }
+    if(off != data.size()) throw std::runtime_error("PROVENANCE_BYTES_TRAILING");
+    constexpr auto padding = std::numeric_limits<std::int16_t>::min();
+    for(std::size_t i=0;i<count;++i) {
+        const auto donor=p.source_view[i];
+        const bool donor_valid=(donor>=0&&donor<8)||donor==-2;
+        if(p.value[i]==255) {
+            if(donor!=padding) throw std::runtime_error("SOURCE_VIEW_PADDING_DRIFT");
+        } else if(!donor_valid) {
+            throw std::runtime_error("SOURCE_VIEW_IDENTITY_INVALID");
+        }
+    }
     return p;
 }
 
@@ -304,6 +325,48 @@ std::uint8_t sample_provenance(const ProvenanceSet& p,std::uint32_t view,double 
     if(risk<0) throw std::runtime_error("PROVENANCE_BILINEAR_FOOTPRINT_EMPTY");
     return static_cast<std::uint8_t>(risk);
 }
+std::int16_t source_view_texel(const ProvenanceSet& p,std::uint32_t view,int x,int y) {
+    x=std::max(0,std::min(x,static_cast<int>(p.width)-1));
+    y=std::max(0,std::min(y,static_cast<int>(p.height)-1));
+    const auto idx=((static_cast<std::size_t>(view)*p.height)+static_cast<std::size_t>(y))*p.width+static_cast<std::size_t>(x);
+    return p.source_view[idx];
+}
+std::int16_t sample_source_view(const ProvenanceSet& p,std::uint32_t view,double u,double v) {
+    u=std::max(0.0,std::min(1.0,u)); v=std::max(0.0,std::min(1.0,v));
+    const double x=u*static_cast<double>(p.width-1), y=v*static_cast<double>(p.height-1);
+    const int x0=static_cast<int>(std::floor(x)), y0=static_cast<int>(std::floor(y));
+    const int x1=std::min(x0+1,static_cast<int>(p.width)-1), y1=std::min(y0+1,static_cast<int>(p.height)-1);
+    const double tx=x-x0, ty=y-y0;
+    const std::array<double,4> w{
+        (1.0-tx)*(1.0-ty), tx*(1.0-ty), (1.0-tx)*ty, tx*ty
+    };
+    const std::array<std::int16_t,4> v4{
+        source_view_texel(p,view,x0,y0),
+        source_view_texel(p,view,x1,y0),
+        source_view_texel(p,view,x0,y1),
+        source_view_texel(p,view,x1,y1)
+    };
+    constexpr std::int16_t kUnset=std::numeric_limits<std::int16_t>::min();
+    constexpr std::int16_t kMixed=-3;
+    std::int16_t result=kUnset;
+    for(std::size_t i=0;i<4;++i) {
+        if(w[i]<=1e-12) continue;
+        if(v4[i]==kUnset) throw std::runtime_error("SOURCE_VIEW_PADDING_SAMPLED");
+        if(result==kUnset) result=v4[i];
+        else if(result!=v4[i]) result=kMixed;
+    }
+    if(result==kUnset) throw std::runtime_error("SOURCE_VIEW_BILINEAR_FOOTPRINT_EMPTY");
+    return result;
+}
+std::int16_t merge_source_view_diagnostic(std::int16_t current,std::int16_t next) {
+    constexpr std::int16_t kUnset=std::numeric_limits<std::int16_t>::min();
+    constexpr std::int16_t kMixed=-3;
+    if(next==kUnset) return current;
+    if(current==kUnset) return next;
+    if(current==next) return current;
+    return kMixed;
+}
+
 std::uint8_t q8(double x) {
     x=std::max(0.0,std::min(1.0,x));
     return static_cast<std::uint8_t>(std::max(0.0,std::min(255.0,std::floor(x*255.0+0.5))));
@@ -332,13 +395,14 @@ int parse_int_exact(const std::string& raw,const std::string& label) {
 
 int main(int argc,char** argv) {
     try {
-        if(argc<2) throw std::runtime_error("USAGE: player package --clip ID --view V0 --frame N --out-rgba PATH [--out-provenance PATH] [--out-owner PATH]");
+        if(argc<2) throw std::runtime_error("USAGE: player package --clip ID --view V0 --frame N --out-rgba PATH [--out-provenance PATH] [--out-source-view PATH] [--out-owner PATH]");
         const std::string package_path=argv[1];
         const std::string clip_id=arg_value(argc,argv,"--clip");
         const std::string view_id=arg_value(argc,argv,"--view");
         const int frame_index=parse_int_exact(arg_value(argc,argv,"--frame"),"FRAME");
         const std::string rgba_path=arg_value(argc,argv,"--out-rgba");
         const std::string prov_path=arg_value(argc,argv,"--out-provenance",false);
+        const std::string source_view_path=arg_value(argc,argv,"--out-source-view",false);
         const std::string owner_path=arg_value(argc,argv,"--out-owner",false);
 
         const auto entries=parse_rss(package_path);
@@ -369,6 +433,14 @@ int main(int argc,char** argv) {
             throw std::runtime_error("DEPTH_BUFFER_CONTRACT_INVALID");
         if(manifest.at("depth_equivalence_epsilon_camera_z")!="1e-12")
             throw std::runtime_error("DEPTH_EQUIVALENCE_EPSILON_INVALID");
+        if(manifest.at("source_view_identity_contract")!="PER_TEXEL_INT16_PRESERVED__DIAGNOSTIC_ONLY")
+            throw std::runtime_error("SOURCE_VIEW_IDENTITY_CONTRACT_INVALID");
+        if(manifest.at("source_view_identity_render_authority")!="0")
+            throw std::runtime_error("SOURCE_VIEW_IDENTITY_RENDER_AUTHORITY_FORBIDDEN");
+        if(manifest.at("source_view_identity_compiled_harmonic_code")!="-2")
+            throw std::runtime_error("SOURCE_VIEW_HARMONIC_CODE_INVALID");
+        if(manifest.at("source_view_identity_mixed_sample_code")!="-3")
+            throw std::runtime_error("SOURCE_VIEW_MIXED_CODE_INVALID");
         const auto mesh=parse_mesh(entries.at("mesh.bin"));
         const auto cameras=parse_cameras(entries.at("cameras.bin"));
         const auto textures=parse_textures(entries.at("textures.bin"));
@@ -481,12 +553,17 @@ int main(int argc,char** argv) {
 
         std::vector<std::uint8_t> rgba(pixels*4u,0);
         std::vector<std::uint8_t> prov(pixels,255);
+        std::vector<std::int16_t> source_view_diag(
+            pixels,
+            std::numeric_limits<std::int16_t>::min()
+        );
         std::vector<std::int32_t> owner(pixels,-1);
         for(int y=0;y<resolution;++y) {
             for(int x=0;x<resolution;++x) {
                 const auto idx=static_cast<std::size_t>(y)*resolution+x;
                 PM pixel_accum{};
                 int pixel_risk=-1;
+                std::int16_t pixel_source_view=std::numeric_limits<std::int16_t>::min();
                 double representative_depth=std::numeric_limits<double>::infinity();
                 std::int32_t representative_owner=-1;
 
@@ -497,6 +574,7 @@ int main(int argc,char** argv) {
                         const auto cidx=static_cast<std::size_t>(cy)*coverage_resolution+cx;
                         PM sample_accum{};
                         int sample_risk=-1;
+                        std::int16_t sample_source_view_diag=std::numeric_limits<std::int16_t>::min();
                         for(int layer=0;layer<kMaxLayers;++layer) {
                             const auto fi=layer_owner[cidx][layer];
                             if(fi<0) continue;
@@ -516,6 +594,15 @@ int main(int argc,char** argv) {
                                         v
                                     ))
                                 );
+                                sample_source_view_diag=merge_source_view_diagnostic(
+                                    sample_source_view_diag,
+                                    sample_source_view(
+                                        provenance,
+                                        static_cast<std::uint32_t>(view),
+                                        u,
+                                        v
+                                    )
+                                );
                             }
                             sample_accum.r+=transmission*sample.r;
                             sample_accum.g+=transmission*sample.g;
@@ -528,6 +615,12 @@ int main(int argc,char** argv) {
                         pixel_accum.b+=sample_accum.b*inv_samples;
                         pixel_accum.a+=sample_accum.a*inv_samples;
                         if(sample_risk>=0) pixel_risk=std::max(pixel_risk,sample_risk);
+                        if(sample_source_view_diag!=std::numeric_limits<std::int16_t>::min()) {
+                            pixel_source_view=merge_source_view_diagnostic(
+                                pixel_source_view,
+                                sample_source_view_diag
+                            );
+                        }
 
                         const double front_depth=layer_depth[cidx][0];
                         if(front_depth<representative_depth) {
@@ -547,6 +640,7 @@ int main(int argc,char** argv) {
                 }
                 rgba[out+3]=q8(alpha);
                 if(pixel_risk>=0) prov[idx]=static_cast<std::uint8_t>(pixel_risk);
+                source_view_diag[idx]=pixel_source_view;
             }
         }
 
@@ -557,6 +651,11 @@ int main(int argc,char** argv) {
 
         write_file(rgba_path,rgba.data(),rgba.size());
         if(!prov_path.empty()) write_file(prov_path,prov.data(),prov.size());
+        if(!source_view_path.empty()) write_file(
+            source_view_path,
+            source_view_diag.data(),
+            source_view_diag.size()*sizeof(std::int16_t)
+        );
         if(!owner_path.empty()) write_file(owner_path,owner.data(),owner.size()*sizeof(std::int32_t));
 
         std::cout<<"renderer=REALSAS_V2_CAA_CANONICAL_DEPTH"

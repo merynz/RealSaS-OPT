@@ -11,15 +11,22 @@
   ],
   "compile_policy": {
     "atlas_layout": "UNIQUE_FACE_BARYCENTRIC_V1",
-    "tile_resolution": 8,
     "bleed_px": 2,
     "max_atlas_resolution": 2048,
-    "max_supported_face_count": 28900,
     "internal_alpha": "PREMULTIPLIED",
     "transport_png_alpha": "STRAIGHT",
     "unpremultiply_export_boundary_count": 1,
     "color_space": "SRGB_TRANSPORT__LINEAR_LIGHT_PREMULTIPLIED_FILTERING",
-    "max_visibility_layers": 4
+    "max_visibility_layers": 4,
+    "tile_resolution_mode": "PROJECTED_SOURCE_DENSITY_V1",
+    "tile_resolution_candidates": [
+      8,
+      12,
+      16,
+      24,
+      32
+    ],
+    "max_source_pixels_per_atlas_texel": 1
   },
   "source_lock_policy": {
     "min_abs_normal_camera_cos": 0.17364817766693041,
@@ -90,7 +97,7 @@
   "rationale": {
     "angle_support": "abs(normal dot camera-forward) >= cos(80deg); at least 10deg away from exact grazing, used only for correspondence eligibility, not RGB quality.",
     "boundary_support": "one-pixel Chebyshev safety band removes source silhouette ambiguity without globally eroding art at runtime.",
-    "atlas_capacity": "tile stride is 12 texels; floor(2048/12)=170 tiles per axis, hence 28,900 unique face tiles under the 2K product texture cap.",
+    "atlas_capacity": "Tile resolution is no longer selected from 2K capacity. A frozen candidate set is evaluated against source-visible projected face footprint; the smallest candidate with <=1 source pixel per atlas texel and a valid 2K page is selected. Capacity may reject a mesh but may not silently lower art resolution.",
     "totality": "definedness is exact and non-negotiable; every supported renderable sample must carry appearance.",
     "holdout_and_seam": "Every source direction must independently carry enough silhouette-adjacent holdout evidence and independently satisfy seam/color/gradient bounds; aggregate statistics may not hide a bad view. Thresholds remain subject-free and are being recalibrated for art quality before Knight.",
     "rest_art": "full source-foreground RGBA and source-alpha coverage are first-class product gates, independent of geometry qualification.",

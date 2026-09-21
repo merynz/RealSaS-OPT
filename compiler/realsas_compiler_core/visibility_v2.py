@@ -17,6 +17,7 @@ VISIBILITY_CONTRACT_V2 = {
     "authority": "CANONICAL_POSED_XYZ_PLUS_CAMERA_DEPTH",
     "projection": "FULL_SURFACE_CAMERA_PROJECTION_V3",
     "raster_fill": "HALF_INTEGER_TOP_LEFT",
+    "shipping_pixel_coverage": "FIXED_2X2_QUARTER_SUBSAMPLES__LINEAR_PM_AVERAGE",
     "depth": "CAMERA_FORWARD_Z_SMALLER_WINS",
     "exact_depth_tie": "SEALED_FACE_INDEX_ONLY__AMBIGUITY_MUST_BE_QUALIFIED",
     "layering": "DEPTH_SORTED_K4_GEOMETRY_LAYERS",
@@ -62,11 +63,20 @@ def rasterize_visible_owner(
     height: int | None = None,
     positions=None,
     max_layers: int = 4,
+    coverage_scale: int = 1,
 ) -> VisibilityRaster:
-    width = int(camera.resolution if width is None else width)
-    height = int(camera.resolution if height is None else height)
+    base_width = int(camera.resolution if width is None else width)
+    base_height = int(camera.resolution if height is None else height)
+    coverage_scale = int(coverage_scale)
+    width = base_width * coverage_scale
+    height = base_height * coverage_scale
     max_layers = int(max_layers)
-    if width <= 0 or height <= 0 or max_layers < 2:
+    if (
+        base_width <= 0
+        or base_height <= 0
+        or coverage_scale <= 0
+        or max_layers < 2
+    ):
         raise QualificationError("VISIBILITY_DIMENSION_INVALID")
 
     vertex_ids = tuple(_vertex_id(vertex) for vertex in mesh.vertices)
@@ -84,8 +94,13 @@ def rasterize_visible_owner(
     projected = np.asarray(project_points_xyz_v3(xyz, camera), dtype=np.float64)
     if projected.shape != (len(vertex_ids), 3) or not np.isfinite(projected).all():
         raise QualificationError("VISIBILITY_PROJECTED_MATRIX_INVALID")
+    raster_projected = projected.copy()
+    raster_projected[:, :2] *= float(coverage_scale)
 
-    by_id = {vertex_ids[i]: projected[i] for i in range(len(vertex_ids))}
+    by_id = {
+        vertex_ids[i]: raster_projected[i]
+        for i in range(len(vertex_ids))
+    }
     layer_owner = np.full(
         (height, width, max_layers),
         -1,

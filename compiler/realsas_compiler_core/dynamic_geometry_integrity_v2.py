@@ -52,30 +52,29 @@ def interior_shared_edge_projection_continuity(
     mismatch = 0
     max_error = 0.0
     worst_edge = None
-    nonmanifold_excluded = 0
+    nonmanifold = 0
     for edge, rows in sorted(incidence.items()):
-        if len(rows) > 2:
-            nonmanifold_excluded += 1
-            continue
-        if len(rows) != 2:
+        if len(rows) < 2:
             continue
         interior += 1
-        left = rows[0][1]
-        right = rows[1][1]
+        if len(rows) > 2:
+            nonmanifold += 1
+        reference = rows[0][1]
         endpoint_error = 0.0
         exact = True
-        for vertex_index in edge:
-            if vertex_index not in left or vertex_index not in right:
-                raise QualificationError(
-                    "DYNAMIC_GEOMETRY_SHARED_EDGE_ENDPOINT_BINDING_DRIFT"
+        for _face_index, candidate in rows[1:]:
+            for vertex_index in edge:
+                if vertex_index not in reference or vertex_index not in candidate:
+                    raise QualificationError(
+                        "DYNAMIC_GEOMETRY_SHARED_EDGE_ENDPOINT_BINDING_DRIFT"
+                    )
+                a = np.asarray(reference[vertex_index], dtype=np.float64)
+                b = np.asarray(candidate[vertex_index], dtype=np.float64)
+                exact = exact and bool(np.array_equal(a, b))
+                endpoint_error = max(
+                    endpoint_error,
+                    float(np.max(np.abs(a - b))),
                 )
-            a = np.asarray(left[vertex_index], dtype=np.float64)
-            b = np.asarray(right[vertex_index], dtype=np.float64)
-            exact = exact and bool(np.array_equal(a, b))
-            endpoint_error = max(
-                endpoint_error,
-                float(np.max(np.abs(a - b))),
-            )
         if not exact:
             mismatch += 1
             if endpoint_error >= max_error:
@@ -88,9 +87,7 @@ def interior_shared_edge_projection_continuity(
         "mismatched_interior_shared_edge_count": int(mismatch),
         "maximum_projected_endpoint_error_px": float(max_error),
         "worst_edge_vertex_indices": worst_edge,
-        "nonmanifold_edge_count_excluded_from_continuity_authority": int(
-            nonmanifold_excluded
-        ),
+        "nonmanifold_shared_edge_count_diagnostic": int(nonmanifold),
         "passed": bool(mismatch == 0),
         "cross_component_or_geometrically_near_edges_inferred": False,
     }

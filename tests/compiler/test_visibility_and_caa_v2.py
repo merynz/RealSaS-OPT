@@ -179,12 +179,52 @@ def test_transparent_front_geometry_reveals_deeper_character_layer():
         )
     center = render.straight_rgba_u8[16, 16]
     assert tuple(map(int, center)) == (0, 255, 0, 255)
-    assert int(render.contributing_layer_count[16, 16]) == 1
-    assert int(render.layer_owner_face_index[16, 16, 0]) == 0
-    assert int(render.layer_owner_face_index[16, 16, 1]) == 1
-    assert not bool(render.contributing_layer_mask[16, 16, 0])
-    assert bool(render.contributing_layer_mask[16, 16, 1])
+    assert int(render.coverage_sample_count) == 4
+    assert set(
+        map(int, render.coverage_sample_owner_face_index[16, 16])
+    ) == {0}
+    contributing_faces = render.layer_owner_face_index[16, 16][
+        render.contributing_layer_mask[16, 16]
+    ]
+    assert len(contributing_faces) == 4
+    assert set(map(int, contributing_faces)) == {1}
+    assert int(render.contributing_layer_count[16, 16]) == 4
     assert not bool(render.layer_overflow[16, 16])
+
+
+def test_runtime_reference_2x2_coverage_produces_fractional_edge_alpha():
+    mesh = SimpleNamespace(
+        vertices=(
+            SimpleNamespace(
+                canonical_mesh_vertex_id="v0",
+                P=(-0.73, -0.73, 0.0),
+            ),
+            SimpleNamespace(
+                canonical_mesh_vertex_id="v1",
+                P=(0.73, -0.73, 0.0),
+            ),
+            SimpleNamespace(
+                canonical_mesh_vertex_id="v2",
+                P=(0.0, 0.73, 0.0),
+            ),
+        ),
+        faces=(("v0", "v1", "v2"),),
+    )
+    face_uv = np.zeros((1, 3, 2), dtype=np.float64)
+    texture = np.asarray([[[220, 80, 40, 255]]], dtype=np.uint8)
+    provenance = np.zeros((1, 1), dtype=np.uint8)
+    render = render_caa_reference(
+        mesh=mesh,
+        camera=_camera(resolution=32),
+        face_uv=face_uv,
+        texture_rgba_u8=texture,
+        provenance_atlas=provenance,
+    )
+    alpha = render.straight_rgba_u8[:, :, 3]
+    partial = alpha[(alpha > 0) & (alpha < 255)]
+    assert len(partial) > 0
+    assert set(map(int, np.unique(partial))).issubset({64, 128, 191})
+    assert np.any(render.geometry_visible & (alpha < 255))
 
 
 def test_visibility_reports_layer_overflow_instead_of_silent_drop():

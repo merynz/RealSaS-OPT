@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2641**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2645**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2653,6 +2653,10 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-21T10:22:14+03:00` | `dd5da1a9e5ff` | yes | CI_TEST, RUNTIME_PRODUCT | ci: bind native source gate through extension V7 | `.github/workflows/native_runtime_source_gate.yml` | `main` |
 | `2026-09-21T10:23:23+03:00` | `8484a1071cfa` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: order visibility-load gate before conditioning predicate | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
 | `2026-09-21T10:25:43+03:00` | `4bdb486c8eaf` | yes | GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: advance VF-24 after exact functional runtime parity | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T10:27:30+03:00` | `97fa97d5f9d2` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-21T10:28:15+03:00` | `03994aceb8ef` | yes | OTHER | research: add subject-free VF-11 geometry feature survival panel | `tools/vf11_geometry_feature_survival_panel.py` | `main` |
+| `2026-09-21T10:28:38+03:00` | `d860dcb8b9cf` | yes | CI_TEST | ci: run exact subject-free VF-11 feature survival calibration | `.github/workflows/vf11_geometry_feature_survival.yml` | `main` |
+| `2026-09-21T10:29:10+03:00` | `c5d33eff35cb` | yes | OTHER | research: retain VF-11 no-bracket cases as catastrophic measurements | `tools/vf11_geometry_feature_survival_panel.py` | `main` |
 
 ## Use rule
 

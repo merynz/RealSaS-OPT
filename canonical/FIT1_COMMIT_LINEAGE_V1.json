@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "4bdb486c8eaf27679805af6407f964da89569399",
+    "main": "c5d33eff35cb464d6c1a1176b96d9df22dcec159",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -117,7 +117,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2641,
+  "commit_count": 2645,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -128087,6 +128087,98 @@
       "subsystem_tags": [
         "GOVERNANCE_CONTINUITY",
         "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "97fa97d5f9d21500f2dd9d831bdddf8b060dd23f",
+      "parents": [
+        "4bdb486c8eaf27679805af6407f964da89569399"
+      ],
+      "author_time": "2026-09-21T10:27:30+03:00",
+      "committer_time": "2026-09-21T10:27:30+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "03994aceb8ef0c1da15f630cbe0d9f37b0b2b1b9",
+      "parents": [
+        "97fa97d5f9d21500f2dd9d831bdddf8b060dd23f"
+      ],
+      "author_time": "2026-09-21T10:28:15+03:00",
+      "committer_time": "2026-09-21T10:28:15+03:00",
+      "subject": "research: add subject-free VF-11 geometry feature survival panel",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/vf11_geometry_feature_survival_panel.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d860dcb8b9cf4b1221d60da291700c70f6882db7",
+      "parents": [
+        "03994aceb8ef0c1da15f630cbe0d9f37b0b2b1b9"
+      ],
+      "author_time": "2026-09-21T10:28:38+03:00",
+      "committer_time": "2026-09-21T10:28:38+03:00",
+      "subject": "ci: run exact subject-free VF-11 feature survival calibration",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/vf11_geometry_feature_survival.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c5d33eff35cb464d6c1a1176b96d9df22dcec159",
+      "parents": [
+        "d860dcb8b9cf4b1221d60da291700c70f6882db7"
+      ],
+      "author_time": "2026-09-21T10:29:10+03:00",
+      "committer_time": "2026-09-21T10:29:10+03:00",
+      "subject": "research: retain VF-11 no-bracket cases as catastrophic measurements",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/vf11_geometry_feature_survival_panel.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

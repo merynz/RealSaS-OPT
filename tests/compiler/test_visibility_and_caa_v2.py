@@ -13,6 +13,7 @@ from compiler.realsas_compiler_core.appearance_bake_v2 import (
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     bilinear_rgba_u8,
     compile_deterministic_caa,
+    select_other_view_donor_by_support,
 )
 from compiler.realsas_compiler_core.appearance_render_v2 import render_caa_reference
 from compiler.realsas_compiler_core.playback_full_surface_v3 import CameraProjectionV3
@@ -141,6 +142,38 @@ def _candidate():
         SimpleNamespace(candidate_vertex_id="v2", P=(0.0, 0.95, 0.0), component_id="c0"),
     )
     return SimpleNamespace(vertices=vertices, faces=(("v0", "v1", "v2"),))
+
+
+def test_other_view_donor_prefers_geometric_support_over_circular_proximity():
+    # Target V0 has no direct evidence. V1 is circularly nearest but weakly
+    # supported; V4 is farthest in index space but has the best face support.
+    direct_valid = np.zeros((8, 3), dtype=bool)
+    direct_valid[1, :] = True
+    direct_valid[4, :] = True
+    face_support = np.zeros((8, 1), dtype=np.float64)
+    face_support[1, 0] = 0.20
+    face_support[4, 0] = 0.90
+    best_view, best_score = select_other_view_donor_by_support(
+        target_view_index=0,
+        missing=np.ones(3, dtype=bool),
+        direct_valid=direct_valid,
+        sample_face_index=np.zeros(3, dtype=np.int32),
+        face_support_by_view=face_support,
+    )
+    assert set(map(int, best_view)) == {4}
+    assert np.allclose(best_score, 0.90, atol=0.0, rtol=0.0)
+
+    # Equal support preserves deterministic cyclic-order tie behavior only.
+    face_support[1, 0] = 0.90
+    tied_view, tied_score = select_other_view_donor_by_support(
+        target_view_index=0,
+        missing=np.ones(3, dtype=bool),
+        direct_valid=direct_valid,
+        sample_face_index=np.zeros(3, dtype=np.int32),
+        face_support_by_view=face_support,
+    )
+    assert set(map(int, tied_view)) == {1}
+    assert np.allclose(tied_score, 0.90, atol=0.0, rtol=0.0)
 
 
 def test_safe_transparent_source_background_is_defined_direct_source_not_unseen():

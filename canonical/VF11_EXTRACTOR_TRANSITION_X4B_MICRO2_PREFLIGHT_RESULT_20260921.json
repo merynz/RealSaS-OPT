@@ -1,0 +1,21 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX4BMicro2PreflightResult.v1",
+  "date_utc": "2026-09-21",
+  "status": "BATCHED_RANGE_ENGINE_REMAINS_PLAUSIBLE__ESTIMATE_REQUIRED_THROUGHPUT_BEFORE_FULL_DOMAIN",
+  "artifact_sha256": "941e2b796c178e361a770254a92802c91fd5899701ffa9923dd4c29bd4c4ced9",
+  "artifact_bytes": 5894,
+  "sample_count": 16,
+  "m0_state_counts": {"UNKNOWN": 16},
+  "m1_state_counts": {"UNKNOWN": 16},
+  "m2_state_counts": {"UNKNOWN": 15, "PROVEN_EMPTY_POSITIVE": 1},
+  "m2_decisive_count": 1,
+  "m2_decisive_fraction": 0.0625,
+  "actual_box_evals_mean": 73.0,
+  "seconds_per_regime_mean": 0.5718709191250468,
+  "elapsed_seconds_total": 9.152058603999649,
+  "interpretation": "Micro-depth 2 was non-vacuous but sparse on the tiny deterministic full-domain regime sample: one of sixteen regimes became strictly empty. Scalar refinement is far too expensive; batching may still be useful, but throughput must be demonstrated before any full-domain execution.",
+  "scientific_boundary": "n=16 is a performance/productivity preflight, not a population estimate of full-domain decisiveness.",
+  "full_domain_execution_performed": false,
+  "full_domain_execution_authorized": false,
+  "product_authority_minted": false
+}

@@ -202,6 +202,73 @@ def unexpected_intersection_pairs(
     return tuple(sorted(set(pairs)))
 
 
+INTERSECTION_PERSISTENCE_BINARY_STEPS = 24
+INTERSECTION_PERSISTENCE_MIN_SCALE = 2.0 ** -12
+INTERSECTION_PERSISTENCE_NUMERICAL_SLACK = 4.0 * (2.0 ** -24)
+
+
+def triangle_intersection_persistence_severity(
+    triangle_a: np.ndarray,
+    triangle_b: np.ndarray,
+    *,
+    binary_steps: int = INTERSECTION_PERSISTENCE_BINARY_STEPS,
+    minimum_scale: float = INTERSECTION_PERSISTENCE_MIN_SCALE,
+) -> float:
+    """Return normalized interior-overlap persistence under homothetic shrink.
+
+    Both triangles are shrunk about their own centroids by the same scale. Since
+    each shrunken triangle is nested inside its larger-scale version, intersection
+    is monotone in scale and the first intersecting scale can be found by binary
+    search. Severity is 1 - critical_scale: shallow overlap tends toward zero,
+    while deep overlap survives stronger shrink and produces a larger value.
+
+    This construction is invariant to a shared rigid transform and uniform scale;
+    it is therefore suitable for rest->posed non-regression rather than an
+    arbitrary world-distance penetration threshold.
+    """
+    a = np.asarray(triangle_a, dtype=np.float64)
+    b = np.asarray(triangle_b, dtype=np.float64)
+    steps = int(binary_steps)
+    floor = float(minimum_scale)
+    if (
+        a.shape != (3, 3)
+        or b.shape != (3, 3)
+        or not np.isfinite(a).all()
+        or not np.isfinite(b).all()
+        or steps < 8
+        or steps > 64
+        or not np.isfinite(floor)
+        or not (0.0 < floor < 0.1)
+    ):
+        raise QualificationError("DYNAMIC_GEOMETRY_INTERSECTION_SEVERITY_INPUT_INVALID")
+
+    ca = np.mean(a, axis=0)
+    cb = np.mean(b, axis=0)
+
+    def intersects(scale: float) -> bool:
+        aa = ca + float(scale) * (a - ca)
+        bb = cb + float(scale) * (b - cb)
+        return triangles_intersect_sat(aa, bb, tolerance=0.0)
+
+    if not intersects(1.0):
+        return 0.0
+    if intersects(floor):
+        return 1.0 - floor
+
+    lo = floor
+    hi = 1.0
+    for _ in range(steps):
+        mid = 0.5 * (lo + hi)
+        if intersects(mid):
+            hi = mid
+        else:
+            lo = mid
+    severity = 1.0 - hi
+    if not np.isfinite(severity) or severity < -1.0e-12 or severity > 1.0:
+        raise QualificationError("DYNAMIC_GEOMETRY_INTERSECTION_SEVERITY_INVALID")
+    return float(max(0.0, min(1.0, severity)))
+
+
 def projected_orientation_flip(
     *,
     rest_screen_triangle: np.ndarray,

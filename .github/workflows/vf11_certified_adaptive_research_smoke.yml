@@ -27,6 +27,7 @@ on:
       - 'canonical/VF11_C1_V2_INTERIM_REVIEW_20260921.json'
       - 'canonical/VF11_C1_V2_RESEARCH_CLOSURE_20260921.json'
       - 'canonical/VF11_C2_ORIENTED_CROSSING_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_LAYERNORM_EPS_ERRATUM_20260921.json'
       - '.github/workflows/vf11_certified_adaptive_research_smoke.yml'
   workflow_dispatch:
 
@@ -132,61 +133,10 @@ jobs:
           assert c2['status']=='PREREGISTERED__C2_ORIENTED_CROSSING_EXISTENCE_UNIQUENESS'
           assert c2['product_authority_minted'] is False
           assert c2['full_domain_traversal_authorized'] is False
+          epsfix=json.load(open('canonical/VF11_LAYERNORM_EPS_ERRATUM_20260921.json',encoding='utf-8'))
+          assert epsfix['status']=='ERRATUM_OPEN__C0_C1_IMPACT_REPLAY_REQUIRED__C2_HOLD'
+          assert epsfix['impact_scope']['c2_execution']=='HOLD_PENDING_IMPACT_REPLAY'
           print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
-          PY
-
-      - name: Diagnose C2 point-bound semantic mismatch
-        run: |
-          python - <<'PY'
-          import sys, torch, numpy as np
-          import torch.nn.functional as F
-          from torch import nn
-          sys.path.insert(0,'experiments/vf11_certified_adaptive')
-          import range_engine_c0_v3 as c0
-          torch.manual_seed(502)
-          class TinyField(nn.Module):
-              def __init__(self, channels=2, hidden=8):
-                  super().__init__()
-                  width=3*channels
-                  self.body=nn.Sequential(nn.LayerNorm(width),nn.Linear(width,hidden),nn.SiLU(),nn.Linear(hidden,hidden),nn.SiLU())
-                  self.sdf_head=nn.Linear(hidden,1)
-              @staticmethod
-              def sample(planes, points):
-                  b,_,c,h,w=planes.shape
-                  x,y,z=points.unbind(-1)
-                  grids=torch.stack([torch.stack([x,y],-1),torch.stack([x,z],-1),torch.stack([y,z],-1)],dim=1)
-                  sampled=F.grid_sample(planes.reshape(b*3,c,h,w),grids.reshape(b*3,points.shape[1],1,2),mode='bilinear',padding_mode='border',align_corners=False)
-                  return sampled.squeeze(-1).reshape(b,3,c,points.shape[1]).permute(0,3,1,2).reshape(b,points.shape[1],3*c)
-              def forward(self,planes,points):
-                  h=self.body(self.sample(planes,points))
-                  return {'sdf':self.sdf_head(h).squeeze(-1)}
-          field=TinyField().double().eval()
-          planes=torch.randn(1,3,2,8,8,dtype=torch.float64)
-          pp=c0.prepare_planes(planes); p=c0.prepare_field(field)
-          point=np.array([0.13,-0.22,0.31],dtype=np.float64)
-          q=torch.tensor(point.reshape(1,1,3),dtype=torch.float64)
-          direct0=field.sample(pp,q).reshape(-1)
-          aff=c0._triplane_affine_single_regime(pp,point,point)
-          print('TRIPLANE maxdiff',float((direct0-aff.center).abs().max()), 'direct', direct0.tolist(), 'aff', aff.center.tolist())
-          direct1=field.body[0](direct0)
-          aff1=c0._layernorm_affine(aff,p)
-          print('LN maxdiff',float((direct1-aff1.center).abs().max()), 'rad',float(aff1.generators.abs().sum(dim=1).max()))
-          direct2=field.body[1](direct1)
-          aff2=c0._linear(aff1,p.w1,p.b1)
-          print('LIN1 maxdiff',float((direct2-aff2.center).abs().max()), 'rad',float(aff2.generators.abs().sum(dim=1).max()))
-          direct3=field.body[2](direct2)
-          aff3=c0._silu_affine(aff2)
-          print('SILU1 maxdiff',float((direct3-aff3.center).abs().max()), 'rad',float(aff3.generators.abs().sum(dim=1).max()))
-          direct4=field.body[3](direct3)
-          aff4=c0._linear(aff3,p.w2,p.b2)
-          print('LIN2 maxdiff',float((direct4-aff4.center).abs().max()), 'rad',float(aff4.generators.abs().sum(dim=1).max()))
-          direct5=field.body[4](direct4)
-          aff5=c0._silu_affine(aff4)
-          print('SILU2 maxdiff',float((direct5-aff5.center).abs().max()), 'rad',float(aff5.generators.abs().sum(dim=1).max()))
-          direct6=field.sdf_head(direct5).reshape(())
-          aff6=c0._linear(aff5,p.wh,p.bh)
-          lo,hi=aff6.bounds()
-          print('HEAD direct',float(direct6),'center',float(aff6.center.item()),'lo',float(lo.item()),'hi',float(hi.item()),'diff',float(direct6-aff6.center.item()))
           PY
 
       - name: Run short deterministic/adversarial range tests
@@ -237,7 +187,7 @@ jobs:
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           out={
-            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v7',
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v8',
             'status':'PASS',
             'product_authority_minted':False,
             'files':{p:sha(p) for p in files},

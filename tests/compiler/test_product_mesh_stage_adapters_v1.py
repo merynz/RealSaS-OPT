@@ -617,10 +617,11 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
                 "dynamic_max_compiled_unobserved_visible_fraction": 0.20,
                 "dynamic_max_frame_compiled_unobserved_visible_fraction": 1.0,
                 "dynamic_max_connected_compiled_unobserved_visible_fraction": 1.0,
-                "dynamic_max_compiled_global_visible_fraction": 1.0,
                 "dynamic_max_micro_visible_pixel_fraction_per_frame": 1.0,
                 "dynamic_max_unmeasurable_consequential_visible_face_count": 1000000,
                 "dynamic_max_exact_depth_ambiguous_fraction": 1.0,
+                "dynamic_max_visible_orientation_flip_face_count": 1000000,
+                "dynamic_max_visibility_layer_overflow_pixel_count": 0,
                 "dynamic_min_visible_pixels_per_face": 1,
                 "dynamic_min_projected_double_area_px2": 0.01,
                 "dynamic_max_uv_to_surface_condition_number": 64.0,
@@ -957,6 +958,26 @@ def test_v2_stage20_to25_caa_branch_executes_real_adapters_on_subject_free_trian
     quality["rest_min_source_alpha_precision"] = 0.0
     quality["rest_max_largest_coherent_alpha_hole_fraction"] = 1.0
     quality["rest_max_alpha_interior_uncovered_fraction"] = 1.0
+    quality["rest_max_exact_depth_ambiguous_fraction"] = 1.0
+    quality["rest_max_visibility_layer_overflow_pixel_count"] = 0
+    quality["rest_max_feature_high_error_fraction"] = 1.0
+    quality["rest_max_largest_connected_high_error_fraction"] = 1.0
+    quality["rest_max_feature_p999_rgba_l1"] = 1.0
+    quality["rest_min_feature_edge_recall_1px"] = 0.0
+    quality["rest_min_feature_edge_precision_1px"] = 0.0
+    quality["cross_view_min_shared_direct_samples_per_pair"] = 1
+    quality["cross_view_min_component_samples_for_gate"] = 1
+    quality["cross_view_max_pair_p95_rgba_l1"] = 1.0
+    quality["cross_view_max_pair_color_conflict_fraction"] = 1.0
+    quality["cross_view_max_pair_p95_alpha_abs"] = 1.0
+    quality["cross_view_max_pair_alpha_conflict_fraction"] = 1.0
+    quality["cross_view_max_component_color_conflict_fraction"] = 1.0
+    quality["cross_view_max_component_alpha_conflict_fraction"] = 1.0
+    quality["max_source_sample_pm_roundtrip_abs_error"] = 1.0
+    quality["max_local_harmonic_region_samples"] = 64
+    quality["max_local_harmonic_graph_hops"] = 8
+    fixture_policy["compile_policy"]["max_source_pixels_per_atlas_texel"] = 8.0
+
 
     policy_path = tmp_path / "caa_fixture_policy.json"
     policy_path.write_text(
@@ -987,8 +1008,7 @@ def test_v2_stage20_to25_caa_branch_executes_real_adapters_on_subject_free_trian
     assert (
         compile_artifact.direct_source_sample_count
         + compile_artifact.other_view_source_sample_count
-        + compile_artifact.compiled_nearest_surface_sample_count
-        + compile_artifact.compiled_global_surface_sample_count
+        + compile_artifact.compiled_local_harmonic_sample_count
         == compile_artifact.total_sample_count
     )
 

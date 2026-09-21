@@ -18,6 +18,7 @@ EXT1 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V1_20260917.json")
 EXT2 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V2_20260917.json")
 EXT3 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V3_20260918.json")
 EXT4 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V4_20260918.json")
+EXT5 = Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V5_20260921.json")
 
 
 def _blob_sha1(payload: bytes) -> str:
@@ -34,6 +35,7 @@ def verify() -> dict:
     ext2 = json.loads(EXT2.read_text(encoding="utf-8"))
     ext3 = json.loads(EXT3.read_text(encoding="utf-8"))
     ext4 = json.loads(EXT4.read_text(encoding="utf-8"))
+    ext5 = json.loads(EXT5.read_text(encoding="utf-8"))
 
     if ext1["schema"] != "realsas.compiler_runtime_source_extension_seal.v1":
         raise RuntimeError("NATIVE_SOURCE_EXT1_SCHEMA_DRIFT")
@@ -87,6 +89,21 @@ def verify() -> dict:
     if ext4["authority"]["runtime_role"] != "subordinate_deployment_consumer":
         raise RuntimeError("NATIVE_SOURCE_EXT4_ROLE_DRIFT")
 
+    if ext5["schema"] != "realsas.compiler_runtime_source_extension_seal.v5":
+        raise RuntimeError("NATIVE_SOURCE_EXT5_SCHEMA_DRIFT")
+    if ext5["prior_extension"]["path"] != str(EXT4):
+        raise RuntimeError("NATIVE_SOURCE_EXT5_PRIOR_PATH_DRIFT")
+    if _blob_sha1(EXT4.read_bytes()) != ext5["prior_extension"]["git_blob_sha1"]:
+        raise RuntimeError("NATIVE_SOURCE_EXT5_PRIOR_BLOB_DRIFT")
+    if ext5["authority"]["historical_base_seal_mutated"] is not False:
+        raise RuntimeError("NATIVE_SOURCE_EXT5_BASE_MUTATION_CLAIM")
+    if ext5["authority"]["prior_extension_mutated"] is not False:
+        raise RuntimeError("NATIVE_SOURCE_EXT5_PRIOR_MUTATION_CLAIM")
+    if ext5["authority"]["runtime_role"] != "subordinate_deployment_consumer":
+        raise RuntimeError("NATIVE_SOURCE_EXT5_ROLE_DRIFT")
+    if ext5["authority"].get("subtree_closure") != "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME":
+        raise RuntimeError("NATIVE_SOURCE_EXT5_SUBTREE_CLOSURE_DRIFT")
+
     expected = {
         row["path"]: {
             "size_bytes": int(row["size_bytes"]),
@@ -121,6 +138,7 @@ def verify() -> dict:
     apply_extension(ext2, "extension_v2")
     apply_extension(ext3, "extension_v3")
     apply_extension(ext4, "extension_v4")
+    apply_extension(ext5, "extension_v5")
 
     tracked = {
         row.strip()
@@ -143,13 +161,13 @@ def verify() -> dict:
                 sort_keys=True,
             )
         )
-    closure = dict(ext3.get("closure") or {})
+    closure = dict(ext5.get("closure") or {})
     if int(closure.get("runtime_realsas_cpp_blob_count", -1)) != len(tracked):
-        raise RuntimeError("NATIVE_SOURCE_EXT3_CLOSURE_COUNT_DRIFT")
+        raise RuntimeError("NATIVE_SOURCE_EXT5_CLOSURE_COUNT_DRIFT")
     if int(closure.get("resulting_sealed_blob_count", -1)) != len(expected):
-        raise RuntimeError("NATIVE_SOURCE_EXT3_SEALED_COUNT_DRIFT")
+        raise RuntimeError("NATIVE_SOURCE_EXT5_SEALED_COUNT_DRIFT")
     if int(closure.get("unsealed_repository_blob_count_under_subtree", -1)) != 0:
-        raise RuntimeError("NATIVE_SOURCE_EXT3_UNSEALED_COUNT_NONZERO")
+        raise RuntimeError("NATIVE_SOURCE_EXT5_UNSEALED_COUNT_NONZERO")
 
     verified = []
     for path_text, identity in sorted(expected.items()):
@@ -180,6 +198,7 @@ def verify() -> dict:
         "extension_v2_change_count": len(ext2["replacements"]) + len(ext2["additions"]),
         "extension_v3_change_count": len(ext3["replacements"]) + len(ext3["additions"]),
         "extension_v4_change_count": len(ext4["replacements"]) + len(ext4["additions"]),
+        "extension_v5_change_count": len(ext5["replacements"]) + len(ext5["additions"]),
         "subtree_blob_count": len(tracked),
         "verified_paths": verified,
     }
@@ -195,5 +214,6 @@ if __name__ == "__main__":
         f"ext2={result['extension_v2_change_count']} "
         f"ext3={result['extension_v3_change_count']} "
         f"ext4={result['extension_v4_change_count']} "
+        f"ext5={result['extension_v5_change_count']} "
         f"subtree={result['subtree_blob_count']}"
     )

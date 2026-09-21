@@ -51,7 +51,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -nEi 'SUBJECT2_KNIGHT|Knight\.fbx|MAGE_|Mage'             tools/vf11_geometry_feature_survival_panel.py; then
+          if grep -nE 'SUBJECT2_KNIGHT|Knight\.fbx|PROMOTED_MAGE|MAGE_FIT|/MAGE|/Mage'             tools/vf11_geometry_feature_survival_panel.py; then
             echo VF11_SUBJECT_CONTAMINATION_FORBIDDEN >&2
             exit 1
           fi

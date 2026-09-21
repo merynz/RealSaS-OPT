@@ -3,6 +3,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import numpy as np
+import pytest
 
 from compiler.realsas_compiler_core.appearance_bake_v2 import bake_direction_atlas
 from compiler.realsas_compiler_core.presentation_partition_v2 import (
@@ -219,3 +220,97 @@ def test_visual_groups_can_have_distinct_rigid_and_deformable_mechanics_inside_o
     assert structure.metadata["mechanical_classification_scope"] == (
         "PRESENTATION_FACE_GROUP"
     )
+
+
+def _single_group_structure(influences_by_vertex):
+    mesh = _mesh()
+    skeleton = SimpleNamespace(
+        joints=(
+            SimpleNamespace(canonical_joint_id="j0"),
+            SimpleNamespace(canonical_joint_id="j1"),
+        ),
+        root_id="j0",
+        skeleton_lineage_hash="s" * 64,
+    )
+    mesh_skin = SimpleNamespace(
+        rows=tuple(
+            SimpleNamespace(
+                canonical_mesh_vertex_id=f"v{i}",
+                influences=tuple(influences_by_vertex[i]),
+            )
+            for i in range(4)
+        ),
+        mesh_skin_lineage_hash="w" * 64,
+    )
+    partition = SimpleNamespace(
+        components=(SimpleNamespace(component_id="c0"),),
+        partition_lineage_hash="p" * 64,
+    )
+    carrier = SimpleNamespace(
+        decisions=(SimpleNamespace(component_id="c0", carrier_class="MESH"),),
+        carrier_policy_lineage_hash="c" * 64,
+    )
+    return build_presentation_structure_v2(
+        skeleton=skeleton,
+        mesh=mesh,
+        mesh_skin=mesh_skin,
+        partition=partition,
+        carrier_policy=carrier,
+        min_rigid_owner_weight=0.999,
+        max_rigid_other_mass=0.001,
+    )
+
+
+def test_rigidity_noop_authority_accepts_exact_one_hot_group():
+    structure = _single_group_structure(
+        {
+            0: (("j1", 1.0),),
+            1: (("j1", 1.0),),
+            2: (("j1", 1.0),),
+            3: (("j1", 1.0),),
+        }
+    )
+    attachment = structure.attachments[0]
+    assert attachment.mechanical_class == "RIGID"
+    assert attachment.metadata["rigid_owner_joint_id"] == "j1"
+    assert attachment.metadata["rigidity_authority"] == (
+        "INDEPENDENT_JOINT_LBS_RIGID_NOOP_V1"
+    )
+    probe = attachment.metadata["rigidity_noop_probe"]
+    assert probe["passed"] is True
+    assert probe["max_relative_edge_error"] <= probe["tolerance"]
+    assert structure.metadata[
+        "legacy_weight_thresholds_are_diagnostic_not_final_authority"
+    ] is True
+
+
+def test_rigidity_noop_authority_keeps_smooth_multijoint_skin_deformable():
+    structure = _single_group_structure(
+        {
+            0: (("j0", 0.85), ("j1", 0.15)),
+            1: (("j0", 0.65), ("j1", 0.35)),
+            2: (("j0", 0.35), ("j1", 0.65)),
+            3: (("j0", 0.15), ("j1", 0.85)),
+        }
+    )
+    attachment = structure.attachments[0]
+    assert attachment.mechanical_class == "DEFORMABLE"
+    assert attachment.metadata["rigid_owner_joint_id"] == ""
+    probe = attachment.metadata["rigidity_noop_probe"]
+    assert probe["passed"] is False
+    assert probe["max_relative_edge_error"] > probe["tolerance"]
+
+
+def test_legacy_0999_rigid_false_positive_is_hard_failure_not_silent_wobble():
+    with pytest.raises(
+        Exception,
+        match="PRESENTATION_V2_LEGACY_RIGID_PREDICATE_NOOP_FAIL",
+    ):
+        _single_group_structure(
+            {
+                0: (("j1", 1.0),),
+                1: (("j1", 0.999), ("j0", 0.001)),
+                2: (("j1", 1.0),),
+                3: (("j1", 1.0),),
+            }
+        )

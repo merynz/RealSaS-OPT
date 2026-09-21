@@ -154,9 +154,22 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
     if not {"KNIGHT_RESULT", "SUBJECT_ID", "CATEGORY_LABEL"}.issubset(forbidden):
         raise QualificationError("PRESENTATION_V2_POLICY_FORBIDDEN_INPUTS_INCOMPLETE")
     mechanical_policy = dict(policy.get("mechanical_binding_policy") or {})
-    required_mechanical = {"min_rigid_owner_weight", "max_rigid_other_mass"}
+    required_mechanical = {
+        "min_rigid_owner_weight",
+        "max_rigid_other_mass",
+        "rigidity_noop_required",
+        "rigidity_noop_relative_edge_tolerance",
+        "rigidity_noop_probe_rotation_degrees",
+        "legacy_weight_thresholds_final_authority",
+    }
     if not required_mechanical.issubset(mechanical_policy):
         raise QualificationError("PRESENTATION_V2_MECHANICAL_POLICY_INCOMPLETE")
+    if bool(mechanical_policy["rigidity_noop_required"]) is not True:
+        raise QualificationError("PRESENTATION_V2_RIGIDITY_NOOP_REQUIRED")
+    if bool(mechanical_policy["legacy_weight_thresholds_final_authority"]):
+        raise QualificationError(
+            "PRESENTATION_V2_LEGACY_WEIGHT_THRESHOLD_AUTHORITY_FORBIDDEN"
+        )
 
     uv_path = resolved_path(asset.uv_npz_path)
     provenance_path = resolved_path(asset.provenance_npz_path)
@@ -196,6 +209,12 @@ def qualify_presentation_structure_stage(ctx: dict) -> dict:
         carrier_policy=carrier,
         min_rigid_owner_weight=float(mechanical_policy["min_rigid_owner_weight"]),
         max_rigid_other_mass=float(mechanical_policy["max_rigid_other_mass"]),
+        rigidity_noop_relative_edge_tolerance=float(
+            mechanical_policy["rigidity_noop_relative_edge_tolerance"]
+        ),
+        rigidity_noop_probe_rotation_degrees=float(
+            mechanical_policy["rigidity_noop_probe_rotation_degrees"]
+        ),
         presentation_cut_face_pairs=evidence.cut_face_pairs,
         presentation_partition_evidence_hash=evidence.evidence_hash,
     )

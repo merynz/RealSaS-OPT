@@ -134,14 +134,31 @@ def _texture_payload(projection: RuntimeProjectionV2IR) -> bytes:
 def _provenance_payload(projection: RuntimeProjectionV2IR) -> bytes:
     path = Path(projection.provenance_npz_path)
     with np.load(path, allow_pickle=False) as data:
-        if "provenance" not in data.files:
-            raise QualificationError("RSS_V2_PROVENANCE_ARRAY_MISSING")
+        required = {"provenance", "source_view"}
+        if not required.issubset(data.files):
+            raise QualificationError("RSS_V2_PROVENANCE_LINEAGE_ARRAY_MISSING")
         value = np.asarray(data["provenance"], dtype=np.uint8)
+        source_view = np.asarray(data["source_view"], dtype="<i2")
     if value.ndim != 3 or value.shape[0] != 8:
         raise QualificationError("RSS_V2_PROVENANCE_SHAPE_INVALID")
+    if source_view.shape != value.shape:
+        raise QualificationError("RSS_V2_SOURCE_VIEW_SHAPE_INVALID")
+    padding = np.iinfo(np.int16).min
+    valid_source = (
+        ((source_view >= 0) & (source_view < 8))
+        | (source_view == -2)
+        | (source_view == padding)
+    )
+    if not np.all(valid_source):
+        raise QualificationError("RSS_V2_SOURCE_VIEW_VALUE_INVALID")
+    if np.any((value != 255) & (source_view == padding)):
+        raise QualificationError("RSS_V2_RENDERABLE_SOURCE_VIEW_MISSING")
+    if np.any((value == 255) & (source_view != padding)):
+        raise QualificationError("RSS_V2_SOURCE_VIEW_PADDING_DRIFT")
     return (
         struct.pack("<III", value.shape[0], value.shape[1], value.shape[2])
         + value.tobytes(order="C")
+        + source_view.tobytes(order="C")
     )
 
 
@@ -185,6 +202,10 @@ def build_rss_v2_entries(projection: RuntimeProjectionV2IR) -> OrderedDict[str, 
         "pixel_coverage_sample_count=4",
         "depth_buffer_contract=IEEE754_FLOAT64_SOFTWARE_SORT",
         "depth_equivalence_epsilon_camera_z=1e-12",
+        "source_view_identity_contract=PER_TEXEL_INT16_PRESERVED__DIAGNOSTIC_ONLY",
+        "source_view_identity_render_authority=0",
+        "source_view_identity_compiled_harmonic_code=-2",
+        "source_view_identity_mixed_sample_code=-3",
         "geometry_uv_position_precision=IEEE754_FLOAT64",
         f"clip_count={len(projection.clips)}",
         f"view_count={len(projection.views)}",

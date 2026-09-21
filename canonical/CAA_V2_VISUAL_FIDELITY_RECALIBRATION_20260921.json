@@ -279,6 +279,14 @@
       "finding": "The subject-free CAA policy, layered visibility, and dynamic appearance conditioning adversarial suites existed in the repository but were not executed by any current workflow. A main commit could therefore retain green current CI while violating repaired visual-fidelity invariants.",
       "repair": "current-runtime-self-hosted-ci now runs test_caa_v2_subject_free_policy.py, test_visibility_and_caa_v2.py, and test_dynamic_appearance_conditioning_v2.py as a mandatory V2 visual-fidelity red-team bank on the same SHA as native parity.",
       "status": "REPAIRED__EXACT_HEAD_CI_PENDING"
+    },
+    {
+      "id": "VF-34",
+      "severity": "HIGH",
+      "owner": "CI / policy authority governance",
+      "finding": "The runtime/native workflow did not trigger when the canonical V2 appearance numerical policy or dynamic-appearance calibration authority changed. Shipping limits could therefore be relaxed without forcing the implementation and adversarial banks to rerun.",
+      "repair": "current-runtime-self-hosted-ci now triggers on CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json and DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json, binding policy changes to the exact runtime/native/red-team gate.",
+      "status": "REPAIRED__EXACT_HEAD_CI_PENDING"
     }
   ],
   "false_or_overstated_external_findings": [

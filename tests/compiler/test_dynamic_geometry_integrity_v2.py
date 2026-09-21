@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import numpy as np
 
+from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
+    rasterize_triangles_half_integer_top_left,
+)
 from compiler.realsas_compiler_core.dynamic_geometry_integrity_v2 import (
     interior_shared_edge_projection_continuity,
     INTERSECTION_PERSISTENCE_NUMERICAL_SLACK,
@@ -272,3 +275,20 @@ def test_topologically_separate_articulation_gap_is_not_inferred_as_crack():
     assert result["mismatched_interior_shared_edge_count"] == 0
     assert result["passed"] is True
     assert result["cross_component_or_geometrically_near_edges_inferred"] is False
+
+
+def test_half_integer_top_left_shared_edge_tiles_without_interior_raster_crack():
+    triangles = (
+        ((8.0, 8.0), (24.0, 8.0), (24.0, 24.0)),
+        ((8.0, 8.0), (24.0, 24.0), (8.0, 24.0)),
+    )
+    raw = rasterize_triangles_half_integer_top_left(
+        triangles,
+        width=32,
+        height=32,
+    )
+    mask = np.frombuffer(raw, dtype=np.uint8).reshape(32, 32).astype(bool)
+    # The two triangles exactly tile a 16x16 square. Their diagonal is an
+    # interior shared edge and may not leave a single uncovered pixel center.
+    assert np.all(mask[8:24, 8:24])
+    assert int(np.count_nonzero(mask)) == 16 * 16

@@ -179,8 +179,12 @@
     },
     {
       "id": "USER_APPROVAL",
-      "status": "BLOCKING_BY_GOVERNANCE",
-      "reason": "Even after technical readiness is resealed, first Knight witness execution requires explicit user approval."
+      "status": "BLOCKING_BY_GOVERNANCE__MACHINE_ENFORCED",
+      "reason": "Even after technical readiness is resealed, named WITNESS init and the Knight preflight must pass validate-witness-authorization. That gate requires a separately recorded APPROVED_EXPLICITLY_BY_USER state and witness_execution_authorized_now=true.",
+      "evidence": [
+        "VF-39",
+        "compiler/realsas_compiler_services/orchestrator/mainline.py"
+      ]
     }
   ],
   "reseal_allowed_now": false,

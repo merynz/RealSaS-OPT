@@ -129,7 +129,8 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     projection = replace(projection, projection_hash=runtime_projection_hash(projection))
 
     rss = tmp_path / "smoke.rss"
-    write_rss_v2(rss, build_rss_v2_entries(projection))
+    entries = build_rss_v2_entries(projection)
+    write_rss_v2(rss, entries)
     native_rgba = tmp_path / "native.rgba"
     native_prov = tmp_path / "native.prov"
     native_owner = tmp_path / "native.owner"
@@ -193,3 +194,52 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     assert np.array_equal(native_p, reference.provenance_code)
     native_o = np.frombuffer(native_owner.read_bytes(), dtype="<i4").reshape(32, 32)
     assert np.array_equal(native_o, reference.owner_face_index)
+
+    fractional = subprocess.run(
+        [
+            str(player),
+            str(rss),
+            "--clip",
+            "smoke",
+            "--view",
+            "V0",
+            "--frame",
+            "0.5",
+            "--out-rgba",
+            str(tmp_path / "fractional.rgba"),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert fractional.returncode != 0
+    assert "FRAME_INTEGER_INVALID" in fractional.stderr
+
+    tampered = entries.copy()
+    tampered_manifest = tampered["manifest.txt"].replace(
+        b"host_interpolation_authorized=0",
+        b"host_interpolation_authorized=1",
+    )
+    assert tampered_manifest != tampered["manifest.txt"]
+    tampered["manifest.txt"] = tampered_manifest
+    tampered_rss = tmp_path / "tampered_interpolation.rss"
+    write_rss_v2(tampered_rss, tampered)
+    rejected = subprocess.run(
+        [
+            str(player),
+            str(tampered_rss),
+            "--clip",
+            "smoke",
+            "--view",
+            "V0",
+            "--frame",
+            "0",
+            "--out-rgba",
+            str(tmp_path / "tampered.rgba"),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert rejected.returncode != 0
+    assert "HOST_INTERPOLATION_MUST_BE_FORBIDDEN" in rejected.stderr

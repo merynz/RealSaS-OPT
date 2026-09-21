@@ -823,7 +823,9 @@ def test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy(tmp_pa
 
 
 def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
+    import os
     from dataclasses import replace
+    import pytest
 
     from compiler.realsas_compiler_core.geometry_substrate_v2 import (
         GeometrySubstrateViewIR,
@@ -851,6 +853,24 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
         bake_complete_appearance_stage,
         qualify_complete_appearance_stage,
         prove_caa_reference_rest_stage,
+    )
+    from compiler.realsas_compiler_services.orchestrator.adapters.product_state_v2 import (
+        qualify_presentation_structure_stage,
+        seal_complete_puppet_stage,
+    )
+    from compiler.realsas_compiler_services.orchestrator.adapters.motion_v2 import (
+        seal_motion_source_stage as seal_motion_source_stage_v2,
+        compile_motion_stage as compile_motion_stage_v2,
+        prove_dynamic_motion_stage,
+    )
+    from compiler.realsas_compiler_services.orchestrator.adapters.runtime_v2 import (
+        build_runtime_projection_stage,
+        materialize_runtime_package_stage,
+        prove_native_package_playback_stage,
+        prove_dynamic_visual_integrity_stage,
+    )
+    from compiler.realsas_compiler_services.orchestrator.adapters.closure_v2 import (
+        seal_product_closure_stage,
     )
 
     ctx = _fixture(tmp_path, resolution=128)
@@ -1061,3 +1081,107 @@ def test_vf23_stage20_to25_uses_unmodified_production_caa_policy(tmp_path):
     assert rest.qualification_report["every_direction_passed"] is True
     assert len(rest.views) == 8
     assert all(row.geometry_visible_pixel_count > 0 for row in rest.views)
+
+    # VF-23 stronger handoff proof: continue the SAME context and consume the
+    # actual exact-production Stage23/24/25 outputs through Stage46. This rules
+    # out a false green where the two halves are individually feasible but the
+    # real appearance artifact cannot cross the presentation/runtime boundary.
+    def alias(old_id: str, new_id: str):
+        old = next(row for row in ctx["ledger"]["stages"] if row["id"] == old_id)
+        ctx["ledger"]["stages"].append(
+            {"id": new_id, "status": "PASS", "outputs": list(old["outputs"])}
+        )
+
+    alias("18_SKELETON_QUALIFIED", "28_SKELETON_QUALIFIED")
+    alias("22_SKIN_QUALIFIED", "32_SKIN_QUALIFIED")
+
+    run(
+        "34_DEFORMATION_CAPABILITY_ENVELOPE",
+        mesh_v2.seal_deformation_capability_envelope,
+    )
+    run(
+        "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED",
+        mesh_v2.qualify_canonical_mesh_stage,
+    )
+    run(
+        "36_QUALIFIED_MESH_SKIN_TRANSFER",
+        mesh_v2.bind_qualified_mesh_skin_stage,
+    )
+
+    presentation_policy = (
+        ROOT / "canonical" / "PRESENTATION_PARTITION_POLICY_V1_20260921.json"
+    )
+    ctx["run_manifest"]["presentation"] = {
+        "mode": "AUTO_ROLE_FREE_V2",
+        "policy_document": {
+            "path": str(presentation_policy.resolve()),
+            "sha256": _sha(presentation_policy),
+        },
+    }
+    run(
+        "37_QUALIFIED_PRESENTATION_STRUCTURE",
+        qualify_presentation_structure_stage,
+    )
+    run("38_CANONICAL_PUPPET_SEALED", seal_complete_puppet_stage)
+    run("39_MOTION_SOURCE_OR_PRESET_SEAL", seal_motion_source_stage_v2)
+    run("40_MOTION_COMPILE_RUN", compile_motion_stage_v2)
+    r41 = run("41_MOTION_DYNAMIC_PROOF", prove_dynamic_motion_stage)
+    dynamic_payload = read_json(r41["outputs"][0]["path"])
+    assert dynamic_payload["qualification_report"]["dynamic_proof_passed"] is True
+    assert (
+        dynamic_payload["qualification_report"][
+            "all_declared_plant_2d_contacts_satisfied"
+        ]
+        is True
+    )
+
+    player_raw = os.environ.get("REALSAS_RUNTIME_V2_PLAYER", "")
+    if not player_raw:
+        pytest.skip(
+            "native V2 player is required for VF23 exact Stage20-to-46 chain"
+        )
+    player = Path(player_raw).expanduser().resolve()
+    assert player.is_file(), player
+    ctx["run_manifest"]["runtime"] = {
+        "native_player": {"path": str(player), "sha256": _sha(player)}
+    }
+
+    run(
+        "42_RUNTIME_PROJECTION_AND_CAA_BINDING",
+        build_runtime_projection_stage,
+    )
+    run("43_RSS_MATERIALIZE_COMPACT", materialize_runtime_package_stage)
+    r44 = run(
+        "44_NATIVE_PACKAGE_OPEN_PLAYBACK",
+        prove_native_package_playback_stage,
+    )
+    assert r44["diagnostics"]["native_reference_mismatch_pixels"] == 0
+
+    r45 = run(
+        "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+        prove_dynamic_visual_integrity_stage,
+    )
+    assert r45["diagnostics"]["native_reference_mismatch_pixel_count"] == 0
+    assert r45["diagnostics"]["undefined_visible_pixel_count"] == 0
+    assert r45["diagnostics"]["compiled_unobserved_visible_fraction"] == 0.0
+    assert r45["diagnostics"]["interior_shared_edge_continuity_passed"] is True
+    assert r45["diagnostics"]["cross_component_crack_authority_claimed"] is False
+
+    r46 = run("46_PRODUCT_CLOSURE_SEAL", seal_product_closure_stage)
+    closure = read_json(
+        next(
+            out
+            for out in r46["outputs"]
+            if out["schema"] == "RealSaS.ProductClosureIR.v2"
+        )["path"]
+    )
+    assert closure["qualification_report"]["product_pass"] is True
+    assert closure["qualification_report"]["appearance_authority_passed"] is True
+    assert (
+        closure["qualification_report"]["interior_shared_edge_continuity_passed"]
+        is True
+    )
+    assert (
+        closure["qualification_report"]["cross_component_crack_authority_claimed"]
+        is False
+    )

@@ -1,0 +1,34 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v10",
+  "sealed_on": "2026-09-21",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V9_20260921.json",
+    "git_blob_sha1": "5aca262f0f0bea66f4dad7a75534b1f065966a88",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "RUNTIME_V2_DISCRETE_DIRECTION_SELECTION_NO_BLEND",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "knight_witness_used": false,
+    "runtime_role": "subordinate_deployment_consumer",
+    "subtree_closure": "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+  },
+  "replacements": [
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+      "size_bytes": 27059,
+      "git_blob_sha1": "61b6a828a9d0fb4525c3427cf6e466db61f509ae",
+      "reason": "native-enforce sealed discrete direction index selection and forbid cross-direction blending"
+    }
+  ],
+  "additions": [],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 25,
+    "replacement_count": 1,
+    "addition_count": 0,
+    "resulting_sealed_blob_count": 25,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

@@ -155,10 +155,17 @@ def render_caa_reference(
 
     occupied = layer_owner >= 0
     adjacent = occupied[:, :, :-1] & occupied[:, :, 1:]
-    depth_delta = np.abs(
-        visibility.layer_depth[:, :, 1:]
-        - visibility.layer_depth[:, :, :-1]
+    depth_delta = np.full(
+        visibility.layer_depth[:, :, 1:].shape,
+        np.inf,
+        dtype=np.float64,
     )
+    if np.any(adjacent):
+        front = visibility.layer_depth[:, :, :-1]
+        back = visibility.layer_depth[:, :, 1:]
+        depth_delta[adjacent] = np.abs(
+            back[adjacent] - front[adjacent]
+        )
     exact_depth_ambiguity = np.any(
         adjacent & (depth_delta <= 1.0e-12),
         axis=2,

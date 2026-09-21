@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 
 from compiler.realsas_compiler_core.dynamic_geometry_integrity_v2 import (
+    interior_shared_edge_projection_continuity,
     INTERSECTION_PERSISTENCE_NUMERICAL_SLACK,
     dynamic_visibility_load_gate,
     nonadjacent_intersection_pairs,
@@ -208,3 +209,66 @@ def test_intersection_persistence_severity_increases_for_deeper_overlap():
     deep_severity = triangle_intersection_persistence_severity(a, deep)
     assert shallow_severity > 0.0
     assert deep_severity > shallow_severity + 0.10
+
+
+def test_interior_shared_edge_projection_continuity_detects_true_seam_crack():
+    faces = np.asarray(
+        ((0, 1, 2), (1, 3, 2)),
+        dtype=np.int64,
+    )
+    # Exact shared edge (1,2): PASS.
+    projected = np.asarray(
+        (
+            ((0.0, 0.0), (10.0, 0.0), (0.0, 10.0)),
+            ((10.0, 0.0), (10.0, 10.0), (0.0, 10.0)),
+        ),
+        dtype=np.float64,
+    )
+    good = interior_shared_edge_projection_continuity(
+        faces=faces,
+        projected_face_vertices=projected,
+    )
+    assert good["interior_shared_edge_count"] == 1
+    assert good["mismatched_interior_shared_edge_count"] == 0
+    assert good["maximum_projected_endpoint_error_px"] == 0.0
+    assert good["passed"] is True
+
+    # Simulate a renderer/deformation bug where the second face consumes a
+    # different projected copy of canonical vertex 1. Topology still declares
+    # continuity, so this is a real crack and must fail.
+    cracked = projected.copy()
+    cracked[1, 0, 0] += 0.25
+    bad = interior_shared_edge_projection_continuity(
+        faces=faces,
+        projected_face_vertices=cracked,
+    )
+    assert bad["interior_shared_edge_count"] == 1
+    assert bad["mismatched_interior_shared_edge_count"] == 1
+    assert bad["maximum_projected_endpoint_error_px"] == 0.25
+    assert bad["worst_edge_vertex_indices"] == [1, 2]
+    assert bad["passed"] is False
+
+
+def test_topologically_separate_articulation_gap_is_not_inferred_as_crack():
+    # Two triangles can move apart and reveal arbitrary background. They use
+    # distinct vertex identities and therefore carry no shared-edge continuity
+    # authority. The gap is legitimate rather than a failed interior seam.
+    faces = np.asarray(
+        ((0, 1, 2), (3, 4, 5)),
+        dtype=np.int64,
+    )
+    projected = np.asarray(
+        (
+            ((0.0, 0.0), (8.0, 0.0), (0.0, 8.0)),
+            ((40.0, 0.0), (48.0, 0.0), (40.0, 8.0)),
+        ),
+        dtype=np.float64,
+    )
+    result = interior_shared_edge_projection_continuity(
+        faces=faces,
+        projected_face_vertices=projected,
+    )
+    assert result["interior_shared_edge_count"] == 0
+    assert result["mismatched_interior_shared_edge_count"] == 0
+    assert result["passed"] is True
+    assert result["cross_component_or_geometrically_near_edges_inferred"] is False

@@ -133,8 +133,8 @@ def conservative_bilinear_provenance(
     """Conservative provenance for the exact bilinear color footprint.
 
     Provenance codes are ordered by increasing inference risk in CAA V2:
-    DIRECT_SOURCE < OTHER_VIEW_SOURCE < COMPILED_NEAREST_SURFACE
-    < COMPILED_GLOBAL_SURFACE < 255/undefined. Any texel with nonzero
+    DIRECT_SOURCE < OTHER_VIEW_SOURCE < COMPILED_LOCAL_HARMONIC
+    < 255/undefined. Any texel with nonzero
     bilinear weight contributes to the returned risk class.
     """
     source = np.asarray(provenance_u8, dtype=np.uint8)

@@ -722,7 +722,12 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         source_xy=arrays["source_xy"],
         sample_positions=arrays["sample_positions"],
         sample_component_index=arrays["sample_component_index"],
+        sample_face_index=arrays["sample_face_index"],
+        face_count=artifact.face_count,
+        tile_resolution=artifact.tile_resolution,
         band_fraction=float(policy["holdout_band_fraction"]),
+        max_region_samples=int(policy["max_local_harmonic_region_samples"]),
+        max_graph_hops=int(policy["max_local_harmonic_graph_hops"]),
     )
     seam = provenance_boundary_metrics(
         rgba=arrays["rgba"],

@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2610**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2615**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2622,6 +2622,11 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-21T09:45:01+03:00` | `85833758fad8` | yes | CI_TEST, COMPILER_PROOF, RUNTIME_PRODUCT | test: adversarially enforce sealed-frame-only native playback | `tests/compiler/test_runtime_v2_native_smoke.py` | `main` |
 | `2026-09-21T09:45:38+03:00` | `c316133f3662` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: seal base-level-only texture sampling contract | `compiler/realsas_compiler_core/runtime_package_v2.py` | `main` |
 | `2026-09-21T09:45:42+03:00` | `155e6b7fdee8` | yes | GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | runtime: reject unqualified mip or alternate sampler authority | `runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp` | `main` |
+| `2026-09-21T09:46:32+03:00` | `27205e381c18` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-21T09:46:55+03:00` | `81fb61434157` | yes | CI_TEST, COMPILER_PROOF, RUNTIME_PRODUCT | test: reject unqualified mip and sampler runtime contracts | `tests/compiler/test_runtime_v2_native_smoke.py` | `main` |
+| `2026-09-21T09:47:01+03:00` | `36abd1356d4d` | yes | CI_TEST, RUNTIME_PRODUCT | ci: enforce dynamic geometry red-team in runtime gate | `.github/workflows/current_runtime_self_hosted_ci.yml` | `main` |
+| `2026-09-21T09:47:55+03:00` | `ed2fbeceec86` | yes | COMPILER_PROOF | repair: require V2 static and dynamic visual non-regression for credit | `compiler/realsas_compiler_services/proof/repair_loop.py` | `main` |
+| `2026-09-21T09:48:09+03:00` | `fd7534f15b5d` | yes | CI_TEST, COMPILER_PROOF | test: forbid single-domain repair promotion in V2 | `tests/compiler/test_bounded_repair_loop_v1.py` | `main` |
 
 ## Use rule
 

@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `73e879a0835d08a5b059856cb38c3fbc00f13980d58dc5d53618b43cb06c11bb`
+> State fingerprint: `d8c64728d2400c54c0de5c89590f2d2ddc25e9a888ede0717da0cfd21e3c5c5f`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -36,7 +36,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `V2_IMPLEMENTATION_ASSEMBLY` | `REVIEW_READY__READY_FOR_WITNESS_EXECUTION__AWAITING_USER_APPROVAL` | `main` | `155e6b7fdee8` | Is the subject-free 46-stage V2 implementation sufficiently sealed for the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction |
+| `V2_IMPLEMENTATION_ASSEMBLY` | `REVIEW_READY__READY_FOR_WITNESS_EXECUTION__AWAITING_USER_APPROVAL` | `main` | `fd7534f15b5d` | Is the subject-free 46-stage V2 implementation sufficiently sealed for the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction |
 
 ## Branch inventory — observed live
 
@@ -46,7 +46,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `155e6b7fdee8` | canonical continuation branch |
+| `main` | `fd7534f15b5d` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 

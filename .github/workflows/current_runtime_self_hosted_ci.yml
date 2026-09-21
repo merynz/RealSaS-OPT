@@ -9,6 +9,8 @@ on:
       - 'compiler/realsas_compiler_core/**'
       - 'compiler/realsas_compiler_services/export/**'
       - 'compiler/realsas_compiler_services/proof/**'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py'
       - 'runtime/realsas_cpp/**'
       - 'runtime/reference_v4/**'
       - 'tests/runtime/**'

@@ -67,6 +67,7 @@ class C1CandidateResult:
     unresolved_leaf_count: int
     max_micro_depth: int
     max_depth_reached: int
+    coverage_complete: bool
 
 
 @dataclass(frozen=True)
@@ -343,6 +344,7 @@ def _evaluate_candidate(
     global_lower = math.inf
     global_upper = -math.inf
     max_depth_reached = 0
+    coverage_complete = True
 
     while stack:
         a, b, depth = stack.pop()
@@ -355,11 +357,13 @@ def _evaluate_candidate(
         if bound.lower > 0.0:
             positive += 1
             if negative:
+                coverage_complete = False
                 break
             continue
         if bound.upper < 0.0:
             negative += 1
             if positive:
+                coverage_complete = False
                 break
             continue
 
@@ -387,6 +391,7 @@ def _evaluate_candidate(
         unresolved_leaf_count=unresolved,
         max_micro_depth=max_micro_depth,
         max_depth_reached=max_depth_reached,
+        coverage_complete=coverage_complete,
     )
 
 
@@ -424,8 +429,8 @@ def certify_directional_regular_c1_prepared(
     return C1Certificate(
         state="UNKNOWN",
         direction=None,
-        derivative_lower=float(min(r.lower_margin for r in results)),
-        derivative_upper=float(max(r.upper_margin for r in results)),
+        derivative_lower=float("nan"),
+        derivative_upper=float("nan"),
         evaluated_box_count=total_evals,
         candidate_results=tuple(results),
     )

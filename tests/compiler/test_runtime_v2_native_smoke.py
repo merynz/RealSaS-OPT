@@ -97,8 +97,21 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
         )
 
     provenance = np.zeros((8, 16, 16), dtype=np.uint8)
+    source_view = np.zeros((8, 16, 16), dtype=np.int16)
+    for vi in range(8):
+        source_view[vi, :, :] = vi
+    # V0 deliberately has one coarse OTHER_VIEW_SOURCE provenance class but
+    # two exact donor identities across the bilinear footprint. Runtime must
+    # preserve the mixed donor diagnostic without letting it affect RGB.
+    provenance[0, :, :] = 1
+    source_view[0, :, :8] = 1
+    source_view[0, :, 8:] = 2
     provenance_npz = tmp_path / "provenance.npz"
-    np.savez_compressed(provenance_npz, provenance=provenance)
+    np.savez_compressed(
+        provenance_npz,
+        provenance=provenance,
+        source_view=source_view,
+    )
     sha = lambda p: __import__("hashlib").sha256(Path(p).read_bytes()).hexdigest()
 
     projection = RuntimeProjectionV2IR(
@@ -133,6 +146,7 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     write_rss_v2(rss, entries)
     native_rgba = tmp_path / "native.rgba"
     native_prov = tmp_path / "native.prov"
+    native_source_view = tmp_path / "native.source_view"
     native_owner = tmp_path / "native.owner"
     proc = subprocess.run(
         [
@@ -148,6 +162,8 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
             str(native_rgba),
             "--out-provenance",
             str(native_prov),
+            "--out-source-view",
+            str(native_source_view),
             "--out-owner",
             str(native_owner),
         ],
@@ -198,6 +214,16 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
 
     native_p = np.frombuffer(native_prov.read_bytes(), dtype=np.uint8).reshape(32, 32)
     assert np.array_equal(native_p, reference.provenance_code)
+    native_sv = np.frombuffer(
+        native_source_view.read_bytes(),
+        dtype="<i2",
+    ).reshape(32, 32)
+    visible = reference.straight_rgba_u8[:, :, 3] > 0
+    assert np.any(visible)
+    assert set(map(int, np.unique(native_sv[visible]))) == {-3}
+    assert np.all(
+        native_sv[~visible] == np.iinfo(np.int16).min
+    )
     native_o = np.frombuffer(native_owner.read_bytes(), dtype="<i4").reshape(32, 32)
     assert np.array_equal(native_o, reference.owner_face_index)
 
@@ -276,6 +302,64 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     )
     assert return_proc.returncode == 0, return_proc.stderr
     assert return_v0.read_bytes() == first_v0
+
+    # Exact donor lineage is diagnostic only. Replacing V0 donor IDs with
+    # another valid donor must change only --out-source-view, never RGBA,
+    # coarse provenance, or owner.
+    donor_tampered = entries.copy()
+    donor_payload = bytearray(donor_tampered["provenance.bin"])
+    count = 8 * 16 * 16
+    donor_offset = 12 + count
+    donor_values = np.frombuffer(
+        donor_payload,
+        dtype="<i2",
+        count=count,
+        offset=donor_offset,
+    ).copy()
+    donor_values[: 16 * 16] = 7
+    donor_payload[
+        donor_offset : donor_offset + count * 2
+    ] = donor_values.astype("<i2").tobytes(order="C")
+    donor_tampered["provenance.bin"] = bytes(donor_payload)
+    donor_rss = tmp_path / "donor_tampered.rss"
+    write_rss_v2(donor_rss, donor_tampered)
+    donor_rgba = tmp_path / "donor_tampered.rgba"
+    donor_prov = tmp_path / "donor_tampered.prov"
+    donor_sv = tmp_path / "donor_tampered.source_view"
+    donor_owner = tmp_path / "donor_tampered.owner"
+    donor_proc = subprocess.run(
+        [
+            str(player),
+            str(donor_rss),
+            "--clip",
+            "smoke",
+            "--view",
+            "V0",
+            "--frame",
+            "0",
+            "--out-rgba",
+            str(donor_rgba),
+            "--out-provenance",
+            str(donor_prov),
+            "--out-source-view",
+            str(donor_sv),
+            "--out-owner",
+            str(donor_owner),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert donor_proc.returncode == 0, donor_proc.stderr
+    assert donor_rgba.read_bytes() == native_rgba.read_bytes()
+    assert donor_prov.read_bytes() == native_prov.read_bytes()
+    assert donor_owner.read_bytes() == native_owner.read_bytes()
+    donor_sv_values = np.frombuffer(
+        donor_sv.read_bytes(),
+        dtype="<i2",
+    ).reshape(32, 32)
+    assert set(map(int, np.unique(donor_sv_values[visible]))) == {7}
+    assert donor_sv.read_bytes() != native_source_view.read_bytes()
 
     fractional = subprocess.run(
         [
@@ -402,6 +486,18 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
             b"tint_order_visibility_authorized=1",
             "RUNTIME_TINT_ORDER_VISIBILITY_MUST_BE_FORBIDDEN",
             "tint_order_visibility",
+        ),
+        (
+            b"source_view_identity_render_authority=0",
+            b"source_view_identity_render_authority=1",
+            "SOURCE_VIEW_IDENTITY_RENDER_AUTHORITY_FORBIDDEN",
+            "source_view_render_authority",
+        ),
+        (
+            b"source_view_identity_contract=PER_TEXEL_INT16_PRESERVED__DIAGNOSTIC_ONLY",
+            b"source_view_identity_contract=UNQUALIFIED_DONOR_AUTHORITY",
+            "SOURCE_VIEW_IDENTITY_CONTRACT_INVALID",
+            "source_view_contract",
         ),
     )
     for old, new, error, label in capability_cases:

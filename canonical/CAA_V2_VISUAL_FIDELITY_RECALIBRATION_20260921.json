@@ -133,7 +133,8 @@
       "owner": "Dynamic geometry/presentation continuity",
       "finding": "Stage45 cannot treat arbitrary owner=-1 dynamic background as a crack because legitimate articulation may create new negative space. The real false-PASS class is an owner=-1 gap that violates an authority-backed continuity relation (for example an interior mesh adjacency or another explicitly non-detachable continuity contract). Current Stage17/37 evidence proves same-mesh shared-edge continuity, but does not yet mint a general cross-component dynamic continuity/underlay authority.",
       "required_closure": "Do not gate raw dynamic background area. Bind crack qualification only to explicit continuity authority: prove no raster gap across topologically interior/shared continuity edges, and define a separate source-backed underlay/non-detachability contract before judging gaps between mechanically separate components. Add adversarial synthetic controls for both a true seam crack and legitimate new negative space.",
-      "status": "OPEN__NARROWED_TO_AUTHORITY_BACKED_CONTINUITY"
+      "status": "REPAIRED__TOPOLOGY_OWNED_SHARED_EDGE_CONTINUITY__CI_PENDING",
+      "repair": "Stage45 now evaluates only topology-owned interior shared-edge continuity. For every frame/view, all incident face copies of a canonical shared edge must use bit-exact equal projected endpoints from the single posed vertex matrix; any mismatch hard-fails dynamic visual integrity. Subject-free adversaries detect a 0.25 px true seam crack, while topologically separate faces with large negative space are explicitly not classified as cracks. The product HALF_INTEGER_TOP_LEFT rasterizer is separately controlled to tile two triangles across a shared diagonal without an uncovered pixel. Stage46 requires this continuity proof and forbids cross-component background-gap crack authority."
     },
     {
       "id": "VF-16",

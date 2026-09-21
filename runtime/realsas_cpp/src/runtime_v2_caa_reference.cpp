@@ -547,6 +547,7 @@ int main(int argc,char** argv) {
         std::cout<<"renderer=REALSAS_V2_CAA_CANONICAL_DEPTH"
                  <<" clip="<<clip_id<<" view="<<view_id<<" frame="<<frame_index
                  <<" resolution="<<resolution<<" visibility=SEALED_K4_DEPTH_LAYERS"
+                 <<" coverage=FIXED_2X2_QUARTER_SUBSAMPLES"
                  <<" appearance=CAA_LINEAR_PREMULTIPLIED_LAYER_COMPOSITE\\n";
         return 0;
     } catch(const std::exception& e) {

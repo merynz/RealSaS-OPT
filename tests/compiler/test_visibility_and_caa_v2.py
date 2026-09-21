@@ -6,6 +6,7 @@ import numpy as np
 
 from compiler.realsas_compiler_core.appearance_bake_v2 import (
     bake_direction_atlas,
+    bake_direction_source_view_atlas,
     bilinear_premultiplied_rgba,
     conservative_bilinear_provenance,
 )
@@ -328,6 +329,29 @@ def test_face_atlas_bleed_leaves_no_undefined_texel():
     assert atlas.shape[:2] == (layout["height"], layout["width"])
     assert uv.shape == (1, 3, 2)
     assert not np.any(prov == 255)
+
+
+def test_source_view_atlas_preserves_exact_donor_ids_and_harmonic_code():
+    per_face = 4 * (4 + 1) // 2
+    source_view = np.asarray(
+        [0, 1, 2, 3, 4, 5, 6, 7, -2, 3],
+        dtype=np.int16,
+    )
+    assert len(source_view) == per_face
+    atlas = bake_direction_source_view_atlas(
+        face_sample_source_view=source_view,
+        face_count=1,
+        tile_resolution=4,
+        bleed_px=2,
+    )
+    padding = np.iinfo(np.int16).min
+    assert not np.any(atlas == padding)
+    assert set(map(int, np.unique(atlas))).issubset(
+        {-2, 0, 1, 2, 3, 4, 5, 6, 7}
+    )
+    assert -2 in set(map(int, np.unique(atlas)))
+    assert 1 in set(map(int, np.unique(atlas)))
+    assert 7 in set(map(int, np.unique(atlas)))
 
 
 def test_face_atlas_allows_unallocated_grid_padding_but_not_surface_undefinedness():

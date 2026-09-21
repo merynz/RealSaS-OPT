@@ -627,7 +627,8 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
                 "dynamic_max_uv_to_surface_condition_number": 64.0,
                 "dynamic_max_relative_surface_condition_number": 16.0,
                 "dynamic_max_relative_surface_principal_stretch": 8.0,
-                "dynamic_max_adjacent_frame_surface_principal_stretch": 8.0
+                "dynamic_max_adjacent_frame_surface_principal_stretch": 8.0,
+                "dynamic_max_texture_texels_per_output_pixel": 1.0
             },
             "fixture": True,
         },
@@ -665,6 +666,11 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
             source_locked_p95_rgba_l1=0.0,
             source_foreground_mean_rgba_l1=0.0,
             source_foreground_p95_rgba_l1=0.0,
+            source_feature_p999_rgba_l1=0.0,
+            source_feature_high_error_fraction=0.0,
+            largest_connected_feature_high_error_fraction=0.0,
+            source_feature_edge_recall_1px=1.0,
+            source_feature_edge_precision_1px=1.0,
             geometry_visible_pixel_count=1,
             final_alpha_pixel_count=1,
             geometry_visible_final_alpha_hole_count=0,
@@ -965,6 +971,7 @@ def test_v2_stage20_to25_caa_branch_executes_real_adapters_on_subject_free_trian
     quality["rest_max_feature_p999_rgba_l1"] = 1.0
     quality["rest_min_feature_edge_recall_1px"] = 0.0
     quality["rest_min_feature_edge_precision_1px"] = 0.0
+    quality["rest_max_texture_texels_per_output_pixel"] = 8.0
     quality["cross_view_min_shared_direct_samples_per_pair"] = 1
     quality["cross_view_min_component_samples_for_gate"] = 1
     quality["cross_view_max_pair_p95_rgba_l1"] = 1.0

@@ -1,0 +1,24 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX4BMicro2PreflightPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__SIXTEEN_BASE_REGIME_MICRO2_PRODUCTIVITY_SAMPLE",
+  "authority_class": "RESEARCH_PERFORMANCE_PREFLIGHT_ONLY",
+  "source_x4_artifact_sha256": "c4d6653895ece83c47cf13eb3eb4c268b86846f3fbe43c56ada62e0e62a5d7ed",
+  "sample_count": 16,
+  "selection": "deterministic evenly-spaced indices across the same 47^3 base-regime ordering",
+  "max_micro_depth": 2,
+  "metrics": [
+    "m0/m1/m2 C0 state counts",
+    "m2 decisive fraction",
+    "actual evaluated boxes per regime",
+    "seconds per regime"
+  ],
+  "decision": {
+    "m2_decisive_fraction_eq_0": "SCALAR_REFINEMENT_NOT_ONLY_SLOW_BUT_VACUOUS_ON_SAMPLE__BATCHING_ALONE_INSUFFICIENT",
+    "m2_decisive_fraction_gt_0": "BATCHED_RANGE_ENGINE_REMAINS_PLAUSIBLE__ESTIMATE_REQUIRED_THROUGHPUT_BEFORE_FULL_DOMAIN"
+  },
+  "full_domain_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

@@ -460,6 +460,22 @@ def seal_product_closure_stage(ctx: dict) -> dict:
         raise QualificationError(
             "V2_PRODUCT_CLOSURE_DYNAMIC_APPEARANCE_EVIDENCE_EMPTY"
         )
+    if not bool(
+        visual.qualification_report.get(
+            "interior_shared_edge_continuity_passed", False
+        )
+    ):
+        raise QualificationError(
+            "V2_PRODUCT_CLOSURE_SHARED_EDGE_CONTINUITY_NOT_PASS"
+        )
+    if bool(
+        visual.qualification_report.get(
+            "cross_component_background_gap_is_crack_authority", True
+        )
+    ):
+        raise QualificationError(
+            "V2_PRODUCT_CLOSURE_CROSS_COMPONENT_CRACK_AUTHORITY_FORBIDDEN"
+        )
     if (
         str(structure.metadata.get("presentation_partition_evidence_hash") or "")
         != partition_evidence.evidence_hash
@@ -497,6 +513,8 @@ def seal_product_closure_stage(ctx: dict) -> dict:
             "appearance_authority_passed": True,
             "presentation_partition_authority_passed": True,
             "dynamic_appearance_conditioning_passed": True,
+            "interior_shared_edge_continuity_passed": True,
+            "cross_component_crack_authority_claimed": False,
             "native_visual_integrity_passed": True,
             "editable_authoring_export_passed": True,
             "runtime_generation_required": False,

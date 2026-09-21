@@ -28,6 +28,8 @@ on:
       - 'canonical/VF11_C1_V2_RESEARCH_CLOSURE_20260921.json'
       - 'canonical/VF11_C2_ORIENTED_CROSSING_PREREGISTRATION_20260921.json'
       - 'canonical/VF11_LAYERNORM_EPS_ERRATUM_20260921.json'
+      - 'canonical/VF11_LAYERNORM_EPS_CORRECTED_C0_C1_RECLOSURE_20260921.json'
+      - 'canonical/VF11_LAYERNORM_EPS_IMPACT_REPLAY_PREREGISTRATION_20260921.json'
       - '.github/workflows/vf11_certified_adaptive_research_smoke.yml'
   workflow_dispatch:
 
@@ -135,7 +137,15 @@ jobs:
           assert c2['full_domain_traversal_authorized'] is False
           epsfix=json.load(open('canonical/VF11_LAYERNORM_EPS_ERRATUM_20260921.json',encoding='utf-8'))
           assert epsfix['status']=='ERRATUM_OPEN__C0_C1_IMPACT_REPLAY_REQUIRED__C2_HOLD'
-          assert epsfix['impact_scope']['c2_execution']=='HOLD_PENDING_IMPACT_REPLAY'
+          impact=json.load(open('canonical/VF11_LAYERNORM_EPS_IMPACT_REPLAY_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert impact['status']=='PREREGISTERED__LAYERNORM_EPS_C0_C1_IMPACT_REPLAY'
+          reclose=json.load(open('canonical/VF11_LAYERNORM_EPS_CORRECTED_C0_C1_RECLOSURE_20260921.json',encoding='utf-8'))
+          assert reclose['status']=='CORRECTED_C0_C1_RECLOSED__C2_REAUTHORIZED'
+          assert reclose['c0_impact']['state_change_count']==0
+          assert reclose['c1_impact']['state_or_c0_change_count']==0
+          assert reclose['c2']['execution_authorized'] is True
+          assert reclose['c2']['full_domain_traversal_authorized'] is False
+          assert reclose['product_authority_minted'] is False
           print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
           PY
 
@@ -187,7 +197,7 @@ jobs:
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           out={
-            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v8',
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v9',
             'status':'PASS',
             'product_authority_minted':False,
             'files':{p:sha(p) for p in files},

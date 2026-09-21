@@ -96,5 +96,16 @@
     "knight_result_used": false,
     "mage_result_used": false,
     "teacher_geometry_used": false
+  },
+  "apparatus_reproducibility": {
+    "pre_slab_run_id": 35575366833,
+    "pre_slab_artifact_id": 10629550460,
+    "post_slab_run_id": 35579668317,
+    "post_slab_artifact_id": 10630602542,
+    "result_json_sha256": "08265bab6f9eea9f38ac1d259fbbcf6e0a6031e1aa88d8baa470e93556ea9d8e",
+    "result_json_bytes": 171905,
+    "byte_identical": true,
+    "semantic_drift_detected": false,
+    "conclusion": "SLABBED_COORDINATE_EVALUATION_IS_EXACTLY_REPRODUCIBLE_AT_R384"
   }
 }

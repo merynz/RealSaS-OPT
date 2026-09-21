@@ -69,6 +69,40 @@ def _relative_surface_stretch(
     return smax / smin, max(smax, 1.0 / smin)
 
 
+
+def screen_to_texture_max_texels_per_pixel(
+    *,
+    uv_triangle,
+    screen_triangle,
+    texture_width: int,
+    texture_height: int,
+) -> float:
+    """Largest screen->texture footprint singular value in atlas texels/pixel.
+
+    Values <= 1 mean the current bilinear runtime is not minifying the atlas
+    in any principal direction. Values > 1 require an explicit minification
+    authority (mip/anisotropic/EWA/etc.) and are therefore rejected by V2.
+    """
+    width = int(texture_width)
+    height = int(texture_height)
+    if width < 2 or height < 2:
+        raise QualificationError("DYNAMIC_APPEARANCE_TEXTURE_DIMENSION_INVALID")
+    uv_edges = _edge_matrix(uv_triangle, dimension=2)
+    screen_edges = _edge_matrix(screen_triangle, dimension=2)
+    determinant = abs(float(np.linalg.det(screen_edges)))
+    if determinant <= 1.0e-12:
+        raise QualificationError("DYNAMIC_APPEARANCE_SCREEN_DEGENERATE")
+    normalized_per_pixel = uv_edges @ np.linalg.inv(screen_edges)
+    texel_scale = np.diag(
+        np.asarray([float(width - 1), float(height - 1)], dtype=np.float64)
+    )
+    jacobian = texel_scale @ normalized_per_pixel
+    singular = np.linalg.svd(jacobian, compute_uv=False)
+    maximum = float(np.max(singular))
+    if not np.isfinite(maximum) or maximum < 0.0:
+        raise QualificationError("DYNAMIC_APPEARANCE_TEXTURE_FOOTPRINT_INVALID")
+    return maximum
+
 def dynamic_face_conditioning_metrics(
     *,
     uv_triangle,

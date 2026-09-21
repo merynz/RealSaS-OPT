@@ -82,7 +82,7 @@ def face_uv_array(layout: Mapping[str, int]) -> np.ndarray:
     columns = int(layout["columns"])
     width = float(layout["width"])
     height = float(layout["height"])
-    uv = np.zeros((faces, 3, 2), dtype=np.float32)
+    uv = np.zeros((faces, 3, 2), dtype=np.float64)
     for face_index in range(faces):
         tx = (face_index % columns) * stride
         ty = (face_index // columns) * stride
@@ -353,8 +353,8 @@ def compile_deterministic_caa(
 
     direct_valid = np.zeros((8, sample_count), dtype=bool)
     direct_rgba = np.zeros((8, sample_count, 4), dtype=np.uint8)
-    direct_pm_linear = np.zeros((8, sample_count, 4), dtype=np.float32)
-    source_xy = np.full((8, sample_count, 2), np.nan, dtype=np.float32)
+    direct_pm_linear = np.zeros((8, sample_count, 4), dtype=np.float64)
+    source_xy = np.full((8, sample_count, 2), np.nan, dtype=np.float64)
     face_support_by_view = np.zeros((8, face_count), dtype=np.float64)
 
     camera_by_view = {int(camera.view_index): camera for camera in cameras}
@@ -378,7 +378,7 @@ def compile_deterministic_caa(
         )
         projected = np.asarray(project_points_xyz_v3(positions, camera), dtype=np.float64)
         xy = projected[:, :2] - 0.5
-        source_xy[view] = xy.astype(np.float32)
+        source_xy[view] = xy
 
         ix = np.rint(xy[:, 0]).astype(np.int64)
         iy = np.rint(xy[:, 1]).astype(np.int64)
@@ -430,7 +430,7 @@ def compile_deterministic_caa(
                 return_premultiplied_linear=True,
             )
             direct_rgba[view, valid] = sampled_rgba
-            direct_pm_linear[view, valid] = sampled_pm.astype(np.float32)
+            direct_pm_linear[view, valid] = sampled_pm
 
     rgba = np.zeros_like(direct_rgba)
     provenance = np.full(
@@ -514,8 +514,8 @@ def compile_deterministic_caa(
         for name, code in CAA_PROVENANCE.items()
     }
     return {
-        "barycentric": barycentric.astype(np.float32),
-        "sample_positions": positions.astype(np.float32),
+        "barycentric": barycentric,
+        "sample_positions": positions,
         "sample_face_index": sample_face,
         "direct_valid": direct_valid,
         "direct_rgba": direct_rgba,

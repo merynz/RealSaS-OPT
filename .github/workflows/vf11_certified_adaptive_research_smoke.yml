@@ -10,10 +10,13 @@ on:
       - 'tests/research/test_vf11_range_engine_c0_v2.py'
       - 'tests/research/test_vf11_range_engine_c0_v3.py'
       - 'tests/research/test_vf11_paired_profile_c0_v3.py'
+      - 'tests/research/test_vf11_directional_regular_c1_v1.py'
       - 'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json'
       - 'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json'
       - 'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json'
       - 'canonical/VF11_C0_PAIRED_RESEARCH_PREREGISTRATION_V3_20260921.json'
+      - 'canonical/VF11_C0_RESEARCH_CLOSURE_V4_20260921.json'
+      - 'canonical/VF11_C1_DIRECTIONAL_REGULARITY_PREREGISTRATION_V1_20260921.json'
       - '.github/workflows/vf11_certified_adaptive_research_smoke.yml'
   workflow_dispatch:
 
@@ -53,10 +56,12 @@ jobs:
           python -m py_compile experiments/vf11_certified_adaptive/profile_c0_v2.py
           python -m py_compile experiments/vf11_certified_adaptive/range_engine_c0_v3.py
           python -m py_compile experiments/vf11_certified_adaptive/paired_profile_c0_v3.py
+          python -m py_compile experiments/vf11_certified_adaptive/directional_regular_c1_v1.py
           python -m py_compile tests/research/test_vf11_range_engine_v1.py
           python -m py_compile tests/research/test_vf11_range_engine_c0_v2.py
           python -m py_compile tests/research/test_vf11_range_engine_c0_v3.py
           python -m py_compile tests/research/test_vf11_paired_profile_c0_v3.py
+          python -m py_compile tests/research/test_vf11_directional_regular_c1_v1.py
 
       - name: Enforce research-only claim boundary
         shell: bash
@@ -82,11 +87,19 @@ jobs:
           assert v3['product_authority_minted'] is False
           assert v3['witness_execution'] is False
           assert v3['proven_regular']=='FORBIDDEN'
+          c0c=json.load(open('canonical/VF11_C0_RESEARCH_CLOSURE_V4_20260921.json',encoding='utf-8'))
+          assert c0c['status']=='C0_RESEARCH_CLOSED__C1_RESEARCH_AUTHORIZED'
+          assert c0c['product_authority_minted'] is False
+          assert c0c['shipping_certificate_backend'] is False
+          c1=json.load(open('canonical/VF11_C1_DIRECTIONAL_REGULARITY_PREREGISTRATION_V1_20260921.json',encoding='utf-8'))
+          assert c1['status']=='PREREGISTERED__C1_DIRECTIONAL_REGULARITY'
+          assert c1['product_authority_minted'] is False
+          assert 'PROVEN_SINGLE_COMPONENT' in c1['forbidden_inferences']
           print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
           PY
 
       - name: Run short deterministic/adversarial range tests
-        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py
+        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py tests/research/test_vf11_directional_regular_c1_v1.py
 
       - name: Emit smoke receipt
         shell: bash
@@ -102,14 +115,18 @@ jobs:
             'experiments/vf11_certified_adaptive/profile_c0_v2.py',
             'experiments/vf11_certified_adaptive/range_engine_c0_v3.py',
             'experiments/vf11_certified_adaptive/paired_profile_c0_v3.py',
+            'experiments/vf11_certified_adaptive/directional_regular_c1_v1.py',
             'tests/research/test_vf11_range_engine_v1.py',
             'tests/research/test_vf11_range_engine_c0_v2.py',
             'tests/research/test_vf11_range_engine_c0_v3.py',
             'tests/research/test_vf11_paired_profile_c0_v3.py',
+            'tests/research/test_vf11_directional_regular_c1_v1.py',
             'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json',
             'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json',
             'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json',
             'canonical/VF11_C0_PAIRED_RESEARCH_PREREGISTRATION_V3_20260921.json',
+            'canonical/VF11_C0_RESEARCH_CLOSURE_V4_20260921.json',
+            'canonical/VF11_C1_DIRECTIONAL_REGULARITY_PREREGISTRATION_V1_20260921.json',
           ]
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()

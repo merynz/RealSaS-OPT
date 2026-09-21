@@ -318,6 +318,56 @@ def _circular_view_order(target: int) -> tuple[int, ...]:
     )
 
 
+def select_other_view_donor_by_support(
+    *,
+    target_view_index: int,
+    missing: np.ndarray,
+    direct_valid: np.ndarray,
+    sample_face_index: np.ndarray,
+    face_support_by_view: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Select source donors by geometric support, never circular index proximity.
+
+    Candidate iteration order is cyclic only to make exact-score ties
+    deterministic. Any strictly higher camera-forward face support must win,
+    regardless of angular/index distance from the target output direction.
+    """
+    target = int(target_view_index)
+    missing = np.asarray(missing, dtype=bool)
+    direct_valid = np.asarray(direct_valid, dtype=bool)
+    sample_face = np.asarray(sample_face_index, dtype=np.int32)
+    support = np.asarray(face_support_by_view, dtype=np.float64)
+    if (
+        target < 0
+        or target >= 8
+        or direct_valid.ndim != 2
+        or direct_valid.shape[0] != 8
+        or direct_valid.shape[1] != len(missing)
+        or sample_face.shape != (len(missing),)
+        or support.ndim != 2
+        or support.shape[0] != 8
+        or np.any(sample_face < 0)
+        or np.any(sample_face >= support.shape[1])
+        or not np.isfinite(support).all()
+    ):
+        raise QualificationError("CAA_DONOR_SUPPORT_INPUT_INVALID")
+
+    best_score = np.full(len(missing), -1.0, dtype=np.float64)
+    best_view = np.full(len(missing), -1, dtype=np.int16)
+    for donor in _circular_view_order(target):
+        if donor == target:
+            continue
+        eligible = missing & direct_valid[donor]
+        if not np.any(eligible):
+            continue
+        candidate_support = support[donor, sample_face]
+        improve = eligible & (candidate_support > best_score + 1.0e-12)
+        if np.any(improve):
+            best_score[improve] = candidate_support[improve]
+            best_view[improve] = donor
+    return best_view, best_score
+
+
 def compile_deterministic_caa(
     *,
     candidate,
@@ -453,19 +503,13 @@ def compile_deterministic_caa(
         source_view[target, direct] = target
 
         missing = ~direct
-        best_score = np.full(sample_count, -1.0, dtype=np.float64)
-        best_view = np.full(sample_count, -1, dtype=np.int16)
-        for donor in _circular_view_order(target):
-            if donor == target:
-                continue
-            eligible = missing & direct_valid[donor]
-            if not np.any(eligible):
-                continue
-            support = face_support_by_view[donor, sample_face]
-            improve = eligible & (support > best_score + 1.0e-12)
-            if np.any(improve):
-                best_score[improve] = support[improve]
-                best_view[improve] = donor
+        best_view, best_score = select_other_view_donor_by_support(
+            target_view_index=target,
+            missing=missing,
+            direct_valid=direct_valid,
+            sample_face_index=sample_face,
+            face_support_by_view=face_support_by_view,
+        )
         source_take = missing & (best_view >= 0)
         if np.any(source_take):
             indices = np.flatnonzero(source_take)

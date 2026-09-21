@@ -594,6 +594,10 @@ def test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy(tmp_pa
     np.savez_compressed(
         provenance_path,
         provenance=np.zeros((8, 32, 32), dtype=np.uint8),
+        source_view=np.broadcast_to(
+            np.arange(8, dtype=np.int16)[:, None, None],
+            (8, 32, 32),
+        ).copy(),
     )
     asset = CompleteAppearanceAssetIR(
         compile_seal_binding_hash="c" * 64,

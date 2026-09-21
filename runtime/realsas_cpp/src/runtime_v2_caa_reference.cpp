@@ -351,6 +351,10 @@ int main(int argc,char** argv) {
             throw std::runtime_error("TEXTURE_SAMPLING_CONTRACT_INVALID");
         if(manifest.at("mip_generation_authorized")!="0")
             throw std::runtime_error("MIP_GENERATION_MUST_BE_FORBIDDEN");
+        if(manifest.at("pixel_coverage_contract")!="FIXED_2X2_QUARTER_SUBSAMPLES__LINEAR_PM_AVERAGE")
+            throw std::runtime_error("PIXEL_COVERAGE_CONTRACT_INVALID");
+        if(manifest.at("pixel_coverage_sample_count")!="4")
+            throw std::runtime_error("PIXEL_COVERAGE_SAMPLE_COUNT_INVALID");
         const auto mesh=parse_mesh(entries.at("mesh.bin"));
         const auto cameras=parse_cameras(entries.at("cameras.bin"));
         const auto textures=parse_textures(entries.at("textures.bin"));
@@ -378,11 +382,20 @@ int main(int argc,char** argv) {
         for(std::uint32_t i=0;i<mesh.vertex_count;++i) {
             xyz[i]={clip.positions[base+i*3u],clip.positions[base+i*3u+1u],clip.positions[base+i*3u+2u]};
         }
+        constexpr int kCoverageScale=2;
+        constexpr int kCoverageSampleCount=kCoverageScale*kCoverageScale;
         std::vector<Proj> projected(mesh.vertex_count);
-        for(std::uint32_t i=0;i<mesh.vertex_count;++i) projected[i]=project(xyz[i],cameras[view]);
+        for(std::uint32_t i=0;i<mesh.vertex_count;++i) {
+            auto p=project(xyz[i],cameras[view]);
+            p.x*=static_cast<double>(kCoverageScale);
+            p.y*=static_cast<double>(kCoverageScale);
+            projected[i]=p;
+        }
 
         const int resolution=static_cast<int>(cameras[view].resolution);
+        const int coverage_resolution=resolution*kCoverageScale;
         const auto pixels=static_cast<std::size_t>(resolution)*resolution;
+        const auto coverage_pixels=static_cast<std::size_t>(coverage_resolution)*coverage_resolution;
         constexpr int kMaxLayers=4;
         const std::array<double,kMaxLayers> depth_init{
             std::numeric_limits<double>::infinity(),
@@ -395,10 +408,10 @@ int main(int argc,char** argv) {
         const std::array<std::array<float,3>,kMaxLayers> bary_init{
             bary_nan,bary_nan,bary_nan,bary_nan
         };
-        std::vector<std::array<double,kMaxLayers>> layer_depth(pixels,depth_init);
-        std::vector<std::array<std::int32_t,kMaxLayers>> layer_owner(pixels,owner_init);
-        std::vector<std::array<std::array<float,3>,kMaxLayers>> layer_bary(pixels,bary_init);
-        std::vector<std::uint8_t> layer_overflow(pixels,0);
+        std::vector<std::array<double,kMaxLayers>> layer_depth(coverage_pixels,depth_init);
+        std::vector<std::array<std::int32_t,kMaxLayers>> layer_owner(coverage_pixels,owner_init);
+        std::vector<std::array<std::array<float,3>,kMaxLayers>> layer_bary(coverage_pixels,bary_init);
+        std::vector<std::uint8_t> layer_overflow(coverage_pixels,0);
 
         for(std::uint32_t fi=0;fi<mesh.face_count;++fi) {
             const auto face=mesh.faces[fi];
@@ -408,9 +421,9 @@ int main(int argc,char** argv) {
             const double minxv=std::min({a.x,b.x,c.x}), maxxv=std::max({a.x,b.x,c.x});
             const double minyv=std::min({a.y,b.y,c.y}), maxyv=std::max({a.y,b.y,c.y});
             const int minx=std::max(0,static_cast<int>(std::floor(minxv-0.5)));
-            const int maxx=std::min(resolution-1,static_cast<int>(std::ceil(maxxv-0.5)));
+            const int maxx=std::min(coverage_resolution-1,static_cast<int>(std::ceil(maxxv-0.5)));
             const int miny=std::max(0,static_cast<int>(std::floor(minyv-0.5)));
-            const int maxy=std::min(resolution-1,static_cast<int>(std::ceil(maxyv-0.5)));
+            const int maxy=std::min(coverage_resolution-1,static_cast<int>(std::ceil(maxyv-0.5)));
             for(int y=miny;y<=maxy;++y) for(int x=minx;x<=maxx;++x) {
                 if(!covers(a,b,c,x,y)) continue;
                 const double px=x+0.5, py=y+0.5;
@@ -420,7 +433,7 @@ int main(int argc,char** argv) {
                 const double z=w0*a.z+w1*b.z+w2*c.z;
                 if(!std::isfinite(z)) throw std::runtime_error("VISIBILITY_DEPTH_NONFINITE");
                 if(z<=1e-12) continue;
-                const auto idx=static_cast<std::size_t>(y)*resolution+x;
+                const auto idx=static_cast<std::size_t>(y)*coverage_resolution+x;
                 int insert_at=-1;
                 for(int layer=0;layer<kMaxLayers;++layer) {
                     const auto current_owner=layer_owner[idx][layer];
@@ -454,44 +467,72 @@ int main(int argc,char** argv) {
         std::vector<std::uint8_t> rgba(pixels*4u,0);
         std::vector<std::uint8_t> prov(pixels,255);
         std::vector<std::int32_t> owner(pixels,-1);
-        for(std::size_t idx=0;idx<pixels;++idx) {
-            owner[idx]=layer_owner[idx][0];
-            PM accum{};
-            int risk=-1;
-            for(int layer=0;layer<kMaxLayers;++layer) {
-                const auto fi=layer_owner[idx][layer];
-                if(fi<0) continue;
-                const auto& uv=mesh.uv[static_cast<std::size_t>(fi)];
-                const auto& w=layer_bary[idx][layer];
-                const double u=uv[0].x*w[0]+uv[1].x*w[1]+uv[2].x*w[2];
-                const double v=uv[0].y*w[0]+uv[1].y*w[1]+uv[2].y*w[2];
-                const auto sample=sample_pm(textures,static_cast<std::uint32_t>(view),u,v);
-                const double transmission=1.0-std::max(0.0,std::min(1.0,accum.a));
-                if(sample.a*transmission>1e-12) {
-                    risk=std::max(
-                        risk,
-                        static_cast<int>(sample_provenance(
-                            provenance,
-                            static_cast<std::uint32_t>(view),
-                            u,
-                            v
-                        ))
-                    );
+        for(int y=0;y<resolution;++y) {
+            for(int x=0;x<resolution;++x) {
+                const auto idx=static_cast<std::size_t>(y)*resolution+x;
+                PM pixel_accum{};
+                int pixel_risk=-1;
+                double representative_depth=std::numeric_limits<double>::infinity();
+                std::int32_t representative_owner=-1;
+
+                for(int sy=0;sy<kCoverageScale;++sy) {
+                    for(int sx=0;sx<kCoverageScale;++sx) {
+                        const int cy=y*kCoverageScale+sy;
+                        const int cx=x*kCoverageScale+sx;
+                        const auto cidx=static_cast<std::size_t>(cy)*coverage_resolution+cx;
+                        PM sample_accum{};
+                        int sample_risk=-1;
+                        for(int layer=0;layer<kMaxLayers;++layer) {
+                            const auto fi=layer_owner[cidx][layer];
+                            if(fi<0) continue;
+                            const auto& uv=mesh.uv[static_cast<std::size_t>(fi)];
+                            const auto& w=layer_bary[cidx][layer];
+                            const double u=uv[0].x*w[0]+uv[1].x*w[1]+uv[2].x*w[2];
+                            const double v=uv[0].y*w[0]+uv[1].y*w[1]+uv[2].y*w[2];
+                            const auto sample=sample_pm(textures,static_cast<std::uint32_t>(view),u,v);
+                            const double transmission=1.0-std::max(0.0,std::min(1.0,sample_accum.a));
+                            if(sample.a*transmission>1e-12) {
+                                sample_risk=std::max(
+                                    sample_risk,
+                                    static_cast<int>(sample_provenance(
+                                        provenance,
+                                        static_cast<std::uint32_t>(view),
+                                        u,
+                                        v
+                                    ))
+                                );
+                            }
+                            sample_accum.r+=transmission*sample.r;
+                            sample_accum.g+=transmission*sample.g;
+                            sample_accum.b+=transmission*sample.b;
+                            sample_accum.a+=transmission*sample.a;
+                        }
+                        const double inv_samples=1.0/static_cast<double>(kCoverageSampleCount);
+                        pixel_accum.r+=sample_accum.r*inv_samples;
+                        pixel_accum.g+=sample_accum.g*inv_samples;
+                        pixel_accum.b+=sample_accum.b*inv_samples;
+                        pixel_accum.a+=sample_accum.a*inv_samples;
+                        if(sample_risk>=0) pixel_risk=std::max(pixel_risk,sample_risk);
+
+                        const double front_depth=layer_depth[cidx][0];
+                        if(front_depth<representative_depth) {
+                            representative_depth=front_depth;
+                            representative_owner=layer_owner[cidx][0];
+                        }
+                    }
                 }
-                accum.r+=transmission*sample.r;
-                accum.g+=transmission*sample.g;
-                accum.b+=transmission*sample.b;
-                accum.a+=transmission*sample.a;
+
+                owner[idx]=representative_owner;
+                const auto out=idx*4u;
+                const double alpha=std::max(0.0,std::min(1.0,pixel_accum.a));
+                if(alpha>1e-12) {
+                    rgba[out]=q8(linear_to_srgb(pixel_accum.r/alpha));
+                    rgba[out+1]=q8(linear_to_srgb(pixel_accum.g/alpha));
+                    rgba[out+2]=q8(linear_to_srgb(pixel_accum.b/alpha));
+                }
+                rgba[out+3]=q8(alpha);
+                if(pixel_risk>=0) prov[idx]=static_cast<std::uint8_t>(pixel_risk);
             }
-            const auto out=idx*4u;
-            const double alpha=std::max(0.0,std::min(1.0,accum.a));
-            if(alpha>1e-12) {
-                rgba[out]=q8(linear_to_srgb(accum.r/alpha));
-                rgba[out+1]=q8(linear_to_srgb(accum.g/alpha));
-                rgba[out+2]=q8(linear_to_srgb(accum.b/alpha));
-            }
-            rgba[out+3]=q8(alpha);
-            if(risk>=0) prov[idx]=static_cast<std::uint8_t>(risk);
         }
 
         const auto overflow_count=static_cast<std::size_t>(

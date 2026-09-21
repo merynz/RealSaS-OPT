@@ -1,0 +1,89 @@
+name: VF10 direction transition calibration
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tools/vf10_direction_transition_calibration.py'
+      - 'compiler/realsas_compiler_core/appearance_quality_v2.py'
+      - 'canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json'
+      - '.github/workflows/vf10_direction_transition_calibration.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: vf10-direction-transition-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calibrate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_VF10_OUT: vf10_out
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install frozen mainline dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile apparatus
+        run: |
+          python -m py_compile \
+            tools/vf10_direction_transition_calibration.py \
+            compiler/realsas_compiler_core/appearance_quality_v2.py
+
+      - name: Enforce subject-free boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nE 'SUBJECT2_KNIGHT|Knight\.fbx|PROMOTED_MAGE|MAGE_FIT|/MAGE|/Mage' \
+            tools/vf10_direction_transition_calibration.py; then
+            echo VF10_SUBJECT_CONTAMINATION_FORBIDDEN >&2
+            exit 1
+          fi
+          echo VF10_SUBJECT_FREE_BOUNDARY=PASS
+
+      - name: Run calibration
+        run: python tools/vf10_direction_transition_calibration.py
+
+      - name: Validate selection boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          p=json.load(open('vf10_out/VF10_DIRECTION_TRANSITION_CALIBRATION.json',encoding='utf-8'))
+          assert p['status']=='PASS_SUBJECT_FREE_SEPARATION'
+          assert p['subject_inputs_used'] is False
+          assert p['knight_result_used'] is False
+          assert p['mage_result_used'] is False
+          assert p['raw_rgb_equality_required'] is False
+          assert p['existing_pair_policy_held_fixed'] is True
+          assert all(x['existing_pair_policy_passed'] for x in p['benign'])
+          assert all(x['existing_pair_policy_passed'] for x in p['adversarial_rgb'])
+          assert all(x['existing_pair_policy_passed'] for x in p['adversarial_alpha'])
+          s=p['selection']
+          assert s['max_benign_pm_l1'] < s['selected_max_triplet_p95_pm_l1'] < s['min_adversarial_pm_l1']
+          assert s['max_benign_alpha_abs'] < s['selected_max_triplet_p95_alpha_abs'] < s['min_adversarial_alpha_abs']
+          print('VF10_CALIBRATION_BOUNDARY=PASS')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vf10-direction-transition-calibration
+          path: vf10_out/
+          if-no-files-found: error

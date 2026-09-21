@@ -24,6 +24,34 @@ from range_engine_c0_v3 import (
 )
 
 
+def prepared_field_to_device(
+    p: PreparedField,
+    device: torch.device | str,
+) -> PreparedField:
+    d = torch.device(device)
+    return PreparedField(
+        p.ln_gamma.to(device=d, dtype=torch.float64).contiguous(),
+        p.ln_beta.to(device=d, dtype=torch.float64).contiguous(),
+        float(p.ln_eps),
+        p.w1.to(device=d, dtype=torch.float64).contiguous(),
+        p.b1.to(device=d, dtype=torch.float64).contiguous(),
+        p.w2.to(device=d, dtype=torch.float64).contiguous(),
+        p.b2.to(device=d, dtype=torch.float64).contiguous(),
+        p.wh.to(device=d, dtype=torch.float64).contiguous(),
+        p.bh.to(device=d, dtype=torch.float64).contiguous(),
+    )
+
+
+def planes_to_device(
+    planes: torch.Tensor,
+    device: torch.device | str,
+) -> torch.Tensor:
+    return planes.detach().to(
+        device=torch.device(device),
+        dtype=torch.float64,
+    ).contiguous()
+
+
 @dataclass
 class _BAffine:
     center: torch.Tensor
@@ -51,9 +79,13 @@ def _bappend_component_remainder(
     rad = (hi - lo) * 0.5
     bsz, n = x.center.shape
     old_k = int(x.generators.shape[2])
-    g = torch.zeros((bsz, n, old_k + n), dtype=torch.float64)
+    g = torch.zeros(
+        (bsz, n, old_k + n),
+        dtype=torch.float64,
+        device=x.center.device,
+    )
     g[:, :, :old_k] = x.generators
-    diag = torch.arange(n)
+    diag = torch.arange(n, device=x.center.device)
     g[:, diag, old_k + diag] = rad
     return _BAffine(x.center + mid, g)
 
@@ -127,7 +159,11 @@ def _blayernorm_affine(x: _BAffine, p: PreparedField) -> _BAffine:
     k = int(q.generators.shape[2])
     zk = int(z.generators.shape[2])
     if zk < k:
-        pad = torch.zeros((bsz, n, k - zk), dtype=torch.float64)
+        pad = torch.zeros(
+            (bsz, n, k - zk),
+            dtype=torch.float64,
+            device=x.center.device,
+        )
         z_g_pad = torch.cat([z.generators, pad], dim=2)
     else:
         z_g_pad = z.generators
@@ -206,7 +242,11 @@ def _bplane_affine(
         + d * uc[:, None] * vc[:, None]
     )
     bsz, channels = center.shape
-    g = torch.zeros((bsz, channels, 6), dtype=torch.float64)
+    g = torch.zeros(
+        (bsz, channels, 6),
+        dtype=torch.float64,
+        device=plane.device,
+    )
     g[:, :, u_generator] = (bb + d * vc[:, None]) * ur[:, None]
     g[:, :, v_generator] = (cc + d * uc[:, None]) * vr[:, None]
     g[:, :, uv_generator] = d * ur[:, None] * vr[:, None]
@@ -239,8 +279,11 @@ def bound_batch_single_regime_prepared(
     los: np.ndarray | torch.Tensor,
     his: np.ndarray | torch.Tensor,
 ) -> tuple[np.ndarray, np.ndarray]:
-    lo = torch.as_tensor(los, dtype=torch.float64, device="cpu").reshape(-1, 3)
-    hi = torch.as_tensor(his, dtype=torch.float64, device="cpu").reshape(-1, 3)
+    device = p.w1.device
+    if planes.device != device:
+        raise ValueError("PREPARED_FIELD_PLANES_DEVICE_MISMATCH")
+    lo = torch.as_tensor(los, dtype=torch.float64, device=device).reshape(-1, 3)
+    hi = torch.as_tensor(his, dtype=torch.float64, device=device).reshape(-1, 3)
     if tuple(lo.shape) != tuple(hi.shape) or bool(torch.any(lo >= hi)):
         raise ValueError("INVALID_BATCH_BOXES")
 

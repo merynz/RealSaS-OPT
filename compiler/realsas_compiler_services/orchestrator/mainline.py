@@ -320,6 +320,42 @@ def validate_readiness(plan: dict | None = None) -> str:
     return content_sha256(readiness)
 
 
+def validate_witness_authorization(plan: dict | None = None) -> str:
+    """Require technical readiness plus an explicit, separately recorded user approval."""
+    plan = plan or load_json(PLAN_PATH)
+    readiness_digest = validate_readiness(plan)
+    readiness = load_json(READINESS_PATH)
+    seal = dict(readiness.get("readiness_seal") or {})
+    if str(seal.get("status") or "") != "PASS":
+        raise RuntimeError(
+            "V2_WITNESS_AUTHORIZATION_REQUIRES_PASS_READINESS_SEAL"
+        )
+    if seal.get("witness_execution_allowed") is not True:
+        raise RuntimeError(
+            "V2_WITNESS_EXECUTION_NOT_TECHNICALLY_ALLOWED"
+        )
+    if seal.get("user_approval_required") is not True:
+        raise RuntimeError(
+            "V2_WITNESS_USER_APPROVAL_REQUIREMENT_DRIFT"
+        )
+    if seal.get("witness_execution_authorized_now") is not True:
+        raise RuntimeError(
+            "V2_WITNESS_EXPLICIT_USER_APPROVAL_REQUIRED"
+        )
+    if str(seal.get("user_approval_state") or "") != (
+        "APPROVED_EXPLICITLY_BY_USER"
+    ):
+        raise RuntimeError(
+            "V2_WITNESS_USER_APPROVAL_STATE_INVALID:"
+            + str(seal.get("user_approval_state") or "UNKNOWN")
+        )
+    if seal.get("knight_started") is not False:
+        raise RuntimeError(
+            "V2_WITNESS_KNIGHT_ALREADY_STARTED_OR_STATE_INVALID"
+        )
+    return readiness_digest
+
+
 def validate_ledger(plan: dict, ledger: dict) -> None:
     plan_hash = validate_plan(plan)
     if ledger.get("schema") != "RealSaS.ActiveRunLedger.v2":
@@ -1035,6 +1071,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("validate-plan")
     sub.add_parser("validate-readiness")
+    sub.add_parser("validate-witness-authorization")
     sub.add_parser("implementation-closure")
     status_parser = sub.add_parser("status")
     status_parser.add_argument(
@@ -1076,6 +1113,13 @@ def main(argv: list[str] | None = None) -> int:
         digest = validate_readiness(plan)
         print(f"MAINLINE_V2_READINESS_PASS readiness_sha256={digest}")
         return 0
+    if args.command == "validate-witness-authorization":
+        digest = validate_witness_authorization(plan)
+        print(
+            "MAINLINE_V2_WITNESS_AUTHORIZATION_PASS "
+            f"readiness_sha256={digest}"
+        )
+        return 0
     if args.command == "implementation-closure":
         manifest = implementation_closure_manifest(plan)
         digest = content_sha256(manifest)
@@ -1100,7 +1144,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "init-run":
         if args.execution_class == "WITNESS":
-            validate_readiness(plan)
+            validate_witness_authorization(plan)
         else:
             validate_plan(plan)
         manifest_path = run_manifest_path(args.run_id)

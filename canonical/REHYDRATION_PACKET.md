@@ -7,15 +7,15 @@
 
 - Product: automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics
 - Current witness: Subject-2 Knight (review-ready; execution held for explicit user approval)
-- Current module: V2 review-ready seal
-- Current state: READY_FOR_WITNESS_EXECUTION__AWAITING_EXPLICIT_USER_APPROVAL
+- Current module: appearance fidelity + dynamic visual integrity reclosure
+- Current state: REOPENED__WITNESS_FORBIDDEN
 - Active experiment: V2_IMPLEMENTATION_ASSEMBLY
-- Most recent closed gate: DOCUMENTATION_INCLUSIVE_EXACT_MAINLINE_AND_ORCHESTRATION_GREEN
-- Canonical main: 162816023f93
+- Most recent closed gate: PRIOR_READY_SEAL_REVOKED_BY_POST_SEAL_APPEARANCE_REVIEW
+- Canonical main: 5301ac611430
 - Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
-- Plan SHA-256: b703b139d30987de0df8c7753eb0ecb8a69134d4c87fd0247ff5e478d1d6163f
-- Promotion block: No implementation blocker remains for the controlled first witness. Do not execute Knight until the user explicitly approves.
-- Scope warning: READY is implementation readiness, not Knight product PASS or unseen generalization.
+- Plan SHA-256: a41ccb9a157624fecc2177a05150646012577f443cc27938b7e93c1e0ff020e4
+- Promotion block: Close tile-density qualification, source-constrained completion quality, cross-view RGB compatibility, dynamic alpha-hole and scattered-hole/speckle gates before any Knight execution.
+- Scope warning: FIT1 or single-subject closure is not unseen/generalization evidence; current learned models are not claimed final.
 
 ## Current machine authority
 
@@ -59,7 +59,7 @@
 
 ## Current scientific question
 
-After user approval, does Subject-2 Knight close the exact V2 product contract without subject-specific repair?
+Can geometry, appearance completion and dynamic rendering jointly eliminate visible holes/speckle while preserving source art without hallucination?
 
 ## Settled invariants
 

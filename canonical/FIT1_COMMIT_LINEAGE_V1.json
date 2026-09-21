@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "162816023f9307f043ae36e15b38ac663f8c8ed4",
+    "main": "5301ac6114308ebb7471bbaebc38ab5a803d0fcd",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -117,7 +117,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2438,
+  "commit_count": 2592,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -123656,6 +123656,3332 @@
       ],
       "subsystem_tags": [
         "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3c849f60a68e09091cdadc661f37366e8f104d11",
+      "parents": [
+        "162816023f9307f043ae36e15b38ac663f8c8ed4"
+      ],
+      "author_time": "2026-09-21T00:45:35+03:00",
+      "committer_time": "2026-09-21T00:45:35+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3ef9e718bf0fd0fd10dde14e4554a5dba226e4b7",
+      "parents": [
+        "3c849f60a68e09091cdadc661f37366e8f104d11"
+      ],
+      "author_time": "2026-09-21T01:31:07+03:00",
+      "committer_time": "2026-09-21T01:31:07+03:00",
+      "subject": "authority: reopen appearance fidelity before Knight",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_IMPLEMENTATION_READINESS.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "89d29be9fd15fe1e9388475813afc725a7ad736b",
+      "parents": [
+        "3ef9e718bf0fd0fd10dde14e4554a5dba226e4b7"
+      ],
+      "author_time": "2026-09-21T01:31:11+03:00",
+      "committer_time": "2026-09-21T01:31:11+03:00",
+      "subject": "authority: reopen appearance fidelity before Knight",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5e362b88c7f67e0356189396d222450c89b3ff9a",
+      "parents": [
+        "89d29be9fd15fe1e9388475813afc725a7ad736b"
+      ],
+      "author_time": "2026-09-21T01:31:13+03:00",
+      "committer_time": "2026-09-21T01:31:13+03:00",
+      "subject": "authority: reopen appearance fidelity before Knight",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CONTEXT_STATE_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1e6c5aebd3caecf3e87842a42f060b2d5669dfe8",
+      "parents": [
+        "5e362b88c7f67e0356189396d222450c89b3ff9a"
+      ],
+      "author_time": "2026-09-21T01:31:17+03:00",
+      "committer_time": "2026-09-21T01:31:17+03:00",
+      "subject": "authority: reopen appearance fidelity before Knight",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/EXPERIMENT_REGISTRY_V3.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2574111511babe36663648b2e3c11dbebf07d36c",
+      "parents": [
+        "1e6c5aebd3caecf3e87842a42f060b2d5669dfe8"
+      ],
+      "author_time": "2026-09-21T01:32:35+03:00",
+      "committer_time": "2026-09-21T01:32:35+03:00",
+      "subject": "authority: add CAA sampling stability blocker",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_IMPLEMENTATION_READINESS.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f87f76bc282db1f3d6bbddf07953654bb0537564",
+      "parents": [
+        "2574111511babe36663648b2e3c11dbebf07d36c"
+      ],
+      "author_time": "2026-09-21T01:44:18+03:00",
+      "committer_time": "2026-09-21T01:44:18+03:00",
+      "subject": "runtime: type frame-local speckle and exposure evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8edaf9c7def721c8675cdc406d0cad127101ca41",
+      "parents": [
+        "f87f76bc282db1f3d6bbddf07953654bb0537564"
+      ],
+      "author_time": "2026-09-21T01:44:48+03:00",
+      "committer_time": "2026-09-21T01:44:48+03:00",
+      "subject": "runtime: add connected inferred-region measurement",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c6e2c2b9b06310c595828c460fde726cb6cbc325",
+      "parents": [
+        "8edaf9c7def721c8675cdc406d0cad127101ca41"
+      ],
+      "author_time": "2026-09-21T01:44:58+03:00",
+      "committer_time": "2026-09-21T01:44:58+03:00",
+      "subject": "runtime: require frame-local DVI budgets",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8749115ec14d30d972192f8f0518d097d2c72ac2",
+      "parents": [
+        "c6e2c2b9b06310c595828c460fde726cb6cbc325"
+      ],
+      "author_time": "2026-09-21T01:45:06+03:00",
+      "committer_time": "2026-09-21T01:45:06+03:00",
+      "subject": "runtime: track frame-local inferred and micro-face load",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b15eb6f8c7992e49e356731b5e816d3f51aabc70",
+      "parents": [
+        "8749115ec14d30d972192f8f0518d097d2c72ac2"
+      ],
+      "author_time": "2026-09-21T01:45:20+03:00",
+      "committer_time": "2026-09-21T01:45:20+03:00",
+      "subject": "runtime: measure frame-max inferred regions and micro faces",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8decc1ecdba32d8cb271204d5a352849b8826b36",
+      "parents": [
+        "b15eb6f8c7992e49e356731b5e816d3f51aabc70"
+      ],
+      "author_time": "2026-09-21T01:47:20+03:00",
+      "committer_time": "2026-09-21T01:47:20+03:00",
+      "subject": "runtime: make sliver and frame-local exposure fail closed",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4d93878b9053b7c23e5010f92015999abfca16a3",
+      "parents": [
+        "8decc1ecdba32d8cb271204d5a352849b8826b36"
+      ],
+      "author_time": "2026-09-21T01:48:07+03:00",
+      "committer_time": "2026-09-21T01:48:07+03:00",
+      "subject": "appearance: sample source RGBA in premultiplied space",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d61c151d5ad5b46d2e2122c3428609be3501f004",
+      "parents": [
+        "4d93878b9053b7c23e5010f92015999abfca16a3"
+      ],
+      "author_time": "2026-09-21T01:48:19+03:00",
+      "committer_time": "2026-09-21T01:48:19+03:00",
+      "subject": "test: reject straight-alpha source interpolation halos",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c7699e44ea602330af9a18ef8067955365a25509",
+      "parents": [
+        "d61c151d5ad5b46d2e2122c3428609be3501f004"
+      ],
+      "author_time": "2026-09-21T01:48:34+03:00",
+      "committer_time": "2026-09-21T01:48:34+03:00",
+      "subject": "appearance: make bilinear provenance conservative",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_bake_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "45b76ccf976620930276b01dd19a74cdf62aadb9",
+      "parents": [
+        "c7699e44ea602330af9a18ef8067955365a25509"
+      ],
+      "author_time": "2026-09-21T01:48:43+03:00",
+      "committer_time": "2026-09-21T01:48:43+03:00",
+      "subject": "runtime: conservatively attribute bilinear appearance provenance",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_render_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "20fb89abcd4221d47a5328a55195ca44fa26c9d1",
+      "parents": [
+        "45b76ccf976620930276b01dd19a74cdf62aadb9"
+      ],
+      "author_time": "2026-09-21T01:48:51+03:00",
+      "committer_time": "2026-09-21T01:48:51+03:00",
+      "subject": "presentation: require source-backed bilinear provenance footprints",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/presentation_partition_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a193b8e9e711a452774b0491e00470b71e16dcd7",
+      "parents": [
+        "20fb89abcd4221d47a5328a55195ca44fa26c9d1"
+      ],
+      "author_time": "2026-09-21T01:49:03+03:00",
+      "committer_time": "2026-09-21T01:49:03+03:00",
+      "subject": "runtime: conservatively sample native provenance footprint",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "63d64a8671edb9bd4f0333d8c686dacc99e9180a",
+      "parents": [
+        "a193b8e9e711a452774b0491e00470b71e16dcd7"
+      ],
+      "author_time": "2026-09-21T01:50:26+03:00",
+      "committer_time": "2026-09-21T01:50:26+03:00",
+      "subject": "test: prevent provenance under-reporting across bilinear footprints",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8388f624ff54a2db797b5f1c2cb53bddf9e11519",
+      "parents": [
+        "63d64a8671edb9bd4f0333d8c686dacc99e9180a"
+      ],
+      "author_time": "2026-09-21T01:51:03+03:00",
+      "committer_time": "2026-09-21T01:51:03+03:00",
+      "subject": "appearance: move holdout from center to silhouette-adjacent edge",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_quality_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fa0ad8a03ab8742c0f102bd7dc0e7ec539e54423",
+      "parents": [
+        "8388f624ff54a2db797b5f1c2cb53bddf9e11519"
+      ],
+      "author_time": "2026-09-21T01:52:27+03:00",
+      "committer_time": "2026-09-21T01:52:27+03:00",
+      "subject": "mesh: make G2 reject geometric cracks and T-junctions",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d2df731a8ab6909c9223f209a853076aca90f0f4",
+      "parents": [
+        "fa0ad8a03ab8742c0f102bd7dc0e7ec539e54423"
+      ],
+      "author_time": "2026-09-21T01:52:35+03:00",
+      "committer_time": "2026-09-21T01:52:35+03:00",
+      "subject": "mesh: bind geometric crack audit into G2 qualification",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "776c3f434d52388113ad7c0b9bed4758762a7262",
+      "parents": [
+        "d2df731a8ab6909c9223f209a853076aca90f0f4"
+      ],
+      "author_time": "2026-09-21T01:52:54+03:00",
+      "committer_time": "2026-09-21T01:52:54+03:00",
+      "subject": "mesh: reject unused vertices in qualified product topology",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "df23221369b0d3dc1c0dece6871c5fbed35e720c",
+      "parents": [
+        "776c3f434d52388113ad7c0b9bed4758762a7262"
+      ],
+      "author_time": "2026-09-21T01:53:05+03:00",
+      "committer_time": "2026-09-21T01:53:05+03:00",
+      "subject": "test: adversarially reject G2 cracks and T-junctions",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4872e0cc900e434bd1e246b5fb4c1855d7b1670c",
+      "parents": [
+        "df23221369b0d3dc1c0dece6871c5fbed35e720c"
+      ],
+      "author_time": "2026-09-21T01:53:25+03:00",
+      "committer_time": "2026-09-21T01:53:25+03:00",
+      "subject": "geometry: add connected defect census primitive",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/product_coverage_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c9dac2c5f68c672220e6785a33b342da4ed19d16",
+      "parents": [
+        "4872e0cc900e434bd1e246b5fb4c1855d7b1670c"
+      ],
+      "author_time": "2026-09-21T01:53:35+03:00",
+      "committer_time": "2026-09-21T01:53:35+03:00",
+      "subject": "geometry: measure scattered pinhole and speckle defects",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/mesh/product_coverage_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9745301b98b5019f2de78315d46033e3298ad193",
+      "parents": [
+        "c9dac2c5f68c672220e6785a33b342da4ed19d16"
+      ],
+      "author_time": "2026-09-21T01:54:10+03:00",
+      "committer_time": "2026-09-21T01:54:10+03:00",
+      "subject": "appearance: require holdout and seam quality per view",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0a8bbe95dbbb4565bf3906108658337d86256426",
+      "parents": [
+        "9745301b98b5019f2de78315d46033e3298ad193"
+      ],
+      "author_time": "2026-09-21T01:54:18+03:00",
+      "committer_time": "2026-09-21T01:54:18+03:00",
+      "subject": "appearance: expose every-view static quality authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "52956113932b5922d7b6afab9b0e112fe65b6c90",
+      "parents": [
+        "0a8bbe95dbbb4565bf3906108658337d86256426"
+      ],
+      "author_time": "2026-09-21T01:57:20+03:00",
+      "committer_time": "2026-09-21T01:57:20+03:00",
+      "subject": "test: allow explicit post-seal scientific reopening",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/repository/test_witness_orchestration_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "371bb6862573c61c4784adc4dbff4e21d6204d21",
+      "parents": [
+        "52956113932b5922d7b6afab9b0e112fe65b6c90"
+      ],
+      "author_time": "2026-09-21T01:57:44+03:00",
+      "committer_time": "2026-09-21T01:57:44+03:00",
+      "subject": "appearance: tighten pre-witness exposure and micro-face policy",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "76fcc0142660325e42956a386b86b17ebe4662da",
+      "parents": [
+        "371bb6862573c61c4784adc4dbff4e21d6204d21"
+      ],
+      "author_time": "2026-09-21T02:07:56+03:00",
+      "committer_time": "2026-09-21T02:07:56+03:00",
+      "subject": "authority: record independent post-seal red-team findings",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_IMPLEMENTATION_READINESS.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "047dc1e9f1d536270192b5b68b117b6766e92fe0",
+      "parents": [
+        "76fcc0142660325e42956a386b86b17ebe4662da"
+      ],
+      "author_time": "2026-09-21T02:08:25+03:00",
+      "committer_time": "2026-09-21T02:08:25+03:00",
+      "subject": "test: bind CAA policy tests to reopened fidelity audit",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_caa_v2_subject_free_policy.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f7f097c8fd3cf81e854f7fac0beb6bc36387918f",
+      "parents": [
+        "047dc1e9f1d536270192b5b68b117b6766e92fe0"
+      ],
+      "author_time": "2026-09-21T02:08:37+03:00",
+      "committer_time": "2026-09-21T02:08:37+03:00",
+      "subject": "test: allow subject-free DVI recalibration state",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_appearance_conditioning_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0df8c74d08985410fafa4e0becb93c940ec88232",
+      "parents": [
+        "f7f097c8fd3cf81e854f7fac0beb6bc36387918f"
+      ],
+      "author_time": "2026-09-21T02:08:58+03:00",
+      "committer_time": "2026-09-21T02:08:58+03:00",
+      "subject": "test: update tiny V2 fixtures for fidelity hardening contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c902325faf4f10b3d21af8039011da16f639054c",
+      "parents": [
+        "0df8c74d08985410fafa4e0becb93c940ec88232"
+      ],
+      "author_time": "2026-09-21T02:09:05+03:00",
+      "committer_time": "2026-09-21T02:09:05+03:00",
+      "subject": "test: bind DVI hash fixture to new visibility metrics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3ca15ed08abe5b91c3fab84237aceef20f97d5b3",
+      "parents": [
+        "c902325faf4f10b3d21af8039011da16f639054c"
+      ],
+      "author_time": "2026-09-21T02:10:50+03:00",
+      "committer_time": "2026-09-21T02:10:50+03:00",
+      "subject": "appearance: make shared-edge seam proof donor-aware",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_quality_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7a0294ce74064febf1dcf9d609326c21d7334bbe",
+      "parents": [
+        "3ca15ed08abe5b91c3fab84237aceef20f97d5b3"
+      ],
+      "author_time": "2026-09-21T02:10:58+03:00",
+      "committer_time": "2026-09-21T02:10:58+03:00",
+      "subject": "appearance: bind seam proof to donor-view identity",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "26794428052fd213f0994267a2553926b1d2d46e",
+      "parents": [
+        "7a0294ce74064febf1dcf9d609326c21d7334bbe"
+      ],
+      "author_time": "2026-09-21T02:11:11+03:00",
+      "committer_time": "2026-09-21T02:11:11+03:00",
+      "subject": "test: catch same-class donor seam discontinuities",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_caa_v2_subject_free_policy.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bf164c2db3269a6ca8e7862a956068f3c96df2be",
+      "parents": [
+        "26794428052fd213f0994267a2553926b1d2d46e"
+      ],
+      "author_time": "2026-09-21T02:12:30+03:00",
+      "committer_time": "2026-09-21T02:12:30+03:00",
+      "subject": "authoring: bind edit invalidation into rsedit manifest",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1477517dab594aaea22265e8d260f6f4080c9fb7",
+      "parents": [
+        "bf164c2db3269a6ca8e7862a956068f3c96df2be"
+      ],
+      "author_time": "2026-09-21T02:26:16+03:00",
+      "committer_time": "2026-09-21T02:26:16+03:00",
+      "subject": "presentation: bind CAA bytes to final mesh source candidate",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "438b20d710d7e94da65f2b78acc249f6765512ab",
+      "parents": [
+        "1477517dab594aaea22265e8d260f6f4080c9fb7"
+      ],
+      "author_time": "2026-09-21T02:28:27+03:00",
+      "committer_time": "2026-09-21T02:28:27+03:00",
+      "subject": "mesh: require local adjacency for preserve continuity",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6c0fc0c365f6f305bf42195dd5458c5b2ccce69c",
+      "parents": [
+        "438b20d710d7e94da65f2b78acc249f6765512ab"
+      ],
+      "author_time": "2026-09-21T02:32:35+03:00",
+      "committer_time": "2026-09-21T02:32:35+03:00",
+      "subject": "presentation: classify rigidity per visual face group",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cedab49472bb870c6062797a51cb9f8b537bc0bc",
+      "parents": [
+        "6c0fc0c365f6f305bf42195dd5458c5b2ccce69c"
+      ],
+      "author_time": "2026-09-21T02:32:46+03:00",
+      "committer_time": "2026-09-21T02:32:46+03:00",
+      "subject": "test: allow rigid prop inside deformable component",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_presentation_partition_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7b24fc5f0fe0ed5def246605dc13a721a275310a",
+      "parents": [
+        "cedab49472bb870c6062797a51cb9f8b537bc0bc"
+      ],
+      "author_time": "2026-09-21T02:33:31+03:00",
+      "committer_time": "2026-09-21T02:33:31+03:00",
+      "subject": "authority: preregister visual fidelity reclosure findings",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a74e58da161fb8ce26455307d335936189b46612",
+      "parents": [
+        "7b24fc5f0fe0ed5def246605dc13a721a275310a"
+      ],
+      "author_time": "2026-09-21T02:33:47+03:00",
+      "committer_time": "2026-09-21T02:33:47+03:00",
+      "subject": "presentation: centralize CAA final-mesh binding invariant",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/product_state_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "446dcbec80905a66893589e2bc0119f7ddd80b40",
+      "parents": [
+        "a74e58da161fb8ce26455307d335936189b46612"
+      ],
+      "author_time": "2026-09-21T02:33:55+03:00",
+      "committer_time": "2026-09-21T02:33:55+03:00",
+      "subject": "test: reject CAA baked on a different mesh candidate",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d943d8c117df3bed06f76328ef37ffee2af1ff27",
+      "parents": [
+        "446dcbec80905a66893589e2bc0119f7ddd80b40"
+      ],
+      "author_time": "2026-09-21T02:34:06+03:00",
+      "committer_time": "2026-09-21T02:34:06+03:00",
+      "subject": "test: reject globally connected but locally cracked preserve boundary",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_authority_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "20652c482433df484a6f862322360bd57be6023b",
+      "parents": [
+        "d943d8c117df3bed06f76328ef37ffee2af1ff27"
+      ],
+      "author_time": "2026-09-21T02:34:37+03:00",
+      "committer_time": "2026-09-21T02:34:37+03:00",
+      "subject": "visibility: expose runner-up depth ambiguity evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/visibility_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cc95bca7a8cf9c9ea99ac2bdbd6d349f60bfedb1",
+      "parents": [
+        "20652c482433df484a6f862322360bd57be6023b"
+      ],
+      "author_time": "2026-09-21T02:34:56+03:00",
+      "committer_time": "2026-09-21T02:34:56+03:00",
+      "subject": "test: expose exact-depth ambiguity instead of hiding tie",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0c9d7181842d11e74fbc2fe52a01d13087927067",
+      "parents": [
+        "cc95bca7a8cf9c9ea99ac2bdbd6d349f60bfedb1"
+      ],
+      "author_time": "2026-09-21T02:36:18+03:00",
+      "committer_time": "2026-09-21T02:36:18+03:00",
+      "subject": "appearance: expose exact-depth overlap ambiguity",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_render_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1fe0f941e0bf4102f43496b9cf0fa95816a85352",
+      "parents": [
+        "0c9d7181842d11e74fbc2fe52a01d13087927067"
+      ],
+      "author_time": "2026-09-21T02:36:27+03:00",
+      "committer_time": "2026-09-21T02:36:27+03:00",
+      "subject": "runtime: type exact-depth ambiguity evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1259d4124b2878c063a7c1b92ff579763e53f4fe",
+      "parents": [
+        "1fe0f941e0bf4102f43496b9cf0fa95816a85352"
+      ],
+      "author_time": "2026-09-21T02:36:46+03:00",
+      "committer_time": "2026-09-21T02:36:46+03:00",
+      "subject": "runtime: fail exact coplanar overlap ambiguity",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ce51d687841929568686a30dca8d0f57f2a9d9c6",
+      "parents": [
+        "1259d4124b2878c063a7c1b92ff579763e53f4fe"
+      ],
+      "author_time": "2026-09-21T02:36:56+03:00",
+      "committer_time": "2026-09-21T02:36:56+03:00",
+      "subject": "appearance: forbid arbitrary exact-depth face ties",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "656c90789f1753c892033992068250ab91a80750",
+      "parents": [
+        "ce51d687841929568686a30dca8d0f57f2a9d9c6"
+      ],
+      "author_time": "2026-09-21T02:37:19+03:00",
+      "committer_time": "2026-09-21T02:37:19+03:00",
+      "subject": "appearance: fail arbitrary exact-depth overlap at rest",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e602bcac4abc3835364976bbd50268904f76a512",
+      "parents": [
+        "656c90789f1753c892033992068250ab91a80750"
+      ],
+      "author_time": "2026-09-21T02:37:33+03:00",
+      "committer_time": "2026-09-21T02:37:33+03:00",
+      "subject": "authority: add dynamic gap and mip-bleed red-team findings",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3f08cdb12a4e7da5346993681540836052d29242",
+      "parents": [
+        "e602bcac4abc3835364976bbd50268904f76a512"
+      ],
+      "author_time": "2026-09-21T02:38:06+03:00",
+      "committer_time": "2026-09-21T02:38:06+03:00",
+      "subject": "appearance: measure adjacent-view source compatibility",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_quality_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "464e982731e27e77447f6fb3bc350d564fa75b18",
+      "parents": [
+        "3f08cdb12a4e7da5346993681540836052d29242"
+      ],
+      "author_time": "2026-09-21T02:38:16+03:00",
+      "committer_time": "2026-09-21T02:38:16+03:00",
+      "subject": "appearance: bind cross-view compatibility diagnostics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0be9f23db2c9c44c82decfe7b49cb11290fe9526",
+      "parents": [
+        "464e982731e27e77447f6fb3bc350d564fa75b18"
+      ],
+      "author_time": "2026-09-21T02:38:44+03:00",
+      "committer_time": "2026-09-21T02:38:44+03:00",
+      "subject": "test: measure adjacent-view source compatibility",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_caa_v2_subject_free_policy.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "52aa82b6720a8ae68e0f6803032ed103e7542b8b",
+      "parents": [
+        "0be9f23db2c9c44c82decfe7b49cb11290fe9526"
+      ],
+      "author_time": "2026-09-21T02:41:32+03:00",
+      "committer_time": "2026-09-21T02:41:32+03:00",
+      "subject": "authority: classify dynamic mechanical visual gaps",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f28f60be3a753f25105c2ba65332bce3402c0051",
+      "parents": [
+        "52aa82b6720a8ae68e0f6803032ed103e7542b8b"
+      ],
+      "author_time": "2026-09-21T02:42:07+03:00",
+      "committer_time": "2026-09-21T02:42:07+03:00",
+      "subject": "authority: expose reopened rehydration focus token",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "CURRENT_STATE.md"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e7be0fd5c74454c9d04dc041579c1bf98e6bee65",
+      "parents": [
+        "f28f60be3a753f25105c2ba65332bce3402c0051"
+      ],
+      "author_time": "2026-09-21T02:42:45+03:00",
+      "committer_time": "2026-09-21T02:42:45+03:00",
+      "subject": "plan: narrow Stage37 to implemented authoring authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/MAINLINE_EXECUTION_PLAN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0d3e26111d972d68fc0a75485e604ef10a112c8b",
+      "parents": [
+        "e7be0fd5c74454c9d04dc041579c1bf98e6bee65"
+      ],
+      "author_time": "2026-09-21T02:42:58+03:00",
+      "committer_time": "2026-09-21T02:42:58+03:00",
+      "subject": "authority: record runtime presentation capability gap",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4e8a5dabb5c9c06400aeea88cce83e2127671064",
+      "parents": [
+        "0d3e26111d972d68fc0a75485e604ef10a112c8b"
+      ],
+      "author_time": "2026-09-21T02:44:33+03:00",
+      "committer_time": "2026-09-21T02:44:33+03:00",
+      "subject": "test: bind exact-depth ambiguity into DVI hash",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1eba3f061957541fdb73ea623e1633fa8d6e16fb",
+      "parents": [
+        "4e8a5dabb5c9c06400aeea88cce83e2127671064"
+      ],
+      "author_time": "2026-09-21T02:44:38+03:00",
+      "committer_time": "2026-09-21T02:44:38+03:00",
+      "subject": "test: include exact-depth ambiguity fixture budget",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "48e631c7c0920ca8c161f64e28b45ac9a0504752",
+      "parents": [
+        "1eba3f061957541fdb73ea623e1633fa8d6e16fb"
+      ],
+      "author_time": "2026-09-21T02:57:24+03:00",
+      "committer_time": "2026-09-21T02:57:24+03:00",
+      "subject": "redteam: add CAA color-space filtering blocker",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b37f0f95e23f1b8afda0464751cd948217da60ff",
+      "parents": [
+        "48e631c7c0920ca8c161f64e28b45ac9a0504752"
+      ],
+      "author_time": "2026-09-21T02:57:54+03:00",
+      "committer_time": "2026-09-21T02:57:54+03:00",
+      "subject": "redteam: add runtime precision and production-policy E2E blockers",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "398ebc0c2e922e527a21b2f5123586cc26473a41",
+      "parents": [
+        "b37f0f95e23f1b8afda0464751cd948217da60ff"
+      ],
+      "author_time": "2026-09-21T02:58:19+03:00",
+      "committer_time": "2026-09-21T02:58:19+03:00",
+      "subject": "redteam: add dynamic raster coverage AA blocker",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "74cc1d9652a4ef1d10f38bf4e113e6b9dc22a17c",
+      "parents": [
+        "398ebc0c2e922e527a21b2f5123586cc26473a41"
+      ],
+      "author_time": "2026-09-21T02:59:01+03:00",
+      "committer_time": "2026-09-21T02:59:01+03:00",
+      "subject": "redteam: add low-alpha transport precision blocker",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "af3cfe6edc0fa7a7ea19b8f3b3bcdb105555b90b",
+      "parents": [
+        "74cc1d9652a4ef1d10f38bf4e113e6b9dc22a17c"
+      ],
+      "author_time": "2026-09-21T02:59:54+03:00",
+      "committer_time": "2026-09-21T02:59:54+03:00",
+      "subject": "redteam: add sparse-feature and cross-view gate blockers",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f12067212741a1dde32785e28a8a00387a772da9",
+      "parents": [
+        "af3cfe6edc0fa7a7ea19b8f3b3bcdb105555b90b"
+      ],
+      "author_time": "2026-09-21T03:00:21+03:00",
+      "committer_time": "2026-09-21T03:00:21+03:00",
+      "subject": "redteam: add transparent-layer composition blocker",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "07ad4aa893e27bb5aa1536c4148b7ba423daf08d",
+      "parents": [
+        "f12067212741a1dde32785e28a8a00387a772da9"
+      ],
+      "author_time": "2026-09-21T03:00:47+03:00",
+      "committer_time": "2026-09-21T03:00:47+03:00",
+      "subject": "redteam: add surface sidedness visibility blocker",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d8d090d40abbe275d3d08fea4efaf33d935765c2",
+      "parents": [
+        "07ad4aa893e27bb5aa1536c4148b7ba423daf08d"
+      ],
+      "author_time": "2026-09-21T03:06:37+03:00",
+      "committer_time": "2026-09-21T03:06:37+03:00",
+      "subject": "appearance: add explicit linear-premultiplied sRGB contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_color_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "11dd197dbf85b2079a0fe76e6cdcd36a14ab44e4",
+      "parents": [
+        "d8d090d40abbe275d3d08fea4efaf33d935765c2"
+      ],
+      "author_time": "2026-09-21T03:06:46+03:00",
+      "committer_time": "2026-09-21T03:06:46+03:00",
+      "subject": "appearance: filter CAA in linear premultiplied light",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_bake_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bf6100945f3251d3e6996cea11f056bfa8a7048e",
+      "parents": [
+        "11dd197dbf85b2079a0fe76e6cdcd36a14ab44e4"
+      ],
+      "author_time": "2026-09-21T03:06:54+03:00",
+      "committer_time": "2026-09-21T03:06:54+03:00",
+      "subject": "appearance: source-sample in linear premultiplied light",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ce59b033bd463a596ceca3b307ba2fd22c02fca3",
+      "parents": [
+        "bf6100945f3251d3e6996cea11f056bfa8a7048e"
+      ],
+      "author_time": "2026-09-21T03:07:05+03:00",
+      "committer_time": "2026-09-21T03:07:05+03:00",
+      "subject": "runtime: encode reference output from linear premultiplied light",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_render_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b5fb1df951ce26c554c5b61081ca0656189aec48",
+      "parents": [
+        "ce59b033bd463a596ceca3b307ba2fd22c02fca3"
+      ],
+      "author_time": "2026-09-21T03:07:16+03:00",
+      "committer_time": "2026-09-21T03:07:16+03:00",
+      "subject": "runtime: use linear-light premultiplied CAA sampling",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a82881457af4fbc6d652c579b0a86da11846eb5b",
+      "parents": [
+        "b5fb1df951ce26c554c5b61081ca0656189aec48"
+      ],
+      "author_time": "2026-09-21T03:07:51+03:00",
+      "committer_time": "2026-09-21T03:07:51+03:00",
+      "subject": "visibility: retain four ordered geometry layers",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/visibility_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ad0d962ab0c1f2493fe7912f25fdcd52cd03a8e4",
+      "parents": [
+        "a82881457af4fbc6d652c579b0a86da11846eb5b"
+      ],
+      "author_time": "2026-09-21T03:08:12+03:00",
+      "committer_time": "2026-09-21T03:08:12+03:00",
+      "subject": "appearance: composite ordered transparent geometry layers",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_render_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "dd814be036077cf8b5c29b34addf60f7a5c183fd",
+      "parents": [
+        "ad0d962ab0c1f2493fe7912f25fdcd52cd03a8e4"
+      ],
+      "author_time": "2026-09-21T03:08:35+03:00",
+      "committer_time": "2026-09-21T03:08:35+03:00",
+      "subject": "runtime: composite four ordered transparent geometry layers",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d168d6ba5badb2571887293f9082b3d5f3af68c0",
+      "parents": [
+        "dd814be036077cf8b5c29b34addf60f7a5c183fd"
+      ],
+      "author_time": "2026-09-21T03:08:57+03:00",
+      "committer_time": "2026-09-21T03:08:57+03:00",
+      "subject": "runtime: type layer-overflow and sidedness evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e8762e67c182c07336a22f8ddb0a862e70f6a149",
+      "parents": [
+        "d168d6ba5badb2571887293f9082b3d5f3af68c0"
+      ],
+      "author_time": "2026-09-21T03:09:06+03:00",
+      "committer_time": "2026-09-21T03:09:06+03:00",
+      "subject": "policy: gate layered visibility and dynamic sidedness",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "185a674bd79f50407353e687ee14083379d8be20",
+      "parents": [
+        "e8762e67c182c07336a22f8ddb0a862e70f6a149"
+      ],
+      "author_time": "2026-09-21T03:09:17+03:00",
+      "committer_time": "2026-09-21T03:09:17+03:00",
+      "subject": "runtime: require layered visibility and sidedness budgets",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "62e86245e0301fc5d2340c1299b8e192372a81e7",
+      "parents": [
+        "185a674bd79f50407353e687ee14083379d8be20"
+      ],
+      "author_time": "2026-09-21T03:09:31+03:00",
+      "committer_time": "2026-09-21T03:09:31+03:00",
+      "subject": "runtime: measure layer overflow and dynamic face flips",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c2c00ca8b6ef1fd9f2682e847750abacadf6536d",
+      "parents": [
+        "62e86245e0301fc5d2340c1299b8e192372a81e7"
+      ],
+      "author_time": "2026-09-21T03:09:42+03:00",
+      "committer_time": "2026-09-21T03:09:42+03:00",
+      "subject": "runtime: hard-gate layer overflow and inside-out faces",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "12a92ce649adc3c2691b1affd7ee8b6464cac075",
+      "parents": [
+        "c2c00ca8b6ef1fd9f2682e847750abacadf6536d"
+      ],
+      "author_time": "2026-09-21T03:10:03+03:00",
+      "committer_time": "2026-09-21T03:10:03+03:00",
+      "subject": "test: falsify gamma filtering and single-layer alpha visibility",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b116c3616bd91eaa421348d9da1a4d1b49bd26d9",
+      "parents": [
+        "12a92ce649adc3c2691b1affd7ee8b6464cac075"
+      ],
+      "author_time": "2026-09-21T03:10:21+03:00",
+      "committer_time": "2026-09-21T03:10:21+03:00",
+      "subject": "policy: forbid rest visibility layer overflow",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2f9e8897d9763090d4e1c69e7e0fd57b8675d02b",
+      "parents": [
+        "b116c3616bd91eaa421348d9da1a4d1b49bd26d9"
+      ],
+      "author_time": "2026-09-21T03:10:40+03:00",
+      "committer_time": "2026-09-21T03:10:40+03:00",
+      "subject": "appearance: fail rest layered-visibility overflow",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0dbc472f696c0661c1858d5be51e8185eab36aee",
+      "parents": [
+        "2f9e8897d9763090d4e1c69e7e0fd57b8675d02b"
+      ],
+      "author_time": "2026-09-21T03:11:24+03:00",
+      "committer_time": "2026-09-21T03:11:24+03:00",
+      "subject": "appearance: retain pre-quantization source PM evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6cfdbb3e8c3db2a44162c8662bcb1799460b0923",
+      "parents": [
+        "0dbc472f696c0661c1858d5be51e8185eab36aee"
+      ],
+      "author_time": "2026-09-21T03:11:31+03:00",
+      "committer_time": "2026-09-21T03:11:31+03:00",
+      "subject": "appearance: seal source PM precision evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "57b9d807a46d3a1a10e0536d625e222dfed54a52",
+      "parents": [
+        "6cfdbb3e8c3db2a44162c8662bcb1799460b0923"
+      ],
+      "author_time": "2026-09-21T03:12:06+03:00",
+      "committer_time": "2026-09-21T03:12:06+03:00",
+      "subject": "policy: bound source PM transport quantization",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a50a54a8b5b4d0810ca114297c82bd6111bc0352",
+      "parents": [
+        "57b9d807a46d3a1a10e0536d625e222dfed54a52"
+      ],
+      "author_time": "2026-09-21T03:12:22+03:00",
+      "committer_time": "2026-09-21T03:12:22+03:00",
+      "subject": "appearance: gate source PM quantization error",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c674cb2dd2b0f3ebe79782775d36b300c6e13e6d",
+      "parents": [
+        "a50a54a8b5b4d0810ca114297c82bd6111bc0352"
+      ],
+      "author_time": "2026-09-21T03:12:47+03:00",
+      "committer_time": "2026-09-21T03:12:47+03:00",
+      "subject": "appearance: expose pairwise cross-view contradiction evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_quality_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "79b65b9d9857683652fa4e99cbec5b9ec17ccef1",
+      "parents": [
+        "c674cb2dd2b0f3ebe79782775d36b300c6e13e6d"
+      ],
+      "author_time": "2026-09-21T03:13:00+03:00",
+      "committer_time": "2026-09-21T03:13:00+03:00",
+      "subject": "policy: preregister cross-view contradiction bounds",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8ee3fd016588858984d2c2db1ef987520d8286cf",
+      "parents": [
+        "79b65b9d9857683652fa4e99cbec5b9ec17ccef1"
+      ],
+      "author_time": "2026-09-21T03:13:16+03:00",
+      "committer_time": "2026-09-21T03:13:16+03:00",
+      "subject": "appearance: hard-gate adjacent-view source contradictions",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9e0cf8c54f70be7fd36689c909c90788dfe563ef",
+      "parents": [
+        "8ee3fd016588858984d2c2db1ef987520d8286cf"
+      ],
+      "author_time": "2026-09-21T03:14:51+03:00",
+      "committer_time": "2026-09-21T03:14:51+03:00",
+      "subject": "appearance: add bounded surface-graph harmonic completion",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e3e3024bfcfb773d76cb683a06a0739cc5880cbe",
+      "parents": [
+        "9e0cf8c54f70be7fd36689c909c90788dfe563ef"
+      ],
+      "author_time": "2026-09-21T03:15:00+03:00",
+      "committer_time": "2026-09-21T03:15:00+03:00",
+      "subject": "appearance: replace nearest/global provenance with local harmonic",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fefa7b1f6c9326301b9a6934db45106726c54895",
+      "parents": [
+        "e3e3024bfcfb773d76cb683a06a0739cc5880cbe"
+      ],
+      "author_time": "2026-09-21T03:15:21+03:00",
+      "committer_time": "2026-09-21T03:15:21+03:00",
+      "subject": "appearance: replace Euclidean/global fill with bounded harmonic surface completion",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e01d7236667f88d26fd61369237d6630fb643781",
+      "parents": [
+        "fefa7b1f6c9326301b9a6934db45106726c54895"
+      ],
+      "author_time": "2026-09-21T03:15:28+03:00",
+      "committer_time": "2026-09-21T03:15:28+03:00",
+      "subject": "policy: forbid global fill and bound harmonic completion",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "b5bd6eb328bce73f21a87b4aceeab7a6b69ac0bb",
+      "parents": [
+        "e01d7236667f88d26fd61369237d6630fb643781"
+      ],
+      "author_time": "2026-09-21T03:15:43+03:00",
+      "committer_time": "2026-09-21T03:15:43+03:00",
+      "subject": "appearance: bind harmonic completion into Stage21",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c1809577aa25e9633f03d3422fd6cbf79ee45115",
+      "parents": [
+        "b5bd6eb328bce73f21a87b4aceeab7a6b69ac0bb"
+      ],
+      "author_time": "2026-09-21T03:15:59+03:00",
+      "committer_time": "2026-09-21T03:15:59+03:00",
+      "subject": "appearance: update provenance ordering for harmonic completion",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_bake_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "90b745f0ce5c9bc6b947c69e770db8f9f7986d68",
+      "parents": [
+        "c1809577aa25e9633f03d3422fd6cbf79ee45115"
+      ],
+      "author_time": "2026-09-21T03:16:11+03:00",
+      "committer_time": "2026-09-21T03:16:11+03:00",
+      "subject": "runtime: remove obsolete global-fill DVI fields",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a6b1ac9c1aa8e994c1d84ecce475993f6f30bc1e",
+      "parents": [
+        "90b745f0ce5c9bc6b947c69e770db8f9f7986d68"
+      ],
+      "author_time": "2026-09-21T03:16:23+03:00",
+      "committer_time": "2026-09-21T03:16:23+03:00",
+      "subject": "runtime: consume only bounded harmonic completion provenance",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "30caeafa220dba1aa3565687fb3fe72030265b90",
+      "parents": [
+        "a6b1ac9c1aa8e994c1d84ecce475993f6f30bc1e"
+      ],
+      "author_time": "2026-09-21T03:17:03+03:00",
+      "committer_time": "2026-09-21T03:17:03+03:00",
+      "subject": "appearance: isolate topology-aware completion authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_completion_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "85943673f057f12b3088c7354128f6d343a45b54",
+      "parents": [
+        "30caeafa220dba1aa3565687fb3fe72030265b90"
+      ],
+      "author_time": "2026-09-21T03:17:13+03:00",
+      "committer_time": "2026-09-21T03:17:13+03:00",
+      "subject": "appearance: share completion primitive between compile and qualification",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3743ba115945de171258a6ff4f78da6c2a4bef4f",
+      "parents": [
+        "85943673f057f12b3088c7354128f6d343a45b54"
+      ],
+      "author_time": "2026-09-21T03:17:44+03:00",
+      "committer_time": "2026-09-21T03:17:44+03:00",
+      "subject": "appearance: let harmonic holdout distinguish unknown from observed",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_completion_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fbdc0f3ebd1e27891d51dadb46938e03b49d4cef",
+      "parents": [
+        "3743ba115945de171258a6ff4f78da6c2a4bef4f"
+      ],
+      "author_time": "2026-09-21T03:18:13+03:00",
+      "committer_time": "2026-09-21T03:18:13+03:00",
+      "subject": "appearance: make holdout topology-aware and occlusion-like",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_quality_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c011ffb1bff460ac1f92fafe8b683116fbdf6421",
+      "parents": [
+        "fbdc0f3ebd1e27891d51dadb46938e03b49d4cef"
+      ],
+      "author_time": "2026-09-21T03:18:23+03:00",
+      "committer_time": "2026-09-21T03:18:23+03:00",
+      "subject": "appearance: qualify shipping completion on bounded edge holdouts",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f81786311911e7976342ef3bfde39b5c6d6001ad",
+      "parents": [
+        "c011ffb1bff460ac1f92fafe8b683116fbdf6421"
+      ],
+      "author_time": "2026-09-21T03:18:48+03:00",
+      "committer_time": "2026-09-21T03:18:48+03:00",
+      "subject": "appearance: add sparse feature and edge preservation metrics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_quality_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "6b5be52703d5d29ac7c9d7dc526593d6566278c5",
+      "parents": [
+        "f81786311911e7976342ef3bfde39b5c6d6001ad"
+      ],
+      "author_time": "2026-09-21T03:18:56+03:00",
+      "committer_time": "2026-09-21T03:18:56+03:00",
+      "subject": "policy: preregister sparse line-art preservation gates",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f12a0001967e85a1a29ff18a7e96505d37ded5e2",
+      "parents": [
+        "6b5be52703d5d29ac7c9d7dc526593d6566278c5"
+      ],
+      "author_time": "2026-09-21T03:19:08+03:00",
+      "committer_time": "2026-09-21T03:19:08+03:00",
+      "subject": "appearance: type sparse source-feature preservation proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_authority_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "78a6e77908e47ec243551eee9dcfdee927ab05a6",
+      "parents": [
+        "f12a0001967e85a1a29ff18a7e96505d37ded5e2"
+      ],
+      "author_time": "2026-09-21T03:19:21+03:00",
+      "committer_time": "2026-09-21T03:19:21+03:00",
+      "subject": "appearance: hard-gate sparse line-art preservation at rest",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "242382390b31166b41d34d05ff8e18f9347fffcb",
+      "parents": [
+        "78a6e77908e47ec243551eee9dcfdee927ab05a6"
+      ],
+      "author_time": "2026-09-21T03:20:10+03:00",
+      "committer_time": "2026-09-21T03:20:10+03:00",
+      "subject": "appearance: derive tile density from source-visible face footprint",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "1090920b2d3ba96d5a0e4e24b265581e03ff390e",
+      "parents": [
+        "242382390b31166b41d34d05ff8e18f9347fffcb"
+      ],
+      "author_time": "2026-09-21T03:20:25+03:00",
+      "committer_time": "2026-09-21T03:20:25+03:00",
+      "subject": "policy: replace fixed tile 8 with projected-density selection",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3d3aab035dcc7943843bdf6327f396509399f0f8",
+      "parents": [
+        "1090920b2d3ba96d5a0e4e24b265581e03ff390e"
+      ],
+      "author_time": "2026-09-21T03:20:38+03:00",
+      "committer_time": "2026-09-21T03:20:38+03:00",
+      "subject": "appearance: resolve atlas density before CAA preregistration",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "784528c38d72a88212619a4d5332c5c98d5c5017",
+      "parents": [
+        "3d3aab035dcc7943843bdf6327f396509399f0f8"
+      ],
+      "author_time": "2026-09-21T03:21:37+03:00",
+      "committer_time": "2026-09-21T03:21:37+03:00",
+      "subject": "mechanics: add dynamic self-intersection authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/dynamic_geometry_integrity_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e8b3d397b641912f4126d26e92c611ba7965ba58",
+      "parents": [
+        "784528c38d72a88212619a4d5332c5c98d5c5017"
+      ],
+      "author_time": "2026-09-21T03:21:52+03:00",
+      "committer_time": "2026-09-21T03:21:52+03:00",
+      "subject": "mechanics: hard-gate newly introduced self-intersections",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_dynamic_proof_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "041f9a842bec8f3ce47779533a053f9641c4d143",
+      "parents": [
+        "e8b3d397b641912f4126d26e92c611ba7965ba58"
+      ],
+      "author_time": "2026-09-21T03:24:49+03:00",
+      "committer_time": "2026-09-21T03:24:49+03:00",
+      "subject": "test: requalify adaptive CAA completion and sparse-art gates",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_caa_v2_subject_free_policy.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3abea4216ba1032af7e82a85b3c02464e78751b2",
+      "parents": [
+        "041f9a842bec8f3ce47779533a053f9641c4d143"
+      ],
+      "author_time": "2026-09-21T03:25:28+03:00",
+      "committer_time": "2026-09-21T03:25:28+03:00",
+      "subject": "test: align tiny adapter fixture with reopened CAA schemas",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "79b4fee8cce4a5793ca375d185d94bbcb0117459",
+      "parents": [
+        "3abea4216ba1032af7e82a85b3c02464e78751b2"
+      ],
+      "author_time": "2026-09-21T03:25:38+03:00",
+      "committer_time": "2026-09-21T03:25:38+03:00",
+      "subject": "test: align tail authority fixtures with new DVI evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_v2_tail_authority_fail_closed.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4729ba6d16a074f4299a141e6216ac684e406fd8",
+      "parents": [
+        "79b4fee8cce4a5793ca375d185d94bbcb0117459"
+      ],
+      "author_time": "2026-09-21T03:26:23+03:00",
+      "committer_time": "2026-09-21T03:26:23+03:00",
+      "subject": "appearance: load sealed pre-quantization PM evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "38c4279e2d1d61bb6e3179668d9e8dc8e65db0cb",
+      "parents": [
+        "4729ba6d16a074f4299a141e6216ac684e406fd8"
+      ],
+      "author_time": "2026-09-21T03:26:48+03:00",
+      "committer_time": "2026-09-21T03:26:48+03:00",
+      "subject": "motion: narrow contact proof to declared PLANT_2D",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/motion_dynamic_proof_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bb5aba7bca82bd2123d17d2aebc17f4366f3ff76",
+      "parents": [
+        "38c4279e2d1d61bb6e3179668d9e8dc8e65db0cb"
+      ],
+      "author_time": "2026-09-21T03:26:56+03:00",
+      "committer_time": "2026-09-21T03:26:56+03:00",
+      "subject": "runtime: seal frame-index-only playback semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "18859b3ad4d858bdf344d61aa8efec53145542bd",
+      "parents": [
+        "bb5aba7bca82bd2123d17d2aebc17f4366f3ff76"
+      ],
+      "author_time": "2026-09-21T03:27:06+03:00",
+      "committer_time": "2026-09-21T03:27:06+03:00",
+      "subject": "runtime: materialize explicit no-interpolation contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_package_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "04f31c0aefabdf5177294789d7dc4803900e5065",
+      "parents": [
+        "18859b3ad4d858bdf344d61aa8efec53145542bd"
+      ],
+      "author_time": "2026-09-21T03:27:19+03:00",
+      "committer_time": "2026-09-21T03:27:19+03:00",
+      "subject": "runtime: preserve Stage41 geometry and UV at float64",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "27879880223acffcd069ce568886bb6c2695f1da",
+      "parents": [
+        "04f31c0aefabdf5177294789d7dc4803900e5065"
+      ],
+      "author_time": "2026-09-21T03:27:35+03:00",
+      "committer_time": "2026-09-21T03:27:35+03:00",
+      "subject": "runtime: serialize V2 geometry and clips as float64",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_package_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9add354c413ffe30ff0f186fc88cd86aece59b81",
+      "parents": [
+        "27879880223acffcd069ce568886bb6c2695f1da"
+      ],
+      "author_time": "2026-09-21T03:27:44+03:00",
+      "committer_time": "2026-09-21T03:27:44+03:00",
+      "subject": "runtime: parse V2 geometry and clips as float64",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "dc80cb9a20c19807ee89a1fff4c24727f72ea22f",
+      "parents": [
+        "9add354c413ffe30ff0f186fc88cd86aece59b81"
+      ],
+      "author_time": "2026-09-21T03:28:37+03:00",
+      "committer_time": "2026-09-21T03:28:37+03:00",
+      "subject": "calibration: add articulated LBS appearance conditioning bank",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "bfdf8de4049ba5fd0ed35f73a73ad9054577c8ad",
+      "parents": [
+        "dc80cb9a20c19807ee89a1fff4c24727f72ea22f"
+      ],
+      "author_time": "2026-09-21T03:28:46+03:00",
+      "committer_time": "2026-09-21T03:28:46+03:00",
+      "subject": "policy: bind articulated LBS conditioning thresholds",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "a37c7eac1e43146f05e0d960f5fc2ddb9dd8f11f",
+      "parents": [
+        "bfdf8de4049ba5fd0ed35f73a73ad9054577c8ad"
+      ],
+      "author_time": "2026-09-21T03:29:04+03:00",
+      "committer_time": "2026-09-21T03:29:04+03:00",
+      "subject": "test: qualify articulated LBS dynamic appearance calibration",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_appearance_conditioning_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e90c033fcc58622f8fab8e32d469a782f54234c2",
+      "parents": [
+        "a37c7eac1e43146f05e0d960f5fc2ddb9dd8f11f"
+      ],
+      "author_time": "2026-09-21T03:29:16+03:00",
+      "committer_time": "2026-09-21T03:29:16+03:00",
+      "subject": "test: attack dynamic self-intersection proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_geometry_integrity_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d378224c8a92a26d9d9b80d48a04ed777074c5e0",
+      "parents": [
+        "e90c033fcc58622f8fab8e32d469a782f54234c2"
+      ],
+      "author_time": "2026-09-21T09:12:32+03:00",
+      "committer_time": "2026-09-21T09:12:32+03:00",
+      "subject": "authority: reopen active V2 ledger for subject-free visual fidelity red-team",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "50c76d2460615556891bf8fc6f41ed21cb9c82cd",
+      "parents": [
+        "d378224c8a92a26d9d9b80d48a04ed777074c5e0"
+      ],
+      "author_time": "2026-09-21T09:12:41+03:00",
+      "committer_time": "2026-09-21T09:12:41+03:00",
+      "subject": "authority: rebind reopened readiness to current V2 plan",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_IMPLEMENTATION_READINESS.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "80634bcf4df70ffe87565f5e9a204cff712389c2",
+      "parents": [
+        "50c76d2460615556891bf8fc6f41ed21cb9c82cd"
+      ],
+      "author_time": "2026-09-21T09:15:05+03:00",
+      "committer_time": "2026-09-21T09:15:05+03:00",
+      "subject": "authority: preserve canonical assembly subject-free governance invariant",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/ACTIVE_RUN_V2.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "cf8fb173d8a792e2a66630a9812f39e66a509b7c",
+      "parents": [
+        "80634bcf4df70ffe87565f5e9a204cff712389c2"
+      ],
+      "author_time": "2026-09-21T09:16:10+03:00",
+      "committer_time": "2026-09-21T09:16:10+03:00",
+      "subject": "runtime: expose visually contributing CAA layers to DVI",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_render_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c3cc46a41c93255782100c5a5f3de4044b0da4eb",
+      "parents": [
+        "cf8fb173d8a792e2a66630a9812f39e66a509b7c"
+      ],
+      "author_time": "2026-09-21T09:16:23+03:00",
+      "committer_time": "2026-09-21T09:16:23+03:00",
+      "subject": "runtime: gate dynamic conditioning on all visual contributors",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "423100ab26f1b07d9dbec66e7e2d0bf3acb986ca",
+      "parents": [
+        "c3cc46a41c93255782100c5a5f3de4044b0da4eb"
+      ],
+      "author_time": "2026-09-21T09:16:36+03:00",
+      "committer_time": "2026-09-21T09:16:36+03:00",
+      "subject": "test: expose deeper visual contributor behind transparent front face",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "31dbbd61f4b3a27d81cf6d78f206649c50dadf9c",
+      "parents": [
+        "423100ab26f1b07d9dbec66e7e2d0bf3acb986ca"
+      ],
+      "author_time": "2026-09-21T09:18:34+03:00",
+      "committer_time": "2026-09-21T09:18:34+03:00",
+      "subject": "test: make native V2 parity discriminate linear-light filtering",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_runtime_v2_native_smoke.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e2430f85bd15e23e5a3f2d0379399110145b0ab7",
+      "parents": [
+        "31dbbd61f4b3a27d81cf6d78f206649c50dadf9c"
+      ],
+      "author_time": "2026-09-21T09:18:42+03:00",
+      "committer_time": "2026-09-21T09:18:42+03:00",
+      "subject": "ci: trigger runtime authority gate on V2 native proof tests",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/current_runtime_self_hosted_ci.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2f8f9f70c845d96f38792a64a8da489b407b5050",
+      "parents": [
+        "e2430f85bd15e23e5a3f2d0379399110145b0ab7"
+      ],
+      "author_time": "2026-09-21T09:19:48+03:00",
+      "committer_time": "2026-09-21T09:19:48+03:00",
+      "subject": "appearance: preserve float64 CAA geometry and UV evidence",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_compile_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c3cffca30d477edfad5c4e42b7c50312f1037514",
+      "parents": [
+        "2f8f9f70c845d96f38792a64a8da489b407b5050"
+      ],
+      "author_time": "2026-09-21T09:20:26+03:00",
+      "committer_time": "2026-09-21T09:20:26+03:00",
+      "subject": "appearance: keep baked surface UV authority float64",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "895c576c8bc1571dfff0279d33aeec815dc52960",
+      "parents": [
+        "c3cffca30d477edfad5c4e42b7c50312f1037514"
+      ],
+      "author_time": "2026-09-21T09:21:01+03:00",
+      "committer_time": "2026-09-21T09:21:01+03:00",
+      "subject": "test: calibrate PM transport on real bilinear low-alpha blends",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_caa_v2_subject_free_policy.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "92818f6d5de63f29b50a0ab6e137e5aee40509b1",
+      "parents": [
+        "895c576c8bc1571dfff0279d33aeec815dc52960"
+      ],
+      "author_time": "2026-09-21T09:22:18+03:00",
+      "committer_time": "2026-09-21T09:22:18+03:00",
+      "subject": "appearance: define fail-closed screen-to-atlas minification metric",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/dynamic_appearance_conditioning_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d0e10c121cfd8ad0fcb7c596508974f46255a4e8",
+      "parents": [
+        "92818f6d5de63f29b50a0ab6e137e5aee40509b1"
+      ],
+      "author_time": "2026-09-21T09:22:25+03:00",
+      "committer_time": "2026-09-21T09:22:25+03:00",
+      "subject": "policy: forbid unqualified texture minification under bilinear runtime",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "692287e09e2afd35ee1947d8d3cbd50226fcb5c7",
+      "parents": [
+        "d0e10c121cfd8ad0fcb7c596508974f46255a4e8"
+      ],
+      "author_time": "2026-09-21T09:22:37+03:00",
+      "committer_time": "2026-09-21T09:22:37+03:00",
+      "subject": "appearance: bind dynamic bilinear minification authority to policy",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/dynamic_appearance_conditioning_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f92d3580ead9a0ac1560c0b497ad4de645d08075",
+      "parents": [
+        "692287e09e2afd35ee1947d8d3cbd50226fcb5c7"
+      ],
+      "author_time": "2026-09-21T09:23:01+03:00",
+      "committer_time": "2026-09-21T09:23:01+03:00",
+      "subject": "runtime: reject dynamic atlas minification without mip authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "e538328fe657234f172f685eb6e4dd83804c4b55",
+      "parents": [
+        "f92d3580ead9a0ac1560c0b497ad4de645d08075"
+      ],
+      "author_time": "2026-09-21T09:23:34+03:00",
+      "committer_time": "2026-09-21T09:23:34+03:00",
+      "subject": "appearance: reject rest atlas minification without filtering authority",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8177f70bb665b2d1ca104d822877e6c05e2807b1",
+      "parents": [
+        "e538328fe657234f172f685eb6e4dd83804c4b55"
+      ],
+      "author_time": "2026-09-21T09:23:52+03:00",
+      "committer_time": "2026-09-21T09:23:52+03:00",
+      "subject": "test: fail closed on atlas minification under bilinear sampler",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_dynamic_appearance_conditioning_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f04497b2d355ba3cfdfb34ee0aa5578f5081ff78",
+      "parents": [
+        "8177f70bb665b2d1ca104d822877e6c05e2807b1"
+      ],
+      "author_time": "2026-09-21T09:24:30+03:00",
+      "committer_time": "2026-09-21T09:24:30+03:00",
+      "subject": "authority: extend visual fidelity red-team through VF-31",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "557ae9d559b3e7566756028ba9196cf930497b98",
+      "parents": [
+        "f04497b2d355ba3cfdfb34ee0aa5578f5081ff78"
+      ],
+      "author_time": "2026-09-21T09:24:46+03:00",
+      "committer_time": "2026-09-21T09:24:46+03:00",
+      "subject": "ci: gate V2 runtime and appearance adapter changes on native proof",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/current_runtime_self_hosted_ci.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "9d641cd3ef91c661be6103ce5201188dd1fc747d",
+      "parents": [
+        "557ae9d559b3e7566756028ba9196cf930497b98"
+      ],
+      "author_time": "2026-09-21T09:27:27+03:00",
+      "committer_time": "2026-09-21T09:27:27+03:00",
+      "subject": "ci: enforce V2 visual fidelity red-team banks on promoted runtime head",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/current_runtime_self_hosted_ci.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "913f1206747e8f34af990e127f087603fc18874d",
+      "parents": [
+        "9d641cd3ef91c661be6103ce5201188dd1fc747d"
+      ],
+      "author_time": "2026-09-21T09:27:43+03:00",
+      "committer_time": "2026-09-21T09:27:43+03:00",
+      "subject": "authority: record CI false-green closures VF-32 and VF-33",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "84f2d7a6069f912abbda75944c3e26e6431f6f32",
+      "parents": [
+        "913f1206747e8f34af990e127f087603fc18874d"
+      ],
+      "author_time": "2026-09-21T09:28:00+03:00",
+      "committer_time": "2026-09-21T09:28:00+03:00",
+      "subject": "ci: bind V2 appearance policy authority to exact runtime gate",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/current_runtime_self_hosted_ci.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "2e7275c99222b039ae81a47b3a738192eee6074f",
+      "parents": [
+        "84f2d7a6069f912abbda75944c3e26e6431f6f32"
+      ],
+      "author_time": "2026-09-21T09:28:10+03:00",
+      "committer_time": "2026-09-21T09:28:10+03:00",
+      "subject": "authority: record policy-gate bypass closure VF-34",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "5301ac6114308ebb7471bbaebc38ab5a803d0fcd",
+      "parents": [
+        "2e7275c99222b039ae81a47b3a738192eee6074f"
+      ],
+      "author_time": "2026-09-21T09:28:55+03:00",
+      "committer_time": "2026-09-21T09:28:55+03:00",
+      "subject": "runtime: apply texture footprint gate only to visual contributors",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

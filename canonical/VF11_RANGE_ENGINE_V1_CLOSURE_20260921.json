@@ -1,0 +1,41 @@
+{
+  "schema": "RealSaS.VF11RangeEngineV1Closure.v1",
+  "date_utc": "2026-09-21",
+  "status": "FALSIFIED__PRACTICALLY_VACUOUS_BOUNDS",
+  "authority_class": "RESEARCH_CLOSURE_ONLY",
+  "product_authority_minted": false,
+  "witness_execution": false,
+  "source_run": {
+    "run_id": "20260921T114055Z",
+    "repo_commit": "f3c620f816f2a9a6423f7c4fe66a24f1baa38a90",
+    "baseline_checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "scene_planes_sha256": "364f4769f1ffb04362669c1fe04b9b6c8f3afe3308bf4b7cede038d9e8226d28",
+    "certifiability_profile_sha256": "5acf7e705e34190fbc1cf360d9b9b36df42a4f8e301dccbfc6bbd62946c20243",
+    "run_log_sha256": "70e0af8403bdee25def00929fdae0fe8cf54949c9306d9fb1e22640ecd6d965c"
+  },
+  "observed": {
+    "depth_2": {"PROVEN_EMPTY": 0, "PROVEN_REGULAR": 0, "UNKNOWN": 64, "exhaustive": true},
+    "depth_3": {"PROVEN_EMPTY": 0, "PROVEN_REGULAR": 0, "UNKNOWN": 512, "exhaustive": true},
+    "depth_4": {"PROVEN_EMPTY": 0, "PROVEN_REGULAR": 0, "UNKNOWN": 4096, "exhaustive": true},
+    "depth_5": {"PROVEN_EMPTY": 0, "PROVEN_REGULAR": 0, "UNKNOWN": 4096, "exhaustive": false},
+    "depth_6": {"PROVEN_EMPTY": 0, "PROVEN_REGULAR": 0, "UNKNOWN": 4096, "exhaustive": false},
+    "depth_7": {"PROVEN_EMPTY": 0, "PROVEN_REGULAR": 0, "UNKNOWN": 4096, "exhaustive": false},
+    "depth_7_unknown_reasons": {
+      "DIRECTIONAL_DERIVATIVE_INTERVAL_CONTAINS_ZERO": 3903,
+      "TRIPLANE_BORDER_REGION": 193
+    }
+  },
+  "interpretation": [
+    "This closes only the naive forward interval implementation. It does not falsify certified adaptive extraction as an architecture family.",
+    "The v1 interval propagation loses cross-feature and cross-neuron correlation through LayerNorm and nonlinear layers, making the returned ranges practically vacuous on the frozen Knight field.",
+    "The TRIPLANE_BORDER_REGION population is also contaminated by float boundary bookkeeping around exact align_corners=False pixel-center knots and must not be interpreted as field complexity."
+  ],
+  "next_contract": {
+    "stage": "C0_RANGE_FIRST",
+    "goal": "Demonstrate useful and tightening field-value bounds before reopening C1 directional-derivative regularity.",
+    "PROVEN_REGULAR_in_v2": "FORBIDDEN",
+    "depth_8_or_9_with_v1": "FORBIDDEN_AS_LOW_INFORMATION",
+    "x1_phase_bank": "REMAINS_HOLD"
+  }
+}

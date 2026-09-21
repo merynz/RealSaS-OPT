@@ -14,7 +14,7 @@ from typing import Any, Mapping
 import numpy as np
 
 from .canonical_puppet_state_v1 import canonical_puppet_state_hash
-from .dynamic_geometry_integrity_v2 import nonadjacent_intersection_pairs
+from .dynamic_geometry_integrity_v2 import unexpected_intersection_pairs
 from .hashing import content_sha256
 from .joint_frames_v1 import derive_joint_frames_from_skeleton, frame_set_hash
 from .mesh.product_coverage_v1 import rasterize_visible_face_pixel_counts
@@ -538,7 +538,7 @@ def build_qualified_dynamic_motion_v2(
     )
     intersection_tolerance=1.0e-8*max(1.0,_scale(skeleton))
     rest_intersection_pairs=set(
-        nonadjacent_intersection_pairs(
+        unexpected_intersection_pairs(
             vertices=rest,
             faces=face_indices,
             tolerance=intersection_tolerance,
@@ -593,7 +593,7 @@ def build_qualified_dynamic_motion_v2(
             clip_max=max(clip_max,max_disp)
             min_area,max_area,max_condition=_frame_metrics(mesh,rest,posed,mesh_policy)
             frame_intersection_pairs=set(
-                nonadjacent_intersection_pairs(
+                unexpected_intersection_pairs(
                     vertices=posed,
                     faces=face_indices,
                     tolerance=intersection_tolerance,

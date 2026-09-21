@@ -1,0 +1,96 @@
+name: VF11 certified adaptive research smoke
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'experiments/vf11_certified_adaptive/**'
+      - 'tests/research/test_vf11_range_engine_v1.py'
+      - 'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json'
+      - '.github/workflows/vf11_certified_adaptive_research_smoke.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: vf11-certified-adaptive-smoke-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  range-engine-smoke:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install minimal frozen test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off pytest==8.3.5
+
+      - name: Compile research range engine
+        run: |
+          python -m py_compile experiments/vf11_certified_adaptive/range_engine_v1.py
+          python -m py_compile tests/research/test_vf11_range_engine_v1.py
+
+      - name: Enforce research-only claim boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          p=json.load(open('canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json',encoding='utf-8'))
+          assert p['authority_class']=='RESEARCH_PREREGISTRATION_ONLY'
+          assert p['product_authority_minted'] is False
+          assert p['witness_execution_authorized'] is False
+          assert p['knight_mainline_started'] is False
+          assert p['x1_disposition']['state']=='HOLD_NOT_EXECUTED'
+          assert p['next_long_experiment']['execution_class']=='LONG__USER_RUN_ALL_NOTEBOOK_REQUIRED'
+          print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
+          PY
+
+      - name: Run short deterministic/adversarial range tests
+        run: pytest -q tests/research/test_vf11_range_engine_v1.py
+
+      - name: Emit smoke receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p vf11_cert_smoke
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          files=[
+            'experiments/vf11_certified_adaptive/range_engine_v1.py',
+            'tests/research/test_vf11_range_engine_v1.py',
+            'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json',
+          ]
+          def sha(path):
+              return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+          out={
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v1',
+            'status':'PASS',
+            'product_authority_minted':False,
+            'files':{p:sha(p) for p in files},
+          }
+          Path('vf11_cert_smoke/receipt.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(out,indent=2,sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vf11-certified-adaptive-research-smoke
+          path: vf11_cert_smoke/
+          if-no-files-found: error

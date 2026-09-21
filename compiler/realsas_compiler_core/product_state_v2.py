@@ -142,6 +142,10 @@ def _face_group_rigidity_noop_probe(
     if xyz.ndim != 2 or xyz.shape[1] != 3 or not np.isfinite(xyz).all():
         raise QualificationError("PRESENTATION_V2_RIGIDITY_PROBE_POSITION_INVALID")
     local = {vertex_id: index for index, vertex_id in enumerate(vertex_ids)}
+    if any(vertex_id not in rows for vertex_id in vertex_ids):
+        raise QualificationError(
+            "PRESENTATION_V2_RIGIDITY_PROBE_SKIN_ROW_MISSING"
+        )
 
     edges = set()
     for face_index in face_indices:

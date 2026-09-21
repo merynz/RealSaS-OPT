@@ -18,6 +18,7 @@ from range_engine_v1 import (  # noqa: E402
     silu_bounds,
     triplane_bounds,
 )
+from profile_v1 import profile_depths  # noqa: E402
 
 
 def _sample(planes: torch.Tensor, points: torch.Tensor) -> torch.Tensor:
@@ -147,3 +148,25 @@ def test_emitted_regular_direction_is_samplewise_one_signed():
         grad=torch.autograd.grad(sdf,p)[0].reshape(3)
         rows.append(float(torch.dot(grad,d)))
     assert min(rows)>-2e-5 or max(rows)<2e-5
+
+
+def test_profiler_is_deterministic_and_research_only():
+    torch.manual_seed(23)
+    c=2
+    planes=torch.randn(1,3,c,6,6)
+    field=TinyField(3*c,7).eval()
+    kwargs=dict(
+        depths=[1,2],
+        max_cells_per_depth=24,
+        domain_lo=-0.75,
+        domain_hi=0.75,
+        seed=12345,
+        logger=None,
+    )
+    a=profile_depths(field,planes,**kwargs)
+    b=profile_depths(field,planes,**kwargs)
+    assert a["schema"]=="RealSaS.VF11CertifiabilityProfile.v1"
+    assert a["status"]=="RESEARCH_MEASUREMENT_ONLY__NO_PRODUCT_AUTHORITY"
+    assert a["numerically_rigorous"] is False
+    assert [r["states"] for r in a["depths"]]==[r["states"] for r in b["depths"]]
+    assert [r["reason_histogram"] for r in a["depths"]]==[r["reason_histogram"] for r in b["depths"]]

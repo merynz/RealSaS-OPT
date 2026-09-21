@@ -1018,6 +1018,12 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         and max_frame_exact_depth_ambiguous_fraction
         <= exact_depth_ambiguity_budget
     )
+    layered_visibility_passed = (
+        visibility_layer_overflow_pixels <= max_layer_overflow_pixels
+    )
+    sidedness_passed = (
+        visible_orientation_flip_faces <= max_orientation_flip_faces
+    )
     passed = (
         geometry_visible > 0
         and undefined_visible == 0
@@ -1025,6 +1031,8 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         and exposure_passed
         and micro_face_passed
         and exact_depth_ambiguity_passed
+        and layered_visibility_passed
+        and sidedness_passed
         and conditioning_passed
     )
     value = DynamicVisualIntegrityV2IR(
@@ -1047,6 +1055,8 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         exact_depth_ambiguous_pixel_count=exact_depth_ambiguous_pixels,
         exact_depth_ambiguous_fraction=exact_depth_ambiguous_fraction,
         maximum_frame_exact_depth_ambiguous_fraction=max_frame_exact_depth_ambiguous_fraction,
+        visibility_layer_overflow_pixel_count=visibility_layer_overflow_pixels,
+        visible_orientation_flip_face_count=visible_orientation_flip_faces,
         native_reference_mismatch_pixel_count=mismatch_pixels,
         maximum_frame_native_reference_mismatch_fraction=max_mismatch_fraction,
         dynamic_conditioning_sample_count=conditioning_sample_count,
@@ -1075,6 +1085,10 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 max_frame_exact_depth_ambiguous_fraction
             ),
             "exact_depth_ambiguity_passed": exact_depth_ambiguity_passed,
+            "visibility_layer_overflow_pixel_count": visibility_layer_overflow_pixels,
+            "layered_visibility_passed": layered_visibility_passed,
+            "visible_orientation_flip_face_count": visible_orientation_flip_faces,
+            "surface_sidedness_passed": sidedness_passed,
             "native_reference_byte_parity_passed": mismatch_pixels == 0,
             "dynamic_appearance_conditioning_passed": conditioning_passed,
             "dynamic_appearance_policy": dict(conditioning_policy),
@@ -1142,5 +1156,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "maximum_frame_exact_depth_ambiguous_fraction": (
                 max_frame_exact_depth_ambiguous_fraction
             ),
+            "visibility_layer_overflow_pixel_count": visibility_layer_overflow_pixels,
+            "visible_orientation_flip_face_count": visible_orientation_flip_faces,
         },
     }

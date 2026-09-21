@@ -157,6 +157,7 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     )
     assert proc.returncode == 0, proc.stderr
     assert "renderer=REALSAS_V2_CAA_CANONICAL_DEPTH" in proc.stdout
+    assert "coverage=FIXED_2X2_QUARTER_SUBSAMPLES" in proc.stdout
 
     mesh = SimpleNamespace(
         vertices=tuple(
@@ -185,6 +186,11 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     )
     native = np.frombuffer(native_rgba.read_bytes(), dtype=np.uint8).reshape(32, 32, 4)
     assert np.array_equal(native, reference.straight_rgba_u8)
+    partial_alpha = native[:, :, 3][
+        (native[:, :, 3] > 0) & (native[:, :, 3] < 255)
+    ]
+    assert len(partial_alpha) > 0
+    assert set(map(int, np.unique(partial_alpha))).issubset({64, 128, 191})
     midpoint = native[16, 16]
     assert 186 <= int(midpoint[0]) <= 189
     assert int(midpoint[0]) == int(midpoint[1]) == int(midpoint[2])
@@ -301,3 +307,32 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     )
     assert sampler_rejected.returncode != 0
     assert "TEXTURE_SAMPLING_CONTRACT_INVALID" in sampler_rejected.stderr
+
+    coverage_tampered = entries.copy()
+    coverage_manifest = coverage_tampered["manifest.txt"].replace(
+        b"pixel_coverage_sample_count=4",
+        b"pixel_coverage_sample_count=1",
+    )
+    assert coverage_manifest != coverage_tampered["manifest.txt"]
+    coverage_tampered["manifest.txt"] = coverage_manifest
+    coverage_rss = tmp_path / "tampered_coverage.rss"
+    write_rss_v2(coverage_rss, coverage_tampered)
+    coverage_rejected = subprocess.run(
+        [
+            str(player),
+            str(coverage_rss),
+            "--clip",
+            "smoke",
+            "--view",
+            "V0",
+            "--frame",
+            "0",
+            "--out-rgba",
+            str(tmp_path / "tampered_coverage.rgba"),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert coverage_rejected.returncode != 0
+    assert "PIXEL_COVERAGE_SAMPLE_COUNT_INVALID" in coverage_rejected.stderr

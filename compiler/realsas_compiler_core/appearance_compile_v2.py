@@ -218,6 +218,7 @@ def compile_deterministic_caa(
 
     direct_valid = np.zeros((8, sample_count), dtype=bool)
     direct_rgba = np.zeros((8, sample_count, 4), dtype=np.uint8)
+    direct_pm_linear = np.zeros((8, sample_count, 4), dtype=np.float32)
     source_xy = np.full((8, sample_count, 2), np.nan, dtype=np.float32)
 
     camera_by_view = {int(camera.view_index): camera for camera in cameras}
@@ -286,7 +287,13 @@ def compile_deterministic_caa(
         valid = in_bounds & visible & appearance_support & angle_safe
         direct_valid[view] = valid
         if np.any(valid):
-            direct_rgba[view, valid] = bilinear_rgba_u8(image, xy[valid])
+            sampled_rgba, sampled_pm = bilinear_rgba_u8(
+                image,
+                xy[valid],
+                return_premultiplied_linear=True,
+            )
+            direct_rgba[view, valid] = sampled_rgba
+            direct_pm_linear[view, valid] = sampled_pm.astype(np.float32)
 
     rgba = np.zeros_like(direct_rgba)
     provenance = np.full(
@@ -367,6 +374,7 @@ def compile_deterministic_caa(
         "sample_face_index": sample_face,
         "direct_valid": direct_valid,
         "direct_rgba": direct_rgba,
+        "direct_pm_linear": direct_pm_linear,
         "source_xy": source_xy,
         "rgba": rgba,
         "provenance": provenance,

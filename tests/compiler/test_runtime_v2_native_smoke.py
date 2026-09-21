@@ -250,6 +250,53 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     assert rejected.returncode != 0
     assert "HOST_INTERPOLATION_MUST_BE_FORBIDDEN" in rejected.stderr
 
+    capability_cases = (
+        (
+            b"presentation_state_execution_authorized=0",
+            b"presentation_state_execution_authorized=1",
+            "PRESENTATION_STATE_EXECUTION_MUST_BE_FORBIDDEN",
+            "presentation_state",
+        ),
+        (
+            b"clipping_authorized=0",
+            b"clipping_authorized=1",
+            "RUNTIME_CLIPPING_MUST_BE_FORBIDDEN",
+            "clipping",
+        ),
+        (
+            b"tint_order_visibility_authorized=0",
+            b"tint_order_visibility_authorized=1",
+            "RUNTIME_TINT_ORDER_VISIBILITY_MUST_BE_FORBIDDEN",
+            "tint_order_visibility",
+        ),
+    )
+    for old, new, error, label in capability_cases:
+        capability_tampered = entries.copy()
+        capability_manifest = capability_tampered["manifest.txt"].replace(old, new)
+        assert capability_manifest != capability_tampered["manifest.txt"]
+        capability_tampered["manifest.txt"] = capability_manifest
+        capability_rss = tmp_path / f"tampered_{label}.rss"
+        write_rss_v2(capability_rss, capability_tampered)
+        capability_rejected = subprocess.run(
+            [
+                str(player),
+                str(capability_rss),
+                "--clip",
+                "smoke",
+                "--view",
+                "V0",
+                "--frame",
+                "0",
+                "--out-rgba",
+                str(tmp_path / f"tampered_{label}.rgba"),
+            ],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        assert capability_rejected.returncode != 0
+        assert error in capability_rejected.stderr
+
     mip_tampered = entries.copy()
     mip_manifest = mip_tampered["manifest.txt"].replace(
         b"mip_generation_authorized=0",

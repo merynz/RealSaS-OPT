@@ -33,6 +33,7 @@ from compiler.realsas_compiler_core.dynamic_appearance_conditioning_v2 import (
 )
 from compiler.realsas_compiler_core.dynamic_geometry_integrity_v2 import (
     dynamic_visibility_load_gate,
+    interior_shared_edge_projection_continuity,
     projected_orientation_flip,
 )
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
@@ -808,6 +809,11 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     max_relative_surface_principal_stretch = 1.0
     max_adjacent_frame_surface_principal_stretch = 1.0
     max_texture_texels_per_output_pixel = 0.0
+    interior_shared_edge_frame_view_count = 0
+    interior_shared_edge_instance_count = 0
+    mismatched_interior_shared_edge_count = 0
+    maximum_shared_edge_endpoint_error_px = 0.0
+    nonmanifold_shared_edge_count_diagnostic = 0
     previous_consequential_faces = {}
     outputs = []
 
@@ -995,6 +1001,24 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 posed_screen = project_points_xyz_v3(
                     posed_vertices, camera
                 )[:, :2]
+                shared_edge = interior_shared_edge_projection_continuity(
+                    faces=faces,
+                    projected_face_vertices=posed_screen[faces],
+                )
+                interior_shared_edge_frame_view_count += 1
+                interior_shared_edge_instance_count += int(
+                    shared_edge["interior_shared_edge_count"]
+                )
+                mismatched_interior_shared_edge_count += int(
+                    shared_edge["mismatched_interior_shared_edge_count"]
+                )
+                maximum_shared_edge_endpoint_error_px = max(
+                    maximum_shared_edge_endpoint_error_px,
+                    float(shared_edge["maximum_projected_endpoint_error_px"]),
+                )
+                nonmanifold_shared_edge_count_diagnostic += int(
+                    shared_edge["nonmanifold_shared_edge_count_diagnostic"]
+                )
                 previous_screen = (
                     None
                     if previous_vertices is None
@@ -1148,6 +1172,10 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     sidedness_passed = (
         visible_orientation_flip_faces <= max_orientation_flip_faces
     )
+    shared_edge_continuity_passed = (
+        mismatched_interior_shared_edge_count == 0
+        and maximum_shared_edge_endpoint_error_px == 0.0
+    )
     passed = (
         geometry_visible > 0
         and undefined_visible == 0
@@ -1157,6 +1185,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         and exact_depth_ambiguity_passed
         and layered_visibility_passed
         and sidedness_passed
+        and shared_edge_continuity_passed
         and minification_passed
         and conditioning_passed
     )
@@ -1213,7 +1242,39 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "visibility_layer_overflow_pixel_count": visibility_layer_overflow_pixels,
             "layered_visibility_passed": layered_visibility_passed,
             "visible_orientation_flip_face_count": visible_orientation_flip_faces,
+            "interior_shared_edge_instance_count": interior_shared_edge_instance_count,
+            "mismatched_interior_shared_edge_count": (
+                mismatched_interior_shared_edge_count
+            ),
+            "maximum_shared_edge_endpoint_error_px": (
+                maximum_shared_edge_endpoint_error_px
+            ),
+            "interior_shared_edge_continuity_passed": (
+                shared_edge_continuity_passed
+            ),
             "surface_sidedness_passed": sidedness_passed,
+            "interior_shared_edge_continuity_mode": (
+                "TOPOLOGY_OWNED_INTERIOR_SHARED_EDGE_EXACT_PROJECTION_V1"
+            ),
+            "interior_shared_edge_frame_view_count": (
+                interior_shared_edge_frame_view_count
+            ),
+            "interior_shared_edge_instance_count": (
+                interior_shared_edge_instance_count
+            ),
+            "mismatched_interior_shared_edge_count": (
+                mismatched_interior_shared_edge_count
+            ),
+            "maximum_shared_edge_endpoint_error_px": (
+                maximum_shared_edge_endpoint_error_px
+            ),
+            "nonmanifold_shared_edge_count_diagnostic": (
+                nonmanifold_shared_edge_count_diagnostic
+            ),
+            "interior_shared_edge_continuity_passed": (
+                shared_edge_continuity_passed
+            ),
+            "cross_component_background_gap_is_crack_authority": False,
             "maximum_texture_texels_per_output_pixel": (
                 max_texture_texels_per_output_pixel
             ),
@@ -1237,6 +1298,11 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             ),
             "perceptual_optimality_claimed": False,
             "subject_identity_used_for_thresholds": False,
+            "dynamic_crack_authority": (
+                "TOPOLOGY_OWNED_INTERIOR_SHARED_EDGES_ONLY"
+            ),
+            "raw_owner_negative_background_area_gated_as_crack": False,
+            "cross_component_non_detachability_authority_claimed": False,
         },
     )
     value = replace(

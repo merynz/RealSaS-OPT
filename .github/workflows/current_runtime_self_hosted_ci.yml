@@ -15,6 +15,8 @@ on:
       - 'tests/compiler/test_current_v4_runtime_v2_projection_v1.py'
       - 'tests/compiler/test_directional_joint_view_binding_v1.py'
       - 'tests/compiler/test_motion_bake_firewall_v1.py'
+      - 'tests/compiler/test_runtime_v2_native_smoke.py'
+      - 'tests/compiler/test_v2_tail_authority_fail_closed.py'
       - 'experiments/single_family_e2e_v1/**'
       - 'canonical/MAIN_POST_MERGE_INTEGRITY_TRIGGER_ONCE_V1_20260904.json'
       - '.github/workflows/current_runtime_self_hosted_ci.yml'

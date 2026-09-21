@@ -105,6 +105,7 @@ def test_paired_profile_emits_all_depth_micro_pairs_without_contradiction():
         near_zero_candidate_count=64,
         seed=4321,
     )
+    checkpointed = []
     out = run_paired_profile(
         field,
         planes,
@@ -114,10 +115,12 @@ def test_paired_profile_emits_all_depth_micro_pairs_without_contradiction():
         domain_hi=0.875,
         max_micro_depth=2,
         logger=None,
+        record_callback=checkpointed.append,
     )
     assert out["schema"] == "RealSaS.VF11C0PairedProfile.v3"
     assert out["anchor_count"] == 4
     assert out["parent_count"] == 8
     assert out["empirical_contradiction_count"] == 0
+    assert len(checkpointed) == out["parent_count"]
     for rec in out["records"]:
         assert set(rec["by_micro"]) == {"0", "1", "2"}

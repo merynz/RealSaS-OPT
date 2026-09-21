@@ -1,0 +1,53 @@
+{
+  "schema": "RealSaS.VF11LayerNormEpsilonErratum.v1",
+  "date_utc": "2026-09-21",
+  "status": "ERRATUM_OPEN__C0_C1_IMPACT_REPLAY_REQUIRED__C2_HOLD",
+  "authority_class": "RESEARCH_ERRATUM",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "discovery": {
+    "trigger": "C2 degenerate-point value-bound containment regression",
+    "failing_fixture_direct_value": 0.07770394365718522,
+    "failing_fixture_upper_bound": 0.07770381050494106,
+    "absolute_miss": 1.3315224416e-7
+  },
+  "root_cause": {
+    "file": "experiments/vf11_certified_adaptive/range_engine_c0_v3.py",
+    "function": "_layernorm_affine",
+    "bug": "The inverse-sqrt affine line was constructed over t = variance + eps, but evaluated at var.center instead of var.center + eps.",
+    "observed_stage_signature": {
+      "triplane_max_abs_diff": 1.1102230246251565e-16,
+      "layernorm_max_abs_diff_before_fix": 4.9809231032149626e-05,
+      "final_sdf_point_miss_before_fix": 1.3317941964519076e-07
+    }
+  },
+  "fix": {
+    "semantic_change": "q_c = slope * (var.center + p.ln_eps) + intercept + residual_mid",
+    "commit": "a97f4a35ebe3c100bfef3c5916890faf33272d98",
+    "regression": "degenerate float64 point enclosure must contain direct production-architecture evaluation"
+  },
+  "impact_scope": {
+    "c0_v3": "AFFECTED",
+    "c1_v2": "AFFECTED because its primal LayerNorm path reuses _layernorm_affine even though the tangent dvar formula separately included eps in its factor bounds",
+    "prior_empirical_contradiction_checks": "still useful diagnostics but not sufficient to preserve certificate authority",
+    "c1_v2_research_closure": "OPERATIONALLY_SUSPENDED_PENDING_IMPACT_REPLAY",
+    "c2_execution": "HOLD_PENDING_IMPACT_REPLAY"
+  },
+  "required_impact_replay": {
+    "same_frozen_inputs": true,
+    "c0": [
+      "replay all 256 paired parent records with corrected C0 V3",
+      "compare per-anchor/depth/micro states against source run",
+      "report changed states and corrected margins"
+    ],
+    "c1": [
+      "replay the same 32 d8 NEAR_ZERO cohort with corrected C1 V2 dependency",
+      "compare 19-cell primary and 32-cell stress states against source replay",
+      "require all corrected minted margins strictly positive",
+      "report any state changes"
+    ],
+    "gate_to_resume_c2": "No empirical contradiction, all state changes explained, and a new corrected C0/C1 closure explicitly authorizes C2."
+  }
+}

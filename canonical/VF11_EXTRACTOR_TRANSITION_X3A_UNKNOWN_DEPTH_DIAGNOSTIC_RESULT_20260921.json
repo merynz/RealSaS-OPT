@@ -1,0 +1,33 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX3AUnknownDepthDiagnosticResult.v1",
+  "date_utc": "2026-09-21",
+  "status": "NO_SAMPLED_SURFACE_THROUGH_D16__PROOF_UNKNOWN_REMAINS",
+  "artifact_sha256": "72edbb15882a283af492d53534bae0e5820b18b91647eb5908aea92a737ad195",
+  "artifact_bytes": 3401,
+  "elapsed_seconds_total": 0.5305253849992368,
+  "targets": [
+    {
+      "root_anchor_id": 49,
+      "proof_path": "323",
+      "absolute_depth": 11,
+      "d14": {"field_min": -0.003084560474298087, "field_max": -4.345760372406748e-06, "mixed_cube_count": 0},
+      "d15": {"field_min": -0.003084560474298087, "field_max": -4.345760372406748e-06, "mixed_cube_count": 0},
+      "d16": {"field_min": -0.003084560474298087, "field_max": -4.345760372406748e-06, "mixed_cube_count": 0}
+    },
+    {
+      "root_anchor_id": 62,
+      "proof_path": "115",
+      "absolute_depth": 11,
+      "d14": {"field_min": -0.004398881902555829, "field_max": -2.554412959480945e-06, "mixed_cube_count": 0},
+      "d15": {"field_min": -0.004398881902555829, "field_max": -2.554412959480945e-06, "mixed_cube_count": 0},
+      "d16": {"field_min": -0.004398881902555829, "field_max": -2.554412959480945e-06, "mixed_cube_count": 0}
+    }
+  ],
+  "interpretation": "Neither of the two remaining C0-UNKNOWN d11 leaves produced any mixed-sign cube even after targeted local sampling through absolute depth 16. All sampled values remained negative. This is evidence against a sampling-depth problem in these two leaves, but it is not an emptiness certificate.",
+  "scientific_consequence": "Do not globally increase extraction depth. The remaining closure problem is proof tightness on exactly two leaves. The next experiment is targeted C0/graph proof refinement only on these leaves.",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_performed": false
+}

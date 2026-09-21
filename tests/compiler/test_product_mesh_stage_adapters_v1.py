@@ -433,7 +433,7 @@ def test_stage24_to_27_typed_wiring_closes_on_subject_free_triangle(tmp_path):
     # test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa.
 
 
-def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tmp_path):
+def test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy(tmp_path):
     import os
     from dataclasses import replace
     import pytest
@@ -471,8 +471,17 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
         seal_product_closure_stage,
     )
 
-    ctx = _fixture(tmp_path)
+    ctx = _fixture(tmp_path, resolution=128)
     ctx["repo_root"] = ROOT
+    production_policy_path = (
+        ROOT
+        / "canonical"
+        / "CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+    )
+    production_policy = json.loads(
+        production_policy_path.read_text(encoding="utf-8")
+    )
+    assert production_policy["status"] == "FROZEN_SUBJECT_FREE_VISUAL_FIDELITY_V3"
 
     def alias(old_id: str, new_id: str):
         old = next(row for row in ctx["ledger"]["stages"] if row["id"] == old_id)
@@ -558,7 +567,7 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     appearance_root.mkdir(parents=True, exist_ok=True)
     texture_rows = []
     for vi in range(8):
-        rgba = np.zeros((4, 4, 4), dtype=np.uint8)
+        rgba = np.zeros((32, 32, 4), dtype=np.uint8)
         rgba[:, :, :] = (70 + vi * 5, 110, 150, 255)
         texture_path = appearance_root / f"V{vi}.png"
         Image.fromarray(rgba, "RGBA").save(
@@ -570,8 +579,8 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
                 direction_id=f"V{vi}",
                 transport_png_path=str(texture_path.resolve()),
                 transport_png_sha256=_sha(texture_path),
-                width=4,
-                height=4,
+                width=32,
+                height=32,
                 metadata={"fixture": True},
             )
         )
@@ -584,7 +593,7 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     provenance_path = appearance_root / "provenance.npz"
     np.savez_compressed(
         provenance_path,
-        provenance=np.zeros((8, 4, 4), dtype=np.uint8),
+        provenance=np.zeros((8, 32, 32), dtype=np.uint8),
     )
     asset = CompleteAppearanceAssetIR(
         compile_seal_binding_hash="c" * 64,
@@ -597,7 +606,7 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
         uv_npz_sha256=_sha(uv_path),
         provenance_npz_path=str(provenance_path.resolve()),
         provenance_npz_sha256=_sha(provenance_path),
-        atlas_layout={"fixture": True, "width": 4, "height": 4},
+        atlas_layout={"fixture": True, "width": 32, "height": 32},
         asset_hash="",
         metadata={"total_appearance_asset": True, "fixture": True},
     )
@@ -634,24 +643,8 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
         },
         qualification_hash="",
         metadata={
-            "policy": {
-                "dynamic_max_compiled_unobserved_visible_fraction": 0.20,
-                "dynamic_max_frame_compiled_unobserved_visible_fraction": 1.0,
-                "dynamic_max_connected_compiled_unobserved_visible_fraction": 1.0,
-                "dynamic_max_micro_visible_pixel_fraction_per_frame": 1.0,
-                "dynamic_max_unmeasurable_consequential_visible_face_count": 1000000,
-                "dynamic_max_exact_depth_ambiguous_fraction": 1.0,
-                "dynamic_max_visible_orientation_flip_face_count": 1000000,
-                "dynamic_max_visibility_layer_overflow_pixel_count": 0,
-                "dynamic_min_visible_pixels_per_face": 1,
-                "dynamic_min_projected_double_area_px2": 0.01,
-                "dynamic_max_uv_to_surface_condition_number": 64.0,
-                "dynamic_max_relative_surface_condition_number": 16.0,
-                "dynamic_max_relative_surface_principal_stretch": 8.0,
-                "dynamic_max_adjacent_frame_surface_principal_stretch": 8.0,
-                "dynamic_max_texture_texels_per_output_pixel": 1.0
-            },
-            "fixture": True,
+            "policy": dict(production_policy["completion_quality_policy"]),
+            "vf23_unmodified_production_policy": True,
         },
     )
     qualification = replace(

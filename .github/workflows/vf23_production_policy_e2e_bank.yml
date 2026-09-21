@@ -1,0 +1,86 @@
+name: VF23 production policy E2E bank
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'compiler/**'
+      - 'runtime/realsas_cpp/**'
+      - 'tests/compiler/test_product_mesh_stage_adapters_v1.py'
+      - 'tests/compiler/test_caa_v2_subject_free_policy.py'
+      - 'tests/compiler/test_visibility_and_caa_v2.py'
+      - 'tests/compiler/test_dynamic_appearance_conditioning_v2.py'
+      - 'tests/compiler/test_dynamic_geometry_integrity_v2.py'
+      - 'tests/compiler/test_presentation_partition_v2.py'
+      - 'canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json'
+      - 'canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json'
+      - 'canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json'
+      - '.github/workflows/vf23_production_policy_e2e_bank.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: vf23-production-policy-e2e-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  production-policy-bank:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_RUNTIME_V2_PLAYER: /tmp/realsas_runtime_v2_vf23
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned CPU dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+
+      - name: Freeze input policy identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum             canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json             canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json             canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json             > /tmp/vf23-policy-before.sha256
+          cat /tmp/vf23-policy-before.sha256
+
+      - name: Build exact native V2 reference player
+        run: |
+          g++ -std=c++17 -O2 -Wall -Wextra -pedantic             runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp             -o "$REALSAS_RUNTIME_V2_PLAYER"
+          sha256sum "$REALSAS_RUNTIME_V2_PLAYER"
+
+      - name: Exact unmodified production-policy E2E wiring
+        run: |
+          python -m pytest -q             tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_stage20_to25_uses_unmodified_production_caa_policy             tests/compiler/test_product_mesh_stage_adapters_v1.py::test_vf23_stage37_to46_tail_uses_unmodified_production_dynamic_policy
+
+      - name: Representative subject-free production semantic controls
+        run: |
+          python -m pytest -q             tests/compiler/test_caa_v2_subject_free_policy.py::test_sparse_one_pixel_line_loss_is_detected_even_below_five_percent_area             tests/compiler/test_caa_v2_subject_free_policy.py::test_rest_alpha_policy_rejects_coherent_missing_art             tests/compiler/test_caa_v2_subject_free_policy.py::test_harmonic_completion_cannot_cross_component_or_invent_without_boundary             tests/compiler/test_visibility_and_caa_v2.py::test_transparent_front_geometry_reveals_deeper_character_layer             tests/compiler/test_visibility_and_caa_v2.py::test_depth_equivalence_epsilon_is_explicit_and_fail_closed_at_boundary             tests/compiler/test_visibility_and_caa_v2.py::test_runtime_reference_2x2_coverage_produces_fractional_edge_alpha             tests/compiler/test_visibility_and_caa_v2.py::test_visibility_reports_layer_overflow_instead_of_silent_drop             tests/compiler/test_dynamic_appearance_conditioning_v2.py::test_articulated_lbs_bank_selects_three_for_intrinsic_and_two_for_temporal             tests/compiler/test_presentation_partition_v2.py::test_visual_groups_can_have_distinct_rigid_and_deformable_mechanics_inside_one_component             tests/compiler/test_presentation_partition_v2.py::test_legacy_0999_rigid_false_positive_is_hard_failure_not_silent_wobble             tests/compiler/test_dynamic_geometry_integrity_v2.py::test_nonadjacent_crossing_triangles_are_detected             tests/compiler/test_dynamic_geometry_integrity_v2.py::test_interior_shared_edge_projection_continuity_detects_true_seam_crack             tests/compiler/test_dynamic_geometry_integrity_v2.py::test_topologically_separate_articulation_gap_is_not_inferred_as_crack
+
+      - name: Prove canonical policies were not mutated
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum             canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json             canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json             canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json             > /tmp/vf23-policy-after.sha256
+          diff -u /tmp/vf23-policy-before.sha256 /tmp/vf23-policy-after.sha256
+          echo VF23_CANONICAL_POLICY_BYTES_UNCHANGED=PASS
+
+      - name: VF23 bank summary
+        run: |
+          echo VF23_EXACT_PRODUCTION_POLICY_E2E_BANK=PASS
+          echo "commit=$GITHUB_SHA"
+          echo subject_inputs_used=false
+          echo threshold_relaxation_used=false
+          echo knight_witness_used=false

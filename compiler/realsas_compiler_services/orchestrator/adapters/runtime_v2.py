@@ -188,7 +188,7 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
     vertex_index = {vertex_id: index for index, vertex_id in enumerate(vertex_ids)}
     if len(vertex_index) != len(vertex_ids):
         raise QualificationError("RUNTIME_V2_DUPLICATE_MESH_VERTEX_ID")
-    vertices = np.asarray([vertex.P for vertex in mesh.vertices], dtype=np.float32)
+    vertices = np.asarray([vertex.P for vertex in mesh.vertices], dtype=np.float64)
     faces = np.asarray(
         [[vertex_index[str(vertex_id)] for vertex_id in face] for face in mesh.faces],
         dtype=np.uint32,
@@ -199,7 +199,7 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
     with np.load(uv_path, allow_pickle=False) as data:
         if "face_uv" not in data.files:
             raise QualificationError("RUNTIME_V2_CAA_FACE_UV_MISSING")
-        face_uv = np.asarray(data["face_uv"], dtype=np.float32)
+        face_uv = np.asarray(data["face_uv"], dtype=np.float64)
     if face_uv.shape != (len(mesh.faces), 3, 2):
         raise QualificationError("RUNTIME_V2_FACE_UV_TOPOLOGY_DRIFT")
 
@@ -213,7 +213,7 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
         times = np.asarray([frame.time_seconds for frame in clip.frames], dtype=np.float64)
         positions = np.zeros(
             (len(clip.frames), len(vertex_ids), 3),
-            dtype=np.float32,
+            dtype=np.float64,
         )
         for frame_index, frame in enumerate(clip.frames):
             by_id = {
@@ -224,7 +224,7 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
                 raise QualificationError("RUNTIME_V2_DYNAMIC_VERTEX_ID_SET_DRIFT")
             positions[frame_index] = np.asarray(
                 [by_id[vertex_id] for vertex_id in vertex_ids],
-                dtype=np.float32,
+                dtype=np.float64,
             )
         prefix = f"clip_{clip_index}"
         arrays[f"{prefix}_times"] = times
@@ -302,6 +302,7 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
             "relighting": False,
             "playback_sampling_contract": "SEALED_FRAME_INDEX_ONLY",
             "host_interpolation_authorized": False,
+            "geometry_uv_position_precision": "IEEE754_FLOAT64",
         },
     )
     projection = replace(

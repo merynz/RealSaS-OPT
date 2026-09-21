@@ -170,11 +170,23 @@ def _box_sdf(
 
 
 def _field(boxes: tuple[dict, ...]) -> np.ndarray:
+    # Keep the final dense field, but never materialize full X/Y/Z coordinate
+    # volumes. This preserves the exact analytic samples while making R512
+    # feasible on the self-hosted calibration runner.
     axis = np.linspace(BOUNDS[0], BOUNDS[1], R, dtype=np.float32)
-    z, y, x = np.meshgrid(axis, axis, axis, indexing="ij")
-    field = np.full((R, R, R), np.inf, dtype=np.float32)
-    for box in boxes:
-        field = np.minimum(field, _box_sdf(x, y, z, box))
+    yy, xx = np.meshgrid(axis, axis, indexing="ij")
+    field = np.empty((R, R, R), dtype=np.float32)
+    slab = max(1, int(os.environ.get("REALSAS_VF11_Z_SLAB", "8")))
+    for z0 in range(0, R, slab):
+        z1 = min(R, z0 + slab)
+        zz = axis[z0:z1, None, None]
+        x = xx[None, :, :]
+        y = yy[None, :, :]
+        local = np.full((z1 - z0, R, R), np.inf, dtype=np.float32)
+        for box in boxes:
+            local = np.minimum(local, _box_sdf(x, y, zz, box))
+        field[z0:z1] = local
+        del local
     return field
 
 

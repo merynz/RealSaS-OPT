@@ -25,6 +25,7 @@ on:
       - 'tests/research/test_vf11_proof_aware_planner_x3.py'
       - 'tests/research/test_vf11_batched_c0_x5.py'
       - 'tests/research/test_vf11_accelerator_screen_x6.py'
+      - 'tests/research/test_vf11_parallel_cpu_verify_x6b.py'
       - 'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json'
       - 'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json'
       - 'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json'
@@ -111,6 +112,7 @@ jobs:
           python -m py_compile experiments/vf11_certified_adaptive/proof_aware_planner_x3.py
           python -m py_compile experiments/vf11_certified_adaptive/batched_c0_x5.py
           python -m py_compile experiments/vf11_certified_adaptive/accelerator_screen_x6.py
+          python -m py_compile experiments/vf11_certified_adaptive/parallel_cpu_verify_x6b.py
           python -m py_compile tests/research/test_vf11_range_engine_v1.py
           python -m py_compile tests/research/test_vf11_range_engine_c0_v2.py
           python -m py_compile tests/research/test_vf11_range_engine_c0_v3.py
@@ -130,6 +132,7 @@ jobs:
           python -m py_compile tests/research/test_vf11_proof_aware_planner_x3.py
           python -m py_compile tests/research/test_vf11_batched_c0_x5.py
           python -m py_compile tests/research/test_vf11_accelerator_screen_x6.py
+          python -m py_compile tests/research/test_vf11_parallel_cpu_verify_x6b.py
 
       - name: Enforce research-only claim boundary
         shell: bash
@@ -253,11 +256,15 @@ jobs:
           assert x6a['status']=='PREREGISTERED__A100_ACCELERATOR_SCREEN_CPU_VERIFY_CONDITIONAL_FULL_DOMAIN'
           assert x6a['execution_class']=='LONG__USER_RUN_ALL_NOTEBOOK_REQUIRED'
           assert x6a['product_authority_minted'] is False
+          x6b=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X6B_PARALLEL_CPU_VERIFY_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x6b['status']=='PREREGISTERED__PARALLEL_CPU_CONFIRMATION_FOR_X6'
+          assert x6b['full_domain_execution_authorized'] is False
+          assert x6b['product_authority_minted'] is False
           print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
           PY
 
       - name: Run short deterministic/adversarial range tests
-        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py tests/research/test_vf11_directional_regular_c1_v1.py tests/research/test_vf11_profile_c1_handoff_v1.py tests/research/test_vf11_directional_regular_c1_v2.py tests/research/test_vf11_profile_c1_handoff_v2.py tests/research/test_vf11_oriented_crossing_c2_v1.py tests/research/test_vf11_profile_c2_primary_v1.py tests/research/test_vf11_axis_graph_c2_v2.py tests/research/test_vf11_profile_c2_axis_graph_v2.py tests/research/test_vf11_adaptive_empty_graph_c2_v3.py tests/research/test_vf11_resume_d11_c2_v4.py tests/research/test_vf11_sparse_mtet_x0.py tests/research/test_vf11_block_mc_x2.py tests/research/test_vf11_proof_aware_planner_x3.py tests/research/test_vf11_batched_c0_x5.py tests/research/test_vf11_accelerator_screen_x6.py
+        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py tests/research/test_vf11_directional_regular_c1_v1.py tests/research/test_vf11_profile_c1_handoff_v1.py tests/research/test_vf11_directional_regular_c1_v2.py tests/research/test_vf11_profile_c1_handoff_v2.py tests/research/test_vf11_oriented_crossing_c2_v1.py tests/research/test_vf11_profile_c2_primary_v1.py tests/research/test_vf11_axis_graph_c2_v2.py tests/research/test_vf11_profile_c2_axis_graph_v2.py tests/research/test_vf11_adaptive_empty_graph_c2_v3.py tests/research/test_vf11_resume_d11_c2_v4.py tests/research/test_vf11_sparse_mtet_x0.py tests/research/test_vf11_block_mc_x2.py tests/research/test_vf11_proof_aware_planner_x3.py tests/research/test_vf11_batched_c0_x5.py tests/research/test_vf11_accelerator_screen_x6.py tests/research/test_vf11_parallel_cpu_verify_x6b.py
 
       - name: Emit smoke receipt
         shell: bash
@@ -299,6 +306,7 @@ jobs:
             'experiments/vf11_certified_adaptive/block_mc_x2.py',
             'experiments/vf11_certified_adaptive/batched_c0_x5.py',
             'experiments/vf11_certified_adaptive/accelerator_screen_x6.py',
+            'experiments/vf11_certified_adaptive/parallel_cpu_verify_x6b.py',
             'experiments/vf11_certified_adaptive/proof_aware_planner_x3.py',
             'tests/research/test_vf11_range_engine_v1.py',
             'tests/research/test_vf11_range_engine_c0_v2.py',
@@ -318,6 +326,7 @@ jobs:
             'tests/research/test_vf11_block_mc_x2.py',
             'tests/research/test_vf11_batched_c0_x5.py',
             'tests/research/test_vf11_accelerator_screen_x6.py',
+            'tests/research/test_vf11_parallel_cpu_verify_x6b.py',
             'tests/research/test_vf11_proof_aware_planner_x3.py',
             'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json',
             'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json',
@@ -334,7 +343,7 @@ jobs:
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           out={
-            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v21',
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v22',
             'status':'PASS',
             'product_authority_minted':False,
             'files':{p:sha(p) for p in files},

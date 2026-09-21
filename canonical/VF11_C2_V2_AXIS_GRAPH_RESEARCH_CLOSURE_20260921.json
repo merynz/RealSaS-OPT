@@ -5,7 +5,7 @@
   "authority_class": "RESEARCH_CLOSURE_ONLY",
   "source_run_id": "20260921T184516Z",
   "source_repo_commit": "56377b832a79e10278a736c753b3a7c1834508c5",
-  "source_profile_sha256": "PENDING_BIND_FROM_RECEIPT",
+  "source_profile_sha256": "3bc30062524e7a6f25d2d2ea94fd5164b5f80a71579cf88f6464f249ee1447ff",
   "product_authority_minted": false,
   "shipping_certificate_backend": false,
   "witness_execution": false,

@@ -939,6 +939,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         "rest_max_largest_coherent_alpha_hole_fraction",
         "rest_max_alpha_interior_uncovered_fraction",
         "rest_max_exact_depth_ambiguous_fraction",
+        "rest_max_visibility_layer_overflow_pixel_count",
     )
     if any(key not in policy for key in required):
         raise QualificationError("CAA_REST_PROOF_POLICY_INCOMPLETE")
@@ -998,6 +999,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         exact_depth_ambiguous_count = int(
             np.count_nonzero(render.exact_depth_ambiguity)
         )
+        layer_overflow_count = int(np.count_nonzero(render.layer_overflow))
         exact_depth_ambiguous_fraction = (
             0.0
             if visible_count <= 0
@@ -1055,6 +1057,8 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             <= float(policy["rest_max_alpha_interior_uncovered_fraction"])
             and exact_depth_ambiguous_fraction
             <= float(policy["rest_max_exact_depth_ambiguous_fraction"])
+            and layer_overflow_count
+            <= int(policy["rest_max_visibility_layer_overflow_pixel_count"])
         )
         all_pass = all_pass and view_pass
         rows.append(
@@ -1088,6 +1092,11 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                     "exact_depth_ambiguity_passed": (
                         exact_depth_ambiguous_fraction
                         <= float(policy["rest_max_exact_depth_ambiguous_fraction"])
+                    ),
+                    "visibility_layer_overflow_pixel_count": layer_overflow_count,
+                    "visibility_layer_overflow_passed": (
+                        layer_overflow_count
+                        <= int(policy["rest_max_visibility_layer_overflow_pixel_count"])
                     ),
                 },
             )

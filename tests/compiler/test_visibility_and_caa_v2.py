@@ -179,6 +179,10 @@ def test_transparent_front_geometry_reveals_deeper_character_layer():
     center = render.straight_rgba_u8[16, 16]
     assert tuple(map(int, center)) == (0, 255, 0, 255)
     assert int(render.contributing_layer_count[16, 16]) == 1
+    assert int(render.layer_owner_face_index[16, 16, 0]) == 0
+    assert int(render.layer_owner_face_index[16, 16, 1]) == 1
+    assert not bool(render.contributing_layer_mask[16, 16, 0])
+    assert bool(render.contributing_layer_mask[16, 16, 1])
     assert not bool(render.layer_overflow[16, 16])
 
 

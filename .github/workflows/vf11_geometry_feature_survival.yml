@@ -27,6 +27,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       OPENBLAS_NUM_THREADS: '1'
       REALSAS_VF11_OUT: vf11_out
+      REALSAS_VF11_DECODER_RESOLUTION: '256'
     steps:
       - uses: actions/checkout@v4
 
@@ -67,23 +68,35 @@ jobs:
           python - <<'PY'
           import json
           p=json.load(open('vf11_out/VF11_GEOMETRY_FEATURE_SURVIVAL_PANEL.json',encoding='utf-8'))
-          assert p['status']=='MEASURED_SUBJECT_FREE__NO_POLICY_SELECTED'
+          assert p['schema']=='RealSaS.VF11GeometryFeatureSurvivalPanel.v2'
+          assert p['status']=='MEASURED_SUBJECT_FREE__FROZEN_STAGE13_PROFILE_EVALUATED'
           assert p['subject_inputs_used'] is False
           assert p['knight_result_used'] is False
           assert p['mage_result_used'] is False
           assert p['teacher_geometry_used'] is False
-          assert p['policy_selected'] is False
+          assert p['new_threshold_selected'] is False
+          assert p['reference_decoder_resolution']==256
           assert p['decoder_resolution']==256
           assert p['raster_resolution']==1024
           assert len(p['cases'])==20
           assert {c['family'] for c in p['cases']}=={
               'THIN_STRAP','FORK_GAP','CONCAVE_NOTCH','THIN_BLADE','SMALL_COMPONENT'
           }
-          print('VF11_MEASUREMENT_BOUNDARY=PASS')
+          assert any(
+              not c['worst']['all_views_frozen_stage13_profile_passed']
+              for c in p['cases']
+          )
+          strap={
+              c['feature_width_reference_voxels']:c
+              for c in p['cases'] if c['family']=='THIN_STRAP'
+          }
+          assert strap[0.75]['decoder_status']=='NO_ZERO_BRACKET'
+          assert strap[1.0]['decoder_status']=='NO_ZERO_BRACKET'
+          print('VF11_R256_REPRODUCTION_BOUNDARY=PASS')
           PY
 
       - uses: actions/upload-artifact@v4
         with:
-          name: vf11-geometry-feature-survival
+          name: vf11-geometry-feature-survival-r256
           path: vf11_out/
           if-no-files-found: error

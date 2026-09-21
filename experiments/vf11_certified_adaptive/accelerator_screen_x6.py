@@ -13,6 +13,7 @@ can reduce efficiency but cannot create an EMPTY certificate by itself.
 
 from dataclasses import dataclass
 from collections import Counter
+import time
 import numpy as np
 import torch
 
@@ -49,6 +50,9 @@ class X6Result:
     cpu_rejected_count: int
     accelerator_box_eval_count: int
     cpu_verify_box_eval_count: int
+    accelerator_seconds: float
+    cpu_verify_seconds: float
+    refinement_overhead_seconds: float
     terminals: tuple[X6Terminal, ...]
 
 
@@ -108,7 +112,10 @@ def screen_verify_single_regime_roots(
         raise ValueError("INVALID_ROOT_BOXES")
     nroots=len(root_los)
     if nroots==0:
-        return X6Result(tuple(),tuple(),tuple(),tuple(),0,0,0,0,0,0,0,tuple())
+        return X6Result(
+            tuple(),tuple(),tuple(),tuple(),0,0,0,0,0,0,0,
+            0.0,0.0,0.0,tuple()
+        )
 
     frontier_lo=root_los
     frontier_hi=root_his
@@ -120,8 +127,12 @@ def screen_verify_single_regime_roots(
     cpu_reject=0
     accel_evals=0
     cpu_evals=0
+    accel_seconds=0.0
+    cpu_seconds=0.0
+    overhead_seconds=0.0
 
     for depth in range(max_micro_depth+1):
+        t0=time.perf_counter()
         s_lo,s_hi=_bound_batch_chunked_prepared(
             accelerator_p,
             accelerator_planes,
@@ -129,6 +140,7 @@ def screen_verify_single_regime_roots(
             frontier_hi,
             node_batch_size=accelerator_node_batch_size,
         )
+        accel_seconds+=time.perf_counter()-t0
         accel_evals+=len(frontier_lo)
         s_sign=strict_signs(s_lo,s_hi)
         proposal_idx=np.where(s_sign!=0)[0]
@@ -139,6 +151,7 @@ def screen_verify_single_regime_roots(
         cpu_hi_all=np.full(len(frontier_lo),np.nan,dtype=np.float64)
 
         if len(proposal_idx):
+            t0=time.perf_counter()
             c_lo,c_hi=_bound_batch_chunked_prepared(
                 cpu_p,
                 cpu_planes,
@@ -146,6 +159,7 @@ def screen_verify_single_regime_roots(
                 frontier_hi[proposal_idx],
                 node_batch_size=cpu_verify_batch_size,
             )
+            cpu_seconds+=time.perf_counter()-t0
             cpu_evals+=len(proposal_idx)
             cpu_lo_all[proposal_idx]=c_lo
             cpu_hi_all[proposal_idx]=c_hi
@@ -184,10 +198,12 @@ def screen_verify_single_regime_roots(
             final_root=np.empty((0,),dtype=np.int64)
             break
 
+        t0=time.perf_counter()
         alo=frontier_lo[active]
         ahi=frontier_hi[active]
         aroot=frontier_root[active]
         clo,chi,pidx=_split_octants_batch(alo,ahi)
+        overhead_seconds+=time.perf_counter()-t0
         frontier_lo=clo
         frontier_hi=chi
         frontier_root=aroot[pidx]
@@ -218,5 +234,8 @@ def screen_verify_single_regime_roots(
         cpu_rejected_count=int(cpu_reject),
         accelerator_box_eval_count=int(accel_evals),
         cpu_verify_box_eval_count=int(cpu_evals),
+        accelerator_seconds=float(accel_seconds),
+        cpu_verify_seconds=float(cpu_seconds),
+        refinement_overhead_seconds=float(overhead_seconds),
         terminals=tuple(terminals),
     )

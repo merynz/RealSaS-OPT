@@ -1,0 +1,143 @@
+{
+  "schema": "RealSaS.VF11GeometryFeatureSurvivalCalibrationAuthority.v1",
+  "status": "RESULT__R256_GENERAL_NUMERICAL_FLOOR_FALSIFIED__R384_REQUERY_SWEEP_AUTHORIZED",
+  "date_utc": "2026-09-21",
+  "authority": "SUBJECT_FREE_GEOMETRY_FEATURE_SURVIVAL__NO_KNIGHT_OR_MAGE_INPUT",
+  "purpose": "Supersede the smooth-sphere/ellipsoid-only interpretation of the 256^3 Stage13 decoder numerical floor with explicit thin-feature, negative-space, concavity and small-component evidence.",
+  "supersedes_claim_scope": {
+    "authority_path": "canonical/STAGE13_GEOMETRY_GATE_V2_CALIBRATION_AUTHORITY_20260919.json",
+    "superseded_claim": "p999_above_numerical_floor may not be interpreted as general feature-survival adequacy at decoder_resolution=256",
+    "historical_sphere_ellipsoid_measurements_preserved": true,
+    "selected_stage13_thresholds_preserved": true
+  },
+  "measurement": {
+    "workflow_run_id": 35573427651,
+    "workflow_job_id": 106249814969,
+    "source_commit": "4e13bd3144795262e789cb4e0fd569c198e72c56",
+    "artifact_id": 10627558400,
+    "artifact_sha256": "661a1412f4941ff0a811b25d996c75df7275a69a689f2a28319f6bed88594a86",
+    "result_sha256": "19a98abfeb138ccef74fe7cbd83c428f66243592a8082365f1e223112c437de6",
+    "result_bytes": 159091,
+    "decoder": "RealSaS.ZeroSurfaceDecoder.MarchingCubes.v3",
+    "decoder_resolution": 256,
+    "raster_resolution": 1024,
+    "skimage_version": "0.25.2",
+    "reference_voxel_world": 0.00784313725490196,
+    "pixels_per_reference_voxel": 4.015686274509804,
+    "case_count": 20,
+    "view_measurement_count": 160
+  },
+  "frozen_stage13_profile_reused_without_relaxation": {
+    "min_recall": 0.999,
+    "min_precision": 0.999,
+    "max_largest_coherent_hole_fraction": 0.00025,
+    "max_interior_uncovered_fraction": 0.0005,
+    "min_component_recall": 0.999,
+    "component_min_foreground_fraction": 0,
+    "max_silhouette_edge_p95_px": 0.5
+  },
+  "decisive_results": {
+    "THIN_STRAP": {
+      "0.75_reference_voxel": {
+        "decoder_status": "NO_ZERO_BRACKET",
+        "min_feature_recall": 0
+      },
+      "1.0_reference_voxel": {
+        "decoder_status": "NO_ZERO_BRACKET",
+        "min_feature_recall": 0
+      },
+      "1.5_reference_voxel": {
+        "decoder_status": "EXTRACTED",
+        "min_feature_recall": 0.9863188405797102
+      },
+      "2.0_reference_voxel": {
+        "decoder_status": "EXTRACTED",
+        "min_feature_recall": 0.9863768115942029
+      }
+    },
+    "FORK_GAP": {
+      "0.75_reference_voxel": {
+        "min_gap_preservation": 0,
+        "max_silhouette_edge_p95_px": 55
+      },
+      "1.0_reference_voxel": {
+        "min_gap_preservation": 0.0025706940874036244,
+        "max_silhouette_edge_p95_px": 55
+      },
+      "1.5_reference_voxel": {
+        "min_gap_preservation": 0.9965724078834619,
+        "max_silhouette_edge_p95_px": 2
+      },
+      "2.0_reference_voxel": {
+        "min_gap_preservation": 0.9980719794344473,
+        "max_silhouette_edge_p95_px": 1
+      }
+    },
+    "CONCAVE_NOTCH": {
+      "0.75_reference_voxel": {
+        "min_gap_preservation": 0.014925373134328401,
+        "max_silhouette_edge_p95_px": 112.75
+      },
+      "1.0_reference_voxel": {
+        "min_gap_preservation": 0.02238805970149249,
+        "max_silhouette_edge_p95_px": 112
+      },
+      "1.5_reference_voxel": {
+        "min_gap_preservation": 1,
+        "max_silhouette_edge_p95_px": 2
+      },
+      "2.0_reference_voxel": {
+        "min_gap_preservation": 1,
+        "max_silhouette_edge_p95_px": 2
+      }
+    },
+    "THIN_BLADE": {
+      "0.75_reference_voxel": {
+        "min_feature_recall": 0.6617647058823529
+      },
+      "1.0_reference_voxel": {
+        "min_feature_recall": 0.7450980392156863
+      },
+      "1.5_reference_voxel": {
+        "min_feature_recall": 0.8300653594771242
+      },
+      "2.0_reference_voxel": {
+        "min_feature_recall": 0.9870689655172413
+      }
+    },
+    "SMALL_COMPONENT": {
+      "0.75_reference_voxel": {
+        "min_feature_recall": 0
+      },
+      "1.0_reference_voxel": {
+        "min_feature_recall": 0
+      },
+      "1.5_reference_voxel": {
+        "min_feature_recall": 0.4444444444444444
+      },
+      "2.0_reference_voxel": {
+        "min_feature_recall": 0.59375
+      }
+    }
+  },
+  "conclusion": {
+    "r256_general_feature_survival_adequacy": false,
+    "global_aggregate_metrics_are_sufficient_for_sparse_feature_survival": false,
+    "direct_component_and_edge_gates_remain_required": true,
+    "higher_resolution_is_real_requery_capable": true,
+    "evidence": "SceneFirstSignedGeometryV3 exposes arbitrary-P continuous signed-field queries and dense_signed_grid_v3 is resolution-parametric; higher-resolution decode can therefore be a checkpoint-bound re-query rather than mesh interpolation.",
+    "next_authorized_resolution": 384,
+    "threshold_relaxation_authorized": false,
+    "knight_witness_authorized": false
+  },
+  "next_experiment": {
+    "name": "VF11_R384_PHYSICAL_FEATURE_REQUERY_SWEEP",
+    "rule": "Hold world-space feature widths fixed to the R256 reference-voxel ladder while increasing signed-field query resolution to 384. Evaluate the unchanged frozen Stage13 P999 profile. If any required control remains below profile, R512 may be opened without relaxing thresholds.",
+    "forbidden": [
+      "KNIGHT_RESULT",
+      "MAGE_RESULT",
+      "SUBJECT_ID",
+      "TEACHER_GEOMETRY"
+    ]
+  }
+}

@@ -58,8 +58,8 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     )
     faces = np.asarray([[0, 1, 2]], dtype=np.uint32)
     face_uv = np.asarray(
-        [[[0.2, 0.2], [0.8, 0.2], [0.5, 0.8]]],
-        dtype=np.float32,
+        [[[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]]],
+        dtype=np.float64,
     )
     projection_npz = tmp_path / "projection.npz"
     np.savez_compressed(

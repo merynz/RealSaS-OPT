@@ -1,0 +1,31 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX3ResearchClosure.v1",
+  "date_utc": "2026-09-21",
+  "status": "X3_RESEARCH_CLOSED__FULL_DOMAIN_COST_PREFLIGHT_AUTHORIZED",
+  "evidence": {
+    "x0": "PASS__SPARSE_FREUDENTHAL_MTET_EQUIVALENCE_BASELINE",
+    "x1": "DEPTH_DOMINANT__MC_RETAINS_BASELINE__LOCAL_SUPPORT_ANOMALY_ISOLATED",
+    "x1b": "NO_MATERIAL_KNOT_EFFECT__KNOT_CROSSING_NOT_PRIMARY_ANOMALY_CAUSE",
+    "x2": "PASS__BLOCKWISE_LEWINER_MC_EQUIVALENCE",
+    "x3d": "PASS__LOCAL_D13_SAMPLED_LATTICE_EQUIVALENCE_WITH_CERTIFIED_EMPTY_PRUNING"
+  },
+  "selected_extractor_direction": "Retain skimage Lewiner marching cubes semantics; separate continuous-field proof/discovery from sampled-lattice contouring; prune only regions with strict-sign certificates; query all other regions on the chosen global lattice; weld block output by canonical global lattice-edge identity.",
+  "local_efficiency_evidence": {
+    "panel": "12 frozen corrected-C1 primary d8 roots",
+    "d13_dense_corner_queries": 431244,
+    "d13_active_corner_queries_after_certified_pruning": 131471,
+    "query_reduction_fraction": 0.6951354685514466
+  },
+  "scientific_limits": [
+    "The 69.5% reduction is local-panel evidence and must not be extrapolated to the full domain without a separate preflight.",
+    "ACTIVE_UNKNOWN and ACTIVE_ZERO_EXISTS regions are query-active; same-sign samples never create emptiness authority.",
+    "No global continuous zero-set completeness claim is made.",
+    "Ordinary float64 proof bounds remain research-only, not a shipping certificate backend.",
+    "No Knight witness, Stage13 product pass, or product authority has been minted."
+  ],
+  "next": "X4_FULL_DOMAIN_ADAPTIVE_DISCOVERY_COST_AND_MEMORY_PREFLIGHT_ONLY",
+  "full_domain_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

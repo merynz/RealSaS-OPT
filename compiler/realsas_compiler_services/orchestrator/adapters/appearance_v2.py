@@ -628,13 +628,46 @@ def bake_complete_appearance_stage(ctx: dict) -> dict:
             )
         )
 
+    provenance_stack = np.stack(provenance_atlases, axis=0).astype(np.uint8)
+    source_view_stack = np.stack(source_view_atlases, axis=0).astype(np.int16)
+    target_view = np.broadcast_to(
+        np.arange(8, dtype=np.int16)[:, None, None],
+        source_view_stack.shape,
+    )
+    direct_mask = provenance_stack == CAA_PROVENANCE["DIRECT_SOURCE"]
+    other_mask = provenance_stack == CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
+    harmonic_mask = provenance_stack == CAA_PROVENANCE["COMPILED_LOCAL_HARMONIC"]
+    padding_mask = provenance_stack == 255
+    if np.any(direct_mask & (source_view_stack != target_view)):
+        raise QualificationError("CAA_BAKE_DIRECT_SOURCE_VIEW_IDENTITY_DRIFT")
+    if np.any(
+        other_mask
+        & (
+            (source_view_stack < 0)
+            | (source_view_stack >= 8)
+            | (source_view_stack == target_view)
+        )
+    ):
+        raise QualificationError("CAA_BAKE_OTHER_VIEW_IDENTITY_DRIFT")
+    if np.any(harmonic_mask & (source_view_stack != -2)):
+        raise QualificationError("CAA_BAKE_HARMONIC_SOURCE_VIEW_IDENTITY_DRIFT")
+    if np.any(padding_mask & (source_view_stack != np.iinfo(np.int16).min)):
+        raise QualificationError("CAA_BAKE_SOURCE_VIEW_PADDING_DRIFT")
+    if np.any(
+        (~padding_mask)
+        & (~direct_mask)
+        & (~other_mask)
+        & (~harmonic_mask)
+    ):
+        raise QualificationError("CAA_BAKE_PROVENANCE_CLASS_INVALID")
+
     uv_path = root / "surface_uv.npz"
     uv_sha = _save_npz(uv_path, face_uv=np.asarray(reference_uv, dtype=np.float64))
     provenance_path = root / "provenance_atlas.npz"
     provenance_sha = _save_npz(
         provenance_path,
-        provenance=np.stack(provenance_atlases, axis=0).astype(np.uint8),
-        source_view=np.stack(source_view_atlases, axis=0).astype(np.int16),
+        provenance=provenance_stack,
+        source_view=source_view_stack,
     )
 
     asset = CompleteAppearanceAssetIR(

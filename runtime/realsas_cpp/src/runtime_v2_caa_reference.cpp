@@ -347,6 +347,12 @@ int main(int argc,char** argv) {
             throw std::runtime_error("PLAYBACK_SAMPLING_CONTRACT_INVALID");
         if(manifest.at("host_interpolation_authorized")!="0")
             throw std::runtime_error("HOST_INTERPOLATION_MUST_BE_FORBIDDEN");
+        if(manifest.at("presentation_state_execution_authorized")!="0")
+            throw std::runtime_error("PRESENTATION_STATE_EXECUTION_MUST_BE_FORBIDDEN");
+        if(manifest.at("clipping_authorized")!="0")
+            throw std::runtime_error("RUNTIME_CLIPPING_MUST_BE_FORBIDDEN");
+        if(manifest.at("tint_order_visibility_authorized")!="0")
+            throw std::runtime_error("RUNTIME_TINT_ORDER_VISIBILITY_MUST_BE_FORBIDDEN");
         if(manifest.at("texture_sampling_contract")!="BASE_LEVEL_BILINEAR_LINEAR_PM_ONLY")
             throw std::runtime_error("TEXTURE_SAMPLING_CONTRACT_INVALID");
         if(manifest.at("mip_generation_authorized")!="0")

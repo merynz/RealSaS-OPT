@@ -5,9 +5,11 @@ from __future__ import annotations
 import math
 
 import numpy as np
-from scipy.spatial import cKDTree
-
 from .appearance_authority_v2 import CAA_PROVENANCE
+from .appearance_completion_v2 import (
+    bounded_surface_harmonic_fill,
+    surface_sample_neighbors,
+)
 from .appearance_bake_v2 import straight_rgba_to_premultiplied_float
 from .types import QualificationError
 
@@ -65,6 +67,48 @@ def _structured_band_mask(
     return mask
 
 
+def _bounded_edge_holdout_mask(
+    *,
+    candidate_mask: np.ndarray,
+    neighbors: tuple[tuple[int, ...], ...],
+    max_region_samples: int,
+    max_graph_hops: int,
+) -> np.ndarray:
+    candidate = np.asarray(candidate_mask, dtype=bool)
+    selected = np.zeros(len(candidate), dtype=bool)
+    blocked = np.zeros(len(candidate), dtype=bool)
+    for seed in np.flatnonzero(candidate):
+        seed = int(seed)
+        if blocked[seed] or selected[seed]:
+            continue
+        patch = []
+        queue = [(seed, 0)]
+        visited = {seed}
+        cursor = 0
+        while cursor < len(queue) and len(patch) < int(max_region_samples):
+            node, depth = queue[cursor]
+            cursor += 1
+            if not candidate[node] or blocked[node]:
+                continue
+            patch.append(node)
+            if depth + 1 >= int(max_graph_hops):
+                continue
+            for nxt in neighbors[node]:
+                if nxt not in visited:
+                    visited.add(int(nxt))
+                    queue.append((int(nxt), depth + 1))
+        if not patch:
+            continue
+        selected[patch] = True
+        # Keep selected regions disconnected so every withheld region respects
+        # the same bounded completion contract as shipping.
+        for node in patch:
+            for nxt in neighbors[node]:
+                if not selected[nxt]:
+                    blocked[nxt] = True
+    return selected
+
+
 def structured_holdout_metrics(
     *,
     direct_valid: np.ndarray,
@@ -72,13 +116,19 @@ def structured_holdout_metrics(
     source_xy: np.ndarray,
     sample_positions: np.ndarray,
     sample_component_index: np.ndarray,
+    sample_face_index: np.ndarray,
+    face_count: int,
+    tile_resolution: int,
     band_fraction: float,
+    max_region_samples: int,
+    max_graph_hops: int,
 ) -> dict:
     direct_valid = np.asarray(direct_valid, dtype=bool)
     direct_rgba = np.asarray(direct_rgba, dtype=np.uint8)
     source_xy = np.asarray(source_xy, dtype=np.float32)
     positions = np.asarray(sample_positions, dtype=np.float64)
     component = np.asarray(sample_component_index, dtype=np.int32)
+    face_index = np.asarray(sample_face_index, dtype=np.int32)
     if direct_valid.ndim != 2 or direct_valid.shape[0] != 8:
         raise QualificationError("CAA_HOLDOUT_DIRECT_VALID_SHAPE_INVALID")
     n = direct_valid.shape[1]
@@ -87,20 +137,38 @@ def structured_holdout_metrics(
         or source_xy.shape != (8, n, 2)
         or positions.shape != (n, 3)
         or component.shape != (n,)
+        or face_index.shape != (n,)
     ):
         raise QualificationError("CAA_HOLDOUT_ARRAY_SHAPE_DRIFT")
     fraction = float(band_fraction)
     if not math.isfinite(fraction) or not (0.02 <= fraction <= 0.5):
         raise QualificationError("CAA_HOLDOUT_BAND_FRACTION_INVALID")
+    if int(face_count) <= 0 or int(tile_resolution) < 4:
+        raise QualificationError("CAA_HOLDOUT_SURFACE_POLICY_INVALID")
+    if n != int(face_count) * int(tile_resolution) * (int(tile_resolution) + 1) // 2:
+        raise QualificationError("CAA_HOLDOUT_FACE_SAMPLE_ACCOUNTING_DRIFT")
+
+    neighbors = surface_sample_neighbors(
+        positions=positions,
+        face_count=int(face_count),
+        tile_resolution=int(tile_resolution),
+    )
+    sample_component = tuple(str(int(value)) for value in component)
 
     errors = []
     per_view = []
     for target in range(8):
-        holdout = _structured_band_mask(
+        edge_band = _structured_band_mask(
             direct_valid[target],
             source_xy[target],
             view_index=target,
             band_fraction=fraction,
+        )
+        holdout = _bounded_edge_holdout_mask(
+            candidate_mask=edge_band,
+            neighbors=neighbors,
+            max_region_samples=int(max_region_samples),
+            max_graph_hops=int(max_graph_hops),
         )
         held = np.flatnonzero(holdout)
         if len(held) == 0:
@@ -111,43 +179,40 @@ def structured_holdout_metrics(
 
         available = direct_valid[target] & ~holdout
         predicted = np.zeros((n, 4), dtype=np.uint8)
+        provenance = np.full(n, 255, dtype=np.uint8)
+        source_view = np.full(n, -1, dtype=np.int16)
         has = available.copy()
         predicted[available] = direct_rgba[target, available]
+        provenance[available] = CAA_PROVENANCE["DIRECT_SOURCE"]
+        source_view[available] = target
 
         for donor in _view_order(target):
             take = (~has) & direct_valid[donor]
             if np.any(take):
                 predicted[take] = direct_rgba[donor, take]
+                provenance[take] = CAA_PROVENANCE["OTHER_VIEW_SOURCE"]
+                source_view[take] = donor
                 has[take] = True
 
-        for component_id in np.unique(component):
-            need = holdout & ~has & (component == component_id)
-            if not np.any(need):
-                continue
-            donors = has & (component == component_id)
-            if not np.any(donors):
-                continue
-            donor_indices = np.flatnonzero(donors)
-            query_indices = np.flatnonzero(need)
-            tree = cKDTree(positions[donor_indices])
-            _distance, nearest = tree.query(positions[query_indices], k=1)
-            predicted[query_indices] = predicted[
-                donor_indices[np.asarray(nearest, dtype=np.int64)]
-            ]
-            has[query_indices] = True
-
-        need = holdout & ~has
-        if np.any(need):
-            donors = np.flatnonzero(has)
-            if len(donors) == 0:
-                raise QualificationError("CAA_HOLDOUT_NO_AVAILABLE_DONOR")
-            query = np.flatnonzero(need)
-            tree = cKDTree(positions[donors])
-            _distance, nearest = tree.query(positions[query], k=1)
-            predicted[query] = predicted[
-                donors[np.asarray(nearest, dtype=np.int64)]
-            ]
-            has[query] = True
+        unresolved = holdout & ~has
+        completion_stats = {
+            "region_count": 0,
+            "maximum_region_samples": 0,
+            "maximum_graph_hops": 0,
+        }
+        if np.any(unresolved):
+            completion_stats = bounded_surface_harmonic_fill(
+                rgba=predicted,
+                provenance=provenance,
+                source_view=source_view,
+                missing=unresolved,
+                observed_mask=has,
+                sample_component=sample_component,
+                neighbors=neighbors,
+                max_region_samples=int(max_region_samples),
+                max_graph_hops=int(max_graph_hops),
+            )
+            has[held] = provenance[held] != 255
 
         if not np.all(has[held]):
             raise QualificationError("CAA_HOLDOUT_PREDICTION_NOT_TOTAL")
@@ -162,19 +227,23 @@ def structured_holdout_metrics(
                 "holdout_sample_count": int(len(held)),
                 "mean_rgba_l1": float(np.mean(error)),
                 "p95_rgba_l1": float(np.quantile(error, 0.95)),
+                "p99_rgba_l1": float(np.quantile(error, 0.99)),
+                "max_rgba_l1": float(np.max(error)),
+                "harmonic_completion": dict(completion_stats),
             }
         )
 
     values = np.asarray(errors, dtype=np.float64)
     return {
-        "mode": "TARGET_VIEW_SILHOUETTE_ADJACENT_EDGE_BAND_V2",
+        "mode": "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V3",
         "band_fraction": fraction,
         "sample_count": int(len(values)),
         "mean_rgba_l1": float(np.mean(values)) if len(values) else 0.0,
         "p95_rgba_l1": float(np.quantile(values, 0.95)) if len(values) else 0.0,
+        "p99_rgba_l1": float(np.quantile(values, 0.99)) if len(values) else 0.0,
+        "max_rgba_l1": float(np.max(values)) if len(values) else 0.0,
         "per_view": per_view,
     }
-
 
 def cross_view_source_compatibility_metrics(
     *,

@@ -75,6 +75,7 @@ def bounded_surface_harmonic_fill(
     missing: np.ndarray,
     sample_component: tuple[str, ...],
     neighbors: tuple[tuple[int, ...], ...],
+    observed_mask: np.ndarray | None = None,
     max_region_samples: int,
     max_graph_hops: int,
 ) -> dict:
@@ -88,7 +89,13 @@ def bounded_surface_harmonic_fill(
     if max_region_samples <= 0 or max_graph_hops <= 0:
         raise QualificationError("CAA_HARMONIC_POLICY_INVALID")
 
-    observed = ~missing
+    observed = (
+        ~missing
+        if observed_mask is None
+        else np.asarray(observed_mask, dtype=bool).copy()
+    )
+    if observed.shape != missing.shape or np.any(observed & missing):
+        raise QualificationError("CAA_HARMONIC_OBSERVED_MASK_INVALID")
     seen = np.zeros(len(missing), dtype=bool)
     region_count = 0
     max_region_seen = 0

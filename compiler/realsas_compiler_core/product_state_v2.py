@@ -6,6 +6,8 @@ from dataclasses import asdict, dataclass, field, replace
 import math
 from typing import Any
 
+import numpy as np
+
 from .hashing import content_sha256
 from .product_authority_v1 import (
     PresentationAttachmentIR,

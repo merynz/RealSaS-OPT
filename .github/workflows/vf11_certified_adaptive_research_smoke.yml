@@ -53,6 +53,8 @@ on:
       - 'canonical/VF11_EXTRACTOR_TRANSITION_X3_PREREGISTRATION_20260921.json'
       - 'canonical/VF11_EXTRACTOR_TRANSITION_X3_PREREGISTRATION_V2_20260921.json'
       - 'canonical/VF11_LAYERNORM_EPS_IMPACT_REPLAY_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X3A_UNKNOWN_DEPTH_DIAGNOSTIC_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_EXTRACTOR_TRANSITION_X3A_UNKNOWN_DEPTH_DIAGNOSTIC_RESULT_20260921.json'
       - '.github/workflows/vf11_certified_adaptive_research_smoke.yml'
   workflow_dispatch:
 
@@ -228,6 +230,11 @@ jobs:
           assert x3v2['status']=='PREREGISTERED__PROOF_AWARE_D13_NARROW_BAND_PLANNER__SEMANTIC_CORRECTION'
           assert x3v2['product_authority_minted'] is False
           assert x3v2['shipping_extractor_selected'] is False
+          x3a=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X3A_UNKNOWN_DEPTH_DIAGNOSTIC_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x3a['status']=='PREREGISTERED__TWO_UNKNOWN_LEAF_D14_D16_LATTICE_DIAGNOSTIC'
+          x3ar=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X3A_UNKNOWN_DEPTH_DIAGNOSTIC_RESULT_20260921.json',encoding='utf-8'))
+          assert x3ar['status']=='NO_SAMPLED_SURFACE_THROUGH_D16__PROOF_UNKNOWN_REMAINS'
+          assert x3ar['product_authority_minted'] is False
           print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
           PY
 
@@ -238,7 +245,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p vf11_cert_smoke
+          mkdir -p vf11_cert_smoke/source
+          cp experiments/vf11_certified_adaptive/range_engine_c0_v3.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/directional_regular_c1_v1.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/directional_regular_c1_v2.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/oriented_crossing_c2_v1.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/axis_graph_c2_v2.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/paired_profile_c0_v3.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/adaptive_empty_graph_c2_v3.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/resume_d11_c2_v4.py vf11_cert_smoke/source/
           python - <<'PY'
           import hashlib,json
           from pathlib import Path
@@ -293,7 +308,7 @@ jobs:
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           out={
-            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v16',
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v17',
             'status':'PASS',
             'product_authority_minted':False,
             'files':{p:sha(p) for p in files},

@@ -1,0 +1,35 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX3CTargetedProofRefinementPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__ONE_UNKNOWN_D12_LEAF_TO_D13_PROOF_REFINEMENT",
+  "authority_class": "RESEARCH_PROOF_REFINEMENT_ONLY",
+  "source_x3b_artifact_sha256": "a6cf61a47261052fd496268df7e5f5b8d2c9f0834feaa7ea7f91915c67e9970f",
+  "target": {
+    "root_anchor_id": 62,
+    "parent_path": "1157",
+    "parent_absolute_depth": 12,
+    "parent_state": "UNRESOLVED",
+    "parent_c0_state": "UNKNOWN",
+    "parent_c0_lower": -0.0022157028501316365,
+    "parent_c0_upper": 1.1986355764638523e-06
+  },
+  "refinement": {
+    "target_absolute_depth": 13,
+    "child_count": 8,
+    "c0_micro_depth": 2,
+    "c1_micro_depth": 2,
+    "face_micro_depth": 2,
+    "empirical_checks": true
+  },
+  "frozen_decision": {
+    "empirical_contradiction_count_gt_0": "FAIL__PROOF_ENGINE_CONTRADICTION",
+    "unresolved_child_count_eq_0": "TARGETED_D13_PROOF_CLOSED__X3_LOCAL_CONTINUOUS_COMPLETENESS_CLOSED",
+    "unresolved_child_count_gt_0": "KEEP_ONLY_REMAINING_CHILDREN_ACTIVE__CONSIDER_MICRO_DEPTH_TIGHTENING_BEFORE_ANY_D14_PROOF_SPLIT"
+  },
+  "claim_boundary": "Exactly one d12 proof-UNKNOWN leaf is refined. No global C2 replay, no full-domain traversal, no shipping/product/witness authority.",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_performed": false
+}

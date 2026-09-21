@@ -321,6 +321,7 @@ def compile_caa_stage(ctx: dict) -> dict:
         foreground_mask_by_view=masks,
         tile_resolution=int(compile_policy["tile_resolution"]),
         source_lock_policy=prereg.source_lock_policy,
+        completion_quality_policy=prereg.completion_quality_policy,
     )
     component_ids = tuple(result["component_ids"])
     component_index = {component_id: index for index, component_id in enumerate(component_ids)}
@@ -363,11 +364,8 @@ def compile_caa_stage(ctx: dict) -> dict:
         total_sample_count=total,
         direct_source_sample_count=int(counts["DIRECT_SOURCE"]),
         other_view_source_sample_count=int(counts["OTHER_VIEW_SOURCE"]),
-        compiled_nearest_surface_sample_count=int(
-            counts["COMPILED_NEAREST_SURFACE"]
-        ),
-        compiled_global_surface_sample_count=int(
-            counts["COMPILED_GLOBAL_SURFACE"]
+        compiled_local_harmonic_sample_count=int(
+            counts["COMPILED_LOCAL_HARMONIC"]
         ),
         compile_hash="",
         metadata={
@@ -376,6 +374,9 @@ def compile_caa_stage(ctx: dict) -> dict:
             "runtime_generation_used": False,
             "geometry_mutated": False,
             "visibility_authority": "RealSaS.VisibilityContract.v2",
+            "completion_mode": "BOUNDED_CANONICAL_SURFACE_HARMONIC",
+            "completion_rows": list(result["completion_rows"]),
+            "global_surface_fill_used": False,
         },
     )
     artifact = replace(artifact, compile_hash=caa_compile_hash(artifact))

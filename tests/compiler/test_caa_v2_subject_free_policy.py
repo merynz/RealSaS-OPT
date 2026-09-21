@@ -15,6 +15,7 @@ from compiler.realsas_compiler_core.appearance_compile_v2 import (
 from compiler.realsas_compiler_core.appearance_color_v2 import (
     premultiplied_linear_to_straight_srgb_u8,
     source_sample_roundtrip_pm_error,
+    straight_srgb_rgba_u8_to_premultiplied_linear,
 )
 from compiler.realsas_compiler_core.appearance_completion_v2 import (
     bounded_surface_harmonic_fill,
@@ -345,25 +346,38 @@ def test_cross_view_compatibility_measures_same_canonical_source_without_requiri
 
 def test_source_pm_transport_roundtrip_has_subject_free_numerical_ceiling():
     p = _policy()["completion_quality_policy"]
-    rgb = np.asarray([0, 1, 8, 16, 32, 64, 96, 128, 160, 192, 224, 255], dtype=np.uint8)
-    alpha = np.asarray([0, 1, 2, 4, 8, 16, 32, 64, 96, 128, 192, 255], dtype=np.uint8)
-    rows = []
+    colors = (
+        (0, 0, 0),
+        (255, 255, 255),
+        (255, 0, 0),
+        (0, 255, 0),
+        (0, 0, 255),
+        (16, 16, 16),
+        (240, 240, 240),
+        (255, 128, 0),
+        (4, 64, 250),
+    )
+    alphas = (0, 1, 2, 4, 8, 16, 32, 64, 128, 192, 255)
+    weights = (0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875)
     truth = []
-    for r in rgb:
-        for g in rgb[::2]:
-            for b in rgb[::3]:
-                for a in alpha:
-                    pm = np.zeros(4, dtype=np.float64)
-                    aa = float(a) / 255.0
-                    encoded = np.asarray([r, g, b], dtype=np.float64) / 255.0
-                    linear = np.where(
-                        encoded <= 0.04045,
-                        encoded / 12.92,
-                        ((encoded + 0.055) / 1.055) ** 2.4,
+    for rgb0 in colors:
+        for rgb1 in colors:
+            for alpha0 in alphas:
+                for alpha1 in alphas:
+                    endpoints = np.asarray(
+                        [
+                            (*rgb0, alpha0),
+                            (*rgb1, alpha1),
+                        ],
+                        dtype=np.uint8,
                     )
-                    pm[:3] = linear * aa
-                    pm[3] = aa
-                    truth.append(pm)
+                    pm = straight_srgb_rgba_u8_to_premultiplied_linear(
+                        endpoints
+                    )
+                    for weight in weights:
+                        truth.append(
+                            (1.0 - weight) * pm[0] + weight * pm[1]
+                        )
     truth = np.asarray(truth, dtype=np.float64)
     transport = premultiplied_linear_to_straight_srgb_u8(truth)
     error = source_sample_roundtrip_pm_error(transport, truth)

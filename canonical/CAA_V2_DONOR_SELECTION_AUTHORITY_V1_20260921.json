@@ -1,0 +1,47 @@
+{
+  "schema": "RealSaS.CAADonorSelectionAuthority.v1",
+  "status": "REPAIR_IMPLEMENTED__EXACT_HEAD_CI_PENDING",
+  "date_utc": "2026-09-21",
+  "finding_id": "VF-37",
+  "authority": "OTHER_VIEW_SOURCE_DONOR_SELECTION",
+  "historical_problem": "Historical red-team found that donor selection could be interpreted as circular view-index proximity rather than source support quality.",
+  "shipping_rule": {
+    "primary_score": "ABS_FACE_NORMAL_DOT_CAMERA_FORWARD",
+    "larger_score_wins": true,
+    "circular_view_index_is_quality_score": false,
+    "circular_order_role": "DETERMINISTIC_TIE_ITERATION_ONLY",
+    "target_view_excluded_from_other_view_selection": true,
+    "motion_participates_in_donor_selection": false
+  },
+  "implementation": {
+    "source": "compiler/realsas_compiler_core/appearance_compile_v2.py",
+    "function": "select_other_view_donor_by_support",
+    "compile_consumer": "compile_deterministic_caa"
+  },
+  "adversarial_control": {
+    "target_view": 0,
+    "candidates": {
+      "V1": {
+        "circular_relation": "NEAREST",
+        "support": 0.2
+      },
+      "V4": {
+        "circular_relation": "FARTHEST",
+        "support": 0.9
+      }
+    },
+    "required_winner": "V4",
+    "tie_control": "When V1 and V4 are both 0.90, deterministic cyclic order selects V1; this tie rule is not a quality ranking."
+  },
+  "tests": [
+    "tests/compiler/test_visibility_and_caa_v2.py::test_other_view_donor_prefers_geometric_support_over_circular_proximity"
+  ],
+  "contamination_checks": {
+    "knight_result_used": false,
+    "mage_result_used": false,
+    "subject_identity_used": false,
+    "learned_donor_score_used": false,
+    "threshold_tuning_used": false
+  },
+  "claim_boundary": "This qualifies deterministic geometric support ranking among already source-valid candidate views. It does not claim perceptual semantic equivalence across artist-redesigned views."
+}

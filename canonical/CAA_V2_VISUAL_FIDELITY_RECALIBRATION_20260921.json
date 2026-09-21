@@ -83,8 +83,8 @@
       "owner": "Visibility",
       "finding": "V2 exact-depth ties are resolved by sealed face index and no near-depth ambiguity/z-fighting gate exists. Determinism therefore does not guarantee artist-authoritative layer order or temporal stability.",
       "required_closure": "Add exact/near-depth overlap ambiguity evidence and either fail ambiguous physical-depth states or mint an explicit qualified presentation tie authority with a narrowly scoped contract.",
-      "repair": "Reference visibility now exposes runner-up depth/owner and exact-depth ambiguity. Rest and Stage45 hard-fail exact coplanar overlap while face-index-only tie semantics remain active.",
-      "status": "PARTIALLY_REPAIRED__NEAR_DEPTH_CALIBRATION_OPEN"
+      "repair": "The hidden depth comparator epsilon is now explicit authority: VISIBILITY_DEPTH_EQUIVALENCE_EPSILON=1e-12 camera-Z with IEEE754_FLOAT64_SOFTWARE_SORT and no hardware-Z quantization. Depth deltas inside/equal to epsilon remain ambiguity evidence and are hard-failed by the existing zero exact-depth budget; deltas outside epsilon are ordered by canonical physical depth. Subject-free controls bracket 0.5x versus +/-2x epsilon, and RSS V2 seals both the float64 depth-buffer contract and epsilon; native tamper adversaries reject either contract being changed. Independent artist-authored draw order remains outside first-witness scope under VF-20 rather than being smuggled in as an arbitrary near-depth threshold.",
+      "status": "REPAIRED__FLOAT64_DEPTH_EQUIVALENCE_EXPLICIT__V9_CI_PENDING"
     },
     {
       "id": "VF-10",

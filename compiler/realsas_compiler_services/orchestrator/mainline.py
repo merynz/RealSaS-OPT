@@ -384,10 +384,9 @@ def validate_witness_authorization(plan: dict | None = None) -> str:
             "V2_WITNESS_USER_APPROVAL_STATE_INVALID:"
             + str(seal.get("user_approval_state") or "UNKNOWN")
         )
-    if seal.get("knight_started") is not False:
-        raise RuntimeError(
-            "V2_WITNESS_KNIGHT_ALREADY_STARTED_OR_STATE_INVALID"
-        )
+    # Run progress is owned by the run-local ActiveRunLedger, not by the
+    # durable approval predicate. Once explicit approval is granted it must
+    # remain valid for subsequent execute/resume calls.
     return readiness_digest
 
 

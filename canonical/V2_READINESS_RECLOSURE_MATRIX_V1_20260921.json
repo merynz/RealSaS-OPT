@@ -170,7 +170,7 @@
     {
       "id": "VF-23",
       "status": "BLOCKING_CI",
-      "reason": "Exact unmodified production-policy E2E representative bank must pass on an exact current implementation."
+      "reason": "Same-context Stage20->46 now consumes the unmodified production CAA policy and real Stage23/24/25 artifacts; the representative exact-head VF23 bank must still complete green."
     },
     {
       "id": "EXACT_HEAD_CI_CLOSURE",

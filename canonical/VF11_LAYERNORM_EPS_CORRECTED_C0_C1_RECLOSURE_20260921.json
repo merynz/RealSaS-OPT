@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.VF11LayerNormEpsCorrectedC0C1Reclosure.v1",
+  "date_utc": "2026-09-21",
+  "status": "CORRECTED_C0_C1_RECLOSED__C2_REAUTHORIZED",
+  "authority_class": "RESEARCH_RECLOSURE_ONLY",
+  "parent_erratum": "canonical/VF11_LAYERNORM_EPS_ERRATUM_20260921.json",
+  "impact_replay_run_id": "20260921T174214Z",
+  "impact_replay_repo_commit": "4baec9b366166a2575aec283bf4707036e4245c4",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_performed": false,
+  "corrected_artifacts": {
+    "c0_fixed_profile_sha256": "53a36c0c7c9f9c64fb662ecbdc57aa797b2afb7fe22a05e691157d61a96ebf04",
+    "c0_impact_audit_sha256": "72dda2b99c5d6d6a5f87d55de04052281c89ca35560f296b27be0c57f5fb4904",
+    "c1_fixed_profile_sha256": "800bb7cb3e82f2b1eeafa41fb83c843939e91ca53fb349125481731a09d927e2",
+    "c1_impact_audit_sha256": "e1abb680f45ca10a4207c9042f6a2497b0d051f124937ba0a61c2681194addc2",
+    "interpretation_sha256": "e5c94051a8aea06ba4b228bc02a707451bec1b96e90e6ea71cc8b4377f422d98"
+  },
+  "c0_impact": {
+    "parent_record_count": 256,
+    "micro_comparison_count": 768,
+    "state_change_count": 0,
+    "empirical_contradiction_count": 0
+  },
+  "c1_impact": {
+    "stress_count": 32,
+    "old_primary_count": 19,
+    "new_primary_count": 19,
+    "old_primary_regular_count": 12,
+    "new_primary_regular_count": 12,
+    "old_stress_regular_count": 17,
+    "new_stress_regular_count": 17,
+    "state_or_c0_change_count": 0,
+    "empirical_contradiction_count": 0,
+    "corrected_primary_terminal_margin_min": 0.0166425613295047,
+    "corrected_primary_terminal_margin_median": 0.3331910733647243
+  },
+  "impact_conclusion": "The LayerNorm epsilon omission changed numeric bounds/margins slightly but caused zero C0 state changes across all 768 parent/micro comparisons and zero C1/C0 cohort state changes across the 32-cell stress cohort. No empirical contradictions were observed.",
+  "numeric_rigor": "ORDINARY_FLOAT64__NOT_DIRECTED_ROUNDING",
+  "semantic_claim_boundary": "Corrected C1 proves strict directional monotonicity on certified cells under the research arithmetic; it still does not prove surface existence, single-component topology, or shipping-rigorous certification by itself.",
+  "c2": {
+    "execution_authorized": true,
+    "scope": "the corrected 12-cell primary C1-regular cohort only",
+    "full_domain_traversal_authorized": false,
+    "single_component_claim_authorized": false,
+    "global_topology_claim_authorized": false
+  }
+}

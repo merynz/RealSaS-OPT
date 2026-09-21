@@ -246,14 +246,25 @@ bool covers(const Proj& a, const Proj& b, const Proj& c, int x, int y) {
 
 struct PM { double r{},g{},b{},a{}; };
 
+double srgb_to_linear(double x) {
+    x=std::max(0.0,std::min(1.0,x));
+    if(x<=0.04045) return x/12.92;
+    return std::pow((x+0.055)/1.055,2.4);
+}
+double linear_to_srgb(double x) {
+    x=std::max(0.0,std::min(1.0,x));
+    if(x<=0.0031308) return 12.92*x;
+    return 1.055*std::pow(x,1.0/2.4)-0.055;
+}
+
 PM texel_pm(const TextureSet& t, std::uint32_t view, int x, int y) {
     x=std::max(0,std::min(x,static_cast<int>(t.width)-1));
     y=std::max(0,std::min(y,static_cast<int>(t.height)-1));
     const auto idx=((((static_cast<std::size_t>(view)*t.height)+static_cast<std::size_t>(y))*t.width)+static_cast<std::size_t>(x))*4u;
     const double a=static_cast<double>(t.rgba[idx+3])/255.0;
-    return {static_cast<double>(t.rgba[idx])/255.0*a,
-            static_cast<double>(t.rgba[idx+1])/255.0*a,
-            static_cast<double>(t.rgba[idx+2])/255.0*a,a};
+    return {srgb_to_linear(static_cast<double>(t.rgba[idx])/255.0)*a,
+            srgb_to_linear(static_cast<double>(t.rgba[idx+1])/255.0)*a,
+            srgb_to_linear(static_cast<double>(t.rgba[idx+2])/255.0)*a,a};
 }
 PM mix(const PM& a,const PM& b,double t) {
     return {a.r+(b.r-a.r)*t,a.g+(b.g-a.g)*t,a.b+(b.b-a.b)*t,a.a+(b.a-a.a)*t};
@@ -394,7 +405,9 @@ int main(int argc,char** argv) {
             const auto out=idx*4u;
             const double alpha=pm.a;
             if(alpha>1e-12) {
-                rgba[out]=q8(pm.r/alpha); rgba[out+1]=q8(pm.g/alpha); rgba[out+2]=q8(pm.b/alpha);
+                rgba[out]=q8(linear_to_srgb(pm.r/alpha));
+                rgba[out+1]=q8(linear_to_srgb(pm.g/alpha));
+                rgba[out+2]=q8(linear_to_srgb(pm.b/alpha));
             }
             rgba[out+3]=q8(alpha);
             prov[idx]=sample_provenance(provenance,static_cast<std::uint32_t>(view),u,v);
@@ -407,7 +420,7 @@ int main(int argc,char** argv) {
         std::cout<<"renderer=REALSAS_V2_CAA_CANONICAL_DEPTH"
                  <<" clip="<<clip_id<<" view="<<view_id<<" frame="<<frame_index
                  <<" resolution="<<resolution<<" visibility=SEALED_FACE_INDEX_ZBUFFER"
-                 <<" appearance=CAA_PREMULTIPLIED_BILINEAR\\n";
+                 <<" appearance=CAA_LINEAR_PREMULTIPLIED_BILINEAR\\n";
         return 0;
     } catch(const std::exception& e) {
         std::cerr<<"ERROR "<<e.what()<<"\\n";

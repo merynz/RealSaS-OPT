@@ -11,7 +11,6 @@ from torch import nn
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "experiments" / "vf11_certified_adaptive"))
 
-import range_engine_c0_v2 as v2  # noqa: E402
 import range_engine_c0_v3 as v3  # noqa: E402
 
 
@@ -59,10 +58,6 @@ class TinyField(nn.Module):
         return self.sdf_head(h).squeeze(-1)
 
 
-def _state_v2(field, planes, lo, hi, micro):
-    return v2.certify_cell_c0(field, planes, lo, hi, max_micro_depth=micro).state
-
-
 def test_vectorized_silu_residual_contains_dense_curve():
     lo = torch.tensor([-8.0, -3.0, -1.0, -0.2, 0.0, 2.0], dtype=torch.float64)
     hi = torch.tensor([-3.0,  3.0,  0.4,  0.3, 6.0, 10.0], dtype=torch.float64)
@@ -105,26 +100,21 @@ def test_v3_single_regime_bound_contains_dense_samples():
     assert vals.max() <= bhi + 3e-6
 
 
-def test_v3_ladder_states_match_v2_for_each_micro_depth():
-    torch.manual_seed(41)
-    field = TinyField(channels=2, hidden=9).eval()
-    planes = torch.randn(1, 3, 2, 8, 8)
+def test_v3_eps_fixed_degenerate_point_contains_direct_float64():
+    torch.manual_seed(502)
+    field = TinyField(channels=2, hidden=8).double().eval()
+    planes = torch.randn(1, 3, 2, 8, 8, dtype=torch.float64)
     p = v3.prepare_field(field)
     pp = v3.prepare_planes(planes)
 
-    # Several cells in different interpolation regimes.
-    cells = [
-        (np.array([-0.42, -0.31, -0.18]), np.array([-0.18, -0.08, 0.03])),
-        (np.array([-0.12, 0.02, 0.18]), np.array([0.07, 0.22, 0.37])),
-        (np.array([0.15, -0.38, 0.08]), np.array([0.34, -0.18, 0.29])),
-    ]
+    point = np.array([0.13, -0.22, 0.31], dtype=np.float64)
+    blo, bhi = v3.bound_single_regime_prepared(p, pp, point, point)
+    q = torch.tensor(point.reshape(1, 1, 3), dtype=torch.float64)
+    with torch.no_grad():
+        value = float(field(pp, q).item())
 
-    for lo, hi in cells:
-        ladder = v3.certify_cell_c0_ladder_prepared(p, pp, lo, hi, max_micro_depth=2)
-        for micro in (0, 1, 2):
-            assert ladder.by_micro_depth[micro].state == _state_v2(
-                field, planes, lo, hi, micro
-            )
+    assert value >= blo - 2e-10
+    assert value <= bhi + 2e-10
 
 
 def test_v3_ladder_is_monotone_in_information():

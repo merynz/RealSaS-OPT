@@ -1,0 +1,46 @@
+{
+  "schema": "RealSaS.VF11C2V2AxisGraphResearchClosure.v1",
+  "date_utc": "2026-09-21",
+  "status": "C2_V2_RESEARCH_CLOSED__ADAPTIVE_CHILD_REFINEMENT_AUTHORIZED",
+  "authority_class": "RESEARCH_CLOSURE_ONLY",
+  "source_run_id": "20260921T184516Z",
+  "source_repo_commit": "56377b832a79e10278a736c753b3a7c1834508c5",
+  "source_profile_sha256": "PENDING_BIND_FROM_RECEIPT",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_performed": false,
+  "global_component_claimed": false,
+  "global_topology_claimed": false,
+  "primary_c1_regular_count": 12,
+  "results": {
+    "graph_patch_count": 2,
+    "graph_patch_fraction": 0.16666666666666666,
+    "unknown_axis_graph_count": 10,
+    "selected_axis_counts": {"Z": 2},
+    "regular_axis_count_distribution": {"0": 2, "1": 9, "2": 1},
+    "bottleneck_margin_min": 0.003041620046878732,
+    "bottleneck_margin_median": 0.004297581943987948,
+    "empirical_contradiction_count": 0,
+    "elapsed_seconds_total": 79.85742257899994
+  },
+  "paired_with_c2_v1": {
+    "c2_v1_center_chord_count": 7,
+    "c2_v1_full_oriented_crossing_count": 0,
+    "graph_from_c2_v1_center_crossing_count": 2,
+    "graph_from_c2_v1_regular_only_count": 0
+  },
+  "failure_signature": {
+    "summary": "Parent-cell axis graph proof is non-vacuous but sparse. Ten of twelve cells remain unresolved. Most unresolved cells already have exactly one certified coordinate-axis derivative sign, but at least one opposite face sign remains unresolved.",
+    "scientific_interpretation": "This is the expected condition under which adaptive subdivision can be useful: subdivision can tighten both derivative and face-value bounds without inventing field content. The next test must classify children only as certified empty, certified local graph patch, or unresolved."
+  },
+  "semantic_claim": "Two parent cells are certified local axis-aligned graph patches under ordinary float64 research arithmetic. This is a local cell statement only.",
+  "forbidden_inferences": [
+    "global single component",
+    "global topology",
+    "coverage of the entire Knight zero set",
+    "shipping proof under ordinary float64"
+  ],
+  "next": "C2_V3_ADAPTIVE_EMPTY_OR_GRAPH_REFINEMENT"
+}

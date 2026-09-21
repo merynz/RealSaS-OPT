@@ -207,7 +207,9 @@
       "severity": "HIGH",
       "owner": "Runtime raster coverage / temporal edge quality",
       "finding": "Reference and native V2 visibility use one binary pixel-center triangle coverage sample. CAA alpha is applied only after geometry ownership, so subpixel silhouette coverage has no MSAA/analytic coverage authority. Native/reference parity can therefore certify identical edge popping/jaggies during motion.",
-      "required_closure": "Add subject-free moving thin-edge/subpixel-silhouette temporal controls and qualify a coverage/AA contract (analytic coverage, supersampling/MSAA-equivalent or another deterministic scheme) shared by reference/native runtime. Gate temporal edge shimmer independently from texture minification."
+      "required_closure": "Add subject-free moving thin-edge/subpixel-silhouette temporal controls and qualify a coverage/AA contract (analytic coverage, supersampling/MSAA-equivalent or another deterministic scheme) shared by reference/native runtime. Gate temporal edge shimmer independently from texture minification.",
+      "repair": "Runtime V2 now uses a sealed fixed 2x2 quarter-subsample coverage contract. Each coverage sample receives its own K=4 geometry depth stack and linear-premultiplied front-to-back composite; the four sample PM results are averaged before straight-sRGB8 export. Provenance is conservative across all contributing samples. Stage45 no longer treats the single debug owner as full-pixel authority: front/contributor census is computed from the exact four coverage samples and all sample x K4 contributors. Native playback enforces the coverage manifest, rejects coverage-count tampering, and is byte-parity checked against the Python reference for RGBA, provenance and representative owner. A subject-free edge adversary requires fractional 1/4, 1/2 or 3/4 coverage alpha. Self-hosted runtime run 35572727905 passed on functional commit 8484a1071cfae7ea539c43e53b6d3ed51ae2da2e.",
+      "status": "REPAIRED__FIXED_2X2_SUBPIXEL_K4_PM_COVERAGE__MAINLINE_AND_SOURCE_CLOSURE_PENDING"
     },
     {
       "id": "VF-25",

@@ -258,6 +258,31 @@ def bound_batch_single_regime_prepared(
     )
 
 
+def _bound_batch_chunked_prepared(
+    p: PreparedField,
+    planes: torch.Tensor,
+    los: np.ndarray,
+    his: np.ndarray,
+    *,
+    node_batch_size: int | None,
+) -> tuple[np.ndarray, np.ndarray]:
+    los = np.asarray(los, dtype=np.float64).reshape(-1, 3)
+    his = np.asarray(his, dtype=np.float64).reshape(-1, 3)
+    n = len(los)
+    if node_batch_size is None or node_batch_size <= 0 or node_batch_size >= n:
+        return bound_batch_single_regime_prepared(p, planes, los, his)
+    lower = np.empty(n, dtype=np.float64)
+    upper = np.empty(n, dtype=np.float64)
+    for start in range(0, n, int(node_batch_size)):
+        stop = min(start + int(node_batch_size), n)
+        lo_i, hi_i = bound_batch_single_regime_prepared(
+            p, planes, los[start:stop], his[start:stop]
+        )
+        lower[start:stop] = lo_i
+        upper[start:stop] = hi_i
+    return lower, upper
+
+
 def _split_octants_batch(los: np.ndarray, his: np.ndarray):
     los = np.asarray(los, dtype=np.float64).reshape(-1, 3)
     his = np.asarray(his, dtype=np.float64).reshape(-1, 3)
@@ -285,6 +310,7 @@ def certify_batch_single_regime_ladders_prepared(
     his: np.ndarray,
     *,
     max_micro_depth: int = 2,
+    node_batch_size: int | None = 16,
 ) -> list[C0LadderCertificate]:
     if max_micro_depth < 0:
         raise ValueError("NEGATIVE_MICRO_DEPTH")
@@ -307,8 +333,12 @@ def certify_batch_single_regime_ladders_prepared(
     eval_counts = np.zeros(bsz, dtype=np.int64)
 
     for depth in range(max_micro_depth + 1):
-        lower, upper = bound_batch_single_regime_prepared(
-            p, planes, frontier_lo, frontier_hi
+        lower, upper = _bound_batch_chunked_prepared(
+            p,
+            planes,
+            frontier_lo,
+            frontier_hi,
+            node_batch_size=node_batch_size,
         )
         signs = np.where(lower > 0.0, 1, np.where(upper < 0.0, -1, 0)).astype(np.int8)
         for rid in frontier_root:

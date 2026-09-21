@@ -1,0 +1,57 @@
+{
+  "schema": "RealSaS.VF15DynamicContinuityAuthority.v1",
+  "status": "REPAIR_IMPLEMENTED__CI_PENDING",
+  "date_utc": "2026-09-21",
+  "finding_id": "VF-15",
+  "authority": "TOPOLOGY_OWNED_DYNAMIC_CONTINUITY__NO_RAW_BACKGROUND_CRACK_INFERENCE",
+  "problem": {
+    "rejected_metric": "RAW_OWNER_NEGATIVE_OR_BACKGROUND_AREA_AS_CRACK",
+    "reason": "Articulation between mechanically/topologically separate regions may legitimately reveal new negative space. Background area alone carries no continuity authority."
+  },
+  "shipping_contract": {
+    "continuity_authority": "CANONICAL_MESH_INTERIOR_SHARED_EDGE_ONLY",
+    "production_stage": "45_DYNAMIC_VISUAL_INTEGRITY_PROOF",
+    "closure_stage": "46_PRODUCT_CLOSURE_SEAL",
+    "shared_edge_definition": "An undirected canonical mesh edge referenced by two or more faces through the same canonical vertex indices.",
+    "per_frame_view_proof": "Every incident face copy of each shared edge must carry bit-exact equal projected XY endpoints from the single posed canonical vertex matrix.",
+    "allowed_mismatched_interior_shared_edge_count": 0,
+    "allowed_maximum_projected_endpoint_error_px": 0,
+    "raster_fill_contract": "HALF_INTEGER_TOP_LEFT",
+    "raster_control": "Two triangles exactly tiling a square must leave zero uncovered pixel centers along their interior shared diagonal.",
+    "native_reference_relation": "Stage45 already requires native/reference owner and RGBA parity, so a native raster divergence cannot bypass the canonical continuity proof."
+  },
+  "scope_boundary": {
+    "cross_component_background_gap_is_crack_authority": false,
+    "geometric_nearness_implies_continuity": false,
+    "source_backed_underlay_non_detachability_authority_minted": false,
+    "future_cross_component_continuity_requires_separate_authority": true
+  },
+  "adversarial_controls": {
+    "true_seam_crack": "Two faces retain shared canonical edge indices while one face consumes a 0.25 px shifted projected copy of an endpoint; continuity proof must fail.",
+    "legitimate_negative_space": "Two topologically separate triangles/components move far apart; no shared-edge continuity authority exists and the gap must not fail.",
+    "raster_shared_edge": "Exact two-triangle square under product HALF_INTEGER_TOP_LEFT rasterizer has full 16x16 coverage with no diagonal crack."
+  },
+  "implementation": {
+    "core": "compiler/realsas_compiler_core/dynamic_geometry_integrity_v2.py:interior_shared_edge_projection_continuity",
+    "stage45": "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py",
+    "stage46": "compiler/realsas_compiler_services/orchestrator/adapters/closure_v2.py",
+    "tests": "tests/compiler/test_dynamic_geometry_integrity_v2.py; tests/compiler/test_product_mesh_stage_adapters_v1.py",
+    "commits": [
+      "96600621f15648fa77ed06bb61f95f16abffebef",
+      "68ee0f61b34b8b9c220e5b42b180378069887db0",
+      "a5d7de80a4b4a10d6112e370ed20f751b0c79a06",
+      "d8037dadd92672ac9664c8a7c5b0c50815666da5",
+      "b8c1df11ba242d9a5bb527dc117d100105eaa2d6",
+      "e280bff0c2493093d49caa326f8d4437a3aa62ae",
+      "edb5b56288996204190a755e2359b47d70f96683"
+    ]
+  },
+  "contamination_checks": {
+    "knight_result_used": false,
+    "mage_result_used": false,
+    "subject_identity_used": false,
+    "category_labels_used": false,
+    "threshold_tuning_used": false
+  },
+  "claim_boundary": "This closes same-canonical-mesh interior seam continuity only. It deliberately does not assert that gaps between mechanically separate components are cracks, and does not invent underlay or non-detachability semantics."
+}

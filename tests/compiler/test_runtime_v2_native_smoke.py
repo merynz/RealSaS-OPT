@@ -75,7 +75,13 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     views = []
     for vi in range(8):
         rgba = np.zeros((16, 16, 4), dtype=np.uint8)
-        rgba[:, :, :] = (80 + vi, 120, 160, 255)
+        if vi == 0:
+            # Gamma-vs-linear discriminator. At u=0.5 the black/white edge
+            # must encode linear-light 0.5 as sRGB ~=188, never gamma-space 128.
+            rgba[:, :8, :] = (0, 0, 0, 255)
+            rgba[:, 8:, :] = (255, 255, 255, 255)
+        else:
+            rgba[:, :, :] = (80 + vi, 120, 160, 255)
         path = tmp_path / f"V{vi}.png"
         Image.fromarray(rgba, mode="RGBA").save(path)
         digest = __import__("hashlib").sha256(path.read_bytes()).hexdigest()
@@ -178,6 +184,10 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     )
     native = np.frombuffer(native_rgba.read_bytes(), dtype=np.uint8).reshape(32, 32, 4)
     assert np.array_equal(native, reference.straight_rgba_u8)
+    midpoint = native[16, 16]
+    assert 186 <= int(midpoint[0]) <= 189
+    assert int(midpoint[0]) == int(midpoint[1]) == int(midpoint[2])
+    assert int(midpoint[3]) == 255
 
     native_p = np.frombuffer(native_prov.read_bytes(), dtype=np.uint8).reshape(32, 32)
     assert np.array_equal(native_p, reference.provenance_code)

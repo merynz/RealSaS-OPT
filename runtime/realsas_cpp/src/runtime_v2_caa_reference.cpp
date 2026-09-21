@@ -345,6 +345,10 @@ int main(int argc,char** argv) {
         const auto manifest=parse_manifest(entries.at("manifest.txt"));
         if(manifest.at("playback_sampling_contract")!="SEALED_FRAME_INDEX_ONLY")
             throw std::runtime_error("PLAYBACK_SAMPLING_CONTRACT_INVALID");
+        if(manifest.at("view_selection_contract")!="SEALED_DISCRETE_DIRECTION_INDEX_ONLY")
+            throw std::runtime_error("VIEW_SELECTION_CONTRACT_INVALID");
+        if(manifest.at("cross_direction_blending_authorized")!="0")
+            throw std::runtime_error("CROSS_DIRECTION_BLENDING_MUST_BE_FORBIDDEN");
         if(manifest.at("host_interpolation_authorized")!="0")
             throw std::runtime_error("HOST_INTERPOLATION_MUST_BE_FORBIDDEN");
         if(manifest.at("presentation_state_execution_authorized")!="0")

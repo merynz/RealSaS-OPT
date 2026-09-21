@@ -227,7 +227,18 @@ def _coverage(source: np.ndarray, predicted: np.ndarray) -> dict:
     raw_s = np.asarray(source, dtype=np.uint8).reshape(-1).tobytes()
     raw_p = np.asarray(predicted, dtype=np.uint8).reshape(-1).tobytes()
     cov = coverage_metrics(raw_s, raw_p, width=RES, height=RES)
-    edge_mean, edge_p95, edge_max = silhouette_distance_metrics(source, predicted)
+    if np.any(source) and np.any(predicted):
+        edge_mean, edge_p95, edge_max = silhouette_distance_metrics(
+            source,
+            predicted,
+        )
+    elif np.array_equal(source, predicted):
+        edge_mean = edge_p95 = edge_max = 0.0
+    else:
+        # Empty predicted/source silhouette is catastrophic, but it is still a
+        # valid measurement. Do not turn the scientifically important failure
+        # into an apparatus exception.
+        edge_mean = edge_p95 = edge_max = math.hypot(RES, RES)
     component = source_connected_component_recall_metrics(
         raw_s,
         raw_p,

@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.VF11LayerNormEpsilonImpactReplayPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__LAYERNORM_EPS_C0_C1_IMPACT_REPLAY",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "parent_erratum": "canonical/VF11_LAYERNORM_EPS_ERRATUM_20260921.json",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_authorized": false,
+  "source_artifacts": {
+    "c0_paired_profile_sha256": "16c2f43535a3c577c62494e464631ca9a79680e480cfeeac92e8a97b852b8ea5",
+    "c1_v2_margin_replay_profile_sha256": "329ac936b54df4293f40803bd127a2da9c6ae79ace5129fd3f53733e527f38cf",
+    "scene_planes_sha256": "364f4769f1ffb04362669c1fe04b9b6c8f3afe3308bf4b7cede038d9e8226d28",
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f"
+  },
+  "intervention": "Only the missing LayerNorm eps constant in C0 V3 affine inverse-sqrt center is corrected.",
+  "c0_replay": {
+    "anchors": 64,
+    "depths": [5, 6, 7, 8],
+    "parent_records": 256,
+    "max_micro_depth": 2,
+    "same_anchor_points": true,
+    "compare": [
+      "per-record per-micro state parity/change",
+      "empirical contradiction count",
+      "decisive counts by stratum/depth/micro",
+      "bound lower/upper deltas"
+    ]
+  },
+  "c1_replay": {
+    "cohort": "corrected C0 d8 NEAR_ZERO 32-cell cohort",
+    "primary_definition": "corrected C0 d8/m2 PROVEN_ZERO_EXISTS or UNKNOWN",
+    "max_micro_depth": 2,
+    "compare": [
+      "corrected primary count",
+      "regular counts and states",
+      "source-run state changes by anchor",
+      "corrected terminal margins",
+      "empirical contradiction count"
+    ]
+  },
+  "decision": {
+    "any_empirical_contradiction": "FAIL__SOUNDNESS_ALARM",
+    "state_changes": "REVIEW_REQUIRED__NO_AUTOMATIC_PROMOTION",
+    "zero_state_changes_and_positive_margins": "IMPACT_REPLAY_PASS__ELIGIBLE_FOR_C0_C1_RECLOSURE",
+    "c2": "HOLD until explicit corrected reclosure"
+  }
+}

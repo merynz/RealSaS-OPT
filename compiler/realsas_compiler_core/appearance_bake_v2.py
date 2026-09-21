@@ -7,6 +7,10 @@ import math
 import numpy as np
 
 from .appearance_compile_v2 import face_atlas_layout, face_uv_array
+from .appearance_color_v2 import (
+    bilinear_premultiplied_linear_rgba,
+    straight_srgb_rgba_u8_to_premultiplied_linear,
+)
 from .types import QualificationError
 
 
@@ -118,12 +122,8 @@ def bake_direction_atlas(
 
 
 def straight_rgba_to_premultiplied_float(rgba_u8: np.ndarray) -> np.ndarray:
-    rgba = np.asarray(rgba_u8, dtype=np.float32) / 255.0
-    if rgba.shape[-1] != 4:
-        raise QualificationError("CAA_PREMULTIPLY_RGBA_SHAPE_INVALID")
-    out = rgba.copy()
-    out[..., :3] *= out[..., 3:4]
-    return out
+    """Compatibility wrapper: straight sRGB RGBA8 -> linear PM RGBA."""
+    return straight_srgb_rgba_u8_to_premultiplied_linear(rgba_u8)
 
 
 def conservative_bilinear_provenance(
@@ -177,24 +177,9 @@ def bilinear_premultiplied_rgba(
     straight_rgba_u8: np.ndarray,
     uv: np.ndarray,
 ) -> np.ndarray:
-    """Reference sampling: convert texels to PM, then bilinear interpolate PM."""
-    image = straight_rgba_to_premultiplied_float(straight_rgba_u8)
-    points = np.asarray(uv, dtype=np.float64)
-    if points.ndim != 2 or points.shape[1] != 2:
-        raise QualificationError("CAA_BILINEAR_UV_INVALID")
-    height, width, _ = image.shape
-    x = np.clip(points[:, 0], 0.0, 1.0) * float(width - 1)
-    y = np.clip(points[:, 1], 0.0, 1.0) * float(height - 1)
-    x0 = np.floor(x).astype(np.int64)
-    y0 = np.floor(y).astype(np.int64)
-    x1 = np.minimum(x0 + 1, width - 1)
-    y1 = np.minimum(y0 + 1, height - 1)
-    tx = (x - x0).reshape(-1, 1)
-    ty = (y - y0).reshape(-1, 1)
-    p00 = image[y0, x0]
-    p10 = image[y0, x1]
-    p01 = image[y1, x0]
-    p11 = image[y1, x1]
-    return (1.0 - ty) * ((1.0 - tx) * p00 + tx * p10) + ty * (
-        (1.0 - tx) * p01 + tx * p11
+    """Reference sampling in linear-light premultiplied RGBA."""
+    return bilinear_premultiplied_linear_rgba(
+        straight_rgba_u8,
+        uv,
+        normalized=True,
     )

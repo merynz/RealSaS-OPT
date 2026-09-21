@@ -387,6 +387,54 @@ def test_source_view_atlas_preserves_exact_donor_ids_and_harmonic_code():
     assert 7 in set(map(int, np.unique(atlas)))
 
 
+def test_rgba_provenance_and_source_view_bakes_share_exact_texel_mapping():
+    face_count = 3
+    tile_resolution = 4
+    bleed_px = 2
+    per_face = tile_resolution * (tile_resolution + 1) // 2
+
+    # Encode the exact face/sample identity redundantly into coarse provenance,
+    # RGBA and source-view lineage. All three products must land on identical
+    # atlas texels because they are one surface-addressing authority.
+    sample_ids = np.arange(face_count * per_face, dtype=np.int16)
+    rgba = np.zeros((len(sample_ids), 4), dtype=np.uint8)
+    rgba[:, 0] = (sample_ids % 251).astype(np.uint8)
+    rgba[:, 1] = ((sample_ids // 251) % 251).astype(np.uint8)
+    rgba[:, 3] = 255
+    provenance = (sample_ids % 3).astype(np.uint8)
+    source_view = (sample_ids % 8).astype(np.int16)
+
+    atlas, prov_atlas, _uv, _layout = bake_direction_atlas(
+        face_sample_rgba=rgba,
+        face_sample_provenance=provenance,
+        face_count=face_count,
+        tile_resolution=tile_resolution,
+        bleed_px=bleed_px,
+    )
+    source_atlas = bake_direction_source_view_atlas(
+        face_sample_source_view=source_view,
+        face_count=face_count,
+        tile_resolution=tile_resolution,
+        bleed_px=bleed_px,
+    )
+
+    allocated = prov_atlas != 255
+    reconstructed_ids = (
+        atlas[:, :, 0].astype(np.int64)
+        + 251 * atlas[:, :, 1].astype(np.int64)
+    )
+    assert np.array_equal(
+        prov_atlas[allocated],
+        (reconstructed_ids[allocated] % 3).astype(np.uint8),
+    )
+    assert np.array_equal(
+        source_atlas[allocated],
+        (reconstructed_ids[allocated] % 8).astype(np.int16),
+    )
+    padding = np.iinfo(np.int16).min
+    assert np.array_equal(source_atlas == padding, ~allocated)
+
+
 def test_face_atlas_allows_unallocated_grid_padding_but_not_surface_undefinedness():
     # Three faces require a 2x2 grid; the fourth tile is intentional non-surface padding.
     per_face = 4 * (4 + 1) // 2

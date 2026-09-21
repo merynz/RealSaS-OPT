@@ -1,0 +1,26 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX1BKnotAlignmentResult.v1",
+  "date_utc": "2026-09-21",
+  "status": "NO_MATERIAL_KNOT_EFFECT__KNOT_CROSSING_NOT_PRIMARY_ANOMALY_CAUSE",
+  "result_sha256": "TO_BE_BOUND_LOCALLY",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "aggregate": {
+    "knot_crossing_comparisons": 14,
+    "nonknot_comparisons": 8,
+    "knot_aligned_over_uniform_p95_residual_ratio_median": 0.975368172641508,
+    "ratio_min": 0.7324471762560277,
+    "ratio_max": 1.009482356753237,
+    "nonknot_ratio_median": 1.0,
+    "topology_alarm_count": 0
+  },
+  "anchor44": {
+    "d11_ratio": 1.009482356753237,
+    "d12_ratio": 0.993263430448977,
+    "interpretation": "Forcing blocks to terminate at both internal triplane knots did not remove the anchor-44 residual anomaly."
+  },
+  "interpretation": "Knot alignment can modestly tighten some knot-crossing roots, but the median effect is small relative to the depth effect and it does not explain the dominant anomaly. Global knot-aligned subdivision is therefore not selected as the next primary lever.",
+  "next": "X2_BLOCKWISE_LEWINER_MC_EQUIVALENCE"
+}

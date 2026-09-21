@@ -58,7 +58,6 @@
     "min_structured_holdout_samples_per_view": 128,
     "dynamic_max_frame_compiled_unobserved_visible_fraction": 0.05,
     "dynamic_max_connected_compiled_unobserved_visible_fraction": 0.01,
-    "dynamic_max_compiled_global_visible_fraction": 0,
     "dynamic_max_micro_visible_pixel_fraction_per_frame": 0.005,
     "dynamic_max_unmeasurable_consequential_visible_face_count": 0,
     "rest_max_exact_depth_ambiguous_fraction": 0,
@@ -76,7 +75,10 @@
     "cross_view_max_pair_p95_alpha_abs": 0.15,
     "cross_view_max_pair_alpha_conflict_fraction": 0.02,
     "cross_view_max_component_color_conflict_fraction": 0.1,
-    "cross_view_max_component_alpha_conflict_fraction": 0.05
+    "cross_view_max_component_alpha_conflict_fraction": 0.05,
+    "max_local_harmonic_region_samples": 16,
+    "max_local_harmonic_graph_hops": 2,
+    "compiled_global_surface_forbidden": true
   },
   "rationale": {
     "angle_support": "abs(normal dot camera-forward) >= cos(80deg); at least 10deg away from exact grazing, used only for correspondence eligibility, not RGB quality.",
@@ -94,7 +96,8 @@
     "surface_sidedness": "Until separately qualified backside appearance exists, a consequential face may not reverse projected orientation relative to its rest orientation in the same output camera. Dynamic orientation flips are a hard failure rather than silently rendering inside-out art.",
     "color_space": "Transport RGBA8 is encoded sRGB straight alpha. Source sampling, runtime filtering and multi-layer composition occur in linear-light premultiplied RGBA, then convert back to sRGB only at the output boundary.",
     "alpha_transport_precision": "Every direct source sample retains its pre-quantization linear-premultiplied value. Straight-sRGB8 transport round-trip error is measured in linear PM space and must remain <=0.0065 per channel; this ceiling is independently attacked by dense subject-free color/alpha controls before reclosure.",
-    "cross_view_compatibility": "Adjacent source views are not required to have identical RGB. Shared canonical direct-source samples must nevertheless avoid gross color/alpha contradiction. Qualification is per adjacent pair and, when sufficiently sampled, per component so aggregate averaging cannot hide one contradictory view or part."
+    "cross_view_compatibility": "Adjacent source views are not required to have identical RGB. Shared canonical direct-source samples must nevertheless avoid gross color/alpha contradiction. Qualification is per adjacent pair and, when sufficiently sampled, per component so aggregate averaging cannot hide one contradictory view or part.",
+    "completion": "Shipping completion is source-constrained and topology-aware: direct source wins; the best qualified other source view is selected by surface support; only small source-bounded missing regions may receive deterministic harmonic extension on the canonical surface graph. Cross-component Euclidean copying and global fill are forbidden."
   },
   "calibration_contract": "tests/compiler/test_caa_v2_subject_free_policy.py",
   "mutable_after_witness": false,

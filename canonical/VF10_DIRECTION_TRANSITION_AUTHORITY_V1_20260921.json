@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.VF10DirectionTransitionAuthority.v1",
+  "status": "NEGATIVE_CALIBRATION_CLOSED__DISCRETE_RUNTIME_SEMANTICS__RUNTIME_CI_PENDING",
+  "date_utc": "2026-09-21",
+  "finding_id": "VF-10",
+  "calibration": {
+    "workflow_run_id": 35579461053,
+    "workflow_job_id": 106268711099,
+    "source_commit": "f509771685a6495e747b7401ac45d69760ebf20c",
+    "artifact_id": 10630031779,
+    "artifact_sha256": "904ad24e334af702795c573ba265a88d9287d8842e670c9fee7ae22a67bbbe3c",
+    "status": "NEGATIVE_RESULT__CURVATURE_GATE_NOT_AUTHORIZED"
+  },
+  "rejected_shipping_metric": {
+    "metric": "CYCLIC_ADJACENT_DIRECTION_LINEAR_PM_SECOND_ORDER_V1",
+    "reason": "Legitimate source-authoritative smooth view-dependent art overlaps the isolated-spike residual range under the already-frozen adjacent-pair compatibility policy.",
+    "benign_max_pm_l1": 0.12342048445521431,
+    "adversarial_min_pm_l1": 0.08131533699518037,
+    "pm_classes_separable": false,
+    "alpha_classes_separable": true,
+    "shipping_curvature_gate_authorized": false,
+    "new_threshold_minted": false
+  },
+  "retained_stage24_authority": {
+    "gross_cross_view_compatibility_gate": true,
+    "per_adjacent_pair": true,
+    "per_component": true,
+    "raw_rgb_equality_required": false
+  },
+  "shipping_transition_semantics": {
+    "direction_domain": "EXACT_DISCRETE_V0_TO_V7",
+    "view_selection_contract": "SEALED_DISCRETE_DIRECTION_INDEX_ONLY",
+    "cross_direction_blending_authorized": false,
+    "host_interpolation_authorized": false,
+    "source_authoritative_view_dependent_variation_must_not_be_smoothed": true,
+    "direction_switch_proof": "Each V0..V7 native render must independently equal its exact Python reference; V0->...->V7->V0 must return byte-identical V0 with no hidden transition state."
+  },
+  "native_source_seal": {
+    "extension": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V10_20260921.json",
+    "source_gate_run_id": 35579612491,
+    "source_gate_status": "SUCCESS",
+    "verified_subtree_blob_count": 25
+  },
+  "contamination_checks": {
+    "subject_inputs_used": false,
+    "knight_result_used": false,
+    "mage_result_used": false
+  },
+  "claim_boundary": "This proves deterministic discrete-direction playback, not continuous yaw interpolation. Continuous cross-direction transition synthesis/blending remains unauthorized."
+}

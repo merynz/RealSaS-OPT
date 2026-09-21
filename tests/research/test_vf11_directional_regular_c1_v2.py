@@ -201,3 +201,34 @@ def test_v2_constant_zero_field_fails_closed():
     )
     assert cert.state == "UNKNOWN"
     assert cert.direction is None
+
+
+def test_v2_terminal_certificate_margin_uses_certified_leaves(monkeypatch):
+    planes = torch.zeros(1, 3, 1, 8, 8, dtype=torch.float64)
+    lo = np.array([-0.2, -0.2, -0.2], dtype=np.float64)
+    hi = np.array([-0.1, -0.1, -0.1], dtype=np.float64)
+    direction = np.array([1.0, 0.0, 0.0], dtype=np.float64)
+
+    def fake_positive(*args, **kwargs):
+        return c1v2.DirectionalBoundV2(lower=0.25, upper=0.75, generator_count=1)
+
+    monkeypatch.setattr(c1v2, "bound_directional_single_regime_correlated_v2", fake_positive)
+    pos = c1v2._evaluate_candidate_v2(
+        None, planes, lo, hi, direction, max_micro_depth=0
+    )
+    assert pos.state == "PROVEN_DIRECTIONAL_REGULAR_POSITIVE"
+    assert pos.certified_terminal_lower == 0.25
+    assert pos.certified_terminal_upper == 0.75
+    assert pos.certificate_margin == 0.25
+
+    def fake_negative(*args, **kwargs):
+        return c1v2.DirectionalBoundV2(lower=-0.90, upper=-0.20, generator_count=1)
+
+    monkeypatch.setattr(c1v2, "bound_directional_single_regime_correlated_v2", fake_negative)
+    neg = c1v2._evaluate_candidate_v2(
+        None, planes, lo, hi, direction, max_micro_depth=0
+    )
+    assert neg.state == "PROVEN_DIRECTIONAL_REGULAR_NEGATIVE"
+    assert neg.certified_terminal_lower == -0.90
+    assert neg.certified_terminal_upper == -0.20
+    assert neg.certificate_margin == 0.20

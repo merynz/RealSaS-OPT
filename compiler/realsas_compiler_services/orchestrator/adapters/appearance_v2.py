@@ -41,6 +41,7 @@ from compiler.realsas_compiler_core.appearance_quality_v2 import (
     cross_view_source_compatibility_metrics,
     provenance_boundary_metrics,
     rgba_l1_premultiplied,
+    source_feature_preservation_metrics,
     structured_holdout_metrics,
 )
 from compiler.realsas_compiler_core.appearance_render_v2 import (
@@ -1018,6 +1019,13 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         "rest_max_alpha_interior_uncovered_fraction",
         "rest_max_exact_depth_ambiguous_fraction",
         "rest_max_visibility_layer_overflow_pixel_count",
+        "rest_feature_high_error_cut_rgba_l1",
+        "rest_feature_edge_gradient_cut",
+        "rest_max_feature_high_error_fraction",
+        "rest_max_largest_connected_high_error_fraction",
+        "rest_max_feature_p999_rgba_l1",
+        "rest_min_feature_edge_recall_1px",
+        "rest_min_feature_edge_precision_1px",
     )
     if any(key not in policy for key in required):
         raise QualificationError("CAA_REST_PROOF_POLICY_INCOMPLETE")
@@ -1102,6 +1110,15 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             if len(foreground_error) == 0
             else float(np.quantile(foreground_error, 0.95))
         )
+        feature_metrics = source_feature_preservation_metrics(
+            predicted_rgba=render.straight_rgba_u8,
+            source_rgba=source_rgba[direction],
+            source_foreground=source_masks[direction],
+            high_error_cut_rgba_l1=float(
+                policy["rest_feature_high_error_cut_rgba_l1"]
+            ),
+            edge_gradient_cut=float(policy["rest_feature_edge_gradient_cut"]),
+        )
         source_alpha_bytes = bytes(source_masks[direction].astype(np.uint8).reshape(-1))
         final_alpha_bytes = bytes(final_alpha.astype(np.uint8).reshape(-1))
         alpha_metrics = coverage_metrics(
@@ -1137,6 +1154,16 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             <= float(policy["rest_max_exact_depth_ambiguous_fraction"])
             and layer_overflow_count
             <= int(policy["rest_max_visibility_layer_overflow_pixel_count"])
+            and float(feature_metrics["high_error_fraction"])
+            <= float(policy["rest_max_feature_high_error_fraction"])
+            and float(feature_metrics["largest_connected_high_error_fraction"])
+            <= float(policy["rest_max_largest_connected_high_error_fraction"])
+            and float(feature_metrics["p999_rgba_l1"])
+            <= float(policy["rest_max_feature_p999_rgba_l1"])
+            and float(feature_metrics["edge_recall_1px"])
+            >= float(policy["rest_min_feature_edge_recall_1px"])
+            and float(feature_metrics["edge_precision_1px"])
+            >= float(policy["rest_min_feature_edge_precision_1px"])
         )
         all_pass = all_pass and view_pass
         rows.append(
@@ -1152,6 +1179,19 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                 source_locked_p95_rgba_l1=p95_error,
                 source_foreground_mean_rgba_l1=foreground_mean_error,
                 source_foreground_p95_rgba_l1=foreground_p95_error,
+                source_feature_p999_rgba_l1=float(feature_metrics["p999_rgba_l1"]),
+                source_feature_high_error_fraction=float(
+                    feature_metrics["high_error_fraction"]
+                ),
+                largest_connected_feature_high_error_fraction=float(
+                    feature_metrics["largest_connected_high_error_fraction"]
+                ),
+                source_feature_edge_recall_1px=float(
+                    feature_metrics["edge_recall_1px"]
+                ),
+                source_feature_edge_precision_1px=float(
+                    feature_metrics["edge_precision_1px"]
+                ),
                 geometry_visible_pixel_count=visible_count,
                 final_alpha_pixel_count=final_alpha_count,
                 geometry_visible_final_alpha_hole_count=hole_count,
@@ -1175,6 +1215,19 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                     "visibility_layer_overflow_passed": (
                         layer_overflow_count
                         <= int(policy["rest_max_visibility_layer_overflow_pixel_count"])
+                    ),
+                    "source_feature_preservation": dict(feature_metrics),
+                    "source_feature_preservation_passed": (
+                        float(feature_metrics["high_error_fraction"])
+                        <= float(policy["rest_max_feature_high_error_fraction"])
+                        and float(feature_metrics["largest_connected_high_error_fraction"])
+                        <= float(policy["rest_max_largest_connected_high_error_fraction"])
+                        and float(feature_metrics["p999_rgba_l1"])
+                        <= float(policy["rest_max_feature_p999_rgba_l1"])
+                        and float(feature_metrics["edge_recall_1px"])
+                        >= float(policy["rest_min_feature_edge_recall_1px"])
+                        and float(feature_metrics["edge_precision_1px"])
+                        >= float(policy["rest_min_feature_edge_precision_1px"])
                     ),
                 },
             )

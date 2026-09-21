@@ -12,14 +12,18 @@
   ],
   "mechanical_binding_policy": {
     "min_rigid_owner_weight": 0.999,
-    "max_rigid_other_mass": 0.001
+    "max_rigid_other_mass": 0.001,
+    "rigidity_noop_required": true,
+    "rigidity_noop_relative_edge_tolerance": 1e-9,
+    "rigidity_noop_probe_rotation_degrees": 37,
+    "legacy_weight_thresholds_final_authority": false
   },
   "appearance_boundary_policy": {
     "edge_samples_per_direction": 5,
     "edge_inset_fraction": 0.15,
     "min_source_backed_sample_pairs": 8,
     "mean_premultiplied_rgba_l1_cut": 0.18,
-    "p95_premultiplied_rgba_l1_cut": 0.30,
+    "p95_premultiplied_rgba_l1_cut": 0.3,
     "source_backed_provenance": [
       "DIRECT_SOURCE",
       "OTHER_VIEW_SOURCE"
@@ -32,7 +36,7 @@
     "author_editability_preserved": true
   },
   "rationale": {
-    "mechanical": "Rigid/deformable slot binding thresholds are frozen subject-free rather than tunable per witness.",
+    "mechanical": "Rigid/deformable binding is decided by an independent-joint LBS no-op proof on each presentation face group. The historical 0.999/0.001 skin thresholds remain diagnostics and a legacy RIGID classification that fails the no-op proof is a hard contradiction, not a silent fallback. The relative edge-length tolerance is frozen subject-free.",
     "appearance": "Adjacent faces inside one mechanical component may be separated when source-backed CAA samples on the two sides of their shared edge exhibit a strong premultiplied-RGBA discontinuity. This realizes presentation segmentation as a distinct observable authority without inventing semantic object labels.",
     "sampling": "Samples are taken slightly inside each incident face to detect region appearance on either side of an edge rather than merely sampling the shared anti-aliased boundary texel."
   },

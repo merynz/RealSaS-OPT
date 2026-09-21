@@ -317,6 +317,11 @@ class CAARestViewProofIR:
     source_locked_p95_rgba_l1: float
     source_foreground_mean_rgba_l1: float
     source_foreground_p95_rgba_l1: float
+    source_feature_p999_rgba_l1: float
+    source_feature_high_error_fraction: float
+    largest_connected_feature_high_error_fraction: float
+    source_feature_edge_recall_1px: float
+    source_feature_edge_precision_1px: float
     geometry_visible_pixel_count: int
     final_alpha_pixel_count: int
     geometry_visible_final_alpha_hole_count: int
@@ -492,6 +497,13 @@ def caa_rest_render_proof_from_dict(payload: Mapping[str, Any]) -> CAARestRender
             source_locked_p95_rgba_l1=float(row["source_locked_p95_rgba_l1"]),
             source_foreground_mean_rgba_l1=float(row["source_foreground_mean_rgba_l1"]),
             source_foreground_p95_rgba_l1=float(row["source_foreground_p95_rgba_l1"]),
+            source_feature_p999_rgba_l1=float(row["source_feature_p999_rgba_l1"]),
+            source_feature_high_error_fraction=float(row["source_feature_high_error_fraction"]),
+            largest_connected_feature_high_error_fraction=float(
+                row["largest_connected_feature_high_error_fraction"]
+            ),
+            source_feature_edge_recall_1px=float(row["source_feature_edge_recall_1px"]),
+            source_feature_edge_precision_1px=float(row["source_feature_edge_precision_1px"]),
             geometry_visible_pixel_count=int(row["geometry_visible_pixel_count"]),
             final_alpha_pixel_count=int(row["final_alpha_pixel_count"]),
             geometry_visible_final_alpha_hole_count=int(

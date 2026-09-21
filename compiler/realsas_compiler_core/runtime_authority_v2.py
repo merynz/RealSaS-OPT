@@ -166,8 +166,6 @@ class DynamicVisualIntegrityV2IR:
     compiled_unobserved_visible_fraction: float
     maximum_frame_compiled_unobserved_visible_fraction: float
     maximum_connected_compiled_unobserved_visible_fraction: float
-    compiled_global_visible_pixel_count: int
-    compiled_global_visible_fraction: float
     maximum_frame_micro_visible_pixel_fraction: float
     consequential_visible_face_count: int
     unmeasurable_consequential_visible_face_count: int
@@ -337,8 +335,6 @@ def dynamic_visual_integrity_from_dict(payload: Mapping[str, Any]) -> DynamicVis
         compiled_unobserved_visible_fraction=float(payload["compiled_unobserved_visible_fraction"]),
         maximum_frame_compiled_unobserved_visible_fraction=float(payload["maximum_frame_compiled_unobserved_visible_fraction"]),
         maximum_connected_compiled_unobserved_visible_fraction=float(payload["maximum_connected_compiled_unobserved_visible_fraction"]),
-        compiled_global_visible_pixel_count=int(payload["compiled_global_visible_pixel_count"]),
-        compiled_global_visible_fraction=float(payload["compiled_global_visible_fraction"]),
         maximum_frame_micro_visible_pixel_fraction=float(payload["maximum_frame_micro_visible_pixel_fraction"]),
         consequential_visible_face_count=int(payload["consequential_visible_face_count"]),
         unmeasurable_consequential_visible_face_count=int(payload["unmeasurable_consequential_visible_face_count"]),

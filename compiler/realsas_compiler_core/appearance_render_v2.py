@@ -16,11 +16,11 @@ from .types import QualificationError
 from .visibility_v2 import VISIBILITY_CONTRACT_V2_HASH, rasterize_visible_owner
 
 
-@dataclass(frozen=True)
 RUNTIME_COVERAGE_SCALE = 2
 RUNTIME_COVERAGE_SAMPLE_COUNT = RUNTIME_COVERAGE_SCALE * RUNTIME_COVERAGE_SCALE
 
 
+@dataclass(frozen=True)
 class ReferenceCAARender:
     premultiplied_rgba: np.ndarray
     straight_rgba_u8: np.ndarray

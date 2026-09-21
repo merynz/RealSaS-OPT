@@ -7,7 +7,10 @@ on:
     paths:
       - 'experiments/vf11_certified_adaptive/**'
       - 'tests/research/test_vf11_range_engine_v1.py'
+      - 'tests/research/test_vf11_range_engine_c0_v2.py'
       - 'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json'
+      - 'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json'
+      - 'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json'
       - '.github/workflows/vf11_certified_adaptive_research_smoke.yml'
   workflow_dispatch:
 
@@ -43,7 +46,10 @@ jobs:
       - name: Compile research range engine
         run: |
           python -m py_compile experiments/vf11_certified_adaptive/range_engine_v1.py
+          python -m py_compile experiments/vf11_certified_adaptive/range_engine_c0_v2.py
+          python -m py_compile experiments/vf11_certified_adaptive/profile_c0_v2.py
           python -m py_compile tests/research/test_vf11_range_engine_v1.py
+          python -m py_compile tests/research/test_vf11_range_engine_c0_v2.py
 
       - name: Enforce research-only claim boundary
         shell: bash
@@ -58,11 +64,17 @@ jobs:
           assert p['knight_mainline_started'] is False
           assert p['x1_disposition']['state']=='HOLD_NOT_EXECUTED'
           assert p['next_long_experiment']['execution_class']=='LONG__USER_RUN_ALL_NOTEBOOK_REQUIRED'
+          v1=json.load(open('canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json',encoding='utf-8'))
+          assert v1['status']=='FALSIFIED__PRACTICALLY_VACUOUS_BOUNDS'
+          v2=json.load(open('canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json',encoding='utf-8'))
+          assert v2['status']=='PREREGISTERED__C0_RANGE_ONLY'
+          assert v2['product_authority_minted'] is False
+          assert v2['witness_execution'] is False
           print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
           PY
 
       - name: Run short deterministic/adversarial range tests
-        run: pytest -q tests/research/test_vf11_range_engine_v1.py
+        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py
 
       - name: Emit smoke receipt
         shell: bash
@@ -74,13 +86,18 @@ jobs:
           from pathlib import Path
           files=[
             'experiments/vf11_certified_adaptive/range_engine_v1.py',
+            'experiments/vf11_certified_adaptive/range_engine_c0_v2.py',
+            'experiments/vf11_certified_adaptive/profile_c0_v2.py',
             'tests/research/test_vf11_range_engine_v1.py',
+            'tests/research/test_vf11_range_engine_c0_v2.py',
             'canonical/VF11_CERTIFIED_ADAPTIVE_RESEARCH_REDIRECTION_V1_20260921.json',
+            'canonical/VF11_RANGE_ENGINE_V1_CLOSURE_20260921.json',
+            'canonical/VF11_C0_RANGE_RESEARCH_PREREGISTRATION_V2_20260921.json',
           ]
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           out={
-            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v1',
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v2',
             'status':'PASS',
             'product_authority_minted':False,
             'files':{p:sha(p) for p in files},

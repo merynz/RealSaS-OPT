@@ -18,8 +18,7 @@ CAA_BACKENDS = {
 CAA_PROVENANCE = {
     "DIRECT_SOURCE": 0,
     "OTHER_VIEW_SOURCE": 1,
-    "COMPILED_NEAREST_SURFACE": 2,
-    "COMPILED_GLOBAL_SURFACE": 3,
+    "COMPILED_LOCAL_HARMONIC": 2,
 }
 CAA_PROVENANCE_BY_CODE = {value: key for key, value in CAA_PROVENANCE.items()}
 
@@ -163,8 +162,7 @@ class CAACompileArtifactIR:
     total_sample_count: int
     direct_source_sample_count: int
     other_view_source_sample_count: int
-    compiled_nearest_surface_sample_count: int
-    compiled_global_surface_sample_count: int
+    compiled_local_harmonic_sample_count: int
     compile_hash: str
     schema_version: str = "RealSaS.CAACompileArtifactIR.v2"
     metadata: Json = field(default_factory=dict)
@@ -192,8 +190,7 @@ def validate_caa_compile_artifact(value: CAACompileArtifactIR) -> None:
     counted = (
         value.direct_source_sample_count
         + value.other_view_source_sample_count
-        + value.compiled_nearest_surface_sample_count
-        + value.compiled_global_surface_sample_count
+        + value.compiled_local_harmonic_sample_count
     )
     if counted != value.total_sample_count:
         raise QualificationError("CAA_COMPILE_PROVENANCE_ACCOUNTING_DRIFT")
@@ -394,8 +391,7 @@ def caa_compile_artifact_from_dict(payload: Mapping[str, Any]) -> CAACompileArti
         int(payload["total_sample_count"]),
         int(payload["direct_source_sample_count"]),
         int(payload["other_view_source_sample_count"]),
-        int(payload["compiled_nearest_surface_sample_count"]),
-        int(payload["compiled_global_surface_sample_count"]),
+        int(payload["compiled_local_harmonic_sample_count"]),
         str(payload["compile_hash"]),
         schema_version=str(payload.get("schema_version") or "RealSaS.CAACompileArtifactIR.v2"),
         metadata=dict(payload.get("metadata") or {}),

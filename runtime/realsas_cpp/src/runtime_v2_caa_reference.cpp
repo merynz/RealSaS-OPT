@@ -132,7 +132,7 @@ Mesh parse_mesh(const std::vector<std::uint8_t>& data) {
     Mesh m;
     m.vertex_count = read_scalar<std::uint32_t>(data, off);
     m.face_count = read_scalar<std::uint32_t>(data, off);
-    const auto vertex_bytes = static_cast<std::size_t>(m.vertex_count) * 3u * sizeof(float);
+    const auto vertex_bytes = static_cast<std::size_t>(m.vertex_count) * 3u * sizeof(double);
     if (off + vertex_bytes > data.size()) throw std::runtime_error("MESH_VERTEX_TRUNCATED");
     off += vertex_bytes; // runtime frames carry exact posed XYZ.
     m.faces.resize(m.face_count);
@@ -142,8 +142,8 @@ Mesh parse_mesh(const std::vector<std::uint8_t>& data) {
     m.uv.resize(m.face_count);
     for (std::uint32_t f = 0; f < m.face_count; ++f) {
         for (int k = 0; k < 3; ++k) {
-            m.uv[f][k].x = static_cast<double>(read_scalar<float>(data, off));
-            m.uv[f][k].y = static_cast<double>(read_scalar<float>(data, off));
+            m.uv[f][k].x = read_scalar<double>(data, off);
+            m.uv[f][k].y = read_scalar<double>(data, off);
         }
     }
     if (off != data.size()) throw std::runtime_error("MESH_BYTES_TRAILING");
@@ -187,7 +187,7 @@ ProvenanceSet parse_provenance(const std::vector<std::uint8_t>& data) {
 struct Clip {
     std::uint32_t frame_count{}, vertex_count{};
     std::vector<double> times;
-    std::vector<float> positions;
+    std::vector<double> positions;
 };
 
 Clip parse_clip(const std::vector<std::uint8_t>& data) {
@@ -199,7 +199,7 @@ Clip parse_clip(const std::vector<std::uint8_t>& data) {
     for (auto& t : c.times) t = read_scalar<double>(data, off);
     const auto n = static_cast<std::size_t>(c.frame_count) * c.vertex_count * 3u;
     c.positions.resize(n);
-    for (auto& v : c.positions) v = read_scalar<float>(data, off);
+    for (auto& v : c.positions) v = read_scalar<double>(data, off);
     if (off != data.size()) throw std::runtime_error("CLIP_BYTES_TRAILING");
     return c;
 }

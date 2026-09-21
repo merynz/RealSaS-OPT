@@ -83,6 +83,26 @@ def test_c1_semantic_exact_fixtures():
     )
     assert state == "UNKNOWN"
 
+    # Tangent fixture f=x^2 on x in [-1,1]: derivative along x contains zero.
+    state = c1.classify_exact_directional_fixture(
+        lambda d: (
+            -2.0 * abs(float(d[0])),
+             2.0 * abs(float(d[0])),
+        ) if abs(float(d[0])) > 0.0 else (0.0, 0.0),
+        [np.array([1.0, 0.0, 0.0])],
+    )
+    assert state == "UNKNOWN"
+
+    # Fold fixture f=x^3-x on x in [-1,1]: df/dx=3x^2-1 spans [-1,2].
+    state = c1.classify_exact_directional_fixture(
+        lambda d: (
+            min(-1.0 * float(d[0]), 2.0 * float(d[0])),
+            max(-1.0 * float(d[0]), 2.0 * float(d[0])),
+        ),
+        [np.array([1.0, 0.0, 0.0])],
+    )
+    assert state == "UNKNOWN"
+
 
 def test_silu_prime_bounds_contain_dense_derivative():
     lo = torch.tensor([-9.0, -3.1, -2.5, -1.0, 0.0, 1.0], dtype=torch.float64)

@@ -33,6 +33,7 @@ from compiler.realsas_compiler_core.appearance_bake_v2 import (
 )
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     compile_deterministic_caa,
+    resolve_projected_tile_resolution,
 )
 from compiler.realsas_compiler_core.appearance_color_v2 import (
     source_sample_roundtrip_pm_error,
@@ -237,6 +238,32 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
     if observation_camera_hashes != tuple(cameras.camera_binding_hashes):
         raise QualificationError("CAA_RASTER_CORRESPONDENCE_PREREQUISITE_FAILED")
 
+    compile_policy = dict(policy["compile_policy"])
+    if str(compile_policy.get("tile_resolution_mode") or "") != "PROJECTED_SOURCE_DENSITY_V1":
+        raise QualificationError("CAA_TILE_RESOLUTION_MODE_UNSUPPORTED")
+    _source_rgba, source_masks = _load_source_inputs(ctx, observation)
+    tile_evidence = resolve_projected_tile_resolution(
+        candidate=candidate,
+        cameras=cameras.cameras,
+        foreground_mask_by_view=source_masks,
+        candidate_resolutions=tuple(
+            int(value)
+            for value in compile_policy.get("tile_resolution_candidates") or ()
+        ),
+        max_source_pixels_per_atlas_texel=float(
+            compile_policy["max_source_pixels_per_atlas_texel"]
+        ),
+        bleed_px=int(compile_policy["bleed_px"]),
+        max_atlas_resolution=int(compile_policy["max_atlas_resolution"]),
+    )
+    compile_policy["tile_resolution"] = int(
+        tile_evidence["selected_tile_resolution"]
+    )
+    compile_policy["max_supported_face_count"] = int(
+        tile_evidence["max_supported_face_count"]
+    )
+    compile_policy["tile_resolution_evidence"] = tile_evidence
+
     prereg = build_caa_preregistration(
         backend_id=backend,
         contract_sha256=contract_sha,
@@ -247,7 +274,7 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
         surface_addressing_hash=addressing.addressing_hash,
         appearance_domain_hash=domain.domain_hash,
         static_mesh_qualification_hash=static_mesh.qualification_hash,
-        compile_policy=dict(policy["compile_policy"]),
+        compile_policy=compile_policy,
         source_lock_policy=dict(policy["source_lock_policy"]),
         completion_quality_policy=dict(policy["completion_quality_policy"]),
     )
@@ -270,6 +297,7 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
                 dict(cfg.get("policy_document") or {}).get("sha256") or ""
             ),
             "raster_correspondence_prerequisite": "PASS",
+            "tile_resolution_evidence": tile_evidence,
         },
     }
 

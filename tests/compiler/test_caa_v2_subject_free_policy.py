@@ -97,12 +97,12 @@ def test_caa_policy_is_reopened_and_tile_density_is_art_quality_driven():
 def _holdout_fixture(*, adversarial: bool):
     tile_resolution = 8
     bary = triangular_barycentric_samples(tile_resolution)
-    face_count = 24
+    face_count = 64
     positions = []
     face_index = []
     for face in range(face_count):
-        x0 = float(face % 6) * 2.0
-        y0 = float(face // 6) * 2.0
+        x0 = float(face % 8) * 2.0
+        y0 = float(face // 8) * 2.0
         tri = np.asarray(
             ((x0, y0, 0.0), (x0 + 1.0, y0, 0.0), (x0, y0 + 1.0, 0.0)),
             dtype=np.float64,

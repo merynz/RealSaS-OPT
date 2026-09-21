@@ -855,7 +855,41 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     visible_faces = owner[visible].astype(np.int64)
                     if np.any(visible_faces >= len(faces)):
                         raise QualificationError("RUNTIME_V2_DVI_OWNER_FACE_INDEX_DRIFT")
-                    counts = np.bincount(visible_faces, minlength=len(faces))
+                    front_counts = np.bincount(
+                        visible_faces,
+                        minlength=len(faces),
+                    )
+                    layer_owner = np.asarray(
+                        reference.layer_owner_face_index,
+                        dtype=np.int64,
+                    )
+                    contribution_mask = np.asarray(
+                        reference.contributing_layer_mask,
+                        dtype=bool,
+                    )
+                    if (
+                        layer_owner.shape != contribution_mask.shape
+                        or layer_owner.shape[:2] != owner.shape
+                    ):
+                        raise QualificationError(
+                            "RUNTIME_V2_DVI_LAYER_CONTRIBUTION_SHAPE_DRIFT"
+                        )
+                    contributing_faces = layer_owner[contribution_mask]
+                    if np.any(contributing_faces < 0) or np.any(
+                        contributing_faces >= len(faces)
+                    ):
+                        raise QualificationError(
+                            "RUNTIME_V2_DVI_CONTRIBUTING_FACE_INDEX_DRIFT"
+                        )
+                    contribution_counts = np.bincount(
+                        contributing_faces,
+                        minlength=len(faces),
+                    )
+                    # A face is consequential when it is geometrically frontmost
+                    # OR actually contributes color/alpha through the qualified
+                    # multi-layer composite. This prevents transparent front
+                    # geometry from hiding a deformed deeper surface from DVI.
+                    counts = np.maximum(front_counts, contribution_counts)
                     consequential = {
                         int(index)
                         for index in np.nonzero(counts >= min_visible_pixels)[0]
@@ -863,9 +897,19 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     micro = np.nonzero(
                         (counts > 0) & (counts < min_visible_pixels)
                     )[0]
-                    micro_pixels = (
-                        0 if len(micro) == 0 else int(np.sum(counts[micro]))
-                    )
+                    if len(micro) == 0:
+                        micro_pixels = 0
+                    else:
+                        micro_pixel_mask = np.isin(owner, micro)
+                        contributed_micro = contribution_mask & np.isin(
+                            layer_owner,
+                            micro,
+                        )
+                        micro_pixel_mask |= np.any(
+                            contributed_micro,
+                            axis=2,
+                        )
+                        micro_pixels = int(np.count_nonzero(micro_pixel_mask))
                     max_frame_micro_visible_fraction = max(
                         max_frame_micro_visible_fraction,
                         float(micro_pixels) / float(visible_count),

@@ -64,6 +64,7 @@ def test_witness_workflow_uses_current_cli_and_run_local_ledger_only():
     ).read_text(encoding="utf-8")
     assert "--from-stage" not in text
     assert "--to-stage" not in text
+    assert "mainline validate-witness-authorization" in text
     assert "mainline init-run" in text
     assert "--target 02_SOURCE_LICENSE_PROVENANCE" in text
     assert "--target 08_NORMALIZATION_DOMAIN_QUALIFIED" in text
@@ -102,6 +103,60 @@ def test_readiness_state_machine_is_consistent_with_required_proofs():
         assert seal_status.startswith("REVOKED")
         assert readiness["status"].endswith("__WITNESS_FORBIDDEN")
         assert readiness["readiness_seal"]["witness_execution_allowed"] is False
+
+
+def test_technical_readiness_does_not_authorize_witness_without_explicit_user_approval(
+    monkeypatch,
+    tmp_path,
+):
+    plan = _plan()
+    current = json.loads(
+        (ROOT / "canonical" / "V2_IMPLEMENTATION_READINESS.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    readiness = dict(current)
+    readiness["status"] = "READY_FOR_WITNESS_EXECUTION"
+    readiness["pipeline_plan_sha256"] = mainline.validate_plan(plan)
+    readiness["implementation_closure_sha256"] = (
+        mainline.implementation_closure_sha256(plan)
+    )
+    readiness["readiness_seal"] = {
+        "status": "PASS",
+        "witness_execution_allowed": True,
+        "witness_execution_authorized_now": False,
+        "user_approval_required": True,
+        "user_approval_state": "AWAITING_EXPLICIT_USER_APPROVAL",
+        "knight_started": False,
+    }
+    path = tmp_path / "V2_IMPLEMENTATION_READINESS.json"
+    path.write_text(
+        json.dumps(readiness, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(mainline, "READINESS_PATH", path)
+
+    # Technical readiness is intentionally distinct from execution permission.
+    mainline.validate_readiness(plan)
+    import pytest
+
+    with pytest.raises(
+        RuntimeError,
+        match="V2_WITNESS_EXPLICIT_USER_APPROVAL_REQUIRED",
+    ):
+        mainline.validate_witness_authorization(plan)
+
+    readiness["readiness_seal"][
+        "witness_execution_authorized_now"
+    ] = True
+    readiness["readiness_seal"][
+        "user_approval_state"
+    ] = "APPROVED_EXPLICITLY_BY_USER"
+    path.write_text(
+        json.dumps(readiness, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    mainline.validate_witness_authorization(plan)
 
 
 def test_implementation_audit_execution_class_is_explicit_and_subject_free():

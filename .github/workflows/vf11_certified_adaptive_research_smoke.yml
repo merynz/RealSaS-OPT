@@ -22,6 +22,7 @@ on:
       - 'canonical/VF11_C1_DIRECTIONAL_REGULARITY_PREREGISTRATION_V1_20260921.json'
       - 'canonical/VF11_C1_V1_CLOSURE_20260921.json'
       - 'canonical/VF11_C1_V2_CORRELATED_AFFINE_PREREGISTRATION_20260921.json'
+      - 'canonical/VF11_C1_V2_INTERIM_REVIEW_20260921.json'
       - '.github/workflows/vf11_certified_adaptive_research_smoke.yml'
   workflow_dispatch:
 
@@ -113,6 +114,9 @@ jobs:
           assert c1v2['status']=='PREREGISTERED__C1_V2_CORRELATED_TANGENT_AFFINE'
           assert c1v2['product_authority_minted'] is False
           assert c1v2['full_domain_traversal_authorized'] is False
+          c1v2r=json.load(open('canonical/VF11_C1_V2_INTERIM_REVIEW_20260921.json',encoding='utf-8'))
+          assert c1v2r['status']=='NONVACUOUS__MARGIN_REPORTING_REPLAY_REQUIRED_BEFORE_CLOSURE'
+          assert c1v2r['product_authority_minted'] is False
           print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
           PY
 
@@ -157,7 +161,7 @@ jobs:
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           out={
-            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v5',
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v6',
             'status':'PASS',
             'product_authority_minted':False,
             'files':{p:sha(p) for p in files},

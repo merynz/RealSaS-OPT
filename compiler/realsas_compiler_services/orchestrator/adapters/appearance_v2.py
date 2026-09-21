@@ -701,6 +701,16 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         "max_provenance_boundary_mean_gradient_jump",
         "max_provenance_boundary_p95_gradient_jump",
         "max_source_sample_pm_roundtrip_abs_error",
+        "cross_view_color_conflict_cut_rgba_l1",
+        "cross_view_alpha_conflict_cut",
+        "cross_view_min_shared_direct_samples_per_pair",
+        "cross_view_min_component_samples_for_gate",
+        "cross_view_max_pair_p95_rgba_l1",
+        "cross_view_max_pair_color_conflict_fraction",
+        "cross_view_max_pair_p95_alpha_abs",
+        "cross_view_max_pair_alpha_conflict_fraction",
+        "cross_view_max_component_color_conflict_fraction",
+        "cross_view_max_component_alpha_conflict_fraction",
     )
     if any(key not in policy for key in required):
         raise QualificationError("CAA_QUALITY_POLICY_INCOMPLETE")
@@ -726,6 +736,10 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         direct_valid=arrays["direct_valid"],
         direct_rgba=arrays["direct_rgba"],
         sample_component_index=arrays["sample_component_index"],
+        color_conflict_cut_rgba_l1=float(
+            policy["cross_view_color_conflict_cut_rgba_l1"]
+        ),
+        alpha_conflict_cut=float(policy["cross_view_alpha_conflict_cut"]),
     )
 
     direct_pm_roundtrip = source_sample_roundtrip_pm_error(
@@ -741,6 +755,37 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         max_source_pm_roundtrip_error
         <= float(policy["max_source_sample_pm_roundtrip_abs_error"])
     )
+
+    cross_view_pair_passed = (
+        len(cross_view["per_pair"]) == 8
+        and all(
+            int(row["shared_direct_sample_count"])
+            >= int(policy["cross_view_min_shared_direct_samples_per_pair"])
+            and float(row["p95_premultiplied_rgba_l1"])
+            <= float(policy["cross_view_max_pair_p95_rgba_l1"])
+            and float(row["color_conflict_fraction"])
+            <= float(policy["cross_view_max_pair_color_conflict_fraction"])
+            and float(row["p95_alpha_abs"])
+            <= float(policy["cross_view_max_pair_p95_alpha_abs"])
+            and float(row["alpha_conflict_fraction"])
+            <= float(policy["cross_view_max_pair_alpha_conflict_fraction"])
+            for row in cross_view["per_pair"]
+        )
+    )
+    component_min = int(policy["cross_view_min_component_samples_for_gate"])
+    qualified_component_rows = [
+        row
+        for row in cross_view["per_pair_component"]
+        if int(row["shared_direct_sample_count"]) >= component_min
+    ]
+    cross_view_component_passed = all(
+        float(row["color_conflict_fraction"])
+        <= float(policy["cross_view_max_component_color_conflict_fraction"])
+        and float(row["alpha_conflict_fraction"])
+        <= float(policy["cross_view_max_component_alpha_conflict_fraction"])
+        for row in qualified_component_rows
+    )
+    cross_view_passed = cross_view_pair_passed and cross_view_component_passed
 
     holdout_per_view_passed = (
         len(holdout["per_view"]) == 8
@@ -793,6 +838,7 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
         <= float(policy["max_provenance_boundary_p95_gradient_jump"])
         and seam_per_view_passed
         and source_pm_roundtrip_passed
+        and cross_view_passed
     )
 
     value = CompleteAppearanceQualificationIR(
@@ -838,7 +884,10 @@ def qualify_complete_appearance_stage(ctx: dict) -> dict:
             "holdout_every_view_passed": holdout_per_view_passed,
             "seam_every_view_passed": seam_per_view_passed,
             "cross_view_source_compatibility_measured": True,
-            "cross_view_source_compatibility_shipping_gate_frozen": False,
+            "cross_view_source_compatibility_shipping_gate_frozen": True,
+            "cross_view_source_compatibility_passed": cross_view_passed,
+            "cross_view_pair_passed": cross_view_pair_passed,
+            "cross_view_component_passed": cross_view_component_passed,
             "source_pm_roundtrip_max_abs_error": max_source_pm_roundtrip_error,
             "source_pm_roundtrip_passed": source_pm_roundtrip_passed,
             "appearance_is_coequal_product_authority": True,

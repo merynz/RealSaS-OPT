@@ -735,6 +735,10 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             view_index=view.view_index,
         )
         cameras[view.view_id] = camera
+    rest_screen_by_view = {
+        view_id: project_points_xyz_v3(rest_vertices, camera)[:, :2]
+        for view_id, camera in cameras.items()
+    }
 
     geometry_visible = 0
     alpha_transparent = 0
@@ -836,6 +840,9 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     np.count_nonzero(reference.exact_depth_ambiguity)
                 )
                 exact_depth_ambiguous_pixels += exact_depth_count
+                visibility_layer_overflow_pixels += int(
+                    np.count_nonzero(reference.layer_overflow)
+                )
                 if visible_count > 0:
                     max_frame_exact_depth_ambiguous_fraction = max(
                         max_frame_exact_depth_ambiguous_fraction,
@@ -875,6 +882,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     consequential = set()
 
                 camera = cameras[view.view_id]
+                rest_screen = rest_screen_by_view[view.view_id]
                 posed_screen = project_points_xyz_v3(
                     posed_vertices, camera
                 )[:, :2]
@@ -889,6 +897,26 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                 )
                 for face_index in sorted(consequential):
                     face = faces[face_index]
+                    rest_tri = rest_screen[face]
+                    posed_tri = posed_screen[face]
+                    rest_area2 = float(
+                        (rest_tri[1, 0] - rest_tri[0, 0])
+                        * (rest_tri[2, 1] - rest_tri[0, 1])
+                        - (rest_tri[1, 1] - rest_tri[0, 1])
+                        * (rest_tri[2, 0] - rest_tri[0, 0])
+                    )
+                    posed_area2 = float(
+                        (posed_tri[1, 0] - posed_tri[0, 0])
+                        * (posed_tri[2, 1] - posed_tri[0, 1])
+                        - (posed_tri[1, 1] - posed_tri[0, 1])
+                        * (posed_tri[2, 0] - posed_tri[0, 0])
+                    )
+                    if (
+                        abs(rest_area2) >= min_projected_area2
+                        and abs(posed_area2) >= min_projected_area2
+                        and rest_area2 * posed_area2 < 0.0
+                    ):
+                        visible_orientation_flip_faces += 1
                     metrics = dynamic_face_conditioning_metrics(
                         uv_triangle=face_uv[face_index],
                         posed_xyz_triangle=posed_vertices[face],

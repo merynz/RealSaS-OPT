@@ -13,6 +13,7 @@ from compiler.realsas_compiler_core.appearance_compile_v2 import (
     bilinear_rgba_u8,
     compile_deterministic_caa,
 )
+from compiler.realsas_compiler_core.appearance_render_v2 import render_caa_reference
 from compiler.realsas_compiler_core.playback_full_surface_v3 import CameraProjectionV3
 from compiler.realsas_compiler_core.visibility_v2 import (
     VISIBILITY_CONTRACT_V2,
@@ -64,7 +65,7 @@ def test_equal_depth_tie_is_sealed_face_index_but_exposed_as_ambiguity_evidence(
     visible = result.owner_face_index[visible_mask]
     assert len(visible) > 0
     assert set(map(int, np.unique(visible))) == {0}
-    assert VISIBILITY_CONTRACT_V2["exact_depth_tie"] == "SEALED_FACE_INDEX_ONLY"
+    assert VISIBILITY_CONTRACT_V2["exact_depth_tie"] == "SEALED_FACE_INDEX_ONLY__AMBIGUITY_MUST_BE_QUALIFIED"
     assert np.all(result.second_owner_face_index[visible_mask] == 1)
     assert np.allclose(result.depth_margin[visible_mask], 0.0, atol=1e-12)
 
@@ -140,6 +141,66 @@ def test_premultiplied_bilinear_filtering_does_not_bleed_transparent_rgb():
     assert 0.49 <= sampled[0] <= 0.51
     assert sampled[1] == 0.0
     assert sampled[2] == 0.0
+
+def test_linear_light_midpoint_is_not_gamma_space_average():
+    image = np.asarray([[[0, 0, 0, 255], [255, 255, 255, 255]]], dtype=np.uint8)
+    sampled = bilinear_rgba_u8(
+        image,
+        np.asarray([[0.5, 0.0]], dtype=np.float64),
+    )[0]
+    # 0.5 linear light encodes to approximately sRGB 188, not encoded-space 128.
+    assert 186 <= int(sampled[0]) <= 189
+    assert int(sampled[0]) == int(sampled[1]) == int(sampled[2])
+    assert int(sampled[3]) == 255
+
+
+def test_transparent_front_geometry_reveals_deeper_character_layer():
+    mesh = _overlap_mesh(equal_depth=False)
+    camera = _camera(resolution=32)
+    face_uv = np.asarray(
+        [
+            [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
+            [[1.0, 0.0], [1.0, 0.0], [1.0, 0.0]],
+        ],
+        dtype=np.float64,
+    )
+    texture = np.asarray(
+        [[[255, 0, 0, 0], [0, 255, 0, 255]]],
+        dtype=np.uint8,
+    )
+    provenance = np.zeros((1, 2), dtype=np.uint8)
+    render = render_caa_reference(
+        mesh=mesh,
+        camera=camera,
+        face_uv=face_uv,
+        texture_rgba_u8=texture,
+        provenance_atlas=provenance,
+    )
+    center = render.straight_rgba_u8[16, 16]
+    assert tuple(map(int, center)) == (0, 255, 0, 255)
+    assert int(render.contributing_layer_count[16, 16]) == 1
+    assert not bool(render.layer_overflow[16, 16])
+
+
+def test_visibility_reports_layer_overflow_instead_of_silent_drop():
+    vertices = []
+    faces = []
+    for layer in range(5):
+        z = 0.05 * layer
+        ids = []
+        for corner, point in enumerate(((-0.8, -0.8), (0.8, -0.8), (0.0, 0.8))):
+            vertex_id = f"l{layer}_{corner}"
+            ids.append(vertex_id)
+            vertices.append(
+                SimpleNamespace(
+                    canonical_mesh_vertex_id=vertex_id,
+                    P=(point[0], point[1], z),
+                )
+            )
+        faces.append(tuple(ids))
+    mesh = SimpleNamespace(vertices=tuple(vertices), faces=tuple(faces))
+    result = rasterize_visible_owner(mesh, _camera())
+    assert np.any(result.layer_overflow)
 
 
 def test_bilinear_provenance_is_conservative_over_color_footprint():

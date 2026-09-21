@@ -349,6 +349,15 @@
       "required_closure": "Keep technical readiness and witness execution authorization as separate fail-closed states. Named WITNESS initialization and Knight preflight must require technical readiness plus a separately recorded explicit user approval; implementation audits must remain unaffected.",
       "repair": "Technical readiness and execution permission are now separate fail-closed states. mainline.validate_witness_authorization first validates the exact READY closure, then requires readiness_seal.status=PASS, witness_execution_allowed=true, user_approval_required=true, witness_execution_authorized_now=true, user_approval_state=APPROVED_EXPLICITLY_BY_USER, and knight_started=false. Named WITNESS init, every subsequent WITNESS execute call, and the Subject-2 Knight preflight all use this stricter gate. Repository adversaries prove both a technically READY but unapproved state and an already-existing WITNESS ledger cannot execute or increment any stage attempt.",
       "status": "REPAIRED__INIT_AND_EVERY_EXECUTE_REQUIRE_EXPLICIT_USER_AUTHORIZATION__EXACT_HEAD_CI_PENDING"
+    },
+    {
+      "id": "VF-40",
+      "severity": "HIGH",
+      "owner": "Implementation closure / CI governance",
+      "finding": "The V2 implementation_closure_sha256 bound the mainline workflow, dry-run and Knight preflight but omitted several gates used by the reopened readiness decision: current runtime/native CI, model source ownership, native runtime source gate/verifier, proof-service promotion gate, VF23 production-policy bank, and the append-only native source-seal chain. Those authority bytes could change without invalidating an otherwise READY closure fingerprint.",
+      "required_closure": "The exact implementation fingerprint must include every workflow/verifier/seal whose semantics participate in technical readiness, and future append-only native source seals must enter the fingerprint automatically rather than requiring a manual list update.",
+      "repair": "IMPLEMENTATION_CLOSURE_STATIC_PATHS now includes current runtime CI, model-mainline source gate, native runtime source gate, proof-service promotion gate, VF23 production-policy bank and the native seal verifier. A deterministic dynamic-glob census additionally binds the historical promotion source seal and every COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V*.json file into the closure. Empty glob sets and duplicate closure files fail closed; repository tests require V11 and the promotion base seal to be present.",
+      "status": "REPAIRED__PROMOTION_GATES_AND_DYNAMIC_SOURCE_SEAL_CHAIN_FINGERPRINTED__EXACT_HEAD_CI_PENDING"
     }
   ],
   "false_or_overstated_external_findings": [

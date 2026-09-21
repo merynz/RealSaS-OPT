@@ -1,0 +1,90 @@
+name: VF13 rigidity no-op calibration
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tools/vf13_rigidity_noop_calibration.py'
+      - 'compiler/realsas_compiler_core/product_state_v2.py'
+      - 'canonical/PRESENTATION_PARTITION_POLICY_V1_20260921.json'
+      - '.github/workflows/vf13_rigidity_noop_calibration.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: vf13-rigidity-noop-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calibrate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_VF13_OUT: vf13_out
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install frozen mainline dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile apparatus
+        run: |
+          python -m py_compile \
+            tools/vf13_rigidity_noop_calibration.py \
+            compiler/realsas_compiler_core/product_state_v2.py
+
+      - name: Enforce subject-free boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nE 'SUBJECT2_KNIGHT|Knight\.fbx|PROMOTED_MAGE|MAGE_FIT|/MAGE|/Mage' \
+            tools/vf13_rigidity_noop_calibration.py; then
+            echo VF13_SUBJECT_CONTAMINATION_FORBIDDEN >&2
+            exit 1
+          fi
+          echo VF13_SUBJECT_FREE_BOUNDARY=PASS
+
+      - name: Validate frozen rigidity no-op tolerance
+        run: python tools/vf13_rigidity_noop_calibration.py
+
+      - name: Validate calibration claim boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          p=json.load(open('vf13_out/VF13_RIGIDITY_NOOP_CALIBRATION.json',encoding='utf-8'))
+          assert p['status']=='PASS_SUBJECT_FREE_FROZEN_TOLERANCE_VALIDATED'
+          assert p['subject_inputs_used'] is False
+          assert p['knight_result_used'] is False
+          assert p['mage_result_used'] is False
+          assert p['category_labels_used'] is False
+          assert all(x['passed'] for x in p['hard_rigid_controls'])
+          assert all(not x['passed'] for x in p['deformable_controls'])
+          s=p['separation']
+          assert s['threshold_search_used'] is False
+          assert s['maximum_hard_rigid_relative_edge_error'] < s['frozen_tolerance']
+          assert s['frozen_tolerance'] < s['minimum_deformable_relative_edge_error']
+          assert p['legacy_false_positive_control']['historical_weight_predicate_would_classify_rigid'] is True
+          assert p['legacy_false_positive_control']['noop_probe_passed'] is False
+          print('VF13_CALIBRATION_BOUNDARY=PASS')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vf13-rigidity-noop-calibration
+          path: vf13_out/
+          if-no-files-found: error

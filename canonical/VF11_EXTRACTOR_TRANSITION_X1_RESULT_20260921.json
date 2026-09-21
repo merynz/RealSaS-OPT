@@ -1,0 +1,40 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX1Result.v1",
+  "date_utc": "2026-09-21",
+  "status": "DEPTH_DOMINANT__MC_RETAINS_BASELINE__LOCAL_SUPPORT_ANOMALY_ISOLATED",
+  "result_sha256": "c2e9bebf6911af1e912925f030e857ad81cc116498877c1b7683528eb06bf13d",
+  "result_bytes": 81709,
+  "elapsed_seconds_total": 21.327222847000485,
+  "frozen_root_count": 12,
+  "d13_mc_surface_present_root_count": 11,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "aggregate": {
+    "d11_mc_normal_distance_p95_median": 3.936150932684577e-6,
+    "d12_mc_normal_distance_p95_median": 9.938521205393233e-7,
+    "d13_mc_normal_distance_p95_median": 2.4988140741003677e-7,
+    "d11_mtet_normal_distance_p95_median": 6.384079205534929e-6,
+    "d12_mtet_normal_distance_p95_median": 1.6105939064279257e-6,
+    "d13_mtet_normal_distance_p95_median": 4.017759701403713e-7,
+    "d11_mc_vs_mtet_p95_over_h_median": 0.34616441875752607,
+    "d12_mc_vs_mtet_p95_over_h_median": 0.34851988866847466,
+    "d13_mc_vs_mtet_p95_over_h_median": 0.350958349865136
+  },
+  "interpretation": "For the median surface-present root, halving lattice spacing improved direct gradient-normalized MC contour residual by about 4x per level. MTet followed the same depth trend but had larger direct residual and substantially more triangles. This reproduces the earlier conclusion that contourer replacement is not the main fidelity lever; local sampling depth is.",
+  "anomaly": {
+    "anchor_id": 44,
+    "c0_state": "UNKNOWN",
+    "c1_state": "PROVEN_DIRECTIONAL_REGULAR_NEGATIVE",
+    "d11_mc_faces": 32,
+    "d12_mc_faces": 64,
+    "d13_mc_faces": 306,
+    "d11_mc_normal_distance_p95": 0.00020691544603865833,
+    "d12_mc_normal_distance_p95": 0.00014709363009434968,
+    "d13_mc_normal_distance_p95": 2.64668514570967e-7,
+    "interpretation": "The abrupt support growth and residual collapse at d13 indicate a local transverse-support sampling issue rather than a global contourer deficit."
+  },
+  "reference_boundary": "d13 local MC is approximation-only, not truth or certificate.",
+  "next": "X1B_TRIPLANE_KNOT_CAUSAL_TEST"
+}

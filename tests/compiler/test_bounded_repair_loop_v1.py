@@ -2,6 +2,7 @@ from compiler.realsas_compiler_services.proof.repair_loop import (
     BoundedRepairOperationV1,
     RepairApplicationRecordV1,
     RepairReproofEvidenceV1,
+    V2VisualRepairNonRegressionEvidenceV1,
     build_bounded_repair_directives_v1,
     evaluate_repair_effect_v1,
     validate_repair_application_v1,
@@ -57,6 +58,23 @@ def _application(d, *, owners=("mesh",), paths=("directional_renderables.mesh.to
     )
 
 
+def _visual(*, child="CHILD", static=True, dynamic=True, impl="IMPL"):
+    return V2VisualRepairNonRegressionEvidenceV1(
+        child_product_state_hash=child,
+        implementation_closure_hash=impl,
+        static_fidelity_bank_hash="STATIC:BANK",
+        dynamic_fidelity_bank_hash="DYNAMIC:BANK",
+        static_fidelity_status="PASS" if static else "FAIL",
+        dynamic_fidelity_status="PASS" if dynamic else "FAIL",
+        static_fidelity_passed=static,
+        dynamic_fidelity_passed=dynamic,
+        metadata={
+            "static_implementation_closure_hash": impl,
+            "dynamic_implementation_closure_hash": impl,
+        },
+    )
+
+
 def _reproof(d, *, probe="PROBE", regression=(), improved=True):
     return RepairReproofEvidenceV1(
         directive_id=d.directive_id,
@@ -107,7 +125,12 @@ def test_child_application_must_be_distinct_single_owner_and_in_scope():
 
 def test_same_probe_reproof_with_material_improvement_accepts_effect():
     d = _directive()
-    out = evaluate_repair_effect_v1(directive=d, application=_application(d), reproof=_reproof(d))
+    out = evaluate_repair_effect_v1(
+        directive=d,
+        application=_application(d),
+        reproof=_reproof(d),
+        visual_nonregression=_visual(),
+    )
     assert out["repair_accepted"] is True
     assert out["blockers"] == []
 
@@ -118,7 +141,51 @@ def test_probe_change_or_protected_regression_rejects_effect():
         directive=d,
         application=_application(d),
         reproof=_reproof(d, probe="DIFFERENT", regression=("loop_seam_regressed",)),
+        visual_nonregression=_visual(),
     )
     assert out["repair_accepted"] is False
     assert "repair_reproof_probe_changed" in out["blockers"]
     assert "repair_protected_invariant_regression" in out["blockers"]
+
+
+
+def test_v2_repair_credit_requires_same_child_static_and_dynamic_visual_pass():
+    d = _directive()
+    missing = evaluate_repair_effect_v1(
+        directive=d,
+        application=_application(d),
+        reproof=_reproof(d),
+    )
+    assert missing["repair_accepted"] is False
+    assert "repair_v2_visual_nonregression_evidence_missing" in missing["blockers"]
+
+    dynamic_regression = evaluate_repair_effect_v1(
+        directive=d,
+        application=_application(d),
+        reproof=_reproof(d),
+        visual_nonregression=_visual(dynamic=False),
+    )
+    assert dynamic_regression["repair_accepted"] is False
+    assert "visual_nonregression_dynamic_bank_not_pass" in dynamic_regression["blockers"]
+
+    drifted = _visual(impl="IMPL:A")
+    drifted = V2VisualRepairNonRegressionEvidenceV1(
+        **{
+            **drifted.__dict__,
+            "metadata": {
+                "static_implementation_closure_hash": "IMPL:A",
+                "dynamic_implementation_closure_hash": "IMPL:B",
+            },
+        }
+    )
+    implementation_drift = evaluate_repair_effect_v1(
+        directive=d,
+        application=_application(d),
+        reproof=_reproof(d),
+        visual_nonregression=drifted,
+    )
+    assert implementation_drift["repair_accepted"] is False
+    assert (
+        "visual_nonregression_cross_bank_implementation_drift"
+        in implementation_drift["blockers"]
+    )

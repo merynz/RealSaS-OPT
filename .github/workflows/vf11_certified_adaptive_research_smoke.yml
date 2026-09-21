@@ -136,7 +136,7 @@ jobs:
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           out={
-            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v2',
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v3',
             'status':'PASS',
             'product_authority_minted':False,
             'files':{p:sha(p) for p in files},

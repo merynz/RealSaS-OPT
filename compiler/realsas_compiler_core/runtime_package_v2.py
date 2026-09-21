@@ -172,6 +172,8 @@ def build_rss_v2_entries(projection: RuntimeProjectionV2IR) -> OrderedDict[str, 
         f"appearance_asset_hash={projection.appearance_asset_binding_hash}",
         f"dynamic_motion_hash={projection.dynamic_motion_binding_hash}",
         f"visibility_contract_hash={projection.visibility_contract_hash}",
+        "playback_sampling_contract=SEALED_FRAME_INDEX_ONLY",
+        "host_interpolation_authorized=0",
         f"clip_count={len(projection.clips)}",
         f"view_count={len(projection.views)}",
     ]

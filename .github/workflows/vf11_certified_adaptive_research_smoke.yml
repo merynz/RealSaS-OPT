@@ -90,7 +90,7 @@ jobs:
           python -m py_compile tests/research/test_vf11_directional_regular_c1_v2.py
           python -m py_compile tests/research/test_vf11_profile_c1_handoff_v2.py
           python -m py_compile tests/research/test_vf11_oriented_crossing_c2_v1.py
-          python -m py_compile tests/research/test_vf11_profile_c2_primary_v1.py tests/research/test_vf11_axis_graph_c2_v2.py tests/research/test_vf11_profile_c2_axis_graph_v2.py
+          python -m py_compile tests/research/test_vf11_profile_c2_primary_v1.py
           python -m py_compile tests/research/test_vf11_axis_graph_c2_v2.py
           python -m py_compile tests/research/test_vf11_profile_c2_axis_graph_v2.py
 
@@ -165,7 +165,7 @@ jobs:
           PY
 
       - name: Run short deterministic/adversarial range tests
-        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py tests/research/test_vf11_directional_regular_c1_v1.py tests/research/test_vf11_profile_c1_handoff_v1.py tests/research/test_vf11_directional_regular_c1_v2.py tests/research/test_vf11_profile_c1_handoff_v2.py tests/research/test_vf11_oriented_crossing_c2_v1.py tests/research/test_vf11_profile_c2_primary_v1.py
+        run: pytest -q tests/research/test_vf11_range_engine_v1.py tests/research/test_vf11_range_engine_c0_v2.py tests/research/test_vf11_range_engine_c0_v3.py tests/research/test_vf11_paired_profile_c0_v3.py tests/research/test_vf11_directional_regular_c1_v1.py tests/research/test_vf11_profile_c1_handoff_v1.py tests/research/test_vf11_directional_regular_c1_v2.py tests/research/test_vf11_profile_c1_handoff_v2.py tests/research/test_vf11_oriented_crossing_c2_v1.py tests/research/test_vf11_profile_c2_primary_v1.py tests/research/test_vf11_axis_graph_c2_v2.py tests/research/test_vf11_profile_c2_axis_graph_v2.py
 
       - name: Emit smoke receipt
         shell: bash

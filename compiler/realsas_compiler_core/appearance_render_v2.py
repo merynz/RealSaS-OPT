@@ -11,6 +11,7 @@ from .appearance_bake_v2 import (
     bilinear_premultiplied_rgba,
     conservative_bilinear_provenance,
 )
+from .appearance_color_v2 import premultiplied_linear_to_straight_srgb_u8
 from .types import QualificationError
 from .visibility_v2 import VISIBILITY_CONTRACT_V2_HASH, rasterize_visible_owner
 
@@ -69,21 +70,11 @@ def _sample_nearest_scalar(image: np.ndarray, uv: np.ndarray) -> np.ndarray:
 
 
 def premultiplied_to_straight_u8(pm: np.ndarray) -> np.ndarray:
+    """Compatibility wrapper: linear PM -> straight sRGB RGBA8."""
     value = np.asarray(pm, dtype=np.float64)
     if value.ndim != 3 or value.shape[2] != 4:
         raise QualificationError("CAA_REFERENCE_PM_RGBA_SHAPE_INVALID")
-    alpha = np.clip(value[..., 3:4], 0.0, 1.0)
-    rgb = np.zeros_like(value[..., :3])
-    nonzero = alpha[..., 0] > 1e-12
-    if np.any(nonzero):
-        rgb[nonzero] = np.clip(
-            value[..., :3][nonzero] / alpha[nonzero],
-            0.0,
-            1.0,
-        )
-    straight = np.concatenate((rgb, alpha), axis=2)
-    return np.clip(np.floor(straight * 255.0 + 0.5), 0, 255).astype(np.uint8)
-
+    return premultiplied_linear_to_straight_srgb_u8(value)
 
 def render_caa_reference(
     *,

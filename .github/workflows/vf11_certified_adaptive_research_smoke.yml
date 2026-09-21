@@ -261,6 +261,9 @@ jobs:
           cp experiments/vf11_certified_adaptive/paired_profile_c0_v3.py vf11_cert_smoke/source/
           cp experiments/vf11_certified_adaptive/adaptive_empty_graph_c2_v3.py vf11_cert_smoke/source/
           cp experiments/vf11_certified_adaptive/resume_d11_c2_v4.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/batched_c0_x5.py vf11_cert_smoke/source/
+          mkdir -p vf11_cert_smoke/source/models/iris/v3
+          cp models/iris/v3/scene_first_signed_v3.py vf11_cert_smoke/source/models/iris/v3/
           python - <<'PY'
           import hashlib,json
           from pathlib import Path
@@ -317,7 +320,7 @@ jobs:
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           out={
-            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v18',
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v19',
             'status':'PASS',
             'product_authority_minted':False,
             'files':{p:sha(p) for p in files},

@@ -336,6 +336,7 @@ def compile_caa_stage(ctx: dict) -> dict:
         sample_component_index=sample_component_index,
         direct_valid=result["direct_valid"],
         direct_rgba=result["direct_rgba"],
+        direct_pm_linear=result["direct_pm_linear"],
         source_xy=result["source_xy"],
         rgba=result["rgba"],
         provenance=result["provenance"],

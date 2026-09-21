@@ -169,13 +169,14 @@ def test_transparent_front_geometry_reveals_deeper_character_layer():
         dtype=np.uint8,
     )
     provenance = np.zeros((1, 2), dtype=np.uint8)
-    render = render_caa_reference(
-        mesh=mesh,
-        camera=camera,
-        face_uv=face_uv,
-        texture_rgba_u8=texture,
-        provenance_atlas=provenance,
-    )
+    with np.errstate(invalid="raise"):
+        render = render_caa_reference(
+            mesh=mesh,
+            camera=camera,
+            face_uv=face_uv,
+            texture_rgba_u8=texture,
+            provenance_atlas=provenance,
+        )
     center = render.straight_rgba_u8[16, 16]
     assert tuple(map(int, center)) == (0, 255, 0, 255)
     assert int(render.contributing_layer_count[16, 16]) == 1

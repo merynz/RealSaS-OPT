@@ -657,6 +657,8 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         "dynamic_max_micro_visible_pixel_fraction_per_frame",
         "dynamic_max_unmeasurable_consequential_visible_face_count",
         "dynamic_max_exact_depth_ambiguous_fraction",
+        "dynamic_max_visible_orientation_flip_face_count",
+        "dynamic_max_visibility_layer_overflow_pixel_count",
     )
     if any(key not in policy for key in required_dynamic_visibility):
         raise QualificationError("RUNTIME_V2_DVI_VISIBILITY_POLICY_INCOMPLETE")
@@ -681,6 +683,12 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     exact_depth_ambiguity_budget = float(
         policy["dynamic_max_exact_depth_ambiguous_fraction"]
     )
+    max_orientation_flip_faces = int(
+        policy["dynamic_max_visible_orientation_flip_face_count"]
+    )
+    max_layer_overflow_pixels = int(
+        policy["dynamic_max_visibility_layer_overflow_pixel_count"]
+    )
     for value in (
         exposure_budget,
         frame_exposure_budget,
@@ -691,8 +699,12 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     ):
         if not (0.0 <= value <= 1.0):
             raise QualificationError("RUNTIME_V2_DVI_VISIBILITY_BUDGET_INVALID")
-    if max_unmeasurable_consequential < 0:
-        raise QualificationError("RUNTIME_V2_DVI_UNMEASURABLE_FACE_BUDGET_INVALID")
+    if (
+        max_unmeasurable_consequential < 0
+        or max_orientation_flip_faces < 0
+        or max_layer_overflow_pixels < 0
+    ):
+        raise QualificationError("RUNTIME_V2_DVI_COUNT_BUDGET_INVALID")
     conditioning_policy = validate_dynamic_appearance_policy(policy)
     min_visible_pixels = int(
         conditioning_policy["dynamic_min_visible_pixels_per_face"]
@@ -736,6 +748,8 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     max_frame_micro_visible_fraction = 0.0
     exact_depth_ambiguous_pixels = 0
     max_frame_exact_depth_ambiguous_fraction = 0.0
+    visibility_layer_overflow_pixels = 0
+    visible_orientation_flip_faces = 0
     frame_count = 0
     conditioning_sample_count = 0
     relative_conditioning_sample_count = 0

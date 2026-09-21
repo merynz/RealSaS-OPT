@@ -1,0 +1,62 @@
+{
+  "schema": "RealSaS.VF11C2V3AdaptiveEmptyOrGraphPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__C2_V3_ADAPTIVE_EMPTY_OR_GRAPH_REFINEMENT",
+  "authority_class": "RESEARCH_PREREGISTRATION_ONLY",
+  "parent_c2_v2_closure": "canonical/VF11_C2_V2_AXIS_GRAPH_RESEARCH_CLOSURE_20260921.json",
+  "product_authority_minted": false,
+  "shipping_certificate_backend": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "full_domain_traversal_authorized": false,
+  "root_cohort": {
+    "count": 12,
+    "source": "corrected C1 V2 primary regular d8 cells",
+    "already_certified_axis_graph_roots": 2,
+    "unresolved_roots": 10
+  },
+  "leaf_classifier_order": [
+    "C0 corrected V3 at micro-depth 2: PROVEN_EMPTY_POSITIVE or PROVEN_EMPTY_NEGATIVE => terminal EMPTY",
+    "otherwise C2 V2 axis-graph: PROVEN_AXIS_GRAPH_PATCH => terminal GRAPH",
+    "otherwise, if relative refinement depth remains => split into 8 octants",
+    "otherwise => terminal UNRESOLVED and abstain"
+  ],
+  "refinement_ladder": {
+    "relative_depths": [0, 1, 2],
+    "root_absolute_depth": 8,
+    "maximum_absolute_depth": 10,
+    "split_rule": "uniform octants only for unresolved leaves",
+    "no_semantic_or_fixture_specific_refinement": true
+  },
+  "proof_semantics": {
+    "EMPTY": "whole leaf box has one strict field sign under corrected C0 research arithmetic",
+    "GRAPH": "leaf zero set is a certified single-valued local coordinate-axis graph patch",
+    "UNRESOLVED": "neither absence nor local graph simplicity was certified; must refine or abstain"
+  },
+  "primary_metrics": [
+    "terminal EMPTY / GRAPH / UNRESOLVED leaf counts at each ladder level",
+    "unresolved root-volume fraction at each ladder level",
+    "number of root boxes whose full descendant partition is closed by EMPTY-or-GRAPH leaves",
+    "graph patch count and selected-axis distribution",
+    "C0 PROVEN_ZERO_EXISTS leaves that remain unresolved",
+    "empirical contradiction count",
+    "runtime and box evaluations"
+  ],
+  "existence_root_audit": {
+    "source": "C2 V1 existence-proven roots",
+    "count": 7,
+    "rule": "If an existence-proven root becomes fully closed, at least one descendant must be GRAPH. An all-EMPTY closed partition is a soundness alarm."
+  },
+  "decision": {
+    "any_empirical_or_existence_partition_contradiction": "FAIL__SOUNDNESS_ALARM",
+    "all_12_roots_fully_closed_by_depth_10": "PASS__BOUNDED_ADAPTIVE_EMPTY_OR_GRAPH_CLOSURE",
+    "some_but_not_all_roots_closed": "NONVACUOUS__DEEPER_REFINEMENT_OR_BOUND_TIGHTENING_DECISION_REQUIRED",
+    "zero_additional_roots_closed": "FALSIFIED__C2_V3_REFINEMENT_NOT_PRACTICALLY_CLOSING"
+  },
+  "forbidden_inferences": [
+    "global Knight topology",
+    "global single component",
+    "full Knight extraction coverage",
+    "shipping proof under ordinary float64"
+  ]
+}

@@ -11,7 +11,7 @@
 - Current state: REOPENED__WITNESS_FORBIDDEN
 - Active experiment: V2_IMPLEMENTATION_ASSEMBLY
 - Most recent closed gate: PRIOR_READY_SEAL_REVOKED_BY_POST_SEAL_APPEARANCE_REVIEW
-- Canonical main: fd7534f15b5d
+- Canonical main: e3fdc598d48b
 - Governance ledger: V2_IMPLEMENTATION_ASSEMBLY — 0/46; ready 01_SOURCE_BYTES_SEALED,05_CAMERA_CONTRACT_SOLVED
 - Plan SHA-256: a41ccb9a157624fecc2177a05150646012577f443cc27938b7e93c1e0ff020e4
 - Promotion block: Close tile-density qualification, source-constrained completion quality, cross-view RGB compatibility, dynamic alpha-hole and scattered-hole/speckle gates before any Knight execution.

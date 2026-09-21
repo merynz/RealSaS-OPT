@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2615**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2623**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2627,6 +2627,14 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-21T09:47:01+03:00` | `36abd1356d4d` | yes | CI_TEST, RUNTIME_PRODUCT | ci: enforce dynamic geometry red-team in runtime gate | `.github/workflows/current_runtime_self_hosted_ci.yml` | `main` |
 | `2026-09-21T09:47:55+03:00` | `ed2fbeceec86` | yes | COMPILER_PROOF | repair: require V2 static and dynamic visual non-regression for credit | `compiler/realsas_compiler_services/proof/repair_loop.py` | `main` |
 | `2026-09-21T09:48:09+03:00` | `fd7534f15b5d` | yes | CI_TEST, COMPILER_PROOF | test: forbid single-domain repair promotion in V2 | `tests/compiler/test_bounded_repair_loop_v1.py` | `main` |
+| `2026-09-21T09:50:00+03:00` | `1eaf6ee2c10c` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-21T09:53:21+03:00` | `e493b99787d5` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: append native runtime source extension V5 | `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V5_20260921.json` | `main` |
+| `2026-09-21T09:53:41+03:00` | `ef28cb0ad270` | yes | GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: verify append-only native runtime source seal V5 | `tools/verify_native_runtime_source_seal_v2.py` | `main` |
+| `2026-09-21T09:54:09+03:00` | `c32b0cd1604c` | yes | CI_TEST, RUNTIME_PRODUCT | ci: bind native source verifier and full seal chain to gate | `.github/workflows/native_runtime_source_gate.yml` | `main` |
+| `2026-09-21T09:54:30+03:00` | `3fdbed19eeeb` | yes | GOVERNANCE_CONTINUITY | authority: record VF-12 VF-16 VF-19 repairs and VF-35 source-gate closure | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T09:57:52+03:00` | `10a3091904f2` | yes | COMPILER_PROOF | visibility: avoid non-finite depth arithmetic in ambiguity proof | `compiler/realsas_compiler_core/appearance_render_v2.py` | `main` |
+| `2026-09-21T09:58:04+03:00` | `6be9104e15dc` | yes | CI_TEST, COMPILER_PROOF | test: make non-finite visibility arithmetic fatal | `tests/compiler/test_visibility_and_caa_v2.py` | `main` |
+| `2026-09-21T09:58:40+03:00` | `e3fdc598d48b` | yes | GOVERNANCE_CONTINUITY | authority: reconcile repaired VF-04 VF-06 VF-07 VF-29 evidence | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
 
 ## Use rule
 

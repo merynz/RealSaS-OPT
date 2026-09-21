@@ -78,9 +78,9 @@ def read_rss_v2(path: Path) -> OrderedDict[str, bytes]:
 
 
 def _mesh_payload(arrays: dict) -> bytes:
-    vertices = np.asarray(arrays["vertices"], dtype="<f4")
+    vertices = np.asarray(arrays["vertices"], dtype="<f8")
     faces = np.asarray(arrays["faces"], dtype="<u4")
-    uv = np.asarray(arrays["face_uv"], dtype="<f4")
+    uv = np.asarray(arrays["face_uv"], dtype="<f8")
     if vertices.ndim != 2 or vertices.shape[1] != 3:
         raise QualificationError("RSS_V2_VERTEX_SHAPE_INVALID")
     if faces.ndim != 2 or faces.shape[1] != 3:
@@ -147,7 +147,7 @@ def _provenance_payload(projection: RuntimeProjectionV2IR) -> bytes:
 
 def _clip_payload(times: np.ndarray, positions: np.ndarray) -> bytes:
     times = np.asarray(times, dtype="<f8")
-    positions = np.asarray(positions, dtype="<f4")
+    positions = np.asarray(positions, dtype="<f8")
     if times.ndim != 1 or positions.ndim != 3 or positions.shape[0] != len(times) or positions.shape[2] != 3:
         raise QualificationError("RSS_V2_CLIP_ARRAY_SHAPE_INVALID")
     return (
@@ -174,6 +174,7 @@ def build_rss_v2_entries(projection: RuntimeProjectionV2IR) -> OrderedDict[str, 
         f"visibility_contract_hash={projection.visibility_contract_hash}",
         "playback_sampling_contract=SEALED_FRAME_INDEX_ONLY",
         "host_interpolation_authorized=0",
+        "geometry_uv_position_precision=IEEE754_FLOAT64",
         f"clip_count={len(projection.clips)}",
         f"view_count={len(projection.views)}",
     ]

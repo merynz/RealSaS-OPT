@@ -103,7 +103,9 @@
       "severity": "HIGH",
       "owner": "Repair governance",
       "finding": "Hash invalidation forces downstream remeasurement after an upstream repair, but no explicit dual-domain non-regression rule prevents a rest improvement from consuming dynamic quality margin or vice versa.",
-      "required_closure": "Require every geometry/appearance repair candidate to pass both static and dynamic adversarial banks before promotion, with protected-metric non-regression evidence."
+      "required_closure": "Require every geometry/appearance repair candidate to pass both static and dynamic adversarial banks before promotion, with protected-metric non-regression evidence.",
+      "repair": "The bounded repair service now marks every current directive as requiring V2 static+dynamic visual non-regression. Repair effect credit requires evidence bound to the exact child product hash, non-empty static/dynamic bank hashes, PASS for both banks, and one identical implementation-closure hash across the two banks. Missing evidence, dynamic regression, child drift or cross-bank implementation drift rejects the repair.",
+      "status": "REPAIRED__DUAL_DOMAIN_PROMOTION_FIREWALL__CI_PENDING"
     },
     {
       "id": "VF-13",
@@ -135,7 +137,8 @@
       "owner": "Atlas filtering",
       "finding": "A future mip/minification repair cannot reuse the current two-pixel per-tile bleed blindly; ordinary atlas mip generation can mix neighboring face tiles across mip levels even when base-level bilinear bleed is correct.",
       "required_closure": "Qualify mip-safe island padding or per-island/per-face mip generation together with the minification filter contract.",
-      "status": "OPEN"
+      "status": "REPAIRED_BY_CAPABILITY_BOUNDARY__NATIVE_ADVERSARY_CI_PENDING",
+      "repair": "Current V2 explicitly authorizes only BASE_LEVEL_BILINEAR_LINEAR_PM_ONLY and forbids mip generation/consumption. Combined with the <=1 texel/output-pixel minification gate, mip bleed is outside the current shipping capability rather than silently unsupported. Native consumer rejects tampered mip or alternate-sampler contracts."
     },
     {
       "id": "VF-17",
@@ -160,7 +163,8 @@
       "owner": "Runtime temporal contract",
       "finding": "Native V2 proof renders only exact sealed Stage41 frame indices. No current evidence was found that native proof interpolates unproved frames; however host-side continuous interpolation semantics are not explicit in the V2 package authority.",
       "required_closure": "Declare playback sampling semantics explicitly. If hosts interpolate, prove the interpolation envelope; otherwise require exact sealed-frame playback semantics.",
-      "status": "OPEN_CONTRACT_CLARIFICATION"
+      "status": "REPAIRED__SEALED_FRAME_ONLY_NATIVE_ENFORCEMENT__CI_PENDING",
+      "repair": "Runtime package seals SEALED_FRAME_INDEX_ONLY with host_interpolation_authorized=0; native consumer enforces both and parses frame/view integers lexically exact so fractional strings cannot truncate through std::stoi. Native adversaries reject fractional frame requests and interpolation-enabled package tampering."
     },
     {
       "id": "VF-20",
@@ -287,6 +291,14 @@
       "finding": "The runtime/native workflow did not trigger when the canonical V2 appearance numerical policy or dynamic-appearance calibration authority changed. Shipping limits could therefore be relaxed without forcing the implementation and adversarial banks to rerun.",
       "repair": "current-runtime-self-hosted-ci now triggers on CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json and DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json, binding policy changes to the exact runtime/native/red-team gate.",
       "status": "REPAIRED__EXACT_HEAD_CI_PENDING"
+    },
+    {
+      "id": "VF-35",
+      "severity": "HIGH",
+      "owner": "CI / native source authority governance",
+      "finding": "The native runtime source-gate push paths did not include the verifier script itself or the new extension seal, and the pull-request path set omitted older extension seals V3/V4. In addition, subtree-set drift had hidden three changed sealed blobs plus two unsealed runtime blobs behind the first failure.",
+      "repair": "Append-only source extension V5 seals the exact current 25-file runtime/realsas_cpp subtree (3 replacements, 2 additions) without mutating historical seals. The verifier consumes V5 as closure authority, and push/PR triggers now include the verifier plus the full extension chain V1-V5.",
+      "status": "REPAIRED__EXACT_SOURCE_GATE_CI_PENDING"
     }
   ],
   "false_or_overstated_external_findings": [

@@ -166,16 +166,17 @@ def test_single_regime_directional_bound_contains_dense_autograd_samples():
         assert val <= bound.upper + 3e-8
 
 
-def test_no_regular_state_is_minted_when_all_candidates_remain_unresolved():
+def test_no_regular_state_is_minted_for_exact_zero_gradient_field():
     torch.manual_seed(105)
     field = TinyField(channels=2, hidden=8).double().eval()
+    for parameter in field.parameters():
+        parameter.data.zero_()
     planes = torch.randn(1, 3, 2, 8, 8, dtype=torch.float64)
 
-    # A deliberately broad cell. This test is not a proof that the true field
-    # is nonregular; it checks fail-closed behavior when the C1 enclosure cannot
-    # establish a fixed derivative sign.
-    lo = np.array([-0.70, -0.70, -0.70], dtype=np.float64)
-    hi = np.array([ 0.70,  0.70,  0.70], dtype=np.float64)
+    # Exact constant-zero field: every directional derivative is exactly zero.
+    # Strict regularity must therefore fail closed.
+    lo = np.array([-0.30, -0.30, -0.30], dtype=np.float64)
+    hi = np.array([ 0.30,  0.30,  0.30], dtype=np.float64)
     cert = c1.certify_directional_regular_c1(
         field, planes, lo, hi, max_micro_depth=0
     )

@@ -390,9 +390,10 @@ def _evaluate_candidate(
     )
 
 
-def certify_directional_regular_c1(
+def certify_directional_regular_c1_prepared(
     field: nn.Module,
-    planes: torch.Tensor,
+    p: PreparedField,
+    pp: torch.Tensor,
     lo: np.ndarray,
     hi: np.ndarray,
     *,
@@ -400,8 +401,6 @@ def certify_directional_regular_c1(
 ) -> C1Certificate:
     if max_micro_depth < 0:
         raise ValueError("NEGATIVE_MICRO_DEPTH")
-    pp = prepare_planes(planes)
-    p = prepare_field(field)
     results: list[C1CandidateResult] = []
     total_evals = 0
 
@@ -429,6 +428,24 @@ def certify_directional_regular_c1(
         derivative_upper=float(max(r.upper_margin for r in results)),
         evaluated_box_count=total_evals,
         candidate_results=tuple(results),
+    )
+
+
+def certify_directional_regular_c1(
+    field: nn.Module,
+    planes: torch.Tensor,
+    lo: np.ndarray,
+    hi: np.ndarray,
+    *,
+    max_micro_depth: int = 2,
+) -> C1Certificate:
+    return certify_directional_regular_c1_prepared(
+        field,
+        prepare_field(field),
+        prepare_planes(planes),
+        lo,
+        hi,
+        max_micro_depth=max_micro_depth,
     )
 
 

@@ -9,6 +9,10 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 from .appearance_authority_v2 import CAA_PROVENANCE
+from .appearance_color_v2 import (
+    bilinear_premultiplied_linear_rgba,
+    premultiplied_linear_to_straight_srgb_u8,
+)
 from .camera_geometry_v2 import project_points_xyz_v3
 from .types import QualificationError
 from .visibility_v2 import (
@@ -109,52 +113,27 @@ def erode_binary_mask(mask: np.ndarray, radius: int) -> np.ndarray:
     return out
 
 
-def bilinear_rgba_u8(image: np.ndarray, xy: np.ndarray) -> np.ndarray:
-    """Premultiplied-safe source sampling returned as straight RGBA u8.
+def bilinear_rgba_u8(
+    image: np.ndarray,
+    xy: np.ndarray,
+    *,
+    return_premultiplied_linear: bool = False,
+):
+    """Sample source sRGB RGBA in linear-light premultiplied space.
 
-    Source rasters are transport RGBA. Interpolating straight RGB across
-    partially transparent texels can import arbitrary transparent RGB into
-    visible edge pixels, so interpolation is performed in premultiplied space
-    and converted back exactly once for the compiled transport representation.
+    The returned transport sample remains straight sRGB RGBA8 for current
+    asset compatibility. When requested, the exact pre-quantization linear
+    premultiplied value is returned as quality evidence.
     """
-    rgba = np.asarray(image, dtype=np.uint8)
-    points = np.asarray(xy, dtype=np.float64)
-    if rgba.ndim != 3 or rgba.shape[2] != 4:
-        raise QualificationError("CAA_SOURCE_RGBA_INVALID")
-    if points.ndim != 2 or points.shape[1] != 2:
-        raise QualificationError("CAA_SAMPLE_XY_INVALID")
-    h, w, _ = rgba.shape
-    x = np.clip(points[:, 0], 0.0, float(w - 1))
-    y = np.clip(points[:, 1], 0.0, float(h - 1))
-    x0 = np.floor(x).astype(np.int64)
-    y0 = np.floor(y).astype(np.int64)
-    x1 = np.minimum(x0 + 1, w - 1)
-    y1 = np.minimum(y0 + 1, h - 1)
-    tx = (x - x0).reshape(-1, 1)
-    ty = (y - y0).reshape(-1, 1)
-
-    source = rgba.astype(np.float64) / 255.0
-    alpha = source[..., 3:4]
-    pm = np.concatenate((source[..., :3] * alpha, alpha), axis=2)
-    p00 = pm[y0, x0]
-    p10 = pm[y0, x1]
-    p01 = pm[y1, x0]
-    p11 = pm[y1, x1]
-    mixed = (1.0 - ty) * ((1.0 - tx) * p00 + tx * p10) + ty * (
-        (1.0 - tx) * p01 + tx * p11
+    pm = bilinear_premultiplied_linear_rgba(
+        np.asarray(image, dtype=np.uint8),
+        np.asarray(xy, dtype=np.float64),
+        normalized=False,
     )
-
-    out = np.zeros_like(mixed)
-    out[:, 3] = mixed[:, 3]
-    nonzero = mixed[:, 3] > 1.0e-12
-    if np.any(nonzero):
-        out[nonzero, :3] = np.clip(
-            mixed[nonzero, :3] / mixed[nonzero, 3:4],
-            0.0,
-            1.0,
-        )
-    return np.clip(np.floor(out * 255.0 + 0.5), 0.0, 255.0).astype(np.uint8)
-
+    straight = premultiplied_linear_to_straight_srgb_u8(pm)
+    if return_premultiplied_linear:
+        return straight, pm
+    return straight
 
 def _candidate_vertex_id(vertex) -> str:
     value = getattr(vertex, "candidate_vertex_id", None)

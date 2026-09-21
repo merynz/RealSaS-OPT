@@ -1,0 +1,100 @@
+{
+  "schema": "RealSaS.VF11GeometryFeatureSurvivalR384Authority.v1",
+  "status": "RESULT__R384_INSUFFICIENT_UNDER_FROZEN_STAGE13_PROFILE__R512_AUTHORIZED",
+  "date_utc": "2026-09-21",
+  "authority": "SUBJECT_FREE_SAME_PHYSICAL_FEATURE_REQUERY__NO_KNIGHT_OR_MAGE_INPUT",
+  "parent_authority": "canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_CALIBRATION_V1_20260921.json",
+  "measurement": {
+    "workflow_run_id": 35575366833,
+    "workflow_job_id": 106255883067,
+    "source_commit": "781468771ede3f1d329e5cae8b2524fb237b186a",
+    "artifact_id": 10629550460,
+    "artifact_sha256": "fc32ecf4c15db0cdd96b2998dfcc00a44211b6fc8c82f0f340f04367e77fba62",
+    "decoder_resolution": 384,
+    "reference_decoder_resolution": 256,
+    "raster_resolution": 1024,
+    "case_count": 20,
+    "frozen_profile_pass_case_count": 0,
+    "frozen_profile_fail_case_count": 20,
+    "physical_widths_held_fixed": true,
+    "threshold_relaxation_used": false
+  },
+  "decisive_observations": {
+    "thin_strap": {
+      "ref_voxel_0_75": {
+        "decoder_status": "EXTRACTED",
+        "min_feature_recall": 0.9820131030375223
+      },
+      "ref_voxel_1_0": {
+        "decoder_status": "EXTRACTED",
+        "min_feature_recall": 0.986427732079906
+      },
+      "ref_voxel_2_0": {
+        "decoder_status": "EXTRACTED",
+        "min_feature_recall": 0.9866086956521739
+      }
+    },
+    "thin_blade": {
+      "ref_voxel_0_75": {
+        "min_feature_recall": 0.9913793103448276
+      },
+      "ref_voxel_1_0": {
+        "min_feature_recall": 0.9946120689655172
+      },
+      "ref_voxel_2_0": {
+        "min_feature_recall": 0.994073275862069
+      }
+    },
+    "small_component": {
+      "ref_voxel_0_75": {
+        "min_feature_recall": 0
+      },
+      "ref_voxel_1_0": {
+        "min_feature_recall": 0.2916666666666667
+      },
+      "ref_voxel_1_5": {
+        "min_feature_recall": 0.75
+      },
+      "ref_voxel_2_0": {
+        "min_feature_recall": 0.6979166666666666
+      }
+    },
+    "fork_gap": {
+      "ref_voxel_0_75": {
+        "min_gap_preservation": 0.9987146529562982
+      },
+      "ref_voxel_1_0": {
+        "min_gap_preservation": 1
+      }
+    },
+    "concave_notch": {
+      "ref_voxel_0_75": {
+        "min_gap_preservation": 1
+      },
+      "ref_voxel_1_0": {
+        "min_gap_preservation": 1
+      }
+    }
+  },
+  "interpretation": {
+    "r384_materially_improves_topology_survival": true,
+    "r384_meets_frozen_stage13_profile": false,
+    "negative_space_recovery_is_not_sufficient_for_full_profile": true,
+    "sparse_detached_component_survival_remains_material_blocker": true,
+    "aggregate_silhouette_metrics_cannot_substitute_for_component_feature_survival": true
+  },
+  "next_experiment": {
+    "decoder_resolution": 512,
+    "physical_feature_widths": "IDENTICAL_TO_R256_REFERENCE_LADDER",
+    "frozen_stage13_profile_reused_without_relaxation": true,
+    "apparatus_memory_policy": "SLABBED_ANALYTIC_SDF_COORDINATE_EVALUATION__FULL_DENSE_FIELD_RETAINED",
+    "if_r512_still_fails": "DO_NOT_RELAX_THRESHOLDS__SEPARATE_DECODER_NUMERICAL_FLOOR_FROM_PRODUCT_SOURCE_RASTER_GATE_AND_REVIEW_EXTRACTION_REPRESENTATION",
+    "knight_witness_forbidden": true
+  },
+  "contamination_checks": {
+    "subject_inputs_used": false,
+    "knight_result_used": false,
+    "mage_result_used": false,
+    "teacher_geometry_used": false
+  }
+}

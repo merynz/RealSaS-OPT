@@ -151,6 +151,7 @@ def _load_compile_arrays(artifact: CAACompileArtifactIR) -> dict:
             "sample_component_index",
             "direct_valid",
             "direct_rgba",
+            "direct_pm_linear",
             "source_xy",
             "rgba",
             "provenance",

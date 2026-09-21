@@ -260,6 +260,10 @@ jobs:
           assert x6b['status']=='PREREGISTERED__PARALLEL_CPU_CONFIRMATION_FOR_X6'
           assert x6b['full_domain_execution_authorized'] is False
           assert x6b['product_authority_minted'] is False
+          x6ba=json.load(open('canonical/VF11_EXTRACTOR_TRANSITION_X6B_A100_PARALLEL_RUN_PREREGISTRATION_20260921.json',encoding='utf-8'))
+          assert x6ba['status']=='PREREGISTERED__A100_PARALLEL_CPU_CONFIRMATION_CONDITIONAL_FULL_DOMAIN'
+          assert x6ba['execution_class']=='LONG__USER_RUN_ALL_NOTEBOOK_REQUIRED'
+          assert x6ba['product_authority_minted'] is False
           print('VF11_RESEARCH_CLAIM_BOUNDARY=PASS')
           PY
 
@@ -281,6 +285,7 @@ jobs:
           cp experiments/vf11_certified_adaptive/resume_d11_c2_v4.py vf11_cert_smoke/source/
           cp experiments/vf11_certified_adaptive/batched_c0_x5.py vf11_cert_smoke/source/
           cp experiments/vf11_certified_adaptive/accelerator_screen_x6.py vf11_cert_smoke/source/
+          cp experiments/vf11_certified_adaptive/parallel_cpu_verify_x6b.py vf11_cert_smoke/source/
           mkdir -p vf11_cert_smoke/source/models/iris/v3
           cp models/iris/v3/scene_first_signed_v3.py vf11_cert_smoke/source/models/iris/v3/
           python - <<'PY'
@@ -343,7 +348,7 @@ jobs:
           def sha(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
           out={
-            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v22',
+            'schema':'RealSaS.VF11CertifiedAdaptiveResearchSmokeReceipt.v23',
             'status':'PASS',
             'product_authority_minted':False,
             'files':{p:sha(p) for p in files},

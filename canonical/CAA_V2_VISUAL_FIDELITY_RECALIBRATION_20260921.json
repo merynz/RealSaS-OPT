@@ -98,7 +98,9 @@
       "severity": "HIGH",
       "owner": "Geometry feature survival",
       "finding": "The 256-cube decoder numerical floor is demonstrated primarily on smooth sphere/ellipsoid controls; minimum thin-feature/concavity/gap survival through decoder->raster is not explicitly calibrated.",
-      "required_closure": "Run a 1024px subject-free feature-survival panel (thin plates/straps, narrow gaps/forks, concave notches, brims/blades, small components) and derive decoder/adaptive-resolution policy from measured survival."
+      "required_closure": "Run a 1024px subject-free feature-survival panel (thin plates/straps, narrow gaps/forks, concave notches, brims/blades, small components) and derive decoder/adaptive-resolution policy from measured survival.",
+      "repair": "A 1024px subject-free five-family feature-survival panel (20 physical cases, 160 view measurements) falsified the smooth-control-only interpretation of a general R256 decoder numerical floor. At R256, 0.75/1.0-reference-voxel straps do not bracket zero; narrow fork/notch negative space collapses; detached small components can have 0% component recall while aggregate silhouette recall remains ~0.994; thin blades remain below the frozen Stage13 profile. canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_CALIBRATION_V1_20260921.json seals the negative result. The IRIS V3 signed field is arbitrary-P queryable, so the next authorized experiment holds physical feature widths fixed and re-queries the same continuous field at R384. Frozen Stage13 P999 thresholds are reused without relaxation.",
+      "status": "R256_GENERAL_FLOOR_FALSIFIED__R384_SAME_PHYSICAL_FEATURE_REQUERY_ACTIVE"
     },
     {
       "id": "VF-12",

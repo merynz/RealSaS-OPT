@@ -737,6 +737,18 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
         dynamic_payload["qualification_report"]["rest_unseen_dynamic_exposure_gate_removed"]
         is True
     )
+    assert (
+        dynamic_payload["qualification_report"]["all_declared_plant_2d_contacts_satisfied"]
+        is True
+    )
+    assert dynamic_payload["qualification_report"]["supported_contact_modes"] == [
+        "PLANT_2D"
+    ]
+    assert (
+        dynamic_payload["qualification_report"]["full_3d_ground_contact_quality_claimed"]
+        is False
+    )
+    assert "all_contacts_satisfied" not in dynamic_payload["qualification_report"]
 
     player_raw = os.environ.get("REALSAS_RUNTIME_V2_PLAYER", "")
     if not player_raw:

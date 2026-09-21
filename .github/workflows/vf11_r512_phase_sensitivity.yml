@@ -1,0 +1,98 @@
+name: VF11 R512 lattice phase sensitivity
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tools/vf11_r512_phase_sensitivity_panel.py'
+      - 'tools/vf11_geometry_feature_survival_panel.py'
+      - 'canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R512_AUTHORITY_V1_20260921.json'
+      - '.github/workflows/vf11_r512_phase_sensitivity.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: vf11-r512-phase-sensitivity-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phase-panel:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 240
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_VF11_DECODER_RESOLUTION: '512'
+      REALSAS_VF11_Z_SLAB: '4'
+      REALSAS_VF11_X1_OUT: vf11_x1_out
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install frozen calibration dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off scikit-image==0.25.2
+
+      - name: Compile apparatus
+        run: |
+          python -m py_compile \
+            tools/vf11_geometry_feature_survival_panel.py \
+            tools/vf11_r512_phase_sensitivity_panel.py
+
+      - name: Enforce subject-free boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nE 'SUBJECT2_KNIGHT|Knight\.fbx|PROMOTED_MAGE|MAGE_FIT|/MAGE|/Mage' \
+            tools/vf11_r512_phase_sensitivity_panel.py; then
+            echo VF11_X1_SUBJECT_CONTAMINATION_FORBIDDEN >&2
+            exit 1
+          fi
+          echo VF11_X1_SUBJECT_FREE_BOUNDARY=PASS
+
+      - name: Run R512 2x2x2 lattice phase panel
+        run: python tools/vf11_r512_phase_sensitivity_panel.py
+
+      - name: Validate measurement contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          p=json.load(open('vf11_x1_out/VF11_R512_PHASE_SENSITIVITY_PANEL.json',encoding='utf-8'))
+          assert p['schema']=='RealSaS.VF11R512PhaseSensitivityPanel.v1'
+          assert p['status']=='MEASURED_SUBJECT_FREE__NO_THRESHOLD_CHANGE'
+          assert p['decoder_resolution']==512
+          assert p['raster_resolution']==1024
+          assert p['phase_bank']['phase_count']==8
+          assert len(p['cases'])==4
+          assert p['physical_geometry_held_fixed'] is True
+          assert p['threshold_relaxation_used'] is False
+          assert p['subject_inputs_used'] is False
+          assert p['knight_result_used'] is False
+          assert p['mage_result_used'] is False
+          assert p['teacher_geometry_used'] is False
+          assert {x['family'] for x in p['cases']}=={
+              'THIN_STRAP','SMALL_COMPONENT','FORK_GAP','CONCAVE_NOTCH'
+          }
+          assert all(x['phase_count']==8 for x in p['cases'])
+          print('VF11_X1_MEASUREMENT_BOUNDARY=PASS')
+          print(json.dumps(p['decision'],sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vf11-r512-phase-sensitivity
+          path: vf11_x1_out/
+          if-no-files-found: error

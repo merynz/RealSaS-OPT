@@ -50,6 +50,12 @@ from compiler.realsas_compiler_core.appearance_render_v2 import (
     load_provenance_atlas,
     render_caa_reference,
 )
+from compiler.realsas_compiler_core.camera_geometry_v2 import (
+    project_points_xyz_v3,
+)
+from compiler.realsas_compiler_core.dynamic_appearance_conditioning_v2 import (
+    screen_to_texture_max_texels_per_pixel,
+)
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import coverage_metrics
 from compiler.realsas_compiler_core.output_presentation_v1 import (
     output_direction_set_from_dict,
@@ -1048,6 +1054,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
         "rest_max_alpha_interior_uncovered_fraction",
         "rest_max_exact_depth_ambiguous_fraction",
         "rest_max_visibility_layer_overflow_pixel_count",
+        "rest_max_texture_texels_per_output_pixel",
         "rest_feature_high_error_cut_rgba_l1",
         "rest_feature_edge_gradient_cut",
         "rest_max_feature_high_error_fraction",
@@ -1061,6 +1068,22 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
 
     root = ctx["run_root"] / "artifacts" / ctx["stage"]["id"]
     root.mkdir(parents=True, exist_ok=True)
+    vertex_ids = tuple(
+        str(vertex.candidate_vertex_id) for vertex in candidate.vertices
+    )
+    vertex_index = {vertex_id: index for index, vertex_id in enumerate(vertex_ids)}
+    candidate_xyz = np.asarray(
+        [vertex.P for vertex in candidate.vertices],
+        dtype=np.float64,
+    )
+    face_indices = np.asarray(
+        [
+            [vertex_index[str(vertex_id)] for vertex_id in face]
+            for face in candidate.faces
+        ],
+        dtype=np.int64,
+    )
+
     rows = []
     outputs = []
     all_pass = True
@@ -1075,6 +1098,33 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             texture_rgba_u8=texture,
             provenance_atlas=provenance_all[direction],
         )
+        projected_screen = project_points_xyz_v3(
+            candidate_xyz,
+            by_camera[direction],
+        )[:, :2]
+        contributing_faces = render.layer_owner_face_index[
+            render.contributing_layer_mask
+        ]
+        if np.any(contributing_faces < 0) or np.any(
+            contributing_faces >= len(candidate.faces)
+        ):
+            raise QualificationError(
+                "CAA_REST_CONTRIBUTING_FACE_INDEX_DRIFT"
+            )
+        maximum_texture_texels_per_output_pixel = 0.0
+        for face_index in np.unique(contributing_faces.astype(np.int64)):
+            footprint = screen_to_texture_max_texels_per_pixel(
+                uv_triangle=face_uv[int(face_index)],
+                screen_triangle=projected_screen[
+                    face_indices[int(face_index)]
+                ],
+                texture_width=int(texture.shape[1]),
+                texture_height=int(texture.shape[0]),
+            )
+            maximum_texture_texels_per_output_pixel = max(
+                maximum_texture_texels_per_output_pixel,
+                float(footprint),
+            )
         image_path = root / f"V{direction}_reference_rest.png"
         Image.fromarray(render.straight_rgba_u8, mode="RGBA").save(
             image_path, format="PNG", optimize=False, compress_level=6
@@ -1183,6 +1233,8 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             <= float(policy["rest_max_exact_depth_ambiguous_fraction"])
             and layer_overflow_count
             <= int(policy["rest_max_visibility_layer_overflow_pixel_count"])
+            and maximum_texture_texels_per_output_pixel
+            <= float(policy["rest_max_texture_texels_per_output_pixel"])
             and float(feature_metrics["high_error_fraction"])
             <= float(policy["rest_max_feature_high_error_fraction"])
             and float(feature_metrics["largest_connected_high_error_fraction"])
@@ -1244,6 +1296,13 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
                     "visibility_layer_overflow_passed": (
                         layer_overflow_count
                         <= int(policy["rest_max_visibility_layer_overflow_pixel_count"])
+                    ),
+                    "maximum_texture_texels_per_output_pixel": (
+                        maximum_texture_texels_per_output_pixel
+                    ),
+                    "texture_minification_passed": (
+                        maximum_texture_texels_per_output_pixel
+                        <= float(policy["rest_max_texture_texels_per_output_pixel"])
                     ),
                     "source_feature_preservation": dict(feature_metrics),
                     "source_feature_preservation_passed": (

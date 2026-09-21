@@ -792,6 +792,8 @@ def test_v2_stage37_to46_tail_closes_on_subject_free_triangle_with_native_caa(tm
     assert closure["qualification_report"]["appearance_authority_passed"] is True
     assert closure["qualification_report"]["presentation_partition_authority_passed"] is True
     assert closure["qualification_report"]["dynamic_appearance_conditioning_passed"] is True
+    assert closure["qualification_report"]["interior_shared_edge_continuity_passed"] is True
+    assert closure["qualification_report"]["cross_component_crack_authority_claimed"] is False
     assert closure["qualification_report"]["native_visual_integrity_passed"] is True
     editable = next(
         out

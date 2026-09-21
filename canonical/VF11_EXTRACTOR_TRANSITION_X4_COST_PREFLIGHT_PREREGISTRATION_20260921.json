@@ -1,0 +1,29 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX4CostPreflightPreregistration.v1",
+  "date_utc": "2026-09-21",
+  "status": "PREREGISTERED__FULL_DOMAIN_SCALAR_COST_PREFLIGHT_ONLY",
+  "authority_class": "RESEARCH_PERFORMANCE_PREFLIGHT_ONLY",
+  "source_closure": "canonical/VF11_EXTRACTOR_TRANSITION_X3_RESEARCH_CLOSURE_20260921.json",
+  "domain": "[-1+1/48, 1-1/48]^3",
+  "triplane_size": 48,
+  "exact_base_regime_count": 103823,
+  "sample": {
+    "count": 256,
+    "selection": "deterministic evenly-spaced indices across the 47^3 triplane-regime ordering",
+    "c0_micro_depth": 0
+  },
+  "metrics": [
+    "milliseconds per base-regime proof evaluation",
+    "micro0 state distribution",
+    "projected scalar full-domain micro0 wall time",
+    "worst-case scalar micro2 box-evaluation count and wall-time projection"
+  ],
+  "frozen_decision": {
+    "projected_scalar_micro0_seconds_gt_300": "NAIVE_SCALAR_FULL_DOMAIN_FORBIDDEN__BATCHED_RANGE_ENGINE_REQUIRED",
+    "otherwise": "SCALAR_FULL_DOMAIN_MAY_BE_PROFILED_FURTHER_BUT_NOT_EXECUTED_WITHOUT_EXPLICIT_AUTHORIZATION"
+  },
+  "full_domain_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

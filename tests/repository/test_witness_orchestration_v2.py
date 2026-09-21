@@ -159,6 +159,64 @@ def test_technical_readiness_does_not_authorize_witness_without_explicit_user_ap
     mainline.validate_witness_authorization(plan)
 
 
+def test_existing_witness_execute_revalidates_explicit_user_authorization(
+    monkeypatch,
+    tmp_path,
+):
+    plan = _plan()
+    run_id = "EXISTING_WITNESS"
+    subject_id = "TEST_SUBJECT"
+    authority_root = tmp_path / "authority"
+    run_root = authority_root / "runs" / run_id
+    run_root.mkdir(parents=True)
+
+    manifest_path = run_root / "run_manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {"run_id": run_id, "subject_id": subject_id},
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    ledger = mainline.build_fresh_run_ledger(
+        plan,
+        run_id=run_id,
+        subject_id=subject_id,
+        manifest_ref=str(manifest_path),
+        architecture_scope="TEST_EXISTING_WITNESS",
+        execution_class="WITNESS",
+    )
+    (run_root / "ACTIVE_RUN_V2.json").write_text(
+        json.dumps(ledger, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("REALSAS_AUTHORITY_ROOT", str(authority_root))
+
+    calls = {"authorization": 0}
+
+    def blocked(_plan=None):
+        calls["authorization"] += 1
+        raise RuntimeError("V2_WITNESS_EXPLICIT_USER_APPROVAL_REQUIRED")
+
+    monkeypatch.setattr(mainline, "validate_witness_authorization", blocked)
+
+    import pytest
+
+    with pytest.raises(
+        RuntimeError,
+        match="V2_WITNESS_EXPLICIT_USER_APPROVAL_REQUIRED",
+    ):
+        mainline.execute(run_id, targets=("01_SOURCE_BYTES_SEALED",))
+
+    assert calls["authorization"] == 1
+    persisted = json.loads(
+        (run_root / "ACTIVE_RUN_V2.json").read_text(encoding="utf-8")
+    )
+    assert persisted["completed_count"] == 0
+    assert all(row["attempts"] == 0 for row in persisted["stages"])
+
+
 def test_implementation_audit_execution_class_is_explicit_and_subject_free():
     plan = _plan()
     ledger = mainline.build_fresh_run_ledger(

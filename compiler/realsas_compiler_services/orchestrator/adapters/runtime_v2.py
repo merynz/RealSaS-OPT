@@ -28,6 +28,7 @@ from compiler.realsas_compiler_core.camera_geometry_v2 import (
 )
 from compiler.realsas_compiler_core.dynamic_appearance_conditioning_v2 import (
     dynamic_face_conditioning_metrics,
+    screen_to_texture_max_texels_per_pixel,
     validate_dynamic_appearance_policy,
 )
 from compiler.realsas_compiler_core.artifact_codec_v2 import (
@@ -739,6 +740,12 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         view_id: project_points_xyz_v3(rest_vertices, camera)[:, :2]
         for view_id, camera in cameras.items()
     }
+    texture_shape_by_view = {}
+    for view in projection.views:
+        texture_path = resolved_path(view.texture_path)
+        with Image.open(texture_path) as image:
+            width, height = image.size
+        texture_shape_by_view[view.view_id] = (int(width), int(height))
 
     geometry_visible = 0
     alpha_transparent = 0
@@ -763,6 +770,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
     max_relative_surface_condition = 1.0
     max_relative_surface_principal_stretch = 1.0
     max_adjacent_frame_surface_principal_stretch = 1.0
+    max_texture_texels_per_output_pixel = 0.0
     previous_consequential_faces = {}
     outputs = []
 
@@ -970,6 +978,19 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
                     if not bool(metrics["measurable"]):
                         unmeasurable_visible_face_count += 1
                         continue
+                    texture_width, texture_height = texture_shape_by_view[
+                        view.view_id
+                    ]
+                    footprint = screen_to_texture_max_texels_per_pixel(
+                        uv_triangle=face_uv[face_index],
+                        screen_triangle=posed_screen[face],
+                        texture_width=texture_width,
+                        texture_height=texture_height,
+                    )
+                    max_texture_texels_per_output_pixel = max(
+                        max_texture_texels_per_output_pixel,
+                        float(footprint),
+                    )
                     conditioning_sample_count += 1
                     max_uv_to_surface_condition = max(
                         max_uv_to_surface_condition,
@@ -1036,6 +1057,10 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             conditioning_policy["dynamic_max_adjacent_frame_surface_principal_stretch"]
         )
     )
+    minification_passed = (
+        max_texture_texels_per_output_pixel
+        <= float(conditioning_policy["dynamic_max_texture_texels_per_output_pixel"])
+    )
     exposure_passed = (
         exposure_fraction <= exposure_budget
         and max_frame_compiled_fraction <= frame_exposure_budget
@@ -1064,6 +1089,7 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
         and exact_depth_ambiguity_passed
         and layered_visibility_passed
         and sidedness_passed
+        and minification_passed
         and conditioning_passed
     )
     value = DynamicVisualIntegrityV2IR(
@@ -1117,6 +1143,10 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "layered_visibility_passed": layered_visibility_passed,
             "visible_orientation_flip_face_count": visible_orientation_flip_faces,
             "surface_sidedness_passed": sidedness_passed,
+            "maximum_texture_texels_per_output_pixel": (
+                max_texture_texels_per_output_pixel
+            ),
+            "texture_minification_passed": minification_passed,
             "native_reference_byte_parity_passed": mismatch_pixels == 0,
             "dynamic_appearance_conditioning_passed": conditioning_passed,
             "dynamic_appearance_policy": dict(conditioning_policy),

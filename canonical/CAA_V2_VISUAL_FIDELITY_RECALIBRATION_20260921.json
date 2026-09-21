@@ -125,9 +125,9 @@
       "id": "VF-15",
       "severity": "HIGH",
       "owner": "Dynamic geometry/presentation continuity",
-      "finding": "Stage45 historically measures only pixels already owned by geometry. A motion-opened background gap between articulated/open-surface parts has owner=-1 and can therefore disappear from the DVI denominator instead of being counted as a hole. Current V2 has no current-authority continuity-underlay or equivalent dynamic coverage proof.",
-      "required_closure": "Introduce a current V2 dynamic continuity/underlay or equivalent coverage authority for articulated boundaries and open surfaces; prove rest+motion jointly so a rest repair cannot create dynamic gaps.",
-      "status": "OPEN"
+      "finding": "Stage45 cannot treat arbitrary owner=-1 dynamic background as a crack because legitimate articulation may create new negative space. The real false-PASS class is an owner=-1 gap that violates an authority-backed continuity relation (for example an interior mesh adjacency or another explicitly non-detachable continuity contract). Current Stage17/37 evidence proves same-mesh shared-edge continuity, but does not yet mint a general cross-component dynamic continuity/underlay authority.",
+      "required_closure": "Do not gate raw dynamic background area. Bind crack qualification only to explicit continuity authority: prove no raster gap across topologically interior/shared continuity edges, and define a separate source-backed underlay/non-detachability contract before judging gaps between mechanically separate components. Add adversarial synthetic controls for both a true seam crack and legitimate new negative space.",
+      "status": "OPEN__NARROWED_TO_AUTHORITY_BACKED_CONTINUITY"
     },
     {
       "id": "VF-16",
@@ -143,8 +143,8 @@
       "owner": "Dynamic mechanics / visual integrity",
       "finding": "Stage41 bounds triangle area ratio and local condition but has no explicit non-adjacent dynamic self-intersection/interpenetration qualification. A mesh can remain locally well-conditioned while distinct body/clothing regions pass through each other and corrupt visibility.",
       "required_closure": "Add subject-free dynamic self-intersection evidence with adjacency exclusions and rest-existing-contact handling; gate newly introduced consequential intersections or explicitly narrow the product claim.",
-      "status": "PARTIALLY_REPAIRED__NEW_PAIR_GATE__REST_BASELINE_SEVERITY_OPEN",
-      "repair": "Stage41 now rejects newly appearing non-adjacent triangle-intersection pairs, but pair-set subtraction can still miss severity growth of a rest-existing pair and shared-vertex exemption remains to be red-teamed."
+      "status": "PARTIALLY_REPAIRED__ADJACENT_INTERIOR_PENETRATION_CLOSED__REST_EXISTING_SEVERITY_OPEN",
+      "repair": "Stage41 now uses a topology-aware unexpected-intersection census: ordinary shared-vertex/shared-edge contact is excluded by infinitesimal inward contraction, but adjacent faces whose interiors still overlap are rejected. Newly appearing unexpected pairs remain a hard failure. Severity growth of a rest-existing tolerated pair is still open."
     },
     {
       "id": "VF-18",

@@ -315,6 +315,19 @@ std::string arg_value(int argc,char** argv,const std::string& key,bool required=
     return {};
 }
 
+int parse_int_exact(const std::string& raw,const std::string& label) {
+    if(raw.empty()) throw std::runtime_error(label+"_INTEGER_EMPTY");
+    std::size_t consumed=0;
+    int value=0;
+    try {
+        value=std::stoi(raw,&consumed,10);
+    } catch(const std::exception&) {
+        throw std::runtime_error(label+"_INTEGER_INVALID");
+    }
+    if(consumed!=raw.size()) throw std::runtime_error(label+"_INTEGER_INVALID");
+    return value;
+}
+
 } // namespace
 
 int main(int argc,char** argv) {
@@ -323,7 +336,7 @@ int main(int argc,char** argv) {
         const std::string package_path=argv[1];
         const std::string clip_id=arg_value(argc,argv,"--clip");
         const std::string view_id=arg_value(argc,argv,"--view");
-        const int frame_index=std::stoi(arg_value(argc,argv,"--frame"));
+        const int frame_index=parse_int_exact(arg_value(argc,argv,"--frame"),"FRAME");
         const std::string rgba_path=arg_value(argc,argv,"--out-rgba");
         const std::string prov_path=arg_value(argc,argv,"--out-provenance",false);
         const std::string owner_path=arg_value(argc,argv,"--out-owner",false);
@@ -340,7 +353,7 @@ int main(int argc,char** argv) {
         const auto provenance=parse_provenance(entries.at("provenance.bin"));
         if(cameras.size()!=8||textures.views!=8||provenance.views!=8) throw std::runtime_error("VIEW_COUNT_INVALID");
         if(view_id.size()!=2||view_id[0]!='V') throw std::runtime_error("VIEW_ID_INVALID");
-        const int view=std::stoi(view_id.substr(1));
+        const int view=parse_int_exact(view_id.substr(1),"VIEW");
         if(view<0||view>=8) throw std::runtime_error("VIEW_INDEX_INVALID");
 
         const int clip_count=std::stoi(manifest.at("clip_count"));

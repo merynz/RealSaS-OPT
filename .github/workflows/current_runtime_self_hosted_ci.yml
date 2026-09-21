@@ -22,6 +22,7 @@ on:
       - 'tests/compiler/test_caa_v2_subject_free_policy.py'
       - 'tests/compiler/test_visibility_and_caa_v2.py'
       - 'tests/compiler/test_dynamic_appearance_conditioning_v2.py'
+      - 'tests/compiler/test_dynamic_geometry_integrity_v2.py'
       - 'experiments/single_family_e2e_v1/**'
       - 'canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json'
       - 'canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json'
@@ -62,7 +63,8 @@ jobs:
           PYTHONPATH=. python -m pytest -q \
             tests/compiler/test_caa_v2_subject_free_policy.py \
             tests/compiler/test_visibility_and_caa_v2.py \
-            tests/compiler/test_dynamic_appearance_conditioning_v2.py
+            tests/compiler/test_dynamic_appearance_conditioning_v2.py \
+            tests/compiler/test_dynamic_geometry_integrity_v2.py
       - name: Complete synthetic proof/export gate
         run: PYTHONPATH=. python -m pytest -q experiments/single_family_e2e_v1/test_complete_e2e_source_v1.py
       - name: Emit exact current package and probe identities

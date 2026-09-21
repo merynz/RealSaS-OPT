@@ -158,6 +158,15 @@ def test_technical_readiness_does_not_authorize_witness_without_explicit_user_ap
     )
     mainline.validate_witness_authorization(plan)
 
+    # Approval is durable across run progress; run-local ledger state owns
+    # started/resume semantics rather than revoking the user's approval.
+    readiness["readiness_seal"]["knight_started"] = True
+    path.write_text(
+        json.dumps(readiness, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    mainline.validate_witness_authorization(plan)
+
 
 def test_existing_witness_execute_revalidates_explicit_user_authorization(
     monkeypatch,

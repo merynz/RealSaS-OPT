@@ -1242,16 +1242,6 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             "visibility_layer_overflow_pixel_count": visibility_layer_overflow_pixels,
             "layered_visibility_passed": layered_visibility_passed,
             "visible_orientation_flip_face_count": visible_orientation_flip_faces,
-            "interior_shared_edge_instance_count": interior_shared_edge_instance_count,
-            "mismatched_interior_shared_edge_count": (
-                mismatched_interior_shared_edge_count
-            ),
-            "maximum_shared_edge_endpoint_error_px": (
-                maximum_shared_edge_endpoint_error_px
-            ),
-            "interior_shared_edge_continuity_passed": (
-                shared_edge_continuity_passed
-            ),
             "surface_sidedness_passed": sidedness_passed,
             "interior_shared_edge_continuity_mode": (
                 "TOPOLOGY_OWNED_INTERIOR_SHARED_EDGE_EXACT_PROJECTION_V1"
@@ -1352,5 +1342,15 @@ def prove_dynamic_visual_integrity_stage(ctx: dict) -> dict:
             ),
             "visibility_layer_overflow_pixel_count": visibility_layer_overflow_pixels,
             "visible_orientation_flip_face_count": visible_orientation_flip_faces,
+            "interior_shared_edge_instance_count": interior_shared_edge_instance_count,
+            "mismatched_interior_shared_edge_count": (
+                mismatched_interior_shared_edge_count
+            ),
+            "maximum_shared_edge_endpoint_error_px": (
+                maximum_shared_edge_endpoint_error_px
+            ),
+            "interior_shared_edge_continuity_passed": (
+                shared_edge_continuity_passed
+            ),
         },
     }

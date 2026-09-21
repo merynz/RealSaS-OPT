@@ -1,0 +1,17 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX0Closure.v1",
+  "date_utc": "2026-09-21",
+  "status": "PASS__SPARSE_FREUDENTHAL_MTET_EQUIVALENCE_BASELINE",
+  "source_commit": "4b3247e018a40509613aefad65d0c8009d8565bf",
+  "self_hosted_smoke_run_id": 35647330993,
+  "self_hosted_smoke_conclusion": "success",
+  "full_research_smoke_test_count": 49,
+  "x0_specific_test_count": 5,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false,
+  "training_performed": false,
+  "result": "On the frozen analytic plane, sphere and saddle-like fixtures, extracting only sign-changing cubes with the global fixed-Freudenthal MTet kernel produced the same canonical mesh as traversing every cube on the same lattice. The adjacent-cube seam fixture and exact-zero fail-closed fixture also passed.",
+  "claim_boundary": "MTet remains a topology/stitching baseline only. No VF11 fidelity advantage is claimed.",
+  "next": "X1_KNIGHT_LOCAL_REFERENCE_BAKEOFF"
+}

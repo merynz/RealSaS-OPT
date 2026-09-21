@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "e3fdc598d48b82e3a64cd2988aa828fc384d3127",
+    "main": "4bdb486c8eaf27679805af6407f964da89569399",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -117,7 +117,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2623,
+  "commit_count": 2641,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -127686,6 +127686,407 @@
       ],
       "subsystem_tags": [
         "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "7756f849cb58b6e74101b22e9a67e8bd394b32c9",
+      "parents": [
+        "e3fdc598d48b82e3a64cd2988aa828fc384d3127"
+      ],
+      "author_time": "2026-09-21T09:59:36+03:00",
+      "committer_time": "2026-09-21T09:59:36+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d6ba130c5042a70d7106cf9aa42592f55fa19c76",
+      "parents": [
+        "7756f849cb58b6e74101b22e9a67e8bd394b32c9"
+      ],
+      "author_time": "2026-09-21T10:13:50+03:00",
+      "committer_time": "2026-09-21T10:13:50+03:00",
+      "subject": "visibility: support exact integer supersample coverage grid",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/visibility_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "0148099506ebd4ad3b3ca917d877c54f9d0c1e18",
+      "parents": [
+        "d6ba130c5042a70d7106cf9aa42592f55fa19c76"
+      ],
+      "author_time": "2026-09-21T10:14:29+03:00",
+      "committer_time": "2026-09-21T10:14:29+03:00",
+      "subject": "render: add deterministic 2x2 subpixel PM coverage",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_render_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "87d0c17821a4d3b83616974bf48a371d3b80ac30",
+      "parents": [
+        "0148099506ebd4ad3b3ca917d877c54f9d0c1e18"
+      ],
+      "author_time": "2026-09-21T10:15:32+03:00",
+      "committer_time": "2026-09-21T10:15:32+03:00",
+      "subject": "runtime: make DVI coverage-sample-aware and parity all proof channels",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c692de05867216267f7204420edf4c23308e6ebd",
+      "parents": [
+        "87d0c17821a4d3b83616974bf48a371d3b80ac30"
+      ],
+      "author_time": "2026-09-21T10:15:54+03:00",
+      "committer_time": "2026-09-21T10:15:54+03:00",
+      "subject": "runtime: seal deterministic 2x2 pixel coverage contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/runtime_package_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d097fa4e5f1e1323a8cf064742b13132b57ef165",
+      "parents": [
+        "c692de05867216267f7204420edf4c23308e6ebd"
+      ],
+      "author_time": "2026-09-21T10:16:26+03:00",
+      "committer_time": "2026-09-21T10:16:26+03:00",
+      "subject": "runtime: render V2 with deterministic 2x2 subpixel coverage",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "c6c7ff7a8ce7ba689b29cc89966612ce061da9dc",
+      "parents": [
+        "d097fa4e5f1e1323a8cf064742b13132b57ef165"
+      ],
+      "author_time": "2026-09-21T10:17:01+03:00",
+      "committer_time": "2026-09-21T10:17:01+03:00",
+      "subject": "test: require subpixel edge coverage and sample-aware contributors",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "3bf165e45c6a45862bd9d093dba1d9867971e3e4",
+      "parents": [
+        "c6c7ff7a8ce7ba689b29cc89966612ce061da9dc"
+      ],
+      "author_time": "2026-09-21T10:17:04+03:00",
+      "committer_time": "2026-09-21T10:17:04+03:00",
+      "subject": "test: adversarially gate 2x2 native coverage contract",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_runtime_v2_native_smoke.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ec7f5fb7f739c94506180dd5aaeee5f8078bd306",
+      "parents": [
+        "3bf165e45c6a45862bd9d093dba1d9867971e3e4"
+      ],
+      "author_time": "2026-09-21T10:18:03+03:00",
+      "committer_time": "2026-09-21T10:18:03+03:00",
+      "subject": "authority: append native runtime source extension V6 for subpixel coverage",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V6_20260921.json"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d8d0fa7919df214c033cede5534c68b2506dbd23",
+      "parents": [
+        "ec7f5fb7f739c94506180dd5aaeee5f8078bd306"
+      ],
+      "author_time": "2026-09-21T10:18:21+03:00",
+      "committer_time": "2026-09-21T10:18:21+03:00",
+      "subject": "authority: verify native runtime source seal V6",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/verify_native_runtime_source_seal_v2.py"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "f4012f8a80ad3a438b86f658b154a2bbc55957c7",
+      "parents": [
+        "d8d0fa7919df214c033cede5534c68b2506dbd23"
+      ],
+      "author_time": "2026-09-21T10:18:25+03:00",
+      "committer_time": "2026-09-21T10:18:25+03:00",
+      "subject": "ci: bind native source gate through extension V6",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/native_runtime_source_gate.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "949a937f2e4441f11e8a329d57d80f24fcf5c2e3",
+      "parents": [
+        "f4012f8a80ad3a438b86f658b154a2bbc55957c7"
+      ],
+      "author_time": "2026-09-21T10:19:21+03:00",
+      "committer_time": "2026-09-21T10:19:21+03:00",
+      "subject": "render: fix coverage constants dataclass placement",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_core/appearance_render_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "649fcc0bd76cf6b2b90b7f613bafe83adf26fb98",
+      "parents": [
+        "949a937f2e4441f11e8a329d57d80f24fcf5c2e3"
+      ],
+      "author_time": "2026-09-21T10:21:33+03:00",
+      "committer_time": "2026-09-21T10:21:33+03:00",
+      "subject": "runtime: expose sealed 2x2 coverage in native contract stdout",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp"
+      ],
+      "subsystem_tags": [
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "67bca2e6c5b3bea97d29d6653a8c3be78138e452",
+      "parents": [
+        "649fcc0bd76cf6b2b90b7f613bafe83adf26fb98"
+      ],
+      "author_time": "2026-09-21T10:21:49+03:00",
+      "committer_time": "2026-09-21T10:21:49+03:00",
+      "subject": "authority: append native runtime source extension V7",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V7_20260921.json"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d8e16c6a039a500893fde389ddcce62f265b4e1b",
+      "parents": [
+        "67bca2e6c5b3bea97d29d6653a8c3be78138e452"
+      ],
+      "author_time": "2026-09-21T10:22:09+03:00",
+      "committer_time": "2026-09-21T10:22:09+03:00",
+      "subject": "authority: verify native runtime source seal V7",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/verify_native_runtime_source_seal_v2.py"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "dd5da1a9e5fffe5308a123a35884d9342ed87d88",
+      "parents": [
+        "d8e16c6a039a500893fde389ddcce62f265b4e1b"
+      ],
+      "author_time": "2026-09-21T10:22:14+03:00",
+      "committer_time": "2026-09-21T10:22:14+03:00",
+      "subject": "ci: bind native source gate through extension V7",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/native_runtime_source_gate.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8484a1071cfae7ea539c43e53b6d3ed51ae2da2e",
+      "parents": [
+        "dd5da1a9e5fffe5308a123a35884d9342ed87d88"
+      ],
+      "author_time": "2026-09-21T10:23:23+03:00",
+      "committer_time": "2026-09-21T10:23:23+03:00",
+      "subject": "runtime: order visibility-load gate before conditioning predicate",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py"
+      ],
+      "subsystem_tags": [
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "4bdb486c8eaf27679805af6407f964da89569399",
+      "parents": [
+        "8484a1071cfae7ea539c43e53b6d3ed51ae2da2e"
+      ],
+      "author_time": "2026-09-21T10:25:43+03:00",
+      "committer_time": "2026-09-21T10:25:43+03:00",
+      "subject": "authority: advance VF-24 after exact functional runtime parity",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY",
+        "RUNTIME_PRODUCT"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

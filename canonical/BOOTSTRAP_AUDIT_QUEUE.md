@@ -4,10 +4,10 @@
 > Bootstrap: `BOOTSTRAP_AUDIT_CLOSED`
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
-- Census artifacts in declared scope: **511 / 511 discovered (100%)**
+- Census artifacts in declared scope: **513 / 513 discovered (100%)**
 - Semantically reconciled: **55**
-- Catalogued but unreviewed: **456**
-- Semantic coverage: **10.8%**
+- Catalogued but unreviewed: **458**
+- Semantic coverage: **10.7%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
 
@@ -387,9 +387,11 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 
 - `KA-417397CA092A` `AUTHORITY_DECISION` — `main` :: `canonical/STAGE14_SUBSTRATE_ADEQUACY_CALIBRATION_AUTHORITY_V2_20260920.json` @ blob `d20f4ab602f7`
 
-### 2026-09-21 :: COMPILER (1)
+### 2026-09-21 :: COMPILER (3)
 
 - `KA-218AD4A05035` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V5_20260921.json` @ blob `cf70e8986d09`
+- `KA-C41F4F6E4D4C` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V6_20260921.json` @ blob `96252588d57c`
+- `KA-61AD2E4922B9` `AUTHORITY_DECISION` — `main` :: `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V7_20260921.json` @ blob `630e66e1d06a`
 
 ### UNKNOWN_DATE :: ARACHNE_SKIN (10)
 
@@ -491,7 +493,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D2D319509ACF` `WORKFLOW` — `main` :: `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` @ blob `16bf42a72ecc`
 - `KA-03510A41D0D4` `WORKFLOW` — `main` :: `.github/workflows/prefit_observation_authority_v1.yml` @ blob `b04004000018`
 - `KA-FDE35053B8A7` `WORKFLOW` — `main` :: `.github/workflows/single_family_data_contract_v1.yml` @ blob `929df12d859e`
-- `KA-167A2670A461` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `4a6cf1a862cc`
+- `KA-8A7A3979F818` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `1fcea9d423b5`
 - `KA-25BB7CDC0AB9` `AUTHORITY_DECISION` — `main` :: `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` @ blob `6b5fff12a484`
 - `KA-DC74ABB19F22` `PREREG` — `main` :: `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` @ blob `c01e1a65f75e`
 - `KA-E1571E78A4A5` `PREREG` — `main` :: `canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md` @ blob `36aef9ae6ecd`

@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2623**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2641**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2635,6 +2635,24 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-21T09:57:52+03:00` | `10a3091904f2` | yes | COMPILER_PROOF | visibility: avoid non-finite depth arithmetic in ambiguity proof | `compiler/realsas_compiler_core/appearance_render_v2.py` | `main` |
 | `2026-09-21T09:58:04+03:00` | `6be9104e15dc` | yes | CI_TEST, COMPILER_PROOF | test: make non-finite visibility arithmetic fatal | `tests/compiler/test_visibility_and_caa_v2.py` | `main` |
 | `2026-09-21T09:58:40+03:00` | `e3fdc598d48b` | yes | GOVERNANCE_CONTINUITY | authority: reconcile repaired VF-04 VF-06 VF-07 VF-29 evidence | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T09:59:36+03:00` | `7756f849cb58` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-21T10:13:50+03:00` | `d6ba130c5042` | yes | COMPILER_PROOF | visibility: support exact integer supersample coverage grid | `compiler/realsas_compiler_core/visibility_v2.py` | `main` |
+| `2026-09-21T10:14:29+03:00` | `0148099506eb` | yes | COMPILER_PROOF | render: add deterministic 2x2 subpixel PM coverage | `compiler/realsas_compiler_core/appearance_render_v2.py` | `main` |
+| `2026-09-21T10:15:32+03:00` | `87d0c17821a4` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: make DVI coverage-sample-aware and parity all proof channels | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
+| `2026-09-21T10:15:54+03:00` | `c692de058672` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: seal deterministic 2x2 pixel coverage contract | `compiler/realsas_compiler_core/runtime_package_v2.py` | `main` |
+| `2026-09-21T10:16:26+03:00` | `d097fa4e5f1e` | yes | RUNTIME_PRODUCT | runtime: render V2 with deterministic 2x2 subpixel coverage | `runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp` | `main` |
+| `2026-09-21T10:17:01+03:00` | `c6c7ff7a8ce7` | yes | CI_TEST, COMPILER_PROOF | test: require subpixel edge coverage and sample-aware contributors | `tests/compiler/test_visibility_and_caa_v2.py` | `main` |
+| `2026-09-21T10:17:04+03:00` | `3bf165e45c6a` | yes | CI_TEST, COMPILER_PROOF, RUNTIME_PRODUCT | test: adversarially gate 2x2 native coverage contract | `tests/compiler/test_runtime_v2_native_smoke.py` | `main` |
+| `2026-09-21T10:18:03+03:00` | `ec7f5fb7f739` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: append native runtime source extension V6 for subpixel coverage | `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V6_20260921.json` | `main` |
+| `2026-09-21T10:18:21+03:00` | `d8d0fa7919df` | yes | GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: verify native runtime source seal V6 | `tools/verify_native_runtime_source_seal_v2.py` | `main` |
+| `2026-09-21T10:18:25+03:00` | `f4012f8a80ad` | yes | CI_TEST, RUNTIME_PRODUCT | ci: bind native source gate through extension V6 | `.github/workflows/native_runtime_source_gate.yml` | `main` |
+| `2026-09-21T10:19:21+03:00` | `949a937f2e44` | yes | COMPILER_PROOF | render: fix coverage constants dataclass placement | `compiler/realsas_compiler_core/appearance_render_v2.py` | `main` |
+| `2026-09-21T10:21:33+03:00` | `649fcc0bd76c` | yes | RUNTIME_PRODUCT | runtime: expose sealed 2x2 coverage in native contract stdout | `runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp` | `main` |
+| `2026-09-21T10:21:49+03:00` | `67bca2e6c5b3` | yes | COMPILER_PROOF, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: append native runtime source extension V7 | `canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V7_20260921.json` | `main` |
+| `2026-09-21T10:22:09+03:00` | `d8e16c6a039a` | yes | GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: verify native runtime source seal V7 | `tools/verify_native_runtime_source_seal_v2.py` | `main` |
+| `2026-09-21T10:22:14+03:00` | `dd5da1a9e5ff` | yes | CI_TEST, RUNTIME_PRODUCT | ci: bind native source gate through extension V7 | `.github/workflows/native_runtime_source_gate.yml` | `main` |
+| `2026-09-21T10:23:23+03:00` | `8484a1071cfa` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: order visibility-load gate before conditioning predicate | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
+| `2026-09-21T10:25:43+03:00` | `4bdb486c8eaf` | yes | GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | authority: advance VF-24 after exact functional runtime parity | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
 
 ## Use rule
 

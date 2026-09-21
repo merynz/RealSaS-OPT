@@ -239,6 +239,8 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
                 metadata={
                     "classification": clip.classification,
                     "source_dynamic_clip_proof_hash": clip.clip_proof_hash,
+                    "playback_sampling_contract": "SEALED_FRAME_INDEX_ONLY",
+                    "host_interpolation_authorized": False,
                 },
             )
         )
@@ -298,6 +300,8 @@ def build_runtime_projection_stage(ctx: dict) -> dict:
             "donor_search_at_runtime": False,
             "runtime_generation": False,
             "relighting": False,
+            "playback_sampling_contract": "SEALED_FRAME_INDEX_ONLY",
+            "host_interpolation_authorized": False,
         },
     )
     projection = replace(

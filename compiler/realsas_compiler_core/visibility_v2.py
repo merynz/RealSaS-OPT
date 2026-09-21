@@ -18,7 +18,11 @@ VISIBILITY_CONTRACT_V2 = {
     "projection": "FULL_SURFACE_CAMERA_PROJECTION_V3",
     "raster_fill": "HALF_INTEGER_TOP_LEFT",
     "depth": "CAMERA_FORWARD_Z_SMALLER_WINS",
-    "exact_depth_tie": "SEALED_FACE_INDEX_ONLY",
+    "exact_depth_tie": "SEALED_FACE_INDEX_ONLY__AMBIGUITY_MUST_BE_QUALIFIED",
+    "layering": "DEPTH_SORTED_K4_GEOMETRY_LAYERS",
+    "alpha_composition": "LINEAR_PREMULTIPLIED_FRONT_TO_BACK",
+    "layer_overflow": "FORBIDDEN",
+    "near_plane": "CAMERA_FORWARD_Z_MUST_BE_POSITIVE",
     "appearance_input_forbidden": True,
     "source_provenance_tiebreak_forbidden": True,
     "texture_alpha_selects_front_surface": False,
@@ -35,6 +39,10 @@ class VisibilityRaster:
     second_owner_face_index: np.ndarray
     second_depth: np.ndarray
     depth_margin: np.ndarray
+    layer_owner_face_index: np.ndarray
+    layer_depth: np.ndarray
+    layer_barycentric: np.ndarray
+    layer_overflow: np.ndarray
     contract_hash: str = VISIBILITY_CONTRACT_V2_HASH
 
 
@@ -53,10 +61,12 @@ def rasterize_visible_owner(
     width: int | None = None,
     height: int | None = None,
     positions=None,
+    max_layers: int = 4,
 ) -> VisibilityRaster:
     width = int(camera.resolution if width is None else width)
     height = int(camera.resolution if height is None else height)
-    if width <= 0 or height <= 0:
+    max_layers = int(max_layers)
+    if width <= 0 or height <= 0 or max_layers < 2:
         raise QualificationError("VISIBILITY_DIMENSION_INVALID")
 
     vertex_ids = tuple(_vertex_id(vertex) for vertex in mesh.vertices)
@@ -76,17 +86,23 @@ def rasterize_visible_owner(
         raise QualificationError("VISIBILITY_PROJECTED_MATRIX_INVALID")
 
     by_id = {vertex_ids[i]: projected[i] for i in range(len(vertex_ids))}
-    owner = np.full((height, width), -1, dtype=np.int32)
-    depth = np.full((height, width), np.inf, dtype=np.float64)
-    barycentric = np.full((height, width, 3), np.nan, dtype=np.float32)
-    tie = np.full((height, width), np.iinfo(np.int32).max, dtype=np.int32)
-    second_owner = np.full((height, width), -1, dtype=np.int32)
-    second_depth = np.full((height, width), np.inf, dtype=np.float64)
-    second_tie = np.full(
-        (height, width),
-        np.iinfo(np.int32).max,
+    layer_owner = np.full(
+        (height, width, max_layers),
+        -1,
         dtype=np.int32,
     )
+    layer_depth = np.full(
+        (height, width, max_layers),
+        np.inf,
+        dtype=np.float64,
+    )
+    layer_barycentric = np.full(
+        (height, width, max_layers, 3),
+        np.nan,
+        dtype=np.float32,
+    )
+    layer_overflow = np.zeros((height, width), dtype=bool)
+    eps = 1.0e-12
 
     for face_index, face in enumerate(mesh.faces):
         ids = tuple(map(str, face))
@@ -94,7 +110,7 @@ def rasterize_visible_owner(
             raise QualificationError("VISIBILITY_FACE_INVALID")
         a, b, c = (by_id[vertex_id] for vertex_id in ids)
         area = _orient2d(a, b, float(c[0]), float(c[1]))
-        if abs(area) <= 1e-12:
+        if abs(area) <= eps:
             continue
 
         xs = (float(a[0]), float(b[0]), float(c[0]))
@@ -121,48 +137,67 @@ def rasterize_visible_owner(
                 )
                 if not math.isfinite(z):
                     raise QualificationError("VISIBILITY_DEPTH_NONFINITE")
-                current = float(depth[y, x])
-                current_tie = int(tie[y, x])
-                wins = z < current - 1e-12 or (
-                    abs(z - current) <= 1e-12
-                    and face_key < current_tie
-                )
-                if wins:
-                    if int(owner[y, x]) >= 0:
-                        second_depth[y, x] = current
-                        second_owner[y, x] = int(owner[y, x])
-                        second_tie[y, x] = current_tie
-                    depth[y, x] = z
-                    owner[y, x] = int(face_index)
-                    barycentric[y, x] = (float(w0), float(w1), float(w2))
-                    tie[y, x] = face_key
-                else:
-                    second_current = float(second_depth[y, x])
-                    second_current_tie = int(second_tie[y, x])
-                    second_wins = z < second_current - 1e-12 or (
-                        abs(z - second_current) <= 1e-12
-                        and face_key < second_current_tie
-                    )
-                    if second_wins:
-                        second_depth[y, x] = z
-                        second_owner[y, x] = int(face_index)
-                        second_tie[y, x] = face_key
+                if z <= eps:
+                    continue
 
+                insert_at = None
+                for layer in range(max_layers):
+                    current_owner = int(layer_owner[y, x, layer])
+                    current_depth = float(layer_depth[y, x, layer])
+                    if (
+                        current_owner < 0
+                        or z < current_depth - eps
+                        or (
+                            abs(z - current_depth) <= eps
+                            and face_key < current_owner
+                        )
+                    ):
+                        insert_at = layer
+                        break
+
+                if insert_at is None:
+                    layer_overflow[y, x] = True
+                    continue
+                if int(layer_owner[y, x, max_layers - 1]) >= 0:
+                    layer_overflow[y, x] = True
+                for layer in range(max_layers - 1, insert_at, -1):
+                    layer_owner[y, x, layer] = layer_owner[y, x, layer - 1]
+                    layer_depth[y, x, layer] = layer_depth[y, x, layer - 1]
+                    layer_barycentric[y, x, layer] = layer_barycentric[
+                        y, x, layer - 1
+                    ]
+                layer_owner[y, x, insert_at] = face_key
+                layer_depth[y, x, insert_at] = z
+                layer_barycentric[y, x, insert_at] = (
+                    float(w0),
+                    float(w1),
+                    float(w2),
+                )
+
+    owner = layer_owner[:, :, 0].copy()
+    depth = layer_depth[:, :, 0].copy()
+    barycentric = layer_barycentric[:, :, 0].copy()
+    second_owner = layer_owner[:, :, 1].copy()
+    second_depth = layer_depth[:, :, 1].copy()
     margin = np.full((height, width), np.inf, dtype=np.float64)
     has_second = second_owner >= 0
     margin[has_second] = second_depth[has_second] - depth[has_second]
     if np.any(margin[has_second] < -1e-10):
         raise QualificationError("VISIBILITY_SECOND_DEPTH_ORDER_INVALID")
-    return VisibilityRaster(
-        owner,
-        depth,
-        barycentric,
-        projected,
-        second_owner,
-        second_depth,
-        margin,
-    )
 
+    return VisibilityRaster(
+        owner_face_index=owner,
+        depth=depth,
+        barycentric=barycentric,
+        projected_vertices=projected,
+        second_owner_face_index=second_owner,
+        second_depth=second_depth,
+        depth_margin=margin,
+        layer_owner_face_index=layer_owner,
+        layer_depth=layer_depth,
+        layer_barycentric=layer_barycentric,
+        layer_overflow=layer_overflow,
+    )
 
 def projected_xy_to_source_texel_xy(projected_xy) -> tuple[float, float]:
     """Map target half-integer raster coordinates to index-centered source texels."""

@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2772**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2779**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2784,6 +2784,13 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-21T12:52:54+03:00` | `c7abb5d5d6be` | yes | COMPILER_PROOF | governance: keep witness approval valid across run resume | `compiler/realsas_compiler_services/orchestrator/mainline.py` | `main` |
 | `2026-09-21T12:53:00+03:00` | `91221fc46b0b` | yes | CI_TEST | test: preserve explicit approval across witness resume | `tests/repository/test_witness_orchestration_v2.py` | `main` |
 | `2026-09-21T12:53:16+03:00` | `f46d6689cb9e` | yes | GOVERNANCE_CONTINUITY | authority: finalize VF-39 durable approval semantics | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T12:56:03+03:00` | `968fc88cb6bb` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-21T13:00:39+03:00` | `8331e222abf1` | yes | GOVERNANCE_CONTINUITY | authority: seal VF-11 R512 partial result and phase diagnosis | `canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R512_AUTHORITY_V1_20260921.json` | `main` |
+| `2026-09-21T13:02:08+03:00` | `29af6e1923c9` | yes | OTHER | research: add VF-11 R512 lattice-phase sensitivity panel | `tools/vf11_r512_phase_sensitivity_panel.py` | `main` |
+| `2026-09-21T13:02:28+03:00` | `427fa1a73422` | yes | CI_TEST | ci: run VF-11 R512 lattice-phase diagnosis | `.github/workflows/vf11_r512_phase_sensitivity.yml` | `main` |
+| `2026-09-21T13:02:52+03:00` | `fad59bae0923` | yes | GOVERNANCE_CONTINUITY | authority: narrow VF-11 R512 thin-blade interpretation | `canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R512_AUTHORITY_V1_20260921.json` | `main` |
+| `2026-09-21T13:02:57+03:00` | `ab0266425942` | yes | GOVERNANCE_CONTINUITY | authority: advance VF-11 to R512 phase diagnosis | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
+| `2026-09-21T13:03:02+03:00` | `91de4328fbb4` | yes | GOVERNANCE_CONTINUITY | authority: keep VF-11 blocking on phase extraction diagnosis | `canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json` | `main` |
 
 ## Use rule
 

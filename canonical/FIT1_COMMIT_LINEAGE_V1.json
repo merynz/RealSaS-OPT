@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "f46d6689cb9e09d12452e8b106b1ca3d46e315ac",
+    "main": "91de4328fbb4e8c41b726e1cafedc582c2b4a054",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -117,7 +117,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2772,
+  "commit_count": 2779,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -130919,6 +130919,161 @@
       "main_reachable": true,
       "changed_paths": [
         "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "968fc88cb6bb47d622fd1292fc418eafe783cabb",
+      "parents": [
+        "f46d6689cb9e09d12452e8b106b1ca3d46e315ac"
+      ],
+      "author_time": "2026-09-21T12:56:03+03:00",
+      "committer_time": "2026-09-21T12:56:03+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8331e222abf1dca6f41a1213c1251bbfacec5470",
+      "parents": [
+        "968fc88cb6bb47d622fd1292fc418eafe783cabb"
+      ],
+      "author_time": "2026-09-21T13:00:39+03:00",
+      "committer_time": "2026-09-21T13:00:39+03:00",
+      "subject": "authority: seal VF-11 R512 partial result and phase diagnosis",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R512_AUTHORITY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "29af6e1923c9875e6bd0602188a040c8585f9d02",
+      "parents": [
+        "8331e222abf1dca6f41a1213c1251bbfacec5470"
+      ],
+      "author_time": "2026-09-21T13:02:08+03:00",
+      "committer_time": "2026-09-21T13:02:08+03:00",
+      "subject": "research: add VF-11 R512 lattice-phase sensitivity panel",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tools/vf11_r512_phase_sensitivity_panel.py"
+      ],
+      "subsystem_tags": [
+        "OTHER"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "427fa1a7342200485bce4499a39c17582adb3e2e",
+      "parents": [
+        "29af6e1923c9875e6bd0602188a040c8585f9d02"
+      ],
+      "author_time": "2026-09-21T13:02:28+03:00",
+      "committer_time": "2026-09-21T13:02:28+03:00",
+      "subject": "ci: run VF-11 R512 lattice-phase diagnosis",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        ".github/workflows/vf11_r512_phase_sensitivity.yml"
+      ],
+      "subsystem_tags": [
+        "CI_TEST"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "fad59bae092304639c9267559f030e96a7012f25",
+      "parents": [
+        "427fa1a7342200485bce4499a39c17582adb3e2e"
+      ],
+      "author_time": "2026-09-21T13:02:52+03:00",
+      "committer_time": "2026-09-21T13:02:52+03:00",
+      "subject": "authority: narrow VF-11 R512 thin-blade interpretation",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R512_AUTHORITY_V1_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ab02664259420ef37368a4dad3e0b57971d74f0c",
+      "parents": [
+        "fad59bae092304639c9267559f030e96a7012f25"
+      ],
+      "author_time": "2026-09-21T13:02:57+03:00",
+      "committer_time": "2026-09-21T13:02:57+03:00",
+      "subject": "authority: advance VF-11 to R512 phase diagnosis",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json"
+      ],
+      "subsystem_tags": [
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "91de4328fbb4e8c41b726e1cafedc582c2b4a054",
+      "parents": [
+        "ab02664259420ef37368a4dad3e0b57971d74f0c"
+      ],
+      "author_time": "2026-09-21T13:03:02+03:00",
+      "committer_time": "2026-09-21T13:03:02+03:00",
+      "subject": "authority: keep VF-11 blocking on phase extraction diagnosis",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json"
       ],
       "subsystem_tags": [
         "GOVERNANCE_CONTINUITY"

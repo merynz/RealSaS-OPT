@@ -4,9 +4,9 @@
 > Bootstrap: `BOOTSTRAP_AUDIT_CLOSED`
 
 - Declared census scope: `main` + 3 registered active/evidence branch(es)
-- Census artifacts in declared scope: **526 / 526 discovered (100%)**
+- Census artifacts in declared scope: **527 / 527 discovered (100%)**
 - Semantically reconciled: **57**
-- Catalogued but unreviewed: **469**
+- Catalogued but unreviewed: **470**
 - Semantic coverage: **10.8%**
 
 **Important:** 100% is discovery coverage only inside the declared scan scope. It is not a claim that all historical branches have been audited or that the repository's scientific history is semantically complete.
@@ -399,14 +399,15 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 
 ### 2026-09-21 :: CROSS_CUTTING_OTHER (1)
 
-- `KA-F541A1071FE0` `CLOSURE` — `main` :: `canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json` @ blob `030a39522a06`
+- `KA-E30668CF6240` `CLOSURE` — `main` :: `canonical/V2_READINESS_RECLOSURE_MATRIX_V1_20260921.json` @ blob `6b4a4cca67c6`
 
-### 2026-09-21 :: REPOSITORY_GOVERNANCE (6)
+### 2026-09-21 :: REPOSITORY_GOVERNANCE (7)
 
 - `KA-A55049C8D2AD` `AUTHORITY_DECISION` — `main` :: `canonical/CAA_V2_DONOR_SELECTION_AUTHORITY_V1_20260921.json` @ blob `cf24942e38a4`
 - `KA-31BB07A93F46` `AUTHORITY_DECISION` — `main` :: `canonical/CAA_V2_SOURCE_VIEW_LINEAGE_AUTHORITY_V1_20260921.json` @ blob `7d82c008e7b6`
 - `KA-FF7B7482167D` `AUTHORITY_DECISION` — `main` :: `canonical/VF10_DIRECTION_TRANSITION_AUTHORITY_V1_20260921.json` @ blob `0121a1e6388e`
 - `KA-EE2429EB5F1E` `AUTHORITY_DECISION` — `main` :: `canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R384_AUTHORITY_V1_20260921.json` @ blob `798eb3fd7621`
+- `KA-099FF3A09967` `AUTHORITY_DECISION` — `main` :: `canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_R512_AUTHORITY_V1_20260921.json` @ blob `a9cc19721a31`
 - `KA-8616E5AB19E1` `AUTHORITY_DECISION` — `main` :: `canonical/VF13_RIGIDITY_NOOP_AUTHORITY_V1_20260921.json` @ blob `207f921ee9da`
 - `KA-5380C6C86298` `AUTHORITY_DECISION` — `main` :: `canonical/VF15_DYNAMIC_CONTINUITY_AUTHORITY_V1_20260921.json` @ blob `11d64f378484`
 
@@ -510,7 +511,7 @@ The queue is a discovery aid. A path being listed does not establish what it pro
 - `KA-D2D319509ACF` `WORKFLOW` — `main` :: `.github/workflows/pre_fit_visible_optimizer_once_v1.yml` @ blob `16bf42a72ecc`
 - `KA-03510A41D0D4` `WORKFLOW` — `main` :: `.github/workflows/prefit_observation_authority_v1.yml` @ blob `b04004000018`
 - `KA-FDE35053B8A7` `WORKFLOW` — `main` :: `.github/workflows/single_family_data_contract_v1.yml` @ blob `929df12d859e`
-- `KA-40EBADED18B6` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `ef5d3785f1ec`
+- `KA-A24A4E4E8B69` `HIGH_SIGNAL_OTHER` — `main` :: `canonical/FIT1_COMMIT_LINEAGE_V1.json` @ blob `b41374eb5706`
 - `KA-25BB7CDC0AB9` `AUTHORITY_DECISION` — `main` :: `canonical/FIT2_CANONICAL_EXECUTION_AUTHORITY_V1.json` @ blob `6b5fff12a484`
 - `KA-DC74ABB19F22` `PREREG` — `main` :: `canonical/FIT8_SOURCE_TEXTURED_AUTHORITY_PREREG_V1.json` @ blob `c01e1a65f75e`
 - `KA-E1571E78A4A5` `PREREG` — `main` :: `canonical/IMAGE_SEMANTIC_CHARACTER_GATE_PREREG_V1.md` @ blob `36aef9ae6ecd`

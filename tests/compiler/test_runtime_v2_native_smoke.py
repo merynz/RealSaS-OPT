@@ -201,6 +201,82 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     native_o = np.frombuffer(native_owner.read_bytes(), dtype="<i4").reshape(32, 32)
     assert np.array_equal(native_o, reference.owner_face_index)
 
+    # Direction changes are discrete state selection, never cross-direction
+    # blending. Every V0..V7 render must independently match its exact Python
+    # reference, and returning to V0 must be byte-identical (no transition
+    # hysteresis or hidden interpolation state).
+    first_v0 = native_rgba.read_bytes()
+    for vi in range(8):
+        direction_rgba = tmp_path / f"direction_V{vi}.rgba"
+        direction_proc = subprocess.run(
+            [
+                str(player),
+                str(rss),
+                "--clip",
+                "smoke",
+                "--view",
+                f"V{vi}",
+                "--frame",
+                "0",
+                "--out-rgba",
+                str(direction_rgba),
+            ],
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        assert direction_proc.returncode == 0, direction_proc.stderr
+        direction_native = np.frombuffer(
+            direction_rgba.read_bytes(),
+            dtype=np.uint8,
+        ).reshape(32, 32, 4)
+        direction_camera = CameraProjectionV3(
+            view_id=f"V{vi}",
+            view_index=vi,
+            origin=(0.0, 0.0, -2.0),
+            right=(1.0, 0.0, 0.0),
+            screen_up=(0.0, 1.0, 0.0),
+            forward=(0.0, 0.0, 1.0),
+            half_extent=1.0,
+            resolution=32,
+        )
+        direction_reference = render_caa_reference(
+            mesh=mesh,
+            camera=direction_camera,
+            face_uv=face_uv.astype(np.float64),
+            texture_rgba_u8=np.asarray(
+                Image.open(textures[vi]).convert("RGBA"),
+                dtype=np.uint8,
+            ),
+            provenance_atlas=provenance[vi],
+            positions=vertices.astype(np.float64),
+        )
+        assert np.array_equal(
+            direction_native,
+            direction_reference.straight_rgba_u8,
+        )
+
+    return_v0 = tmp_path / "direction_return_V0.rgba"
+    return_proc = subprocess.run(
+        [
+            str(player),
+            str(rss),
+            "--clip",
+            "smoke",
+            "--view",
+            "V0",
+            "--frame",
+            "0",
+            "--out-rgba",
+            str(return_v0),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert return_proc.returncode == 0, return_proc.stderr
+    assert return_v0.read_bytes() == first_v0
+
     fractional = subprocess.run(
         [
             str(player),
@@ -220,6 +296,64 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     )
     assert fractional.returncode != 0
     assert "FRAME_INTEGER_INVALID" in fractional.stderr
+
+    view_contract_tampered = entries.copy()
+    view_contract_manifest = view_contract_tampered["manifest.txt"].replace(
+        b"view_selection_contract=SEALED_DISCRETE_DIRECTION_INDEX_ONLY",
+        b"view_selection_contract=UNQUALIFIED_DIRECTION_BLEND",
+    )
+    assert view_contract_manifest != view_contract_tampered["manifest.txt"]
+    view_contract_tampered["manifest.txt"] = view_contract_manifest
+    view_contract_rss = tmp_path / "tampered_view_contract.rss"
+    write_rss_v2(view_contract_rss, view_contract_tampered)
+    view_contract_rejected = subprocess.run(
+        [
+            str(player),
+            str(view_contract_rss),
+            "--clip",
+            "smoke",
+            "--view",
+            "V0",
+            "--frame",
+            "0",
+            "--out-rgba",
+            str(tmp_path / "tampered_view_contract.rgba"),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert view_contract_rejected.returncode != 0
+    assert "VIEW_SELECTION_CONTRACT_INVALID" in view_contract_rejected.stderr
+
+    blend_tampered = entries.copy()
+    blend_manifest = blend_tampered["manifest.txt"].replace(
+        b"cross_direction_blending_authorized=0",
+        b"cross_direction_blending_authorized=1",
+    )
+    assert blend_manifest != blend_tampered["manifest.txt"]
+    blend_tampered["manifest.txt"] = blend_manifest
+    blend_rss = tmp_path / "tampered_direction_blend.rss"
+    write_rss_v2(blend_rss, blend_tampered)
+    blend_rejected = subprocess.run(
+        [
+            str(player),
+            str(blend_rss),
+            "--clip",
+            "smoke",
+            "--view",
+            "V0",
+            "--frame",
+            "0",
+            "--out-rgba",
+            str(tmp_path / "tampered_direction_blend.rgba"),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert blend_rejected.returncode != 0
+    assert "CROSS_DIRECTION_BLENDING_MUST_BE_FORBIDDEN" in blend_rejected.stderr
 
     tampered = entries.copy()
     tampered_manifest = tampered["manifest.txt"].replace(

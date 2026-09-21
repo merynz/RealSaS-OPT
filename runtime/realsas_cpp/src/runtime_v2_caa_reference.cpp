@@ -361,6 +361,10 @@ int main(int argc,char** argv) {
             throw std::runtime_error("PIXEL_COVERAGE_CONTRACT_INVALID");
         if(manifest.at("pixel_coverage_sample_count")!="4")
             throw std::runtime_error("PIXEL_COVERAGE_SAMPLE_COUNT_INVALID");
+        if(manifest.at("depth_buffer_contract")!="IEEE754_FLOAT64_SOFTWARE_SORT")
+            throw std::runtime_error("DEPTH_BUFFER_CONTRACT_INVALID");
+        if(manifest.at("depth_equivalence_epsilon_camera_z")!="1e-12")
+            throw std::runtime_error("DEPTH_EQUIVALENCE_EPSILON_INVALID");
         const auto mesh=parse_mesh(entries.at("mesh.bin"));
         const auto cameras=parse_cameras(entries.at("cameras.bin"));
         const auto textures=parse_textures(entries.at("textures.bin"));
@@ -390,6 +394,7 @@ int main(int argc,char** argv) {
         }
         constexpr int kCoverageScale=2;
         constexpr int kCoverageSampleCount=kCoverageScale*kCoverageScale;
+        constexpr double kDepthEquivalenceEpsilon=1e-12;
         std::vector<Proj> projected(mesh.vertex_count);
         for(std::uint32_t i=0;i<mesh.vertex_count;++i) {
             auto p=project(xyz[i],cameras[view]);
@@ -438,14 +443,14 @@ int main(int argc,char** argv) {
                 const double w2=orient(a,b,px,py)/area;
                 const double z=w0*a.z+w1*b.z+w2*c.z;
                 if(!std::isfinite(z)) throw std::runtime_error("VISIBILITY_DEPTH_NONFINITE");
-                if(z<=1e-12) continue;
+                if(z<=kDepthEquivalenceEpsilon) continue;
                 const auto idx=static_cast<std::size_t>(y)*coverage_resolution+x;
                 int insert_at=-1;
                 for(int layer=0;layer<kMaxLayers;++layer) {
                     const auto current_owner=layer_owner[idx][layer];
                     const auto current_depth=layer_depth[idx][layer];
-                    if(current_owner<0 || z<current_depth-1e-12 ||
-                       (std::abs(z-current_depth)<=1e-12 && static_cast<std::int32_t>(fi)<current_owner)) {
+                    if(current_owner<0 || z<current_depth-kDepthEquivalenceEpsilon ||
+                       (std::abs(z-current_depth)<=kDepthEquivalenceEpsilon && static_cast<std::int32_t>(fi)<current_owner)) {
                         insert_at=layer;
                         break;
                     }

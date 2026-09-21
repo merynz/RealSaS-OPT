@@ -2,19 +2,31 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
+import pytest
 
 from compiler.realsas_compiler_core.appearance_compile_v2 import (
     face_atlas_layout,
+    resolve_projected_tile_resolution,
     triangular_barycentric_samples,
+)
+from compiler.realsas_compiler_core.appearance_color_v2 import (
+    premultiplied_linear_to_straight_srgb_u8,
+    source_sample_roundtrip_pm_error,
+)
+from compiler.realsas_compiler_core.appearance_completion_v2 import (
+    bounded_surface_harmonic_fill,
 )
 from compiler.realsas_compiler_core.appearance_quality_v2 import (
     cross_view_source_compatibility_metrics,
     provenance_boundary_metrics,
+    source_feature_preservation_metrics,
     structured_holdout_metrics,
 )
 from compiler.realsas_compiler_core.mesh.product_coverage_v1 import coverage_metrics
+from compiler.realsas_compiler_core.playback_full_surface_v3 import CameraProjectionV3
 
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "canonical" / "CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
@@ -24,85 +36,137 @@ def _policy():
     return json.loads(POLICY_PATH.read_text(encoding="utf-8"))
 
 
-def test_caa_policy_is_frozen_before_witness_and_atlas_capacity_is_analytic():
+def _camera(view: int = 0, resolution: int = 64):
+    return CameraProjectionV3(
+        view_id=f"V{view}",
+        view_index=view,
+        origin=(0.0, 0.0, -2.0),
+        right=(1.0, 0.0, 0.0),
+        screen_up=(0.0, 1.0, 0.0),
+        forward=(0.0, 0.0, 1.0),
+        half_extent=1.0,
+        resolution=resolution,
+    )
+
+
+def test_caa_policy_is_reopened_and_tile_density_is_art_quality_driven():
     policy = _policy()
     assert policy["schema"] == "RealSaS.CAAQualificationPolicy.v1"
     assert policy["status"] == "REOPENED_SUBJECT_FREE_VISUAL_FIDELITY_RECALIBRATION_V2"
     assert policy["mutable_after_witness"] is False
     compile_policy = policy["compile_policy"]
-    assert compile_policy["tile_resolution"] == 8
+    assert compile_policy["tile_resolution_mode"] == "PROJECTED_SOURCE_DENSITY_V1"
+    assert compile_policy["tile_resolution_candidates"] == [8, 12, 16, 24, 32]
+    assert compile_policy["max_source_pixels_per_atlas_texel"] == 1.0
     assert compile_policy["bleed_px"] == 2
     assert compile_policy["max_atlas_resolution"] == 2048
-    assert compile_policy["max_supported_face_count"] == 28900
+    assert "tile_resolution" not in compile_policy
+    assert "max_supported_face_count" not in compile_policy
 
-    passing = face_atlas_layout(
-        28900,
-        tile_resolution=8,
-        bleed_px=2,
+    candidate = SimpleNamespace(
+        vertices=(
+            SimpleNamespace(candidate_vertex_id="v0", P=(-0.2, -0.2, 0.0), component_id="c0"),
+            SimpleNamespace(candidate_vertex_id="v1", P=(0.2, -0.2, 0.0), component_id="c0"),
+            SimpleNamespace(candidate_vertex_id="v2", P=(-0.2, 0.2, 0.0), component_id="c0"),
+        ),
+        faces=(("v0", "v1", "v2"),),
     )
-    failing = face_atlas_layout(
-        28901,
-        tile_resolution=8,
+    masks = {view: np.ones((64, 64), dtype=bool) for view in range(8)}
+    evidence = resolve_projected_tile_resolution(
+        candidate=candidate,
+        cameras=tuple(_camera(view, 64) for view in range(8)),
+        foreground_mask_by_view=masks,
+        candidate_resolutions=(8, 12, 16, 24, 32),
+        max_source_pixels_per_atlas_texel=1.0,
         bleed_px=2,
+        max_atlas_resolution=2048,
     )
-    assert passing["width"] <= 2048 and passing["height"] <= 2048
-    assert failing["width"] > 2048 or failing["height"] > 2048
-
+    assert evidence["mode"] == "PROJECTED_SOURCE_DENSITY_V1"
+    assert evidence["selected_tile_resolution"] in {12, 16, 24, 32}
+    selected = next(
+        row for row in evidence["candidates"]
+        if row["tile_resolution"] == evidence["selected_tile_resolution"]
+    )
+    assert selected["density_passed"] is True
+    assert selected["capacity_passed"] is True
+    for row in evidence["candidates"]:
+        if row["tile_resolution"] < evidence["selected_tile_resolution"]:
+            assert not (row["density_passed"] and row["capacity_passed"])
 
 def _holdout_fixture(*, adversarial: bool):
-    count = 400
-    positions = np.column_stack(
-        (
-            np.linspace(0.0, 1.0, count),
-            np.zeros(count),
-            np.zeros(count),
+    tile_resolution = 8
+    bary = triangular_barycentric_samples(tile_resolution)
+    face_count = 24
+    positions = []
+    face_index = []
+    for face in range(face_count):
+        x0 = float(face % 6) * 2.0
+        y0 = float(face // 6) * 2.0
+        tri = np.asarray(
+            ((x0, y0, 0.0), (x0 + 1.0, y0, 0.0), (x0, y0 + 1.0, 0.0)),
+            dtype=np.float64,
         )
-    )
+        positions.append(bary @ tri)
+        face_index.extend([face] * len(bary))
+    positions = np.concatenate(positions, axis=0)
+    count = len(positions)
     component = np.zeros(count, dtype=np.int32)
     direct_valid = np.ones((8, count), dtype=bool)
     source_xy = np.zeros((8, count, 2), dtype=np.float32)
-    source_xy[:, :, 0] = np.arange(count, dtype=np.float32)[None, :]
-    source_xy[:, :, 1] = 100.0
+    source_xy[:, :, 0] = positions[:, 0][None, :] * 20.0
+    source_xy[:, :, 1] = positions[:, 1][None, :] * 20.0
 
     rgba = np.zeros((8, count, 4), dtype=np.uint8)
     rgba[:, :, 3] = 255
+    base = np.clip(np.floor((positions[:, 0] + positions[:, 1]) * 6.0), 0, 180).astype(np.uint8)
     if adversarial:
         for view in range(8):
             rgba[view, :, 0] = 255 if view % 2 else 0
+            rgba[view, :, 1] = base
     else:
         for view in range(8):
-            rgba[view, :, 0] = view * 2
-            rgba[view, :, 1] = np.arange(count, dtype=np.uint16) % 128
-    return direct_valid, rgba, source_xy, positions, component
+            rgba[view, :, 0] = np.clip(base.astype(np.uint16) + view, 0, 255).astype(np.uint8)
+            rgba[view, :, 1] = base
+    return {
+        "direct_valid": direct_valid,
+        "direct_rgba": rgba,
+        "source_xy": source_xy,
+        "sample_positions": positions,
+        "sample_component_index": component,
+        "sample_face_index": np.asarray(face_index, dtype=np.int32),
+        "face_count": face_count,
+        "tile_resolution": tile_resolution,
+    }
 
 
-def test_structured_holdout_policy_passes_small_directional_change_and_rejects_large_patch_change():
+def test_structured_holdout_uses_bounded_surface_completion_and_rejects_view_conflict():
     p = _policy()["completion_quality_policy"]
+    good_args = _holdout_fixture(adversarial=False)
     good = structured_holdout_metrics(
-        direct_valid=_holdout_fixture(adversarial=False)[0],
-        direct_rgba=_holdout_fixture(adversarial=False)[1],
-        source_xy=_holdout_fixture(adversarial=False)[2],
-        sample_positions=_holdout_fixture(adversarial=False)[3],
-        sample_component_index=_holdout_fixture(adversarial=False)[4],
+        **good_args,
         band_fraction=p["holdout_band_fraction"],
+        max_region_samples=p["max_local_harmonic_region_samples"],
+        max_graph_hops=p["max_local_harmonic_graph_hops"],
     )
     bad_args = _holdout_fixture(adversarial=True)
     bad = structured_holdout_metrics(
-        direct_valid=bad_args[0],
-        direct_rgba=bad_args[1],
-        source_xy=bad_args[2],
-        sample_positions=bad_args[3],
-        sample_component_index=bad_args[4],
+        **bad_args,
         band_fraction=p["holdout_band_fraction"],
+        max_region_samples=p["max_local_harmonic_region_samples"],
+        max_graph_hops=p["max_local_harmonic_graph_hops"],
     )
+    assert good["mode"] == "SILHOUETTE_ADJACENT_BOUNDED_OCCLUSION_PATCHES_V3"
     assert good["sample_count"] >= p["min_structured_holdout_samples"]
+    assert all(
+        row["holdout_sample_count"] >= p["min_structured_holdout_samples_per_view"]
+        for row in good["per_view"]
+    )
     assert good["mean_rgba_l1"] <= p["max_structured_holdout_mean_rgba_l1"]
     assert good["p95_rgba_l1"] <= p["max_structured_holdout_p95_rgba_l1"]
     assert (
         bad["mean_rgba_l1"] > p["max_structured_holdout_mean_rgba_l1"]
         or bad["p95_rgba_l1"] > p["max_structured_holdout_p95_rgba_l1"]
     )
-
 
 def _seam_fixture(*, adversarial: bool):
     bary = triangular_barycentric_samples(8)
@@ -277,3 +341,119 @@ def test_cross_view_compatibility_measures_same_canonical_source_without_requiri
     assert bad["p95_premultiplied_rgba_l1"] > metrics[
         "p95_premultiplied_rgba_l1"
     ]
+
+
+def test_source_pm_transport_roundtrip_has_subject_free_numerical_ceiling():
+    p = _policy()["completion_quality_policy"]
+    rgb = np.asarray([0, 1, 8, 16, 32, 64, 96, 128, 160, 192, 224, 255], dtype=np.uint8)
+    alpha = np.asarray([0, 1, 2, 4, 8, 16, 32, 64, 96, 128, 192, 255], dtype=np.uint8)
+    rows = []
+    truth = []
+    for r in rgb:
+        for g in rgb[::2]:
+            for b in rgb[::3]:
+                for a in alpha:
+                    pm = np.zeros(4, dtype=np.float64)
+                    aa = float(a) / 255.0
+                    encoded = np.asarray([r, g, b], dtype=np.float64) / 255.0
+                    linear = np.where(
+                        encoded <= 0.04045,
+                        encoded / 12.92,
+                        ((encoded + 0.055) / 1.055) ** 2.4,
+                    )
+                    pm[:3] = linear * aa
+                    pm[3] = aa
+                    truth.append(pm)
+    truth = np.asarray(truth, dtype=np.float64)
+    transport = premultiplied_linear_to_straight_srgb_u8(truth)
+    error = source_sample_roundtrip_pm_error(transport, truth)
+    assert float(np.max(error)) <= p["max_source_sample_pm_roundtrip_abs_error"]
+
+
+def test_sparse_one_pixel_line_loss_is_detected_even_below_five_percent_area():
+    source = np.full((64, 64, 4), 255, dtype=np.uint8)
+    source[:, :, :3] = 240
+    source[32, 10:54, :3] = 10
+    predicted = source.copy()
+    predicted[32, 10:54, :3] = 240
+    foreground = np.ones((64, 64), dtype=bool)
+    p = _policy()["completion_quality_policy"]
+    metrics = source_feature_preservation_metrics(
+        predicted_rgba=predicted,
+        source_rgba=source,
+        source_foreground=foreground,
+        high_error_cut_rgba_l1=p["rest_feature_high_error_cut_rgba_l1"],
+        edge_gradient_cut=p["rest_feature_edge_gradient_cut"],
+    )
+    assert metrics["high_error_fraction"] < 0.05
+    assert (
+        metrics["edge_recall_1px"] < p["rest_min_feature_edge_recall_1px"]
+        or metrics["largest_connected_high_error_fraction"]
+        > p["rest_max_largest_connected_high_error_fraction"]
+        or metrics["p999_rgba_l1"] > p["rest_max_feature_p999_rgba_l1"]
+    )
+
+
+def test_harmonic_completion_cannot_cross_component_or_invent_without_boundary():
+    rgba = np.asarray(
+        [[255, 0, 0, 255], [0, 0, 0, 0], [0, 255, 0, 255], [0, 0, 0, 0]],
+        dtype=np.uint8,
+    )
+    provenance = np.asarray([0, 255, 0, 255], dtype=np.uint8)
+    source_view = np.asarray([0, -1, 0, -1], dtype=np.int16)
+    missing = np.asarray([False, True, False, True])
+    neighbors = ((1,), (0,), (3,), (2,))
+    with pytest.raises(Exception, match="CAA_HARMONIC_REGION_WITHOUT_SOURCE_BOUNDARY"):
+        bounded_surface_harmonic_fill(
+            rgba=rgba,
+            provenance=provenance,
+            source_view=source_view,
+            missing=missing,
+            sample_component=("A", "A", "B", "C"),
+            neighbors=neighbors,
+            max_region_samples=4,
+            max_graph_hops=2,
+        )
+
+
+def test_cross_view_policy_accepts_small_artist_variation_and_rejects_gross_contradiction():
+    p = _policy()["completion_quality_policy"]
+    count = 32
+    valid = np.ones((8, count), dtype=bool)
+    component = np.asarray([0] * 16 + [1] * 16, dtype=np.int32)
+    good = np.zeros((8, count, 4), dtype=np.uint8)
+    good[:, :, 3] = 255
+    for view in range(8):
+        good[view, :, 0] = 100 + view * 2
+        good[view, :, 1] = 120
+    good_metrics = cross_view_source_compatibility_metrics(
+        direct_valid=valid,
+        direct_rgba=good,
+        sample_component_index=component,
+        color_conflict_cut_rgba_l1=p["cross_view_color_conflict_cut_rgba_l1"],
+        alpha_conflict_cut=p["cross_view_alpha_conflict_cut"],
+    )
+    assert all(
+        row["shared_direct_sample_count"] >= p["cross_view_min_shared_direct_samples_per_pair"]
+        and row["p95_premultiplied_rgba_l1"] <= p["cross_view_max_pair_p95_rgba_l1"]
+        and row["color_conflict_fraction"] <= p["cross_view_max_pair_color_conflict_fraction"]
+        and row["p95_alpha_abs"] <= p["cross_view_max_pair_p95_alpha_abs"]
+        and row["alpha_conflict_fraction"] <= p["cross_view_max_pair_alpha_conflict_fraction"]
+        for row in good_metrics["per_pair"]
+    )
+
+    bad = good.copy()
+    bad[1, :16] = (255, 0, 255, 0)
+    bad_metrics = cross_view_source_compatibility_metrics(
+        direct_valid=valid,
+        direct_rgba=bad,
+        sample_component_index=component,
+        color_conflict_cut_rgba_l1=p["cross_view_color_conflict_cut_rgba_l1"],
+        alpha_conflict_cut=p["cross_view_alpha_conflict_cut"],
+    )
+    assert any(
+        row["color_conflict_fraction"] > p["cross_view_max_component_color_conflict_fraction"]
+        or row["alpha_conflict_fraction"] > p["cross_view_max_component_alpha_conflict_fraction"]
+        for row in bad_metrics["per_pair_component"]
+        if row["shared_direct_sample_count"] >= p["cross_view_min_component_samples_for_gate"]
+    )

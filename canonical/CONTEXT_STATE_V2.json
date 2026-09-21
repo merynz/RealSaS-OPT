@@ -22,17 +22,17 @@
   },
   "product": {
     "target": "automatic 8-direction Spine-class 2D puppet compiler with internal 3D mechanics",
-    "demo_witness": "Subject-2 Knight (review-ready; execution held for explicit user approval)",
-    "next_visible_product_milestone": "user reviews the sealed V2 implementation; after explicit approval only, initialize fresh run-local Knight Stage01"
+    "demo_witness": "Subject-2 Knight (technical readiness reclosure active; execution forbidden)",
+    "next_visible_product_milestone": "complete VF-11 R512, VF-23 same-context exact production-policy E2E, and exact-head CI reclosure; then request explicit user authorization"
   },
   "current_focus": {
     "module": "appearance fidelity + dynamic visual integrity reclosure",
     "state": "REOPENED__WITNESS_FORBIDDEN",
     "active_experiment": "V2_IMPLEMENTATION_ASSEMBLY",
     "most_recent_closed_gate": "PRIOR_READY_SEAL_REVOKED_BY_POST_SEAL_APPEARANCE_REVIEW",
-    "promotion_block": "Close tile-density qualification, source-constrained completion quality, cross-view RGB compatibility, dynamic alpha-hole and scattered-hole/speckle gates before any Knight execution.",
+    "promotion_block": "VF-11 R512 remains the active scientific blocker; VF-23 same-context Stage20->46 production-policy E2E and exact-head mainline/runtime/source/orchestration closure must also pass before technical reseal.",
     "scope_warning": "FIT1 or single-subject closure is not unseen/generalization evidence; current learned models are not claimed final.",
-    "scientific_question": "Can geometry, appearance completion and dynamic rendering jointly eliminate visible holes/speckle while preserving source art without hallucination?"
+    "scientific_question": "Can the reopened geometry/appearance/runtime fidelity audit be fully reclosed subject-free, including R512 feature survival and exact production-policy E2E, without relaxing thresholds or using Knight?"
   },
   "execution_environment": {
     "actions": "SELF_HOSTED_LOCAL_ONLY",
@@ -136,7 +136,7 @@
     "Product closure is Stage46 and requires native Dynamic Visual Integrity.",
     "Presentation partition may use qualified source-backed appearance boundaries but may not invent semantic object identity.",
     "Dynamic appearance shipping gates are intrinsic surface metrics invariant to rigid 3D motion; screen projection conditioning is diagnostic only.",
-    "Knight execution requires exact READY_FOR_WITNESS_EXECUTION and explicit user approval."
+    "Knight execution requires exact READY_FOR_WITNESS_EXECUTION plus the separate machine-enforced APPROVED_EXPLICITLY_BY_USER authorization state."
   ],
   "known_context_traps": [
     {
@@ -163,8 +163,8 @@
   "continuation_protocol": {
     "first_action": "Read V2_IMPLEMENTATION_READINESS and verify implementation_closure_sha256 equals exact current implementation closure.",
     "assembly_completion_definition": "Completed: all required subject-free proofs PASS and exact closure is resealed.",
-    "witness_rule": "Do not execute Knight until explicit user approval; after approval create a fresh run-local Knight ledger under $REALSAS_AUTHORITY_ROOT and begin Stage01.",
-    "experiment_completion_definition": "Implementation assembly is review-ready; Knight remains a separate user-authorized scientific witness."
+    "witness_rule": "Do not execute Knight until technical READY is exact-current AND validate-witness-authorization confirms APPROVED_EXPLICITLY_BY_USER; then create a fresh run-local Knight ledger under $REALSAS_AUTHORITY_ROOT and begin Stage01.",
+    "experiment_completion_definition": "Implementation assembly is complete only after VF-11, VF-23 and exact-head CI reclosure are sealed; technical READY still does not authorize Knight without separate explicit user approval."
   },
   "product_quality_axes": {
     "geometry": {

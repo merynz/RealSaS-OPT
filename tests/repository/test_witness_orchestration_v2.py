@@ -319,8 +319,18 @@ def test_implementation_closure_covers_all_current_stages_and_excludes_donor_era
     assert imported.isdisjoint(mainline.CURRENT_V2_FORBIDDEN_IMPORT_MODULES)
     critical = {row["path"] for row in manifest["critical_files"]}
     assert "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp" in critical
+    assert ".github/workflows/current_runtime_self_hosted_ci.yml" in critical
+    assert ".github/workflows/model_mainline_source_gate.yml" in critical
+    assert ".github/workflows/native_runtime_source_gate.yml" in critical
+    assert ".github/workflows/proof_service_promotion_gate.yml" in critical
+    assert ".github/workflows/vf23_production_policy_e2e_bank.yml" in critical
     assert ".github/workflows/subject2_knight_observation_preflight.yml" in critical
     assert ".github/workflows/v2_witness_orchestration_subject_free_dry_run.yml" in critical
+    assert "tools/verify_native_runtime_source_seal_v2.py" in critical
+    dynamic = set(manifest["dynamic_governance_files"])
+    assert "canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json" in dynamic
+    assert "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V11_20260921.json" in dynamic
+    assert dynamic <= critical
 
 
 def test_implementation_closure_hash_changes_when_critical_bytes_change(monkeypatch):

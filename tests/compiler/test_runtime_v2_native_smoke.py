@@ -383,3 +383,61 @@ def test_native_v2_rss_smoke_matches_python_reference_byte_exact(tmp_path: Path)
     )
     assert coverage_rejected.returncode != 0
     assert "PIXEL_COVERAGE_SAMPLE_COUNT_INVALID" in coverage_rejected.stderr
+
+    depth_contract_tampered = entries.copy()
+    depth_contract_manifest = depth_contract_tampered["manifest.txt"].replace(
+        b"depth_buffer_contract=IEEE754_FLOAT64_SOFTWARE_SORT",
+        b"depth_buffer_contract=UNQUALIFIED_HARDWARE_Z",
+    )
+    assert depth_contract_manifest != depth_contract_tampered["manifest.txt"]
+    depth_contract_tampered["manifest.txt"] = depth_contract_manifest
+    depth_contract_rss = tmp_path / "tampered_depth_contract.rss"
+    write_rss_v2(depth_contract_rss, depth_contract_tampered)
+    depth_contract_rejected = subprocess.run(
+        [
+            str(player),
+            str(depth_contract_rss),
+            "--clip",
+            "smoke",
+            "--view",
+            "V0",
+            "--frame",
+            "0",
+            "--out-rgba",
+            str(tmp_path / "tampered_depth_contract.rgba"),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert depth_contract_rejected.returncode != 0
+    assert "DEPTH_BUFFER_CONTRACT_INVALID" in depth_contract_rejected.stderr
+
+    depth_epsilon_tampered = entries.copy()
+    depth_epsilon_manifest = depth_epsilon_tampered["manifest.txt"].replace(
+        b"depth_equivalence_epsilon_camera_z=1e-12",
+        b"depth_equivalence_epsilon_camera_z=1e-6",
+    )
+    assert depth_epsilon_manifest != depth_epsilon_tampered["manifest.txt"]
+    depth_epsilon_tampered["manifest.txt"] = depth_epsilon_manifest
+    depth_epsilon_rss = tmp_path / "tampered_depth_epsilon.rss"
+    write_rss_v2(depth_epsilon_rss, depth_epsilon_tampered)
+    depth_epsilon_rejected = subprocess.run(
+        [
+            str(player),
+            str(depth_epsilon_rss),
+            "--clip",
+            "smoke",
+            "--view",
+            "V0",
+            "--frame",
+            "0",
+            "--out-rgba",
+            str(tmp_path / "tampered_depth_epsilon.rgba"),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert depth_epsilon_rejected.returncode != 0
+    assert "DEPTH_EQUIVALENCE_EPSILON_INVALID" in depth_epsilon_rejected.stderr

@@ -1,0 +1,59 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v5",
+  "sealed_on": "2026-09-21",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V4_20260918.json",
+    "git_blob_sha1": "05b3f93aac51643c8e2cc0489ef724b8a27c8e54",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "RUNTIME_V2_VISUAL_FIDELITY_AND_EQUAL_DEPTH_SOURCE_RECLOSURE",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "knight_witness_used": false,
+    "runtime_role": "subordinate_deployment_consumer",
+    "subtree_closure": "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+  },
+  "replacements": [
+    {
+      "path": "runtime/realsas_cpp/CMakeLists.txt",
+      "size_bytes": 6606,
+      "git_blob_sha1": "31fd9fa82b236232d01b889c09e936cfa6d39204",
+      "reason": "include current equal-depth presentation/native conformance targets"
+    },
+    {
+      "path": "runtime/realsas_cpp/src/reference_raster_v3.h",
+      "size_bytes": 4512,
+      "git_blob_sha1": "35d89f3e9b7f42c18903b8851917c7486fc20fa5",
+      "reason": "make physical occlusion independent of UI slot draw order"
+    },
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v4_reference.cpp",
+      "size_bytes": 28087,
+      "git_blob_sha1": "c5b8a45f30e8d586caca076f2fce879118dfdc3c",
+      "reason": "current equal-depth source-backed presentation tie semantics and scope fix"
+    }
+  ],
+  "additions": [
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v2_caa_reference.cpp",
+      "size_bytes": 23112,
+      "git_blob_sha1": "45133740476bc49280aa0b50bec6e0805ca1db39",
+      "reason": "V2 canonical-depth CAA reference/native consumer with layered alpha, linear-light PM filtering, sealed-frame and base-level sampling contracts"
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/runtime_v4_equal_depth_presentation_e2e.py",
+      "size_bytes": 5641,
+      "git_blob_sha1": "31812d17b2e1d8a8b343e6901e7479c43f6090ec",
+      "reason": "native equal-depth presentation conformance adversary"
+    }
+  ],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 25,
+    "replacement_count": 3,
+    "addition_count": 2,
+    "resulting_sealed_blob_count": 25,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

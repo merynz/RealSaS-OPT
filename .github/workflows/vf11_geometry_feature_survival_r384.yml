@@ -1,0 +1,103 @@
+name: VF11 geometry feature survival R384
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tools/vf11_geometry_feature_survival_panel.py'
+      - 'models/iris/v3/zero_surface_decoder_v3.py'
+      - 'compiler/realsas_compiler_core/mesh/product_coverage_v1.py'
+      - 'compiler/realsas_compiler_core/rest_preservation_v1.py'
+      - 'canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_CALIBRATION_V1_20260921.json'
+      - '.github/workflows/vf11_geometry_feature_survival_r384.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: vf11-geometry-feature-survival-r384-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  feature-survival-r384:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      REALSAS_VF11_OUT: vf11_r384_out
+      REALSAS_VF11_DECODER_RESOLUTION: '384'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install frozen calibration dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off scikit-image==0.25.2
+
+      - name: Compile apparatus
+        run: |
+          python -m py_compile \
+            tools/vf11_geometry_feature_survival_panel.py \
+            models/iris/v3/zero_surface_decoder_v3.py \
+            compiler/realsas_compiler_core/mesh/product_coverage_v1.py \
+            compiler/realsas_compiler_core/rest_preservation_v1.py
+
+      - name: Enforce subject-free calibration boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nE 'SUBJECT2_KNIGHT|Knight\.fbx|PROMOTED_MAGE|MAGE_FIT|/MAGE|/Mage' \
+            tools/vf11_geometry_feature_survival_panel.py; then
+            echo VF11_R384_SUBJECT_CONTAMINATION_FORBIDDEN >&2
+            exit 1
+          fi
+          echo VF11_R384_SUBJECT_FREE_BOUNDARY=PASS
+
+      - name: Run same-physical-feature R384 requery panel
+        run: python tools/vf11_geometry_feature_survival_panel.py
+
+      - name: Validate frozen-profile measurement boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          p=json.load(open('vf11_r384_out/VF11_GEOMETRY_FEATURE_SURVIVAL_PANEL.json',encoding='utf-8'))
+          assert p['schema']=='RealSaS.VF11GeometryFeatureSurvivalPanel.v2'
+          assert p['status']=='MEASURED_SUBJECT_FREE__FROZEN_STAGE13_PROFILE_EVALUATED'
+          assert p['subject_inputs_used'] is False
+          assert p['knight_result_used'] is False
+          assert p['mage_result_used'] is False
+          assert p['teacher_geometry_used'] is False
+          assert p['new_threshold_selected'] is False
+          assert p['reference_decoder_resolution']==256
+          assert p['decoder_resolution']==384
+          assert p['raster_resolution']==1024
+          assert len(p['cases'])==20
+          assert p['frozen_stage13_profile']=={
+              'min_recall':0.999,
+              'min_precision':0.999,
+              'max_largest_coherent_hole_fraction':0.00025,
+              'max_interior_uncovered_fraction':0.0005,
+              'min_component_recall':0.999,
+              'max_silhouette_edge_p95_px':0.5,
+          }
+          print('VF11_R384_MEASUREMENT_BOUNDARY=PASS')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vf11-geometry-feature-survival-r384
+          path: vf11_r384_out/
+          if-no-files-found: error

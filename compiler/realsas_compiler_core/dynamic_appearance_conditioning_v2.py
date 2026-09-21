@@ -170,6 +170,7 @@ def validate_dynamic_appearance_policy(
         "dynamic_max_relative_surface_condition_number",
         "dynamic_max_relative_surface_principal_stretch",
         "dynamic_max_adjacent_frame_surface_principal_stretch",
+        "dynamic_max_texture_texels_per_output_pixel",
     )
     if any(key not in policy for key in required):
         raise QualificationError("DYNAMIC_APPEARANCE_POLICY_INCOMPLETE")
@@ -192,13 +193,19 @@ def validate_dynamic_appearance_policy(
         "dynamic_max_adjacent_frame_surface_principal_stretch": float(
             policy["dynamic_max_adjacent_frame_surface_principal_stretch"]
         ),
+        "dynamic_max_texture_texels_per_output_pixel": float(
+            policy["dynamic_max_texture_texels_per_output_pixel"]
+        ),
     }
     if int(out["dynamic_min_visible_pixels_per_face"]) < 1:
         raise QualificationError("DYNAMIC_APPEARANCE_VISIBLE_PIXEL_FLOOR_INVALID")
     if float(out["dynamic_min_projected_double_area_px2"]) <= 0.0:
         raise QualificationError("DYNAMIC_APPEARANCE_PROJECTED_AREA_FLOOR_INVALID")
-    for key in required[2:]:
+    for key in required[2:-1]:
         value = float(out[key])
         if not np.isfinite(value) or value < 1.0:
             raise QualificationError("DYNAMIC_APPEARANCE_CONDITION_LIMIT_INVALID")
+    footprint = float(out["dynamic_max_texture_texels_per_output_pixel"])
+    if not np.isfinite(footprint) or footprint <= 0.0 or footprint > 1.0 + 1.0e-12:
+        raise QualificationError("DYNAMIC_APPEARANCE_MINIFICATION_LIMIT_INVALID")
     return out

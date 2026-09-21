@@ -9,6 +9,7 @@ import pytest
 
 from compiler.realsas_compiler_core.dynamic_appearance_conditioning_v2 import (
     dynamic_face_conditioning_metrics,
+    screen_to_texture_max_texels_per_pixel,
     validate_dynamic_appearance_policy,
 )
 
@@ -25,6 +26,26 @@ def _policy():
         ).read_text(encoding="utf-8")
     )
     return payload["completion_quality_policy"]
+
+
+def test_screen_to_texture_footprint_separates_magnification_from_minification():
+    uv = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+    magnified = screen_to_texture_max_texels_per_pixel(
+        uv_triangle=uv,
+        screen_triangle=((0.0, 0.0), (255.0, 0.0), (0.0, 255.0)),
+        texture_width=256,
+        texture_height=256,
+    )
+    minified = screen_to_texture_max_texels_per_pixel(
+        uv_triangle=uv,
+        screen_triangle=((0.0, 0.0), (63.75, 0.0), (0.0, 63.75)),
+        texture_width=256,
+        texture_height=256,
+    )
+    assert magnified == pytest.approx(1.0)
+    assert minified == pytest.approx(4.0)
+    assert magnified <= _policy()["dynamic_max_texture_texels_per_output_pixel"]
+    assert minified > _policy()["dynamic_max_texture_texels_per_output_pixel"]
 
 
 def test_dynamic_appearance_identity_map_is_well_conditioned():
@@ -121,6 +142,7 @@ def test_dynamic_appearance_policy_is_subject_free_and_nontrivial():
     assert 1.0 < policy["dynamic_max_relative_surface_condition_number"] < 20.0
     assert 1.0 < policy["dynamic_max_relative_surface_principal_stretch"] < 10.0
     assert 1.0 < policy["dynamic_max_adjacent_frame_surface_principal_stretch"] < 8.0
+    assert policy["dynamic_max_texture_texels_per_output_pixel"] == 1.0
 
 
 def test_subject_free_calibration_bank_selects_frozen_relative_thresholds():

@@ -21,6 +21,7 @@ from compiler.realsas_compiler_core.appearance_completion_v2 import (
     bounded_surface_harmonic_fill,
 )
 from compiler.realsas_compiler_core.appearance_quality_v2 import (
+    adjacent_direction_transition_metrics,
     cross_view_source_compatibility_metrics,
     provenance_boundary_metrics,
     source_feature_preservation_metrics,
@@ -342,6 +343,61 @@ def test_cross_view_compatibility_measures_same_canonical_source_without_requiri
     assert bad["p95_premultiplied_rgba_l1"] > metrics[
         "p95_premultiplied_rgba_l1"
     ]
+
+
+def test_adjacent_direction_transition_metric_allows_smooth_artist_variation_and_exposes_single_view_shimmer():
+    count = 64
+    valid = np.ones((8, count), dtype=bool)
+    component = np.asarray([0] * 32 + [1] * 32, dtype=np.int32)
+
+    smooth = np.zeros((8, count, 4), dtype=np.uint8)
+    smooth[:, :, 3] = 255
+    for view in range(8):
+        phase = 2.0 * np.pi * float(view) / 8.0
+        level = int(round(128.0 + 36.0 * np.sin(phase)))
+        smooth[view, :, :3] = level
+    smooth_metrics = adjacent_direction_transition_metrics(
+        direct_valid=valid,
+        direct_rgba=smooth,
+        sample_component_index=component,
+    )
+    assert smooth_metrics["triplet_count"] == 8
+    assert len(smooth_metrics["per_triplet"]) == 8
+    assert len(smooth_metrics["per_triplet_component"]) == 16
+    assert smooth_metrics["raw_rgb_equality_required"] is False
+    assert smooth_metrics["view_dependent_artist_intent_allowed"] is True
+
+    shimmer = smooth.copy()
+    shimmer[2, :, :3] = np.clip(
+        shimmer[2, :, :3].astype(np.int16) + 60,
+        0,
+        255,
+    ).astype(np.uint8)
+    shimmer_metrics = adjacent_direction_transition_metrics(
+        direct_valid=valid,
+        direct_rgba=shimmer,
+        sample_component_index=component,
+    )
+    assert (
+        shimmer_metrics["p95_center_residual_pm_l1"]
+        > smooth_metrics["p95_center_residual_pm_l1"]
+    )
+    assert max(
+        row["p95_center_residual_pm_l1"]
+        for row in shimmer_metrics["per_triplet"]
+    ) > max(
+        row["p95_center_residual_pm_l1"]
+        for row in smooth_metrics["per_triplet"]
+    )
+
+    alpha_shimmer = smooth.copy()
+    alpha_shimmer[5, :, 3] = 225
+    alpha_metrics = adjacent_direction_transition_metrics(
+        direct_valid=valid,
+        direct_rgba=alpha_shimmer,
+        sample_component_index=component,
+    )
+    assert alpha_metrics["p95_center_alpha_residual"] > 0.0
 
 
 def test_source_pm_transport_roundtrip_has_subject_free_numerical_ceiling():

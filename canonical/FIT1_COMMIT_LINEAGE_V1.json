@@ -53,7 +53,7 @@
     "hardening/pre-fit-closure-v1-20260904": "d4da94279e1f8d2bbc3882c428b975e2e19cfab4",
     "ignore-this": "91b4593d5b2afdd540f05ab05e7474ac04d8b171",
     "integration/mage-real-e2e-20260912": "11d1fdfd4398b01b57dd56bb54b360af23f746ed",
-    "main": "5301ac6114308ebb7471bbaebc38ab5a803d0fcd",
+    "main": "ed870fcd64cf2a815b49c3cec93e81c51af537f4",
     "motion/quaternius-direct-fbx-gate-v1-20260919": "47fb1555455bd7a1e43940bad97f4ca0000f65ab",
     "motion/quaternius-materializer-v1-20260919": "f17bc5050f2b0bc1cec5e6a139a23c3d209ed125",
     "noop": "c6b5108f672bb1af5354a2c6abd86cda36c2c845",
@@ -117,7 +117,7 @@
     "tmp_should_not_create": "a5edb2b23fc4dd26c7aab2050954227f81964304",
     "tooling/export-frozen-source-7f39": "43a1e5b2376fee305ebdbb6699289da6f2370ddf"
   },
-  "commit_count": 2592,
+  "commit_count": 2597,
   "commits": [
     {
       "sha": "f6ce5dbc8719d6b6c592a4e060d8f1b38056b8ee",
@@ -126982,6 +126982,124 @@
       "subsystem_tags": [
         "COMPILER_PROOF",
         "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "8b8fb82c3808b679b66b880bef9a2651097455b5",
+      "parents": [
+        "5301ac6114308ebb7471bbaebc38ab5a803d0fcd"
+      ],
+      "author_time": "2026-09-21T09:30:22+03:00",
+      "committer_time": "2026-09-21T09:30:22+03:00",
+      "subject": "Refresh live authority context [skip ci]",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "canonical/BOOTSTRAP_AUDIT_QUEUE.md",
+        "canonical/CONTEXT_COVERAGE_AUDIT.json",
+        "canonical/CONTEXT_COVERAGE_AUDIT.md",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.json",
+        "canonical/FIT1_COMMIT_LINEAGE_V1.md",
+        "canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json",
+        "canonical/LIVE_AUTHORITY_MAP.md",
+        "canonical/REHYDRATION_PACKET.md"
+      ],
+      "subsystem_tags": [
+        "FIT_DATA",
+        "GOVERNANCE_CONTINUITY"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "45c7e98f06056f5582f7a4929098c0025ee2abb1",
+      "parents": [
+        "8b8fb82c3808b679b66b880bef9a2651097455b5"
+      ],
+      "author_time": "2026-09-21T09:36:37+03:00",
+      "committer_time": "2026-09-21T09:36:37+03:00",
+      "subject": "test: give structured holdout fixture per-view evidence margin",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_caa_v2_subject_free_policy.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ee5fdc6691dc3cae875c7dfe420a38f4fdb892d1",
+      "parents": [
+        "45c7e98f06056f5582f7a4929098c0025ee2abb1"
+      ],
+      "author_time": "2026-09-21T09:36:41+03:00",
+      "committer_time": "2026-09-21T09:36:41+03:00",
+      "subject": "test: isolate transparent direct-source background semantics",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_visibility_and_caa_v2.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "d622cab196bd6d70734f235e1d5fbccdc2e02e6b",
+      "parents": [
+        "ee5fdc6691dc3cae875c7dfe420a38f4fdb892d1"
+      ],
+      "author_time": "2026-09-21T09:36:43+03:00",
+      "committer_time": "2026-09-21T09:36:43+03:00",
+      "subject": "test: sample exact black-white midpoint in native linear-light discriminator",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_runtime_v2_native_smoke.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF",
+        "RUNTIME_PRODUCT"
+      ],
+      "is_fit1_gate_anchor": false,
+      "is_first_executable_fit_base": false
+    },
+    {
+      "sha": "ed870fcd64cf2a815b49c3cec93e81c51af537f4",
+      "parents": [
+        "d622cab196bd6d70734f235e1d5fbccdc2e02e6b"
+      ],
+      "author_time": "2026-09-21T09:36:52+03:00",
+      "committer_time": "2026-09-21T09:36:52+03:00",
+      "subject": "test: rebase V2 integration fixtures onto new appearance contracts",
+      "branches_containing": [
+        "main"
+      ],
+      "main_reachable": true,
+      "changed_paths": [
+        "tests/compiler/test_product_mesh_stage_adapters_v1.py"
+      ],
+      "subsystem_tags": [
+        "CI_TEST",
+        "COMPILER_PROOF"
       ],
       "is_fit1_gate_anchor": false,
       "is_first_executable_fit_base": false

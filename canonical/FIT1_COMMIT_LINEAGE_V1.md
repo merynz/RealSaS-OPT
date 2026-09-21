@@ -6,7 +6,7 @@
 > Semantic interpretation: `canonical/FIT1_SCIENTIFIC_LINEAGE_V1.md`
 > Ownership interpretation: `canonical/SUBSYSTEM_OWNERSHIP_ENVELOPES_V1.md`
 
-Commits descended from the FIT1 gate anchor across eligible live refs: **2592**.
+Commits descended from the FIT1 gate anchor across eligible live refs: **2597**.
 
 Every row is discoverable context. A row does **not** imply that its subject-line claim is scientifically promoted; inspect the linked prereg/result/authority ledger before making a scientific claim.
 
@@ -2604,6 +2604,11 @@ Every row is discoverable context. A row does **not** imply that its subject-lin
 | `2026-09-21T09:28:00+03:00` | `84f2d7a6069f` | yes | CI_TEST, GOVERNANCE_CONTINUITY, RUNTIME_PRODUCT | ci: bind V2 appearance policy authority to exact runtime gate | `.github/workflows/current_runtime_self_hosted_ci.yml` | `main` |
 | `2026-09-21T09:28:10+03:00` | `2e7275c99222` | yes | GOVERNANCE_CONTINUITY | authority: record policy-gate bypass closure VF-34 | `canonical/CAA_V2_VISUAL_FIDELITY_RECALIBRATION_20260921.json` | `main` |
 | `2026-09-21T09:28:55+03:00` | `5301ac611430` | yes | COMPILER_PROOF, RUNTIME_PRODUCT | runtime: apply texture footprint gate only to visual contributors | `compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py` | `main` |
+| `2026-09-21T09:30:22+03:00` | `8b8fb82c3808` | yes | FIT_DATA, GOVERNANCE_CONTINUITY | Refresh live authority context [skip ci] | `canonical/BOOTSTRAP_AUDIT_QUEUE.md`<br>`canonical/CONTEXT_COVERAGE_AUDIT.json`<br>`canonical/CONTEXT_COVERAGE_AUDIT.md`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.json`<br>`canonical/FIT1_COMMIT_LINEAGE_V1.md`<br>`canonical/KNOWLEDGE_ARTIFACT_CATALOG_V1.json`<br>`canonical/LIVE_AUTHORITY_MAP.md`<br>`canonical/REHYDRATION_PACKET.md` | `main` |
+| `2026-09-21T09:36:37+03:00` | `45c7e98f0605` | yes | CI_TEST, COMPILER_PROOF | test: give structured holdout fixture per-view evidence margin | `tests/compiler/test_caa_v2_subject_free_policy.py` | `main` |
+| `2026-09-21T09:36:41+03:00` | `ee5fdc6691dc` | yes | CI_TEST, COMPILER_PROOF | test: isolate transparent direct-source background semantics | `tests/compiler/test_visibility_and_caa_v2.py` | `main` |
+| `2026-09-21T09:36:43+03:00` | `d622cab196bd` | yes | CI_TEST, COMPILER_PROOF, RUNTIME_PRODUCT | test: sample exact black-white midpoint in native linear-light discriminator | `tests/compiler/test_runtime_v2_native_smoke.py` | `main` |
+| `2026-09-21T09:36:52+03:00` | `ed870fcd64cf` | yes | CI_TEST, COMPILER_PROOF | test: rebase V2 integration fixtures onto new appearance contracts | `tests/compiler/test_product_mesh_stage_adapters_v1.py` | `main` |
 
 ## Use rule
 

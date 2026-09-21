@@ -955,7 +955,7 @@ def execute(
     validate_ledger(plan, ledger)
     execution_class = str(ledger.get("execution_class") or "WITNESS")
     if execution_class == "WITNESS":
-        validate_readiness(plan)
+        validate_witness_authorization(plan)
     elif execution_class == "IMPLEMENTATION_AUDIT":
         manifest_preview = load_json(run_manifest_path(run_id))
         if manifest_preview.get("implementation_audit") is not True:

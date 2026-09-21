@@ -263,6 +263,22 @@
       "finding": "current-runtime-self-hosted-ci executed the V2 native smoke and fail-closed tail tests but its push path filter did not include those test files. Native proof authority could therefore be edited without triggering the runtime gate on that exact commit.",
       "repair": "The runtime workflow push filter now includes tests/compiler/test_runtime_v2_native_smoke.py and tests/compiler/test_v2_tail_authority_fail_closed.py. The native smoke also contains a linear-light discriminator.",
       "status": "REPAIRED__EXACT_HEAD_CI_PENDING"
+    },
+    {
+      "id": "VF-32",
+      "severity": "HIGH",
+      "owner": "CI / runtime adapter governance",
+      "finding": "The current runtime workflow was path-filtered on compiler core/export/proof and native runtime sources, but not on the V2 appearance/runtime orchestrator adapters that implement Stage23-25 and Stage42-45 product qualification. Shipping-gate logic could therefore change on main without triggering the exact native/runtime proof workflow.",
+      "repair": "current-runtime-self-hosted-ci now triggers on compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py and appearance_v2.py so Stage23-25/42-45 authority changes are checked on the exact promoted SHA.",
+      "status": "REPAIRED__EXACT_HEAD_CI_PENDING"
+    },
+    {
+      "id": "VF-33",
+      "severity": "HIGH",
+      "owner": "CI / subject-free red-team enforcement",
+      "finding": "The subject-free CAA policy, layered visibility, and dynamic appearance conditioning adversarial suites existed in the repository but were not executed by any current workflow. A main commit could therefore retain green current CI while violating repaired visual-fidelity invariants.",
+      "repair": "current-runtime-self-hosted-ci now runs test_caa_v2_subject_free_policy.py, test_visibility_and_caa_v2.py, and test_dynamic_appearance_conditioning_v2.py as a mandatory V2 visual-fidelity red-team bank on the same SHA as native parity.",
+      "status": "REPAIRED__EXACT_HEAD_CI_PENDING"
     }
   ],
   "false_or_overstated_external_findings": [

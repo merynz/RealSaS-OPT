@@ -1,5 +1,13 @@
 import numpy as np
+import torch
 
+from models.iris.v4.scene_first_signed_v4 import (
+    SceneFirstSignedGeometryConfigV4,
+    SceneFirstSignedGeometryV4,
+)
+from models.iris.v4.mixed_precision_query_v4 import (
+    query_hard_negative_ray_min_sdf_v4,
+)
 from models.iris.v4.source_constraint_v4 import (
     SourceConstraintSamplingPolicyV4,
     build_source_constraint_view_state_v4,
@@ -82,3 +90,39 @@ def test_v4_hard_negative_refresh_is_broad_deterministic_and_selects_lowest_sdf(
     assert len(bank) == policy.hard_negative_bank_size_per_view
     expected = set(a[np.argsort(sdf)[: policy.hard_negative_bank_size_per_view]].tolist())
     assert set(bank.tolist()) == expected
+
+
+def test_v4_hard_negative_query_promotes_cached_bfloat16_planes_to_model_dtype():
+    cfg = SceneFirstSignedGeometryConfigV4(
+        image_token_dim=8,
+        camera_feature_dim=13,
+        scene_dim=24,
+        camera_embed_dim=12,
+        plane_size=4,
+        plane_channels=6,
+        field_hidden_dim=16,
+        field_residual_blocks=2,
+        attention_heads=4,
+        scene_layers=1,
+        feedforward_multiplier=2,
+        dropout=0.0,
+    )
+    torch.manual_seed(17)
+    model = SceneFirstSignedGeometryV4(cfg).eval()
+    planes = torch.randn(1, 3, 6, 8, 8, dtype=torch.bfloat16)
+    points = torch.tensor(
+        [[
+            [[-0.5, 0.0, -0.5], [-0.5, 0.0, 0.0], [-0.5, 0.0, 0.5]],
+            [[0.5, 0.0, -0.5], [0.5, 0.0, 0.0], [0.5, 0.0, 0.5]],
+        ]],
+        dtype=torch.float32,
+    )
+    ray_min = query_hard_negative_ray_min_sdf_v4(
+        model,
+        planes,
+        points,
+        query_chunk=16,
+    )
+    assert ray_min.shape == (1, 2)
+    assert ray_min.dtype == torch.float32
+    assert torch.isfinite(ray_min).all()

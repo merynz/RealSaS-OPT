@@ -26,8 +26,8 @@ class SourceConstraintSamplingPolicyV4:
     near_background_rays_per_view: int = 32
     far_background_rays_per_view: int = 16
     hard_negative_replay_rays_per_view: int = 16
-    hard_negative_refresh_candidates_per_view: int = 128
-    hard_negative_bank_size_per_view: int = 32
+    hard_negative_refresh_candidates_per_view: int = 1024
+    hard_negative_bank_size_per_view: int = 64
     hard_negative_refresh_interval_steps: int = 80
     near_boundary_max_px: float = 32.0
 

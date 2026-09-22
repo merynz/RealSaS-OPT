@@ -28,6 +28,9 @@
     "margin_rule": "m(r)=min(0.04, r_px*(2*camera_half_extent_normalized/raster_width))",
     "fixed_0_04_near_silhouette_barrier_forbidden": true,
     "full_screen_postfit_violation_map_required": true,
+    "full_screen_audit_resolution": 256,
+    "full_screen_audit_mask_downsample": "CONSERVATIVE_4X4_MAX_POOL_FROM_NATIVE_1024_FOREGROUND_MASK",
+    "full_screen_audit_background_semantics": "AN_AUDIT_PIXEL_IS_BACKGROUND_ONLY_IF_ALL_16_NATIVE_SOURCE_PIXELS_IN_ITS_4X4_BLOCK_ARE_BACKGROUND",
     "violation_distance_bins_px": ["0_2", "2_8", "8_32", "gt_32"]
   },
   "objective_semantics": {
@@ -56,8 +59,8 @@
     "R512 learned zero surface and unchanged Stage13-v2 report",
     "R256-R512 convergence report",
     "source-support audit with largest-component accounting",
-    "per-view full-screen source-background minimum-SDF violation maps",
-    "distance-binned zero-crossing and margin-violation summaries for 0-2, 2-8, 8-32 and >32 px"
+    "per-view conservative-256 full-screen source-background minimum-SDF violation maps",
+    "distance-binned zero-crossing and margin-violation summaries for 0-2, 2-8, 8-32 and >32 audit pixels"
   ],
   "decision_rule": {
     "if_stage13_passes_and_full_screen_background_zero_crossings_close": "SAMPLING_OBJECTIVE_OWNER_SUPPORTED__CURRENT_V3_REPRESENTATION_NOT_FALSIFIED",

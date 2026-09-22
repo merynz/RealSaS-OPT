@@ -41,7 +41,8 @@ def finite_difference_narrow_band_eikonal_v41(
     points are already part of the FIT-only local metric-SDF supervision; this term does
     not mint new geometry authority. It only penalizes oscillatory signed fields between
     observed constraints by encouraging |grad f| ~= 1 near the current source-supported
-    surface neighborhood.
+    surface neighborhood. Finite-difference field queries run explicitly in FP32 so the
+    small epsilon is not quantized by the surrounding BF16 training autocast context.
     """
 
     policy.validate()
@@ -66,17 +67,17 @@ def finite_difference_narrow_band_eikonal_v41(
     points = flat_points[:limit]
     eps = float(policy.finite_difference_epsilon_normalized)
     points = torch.clamp(points.float(), min=-1.0 + eps, max=1.0 - eps)
-    dtype = next(model.parameters()).dtype
-    planes = scene_planes.to(dtype=dtype)
-    points = points.to(device=planes.device, dtype=dtype)
+    planes = scene_planes.float()
+    points = points.to(device=planes.device, dtype=torch.float32)
 
     derivatives: list[torch.Tensor] = []
-    for axis in range(3):
-        delta = torch.zeros_like(points)
-        delta[:, axis] = eps
-        plus = model.query(planes, (points + delta).unsqueeze(0))["sdf"].squeeze(0).float()
-        minus = model.query(planes, (points - delta).unsqueeze(0))["sdf"].squeeze(0).float()
-        derivatives.append((plus - minus) / (2.0 * eps))
+    with torch.autocast(device_type=planes.device.type, enabled=False):
+        for axis in range(3):
+            delta = torch.zeros_like(points)
+            delta[:, axis] = eps
+            plus = model.query(planes, (points + delta).unsqueeze(0))["sdf"].squeeze(0).float()
+            minus = model.query(planes, (points - delta).unsqueeze(0))["sdf"].squeeze(0).float()
+            derivatives.append((plus - minus) / (2.0 * eps))
     gradient = torch.stack(derivatives, dim=-1)
     norm = torch.linalg.vector_norm(gradient, dim=-1)
     error = torch.abs(norm - 1.0)

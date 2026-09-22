@@ -9,6 +9,8 @@ on:
       - 'tests/iris/test_dense_source_coverage_v3.py'
       - 'tests/iris/test_dense_source_coverage_v3_fixtures.py'
       - 'canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_20260922.json'
+      - 'canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_V2_20260922.json'
+      - 'canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_NUMERIC_ERRATUM_20260922.json'
       - 'canonical/VF11_IRIS_V3_DENSE_STAGE13_REPAIR_SAMPLING_AMENDMENT_20260922.json'
       - 'canonical/KNIGHT_DEMO_CRITICAL_CLOSURE_PLAN_20260922.json'
       - '.github/workflows/vf11_iris_v3_dense_loss_contract.yml'
@@ -67,7 +69,9 @@ jobs:
 
           p = DenseSourceCoveragePolicyV3()
           a = json.loads(Path('canonical/VF11_IRIS_V3_DENSE_STAGE13_REPAIR_SAMPLING_AMENDMENT_20260922.json').read_text())
-          v3 = json.loads(Path('canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_20260922.json').read_text())
+          v1 = json.loads(Path('canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_20260922.json').read_text())
+          e = json.loads(Path('canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_NUMERIC_ERRATUM_20260922.json').read_text())
+          v2 = json.loads(Path('canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_V2_20260922.json').read_text())
           s = a['subject_free_scale_authority']
           d = a['depth_sampling_contract']
           r = a['ray_occupancy_contract']
@@ -76,12 +80,16 @@ jobs:
           assert abs(p.maximum_depth_step_normalized - d['maximum_depth_step_normalized']) < 1e-15
           assert abs(p.occupancy_beta_normalized - r['beta_normalized']) < 1e-15
           assert r['logsumexp_softmin_used'] is False
-          assert v3['status'] == 'FROZEN_PRE_KNIGHT_SUBJECT_FREE'
-          assert v3['architecture_id'] == 'RealSaS.IRIS.SceneFirstSignedGeometry.v3'
-          assert v3['single_scientific_change'] == 'ADD_V3_NATIVE_DENSE_SOURCE_COVERAGE_TERM_TO_UNCHANGED_HISTORICAL_SPARSE_OBJECTIVE'
-          assert abs(p.top_level_loss_weight - v3['dense_loss']['top_level_loss_weight']) < 1e-15
-          assert v3['ray_occupancy']['signed_reduction'] == 'HARD_AMIN_OVER_VALID_DEPTH_SAMPLES'
-          assert v3['teacher_geometry_used_by_dense_term'] is False
-          assert v3['mask_is_forward_input'] is False
-          print('V3_DENSE_LOSS_PREREG_BINDING=PASS')
+          assert e['status'] == 'ERRATUM_CLOSED__LOGIT_DOMAIN_BCE_REQUIRED'
+          assert e['knight_arm_A_had_started'] is False
+          assert v2['supersedes'] == 'canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_20260922.json'
+          assert v2['status'] == 'FROZEN_PRE_KNIGHT_SUBJECT_FREE__LOGIT_DOMAIN_BCE'
+          assert v2['architecture_id'] == 'RealSaS.IRIS.SceneFirstSignedGeometry.v3'
+          assert v2['single_scientific_change'] == 'ADD_V3_NATIVE_DENSE_SOURCE_COVERAGE_TERM_TO_UNCHANGED_HISTORICAL_SPARSE_OBJECTIVE'
+          assert abs(p.top_level_loss_weight - v2['dense_loss']['top_level_loss_weight']) < 1e-15
+          assert v2['dense_loss']['bce_interface'] == 'BINARY_CROSS_ENTROPY_WITH_LOGITS__NO_PROBABILITY_CLAMP'
+          assert v2['ray_occupancy']['signed_reduction'] == 'HARD_AMIN_OVER_VALID_DEPTH_SAMPLES'
+          assert v2['teacher_geometry_used_by_dense_term'] is False
+          assert v2['mask_is_forward_input'] is False
+          print('V3_DENSE_LOSS_V2_PREREG_BINDING=PASS')
           PY

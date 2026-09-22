@@ -1,0 +1,78 @@
+name: vf11-iris-v3-negative-space-upper-bound-contract
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'models/iris/v3/negative_space_upper_bound_v3.py'
+      - 'models/iris/v3/train_upper_bound_fit_v3.py'
+      - 'tests/iris/test_negative_space_upper_bound_v3.py'
+      - 'tests/iris/test_train_upper_bound_fit_v3.py'
+      - 'canonical/IRIS_V3_NEGATIVE_SPACE_OWNER_SEPARATION_ARM_C_POLICY_V1_20260922.json'
+      - '.github/workflows/vf11_iris_v3_negative_space_upper_bound_contract.yml'
+  workflow_dispatch:
+
+jobs:
+  arm-c-owner-separation-contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install frozen CPU test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off pytest==8.3.5 scipy==1.15.3
+
+      - name: Compile Arm C modules
+        run: |
+          python -m py_compile models/iris/v3/negative_space_upper_bound_v3.py
+          python -m py_compile models/iris/v3/train_upper_bound_fit_v3.py
+          python -m py_compile tests/iris/test_negative_space_upper_bound_v3.py
+          python -m py_compile tests/iris/test_train_upper_bound_fit_v3.py
+
+      - name: Run Arm C falsification tests
+        run: |
+          python -m pytest -q \
+            tests/iris/test_negative_space_upper_bound_v3.py \
+            tests/iris/test_train_upper_bound_fit_v3.py \
+            tests/iris/test_dense_source_coverage_v3_fixtures.py \
+            tests/iris/test_dense_source_sampling_v3.py
+
+      - name: Seal Arm C policy binding
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from models.iris.v3.negative_space_upper_bound_v3 import NegativeSpaceUpperBoundPolicyV3
+          from models.iris.v3.train_upper_bound_fit_v3 import compute_v3_owner_separation_upper_bound_objective
+
+          p = NegativeSpaceUpperBoundPolicyV3()
+          authority = json.loads(Path('canonical/IRIS_V3_NEGATIVE_SPACE_OWNER_SEPARATION_ARM_C_POLICY_V1_20260922.json').read_text())
+          assert authority['status'] == 'FROZEN_PRE_KNIGHT_ARM_C_OWNER_SEPARATION_DIAGNOSTIC'
+          assert authority['frozen_architecture']['plane_resolution'] == 48
+          assert authority['frozen_architecture']['demo_runtime_architecture_pivot'] is False
+          assert authority['upper_bound_negative_space']['boundary_band_max_px'] == p.boundary_band_max_px
+          assert authority['upper_bound_negative_space']['background_rays_per_active_view'] == p.background_rays_per_active_view
+          assert authority['upper_bound_negative_space']['fixed_0_04_near_silhouette_barrier_forbidden'] is True
+          assert authority['objective_semantics']['historical_sparse_background_plus_0_04_term'].startswith('DISABLED')
+          assert authority['objective_semantics']['historical_certified_outside_plus_0_04_term'].startswith('DISABLED')
+          assert authority['objective_semantics']['visual_hull_clipping'] is False
+          assert authority['decision_rule']['posthoc_gate_relaxation'] is False
+          assert callable(compute_v3_owner_separation_upper_bound_objective)
+          print('V3_ARM_C_OWNER_SEPARATION_POLICY_BINDING=PASS')
+          PY

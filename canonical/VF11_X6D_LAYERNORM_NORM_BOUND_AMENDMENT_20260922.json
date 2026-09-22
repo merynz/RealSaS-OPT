@@ -1,0 +1,29 @@
+{
+  "schema": "RealSaS.VF11X6DLayerNormNormBoundAmendment.v1",
+  "date_utc": "2026-09-22",
+  "status": "PREPARED__EXECUTION_HELD_UNTIL_LEARNED_R512_PRIMARY_GATE",
+  "parent": "canonical/VF11_X6D_SOURCE_SUPPORT_AND_BOUND_TIGHTNESS_PREREGISTRATION_20260922.json",
+  "formula": {
+    "affine_form": "x = x0 + sum_i a_i * eps_i + r, |eps_i| <= 1, |r_j| <= rho_j",
+    "center_projector": "P = I - (1/n)11^T",
+    "lower_norm": "L = max(0, ||P x0||_2 - sum_i ||P a_i||_2 - ||rho||_2)",
+    "upper_norm": "U = ||P x0||_2 + sum_i ||P a_i||_2 + ||rho||_2",
+    "sigma_lower": "L / sqrt(n)",
+    "sigma_upper": "U / sqrt(n)",
+    "variance_lower": "sigma_lower^2",
+    "variance_upper": "sigma_upper^2"
+  },
+  "soundness_note": "The bound follows from triangle/reverse-triangle inequalities and ||P r||_2 <= ||r||_2 <= ||rho||_2. It preserves generator-wise vector correlation lost by independent componentwise square intervals.",
+  "diagnostic_comparison": [
+    "existing componentwise LayerNorm variance lower bound",
+    "projected-generator norm lower bound",
+    "direct center pre-LayerNorm sigma",
+    "C0 output interval width",
+    "micro2 decisive fraction"
+  ],
+  "claim_boundary": "Diagnostic/tightness candidate only. It is not automatically sharper on every box, does not provide directed-rounding rigor, and does not authorize X7 or shipping.",
+  "execution_order": "Run the frozen learned-field R512 primary fidelity gate first; only then spend effort on certification-tightness engineering.",
+  "x7_execution_authorized": false,
+  "product_authority_minted": false,
+  "witness_execution": false
+}

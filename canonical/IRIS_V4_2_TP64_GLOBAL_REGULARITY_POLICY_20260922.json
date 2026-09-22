@@ -1,0 +1,81 @@
+{
+  "schema": "RealSaS.IRISV42TP64GlobalRegularityPolicy.v1",
+  "date_utc": "2026-09-22",
+  "status": "FROZEN_PRE_RUN",
+  "authority": "CONTROLLED_KNIGHT_FIT1_GEOMETRY_TREATMENT__SOURCE_AUTHORITY_PRESERVED",
+  "scientific_name": "IRIS_V4_2_TP64",
+  "parent_negative_result": "canonical/IRIS_V4_1_TP64_CHECKPOINT_FIX1_NEGATIVE_RESULT_20260922.json",
+  "architecture": {
+    "source": "models/iris/v4/scene_first_signed_v4.py",
+    "historical_architecture_id": "RealSaS.IRIS.SceneFirstSignedGeometry.v4.demo64",
+    "scientific_alias": "RealSaS.IRIS.SceneFirstSignedGeometry.v4.tp64",
+    "scene_dim": 256,
+    "scene_transformer_layers": 4,
+    "attention_heads": 8,
+    "scene_query_lattice": [3,32,32],
+    "final_triplane_shape_excluding_batch": [3,64,64,64],
+    "plane_channels": 64,
+    "field_hidden_dim": 192,
+    "field_residual_blocks": 4,
+    "architecture_changed_from_v4_1": false
+  },
+  "training": {
+    "trainer": "models/iris/v4/train_fit_v4_2.py",
+    "fresh_init": true,
+    "random_seed": 26091909,
+    "train_steps": 4800,
+    "learning_rate": 0.00008,
+    "weight_decay": 0.0001,
+    "all_eight_views_every_step": true,
+    "source_sampling": "UNCHANGED_V4_1_HARD_POSITIVE_PLUS_FOUR_BACKGROUND_BANDS_PLUS_REPLAY",
+    "foreground": "UNCHANGED_COMPONENT_BALANCED_SATURATING_EXISTENCE_HINGE",
+    "background": "UNCHANGED_METRIC_FULL_RAY_POINTWISE_BARRIER",
+    "source_exterior": "UNCHANGED_V4_SOURCE_CERTIFIED_3D_EXTERIOR",
+    "fit_local_metric_sdf": "UNCHANGED_FIT_ONLY_STRUCTURAL_AID",
+    "teacher_surface_zero": "UNCHANGED_FIT_ONLY_STRUCTURAL_AID",
+    "global_eikonal": {
+      "enabled": true,
+      "sampling": "DETERMINISTIC_SCRAMBLED_SOBOL_FULL_CANONICAL_CUBE",
+      "points_per_step": 1024,
+      "finite_difference_epsilon_normalized": 0.003913894324853229,
+      "top_level_weight": 0.02,
+      "authority": "REGULARITY_ONLY__NO_GEOMETRY_TRUTH"
+    },
+    "ray_directional_lipschitz": {
+      "enabled": true,
+      "maximum_directional_lipschitz": 1.0,
+      "loss": "MEAN_SQUARED_RELU_ABS_DELTA_SDF_MINUS_DELTA_X",
+      "top_level_weight": 0.02,
+      "uses_existing_source_ray_lattice": true,
+      "authority": "SDF_REGULARITY_ONLY__NO_CROSSING_COUNT_TRUTH"
+    },
+    "sign_transition_count": {
+      "training_loss": false,
+      "diagnostic_only": true,
+      "reason": "Source raster does not certify exactly two physical depth crossings per foreground pixel."
+    }
+  },
+  "held": {
+    "training_only_differentiable_extracted_surface_raster_loss": true,
+    "global_teacher_sdf": true,
+    "teacher_first_hit_depth_loss": true,
+    "plane_channel_or_scene_width_increase": true,
+    "canonical_extractor_change": true,
+    "visual_hull_clipping": true
+  },
+  "qualification": {
+    "frozen_stage13_policy": "canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json",
+    "stage13_threshold_relaxation": false,
+    "stage13_implementation_changed": false,
+    "audit_scheduler": "models/iris/v4/audit_scheduler_v4_2.py",
+    "cheap_selection_resolution": 128,
+    "r256_is_promotion_screen_not_product_authority": true,
+    "r512_required_for_product_promotion_after_r256_pass": true,
+    "expensive_source_support_and_convergence_only_after_promotion_viability": true
+  },
+  "falsification": {
+    "primary": "V4_2_FAILS_TO_SUPPRESS_ZERO_SET_FOAM_WITH_SOURCE_ONLY_GLOBAL_REGULARITY",
+    "secondary": "FOAM_CLOSES_BUT_STAGE13_CONTOUR_REMAINS_MATERIALLY_WRONG__AUTHORIZE_RASTER_COUPLED_SURFACE_SUPERVISION",
+    "forbidden_interpretation": "A_COMPUTE_GUARD_SKIP_IS_NOT_A_STAGE13_FAIL"
+  }
+}

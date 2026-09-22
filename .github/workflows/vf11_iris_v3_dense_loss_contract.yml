@@ -1,0 +1,66 @@
+name: vf11-iris-v3-dense-loss-contract
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'models/iris/v3/dense_source_coverage_v3.py'
+      - 'tests/iris/test_dense_source_coverage_v3.py'
+      - 'canonical/VF11_IRIS_V3_DENSE_STAGE13_REPAIR_SAMPLING_AMENDMENT_20260922.json'
+      - 'canonical/KNIGHT_DEMO_CRITICAL_CLOSURE_PLAN_20260922.json'
+      - '.github/workflows/vf11_iris_v3_dense_loss_contract.yml'
+  workflow_dispatch:
+
+jobs:
+  dense-loss-contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PY: /home/monster/realsas-ml312/bin/python
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify exact local ML runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          "$PY" - <<'PY'
+          import torch, pytest
+          print('torch', torch.__version__, 'cuda', torch.cuda.is_available())
+          PY
+
+      - name: Compile V3 dense source coverage module
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PY" -m py_compile models/iris/v3/dense_source_coverage_v3.py
+
+      - name: Run loss-specific falsification unit tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH="$GITHUB_WORKSPACE" "$PY" -m pytest -q tests/iris/test_dense_source_coverage_v3.py
+
+      - name: Seal prereg constants against implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH="$GITHUB_WORKSPACE" "$PY" - <<'PY'
+          import json
+          from pathlib import Path
+          from models.iris.v3.dense_source_coverage_v3 import DenseSourceCoveragePolicyV3
+
+          p = DenseSourceCoveragePolicyV3()
+          a = json.loads(Path('canonical/VF11_IRIS_V3_DENSE_STAGE13_REPAIR_SAMPLING_AMENDMENT_20260922.json').read_text())
+          s = a['subject_free_scale_authority']
+          d = a['depth_sampling_contract']
+          r = a['ray_occupancy_contract']
+          assert abs(p.reference_voxel_normalized - s['reference_voxel_normalized']) < 1e-15
+          assert abs(p.minimum_feature_width_normalized - s['minimum_feature_width_normalized']) < 1e-15
+          assert abs(p.maximum_depth_step_normalized - d['maximum_depth_step_normalized']) < 1e-15
+          assert abs(p.occupancy_beta_normalized - r['beta_normalized']) < 1e-15
+          assert r['logsumexp_softmin_used'] is False
+          print('V3_DENSE_LOSS_PREREG_BINDING=PASS')
+          PY

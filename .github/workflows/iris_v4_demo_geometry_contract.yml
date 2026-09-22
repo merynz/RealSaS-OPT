@@ -13,9 +13,12 @@ on:
       - 'tests/iris/test_train_demo_fit_v4.py'
       - 'tests/iris/test_train_demo_fit_v4_1.py'
       - 'tests/iris/test_regularity_v4_1.py'
+      - 'tests/iris/test_checkpoint_selection_v4_1.py'
       - 'canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_20260922.json'
       - 'canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_V2_20260922.json'
       - 'canonical/IRIS_V4_1_DEMO_GEOMETRY_POLICY_20260922.json'
+      - 'canonical/IRIS_V4_1_CHECKPOINT_SELECTION_POLICY_V2_20260922.json'
+      - 'canonical/IRIS_V4_1_CHECKPOINT_SELECTION_ERRATUM_20260922.json'
       - 'canonical/IRIS_V4_DEMO64_NEGATIVE_RESULT_AND_V41_DECISION_20260922.json'
       - 'canonical/IRIS_V4_FOREGROUND_BCE_GEOMETRIC_PRESSURE_ERRATUM_20260922.json'
       - 'canonical/IRIS_V3_ARM_C_RESULT_AND_V4_DEMO_GEOMETRY_DECISION_20260922.json'
@@ -51,6 +54,7 @@ jobs:
           python -m py_compile models/iris/v4/source_constraint_v4_1.py
           python -m py_compile models/iris/v4/source_exterior_v4.py
           python -m py_compile models/iris/v4/regularity_v4_1.py
+          python -m py_compile models/iris/v4/checkpoint_selection_v4_1.py
           python -m py_compile models/iris/v4/train_demo_fit_v4.py
           python -m py_compile models/iris/v4/train_demo_fit_v4_1.py
           python -m py_compile tests/iris/test_scene_first_signed_v4_demo.py
@@ -60,6 +64,7 @@ jobs:
           python -m py_compile tests/iris/test_train_demo_fit_v4.py
           python -m py_compile tests/iris/test_train_demo_fit_v4_1.py
           python -m py_compile tests/iris/test_regularity_v4_1.py
+          python -m py_compile tests/iris/test_checkpoint_selection_v4_1.py
       - name: Run V4 and V4.1 geometry falsification tests
         run: |
           python -m pytest -q \
@@ -70,8 +75,9 @@ jobs:
             tests/iris/test_train_demo_fit_v4.py \
             tests/iris/test_train_demo_fit_v4_1.py \
             tests/iris/test_regularity_v4_1.py \
+            tests/iris/test_checkpoint_selection_v4_1.py \
             tests/iris/test_dense_source_coverage_v3_fixtures.py
-      - name: Prove V4.1 architecture freeze and source-retention changes
+      - name: Prove V4.1 architecture freeze and authority-aligned checkpoint selection
         run: |
           python - <<'PY'
           import json
@@ -79,8 +85,11 @@ jobs:
           from models.iris.v4.scene_first_signed_v4 import SceneFirstSignedGeometryV4
           from models.iris.v4.source_constraint_v4_1 import SourceConstraintSamplingPolicyV41
           from models.iris.v4.regularity_v4_1 import NarrowBandEikonalPolicyV41
+          from models.iris.v4.checkpoint_selection_v4_1 import HardSignCheckpointCandidateV41, pareto_front_hard_sign_v41
           v4=SceneFirstSignedGeometryV4()
           p=json.loads(Path('canonical/IRIS_V4_1_DEMO_GEOMETRY_POLICY_20260922.json').read_text())
+          s=json.loads(Path('canonical/IRIS_V4_1_CHECKPOINT_SELECTION_POLICY_V2_20260922.json').read_text())
+          e=json.loads(Path('canonical/IRIS_V4_1_CHECKPOINT_SELECTION_ERRATUM_20260922.json').read_text())
           a=p['architecture']; t=p['training']; sp=SourceConstraintSamplingPolicyV41(); ep=NarrowBandEikonalPolicyV41()
           assert v4.architecture_id==a['architecture_id']
           assert tuple(v4.scene_fusion.scene_queries.shape)==(3,32,32,256)
@@ -99,11 +108,22 @@ jobs:
           assert t['checkpoint_selection']['final_step_forced'] is False
           assert p['held']['training_only_differentiable_mesh_raster_loss'] is True
           assert p['qualification']['stage13_threshold_relaxation'] is False
+          assert e['status'].startswith('APPARATUS_INVALID__CHECKPOINT_SELECTION_COLLAPSE')
+          assert s['training_lane']['architecture_changed'] is False
+          assert s['training_lane']['sampling_changed'] is False
+          assert s['training_lane']['loss_weights_changed'] is False
+          assert s['hard_sign_pareto']['scalar_weighting_forbidden'] is True
+          assert s['authority_aligned_selection']['selection_resolution']==256
+          assert s['final_authority']['winner_redecoded_at_resolution']==512
+          collapsed=HardSignCheckpointCandidateV41(160,1.0,0.09375,0.0)
+          balanced=HardSignCheckpointCandidateV41(4480,0.03125,0.765625,0.00390625)
+          front=pareto_front_hard_sign_v41((collapsed,balanced))
+          assert {x.step for x in front}=={160,4480}
           print('V41_ARCHITECTURE_FROZEN=PASS')
           print('V41_HARD_POSITIVE_REPLAY=PASS')
           print('V41_FOUR_BAND_NEGATIVE_REPLAY=PASS')
           print('V41_FINITE_DIFFERENCE_EIKONAL=PASS')
-          print('V41_CHECKPOINT_SELECTION=HARD_SOURCE_SIGN_FIRST')
+          print('V41_CHECKPOINT_SELECTION=PARETO_THEN_EXACT_STAGE13_R256')
           PY
       - name: Enforce source-authority boundary
         run: |
@@ -113,10 +133,13 @@ jobs:
           import json
           from pathlib import Path
           p=json.loads(Path('canonical/IRIS_V4_1_DEMO_GEOMETRY_POLICY_20260922.json').read_text())
+          s=json.loads(Path('canonical/IRIS_V4_1_CHECKPOINT_SELECTION_POLICY_V2_20260922.json').read_text())
           assert p['qualification']['stage13_threshold_relaxation'] is False
           assert p['qualification']['visual_hull_clipping'] is False
           assert p['training']['narrow_band_eikonal']['authority'].startswith('REGULARITY_ONLY')
           assert p['held']['global_teacher_sdf'] is True
           assert p['held']['canonical_extractor_change'] is True
+          assert s['authority_aligned_selection']['threshold_relaxation'] is False
+          assert s['final_authority']['r512_stage13_pass_required_before_downstream_geometry_promotion'] is True
           print('V41_SOURCE_AUTHORITY_BOUNDARY=PASS')
           PY

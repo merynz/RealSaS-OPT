@@ -1,0 +1,27 @@
+{
+  "schema": "RealSaS.VF11X7HoldSourceSupportAndNumericRigor.v1",
+  "date_utc": "2026-09-22",
+  "status": "X7_HOLD__SOURCE_SUPPORT_DOMAIN_DIAGNOSTIC_REQUIRED_BEFORE_EXECUTION",
+  "supersedes_execution_authority_of": "canonical/VF11_EXTRACTOR_TRANSITION_X7_MICRO3_HOLDOUT_PREREGISTRATION_20260922.json",
+  "reason": [
+    "The full-domain learned-field UNKNOWN population contains a large source-external region. A coarse source-visual-hull AABB proxy alone excludes about 69.46% of all base-regime roots and about 70.42% of root-level UNKNOWNs.",
+    "Running the existing X7 holdout before separating SOURCE_ABSENT from FIELD_UNKNOWN would mix a product-domain qualification question with a bound-productivity question.",
+    "The previously proposed R512 mesh-vertex soundness test is invalid if it uses NB1 MC_R512, because that mesh is extracted from F4_SOURCE_FIELD, an 8-view source-silhouette intersection field, not from the learned IRIS field."
+  ],
+  "unchanged_facts": {
+    "x6c_cpu_rejected_count": 0,
+    "x6c_micro2_unresolved_volume_fraction": 0.3930427265634782,
+    "x7_has_not_been_executed": true
+  },
+  "required_before_x7": [
+    "X6D source-support domain diagnostic with explicit silhouette dilation/calibration tolerance and SOURCE_ABSENT semantics",
+    "learned-field aligned-lattice near-surface certificate audit, independent of the source visual-hull mesh",
+    "direct LayerNorm interval-variance instrumentation on a spatial/certifiability stratified sample"
+  ],
+  "numeric_rigor_note": "Current CPU confirmation and CUDA screening both use ordinary float64 rather than directed rounding. CPU replay is a cross-implementation/device consistency check, not a formal strengthening of the numerical certificate. GPU authority is forbidden until an end-to-end outward enclosure covers all arithmetic, reductions, LayerNorm nonlinearities, and SiLU residual calculations.",
+  "full_domain_micro3_authorized": false,
+  "x7_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

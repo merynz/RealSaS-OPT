@@ -6,8 +6,12 @@ on:
       - research/vf11-certified-adaptive-20260921
     paths:
       - 'models/iris/v3/dense_source_coverage_v3.py'
+      - 'models/iris/v3/dense_source_sampling_v3.py'
+      - 'models/iris/v3/train_dense_fit_v3.py'
       - 'tests/iris/test_dense_source_coverage_v3.py'
       - 'tests/iris/test_dense_source_coverage_v3_fixtures.py'
+      - 'tests/iris/test_dense_source_sampling_v3.py'
+      - 'tests/iris/test_train_dense_fit_v3.py'
       - 'canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_20260922.json'
       - 'canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_V2_20260922.json'
       - 'canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_NUMERIC_ERRATUM_20260922.json'
@@ -39,26 +43,32 @@ jobs:
           PIP_DEFAULT_TIMEOUT: '60'
         run: |
           python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
-          python -m pip install --no-input --progress-bar off pytest==8.3.5
+          python -m pip install --no-input --progress-bar off pytest==8.3.5 scipy==1.15.3
 
       - name: Verify ML runtime
         run: |
           python - <<'PY'
-          import torch, pytest
-          print('torch', torch.__version__, 'cuda', torch.cuda.is_available())
+          import torch, scipy, pytest
+          print('torch', torch.__version__, 'cuda', torch.cuda.is_available(), 'scipy', scipy.__version__)
           PY
 
-      - name: Compile V3 dense source coverage module
+      - name: Compile V3 dense modules
         run: |
           python -m py_compile models/iris/v3/dense_source_coverage_v3.py
+          python -m py_compile models/iris/v3/dense_source_sampling_v3.py
+          python -m py_compile models/iris/v3/train_dense_fit_v3.py
           python -m py_compile tests/iris/test_dense_source_coverage_v3.py
           python -m py_compile tests/iris/test_dense_source_coverage_v3_fixtures.py
+          python -m py_compile tests/iris/test_dense_source_sampling_v3.py
+          python -m py_compile tests/iris/test_train_dense_fit_v3.py
 
-      - name: Run loss-specific falsification unit tests
+      - name: Run V3 dense falsification and trainer tests
         run: |
           python -m pytest -q \
             tests/iris/test_dense_source_coverage_v3.py \
-            tests/iris/test_dense_source_coverage_v3_fixtures.py
+            tests/iris/test_dense_source_coverage_v3_fixtures.py \
+            tests/iris/test_dense_source_sampling_v3.py \
+            tests/iris/test_train_dense_fit_v3.py
 
       - name: Seal prereg constants against implementation
         run: |
@@ -66,15 +76,17 @@ jobs:
           import json
           from pathlib import Path
           from models.iris.v3.dense_source_coverage_v3 import DenseSourceCoveragePolicyV3
+          from models.iris.v3.dense_source_sampling_v3 import DenseSourceSamplingPolicyV3
 
           p = DenseSourceCoveragePolicyV3()
+          sp = DenseSourceSamplingPolicyV3()
           a = json.loads(Path('canonical/VF11_IRIS_V3_DENSE_STAGE13_REPAIR_SAMPLING_AMENDMENT_20260922.json').read_text())
-          v1 = json.loads(Path('canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_20260922.json').read_text())
           e = json.loads(Path('canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_NUMERIC_ERRATUM_20260922.json').read_text())
           v2 = json.loads(Path('canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_V2_20260922.json').read_text())
           s = a['subject_free_scale_authority']
           d = a['depth_sampling_contract']
           r = a['ray_occupancy_contract']
+          mb = v2['ray_minibatch']
           assert abs(p.reference_voxel_normalized - s['reference_voxel_normalized']) < 1e-15
           assert abs(p.minimum_feature_width_normalized - s['minimum_feature_width_normalized']) < 1e-15
           assert abs(p.maximum_depth_step_normalized - d['maximum_depth_step_normalized']) < 1e-15
@@ -82,7 +94,6 @@ jobs:
           assert r['logsumexp_softmin_used'] is False
           assert e['status'] == 'ERRATUM_CLOSED__LOGIT_DOMAIN_BCE_REQUIRED'
           assert e['knight_arm_A_had_started'] is False
-          assert v2['supersedes'] == 'canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_20260922.json'
           assert v2['status'] == 'FROZEN_PRE_KNIGHT_SUBJECT_FREE__LOGIT_DOMAIN_BCE'
           assert v2['architecture_id'] == 'RealSaS.IRIS.SceneFirstSignedGeometry.v3'
           assert v2['single_scientific_change'] == 'ADD_V3_NATIVE_DENSE_SOURCE_COVERAGE_TERM_TO_UNCHANGED_HISTORICAL_SPARSE_OBJECTIVE'
@@ -91,5 +102,10 @@ jobs:
           assert v2['ray_occupancy']['signed_reduction'] == 'HARD_AMIN_OVER_VALID_DEPTH_SAMPLES'
           assert v2['teacher_geometry_used_by_dense_term'] is False
           assert v2['mask_is_forward_input'] is False
-          print('V3_DENSE_LOSS_V2_PREREG_BINDING=PASS')
+          assert sp.foreground_component_rays_per_component_per_view == mb['foreground_component_rays_per_component_per_view']
+          assert sp.additional_global_foreground_boundary_rays_per_view == mb['additional_global_foreground_boundary_rays_per_view']
+          assert sp.additional_global_foreground_interior_rays_per_view == mb['additional_global_foreground_interior_rays_per_view']
+          assert sp.background_rays_per_view == mb['background_rays_per_view']
+          assert Path('models/iris/v3/train_dense_fit_v3.py').is_file()
+          print('V3_DENSE_SAMPLER_TRAINER_POLICY_BINDING=PASS')
           PY

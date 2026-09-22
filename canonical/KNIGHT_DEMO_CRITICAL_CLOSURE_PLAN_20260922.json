@@ -1,0 +1,111 @@
+{
+  "schema": "RealSaS.KnightDemoCriticalClosurePlan.v1",
+  "date_utc": "2026-09-22",
+  "status": "DEMO_CRITICAL_PATH_OPEN__SCOPE_FROZEN",
+  "purpose": "Reach a defensible controlled Knight end-to-end compile demo within the near-term demo window without conflating demo readiness with full shipping/generalization/formal-proof closure.",
+  "demo_claim_scope": "CONTROLLED_KNIGHT_EXACT_8_VIEW_FIT_TO_EDITABLE_RSS_WITH_SOURCE_FAITHFUL_APPEARANCE_AND_RUN_IDLE_SLASH",
+  "explicit_nonclaims": [
+    "unseen-subject generalization",
+    "arbitrary real-world imperfect-view qualification",
+    "global continuous zero-set completeness",
+    "shipping-grade directed-rounding numerical certificate",
+    "10k+ generalization",
+    "all 46 stages exhaustively adversarially closed for every future subject"
+  ],
+  "scope_control_rule": "New research questions do not enter P0 merely because they are scientifically interesting. They enter P0 only if they can invalidate the controlled Knight demo claim or corrupt its exported artifact.",
+  "p0_demo_blockers": [
+    {
+      "id": "P0_INGRESS_SOURCE_INTEGRITY",
+      "owner": "STAGES_01_08",
+      "status": "TARGETED_REGRESSION_REQUIRED",
+      "required": [
+        "exact Stage01 source raster/hash binding survives to the Stage07 observation set",
+        "no adaptive crop/zoom, alpha erosion, mirror/sign error, pixel-center drift or hidden resize changes foreground support",
+        "source-mask/camera round-trip regression catches deliberate crop, padding, Y-flip and pixel-center corruptions before IRIS fit"
+      ],
+      "reason": "Mage demonstrated that an upstream source-ingress corruption can remain hidden until export."
+    },
+    {
+      "id": "P0_IRIS_V3_FIELD_FIDELITY",
+      "owner": "STAGES_09_13",
+      "status": "OPEN__ROOT_CAUSE_IDENTIFIED",
+      "authority": [
+        "canonical/VF11_LEARNED_FIELD_R512_ROOT_CAUSE_DIAGNOSIS_20260922.json",
+        "canonical/VF11_IRIS_V3_DENSE_STAGE13_REPAIR_PREREGISTRATION_20260922.json",
+        "canonical/VF11_IRIS_V3_DENSE_STAGE13_REPAIR_SAMPLING_AMENDMENT_20260922.json"
+      ],
+      "required": [
+        "V3-native dense source-coverage primitives pass subject-free continuous-field falsification",
+        "fresh-init matched-seed Knight Arm A uses exact frozen V3 objective provenance",
+        "Arm A learned field passes unchanged Stage13-v2 on all eight source views",
+        "source-support outgrowth is within the frozen tolerance",
+        "subject-free FORK_GAP/CONCAVE_NOTCH anti-hull-collapse gate remains satisfied"
+      ],
+      "not_required_for_demo": [
+        "pair-holdout Arm B",
+        "second-subject recipe generalization"
+      ]
+    },
+    {
+      "id": "P0_PRODUCT_MESH_GEOMETRY_SURVIVAL",
+      "owner": "STAGES_18_19",
+      "status": "OPEN_CLAIM_GAP",
+      "finding": "Stage19 currently inherits dense Stage13 qualification but must directly prove that the actual Stage18/19 candidate/product mesh produced after GSA/relation/CDT still preserves source geometry.",
+      "required": [
+        "reproject the actual qualified product mesh through the exact Stage13 apparatus",
+        "apply the same source fidelity/component/negative-space gates or a preregistered equivalent that is at least as strict",
+        "fail closed if dense zero-surface PASS does not survive product-mesh materialization"
+      ]
+    },
+    {
+      "id": "P0_APPEARANCE_RUNTIME_EXPORT",
+      "owner": "STAGES_18_25_AND_FINAL_RUNTIME_EXPORT",
+      "status": "ACTUAL_KNIGHT_WITNESS_REQUIRED",
+      "required": [
+        "CAA uses exact source-bound donor lineage and total appearance without relighting",
+        "rest-pose and motion renders have no undefined appearance, hidden peppering or source-lineage loss",
+        "depth ownership and equal-depth tie semantics do not hide the correct surface",
+        "exported RSS reload reproduces the qualified source-faithful Knight presentation"
+      ],
+      "note": "Existing subject-free CAA/runtime closures remain valid methodology; P0 needs their actual Knight witness, not another open-ended theoretical red-team expansion."
+    },
+    {
+      "id": "P0_KNIGHT_MECHANICS_AND_MOTION",
+      "owner": "RIG_SKIN_MOTION_RUNTIME",
+      "status": "FINAL_ARTIFACT_WITNESS_REQUIRED",
+      "required": [
+        "Knight-specific skeleton is editable and correctly bound to the final qualified product mesh",
+        "skinning remains stable on final mesh",
+        "idle, run and slash execute with the current proper-axis motion semantics",
+        "motion does not reveal catastrophic geometry/appearance holes or invalid ownership"
+      ],
+      "nonrequirement": "No claim that the preset motion recipe generalizes to arbitrary unseen characters is needed for the controlled demo."
+    },
+    {
+      "id": "P0_RSS_RELOAD_AND_DEMO_REPRODUCIBILITY",
+      "owner": "FINAL_PRODUCT",
+      "status": "FINAL_GATE",
+      "required": [
+        "one clean Stage01-to-export run from sealed exact Knight inputs",
+        "no cherry-picked intermediate replacement",
+        "RSS opens/reloads as editable puppet",
+        "idle/run/slash clips are callable after reload",
+        "canonical compile report binds source hashes, checkpoint/objective provenance, mesh, CAA and exported RSS hashes"
+      ]
+    }
+  ],
+  "p1_after_demo_or_parallel_if_capacity": [
+    "Knight dense-target pair-holdout Arm B",
+    "second-subject immutable-recipe test before any unseen/generalization claim",
+    "new-checkpoint X6C population and runtime numeric rebaseline",
+    "X6D source-domain diagnostic",
+    "LayerNorm bound-tightness work",
+    "X7 confirmatory micro3 holdout",
+    "shipping GPU directed-rounding/outward-enclosure proof",
+    "full exhaustive 46-stage adversarial red-team beyond demo-critical claim boundaries"
+  ],
+  "promotion_rule": "Controlled Knight demo is authorized when every P0 item is PASS on one provenance-sealed end-to-end Knight run. P1 incompleteness must remain explicitly disclosed and must not silently broaden the demo claim.",
+  "stop_expansion_rule": "Once P0 is green, do not delay the demo to pursue a new P1 research improvement unless new evidence shows that improvement is necessary to keep an existing P0 claim true.",
+  "product_authority_minted": false,
+  "knight_demo_authorized": false
+}

@@ -1,0 +1,78 @@
+{
+  "schema": "RealSaS.IRISV3DenseStage13ArmANegativeResult.v1",
+  "date_utc": "2026-09-22",
+  "status": "ARM_A_FAIL__FOREGROUND_COVERAGE_IMPROVED__NEGATIVE_SPACE_UNDERCONSTRAINED",
+  "run_id": "20260922T072555Z",
+  "repo_commit": "53f6112e284c5cb50ceaccbda48a6aa40bc7d256",
+  "checkpoint_sha256": "956e0fdab72c03eee2bc1a2c9bcfce913edb952466f612c210610249440a836f",
+  "r512_zero_surface_sha256": "a08b68c97d8525a543a58138e7d8a952be6abc617409356411f9582298cd667d",
+  "bundle_sha256": "bb5976c4cb9592221e56fad2e62f563f506ea8b2289a6bf5564b2ec3b7288240",
+  "single_scientific_change": "ADD_V3_NATIVE_DENSE_SOURCE_COVERAGE_TERM_TO_UNCHANGED_HISTORICAL_SPARSE_OBJECTIVE",
+  "stage13_r512": {
+    "pass": false,
+    "min_precision": 0.9245656448441479,
+    "min_recall": 0.9886905686331063,
+    "min_component_recall": 0.9886905686331063,
+    "max_interior_uncovered_fraction": 0.00765190618491352,
+    "max_largest_coherent_hole_fraction": 0.0023794732988707207,
+    "max_silhouette_edge_p95_px": 24.0,
+    "max_silhouette_edge_max_px": 148.0135128966271
+  },
+  "historical_sparse_r512": {
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "min_precision": 0.9520502645502645,
+    "min_recall": 0.9704206994093014,
+    "max_interior_uncovered_fraction": 0.01778245637864973,
+    "max_largest_coherent_hole_fraction": 0.008691456082355291,
+    "max_silhouette_edge_p95_px": 15.0,
+    "outside_source_support_1px_fraction": 0.0689200183047745,
+    "outside_source_support_8px_fraction": 0.023465703971119134
+  },
+  "causal_delta_vs_historical_sparse": {
+    "recall_improved_absolute": 0.0182698692238049,
+    "interior_uncovered_reduced_absolute": 0.01013055019373621,
+    "coherent_hole_reduced_absolute": 0.00631198278348457,
+    "precision_changed_absolute": -0.0274846197061166,
+    "outside_source_support_1px_fraction_new": 0.1199154344313087,
+    "outside_source_support_8px_fraction_new": 0.029617389402573416,
+    "interpretation": "The new dense foreground surrogate has real causal effect: it fills missing source support and reduces holes, but it simultaneously permits more source-unsupported negative volume. This falsifies simple extraction-resolution ownership and narrows the next owner to negative-space/source-support supervision semantics before representation capacity is blamed."
+  },
+  "spatial_diagnosis": {
+    "new_r512_normalized_bounds_min": [-0.95683664, -0.6550059, -0.62894356],
+    "new_r512_normalized_bounds_max": [0.67108643, 0.6482103, 0.61857116],
+    "historical_r512_normalized_bounds_min": [-0.64985394, -0.6169817, -0.61591566],
+    "historical_r512_normalized_bounds_max": [0.66508186, 0.6397066, 0.61053693],
+    "sealed_source_normalized_bbox_min": [-0.6668898131236102, -0.639088678638954, -0.6116610587798408],
+    "sealed_source_normalized_bbox_max": [0.6668898131236102, 0.6390886490774936, 0.6116610236440316],
+    "new_detached_floater_components_over_1px_support": 5,
+    "two_largest_far_left_floater_vertex_counts": [1006, 568],
+    "far_left_floater_normalized_x_range_approx": [-0.95684, -0.92659],
+    "view0_projected_x_range_px_approx": [22.1, 37.6],
+    "view0_source_foreground_x_min_px": 170,
+    "view4_projected_x_range_px_approx": [986.4, 1001.9],
+    "view4_source_foreground_x_max_px": 853,
+    "largest_component_outside_1px_vertices": 47573,
+    "largest_component_vertex_count": 399291,
+    "note": "Detached floaters are a visible symptom but not the whole failure: most >1px unsupported vertices remain embedded in the largest component."
+  },
+  "surrogate_gap": {
+    "current_background_target": "RAY_OCCUPANCY_BCE_ON_HARD_MIN_SDF",
+    "stronger_valid_source_semantics": "A qualified background pixel certifies that the full admitted camera ray segment contains no subject geometry.",
+    "finding": "Using only the ray minimum discards the pointwise empty-space authority of background rays. It supplies gradient primarily through the most negative depth sample and does not directly require every sampled point on a known-background ray to remain positive.",
+    "next_owner": "IRIS_V3_NEGATIVE_SPACE_SOURCE_SUPPORT_OBJECTIVE"
+  },
+  "governance": {
+    "representation_capacity_declared_owner": false,
+    "x7_execution_authorized": false,
+    "product_authority_minted": false,
+    "knight_witness_promoted": false,
+    "threshold_relaxation_authorized": false,
+    "blind_resolution_escalation_authorized": false
+  },
+  "required_next": [
+    "Add a V3-native full-ray empty-space barrier for source-background rays so every violating sampled SDF point, not only the hard minimum, receives positive-margin corrective gradient.",
+    "Falsify the barrier subject-free on THIN_BLADE, SMALL_COMPONENT, THIN_STRAP, FORK_GAP and CONCAVE_NOTCH semantics before any new Knight result is inspected.",
+    "Keep foreground occupancy, historical sparse objective, Stage13-v2 thresholds, seed, architecture and decode apparatus frozen for the next causal arm.",
+    "If the negative-space repair still leaves large unsupported outgrowth, only then escalate to representation-capacity or iterative hard-negative source-support repair experiments."
+  ]
+}

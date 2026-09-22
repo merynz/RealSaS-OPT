@@ -1,0 +1,68 @@
+{
+  "schema": "RealSaS.IRISV41CheckpointSelectionPolicy.v2",
+  "date_utc": "2026-09-22",
+  "status": "FROZEN_AFTER_APPARATUS_ERRATUM__TRAINING_UNCHANGED",
+  "authority": "CONTROLLED_KNIGHT_FIT1_CHECKPOINT_SELECTION_ONLY__NOT_STAGE13_THRESHOLD_AUTHORITY",
+  "supersedes_selection_semantics": "FIXED_SOURCE_CONTRACT_LEXICOGRAPHIC_HARD_SIGN_FIRST",
+  "erratum": "canonical/IRIS_V4_1_CHECKPOINT_SELECTION_ERRATUM_20260922.json",
+  "training_lane": {
+    "architecture": "RealSaS.IRIS.SceneFirstSignedGeometry.v4.demo64",
+    "objective": "UNCHANGED_V4_1_RETENTION_REGULARITY",
+    "train_steps": 4800,
+    "audit_interval_steps": 160,
+    "architecture_changed": false,
+    "sampling_changed": false,
+    "loss_weights_changed": false,
+    "optimizer_changed": false
+  },
+  "candidate_capture": {
+    "save_state_every_audit": true,
+    "storage": "COLAB_LOCAL_EPHEMERAL__NOT_PRODUCT_ARTIFACT",
+    "state_format": "MODEL_STATE_DICT_ONLY",
+    "all_audited_steps_retained_until_selection": true
+  },
+  "hard_sign_pareto": {
+    "axes": [
+      "max_foreground_miss_fraction",
+      "max_background_zero_crossing_fraction",
+      "source_exterior_negative_fraction"
+    ],
+    "scalar_weighting_forbidden": true,
+    "lexicographic_privileging_of_one_hard_sign_axis_forbidden": true,
+    "domination": "NO_WORSE_ON_ALL_THREE_AND_STRICTLY_BETTER_ON_AT_LEAST_ONE"
+  },
+  "authority_aligned_selection": {
+    "pareto_candidates_only": true,
+    "selection_resolution": 256,
+    "selection_measurement": "UNCHANGED_EXACT_STAGE13_V2_RASTER_AND_SOURCE_MASKS",
+    "frozen_stage13_policy": "canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json",
+    "frozen_stage13_policy_sha256": "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214",
+    "candidate_score": {
+      "primary": "FAILED_PER_VIEW_RULE_COUNT",
+      "secondary": "WORST_NORMALIZED_EXCESS_OVER_FROZEN_GATE",
+      "tertiary": "SUM_NORMALIZED_EXCESS_OVER_FROZEN_GATES",
+      "tie_break": "EARLIER_STEP"
+    },
+    "pass_candidate_always_outranks_fail_candidate": true,
+    "threshold_relaxation": false
+  },
+  "final_authority": {
+    "winner_redecoded_at_resolution": 512,
+    "winner_remeasured_with_unchanged_stage13_v2": true,
+    "r256_selection_is_not_product_authority": true,
+    "r512_stage13_pass_required_before_downstream_geometry_promotion": true
+  },
+  "recording": {
+    "write_all_pareto_steps": true,
+    "write_r256_stage13_result_for_each_pareto_candidate": true,
+    "write_selected_step_and_score": true,
+    "delete_nonselected_local_candidate_states_after_selection": true
+  },
+  "forbidden": [
+    "SELECT_CHECKPOINT_FROM_TRAINING_LOSS_ONLY",
+    "SELECT_BACKGROUND_EMPTY_FIELD_OVER_FOREGROUND_SURVIVAL",
+    "RELAX_STAGE13_TO_ACCEPT_CANDIDATE",
+    "VISUAL_HULL_CLIP_BEFORE_MEASUREMENT",
+    "POSTHOC_MESH_REPAIR_BEFORE_PRIMARY_MEASUREMENT"
+  ]
+}

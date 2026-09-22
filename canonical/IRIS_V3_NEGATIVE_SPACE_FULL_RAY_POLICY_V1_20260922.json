@@ -1,0 +1,73 @@
+{
+  "schema": "RealSaS.IRISV3NegativeSpaceFullRayPolicy.v1",
+  "status": "FROZEN_PRE_KNIGHT_ARM_B_SUBJECT_FREE",
+  "date_utc": "2026-09-22",
+  "authority": "IRIS_V3_NEGATIVE_SPACE_SOURCE_SUPPORT_OBJECTIVE",
+  "parent_negative_result": "canonical/IRIS_V3_DENSE_STAGE13_ARM_A_NEGATIVE_RESULT_20260922.json",
+  "parent_arm_A": {
+    "run_id": "20260922T072555Z",
+    "checkpoint_sha256": "956e0fdab72c03eee2bc1a2c9bcfce913edb952466f612c210610249440a836f",
+    "result": "ARM_A_R512_STAGE13_FAIL__V3_DENSE_SURROGATE_OR_REPRESENTATION_REMAINS_OWNER"
+  },
+  "architecture_id": "RealSaS.IRIS.SceneFirstSignedGeometry.v3",
+  "producer": "models/iris/v3/scene_first_signed_v3.py",
+  "coverage_policy": "canonical/IRIS_V3_DENSE_SOURCE_COVERAGE_POLICY_V3_20260922.json",
+  "coverage_implementation": "models/iris/v3/dense_source_coverage_v3.py",
+  "negative_space_implementation": "models/iris/v3/negative_space_barrier_v3.py",
+  "trainer": "models/iris/v3/train_dense_fit_v3.py",
+  "single_scientific_change_vs_arm_A": "ADD_POINTWISE_FULL_RAY_EMPTY_SPACE_BARRIER_ON_QUALIFIED_SOURCE_BACKGROUND_RAYS",
+  "source_semantics": {
+    "foreground_ray": "EXISTENTIAL_SUBJECT_SUPPORT__AT_LEAST_ONE_INSIDE_OR_SURFACE_ENCOUNTER",
+    "background_ray": "UNIVERSAL_EMPTY_SPACE__NO_SUBJECT_GEOMETRY_ANYWHERE_ON_ADMITTED_NORMALIZATION_CUBE_SEGMENT",
+    "reason_for_asymmetry": "Foreground occupancy is existential while background evidence is a full-ray veto. Applying only hard-min occupancy BCE to background rays discards valid empty-space authority."
+  },
+  "full_ray_barrier": {
+    "target": "SOURCE_BACKGROUND_RAYS_ONLY",
+    "sample_domain": "THE_SAME_PHASE_JITTERED_NORMALIZATION_CUBE_RAY_POINTS_ALREADY_QUERIED_BY_DENSE_COVERAGE",
+    "loss": "MEAN_RELU(POSITIVE_MARGIN_MINUS_SDF)_OVER_ALL_BACKGROUND_RAY_DEPTH_SAMPLES",
+    "positive_margin": 0.04,
+    "positive_margin_authority": "UNCHANGED_HISTORICAL_STRIDE8_V3_POSITIVE_MARGIN",
+    "top_level_weight": 1.0,
+    "extra_model_queries": false,
+    "foreground_rays_receive_full_ray_positive_barrier": false
+  },
+  "unchanged_from_arm_A": {
+    "fresh_initialization": true,
+    "random_seed": 26091909,
+    "anchor_stride_px": 8,
+    "train_steps": 4800,
+    "lr": 0.00008,
+    "weight_decay": 0.0001,
+    "historical_sparse_objective": true,
+    "dense_foreground_occupancy_objective": true,
+    "dense_beta_scaled_weight": 0.0007352941176470588,
+    "dense_sampler": "UNCHANGED_UNIFORM_BACKGROUND_RAY_SAMPLER_FOR_CAUSAL_ISOLATION",
+    "opposite_pair_schedule": [[0,4],[1,5],[2,6],[3,7]],
+    "decode_resolutions": [256,512],
+    "primary_qualification_resolution": 512,
+    "stage13_v2_thresholds_unchanged": true,
+    "visual_hull_clipping": false,
+    "mask_is_forward_input": false,
+    "teacher_geometry_used_by_new_barrier": false
+  },
+  "subject_free_falsification": {
+    "required_before_knight_arm_B": true,
+    "required_properties": [
+      "Every background-ray SDF sample below +0.04 receives finite corrective gradient, not only the hard-min sample.",
+      "Foreground rays are not forced positive along their full depth segment.",
+      "FORK_GAP and CONCAVE_NOTCH background rays preserve negative-space authority even when neighboring rays are foreground.",
+      "The combined trainer adds the full-ray barrier exactly once and can reproduce Arm-A objective when the barrier is explicitly disabled.",
+      "No new teacher-geometry input or visual-hull clipping path is introduced."
+    ]
+  },
+  "decision_after_arm_B": {
+    "if_stage13_pass": "NEGATIVE_SPACE_SURROGATE_REPAIR_CAUSALLY_SUPPORTED__PROCEED_TO_PRODUCT_MESH_P0",
+    "if_precision_and_source_support_improve_but_fail": "NEGATIVE_SPACE_SAMPLING_DENSITY_OR_HARD_NEGATIVE_MINING_REMAINS_OWNER",
+    "if_no_material_precision_or_support_improvement": "ESCALATE_TO_V3_REPRESENTATION_CAPACITY_ABLATION",
+    "threshold_relaxation_forbidden": true,
+    "blind_resolution_escalation_forbidden": true
+  },
+  "knight_tuning_forbidden": true,
+  "x7_execution_authorized": false,
+  "product_authority_minted": false
+}

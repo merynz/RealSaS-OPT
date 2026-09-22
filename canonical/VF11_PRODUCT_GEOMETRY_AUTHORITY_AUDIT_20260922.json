@@ -1,0 +1,21 @@
+{
+  "schema": "RealSaS.VF11ProductGeometryAuthorityAudit.v1",
+  "date_utc": "2026-09-22",
+  "status": "PASS__LEARNED_SIGNED_ZERO_SURFACE_IS_DENSE_GEOMETRY_AUTHORITY__PER_RUN_ARTIFACT_SEAL_STILL_REQUIRED",
+  "audited_paths": [
+    "compiler/realsas_compiler_core/substrate/adequacy_v1.py",
+    "compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py",
+    "models/iris/v3/scene_first_signed_v3.py",
+    "models/iris/v3/zero_surface_decoder_v3.py"
+  ],
+  "findings": [
+    "The substrate adequacy module explicitly defines the dense signed zero-surface as geometry authority and only selects a bounded mechanical carrier density without changing dense geometry.",
+    "The V2 IRIS geometry adapter loads and validates a SignedZeroSurfaceSealIR NPZ, binds it to the sealed IRIS checkpoint, observation set and normalization, forbids teacher truth, and derives the rigging surface from that dense zero-surface.",
+    "The current learned Knight R256 zero-surface artifact records visual_hull_clipping=false; the source visual-hull/F4 field is research apparatus and is not the canonical dense product geometry authority."
+  ],
+  "required_runtime_invariant": "Every product run must bind the exact zero-surface artifact hash and decoder metadata to the checkpoint/observation/normalization seals; authority type alignment alone does not imply bitwise artifact identity across runs or resolutions.",
+  "source_hull_as_product_geometry": false,
+  "learned_signed_zero_surface_as_dense_geometry_authority": true,
+  "product_authority_minted_by_this_audit": false,
+  "witness_execution": false
+}

@@ -1,0 +1,68 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX6CFullDomainResult.v1",
+  "date_utc": "2026-09-22",
+  "status": "COMPLETE__FULL_DOMAIN_C0_MICRO2_RESEARCH_MEASUREMENT",
+  "source_run": {
+    "drive_folder": "KNIGHT_VF11_X6C_FULL_DOMAIN_RESUMABLE_V1",
+    "repo_commit": "0e93e6fe6f6e05445a7e8eaf9059d3604140441f",
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "scene_planes_sha256": "364f4769f1ffb04362669c1fe04b9b6c8f3afe3308bf4b7cede038d9e8226d28",
+    "root_states_sha256": "460b9300e11d548fb05315e69169c150186e71385dab542ca2c6798869c25b52",
+    "summary_sha256": "83155205228ed7c7f1a4d6e3627eafb7f346065b4c51795ca5ec919fa4eae22f",
+    "chunk_ledger_sha256": "87d44b2955fe22ad0cf9046199a1fcdbf66b63d408e5fe56ccdead832b8555f0"
+  },
+  "coverage": {
+    "base_regime_count": 103823,
+    "chunk_count": 51,
+    "completed_root_count": 103823,
+    "max_micro_depth": 2,
+    "micro2_leaf_capacity": 6644672
+  },
+  "state_counts": {
+    "UNKNOWN": 96083,
+    "PROVEN_EMPTY_POSITIVE": 7726,
+    "PROVEN_EMPTY_NEGATIVE": 14,
+    "PROVEN_ZERO_EXISTS": 0
+  },
+  "leaf_counts": {
+    "positive_terminal_count": 4008625,
+    "negative_terminal_count": 24407,
+    "decisive_terminal_count": 4033032,
+    "unresolved_leaf_count": 2611640,
+    "decisive_volume_fraction": 0.6069572734365217,
+    "unresolved_volume_fraction": 0.3930427265634782
+  },
+  "execution": {
+    "accelerator_box_eval_count": 7579079,
+    "expected_full_tree_box_eval_count": 7579079,
+    "screen_decisive_proposal_count": 4033032,
+    "cpu_confirmed_count": 4033032,
+    "cpu_rejected_count": 0,
+    "accelerator_seconds_sum": 256.8755196639968,
+    "parallel_cpu_verify_seconds_sum": 2875.977834395,
+    "chunk_wall_seconds_sum": 3134.2518041249996
+  },
+  "independent_integrity_red_team": {
+    "root_state_array_recomputed_state_count_match": true,
+    "empty_positive_invariant_violations": 0,
+    "empty_negative_invariant_violations": 0,
+    "unknown_with_both_decisive_signs": 0,
+    "unknown_without_unresolved_leaf": 0,
+    "terminal_plus_unresolved_micro2_leaf_identity": "4033032 + 2611640 = 6644672",
+    "full_tree_eval_identity": "103823 * (1 + 8 + 64) = 7579079",
+    "direct_field_empty_root_sample": {
+      "scope": "all 7740 root-level PROVEN_EMPTY regimes; 8 regime corners plus center",
+      "direct_point_count": 69660,
+      "sign_contradiction_count": 0,
+      "minimum_sampled_positive_sdf": 0.03449389247350371,
+      "maximum_sampled_negative_sdf": -0.0775428348757442,
+      "authority": "EMPIRICAL_RED_TEAM_ONLY__NOT_PART_OF_CERTIFICATE"
+    }
+  },
+  "interpretation": "The full-domain run is internally consistent and non-vacuous at micro2 leaf volume: 60.6957% of the exact triplane-regime volume receives CPU-confirmed strict-sign certificates. However only 7.455% of base regimes close as whole-root EMPTY and 92.545% remain root-level UNKNOWN; no base regime reaches PROVEN_ZERO_EXISTS at micro2. C0 micro2 is therefore useful as certified empty-volume pruning but too weak as a complete global zero-set discovery layer.",
+  "numeric_rigor": "CUDA_FLOAT64_SCREEN__PARALLEL_CPU_FLOAT64_CONFIRM__ORDINARY_FLOAT64_NOT_DIRECTED_ROUNDING",
+  "claim_boundary": "NO_GLOBAL_CONTINUOUS_ZERO_SET_COMPLETENESS__NO_PRODUCT_AUTHORITY__NO_WITNESS__NO_STAGE13_PASS__NO_SHIPPING_CERTIFICATE",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

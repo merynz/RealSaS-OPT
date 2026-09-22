@@ -10,8 +10,8 @@ from models.iris.v4.source_constraint_v4 import (
 
 
 def _state():
-    mask = np.zeros((64, 64), dtype=bool)
-    mask[20:44, 20:44] = True
+    mask = np.zeros((128, 128), dtype=bool)
+    mask[48:80, 48:80] = True
     admitted = np.ones_like(mask)
     return build_source_constraint_view_state_v4(mask, admitted)
 

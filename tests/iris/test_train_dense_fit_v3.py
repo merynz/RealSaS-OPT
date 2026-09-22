@@ -45,7 +45,7 @@ def _sparse_inputs():
     )
 
 
-def test_combined_objective_is_sparse_plus_mean_dense_at_frozen_weight():
+def test_arm_a_compatibility_path_is_sparse_plus_mean_dense_at_frozen_weight():
     model = _ScalarField()
     policy = DenseSourceCoveragePolicyV3()
     out = compute_v3_dense_fit_objective(
@@ -53,14 +53,41 @@ def test_combined_objective_is_sparse_plus_mean_dense_at_frozen_weight():
         scene_planes=torch.zeros(1, 1, 1, 1),
         dense_view_batches=(_dense_batch(0, 0.0), _dense_batch(4, 0.05)),
         policy=policy,
+        enforce_full_ray_background_empty_space=False,
         **_sparse_inputs(),
     )
     assert torch.allclose(
         out["total"],
         out["sparse_total"] + policy.top_level_loss_weight * out["dense_total"],
     )
+    assert float(out["background_full_ray_empty_space"]) == 0.0
     assert len(out["dense_views"]) == 2
     assert {row["view_index"] for row in out["dense_views"]} == {0, 4}
+    out["total"].backward()
+    assert model.weight.grad is not None
+    assert torch.isfinite(model.weight.grad)
+    assert abs(float(model.weight.grad)) > 0.0
+
+
+def test_arm_b_objective_adds_full_ray_background_empty_space_exactly_once():
+    model = _ScalarField()
+    policy = DenseSourceCoveragePolicyV3()
+    out = compute_v3_dense_fit_objective(
+        model=model,
+        scene_planes=torch.zeros(1, 1, 1, 1),
+        dense_view_batches=(_dense_batch(0, 0.0), _dense_batch(4, 0.05)),
+        policy=policy,
+        positive_margin=0.04,
+        enforce_full_ray_background_empty_space=True,
+        **_sparse_inputs(),
+    )
+    assert float(out["background_full_ray_empty_space"]) > 0.0
+    expected = (
+        out["sparse_total"]
+        + policy.top_level_loss_weight * out["dense_total"]
+        + out["background_full_ray_empty_space"]
+    )
+    assert torch.allclose(out["total"], expected)
     out["total"].backward()
     assert model.weight.grad is not None
     assert torch.isfinite(model.weight.grad)

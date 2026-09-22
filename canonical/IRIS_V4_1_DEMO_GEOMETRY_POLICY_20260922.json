@@ -1,0 +1,116 @@
+{
+  "schema": "RealSaS.IRISV41DemoGeometryPolicy.v1",
+  "date_utc": "2026-09-22",
+  "status": "FROZEN_PRE_V41_KNIGHT_RUN__ARCHITECTURE_UNCHANGED",
+  "authority": "CONTROLLED_KNIGHT_DEMO_ENGINEERING_POLICY__DERIVED_AFTER_V4_NEGATIVE_RESULT",
+  "parent_architecture_policy": "canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_V2_20260922.json",
+  "decision_record": "canonical/IRIS_V4_DEMO64_NEGATIVE_RESULT_AND_V41_DECISION_20260922.json",
+  "architecture": {
+    "architecture_id": "RealSaS.IRIS.SceneFirstSignedGeometry.v4.demo64",
+    "source": "models/iris/v4/scene_first_signed_v4.py",
+    "scene_dim": 256,
+    "scene_transformer_layers": 4,
+    "attention_heads": 8,
+    "scene_query_lattice": [3,32,32],
+    "final_triplane_shape_excluding_batch": [3,64,64,64],
+    "plane_channels": 64,
+    "point_feature_dim": 192,
+    "field_hidden_dim": 192,
+    "field_residual_blocks": 4,
+    "camera_injection_semantics": "UNCHANGED_V3_POST_DINO_CAMERA_AWARE_TOKEN_BANK",
+    "canonical_surface_extractor": "RealSaS.ZeroSurfaceDecoder.MarchingCubes.v3"
+  },
+  "training": {
+    "trainer": "models/iris/v4/train_demo_fit_v4_1.py",
+    "sampler": "models/iris/v4/source_constraint_v4_1.py",
+    "regularity": "models/iris/v4/regularity_v4_1.py",
+    "fresh_init": true,
+    "random_seed": 26091909,
+    "train_steps": 4800,
+    "learning_rate": 0.00008,
+    "weight_decay": 0.0001,
+    "all_eight_views_every_step": true,
+    "foreground": {
+      "loss": "COMPONENT_BALANCED_SATURATING_EXISTENCE_HINGE",
+      "random_component_boundary_interior_sampling_retained": true,
+      "hard_positive_replay_rays_per_view": 16,
+      "hard_positive_refresh_candidates_per_view": 1024,
+      "hard_positive_bank_size_per_view": 64,
+      "selection": "LARGEST_REQUIRED_INSIDE_MARGIN_VIOLATION"
+    },
+    "background": {
+      "metric_full_ray_barrier_retained": true,
+      "bands_px": {
+        "0_2": {"base_rays_per_view":16,"hard_replay_rays_per_view":8},
+        "2_8": {"base_rays_per_view":16,"hard_replay_rays_per_view":8},
+        "8_32": {"base_rays_per_view":16,"hard_replay_rays_per_view":8},
+        "gt_32": {"base_rays_per_view":16,"hard_replay_rays_per_view":8}
+      },
+      "hard_negative_refresh_candidates_per_band_per_view": 512,
+      "hard_negative_bank_size_per_band_per_view": 64,
+      "selection": "LOWEST_RAY_MIN_SDF_WITHIN_SAME_SOURCE_DISTANCE_BAND"
+    },
+    "hard_refresh_interval_steps": 80,
+    "source_certified_3d_exterior": "UNCHANGED_V4",
+    "local_metric_sdf": "UNCHANGED_V4_FIT_ONLY",
+    "teacher_surface_zero": "UNCHANGED_V4_FIT_ONLY",
+    "narrow_band_eikonal": {
+      "enabled": true,
+      "method": "CENTRAL_FINITE_DIFFERENCE__NO_SECOND_ORDER_GRID_SAMPLE_AUTOGRAD",
+      "band_radius_normalized": 0.02,
+      "finite_difference_epsilon_normalized": 0.003913894324853229,
+      "maximum_points_per_step": 512,
+      "top_level_weight": 0.02,
+      "authority": "REGULARITY_ONLY__NO_NEW_GEOMETRY_TRUTH"
+    },
+    "checkpoint_selection": {
+      "enabled": true,
+      "final_step_forced": false,
+      "audit_is_fixed_and_deterministic": true,
+      "lexicographic_lower_is_better": [
+        "max_background_zero_crossing_fraction",
+        "max_foreground_miss_fraction",
+        "source_exterior_negative_fraction",
+        "max_background_margin_violation_fraction",
+        "eikonal_abs_error_mean",
+        "scalar_loss"
+      ],
+      "rule": "HARD_SOURCE_SIGN_BEFORE_SOFT_MARGIN_REGULARITY_AND_SCALAR_LOSS"
+    }
+  },
+  "explicitly_frozen": [
+    "scene_dim",
+    "scene_transformer_depth",
+    "attention_heads",
+    "scene_query_lattice",
+    "final_triplane_resolution",
+    "plane_channels",
+    "point_feature_width",
+    "field_hidden_width",
+    "field_residual_depth",
+    "DINO backbone",
+    "camera injection semantics",
+    "canonical surface extractor",
+    "GSA authority",
+    "RiggingSurfaceIR authority",
+    "CAA authority",
+    "Stage13-v2 thresholds"
+  ],
+  "held": {
+    "training_only_differentiable_mesh_raster_loss": true,
+    "global_eikonal": true,
+    "global_teacher_sdf": true,
+    "plane_channel_or_scene_width_increase": true,
+    "canonical_extractor_change": true
+  },
+  "qualification": {
+    "primary_resolution": 512,
+    "secondary_resolution": 256,
+    "stage13_threshold_relaxation": false,
+    "source_support_audit": true,
+    "r256_r512_convergence": true,
+    "full_screen_negative_space_audit": true,
+    "posthoc_mesh_repair_before_primary_measurement": false,
+    "visual_hull_clipping": false
+  }
+}

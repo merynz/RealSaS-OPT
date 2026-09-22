@@ -10,11 +10,7 @@ import torch.nn.functional as F
 
 @dataclass(frozen=True)
 class DenseSourceCoveragePolicyV3:
-    """Subject-free V3 source-coverage surrogate constants.
-
-    The physical scale is frozen from the VF-11 feature-survival calibration rather than
-    tuned on Knight. The smallest required control is 0.75 of an R256 reference voxel.
-    """
+    """Subject-free V3 source-coverage surrogate constants."""
 
     reference_decoder_resolution: int = 256
     minimum_feature_width_reference_voxels: float = 0.75
@@ -65,12 +61,7 @@ def historical_sparse_objective_v3(
     *,
     positive_margin: float = 0.04,
 ) -> dict[str, torch.Tensor]:
-    """Exact 2026-09-19 STRIDE8 sparse objective, preserved for causal Arm A.
-
-    This is intentionally byte-for-byte semantic compatibility rather than a redesigned
-    loss: local SmoothL1 beta=.02, two positive-margin hinge terms, teacher-surface-zero
-    SmoothL1 beta=.01, and historical top-level weights 1/.25/.25/.50.
-    """
+    """Exact 2026-09-19 STRIDE8 sparse objective, preserved for causal Arm A."""
 
     margin = float(positive_margin)
     if not math.isfinite(margin) or margin <= 0.0:
@@ -131,12 +122,7 @@ def phase_jittered_depth_lattice(
     device: torch.device | str | None = None,
     dtype: torch.dtype = torch.float32,
 ) -> torch.Tensor:
-    """Return an equally-spaced lattice with one random global phase.
-
-    Independent per-bin jitter is deliberately not used: it can double the largest
-    inter-sample gap. A global phase shift preserves the preregistered maximum spacing
-    while preventing one fixed phase from systematically missing thin geometry.
-    """
+    """Return an equally-spaced lattice with one random global phase."""
 
     policy.validate()
     lo = float(depth_min)
@@ -196,12 +182,7 @@ def phase_jittered_unit_cube_ray_points(
     phase_fraction: float,
     policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
 ) -> torch.Tensor:
-    """Sample admitted forward ray segments with bounded spacing and explicit endpoints.
-
-    Every supplied ray must intersect the normalization cube. One pair-level phase moves
-    all interior samples together. Entry/exit are always included, so neither a phase
-    shift nor a feature touching the admitted domain boundary creates an unsampled tail.
-    """
+    """Sample admitted forward ray segments with bounded spacing and explicit endpoints."""
 
     policy.validate()
     phase = float(phase_fraction)
@@ -237,16 +218,16 @@ def phase_jittered_unit_cube_ray_points(
     return points
 
 
-def ray_foreground_probability_from_sdf_samples(
+def ray_foreground_logit_from_sdf_samples(
     sdf_samples: torch.Tensor,
     *,
     policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
 ) -> torch.Tensor:
-    """Map V3 signed samples on each ray to foreground occupancy probability.
+    """Stable foreground logit from the exact hard signed minimum.
 
-    Uses the exact hard minimum rather than log-sum-exp soft-min, avoiding the
-    multiplicity-dependent tau*log(N) silhouette bias. torch.amin is differentiable
-    almost everywhere and distributes gradients across exact ties.
+    Training must use this logit with BCEWithLogits. Converting to probability and then
+    clamping can erase the gradient on severely wrong rays, exactly where correction is
+    most needed.
     """
 
     policy.validate()
@@ -255,19 +236,26 @@ def ray_foreground_probability_from_sdf_samples(
     if not torch.isfinite(sdf_samples).all():
         raise ValueError("sdf_samples must be finite")
     ray_min = torch.amin(sdf_samples, dim=-1)
-    return torch.sigmoid(-ray_min / policy.occupancy_beta_normalized)
+    return -ray_min / policy.occupancy_beta_normalized
 
 
-def query_ray_foreground_probability_v3(
+def ray_foreground_probability_from_sdf_samples(
+    sdf_samples: torch.Tensor,
+    *,
+    policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
+) -> torch.Tensor:
+    """Probability view for diagnostics/soft Dice; not the BCE training interface."""
+
+    return torch.sigmoid(ray_foreground_logit_from_sdf_samples(sdf_samples, policy=policy))
+
+
+def _query_ray_sdf_v3(
     model,
     scene_planes: torch.Tensor,
     ray_points_normalized: torch.Tensor,
     *,
-    policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
-    query_chunk: int = 131072,
+    query_chunk: int,
 ) -> torch.Tensor:
-    """Backpropagating occupancy query through the actual V3 signed-field producer."""
-
     if ray_points_normalized.ndim != 4 or ray_points_normalized.shape[-1] != 3:
         raise ValueError("ray_points_normalized must be [B,R,D,3]")
     if ray_points_normalized.shape[0] != scene_planes.shape[0]:
@@ -281,8 +269,136 @@ def query_ray_foreground_probability_v3(
         sdf_parts.append(
             model.query(scene_planes, flat[:, start : start + int(query_chunk)])["sdf"]
         )
-    sdf = torch.cat(sdf_parts, dim=1).reshape(b, r, d)
-    return ray_foreground_probability_from_sdf_samples(sdf, policy=policy)
+    return torch.cat(sdf_parts, dim=1).reshape(b, r, d)
+
+
+def query_ray_foreground_logit_v3(
+    model,
+    scene_planes: torch.Tensor,
+    ray_points_normalized: torch.Tensor,
+    *,
+    policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
+    query_chunk: int = 131072,
+) -> torch.Tensor:
+    """Backpropagating stable occupancy logit through the actual V3 signed field."""
+
+    sdf = _query_ray_sdf_v3(
+        model,
+        scene_planes,
+        ray_points_normalized,
+        query_chunk=query_chunk,
+    )
+    return ray_foreground_logit_from_sdf_samples(sdf, policy=policy)
+
+
+def query_ray_foreground_probability_v3(
+    model,
+    scene_planes: torch.Tensor,
+    ray_points_normalized: torch.Tensor,
+    *,
+    policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
+    query_chunk: int = 131072,
+) -> torch.Tensor:
+    """Probability diagnostic wrapper around the stable V3 logit query."""
+
+    return torch.sigmoid(
+        query_ray_foreground_logit_v3(
+            model,
+            scene_planes,
+            ray_points_normalized,
+            policy=policy,
+            query_chunk=query_chunk,
+        )
+    )
+
+
+def _validate_group_inputs(
+    value: torch.Tensor,
+    target_foreground: torch.Tensor,
+    component_id: torch.Tensor,
+    boundary: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    if (
+        value.shape != target_foreground.shape
+        or value.shape != component_id.shape
+        or value.shape != boundary.shape
+    ):
+        raise ValueError("value/target/component_id/boundary shapes must match")
+    if value.numel() == 0:
+        raise ValueError("coverage loss requires at least one sampled ray")
+    if not torch.isfinite(value).all():
+        raise ValueError("coverage values must be finite")
+    target = target_foreground.to(dtype=value.dtype)
+    if torch.any((target != 0) & (target != 1)):
+        raise ValueError("target_foreground must be binary")
+    cid = component_id.to(dtype=torch.long)
+    bnd = boundary.to(dtype=value.dtype).clamp(0.0, 1.0)
+    if torch.any((target > 0.5) & (cid < 0)):
+        raise ValueError("foreground samples require non-negative component_id")
+    if torch.any((target < 0.5) & (cid >= 0)):
+        raise ValueError("background samples require component_id=-1")
+    return target, cid, bnd
+
+
+def _balanced_group_mean(
+    per_ray_loss: torch.Tensor,
+    cid: torch.Tensor,
+    ray_weight: torch.Tensor,
+) -> tuple[torch.Tensor, int]:
+    group_losses: list[torch.Tensor] = []
+    background_mask = cid < 0
+    if torch.any(background_mask):
+        w = ray_weight[background_mask]
+        group_losses.append(
+            (per_ray_loss[background_mask] * w).sum() / w.sum().clamp_min(1e-12)
+        )
+    positive_ids = torch.unique(cid[cid >= 0], sorted=True)
+    for group_id in positive_ids:
+        mask = cid == group_id
+        w = ray_weight[mask]
+        group_losses.append((per_ray_loss[mask] * w).sum() / w.sum().clamp_min(1e-12))
+    if not group_losses:
+        raise ValueError("no valid source-coverage groups")
+    return torch.stack(group_losses).mean(), len(group_losses)
+
+
+def component_balanced_source_coverage_loss_from_logits(
+    foreground_logit: torch.Tensor,
+    target_foreground: torch.Tensor,
+    component_id: torch.Tensor,
+    boundary: torch.Tensor,
+    *,
+    policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
+) -> dict[str, torch.Tensor]:
+    """Numerically stable training loss with equal BCE authority per source component."""
+
+    policy.validate()
+    target, cid, bnd = _validate_group_inputs(
+        foreground_logit,
+        target_foreground,
+        component_id,
+        boundary,
+    )
+    per_ray_bce = F.binary_cross_entropy_with_logits(
+        foreground_logit.float(),
+        target.float(),
+        reduction="none",
+    )
+    ray_weight = 1.0 + (policy.boundary_multiplier - 1.0) * bnd.float()
+    balanced_bce, group_count = _balanced_group_mean(per_ray_bce, cid, ray_weight)
+
+    probability = torch.sigmoid(foreground_logit.float())
+    target_float = target.float()
+    intersection = torch.sum(probability * target_float)
+    denominator = torch.sum(probability) + torch.sum(target_float)
+    soft_dice = 1.0 - (2.0 * intersection + 1.0) / (denominator + 1.0)
+    total = policy.bce_weight * balanced_bce + policy.soft_dice_weight * soft_dice
+    return {
+        "total": total,
+        "component_balanced_bce": balanced_bce,
+        "soft_dice": soft_dice,
+        "group_count": torch.as_tensor(group_count, device=foreground_logit.device, dtype=torch.int64),
+    }
 
 
 def component_balanced_source_coverage_loss(
@@ -293,65 +409,30 @@ def component_balanced_source_coverage_loss(
     *,
     policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
 ) -> dict[str, torch.Tensor]:
-    """BCE + silhouette Dice with equal total BCE authority per source component.
+    """Probability-domain compatibility helper for non-saturated diagnostics/tests.
 
-    component_id is -1 for background and >=0 for foreground connected components.
-    Every represented foreground component contributes one group mean, regardless of
-    area; background contributes one additional group. Boundary pixels are emphasized
-    inside each group and then renormalized, so tiny components cannot acquire an
-    unbounded raw inverse-area weight.
+    Shipping/training code must use component_balanced_source_coverage_loss_from_logits.
     """
 
     policy.validate()
-    if (
-        probability.shape != target_foreground.shape
-        or probability.shape != component_id.shape
-        or probability.shape != boundary.shape
-    ):
-        raise ValueError("probability/target/component_id/boundary shapes must match")
-    if probability.numel() == 0:
-        raise ValueError("coverage loss requires at least one sampled ray")
-    if not torch.isfinite(probability).all():
-        raise ValueError("probability must be finite")
-    p = probability.clamp(1e-6, 1.0 - 1e-6)
-    target = target_foreground.to(dtype=p.dtype)
-    if torch.any((target != 0) & (target != 1)):
-        raise ValueError("target_foreground must be binary")
-    cid = component_id.to(dtype=torch.long)
-    bnd = boundary.to(dtype=p.dtype).clamp(0.0, 1.0)
-    if torch.any((target > 0.5) & (cid < 0)):
-        raise ValueError("foreground samples require non-negative component_id")
-    if torch.any((target < 0.5) & (cid >= 0)):
-        raise ValueError("background samples require component_id=-1")
-
-    per_ray_bce = F.binary_cross_entropy(p, target, reduction="none")
+    target, cid, bnd = _validate_group_inputs(
+        probability,
+        target_foreground,
+        component_id,
+        boundary,
+    )
+    if torch.any((probability <= 0.0) | (probability >= 1.0)):
+        raise ValueError("probability-domain helper requires strict probabilities in (0,1)")
+    per_ray_bce = F.binary_cross_entropy(probability, target, reduction="none")
     ray_weight = 1.0 + (policy.boundary_multiplier - 1.0) * bnd
-
-    group_losses: list[torch.Tensor] = []
-    background_mask = cid < 0
-    if torch.any(background_mask):
-        w = ray_weight[background_mask]
-        group_losses.append(
-            (per_ray_bce[background_mask] * w).sum() / w.sum().clamp_min(1e-12)
-        )
-
-    positive_ids = torch.unique(cid[cid >= 0], sorted=True)
-    for group_id in positive_ids:
-        mask = cid == group_id
-        w = ray_weight[mask]
-        group_losses.append((per_ray_bce[mask] * w).sum() / w.sum().clamp_min(1e-12))
-
-    if not group_losses:
-        raise ValueError("no valid source-coverage groups")
-    balanced_bce = torch.stack(group_losses).mean()
-
-    intersection = torch.sum(p * target)
-    denominator = torch.sum(p) + torch.sum(target)
+    balanced_bce, group_count = _balanced_group_mean(per_ray_bce, cid, ray_weight)
+    intersection = torch.sum(probability * target)
+    denominator = torch.sum(probability) + torch.sum(target)
     soft_dice = 1.0 - (2.0 * intersection + 1.0) / (denominator + 1.0)
     total = policy.bce_weight * balanced_bce + policy.soft_dice_weight * soft_dice
     return {
         "total": total,
         "component_balanced_bce": balanced_bce,
         "soft_dice": soft_dice,
-        "group_count": torch.as_tensor(len(group_losses), device=p.device, dtype=torch.int64),
+        "group_count": torch.as_tensor(group_count, device=probability.device, dtype=torch.int64),
     }

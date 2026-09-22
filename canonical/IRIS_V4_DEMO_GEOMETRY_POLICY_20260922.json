@@ -27,15 +27,24 @@
   },
   "training": {
     "trainer": "models/iris/v4/train_demo_fit_v4.py",
-    "sampler": "models/iris/v4/source_constraint_v4.py",
+    "ray_sampler": "models/iris/v4/source_constraint_v4.py",
+    "source_exterior": "models/iris/v4/source_exterior_v4.py",
     "fresh_init": true,
     "random_seed": 26091909,
     "anchor_stride_px": 8,
     "train_steps": 4800,
     "learning_rate": 0.00008,
     "weight_decay": 0.0001,
+    "training_signal_decision": {
+      "principle": "TRAIN_THE_SOURCE_GEOMETRY_CONTRACT_DIRECTLY_WITHOUT_MINTING_A_SECOND_GEOMETRY_AUTHORITY",
+      "explicit_zero_set_near_zero_loss": "REJECTED_AS_REDUNDANT_IN_FIRST_V4",
+      "reason_zero_set_loss_rejected": "Arm C closed its active minibatch constraint locally but failed full-screen retention; adding another local zero-set surrogate would not address the observed owner and could bias tangent/near-boundary rays.",
+      "training_only_differentiable_mesh_raster_loss": "HELD_FOR_SECOND_V4_STEP_ONLY_IF_FIRST_V4_FAILS",
+      "reason_mesh_proxy_held": "For exact orthographic binary source authority, foreground-existence plus full-ray background-emptiness is a more direct constraint than introducing a proxy extractor into the first V4 arm."
+    },
     "local_metric_sdf": {
       "enabled": true,
+      "role": "FIT_ONLY_LOCAL_STRUCTURAL_AID__NOT_SOURCE_FIDELITY_AUTHORITY",
       "surface_rays_per_step": 192,
       "local_samples_per_ray": 9,
       "local_band_norm": 0.1,
@@ -43,28 +52,45 @@
     },
     "teacher_surface_zero_fit_only": {
       "enabled": true,
+      "role": "FIT_ONLY_SURFACE_ANCHOR__SOURCE_RASTER_REMAINS_FINAL_SHAPE_FIDELITY_AUTHORITY",
       "points_per_step": 1024,
       "smooth_l1_beta": 0.01,
       "top_level_weight": 0.5,
-      "inference_input": false
+      "inference_input": false,
+      "global_teacher_sdf_authority": false
     },
     "source_foreground_occupancy": {
       "enabled": true,
       "all_eight_views_every_step": true,
+      "semantics": "EVERY_QUALIFIED_SOURCE_FOREGROUND_RAY_MUST_CONTAIN_INTERIOR_SIGNED_FIELD_EVIDENCE",
       "ray_reduction": "HARD_AMIN_OVER_DEPTH_SAMPLES",
       "bce_interface": "BINARY_CROSS_ENTROPY_WITH_LOGITS",
       "component_balanced": true,
       "boundary_multiplier": 4.0,
       "top_level_weight": 0.0007352941176470588
     },
-    "source_negative_space": {
+    "source_background_empty_space": {
       "enabled": true,
       "all_eight_views_every_step": true,
+      "semantics": "EVERY_SAMPLED_POINT_ON_A_QUALIFIED_SOURCE_BACKGROUND_RAY_MUST_REMAIN_EXTERIOR",
       "pointwise_full_ray": true,
       "margin_rule": "m(r)=min(0.04,r_px*(2*camera_half_extent_normalized/raster_width))",
       "maximum_margin_normalized": 0.04,
       "near_and_far_authority_coexist": true,
       "top_level_weight": 1.0
+    },
+    "source_certified_3d_exterior": {
+      "enabled": true,
+      "semantics": "A_3D_POINT_PROJECTING_IN_FRAME_TO_SOURCE_BACKGROUND_IN_ANY_EXACT_VIEW_IS_CERTIFIED_EXTERIOR_WHEN_PROJECTED_DISTANCE_REMAINS_POSITIVE_AFTER_RASTER_GUARD",
+      "per_view_projected_distance_lower_bound": true,
+      "combine_views": "MAX_VALID_LOWER_BOUND",
+      "out_of_frame_semantics": "UNKNOWN__NEVER_NEGATIVE_EVIDENCE",
+      "pixel_quantization_guard_px": 1.4142135623730951,
+      "margin_rule": "min(0.04,max_v(max(0,d_v_px-sqrt(2))*2*camera_half_extent_normalized/raster_width))",
+      "maximum_margin_normalized": 0.04,
+      "points_per_step": 512,
+      "top_level_weight": 1.0,
+      "visual_hull_clipping": false
     },
     "view_sampling": {
       "foreground_component_rays_per_component_per_view": 4,
@@ -74,15 +100,23 @@
       "near_boundary_max_px": 32.0,
       "far_background_rays_per_view": 16,
       "hard_negative_replay_rays_per_view": 16,
-      "hard_negative_refresh_candidates_per_view": 128,
-      "hard_negative_bank_size_per_view": 32,
+      "hard_negative_refresh_candidates_per_view": 1024,
+      "hard_negative_bank_size_per_view": 64,
       "hard_negative_refresh_interval_steps": 80,
       "near_background_selection": "DETERMINISTIC_CYCLE_NEAREST_BOUNDARY_ORDER",
       "far_background_selection": "DETERMINISTIC_CYCLE_DISTANCE_ORDER",
       "foreground_selection": "DETERMINISTIC_HASHED_RNG_WITH_COMPONENT_QUOTA",
       "hard_negative_definition": "LOWEST_RAY_MIN_SDF_AMONG_REFRESHED_SOURCE_BACKGROUND_CANDIDATES"
     },
-    "approximate_ray_budget_note": "For a one-component view, 92 rays/view x 8 = 736 rays/step, close to Arm C pair-only ~656 rays/step while providing all-view retention."
+    "retention_contract": {
+      "pair_only_optimization_forbidden": true,
+      "all_eight_views_must_contribute_to_every_optimizer_step": true,
+      "near_background_may_not_replace_far_background": true,
+      "far_background_may_not_replace_near_background": true,
+      "3d_exterior_may_not_replace_ray_constraints": true,
+      "hard_negative_replay_is_additive": true
+    },
+    "approximate_ray_budget_note": "For a one-component view, 92 rays/view x 8 = 736 rays/step, close to Arm C pair-only ray count while preserving all-view constraints; hard-negative refresh is amortized every 80 steps."
   },
   "qualification": {
     "primary_resolution": 512,

@@ -10,7 +10,12 @@ import torch.nn.functional as F
 
 @dataclass(frozen=True)
 class DenseSourceCoveragePolicyV3:
-    """Subject-free V3 source-coverage surrogate constants."""
+    """Subject-free V3 source-coverage surrogate constants.
+
+    The dense BCE/Dice is multiplied by beta at the top level. Since the occupancy
+    logit is z=-f/beta, this keeps the derivative with respect to the signed field on
+    an O(1) scale instead of O(1/beta), without Knight-dependent tuning.
+    """
 
     reference_decoder_resolution: int = 256
     minimum_feature_width_reference_voxels: float = 0.75
@@ -19,7 +24,7 @@ class DenseSourceCoveragePolicyV3:
     boundary_multiplier: float = 4.0
     bce_weight: float = 1.0
     soft_dice_weight: float = 1.0
-    top_level_loss_weight: float = 1.0
+    top_level_loss_weight: float = 0.0007352941176470588
 
     def validate(self) -> None:
         if self.reference_decoder_resolution < 2:
@@ -34,6 +39,8 @@ class DenseSourceCoveragePolicyV3:
             raise ValueError("boundary multiplier must be >=1")
         if min(self.bce_weight, self.soft_dice_weight, self.top_level_loss_weight) < 0.0:
             raise ValueError("loss weights must be non-negative")
+        if abs(self.top_level_loss_weight - self.occupancy_beta_normalized) > 1e-15:
+            raise ValueError("top-level dense weight must equal the frozen occupancy beta")
 
     @property
     def reference_voxel_normalized(self) -> float:
@@ -223,12 +230,7 @@ def ray_foreground_logit_from_sdf_samples(
     *,
     policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
 ) -> torch.Tensor:
-    """Stable foreground logit from the exact hard signed minimum.
-
-    Training must use this logit with BCEWithLogits. Converting to probability and then
-    clamping can erase the gradient on severely wrong rays, exactly where correction is
-    most needed.
-    """
+    """Stable foreground logit from the exact hard signed minimum."""
 
     policy.validate()
     if sdf_samples.ndim < 1 or sdf_samples.shape[-1] < 1:
@@ -280,8 +282,6 @@ def query_ray_foreground_logit_v3(
     policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
     query_chunk: int = 131072,
 ) -> torch.Tensor:
-    """Backpropagating stable occupancy logit through the actual V3 signed field."""
-
     sdf = _query_ray_sdf_v3(
         model,
         scene_planes,
@@ -299,8 +299,6 @@ def query_ray_foreground_probability_v3(
     policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
     query_chunk: int = 131072,
 ) -> torch.Tensor:
-    """Probability diagnostic wrapper around the stable V3 logit query."""
-
     return torch.sigmoid(
         query_ray_foreground_logit_v3(
             model,
@@ -370,7 +368,7 @@ def component_balanced_source_coverage_loss_from_logits(
     *,
     policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
 ) -> dict[str, torch.Tensor]:
-    """Numerically stable training loss with equal BCE authority per source component."""
+    """Numerically stable unscaled BCE+Dice; caller applies the frozen beta top weight."""
 
     policy.validate()
     target, cid, bnd = _validate_group_inputs(
@@ -409,10 +407,7 @@ def component_balanced_source_coverage_loss(
     *,
     policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
 ) -> dict[str, torch.Tensor]:
-    """Probability-domain compatibility helper for non-saturated diagnostics/tests.
-
-    Shipping/training code must use component_balanced_source_coverage_loss_from_logits.
-    """
+    """Probability-domain compatibility helper for non-saturated diagnostics/tests."""
 
     policy.validate()
     target, cid, bnd = _validate_group_inputs(

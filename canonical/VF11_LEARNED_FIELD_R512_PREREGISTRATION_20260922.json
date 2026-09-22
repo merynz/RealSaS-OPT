@@ -1,0 +1,52 @@
+{
+  "schema": "RealSaS.VF11LearnedFieldR512Preregistration.v1",
+  "date_utc": "2026-09-22",
+  "status": "PREREGISTERED__FROZEN_LEARNED_IRIS_FIELD_DENSE_R512_STAGE13_AND_SOURCE_SUPPORT",
+  "authority_class": "RESEARCH_DIAGNOSTIC__DECISION_GATE_BEFORE_FURTHER_CERTIFICATION",
+  "parent_erratum": "canonical/VF11_NB1_E1_E2_E3_PROVENANCE_ERRATUM_20260922.json",
+  "frozen_inputs": {
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "scene_planes_sha256": "364f4769f1ffb04362669c1fe04b9b6c8f3afe3308bf4b7cede038d9e8226d28",
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "learned_r256_zero_surface_sha256": "42d7fc790d869d4248c23a3ef3d4ae1dea9f6d3e1b7a671557858b32a04ddc59",
+    "model_source_sha256": "be5e29f1119be6d93abb0219383c05eaaa6e5ff3ae07d2de44f4aa29d3b338f4"
+  },
+  "execution": {
+    "resolution": 512,
+    "normalized_bounds": [-1.0, 1.0],
+    "field": "frozen ContinuousSignedSurfaceFieldV3 queried from frozen SCENE_PLANES",
+    "decoder": "models/iris/v3/zero_surface_decoder_v3.py::extract_zero_surface_mesh_v3",
+    "level": 0.0,
+    "retraining": false,
+    "visual_hull_clipping": false,
+    "source_hull_postprocess": false,
+    "mesh_repair_before_measurement": false,
+    "teacher_geometry": false
+  },
+  "primary_gate": {
+    "policy": "canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json",
+    "aggregation": "all eight views must pass every rule",
+    "decision": {
+      "pass": "LEARNED_FIELD_R512_STAGE13_PASS__CERTIFICATION_FOUNDATION_RESTORED_FOR_REVIEW",
+      "fail": "LEARNED_FIELD_R512_STAGE13_FAIL__LEARNED_FIELD_LANE_REMAINS_OWNER__CERTIFICATION_DEPTH_ESCALATION_HELD"
+    }
+  },
+  "secondary_diagnostics": [
+    "Re-evaluate the existing learned R256 zero mesh with the same exact Stage13-v2 apparatus.",
+    "Report R256-to-R512 symmetric surface convergence using deterministic equal-area mesh samples.",
+    "Report exact source-silhouette support violations for R256 and R512 vertices at 0, 0.5, 1, 2 and 3 pixel dilation plus >4/8/12/16/20/24-pixel tails.",
+    "Use SOURCE_UNSUPPORTED_ZERO_SURFACE for any learned zero surface outside admitted support; use UNSUPPORTED_OUTGROWTH for violations on the largest connected learned component; reserve FLOATER_COMPONENT for detached all-outside components.",
+    "Use source-hull R512 only as a descriptive envelope/extractor reference, never as learned-field truth or a certificate oracle."
+  ],
+  "forbidden": [
+    "Changing checkpoint, scene planes, source masks, cameras or Stage13 thresholds after inspecting R512.",
+    "Using NB1 source-hull MC_R512 as learned-field ground truth.",
+    "Clipping learned R512 to source support before the primary Stage13 measurement.",
+    "Continuing X7 micro3 before this primary gate is reviewed.",
+    "Minting product authority, Knight witness approval, shipping certificate rigor, or global zero-set completeness."
+  ],
+  "x7_execution_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

@@ -8,7 +8,11 @@ from models.iris.v3.dense_source_coverage_v3 import (
     DenseSourceCoveragePolicyV3,
     component_balanced_source_coverage_loss_from_logits,
     historical_sparse_objective_v3,
-    query_ray_foreground_logit_v3,
+    ray_foreground_logit_from_sdf_samples,
+)
+from models.iris.v3.negative_space_barrier_v3 import (
+    background_full_ray_empty_space_barrier,
+    query_dense_ray_sdf_v3,
 )
 
 
@@ -50,12 +54,18 @@ def compute_v3_dense_fit_objective(
     policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
     positive_margin: float = 0.04,
     query_chunk: int = 131072,
+    enforce_full_ray_background_empty_space: bool = True,
 ) -> dict[str, torch.Tensor | tuple[dict[str, torch.Tensor | int], ...]]:
-    """Historical STRIDE8 V3 sparse objective plus one frozen dense source term.
+    """Historical STRIDE8 sparse objective plus source-raster constraints.
 
-    The historical sparse terms are intentionally unchanged. The only added scientific
-    variable is the mean dense source-coverage loss over the supplied scheduled views,
-    multiplied by the frozen subject-free top-level weight.
+    Foreground rays retain the Arm-A occupancy semantics: some negative/inside field
+    evidence must occur along the admitted ray. Source-background rays carry stronger
+    authority: the whole admitted segment is certified empty, so every sampled SDF
+    point is additionally constrained to stay positive by the historical 0.04 margin.
+
+    The full-ray barrier is one-sided negative-space supervision. It does not use a
+    teacher mesh, does not make the source mask a forward input, and does not replace
+    the learned field with a visual hull.
     """
 
     policy.validate()
@@ -79,6 +89,7 @@ def compute_v3_dense_fit_objective(
 
     dense_rows: list[dict[str, torch.Tensor | int]] = []
     dense_totals: list[torch.Tensor] = []
+    empty_space_totals: list[torch.Tensor] = []
     seen_views: set[int] = set()
     for batch in dense_view_batches:
         batch.validate()
@@ -86,37 +97,64 @@ def compute_v3_dense_fit_objective(
         if view_index in seen_views:
             raise ValueError(f"duplicate dense scheduled view:{view_index}")
         seen_views.add(view_index)
-        logit = query_ray_foreground_logit_v3(
+
+        ray_sdf = query_dense_ray_sdf_v3(
             model,
             scene_planes,
             batch.ray_points_normalized,
-            policy=policy,
             query_chunk=query_chunk,
         )
-        row = component_balanced_source_coverage_loss_from_logits(
+        logit = ray_foreground_logit_from_sdf_samples(ray_sdf, policy=policy)
+        coverage = component_balanced_source_coverage_loss_from_logits(
             logit,
             batch.target_foreground,
             batch.component_id,
             batch.boundary,
             policy=policy,
         )
-        dense_totals.append(row["total"])
+        if enforce_full_ray_background_empty_space:
+            empty = background_full_ray_empty_space_barrier(
+                ray_sdf,
+                batch.target_foreground,
+                positive_margin=positive_margin,
+            )
+        else:
+            zero = ray_sdf.sum() * 0.0
+            empty = {
+                "total": zero,
+                "background_ray_count": torch.zeros((), dtype=torch.int64, device=ray_sdf.device),
+                "violating_point_fraction": zero,
+                "minimum_background_sdf": torch.full((), float("nan"), dtype=ray_sdf.dtype, device=ray_sdf.device),
+            }
+
+        dense_totals.append(coverage["total"])
+        empty_space_totals.append(empty["total"])
         dense_rows.append(
             {
                 "view_index": view_index,
-                "total": row["total"],
-                "component_balanced_bce": row["component_balanced_bce"],
-                "soft_dice": row["soft_dice"],
-                "group_count": row["group_count"],
+                "total": coverage["total"],
+                "component_balanced_bce": coverage["component_balanced_bce"],
+                "soft_dice": coverage["soft_dice"],
+                "group_count": coverage["group_count"],
+                "background_full_ray_empty_space": empty["total"],
+                "background_ray_count": empty["background_ray_count"],
+                "background_violating_point_fraction": empty["violating_point_fraction"],
+                "minimum_background_sdf": empty["minimum_background_sdf"],
             }
         )
 
     dense_total = torch.stack(dense_totals).mean()
-    total = sparse["total"] + float(policy.top_level_loss_weight) * dense_total
+    empty_space_total = torch.stack(empty_space_totals).mean()
+    total = (
+        sparse["total"]
+        + float(policy.top_level_loss_weight) * dense_total
+        + empty_space_total
+    )
     return {
         "total": total,
         "sparse_total": sparse["total"],
         "dense_total": dense_total,
+        "background_full_ray_empty_space": empty_space_total,
         "local": sparse["local"],
         "background": sparse["background"],
         "certified_outside": sparse["certified_outside"],

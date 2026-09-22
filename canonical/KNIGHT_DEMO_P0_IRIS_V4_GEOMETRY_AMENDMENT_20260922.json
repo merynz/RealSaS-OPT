@@ -1,0 +1,54 @@
+{
+  "schema": "RealSaS.KnightDemoP0IrisV4GeometryAmendment.v1",
+  "date_utc": "2026-09-22",
+  "status": "P0_IRIS_GEOMETRY_REDIRECTED_TO_SCOPED_V4_DEMO_PRODUCER",
+  "amends": "canonical/KNIGHT_DEMO_CRITICAL_CLOSURE_PLAN_20260922.json",
+  "decision_authority": "canonical/IRIS_V3_ARM_C_RESULT_AND_V4_DEMO_GEOMETRY_DECISION_20260922.json",
+  "p0_owner": "STAGES_09_13__IRIS_V4_DEMO_GEOMETRY",
+  "required_before_controlled_knight_demo": [
+    "V4 source code and exact architecture policy are hash sealed before Knight V4 result inspection",
+    "V4 real learned field passes unchanged Stage13-v2 on all eight exact source views at R512",
+    "R256-R512 convergence and source-support audit are recorded without posthoc repair",
+    "largest-component source unsupported outgrowth materially closes rather than being hidden by deleting components",
+    "detached unsupported components do not survive the learned-field qualification path",
+    "actual Stage18 product mesh remeasurement preserves the qualified geometry",
+    "final idle/run/slash posed renders pass no-empty-region and no-pepper/speckle demo artifact audit"
+  ],
+  "first_v4_architecture_scope": {
+    "image_token_dim": 384,
+    "scene_dim": 256,
+    "camera_embed_dim": 96,
+    "plane_size": 32,
+    "scene_query_count": 3072,
+    "final_plane_resolution": 64,
+    "plane_channels": 64,
+    "point_feature_dim": 192,
+    "field_hidden_dim": 192,
+    "field_decoder": "FOUR_RESIDUAL_SILU_BLOCKS",
+    "attention_heads": 8,
+    "scene_transformer_layers": 4
+  },
+  "first_v4_training_scope": {
+    "preserve_source_foreground_occupancy": true,
+    "preserve_local_metric_sdf": true,
+    "preserve_teacher_surface_zero_fit_only": true,
+    "metric_near_boundary_negative_space": true,
+    "far_field_background_empty_space": true,
+    "all_view_constraint_retention": true,
+    "hard_negative_replay": true,
+    "mask_forward_input": false,
+    "visual_hull_clipping": false
+  },
+  "not_in_first_v4": [
+    "scene_transformer_depth_increase",
+    "scene_dim_increase",
+    "plane_channel_increase",
+    "point_feature_width_increase",
+    "camera_modulated_dino",
+    "canonical_surface_extractor_replacement",
+    "Stage13_threshold_relaxation"
+  ],
+  "claim_boundary": "CONTROLLED_KNIGHT_DEMO_ONLY__NO_UNSEEN_GENERALIZATION_OR_SHIPPING_ARCHITECTURE_CLAIM",
+  "product_authority_minted": false,
+  "knight_demo_authorized": false
+}

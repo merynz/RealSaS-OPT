@@ -1,22 +1,29 @@
 {
-  "schema": "RealSaS.IRISV4Demo64SaturatingSourceGeometryA100Handoff.v1",
+  "schema": "RealSaS.IRISV4Demo64SaturatingSourceGeometryA100Handoff.v2",
   "date_utc": "2026-09-22",
-  "status": "READY_FOR_A100_RUN_ALL__SELF_HOSTED_CONTRACT_GREEN",
-  "notebook": {
+  "status": "READY_FOR_A100_RUN_ALL_FIX1__MIXED_PRECISION_ERRATUM_CLOSED",
+  "supersedes_notebook": {
     "filename": "RealSaS_IRIS_KNIGHT_A100_RUN_ALL_V4_DEMO64_SATURATING_SOURCE_GEOMETRY.ipynb",
     "sha256": "421f41185987f0dd15488936798595d28801984e9d542d9ba322c221620d1e27",
+    "disposition": "FORBIDDEN_FOR_RESULT__FAILED_BEFORE_FIRST_OPTIMIZER_STEP",
+    "erratum": "canonical/IRIS_V4_A100_MIXED_PRECISION_HARD_NEGATIVE_REFRESH_ERRATUM_20260922.json"
+  },
+  "notebook": {
+    "filename": "RealSaS_IRIS_KNIGHT_A100_RUN_ALL_V4_DEMO64_SATURATING_SOURCE_GEOMETRY_FIX1.ipynb",
+    "sha256": "a02553b7ffbbf3224d41e1820136bc20356acd8eb094dffdd395615ed25c78d6",
     "cell_count": 12,
     "code_cell_count": 10,
     "code_cells_compile": true,
-    "nbformat_valid": true
+    "nbformat_valid": true,
+    "hard_negative_refresh_query": "models.iris.v4.mixed_precision_query_v4:query_hard_negative_ray_min_sdf_v4"
   },
-  "repo_pin": "fe4188807e4301a6d02a16b4df92773a06292d64",
+  "repo_pin": "07cf44cfa307b16e33d76c565a324e417c05b6d7",
   "self_hosted_preflight": {
     "workflow": "iris-v4-demo-geometry-contract",
-    "run_id": 35716911913,
-    "job_id": 106710445312,
+    "run_id": 35719533978,
+    "job_id": 106718900695,
     "conclusion": "success",
-    "pytest": "22_PASSED",
+    "mixed_precision_regression": true,
     "foreground_signal": "COMPONENT_BALANCED_SATURATING_EXISTENCE_HINGE",
     "foreground_saturation_proven": true,
     "all_eight_view_retention_proven": true,
@@ -25,6 +32,7 @@
   "frozen_policy": {
     "path": "canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_V2_20260922.json",
     "foreground_bce_erratum": "canonical/IRIS_V4_FOREGROUND_BCE_GEOMETRIC_PRESSURE_ERRATUM_20260922.json",
+    "mixed_precision_erratum": "canonical/IRIS_V4_A100_MIXED_PRECISION_HARD_NEGATIVE_REFRESH_ERRATUM_20260922.json",
     "stage13_policy_sha256": "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214"
   },
   "architecture": {

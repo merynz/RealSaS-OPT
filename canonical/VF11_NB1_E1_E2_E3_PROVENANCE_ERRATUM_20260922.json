@@ -1,0 +1,38 @@
+{
+  "schema": "RealSaS.VF11NB1E1E2E3ProvenanceErratum.v1",
+  "date_utc": "2026-09-22",
+  "status": "ERRATUM__NB1_E1_E2_E3_MEASURE_SOURCE_CONSTRUCTIVE_FIELD_NOT_LEARNED_IRIS_FIELD",
+  "affected_run": "NB1_EXTRACTION_20260920T115521Z",
+  "affected_experiments": ["E1_MC_RESOLUTION", "E2_EXTRACTOR_BAKEOFF", "E3_BOUNDED_TET_DEFORMATION"],
+  "root_cause": "NB1 constructs F4_SOURCE_FIELD from the maximum across eight signed 2D source-silhouette distance fields. E1/E2 extract that field directly; E3 also freezes its SDF/signs from build_field_npy(256) and optimizes lattice positions against the same source field.",
+  "retained_claims": [
+    "E1 resolution behavior is evidence about marching-cubes discretization of the source-silhouette intersection field.",
+    "E2 MC-versus-regular-MTet is an extractor comparison on the source-silhouette intersection field.",
+    "E3 bounded lattice deformation is a deformation experiment on the source-silhouette intersection field.",
+    "The NB1 Stage13 apparatus uses exact admitted Knight source masks and cameras, but applying it to the source visual-hull-like field is not evidence that the learned IRIS field preserves the same geometry."
+  ],
+  "withdrawn_or_not_established": [
+    "Learned IRIS R512 Stage13 PASS.",
+    "The learned IRIS field already contains the required detail and extraction/sampling is the only remaining owner.",
+    "MC is better than MTet for the learned IRIS field.",
+    "Bounded tetrahedral deformation fails to improve the learned IRIS field.",
+    "NB1 source-hull MC_R512 may be used as an oracle for learned-field certificate soundness."
+  ],
+  "existing_learned_field_baseline": {
+    "resolution": 256,
+    "zero_surface_sha256": "42d7fc790d869d4248c23a3ef3d4ae1dea9f6d3e1b7a671557858b32a04ddc59",
+    "vertex_count": 96810,
+    "face_count": 193752,
+    "visual_hull_clipping": false,
+    "fit_metrics": {
+      "min_view_precision": 0.9538098723265838,
+      "min_view_recall": 0.9687733991513908,
+      "max_view_largest_coherent_hole_fraction": 0.009063075455372396
+    },
+    "interpretation": "The learned field was already measured at R256 and is far below frozen Stage13-v2 source-correctness thresholds on overlapping metrics. The unresolved question is whether dense R512 evaluation materially changes that conclusion."
+  },
+  "required_next": "VF11_LEARNED_FIELD_R512",
+  "x7_execution_authorized": false,
+  "product_authority_minted": false,
+  "witness_execution": false
+}

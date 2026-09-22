@@ -7,8 +7,10 @@ on:
     paths:
       - 'models/iris/v3/negative_space_upper_bound_v3.py'
       - 'models/iris/v3/train_upper_bound_fit_v3.py'
+      - 'models/iris/v3/full_screen_negative_space_audit_v3.py'
       - 'tests/iris/test_negative_space_upper_bound_v3.py'
       - 'tests/iris/test_train_upper_bound_fit_v3.py'
+      - 'tests/iris/test_full_screen_negative_space_audit_v3.py'
       - 'canonical/IRIS_V3_NEGATIVE_SPACE_OWNER_SEPARATION_ARM_C_POLICY_V1_20260922.json'
       - '.github/workflows/vf11_iris_v3_negative_space_upper_bound_contract.yml'
   workflow_dispatch:
@@ -42,14 +44,17 @@ jobs:
         run: |
           python -m py_compile models/iris/v3/negative_space_upper_bound_v3.py
           python -m py_compile models/iris/v3/train_upper_bound_fit_v3.py
+          python -m py_compile models/iris/v3/full_screen_negative_space_audit_v3.py
           python -m py_compile tests/iris/test_negative_space_upper_bound_v3.py
           python -m py_compile tests/iris/test_train_upper_bound_fit_v3.py
+          python -m py_compile tests/iris/test_full_screen_negative_space_audit_v3.py
 
       - name: Run Arm C falsification tests
         run: |
           python -m pytest -q \
             tests/iris/test_negative_space_upper_bound_v3.py \
             tests/iris/test_train_upper_bound_fit_v3.py \
+            tests/iris/test_full_screen_negative_space_audit_v3.py \
             tests/iris/test_dense_source_coverage_v3_fixtures.py \
             tests/iris/test_dense_source_sampling_v3.py
 
@@ -60,6 +65,7 @@ jobs:
           from pathlib import Path
           from models.iris.v3.negative_space_upper_bound_v3 import NegativeSpaceUpperBoundPolicyV3
           from models.iris.v3.train_upper_bound_fit_v3 import compute_v3_owner_separation_upper_bound_objective
+          from models.iris.v3.full_screen_negative_space_audit_v3 import audit_full_screen_negative_space_v3
 
           p = NegativeSpaceUpperBoundPolicyV3()
           authority = json.loads(Path('canonical/IRIS_V3_NEGATIVE_SPACE_OWNER_SEPARATION_ARM_C_POLICY_V1_20260922.json').read_text())
@@ -74,5 +80,6 @@ jobs:
           assert authority['objective_semantics']['visual_hull_clipping'] is False
           assert authority['decision_rule']['posthoc_gate_relaxation'] is False
           assert callable(compute_v3_owner_separation_upper_bound_objective)
+          assert callable(audit_full_screen_negative_space_v3)
           print('V3_ARM_C_OWNER_SEPARATION_POLICY_BINDING=PASS')
           PY

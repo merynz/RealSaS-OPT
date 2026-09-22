@@ -1,0 +1,40 @@
+{
+  "schema": "RealSaS.IRIS.V3NegativeSpaceOwnerSeparationArmCHandoff.v1",
+  "date_utc": "2026-09-22",
+  "status": "READY_FOR_A100_RUN_ALL__SELF_HOSTED_CONTRACT_GREEN",
+  "repo_commit": "d67908dd1f938ffa019f5a871541238733c51c49",
+  "self_hosted_contract": {
+    "workflow": "vf11-iris-v3-negative-space-upper-bound-contract",
+    "run_id": 35706431308,
+    "run_number": 3,
+    "conclusion": "success"
+  },
+  "notebook": {
+    "filename": "RealSaS_IRIS_KNIGHT_A100_RUN_ALL_V3_NEGATIVE_SPACE_OWNER_SEPARATION_ARM_C.ipynb",
+    "sha256": "1ba6709140cb80baf9b8bc69810bbbb8e5535864a19ee8f2e6275216b2243287",
+    "code_cell_compile": "10/10_PASS"
+  },
+  "frozen_question": "After removing known non-metric fixed-margin negative-space conflicts and systematically covering the 0-32px source-background boundary band, can the unchanged 48x48 SceneFirstSignedGeometryV3 representation satisfy the unchanged Stage13-v2 source-fidelity gate?",
+  "boundary_band_training": {
+    "background_rays_per_active_view": 256,
+    "expected_scheduled_visits_per_view": 1200,
+    "observed_preflight_pool_sizes_native_1024": [86342, 94048, 89366, 81403, 86323, 94037, 89329, 81400],
+    "expected_full_coverage_cycles": [3.5579439901785923, 3.2664171486900306, 3.4375489559787837, 3.773816689802587, 3.5587271063331904, 3.2667992385975735, 3.4389727859933505, 3.773955773955774]
+  },
+  "postfit_audit": {
+    "resolution": 256,
+    "mask_downsample": "CONSERVATIVE_4X4_MAX_POOL_FROM_NATIVE_1024",
+    "per_view_full_screen_minimum_sdf_maps": true,
+    "distance_bins": ["0_2", "2_8", "8_32", "gt_32"]
+  },
+  "architecture_governance": {
+    "knight_demo_runtime_architecture_pivot": false,
+    "source_backed_2d_presentation_carrier": "PARKED_POST_DEMO_RESEARCH_ONLY",
+    "visual_hull_clipping": false,
+    "threshold_relaxation": false,
+    "r768_or_r1024_escape": false
+  },
+  "product_authority_minted": false,
+  "knight_witness_promoted": false,
+  "x7_execution_authorized": false
+}

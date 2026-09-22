@@ -15,39 +15,46 @@ on:
 jobs:
   dense-loss-contract:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
-      PY: /home/monster/realsas-ml312/bin/python
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify exact local ML runtime
-        shell: bash
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install frozen CPU test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
         run: |
-          set -euo pipefail
-          test -x "$PY"
-          "$PY" - <<'PY'
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off pytest==8.3.5
+
+      - name: Verify ML runtime
+        run: |
+          python - <<'PY'
           import torch, pytest
           print('torch', torch.__version__, 'cuda', torch.cuda.is_available())
           PY
 
       - name: Compile V3 dense source coverage module
-        shell: bash
         run: |
-          set -euo pipefail
-          "$PY" -m py_compile models/iris/v3/dense_source_coverage_v3.py
+          python -m py_compile models/iris/v3/dense_source_coverage_v3.py
 
       - name: Run loss-specific falsification unit tests
-        shell: bash
         run: |
-          set -euo pipefail
-          PYTHONPATH="$GITHUB_WORKSPACE" "$PY" -m pytest -q tests/iris/test_dense_source_coverage_v3.py
+          python -m pytest -q tests/iris/test_dense_source_coverage_v3.py
 
       - name: Seal prereg constants against implementation
-        shell: bash
         run: |
-          set -euo pipefail
-          PYTHONPATH="$GITHUB_WORKSPACE" "$PY" - <<'PY'
+          python - <<'PY'
           import json
           from pathlib import Path
           from models.iris.v3.dense_source_coverage_v3 import DenseSourceCoveragePolicyV3

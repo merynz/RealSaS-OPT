@@ -6,11 +6,12 @@ import torch
 from models.iris.v3.dense_source_coverage_v3 import (
     DenseSourceCoveragePolicyV3,
     component_balanced_source_coverage_loss,
+    component_balanced_source_coverage_loss_from_logits,
     deterministic_phase_fraction,
     historical_sparse_objective_v3,
     phase_jittered_unit_cube_ray_points,
-    query_ray_foreground_probability_v3,
-    ray_foreground_probability_from_sdf_samples,
+    query_ray_foreground_logit_v3,
+    ray_foreground_logit_from_sdf_samples,
 )
 from models.iris.v3.scene_first_signed_v3 import (
     SceneFirstSignedGeometryConfigV3,
@@ -66,9 +67,7 @@ def test_small_component_keeps_equal_group_bce_authority():
             torch.full((body_n,), 0.10),
         ]
     ).requires_grad_(True)
-    target = torch.cat(
-        [torch.ones(body_n + 1), torch.zeros(body_n)]
-    )
+    target = torch.cat([torch.ones(body_n + 1), torch.zeros(body_n)])
     component_id = torch.cat(
         [
             torch.zeros(body_n, dtype=torch.long),
@@ -116,12 +115,12 @@ def test_thin_boundary_component_remains_consequential():
 @pytest.mark.parametrize("fixture", ["FORK_GAP", "CONCAVE_NOTCH"])
 def test_negative_space_background_ray_is_pushed_positive_not_filled(fixture):
     sdf = torch.tensor([[0.20, 0.10, -0.01, 0.15]], dtype=torch.float64, requires_grad=True)
-    probability = ray_foreground_probability_from_sdf_samples(sdf, policy=POLICY)
-    out = component_balanced_source_coverage_loss(
-        probability,
-        torch.zeros_like(probability),
-        torch.full_like(probability, -1, dtype=torch.long),
-        torch.zeros_like(probability),
+    logit = ray_foreground_logit_from_sdf_samples(sdf, policy=POLICY)
+    out = component_balanced_source_coverage_loss_from_logits(
+        logit,
+        torch.zeros_like(logit),
+        torch.full_like(logit, -1, dtype=torch.long),
+        torch.zeros_like(logit),
         policy=POLICY,
     )
     out["total"].backward()
@@ -130,19 +129,20 @@ def test_negative_space_background_ray_is_pushed_positive_not_filled(fixture):
     assert float(torch.count_nonzero(sdf.grad)) > 0, fixture
 
 
-def test_missing_foreground_ray_is_pushed_negative_with_finite_gradient():
+def test_missing_foreground_ray_keeps_strong_finite_gradient_even_when_severely_wrong():
     sdf = torch.tensor([[0.04, 0.08, 0.12]], dtype=torch.float64, requires_grad=True)
-    probability = ray_foreground_probability_from_sdf_samples(sdf, policy=POLICY)
-    out = component_balanced_source_coverage_loss(
-        probability,
-        torch.ones_like(probability),
-        torch.zeros_like(probability, dtype=torch.long),
-        torch.ones_like(probability),
+    logit = ray_foreground_logit_from_sdf_samples(sdf, policy=POLICY)
+    assert float(logit) < -50.0
+    out = component_balanced_source_coverage_loss_from_logits(
+        logit,
+        torch.ones_like(logit),
+        torch.zeros_like(logit, dtype=torch.long),
+        torch.ones_like(logit),
         policy=POLICY,
     )
     out["total"].backward()
     assert torch.isfinite(sdf.grad).all()
-    assert float(sdf.grad[0, 0]) > 0.0
+    assert float(sdf.grad[0, 0]) > 100.0
     assert float(torch.count_nonzero(sdf.grad)) > 0
 
 
@@ -179,15 +179,15 @@ def test_dense_loss_backpropagates_through_actual_v3_signed_field():
         phase_fraction=0.375,
         policy=POLICY,
     ).unsqueeze(0)
-    probability = query_ray_foreground_probability_v3(
+    logit = query_ray_foreground_logit_v3(
         model,
         planes,
         points,
         policy=POLICY,
         query_chunk=4096,
     )
-    loss = component_balanced_source_coverage_loss(
-        probability,
+    loss = component_balanced_source_coverage_loss_from_logits(
+        logit,
         torch.tensor([[1.0, 0.0]]),
         torch.tensor([[0, -1]], dtype=torch.long),
         torch.tensor([[1.0, 0.0]]),

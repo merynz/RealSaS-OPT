@@ -1,0 +1,25 @@
+{
+  "schema": "RealSaS.VF11LearnedFieldR512NotebookHandoff.v1",
+  "date_utc": "2026-09-22",
+  "status": "READY_FOR_USER_RUN_ALL__A100_LONG_RUN",
+  "notebook_filename": "RealSaS_KNIGHT_VF11_LEARNED_FIELD_R512_RUN_ALL.ipynb",
+  "notebook_sha256": "55153920ee9bf6456a87e917a249b22b9c5e6176198de7da1e0fb60cda148345",
+  "repo_pin": "0956c0831c16435c9971c3c5ac454ebb1bf5ba95",
+  "frozen_inputs": {
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "scene_planes_sha256": "364f4769f1ffb04362669c1fe04b9b6c8f3afe3308bf4b7cede038d9e8226d28",
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "learned_r256_zero_surface_sha256": "42d7fc790d869d4248c23a3ef3d4ae1dea9f6d3e1b7a671557858b32a04ddc59"
+  },
+  "primary_question": "Does the frozen learned IRIS field itself, densely sampled at R512 and decoded without visual-hull clipping or repair, satisfy the frozen Stage13-v2 source-correctness policy?",
+  "secondary": [
+    "same-apparatus learned R256 baseline",
+    "R256-to-R512 learned-surface convergence",
+    "R256/R512 source-support violation audit",
+    "descriptive-only learned-R512 versus source-hull-R512 comparison"
+  ],
+  "execution_class": "LONG__USER_TRIGGERED_A100_NOTEBOOK",
+  "x7_execution_authorized": false,
+  "product_authority_minted": false,
+  "witness_execution": false
+}

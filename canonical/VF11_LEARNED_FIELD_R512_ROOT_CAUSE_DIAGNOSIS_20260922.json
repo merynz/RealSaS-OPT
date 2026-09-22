@@ -1,0 +1,68 @@
+{
+  "schema": "RealSaS.VF11LearnedFieldR512RootCauseDiagnosis.v1",
+  "date_utc": "2026-09-22",
+  "status": "ROOT_CAUSE_IDENTIFIED__IRIS_V3_TRAINING_PRODUCER_NOT_STAGE13_DENSE_ALIGNED",
+  "authority_class": "RESEARCH_DIAGNOSIS__REOPENS_IRIS_MODULE_D__NO_PRODUCT_AUTHORITY",
+  "supersedes_interpretation": [
+    "R512 failure may be treated as evidence that the post-20260920 dense-source-coverage objective itself failed",
+    "the frozen checkpoint may be treated as representative of the current Stage13-aligned IRIS training objective"
+  ],
+  "r512_measurement": {
+    "run_id": "20260922T052741Z",
+    "repo_pin": "0956c0831c16435c9971c3c5ac454ebb1bf5ba95",
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "r512_zero_surface_sha256": "2c646e16693f3720565f3a13d2f326ac87f683d96107c2297624a05ec4476aa0",
+    "stage13_v2_pass": false,
+    "min_view_precision": 0.9520502645502645,
+    "min_view_recall": 0.9704206994093014,
+    "max_view_interior_uncovered_fraction": 0.01778245637864973,
+    "max_view_largest_coherent_hole_fraction": 0.008691456082355291,
+    "max_view_silhouette_edge_p95_px": 15.0,
+    "r512_outside_source_support_1px_fraction": 0.0689200183047745,
+    "r512_outside_source_support_8px_fraction": 0.023465703971119134,
+    "r512_max_source_support_violation_px": 28.81346893310547,
+    "r256_r512_symmetric_mean_norm": 0.0033228033204727456,
+    "r256_r512_symmetric_p95_norm": 0.006370335261647418
+  },
+  "checkpoint_provenance": {
+    "source_run_id": "20260919T150323Z",
+    "arm": "STRIDE8",
+    "anchor_stride_px": 8,
+    "checkpoint_sha256": "59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f",
+    "training_notebook": "RealSaS_IRIS_KNIGHT_A100_RUN_ALL_V3_DUAL_ARM_STRIDE8_STRIDE4.ipynb",
+    "architecture": "RealSaS.IRIS.SceneFirstSignedGeometry.v3",
+    "train_steps": 4800,
+    "training_objective": "local_signed_smooth_l1 + 0.25*background_positive_margin + 0.25*certified_outside_positive_margin + 0.50*teacher_surface_zero_smooth_l1",
+    "source_foreground_masks_consumed_as_dense_training_target": false,
+    "dense_source_coverage_loss_present": false
+  },
+  "producer_contract_mismatch": {
+    "current_scene_first_signed_geometry_authority_source": "models/iris/v3/scene_first_signed_v3.py",
+    "dense_source_coverage_implementation_source": "models/iris/v2/train_v2.py",
+    "dense_source_coverage_policy": "canonical/IRIS_V2_DENSE_SOURCE_COVERAGE_POLICY_20260920.json",
+    "finding": "The Stage13-aligned dense source-coverage repair was implemented in the IRIS V2 reprojection training stack, while the Knight learned-field checkpoint and current scene-first signed-geometry witness producer are IRIS V3. The V3 checkpoint tested at R512 therefore never consumed the dense source-mask objective.",
+    "module_d_previous_subject_free_pass_is_sufficient_for_product_reliance": false
+  },
+  "causal_conclusions": {
+    "decoder_or_marching_cubes_resolution_is_primary_owner": false,
+    "visual_hull_clipping_is_primary_owner": false,
+    "r512_failure_proves_post_20260920_dense_objective_failed": false,
+    "tested_learned_v3_field_is_source_faithful": false,
+    "primary_owner": "IRIS_V3_TRAINING_PRODUCER_AND_OBJECTIVE_ALIGNMENT",
+    "failure_mode": "SPARSE_SUPERVISION_PERMITS_SYSTEMATIC_SOURCE_UNSUPPORTED_OUTGROWTH_AND_SOURCE_UNDERCOVERAGE_BETWEEN_SUPERVISED_CONSTRAINTS"
+  },
+  "governance": {
+    "reopen_module": "D__IRIS_FIT_DECODE_STAGE13__STAGES_09_13",
+    "x7_execution_authorized": false,
+    "certification_depth_escalation_authorized": false,
+    "knight_end_to_end_authorized_by_this_record": false,
+    "product_authority_minted": false,
+    "historical_pass_evidence_erased": false
+  },
+  "required_next": [
+    "Define and subject-free test a V3-native Stage13-aligned source-coverage objective that operates on the actual SceneFirstSignedGeometryV3 signed-field producer; do not claim the V2 support-probability loss is wired into V3.",
+    "Freeze the V3 objective, view schedule, raster/camera semantics, loss weights and execution metadata before any new Knight training result is inspected.",
+    "Run a fresh-init matched-seed STRIDE8 V3 fit on the exact sealed Stage01-08 Knight evidence with the only causal change being the frozen V3-native dense source-coverage objective.",
+    "Decode R256 and R512 and apply the unchanged Stage13-v2 gate plus source-support audit. If it fails, the V3 dense surrogate/representation becomes owner; do not return to X7 or certification-depth work."
+  ]
+}

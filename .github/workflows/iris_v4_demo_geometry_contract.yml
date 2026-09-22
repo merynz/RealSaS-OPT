@@ -1,0 +1,120 @@
+name: iris-v4-demo-geometry-contract
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'models/iris/v4/**'
+      - 'tests/iris/test_scene_first_signed_v4_demo.py'
+      - 'tests/iris/test_source_constraint_v4.py'
+      - 'tests/iris/test_source_exterior_v4.py'
+      - 'tests/iris/test_train_demo_fit_v4.py'
+      - 'canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_20260922.json'
+      - 'canonical/IRIS_V3_ARM_C_RESULT_AND_V4_DEMO_GEOMETRY_DECISION_20260922.json'
+      - 'canonical/KNIGHT_DEMO_P0_IRIS_V4_GEOMETRY_AMENDMENT_20260922.json'
+      - '.github/workflows/iris_v4_demo_geometry_contract.yml'
+  workflow_dispatch:
+
+jobs:
+  v4-demo-geometry-contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install frozen CPU test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off pytest==8.3.5 scipy==1.15.3
+
+      - name: Compile V4 geometry lane
+        run: |
+          python -m py_compile models/iris/v4/scene_first_signed_v4.py
+          python -m py_compile models/iris/v4/source_constraint_v4.py
+          python -m py_compile models/iris/v4/source_exterior_v4.py
+          python -m py_compile models/iris/v4/train_demo_fit_v4.py
+          python -m py_compile tests/iris/test_scene_first_signed_v4_demo.py
+          python -m py_compile tests/iris/test_source_constraint_v4.py
+          python -m py_compile tests/iris/test_source_exterior_v4.py
+          python -m py_compile tests/iris/test_train_demo_fit_v4.py
+
+      - name: Run V4 geometry and training-signal falsification tests
+        run: |
+          python -m pytest -q \
+            tests/iris/test_scene_first_signed_v4_demo.py \
+            tests/iris/test_source_constraint_v4.py \
+            tests/iris/test_source_exterior_v4.py \
+            tests/iris/test_train_demo_fit_v4.py \
+            tests/iris/test_dense_source_coverage_v3_fixtures.py
+
+      - name: Prove V3 to V4 capacity delta and frozen non-changes
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from models.iris.v3.scene_first_signed_v3 import SceneFirstSignedGeometryV3
+          from models.iris.v4.scene_first_signed_v4 import SceneFirstSignedGeometryV4
+          from models.iris.v4.source_constraint_v4 import SourceConstraintSamplingPolicyV4
+
+          v3=SceneFirstSignedGeometryV3()
+          v4=SceneFirstSignedGeometryV4()
+          c3=sum(p.numel() for p in v3.parameters() if p.requires_grad)
+          c4=sum(p.numel() for p in v4.parameters() if p.requires_grad)
+          policy=json.loads(Path('canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_20260922.json').read_text())
+          a=policy['architecture']; t=policy['training']; sp=SourceConstraintSamplingPolicyV4()
+          assert v4.architecture_id==a['architecture_id']
+          assert tuple(v4.scene_fusion.scene_queries.shape)==(3,32,32,256)
+          assert 2*v4.config.plane_size==64
+          assert v4.config.plane_channels==64
+          assert 3*v4.config.plane_channels==192
+          assert len(v4.scene_fusion.decoder.layers)==4
+          assert len(v4.surface_field.blocks)==4
+          assert v3.config.scene_dim==v4.config.scene_dim==256
+          assert v3.config.scene_layers==v4.config.scene_layers==4
+          assert v3.config.attention_heads==v4.config.attention_heads==8
+          assert v3.config.plane_channels==v4.config.plane_channels==64
+          assert sp.hard_negative_refresh_candidates_per_view==1024
+          assert sp.hard_negative_bank_size_per_view==64
+          assert t['retention_contract']['all_eight_views_must_contribute_to_every_optimizer_step'] is True
+          assert t['source_certified_3d_exterior']['enabled'] is True
+          assert t['training_signal_decision']['explicit_zero_set_near_zero_loss'].startswith('REJECTED')
+          assert not Path('models/iris/v4/zero_set_supervision_v4.py').exists()
+          print('V3_TRAINABLE_PARAMETERS',c3)
+          print('V4_TRAINABLE_PARAMETERS',c4)
+          print('V4_MINUS_V3_PARAMETERS',c4-c3)
+          print('V4_OVER_V3_PARAMETER_RATIO',c4/c3)
+          print('V4_SCENE_QUERY_SHAPE',tuple(v4.scene_fusion.scene_queries.shape))
+          print('V4_FINAL_TRIPLANE_RESOLUTION',2*v4.config.plane_size)
+          print('V4_FIELD_RESIDUAL_BLOCKS',len(v4.surface_field.blocks))
+          print('V4_DEMO_GEOMETRY_CONTRACT=PASS')
+          PY
+
+      - name: Enforce source-authority and no-proxy-repair boundary
+        run: |
+          set -euo pipefail
+          ! grep -RniE 'visual[_ -]?hull.*clip|mesh.*repair.*before.*stage13|charactergen' models/iris/v4
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_20260922.json').read_text())
+          assert p['qualification']['threshold_relaxation'] is False
+          assert p['qualification']['visual_hull_clipping'] is False
+          assert p['training']['teacher_surface_zero_fit_only']['global_teacher_sdf_authority'] is False
+          assert p['training']['source_background_empty_space']['all_eight_views_every_step'] is True
+          assert p['training']['source_certified_3d_exterior']['out_of_frame_semantics'].startswith('UNKNOWN')
+          print('V4_SOURCE_AUTHORITY_BOUNDARY=PASS')
+          PY

@@ -1,27 +1,34 @@
 {
-  "schema": "RealSaS.VF11X7HoldSourceSupportAndNumericRigor.v2",
+  "schema": "RealSaS.VF11X7HoldSourceSupportAndNumericRigor.v3",
   "date_utc": "2026-09-22",
-  "status": "X7_HOLD__LEARNED_R512_FIDELITY_AND_SOURCE_SUPPORT_DIAGNOSTICS_REQUIRED_BEFORE_EXECUTION",
+  "status": "X7_HOLD__IRIS_V3_TRAINING_OBJECTIVE_ALIGNMENT_REQUIRED_BEFORE_EXECUTION",
   "supersedes_execution_authority_of": "canonical/VF11_EXTRACTOR_TRANSITION_X7_MICRO3_HOLDOUT_PREREGISTRATION_20260922.json",
+  "root_cause_diagnosis": "canonical/VF11_LEARNED_FIELD_R512_ROOT_CAUSE_DIAGNOSIS_20260922.json",
   "reason": [
-    "NB1 E1/E2/E3 were discovered to measure F4_SOURCE_FIELD, the eight-view source-silhouette intersection field, rather than the learned IRIS field. Their R512 Stage13/extractor results therefore cannot establish learned-field fidelity or learned-field extractor ownership.",
-    "The existing learned IRIS R256 zero-surface is far below Stage13-v2 thresholds on overlapping source-correctness metrics; a frozen learned-field R512 measurement is the cheapest direct test of whether this is primarily dense-sampling error or learned-field error.",
-    "The full-domain learned-field UNKNOWN population also contains a large source-external region. Running X7 before learned-field fidelity and SOURCE_ABSENT versus FIELD_UNKNOWN separation would mix field quality, product-domain qualification and bound-productivity questions."
+    "The frozen learned IRIS V3 field was measured directly at R512 and still fails Stage13-v2 by large margins, while R256-to-R512 convergence is already tight. Dense sampling / marching-cubes resolution is therefore not the primary owner.",
+    "The R512-tested checkpoint 59b1ca675ca078b6f25517de816ee53a0789f95223a3c1a5b4b68244de4b138f is the 2026-09-19 STRIDE8 SceneFirstSignedGeometryV3 checkpoint. Its training objective contains sparse local signed rays, background/outside positive margins and sampled teacher zero points, but no dense source-foreground-mask loss.",
+    "The Stage13-aligned dense source-coverage repair added on 2026-09-20 lives in the IRIS V2 reprojection training stack. The current scene-first signed-geometry witness producer is IRIS V3. Therefore the measured failure cannot be used to conclude that the post-20260920 dense objective failed; it instead exposes a producer/objective wiring gap.",
+    "Certification-depth work cannot repair a source-unfaithful learned field. X7 remains scientifically downstream and blocked."
   ],
   "unchanged_facts": {
     "x6c_cpu_rejected_count": 0,
     "x6c_micro2_unresolved_volume_fraction": 0.3930427265634782,
-    "x7_has_not_been_executed": true
+    "x7_has_not_been_executed": true,
+    "r512_stage13_v2_pass": false,
+    "r512_outside_source_support_1px_fraction": 0.0689200183047745,
+    "r512_max_source_support_violation_px": 28.81346893310547
   },
   "required_before_x7": [
-    "VF11 learned-field R512 primary fidelity gate under the frozen Stage13-v2 policy, with no visual-hull clipping or mesh repair before measurement",
-    "X6D source-support domain diagnostic with explicit silhouette dilation/calibration tolerance and SOURCE_ABSENT semantics",
-    "learned-field aligned-lattice near-surface certificate audit, independent of the source visual-hull mesh",
-    "direct LayerNorm interval-variance instrumentation, including comparison to the projected-generator norm lower bound, on a spatial/certifiability stratified sample"
+    "Implement and subject-free validate a V3-native Stage13-aligned source-coverage objective on the actual SceneFirstSignedGeometryV3 producer; do not substitute the V2 support-probability objective by name alone.",
+    "Freeze V3 objective semantics, source-mask/camera coordinate contract, view schedule, weights and execution receipt fields before new Knight training result inspection.",
+    "Run a matched-seed fresh-init STRIDE8 V3 causal fit on the exact sealed Stage01-08 Knight evidence with only the V3-native dense source-coverage objective added relative to the historical sparse producer.",
+    "Decode learned R256 and R512 surfaces and apply unchanged Stage13-v2 plus source-support audit. A FAIL keeps the learned-field producer lane as owner.",
+    "Only after learned-field fidelity closes may source-domain/certification diagnostics (X6D, near-surface audit, LayerNorm bound tightening, X7 micro3 holdout) resume."
   ],
   "numeric_rigor_note": "Current CPU confirmation and CUDA screening both use ordinary float64 rather than directed rounding. CPU replay is a cross-implementation/device consistency check, not a formal strengthening of the numerical certificate. GPU authority is forbidden until an end-to-end outward enclosure covers all arithmetic, reductions, LayerNorm nonlinearities, and SiLU residual calculations.",
   "full_domain_micro3_authorized": false,
   "x7_execution_authorized": false,
+  "certification_depth_escalation_authorized": false,
   "product_authority_minted": false,
   "shipping_extractor_selected": false,
   "witness_execution": false

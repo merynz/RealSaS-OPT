@@ -1,0 +1,38 @@
+{
+  "schema": "RealSaS.KnightDemoArchitectureFreezeNoPresentationPivot.v1",
+  "date_utc": "2026-09-22",
+  "status": "DEMO_ARCHITECTURE_FROZEN__NO_2D_PRESENTATION_CARRIER_PIVOT_BEFORE_KNIGHT_WITNESS",
+  "scope": "KNIGHT_DEMO_P0",
+  "decision": {
+    "current_v3_to_3d_mesh_to_posed_xyz_to_canonical_depth_runtime_retained": true,
+    "stage13_geometry_lane_retained": true,
+    "caa_retained": true,
+    "presentation_partition_retained": true,
+    "source_backed_2d_carrier_architecture_promoted": false,
+    "semantic_or_presentation_segmentation_runtime_pivot_authorized": false
+  },
+  "rationale": [
+    "The investor demo is near-term; a presentation-substrate pivot would introduce new integration and validation risk on the critical path.",
+    "The current IRIS V3 / Stage13 failure is not yet fully explained. Pivoting before owner closure would discard causal information and may replace known problems with unmeasured ones.",
+    "The current preset motion/runtime path is already defined around posed 3D geometry and canonical-depth rendering. Preserving it minimizes demo-critical surface area.",
+    "The product requirement is source-faithful 2D appearance; the internal route may remain 3D as long as the output contract is met."
+  ],
+  "post_demo_research_hypothesis": {
+    "name": "SOURCE_BACKED_2D_PRESENTATION_OVER_3D_MECHANICAL_SUBSTRATE",
+    "status": "PARKED__NON_BLOCKING_RESEARCH",
+    "allowed_now": "documentation and non-invasive diagnostics only",
+    "forbidden_now": "runtime replacement, Stage13 claim rewrite, demo-path refactor, shipping authority changes"
+  },
+  "current_owner_work": {
+    "arm_b_result": "ARM_B_FAIL__FULL_RAY_BARRIER_CAUSALLY_HELPFUL__UNIFORM_BACKGROUND_SAMPLING_INSUFFICIENT",
+    "next_question": "Can metric-consistent dense negative-space supervision close largest-component source-support error without recall collapse under the existing V3 representation?",
+    "representation_pivot_only_if": "A preregistered upper-bound negative-space supervision arm removes known margin/sampling contradictions yet the largest connected component still violates source support materially."
+  },
+  "governance": {
+    "no_demo_claim_expansion": true,
+    "no_threshold_relaxation": true,
+    "no_posthoc_mesh_clipping": true,
+    "no_architecture_pivot_from_knight_pressure": true,
+    "p0_priority": "UNDERSTAND_AND_CLOSE_CURRENT_ARCHITECTURE_FIRST"
+  }
+}

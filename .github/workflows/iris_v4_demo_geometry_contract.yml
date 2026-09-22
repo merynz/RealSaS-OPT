@@ -11,6 +11,8 @@ on:
       - 'tests/iris/test_source_exterior_v4.py'
       - 'tests/iris/test_train_demo_fit_v4.py'
       - 'canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_20260922.json'
+      - 'canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_V2_20260922.json'
+      - 'canonical/IRIS_V4_FOREGROUND_BCE_GEOMETRIC_PRESSURE_ERRATUM_20260922.json'
       - 'canonical/IRIS_V3_ARM_C_RESULT_AND_V4_DEMO_GEOMETRY_DECISION_20260922.json'
       - 'canonical/KNIGHT_DEMO_P0_IRIS_V4_GEOMETRY_AMENDMENT_20260922.json'
       - '.github/workflows/iris_v4_demo_geometry_contract.yml'
@@ -74,8 +76,11 @@ jobs:
           v4=SceneFirstSignedGeometryV4()
           c3=sum(p.numel() for p in v3.parameters() if p.requires_grad)
           c4=sum(p.numel() for p in v4.parameters() if p.requires_grad)
-          policy=json.loads(Path('canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_20260922.json').read_text())
+          policy=json.loads(Path('canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_V2_20260922.json').read_text())
+          erratum=json.loads(Path('canonical/IRIS_V4_FOREGROUND_BCE_GEOMETRIC_PRESSURE_ERRATUM_20260922.json').read_text())
           a=policy['architecture']; t=policy['training']; sp=SourceConstraintSamplingPolicyV4()
+          assert erratum['status']=='ERRATUM_CLOSED__SATURATING_FOREGROUND_EXISTENCE_REQUIRED_BEFORE_FIRST_V4_KNIGHT_RUN'
+          assert erratum['v4_knight_result_had_been_inspected'] is False
           assert v4.architecture_id==a['architecture_id']
           assert tuple(v4.scene_fusion.scene_queries.shape)==(3,32,32,256)
           assert 2*v4.config.plane_size==64
@@ -91,7 +96,13 @@ jobs:
           assert sp.hard_negative_bank_size_per_view==64
           assert t['retention_contract']['all_eight_views_must_contribute_to_every_optimizer_step'] is True
           assert t['source_certified_3d_exterior']['enabled'] is True
-          assert t['training_signal_decision']['explicit_zero_set_near_zero_loss'].startswith('REJECTED')
+          fg=t['source_foreground_existence']
+          assert fg['loss']=='COMPONENT_BALANCED_SATURATING_HINGE'
+          assert fg['bce_or_soft_dice_in_training_objective'] is False
+          assert fg['saturation']=='ZERO_GRADIENT_AFTER_REQUIRED_NEGATIVE_MARGIN_IS_SATISFIED'
+          assert t['held_from_first_v4']['explicit_zero_set_near_zero_loss'] is True
+          assert t['held_from_first_v4']['training_only_differentiable_mesh_raster_loss'] is True
+          assert t['held_from_first_v4']['eikonal_regularizer'] is True
           assert not Path('models/iris/v4/zero_set_supervision_v4.py').exists()
           print('V3_TRAINABLE_PARAMETERS',c3)
           print('V4_TRAINABLE_PARAMETERS',c4)
@@ -100,6 +111,7 @@ jobs:
           print('V4_SCENE_QUERY_SHAPE',tuple(v4.scene_fusion.scene_queries.shape))
           print('V4_FINAL_TRIPLANE_RESOLUTION',2*v4.config.plane_size)
           print('V4_FIELD_RESIDUAL_BLOCKS',len(v4.surface_field.blocks))
+          print('V4_FOREGROUND_SIGNAL','SATURATING_EXISTENCE_HINGE')
           print('V4_DEMO_GEOMETRY_CONTRACT=PASS')
           PY
 
@@ -110,11 +122,12 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          p=json.loads(Path('canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_20260922.json').read_text())
+          p=json.loads(Path('canonical/IRIS_V4_DEMO_GEOMETRY_POLICY_V2_20260922.json').read_text())
           assert p['qualification']['threshold_relaxation'] is False
           assert p['qualification']['visual_hull_clipping'] is False
           assert p['training']['teacher_surface_zero_fit_only']['global_teacher_sdf_authority'] is False
           assert p['training']['source_background_empty_space']['all_eight_views_every_step'] is True
           assert p['training']['source_certified_3d_exterior']['out_of_frame_semantics'].startswith('UNKNOWN')
+          assert p['training']['source_foreground_existence']['bce_or_soft_dice_in_training_objective'] is False
           print('V4_SOURCE_AUTHORITY_BOUNDARY=PASS')
           PY

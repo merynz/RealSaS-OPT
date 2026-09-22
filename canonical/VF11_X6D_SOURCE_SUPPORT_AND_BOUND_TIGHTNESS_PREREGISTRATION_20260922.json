@@ -1,0 +1,48 @@
+{
+  "schema": "RealSaS.VF11X6DSourceSupportAndBoundTightnessPreregistration.v1",
+  "date_utc": "2026-09-22",
+  "status": "PREREGISTERED__SOURCE_SUPPORT_SEPARATION_AND_BOUND_TIGHTNESS_DIAGNOSTIC",
+  "authority_class": "RESEARCH_DIAGNOSTIC_ONLY",
+  "parent": "canonical/VF11_X7_HOLD_SOURCE_SUPPORT_AND_NUMERIC_RIGOR_20260922.json",
+  "questions": [
+    "How much of X6C FIELD_UNKNOWN lies outside a source-admissible silhouette-intersection support envelope?",
+    "How much micro2 uncertainty remains after SOURCE_ABSENT cells are removed from the proof domain?",
+    "Is poor certifiability better predicted by learned-field margin, LayerNorm interval variance lower bound, or source-surface distance?",
+    "Do learned-field mixed-sign lattice cells ever receive a strict-sign C0 certificate?"
+  ],
+  "source_support_contract": {
+    "base": "the existing 8-view signed silhouette intersection field F4_SOURCE_FIELD, where the maximum signed 2D silhouette distance is negative only inside every admitted silhouette extrusion",
+    "semantics": "SOURCE_ABSENT is separate from PROVEN_EMPTY; source-support clipping does not prove the learned field has no zero outside the envelope, it declares such zero-set content inadmissible under the product source contract",
+    "required_padding": "at least the frozen camera/calibration and raster edge tolerance; exact padding must be recorded before any production use",
+    "first_diagnostic": "coarse visual-hull AABB and exact source-field support are both reported; only exact source-field support may justify final clipping"
+  },
+  "learned_field_lattice_audit": {
+    "grid": "the exact 189^3 vertex lattice defining all 188^3 X6C micro2 cells",
+    "population": "all cells with direct learned-field corner min < 0 and max > 0",
+    "gate": "zero cells may simultaneously have a C0 strict-positive or strict-negative enclosure",
+    "status_if_violation": "FAIL__C0_SOUNDNESS_CONTRADICTION",
+    "note": "This uses the learned IRIS field itself. NB1 source-hull MC_R512 is explicitly forbidden as a learned-field certificate oracle."
+  },
+  "layernorm_instrumentation": {
+    "sample": "deterministic spatial and unresolved-count stratification of X6C roots, plus near-source and far-source cohorts",
+    "metrics": [
+      "direct center |SDF|",
+      "direct pre-LayerNorm sigma",
+      "affine variance lower and upper bounds before LayerNorm reciprocal-sqrt",
+      "C0 output interval width",
+      "micro2 decisive fraction",
+      "source-support class and source-surface distance proxy"
+    ],
+    "interpretation": "Direct center sigma alone cannot establish LayerNorm blow-up; the affine variance interval must be inspected."
+  },
+  "numeric_rigor_boundary": {
+    "current_cpu_confirmation": "ordinary float64 cross-check only",
+    "gpu_authority": "forbidden",
+    "gpu_authority_requirements": "end-to-end outward enclosure for elementary arithmetic, reductions, transcendental/nonlinear terms used by LayerNorm and SiLU residual bounds, and compiler behavior; simple unproven per-op ulp padding is insufficient"
+  },
+  "x7_execution_authorized": false,
+  "full_domain_micro3_authorized": false,
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

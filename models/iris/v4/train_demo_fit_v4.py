@@ -6,11 +6,7 @@ import math
 import torch
 import torch.nn.functional as F
 
-from models.iris.v3.dense_source_coverage_v3 import (
-    DenseSourceCoveragePolicyV3,
-    component_balanced_source_coverage_loss_from_logits,
-    ray_foreground_logit_from_sdf_samples,
-)
+from models.iris.v3.dense_source_coverage_v3 import DenseSourceCoveragePolicyV3
 from models.iris.v3.negative_space_barrier_v3 import query_dense_ray_sdf_v3
 from models.iris.v4.source_exterior_v4 import source_exterior_metric_barrier_v4
 
@@ -75,6 +71,84 @@ def metric_background_margin_v4(
     return torch.clamp(distance_px.float() * pixel_scale, min=0.0, max=cap)
 
 
+def component_balanced_foreground_existence_hinge_v4(
+    sdf_samples: torch.Tensor,
+    target_foreground: torch.Tensor,
+    component_id: torch.Tensor,
+    boundary: torch.Tensor,
+    *,
+    boundary_inside_margin_normalized: float,
+    interior_inside_margin_normalized: float,
+) -> dict[str, torch.Tensor]:
+    """Saturating source-foreground existence constraint.
+
+    A source-foreground pixel only certifies that the continuous signed field must enter
+    the interior somewhere along that admitted ray. Unlike BCE(sigmoid(-minSDF/beta),1),
+    this hinge gives no reward for driving an already-satisfied ray deeper negative.
+    Equal component means keep small source components consequential without inverse-area
+    pixel weights.
+    """
+
+    if sdf_samples.ndim != 3:
+        raise ValueError("sdf_samples must be [B,R,D]")
+    expected = sdf_samples.shape[:2]
+    if (
+        target_foreground.shape != expected
+        or component_id.shape != expected
+        or boundary.shape != expected
+    ):
+        raise ValueError("foreground existence metadata must be [B,R]")
+    if not torch.isfinite(sdf_samples).all():
+        raise ValueError("foreground existence SDF must be finite")
+    boundary_margin = float(boundary_inside_margin_normalized)
+    interior_margin = float(interior_inside_margin_normalized)
+    if (
+        not math.isfinite(boundary_margin)
+        or not math.isfinite(interior_margin)
+        or boundary_margin <= 0.0
+        or interior_margin <= 0.0
+        or boundary_margin > interior_margin
+    ):
+        raise ValueError("invalid foreground inside margins")
+
+    target = target_foreground > 0.5
+    cid = component_id.to(dtype=torch.long)
+    if torch.any(target & (cid < 0)):
+        raise ValueError("foreground rays require non-negative component_id")
+    if not torch.any(target):
+        raise ValueError("foreground existence requires foreground rays")
+
+    ray_min = torch.amin(sdf_samples, dim=-1)
+    margin = torch.where(
+        boundary > 0.5,
+        torch.as_tensor(boundary_margin, device=ray_min.device, dtype=ray_min.dtype),
+        torch.as_tensor(interior_margin, device=ray_min.device, dtype=ray_min.dtype),
+    )
+    per_ray = F.relu(ray_min + margin)
+
+    groups: list[torch.Tensor] = []
+    positive_ids = torch.unique(cid[target], sorted=True)
+    for group_id in positive_ids:
+        mask = target & (cid == group_id)
+        groups.append(per_ray[mask].mean())
+    if not groups:
+        raise ValueError("foreground existence has no valid component group")
+
+    fg_min = ray_min[target]
+    fg_margin = margin[target]
+    total = torch.stack(groups).mean()
+    return {
+        "total": total,
+        "group_count": torch.as_tensor(len(groups), device=ray_min.device, dtype=torch.int64),
+        "satisfied_fraction": (fg_min <= -fg_margin).to(dtype=ray_min.dtype).mean(),
+        "zero_crossing_fraction": (fg_min <= 0.0).to(dtype=ray_min.dtype).mean(),
+        "minimum_ray_sdf": torch.amin(fg_min),
+        "maximum_ray_sdf": torch.amax(fg_min),
+        "boundary_inside_margin": torch.as_tensor(boundary_margin, device=ray_min.device, dtype=ray_min.dtype),
+        "interior_inside_margin": torch.as_tensor(interior_margin, device=ray_min.device, dtype=ray_min.dtype),
+    }
+
+
 def source_negative_space_barrier_v4(
     sdf_samples: torch.Tensor,
     target_foreground: torch.Tensor,
@@ -132,6 +206,7 @@ def compute_v4_demo_geometry_objective(
     source_view_batches: tuple[SourceConstraintRayBatchV4, ...],
     coverage_policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
     teacher_surface_zero_weight: float = 0.50,
+    foreground_existence_weight: float = 1.0,
     negative_space_weight: float = 1.0,
     source_exterior_weight: float = 1.0,
     maximum_background_margin_normalized: float = 0.04,
@@ -139,11 +214,10 @@ def compute_v4_demo_geometry_objective(
 ) -> dict[str, object]:
     """All-view V4 FIT1 objective with retained 2D and 3D source authority.
 
-    The source raster is the shape-fidelity authority. Teacher geometry remains FIT-only
-    local structural supervision; it never becomes a forward input or an admission
-    oracle. Foreground existence, all-view near/far negative space, persistent hard
-    negatives and metric source-certified 3D exterior points are optimized together on
-    every step so one projection cannot silently erase another.
+    Source foreground is a saturating existence constraint, not a probability objective:
+    once a ray contains sufficient interior evidence it receives no further pressure to
+    thicken geometry. Source background is stronger and remains pointwise exterior along
+    the whole admitted ray. Teacher geometry remains FIT-only local structural aid.
     """
 
     coverage_policy.validate()
@@ -180,7 +254,10 @@ def compute_v4_demo_geometry_objective(
     )
     structural = local + float(teacher_surface_zero_weight) * teacher_zero
 
-    coverage_terms: list[torch.Tensor] = []
+    beta = float(coverage_policy.occupancy_beta_normalized)
+    boundary_inside_margin = 0.5 * beta
+    interior_inside_margin = beta
+    foreground_terms: list[torch.Tensor] = []
     negative_terms: list[torch.Tensor] = []
     rows: list[dict[str, object]] = []
     for batch in sorted(source_view_batches, key=lambda row: int(row.view_index)):
@@ -191,13 +268,13 @@ def compute_v4_demo_geometry_objective(
             batch.ray_points_normalized,
             query_chunk=query_chunk,
         )
-        logit = ray_foreground_logit_from_sdf_samples(ray_sdf, policy=coverage_policy)
-        coverage = component_balanced_source_coverage_loss_from_logits(
-            logit,
+        foreground = component_balanced_foreground_existence_hinge_v4(
+            ray_sdf,
             batch.target_foreground,
             batch.component_id,
             batch.boundary,
-            policy=coverage_policy,
+            boundary_inside_margin_normalized=boundary_inside_margin,
+            interior_inside_margin_normalized=interior_inside_margin,
         )
         negative = source_negative_space_barrier_v4(
             ray_sdf,
@@ -207,14 +284,18 @@ def compute_v4_demo_geometry_objective(
             raster_width=batch.raster_width,
             maximum_margin_normalized=maximum_background_margin_normalized,
         )
-        coverage_terms.append(coverage["total"])
+        foreground_terms.append(foreground["total"])
         negative_terms.append(negative["total"])
         rows.append({
             "view_index": int(batch.view_index),
-            "coverage_total": coverage["total"],
-            "component_balanced_bce": coverage["component_balanced_bce"],
-            "soft_dice": coverage["soft_dice"],
-            "group_count": coverage["group_count"],
+            "foreground_existence_total": foreground["total"],
+            "foreground_component_group_count": foreground["group_count"],
+            "foreground_satisfied_fraction": foreground["satisfied_fraction"],
+            "foreground_zero_crossing_fraction": foreground["zero_crossing_fraction"],
+            "foreground_minimum_ray_sdf": foreground["minimum_ray_sdf"],
+            "foreground_maximum_ray_sdf": foreground["maximum_ray_sdf"],
+            "foreground_boundary_inside_margin": foreground["boundary_inside_margin"],
+            "foreground_interior_inside_margin": foreground["interior_inside_margin"],
             "negative_space_total": negative["total"],
             "negative_space_violating_point_fraction": negative["violating_point_fraction"],
             "negative_space_zero_crossing_fraction": negative["zero_crossing_fraction"],
@@ -225,11 +306,11 @@ def compute_v4_demo_geometry_objective(
             "ray_count": int(batch.target_foreground.numel()),
         })
 
-    coverage_total = torch.stack(coverage_terms).mean()
+    foreground_total = torch.stack(foreground_terms).mean()
     negative_total = torch.stack(negative_terms).mean()
     total = (
         structural
-        + float(coverage_policy.top_level_loss_weight) * coverage_total
+        + float(foreground_existence_weight) * foreground_total
         + float(negative_space_weight) * negative_total
         + float(source_exterior_weight) * exterior["total"]
     )
@@ -238,7 +319,7 @@ def compute_v4_demo_geometry_objective(
         "structural_total": structural,
         "local": local,
         "teacher_surface_zero": teacher_zero,
-        "coverage_total": coverage_total,
+        "foreground_existence_total": foreground_total,
         "negative_space_total": negative_total,
         "source_exterior_total": exterior["total"],
         "source_exterior_violating_fraction": exterior["violating_fraction"],

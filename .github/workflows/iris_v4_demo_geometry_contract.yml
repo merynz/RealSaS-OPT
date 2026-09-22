@@ -97,7 +97,7 @@ jobs:
           assert sp.hard_negative_replay_rays_per_band_per_view==8
           assert ep.top_level_weight==0.02
           assert t['checkpoint_selection']['final_step_forced'] is False
-          assert t['held']['training_only_differentiable_mesh_raster_loss'] is True
+          assert p['held']['training_only_differentiable_mesh_raster_loss'] is True
           assert p['qualification']['stage13_threshold_relaxation'] is False
           print('V41_ARCHITECTURE_FROZEN=PASS')
           print('V41_HARD_POSITIVE_REPLAY=PASS')

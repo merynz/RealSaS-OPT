@@ -12,6 +12,7 @@ from models.iris.v3.dense_source_coverage_v3 import (
     ray_foreground_logit_from_sdf_samples,
 )
 from models.iris.v3.negative_space_barrier_v3 import query_dense_ray_sdf_v3
+from models.iris.v4.source_exterior_v4 import source_exterior_metric_barrier_v4
 
 
 @dataclass(frozen=True)
@@ -126,14 +127,24 @@ def compute_v4_demo_geometry_objective(
     local_points_normalized: torch.Tensor,
     local_target_sdf: torch.Tensor,
     teacher_surface_zero_points_normalized: torch.Tensor,
+    source_exterior_points_normalized: torch.Tensor,
+    source_exterior_margin_normalized: torch.Tensor,
     source_view_batches: tuple[SourceConstraintRayBatchV4, ...],
     coverage_policy: DenseSourceCoveragePolicyV3 = DenseSourceCoveragePolicyV3(),
     teacher_surface_zero_weight: float = 0.50,
     negative_space_weight: float = 1.0,
+    source_exterior_weight: float = 1.0,
     maximum_background_margin_normalized: float = 0.04,
     query_chunk: int = 131072,
 ) -> dict[str, object]:
-    """All-view V4 FIT1 objective with retained near/far source constraints."""
+    """All-view V4 FIT1 objective with retained 2D and 3D source authority.
+
+    The source raster is the shape-fidelity authority. Teacher geometry remains FIT-only
+    local structural supervision; it never becomes a forward input or an admission
+    oracle. Foreground existence, all-view near/far negative space, persistent hard
+    negatives and metric source-certified 3D exterior points are optimized together on
+    every step so one projection cannot silently erase another.
+    """
 
     coverage_policy.validate()
     if int(query_chunk) <= 0:
@@ -143,9 +154,18 @@ def compute_v4_demo_geometry_objective(
     view_indices = [int(batch.view_index) for batch in source_view_batches]
     if set(view_indices) != set(range(8)) or len(set(view_indices)) != 8:
         raise ValueError("V4 source-view batches must be unique V0..V7")
+    if (
+        source_exterior_points_normalized.ndim != 3
+        or source_exterior_points_normalized.shape[-1] != 3
+        or source_exterior_points_normalized.shape[:2]
+        != source_exterior_margin_normalized.shape
+        or source_exterior_points_normalized.numel() == 0
+    ):
+        raise ValueError("source exterior points must be [B,N,3] with margins [B,N]")
 
     local_sdf = model.query(scene_planes, local_points_normalized)["sdf"]
     teacher_sdf = model.query(scene_planes, teacher_surface_zero_points_normalized)["sdf"]
+    exterior_sdf = model.query(scene_planes, source_exterior_points_normalized)["sdf"]
     if local_sdf.shape != local_target_sdf.shape:
         raise ValueError("local target shape mismatch")
     local = F.smooth_l1_loss(local_sdf.float(), local_target_sdf.float(), beta=0.02)
@@ -153,6 +173,10 @@ def compute_v4_demo_geometry_objective(
         teacher_sdf.float(),
         torch.zeros_like(teacher_sdf.float()),
         beta=0.01,
+    )
+    exterior = source_exterior_metric_barrier_v4(
+        exterior_sdf.float(),
+        source_exterior_margin_normalized.float(),
     )
     structural = local + float(teacher_surface_zero_weight) * teacher_zero
 
@@ -207,6 +231,7 @@ def compute_v4_demo_geometry_objective(
         structural
         + float(coverage_policy.top_level_loss_weight) * coverage_total
         + float(negative_space_weight) * negative_total
+        + float(source_exterior_weight) * exterior["total"]
     )
     return {
         "total": total,
@@ -215,5 +240,11 @@ def compute_v4_demo_geometry_objective(
         "teacher_surface_zero": teacher_zero,
         "coverage_total": coverage_total,
         "negative_space_total": negative_total,
+        "source_exterior_total": exterior["total"],
+        "source_exterior_violating_fraction": exterior["violating_fraction"],
+        "source_exterior_negative_fraction": exterior["negative_fraction"],
+        "source_exterior_minimum_sdf": exterior["minimum_sdf"],
+        "source_exterior_minimum_margin": exterior["minimum_margin"],
+        "source_exterior_maximum_margin": exterior["maximum_margin"],
         "source_views": tuple(rows),
     }

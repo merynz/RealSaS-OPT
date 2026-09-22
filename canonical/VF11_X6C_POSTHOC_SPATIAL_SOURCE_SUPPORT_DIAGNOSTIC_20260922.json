@@ -1,0 +1,66 @@
+{
+  "schema": "RealSaS.VF11X6CPosthocSpatialSourceSupportDiagnostic.v1",
+  "date_utc": "2026-09-22",
+  "status": "POSTHOC_DIAGNOSTIC__NOT_CONFIRMATORY",
+  "source_run": "canonical/VF11_EXTRACTOR_TRANSITION_X6C_FULL_DOMAIN_RESULT_20260922.json",
+  "root_ordering": {
+    "shape": [47, 47, 47],
+    "flattening": "z-major, y-middle, x-fastest",
+    "note": "The X6C flat index is z*(47*47)+y*47+x. Chunk timing therefore primarily tracks z slabs, not x slabs."
+  },
+  "spatial_certifiability": {
+    "decisive_leaf_fraction_global": 0.6069572734365217,
+    "axis_slice_decisive_fraction_minmax": {
+      "x": {"min_index": 27, "min": 0.43962907424173836, "max_index": 38, "max": 0.7585870303304663},
+      "y": {"min_index": 27, "min": 0.4119864757808963, "max_index": 40, "max": 0.7592802172928927},
+      "z": {"min_index": 21, "min": 0.1944106496152105, "max_index": 32, "max": 0.7907282707107288}
+    },
+    "axis_additive_model_r2": 0.24700698828755296,
+    "interpretation": "There are strong axis-aligned effects, especially on z, but an additive x+y+z band model explains only about 24.7% of certifiability variance; simple triplane-band causation is therefore not established."
+  },
+  "frozen_field_center_diagnostics": {
+    "unknown_root_center_positive_fraction": 0.9729921005797071,
+    "unknown_root_center_abs_sdf_gt_0_05_fraction": 0.9670180989352956,
+    "unknown_root_center_abs_sdf_median": 0.12320412256884603,
+    "layernorm_input_sigma_center_min": 0.31242623196758185,
+    "layernorm_input_sigma_center_max": 0.6275400909402201,
+    "spearman_decisive_fraction_vs_abs_center_sdf": 0.6161574990219005,
+    "spearman_decisive_fraction_vs_center_layernorm_sigma": 0.5924633017834315,
+    "interpretation": "Poor certifiability is strongly associated with small |f(center)| and lower pre-LayerNorm feature sigma. Center sigma is not near epsilon, so a literal near-zero-variance singularity is not demonstrated; interval variance lower-bound inflation remains a plausible mechanism and needs direct instrumentation."
+  },
+  "source_visual_hull_proxy": {
+    "artifact": "NB1 MC_R512 ZERO_SURFACE generated from F4_SOURCE_FIELD_R512",
+    "meaning": "8-view source-silhouette signed-distance intersection, not the learned IRIS signed field",
+    "mesh_vertex_count": 452003,
+    "mesh_face_count": 904006,
+    "normalized_aabb": {
+      "min": [-0.66823697, -0.64090586, -0.61357343],
+      "max": [0.66901398, 0.64090598, 0.61357355]
+    },
+    "root_boxes_intersecting_aabb": 31713,
+    "root_boxes_outside_aabb": 72110,
+    "outside_aabb_fraction": 0.6946235444943794,
+    "unknown_roots_outside_aabb": 67661,
+    "unknown_roots_outside_aabb_fraction": 0.7041932495862951,
+    "warning": "The R512 source-hull mesh cannot be used as a zero-set soundness oracle for C0 certificates of the learned IRIS field. It is suitable as source-support evidence only, with an explicit calibration/pixel-dilation contract."
+  },
+  "distance_diagnostic": {
+    "distance_reference": "nearest vertex of the source-silhouette R512 visual-hull mesh; diagnostic proxy only",
+    "spearman_decisive_fraction_vs_distance": 0.16049394454746863,
+    "decisive_fraction_by_distance_decile": [0.24323413271694116, 0.6012795583702563, 0.617338000866885, 0.6602247278944327, 0.6691554493353882, 0.6825068621785612, 0.6731000770564438, 0.6658233601425544, 0.6416589409554999, 0.6152785803717615],
+    "interpretation": "Certifiability improves away from source geometry at first but degrades again in the farthest region; geometric distance alone does not explain bound tightness."
+  },
+  "learned_field_aligned_lattice_red_team": {
+    "grid": "189^3 vertices over the exact X6C micro2 leaf lattice (188^3 cells)",
+    "mixed_sign_cell_count": 55948,
+    "mixed_sign_cell_fraction": 0.008419979195361336,
+    "deterministic_mixed_cell_bound_sample_count": 4096,
+    "sample_strict_sign_certificate_contradiction_count": 0,
+    "sample_status": "EXPLORATORY_ONLY__FULL_POPULATION_AUDIT_NOT_YET_EXECUTED",
+    "note": "This is the correct learned-field near-surface soundness diagnostic family. A source-hull MC vertex test is not."
+  },
+  "claim_boundary": "POSTHOC_DIAGNOSTIC_ONLY__NO_NEW_PROOF_AUTHORITY__NO_X7_RESULT__NO_PRODUCT_AUTHORITY__NO_WITNESS",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

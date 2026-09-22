@@ -1,0 +1,75 @@
+{
+  "schema": "RealSaS.IRIS.V3NegativeSpaceOwnerSeparationArmCPolicy.v1",
+  "date_utc": "2026-09-22",
+  "status": "FROZEN_PRE_KNIGHT_ARM_C_OWNER_SEPARATION_DIAGNOSTIC",
+  "purpose": "Separate negative-space sampling/objective failure from SceneFirstSignedGeometryV3 representation failure before any architecture pivot.",
+  "parent_arm_B": {
+    "run_id": "20260922T075836Z",
+    "checkpoint_sha256": "0ce7f0f9166376939db62fbd3f85cbc7d6bd042f09066e224c4ad984ac6afcec",
+    "r512_stage13_pass": false,
+    "min_precision": 0.922039009367381,
+    "min_recall": 0.9904599205732922,
+    "outside_source_support_1px_fraction": 0.10800146001242984,
+    "outside_1px_on_largest_component": 42662,
+    "largest_component_vertex_count": 391622,
+    "detached_floater_outside_vertex_count": 1128,
+    "interpretation": "Maximum error includes detached floaters, but 97%+ of >1px unsupported vertices belong to the largest connected component; the primary precision failure is not a floater problem."
+  },
+  "frozen_architecture": {
+    "architecture_id": "RealSaS.IRIS.SceneFirstSignedGeometry.v3",
+    "plane_resolution": 48,
+    "demo_runtime_architecture_pivot": false,
+    "source_backed_2d_presentation_carrier": "PARKED_POST_DEMO_RESEARCH_ONLY"
+  },
+  "upper_bound_negative_space": {
+    "boundary_band_max_px": 32.0,
+    "background_rays_per_active_view": 256,
+    "selection": "DETERMINISTIC_CYCLIC_NEAREST_BOUNDARY_FIRST_OVER_ALL_ADMITTED_SOURCE_BACKGROUND_PIXELS_IN_0_TO_32PX_BAND",
+    "margin_rule": "m(r)=min(0.04, r_px*(2*camera_half_extent_normalized/raster_width))",
+    "fixed_0_04_near_silhouette_barrier_forbidden": true,
+    "full_screen_postfit_violation_map_required": true,
+    "violation_distance_bins_px": ["0_2", "2_8", "8_32", "gt_32"]
+  },
+  "objective_semantics": {
+    "historical_local_metric_sdf_term": "PRESERVED",
+    "historical_teacher_surface_zero_term": "PRESERVED",
+    "arm_A_dense_source_occupancy_term": "PRESERVED",
+    "historical_sparse_background_plus_0_04_term": "DISABLED_IN_THIS_DIAGNOSTIC_ONLY__KNOWN_NON_METRIC_NEAR_BOUNDARY",
+    "historical_certified_outside_plus_0_04_term": "DISABLED_IN_THIS_DIAGNOSTIC_ONLY__KNOWN_NON_METRIC_NEAR_BOUNDARY",
+    "graded_full_ray_negative_space": "ENABLED",
+    "visual_hull_clipping": false,
+    "teacher_geometry_used_by_new_negative_space_term": false,
+    "source_mask_used_as_forward_model_input": false
+  },
+  "unchanged_training_controls": {
+    "fresh_init": true,
+    "fit_seed": 26091909,
+    "anchor_stride_px": 8,
+    "train_steps": 4800,
+    "learning_rate": 0.00008,
+    "weight_decay": 0.0001,
+    "opposite_pair_schedule": [[0,4],[1,5],[2,6],[3,7]],
+    "stage13_v2_policy_sha256": "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214"
+  },
+  "required_outputs": [
+    "R256 learned zero surface and unchanged Stage13-v2 report",
+    "R512 learned zero surface and unchanged Stage13-v2 report",
+    "R256-R512 convergence report",
+    "source-support audit with largest-component accounting",
+    "per-view full-screen source-background minimum-SDF violation maps",
+    "distance-binned zero-crossing and margin-violation summaries for 0-2, 2-8, 8-32 and >32 px"
+  ],
+  "decision_rule": {
+    "if_stage13_passes_and_full_screen_background_zero_crossings_close": "SAMPLING_OBJECTIVE_OWNER_SUPPORTED__CURRENT_V3_REPRESENTATION_NOT_FALSIFIED",
+    "if_largest_component_source_outgrowth_remains_material_after_systematic_metric_negative_space_supervision": "V3_REPRESENTATION_OWNER_SUPPORTED__OPEN_PIXEL_ALIGNED_OR_HIGHER_RESOLUTION_REPRESENTATION_RESEARCH",
+    "if_recall_degrades_while_precision_is_repaired": "REPRESENTATION_OR_CONFLICTING_POSITIVE_SUPERVISION_REMAINS_OWNER__DO_NOT_TUNE_THRESHOLDS",
+    "posthoc_gate_relaxation": false,
+    "r768_or_r1024_resolution_escape": false
+  },
+  "claim_boundary": {
+    "product_authority_minted": false,
+    "shipping_recipe_selected": false,
+    "knight_witness_promoted": false,
+    "architecture_pivot_authorized": false
+  }
+}

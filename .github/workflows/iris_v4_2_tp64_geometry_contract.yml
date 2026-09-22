@@ -11,6 +11,7 @@ on:
       - 'tests/iris/test_regularity_v4_2.py'
       - 'canonical/IRIS_V4_1_TP64_CHECKPOINT_FIX1_NEGATIVE_RESULT_20260922.json'
       - 'canonical/IRIS_V4_2_TP64_GLOBAL_REGULARITY_POLICY_20260922.json'
+      - 'canonical/IRIS_V4_2_TP64_CHECKPOINT_AND_AUDIT_POLICY_20260922.json'
       - '.github/workflows/iris_v4_2_tp64_geometry_contract.yml'
   workflow_dispatch:
 
@@ -57,6 +58,7 @@ jobs:
           from models.iris.v4.regularity_v4_2 import GlobalEikonalPolicyV42, RayLipschitzPolicyV42
           from models.iris.v4.audit_scheduler_v4_2 import AuditComputeBudgetV42
           p=json.loads(Path('canonical/IRIS_V4_2_TP64_GLOBAL_REGULARITY_POLICY_20260922.json').read_text())
+          a=json.loads(Path('canonical/IRIS_V4_2_TP64_CHECKPOINT_AND_AUDIT_POLICY_20260922.json').read_text())
           r=json.loads(Path('canonical/IRIS_V4_1_TP64_CHECKPOINT_FIX1_NEGATIVE_RESULT_20260922.json').read_text())
           ep=GlobalEikonalPolicyV42(); lp=RayLipschitzPolicyV42(); bp=AuditComputeBudgetV42()
           assert p['scientific_name']=='IRIS_V4_2_TP64'
@@ -69,6 +71,9 @@ jobs:
           assert p['held']['teacher_first_hit_depth_loss'] is True
           assert p['qualification']['stage13_threshold_relaxation'] is False
           assert p['qualification']['stage13_implementation_changed'] is False
+          assert a['selection']['cheap_decode_resolution']==128
+          assert a['promotion_flow']['r512_required_only_after_r256_stage13_pass'] is True
+          assert a['compute_scheduler']['semantics'].startswith('APPARATUS_ONLY')
           assert bp.r128_exact_stage13_face_cap < bp.r256_exact_stage13_face_cap < bp.r512_exact_stage13_face_cap
           assert r['r512']['face_count']>30_000_000
           assert r['product_authority_minted'] is False

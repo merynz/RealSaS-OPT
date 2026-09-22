@@ -1,0 +1,104 @@
+{
+  "schema": "RealSaS.IRISV3NegativeSpaceStage13ArmBNegativeResult.v1",
+  "date_utc": "2026-09-22",
+  "status": "ARM_B_FAIL__FULL_RAY_BARRIER_CAUSALLY_HELPFUL__UNIFORM_BACKGROUND_SAMPLING_INSUFFICIENT",
+  "run_id": "20260922T075836Z",
+  "repo_commit": "12104585185cb55a8c0816d3ac16294fb7752312",
+  "checkpoint_sha256": "0ce7f0f9166376939db62fbd3f85cbc7d6bd042f09066e224c4ad984ac6afcec",
+  "r512_zero_surface_sha256": "22f054308a13e61a26a36b7a2b01a56da1aad3cf850c433100bb9d64ff805c26",
+  "decision": "ARM_B_R512_STAGE13_FAIL__NEGATIVE_SPACE_SAMPLING_OR_REPRESENTATION_REMAINS_OWNER",
+  "single_scientific_change_vs_arm_A": "ADD_POINTWISE_FULL_RAY_EMPTY_SPACE_BARRIER_ON_QUALIFIED_SOURCE_BACKGROUND_RAYS",
+  "r512_stage13": {
+    "pass": false,
+    "min_precision": 0.922039009367381,
+    "min_recall": 0.9904599205732922,
+    "min_component_recall": 0.9904599205732922,
+    "max_interior_uncovered_fraction": 0.005354070451869963,
+    "max_largest_coherent_hole_fraction": 0.0015707226470689398,
+    "max_silhouette_edge_p95_px": 19.0,
+    "max_silhouette_edge_max_px": 157.53729717117784
+  },
+  "delta_vs_arm_A": {
+    "min_precision": -0.002526635476766903,
+    "min_recall": 0.0017693519401859037,
+    "max_interior_uncovered_fraction": -0.002297835733043557,
+    "max_largest_coherent_hole_fraction": -0.000808750651801781,
+    "outside_source_support_1px_fraction": -0.011913974418878856,
+    "outside_source_support_8px_fraction": -0.008632176960899927,
+    "interpretation": "The full-ray barrier has a real beneficial causal effect on negative-space support and source coverage overall, but the global min precision is dominated by a new failure localized to the opposite-view 2/6 projection axis."
+  },
+  "source_support_r512": {
+    "all_vertices_in_frame_all_views": true,
+    "outside_1px_fraction": 0.10800146001242984,
+    "outside_1px_vertex_count": 43792,
+    "outside_8px_fraction": 0.02098521244167349,
+    "outside_8px_vertex_count": 8509,
+    "outside_24px_fraction": 0.004782033955153943,
+    "outside_24px_vertex_count": 1939,
+    "vertex_max_violation_px": 157.7816925048828,
+    "component_count": 45,
+    "detached_floater_component_count": 3,
+    "largest_component_vertex_count": 391622,
+    "largest_component_outside_1px_vertex_count": 42662,
+    "largest_component_outside_1px_fraction": 0.10893667873612821
+  },
+  "arm_A_source_support_reference": {
+    "outside_1px_fraction": 0.1199154344313087,
+    "outside_8px_fraction": 0.029617389402573416,
+    "detached_floater_component_count": 5,
+    "all_vertices_in_frame_all_views": false
+  },
+  "per_axis_diagnosis": {
+    "views_0_4": "precision improves by about +0.0156; edge max drops from about 148 px to about 42.6 px",
+    "views_1_5": "precision improves by about +0.0091; p95 drops from about 10.44 px to about 7.28 px",
+    "views_3_7": "precision improves by about +0.0084; p95 drops from 24 px to about 9.85 px",
+    "views_2_6": "precision decreases by about -0.00253; p95 rises from about 14.01 px to 19 px; edge max rises from about 65.2 px to about 157.5 px"
+  },
+  "catastrophic_edge_owner_diagnosis": {
+    "component_vertex_count": 1112,
+    "component_normalized_y_min": 0.9313029,
+    "component_normalized_y_max": 0.94683623,
+    "sealed_source_normalized_y_max": 0.6390886490774936,
+    "approx_excess_normalized": 0.2922142509225064,
+    "approx_excess_pixels_at_1024_with_unit_half_extent": 149.61369647232328,
+    "finding": "The ~157 px Stage13 max edge error is consistent with a detached far-background island, not with a global 157 px displacement of the main surface."
+  },
+  "training_diagnosis": {
+    "pair_counts": {
+      "0-4": 1200,
+      "1-5": 1200,
+      "2-6": 1200,
+      "3-7": 1200
+    },
+    "logging_alias_only": true,
+    "background_rays_per_active_view_per_step": 32,
+    "final_logged_pair": [3, 7],
+    "final_logged_background_violating_point_fraction_view3": 0.00138092041015625,
+    "final_logged_background_violating_point_fraction_view7": 0.000919342041015625,
+    "finding": "The barrier drives sampled background rays close to satisfaction, while unsampled negative-space regions can still host unsupported islands. The dominant next owner is sampling coverage / hard-negative discovery before representation capacity is declared primary."
+  },
+  "fixed_margin_caveat": {
+    "normalized_units_per_source_pixel": 0.001953125,
+    "fixed_margin_normalized": 0.04,
+    "fixed_margin_pixel_equivalent": 20.48,
+    "finding": "A constant +0.04 lower bound is not metric-SDF-consistent for source-background rays immediately adjacent to the silhouette. A future barrier must use a source-distance-aware lower bound m(r)=min(0.04, r*pixel_scale) or an equivalent conservative construction.",
+    "arm_B_interpretation": "Arm B remains valid as a fixed-margin stress ablation; it is not promoted as the final training recipe."
+  },
+  "governance": {
+    "representation_capacity_declared_primary_owner": false,
+    "uniform_background_sampling_declared_sufficient": false,
+    "fixed_margin_barrier_promoted_to_product_recipe": false,
+    "mesh_component_posthoc_removal_authorized": false,
+    "threshold_relaxation_authorized": false,
+    "x7_execution_authorized": false,
+    "product_authority_minted": false,
+    "knight_witness_promoted": false
+  },
+  "required_next": [
+    "Replace constant empty-space lower bound with a source-distance-aware metric-consistent bound before any final negative-space recipe is claimed.",
+    "Add subject-free deterministic background coverage / hard-negative discovery that can expose spatially localized unsupported islands instead of relying on 32 uniformly random background rays per active view.",
+    "Keep Arm A foreground occupancy, historical sparse objective, Stage13-v2 thresholds, architecture and decode apparatus frozen while testing negative-space sampling semantics.",
+    "Use component removal only as a diagnostic ablation; do not repair or promote the witness by deleting unsupported learned components.",
+    "If dense/coverage-aware negative-space supervision still leaves large unsupported error on the largest connected component, escalate representation capacity / pixel-aligned feature architecture as the primary owner."
+  ]
+}

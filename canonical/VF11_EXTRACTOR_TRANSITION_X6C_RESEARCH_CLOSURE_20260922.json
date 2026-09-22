@@ -1,0 +1,28 @@
+{
+  "schema": "RealSaS.VF11ExtractorTransitionX6CResearchClosure.v1",
+  "date_utc": "2026-09-22",
+  "status": "X6C_CLOSED__TARGETED_MICRO3_HOLDOUT_RESEARCH_AUTHORIZED",
+  "result": "canonical/VF11_EXTRACTOR_TRANSITION_X6C_FULL_DOMAIN_RESULT_20260922.json",
+  "closed_facts": {
+    "full_domain_executed": true,
+    "base_regime_count": 103823,
+    "micro2_decisive_volume_fraction": 0.6069572734365217,
+    "micro2_unresolved_volume_fraction": 0.3930427265634782,
+    "root_unknown_count": 96083,
+    "root_proven_empty_count": 7740,
+    "root_proven_zero_exists_count": 0,
+    "cpu_rejected_count": 0
+  },
+  "scientific_conclusion": "C0 micro2 is validated as a conservative certified-empty volume-pruning layer, not as a sufficient full-domain topology/existence closure layer. Increasing global depth blindly is not authorized; the next question is whether one additional unresolved-only micro level has high enough proof productivity on a preregistered holdout to justify a bounded adaptive extension.",
+  "forbidden": [
+    "global micro3 full-domain run without holdout productivity/cost evidence",
+    "promoting UNKNOWN to EMPTY from sampled field signs",
+    "claiming PROVEN_ZERO_EXISTS absence means no surface",
+    "shipping ordinary-float64 certificates",
+    "Knight witness or product authority"
+  ],
+  "next": "X7_TARGETED_MICRO3_HOLDOUT_PRODUCTIVITY",
+  "product_authority_minted": false,
+  "shipping_extractor_selected": false,
+  "witness_execution": false
+}

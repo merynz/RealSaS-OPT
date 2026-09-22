@@ -1,0 +1,72 @@
+{
+  "schema": "RealSaS.IRISV41TP64CheckpointFix1NegativeResult.v1",
+  "date_utc": "2026-09-22",
+  "status": "SEALED_NEGATIVE__OBJECTIVE_TO_EXTRACTED_SURFACE_GAP_CONFIRMED",
+  "historical_run_namespace": "V4_1_DEMO64_RETENTION_REGULARITY_CHECKPOINT_FIX1",
+  "scientific_alias": "IRIS_V4_1_TP64",
+  "run_folder_id": "1xqei7PZ6CJ0k57NEteVKudnK-Q8G2mJE",
+  "repo_commit": "7c7146a1035409cb5940bc100c49a5eb1e64bebb",
+  "selected_step": 320,
+  "selection_note": "The authority-aligned R256 selector still preferred a pathological foam state because FAILED_PER_VIEW_RULE_COUNT dominated normalized severity; this is an apparatus lesson, not a valid quality preference.",
+  "r256": {
+    "vertex_count": 3065426,
+    "face_count": 6037988,
+    "min_view_precision": 0.1558550447744782,
+    "min_view_recall": 0.942064706411792,
+    "min_view_component_recall": 0.942064706411792,
+    "max_view_interior_uncovered_fraction": 0.057282607924011276,
+    "max_view_largest_coherent_hole_fraction": 0.017668969910131962,
+    "max_view_silhouette_edge_p95_px": 460.0,
+    "stage13_elapsed_seconds": 2971.6541697978973,
+    "stage13_v2_pass": false
+  },
+  "r512": {
+    "vertex_count": 16934590,
+    "face_count": 33353372,
+    "min_view_precision": 0.155633268766903,
+    "min_view_recall": 0.9434701634622708,
+    "min_view_component_recall": 0.9434701634622708,
+    "max_view_interior_uncovered_fraction": 0.05600477059270355,
+    "max_view_largest_coherent_hole_fraction": 0.014158716091778944,
+    "max_view_silhouette_edge_p95_px": 459.4855800575627,
+    "stage13_elapsed_seconds": 9124.30270767212,
+    "stage13_v2_pass": false
+  },
+  "resolution_interpretation": {
+    "precision_r256_to_r512_delta": -0.0002217760075751931,
+    "silhouette_p95_r256_to_r512_delta_px": -0.5144199424373,
+    "face_count_multiplier_r512_over_r256": 5.52475973644751,
+    "conclusion": "Increasing extraction resolution densified the same pathological zero-set instead of converging toward the source silhouette. Extraction resolution is not the current owner."
+  },
+  "foam_diagnosis": {
+    "confirmed": true,
+    "mechanism": "Saturating foreground ray existence plus discretely sampled background positivity admits highly oscillatory zero sets between supervised samples when field regularity is only local. Narrow-band Eikonal covered at most 512 FIT-local points within |teacher_sdf|<=0.02 and did not constrain the full canonical volume.",
+    "important_correction": "Finite-sample Eikonal is a regularizer, not an exact global 1-Lipschitz proof. The next arm therefore adds both global Eikonal sampling and an explicit adjacent-ray-sample Lipschitz excess penalty.",
+    "foreground_exact_two_crossings_as_loss": false,
+    "reason": "A 2D source ray may legitimately intersect multiple depth layers; exact crossing multiplicity would invent unsupported 3D truth. Crossing counts remain diagnostic only."
+  },
+  "next_treatment": {
+    "id": "IRIS_V4_2_TP64",
+    "architecture_changed": false,
+    "source_sampling_changed": false,
+    "optimizer_changed": false,
+    "new_training_signals": [
+      "GLOBAL_FULL_CUBE_FINITE_DIFFERENCE_EIKONAL",
+      "EXPLICIT_ADJACENT_SOURCE_RAY_DIRECTIONAL_1_LIPSCHITZ_EXCESS"
+    ],
+    "held": [
+      "TRAINING_ONLY_DIFFERENTIABLE_EXTRACTED_SURFACE_RASTER_SUPERVISION",
+      "GLOBAL_TEACHER_SDF",
+      "TEACHER_FIRST_HIT_DEPTH_AUTHORITY",
+      "ARCHITECTURE_WIDTH_OR_DEPTH_GROWTH"
+    ],
+    "raster_escalation_trigger": "If source-only global regularity closes foam but exact Stage13 contour still materially fails, authorize raster-coupled extracted-surface supervision next."
+  },
+  "compute_postmortem": {
+    "problem": "Exact Stage13 was scheduled on multi-million-face pathological meshes and produced multi-hour silent CPU work.",
+    "repair": "Keep Stage13 unchanged but put an apparatus-only compute scheduler in front of it: cheap R128 complexity screening, progress heartbeat, bounded face-count scheduling, R256 promotion screen, and R512 only after R256 remains promotion-viable.",
+    "product_thresholds_changed": false
+  },
+  "product_authority_minted": false,
+  "knight_witness_promoted": false
+}

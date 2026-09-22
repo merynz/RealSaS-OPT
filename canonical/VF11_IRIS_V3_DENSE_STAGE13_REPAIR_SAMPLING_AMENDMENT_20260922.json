@@ -1,0 +1,110 @@
+{
+  "schema": "RealSaS.VF11IrisV3DenseStage13RepairSamplingAmendment.v1",
+  "date_utc": "2026-09-22",
+  "status": "FROZEN_BEFORE_NEW_KNIGHT_DENSE_FIT__SUBJECT_FREE_FALSIFICATION_REQUIRED",
+  "amends": "canonical/VF11_IRIS_V3_DENSE_STAGE13_REPAIR_PREREGISTRATION_20260922.json",
+  "implementation": "models/iris/v3/dense_source_coverage_v3.py",
+  "reason": [
+    "A discrete ray-depth surrogate can reproduce lattice-phase aliasing inside the training loss itself unless its depth spacing is tied to a subject-free minimum feature scale.",
+    "Log-sum-exp soft-min introduces a multiplicity-dependent O(tau*log(N)) signed bias exactly where tangent silhouette rays create many near-minimum samples.",
+    "Area-averaged BCE/Dice can make a small connected source component almost irrelevant even though Stage13 component recall treats its survival as consequential."
+  ],
+  "subject_free_scale_authority": {
+    "source": "canonical/VF11_GEOMETRY_FEATURE_SURVIVAL_CALIBRATION_V1_20260921.json",
+    "reference_decoder_resolution": 256,
+    "reference_voxel_normalized": 0.00784313725490196,
+    "pixels_per_reference_voxel_at_1024": 4.015686274509804,
+    "minimum_required_fixture_width_reference_voxels": 0.75,
+    "minimum_feature_width_normalized": 0.0058823529411764705,
+    "minimum_feature_width_pixels_at_1024": 3.011764705882353
+  },
+  "depth_sampling_contract": {
+    "scheme": "EQUALLY_SPACED_LATTICE_WITH_ONE_GLOBAL_RANDOM_PHASE_PER_TRAINING_DRAW",
+    "independent_per_bin_jitter_forbidden": true,
+    "why": "Independent bin jitter can create an inter-sample gap approaching twice the nominal bin width. A single global phase shift changes lattice phase without relaxing the maximum spacing bound.",
+    "maximum_depth_step_normalized": 0.0029411764705882353,
+    "derivation": "minimum_feature_width_normalized / 2",
+    "phase_rng_must_be_deterministically_derived_from": [
+      "fit random seed",
+      "training step",
+      "view-pair identity"
+    ],
+    "knight_tuning_forbidden": true
+  },
+  "ray_occupancy_contract": {
+    "signed_reduction": "HARD_AMIN_OVER_DEPTH_SAMPLES",
+    "logsumexp_softmin_used": false,
+    "softmin_temperature_parameter_exists": false,
+    "reason": "torch.amin is differentiable almost everywhere and removes sample-multiplicity bias; phase jitter moves the winning sample across optimization steps.",
+    "foreground_probability": "sigmoid(-ray_min_sdf / beta)",
+    "beta_normalized": 0.0007352941176470588,
+    "beta_derivation": "minimum_feature_width_normalized / 8",
+    "thin_fixture_center_probability_requirement": ">0.98 at sdf=-minimum_feature_width/2"
+  },
+  "component_balance_contract": {
+    "source_component_authority": "CONNECTED_COMPONENTS_OF_QUALIFIED_SOURCE_FOREGROUND_MASK",
+    "background_component_id": -1,
+    "foreground_component_ids": "NONNEGATIVE_STABLE_PER_VIEW_IDS",
+    "bce_grouping": "BACKGROUND_IS_ONE_GROUP_AND_EACH_PRESENT_FOREGROUND_COMPONENT_IS_ONE_GROUP",
+    "group_aggregation": "EQUAL_MEAN_AUTHORITY_PER_GROUP",
+    "raw_inverse_area_pixel_weighting": false,
+    "reason": "Equal group means give a tiny component consequential gradient without unbounded per-pixel inverse-area weights.",
+    "boundary_multiplier": 4.0,
+    "boundary_weighting_rule": "APPLY_WITHIN_GROUP_THEN_RENORMALIZE_GROUP",
+    "global_soft_dice_weight": 1.0,
+    "component_balanced_bce_weight": 1.0,
+    "opposite_view_pair_normalization": true
+  },
+  "loss_specific_subject_free_gate": {
+    "evaluation_level": "CONTINUOUS_SIGNED_FIELD_AND_RAY_OCCUPANCY_BEFORE_MARCHING_CUBES",
+    "reason": "Known VF11 R512 SMALL_COMPONENT and THIN_STRAP failures include a separate extraction/phase owner; requiring their downstream MC Stage13 profile to close before evaluating the training surrogate would conflate two independent mechanisms.",
+    "fixtures": [
+      "THIN_BLADE",
+      "SMALL_COMPONENT",
+      "THIN_STRAP",
+      "FORK_GAP",
+      "CONCAVE_NOTCH"
+    ],
+    "required": [
+      "phase bank does not systematically miss the minimum-width control",
+      "finite nonzero gradient exists on foreground and boundary failure cases",
+      "small-component loss authority remains consequential under a large-body distractor",
+      "FORK_GAP and CONCAVE_NOTCH negative space is not filled merely to improve silhouette occupancy",
+      "source-external occupancy pressure and source-interior occupancy pressure both have the expected gradient sign"
+    ],
+    "downstream_extractor_issue_remains_separate": true,
+    "knight_input_forbidden": true
+  },
+  "operational_rule": {
+    "full_1024x1024_all_rays_every_step_required": false,
+    "training_may_use_bounded_ray_minibatches": true,
+    "ray_minibatch_must_include": [
+      "equal-quota represented foreground connected components",
+      "foreground boundary samples",
+      "foreground interior samples",
+      "background samples"
+    ],
+    "sampling_probabilities_and_batch_sizes_must_be_frozen_before_knight_result": true,
+    "performance_benchmark_required_before_long_fit": true
+  },
+  "second_subject_rule": {
+    "required_before_claiming_recipe_or_unseen_subject_generalization": true,
+    "required_before_controlled_knight_demo": false,
+    "recipe_mutation_between_knight_and_second_subject": "FORBIDDEN",
+    "demo_claim_if_second_subject_not_yet_run": "CONTROLLED_KNIGHT_8_VIEW_FIT_DEMONSTRATION_ONLY__NO_UNSEEN_SUBJECT_GENERALIZATION_CLAIM"
+  },
+  "unit_test_preflight": {
+    "local_cpu_test_count": 6,
+    "local_cpu_status": "PASS",
+    "tests_cover": [
+      "VF11-derived scale constants",
+      "global phase spacing bound",
+      "hard-min multiplicity invariance",
+      "thin-feature beta strength",
+      "small-component balancing",
+      "within-group boundary normalization"
+    ]
+  },
+  "x7_execution_authorized": false,
+  "product_authority_minted": false
+}

@@ -1,0 +1,86 @@
+name: iris-v4-2-tp64-geometry-contract
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'models/iris/v4/regularity_v4_2.py'
+      - 'models/iris/v4/audit_scheduler_v4_2.py'
+      - 'models/iris/v4/train_fit_v4_2.py'
+      - 'tests/iris/test_regularity_v4_2.py'
+      - 'canonical/IRIS_V4_1_TP64_CHECKPOINT_FIX1_NEGATIVE_RESULT_20260922.json'
+      - 'canonical/IRIS_V4_2_TP64_GLOBAL_REGULARITY_POLICY_20260922.json'
+      - '.github/workflows/iris_v4_2_tp64_geometry_contract.yml'
+  workflow_dispatch:
+
+jobs:
+  v4-2-tp64-contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install frozen CPU test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off pytest==8.3.5 scipy==1.15.3
+      - name: Compile V4.2 TP64 lane
+        run: |
+          python -m py_compile models/iris/v4/regularity_v4_2.py
+          python -m py_compile models/iris/v4/audit_scheduler_v4_2.py
+          python -m py_compile models/iris/v4/train_fit_v4_2.py
+          python -m py_compile tests/iris/test_regularity_v4_2.py
+      - name: Run V4.2 TP64 falsification tests
+        run: |
+          python -m pytest -q \
+            tests/iris/test_regularity_v4_2.py \
+            tests/iris/test_source_constraint_v4_1.py \
+            tests/iris/test_source_exterior_v4.py \
+            tests/iris/test_dense_source_coverage_v3_fixtures.py
+      - name: Prove V4.2 authority and compute boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from models.iris.v4.regularity_v4_2 import GlobalEikonalPolicyV42, RayLipschitzPolicyV42
+          from models.iris.v4.audit_scheduler_v4_2 import AuditComputeBudgetV42
+          p=json.loads(Path('canonical/IRIS_V4_2_TP64_GLOBAL_REGULARITY_POLICY_20260922.json').read_text())
+          r=json.loads(Path('canonical/IRIS_V4_1_TP64_CHECKPOINT_FIX1_NEGATIVE_RESULT_20260922.json').read_text())
+          ep=GlobalEikonalPolicyV42(); lp=RayLipschitzPolicyV42(); bp=AuditComputeBudgetV42()
+          assert p['scientific_name']=='IRIS_V4_2_TP64'
+          assert p['architecture']['architecture_changed_from_v4_1'] is False
+          assert ep.maximum_points_per_step==1024 and ep.top_level_weight==0.02
+          assert lp.maximum_directional_lipschitz==1.0 and lp.top_level_weight==0.02
+          assert p['training']['sign_transition_count']['training_loss'] is False
+          assert p['held']['training_only_differentiable_extracted_surface_raster_loss'] is True
+          assert p['held']['global_teacher_sdf'] is True
+          assert p['held']['teacher_first_hit_depth_loss'] is True
+          assert p['qualification']['stage13_threshold_relaxation'] is False
+          assert p['qualification']['stage13_implementation_changed'] is False
+          assert bp.r128_exact_stage13_face_cap < bp.r256_exact_stage13_face_cap < bp.r512_exact_stage13_face_cap
+          assert r['r512']['face_count']>30_000_000
+          assert r['product_authority_minted'] is False
+          print('V42_TP64_ARCHITECTURE_FROZEN=PASS')
+          print('V42_GLOBAL_EIKONAL=PASS')
+          print('V42_RAY_LIPSCHITZ=PASS')
+          print('V42_SIGN_MULTIPLICITY_DIAGNOSTIC_ONLY=PASS')
+          print('V42_STAGE13_UNCHANGED=PASS')
+          print('V42_COMPUTE_GUARD_APPARATUS_ONLY=PASS')
+          PY
+      - name: Enforce source-authority boundary
+        run: |
+          set -euo pipefail
+          ! grep -RniE 'teacher_first_hit|global_teacher_sdf|visual[_ -]?hull.*clip|mesh.*repair.*before.*stage13' models/iris/v4/train_fit_v4_2.py models/iris/v4/regularity_v4_2.py
+          echo 'V42_SOURCE_AUTHORITY_BOUNDARY=PASS'

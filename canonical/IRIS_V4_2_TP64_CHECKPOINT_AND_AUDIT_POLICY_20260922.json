@@ -1,0 +1,55 @@
+{
+  "schema": "RealSaS.IRISV42TP64CheckpointAndAuditPolicy.v1",
+  "date_utc": "2026-09-22",
+  "status": "FROZEN_PRE_RUN",
+  "authority": "CHECKPOINT_SELECTION_AND_COMPUTE_SCHEDULING_ONLY__NOT_PRODUCT_QUALITY_AUTHORITY",
+  "scientific_name": "IRIS_V4_2_TP64",
+  "candidate_capture": {
+    "audit_interval_steps": 160,
+    "save_state_every_audit": true,
+    "hard_sign_pareto_axes": [
+      "max_foreground_miss_fraction",
+      "max_background_zero_crossing_fraction",
+      "source_exterior_negative_fraction"
+    ]
+  },
+  "selection": {
+    "cheap_decode_resolution": 128,
+    "exact_stage13_on_compute_admissible_pareto_candidates": true,
+    "stage13_thresholds_unchanged": true,
+    "score_order": [
+      "STAGE13_PASS_FIRST",
+      "WORST_NORMALIZED_GATE_EXCESS",
+      "SUMMED_NORMALIZED_GATE_EXCESS",
+      "FAILED_RULE_COUNT",
+      "EARLIER_STEP"
+    ],
+    "r128_selection_is_product_authority": false
+  },
+  "compute_scheduler": {
+    "semantics": "APPARATUS_ONLY__SKIP_IS_NOT_STAGE13_FAIL",
+    "r128_exact_stage13_face_cap": 250000,
+    "r256_exact_stage13_face_cap": 1000000,
+    "r512_exact_stage13_face_cap": 2000000,
+    "heartbeat_required": true,
+    "heartbeat_fields": ["phase","candidate_index","candidate_count","step","resolution","face_count","elapsed_seconds"],
+    "silent_multi_hour_stage13_forbidden": true
+  },
+  "promotion_flow": {
+    "selected_candidate_redecode_r256": true,
+    "r256_exact_stage13_if_compute_admissible": true,
+    "if_r256_stage13_fails": "STOP__DO_NOT_RUN_R512_PROMOTION_AUDIT",
+    "if_r256_compute_guard_skips": "STOP__NO_PRODUCT_PROMOTION_CLAIM",
+    "r512_required_only_after_r256_stage13_pass": true,
+    "r512_exact_stage13_if_compute_admissible": true,
+    "r512_stage13_pass_required_for_product_promotion": true,
+    "expensive_source_support_convergence_fullscreen_audits": "ONLY_AFTER_R512_STAGE13_PASS"
+  },
+  "forbidden": [
+    "TREAT_COMPUTE_GUARD_AS_GEOMETRY_FAIL",
+    "RELAX_STAGE13_THRESHOLDS",
+    "SELECT_BY_FAILED_RULE_COUNT_BEFORE_ERROR_SEVERITY",
+    "RUN_R512_AFTER_GROSS_R256_FAIL_FOR_COMPLETENESS_ONLY",
+    "RUN_MULTI_MILLION_FACE_SUPPORT_GRAPH_AFTER_PRIMARY_FAIL"
+  ]
+}

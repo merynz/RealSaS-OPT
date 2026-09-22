@@ -1,0 +1,114 @@
+{
+  "schema": "RealSaS.IRISV3ArmCResultAndV4DemoGeometryDecision.v1",
+  "date_utc": "2026-09-22",
+  "status": "ARM_C_FAIL__SCIENTIFIC_OWNER_MIXED__DEMO_V4_GEOMETRY_PIVOT_OPENED",
+  "arm_c": {
+    "run_id": "20260922T085849Z",
+    "repo_commit": "d67908dd1f938ffa019f5a871541238733c51c49",
+    "checkpoint_sha256": "dc201bf5fe9ffe3915dd850a758f889e4361685b06d1caf65492035cb6de2096",
+    "r512_zero_surface_sha256": "6f7a64fe6a0a7767e64266f0a25375a42c0ede753f0e36c2f3ac9ef32272ab07",
+    "stage13_r512": {
+      "pass": false,
+      "min_precision": 0.9130984448058549,
+      "min_recall": 0.9923070523309021,
+      "min_component_recall": 0.9923070523309021,
+      "max_interior_uncovered_fraction": 0.0038089093389023776,
+      "max_largest_coherent_hole_fraction": 0.0014303532400361592,
+      "max_silhouette_edge_p95_px": 165.0293911990307,
+      "max_silhouette_edge_max_px": 232.1055794245369
+    },
+    "negative_space_audit": {
+      "audit_resolution": 256,
+      "max_zero_crossing_fraction": 0.012696941612604264,
+      "max_margin_violation_fraction": 0.35949808166367025,
+      "weighted_zero_crossing_fraction_0_2px": 0.18651496782616805,
+      "weighted_margin_violation_fraction_0_2px": 0.5228947123006621,
+      "finding": "Metric-consistent boundary supervision was visited multiple complete cycles but was not retained over the final all-view field; near-silhouette background remains especially unstable."
+    },
+    "source_support_r512": {
+      "total_outside_1px_fraction": 0.14023791594780338,
+      "total_outside_8px_fraction": 0.06790279379664668,
+      "largest_component_outside_1px_fraction": 0.09485032866095029,
+      "detached_floater_component_count": 31,
+      "detached_floater_vertex_count": 22357
+    },
+    "delta_interpretation_vs_arm_b": {
+      "largest_component_source_support_improved": true,
+      "recall_and_interior_coverage_improved": true,
+      "global_precision_improved": false,
+      "detached_component_stability_regressed": true,
+      "negative_space_constraints_closed": false
+    }
+  },
+  "scientific_owner_conclusion": {
+    "v3_48x48_representation_proven_primary_owner": false,
+    "objective_sampling_retention_proven_primary_owner": false,
+    "classification": "MIXED_OWNER__CONSTRAINT_RETENTION_AND_REPRESENTATION_CAPACITY_REMAIN_ENTANGLED",
+    "reason": "Arm C demonstrates real response to stronger metric negative-space supervision on the largest component, while final full-screen violations and detached components remain. The experiment therefore does not isolate representation capacity as the sole cause."
+  },
+  "demo_engineering_decision": {
+    "open_new_geometry_producer": true,
+    "new_lane_name": "IRIS_V4_DEMO_GEOMETRY",
+    "claim": "CONTROLLED_KNIGHT_DEMO_ENGINEERING_PIVOT__NOT_A_SINGLE_VARIABLE_CAUSAL_CLAIM",
+    "reason": "The controlled demo requires source-faithful geometry now; repeated V3 causal arms show useful but insufficient progress and the current representation/training interface is no longer cost-effective to tune incrementally."
+  },
+  "selected_first_v4_changes": {
+    "scene_query_lattice": {
+      "v3": "3x24x24",
+      "v4": "3x32x32",
+      "reason": "Directly raises spatial information capacity; final learned triplane becomes 64x64 rather than 48x48."
+    },
+    "final_triplane_resolution": {
+      "v3": 48,
+      "v4": 64
+    },
+    "field_decoder": {
+      "v3": "TWO_SILU_HIDDEN_LAYERS_WIDTH_192",
+      "v4": "FOUR_RESIDUAL_SILU_BLOCKS_WIDTH_192",
+      "reason": "Increase zero-set complexity inside each bilinearly sampled latent cell without simultaneously widening the whole scene model."
+    },
+    "training_signal": {
+      "v4_requirement": "ALL_VIEW_CONSTRAINT_RETENTION_WITH_NEAR_BOUNDARY_METRIC_NEGATIVE_SPACE_PLUS_FAR_FIELD_EMPTY_SPACE_AND_HARD_NEGATIVE_REPLAY",
+      "reason": "Arm C improved the actively supervised region but forgot/created unsupervised geometry elsewhere; near and far source-negative authority must coexist rather than replace one another."
+    }
+  },
+  "explicitly_frozen_in_first_v4": {
+    "scene_dim": 256,
+    "scene_transformer_layers": 4,
+    "attention_heads": 8,
+    "camera_injection_semantics": "UNCHANGED_V3_POST_DINO_CAMERA_AWARE_TOKEN_BANK",
+    "plane_channels": 64,
+    "point_feature_dim": 192,
+    "image_token_dim": 384,
+    "canonical_surface_extractor": "MARCHING_CUBES_V3__R512_PRIMARY_QUALIFICATION",
+    "stage13_v2_thresholds": "UNCHANGED",
+    "gsa_and_rigging_surface_authority": "UNCHANGED",
+    "caa_authority": "UNCHANGED",
+    "visual_hull_clipping": false,
+    "posthoc_mesh_repair_before_primary_measurement": false
+  },
+  "held_for_second_v4_step_only_if_needed": [
+    "plane_channels_64_to_96_or_128",
+    "point_feature_192_to_288_or_384",
+    "scene_dim_256_to_384",
+    "scene_transformer_4_to_8",
+    "camera_modulated_dino",
+    "training_only_differentiable_extracted_surface_raster_loss",
+    "canonical_extractor_change"
+  ],
+  "v4_preflight_required_before_knight_long_fit": [
+    "code-level tensor-shape assertions proving 3x32x32 scene queries and 3x64x64 final planes",
+    "parameter-count report V3 versus V4",
+    "subject-free thin-feature and negative-space gradient tests",
+    "all-view hard-negative retention test demonstrating that a constraint learned on one view is not silently lost while optimizing another",
+    "R512 canonical extractor remains unchanged"
+  ],
+  "governance": {
+    "stage13_relaxation_authorized": false,
+    "x7_execution_authorized": false,
+    "product_authority_minted": false,
+    "knight_witness_promoted": false,
+    "scientific_claim_of_v3_capacity_failure": false,
+    "demo_v4_implementation_authorized": true
+  }
+}

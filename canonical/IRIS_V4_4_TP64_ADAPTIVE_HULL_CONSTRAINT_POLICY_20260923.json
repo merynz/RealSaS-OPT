@@ -1,0 +1,87 @@
+{
+  "schema": "RealSaS.IRIS.V44TP64AdaptiveHullConstraintPolicy.v1",
+  "date_utc": "2026-09-23",
+  "status": "FROZEN_PRE_RUN",
+  "scientific_name": "IRIS_V4_4_TP64",
+  "authority": "CONTROLLED_KNIGHT_FIT1_GEOMETRY_TREATMENT__ONLY_HULL_CONSTRAINT_CONTROL_MECHANISM_CHANGES",
+  "parents": {
+    "v43_negative": "canonical/IRIS_V4_3_TP64_NEGATIVE_RESULT_20260923.json",
+    "foreground_hull_feasibility": "canonical/IRIS_V4_3_FOREGROUND_HULL_CONSTRAINT_FEASIBILITY_20260923.json",
+    "shell_measurement": "canonical/IRIS_V4_4_CERTIFICATION_SHELL_MEASUREMENT_20260923.json",
+    "v43_policy": "canonical/IRIS_V4_3_TP64_SOURCE_HULL_LATTICE_POLICY_20260923.json"
+  },
+  "frozen": {
+    "architecture": "EXACT_V4_3_TP64",
+    "architecture_change": false,
+    "source_masks_and_cameras": "EXACT_STAGE08",
+    "foreground_audit_target_max_miss_fraction": 0,
+    "stage13_policy": "canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json",
+    "stage13_threshold_relaxation": false,
+    "lattice_resolution": 512,
+    "full_scan_interval_steps": 100,
+    "hull_sampling_and_replay": "EXACT_V4_3",
+    "v42_base_objective": "EXACT_V4_3_PARENT",
+    "extractor": "CANONICAL_MARCHING_CUBES_UNCHANGED",
+    "teacher_first_hit_depth_loss": false,
+    "global_teacher_sdf": false,
+    "visual_hull_clipping_or_posthoc_carving": false,
+    "differentiable_raster_coupling": false,
+    "capacity_growth": false
+  },
+  "single_causal_change": "FIXED_HULL_WEIGHT_1_TO_SINGLE_STATE_ADAPTIVE_MULTIPLIER_PLUS_FROZEN_GRADIENT_NORM_DERIVED_QUADRATIC_DAMPING",
+  "controller": {
+    "state_variables": [
+      "lambda"
+    ],
+    "lambda_initial": 1,
+    "lambda_projection": "MAX_0",
+    "full_population_control": {
+      "statistic": "EQUAL_MEAN_OVER_4_DISTANCE_BANDS_OF_MEAN_CLIP((HULL_MARGIN-FIELD_SDF)/V43_HUBER_BETA,-1,1)",
+      "range": [
+        -1,
+        1
+      ],
+      "reason": [
+        "SIGNED_SO_LAMBDA_CAN_INCREASE_OR_DECREASE",
+        "SAME_DEFICIT_ONTOLOGY_AS_PRIMAL_HULL_TERM",
+        "STREAMABLE_DURING_EXACT_R512_SCAN",
+        "FOUR_BAND_BALANCE_MATCHES_V43_PRIMAL_AGGREGATION"
+      ]
+    },
+    "short_loop": {
+      "replay_bank_is_population_estimate": false,
+      "formula": "C_HAT = CLIP(C_FULL_ANCHOR + (C_REPLAY_NOW - C_REPLAY_AT_ANCHOR), -1, 1)",
+      "lambda_update": "LAMBDA_NEXT = MAX(0, LAMBDA + C_HAT / FULL_SCAN_INTERVAL_STEPS)",
+      "scan_reanchor": "REPLACE_C_FULL_ANCHOR_AND_C_REPLAY_AT_ANCHOR_WITHOUT_RESETTING_LAMBDA",
+      "rationale": "ONLY_WITHIN_BANK_CHANGE_IS_USED_SO_ENRICHED_REPLAY_BIAS_CANNOT_SET_THE_POPULATION_SCALE"
+    },
+    "rho": {
+      "adaptive_state": false,
+      "calibration_time": "BEFORE_OPTIMIZER_STEP_1_ON_THE_DETERMINISTIC_INITIAL_V44_BATCH",
+      "formula": "RHO = ||GRAD L_BASE||_2 / ||GRAD PHI_HULL||_2",
+      "phi_value_used_in_calibration": false,
+      "frozen_after_calibration": true,
+      "zero_or_nonfinite_gradient": "APPARATUS_ABORT",
+      "knight_result_tuning": false
+    },
+    "primal_objective": "L_BASE + LAMBDA*PHI_HULL + 0.5*RHO*PHI_HULL^2"
+  },
+  "causal_success": {
+    "foreground_health_required": true,
+    "exact_r512_nonpositive_certified_exterior_corner_count": 0,
+    "exact_r512_metric_deficit_violation_count": "REPORT_AND_TARGET_ZERO",
+    "tail_safety": {
+      "maximum_metric_deficit": "REPORT",
+      "residual_projection_extent_px": "COMPARE_TO_MEASURED_4.885094241336951PX_CERTIFICATION_SHELL__NOT_A_STAGE13_THRESHOLD"
+    },
+    "stage13_pass_required_for_causal_success": false,
+    "stage13_pass_required_for_product_promotion": true
+  },
+  "decision_tree": {
+    "sign_closure_and_healthy_foreground_and_residual_at_shell_scale": "V44_CAUSAL_SUCCESS__AUTHORIZE_RASTER_OR_BOUNDARY_COUPLING_ONLY_IF_FROZEN_STAGE13_REMAINS_OPEN",
+    "sign_closure_but_foreground_collapsed": "FAIL_DEGENERATE__NO_CAPACITY_CLAIM",
+    "healthy_foreground_but_sign_closure_not_reached": "FAIL_ADAPTIVE_CONSTRAINT_INSUFFICIENT__CAPACITY_OR_CONTROLLER_REMAINS_OPEN",
+    "residual_materially_beyond_measured_shell": "CAPACITY_OR_REPRESENTATION_DEBATE_REOPENS"
+  },
+  "claim_boundary": "Controlled Knight FIT research only; no product authority, unseen, FITK, or generalization claim."
+}

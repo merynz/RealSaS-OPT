@@ -12,6 +12,7 @@ on:
       - 'canonical/IRIS_V5_FIELD_ONTOLOGY_RECLOSURE_20260923.json'
       - 'canonical/IRIS_V5_CONTINUOUS_SOURCE_FIELD_POLICY_20260923.json'
       - 'canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json'
+      - 'canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_AMENDMENT_20260923.json'
       - '.github/workflows/iris_v5_source_field_contract.yml'
   workflow_dispatch:
 
@@ -67,12 +68,17 @@ jobs:
           assert ontology['active_field_ontology']['euclidean_sdf_required'] is False
           assert ontology['r512_independent_sign_certificate']['metric_magnitude_lower_bound_is_gate'] is False
           prereg=json.loads(Path('canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json').read_text())
+          amendment=json.loads(Path('canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_AMENDMENT_20260923.json').read_text())
           assert prereg['status']=='FROZEN_BEFORE_OPTIMIZER_STEP_1'
           assert prereg['execution']['repo_commit']=='4de08a779199d64b60b0d1aae3512a0f77e77c77'
           assert prereg['optimizer']['primary_objective']['type']=='SMOOTH_L1_DIRECT_FSTAR_ONLY'
           assert prereg['optimizer']['weight_decay']==0.0
           assert prereg['checkpoint_selection']['stage13_blind'] is True
           assert prereg['checkpoint_selection']['exact_r512_audit_blind'] is True
+          assert amendment['status']=='FROZEN_APPARATUS_ONLY_REPAIR_BEFORE_FINAL_QUALIFICATION_DECISION'
+          assert amendment['repair']['scientific_change'] is False
+          assert amendment['amended_execution']['repo_commit']=='4de08a779199d64b60b0d1aae3512a0f77e77c77'
+          assert amendment['amended_execution']['notebook_sha256']=='93e7dd44dcfed865b5ba5861365e88b6407255da6ce0af9674c43a6bbb231aad'
           auth=ontology['training_authorization']
           if auth['authorized']:
               assert auth['blockers']==[]

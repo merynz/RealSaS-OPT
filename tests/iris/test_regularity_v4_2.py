@@ -1,4 +1,5 @@
 import torch
+import pytest
 
 from models.iris.v4.audit_scheduler_v4_2 import (
     AuditComputeBudgetV42,
@@ -9,6 +10,7 @@ from models.iris.v4.regularity_v4_2 import (
     GlobalEikonalPolicyV42,
     RayLipschitzPolicyV42,
     deterministic_global_points_v42,
+    finite_difference_global_eikonal_v42,
     ray_directional_lipschitz_v42,
     sign_transition_diagnostic_v42,
 )
@@ -52,3 +54,20 @@ def test_compute_guard_is_apparatus_only_and_promotion_is_fail_fast():
     assert not ok and reason.startswith('COMPUTE_GUARD_FACE_CAP')
     assert r512_promotion_audit_required_v42(r256_stage13_pass=False) is False
     assert r512_promotion_audit_required_v42(r256_stage13_pass=True) is True
+
+
+class _LinearField:
+    def query(self, scene_planes, points):
+        return {"sdf": points[..., :1]}
+
+
+def test_global_eikonal_reports_tail_norm_diagnostics():
+    row=finite_difference_global_eikonal_v42(
+        model=_LinearField(),
+        scene_planes=torch.zeros(1,1,1,1),
+        fit_seed=7,
+        training_step=3,
+        policy=GlobalEikonalPolicyV42(maximum_points_per_step=32),
+    )
+    assert float(row["gradient_norm_p99"]) == pytest.approx(1.0, abs=1e-5)
+    assert float(row["gradient_norm_max"]) == pytest.approx(1.0, abs=1e-5)

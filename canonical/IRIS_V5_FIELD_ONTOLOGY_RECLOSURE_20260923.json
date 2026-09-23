@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_TP64_DIRECT_FSTAR_FIT_AUTHORIZED",
+  "status": "FROZEN_FSTAR__TP64_DIRECT_FSTAR_ARM_FAIL__LEARNED_OWNER_REOPENED",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -43,6 +43,15 @@
       "vertex_count": 6253564,
       "face_count": 12507100,
       "boundary_crossing_tets": 0
+    },
+    "tp64_direct_fstar_fit": {
+      "closure": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_CLOSURE_20260923.json",
+      "run_id": "20260923T212708Z",
+      "selected_step": 4800,
+      "r512_nonpositive_certified_exterior_count": 85849,
+      "sparse_shell_boundary_crossing_tets": 436,
+      "stage13_executed": false,
+      "scientific_pass": false
     }
   },
   "active_field_ontology": {
@@ -84,26 +93,14 @@
     ]
   },
   "training_authorization": {
-    "authorized": true,
-    "authorization_scope": "KNIGHT_FIT1__TP64_DIRECT_FSTAR_REACHABILITY__ONE_FROZEN_PREREGISTERED_ARM",
-    "preregistration": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json",
-    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_DIRECT_FSTAR_FIT_RUN_ALL_AUDITED_V2.ipynb",
-    "notebook_sha256": "93e7dd44dcfed865b5ba5861365e88b6407255da6ce0af9674c43a6bbb231aad",
-    "execution_repo_commit": "4de08a779199d64b60b0d1aae3512a0f77e77c77",
-    "closed_prerequisites": [
-      "FREEZE_EXACT_V5_FSTAR_TARGET_CONTRACT",
-      "PROVE_ANALYTIC_FSTAR_TO_INDEXED_SPARSE_REGULAR_TETRA_MT_TO_FROZEN_STAGE13_P999_PASS",
-      "FREEZE_DIRECT_TARGET_TP64_FIT_PREREGISTRATION"
+    "authorized": false,
+    "prior_authorized_arm": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json",
+    "prior_arm_closure": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_CLOSURE_20260923.json",
+    "blockers": [
+      "LOCALIZE_LEARNED_SIGN_AND_ZERO_SET_TAIL",
+      "FREEZE_NEXT_LEARNED_OWNER_EXPERIMENT_PREREGISTRATION"
     ],
-    "blockers": [],
-    "forbidden_scope_expansion": [
-      "NO_POSTHOC_LOSS_TERM_ADDITION",
-      "NO_STAGE13_IN_CHECKPOINT_SELECTION",
-      "NO_R512_AUDIT_IN_CHECKPOINT_SELECTION",
-      "NO_SECOND_SEED_OR_HYPERPARAMETER_RETRY_INSIDE_THIS_PREREGISTERED_ARM"
-    ],
-    "note": "Optimizer steps remain authorized only under the frozen parent preregistration plus the apparatus-only amendment. V2 changes only the indexed MT count integration and early API-signature guard; scientific contracts are unchanged.",
-    "preregistration_amendment": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_AMENDMENT_20260923.json"
+    "note": "The exact F* target and analytic indexed decoder parity remain frozen. New optimizer steps are blocked until the learned sign/topology failure tail is localized and a new arm is preregistered."
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",

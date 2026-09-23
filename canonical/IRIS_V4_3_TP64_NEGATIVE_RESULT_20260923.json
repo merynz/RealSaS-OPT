@@ -1,0 +1,112 @@
+{
+  "schema": "RealSaS.IRIS.V43TP64NegativeResult.v1",
+  "date_utc": "2026-09-23",
+  "status": "SEALED_NEGATIVE__FIXED_WEIGHT_HULL_CONSTRAINT_DID_NOT_STABILIZE_HEALTHY_FOREGROUND_PLUS_EXACT_R512_SIGN_CLOSURE",
+  "run": {
+    "run_id": "20260923T071556Z",
+    "repo_commit": "529ce9a6bdd32224d591d6b149abd1fff2fe23dd",
+    "result_sha256": "ca6595dc8b73cddf1cb519ddfd56c4527240ea76187e2be87e9505c65d8dc3c3",
+    "r512_final_audit_sha256": "37c1daa3c3899a3dbc843639e2efde51534d0842d9c48f7f5187dc62bce31128",
+    "r512_scan_history_sha256": "4a69f45d29fa9f8e7b20b3a7c52fa884037266944c07306f0bfba4af04034022",
+    "r256_stage13_sha256": "b86ffeebb81ff982048ab07c58dafcb666529f8f0d832488958086c41961d204",
+    "r256_source_support_sha256": "5c5da43166a585ba67c963cbc199840e019951b8532a362af7028dd9ab923c03"
+  },
+  "selected_checkpoint": {
+    "step": 2600,
+    "r512_certified_exterior_corner_count": 128851336,
+    "r512_nonpositive_corner_count": 32089,
+    "r512_nonpositive_fraction": 0.0002490389389520959,
+    "r512_nonpositive_by_band": {
+      "0_2": 24415,
+      "2_8": 7650,
+      "8_32": 24,
+      "gt_32": 0
+    },
+    "r512_exact_p99_metric_deficit": 0.0031783580780029297,
+    "r512_maximum_metric_deficit": 0.05416586995124817,
+    "r256_stage13": {
+      "pass": false,
+      "min_precision": 0.9548463215149879,
+      "min_recall": 0.9897834105216451,
+      "min_component_recall": 0.9897834105216451,
+      "max_interior_uncovered_fraction": 0.005778449383386817,
+      "max_largest_coherent_hole_fraction": 0.0019796088842100445,
+      "max_silhouette_edge_p95_px": 7.810249675906654,
+      "max_silhouette_edge_max_px": 31.25699921617557,
+      "vertex_count": 106197,
+      "face_count": 212226
+    }
+  },
+  "causal_observation": {
+    "degenerate_exact_sign_example": {
+      "step": 1800,
+      "r512_nonpositive_corner_count": 0,
+      "max_foreground_miss_fraction": 0.46875
+    },
+    "healthy_foreground_examples": [
+      {
+        "step": 2200,
+        "max_foreground_miss_fraction": 0.01953125,
+        "r512_nonpositive_corner_count": 41325
+      },
+      {
+        "step": 2400,
+        "max_foreground_miss_fraction": 0.0078125,
+        "r512_nonpositive_corner_count": 55932
+      },
+      {
+        "step": 2600,
+        "max_foreground_miss_fraction": 0.01171875,
+        "r512_nonpositive_corner_count": 32089
+      },
+      {
+        "step": 2800,
+        "max_foreground_miss_fraction": 0.00390625,
+        "r512_nonpositive_corner_count": 70870
+      },
+      {
+        "step": 4800,
+        "max_foreground_miss_fraction": 0.00390625,
+        "r512_nonpositive_corner_count": 141186
+      }
+    ],
+    "late_hull_dominant_examples": [
+      {
+        "step": 4600,
+        "max_foreground_miss_fraction": 0.05859375,
+        "r512_nonpositive_corner_count": 4764
+      },
+      {
+        "step": 4700,
+        "r512_nonpositive_corner_count": 1947
+      }
+    ],
+    "interpretation": "fixed-weight optimization oscillated between foreground retention and exterior sign closure; step 1800 sign closure is not a capacity proof because foreground collapsed"
+  },
+  "localization": {
+    "selected_checkpoint_nonpositive_within_8px": 32065,
+    "selected_checkpoint_nonpositive_within_8px_fraction_of_nonpositive": 0.999252080152077,
+    "selected_checkpoint_nonpositive_gt32px": 0,
+    "r256_vertex_max_violation_px": 10.551384925842285,
+    "largest_component_outside_1px_vertex_count": 15322,
+    "largest_component_vertex_count": 104739,
+    "interpretation": "catastrophic distant foam is closed; residual owner is primarily main-carrier silhouette/boundary consistency, not detached far geometry"
+  },
+  "falsified": "Adding exact R512 source-hull lattice supervision as a fixed-weight loss is sufficient to stabilize healthy foreground retention and exact certified-exterior sign closure simultaneously.",
+  "not_falsified": [
+    "TP64 representation capacity is sufficient.",
+    "TP64 representation capacity is insufficient.",
+    "Adaptive constrained optimization can stabilize the two requirements.",
+    "A later raster/boundary coupling step may still be required after sign closure."
+  ],
+  "promotion": {
+    "product_authority_minted": false,
+    "knight_witness_promoted": false,
+    "r512_stage13_run": false
+  },
+  "next_required": [
+    "source-only foreground/hull feasibility audit",
+    "V4.4 single-variable adaptive hull constraint control if feasibility target remains valid"
+  ],
+  "claim_boundary": "Controlled Knight FIT research only; no product, unseen, FITK, or generalization claim."
+}

@@ -72,13 +72,13 @@
     "exact_r512_metric_deficit_violation_count": "REPORT_AND_TARGET_ZERO",
     "tail_safety": {
       "maximum_metric_deficit": "REPORT",
-      "residual_projection_extent_px": "COMPARE_TO_MEASURED_4.885094241336951PX_CERTIFICATION_SHELL__NOT_A_STAGE13_THRESHOLD"
+      "residual_projection_extent_px": "COMPARE_TO_MATCHING_EXTRACTION_RESOLUTION_CERTIFICATION_SHELL__R128_15.379725585605618__R256_8.369586217081057__R512_4.885094241336951__NOT_STAGE13_THRESHOLDS"
     },
     "stage13_pass_required_for_causal_success": false,
     "stage13_pass_required_for_product_promotion": true
   },
   "decision_tree": {
-    "sign_closure_and_healthy_foreground_and_residual_at_shell_scale": "V44_CAUSAL_SUCCESS__AUTHORIZE_RASTER_OR_BOUNDARY_COUPLING_ONLY_IF_FROZEN_STAGE13_REMAINS_OPEN",
+    "sign_closure_and_healthy_foreground_and_residual_at_shell_scale": "V44_CAUSAL_SUCCESS__USE_MATCHING_RESOLUTION_SHELL__AUTHORIZE_RASTER_OR_BOUNDARY_COUPLING_ONLY_IF_FROZEN_STAGE13_REMAINS_OPEN",
     "sign_closure_but_foreground_collapsed": "FAIL_DEGENERATE__NO_CAPACITY_CLAIM",
     "healthy_foreground_but_sign_closure_not_reached": "FAIL_ADAPTIVE_CONSTRAINT_INSUFFICIENT__CAPACITY_OR_CONTROLLER_REMAINS_OPEN",
     "residual_materially_beyond_measured_shell": "CAPACITY_OR_REPRESENTATION_DEBATE_REOPENS"

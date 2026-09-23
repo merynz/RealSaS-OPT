@@ -1,0 +1,93 @@
+{
+  "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
+  "status": "FROZEN_PRE_V5_TRAINING",
+  "date_utc": "2026-09-23",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
+  "purpose": "Supersede the active metric-SDF magnitude interpretation after the source-only oracle chain isolated a bounded source-consistent signed geometry field whose zero set passes frozen Stage13.",
+  "supersession": {
+    "historical_drive_run_id": "20260923T174330Z",
+    "historical_decision": "TARGET_AUTHORITY_CONFLICT__DO_NOT_TRAIN_YET",
+    "disposition": "HISTORICAL_RESULT_RETAINED__ACTIVE_FIELD_ONTOLOGY_SUPERSEDED",
+    "note": "The historical hard_compatible=false remains a true statement about the retired uncapped metric-magnitude lower-bound contract. It is not an exterior-sign failure."
+  },
+  "evidence": {
+    "exact_r512_exterior_sign_audit": {
+      "certified_exterior_count": 128851336,
+      "nonpositive_certified_exterior_count": 0,
+      "pass": true,
+      "active_interpretation": "ALL_SOURCE_CERTIFIED_EXTERIOR_R512_POINTS_ARE_STRICTLY_POSITIVE"
+    },
+    "retired_metric_magnitude_audit": {
+      "hard_compatible": false,
+      "maximum_metric_deficit": 0.8935642242431641,
+      "margin_at_maximum_deficit": 1.143564224243164,
+      "target_at_maximum_deficit": 0.25,
+      "disposition": "RETIRED_AS_ACTIVE_REQUIREMENT_FOR_V5_FIELD"
+    },
+    "f4_constructive_oracle": {
+      "run_id": "20260923T165606Z",
+      "decision": "CONTINUOUS_TARGET_UNDEFORMED_AND_DEFORMED_PASS__TARGET_SAMPLING_WAS_SUFFICIENT_OWNER__DEFORMATION_NOT_REQUIRED_FOR_THIS_WITNESS",
+      "selected_arm": "U_UNDEFORMED",
+      "learned_field_used": false,
+      "teacher_geometry_used": false,
+      "stage13_feedback_used": false,
+      "frozen_stage13_p999_pass": true,
+      "representation": "CONTINUOUS_TARGET__SPARSE_REGULAR_TETRA__UNDEFORMED__MT"
+    }
+  },
+  "active_field_ontology": {
+    "name": "BOUNDED_SOURCE_CONSISTENT_SIGNED_GEOMETRY_FIELD",
+    "zero_level_set_is_geometry_authority": true,
+    "sign_semantics": {
+      "negative": "SOURCE_CONSISTENT_INTERIOR_EVIDENCE",
+      "zero": "GEOMETRY_SURFACE",
+      "positive": "SOURCE_CONSISTENT_EXTERIOR_EVIDENCE"
+    },
+    "magnitude_semantics": "BOUNDED_CONTINUOUS_SOURCE_GEOMETRY_SCORE__NOT_EUCLIDEAN_DISTANCE",
+    "euclidean_sdf_required": false,
+    "eikonal_unit_gradient_required": false,
+    "clamp_absolute_value": 0.25,
+    "source_authority_only": true
+  },
+  "r512_independent_sign_certificate": {
+    "rule": "FOR_EVERY_SOURCE_CERTIFIED_EXTERIOR_R512_POINT_Q__F(Q)>0",
+    "required_nonpositive_count": 0,
+    "metric_magnitude_lower_bound_is_gate": false,
+    "purpose": "Independent exterior sign safety audit; not a training magnitude objective."
+  },
+  "optimizer_authority": {
+    "primary_semantics": "DIRECT_REGRESSION_TO_ONE_CANONICAL_FSTAR_TARGET",
+    "retired_from_primary_optimizer": [
+      "UNCAPPED_R512_HULL_METRIC_MAGNITUDE_LOWER_BOUND",
+      "V4_4_OR_V4_4_1_HULL_LAMBDA_RHO_CONTROLLER",
+      "GLOBAL_EIKONAL_UNIT_GRADIENT",
+      "RAY_DIRECTIONAL_LIPSCHITZ",
+      "TEACHER_OR_LOCAL_METRIC_SDF_MAGNITUDE",
+      "TEACHER_SURFACE_ZERO_AUTHORITY",
+      "SEPARATE_FOREGROUND_EXISTENCE_HINGE",
+      "SEPARATE_BACKGROUND_NEGATIVE_SPACE_HINGE"
+    ],
+    "diagnostics_may_be_retained": [
+      "R512_EXTERIOR_SIGN_CERTIFICATE",
+      "SOURCE_FOREGROUND_AND_BACKGROUND_AUDITS",
+      "FROZEN_STAGE13_P999_QUALIFICATION"
+    ]
+  },
+  "training_authorization": {
+    "authorized": false,
+    "blockers": [
+      "FREEZE_EXACT_V5_FSTAR_TARGET_CONTRACT",
+      "PROVE_ANALYTIC_FSTAR_TO_INDEXED_SPARSE_REGULAR_TETRA_MT_TO_FROZEN_STAGE13_P999_PASS",
+      "FREEZE_DIRECT_TARGET_TP64_FIT_PREREGISTRATION"
+    ],
+    "note": "Ontology conflict is closed here, but this document alone does not authorize optimizer steps."
+  },
+  "claim_boundary": [
+    "This reclosure does not prove TP64 can learn F*.",
+    "This reclosure does not prove unseen generalization.",
+    "This reclosure does not relax frozen Stage13 P999.",
+    "This reclosure does not select a deterministic no-model shipping lane.",
+    "Historical negative results remain preserved as evidence under their original contracts."
+  ]
+}

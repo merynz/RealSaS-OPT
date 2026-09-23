@@ -1,0 +1,78 @@
+name: iris-v5-source-field-contract
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'models/iris/v5/**'
+      - 'tests/iris/test_source_signed_field_v5.py'
+      - 'canonical/IRIS_V5_FIELD_ONTOLOGY_RECLOSURE_20260923.json'
+      - 'canonical/IRIS_V5_CONTINUOUS_SOURCE_FIELD_POLICY_20260923.json'
+      - '.github/workflows/iris_v5_source_field_contract.yml'
+  workflow_dispatch:
+
+jobs:
+  v5-source-field-contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install frozen CPU test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off pytest==8.3.5 scipy==1.15.3
+      - name: Compile V5 source-field lane
+        run: |
+          python -m py_compile models/iris/v5/source_signed_field_v5.py
+          python -m py_compile tests/iris/test_source_signed_field_v5.py
+      - name: Run exact V5 target contract tests
+        run: |
+          python -m pytest -q tests/iris/test_source_signed_field_v5.py
+      - name: Prove ontology supersession boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          ontology=json.loads(Path('canonical/IRIS_V5_FIELD_ONTOLOGY_RECLOSURE_20260923.json').read_text())
+          target=json.loads(Path('canonical/IRIS_V5_CONTINUOUS_SOURCE_FIELD_POLICY_20260923.json').read_text())
+
+          ext=ontology['evidence']['exact_r512_exterior_sign_audit']
+          assert ext['certified_exterior_count']==128851336
+          assert ext['nonpositive_certified_exterior_count']==0
+          assert ext['pass'] is True
+          assert ontology['active_field_ontology']['euclidean_sdf_required'] is False
+          assert ontology['r512_independent_sign_certificate']['metric_magnitude_lower_bound_is_gate'] is False
+          assert ontology['training_authorization']['authorized'] is False
+
+          c=target['exact_target_contract']
+          assert c['required_view_count']==8
+          assert c['required_resolution']==1024
+          assert c['signed_2d']=='EDT(background)-EDT(foreground)'
+          assert c['projection']['raster_cell_support']=='0<=sx<=RES AND 0<=sy<=RES'
+          assert c['sample_coordinates']=='(sy-0.5,sx-0.5)'
+          assert c['interpolation']=='BILINEAR'
+          assert c['edge_extension']=='NEAREST'
+          assert c['multi_view_aggregation']=='MAX_OVER_VALID_VIEWS'
+          assert c['unseen_value']==0.25
+          assert c['field_clamp']=={'min':-0.25,'max':0.25}
+          assert target['next_gate']['training_before_gate'] is False
+
+          print('V5_EXTERIOR_SIGN_AUTHORITY=PASS_0_OF_128851336')
+          print('V5_LEGACY_METRIC_MAGNITUDE_GATE=RETIRED')
+          print('V5_FSTAR_CONTRACT=FROZEN')
+          print('V5_TRAINING=BLOCKED_PENDING_INDEXED_STAGE12_PARITY')
+          PY

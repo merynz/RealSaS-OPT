@@ -83,5 +83,21 @@
     "healthy_foreground_but_sign_closure_not_reached": "FAIL_ADAPTIVE_CONSTRAINT_INSUFFICIENT__CAPACITY_OR_CONTROLLER_REMAINS_OPEN",
     "residual_materially_beyond_measured_shell": "CAPACITY_OR_REPRESENTATION_DEBATE_REOPENS"
   },
-  "claim_boundary": "Controlled Knight FIT research only; no product authority, unseen, FITK, or generalization claim."
+  "claim_boundary": "Controlled Knight FIT research only; no product authority, unseen, FITK, or generalization claim.",
+  "checkpoint_selection": {
+    "audit_interval_steps": 200,
+    "causal_joint_candidate_definition": {
+      "max_foreground_miss_fraction": 0,
+      "exact_r512_nonpositive_certified_exterior_corner_count": 0
+    },
+    "lexicographic_rule": [
+      "CAUSAL_JOINT_CANDIDATE_FIRST",
+      "EXISTING_V43_FIVE_DIMENSION_PARETO",
+      "FROZEN_R128_STAGE13_SEVERITY",
+      "R256_SCREEN",
+      "R512_ONLY_AFTER_R256_STAGE13_PASS"
+    ],
+    "if_no_joint_candidate": "SELECT_BEST_EXISTING_V43_DIAGNOSTIC_PARETO_CANDIDATE_WITHOUT_MINTING_V44_CAUSAL_SUCCESS",
+    "metric_lower_bound_violation_count": "REPORT_AND_TARGET_ZERO__NOT_USED_TO_RELAX_EXACT_SIGN_OR_FOREGROUND_REQUIREMENTS"
+  }
 }

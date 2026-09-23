@@ -203,7 +203,7 @@ def test_independent_exterior_sign_audit_ignores_metric_magnitude():
     assert failed["nonpositive_certified_exterior_count"] == 1
 
 
-def test_canonical_policy_matches_f4_contract_and_blocks_training():
+def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization():
     policy = json.loads(
         Path("canonical/IRIS_V5_CONTINUOUS_SOURCE_FIELD_POLICY_20260923.json").read_text()
     )
@@ -225,4 +225,9 @@ def test_canonical_policy_matches_f4_contract_and_blocks_training():
         "pass": True,
         "active_interpretation": "ALL_SOURCE_CERTIFIED_EXTERIOR_R512_POINTS_ARE_STRICTLY_POSITIVE",
     }
-    assert ontology["training_authorization"]["authorized"] is False
+    auth = ontology["training_authorization"]
+    assert auth["authorized"] is True
+    assert auth["authorization_scope"] == "KNIGHT_FIT1__TP64_DIRECT_FSTAR_REACHABILITY__ONE_FROZEN_PREREGISTERED_ARM"
+    assert auth["execution_repo_commit"] == "4de08a779199d64b60b0d1aae3512a0f77e77c77"
+    assert auth["notebook_sha256"] == "c5ccbb66f7de1ef9993482d58a4e8d62ffe1950e3df7b947e3febb5d074e58b5"
+    assert auth["blockers"] == []

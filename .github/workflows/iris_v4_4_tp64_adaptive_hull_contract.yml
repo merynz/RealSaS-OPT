@@ -1,0 +1,112 @@
+name: iris-v4-4-tp64-adaptive-hull-contract
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'models/iris/v4/adaptive_hull_constraint_v4_4.py'
+      - 'models/iris/v4/train_fit_v4_4.py'
+      - 'models/iris/v4/source_hull_lattice_v4_3.py'
+      - 'tests/iris/test_v4_4_adaptive_hull_constraint.py'
+      - 'tools/iris_v4_3_foreground_hull_feasibility.py'
+      - 'tools/iris_v4_4_certification_shell.py'
+      - 'canonical/IRIS_V4_3_TP64_NEGATIVE_RESULT_20260923.json'
+      - 'canonical/IRIS_V4_3_FOREGROUND_HULL_CONSTRAINT_FEASIBILITY_20260923.json'
+      - 'canonical/IRIS_V4_4_CERTIFICATION_SHELL_MEASUREMENT_20260923.json'
+      - 'canonical/IRIS_V4_4_TP64_ADAPTIVE_HULL_CONSTRAINT_POLICY_20260923.json'
+      - '.github/workflows/iris_v4_4_tp64_adaptive_hull_contract.yml'
+  workflow_dispatch:
+
+jobs:
+  v4-4-tp64-contract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install frozen CPU test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m pip install --no-input --progress-bar off pytest==8.3.5 scipy==1.15.3
+      - name: Compile V4.4 lane and audit tools
+        run: |
+          python -m py_compile models/iris/v4/adaptive_hull_constraint_v4_4.py
+          python -m py_compile models/iris/v4/train_fit_v4_4.py
+          python -m py_compile tools/iris_v4_3_foreground_hull_feasibility.py
+          python -m py_compile tools/iris_v4_4_certification_shell.py
+          python -m py_compile tests/iris/test_v4_4_adaptive_hull_constraint.py
+      - name: Run V4.4 controller and inherited hull tests
+        run: |
+          python -m pytest -q \
+            tests/iris/test_v4_4_adaptive_hull_constraint.py \
+            tests/iris/test_source_hull_lattice_v4_3.py \
+            tests/iris/test_regularity_v4_2.py \
+            tests/iris/test_source_exterior_v4.py
+      - name: Prove V4.4 single-variable claim boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from models.iris.v4.adaptive_hull_constraint_v4_4 import AdaptiveHullConstraintPolicyV44
+          from models.iris.v4.source_hull_lattice_v4_3 import SourceHullLatticePolicyV43
+
+          v43=json.loads(Path('canonical/IRIS_V4_3_TP64_NEGATIVE_RESULT_20260923.json').read_text())
+          feas=json.loads(Path('canonical/IRIS_V4_3_FOREGROUND_HULL_CONSTRAINT_FEASIBILITY_20260923.json').read_text())
+          shell=json.loads(Path('canonical/IRIS_V4_4_CERTIFICATION_SHELL_MEASUREMENT_20260923.json').read_text())
+          p=json.loads(Path('canonical/IRIS_V4_4_TP64_ADAPTIVE_HULL_CONSTRAINT_POLICY_20260923.json').read_text())
+          c=AdaptiveHullConstraintPolicyV44()
+          h=SourceHullLatticePolicyV43()
+
+          assert v43['status'].startswith('SEALED_NEGATIVE')
+          assert v43['promotion']['product_authority_minted'] is False
+          assert feas['result']['feasible_ray_count']==2048
+          assert feas['result']['infeasible_ray_count']==0
+          assert feas['decision']['relax_foreground_target'] is False
+          assert shell['maximum_in_frame_boundary_crossing_cell_shell_upper_bound_px']==4.885094241336951
+          assert shell['frame_margin_dominates_shell'] is True
+
+          assert p['scientific_name']=='IRIS_V4_4_TP64'
+          assert p['status']=='FROZEN_PRE_RUN'
+          assert p['frozen']['architecture_change'] is False
+          assert p['frozen']['foreground_audit_target_max_miss_fraction']==0.0
+          assert p['frozen']['stage13_threshold_relaxation'] is False
+          assert p['frozen']['teacher_first_hit_depth_loss'] is False
+          assert p['frozen']['global_teacher_sdf'] is False
+          assert p['frozen']['visual_hull_clipping_or_posthoc_carving'] is False
+          assert p['frozen']['differentiable_raster_coupling'] is False
+          assert p['frozen']['capacity_growth'] is False
+          assert p['controller']['state_variables']==['lambda']
+          assert p['controller']['rho']['adaptive_state'] is False
+          assert p['controller']['rho']['phi_value_used_in_calibration'] is False
+          assert p['causal_success']['exact_r512_nonpositive_certified_exterior_corner_count']==0
+          assert p['causal_success']['stage13_pass_required_for_causal_success'] is False
+          assert p['causal_success']['stage13_pass_required_for_product_promotion'] is True
+
+          assert c.full_scan_interval_steps==h.full_scan_interval_steps==100
+          assert c.initial_lambda==h.top_level_weight==1.0
+          print('V44_SINGLE_CAUSAL_CHANGE=PASS')
+          print('V44_FOREGROUND_TARGET_UNRELAXED=PASS')
+          print('V44_SIGNED_CONTROLLER=PASS')
+          print('V44_RHO_FROZEN_GRADIENT_DERIVED=PASS')
+          print('V44_CERTIFICATION_SHELL_MEASURED=PASS')
+          print('V44_STAGE13_UNCHANGED=PASS')
+          PY
+      - name: Enforce V4.4 source-authority boundary
+        run: |
+          set -euo pipefail
+          ! grep -RniE 'teacher_first_hit|global_teacher_sdf|visual[_ -]?hull.*clip|posthoc.*carv|differentiable.*raster' \
+            models/iris/v4/adaptive_hull_constraint_v4_4.py \
+            models/iris/v4/train_fit_v4_4.py
+          echo 'V44_SOURCE_AUTHORITY_BOUNDARY=PASS'

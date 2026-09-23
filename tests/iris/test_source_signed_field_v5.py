@@ -226,9 +226,15 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
         "active_interpretation": "ALL_SOURCE_CERTIFIED_EXTERIOR_R512_POINTS_ARE_STRICTLY_POSITIVE",
     }
     auth = ontology["training_authorization"]
-    assert auth["authorized"] is True
-    assert auth["authorization_scope"] == "KNIGHT_FIT1__TP64_DIRECT_FSTAR_REACHABILITY__ONE_FROZEN_PREREGISTERED_ARM"
-    assert auth["execution_repo_commit"] == "4de08a779199d64b60b0d1aae3512a0f77e77c77"
-    assert auth["notebook_sha256"] == "93e7dd44dcfed865b5ba5861365e88b6407255da6ce0af9674c43a6bbb231aad"
-    assert auth["preregistration_amendment"] == "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_AMENDMENT_20260923.json"
-    assert auth["blockers"] == []
+    if auth["authorized"]:
+        assert auth["authorization_scope"] == "KNIGHT_FIT1__TP64_DIRECT_FSTAR_REACHABILITY__ONE_FROZEN_PREREGISTERED_ARM"
+        assert auth["execution_repo_commit"] == "4de08a779199d64b60b0d1aae3512a0f77e77c77"
+        assert auth["notebook_sha256"] == "93e7dd44dcfed865b5ba5861365e88b6407255da6ce0af9674c43a6bbb231aad"
+        assert auth["preregistration_amendment"] == "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_AMENDMENT_20260923.json"
+        assert auth["blockers"] == []
+    else:
+        assert auth["prior_arm_closure"] == "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_CLOSURE_20260923.json"
+        assert auth["blockers"] == [
+            "LOCALIZE_LEARNED_SIGN_AND_ZERO_SET_TAIL",
+            "FREEZE_NEXT_LEARNED_OWNER_EXPERIMENT_PREREGISTRATION",
+        ]

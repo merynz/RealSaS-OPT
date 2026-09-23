@@ -7,6 +7,7 @@ from models.iris.v5.indexed_sparse_tetra_decoder_v5 import (
     SparseRegularTetraPolicyV5,
     SparseSurfaceTruncationError,
     decode_indexed_sparse_tetra_mt_v5,
+    implicit_normals_with_diagnostics_from_query_v5,
     write_stage12_npz_v5,
 )
 
@@ -65,6 +66,11 @@ def test_indexed_sparse_mt_extracts_closed_sphere_and_stage12_arrays(tmp_path):
     assert d["face_count"] == len(f)
     assert d["vertex_count"] == len(v)
     assert len(v) < 3 * len(f)
+    nd = d["implicit_normal_diagnostics"]
+    assert nd["vertex_count"] == len(v)
+    assert nd["unresolved_vertex_count"] == 0
+    assert nd["source_field_only"] is True
+    assert nd["teacher_truth_used"] is False
 
     npz = write_stage12_npz_v5(mesh, tmp_path / "stage12.npz")
     with np.load(npz, allow_pickle=False) as data:
@@ -136,3 +142,57 @@ def test_policy_preserves_f4_t512_t1024_geometry():
         abs=1e-15,
     )
     assert policy.fail_on_boundary_crossing is True
+
+
+def test_nonsmooth_max_field_kink_uses_deterministic_one_sided_orientation():
+    policy = SparseRegularTetraPolicyV5(
+        base_cells=8,
+        fine_cells=16,
+        query_chunk=64,
+        cell_chunk=8,
+        refine_slab_cells=2,
+        fine_gid_cell_chunk=8,
+        normal_chunk=64,
+    )
+
+    def absolute_kink(points: np.ndarray) -> np.ndarray:
+        q = np.asarray(points, dtype=np.float32)
+        return np.abs(q[:, 0]).astype(np.float32)
+
+    vertices = np.asarray([[0.0, 0.0, 0.0]], dtype=np.float32)
+    normals, diagnostics = implicit_normals_with_diagnostics_from_query_v5(
+        absolute_kink,
+        vertices,
+        policy=policy,
+    )
+    np.testing.assert_array_equal(
+        normals,
+        np.asarray([[1.0, 0.0, 0.0]], dtype=np.float32),
+    )
+    assert diagnostics["central_gradient_vertex_count"] == 0
+    assert diagnostics["one_sided_fallback_vertex_count"] == 1
+    assert diagnostics["fallback_scale_counts"] == {"1x": 1}
+    assert diagnostics["unresolved_vertex_count"] == 0
+
+
+def test_truly_flat_field_orientation_still_fails_closed():
+    policy = SparseRegularTetraPolicyV5(
+        base_cells=8,
+        fine_cells=16,
+        query_chunk=64,
+        cell_chunk=8,
+        refine_slab_cells=2,
+        fine_gid_cell_chunk=8,
+        normal_chunk=64,
+    )
+
+    def flat(points: np.ndarray) -> np.ndarray:
+        q = np.asarray(points, dtype=np.float32)
+        return np.zeros(len(q), dtype=np.float32)
+
+    with pytest.raises(ValueError, match="implicit field orientation is unresolved"):
+        implicit_normals_with_diagnostics_from_query_v5(
+            flat,
+            np.asarray([[0.0, 0.0, 0.0]], dtype=np.float32),
+            policy=policy,
+        )

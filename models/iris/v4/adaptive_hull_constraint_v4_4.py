@@ -61,6 +61,7 @@ def signed_equal_band_control_v44(
     certified: torch.Tensor,
     *,
     hull_policy: SourceHullLatticePolicyV43=SourceHullLatticePolicyV43(),
+    require_all_bands: bool=True,
 ) -> dict[str, object]:
     """Bounded signed hull deficit statistic for the dual controller.
 
@@ -87,7 +88,9 @@ def signed_equal_band_control_v44(
     for name,mask in zip(names,masks):
         count=int(mask.sum().detach().cpu())
         if count<=0:
-            raise ValueError(f"V44_CONTROLLER_EMPTY_BAND:{name}")
+            if require_all_bands:
+                raise ValueError(f"V44_CONTROLLER_EMPTY_BAND:{name}")
+            continue
         value=clipped[mask].mean()
         controls.append(value)
         rows.append({
@@ -98,11 +101,14 @@ def signed_equal_band_control_v44(
             "nonpositive_sign_fraction":(s[mask]<=0).float().mean(),
             "maximum_metric_deficit":torch.amax(deficit[mask]),
         })
+    if not controls:
+        raise ValueError("V44_CONTROLLER_NO_ACTIVE_BANDS")
     control=torch.stack(controls).mean()
     certified_count=c.sum()
     return {
         "control":control,
         "bands":tuple(rows),
+        "active_band_names":tuple(row["band"] for row in rows),
         "certified_count":certified_count,
         "metric_deficit_violation_count":((deficit>0)&c).sum(),
         "metric_deficit_violation_fraction":((deficit>0)&c).float().sum()/certified_count.clamp_min(1),

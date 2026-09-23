@@ -105,12 +105,16 @@ def finite_difference_global_eikonal_v42(
     norm = torch.linalg.vector_norm(gradient, dim=-1)
     error = torch.abs(norm - 1.0)
     total = torch.mean((norm - 1.0) ** 2)
+    ordered = torch.sort(norm.reshape(-1)).values
     p95_index = max(0, int(math.ceil(0.95 * int(norm.numel()))) - 1)
+    p99_index = max(0, int(math.ceil(0.99 * int(norm.numel()))) - 1)
     return {
         "total": total,
         "sample_count": torch.as_tensor(norm.numel(), dtype=torch.int64, device=planes.device),
         "gradient_norm_mean": norm.mean(),
-        "gradient_norm_p95": torch.sort(norm.reshape(-1)).values[p95_index],
+        "gradient_norm_p95": ordered[p95_index],
+        "gradient_norm_p99": ordered[p99_index],
+        "gradient_norm_max": torch.amax(norm),
         "gradient_norm_abs_error_mean": error.mean(),
     }
 

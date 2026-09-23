@@ -187,6 +187,8 @@ def compute_v42_tp64_geometry_objective(
         "global_eikonal_sample_count": global_eikonal["sample_count"],
         "global_eikonal_gradient_norm_mean": global_eikonal["gradient_norm_mean"],
         "global_eikonal_gradient_norm_p95": global_eikonal["gradient_norm_p95"],
+        "global_eikonal_gradient_norm_p99": global_eikonal["gradient_norm_p99"],
+        "global_eikonal_gradient_norm_max": global_eikonal["gradient_norm_max"],
         "global_eikonal_gradient_norm_abs_error_mean": global_eikonal["gradient_norm_abs_error_mean"],
         "ray_lipschitz_total": ray_lipschitz_total,
         "ray_lipschitz_weight": float(ray_lipschitz_policy.top_level_weight),

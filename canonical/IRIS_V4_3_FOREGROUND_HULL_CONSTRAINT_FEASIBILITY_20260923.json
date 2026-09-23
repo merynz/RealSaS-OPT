@@ -1,0 +1,164 @@
+{
+  "schema": "RealSaS.IRIS.V43ForegroundHullConstraintFeasibility.v1",
+  "date_utc": "2026-09-23",
+  "status": "SOURCE_ONLY_FIXED_AUDIT_FOREGROUND_TARGET_FEASIBLE__NOT_CAPACITY_PROOF",
+  "parent_run": {
+    "run_id": "20260923T071556Z",
+    "repo_commit": "529ce9a6bdd32224d591d6b149abd1fff2fe23dd",
+    "v43_result_sha256": "ca6595dc8b73cddf1cb519ddfd56c4527240ea76187e2be87e9505c65d8dc3c3",
+    "r512_final_audit_sha256": "37c1daa3c3899a3dbc843639e2efde51534d0842d9c48f7f5187dc62bce31128",
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7"
+  },
+  "question": "Can the fixed V4.3 foreground audit target max_foreground_miss_fraction=0 be rejected as geometrically inconsistent with the source-only hull exterior contract before changing the optimizer?",
+  "method": {
+    "foreground_rays": "exact V4.3 fixed audit positive indices: sample_hard_positive_refresh_candidates_v41(state, fit_seed=SEED+404, refresh_index=0, count=256) for each of 8 views",
+    "ray_sampling": "exact build_ray_points_v4 semantics at training_step=777777; DenseSourceCoveragePolicyV3 depth spacing and phase",
+    "exterior_test": "source_hull_exterior_margin_v43 semantics evaluated at every foreground audit ray sample point using the exact 8 source masks/cameras and sqrt(2) pixel quantization guard",
+    "feasible_ray_definition": "a foreground audit ray is source-hull-feasible iff at least one sampled point is not source-certified exterior (h(x)=0), so the source-only exterior contract does not itself forbid negative support somewhere on that ray",
+    "teacher_signed_sdf_used": false,
+    "truth_mesh_signed_sdf_used": false,
+    "why_truth_mesh_signed_sdf_forbidden": "teacher_truth_fit_only.npz is zero-surface evidence, not a watertight signed-volume authority; assigning an exact inside/outside SDF would invent truth not present in the evidence"
+  },
+  "frozen_constants": {
+    "fit_seed": 26091909,
+    "audit_training_step": 777777,
+    "audit_rays_per_view": 256,
+    "total_audit_rays": 2048,
+    "occupancy_beta_normalized": 0.0007352941176470588,
+    "boundary_inside_margin_normalized": 0.0003676470588235294,
+    "interior_inside_margin_normalized": 0.0007352941176470588,
+    "maximum_depth_step_normalized": 0.0029411764705882353,
+    "pixel_quantization_guard_px": 1.4142135623730951
+  },
+  "result": {
+    "feasible_ray_count": 2048,
+    "infeasible_ray_count": 0,
+    "feasible_fraction": 1,
+    "minimum_uncertified_samples_on_any_ray": 7,
+    "per_view": [
+      {
+        "view": 0,
+        "rays": 256,
+        "phase": 0.8183710983753456,
+        "depth_samples": 682,
+        "source_hull_feasible_count": 256,
+        "source_hull_infeasible_count": 0,
+        "min_free_samples_per_ray": 13,
+        "median_free_samples_per_ray": 146,
+        "max_free_samples_per_ray": 392,
+        "boundary_rays": 4,
+        "interior_rays": 252,
+        "max_min_hull_margin_on_ray": 0
+      },
+      {
+        "view": 1,
+        "rays": 256,
+        "phase": 0.8778657635524183,
+        "depth_samples": 964,
+        "source_hull_feasible_count": 256,
+        "source_hull_infeasible_count": 0,
+        "min_free_samples_per_ray": 19,
+        "median_free_samples_per_ray": 170.5,
+        "max_free_samples_per_ray": 464,
+        "boundary_rays": 4,
+        "interior_rays": 252,
+        "max_min_hull_margin_on_ray": 0
+      },
+      {
+        "view": 2,
+        "rays": 256,
+        "phase": 0.7981336096590875,
+        "depth_samples": 682,
+        "source_hull_feasible_count": 256,
+        "source_hull_infeasible_count": 0,
+        "min_free_samples_per_ray": 7,
+        "median_free_samples_per_ray": 164.5,
+        "max_free_samples_per_ray": 413,
+        "boundary_rays": 6,
+        "interior_rays": 250,
+        "max_min_hull_margin_on_ray": 0
+      },
+      {
+        "view": 3,
+        "rays": 256,
+        "phase": 0.1649140918454905,
+        "depth_samples": 962,
+        "source_hull_feasible_count": 256,
+        "source_hull_infeasible_count": 0,
+        "min_free_samples_per_ray": 15,
+        "median_free_samples_per_ray": 185,
+        "max_free_samples_per_ray": 523,
+        "boundary_rays": 4,
+        "interior_rays": 252,
+        "max_min_hull_margin_on_ray": 0
+      },
+      {
+        "view": 4,
+        "rays": 256,
+        "phase": 0.8183710983753456,
+        "depth_samples": 682,
+        "source_hull_feasible_count": 256,
+        "source_hull_infeasible_count": 0,
+        "min_free_samples_per_ray": 12,
+        "median_free_samples_per_ray": 137,
+        "max_free_samples_per_ray": 402,
+        "boundary_rays": 3,
+        "interior_rays": 253,
+        "max_min_hull_margin_on_ray": 0
+      },
+      {
+        "view": 5,
+        "rays": 256,
+        "phase": 0.8778657635524183,
+        "depth_samples": 964,
+        "source_hull_feasible_count": 256,
+        "source_hull_infeasible_count": 0,
+        "min_free_samples_per_ray": 16,
+        "median_free_samples_per_ray": 174.5,
+        "max_free_samples_per_ray": 516,
+        "boundary_rays": 6,
+        "interior_rays": 250,
+        "max_min_hull_margin_on_ray": 0
+      },
+      {
+        "view": 6,
+        "rays": 256,
+        "phase": 0.7981336096590875,
+        "depth_samples": 682,
+        "source_hull_feasible_count": 256,
+        "source_hull_infeasible_count": 0,
+        "min_free_samples_per_ray": 9,
+        "median_free_samples_per_ray": 161,
+        "max_free_samples_per_ray": 414,
+        "boundary_rays": 7,
+        "interior_rays": 249,
+        "max_min_hull_margin_on_ray": 0
+      },
+      {
+        "view": 7,
+        "rays": 256,
+        "phase": 0.1649140918454905,
+        "depth_samples": 964,
+        "source_hull_feasible_count": 256,
+        "source_hull_infeasible_count": 0,
+        "min_free_samples_per_ray": 18,
+        "median_free_samples_per_ray": 185.5,
+        "max_free_samples_per_ray": 534,
+        "boundary_rays": 3,
+        "interior_rays": 253,
+        "max_min_hull_margin_on_ray": 0
+      }
+    ]
+  },
+  "decision": {
+    "relax_foreground_target": false,
+    "foreground_audit_target": "max_foreground_miss_fraction == 0 remains preregisterable",
+    "owner": "optimization/representation remains open; source-mask vs hull-contract inconsistency is not supported on the fixed audit rays",
+    "next": "V4.4 may change only the hull-constraint control mechanism; architecture, source masks, Stage13 thresholds, teacher boundary and foreground target remain frozen"
+  },
+  "claim_boundary": [
+    "This is a fixed-audit source-constraint feasibility result, not a proof that TP64 can realize a nondegenerate field satisfying all constraints.",
+    "This does not mint product authority, Knight promotion, Stage13 PASS, or a general unseen claim.",
+    "This does not define a signed truth SDF for the non-watertight teacher mesh."
+  ]
+}

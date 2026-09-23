@@ -1,0 +1,137 @@
+{
+  "schema": "RealSaS.IRIS.V5IndexedStage12AnalyticParityClosure.v1",
+  "status": "PASS_CLOSED",
+  "date_utc": "2026-09-23",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "preregistration": "canonical/IRIS_V5_INDEXED_STAGE12_ANALYTIC_PARITY_PREREG_20260923.json",
+  "preregistration_amendment": "canonical/IRIS_V5_INDEXED_STAGE12_ANALYTIC_PARITY_PREREG_AMENDMENT_20260923.json",
+  "canonical_run": {
+    "run_id": "20260923T202040Z",
+    "repo_commit": "efd814a15f5b6714fb6c3abb3ef7400ae9c312b0",
+    "decision": "V5_INDEXED_STAGE12_ANALYTIC_PARITY_PASS__REPO_INDEXED_DECODER_PRESERVES_F4_U_WITNESS__TP64_DIRECT_TARGET_PREREG_NEXT",
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "observation_set_binding_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+    "normalization_binding_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23"
+  },
+  "target_parity": {
+    "sampled_points": 16384,
+    "cpu_gpu_max_abs": 2.9802322387695312e-8,
+    "cpu_gpu_mean_abs": 8.738423318277455e-10,
+    "sign_disagreements": 0,
+    "pass": true
+  },
+  "indexed_stage12": {
+    "decoder_id": "RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT.v5",
+    "base_cells": 512,
+    "fine_cells": 1024,
+    "refined_cell_count": 1487543,
+    "fine_vertex_count": 13628281,
+    "candidate_fine_tets": 71402064,
+    "crossing_tets": 9444524,
+    "boundary_crossing_tets": 0,
+    "vertex_count": 6253564,
+    "face_count": 12507100,
+    "global_shared_edge_dedup": true,
+    "deformation": false,
+    "zero_surface_npz_bytes": 300171534,
+    "zero_surface_npz_sha256": "2de60a6926548428d71d6b562a7281e1a404592f980099d36f4287afb87beeb8",
+    "canonical_array_hashes": {
+      "vertices_normalized": "5dc04e7855f43e977d25e6d5d78b95304d667a4ae0039e247a24046ff2f632cb",
+      "faces": "1b9711e235021b66f2e913dc8a46f68c76e4f845fad0b86fac6017e14e2f74df",
+      "implicit_normals": "5ca45158abcf2baaa05497476b5c3d8d829dda8e61cfdad3cc2f156582d1f061"
+    },
+    "structural_reverification": {
+      "required_arrays_exact": [
+        "vertices_normalized",
+        "faces",
+        "implicit_normals"
+      ],
+      "vertices_shape": [
+        6253564,
+        3
+      ],
+      "faces_shape": [
+        12507100,
+        3
+      ],
+      "implicit_normals_shape": [
+        6253564,
+        3
+      ],
+      "vertices_dtype": "float32",
+      "faces_dtype": "int32",
+      "implicit_normals_dtype": "float32",
+      "all_floating_arrays_finite": true,
+      "face_index_min": 0,
+      "face_index_max": 6253563,
+      "degenerate_index_face_count": 0,
+      "implicit_normal_norm_min": 0.9999999502523546,
+      "implicit_normal_norm_max": 1.0000000512286662
+    },
+    "implicit_orientation": {
+      "central_gradient_vertex_count": 6251403,
+      "one_sided_fallback_vertex_count": 2161,
+      "one_sided_fallback_fraction": 0.0003455629461855671,
+      "fallback_scale_counts": {
+        "1x": 2161
+      },
+      "unresolved_vertex_count": 0,
+      "source_field_only": true,
+      "teacher_truth_used": false
+    }
+  },
+  "independent_count_parity": {
+    "independent_exact_faces": 12507100,
+    "repo_decoder_face_count": 12507100,
+    "equal": true,
+    "boundary_crossing_tets": 0
+  },
+  "actual_mesh_stage13_path_parity": {
+    "sample_faces": 512,
+    "projection_max_abs": 2.2737367544323206e-13,
+    "raster_mismatch_views": [],
+    "pass": true
+  },
+  "frozen_stage13": {
+    "profile": "P999",
+    "every_view_passed": true,
+    "max_view_interior_uncovered_fraction": 0,
+    "max_view_largest_coherent_hole_fraction": 0.00003432847776086782,
+    "max_view_silhouette_edge_p95_px": 0,
+    "max_view_silhouette_edge_max_px_diagnostic_only": 26,
+    "min_view_component_recall": 0.9997507563851368,
+    "min_view_precision": 0.999794798986196,
+    "min_view_recall": 0.9997507563851368,
+    "thresholds": {
+      "min_recall": 0.999,
+      "min_precision": 0.999,
+      "max_largest_coherent_hole_fraction": 0.00025,
+      "max_interior_uncovered_fraction": 0.0005,
+      "min_component_recall": 0.999,
+      "component_min_foreground_fraction": 0,
+      "max_silhouette_edge_p95_px": 0.5
+    },
+    "historical_f4_u_metric_parity": "EXACT_PER_VIEW_METRIC_EQUALITY__ELIGIBLE_COMPONENT_COUNT_WRAPPER_FIELD_EXCLUDED"
+  },
+  "independent_postrun_verification": {
+    "artifact_json_sha256s_match_manifest": true,
+    "zero_surface_npz_sha256_recomputed_from_materialized_drive_bytes": true,
+    "canonical_array_hashes_recomputed_from_materialized_npz": true,
+    "stage13_current_vs_historical_f4_u_exact_per_view_metrics": true
+  },
+  "scientific_decision": {
+    "indexed_stage12_analytic_parity_closed": true,
+    "target_ontology_reopen_required": false,
+    "representation_search_reopen_required": false,
+    "deterministic_no_model_product_promotion_authorized": false,
+    "tp64_reachability_proven": false,
+    "next_gate": "FREEZE_TP64_DIRECT_FSTAR_FIT_PREREGISTRATION__THEN_RUN_REACHABILITY_FIT"
+  },
+  "claim_boundary": [
+    "This closes only analytic F* -> repo indexed Stage12 -> frozen Knight Stage13 P999 parity.",
+    "This does not prove TP64 can learn F*.",
+    "This does not authorize deterministic no-model product promotion.",
+    "This does not prove Stage14-46 product closure or unseen generalization.",
+    "The 26 px silhouette maximum remains diagnostic-only under the pre-frozen P999 contract; p95 remains the scientific silhouette gate."
+  ]
+}

@@ -6,9 +6,10 @@
   "execution_repo_commit": "9398cf415e76823499b903e025b14d5d501ddcf8",
   "notebook": {
     "filename": "RealSaS_IRIS_KNIGHT_V5_INDEXED_STAGE12_ANALYTIC_PARITY_RUN_ALL.ipynb",
-    "sha256": "918681d74fb93cc8949034b503c399466f64dee4472fceed7903fd3423e895ec",
+    "sha256": "3231c4bf4dacf7ecb7c60981a9fbd2ad057469cacd0d46de79c93fefb708f16b",
     "execution_count_required_initially_null": true,
-    "prior_outputs_forbidden": true
+    "prior_outputs_forbidden": true,
+    "audit_revision": "V2_PREFLIGHT_FIX__HOTPATH_OPT__EXACT_STAGE13_FLOAT64_CENTER_PARITY"
   },
   "frozen_inputs": {
     "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
@@ -80,5 +81,23 @@
     "PASS does not authorize deterministic no-model product promotion.",
     "PASS does not prove Stage14-46 closure or unseen generalization.",
     "FAIL does not reopen the target ontology or representation search without new evidence."
-  ]
+  ],
+  "execution_efficiency_audit": {
+    "scientific_construction_changed": false,
+    "fixes": [
+      "REMOVE_UNDEFINED_FIELD_QUERY_CHUNK__USE_FROZEN_QUERY_CHUNK",
+      "T512_COORDINATES_GENERATED_DIRECTLY_ON_GPU",
+      "REUSE_EXACT_T512_VALUES_AT_COINCIDENT_FINE_T1024_VERTICES",
+      "EMIT_EDGE_BENCHMARK_KEYS_ONCE",
+      "TRANSFER_STAGE13_FACE_CHUNK_TO_GPU_ONCE_FOR_EIGHT_VIEWS",
+      "STREAM_ARRAY_HASH_BYTES_WITHOUT_LARGE_TOBYTES_COPY",
+      "COPY_LARGE_STAGE12_NPZ_TO_DRIVE_ONCE",
+      "SPLIT_FSTAR_FLOAT32_CENTER_FROM_EXACT_STAGE13_FLOAT64_NORMALIZATION_CENTER",
+      "ADD_ACTUAL_INDEXED_MESH_CPU_GPU_PROJECTION_AND_RASTER_PARITY"
+    ],
+    "intentionally_retained_duplicate_work": [
+      "INDEPENDENT_MT_FACE_COUNT_BEFORE_REPO_DECODER_BUILD__SCIENTIFIC_PARITY_CHECK",
+      "SMALL_STAGE13_RASTER_SPEED_PREFLIGHT_BEFORE_FULL_FROZEN_REPLAY"
+    ]
+  }
 }

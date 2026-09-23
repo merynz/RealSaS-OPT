@@ -11,6 +11,7 @@ on:
       - 'tests/iris/test_direct_fstar_fit_v5.py'
       - 'canonical/IRIS_V5_FIELD_ONTOLOGY_RECLOSURE_20260923.json'
       - 'canonical/IRIS_V5_CONTINUOUS_SOURCE_FIELD_POLICY_20260923.json'
+      - 'canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json'
       - '.github/workflows/iris_v5_source_field_contract.yml'
   workflow_dispatch:
 
@@ -65,7 +66,19 @@ jobs:
           assert ext['pass'] is True
           assert ontology['active_field_ontology']['euclidean_sdf_required'] is False
           assert ontology['r512_independent_sign_certificate']['metric_magnitude_lower_bound_is_gate'] is False
-          assert ontology['training_authorization']['authorized'] is False
+          prereg=json.loads(Path('canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json').read_text())
+          assert prereg['status']=='FROZEN_BEFORE_OPTIMIZER_STEP_1'
+          assert prereg['execution']['repo_commit']=='4de08a779199d64b60b0d1aae3512a0f77e77c77'
+          assert prereg['optimizer']['primary_objective']['type']=='SMOOTH_L1_DIRECT_FSTAR_ONLY'
+          assert prereg['optimizer']['weight_decay']==0.0
+          assert prereg['checkpoint_selection']['stage13_blind'] is True
+          assert prereg['checkpoint_selection']['exact_r512_audit_blind'] is True
+          auth=ontology['training_authorization']
+          if auth['authorized']:
+              assert auth['blockers']==[]
+              assert auth['preregistration']=='canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json'
+          else:
+              assert 'FREEZE_DIRECT_TARGET_TP64_FIT_PREREGISTRATION' in auth['blockers']
 
           c=target['exact_target_contract']
           assert c['required_view_count']==8
@@ -83,5 +96,5 @@ jobs:
           print('V5_EXTERIOR_SIGN_AUTHORITY=PASS_0_OF_128851336')
           print('V5_LEGACY_METRIC_MAGNITUDE_GATE=RETIRED')
           print('V5_FSTAR_CONTRACT=FROZEN')
-          print('V5_TRAINING=BLOCKED_PENDING_DIRECT_FSTAR_TP64_PREREG')
+          print('V5_TRAINING_AUTHORIZED='+str(bool(ontology['training_authorization']['authorized'])).upper())
           PY

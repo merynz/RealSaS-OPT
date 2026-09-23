@@ -1,0 +1,78 @@
+{
+  "schema": "RealSaS.IRIS.V5ContinuousSourceFieldPolicy.v1",
+  "status": "FROZEN_PRE_V5_TRAINING",
+  "date_utc": "2026-09-23",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
+  "field_ontology": "canonical/IRIS_V5_FIELD_ONTOLOGY_RECLOSURE_20260923.json",
+  "oracle_provenance": {
+    "source_notebook": "RealSaS_IRIS_KNIGHT_F4_CONTINUOUS_TETRA_AB_STAGE13_RUN_ALL.ipynb",
+    "f4_run_id": "20260923T165606Z",
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "scientific_change_in_oracle": "SOURCE_TARGET_SAMPLING_CONTRACT_ONLY"
+  },
+  "source_inputs": {
+    "exact_eight_foreground_masks": "STAGE07_BOUND_SOURCE_MASKS",
+    "exact_qualified_cameras": "STAGE05_QUALIFIED_CAMERA_SET",
+    "normalization": "STAGE08_NORMALIZATION_DOMAIN",
+    "teacher_geometry": false,
+    "learned_checkpoint": false,
+    "stage13_feedback": false
+  },
+  "exact_target_contract": {
+    "required_view_count": 8,
+    "required_resolution": 1024,
+    "signed_2d": "EDT(background)-EDT(foreground)",
+    "projection": {
+      "world_point": "p_world = center_xyz + q_normalized * normalization_half_extent",
+      "gx": "dot(p_world-camera_origin, camera_right) / camera_half_extent",
+      "gy": "-dot(p_world-camera_origin, camera_screen_up) / camera_half_extent",
+      "sx": "(gx+1)*0.5*RES",
+      "sy": "(gy+1)*0.5*RES",
+      "raster_cell_support": "0<=sx<=RES AND 0<=sy<=RES"
+    },
+    "sample_coordinates": "(sy-0.5,sx-0.5)",
+    "interpolation": "BILINEAR",
+    "edge_extension": "NEAREST",
+    "per_view_scale": "2*camera_half_extent/(RES*normalization_half_extent)",
+    "multi_view_aggregation": "MAX_OVER_VALID_VIEWS",
+    "unseen_value": 0.25,
+    "field_clamp": {
+      "min": -0.25,
+      "max": 0.25
+    },
+    "formula": "F*(q)=clip(max_valid_v bilinear(S_v,sy_v(q)-0.5,sx_v(q)-0.5)*2*h_v/(RES*H),-0.25,+0.25); unseen(q)=+0.25",
+    "sign_convention": {
+      "negative": "interior",
+      "zero": "surface",
+      "positive": "exterior"
+    }
+  },
+  "implementation": {
+    "module": "models/iris/v5/source_signed_field_v5.py",
+    "cpu_reference": "SCIPY_MAP_COORDINATES_ORDER1_MODE_NEAREST_PREFILTER_FALSE",
+    "torch_reference": "EXPLICIT_MANUAL_BILINEAR_WITH_COORDINATE_CLAMP_0_TO_RES_MINUS_1",
+    "camera_basis_normalization_inside_target": false,
+    "note": "Qualified camera basis is consumed exactly as frozen by the F4 oracle; the target implementation must not silently renormalize or change support semantics."
+  },
+  "primary_optimizer_boundary": {
+    "single_target": "FSTAR_ONLY",
+    "stage13_is_training_loss": false,
+    "r512_metric_magnitude_is_training_loss": false,
+    "r512_sign_is_independent_audit": true,
+    "eikonal_is_primary_loss": false,
+    "ray_lipschitz_is_primary_loss": false,
+    "hull_controller_is_primary_loss": false,
+    "teacher_metric_sdf_is_primary_loss": false
+  },
+  "next_gate": {
+    "required": "ANALYTIC_FSTAR_TO_INDEXED_SPARSE_REGULAR_TETRA_MT_TO_FROZEN_STAGE13_P999_PASS",
+    "training_before_gate": false
+  },
+  "claim_boundary": [
+    "This policy freezes F* but does not authorize training by itself.",
+    "This policy does not claim TP64 reachability.",
+    "This policy does not relax Stage13.",
+    "The F4 source-only PASS is an extraction existence witness, not learned-field evidence."
+  ]
+}

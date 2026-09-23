@@ -229,5 +229,6 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert auth["authorized"] is True
     assert auth["authorization_scope"] == "KNIGHT_FIT1__TP64_DIRECT_FSTAR_REACHABILITY__ONE_FROZEN_PREREGISTERED_ARM"
     assert auth["execution_repo_commit"] == "4de08a779199d64b60b0d1aae3512a0f77e77c77"
-    assert auth["notebook_sha256"] == "c5ccbb66f7de1ef9993482d58a4e8d62ffe1950e3df7b947e3febb5d074e58b5"
+    assert auth["notebook_sha256"] == "93e7dd44dcfed865b5ba5861365e88b6407255da6ce0af9674c43a6bbb231aad"
+    assert auth["preregistration_amendment"] == "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_AMENDMENT_20260923.json"
     assert auth["blockers"] == []

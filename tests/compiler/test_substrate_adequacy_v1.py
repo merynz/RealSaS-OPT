@@ -2,8 +2,12 @@ import math
 import numpy as np
 import pytest
 
+from compiler.realsas_compiler_core.types import QualificationError
+
 from compiler.realsas_compiler_core.substrate.adequacy_v1 import (
     _eligible_dense_components,
+    _mechanical_probe_metrics,
+    _policy as _parse_adequacy_policy,
     select_adequate_rigging_surface_v1,
     substrate_adequacy_report_hash_v1,
 )
@@ -143,3 +147,45 @@ def test_component_aware_voxel_compaction_prevents_cross_component_cluster_alias
 
     assert mixed_cluster_count(baseline_inverse)>0
     assert mixed_cluster_count(aware_inverse)==0
+
+
+def test_mechanical_probe_is_exact_when_carrier_equals_dense_samples():
+    dense=np.asarray([
+        [-0.4,-0.2,-0.5],[-0.2,0.3,-0.1],[0.0,0.0,0.0],
+        [0.2,-0.3,0.4],[0.45,0.2,0.7],
+    ],dtype=np.float64)
+    report=_mechanical_probe_metrics(dense,dense)
+    assert report["aggregate_p95_norm"]<1e-10
+    assert report["aggregate_max_norm"]<1e-10
+    for row in report["basis"].values():
+        assert row["p95_norm"]<1e-10
+        assert row["max_norm"]<1e-10
+
+
+def test_mechanical_probe_policy_is_explicit_and_fail_closed():
+    base={
+        "min_candidate_nodes":128,
+        "max_candidate_nodes":8192,
+        "candidate_growth_factor":2.0,
+        "refinement_rounds":2,
+        "max_dense_to_surface_p95_norm":0.03,
+        "max_dense_to_surface_max_norm":0.08,
+        "max_normal_p95_deg":30.0,
+        "max_projected_p95_px":16.0,
+        "max_projected_max_px":24.0,
+        "component_min_dense_fraction":0.001,
+        "min_nodes_per_component":1,
+        "max_component_alias_nodes":0,
+        "mechanical_probe_enabled":True,
+    }
+    with pytest.raises(QualificationError,match="SUBSTRATE_ADEQUACY_MECHANICAL_POLICY_INCOMPLETE"):
+        _parse_adequacy_policy(base)
+
+    parsed=_parse_adequacy_policy({
+        **base,
+        "max_mechanical_probe_p95_norm":0.003,
+        "max_mechanical_probe_max_norm":0.012,
+    })
+    assert parsed["mechanical_probe_enabled"] is True
+    assert parsed["max_mechanical_probe_p95_norm"]==pytest.approx(0.003)
+    assert parsed["max_mechanical_probe_max_norm"]==pytest.approx(0.012)

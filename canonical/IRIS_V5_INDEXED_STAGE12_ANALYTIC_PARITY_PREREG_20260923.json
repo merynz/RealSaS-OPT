@@ -1,0 +1,84 @@
+{
+  "schema": "RealSaS.IRIS.V5IndexedStage12AnalyticParityPreregistration.v1",
+  "status": "FROZEN_BEFORE_RUN",
+  "date_utc": "2026-09-23",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "execution_repo_commit": "d4b1720b1fe014e5737e4939cf8f6c9a9ce5ac93",
+  "notebook": {
+    "filename": "RealSaS_IRIS_KNIGHT_V5_INDEXED_STAGE12_ANALYTIC_PARITY_RUN_ALL.ipynb",
+    "sha256": "9b60a1344ca1173146fc28d509ea53d5367eea309b9b060abd8532f287962103",
+    "execution_count_required_initially_null": true,
+    "prior_outputs_forbidden": true
+  },
+  "frozen_inputs": {
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "observation_set_binding_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+    "normalization_binding_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23",
+    "field_ontology": "canonical/IRIS_V5_FIELD_ONTOLOGY_RECLOSURE_20260923.json",
+    "fstar_policy": "canonical/IRIS_V5_CONTINUOUS_SOURCE_FIELD_POLICY_20260923.json",
+    "stage13_policy": "canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json",
+    "stage13_policy_sha256": "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214"
+  },
+  "construction": {
+    "target": "EXACT_V5_FSTAR",
+    "base_cells": 512,
+    "fine_cells": 1024,
+    "refine_band": "sqrt(3)*(2/512)",
+    "deformation": false,
+    "whole_cell_halo": false,
+    "decoder_contract_id": "CONTINUOUS_FIELD__T512__SPARSE_T1024__REGULAR_TETRA__UNDEFORMED__INDEXED_MT",
+    "decoder_implementation": "models/iris/v5/indexed_sparse_tetra_decoder_v5.py",
+    "stage12_arrays": [
+      "vertices_normalized",
+      "faces",
+      "implicit_normals"
+    ],
+    "global_shared_edge_dedup": "SORTED_FINE_LATTICE_ENDPOINT_GID_PAIR",
+    "sparse_shell_boundary_crossing_allowed": false
+  },
+  "pass_criteria": {
+    "apparatus_abort": false,
+    "repo_cpu_vs_gpu_fstar_max_abs_lte": 0.000001,
+    "fstar_sign_disagreements": 0,
+    "independent_mt_face_count_equals_repo_decoder_face_count": true,
+    "sparse_shell_boundary_crossing_tets": 0,
+    "indexed_mesh_finite": true,
+    "stage12_array_contract_exact": true,
+    "frozen_stage13_profile": "P999",
+    "frozen_stage13_v2_pass": true,
+    "every_view_every_rule": true,
+    "thresholds": {
+      "min_recall": 0.999,
+      "min_precision": 0.999,
+      "max_largest_coherent_hole_fraction": 0.00025,
+      "max_interior_uncovered_fraction": 0.0005,
+      "min_component_recall": 0.999,
+      "component_min_foreground_fraction": 0,
+      "max_silhouette_edge_p95_px": 0.5
+    }
+  },
+  "forbidden": {
+    "optimizer_steps": true,
+    "teacher_geometry": true,
+    "teacher_depth": true,
+    "teacher_sdf": true,
+    "learned_geometry": true,
+    "learned_deformation": true,
+    "stage13_feedback_into_geometry": true,
+    "audit_failure_location_conditioning": true,
+    "gate_relaxation": true,
+    "deterministic_no_model_product_promotion": true
+  },
+  "decision_rule": {
+    "pass": "CLOSE_INDEXED_STAGE12_ANALYTIC_PARITY__NEXT_FREEZE_TP64_DIRECT_FSTAR_FIT_PREREG",
+    "fail": "KEEP_TRAINING_BLOCKED__LOCALIZE_INDEXED_MATERIALIZATION_NORMALS_OR_RASTER_OWNER",
+    "apparatus_abort": "NO_SCIENTIFIC_DECISION__OPTIMIZE_EXECUTION_WITHOUT_CHANGING_CONSTRUCTION"
+  },
+  "claim_boundary": [
+    "PASS proves only analytic F* to the repo indexed Stage12 decoder preserves frozen Knight Stage13 P999.",
+    "PASS does not prove TP64 reachability; TP64 direct-target FIT is the next experiment.",
+    "PASS does not authorize deterministic no-model product promotion.",
+    "PASS does not prove Stage14-46 closure or unseen generalization.",
+    "FAIL does not reopen the target ontology or representation search without new evidence."
+  ]
+}

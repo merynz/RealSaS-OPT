@@ -8,6 +8,7 @@ on:
       - 'models/iris/v5/**'
       - 'tests/iris/test_source_signed_field_v5.py'
       - 'tests/iris/test_indexed_sparse_tetra_decoder_v5.py'
+      - 'tests/iris/test_direct_fstar_fit_v5.py'
       - 'canonical/IRIS_V5_FIELD_ONTOLOGY_RECLOSURE_20260923.json'
       - 'canonical/IRIS_V5_CONTINUOUS_SOURCE_FIELD_POLICY_20260923.json'
       - '.github/workflows/iris_v5_source_field_contract.yml'
@@ -39,13 +40,16 @@ jobs:
         run: |
           python -m py_compile models/iris/v5/source_signed_field_v5.py
           python -m py_compile models/iris/v5/indexed_sparse_tetra_decoder_v5.py
+          python -m py_compile models/iris/v5/direct_fstar_fit_v5.py
           python -m py_compile tests/iris/test_source_signed_field_v5.py
           python -m py_compile tests/iris/test_indexed_sparse_tetra_decoder_v5.py
+          python -m py_compile tests/iris/test_direct_fstar_fit_v5.py
       - name: Run V5 target and indexed decoder tests
         run: |
           python -m pytest -q \
             tests/iris/test_source_signed_field_v5.py \
-            tests/iris/test_indexed_sparse_tetra_decoder_v5.py
+            tests/iris/test_indexed_sparse_tetra_decoder_v5.py \
+            tests/iris/test_direct_fstar_fit_v5.py
       - name: Prove ontology supersession boundary
         run: |
           python - <<'PY'
@@ -79,5 +83,5 @@ jobs:
           print('V5_EXTERIOR_SIGN_AUTHORITY=PASS_0_OF_128851336')
           print('V5_LEGACY_METRIC_MAGNITUDE_GATE=RETIRED')
           print('V5_FSTAR_CONTRACT=FROZEN')
-          print('V5_TRAINING=BLOCKED_PENDING_INDEXED_STAGE12_PARITY')
+          print('V5_TRAINING=BLOCKED_PENDING_DIRECT_FSTAR_TP64_PREREG')
           PY

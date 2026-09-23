@@ -87,8 +87,8 @@
     "authorized": true,
     "authorization_scope": "KNIGHT_FIT1__TP64_DIRECT_FSTAR_REACHABILITY__ONE_FROZEN_PREREGISTERED_ARM",
     "preregistration": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json",
-    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_DIRECT_FSTAR_FIT_RUN_ALL_AUDITED.ipynb",
-    "notebook_sha256": "c5ccbb66f7de1ef9993482d58a4e8d62ffe1950e3df7b947e3febb5d074e58b5",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_DIRECT_FSTAR_FIT_RUN_ALL_AUDITED_V2.ipynb",
+    "notebook_sha256": "93e7dd44dcfed865b5ba5861365e88b6407255da6ce0af9674c43a6bbb231aad",
     "execution_repo_commit": "4de08a779199d64b60b0d1aae3512a0f77e77c77",
     "closed_prerequisites": [
       "FREEZE_EXACT_V5_FSTAR_TARGET_CONTRACT",
@@ -102,7 +102,8 @@
       "NO_R512_AUDIT_IN_CHECKPOINT_SELECTION",
       "NO_SECOND_SEED_OR_HYPERPARAMETER_RETRY_INSIDE_THIS_PREREGISTERED_ARM"
     ],
-    "note": "Optimizer steps are authorized only for the exact notebook/hash and code pin above. PASS/FAIL interpretation remains bounded by the preregistration."
+    "note": "Optimizer steps remain authorized only under the frozen parent preregistration plus the apparatus-only amendment. V2 changes only the indexed MT count integration and early API-signature guard; scientific contracts are unchanged.",
+    "preregistration_amendment": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_AMENDMENT_20260923.json"
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",

@@ -69,9 +69,23 @@
   "frame_margin_dominates_shell": true,
   "v44_decision_rule": {
     "no_knight_tuned_pixel_threshold": true,
-    "compare_residual_extent_to_measured_shell": true,
-    "interpretation_if_residual_localizes_at_or_below_shell": "BOUNDARY_CROSSING_CELL_OR_RASTER_COUPLING_OWNER_SUPPORTED",
-    "interpretation_if_residual_remains_materially_beyond_shell": "REPRESENTATION_OR_OPTIMIZATION_OWNER_REMAINS_OPEN"
+    "compare_residual_extent_to_matching_extractor_resolution_shell": true,
+    "r128_shell_px": 15.379725585605618,
+    "r256_shell_px": 8.369586217081057,
+    "r512_shell_px": 4.885094241336951,
+    "interpretation_if_residual_localizes_at_or_below_matching_shell": "BOUNDARY_CROSSING_CELL_OR_RASTER_COUPLING_OWNER_SUPPORTED",
+    "interpretation_if_residual_remains_materially_beyond_matching_shell": "REPRESENTATION_OR_OPTIMIZATION_OWNER_REMAINS_OPEN"
   },
-  "claim_boundary": "Research localization ruler only; does not relax frozen Stage13, mint product authority, or prove capacity."
+  "claim_boundary": "Research localization ruler only; does not relax frozen Stage13, mint product authority, or prove capacity.",
+  "matching_resolution_shells": {
+    "128": {
+      "maximum_in_frame_boundary_crossing_cell_shell_upper_bound_px": 15.379725585605618
+    },
+    "256": {
+      "maximum_in_frame_boundary_crossing_cell_shell_upper_bound_px": 8.369586217081057
+    },
+    "512": {
+      "maximum_in_frame_boundary_crossing_cell_shell_upper_bound_px": 4.885094241336951
+    }
+  }
 }

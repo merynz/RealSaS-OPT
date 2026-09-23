@@ -7,9 +7,13 @@ on:
     paths:
       - 'models/iris/v4/source_hull_lattice_v4_3.py'
       - 'models/iris/v4/train_fit_v4_3.py'
+      - 'models/iris/v4/regularity_v4_2.py'
+      - 'models/iris/v4/train_fit_v4_2.py'
       - 'tests/iris/test_source_hull_lattice_v4_3.py'
+      - 'tests/iris/test_regularity_v4_2.py'
       - 'canonical/KNIGHT_TRUTH_RASTER_CONVENTION_REFERENCE_20260923.json'
       - 'canonical/IRIS_V4_3_TP64_SOURCE_HULL_LATTICE_POLICY_20260923.json'
+      - 'canonical/IRIS_V4_3_TP64_EXECUTION_BUDGET_20260923.json'
       - '.github/workflows/iris_v4_3_tp64_source_hull_lattice_contract.yml'
   workflow_dispatch:
 
@@ -39,7 +43,10 @@ jobs:
         run: |
           python -m py_compile models/iris/v4/source_hull_lattice_v4_3.py
           python -m py_compile models/iris/v4/train_fit_v4_3.py
+          python -m py_compile models/iris/v4/regularity_v4_2.py
+          python -m py_compile models/iris/v4/train_fit_v4_2.py
           python -m py_compile tests/iris/test_source_hull_lattice_v4_3.py
+          python -m py_compile tests/iris/test_regularity_v4_2.py
       - name: Run V4.3 authority tests
         run: |
           python -m pytest -q             tests/iris/test_source_hull_lattice_v4_3.py             tests/iris/test_regularity_v4_2.py             tests/iris/test_source_exterior_v4.py
@@ -51,6 +58,7 @@ jobs:
           from models.iris.v4.source_hull_lattice_v4_3 import SourceHullLatticePolicyV43
           p=json.loads(Path('canonical/IRIS_V4_3_TP64_SOURCE_HULL_LATTICE_POLICY_20260923.json').read_text())
           t=json.loads(Path('canonical/KNIGHT_TRUTH_RASTER_CONVENTION_REFERENCE_20260923.json').read_text())
+          b=json.loads(Path('canonical/IRIS_V4_3_TP64_EXECUTION_BUDGET_20260923.json').read_text())
           q=SourceHullLatticePolicyV43()
           assert p['scientific_name']=='IRIS_V4_3_TP64'
           assert p['architecture']['changed_from_v4_2'] is False
@@ -68,12 +76,17 @@ jobs:
           assert t['authority_boundary']['do_not_rebase_or_relax_stage13_to_this_reference'] is True
           assert t['exact_retained_summary']['truth_hard_raster_precision_all_views']==1.0
           assert t['constructive_source_contract_feasibility']['mc_r512_stage13_v2_pass'] is True
+          assert b['status'].startswith('FROZEN_APPARATUS_ONLY')
+          assert b['claim_boundary']['does_not_change_loss'] is True
+          assert b['claim_boundary']['does_not_change_stage13'] is True
+          assert b['limits']['max_estimated_total_notebook_wall_seconds']==10800.0
           print('V43_TP64_ARCHITECTURE_FROZEN=PASS')
           print('V43_R512_CANONICAL_LATTICE=PASS')
           print('V43_EXTERIOR_GATE_NO_RECALL_PRESSURE=PASS')
           print('V43_UNCAPPED_SOURCE_TARGET=PASS')
           print('V43_TRUTH_REFERENCE_NON_NORMATIVE=PASS')
           print('V43_STAGE13_UNCHANGED=PASS')
+          print('V43_EXECUTION_BUDGET_APPARATUS_ONLY=PASS')
           PY
       - name: Enforce source-authority boundary
         run: |

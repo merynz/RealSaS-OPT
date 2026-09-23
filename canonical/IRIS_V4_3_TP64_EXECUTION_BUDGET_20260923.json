@@ -13,7 +13,7 @@
   "prediction": {
     "baseline_v42_training_wall_seconds": 4906.111542224884,
     "baseline_v42_mean_optimizer_step_seconds": 1.022106571296851,
-    "full_scan_count_planned": 49,
+    "full_scan_count_planned": 50,
     "training_steps": 4800,
     "method": "After static target precompute and the initial exact R512 hull scan, benchmark the added V4.3 hull forward/backward lane on the actual A100. Estimate total wall time from the measured hull-lane increment plus observed initial-scan time. Abort before optimizer training if the estimate exceeds the apparatus wall budget."
   },

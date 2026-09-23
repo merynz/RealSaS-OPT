@@ -1,0 +1,123 @@
+{
+  "schema": "RealSaS.IRIS.V5TP64DirectFStarFITClosure.v1",
+  "status": "FAIL_CLOSED__LEARNED_OWNER_REOPENED",
+  "date_utc": "2026-09-23",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "preregistration": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json",
+  "run": {
+    "run_id": "20260923T212708Z",
+    "repo_commit": "4de08a779199d64b60b0d1aae3512a0f77e77c77",
+    "selected_step": 4800,
+    "selected_checkpoint_sha256": "45de860757ddb6f65afcecb7fdc9f51ef4aef2aeaf598288459a0e5bfa1ec751",
+    "training_wall_seconds": 191.6380558013916,
+    "decision": "V5_TP64_DIRECT_FSTAR_FIT_FAIL__SELECTED_LEARNED_FIELD_NOT_DECODABLE_BY_FROZEN_INDEXED_STAGE12_PATH",
+    "scientific_pass": false
+  },
+  "authority_checks": {
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "observation_set_binding_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+    "normalization_binding_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23",
+    "fstar_parity": {
+      "points": 16384,
+      "cpu_gpu_max_abs": 2.9802322387695312e-8,
+      "cpu_gpu_mean_abs": 8.5315171594047e-10,
+      "sign_disagreements": 0,
+      "pass": true
+    },
+    "teacher_geometry_used": false,
+    "teacher_depth_used": false,
+    "teacher_sdf_used": false,
+    "stage13_feedback_used": false,
+    "stage13_used_for_checkpoint_selection": false,
+    "r512_used_for_checkpoint_selection": false
+  },
+  "training_result": {
+    "architecture_id": "RealSaS.IRIS.SceneFirstSignedGeometry.v4.tp64",
+    "trainable_parameters": 5094882,
+    "steps": 4800,
+    "candidate_count": 24,
+    "selected_step": 4800,
+    "selected_heldout": {
+      "count": 131072,
+      "mae": 0.004022167529910803,
+      "rmse": 0.006809980608522892,
+      "p95_abs": 0.012749556452035904,
+      "maximum_abs": 0.15077704191207886,
+      "near_zero_count": 68072,
+      "near_zero_mae": 0.0038170393090695143,
+      "sign_disagreement_count": 14861,
+      "sign_disagreement_fraction": 0.11338043212890625,
+      "sign_clean": false
+    },
+    "trajectory": {
+      "step_200_sign_disagreement_fraction": 0.26207733154296875,
+      "step_200_mae": 0.04791282117366791,
+      "step_4000_sign_disagreement_fraction": 0.12105560302734375,
+      "step_4000_mae": 0.004709464497864246,
+      "step_4800_sign_disagreement_fraction": 0.11338043212890625,
+      "step_4800_mae": 0.004022167529910803,
+      "best_candidate_was_final_step": true,
+      "interpretation": "LEARNING_PROGRESS_PRESENT_BUT_FROZEN_ARM_DID_NOT_CLOSE_SIGN_TOPOLOGY"
+    }
+  },
+  "independent_r512_sign_gate": {
+    "authority": "FROZEN_V4_3_SOURCE_HULL_CERTIFICATION__SIGN_ONLY",
+    "resolution": 512,
+    "point_count": 134217728,
+    "certified_exterior_count": 128851336,
+    "expected_certified_exterior_count": 128851336,
+    "nonpositive_certified_exterior_count": 85849,
+    "nonpositive_fraction": 0.0006662639493314993,
+    "passed": false,
+    "metric_magnitude_lower_bound_is_gate": false,
+    "decisive_for_scientific_pass": true
+  },
+  "indexed_stage12_gate": {
+    "candidate_fine_tets": 87228480,
+    "crossing_tets": 9099510,
+    "exact_faces": 12001452,
+    "boundary_crossing_tets": 436,
+    "passed": false,
+    "failure": "SPARSE_SHELL_TRUNCATES_LEARNED_ZERO_SURFACE",
+    "stage13_executed": false,
+    "note": "Frozen decoder correctly failed before Stage13 because the learned zero surface crossed the sparse carrier boundary."
+  },
+  "artifact_integrity": {
+    "training_trace_sha256": "704c1dc65e021b54afd95ec350644fea9e4d88d784097fcfe6dc58cad3afceb0",
+    "selected_checkpoint_sha256": "45de860757ddb6f65afcecb7fdc9f51ef4aef2aeaf598288459a0e5bfa1ec751",
+    "result_sha256": "859a80dbd64fb5c89e6305fcc92db75d5d01f37f9024be53f016a88f84427d39",
+    "r512_audit_sha256": "6c88ac613fd8a28b3c58920ac401c21aa64bd93b73b0d718c53b304fd9e887e5",
+    "mt_count_sha256": "c0dde62185f03b78ae6736bf70103d9e65023000ad70b6b90f0df161071aec36",
+    "drive_sync_ok": true,
+    "completion_marker_present": true
+  },
+  "scientific_interpretation": {
+    "fstar_target_ontology_reopened": false,
+    "analytic_indexed_decoder_parity_reopened": false,
+    "existing_tp64_frozen_arm_passed": false,
+    "mathematical_impossibility_of_tp64_proven": false,
+    "learned_representation_or_training_owner_reopened": true,
+    "reasons": [
+      "Independent R512 sign gate failed with 85,849 nonpositive certified exterior points.",
+      "Frozen sparse indexed decoder additionally found 436 boundary-crossing tetrahedra and therefore correctly refused Stage13 materialization.",
+      "Held-out residuals and sign disagreement improved substantially through step 4800, so this arm does not support a claim that the model learned nothing or that TP64 is mathematically incapable.",
+      "Because the selected candidate remained sign-dirty and the best candidate occurred at the final frozen step, the next experiment should first localize the residual/sign/topology tail before choosing whether to change optimization schedule, sampling, or representation."
+    ]
+  },
+  "next_gate": {
+    "status": "LOCALIZE_LEARNED_SIGN_AND_ZERO_SET_TAIL_BEFORE_NEW_TRAINING_ARM",
+    "recommended_diagnostics": [
+      "Map exact R512 nonpositive certified-exterior points by distance-to-zero target magnitude, spatial clusters, and source witness view.",
+      "Map the 436 sparse-shell boundary-crossing tetrahedra and test overlap/proximity with learned sign-error clusters.",
+      "Bin held-out sign disagreements by |F*| to determine whether failures are almost entirely near the zero set or include material field errors.",
+      "Do not run a second seed, extend steps, relax Stage13, enlarge the decoder shell, or change architecture until this localization is sealed."
+    ]
+  },
+  "claim_boundary": [
+    "This FAIL closes only the preregistered Knight FIT1 TP64 direct-F* arm.",
+    "It does not reopen the exact F* target contract.",
+    "It does not invalidate the analytic indexed Stage12 parity PASS.",
+    "It does not prove TP64 mathematical insufficiency.",
+    "No Stage13 result exists for this run because the frozen decoder failed earlier."
+  ]
+}

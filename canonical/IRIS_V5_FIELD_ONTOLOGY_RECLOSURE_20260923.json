@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_PRE_V5_TRAINING",
+  "status": "FROZEN_PRE_TP64_DIRECT_FSTAR_FIT",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -34,6 +34,15 @@
       "stage13_feedback_used": false,
       "frozen_stage13_p999_pass": true,
       "representation": "CONTINUOUS_TARGET__SPARSE_REGULAR_TETRA__UNDEFORMED__MT"
+    },
+    "indexed_stage12_analytic_parity": {
+      "closure": "canonical/IRIS_V5_INDEXED_STAGE12_ANALYTIC_PARITY_CLOSURE_20260923.json",
+      "run_id": "20260923T202040Z",
+      "repo_commit": "efd814a15f5b6714fb6c3abb3ef7400ae9c312b0",
+      "frozen_stage13_p999_pass": true,
+      "vertex_count": 6253564,
+      "face_count": 12507100,
+      "boundary_crossing_tets": 0
     }
   },
   "active_field_ontology": {
@@ -76,12 +85,14 @@
   },
   "training_authorization": {
     "authorized": false,
-    "blockers": [
+    "closed_prerequisites": [
       "FREEZE_EXACT_V5_FSTAR_TARGET_CONTRACT",
-      "PROVE_ANALYTIC_FSTAR_TO_INDEXED_SPARSE_REGULAR_TETRA_MT_TO_FROZEN_STAGE13_P999_PASS",
+      "PROVE_ANALYTIC_FSTAR_TO_INDEXED_SPARSE_REGULAR_TETRA_MT_TO_FROZEN_STAGE13_P999_PASS"
+    ],
+    "blockers": [
       "FREEZE_DIRECT_TARGET_TP64_FIT_PREREGISTRATION"
     ],
-    "note": "Ontology conflict is closed here, but this document alone does not authorize optimizer steps."
+    "note": "Field ontology and indexed Stage12 analytic parity are closed. Optimizer steps remain blocked until the direct-F* TP64 FIT preregistration is frozen."
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",

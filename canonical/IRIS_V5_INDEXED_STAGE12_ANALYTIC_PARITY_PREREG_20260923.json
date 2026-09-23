@@ -3,10 +3,10 @@
   "status": "FROZEN_BEFORE_RUN",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
-  "execution_repo_commit": "d4b1720b1fe014e5737e4939cf8f6c9a9ce5ac93",
+  "execution_repo_commit": "9398cf415e76823499b903e025b14d5d501ddcf8",
   "notebook": {
     "filename": "RealSaS_IRIS_KNIGHT_V5_INDEXED_STAGE12_ANALYTIC_PARITY_RUN_ALL.ipynb",
-    "sha256": "9b60a1344ca1173146fc28d509ea53d5367eea309b9b060abd8532f287962103",
+    "sha256": "918681d74fb93cc8949034b503c399466f64dee4472fceed7903fd3423e895ec",
     "execution_count_required_initially_null": true,
     "prior_outputs_forbidden": true
   },
@@ -26,7 +26,7 @@
     "refine_band": "sqrt(3)*(2/512)",
     "deformation": false,
     "whole_cell_halo": false,
-    "decoder_contract_id": "CONTINUOUS_FIELD__T512__SPARSE_T1024__REGULAR_TETRA__UNDEFORMED__INDEXED_MT",
+    "decoder_contract_id": "RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT.v5",
     "decoder_implementation": "models/iris/v5/indexed_sparse_tetra_decoder_v5.py",
     "stage12_arrays": [
       "vertices_normalized",

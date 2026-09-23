@@ -542,18 +542,110 @@ def _emit_edge_keys_for_chunk(
     return np.concatenate(pieces)
 
 
-def implicit_normals_from_query_v5(
+def _one_sided_orientation_fallback_v5(
+    query_fn: Callable[[np.ndarray], Any],
+    points: np.ndarray,
+    *,
+    epsilon: float,
+    policy: SparseRegularTetraPolicyV5,
+) -> tuple[np.ndarray, np.ndarray, dict[str, int]]:
+    """Resolve non-smooth MAX-field kinks without pretending a classical gradient exists.
+
+    The canonical V5 source field is a MAX over per-view signed fields.  At an active-view
+    ridge a symmetric central stencil can be exactly zero even though the zero set is
+    perfectly well-defined.  Stage14 consumes these vectors only as orientation hints for
+    its robust local-PCA normal operator, so for those non-smooth points we select a
+    deterministic outward one-sided secant.  A genuinely flat/unoriented neighborhood
+    still fails closed.
+    """
+
+    q_all = np.asarray(points, dtype=np.float32)
+    if q_all.ndim != 2 or q_all.shape[1] != 3:
+        raise ValueError("points must be [N,3]")
+    if len(q_all) == 0:
+        return (
+            np.empty((0, 3), dtype=np.float32),
+            np.zeros(0, dtype=bool),
+            {},
+        )
+
+    eye = np.eye(3, dtype=np.float32)
+    out = np.zeros_like(q_all)
+    resolved = np.zeros(len(q_all), dtype=bool)
+    scale_counts: dict[str, int] = {}
+    f0_all = _query_numpy(
+        query_fn,
+        q_all,
+        chunk_size=int(policy.query_chunk),
+    ).astype(np.float64)
+
+    # Start at the exact frozen normal stencil, then widen only unresolved points.
+    for scale in (1.0, 2.0, 4.0, 8.0):
+        pending = np.flatnonzero(~resolved)
+        if len(pending) == 0:
+            break
+        q = q_all[pending]
+        f0 = f0_all[pending]
+        step = float(epsilon) * float(scale)
+        components = np.zeros((len(q), 3), dtype=np.float64)
+        best_axis_slope = np.zeros((len(q), 3), dtype=np.float64)
+
+        for axis in range(3):
+            qp = np.clip(q + step * eye[axis], -1.0, 1.0)
+            qm = np.clip(q - step * eye[axis], -1.0, 1.0)
+            fp = _query_numpy(
+                query_fn, qp, chunk_size=int(policy.query_chunk)
+            ).astype(np.float64)
+            fm = _query_numpy(
+                query_fn, qm, chunk_size=int(policy.query_chunk)
+            ).astype(np.float64)
+            dp = qp[:, axis].astype(np.float64) - q[:, axis].astype(np.float64)
+            dm = q[:, axis].astype(np.float64) - qm[:, axis].astype(np.float64)
+
+            plus = np.full(len(q), -np.inf, dtype=np.float64)
+            minus = np.full(len(q), -np.inf, dtype=np.float64)
+            valid_plus = dp > 1e-12
+            valid_minus = dm > 1e-12
+            plus[valid_plus] = (fp[valid_plus] - f0[valid_plus]) / dp[valid_plus]
+            minus[valid_minus] = (fm[valid_minus] - f0[valid_minus]) / dm[valid_minus]
+
+            choose_plus = plus >= minus
+            chosen = np.maximum(plus, minus)
+            positive = np.maximum(chosen, 0.0)
+            components[:, axis] = np.where(choose_plus, positive, -positive)
+            best_axis_slope[:, axis] = positive
+
+        norm = np.linalg.norm(components, axis=1)
+        good = np.isfinite(norm) & (norm > 1e-12) & (
+            np.max(best_axis_slope, axis=1) > 1e-12
+        )
+        if np.any(good):
+            local = pending[good]
+            out[local] = (
+                components[good] / norm[good, None]
+            ).astype(np.float32)
+            resolved[local] = True
+            scale_counts[f"{scale:g}x"] = int(np.count_nonzero(good))
+
+    return out.astype(np.float32), resolved, scale_counts
+
+
+def implicit_normals_with_diagnostics_from_query_v5(
     query_fn: Callable[[np.ndarray], Any],
     vertices_normalized: np.ndarray,
     *,
     policy: SparseRegularTetraPolicyV5,
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict[str, Any]]:
     vertices = np.asarray(vertices_normalized, dtype=np.float32)
     if vertices.ndim != 2 or vertices.shape[1] != 3 or len(vertices) == 0:
         raise ValueError("vertices_normalized must be non-empty [N,3]")
     epsilon = float(policy.normal_epsilon)
     eye = np.eye(3, dtype=np.float32)
     out = np.empty_like(vertices)
+    central_count = 0
+    fallback_count = 0
+    fallback_scale_counts: dict[str, int] = {}
+
     for start in range(0, len(vertices), int(policy.normal_chunk)):
         end = min(len(vertices), start + int(policy.normal_chunk))
         q = vertices[start:end]
@@ -564,13 +656,83 @@ def implicit_normals_from_query_v5(
             fp = _query_numpy(query_fn, qp, chunk_size=int(policy.query_chunk))
             fm = _query_numpy(query_fn, qm, chunk_size=int(policy.query_chunk))
             denom = np.maximum(qp[:, axis] - qm[:, axis], 1e-12)
-            gradients.append((fp - fm) / denom)
+            gradients.append(
+                (fp.astype(np.float64) - fm.astype(np.float64))
+                / denom.astype(np.float64)
+            )
         gradient = np.stack(gradients, axis=1)
-        norm = np.linalg.norm(gradient, axis=1, keepdims=True)
-        if not np.isfinite(norm).all() or np.any(norm <= 1e-12):
-            raise ValueError("implicit field gradient is degenerate on extracted surface")
-        out[start:end] = gradient / norm
-    return out.astype(np.float32)
+        norm = np.linalg.norm(gradient, axis=1)
+        if not np.isfinite(norm).all():
+            raise ValueError("implicit field gradient is non-finite on extracted surface")
+
+        good = norm > 1e-12
+        if np.any(good):
+            out[start:end][good] = (
+                gradient[good] / norm[good, None]
+            ).astype(np.float32)
+            central_count += int(np.count_nonzero(good))
+
+        bad = ~good
+        if np.any(bad):
+            fallback, resolved, scale_counts = _one_sided_orientation_fallback_v5(
+                query_fn,
+                q[bad],
+                epsilon=epsilon,
+                policy=policy,
+            )
+            if not np.all(resolved):
+                unresolved = q[bad][~resolved]
+                sample = unresolved[:8].astype(np.float64).tolist()
+                raise ValueError(
+                    "implicit field orientation is unresolved on extracted surface:"
+                    f"count={len(unresolved)} sample={sample}"
+                )
+            out[start:end][bad] = fallback
+            nfb = int(np.count_nonzero(bad))
+            fallback_count += nfb
+            for key, value in scale_counts.items():
+                fallback_scale_counts[key] = (
+                    fallback_scale_counts.get(key, 0) + int(value)
+                )
+
+    final_norm = np.linalg.norm(out.astype(np.float64), axis=1)
+    if (
+        not np.isfinite(out).all()
+        or not np.isfinite(final_norm).all()
+        or np.any(final_norm <= 1e-12)
+    ):
+        raise ValueError("implicit orientation hint contains invalid vector")
+
+    diagnostics = {
+        "method": (
+            "CENTRAL_DIFFERENCE_GRADIENT_WITH_DETERMINISTIC_"
+            "ONE_SIDED_OUTWARD_SECANT_FALLBACK"
+        ),
+        "normal_epsilon": float(epsilon),
+        "vertex_count": int(len(vertices)),
+        "central_gradient_vertex_count": int(central_count),
+        "one_sided_fallback_vertex_count": int(fallback_count),
+        "one_sided_fallback_fraction": float(fallback_count / len(vertices)),
+        "fallback_scale_counts": dict(sorted(fallback_scale_counts.items())),
+        "unresolved_vertex_count": 0,
+        "source_field_only": True,
+        "teacher_truth_used": False,
+    }
+    return out.astype(np.float32), diagnostics
+
+
+def implicit_normals_from_query_v5(
+    query_fn: Callable[[np.ndarray], Any],
+    vertices_normalized: np.ndarray,
+    *,
+    policy: SparseRegularTetraPolicyV5,
+) -> np.ndarray:
+    normals, _diagnostics = implicit_normals_with_diagnostics_from_query_v5(
+        query_fn,
+        vertices_normalized,
+        policy=policy,
+    )
+    return normals
 
 
 def build_indexed_mt_from_sparse_carrier_v5(
@@ -688,7 +850,7 @@ def build_indexed_mt_from_sparse_carrier_v5(
     if not np.isfinite(vertices).all() or np.max(np.abs(vertices)) > 1.00001:
         raise ValueError("indexed MT produced invalid normalized vertices")
 
-    normals = implicit_normals_from_query_v5(
+    normals, normal_diagnostics = implicit_normals_with_diagnostics_from_query_v5(
         query_fn,
         vertices,
         policy=policy,
@@ -709,6 +871,7 @@ def build_indexed_mt_from_sparse_carrier_v5(
         "deformation": False,
         "whole_cell_halo": False,
         "raw_edge_path": str(raw_edge_path) if raw_edge_path is not None else None,
+        "implicit_normal_diagnostics": normal_diagnostics,
     }
     return IndexedSparseTetraMeshV5(
         vertices_normalized=vertices,

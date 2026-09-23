@@ -1,0 +1,95 @@
+{
+  "schema": "RealSaS.IRIS.V441TP64AdaptiveHullConstraintPolicy.v1",
+  "date_utc": "2026-09-23",
+  "status": "FROZEN_PRE_RUN",
+  "scientific_name": "IRIS_V4_4_1_TP64",
+  "authority": "CONTROLLED_KNIGHT_FIT1_GEOMETRY_TREATMENT__ONLY_V44_CONTROLLER_AGGREGATION_AND_ZERO_ONLY_LEAK_REPAIRED",
+  "parents": {
+    "v43_negative": "canonical/IRIS_V4_3_TP64_NEGATIVE_RESULT_20260923.json",
+    "v44_policy": "canonical/IRIS_V4_4_TP64_ADAPTIVE_HULL_CONSTRAINT_POLICY_20260923.json",
+    "foreground_hull_feasibility": "canonical/IRIS_V4_3_FOREGROUND_HULL_CONSTRAINT_FEASIBILITY_20260923.json",
+    "truth_surface_reference": "canonical/IRIS_V4_3_FOREGROUND_TRUTH_SURFACE_REFERENCE_20260923.json",
+    "shell_measurement": "canonical/IRIS_V4_4_CERTIFICATION_SHELL_MEASUREMENT_20260923.json"
+  },
+  "v44_abort_reason": {
+    "classification": "CONTROLLER_SIGNAL_OBSERVABILITY_DEFECT",
+    "not_capacity_evidence": true,
+    "observed_failure": "SIGNED_MEAN_OVER_ALL_CERTIFIED_POINTS_ALLOWED_SATISFIED_MAJORITY_TO_CANCEL_SPARSE_VIOLATING_TAIL_AND_DRIVE_LAMBDA_TO_ZERO",
+    "repair_required_before_further_scientific_interpretation": true
+  },
+  "frozen": {
+    "architecture": "EXACT_V4_4_TP64",
+    "architecture_change": false,
+    "source_masks_and_cameras": "EXACT_STAGE08",
+    "foreground_audit_target_max_miss_fraction": 0,
+    "stage13_policy": "canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json",
+    "stage13_threshold_relaxation": false,
+    "lattice_resolution": 512,
+    "full_scan_interval_steps": 100,
+    "hull_sampling_and_replay": "EXACT_V4_4",
+    "v42_base_objective": "EXACT_V4_4_PARENT",
+    "hull_primal_loss": "EXACT_V4_4_PARENT",
+    "rho_calibration": "EXACT_V4_4_GRADIENT_NORM_RATIO",
+    "rho_adaptive": false,
+    "extractor": "CANONICAL_MARCHING_CUBES_UNCHANGED",
+    "teacher_first_hit_depth_loss": false,
+    "global_teacher_sdf": false,
+    "visual_hull_clipping_or_posthoc_carving": false,
+    "differentiable_raster_coupling": false,
+    "capacity_growth": false
+  },
+  "single_causal_change": "V44_SIGNED_ALL_CERTIFIED_MEAN_CONTROLLER_TO_VIOLATION_CONDITIONED_SIGN_SEVERITY_CONTROLLER_WITH_ZERO_ONLY_LEAK",
+  "controller": {
+    "state_variables": ["lambda"],
+    "lambda_initial": 1,
+    "lambda_projection": "MAX_0",
+    "full_population_control": {
+      "sign_violation_definition": "CERTIFIED_AND_FIELD_SDF_LE_0",
+      "per_violator_severity": "CLIP((HULL_MARGIN-FIELD_SDF)/V43_HUBER_BETA,0,1)",
+      "per_band_statistic": "MEAN_SEVERITY_CONDITIONED_ON_SIGN_VIOLATION_ELSE_0",
+      "population_statistic": "EQUAL_MEAN_OVER_THE_SAME_4_FROZEN_DISTANCE_BANDS",
+      "range": [0,1],
+      "zero_iff": "NO_CERTIFIED_EXTERIOR_SIGN_VIOLATION_IN_ANY_PRESENT_BAND",
+      "satisfied_points_negative_contribution": false,
+      "reason": [
+        "SPARSE_TAIL_CANNOT_BE_CANCELLED_BY_SATISFIED_MAJORITY",
+        "MAXIMUM_ONLY_NOISE_AVOIDED_BY_MEAN_OVER_VIOLATORS",
+        "EXACT_CAUSAL_SIGN_CLOSURE_ONTOLOGY",
+        "FOUR_BAND_STRUCTURE_REMAINS_FROZEN"
+      ]
+    },
+    "short_loop": {
+      "replay_bank_is_population_estimate": false,
+      "formula": "C_HAT = CLIP(C_FULL_ANCHOR + (C_REPLAY_NOW - C_REPLAY_AT_ANCHOR),0,1)",
+      "eta": "1/FULL_SCAN_INTERVAL_STEPS",
+      "lambda_update_when_c_hat_gt_0": "LAMBDA_NEXT = LAMBDA + ETA*C_HAT",
+      "lambda_update_when_c_hat_eq_0": "LAMBDA_NEXT = (1-ETA)*LAMBDA",
+      "scan_reanchor": "REPLACE_C_FULL_ANCHOR_AND_C_REPLAY_AT_ANCHOR_WITHOUT_RESETTING_LAMBDA",
+      "rationale": "LAMBDA_ACCUMULATES_WHILE_ANY_ESTIMATED_SIGN_VIOLATION_REMAINS_AND_RELAXES_ONLY_AFTER_ZERO_CONTROL"
+    },
+    "rho": {
+      "adaptive_state": false,
+      "formula": "UNCHANGED_V44__RHO=||GRAD_L_BASE||_2/||GRAD_PHI_HULL||_2",
+      "phi_value_used_in_calibration": false,
+      "frozen_after_calibration": true,
+      "knight_result_tuning": false
+    },
+    "primal_objective": "UNCHANGED_V44__L_BASE+LAMBDA*PHI_HULL+0.5*RHO*PHI_HULL^2"
+  },
+  "causal_success": {
+    "foreground_health_required": true,
+    "exact_r512_nonpositive_certified_exterior_corner_count": 0,
+    "stage13_pass_required_for_causal_success": false,
+    "stage13_pass_required_for_product_promotion": true,
+    "residual_extent": "COMPARE_TO_MATCHING_EXTRACTION_RESOLUTION_CERTIFICATION_SHELL"
+  },
+  "decision_tree": {
+    "joint_zero_sign_and_zero_foreground_miss": "V441_CAUSAL_SUCCESS",
+    "sign_zero_foreground_collapsed": "FAIL_DEGENERATE_NO_CAPACITY_CLAIM",
+    "healthy_foreground_sign_not_zero_with_lambda_active": "FAIL_CONTROLLER_INSUFFICIENT_OR_CAPACITY_REMAINS_OPEN",
+    "lambda_zero_while_sign_violations_remain": "APPARATUS_ABORT_CONTROLLER_INVARIANT_BROKEN",
+    "residual_at_shell_scale_after_causal_success": "AUTHORIZE_BOUNDARY_RASTER_COUPLING_ONLY_IF_STAGE13_REMAINS_OPEN",
+    "residual_materially_beyond_shell": "CAPACITY_OR_REPRESENTATION_DEBATE_REOPENS"
+  },
+  "claim_boundary": "Controlled Knight FIT research only; no product authority, unseen, FITK, or generalization claim."
+}

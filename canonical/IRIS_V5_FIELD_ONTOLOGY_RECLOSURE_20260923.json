@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_PRE_TP64_DIRECT_FSTAR_FIT",
+  "status": "FROZEN_TP64_DIRECT_FSTAR_FIT_AUTHORIZED",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -84,15 +84,25 @@
     ]
   },
   "training_authorization": {
-    "authorized": false,
+    "authorized": true,
+    "authorization_scope": "KNIGHT_FIT1__TP64_DIRECT_FSTAR_REACHABILITY__ONE_FROZEN_PREREGISTERED_ARM",
+    "preregistration": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_DIRECT_FSTAR_FIT_RUN_ALL_AUDITED.ipynb",
+    "notebook_sha256": "c5ccbb66f7de1ef9993482d58a4e8d62ffe1950e3df7b947e3febb5d074e58b5",
+    "execution_repo_commit": "4de08a779199d64b60b0d1aae3512a0f77e77c77",
     "closed_prerequisites": [
       "FREEZE_EXACT_V5_FSTAR_TARGET_CONTRACT",
-      "PROVE_ANALYTIC_FSTAR_TO_INDEXED_SPARSE_REGULAR_TETRA_MT_TO_FROZEN_STAGE13_P999_PASS"
-    ],
-    "blockers": [
+      "PROVE_ANALYTIC_FSTAR_TO_INDEXED_SPARSE_REGULAR_TETRA_MT_TO_FROZEN_STAGE13_P999_PASS",
       "FREEZE_DIRECT_TARGET_TP64_FIT_PREREGISTRATION"
     ],
-    "note": "Field ontology and indexed Stage12 analytic parity are closed. Optimizer steps remain blocked until the direct-F* TP64 FIT preregistration is frozen."
+    "blockers": [],
+    "forbidden_scope_expansion": [
+      "NO_POSTHOC_LOSS_TERM_ADDITION",
+      "NO_STAGE13_IN_CHECKPOINT_SELECTION",
+      "NO_R512_AUDIT_IN_CHECKPOINT_SELECTION",
+      "NO_SECOND_SEED_OR_HYPERPARAMETER_RETRY_INSIDE_THIS_PREREGISTERED_ARM"
+    ],
+    "note": "Optimizer steps are authorized only for the exact notebook/hash and code pin above. PASS/FAIL interpretation remains bounded by the preregistration."
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",

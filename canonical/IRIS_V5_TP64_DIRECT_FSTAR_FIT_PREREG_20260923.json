@@ -1,0 +1,214 @@
+{
+  "schema": "RealSaS.IRIS.V5TP64DirectFStarFITPreregistration.v1",
+  "status": "FROZEN_BEFORE_OPTIMIZER_STEP_1",
+  "date_utc": "2026-09-23",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "purpose": "Test whether the existing full IRIS TP64 architecture can learn the already-closed canonical V5 F* field on Knight FIT1 under a single-authority direct-regression objective.",
+  "execution": {
+    "repo_commit": "4de08a779199d64b60b0d1aae3512a0f77e77c77",
+    "ci_workflow": "iris-v5-source-field-contract",
+    "ci_run_id": 35917561202,
+    "ci_conclusion": "success",
+    "ci_tests": "20 passed in 1.54s",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_DIRECT_FSTAR_FIT_RUN_ALL_AUDITED.ipynb",
+    "notebook_sha256": "c5ccbb66f7de1ef9993482d58a4e8d62ffe1950e3df7b947e3febb5d074e58b5",
+    "notebook_code_cells": 13,
+    "notebook_outputs_required_initially_empty": true,
+    "notebook_execution_counts_required_initially_null": true
+  },
+  "frozen_inputs": {
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "observation_set_binding_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+    "normalization_binding_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23",
+    "target_contract": "canonical/IRIS_V5_CONTINUOUS_SOURCE_FIELD_POLICY_20260923.json",
+    "field_ontology": "canonical/IRIS_V5_FIELD_ONTOLOGY_RECLOSURE_20260923.json",
+    "analytic_indexed_parity_closure": "canonical/IRIS_V5_INDEXED_STAGE12_ANALYTIC_PARITY_CLOSURE_20260923.json",
+    "stage13_policy": "canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json",
+    "frozen_stage13_profile": "P999"
+  },
+  "foundation": {
+    "dino_repository": "facebookresearch/dinov2",
+    "dino_source_revision": "7764ea0f912e53c92e82eb78a2a1631e92725fc8",
+    "dino_constructor": "dinov2_vits14",
+    "dino_weight_sha256": "b938bf1bc15cd2ec0feacfe3a1bb553fe8ea9ca46a7e1d8d00217f29aef60cd9",
+    "dino_weight_size_bytes": 88283115,
+    "frozen": true,
+    "forward_evidence": "8_VIEW_DINOV2_S_PATCH_TOKENS_PLUS_TOKEN_XY_PLUS_QUALIFIED_CAMERA_FEATURES"
+  },
+  "architecture": {
+    "scientific_id": "RealSaS.IRIS.SceneFirstSignedGeometry.v4.tp64",
+    "implementation_id": "RealSaS.IRIS.SceneFirstSignedGeometry.v4.demo64",
+    "implementation_path": "models/iris/v4/scene_first_signed_v4.py",
+    "unchanged_from_existing_tp64": true,
+    "config": {
+      "image_token_dim": 384,
+      "camera_feature_dim": 13,
+      "scene_dim": 256,
+      "camera_embed_dim": 96,
+      "plane_size": 32,
+      "plane_channels": 64,
+      "field_hidden_dim": 192,
+      "field_residual_blocks": 4,
+      "attention_heads": 8,
+      "scene_layers": 4,
+      "feedforward_multiplier": 3,
+      "dropout": 0
+    }
+  },
+  "optimizer": {
+    "steps": 4800,
+    "seed": 26092357,
+    "optimizer": "AdamW",
+    "learning_rate": 0.00008,
+    "weight_decay": 0,
+    "scheduler": "CosineAnnealingLR",
+    "eta_min": 0.000004,
+    "gradient_clip_norm": 1,
+    "autocast": "bfloat16",
+    "tf32_allowed": false,
+    "float32_matmul_precision": "highest",
+    "primary_objective": {
+      "implementation": "models/iris/v5/direct_fstar_fit_v5.py::direct_fstar_loss_v5",
+      "type": "SMOOTH_L1_DIRECT_FSTAR_ONLY",
+      "huber_beta": 0.01,
+      "target_clamp_absolute": 0.25
+    }
+  },
+  "query_distribution": {
+    "total_points_per_step": 32768,
+    "fresh_global_uniform": 16384,
+    "frozen_near_zero": 8192,
+    "frozen_sign_straddle_endpoints": 4096,
+    "hard_residual_replay": 4096,
+    "near_zero_band": 0.03,
+    "straddle_delta": 0.001953125,
+    "straddle_base_band": 0.006,
+    "frozen_pool_counts": {
+      "train_near_zero": 131072,
+      "train_straddle_endpoints": 65536,
+      "replay_global": 65536,
+      "replay_near_zero": 65536,
+      "hard_replay_bank_size": 32768,
+      "heldout_global": 65536,
+      "heldout_near_zero": 32768,
+      "heldout_straddle_endpoints": 32768
+    },
+    "all_labels_from_exact_fstar": true,
+    "heldout_minted_before_optimizer_step_1": true,
+    "heldout_exact_float32_point_overlap_with_static_training_pools_forbidden": true,
+    "heldout_used_for_training": false,
+    "heldout_used_for_hard_replay": false,
+    "hard_replay_rule": "TOP_ABSOLUTE_FSTAR_RESIDUAL_ON_FIXED_FSTAR_LABELED_REPLAY_POOL",
+    "hard_replay_initialization_step": 0,
+    "hard_replay_refresh_every_steps": 200,
+    "audit_failure_location_conditioning": false
+  },
+  "checkpoint_selection": {
+    "evaluation_steps": "200,400,...,4800",
+    "expected_candidate_count": 24,
+    "fixed_heldout_only": true,
+    "stage13_blind": true,
+    "exact_r512_audit_blind": true,
+    "selector": "models/iris/v5/direct_fstar_fit_v5.py::select_direct_fstar_checkpoint_v5",
+    "lexicographic_rule": [
+      "SIGN_CLEAN_HELDOUT_FIRST",
+      "LOWER_HELDOUT_FSTAR_MAE",
+      "LOWER_NEAR_ZERO_MAE",
+      "LOWER_P95_ABSOLUTE_RESIDUAL",
+      "LOWER_RMSE",
+      "EARLIER_STEP"
+    ],
+    "no_second_seed_or_posthoc_retry": true
+  },
+  "final_qualification": {
+    "selected_checkpoint_only": true,
+    "r512": {
+      "authority": "FROZEN_V4_3_SOURCE_HULL_CERTIFICATION__SIGN_ONLY",
+      "resolution": 512,
+      "point_count": 134217728,
+      "spacing": 0.003913894324853229,
+      "expected_certified_exterior_count": 128851336,
+      "required_nonpositive_certified_exterior_count": 0,
+      "metric_magnitude_lower_bound_is_gate": false
+    },
+    "decoder": {
+      "id": "RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT.v5",
+      "base_cells": 512,
+      "fine_cells": 1024,
+      "dense_t1024": false,
+      "deformation": false,
+      "sparse_shell_boundary_crossing_allowed": false,
+      "unresolved_implicit_orientation_allowed": false,
+      "stage12_arrays": [
+        "vertices_normalized",
+        "faces",
+        "implicit_normals"
+      ]
+    },
+    "stage13": {
+      "profile": "P999",
+      "feedback_into_training": false,
+      "used_for_checkpoint_selection": false,
+      "thresholds": {
+        "min_recall": 0.999,
+        "min_precision": 0.999,
+        "max_largest_coherent_hole_fraction": 0.00025,
+        "max_interior_uncovered_fraction": 0.0005,
+        "min_component_recall": 0.999,
+        "component_min_foreground_fraction": 0,
+        "max_silhouette_edge_p95_px": 0.5
+      }
+    }
+  },
+  "forbidden_primary_optimizer_terms": [
+    "TEACHER_SDF",
+    "TEACHER_SURFACE_ZERO",
+    "TEACHER_DEPTH",
+    "TEACHER_GEOMETRY",
+    "FOREGROUND_EXISTENCE_HINGE",
+    "NEGATIVE_SPACE_HINGE",
+    "SOURCE_HULL_METRIC_MAGNITUDE",
+    "ADAPTIVE_LAMBDA_RHO_CONTROLLER",
+    "EIKONAL",
+    "RAY_LIPSCHITZ",
+    "DIFFERENTIABLE_RASTER",
+    "STAGE13_FEEDBACK",
+    "AUDIT_FAILURE_LOCATION_CONDITIONING",
+    "WEIGHT_DECAY_REGULARIZATION"
+  ],
+  "apparatus_preflights": {
+    "a100_minimum_vram_gib": 30,
+    "training_budget_seconds": 10800,
+    "training_estimate": "MEASURED_FULL_32768_POINT_STEP_PLUS_MEASURED_PERIODIC_EVAL_REPLAY_PLUS_WORST_CASE_CHECKPOINT_WRITES",
+    "r512_audit_budget_seconds": 900,
+    "decoder_coarse_query_budget_seconds": 900,
+    "decoder_fine_query_budget_seconds": 900,
+    "edge_emit_budget_seconds": 900,
+    "edge_unique_budget_seconds": 900,
+    "implicit_normal_budget_seconds_diagnostic_only": 900,
+    "stage13_raster_budget_seconds": 900,
+    "apparatus_abort_is_scientific_fail": false
+  },
+  "decision_rule": {
+    "pass": "R512_SIGN_PASS_AND_FROZEN_INDEXED_STAGE12_DECODABLE_AND_FROZEN_STAGE13_P999_PASS",
+    "pass_decision": "V5_TP64_DIRECT_FSTAR_FIT_PASS__EXISTING_TP64_LEARNS_FSTAR__R512_SIGN_CLOSED__INDEXED_STAGE12_STAGE13_P999_PASS",
+    "fail": "REPORT_THE_OBSERVED_LEARNED_OWNER_FAILURE_WITHOUT_CHANGING_TARGET_OR_GATES",
+    "apparatus_abort": "NO_SCIENTIFIC_DECISION"
+  },
+  "next_gate": {
+    "if_pass": [
+      "Seal selected TP64 checkpoint and learned Stage12 provenance.",
+      "Continue Knight V2 from Stage14 using the learned Stage12 artifact, never the analytic witness."
+    ],
+    "if_fail": [
+      "Reopen the learned neural representation/training owner under the direct-F* evidence.",
+      "Do not reopen F* ontology or analytic indexed-decoder parity without new contradictory evidence."
+    ]
+  },
+  "claim_boundary": [
+    "PASS proves Knight FIT1 reachability only, not FITK, LOFO, unseen, or product generalization.",
+    "FAIL of this frozen arm does not by itself prove mathematical impossibility of TP64; it localizes the remaining owner to the learned representation/training lane.",
+    "The analytic no-model witness remains evidence only and is not promoted to a product lane.",
+    "No frozen Stage13 threshold may be changed after this preregistration."
+  ]
+}

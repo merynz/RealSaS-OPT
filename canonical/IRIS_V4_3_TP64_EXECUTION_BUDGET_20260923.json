@@ -1,0 +1,40 @@
+{
+  "schema": "RealSaS.IRISV43ExecutionBudget.v1",
+  "status": "FROZEN_APPARATUS_ONLY__NOT_SCIENTIFIC_GATE",
+  "date_utc": "2026-09-23",
+  "scientific_name": "IRIS_V4_3_TP64",
+  "purpose": "Prevent silent multi-hour apparatus failures while leaving all scientific objectives, Stage13 thresholds, and promotion semantics unchanged.",
+  "limits": {
+    "max_static_r512_hull_target_precompute_seconds": 600.0,
+    "max_single_r512_hull_scan_seconds": 180.0,
+    "max_estimated_total_notebook_wall_seconds": 10800.0,
+    "max_silent_interval_seconds": 120.0
+  },
+  "prediction": {
+    "baseline_v42_training_wall_seconds": 4906.111542224884,
+    "baseline_v42_mean_optimizer_step_seconds": 1.022106571296851,
+    "full_scan_count_planned": 49,
+    "training_steps": 4800,
+    "method": "After static target precompute and the initial exact R512 hull scan, benchmark the added V4.3 hull forward/backward lane on the actual A100. Estimate total wall time from the measured hull-lane increment plus observed initial-scan time. Abort before optimizer training if the estimate exceeds the apparatus wall budget."
+  },
+  "heartbeat": {
+    "static_target_points_interval": 16777216,
+    "r512_scan_z_slice_interval": 64,
+    "training_check_interval_steps": 200,
+    "full_scan_interval_steps": 100
+  },
+  "abort_semantics": {
+    "apparatus_abort_is_scientific_fail": false,
+    "product_authority_minted": false,
+    "threshold_relaxation_allowed": false,
+    "partial_artifacts_must_be_persisted": true,
+    "decision_prefix": "APPARATUS_TIME_BUDGET_ABORT"
+  },
+  "claim_boundary": {
+    "does_not_change_loss": true,
+    "does_not_change_sampling_distribution": true,
+    "does_not_change_checkpoint_selection": true,
+    "does_not_change_stage13": true,
+    "does_not_change_r512_promotion_policy": true
+  }
+}

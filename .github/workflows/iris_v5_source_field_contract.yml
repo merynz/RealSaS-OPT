@@ -84,7 +84,11 @@ jobs:
               assert auth['blockers']==[]
               assert auth['preregistration']=='canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json'
           else:
-              assert 'FREEZE_DIRECT_TARGET_TP64_FIT_PREREGISTRATION' in auth['blockers']
+              assert auth['prior_arm_closure']=='canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_CLOSURE_20260923.json'
+              assert auth['blockers']==[
+                  'LOCALIZE_LEARNED_SIGN_AND_ZERO_SET_TAIL',
+                  'FREEZE_NEXT_LEARNED_OWNER_EXPERIMENT_PREREGISTRATION',
+              ]
 
           c=target['exact_target_contract']
           assert c['required_view_count']==8

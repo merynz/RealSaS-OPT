@@ -273,7 +273,7 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert diag2["diagnostic_repo_commit"] == "fd7ee14764f0d0be04b37349fac99825936c57a2"
     assert diag2["code_ci_run_id"] == 36009727585
     assert diag2["code_ci_conclusion"] == "success"
-    assert diag2["notebook_sha256"] == "250d3a4a4b2520aeb0d832ab13e0837565033416f48805c668d2367ca6a29b89"
+    assert diag2["notebook_sha256"] == "d988f57eb121865dd850a7b5514c0ff112235cd911acb4966e4618e356c0b3d2"
     assert diag2["exact_historical_replay_bank_overlap_claimed"] is False
     assert diag2["optimizer_steps_permitted"] == 0
     assert diag2["parameter_updates_permitted"] == 0

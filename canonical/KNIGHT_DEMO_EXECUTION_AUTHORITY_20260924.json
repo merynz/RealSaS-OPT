@@ -1,5 +1,5 @@
 {
-  "schema": "RealSaS.KnightDemoExecutionAuthority.v1",
+  "schema": "RealSaS.DemoExecutionAuthority.v1",
   "status": "APPROVED_DEMO_ONLY",
   "date_utc": "2026-09-24",
   "subject_id": "SUBJECT2_KNIGHT",

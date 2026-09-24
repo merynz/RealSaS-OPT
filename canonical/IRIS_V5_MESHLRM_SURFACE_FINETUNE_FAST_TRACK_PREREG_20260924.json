@@ -1,0 +1,99 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMSurfaceFineTuneFastTrackPrereg.v1",
+  "status": "FROZEN_BEFORE_OPTIMIZER_STEP",
+  "date_utc": "2026-09-24",
+  "purpose": "Attempt to close frozen Knight Stage13 P999 by adding the missing extracted-mesh -> differentiable-raster -> IRIS gradient path inspired by MeshLRM Stage 2. Demo is paused at Stage08. Negative result resumes frozen-C fallback.",
+  "source_paper": {
+    "title": "MeshLRM: Large Reconstruction Model for High-Quality Meshes",
+    "arxiv": "2404.12385",
+    "translated_intervention": "STAGE2_DIFFERENTIABLE_ISOSURFACE_PLUS_SURFACE_RASTER_FINE_TUNE"
+  },
+  "frozen_inputs": {
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "observation_set_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+    "normalization_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23",
+    "start_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+    "start_absolute_effective_step": 19200,
+    "fallback": "FROZEN_C_FALLBACK",
+    "stage13_profile": "P999"
+  },
+  "invariants": {
+    "dino_unchanged": true,
+    "scene_first_tp64_architecture_unchanged": true,
+    "fstar_definition_unchanged": true,
+    "exact_8_cameras_unchanged": true,
+    "source_masks_only_for_mesh_render_supervision": true,
+    "rgb_or_perceptual_loss": false,
+    "teacher_geometry": false,
+    "teacher_depth": false,
+    "teacher_normals": false,
+    "caa_not_in_training": true,
+    "product_decoder_unchanged": true,
+    "final_stage13_unchanged": true
+  },
+  "training_surface": {
+    "extractor": "DISO DiffMC",
+    "diso_commit": "9792ad928ccb09bdec938779651ee03e395758a6",
+    "grid_resolution": 256,
+    "grid_domain": "NORMALIZED [-1,1]^3",
+    "isovalue": 0,
+    "grid_deformation": false,
+    "rasterizer": "nvdiffrast",
+    "nvdiffrast_commit": "253ac4fcea7de5f396371124af597e6cc957bfae",
+    "raster_resolution": 1024,
+    "views_per_step": 8,
+    "source_target": "EXACT_BINARY_FOREGROUND_MASK",
+    "mesh_loss": "MEAN_OVER_VIEWS[0.5*MEAN_FOREGROUND(1-alpha)+0.5*MEAN_BACKGROUND(alpha)]",
+    "antialiasing": "NVDIFFRAST_ANTIALIAS",
+    "training_surface_role": "TRAINING_ONLY__NEVER_PRODUCT_AUTHORITY"
+  },
+  "optimizer": {
+    "continuation_steps": 1200,
+    "eval_every": 100,
+    "checkpoint_candidates_from_step": 200,
+    "fresh_adamw": true,
+    "lr": 0.00001,
+    "eta_min": 0.000001,
+    "warmup_steps": 100,
+    "weight_decay": 0,
+    "grad_clip_norm": 1,
+    "amp": "BF16_FOR_MODEL_QUERIES__DIFFMC_AND_RASTER_FP32",
+    "base_objective": "UNCHANGED_C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+    "mesh_gradient_injection": "EXACT_CHAIN_RULE_VJP_FROM_DENSE_DIFFMC_GRID_GRADIENT_BACK_INTO_CURRENT_IRIS_NETWORK",
+    "gradient_support_truncation": false,
+    "initial_mesh_to_base_parameter_gradient_norm_target_ratio": 1,
+    "initial_mesh_gradient_scale_clamp": [
+      0.25,
+      4
+    ],
+    "mesh_gradient_scale_frozen_after_step0": true
+  },
+  "checkpoint_selection": {
+    "stage13_feedback_during_training": false,
+    "r512_feedback_during_training": false,
+    "candidate_schedule": "EVERY_100_STEPS_FROM_STEP_200_PLUS_TERMINAL",
+    "primary": "LOWEST_FULL_8VIEW_DIFFMC_MESH_MASK_LOSS",
+    "tie_break_1": "LOWEST_HELDOUT_FSTAR_SIGN_DISAGREEMENT_FRACTION",
+    "tie_break_2": "LOWEST_HELDOUT_FSTAR_MAE",
+    "stage13_executions_after_selection": 1
+  },
+  "final_qualification": {
+    "decoder": "UNCHANGED RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT.ExactShellContainment.v5_1",
+    "containment_required": true,
+    "stage13": "UNCHANGED_FROZEN_P999",
+    "promote_rule": "PROMOTE_NEW_CHECKPOINT_IFF_EXACT_CONTAINMENT_PASS_AND_STAGE13_EVERY_VIEW_PASS",
+    "otherwise": "FROZEN_C_FALLBACK",
+    "product_authority_claimed": false,
+    "unseen_claimed": false
+  },
+  "apparatus_fail_closed": [
+    "A100_CLASS_GPU_REQUIRED",
+    "PINNED_REPO_AND_FROZEN_INPUT_SHA_REQUIRED",
+    "PINNED_DISO_AND_NVDIFFRAST_INSTALL_REQUIRED",
+    "DIFFMC_FORWARD_BACKWARD_SANITY_REQUIRED",
+    "NVDIFFRAST_Y_ORIENTATION_SYNTHETIC_CALIBRATION_REQUIRED",
+    "FINITE_NONZERO_MESH_GRID_GRADIENT_REQUIRED",
+    "NO_SILENT_MESH_GRADIENT_TOPK_OR_TRUNCATION",
+    "OUTPUT_SYNC_AND_COMPLETION_MARKER_REQUIRED"
+  ]
+}

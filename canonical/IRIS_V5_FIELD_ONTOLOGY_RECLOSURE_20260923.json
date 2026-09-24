@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_FSTAR__TP64_TAIL_LOCALIZED__OBJECTIVE_CAUSAL_ABLATION_AUTHORIZED",
+  "status": "FROZEN_FSTAR__TP64_OBJECTIVE_ABLATION_CLOSED__LONG_HORIZON_LOW_LR_PREREG_REQUIRED",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -62,6 +62,43 @@
       "sparse_shell_boundary_crossing_tets": 436,
       "primary_working_hypothesis": "OBJECTIVE_OR_SIGN_WEIGHTING_MISMATCH",
       "causal_proof": false
+    },
+    "tp64_objective_causal_ablation": {
+      "closure": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json",
+      "run_id": "20260924T084959Z",
+      "all_arms_scientific_pass": false,
+      "stage13_executed_for_any_arm": false,
+      "selected_checkpoint_sha256": {
+        "A0": "2d2026f8d54cea27166d24a1c75dc8d9023756a6255f845b2ec0293a71863471",
+        "B": "9ff4583567470dd1f3c6806db3778f25ca97b8ec0e6431065b2e8973f21718ce",
+        "C": "988dd2a614a7e0632938e69d54abdbd96544a010c650ba8cf05f979ca86891b3",
+        "D": "3ac74e0f841f665f52774f873cac82305852e7fdf60786c4f3aff55ccb1997a4"
+      },
+      "heldout_sign_disagreement_count": {
+        "A0": 13017,
+        "B": 11527,
+        "C": 11880,
+        "D": 11772
+      },
+      "r512_nonpositive_certified_exterior_count": {
+        "A0": 66909,
+        "B": 41157,
+        "C": 33240,
+        "D": 29857
+      },
+      "sparse_shell_boundary_crossing_tets": {
+        "A0": 133,
+        "B": 535,
+        "C": 422,
+        "D": 1504
+      },
+      "horizon_censoring": {
+        "A0": false,
+        "B": true,
+        "C": true,
+        "D": false
+      },
+      "convergence_closed": false
     }
   },
   "active_field_ontology": {
@@ -103,26 +140,17 @@
     ]
   },
   "training_authorization": {
-    "authorized": true,
-    "authorization_scope": "KNIGHT_FIT1__TP64_OBJECTIVE_CAUSAL_ABLATION__FOUR_FROZEN_CONTINUATION_ARMS",
-    "preregistration": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json",
-    "execution_repo_commit": "df260b8e1423927d7df8873f80b2b82ab376a77b",
-    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_RUN_ALL.ipynb",
-    "notebook_sha256": "b469a617867e3e6e76c344a833568b9ed3d631039fcdb2010b30659e4f237fbb",
-    "base_checkpoint_sha256": "45de860757ddb6f65afcecb7fdc9f51ef4aef2aeaf598288459a0e5bfa1ec751",
-    "base_checkpoint_step": 4800,
-    "arms": [
-      "A0_CONTINUE_DIRECT_FSTAR_ONLY",
-      "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
-      "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
-      "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE"
+    "authorized": false,
+    "prior_authorized_arm": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json",
+    "prior_arm_closure": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json",
+    "blockers": [
+      "FREEZE_TP64_LONG_HORIZON_LOW_LR_CONTINUATION_PREREGISTRATION",
+      "FREEZE_TP64_LONG_HORIZON_LOW_LR_RUN_ALL_NOTEBOOK"
     ],
-    "exact_r512_audit_lattice_points_forbidden_from_training": true,
-    "exact_r512_and_stage13_checkpoint_selection_blind": true,
     "architecture_change_authorized": false,
     "spatial_resolution_change_authorized": false,
-    "blockers": [],
-    "next_gate": "EXECUTE_EXACT_PREREGISTERED_NOTEBOOK_ON_A100_AND_REVIEW_ALL_FOUR_ARMS_BEFORE_SPATIAL_ABLATION"
+    "exact_r512_and_stage13_checkpoint_selection_blind": true,
+    "note": "Objective causal ablation is closed. New optimizer steps are blocked until a long-horizon low-LR model-state continuation is frozen."
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",

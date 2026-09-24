@@ -1,0 +1,56 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMSurfaceFineTuneFastTrackPreregAmendmentV7.v1",
+  "status": "FROZEN_BEFORE_ANY_SCIENTIFIC_OPTIMIZER_STEP__FULL_NOTEBOOK_RUNTIME_AUDIT",
+  "date_utc": "2026-09-24",
+  "amends": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_V6_20260924.json",
+  "user_directive": "Audit and repair likely failures across all remaining notebook cells so the run does not repeatedly stop on plumbing defects.",
+  "recovered_valid_evidence": {
+    "training_mesh_proxy_parity_pass": true,
+    "min_product_mask_recall": 0.9965454575222253,
+    "min_product_mask_precision": 0.9994424727015597,
+    "stage13_semantic_parity_min_recall": 0.99951992318771,
+    "stage13_semantic_parity_min_precision": 0.9985611510791367
+  },
+  "runtime_audit_repairs": [
+    {
+      "id": "FP32_MESH_VJP_FRESH_GRAPH",
+      "defect": "BF16 base planes were reused by FP32 mesh VJP query, causing grid_sample dtype mismatch.",
+      "repair": "Base-C BF16 and mesh-VJP FP32 use independent encode/query graphs. Base backward does not retain its graph. Mesh branch re-encodes the scene in FP32 and propagates all nonzero sparse carrier gradients."
+    },
+    {
+      "id": "NO_GRAD_MESH_EVAL_RETURN_ARITY",
+      "defect": "The evaluation branch still unpacked three values from render_mesh_feedback_pytorch3d after the function was changed to return four values, and referenced silhouette_face_count without defining it.",
+      "repair": "Evaluation branch unpacks all four values and records silhouette_face_count deterministically."
+    },
+    {
+      "id": "MODEL_MODE_SIDE_EFFECT",
+      "defect": "dense_field_grid_no_grad forced model.eval() without restoring the caller's training mode, making disposable/full-step preflight semantics differ from the actual loop.",
+      "repair": "All evaluation helpers preserve and restore model.training state."
+    },
+    {
+      "id": "PRETRAIN_RUNTIME_SMOKE",
+      "repair": "Before the real continuation, run hard proxy parity, need_grad=False mesh evaluation, separate gradient calibration, one full disposable combined update, post-update heldout+mesh evaluation, checkpoint serialization, checkpoint reload, and deterministic prediction roundtrip. No real continuation parameter is mutated."
+    },
+    {
+      "id": "DOWNSTREAM_DECODER_STAGE13_PARITY",
+      "evidence": "Current corrected product decoder cell differs from the previously completed spatial-risk fast-track decoder only in work-directory naming; current Stage13 cell is logic-identical to the previously completed frozen Stage13 cell.",
+      "repair": "Do not rewrite downstream decoder/Stage13 logic; preserve known-good code."
+    }
+  ],
+  "preflight_requirements": {
+    "mesh_eval_no_grad_finite": true,
+    "mesh_eval_no_grad_all_8_views": true,
+    "base_grad_norm_finite_positive": true,
+    "mesh_grad_norm_finite_positive": true,
+    "scaled_mesh_to_base_grad_ratio": [
+      0.95,
+      1.05
+    ],
+    "combined_one_step_finite": true,
+    "post_update_heldout_finite": true,
+    "post_update_mesh_eval_finite": true,
+    "checkpoint_roundtrip_max_abs_prediction_error": 0
+  },
+  "scientific_intervention_unchanged": true,
+  "frozen_final_product_decoder_and_stage13_unchanged": true
+}

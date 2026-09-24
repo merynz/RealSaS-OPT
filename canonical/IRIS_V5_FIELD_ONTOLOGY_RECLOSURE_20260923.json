@@ -118,6 +118,6 @@
     "optimizer_steps_permitted": 0,
     "parameter_updates_permitted": 0,
     "stage13_qualification_permitted": false,
-    "training_authorization_unchanged": false
+    "training_remains_blocked": true
   }
 }

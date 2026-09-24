@@ -18,7 +18,7 @@
   "execution": {
     "diagnostic_repo_commit": "3eb635f84768c180ea6acdda920f107188ad956b",
     "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_LEARNED_TAIL_LOCALIZATION_RUN_ALL.ipynb",
-    "notebook_sha256": "607c217c2259c769290dd0ee566e12ad3f03fb284d0474eb4c744f7d472d8e26",
+    "notebook_sha256": "7b7a95f3fd9b104db2cdc48394fb3d9dfb345a5277fd6bab66e8bf9ccc85d0c8",
     "required_hardware": "A100_CLASS__VRAM_GE_30_GIB",
     "optimizer_steps_permitted": 0,
     "parameter_updates_permitted": 0,

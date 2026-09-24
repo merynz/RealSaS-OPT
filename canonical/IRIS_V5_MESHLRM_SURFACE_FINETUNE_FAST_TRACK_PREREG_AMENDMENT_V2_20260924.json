@@ -1,0 +1,64 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMSurfaceFineTuneFastTrackPreregAmendmentV2.v1",
+  "status": "FROZEN_BEFORE_ANY_SCIENTIFIC_OPTIMIZER_STEP__APPARATUS_REPAIR_ONLY",
+  "date_utc": "2026-09-24",
+  "amends": [
+    "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_20260924.json",
+    "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_20260924.json"
+  ],
+  "invalidated_attempt": {
+    "run_id": "20260924T171641Z",
+    "terminal": "APPARATUS_ABORT__DMTET_EXACT_ZERO_GRID_VERTEX_UNSUPPORTED",
+    "exact_zero_grid_vertex_count": 1,
+    "actual_continuation_optimizer_steps": 0,
+    "actual_continuation_parameter_updates": 0,
+    "disposable_probe_optimizer_steps": 1,
+    "scientific_result": false,
+    "frozen_c_mutated": false
+  },
+  "apparatus_defects_discovered": {
+    "exact_zero": {
+      "problem": "The first-party training DMTet unnecessarily aborted on an exact zero lattice sample. The sign-case needs a deterministic symbolic tie-break; an exact zero is not a scientific failure.",
+      "repair": "Evaluate mesh field in FP32. For any remaining exact zero, add a deterministic infinitesimal checkerboard sign perturbation only to the training extractor surrogate before sign classification/interpolation; record the count. Abort only on nonfinite values or pathological zero multiplicity."
+    },
+    "gradient_scale": {
+      "observed_base_param_grad_norm": 0.11462527732568506,
+      "observed_mesh_param_grad_norm_unscaled": 136.33167685537882,
+      "observed_raw_equal_norm_scale": 0.000840782421001687,
+      "invalid_old_clamped_scale": 0.25,
+      "implied_mesh_to_base_ratio_if_old_scale_used": 297.341,
+      "problem": "The old [0.25,4.0] clamp was dimensionally inappropriate for an absolute VJP scale and would have overwhelmed the base C objective.",
+      "repair": "Use the measured raw equal-norm scale directly. Require finite positive scale in [1e-8,1.0] and verify reconstructed scaled mesh/base norm ratio in [0.95,1.05]. Freeze that exact scale after step 0."
+    },
+    "proxy_semantics": {
+      "observation": "The initial soft-alpha fg_miss values were ~0.586..0.641 despite the frozen-C product decoder having ~0.998 minimum Stage13 recall. Soft alpha is not a hard coverage metric, so this does not yet prove proxy failure, but a parity check is mandatory before training.",
+      "repair": "At step 0, hard-rasterize the same training DMTet mesh with both PyTorch3D signed-distance coverage and the exact Stage13 half-integer top-left rasterizer. Require min per-view IoU >=0.99 between those two hard masks. Also compare the 256-grid training mesh hard mask to the frozen-C product Stage13 predicted masks and require min recall and precision >=0.95. Abort as apparatus mismatch otherwise."
+    }
+  },
+  "precision_contract": {
+    "dense_training_mesh_field_eval": "FP32_NO_AUTOCAST",
+    "sparse_vjp_field_requery": "FP32_NO_AUTOCAST",
+    "base_c_objective": "UNCHANGED_BF16_POLICY",
+    "final_product_decoder": "UNCHANGED",
+    "final_stage13": "UNCHANGED"
+  },
+  "frozen_product_mask_reference": {
+    "path": "RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1/20260924T115953Z/V5_TP64_LONG_HORIZON_LOW_LR/arms/C/STAGE13_PREDICTED_MASKS.npz",
+    "sha256": "3a476f7997ffa837082f8ed33d991afca0d6c9a7f3bc2af1efbf5f180e3c83f0",
+    "shape": [
+      8,
+      1024,
+      1024
+    ],
+    "dtype": "uint8"
+  },
+  "rasterizer_decision": {
+    "nvdiffrast_rejected_for_this_demo_lane": true,
+    "reason": "Current NVlabs/nvdiffrast LICENSE.txt is NVIDIA Source Code License (1-Way Commercial) with Section 3.3 limiting non-NVIDIA use to non-commercial research/evaluation and excluding direct or indirect monetary gain. Historical RealSaS nvdiffrast use remains valid research lineage; the investor-demo selection lane avoids introducing it as a new dependency.",
+    "pytorch3d_retained": true,
+    "pytorch3d_license": "BSD",
+    "parity_gate_added": true
+  },
+  "preserved_scientific_intervention": "EXTRACTED_CANONICAL_MESH -> DIFFERENTIABLE_SOURCE_VIEW_RASTER LOSS -> IRIS VJP, with frozen C/F*/DINO/TP64/source cameras and unchanged final product decoder+Stage13.",
+  "execution_authorized_after_notebook_static_validation": true
+}

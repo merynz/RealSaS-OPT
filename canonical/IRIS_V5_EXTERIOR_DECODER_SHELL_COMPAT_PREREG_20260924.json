@@ -1,0 +1,67 @@
+{
+  "schema": "RealSaS.IRIS.V5ExteriorDecoderShellCompatibilityPrereg.v1",
+  "status": "PREREGISTERED__DIAGNOSTIC_ONLY__NO_TRAINING",
+  "date_utc": "2026-09-24",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "parent_closure": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json",
+  "execution": {
+    "repo_commit": "77cd81ffe6389a5c078f267ae2a1458f2a953459",
+    "notebook_name": "RealSaS_IRIS_KNIGHT_V5_EXTERIOR_DECODER_SHELL_COMPAT_DIAGNOSTIC_RUN_ALL.ipynb",
+    "notebook_sha256": "1215f809dd6f519ecf51a4eaa90aea3826f8d5123f296b511f092cf4490ba0ec",
+    "optimizer_steps_permitted": 0,
+    "parameter_updates_permitted": 0,
+    "stage13_qualification_permitted": false
+  },
+  "frozen_states": {
+    "BASE": {
+      "checkpoint_sha256": "45de860757ddb6f65afcecb7fdc9f51ef4aef2aeaf598288459a0e5bfa1ec751",
+      "r512_nonpositive": 85849,
+      "boundary_crossing_tets": 436
+    },
+    "A0": {
+      "checkpoint_sha256": "2d2026f8d54cea27166d24a1c75dc8d9023756a6255f845b2ec0293a71863471",
+      "r512_nonpositive": 66909,
+      "boundary_crossing_tets": 133
+    },
+    "B": {
+      "checkpoint_sha256": "9ff4583567470dd1f3c6806db3778f25ca97b8ec0e6431065b2e8973f21718ce",
+      "r512_nonpositive": 41157,
+      "boundary_crossing_tets": 535
+    },
+    "C": {
+      "checkpoint_sha256": "988dd2a614a7e0632938e69d54abdbd96544a010c650ba8cf05f979ca86891b3",
+      "r512_nonpositive": 33240,
+      "boundary_crossing_tets": 422
+    },
+    "D": {
+      "checkpoint_sha256": "3ac74e0f841f665f52774f873cac82305852e7fdf60786c4f3aff55ccb1997a4",
+      "r512_nonpositive": 29857,
+      "boundary_crossing_tets": 1504
+    }
+  },
+  "questions": [
+    "REPRODUCE_EXACT_R512_AND_CONSERVATIVE_BOUNDARY_COUNTS_FOR_ALL_FIVE_STATES",
+    "SEPARATE_CONSERVATIVE_BOUNDARY_PARENT_FAILURES_FROM_ACTUAL_ZERO_SET_ESCAPE_THROUGH_OMITTED_IN_DOMAIN_NEIGHBOR_FACE",
+    "MEASURE_WHETHER_ANALYTIC_FSTAR_WOULD_REFINE_EACH_OMITTED_ESCAPE_NEIGHBOR",
+    "MEASURE_WHETHER_ANALYTIC_FSTAR_CROSSES_EACH_LEARNED_ESCAPE_FACE",
+    "MEASURE_ESCAPE_TO_COMPLETE_R512_VIOLATION_PROXIMITY",
+    "MEASURE_LOCAL_REGULARITY_LOWER_BOUND_AND_FINE_FACE_SLOPE_PROXIES_FOR_LEARNED_FIELD_AND_FSTAR"
+  ],
+  "theory": {
+    "base_step": "2/512",
+    "refine_band": "sqrt(3)*(2/512)",
+    "actual_missing_face_escape_implication": "FOR_CONTINUOUS_FIELD__LOCAL_LIPSCHITZ_MUST_EXCEED_SQRT6_SOMEWHERE_IF_OMITTED_NEIGHBOR_COARSE_CORNERS_ALL_SATISFY_CURRENT_NONREFINE_RULE",
+    "note": "This implication is diagnostic and does not authorize a gradient penalty or decoder-band change."
+  },
+  "forbidden": [
+    "OPTIMIZER_STEP",
+    "PARAMETER_UPDATE",
+    "LOSS_CHANGE",
+    "EIKONAL_OR_LIPSCHITZ_REGULARIZER",
+    "REFINE_BAND_CHANGE",
+    "DECODER_CHANGE",
+    "SPATIAL_RESOLUTION_CHANGE",
+    "STAGE13_SELECTION_FEEDBACK"
+  ],
+  "next_gate": "REVIEW_AND_SEAL_SHELL_COMPATIBILITY_BEFORE_LONG_HORIZON_OR_REGULARITY_ARM"
+}

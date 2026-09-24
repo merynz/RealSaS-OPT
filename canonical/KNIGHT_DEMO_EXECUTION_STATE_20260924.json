@@ -1,0 +1,60 @@
+{
+  "schema": "RealSaS.KnightDemoExecutionState.v1",
+  "status": "ACTIVE__STAGE08_PREFLIGHT_PASS__FROZEN_C_EXACT_UPSTREAM_IMPORT_REQUIRED",
+  "date_utc": "2026-09-24",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "run": {
+    "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+    "subject_id": "SUBJECT2_KNIGHT",
+    "execution_class": "DEMO_WITNESS",
+    "product_authority_claimed": false,
+    "product_pass_forbidden": true,
+    "stage13_scientific_pass": false
+  },
+  "geometry": {
+    "scientific_state": "STAGE13_FAIL",
+    "demo_choice": "FROZEN_C_FALLBACK",
+    "checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+    "zero_surface_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c",
+    "spatial_risk_demo_closure": "canonical/IRIS_V5_C_SPATIAL_RISK_REPLAY_DEMO_CLOSURE_20260924.json",
+    "demo_authority": "canonical/KNIGHT_DEMO_EXECUTION_AUTHORITY_20260924.json"
+  },
+  "fresh_demo_preflight": {
+    "workflow_run_id": 36022491562,
+    "conclusion": "success",
+    "completed_count": 8,
+    "stages_01_08": "PASS",
+    "artifact_id": 10817631769,
+    "artifact_digest_sha256": "62b903544c7541b10f028f9e640fffeeff24a2eec99af4cebc365325b672fe39",
+    "disposition": "PREFLIGHT_PASS__NOT_FROZEN_C_UPSTREAM",
+    "reason": "Fresh self-hosted render is semantically close but not byte/numeric identical to the historical Stage08 observation set used by frozen C."
+  },
+  "exact_frozen_c_upstream": {
+    "historical_workflow_run_id": 35447124607,
+    "historical_head_sha": "f45aed3655a2e974f20b343e8b379abeb0de209a",
+    "historical_artifact_id": 10586270615,
+    "historical_artifact_name": "subject2-knight-prefit-stage08",
+    "historical_artifact_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "artifact_expires_at": "2026-10-03T13:58:50Z",
+    "camera_set_hash": "2485d184c7fef6c453b6ff817d3eac525e438fe023350b294436589d62d75cca",
+    "observation_set_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+    "normalization_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e",
+    "import_required_before_frozen_c_stage09_15": true
+  },
+  "runner_transfer_probe": {
+    "workflow_run_id": 36022833231,
+    "conclusion": "success",
+    "runner_local_frozen_c_artifact_count": 0,
+    "rclone_installed": false,
+    "gdrive_cli_installed": false
+  },
+  "next_actions": [
+    "IMPORT_EXACT_HISTORICAL_STAGE08_ARTIFACT_INTO_DEMO_LINEAGE",
+    "ESTABLISH_HASH_BOUND_FROZEN_C_CHECKPOINT_AND_ZERO_SURFACE_HANDOFF_TO_SELF_HOSTED_RUNNER",
+    "ADMIT_V5_EXTERNAL_FIT_AS_DEMO_ONLY_WITHOUT_FABRICATING_V2_DENSE_COVERAGE_COMPATIBILITY",
+    "EXECUTE_STAGE09_15",
+    "START_CAA_AND_GEPPETTO_BRANCHES_IN_PARALLEL",
+    "RETURN_TO_USER_AT_GPU_FIT_BOUNDARY"
+  ],
+  "continuation_rule": "On a future chat, read this file first and continue the same run_id; do not start a replacement Knight run unless this state explicitly records supersession."
+}

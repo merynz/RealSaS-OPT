@@ -79,3 +79,15 @@ Complete R512, VF-23 and exact-head reclosure. Only after technical readiness is
 ## Post-seal appearance fidelity reopening — 2026-09-21
 
 The prior READY seal was revoked before Knight execution. New review found that fixed CAA tile resolution 8 was capacity-derived rather than art-frequency qualified; unobserved completion still uses nearest-surface color copy; cross-view RGB compatibility is not an explicit authority; dynamic alpha holes are currently diagnostic rather than a hard Stage45 failure; and scattered/speckled holes are not independently bounded. Current learned-model fits remain scoped FIT evidence and are not claimed final or unseen-ready.
+
+
+## Knight demo-only execution — 2026-09-24
+
+A separate investor-demo execution lane is active and does **not** change product readiness or scientific geometry status.
+
+- Demo run: `SUBJECT2_KNIGHT_DEMO_V2_20260924` / `DEMO_WITNESS`.
+- IRIS Stage13 remains scientific **FAIL**; product `PASS_PRODUCT_V2` is forbidden on this lineage.
+- Demo geometry is frozen C: checkpoint `222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0`; zero-surface `adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c`.
+- Fresh demo Stage01–08 self-hosted preflight run `36022491562` passed, but its render bytes/numerics drift slightly from the historical frozen-C upstream and therefore are **not** being silently rebound to the checkpoint.
+- Exact frozen-C Stage08 upstream remains GitHub artifact `10586270615` from run `35447124607`, digest `5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7`.
+- Durable continuation authority: `canonical/KNIGHT_DEMO_EXECUTION_STATE_20260924.json`.

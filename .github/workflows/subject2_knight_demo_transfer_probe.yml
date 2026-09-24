@@ -1,0 +1,51 @@
+name: subject2-knight-demo-transfer-probe
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_TRANSFER_PROBE_TRIGGER_20260924.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Probe exact artifact transport capability
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$HOME/realsas_authority"
+          echo "AUTHORITY_ROOT_EXISTS=$([ -d "$root" ] && echo 1 || echo 0)"
+          exact_count=0
+          if [ -d "$root" ]; then
+            exact_count=$(find "$root" -type f -path '*20260924T115953Z*' \( -name 'SELECTED_CHECKPOINT.pt' -o -name 'IRIS_SIGNED_ZERO_SURFACE.npz' \) 2>/dev/null | wc -l)
+          fi
+          echo "FROZEN_C_LOCAL_EXACT_ARTIFACT_COUNT=$exact_count"
+
+          if command -v rclone >/dev/null 2>&1; then
+            echo "RCLONE_INSTALLED=1"
+            mapfile -t remotes < <(rclone listremotes 2>/dev/null || true)
+            echo "RCLONE_REMOTE_COUNT=${#remotes[@]}"
+            found=0
+            for remote in "${remotes[@]}"; do
+              if rclone lsf "${remote}RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1/20260924T115953Z/V5_TP64_LONG_HORIZON_LOW_LR/arms/C" --max-depth 1 >/dev/null 2>&1; then
+                found=1
+                break
+              fi
+            done
+            echo "FROZEN_C_RCLONE_PATH_ACCESSIBLE=$found"
+          else
+            echo "RCLONE_INSTALLED=0"
+            echo "RCLONE_REMOTE_COUNT=0"
+            echo "FROZEN_C_RCLONE_PATH_ACCESSIBLE=0"
+          fi
+
+          if command -v gdrive >/dev/null 2>&1; then echo "GDRIVE_CLI_INSTALLED=1"; else echo "GDRIVE_CLI_INSTALLED=0"; fi

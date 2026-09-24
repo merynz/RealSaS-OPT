@@ -114,7 +114,7 @@
     "scope": "KNIGHT_FIT1__SELECTED_TP64_LEARNED_TAIL_LOCALIZATION_ONLY",
     "preregistration": "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_PREREG_20260924.json",
     "diagnostic_repo_commit": "3eb635f84768c180ea6acdda920f107188ad956b",
-    "notebook_sha256": "607c217c2259c769290dd0ee566e12ad3f03fb284d0474eb4c744f7d472d8e26",
+    "notebook_sha256": "7b7a95f3fd9b104db2cdc48394fb3d9dfb345a5277fd6bab66e8bf9ccc85d0c8",
     "optimizer_steps_permitted": 0,
     "parameter_updates_permitted": 0,
     "stage13_qualification_permitted": false,

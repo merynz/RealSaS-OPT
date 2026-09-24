@@ -269,10 +269,12 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     diag2 = ontology["field_failure_diagnostic_authorization"]
     assert diag2["authorized"] is True
     assert diag2["preregistration"] == "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json"
-    assert diag2["diagnostic_repo_commit"] == "6e3cf4d6f2d973e7c1df7ca0f31efbd7b11e3d86"
-    assert diag2["code_ci_run_id"] == 36007195382
+    assert diag2["preregistration_amendment"] == "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json"
+    assert diag2["diagnostic_repo_commit"] == "fd7ee14764f0d0be04b37349fac99825936c57a2"
+    assert diag2["code_ci_run_id"] == 36009727585
     assert diag2["code_ci_conclusion"] == "success"
-    assert diag2["notebook_sha256"] == "efcb98d93da2a00570e97e1939d583cbb20f8dc30bdca1a4c28c2cf69ff5d2ff"
+    assert diag2["notebook_sha256"] == "250d3a4a4b2520aeb0d832ab13e0837565033416f48805c668d2367ca6a29b89"
+    assert diag2["exact_historical_replay_bank_overlap_claimed"] is False
     assert diag2["optimizer_steps_permitted"] == 0
     assert diag2["parameter_updates_permitted"] == 0
     assert diag2["autograd_gradient_measurement_permitted"] is True

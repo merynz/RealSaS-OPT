@@ -34,6 +34,7 @@ on:
       - 'canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json'
       - 'canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json'
       - 'canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json'
+      - 'canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json'
       - '.github/workflows/iris_v5_source_field_contract.yml'
   workflow_dispatch:
 
@@ -114,6 +115,7 @@ jobs:
           longh_prereg=json.loads(Path('canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json').read_text())
           bc_prereg=json.loads(Path('canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json').read_text())
           field_diag_prereg=json.loads(Path('canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json').read_text())
+          field_diag_amend=json.loads(Path('canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json').read_text())
           assert prereg['status']=='FROZEN_BEFORE_OPTIMIZER_STEP_1'
           assert prereg['execution']['repo_commit']=='4de08a779199d64b60b0d1aae3512a0f77e77c77'
           assert prereg['optimizer']['primary_objective']['type']=='SMOOTH_L1_DIRECT_FSTAR_ONLY'
@@ -213,6 +215,13 @@ jobs:
           assert field_diag_prereg['surface_diagnostic']['sample_count_per_arm']==131072
           assert field_diag_prereg['replay_diagnostic']['expected_fixed_bank_sha256']=='f10fcd363423cda8131888b5720680297d7d4b263638e471f8b6484c5281ef16'
           assert field_diag_prereg['gradient_diagnostic']['total_rays']==256
+          assert field_diag_amend['status']=='FROZEN_AFTER_APPARATUS_FAIL_BEFORE_RERUN'
+          assert field_diag_amend['apparatus_failure']['scientific_surface_diagnostic_executed'] is False
+          assert field_diag_amend['root_cause']['exact_historical_bank_indices_available'] is False
+          assert field_diag_amend['amended_H3']['exact_training_bank_overlap_claimed'] is False
+          assert field_diag_amend['amended_execution']['diagnostic_repo_commit']=='fd7ee14764f0d0be04b37349fac99825936c57a2'
+          assert field_diag_amend['amended_execution']['code_ci_run_id']==36009727585
+          assert field_diag_amend['amended_execution']['notebook_sha256']=='250d3a4a4b2520aeb0d832ab13e0837565033416f48805c668d2367ca6a29b89'
           diag=ontology['diagnostic_authorization']
           assert diag['authorized'] is False
           assert diag['completed_scope']=='KNIGHT_FIT1__FIVE_FROZEN_STATES__EXTERIOR_DECODER_SHELL_COMPATIBILITY_ONLY'
@@ -249,9 +258,11 @@ jobs:
           field_diag=ontology['field_failure_diagnostic_authorization']
           assert field_diag['authorized'] is True
           assert field_diag['preregistration']=='canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json'
-          assert field_diag['diagnostic_repo_commit']=='6e3cf4d6f2d973e7c1df7ca0f31efbd7b11e3d86'
-          assert field_diag['code_ci_run_id']==36007195382
-          assert field_diag['notebook_sha256']=='efcb98d93da2a00570e97e1939d583cbb20f8dc30bdca1a4c28c2cf69ff5d2ff'
+          assert field_diag['preregistration_amendment']=='canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json'
+          assert field_diag['diagnostic_repo_commit']=='fd7ee14764f0d0be04b37349fac99825936c57a2'
+          assert field_diag['code_ci_run_id']==36009727585
+          assert field_diag['notebook_sha256']=='250d3a4a4b2520aeb0d832ab13e0837565033416f48805c668d2367ca6a29b89'
+          assert field_diag['exact_historical_replay_bank_overlap_claimed'] is False
           assert field_diag['optimizer_steps_permitted']==0
           assert field_diag['parameter_updates_permitted']==0
           assert field_diag['incomplete_bc_endpoint_run_consumed'] is False

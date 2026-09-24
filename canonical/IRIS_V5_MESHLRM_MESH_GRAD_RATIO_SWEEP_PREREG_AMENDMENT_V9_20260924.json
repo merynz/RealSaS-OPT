@@ -1,0 +1,66 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMMeshGradRatioSweepPreregAmendmentV9.v1",
+  "status": "FROZEN_BEFORE_RATIO_SWEEP_OPTIMIZER_STEP__SCHEDULE_PARITY_REPAIR",
+  "date_utc": "2026-09-24",
+  "amends": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_V8_20260924.json",
+  "reason": "Full stale-assumption audit found that shortening the ratio sweep to 300 actual updates had inadvertently compressed the cosine schedule and changed warmup from 100 to 50. That would confound the intended single-variable comparison of mesh-gradient strength.",
+  "invalidated_notebook": {
+    "filename": "RealSaS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_RUN_ALL.ipynb",
+    "sha256": "506314a949498218bcd41e3c6dc3c012d71f35141b553a3b7c3d647edffd51c8",
+    "execution_authorized": false
+  },
+  "repaired_training_contract": {
+    "actual_continuation_steps_per_arm": 300,
+    "evaluation_every_steps": 100,
+    "candidate_start_step": 100,
+    "lr": 0.00001,
+    "eta_min": 0.000001,
+    "warmup_steps": 100,
+    "scheduler_reference_horizon_steps": 1200,
+    "scheduler_rule": "Use the exact V4/1.0x lr_factor trajectory evaluated only for steps 1..300; do not renormalize/compress cosine decay to the short sweep horizon.",
+    "optimizer": "AdamW",
+    "weight_decay": 0,
+    "gradient_clip_norm": 1,
+    "base_objective": "UNCHANGED_C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+    "train_points_per_step": 32768,
+    "train_global": 16384,
+    "train_near_zero": 8192,
+    "train_straddle": 4096,
+    "train_replay": 4096,
+    "silhouette_rays_per_step": 256,
+    "silhouette_depth_samples": 128,
+    "mesh_grid_n": 256,
+    "mesh_raster_res": 1024
+  },
+  "single_variable_rule": {
+    "arms": [
+      {
+        "name": "M0_10",
+        "mesh_to_base_grad_ratio": 0.1
+      },
+      {
+        "name": "M0_25",
+        "mesh_to_base_grad_ratio": 0.25
+      }
+    ],
+    "allowed_training_trajectory_difference_between_arms": "MESH_VJP_MULTIPLIER_ONLY",
+    "deterministic_base_train_schedule_shared_by_step": true,
+    "deterministic_source_ray_schedule_shared_by_step": true,
+    "independent_frozen_c_start_per_arm": true
+  },
+  "selection_only_differences": {
+    "candidate_start_step_100": "Allowed because it does not alter optimization trajectory; it only permits an earlier eligible checkpoint to be retained.",
+    "frozen_c_field_fidelity_guard": "Selection gate only; does not alter gradients."
+  },
+  "audit_requirements": [
+    "NUMERIC_LR_PARITY_WITH_V4_FOR_EVERY_STEP_1_TO_300_MAX_ABS_ERROR_LE_1E-15",
+    "STATIC_CONSTANT_DIFF_VS_V4_ALLOWS_ONLY_ACTUAL_HORIZON_CANDIDATE_SELECTION_RATIO_SWEEP_AND_GUARD_FIELDS",
+    "NO_STALE_SINGLE_ARM_LOOP_IN_DECODER_STAGE13_FINAL",
+    "EMPTY_ELIGIBLE_SET_FALLS_BACK_WITHOUT_DECODER_STAGE13_ACCESS",
+    "CHECKPOINT_ARM_AND_RATIO_LINEAGE_ASSERTED",
+    "ALL_CODE_CELLS_COMPILE_AND_COMBINED_MODULE_AST_PARSE",
+    "NO_STORED_OUTPUTS_OR_EXECUTION_COUNTS"
+  ],
+  "final_decoder_and_stage13_unchanged": true,
+  "scientific_intervention_unchanged": true
+}

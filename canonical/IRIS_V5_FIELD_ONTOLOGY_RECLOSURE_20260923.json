@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_FSTAR__TP64_DIRECT_FSTAR_ARM_FAIL__LEARNED_TAIL_LOCALIZED__NEXT_ABLATION_PREREG_REQUIRED",
+  "status": "FROZEN_FSTAR__TP64_TAIL_LOCALIZED__OBJECTIVE_CAUSAL_ABLATION_AUTHORIZED",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -103,15 +103,26 @@
     ]
   },
   "training_authorization": {
-    "authorized": false,
-    "prior_authorized_arm": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json",
-    "prior_arm_closure": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_CLOSURE_20260923.json",
-    "diagnostic_closure": "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json",
-    "blockers": [
-      "FREEZE_CAUSAL_TAIL_REPAIR_ABLATION_PREREGISTRATION",
-      "FREEZE_CAUSAL_TAIL_REPAIR_RUN_ALL_NOTEBOOK"
+    "authorized": true,
+    "authorization_scope": "KNIGHT_FIT1__TP64_OBJECTIVE_CAUSAL_ABLATION__FOUR_FROZEN_CONTINUATION_ARMS",
+    "preregistration": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json",
+    "execution_repo_commit": "df260b8e1423927d7df8873f80b2b82ab376a77b",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_RUN_ALL.ipynb",
+    "notebook_sha256": "b469a617867e3e6e76c344a833568b9ed3d631039fcdb2010b30659e4f237fbb",
+    "base_checkpoint_sha256": "45de860757ddb6f65afcecb7fdc9f51ef4aef2aeaf598288459a0e5bfa1ec751",
+    "base_checkpoint_step": 4800,
+    "arms": [
+      "A0_CONTINUE_DIRECT_FSTAR_ONLY",
+      "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
+      "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+      "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE"
     ],
-    "note": "Learned-tail localization is closed without training. New optimizer steps remain blocked until a causal continuation ablation is frozen. Exact R512 audit points must remain training-blind."
+    "exact_r512_audit_lattice_points_forbidden_from_training": true,
+    "exact_r512_and_stage13_checkpoint_selection_blind": true,
+    "architecture_change_authorized": false,
+    "spatial_resolution_change_authorized": false,
+    "blockers": [],
+    "next_gate": "EXECUTE_EXACT_PREREGISTERED_NOTEBOOK_ON_A100_AND_REVIEW_ALL_FOUR_ARMS_BEFORE_SPATIAL_ABLATION"
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",

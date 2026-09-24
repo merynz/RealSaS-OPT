@@ -14,6 +14,7 @@ on:
       - 'canonical/IRIS_V5_CONTINUOUS_SOURCE_FIELD_POLICY_20260923.json'
       - 'canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json'
       - 'canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_AMENDMENT_20260923.json'
+      - 'canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_PREREG_20260924.json'
       - '.github/workflows/iris_v5_source_field_contract.yml'
   workflow_dispatch:
 
@@ -73,6 +74,7 @@ jobs:
           assert ontology['r512_independent_sign_certificate']['metric_magnitude_lower_bound_is_gate'] is False
           prereg=json.loads(Path('canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json').read_text())
           amendment=json.loads(Path('canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_AMENDMENT_20260923.json').read_text())
+          tail_prereg=json.loads(Path('canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_PREREG_20260924.json').read_text())
           assert prereg['status']=='FROZEN_BEFORE_OPTIMIZER_STEP_1'
           assert prereg['execution']['repo_commit']=='4de08a779199d64b60b0d1aae3512a0f77e77c77'
           assert prereg['optimizer']['primary_objective']['type']=='SMOOTH_L1_DIRECT_FSTAR_ONLY'
@@ -83,6 +85,21 @@ jobs:
           assert amendment['repair']['scientific_change'] is False
           assert amendment['amended_execution']['repo_commit']=='4de08a779199d64b60b0d1aae3512a0f77e77c77'
           assert amendment['amended_execution']['notebook_sha256']=='93e7dd44dcfed865b5ba5861365e88b6407255da6ce0af9674c43a6bbb231aad'
+          assert tail_prereg['status']=='FROZEN_BEFORE_DIAGNOSTIC_EXECUTION'
+          assert tail_prereg['execution']['diagnostic_repo_commit']=='3eb635f84768c180ea6acdda920f107188ad956b'
+          assert tail_prereg['execution']['notebook_sha256']=='607c217c2259c769290dd0ee566e12ad3f03fb284d0474eb4c744f7d472d8e26'
+          assert tail_prereg['execution']['optimizer_steps_permitted']==0
+          assert tail_prereg['execution']['parameter_updates_permitted']==0
+          assert tail_prereg['execution']['stage13_qualification_permitted'] is False
+          diag=ontology['diagnostic_authorization']
+          assert diag['authorized'] is True
+          assert diag['scope']=='KNIGHT_FIT1__SELECTED_TP64_LEARNED_TAIL_LOCALIZATION_ONLY'
+          assert diag['preregistration']=='canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_PREREG_20260924.json'
+          assert diag['notebook_sha256']==tail_prereg['execution']['notebook_sha256']
+          assert diag['optimizer_steps_permitted']==0
+          assert diag['parameter_updates_permitted']==0
+          assert diag['stage13_qualification_permitted'] is False
+          assert diag['training_remains_blocked'] is True
           auth=ontology['training_authorization']
           if auth['authorized']:
               assert auth['blockers']==[]

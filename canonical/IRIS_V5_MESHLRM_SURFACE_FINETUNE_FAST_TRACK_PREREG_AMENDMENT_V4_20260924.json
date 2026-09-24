@@ -1,0 +1,53 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMSurfaceFineTuneFastTrackPreregAmendmentV4.v1",
+  "status": "FROZEN_BEFORE_ANY_SCIENTIFIC_OPTIMIZER_STEP__HARD_RASTER_PATH_REPAIR",
+  "date_utc": "2026-09-24",
+  "amends": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_V3_20260924.json",
+  "invalidated_attempt": {
+    "run_id": "20260924T174446Z",
+    "terminal": "APPARATUS_ABORT__TRAINING_MESH_PROXY_PRODUCT_MASK_MISMATCH",
+    "actual_continuation_optimizer_steps": 0,
+    "actual_continuation_parameter_updates": 0,
+    "scientific_result": false,
+    "frozen_c_mutated": false
+  },
+  "observed_pattern": {
+    "min_product_mask_recall": 0.007674536541387277,
+    "max_product_mask_recall": 0.027221502225728292,
+    "min_product_mask_precision": 1,
+    "interpretation": "Near-perfect precision with ~0.8-2.7% recall is incompatible with a mild 256-grid resolution deficit and indicates raster apparatus under-coverage."
+  },
+  "root_cause": {
+    "code_path": "render_mesh_feedback_pytorch3d",
+    "defect": "The hard occupancy mask was derived from the same blurred PyTorch3D fragment list used for the soft gradient surrogate (blur_radius>0, faces_per_pixel=8). On a ~730k triangle projection, nearby non-covering front faces can consume the top-K fragment slots and exclude the actual covering triangle. Therefore 'hard = any(valid & dists<=0)' was not an exact hard union-of-triangles raster.",
+    "consequence": "Proxy parity measured fragment-list truncation, not the training mesh footprint."
+  },
+  "repair": {
+    "hard_forward_raster": {
+      "blur_radius": 0,
+      "faces_per_pixel": 1,
+      "hard_coverage": "pix_to_face[...,0]>=0",
+      "role": "FORWARD_VALUE_AND_PROXY_GATE_ONLY",
+      "explanation": "With zero blur only genuinely covering faces enter the rasterizer; one nearest covering face is sufficient for silhouette union coverage."
+    },
+    "soft_backward_raster": {
+      "blur_radius": "UNCHANGED_BOUNDARY_SIGMA_SUPPORT",
+      "faces_per_pixel": 8,
+      "face_subset": "DETACHED_CURRENT_VISIBLE_SILHOUETTE_FACES_ONLY",
+      "role": "BACKWARD_SURROGATE_ONLY",
+      "explanation": "Soft distance gradients are restricted to faces that actually support the current hard predicted boundary, preventing internal triangle edges from acting as silhouette loss."
+    },
+    "stage13_semantic_parity": {
+      "sample_face_count": 4096,
+      "requirement": "PyTorch3D zero-blur hard mask must byte/IoU-parity an exact Stage13 half-integer top-left raster of the same sampled training triangles in every view before optimizer start.",
+      "min_iou": 0.999
+    },
+    "frozen_product_proxy_gate": {
+      "required_min_recall": 0.95,
+      "required_min_precision": 0.95,
+      "unchanged": true
+    }
+  },
+  "product_decoder_and_stage13_unchanged": true,
+  "scientific_intervention_unchanged": "EXTRACTED_CANONICAL_MESH -> DIFFERENTIABLE_SOURCE_VIEW_SILHOUETTE_FEEDBACK -> IRIS"
+}

@@ -1,8 +1,21 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
-from models.iris.v5.indexed_sparse_tetra_decoder_v5 import SparseRegularTetraPolicyV5
+from models.iris.v5.indexed_sparse_tetra_decoder_v5 import (
+    SparseRegularTetraPolicyV5,
+    SparseSurfaceTruncationError,
+    boundary_parent_cells_v5,
+    count_sparse_mt_v5,
+    fine_positions_from_gids_v5,
+    fine_vertex_gids_v5,
+)
+from models.iris.v5.contained_sparse_tetra_decoder_v5 import (
+    build_indexed_mt_from_sparse_carrier_contained_v5,
+    decode_indexed_sparse_tetra_mt_contained_v5,
+    exact_sparse_shell_containment_report_v5,
+)
 from models.iris.v5.shell_escape_diagnostics_v5 import (
     face_zero_crossing_from_scalar_v5,
     missing_neighbor_faces_v5,
@@ -65,3 +78,88 @@ def test_policy_geometry_is_still_512_to_1024():
     p=SparseRegularTetraPolicyV5()
     assert p.base_cells==512
     assert p.fine_cells==1024
+
+
+def _small_policy() -> SparseRegularTetraPolicyV5:
+    return SparseRegularTetraPolicyV5(
+        base_cells=4,
+        fine_cells=8,
+        query_chunk=1024,
+        cell_chunk=64,
+        refine_slab_cells=2,
+        fine_gid_cell_chunk=64,
+        normal_chunk=1024,
+    )
+
+
+def test_exact_containment_rejects_legacy_boundary_proxy_false_positive(tmp_path):
+    p=_small_policy()
+    refined=np.asarray([[1,1,1]],dtype=np.int32)
+    gids=fine_vertex_gids_v5(refined,policy=p)
+    q=fine_positions_from_gids_v5(gids,fine_cells=p.fine_cells)
+    center=np.asarray([-.25,-.25,-.25],dtype=np.float32)
+    scalar=np.linalg.norm(q-center[None,:],axis=1).astype(np.float32)-np.float32(.20)
+
+    boundary=boundary_parent_cells_v5(refined,policy=p)
+    legacy=count_sparse_mt_v5(refined,gids,scalar,boundary,policy=p)
+    assert int(legacy['boundary_crossing_tets'])>0
+
+    containment,_=exact_sparse_shell_containment_report_v5(
+        refined,gids,scalar,policy=p
+    )
+    assert containment['passed'] is True
+    assert containment['actual_missing_face_zero_crossing_count']==0
+    assert containment['actual_domain_boundary_zero_crossing_count']==0
+
+    def query(points):
+        x=np.asarray(points,dtype=np.float32)
+        return np.linalg.norm(x-center[None,:],axis=1).astype(np.float32)-np.float32(.20)
+
+    mesh=build_indexed_mt_from_sparse_carrier_contained_v5(
+        refined,gids,scalar,query_fn=query,policy=p,work_dir=tmp_path/'contained'
+    )
+    assert mesh.diagnostics['legacy_boundary_crossing_tets_is_truncation_gate'] is False
+    assert mesh.diagnostics['legacy_boundary_crossing_tets_role']=='TELEMETRY_ONLY'
+    assert mesh.diagnostics['actual_total_boundary_zero_crossing_count']==0
+
+
+def test_exact_containment_fails_on_omitted_in_domain_face_zero_contact():
+    p=_small_policy()
+    refined=np.asarray([[1,1,1]],dtype=np.int32)
+    gids=fine_vertex_gids_v5(refined,policy=p)
+    q=fine_positions_from_gids_v5(gids,fine_cells=p.fine_cells)
+    # x=0 is the +X face of base cell [1,1,1] in a 4^3 domain.
+    scalar=q[:,0].astype(np.float32)
+
+    containment,_=exact_sparse_shell_containment_report_v5(
+        refined,gids,scalar,policy=p
+    )
+    assert containment['passed'] is False
+    assert containment['actual_missing_face_zero_crossing_count']>0
+    assert containment['actual_domain_boundary_zero_crossing_count']==0
+
+
+def test_corrected_decoder_still_fails_closed_on_global_domain_escape(tmp_path):
+    p=SparseRegularTetraPolicyV5(
+        base_cells=8,
+        fine_cells=16,
+        query_chunk=4096,
+        cell_chunk=64,
+        refine_slab_cells=4,
+        fine_gid_cell_chunk=64,
+        normal_chunk=4096,
+    )
+
+    def near_domain_boundary(points: np.ndarray) -> np.ndarray:
+        q=np.asarray(points,dtype=np.float32)
+        return q[:,0]+np.float32(.95)
+
+    with pytest.raises(
+        SparseSurfaceTruncationError,
+        match='SPARSE_SHELL_ACTUAL_ZERO_SURFACE_ESCAPE',
+    ):
+        decode_indexed_sparse_tetra_mt_contained_v5(
+            near_domain_boundary,
+            policy=p,
+            work_dir=tmp_path/'domain_escape',
+        )

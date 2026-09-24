@@ -198,19 +198,26 @@ def zero_set_conditioning_proxy_v5(
     return out
 
 
-def replay_staleness_report_v5(
-    base_residual: np.ndarray,
+def residual_rank_drift_report_v5(
+    reference_residual: np.ndarray,
     current_residual: np.ndarray,
     *,
-    bank_size: int,
+    hard_set_size: int,
 ) -> dict[str, float | int]:
-    base = np.asarray(base_residual, dtype=np.float64).reshape(-1)
+    """Compare residual difficulty rankings on one frozen query pool.
+
+    This intentionally does NOT claim overlap with a historical training replay
+    bank unless the exact historical bank indices were persisted.  Both hard sets
+    are reconstructed on the current apparatus from aligned residual vectors.
+    """
+
+    ref = np.asarray(reference_residual, dtype=np.float64).reshape(-1)
     cur = np.asarray(current_residual, dtype=np.float64).reshape(-1)
-    if base.shape != cur.shape or len(base) == 0 or not np.isfinite(base).all() or not np.isfinite(cur).all():
-        raise ValueError("base/current residuals must be finite aligned non-empty vectors")
-    k = int(bank_size)
-    if k <= 0 or k > len(base):
-        raise ValueError("bank_size must be in [1,N]")
+    if ref.shape != cur.shape or len(ref) == 0 or not np.isfinite(ref).all() or not np.isfinite(cur).all():
+        raise ValueError("reference/current residuals must be finite aligned non-empty vectors")
+    k = int(hard_set_size)
+    if k <= 0 or k > len(ref):
+        raise ValueError("hard_set_size must be in [1,N]")
 
     def hard_indices(x: np.ndarray) -> np.ndarray:
         if k == len(x):
@@ -220,24 +227,24 @@ def replay_staleness_report_v5(
         order = np.lexsort((ids, -x[ids]))
         return ids[order]
 
-    frozen = hard_indices(base)
+    reference = hard_indices(ref)
     current = hard_indices(cur)
-    overlap = np.intersect1d(frozen, current, assume_unique=False)
-    frozen_mask = np.zeros(len(base), dtype=bool)
-    frozen_mask[frozen] = True
-    current_captured = int(np.count_nonzero(frozen_mask[current]))
-    rho = spearmanr(base, cur).statistic
+    overlap = np.intersect1d(reference, current, assume_unique=False)
+    reference_mask = np.zeros(len(ref), dtype=bool)
+    reference_mask[reference] = True
+    current_captured = int(np.count_nonzero(reference_mask[current]))
+    rho = spearmanr(ref, cur).statistic
     if not np.isfinite(rho):
         rho = 0.0
     return {
-        "pool_count": int(len(base)),
-        "bank_size": k,
+        "pool_count": int(len(ref)),
+        "hard_set_size": k,
         "hard_set_overlap_count": int(len(overlap)),
         "hard_set_overlap_fraction": float(len(overlap) / k),
-        "current_hard_set_captured_by_frozen_bank_count": current_captured,
-        "current_hard_set_captured_by_frozen_bank_fraction": float(current_captured / k),
-        "base_current_residual_spearman": float(rho),
-        "frozen_bank_current_residual_mean": float(cur[frozen].mean()),
+        "current_hard_set_captured_by_reference_count": current_captured,
+        "current_hard_set_captured_by_reference_fraction": float(current_captured / k),
+        "reference_current_residual_spearman": float(rho),
+        "reference_hard_set_current_residual_mean": float(cur[reference].mean()),
         "current_hard_residual_mean": float(cur[current].mean()),
         "pool_current_residual_mean": float(cur.mean()),
     }

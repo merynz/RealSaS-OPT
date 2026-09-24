@@ -4,7 +4,7 @@ import numpy as np
 
 from models.iris.v5.field_failure_diagnostics_v5 import (
     finite_difference_gradient_numpy_v5,
-    replay_staleness_report_v5,
+    residual_rank_drift_report_v5,
     source_signed_field_per_view_numpy_v5,
     top_two_view_margin_v5,
     zero_set_conditioning_proxy_v5,
@@ -59,10 +59,10 @@ def test_finite_difference_gradient_and_conditioning_proxy_linear_field():
     np.testing.assert_allclose(rep["offset_proxy_pixels"],expected_offset/0.01,rtol=2e-4,atol=2e-4)
 
 
-def test_replay_staleness_detects_shifted_hard_set():
+def test_residual_rank_drift_detects_shifted_hard_set():
     base=np.asarray([10,9,8,7,1,1,1,1],np.float64)
     current=np.asarray([1,1,1,1,10,9,8,7],np.float64)
-    rep=replay_staleness_report_v5(base,current,bank_size=4)
+    rep=residual_rank_drift_report_v5(base,current,hard_set_size=4)
     assert rep["hard_set_overlap_count"]==0
-    assert rep["current_hard_set_captured_by_frozen_bank_fraction"]==0.0
-    assert rep["current_hard_residual_mean"]>rep["frozen_bank_current_residual_mean"]
+    assert rep["current_hard_set_captured_by_reference_fraction"]==0.0
+    assert rep["current_hard_residual_mean"]>rep["reference_hard_set_current_residual_mean"]

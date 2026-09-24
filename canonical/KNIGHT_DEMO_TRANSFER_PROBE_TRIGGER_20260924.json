@@ -2,5 +2,7 @@
   "schema": "RealSaS.KnightDemoTransferProbeTrigger.v1",
   "status": "PROBE_REQUESTED",
   "date_utc": "2026-09-24",
-  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924"
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "probe_revision": 2,
+  "probe_scope": "WSL_WINDOWS_GOOGLE_DRIVE_MOUNTS"
 }

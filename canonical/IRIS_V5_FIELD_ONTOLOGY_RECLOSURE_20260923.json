@@ -247,7 +247,8 @@
     "replay_refresh_authorized": false,
     "target_aggregation_change_authorized": false,
     "decoder_change_authorized": false,
-    "stage13_threshold_change_authorized": false
+    "stage13_threshold_change_authorized": false,
+    "exact_r512_and_stage13_checkpoint_selection_blind": true
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",

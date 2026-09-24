@@ -416,7 +416,7 @@ def validate_demo_witness_authorization(manifest: dict, *, subject_id: str) -> s
     if sha256_file(path)!=expected:
         raise RuntimeError("DEMO_WITNESS_AUTHORITY_SHA_DRIFT")
     payload=load_json(path)
-    if str(payload.get("schema") or "")!="RealSaS.KnightDemoExecutionAuthority.v1":
+    if str(payload.get("schema") or "")!="RealSaS.DemoExecutionAuthority.v1":
         raise RuntimeError("DEMO_WITNESS_AUTHORITY_SCHEMA_DRIFT")
     if str(payload.get("status") or "")!="APPROVED_DEMO_ONLY":
         raise RuntimeError("DEMO_WITNESS_AUTHORITY_NOT_APPROVED")

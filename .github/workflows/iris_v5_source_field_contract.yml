@@ -9,6 +9,7 @@ on:
       - 'tests/iris/test_source_signed_field_v5.py'
       - 'tests/iris/test_indexed_sparse_tetra_decoder_v5.py'
       - 'tests/iris/test_direct_fstar_fit_v5.py'
+      - 'tests/iris/test_learned_tail_localization_v5.py'
       - 'canonical/IRIS_V5_FIELD_ONTOLOGY_RECLOSURE_20260923.json'
       - 'canonical/IRIS_V5_CONTINUOUS_SOURCE_FIELD_POLICY_20260923.json'
       - 'canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json'
@@ -43,15 +44,18 @@ jobs:
           python -m py_compile models/iris/v5/source_signed_field_v5.py
           python -m py_compile models/iris/v5/indexed_sparse_tetra_decoder_v5.py
           python -m py_compile models/iris/v5/direct_fstar_fit_v5.py
+          python -m py_compile models/iris/v5/learned_tail_localization_v5.py
           python -m py_compile tests/iris/test_source_signed_field_v5.py
           python -m py_compile tests/iris/test_indexed_sparse_tetra_decoder_v5.py
           python -m py_compile tests/iris/test_direct_fstar_fit_v5.py
+          python -m py_compile tests/iris/test_learned_tail_localization_v5.py
       - name: Run V5 target and indexed decoder tests
         run: |
           python -m pytest -q \
             tests/iris/test_source_signed_field_v5.py \
             tests/iris/test_indexed_sparse_tetra_decoder_v5.py \
-            tests/iris/test_direct_fstar_fit_v5.py
+            tests/iris/test_direct_fstar_fit_v5.py \
+            tests/iris/test_learned_tail_localization_v5.py
       - name: Prove ontology supersession boundary
         run: |
           python - <<'PY'

@@ -232,8 +232,9 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert auth["shell_compatibility_closure"] == "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json"
     assert auth["corrected_decoder_stage13_preregistration"] == "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json"
     assert auth["corrected_decoder_stage13_closure"] == "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_CLOSURE_20260924.json"
+    assert auth["morphology_closure"] == "canonical/IRIS_V5_STAGE13_FROZEN_MASK_MORPHOLOGY_CLOSURE_20260924.json"
     assert auth["blockers"] == [
-        "CLOSE_STAGE13_FROZEN_MASK_MORPHOLOGY_DIAGNOSTIC_BEFORE_LONG_HORIZON",
+        "CLOSE_ZERO_SURFACE_OWNER_DIAGNOSTIC_BEFORE_LONG_HORIZON",
     ]
     assert auth["architecture_change_authorized"] is False
     assert auth["spatial_resolution_change_authorized"] is False
@@ -254,13 +255,18 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert requal["optimizer_steps_executed"] == 0
     assert requal["parameter_updates_executed"] == 0
     morph = ontology["morphology_diagnostic_authorization"]
-    assert morph["authorized"] is True
-    assert morph["preregistration"] == "canonical/IRIS_V5_STAGE13_FROZEN_MASK_MORPHOLOGY_PREREG_20260924.json"
-    assert morph["diagnostic_repo_commit"] == "ba4fcb6b3320f1590583e75d85d485aa01d7dc90"
-    assert morph["code_ci_run_id"] == 35992552613
-    assert morph["notebook_sha256"] == "76f2feb13ee136350ea348a52d577597a40b3dc8dadd250016bafd14617d4d56"
-    assert morph["optimizer_steps_permitted"] == 0
-    assert morph["parameter_updates_permitted"] == 0
-    assert morph["rerasterization_permitted"] is False
-    assert morph["checkpoint_selection_permitted"] is False
-    assert morph["automatic_training_authorization"] is False
+    assert morph["authorized"] is False
+    assert morph["closure"] == "canonical/IRIS_V5_STAGE13_FROZEN_MASK_MORPHOLOGY_CLOSURE_20260924.json"
+    assert morph["optimizer_steps_executed"] == 0
+    assert morph["parameter_updates_executed"] == 0
+    owner = ontology["zero_surface_owner_diagnostic_authorization"]
+    assert owner["authorized"] is True
+    assert owner["preregistration"] == "canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_PREREG_20260924.json"
+    assert owner["diagnostic_repo_commit"] == "0b29e55b2270c5c6a12b93ed4c7956bf271c7ea4"
+    assert owner["notebook_sha256"] == "e9b5ca62c42113c022ce35767e8326da86ee757799b4bc85b4d007fd80e5315b"
+    assert owner["optimizer_steps_permitted"] == 0
+    assert owner["parameter_updates_permitted"] == 0
+    assert owner["rerasterization_permitted"] is False
+    assert owner["checkpoint_selection_permitted"] is False
+    assert owner["automatic_owner_selection"] is False
+    assert owner["automatic_training_authorization"] is False

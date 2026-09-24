@@ -1,0 +1,128 @@
+{
+  "schema": "RealSaS.IRIS.V5TP64LearnedTailLocalizationClosure.v1",
+  "status": "CLOSED__OBJECTIVE_SIGN_TAIL_HYPOTHESIS_ELEVATED__TRAINING_STILL_BLOCKED",
+  "date_utc": "2026-09-24",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "run": {
+    "run_id": "20260924T072425Z",
+    "diagnostic_repo_commit": "3eb635f84768c180ea6acdda920f107188ad956b",
+    "baseline_run_id": "20260923T212708Z",
+    "baseline_selected_checkpoint_sha256": "45de860757ddb6f65afcecb7fdc9f51ef4aef2aeaf598288459a0e5bfa1ec751",
+    "optimizer_steps_executed": 0,
+    "parameter_updates_executed": 0,
+    "stage13_executed": false
+  },
+  "integrity": {
+    "drive_sync_ok": true,
+    "completion_marker_present": true,
+    "manifest_artifact_count": 13,
+    "all_manifest_hashes_independently_verified": true,
+    "localization_result_sha256": "c6f83c9ce3bf6b52e821558ed2deafa4cb40d238c246af27e6fe3fa2b6711927",
+    "heldout_points_sha256": "207cb43b99a0efb2f7f4e275e720490ac96579072580ab4fb709704c23d96233",
+    "r512_points_sha256": "2443cffbd1e391bd086963903a26f6b1c91e66da60d964497d166158ab89108e",
+    "boundary_points_sha256": "4b31f8d268af26518a4f806387d1ba005fac5a7af1a1d6f6f3ad3526053b3eac"
+  },
+  "reproduced_baseline": {
+    "heldout_count": 131072,
+    "heldout_sign_disagreement_count": 14861,
+    "heldout_sign_disagreement_fraction": 0.11338043212890625,
+    "heldout_mae": 0.004022167529910803,
+    "exact_r512_certified_exterior_count": 128851336,
+    "exact_r512_nonpositive_count": 85849,
+    "sparse_boundary_crossing_tetra_count": 436
+  },
+  "heldout_tail": {
+    "sign_error_count": 14861,
+    "false_exterior_count": 7715,
+    "false_interior_count": 7146,
+    "fraction_abs_fstar_lt_1_fine_step": 0.5105982100800753,
+    "fraction_abs_fstar_lt_1_coarse_step": 0.9156180606957809,
+    "fraction_abs_fstar_lt_refine_band": 0.9742951349168966,
+    "sign_errors_abs_fstar_ge_0_03": 0,
+    "top_one_percent_residual_count": 1311,
+    "top_one_percent_abs_fstar_ge_0_03_fraction": 0.965675057208238,
+    "top_one_percent_overlap_with_sign_error_count": 10,
+    "interpretation": "TOPOLOGY_RELEVANT_SIGN_ERRORS_ARE_A_NARROW_ZERO_SET_TAIL_WHILE_LARGEST_MAGNITUDE_RESIDUALS_ARE_PREDOMINANTLY_FAR_FIELD"
+  },
+  "r512_tail": {
+    "nonpositive_count": 85849,
+    "fraction_fstar_lt_coarse_step": 0.2824610653589442,
+    "fraction_fstar_lt_refine_band": 0.6912252909177742,
+    "fraction_fstar_lt_2x_refine_band": 0.935025451665133,
+    "fstar_ge_0_03_count": 870,
+    "projected_distance_px_le_2_count": 58539,
+    "projected_distance_px_le_2_fraction": 0.6818833067362462,
+    "projected_distance_px_le_8_count": 82978,
+    "projected_distance_px_le_8_fraction": 0.9665575603676227,
+    "projected_distance_px_gt_32_count": 14,
+    "interpretation": "EXTERIOR_SIGN_FAILURES_ARE_OVERWHELMINGLY_NEAR_SOURCE_SILHOUETTE_BOUNDARIES_WITH_A_SMALL_DEEP_EXTERIOR_TAIL"
+  },
+  "boundary_tail": {
+    "tetra_count": 436,
+    "unique_parent_cell_count": 68,
+    "analytic_fstar_vertex_crossing_count": 112,
+    "analytic_fstar_vertex_crossing_fraction": 0.25688073394495414,
+    "analytic_fstar_minabs_within_refine_band_count": 414,
+    "analytic_fstar_minabs_within_refine_band_fraction": 0.9495412844036697,
+    "analytic_fstar_center_within_refine_band_count": 384,
+    "analytic_fstar_center_within_refine_band_fraction": 0.8807339449541285,
+    "analytic_fstar_center_abs_ge_0_03_count": 2,
+    "interpretation": "BOUNDARY_TRUNCATION_IS_HIGHLY_LOCALIZED_AND_LIES_ALMOST_ENTIRELY_NEAR_THE_TRUE_ANALYTIC_ZERO_SET__IT_IS_NOT_A_RANDOM_FAR_FIELD_HALLUCINATION"
+  },
+  "cross_tail": {
+    "boundary_same_32_bin_as_heldout_sign_error_fraction": 0.9954128440366973,
+    "boundary_same_64_bin_as_heldout_sign_error_fraction": 0.9862385321100917,
+    "boundary_same_128_bin_as_heldout_sign_error_fraction": 0.23394495412844038,
+    "boundary_within_2x_refine_band_of_heldout_sign_error_fraction": 0.786697247706422,
+    "boundary_within_0_03_of_heldout_sign_error_fraction": 0.9954128440366973,
+    "boundary_same_32_bin_as_top_one_percent_residual_fraction": 0.0045871559633027525,
+    "boundary_same_64_bin_as_top_one_percent_residual_fraction": 0,
+    "boundary_same_32_bin_as_r512_violation_fraction": 0.7362385321100917,
+    "interpretation": "DECODER_TRUNCATION_COLOCATES_WITH_SIGN_ERROR_TAIL_NOT_WITH_LARGEST_MAGNITUDE_RESIDUAL_TAIL"
+  },
+  "causal_read": {
+    "elevated_primary_hypothesis": "OBJECTIVE_OR_SIGN_WEIGHTING_MISMATCH",
+    "supporting_points": [
+      "Direct Huber assigns small cost to sign-flipping residuals close to zero despite their large topological consequence.",
+      "Nearly all held-out sign disagreements are confined to a narrow |F*| band around zero.",
+      "The largest magnitude residuals are mostly far from the surface and almost never co-locate with sparse-shell boundary truncation.",
+      "R512 exterior violations are overwhelmingly near source silhouette boundaries.",
+      "Boundary-crossing tetrahedra almost entirely lie near the analytic F* zero set and co-locate with held-out sign-error regions."
+    ],
+    "not_ruled_out": [
+      "OPTIMIZATION_SCHEDULE_OR_BUDGET",
+      "LOCAL_FIELD_REGULARITY_OR_SAMPLING",
+      "REPRESENTATION_BANDWIDTH_OR_CAPACITY"
+    ],
+    "specifically_not_proven": [
+      "TP64_CAPACITY_INSUFFICIENT",
+      "TP64_CAPACITY_SUFFICIENT",
+      "LONGER_HUBER_ONLY_TRAINING_WOULD_NOT_HELP",
+      "DIFFERENTIABLE_SILHOUETTE_SUPERVISION_IS_SUFFICIENT",
+      "EXTERIOR_SIGN_AUXILIARY_IS_SUFFICIENT"
+    ]
+  },
+  "next_experiment_constraints": {
+    "status": "FREEZE_CAUSAL_TAIL_REPAIR_ABLATION_BEFORE_OPTIMIZER_STEP_1",
+    "required_controls": [
+      "All new repair arms start from the exact same selected step-4800 checkpoint.",
+      "Include a Huber-only continuation control so additional optimization budget is separated from auxiliary-objective effects.",
+      "Do not train on exact R512 audit lattice points; keep the R512 sign audit independent.",
+      "Keep TP64 architecture, DINO evidence, F* target, deterministic shipping decoder, and Stage13 thresholds frozen.",
+      "Stage13 and exact R512 must remain blind to checkpoint selection."
+    ],
+    "candidate_arms": [
+      "A_CONTINUE_DIRECT_FSTAR_ONLY",
+      "B_DIRECT_FSTAR_PLUS_OFF_LATTICE_SOURCE_CERTIFIED_EXTERIOR_SIGN",
+      "C_DIRECT_FSTAR_PLUS_DIFFERENTIABLE_SOURCE_SILHOUETTE",
+      "D_DIRECT_FSTAR_PLUS_BOTH"
+    ]
+  },
+  "claim_boundary": [
+    "Localization closes the previously required diagnostic blocker.",
+    "This closure does not authorize training until the next ablation preregistration and notebook are frozen.",
+    "The localization supports objective/sign weighting as the leading working hypothesis but is not a causal proof.",
+    "The exact F* target contract and analytic indexed decoder parity remain frozen.",
+    "The shipping decoder and Stage13 gates remain unchanged."
+  ]
+}

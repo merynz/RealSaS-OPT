@@ -348,6 +348,8 @@
     "base_heldout_semantic_reproduction_gate": true,
     "automatic_training_authorization": false,
     "automatic_representation_change_authorization": false,
-    "disposition": "AUTHORIZED_ONCE_UNDER_V2_APPARATUS__CLOSE_DIAGNOSTIC_BEFORE_NEXT_SCIENTIFIC_ROUTE"
+    "disposition": "AUTHORIZED_ONCE_UNDER_V2_APPARATUS__CLOSE_DIAGNOSTIC_BEFORE_NEXT_SCIENTIFIC_ROUTE",
+    "code_ci_run_id": 36009727585,
+    "code_ci_conclusion": "success"
   }
 }

@@ -36,6 +36,7 @@ on:
       - 'canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json'
       - 'canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json'
       - 'canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_V2_20260924.json'
+      - 'canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_CLOSURE_20260924.json'
       - '.github/workflows/iris_v5_source_field_contract.yml'
   workflow_dispatch:
 
@@ -118,6 +119,7 @@ jobs:
           field_diag_prereg=json.loads(Path('canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json').read_text())
           field_diag_amend=json.loads(Path('canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json').read_text())
           field_diag_amend2=json.loads(Path('canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_V2_20260924.json').read_text())
+          field_diag_closure=json.loads(Path('canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_CLOSURE_20260924.json').read_text())
           assert prereg['status']=='FROZEN_BEFORE_OPTIMIZER_STEP_1'
           assert prereg['execution']['repo_commit']=='4de08a779199d64b60b0d1aae3512a0f77e77c77'
           assert prereg['optimizer']['primary_objective']['type']=='SMOOTH_L1_DIRECT_FSTAR_ONLY'
@@ -229,6 +231,13 @@ jobs:
           assert field_diag_amend2['semantic_reproduction_gate']['sign_disagreement_count_absolute_tolerance']==128
           assert field_diag_amend2['amended_execution']['diagnostic_repo_commit']=='fd7ee14764f0d0be04b37349fac99825936c57a2'
           assert field_diag_amend2['amended_execution']['notebook_sha256']=='d988f57eb121865dd850a7b5514c0ff112235cd911acb4966e4618e356c0b3d2'
+          assert field_diag_closure['status'].startswith('CLOSED__H1_CONDITIONING_SUPPORTED')
+          assert field_diag_closure['run_id']=='20260924T143047Z'
+          assert field_diag_closure['execution']['optimizer_steps_executed']==0
+          assert field_diag_closure['hypotheses']['H1_ZERO_SET_CONDITIONING']['disposition'].startswith('SUPPORTED_STRONGLY')
+          assert field_diag_closure['hypotheses']['H2_VIEW_SWITCH_RIDGE']['disposition'].startswith('NOT_SUPPORTED')
+          assert field_diag_closure['hypotheses']['H3_REPLAY_STALENESS']['disposition'].startswith('SUPPORTED_DESCRIPTIVELY')
+          assert field_diag_closure['hypotheses']['H4_GRADIENT_COMPETITION']['disposition'].startswith('NOT_SUPPORTED')
           diag=ontology['diagnostic_authorization']
           assert diag['authorized'] is False
           assert diag['completed_scope']=='KNIGHT_FIT1__FIVE_FROZEN_STATES__EXTERIOR_DECODER_SHELL_COMPATIBILITY_ONLY'
@@ -240,8 +249,8 @@ jobs:
 
           auth=ontology['training_authorization']
           assert auth['authorized'] is False
-          assert auth['blocker']=='CLOSE_FIELD_FAILURE_DIAGNOSTIC_BEFORE_ANY_FURTHER_TP64_TRAINING_OR_CAPACITY_CHANGE'
-          assert auth['prior_bc_preregistration']=='canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json'
+          assert auth['blocker']=='CLOSE_ZERO_UPDATE_H1_H3_BRIDGE_DIAGNOSTIC_BEFORE_FURTHER_TP64_TRAINING_OR_OBJECTIVE_CHANGE'
+          assert auth['prior_field_failure_closure']=='canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_CLOSURE_20260924.json'
           assert auth['replay_refresh_authorized'] is False
           assert auth['target_aggregation_change_authorized'] is False
           rq=ontology['requalification_authorization']
@@ -263,21 +272,16 @@ jobs:
           bc=ontology['bc_endpoint_training_authorization']
           assert bc['authorized'] is False
           field_diag=ontology['field_failure_diagnostic_authorization']
-          assert field_diag['authorized'] is True
-          assert field_diag['preregistration']=='canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json'
-          assert field_diag['preregistration_amendment']=='canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json'
-          assert field_diag['preregistration_amendment_v2']=='canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_V2_20260924.json'
-          assert field_diag['diagnostic_repo_commit']=='fd7ee14764f0d0be04b37349fac99825936c57a2'
-          assert field_diag['code_ci_run_id']==36009727585
-          assert field_diag['notebook_sha256']=='d988f57eb121865dd850a7b5514c0ff112235cd911acb4966e4618e356c0b3d2'
-          assert field_diag['exact_historical_replay_bank_overlap_claimed'] is False
-          assert field_diag['dino_patch_map_byte_identity_gate'] is False
-          assert field_diag['dino_source_revision_exact_gate'] is True
-          assert field_diag['dino_weight_sha256_exact_gate'] is True
-          assert field_diag['base_heldout_semantic_reproduction_gate'] is True
-          assert field_diag['optimizer_steps_permitted']==0
-          assert field_diag['parameter_updates_permitted']==0
-          assert field_diag['incomplete_bc_endpoint_run_consumed'] is False
+          assert field_diag['authorized'] is False
+          assert field_diag['closure']=='canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_CLOSURE_20260924.json'
+          assert field_diag['run_id']=='20260924T143047Z'
+          assert field_diag['optimizer_steps_executed']==0
+          assert field_diag['parameter_updates_executed']==0
+          bridge=ontology['h1_h3_bridge_diagnostic_authorization']
+          assert bridge['authorized'] is False
+          assert bridge['status']=='REQUIRES_SEPARATE_PREREGISTRATION'
+          assert bridge['optimizer_steps_permitted']==0
+          assert bridge['parameter_updates_permitted']==0
           assert auth['architecture_change_authorized'] is False
           assert auth['spatial_resolution_change_authorized'] is False
           assert auth['regularity_loss_change_authorized'] is False

@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_FSTAR__FIELD_FAILURE_DIAGNOSTIC_AMENDED_V2_AFTER_DINO_BYTE_HASH_FAIL",
+  "status": "FROZEN_FSTAR__FIELD_FAILURE_DIAGNOSTIC_CLOSED__H1_H3_BRIDGE_REQUIRED",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -210,6 +210,19 @@
       "historical_source_patch_map_sha256": "19a7c82469fb00818adeacbb43d5c9da4c7f5e197338db086b3eab5a7ee9f134",
       "observed_patch_map_sha256": "71972e40cb611174f866708a0d9e4de90b6addad97949820db724bb7946eff0f",
       "scientific_result_produced": false
+    },
+    "field_failure_diagnostic": {
+      "closure": "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_CLOSURE_20260924.json",
+      "run_id": "20260924T143047Z",
+      "result_sha256": "43216282c1965a769c81c73667533b4b701d804c83668fef98db18f7a3765d82",
+      "foundation_sha256": "960c3afa0bb7da7d0cf346b5ee2af3d9ed1d9d1578e3627fb8e70d6663c273fb",
+      "result": {
+        "H1": "SUPPORTED_STRONGLY_AS_SPATIAL_ERROR_AMPLIFIER",
+        "H2": "NOT_SUPPORTED_AS_RESIDUAL_LOCALIZATION_DRIVER",
+        "H3": "SUPPORTED_DESCRIPTIVELY_AS_RESIDUAL_RANK_DRIFT",
+        "H4": "NOT_SUPPORTED__AUXILIARY_GRADIENTS_ALIGNED"
+      },
+      "next_gate": "ZERO_UPDATE_H1_H3_BRIDGE_DIAGNOSTIC_REQUIRED"
     }
   },
   "active_field_ontology": {
@@ -252,9 +265,8 @@
   },
   "training_authorization": {
     "authorized": false,
-    "blocker": "CLOSE_FIELD_FAILURE_DIAGNOSTIC_BEFORE_ANY_FURTHER_TP64_TRAINING_OR_CAPACITY_CHANGE",
-    "prior_bc_preregistration": "canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json",
-    "note": "The operator stopped the BC tail before scientific completion. No incomplete run output is consumed as evidence. Training is blocked while the zero-update field-failure diagnostic is open.",
+    "blocker": "CLOSE_ZERO_UPDATE_H1_H3_BRIDGE_DIAGNOSTIC_BEFORE_FURTHER_TP64_TRAINING_OR_OBJECTIVE_CHANGE",
+    "prior_field_failure_closure": "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_CLOSURE_20260924.json",
     "architecture_change_authorized": false,
     "spatial_resolution_change_authorized": false,
     "regularity_loss_change_authorized": false,
@@ -329,27 +341,23 @@
     "disposition": "OPERATOR_STOPPED_BEFORE_COMPLETION__INCOMPLETE_RUN_NOT_SCIENTIFIC_EVIDENCE__SUPERSEDED_BY_FIELD_FAILURE_DIAGNOSTIC"
   },
   "field_failure_diagnostic_authorization": {
-    "authorized": true,
-    "scope": "KNIGHT_FIT1__COMPLETED_LONG_HORIZON_B_C_SELECTED_STATES__ZERO_UPDATE_FIELD_FAILURE_DIAGNOSTIC",
+    "authorized": false,
+    "completed_scope": "KNIGHT_FIT1__COMPLETED_LONG_HORIZON_B_C_SELECTED_STATES__ZERO_UPDATE_FIELD_FAILURE_DIAGNOSTIC",
     "preregistration": "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json",
     "preregistration_amendment": "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json",
     "preregistration_amendment_v2": "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_V2_20260924.json",
-    "diagnostic_repo_commit": "fd7ee14764f0d0be04b37349fac99825936c57a2",
-    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_FIELD_FAILURE_DIAGNOSTIC_RUN_ALL_V3.ipynb",
-    "notebook_sha256": "d988f57eb121865dd850a7b5514c0ff112235cd911acb4966e4618e356c0b3d2",
+    "closure": "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_CLOSURE_20260924.json",
+    "run_id": "20260924T143047Z",
+    "optimizer_steps_executed": 0,
+    "parameter_updates_executed": 0,
+    "disposition": "CLOSED__H1_SUPPORTED__H2_NOT_LOCALIZER__H3_RANK_DRIFT__H4_NOT_COMPETING"
+  },
+  "h1_h3_bridge_diagnostic_authorization": {
+    "authorized": false,
+    "status": "REQUIRES_SEPARATE_PREREGISTRATION",
+    "question": "DOES_THE_CURRENT_HARD_RESIDUAL_SET_SYSTEMATICALLY_CONCENTRATE_IN_LOW_GRADIENT_HIGH_SPATIAL_OFFSET_REGIONS_THAT_THE_RECONSTRUCTED_REFERENCE_HARD_SET_UNDERREPRESENTS",
     "optimizer_steps_permitted": 0,
     "parameter_updates_permitted": 0,
-    "autograd_gradient_measurement_permitted": true,
-    "incomplete_bc_endpoint_run_consumed": false,
-    "exact_historical_replay_bank_overlap_claimed": false,
-    "dino_patch_map_byte_identity_gate": false,
-    "dino_source_revision_exact_gate": true,
-    "dino_weight_sha256_exact_gate": true,
-    "base_heldout_semantic_reproduction_gate": true,
-    "automatic_training_authorization": false,
-    "automatic_representation_change_authorization": false,
-    "disposition": "AUTHORIZED_ONCE_UNDER_V2_APPARATUS__CLOSE_DIAGNOSTIC_BEFORE_NEXT_SCIENTIFIC_ROUTE",
-    "code_ci_run_id": 36009727585,
-    "code_ci_conclusion": "success"
+    "automatic_training_authorization": false
   }
 }

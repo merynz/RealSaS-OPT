@@ -1,0 +1,154 @@
+{
+  "schema": "RealSaS.IRIS.V5FieldFailureDiagnosticClosure.v1",
+  "status": "CLOSED__H1_CONDITIONING_SUPPORTED__H2_VIEW_SWITCH_NOT_SUPPORTED_AS_RESIDUAL_LOCALIZER__H3_RESIDUAL_RANK_DRIFT_SUPPORTED_DESCRIPTIVELY__H4_GRADIENT_COMPETITION_NOT_SUPPORTED__ZERO_UPDATE_H1_H3_BRIDGE_REQUIRED",
+  "date_utc": "2026-09-24",
+  "run_id": "20260924T143047Z",
+  "preregistration": "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json",
+  "amendments": [
+    "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json",
+    "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_V2_20260924.json"
+  ],
+  "execution": {
+    "diagnostic_repo_commit": "fd7ee14764f0d0be04b37349fac99825936c57a2",
+    "notebook_sha256": "d988f57eb121865dd850a7b5514c0ff112235cd911acb4966e4618e356c0b3d2",
+    "optimizer_steps_executed": 0,
+    "parameter_updates_executed": 0,
+    "checkpoint_selection_executed": false,
+    "r512_executed": false,
+    "stage13_executed": false,
+    "teacher_geometry_used": false
+  },
+  "artifact_integrity": {
+    "result_sha256": "43216282c1965a769c81c73667533b4b701d804c83668fef98db18f7a3765d82",
+    "input_authority_sha256": "18353c1eb966f2619b0b08bc0f0a73d6bed8cd244155650329029173b5cec793",
+    "foundation_sha256": "960c3afa0bb7da7d0cf346b5ee2af3d9ed1d9d1578e3627fb8e70d6663c273fb",
+    "manifest_sha256": "9d58de8ac668e95838dcdd494cfc72d586cf17f88c6e8c16b51fb65c6c028e15",
+    "output_sync_sha256": "95d2e359aabc4542fa420c34e715a6352ccb09a345d0044f19b2c8fcb066cb29",
+    "fstar_parity_sha256": "6c0dc6ad9c16ba564dab5cd4b3b712d2bbcf1ae69f8812ecf481f8e9621b9d72",
+    "sync_ok": true,
+    "completion_marker_last": true
+  },
+  "apparatus_validity": {
+    "dino_source_revision": "7764ea0f912e53c92e82eb78a2a1631e92725fc8",
+    "dino_weight_sha256": "b938bf1bc15cd2ec0feacfe3a1bb553fe8ea9ca46a7e1d8d00217f29aef60cd9",
+    "dino_patch_map_byte_identical_to_source": false,
+    "dino_patch_map_role": "TELEMETRY_ONLY",
+    "base_heldout_semantic_reproduction_gate_passed": true,
+    "base_heldout_sign_expected": 14861,
+    "base_heldout_sign_observed": 14858,
+    "fstar_parity_max_abs": 2.9802322387695312e-8,
+    "fstar_parity_sign_disagreements": 0
+  },
+  "hypotheses": {
+    "H1_ZERO_SET_CONDITIONING": {
+      "disposition": "SUPPORTED_STRONGLY_AS_SPATIAL_ERROR_AMPLIFIER__NOT_YET_CAUSAL_ROOT_PROOF",
+      "B": {
+        "spearman_abs_fstar_vs_gradient_norm": -0.916769518120517,
+        "offset_proxy_px_median": 0.4750058799982071,
+        "offset_proxy_px_p75": 1.4922573864459991,
+        "offset_proxy_px_p95": 2.4597341656684875,
+        "offset_proxy_px_p99": 3.6870274043083198,
+        "fraction_gt_1px": 0.3461761474609375,
+        "fraction_gt_2px": 0.087066650390625,
+        "high_residual_quartile_median_gradient_norm": 0.9999363422393799,
+        "low_residual_quartile_median_gradient_norm": 2
+      },
+      "C": {
+        "spearman_abs_fstar_vs_gradient_norm": -0.9034679484917857,
+        "offset_proxy_px_median": 0.6541751623153687,
+        "offset_proxy_px_p75": 1.6399854123592377,
+        "offset_proxy_px_p95": 2.7535258650779717,
+        "offset_proxy_px_p99": 4.132076401710509,
+        "fraction_gt_1px": 0.41347503662109375,
+        "fraction_gt_2px": 0.12511444091796875,
+        "high_residual_quartile_median_gradient_norm": 1,
+        "low_residual_quartile_median_gradient_norm": 2
+      },
+      "interpretation": "Large canonical field residuals on the predicted zero surface concentrate where canonical F* gradient magnitude is lower, and the first-order offset proxy naturally reaches multi-pixel scale. This supports conditioning as an amplifier of spatial zero-set error."
+    },
+    "H2_VIEW_SWITCH_RIDGE": {
+      "disposition": "NOT_SUPPORTED_AS_RESIDUAL_LOCALIZATION_DRIVER_UNDER_THIS_DIAGNOSTIC",
+      "B": {
+        "spearman_abs_fstar_vs_view_margin": 0.13905044126279484,
+        "fraction_margin_le_1e_5_all": 0.9754791259765625,
+        "fraction_margin_le_1e_5_high_residual_quartile": 0.9582837437822332,
+        "enrichment_ratio_at_1e_5": 0.9823723729842863
+      },
+      "C": {
+        "spearman_abs_fstar_vs_view_margin": 0.1268839939969967,
+        "fraction_margin_le_1e_5_all": 0.9746170043945312,
+        "fraction_margin_le_1e_5_high_residual_quartile": 0.960540771484375,
+        "enrichment_ratio_at_1e_5": 0.985557164663979
+      },
+      "interpretation": "Very small top1-top2 margins are nearly ubiquitous on the sampled surface, but high-residual points are not enriched at the smallest margins. MAX-view switching therefore does not explain where the residual becomes large in this test."
+    },
+    "H3_REPLAY_STALENESS": {
+      "disposition": "SUPPORTED_DESCRIPTIVELY_AS_RESIDUAL_RANK_DRIFT__EXACT_HISTORICAL_BANK_STALENESS_NOT_PROVEN",
+      "exact_historical_bank_indices_available": false,
+      "B": {
+        "hard_set_overlap_fraction": 0.463348388671875,
+        "chance_overlap_fraction": 0.25,
+        "residual_rank_spearman": 0.329730079041143,
+        "current_hard_mean": 0.004253100414786104,
+        "reference_hard_current_mean": 0.0027940053956072575,
+        "current_to_reference_hard_mean_ratio": 1.5222234078262122
+      },
+      "C": {
+        "hard_set_overlap_fraction": 0.456024169921875,
+        "chance_overlap_fraction": 0.25,
+        "residual_rank_spearman": 0.3206051139751649,
+        "current_hard_mean": 0.0042637026219480845,
+        "reference_hard_current_mean": 0.0027881050282498876,
+        "current_to_reference_hard_mean_ratio": 1.5292474920230819
+      },
+      "interpretation": "Difficulty ranking changed materially on the same frozen pool. Roughly 54% of each current hard set lies outside the reconstructed base hard set, while the current hard-set residual mean is about 1.52x the residual mean on the reconstructed reference hard set."
+    },
+    "H4_GRADIENT_COMPETITION": {
+      "disposition": "NOT_SUPPORTED__AUXILIARY_GRADIENTS_ARE_SUBSTANTIAL_AND_STRONGLY_ALIGNED_WITH_DIRECT_FSTAR_ON_THE_FROZEN_DIAGNOSTIC_BATCH",
+      "B": {
+        "direct_grad_norm": 0.11763793119334673,
+        "aux_grad_norm": 0.06925904215330742,
+        "aux_over_direct_norm": 0.5887475361962546,
+        "cosine": 0.9944142272129856,
+        "auxiliary_wrong_count": 196,
+        "parameter_mutated": false
+      },
+      "C": {
+        "direct_grad_norm": 0.10887702774920983,
+        "aux_grad_norm": 0.12237344726415156,
+        "aux_over_direct_norm": 1.1239602126725,
+        "cosine": 0.9436714170330737,
+        "auxiliary_wrong_count": 4,
+        "parameter_mutated": false
+      },
+      "interpretation": "The sign and silhouette auxiliaries are not fighting the direct F* gradient in this batch. C's silhouette gradient is actually slightly larger than the direct gradient norm while remaining strongly aligned."
+    }
+  },
+  "scientific_read": {
+    "primary_supported_mechanism": "CANONICAL_FSTAR_CONDITIONING_AMPLIFIES_FIELD_ERROR_INTO_MULTI_PIXEL_ZERO_SET_ERROR",
+    "secondary_supported_mechanism": "RESIDUAL_DIFFICULTY_RANK_DRIFTS_MATERIALLY_ON_THE_FROZEN_REPLAY_POOL",
+    "view_switch_localization_supported": false,
+    "auxiliary_gradient_conflict_supported": false,
+    "representation_failure_proven": false,
+    "spatial_capacity_failure_proven": false,
+    "more_blind_long_horizon_training_justified": false
+  },
+  "next_gate": {
+    "status": "ZERO_UPDATE_H1_H3_BRIDGE_DIAGNOSTIC_REQUIRED",
+    "question": "DOES_THE_CURRENT_HARD_RESIDUAL_SET_SYSTEMATICALLY_CONCENTRATE_IN_LOW_GRADIENT_HIGH_SPATIAL_OFFSET_REGIONS_THAT_THE_RECONSTRUCTED_REFERENCE_HARD_SET_UNDERREPRESENTS",
+    "purpose": "Determine whether replay drift and F* conditioning are one coupled mechanism before authorizing replay refresh or a conditioning-aware zero-set objective.",
+    "optimizer_steps_permitted": 0,
+    "parameter_updates_permitted": 0,
+    "replay_refresh_authorized": false,
+    "conditioning_aware_objective_authorized": false,
+    "spatial_resolution_change_authorized": false,
+    "representation_change_authorized": false
+  },
+  "claim_boundary": [
+    "H1 is supported as a spatial-error amplification mechanism, not yet proven as the sole causal root of Stage13 failure.",
+    "H2 is not supported as the localization driver in this diagnostic; near-zero view margins are almost ubiquitous.",
+    "H3 demonstrates residual-rank drift on a reconstructed reference hard set, not exact historical replay-bank overlap.",
+    "H4 gradient competition is not supported on the frozen diagnostic batch.",
+    "No further training, replay refresh, target change, spatial-resolution change, or representation change is authorized by this closure."
+  ]
+}

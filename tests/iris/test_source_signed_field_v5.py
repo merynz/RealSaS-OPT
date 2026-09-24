@@ -227,8 +227,8 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     }
     auth = ontology["training_authorization"]
     assert auth["authorized"] is False
-    assert auth["blocker"] == "CLOSE_FIELD_FAILURE_DIAGNOSTIC_BEFORE_ANY_FURTHER_TP64_TRAINING_OR_CAPACITY_CHANGE"
-    assert auth["prior_bc_preregistration"] == "canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json"
+    assert auth["blocker"] == "CLOSE_ZERO_UPDATE_H1_H3_BRIDGE_DIAGNOSTIC_BEFORE_FURTHER_TP64_TRAINING_OR_OBJECTIVE_CHANGE"
+    assert auth["prior_field_failure_closure"] == "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_CLOSURE_20260924.json"
     assert auth["replay_refresh_authorized"] is False
     assert auth["target_aggregation_change_authorized"] is False
     assert auth["architecture_change_authorized"] is False
@@ -267,15 +267,13 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert bc["authorized"] is False
     assert bc["preregistration"] == "canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json"
     diag2 = ontology["field_failure_diagnostic_authorization"]
-    assert diag2["authorized"] is True
-    assert diag2["preregistration"] == "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json"
-    assert diag2["preregistration_amendment"] == "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json"
-    assert diag2["diagnostic_repo_commit"] == "fd7ee14764f0d0be04b37349fac99825936c57a2"
-    assert diag2["code_ci_run_id"] == 36009727585
-    assert diag2["code_ci_conclusion"] == "success"
-    assert diag2["notebook_sha256"] == "d988f57eb121865dd850a7b5514c0ff112235cd911acb4966e4618e356c0b3d2"
-    assert diag2["exact_historical_replay_bank_overlap_claimed"] is False
-    assert diag2["optimizer_steps_permitted"] == 0
-    assert diag2["parameter_updates_permitted"] == 0
-    assert diag2["autograd_gradient_measurement_permitted"] is True
-    assert diag2["incomplete_bc_endpoint_run_consumed"] is False
+    assert diag2["authorized"] is False
+    assert diag2["closure"] == "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_CLOSURE_20260924.json"
+    assert diag2["run_id"] == "20260924T143047Z"
+    assert diag2["optimizer_steps_executed"] == 0
+    assert diag2["parameter_updates_executed"] == 0
+    bridge = ontology["h1_h3_bridge_diagnostic_authorization"]
+    assert bridge["authorized"] is False
+    assert bridge["status"] == "REQUIRES_SEPARATE_PREREGISTRATION"
+    assert bridge["optimizer_steps_permitted"] == 0
+    assert bridge["parameter_updates_permitted"] == 0

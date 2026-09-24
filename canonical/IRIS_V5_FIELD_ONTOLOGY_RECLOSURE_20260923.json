@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_FSTAR__TP64_DIRECT_FSTAR_ARM_FAIL__LEARNED_OWNER_REOPENED",
+  "status": "FROZEN_FSTAR__TP64_DIRECT_FSTAR_ARM_FAIL__LEARNED_TAIL_LOCALIZED__NEXT_ABLATION_PREREG_REQUIRED",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -52,6 +52,16 @@
       "sparse_shell_boundary_crossing_tets": 436,
       "stage13_executed": false,
       "scientific_pass": false
+    },
+    "tp64_learned_tail_localization": {
+      "closure": "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json",
+      "run_id": "20260924T072425Z",
+      "optimizer_steps_executed": 0,
+      "heldout_sign_disagreement_count": 14861,
+      "r512_nonpositive_certified_exterior_count": 85849,
+      "sparse_shell_boundary_crossing_tets": 436,
+      "primary_working_hypothesis": "OBJECTIVE_OR_SIGN_WEIGHTING_MISMATCH",
+      "causal_proof": false
     }
   },
   "active_field_ontology": {
@@ -96,11 +106,12 @@
     "authorized": false,
     "prior_authorized_arm": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json",
     "prior_arm_closure": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_CLOSURE_20260923.json",
+    "diagnostic_closure": "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json",
     "blockers": [
-      "LOCALIZE_LEARNED_SIGN_AND_ZERO_SET_TAIL",
-      "FREEZE_NEXT_LEARNED_OWNER_EXPERIMENT_PREREGISTRATION"
+      "FREEZE_CAUSAL_TAIL_REPAIR_ABLATION_PREREGISTRATION",
+      "FREEZE_CAUSAL_TAIL_REPAIR_RUN_ALL_NOTEBOOK"
     ],
-    "note": "Training remains blocked. Only the frozen diagnostic-only learned-tail localization preregistration is authorized; no optimizer step or parameter update is permitted until that result is reviewed and sealed."
+    "note": "Learned-tail localization is closed without training. New optimizer steps remain blocked until a causal continuation ablation is frozen. Exact R512 audit points must remain training-blind."
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",

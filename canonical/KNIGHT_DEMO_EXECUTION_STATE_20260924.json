@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoExecutionState.v1",
-  "status": "PAUSED_AT_STAGE08__MESHLRM_MESH_RENDER_AWARE_A100_NOTEBOOK_V3_READY",
+  "status": "PAUSED_AT_STAGE08__MESHLRM_MESH_RENDER_AWARE_A100_NOTEBOOK_V4_RUNTIME_AUDITED_READY",
   "date_utc": "2026-09-24",
   "branch": "research/vf11-certified-adaptive-20260921",
   "run": {
@@ -49,9 +49,12 @@
     "gdrive_cli_installed": false
   },
   "next_actions": [
-    "USER_RUN_REALSaS_V5_MESHLRM_SURFACE_FINETUNE_RUN_ALL_V3_HARD_RASTER_FIXED_ON_A100",
-    "VERIFY_PYTORCH3D_HARD_STAGE13_SEMANTIC_PARITY_AND_TRAINING_MESH_PROXY_PARITY",
-    "IF_APPARATUS_GATES_PASS_CONTINUE_MESH_AWARE_FINE_TUNE",
+    "USER_RUN_REALSaS_V5_MESHLRM_SURFACE_FINETUNE_RUN_ALL_V4_RUNTIME_AUDITED_ON_A100",
+    "REQUIRE_TRAINING_MESH_PROXY_PARITY_PASS",
+    "REQUIRE_MESH_NO_GRAD_EVAL_PREFLIGHT_PASS",
+    "REQUIRE_GRADIENT_CALIBRATION_PASS",
+    "REQUIRE_FULL_RUNTIME_PREFLIGHT_PASS",
+    "THEN_ALLOW_REAL_1200_STEP_CONTINUATION",
     "IF_FINAL_CONTAINMENT_AND_P999_STAGE13_PASS_PROMOTE_NEW_DEMO_ONLY_GEOMETRY",
     "OTHERWISE_BIND_FROZEN_C_FALLBACK_AND_RESUME_SAME_KNIGHT_RUN"
   ],
@@ -65,33 +68,29 @@
     "fallback_scientific_state": "STAGE13_FAIL__DEMO_ONLY"
   },
   "mesh_render_aware_oracle": {
-    "status": "USER_ACTION_REQUIRED__RUN_A100_NOTEBOOK_V3",
-    "notebook_filename": "RealSaS_V5_MESHLRM_SURFACE_FINETUNE_RUN_ALL_V3_HARD_RASTER_FIXED.ipynb",
-    "notebook_sha256": "a7a73f716cc525082ee666c91c458f8dcd9c8ec97496dcc7101e1272ad5fbd8c",
-    "supersedes_notebook_sha256": "3ab7f65bb8da77a92d3aafa915478feab3f7ae08129d86699cc231ca12a0ab25",
-    "invalidated_attempts": [
-      {
-        "run_id": "20260924T171641Z",
-        "reason": "DMTET_EXACT_ZERO_GRID_VERTEX_UNSUPPORTED",
-        "scientific_result": false,
-        "actual_parameter_updates": 0
-      },
-      {
-        "run_id": "20260924T174446Z",
-        "reason": "TRAINING_MESH_PROXY_PRODUCT_MASK_MISMATCH__BLURRED_TOPK_HARD_RASTER_BUG",
-        "scientific_result": false,
-        "actual_parameter_updates": 0
-      }
+    "status": "USER_ACTION_REQUIRED__RUN_A100_NOTEBOOK_V4",
+    "notebook_filename": "RealSaS_V5_MESHLRM_SURFACE_FINETUNE_RUN_ALL_V4_RUNTIME_AUDITED.ipynb",
+    "notebook_sha256": "1cfbc5b0dd9359edc19c5f3ce7ffaa87db2a6a48cdd11dad744941c1cee32581",
+    "supersedes_notebook_sha256": "a7a73f716cc525082ee666c91c458f8dcd9c8ec97496dcc7101e1272ad5fbd8c",
+    "recovered_proxy_evidence": {
+      "min_product_mask_recall": 0.9965454575222253,
+      "min_product_mask_precision": 0.9994424727015597,
+      "stage13_semantic_parity_min_recall": 0.99951992318771,
+      "stage13_semantic_parity_min_precision": 0.9985611510791367
+    },
+    "prior_attempts_scientific_result": false,
+    "prior_attempts_actual_parameter_updates": 0,
+    "runtime_audit_repairs": [
+      "SEPARATE_BF16_BASE_AND_FP32_MESH_VJP_GRAPHS",
+      "NO_GRAD_MESH_EVAL_RETURN_ARITY_AND_SILHOUETTE_FACE_COUNT",
+      "MODEL_TRAIN_EVAL_MODE_RESTORATION",
+      "NEED_GRAD_FALSE_EVAL_PREFLIGHT",
+      "DISPOSABLE_FULL_COMBINED_UPDATE_PREFLIGHT",
+      "POST_UPDATE_HELDOUT_AND_MESH_EVAL_PREFLIGHT",
+      "CHECKPOINT_SAVE_LOAD_STATE_AND_PREDICTION_ROUNDTRIP",
+      "SELECTED_CHECKPOINT_LINEAGE_GATES"
     ],
-    "repairs": [
-      "FP32_MESH_FIELD_AND_VJP",
-      "DETERMINISTIC_EXACT_ZERO_SYMBOLIC_TIE_BREAK",
-      "DIRECT_EQUAL_NORM_MESH_GRAD_SCALE",
-      "SEPARATE_ZERO_BLUR_FPP1_HARD_RASTER",
-      "VISIBLE_SILHOUETTE_FACE_ONLY_SOFT_BACKWARD_SURROGATE",
-      "PYTORCH3D_HARD_VS_EXACT_STAGE13_SEMANTIC_PARITY_GATE",
-      "FROZEN_C_PRODUCT_MASK_PROXY_GATE"
-    ],
+    "downstream_assurance": "Product decoder and frozen Stage13 cells were diffed against the previously completed spatial-risk fast-track notebook. Decoder differs only by work-directory naming plus new checkpoint-lineage assertions; Stage13 logic is unchanged.",
     "start_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
     "final_gate": "UNCHANGED_CONTAINED_T512_T1024_PLUS_FROZEN_P999_STAGE13",
     "pass_action": "PROMOTE_NEW_MESHAWARE_CHECKPOINT_FOR_DEMO_ONLY_AND_RESUME_SAME_KNIGHT_RUN",

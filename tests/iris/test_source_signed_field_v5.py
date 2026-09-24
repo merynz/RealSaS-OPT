@@ -230,9 +230,9 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert auth["prior_authorized_arm"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json"
     assert auth["prior_arm_closure"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json"
     assert auth["shell_compatibility_closure"] == "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json"
+    assert auth["corrected_decoder_stage13_preregistration"] == "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json"
     assert auth["blockers"] == [
-        "FREEZE_LONG_HORIZON_OPTIMIZATION_EXPERIMENT_PREREGISTRATION",
-        "FREEZE_LONG_HORIZON_RUN_ALL_NOTEBOOK",
+        "CLOSE_CORRECTED_DECODER_STAGE13_REQUALIFICATION_BEFORE_LONG_HORIZON",
     ]
     assert auth["architecture_change_authorized"] is False
     assert auth["spatial_resolution_change_authorized"] is False
@@ -246,3 +246,15 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert diag["optimizer_steps_executed"] == 0
     assert diag["parameter_updates_executed"] == 0
     assert diag["stage13_qualification_executed"] is False
+    requal = ontology["requalification_authorization"]
+    assert requal["authorized"] is True
+    assert requal["scope"] == "KNIGHT_FIT1__FIVE_FROZEN_STATES__CORRECTED_EXACT_SHELL_CONTAINMENT__FROZEN_STAGE13_P999"
+    assert requal["preregistration"] == "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json"
+    assert requal["code_repo_commit"] == "b39b5f13e2657553692c7a8b27db62b20332e279"
+    assert requal["code_ci_run_id"] == 35986938283
+    assert requal["notebook_sha256"] == "370ce75c128e20bd503ce3a9d34b2dbe57962dc94cb48d17c694bc8a4671b2ca"
+    assert requal["optimizer_steps_permitted"] == 0
+    assert requal["parameter_updates_permitted"] == 0
+    assert requal["stage13_qualification_permitted"] is True
+    assert requal["checkpoint_selection_permitted"] is False
+    assert requal["threshold_change_authorized"] is False

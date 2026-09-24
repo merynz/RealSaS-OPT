@@ -42,11 +42,11 @@ def _identity_cameras():
 
 def test_center_pixel_ray_intersects_normalized_cube_exactly():
     origins,right,up,forward,half=_identity_cameras()
-    # For an even 4x4 raster, pixel center x=y=1.5 corresponds to gx=gy=0.
+    # For a 5x5 raster, integer pixel index 2 has center coordinate 2.5 => gx=gy=0.
     base,d,te,tx=orthographic_source_rays_normalized_v5(
-        torch.tensor([[1.5,1.5]],dtype=torch.float32),
+        torch.tensor([[2.0,2.0]],dtype=torch.float32),
         torch.tensor([0]),
-        resolution=4,
+        resolution=5,
         center_xyz=torch.zeros(3),
         normalization_half_extent=1.0,
         camera_origins=origins,camera_right=right,camera_screen_up=up,
@@ -61,7 +61,7 @@ def test_center_pixel_ray_intersects_normalized_cube_exactly():
 def test_ray_samples_stay_inside_domain():
     origins,right,up,forward,half=_identity_cameras()
     base,d,te,tx=orthographic_source_rays_normalized_v5(
-        torch.tensor([[1.5,1.5]],dtype=torch.float32),torch.tensor([0]),resolution=4,
+        torch.tensor([[2.0,2.0]],dtype=torch.float32),torch.tensor([0]),resolution=5,
         center_xyz=torch.zeros(3),normalization_half_extent=1.0,
         camera_origins=origins,camera_right=right,camera_screen_up=up,
         camera_forward=forward,camera_half_extent=half,

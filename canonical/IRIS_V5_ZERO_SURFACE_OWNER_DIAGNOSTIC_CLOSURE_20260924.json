@@ -32,12 +32,12 @@
       "network_target_pearson": -0.023657236409248078
     },
     "A0": {
-      "network_vertex_abs_p95": 0.00002718120813369751,
-      "canonical_fstar_vertex_abs_p95": 0.006990000605583191,
-      "canonical_fstar_centroid_abs_p95": 0.007013130187988281,
-      "target_over_network_p95_ratio": 257.1370041369262,
-      "centroid_over_vertex_target_p95_ratio": 1.003309,
-      "network_target_pearson": -0.123614
+      "network_vertex_abs_p95": 0.000027183443307876587,
+      "canonical_fstar_vertex_abs_p95": 0.0069898691726848474,
+      "canonical_fstar_centroid_abs_p95": 0.00701299018692225,
+      "target_over_network_p95_ratio": 257.13700407701793,
+      "centroid_over_vertex_target_p95_ratio": 1.003307789268468,
+      "network_target_pearson": -0.12361440484293679
     },
     "B": {
       "network_vertex_abs_p95": 0.0000302046537399292,

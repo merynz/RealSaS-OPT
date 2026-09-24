@@ -226,23 +226,16 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
         "active_interpretation": "ALL_SOURCE_CERTIFIED_EXTERIOR_R512_POINTS_ARE_STRICTLY_POSITIVE",
     }
     auth = ontology["training_authorization"]
-    assert auth["authorized"] is True
-    assert auth["authorization_scope"] == "KNIGHT_FIT1__TP64_OBJECTIVE_CAUSAL_ABLATION__FOUR_FROZEN_CONTINUATION_ARMS"
-    assert auth["preregistration"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json"
-    assert auth["execution_repo_commit"] == "df260b8e1423927d7df8873f80b2b82ab376a77b"
-    assert auth["notebook_sha256"] == "b469a617867e3e6e76c344a833568b9ed3d631039fcdb2010b30659e4f237fbb"
-    assert auth["base_checkpoint_sha256"] == "45de860757ddb6f65afcecb7fdc9f51ef4aef2aeaf598288459a0e5bfa1ec751"
-    assert auth["exact_r512_audit_lattice_points_forbidden_from_training"] is True
-    assert auth["exact_r512_and_stage13_checkpoint_selection_blind"] is True
+    assert auth["authorized"] is False
+    assert auth["prior_authorized_arm"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json"
+    assert auth["prior_arm_closure"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json"
+    assert auth["blockers"] == [
+        "FREEZE_TP64_LONG_HORIZON_LOW_LR_CONTINUATION_PREREGISTRATION",
+        "FREEZE_TP64_LONG_HORIZON_LOW_LR_RUN_ALL_NOTEBOOK",
+    ]
     assert auth["architecture_change_authorized"] is False
     assert auth["spatial_resolution_change_authorized"] is False
-    assert auth["blockers"] == []
-    assert auth["arms"] == [
-        "A0_CONTINUE_DIRECT_FSTAR_ONLY",
-        "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
-        "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
-        "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE",
-    ]
+    assert auth["exact_r512_and_stage13_checkpoint_selection_blind"] is True
     diag = ontology["diagnostic_authorization"]
     assert diag["authorized"] is False
     assert diag["closure"] == "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json"

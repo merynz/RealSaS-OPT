@@ -153,6 +153,10 @@ def orthographic_source_rays_normalized_v5(
         raise ValueError("resolution must be positive")
     if bool(torch.any(vi < 0)) or bool(torch.any(vi >= 8)):
         raise ValueError("view_index must lie in [0,7]")
+    if bool(torch.any(px < 0.0)) or bool(torch.any(px > float(int(resolution)-1))):
+        raise ValueError("pixel_xy must lie on the source raster")
+    if not bool(torch.all(torch.abs(px-torch.round(px)) <= 1e-6)):
+        raise ValueError("pixel_xy must contain integer source-pixel indices")
 
     device=px.device
     center=torch.as_tensor(center_xyz,device=device,dtype=torch.float32).reshape(3)

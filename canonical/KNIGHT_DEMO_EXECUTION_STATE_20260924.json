@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoExecutionState.v1",
-  "status": "PAUSED_AT_STAGE08__MESHLRM_STAGE2_TRANSLATION_ORACLE_BEFORE_STAGE09_15",
+  "status": "PAUSED_AT_STAGE08__MESHLRM_MESH_RENDER_AWARE_A100_NOTEBOOK_READY",
   "date_utc": "2026-09-24",
   "branch": "research/vf11-certified-adaptive-20260921",
   "run": {
@@ -49,13 +49,12 @@
     "gdrive_cli_installed": false
   },
   "next_actions": [
-    "COMPARE_MESHLRM_STAGE2_TO_CURRENT_IRIS_V5_EXACTLY",
-    "PREREGISTER_SOURCE_ONLY_MESH_RENDER_AWARE_FINE_TUNE_ORACLE",
-    "RUN_ORACLE_ON_A100_IF_FEASIBLE",
-    "IF_STAGE13_NOT_PROMOTED_RESUME_SAME_DEMO_RUN_WITH_FROZEN_C",
-    "IF_PROMOTED_BIND_NEW_DEMO_ONLY_GEOMETRY_THEN_EXECUTE_STAGE09_15",
-    "START_CAA_AND_GEPPETTO_BRANCHES_IN_PARALLEL_AFTER_GEOMETRY_FREEZE",
-    "RETURN_TO_USER_AT_GPU_FIT_BOUNDARY"
+    "USER_RUN_REALSaS_V5_MESHLRM_SURFACE_FINETUNE_LICENSE_SAFE_RUN_ALL_ON_A100",
+    "INGEST_EXACT_DRIVE_RESULT_AND_VERIFY_COMPLETION_SYNC_HASHES",
+    "IF_FINAL_CONTAINMENT_AND_P999_STAGE13_PASS_PROMOTE_NEW_DEMO_ONLY_GEOMETRY",
+    "OTHERWISE_BIND_FROZEN_C_FALLBACK",
+    "RESUME_SAME_SUBJECT2_KNIGHT_DEMO_V2_20260924_RUN_AT_STAGE09_15",
+    "START_CAA_AND_GEPPETTO_BRANCHES_IN_PARALLEL_AFTER_GEOMETRY_FREEZE"
   ],
   "continuation_rule": "On a future chat, read this file first. While pause is active, do not execute Stage09+ demo stages. Complete/reject the MeshLRM-style oracle, then resume the same run_id unless explicitly superseded.",
   "pause": {
@@ -65,5 +64,16 @@
     "downstream_demo_stage_execution_authorized_during_pause": false,
     "fallback_geometry_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
     "fallback_scientific_state": "STAGE13_FAIL__DEMO_ONLY"
+  },
+  "mesh_render_aware_oracle": {
+    "status": "USER_ACTION_REQUIRED__RUN_A100_NOTEBOOK",
+    "notebook_filename": "RealSaS_V5_MESHLRM_SURFACE_FINETUNE_LICENSE_SAFE_RUN_ALL.ipynb",
+    "notebook_sha256": "2dabed0238359ff03b9862bab5fed289f39956dcce9ea666d376a301fe8b9c04",
+    "prereg": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_20260924.json",
+    "amendment": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_20260924.json",
+    "start_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+    "final_gate": "UNCHANGED_CONTAINED_T512_T1024_PLUS_FROZEN_P999_STAGE13",
+    "pass_action": "PROMOTE_NEW_MESHAWARE_CHECKPOINT_FOR_DEMO_ONLY_AND_RESUME_SAME_KNIGHT_RUN",
+    "fail_action": "RESUME_SAME_KNIGHT_RUN_WITH_FROZEN_C_FALLBACK"
   }
 }

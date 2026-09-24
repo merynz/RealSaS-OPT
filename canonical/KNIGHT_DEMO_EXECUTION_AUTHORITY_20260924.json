@@ -1,0 +1,22 @@
+{
+  "schema": "RealSaS.KnightDemoExecutionAuthority.v1",
+  "status": "APPROVED_DEMO_ONLY",
+  "date_utc": "2026-09-24",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "explicit_user_approval": true,
+  "stage13_scientific_pass": false,
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true,
+  "allowed_execution_class": "DEMO_WITNESS",
+  "geometry_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+  "spatial_risk_demo_closure": "canonical/IRIS_V5_C_SPATIAL_RISK_REPLAY_DEMO_CLOSURE_20260924.json",
+  "allow_stage13_scientific_fail_for_demo": true,
+  "stage13_ledger_status": "PASS_DEMO_ONLY",
+  "stage46_product_closure_forbidden": true,
+  "claims_forbidden": [
+    "PASS_PRODUCT_V2",
+    "P999_GEOMETRY_PASS",
+    "UNSEEN_GENERALIZATION",
+    "SHIPPING_READY"
+  ]
+}

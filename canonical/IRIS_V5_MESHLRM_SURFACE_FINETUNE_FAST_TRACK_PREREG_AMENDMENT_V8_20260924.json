@@ -1,0 +1,83 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMSurfaceFineTuneFastTrackPreregAmendmentV8.v1",
+  "status": "FROZEN_BEFORE_SWEEP_OPTIMIZER_STEP",
+  "date_utc": "2026-09-24",
+  "amends": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_V7_20260924.json",
+  "trigger_evidence": {
+    "source_run": "V4 mesh-aware 1.0x gradient arm",
+    "frozen_c_heldout": {
+      "sign_disagreement_count": 9882,
+      "mae": 0.0017101818230003119
+    },
+    "step100": {
+      "mesh_loss": 0.04637713823467493,
+      "sign_disagreement_count": 11059,
+      "mae": 0.0019022994674742222
+    },
+    "step200": {
+      "mesh_loss": 0.042676317505538464,
+      "sign_disagreement_count": 14428,
+      "mae": 0.002505662851035595
+    },
+    "interpretation": "The extracted-mesh feedback is effective but 1.0x equal-norm mesh gradient is too dominant: mesh loss improves while frozen F* heldout fidelity degrades sharply."
+  },
+  "scientific_question": "Can weaker mesh-gradient ratios preserve frozen-C field fidelity while retaining useful mesh-render improvement?",
+  "sweep": {
+    "arms": [
+      {
+        "name": "M0_10",
+        "mesh_to_base_grad_ratio": 0.1
+      },
+      {
+        "name": "M0_25",
+        "mesh_to_base_grad_ratio": 0.25
+      }
+    ],
+    "independent_start_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+    "continuation_steps_per_arm": 300,
+    "evaluation_every_steps": 100,
+    "candidate_start_step": 100,
+    "lr": 0.00001,
+    "eta_min": 0.000001,
+    "warmup_steps": 50,
+    "base_c_objective": "UNCHANGED",
+    "mesh_feedback_apparatus": "UNCHANGED_V4_RUNTIME_AUDITED",
+    "stage13_feedback_during_training": false,
+    "r512_feedback_during_training": false
+  },
+  "calibration": {
+    "raw_equal_norm_scale_measured_once_from_frozen_c": true,
+    "arm_scale_formula": "arm_mesh_scale = raw_equal_norm_scale * mesh_to_base_grad_ratio",
+    "recalibration_per_arm": false,
+    "exact_ratio_tolerance": [
+      0.98,
+      1.02
+    ]
+  },
+  "eligibility_guard": {
+    "baseline_sign_disagreement_count": 9882,
+    "baseline_mae": 0.0017101818230003119,
+    "max_relative_sign_degradation": 0.05,
+    "max_relative_mae_degradation": 0.05,
+    "sign_disagreement_count_max": 10376,
+    "mae_max": 0.0017956909141503277,
+    "rationale": "This is a regularized demo sweep, not a pure mesh-loss takeover. A candidate that improves mesh loss by materially eroding the frozen-C field is ineligible."
+  },
+  "per_arm_selection": {
+    "eligible_candidates_only": true,
+    "primary": "LOWEST_MESH_EVAL_LOSS",
+    "tie_break_1": "LOWEST_SIGN_DISAGREEMENT_FRACTION",
+    "tie_break_2": "LOWEST_HELDOUT_MAE",
+    "frozen_c_is_fallback_not_train_candidate": true
+  },
+  "final_evaluation": {
+    "decode_selected_eligible_checkpoint_per_arm": true,
+    "exact_containment": true,
+    "frozen_p999_stage13_once_per_eligible_arm": true,
+    "if_any_arm_stage13_pass": "PROMOTE_BEST_PASSING_ARM_FOR_DEMO",
+    "passing_arm_order": "LOWEST_MAX_VIEW_SILHOUETTE_P95_THEN_HIGHEST_MIN_RECALL_THEN_HIGHEST_MIN_PRECISION_THEN_LOWER_MESH_RATIO",
+    "if_no_arm_stage13_pass": "FROZEN_C_FALLBACK"
+  },
+  "product_authority_claimed": false,
+  "unseen_claimed": false
+}

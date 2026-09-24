@@ -17,7 +17,7 @@ PLAN_PATH = ROOT / "canonical" / "MAINLINE_EXECUTION_PLAN_V2.json"
 LEDGER_PATH = ROOT / "canonical" / "ACTIVE_RUN_V2.json"
 READINESS_PATH = ROOT / "canonical" / "V2_IMPLEMENTATION_READINESS.json"
 
-PASS_STATUSES = {"PASS", "CACHE_HIT"}
+PASS_STATUSES = {"PASS", "CACHE_HIT", "PASS_DEMO_ONLY"}
 FAIL_STATUSES = {"FAIL", "ABSTAIN", "BLOCKED"}
 _STAGE_RE = re.compile(r"^\d{2}_[A-Z0-9_]+$")
 
@@ -390,6 +390,41 @@ def validate_witness_authorization(plan: dict | None = None) -> str:
     return readiness_digest
 
 
+
+def validate_demo_witness_authorization(manifest: dict, *, subject_id: str) -> str:
+    demo=dict(manifest.get("demo_execution") or {})
+    if str(demo.get("schema") or "")!="RealSaS.DemoExecutionAuthorization.v1":
+        raise RuntimeError("DEMO_WITNESS_AUTHORIZATION_SCHEMA_INVALID")
+    if str(demo.get("mode") or "")!="DEMO_ONLY":
+        raise RuntimeError("DEMO_WITNESS_MODE_INVALID")
+    if demo.get("explicit_user_approval") is not True:
+        raise RuntimeError("DEMO_WITNESS_EXPLICIT_USER_APPROVAL_REQUIRED")
+    if demo.get("product_authority_claimed") is not False:
+        raise RuntimeError("DEMO_WITNESS_PRODUCT_AUTHORITY_FORBIDDEN")
+    if demo.get("stage13_scientific_pass") is not False:
+        raise RuntimeError("DEMO_WITNESS_STAGE13_SCIENTIFIC_STATE_DRIFT")
+    if demo.get("allow_stage13_scientific_fail_for_demo") is not True:
+        raise RuntimeError("DEMO_WITNESS_STAGE13_DEMO_ADMISSION_REQUIRED")
+    if str(manifest.get("subject_id") or "")!=str(subject_id):
+        raise RuntimeError("DEMO_WITNESS_SUBJECT_ID_DRIFT")
+    authority=dict(demo.get("authority") or {})
+    rel=str(authority.get("path") or "")
+    expected=str(authority.get("sha256") or "")
+    path=(ROOT/rel).resolve()
+    if not rel or len(expected)!=64 or ROOT not in path.parents or not path.is_file():
+        raise RuntimeError("DEMO_WITNESS_AUTHORITY_REF_INVALID")
+    if sha256_file(path)!=expected:
+        raise RuntimeError("DEMO_WITNESS_AUTHORITY_SHA_DRIFT")
+    payload=load_json(path)
+    if str(payload.get("schema") or "")!="RealSaS.KnightDemoExecutionAuthority.v1":
+        raise RuntimeError("DEMO_WITNESS_AUTHORITY_SCHEMA_DRIFT")
+    if str(payload.get("status") or "")!="APPROVED_DEMO_ONLY":
+        raise RuntimeError("DEMO_WITNESS_AUTHORITY_NOT_APPROVED")
+    if payload.get("product_authority_claimed") is not False or payload.get("stage13_scientific_pass") is not False:
+        raise RuntimeError("DEMO_WITNESS_AUTHORITY_SCOPE_DRIFT")
+    return content_sha256(payload)
+
+
 def validate_ledger(plan: dict, ledger: dict) -> None:
     plan_hash = validate_plan(plan)
     if ledger.get("schema") != "RealSaS.ActiveRunLedger.v2":
@@ -397,7 +432,7 @@ def validate_ledger(plan: dict, ledger: dict) -> None:
     if ledger.get("canonical_branch") != "main":
         raise RuntimeError("ACTIVE_RUN_V2_LEDGER_BRANCH_DRIFT")
     execution_class = str(ledger.get("execution_class") or "WITNESS")
-    if execution_class not in {"WITNESS", "IMPLEMENTATION_AUDIT"}:
+    if execution_class not in {"WITNESS", "IMPLEMENTATION_AUDIT", "DEMO_WITNESS"}:
         raise RuntimeError("ACTIVE_RUN_V2_EXECUTION_CLASS_INVALID")
     if (
         execution_class == "IMPLEMENTATION_AUDIT"
@@ -481,7 +516,7 @@ def build_fresh_run_ledger(
         for stage in plan["stages"]
     ]
     execution_class = str(execution_class).upper()
-    if execution_class not in {"WITNESS", "IMPLEMENTATION_AUDIT"}:
+    if execution_class not in {"WITNESS", "IMPLEMENTATION_AUDIT", "DEMO_WITNESS"}:
         raise RuntimeError(f"RUN_EXECUTION_CLASS_INVALID:{execution_class}")
     if execution_class == "IMPLEMENTATION_AUDIT" and not str(subject_id).startswith("SUBJECT_FREE_"):
         raise RuntimeError("IMPLEMENTATION_AUDIT_REQUIRES_SUBJECT_FREE_SUBJECT_ID")
@@ -909,7 +944,7 @@ def _run_stage(
         result = dict(function(ctx) or {})
         elapsed = perf_counter() - started
         status = str(result.get("status", "FAIL")).upper()
-        if status != "PASS":
+        if status not in PASS_STATUSES:
             row.update(
                 status=status if status in FAIL_STATUSES else "FAIL",
                 diagnostics_hash=content_sha256(result.get("diagnostics", {})),
@@ -922,7 +957,7 @@ def _run_stage(
             )
         else:
             row.update(
-                status="PASS",
+                status=status,
                 outputs=_seal_outputs(
                     list(result.get("outputs") or ()),
                     allowed_root=(
@@ -996,6 +1031,12 @@ def execute(
             raise RuntimeError("IMPLEMENTATION_AUDIT_MANIFEST_FLAG_REQUIRED")
         if str(manifest_preview.get("subject_id") or "") != str(ledger.get("subject_id") or ""):
             raise RuntimeError("IMPLEMENTATION_AUDIT_SUBJECT_ID_DRIFT")
+    elif execution_class == "DEMO_WITNESS":
+        manifest_preview = load_json(run_manifest_path(run_id))
+        validate_demo_witness_authorization(
+            manifest_preview,
+            subject_id=str(ledger.get("subject_id") or ""),
+        )
     if ledger["run_id"] != run_id:
         raise RuntimeError(
             f"ACTIVE_RUN_V2_ID_MISMATCH:{ledger['run_id']}!={run_id}"
@@ -1122,7 +1163,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     init.add_argument(
         "--execution-class",
-        choices=("WITNESS", "IMPLEMENTATION_AUDIT"),
+        choices=("WITNESS", "IMPLEMENTATION_AUDIT", "DEMO_WITNESS"),
         default="WITNESS",
     )
     run = sub.add_parser("execute")
@@ -1190,6 +1231,8 @@ def main(argv: list[str] | None = None) -> int:
             run_id=args.run_id,
             subject_id=args.subject_id,
         )
+        if args.execution_class == "DEMO_WITNESS":
+            validate_demo_witness_authorization(manifest_preview, subject_id=args.subject_id)
         if args.execution_class == "IMPLEMENTATION_AUDIT":
             if manifest_preview.get("implementation_audit") is not True:
                 raise RuntimeError("IMPLEMENTATION_AUDIT_MANIFEST_FLAG_REQUIRED")

@@ -226,26 +226,11 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
         "active_interpretation": "ALL_SOURCE_CERTIFIED_EXTERIOR_R512_POINTS_ARE_STRICTLY_POSITIVE",
     }
     auth = ontology["training_authorization"]
-    assert auth["authorized"] is True
-    assert auth["scope"] == "KNIGHT_FIT1__TP64__B_C_ENDPOINT_CLOSURE_ONLY"
-    assert auth["preregistration"] == "canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json"
-    assert auth["long_horizon_closure"] == "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json"
-    assert auth["code_repo_commit"] == "2d07f70536ecd2d02d0a55a5cb15c761a7ce6838"
-    assert auth["notebook_sha256"] == "6841b66a4d2622472835b30b9f46591546593ffdea2481b15a0dc884a151579e"
-    assert auth["train_arms"] == [
-        "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
-        "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
-    ]
-    assert auth["frozen_reference_arms"] == [
-        "A0_CONTINUE_DIRECT_FSTAR_ONLY",
-        "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE",
-    ]
-    assert auth["continuation_steps_per_arm"] == 32000
-    assert auth["evaluation_every_steps"] == 1000
-    assert auth["restore_saved_optimizer_state"] is True
-    assert auth["active_schedule"] == "CONSTANT_TERMINAL_LR"
-    assert auth["learning_rate"] == 1e-6
-    assert auth["schedule_index_offset"] == 9600
+    assert auth["authorized"] is False
+    assert auth["blocker"] == "CLOSE_FIELD_FAILURE_DIAGNOSTIC_BEFORE_ANY_FURTHER_TP64_TRAINING_OR_CAPACITY_CHANGE"
+    assert auth["prior_bc_preregistration"] == "canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json"
+    assert auth["replay_refresh_authorized"] is False
+    assert auth["target_aggregation_change_authorized"] is False
     assert auth["architecture_change_authorized"] is False
     assert auth["spatial_resolution_change_authorized"] is False
     assert auth["regularity_loss_change_authorized"] is False
@@ -279,16 +264,16 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert longh["closure"] == "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json"
     assert longh["run_id"] == "20260924T115953Z"
     bc = ontology["bc_endpoint_training_authorization"]
-    assert bc["authorized"] is True
+    assert bc["authorized"] is False
     assert bc["preregistration"] == "canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json"
-    assert bc["notebook_sha256"] == "6841b66a4d2622472835b30b9f46591546593ffdea2481b15a0dc884a151579e"
-    assert bc["arms"] == [
-        "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
-        "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
-    ]
-    assert bc["continuation_steps_per_arm"] == 32000
-    assert bc["restore_optimizer_state"] is True
-    assert bc["active_schedule"] == "CONSTANT_TERMINAL_LR"
-    assert bc["tail_lr"] == 1e-6
-    assert bc["schedule_offset"] == 9600
-    assert bc["exact_r512_and_stage13_selection_blind"] is True
+    diag2 = ontology["field_failure_diagnostic_authorization"]
+    assert diag2["authorized"] is True
+    assert diag2["preregistration"] == "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json"
+    assert diag2["diagnostic_repo_commit"] == "6e3cf4d6f2d973e7c1df7ca0f31efbd7b11e3d86"
+    assert diag2["code_ci_run_id"] == 36007195382
+    assert diag2["code_ci_conclusion"] == "success"
+    assert diag2["notebook_sha256"] == "efcb98d93da2a00570e97e1939d583cbb20f8dc30bdca1a4c28c2cf69ff5d2ff"
+    assert diag2["optimizer_steps_permitted"] == 0
+    assert diag2["parameter_updates_permitted"] == 0
+    assert diag2["autograd_gradient_measurement_permitted"] is True
+    assert diag2["incomplete_bc_endpoint_run_consumed"] is False

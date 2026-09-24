@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_FSTAR__LONG_HORIZON_CLOSED__BC_ENDPOINT_CLOSURE_AUTHORIZED",
+  "status": "FROZEN_FSTAR__BC_TAIL_OPERATOR_STOPPED__FIELD_FAILURE_DIAGNOSTIC_AUTHORIZED",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -236,36 +236,18 @@
     ]
   },
   "training_authorization": {
-    "authorized": true,
-    "scope": "KNIGHT_FIT1__TP64__B_C_ENDPOINT_CLOSURE_ONLY",
-    "preregistration": "canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json",
-    "long_horizon_closure": "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json",
-    "code_repo_commit": "2d07f70536ecd2d02d0a55a5cb15c761a7ce6838",
-    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_BC_ENDPOINT_CLOSURE_RUN_ALL.ipynb",
-    "notebook_sha256": "6841b66a4d2622472835b30b9f46591546593ffdea2481b15a0dc884a151579e",
-    "train_arms": [
-      "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
-      "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE"
-    ],
-    "frozen_reference_arms": [
-      "A0_CONTINUE_DIRECT_FSTAR_ONLY",
-      "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE"
-    ],
-    "continuation_steps_per_arm": 32000,
-    "evaluation_every_steps": 1000,
-    "restore_saved_optimizer_state": true,
-    "active_schedule": "CONSTANT_TERMINAL_LR",
-    "learning_rate": 0.000001,
-    "schedule_index_offset": 9600,
+    "authorized": false,
+    "blocker": "CLOSE_FIELD_FAILURE_DIAGNOSTIC_BEFORE_ANY_FURTHER_TP64_TRAINING_OR_CAPACITY_CHANGE",
+    "prior_bc_preregistration": "canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json",
+    "note": "The operator stopped the BC tail before scientific completion. No incomplete run output is consumed as evidence. Training is blocked while the zero-update field-failure diagnostic is open.",
     "architecture_change_authorized": false,
     "spatial_resolution_change_authorized": false,
     "regularity_loss_change_authorized": false,
     "objective_change_authorized": false,
+    "replay_refresh_authorized": false,
+    "target_aggregation_change_authorized": false,
     "decoder_change_authorized": false,
-    "stage13_threshold_change_authorized": false,
-    "exact_r512_and_stage13_checkpoint_selection_blind": true,
-    "one_time_under_frozen_prereg": true,
-    "disposition": "AUTHORIZED_ONCE__CLOSE_BC_ENDPOINT_RESULT_BEFORE_ANY_SPATIAL_OR_REPRESENTATION_CHANGE"
+    "stage13_threshold_change_authorized": false
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",
@@ -326,20 +308,25 @@
     "disposition": "CLOSED__B_C_REMAIN_HORIZON_CENSORED"
   },
   "bc_endpoint_training_authorization": {
-    "authorized": true,
+    "authorized": false,
     "preregistration": "canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json",
-    "notebook_sha256": "6841b66a4d2622472835b30b9f46591546593ffdea2481b15a0dc884a151579e",
-    "code_repo_commit": "2d07f70536ecd2d02d0a55a5cb15c761a7ce6838",
-    "arms": [
-      "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
-      "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE"
-    ],
-    "continuation_steps_per_arm": 32000,
-    "restore_optimizer_state": true,
-    "active_schedule": "CONSTANT_TERMINAL_LR",
-    "tail_lr": 0.000001,
-    "schedule_offset": 9600,
-    "exact_r512_and_stage13_selection_blind": true,
-    "automatic_next_gate": false
+    "disposition": "OPERATOR_STOPPED_BEFORE_COMPLETION__INCOMPLETE_RUN_NOT_SCIENTIFIC_EVIDENCE__SUPERSEDED_BY_FIELD_FAILURE_DIAGNOSTIC"
+  },
+  "field_failure_diagnostic_authorization": {
+    "authorized": true,
+    "scope": "KNIGHT_FIT1__COMPLETED_LONG_HORIZON_B_C_SELECTED_STATES__ZERO_UPDATE_FIELD_FAILURE_DIAGNOSTIC",
+    "preregistration": "canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_20260924.json",
+    "diagnostic_repo_commit": "6e3cf4d6f2d973e7c1df7ca0f31efbd7b11e3d86",
+    "code_ci_run_id": 36007195382,
+    "code_ci_conclusion": "success",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_FIELD_FAILURE_DIAGNOSTIC_RUN_ALL.ipynb",
+    "notebook_sha256": "efcb98d93da2a00570e97e1939d583cbb20f8dc30bdca1a4c28c2cf69ff5d2ff",
+    "optimizer_steps_permitted": 0,
+    "parameter_updates_permitted": 0,
+    "autograd_gradient_measurement_permitted": true,
+    "incomplete_bc_endpoint_run_consumed": false,
+    "automatic_training_authorization": false,
+    "automatic_representation_change_authorization": false,
+    "disposition": "AUTHORIZED_ONCE__CLOSE_DIAGNOSTIC_BEFORE_NEXT_SCIENTIFIC_ROUTE"
   }
 }

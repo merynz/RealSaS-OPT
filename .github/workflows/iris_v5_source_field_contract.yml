@@ -30,6 +30,8 @@ on:
       - 'canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_PREREG_20260924.json'
       - 'canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_CLOSURE_20260924.json'
       - 'canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json'
+      - 'canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json'
+      - 'canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json'
       - '.github/workflows/iris_v5_source_field_contract.yml'
   workflow_dispatch:
 
@@ -105,6 +107,7 @@ jobs:
           morph_prereg=json.loads(Path('canonical/IRIS_V5_STAGE13_FROZEN_MASK_MORPHOLOGY_PREREG_20260924.json').read_text())
           owner_prereg=json.loads(Path('canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_PREREG_20260924.json').read_text())
           longh_prereg=json.loads(Path('canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json').read_text())
+          bc_prereg=json.loads(Path('canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json').read_text())
           assert prereg['status']=='FROZEN_BEFORE_OPTIMIZER_STEP_1'
           assert prereg['execution']['repo_commit']=='4de08a779199d64b60b0d1aae3512a0f77e77c77'
           assert prereg['optimizer']['primary_objective']['type']=='SMOOTH_L1_DIRECT_FSTAR_ONLY'
@@ -179,6 +182,21 @@ jobs:
           assert longh_prereg['common_continuation']['eta_min']==1e-6
           assert longh_prereg['checkpoint_selection']['exact_r512_blind'] is True
           assert longh_prereg['checkpoint_selection']['stage13_blind'] is True
+          assert bc_prereg['status']=='FROZEN_BEFORE_BC_ENDPOINT_CLOSURE_OPTIMIZER_STEP_1'
+          assert bc_prereg['execution']['code_repo_commit']=='2d07f70536ecd2d02d0a55a5cb15c761a7ce6838'
+          assert bc_prereg['execution']['notebook_sha256']=='6841b66a4d2622472835b30b9f46591546593ffdea2481b15a0dc884a151579e'
+          assert [x['id'] for x in bc_prereg['train_arms']]==[
+              'B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN',
+              'C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE',
+          ]
+          assert bc_prereg['continuation']['restore_saved_optimizer_state'] is True
+          assert bc_prereg['continuation']['active_schedule']=='CONSTANT_TERMINAL_LR'
+          assert bc_prereg['continuation']['learning_rate']==1e-6
+          assert bc_prereg['continuation']['continuation_steps_per_arm']==32000
+          assert bc_prereg['continuation']['evaluation_every_steps']==1000
+          assert bc_prereg['continuation']['schedule_index_offset']==9600
+          assert bc_prereg['checkpoint_selection']['exact_r512_blind'] is True
+          assert bc_prereg['checkpoint_selection']['stage13_blind'] is True
           diag=ontology['diagnostic_authorization']
           assert diag['authorized'] is False
           assert diag['completed_scope']=='KNIGHT_FIT1__FIVE_FROZEN_STATES__EXTERIOR_DECODER_SHELL_COMPATIBILITY_ONLY'
@@ -190,16 +208,21 @@ jobs:
 
           auth=ontology['training_authorization']
           assert auth['authorized'] is True
-          assert auth['scope']=='KNIGHT_FIT1__TP64__A0_B_C_D_LONG_HORIZON_LOW_LR_ONLY'
-          assert auth['preregistration']=='canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json'
-          assert auth['owner_closure']=='canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_CLOSURE_20260924.json'
-          assert auth['objective_closure']=='canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json'
-          assert auth['code_repo_commit']=='54a18d5353c6d39f383b823c019c25336fbadaef'
-          assert auth['notebook_sha256']=='ef2dde3de7b97af5d7da7d1782ebac72b3e9a83f07daf0fafe8c04c27bc1cc4d'
-          assert auth['continuation_steps_per_arm']==9600
-          assert auth['evaluation_every_steps']==400
-          assert auth['learning_rate']==2e-5
-          assert auth['eta_min']==1e-6
+          assert auth['scope']=='KNIGHT_FIT1__TP64__B_C_ENDPOINT_CLOSURE_ONLY'
+          assert auth['preregistration']=='canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json'
+          assert auth['long_horizon_closure']=='canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json'
+          assert auth['code_repo_commit']=='2d07f70536ecd2d02d0a55a5cb15c761a7ce6838'
+          assert auth['notebook_sha256']=='6841b66a4d2622472835b30b9f46591546593ffdea2481b15a0dc884a151579e'
+          assert auth['train_arms']==[
+              'B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN',
+              'C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE',
+          ]
+          assert auth['continuation_steps_per_arm']==32000
+          assert auth['evaluation_every_steps']==1000
+          assert auth['restore_saved_optimizer_state'] is True
+          assert auth['active_schedule']=='CONSTANT_TERMINAL_LR'
+          assert auth['learning_rate']==1e-6
+          assert auth['schedule_index_offset']==9600
           rq=ontology['requalification_authorization']
           assert rq['authorized'] is False
           assert rq['closure']=='canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_CLOSURE_20260924.json'
@@ -214,12 +237,18 @@ jobs:
           assert owner['authorized'] is False
           assert owner['closure']=='canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_CLOSURE_20260924.json'
           longh=ontology['long_horizon_training_authorization']
-          assert longh['authorized'] is True
-          assert longh['preregistration']=='canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json'
-          assert longh['notebook_sha256']=='ef2dde3de7b97af5d7da7d1782ebac72b3e9a83f07daf0fafe8c04c27bc1cc4d'
-          assert longh['continuation_steps_per_arm']==9600
-          assert longh['exact_r512_and_stage13_selection_blind'] is True
-          assert longh['optimizer_scheduler_state_must_be_saved'] is True
+          assert longh['authorized'] is False
+          assert longh['closure']=='canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json'
+          bc=ontology['bc_endpoint_training_authorization']
+          assert bc['authorized'] is True
+          assert bc['preregistration']=='canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json'
+          assert bc['notebook_sha256']=='6841b66a4d2622472835b30b9f46591546593ffdea2481b15a0dc884a151579e'
+          assert bc['continuation_steps_per_arm']==32000
+          assert bc['restore_optimizer_state'] is True
+          assert bc['active_schedule']=='CONSTANT_TERMINAL_LR'
+          assert bc['tail_lr']==1e-6
+          assert bc['schedule_offset']==9600
+          assert bc['exact_r512_and_stage13_selection_blind'] is True
           assert auth['architecture_change_authorized'] is False
           assert auth['spatial_resolution_change_authorized'] is False
           assert auth['regularity_loss_change_authorized'] is False

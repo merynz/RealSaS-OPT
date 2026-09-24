@@ -227,18 +227,25 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     }
     auth = ontology["training_authorization"]
     assert auth["authorized"] is True
-    assert auth["scope"] == "KNIGHT_FIT1__TP64__A0_B_C_D_LONG_HORIZON_LOW_LR_ONLY"
-    assert auth["preregistration"] == "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json"
-    assert auth["owner_closure"] == "canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_CLOSURE_20260924.json"
-    assert auth["objective_closure"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json"
-    assert auth["code_repo_commit"] == "54a18d5353c6d39f383b823c019c25336fbadaef"
-    assert auth["notebook_sha256"] == "ef2dde3de7b97af5d7da7d1782ebac72b3e9a83f07daf0fafe8c04c27bc1cc4d"
-    assert auth["continuation_steps_per_arm"] == 9600
-    assert auth["evaluation_every_steps"] == 400
-    assert auth["learning_rate"] == 2e-5
-    assert auth["eta_min"] == 1e-6
-    assert auth["fresh_optimizer_restart"] is True
-    assert auth["selected_checkpoint_optimizer_scheduler_state_required"] is True
+    assert auth["scope"] == "KNIGHT_FIT1__TP64__B_C_ENDPOINT_CLOSURE_ONLY"
+    assert auth["preregistration"] == "canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json"
+    assert auth["long_horizon_closure"] == "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json"
+    assert auth["code_repo_commit"] == "2d07f70536ecd2d02d0a55a5cb15c761a7ce6838"
+    assert auth["notebook_sha256"] == "6841b66a4d2622472835b30b9f46591546593ffdea2481b15a0dc884a151579e"
+    assert auth["train_arms"] == [
+        "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
+        "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+    ]
+    assert auth["frozen_reference_arms"] == [
+        "A0_CONTINUE_DIRECT_FSTAR_ONLY",
+        "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE",
+    ]
+    assert auth["continuation_steps_per_arm"] == 32000
+    assert auth["evaluation_every_steps"] == 1000
+    assert auth["restore_saved_optimizer_state"] is True
+    assert auth["active_schedule"] == "CONSTANT_TERMINAL_LR"
+    assert auth["learning_rate"] == 1e-6
+    assert auth["schedule_index_offset"] == 9600
     assert auth["architecture_change_authorized"] is False
     assert auth["spatial_resolution_change_authorized"] is False
     assert auth["regularity_loss_change_authorized"] is False
@@ -268,15 +275,20 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert owner["optimizer_steps_executed"] == 0
     assert owner["parameter_updates_executed"] == 0
     longh = ontology["long_horizon_training_authorization"]
-    assert longh["authorized"] is True
-    assert longh["preregistration"] == "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json"
-    assert longh["notebook_sha256"] == "ef2dde3de7b97af5d7da7d1782ebac72b3e9a83f07daf0fafe8c04c27bc1cc4d"
-    assert longh["arms"] == [
-        "A0_CONTINUE_DIRECT_FSTAR_ONLY",
+    assert longh["authorized"] is False
+    assert longh["closure"] == "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json"
+    assert longh["run_id"] == "20260924T115953Z"
+    bc = ontology["bc_endpoint_training_authorization"]
+    assert bc["authorized"] is True
+    assert bc["preregistration"] == "canonical/IRIS_V5_TP64_BC_ENDPOINT_CLOSURE_PREREG_20260924.json"
+    assert bc["notebook_sha256"] == "6841b66a4d2622472835b30b9f46591546593ffdea2481b15a0dc884a151579e"
+    assert bc["arms"] == [
         "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
         "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
-        "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE",
     ]
-    assert longh["continuation_steps_per_arm"] == 9600
-    assert longh["exact_r512_and_stage13_selection_blind"] is True
-    assert longh["optimizer_scheduler_state_must_be_saved"] is True
+    assert bc["continuation_steps_per_arm"] == 32000
+    assert bc["restore_optimizer_state"] is True
+    assert bc["active_schedule"] == "CONSTANT_TERMINAL_LR"
+    assert bc["tail_lr"] == 1e-6
+    assert bc["schedule_offset"] == 9600
+    assert bc["exact_r512_and_stage13_selection_blind"] is True

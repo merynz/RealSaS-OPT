@@ -230,15 +230,18 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert auth["prior_authorized_arm"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json"
     assert auth["prior_arm_closure"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json"
     assert auth["blockers"] == [
-        "FREEZE_TP64_LONG_HORIZON_LOW_LR_CONTINUATION_PREREGISTRATION",
-        "FREEZE_TP64_LONG_HORIZON_LOW_LR_RUN_ALL_NOTEBOOK",
+        "RUN_AND_SEAL_EXTERIOR_DECODER_SHELL_COMPAT_DIAGNOSTIC",
+        "THEN_FREEZE_LONG_HORIZON_OR_REGULARITY_NEXT_ARM_FROM_DIAGNOSTIC_RESULT",
     ]
     assert auth["architecture_change_authorized"] is False
     assert auth["spatial_resolution_change_authorized"] is False
     assert auth["exact_r512_and_stage13_checkpoint_selection_blind"] is True
     diag = ontology["diagnostic_authorization"]
-    assert diag["authorized"] is False
-    assert diag["closure"] == "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json"
-    assert diag["optimizer_steps_executed"] == 0
-    assert diag["parameter_updates_executed"] == 0
-    assert diag["stage13_qualification_executed"] is False
+    assert diag["authorized"] is True
+    assert diag["scope"] == "KNIGHT_FIT1__FIVE_FROZEN_STATES__EXTERIOR_DECODER_SHELL_COMPATIBILITY_ONLY"
+    assert diag["preregistration"] == "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_PREREG_20260924.json"
+    assert diag["notebook_sha256"] == "1215f809dd6f519ecf51a4eaa90aea3826f8d5123f296b511f092cf4490ba0ec"
+    assert diag["optimizer_steps_permitted"] == 0
+    assert diag["parameter_updates_permitted"] == 0
+    assert diag["stage13_qualification_permitted"] is False
+    assert diag["training_remains_blocked"] is True

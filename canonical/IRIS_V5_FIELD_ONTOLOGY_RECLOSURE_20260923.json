@@ -100,7 +100,7 @@
       "LOCALIZE_LEARNED_SIGN_AND_ZERO_SET_TAIL",
       "FREEZE_NEXT_LEARNED_OWNER_EXPERIMENT_PREREGISTRATION"
     ],
-    "note": "The exact F* target and analytic indexed decoder parity remain frozen. New optimizer steps are blocked until the learned sign/topology failure tail is localized and a new arm is preregistered."
+    "note": "Training remains blocked. Only the frozen diagnostic-only learned-tail localization preregistration is authorized; no optimizer step or parameter update is permitted until that result is reviewed and sealed."
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",
@@ -108,5 +108,16 @@
     "This reclosure does not relax frozen Stage13 P999.",
     "This reclosure does not select a deterministic no-model shipping lane.",
     "Historical negative results remain preserved as evidence under their original contracts."
-  ]
+  ],
+  "diagnostic_authorization": {
+    "authorized": true,
+    "scope": "KNIGHT_FIT1__SELECTED_TP64_LEARNED_TAIL_LOCALIZATION_ONLY",
+    "preregistration": "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_PREREG_20260924.json",
+    "diagnostic_repo_commit": "3eb635f84768c180ea6acdda920f107188ad956b",
+    "notebook_sha256": "607c217c2259c769290dd0ee566e12ad3f03fb284d0474eb4c744f7d472d8e26",
+    "optimizer_steps_permitted": 0,
+    "parameter_updates_permitted": 0,
+    "stage13_qualification_permitted": false,
+    "training_authorization_unchanged": false
+  }
 }

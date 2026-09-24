@@ -226,16 +226,19 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
         "active_interpretation": "ALL_SOURCE_CERTIFIED_EXTERIOR_R512_POINTS_ARE_STRICTLY_POSITIVE",
     }
     auth = ontology["training_authorization"]
-    assert auth["authorized"] is False
-    assert auth["prior_authorized_arm"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json"
-    assert auth["prior_arm_closure"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json"
-    assert auth["shell_compatibility_closure"] == "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json"
-    assert auth["corrected_decoder_stage13_preregistration"] == "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json"
-    assert auth["corrected_decoder_stage13_closure"] == "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_CLOSURE_20260924.json"
-    assert auth["morphology_closure"] == "canonical/IRIS_V5_STAGE13_FROZEN_MASK_MORPHOLOGY_CLOSURE_20260924.json"
-    assert auth["blockers"] == [
-        "CLOSE_ZERO_SURFACE_OWNER_DIAGNOSTIC_BEFORE_LONG_HORIZON",
-    ]
+    assert auth["authorized"] is True
+    assert auth["scope"] == "KNIGHT_FIT1__TP64__A0_B_C_D_LONG_HORIZON_LOW_LR_ONLY"
+    assert auth["preregistration"] == "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json"
+    assert auth["owner_closure"] == "canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_CLOSURE_20260924.json"
+    assert auth["objective_closure"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json"
+    assert auth["code_repo_commit"] == "54a18d5353c6d39f383b823c019c25336fbadaef"
+    assert auth["notebook_sha256"] == "ef2dde3de7b97af5d7da7d1782ebac72b3e9a83f07daf0fafe8c04c27bc1cc4d"
+    assert auth["continuation_steps_per_arm"] == 9600
+    assert auth["evaluation_every_steps"] == 400
+    assert auth["learning_rate"] == 2e-5
+    assert auth["eta_min"] == 1e-6
+    assert auth["fresh_optimizer_restart"] is True
+    assert auth["selected_checkpoint_optimizer_scheduler_state_required"] is True
     assert auth["architecture_change_authorized"] is False
     assert auth["spatial_resolution_change_authorized"] is False
     assert auth["regularity_loss_change_authorized"] is False
@@ -260,13 +263,20 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert morph["optimizer_steps_executed"] == 0
     assert morph["parameter_updates_executed"] == 0
     owner = ontology["zero_surface_owner_diagnostic_authorization"]
-    assert owner["authorized"] is True
-    assert owner["preregistration"] == "canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_PREREG_20260924.json"
-    assert owner["diagnostic_repo_commit"] == "0b29e55b2270c5c6a12b93ed4c7956bf271c7ea4"
-    assert owner["notebook_sha256"] == "e9b5ca62c42113c022ce35767e8326da86ee757799b4bc85b4d007fd80e5315b"
-    assert owner["optimizer_steps_permitted"] == 0
-    assert owner["parameter_updates_permitted"] == 0
-    assert owner["rerasterization_permitted"] is False
-    assert owner["checkpoint_selection_permitted"] is False
-    assert owner["automatic_owner_selection"] is False
-    assert owner["automatic_training_authorization"] is False
+    assert owner["authorized"] is False
+    assert owner["closure"] == "canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_CLOSURE_20260924.json"
+    assert owner["optimizer_steps_executed"] == 0
+    assert owner["parameter_updates_executed"] == 0
+    longh = ontology["long_horizon_training_authorization"]
+    assert longh["authorized"] is True
+    assert longh["preregistration"] == "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json"
+    assert longh["notebook_sha256"] == "ef2dde3de7b97af5d7da7d1782ebac72b3e9a83f07daf0fafe8c04c27bc1cc4d"
+    assert longh["arms"] == [
+        "A0_CONTINUE_DIRECT_FSTAR_ONLY",
+        "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
+        "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+        "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE",
+    ]
+    assert longh["continuation_steps_per_arm"] == 9600
+    assert longh["exact_r512_and_stage13_selection_blind"] is True
+    assert longh["optimizer_scheduler_state_must_be_saved"] is True

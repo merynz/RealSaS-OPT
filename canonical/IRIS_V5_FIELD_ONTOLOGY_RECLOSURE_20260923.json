@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_FSTAR__MORPHOLOGY_CLOSED__ZERO_SURFACE_OWNER_DIAGNOSTIC_AUTHORIZED",
+  "status": "FROZEN_FSTAR__ZERO_SURFACE_OWNER_CLOSED__LONG_HORIZON_LOW_LR_AUTHORIZED",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -152,6 +152,28 @@
       ],
       "uniform_erosion_closes_p999": false,
       "conclusion": "NOT_UNIFORM_LOCAL_BOUNDARY_ONLY__FIELD_SPACE_OWNER_DIAGNOSTIC_REQUIRED"
+    },
+    "zero_surface_owner": {
+      "closure": "canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_CLOSURE_20260924.json",
+      "run_id": "20260924T114349Z",
+      "result_sha256": "45788db74ec1f653ea3f3a529ffff5c9654dc1589b6d897e5c8ce546a76996b3",
+      "network_vertex_abs_p95_range": [
+        0.000024594366550445557,
+        0.0000302046537399292
+      ],
+      "canonical_fstar_vertex_abs_p95_range": [
+        0.006640445324592292,
+        0.010620034579187627
+      ],
+      "target_over_network_p95_ratio_range": [
+        223.2256074247654,
+        431.80760754316856
+      ],
+      "centroid_over_vertex_target_p95_ratio_range": [
+        0.9939740964653168,
+        1.003307789268468
+      ],
+      "dominant_residual_owner": "LEARNED_FIELD_ZERO_LEVEL_SET_DISPLACEMENT_RELATIVE_TO_CANONICAL_FSTAR"
     }
   },
   "active_field_ontology": {
@@ -193,21 +215,35 @@
     ]
   },
   "training_authorization": {
-    "authorized": false,
-    "prior_authorized_arm": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json",
-    "prior_arm_closure": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json",
-    "shell_compatibility_closure": "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json",
-    "corrected_decoder_stage13_preregistration": "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json",
-    "blockers": [
-      "CLOSE_ZERO_SURFACE_OWNER_DIAGNOSTIC_BEFORE_LONG_HORIZON"
+    "authorized": true,
+    "scope": "KNIGHT_FIT1__TP64__A0_B_C_D_LONG_HORIZON_LOW_LR_ONLY",
+    "preregistration": "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json",
+    "owner_closure": "canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_CLOSURE_20260924.json",
+    "objective_closure": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json",
+    "code_repo_commit": "54a18d5353c6d39f383b823c019c25336fbadaef",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_LONG_HORIZON_LOW_LR_RUN_ALL.ipynb",
+    "notebook_sha256": "ef2dde3de7b97af5d7da7d1782ebac72b3e9a83f07daf0fafe8c04c27bc1cc4d",
+    "required_arms": [
+      "A0_CONTINUE_DIRECT_FSTAR_ONLY",
+      "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
+      "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+      "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE"
     ],
+    "continuation_steps_per_arm": 9600,
+    "evaluation_every_steps": 400,
+    "learning_rate": 0.00002,
+    "eta_min": 0.000001,
+    "fresh_optimizer_restart": true,
+    "selected_checkpoint_optimizer_scheduler_state_required": true,
     "architecture_change_authorized": false,
     "spatial_resolution_change_authorized": false,
     "regularity_loss_change_authorized": false,
+    "objective_change_authorized": false,
+    "decoder_change_authorized": false,
+    "stage13_threshold_change_authorized": false,
     "exact_r512_and_stage13_checkpoint_selection_blind": true,
-    "note": "Training remains blocked. Morphology showed the Stage13 error is not a uniform local boundary dilation and includes remote >16px false positives in BASE and D. Zero-surface owner attribution is required before another optimizer step.",
-    "corrected_decoder_stage13_closure": "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_CLOSURE_20260924.json",
-    "morphology_closure": "canonical/IRIS_V5_STAGE13_FROZEN_MASK_MORPHOLOGY_CLOSURE_20260924.json"
+    "one_time_under_frozen_prereg": true,
+    "disposition": "AUTHORIZED_ONCE__CLOSE_RESULT_BEFORE_ANY_SPATIAL_OR_REPRESENTATION_CHANGE"
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",
@@ -249,18 +285,29 @@
     "disposition": "CLOSED__NO_FURTHER_EXECUTION_UNDER_THIS_PREREG"
   },
   "zero_surface_owner_diagnostic_authorization": {
-    "authorized": true,
-    "scope": "KNIGHT_FIT1__FIVE_FROZEN_STAGE12_MESHES__EVERY_VERTEX_NET_AND_FSTAR__EVERY_TRIANGLE_CENTROID_FSTAR",
+    "authorized": false,
+    "completed_scope": "KNIGHT_FIT1__FIVE_FROZEN_STAGE12_MESHES__EVERY_VERTEX_NET_AND_FSTAR__EVERY_TRIANGLE_CENTROID_FSTAR",
     "preregistration": "canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_PREREG_20260924.json",
-    "diagnostic_repo_commit": "0b29e55b2270c5c6a12b93ed4c7956bf271c7ea4",
-    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_RUN_ALL.ipynb",
-    "notebook_sha256": "e9b5ca62c42113c022ce35767e8326da86ee757799b4bc85b4d007fd80e5315b",
-    "optimizer_steps_permitted": 0,
-    "parameter_updates_permitted": 0,
-    "rerasterization_permitted": false,
-    "checkpoint_selection_permitted": false,
-    "automatic_owner_selection": false,
-    "automatic_training_authorization": false,
-    "disposition": "AUTHORIZED_ONCE_UNDER_FROZEN_PREREG__CLOSE_BEFORE_ANY_TRAINING"
+    "closure": "canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_CLOSURE_20260924.json",
+    "run_id": "20260924T114349Z",
+    "optimizer_steps_executed": 0,
+    "parameter_updates_executed": 0,
+    "disposition": "CLOSED__LEARNED_FIELD_ZERO_SET_DISPLACEMENT_DOMINANT__NO_FURTHER_EXECUTION_UNDER_THIS_PREREG"
+  },
+  "long_horizon_training_authorization": {
+    "authorized": true,
+    "preregistration": "canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json",
+    "notebook_sha256": "ef2dde3de7b97af5d7da7d1782ebac72b3e9a83f07daf0fafe8c04c27bc1cc4d",
+    "code_repo_commit": "54a18d5353c6d39f383b823c019c25336fbadaef",
+    "arms": [
+      "A0_CONTINUE_DIRECT_FSTAR_ONLY",
+      "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
+      "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+      "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE"
+    ],
+    "continuation_steps_per_arm": 9600,
+    "exact_r512_and_stage13_selection_blind": true,
+    "optimizer_scheduler_state_must_be_saved": true,
+    "automatic_next_gate": false
   }
 }

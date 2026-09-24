@@ -37,6 +37,8 @@ on:
       - 'canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json'
       - 'canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_V2_20260924.json'
       - 'canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_CLOSURE_20260924.json'
+      - 'canonical/KNIGHT_INVESTOR_DEMO_FALLBACK_C_20260924.json'
+      - 'canonical/IRIS_V5_C_SPATIAL_RISK_REPLAY_DEMO_FAST_TRACK_PREREG_20260924.json'
       - '.github/workflows/iris_v5_source_field_contract.yml'
   workflow_dispatch:
 
@@ -120,6 +122,8 @@ jobs:
           field_diag_amend=json.loads(Path('canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json').read_text())
           field_diag_amend2=json.loads(Path('canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_V2_20260924.json').read_text())
           field_diag_closure=json.loads(Path('canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_CLOSURE_20260924.json').read_text())
+          demo_prereg=json.loads(Path('canonical/IRIS_V5_C_SPATIAL_RISK_REPLAY_DEMO_FAST_TRACK_PREREG_20260924.json').read_text())
+          demo_fallback=json.loads(Path('canonical/KNIGHT_INVESTOR_DEMO_FALLBACK_C_20260924.json').read_text())
           assert prereg['status']=='FROZEN_BEFORE_OPTIMIZER_STEP_1'
           assert prereg['execution']['repo_commit']=='4de08a779199d64b60b0d1aae3512a0f77e77c77'
           assert prereg['optimizer']['primary_objective']['type']=='SMOOTH_L1_DIRECT_FSTAR_ONLY'
@@ -238,6 +242,14 @@ jobs:
           assert field_diag_closure['hypotheses']['H2_VIEW_SWITCH_RIDGE']['disposition'].startswith('NOT_SUPPORTED')
           assert field_diag_closure['hypotheses']['H3_REPLAY_STALENESS']['disposition'].startswith('SUPPORTED_DESCRIPTIVELY')
           assert field_diag_closure['hypotheses']['H4_GRADIENT_COMPETITION']['disposition'].startswith('NOT_SUPPORTED')
+          assert demo_prereg['status']=='FROZEN_BEFORE_DEMO_FAST_TRACK_OPTIMIZER_STEP_1'
+          assert demo_prereg['execution']['repo_commit']=='9efef7087952f27ef72f4a68ef436e32d23599a4'
+          assert demo_prereg['execution']['notebook_sha256']=='ed40ea5093034b308ee0f186bf9a5da24da8a8cec0e665a846c42d592878573f'
+          assert demo_prereg['training']['continuation_steps']==6000
+          assert demo_prereg['intervention']['risk_bank_size']==32768
+          assert demo_prereg['post_selection_demo_qualification']['r512_executed'] is False
+          assert demo_fallback['status']=='DEMO_FALLBACK_ELIGIBLE__NOT_PRODUCT_QUALIFIED'
+          assert demo_fallback['source']['checkpoint_sha256']=='222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0'
           diag=ontology['diagnostic_authorization']
           assert diag['authorized'] is False
           assert diag['completed_scope']=='KNIGHT_FIT1__FIVE_FROZEN_STATES__EXTERIOR_DECODER_SHELL_COMPATIBILITY_ONLY'
@@ -277,6 +289,13 @@ jobs:
           assert field_diag['run_id']=='20260924T143047Z'
           assert field_diag['optimizer_steps_executed']==0
           assert field_diag['parameter_updates_executed']==0
+          demo=ontology['demo_fast_track_training_authorization']
+          assert demo['authorized'] is True
+          assert demo['scope']=='KNIGHT_FIT1__C_ONLY__SPATIAL_RISK_REPLAY__INVESTOR_DEMO_FAST_TRACK'
+          assert demo['execution_repo_commit']=='9efef7087952f27ef72f4a68ef436e32d23599a4'
+          assert demo['notebook_sha256']=='ed40ea5093034b308ee0f186bf9a5da24da8a8cec0e665a846c42d592878573f'
+          assert demo['continuation_steps']==6000
+          assert demo['product_authority'] is False
           bridge=ontology['h1_h3_bridge_diagnostic_authorization']
           assert bridge['authorized'] is False
           assert bridge['status']=='REQUIRES_SEPARATE_PREREGISTRATION'

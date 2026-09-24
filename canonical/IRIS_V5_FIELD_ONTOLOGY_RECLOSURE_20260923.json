@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_FSTAR__FIELD_FAILURE_DIAGNOSTIC_CLOSED__H1_H3_BRIDGE_REQUIRED",
+  "status": "FROZEN_FSTAR__FIELD_FAILURE_CLOSED__DEMO_FAST_TRACK_ACTIVE__H1_H3_BRIDGE_STILL_REQUIRED",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -359,5 +359,29 @@
     "optimizer_steps_permitted": 0,
     "parameter_updates_permitted": 0,
     "automatic_training_authorization": false
+  },
+  "demo_fast_track_training_authorization": {
+    "authorized": true,
+    "scope": "KNIGHT_FIT1__C_ONLY__SPATIAL_RISK_REPLAY__INVESTOR_DEMO_FAST_TRACK",
+    "preregistration": "canonical/IRIS_V5_C_SPATIAL_RISK_REPLAY_DEMO_FAST_TRACK_PREREG_20260924.json",
+    "execution_repo_commit": "9efef7087952f27ef72f4a68ef436e32d23599a4",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_C_SPATIAL_RISK_REPLAY_DEMO_RUN_ALL.ipynb",
+    "notebook_sha256": "ed40ea5093034b308ee0f186bf9a5da24da8a8cec0e665a846c42d592878573f",
+    "start_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+    "continuation_steps": 6000,
+    "eval_every_steps": 500,
+    "risk_bank_size": 32768,
+    "risk_gradient_floor": 0.5,
+    "learning_rate": 0.00001,
+    "eta_min": 0.000001,
+    "objective_change_authorized": false,
+    "architecture_change_authorized": false,
+    "representation_change_authorized": false,
+    "stage13_feedback_to_training_forbidden": true,
+    "r512_feedback_to_training_forbidden": true,
+    "product_authority": false,
+    "fallback_manifest": "canonical/KNIGHT_INVESTOR_DEMO_FALLBACK_C_20260924.json",
+    "one_time_under_frozen_prereg": true,
+    "disposition": "AUTHORIZED_ONCE_FOR_DEMO_CANDIDATE__DO_NOT_INTERPRET_AS_H1_H3_SCIENTIFIC_CLOSURE"
   }
 }

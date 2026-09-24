@@ -272,6 +272,19 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert diag2["run_id"] == "20260924T143047Z"
     assert diag2["optimizer_steps_executed"] == 0
     assert diag2["parameter_updates_executed"] == 0
+
+    demo = ontology["demo_fast_track_training_authorization"]
+    assert demo["authorized"] is True
+    assert demo["scope"] == "KNIGHT_FIT1__C_ONLY__SPATIAL_RISK_REPLAY__INVESTOR_DEMO_FAST_TRACK"
+    assert demo["preregistration"] == "canonical/IRIS_V5_C_SPATIAL_RISK_REPLAY_DEMO_FAST_TRACK_PREREG_20260924.json"
+    assert demo["execution_repo_commit"] == "9efef7087952f27ef72f4a68ef436e32d23599a4"
+    assert demo["notebook_sha256"] == "ed40ea5093034b308ee0f186bf9a5da24da8a8cec0e665a846c42d592878573f"
+    assert demo["continuation_steps"] == 6000
+    assert demo["risk_bank_size"] == 32768
+    assert demo["objective_change_authorized"] is False
+    assert demo["representation_change_authorized"] is False
+    assert demo["stage13_feedback_to_training_forbidden"] is True
+    assert demo["product_authority"] is False
     bridge = ontology["h1_h3_bridge_diagnostic_authorization"]
     assert bridge["authorized"] is False
     assert bridge["status"] == "REQUIRES_SEPARATE_PREREGISTRATION"

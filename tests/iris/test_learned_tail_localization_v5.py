@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import numpy as np
 
-from models.iris.v5.indexed_sparse_tetra_decoder_v5 import SparseRegularTetraPolicyV5
+from models.iris.v5.indexed_sparse_tetra_decoder_v5 import (
+    SparseRegularTetraPolicyV5,
+    boundary_parent_cells_v5,
+    count_sparse_mt_v5,
+    fine_positions_from_gids_v5,
+    fine_vertex_gids_v5,
+)
 from models.iris.v5.learned_tail_localization_v5 import (
     LearnedTailLocalizationPolicyV5,
     deterministic_top_residual_indices_v5,
@@ -11,6 +17,7 @@ from models.iris.v5.learned_tail_localization_v5 import (
     spatial_concentration_v5,
     target_abs_band_counts_v5,
     uniform_spatial_bin_ids_v5,
+    boundary_crossing_tetra_localization_v5,
 )
 
 
@@ -78,3 +85,28 @@ def test_decoder_policy_still_frozen_512_1024():
     p=SparseRegularTetraPolicyV5()
     assert p.base_cells==512
     assert p.fine_cells==1024
+
+
+def test_boundary_crossing_localization_matches_independent_mt_count():
+    p=SparseRegularTetraPolicyV5(
+        base_cells=2,
+        fine_cells=4,
+        query_chunk=128,
+        cell_chunk=2,
+        fine_gid_cell_chunk=2,
+    )
+    refined=np.asarray(
+        [(i,j,k) for i in range(2) for j in range(2) for k in range(2)],
+        dtype=np.int32,
+    )
+    boundary=boundary_parent_cells_v5(refined,policy=p)
+    gids=fine_vertex_gids_v5(refined,policy=p)
+    pos=fine_positions_from_gids_v5(gids,fine_cells=p.fine_cells)
+    scalar=pos[:,0].astype(np.float32)
+    count=count_sparse_mt_v5(refined,gids,scalar,boundary,policy=p)
+    loc=boundary_crossing_tetra_localization_v5(
+        refined,gids,scalar,boundary,policy=p
+    )
+    assert len(loc["parent_index"])==count["boundary_crossing_tets"]
+    assert len(loc["tet_center_normalized"])==count["boundary_crossing_tets"]
+    assert loc["tet_vertex_scalar"].shape==(count["boundary_crossing_tets"],4)

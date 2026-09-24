@@ -1,0 +1,165 @@
+{
+  "schema": "RealSaS.IRIS.V5Stage13FrozenMaskMorphologyClosure.v1",
+  "status": "CLOSED__NOT_UNIFORM_LOCAL_BOUNDARY_ONLY__REMOTE_FP_EXISTS__POSTHOC_EROSION_REJECTED_AS_SOLUTION__FIELD_SPACE_OWNER_DIAGNOSTIC_REQUIRED",
+  "date_utc": "2026-09-24",
+  "run_id": "20260924T113134Z",
+  "preregistration": "canonical/IRIS_V5_STAGE13_FROZEN_MASK_MORPHOLOGY_PREREG_20260924.json",
+  "execution": {
+    "diagnostic_repo_commit": "ba4fcb6b3320f1590583e75d85d485aa01d7dc90",
+    "code_ci_run_id": 35992552613,
+    "notebook_sha256": "76f2feb13ee136350ea348a52d577597a40b3dc8dadd250016bafd14617d4d56",
+    "optimizer_steps_executed": 0,
+    "parameter_updates_executed": 0,
+    "rerasterization_executed": false,
+    "checkpoint_selection_executed": false,
+    "stage13_feedback_to_model": false
+  },
+  "artifact_integrity": {
+    "result_sha256": "cd3c5d770769f4dea6e7d4c1e6491f10c60f4b264ee7eb80f91837fb40b6679f",
+    "input_authority_sha256": "e73060e7c513e8f5c59b328c872e8e3feb2765745ebb186de16186193b190ac8",
+    "artifact_manifest_sha256": "91c0cf0d8eedfcb5c4779bea9c9aafe186639001154c5cc46df14ed2f7a99e6c",
+    "output_sync_report_sha256": "44453141a03c0df8a69e9ff37cfa5d7665a082e4bd9ddf3f113a8f3f71a674b5",
+    "completion_marker_last": true,
+    "sync_ok": true
+  },
+  "preregistered_flags": {
+    "LOCAL_FP_8PX_ALL_VIEWS": false,
+    "REMOTE_FP_GT16PX_SIGNIFICANT": true
+  },
+  "remote_fp_state_views": [
+    {
+      "state": "BASE",
+      "view_index": 1,
+      "fp_beyond_16px_fraction": 0.02728439974320565,
+      "fp_p95_px": 11.40175425099138,
+      "fp_max_px": 31.064449134018133,
+      "predicted_component_count": 3,
+      "source_component_count": 1
+    },
+    {
+      "state": "BASE",
+      "view_index": 3,
+      "fp_beyond_16px_fraction": 0.027967603138445964,
+      "fp_p95_px": 13,
+      "fp_max_px": 45.880278987817846,
+      "predicted_component_count": 2,
+      "source_component_count": 1
+    },
+    {
+      "state": "BASE",
+      "view_index": 5,
+      "fp_beyond_16px_fraction": 0.027287319422150885,
+      "fp_p95_px": 11.40175425099138,
+      "fp_max_px": 31.064449134018133,
+      "predicted_component_count": 3,
+      "source_component_count": 1
+    },
+    {
+      "state": "BASE",
+      "view_index": 7,
+      "fp_beyond_16px_fraction": 0.02797822509178377,
+      "fp_p95_px": 13,
+      "fp_max_px": 45.880278987817846,
+      "predicted_component_count": 2,
+      "source_component_count": 1
+    },
+    {
+      "state": "D",
+      "view_index": 1,
+      "fp_beyond_16px_fraction": 0.013097072419106317,
+      "fp_p95_px": 5.830951894845301,
+      "fp_max_px": 28.231188426986208,
+      "predicted_component_count": 2,
+      "source_component_count": 1
+    },
+    {
+      "state": "D",
+      "view_index": 5,
+      "fp_beyond_16px_fraction": 0.013107170393215111,
+      "fp_p95_px": 5.830951894845301,
+      "fp_max_px": 28.231188426986208,
+      "predicted_component_count": 2,
+      "source_component_count": 1
+    }
+  ],
+  "state_summary": {
+    "BASE": {
+      "min_precision": 0.9499938468782271,
+      "min_recall": 0.9847860450927647,
+      "min_fp_within_8px_fraction": 0.8801114065071528,
+      "max_fp_beyond_16px_fraction": 0.02797822509178377,
+      "max_fp_p95_px": 13,
+      "max_fn_p95_px": 16.101191507918173,
+      "views_with_component_count_mismatch": 8
+    },
+    "A0": {
+      "min_precision": 0.9565757070884748,
+      "min_recall": 0.9955859254078719,
+      "min_fp_within_8px_fraction": 0.9764089121887287,
+      "max_fp_beyond_16px_fraction": 0,
+      "max_fp_p95_px": 6.082762530298219,
+      "max_fn_p95_px": 6,
+      "views_with_component_count_mismatch": 0
+    },
+    "B": {
+      "min_precision": 0.9641320422653025,
+      "min_recall": 0.9963712867314064,
+      "min_fp_within_8px_fraction": 0.9564494178133979,
+      "max_fp_beyond_16px_fraction": 0.0055975794251134645,
+      "max_fp_p95_px": 7.615773105863909,
+      "max_fn_p95_px": 5,
+      "views_with_component_count_mismatch": 2
+    },
+    "C": {
+      "min_precision": 0.963690750422317,
+      "min_recall": 0.9974490088396143,
+      "min_fp_within_8px_fraction": 0.9920419254658385,
+      "max_fp_beyond_16px_fraction": 0,
+      "max_fp_p95_px": 4.123105625617661,
+      "max_fn_p95_px": 4,
+      "views_with_component_count_mismatch": 0
+    },
+    "D": {
+      "min_precision": 0.9700100280651218,
+      "min_recall": 0.9969674734295639,
+      "min_fp_within_8px_fraction": 0.9778334618350039,
+      "max_fp_beyond_16px_fraction": 0.013107170393215111,
+      "max_fp_p95_px": 5.830951894845301,
+      "max_fn_p95_px": 4,
+      "views_with_component_count_mismatch": 4
+    }
+  },
+  "erosion_diagnostic": {
+    "radii_px": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "any_state_has_radius_meeting_min_precision_and_min_recall_p999": false,
+    "disposition": "DIAGNOSTIC_ONLY__UNIFORM_POSTHOC_EROSION_DOES_NOT_CLOSE_P999_AND_IS_NOT_AUTHORIZED_AS_PRODUCT_FIX"
+  },
+  "interpretation": {
+    "local_boundary_only_hypothesis": "FALSIFIED_AS_GLOBAL_EXPLANATION",
+    "remote_or_topological_false_positive_geometry": "SUPPORTED_IN_BASE_AND_D",
+    "C_is_mostly_local_but_not_uniformly_correctable": true,
+    "opposed_view_pair_symmetry": "VERY_HIGH__ERROR_IS_REPRODUCIBLE_NOT_RANDOM_VIEW_NOISE",
+    "long_horizon_authorized": false,
+    "boundary_calibration_only_authorized": false,
+    "representation_change_authorized": false,
+    "threshold_change_authorized": false,
+    "next_required_question": "DO_EXTRACTED_ZERO_SURFACE_POINTS_LIE_ON_CANONICAL_FSTAR_ZERO_AND_ON_THE_FROZEN_NETWORK_ZERO_LEVEL__SEPARATE_LEARNED_FIELD_FROM_MT_INTERPOLATION_OR_TRIANGLE_GEOMETRY_OWNER"
+  },
+  "claim_boundary": [
+    "The frozen Stage13 error is not explained by a uniform <=8px outward silhouette displacement in all state/view pairs.",
+    "Remote >16px false-positive pixels occur in BASE and D under the preregistered >1% criterion.",
+    "Uniform prediction erosion from 0-8px does not simultaneously satisfy P999 precision and recall for any state.",
+    "This result does not prove whether the learned field, marching-tetra interpolation, or triangle geometry owns the residual.",
+    "No training or representation change is authorized by this closure."
+  ]
+}

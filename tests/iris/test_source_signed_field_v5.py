@@ -234,7 +234,14 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
         assert auth["blockers"] == []
     else:
         assert auth["prior_arm_closure"] == "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_CLOSURE_20260923.json"
+        assert auth["diagnostic_closure"] == "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json"
         assert auth["blockers"] == [
-            "LOCALIZE_LEARNED_SIGN_AND_ZERO_SET_TAIL",
-            "FREEZE_NEXT_LEARNED_OWNER_EXPERIMENT_PREREGISTRATION",
+            "FREEZE_CAUSAL_TAIL_REPAIR_ABLATION_PREREGISTRATION",
+            "FREEZE_CAUSAL_TAIL_REPAIR_RUN_ALL_NOTEBOOK",
         ]
+        diag = ontology["diagnostic_authorization"]
+        assert diag["authorized"] is False
+        assert diag["closure"] == "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json"
+        assert diag["optimizer_steps_executed"] == 0
+        assert diag["parameter_updates_executed"] == 0
+        assert diag["stage13_qualification_executed"] is False

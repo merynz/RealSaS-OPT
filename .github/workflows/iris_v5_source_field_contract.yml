@@ -18,6 +18,7 @@ on:
       - 'canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_PREREG_20260924.json'
       - 'canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json'
       - 'canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json'
+      - 'canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json'
       - '.github/workflows/iris_v5_source_field_contract.yml'
   workflow_dispatch:
 
@@ -118,16 +119,16 @@ jobs:
           assert diag['stage13_qualification_executed'] is False
 
           auth=ontology['training_authorization']
-          assert auth['authorized'] is True
-          assert auth['authorization_scope']=='KNIGHT_FIT1__TP64_OBJECTIVE_CAUSAL_ABLATION__FOUR_FROZEN_CONTINUATION_ARMS'
-          assert auth['preregistration']=='canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json'
-          assert auth['execution_repo_commit']=='df260b8e1423927d7df8873f80b2b82ab376a77b'
-          assert auth['notebook_sha256']=='b469a617867e3e6e76c344a833568b9ed3d631039fcdb2010b30659e4f237fbb'
-          assert auth['exact_r512_audit_lattice_points_forbidden_from_training'] is True
-          assert auth['exact_r512_and_stage13_checkpoint_selection_blind'] is True
+          assert auth['authorized'] is False
+          assert auth['prior_authorized_arm']=='canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json'
+          assert auth['prior_arm_closure']=='canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json'
+          assert auth['blockers']==[
+              'FREEZE_TP64_LONG_HORIZON_LOW_LR_CONTINUATION_PREREGISTRATION',
+              'FREEZE_TP64_LONG_HORIZON_LOW_LR_RUN_ALL_NOTEBOOK',
+          ]
           assert auth['architecture_change_authorized'] is False
           assert auth['spatial_resolution_change_authorized'] is False
-          assert auth['blockers']==[]
+          assert auth['exact_r512_and_stage13_checkpoint_selection_blind'] is True
 
           c=target['exact_target_contract']
           assert c['required_view_count']==8

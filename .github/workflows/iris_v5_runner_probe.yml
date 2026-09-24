@@ -13,25 +13,26 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Probe GPU and known authority paths
+      - name: Probe known authority paths
         shell: bash
         run: |
           set -euo pipefail
-          nvidia-smi || true
-          python3 - <<'PY'
-          from pathlib import Path
-          import torch
-          print("cuda_available", torch.cuda.is_available())
-          if torch.cuda.is_available():
-              print("gpu", torch.cuda.get_device_name(0))
-              print("vram_gib", torch.cuda.get_device_properties(0).total_memory/2**30)
-          root=Path.home()/"realsas_authority"
-          print("authority_root_exists", root.exists())
-          for rel in [
-              "RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1/20260924T115953Z/V5_TP64_LONG_HORIZON_LOW_LR",
-              "RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1/20260923T212708Z/V5_TP64_DIRECT_FSTAR_FIT",
-              "RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip",
-          ]:
-              p=root/rel
-              print(rel, p.exists())
-          PY
+          echo "HOME=$HOME"
+          ROOT="$HOME/realsas_authority/RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1"
+          for P in \
+            "$ROOT/SUBJECT2_KNIGHT_V1_STAGE08_PREFIT_EVIDENCE.zip" \
+            "$ROOT/20260923T212708Z/V5_TP64_DIRECT_FSTAR_FIT/IRIS_V5_TP64_DIRECT_FSTAR_SELECTED.pt" \
+            "$ROOT/20260923T212708Z/V5_TP64_DIRECT_FSTAR_FIT/FROZEN_FSTAR_QUERY_POOLS.npz" \
+            "$ROOT/20260924T115953Z/V5_TP64_LONG_HORIZON_LOW_LR/V5_TP64_LONG_HORIZON_LOW_LR_RESULT.json" \
+            "$ROOT/20260924T115953Z/V5_TP64_LONG_HORIZON_LOW_LR/FOUNDATION_AND_COMMON_BASE.json" \
+            "$ROOT/20260924T115953Z/V5_TP64_LONG_HORIZON_LOW_LR/arms/B/SELECTED_CHECKPOINT.pt" \
+            "$ROOT/20260924T115953Z/V5_TP64_LONG_HORIZON_LOW_LR/arms/B/IRIS_SIGNED_ZERO_SURFACE.npz" \
+            "$ROOT/20260924T115953Z/V5_TP64_LONG_HORIZON_LOW_LR/arms/C/SELECTED_CHECKPOINT.pt" \
+            "$ROOT/20260924T115953Z/V5_TP64_LONG_HORIZON_LOW_LR/arms/C/IRIS_SIGNED_ZERO_SURFACE.npz"
+          do
+            if [ -f "$P" ]; then
+              stat -c 'FOUND %n %s' "$P"
+            else
+              echo "MISSING $P"
+            fi
+          done

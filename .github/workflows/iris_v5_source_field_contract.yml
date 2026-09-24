@@ -221,7 +221,7 @@ jobs:
           assert field_diag_amend['amended_H3']['exact_training_bank_overlap_claimed'] is False
           assert field_diag_amend['amended_execution']['diagnostic_repo_commit']=='fd7ee14764f0d0be04b37349fac99825936c57a2'
           assert field_diag_amend['amended_execution']['code_ci_run_id']==36009727585
-          assert field_diag_amend['amended_execution']['notebook_sha256']=='250d3a4a4b2520aeb0d832ab13e0837565033416f48805c668d2367ca6a29b89'
+          assert field_diag_amend['amended_execution']['notebook_sha256']=='d988f57eb121865dd850a7b5514c0ff112235cd911acb4966e4618e356c0b3d2'
           diag=ontology['diagnostic_authorization']
           assert diag['authorized'] is False
           assert diag['completed_scope']=='KNIGHT_FIT1__FIVE_FROZEN_STATES__EXTERIOR_DECODER_SHELL_COMPATIBILITY_ONLY'
@@ -261,7 +261,7 @@ jobs:
           assert field_diag['preregistration_amendment']=='canonical/IRIS_V5_FIELD_FAILURE_DIAGNOSTIC_PREREG_AMENDMENT_20260924.json'
           assert field_diag['diagnostic_repo_commit']=='fd7ee14764f0d0be04b37349fac99825936c57a2'
           assert field_diag['code_ci_run_id']==36009727585
-          assert field_diag['notebook_sha256']=='250d3a4a4b2520aeb0d832ab13e0837565033416f48805c668d2367ca6a29b89'
+          assert field_diag['notebook_sha256']=='d988f57eb121865dd850a7b5514c0ff112235cd911acb4966e4618e356c0b3d2'
           assert field_diag['exact_historical_replay_bank_overlap_claimed'] is False
           assert field_diag['optimizer_steps_permitted']==0
           assert field_diag['parameter_updates_permitted']==0

@@ -49,3 +49,19 @@ jobs:
           fi
 
           if command -v gdrive >/dev/null 2>&1; then echo "GDRIVE_CLI_INSTALLED=1"; else echo "GDRIVE_CLI_INSTALLED=0"; fi
+
+          echo "== WSL Windows/Drive mounts =="
+          for d in /mnt/g /mnt/h /mnt/i /mnt/j; do
+            if [ -d "$d" ]; then
+              echo "MOUNT_PRESENT=$d"
+              for candidate in                 "$d/My Drive/RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1"                 "$d/Benim Drive'ım/RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1"                 "$d/RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1"; do
+                if [ -d "$candidate" ]; then echo "KNIGHT_DRIVE_ROOT=$candidate"; fi
+              done
+            fi
+          done
+          for userroot in /mnt/c/Users/*; do
+            [ -d "$userroot" ] || continue
+            for candidate in               "$userroot/My Drive/RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1"               "$userroot/Google Drive/My Drive/RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1"; do
+              if [ -d "$candidate" ]; then echo "KNIGHT_DRIVE_ROOT=$candidate"; fi
+            done
+          done

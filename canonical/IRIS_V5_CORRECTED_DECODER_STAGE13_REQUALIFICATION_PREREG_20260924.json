@@ -1,0 +1,111 @@
+{
+  "schema": "RealSaS.IRIS.V5CorrectedDecoderStage13RequalificationPreregistration.v1",
+  "status": "FROZEN_BEFORE_REQUALIFICATION_EXECUTION",
+  "date_utc": "2026-09-24",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "purpose": "Requalify five already-selected Knight FIT1 V5 learned fields after correcting the falsified conservative sparse-shell truncation proxy, using exact carrier-boundary containment and the unchanged frozen Stage13 P999 gate.",
+  "parents": {
+    "objective_ablation_closure": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json",
+    "shell_compatibility_closure": "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json"
+  },
+  "execution": {
+    "code_repo_commit": "b39b5f13e2657553692c7a8b27db62b20332e279",
+    "code_ci_workflow": "iris-v5-source-field-contract",
+    "code_ci_run_id": 35986938283,
+    "code_ci_conclusion": "success",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_RUN_ALL.ipynb",
+    "notebook_sha256": "ec59aba793814dff39dfa5fbda2496ae565a459f82080070be5ee1efd981b7a8",
+    "notebook_outputs_required_initially_empty": true,
+    "notebook_execution_counts_required_initially_null": true,
+    "required_accelerator": "A100_CLASS__VRAM_GTE_30_GIB",
+    "optimizer_steps_permitted": 0,
+    "parameter_updates_permitted": 0
+  },
+  "frozen_inputs": {
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "observation_set_binding_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+    "normalization_binding_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23",
+    "objective_result_sha256": "ddadbe4c10180e5d6f73a7f47cf88a816820d096e4f311a4b8abf1a83dc1dc04",
+    "shell_compat_result_sha256": "4c23ff9cf02779bf3d022808e84dad0e962b0faad587c33faa917d9283c5016b",
+    "checkpoints": {
+      "BASE": "45de860757ddb6f65afcecb7fdc9f51ef4aef2aeaf598288459a0e5bfa1ec751",
+      "A0": "2d2026f8d54cea27166d24a1c75dc8d9023756a6255f845b2ec0293a71863471",
+      "B": "9ff4583567470dd1f3c6806db3778f25ca97b8ec0e6431065b2e8973f21718ce",
+      "C": "988dd2a614a7e0632938e69d54abdbd96544a010c650ba8cf05f979ca86891b3",
+      "D": "3ac74e0f841f665f52774f873cac82305852e7fdf60786c4f3aff55ccb1997a4"
+    },
+    "inherited_r512_nonpositive": {
+      "BASE": 85849,
+      "A0": 66909,
+      "B": 41157,
+      "C": 33240,
+      "D": 29857
+    },
+    "legacy_boundary_crossing_tets": {
+      "BASE": 436,
+      "A0": 133,
+      "B": 535,
+      "C": 422,
+      "D": 1504
+    },
+    "prior_actual_omitted_face_escape": {
+      "BASE": 0,
+      "A0": 0,
+      "B": 0,
+      "C": 0,
+      "D": 0
+    }
+  },
+  "corrected_decoder_contract": {
+    "id": "RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT.ExactShellContainment.v5_1",
+    "representation": "SPARSE_REGULAR_TETRA_UNDEFORMED",
+    "base_cells": 512,
+    "fine_cells": 1024,
+    "refine_band_change": false,
+    "geometry_extraction_change": false,
+    "legacy_boundary_crossing_tets_role": "TELEMETRY_ONLY",
+    "exact_fail_condition": "ANY_ZERO_CONTACT_ON_OMITTED_IN_DOMAIN_REFINED_NEIGHBOR_FACE_OR_GLOBAL_NORMALIZED_DOMAIN_FACE",
+    "edge_or_corner_zero_contact_policy": "FAIL_CLOSED_AS_BOUNDARY_CONTACT"
+  },
+  "stage13": {
+    "profile": "P999",
+    "thresholds": {
+      "min_recall": 0.999,
+      "min_precision": 0.999,
+      "max_largest_coherent_hole_fraction": 0.00025,
+      "max_interior_uncovered_fraction": 0.0005,
+      "min_component_recall": 0.999,
+      "component_min_foreground_fraction": 0,
+      "max_silhouette_edge_p95_px": 0.5
+    },
+    "threshold_change": false,
+    "qualification_permitted": true,
+    "checkpoint_selection_feedback_forbidden": true
+  },
+  "leakage_controls": {
+    "checkpoint_reselection_forbidden": true,
+    "objective_change_forbidden": true,
+    "r512_training_or_selection_feedback_forbidden": true,
+    "stage13_training_or_selection_feedback_forbidden": true,
+    "teacher_geometry_forbidden": true,
+    "teacher_sdf_forbidden": true,
+    "architecture_change_forbidden": true,
+    "spatial_resolution_change_forbidden": true,
+    "regularity_loss_change_forbidden": true
+  },
+  "decision_rule": {
+    "report_all_five_states": true,
+    "automatic_winner_selected": false,
+    "corrected_decoder_stage13_requalification_pass": "EXACT_CONTAINMENT_PASS_AND_INDEXED_MT_BUILD_PASS_AND_FROZEN_STAGE13_P999_PASS",
+    "full_frozen_final_qualification_pass": "INHERITED_R512_NONPOSITIVE_EQ_0_AND_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PASS",
+    "automatic_long_horizon_authorization": false,
+    "automatic_representation_change_authorization": false
+  },
+  "claim_boundary": [
+    "This experiment is Knight FIT1 requalification of five already-selected states only.",
+    "A corrected-decoder Stage13 PASS does not close exact R512 exterior sign authority.",
+    "A Stage13 FAIL does not by itself establish TP64 representation insufficiency.",
+    "No objective winner is selected by this notebook.",
+    "No result establishes FITK, unseen, or product generalization."
+  ]
+}

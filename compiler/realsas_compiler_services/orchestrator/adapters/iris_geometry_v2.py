@@ -642,6 +642,31 @@ def qualify_geometry_substrate_stage(ctx: dict) -> dict:
         },
     )
     if not value.qualification_report["every_view_passed"]:
+        demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+        if (
+            str(ctx["ledger"].get("execution_class") or "") == "DEMO_WITNESS"
+            and demo.get("allow_stage13_scientific_fail_for_demo") is True
+            and demo.get("product_authority_claimed") is False
+            and demo.get("stage13_scientific_pass") is False
+        ):
+            root = ctx["run_root"] / "artifacts" / "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+            return {
+                "status": "PASS_DEMO_ONLY",
+                "outputs": [
+                    write_ir(
+                        root / "geometry_substrate_qualification.json",
+                        value,
+                        authority_class="DEMO_ONLY_GEOMETRY_SUBSTRATE",
+                    )
+                ],
+                "diagnostics": {
+                    "scientific_pass": False,
+                    "demo_admitted": True,
+                    "per_view": [row.to_dict() for row in rows],
+                    "substrate_hash": value.substrate_hash,
+                    "product_authority_claimed": False,
+                },
+            }
         return {
             "status": "FAIL",
             "blockers": ["GEOMETRY_SUBSTRATE_QUALIFICATION_FAILED"],

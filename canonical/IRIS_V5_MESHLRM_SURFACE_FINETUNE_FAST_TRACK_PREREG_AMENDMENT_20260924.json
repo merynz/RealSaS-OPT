@@ -1,0 +1,55 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMSurfaceFineTuneFastTrackPreregAmendment.v1",
+  "status": "FROZEN_BEFORE_OPTIMIZER_STEP",
+  "date_utc": "2026-09-24",
+  "amends": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_20260924.json",
+  "reason": "Commercial-license hygiene discovered before execution: DISO is CC BY-NC 4.0 and is therefore excluded from the investor/commercial demo research lane. The scientific intervention remains extracted-mesh -> differentiable-raster -> IRIS gradient; only the apparatus implementation is replaced.",
+  "superseded_apparatus": {
+    "extractor": "DISO DiffMC",
+    "diso_commit": "9792ad928ccb09bdec938779651ee03e395758a6",
+    "rasterizer": "nvdiffrast",
+    "execution_authorized": false
+  },
+  "replacement_apparatus": {
+    "extractor": "REALSAS_FIRST_PARTY_SPARSE_DIFFERENTIABLE_MARCHING_TETRA_V1",
+    "extractor_dependency": "NONE",
+    "cube_tetrahedralization": "CONFORMING_FREUDENTHAL_6_TETS_PER_ACTIVE_CUBE",
+    "active_carrier": "CURRENT_FIELD_ZERO_CROSSING_CUBES_AT_256_GRID",
+    "differentiable_quantity": "LINEAR_ZERO_CROSSING_POSITION_WRT_ENDPOINT_FIELD_VALUES",
+    "topology_selection_gradient": "DISCRETE_NONDIFFERENTIABLE_SIGN_CASE__REFRESHED_EACH_OPTIMIZER_STEP",
+    "rasterizer": "PyTorch3D rasterize_meshes + signed-distance soft silhouette",
+    "pytorch3d_commit": "978cd99221b9e0a6a568f1d427854d73363265cf",
+    "pytorch3d_license": "BSD",
+    "source_mask_supervision": "UNCHANGED_EXACT_8_BINARY_FOREGROUND_MASKS",
+    "raster_resolution": 1024,
+    "faces_per_pixel": 8,
+    "edge_sigma_px": 1.5,
+    "training_only_not_product_authority": true
+  },
+  "preserved_contract": {
+    "grid_resolution": 256,
+    "continuation_steps": 1200,
+    "optimizer_and_lr": "UNCHANGED",
+    "frozen_c_start": "UNCHANGED",
+    "base_c_objective": "UNCHANGED",
+    "mesh_to_base_gradient_norm_calibration": "UNCHANGED",
+    "no_teacher_geometry": true,
+    "no_rgb_perceptual_loss": true,
+    "no_depth_or_normal_teacher": true,
+    "stage13_feedback_during_training": false,
+    "r512_feedback_during_training": false,
+    "final_product_decoder": "UNCHANGED_CONTAINED_T512_T1024",
+    "final_stage13": "UNCHANGED_P999",
+    "promote_only_on_final_containment_and_stage13_pass": true,
+    "fallback_on_negative": "FROZEN_C_FALLBACK"
+  },
+  "new_fail_closed_preflights": [
+    "FIRST_PARTY_DMTET_ANALYTIC_SPHERE_FORWARD_BACKWARD",
+    "SHARED_EDGE_VERTEX_DEDUP_REQUIRED",
+    "PYTORCH3D_PIN_AND_BSD_LICENSE_RECEIPT_REQUIRED",
+    "PYTORCH3D_NDC_ORIENTATION_SYNTHETIC_CALIBRATION_REQUIRED",
+    "FINITE_NONZERO_SPARSE_FIELD_GRADIENT_REQUIRED",
+    "NO_TOPK_OR_GRADIENT_SUPPORT_TRUNCATION"
+  ],
+  "scientific_interpretation": "This amendment does not add or remove a causal mechanism. It replaces a noncommercial/restrictive third-party implementation with a first-party differentiable tetra extractor and BSD rasterizer before any optimizer step."
+}

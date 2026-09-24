@@ -121,14 +121,14 @@
     "Historical negative results remain preserved as evidence under their original contracts."
   ],
   "diagnostic_authorization": {
-    "authorized": true,
-    "scope": "KNIGHT_FIT1__SELECTED_TP64_LEARNED_TAIL_LOCALIZATION_ONLY",
+    "authorized": false,
+    "completed_scope": "KNIGHT_FIT1__SELECTED_TP64_LEARNED_TAIL_LOCALIZATION_ONLY",
     "preregistration": "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_PREREG_20260924.json",
-    "diagnostic_repo_commit": "3eb635f84768c180ea6acdda920f107188ad956b",
-    "notebook_sha256": "7b7a95f3fd9b104db2cdc48394fb3d9dfb345a5277fd6bab66e8bf9ccc85d0c8",
-    "optimizer_steps_permitted": 0,
-    "parameter_updates_permitted": 0,
-    "stage13_qualification_permitted": false,
-    "training_remains_blocked": true
+    "closure": "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json",
+    "run_id": "20260924T072425Z",
+    "optimizer_steps_executed": 0,
+    "parameter_updates_executed": 0,
+    "stage13_qualification_executed": false,
+    "disposition": "DIAGNOSTIC_COMPLETE__NO_FURTHER_EXECUTION_AUTHORIZED_UNDER_THIS_PREREG"
   }
 }

@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_FSTAR__SHELL_COMPAT_CLOSED__CORRECTED_DECODER_STAGE13_REQUALIFICATION_AUTHORIZED",
+  "status": "FROZEN_FSTAR__CORRECTED_DECODER_STAGE13_FAIL_ALL__FROZEN_MASK_MORPHOLOGY_DIAGNOSTIC_AUTHORIZED",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -119,6 +119,21 @@
         "D": 1504
       },
       "conclusion": "CURRENT_BOUNDARY_CROSSING_TET_PROXY_DOES_NOT_DEMONSTRATE_SPARSE_SHELL_TRUNCATION_ON_THE_FIVE_FROZEN_KNIGHT_STATES"
+    },
+    "corrected_decoder_stage13_requalification": {
+      "closure": "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_CLOSURE_20260924.json",
+      "run_id": "20260924T103507Z",
+      "optimizer_steps_executed": 0,
+      "parameter_updates_executed": 0,
+      "exact_shell_containment_pass_states": [
+        "BASE",
+        "A0",
+        "B",
+        "C",
+        "D"
+      ],
+      "stage13_p999_pass_states": [],
+      "conclusion": "CORRECTED_CONTAINMENT_PASS_ALL_FIVE__UNCHANGED_STAGE13_P999_FAIL_ALL_FIVE"
     }
   },
   "active_field_ontology": {
@@ -166,13 +181,14 @@
     "shell_compatibility_closure": "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json",
     "corrected_decoder_stage13_preregistration": "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json",
     "blockers": [
-      "CLOSE_CORRECTED_DECODER_STAGE13_REQUALIFICATION_BEFORE_LONG_HORIZON"
+      "CLOSE_STAGE13_FROZEN_MASK_MORPHOLOGY_DIAGNOSTIC_BEFORE_LONG_HORIZON"
     ],
     "architecture_change_authorized": false,
     "spatial_resolution_change_authorized": false,
     "regularity_loss_change_authorized": false,
     "exact_r512_and_stage13_checkpoint_selection_blind": true,
-    "note": "Training remains blocked. Human review authorized a diagnostic/qualification-only corrected decoder requalification first, because the prior conservative boundary-crossing proxy was falsified and all five frozen states still lack Stage13 results."
+    "note": "Training remains blocked. Corrected decoder containment passed all five frozen Knight states, but unchanged Stage13 P999 failed all five. Frozen-mask morphology localization is authorized before any further optimizer step.",
+    "corrected_decoder_stage13_closure": "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_CLOSURE_20260924.json"
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",
@@ -193,21 +209,28 @@
     "disposition": "DIAGNOSTIC_COMPLETE__NO_FURTHER_EXECUTION_AUTHORIZED_UNDER_THIS_PREREG"
   },
   "requalification_authorization": {
-    "authorized": true,
-    "scope": "KNIGHT_FIT1__FIVE_FROZEN_STATES__CORRECTED_EXACT_SHELL_CONTAINMENT__FROZEN_STAGE13_P999",
+    "authorized": false,
+    "completed_scope": "KNIGHT_FIT1__FIVE_FROZEN_STATES__CORRECTED_EXACT_SHELL_CONTAINMENT__FROZEN_STAGE13_P999",
     "preregistration": "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json",
-    "code_repo_commit": "b39b5f13e2657553692c7a8b27db62b20332e279",
-    "code_ci_run_id": 35986938283,
-    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_RUN_ALL.ipynb",
-    "notebook_sha256": "370ce75c128e20bd503ce3a9d34b2dbe57962dc94cb48d17c694bc8a4671b2ca",
+    "closure": "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_CLOSURE_20260924.json",
+    "run_id": "20260924T103507Z",
+    "optimizer_steps_executed": 0,
+    "parameter_updates_executed": 0,
+    "disposition": "CLOSED__CONTAINMENT_PASS_ALL__STAGE13_FAIL_ALL__NO_FURTHER_EXECUTION_UNDER_THIS_PREREG"
+  },
+  "morphology_diagnostic_authorization": {
+    "authorized": true,
+    "scope": "KNIGHT_FIT1__FIVE_FROZEN_STATES__STAGE13_PREDICTED_MASK_MORPHOLOGY_ONLY",
+    "preregistration": "canonical/IRIS_V5_STAGE13_FROZEN_MASK_MORPHOLOGY_PREREG_20260924.json",
+    "diagnostic_repo_commit": "ba4fcb6b3320f1590583e75d85d485aa01d7dc90",
+    "code_ci_run_id": 35992552613,
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_STAGE13_FROZEN_MASK_MORPHOLOGY_DIAGNOSTIC_RUN_ALL.ipynb",
+    "notebook_sha256": "76f2feb13ee136350ea348a52d577597a40b3dc8dadd250016bafd14617d4d56",
     "optimizer_steps_permitted": 0,
     "parameter_updates_permitted": 0,
-    "stage13_qualification_permitted": true,
+    "rerasterization_permitted": false,
     "checkpoint_selection_permitted": false,
-    "r512_rerun_required": false,
-    "threshold_change_authorized": false,
-    "architecture_change_authorized": false,
-    "spatial_resolution_change_authorized": false,
+    "automatic_training_authorization": false,
     "disposition": "AUTHORIZED_ONCE_UNDER_FROZEN_PREREG__CLOSE_BEFORE_ANY_TRAINING"
   }
 }

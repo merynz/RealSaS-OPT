@@ -231,8 +231,9 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert auth["prior_arm_closure"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json"
     assert auth["shell_compatibility_closure"] == "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json"
     assert auth["corrected_decoder_stage13_preregistration"] == "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json"
+    assert auth["corrected_decoder_stage13_closure"] == "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_CLOSURE_20260924.json"
     assert auth["blockers"] == [
-        "CLOSE_CORRECTED_DECODER_STAGE13_REQUALIFICATION_BEFORE_LONG_HORIZON",
+        "CLOSE_STAGE13_FROZEN_MASK_MORPHOLOGY_DIAGNOSTIC_BEFORE_LONG_HORIZON",
     ]
     assert auth["architecture_change_authorized"] is False
     assert auth["spatial_resolution_change_authorized"] is False
@@ -247,14 +248,19 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
     assert diag["parameter_updates_executed"] == 0
     assert diag["stage13_qualification_executed"] is False
     requal = ontology["requalification_authorization"]
-    assert requal["authorized"] is True
-    assert requal["scope"] == "KNIGHT_FIT1__FIVE_FROZEN_STATES__CORRECTED_EXACT_SHELL_CONTAINMENT__FROZEN_STAGE13_P999"
-    assert requal["preregistration"] == "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json"
-    assert requal["code_repo_commit"] == "b39b5f13e2657553692c7a8b27db62b20332e279"
-    assert requal["code_ci_run_id"] == 35986938283
-    assert requal["notebook_sha256"] == "370ce75c128e20bd503ce3a9d34b2dbe57962dc94cb48d17c694bc8a4671b2ca"
-    assert requal["optimizer_steps_permitted"] == 0
-    assert requal["parameter_updates_permitted"] == 0
-    assert requal["stage13_qualification_permitted"] is True
-    assert requal["checkpoint_selection_permitted"] is False
-    assert requal["threshold_change_authorized"] is False
+    assert requal["authorized"] is False
+    assert requal["completed_scope"] == "KNIGHT_FIT1__FIVE_FROZEN_STATES__CORRECTED_EXACT_SHELL_CONTAINMENT__FROZEN_STAGE13_P999"
+    assert requal["closure"] == "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_CLOSURE_20260924.json"
+    assert requal["optimizer_steps_executed"] == 0
+    assert requal["parameter_updates_executed"] == 0
+    morph = ontology["morphology_diagnostic_authorization"]
+    assert morph["authorized"] is True
+    assert morph["preregistration"] == "canonical/IRIS_V5_STAGE13_FROZEN_MASK_MORPHOLOGY_PREREG_20260924.json"
+    assert morph["diagnostic_repo_commit"] == "ba4fcb6b3320f1590583e75d85d485aa01d7dc90"
+    assert morph["code_ci_run_id"] == 35992552613
+    assert morph["notebook_sha256"] == "76f2feb13ee136350ea348a52d577597a40b3dc8dadd250016bafd14617d4d56"
+    assert morph["optimizer_steps_permitted"] == 0
+    assert morph["parameter_updates_permitted"] == 0
+    assert morph["rerasterization_permitted"] is False
+    assert morph["checkpoint_selection_permitted"] is False
+    assert morph["automatic_training_authorization"] is False

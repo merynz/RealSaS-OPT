@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoExecutionState.v1",
-  "status": "PAUSED_AT_STAGE08__MESHLRM_MESH_RENDER_AWARE_A100_NOTEBOOK_V2_READY",
+  "status": "PAUSED_AT_STAGE08__MESHLRM_MESH_RENDER_AWARE_A100_NOTEBOOK_V3_READY",
   "date_utc": "2026-09-24",
   "branch": "research/vf11-certified-adaptive-20260921",
   "run": {
@@ -49,11 +49,11 @@
     "gdrive_cli_installed": false
   },
   "next_actions": [
-    "USER_RUN_REALSaS_V5_MESHLRM_SURFACE_FINETUNE_RUN_ALL_V2_FIXED_ON_A100",
-    "INGEST_EXACT_DRIVE_RESULT_AND_VERIFY_PROXY_GATE_CALIBRATION_COMPLETION_SYNC_HASHES",
+    "USER_RUN_REALSaS_V5_MESHLRM_SURFACE_FINETUNE_RUN_ALL_V3_HARD_RASTER_FIXED_ON_A100",
+    "VERIFY_PYTORCH3D_HARD_STAGE13_SEMANTIC_PARITY_AND_TRAINING_MESH_PROXY_PARITY",
+    "IF_APPARATUS_GATES_PASS_CONTINUE_MESH_AWARE_FINE_TUNE",
     "IF_FINAL_CONTAINMENT_AND_P999_STAGE13_PASS_PROMOTE_NEW_DEMO_ONLY_GEOMETRY",
-    "OTHERWISE_BIND_FROZEN_C_FALLBACK",
-    "RESUME_SAME_SUBJECT2_KNIGHT_DEMO_V2_20260924_RUN_AT_STAGE09_15"
+    "OTHERWISE_BIND_FROZEN_C_FALLBACK_AND_RESUME_SAME_KNIGHT_RUN"
   ],
   "continuation_rule": "On a future chat, read this file first. While pause is active, do not execute Stage09+ demo stages. Complete/reject the MeshLRM-style oracle, then resume the same run_id unless explicitly superseded.",
   "pause": {
@@ -65,25 +65,32 @@
     "fallback_scientific_state": "STAGE13_FAIL__DEMO_ONLY"
   },
   "mesh_render_aware_oracle": {
-    "status": "USER_ACTION_REQUIRED__RUN_A100_NOTEBOOK_V2",
-    "notebook_filename": "RealSaS_V5_MESHLRM_SURFACE_FINETUNE_RUN_ALL_V2_FIXED.ipynb",
-    "notebook_sha256": "3ab7f65bb8da77a92d3aafa915478feab3f7ae08129d86699cc231ca12a0ab25",
-    "supersedes_notebook_sha256": "2dabed0238359ff03b9862bab5fed289f39956dcce9ea666d376a301fe8b9c04",
-    "invalidated_preflight_run_id": "20260924T171641Z",
-    "invalidated_preflight_scientific_result": false,
-    "invalidated_preflight_actual_parameter_updates": 0,
-    "prereg": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_20260924.json",
-    "amendments": [
-      "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_20260924.json",
-      "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_V2_20260924.json",
-      "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_V3_20260924.json"
+    "status": "USER_ACTION_REQUIRED__RUN_A100_NOTEBOOK_V3",
+    "notebook_filename": "RealSaS_V5_MESHLRM_SURFACE_FINETUNE_RUN_ALL_V3_HARD_RASTER_FIXED.ipynb",
+    "notebook_sha256": "a7a73f716cc525082ee666c91c458f8dcd9c8ec97496dcc7101e1272ad5fbd8c",
+    "supersedes_notebook_sha256": "3ab7f65bb8da77a92d3aafa915478feab3f7ae08129d86699cc231ca12a0ab25",
+    "invalidated_attempts": [
+      {
+        "run_id": "20260924T171641Z",
+        "reason": "DMTET_EXACT_ZERO_GRID_VERTEX_UNSUPPORTED",
+        "scientific_result": false,
+        "actual_parameter_updates": 0
+      },
+      {
+        "run_id": "20260924T174446Z",
+        "reason": "TRAINING_MESH_PROXY_PRODUCT_MASK_MISMATCH__BLURRED_TOPK_HARD_RASTER_BUG",
+        "scientific_result": false,
+        "actual_parameter_updates": 0
+      }
     ],
     "repairs": [
       "FP32_MESH_FIELD_AND_VJP",
       "DETERMINISTIC_EXACT_ZERO_SYMBOLIC_TIE_BREAK",
-      "DIRECT_EQUAL_NORM_MESH_GRAD_SCALE_NO_BAD_ABSOLUTE_CLAMP",
-      "HARD_FORWARD_SOFT_BACKWARD_BOUNDARY_ONLY_RASTER_FEEDBACK",
-      "FROZEN_C_PRODUCT_MASK_PROXY_PARITY_GATE"
+      "DIRECT_EQUAL_NORM_MESH_GRAD_SCALE",
+      "SEPARATE_ZERO_BLUR_FPP1_HARD_RASTER",
+      "VISIBLE_SILHOUETTE_FACE_ONLY_SOFT_BACKWARD_SURROGATE",
+      "PYTORCH3D_HARD_VS_EXACT_STAGE13_SEMANTIC_PARITY_GATE",
+      "FROZEN_C_PRODUCT_MASK_PROXY_GATE"
     ],
     "start_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
     "final_gate": "UNCHANGED_CONTAINED_T512_T1024_PLUS_FROZEN_P999_STAGE13",

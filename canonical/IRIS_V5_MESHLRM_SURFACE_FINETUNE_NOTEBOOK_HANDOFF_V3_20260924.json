@@ -1,0 +1,29 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMSurfaceFineTuneNotebookHandoffV3.v1",
+  "status": "READY_FOR_USER_A100_RUN",
+  "date_utc": "2026-09-24",
+  "notebook": {
+    "filename": "RealSaS_V5_MESHLRM_SURFACE_FINETUNE_RUN_ALL_V3_HARD_RASTER_FIXED.ipynb",
+    "sha256": "a7a73f716cc525082ee666c91c458f8dcd9c8ec97496dcc7101e1272ad5fbd8c",
+    "code_cells": 11,
+    "static_compile_pass": true,
+    "stored_outputs": 0,
+    "stored_execution_counts": 0
+  },
+  "repo_commit_used_by_notebook": "7bed92c20057dad6226238f0c22dbf6236328e76",
+  "key_root_cause": "V2 hard occupancy was incorrectly derived from a blurred top-K fragment list. Dense-mesh nearby faces truncated the true covering face, producing ~1-3% recall with ~100% precision.",
+  "hard_forward": {
+    "blur_radius": 0,
+    "faces_per_pixel": 1
+  },
+  "soft_backward": {
+    "face_subset": "CURRENT_VISIBLE_PREDICTED_SILHOUETTE_FACES",
+    "full_internal_mesh_soft_raster": false
+  },
+  "apparatus_gates": [
+    "PYTORCH3D_HARD_VS_EXACT_STAGE13_SAMPLE_PARITY",
+    "FROZEN_C_PRODUCT_MASK_PROXY_RECALL_PRECISION_GE_0_95",
+    "EQUAL_NORM_GRAD_SCALE"
+  ],
+  "final_decision_rule": "PROMOTE only on unchanged final containment PASS + frozen P999 Stage13 every_view PASS; else frozen-C fallback."
+}

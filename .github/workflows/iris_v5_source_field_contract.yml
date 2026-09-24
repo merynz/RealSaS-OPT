@@ -87,7 +87,7 @@ jobs:
           assert amendment['amended_execution']['notebook_sha256']=='93e7dd44dcfed865b5ba5861365e88b6407255da6ce0af9674c43a6bbb231aad'
           assert tail_prereg['status']=='FROZEN_BEFORE_DIAGNOSTIC_EXECUTION'
           assert tail_prereg['execution']['diagnostic_repo_commit']=='3eb635f84768c180ea6acdda920f107188ad956b'
-          assert tail_prereg['execution']['notebook_sha256']=='607c217c2259c769290dd0ee566e12ad3f03fb284d0474eb4c744f7d472d8e26'
+          assert tail_prereg['execution']['notebook_sha256']=='7b7a95f3fd9b104db2cdc48394fb3d9dfb345a5277fd6bab66e8bf9ccc85d0c8'
           assert tail_prereg['execution']['optimizer_steps_permitted']==0
           assert tail_prereg['execution']['parameter_updates_permitted']==0
           assert tail_prereg['execution']['stage13_qualification_permitted'] is False

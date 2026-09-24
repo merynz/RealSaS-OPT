@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_FSTAR__TP64_OBJECTIVE_ABLATION_CLOSED__SHELL_COMPAT_DIAGNOSTIC_REQUIRED_BEFORE_LONG_HORIZON",
+  "status": "FROZEN_FSTAR__TP64_OBJECTIVE_ABLATION_CLOSED__SHELL_COMPAT_CLOSED__LONG_HORIZON_PREREG_REQUIRED",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -99,6 +99,26 @@
         "D": false
       },
       "convergence_closed": false
+    },
+    "exterior_decoder_shell_compatibility": {
+      "closure": "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json",
+      "run_id": "20260924T094420Z",
+      "optimizer_steps_executed": 0,
+      "actual_missing_face_zero_crossings": {
+        "BASE": 0,
+        "A0": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "conservative_boundary_crossing_tets": {
+        "BASE": 436,
+        "A0": 133,
+        "B": 535,
+        "C": 422,
+        "D": 1504
+      },
+      "conclusion": "CURRENT_BOUNDARY_CROSSING_TET_PROXY_DOES_NOT_DEMONSTRATE_SPARSE_SHELL_TRUNCATION_ON_THE_FIVE_FROZEN_KNIGHT_STATES"
     }
   },
   "active_field_ontology": {
@@ -143,14 +163,16 @@
     "authorized": false,
     "prior_authorized_arm": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json",
     "prior_arm_closure": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json",
+    "shell_compatibility_closure": "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json",
     "blockers": [
-      "RUN_AND_SEAL_EXTERIOR_DECODER_SHELL_COMPAT_DIAGNOSTIC",
-      "THEN_FREEZE_LONG_HORIZON_OR_REGULARITY_NEXT_ARM_FROM_DIAGNOSTIC_RESULT"
+      "FREEZE_LONG_HORIZON_OPTIMIZATION_EXPERIMENT_PREREGISTRATION",
+      "FREEZE_LONG_HORIZON_RUN_ALL_NOTEBOOK"
     ],
     "architecture_change_authorized": false,
     "spatial_resolution_change_authorized": false,
+    "regularity_loss_change_authorized": false,
     "exact_r512_and_stage13_checkpoint_selection_blind": true,
-    "note": "Objective ablation is closed. Long-horizon continuation and any Lipschitz/regularity arm are blocked until the conservative boundary-crossing metric is decomposed into actual omitted-face escape vs false-positive boundary-parent counts."
+    "note": "Shell compatibility diagnostic is closed. No actual omitted-face zero-set escape was found in BASE/A0/B/C/D. The conservative boundary-crossing proxy must not be interpreted as truncation proof. Long-horizon optimization is the next learned-owner experiment; any Lipschitz/Eikonal arm remains blocked."
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",
@@ -160,14 +182,14 @@
     "Historical negative results remain preserved as evidence under their original contracts."
   ],
   "diagnostic_authorization": {
-    "authorized": true,
-    "scope": "KNIGHT_FIT1__FIVE_FROZEN_STATES__EXTERIOR_DECODER_SHELL_COMPATIBILITY_ONLY",
+    "authorized": false,
+    "completed_scope": "KNIGHT_FIT1__FIVE_FROZEN_STATES__EXTERIOR_DECODER_SHELL_COMPATIBILITY_ONLY",
     "preregistration": "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_PREREG_20260924.json",
-    "notebook_name": "RealSaS_IRIS_KNIGHT_V5_EXTERIOR_DECODER_SHELL_COMPAT_DIAGNOSTIC_RUN_ALL.ipynb",
-    "notebook_sha256": "1215f809dd6f519ecf51a4eaa90aea3826f8d5123f296b511f092cf4490ba0ec",
-    "optimizer_steps_permitted": 0,
-    "parameter_updates_permitted": 0,
-    "stage13_qualification_permitted": false,
-    "training_remains_blocked": true
+    "closure": "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json",
+    "run_id": "20260924T094420Z",
+    "optimizer_steps_executed": 0,
+    "parameter_updates_executed": 0,
+    "stage13_qualification_executed": false,
+    "disposition": "DIAGNOSTIC_COMPLETE__NO_FURTHER_EXECUTION_AUTHORIZED_UNDER_THIS_PREREG"
   }
 }

@@ -1,0 +1,99 @@
+{
+  "schema": "RealSaS.IRIS.V5ZeroSurfaceOwnerDiagnosticClosure.v1",
+  "status": "CLOSED__LEARNED_FIELD_ZERO_SET_DISPLACEMENT_DOMINANT__MT_EDGE_INTERPOLATION_NOT_MATERIAL_OWNER__TRIANGLE_APPROXIMATION_NOT_MATERIAL_OWNER__LONG_HORIZON_LOW_LR_AUTHORIZED",
+  "date_utc": "2026-09-24",
+  "run_id": "20260924T114349Z",
+  "preregistration": "canonical/IRIS_V5_ZERO_SURFACE_OWNER_DIAGNOSTIC_PREREG_20260924.json",
+  "execution": {
+    "diagnostic_repo_commit": "0b29e55b2270c5c6a12b93ed4c7956bf271c7ea4",
+    "notebook_sha256": "e9b5ca62c42113c022ce35767e8326da86ee757799b4bc85b4d007fd80e5315b",
+    "optimizer_steps_executed": 0,
+    "parameter_updates_executed": 0,
+    "rerasterization_executed": false,
+    "checkpoint_selection_executed": false,
+    "teacher_geometry_used": false,
+    "stage13_feedback_to_model": false
+  },
+  "artifact_integrity": {
+    "result_sha256": "45788db74ec1f653ea3f3a529ffff5c9654dc1589b6d897e5c8ce546a76996b3",
+    "input_authority_sha256": "a8fc1acef6bb03b16a46378b5287365466f2d71cb6814456b93668db2b593483",
+    "artifact_manifest_sha256": "92c7c7f11174c4685f96f49b8207dc2b34c4b512a273adfb619aa5d922b78324",
+    "output_sync_report_sha256": "44453141a03c0df8a69e9ff37cfa5d7665a082e4bd9ddf3f113a8f3f71a674b5",
+    "completion_marker_last": true,
+    "sync_ok": true
+  },
+  "state_summary": {
+    "BASE": {
+      "network_vertex_abs_p95": 0.000024594366550445557,
+      "canonical_fstar_vertex_abs_p95": 0.010620034579187627,
+      "canonical_fstar_centroid_abs_p95": 0.010574022773653262,
+      "target_over_network_p95_ratio": 431.80760754316856,
+      "centroid_over_vertex_target_p95_ratio": 0.9956674523805661,
+      "network_target_pearson": -0.023657236409248078
+    },
+    "A0": {
+      "network_vertex_abs_p95": 0.00002718120813369751,
+      "canonical_fstar_vertex_abs_p95": 0.006990000605583191,
+      "canonical_fstar_centroid_abs_p95": 0.007013130187988281,
+      "target_over_network_p95_ratio": 257.1370041369262,
+      "centroid_over_vertex_target_p95_ratio": 1.003309,
+      "network_target_pearson": -0.123614
+    },
+    "B": {
+      "network_vertex_abs_p95": 0.0000302046537399292,
+      "canonical_fstar_vertex_abs_p95": 0.006742452178150407,
+      "canonical_fstar_centroid_abs_p95": 0.006701822811737658,
+      "target_over_network_p95_ratio": 223.2256074247654,
+      "centroid_over_vertex_target_p95_ratio": 0.9939740964653168,
+      "network_target_pearson": -0.07299950757489332
+    },
+    "C": {
+      "network_vertex_abs_p95": 0.000027719885110855103,
+      "canonical_fstar_vertex_abs_p95": 0.006640445324592292,
+      "canonical_fstar_centroid_abs_p95": 0.006614381144754581,
+      "target_over_network_p95_ratio": 239.5552975070555,
+      "centroid_over_vertex_target_p95_ratio": 0.9960749349533554,
+      "network_target_pearson": -0.09515056640149708
+    },
+    "D": {
+      "network_vertex_abs_p95": 0.000029597431421279907,
+      "canonical_fstar_vertex_abs_p95": 0.0068359375,
+      "canonical_fstar_centroid_abs_p95": 0.00683140754699707,
+      "target_over_network_p95_ratio": 230.9638766519824,
+      "centroid_over_vertex_target_p95_ratio": 0.9993373325892857,
+      "network_target_pearson": -0.03215413674512674
+    }
+  },
+  "interpretation": {
+    "frozen_network_zero_alignment": "SUPPORTED_STRONGLY__ALL_STATES_NETWORK_VERTEX_ABS_P95_APPROX_2_5E_5_TO_3_0E_5",
+    "canonical_fstar_zero_alignment": "REJECTED_STRONGLY__ALL_STATES_FSTAR_VERTEX_ABS_P95_APPROX_6_6E_3_TO_1_06E_2",
+    "mt_edge_interpolation_owner": "NOT_MATERIAL_AT_OBSERVED_SCALE__NETWORK_RESIDUAL_P95_IS_223X_TO_432X_SMALLER_THAN_FSTAR_RESIDUAL_P95",
+    "triangle_approximation_owner": "NOT_MATERIAL_AT_OBSERVED_SCALE__CENTROID_FSTAR_P95_OVER_VERTEX_FSTAR_P95_APPROX_0_994_TO_1_003",
+    "dominant_residual_owner": "LEARNED_FIELD_ZERO_LEVEL_SET_DISPLACEMENT_RELATIVE_TO_CANONICAL_FSTAR",
+    "causal_boundary": "This identifies where the residual lives, not proof that any particular optimizer schedule will close it."
+  },
+  "next_gate": {
+    "status": "LONG_HORIZON_LOW_LR_MODEL_STATE_CONTINUATION_AUTHORIZED",
+    "controlling_prior_closure": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json",
+    "required_arms": [
+      "A0_CONTINUE_DIRECT_FSTAR_ONLY",
+      "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
+      "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+      "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE"
+    ],
+    "starting_states": "EACH_ARMS_OWN_SELECTED_CHECKPOINT_FROM_OBJECTIVE_CAUSAL_ABLATION_CLOSURE",
+    "common_low_lr_fresh_optimizer_restart_required": true,
+    "optimizer_scheduler_state_must_be_saved": true,
+    "exact_r512_and_stage13_checkpoint_selection_blind": true,
+    "spatial_resolution_change_forbidden": true,
+    "representation_change_forbidden": true,
+    "stage13_threshold_change_forbidden": true
+  },
+  "claim_boundary": [
+    "All five extracted meshes lie extremely close to the frozen network zero level at vertices.",
+    "The same vertices remain materially displaced from canonical F* zero, by more than two orders of magnitude at p95.",
+    "Triangle-centroid canonical F* residual is essentially the same as vertex canonical F* residual, so triangle planarization is not the dominant observed owner.",
+    "This closure authorizes the already-required low-LR long-horizon continuation; it does not declare TP64 sufficient or insufficient.",
+    "A0/B/C/D must all remain in the continuation to preserve the causal control structure."
+  ]
+}

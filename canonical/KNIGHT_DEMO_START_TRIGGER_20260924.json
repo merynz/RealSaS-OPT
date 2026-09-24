@@ -1,0 +1,10 @@
+{
+  "schema": "RealSaS.KnightDemoStartTrigger.v1",
+  "status": "START_STAGE01_08",
+  "date_utc": "2026-09-24",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "execution_class": "DEMO_WITNESS",
+  "product_authority_claimed": false,
+  "stage13_scientific_pass": false
+}

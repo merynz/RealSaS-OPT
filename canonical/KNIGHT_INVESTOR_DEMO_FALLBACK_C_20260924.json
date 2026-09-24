@@ -1,0 +1,34 @@
+{
+  "schema": "RealSaS.KnightInvestorDemoFallback.v1",
+  "status": "DEMO_FALLBACK_ELIGIBLE__NOT_PRODUCT_QUALIFIED",
+  "date_utc": "2026-09-24",
+  "purpose": "Provide a controlled investor-demo geometry fallback while scientific V5 geometry research continues.",
+  "source": {
+    "run_id": "20260924T115953Z",
+    "arm": "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+    "checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+    "selected_absolute_effective_step": 19200
+  },
+  "known_qualification": {
+    "exact_shell_containment_pass": true,
+    "stage13_min_precision": 0.9783673081878721,
+    "stage13_min_recall": 0.9981541565871387,
+    "stage13_max_interior_uncovered_fraction": 0.00028673080073964843,
+    "stage13_max_largest_coherent_hole_fraction": 0.0003611515575377489,
+    "stage13_max_silhouette_p95_px": 3,
+    "stage13_p999_pass": false,
+    "r512_nonpositive_certified_exterior_count": 11001,
+    "r512_pass": false
+  },
+  "demo_policy": {
+    "controlled_knight_only": true,
+    "investor_demo_use_permitted": true,
+    "product_witness_forbidden": true,
+    "unseen_claim_forbidden": true,
+    "p999_claim_forbidden": true,
+    "render_or_camera_cherry_pick_beyond_normal_demo_direction_selection_forbidden": true,
+    "label_in_internal_artifacts": "DEMO_FALLBACK_C__NOT_PRODUCT_AUTHORITY"
+  },
+  "rationale": "Among the completed long-horizon arms, C had the strongest visual-facing Stage13 combination: highest recorded minimum recall, highest recorded minimum precision, 3 px silhouette p95, and exact containment PASS. It remains a scientific FAIL and is retained only as the current demo fallback.",
+  "supersession": "A later demo-candidate checkpoint may replace this fallback only through an explicit demo-only promotion record; product authority remains unchanged."
+}

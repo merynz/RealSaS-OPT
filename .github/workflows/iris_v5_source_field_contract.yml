@@ -15,6 +15,7 @@ on:
       - 'canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json'
       - 'canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_AMENDMENT_20260923.json'
       - 'canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_PREREG_20260924.json'
+      - 'canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json'
       - '.github/workflows/iris_v5_source_field_contract.yml'
   workflow_dispatch:
 
@@ -92,23 +93,23 @@ jobs:
           assert tail_prereg['execution']['parameter_updates_permitted']==0
           assert tail_prereg['execution']['stage13_qualification_permitted'] is False
           diag=ontology['diagnostic_authorization']
-          assert diag['authorized'] is True
-          assert diag['scope']=='KNIGHT_FIT1__SELECTED_TP64_LEARNED_TAIL_LOCALIZATION_ONLY'
+          assert diag['authorized'] is False
+          assert diag['completed_scope']=='KNIGHT_FIT1__SELECTED_TP64_LEARNED_TAIL_LOCALIZATION_ONLY'
           assert diag['preregistration']=='canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_PREREG_20260924.json'
-          assert diag['notebook_sha256']==tail_prereg['execution']['notebook_sha256']
-          assert diag['optimizer_steps_permitted']==0
-          assert diag['parameter_updates_permitted']==0
-          assert diag['stage13_qualification_permitted'] is False
-          assert diag['training_remains_blocked'] is True
+          assert diag['closure']=='canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json'
+          assert diag['optimizer_steps_executed']==0
+          assert diag['parameter_updates_executed']==0
+          assert diag['stage13_qualification_executed'] is False
           auth=ontology['training_authorization']
           if auth['authorized']:
               assert auth['blockers']==[]
               assert auth['preregistration']=='canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_20260923.json'
           else:
               assert auth['prior_arm_closure']=='canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_CLOSURE_20260923.json'
+              assert auth['diagnostic_closure']=='canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json'
               assert auth['blockers']==[
-                  'LOCALIZE_LEARNED_SIGN_AND_ZERO_SET_TAIL',
-                  'FREEZE_NEXT_LEARNED_OWNER_EXPERIMENT_PREREGISTRATION',
+                  'FREEZE_CAUSAL_TAIL_REPAIR_ABLATION_PREREGISTRATION',
+                  'FREEZE_CAUSAL_TAIL_REPAIR_RUN_ALL_NOTEBOOK',
               ]
 
           c=target['exact_target_contract']

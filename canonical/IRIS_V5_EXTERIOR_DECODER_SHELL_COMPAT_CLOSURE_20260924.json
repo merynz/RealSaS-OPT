@@ -1,0 +1,89 @@
+{
+  "schema": "RealSaS.IRIS.V5ExteriorDecoderShellCompatibilityClosure.v1",
+  "status": "CLOSED__NO_ACTUAL_OMITTED_FACE_ESCAPE_IN_ANY_FROZEN_STATE__CONSERVATIVE_DECODER_GATE_FALSIFIED_AS_TRUNCATION_PROXY",
+  "date_utc": "2026-09-24",
+  "branch": "research/vf11-certified-adaptive-20260921",
+  "parent_preregistration": "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_PREREG_20260924.json",
+  "run": {
+    "run_id": "20260924T094420Z",
+    "repo_commit": "77cd81ffe6389a5c078f267ae2a1458f2a953459",
+    "optimizer_steps_executed": 0,
+    "parameter_updates_executed": 0,
+    "stage13_executed": false,
+    "result_sha256": "4c23ff9cf02779bf3d022808e84dad0e962b0faad587c33faa917d9283c5016b",
+    "manifest_integrity_independently_verified": true,
+    "npz_escape_arrays_independently_verified_empty": true
+  },
+  "reproduced_states": {
+    "BASE": {
+      "r512_nonpositive": 85849,
+      "conservative_boundary_crossing_tets": 436,
+      "actual_missing_face_zero_crossings": 0,
+      "actual_escape_parent_cells": 0
+    },
+    "A0": {
+      "r512_nonpositive": 66909,
+      "conservative_boundary_crossing_tets": 133,
+      "actual_missing_face_zero_crossings": 0,
+      "actual_escape_parent_cells": 0
+    },
+    "B": {
+      "r512_nonpositive": 41157,
+      "conservative_boundary_crossing_tets": 535,
+      "actual_missing_face_zero_crossings": 0,
+      "actual_escape_parent_cells": 0
+    },
+    "C": {
+      "r512_nonpositive": 33240,
+      "conservative_boundary_crossing_tets": 422,
+      "actual_missing_face_zero_crossings": 0,
+      "actual_escape_parent_cells": 0
+    },
+    "D": {
+      "r512_nonpositive": 29857,
+      "conservative_boundary_crossing_tets": 1504,
+      "actual_missing_face_zero_crossings": 0,
+      "actual_escape_parent_cells": 0
+    }
+  },
+  "decoder_gate_diagnosis": {
+    "current_implementation": "count_sparse_mt_v5 increments boundary_crossing_tets for every zero-crossing tetra whose parent cell is marked boundary_parent; boundary_parent means the parent has at least one missing refined neighbor in any of six directions.",
+    "current_fail_condition": "build_indexed_mt_from_sparse_carrier_v5 raises SparseSurfaceTruncationError whenever boundary_crossing_tets != 0.",
+    "falsified_interpretation": "NONZERO_BOUNDARY_CROSSING_TETS_PROVES_SPARSE_SHELL_TRUNCATES_ZERO_SURFACE",
+    "measured_replacement_fact": "Across BASE/A0/B/C/D, no learned zero-set intersection was found on any shared face whose in-domain neighbor was omitted.",
+    "implication": "The 436/133/535/422/1504 counts are conservative boundary-parent proxy hits, not demonstrated omitted-face surface escapes."
+  },
+  "regularity_arm_disposition": {
+    "lipschitz_ceiling_arm_authorized": false,
+    "eikonal_arm_authorized": false,
+    "reason": "No actual omitted-face escape was observed, so decoder-shell compatibility does not currently supply causal evidence for a gradient/Lipschitz regularizer.",
+    "note": "Regularity may be studied for another independently established failure mechanism, but not justified from the conservative boundary-crossing proxy."
+  },
+  "exterior_relation": {
+    "conclusion": "R512 exterior sign violations and the current conservative decoder boundary-crossing counter are distinct quantities.",
+    "evidence": "R512 violations decrease strongly across objective arms while conservative boundary-crossing counts are non-monotonic, and actual omitted-face escape is zero in all states.",
+    "r512_gate_remains_active": true,
+    "r512_required_nonpositive_count": 0
+  },
+  "decoder_next_action": {
+    "status": "CORRECTION_REQUIRED_BEFORE_TREATING_BOUNDARY_PROXY_AS_TRUNCATION_GATE",
+    "required_behavior": "Gate on actual zero-set escape through omitted in-domain refined-neighbor faces, or an equivalently proven conservative criterion tied to such escape.",
+    "forbidden_shortcut": "Do not simply disable fail_on_boundary_crossing without replacing it with an actual shell-containment proof.",
+    "stage13_threshold_change_authorized": false
+  },
+  "optimization_next_action": {
+    "long_horizon_experiment_supported": true,
+    "reason": "The decoder proxy no longer supplies evidence for a learned-field truncation owner; objective arms remain R512-sign-failing and convergence/horizon remains open.",
+    "required_preregistration": "FREEZE_LONG_HORIZON_OPTIMIZATION_EXPERIMENT_BEFORE_NEW_OPTIMIZER_STEP",
+    "spatial_resolution_change_authorized": false
+  },
+  "claim_boundary": [
+    "This closure proves no omitted-face zero-set escape for the five frozen Knight FIT1 states under the exact diagnostic carrier.",
+    "This closure does not prove the learned fields pass R512 exterior sign authority.",
+    "This closure does not prove Stage13 pass because Stage13 was not reached.",
+    "This closure does not prove the sparse carrier can never truncate another field or another subject.",
+    "This closure does not prove TP64 representation capacity is sufficient.",
+    "This closure does not authorize a Lipschitz or Eikonal training term.",
+    "The previous SparseSurfaceTruncationError label is not supported by these five states when triggered solely by boundary_crossing_tets."
+  ]
+}

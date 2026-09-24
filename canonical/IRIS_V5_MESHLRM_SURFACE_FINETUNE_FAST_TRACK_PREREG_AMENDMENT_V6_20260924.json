@@ -1,0 +1,41 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMSurfaceFineTuneFastTrackPreregAmendmentV6.v1",
+  "status": "FROZEN_BEFORE_ANY_SCIENTIFIC_OPTIMIZER_STEP__FP32_VJP_GRAPH_REPAIR",
+  "date_utc": "2026-09-24",
+  "amends": "canonical/IRIS_V5_MESHLRM_SURFACE_FINETUNE_FAST_TRACK_PREREG_AMENDMENT_V5_20260924.json",
+  "invalidated_attempt": {
+    "run_id": "20260924T180311Z",
+    "observed_terminal": "RuntimeError: expected scalar type BFloat16 but found Float",
+    "location": "mesh sparse VJP calibration",
+    "actual_continuation_optimizer_steps": 0,
+    "actual_continuation_parameter_updates": 0,
+    "scientific_result": false,
+    "frozen_c_mutated": false
+  },
+  "evidence_recovered_before_abort": {
+    "training_mesh_proxy_parity_pass": true,
+    "min_product_mask_recall": 0.9965454575222253,
+    "min_product_mask_precision": 0.9994424727015597,
+    "stage13_semantic_parity_min_recall": 0.99951992318771,
+    "stage13_semantic_parity_min_precision": 0.9985611510791367,
+    "interpretation": "The 256-grid differentiable mesh is a high-fidelity proxy for the frozen-C product mesh, and the hard raster path matches Stage13 semantics. The remaining abort is dtype plumbing only."
+  },
+  "root_cause": {
+    "defect": "inject_mesh_sparse_vjp received BF16 planes produced inside the base-C autocast graph while querying with FP32 q. torch.grid_sample requires input and grid dtype agreement.",
+    "scientific_relevance": false
+  },
+  "repair": {
+    "base_branch": "UNCHANGED BF16 autocast graph for base C objective; backward completes and graph is released.",
+    "mesh_branch": "Fresh FP32 encode_scene graph from the same model, followed by FP32 query on every nonzero sparse carrier support and exact VJP injection.",
+    "shared_graph_between_base_and_mesh": false,
+    "base_backward_retain_graph": false,
+    "mesh_encode_inputs_dtype": "FP32",
+    "mesh_planes_required_dtype": "FP32",
+    "mesh_query_required_dtype": "FP32",
+    "mesh_carrier_grad_dtype": "FP32",
+    "no_gradient_support_truncation": true
+  },
+  "calibration": "Base and mesh parameter-gradient norms remain measured separately; raw equal-norm mesh scale is frozen after calibration.",
+  "final_product_decoder_and_stage13_unchanged": true,
+  "scientific_intervention_unchanged": true
+}

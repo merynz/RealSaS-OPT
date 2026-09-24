@@ -1,0 +1,47 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMMeshGradRatioSweepNotebookHandoffV10.v1",
+  "status": "READY_FOR_USER_A100_RUN",
+  "date_utc": "2026-09-24",
+  "notebook": {
+    "filename": "RealSaS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_RUN_ALL_V10_400STEP_AUDITED.ipynb",
+    "sha256": "e9ea79d3ad5b2f32c84537694ff29810e77fa7dde92ed5cfbdb745fa0562cc41",
+    "code_cells": 11,
+    "total_cells": 13,
+    "static_compile_pass": true,
+    "combined_ast_parse": true,
+    "stored_outputs": 0,
+    "stored_execution_counts": 0
+  },
+  "supersedes": {
+    "filename": "RealSaS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_RUN_ALL.ipynb",
+    "sha256": "506314a949498218bcd41e3c6dc3c012d71f35141b553a3b7c3d647edffd51c8",
+    "reason": "V8 notebook accidentally compressed LR schedule to 300-step horizon and used warmup=50; stale historical assertions would also fail after correction."
+  },
+  "active_contract": {
+    "steps_per_arm": 400,
+    "eval_steps": [
+      100,
+      200,
+      300,
+      400
+    ],
+    "warmup_steps": 100,
+    "scheduler_reference_horizon_steps": 1200,
+    "arm_ratios": {
+      "M0_10": 0.1,
+      "M0_25": 0.25
+    },
+    "independent_frozen_c_start": true
+  },
+  "audits": [
+    "V8 historical 300-step/50-warmup assertions isolated from active values",
+    "V9 schedule repair asserted",
+    "V10 400-step contract asserted",
+    "exact numeric V4 LR parity gate for steps 1..400",
+    "no active compressed CONTINUATION_STEPS-based cosine denominator",
+    "no stale single-arm final decoder or Stage13 loop",
+    "eligible-only final evaluation and safe frozen-C fallback",
+    "all code cells compile; combined AST parses; no stored outputs"
+  ],
+  "final_decision": "Eligible selected arms only -> unchanged contained product decoder -> frozen P999 Stage13 once each -> promote preregistered best passing arm; otherwise frozen C fallback."
+}

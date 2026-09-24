@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoExecutionState.v1",
-  "status": "PAUSED_AT_STAGE08__MESHLRM_MESH_GRAD_RATIO_SWEEP_A100_NOTEBOOK_READY",
+  "status": "PAUSED_AT_STAGE08__MESHLRM_MESH_GRAD_RATIO_SWEEP_V10_400STEP_AUDITED_READY",
   "date_utc": "2026-09-24",
   "branch": "research/vf11-certified-adaptive-20260921",
   "run": {
@@ -49,9 +49,11 @@
     "gdrive_cli_installed": false
   },
   "next_actions": [
-    "STOP_OR_IGNORE_CURRENT_1P0X_MESH_GRAD_RUN",
-    "USER_RUN_REALSaS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_RUN_ALL_ON_FRESH_A100_RUNTIME",
-    "COMPARE_M0_10_AND_M0_25_AT_STEPS_100_200_300_UNDER_FROZEN_C_FIDELITY_GUARD",
+    "DO_NOT_RUN_SUPERSEDED_RATIO_SWEEP_NOTEBOOK_SHA_506314A949498218BCD41E3C6DC3C012D71F35141B553A3B7C3D647EDFFD51C8",
+    "USER_RUN_REALSaS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_RUN_ALL_V10_400STEP_AUDITED_ON_FRESH_A100_RUNTIME",
+    "REQUIRE_V4_LR_SCHEDULE_PARITY_PASS",
+    "REQUIRE_SHARED_PROXY_AND_RUNTIME_PREFLIGHTS",
+    "COMPARE_M0_10_AND_M0_25_AT_STEPS_100_200_300_400",
     "PRODUCT_DECODE_AND_FROZEN_P999_STAGE13_ONLY_ELIGIBLE_SELECTED_ARMS",
     "IF_ANY_PASS_PROMOTE_PREREGISTERED_BEST_PASSING_ARM",
     "OTHERWISE_BIND_FROZEN_C_FALLBACK_AND_RESUME_SAME_KNIGHT_RUN"
@@ -66,29 +68,47 @@
     "fallback_scientific_state": "STAGE13_FAIL__DEMO_ONLY"
   },
   "mesh_render_aware_oracle": {
-    "status": "USER_ACTION_REQUIRED__RUN_A100_RATIO_SWEEP",
-    "notebook_filename": "RealSaS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_RUN_ALL.ipynb",
-    "notebook_sha256": "506314a949498218bcd41e3c6dc3c012d71f35141b553a3b7c3d647edffd51c8",
-    "repo_commit_used_by_notebook": "b66b46f41050978179af9d98c1b74f847f65f88e",
+    "status": "USER_ACTION_REQUIRED__RUN_A100_RATIO_SWEEP_V10",
+    "notebook_filename": "RealSaS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_RUN_ALL_V10_400STEP_AUDITED.ipynb",
+    "notebook_sha256": "e9ea79d3ad5b2f32c84537694ff29810e77fa7dde92ed5cfbdb745fa0562cc41",
+    "repo_commit_used_by_notebook": "7bc4085cb6b43da13027d6f21df25cb081a035b8",
     "start_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
     "arms": [
       {
         "name": "M0_10",
         "mesh_to_base_grad_ratio": 0.1,
-        "steps": 300
+        "steps": 400
       },
       {
         "name": "M0_25",
         "mesh_to_base_grad_ratio": 0.25,
-        "steps": 300
+        "steps": 400
       }
     ],
-    "evaluation_every_steps": 100,
+    "eval_steps": [
+      100,
+      200,
+      300,
+      400
+    ],
+    "warmup_steps": 100,
+    "scheduler_reference_horizon_steps": 1200,
+    "lr_schedule": "EXACT_V4_1200_STEP_TRAJECTORY_TRUNCATED_AFTER_ACTIVE_STEP_400__NOT_COMPRESSED",
     "eligibility_guard": {
       "sign_disagreement_count_max": 10376,
-      "mae_max": 0.0017956909141503277,
-      "baseline_sign_disagreement_count": 9882,
-      "baseline_mae": 0.0017101818230003119
+      "mae_max": 0.0017956909141503277
+    },
+    "audit": {
+      "all_code_cells_compile": true,
+      "combined_ast_parse": true,
+      "stored_outputs": 0,
+      "active_300_step_assignment_absent": true,
+      "active_warmup_50_absent": true,
+      "old_compressed_cosine_denominator_absent": true,
+      "numeric_lr_parity_v4_steps_1_400_max_abs_error": 0,
+      "stale_v8_active_assertions_removed": true,
+      "final_eval_uses_eligible_arms_only": true,
+      "empty_eligible_set_fallback_safe": true
     },
     "training_stage13_feedback": false,
     "final_gate": "UNCHANGED_CONTAINED_T512_T1024_PLUS_FROZEN_P999_STAGE13_ON_ELIGIBLE_SELECTED_ARMS_ONLY",

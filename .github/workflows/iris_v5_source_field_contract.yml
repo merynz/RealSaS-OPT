@@ -20,6 +20,7 @@ on:
       - 'canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json'
       - 'canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json'
       - 'canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json'
+      - 'canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_PREREG_20260924.json'
       - '.github/workflows/iris_v5_source_field_contract.yml'
   workflow_dispatch:
 
@@ -87,6 +88,7 @@ jobs:
           amendment=json.loads(Path('canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_AMENDMENT_20260923.json').read_text())
           tail_prereg=json.loads(Path('canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_PREREG_20260924.json').read_text())
           objective_prereg=json.loads(Path('canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json').read_text())
+          shell_prereg=json.loads(Path('canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_PREREG_20260924.json').read_text())
           assert prereg['status']=='FROZEN_BEFORE_OPTIMIZER_STEP_1'
           assert prereg['execution']['repo_commit']=='4de08a779199d64b60b0d1aae3512a0f77e77c77'
           assert prereg['optimizer']['primary_objective']['type']=='SMOOTH_L1_DIRECT_FSTAR_ONLY'
@@ -113,22 +115,29 @@ jobs:
           assert objective_prereg['checkpoint_selection']['stage13_blind'] is True
           assert objective_prereg['architecture']['spatial_resolution_ablation_in_this_notebook'] is False
 
+          assert shell_prereg['status']=='PREREGISTERED__DIAGNOSTIC_ONLY__NO_TRAINING'
+          assert shell_prereg['execution']['repo_commit']=='77cd81ffe6389a5c078f267ae2a1458f2a953459'
+          assert shell_prereg['execution']['notebook_sha256']=='1215f809dd6f519ecf51a4eaa90aea3826f8d5123f296b511f092cf4490ba0ec'
+          assert shell_prereg['execution']['optimizer_steps_permitted']==0
+          assert shell_prereg['execution']['parameter_updates_permitted']==0
+          assert shell_prereg['execution']['stage13_qualification_permitted'] is False
           diag=ontology['diagnostic_authorization']
-          assert diag['authorized'] is False
-          assert diag['completed_scope']=='KNIGHT_FIT1__SELECTED_TP64_LEARNED_TAIL_LOCALIZATION_ONLY'
-          assert diag['preregistration']=='canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_PREREG_20260924.json'
-          assert diag['closure']=='canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json'
-          assert diag['optimizer_steps_executed']==0
-          assert diag['parameter_updates_executed']==0
-          assert diag['stage13_qualification_executed'] is False
+          assert diag['authorized'] is True
+          assert diag['scope']=='KNIGHT_FIT1__FIVE_FROZEN_STATES__EXTERIOR_DECODER_SHELL_COMPATIBILITY_ONLY'
+          assert diag['preregistration']=='canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_PREREG_20260924.json'
+          assert diag['notebook_sha256']==shell_prereg['execution']['notebook_sha256']
+          assert diag['optimizer_steps_permitted']==0
+          assert diag['parameter_updates_permitted']==0
+          assert diag['stage13_qualification_permitted'] is False
+          assert diag['training_remains_blocked'] is True
 
           auth=ontology['training_authorization']
           assert auth['authorized'] is False
           assert auth['prior_authorized_arm']=='canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json'
           assert auth['prior_arm_closure']=='canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json'
           assert auth['blockers']==[
-              'FREEZE_TP64_LONG_HORIZON_LOW_LR_CONTINUATION_PREREGISTRATION',
-              'FREEZE_TP64_LONG_HORIZON_LOW_LR_RUN_ALL_NOTEBOOK',
+              'RUN_AND_SEAL_EXTERIOR_DECODER_SHELL_COMPAT_DIAGNOSTIC',
+              'THEN_FREEZE_LONG_HORIZON_OR_REGULARITY_NEXT_ARM_FROM_DIAGNOSTIC_RESULT',
           ]
           assert auth['architecture_change_authorized'] is False
           assert auth['spatial_resolution_change_authorized'] is False

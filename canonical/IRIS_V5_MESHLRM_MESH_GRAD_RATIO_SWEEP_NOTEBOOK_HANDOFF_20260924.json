@@ -1,0 +1,48 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMMeshGradRatioSweepNotebookHandoff.v1",
+  "status": "READY_FOR_USER_A100_RUN",
+  "date_utc": "2026-09-24",
+  "notebook": {
+    "filename": "RealSaS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_RUN_ALL.ipynb",
+    "sha256": "506314a949498218bcd41e3c6dc3c012d71f35141b553a3b7c3d647edffd51c8",
+    "code_cells": 11,
+    "static_compile_pass": true,
+    "combined_sequential_compile_pass": true,
+    "stored_outputs": 0,
+    "stored_execution_counts": 0
+  },
+  "sweep": {
+    "arms": [
+      [
+        "M0_10",
+        0.1
+      ],
+      [
+        "M0_25",
+        0.25
+      ]
+    ],
+    "steps_per_arm": 300,
+    "eval_every": 100,
+    "warmup_steps": 50,
+    "independent_frozen_c_start_per_arm": true,
+    "raw_equal_norm_scale_measured_once": true,
+    "arm_scale_formula": "raw_equal_norm_scale * arm ratio",
+    "stage13_during_training": false
+  },
+  "candidate_guard": {
+    "sign_max": 10376,
+    "mae_max": 0.0017956909141503277,
+    "rule": "candidate must satisfy both; otherwise it cannot be product-decoded or promoted"
+  },
+  "runtime_audit": [
+    "shared hard-raster proxy parity",
+    "shared no-grad mesh eval",
+    "shared raw gradient calibration",
+    "disposable full one-step update + eval + checkpoint roundtrip for both ratios",
+    "per-arm independent optimizer/scheduler/model",
+    "empty eligible-arm set safely falls back without decoder abort",
+    "known-good product decoder and Stage13 retained"
+  ],
+  "final_decision": "Eligible selected arms only -> contained product decoder -> frozen P999 Stage13 once each -> promote preregistered best passing arm; otherwise frozen C fallback."
+}

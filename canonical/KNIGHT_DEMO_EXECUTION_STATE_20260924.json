@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoExecutionState.v1",
-  "status": "PAUSED_AT_STAGE08__MESHLRM_MESH_RENDER_AWARE_A100_NOTEBOOK_V4_RUNTIME_AUDITED_READY",
+  "status": "PAUSED_AT_STAGE08__MESHLRM_MESH_GRAD_RATIO_SWEEP_A100_NOTEBOOK_READY",
   "date_utc": "2026-09-24",
   "branch": "research/vf11-certified-adaptive-20260921",
   "run": {
@@ -49,13 +49,11 @@
     "gdrive_cli_installed": false
   },
   "next_actions": [
-    "USER_RUN_REALSaS_V5_MESHLRM_SURFACE_FINETUNE_RUN_ALL_V4_RUNTIME_AUDITED_ON_A100",
-    "REQUIRE_TRAINING_MESH_PROXY_PARITY_PASS",
-    "REQUIRE_MESH_NO_GRAD_EVAL_PREFLIGHT_PASS",
-    "REQUIRE_GRADIENT_CALIBRATION_PASS",
-    "REQUIRE_FULL_RUNTIME_PREFLIGHT_PASS",
-    "THEN_ALLOW_REAL_1200_STEP_CONTINUATION",
-    "IF_FINAL_CONTAINMENT_AND_P999_STAGE13_PASS_PROMOTE_NEW_DEMO_ONLY_GEOMETRY",
+    "STOP_OR_IGNORE_CURRENT_1P0X_MESH_GRAD_RUN",
+    "USER_RUN_REALSaS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_RUN_ALL_ON_FRESH_A100_RUNTIME",
+    "COMPARE_M0_10_AND_M0_25_AT_STEPS_100_200_300_UNDER_FROZEN_C_FIDELITY_GUARD",
+    "PRODUCT_DECODE_AND_FROZEN_P999_STAGE13_ONLY_ELIGIBLE_SELECTED_ARMS",
+    "IF_ANY_PASS_PROMOTE_PREREGISTERED_BEST_PASSING_ARM",
     "OTHERWISE_BIND_FROZEN_C_FALLBACK_AND_RESUME_SAME_KNIGHT_RUN"
   ],
   "continuation_rule": "On a future chat, read this file first. While pause is active, do not execute Stage09+ demo stages. Complete/reject the MeshLRM-style oracle, then resume the same run_id unless explicitly superseded.",
@@ -68,32 +66,33 @@
     "fallback_scientific_state": "STAGE13_FAIL__DEMO_ONLY"
   },
   "mesh_render_aware_oracle": {
-    "status": "USER_ACTION_REQUIRED__RUN_A100_NOTEBOOK_V4",
-    "notebook_filename": "RealSaS_V5_MESHLRM_SURFACE_FINETUNE_RUN_ALL_V4_RUNTIME_AUDITED.ipynb",
-    "notebook_sha256": "1cfbc5b0dd9359edc19c5f3ce7ffaa87db2a6a48cdd11dad744941c1cee32581",
-    "supersedes_notebook_sha256": "a7a73f716cc525082ee666c91c458f8dcd9c8ec97496dcc7101e1272ad5fbd8c",
-    "recovered_proxy_evidence": {
-      "min_product_mask_recall": 0.9965454575222253,
-      "min_product_mask_precision": 0.9994424727015597,
-      "stage13_semantic_parity_min_recall": 0.99951992318771,
-      "stage13_semantic_parity_min_precision": 0.9985611510791367
-    },
-    "prior_attempts_scientific_result": false,
-    "prior_attempts_actual_parameter_updates": 0,
-    "runtime_audit_repairs": [
-      "SEPARATE_BF16_BASE_AND_FP32_MESH_VJP_GRAPHS",
-      "NO_GRAD_MESH_EVAL_RETURN_ARITY_AND_SILHOUETTE_FACE_COUNT",
-      "MODEL_TRAIN_EVAL_MODE_RESTORATION",
-      "NEED_GRAD_FALSE_EVAL_PREFLIGHT",
-      "DISPOSABLE_FULL_COMBINED_UPDATE_PREFLIGHT",
-      "POST_UPDATE_HELDOUT_AND_MESH_EVAL_PREFLIGHT",
-      "CHECKPOINT_SAVE_LOAD_STATE_AND_PREDICTION_ROUNDTRIP",
-      "SELECTED_CHECKPOINT_LINEAGE_GATES"
-    ],
-    "downstream_assurance": "Product decoder and frozen Stage13 cells were diffed against the previously completed spatial-risk fast-track notebook. Decoder differs only by work-directory naming plus new checkpoint-lineage assertions; Stage13 logic is unchanged.",
+    "status": "USER_ACTION_REQUIRED__RUN_A100_RATIO_SWEEP",
+    "notebook_filename": "RealSaS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_RUN_ALL.ipynb",
+    "notebook_sha256": "506314a949498218bcd41e3c6dc3c012d71f35141b553a3b7c3d647edffd51c8",
+    "repo_commit_used_by_notebook": "b66b46f41050978179af9d98c1b74f847f65f88e",
     "start_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
-    "final_gate": "UNCHANGED_CONTAINED_T512_T1024_PLUS_FROZEN_P999_STAGE13",
-    "pass_action": "PROMOTE_NEW_MESHAWARE_CHECKPOINT_FOR_DEMO_ONLY_AND_RESUME_SAME_KNIGHT_RUN",
+    "arms": [
+      {
+        "name": "M0_10",
+        "mesh_to_base_grad_ratio": 0.1,
+        "steps": 300
+      },
+      {
+        "name": "M0_25",
+        "mesh_to_base_grad_ratio": 0.25,
+        "steps": 300
+      }
+    ],
+    "evaluation_every_steps": 100,
+    "eligibility_guard": {
+      "sign_disagreement_count_max": 10376,
+      "mae_max": 0.0017956909141503277,
+      "baseline_sign_disagreement_count": 9882,
+      "baseline_mae": 0.0017101818230003119
+    },
+    "training_stage13_feedback": false,
+    "final_gate": "UNCHANGED_CONTAINED_T512_T1024_PLUS_FROZEN_P999_STAGE13_ON_ELIGIBLE_SELECTED_ARMS_ONLY",
+    "pass_action": "PROMOTE_BEST_PASSING_RATIO_ARM_FOR_DEMO_ONLY_AND_RESUME_SAME_KNIGHT_RUN",
     "fail_action": "RESUME_SAME_KNIGHT_RUN_WITH_FROZEN_C_FALLBACK"
   }
 }

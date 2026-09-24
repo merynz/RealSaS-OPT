@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMMeshGradRatioSweepPreregAmendmentV10.v1",
+  "status": "FROZEN_BEFORE_RATIO_SWEEP_OPTIMIZER_STEP__400_STEP_OBSERVATION_WINDOW",
+  "date_utc": "2026-09-24",
+  "amends": "canonical/IRIS_V5_MESHLRM_MESH_GRAD_RATIO_SWEEP_PREREG_AMENDMENT_V9_20260924.json",
+  "reason": "The 0.10x arm may respond more slowly than the previously observed 1.0x arm. Extending only the observation window from 300 to 400 updates reduces the risk of falsely concluding no effect while preserving the exact original V4 optimization trajectory.",
+  "repaired_training_contract": {
+    "actual_continuation_steps_per_arm": 400,
+    "evaluation_steps": [
+      100,
+      200,
+      300,
+      400
+    ],
+    "candidate_start_step": 100,
+    "warmup_steps": 100,
+    "scheduler_reference_horizon_steps": 1200,
+    "lr": 0.00001,
+    "eta_min": 0.000001,
+    "optimizer": "AdamW",
+    "weight_decay": 0,
+    "gradient_clip_norm": 1,
+    "scheduler_rule": "Exact V4 1200-step lr_factor evaluated for steps 1..400. The cosine schedule is not compressed to the 400-step observation window."
+  },
+  "single_variable_rule": {
+    "allowed_difference_between_arms": "MESH_VJP_MULTIPLIER_ONLY",
+    "arm_ratios": {
+      "M0_10": 0.1,
+      "M0_25": 0.25
+    },
+    "independent_frozen_c_start_per_arm": true,
+    "shared_base_training_schedule_by_step": true,
+    "shared_source_ray_schedule_by_step": true
+  },
+  "eligibility_guard": {
+    "sign_disagreement_count_max": 10376,
+    "mae_max": 0.0017956909141503277,
+    "unchanged_from_v8": true
+  },
+  "audit_requirements": [
+    "V8 historical continuation_steps_per_arm must remain 300 and historical warmup_steps must remain 50; neither is compared to active values.",
+    "V9 schedule_reference_horizon_steps must be 1200 and warmup_steps 100.",
+    "V10 active continuation_steps_per_arm must be 400 and evaluation steps 100,200,300,400.",
+    "Numeric LR parity against the original V4 lr_factor for every active step 1..400 must have max_abs_error <= 1e-15.",
+    "All stale single-arm, 300-step, 50-warmup, compressed-cosine assumptions must be absent from active training logic.",
+    "Product decoder and frozen Stage13 remain unchanged and only see eligible selected checkpoints."
+  ],
+  "final_decoder_and_stage13_unchanged": true,
+  "scientific_intervention_unchanged": true
+}

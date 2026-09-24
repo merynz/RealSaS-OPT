@@ -1,0 +1,37 @@
+{
+  "schema": "RealSaS.IRIS.V5MeshLRMTranslationDecision.v1",
+  "status": "ANALYSIS_COMPLETE__DEMO_PAUSED__PREREG_REQUIRED_BEFORE_OPTIMIZER_STEP",
+  "date_utc": "2026-09-24",
+  "source_paper": {
+    "title": "MeshLRM: Large Reconstruction Model for High-Quality Meshes",
+    "arxiv": "2404.12385",
+    "relevant_stage": "STAGE_2_DIFFERENTIABLE_SURFACE_RENDERING_FINE_TUNE"
+  },
+  "current_realsas": {
+    "checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+    "field": "BOUNDED_SOURCE_DERIVED_FSTAR__ZERO_LEVEL_GEOMETRY",
+    "architecture": "SCENE_FIRST_CAMERA_AWARE_TRIPLANE__FROZEN_DINO_IMAGE_TOKENS",
+    "training_silhouette": "RAY_SOFT_MIN_WRONG_SIGN__NOT_EXTRACTED_MESH_RASTERIZATION",
+    "production_extraction": "SPARSE_REGULAR_TETRA_T512_T1024__EXACT_SHELL_CONTAINMENT",
+    "stage13": "POST_TRAINING_EXTRACTED_MESH_RASTER_QUALIFICATION__NO_BACKPROP"
+  },
+  "transferable_meshlrm_core": [
+    "DIFFERENTIABLE_ISOSURFACE_EXTRACTION_INSIDE_TRAINING",
+    "DIFFERENTIABLE_RASTERIZATION_OF_EXTRACTED_MESH",
+    "FULL_IMAGE_SURFACE_RENDER_SUPERVISION_INSTEAD_OF_ONLY_FIELD_OR_RAY_SIGN_SUPERVISION",
+    "EMPTY_SPACE_REGULARIZATION_TO_COUNTER_SPARSE_SURFACE_GRADIENTS"
+  ],
+  "not_to_copy_directly": [
+    "NERF_VOLUME_STAGE1__REALSAS_ALREADY_HAS_FROZEN_GEOMETRY_INITIALIZATION",
+    "RGB_COLOR_MLP_AND_PERCEPTUAL_APPEARANCE_LOSS__CAA_OWNS_APPEARANCE",
+    "GT_DEPTH_BASED_RAY_OPACITY_EXACT_FORM__ARTIST_INPUT_HAS_NO_PRODUCT_DEPTH_AUTHORITY",
+    "GT_NORMAL_MAP_LOSS__NO_PRODUCT_NORMAL_TEACHER_AUTHORITY",
+    "DINO_REMOVAL__NOT_IMPLICATED_BY_CURRENT_FAILURE_DIAGNOSTIC",
+    "PLUCKER_TOKENIZER_REWRITE__UNRELATED_TO_CURRENT_STAGE13_FAILURE"
+  ],
+  "proposed_translation_boundary": "KEEP_IRIS_INPUT_ENCODER_TRIPLANE_AND_FSTAR; ADD_TRAINING_ONLY_DIFFERENTIABLE_MESH_EXTRACTION_PLUS_SOURCE_MASK_RASTER_LOSS; RETAIN_SOURCE_ONLY_EMPTY_SPACE/FSTAR_SUPERVISION; FINAL_QUALIFICATION_USES_UNCHANGED_CONTAINED_TETRA_DECODER_AND_FROZEN_STAGE13.",
+  "scientific_reason": "Current diagnostics support spatial zero-set conditioning as an amplifier and show that ray-sign silhouette auxiliaries are aligned yet insufficient. The missing feedback path is from the actual extracted/rasterized mesh artifact back into the field network, matching MeshLRM Stage 2's central intervention.",
+  "training_authorized": false,
+  "prereg_required": true,
+  "demo_resume_on_negative": true
+}

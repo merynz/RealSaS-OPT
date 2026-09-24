@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoExecutionState.v1",
-  "status": "ACTIVE__STAGE08_PREFLIGHT_PASS__FROZEN_C_EXACT_UPSTREAM_IMPORT_REQUIRED",
+  "status": "PAUSED_AT_STAGE08__MESHLRM_STAGE2_TRANSLATION_ORACLE_BEFORE_STAGE09_15",
   "date_utc": "2026-09-24",
   "branch": "research/vf11-certified-adaptive-20260921",
   "run": {
@@ -49,12 +49,21 @@
     "gdrive_cli_installed": false
   },
   "next_actions": [
-    "IMPORT_EXACT_HISTORICAL_STAGE08_ARTIFACT_INTO_DEMO_LINEAGE",
-    "ESTABLISH_HASH_BOUND_FROZEN_C_CHECKPOINT_AND_ZERO_SURFACE_HANDOFF_TO_SELF_HOSTED_RUNNER",
-    "ADMIT_V5_EXTERNAL_FIT_AS_DEMO_ONLY_WITHOUT_FABRICATING_V2_DENSE_COVERAGE_COMPATIBILITY",
-    "EXECUTE_STAGE09_15",
-    "START_CAA_AND_GEPPETTO_BRANCHES_IN_PARALLEL",
+    "COMPARE_MESHLRM_STAGE2_TO_CURRENT_IRIS_V5_EXACTLY",
+    "PREREGISTER_SOURCE_ONLY_MESH_RENDER_AWARE_FINE_TUNE_ORACLE",
+    "RUN_ORACLE_ON_A100_IF_FEASIBLE",
+    "IF_STAGE13_NOT_PROMOTED_RESUME_SAME_DEMO_RUN_WITH_FROZEN_C",
+    "IF_PROMOTED_BIND_NEW_DEMO_ONLY_GEOMETRY_THEN_EXECUTE_STAGE09_15",
+    "START_CAA_AND_GEPPETTO_BRANCHES_IN_PARALLEL_AFTER_GEOMETRY_FREEZE",
     "RETURN_TO_USER_AT_GPU_FIT_BOUNDARY"
   ],
-  "continuation_rule": "On a future chat, read this file first and continue the same run_id; do not start a replacement Knight run unless this state explicitly records supersession."
+  "continuation_rule": "On a future chat, read this file first. While pause is active, do not execute Stage09+ demo stages. Complete/reject the MeshLRM-style oracle, then resume the same run_id unless explicitly superseded.",
+  "pause": {
+    "reason": "USER_REQUESTED_SHORT_PAUSE_TO_TEST_MESHLRM_STYLE_DIFFERENTIABLE_MESH_RENDER_FINE_TUNING",
+    "date_utc": "2026-09-24",
+    "resume_same_run_id": true,
+    "downstream_demo_stage_execution_authorized_during_pause": false,
+    "fallback_geometry_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+    "fallback_scientific_state": "STAGE13_FAIL__DEMO_ONLY"
+  }
 }

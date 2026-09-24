@@ -22,6 +22,7 @@ on:
       - 'canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json'
       - 'canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_PREREG_20260924.json'
       - 'canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json'
+      - 'canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json'
       - '.github/workflows/iris_v5_source_field_contract.yml'
   workflow_dispatch:
 
@@ -90,6 +91,7 @@ jobs:
           tail_prereg=json.loads(Path('canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_PREREG_20260924.json').read_text())
           objective_prereg=json.loads(Path('canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json').read_text())
           shell_prereg=json.loads(Path('canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_PREREG_20260924.json').read_text())
+          requal_prereg=json.loads(Path('canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json').read_text())
           assert prereg['status']=='FROZEN_BEFORE_OPTIMIZER_STEP_1'
           assert prereg['execution']['repo_commit']=='4de08a779199d64b60b0d1aae3512a0f77e77c77'
           assert prereg['optimizer']['primary_objective']['type']=='SMOOTH_L1_DIRECT_FSTAR_ONLY'
@@ -122,6 +124,16 @@ jobs:
           assert shell_prereg['execution']['optimizer_steps_permitted']==0
           assert shell_prereg['execution']['parameter_updates_permitted']==0
           assert shell_prereg['execution']['stage13_qualification_permitted'] is False
+          assert requal_prereg['status']=='FROZEN_BEFORE_REQUALIFICATION_EXECUTION'
+          assert requal_prereg['execution']['code_repo_commit']=='b39b5f13e2657553692c7a8b27db62b20332e279'
+          assert requal_prereg['execution']['code_ci_run_id']==35986938283
+          assert requal_prereg['execution']['code_ci_conclusion']=='success'
+          assert requal_prereg['execution']['notebook_sha256']=='ec59aba793814dff39dfa5fbda2496ae565a459f82080070be5ee1efd981b7a8'
+          assert requal_prereg['execution']['optimizer_steps_permitted']==0
+          assert requal_prereg['execution']['parameter_updates_permitted']==0
+          assert requal_prereg['stage13']['profile']=='P999'
+          assert requal_prereg['stage13']['threshold_change'] is False
+          assert requal_prereg['stage13']['checkpoint_selection_feedback_forbidden'] is True
           diag=ontology['diagnostic_authorization']
           assert diag['authorized'] is False
           assert diag['completed_scope']=='KNIGHT_FIT1__FIVE_FROZEN_STATES__EXTERIOR_DECODER_SHELL_COMPATIBILITY_ONLY'
@@ -137,9 +149,19 @@ jobs:
           assert auth['prior_arm_closure']=='canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json'
           assert auth['shell_compatibility_closure']=='canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json'
           assert auth['blockers']==[
-              'FREEZE_LONG_HORIZON_OPTIMIZATION_EXPERIMENT_PREREGISTRATION',
-              'FREEZE_LONG_HORIZON_RUN_ALL_NOTEBOOK',
+              'CLOSE_CORRECTED_DECODER_STAGE13_REQUALIFICATION_BEFORE_LONG_HORIZON',
           ]
+          rq=ontology['requalification_authorization']
+          assert rq['authorized'] is True
+          assert rq['preregistration']=='canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json'
+          assert rq['code_repo_commit']=='b39b5f13e2657553692c7a8b27db62b20332e279'
+          assert rq['code_ci_run_id']==35986938283
+          assert rq['notebook_sha256']=='ec59aba793814dff39dfa5fbda2496ae565a459f82080070be5ee1efd981b7a8'
+          assert rq['optimizer_steps_permitted']==0
+          assert rq['parameter_updates_permitted']==0
+          assert rq['stage13_qualification_permitted'] is True
+          assert rq['checkpoint_selection_permitted'] is False
+          assert rq['threshold_change_authorized'] is False
           assert auth['architecture_change_authorized'] is False
           assert auth['spatial_resolution_change_authorized'] is False
           assert auth['regularity_loss_change_authorized'] is False

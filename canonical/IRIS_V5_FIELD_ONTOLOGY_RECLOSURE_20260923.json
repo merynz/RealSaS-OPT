@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRIS.V5FieldOntologyReclosure.v1",
-  "status": "FROZEN_FSTAR__TP64_OBJECTIVE_ABLATION_CLOSED__SHELL_COMPAT_CLOSED__LONG_HORIZON_PREREG_REQUIRED",
+  "status": "FROZEN_FSTAR__SHELL_COMPAT_CLOSED__CORRECTED_DECODER_STAGE13_REQUALIFICATION_AUTHORIZED",
   "date_utc": "2026-09-23",
   "branch": "research/vf11-certified-adaptive-20260921",
   "parent_repo_commit": "3e6c320fe1abaeaf2128150f817bf728f5381f28",
@@ -164,15 +164,15 @@
     "prior_authorized_arm": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json",
     "prior_arm_closure": "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_CLOSURE_20260924.json",
     "shell_compatibility_closure": "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json",
+    "corrected_decoder_stage13_preregistration": "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json",
     "blockers": [
-      "FREEZE_LONG_HORIZON_OPTIMIZATION_EXPERIMENT_PREREGISTRATION",
-      "FREEZE_LONG_HORIZON_RUN_ALL_NOTEBOOK"
+      "CLOSE_CORRECTED_DECODER_STAGE13_REQUALIFICATION_BEFORE_LONG_HORIZON"
     ],
     "architecture_change_authorized": false,
     "spatial_resolution_change_authorized": false,
     "regularity_loss_change_authorized": false,
     "exact_r512_and_stage13_checkpoint_selection_blind": true,
-    "note": "Shell compatibility diagnostic is closed. No actual omitted-face zero-set escape was found in BASE/A0/B/C/D. The conservative boundary-crossing proxy must not be interpreted as truncation proof. Long-horizon optimization is the next learned-owner experiment; any Lipschitz/Eikonal arm remains blocked."
+    "note": "Training remains blocked. Human review authorized a diagnostic/qualification-only corrected decoder requalification first, because the prior conservative boundary-crossing proxy was falsified and all five frozen states still lack Stage13 results."
   },
   "claim_boundary": [
     "This reclosure does not prove TP64 can learn F*.",
@@ -191,5 +191,23 @@
     "parameter_updates_executed": 0,
     "stage13_qualification_executed": false,
     "disposition": "DIAGNOSTIC_COMPLETE__NO_FURTHER_EXECUTION_AUTHORIZED_UNDER_THIS_PREREG"
+  },
+  "requalification_authorization": {
+    "authorized": true,
+    "scope": "KNIGHT_FIT1__FIVE_FROZEN_STATES__CORRECTED_EXACT_SHELL_CONTAINMENT__FROZEN_STAGE13_P999",
+    "preregistration": "canonical/IRIS_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_PREREG_20260924.json",
+    "code_repo_commit": "b39b5f13e2657553692c7a8b27db62b20332e279",
+    "code_ci_run_id": 35986938283,
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_CORRECTED_DECODER_STAGE13_REQUALIFICATION_RUN_ALL.ipynb",
+    "notebook_sha256": "ec59aba793814dff39dfa5fbda2496ae565a459f82080070be5ee1efd981b7a8",
+    "optimizer_steps_permitted": 0,
+    "parameter_updates_permitted": 0,
+    "stage13_qualification_permitted": true,
+    "checkpoint_selection_permitted": false,
+    "r512_rerun_required": false,
+    "threshold_change_authorized": false,
+    "architecture_change_authorized": false,
+    "spatial_resolution_change_authorized": false,
+    "disposition": "AUTHORIZED_ONCE_UNDER_FROZEN_PREREG__CLOSE_BEFORE_ANY_TRAINING"
   }
 }

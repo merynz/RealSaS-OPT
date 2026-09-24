@@ -1,0 +1,106 @@
+{
+  "schema": "RealSaS.IRIS.V5TP64LearnedTailLocalizationPrereg.v1",
+  "status": "FROZEN_BEFORE_DIAGNOSTIC_EXECUTION",
+  "date_utc": "2026-09-24",
+  "purpose": "Localize the already-selected Knight FIT1 TP64 direct-F* learned sign/zero-set tail without performing optimizer steps, changing any scientific authority, or using Stage13 feedback.",
+  "baseline": {
+    "closure": "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_CLOSURE_20260923.json",
+    "run_id": "20260923T212708Z",
+    "execution_repo_commit": "4de08a779199d64b60b0d1aae3512a0f77e77c77",
+    "selected_step": 4800,
+    "selected_checkpoint_sha256": "45de860757ddb6f65afcecb7fdc9f51ef4aef2aeaf598288459a0e5bfa1ec751",
+    "frozen_query_pool_sha256": "0f0215f4a2ef018729d0f86c052da916dcc3ca4b376c66c455ffdc38edfd91ad",
+    "heldout_sign_disagreement_count": 14861,
+    "r512_certified_exterior_count": 128851336,
+    "r512_nonpositive_certified_exterior_count": 85849,
+    "sparse_shell_boundary_crossing_tets": 436
+  },
+  "execution": {
+    "diagnostic_repo_commit": "3eb635f84768c180ea6acdda920f107188ad956b",
+    "notebook_filename": "RealSaS_IRIS_KNIGHT_V5_TP64_LEARNED_TAIL_LOCALIZATION_RUN_ALL.ipynb",
+    "notebook_sha256": "607c217c2259c769290dd0ee566e12ad3f03fb284d0474eb4c744f7d472d8e26",
+    "required_hardware": "A100_CLASS__VRAM_GE_30_GIB",
+    "optimizer_steps_permitted": 0,
+    "parameter_updates_permitted": 0,
+    "stage13_qualification_permitted": false
+  },
+  "frozen_authorities": {
+    "stage08_evidence_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "observation_set_binding_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
+    "normalization_binding_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23",
+    "fstar_contract": "canonical/IRIS_V5_CONTINUOUS_SOURCE_FIELD_POLICY_20260923.json",
+    "field_ontology": "canonical/IRIS_V5_FIELD_ONTOLOGY_RECLOSURE_20260923.json",
+    "analytic_indexed_decoder_closure": "canonical/IRIS_V5_INDEXED_STAGE12_ANALYTIC_PARITY_CLOSURE_20260923.json",
+    "decoder": "RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT.v5",
+    "r512_certification": "FROZEN_V4_3_SOURCE_HULL_CERTIFICATION__SIGN_ONLY"
+  },
+  "diagnostic_questions": [
+    "Bin held-out sign disagreements and top 1% absolute residuals by exact |F*| and normalized spatial concentration.",
+    "Capture every exact R512 source-certified exterior point where the selected learned field is nonpositive, including source-hull distance, witness view, learned value, exact F*, and normalized location.",
+    "Capture every sparse-shell boundary-crossing tetrahedron, including parent/subcube/tetra identity, learned corner scalars, exact normalized center, and exact F* at tetra vertices and center.",
+    "Measure normalized-Euclidean proximity and 32/64/128 uniform-bin overlap between boundary crossings, exact R512 sign violations, held-out sign errors, and held-out top 1% residuals."
+  ],
+  "frozen_analysis": {
+    "heldout_top_residual_fraction": 0.01,
+    "spatial_resolutions": [
+      32,
+      64,
+      128
+    ],
+    "target_abs_band_edges": [
+      0.001953125,
+      0.00390625,
+      0.0067658234670659265,
+      0.013531646934131853,
+      0.03
+    ],
+    "proximity_thresholds": [
+      0.001953125,
+      0.00390625,
+      0.0067658234670659265,
+      0.013531646934131853,
+      0.03
+    ],
+    "proximity_semantics": "NORMALIZED_Q_EUCLIDEAN_DISTANCE__NOT_FSTAR_MAGNITUDE__NOT_PIXEL_DISTANCE",
+    "automatic_owner_selection": false,
+    "adaptive_threshold_selection": false
+  },
+  "exact_reproduction_gates": {
+    "heldout_count": 131072,
+    "heldout_sign_disagreement_count": 14861,
+    "r512_certified_exterior_count": 128851336,
+    "r512_nonpositive_certified_exterior_count": 85849,
+    "candidate_fine_tets": 87228480,
+    "crossing_tets": 9099510,
+    "exact_faces": 12001452,
+    "boundary_crossing_tets": 436,
+    "mismatch_disposition": "APPARATUS_ABORT__NOT_SCIENTIFIC_RESULT"
+  },
+  "forbidden_actions": [
+    "ANY_OPTIMIZER_STEP",
+    "ANY_PARAMETER_UPDATE",
+    "SECOND_SEED",
+    "LOSS_OR_ARCHITECTURE_CHANGE",
+    "STAGE13_EXECUTION",
+    "STAGE13_FEEDBACK",
+    "R512_OR_BOUNDARY_FAILURE_LOCATION_CONDITIONING",
+    "POSTHOC_DIAGNOSTIC_THRESHOLD_CHANGE",
+    "AUTOMATIC_AUTHORIZATION_OF_NEXT_TRAINING_ARM"
+  ],
+  "completion_rule": {
+    "required_marker": "RUN_ALL_COMPLETE.txt",
+    "marker_written_last": true,
+    "drive_sync_must_complete_before_marker": true,
+    "result_is_diagnostic_only": true
+  },
+  "next_gate": {
+    "required_action": "REVIEW_AND_SEAL_LOCALIZATION_RESULT_BEFORE_FREEZING_ANY_NEW_TRAINING_ARM",
+    "training_remains_blocked": true,
+    "candidate_hypotheses": [
+      "OBJECTIVE_OR_SIGN_WEIGHTING",
+      "OPTIMIZATION_SCHEDULE_OR_BUDGET",
+      "LOCAL_FIELD_REGULARITY_OR_SAMPLING",
+      "REPRESENTATION_BANDWIDTH_OR_CAPACITY"
+    ]
+  }
+}

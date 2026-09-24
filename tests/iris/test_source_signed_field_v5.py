@@ -226,22 +226,26 @@ def test_canonical_policy_matches_f4_contract_and_frozen_training_authorization(
         "active_interpretation": "ALL_SOURCE_CERTIFIED_EXTERIOR_R512_POINTS_ARE_STRICTLY_POSITIVE",
     }
     auth = ontology["training_authorization"]
-    if auth["authorized"]:
-        assert auth["authorization_scope"] == "KNIGHT_FIT1__TP64_DIRECT_FSTAR_REACHABILITY__ONE_FROZEN_PREREGISTERED_ARM"
-        assert auth["execution_repo_commit"] == "4de08a779199d64b60b0d1aae3512a0f77e77c77"
-        assert auth["notebook_sha256"] == "93e7dd44dcfed865b5ba5861365e88b6407255da6ce0af9674c43a6bbb231aad"
-        assert auth["preregistration_amendment"] == "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_PREREG_AMENDMENT_20260923.json"
-        assert auth["blockers"] == []
-    else:
-        assert auth["prior_arm_closure"] == "canonical/IRIS_V5_TP64_DIRECT_FSTAR_FIT_CLOSURE_20260923.json"
-        assert auth["diagnostic_closure"] == "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json"
-        assert auth["blockers"] == [
-            "FREEZE_CAUSAL_TAIL_REPAIR_ABLATION_PREREGISTRATION",
-            "FREEZE_CAUSAL_TAIL_REPAIR_RUN_ALL_NOTEBOOK",
-        ]
-        diag = ontology["diagnostic_authorization"]
-        assert diag["authorized"] is False
-        assert diag["closure"] == "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json"
-        assert diag["optimizer_steps_executed"] == 0
-        assert diag["parameter_updates_executed"] == 0
-        assert diag["stage13_qualification_executed"] is False
+    assert auth["authorized"] is True
+    assert auth["authorization_scope"] == "KNIGHT_FIT1__TP64_OBJECTIVE_CAUSAL_ABLATION__FOUR_FROZEN_CONTINUATION_ARMS"
+    assert auth["preregistration"] == "canonical/IRIS_V5_TP64_OBJECTIVE_CAUSAL_ABLATION_PREREG_20260924.json"
+    assert auth["execution_repo_commit"] == "df260b8e1423927d7df8873f80b2b82ab376a77b"
+    assert auth["notebook_sha256"] == "b469a617867e3e6e76c344a833568b9ed3d631039fcdb2010b30659e4f237fbb"
+    assert auth["base_checkpoint_sha256"] == "45de860757ddb6f65afcecb7fdc9f51ef4aef2aeaf598288459a0e5bfa1ec751"
+    assert auth["exact_r512_audit_lattice_points_forbidden_from_training"] is True
+    assert auth["exact_r512_and_stage13_checkpoint_selection_blind"] is True
+    assert auth["architecture_change_authorized"] is False
+    assert auth["spatial_resolution_change_authorized"] is False
+    assert auth["blockers"] == []
+    assert auth["arms"] == [
+        "A0_CONTINUE_DIRECT_FSTAR_ONLY",
+        "B_DIRECT_FSTAR_PLUS_NEAR_ZERO_SIGN",
+        "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE",
+        "D_DIRECT_FSTAR_PLUS_SIGN_AND_SILHOUETTE",
+    ]
+    diag = ontology["diagnostic_authorization"]
+    assert diag["authorized"] is False
+    assert diag["closure"] == "canonical/IRIS_V5_TP64_LEARNED_TAIL_LOCALIZATION_CLOSURE_20260924.json"
+    assert diag["optimizer_steps_executed"] == 0
+    assert diag["parameter_updates_executed"] == 0
+    assert diag["stage13_qualification_executed"] is False

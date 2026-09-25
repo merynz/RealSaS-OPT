@@ -17,6 +17,7 @@ from ..hashing import content_sha256
 from ..types import QualificationError
 from .scene_first_signed import (
     _self_zbuffer_support,
+    mesh_connected_component_labels_v1,
     rigging_surface_from_scene_first_zero_mesh_v1,
 )
 
@@ -30,29 +31,7 @@ def substrate_adequacy_report_hash_v1(report:dict)->str:
 
 
 def _dense_component_labels(vertex_count:int,faces:np.ndarray)->np.ndarray:
-    parent=np.arange(int(vertex_count),dtype=np.int64)
-    rank=np.zeros(int(vertex_count),dtype=np.int8)
-
-    def find(x:int)->int:
-        while parent[x]!=x:
-            parent[x]=parent[parent[x]]
-            x=int(parent[x])
-        return x
-
-    def union(a:int,b:int)->None:
-        ra,rb=find(a),find(b)
-        if ra==rb: return
-        if rank[ra]<rank[rb]:
-            ra,rb=rb,ra
-        parent[rb]=ra
-        if rank[ra]==rank[rb]:
-            rank[ra]+=1
-
-    for a,b,c in np.asarray(faces,dtype=np.int64):
-        union(int(a),int(b)); union(int(b),int(c)); union(int(c),int(a))
-    roots=np.asarray([find(i) for i in range(int(vertex_count))],dtype=np.int64)
-    _,labels=np.unique(roots,return_inverse=True)
-    return labels.astype(np.int64)
+    return mesh_connected_component_labels_v1(vertex_count, faces)
 
 
 def _candidate_caps(policy:dict)->tuple[int,...]:

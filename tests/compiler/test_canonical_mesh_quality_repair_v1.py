@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from types import SimpleNamespace
 
 from compiler.realsas_compiler_core.canonical_mesh_quality_repair_v1 import (
+    mechanical_quality_protected_surface_ids_v1,
     repair_candidate_endpoint_collapses_v1,
     repair_candidate_fixed_vertex_flips_v1,
     repair_candidate_projected_relaxation_v1,
@@ -175,3 +177,16 @@ def test_projected_relaxation_moves_interior_vertex_on_reference_surface_with_co
     assert moved.support_binding.mode=="LOCAL_CONVEX_INTERPOLATION"
     assert abs(sum(coeff for _,coeff in moved.support_binding.coefficients)-1.0)<1e-9
     assert moved.P != pts["v"]
+
+
+def test_quality_protection_only_hard_protects_cut_and_unknown_boundaries():
+    partition=SimpleNamespace(
+        boundary_constraints=(
+            SimpleNamespace(a_surface_id="a",b_surface_id="b",decision="PRESERVE_CONTINUITY"),
+            SimpleNamespace(a_surface_id="c",b_surface_id="d",decision="SEPARATE"),
+            SimpleNamespace(a_surface_id="e",b_surface_id="f",decision="UNKNOWN"),
+        )
+    )
+    protected=mechanical_quality_protected_surface_ids_v1(partition)
+    assert protected==frozenset({"c","d","e","f"})
+    assert "a" not in protected and "b" not in protected

@@ -9,142 +9,97 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   probe:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
-      - name: Probe and import exact Frozen-C artifacts from Windows Google Drive
+      - name: Verify current demo-only orchestration semantics
         shell: bash
-        env:
-          FROZEN_C_CHECKPOINT_SHA256: '222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0'
-          FROZEN_C_ZERO_SURFACE_SHA256: 'adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c'
         run: |
           set -euo pipefail
-          root="$HOME/realsas_authority"
-          import_dir="$root/imports/frozen_c_20260924T115953Z"
-          mkdir -p "$import_dir"
-          echo "AUTHORITY_ROOT_EXISTS=$([ -d "$root" ] && echo 1 || echo 0)"
-          echo "IMPORT_DIR=$import_dir"
+          python -m py_compile \
+            compiler/realsas_compiler_services/orchestrator/status_semantics.py \
+            compiler/realsas_compiler_services/orchestrator/mainline.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/adapter_io.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py
+          python -m pytest -q \
+            tests/repository/test_demo_only_status_semantics.py \
+            tests/repository/test_mainline_v2_dag_scheduler.py
 
-          exact_count=0
-          if [ -f "$import_dir/SELECTED_CHECKPOINT.pt" ]; then exact_count=$((exact_count+1)); fi
-          if [ -f "$import_dir/IRIS_SIGNED_ZERO_SURFACE.npz" ]; then exact_count=$((exact_count+1)); fi
-          echo "FROZEN_C_LOCAL_EXACT_ARTIFACT_COUNT_BEFORE=$exact_count"
-
-          if command -v rclone >/dev/null 2>&1; then
-            echo "RCLONE_INSTALLED=1"
-            mapfile -t remotes < <(rclone listremotes 2>/dev/null || true)
-            echo "RCLONE_REMOTE_COUNT=${#remotes[@]}"
-          else
-            echo "RCLONE_INSTALLED=0"
-            echo "RCLONE_REMOTE_COUNT=0"
-          fi
-          if command -v gdrive >/dev/null 2>&1; then echo "GDRIVE_CLI_INSTALLED=1"; else echo "GDRIVE_CLI_INSTALLED=0"; fi
-
-          if ! command -v powershell.exe >/dev/null 2>&1; then
-            echo "WINDOWS_POWERSHELL_AVAILABLE=0"
-            exit 1
-          fi
-          echo "WINDOWS_POWERSHELL_AVAILABLE=1"
-
-          ps1="$RUNNER_TEMP/realsas_find_copy_frozen_c.ps1"
-          cat > "$ps1" <<'POWERSHELL'
-          param(
-            [Parameter(Mandatory=$true)][string]$Destination
+      - name: Verify authenticated Google Drive and exact Frozen C bytes
+        shell: bash
+        env:
+          CHECKPOINT_SHA: '222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0'
+          ZERO_SHA: 'adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c'
+        run: |
+          set -euo pipefail
+          command -v rclone
+          rclone listremotes | grep -Fx 'gdrive:'
+          rclone lsf 'gdrive:RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1' --dirs-only --max-depth 1 >/dev/null
+          d="$HOME/realsas_authority/imports/frozen_c_20260924T115953Z"
+          required=(
+            SELECTED_CHECKPOINT.pt
+            IRIS_SIGNED_ZERO_SURFACE.npz
+            SELECTED_CHECKPOINT_REPORT.json
+            DECODER_RESULT.json
+            FROZEN_STAGE13_RESULT.json
+            V5_TP64_LONG_HORIZON_LOW_LR_RESULT.json
           )
-          $ErrorActionPreference = 'Stop'
-          $relatives = @(
-            "My Drive\RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1\20260924T115953Z\V5_TP64_LONG_HORIZON_LOW_LR\arms\C",
-            "Benim Drive'ım\RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1\20260924T115953Z\V5_TP64_LONG_HORIZON_LOW_LR\arms\C",
-            "RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1\20260924T115953Z\V5_TP64_LONG_HORIZON_LOW_LR\arms\C",
-            "Google Drive\My Drive\RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1\20260924T115953Z\V5_TP64_LONG_HORIZON_LOW_LR\arms\C"
-          )
-          $source = $null
-          $driveRows = @()
-          foreach ($drive in (Get-PSDrive -PSProvider FileSystem)) {
-            $driveRows += [PSCustomObject]@{Name=$drive.Name;Root=$drive.Root}
-            foreach ($relative in $relatives) {
-              $candidate = Join-Path $drive.Root $relative
-              if (
-                (Test-Path -LiteralPath (Join-Path $candidate 'SELECTED_CHECKPOINT.pt') -PathType Leaf) -and
-                (Test-Path -LiteralPath (Join-Path $candidate 'IRIS_SIGNED_ZERO_SURFACE.npz') -PathType Leaf)
-              ) {
-                $source = $candidate
-                break
-              }
-            }
-            if ($null -ne $source) { break }
-          }
-          Write-Host ('WINDOWS_FILESYSTEM_DRIVES=' + (($driveRows | ForEach-Object { $_.Name + ':' + $_.Root }) -join ';'))
-          if ($null -eq $source) {
-            Write-Host 'FROZEN_C_WINDOWS_DRIVE_PATH_ACCESSIBLE=0'
-            exit 42
-          }
-          Write-Host 'FROZEN_C_WINDOWS_DRIVE_PATH_ACCESSIBLE=1'
-          Write-Host ('FROZEN_C_WINDOWS_SOURCE=' + $source)
-          New-Item -ItemType Directory -Force -Path $Destination | Out-Null
-          $required = @(
-            'SELECTED_CHECKPOINT.pt',
-            'SELECTED_CHECKPOINT_REPORT.json',
-            'IRIS_SIGNED_ZERO_SURFACE.npz',
-            'DECODER_RESULT.json',
-            'FROZEN_STAGE13_RESULT.json'
-          )
-          foreach ($name in $required) {
-            $src = Join-Path $source $name
-            if (-not (Test-Path -LiteralPath $src -PathType Leaf)) {
-              throw ('FROZEN_C_REQUIRED_FILE_MISSING:' + $src)
-            }
-            Copy-Item -LiteralPath $src -Destination (Join-Path $Destination $name) -Force
-          }
-          $longHorizon = Split-Path -Parent (Split-Path -Parent $source)
-          $result = Join-Path $longHorizon 'V5_TP64_LONG_HORIZON_LOW_LR_RESULT.json'
-          if (-not (Test-Path -LiteralPath $result -PathType Leaf)) {
-            throw ('FROZEN_C_RESULT_MISSING:' + $result)
-          }
-          Copy-Item -LiteralPath $result -Destination (Join-Path $Destination 'V5_TP64_LONG_HORIZON_LOW_LR_RESULT.json') -Force
-          Write-Host 'FROZEN_C_WINDOWS_COPY_COMPLETE=1'
-          POWERSHELL
+          for name in "${required[@]}"; do test -s "$d/$name"; done
+          printf '%s  %s\n' "$CHECKPOINT_SHA" "$d/SELECTED_CHECKPOINT.pt" | sha256sum -c -
+          printf '%s  %s\n' "$ZERO_SHA" "$d/IRIS_SIGNED_ZERO_SURFACE.npz" | sha256sum -c -
 
-          ps1_win="$(wslpath -w "$ps1")"
-          dest_win="$(wslpath -w "$import_dir")"
-          set +e
-          powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$ps1_win" -Destination "$dest_win"
-          ps_rc=$?
-          set -e
-          echo "WINDOWS_IMPORT_EXIT_CODE=$ps_rc"
-          if [ "$ps_rc" -ne 0 ]; then
-            exit "$ps_rc"
-          fi
-
-          printf '%s  %s\n' "$FROZEN_C_CHECKPOINT_SHA256" "$import_dir/SELECTED_CHECKPOINT.pt" | sha256sum --check -
-          printf '%s  %s\n' "$FROZEN_C_ZERO_SURFACE_SHA256" "$import_dir/IRIS_SIGNED_ZERO_SURFACE.npz" | sha256sum --check -
+      - name: Seal verified resume gate
+        shell: bash
+        run: |
+          set -euo pipefail
           python - <<'PY'
           import hashlib, json, os
           from pathlib import Path
-          root=Path.home()/'realsas_authority'/'imports'/'frozen_c_20260924T115953Z'
+
+          d=Path.home()/"realsas_authority"/"imports"/"frozen_c_20260924T115953Z"
           def sha(p):
               h=hashlib.sha256()
-              with Path(p).open('rb') as f:
-                  for b in iter(lambda:f.read(1<<20),b''): h.update(b)
+              with Path(p).open("rb") as f:
+                  for chunk in iter(lambda:f.read(1<<20),b""): h.update(chunk)
               return h.hexdigest()
-          rows={}
-          for p in sorted(root.iterdir()):
-              if p.is_file():
-                  rows[p.name]={'sha256':sha(p),'bytes':p.stat().st_size}
-          receipt={
-              'schema':'RealSaS.KnightFrozenCArtifactImport.v1',
-              'status':'PASS',
-              'source':'WINDOWS_GOOGLE_DRIVE_DESKTOP_EXACT_BYTES',
-              'checkpoint_sha256':'222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0',
-              'zero_surface_sha256':'adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c',
-              'files':rows,
+          files={}
+          for name in (
+              "SELECTED_CHECKPOINT.pt",
+              "IRIS_SIGNED_ZERO_SURFACE.npz",
+              "SELECTED_CHECKPOINT_REPORT.json",
+              "DECODER_RESULT.json",
+              "FROZEN_STAGE13_RESULT.json",
+              "V5_TP64_LONG_HORIZON_LOW_LR_RESULT.json",
+          ):
+              p=d/name
+              files[name]={"sha256":sha(p),"bytes":p.stat().st_size}
+          payload={
+              "schema":"RealSaS.KnightDemoResumeGateReceipt.v1",
+              "status":"PASS",
+              "tested_commit":os.environ["GITHUB_SHA"],
+              "runner_name":os.environ.get("RUNNER_NAME",""),
+              "runner_os":os.environ.get("RUNNER_OS",""),
+              "demo_only_status_semantics":"PASS",
+              "rclone_google_drive_access":"PASS",
+              "frozen_c_checkpoint_sha256":files["SELECTED_CHECKPOINT.pt"]["sha256"],
+              "frozen_c_zero_surface_sha256":files["IRIS_SIGNED_ZERO_SURFACE.npz"]["sha256"],
+              "files":files,
+              "product_authority_claimed":False,
           }
-          (root/'IMPORT_RECEIPT.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
-          print('FROZEN_C_IMPORT_PASS',json.dumps(receipt,sort_keys=True))
+          out=Path("canonical/KNIGHT_DEMO_RESUME_GATE_RECEIPT_20260925.json")
+          out.write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print(json.dumps(payload,sort_keys=True))
           PY
+          git config user.name "realsas-self-hosted-runner"
+          git config user.email "runner@realsas.local"
+          git add canonical/KNIGHT_DEMO_RESUME_GATE_RECEIPT_20260925.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'demo: seal verified Frozen C resume gate'
+            git push origin HEAD:research/vf11-certified-adaptive-20260921
+          fi

@@ -15,6 +15,7 @@ from models.geppetto.reference_strength_v1.rigging_surface_tensorization_v1 impo
 from compiler.realsas_compiler_core.geometry_substrate_v2 import (
     GeometrySubstrateViewIR,
     build_geometry_substrate_qualification,
+    geometry_substrate_evidence_from_dict,
     geometry_substrate_from_dict,
 )
 from compiler.realsas_compiler_core.hashing import content_sha256

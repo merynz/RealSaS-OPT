@@ -8,6 +8,10 @@ on:
     paths:
       - 'canonical/KNIGHT_DEMO_STAGE15_RECEIPT_RECOVER_TRIGGER_20260925.json'
 
+concurrency:
+  group: subject2-knight-demo-v2-run
+  cancel-in-progress: false
+
 permissions:
   contents: write
 

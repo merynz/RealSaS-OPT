@@ -184,7 +184,7 @@ def _surface_sample_geometry(candidate, barycentric: np.ndarray):
     )
 
 
-def resolve_projected_tile_resolution(
+def projected_tile_resolution_evidence(
     *,
     candidate,
     cameras,
@@ -284,26 +284,56 @@ def resolve_projected_tile_resolution(
         if selected is None and density_passed and capacity_passed:
             selected = resolution
 
-    if selected is None:
-        raise QualificationError("CAA_TILE_DENSITY_OR_CAPACITY_UNSATISFIED")
-    selected_layout = face_atlas_layout(
-        face_count,
-        tile_resolution=selected,
-        bleed_px=int(bleed_px),
-    )
-    stride = int(selected_layout["tile_stride"])
-    per_axis = int(max_atlas_resolution) // stride
+    max_supported_face_count = 0
+    if selected is not None:
+        selected_layout = face_atlas_layout(
+            face_count,
+            tile_resolution=selected,
+            bleed_px=int(bleed_px),
+        )
+        stride = int(selected_layout["tile_stride"])
+        per_axis = int(max_atlas_resolution) // stride
+        max_supported_face_count = int(per_axis * per_axis)
+
     return {
         "mode": "PROJECTED_SOURCE_DENSITY_V1",
-        "selected_tile_resolution": int(selected),
+        "selected_tile_resolution": (
+            None if selected is None else int(selected)
+        ),
         "max_source_pixels_per_atlas_texel": limit,
+        "max_atlas_resolution": int(max_atlas_resolution),
+        "face_count": int(face_count),
         "worst_projected_barycentric_sigma_px": worst_sigma,
         "worst_view_index": int(worst_view),
         "worst_face_index": int(worst_face),
         "visible_face_observation_count": int(visible_face_observation_count),
-        "max_supported_face_count": int(per_axis * per_axis),
+        "max_supported_face_count": int(max_supported_face_count),
         "candidates": rows,
     }
+
+
+def resolve_projected_tile_resolution(
+    *,
+    candidate,
+    cameras,
+    foreground_mask_by_view: Mapping[int, np.ndarray],
+    candidate_resolutions: tuple[int, ...],
+    max_source_pixels_per_atlas_texel: float,
+    bleed_px: int,
+    max_atlas_resolution: int,
+) -> dict:
+    evidence = projected_tile_resolution_evidence(
+        candidate=candidate,
+        cameras=cameras,
+        foreground_mask_by_view=foreground_mask_by_view,
+        candidate_resolutions=candidate_resolutions,
+        max_source_pixels_per_atlas_texel=max_source_pixels_per_atlas_texel,
+        bleed_px=bleed_px,
+        max_atlas_resolution=max_atlas_resolution,
+    )
+    if evidence["selected_tile_resolution"] is None:
+        raise QualificationError("CAA_TILE_DENSITY_OR_CAPACITY_UNSATISFIED")
+    return evidence
 
 
 def _circular_view_order(target: int) -> tuple[int, ...]:

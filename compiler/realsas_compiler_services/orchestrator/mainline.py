@@ -70,6 +70,29 @@ def atomic_json(path: Path, value: dict) -> None:
     tmp.replace(path)
 
 
+def _persist_failure_diagnostics(
+    *,
+    run_id: str,
+    stage_id: str,
+    diagnostics: Any,
+) -> dict:
+    payload = {
+        "schema": "RealSaS.StageFailureDiagnostics.v1",
+        "run_id": str(run_id),
+        "stage_id": str(stage_id),
+        "diagnostics": _canon(diagnostics),
+    }
+    root = authority_root() / "runs" / str(run_id) / "artifacts" / str(stage_id)
+    path = root / "failure_diagnostics.json"
+    atomic_json(path, payload)
+    return {
+        "path": str(path.resolve()),
+        "sha256": sha256_file(path),
+        "bytes": path.stat().st_size,
+        "diagnostics_hash": content_sha256(diagnostics),
+    }
+
+
 def _stage_map(plan: dict) -> dict[str, dict]:
     return {str(stage["id"]): stage for stage in plan["stages"]}
 
@@ -1012,15 +1035,28 @@ def _run_stage(
                 }
             )
         if status not in PASS_STATUSES:
+            diagnostics = result.get("diagnostics", {})
+            diagnostics_ref = _persist_failure_diagnostics(
+                run_id=run_id,
+                stage_id=stage_id,
+                diagnostics=diagnostics,
+            )
             row.update(
                 status=status if status in FAIL_STATUSES else "FAIL",
-                diagnostics_hash=content_sha256(result.get("diagnostics", {})),
+                diagnostics_hash=diagnostics_ref["diagnostics_hash"],
                 blockers=list(
                     result.get("blockers")
                     or ["STAGE_ADAPTER_REPORTED_FAILURE"]
                 ),
                 wall_seconds=float(elapsed),
                 performance=dict(result.get("performance") or {}),
+            )
+            ledger.setdefault("history", []).append(
+                {
+                    "event": "STAGE_FAILURE_DIAGNOSTICS_PERSISTED",
+                    "stage_id": stage_id,
+                    "diagnostics_ref": diagnostics_ref,
+                }
             )
         else:
             row.update(
@@ -1042,12 +1078,19 @@ def _run_stage(
             )
     except Exception as exc:
         elapsed = perf_counter() - started
+        diagnostics = {
+            "exception_type": type(exc).__name__,
+            "message": str(exc),
+        }
+        diagnostics_ref = _persist_failure_diagnostics(
+            run_id=run_id,
+            stage_id=stage_id,
+            diagnostics=diagnostics,
+        )
         row.update(
             status="FAIL",
             outputs=[],
-            diagnostics_hash=content_sha256(
-                {"exception_type": type(exc).__name__, "message": str(exc)}
-            ),
+            diagnostics_hash=diagnostics_ref["diagnostics_hash"],
             blockers=[f"EXCEPTION:{type(exc).__name__}:{exc}"],
             wall_seconds=float(elapsed),
             performance={},
@@ -1058,6 +1101,7 @@ def _run_stage(
                 "stage_id": stage_id,
                 "exception_type": type(exc).__name__,
                 "message": str(exc),
+                "diagnostics_ref": diagnostics_ref,
             }
         )
     _refresh(plan, ledger)

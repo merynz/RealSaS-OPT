@@ -174,7 +174,15 @@ def _qualified_topology_metrics(qualified, target, matching) -> dict:
     }
 
 
-def _evaluate_seed(model, surface, tensor, target, seed: int) -> dict:
+def _evaluate_seed(
+    model,
+    surface,
+    tensor,
+    target,
+    seed: int,
+    *,
+    include_payload: bool = False,
+) -> dict:
     device = next(model.parameters()).device
     generator = torch.Generator(device=device)
     generator.manual_seed(int(seed))
@@ -203,9 +211,10 @@ def _evaluate_seed(model, surface, tensor, target, seed: int) -> dict:
                 "status": "COMPILER_QUALIFICATION_FAIL",
                 "pass": False,
                 "qualification_error": f"{type(exc).__name__}:{exc}",
-                "proposal": proposal.to_dict(),
             }
         )
+        if include_payload:
+            report["proposal"] = proposal.to_dict()
         return report
 
     pred_world = np.asarray(
@@ -240,20 +249,38 @@ def _evaluate_seed(model, surface, tensor, target, seed: int) -> dict:
             "matched_p95_norm": matching["p95_norm"],
             **topology,
             "finite": finite,
-            "proposal": proposal.to_dict(),
-            "qualified": qualified.to_dict(),
         }
     )
+    if include_payload:
+        report["proposal"] = proposal.to_dict()
+        report["qualified"] = qualified.to_dict()
     return report
 
 
-def _check(model, surface, tensor, target, step: int) -> dict:
+def _check(
+    model,
+    surface,
+    tensor,
+    target,
+    step: int,
+    *,
+    include_payload: bool = False,
+) -> dict:
     model.eval()
     assert_no_learned_view_slot_identity_v1(model)
     rows = []
     with torch.no_grad():
         for seed in DIFFUSION_SEEDS:
-            rows.append(_evaluate_seed(model, surface, tensor, target, seed))
+            rows.append(
+                _evaluate_seed(
+                    model,
+                    surface,
+                    tensor,
+                    target,
+                    seed,
+                    include_payload=include_payload,
+                )
+            )
     return {
         "step": int(step),
         "pass": all(bool(row.get("pass", False)) for row in rows),
@@ -487,7 +514,14 @@ def run(args) -> dict:
             break
 
     final_step = closure_step or MAX_STEPS
-    final_check = _check(model, surface, tensor, target, final_step)
+    final_check = _check(
+        model,
+        surface,
+        tensor,
+        target,
+        final_step,
+        include_payload=True,
+    )
     if closure_step is None or final_check.get("pass") is not True:
         result = {
             "schema": SCHEMA,

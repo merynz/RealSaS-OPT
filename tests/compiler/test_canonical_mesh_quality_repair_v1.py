@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 
 from compiler.realsas_compiler_core.canonical_mesh_quality_repair_v1 import (
+    repair_candidate_endpoint_collapses_v1,
     repair_candidate_fixed_vertex_flips_v1,
 )
 from compiler.realsas_compiler_core.product_authority_v1 import (
@@ -75,3 +76,54 @@ def test_nonplanar_flip_is_rejected_by_frozen_g1_deviation_budget():
     repaired,report=repair_candidate_fixed_vertex_flips_v1(candidate,_policy())
     assert report["accepted_flip_count"]==0
     assert repaired.faces==candidate.faces
+
+
+def test_endpoint_collapse_removes_short_edge_slivers_with_link_condition():
+    pts={
+        "u":(0.0,0.0,0.0),
+        "v":(0.02,0.02,0.0),
+        "a":(0.0,1.0,0.0),
+        "b":(0.0,-1.0,0.0),
+        "c":(1.0,1.0,0.0),
+        "d":(1.0,-1.0,0.0),
+    }
+    vertices=tuple(
+        CanonicalMeshVertexCandidateIR(
+            vid,
+            SurfaceSupportBinding("IDENTITY_SURFACE_NODE",((f"s{vid}",1.0),)),
+            "c0",
+            pts[vid],
+        )
+        for vid in ("u","v","a","b","c","d")
+    )
+    faces=(
+        ("u","v","a"),
+        ("v","u","b"),
+        ("v","c","a"),
+        ("v","b","d"),
+    )
+    edges=tuple(sorted({
+        tuple(sorted((face[i],face[j])))
+        for face in faces for i,j in ((0,1),(1,2),(2,0))
+    }))
+    candidate=CanonicalMeshCandidateIR(
+        vertices,faces,edges,
+        "surface","partition","carrier",
+        "fixture","fixture-policy","",
+    )
+    candidate=replace(
+        candidate,
+        candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(candidate),
+    )
+    repaired,report=repair_candidate_endpoint_collapses_v1(
+        candidate,_policy(),max_collapses=4
+    )
+    assert report["accepted_collapse_count"]==1
+    assert report["before"]["policy_violating_face_count"]==2
+    assert report["after"]["policy_violating_face_count"]==0
+    assert len(repaired.vertices)==5
+    assert len(repaired.faces)==2
+    assert all(
+        vertex.support_binding in tuple(v.support_binding for v in candidate.vertices)
+        for vertex in repaired.vertices
+    )

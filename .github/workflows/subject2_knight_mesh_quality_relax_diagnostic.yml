@@ -56,6 +56,7 @@ jobs:
               qualified_observation_set_from_dict,
           )
           from compiler.realsas_compiler_core.canonical_mesh_quality_repair_v1 import (
+              mechanical_quality_protected_surface_ids_v1,
               repair_candidate_endpoint_collapses_v1,
               repair_candidate_fixed_vertex_flips_v1,
               repair_candidate_projected_relaxation_v1,
@@ -95,11 +96,9 @@ jobs:
                   "RealSaS.MechanicalPartitionIR.v1",
               )
           )
-          protected_surface_ids={
-              str(sid)
-              for row in partition.boundary_constraints
-              for sid in (row.a_surface_id,row.b_surface_id)
-          }
+          protected_surface_ids=set(
+              mechanical_quality_protected_surface_ids_v1(partition)
+          )
           cameras=qualified_camera_set_from_dict(
               stage_output_payload(
                   ctx,"05_CAMERA_CONTRACT_SOLVED",
@@ -152,6 +151,7 @@ jobs:
               "input_candidate_lineage_hash":original.candidate_lineage_hash,
               "final_candidate_lineage_hash":relaxed.candidate_lineage_hash,
               "protected_surface_id_count":len(protected_surface_ids),
+              "quality_protection_policy":"SEPARATE_AND_UNKNOWN_ONLY__PRESERVE_CONTINUITY_VALIDATED_POST_REPAIR",
               "before":before,
               "after_flip":flip_report["after"],
               "after_collapse":collapse_report["after"],

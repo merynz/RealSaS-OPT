@@ -361,7 +361,8 @@ jobs:
               json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8"
           )
           PY
-          python tools/demo_exact_artifact_import_v2.py \
+          PYTHONPATH="$GITHUB_WORKSPACE${PYTHONPATH:+:$PYTHONPATH}" \
+            python tools/demo_exact_artifact_import_v2.py \
             --run-id "$RUN_ID" \
             --import-spec "$spec"
           python - <<'PY'

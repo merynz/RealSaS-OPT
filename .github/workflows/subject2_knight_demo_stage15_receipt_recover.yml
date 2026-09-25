@@ -1,0 +1,122 @@
+name: subject2-knight-demo-stage15-receipt-recover
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_STAGE15_RECEIPT_RECOVER_TRIGGER_20260925.json'
+
+permissions:
+  contents: write
+
+jobs:
+  seal-existing-stage15:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      SUBJECT_ID: SUBJECT2_KNIGHT
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      HISTORICAL_STAGE08_SHA256: '5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7'
+      OBSERVATION_SET_HASH: '87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa'
+      NORMALIZATION_HASH: '81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23'
+      CAMERA_SET_HASH: '2485d184c7fef6c453b6ff817d3eac525e438fe023350b294436589d62d75cca'
+      FROZEN_C_CHECKPOINT_SHA256: '222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0'
+      FROZEN_C_ZERO_SHA256: 'adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify existing Stage15 demo ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          assert ledger["run_id"]==os.environ["RUN_ID"], ledger["run_id"]
+          assert ledger["subject_id"]==os.environ["SUBJECT_ID"], ledger["subject_id"]
+          assert ledger["execution_class"]=="DEMO_WITNESS", ledger["execution_class"]
+          by={row["id"]:row for row in ledger["stages"]}
+          for ordinal in range(1,16):
+              row=next(x for x in ledger["stages"] if x["ordinal"]==ordinal)
+              assert row["status"]=="PASS_DEMO_ONLY",(row["id"],row["status"],row.get("blockers"))
+          assert ledger["failed_count"]==0, ledger["failed_stage_ids"]
+          print("EXISTING_STAGE15_LEDGER_PASS_DEMO_ONLY")
+          PY
+
+      - name: Seal Stage15 receipt from existing authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          run_root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((run_root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          def payload_for(stage_id,schema):
+              matches=[o for o in by[stage_id]["outputs"] if o["schema"]==schema]
+              if len(matches)!=1: raise SystemExit(f"OUTPUT_CARDINALITY:{stage_id}:{schema}:{len(matches)}")
+              p=Path(matches[0]["path"])
+              return json.loads(p.read_text())
+          stage13=payload_for("13_GEOMETRY_SUBSTRATE_QUALIFIED","RealSaS.GeometrySubstrateQualificationIR.v2")
+          stage14=payload_for("14_GSA_BUILD","RealSaS.SubstrateAdequacyReport.v1")
+          stage15=payload_for("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceQualificationIR.v1")
+          receipt={
+            "schema":"RealSaS.KnightDemoStage15Receipt.v1",
+            "status":"PASS_DEMO_ONLY",
+            "sealed_from_existing_runner_authority":True,
+            "seal_commit":os.environ["GITHUB_SHA"],
+            "run_id":os.environ["RUN_ID"],
+            "subject_id":os.environ["SUBJECT_ID"],
+            "execution_class":"DEMO_WITNESS",
+            "completed_through_stage":15,
+            "stage_statuses":{row["id"]:row["status"] for row in ledger["stages"][:15]},
+            "exact_frozen_stage08":{
+              "artifact_sha256":os.environ["HISTORICAL_STAGE08_SHA256"],
+              "camera_set_hash":os.environ["CAMERA_SET_HASH"],
+              "observation_set_hash":os.environ["OBSERVATION_SET_HASH"],
+              "normalization_hash":os.environ["NORMALIZATION_HASH"],
+            },
+            "frozen_c":{
+              "checkpoint_sha256":os.environ["FROZEN_C_CHECKPOINT_SHA256"],
+              "zero_surface_npz_sha256":os.environ["FROZEN_C_ZERO_SHA256"],
+            },
+            "stage13":{
+              "scientific_pass":False,
+              "substrate_hash":stage13["substrate_hash"],
+              "qualification_report":stage13["qualification_report"],
+            },
+            "stage14":{
+              "status":stage14["status"],
+              "adequacy_report_hash":stage14["adequacy_report_hash"],
+              "selected_actual_node_count":stage14["selected_actual_node_count"],
+              "selected_surface_lineage_hash":stage14["selected_surface_lineage_hash"],
+            },
+            "stage15":{
+              "status":stage15["qualification_report"]["status"],
+              "qualification_hash":stage15["qualification_hash"],
+              "tensorization_hash":stage15["tensorization_hash"],
+              "certificate_hash":stage15["certificate_hash"],
+              "node_count":stage15["node_count"],
+              "edge_count":stage15["edge_count"],
+            },
+            "product_authority_claimed":False,
+            "product_pass_forbidden":True,
+          }
+          out=Path("canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json")
+          out.write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+          git config user.name 'realsas-self-hosted-runner'
+          git config user.email 'runner@realsas.local'
+          git add canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'demo: recover Knight Frozen C Stage15 receipt'
+            git push origin HEAD:research/vf11-certified-adaptive-20260921
+          fi

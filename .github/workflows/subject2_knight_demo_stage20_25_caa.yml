@@ -1,0 +1,165 @@
+name: subject2-knight-demo-stage20-25-caa
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_STAGE19_RECEIPT_20260925.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  caa-through-stage25:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 90
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      SUBJECT_ID: SUBJECT2_KNIGHT
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      PYTHONHASHSEED: '0'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned mainline dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py
+
+      - name: Verify Stage19 measured demo authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s canonical/KNIGHT_DEMO_STAGE19_RECEIPT_20260925.json
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          receipt=json.loads(Path("canonical/KNIGHT_DEMO_STAGE19_RECEIPT_20260925.json").read_text())
+          assert receipt["schema"]=="RealSaS.KnightDemoStage19Receipt.v1"
+          assert receipt["status"]=="PASS_DEMO_ONLY"
+          assert receipt["run_id"]==os.environ["RUN_ID"]
+          assert receipt["product_authority_claimed"] is False
+          ledger=json.loads((Path(os.environ["RUN_ROOT"])/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          assert by["19_STATIC_CANONICAL_MESH_QUALIFIED"]["status"]=="PASS_DEMO_ONLY"
+          assert ledger["failed_count"]==0,ledger["failed_stage_ids"]
+          print("STAGE19_MEASURED_DEMO_AUTHORITY_PASS")
+          PY
+
+      - name: Verify frozen CAA policy remains exact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          manifest=json.loads((root/"run_manifest.json").read_text())
+          appearance=dict(manifest.get("appearance") or {})
+          assert appearance.get("backend")=="DETERMINISTIC_V1",appearance
+          ref=dict(appearance.get("policy_document") or {})
+          p=Path(ref["path"])
+          h=hashlib.sha256(p.read_bytes()).hexdigest()
+          assert h==ref["sha256"],(h,ref["sha256"])
+          policy=json.loads(p.read_text())
+          assert policy["schema"]=="RealSaS.CAAQualificationPolicy.v1"
+          assert str(policy["status"]).startswith("FROZEN_")
+          print("CAA_FROZEN_POLICY_PASS",h)
+          PY
+
+      - name: Execute deterministic CAA through Stage25
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+            --run-id "$RUN_ID" \
+            --target 25_CAA_REFERENCE_REST_RENDER_PROOF || rc=$?
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status \
+            --run-id "$RUN_ID"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          ledger=json.loads((Path(os.environ["RUN_ROOT"])/"ACTIVE_RUN_V2.json").read_text())
+          for row in ledger["stages"][19:25]:
+              print("CAA_STAGE_ROW",json.dumps({
+                  "id":row["id"],
+                  "status":row["status"],
+                  "blockers":row.get("blockers") or [],
+                  "diagnostics_hash":row.get("diagnostics_hash") or "",
+              },sort_keys=True))
+          for event in (ledger.get("history") or [])[-24:]:
+              if event.get("event") in {"STAGE_EXCEPTION","STAGE_FAILED","STAGE_BLOCKED"}:
+                  print("CAA_STAGE_HISTORY",json.dumps(event,sort_keys=True))
+          PY
+          if test "$rc" -ne 0; then exit "$rc"; fi
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          ledger=json.loads((Path(os.environ["RUN_ROOT"])/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          for ordinal in range(20,26):
+              row=next(x for x in ledger["stages"] if x["ordinal"]==ordinal)
+              assert row["status"]=="PASS_DEMO_ONLY",(row["id"],row["status"],row.get("blockers"))
+          assert ledger["failed_count"]==0,ledger["failed_stage_ids"]
+          print("KNIGHT_DEMO_CAA_STAGE25_PASS_DEMO_ONLY")
+          PY
+
+      - name: Seal CAA Stage25 receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          def outputs(stage):
+              return [
+                  {
+                      "schema":x["schema"],
+                      "authority_class":x["authority_class"],
+                      "sha256":x["sha256"],
+                      "bytes":x["bytes"],
+                  }
+                  for x in by[stage]["outputs"]
+              ]
+          receipt={
+              "schema":"RealSaS.KnightDemoCAAStage25Receipt.v1",
+              "status":"PASS_DEMO_ONLY",
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "execution_repo_commit":os.environ["GITHUB_SHA"],
+              "completed_through_stage":25,
+              "stage20_outputs":outputs("20_CAA_BACKEND_PREREGISTERED"),
+              "stage21_outputs":outputs("21_CAA_COMPILE"),
+              "stage22_outputs":outputs("22_CAA_COMPILE_SEALED"),
+              "stage23_outputs":outputs("23_COMPLETE_APPEARANCE_ASSET_BAKED"),
+              "stage24_outputs":outputs("24_COMPLETE_APPEARANCE_QUALIFIED"),
+              "stage25_outputs":outputs("25_CAA_REFERENCE_REST_RENDER_PROOF"),
+              "product_authority_claimed":False,
+              "product_pass_forbidden":True,
+          }
+          Path("canonical/KNIGHT_DEMO_CAA_STAGE25_RECEIPT_20260925.json").write_text(
+              json.dumps(receipt,indent=2,sort_keys=True)+"\n"
+          )
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+          git config user.name 'realsas-self-hosted-runner'
+          git config user.email 'runner@realsas.local'
+          git add canonical/KNIGHT_DEMO_CAA_STAGE25_RECEIPT_20260925.json
+          git commit -m 'demo: seal Knight CAA Stage25 evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

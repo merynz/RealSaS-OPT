@@ -1,0 +1,89 @@
+name: subject2-knight-demo-resume-gate
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - '.github/workflows/subject2_knight_demo_resume_gate.yml'
+      - 'compiler/realsas_compiler_services/orchestrator/status_semantics.py'
+      - 'compiler/realsas_compiler_services/orchestrator/mainline.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/adapter_io.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py'
+      - 'tests/repository/test_demo_only_status_semantics.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  resume-gate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify demo-only status semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile             compiler/realsas_compiler_services/orchestrator/status_semantics.py             compiler/realsas_compiler_services/orchestrator/mainline.py             compiler/realsas_compiler_services/orchestrator/adapters/adapter_io.py             compiler/realsas_compiler_services/orchestrator/adapters/mesh_v2.py
+          python -m pytest -q             tests/repository/test_demo_only_status_semantics.py             tests/repository/test_mainline_v2_dag_scheduler.py
+
+      - name: Verify rclone Drive access
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "RUNNER_USER=$(whoami)"
+          command -v rclone
+          rclone listremotes | grep -Fx 'gdrive:'
+          rclone lsf 'gdrive:RealSaS_SUBJECT2_KNIGHT_IRIS_FIT_V1' --dirs-only --max-depth 1 | head -n 20
+
+      - name: Verify exact Frozen C import
+        shell: bash
+        env:
+          FROZEN_C_CHECKPOINT_SHA256: '222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0'
+          FROZEN_C_ZERO_SURFACE_SHA256: 'adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c'
+        run: |
+          set -euo pipefail
+          d="$HOME/realsas_authority/imports/frozen_c_20260924T115953Z"
+          test -f "$d/SELECTED_CHECKPOINT.pt"
+          test -f "$d/IRIS_SIGNED_ZERO_SURFACE.npz"
+          printf '%s  %s\n' "$FROZEN_C_CHECKPOINT_SHA256" "$d/SELECTED_CHECKPOINT.pt" | sha256sum -c -
+          printf '%s  %s\n' "$FROZEN_C_ZERO_SURFACE_SHA256" "$d/IRIS_SIGNED_ZERO_SURFACE.npz" | sha256sum -c -
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+
+          root = Path.home() / "realsas_authority" / "imports" / "frozen_c_20260924T115953Z"
+          required = (
+              "SELECTED_CHECKPOINT.pt",
+              "IRIS_SIGNED_ZERO_SURFACE.npz",
+              "SELECTED_CHECKPOINT_REPORT.json",
+              "DECODER_RESULT.json",
+              "FROZEN_STAGE13_RESULT.json",
+              "V5_TP64_LONG_HORIZON_LOW_LR_RESULT.json",
+          )
+          missing = [name for name in required if not (root / name).is_file()]
+          if missing:
+              raise SystemExit("FROZEN_C_REQUIRED_FILES_MISSING:" + ",".join(missing))
+
+          rows = {}
+          for name in required:
+              p = root / name
+              h = hashlib.sha256()
+              with p.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1 << 20), b""):
+                      h.update(chunk)
+              rows[name] = {"sha256": h.hexdigest(), "bytes": p.stat().st_size}
+
+          receipt = {
+              "schema": "RealSaS.KnightFrozenCArtifactImport.v2",
+              "status": "PASS",
+              "source": "RCLONE_AUTHENTICATED_GOOGLE_DRIVE_TO_RUNNER_AUTHORITY",
+              "files": rows,
+          }
+          out = root / "IMPORT_RECEIPT.json"
+          out.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          print(json.dumps(receipt, indent=2, sort_keys=True))
+          PY

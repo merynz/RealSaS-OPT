@@ -655,9 +655,11 @@ def _manifest_subset(manifest: dict, stage: dict) -> dict:
             and key == "arachne_fit"
         ):
             cfg = dict(value or {})
-            subset[key] = {"preregistration": cfg.get("preregistration")}
+            subset[key] = _canon(
+                {"preregistration": cfg.get("preregistration")}
+            )
         else:
-            subset[key] = value
+            subset[key] = _canon(value)
     return subset
 
 

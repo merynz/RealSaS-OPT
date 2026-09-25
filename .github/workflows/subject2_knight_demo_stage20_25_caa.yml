@@ -42,7 +42,8 @@ jobs:
           python -m py_compile compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py
           python -m pytest -q \
             tests/compiler/test_caa_demo_static_mesh_admission_v2.py \
-            tests/compiler/test_caa_v2_subject_free_policy.py
+            tests/compiler/test_caa_v2_subject_free_policy.py::test_caa_policy_is_refrozen_and_tile_density_is_art_quality_driven \
+            tests/compiler/test_caa_v2_subject_free_policy.py::test_tile_resolution_unsatisfied_evidence_is_preserved
 
       - name: Verify Stage19 measured demo authority
         shell: bash

@@ -1,0 +1,202 @@
+name: subject2-knight-mesh-quality-relax-diagnostic
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_MESH_QUALITY_RELAX_DIAGNOSTIC_TRIGGER_20260925.json'
+  workflow_dispatch:
+
+concurrency:
+  group: subject2-knight-demo-v2-run
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  diagnostic:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Gate projected relaxation operator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile compiler/realsas_compiler_core/canonical_mesh_quality_repair_v1.py
+          python -m pytest -q tests/compiler/test_canonical_mesh_quality_repair_v1.py
+
+      - name: Measure flip collapse projected-relaxation on exact Knight
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os,time
+          from pathlib import Path
+
+          from compiler.realsas_compiler_core.artifact_codec_v2 import (
+              canonical_mesh_candidate_from_dict,
+              mechanical_partition_from_dict,
+              mesh_policy_from_dict,
+              qualified_camera_set_from_dict,
+              qualified_observation_set_from_dict,
+          )
+          from compiler.realsas_compiler_core.canonical_mesh_quality_repair_v1 import (
+              repair_candidate_endpoint_collapses_v1,
+              repair_candidate_fixed_vertex_flips_v1,
+              repair_candidate_projected_relaxation_v1,
+          )
+          from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
+              stage_output_payload,
+          )
+          from compiler.realsas_compiler_services.orchestrator.adapters.mesh_v2 import (
+              _relation_parent_quality_report,
+          )
+          from compiler.realsas_compiler_services.orchestrator.adapters.v2_architecture import (
+              _evaluate_candidate_source_fidelity_v1,
+              _source_foreground_masks_v1,
+              _static_geometry_evidence,
+          )
+
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          manifest=json.loads((root/"run_manifest.json").read_text())
+          ctx={"ledger":ledger,"run_manifest":manifest,"run_root":root}
+
+          original=canonical_mesh_candidate_from_dict(
+              stage_output_payload(
+                  ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD",
+                  "RealSaS.CanonicalMeshCandidateIR.v1",
+              )
+          )
+          policy=mesh_policy_from_dict(
+              stage_output_payload(
+                  ctx,"18_CANONICAL_MESH_ADDRESSING_BUILD",
+                  "RealSaS.MeshQualificationPolicyIR.v1",
+              )
+          )
+          partition=mechanical_partition_from_dict(
+              stage_output_payload(
+                  ctx,"17_MECHANICAL_PARTITION_QUALIFIED",
+                  "RealSaS.MechanicalPartitionIR.v1",
+              )
+          )
+          protected_surface_ids={
+              str(sid)
+              for row in partition.boundary_constraints
+              for sid in (row.a_surface_id,row.b_surface_id)
+          }
+          cameras=qualified_camera_set_from_dict(
+              stage_output_payload(
+                  ctx,"05_CAMERA_CONTRACT_SOLVED",
+                  "RealSaS.QualifiedCameraSetIR.v1",
+              )
+          )
+          observation=qualified_observation_set_from_dict(
+              stage_output_payload(
+                  ctx,"07_OBSERVATION_CONTRACT_QUALIFIED",
+                  "RealSaS.QualifiedObservationSetIR.v1",
+              )
+          )
+          geometry,demo_geometry_lineage=_static_geometry_evidence(ctx)
+          source=_source_foreground_masks_v1(ctx,observation)
+
+          before=_relation_parent_quality_report(original,policy)
+
+          t0=time.perf_counter()
+          flipped,flip_report=repair_candidate_fixed_vertex_flips_v1(
+              original,policy,max_passes=12
+          )
+          collapsed,collapse_report=repair_candidate_endpoint_collapses_v1(
+              flipped,policy,max_collapses=256
+          )
+          pre_relax_wall=time.perf_counter()-t0
+
+          t1=time.perf_counter()
+          relaxed,relax_report=repair_candidate_projected_relaxation_v1(
+              collapsed,
+              original,
+              policy,
+              protected_surface_ids=protected_surface_ids,
+              max_moves=256,
+          )
+          relax_wall=time.perf_counter()-t1
+          after=_relation_parent_quality_report(relaxed,policy)
+
+          fidelity_passed,fidelity_rows=_evaluate_candidate_source_fidelity_v1(
+              candidate=relaxed,
+              geometry=geometry,
+              cameras=cameras,
+              observation=observation,
+              source_foreground=source,
+          )
+
+          payload={
+              "schema":"RealSaS.KnightFlipCollapseRelaxMeshQualityDiagnostic.v1",
+              "status":"PASS_MEASUREMENT",
+              "run_id":os.environ["RUN_ID"],
+              "input_candidate_lineage_hash":original.candidate_lineage_hash,
+              "final_candidate_lineage_hash":relaxed.candidate_lineage_hash,
+              "protected_surface_id_count":len(protected_surface_ids),
+              "before":before,
+              "after_flip":flip_report["after"],
+              "after_collapse":collapse_report["after"],
+              "after":after,
+              "flip_report":flip_report,
+              "collapse_report":collapse_report,
+              "relax_report":relax_report,
+              "input_vertex_count":len(original.vertices),
+              "final_vertex_count":len(relaxed.vertices),
+              "input_face_count":len(original.faces),
+              "final_face_count":len(relaxed.faces),
+              "pre_relax_wall_seconds":pre_relax_wall,
+              "relax_wall_seconds":relax_wall,
+              "total_repair_wall_seconds":pre_relax_wall+relax_wall,
+              "source_fidelity_passed":bool(fidelity_passed),
+              "source_fidelity_views":fidelity_rows,
+              "demo_geometry_lineage":bool(demo_geometry_lineage),
+              "product_authority_claimed":False,
+          }
+          out=Path("canonical/KNIGHT_FLIP_COLLAPSE_RELAX_MESH_QUALITY_DIAGNOSTIC_20260925.json")
+          out.write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print(json.dumps({
+              "flip_count":flip_report["accepted_flip_count"],
+              "collapse_count":collapse_report["accepted_collapse_count"],
+              "relax_move_count":relax_report["accepted_move_count"],
+              "before_violations":before["policy_violating_face_count"],
+              "after_flip":flip_report["after"]["policy_violating_face_count"],
+              "after_collapse":collapse_report["after"]["policy_violating_face_count"],
+              "after_relax":after["policy_violating_face_count"],
+              "after_min_angle":after["min_angle_deg"],
+              "after_max_aspect":after["max_aspect_longest_over_min_altitude"],
+              "repair_wall_seconds":pre_relax_wall+relax_wall,
+              "source_fidelity_passed":bool(fidelity_passed),
+          },sort_keys=True))
+          PY
+
+      - name: Seal diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'realsas-self-hosted-runner'
+          git config user.email 'runner@realsas.local'
+          git add canonical/KNIGHT_FLIP_COLLAPSE_RELAX_MESH_QUALITY_DIAGNOSTIC_20260925.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'mesh: seal Knight projected-relaxation quality diagnostic'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

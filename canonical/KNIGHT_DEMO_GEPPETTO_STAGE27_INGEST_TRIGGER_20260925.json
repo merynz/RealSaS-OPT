@@ -1,0 +1,13 @@
+{
+  "schema": "RealSaS.KnightGeppettoStage27IngestTrigger.v1",
+  "status": "REQUESTED_AFTER_FIRST_PASS_RUN_ALL",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "execution_class": "DEMO_WITNESS",
+  "source_drive_folder": "RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/GEPPETTO_STAGE27_OUTPUT",
+  "expected_result_status": "TERMINAL_PASS",
+  "expected_all_diffusion_seeds_passed": true,
+  "expected_closure_step": 640,
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true
+}

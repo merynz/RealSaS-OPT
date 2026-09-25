@@ -3,6 +3,10 @@ name: subject2-knight-demo-geppetto-stage27-ingest
 on:
   workflow_dispatch:
 
+concurrency:
+  group: subject2-knight-demo-v2-run
+  cancel-in-progress: false
+
 permissions:
   contents: write
 

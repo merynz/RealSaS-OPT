@@ -1,0 +1,14 @@
+{
+  "checkpoint_seal_hash": "377e2a591c139c75be034cdcad8edff5b3550630105ba19aabaca49fe61965f9",
+  "execution_repo_commit": "e00356e9bf208d63b9c91f7c544c3c798e7c4b51",
+  "geppetto_checkpoint_sha256": "1ea931583d0124a0183979172f8a86a211b03973cd6be87f2c124a233c189ff9",
+  "geppetto_execution_hash": "74f68838c3ff72f6378d5ab56f3b2665e5da7fa4fc7395d16669bb10f33694fe",
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true,
+  "qualified_joint_count": 20,
+  "qualified_skeleton_lineage_hash": "4cbe240ed7853a3c57befd92239b3b8aa491de1d01fe39fc8561b3bfbe14ff97",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightGeppettoStage29Receipt.v1",
+  "status": "PASS_DEMO_ONLY",
+  "subject_id": "SUBJECT2_KNIGHT"
+}

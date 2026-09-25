@@ -489,9 +489,16 @@ jobs:
               },
               "stage14":{
                   "status":stage14_report["status"],
+                  "scientific_pass":stage14_report["status"]=="PASS",
                   "adequacy_report_hash":stage14_report["adequacy_report_hash"],
                   "selected_actual_node_count":stage14_report["selected_actual_node_count"],
                   "selected_surface_lineage_hash":stage14_report["selected_surface_lineage_hash"],
+                  "demo_fallback_admitted":bool(stage14_report.get("demo_fallback_admitted",False)),
+                  "demo_fallback_selection_rule":stage14_report.get("demo_fallback_selection_rule"),
+                  "demo_fallback_target_node_cap":stage14_report.get("demo_fallback_target_node_cap"),
+                  "demo_fallback_actual_node_count":stage14_report.get("demo_fallback_actual_node_count"),
+                  "demo_fallback_surface_lineage_hash":stage14_report.get("demo_fallback_surface_lineage_hash"),
+                  "diagnostic_closest_nonpassing_candidate":stage14_report.get("diagnostic_closest_nonpassing_candidate"),
               },
               "stage15":{
                   "status":stage15["qualification_report"]["status"],

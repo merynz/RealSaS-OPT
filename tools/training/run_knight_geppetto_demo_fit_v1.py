@@ -13,7 +13,9 @@ from dataclasses import asdict
 from hashlib import sha256
 import json
 import math
+import platform
 from pathlib import Path
+import sys
 import time
 
 import numpy as np
@@ -75,6 +77,40 @@ def _sha(path: Path) -> str:
 
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _runtime_environment() -> dict:
+    cuda_available = bool(torch.cuda.is_available())
+    gpu = None
+    if cuda_available:
+        props = torch.cuda.get_device_properties(0)
+        gpu = {
+            "name": str(props.name),
+            "total_memory_bytes": int(props.total_memory),
+            "compute_capability": [
+                int(props.major),
+                int(props.minor),
+            ],
+        }
+    return {
+        "python_version": platform.python_version(),
+        "python_implementation": platform.python_implementation(),
+        "platform": platform.platform(),
+        "numpy_version": str(np.__version__),
+        "torch_version": str(torch.__version__),
+        "torch_git_version": str(getattr(torch.version, "git_version", "") or ""),
+        "torch_cuda_runtime": (
+            None if torch.version.cuda is None else str(torch.version.cuda)
+        ),
+        "cudnn_version": (
+            None
+            if torch.backends.cudnn.version() is None
+            else int(torch.backends.cudnn.version())
+        ),
+        "cuda_available": cuda_available,
+        "gpu0": gpu,
+        "sys_executable": str(sys.executable),
+    }
 
 
 def _load_target(npz_path: Path, report_path: Path) -> tuple[MechanicalCoreTargetV1, dict]:
@@ -546,6 +582,7 @@ def run(args) -> dict:
             "parent_accuracy_required": 1.0,
             "all_diffusion_seeds_must_pass": True,
         },
+        "runtime_environment": _runtime_environment(),
         "product_authority_claimed": False,
         "generalization_claimed": False,
     }
@@ -726,6 +763,7 @@ def run(args) -> dict:
         "historical_checkpoint_loaded": False,
         "fresh_from_scratch": True,
         "wall_seconds": wall_seconds,
+        "runtime_environment": _runtime_environment(),
         "product_authority_claimed": False,
         "generalization_claimed": False,
     }
@@ -760,6 +798,7 @@ def run(args) -> dict:
             "historical_checkpoint_loaded": False,
             "all_frozen_diffusion_seeds_passed": True,
             "selected_proposal_seed_predeclared": SELECTED_PROPOSAL_SEED,
+            "runtime_environment": _runtime_environment(),
             "product_authority_minted": False,
             "generalization_claimed": False,
         },

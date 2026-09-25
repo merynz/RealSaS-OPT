@@ -1,0 +1,46 @@
+name: geppetto-mechanically-meaningful-v2-verify
+
+on:
+  push:
+    branches:
+      - repair/geppetto-mechanically-meaningful-rig-v2-20260925
+    paths:
+      - 'experiments/geppetto_reference_strength_fullstack_v1/mechanically_meaningful_target_v2.py'
+      - 'tools/training/run_knight_geppetto_demo_fit_v3_mechanical.py'
+      - 'tests/geppetto/test_mechanically_meaningful_target_v2.py'
+      - 'canonical/GEPPETTO_MECHANICALLY_MEANINGFUL_RIG_POLICY_V1_20260925.json'
+      - '.github/workflows/geppetto_mechanically_meaningful_v2_verify.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Static and semantic verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile             experiments/geppetto_reference_strength_fullstack_v1/mechanically_meaningful_target_v2.py             tools/training/run_knight_geppetto_demo_fit_v3_mechanical.py
+          python -m pytest -q tests/geppetto/test_mechanically_meaningful_target_v2.py
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          p=Path("tools/training/run_knight_geppetto_demo_fit_v3_mechanical.py")
+          t=p.read_text(encoding="utf-8")
+          assert "TERMINAL_CHECKS = 3" in t
+          assert "MechanicallyMeaningfulRigTargetV2" in t
+          assert "target_ontology_policy_sha256" in t
+          assert "RealSaS.KnightGeppettoDemoFitPreregistration.v2" in t
+          ast.parse(t, filename=str(p))
+          print("GEPPETTO_MECHANICALLY_MEANINGFUL_V2_VERIFY_PASS")
+          PY

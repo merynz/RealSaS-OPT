@@ -7,6 +7,9 @@ from pathlib import Path
 
 from compiler.realsas_compiler_core.artifact_codec_v2 import write_ir_json
 from compiler.realsas_compiler_core.types import QualificationError
+from compiler.realsas_compiler_services.orchestrator.status_semantics import (
+    dependency_status_admissible,
+)
 
 
 def sha256_file(path: Path) -> str:
@@ -56,10 +59,9 @@ def stage_output_payload(ctx: dict, stage_id: str, schema: str) -> dict:
         (row for row in ctx["ledger"]["stages"] if row["id"] == stage_id),
         None,
     )
-    allowed_statuses = {"PASS", "CACHE_HIT"}
-    if str(ctx["ledger"].get("execution_class") or "") == "DEMO_WITNESS":
-        allowed_statuses.add("PASS_DEMO_ONLY")
-    if row is None or row.get("status") not in allowed_statuses:
+    if row is None or not dependency_status_admissible(
+        ctx["ledger"], str(row.get("status") or "")
+    ):
         raise QualificationError(f"ADAPTER_UPSTREAM_NOT_PASS:{stage_id}")
     matches = [
         output

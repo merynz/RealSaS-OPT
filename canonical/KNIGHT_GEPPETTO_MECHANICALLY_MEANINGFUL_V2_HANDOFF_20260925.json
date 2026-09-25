@@ -9,15 +9,11 @@
     89
   ],
   "execution_class": "DEMO_WITNESS",
-  "execution_repo_commit": "1cec9a7cbdbe84e22443ffe89df5934391aa5192",
+  "execution_repo_commit": "10e0d80f290d270c51add7a2bca09f1076fff208",
   "files": {
     "GEPPETTO_MECHANICALLY_MEANINGFUL_RIG_POLICY_V1_20260925.json": {
       "bytes": 1842,
       "sha256": "b5758ff3fe715ec8b2dd1679e62270a8cabc01ea8004aaefbc3b0952f1d13d66"
-    },
-    "RealSaS_KNIGHT_GEPPETTO_STAGE27_MECHANICALLY_MEANINGFUL_V2_RUN_ALL.ipynb": {
-      "bytes": 15182,
-      "sha256": "d927173be0cda5472000d60c710a27d102b7165b77ae582dd6911106ba621aab"
     },
     "experiment_preregistration_v2.json": {
       "bytes": 2986,
@@ -41,7 +37,8 @@
     "Aesthetic minimalism/clean skeleton is explicitly not an objective.",
     "No fixed target joint count is used by the target builder; Knight resolves to 28 from mechanical rules.",
     "Every full check requires all four frozen diffusion seeds; terminal closure requires three consecutive full checks.",
-    "The final result persists the training check trace so the three-pass claim is auditable."
+    "The final result persists the training check trace so the three-pass claim is auditable.",
+    "Repo builder byte stream was re-pinned to preserve the sealed EOF newline; semantic source unchanged."
   ],
   "product_authority_claimed": false,
   "repair_branch": "repair/geppetto-mechanically-meaningful-rig-v2-20260925",
@@ -49,7 +46,7 @@
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
   "schema": "RealSaS.KnightGeppettoMechanicallyMeaningfulStage27Handoff.v2",
   "self_hosted_ci_conclusion": "success",
-  "self_hosted_ci_run_id": 36164993541,
+  "self_hosted_ci_run_id": 36175980288,
   "source_reuse": {
     "base_handoff": "GEPPETTO_STAGE27_HANDOFF",
     "historical_checkpoint_reused": false,

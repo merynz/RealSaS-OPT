@@ -58,7 +58,9 @@ jobs:
           out="$RUNNER_TEMP/knight_arachne_teacher_source"
           rm -rf "$out"; mkdir -p "$out"
           "$BLENDER_EXE" --background --factory-startup             --python experiments/post_corpus_audit/realsas_blender_evaluated_extract_v1.py --             "$KNIGHT_FBX" "$out/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" "$out/KNIGHT_EVALUATED_TEACHER_SOURCE_AUDIT.json"
-          python3 -m venv "$RUNNER_TEMP/knight-audit-venv"\n          "$RUNNER_TEMP/knight-audit-venv/bin/python" -m pip install --disable-pip-version-check numpy\n          "$RUNNER_TEMP/knight-audit-venv/bin/python" - <<'PY'
+          python3 -m venv "$RUNNER_TEMP/knight-audit-venv"
+          "$RUNNER_TEMP/knight-audit-venv/bin/python" -m pip install --disable-pip-version-check numpy
+          "$RUNNER_TEMP/knight-audit-venv/bin/python" - <<'PY'
           import hashlib, json, os
           from pathlib import Path
           import numpy as np

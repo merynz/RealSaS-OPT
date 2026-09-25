@@ -177,15 +177,16 @@ def _qualified_source_index_map(skeleton, conditioning) -> np.ndarray:
     return arr
 
 
-def _teacher_for_conditioning(bank_path: Path, conditioning, skeleton) -> tuple[np.ndarray, dict]:
+def _teacher_for_conditioning(bank_path: Path, conditioning, skeleton) -> tuple[np.ndarray, np.ndarray, dict]:
     with np.load(bank_path, allow_pickle=False) as z:
-        required = {"weights","surface_ids"}
+        required = {"weights","surface_ids","teacher_valid_mask"}
         if not required.issubset(z.files):
             raise RuntimeError(f"ARACHNE_TEACHER_BANK_SCHEMA_MISSING:{sorted(required-set(z.files))}")
         w0 = np.asarray(z["weights"], dtype=np.float64)
+        valid0 = np.asarray(z["teacher_valid_mask"], dtype=np.uint8).astype(bool)
         s0 = tuple(map(str, z["surface_ids"].tolist()))
-    if w0.shape != (len(s0), EXPECTED_JOINTS):
-        raise RuntimeError(f"ARACHNE_TEACHER_BANK_SHAPE_DRIFT:{w0.shape}")
+    if w0.shape != (len(s0), EXPECTED_JOINTS) or valid0.shape != (len(s0),):
+        raise RuntimeError(f"ARACHNE_TEACHER_BANK_SHAPE_DRIFT:{w0.shape}:{valid0.shape}")
     row_of = {sid:i for i,sid in enumerate(s0)}
     wanted = tuple(map(str, conditioning.surface_ids[0]))
     if len(row_of) != len(s0) or any(sid not in row_of for sid in wanted):
@@ -193,6 +194,9 @@ def _teacher_for_conditioning(bank_path: Path, conditioning, skeleton) -> tuple[
     rows = np.asarray([row_of[sid] for sid in wanted], dtype=np.int64)
     cols = _qualified_source_index_map(skeleton, conditioning)
     w = w0[rows][:, cols]
+    valid = valid0[rows]
+    if int(np.count_nonzero(valid)) < 192:
+        raise RuntimeError("ARACHNE_TEACHER_CLEAN_ROWS_INSUFFICIENT")
     w = np.maximum(w, 0.0)
     sums = w.sum(1, keepdims=True)
     if np.any(sums <= 1e-12):
@@ -201,11 +205,14 @@ def _teacher_for_conditioning(bank_path: Path, conditioning, skeleton) -> tuple[
     residual = np.abs(w.sum(1)-1.0)
     if not np.isfinite(w).all() or float(residual.max(initial=0.0)) > 1e-10:
         raise RuntimeError("ARACHNE_TEACHER_NUMERIC_DRIFT")
-    return w.astype(np.float32), {
+    return w.astype(np.float32), valid.astype(bool), {
         "bank_sha256": _sha(bank_path),
         "row_reindexed": bool(rows.tolist() != list(range(len(rows)))),
         "canonical_joint_to_target_index": cols.tolist(),
         "max_simplex_residual": float(residual.max(initial=0.0)),
+        "clean_row_count": int(np.count_nonzero(valid)),
+        "coverage": float(np.mean(valid)),
+        "teacher_valid_mask_applied": True,
     }
 
 
@@ -241,13 +248,14 @@ def _lbs(rest, weights, transforms):
     return torch.einsum("bnj,bpjna->bpna", weights, moved)
 
 
-def _deform_ratio(rest, truth, pred, transforms):
+def _deform_ratio(rest, truth, pred, transforms, row_mask):
     td = _lbs(rest, truth, transforms)
     pd = _lbs(rest, pred, transforms)
     rp = rest[:,None].expand_as(td)
-    den = float(td.numel())
-    motion = torch.sqrt(((td-rp).square().sum()/den).clamp_min(1e-12))
-    err = torch.sqrt(((pd-td).square().sum()/den).clamp_min(1e-12))
+    m = row_mask[:,None,:,None].to(td.dtype)
+    den = (m.sum()*td.shape[1]*td.shape[-1]).clamp_min(1.0)
+    motion = torch.sqrt((((td-rp)*m).square().sum()/den).clamp_min(1e-12))
+    err = torch.sqrt((((pd-td)*m).square().sum()/den).clamp_min(1e-12))
     return float((err/motion.clamp_min(1e-6)).detach().cpu()), float(motion.detach().cpu()), float(err.detach().cpu())
 
 
@@ -312,26 +320,32 @@ def _proposal(surface, skeleton, conditioning, weights64: np.ndarray, provenance
     )
 
 
-def _metrics(pred: np.ndarray, truth: np.ndarray, world: np.ndarray, joint_world, parent, joint_mask, device) -> dict:
-    row = np.abs(np.asarray(pred,np.float64)-np.asarray(truth,np.float64)).sum(1)
+def _metrics(pred: np.ndarray, truth: np.ndarray, valid_mask: np.ndarray, world: np.ndarray, joint_world, parent, joint_mask, device) -> dict:
+    valid = np.asarray(valid_mask, dtype=bool)
+    if valid.shape != (len(pred),) or not bool(valid.any()):
+        raise RuntimeError("ARACHNE_TEACHER_VALID_MASK_DRIFT")
+    row_all = np.abs(np.asarray(pred,np.float64)-np.asarray(truth,np.float64)).sum(1)
+    row = row_all[valid]
     pt = torch.as_tensor(np.asarray(pred,np.float32)[None], device=device)
     tt = torch.as_tensor(np.asarray(truth,np.float32)[None], device=device)
     rest = torch.as_tensor(np.asarray(world,np.float32)[None], device=device)
+    mask = torch.as_tensor(valid[None], device=device, dtype=torch.bool)
     legacy = _legacy_probe_transforms(pred.shape[1], device)
-    legacy_ratio, legacy_motion, legacy_err = _deform_ratio(rest,tt,pt,legacy)
+    legacy_ratio, legacy_motion, legacy_err = _deform_ratio(rest,tt,pt,legacy,mask)
     articulated = build_articulated_probe_transforms(joint_world,parent,joint_mask)
     with torch.no_grad():
-        mask = torch.ones((1,len(pred)),device=device,dtype=torch.bool)
         art_ratio, art_motion, art_err = articulated_deformation_ratio_loss(pt,tt,rest,articulated,mask)
     return {
         "rows_total":int(len(pred)),
+        "rows_evaluated":int(np.count_nonzero(valid)),
+        "teacher_coverage":float(np.mean(valid)),
         "row_l1_mean":float(row.mean()),
         "row_l1_p50":float(np.quantile(row,.50)),
         "row_l1_p90":float(np.quantile(row,.90)),
         "row_l1_p95":float(np.quantile(row,.95)),
         "row_l1_p99":float(np.quantile(row,.99)),
         "cvar10":float(row[row>=np.quantile(row,.90)].mean()),
-        "dominant_accuracy":float((pred.argmax(1)==truth.argmax(1)).mean()),
+        "dominant_accuracy":float((pred[valid].argmax(1)==truth[valid].argmax(1)).mean()),
         "simplex_max_abs_residual":float(np.max(np.abs(np.asarray(pred,np.float64).sum(1)-1.0))),
         "legacy_deformation_ratio":legacy_ratio,
         "legacy_teacher_motion_rms":legacy_motion,
@@ -352,12 +366,12 @@ def _science_pass(m: dict) -> bool:
     )
 
 
-def _evaluate(model, ci, truth, surface, skeleton, conditioning, world, joint_world, parent, joint_mask, device, step, provenance):
+def _evaluate(model, ci, truth, valid_mask, surface, skeleton, conditioning, world, joint_world, parent, joint_mask, device, step, provenance):
     model.eval()
     with torch.inference_mode(), torch.autocast(device_type="cuda",dtype=torch.bfloat16,enabled=torch.cuda.is_bf16_supported()):
         pred_t = _decode_all(model,ci,chunk=1024)
     pred = pred_t[0].float().cpu().numpy()
-    m = _metrics(pred,truth,world,joint_world,parent,joint_mask,device)
+    m = _metrics(pred,truth,valid_mask,world,joint_world,parent,joint_mask,device)
     science = _science_pass(m)
     compiler = {"pass":False,"attempted":False}
     canonicalization = None
@@ -402,9 +416,11 @@ def _lr_factor(step: int) -> float:
     return LR_FLOOR + (1.0-LR_FLOOR)*0.5*(1.0+math.cos(math.pi*q))
 
 
-def _sample_loss(model, ci, truth_np, surface_world_np, articulated_transforms, rng, device):
-    n = truth_np.shape[0]
-    idx_np = rng.choice(n, size=min(ROWS_PER_STEP,n), replace=False)
+def _sample_loss(model, ci, truth_np, valid_mask_np, surface_world_np, articulated_transforms, rng, device):
+    clean = np.flatnonzero(np.asarray(valid_mask_np, dtype=bool))
+    if len(clean) < 1:
+        raise RuntimeError("ARACHNE_TEACHER_VALID_MASK_EMPTY")
+    idx_np = rng.choice(clean, size=min(ROWS_PER_STEP,len(clean)), replace=False)
     idx = torch.as_tensor(idx_np,device=device,dtype=torch.long)
     raw = model.backbone(**ci)
     geom_all = model.geometry7_from_surface(
@@ -480,7 +496,7 @@ def run(args) -> dict:
     if int(conditioning.surface_mask[0].sum())!=EXPECTED_SURFACE_N or int(conditioning.edge_mask[0].sum())!=EXPECTED_SURFACE_E or int(conditioning.joint_mask[0].sum())!=EXPECTED_JOINTS:
         raise RuntimeError("ARACHNE_KNIGHT_CONDITIONING_CARDINALITY_DRIFT")
     ci=_conditioning_to_torch(conditioning,device)
-    truth,teacher_binding=_teacher_for_conditioning(bank_path,conditioning,skeleton)
+    truth,teacher_valid,teacher_binding=_teacher_for_conditioning(bank_path,conditioning,skeleton)
     world=np.asarray(conditioning.surface_positions_world[0],np.float32)
     joint_world,parent,joint_mask=_joint_world(skeleton,conditioning,device)
     articulated=build_articulated_probe_transforms(joint_world,parent,joint_mask)
@@ -514,7 +530,7 @@ def run(args) -> dict:
     started=time.monotonic()
     trace=[]
     zero,pred,qualified=_evaluate(
-        model,ci,truth,surface,skeleton,conditioning,world,joint_world,parent,joint_mask,
+        model,ci,truth,teacher_valid,surface,skeleton,conditioning,world,joint_world,parent,joint_mask,
         device,0,"KNIGHT_ARACHNE_V5_ZERO_SHOT_FROM_MAGE_FIT2"
     )
     zero["stable_streak"]=0
@@ -539,7 +555,7 @@ def run(args) -> dict:
             model.train()
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast(device_type="cuda",dtype=torch.bfloat16,enabled=True):
-                losses=_sample_loss(model,ci,truth,world,articulated,rng,device)
+                losses=_sample_loss(model,ci,truth,teacher_valid,world,articulated,rng,device)
             losses["total"].backward()
             grad=float(torch.nn.utils.clip_grad_norm_(model.parameters(),GRAD_CLIP))
             if not math.isfinite(grad):
@@ -552,7 +568,7 @@ def run(args) -> dict:
             if step % CHECK_EVERY:
                 continue
             row,pred,qualified=_evaluate(
-                model,ci,truth,surface,skeleton,conditioning,world,joint_world,parent,joint_mask,
+                model,ci,truth,teacher_valid,surface,skeleton,conditioning,world,joint_world,parent,joint_mask,
                 device,step,"KNIGHT_ARACHNE_V5_TRANSFER_FINETUNE"
             )
             stable=stable+1 if row["full_gate"] and step>=MIN_FINETUNE_GATE_STEP else 0
@@ -583,7 +599,7 @@ def run(args) -> dict:
 
     # Re-evaluate closure model and mint final Compiler authority.
     final_eval,final_pred,final_qualified=_evaluate(
-        model,ci,truth,surface,skeleton,conditioning,world,joint_world,parent,joint_mask,
+        model,ci,truth,teacher_valid,surface,skeleton,conditioning,world,joint_world,parent,joint_mask,
         device,int(closure_step),f"KNIGHT_ARACHNE_V5_{closure_mode}"
     )
     if not final_eval["full_gate"] or final_qualified is None:

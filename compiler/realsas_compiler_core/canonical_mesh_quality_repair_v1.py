@@ -665,6 +665,26 @@ def _face_normal(face, positions):
     return n/norm
 
 
+def mechanical_quality_protected_surface_ids_v1(partition) -> frozenset[str]:
+    """Surface IDs that must remain immobile during local quality relaxation.
+
+    PRESERVE_CONTINUITY is a connectivity invariant, not a vertex-motion ban.
+    Only explicit cuts and unresolved boundaries hard-protect their endpoint
+    supports. Topological boundary vertices are protected independently by the
+    relaxation operator itself.
+    """
+    rows = tuple(getattr(partition, "boundary_constraints", ()) or ())
+    protected: set[str] = set()
+    for row in rows:
+        decision = str(getattr(row, "decision", ""))
+        if decision not in {"SEPARATE", "PRESERVE_CONTINUITY", "UNKNOWN"}:
+            raise QualificationError("QUALITY_PROTECTION_BOUNDARY_DECISION_INVALID")
+        if decision in {"SEPARATE", "UNKNOWN"}:
+            protected.add(str(row.a_surface_id))
+            protected.add(str(row.b_surface_id))
+    return frozenset(sorted(protected))
+
+
 def repair_candidate_projected_relaxation_v1(
     candidate: CanonicalMeshCandidateIR,
     reference_candidate: CanonicalMeshCandidateIR,

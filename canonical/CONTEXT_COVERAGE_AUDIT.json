@@ -12,8 +12,8 @@
   "explained_high_signal_count": 344,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 146,
-  "safe_default_evidence_only_branch_count": 142,
+  "live_branch_count": 147,
+  "safe_default_evidence_only_branch_count": 143,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -450,7 +450,7 @@
     },
     {
       "name": "main",
-      "sha": "3fc8d247eed25e694d16f6e394877acfe78cdde8",
+      "sha": "c5f3231320ec50c9de6e7a52780d18b7a79d82df",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -611,6 +611,12 @@
       "reason": "safe default under branch authority policy"
     },
     {
+      "name": "repair/geppetto-mechanically-meaningful-rig-v2-20260925",
+      "sha": "249bb6c69c66572ad96c221a807b773fb4ac3fbf",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
       "name": "repair/mage-full-subject-reclosure-20260912",
       "sha": "2fa5d4b604d5ce1dcb24feee2e6a6b8fa12476e3",
       "class": "EVIDENCE_ONLY",
@@ -750,7 +756,7 @@
     },
     {
       "name": "research/vf11-certified-adaptive-20260921",
-      "sha": "3fc8d247eed25e694d16f6e394877acfe78cdde8",
+      "sha": "1ddb10b919d8682aa16ed25fb6f3c1d759a37220",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

@@ -19,6 +19,7 @@ from .scene_first_signed import (
     _self_zbuffer_support,
     mesh_connected_component_labels_v1,
     rigging_surface_from_scene_first_zero_mesh_v1,
+    robust_zero_surface_normals_v1,
 )
 
 Json=dict[str,Any]
@@ -240,7 +241,9 @@ def select_adequate_rigging_surface_v1(
     # The public GSA builder recomputes robust normals per candidate. For adequacy
     # measurement we use the signed decoder normals as orientation-bearing dense
     # reference; selected S still uses the canonical robust PCA operator.
-    dense_normals=hints/np.linalg.norm(hints,axis=1,keepdims=True).clip(min=1e-12)
+    dense_normals = robust_zero_surface_normals_v1(
+        dense_world, hints, k=int(normal_k)
+    )
     dense_labels=_dense_component_labels(len(vn),f)
     dense_support,dense_raster,_=_self_zbuffer_support(
         dense_world,dense_world,tuple(cameras),
@@ -264,6 +267,8 @@ def select_adequate_rigging_surface_v1(
             normal_k=int(normal_k),
             visibility_depth_tolerance_norm=float(visibility_depth_tolerance_norm),
             component_aware_compaction=bool(policy.get("component_aware_voxel_compaction",False)),
+            precomputed_dense_normals=dense_normals,
+            precomputed_component_labels=dense_labels,
             metadata={**dict(metadata or {}),"substrate_adequacy_candidate":True,"candidate_target_node_cap":cap},
         )
         metric=_metrics(

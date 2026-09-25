@@ -11,7 +11,7 @@ on:
 
 concurrency:
   group: subject2-knight-demo-v2-run
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: write

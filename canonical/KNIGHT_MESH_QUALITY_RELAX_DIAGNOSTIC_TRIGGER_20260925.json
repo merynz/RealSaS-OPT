@@ -1,0 +1,15 @@
+{
+  "schema": "RealSaS.KnightMeshQualityRelaxDiagnosticTrigger.v1",
+  "status": "REQUESTED",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "execution_class": "DEMO_WITNESS",
+  "operators": [
+    "FIXED_VERTEX_MONOTONE_EDGE_FLIP_V1",
+    "ENDPOINT_HALFEDGE_COLLAPSE_LINK_CONDITION_V1",
+    "PROJECTED_LOCAL_RELAXATION_V1"
+  ],
+  "protected_mechanical_boundary_support": true,
+  "projection_surface": "IMMUTABLE_STAGE18_REFERENCE_CANDIDATE",
+  "product_authority_claimed": false
+}

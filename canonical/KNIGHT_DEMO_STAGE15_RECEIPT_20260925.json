@@ -36,6 +36,89 @@
   },
   "stage14": {
     "adequacy_report_hash": "5fd590f212aa9d96fef0ff05ab00bd7616dda8d243c5e5888fed5cef97f774c6",
+    "demo_fallback_actual_node_count": 12090,
+    "demo_fallback_admitted": true,
+    "demo_fallback_selection_rule": "MIN_FAILED_GATES__MIN_MAX_RELATIVE_EXCESS__MIN_SUM_RELATIVE_EXCESS__MAX_ACTUAL_NODES__MIN_TARGET_CAP_V1",
+    "demo_fallback_surface_lineage_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a",
+    "demo_fallback_target_node_cap": 12288,
+    "diagnostic_closest_nonpassing_candidate": {
+      "actual_node_count": 12090,
+      "candidate_target_node_cap": 12288,
+      "selection_key": [
+        3,
+        1.0,
+        2.1151489698313055,
+        -12090,
+        12288
+      ],
+      "selection_rule": "MIN_FAILED_GATES__MIN_MAX_RELATIVE_EXCESS__MIN_SUM_RELATIVE_EXCESS__MAX_ACTUAL_NODES__MIN_TARGET_CAP_V1",
+      "surface_lineage_hash": "452cf6564a2cde35a4d6d420021491d231f90cec267df9f41d4424dc8d74895a",
+      "violations": {
+        "failed_gate_count": 3,
+        "finite": true,
+        "gates": [
+          {
+            "failed": false,
+            "metric": "dense_to_surface_p95_norm",
+            "relative_excess": 0.0,
+            "sense": "MAX",
+            "threshold": 0.03,
+            "value": 0.013497031876577553
+          },
+          {
+            "failed": false,
+            "metric": "dense_to_surface_max_norm",
+            "relative_excess": 0.0,
+            "sense": "MAX",
+            "threshold": 0.08,
+            "value": 0.01921792090191674
+          },
+          {
+            "failed": true,
+            "metric": "normal_p95_deg",
+            "relative_excess": 0.2401489698313053,
+            "sense": "MAX",
+            "threshold": 30.0,
+            "value": 37.20446909493916
+          },
+          {
+            "failed": false,
+            "metric": "projected_p95_px",
+            "relative_excess": 0.0,
+            "sense": "MAX",
+            "threshold": 6.0,
+            "value": 5.758815077601405
+          },
+          {
+            "failed": false,
+            "metric": "projected_max_px",
+            "relative_excess": 0.0,
+            "sense": "MAX",
+            "threshold": 16.0,
+            "value": 11.646091593936555
+          },
+          {
+            "failed": true,
+            "metric": "minimum_nodes_per_eligible_component",
+            "relative_excess": 0.875,
+            "sense": "MIN",
+            "threshold": 8.0,
+            "value": 1.0
+          },
+          {
+            "failed": true,
+            "metric": "component_alias_node_count",
+            "relative_excess": 1.0,
+            "sense": "MAX_ZERO",
+            "threshold": 0.0,
+            "value": 1.0
+          }
+        ],
+        "max_relative_excess": 1.0,
+        "sum_relative_excess": 2.1151489698313055
+      }
+    },
+    "scientific_pass": false,
     "selected_actual_node_count": null,
     "selected_surface_lineage_hash": "",
     "status": "FAIL"
@@ -67,5 +150,5 @@
   },
   "status": "PASS_DEMO_ONLY",
   "subject_id": "SUBJECT2_KNIGHT",
-  "tested_commit": "66845a6f52c94006ceaca609a295ba8fc3a4c80c"
+  "tested_commit": "cde5811ca6042cd5d10492dbdafd0bf90f8c886d"
 }

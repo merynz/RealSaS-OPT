@@ -1307,6 +1307,67 @@ def _geometry_substrate_for_downstream(ctx: dict):
     return geometry_substrate_from_dict(payload)
 
 
+_DEMO_STAGE14_FALLBACK_SCHEMA = (
+    "RealSaS.KnightDemoStage14FallbackPreregistration.v1"
+)
+_DEMO_STAGE14_FALLBACK_STATUS = (
+    "FROZEN_BEFORE_KNIGHT_STAGE14_CANDIDATE_METRICS_INSPECTION"
+)
+_DEMO_STAGE14_CLOSEST_RULE = (
+    "MIN_FAILED_GATES__MIN_MAX_RELATIVE_EXCESS__MIN_SUM_RELATIVE_EXCESS__"
+    "MAX_ACTUAL_NODES__MIN_TARGET_CAP_V1"
+)
+
+
+def _stage_row(ctx: dict, stage_id: str) -> dict | None:
+    return next(
+        (
+            row
+            for row in ctx["ledger"].get("stages") or ()
+            if str(row.get("id") or "") == str(stage_id)
+        ),
+        None,
+    )
+
+
+def _demo_stage14_fallback_prereg(ctx: dict) -> tuple[dict, str] | None:
+    if str(ctx["ledger"].get("execution_class") or "") != "DEMO_WITNESS":
+        return None
+    demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+    ref = dict(demo.get("stage14_fallback_preregistration") or {})
+    if not ref:
+        return None
+    payload = load_file_ref(ref, expected_schema=_DEMO_STAGE14_FALLBACK_SCHEMA)
+    if (
+        demo.get("allow_stage14_scientific_fail_for_demo") is not True
+        or demo.get("stage13_scientific_pass") is not False
+        or demo.get("product_authority_claimed") is not False
+        or str(payload.get("status") or "") != _DEMO_STAGE14_FALLBACK_STATUS
+        or str(payload.get("run_id") or "") != str(ctx["ledger"].get("run_id") or "")
+        or str(payload.get("subject_id") or "") != str(ctx["ledger"].get("subject_id") or "")
+        or str(payload.get("execution_class") or "") != "DEMO_WITNESS"
+    ):
+        raise QualificationError("DEMO_STAGE14_FALLBACK_SCOPE_DRIFT")
+    eligibility = dict(payload.get("eligibility") or {})
+    rule = dict(payload.get("frozen_closest_candidate_rule") or {})
+    semantics = dict(payload.get("demo_admission_semantics") or {})
+    if (
+        eligibility.get("stage13_ledger_status_required") != "PASS_DEMO_ONLY"
+        or eligibility.get("stage13_scientific_pass_required") is not False
+        or eligibility.get("stage14_frozen_product_adequacy_status_required") != "FAIL"
+        or eligibility.get("product_authority_claimed_required") is not False
+        or eligibility.get("teacher_truth_allowed") is not False
+        or eligibility.get("appearance_authority_allowed") is not False
+        or str(rule.get("rule_id") or "") != _DEMO_STAGE14_CLOSEST_RULE
+        or semantics.get("product_pass_forbidden") is not True
+    ):
+        raise QualificationError("DEMO_STAGE14_FALLBACK_PREREG_DRIFT")
+    stage13 = _stage_row(ctx, "13_GEOMETRY_SUBSTRATE_QUALIFIED")
+    if stage13 is None or str(stage13.get("status") or "") != "PASS_DEMO_ONLY":
+        raise QualificationError("DEMO_STAGE14_FALLBACK_STAGE13_STATUS_DRIFT")
+    return payload, str(ref.get("sha256") or "")
+
+
 def build_gsa_stage(ctx: dict) -> dict:
     zero = signed_zero_surface_from_dict(
         stage_output_payload(
@@ -1364,6 +1425,7 @@ def build_gsa_stage(ctx: dict) -> dict:
         asdict(camera)
         for camera in sorted(cameras.cameras, key=lambda value: value.view_index)
     )
+    demo_fallback = _demo_stage14_fallback_prereg(ctx)
     surface, adequacy = select_adequate_rigging_surface_v1(
         vertices,
         faces,
@@ -1378,6 +1440,7 @@ def build_gsa_stage(ctx: dict) -> dict:
         normal_k=normal_k,
         visibility_depth_tolerance_norm=tolerance,
         adequacy_policy=document_adequacy,
+        return_closest_nonpassing_evidence=demo_fallback is not None,
         metadata={
             "geometry_substrate_hash": geometry.substrate_hash,
             "observation_set_hash": zero.observation_set_binding_hash,
@@ -1402,19 +1465,65 @@ def build_gsa_stage(ctx: dict) -> dict:
             "diagnostics": adequacy,
         }
 
+    scientific_pass = str(adequacy.get("status") or "") == "PASS"
+    authority_surface = "GSA_RIGGING_SURFACE_CANDIDATE"
+    authority_report = "SUBSTRATE_ADEQUACY_REPORT"
+    reported_status = "PASS"
+    selected_cap = adequacy.get("selected_target_node_cap")
+    if not scientific_pass:
+        if demo_fallback is None:
+            raise QualificationError("GSA_NONPASSING_SURFACE_WITHOUT_DEMO_PREREG")
+        prereg, prereg_sha = demo_fallback
+        closest = dict(adequacy.get("diagnostic_closest_nonpassing_candidate") or {})
+        if (
+            str(closest.get("selection_rule") or "") != _DEMO_STAGE14_CLOSEST_RULE
+            or str(closest.get("surface_lineage_hash") or "")
+            != surface.geometry_lineage_hash
+            or int(closest.get("actual_node_count", -1)) != len(surface.surface_nodes)
+            or dict(closest.get("violations") or {}).get("finite") is not True
+        ):
+            raise QualificationError("DEMO_STAGE14_CLOSEST_CANDIDATE_DRIFT")
+        selected_cap = int(closest["candidate_target_node_cap"])
+        adequacy.update(
+            {
+                "demo_fallback_admitted": True,
+                "demo_fallback_preregistration_sha256": prereg_sha,
+                "demo_fallback_selection_rule": _DEMO_STAGE14_CLOSEST_RULE,
+                "demo_fallback_target_node_cap": selected_cap,
+                "demo_fallback_actual_node_count": len(surface.surface_nodes),
+                "demo_fallback_surface_lineage_hash": surface.geometry_lineage_hash,
+                "stage14_scientific_pass": False,
+                "product_authority_claimed": False,
+                "product_selection_fields_remain_unset": (
+                    adequacy.get("selected_target_node_cap") is None
+                    and adequacy.get("selected_actual_node_count") is None
+                    and str(adequacy.get("selected_surface_lineage_hash") or "") == ""
+                ),
+            }
+        )
+        if adequacy["product_selection_fields_remain_unset"] is not True:
+            raise QualificationError("DEMO_STAGE14_PRODUCT_SELECTION_FIELDS_MUTATED")
+        adequacy["adequacy_report_hash"] = ""
+        adequacy["adequacy_report_hash"] = substrate_adequacy_report_hash_v1(
+            adequacy
+        )
+        authority_surface = "DEMO_ONLY_GSA_RIGGING_SURFACE_CANDIDATE"
+        authority_report = "DEMO_ONLY_SUBSTRATE_ADEQUACY_MEASUREMENT"
+        reported_status = "PASS_DEMO_ONLY"
+
     root = ctx["run_root"] / "artifacts" / "14_GSA_BUILD"
     return {
-        "status": "PASS",
+        "status": reported_status,
         "outputs": [
             write_ir(
                 root / "rigging_surface_candidate.json",
                 surface,
-                authority_class="GSA_RIGGING_SURFACE_CANDIDATE",
+                authority_class=authority_surface,
             ),
             write_json(
                 root / "substrate_adequacy_report.json",
                 adequacy,
-                authority_class="SUBSTRATE_ADEQUACY_REPORT",
+                authority_class=authority_report,
                 schema="RealSaS.SubstrateAdequacyReport.v1",
             ),
         ],
@@ -1423,7 +1532,10 @@ def build_gsa_stage(ctx: dict) -> dict:
             "node_count": len(surface.surface_nodes),
             "relation_count": len(surface.local_relations),
             "adequacy_report_hash": adequacy["adequacy_report_hash"],
-            "selected_target_node_cap": adequacy["selected_target_node_cap"],
+            "selected_target_node_cap": selected_cap,
+            "stage14_scientific_pass": scientific_pass,
+            "demo_fallback_admitted": not scientific_pass,
+            "product_authority_claimed": False if not scientific_pass else None,
         },
     }
 
@@ -1446,16 +1558,40 @@ def qualify_rigging_surface_stage(ctx: dict) -> dict:
         != substrate_adequacy_report_hash_v1(adequacy)
     ):
         raise QualificationError("RIGGING_SURFACE_ADEQUACY_HASH_DRIFT")
-    if (
-        str(adequacy.get("status")) != "PASS"
-        or str(adequacy.get("selected_surface_lineage_hash"))
-        != surface.geometry_lineage_hash
-    ):
-        raise QualificationError("RIGGING_SURFACE_ADEQUACY_BINDING_DRIFT")
-    if int(adequacy.get("selected_actual_node_count", -1)) != len(
-        surface.surface_nodes
-    ):
-        raise QualificationError("RIGGING_SURFACE_ADEQUACY_NODE_COUNT_DRIFT")
+    scientific_adequacy_pass = str(adequacy.get("status") or "") == "PASS"
+    demo_fallback_admitted = False
+    if scientific_adequacy_pass:
+        if (
+            str(adequacy.get("selected_surface_lineage_hash"))
+            != surface.geometry_lineage_hash
+        ):
+            raise QualificationError("RIGGING_SURFACE_ADEQUACY_BINDING_DRIFT")
+        if int(adequacy.get("selected_actual_node_count", -1)) != len(
+            surface.surface_nodes
+        ):
+            raise QualificationError("RIGGING_SURFACE_ADEQUACY_NODE_COUNT_DRIFT")
+    else:
+        prereg = _demo_stage14_fallback_prereg(ctx)
+        stage14 = _stage_row(ctx, "14_GSA_BUILD")
+        closest = dict(adequacy.get("diagnostic_closest_nonpassing_candidate") or {})
+        if (
+            prereg is None
+            or stage14 is None
+            or str(stage14.get("status") or "") != "PASS_DEMO_ONLY"
+            or adequacy.get("demo_fallback_admitted") is not True
+            or adequacy.get("stage14_scientific_pass") is not False
+            or adequacy.get("product_authority_claimed") is not False
+            or str(adequacy.get("demo_fallback_selection_rule") or "")
+            != _DEMO_STAGE14_CLOSEST_RULE
+            or str(adequacy.get("demo_fallback_surface_lineage_hash") or "")
+            != surface.geometry_lineage_hash
+            or str(closest.get("surface_lineage_hash") or "")
+            != surface.geometry_lineage_hash
+            or int(adequacy.get("demo_fallback_actual_node_count", -1))
+            != len(surface.surface_nodes)
+        ):
+            raise QualificationError("RIGGING_SURFACE_DEMO_FALLBACK_BINDING_DRIFT")
+        demo_fallback_admitted = True
 
     tensor = tensorize_rigging_surface_v1(surface, require_scene_first=True)
     if tensor.source_surface_hash != surface.geometry_lineage_hash:
@@ -1476,12 +1612,18 @@ def qualify_rigging_surface_stage(ctx: dict) -> dict:
         observed,
         completed,
         {
-            "status": "PASS",
+            "status": (
+                "DEMO_ONLY_RIGGING_SURFACE_ADMISSION__SCIENTIFIC_ADEQUACY_FAIL"
+                if demo_fallback_admitted
+                else "PASS"
+            ),
             "scene_first_signed_geometry": True,
             "teacher_truth_contamination_rejected": True,
             "lossless_fieldwise_tensorization_passed": True,
             "local_relation_graph_present": tensor.edge_count > 0,
-            "substrate_adequacy_passed": True,
+            "substrate_adequacy_passed": bool(scientific_adequacy_pass),
+            "demo_fallback_admitted": bool(demo_fallback_admitted),
+            "product_authority_claimed": False if demo_fallback_admitted else None,
             "substrate_adequacy_report_hash": adequacy["adequacy_report_hash"],
             "appearance_authority_used": False,
         },
@@ -1499,17 +1641,25 @@ def qualify_rigging_surface_stage(ctx: dict) -> dict:
     )
     root = ctx["run_root"] / "artifacts" / "15_RIGGING_SURFACE_QUALIFIED"
     return {
-        "status": "PASS",
+        "status": "PASS_DEMO_ONLY" if demo_fallback_admitted else "PASS",
         "outputs": [
             write_ir(
                 root / "qualified_rigging_surface.json",
                 surface,
-                authority_class="QUALIFIED_RIGGING_SURFACE",
+                authority_class=(
+                    "DEMO_ONLY_RIGGING_SURFACE_MEASUREMENT"
+                    if demo_fallback_admitted
+                    else "QUALIFIED_RIGGING_SURFACE"
+                ),
             ),
             write_ir(
                 root / "rigging_surface_qualification.json",
                 value,
-                authority_class="RIGGING_SURFACE_QUALIFICATION",
+                authority_class=(
+                    "DEMO_ONLY_RIGGING_SURFACE_QUALIFICATION"
+                    if demo_fallback_admitted
+                    else "RIGGING_SURFACE_QUALIFICATION"
+                ),
             ),
         ],
         "diagnostics": {

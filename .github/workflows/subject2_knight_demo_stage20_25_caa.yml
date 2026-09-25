@@ -40,7 +40,9 @@ jobs:
           set -euo pipefail
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
           python -m py_compile compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py
-          python -m pytest -q tests/compiler/test_caa_demo_static_mesh_admission_v2.py
+          python -m pytest -q \
+            tests/compiler/test_caa_demo_static_mesh_admission_v2.py \
+            tests/compiler/test_caa_v2_subject_free_policy.py
 
       - name: Verify Stage19 measured demo authority
         shell: bash

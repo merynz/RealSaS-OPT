@@ -616,14 +616,17 @@ def decode_zero_surface_stage(ctx: dict) -> dict:
         if (
             vertices.ndim != 2
             or vertices.shape[1] != 3
+            or len(vertices) < 4
             or not np.isfinite(vertices).all()
             or faces.ndim != 2
             or faces.shape[1] != 3
+            or len(faces) == 0
             or not np.issubdtype(faces.dtype, np.integer)
             or np.any(faces < 0)
             or np.any(faces >= len(vertices))
             or normals.shape != vertices.shape
             or not np.isfinite(normals).all()
+            or np.any(np.linalg.norm(normals, axis=1) <= 1e-12)
         ):
             raise QualificationError("DEMO_ZERO_SURFACE_ARRAYS_INVALID")
         vertices_sha = _array_hash(vertices)
@@ -919,6 +922,38 @@ def qualify_geometry_substrate_stage(ctx: dict) -> dict:
             or {int(row.get("view_index", -1)) for row in evidence_rows} != set(range(8))
         ):
             raise QualificationError("DEMO_STAGE13_VIEW_SET_INVALID")
+        if str(evidence.get("policy_profile") or "") != "P999":
+            raise QualificationError("DEMO_STAGE13_POLICY_PROFILE_DRIFT")
+        summary = dict(evidence.get("summary") or {})
+        extrema = {
+            "min_precision": min(float(row["precision"]) for row in evidence_rows),
+            "min_recall": min(float(row["recall"]) for row in evidence_rows),
+            "min_component_recall": min(
+                float(row["minimum_eligible_component_recall"])
+                for row in evidence_rows
+            ),
+            "max_interior_uncovered_fraction": max(
+                float(row["interior_uncovered_fraction"])
+                for row in evidence_rows
+            ),
+            "max_largest_coherent_hole_fraction": max(
+                float(row["largest_coherent_hole_fraction"])
+                for row in evidence_rows
+            ),
+            "max_silhouette_edge_p95_px": max(
+                float(row["silhouette_edge_p95_px"])
+                for row in evidence_rows
+            ),
+            "max_silhouette_edge_max_px": max(
+                float(row["silhouette_edge_max_px"])
+                for row in evidence_rows
+            ),
+        }
+        for key, actual in extrema.items():
+            if key not in summary or abs(float(summary[key]) - actual) > 1e-15:
+                raise QualificationError(
+                    f"DEMO_STAGE13_EVIDENCE_SUMMARY_DRIFT:{key}"
+                )
 
         observations = {int(view.view_index): view for view in observation.views}
         rows = []

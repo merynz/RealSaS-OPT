@@ -212,6 +212,125 @@ def _metrics(
     return values
 
 
+_CLOSEST_NONPASSING_RULE_ID = (
+    "MIN_FAILED_GATES__MIN_MAX_RELATIVE_EXCESS__MIN_SUM_RELATIVE_EXCESS__"
+    "MAX_ACTUAL_NODES__MIN_TARGET_CAP_V1"
+)
+
+
+def _candidate_gate_violations_v1(metric: dict, policy: dict) -> dict:
+    specs = (
+        ("dense_to_surface_p95_norm", "MAX", "max_dense_to_surface_p95_norm"),
+        ("dense_to_surface_max_norm", "MAX", "max_dense_to_surface_max_norm"),
+        ("normal_p95_deg", "MAX", "max_normal_p95_deg"),
+        ("projected_p95_px", "MAX", "max_projected_p95_px"),
+        ("projected_max_px", "MAX", "max_projected_max_px"),
+        (
+            "minimum_nodes_per_eligible_component",
+            "MIN",
+            "min_nodes_per_component",
+        ),
+        (
+            "component_alias_node_count",
+            "MAX_ZERO",
+            "max_component_alias_nodes",
+        ),
+    )
+    rows = []
+    finite = True
+    for metric_name, sense, policy_name in specs:
+        value = float(metric[metric_name])
+        threshold = float(policy[policy_name])
+        if not math.isfinite(value) or not math.isfinite(threshold):
+            finite = False
+            excess = float("inf")
+        elif sense == "MAX":
+            if threshold <= 0:
+                raise QualificationError(
+                    "CLOSEST_CANDIDATE_MAX_THRESHOLD_NONPOSITIVE:"
+                    + metric_name
+                )
+            excess = max(0.0, value / threshold - 1.0)
+        elif sense == "MIN":
+            if threshold <= 0:
+                raise QualificationError(
+                    "CLOSEST_CANDIDATE_MIN_THRESHOLD_NONPOSITIVE:"
+                    + metric_name
+                )
+            excess = max(0.0, (threshold - value) / threshold)
+        elif sense == "MAX_ZERO":
+            excess = (
+                0.0
+                if value <= threshold
+                else (value if threshold == 0.0 else value / threshold - 1.0)
+            )
+        else:
+            raise AssertionError(sense)
+        rows.append(
+            {
+                "metric": metric_name,
+                "sense": sense,
+                "threshold": threshold,
+                "value": value,
+                "relative_excess": float(excess),
+                "failed": bool(excess > 0.0),
+            }
+        )
+    finite = finite and all(
+        math.isfinite(float(row["relative_excess"])) for row in rows
+    )
+    failed_count = sum(bool(row["failed"]) for row in rows)
+    max_excess = max((float(row["relative_excess"]) for row in rows), default=0.0)
+    sum_excess = sum(float(row["relative_excess"]) for row in rows)
+    return {
+        "finite": bool(finite),
+        "failed_gate_count": int(failed_count),
+        "max_relative_excess": float(max_excess),
+        "sum_relative_excess": float(sum_excess),
+        "gates": rows,
+    }
+
+
+def closest_nonpassing_candidate_v1(
+    evaluated: dict[int, dict],
+    policy: dict,
+) -> dict | None:
+    rows = []
+    for cap in sorted(evaluated):
+        metric = dict(evaluated[cap])
+        if bool(metric.get("passed")):
+            continue
+        violations = _candidate_gate_violations_v1(metric, policy)
+        if not violations["finite"]:
+            continue
+        actual = int(metric["actual_node_count"])
+        key = (
+            int(violations["failed_gate_count"]),
+            float(violations["max_relative_excess"]),
+            float(violations["sum_relative_excess"]),
+            -actual,
+            int(cap),
+        )
+        rows.append((key, int(cap), metric, violations))
+    if not rows:
+        return None
+    key, cap, metric, violations = min(rows, key=lambda row: row[0])
+    return {
+        "selection_rule": _CLOSEST_NONPASSING_RULE_ID,
+        "candidate_target_node_cap": int(cap),
+        "actual_node_count": int(metric["actual_node_count"]),
+        "surface_lineage_hash": str(metric["surface_lineage_hash"]),
+        "selection_key": [
+            int(key[0]),
+            float(key[1]),
+            float(key[2]),
+            int(key[3]),
+            int(key[4]),
+        ],
+        "violations": violations,
+    }
+
+
 def select_adequate_rigging_surface_v1(
     vertices_normalized,
     faces,
@@ -301,6 +420,11 @@ def select_adequate_rigging_surface_v1(
     else:
         best=None
 
+    closest_nonpassing = (
+        None
+        if best is not None
+        else closest_nonpassing_candidate_v1(evaluated, policy)
+    )
     report={
         "schema":"RealSaS.SubstrateAdequacyReport.v1",
         "status":"PASS" if best is not None else "FAIL",
@@ -312,6 +436,7 @@ def select_adequate_rigging_surface_v1(
         "selected_actual_node_count":None if best is None else int(evaluated[best]["actual_node_count"]),
         "selected_surface_lineage_hash":"" if best is None else str(evaluated[best]["surface_lineage_hash"]),
         "selection_rule":"MINIMUM_ACTUAL_NODE_COUNT_AMONG_PASSING_BOUNDED_SEARCH_CANDIDATES",
+        "diagnostic_closest_nonpassing_candidate":closest_nonpassing,
         "teacher_truth_used":False,
         "categorical_recognition_used":False,
         "adequacy_report_hash":"",

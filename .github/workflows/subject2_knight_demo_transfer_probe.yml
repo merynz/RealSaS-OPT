@@ -62,6 +62,8 @@ jobs:
             tests/compiler/test_geometry_substrate_evidence_v2.py \
             tests/compiler/test_mesh_component_labels_v1.py \
             tests/compiler/test_substrate_adequacy_v1.py
+          python -m py_compile \
+            compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py
 
       - name: Verify authenticated Drive and refresh exact Frozen C import
         shell: bash
@@ -202,6 +204,7 @@ jobs:
           gsa=dict(stage14_policy["gsa"])
 
           authority_path=repo/"canonical/KNIGHT_DEMO_EXECUTION_AUTHORITY_20260924.json"
+          stage14_demo_prereg_path=repo/"canonical/KNIGHT_DEMO_STAGE14_FALLBACK_PREREG_20260925.json"
           prereg_path=repo/"canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_PREREG_20260924.json"
           closure_path=repo/"canonical/IRIS_V5_TP64_LONG_HORIZON_LOW_LR_CLOSURE_20260924.json"
 
@@ -230,6 +233,8 @@ jobs:
                   "product_authority_claimed":False,
                   "stage13_scientific_pass":False,
                   "allow_stage13_scientific_fail_for_demo":True,
+                  "allow_stage14_scientific_fail_for_demo":True,
+                  "stage14_fallback_preregistration":ref(stage14_demo_prereg_path),
                   "authority":{
                       "path":"canonical/KNIGHT_DEMO_EXECUTION_AUTHORITY_20260924.json",
                       "sha256":sha(authority_path),

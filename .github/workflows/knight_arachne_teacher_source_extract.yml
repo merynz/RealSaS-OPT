@@ -1,0 +1,105 @@
+name: knight-arachne-teacher-source-extract
+
+on:
+  push:
+    branches:
+      - demo/knight-arachne-v5-20260925
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      KAYKIT_COMMIT: '672074b73ba276876a19e8816ecdc5241817ab47'
+      KNIGHT_FBX_SHA256: 'b25e35cc7eaaa3c7c103f10a4f41fde1cbd81936fede9aa9ae4efbd29d40ba1b'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve pinned Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v blender >/dev/null 2>&1; then
+            echo "BLENDER_EXE=$(command -v blender)" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          version='4.5.14'
+          base="https://download.blender.org/release/Blender4.5"
+          archive="blender-${version}-linux-x64.tar.xz"
+          install_root="$RUNNER_TEMP/realsas_blender"
+          mkdir -p "$install_root"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/$archive" --output "$RUNNER_TEMP/$archive"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/blender-${version}.sha256" --output "$RUNNER_TEMP/blender.sha256"
+          (cd "$RUNNER_TEMP" && grep "  $archive\$" blender.sha256 | sha256sum --check -)
+          tar -xJf "$RUNNER_TEMP/$archive" -C "$install_root"
+          exe="$install_root/blender-${version}-linux-x64/blender"
+          test -x "$exe"
+          echo "BLENDER_EXE=$exe" >> "$GITHUB_ENV"
+
+      - name: Stage exact Knight source
+        shell: bash
+        run: |
+          set -euo pipefail
+          src="$RUNNER_TEMP/Knight.fbx"
+          base="https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/$KAYKIT_COMMIT"
+          curl --fail --location --retry 3 "$base/addons/kaykit_character_pack_adventures/Characters/fbx/Knight.fbx" -o "$src"
+          printf '%s  %s\n' "$KNIGHT_FBX_SHA256" "$src" | sha256sum --check -
+          test "$(wc -c < "$src")" = '20659324'
+          echo "KNIGHT_FBX=$src" >> "$GITHUB_ENV"
+
+      - name: Extract evaluated source geometry and rig truth
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/knight_arachne_teacher_source"
+          rm -rf "$out"; mkdir -p "$out"
+          "$BLENDER_EXE" --background --factory-startup             --python experiments/post_corpus_audit/realsas_blender_evaluated_extract_v1.py --             "$KNIGHT_FBX" "$out/KNIGHT_EVALUATED_TEACHER_SOURCE.npz" "$out/KNIGHT_EVALUATED_TEACHER_SOURCE_AUDIT.json"
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          import numpy as np
+          out=Path(os.environ["RUNNER_TEMP"])/"knight_arachne_teacher_source"
+          npz=out/"KNIGHT_EVALUATED_TEACHER_SOURCE.npz"
+          audit=out/"KNIGHT_EVALUATED_TEACHER_SOURCE_AUDIT.json"
+          with np.load(npz,allow_pickle=False) as z:
+              required={"vertices_source","faces","bone_heads_source","bone_tails_source","parents","deform_mask","rest_world_source","skin"}
+              assert required.issubset(z.files), sorted(set(required)-set(z.files))
+              assert z["vertices_source"].shape[0]==z["skin"].shape[0]
+              assert z["skin"].shape[1]==z["parents"].shape[0]
+              summary={
+                  "vertices":int(z["vertices_source"].shape[0]),
+                  "faces":int(z["faces"].shape[0]),
+                  "bones":int(z["parents"].shape[0]),
+                  "zero_weight_vertices":int((z["skin"].sum(1)<=1e-8).sum()),
+                  "nonzero_weight_vertices":int((z["skin"].sum(1)>1e-8).sum()),
+              }
+          def sha(p):
+              h=hashlib.sha256()
+              with open(p,"rb") as f:
+                  for b in iter(lambda:f.read(1<<20),b""): h.update(b)
+              return h.hexdigest()
+          seal={
+              "schema":"RealSaS.KnightArachneTeacherSourceExtraction.v1",
+              "status":"PASS",
+              "source_fbx_sha256":os.environ["KNIGHT_FBX_SHA256"],
+              "extractor":"experiments/post_corpus_audit/realsas_blender_evaluated_extract_v1.py",
+              "npz_sha256":sha(npz),
+              "audit_sha256":sha(audit),
+              **summary,
+          }
+          (out/"EXTRACTION_SEAL.json").write_text(json.dumps(seal,indent=2,sort_keys=True)+"\n")
+          print("KNIGHT_ARACHNE_TEACHER_SOURCE_EXTRACT_PASS",json.dumps(seal,sort_keys=True))
+          PY
+          echo "EVIDENCE_DIR=$out" >> "$GITHUB_ENV"
+
+      - name: Upload extraction evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-arachne-teacher-source
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 7

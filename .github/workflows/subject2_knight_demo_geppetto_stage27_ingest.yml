@@ -86,6 +86,11 @@ jobs:
           assert receipt["teacher_inference_inputs_used"] is False,receipt
           assert receipt["metadata"]["historical_checkpoint_loaded"] is False,receipt
           assert receipt["metadata"]["all_frozen_diffusion_seeds_passed"] is True,receipt
+          runtime=dict(receipt["metadata"].get("runtime_environment") or {})
+          assert runtime.get("cuda_available") is True,runtime
+          assert runtime.get("torch_version"),runtime
+          assert runtime.get("torch_cuda_runtime"),runtime
+          assert dict(runtime.get("gpu0") or {}).get("name"),runtime
           print("GEPPETTO_STAGE27_OUTPUT_VERIFIED",json.dumps({
               "checkpoint_sha256":receipt["checkpoint_sha256"],
               "result_sha256":receipt["result_sha256"],

@@ -811,6 +811,20 @@ def _source_foreground(ctx: dict, observation):
     return output
 
 
+def _demo_frozen_stage13_import_cfg(ctx: dict) -> dict | None:
+    if str(ctx["ledger"].get("execution_class") or "") != "DEMO_WITNESS":
+        return None
+    cfg = dict(ctx["run_manifest"].get("geometry_gate") or {})
+    demo = dict(cfg.get("demo_frozen_stage13_import") or {})
+    if not demo:
+        return None
+    if demo.get("enabled") is not True:
+        raise QualificationError("DEMO_STAGE13_IMPORT_NOT_EXPLICITLY_ENABLED")
+    if demo.get("product_authority_claimed") is not False:
+        raise QualificationError("DEMO_STAGE13_IMPORT_PRODUCT_AUTHORITY_FORBIDDEN")
+    return demo
+
+
 def _geometry_policy(cfg: dict) -> dict | None:
     keys = (
         "min_recall",
@@ -868,12 +882,6 @@ def qualify_geometry_substrate_stage(ctx: dict) -> dict:
         )
     )
 
-    vertices, faces, _normals = _load_zero_arrays(zero)
-    world = (
-        np.asarray(normalization.center_xyz, dtype=np.float64)[None, :]
-        + np.asarray(vertices, dtype=np.float64) * float(normalization.half_extent)
-    )
-    source = _source_foreground(ctx, observation)
     cfg = dict(ctx["run_manifest"].get("geometry_gate") or {})
     policy = _geometry_policy(cfg)
     if policy is None:
@@ -883,6 +891,131 @@ def qualify_geometry_substrate_stage(ctx: dict) -> dict:
             "diagnostics": {},
         }
 
+    demo_import = _demo_frozen_stage13_import_cfg(ctx)
+    if demo_import is not None:
+        evidence_ref = dict(demo_import.get("evidence") or {})
+        evidence_path, evidence_sha, evidence = _demo_ref_payload(
+            evidence_ref,
+            expected_schema="RealSaS.IRIS.V5TP64LongHorizon.Stage13Result.v1",
+        )
+        expected_npz = str(demo_import.get("zero_surface_npz_sha256") or "")
+        if expected_npz != zero.npz_sha256:
+            raise QualificationError("DEMO_STAGE13_ZERO_SURFACE_BINDING_DRIFT")
+        if str(evidence.get("arm") or "") != "C_DIRECT_FSTAR_PLUS_SOURCE_SILHOUETTE":
+            raise QualificationError("DEMO_STAGE13_ARM_DRIFT")
+        if evidence.get("stage13_v2_pass") is not False:
+            raise QualificationError("DEMO_STAGE13_SCIENTIFIC_STATE_DRIFT")
+        evidence_policy = {
+            str(key): float(value)
+            for key, value in dict(evidence.get("policy") or {}).items()
+        }
+        if content_sha256(evidence_policy) != content_sha256(policy):
+            raise QualificationError("DEMO_STAGE13_POLICY_DRIFT")
+
+        source = _source_foreground(ctx, observation)
+        evidence_rows = tuple(evidence.get("per_view") or ())
+        if (
+            len(evidence_rows) != 8
+            or {int(row.get("view_index", -1)) for row in evidence_rows} != set(range(8))
+        ):
+            raise QualificationError("DEMO_STAGE13_VIEW_SET_INVALID")
+
+        observations = {int(view.view_index): view for view in observation.views}
+        rows = []
+        for raw in sorted(evidence_rows, key=lambda value: int(value["view_index"])):
+            view_index = int(raw["view_index"])
+            authority = observations[view_index]
+            source_count = int(sum(source[view_index]))
+            recall = float(raw["recall"])
+            precision = float(raw["precision"])
+            if source_count <= 0 or recall <= 0 or precision <= 0:
+                raise QualificationError("DEMO_STAGE13_PIXEL_ACCOUNTING_INVALID")
+            true_positive = int(round(recall * source_count))
+            predicted_count = int(round(true_positive / precision))
+            if (
+                abs(true_positive / source_count - recall) > 1e-15
+                or abs(true_positive / predicted_count - precision) > 1e-15
+            ):
+                raise QualificationError("DEMO_STAGE13_INTEGER_METRIC_RECONSTRUCTION_DRIFT")
+
+            rows.append(
+                GeometrySubstrateViewIR(
+                    view_index=view_index,
+                    silhouette_recall=recall,
+                    silhouette_precision=precision,
+                    largest_coherent_hole_fraction=float(
+                        raw["largest_coherent_hole_fraction"]
+                    ),
+                    interior_uncovered_fraction=float(
+                        raw["interior_uncovered_fraction"]
+                    ),
+                    source_foreground_pixel_count=source_count,
+                    predicted_foreground_pixel_count=predicted_count,
+                    component_recall=float(
+                        raw["minimum_eligible_component_recall"]
+                    ),
+                    silhouette_edge_p95_px=float(raw["silhouette_edge_p95_px"]),
+                    passed=bool(raw["passed"]),
+                    metadata={
+                        "source_observation_hash": authority.source_observation_hash,
+                        "silhouette_edge_mean_px": float(
+                            raw["silhouette_edge_mean_px"]
+                        ),
+                        "silhouette_edge_max_px": float(
+                            raw["silhouette_edge_max_px"]
+                        ),
+                        "historical_external_measurement": True,
+                        "evidence_sha256": evidence_sha,
+                    },
+                )
+            )
+
+        value = build_geometry_substrate_qualification(
+            zero_surface_binding_hash=zero.zero_surface_hash,
+            observation_set_binding_hash=observation.observation_set_hash,
+            camera_set_binding_hash=cameras.camera_set_hash,
+            normalization_binding_hash=normalization.normalization_hash,
+            policy=policy,
+            views=tuple(rows),
+            metadata={
+                "metric_contract": "GEOMETRY_SUBSTRATE_V2",
+                "historical_external_stage13_measurement_import": True,
+                "historical_evidence_path": str(evidence_path),
+                "historical_evidence_sha256": evidence_sha,
+                "appearance_proxy_forbidden": True,
+                "final_visual_fidelity_claimed": False,
+                "product_authority_claimed": False,
+            },
+        )
+        if value.qualification_report["every_view_passed"]:
+            raise QualificationError("DEMO_STAGE13_IMPORT_UNEXPECTED_SCIENTIFIC_PASS")
+        root = ctx["run_root"] / "artifacts" / "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+        return {
+            "status": "PASS_DEMO_ONLY",
+            "outputs": [
+                write_ir(
+                    root / "geometry_substrate_qualification.json",
+                    value,
+                    authority_class="DEMO_ONLY_GEOMETRY_SUBSTRATE",
+                )
+            ],
+            "diagnostics": {
+                "scientific_pass": False,
+                "demo_admitted": True,
+                "historical_external_measurement_import": True,
+                "evidence_sha256": evidence_sha,
+                "per_view": [row.to_dict() for row in rows],
+                "substrate_hash": value.substrate_hash,
+                "product_authority_claimed": False,
+            },
+        }
+
+    vertices, faces, _normals = _load_zero_arrays(zero)
+    world = (
+        np.asarray(normalization.center_xyz, dtype=np.float64)[None, :]
+        + np.asarray(vertices, dtype=np.float64) * float(normalization.half_extent)
+    )
+    source = _source_foreground(ctx, observation)
     observations = {int(view.view_index): view for view in observation.views}
     rows = []
     for camera in sorted(cameras.cameras, key=lambda value: value.view_index):

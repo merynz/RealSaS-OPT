@@ -28,7 +28,7 @@ from .product_authority_v1 import (
     MeshQualificationPolicyIR,
     canonical_mesh_candidate_lineage_hash,
 )
-from .types import QualificationError
+from .types import QualificationError, SurfaceSupportBinding
 
 
 _EPS = 1e-10
@@ -602,3 +602,354 @@ def repair_candidate_endpoint_collapses_v1(
         candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(provisional),
     )
     return result,dict(result.metadata["endpoint_collapse_quality_repair"])
+
+
+def _closest_point_barycentric(point, tri):
+    """Return closest point and barycentric weights on one 3D triangle."""
+    p=np.asarray(point,dtype=np.float64)
+    a,b,c=(np.asarray(x,dtype=np.float64) for x in tri)
+    ab=b-a; ac=c-a; ap=p-a
+    d1=float(np.dot(ab,ap)); d2=float(np.dot(ac,ap))
+    if d1<=0.0 and d2<=0.0:
+        return a,np.asarray([1.0,0.0,0.0],dtype=np.float64)
+    bp=p-b; d3=float(np.dot(ab,bp)); d4=float(np.dot(ac,bp))
+    if d3>=0.0 and d4<=d3:
+        return b,np.asarray([0.0,1.0,0.0],dtype=np.float64)
+    vc=d1*d4-d3*d2
+    if vc<=0.0 and d1>=0.0 and d3<=0.0:
+        v=d1/(d1-d3)
+        return a+v*ab,np.asarray([1.0-v,v,0.0],dtype=np.float64)
+    cp=p-c; d5=float(np.dot(ab,cp)); d6=float(np.dot(ac,cp))
+    if d6>=0.0 and d5<=d6:
+        return c,np.asarray([0.0,0.0,1.0],dtype=np.float64)
+    vb=d5*d2-d1*d6
+    if vb<=0.0 and d2>=0.0 and d6<=0.0:
+        w=d2/(d2-d6)
+        return a+w*ac,np.asarray([1.0-w,0.0,w],dtype=np.float64)
+    va=d3*d6-d5*d4
+    if va<=0.0 and (d4-d3)>=0.0 and (d5-d6)>=0.0:
+        w=(d4-d3)/((d4-d3)+(d5-d6))
+        return b+w*(c-b),np.asarray([0.0,1.0-w,w],dtype=np.float64)
+    denom=1.0/(va+vb+vc)
+    v=vb*denom; w=vc*denom; u=1.0-v-w
+    return a+ab*v+ac*w,np.asarray([u,v,w],dtype=np.float64)
+
+
+def _combine_support_bindings(vertices, weights):
+    rows=defaultdict(float)
+    for vertex,weight in zip(vertices,weights):
+        w=float(weight)
+        if w<=1e-14:
+            continue
+        for sid,coeff in vertex.support_binding.coefficients:
+            rows[str(sid)]+=w*float(coeff)
+    cleaned=[(sid,value) for sid,value in sorted(rows.items()) if value>1e-12]
+    total=sum(value for _,value in cleaned)
+    if total<=0.0:
+        raise QualificationError("QUALITY_RELAX_SUPPORT_EMPTY")
+    coeffs=tuple((sid,float(value/total)) for sid,value in cleaned)
+    mode=(
+        "IDENTITY_SURFACE_NODE"
+        if len(coeffs)==1 and abs(coeffs[0][1]-1.0)<=1e-12
+        else "LOCAL_CONVEX_INTERPOLATION"
+    )
+    return SurfaceSupportBinding(mode,coeffs)
+
+
+def _face_normal(face, positions):
+    p=[np.asarray(positions[str(v)],dtype=np.float64) for v in face]
+    n=np.cross(p[1]-p[0],p[2]-p[0])
+    norm=float(np.linalg.norm(n))
+    if not math.isfinite(norm) or norm<=_EPS:
+        return None
+    return n/norm
+
+
+def repair_candidate_projected_relaxation_v1(
+    candidate: CanonicalMeshCandidateIR,
+    reference_candidate: CanonicalMeshCandidateIR,
+    policy: MeshQualificationPolicyIR,
+    *,
+    protected_surface_ids: set[str] | frozenset[str] = frozenset(),
+    max_moves: int = 256,
+    relaxation_fractions: tuple[float,...] = (0.25,0.5,0.75,1.0),
+) -> tuple[CanonicalMeshCandidateIR, dict]:
+    """Quality-targeted tangential relaxation projected to immutable source mesh.
+
+    Only interior vertices in currently violating faces are considered. The
+    Laplacian target is projected onto the vertex's immutable reference 1-ring
+    triangles; the projected barycentric coordinates are composed with existing
+    SurfaceSupportBindings, yielding an exact LOCAL_CONVEX_INTERPOLATION rather
+    than a free geometric point.
+    """
+    if int(max_moves)<1:
+        raise QualificationError("QUALITY_RELAX_MAX_MOVES_INVALID")
+    fractions=tuple(float(x) for x in relaxation_fractions)
+    if not fractions or any((not math.isfinite(x) or x<=0.0 or x>1.0) for x in fractions):
+        raise QualificationError("QUALITY_RELAX_FRACTIONS_INVALID")
+
+    reference_vertices={str(v.candidate_vertex_id):v for v in reference_candidate.vertices}
+    reference_positions={vid:tuple(map(float,v.P)) for vid,v in reference_vertices.items()}
+    reference_incident=_incident_faces_by_vertex(reference_candidate.faces)
+
+    vertices={str(v.candidate_vertex_id):v for v in candidate.vertices}
+    positions={vid:tuple(map(float,v.P)) for vid,v in vertices.items()}
+    faces=[tuple(map(str,face)) for face in candidate.faces]
+    before=_report(faces,positions,policy)
+    protected_surface_ids={str(x) for x in protected_surface_ids}
+
+    accepted=[]
+    rejected_boundary=0
+    rejected_protected=0
+    rejected_projection=0
+    rejected_quality=0
+    rejected_shape=0
+    rejected_orientation=0
+
+    for move_index in range(int(max_moves)):
+        incidence=_edge_incidence(faces)
+        neighbors=_vertex_neighbors(faces)
+        incident=_incident_faces_by_vertex(faces)
+        metrics=[_metric(face,positions) for face in faces]
+        violating={i for i,m in enumerate(metrics) if _violates(m,policy)}
+        if not violating:
+            break
+
+        boundary_vertices={
+            vid for edge,adj in incidence.items() if len(adj)==1 for vid in edge
+        }
+        seed_vertices=sorted({
+            str(v) for fi in violating for v in faces[fi]
+        })
+        proposals=[]
+
+        for vid in seed_vertices:
+            if vid not in vertices or vid not in reference_vertices:
+                continue
+            if vid in boundary_vertices:
+                rejected_boundary+=1
+                continue
+            if protected_surface_ids.intersection(
+                sid for sid,_ in vertices[vid].support_binding.coefficients
+            ):
+                rejected_protected+=1
+                continue
+            nbs=sorted(neighbors.get(vid,()))
+            if len(nbs)<3 or any(nb not in positions for nb in nbs):
+                continue
+            component=vertices[vid].component_id
+            if any(vertices[nb].component_id!=component for nb in nbs):
+                continue
+
+            patch_indices=set(incident[vid])
+            old_faces=tuple(faces[i] for i in sorted(patch_indices))
+            old_metrics=tuple(_metric(face,positions) for face in old_faces)
+            oldq={
+                "violation_count":sum(_violates(m,policy) for m in old_metrics),
+                "min_angle_deg":min(float(m["min_angle_deg"]) for m in old_metrics),
+                "max_aspect":max(float(m["aspect_longest_over_min_altitude"]) for m in old_metrics),
+            }
+            if oldq["violation_count"]<=0:
+                continue
+
+            current=np.asarray(positions[vid],dtype=np.float64)
+            centroid=np.mean(
+                np.asarray([positions[nb] for nb in nbs],dtype=np.float64),
+                axis=0,
+            )
+            local_scale=_local_scale([vid,*nbs],positions)
+            if local_scale<=_EPS:
+                continue
+
+            ref_face_indices=reference_incident.get(vid,set())
+            ref_faces=[
+                tuple(map(str,reference_candidate.faces[i]))
+                for i in sorted(ref_face_indices)
+            ]
+            ref_faces=[
+                face for face in ref_faces
+                if all(x in reference_positions for x in face)
+                and len({reference_vertices[x].component_id for x in face})==1
+                and reference_vertices[face[0]].component_id==component
+            ]
+            if not ref_faces:
+                rejected_projection+=1
+                continue
+
+            for fraction in fractions:
+                target=current+fraction*(centroid-current)
+                best=None
+                for ref_face in ref_faces:
+                    tri=tuple(reference_positions[x] for x in ref_face)
+                    projected,bary=_closest_point_barycentric(target,tri)
+                    distance=float(np.linalg.norm(target-projected))
+                    key=(distance,tuple(ref_face))
+                    if best is None or key<best[0]:
+                        best=(key,ref_face,projected,bary)
+                if best is None:
+                    continue
+                _,ref_face,projected,bary=best
+                displacement=float(np.linalg.norm(projected-current))
+                allowed_displacement=float(policy.g1_max_normal_refinement_ratio)*local_scale
+                if displacement>allowed_displacement+1e-12:
+                    rejected_shape+=1
+                    continue
+
+                new_positions=dict(positions)
+                new_positions[vid]=tuple(map(float,projected))
+                new_metrics=tuple(_metric(face,new_positions) for face in old_faces)
+                if any(bool(m["degenerate"]) for m in new_metrics):
+                    rejected_quality+=1
+                    continue
+                newq={
+                    "violation_count":sum(_violates(m,policy) for m in new_metrics),
+                    "min_angle_deg":min(float(m["min_angle_deg"]) for m in new_metrics),
+                    "max_aspect":max(float(m["aspect_longest_over_min_altitude"]) for m in new_metrics),
+                }
+                monotone=(
+                    newq["violation_count"]<=oldq["violation_count"]
+                    and newq["min_angle_deg"]+1e-9>=oldq["min_angle_deg"]
+                    and newq["max_aspect"]<=oldq["max_aspect"]+1e-9
+                )
+                strict=(
+                    newq["violation_count"]<oldq["violation_count"]
+                    or newq["min_angle_deg"]>oldq["min_angle_deg"]+1e-7
+                    or newq["max_aspect"]+1e-7<oldq["max_aspect"]
+                )
+                if not (monotone and strict):
+                    rejected_quality+=1
+                    continue
+
+                orientation_ok=True
+                for face in old_faces:
+                    oldn=_face_normal(face,positions)
+                    newn=_face_normal(face,new_positions)
+                    if oldn is None or newn is None or float(np.dot(oldn,newn))<=0.0:
+                        orientation_ok=False
+                        break
+                if not orientation_ok:
+                    rejected_orientation+=1
+                    continue
+
+                new_faces=old_faces
+                deviation=_sampled_symmetric_local_deviation(
+                    old_faces,new_faces,new_positions
+                )
+                # The topology is unchanged; supplement the symmetric face test
+                # with direct vertex displacement because the old/new helper sees
+                # one shared face list.
+                deviation=max(deviation,displacement)
+                if deviation>allowed_displacement+1e-12:
+                    rejected_shape+=1
+                    continue
+
+                ref_vertex_rows=[reference_vertices[x] for x in ref_face]
+                support=_combine_support_bindings(ref_vertex_rows,bary)
+                proposals.append({
+                    "vertex_id":vid,
+                    "fraction":fraction,
+                    "projected":tuple(map(float,projected)),
+                    "support":support,
+                    "reference_face":ref_face,
+                    "barycentric":tuple(map(float,bary)),
+                    "displacement":displacement,
+                    "allowed":allowed_displacement,
+                    "old_quality":oldq,
+                    "new_quality":newq,
+                })
+
+        if not proposals:
+            break
+        proposals.sort(key=lambda row:(
+            -int(row["old_quality"]["violation_count"]-row["new_quality"]["violation_count"]),
+            -float(row["new_quality"]["min_angle_deg"]-row["old_quality"]["min_angle_deg"]),
+            float(row["new_quality"]["max_aspect"]),
+            float(row["displacement"]),
+            str(row["vertex_id"]),
+            float(row["fraction"]),
+        ))
+        row=proposals[0]
+        vid=str(row["vertex_id"])
+        old_vertex=vertices[vid]
+        vertices[vid]=replace(
+            old_vertex,
+            support_binding=row["support"],
+            P=row["projected"],
+            metadata={
+                **dict(old_vertex.metadata or {}),
+                "projected_quality_relaxation":{
+                    "algorithm":"PROJECTED_LOCAL_RELAXATION_V1",
+                    "reference_face":list(row["reference_face"]),
+                    "barycentric":list(row["barycentric"]),
+                    "fraction":row["fraction"],
+                    "displacement":row["displacement"],
+                    "allowed_displacement":row["allowed"],
+                },
+            },
+        )
+        positions[vid]=row["projected"]
+        accepted.append({
+            "move_index":move_index,
+            "vertex_id":vid,
+            "fraction":row["fraction"],
+            "reference_face":row["reference_face"],
+            "barycentric":row["barycentric"],
+            "displacement":row["displacement"],
+            "allowed_displacement":row["allowed"],
+            "old_violation_count":row["old_quality"]["violation_count"],
+            "new_violation_count":row["new_quality"]["violation_count"],
+            "old_min_angle_deg":row["old_quality"]["min_angle_deg"],
+            "new_min_angle_deg":row["new_quality"]["min_angle_deg"],
+            "old_max_aspect":row["old_quality"]["max_aspect"],
+            "new_max_aspect":row["new_quality"]["max_aspect"],
+        })
+
+    vertices_tuple=tuple(vertices[vid] for vid in sorted(vertices))
+    after=_report(faces,positions,policy)
+    producer_policy_hash=content_sha256({
+        "schema":"RealSaS.ProjectedLocalRelaxationRepairPolicy.v1",
+        "input_candidate_lineage_hash":candidate.candidate_lineage_hash,
+        "reference_candidate_lineage_hash":reference_candidate.candidate_lineage_hash,
+        "mesh_policy_hash":policy.qualification_policy_lineage_hash,
+        "max_moves":int(max_moves),
+        "relaxation_fractions":list(fractions),
+        "projection":"IMMUTABLE_REFERENCE_ONE_RING_TRIANGLES",
+        "support":"COMPOSED_LOCAL_CONVEX_INTERPOLATION",
+        "boundary_vertices":"PROTECTED",
+        "protected_surface_ids":sorted(protected_surface_ids),
+        "g1_displacement_ratio":float(policy.g1_max_normal_refinement_ratio),
+    })
+    provisional=CanonicalMeshCandidateIR(
+        vertices=vertices_tuple,
+        faces=tuple(faces),
+        edges=candidate.edges,
+        surface_binding_hash=candidate.surface_binding_hash,
+        partition_binding_hash=candidate.partition_binding_hash,
+        carrier_policy_binding_hash=candidate.carrier_policy_binding_hash,
+        producer_id="RealSaS.CanonicalMesh.ProjectedLocalRelaxation.v1",
+        producer_policy_hash=producer_policy_hash,
+        candidate_lineage_hash="",
+        metadata={
+            **dict(candidate.metadata or {}),
+            "projected_local_relaxation":{
+                "algorithm":"PROJECTED_LOCAL_RELAXATION_V1",
+                "input_candidate_lineage_hash":candidate.candidate_lineage_hash,
+                "reference_candidate_lineage_hash":reference_candidate.candidate_lineage_hash,
+                "accepted_move_count":len(accepted),
+                "rejected_boundary_count":int(rejected_boundary),
+                "rejected_protected_count":int(rejected_protected),
+                "rejected_projection_count":int(rejected_projection),
+                "rejected_quality_count":int(rejected_quality),
+                "rejected_shape_count":int(rejected_shape),
+                "rejected_orientation_count":int(rejected_orientation),
+                "before":before,
+                "after":after,
+                "accepted_moves":accepted,
+            },
+        },
+    )
+    result=replace(
+        provisional,
+        candidate_lineage_hash=canonical_mesh_candidate_lineage_hash(provisional),
+    )
+    return result,dict(result.metadata["projected_local_relaxation"])

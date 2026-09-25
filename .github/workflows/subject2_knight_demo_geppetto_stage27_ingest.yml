@@ -1,0 +1,200 @@
+name: subject2-knight-demo-geppetto-stage27-ingest
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ingest-and-qualify:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      SUBJECT_ID: SUBJECT2_KNIGHT
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      GEPPETTO_REMOTE: gdrive:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/GEPPETTO_STAGE27_OUTPUT
+      PYTHONHASHSEED: '0'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned mainline dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m py_compile \
+            compiler/realsas_compiler_services/orchestrator/mainline.py \
+            compiler/realsas_compiler_services/orchestrator/adapters/learned_mechanics_v2.py
+
+      - name: Pull and verify exact Geppetto Stage27 output
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v rclone
+          local="$RUN_ROOT/imports/geppetto_stage27"
+          rm -rf "$local"
+          mkdir -p "$local"
+          rclone copy "$GEPPETTO_REMOTE" "$local" --checksum
+          test -s "$local/RUN_ALL_COMPLETE.json"
+          test -s "$local/GEPPETTO_KNIGHT_OUTPUT_MANIFEST.json"
+          test -s "$local/GEPPETTO_KNIGHT_EXECUTION_RECEIPT.json"
+          test -s "$local/GEPPETTO_KNIGHT_CHECKPOINT.pt"
+          test -s "$local/GEPPETTO_KNIGHT_RESULT.json"
+          test -s "$local/GEPPETTO_KNIGHT_SKELETON_PROPOSAL.json"
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+
+          root=Path(os.environ["RUN_ROOT"])/"imports"/"geppetto_stage27"
+          def sha(p):
+              h=hashlib.sha256()
+              with Path(p).open("rb") as f:
+                  for b in iter(lambda:f.read(1<<20),b""): h.update(b)
+              return h.hexdigest()
+
+          complete=json.loads((root/"RUN_ALL_COMPLETE.json").read_text())
+          manifest_path=root/"GEPPETTO_KNIGHT_OUTPUT_MANIFEST.json"
+          manifest=json.loads(manifest_path.read_text())
+          assert complete["schema"]=="RealSaS.KnightGeppettoStage27RunAllComplete.v1",complete
+          assert complete["status"]=="PASS",complete
+          assert complete["product_authority_claimed"] is False,complete
+          assert manifest["schema"]=="RealSaS.KnightGeppettoFitOutputManifest.v1",manifest
+          assert manifest["status"]=="PASS",manifest
+          assert manifest["product_authority_claimed"] is False,manifest
+          assert sha(manifest_path)==complete["output_manifest_sha256"],complete
+          for role,meta in manifest["files"].items():
+              p=root/meta["path"]
+              assert p.is_file(),(role,p)
+              assert sha(p)==meta["sha256"],(role,sha(p),meta["sha256"])
+          receipt=json.loads((root/"GEPPETTO_KNIGHT_EXECUTION_RECEIPT.json").read_text())
+          assert receipt["schema"]=="RealSaS.ModelFitExecutionReceipt.v1",receipt
+          assert receipt["lane"]=="GEPPETTO" and receipt["status"]=="PASS",receipt
+          assert receipt["teacher_inference_inputs_used"] is False,receipt
+          assert receipt["metadata"]["historical_checkpoint_loaded"] is False,receipt
+          assert receipt["metadata"]["all_frozen_diffusion_seeds_passed"] is True,receipt
+          print("GEPPETTO_STAGE27_OUTPUT_VERIFIED",json.dumps({
+              "checkpoint_sha256":receipt["checkpoint_sha256"],
+              "result_sha256":receipt["result_sha256"],
+              "proposal_sha256":receipt["proposal_sha256"],
+          },sort_keys=True))
+          PY
+          echo "GEPPETTO_LOCAL=$local" >> "$GITHUB_ENV"
+
+      - name: Bind exact external execution into same run manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          imported=Path(os.environ["GEPPETTO_LOCAL"])
+          manifest_path=root/"run_manifest.json"
+          manifest=json.loads(manifest_path.read_text())
+          old=dict(manifest.get("geppetto_fit") or {})
+          prereg=dict(old.get("preregistration") or {})
+          assert prereg, "GEPPETTO_PREREGISTRATION_MISSING"
+
+          def ref(p):
+              p=Path(p).resolve()
+              h=hashlib.sha256(p.read_bytes()).hexdigest() if p.stat().st_size < (1<<28) else None
+              if h is None:
+                  d=hashlib.sha256()
+                  with p.open("rb") as f:
+                      for b in iter(lambda:f.read(1<<20),b""): d.update(b)
+                  h=d.hexdigest()
+              return {"path":str(p),"sha256":h}
+
+          manifest["geppetto_fit"]={
+              "preregistration":prereg,
+              "execution_receipt":ref(imported/"GEPPETTO_KNIGHT_EXECUTION_RECEIPT.json"),
+              "checkpoint":ref(imported/"GEPPETTO_KNIGHT_CHECKPOINT.pt"),
+              "result":ref(imported/"GEPPETTO_KNIGHT_RESULT.json"),
+              "proposal":ref(imported/"GEPPETTO_KNIGHT_SKELETON_PROPOSAL.json"),
+          }
+          manifest_path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print("GEPPETTO_STAGE27_MANIFEST_BIND_PASS")
+          PY
+
+      - name: Execute Stage27 through Stage29
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+            --run-id "$RUN_ID" \
+            --target 29_GEPPETTO_CHECKPOINT_SEALED
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status \
+            --run-id "$RUN_ID"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          ledger=json.loads((Path(os.environ["RUN_ROOT"])/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          for sid in (
+              "27_GEPPETTO_FIT",
+              "28_SKELETON_QUALIFIED",
+              "29_GEPPETTO_CHECKPOINT_SEALED",
+          ):
+              assert by[sid]["status"]=="PASS_DEMO_ONLY",(sid,by[sid]["status"],by[sid].get("blockers"))
+          assert ledger["failed_count"]==0,ledger["failed_stage_ids"]
+          print("KNIGHT_GEPPETTO_STAGE29_PASS_DEMO_ONLY")
+          PY
+
+      - name: Seal Geppetto Stage29 receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+
+          def payload(stage,schema):
+              rows=[x for x in by[stage]["outputs"] if x["schema"]==schema]
+              if len(rows)!=1: raise SystemExit(f"OUTPUT_CARDINALITY:{stage}:{schema}:{len(rows)}")
+              return json.loads(Path(rows[0]["path"]).read_text())
+
+          execution=payload("27_GEPPETTO_FIT","RealSaS.ModelFitExecutionIR.v1")
+          skeleton=payload("28_SKELETON_QUALIFIED","RealSaS.QualifiedSkeletonIR.v1")
+          seal=payload("29_GEPPETTO_CHECKPOINT_SEALED","RealSaS.ModelCheckpointSealIR.v1")
+          receipt={
+              "schema":"RealSaS.KnightGeppettoStage29Receipt.v1",
+              "status":"PASS_DEMO_ONLY",
+              "run_id":os.environ["RUN_ID"],
+              "subject_id":os.environ["SUBJECT_ID"],
+              "execution_repo_commit":os.environ["GITHUB_SHA"],
+              "geppetto_execution_hash":execution["execution_hash"],
+              "geppetto_checkpoint_sha256":execution["checkpoint_sha256"],
+              "qualified_skeleton_lineage_hash":skeleton["skeleton_lineage_hash"],
+              "qualified_joint_count":len(skeleton.get("joints") or []),
+              "checkpoint_seal_hash":seal["checkpoint_seal_hash"],
+              "product_authority_claimed":False,
+              "product_pass_forbidden":True,
+          }
+          out=Path("canonical/KNIGHT_DEMO_GEPPETTO_STAGE29_RECEIPT_20260925.json")
+          out.write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+          git config user.name 'realsas-self-hosted-runner'
+          git config user.email 'runner@realsas.local'
+          git add canonical/KNIGHT_DEMO_GEPPETTO_STAGE29_RECEIPT_20260925.json
+          if git diff --cached --quiet; then
+            echo "GEPPETTO_STAGE29_RECEIPT_ALREADY_CURRENT=1"
+            exit 0
+          fi
+          git commit -m 'demo: seal Knight Geppetto Stage29 evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

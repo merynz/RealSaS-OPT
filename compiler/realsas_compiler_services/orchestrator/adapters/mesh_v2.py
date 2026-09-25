@@ -63,6 +63,9 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
     validate_mesh_qualification_policy,
 )
 from compiler.realsas_compiler_core.types import QualificationError
+from compiler.realsas_compiler_services.orchestrator.adapters.adapter_io import (
+    stage_output_payload,
+)
 
 Json=dict[str,Any]
 
@@ -101,21 +104,7 @@ def _load_file_ref(ref:dict, *, expected_schema:str|None=None, json_required:boo
 
 
 def _stage_output_payload(ctx:dict, stage_id:str, schema:str)->dict:
-    row=next((x for x in ctx["ledger"]["stages"] if x["id"]==stage_id),None)
-    if row is None or row.get("status") not in {"PASS","CACHE_HIT"}:
-        raise QualificationError(f"PRODUCT_ADAPTER_UPSTREAM_NOT_PASS:{stage_id}")
-    matches=[out for out in row.get("outputs",()) if out.get("schema")==schema]
-    if len(matches)!=1:
-        raise QualificationError(f"PRODUCT_ADAPTER_UPSTREAM_SCHEMA_CARDINALITY:{stage_id}:{schema}:{len(matches)}")
-    out=matches[0]
-    path=_resolved_path(out["path"])
-    if not path.is_file() or _sha256(path)!=out.get("sha256"):
-        raise QualificationError(f"PRODUCT_ADAPTER_UPSTREAM_OUTPUT_DRIFT:{stage_id}:{schema}")
-    payload=json.loads(path.read_text(encoding="utf-8"))
-    actual_schema=str(payload.get("schema") or payload.get("schema_version") or "")
-    if actual_schema!=schema:
-        raise QualificationError(f"PRODUCT_ADAPTER_UPSTREAM_EMBEDDED_SCHEMA_DRIFT:{stage_id}:{schema}")
-    return payload
+    return stage_output_payload(ctx, stage_id, schema)
 
 
 def _write_json(path:Path,payload:dict,*,authority_class:str,schema:str)->dict:

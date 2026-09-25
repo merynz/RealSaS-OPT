@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoDownstreamTrigger.v1",
-  "status": "REQUESTED_AFTER_SEALED_STAGE15",
+  "status": "RERUN_STAGE16_19_AFTER_PREREGISTERED_STAGE18_FALLBACK",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
   "subject_id": "SUBJECT2_KNIGHT",
   "execution_class": "DEMO_WITNESS",
@@ -10,5 +10,20 @@
     "26_GEPPETTO_FIT_PREREGISTERED_AND_STAGE27_HANDOFF"
   ],
   "product_authority_claimed": false,
-  "product_pass_forbidden": true
+  "product_pass_forbidden": true,
+  "revision": 1,
+  "latest_stage18_failure_evidence": {
+    "blocker": "CDT_PARENT_MIN_ANGLE_UNREPAIRABLE_WITHOUT_BOUNDARY_SPLIT",
+    "face_count": 24958,
+    "below_min_angle_face_count": 109,
+    "below_min_angle_face_fraction": 0.004367337126372306,
+    "min_angle_deg": 0.4074608559654188,
+    "policy_min_angle_deg": 7.5,
+    "above_max_aspect_face_count": 57,
+    "max_aspect_longest_over_min_altitude": 272.00299700239304,
+    "policy_max_aspect_longest_over_min_altitude": 16,
+    "degenerate_face_count": 0,
+    "evidence_observed_after_fallback_preregistration": true
+  },
+  "stage18_fallback_preregistration": "canonical/KNIGHT_DEMO_STAGE18_MESH_FALLBACK_PREREG_20260925.json"
 }

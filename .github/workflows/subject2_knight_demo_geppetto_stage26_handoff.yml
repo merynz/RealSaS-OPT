@@ -137,7 +137,7 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import hashlib,json,os,shutil
+          import hashlib,json,os,shutil,subprocess
           from pathlib import Path
 
           repo=Path(os.environ["GITHUB_WORKSPACE"]).resolve()
@@ -306,7 +306,23 @@ jobs:
                   for b in iter(lambda:f.read(1<<20),b""): h.update(b)
               return h.hexdigest()
 
-          files={}
+          source_archive=handoff/"realsas_execution_source.zip"
+          subprocess.run(
+              [
+                  "git","archive","--format=zip",
+                  f"--output={source_archive}",
+                  os.environ["GITHUB_SHA"],
+              ],
+              cwd=os.environ["GITHUB_WORKSPACE"],
+              check=True,
+          )
+
+          files={
+              "realsas_execution_source.zip":{
+                  "sha256":sha(source_archive),
+                  "bytes":source_archive.stat().st_size,
+              }
+          }
           mapping=[
               (one("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceIR.v1"),"qualified_rigging_surface.json"),
               (one("15_RIGGING_SURFACE_QUALIFIED","RealSaS.RiggingSurfaceQualificationIR.v1"),"rigging_surface_qualification.json"),

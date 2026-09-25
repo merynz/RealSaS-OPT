@@ -18,9 +18,14 @@ import time
 
 import numpy as np
 import torch
+from PIL import Image, ImageDraw
 from scipy.optimize import linear_sum_assignment
 
-from compiler.realsas_compiler_core.artifact_codec_v2 import rigging_surface_from_dict
+from compiler.realsas_compiler_core.artifact_codec_v2 import (
+    qualified_camera_set_from_dict,
+    rigging_surface_from_dict,
+)
+from compiler.realsas_compiler_core.camera_geometry_v2 import project_points_xyz_v3
 from compiler.realsas_compiler_core.preproduct_authority_v1 import (
     model_fit_preregistration_from_dict,
     rigging_surface_qualification_from_dict,
@@ -291,6 +296,107 @@ def _check(
     }
 
 
+def _render_final_skeleton_evidence(
+    final_check: dict,
+    *,
+    camera_set_path: Path,
+    observation_dir: Path,
+    outdir: Path,
+) -> dict:
+    rows = {
+        int(row["seed"]): row
+        for row in final_check.get("diffusion_seed_reports") or ()
+    }
+    selected = rows.get(SELECTED_PROPOSAL_SEED)
+    if selected is None or selected.get("pass") is not True:
+        raise RuntimeError("GEPPETTO_VISUAL_EVIDENCE_SELECTED_SEED_NOT_PASS")
+    qualified = dict(selected.get("qualified") or {})
+    joints = list(qualified.get("joints") or ())
+    if not joints:
+        raise RuntimeError("GEPPETTO_VISUAL_EVIDENCE_SKELETON_EMPTY")
+
+    camera_set = qualified_camera_set_from_dict(_load_json(camera_set_path))
+    joint_ids = [str(row["canonical_joint_id"]) for row in joints]
+    index_by_id = {jid: i for i, jid in enumerate(joint_ids)}
+    if len(index_by_id) != len(joints):
+        raise RuntimeError("GEPPETTO_VISUAL_EVIDENCE_DUPLICATE_JOINT_ID")
+    world = np.asarray([row["position"] for row in joints], dtype=np.float64)
+    if world.shape != (len(joints), 3) or not np.isfinite(world).all():
+        raise RuntimeError("GEPPETTO_VISUAL_EVIDENCE_JOINT_POSITION_INVALID")
+
+    visual_dir = outdir / "visual_evidence"
+    visual_dir.mkdir(parents=True, exist_ok=True)
+    views = []
+    rendered = []
+    for camera in sorted(camera_set.cameras, key=lambda row: int(row.view_index)):
+        vi = int(camera.view_index)
+        source = observation_dir / f"V{vi}.png"
+        if not source.is_file():
+            raise RuntimeError(f"GEPPETTO_VISUAL_EVIDENCE_SOURCE_MISSING:V{vi}")
+        image = Image.open(source).convert("RGB")
+        projected = np.asarray(project_points_xyz_v3(world, camera), dtype=np.float64)
+        if projected.shape != (len(joints), 3) or not np.isfinite(projected).all():
+            raise RuntimeError(f"GEPPETTO_VISUAL_EVIDENCE_PROJECTION_INVALID:V{vi}")
+        if np.any(projected[:, 2] <= 0.0):
+            raise RuntimeError(f"GEPPETTO_VISUAL_EVIDENCE_BEHIND_CAMERA:V{vi}")
+        draw = ImageDraw.Draw(image)
+        xy = projected[:, :2]
+        for child, row in enumerate(joints):
+            parent_id = row.get("parent_canonical_id")
+            if parent_id is None:
+                continue
+            parent = index_by_id.get(str(parent_id))
+            if parent is None:
+                raise RuntimeError("GEPPETTO_VISUAL_EVIDENCE_PARENT_ID_DRIFT")
+            draw.line(
+                [
+                    (float(xy[parent, 0]), float(xy[parent, 1])),
+                    (float(xy[child, 0]), float(xy[child, 1])),
+                ],
+                fill=(255, 80, 80),
+                width=4,
+            )
+        for i, row in enumerate(joints):
+            x, y = map(float, xy[i])
+            radius = 6
+            fill = (80, 220, 120) if row.get("parent_canonical_id") is None else (255, 230, 80)
+            draw.ellipse(
+                (x - radius, y - radius, x + radius, y + radius),
+                fill=fill,
+                outline=(20, 20, 20),
+                width=2,
+            )
+        target = visual_dir / f"V{vi}_QUALIFIED_SKELETON.png"
+        image.save(target)
+        rendered.append(image)
+        views.append(
+            {
+                "view_index": vi,
+                "path": str(target),
+                "sha256": _sha(target),
+                "source_raster_sha256": _sha(source),
+            }
+        )
+
+    width = max(image.width for image in rendered)
+    height = max(image.height for image in rendered)
+    sheet = Image.new("RGB", (width * 2, height * 4), (0, 0, 0))
+    for index, image in enumerate(rendered):
+        sheet.paste(image, ((index % 2) * width, (index // 2) * height))
+    sheet_path = visual_dir / "KNIGHT_GEPPETTO_8VIEW_CONTACT_SHEET.png"
+    sheet.save(sheet_path)
+    return {
+        "schema": "RealSaS.KnightGeppettoVisualEvidence.v1",
+        "selected_proposal_seed": SELECTED_PROPOSAL_SEED,
+        "gate_role": "HUMAN_REVIEW_EVIDENCE_ONLY__NOT_CHECKPOINT_SELECTION",
+        "views": views,
+        "contact_sheet": {
+            "path": str(sheet_path),
+            "sha256": _sha(sheet_path),
+        },
+    }
+
+
 def _selected_proposal(final_check: dict) -> dict:
     rows = {
         int(row["seed"]): row
@@ -310,6 +416,8 @@ def run(args) -> dict:
     prereg_path = Path(args.preregistration_ir).expanduser().resolve()
     experiment_prereg_path = Path(args.experiment_prereg).expanduser().resolve()
     model_source_path = Path(args.model_source).expanduser().resolve()
+    camera_set_path = Path(args.camera_set_json).expanduser().resolve()
+    observation_dir = Path(args.observation_dir).expanduser().resolve()
     outdir = Path(args.output_dir).expanduser().resolve()
     outdir.mkdir(parents=True, exist_ok=True)
 
@@ -545,6 +653,13 @@ def run(args) -> dict:
         )
         raise AssertionError("GEPPETTO_KNIGHT_NO_TERMINAL_CLOSURE")
 
+    visual_evidence = _render_final_skeleton_evidence(
+        final_check,
+        camera_set_path=camera_set_path,
+        observation_dir=observation_dir,
+        outdir=outdir,
+    )
+
     checkpoint_path = outdir / "GEPPETTO_KNIGHT_CHECKPOINT.pt"
     torch.save(
         {
@@ -604,6 +719,7 @@ def run(args) -> dict:
         "final_check": final_check,
         "checkpoint_sha256": checkpoint_sha,
         "proposal_sha256": proposal_sha,
+        "visual_evidence": visual_evidence,
         "teacher_supervision_during_training": True,
         "teacher_feedback_during_free_running_inference": False,
         "teacher_inference_inputs_used": False,
@@ -695,6 +811,8 @@ def parse_args():
     parser.add_argument("--preregistration-ir", required=True)
     parser.add_argument("--experiment-prereg", required=True)
     parser.add_argument("--model-source", required=True)
+    parser.add_argument("--camera-set-json", required=True)
+    parser.add_argument("--observation-dir", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--preflight-only", action="store_true")
     return parser.parse_args()

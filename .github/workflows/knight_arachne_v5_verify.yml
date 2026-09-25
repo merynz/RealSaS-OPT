@@ -1,0 +1,42 @@
+name: knight-arachne-v5-verify
+
+on:
+  push:
+    branches:
+      - demo/knight-arachne-v5-20260925
+    paths:
+      - 'tools/training/run_knight_arachne_v5_demo_transfer_fit_v1.py'
+      - 'tools/training/knight_arachne_teacher_projection_v1.py'
+      - 'canonical/KNIGHT_ARACHNE_V5_DEMO_TRANSFER_PREREG_20260925.json'
+      - '.github/workflows/knight_arachne_v5_verify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile             tools/training/run_knight_arachne_v5_demo_transfer_fit_v1.py             tools/training/knight_arachne_teacher_projection_v1.py
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("canonical/KNIGHT_ARACHNE_V5_DEMO_TRANSFER_PREREG_20260925.json")
+          d=json.loads(p.read_text())
+          assert d["status"]=="FROZEN_BEFORE_KNIGHT_ARACHNE_OPTIMIZER_STEP_1"
+          assert d["architecture_id"]=="RealSaS.Arachne.A1.MinimalK4DirectSimplex.v5"
+          assert d["training"]["stable_consecutive_full_passes_required"]==3
+          assert d["bindings"]["rigging_surface_node_count"]==12090
+          assert d["bindings"]["qualified_skeleton_joint_count"]==28
+          assert d["teacher_boundary"]=="OBJECTIVE_AND_EVALUATION_ONLY__NEVER_PREDICTOR_INPUT"
+          assert d["output_policy"]["product_authority_claimed"] is False
+          assert d["output_policy"]["generalization_claimed"] is False
+          print("KNIGHT_ARACHNE_V5_STATIC_VERIFY_PASS")
+          PY

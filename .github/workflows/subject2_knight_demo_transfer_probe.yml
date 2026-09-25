@@ -387,12 +387,33 @@ jobs:
       - name: Execute Frozen C continuation through Stage15
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
+          rc=0
           python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
             --run-id "$RUN_ID" \
-            --target 15_RIGGING_SURFACE_QUALIFIED
+            --target 15_RIGGING_SURFACE_QUALIFIED || rc=$?
           python -m compiler.realsas_compiler_services.orchestrator.mainline status \
             --run-id "$RUN_ID"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          ledger=json.loads((Path(os.environ["RUN_ROOT"])/"ACTIVE_RUN_V2.json").read_text())
+          for row in ledger["stages"][:15]:
+              if row["status"] in {"FAIL","ABSTAIN","BLOCKED"}:
+                  print("DEMO_STAGE_FAILURE",json.dumps({
+                      "id":row["id"],
+                      "status":row["status"],
+                      "blockers":row.get("blockers") or [],
+                      "diagnostics_hash":row.get("diagnostics_hash") or "",
+                  },sort_keys=True))
+          history=ledger.get("history") or []
+          for event in history[-12:]:
+              if event.get("event") in {"STAGE_EXCEPTION","STAGE_FAILED","STAGE_BLOCKED"}:
+                  print("DEMO_STAGE_HISTORY",json.dumps(event,sort_keys=True))
+          PY
+          if test "$rc" -ne 0; then
+            exit "$rc"
+          fi
           python - <<'PY'
           import json,os
           from pathlib import Path

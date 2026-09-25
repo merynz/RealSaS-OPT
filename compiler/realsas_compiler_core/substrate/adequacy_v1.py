@@ -346,6 +346,7 @@ def select_adequate_rigging_surface_v1(
     normal_k:int,
     visibility_depth_tolerance_norm:float,
     adequacy_policy:dict,
+    return_closest_nonpassing_evidence:bool=False,
     metadata:dict|None=None,
 ):
     policy=_policy(dict(adequacy_policy))
@@ -443,6 +444,20 @@ def select_adequate_rigging_surface_v1(
     }
     report["adequacy_report_hash"]=substrate_adequacy_report_hash_v1(report)
     if best is None:
+        if bool(return_closest_nonpassing_evidence):
+            if closest_nonpassing is None:
+                return None,report
+            cap=int(closest_nonpassing["candidate_target_node_cap"])
+            selected=surfaces.get(cap)
+            if selected is None:
+                raise QualificationError("CLOSEST_NONPASSING_SURFACE_MISSING")
+            if selected.geometry_lineage_hash != str(
+                closest_nonpassing["surface_lineage_hash"]
+            ):
+                raise QualificationError(
+                    "CLOSEST_NONPASSING_SURFACE_LINEAGE_DRIFT"
+                )
+            return selected,report
         return None,report
     selected=surfaces[best]
     selected.metadata.update if False else None

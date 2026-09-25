@@ -446,10 +446,9 @@ def qualify_static_canonical_mesh_stage(ctx: dict) -> dict:
         "actual_candidate_source_fidelity_passed": bool(source_fidelity_passed),
         "actual_candidate_source_fidelity_views": source_fidelity_rows,
         "demo_geometry_lineage": bool(demo_geometry_lineage),
-        "product_authority_claimed": False if demo_geometry_lineage else True,
-        "product_source_fidelity_qualification_claimed": (
-            bool(source_fidelity_passed) and not demo_geometry_lineage
-        ),
+        "product_authority_claimed": False,
+        "source_fidelity_qualification_passed": bool(source_fidelity_passed),
+        "demo_only_source_fidelity_admission": bool(demo_geometry_lineage),
         "silhouette_is_geometry_authority_not_caa": True,
         "unknown_boundary_policy": (
             "CONSERVATIVE_UNTIL_STAGE35__NO_POST_SKIN_PARTITION_MUTATION_V1"

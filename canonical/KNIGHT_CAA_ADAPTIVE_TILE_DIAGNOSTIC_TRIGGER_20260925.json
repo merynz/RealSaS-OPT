@@ -1,0 +1,11 @@
+{
+  "schema": "RealSaS.KnightCAAAdaptiveTileDiagnosticTrigger.v1",
+  "status": "REQUESTED",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "execution_class": "DEMO_WITNESS",
+  "mode": "PROJECTED_SOURCE_DENSITY_PER_FACE_V1",
+  "max_source_pixels_per_atlas_texel_unchanged": true,
+  "max_page_resolution_unchanged": true,
+  "product_authority_claimed": false
+}

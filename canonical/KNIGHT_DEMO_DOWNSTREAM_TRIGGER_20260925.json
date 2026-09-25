@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightDemoDownstreamTrigger.v1",
-  "status": "RERUN_STAGE16_19_AFTER_PREREGISTERED_STAGE18_FALLBACK",
+  "status": "RERUN_STAGE16_19_AFTER_STAGE15_GATE_SCOPE_FIX",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
   "subject_id": "SUBJECT2_KNIGHT",
   "execution_class": "DEMO_WITNESS",
@@ -11,7 +11,7 @@
   ],
   "product_authority_claimed": false,
   "product_pass_forbidden": true,
-  "revision": 1,
+  "revision": 2,
   "latest_stage18_failure_evidence": {
     "blocker": "CDT_PARENT_MIN_ANGLE_UNREPAIRABLE_WITHOUT_BOUNDARY_SPLIT",
     "face_count": 24958,
@@ -25,5 +25,10 @@
     "degenerate_face_count": 0,
     "evidence_observed_after_fallback_preregistration": true
   },
-  "stage18_fallback_preregistration": "canonical/KNIGHT_DEMO_STAGE18_MESH_FALLBACK_PREREG_20260925.json"
+  "stage18_fallback_preregistration": "canonical/KNIGHT_DEMO_STAGE18_MESH_FALLBACK_PREREG_20260925.json",
+  "orchestrator_notes": {
+    "stage15_gate": "SCOPED_TO_ORDINALS_1_THROUGH_15",
+    "downstream_stale_failures": "REOPENED_BY_IDENTITY_CHANGE",
+    "stage18_fallback_preregistered": true
+  }
 }

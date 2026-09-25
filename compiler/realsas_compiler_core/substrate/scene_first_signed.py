@@ -50,11 +50,12 @@ def robust_zero_surface_normals_v1(points, orientation_hints, *, k: int = 64) ->
     except ImportError as exc:
         raise RuntimeError("scipy is required for zero-surface local geometry") from exc
     tree = cKDTree(p)
-    _, nn = tree.query(p, k=kk + 1, workers=-1)
-    nn = np.asarray(nn[:, 1:], dtype=np.int64)
     out = np.empty_like(p)
-    for start in range(0, len(p), 8192):
-        rows = nn[start : start + 8192]
+    query_chunk = 8192
+    for start in range(0, len(p), query_chunk):
+        stop = min(len(p), start + query_chunk)
+        _, rows = tree.query(p[start:stop], k=kk + 1, workers=-1)
+        rows = np.asarray(rows[:, 1:], dtype=np.int64)
         x = p[rows]
         center = np.median(x, axis=1, keepdims=True)
         dist = np.linalg.norm(x - center, axis=2)
@@ -74,10 +75,10 @@ def robust_zero_surface_normals_v1(points, orientation_hints, *, k: int = 64) ->
         n = evecs[:, :, 0]
         if not np.isfinite(evals).all() or not np.isfinite(n).all():
             raise QualificationError("non-finite zero-surface local PCA")
-        h = hint[start : start + len(n)]
+        h = hint[start:stop]
         flip = np.sum(n * h, axis=1) < 0.0
         n[flip] *= -1.0
-        out[start : start + len(n)] = _normalize_rows(n)
+        out[start:stop] = _normalize_rows(n)
     return out.astype(np.float32)
 
 
@@ -139,7 +140,15 @@ def _mesh_connected_component_labels(vertex_count:int, faces:np.ndarray)->np.nda
     return mesh_connected_component_labels_v1(vertex_count, faces)
 
 
-def _adaptive_voxel_compact(points, faces, dense_normals, *, target_nodes: int, preserve_connected_components: bool=False):
+def _adaptive_voxel_compact(
+    points,
+    faces,
+    dense_normals,
+    *,
+    target_nodes: int,
+    preserve_connected_components: bool=False,
+    precomputed_component_labels: np.ndarray | None = None,
+):
     p = np.asarray(points, dtype=np.float64)
     f = np.asarray(faces, dtype=np.int64)
     n = np.asarray(dense_normals, dtype=np.float64)
@@ -152,11 +161,18 @@ def _adaptive_voxel_compact(points, faces, dense_normals, *, target_nodes: int, 
         lo = p.min(axis=0)
         span = np.maximum(p.max(axis=0) - lo, 1e-12)
 
-        component_labels=(
-            _mesh_connected_component_labels(len(p),f)
-            if bool(preserve_connected_components)
-            else None
-        )
+        component_labels = None
+        if bool(preserve_connected_components):
+            if precomputed_component_labels is None:
+                component_labels = _mesh_connected_component_labels(len(p), f)
+            else:
+                component_labels = np.asarray(
+                    precomputed_component_labels, dtype=np.int64
+                )
+                if component_labels.shape != (len(p),):
+                    raise QualificationError(
+                        "PRECOMPUTED_COMPONENT_LABEL_SHAPE_INVALID"
+                    )
 
         def labels_for(divisions: int):
             keys = np.floor((p - lo) / span * divisions).astype(np.int64)
@@ -296,6 +312,8 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
     normal_k: int = 64,
     visibility_depth_tolerance_norm: float = 0.02,
     component_aware_compaction: bool = False,
+    precomputed_dense_normals: np.ndarray | None = None,
+    precomputed_component_labels: np.ndarray | None = None,
     metadata: dict | None = None,
 ) -> RiggingSurfaceIR:
     """Canonical GSA bridge from a predicted signed zero-surface to RiggingSurfaceIR.
@@ -321,10 +339,22 @@ def rigging_surface_from_scene_first_zero_mesh_v1(
         raise QualificationError("visibility tolerance must be positive")
 
     world = center[None, :] + vn * half
-    dense_normals = robust_zero_surface_normals_v1(world, hint, k=normal_k)
+    if precomputed_dense_normals is None:
+        dense_normals = robust_zero_surface_normals_v1(world, hint, k=normal_k)
+    else:
+        dense_normals = np.asarray(precomputed_dense_normals, dtype=np.float32)
+        if dense_normals.shape != vn.shape or not np.isfinite(dense_normals).all():
+            raise QualificationError("PRECOMPUTED_DENSE_NORMALS_INVALID")
+        lengths = np.linalg.norm(dense_normals, axis=1)
+        if np.any(lengths <= 1e-12):
+            raise QualificationError("PRECOMPUTED_DENSE_NORMALS_DEGENERATE")
     points, normals, edges, divisions, _inverse = _adaptive_voxel_compact(
-        world, f, dense_normals, target_nodes=int(target_nodes),
+        world,
+        f,
+        dense_normals,
+        target_nodes=int(target_nodes),
         preserve_connected_components=bool(component_aware_compaction),
+        precomputed_component_labels=precomputed_component_labels,
     )
     support, raster, visible_counts = _self_zbuffer_support(
         world,

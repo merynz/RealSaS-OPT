@@ -637,7 +637,28 @@ def _adapter_impl_hash(adapter: str) -> str:
 
 
 def _manifest_subset(manifest: dict, stage: dict) -> dict:
-    return {key: manifest.get(key) for key in stage["manifest_keys"]}
+    """Return only manifest state semantically consumed by this stage.
+
+    External-fit preregistration must remain immutable when execution artifacts
+    are filled in later. Stages 26/30 read only the preregistration ref; their
+    downstream execution stages fingerprint the complete fit section.
+    """
+    stage_id = str(stage.get("id") or "")
+    subset = {}
+    for key in stage["manifest_keys"]:
+        value = manifest.get(key)
+        if (
+            stage_id == "26_GEPPETTO_FIT_PREREGISTERED"
+            and key == "geppetto_fit"
+        ) or (
+            stage_id == "30_ARACHNE_FIT_PREREGISTERED"
+            and key == "arachne_fit"
+        ):
+            cfg = dict(value or {})
+            subset[key] = {"preregistration": cfg.get("preregistration")}
+        else:
+            subset[key] = value
+    return subset
 
 
 def _path_within(path: Path, root: Path) -> bool:

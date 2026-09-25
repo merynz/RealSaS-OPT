@@ -8,6 +8,10 @@ on:
       - 'canonical/KNIGHT_DEMO_STAGE19_RECEIPT_20260925.json'
   workflow_dispatch:
 
+concurrency:
+  group: subject2-knight-demo-v2-run
+  cancel-in-progress: false
+
 permissions:
   contents: write
 

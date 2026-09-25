@@ -1,10 +1,10 @@
 {
   "schema": "RealSaS.KnightDemoTransferProbeTrigger.v1",
-  "status": "IMPORT_REQUESTED",
+  "status": "VERIFY_REQUESTED",
   "date_utc": "2026-09-25",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
-  "probe_revision": 3,
-  "probe_scope": "WINDOWS_GOOGLE_DRIVE_DESKTOP_EXACT_FROZEN_C_IMPORT",
+  "probe_revision": 4,
+  "probe_scope": "RCLONE_AUTHENTICATED_DRIVE__DEMO_STATUS_SEMANTICS__FROZEN_C_EXACT_HASH_GATE",
   "expected_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
   "expected_zero_surface_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c"
 }

@@ -5,7 +5,28 @@ import numpy as np
 argv=sys.argv[sys.argv.index('--')+1:]
 src=Path(argv[0]); out_npz=Path(argv[1]); out_json=Path(argv[2])
 
-bpy.ops.wm.open_mainfile(filepath=str(src))
+ext=src.suffix.lower()
+if ext=='.blend':
+    bpy.ops.wm.open_mainfile(filepath=str(src))
+elif ext=='.fbx':
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.object.delete(use_global=False)
+    imported=False
+    errors=[]
+    for op in (
+        lambda: bpy.ops.wm.fbx_import(filepath=str(src)),
+        lambda: bpy.ops.import_scene.fbx(filepath=str(src), automatic_bone_orientation=False),
+    ):
+        try:
+            op()
+            imported=True
+            break
+        except Exception as exc:
+            errors.append(repr(exc))
+    if not imported:
+        raise RuntimeError('FBX importer unavailable: '+json.dumps(errors))
+else:
+    raise RuntimeError(f'unsupported source extension:{ext}')
 
 # Canonical repair policy: armatures in REST; active non-Basis shape-key assets are
 # excluded by the driver and must never reach this extractor.

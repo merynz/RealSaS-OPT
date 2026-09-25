@@ -18,6 +18,7 @@ from .appearance_completion_v2 import (
 )
 from .camera_geometry_v2 import project_points_xyz_v3
 from .types import QualificationError
+from .hashing import content_sha256
 from .visibility_v2 import (
     projected_xy_to_source_texel_xy,
     rasterize_visible_owner,

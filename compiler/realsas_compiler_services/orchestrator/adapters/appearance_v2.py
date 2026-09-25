@@ -140,6 +140,51 @@ def _load_source_inputs(ctx: dict, observation):
     return rgba, masks
 
 
+def _static_mesh_for_appearance(ctx: dict):
+    payload = stage_output_payload(
+        ctx,
+        "19_STATIC_CANONICAL_MESH_QUALIFIED",
+        "RealSaS.StaticCanonicalMeshQualificationIR.v1",
+    )
+    value = static_mesh_qualification_from_dict(payload)
+    report = dict(value.qualification_report or {})
+    status = str(report.get("status") or "")
+    row = next(
+        (
+            item
+            for item in ctx["ledger"].get("stages") or ()
+            if str(item.get("id") or "") == "19_STATIC_CANONICAL_MESH_QUALIFIED"
+        ),
+        None,
+    )
+    execution_class = str(ctx["ledger"].get("execution_class") or "")
+    ledger_status = "" if row is None else str(row.get("status") or "")
+
+    if status == "PASS_STATIC_CANONICAL_CARRIER":
+        return value
+
+    if (
+        execution_class == "DEMO_WITNESS"
+        and ledger_status == "PASS_DEMO_ONLY"
+        and status == "DEMO_ONLY_MEASURED_STATIC_CANONICAL_CARRIER__P999_FAIL"
+        and report.get("demo_geometry_lineage") is True
+        and report.get("product_authority_claimed") is False
+        and report.get("demo_only_source_fidelity_admission") is True
+    ):
+        demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+        if (
+            demo.get("stage13_scientific_pass") is not False
+            or demo.get("product_authority_claimed") is not False
+        ):
+            raise QualificationError("CAA_DEMO_STATIC_MESH_SCOPE_DRIFT")
+        return value
+
+    raise QualificationError(
+        "CAA_STATIC_MESH_NOT_ADMISSIBLE:"
+        f"{execution_class}:{ledger_status}:{status}"
+    )
+
+
 def _save_npz(path: Path, **arrays) -> str:
     path.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(path, **arrays)
@@ -231,13 +276,7 @@ def preregister_caa_backend_stage(ctx: dict) -> dict:
             "RealSaS.AppearanceDomainIR.v1",
         )
     )
-    static_mesh = static_mesh_qualification_from_dict(
-        stage_output_payload(
-            ctx,
-            "19_STATIC_CANONICAL_MESH_QUALIFIED",
-            "RealSaS.StaticCanonicalMeshQualificationIR.v1",
-        )
-    )
+    static_mesh = _static_mesh_for_appearance(ctx)
 
     observation_camera_hashes = tuple(
         row.camera_binding_hash
@@ -1058,13 +1097,7 @@ def prove_caa_reference_rest_stage(ctx: dict) -> dict:
             "RealSaS.CanonicalMeshCandidateIR.v1",
         )
     )
-    static_mesh = static_mesh_qualification_from_dict(
-        stage_output_payload(
-            ctx,
-            "19_STATIC_CANONICAL_MESH_QUALIFIED",
-            "RealSaS.StaticCanonicalMeshQualificationIR.v1",
-        )
-    )
+    static_mesh = _static_mesh_for_appearance(ctx)
     cameras = qualified_camera_set_from_dict(
         stage_output_payload(
             ctx,

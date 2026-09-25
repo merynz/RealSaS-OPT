@@ -5,7 +5,7 @@ on:
     branches:
       - research/vf11-certified-adaptive-20260921
     paths:
-      - 'canonical/KNIGHT_DEMO_GEPPETTO_STAGE26_TRIGGER_20260925_01.json'
+      - 'canonical/KNIGHT_DEMO_GEPPETTO_STAGE26_TRIGGER_*.json'
   workflow_dispatch:
 
 concurrency:

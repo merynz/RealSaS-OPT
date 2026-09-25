@@ -946,6 +946,48 @@ def _verify_existing_passes(plan: dict, ledger: dict, manifest: dict) -> bool:
     return changed
 
 
+def _reset_stale_failures(plan: dict, ledger: dict, manifest: dict) -> bool:
+    """Re-open failed branches only when their exact execution identity changed.
+
+    A stable FAIL remains sealed. If adapter implementation, manifest inputs,
+    dependency identities, policy, or pipeline identity changes, the failed stage
+    and its dependent subgraph return to PENDING for a truthful retry.
+    """
+    changed = False
+    rows = _ledger_map(ledger)
+    for stage_id in topological_stage_ids(plan):
+        stage = _stage_map(plan)[stage_id]
+        row = rows[stage_id]
+        if str(row.get("status") or "") not in FAIL_STATUSES:
+            continue
+        dependencies = tuple(map(str, stage.get("depends_on", ())))
+        if not all(
+            dependency_status_admissible(
+                ledger, str(rows[dependency].get("status") or "")
+            )
+            for dependency in dependencies
+        ):
+            continue
+        implementation_hash = _adapter_impl_hash(stage["adapter"])
+        fingerprint, policy_hash = _fingerprint(
+            plan, ledger, manifest, stage, implementation_hash
+        )
+        if (
+            str(row.get("input_fingerprint") or "") != fingerprint
+            or str(row.get("implementation_hash") or "") != implementation_hash
+            or str(row.get("policy_hash") or "") != policy_hash
+        ):
+            _invalidate_dependents(
+                plan,
+                ledger,
+                stage_id,
+                "STALE_FAILURE_IDENTITY",
+            )
+            changed = True
+            break
+    return changed
+
+
 def _target_closure(plan: dict, targets: tuple[str, ...]) -> set[str]:
     stages = _stage_map(plan)
     if not targets:
@@ -1166,6 +1208,9 @@ def execute(
     target_set = _target_closure(plan, targets)
 
     if _verify_existing_passes(plan, ledger, manifest):
+        atomic_json(ledger_path, ledger)
+
+    while _reset_stale_failures(plan, ledger, manifest):
         atomic_json(ledger_path, ledger)
 
     if not resume:

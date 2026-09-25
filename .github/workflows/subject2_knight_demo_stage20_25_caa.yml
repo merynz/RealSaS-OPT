@@ -61,8 +61,16 @@ jobs:
           ledger=json.loads((Path(os.environ["RUN_ROOT"])/"ACTIVE_RUN_V2.json").read_text())
           by={row["id"]:row for row in ledger["stages"]}
           assert by["19_STATIC_CANONICAL_MESH_QUALIFIED"]["status"]=="PASS_DEMO_ONLY"
-          assert ledger["failed_count"]==0,ledger["failed_stage_ids"]
-          print("STAGE19_MEASURED_DEMO_AUTHORITY_PASS")
+          for row in ledger["stages"][:19]:
+              assert row["status"]=="PASS_DEMO_ONLY",(row["id"],row["status"])
+          downstream_failures=[
+              row["id"] for row in ledger["stages"][19:]
+              if row["status"] in {"FAIL","ABSTAIN","BLOCKED"}
+          ]
+          print(
+              "STAGE19_MEASURED_DEMO_AUTHORITY_PASS",
+              json.dumps({"downstream_failures_before_retry":downstream_failures},sort_keys=True),
+          )
           PY
 
       - name: Verify frozen CAA policy remains exact

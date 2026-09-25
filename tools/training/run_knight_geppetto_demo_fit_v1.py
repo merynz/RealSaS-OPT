@@ -281,6 +281,7 @@ def run(args) -> dict:
     target_path = Path(args.teacher_target_npz).expanduser().resolve()
     target_report_path = Path(args.teacher_target_report).expanduser().resolve()
     prereg_path = Path(args.preregistration_ir).expanduser().resolve()
+    experiment_prereg_path = Path(args.experiment_prereg).expanduser().resolve()
     model_source_path = Path(args.model_source).expanduser().resolve()
     outdir = Path(args.output_dir).expanduser().resolve()
     outdir.mkdir(parents=True, exist_ok=True)
@@ -321,6 +322,56 @@ def run(args) -> dict:
     if tensor.certificate_hash != qualification.certificate_hash:
         raise RuntimeError("GEPPETTO_TENSORIZATION_CERTIFICATE_DRIFT")
     target, target_report = _load_target(target_path, target_report_path)
+    experiment_prereg = _load_json(experiment_prereg_path)
+    if experiment_prereg.get("schema") != "RealSaS.KnightGeppettoDemoFitPreregistration.v1":
+        raise RuntimeError("GEPPETTO_EXPERIMENT_PREREG_SCHEMA_DRIFT")
+    if experiment_prereg.get("status") != "FROZEN_BEFORE_OPTIMIZER_STEP_1":
+        raise RuntimeError("GEPPETTO_EXPERIMENT_PREREG_NOT_FROZEN")
+    if experiment_prereg.get("product_authority_claimed") is not False:
+        raise RuntimeError("GEPPETTO_EXPERIMENT_PREREG_PRODUCT_AUTHORITY_FORBIDDEN")
+    bindings = dict(experiment_prereg.get("bindings") or {})
+    expected_bindings = {
+        "rigging_surface_lineage_hash": surface.geometry_lineage_hash,
+        "rigging_surface_qualification_hash": qualification.qualification_hash,
+        "tensorization_hash": tensor.tensorization_hash,
+        "certificate_hash": tensor.certificate_hash,
+        "teacher_target_content_sha256": target_content_sha256_v1(target),
+    }
+    for key, expected in expected_bindings.items():
+        if str(bindings.get(key) or "") != str(expected):
+            raise RuntimeError(f"GEPPETTO_EXPERIMENT_PREREG_BINDING_DRIFT:{key}")
+    apparatus = dict(experiment_prereg.get("apparatus") or {})
+    expected_apparatus = {
+        "architecture_id": ARCHITECTURE_ID,
+        "seed": SEED,
+        "max_steps": MAX_STEPS,
+        "check_every": CHECK_EVERY,
+        "terminal_checks": TERMINAL_CHECKS,
+        "learning_rate": LR,
+        "weight_decay": WEIGHT_DECAY,
+        "gradient_clip_norm": GRAD_CLIP,
+        "resource_step_limit_execution_only": RESOURCE_STEP_LIMIT,
+        "selected_proposal_seed_predeclared": SELECTED_PROPOSAL_SEED,
+        "matched_mae_norm_max": MAX_MATCHED_MAE_NORM,
+        "matched_p95_norm_max": MAX_MATCHED_P95_NORM,
+    }
+    for key, expected in expected_apparatus.items():
+        actual = apparatus.get(key)
+        if isinstance(expected, float):
+            if actual is None or abs(float(actual) - expected) > 1e-15:
+                raise RuntimeError(f"GEPPETTO_EXPERIMENT_PREREG_APPARATUS_DRIFT:{key}")
+        elif actual != expected:
+            raise RuntimeError(f"GEPPETTO_EXPERIMENT_PREREG_APPARATUS_DRIFT:{key}")
+    if tuple(map(int, apparatus.get("diffusion_eval_seeds") or ())) != DIFFUSION_SEEDS:
+        raise RuntimeError("GEPPETTO_EXPERIMENT_PREREG_DIFFUSION_SEEDS_DRIFT")
+    if apparatus.get("fresh_from_scratch") is not True:
+        raise RuntimeError("GEPPETTO_EXPERIMENT_PREREG_FRESH_INIT_REQUIRED")
+    if apparatus.get("historical_checkpoint_loaded") is not False:
+        raise RuntimeError("GEPPETTO_EXPERIMENT_PREREG_HISTORICAL_CHECKPOINT_FORBIDDEN")
+    if apparatus.get("teacher_feedback_during_free_running_inference") is not False:
+        raise RuntimeError("GEPPETTO_EXPERIMENT_PREREG_TEACHER_FEEDBACK_FORBIDDEN")
+    experiment_prereg_sha = _sha(experiment_prereg_path)
+
     prepared = prepare_reference_strength_target_v1(
         tensor,
         target,
@@ -341,6 +392,7 @@ def run(args) -> dict:
         "certificate_hash": tensor.certificate_hash,
         "target_content_sha256": target_content_sha256_v1(target),
         "target_count": target.count,
+        "experiment_preregistration_sha256": experiment_prereg_sha,
         "target_root_count": int(np.count_nonzero(target.root_mask)),
         "teacher_target_report_sha256": _sha(target_report_path),
         "teacher_supervision_during_training": True,
@@ -507,6 +559,7 @@ def run(args) -> dict:
         "target_content_sha256": target_content_sha256_v1(target),
         "target_count": target.count,
         "teacher_target_report_sha256": _sha(target_report_path),
+        "experiment_preregistration_sha256": experiment_prereg_sha,
         "loss_config": asdict(loss_cfg),
         "closure_step": closure_step,
         "terminal_streak": terminal_streak,
@@ -606,6 +659,7 @@ def parse_args():
     parser.add_argument("--teacher-target-npz", required=True)
     parser.add_argument("--teacher-target-report", required=True)
     parser.add_argument("--preregistration-ir", required=True)
+    parser.add_argument("--experiment-prereg", required=True)
     parser.add_argument("--model-source", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--preflight-only", action="store_true")

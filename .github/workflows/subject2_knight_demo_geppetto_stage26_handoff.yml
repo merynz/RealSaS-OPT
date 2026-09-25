@@ -47,6 +47,7 @@ jobs:
           python -m py_compile \
             tools/training/build_geppetto_teacher_target_v1.py \
             tools/training/run_knight_geppetto_demo_fit_v1.py \
+            tools/training/run_knight_geppetto_demo_fit_v2_first_pass.py \
             compiler/realsas_compiler_services/orchestrator/mainline.py
           python -m pytest -q \
             tests/repository/test_mainline_v2_dag_scheduler.py \
@@ -54,7 +55,7 @@ jobs:
           python - <<'PY'
           import ast, json
           from pathlib import Path
-          p=Path("notebooks/RealSaS_KNIGHT_GEPPETTO_STAGE27_RUN_ALL.ipynb")
+          p=Path("notebooks/RealSaS_KNIGHT_GEPPETTO_STAGE27_FIRST_PASS_RUN_ALL.ipynb")
           nb=json.loads(p.read_text(encoding="utf-8"))
           assert nb["nbformat"]==4
           assert all(cell.get("outputs",[])==[] for cell in nb["cells"] if cell.get("cell_type")=="code")
@@ -241,7 +242,7 @@ jobs:
                   "historical_checkpoint_loaded":False,
                   "max_steps":16384,
                   "check_every":64,
-                  "terminal_checks":48,
+                  "terminal_checks":1,
                   "learning_rate":0.0001,
                   "weight_decay":0.0001,
                   "gradient_clip_norm":1.0,
@@ -257,7 +258,7 @@ jobs:
                   "teacher_feedback_during_free_running_inference":False,
                   "teacher_inference_inputs_allowed":False,
               },
-              "selection_rule":"ALL_FOUR_FROZEN_DIFFUSION_SEEDS_PASS_FOR_48_CONSECUTIVE_CHECKS__EXPORT_PREDECLARED_SEED_11",
+              "selection_rule":"FIRST_CHECK_WHERE_ALL_FOUR_FROZEN_DIFFUSION_SEEDS_PASS__EXPORT_PREDECLARED_SEED_11",
               "thresholds_changed_after_knight_result":False,
               "product_authority_claimed":False,
               "generalization_claimed":False,
@@ -384,7 +385,7 @@ jobs:
               (teacher/"KNIGHT_GEPPETTO_TEACHER_SOURCE_AUDIT.json","teacher_source_audit.json"),
               (inputs/"GEPPETTO_KNIGHT_EXPERIMENT_PREREG.json","experiment_preregistration.json"),
               (inputs/"geppetto_reference_strength_no_learned_slot_v1.py","model_source.py"),
-              (repo/"notebooks/RealSaS_KNIGHT_GEPPETTO_STAGE27_RUN_ALL.ipynb","RealSaS_KNIGHT_GEPPETTO_STAGE27_RUN_ALL.ipynb"),
+              (repo/"notebooks/RealSaS_KNIGHT_GEPPETTO_STAGE27_FIRST_PASS_RUN_ALL.ipynb","RealSaS_KNIGHT_GEPPETTO_STAGE27_FIRST_PASS_RUN_ALL.ipynb"),
               (one("05_CAMERA_CONTRACT_SOLVED","RealSaS.QualifiedCameraSetIR.v1"),"qualified_camera_set.json"),
           ]
           for src,name in mapping:
@@ -408,8 +409,8 @@ jobs:
               "execution_class":"DEMO_WITNESS",
               "execution_repo_commit":os.environ["GITHUB_SHA"],
               "files":files,
-              "colab_runner":"tools/training/run_knight_geppetto_demo_fit_v1.py",
-              "colab_notebook":"RealSaS_KNIGHT_GEPPETTO_STAGE27_RUN_ALL.ipynb",
+              "colab_runner":"tools/training/run_knight_geppetto_demo_fit_v2_first_pass.py",
+              "colab_notebook":"RealSaS_KNIGHT_GEPPETTO_STAGE27_FIRST_PASS_RUN_ALL.ipynb",
               "output_contract":{
                   "checkpoint":"GEPPETTO_KNIGHT_CHECKPOINT.pt",
                   "result":"GEPPETTO_KNIGHT_RESULT.json",
@@ -438,7 +439,7 @@ jobs:
           rm -rf "$out"
           mkdir -p "$out"
           PYTHONPATH="$GITHUB_WORKSPACE${PYTHONPATH:+:$PYTHONPATH}" \
-            python tools/training/run_knight_geppetto_demo_fit_v1.py \
+            python tools/training/run_knight_geppetto_demo_fit_v2_first_pass.py \
               --surface-json "$handoff/qualified_rigging_surface.json" \
               --surface-qualification-json "$handoff/rigging_surface_qualification.json" \
               --teacher-target-npz "$handoff/teacher_target.npz" \

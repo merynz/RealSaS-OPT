@@ -1,0 +1,12 @@
+{
+  "schema": "RealSaS.KnightDemoCAATrigger.v1",
+  "status": "REQUESTED_AFTER_STAGE26_HANDOFF",
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "execution_class": "DEMO_WITNESS",
+  "stage19_receipt": "canonical/KNIGHT_DEMO_STAGE19_RECEIPT_20260925.json",
+  "stage26_handoff_receipt": "canonical/KNIGHT_DEMO_GEPPETTO_STAGE26_HANDOFF_RECEIPT_20260925.json",
+  "target": "25_CAA_REFERENCE_REST_RENDER_PROOF",
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true
+}

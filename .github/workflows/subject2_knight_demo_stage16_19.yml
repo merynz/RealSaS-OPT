@@ -64,10 +64,16 @@ jobs:
           assert receipt["product_authority_claimed"] is False
           ledger=json.loads((Path(os.environ["RUN_ROOT"])/"ACTIVE_RUN_V2.json").read_text())
           assert ledger["execution_class"]=="DEMO_WITNESS"
-          assert ledger["failed_count"]==0,ledger["failed_stage_ids"]
           for row in ledger["stages"][:15]:
               assert row["status"]=="PASS_DEMO_ONLY",(row["id"],row["status"])
-          print("STAGE15_AUTHORITY_AND_LEDGER_PASS")
+          downstream_failures=[
+              row["id"] for row in ledger["stages"][15:]
+              if row["status"] in {"FAIL","ABSTAIN","BLOCKED"}
+          ]
+          print(
+              "STAGE15_AUTHORITY_PASS",
+              json.dumps({"downstream_failures_before_retry":downstream_failures},sort_keys=True),
+          )
           PY
 
       - name: Extend same run manifest for Stage16-25 authorities

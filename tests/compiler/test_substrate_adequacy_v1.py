@@ -8,7 +8,10 @@ from compiler.realsas_compiler_core.substrate.adequacy_v1 import (
     substrate_adequacy_report_hash_v1,
 )
 from models.iris.v3.zero_surface_decoder_v3 import extract_zero_surface_mesh_v3
-from compiler.realsas_compiler_core.substrate.scene_first_signed import _adaptive_voxel_compact
+from compiler.realsas_compiler_core.substrate.scene_first_signed import (
+    _adaptive_voxel_compact,
+    mesh_connected_component_labels_v1,
+)
 
 
 def _mesh():
@@ -143,3 +146,31 @@ def test_component_aware_voxel_compaction_prevents_cross_component_cluster_alias
 
     assert mixed_cluster_count(baseline_inverse)>0
     assert mixed_cluster_count(aware_inverse)==0
+
+
+def test_component_aware_compaction_precomputed_labels_are_exactly_equivalent():
+    count=48
+    theta=np.linspace(0.0,2.0*math.pi,count,endpoint=False)
+    ring=np.column_stack((0.3*np.cos(theta),0.3*np.sin(theta),np.zeros(count)))
+    points=np.concatenate((ring,ring+np.asarray([0.0,0.0,0.4])),axis=0)
+    normals=np.tile(np.asarray([[0.0,0.0,1.0]]),(len(points),1))
+    faces=[]
+    for offset in (0,count):
+        for i in range(1,count-1):
+            faces.append((offset,offset+i,offset+i+1))
+    faces=np.asarray(faces,dtype=np.int64)
+    labels=mesh_connected_component_labels_v1(len(points),faces,face_chunk_size=11)
+
+    auto=_adaptive_voxel_compact(
+        points,faces,normals,target_nodes=64,preserve_connected_components=True,
+    )
+    cached=_adaptive_voxel_compact(
+        points,faces,normals,target_nodes=64,preserve_connected_components=True,
+        precomputed_component_labels=labels,
+    )
+    for a,b in zip(auto[:4],cached[:4]):
+        if isinstance(a,np.ndarray):
+            assert np.array_equal(a,b)
+        else:
+            assert a==b
+    assert np.array_equal(auto[4],cached[4])

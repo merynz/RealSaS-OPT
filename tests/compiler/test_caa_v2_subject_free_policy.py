@@ -103,7 +103,7 @@ def test_tile_resolution_unsatisfied_evidence_is_preserved():
             SimpleNamespace(candidate_vertex_id="v1", P=(0.9, -0.9, 0.0), component_id="c0"),
             SimpleNamespace(candidate_vertex_id="v2", P=(-0.9, 0.9, 0.0), component_id="c0"),
         ),
-        faces=(("v0", "v1", "v2"),) * 20000,
+        faces=(("v0", "v1", "v2"),),
     )
     masks = {view: np.ones((64, 64), dtype=bool) for view in range(8)}
     evidence = projected_tile_resolution_evidence(
@@ -113,10 +113,10 @@ def test_tile_resolution_unsatisfied_evidence_is_preserved():
         candidate_resolutions=(8, 12),
         max_source_pixels_per_atlas_texel=0.01,
         bleed_px=2,
-        max_atlas_resolution=256,
+        max_atlas_resolution=8,
     )
     assert evidence["selected_tile_resolution"] is None
-    assert evidence["face_count"] == 20000
+    assert evidence["face_count"] == 1
     assert evidence["worst_projected_barycentric_sigma_px"] > 0.0
     assert len(evidence["candidates"]) == 2
     assert not any(

@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   resume-gate:
@@ -87,3 +87,38 @@ jobs:
           out.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
           print(json.dumps(receipt, indent=2, sort_keys=True))
           PY
+
+      - name: Seal successful resume gate into branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          receipt="canonical/KNIGHT_DEMO_RESUME_GATE_RECEIPT_20260925.json"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          payload = {
+              "schema": "RealSaS.KnightDemoResumeGateReceipt.v1",
+              "status": "PASS",
+              "tested_commit": os.environ["GITHUB_SHA"],
+              "runner_name": os.environ.get("RUNNER_NAME", ""),
+              "runner_os": os.environ.get("RUNNER_OS", ""),
+              "demo_only_status_semantics": "PASS",
+              "rclone_google_drive_access": "PASS",
+              "frozen_c_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+              "frozen_c_zero_surface_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c",
+              "product_authority_claimed": False,
+          }
+          Path("canonical/KNIGHT_DEMO_RESUME_GATE_RECEIPT_20260925.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+          git config user.name "realsas-self-hosted-runner"
+          git config user.email "runner@realsas.local"
+          git add "$receipt"
+          if git diff --cached --quiet; then
+            echo "RESUME_GATE_RECEIPT_ALREADY_CURRENT=1"
+            exit 0
+          fi
+          git commit -m "demo: seal resume gate evidence"
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

@@ -2,7 +2,7 @@
 
 > **GENERATED FILE — DO NOT HAND EDIT.**  
 > Policy/source of truth: `canonical/AUTHORITY_MAP_V1.json`. Repository branch names/heads are read live from `origin` with `git ls-remote --heads`; branch trees are not fetched.  
-> State fingerprint: `7f82cf8ad5cffda559f6cd574efd0d0c6fde71471f73f9233d306b86ba401383`
+> State fingerprint: `8d0e1dadca53ab9d6ac7bb2f0667ac4b5cbee9d6c61c4f6c83e5756ad3f63e25`
 
 **Continuation authority:** `CURRENT_STATE.md` on `main`.  
 A recent branch, green Action, notebook, report, or source file is **not** continuation authority unless the manifest + `CURRENT_STATE.md` explicitly say so.
@@ -36,17 +36,17 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 
 | Gate | Status | Branch | Live head | Question | Does not prove |
 |---|---|---|---|---|---|
-| `V2_IMPLEMENTATION_ASSEMBLY` | `RECLOSURE_ACTIVE__WITNESS_FORBIDDEN` | `main` | `c5f3231320ec` | Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction; witness execution authorization before explicit user approval |
+| `V2_IMPLEMENTATION_ASSEMBLY` | `RECLOSURE_ACTIVE__WITNESS_FORBIDDEN` | `main` | `c515671c70ec` | Can the reopened subject-free visual-fidelity and governance audit be fully reclosed, including VF-11 R512, VF-23 exact production-policy E2E, and exact-head CI, before asking the user to authorize the first controlled Knight witness? | Knight product pass; unseen generalization; semantic object recognition; human aesthetic optimality; source-view cardinality reduction; witness execution authorization before explicit user approval |
 
 ## Branch inventory — observed live
 
-**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 143**
+**CANONICAL: 1** / **EVIDENCE_ONLY: 3** / **EVIDENCE_ONLY_UNREGISTERED: 144**
 
 ### CANONICAL
 
 | Branch | Head | Classification reason |
 |---|---|---|
-| `main` | `c5f3231320ec` | canonical continuation branch |
+| `main` | `c515671c70ec` | canonical continuation branch |
 
 ### EVIDENCE_ONLY
 
@@ -82,6 +82,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `compiler-runtime-migration-closure-20260901` | `255910d22fea` | observed live; not explicitly registered active |
 | `consumer-interlock-v0-20260829` | `81ec9fd98d90` | observed live; not explicitly registered active |
 | `demo/investor-single-specimen-e2e` | `47892ffa16b7` | observed live; not explicitly registered active |
+| `demo/knight-arachne-v5-20260925` | `5054091cf671` | observed live; not explicitly registered active |
 | `dependabot/pip/numpy-2.4.6` | `c9a1ecae3871` | observed live; not explicitly registered active |
 | `dependabot/pip/pillow-12.3.0` | `b7bdee2eda95` | observed live; not explicitly registered active |
 | `dependabot/pip/pip-audit-2.10.1` | `add7ffd97461` | observed live; not explicitly registered active |
@@ -156,7 +157,7 @@ A recent branch, green Action, notebook, report, or source file is **not** conti
 | `redteam-hardening-20260920` | `a9aeb3fb1eac` | observed live; not explicitly registered active |
 | `redteam-sync-20260920` | `1741beaff327` | observed live; not explicitly registered active |
 | `repair/g5-mesh-policy-v2-20260919` | `1d1193f26796` | observed live; not explicitly registered active |
-| `repair/geppetto-mechanically-meaningful-rig-v2-20260925` | `249bb6c69c66` | observed live; not explicitly registered active |
+| `repair/geppetto-mechanically-meaningful-rig-v2-20260925` | `df6985e03535` | observed live; not explicitly registered active |
 | `repair/mage-full-subject-reclosure-20260912-adaptive-steiner-tmp` | `221ad1b79eae` | observed live; not explicitly registered active |
 | `repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp` | `c69ab78eac42` | observed live; not explicitly registered active |
 | `repair/stage13-geometry-gate-v2-20260919` | `d577616728c2` | observed live; not explicitly registered active |

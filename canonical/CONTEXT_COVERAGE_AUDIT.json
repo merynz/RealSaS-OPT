@@ -12,8 +12,8 @@
   "explained_high_signal_count": 344,
   "unexplained_high_signal_count": 0,
   "coverage_fraction": 1.0,
-  "live_branch_count": 147,
-  "safe_default_evidence_only_branch_count": 143,
+  "live_branch_count": 148,
+  "safe_default_evidence_only_branch_count": 144,
   "unexplained_high_signal_artifacts": [],
   "branches": [
     {
@@ -145,6 +145,12 @@
     {
       "name": "demo/investor-single-specimen-e2e",
       "sha": "47892ffa16b797cbc18294c07317790ac5f61d95",
+      "class": "EVIDENCE_ONLY_UNREGISTERED",
+      "reason": "safe default under branch authority policy"
+    },
+    {
+      "name": "demo/knight-arachne-v5-20260925",
+      "sha": "5054091cf6713ac1080a9dd40ec58e443215a8f2",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },
@@ -450,7 +456,7 @@
     },
     {
       "name": "main",
-      "sha": "c5f3231320ec50c9de6e7a52780d18b7a79d82df",
+      "sha": "c515671c70ec0c73b210fc50e584bbb1871761df",
       "class": "CANONICAL",
       "reason": "canonical branch"
     },
@@ -612,7 +618,7 @@
     },
     {
       "name": "repair/geppetto-mechanically-meaningful-rig-v2-20260925",
-      "sha": "249bb6c69c66572ad96c221a807b773fb4ac3fbf",
+      "sha": "df6985e0353508ffae636eb9a715b7d4f6939556",
       "class": "EVIDENCE_ONLY_UNREGISTERED",
       "reason": "safe default under branch authority policy"
     },

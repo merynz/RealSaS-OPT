@@ -11,8 +11,8 @@
 - Explained by continuity policy: **344**
 - Unexplained high-signal artifacts: **0**
 - Coverage: **100.0%**
-- Live branches: **147**
-- Safe-default evidence-only branches: **143**
+- Live branches: **148**
+- Safe-default evidence-only branches: **144**
 
 ### Classification counts
 
@@ -51,6 +51,7 @@ _None._
 | `compiler-runtime-migration-closure-20260901` | `255910d22fea` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `consumer-interlock-v0-20260829` | `81ec9fd98d90` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `demo/investor-single-specimen-e2e` | `47892ffa16b7` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `demo/knight-arachne-v5-20260925` | `5054091cf671` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `dependabot/pip/numpy-2.4.6` | `c9a1ecae3871` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `dependabot/pip/pillow-12.3.0` | `b7bdee2eda95` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `dependabot/pip/pip-audit-2.10.1` | `add7ffd97461` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -101,7 +102,7 @@ _None._
 | `m4-closure-20260829` | `95a487b92ab0` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4-execution-seal-20260829` | `d203b8233509` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `m4r-closure-20260829` | `1fcd18a4cc70` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `main` | `c5f3231320ec` | `CANONICAL` | canonical branch |
+| `main` | `c515671c70ec` | `CANONICAL` | canonical branch |
 | `motion/quaternius-direct-fbx-gate-v1-20260919` | `47fb1555455b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `motion/quaternius-materializer-v1-20260919` | `f17bc5050f2b` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `mwb0-closure-backlog-20260831` | `916ecc2c562a` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
@@ -128,7 +129,7 @@ _None._
 | `redteam-hardening-20260920` | `a9aeb3fb1eac` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `redteam-sync-20260920` | `1741beaff327` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/g5-mesh-policy-v2-20260919` | `1d1193f26796` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
-| `repair/geppetto-mechanically-meaningful-rig-v2-20260925` | `249bb6c69c66` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
+| `repair/geppetto-mechanically-meaningful-rig-v2-20260925` | `df6985e03535` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/mage-full-subject-reclosure-20260912` | `2fa5d4b604d5` | `EVIDENCE_ONLY` | explicit authority-map override |
 | `repair/mage-full-subject-reclosure-20260912-adaptive-steiner-tmp` | `221ad1b79eae` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |
 | `repair/mage-full-subject-reclosure-20260912-baseline-patch-tmp` | `c69ab78eac42` | `EVIDENCE_ONLY_UNREGISTERED` | safe default under branch authority policy |

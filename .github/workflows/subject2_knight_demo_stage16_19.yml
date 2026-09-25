@@ -80,6 +80,7 @@ jobs:
               return {"path":str(p),"sha256":sha(p)}
           mesh_policy=repo/"canonical/QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json"
           caa_policy=repo/"canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+          stage18_demo_prereg=repo/"canonical/KNIGHT_DEMO_STAGE18_MESH_FALLBACK_PREREG_20260925.json"
           manifest["mesh_policy"]={"document":ref(mesh_policy)}
           manifest["mesh"]={
               "backend":"CANONICAL_CDT_LOCAL_CHART_V1",
@@ -92,6 +93,9 @@ jobs:
               "policy_document":ref(caa_policy),
           })
           manifest["appearance"]=appearance
+          demo=dict(manifest.get("demo_execution") or {})
+          demo["stage18_mesh_fallback_preregistration"]=ref(stage18_demo_prereg)
+          manifest["demo_execution"]=demo
           manifest_path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
           print("RUN_MANIFEST_EXTENDED_STAGE16_25",sha(manifest_path))
           PY

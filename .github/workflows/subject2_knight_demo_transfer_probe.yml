@@ -56,7 +56,8 @@ jobs:
             tests/repository/test_demo_only_status_semantics.py \
             tests/repository/test_mainline_v2_dag_scheduler.py \
             tests/compiler/test_geometry_substrate_evidence_v2.py \
-            tests/compiler/test_mesh_component_labels_v1.py
+            tests/compiler/test_mesh_component_labels_v1.py \
+            tests/compiler/test_substrate_adequacy_v1.py
 
       - name: Verify authenticated Drive and refresh exact Frozen C import
         shell: bash

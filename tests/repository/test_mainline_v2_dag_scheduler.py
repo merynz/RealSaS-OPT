@@ -223,6 +223,28 @@ def test_geppetto_execution_fingerprint_subset_binds_execution_refs():
     assert before != after
 
 
+def test_manifest_subset_snapshot_is_detached_from_nested_source_mutation():
+    stage = {"id": "27_GEPPETTO_FIT", "manifest_keys": ["geppetto_fit"]}
+    manifest = {
+        "geppetto_fit": {
+            "preregistration": {
+                "path": "/authority/prereg.json",
+                "sha256": "a" * 64,
+                "metadata": {"nested": {"token": "before"}},
+            },
+            "checkpoint": {
+                "path": "/authority/model.pt",
+                "sha256": "c" * 64,
+            },
+        }
+    }
+    snapshot = _manifest_subset(manifest, stage)
+    manifest["geppetto_fit"]["preregistration"]["metadata"]["nested"]["token"] = "after"
+    manifest["geppetto_fit"]["checkpoint"]["sha256"] = "f" * 64
+    assert snapshot["geppetto_fit"]["preregistration"]["metadata"]["nested"]["token"] == "before"
+    assert snapshot["geppetto_fit"]["checkpoint"]["sha256"] == "c" * 64
+
+
 def test_arachne_prereg_fingerprint_subset_ignores_future_execution_refs():
     stage = {
         "id": "30_ARACHNE_FIT_PREREGISTERED",

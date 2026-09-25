@@ -1,0 +1,71 @@
+{
+  "completed_through_stage": 15,
+  "exact_frozen_stage08": {
+    "artifact_sha256": "5cd95805c1096d7b1a1a2a433a8db90c2a9d8e26650fd3ac711069730111c6b7",
+    "camera_set_hash": "2485d184c7fef6c453b6ff817d3eac525e438fe023350b294436589d62d75cca",
+    "normalization_hash": "81b1d0d8d2e7cbaf8a5dc14d174bdb65f6310d2868dd8af6e2f3915471526e23",
+    "observation_set_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa"
+  },
+  "execution_class": "DEMO_WITNESS",
+  "frozen_c": {
+    "checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
+    "zero_surface_npz_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c"
+  },
+  "product_authority_claimed": false,
+  "product_pass_forbidden": true,
+  "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
+  "schema": "RealSaS.KnightDemoStage15Receipt.v1",
+  "stage13": {
+    "demo_admitted": true,
+    "qualification_report": {
+      "appearance_authority_used": false,
+      "claim": "GEOMETRY_CARRIER_COMPATIBILITY_ONLY",
+      "does_not_claim": [
+        "RGB_OR_LINE_ART_FIDELITY",
+        "COMPLETE_APPEARANCE",
+        "RUNTIME_VISIBILITY_CORRECTNESS",
+        "TEXTURE_SAMPLING_CORRECTNESS"
+      ],
+      "every_view_passed": false,
+      "status": "FAIL_GEOMETRY_SUBSTRATE",
+      "teacher_truth_used": false,
+      "view_count": 8
+    },
+    "scientific_pass": false,
+    "substrate_hash": "f1a7a3d1c54f423b75ca78bb2ce9f161802da83c02320577c544ae2297c8dbe6"
+  },
+  "stage14": {
+    "adequacy_report_hash": "5fd590f212aa9d96fef0ff05ab00bd7616dda8d243c5e5888fed5cef97f774c6",
+    "selected_actual_node_count": null,
+    "selected_surface_lineage_hash": "",
+    "status": "FAIL"
+  },
+  "stage15": {
+    "certificate_hash": "3693024797ff0938deb9abc5db314e082ab596969a960ea5911860fd658d2f23",
+    "edge_count": 36469,
+    "node_count": 12090,
+    "qualification_hash": "331c888920ef7e73a1cc2e4229ad3ae26127761902efb8fe3dbaf5e742caf5ae",
+    "status": "DEMO_ONLY_RIGGING_SURFACE_ADMISSION__SCIENTIFIC_ADEQUACY_FAIL",
+    "tensorization_hash": "fb5e8afa1c7d489bb0aedd0c79eb1c3267d7ad8b256734862cd3fb6b8bd905e8"
+  },
+  "stage_statuses": {
+    "01_SOURCE_BYTES_SEALED": "PASS_DEMO_ONLY",
+    "02_SOURCE_LICENSE_PROVENANCE": "PASS_DEMO_ONLY",
+    "03_SOURCE_MECHANICAL_AUDIT": "PASS_DEMO_ONLY",
+    "04_FULL_SUBJECT_ADMISSION": "PASS_DEMO_ONLY",
+    "05_CAMERA_CONTRACT_SOLVED": "PASS_DEMO_ONLY",
+    "06_OBSERVATION_RENDER_8VIEW": "PASS_DEMO_ONLY",
+    "07_OBSERVATION_CONTRACT_QUALIFIED": "PASS_DEMO_ONLY",
+    "08_NORMALIZATION_DOMAIN_QUALIFIED": "PASS_DEMO_ONLY",
+    "09_IRIS_FIT_PREREGISTERED": "PASS_DEMO_ONLY",
+    "10_IRIS_FIT": "PASS_DEMO_ONLY",
+    "11_IRIS_CHECKPOINT_SEALED": "PASS_DEMO_ONLY",
+    "12_ZERO_SURFACE_DECODED": "PASS_DEMO_ONLY",
+    "13_GEOMETRY_SUBSTRATE_QUALIFIED": "PASS_DEMO_ONLY",
+    "14_GSA_BUILD": "PASS_DEMO_ONLY",
+    "15_RIGGING_SURFACE_QUALIFIED": "PASS_DEMO_ONLY"
+  },
+  "status": "PASS_DEMO_ONLY",
+  "subject_id": "SUBJECT2_KNIGHT",
+  "tested_commit": "66845a6f52c94006ceaca609a295ba8fc3a4c80c"
+}

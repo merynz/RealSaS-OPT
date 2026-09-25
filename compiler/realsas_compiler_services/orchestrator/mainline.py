@@ -12,13 +12,20 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any
 
+from compiler.realsas_compiler_services.orchestrator.status_semantics import (
+    DEMO_ONLY_STATUS,
+    FAIL_STATUSES,
+    PASS_STATUSES,
+    assert_demo_only_scope,
+    dependency_status_admissible,
+    normalize_success_status,
+)
+
 ROOT = Path(__file__).resolve().parents[3]
 PLAN_PATH = ROOT / "canonical" / "MAINLINE_EXECUTION_PLAN_V2.json"
 LEDGER_PATH = ROOT / "canonical" / "ACTIVE_RUN_V2.json"
 READINESS_PATH = ROOT / "canonical" / "V2_IMPLEMENTATION_READINESS.json"
 
-PASS_STATUSES = {"PASS", "CACHE_HIT", "PASS_DEMO_ONLY"}
-FAIL_STATUSES = {"FAIL", "ABSTAIN", "BLOCKED"}
 _STAGE_RE = re.compile(r"^\d{2}_[A-Z0-9_]+$")
 
 
@@ -434,6 +441,7 @@ def validate_ledger(plan: dict, ledger: dict) -> None:
     execution_class = str(ledger.get("execution_class") or "WITNESS")
     if execution_class not in {"WITNESS", "IMPLEMENTATION_AUDIT", "DEMO_WITNESS"}:
         raise RuntimeError("ACTIVE_RUN_V2_EXECUTION_CLASS_INVALID")
+    assert_demo_only_scope(ledger)
     if (
         execution_class == "IMPLEMENTATION_AUDIT"
         and not str(ledger.get("subject_id") or "").startswith("SUBJECT_FREE_")
@@ -455,15 +463,20 @@ def validate_ledger(plan: dict, ledger: dict) -> None:
         row = by_id[stage["id"]]
         if int(row.get("ordinal", -1)) != int(stage["ordinal"]):
             raise RuntimeError(f"ACTIVE_RUN_V2_LEDGER_ORDINAL_DRIFT:{stage['id']}")
-        if row.get("status") in PASS_STATUSES:
+        if dependency_status_admissible(ledger, str(row.get("status") or "")):
             for dependency in stage.get("depends_on", ()):
-                if by_id[str(dependency)].get("status") not in PASS_STATUSES:
+                if not dependency_status_admissible(
+                    ledger, str(by_id[str(dependency)].get("status") or "")
+                ):
                     raise RuntimeError(
                         "ACTIVE_RUN_V2_PASS_WITH_UNPASSED_DEPENDENCY:"
                         f"{stage['id']}:{dependency}"
                     )
 
-    completed = sum(row.get("status") in PASS_STATUSES for row in rows)
+    completed = sum(
+        dependency_status_admissible(ledger, str(row.get("status") or ""))
+        for row in rows
+    )
     if int(ledger.get("completed_count", -1)) != completed:
         raise RuntimeError("ACTIVE_RUN_V2_LEDGER_PROGRESS_DRIFT")
     expected_ready = list(ready_stage_ids(plan, ledger))
@@ -729,7 +742,12 @@ def ready_stage_ids(plan: dict, ledger: dict) -> tuple[str, ...]:
         if row.get("status") != "PENDING":
             continue
         dependencies = tuple(map(str, stage.get("depends_on", ())))
-        if all(rows[dependency].get("status") in PASS_STATUSES for dependency in dependencies):
+        if all(
+            dependency_status_admissible(
+                ledger, str(rows[dependency].get("status") or "")
+            )
+            for dependency in dependencies
+        ):
             ready.append(stage_id)
     return tuple(sorted(ready, key=lambda stage_id: (ordinal[stage_id], stage_id)))
 
@@ -737,7 +755,8 @@ def ready_stage_ids(plan: dict, ledger: dict) -> tuple[str, ...]:
 def _refresh(plan: dict, ledger: dict) -> None:
     rows = ledger["stages"]
     ledger["completed_count"] = sum(
-        row.get("status") in PASS_STATUSES for row in rows
+        dependency_status_admissible(ledger, str(row.get("status") or ""))
+        for row in rows
     )
     ledger["failed_count"] = sum(row.get("status") in FAIL_STATUSES for row in rows)
     ledger["total_count"] = len(rows)
@@ -752,7 +771,11 @@ def _refresh(plan: dict, ledger: dict) -> None:
         and _ledger_map(ledger)[stage["id"]].get("status") == "PENDING"
     }
     if ledger["completed_count"] == len(rows):
-        ledger["status"] = "PASS__ALL_46_STAGES"
+        ledger["status"] = (
+            "PASS_DEMO_ONLY__ALL_46_STAGES"
+            if any(str(row.get("status") or "") == DEMO_ONLY_STATUS for row in rows)
+            else "PASS__ALL_46_STAGES"
+        )
     elif ledger["failed_count"]:
         ledger["status"] = "ACTIVE_WITH_FAILED_BRANCHES"
     elif ledger["ready_stage_ids"]:
@@ -847,7 +870,7 @@ def _verify_existing_passes(plan: dict, ledger: dict, manifest: dict) -> bool:
     for stage_id in topological_stage_ids(plan):
         stage = _stage_map(plan)[stage_id]
         row = _ledger_map(ledger)[stage_id]
-        if row.get("status") not in PASS_STATUSES:
+        if not dependency_status_admissible(ledger, str(row.get("status") or "")):
             continue
         implementation_hash = _adapter_impl_hash(stage["adapter"])
         fingerprint, policy_hash = _fingerprint(
@@ -943,7 +966,28 @@ def _run_stage(
     try:
         result = dict(function(ctx) or {})
         elapsed = perf_counter() - started
-        status = str(result.get("status", "FAIL")).upper()
+        reported_status = str(result.get("status", "FAIL")).upper()
+        status = normalize_success_status(
+            plan=plan,
+            ledger=ledger,
+            stage_id=stage_id,
+            reported_status=reported_status,
+        )
+        if status != reported_status and status == DEMO_ONLY_STATUS:
+            ledger.setdefault("history", []).append(
+                {
+                    "event": "DEMO_ONLY_TAINT_PROPAGATED",
+                    "stage_id": stage_id,
+                    "reported_status": reported_status,
+                    "persisted_status": status,
+                    "demo_only_dependencies": [
+                        str(dep)
+                        for dep in stage.get("depends_on", ())
+                        if str(_ledger_map(ledger)[str(dep)].get("status") or "")
+                        == DEMO_ONLY_STATUS
+                    ],
+                }
+            )
         if status not in PASS_STATUSES:
             row.update(
                 status=status if status in FAIL_STATUSES else "FAIL",
@@ -1061,7 +1105,9 @@ def execute(
             target_set,
             key=lambda sid: int(_stage_map(plan)[sid]["ordinal"]),
         ):
-            if _ledger_map(ledger)[stage_id].get("status") in PASS_STATUSES:
+            if dependency_status_admissible(
+                ledger, str(_ledger_map(ledger)[stage_id].get("status") or "")
+            ):
                 _invalidate_dependents(plan, ledger, stage_id, "FORCED_RERUN")
 
     while True:
@@ -1121,7 +1167,7 @@ def status_text(plan: dict, ledger: dict) -> str:
         row = by_id[stage["id"]]
         mark = (
             "x"
-            if row["status"] in PASS_STATUSES
+            if dependency_status_admissible(ledger, str(row["status"]))
             else "!"
             if row["status"] in FAIL_STATUSES
             else "~"

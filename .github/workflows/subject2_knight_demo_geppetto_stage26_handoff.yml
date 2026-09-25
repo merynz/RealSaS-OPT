@@ -39,6 +39,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
           python -m py_compile \
             tools/training/build_geppetto_teacher_target_v1.py \
             tools/training/run_knight_geppetto_demo_fit_v1.py \
@@ -395,6 +396,34 @@ jobs:
           rclone sync "$handoff" "$remote" --checksum
           echo "GEPPETTO_HANDOFF_ROOT=$handoff" >> "$GITHUB_ENV"
           echo "GEPPETTO_HANDOFF_REMOTE=$remote" >> "$GITHUB_ENV"
+
+      - name: CPU preflight exact Stage27 Geppetto fit apparatus
+        shell: bash
+        run: |
+          set -euo pipefail
+          handoff="$RUN_ROOT/handoff/GEPPETTO_STAGE27"
+          out="$RUN_ROOT/handoff/GEPPETTO_STAGE27_PREFLIGHT"
+          rm -rf "$out"
+          mkdir -p "$out"
+          PYTHONPATH="$GITHUB_WORKSPACE${PYTHONPATH:+:$PYTHONPATH}" \
+            python tools/training/run_knight_geppetto_demo_fit_v1.py \
+              --surface-json "$handoff/qualified_rigging_surface.json" \
+              --surface-qualification-json "$handoff/rigging_surface_qualification.json" \
+              --teacher-target-npz "$handoff/teacher_target.npz" \
+              --teacher-target-report "$handoff/teacher_target_report.json" \
+              --preregistration-ir "$handoff/model_fit_preregistration.json" \
+              --experiment-prereg "$handoff/experiment_preregistration.json" \
+              --model-source "$handoff/model_source.py" \
+              --camera-set-json "$handoff/qualified_camera_set.json" \
+              --observation-dir "$handoff/observations" \
+              --output-dir "$out" \
+              --preflight-only
+          test -s "$out/GEPPETTO_KNIGHT_PREFLIGHT.json"
+          cp "$out/GEPPETTO_KNIGHT_PREFLIGHT.json" "$handoff/GEPPETTO_KNIGHT_PREFLIGHT.json"
+          rclone copyto \
+            "$handoff/GEPPETTO_KNIGHT_PREFLIGHT.json" \
+            "$GEPPETTO_HANDOFF_REMOTE/GEPPETTO_KNIGHT_PREFLIGHT.json" \
+            --checksum
 
       - name: Seal Stage26 handoff receipt into branch
         shell: bash

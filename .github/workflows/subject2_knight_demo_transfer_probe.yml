@@ -61,7 +61,8 @@ jobs:
             tests/repository/test_mainline_v2_dag_scheduler.py \
             tests/compiler/test_geometry_substrate_evidence_v2.py \
             tests/compiler/test_mesh_component_labels_v1.py \
-            tests/compiler/test_substrate_adequacy_v1.py
+            tests/compiler/test_substrate_adequacy_v1.py \
+            tests/compiler/test_demo_stage14_fallback_v2.py
           python -m py_compile \
             compiler/realsas_compiler_services/orchestrator/adapters/iris_geometry_v2.py
 

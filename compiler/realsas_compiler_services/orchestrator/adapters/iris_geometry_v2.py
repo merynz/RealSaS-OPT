@@ -1276,6 +1276,37 @@ def _validate_gsa_policy_document(cfg: dict, policy_document: dict):
     return normal_k, tolerance, document_adequacy
 
 
+def _geometry_substrate_for_downstream(ctx: dict):
+    payload = stage_output_payload(
+        ctx,
+        "13_GEOMETRY_SUBSTRATE_QUALIFIED",
+        "RealSaS.GeometrySubstrateQualificationIR.v2",
+    )
+    row = next(
+        (
+            value
+            for value in ctx["ledger"].get("stages") or ()
+            if str(value.get("id") or "") == "13_GEOMETRY_SUBSTRATE_QUALIFIED"
+        ),
+        None,
+    )
+    if (
+        str(ctx["ledger"].get("execution_class") or "") == "DEMO_WITNESS"
+        and row is not None
+        and str(row.get("status") or "") == "PASS_DEMO_ONLY"
+    ):
+        value = geometry_substrate_evidence_from_dict(payload)
+        demo = dict(ctx["run_manifest"].get("demo_execution") or {})
+        if (
+            value.qualification_report.get("every_view_passed") is not False
+            or demo.get("stage13_scientific_pass") is not False
+            or demo.get("product_authority_claimed") is not False
+        ):
+            raise QualificationError("DEMO_GEOMETRY_EVIDENCE_SCOPE_DRIFT")
+        return value
+    return geometry_substrate_from_dict(payload)
+
+
 def build_gsa_stage(ctx: dict) -> dict:
     zero = signed_zero_surface_from_dict(
         stage_output_payload(
@@ -1284,13 +1315,7 @@ def build_gsa_stage(ctx: dict) -> dict:
             "RealSaS.SignedZeroSurfaceSealIR.v1",
         )
     )
-    geometry = geometry_substrate_from_dict(
-        stage_output_payload(
-            ctx,
-            "13_GEOMETRY_SUBSTRATE_QUALIFIED",
-            "RealSaS.GeometrySubstrateQualificationIR.v2",
-        )
-    )
+    geometry = _geometry_substrate_for_downstream(ctx)
     normalization = normalization_domain_from_dict(
         stage_output_payload(
             ctx,

@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.KnightMeshQualityRelaxDiagnosticTrigger.v1",
-  "status": "REQUESTED",
+  "status": "RERUN_WITH_HARD_BOUNDARY_ONLY_PROTECTION",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
   "subject_id": "SUBJECT2_KNIGHT",
   "execution_class": "DEMO_WITNESS",
@@ -11,5 +11,7 @@
   ],
   "protected_mechanical_boundary_support": true,
   "projection_surface": "IMMUTABLE_STAGE18_REFERENCE_CANDIDATE",
-  "product_authority_claimed": false
+  "product_authority_claimed": false,
+  "revision": 1,
+  "protection_policy": "SEPARATE_AND_UNKNOWN_ONLY__PRESERVE_CONTINUITY_VALIDATED_POST_REPAIR"
 }

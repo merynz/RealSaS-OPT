@@ -174,3 +174,27 @@ def test_component_aware_compaction_precomputed_labels_are_exactly_equivalent():
         else:
             assert a==b
     assert np.array_equal(auto[4],cached[4])
+
+
+def test_failed_selector_can_return_demo_evidence_without_mutating_product_status():
+    mesh=_mesh()
+    p=_policy()
+    p["max_dense_to_surface_max_norm"]=0.0
+    surface,report=select_adequate_rigging_surface_v1(
+        mesh.vertices_normalized,mesh.faces,mesh.normals,_cams(),
+        normalization_center=(0,0,0),normalization_half_extent=1.0,authority_label="TEST",
+        source_run_id="RUN",source_checkpoint_sha256="a"*64,source_zero_surface_sha256="b"*64,
+        normal_k=24,visibility_depth_tolerance_norm=0.03,adequacy_policy=p,
+        return_closest_nonpassing_evidence=True,
+    )
+    assert surface is not None
+    assert report["status"]=="FAIL"
+    assert report["selected_target_node_cap"] is None
+    assert report["selected_actual_node_count"] is None
+    assert report["selected_surface_lineage_hash"]==""
+    closest=report["diagnostic_closest_nonpassing_candidate"]
+    assert closest is not None
+    assert closest["surface_lineage_hash"]==surface.geometry_lineage_hash
+    assert closest["actual_node_count"]==len(surface.surface_nodes)
+    assert closest["violations"]["finite"] is True
+    assert report["adequacy_report_hash"]==substrate_adequacy_report_hash_v1(report)

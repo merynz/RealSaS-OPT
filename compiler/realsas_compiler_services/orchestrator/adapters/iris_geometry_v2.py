@@ -926,25 +926,29 @@ def qualify_geometry_substrate_stage(ctx: dict) -> dict:
             raise QualificationError("DEMO_STAGE13_POLICY_PROFILE_DRIFT")
         summary = dict(evidence.get("summary") or {})
         extrema = {
-            "min_precision": min(float(row["precision"]) for row in evidence_rows),
-            "min_recall": min(float(row["recall"]) for row in evidence_rows),
-            "min_component_recall": min(
+            "min_view_precision": min(
+                float(row["precision"]) for row in evidence_rows
+            ),
+            "min_view_recall": min(
+                float(row["recall"]) for row in evidence_rows
+            ),
+            "min_view_component_recall": min(
                 float(row["minimum_eligible_component_recall"])
                 for row in evidence_rows
             ),
-            "max_interior_uncovered_fraction": max(
+            "max_view_interior_uncovered_fraction": max(
                 float(row["interior_uncovered_fraction"])
                 for row in evidence_rows
             ),
-            "max_largest_coherent_hole_fraction": max(
+            "max_view_largest_coherent_hole_fraction": max(
                 float(row["largest_coherent_hole_fraction"])
                 for row in evidence_rows
             ),
-            "max_silhouette_edge_p95_px": max(
+            "max_view_silhouette_edge_p95_px": max(
                 float(row["silhouette_edge_p95_px"])
                 for row in evidence_rows
             ),
-            "max_silhouette_edge_max_px": max(
+            "max_view_silhouette_edge_max_px": max(
                 float(row["silhouette_edge_max_px"])
                 for row in evidence_rows
             ),

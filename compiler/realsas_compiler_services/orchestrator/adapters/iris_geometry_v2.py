@@ -25,9 +25,11 @@ from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
 )
 from compiler.realsas_compiler_core.camera_geometry_v2 import project_points_xyz_v3
 from compiler.realsas_compiler_core.preproduct_authority_v1 import (
+    ModelCheckpointSealIR,
     RiggingSurfaceQualificationIR,
     SignedZeroSurfaceSealIR,
     model_checkpoint_seal_from_dict,
+    model_checkpoint_seal_hash,
     model_fit_execution_from_dict,
     model_fit_preregistration_from_dict,
     normalization_domain_from_dict,

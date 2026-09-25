@@ -3,8 +3,8 @@
   "status": "RERUN_REQUESTED",
   "date_utc": "2026-09-25",
   "run_id": "SUBJECT2_KNIGHT_DEMO_V2_20260924",
-  "probe_revision": 13,
-  "probe_scope": "FROZEN_C_STAGE14_15__CACHED_DENSE_OPERATORS__IMMUTABLE_MANIFEST_SNAPSHOT",
+  "probe_revision": 14,
+  "probe_scope": "FROZEN_C_STAGE14_15__PREREGISTERED_DEMO_CLOSEST_CARRIER",
   "expected_checkpoint_sha256": "222350d1d1fb37fffdf0b5cbef3ca941fe94dd440451ee9fd0e6f8029b51d2e0",
   "expected_zero_surface_sha256": "adbaf0a939eb414631736dabba1140245e88b14a41af0dc172adb7a25e5c084c",
   "expected_observation_set_hash": "87a3ba4ba20ea680669d9957593489bafd8fef285f7a5678c8eb419160792efa",
@@ -26,5 +26,13 @@
     "manifest_subset_snapshot": "DEEP_CANONICAL_COPY",
     "learned_fit_prereg_immutability_preserved": true,
     "execution_refs_fingerprint_bound": true
+  },
+  "demo_stage14_fallback": {
+    "preregistration": "canonical/KNIGHT_DEMO_STAGE14_FALLBACK_PREREG_20260925.json",
+    "scientific_stage14_pass_expected": false,
+    "expected_ledger_status": "PASS_DEMO_ONLY",
+    "product_policy_mutated": false,
+    "selection_rule": "MIN_FAILED_GATES__MIN_MAX_RELATIVE_EXCESS__MIN_SUM_RELATIVE_EXCESS__MAX_ACTUAL_NODES__MIN_TARGET_CAP_V1",
+    "full_failure_diagnostics_persistence_required": true
   }
 }

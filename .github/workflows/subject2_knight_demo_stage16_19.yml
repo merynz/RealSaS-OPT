@@ -1,0 +1,181 @@
+name: subject2-knight-demo-stage16-19
+
+on:
+  push:
+    branches:
+      - research/vf11-certified-adaptive-20260921
+    paths:
+      - 'canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  continue-through-stage19:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      SUBJECT_ID: SUBJECT2_KNIGHT
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ROOT: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned mainline dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Verify sealed Stage15 authority and live ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          receipt=json.loads(Path("canonical/KNIGHT_DEMO_STAGE15_RECEIPT_20260925.json").read_text())
+          assert receipt["schema"]=="RealSaS.KnightDemoStage15Receipt.v1"
+          assert receipt["status"]=="PASS_DEMO_ONLY"
+          assert receipt["run_id"]==os.environ["RUN_ID"]
+          assert receipt["product_authority_claimed"] is False
+          ledger=json.loads((Path(os.environ["RUN_ROOT"])/"ACTIVE_RUN_V2.json").read_text())
+          assert ledger["execution_class"]=="DEMO_WITNESS"
+          assert ledger["failed_count"]==0,ledger["failed_stage_ids"]
+          for row in ledger["stages"][:15]:
+              assert row["status"]=="PASS_DEMO_ONLY",(row["id"],row["status"])
+          print("STAGE15_AUTHORITY_AND_LEDGER_PASS")
+          PY
+
+      - name: Extend same run manifest for Stage16-25 authorities
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          manifest_path=root/"run_manifest.json"
+          manifest=json.loads(manifest_path.read_text())
+          repo=Path.cwd().resolve()
+          def sha(p):
+              h=hashlib.sha256()
+              with Path(p).open("rb") as f:
+                  for b in iter(lambda:f.read(1<<20),b""): h.update(b)
+              return h.hexdigest()
+          def ref(p):
+              p=Path(p).resolve()
+              return {"path":str(p),"sha256":sha(p)}
+          mesh_policy=repo/"canonical/QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json"
+          caa_policy=repo/"canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json"
+          manifest["mesh_policy"]={"document":ref(mesh_policy)}
+          manifest["mesh"]={
+              "backend":"CANONICAL_CDT_LOCAL_CHART_V1",
+              "max_constraint_recovery_iterations":96,
+              "max_quality_iterations":96,
+          }
+          appearance=dict(manifest.get("appearance") or {})
+          appearance.update({
+              "backend":"DETERMINISTIC_V1",
+              "policy_document":ref(caa_policy),
+          })
+          manifest["appearance"]=appearance
+          manifest_path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
+          print("RUN_MANIFEST_EXTENDED_STAGE16_25",sha(manifest_path))
+          PY
+
+      - name: Execute through Stage19 with explicit failure evidence
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          python -m compiler.realsas_compiler_services.orchestrator.mainline execute \
+            --run-id "$RUN_ID" \
+            --target 19_STATIC_CANONICAL_MESH_QUALIFIED || rc=$?
+          python -m compiler.realsas_compiler_services.orchestrator.mainline status \
+            --run-id "$RUN_ID"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          ledger=json.loads((Path(os.environ["RUN_ROOT"])/"ACTIVE_RUN_V2.json").read_text())
+          for row in ledger["stages"][15:19]:
+              print("STAGE16_19_ROW",json.dumps({
+                  "id":row["id"],"status":row["status"],
+                  "blockers":row.get("blockers") or [],
+                  "diagnostics_hash":row.get("diagnostics_hash") or "",
+              },sort_keys=True))
+          for event in (ledger.get("history") or [])[-16:]:
+              if event.get("event") in {"STAGE_EXCEPTION","STAGE_FAILED","STAGE_BLOCKED"}:
+                  print("STAGE16_19_HISTORY",json.dumps(event,sort_keys=True))
+          PY
+          if test "$rc" -ne 0; then exit "$rc"; fi
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          ledger=json.loads((Path(os.environ["RUN_ROOT"])/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          expected=[
+            "16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED",
+            "17_MECHANICAL_PARTITION_QUALIFIED",
+            "18_CANONICAL_MESH_ADDRESSING_BUILD",
+            "19_STATIC_CANONICAL_MESH_QUALIFIED",
+          ]
+          for sid in expected:
+              assert by[sid]["status"]=="PASS_DEMO_ONLY",(sid,by[sid]["status"],by[sid].get("blockers"))
+          assert ledger["failed_count"]==0,ledger["failed_stage_ids"]
+          print("KNIGHT_DEMO_STAGE19_PASS_DEMO_ONLY")
+          PY
+
+      - name: Seal Stage19 measured demo receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["RUN_ROOT"])
+          ledger=json.loads((root/"ACTIVE_RUN_V2.json").read_text())
+          by={row["id"]:row for row in ledger["stages"]}
+          def payload(stage,schema):
+              rows=[x for x in by[stage]["outputs"] if x["schema"]==schema]
+              if len(rows)!=1: raise SystemExit(f"OUTPUT_CARDINALITY:{stage}:{schema}:{len(rows)}")
+              return json.loads(Path(rows[0]["path"]).read_text())
+          directions=payload("16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED","RealSaS.OutputPresentationDirectionSetIR.v1")
+          partition=payload("17_MECHANICAL_PARTITION_QUALIFIED","RealSaS.MechanicalPartitionIR.v1")
+          candidate=payload("18_CANONICAL_MESH_ADDRESSING_BUILD","RealSaS.CanonicalMeshCandidateIR.v1")
+          static=payload("19_STATIC_CANONICAL_MESH_QUALIFIED","RealSaS.StaticCanonicalMeshQualificationIR.v1")
+          receipt={
+            "schema":"RealSaS.KnightDemoStage19Receipt.v1",
+            "status":"PASS_DEMO_ONLY",
+            "run_id":os.environ["RUN_ID"],
+            "subject_id":os.environ["SUBJECT_ID"],
+            "completed_through_stage":19,
+            "stage16_direction_set_hash":directions["direction_set_hash"],
+            "stage17_partition_lineage_hash":partition["partition_lineage_hash"],
+            "stage18_candidate_lineage_hash":candidate["candidate_lineage_hash"],
+            "stage18_vertex_count":len(candidate.get("vertices") or []),
+            "stage18_face_count":len(candidate.get("faces") or []),
+            "stage19_qualification_hash":static["qualification_hash"],
+            "stage19_report":static["qualification_report"],
+            "product_authority_claimed":False,
+            "product_pass_forbidden":True,
+          }
+          Path("canonical/KNIGHT_DEMO_STAGE19_RECEIPT_20260925.json").write_text(
+              json.dumps(receipt,indent=2,sort_keys=True)+"\n"
+          )
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+          git config user.name 'realsas-self-hosted-runner'
+          git config user.email 'runner@realsas.local'
+          git add canonical/KNIGHT_DEMO_STAGE19_RECEIPT_20260925.json
+          git commit -m 'demo: seal Knight measured Stage19 evidence'
+          git fetch origin research/vf11-certified-adaptive-20260921
+          git rebase origin/research/vf11-certified-adaptive-20260921
+          git push origin HEAD:research/vf11-certified-adaptive-20260921

@@ -153,9 +153,10 @@ jobs:
           set -euo pipefail
           export REALSAS_AUTHORITY_ROOT="$HOME/realsas_authority"
           run_root="$REALSAS_AUTHORITY_ROOT/runs/$RUN_ID"
+          export RUN_ROOT="$run_root"
           mkdir -p "$run_root"
           echo "REALSAS_AUTHORITY_ROOT=$REALSAS_AUTHORITY_ROOT" >> "$GITHUB_ENV"
-          echo "RUN_ROOT=$run_root" >> "$GITHUB_ENV"
+          echo "RUN_ROOT=$RUN_ROOT" >> "$GITHUB_ENV"
           python - <<'PY'
           import hashlib,json,os
           from pathlib import Path
